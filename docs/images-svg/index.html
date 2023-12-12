@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v2.4.3">
 <title data-rh="true">SVG Images | React Native Skia</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://shopify.github.io/react-native-skia/docs/images-svg"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="SVG Images | React Native Skia"><meta data-rh="true" name="description" content="Draw an SVG (see SVG Support)."><meta data-rh="true" property="og:description" content="Draw an SVG (see SVG Support)."><link data-rh="true" rel="icon" href="/react-native-skia/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://shopify.github.io/react-native-skia/docs/images-svg"><link data-rh="true" rel="alternate" href="https://shopify.github.io/react-native-skia/docs/images-svg" hreflang="en"><link data-rh="true" rel="alternate" href="https://shopify.github.io/react-native-skia/docs/images-svg" hreflang="x-default"><link data-rh="true" rel="preconnect" href="https://LFNAM0RNW3-dsn.algolia.net" crossorigin="anonymous"><link rel="search" type="application/opensearchdescription+xml" title="React Native Skia" href="/react-native-skia/opensearch.xml"><link rel="stylesheet" href="/react-native-skia/assets/css/styles.de096103.css">
-<link rel="preload" href="/react-native-skia/assets/js/runtime~main.7ad1640c.js" as="script">
+<link rel="preload" href="/react-native-skia/assets/js/runtime~main.48a8f891.js" as="script">
 <link rel="preload" href="/react-native-skia/assets/js/main.60aaa8ce.js" as="script">
 </head>
 <body class="navigation-with-keyboard">
@@ -47,18 +47,18 @@ import React">React</data-lsp> </span><span style="color:#D32F2F">from</span><sp
 import Canvas">Canvas</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="(alias) const ImageSVG: (props: AnimatedProps&lt;ImageSVGProps&gt;) =&gt; React.JSX.Element
 import ImageSVG">ImageSVG</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="(alias) const Skia: SkSkiaApi
 import Skia">Skia</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="(alias) const rect: (x: number, y: number, width: number, height: number) =&gt; SkRect
-import rect">rect</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="(alias) const fitbox: (fit: Fit, src: SkRect, dst: SkRect) =&gt; readonly [
+import rect">rect</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="(alias) const fitbox: (fit: Fit, src: SkRect, dst: SkRect) =&gt; [
     {
-        readonly translateX: number;
+        translateX: number;
     },
     {
-        readonly translateY: number;
+        translateY: number;
     },
     {
-        readonly scaleX: number;
+        scaleX: number;
     },
     {
-        readonly scaleY: number;
+        scaleY: number;
     }
 ]
 import fitbox">fitbox</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="(alias) const Group: ({ layer, ...props }: SkiaProps&lt;PublicGroupProps&gt;) =&gt; React.JSX.Element
@@ -67,14 +67,14 @@ import Skia">Skia</data-lsp></span><span style="color:#6F42C1">.</span><span sty
 import rect">rect</data-lsp></span><span style="color:#24292EFF">(</span><span style="color:#1976D2">0</span><span style="color:#212121">,</span><span style="color:#24292EFF"> </span><span style="color:#1976D2">0</span><span style="color:#212121">,</span><span style="color:#24292EFF"> </span><span style="color:#1976D2"><data-lsp lsp="const svg: SkSVG">svg</data-lsp></span><span style="color:#6F42C1">.<data-lsp lsp="(method) SkSVG.width(): number">width</data-lsp></span><span style="color:#24292EFF">()</span><span style="color:#212121">,</span><span style="color:#24292EFF"> </span><span style="color:#1976D2"><data-lsp lsp="const svg: SkSVG">svg</data-lsp></span><span style="color:#6F42C1">.<data-lsp lsp="(method) SkSVG.height(): number">height</data-lsp></span><span style="color:#24292EFF">());</span></div><div class="line"><span style="color:#D32F2F">const</span><span style="color:#24292EFF"> </span><span style="color:#1976D2"><data-lsp lsp="const dst: SkRect">dst</data-lsp></span><span style="color:#24292EFF"> </span><span style="color:#D32F2F">=</span><span style="color:#24292EFF"> </span><span style="color:#6F42C1"><data-lsp lsp="(alias) rect(x: number, y: number, width: number, height: number): SkRect
 import rect">rect</data-lsp></span><span style="color:#24292EFF">(</span><span style="color:#1976D2">0</span><span style="color:#212121">,</span><span style="color:#24292EFF"> </span><span style="color:#1976D2">0</span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="const width: 256">width</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="const height: 256">height</data-lsp>);</span></div><div class="line"> </div><div class="line"><span style="color:#D32F2F">export</span><span style="color:#24292EFF"> </span><span style="color:#D32F2F">const</span><span style="color:#24292EFF"> </span><span style="color:#6F42C1"><data-lsp lsp="const SVG: () =&gt; React.JSX.Element">SVG</data-lsp></span><span style="color:#24292EFF"> </span><span style="color:#D32F2F">=</span><span style="color:#24292EFF"> () </span><span style="color:#D32F2F">=&gt;</span><span style="color:#24292EFF"> {</span></div><div class="line"><span style="color:#24292EFF">  </span><span style="color:#D32F2F">return</span><span style="color:#24292EFF"> (</span></div><div class="line"><span style="color:#24292EFF">    &lt;</span><span style="color:#1976D2"><data-lsp lsp="(alias) const Canvas: React.FunctionComponent&lt;CanvasProps &amp; React.RefAttributes&lt;SkiaDomView&gt;&gt;
 import Canvas">Canvas</data-lsp></span><span style="color:#24292EFF"> </span><span style="color:#6F42C1"><data-lsp lsp="(property) ViewProps.style?: StyleProp&lt;ViewStyle&gt;">style</data-lsp></span><span style="color:#D32F2F">=</span><span style="color:#24292EFF">{{ <data-lsp lsp="(property) FlexStyle.flex?: number | undefined">flex</data-lsp></span><span style="color:#D32F2F">:</span><span style="color:#24292EFF"> </span><span style="color:#1976D2">1</span><span style="color:#24292EFF"> }}&gt;</span></div><div class="line"><span style="color:#24292EFF">    &lt;</span><span style="color:#1976D2"><data-lsp lsp="(alias) const Group: ({ layer, ...props }: SkiaProps&lt;PublicGroupProps&gt;) =&gt; React.JSX.Element
-import Group">Group</data-lsp></span><span style="color:#24292EFF"> </span><span style="color:#6F42C1"><data-lsp lsp="(property) transform?: AnimatedProp&lt;Transforms2d | undefined, any&gt;">transform</data-lsp></span><span style="color:#D32F2F">=</span><span style="color:#24292EFF">{</span><span style="color:#6F42C1"><data-lsp lsp="(alias) fitbox(fit: Fit, src: SkRect, dst: SkRect): readonly [{
-    readonly translateX: number;
+import Group">Group</data-lsp></span><span style="color:#24292EFF"> </span><span style="color:#6F42C1"><data-lsp lsp="(property) transform?: AnimatedProp&lt;Transforms3d | undefined, any&gt;">transform</data-lsp></span><span style="color:#D32F2F">=</span><span style="color:#24292EFF">{</span><span style="color:#6F42C1"><data-lsp lsp="(alias) fitbox(fit: Fit, src: SkRect, dst: SkRect): [{
+    translateX: number;
 }, {
-    readonly translateY: number;
+    translateY: number;
 }, {
-    readonly scaleX: number;
+    scaleX: number;
 }, {
-    readonly scaleY: number;
+    scaleY: number;
 }]
 import fitbox">fitbox</data-lsp></span><span style="color:#24292EFF">(</span><span style="color:#22863A">&quot;contain&quot;</span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="const src: SkRect">src</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="const dst: SkRect">dst</data-lsp>)}&gt;</span></div><div class="line"><span style="color:#24292EFF">      &lt;</span><span style="color:#1976D2"><data-lsp lsp="(alias) const ImageSVG: (props: AnimatedProps&lt;ImageSVGProps&gt;) =&gt; React.JSX.Element
 import ImageSVG">ImageSVG</data-lsp></span><span style="color:#24292EFF"> </span><span style="color:#6F42C1"><data-lsp lsp="(property) svg: AnimatedProp&lt;SkSVG | null, any&gt;">svg</data-lsp></span><span style="color:#D32F2F">=</span><span style="color:#24292EFF">{<data-lsp lsp="const svg: SkSVG">svg</data-lsp>} </span><span style="color:#6F42C1"><data-lsp lsp="(property) x?: AnimatedProp&lt;number | undefined, any&gt;">x</data-lsp></span><span style="color:#D32F2F">=</span><span style="color:#24292EFF">{</span><span style="color:#1976D2">0</span><span style="color:#24292EFF">} </span><span style="color:#6F42C1"><data-lsp lsp="(property) y?: AnimatedProp&lt;number | undefined, any&gt;">y</data-lsp></span><span style="color:#D32F2F">=</span><span style="color:#24292EFF">{</span><span style="color:#1976D2">0</span><span style="color:#24292EFF">} </span><span style="color:#6F42C1"><data-lsp lsp="(property) width?: AnimatedProp&lt;number | undefined, any&gt;">width</data-lsp></span><span style="color:#D32F2F">=</span><span style="color:#24292EFF">{</span><span style="color:#1976D2">20</span><span style="color:#24292EFF">} </span><span style="color:#6F42C1"><data-lsp lsp="(property) height?: AnimatedProp&lt;number | undefined, any&gt;">height</data-lsp></span><span style="color:#D32F2F">=</span><span style="color:#24292EFF">{</span><span style="color:#1976D2">20</span><span style="color:#24292EFF">} /&gt;</span></div><div class="line"><span style="color:#24292EFF">      &lt;/</span><span style="color:#1976D2"><data-lsp lsp="(alias) const Group: ({ layer, ...props }: SkiaProps&lt;PublicGroupProps&gt;) =&gt; React.JSX.Element
@@ -84,18 +84,18 @@ import React">React</data-lsp></span><span style="color:#D8DEE9FF"> </span><span
 import Canvas">Canvas</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(alias) const ImageSVG: (props: AnimatedProps&lt;ImageSVGProps&gt;) =&gt; React.JSX.Element
 import ImageSVG">ImageSVG</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(alias) const Skia: SkSkiaApi
 import Skia">Skia</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(alias) const rect: (x: number, y: number, width: number, height: number) =&gt; SkRect
-import rect">rect</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(alias) const fitbox: (fit: Fit, src: SkRect, dst: SkRect) =&gt; readonly [
+import rect">rect</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(alias) const fitbox: (fit: Fit, src: SkRect, dst: SkRect) =&gt; [
     {
-        readonly translateX: number;
+        translateX: number;
     },
     {
-        readonly translateY: number;
+        translateY: number;
     },
     {
-        readonly scaleX: number;
+        scaleX: number;
     },
     {
-        readonly scaleY: number;
+        scaleY: number;
     }
 ]
 import fitbox">fitbox</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(alias) const Group: ({ layer, ...props }: SkiaProps&lt;PublicGroupProps&gt;) =&gt; React.JSX.Element
@@ -104,14 +104,14 @@ import Skia">Skia</data-lsp></span><span style="color:#ECEFF4">.</span><span sty
 import rect">rect</data-lsp></span><span style="color:#D8DEE9FF">(</span><span style="color:#B48EAD">0</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#B48EAD">0</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const svg: SkSVG">svg</data-lsp></span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0"><data-lsp lsp="(method) SkSVG.width(): number">width</data-lsp></span><span style="color:#D8DEE9FF">()</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const svg: SkSVG">svg</data-lsp></span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0"><data-lsp lsp="(method) SkSVG.height(): number">height</data-lsp></span><span style="color:#D8DEE9FF">())</span><span style="color:#81A1C1">;</span></div><div class="line"><span style="color:#81A1C1">const</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const dst: SkRect">dst</data-lsp></span><span style="color:#D8DEE9FF"> </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9FF"> </span><span style="color:#88C0D0"><data-lsp lsp="(alias) rect(x: number, y: number, width: number, height: number): SkRect
 import rect">rect</data-lsp></span><span style="color:#D8DEE9FF">(</span><span style="color:#B48EAD">0</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#B48EAD">0</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const width: 256">width</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const height: 256">height</data-lsp></span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></div><div class="line"> </div><div class="line"><span style="color:#81A1C1">export</span><span style="color:#D8DEE9FF"> </span><span style="color:#81A1C1">const</span><span style="color:#D8DEE9FF"> </span><span style="color:#88C0D0"><data-lsp lsp="const SVG: () =&gt; React.JSX.Element">SVG</data-lsp></span><span style="color:#D8DEE9FF"> </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9FF"> </span><span style="color:#ECEFF4">()</span><span style="color:#D8DEE9FF"> </span><span style="color:#81A1C1">=&gt;</span><span style="color:#D8DEE9FF"> </span><span style="color:#ECEFF4">{</span></div><div class="line"><span style="color:#D8DEE9FF">  </span><span style="color:#81A1C1">return</span><span style="color:#D8DEE9FF"> (</span></div><div class="line"><span style="color:#D8DEE9FF">    </span><span style="color:#81A1C1">&lt;</span><span style="color:#8FBCBB"><data-lsp lsp="(alias) const Canvas: React.FunctionComponent&lt;CanvasProps &amp; React.RefAttributes&lt;SkiaDomView&gt;&gt;
 import Canvas">Canvas</data-lsp></span><span style="color:#D8DEE9FF"> </span><span style="color:#8FBCBB"><data-lsp lsp="(property) ViewProps.style?: StyleProp&lt;ViewStyle&gt;">style</data-lsp></span><span style="color:#81A1C1">={</span><span style="color:#ECEFF4">{</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(property) FlexStyle.flex?: number | undefined">flex</data-lsp></span><span style="color:#ECEFF4">:</span><span style="color:#D8DEE9FF"> </span><span style="color:#B48EAD">1</span><span style="color:#D8DEE9FF"> </span><span style="color:#ECEFF4">}</span><span style="color:#81A1C1">}&gt;</span></div><div class="line"><span style="color:#D8DEE9FF">    </span><span style="color:#81A1C1">&lt;</span><span style="color:#8FBCBB"><data-lsp lsp="(alias) const Group: ({ layer, ...props }: SkiaProps&lt;PublicGroupProps&gt;) =&gt; React.JSX.Element
-import Group">Group</data-lsp></span><span style="color:#D8DEE9FF"> </span><span style="color:#8FBCBB"><data-lsp lsp="(property) transform?: AnimatedProp&lt;Transforms2d | undefined, any&gt;">transform</data-lsp></span><span style="color:#81A1C1">={</span><span style="color:#88C0D0"><data-lsp lsp="(alias) fitbox(fit: Fit, src: SkRect, dst: SkRect): readonly [{
-    readonly translateX: number;
+import Group">Group</data-lsp></span><span style="color:#D8DEE9FF"> </span><span style="color:#8FBCBB"><data-lsp lsp="(property) transform?: AnimatedProp&lt;Transforms3d | undefined, any&gt;">transform</data-lsp></span><span style="color:#81A1C1">={</span><span style="color:#88C0D0"><data-lsp lsp="(alias) fitbox(fit: Fit, src: SkRect, dst: SkRect): [{
+    translateX: number;
 }, {
-    readonly translateY: number;
+    translateY: number;
 }, {
-    readonly scaleX: number;
+    scaleX: number;
 }, {
-    readonly scaleY: number;
+    scaleY: number;
 }]
 import fitbox">fitbox</data-lsp></span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">&quot;</span><span style="color:#A3BE8C">contain</span><span style="color:#ECEFF4">&quot;</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const src: SkRect">src</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const dst: SkRect">dst</data-lsp></span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">}&gt;</span></div><div class="line"><span style="color:#D8DEE9FF">      </span><span style="color:#81A1C1">&lt;</span><span style="color:#8FBCBB"><data-lsp lsp="(alias) const ImageSVG: (props: AnimatedProps&lt;ImageSVGProps&gt;) =&gt; React.JSX.Element
 import ImageSVG">ImageSVG</data-lsp></span><span style="color:#D8DEE9FF"> </span><span style="color:#8FBCBB"><data-lsp lsp="(property) svg: AnimatedProp&lt;SkSVG | null, any&gt;">svg</data-lsp></span><span style="color:#81A1C1">={</span><span style="color:#D8DEE9"><data-lsp lsp="const svg: SkSVG">svg</data-lsp></span><span style="color:#81A1C1">}</span><span style="color:#D8DEE9FF"> </span><span style="color:#8FBCBB"><data-lsp lsp="(property) x?: AnimatedProp&lt;number | undefined, any&gt;">x</data-lsp></span><span style="color:#81A1C1">={</span><span style="color:#B48EAD">0</span><span style="color:#81A1C1">}</span><span style="color:#D8DEE9FF"> </span><span style="color:#8FBCBB"><data-lsp lsp="(property) y?: AnimatedProp&lt;number | undefined, any&gt;">y</data-lsp></span><span style="color:#81A1C1">={</span><span style="color:#B48EAD">0</span><span style="color:#81A1C1">}</span><span style="color:#D8DEE9FF"> </span><span style="color:#8FBCBB"><data-lsp lsp="(property) width?: AnimatedProp&lt;number | undefined, any&gt;">width</data-lsp></span><span style="color:#81A1C1">={</span><span style="color:#B48EAD">20</span><span style="color:#81A1C1">}</span><span style="color:#D8DEE9FF"> </span><span style="color:#8FBCBB"><data-lsp lsp="(property) height?: AnimatedProp&lt;number | undefined, any&gt;">height</data-lsp></span><span style="color:#81A1C1">={</span><span style="color:#B48EAD">20</span><span style="color:#81A1C1">}</span><span style="color:#D8DEE9FF"> </span><span style="color:#81A1C1">/&gt;</span></div><div class="line"><span style="color:#D8DEE9FF">      </span><span style="color:#81A1C1">&lt;/</span><span style="color:#8FBCBB"><data-lsp lsp="(alias) const Group: ({ layer, ...props }: SkiaProps&lt;PublicGroupProps&gt;) =&gt; React.JSX.Element
@@ -123,18 +123,18 @@ import React">React</data-lsp> </span><span style="color:#D32F2F">from</span><sp
 import Canvas">Canvas</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="(alias) const ImageSVG: (props: AnimatedProps&lt;ImageSVGProps&gt;) =&gt; React.JSX.Element
 import ImageSVG">ImageSVG</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="(alias) const Skia: SkSkiaApi
 import Skia">Skia</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="(alias) const rect: (x: number, y: number, width: number, height: number) =&gt; SkRect
-import rect">rect</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="(alias) const fitbox: (fit: Fit, src: SkRect, dst: SkRect) =&gt; readonly [
+import rect">rect</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="(alias) const fitbox: (fit: Fit, src: SkRect, dst: SkRect) =&gt; [
     {
-        readonly translateX: number;
+        translateX: number;
     },
     {
-        readonly translateY: number;
+        translateY: number;
     },
     {
-        readonly scaleX: number;
+        scaleX: number;
     },
     {
-        readonly scaleY: number;
+        scaleY: number;
     }
 ]
 import fitbox">fitbox</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="(alias) const useSVG: (source: DataSourceParam, onError?: ((err: Error) =&gt; void) | undefined) =&gt; import(&quot;../types&quot;).SkSVG | null
@@ -148,14 +148,14 @@ import useSVG">useSVG</data-lsp></span><span style="color:#24292EFF">(</span><sp
 import rect">rect</data-lsp></span><span style="color:#24292EFF">(</span><span style="color:#1976D2">0</span><span style="color:#212121">,</span><span style="color:#24292EFF"> </span><span style="color:#1976D2">0</span><span style="color:#212121">,</span><span style="color:#24292EFF"> </span><span style="color:#1976D2"><data-lsp lsp="const tiger: SkSVG">tiger</data-lsp></span><span style="color:#6F42C1">.<data-lsp lsp="(method) SkSVG.width(): number">width</data-lsp></span><span style="color:#24292EFF">()</span><span style="color:#212121">,</span><span style="color:#24292EFF"> </span><span style="color:#1976D2"><data-lsp lsp="const tiger: SkSVG">tiger</data-lsp></span><span style="color:#6F42C1">.<data-lsp lsp="(method) SkSVG.height(): number">height</data-lsp></span><span style="color:#24292EFF">());</span></div><div class="line"><span style="color:#24292EFF">  </span><span style="color:#D32F2F">const</span><span style="color:#24292EFF"> </span><span style="color:#1976D2"><data-lsp lsp="const dst: SkRect">dst</data-lsp></span><span style="color:#24292EFF"> </span><span style="color:#D32F2F">=</span><span style="color:#24292EFF"> </span><span style="color:#6F42C1"><data-lsp lsp="(alias) rect(x: number, y: number, width: number, height: number): SkRect
 import rect">rect</data-lsp></span><span style="color:#24292EFF">(</span><span style="color:#1976D2">0</span><span style="color:#212121">,</span><span style="color:#24292EFF"> </span><span style="color:#1976D2">0</span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="const width: 256">width</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="const height: 256">height</data-lsp>);</span></div><div class="line"><span style="color:#24292EFF">  </span><span style="color:#D32F2F">return</span><span style="color:#24292EFF"> (</span></div><div class="line"><span style="color:#24292EFF">    &lt;</span><span style="color:#1976D2"><data-lsp lsp="(alias) const Canvas: React.FunctionComponent&lt;CanvasProps &amp; React.RefAttributes&lt;SkiaDomView&gt;&gt;
 import Canvas">Canvas</data-lsp></span><span style="color:#24292EFF"> </span><span style="color:#6F42C1"><data-lsp lsp="(property) ViewProps.style?: StyleProp&lt;ViewStyle&gt;">style</data-lsp></span><span style="color:#D32F2F">=</span><span style="color:#24292EFF">{{ <data-lsp lsp="(property) FlexStyle.flex?: number | undefined">flex</data-lsp></span><span style="color:#D32F2F">:</span><span style="color:#24292EFF"> </span><span style="color:#1976D2">1</span><span style="color:#24292EFF"> }}&gt;</span></div><div class="line"><span style="color:#24292EFF">      &lt;</span><span style="color:#1976D2"><data-lsp lsp="(alias) const Group: ({ layer, ...props }: SkiaProps&lt;PublicGroupProps&gt;) =&gt; React.JSX.Element
-import Group">Group</data-lsp></span></div><div class="line"><span style="color:#24292EFF">        </span><span style="color:#6F42C1"><data-lsp lsp="(property) transform?: AnimatedProp&lt;Transforms2d | undefined, any&gt;">transform</data-lsp></span><span style="color:#D32F2F">=</span><span style="color:#24292EFF">{</span><span style="color:#6F42C1"><data-lsp lsp="(alias) fitbox(fit: Fit, src: SkRect, dst: SkRect): readonly [{
-    readonly translateX: number;
+import Group">Group</data-lsp></span></div><div class="line"><span style="color:#24292EFF">        </span><span style="color:#6F42C1"><data-lsp lsp="(property) transform?: AnimatedProp&lt;Transforms3d | undefined, any&gt;">transform</data-lsp></span><span style="color:#D32F2F">=</span><span style="color:#24292EFF">{</span><span style="color:#6F42C1"><data-lsp lsp="(alias) fitbox(fit: Fit, src: SkRect, dst: SkRect): [{
+    translateX: number;
 }, {
-    readonly translateY: number;
+    translateY: number;
 }, {
-    readonly scaleX: number;
+    scaleX: number;
 }, {
-    readonly scaleY: number;
+    scaleY: number;
 }]
 import fitbox">fitbox</data-lsp></span><span style="color:#24292EFF">(</span><span style="color:#22863A">&quot;contain&quot;</span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="const src: SkRect">src</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="const dst: SkRect">dst</data-lsp>)}</span></div><div class="line"><span style="color:#24292EFF">        </span><span style="color:#6F42C1"><data-lsp lsp="(property) layer?: AnimatedProp&lt;React.ReactNode | SkPaint | React.ReactNode[], any&gt;">layer</data-lsp></span><span style="color:#D32F2F">=</span><span style="color:#24292EFF">{&lt;</span><span style="color:#1976D2"><data-lsp lsp="(alias) const Paint: (props: SkiaProps&lt;DrawingNodeProps&gt;) =&gt; React.JSX.Element
 import Paint">Paint</data-lsp></span><span style="color:#24292EFF">&gt;&lt;</span><span style="color:#1976D2"><data-lsp lsp="(alias) const ColorMatrix: (props: SkiaProps&lt;MatrixColorFilterProps&gt;) =&gt; React.JSX.Element
@@ -169,18 +169,18 @@ import React">React</data-lsp></span><span style="color:#D8DEE9FF"> </span><span
 import Canvas">Canvas</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(alias) const ImageSVG: (props: AnimatedProps&lt;ImageSVGProps&gt;) =&gt; React.JSX.Element
 import ImageSVG">ImageSVG</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(alias) const Skia: SkSkiaApi
 import Skia">Skia</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(alias) const rect: (x: number, y: number, width: number, height: number) =&gt; SkRect
-import rect">rect</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(alias) const fitbox: (fit: Fit, src: SkRect, dst: SkRect) =&gt; readonly [
+import rect">rect</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(alias) const fitbox: (fit: Fit, src: SkRect, dst: SkRect) =&gt; [
     {
-        readonly translateX: number;
+        translateX: number;
     },
     {
-        readonly translateY: number;
+        translateY: number;
     },
     {
-        readonly scaleX: number;
+        scaleX: number;
     },
     {
-        readonly scaleY: number;
+        scaleY: number;
     }
 ]
 import fitbox">fitbox</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(alias) const useSVG: (source: DataSourceParam, onError?: ((err: Error) =&gt; void) | undefined) =&gt; import(&quot;../types&quot;).SkSVG | null
@@ -194,14 +194,14 @@ import useSVG">useSVG</data-lsp></span><span style="color:#D8DEE9FF">(</span><sp
 import rect">rect</data-lsp></span><span style="color:#D8DEE9FF">(</span><span style="color:#B48EAD">0</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#B48EAD">0</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const tiger: SkSVG">tiger</data-lsp></span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0"><data-lsp lsp="(method) SkSVG.width(): number">width</data-lsp></span><span style="color:#D8DEE9FF">()</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const tiger: SkSVG">tiger</data-lsp></span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0"><data-lsp lsp="(method) SkSVG.height(): number">height</data-lsp></span><span style="color:#D8DEE9FF">())</span><span style="color:#81A1C1">;</span></div><div class="line"><span style="color:#D8DEE9FF">  </span><span style="color:#81A1C1">const</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const dst: SkRect">dst</data-lsp></span><span style="color:#D8DEE9FF"> </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9FF"> </span><span style="color:#88C0D0"><data-lsp lsp="(alias) rect(x: number, y: number, width: number, height: number): SkRect
 import rect">rect</data-lsp></span><span style="color:#D8DEE9FF">(</span><span style="color:#B48EAD">0</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#B48EAD">0</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const width: 256">width</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const height: 256">height</data-lsp></span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></div><div class="line"><span style="color:#D8DEE9FF">  </span><span style="color:#81A1C1">return</span><span style="color:#D8DEE9FF"> (</span></div><div class="line"><span style="color:#D8DEE9FF">    </span><span style="color:#81A1C1">&lt;</span><span style="color:#8FBCBB"><data-lsp lsp="(alias) const Canvas: React.FunctionComponent&lt;CanvasProps &amp; React.RefAttributes&lt;SkiaDomView&gt;&gt;
 import Canvas">Canvas</data-lsp></span><span style="color:#D8DEE9FF"> </span><span style="color:#8FBCBB"><data-lsp lsp="(property) ViewProps.style?: StyleProp&lt;ViewStyle&gt;">style</data-lsp></span><span style="color:#81A1C1">={</span><span style="color:#ECEFF4">{</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(property) FlexStyle.flex?: number | undefined">flex</data-lsp></span><span style="color:#ECEFF4">:</span><span style="color:#D8DEE9FF"> </span><span style="color:#B48EAD">1</span><span style="color:#D8DEE9FF"> </span><span style="color:#ECEFF4">}</span><span style="color:#81A1C1">}&gt;</span></div><div class="line"><span style="color:#D8DEE9FF">      </span><span style="color:#81A1C1">&lt;</span><span style="color:#8FBCBB"><data-lsp lsp="(alias) const Group: ({ layer, ...props }: SkiaProps&lt;PublicGroupProps&gt;) =&gt; React.JSX.Element
-import Group">Group</data-lsp></span></div><div class="line"><span style="color:#D8DEE9FF">        </span><span style="color:#8FBCBB"><data-lsp lsp="(property) transform?: AnimatedProp&lt;Transforms2d | undefined, any&gt;">transform</data-lsp></span><span style="color:#81A1C1">={</span><span style="color:#88C0D0"><data-lsp lsp="(alias) fitbox(fit: Fit, src: SkRect, dst: SkRect): readonly [{
-    readonly translateX: number;
+import Group">Group</data-lsp></span></div><div class="line"><span style="color:#D8DEE9FF">        </span><span style="color:#8FBCBB"><data-lsp lsp="(property) transform?: AnimatedProp&lt;Transforms3d | undefined, any&gt;">transform</data-lsp></span><span style="color:#81A1C1">={</span><span style="color:#88C0D0"><data-lsp lsp="(alias) fitbox(fit: Fit, src: SkRect, dst: SkRect): [{
+    translateX: number;
 }, {
-    readonly translateY: number;
+    translateY: number;
 }, {
-    readonly scaleX: number;
+    scaleX: number;
 }, {
-    readonly scaleY: number;
+    scaleY: number;
 }]
 import fitbox">fitbox</data-lsp></span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">&quot;</span><span style="color:#A3BE8C">contain</span><span style="color:#ECEFF4">&quot;</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const src: SkRect">src</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const dst: SkRect">dst</data-lsp></span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">}</span></div><div class="line"><span style="color:#D8DEE9FF">        </span><span style="color:#8FBCBB"><data-lsp lsp="(property) layer?: AnimatedProp&lt;React.ReactNode | SkPaint | React.ReactNode[], any&gt;">layer</data-lsp></span><span style="color:#81A1C1">={&lt;</span><span style="color:#8FBCBB"><data-lsp lsp="(alias) const Paint: (props: SkiaProps&lt;DrawingNodeProps&gt;) =&gt; React.JSX.Element
 import Paint">Paint</data-lsp></span><span style="color:#81A1C1">&gt;&lt;</span><span style="color:#8FBCBB"><data-lsp lsp="(alias) const ColorMatrix: (props: SkiaProps&lt;MatrixColorFilterProps&gt;) =&gt; React.JSX.Element
@@ -215,18 +215,18 @@ import React">React</data-lsp> </span><span style="color:#D32F2F">from</span><sp
 import Canvas">Canvas</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="(alias) const ImageSVG: (props: AnimatedProps&lt;ImageSVGProps&gt;) =&gt; React.JSX.Element
 import ImageSVG">ImageSVG</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="(alias) const Skia: SkSkiaApi
 import Skia">Skia</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="(alias) const rect: (x: number, y: number, width: number, height: number) =&gt; SkRect
-import rect">rect</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="(alias) const fitbox: (fit: Fit, src: SkRect, dst: SkRect) =&gt; readonly [
+import rect">rect</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="(alias) const fitbox: (fit: Fit, src: SkRect, dst: SkRect) =&gt; [
     {
-        readonly translateX: number;
+        translateX: number;
     },
     {
-        readonly translateY: number;
+        translateY: number;
     },
     {
-        readonly scaleX: number;
+        scaleX: number;
     },
     {
-        readonly scaleY: number;
+        scaleY: number;
     }
 ]
 import fitbox">fitbox</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="(alias) const useSVG: (source: DataSourceParam, onError?: ((err: Error) =&gt; void) | undefined) =&gt; import(&quot;../types&quot;).SkSVG | null
@@ -239,14 +239,14 @@ import useSVG">useSVG</data-lsp></span><span style="color:#24292EFF">(</span><sp
 import rect">rect</data-lsp></span><span style="color:#24292EFF">(</span><span style="color:#1976D2">0</span><span style="color:#212121">,</span><span style="color:#24292EFF"> </span><span style="color:#1976D2">0</span><span style="color:#212121">,</span><span style="color:#24292EFF"> </span><span style="color:#1976D2"><data-lsp lsp="const tiger: SkSVG">tiger</data-lsp></span><span style="color:#6F42C1">.<data-lsp lsp="(method) SkSVG.width(): number">width</data-lsp></span><span style="color:#24292EFF">()</span><span style="color:#212121">,</span><span style="color:#24292EFF"> </span><span style="color:#1976D2"><data-lsp lsp="const tiger: SkSVG">tiger</data-lsp></span><span style="color:#6F42C1">.<data-lsp lsp="(method) SkSVG.height(): number">height</data-lsp></span><span style="color:#24292EFF">());</span></div><div class="line"><span style="color:#24292EFF">  </span><span style="color:#D32F2F">const</span><span style="color:#24292EFF"> </span><span style="color:#1976D2"><data-lsp lsp="const dst: SkRect">dst</data-lsp></span><span style="color:#24292EFF"> </span><span style="color:#D32F2F">=</span><span style="color:#24292EFF"> </span><span style="color:#6F42C1"><data-lsp lsp="(alias) rect(x: number, y: number, width: number, height: number): SkRect
 import rect">rect</data-lsp></span><span style="color:#24292EFF">(</span><span style="color:#1976D2">0</span><span style="color:#212121">,</span><span style="color:#24292EFF"> </span><span style="color:#1976D2">0</span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="const width: 256">width</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="const height: 256">height</data-lsp>);</span></div><div class="line"><span style="color:#24292EFF">  </span><span style="color:#D32F2F">return</span><span style="color:#24292EFF"> (</span></div><div class="line"><span style="color:#24292EFF">    &lt;</span><span style="color:#1976D2"><data-lsp lsp="(alias) const Canvas: React.FunctionComponent&lt;CanvasProps &amp; React.RefAttributes&lt;SkiaDomView&gt;&gt;
 import Canvas">Canvas</data-lsp></span><span style="color:#24292EFF"> </span><span style="color:#6F42C1"><data-lsp lsp="(property) ViewProps.style?: StyleProp&lt;ViewStyle&gt;">style</data-lsp></span><span style="color:#D32F2F">=</span><span style="color:#24292EFF">{{ <data-lsp lsp="(property) FlexStyle.flex?: number | undefined">flex</data-lsp></span><span style="color:#D32F2F">:</span><span style="color:#24292EFF"> </span><span style="color:#1976D2">1</span><span style="color:#24292EFF"> }}&gt;</span></div><div class="line"><span style="color:#24292EFF">      &lt;</span><span style="color:#1976D2"><data-lsp lsp="(alias) const Group: ({ layer, ...props }: SkiaProps&lt;PublicGroupProps&gt;) =&gt; React.JSX.Element
-import Group">Group</data-lsp></span><span style="color:#24292EFF"> </span><span style="color:#6F42C1"><data-lsp lsp="(property) transform?: AnimatedProp&lt;Transforms2d | undefined, any&gt;">transform</data-lsp></span><span style="color:#D32F2F">=</span><span style="color:#24292EFF">{</span><span style="color:#6F42C1"><data-lsp lsp="(alias) fitbox(fit: Fit, src: SkRect, dst: SkRect): readonly [{
-    readonly translateX: number;
+import Group">Group</data-lsp></span><span style="color:#24292EFF"> </span><span style="color:#6F42C1"><data-lsp lsp="(property) transform?: AnimatedProp&lt;Transforms3d | undefined, any&gt;">transform</data-lsp></span><span style="color:#D32F2F">=</span><span style="color:#24292EFF">{</span><span style="color:#6F42C1"><data-lsp lsp="(alias) fitbox(fit: Fit, src: SkRect, dst: SkRect): [{
+    translateX: number;
 }, {
-    readonly translateY: number;
+    translateY: number;
 }, {
-    readonly scaleX: number;
+    scaleX: number;
 }, {
-    readonly scaleY: number;
+    scaleY: number;
 }]
 import fitbox">fitbox</data-lsp></span><span style="color:#24292EFF">(</span><span style="color:#22863A">&quot;contain&quot;</span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="const src: SkRect">src</data-lsp></span><span style="color:#212121">,</span><span style="color:#24292EFF"> <data-lsp lsp="const dst: SkRect">dst</data-lsp>)} </span><span style="color:#6F42C1"><data-lsp lsp="(property) layer?: AnimatedProp&lt;React.ReactNode | SkPaint | React.ReactNode[], any&gt;">layer</data-lsp></span><span style="color:#D32F2F">=</span><span style="color:#24292EFF">{&lt;</span><span style="color:#1976D2"><data-lsp lsp="(alias) const Paint: (props: SkiaProps&lt;DrawingNodeProps&gt;) =&gt; React.JSX.Element
 import Paint">Paint</data-lsp></span><span style="color:#24292EFF">&gt;&lt;</span><span style="color:#1976D2"><data-lsp lsp="(alias) const Blur: ({ mode, ...props }: SkiaDefaultProps&lt;BlurImageFilterProps, &quot;mode&quot;&gt;) =&gt; React.JSX.Element
@@ -259,18 +259,18 @@ import React">React</data-lsp></span><span style="color:#D8DEE9FF"> </span><span
 import Canvas">Canvas</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(alias) const ImageSVG: (props: AnimatedProps&lt;ImageSVGProps&gt;) =&gt; React.JSX.Element
 import ImageSVG">ImageSVG</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(alias) const Skia: SkSkiaApi
 import Skia">Skia</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(alias) const rect: (x: number, y: number, width: number, height: number) =&gt; SkRect
-import rect">rect</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(alias) const fitbox: (fit: Fit, src: SkRect, dst: SkRect) =&gt; readonly [
+import rect">rect</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(alias) const fitbox: (fit: Fit, src: SkRect, dst: SkRect) =&gt; [
     {
-        readonly translateX: number;
+        translateX: number;
     },
     {
-        readonly translateY: number;
+        translateY: number;
     },
     {
-        readonly scaleX: number;
+        scaleX: number;
     },
     {
-        readonly scaleY: number;
+        scaleY: number;
     }
 ]
 import fitbox">fitbox</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(alias) const useSVG: (source: DataSourceParam, onError?: ((err: Error) =&gt; void) | undefined) =&gt; import(&quot;../types&quot;).SkSVG | null
@@ -283,14 +283,14 @@ import useSVG">useSVG</data-lsp></span><span style="color:#D8DEE9FF">(</span><sp
 import rect">rect</data-lsp></span><span style="color:#D8DEE9FF">(</span><span style="color:#B48EAD">0</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#B48EAD">0</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const tiger: SkSVG">tiger</data-lsp></span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0"><data-lsp lsp="(method) SkSVG.width(): number">width</data-lsp></span><span style="color:#D8DEE9FF">()</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const tiger: SkSVG">tiger</data-lsp></span><span style="color:#ECEFF4">.</span><span style="color:#88C0D0"><data-lsp lsp="(method) SkSVG.height(): number">height</data-lsp></span><span style="color:#D8DEE9FF">())</span><span style="color:#81A1C1">;</span></div><div class="line"><span style="color:#D8DEE9FF">  </span><span style="color:#81A1C1">const</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const dst: SkRect">dst</data-lsp></span><span style="color:#D8DEE9FF"> </span><span style="color:#81A1C1">=</span><span style="color:#D8DEE9FF"> </span><span style="color:#88C0D0"><data-lsp lsp="(alias) rect(x: number, y: number, width: number, height: number): SkRect
 import rect">rect</data-lsp></span><span style="color:#D8DEE9FF">(</span><span style="color:#B48EAD">0</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#B48EAD">0</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const width: 256">width</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const height: 256">height</data-lsp></span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">;</span></div><div class="line"><span style="color:#D8DEE9FF">  </span><span style="color:#81A1C1">return</span><span style="color:#D8DEE9FF"> (</span></div><div class="line"><span style="color:#D8DEE9FF">    </span><span style="color:#81A1C1">&lt;</span><span style="color:#8FBCBB"><data-lsp lsp="(alias) const Canvas: React.FunctionComponent&lt;CanvasProps &amp; React.RefAttributes&lt;SkiaDomView&gt;&gt;
 import Canvas">Canvas</data-lsp></span><span style="color:#D8DEE9FF"> </span><span style="color:#8FBCBB"><data-lsp lsp="(property) ViewProps.style?: StyleProp&lt;ViewStyle&gt;">style</data-lsp></span><span style="color:#81A1C1">={</span><span style="color:#ECEFF4">{</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="(property) FlexStyle.flex?: number | undefined">flex</data-lsp></span><span style="color:#ECEFF4">:</span><span style="color:#D8DEE9FF"> </span><span style="color:#B48EAD">1</span><span style="color:#D8DEE9FF"> </span><span style="color:#ECEFF4">}</span><span style="color:#81A1C1">}&gt;</span></div><div class="line"><span style="color:#D8DEE9FF">      </span><span style="color:#81A1C1">&lt;</span><span style="color:#8FBCBB"><data-lsp lsp="(alias) const Group: ({ layer, ...props }: SkiaProps&lt;PublicGroupProps&gt;) =&gt; React.JSX.Element
-import Group">Group</data-lsp></span><span style="color:#D8DEE9FF"> </span><span style="color:#8FBCBB"><data-lsp lsp="(property) transform?: AnimatedProp&lt;Transforms2d | undefined, any&gt;">transform</data-lsp></span><span style="color:#81A1C1">={</span><span style="color:#88C0D0"><data-lsp lsp="(alias) fitbox(fit: Fit, src: SkRect, dst: SkRect): readonly [{
-    readonly translateX: number;
+import Group">Group</data-lsp></span><span style="color:#D8DEE9FF"> </span><span style="color:#8FBCBB"><data-lsp lsp="(property) transform?: AnimatedProp&lt;Transforms3d | undefined, any&gt;">transform</data-lsp></span><span style="color:#81A1C1">={</span><span style="color:#88C0D0"><data-lsp lsp="(alias) fitbox(fit: Fit, src: SkRect, dst: SkRect): [{
+    translateX: number;
 }, {
-    readonly translateY: number;
+    translateY: number;
 }, {
-    readonly scaleX: number;
+    scaleX: number;
 }, {
-    readonly scaleY: number;
+    scaleY: number;
 }]
 import fitbox">fitbox</data-lsp></span><span style="color:#D8DEE9FF">(</span><span style="color:#ECEFF4">&quot;</span><span style="color:#A3BE8C">contain</span><span style="color:#ECEFF4">&quot;</span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const src: SkRect">src</data-lsp></span><span style="color:#ECEFF4">,</span><span style="color:#D8DEE9FF"> </span><span style="color:#D8DEE9"><data-lsp lsp="const dst: SkRect">dst</data-lsp></span><span style="color:#D8DEE9FF">)</span><span style="color:#81A1C1">}</span><span style="color:#D8DEE9FF"> </span><span style="color:#8FBCBB"><data-lsp lsp="(property) layer?: AnimatedProp&lt;React.ReactNode | SkPaint | React.ReactNode[], any&gt;">layer</data-lsp></span><span style="color:#81A1C1">={&lt;</span><span style="color:#8FBCBB"><data-lsp lsp="(alias) const Paint: (props: SkiaProps&lt;DrawingNodeProps&gt;) =&gt; React.JSX.Element
 import Paint">Paint</data-lsp></span><span style="color:#81A1C1">&gt;&lt;</span><span style="color:#8FBCBB"><data-lsp lsp="(alias) const Blur: ({ mode, ...props }: SkiaDefaultProps&lt;BlurImageFilterProps, &quot;mode&quot;&gt;) =&gt; React.JSX.Element
@@ -310,7 +310,7 @@ However, the way you can set the <code>font-family</code> attribute is as flexib
 You can use the <code>href</code> attribute instead.
 However, we found that it doesn&#x27;t appear to be adequately supported.
 We would recommend avoiding using it.</p><h3 class="anchor anchorWithStickyNavbar_LWe7" id="fallbacks">Fallbacks<a href="#fallbacks" class="hash-link" aria-label="Direct link to Fallbacks" title="Direct link to Fallbacks">​</a></h3><p>Some SVG with issues display nicely in the browser because they are very tolerant of errors. We found that the Skia SVG module is much less forgiving.</p></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="theme-doc-footer-edit-meta-row row"><div class="col"><a href="https://github.com/shopify/react-native-skia/edit/main/docs/docs/image-svg.md" target="_blank" rel="noreferrer noopener" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_vwxv"></div></div></footer></article><nav class="pagination-nav docusaurus-mt-lg" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/react-native-skia/docs/animated-images"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Animated Images</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/react-native-skia/docs/snapshotviews"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Snapshot Views</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#example" class="table-of-contents__link toc-highlight">Example</a></li><li><a href="#scaling-the-svg" class="table-of-contents__link toc-highlight">Scaling the SVG</a><ul><li><a href="#example-1" class="table-of-contents__link toc-highlight">Example</a></li></ul></li><li><a href="#applying-effects" class="table-of-contents__link toc-highlight">Applying Effects</a><ul><li><a href="#opacity-example" class="table-of-contents__link toc-highlight">Opacity Example</a></li><li><a href="#blur-example" class="table-of-contents__link toc-highlight">Blur Example</a></li><li><a href="#result" class="table-of-contents__link toc-highlight">Result</a></li></ul></li><li><a href="#svg-support" class="table-of-contents__link toc-highlight">SVG Support</a><ul><li><a href="#css-styles" class="table-of-contents__link toc-highlight">CSS Styles</a></li><li><a href="#rgba-colors" class="table-of-contents__link toc-highlight">RGBA Colors</a></li><li><a href="#non-supported-elements" class="table-of-contents__link toc-highlight">Non Supported Elements</a></li><li><a href="#font-family" class="table-of-contents__link toc-highlight">Font Family</a></li><li><a href="#inlined-svgs" class="table-of-contents__link toc-highlight">Inlined SVGs</a></li><li><a href="#gradient-templates" class="table-of-contents__link toc-highlight">Gradient Templates</a></li><li><a href="#fallbacks" class="table-of-contents__link toc-highlight">Fallbacks</a></li></ul></li></ul></div></div></div></div></main></div></div><footer class="footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="col footer__col"><div class="footer__title">Resources</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/react-native-skia/docs/getting-started/installation">Documentation</a></li></ul></div><div class="col footer__col"><div class="footer__title">More</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://github.com/shopify/react-native-skia" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-hidden="true" viewBox="0 0 24 24" class="iconExternalLink_nPIU"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"></path></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2023 Shopify, Inc. Built with Docusaurus.</div></div></div></footer></div>
-<script src="/react-native-skia/assets/js/runtime~main.7ad1640c.js"></script>
+<script src="/react-native-skia/assets/js/runtime~main.48a8f891.js"></script>
 <script src="/react-native-skia/assets/js/main.60aaa8ce.js"></script>
 </body>
 </html>
