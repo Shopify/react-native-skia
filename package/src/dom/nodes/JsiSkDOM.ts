@@ -173,6 +173,10 @@ export class JsiSkDOM implements SkDOM {
   }
 
   CustomDrawing(props: CustomDrawingNodeProps) {
+    console.warn(
+      // eslint-disable-next-line max-len
+      "The <Drawing /> component is deprecated and will be removed in the next release. For custom drawings, please sure the <Picture /> component: https://shopify.github.io/react-native-skia/docs/shapes/pictures/"
+    );
     return NATIVE_DOM
       ? global.SkiaDomApi.CustomDrawingNode(props ?? {})
       : new CustomDrawingNode(this.ctx, props);

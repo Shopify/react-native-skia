@@ -11,7 +11,7 @@ import type {
   SkRRect,
   StrokeCap,
   StrokeJoin,
-  Transforms2d,
+  Transforms3d,
   Vector,
 } from "../../skia/types";
 
@@ -64,9 +64,9 @@ export interface ScalarCircleDef {
 export type CircleDef = PointCircleDef | ScalarCircleDef;
 
 export interface TransformProps {
-  transform?: Transforms2d;
+  transform?: Transforms3d;
   origin?: Vector;
-  matrix?: SkMatrix;
+  matrix?: SkMatrix | number[];
 }
 
 export interface PaintProps extends ChildrenProps {

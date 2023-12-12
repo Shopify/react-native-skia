@@ -337,7 +337,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
   }
 
   transform(m3: SkMatrix) {
-    this.ref.transform(JsiSkMatrix.fromValue(m3));
+    this.ref.transform(Array.isArray(m3) ? m3 : JsiSkMatrix.fromValue(m3));
     return this;
   }
 

@@ -4,6 +4,9 @@ import { ValueApi } from "../api";
 import type { SkiaMutableValue } from "../types";
 
 /**
+ * @deprecated Use Reanimated 3
+ * for animating Skia: https://shopify.github.io/react-native-skia/docs/animations/animations
+ *
  * Creates a new value that holds some data.
  * @param v Value to hold
  * @returns A Value of type of v

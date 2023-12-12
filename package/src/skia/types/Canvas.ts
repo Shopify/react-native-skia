@@ -485,7 +485,7 @@ export interface SkCanvas {
    * Replaces current matrix with m premultiplied with the existing matrix.
    * @param m
    */
-  concat(m: SkMatrix): void;
+  concat(m: SkMatrix | number[]): void;
 
   /**
    * Draws the given picture using the current clip, current matrix, and the provided paint.

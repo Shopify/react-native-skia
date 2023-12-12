@@ -25,6 +25,14 @@ public:
       if (matrix != nullptr) {
         setDerivedValue(matrix->getObject());
       }
+    } else if (_matrixProp->isSet()) {
+      auto values = _matrixProp->value().getAsArray();
+      auto m3 = std::make_shared<SkMatrix>();
+      for (size_t i = 0; i < values.size(); ++i) {
+        auto a = values[i];
+        m3->set(i, a.getAsNumber());
+      }
+      setDerivedValue(m3);
     }
   }
 
