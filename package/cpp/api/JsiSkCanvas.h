@@ -525,7 +525,7 @@ public:
     if (!_canvas->readPixels(*info, bfrPtr, bytesPerRow, srcX, srcY)) {
       return jsi::Value::null();
     }
-	  return dest;
+    return dest;
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkCanvas, drawPaint),
