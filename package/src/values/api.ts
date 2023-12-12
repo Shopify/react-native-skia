@@ -26,7 +26,6 @@ export const ValueApi = {
    * for animating Skia: https://shopify.github.io/react-native-skia/docs/animations/animations
    */
   createValue<T>(initialValue: T): SkiaMutableValue<T> {
-    deprecatedWarning();
     return SkiaValueApi.createValue(initialValue);
   },
   /**

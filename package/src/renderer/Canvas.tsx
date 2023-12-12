@@ -14,7 +14,7 @@ import type {
   FunctionComponent,
 } from "react";
 
-import { SkiaDomView, SkiaView } from "../views";
+import { SkiaDomView, SkiaPictureView } from "../views";
 import { Skia } from "../skia/Skia";
 import type { TouchHandler, SkiaBaseViewProps } from "../views";
 import type { SkiaValue } from "../values/types";
@@ -109,19 +109,23 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
         />
       );
     } else {
+      // This is for debugging
+      const recorder = Skia.PictureRecorder();
+      const canvas = recorder.beginRecording(
+        Skia.XYWHRect(0, 0, 2_000_000, 2_000_000)
+      );
+      const ctx = new JsiDrawingContext(Skia, canvas);
+      root.dom.render(ctx);
+      const picture = recorder.finishRecordingAsPicture();
       return (
-        <SkiaView
+        <SkiaPictureView
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ref={ref as any}
           style={style}
           mode={mode}
           debug={debug}
+          picture={picture}
           onSize={onSize}
-          onDraw={(canvas, info) => {
-            onTouch && onTouch(info.touches);
-            const ctx = new JsiDrawingContext(Skia, canvas);
-            root.dom.render(ctx);
-          }}
           {...props}
         />
       );

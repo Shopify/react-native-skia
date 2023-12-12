@@ -8,12 +8,17 @@ import { isRect, type SkCanvas, type SkRect, type SkSize } from "../types";
  * @returns SkPicture
  */
 export const createPicture = (
-  rect: SkRect | SkSize,
-  cb: (canvas: SkCanvas) => void
+  cb: (canvas: SkCanvas) => void,
+  rect?: SkRect | SkSize
 ) => {
   const recorder = Skia.PictureRecorder();
   const canvas = recorder.beginRecording(
-    isRect(rect) ? rect : Skia.XYWHRect(0, 0, rect.width, rect.height)
+    // eslint-disable-next-line no-nested-ternary
+    rect
+      ? isRect(rect)
+        ? rect
+        : Skia.XYWHRect(0, 0, rect.width, rect.height)
+      : undefined
   );
   cb(canvas);
   return recorder.finishRecordingAsPicture();
