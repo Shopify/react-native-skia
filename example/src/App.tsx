@@ -27,6 +27,7 @@ import {
   Severance,
   Transitions,
   Stickers,
+  FrostedCard,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
@@ -57,6 +58,7 @@ const linking: LinkingOptions<StackParamList> = {
       Tests: "test",
       Transitions: "transitions",
       Stickers: "stickers",
+      FrostedCard: "frosted-card",
     },
   },
   prefixes: ["rnskia://"],
@@ -147,6 +149,13 @@ const App = () => {
             <Stack.Screen
               name="Glassmorphism"
               component={Glassmorphism}
+              options={{
+                header: () => null,
+              }}
+            />
+            <Stack.Screen
+              name="FrostedCard"
+              component={FrostedCard}
               options={{
                 header: () => null,
               }}

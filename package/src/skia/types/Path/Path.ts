@@ -540,7 +540,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
   /**
    * Transforms the path by the specified matrix.
    */
-  transform(m3: SkMatrix): SkPath;
+  transform(m3: SkMatrix | number[]): SkPath;
 
   /**
    * Interpolates between Path with point array of equal size.

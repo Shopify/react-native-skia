@@ -368,8 +368,8 @@ export class JsiSkCanvas
     );
   }
 
-  concat(m: SkMatrix) {
-    this.ref.concat(JsiSkMatrix.fromValue(m));
+  concat(m: SkMatrix | number[]) {
+    this.ref.concat(Array.isArray(m) ? m : JsiSkMatrix.fromValue(m));
   }
 
   drawPicture(skp: SkPicture) {
