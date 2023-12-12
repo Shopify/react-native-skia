@@ -16,7 +16,8 @@ import { useClient } from "./useClient";
 import { Screens } from "./Screens";
 
 export const CI = process.env.CI === "true";
-const scale = 3 / PixelRatio.get();
+const s = 3;
+const scale = s / PixelRatio.get();
 const size = 256 * scale;
 // Maximum time to draw: 250 on iOS, 500ms on Android, 1000ms on CI
 // eslint-disable-next-line no-nested-ternary
@@ -40,10 +41,12 @@ export const Tests = ({ assets }: TestsProps) => {
           client.send(
             JSON.stringify(
               eval(
-                `(function Main(){return (${tree.code})(this.Skia, this.ctx); })`
+                `(function Main(){return (${tree.code})(this.Skia, this.ctx, this.size, this.scale); })`
               ).call({
                 Skia,
                 ctx: parseProps(tree.ctx, assets),
+                size: size * PixelRatio.get(),
+                scale: s,
               })
             )
           );
