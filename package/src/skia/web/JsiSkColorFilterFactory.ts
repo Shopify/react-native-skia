@@ -8,7 +8,7 @@ import type {
   BlendMode,
 } from "../types";
 
-import { ckEnum, Host } from "./Host";
+import { getEnum, Host } from "./Host";
 import { JsiSkColorFilter } from "./JsiSkColorFilter";
 
 export class JsiSkColorFilterFactory
@@ -29,7 +29,10 @@ export class JsiSkColorFilterFactory
   MakeBlend(color: SkColor, mode: BlendMode) {
     return new JsiSkColorFilter(
       this.CanvasKit,
-      this.CanvasKit.ColorFilter.MakeBlend(color, ckEnum(mode))
+      this.CanvasKit.ColorFilter.MakeBlend(
+        color,
+        getEnum(this.CanvasKit.BlendMode, mode)
+      )
     );
   }
 

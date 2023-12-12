@@ -8,7 +8,7 @@ import type {
   SkPathEffect,
 } from "../types";
 
-import { ckEnum, Host, NotImplementedOnRNWeb } from "./Host";
+import { getEnum, Host, NotImplementedOnRNWeb } from "./Host";
 import { JsiSkMatrix } from "./JsiSkMatrix";
 import { JsiSkPath } from "./JsiSkPath";
 import { JsiSkPathEffect } from "./JsiSkPathEffect";
@@ -69,7 +69,7 @@ export class JsiSkPathEffectFactory extends Host implements PathEffectFactory {
       JsiSkPath.fromValue(path),
       advance,
       phase,
-      ckEnum(style)
+      getEnum(this.CanvasKit.Path1DEffect, style)
     );
     if (pe === null) {
       return null;

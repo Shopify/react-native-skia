@@ -10,7 +10,7 @@ import type {
   SkTypeface,
 } from "../types";
 
-import { HostObject, NotImplementedOnRNWeb, ckEnum } from "./Host";
+import { HostObject, NotImplementedOnRNWeb, getEnum } from "./Host";
 import { JsiSkPaint } from "./JsiSkPaint";
 import { JsiSkPoint } from "./JsiSkPoint";
 import { JsiSkRect } from "./JsiSkRect";
@@ -100,7 +100,7 @@ export class JsiSkFont extends HostObject<Font, "Font"> implements SkFont {
   }
 
   setEdging(edging: FontEdging) {
-    this.ref.setEdging(ckEnum(edging));
+    this.ref.setEdging(getEnum(this.CanvasKit.FontEdging, edging));
   }
 
   setEmbeddedBitmaps(embeddedBitmaps: boolean) {
@@ -108,7 +108,7 @@ export class JsiSkFont extends HostObject<Font, "Font"> implements SkFont {
   }
 
   setHinting(hinting: FontHinting) {
-    this.ref.setHinting(ckEnum(hinting));
+    this.ref.setHinting(getEnum(this.CanvasKit.FontHinting, hinting));
   }
 
   setLinearMetrics(linearMetrics: boolean) {

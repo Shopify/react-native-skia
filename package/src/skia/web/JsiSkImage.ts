@@ -15,7 +15,7 @@ import type {
   ImageInfo,
 } from "../types";
 
-import { ckEnum, getCkEnum, HostObject } from "./Host";
+import { getEnum, HostObject } from "./Host";
 import { JsiSkMatrix } from "./JsiSkMatrix";
 import { JsiSkShader } from "./JsiSkShader";
 
@@ -77,10 +77,10 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     return new JsiSkShader(
       this.CanvasKit,
       this.ref.makeShaderOptions(
-        ckEnum(tx),
-        ckEnum(ty),
-        ckEnum(fm),
-        ckEnum(mm),
+        getEnum(this.CanvasKit.TileMode, tx),
+        getEnum(this.CanvasKit.TileMode, ty),
+        getEnum(this.CanvasKit.FilterMode, fm),
+        getEnum(this.CanvasKit.MipmapMode, mm),
         localMatrix ? JsiSkMatrix.fromValue(localMatrix) : undefined
       )
     );
@@ -96,8 +96,8 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     return new JsiSkShader(
       this.CanvasKit,
       this.ref.makeShaderCubic(
-        ckEnum(tx),
-        ckEnum(ty),
+        getEnum(this.CanvasKit.TileMode, tx),
+        getEnum(this.CanvasKit.TileMode, ty),
         B,
         C,
         localMatrix ? JsiSkMatrix.fromValue(localMatrix) : undefined
@@ -108,9 +108,12 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
   encodeToBytes(fmt?: ImageFormat, quality?: number) {
     let result: Uint8Array | null;
     if (fmt && quality) {
-      result = this.ref.encodeToBytes(ckEnum(fmt), quality);
+      result = this.ref.encodeToBytes(
+        getEnum(this.CanvasKit.ImageFormat, fmt),
+        quality
+      );
     } else if (fmt) {
-      result = this.ref.encodeToBytes(ckEnum(fmt));
+      result = this.ref.encodeToBytes(getEnum(this.CanvasKit.ImageFormat, fmt));
     } else {
       result = this.ref.encodeToBytes();
     }
@@ -131,11 +134,11 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
       colorSpace: this.CanvasKit.ColorSpace.SRGB,
       width: imageInfo?.width ?? info.width,
       height: imageInfo?.height ?? info.height,
-      alphaType: getCkEnum(
+      alphaType: getEnum(
         this.CanvasKit.AlphaType,
         (imageInfo ?? info).alphaType
       ),
-      colorType: getCkEnum(
+      colorType: getEnum(
         this.CanvasKit.ColorType,
         (imageInfo ?? info).colorType
       ),

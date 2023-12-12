@@ -9,7 +9,7 @@ import type {
   SkMatrix,
 } from "../types";
 
-import { HostObject, ckEnum } from "./Host";
+import { HostObject, getEnum } from "./Host";
 import { JsiSkShader } from "./JsiSkShader";
 import { JsiSkMatrix } from "./JsiSkMatrix";
 import { JsiSkRect } from "./JsiSkRect";
@@ -36,9 +36,9 @@ export class JsiSkPicture
     return new JsiSkShader(
       this.CanvasKit,
       this.ref.makeShader(
-        ckEnum(tmx),
-        ckEnum(tmy),
-        ckEnum(mode),
+        getEnum(this.CanvasKit.TileMode, tmx),
+        getEnum(this.CanvasKit.TileMode, tmy),
+        getEnum(this.CanvasKit.FilterMode, mode),
         localMatrix ? JsiSkMatrix.fromValue(localMatrix) : undefined,
         tileRect ? JsiSkRect.fromValue(this.CanvasKit, tileRect) : undefined
       )

@@ -14,7 +14,7 @@ import type {
   SkPathEffect,
 } from "../types";
 
-import { HostObject, ckEnum } from "./Host";
+import { HostObject, getEnum } from "./Host";
 import { JsiSkColorFilter } from "./JsiSkColorFilter";
 import { JsiSkImageFilter } from "./JsiSkImageFilter";
 import { JsiSkMaskFilter } from "./JsiSkMaskFilter";
@@ -75,7 +75,7 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
   }
 
   setBlendMode(blendMode: BlendMode) {
-    this.ref.setBlendMode(ckEnum(blendMode));
+    this.ref.setBlendMode(getEnum(this.CanvasKit.BlendMode, blendMode));
   }
 
   setColor(color: SkColor) {
@@ -103,11 +103,11 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
   }
 
   setStrokeCap(cap: StrokeCap) {
-    this.ref.setStrokeCap(ckEnum(cap));
+    this.ref.setStrokeCap(getEnum(this.CanvasKit.StrokeCap, cap));
   }
 
   setStrokeJoin(join: StrokeJoin) {
-    this.ref.setStrokeJoin(ckEnum(join));
+    this.ref.setStrokeJoin(getEnum(this.CanvasKit.StrokeJoin, join));
   }
 
   setStrokeMiter(limit: number) {
