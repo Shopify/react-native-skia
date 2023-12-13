@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 import type {
   BlendMode,
   Color,
+  Matrix3,
+  Matrix4,
   PaintStyle,
   SkMatrix,
   SkPaint,
@@ -66,7 +68,7 @@ export type CircleDef = PointCircleDef | ScalarCircleDef;
 export interface TransformProps {
   transform?: Transforms3d;
   origin?: Vector;
-  matrix?: SkMatrix | number[];
+  matrix?: SkMatrix | Matrix4 | Matrix3 | number[];
 }
 
 export interface PaintProps extends ChildrenProps {

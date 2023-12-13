@@ -7,16 +7,12 @@ import {
   BackdropFilter,
   Fill,
   Blur,
-  notifyChange,
+  usePathValue,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import {
-  useDerivedValue,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
+import { useSharedValue, withSpring } from "react-native-reanimated";
 
 const { width, height } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.9;
@@ -47,7 +43,6 @@ export const FrostedCard = () => {
   const image = useImage(require("./dynamo.jpg"));
   const rotateX = useSharedValue(0);
   const rotateY = useSharedValue(0);
-  const path = useSharedValue(Skia.Path.Make());
 
   const gesture = Gesture.Pan()
     .onChange((event) => {
@@ -59,10 +54,10 @@ export const FrostedCard = () => {
       rotateY.value = withSpring(0, springConfig(velocityX / sf));
     });
 
-  useDerivedValue(() => {
-    path.value.reset();
-    path.value.addRRect(rrct);
-    path.value.transform(
+  const clip = usePathValue((path) => {
+    "worklet";
+    path.addRRect(rrct);
+    path.transform(
       processTransform3d([
         { translate: [width / 2, height / 2] },
         { perspective: 300 },
@@ -71,9 +66,7 @@ export const FrostedCard = () => {
         { translate: [-width / 2, -height / 2] },
       ])
     );
-    notifyChange(path);
   });
-
   return (
     <View style={{ flex: 1 }}>
       <GestureDetector gesture={gesture}>
@@ -86,7 +79,7 @@ export const FrostedCard = () => {
             height={height}
             fit="cover"
           />
-          <BackdropFilter filter={<Blur blur={30} mode="clamp" />} clip={path}>
+          <BackdropFilter filter={<Blur blur={30} mode="clamp" />} clip={clip}>
             <Fill color="rgba(255, 255, 255, 0.1)" />
           </BackdropFilter>
         </Canvas>

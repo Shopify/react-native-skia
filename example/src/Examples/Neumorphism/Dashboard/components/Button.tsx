@@ -4,11 +4,12 @@ import {
   Group,
   LinearGradient,
   RadialGradient,
-  translate,
   vec,
 } from "@shopify/react-native-skia";
 import type { ReactNode } from "react";
 import React from "react";
+
+import { translate } from "../../../../components/Animations";
 
 export const BUTTON_SIZE = 62;
 const PADDING = 6;

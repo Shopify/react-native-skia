@@ -22,10 +22,3 @@ export const dist = (a: Vector, b: Vector) => {
   "worklet";
   return Math.hypot(a.x - b.x, a.y - b.y);
 };
-export const translate = ({
-  x,
-  y,
-}: Vector): [{ translateX: number }, { translateY: number }] => {
-  "worklet";
-  return [{ translateX: x }, { translateY: y }];
-};

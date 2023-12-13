@@ -5,8 +5,9 @@ import {
   Group,
   Path,
   Rect,
-  translate,
 } from "@shopify/react-native-skia";
+
+import { translate } from "../../../../components/Animations";
 
 const aspectRatio = 757 / 492;
 const center = { x: 492 / 2, y: 757 / 2 };

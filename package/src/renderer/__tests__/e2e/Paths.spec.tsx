@@ -170,7 +170,7 @@ describe("Paths", () => {
     ]);
   });
   it("should draw a pattern properly", async () => {
-    const { Skia, translate } = importSkia();
+    const { Skia } = importSkia();
 
     const center = { x: 492 / 2, y: 757 / 2 };
     const scale = 0.325;
@@ -253,7 +253,7 @@ describe("Paths", () => {
             </Group>
           );
         })}
-        <Group transform={translate(center)}>
+        <Group transform={[{ translate: [center.x, center.y] }]}>
           <Group transform={[{ translateY: -200 }]}>
             <Circles />
           </Group>
