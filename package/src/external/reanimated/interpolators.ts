@@ -3,7 +3,7 @@ import type {
   FrameInfo,
   SharedValue,
 } from "react-native-reanimated";
-import { useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 
 import type { SkPath, SkPoint } from "../../skia/types";
 import { interpolatePaths, interpolateVector } from "../../animation";
@@ -37,10 +37,10 @@ export const usePathValue = (cb: (path: SkPath) => void) => {
 
 export const useClock = () => {
   const clock = useSharedValue(0);
-  const callback = useRef((info: FrameInfo) => {
+  const callback = useCallback((info: FrameInfo) => {
     "worklet";
     clock.value = info.timeSinceFirstFrame;
-  }).current;
+  }, []);
   useFrameCallback(callback);
   return clock;
 };

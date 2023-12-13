@@ -55,6 +55,7 @@ export const FrostedCard = () => {
     });
 
   const clip = usePathValue((path) => {
+    "worklet";
     path.addRRect(rrct);
     path.transform(
       processTransform3d([
@@ -66,7 +67,6 @@ export const FrostedCard = () => {
       ])
     );
   });
-
   return (
     <View style={{ flex: 1 }}>
       <GestureDetector gesture={gesture}>
