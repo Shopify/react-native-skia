@@ -38,7 +38,7 @@ public:
       auto pers1 = array.getValueAtIndex(runtime, 7).asNumber();
       auto pers2 = array.getValueAtIndex(runtime, 8).asNumber();
       return SkMatrix::MakeAll(scaleX, skewX, transX, skewY, scaleY, transY,
-                              pers0, pers1, pers2);
+                               pers0, pers1, pers2);
     } else if (array.size(runtime) == 16) {
       auto m11 = array.getValueAtIndex(runtime, 0).asNumber();
       auto m12 = array.getValueAtIndex(runtime, 1).asNumber();
@@ -52,8 +52,8 @@ public:
       return SkMatrix::MakeAll(m11, m12, m14, m21, m22, m24, m41, m42, m44);
     }
     throw jsi::JSError(runtime,
-        "Expected array of length 9 or 16 for matrix, got " +
-        std::to_string(array.size(runtime)));
+                       "Expected array of length 9 or 16 for matrix, got " +
+                           std::to_string(array.size(runtime)));
   }
 
   JSI_HOST_FUNCTION(concat) {
