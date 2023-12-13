@@ -12,7 +12,7 @@ export type Matrix3 = readonly [
   number,
   number,
   number,
-  number,
+  number
 ];
 
 export type Matrix4 = readonly [
@@ -240,28 +240,37 @@ export const scale = (
   return m4;
 };
 
-/**
- * @worklet
- */
-export const rotateZ = (value: number, p: Point) => {
+const rotateAxis = (axis: Vec3, angle: number, p?: Point) => {
   "worklet";
-  return pivot(rotate([0, 0, 1], value), p);
+  const result = rotate(axis, angle);
+  if (p) {
+    return pivot(result, p);
+  }
+  return result;
 };
 
 /**
  * @worklet
  */
-export const rotateX = (value: number, p: Point) => {
+export const rotateZ = (value: number, p?: Point) => {
   "worklet";
-  return pivot(rotate([1, 0, 0], value), p);
+  return rotateAxis([0, 0, 1], value, p);
 };
 
 /**
  * @worklet
  */
-export const rotateY = (value: number, p: Point) => {
+export const rotateX = (value: number, p?: Point) => {
   "worklet";
-  return pivot(rotate([0, 1, 0], value), p);
+  return rotateAxis([1, 0, 0], value, p);
+};
+
+/**
+ * @worklet
+ */
+export const rotateY = (value: number, p?: Point) => {
+  "worklet";
+  return rotateAxis([0, 1, 0], value, p);
 };
 
 /**

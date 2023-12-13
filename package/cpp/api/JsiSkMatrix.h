@@ -27,17 +27,33 @@ public:
   static SkMatrix getMatrix(jsi::Runtime &runtime, const jsi::Value &value) {
     const auto &object = value.asObject(runtime);
     const auto &array = object.asArray(runtime);
-    auto scaleX = array.getValueAtIndex(runtime, 0).asNumber();
-    auto skewX = array.getValueAtIndex(runtime, 1).asNumber();
-    auto transX = array.getValueAtIndex(runtime, 2).asNumber();
-    auto skewY = array.getValueAtIndex(runtime, 3).asNumber();
-    auto scaleY = array.getValueAtIndex(runtime, 4).asNumber();
-    auto transY = array.getValueAtIndex(runtime, 5).asNumber();
-    auto pers0 = array.getValueAtIndex(runtime, 6).asNumber();
-    auto pers1 = array.getValueAtIndex(runtime, 7).asNumber();
-    auto pers2 = array.getValueAtIndex(runtime, 8).asNumber();
-    return SkMatrix::MakeAll(scaleX, skewX, transX, skewY, scaleY, transY,
-                             pers0, pers1, pers2);
+    if (array.size(runtime) == 9) {
+      auto scaleX = array.getValueAtIndex(runtime, 0).asNumber();
+      auto skewX = array.getValueAtIndex(runtime, 1).asNumber();
+      auto transX = array.getValueAtIndex(runtime, 2).asNumber();
+      auto skewY = array.getValueAtIndex(runtime, 3).asNumber();
+      auto scaleY = array.getValueAtIndex(runtime, 4).asNumber();
+      auto transY = array.getValueAtIndex(runtime, 5).asNumber();
+      auto pers0 = array.getValueAtIndex(runtime, 6).asNumber();
+      auto pers1 = array.getValueAtIndex(runtime, 7).asNumber();
+      auto pers2 = array.getValueAtIndex(runtime, 8).asNumber();
+      return SkMatrix::MakeAll(scaleX, skewX, transX, skewY, scaleY, transY,
+                              pers0, pers1, pers2);
+    } else if (array.size(runtime) == 16) {
+      auto m11 = array.getValueAtIndex(runtime, 0).asNumber();
+      auto m12 = array.getValueAtIndex(runtime, 1).asNumber();
+      auto m14 = array.getValueAtIndex(runtime, 3).asNumber();
+      auto m21 = array.getValueAtIndex(runtime, 4).asNumber();
+      auto m22 = array.getValueAtIndex(runtime, 5).asNumber();
+      auto m24 = array.getValueAtIndex(runtime, 7).asNumber();
+      auto m41 = array.getValueAtIndex(runtime, 12).asNumber();
+      auto m42 = array.getValueAtIndex(runtime, 13).asNumber();
+      auto m44 = array.getValueAtIndex(runtime, 15).asNumber();
+      return SkMatrix::MakeAll(m11, m12, m14, m21, m22, m24, m41, m42, m44);
+    }
+    throw jsi::JSError(runtime,
+        "Expected array of length 9 or 16 for matrix, got " +
+        std::to_string(array.size(runtime)));
   }
 
   JSI_HOST_FUNCTION(concat) {

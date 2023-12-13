@@ -1,13 +1,13 @@
 import type { SkJSIInstance } from "./JsiInstance";
 import type { SkCanvas } from "./Canvas";
-import type { Transforms3d } from "./Matrix4";
+import type { Matrix3, Matrix4, Transforms3d } from "./Matrix4";
 import { processTransform3d } from "./Matrix4";
 
 export const isMatrix = (obj: unknown): obj is SkMatrix =>
   obj !== null && (obj as SkJSIInstance<string>).__typename__ === "Matrix";
 
 export interface SkMatrix extends SkJSIInstance<"Matrix"> {
-  concat: (matrix: SkMatrix | number[]) => SkMatrix;
+  concat: (matrix: SkMatrix | Matrix4 | Matrix3 | number[]) => SkMatrix;
   translate: (x: number, y: number) => SkMatrix;
   scale: (x: number, y?: number) => SkMatrix;
   skew: (x: number, y: number) => SkMatrix;
