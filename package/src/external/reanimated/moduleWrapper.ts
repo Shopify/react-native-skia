@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { DependencyList } from "react";
 import type {
+  DerivedValue,
   FrameCallback,
   FrameInfo,
   SharedValue,
@@ -41,6 +42,9 @@ export const useSharedValue: <T>(
   init: T,
   oneWayReadsOnly?: boolean
 ) => SharedValue<T> = Reanimated2?.useSharedValue || throwOnMissingReanimated;
+
+
+export const useDerivedValue: <T>(processor: () => T,dependencies?: DependencyList) => DerivedValue<T> = Reanimated2?.useDerivedValue || throwOnMissingReanimated;
 
 export const useFrameCallback: (
   callback: (frameInfo: FrameInfo) => void,

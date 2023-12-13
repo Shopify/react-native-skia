@@ -13,6 +13,7 @@ import {
   useAnimatedReaction,
   useFrameCallback,
   useSharedValue,
+  useDerivedValue
 } from "./moduleWrapper";
 
 export const notifyChange = (value: SharedValue<unknown>) => {
@@ -21,6 +22,17 @@ export const notifyChange = (value: SharedValue<unknown>) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (value as any)._value = value.value;
   }
+};
+
+export const usePathValue = (cb: (path: SkPath) => void) => {
+  const pathInit = useMemo(() => Skia.Path.Make(), []);
+  const path = useSharedValue(pathInit);
+  useDerivedValue(() => {
+    path.value.reset();
+    cb(path.value);
+    notifyChange(path);
+  });
+  return path;
 };
 
 export const useClock = () => {
