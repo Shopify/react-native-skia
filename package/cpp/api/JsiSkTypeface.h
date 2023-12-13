@@ -13,8 +13,8 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "SkFont.h"
-#include "SkTypeface.h"
 #include "SkFontTypes.h"
+#include "SkTypeface.h"
 
 #pragma clang diagnostic pop
 
