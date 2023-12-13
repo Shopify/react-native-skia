@@ -43,8 +43,10 @@ export const useSharedValue: <T>(
   oneWayReadsOnly?: boolean
 ) => SharedValue<T> = Reanimated2?.useSharedValue || throwOnMissingReanimated;
 
-
-export const useDerivedValue: <T>(processor: () => T,dependencies?: DependencyList) => DerivedValue<T> = Reanimated2?.useDerivedValue || throwOnMissingReanimated;
+export const useDerivedValue: <T>(
+  processor: () => T,
+  dependencies?: DependencyList
+) => DerivedValue<T> = Reanimated2?.useDerivedValue || throwOnMissingReanimated;
 
 export const useFrameCallback: (
   callback: (frameInfo: FrameInfo) => void,
