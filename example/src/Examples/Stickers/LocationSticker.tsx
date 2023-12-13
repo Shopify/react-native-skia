@@ -11,10 +11,8 @@ import {
   Path,
   rect,
   Text,
-  toMatrix3,
 } from "@shopify/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
-import { useDerivedValue } from "react-native-reanimated";
 
 const x = 32;
 const y = 200;
