@@ -78,6 +78,32 @@ const textStyle = {
 };
 ```
 
+## Paragraph Height
+
+To get the paragraph height, you can calculate the layout using `layout()` and once done, you can invoke `getHeight()`.
+
+```tsx twoslash
+import { useMemo } from "react";
+import { Paragraph, Skia, useFonts } from "@shopify/react-native-skia";
+
+const MyParagraph = () => {
+  const paragraph = useMemo(() => {
+    const para = Skia.ParagraphBuilder.Make()
+      .addText("Say Hello to ")
+      .addText("Skia 🎨")
+      .pop()
+      .build();
+    // Calculate the layout
+    para.layout(300);
+    return para;
+  }, []);
+  // Now the paragraph height is available
+  const height = paragraph.getHeight();
+  // Render the paragraph
+  return <Paragraph paragraph={paragraph} x={0} y={0} width={300} />;
+};
+```
+
 ## Fonts
 
 By default, the paragraph API will use the system fonts.

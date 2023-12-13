@@ -453,6 +453,67 @@ describe("Paragraphs", () => {
     );
   });
 
+  itRunsE2eOnly("should draw the bounding box", async () => {
+    const img = await surface.drawOffscreen(
+      (Skia, canvas, { bold, boldItalic, italic }) => {
+        const para = Skia.ParagraphBuilder.Make()
+          .pushStyle({
+            fontStyle: italic,
+            color: Skia.Color("black"),
+          })
+          .addText("Hello Skia in italic")
+          .pop()
+          .pushStyle({ fontStyle: bold, color: Skia.Color("black") })
+          .addText("Hello Skia in bold")
+          .pop()
+          .pushStyle({
+            fontStyle: boldItalic,
+            color: Skia.Color("black"),
+          })
+          .addText("Hello Skia in bold-italic")
+          .pop()
+          .build();
+        para.layout(150);
+        const height = para.getHeight();
+        const paint = Skia.Paint();
+        paint.setColor(Skia.Color("cyan"));
+        canvas.drawRect(Skia.XYWHRect(0, 0, 150, height), paint);
+        para.paint(canvas, 0, 0);
+      },
+      {
+        bold: FontStyle.Bold,
+        italic: FontStyle.Italic,
+        boldItalic: FontStyle.BoldItalic,
+      }
+    );
+    checkImage(
+      img,
+      `snapshots/paragraph/paragraph-text-style-font-style-${surface.OS}-box.png`
+    );
+  });
+
+  itRunsE2eOnly("should return the paragraph height", async () => {
+    const { width, height } = await surface.eval((Skia) => {
+      const para = Skia.ParagraphBuilder.Make()
+        .pushStyle({
+          color: Skia.Color("black"),
+          fontSize: 25,
+          shadows: [
+            {
+              color: Skia.Color("#ff000044"),
+              blurRadius: 4,
+              offset: { x: 4, y: 4 },
+            },
+          ],
+        })
+        .addText("Hello Skia with red shadow")
+        .build();
+      para.layout(150);
+      return { height: para.getHeight(), width: para.getMaxWidth() };
+    });
+    expect(width).toBe(150);
+    expect(height).toBeGreaterThan(25);
+  });
   itRunsE2eOnly("should support font shadows", async () => {
     const img = await surface.drawOffscreen((Skia, canvas) => {
       const para = Skia.ParagraphBuilder.Make()
