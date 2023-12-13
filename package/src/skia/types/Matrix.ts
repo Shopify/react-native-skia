@@ -2,17 +2,6 @@ import type { SkJSIInstance } from "./JsiInstance";
 import type { SkCanvas } from "./Canvas";
 import type { Transforms3d } from "./Matrix4";
 import { processTransform3d } from "./Matrix4";
-export enum MatrixIndex {
-  ScaleX = 0,
-  SkewX = 1,
-  TransX = 2,
-  SkewY = 3,
-  ScaleY = 4,
-  TransY = 5,
-  Persp0 = 6,
-  Persp1 = 7,
-  Persp2 = 8,
-}
 
 export const isMatrix = (obj: unknown): obj is SkMatrix =>
   obj !== null && (obj as SkJSIInstance<string>).__typename__ === "Matrix";

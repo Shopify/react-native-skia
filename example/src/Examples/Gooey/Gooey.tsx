@@ -5,7 +5,6 @@ import {
   Canvas,
   Fill,
   Skia,
-  translate,
   vec,
   Group,
   PathOp,
@@ -24,6 +23,8 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
+
+import { translate } from "../../components/Animations";
 
 import { Icon, R } from "./components/Icon";
 import { Hamburger } from "./components/Hamburger";

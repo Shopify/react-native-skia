@@ -5,7 +5,11 @@ import { Group, Rect } from "../../components";
 import { surface } from "../setup";
 import { processTransform3d } from "../../../skia/types";
 
-const toMatrix3 = (m: number[]) => {
+/**
+ * @worklet
+ */
+export const toMatrix3 = (m: number[]) => {
+  "worklet";
   return [m[0], m[1], m[3], m[4], m[5], m[7], m[12], m[13], m[15]];
 };
 

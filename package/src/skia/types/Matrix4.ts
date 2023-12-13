@@ -1,6 +1,19 @@
+type Point = { x: number; y: number };
 type Vec2 = readonly [number, number];
 type Vec3 = readonly [number, number, number];
 type Vec4 = readonly [number, number, number, number];
+
+export type Matrix3 = readonly [
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+];
 
 export type Matrix4 = readonly [
   number,
@@ -78,17 +91,18 @@ export const Matrix4 = (): Matrix4 => {
   return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 };
 
-const translate = (x: number, y: number, z: number): Matrix4 => {
+/**
+ * @worklet
+ */
+export const translate = (x: number, y: number, z: number = 0): Matrix4 => {
   "worklet";
   return [1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z, 0, 0, 0, 1];
 };
 
-const scale = (sx: number, sy: number, sz: number): Matrix4 => {
-  "worklet";
-  return [sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, 0, 0, 0, 1];
-};
-
-const perspective = (p: number): Matrix4 => {
+/**
+ * @worklet
+ */
+export const perspective = (p: number): Matrix4 => {
   "worklet";
   return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -1 / p, 1];
 };
@@ -136,15 +150,6 @@ const rotatedUnitSinCos = (
   ];
 };
 
-const rotate = (axis: Vec3, value: number) => {
-  "worklet";
-  return rotatedUnitSinCos(
-    normalizeVec(axis),
-    Math.sin(value),
-    Math.cos(value)
-  );
-};
-
 const matrixVecMul4 = (m: Matrix4, v: Vec4) => {
   "worklet";
   const [vx, vy, vz, vw] = v;
@@ -165,7 +170,10 @@ export const mapPoint3d = (m: Matrix4, v: Vec3) => {
   return [r[0] / r[3], r[1] / r[3], r[2] / r[3]] as const;
 };
 
-const multiply4 = (a: Matrix4, b: Matrix4): Matrix4 => {
+/**
+ * @worklet
+ */
+export const multiply4 = (a: Matrix4, b: Matrix4): Matrix4 => {
   "worklet";
   const result = new Array(16).fill(0);
   for (let i = 0; i < 4; i++) {
@@ -190,9 +198,70 @@ const skewX = (angle: number): Matrix4 => {
   return [1, 0, 0, 0, Math.tan(angle), 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 };
 
-const toMatrix3 = (m: Matrix4) => {
+/**
+ * @worklet
+ */
+export const toMatrix3 = (m: Matrix4) => {
   "worklet";
   return [m[0], m[1], m[3], m[4], m[5], m[7], m[12], m[13], m[15]];
+};
+
+const rotate = (axis: Vec3, value: number) => {
+  "worklet";
+  return rotatedUnitSinCos(
+    normalizeVec(axis),
+    Math.sin(value),
+    Math.cos(value)
+  );
+};
+
+/**
+ * @worklet
+ */
+export const pivot = (m: Matrix4, p: Point) => {
+  "worklet";
+  return multiply4(translate(p.x, p.y), multiply4(m, translate(-p.x, -p.y)));
+};
+
+/**
+ * @worklet
+ */
+export const scale = (
+  sx: number,
+  sy: number,
+  sz: number = 1,
+  p?: Point
+): Matrix4 => {
+  "worklet";
+  const m4: Matrix4 = [sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, 0, 0, 0, 1];
+  if (p) {
+    return pivot(m4, p);
+  }
+  return m4;
+};
+
+/**
+ * @worklet
+ */
+export const rotateZ = (value: number, p: Point) => {
+  "worklet";
+  return pivot(rotate([0, 0, 1], value), p);
+};
+
+/**
+ * @worklet
+ */
+export const rotateX = (value: number, p: Point) => {
+  "worklet";
+  return pivot(rotate([1, 0, 0], value), p);
+};
+
+/**
+ * @worklet
+ */
+export const rotateY = (value: number, p: Point) => {
+  "worklet";
+  return pivot(rotate([0, 1, 0], value), p);
 };
 
 /**

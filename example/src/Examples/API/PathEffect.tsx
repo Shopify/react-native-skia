@@ -7,7 +7,6 @@ import {
   sub,
   Canvas,
   Circle,
-  translate,
   Skia,
   PaintStyle,
   DiscretePathEffect,
@@ -21,6 +20,8 @@ import {
   Group,
   processTransform2d,
 } from "@shopify/react-native-skia";
+
+import { translate } from "../../components/Animations";
 
 import { Title } from "./components/Title";
 

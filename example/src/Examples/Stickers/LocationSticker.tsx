@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import React from "react";
-import type { SkFont, SkMatrix } from "@shopify/react-native-skia";
+import type { Matrix4, SkFont } from "@shopify/react-native-skia";
 import {
   Skia,
   vec,
@@ -11,8 +11,10 @@ import {
   Path,
   rect,
   Text,
+  toMatrix3,
 } from "@shopify/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
+import { useDerivedValue } from "react-native-reanimated";
 
 const x = 32;
 const y = 200;
@@ -25,7 +27,7 @@ const path = Skia.Path.MakeFromSVGString(
 const bounds = path.computeTightBounds();
 
 interface LocationStickerProps {
-  matrix: SharedValue<SkMatrix>;
+  matrix: SharedValue<Matrix4>;
   font: SkFont;
 }
 

@@ -1,3 +1,4 @@
+import type { Vector } from "@shopify/react-native-skia";
 import { useEffect } from "react";
 import {
   Easing,
@@ -22,6 +23,13 @@ export const useLoop = ({ duration }: { duration: number }) => {
   return progress;
 };
 
+export const translate = ({
+  x,
+  y,
+}: Vector): [{ translateX: number }, { translateY: number }] => {
+  "worklet";
+  return [{ translateX: x }, { translateY: y }];
+};
 const fade = (t: number) => {
   "worklet";
   return t * t * t * (t * (t * 6 - 15) + 10);
