@@ -161,13 +161,11 @@ export const importSkia = (): typeof SkiaExports => {
   const offscreen = require("../Offscreen");
   // TODO: to remove
   const animation = require("../../animation");
-  const values = require("../../values");
   const useTouchHandler = require("../../views/useTouchHandler");
   return {
     ...skia,
     ...renderer,
     ...animation,
-    ...values,
     ...offscreen,
     ...useTouchHandler,
   };
