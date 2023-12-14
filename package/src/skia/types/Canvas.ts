@@ -8,12 +8,11 @@ import type { SkColor } from "./Color";
 import type { SkRRect } from "./RRect";
 import type { BlendMode } from "./Paint/BlendMode";
 import type { SkPoint, PointMode } from "./Point";
-import type { SkMatrix } from "./Matrix";
+import type { InputMatrix } from "./Matrix";
 import type { SkImageFilter } from "./ImageFilter";
 import type { SkVertices } from "./Vertices";
 import type { SkTextBlob } from "./TextBlob";
 import type { SkPicture } from "./Picture";
-import type { Matrix4, Matrix3 } from "./Matrix4";
 
 export enum ClipOp {
   Difference,
@@ -486,7 +485,7 @@ export interface SkCanvas {
    * Replaces current matrix with m premultiplied with the existing matrix.
    * @param m
    */
-  concat(m: SkMatrix | number[] | Matrix4 | Matrix3): void;
+  concat(m: InputMatrix): void;
 
   /**
    * Draws the given picture using the current clip, current matrix, and the provided paint.
