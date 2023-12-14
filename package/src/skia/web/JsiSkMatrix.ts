@@ -1,12 +1,12 @@
 import type { CanvasKit, Matrix3x3 } from "canvaskit-wasm";
 
-import { toMatrix3, type Matrix3, type Matrix4, type SkMatrix } from "../types";
+import { toMatrix3 } from "../types";
+import type { SkMatrix, InputMatrix, Matrix4 } from "../types";
 
 import { HostObject } from "./Host";
 
-const isMatrixHostObject = (
-  obj: SkMatrix | number[] | Matrix4 | Matrix3
-): obj is SkMatrix => !Array.isArray(obj);
+const isMatrixHostObject = (obj: InputMatrix): obj is SkMatrix =>
+  !Array.isArray(obj);
 
 export class JsiSkMatrix
   extends HostObject<Matrix3x3, "Matrix">
@@ -28,7 +28,7 @@ export class JsiSkMatrix
     // Do nothing - the matrix is represenetd by a Float32Array
   };
 
-  concat(matrix: SkMatrix | number[] | Matrix4 | Matrix3) {
+  concat(matrix: InputMatrix) {
     this.preMultiply(
       // eslint-disable-next-line no-nested-ternary
       isMatrixHostObject(matrix)

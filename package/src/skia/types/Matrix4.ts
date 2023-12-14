@@ -278,67 +278,65 @@ export const rotateY = (value: number, p?: Point) => {
  */
 export const processTransform3d = (transforms: Transforms3d) => {
   "worklet";
-  return toMatrix3(
-    transforms.reduce((acc, val) => {
-      const key = Object.keys(val)[0] as Transform3dName;
-      const transform = val as Pick<Transformations, typeof key>;
-      if (key === "translateX") {
-        const value = transform[key];
-        return multiply4(acc, translate(value, 0, 0));
-      }
-      if (key === "translate") {
-        const [x, y, z = 0] = transform[key];
-        return multiply4(acc, translate(x, y, z));
-      }
-      if (key === "translateY") {
-        const value = transform[key];
-        return multiply4(acc, translate(0, value, 0));
-      }
-      if (key === "translateZ") {
-        const value = transform[key];
-        return multiply4(acc, translate(0, 0, value));
-      }
-      if (key === "scale") {
-        const value = transform[key];
-        return multiply4(acc, scale(value, value, 1));
-      }
-      if (key === "scaleX") {
-        const value = transform[key];
-        return multiply4(acc, scale(value, 1, 1));
-      }
-      if (key === "scaleY") {
-        const value = transform[key];
-        return multiply4(acc, scale(1, value, 1));
-      }
-      if (key === "skewX") {
-        const value = transform[key];
-        return multiply4(acc, skewX(value));
-      }
-      if (key === "skewY") {
-        const value = transform[key];
-        return multiply4(acc, skewY(value));
-      }
-      if (key === "rotateX") {
-        const value = transform[key];
-        return multiply4(acc, rotate([1, 0, 0], value));
-      }
-      if (key === "rotateY") {
-        const value = transform[key];
-        return multiply4(acc, rotate([0, 1, 0], value));
-      }
-      if (key === "perspective") {
-        const value = transform[key];
-        return multiply4(acc, perspective(value));
-      }
-      if (key === "rotate" || key === "rotateZ") {
-        const value = transform[key];
-        return multiply4(acc, rotate([0, 0, 1], value));
-      }
-      if (key === "matrix") {
-        const value = transform[key];
-        return multiply4(acc, value);
-      }
-      return exhaustiveCheck(key);
-    }, Matrix4())
-  );
+  return transforms.reduce((acc, val) => {
+    const key = Object.keys(val)[0] as Transform3dName;
+    const transform = val as Pick<Transformations, typeof key>;
+    if (key === "translateX") {
+      const value = transform[key];
+      return multiply4(acc, translate(value, 0, 0));
+    }
+    if (key === "translate") {
+      const [x, y, z = 0] = transform[key];
+      return multiply4(acc, translate(x, y, z));
+    }
+    if (key === "translateY") {
+      const value = transform[key];
+      return multiply4(acc, translate(0, value, 0));
+    }
+    if (key === "translateZ") {
+      const value = transform[key];
+      return multiply4(acc, translate(0, 0, value));
+    }
+    if (key === "scale") {
+      const value = transform[key];
+      return multiply4(acc, scale(value, value, 1));
+    }
+    if (key === "scaleX") {
+      const value = transform[key];
+      return multiply4(acc, scale(value, 1, 1));
+    }
+    if (key === "scaleY") {
+      const value = transform[key];
+      return multiply4(acc, scale(1, value, 1));
+    }
+    if (key === "skewX") {
+      const value = transform[key];
+      return multiply4(acc, skewX(value));
+    }
+    if (key === "skewY") {
+      const value = transform[key];
+      return multiply4(acc, skewY(value));
+    }
+    if (key === "rotateX") {
+      const value = transform[key];
+      return multiply4(acc, rotate([1, 0, 0], value));
+    }
+    if (key === "rotateY") {
+      const value = transform[key];
+      return multiply4(acc, rotate([0, 1, 0], value));
+    }
+    if (key === "perspective") {
+      const value = transform[key];
+      return multiply4(acc, perspective(value));
+    }
+    if (key === "rotate" || key === "rotateZ") {
+      const value = transform[key];
+      return multiply4(acc, rotate([0, 0, 1], value));
+    }
+    if (key === "matrix") {
+      const value = transform[key];
+      return multiply4(acc, value);
+    }
+    return exhaustiveCheck(key);
+  }, Matrix4());
 };

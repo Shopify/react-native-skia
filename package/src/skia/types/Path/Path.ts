@@ -2,7 +2,7 @@ import type { SkRect } from "../Rect";
 import type { SkPoint } from "../Point";
 import type { SkRRect } from "../RRect";
 import type { StrokeJoin, StrokeCap } from "../Paint";
-import type { SkMatrix } from "../Matrix";
+import type { InputMatrix, SkMatrix } from "../Matrix";
 import type { SkJSIInstance } from "../JsiInstance";
 
 /**
@@ -540,7 +540,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
   /**
    * Transforms the path by the specified matrix.
    */
-  transform(m3: SkMatrix | number[]): SkPath;
+  transform(m3: InputMatrix): SkPath;
 
   /**
    * Interpolates between Path with point array of equal size.

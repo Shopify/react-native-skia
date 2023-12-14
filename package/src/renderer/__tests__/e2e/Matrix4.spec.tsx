@@ -9,15 +9,8 @@ import {
   processTransform3d,
   rotateX,
   translate,
+  toMatrix3,
 } from "../../../skia/types";
-
-/**
- * @worklet
- */
-export const toCKMatrix3 = (m: number[]) => {
-  "worklet";
-  return [m[0], m[1], m[3], m[4], m[5], m[7], m[12], m[13], m[15]];
-};
 
 const ckPerspective = (d: number) => [
   1,
@@ -43,7 +36,7 @@ const concat = (a: number[], b: number[]) => CanvasKit.M44.multiply(a, b);
 describe("Matrix4", () => {
   it("should be a row major matix", () => {
     const m4 = CanvasKit.M44.identity();
-    expect(processTransform3d([])).toEqual(toCKMatrix3(m4));
+    expect(processTransform3d([])).toEqual(m4);
   });
   it("should match identity matrix", () => {
     const m4 = CanvasKit.M44.identity();
@@ -54,7 +47,7 @@ describe("Matrix4", () => {
         { translateX: -256 / 2 },
         { translateY: -256 / 2 },
       ])
-    ).toEqual(toCKMatrix3(m4));
+    ).toEqual(m4);
   });
   it("Identity should match identity matrix", () => {
     const m4 = CanvasKit.M44.identity();
@@ -65,7 +58,7 @@ describe("Matrix4", () => {
         { translateX: -256 / 2 },
         { translateY: -256 / 2 },
       ])
-    ).toEqual(toCKMatrix3(m4));
+    ).toEqual(m4);
   });
   it("should match perspective matrix", () => {
     let m4 = CanvasKit.M44.identity();
@@ -80,15 +73,15 @@ describe("Matrix4", () => {
         { translateX: -256 / 2 },
         { translateY: -256 / 2 },
       ])
-    ).toEqual(toCKMatrix3(m4));
+    ).toEqual(m4);
   });
   it("should match rotation matrix (1)", () => {
     let m4 = CanvasKit.M44.identity();
     m4 = concat(m4, CanvasKit.M44.rotated([1, 0, 0], 1));
-    expect(processTransform3d([{ rotateX: 1 }])).toEqual(toCKMatrix3(m4));
+    expect(processTransform3d([{ rotateX: 1 }])).toEqual(m4);
     m4 = CanvasKit.M44.identity();
     m4 = concat(m4, CanvasKit.M44.rotated([0, 1, 0], Math.PI));
-    expect(processTransform3d([{ rotateY: Math.PI }])).toEqual(toCKMatrix3(m4));
+    expect(processTransform3d([{ rotateY: Math.PI }])).toEqual(m4);
   });
   it("should match rotation matrix (2)", () => {
     let m4 = CanvasKit.M44.identity();
@@ -103,7 +96,7 @@ describe("Matrix4", () => {
         { translateX: -256 / 2 },
         { translateY: -256 / 2 },
       ])
-    ).toEqual(toCKMatrix3(m4));
+    ).toEqual(m4);
   });
   it("Should do a perspective transformation (1)", async () => {
     const { width, height } = surface;
@@ -221,12 +214,14 @@ describe("Matrix4", () => {
     );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, jest/valid-expect
     (expect(result) as any).toBeApproximatelyEqual(
-      processTransform3d([
-        { translate: [width / 2, height / 2] },
-        { perspective: 300 },
-        { rotateX: 1 },
-        { translate: [-width / 2, -height / 2] },
-      ]),
+      toMatrix3(
+        processTransform3d([
+          { translate: [width / 2, height / 2] },
+          { perspective: 300 },
+          { rotateX: 1 },
+          { translate: [-width / 2, -height / 2] },
+        ])
+      ),
       0.1
     );
   });
