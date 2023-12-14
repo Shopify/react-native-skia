@@ -162,9 +162,7 @@ public:
   /**
    Destructor
    */
-  virtual ~RNSkView() {
-    endDrawingLoop();
-  }
+  virtual ~RNSkView() { endDrawingLoop(); }
 
   /**
    Sets custom properties. Custom properties are properties that are set
