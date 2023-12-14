@@ -5,27 +5,17 @@ import {
   rotateZ,
   scale,
   translate,
+  convertToColumnMajor,
+  convertToAffineMatrix,
 } from "@shopify/react-native-skia";
 import React from "react";
+import { Platform } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import type { SharedValue } from "react-native-reanimated";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-
-const convertToColumnMajor = (rowMajorMatrix: Matrix4) => {
-  "worklet";
-
-  const colMajorMatrix = new Array(16);
-  const size = 4;
-  for (let row = 0; row < size; row++) {
-    for (let col = 0; col < size; col++) {
-      colMajorMatrix[col * size + row] = rowMajorMatrix[row * size + col];
-    }
-  }
-  return colMajorMatrix;
-};
 
 interface GestureHandlerProps {
   matrix: SharedValue<Matrix4>;
@@ -68,6 +58,7 @@ export const GestureHandler = ({
     });
 
   const style = useAnimatedStyle(() => {
+    const m4 = convertToColumnMajor(matrix.value);
     return {
       position: "absolute",
       left: x,
@@ -79,7 +70,7 @@ export const GestureHandler = ({
         { translateX: -width / 2 },
         { translateY: -height / 2 },
         {
-          matrix: convertToColumnMajor(matrix.value),
+          matrix: Platform.OS === "web" ? convertToAffineMatrix(m4) : m4,
         },
         { translateX: width / 2 },
         { translateY: height / 2 },
