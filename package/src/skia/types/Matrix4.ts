@@ -346,7 +346,7 @@ export const processTransform3d = (transforms: Transforms3d) => {
 /**
  * @worklet
  */
-export const convertToColumnMajor = (rowMajorMatrix: number[]) => {
+export const convertToColumnMajor = (rowMajorMatrix: Matrix4) => {
   "worklet";
 
   const colMajorMatrix = new Array<number>(16);
@@ -356,13 +356,13 @@ export const convertToColumnMajor = (rowMajorMatrix: number[]) => {
       colMajorMatrix[col * size + row] = rowMajorMatrix[row * size + col];
     }
   }
-  return colMajorMatrix as unknown as Matrix4;
+  return colMajorMatrix;
 };
 
 /**
  * @worklet
  */
-export const convertToAffineMatrix = (m4: Matrix4) => {
+export const convertToAffineMatrix = (m4: number[]) => {
   "worklet";
   // Extracting the relevant components from the 4x4 matrix
   const a = m4[0]; // Scale X
