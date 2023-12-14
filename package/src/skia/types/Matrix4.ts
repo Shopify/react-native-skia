@@ -342,3 +342,36 @@ export const processTransform3d = (transforms: Transforms3d) => {
     }, Matrix4())
   );
 };
+
+/**
+ * @worklet
+ */
+export const convertToColumnMajor = (rowMajorMatrix: number[]) => {
+  "worklet";
+
+  const colMajorMatrix = new Array<number>(16);
+  const size = 4;
+  for (let row = 0; row < size; row++) {
+    for (let col = 0; col < size; col++) {
+      colMajorMatrix[col * size + row] = rowMajorMatrix[row * size + col];
+    }
+  }
+  return colMajorMatrix as unknown as Matrix4;
+};
+
+/**
+ * @worklet
+ */
+export const convertToAffineMatrix = (m4: Matrix4) => {
+  "worklet";
+  // Extracting the relevant components from the 4x4 matrix
+  const a = m4[0]; // Scale X
+  const b = m4[1]; // Skew Y
+  const c = m4[4]; // Skew X
+  const d = m4[5]; // Scale Y
+  const tx = m4[12]; // Translate X
+  const ty = m4[13]; // Translate Y
+
+  // Returning the 6-element affine transformation matrix
+  return [a, b, c, d, tx, ty];
+};

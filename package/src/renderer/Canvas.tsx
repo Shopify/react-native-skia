@@ -14,11 +14,11 @@ import type {
 } from "react";
 import type { LayoutChangeEvent } from "react-native";
 
-import { SkiaDomView, SkiaPictureView } from "../views";
+import { SkiaDomView } from "../views";
+import { SkiaDomView as SkiaDomViewWeb } from "../views/SkiaDomView.web";
 import { Skia } from "../skia/Skia";
 import type { TouchHandler, SkiaBaseViewProps } from "../views";
 import type { SkiaValue } from "../values/types";
-import { JsiDrawingContext } from "../dom/types";
 
 import { SkiaRoot } from "./Reconciler";
 import { NATIVE_DOM } from "./HostComponents";
@@ -116,23 +116,16 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
         />
       );
     } else {
-      // This is for debugging
-      const recorder = Skia.PictureRecorder();
-      const canvas = recorder.beginRecording(
-        Skia.XYWHRect(0, 0, 2_000_000, 2_000_000)
-      );
-      const ctx = new JsiDrawingContext(Skia, canvas);
-      root.dom.render(ctx);
-      const picture = recorder.finishRecordingAsPicture();
       return (
-        <SkiaPictureView
+        <SkiaDomViewWeb
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ref={ref as any}
           style={style}
+          root={root.dom}
+          onTouch={onTouch}
+          onLayout={onLayout}
           mode={mode}
           debug={debug}
-          picture={picture}
-          onLayout={onLayout}
           {...props}
         />
       );
