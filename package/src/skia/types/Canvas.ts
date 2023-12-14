@@ -13,6 +13,7 @@ import type { SkImageFilter } from "./ImageFilter";
 import type { SkVertices } from "./Vertices";
 import type { SkTextBlob } from "./TextBlob";
 import type { SkPicture } from "./Picture";
+import type { Matrix4, Matrix3 } from "./Matrix4";
 
 export enum ClipOp {
   Difference,
@@ -485,7 +486,7 @@ export interface SkCanvas {
    * Replaces current matrix with m premultiplied with the existing matrix.
    * @param m
    */
-  concat(m: SkMatrix | number[]): void;
+  concat(m: SkMatrix | number[] | Matrix4 | Matrix3): void;
 
   /**
    * Draws the given picture using the current clip, current matrix, and the provided paint.

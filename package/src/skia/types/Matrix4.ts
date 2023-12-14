@@ -278,8 +278,7 @@ export const rotateY = (value: number, p?: Point) => {
  */
 export const processTransform3d = (transforms: Transforms3d) => {
   "worklet";
-  return toMatrix3(
-    transforms.reduce((acc, val) => {
+  return transforms.reduce((acc, val) => {
       const key = Object.keys(val)[0] as Transform3dName;
       const transform = val as Pick<Transformations, typeof key>;
       if (key === "translateX") {
@@ -339,6 +338,5 @@ export const processTransform3d = (transforms: Transforms3d) => {
         return multiply4(acc, value);
       }
       return exhaustiveCheck(key);
-    }, Matrix4())
-  );
+    }, Matrix4());
 };

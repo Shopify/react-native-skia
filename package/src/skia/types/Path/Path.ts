@@ -4,6 +4,7 @@ import type { SkRRect } from "../RRect";
 import type { StrokeJoin, StrokeCap } from "../Paint";
 import type { SkMatrix } from "../Matrix";
 import type { SkJSIInstance } from "../JsiInstance";
+import { Matrix3, Matrix4 } from "../Matrix4";
 
 /**
  * Options used for Path.stroke(). If an option is omitted, a sensible default will be used.
@@ -540,7 +541,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
   /**
    * Transforms the path by the specified matrix.
    */
-  transform(m3: SkMatrix | number[]): SkPath;
+  transform(m3: SkMatrix | number[] | Matrix3 | Matrix4): SkPath;
 
   /**
    * Interpolates between Path with point array of equal size.
