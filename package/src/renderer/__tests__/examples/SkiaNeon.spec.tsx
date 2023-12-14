@@ -1,7 +1,6 @@
 /* eslint-disable max-len */
 import React, { useMemo } from "react";
 
-import type { SkiaValue } from "../../../values/types";
 import { processResult } from "../../../__tests__/setup";
 import {
   Blur,
@@ -59,7 +58,7 @@ const defaultPath = [
 ];
 
 interface SkiaNeonProps {
-  progress: SkiaValue<number>;
+  progress: { current: number };
 }
 
 export const SkiaNeon = ({ progress }: SkiaNeonProps) => {
@@ -102,7 +101,7 @@ export const SkiaNeon = ({ progress }: SkiaNeonProps) => {
               color="transparent"
               strokeCap="round"
               strokeJoin="round"
-              end={progress}
+              end={progress.current}
             >
               <Paint
                 style="stroke"
@@ -159,7 +158,7 @@ export const SkiaNeon = ({ progress }: SkiaNeonProps) => {
 
 describe("Skia Neon", () => {
   it("should render the Skia Neon example properly", () => {
-    const progress = global.SkiaValueApi.createValue(0.5);
+    const progress = { current: 0.5 };
     const { surface, draw } = mountCanvas(<SkiaNeon progress={progress} />);
     draw();
     processResult(surface, "snapshots/demos/skia-neon.png");

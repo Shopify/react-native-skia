@@ -6,8 +6,6 @@ import React from "react";
 import type { ReactNode } from "react";
 import type { Server, WebSocket } from "ws";
 
-import { DependencyManager } from "../DependencyManager";
-import { ValueApi } from "../../values/web";
 import type * as SkiaExports from "../../index";
 import { JsiSkApi } from "../../skia/web/JsiSkia";
 import type { Node } from "../../dom/nodes";
@@ -49,7 +47,6 @@ beforeAll(async () => {
   await LoadSkiaWeb();
   const Skia = JsiSkApi(global.CanvasKit);
   global.SkiaApi = Skia;
-  global.SkiaValueApi = ValueApi;
   surface = E2E ? new RemoteSurface() : new LocalSurface();
   const { fontSize } = surface;
   const NotoSansSCRegular = loadFont(
@@ -178,8 +175,7 @@ export const importSkia = (): typeof SkiaExports => {
 
 export const getSkDOM = () => {
   const { Skia } = importSkia();
-  const depMgr = new DependencyManager(() => () => {});
-  return new JsiSkDOM({ Skia, depMgr });
+  return new JsiSkDOM({ Skia });
 };
 
 export const PIXEL_RATIO = 3;
@@ -204,7 +200,6 @@ export const mountCanvas = (element: ReactNode) => {
   const root = new SkiaRoot(Skia);
   root.render(element);
   return {
-    unmount: root.unmount.bind(root),
     surface: ckSurface,
     root: root.dom,
     draw: () => {
