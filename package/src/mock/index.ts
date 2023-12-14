@@ -14,7 +14,6 @@ export const Mock = (CanvasKit: CanvasKit) => {
     Skia,
     ...require("../renderer/components"),
     ...require("../skia"),
-    ...require("../values"),
     ...require("../animation"),
     ...require("../dom/types"),
     ...require("../dom/nodes"),
