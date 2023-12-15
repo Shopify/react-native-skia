@@ -1,13 +1,7 @@
 import type { ViewProps } from "react-native";
 
 import type { GroupProps, RenderNode } from "../dom/types";
-import type {
-  SkCanvas,
-  SkImage,
-  SkPicture,
-  SkRect,
-  SkSize,
-} from "../skia/types";
+import type { SkImage, SkPicture, SkRect, SkSize } from "../skia/types";
 import type { SkiaMutableValue, SkiaValue } from "../values";
 import type { SharedValueType } from "../renderer/processors/Animations/Animations";
 
@@ -55,8 +49,6 @@ export type TouchHandlers = {
 
 export type TouchHandler = (touchInfo: Array<Array<TouchInfo>>) => void;
 
-export type RNSkiaDrawCallback = (canvas: SkCanvas, info: DrawingInfo) => void;
-
 /**
  * Listener interface for value changes
  */
@@ -99,17 +91,6 @@ export interface SkiaBaseViewProps extends ViewProps {
    * the Skia view is resized.
    */
   onSize?: SkiaMutableValue<SkSize> | SharedValueType<SkSize>;
-}
-
-export interface SkiaDrawViewProps extends SkiaBaseViewProps {
-  /**
-   * Draw callback. Will be called whenever the view is invalidated and
-   * needs to redraw. This is either caused by a change in a react
-   * property, a touch event, or a call to redraw. If the view is in
-   * continuous mode the callback will be called 60 frames per second
-   * by the native view.
-   */
-  onDraw?: RNSkiaDrawCallback;
 }
 
 export interface SkiaPictureViewProps extends SkiaBaseViewProps {

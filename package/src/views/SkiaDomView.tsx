@@ -7,8 +7,8 @@ import { Platform } from "../Platform";
 import SkiaDomViewNativeComponent from "../specs/SkiaDomViewNativeComponent";
 
 import { SkiaViewApi } from "./api";
-import { SkiaViewNativeId } from "./SkiaView";
 import type { SkiaDomViewProps } from "./types";
+import { SkiaViewNativeId } from "./SkiaViewNativeId";
 
 const NativeSkiaDomView: HostComponent<SkiaDomViewProps> =
   Platform.OS !== "web"
