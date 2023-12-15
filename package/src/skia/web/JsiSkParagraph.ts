@@ -20,6 +20,10 @@ export class JsiSkParagraph
     return this.ref.getMaxIntrinsicWidth();
   }
 
+  getLongestLine(): number {
+    return this.ref.getLongestLine();
+  }
+
   layout(width: number): void {
     this.ref.layout(width);
   }

@@ -518,9 +518,9 @@ describe("Paragraphs", () => {
         paint.setColor(Skia.Color("cyan"));
         const maxWidth = para.getMaxWidth();
         const height = para.getHeight();
-        const maxIntrinsicWidth = para.getMaxIntrinsicWidth();
+        const longestLine = para.getLongestLine();
         // The width of the bounding box is the smaller of the maximum width or the maximum intrinsic width
-        const width = Math.min(maxWidth, maxIntrinsicWidth);
+        const width = Math.min(maxWidth, longestLine);
         canvas.drawRect(Skia.XYWHRect(0, 0, width, height), paint);
         para.paint(canvas, 0, 0);
       },

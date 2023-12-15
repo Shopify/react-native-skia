@@ -52,6 +52,12 @@ export interface SkParagraph extends SkJSIInstance<"Paragraph"> {
   getMaxIntrinsicWidth(): number;
 
   /**
+   * Returns the width of the longest line in the paragraph.
+   * This method requires the layout method to have been called first.
+   */
+  getLongestLine(): number;
+
+  /**
    * Returns the index of the glyph at the given position. This method requires
    * the layout method to have been called first.
    * @param x X coordinate of the position
