@@ -4,8 +4,8 @@ import type { SkRect } from "../skia/types";
 import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeComponent";
 
 import { SkiaViewApi } from "./api";
-import { SkiaViewNativeId } from "./SkiaView";
 import type { SkiaPictureViewProps } from "./types";
+import { SkiaViewNativeId } from "./SkiaViewNativeId";
 
 const NativeSkiaPictureView = SkiaPictureViewNativeComponent;
 
