@@ -3,7 +3,6 @@ import type { HostConfig } from "react-reconciler";
 import { DefaultEventPriority } from "react-reconciler/constants";
 
 import type { NodeType, Node } from "../dom/types";
-import type { SkiaValue } from "../values";
 import {
   bindReanimatedProps,
   extractReanimatedProps,
@@ -12,9 +11,7 @@ import {
 
 import type { Container } from "./Container";
 import { createNode } from "./HostComponents";
-import type { AnimatedProps } from "./processors";
-import { isSelector, isValue } from "./processors";
-import { mapKeys, shallowEq } from "./typeddash";
+import { shallowEq } from "./typeddash";
 
 const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
@@ -128,9 +125,8 @@ export const skHostConfig: SkiaHostConfig = {
   ) {
     debug("createInstance", type);
     const [props, reanimatedProps] = extractReanimatedProps(pristineProps);
-    const node = createNode(container, type, materialize(props));
+    const node = createNode(container, type, props);
     bindReanimatedProps(container, node, reanimatedProps);
-    container.depMgr.subscribeNode(node, props);
     return node;
   },
 
@@ -162,7 +158,6 @@ export const skHostConfig: SkiaHostConfig = {
 
   resetAfterCommit(container) {
     debug("resetAfterCommit");
-    container.depMgr.update();
     container.redraw();
   },
 
@@ -201,10 +196,8 @@ export const skHostConfig: SkiaHostConfig = {
       return;
     }
     const [props, reanimatedProps] = extractReanimatedProps(nextProps);
-    updatePayload.depMgr.unsubscribeNode(instance);
-    instance.setProps(materialize(props));
+    instance.setProps(props);
     bindReanimatedProps(updatePayload, instance, reanimatedProps);
-    updatePayload.depMgr.subscribeNode(instance, props);
   },
 
   commitTextUpdate: (
@@ -248,18 +241,4 @@ export const skHostConfig: SkiaHostConfig = {
   beforeActiveInstanceBlur: () => {},
   afterActiveInstanceBlur: () => {},
   detachDeletedInstance: () => {},
-};
-
-const materialize = <P>(props: AnimatedProps<P>) => {
-  const result = { ...props } as P;
-  mapKeys(props).forEach((key) => {
-    const prop = props[key];
-    if (isValue(prop)) {
-      result[key] = (prop as SkiaValue<P[typeof key]>).current;
-    } else if (isSelector(prop)) {
-      result[key] = prop.selector(prop.value.current) as P[typeof key];
-    }
-  });
-
-  return result;
 };

@@ -2,7 +2,6 @@ import type { ViewProps } from "react-native";
 
 import type { GroupProps, RenderNode } from "../dom/types";
 import type { SkImage, SkPicture, SkRect, SkSize } from "../skia/types";
-import type { SkiaMutableValue, SkiaValue } from "../values";
 import type { SharedValueType } from "../renderer/processors/Animations/Animations";
 
 export type DrawMode = "continuous" | "default";
@@ -64,10 +63,6 @@ export interface ISkiaViewApi {
     name: string,
     ...args: T
   ) => void;
-  registerValuesInView: (
-    nativeId: number,
-    values: SkiaValue<unknown>[]
-  ) => () => void;
   requestRedraw: (nativeId: number) => void;
   makeImageSnapshot: (nativeId: number, rect?: SkRect) => SkImage;
 }
@@ -90,7 +85,7 @@ export interface SkiaBaseViewProps extends ViewProps {
    * Pass an animated value to the onSize property to get updates when
    * the Skia view is resized.
    */
-  onSize?: SkiaMutableValue<SkSize> | SharedValueType<SkSize>;
+  onSize?: SharedValueType<SkSize>;
 }
 
 export interface SkiaPictureViewProps extends SkiaBaseViewProps {

@@ -109,37 +109,34 @@ describe("Data Loading", () => {
     expect(SkiaRenderer).toBeDefined();
   });
   it("Should accept null as an argument", async () => {
-    const { surface, draw, unmount } = mountCanvas(<CheckData />);
+    const { surface, draw } = mountCanvas(<CheckData />);
     draw();
     processResult(surface, "snapshots/font/green.png");
     await wait(42);
     draw();
     processResult(surface, "snapshots/font/green.png");
-    unmount();
   });
 
   it("Should load a font file", async () => {
-    const { surface, draw, unmount } = mountCanvas(<CheckFont />);
+    const { surface, draw } = mountCanvas(<CheckFont />);
     draw();
     processResult(surface, "snapshots/font/red.png");
     await wait(500);
     draw();
     processResult(surface, "snapshots/font/green.png");
-    unmount();
   });
 
   it("Should load an image", async () => {
-    const { surface, draw, unmount } = mountCanvas(<CheckImage />);
+    const { surface, draw } = mountCanvas(<CheckImage />);
     draw();
     processResult(surface, "snapshots/font/red.png");
     await wait(500);
     draw();
     processResult(surface, "snapshots/font/green.png");
-    unmount();
   });
 
   it("Should toggle the image to change", async () => {
-    const { surface, draw, unmount } = mountCanvas(<CheckTogglingImage />);
+    const { surface, draw } = mountCanvas(<CheckTogglingImage />);
     draw();
     processResult(surface, "snapshots/data/red.png");
     await wait(10);
@@ -148,11 +145,10 @@ describe("Data Loading", () => {
     await wait(30);
     draw();
     processResult(surface, "snapshots/data/oslo.png");
-    unmount();
   });
 
   it("Should allow for the source image to change", async () => {
-    const { surface, draw, unmount } = mountCanvas(<CheckChangingImage />);
+    const { surface, draw } = mountCanvas(<CheckChangingImage />);
     draw();
     processResult(surface, "snapshots/data/red.png");
     await wait(10);
@@ -161,6 +157,5 @@ describe("Data Loading", () => {
     await wait(30);
     draw();
     processResult(surface, "snapshots/data/oslo.png");
-    unmount();
   });
 });

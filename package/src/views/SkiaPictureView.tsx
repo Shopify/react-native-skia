@@ -1,7 +1,6 @@
 import React from "react";
 
 import type { SkRect } from "../skia/types";
-import type { SkiaValue } from "../values";
 import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeComponent";
 
 import { SkiaViewApi } from "./api";
@@ -61,16 +60,6 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
     SkiaViewApi.requestRedraw(this._nativeId);
   }
 
-  /**
-   * Registers one or move values as a dependant value of the Skia View. The view will
-   * The view will redraw itself when any of the values change.
-   * @param values Values to register
-   */
-  public registerValues(values: SkiaValue<unknown>[]): () => void {
-    assertSkiaViewApi();
-    return SkiaViewApi.registerValuesInView(this._nativeId, values);
-  }
-
   render() {
     const { mode, debug = false, ...viewProps } = this.props;
     return (
@@ -90,7 +79,6 @@ const assertSkiaViewApi = () => {
     SkiaViewApi === null ||
     SkiaViewApi.setJsiProperty === null ||
     SkiaViewApi.callJsiMethod === null ||
-    SkiaViewApi.registerValuesInView === null ||
     SkiaViewApi.requestRedraw === null ||
     SkiaViewApi.makeImageSnapshot === null
   ) {

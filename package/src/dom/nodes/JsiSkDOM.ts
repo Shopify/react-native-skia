@@ -11,7 +11,6 @@ import type {
   PaintProps,
   ShaderProps,
   ImageShaderProps,
-  CustomDrawingNodeProps,
   LineProps,
   OvalProps,
   PatchProps,
@@ -72,7 +71,6 @@ import {
   VerticesNode,
   TextNode,
   OvalNode,
-  CustomDrawingNode,
   TextPathNode,
   TextBlobNode,
   GlyphsNode,
@@ -170,16 +168,6 @@ export class JsiSkDOM implements SkDOM {
     return NATIVE_DOM
       ? global.SkiaDomApi.PathNode(props ?? {})
       : new PathNode(this.ctx, props);
-  }
-
-  CustomDrawing(props: CustomDrawingNodeProps) {
-    console.warn(
-      // eslint-disable-next-line max-len
-      "The <Drawing /> component is deprecated and will be removed in the next release. For custom drawings, please sure the <Picture /> component: https://shopify.github.io/react-native-skia/docs/shapes/pictures/"
-    );
-    return NATIVE_DOM
-      ? global.SkiaDomApi.CustomDrawingNode(props ?? {})
-      : new CustomDrawingNode(this.ctx, props);
   }
 
   Line(props: LineProps) {
