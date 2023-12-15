@@ -38,8 +38,6 @@
 #include "nodes/JsiBoxNode.h"
 #include "nodes/JsiBoxShadowNode.h"
 
-#include "nodes/JsiCustomDrawingNode.h"
-
 #include "nodes/JsiGlyphsNode.h"
 #include "nodes/JsiTextBlobNode.h"
 #include "nodes/JsiTextNode.h"
@@ -149,9 +147,6 @@ public:
     installFunction("BlendNode", JsiBlendNode::createCtor(context));
     installFunction("BoxNode", JsiBoxNode::createCtor(context));
     installFunction("BoxShadowNode", JsiBoxShadowNode::createCtor(context));
-
-    installFunction("CustomDrawingNode",
-                    JsiCustomDrawingNode::createCtor(context));
 
     installFunction("GlyphsNode", JsiGlyphsNode::createCtor(context));
     installFunction("TextNode", JsiTextNode::createCtor(context));

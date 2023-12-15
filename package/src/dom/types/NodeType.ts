@@ -48,7 +48,6 @@ export const enum NodeType {
 
   // Drawings
   Group = "skGroup",
-  Drawing = "skDrawing",
   Paint = "skPaint",
   Circle = "skCircle",
   Fill = "skFill",

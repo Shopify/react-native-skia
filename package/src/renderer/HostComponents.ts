@@ -8,7 +8,6 @@ import type {
   ImageProps,
   PaintProps,
   PathProps,
-  CustomDrawingNodeProps,
   LineProps,
   OvalProps,
   DiffRectProps,
@@ -80,9 +79,6 @@ declare global {
     FillNode: (props: PaintProps) => RenderNode<PaintProps>;
     CircleNode: (props: CircleProps) => RenderNode<CircleProps>;
     PathNode: (props: PathProps) => RenderNode<PathProps>;
-    CustomDrawingNode: (
-      props: CustomDrawingNodeProps
-    ) => RenderNode<CustomDrawingNodeProps>;
     LineNode: (props: LineProps) => RenderNode<LineProps>;
     ImageNode: (props: ImageProps) => RenderNode<ImageProps>;
     OvalNode: (props: OvalProps) => RenderNode<OvalProps>;
@@ -205,7 +201,6 @@ declare global {
       skImage: SkiaProps<ImageProps>;
       skCircle: SkiaProps<CircleProps>;
       skPath: SkiaProps<PathProps>;
-      skDrawing: SkiaProps<CustomDrawingNodeProps>;
       skLine: SkiaProps<LineProps>;
       skOval: SkiaProps<OvalProps>;
       skPatch: SkiaProps<PatchProps>;
@@ -296,8 +291,6 @@ export const createNode = (
       return Sk.Circle(props);
     case NodeType.Path:
       return Sk.Path(props);
-    case NodeType.Drawing:
-      return Sk.CustomDrawing(props);
     case NodeType.Line:
       return Sk.Line(props);
     case NodeType.Oval:
