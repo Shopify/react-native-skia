@@ -18,11 +18,9 @@ import { SkiaDomView } from "../views";
 import { SkiaDomView as SkiaDomViewWeb } from "../views/SkiaDomView.web";
 import { Skia } from "../skia/Skia";
 import type { TouchHandler, SkiaBaseViewProps } from "../views";
-import type { SkiaValue } from "../values/types";
 
 import { SkiaRoot } from "./Reconciler";
 import { NATIVE_DOM } from "./HostComponents";
-import { isValue } from "./processors";
 
 export const useCanvasRef = () => useRef<SkiaDomView>(null);
 
@@ -43,9 +41,7 @@ const useOnSizeEvent = (
       }
       const { width, height } = event.nativeEvent.layout;
 
-      if (isValue(resultValue)) {
-        resultValue.current = { width, height };
-      } else if (resultValue) {
+      if (resultValue) {
         resultValue.value = { width, height };
       }
     },
@@ -78,18 +74,9 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       return id;
     }, [innerRef]);
 
-    const registerValues = useCallback(
-      (values: Array<SkiaValue<unknown>>) => {
-        if (ref.current !== null) {
-          return ref.current.registerValues(values);
-        }
-        return () => {};
-      },
-      [ref]
-    );
     const root = useMemo(
-      () => new SkiaRoot(Skia, registerValues, redraw, getNativeId),
-      [redraw, registerValues, getNativeId]
+      () => new SkiaRoot(Skia, redraw, getNativeId),
+      [redraw, getNativeId]
     );
 
     // Render effect
@@ -97,11 +84,6 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       root.render(children);
     }, [children, root, redraw]);
 
-    useEffect(() => {
-      return () => {
-        root.unmount();
-      };
-    }, [root]);
     if (NATIVE_DOM) {
       return (
         <SkiaDomView

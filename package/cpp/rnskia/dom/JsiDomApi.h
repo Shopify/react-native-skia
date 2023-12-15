@@ -8,8 +8,6 @@
 
 #include "JsiHostObject.h"
 
-#include "base/JsiDependencyManager.h"
-
 #include "nodes/JsiCircleNode.h"
 #include "nodes/JsiDiffRectNode.h"
 #include "nodes/JsiFillNode.h"
@@ -56,8 +54,6 @@ class JsiDomApi : public JsiHostObject {
 public:
   explicit JsiDomApi(std::shared_ptr<RNSkPlatformContext> context)
       : JsiHostObject() {
-    installFunction("DependencyManager",
-                    JsiDependencyManager::createCtor(context));
 
     // Shapes
     installFunction("RectNode", JsiRectNode::createCtor(context));

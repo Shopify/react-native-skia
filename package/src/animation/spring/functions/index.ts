@@ -1,1 +1,0 @@
-export { createSpringEasing } from "./spring";
