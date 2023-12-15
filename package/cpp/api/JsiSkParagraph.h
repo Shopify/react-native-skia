@@ -55,6 +55,14 @@ public:
     return static_cast<double>(_paragraph->getMaxWidth());
   }
 
+  JSI_HOST_FUNCTION(getMaxIntrinsicWidth) {
+    return static_cast<double>(_paragraph->getMaxIntrinsicWidth());
+  }
+
+  JSI_HOST_FUNCTION(getMinIntrinsicWidth) {
+    return static_cast<double>(_paragraph->getMinIntrinsicWidth());
+  }
+
   JSI_HOST_FUNCTION(getGlyphPositionAtCoordinate) {
     auto dx = getArgumentAsNumber(runtime, arguments, count, 0);
     auto dy = getArgumentAsNumber(runtime, arguments, count, 1);
@@ -113,6 +121,8 @@ public:
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraph, layout),
                        JSI_EXPORT_FUNC(JsiSkParagraph, paint),
                        JSI_EXPORT_FUNC(JsiSkParagraph, getMaxWidth),
+                       JSI_EXPORT_FUNC(JsiSkParagraph, getMinIntrinsicWidth),
+                       JSI_EXPORT_FUNC(JsiSkParagraph, getMaxIntrinsicWidth),
                        JSI_EXPORT_FUNC(JsiSkParagraph, getHeight),
                        JSI_EXPORT_FUNC(JsiSkParagraph, getRectsForPlaceholders),
                        JSI_EXPORT_FUNC(JsiSkParagraph,

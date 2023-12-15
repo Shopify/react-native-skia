@@ -453,7 +453,7 @@ describe("Paragraphs", () => {
     );
   });
 
-  itRunsE2eOnly("should draw the bounding box", async () => {
+  itRunsE2eOnly("should draw the bounding box (1)", async () => {
     const img = await surface.drawOffscreen(
       (Skia, canvas, { bold, boldItalic, italic }) => {
         const para = Skia.ParagraphBuilder.Make()
@@ -474,10 +474,12 @@ describe("Paragraphs", () => {
           .pop()
           .build();
         para.layout(150);
-        const height = para.getHeight();
         const paint = Skia.Paint();
         paint.setColor(Skia.Color("cyan"));
-        canvas.drawRect(Skia.XYWHRect(0, 0, 150, height), paint);
+        canvas.drawRect(
+          Skia.XYWHRect(0, 0, para.getMaxWidth(), para.getHeight()),
+          paint
+        );
         para.paint(canvas, 0, 0);
       },
       {
@@ -489,6 +491,46 @@ describe("Paragraphs", () => {
     checkImage(
       img,
       `snapshots/paragraph/paragraph-text-style-font-style-${surface.OS}-box.png`
+    );
+  });
+
+  it("should draw the bounding box (2)", async () => {
+    const img = await surface.drawOffscreen(
+      (Skia, canvas, ctx) => {
+        const robotoRegular = Skia.Typeface.MakeFreeTypeFaceFromData(
+          Skia.Data.fromBytes(new Uint8Array(ctx.RobotoRegular))
+        )!;
+        const provider = Skia.TypefaceFontProvider.Make();
+        provider.registerFont(robotoRegular, "Roboto");
+        const para = Skia.ParagraphBuilder.Make(
+          {
+            textStyle: {
+              color: Skia.Color("black"),
+              fontSize: 30,
+            },
+          },
+          provider
+        )
+          .addText("Say Hello to React Native Skia")
+          .build();
+        para.layout(150);
+        const paint = Skia.Paint();
+        paint.setColor(Skia.Color("cyan"));
+        const maxWidth = para.getMaxWidth();
+        const height = para.getHeight();
+        const maxIntrinsicWidth = para.getMaxIntrinsicWidth();
+        // The width of the bounding box is the smaller of the maximum width or the maximum intrinsic width
+        const width = Math.min(maxWidth, maxIntrinsicWidth);
+        canvas.drawRect(Skia.XYWHRect(0, 0, width, height), paint);
+        para.paint(canvas, 0, 0);
+      },
+      {
+        RobotoRegular,
+      }
+    );
+    checkImage(
+      img,
+      `snapshots/paragraph/paragraph-bounding-box-${surface.OS}.png`
     );
   });
 
