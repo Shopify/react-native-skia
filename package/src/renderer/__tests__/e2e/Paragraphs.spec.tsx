@@ -502,26 +502,20 @@ describe("Paragraphs", () => {
         )!;
         const provider = Skia.TypefaceFontProvider.Make();
         provider.registerFont(robotoRegular, "Roboto");
-        const para = Skia.ParagraphBuilder.Make(
-          {
-            textStyle: {
-              fontFamilies: ["Roboto"],
-              color: Skia.Color("black"),
-              fontSize: 30,
-            },
-          },
-          provider
-        )
+        const para = Skia.ParagraphBuilder.Make({}, provider)
+          .pushStyle({
+            fontFamilies: ["Roboto"],
+            color: Skia.Color("black"),
+            fontSize: 30,
+          })
           .addText("Say Hello to React Native Skia")
+          .pop()
           .build();
         para.layout(150);
         const paint = Skia.Paint();
         paint.setColor(Skia.Color("cyan"));
-        const maxWidth = para.getMaxWidth();
         const height = para.getHeight();
-        const longestLine = para.getLongestLine();
-        // The width of the bounding box is the smaller of the maximum width or the maximum intrinsic width
-        const width = Math.min(maxWidth, longestLine);
+        const width = para.getLongestLine();
         canvas.drawRect(Skia.XYWHRect(0, 0, width, height), paint);
         para.paint(canvas, 0, 0);
       },
