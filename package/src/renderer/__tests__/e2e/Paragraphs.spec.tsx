@@ -505,6 +505,7 @@ describe("Paragraphs", () => {
         const para = Skia.ParagraphBuilder.Make(
           {
             textStyle: {
+              fontFamilies: ["Roboto"],
               color: Skia.Color("black"),
               fontSize: 30,
             },
