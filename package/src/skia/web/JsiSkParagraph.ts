@@ -12,6 +12,17 @@ export class JsiSkParagraph
   constructor(CanvasKit: CanvasKit, ref: Paragraph) {
     super(CanvasKit, ref, "Paragraph");
   }
+  getMinIntrinsicWidth(): number {
+    return this.ref.getMinIntrinsicWidth();
+  }
+
+  getMaxIntrinsicWidth(): number {
+    return this.ref.getMaxIntrinsicWidth();
+  }
+
+  getLongestLine(): number {
+    return this.ref.getLongestLine();
+  }
 
   layout(width: number): void {
     this.ref.layout(width);

@@ -78,31 +78,41 @@ const textStyle = {
 };
 ```
 
-## Paragraph Height
+## Paragraph Bounding Box
 
-To get the paragraph height, you can calculate the layout using `layout()` and once done, you can invoke `getHeight()`.
+Before getting the paragraph height and width, you need to compute its layout using `layout()` and and once done, you can invoke `getHeight()` for the height and `getLongestLine()` for the width.
 
 ```tsx twoslash
 import { useMemo } from "react";
-import { Paragraph, Skia, useFonts } from "@shopify/react-native-skia";
+import { Paragraph, Skia, useFonts, Canvas, Rect } from "@shopify/react-native-skia";
 
 const MyParagraph = () => {
   const paragraph = useMemo(() => {
     const para = Skia.ParagraphBuilder.Make()
-      .addText("Say Hello to ")
-      .addText("Skia 🎨")
-      .pop()
+      .addText("Say Hello to React Native Skia")
       .build();
     // Calculate the layout
-    para.layout(300);
+    para.layout(200);
     return para;
   }, []);
   // Now the paragraph height is available
   const height = paragraph.getHeight();
+  const width = paragraph.getLongestLine();
   // Render the paragraph
-  return <Paragraph paragraph={paragraph} x={0} y={0} width={300} />;
+  return (
+    <Canvas style={{ width: 256, height: 256 }}>
+      {/* Maximum paragraph width */}
+      <Rect x={0} y={0} width={200} height={256} color="magenta" />
+      {/* Paragraph bounding box */}
+      <Rect x={0} y={0} width={width} height={height} color="cyan" />
+      <Paragraph paragraph={paragraph} x={0} y={0} width={200} />
+    </Canvas>
+  );
 };
 ```
+
+<img src={require("/static/img/paragraph/boundingbox-node.png").default} width="256" height="256" />
+
 
 ## Fonts
 
