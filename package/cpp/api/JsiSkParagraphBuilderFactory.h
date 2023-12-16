@@ -1,5 +1,8 @@
 #pragma once
 
+#include <memory>
+#include <utility>
+
 #include <jsi/jsi.h>
 
 #include <JsiSkParagraphBuilder.h>
