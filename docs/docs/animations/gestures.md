@@ -7,7 +7,7 @@ slug: /animations/gestures
 
 When integrating with [reanimated](/docs/animations/animations), we recommend using [react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/docs/).
 
-We've prepared a few [tutorials](https://shopify.github.io/react-native-skia/docs/tutorials#gestures) that showcase the use of advanced gestures within the context of Skia drawings.
+We've prepared a few [tutorials](/docs/tutorials#gestures) that showcase the use of advanced gestures within the context of Skia drawings.
 
 ```tsx twoslash
 import { useWindowDimensions } from "react-native";
