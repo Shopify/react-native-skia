@@ -24,6 +24,7 @@
 #include "JsiSkMaskFilterFactory.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkPaint.h"
+#include "JsiSkParagraphBuilderFactory.h"   
 #include "JsiSkParagraphBuilder.h"
 #include "JsiSkPath.h"
 #include "JsiSkPathEffect.h"
