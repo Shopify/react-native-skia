@@ -12,7 +12,6 @@
 
 #pragma clang diagnostic pop
 
-
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
