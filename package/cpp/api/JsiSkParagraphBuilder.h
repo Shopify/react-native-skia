@@ -12,6 +12,7 @@
 #include <JsiSkParagraphStyle.h>
 #include <JsiSkTextStyle.h>
 #include <JsiSkTypefaceFontProvider.h>
+#include <JsiSkFontMgrFactory.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -113,7 +114,8 @@ public:
                                  sk_sp<SkFontMgr> fontManager)
       : JsiSkHostObject(std::move(context)) {
     _fontCollection = sk_make_sp<para::FontCollection>();
-    _fontCollection->setDefaultFontManager(JsiSkFontMgrFactory::getFontMgr(context));
+    auto fontMgr = JsiSkFontMgrFactory::getFontMgr(getContext());
+    _fontCollection->setDefaultFontManager(fontMgr);
     if (fontManager != nullptr) {
       _fontCollection->setAssetFontManager(fontManager);
     }
