@@ -9,7 +9,7 @@ import type {
 import { Host } from "./Host";
 import { JsiSkParagraphBuilder } from "./JsiSkParagraphBuilder";
 import { JsiSkParagraphStyle } from "./JsiSkParagraphStyle";
-import { JsiSkTypeface } from "./JsiSkTypeface";
+import { JsiSkTypefaceFontProvider } from "./JsiSkTypefaceFontProvider";
 
 export class JsiSkParagraphBuilderFactory
   extends Host
@@ -31,11 +31,17 @@ export class JsiSkParagraphBuilderFactory
         "SkTypefaceFontProvider is required on React Native Web."
       );
     }
+    const fontCollection = this.CanvasKit.FontCollection.Make();
+    fontCollection.setDefaultFontManager(
+      JsiSkTypefaceFontProvider.fromValue(typefaceProvider)
+    );
+    fontCollection.enableFontFallback();
+
     return new JsiSkParagraphBuilder(
       this.CanvasKit,
-      this.CanvasKit.ParagraphBuilder.MakeFromFontProvider(
+      this.CanvasKit.ParagraphBuilder.MakeFromFontCollection(
         style,
-        JsiSkTypeface.fromValue(typefaceProvider)
+        fontCollection
       )
     );
   }

@@ -528,6 +528,42 @@ describe("Paragraphs", () => {
       `snapshots/paragraph/paragraph-bounding-box-${surface.OS}.png`
     );
   });
+  it("should draw the bounding box (3)", async () => {
+    const img = await surface.drawOffscreen(
+      (Skia, canvas, ctx) => {
+        const robotoRegular = Skia.Typeface.MakeFreeTypeFaceFromData(
+          Skia.Data.fromBytes(new Uint8Array(ctx.RobotoRegular))
+        )!;
+        const provider = Skia.TypefaceFontProvider.Make();
+        provider.registerFont(robotoRegular, "Roboto");
+        const para = Skia.ParagraphBuilder.Make({}, provider)
+          .pushStyle({
+            fontFamilies: ["Roboto"],
+            color: Skia.Color("black"),
+            fontSize: 30,
+          })
+          .addText("Say Hello to React Native Skia")
+          .pop()
+          .build();
+        const maxWidth = ctx.canvasWidth * 0.78125;
+        para.layout(maxWidth);
+        const paint = Skia.Paint();
+        paint.setColor(Skia.Color("magenta"));
+        const height = para.getHeight();
+        const width = para.getLongestLine();
+        canvas.drawRect(Skia.XYWHRect(0, 0, maxWidth, ctx.canvasHeight), paint);
+        paint.setColor(Skia.Color("cyan"));
+        canvas.drawRect(Skia.XYWHRect(0, 0, width, height), paint);
+        para.paint(canvas, 0, 0);
+      },
+      {
+        RobotoRegular,
+        canvasWidth: surface.width,
+        canvasHeight: surface.height,
+      }
+    );
+    checkImage(img, docPath(`paragraph/boundingbox-${surface.OS}.png`));
+  });
 
   itRunsE2eOnly("should return the paragraph height", async () => {
     const { width, height } = await surface.eval((Skia) => {
