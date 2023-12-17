@@ -34,6 +34,8 @@ import { Fill, draw } from "@shopify/react-native-skia/lib/commonjs/headless";
         />
     </Group>, width, height);
   console.log(image.encodeToBase64());
+  // Dispose the image after use to prevent a memory leak.
+  image.dispose();
 })();
 ```
 

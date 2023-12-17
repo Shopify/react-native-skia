@@ -27,5 +27,6 @@ export const draw = (element: ReactNode, width: number, height: number) => {
   root.dom.render(ctx);
   surface.flush();
   const image = surface.makeImageSnapshot();
+  surface.dispose();
   return image;
 };
