@@ -2,5 +2,10 @@
   "extends": "eslint-config-react-native-wcandillon/tsconfig.base",
   "compilerOptions": {
     "noUncheckedIndexedAccess": false,
+    "lib": [
+      "dom",
+      "es2019",
+      "esnext.disposable"
+    ],
   }
 }

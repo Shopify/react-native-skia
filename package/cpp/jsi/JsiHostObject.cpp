@@ -1,6 +1,8 @@
-#include <JsiHostObject.h>
 #include <functional>
 #include <vector>
+
+#include <JsiHostObject.h>
+#include <RNSkLog.h>
 
 // To be able to find objects that aren't cleaned up correctly,
 // we can set this value to 1 and debug the constructor/destructor
@@ -51,9 +53,20 @@ void JsiHostObject::set(jsi::Runtime &rt, const jsi::PropNameID &name,
   }
 }
 
+jsi::Value eval(jsi::Runtime &runtime, const std::string &js) {
+  return runtime.global()
+      .getPropertyAsFunction(runtime, "eval")
+      .call(runtime, js);
+}
+
 jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
                               const jsi::PropNameID &name) {
-  auto nameStr = name.utf8(runtime);
+  static const auto disposeSymbol = jsi::PropNameID::forSymbol(
+      runtime,
+      eval(runtime, "Symbol.for('Symbol.dispose');").getSymbol(runtime));
+  auto nameStr = jsi::PropNameID::compare(runtime, disposeSymbol, name)
+                     ? "dispose"
+                     : name.utf8(runtime);
 
   // Happy path - cached host functions are cheapest to look up
   const JsiFunctionMap &funcs = getExportedFunctionMap();
