@@ -23,7 +23,7 @@ import { Fill, makeOffscreenSurface, drawOffscreen } from "@shopify/react-native
   const r = size * 0.33;
   await LoadSkiaWeb();
   const surface = makeOffscreenSurface(width, height);
-  const image = draw(surface,
+  const image = drawOffscreen(surface,
     <Group blendMode="multiply">
       <Circle cx={r} cy={r} r={r} color="cyan" />
       <Circle cx={size - r} cy={r} r={r} color="magenta" />
