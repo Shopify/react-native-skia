@@ -6,13 +6,14 @@ import type { ReactNode } from "react";
 import { JsiSkApi } from "../skia/web";
 import { SkiaRoot } from "../renderer/Reconciler";
 import { JsiDrawingContext } from "../dom/types";
+import type { SkSurface } from "../skia";
 
 export * from "../renderer/components";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let Skia: any;
 
-export const draw = (element: ReactNode, width: number, height: number) => {
+export const makeOffscreenSurface = (width: number, height: number) => {
   if (!Skia) {
     Skia = JsiSkApi(CanvasKit);
   }
@@ -20,12 +21,15 @@ export const draw = (element: ReactNode, width: number, height: number) => {
   if (surface === null) {
     throw new Error("Couldn't create surface!");
   }
+  return surface;
+};
+
+export const drawOffscreen = (surface: SkSurface, element: ReactNode) => {
   const root = new SkiaRoot(Skia);
   root.render(element);
   const canvas = surface.getCanvas();
   const ctx = new JsiDrawingContext(Skia, canvas);
   root.dom.render(ctx);
   surface.flush();
-  const image = surface.makeImageSnapshot();
-  return image;
+  return surface.makeImageSnapshot();
 };
