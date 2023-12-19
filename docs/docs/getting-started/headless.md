@@ -22,18 +22,21 @@ import { Fill, draw } from "@shopify/react-native-skia/lib/commonjs/headless";
   const height = 256;
   const r = size * 0.33;
   await LoadSkiaWeb();
-  const image = draw(
+  const {image, surface} = draw(
     <Group blendMode="multiply">
-        <Circle cx={r} cy={r} r={r} color="cyan" />
-        <Circle cx={size - r} cy={r} r={r} color="magenta" />
-        <Circle
-          cx={size/2}
-          cy={size - r}
-          r={r}
-          color="yellow"
-        />
+      <Circle cx={r} cy={r} r={r} color="cyan" />
+      <Circle cx={size - r} cy={r} r={r} color="magenta" />
+      <Circle
+        cx={size/2}
+        cy={size - r}
+        r={r}
+        color="yellow"
+      />
     </Group>, width, height);
   console.log(image.encodeToBase64());
+  // Cleaning up CanvasKit resources
+  image.dispose();
+  surface.dispose();
 })();
 ```
 
