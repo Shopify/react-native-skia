@@ -62,6 +62,7 @@ add_library(
         "${PROJECT_SOURCE_DIR}/../cpp/rnskia/dom/base/ConcatablePaint.cpp"
 
         "${PROJECT_SOURCE_DIR}/../cpp/api/third_party/CSSColorParser.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/api/third_party/base64.cpp"
 
 )
 

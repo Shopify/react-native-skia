@@ -7,7 +7,7 @@
 
 #include "JsiPromises.h"
 #include "JsiSkData.h"
-#include "SkBase64.h"
+#include "third_party/base64.h"
 
 namespace RNSkia {
 
@@ -67,17 +67,17 @@ public:
     // Calculate length
     size_t len;
     auto err =
-        SkBase64::Decode(&base64.utf8(runtime).c_str()[0], size, nullptr, &len);
-    if (err != SkBase64::Error::kNoError) {
+        Base64::Decode(&base64.utf8(runtime).c_str()[0], size, nullptr, &len);
+    if (err != Base64::Error::kNone) {
       throw jsi::JSError(runtime, "Error decoding base64 string");
       return jsi::Value::undefined();
     }
 
     // Create data object and decode
     auto data = SkData::MakeUninitialized(len);
-    err = SkBase64::Decode(&base64.utf8(runtime).c_str()[0], size,
+    err = Base64::Decode(&base64.utf8(runtime).c_str()[0], size,
                            data->writable_data(), &len);
-    if (err != SkBase64::Error::kNoError) {
+    if (err != Base64::Error::kNone) {
       throw jsi::JSError(runtime, "Error decoding base64 string");
       return jsi::Value::undefined();
     }
