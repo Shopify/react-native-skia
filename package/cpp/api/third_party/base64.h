@@ -11,7 +11,7 @@
 namespace RNSkia {
 
 struct Base64 {
- public:
+public:
   enum class Error {
     kNone,
     kBadPadding,
@@ -29,7 +29,7 @@ struct Base64 {
 
      @return the required length of dst for encoding.
   */
-  static size_t Encode(const void* src, size_t length, void* dst);
+  static size_t Encode(const void *src, size_t length, void *dst);
 
   /**
      Base64 decodes src into dst.
@@ -43,10 +43,8 @@ struct Base64 {
      @param dstLength assigned the length dst is required to be. Must not be
      nullptr.
   */
-  [[nodiscard]] static Error Decode(const void* src,
-                                    size_t srcLength,
-                                    void* dst,
-                                    size_t* dstLength);
+  [[nodiscard]] static Error Decode(const void *src, size_t srcLength,
+                                    void *dst, size_t *dstLength);
 };
 
 } // namespace RNSkia

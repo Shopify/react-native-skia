@@ -4,11 +4,11 @@
 #include <string>
 #include <utility>
 
-#include "third_party/base64.h"
 #include "JsiSkHostObjects.h"
 #include "JsiSkImageInfo.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkShader.h"
+#include "third_party/base64.h"
 
 #include "RNSkTypedArray.h"
 
@@ -136,7 +136,7 @@ public:
     auto len = Base64::Encode(data->bytes(), data->size(), nullptr);
     auto buffer = std::string(len, 0);
     Base64::Encode(data->bytes(), data->size(),
-                     reinterpret_cast<void *>(&buffer[0]));
+                   reinterpret_cast<void *>(&buffer[0]));
     return jsi::String::createFromAscii(runtime, buffer);
   }
 

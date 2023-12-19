@@ -76,7 +76,7 @@ public:
     // Create data object and decode
     auto data = SkData::MakeUninitialized(len);
     err = Base64::Decode(&base64.utf8(runtime).c_str()[0], size,
-                           data->writable_data(), &len);
+                         data->writable_data(), &len);
     if (err != Base64::Error::kNone) {
       throw jsi::JSError(runtime, "Error decoding base64 string");
       return jsi::Value::undefined();

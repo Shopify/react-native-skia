@@ -11,10 +11,9 @@
 #define DecodePad -2
 #define EncodePad 64
 
-static const char kDefaultEncode[] =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    "abcdefghijklmnopqrstuvwxyz"
-    "0123456789+/=";
+static const char kDefaultEncode[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                     "abcdefghijklmnopqrstuvwxyz"
+                                     "0123456789+/=";
 
 static const signed char kDecodeData[] = {
     62, -1, -1,        -1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1,
@@ -25,17 +24,15 @@ static const signed char kDecodeData[] = {
 
 namespace RNSkia {
 
-Base64::Error Base64::Decode(const void* srcv,
-                             size_t srcLength,
-                             void* dstv,
-                             size_t* dstLength) {
-  const unsigned char* src = static_cast<const unsigned char*>(srcv);
-  unsigned char* dst = static_cast<unsigned char*>(dstv);
+Base64::Error Base64::Decode(const void *srcv, size_t srcLength, void *dstv,
+                             size_t *dstLength) {
+  const unsigned char *src = static_cast<const unsigned char *>(srcv);
+  unsigned char *dst = static_cast<unsigned char *>(dstv);
 
   int i = 0;
   bool padTwo = false;
   bool padThree = false;
-  char unsigned const* const end = src + srcLength;
+  char unsigned const *const end = src + srcLength;
   while (src < end) {
     unsigned char bytes[4] = {0, 0, 0, 0};
     int byte = 0;
@@ -46,7 +43,7 @@ Base64::Error Base64::Decode(const void* srcv,
         return Error::kNone;
       }
       if (srcByte <= ' ') {
-        continue;  // treat as white space
+        continue; // treat as white space
       }
       if (srcByte < '+' || srcByte > 'z') {
         return Error::kBadChar;
@@ -114,14 +111,14 @@ Base64::Error Base64::Decode(const void* srcv,
   return Error::kNone;
 }
 
-size_t Base64::Encode(const void* srcv, size_t length, void* dstv) {
-  const unsigned char* src = static_cast<const unsigned char*>(srcv);
-  unsigned char* dst = static_cast<unsigned char*>(dstv);
+size_t Base64::Encode(const void *srcv, size_t length, void *dstv) {
+  const unsigned char *src = static_cast<const unsigned char *>(srcv);
+  unsigned char *dst = static_cast<unsigned char *>(dstv);
 
-  const char* encode = kDefaultEncode;
+  const char *encode = kDefaultEncode;
   if (dst) {
     size_t remainder = length % 3;
-    char unsigned const* const end = &src[length - remainder];
+    char unsigned const *const end = &src[length - remainder];
     while (src < end) {
       unsigned a = *src++;
       unsigned b = *src++;
