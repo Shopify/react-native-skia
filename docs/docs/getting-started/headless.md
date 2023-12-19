@@ -15,14 +15,15 @@ You will notice in the example below that the import URL looks different than th
 
 ```tsx
 import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/commonjs/web/LoadSkiaWeb";
-import { Fill, draw } from "@shopify/react-native-skia/lib/commonjs/headless";
+import { Fill, makeOffscreenSurface, drawOffscreen } from "@shopify/react-native-skia/lib/commonjs/headless";
 
 (async () => {
   const width = 256;
   const height = 256;
   const r = size * 0.33;
   await LoadSkiaWeb();
-  const {image, surface} = draw(
+  const surface = makeOffscreenSurface(width, height);
+  const image = draw(surface,
     <Group blendMode="multiply">
       <Circle cx={r} cy={r} r={r} color="cyan" />
       <Circle cx={size - r} cy={r} r={r} color="magenta" />
@@ -32,7 +33,7 @@ import { Fill, draw } from "@shopify/react-native-skia/lib/commonjs/headless";
         r={r}
         color="yellow"
       />
-    </Group>, width, height);
+    </Group>);
   console.log(image.encodeToBase64());
   // Cleaning up CanvasKit resources
   image.dispose();
