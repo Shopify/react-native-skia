@@ -494,7 +494,7 @@ public:
   JSI_HOST_FUNCTION(interpolate) {
     auto path2 = JsiSkPath::fromValue(runtime, arguments[0]);
     auto weight = arguments[1].asNumber();
-    if (count > 2) {
+    if (count > 2 && !arguments[2].isUndefined()) {
       auto path3 = JsiSkPath::fromValue(runtime, arguments[2]);
       auto succeed = getObject()->interpolate(*path2, weight, path3.get());
       if (!succeed) {
