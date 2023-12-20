@@ -6,7 +6,7 @@ jobs:
     env:
       WORKING_DIRECTORY: ./
     concurrency:
-      group: npm-${{ github.ref }}
+      group: ci-${{ github.ref }}
       cancel-in-progress: true
     steps:
       - name: checkout
