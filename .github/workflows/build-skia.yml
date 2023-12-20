@@ -5,14 +5,16 @@ jobs:
     runs-on: macos-13
     env:
       WORKING_DIRECTORY: ./
-    concurrency:
-      group: skia-${{ github.ref }}
-      cancel-in-progress: true
     steps:
       - name: checkout
         uses: actions/checkout@v2
         with:
           submodules: recursive
+
+      - name: Set up Xcode version
+        uses: actions/setup-xcode@v1
+        with:
+          xcode-version: '15.0'
 
       - name: Setup Android NDK
         id: setup-ndk
