@@ -8,13 +8,13 @@
 #include "JsiSkImageInfo.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkShader.h"
+#include "third_party/base64.h"
 
 #include "RNSkTypedArray.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkBase64.h"
 #include "SkImage.h"
 #include "SkStream.h"
 #include "include/codec/SkEncodedImageFormat.h"
@@ -133,10 +133,10 @@ public:
   JSI_HOST_FUNCTION(encodeToBase64) {
     auto data = encodeImageData(arguments, count);
 
-    auto len = SkBase64::Encode(data->bytes(), data->size(), nullptr);
+    auto len = Base64::Encode(data->bytes(), data->size(), nullptr);
     auto buffer = std::string(len, 0);
-    SkBase64::Encode(data->bytes(), data->size(),
-                     reinterpret_cast<void *>(&buffer[0]));
+    Base64::Encode(data->bytes(), data->size(),
+                   reinterpret_cast<void *>(&buffer[0]));
     return jsi::String::createFromAscii(runtime, buffer);
   }
 

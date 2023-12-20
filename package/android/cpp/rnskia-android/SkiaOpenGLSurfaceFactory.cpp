@@ -31,8 +31,8 @@ sk_sp<SkSurface> SkiaOpenGLSurfaceFactory::makeOffscreenSurface(int width,
   // Create texture
   auto texture =
       ThreadContextHolder::ThreadSkiaOpenGLContext.directContext
-          ->createBackendTexture(width, height, colorType, GrMipMapped::kNo,
-                                 GrRenderable::kYes);
+          ->createBackendTexture(width, height, colorType,
+                                 skgpu::Mipmapped::kNo, GrRenderable::kYes);
 
   struct ReleaseContext {
     SkiaOpenGLContext *context;

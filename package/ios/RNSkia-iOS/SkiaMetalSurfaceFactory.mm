@@ -92,7 +92,7 @@ sk_sp<SkSurface> SkiaMetalSurfaceFactory::makeOffscreenSurface(int width,
   // Create a GrBackendTexture from the Metal texture
   GrMtlTextureInfo info;
   info.fTexture.retain((__bridge void *)ctx->texture);
-  GrBackendTexture backendTexture(width, height, GrMipMapped::kNo, info);
+  GrBackendTexture backendTexture(width, height, skgpu::Mipmapped::kNo, info);
 
   // Create a SkSurface from the GrBackendTexture
   auto surface = SkSurfaces::WrapBackendTexture(
