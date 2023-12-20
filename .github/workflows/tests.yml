@@ -6,7 +6,7 @@ jobs:
     env:
       WORKING_DIRECTORY: ./
     concurrency:
-      group: ci-${{ github.ref }}
+      group: tests-${{ github.ref }}
       cancel-in-progress: true
     steps:
       - name: checkout
