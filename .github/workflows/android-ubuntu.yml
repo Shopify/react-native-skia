@@ -6,6 +6,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 55
+    concurrency:
+      group: ci-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - name: checkout
         uses: actions/checkout@v3
