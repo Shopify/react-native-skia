@@ -54,11 +54,11 @@ const tiger = new SVGAsset(
   800,
   800
 );
-//<text x="20" y="35">My Text</text>
 
 const text = new SVGAsset(
-  `<svg viewBox='0 0 290 500' xmlns='http://www.w3.org/2000/svg'>
+  `<svg viewBox='0 0 290 500' width='290' height='325' xmlns='http://www.w3.org/2000/svg'>
 <circle cx='31' cy='325' r='120px' fill='#c02aaa'/>
+<text x="20" y="35">My Text</text>
 </svg>`,
   290,
   500
