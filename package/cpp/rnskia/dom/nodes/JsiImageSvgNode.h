@@ -36,7 +36,7 @@ protected:
           svgDom->setContainerSize(SkSize::Make(width, height));
         }
       }
-      svgDom->render(context->getCanvas());
+	  svgDom->render(context->getCanvas());
       context->getCanvas()->restore();
     }
   }

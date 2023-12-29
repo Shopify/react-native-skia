@@ -24,6 +24,7 @@ namespace jsi = facebook::jsi;
 class JsiSkSVGFactory : public JsiSkHostObject {
 public:
   JSI_HOST_FUNCTION(MakeFromData) {
+    //auto fontMgr = JsiSkFontMgrFactory::getFontMgr(getContext());
     auto data = JsiSkData::fromValue(runtime, arguments[0]);
     auto stream = SkMemoryStream::Make(data);
     auto svg_dom = SkSVGDOM::Builder().make(*stream);
@@ -32,6 +33,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(MakeFromString) {
+    //auto fontMgr = JsiSkFontMgrFactory::getFontMgr(getContext());
     auto svgText = arguments[0].asString(runtime).utf8(runtime);
     auto stream = SkMemoryStream::MakeDirect(svgText.c_str(), svgText.size());
     auto svg_dom = SkSVGDOM::Builder().make(*stream);
