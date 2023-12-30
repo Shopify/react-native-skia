@@ -9,7 +9,7 @@ import type {
   SkPath,
   SkPoint,
   SkRect,
-  SkRRect,
+  InputRRect,
   StrokeOpts,
 } from "../types";
 
@@ -285,7 +285,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     return this;
   }
 
-  addRRect(rrect: SkRRect, isCCW?: boolean) {
+  addRRect(rrect: InputRRect, isCCW?: boolean) {
     this.ref.addRRect(JsiSkRRect.fromValue(this.CanvasKit, rrect), isCCW);
     return this;
   }

@@ -1,6 +1,6 @@
 import type { CanvasKit, RRect } from "canvaskit-wasm";
 
-import type { SkRect, SkRRect } from "../types";
+import type { InputRRect, SkRect, SkRRect } from "../types";
 
 import { BaseHostObject } from "./Host";
 import { JsiSkRect } from "./JsiSkRect";
@@ -13,9 +13,30 @@ export class JsiSkRRect
     // Float32Array
   };
 
-  static fromValue(CanvasKit: CanvasKit, rect: SkRRect) {
+  static fromValue(CanvasKit: CanvasKit, rect: InputRRect) {
     if (rect instanceof JsiSkRect) {
       return rect.ref;
+    }
+    if (
+      "topLeft" in rect &&
+      "topRight" in rect &&
+      "bottomRight" in rect &&
+      "bottomLeft" in rect
+    ) {
+      return Float32Array.of(
+        rect.rect.x,
+        rect.rect.y,
+        rect.rect.x + rect.rect.width,
+        rect.rect.y + rect.rect.height,
+        rect.topLeft.x,
+        rect.topLeft.y,
+        rect.topRight.x,
+        rect.topRight.y,
+        rect.bottomRight.x,
+        rect.bottomRight.y,
+        rect.bottomLeft.x,
+        rect.bottomLeft.y
+      );
     }
     return CanvasKit.RRectXY(
       JsiSkRect.fromValue(CanvasKit, rect.rect),

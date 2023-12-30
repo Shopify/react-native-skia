@@ -19,7 +19,7 @@ import type {
   SkPicture,
   SkPoint,
   SkRect,
-  SkRRect,
+  InputRRect,
   SkSVG,
   SkTextBlob,
   SkVertices,
@@ -235,14 +235,14 @@ export class JsiSkCanvas
     );
   }
 
-  drawRRect(rrect: SkRRect, paint: SkPaint) {
+  drawRRect(rrect: InputRRect, paint: SkPaint) {
     this.ref.drawRRect(
       JsiSkRRect.fromValue(this.CanvasKit, rrect),
       JsiSkPaint.fromValue(paint)
     );
   }
 
-  drawDRRect(outer: SkRRect, inner: SkRRect, paint: SkPaint) {
+  drawDRRect(outer: InputRRect, inner: InputRRect, paint: SkPaint) {
     this.ref.drawDRRect(
       JsiSkRRect.fromValue(this.CanvasKit, outer),
       JsiSkRRect.fromValue(this.CanvasKit, inner),
@@ -367,7 +367,7 @@ export class JsiSkCanvas
     );
   }
 
-  clipRRect(rrect: SkRRect, op: ClipOp, doAntiAlias: boolean) {
+  clipRRect(rrect: InputRRect, op: ClipOp, doAntiAlias: boolean) {
     this.ref.clipRRect(
       JsiSkRRect.fromValue(this.CanvasKit, rrect),
       getEnum(this.CanvasKit.PathOp, op),

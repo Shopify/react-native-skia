@@ -61,9 +61,33 @@ public:
     } else {
       auto rect =
           JsiSkRect::fromValue(runtime, object.getProperty(runtime, "rect"));
-      auto rx = object.getProperty(runtime, "rx").asNumber();
-      auto ry = object.getProperty(runtime, "ry").asNumber();
-      return std::make_shared<SkRRect>(SkRRect::MakeRectXY(*rect, rx, ry));
+      if (!object.getProperty(runtime, "rx").isUndefined()) {
+        auto rx = object.getProperty(runtime, "rx").asNumber();
+        auto ry = object.getProperty(runtime, "ry").asNumber();
+        return std::make_shared<SkRRect>(SkRRect::MakeRectXY(*rect, rx, ry));
+      } else if (object.getProperty(runtime, "topLeft").isObject() &&
+                 object.getProperty(runtime, "topRight").isObject() &&
+                 object.getProperty(runtime, "bottomRight").isObject() &&
+                 object.getProperty(runtime, "bottomLeft").isObject()) {
+        std::vector<SkPoint> points;
+        std::shared_ptr<SkPoint> topLeft = JsiSkPoint::fromValue(
+            runtime, object.getProperty(runtime, "topLeft").asObject(runtime));
+		  std::shared_ptr<SkPoint> topRight = JsiSkPoint::fromValue(
+		runtime, object.getProperty(runtime, "topRight").asObject(runtime));
+		  std::shared_ptr<SkPoint> bottomRight = JsiSkPoint::fromValue(
+		runtime, object.getProperty(runtime, "bottomRight").asObject(runtime));
+		  std::shared_ptr<SkPoint> bottomLeft = JsiSkPoint::fromValue(
+		runtime, object.getProperty(runtime, "bottomLeft").asObject(runtime));
+	    points.push_back(*topLeft.get());
+		  points.push_back(*topRight.get());
+		  points.push_back(*bottomRight.get());
+		  points.push_back(*bottomLeft.get());
+        auto rrect = SkRRect::MakeEmpty();
+        rrect.setRectRadii(*rect, points.data());
+        return std::make_shared<SkRRect>(rrect);
+      } else {
+        throw jsi::JSError(runtime, "Invalid RRect object");
+      }
     }
   }
 

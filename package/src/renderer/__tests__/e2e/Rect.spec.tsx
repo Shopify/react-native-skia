@@ -1,4 +1,8 @@
-import { surface } from "../setup";
+import React from "react";
+
+import { checkImage, docPath } from "../../../__tests__/setup";
+import { RoundedRect } from "../../components";
+import { importSkia, surface } from "../setup";
 
 describe("Rects and rounded rects", () => {
   it("The rounded rectangle radii should be scale to its maximum value", async () => {
@@ -25,5 +29,45 @@ describe("Rects and rounded rects", () => {
       return { rx: rrect.rx, ry: rrect.ry };
     });
     expect(result3).toEqual({ rx: 10, ry: 20 });
+  });
+  it("Should draw a rounded rect with uniform values (1)", async () => {
+    const { width } = surface;
+    const r = width * 0.2;
+    const image = await surface.draw(
+      <RoundedRect
+        x={0}
+        y={0}
+        width={width}
+        height={width}
+        r={r}
+        color="lightblue"
+      />
+    );
+    checkImage(image, docPath("rrect/uniform.png"));
+  });
+  it("Should draw a rounded rect with uniform values (2)", async () => {
+    const { Skia } = importSkia();
+    const { width } = surface;
+    const r = width * 0.2;
+    const rrct = Skia.RRectXY(Skia.XYWHRect(0, 0, width, width), r, r);
+    const image = await surface.draw(
+      <RoundedRect rect={rrct} color="lightblue" />
+    );
+    checkImage(image, docPath("rrect/uniform.png"));
+  });
+  it("Should draw a rounded rect with uniform values (3)", async () => {
+    const { width } = surface;
+    const r = width * 0.2;
+    const rrct = {
+      rect: { x: 0, y: 0, width, height: width },
+      topLeft: { x: r, y: r },
+      topRight: { x: r, y: r },
+      bottomRight: { x: r, y: r },
+      bottomLeft: { x: r, y: r },
+    };
+    const image = await surface.draw(
+      <RoundedRect rect={rrct} color="lightblue" />
+    );
+    checkImage(image, docPath("rrect/uniform.png"));
   });
 });

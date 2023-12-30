@@ -4,6 +4,7 @@ import type {
   BlendMode,
   Color,
   InputMatrix,
+  InputRRect,
   PaintStyle,
   SkPaint,
   SkPath,
@@ -48,7 +49,7 @@ export interface RRectCtor extends RectCtor {
 }
 
 export type RectDef = RectCtor | { rect: SkRect };
-export type RRectDef = RRectCtor | { rect: SkRRect };
+export type RRectDef = RRectCtor | { rect: InputRRect };
 
 export interface PointCircleDef {
   c?: Vector;
