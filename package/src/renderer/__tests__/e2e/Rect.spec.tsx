@@ -70,4 +70,19 @@ describe("Rects and rounded rects", () => {
     );
     checkImage(image, docPath("rrect/uniform.png"));
   });
+  it("Should draw a rounded rect with non-uniform values", async () => {
+    const { width } = surface;
+    const r = width * 0.2;
+    const rrct = {
+      rect: { x: 0, y: 0, width, height: width },
+      topLeft: { x: 0, y: 0 },
+      topRight: { x: r, y: r },
+      bottomRight: { x: 0, y: 0 },
+      bottomLeft: { x: r, y: r },
+    };
+    const image = await surface.draw(
+      <RoundedRect rect={rrct} color="lightblue" />
+    );
+    checkImage(image, docPath("rrect/nonuniform.png"));
+  });
 });

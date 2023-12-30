@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include <jsi/jsi.h>
 
@@ -72,16 +73,18 @@ public:
         std::vector<SkPoint> points;
         std::shared_ptr<SkPoint> topLeft = JsiSkPoint::fromValue(
             runtime, object.getProperty(runtime, "topLeft").asObject(runtime));
-		  std::shared_ptr<SkPoint> topRight = JsiSkPoint::fromValue(
-		runtime, object.getProperty(runtime, "topRight").asObject(runtime));
-		  std::shared_ptr<SkPoint> bottomRight = JsiSkPoint::fromValue(
-		runtime, object.getProperty(runtime, "bottomRight").asObject(runtime));
-		  std::shared_ptr<SkPoint> bottomLeft = JsiSkPoint::fromValue(
-		runtime, object.getProperty(runtime, "bottomLeft").asObject(runtime));
-	    points.push_back(*topLeft.get());
-		  points.push_back(*topRight.get());
-		  points.push_back(*bottomRight.get());
-		  points.push_back(*bottomLeft.get());
+        std::shared_ptr<SkPoint> topRight = JsiSkPoint::fromValue(
+            runtime, object.getProperty(runtime, "topRight").asObject(runtime));
+        std::shared_ptr<SkPoint> bottomRight = JsiSkPoint::fromValue(
+            runtime,
+            object.getProperty(runtime, "bottomRight").asObject(runtime));
+        std::shared_ptr<SkPoint> bottomLeft = JsiSkPoint::fromValue(
+            runtime,
+            object.getProperty(runtime, "bottomLeft").asObject(runtime));
+        points.push_back(*topLeft.get());
+        points.push_back(*topRight.get());
+        points.push_back(*bottomRight.get());
+        points.push_back(*bottomLeft.get());
         auto rrect = SkRRect::MakeEmpty();
         rrect.setRectRadii(*rect, points.data());
         return std::make_shared<SkRRect>(rrect);
