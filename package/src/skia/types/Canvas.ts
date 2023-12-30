@@ -5,7 +5,7 @@ import type { SkPath } from "./Path";
 import type { SkImage, MipmapMode, FilterMode, ImageInfo } from "./Image";
 import type { SkSVG } from "./SVG";
 import type { SkColor } from "./Color";
-import type { SkRRect } from "./RRect";
+import type { InputRRect } from "./RRect";
 import type { BlendMode } from "./Paint/BlendMode";
 import type { SkPoint, PointMode } from "./Point";
 import type { InputMatrix } from "./Matrix";
@@ -278,7 +278,7 @@ export interface SkCanvas {
    * @param rrect
    * @param paint
    */
-  drawRRect(rrect: SkRRect, paint: SkPaint): void;
+  drawRRect(rrect: InputRRect, paint: SkPaint): void;
 
   /**
    * Draws RRect outer and inner using clip, Matrix, and Paint paint.
@@ -287,7 +287,7 @@ export interface SkCanvas {
    * @param inner
    * @param paint
    */
-  drawDRRect(outer: SkRRect, inner: SkRRect, paint: SkPaint): void;
+  drawDRRect(outer: InputRRect, inner: InputRRect, paint: SkPaint): void;
 
   /**
    * Draws an oval bounded by the given rectangle using the current clip, current matrix,
@@ -479,7 +479,7 @@ export interface SkCanvas {
    * @param op
    * @param doAntiAlias
    */
-  clipRRect(rrect: SkRRect, op: ClipOp, doAntiAlias: boolean): void;
+  clipRRect(rrect: InputRRect, op: ClipOp, doAntiAlias: boolean): void;
 
   /**
    * Replaces current matrix with m premultiplied with the existing matrix.
