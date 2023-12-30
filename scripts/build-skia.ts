@@ -190,13 +190,14 @@ try {
   console.log("gclient sync done");
 
   // lets check for any dependencies
-  if (platform.dependencies) {
-    console.log(`Found dependencies for platform ${SelectedPlatform}`);
-    platform.dependencies.forEach((dep) => {
-      console.log(`Running dependency ${dep.name}`);
-      dep.executable();
-    });
-  }
+  // TODO: to remove
+  // if (platform.dependencies) {
+  //   console.log(`Found dependencies for platform ${SelectedPlatform}`);
+  //   platform.dependencies.forEach((dep) => {
+  //     console.log(`Running dependency ${dep.name}`);
+  //     dep.executable();
+  //   });
+  // }
 
   try {
     // Configure the platform
