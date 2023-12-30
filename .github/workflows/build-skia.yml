@@ -44,6 +44,7 @@ jobs:
         run: yarn build-skia
 
       - name: Upload artifacts - Android arm
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v2
         with:
           name: skia-android-arm
@@ -57,6 +58,7 @@ jobs:
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm/libskunicode.a
 
       - name: Upload artifacts - Android arm64
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v2
         with:
           name: skia-android-arm-64
@@ -70,6 +72,7 @@ jobs:
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/arm64/libskunicode.a
 
       - name: Upload artifacts - Android x86
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v2
         with:
           name: skia-android-arm-x86
@@ -83,6 +86,7 @@ jobs:
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x86/libskunicode.a
 
       - name: Upload artifacts - Android x64
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v2
         with:
           name: skia-android-arm-x64
@@ -96,6 +100,7 @@ jobs:
             ${{ env.WORKING_DIRECTORY }}/externals/skia/out/android/x64/libskunicode.a
 
       - name: Upload artifacts - iOS xcframeworks
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v2
         with:
           name: skia-ios-xcframeworks
