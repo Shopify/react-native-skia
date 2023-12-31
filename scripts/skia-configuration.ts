@@ -27,7 +27,7 @@ const ParagraphArgsIOS = BUILD_WITH_PARAGRAPH
   ? [
       ...CommonParagraphArgs,
       ["skia_use_icu", false],
-      ["skia_use_client_icu", true],
+      ["skia_use_libgrapheme", true],
     ]
   : NoParagraphArgs;
 
