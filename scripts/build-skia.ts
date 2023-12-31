@@ -193,9 +193,8 @@ try {
 
   // Generate libgrapheme headers
   // TODO: clean object files if needed
-  process.chdir(SkiaDir);
-  const libgraphemeDir = `./third_party/externals/libgrapheme`;
   console.log("Generating libgrapheme headers...");
+  const libgraphemeDir = `./third_party/externals/libgrapheme`;
   executeCmdSync(`cd ${libgraphemeDir} && ./configure && make`);
 
   try {
