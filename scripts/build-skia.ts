@@ -190,6 +190,13 @@ try {
   executeCmdSync("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
   console.log("gclient sync done");
 
+
+  // Generate libgrapheme headers
+  process.chdir(SkiaDir);
+  const libgraphemeDir = `./externals/skia/third_party/externals/libgrapheme`;
+  console.log("Generating libgrapheme headers...");
+  executeCmdSync(`cd ${libgraphemeDir} && ./configure && make`);
+
   try {
     // Configure the platform
     if (!configurePlatform(SelectedPlatform, SelectedTarget)) {
