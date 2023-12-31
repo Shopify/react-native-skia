@@ -1,6 +1,7 @@
 import { executeCmd, executeCmdSync } from "./utils";
 import { exit } from "process";
 import { commonArgs, configurations, PlatformName } from "./skia-configuration";
+
 const fs = require("fs");
 const typedKeys = <T extends object>(obj: T) => Object.keys(obj) as (keyof T)[];
 
