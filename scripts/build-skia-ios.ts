@@ -3,7 +3,6 @@ import { executeCmd, executeCmdSync } from "./utils";
 
 const configuration = configurations.ios;
 
-console.log("Building skia for iOS...");
 let command = "";
 
 Object.keys(configuration.targets).forEach((targetKey) => {
@@ -13,9 +12,12 @@ Object.keys(configuration.targets).forEach((targetKey) => {
 });
 
 // Generate libgrapheme headers
-const libgraphemeDir = "./externals/skia/third_party/externals/libgrapheme";
+const currentDir = process.cwd();
+const libgraphemeDir = `${currentDir}/externals/skia/third_party/externals/libgrapheme`;
 
+console.log("Generating libgrapheme headers...");
 executeCmdSync(`cd ${libgraphemeDir} && ./configure && make`);
+console.log("Building skia for iOS...");
 executeCmd(command, "iOS", () => {
   console.log(`Done building skia for iOS.`);
 });
