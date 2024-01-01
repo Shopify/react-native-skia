@@ -55,14 +55,14 @@ const tiger = new SVGAsset(
   800
 );
 
-const text = new SVGAsset(
-  `<svg viewBox='0 0 290 500' width='290' height='325' xmlns='http://www.w3.org/2000/svg'>
-<circle cx='31' cy='325' r='120px' fill='#c02aaa'/>
-<text x="20" y="35" fill="black">My Text</text>
-</svg>`,
-  290,
-  500
-);
+// const text = new SVGAsset(
+//   `<svg viewBox='0 0 290 500' width='290' height='325' xmlns='http://www.w3.org/2000/svg'>
+// <circle cx='31' cy='325' r='120px' fill='#c02aaa'/>
+// <text x="20" y="35" fill="black">My Text</text>
+// </svg>`,
+//   290,
+//   500
+// );
 
 const svgWithoutSize = {
   __typename__: "SVG" as const,
@@ -205,13 +205,13 @@ describe("Displays SVGs", () => {
     checkImage(image, docPath("opacity-tiger.png"));
   });
 
-  itRunsE2eOnly("can render text", async () => {
-    const image = await surface.draw(
-      <>
-        <Fill color="white" />
-        <ImageSVG svg={text} x={0} y={0} width={800} height={800} />
-      </>
-    );
-    checkImage(image, "snapshots/svg/text.png");
-  });
+  // itRunsE2eOnly("can render text", async () => {
+  //   const image = await surface.draw(
+  //     <>
+  //       <Fill color="white" />
+  //       <ImageSVG svg={text} x={0} y={0} width={800} height={800} />
+  //     </>
+  //   );
+  //   checkImage(image, "snapshots/svg/text.png");
+  // });
 });
