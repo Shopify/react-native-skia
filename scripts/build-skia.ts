@@ -192,10 +192,11 @@ try {
 
 
   // Generate libgrapheme headers
-  // TODO: clean object files if needed
-  console.log("Generating libgrapheme headers...");
-  const libgraphemeDir = `./third_party/externals/libgrapheme`;
-  executeCmdSync(`cd ${libgraphemeDir} && ./configure && make`);
+  if (SelectedPlatform === "ios") {
+    console.log("Generating libgrapheme headers...");
+    const libgraphemeDir = `./third_party/externals/libgrapheme`;
+    executeCmdSync(`cd ${libgraphemeDir} && ./configure && make clean && make`);
+  }
 
   try {
     // Configure the platform
