@@ -1,9 +1,8 @@
 import { configurations } from "./skia-configuration";
-import { executeCmd } from "./utils";
+import { executeCmd, executeCmdSync } from "./utils";
 
 const configuration = configurations.ios;
 
-console.log("Building skia for iOS...");
 let command = "";
 
 Object.keys(configuration.targets).forEach((targetKey) => {
@@ -12,6 +11,7 @@ Object.keys(configuration.targets).forEach((targetKey) => {
     `yarn ts-node ./scripts/build-skia.ts ios ${targetKey}`;
 });
 
+console.log("Building skia for iOS...");
 executeCmd(command, "iOS", () => {
   console.log(`Done building skia for iOS.`);
 });
