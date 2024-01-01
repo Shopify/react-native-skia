@@ -1,3 +1,6 @@
+import { buildLibGraphemeiOS } from "./build-libgrapheme-ios";
+import { executeCmdSync } from "./utils";
+
 const NdkDir: string = process.env.ANDROID_NDK ?? "";
 
 export const BUILD_WITH_PARAGRAPH = true;
@@ -70,6 +73,7 @@ export type Platform = {
   outputRoot: string;
   outputNames: string[];
   options?: Arg[];
+  dependencies?: { name: string; executable: () => void }[];
 };
 
 export const configurations: Configuration = {
@@ -159,6 +163,12 @@ export const configurations: Configuration = {
       "libskottie.a",
       "libsksg.a",
       ...ParagraphOutputs,
+    ],
+    dependencies: [
+      {
+        name: "libgrapheme",
+        executable: buildLibGraphemeiOS,
+      },
     ],
   },
 };
