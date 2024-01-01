@@ -1,7 +1,6 @@
 import { executeCmd, executeCmdSync } from "./utils";
 import { exit } from "process";
 import { commonArgs, configurations, PlatformName } from "./skia-configuration";
-
 const fs = require("fs");
 const typedKeys = <T extends object>(obj: T) => Object.keys(obj) as (keyof T)[];
 
@@ -190,12 +189,13 @@ try {
   executeCmdSync("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
   console.log("gclient sync done");
 
-
-  // Generate libgrapheme headers
-  if (SelectedPlatform === "ios") {
-    console.log("Generating libgrapheme headers...");
-    const libgraphemeDir = `./third_party/externals/libgrapheme`;
-    executeCmdSync(`cd ${libgraphemeDir} && ./configure && make clean && make`);
+  // lets check for any dependencies
+  if (platform.dependencies) {
+    console.log(`Found dependencies for platform ${SelectedPlatform}`);
+    platform.dependencies.forEach((dep) => {
+      console.log(`Running dependency ${dep.name}`);
+      dep.executable();
+    });
   }
 
   try {
