@@ -122,13 +122,6 @@ export const configurations: Configuration = {
           ["ios_min_target", '"13.0"'],
         ],
       },
-      // "arm64-iphonesimulator": {
-      //   cpu: "arm64",
-      //   args: [
-      //     ["ios_min_target", '"13.0"'],
-      //     ["ios_use_simulator", true],
-      //   ],
-      // },
       x64: {
         cpu: "x64",
         args: [
