@@ -1,7 +1,6 @@
 import { executeCmd, executeCmdSync } from "./utils";
 import { exit } from "process";
 import { commonArgs, configurations, PlatformName } from "./skia-configuration";
-
 const fs = require("fs");
 const typedKeys = <T extends object>(obj: T) => Object.keys(obj) as (keyof T)[];
 
@@ -189,7 +188,6 @@ try {
   // Start by running sync
   executeCmdSync("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
   console.log("gclient sync done");
-
 
   // Generate libgrapheme headers
   // TODO: this should be done once and only the configure step?
