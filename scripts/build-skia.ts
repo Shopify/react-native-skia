@@ -192,10 +192,11 @@ try {
 
 
   // Generate libgrapheme headers
+  // TODO: this should be done once and only the configure step?
   if (SelectedPlatform === "ios") {
     console.log("Generating libgrapheme headers...");
     const libgraphemeDir = `./third_party/externals/libgrapheme`;
-    executeCmdSync(`cd ${libgraphemeDir} && ./configure && make clean && make`);
+   // executeCmdSync(`cd ${libgraphemeDir} && ./configure && make clean && make`);
   }
 
   try {
