@@ -152,12 +152,11 @@ const rotatedUnitSinCos = (
 
 const matrixVecMul4 = (m: Matrix4, v: Vec4) => {
   "worklet";
-  const [vx, vy, vz, vw] = v;
   return [
-    vx * m[0] + vy * m[4] + vz * m[8] + vw * m[12],
-    vx * m[1] + vy * m[5] + vz * m[9] + vw * m[13],
-    vx * m[2] + vy * m[6] + vz * m[10] + vw * m[14],
-    vx * m[3] + vy * m[7] + vz * m[11] + vw * m[15],
+    m[0] * v[0] + m[1] * v[1] + m[2] * v[2] + m[3] * v[3],
+    m[4] * v[0] + m[5] * v[1] + m[6] * v[2] + m[7] * v[3],
+    m[8] * v[0] + m[9] * v[1] + m[10] * v[2] + m[11] * v[3],
+    m[12] * v[0] + m[13] * v[1] + m[14] * v[2] + m[15] * v[3],
   ];
 };
 
@@ -354,7 +353,7 @@ export const convertToColumnMajor = (rowMajorMatrix: Matrix4) => {
       colMajorMatrix[col * size + row] = rowMajorMatrix[row * size + col];
     }
   }
-  return colMajorMatrix;
+  return colMajorMatrix as unknown as Matrix4;
 };
 
 /**
