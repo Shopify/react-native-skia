@@ -7,8 +7,8 @@ import {
 } from "../../../__tests__/setup";
 import {
   FontStyle,
-  SkTextAlign,
-  SkTextDirection,
+  TextAlign,
+  TextDirection,
   TextDecoration,
 } from "../../../skia/types";
 
@@ -216,7 +216,7 @@ describe("Paragraphs", () => {
         para.layout(width);
         para.paint(canvas, 0, 0);
       },
-      { width: surface.width, textAlign: SkTextAlign.Right }
+      { width: surface.width, textAlign: TextAlign.Right }
     );
     checkImage(
       img,
@@ -236,7 +236,7 @@ describe("Paragraphs", () => {
         para.layout(width);
         para.paint(canvas, 0, 0);
       },
-      { width: surface.width, textAlign: SkTextAlign.Center }
+      { width: surface.width, textAlign: TextAlign.Center }
     );
     checkImage(
       img,
@@ -260,7 +260,7 @@ describe("Paragraphs", () => {
         para.layout(width);
         para.paint(canvas, 0, 0);
       },
-      { textAlign: SkTextAlign.Justify, width: surface.width }
+      { textAlign: TextAlign.Justify, width: surface.width }
     );
     checkImage(
       img,
@@ -284,7 +284,7 @@ describe("Paragraphs", () => {
         para.layout(width);
         para.paint(canvas, 0, 0);
       },
-      { width: surface.width, textAlign: SkTextAlign.Justify }
+      { width: surface.width, textAlign: TextAlign.Justify }
     );
     checkImage(
       img,
@@ -306,7 +306,7 @@ describe("Paragraphs", () => {
         para.layout(150);
         para.paint(canvas, 0, 0);
       },
-      { textDirection: SkTextDirection.RTL }
+      { textDirection: TextDirection.RTL }
     );
     checkImage(
       img,
