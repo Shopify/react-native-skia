@@ -10,6 +10,8 @@ import {
   rotateX,
   translate,
   toMatrix3,
+  Matrix4,
+  mapPoint3d,
 } from "../../../skia/types";
 
 const ckPerspective = (d: number) => [
@@ -224,5 +226,18 @@ describe("Matrix4", () => {
       ),
       0.1
     );
+  });
+  it("should correctly transform a point with an identity matrix", () => {
+    const identityMatrix = Matrix4();
+    const point = [100, -100, 200] as const; // Define some test point
+    const result = mapPoint3d(identityMatrix, point);
+    expect(result).toEqual(point);
+  });
+  it("should correctly transform a point with a translation matrix", () => {
+    const translationMatrix = translate(100, 100, 100);
+    const point = [100, -100, 200] as const; // Define some test point
+    const expectedResult = [200, 0, 300] as const;
+    const result = mapPoint3d(translationMatrix, point);
+    expect(result).toEqual(expectedResult);
   });
 });
