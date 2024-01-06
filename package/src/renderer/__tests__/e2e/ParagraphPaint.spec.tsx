@@ -1,9 +1,85 @@
-import { resolveFile, surface } from "../setup";
+import React from "react";
+
+import type { EvalContext } from "../setup";
+import { importSkia, resolveFile, surface } from "../setup";
 import { checkImage, docPath } from "../../../__tests__/setup";
+import {
+  Blur,
+  ColorMatrix,
+  Fill,
+  Group,
+  OpacityMatrix,
+  Paint,
+  Paragraph,
+} from "../../components";
+import type {
+  Skia,
+  SkCanvas,
+  SkParagraph,
+  SkRectWithDirection,
+} from "../../../skia/types";
 
 const RobotoMedium = Array.from(
   resolveFile("skia/__tests__/assets/Roboto-Medium.ttf")
 );
+
+class ParagraphAsset<Ctx extends EvalContext> implements SkParagraph {
+  private code: string;
+  private paragraph: SkParagraph;
+  constructor(
+    Skia: Skia,
+    fn: (Skia: Skia, ctx: Ctx) => SkParagraph,
+    public context: Ctx = {} as Ctx
+  ) {
+    this.code = `(Skia, ctx) => {
+  return (${fn.toString()})(Skia, ctx);
+}`;
+    this.paragraph = fn(Skia, context);
+  }
+
+  layout(width: number) {
+    this.paragraph.layout(width);
+  }
+  paint(canvas: SkCanvas, x: number, y: number) {
+    this.paragraph.paint(canvas, x, y);
+  }
+  getHeight() {
+    return this.paragraph.getHeight();
+  }
+  getMaxWidth() {
+    return this.paragraph.getMaxWidth();
+  }
+  getMinIntrinsicWidth() {
+    return this.paragraph.getMinIntrinsicWidth();
+  }
+  getMaxIntrinsicWidth() {
+    return this.paragraph.getMaxIntrinsicWidth();
+  }
+  getLongestLine() {
+    return this.paragraph.getLongestLine();
+  }
+  getGlyphPositionAtCoordinate(x: number, y: number) {
+    return this.paragraph.getGlyphPositionAtCoordinate(x, y);
+  }
+  getRectsForRange(start: number, end: number) {
+    return this.paragraph.getRectsForRange(start, end);
+  }
+  getLineMetrics() {
+    return this.paragraph.getLineMetrics();
+  }
+  getRectsForPlaceholders(): SkRectWithDirection[] {
+    return this.paragraph.getRectsForPlaceholders();
+  }
+  __typename__: "Paragraph" = "Paragraph" as const;
+
+  dispose(): void {
+    this.paragraph.dispose();
+  }
+
+  source() {
+    return this.code;
+  }
+}
 
 describe("Paragraphs", () => {
   it("Should use shader for the foreground and background", async () => {
@@ -167,5 +243,83 @@ describe("Paragraphs", () => {
       }
     );
     checkImage(img, docPath(`paragraph/background-only-${surface.OS}.png`));
+  });
+
+  it("should apply an image filter to the paragraph", async () => {
+    const { Skia: Sk } = importSkia();
+    const { width } = surface;
+    const paragraph = new ParagraphAsset(
+      Sk,
+      (Skia, ctx) => {
+        const robotoMedium = Skia.Typeface.MakeFreeTypeFaceFromData(
+          Skia.Data.fromBytes(new Uint8Array(ctx.RobotoMedium))
+        )!;
+        const provider = Skia.TypefaceFontProvider.Make();
+        provider.registerFont(robotoMedium, "Roboto");
+        return Skia.ParagraphBuilder.Make({}, provider)
+          .pushStyle({
+            fontFamilies: ["Roboto"],
+            color: Skia.Color("black"),
+            fontSize: 25,
+          })
+          .addText("Hello Skia")
+          .build();
+      },
+      { RobotoMedium }
+    );
+    const image = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Group
+          layer={
+            <Paint>
+              <Blur blur={2} />
+            </Paint>
+          }
+        >
+          <Paragraph paragraph={paragraph} x={0} y={0} width={width} />
+        </Group>
+      </>
+    );
+    checkImage(image, docPath(`blurred-paragraph-${surface.OS}.png`));
+  });
+
+  it("should apply an opacity filter to the paragraph", async () => {
+    const { Skia: Sk } = importSkia();
+    const { width } = surface;
+    const paragraph = new ParagraphAsset(
+      Sk,
+      (Skia, ctx) => {
+        const robotoMedium = Skia.Typeface.MakeFreeTypeFaceFromData(
+          Skia.Data.fromBytes(new Uint8Array(ctx.RobotoMedium))
+        )!;
+        const provider = Skia.TypefaceFontProvider.Make();
+        provider.registerFont(robotoMedium, "Roboto");
+        return Skia.ParagraphBuilder.Make({}, provider)
+          .pushStyle({
+            fontFamilies: ["Roboto"],
+            color: Skia.Color("black"),
+            fontSize: 25,
+          })
+          .addText("Hello Skia")
+          .build();
+      },
+      { RobotoMedium }
+    );
+    const image = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Group
+          layer={
+            <Paint>
+              <ColorMatrix matrix={OpacityMatrix(0.5)} />
+            </Paint>
+          }
+        >
+          <Paragraph paragraph={paragraph} x={0} y={0} width={width} />
+        </Group>
+      </>
+    );
+    checkImage(image, docPath(`opacity-paragraph-${surface.OS}.png`));
   });
 });
