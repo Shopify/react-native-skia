@@ -32,6 +32,16 @@ console.log("");
 console.log("Prerequisites met. Starting build.");
 console.log("");
 
+console.log("Building fat binary for iphone simulator");
+configurations.ios.outputNames.forEach((out) => {
+  console.log(`Building fat binary for simulator for file ${out}`);
+  executeCmdSync(
+    `lipo -create package/libs/ios/x64/${out} package/libs/ios/arm64-iphonesimulator/${out} -output package/libs/ios/${
+      out.split(".")[0]
+    }.a`
+  );
+});
+
 console.log("");
 console.log("Building xcframeworks...");
 
@@ -41,7 +51,7 @@ configurations.ios.outputNames.forEach((out) => {
   executeCmdSync(`rm -rf ./package/libs/ios/${libName}.xcframework`);
   executeCmdSync(
     "xcodebuild -create-xcframework " +
-      `-library ./package/libs/ios/x64/${libName}.a ` +
+      `-library ./package/libs/ios/${libName}.a ` +
       `-library ./package/libs/ios/arm64-iphoneos/${libName}.a ` +
       ` -output ./package/libs/ios/${libName}.xcframework `
   );

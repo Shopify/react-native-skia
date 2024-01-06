@@ -189,15 +189,6 @@ try {
   executeCmdSync("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
   console.log("gclient sync done");
 
-  // Generate libgrapheme headers
-  if (SelectedPlatform === "ios") {
-    if (!fs.existsSync("./third_party/externals/libgrapheme/gen/case.o")) {
-      console.log("Generating libgrapheme headers...");
-      const libgraphemeDir = `./third_party/externals/libgrapheme`;
-      executeCmdSync(`cd ${libgraphemeDir} && ./configure && make clean && make`);
-    }
-  }
-
   try {
     // Configure the platform
     if (!configurePlatform(SelectedPlatform, SelectedTarget)) {
