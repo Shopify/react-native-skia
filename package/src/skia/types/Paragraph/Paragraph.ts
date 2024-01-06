@@ -2,11 +2,11 @@ import type { SkCanvas } from "../Canvas";
 import type { SkJSIInstance } from "../JsiInstance";
 import type { SkRect } from "../Rect";
 
-import type { SkTextDirection } from "./ParagraphStyle";
+import type { TextDirection } from "./ParagraphStyle";
 
 export interface SkRectWithDirection {
   rect: SkRect;
-  direction: SkTextDirection;
+  direction: TextDirection;
 }
 
 export interface SkParagraph extends SkJSIInstance<"Paragraph"> {
