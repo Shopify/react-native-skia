@@ -13,9 +13,7 @@ export abstract class SkiaObject<
     fn: (Skia: Skia, ctx: Ctx) => R,
     public _context: Ctx
   ) {
-    this._source = `(Skia, ctx) => {
-        return (${fn.toString()})(Skia, ctx);
-      }`;
+    this._source = fn.toString();
     this.instance = fn(Skia, _context);
   }
 
