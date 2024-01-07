@@ -14,32 +14,8 @@ import {
   Paint,
   fitbox,
 } from "../../components";
-import type { SkSVG } from "../../../skia/types";
 
-// Because SkSVG doesn't exist on web,
-// this instance is just to send the svg over the wire
-class SVGAsset implements SkSVG {
-  __typename__ = "SVG" as const;
-  constructor(
-    private _source: string,
-    private _width: number,
-    private _height: number
-  ) {}
-
-  dispose() {}
-
-  source() {
-    return this._source;
-  }
-
-  width() {
-    return this._width;
-  }
-
-  height() {
-    return this._height;
-  }
-}
+import { SVGAsset } from "./setup";
 
 const circle = new SVGAsset(
   `<svg viewBox='0 0 20 20' width="20" height="20" xmlns='http://www.w3.org/2000/svg'>
@@ -55,21 +31,13 @@ const tiger = new SVGAsset(
   800
 );
 
-const svgWithoutSize = {
-  __typename__: "SVG" as const,
-  width() {
-    return -1;
-  },
-  height() {
-    return -1;
-  },
-  dispose() {},
-  source() {
-    return `<svg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'>
-    <circle cx='10' cy='10' r='10' fill='#00FFFF'/>
-  </svg>`;
-  },
-};
+const svgWithoutSize = new SVGAsset(
+  `<svg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'>
+<circle cx='10' cy='10' r='10' fill='#00FFFF'/>
+</svg>`,
+  -1,
+  -1
+);
 
 describe("Displays SVGs", () => {
   itRunsE2eOnly(
