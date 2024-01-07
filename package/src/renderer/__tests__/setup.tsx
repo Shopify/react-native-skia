@@ -284,6 +284,12 @@ const serializeSkOjects = (obj: any): any => {
         __typename__: "SVG",
         source: obj.source(),
       };
+    } else if (obj.__typename__ === "Paragraph") {
+      return {
+        __typename__: "Paragraph",
+        source: obj.source(),
+        context: obj.context,
+      };
     }
   }
   return obj;
@@ -306,7 +312,7 @@ const serializeNode = (node: Node<any>): SerializedNode => {
   };
 };
 
-type EvalContext = Record<string, any>;
+export type EvalContext = Record<string, any>;
 
 interface TestingSurface {
   eval<Ctx extends EvalContext, R>(
