@@ -18,6 +18,8 @@ import { SkiaRoot } from "../Reconciler";
 import { JsiDrawingContext } from "../../dom/types/DrawingContext";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
 
+import type { SkiaObject } from "./e2e/setup";
+
 jest.setTimeout(180 * 1000);
 
 type TestOS = "ios" | "android" | "web" | "node";
@@ -285,10 +287,11 @@ const serializeSkOjects = (obj: any): any => {
         source: obj.source(),
       };
     } else if (obj.__typename__ === "Paragraph") {
+      const skObj: SkiaObject<EvalContext, any> = obj;
       return {
-        __typename__: "Paragraph",
-        source: obj.source(),
-        context: obj.context,
+        __typename__: "SkiaObject",
+        source: skObj.source,
+        context: skObj.context,
       };
     }
   }

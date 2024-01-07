@@ -1,60 +1,56 @@
 import type { SkParagraph, Skia, SkCanvas } from "../../../../skia/types";
 import type { EvalContext } from "../../setup";
 
-export class ParagraphAsset<Ctx extends EvalContext> implements SkParagraph {
-  private code: string;
-  private paragraph: SkParagraph;
+import { SkiaObject } from "./SkiaObject";
+
+export class ParagraphAsset<Ctx extends EvalContext>
+  extends SkiaObject<Ctx, SkParagraph>
+  implements SkParagraph
+{
   constructor(
     Skia: Skia,
     fn: (Skia: Skia, ctx: Ctx) => SkParagraph,
-    public context: Ctx = {} as Ctx
+    context: Ctx = {} as Ctx
   ) {
-    this.code = `(Skia, ctx) => {
-    return (${fn.toString()})(Skia, ctx);
-  }`;
-    this.paragraph = fn(Skia, context);
+    super(Skia, fn, context);
   }
 
   layout(width: number) {
-    this.paragraph.layout(width);
+    this.instance.layout(width);
   }
   paint(canvas: SkCanvas, x: number, y: number) {
-    this.paragraph.paint(canvas, x, y);
+    this.instance.paint(canvas, x, y);
   }
   getHeight() {
-    return this.paragraph.getHeight();
+    return this.instance.getHeight();
   }
   getMaxWidth() {
-    return this.paragraph.getMaxWidth();
+    return this.instance.getMaxWidth();
   }
   getMinIntrinsicWidth() {
-    return this.paragraph.getMinIntrinsicWidth();
+    return this.instance.getMinIntrinsicWidth();
   }
   getMaxIntrinsicWidth() {
-    return this.paragraph.getMaxIntrinsicWidth();
+    return this.instance.getMaxIntrinsicWidth();
   }
   getLongestLine() {
-    return this.paragraph.getLongestLine();
+    return this.instance.getLongestLine();
   }
   getGlyphPositionAtCoordinate(x: number, y: number) {
-    return this.paragraph.getGlyphPositionAtCoordinate(x, y);
+    return this.instance.getGlyphPositionAtCoordinate(x, y);
   }
   getRectsForRange(start: number, end: number) {
-    return this.paragraph.getRectsForRange(start, end);
+    return this.instance.getRectsForRange(start, end);
   }
   getLineMetrics() {
-    return this.paragraph.getLineMetrics();
+    return this.instance.getLineMetrics();
   }
   getRectsForPlaceholders() {
-    return this.paragraph.getRectsForPlaceholders();
+    return this.instance.getRectsForPlaceholders();
   }
-  __typename__: "Paragraph" = "Paragraph" as const;
+  __typename__ = "Paragraph" as const;
 
   dispose(): void {
-    this.paragraph.dispose();
-  }
-
-  source() {
-    return this.code;
+    this.instance.dispose();
   }
 }
