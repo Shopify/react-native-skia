@@ -156,43 +156,7 @@ const MyParagraph = () => {
 
 The `Paragraph` component doesn't follow the same painting rules as other components.
 However you can apply effets using the `layer` property.
-
-#### Opacity Example
-
-In the example below we apply an opacity effect via the `ColorMatrix` component.
-
-```tsx twoslash
-import React from "react";
-import { Canvas, ImageSVG, Skia, Paragraph, Group, Paint, OpacityMatrix, ColorMatrix } from "@shopify/react-native-skia";
-
-const width = 256;
-const height = 256;
-
-export const Demo = () => {
-  const paragraph = Skia.ParagraphBuilder.Make()
-          .pushStyle({
-            color: Skia.Color("black"),
-            fontSize: 25,
-          })
-          .addText("Hello Skia")
-          .build();
-  return (
-    <Canvas style={{ flex: 1 }}>
-      <Group
-        layer={<Paint><ColorMatrix matrix={OpacityMatrix(0.5)} /></Paint>}
-      >
-        <Paragraph paragraph={paragraph} x={0} y={0} width={width} />
-      </Group>
-    </Canvas>
-  );
-};
-```
-
-<img src={require("/static/img/opacity-paragraph-node.png").default} width="256" height="256" />
-
-#### Blur Example
-
-In the example below we apply a blur image filter.
+For instance, in the example below, fopr  we apply a blur image filter.
 
 ```tsx twoslash
 import React from "react";
