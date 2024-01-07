@@ -1,10 +1,12 @@
 package com.shopify.reactnative.skia;
 
 import android.content.Context;
+import android.graphics.PixelFormat;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.ViewGroup;
 
 import com.facebook.react.views.view.ReactViewGroup;
 
@@ -17,7 +19,16 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SurfaceHold
         super(context);
         mSurfaceView = new SurfaceView(context);
         mSurfaceView.getHolder().addCallback(this);
-        mSurfaceView.setZOrderOnTop(true); // Necessary to make the surface view transparent
+
+        // Set the surface view to be transparent
+        mSurfaceView.setZOrderOnTop(true);
+        mSurfaceView.getHolder().setFormat(PixelFormat.TRANSPARENT);
+
+        // Adjust the layout parameters to ensure proper layering
+        LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        mSurfaceView.setLayoutParams(params);
+
+        // Add the surface view to the ReactViewGroup
         addView(mSurfaceView);
     }
 
@@ -30,6 +41,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SurfaceHold
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         Log.i(tag, "onLayout " + this.getMeasuredWidth() + "/" + this.getMeasuredHeight());
         super.onLayout(changed, left, top, right, bottom);
+        // Ensure that the surface view fills the entire ReactViewGroup
         mSurfaceView.layout(0, 0, this.getMeasuredWidth(), this.getMeasuredHeight());
     }
 
