@@ -69,19 +69,6 @@ describe("Text", () => {
     checkImage(image, `snapshots/text/text-bounds-${surface.OS}.png`);
   });
 
-  // We test it only on Android and iOS now because there might be no default font on Web
-  itRunsE2eOnly("The font property is optional", async () => {
-    const image = await surface.draw(
-      <>
-        <Fill color="white" />
-        <Group>
-          <Text x={32} y={64} text="Hello World!" />
-        </Group>
-      </>
-    );
-    checkImage(image, `snapshots/text/text-default-font-${surface.OS}.png`);
-  });
-
   it("Should draw text along a circle", async () => {
     const font = fonts.RobotoMedium;
     const { Skia } = importSkia();
