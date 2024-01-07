@@ -109,7 +109,7 @@ export interface DiffRectProps extends DrawingNodeProps {
 }
 
 export interface TextProps extends DrawingNodeProps {
-  font?: SkFont | null;
+  font: SkFont | null;
   text: string;
   x: number;
   y: number;

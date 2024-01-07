@@ -23,21 +23,8 @@ export class TextNode extends JsiDrawingNode<TextProps, SkFont | null> {
 
   protected deriveProps() {
     const { font } = this.props;
-    if (font === null) {
+    if (!font) {
       return null;
-    } else if (font === undefined) {
-      console.warn(
-        "<Text />: the font property is mandatory on React Native Web"
-      );
-      return null;
-      // return this.Skia.Font(
-      //   this.Skia.FontMgr.System().matchFamilyStyle("System", {
-      //     width: 5,
-      //     weight: 400,
-      //     slant: 0,
-      //   }),
-      //   14
-      // );
     }
     return font;
   }
