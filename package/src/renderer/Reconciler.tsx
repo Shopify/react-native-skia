@@ -44,6 +44,10 @@ export class SkiaRoot {
     });
   }
 
+  unmount() {
+    skiaReconciler.updateContainer(null, this.root, null, () => {});
+  }
+
   get dom() {
     return this.container.root;
   }
