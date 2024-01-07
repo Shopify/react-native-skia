@@ -84,6 +84,12 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       root.render(children);
     }, [children, root, redraw]);
 
+    useEffect(() => {
+      return () => {
+        root.unmount();
+      };
+    }, [root]);
+
     if (NATIVE_DOM) {
       return (
         <SkiaDomView
