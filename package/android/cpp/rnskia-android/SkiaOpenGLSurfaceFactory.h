@@ -5,9 +5,8 @@
 #include <fbjni/fbjni.h>
 #include <jni.h>
 
-#include <android/native_window_jni.h>
-#include <android/surface_texture.h>
-#include <android/surface_texture_jni.h>
+#include <android/hardware_buffer.h>
+#include <android/hardware_buffer_jni.h>
 #include <condition_variable>
 #include <memory>
 #include <thread>
@@ -44,14 +43,14 @@ public:
  */
 class WindowSurfaceHolder {
 public:
-  WindowSurfaceHolder(jobject jSurface, int width, int height)
+  WindowSurfaceHolder(jobject jHB, int width, int height)
       : _width(width), _height(height) {
     JNIEnv *env = facebook::jni::Environment::current();
-    _window = ANativeWindow_fromSurface(env, jSurface);
+    _hb = AHardwareBuffer_fromHardwareBuffer(env, jHB);
   }
 
   ~WindowSurfaceHolder() {
-    ANativeWindow_release(_window);
+    AHardwareBuffer_release(_hb);
   }
 
   int getWidth() { return _width; }
@@ -97,7 +96,7 @@ public:
   }
 
 private:
-  ANativeWindow *_window;
+  AHardwareBuffer *_hb;
   sk_sp<SkSurface> _skSurface = nullptr;
   EGLSurface _glSurface = EGL_NO_SURFACE;
   int _width = 0;

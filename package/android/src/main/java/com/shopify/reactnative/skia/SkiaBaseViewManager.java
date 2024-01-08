@@ -29,7 +29,6 @@ public abstract class SkiaBaseViewManager<T extends SkiaBaseView> extends ReactV
     @Override
     public void onDropViewInstance(@NonNull ReactViewGroup view) {
         super.onDropViewInstance(view);
-        ((SkiaBaseView)view).destroySurface();
         ((SkiaBaseView)view).unregisterView();
     }
 }

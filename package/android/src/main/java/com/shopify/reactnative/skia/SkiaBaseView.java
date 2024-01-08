@@ -2,6 +2,7 @@ package com.shopify.reactnative.skia;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.hardware.HardwareBuffer;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.util.Log;
@@ -10,61 +11,22 @@ import android.view.ViewGroup;
 
 import com.facebook.react.views.view.ReactViewGroup;
 
-public abstract class SkiaBaseView extends ReactViewGroup implements SurfaceHolder.Callback {
-    private SurfaceView mSurfaceView;
+public abstract class SkiaBaseView extends ReactViewGroup {
 
     private String tag = "SkiaView";
 
     public SkiaBaseView(Context context) {
         super(context);
-        mSurfaceView = new SurfaceView(context);
-        mSurfaceView.getHolder().addCallback(this);
-
-        // Set the surface view to be transparent
-        mSurfaceView.setZOrderOnTop(true);
-        mSurfaceView.getHolder().setFormat(PixelFormat.TRANSPARENT);
-
-        // Adjust the layout parameters to ensure proper layering
-        LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        mSurfaceView.setLayoutParams(params);
-
-        // Add the surface view to the ReactViewGroup
-        addView(mSurfaceView);
-    }
-
-    public void destroySurface() {
-        Log.i(tag, "destroySurface");
-        surfaceDestroyed();
+        setWillNotDraw(false);
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        Log.i(tag, "onLayout " + this.getMeasuredWidth() + "/" + this.getMeasuredHeight());
+        Log.i(tag, "onLayout " + getMeasuredWidth() + "/" + getMeasuredHeight());
         super.onLayout(changed, left, top, right, bottom);
-        // Ensure that the surface view fills the entire ReactViewGroup
-        mSurfaceView.layout(0, 0, this.getMeasuredWidth(), this.getMeasuredHeight());
-    }
-
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        Log.i(tag, "surfaceCreated");
-        if (holder.getSurface() == null) {
-            Log.i(tag, "getSurface()");
-        }
-        surfaceAvailable(holder.getSurface(), this.getMeasuredWidth(), this.getMeasuredHeight());
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        Log.i(tag, "surfaceChanged " + width + "/" + height);
-        surfaceSizeChanged(width, height);
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        Log.i(tag, "surfaceDestroyed");
-        destroySurface();
-        // Additional clean-up as necessary
+        long usage = HardwareBuffer.USAGE_CPU_READ_RARELY | HardwareBuffer.USAGE_CPU_WRITE_RARELY | HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE | HardwareBuffer.USAGE_GPU_COLOR_OUTPUT;
+        HardwareBuffer hb = HardwareBuffer.create(getMeasuredWidth(), getMeasuredHeight(),HardwareBuffer.RGBA_8888 , 1, usage);
+        surfaceAvailable(hb, getMeasuredWidth(), getMeasuredHeight());
     }
 
     @Override
