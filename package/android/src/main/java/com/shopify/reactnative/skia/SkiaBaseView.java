@@ -40,6 +40,8 @@ public abstract class SkiaBaseView extends ReactViewGroup implements Choreograph
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if (mBitmap != null) {
+            end = System.nanoTime();
+            Log.i(tag, "render time: " + (end - start) / 1000000 + "ms");
             canvas.drawBitmap(mBitmap, new Matrix(), new Paint());
         }
     }
@@ -66,10 +68,10 @@ public abstract class SkiaBaseView extends ReactViewGroup implements Choreograph
             mImageReader.setOnImageAvailableListener(reader -> {
                 try (Image image = reader.acquireLatestImage()) {
                     if (image != null) {
+                        start = System.nanoTime();
                         HardwareBuffer hb = image.getHardwareBuffer();
                         mBitmap = Bitmap.wrapHardwareBuffer(hb, null);
                         hb.close();
-                        invalidate();
                     }
                 }
             }, null);
@@ -79,15 +81,15 @@ public abstract class SkiaBaseView extends ReactViewGroup implements Choreograph
         }
     }
 
+    long start;
+    long end;
+
     @Override
     public void doFrame(long frameTimeNanos) {
-        Log.i(tag, "doFrame: " + frameTimeNanos);
         choreographer.postFrameCallback(this);
         if (mImageReader.getSurface() != null) {
-            long start = System.nanoTime();
             surfaceSizeChanged(getMeasuredWidth(), getMeasuredHeight());
-            long end = System.nanoTime();
-            Log.i(tag, "render time: " + (end - start) / 1000000 + "ms");
+            invalidate();
         }
     }
 
