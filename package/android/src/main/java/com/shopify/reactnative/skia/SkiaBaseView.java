@@ -1,35 +1,47 @@
 package com.shopify.reactnative.skia;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
+import android.media.Image;
+import android.media.ImageReader;
+import android.os.Build;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
+import android.hardware.HardwareBuffer;
+
+import androidx.annotation.RequiresApi;
 
 import com.facebook.react.views.view.ReactViewGroup;
 
-public abstract class SkiaBaseView extends ReactViewGroup implements SurfaceHolder.Callback {
-    private SurfaceView mSurfaceView;
-
+@RequiresApi(api = Build.VERSION_CODES.Q)
+public abstract class SkiaBaseView extends ReactViewGroup {
+    private ImageReader mImageReader = null;
+    private Bitmap mBitmap = null;
     private String tag = "SkiaView";
 
+    @SuppressLint("WrongConstant")
     public SkiaBaseView(Context context) {
         super(context);
-        mSurfaceView = new SurfaceView(context);
-        mSurfaceView.getHolder().addCallback(this);
 
-        // Set the surface view to be transparent
-        mSurfaceView.setZOrderOnTop(true);
-        mSurfaceView.getHolder().setFormat(PixelFormat.TRANSPARENT);
-
-        // Adjust the layout parameters to ensure proper layering
+        // Adjust layout parameters
         LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        mSurfaceView.setLayoutParams(params);
+        setLayoutParams(params);
+        setWillNotDraw(false);
+    }
 
-        // Add the surface view to the ReactViewGroup
-        addView(mSurfaceView);
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        if (mBitmap != null) {
+            Log.i(tag, "drawBitmap");
+            canvas.drawBitmap(mBitmap, new Matrix(), new Paint());
+        }
     }
 
     public void destroySurface() {
@@ -37,35 +49,33 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SurfaceHold
         surfaceDestroyed();
     }
 
+    @SuppressLint("WrongConstant")
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         Log.i(tag, "onLayout " + this.getMeasuredWidth() + "/" + this.getMeasuredHeight());
         super.onLayout(changed, left, top, right, bottom);
-        // Ensure that the surface view fills the entire ReactViewGroup
-        mSurfaceView.layout(0, 0, this.getMeasuredWidth(), this.getMeasuredHeight());
-    }
-
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        Log.i(tag, "surfaceCreated");
-        if (holder.getSurface() == null) {
-            Log.i(tag, "getSurface()");
+        if (mImageReader != null) {
+            mImageReader.close();
         }
-        surfaceAvailable(holder.getSurface(), this.getMeasuredWidth(), this.getMeasuredHeight());
+        long usage = HardwareBuffer.USAGE_CPU_READ_RARELY |
+                HardwareBuffer.USAGE_CPU_WRITE_RARELY |
+                HardwareBuffer.USAGE_GPU_COLOR_OUTPUT |
+                HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE;
+        mImageReader = ImageReader.newInstance(getMeasuredWidth(), getMeasuredHeight(), PixelFormat.RGBA_8888, 2, usage);
+        mImageReader.setOnImageAvailableListener(reader -> {
+            try (Image image = reader.acquireLatestImage()) {
+                if (image != null) {
+                    HardwareBuffer hb = image.getHardwareBuffer();
+                    mBitmap = Bitmap.wrapHardwareBuffer(hb, null);
+                    hb.close();
+                    invalidate();
+                }
+            }
+        }, null);
+        surfaceAvailable(mImageReader.getSurface(), getMeasuredWidth(), getMeasuredHeight());
+      //  }
     }
 
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        Log.i(tag, "surfaceChanged " + width + "/" + height);
-        surfaceSizeChanged(width, height);
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        Log.i(tag, "surfaceDestroyed");
-        destroySurface();
-        // Additional clean-up as necessary
-    }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
