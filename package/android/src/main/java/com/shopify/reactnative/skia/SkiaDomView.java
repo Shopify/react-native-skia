@@ -26,6 +26,7 @@ public class SkiaDomView extends SkiaBaseView {
 
     protected native void surfaceAvailable(Object surface, int width, int height);
 
+    protected native void drawFrame();
     protected native void surfaceSizeChanged(int width, int height);
 
     protected native void surfaceDestroyed();

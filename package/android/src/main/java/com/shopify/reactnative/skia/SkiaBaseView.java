@@ -9,8 +9,10 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.media.Image;
 import android.media.ImageReader;
+import android.opengl.EGLSurface;
 import android.os.Build;
 import android.util.Log;
+import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.hardware.HardwareBuffer;
@@ -20,15 +22,19 @@ import androidx.annotation.RequiresApi;
 import com.facebook.react.views.view.ReactViewGroup;
 
 @RequiresApi(api = Build.VERSION_CODES.Q)
-public abstract class SkiaBaseView extends ReactViewGroup {
+public abstract class SkiaBaseView extends ReactViewGroup implements Choreographer.FrameCallback {
     private ImageReader mImageReader = null;
-    private Bitmap mBitmap = null;
+    private EGLSurface mSurface;
+
     private String tag = "SkiaView";
+    private SkiaRenderer mRenderer;
+
+    private Choreographer choreographer;
 
     @SuppressLint("WrongConstant")
     public SkiaBaseView(Context context) {
         super(context);
-
+        mRenderer = SkiaRenderer.getInstance();
         // Adjust layout parameters
         LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         setLayoutParams(params);
@@ -38,15 +44,42 @@ public abstract class SkiaBaseView extends ReactViewGroup {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (mBitmap != null) {
+        Image image = mImageReader.acquireLatestImage();
+        if (image != null) {
             Log.i(tag, "drawBitmap");
-            canvas.drawBitmap(mBitmap, new Matrix(), new Paint());
+            HardwareBuffer hb = image.getHardwareBuffer();
+            Bitmap bitmap = Bitmap.wrapHardwareBuffer(hb, null);
+            canvas.drawBitmap(bitmap, new Matrix(), new Paint());
+            hb.close();
+            image.close();
+        } else {
+            Log.i(tag, "nothing to draw");
         }
+    }
+
+    @Override
+    public void doFrame(long frameTimeNanos) {
+        Log.i(tag, "doFrame: " + frameTimeNanos);
+        //choreographer.postFrameCallback(this);
+        if (mSurface != null) {
+            long start = System.nanoTime();
+            mRenderer.makeCurrent(mSurface);
+            drawFrame();
+            mRenderer.present(mSurface, frameTimeNanos);
+            invalidate();
+            long end = System.nanoTime();
+            Log.i(tag, "render time: " + (end - start) / 1000000 + "ms");
+        }
+
     }
 
     public void destroySurface() {
         Log.i(tag, "destroySurface");
-        surfaceDestroyed();
+        // TODO: remove, close image reader?
+        //surfaceDestroyed();
+        mRenderer.destroy(mSurface);
+        mRenderer = null;
+        mSurface = null;
     }
 
     @SuppressLint("WrongConstant")
@@ -62,18 +95,10 @@ public abstract class SkiaBaseView extends ReactViewGroup {
                 HardwareBuffer.USAGE_GPU_COLOR_OUTPUT |
                 HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE;
         mImageReader = ImageReader.newInstance(getMeasuredWidth(), getMeasuredHeight(), PixelFormat.RGBA_8888, 2, usage);
-        mImageReader.setOnImageAvailableListener(reader -> {
-            try (Image image = reader.acquireLatestImage()) {
-                if (image != null) {
-                    HardwareBuffer hb = image.getHardwareBuffer();
-                    mBitmap = Bitmap.wrapHardwareBuffer(hb, null);
-                    hb.close();
-                    invalidate();
-                }
-            }
-        }, null);
+        mSurface = SkiaRenderer.getInstance().makeOnscreenSurface(mImageReader.getSurface());
         surfaceAvailable(mImageReader.getSurface(), getMeasuredWidth(), getMeasuredHeight());
-      //  }
+        choreographer = Choreographer.getInstance();
+        choreographer.postFrameCallback(this);
     }
 
 
@@ -148,6 +173,8 @@ public abstract class SkiaBaseView extends ReactViewGroup {
     }
 
     protected abstract void surfaceAvailable(Object surface, int width, int height);
+
+    protected abstract void drawFrame();
 
     protected abstract void surfaceSizeChanged(int width, int height);
 

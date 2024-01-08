@@ -14,6 +14,8 @@ class RNSkBaseAndroidView {
 public:
   virtual void surfaceAvailable(jobject surface, int width, int height) = 0;
 
+  virtual void drawFrame() = 0;
+
   virtual void surfaceDestroyed() = 0;
 
   virtual void surfaceSizeChanged(int width, int height) = 0;
@@ -45,6 +47,12 @@ public:
 
     // Try to render directly when the surface has been set so that
     // we don't have to wait until the draw loop returns.
+    RNSkView::renderImmediate();
+  }
+
+  void drawFrame() override {
+    // std::static_pointer_cast<RNSkOpenGLCanvasProvider>(T::getCanvasProvider())
+    //     ->drawFrame();
     RNSkView::renderImmediate();
   }
 

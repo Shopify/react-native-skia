@@ -46,13 +46,9 @@ class WindowSurfaceHolder {
 public:
   WindowSurfaceHolder(jobject jSurface, int width, int height)
       : _width(width), _height(height) {
-    JNIEnv *env = facebook::jni::Environment::current();
-    _window = ANativeWindow_fromSurface(env, jSurface);
   }
 
-  ~WindowSurfaceHolder() {
-    ANativeWindow_release(_window);
-  }
+  ~WindowSurfaceHolder() {}
 
   int getWidth() { return _width; }
   int getHeight() { return _height; }
@@ -70,16 +66,6 @@ public:
   void resize(int width, int height) {
     _width = width;
     _height = height;
-    _skSurface = nullptr;
-  }
-
-  /**
-   * Sets the current surface as the active surface
-   * @return true if make current succeeds
-   */
-  bool makeCurrent() {
-    return SkiaOpenGLHelper::makeCurrent(
-        &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
   }
 
   /**
@@ -90,16 +76,10 @@ public:
     // Flush and submit the direct context
     ThreadContextHolder::ThreadSkiaOpenGLContext.directContext
         ->flushAndSubmit();
-
-    // Swap buffers
-    return SkiaOpenGLHelper::swapBuffers(
-        &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
+    return true;
   }
 
 private:
-  ANativeWindow *_window;
-  sk_sp<SkSurface> _skSurface = nullptr;
-  EGLSurface _glSurface = EGL_NO_SURFACE;
   int _width = 0;
   int _height = 0;
 };
