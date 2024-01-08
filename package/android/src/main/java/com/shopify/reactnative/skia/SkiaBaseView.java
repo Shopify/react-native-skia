@@ -11,6 +11,7 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.os.Build;
 import android.util.Log;
+import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.hardware.HardwareBuffer;
@@ -20,15 +21,15 @@ import androidx.annotation.RequiresApi;
 import com.facebook.react.views.view.ReactViewGroup;
 
 @RequiresApi(api = Build.VERSION_CODES.Q)
-public abstract class SkiaBaseView extends ReactViewGroup {
+public abstract class SkiaBaseView extends ReactViewGroup implements Choreographer.FrameCallback {
     private ImageReader mImageReader = null;
     private Bitmap mBitmap = null;
     private String tag = "SkiaView";
+    private Choreographer choreographer;
 
     @SuppressLint("WrongConstant")
     public SkiaBaseView(Context context) {
         super(context);
-
         // Adjust layout parameters
         LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         setLayoutParams(params);
@@ -39,7 +40,6 @@ public abstract class SkiaBaseView extends ReactViewGroup {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if (mBitmap != null) {
-            Log.i(tag, "drawBitmap");
             canvas.drawBitmap(mBitmap, new Matrix(), new Paint());
         }
     }
@@ -55,27 +55,41 @@ public abstract class SkiaBaseView extends ReactViewGroup {
         Log.i(tag, "onLayout " + this.getMeasuredWidth() + "/" + this.getMeasuredHeight());
         super.onLayout(changed, left, top, right, bottom);
         if (mImageReader != null) {
-            mImageReader.close();
-        }
-        long usage = HardwareBuffer.USAGE_CPU_READ_RARELY |
-                HardwareBuffer.USAGE_CPU_WRITE_RARELY |
-                HardwareBuffer.USAGE_GPU_COLOR_OUTPUT |
-                HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE;
-        mImageReader = ImageReader.newInstance(getMeasuredWidth(), getMeasuredHeight(), PixelFormat.RGBA_8888, 2, usage);
-        mImageReader.setOnImageAvailableListener(reader -> {
-            try (Image image = reader.acquireLatestImage()) {
-                if (image != null) {
-                    HardwareBuffer hb = image.getHardwareBuffer();
-                    mBitmap = Bitmap.wrapHardwareBuffer(hb, null);
-                    hb.close();
-                    invalidate();
+          //  mImageReader.close();
+          //  surfaceSizeChanged(getMeasuredWidth(), getMeasuredHeight());
+        } else {
+            long usage = HardwareBuffer.USAGE_CPU_READ_RARELY |
+                    HardwareBuffer.USAGE_CPU_WRITE_RARELY |
+                    HardwareBuffer.USAGE_GPU_COLOR_OUTPUT |
+                    HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE;
+            mImageReader = ImageReader.newInstance(getMeasuredWidth(), getMeasuredHeight(), PixelFormat.RGBA_8888, 2, usage);
+            mImageReader.setOnImageAvailableListener(reader -> {
+                try (Image image = reader.acquireLatestImage()) {
+                    if (image != null) {
+                        HardwareBuffer hb = image.getHardwareBuffer();
+                        mBitmap = Bitmap.wrapHardwareBuffer(hb, null);
+                        hb.close();
+                        invalidate();
+                    }
                 }
-            }
-        }, null);
-        surfaceAvailable(mImageReader.getSurface(), getMeasuredWidth(), getMeasuredHeight());
-      //  }
+            }, null);
+            surfaceAvailable(mImageReader.getSurface(), getMeasuredWidth(), getMeasuredHeight());
+            choreographer = Choreographer.getInstance();
+            choreographer.postFrameCallback(this);
+        }
     }
 
+    @Override
+    public void doFrame(long frameTimeNanos) {
+        Log.i(tag, "doFrame: " + frameTimeNanos);
+        choreographer.postFrameCallback(this);
+        if (mImageReader.getSurface() != null) {
+            long start = System.nanoTime();
+            surfaceSizeChanged(getMeasuredWidth(), getMeasuredHeight());
+            long end = System.nanoTime();
+            Log.i(tag, "render time: " + (end - start) / 1000000 + "ms");
+        }
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
