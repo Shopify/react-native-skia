@@ -27,10 +27,12 @@ public abstract class SkiaBaseView extends ReactViewGroup implements Choreograph
     private String tag = "SkiaView";
     private Choreographer choreographer;
 
+    private Paint paint = new Paint();
+    private Matrix matrix = new Matrix();
+
     @SuppressLint("WrongConstant")
     public SkiaBaseView(Context context) {
         super(context);
-        // Adjust layout parameters
         LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         setLayoutParams(params);
         setWillNotDraw(false);
@@ -42,7 +44,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements Choreograph
         if (mBitmap != null) {
             end = System.nanoTime();
             Log.i(tag, "render time: " + (end - start) / 1000000 + "ms");
-            canvas.drawBitmap(mBitmap, new Matrix(), new Paint());
+            canvas.drawBitmap(mBitmap, matrix, paint);
         }
     }
 
@@ -56,6 +58,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements Choreograph
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         Log.i(tag, "onLayout " + this.getMeasuredWidth() + "/" + this.getMeasuredHeight());
         super.onLayout(changed, left, top, right, bottom);
+        // TODO: fix lifecycle there
         if (mImageReader != null) {
           //  mImageReader.close();
           //  surfaceSizeChanged(getMeasuredWidth(), getMeasuredHeight());
@@ -65,16 +68,6 @@ public abstract class SkiaBaseView extends ReactViewGroup implements Choreograph
                     HardwareBuffer.USAGE_GPU_COLOR_OUTPUT |
                     HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE;
             mImageReader = ImageReader.newInstance(getMeasuredWidth(), getMeasuredHeight(), PixelFormat.RGBA_8888, 2, usage);
-            mImageReader.setOnImageAvailableListener(reader -> {
-                try (Image image = reader.acquireLatestImage()) {
-                    if (image != null) {
-                        start = System.nanoTime();
-                        HardwareBuffer hb = image.getHardwareBuffer();
-                        mBitmap = Bitmap.wrapHardwareBuffer(hb, null);
-                        hb.close();
-                    }
-                }
-            }, null);
             surfaceAvailable(mImageReader.getSurface(), getMeasuredWidth(), getMeasuredHeight());
             choreographer = Choreographer.getInstance();
             choreographer.postFrameCallback(this);
@@ -88,8 +81,17 @@ public abstract class SkiaBaseView extends ReactViewGroup implements Choreograph
     public void doFrame(long frameTimeNanos) {
         choreographer.postFrameCallback(this);
         if (mImageReader.getSurface() != null) {
+            // TODO: use drawFrame() instead
             surfaceSizeChanged(getMeasuredWidth(), getMeasuredHeight());
-            invalidate();
+            try (Image image = mImageReader.acquireLatestImage()) {
+                if (image != null) {
+                    start = System.nanoTime();
+                    HardwareBuffer hb = image.getHardwareBuffer();
+                    mBitmap = Bitmap.wrapHardwareBuffer(hb, null);
+                    hb.close();
+                    invalidate();
+                }
+            }
         }
     }
 
