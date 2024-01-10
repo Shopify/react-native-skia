@@ -10,7 +10,6 @@
 #include "JsiHostObject.h"
 #include "JsiValueWrapper.h"
 #include "RNSkPlatformContext.h"
-#include "RNSkValue.h"
 #include "RNSkView.h"
 #include <jsi/jsi.h>
 
@@ -178,59 +177,8 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_HOST_FUNCTION(registerValuesInView) {
-    // Check params
-    if (!arguments[1].isObject() ||
-        !arguments[1].asObject(runtime).isArray(runtime)) {
-      throw jsi::JSError(runtime,
-                         "Expected array of Values as second parameter");
-      return jsi::Value::undefined();
-    }
-
-    // Get identifier of native SkiaView
-    int nativeId = arguments[0].asNumber();
-
-    // Get values that should be added as dependencies
-    auto values = arguments[1].asObject(runtime).asArray(runtime);
-    std::vector<std::function<void()>> unsubscribers;
-    const std::size_t size = values.size(runtime);
-    unsubscribers.reserve(size);
-    for (size_t i = 0; i < size; ++i) {
-      auto value = values.getValueAtIndex(runtime, i)
-                       .asObject(runtime)
-                       .asHostObject<RNSkReadonlyValue>(runtime);
-
-      if (value != nullptr) {
-        // Add change listener
-        unsubscribers.push_back(value->addListener(
-            [weakSelf = weak_from_this(), nativeId](jsi::Runtime &) {
-              auto self = weakSelf.lock();
-              if (self) {
-                auto info = self->getEnsuredViewInfo(nativeId);
-                if (info->view != nullptr) {
-                  info->view->requestRedraw();
-                }
-              }
-            }));
-      }
-    }
-
-    // Return unsubscribe method that unsubscribes to all values
-    // that we subscribed to.
-    return jsi::Function::createFromHostFunction(
-        runtime, jsi::PropNameID::forUtf8(runtime, "unsubscribe"), 0,
-        JSI_HOST_FUNCTION_LAMBDA {
-          // decrease dependency count on the Skia View
-          for (auto &unsub : unsubscribers) {
-            unsub();
-          }
-          return jsi::Value::undefined();
-        });
-  }
-
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setJsiProperty),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, callJsiMethod),
-                       JSI_EXPORT_FUNC(RNSkJsiViewApi, registerValuesInView),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, requestRedraw),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshot))
 

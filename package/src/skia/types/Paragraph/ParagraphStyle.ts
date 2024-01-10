@@ -1,10 +1,10 @@
 import type { SkTextFontStyle, SkTextStyle } from "./TextStyle";
 
-export enum SkTextDirection {
+export enum TextDirection {
   RTL = 0,
   LTR = 1,
 }
-export enum SkTextAlign {
+export enum TextAlign {
   Left = 0,
   Right,
   Center,
@@ -24,7 +24,7 @@ export interface SkStrutStyle {
   forceStrutHeight?: boolean;
 }
 
-export enum SkTextHeightBehavior {
+export enum TextHeightBehavior {
   All = 0x0,
   DisableFirstAscent = 0x1,
   DisableLastDescent = 0x2,
@@ -38,8 +38,8 @@ export interface SkParagraphStyle {
   maxLines?: number;
   replaceTabCharacters?: boolean;
   strutStyle?: SkStrutStyle;
-  textAlign?: SkTextAlign;
-  textDirection?: SkTextDirection;
-  textHeightBehavior?: SkTextHeightBehavior;
+  textAlign?: TextAlign;
+  textDirection?: TextDirection;
+  textHeightBehavior?: TextHeightBehavior;
   textStyle?: SkTextStyle;
 }

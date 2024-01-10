@@ -11,7 +11,6 @@ import type {
   PaintProps,
   ShaderProps,
   ImageShaderProps,
-  CustomDrawingNodeProps,
   LineProps,
   OvalProps,
   PatchProps,
@@ -72,7 +71,6 @@ import {
   VerticesNode,
   TextNode,
   OvalNode,
-  CustomDrawingNode,
   TextPathNode,
   TextBlobNode,
   GlyphsNode,
@@ -170,12 +168,6 @@ export class JsiSkDOM implements SkDOM {
     return NATIVE_DOM
       ? global.SkiaDomApi.PathNode(props ?? {})
       : new PathNode(this.ctx, props);
-  }
-
-  CustomDrawing(props: CustomDrawingNodeProps) {
-    return NATIVE_DOM
-      ? global.SkiaDomApi.CustomDrawingNode(props ?? {})
-      : new CustomDrawingNode(this.ctx, props);
   }
 
   Line(props: LineProps) {

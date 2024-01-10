@@ -1,11 +1,11 @@
-import type { Skia, SkRect, Transforms2d, Vector } from "../../../skia/types";
+import type { Skia, SkRect, Transforms3d, Vector } from "../../../skia/types";
 import { TileMode } from "../../../skia/types";
 import type { GradientProps, ImageShaderProps } from "../../types";
 
 import { enumKey } from "./Enum";
 import { processTransformProps } from "./Transform";
 
-export const transformOrigin = (origin: Vector, transform: Transforms2d) => [
+export const transformOrigin = (origin: Vector, transform: Transforms3d) => [
   { translateX: origin.x },
   { translateY: origin.y },
   ...transform,

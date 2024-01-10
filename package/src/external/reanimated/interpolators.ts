@@ -1,5 +1,9 @@
-import type { ExtrapolationType, SharedValue } from "react-native-reanimated";
-import { useMemo } from "react";
+import type {
+  ExtrapolationType,
+  FrameInfo,
+  SharedValue,
+} from "react-native-reanimated";
+import { useCallback, useMemo } from "react";
 
 import type { SkPath, SkPoint } from "../../skia/types";
 import { interpolatePaths, interpolateVector } from "../../animation";
@@ -9,19 +13,38 @@ import {
   useAnimatedReaction,
   useFrameCallback,
   useSharedValue,
+  useDerivedValue,
 } from "./moduleWrapper";
 
 export const notifyChange = (value: SharedValue<unknown>) => {
   "worklet";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (value as any)._value = value.value;
+  if (_WORKLET) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (value as any)._value = value.value;
+  }
+};
+
+export const usePathValue = (cb: (path: SkPath) => void) => {
+  const pathInit = useMemo(() => Skia.Path.Make(), []);
+  const path = useSharedValue(pathInit);
+  useDerivedValue(() => {
+    path.value.reset();
+    cb(path.value);
+    notifyChange(path);
+  });
+  return path;
 };
 
 export const useClock = () => {
   const clock = useSharedValue(0);
-  useFrameCallback((info) => {
-    clock.value = info.timeSinceFirstFrame;
-  });
+  const callback = useCallback(
+    (info: FrameInfo) => {
+      "worklet";
+      clock.value = info.timeSinceFirstFrame;
+    },
+    [clock]
+  );
+  useFrameCallback(callback);
   return clock;
 };
 

@@ -19,7 +19,6 @@ import type {
   ImageProps,
   CircleProps,
   PathProps,
-  CustomDrawingNodeProps,
   LineProps,
   OvalProps,
   PatchProps,
@@ -77,9 +76,6 @@ export interface SkDOM {
   Image(props: ImageProps): DrawingNode<ImageProps>;
   Circle(props: CircleProps): DrawingNode<CircleProps>;
   Path(props: PathProps): DrawingNode<PathProps>;
-  CustomDrawing(
-    props: CustomDrawingNodeProps
-  ): DrawingNode<CustomDrawingNodeProps>;
   Line(props: LineProps): DrawingNode<LineProps>;
   Oval(props: OvalProps): DrawingNode<OvalProps>;
   Patch(props: PatchProps): DrawingNode<PatchProps>;

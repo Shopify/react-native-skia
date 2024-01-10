@@ -5,6 +5,7 @@
 #include "RectProp.h"
 
 #include <memory>
+#include <vector>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -19,6 +20,10 @@ namespace RNSkia {
 static PropId PropNameRx = JsiPropId::get("rx");
 static PropId PropNameRy = JsiPropId::get("ry");
 static PropId PropNameR = JsiPropId::get("r");
+static PropId PropNameTopLeft = JsiPropId::get("topLeft");
+static PropId PropNameTopRight = JsiPropId::get("topRight");
+static PropId PropNameBottomRight = JsiPropId::get("bottomRight");
+static PropId PropNameBottomLeft = JsiPropId::get("bottomLeft");
 
 /**
  Reads a rect from a given propety in the node. The name of the property is
@@ -63,6 +68,51 @@ public:
                 SkRect::MakeXYWH(x.getAsNumber(), y.getAsNumber(),
                                  width.getAsNumber(), height.getAsNumber()),
                 rx.getAsNumber(), ry.getAsNumber()));
+          }
+        } else if (value.hasValue(PropNameRect) &&
+                   value.hasValue(PropNameTopLeft) &&
+                   value.hasValue(PropNameTopRight) &&
+                   value.hasValue(PropNameBottomRight) &&
+                   value.hasValue(PropNameBottomLeft)) {
+          auto rect = value.getValue(PropNameRect);
+          if (rect.hasValue(PropNameX) && rect.hasValue(PropNameY) &&
+              rect.hasValue(PropNameWidth) && rect.hasValue(PropNameHeight)) {
+            auto x = rect.getValue(PropNameX);
+            auto y = rect.getValue(PropNameY);
+            auto width = rect.getValue(PropNameWidth);
+            auto height = rect.getValue(PropNameHeight);
+            std::vector<SkPoint> points;
+            points.reserve(4);
+            auto topLeft = value.getValue(PropNameTopLeft);
+            auto topLeftX = topLeft.getValue(PropNameX);
+            auto topLeftY = topLeft.getValue(PropNameY);
+            points.push_back(
+                SkPoint::Make(topLeftX.getAsNumber(), topLeftY.getAsNumber()));
+
+            auto topRight = value.getValue(PropNameTopRight);
+            auto topRightX = topRight.getValue(PropNameX);
+            auto topRightY = topRight.getValue(PropNameY);
+            points.push_back(SkPoint::Make(topRightX.getAsNumber(),
+                                           topRightY.getAsNumber()));
+
+            auto bottomRight = value.getValue(PropNameBottomRight);
+            auto bottomRightX = bottomRight.getValue(PropNameX);
+            auto bottomRightY = bottomRight.getValue(PropNameY);
+            points.push_back(SkPoint::Make(bottomRightX.getAsNumber(),
+                                           bottomRightY.getAsNumber()));
+
+            auto bottomLeft = value.getValue(PropNameBottomLeft);
+            auto bottomLeftX = bottomLeft.getValue(PropNameX);
+            auto bottomLeftY = bottomLeft.getValue(PropNameY);
+            points.push_back(SkPoint::Make(bottomLeftX.getAsNumber(),
+                                           bottomLeftY.getAsNumber()));
+
+            auto rrect = std::make_shared<SkRRect>(SkRRect::MakeEmpty());
+            rrect->setRectRadii(
+                SkRect::MakeXYWH(x.getAsNumber(), y.getAsNumber(),
+                                 width.getAsNumber(), height.getAsNumber()),
+                points.data());
+            return rrect;
           }
         }
       }

@@ -4,7 +4,6 @@ import type { PointerEvent } from "react";
 import type { LayoutChangeEvent } from "react-native";
 
 import type { SkRect, SkCanvas } from "../skia/types";
-import type { SkiaValue } from "../values";
 import { JsiSkSurface } from "../skia/web/JsiSkSurface";
 import { Platform } from "../Platform";
 
@@ -146,24 +145,6 @@ export abstract class SkiaBaseWebView<
   public setDrawMode(mode: DrawMode) {
     this._mode = mode;
     this.tick();
-  }
-
-  /**
-   * Registers one or move values as a dependant value of the Skia View. The view will
-   * The view will redraw itself when any of the values change.
-   * @param values Values to register
-   */
-  public registerValues(_values: SkiaValue<unknown>[]) {
-    // Unsubscribe from dependency values
-    this.unsubscribeAll();
-    // Register redraw dependencies on values
-    _values.forEach((v) => {
-      this._unsubscriptions.push(
-        v.addListener(() => {
-          this.redraw();
-        })
-      );
-    });
   }
 
   private handleTouchEvent(evt: PointerEvent, touchType: TouchType) {

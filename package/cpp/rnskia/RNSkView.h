@@ -8,7 +8,6 @@
 
 #include "JsiValueWrapper.h"
 #include "RNSkPlatformContext.h"
-#include "RNSkValue.h"
 
 #include "JsiSkImage.h"
 #include "JsiSkPoint.h"
@@ -163,13 +162,7 @@ public:
   /**
    Destructor
    */
-  virtual ~RNSkView() {
-    endDrawingLoop();
-    if (_onSizeUnsubscribe != nullptr) {
-      _onSizeUnsubscribe();
-      _onSizeUnsubscribe = nullptr;
-    }
-  }
+  virtual ~RNSkView() { endDrawingLoop(); }
 
   /**
    Sets custom properties. Custom properties are properties that are set
@@ -177,37 +170,7 @@ public:
    */
   virtual void setJsiProperties(
       std::unordered_map<std::string, RNJsi::JsiValueWrapper> &props) {
-
-    for (auto &prop : props) {
-      if (prop.first == "onSize") {
-        // Start by removing any subscribers to the current onSize
-        if (_onSizeUnsubscribe != nullptr) {
-          _onSizeUnsubscribe();
-          _onSizeUnsubscribe = nullptr;
-        }
-        if (prop.second.isUndefinedOrNull()) {
-          // Clear touchCallback
-          _onSize = nullptr;
-        } else if (prop.second.getType() !=
-                   RNJsi::JsiWrapperValueType::HostObject) {
-          // We expect a function for the draw callback custom property
-          throw std::runtime_error(
-              "Expected a Skia mutable value for the onSize property.");
-        }
-        // Save onSize
-        _onSize =
-            std::dynamic_pointer_cast<RNSkValue>(prop.second.getAsHostObject());
-
-        // Add listener
-        _onSizeUnsubscribe =
-            _onSize->addListener([weakSelf = weak_from_this()](jsi::Runtime &) {
-              auto self = weakSelf.lock();
-              if (self) {
-                self->requestRedraw();
-              }
-            });
-      }
-    }
+    // Nothing here...
   }
 
   /**
@@ -326,53 +289,6 @@ private:
         });
   }
 
-  void updateOnSize() {
-    if (_onSize != nullptr) {
-      auto width = _canvasProvider->getScaledWidth() /
-                   _platformContext->getPixelDensity();
-      auto height = _canvasProvider->getScaledHeight() /
-                    _platformContext->getPixelDensity();
-
-      _platformContext->runOnJavascriptThread(
-          [width, height, weakSelf = weak_from_this()]() {
-            auto self = weakSelf.lock();
-            if (self) {
-              auto runtime = self->_platformContext->getJsRuntime();
-              auto onSize = self->_onSize->getCurrent(*runtime);
-              if (!onSize.isObject()) {
-                throw jsi::JSError(
-                    *runtime,
-                    "Expected onSize property to be a mutable Skia value.");
-                return;
-              }
-              auto onSizeObj = onSize.asObject(*runtime);
-
-              auto wVal = onSizeObj.getProperty(*runtime, "width");
-              auto hVal = onSizeObj.getProperty(*runtime, "height");
-
-              if (!wVal.isNumber() || !hVal.isNumber()) {
-                throw jsi::JSError(*runtime,
-                                   "Expected onSize property to be a mutable "
-                                   "Skia value of type SkSize.");
-                return;
-              }
-
-              auto w = wVal.asNumber();
-              auto h = hVal.asNumber();
-
-              if (w != width || h != height) {
-                // Update
-                auto newValue = jsi::Object(*runtime);
-                newValue.setProperty(*runtime, "width", width);
-                newValue.setProperty(*runtime, "height", height);
-                self->_onSize->set_current(*runtime,
-                                           jsi::Value(*runtime, newValue));
-              }
-            }
-          });
-    }
-  }
-
   /**
     Draw loop callback
    */
@@ -380,9 +296,6 @@ private:
     if (_redrawRequestCounter > 0 ||
         _drawingMode == RNSkDrawingMode::Continuous) {
       _redrawRequestCounter = 0;
-
-      // Update size if needed
-      updateOnSize();
 
       if (!_renderer->tryRender(_canvasProvider)) {
         // The renderer could not render cause it was busy, just schedule
@@ -396,8 +309,6 @@ private:
   std::shared_ptr<RNSkCanvasProvider> _canvasProvider;
   std::shared_ptr<RNSkRenderer> _renderer;
 
-  std::shared_ptr<RNSkValue> _onSize;
-  std::function<void()> _onSizeUnsubscribe;
   RNSkDrawingMode _drawingMode = RNSkDrawingMode::Default;
   size_t _nativeId;
 

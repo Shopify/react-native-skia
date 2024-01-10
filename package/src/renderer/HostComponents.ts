@@ -8,7 +8,6 @@ import type {
   ImageProps,
   PaintProps,
   PathProps,
-  CustomDrawingNodeProps,
   LineProps,
   OvalProps,
   DiffRectProps,
@@ -59,12 +58,10 @@ import type {
 } from "../dom/types/ImageFilters";
 import type { SkRect, SkRRect } from "../skia/types";
 import type { JsiDrawingNode } from "../dom/nodes/DrawingNode";
-import type { SkiaValue } from "../values";
 
 import type { Container } from "./Container";
 import { exhaustiveCheck } from "./typeddash";
 import type { SkiaProps } from "./processors";
-import type { DependencyManager } from "./DependencyManager";
 
 // This flag should only be turned on for debugging/testing
 const shouldUseJSDomOnNative = false;
@@ -72,10 +69,6 @@ export const NATIVE_DOM = shouldUseJSDomOnNative ? false : !!global.SkiaDomApi;
 
 declare global {
   var SkiaDomApi: {
-    DependencyManager: (
-      registerValues: (values: Array<SkiaValue<unknown>>) => () => void
-    ) => DependencyManager;
-
     // FIXME: We need a better type for this
     RectNode: (props: RectProps) => JsiDrawingNode<RectProps, SkRect>;
     RRectNode: (
@@ -86,9 +79,6 @@ declare global {
     FillNode: (props: PaintProps) => RenderNode<PaintProps>;
     CircleNode: (props: CircleProps) => RenderNode<CircleProps>;
     PathNode: (props: PathProps) => RenderNode<PathProps>;
-    CustomDrawingNode: (
-      props: CustomDrawingNodeProps
-    ) => RenderNode<CustomDrawingNodeProps>;
     LineNode: (props: LineProps) => RenderNode<LineProps>;
     ImageNode: (props: ImageProps) => RenderNode<ImageProps>;
     OvalNode: (props: OvalProps) => RenderNode<OvalProps>;
@@ -211,7 +201,6 @@ declare global {
       skImage: SkiaProps<ImageProps>;
       skCircle: SkiaProps<CircleProps>;
       skPath: SkiaProps<PathProps>;
-      skDrawing: SkiaProps<CustomDrawingNodeProps>;
       skLine: SkiaProps<LineProps>;
       skOval: SkiaProps<OvalProps>;
       skPatch: SkiaProps<PatchProps>;
@@ -302,8 +291,6 @@ export const createNode = (
       return Sk.Circle(props);
     case NodeType.Path:
       return Sk.Path(props);
-    case NodeType.Drawing:
-      return Sk.CustomDrawing(props);
     case NodeType.Line:
       return Sk.Line(props);
     case NodeType.Oval:

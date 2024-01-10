@@ -1,6 +1,15 @@
-import type { SkMatrix, SkRect } from "@shopify/react-native-skia";
-import { Skia } from "@shopify/react-native-skia";
+import type { SkRect } from "@shopify/react-native-skia";
+import {
+  Matrix4,
+  multiply4,
+  rotateZ,
+  scale,
+  translate,
+  convertToColumnMajor,
+  convertToAffineMatrix,
+} from "@shopify/react-native-skia";
 import React from "react";
+import { Platform } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import type { SharedValue } from "react-native-reanimated";
 import Animated, {
@@ -8,10 +17,8 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 
-import { rotateZ, toM4, translate, scale } from "./MatrixHelpers";
-
 interface GestureHandlerProps {
-  matrix: SharedValue<SkMatrix>;
+  matrix: SharedValue<Matrix4>;
   dimensions: SkRect;
   debug?: boolean;
 }
@@ -23,33 +30,35 @@ export const GestureHandler = ({
 }: GestureHandlerProps) => {
   const { x, y, width, height } = dimensions;
   const origin = useSharedValue({ x: 0, y: 0 });
-  const offset = useSharedValue(Skia.Matrix());
+  const offset = useSharedValue(Matrix4());
 
   const pan = Gesture.Pan().onChange((e) => {
-    translate(matrix, e.changeX, e.changeY);
+    matrix.value = multiply4(translate(e.changeX, e.changeY), matrix.value);
   });
 
   const rotate = Gesture.Rotation()
     .onBegin((e) => {
       origin.value = { x: e.anchorX, y: e.anchorY };
-      offset.value.identity();
-      offset.value.concat(matrix.value);
+      offset.value = matrix.value;
     })
     .onChange((e) => {
-      rotateZ(matrix, offset.value, e.rotation, origin.value);
+      matrix.value = multiply4(offset.value, rotateZ(e.rotation, origin.value));
     });
 
   const pinch = Gesture.Pinch()
     .onBegin((e) => {
       origin.value = { x: e.focalX, y: e.focalY };
-      offset.value.identity();
-      offset.value.concat(matrix.value);
+      offset.value = matrix.value;
     })
     .onChange((e) => {
-      scale(matrix, offset.value, e.scale, origin.value);
+      matrix.value = multiply4(
+        offset.value,
+        scale(e.scale, e.scale, 1, origin.value)
+      );
     });
 
   const style = useAnimatedStyle(() => {
+    const m4 = convertToColumnMajor(matrix.value);
     return {
       position: "absolute",
       left: x,
@@ -61,7 +70,7 @@ export const GestureHandler = ({
         { translateX: -width / 2 },
         { translateY: -height / 2 },
         {
-          matrix: toM4(matrix.value),
+          matrix: Platform.OS === "web" ? convertToAffineMatrix(m4) : m4,
         },
         { translateX: width / 2 },
         { translateY: height / 2 },

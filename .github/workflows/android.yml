@@ -46,6 +46,7 @@ jobs:
           workflow: "build-skia.yml"
           repo: shopify/react-native-skia
           path: artifacts
+          branch: main
 
       - name: Copy Artifacts to libs folder
         run: yarn workflow-copy-libs
@@ -158,19 +159,26 @@ jobs:
           PACKAGE_NAME: ${{ matrix.working-directory == 'fabricexample' && 'com.fabricexample' || 'com.rnskia' }}  
         run: adb shell monkey -p ${{ env.PACKAGE_NAME }} 1  
 
+      # On fabric, the system fonts are slightly different
+      # so wont run the paragraph tests there for now
       - name: Run e2e Tests
         working-directory: package
-        run: CI=true yarn e2e
+        run: |
+          if [ "${{ matrix.working-directory }}" = "example" ]; then
+            CI=true yarn e2e
+          elif [ "${{ matrix.working-directory }}" = "fabricexample" ]; then
+            CI=true yarn e2e --testPathIgnorePatterns Paragraphs
+          fi
 
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
           path: package/src/__tests__/snapshots/
-          name: snapshots-screenshots
+          name: ${{ matrix.working-directory }}-snapshots-screenshots
 
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
           path: docs/static
-          name: docs-screenshots
+          name: ${{ matrix.working-directory }}-docs-screenshots
       

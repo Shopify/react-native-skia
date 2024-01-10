@@ -1,0 +1,91 @@
+name: Android Ubuntu
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    concurrency:
+      group: android-unbuntu-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+
+      - name: Install NDK
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r21d
+
+      - name: Set ANDROID_NDK
+        run: echo "ANDROID_NDK=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
+
+      - name: Install root node dependencies
+        run: yarn
+
+      - name: Download Skia Binary Artifacts
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: "build-skia.yml"
+          repo: shopify/react-native-skia
+          path: artifacts
+          branch: main
+
+      - name: Copy Artifacts to libs folder
+        run: yarn workflow-copy-libs
+
+      - name: Copy Skia Headers
+        run: yarn copy-skia-headers
+
+      - name: SDKs - accept licenses
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+
+      - name: Install Package
+        working-directory: package
+        run: yarn install
+
+      - name: Install example app node dependencies
+        working-directory: example
+        run: yarn
+
+      - name: Cache hermes build
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-rn-hermes-engine
+        with:
+          path: example/node_modules/react-native
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-example-${{ hashFiles('**/react-native/package.json') }}
+
+      - name: Cache android libraries
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-rn
+        with:
+          path: example/android/app/build
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-example-${{ hashFiles('**/react-native/package.json') }}
+
+      - name: Build Android app
+        working-directory: example/android
+        run: ./gradlew assembleDebug
+
+      - name: Cache apk
+        uses: actions/cache/save@v3
+        env:
+          cache-name: cache-apk
+        with:
+          path: example/android/app/build/outputs/apk/debug/app-debug.apk
+          key: apk-${{ github.sha }}

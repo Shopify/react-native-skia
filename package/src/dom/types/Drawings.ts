@@ -26,7 +26,6 @@ import type {
   RRectDef,
   SkEnum,
 } from "./Common";
-import type { DrawingContext } from "./DrawingContext";
 
 export interface DrawingNodeProps extends GroupProps {
   paint?: SkPaint;
@@ -46,10 +45,6 @@ export interface PathProps extends DrawingNodeProps {
   end: number;
   stroke?: StrokeOpts;
   fillType?: SkEnum<typeof FillType>;
-}
-
-export interface CustomDrawingNodeProps extends DrawingNodeProps {
-  drawing: (ctx: DrawingContext) => void;
 }
 
 export interface LineProps extends DrawingNodeProps {
@@ -114,7 +109,7 @@ export interface DiffRectProps extends DrawingNodeProps {
 }
 
 export interface TextProps extends DrawingNodeProps {
-  font?: SkFont | null;
+  font: SkFont | null;
   text: string;
   x: number;
   y: number;

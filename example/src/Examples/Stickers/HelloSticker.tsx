@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import type { SkMatrix } from "@shopify/react-native-skia";
+import type { Matrix4 } from "@shopify/react-native-skia";
 import {
   fitbox,
   Group,
@@ -22,7 +22,7 @@ export const HelloStickerDimensions = rect(
   (300 * bounds.height) / bounds.width
 );
 interface HelloStickerProps {
-  matrix: SharedValue<SkMatrix>;
+  matrix: SharedValue<Matrix4>;
 }
 
 export const HelloSticker = ({ matrix }: HelloStickerProps) => {

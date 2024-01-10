@@ -41,10 +41,11 @@ export abstract class HostObject<T, N extends string> extends BaseHostObject<
   }
 }
 
-export const getCkEnum = (e: EmbindEnum, v: number): EmbindEnumEntity =>
+export const getEnum = (e: EmbindEnum, v: number): EmbindEnumEntity =>
   Object.values(e).find(({ value }) => value === v);
-export const ckEnum = (value: number): EmbindEnumEntity => ({ value });
+
 export const optEnum = (
+  e: EmbindEnum,
   value: number | undefined
 ): EmbindEnumEntity | undefined =>
-  value === undefined ? undefined : { value };
+  value === undefined ? undefined : getEnum(e, value);

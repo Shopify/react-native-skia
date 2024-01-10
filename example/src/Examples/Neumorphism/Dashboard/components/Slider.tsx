@@ -5,7 +5,6 @@ import {
   rrect,
   RoundedRect,
   Group,
-  translate,
   LinearGradient,
   vec,
 } from "@shopify/react-native-skia";
@@ -28,7 +27,7 @@ export const Slider = ({ x, y, progress }: SliderProps) => {
     [progress]
   );
   return (
-    <Group transform={translate({ x, y })}>
+    <Group transform={[{ translate: [x, y] }]}>
       <Box box={rrect(rect(0, 3.5, 192, 8), 25, 25)} color="#1B1B1D">
         <BoxShadow
           dx={-1.25}

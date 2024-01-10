@@ -9,12 +9,20 @@ export interface Size {
 
 export const size = (width = 0, height = 0) => ({ width, height });
 
-export const rect2rect = (src: SkRect, dst: SkRect) => {
+export const rect2rect = (
+  src: SkRect,
+  dst: SkRect
+): [
+  { translateX: number },
+  { translateY: number },
+  { scaleX: number },
+  { scaleY: number }
+] => {
   const scaleX = dst.width / src.width;
   const scaleY = dst.height / src.height;
   const translateX = dst.x - src.x * scaleX;
   const translateY = dst.y - src.y * scaleY;
-  return [{ translateX }, { translateY }, { scaleX }, { scaleY }] as const;
+  return [{ translateX }, { translateY }, { scaleX }, { scaleY }];
 };
 
 export const fitRects = (

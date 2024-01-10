@@ -2,11 +2,11 @@ import type { SkCanvas } from "../Canvas";
 import type { SkJSIInstance } from "../JsiInstance";
 import type { SkRect } from "../Rect";
 
-import type { SkTextDirection } from "./ParagraphStyle";
+import type { TextDirection } from "./ParagraphStyle";
 
 export interface SkRectWithDirection {
   rect: SkRect;
-  direction: SkTextDirection;
+  direction: TextDirection;
 }
 
 export interface SkParagraph extends SkJSIInstance<"Paragraph"> {
@@ -32,6 +32,31 @@ export interface SkParagraph extends SkJSIInstance<"Paragraph"> {
    * method to have been called first.
    */
   getMaxWidth(): number;
+  /**
+   * Returns the minimum intrinsic width of the paragraph.
+   * The minimum intrinsic width is the width beyond which increasing the width of the paragraph
+   * does not decrease the height. This is effectively the width at which the paragraph
+   * can no longer wrap lines and is forced to overflow.
+   * This method requires the layout method to have been called first.
+   * @returns {number} The minimum intrinsic width of the paragraph.
+   */
+  getMinIntrinsicWidth(): number;
+  /**
+   * Returns the maximum intrinsic width of the paragraph.
+   * The maximum intrinsic width is the width at which the paragraph can layout its content without line breaks,
+   * meaning it's the width of the widest line or the widest word if the widest line is shorter than that.
+   * This width represents the ideal width for the paragraph to display all content in a single line without overflow.
+   * This method requires the layout method to have been called first.
+   * @returns {number} The maximum intrinsic width of the paragraph.
+   */
+  getMaxIntrinsicWidth(): number;
+
+  /**
+   * Returns the width of the longest line in the paragraph.
+   * This method requires the layout method to have been called first.
+   */
+  getLongestLine(): number;
+
   /**
    * Returns the index of the glyph at the given position. This method requires
    * the layout method to have been called first.

@@ -37,6 +37,7 @@ jobs:
         with:
           workflow: "build-skia.yml"
           path: artifacts
+          branch: main
 
       - name: Copy Artifacts to libs folder
         run: yarn workflow-copy-libs

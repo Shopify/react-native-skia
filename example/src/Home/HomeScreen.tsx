@@ -62,6 +62,11 @@ export const HomeScreen = () => {
         description="Glassmorphism"
         route="Glassmorphism"
       />
+      <HomeScreenButton
+        title="☃️ Frosted Card"
+        description="Frosted Card"
+        route="FrostedCard"
+      />
       <HomeScreenButton title="💳 Wallet" description="Wallet" route="Wallet" />
       <HomeScreenButton
         title="📉 Graphs"

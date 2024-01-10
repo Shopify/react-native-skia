@@ -2,8 +2,8 @@ import type { CanvasKit } from "canvaskit-wasm";
 
 import type { SkColor, SkPoint, VertexMode } from "../types";
 
-import { ckEnum } from "./Host";
 import { JsiSkVertices } from "./JsiSkVertices";
+import { getEnum } from "./Host";
 
 const concat = (...arrays: Float32Array[]) => {
   let totalLength = 0;
@@ -31,7 +31,7 @@ export const MakeVertices = (
   new JsiSkVertices(
     CanvasKit,
     CanvasKit.MakeVertices(
-      ckEnum(mode),
+      getEnum(CanvasKit.VertexMode, mode),
       positions.map(({ x, y }) => [x, y]).flat(),
       (textureCoordinates || []).map(({ x, y }) => [x, y]).flat(),
       !colors ? null : colors.reduce((a, c) => concat(a, c)),

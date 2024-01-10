@@ -8,6 +8,7 @@ slug: /shaders/overview
 Skia provides a shading language.
 You can play with it [here](https://shaders.skia.org/).
 The syntax is very similar to GLSL.
+If you're already familiar with GLSL, or are looking to convert a GLSL shader to SKSL, you can view a list of their differences [here](https://github.com/google/skia/tree/main/src/sksl#readme).
 
 The first step is to create a shader and compile it using `RuntimeEffect.Make`.
 
