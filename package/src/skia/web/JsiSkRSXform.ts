@@ -13,8 +13,19 @@ export class JsiSkRSXform
   constructor(CanvasKit: CanvasKit, ref: RSXform) {
     super(CanvasKit, ref, "RSXform");
   }
-
+  get scos() {
+    return this.ref[0];
+  }
+  get ssin() {
+    return this.ref[1];
+  }
+  get tx() {
+    return this.ref[2];
+  }
+  get ty() {
+    return this.ref[3];
+  }
   dispose = () => {
-    // Do nothing in the web implementation
+    // nothing to do here, RSXform is a Float32Array
   };
 }

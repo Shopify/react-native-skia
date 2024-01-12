@@ -1,3 +1,8 @@
 import type { SkJSIInstance } from "./JsiInstance";
 
-export type SkRSXform = SkJSIInstance<"RSXform">;
+export interface SkRSXform extends SkJSIInstance<"RSXform"> {
+  readonly scos: number;
+  readonly ssin: number;
+  readonly tx: number;
+  readonly ty: number;
+}
