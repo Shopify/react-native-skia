@@ -14,10 +14,10 @@
 #include "JsiSkPicture.h"
 #include "JsiSkPoint.h"
 #include "JsiSkRRect.h"
+#include "JsiSkRSXform.h"
 #include "JsiSkSVG.h"
 #include "JsiSkTextBlob.h"
 #include "JsiSkVertices.h"
-#include "JsiSkRSXform.h"
 
 #include "RNSkTypedArray.h"
 
@@ -499,8 +499,11 @@ public:
   JSI_HOST_FUNCTION(drawAtlas) {
     auto atlas = JsiSkImage::fromValue(runtime, arguments[0]);
     auto rects = arguments[1].asObject(runtime).asArray(runtime);
-    auto transforms = arguments[2].asObject(runtime).asArray(runtime);    
+    auto transforms = arguments[2].asObject(runtime).asArray(runtime);
     auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
+    auto blendMode = count > 5 && !arguments[4].isUndefined()
+                         ? static_cast<SkBlendMode>(arguments[4].asNumber())
+                         : SkBlendMode::kSrcOver;
 
     std::vector<SkRSXform> xforms;
     int xformsSize = static_cast<int>(transforms.size(runtime));
@@ -518,9 +521,11 @@ public:
       auto rect = JsiSkRect::fromValue(
           runtime, rects.getValueAtIndex(runtime, i).asObject(runtime));
       skRects.push_back(*rect.get());
-    } 
+    }
     SkSamplingOptions sampling;
-    _canvas->drawAtlas(atlas.get(), xforms.data(), skRects.data(), nullptr, skRects.size(), SkBlendMode::kSrcOver, sampling, nullptr, paint.get());
+    _canvas->drawAtlas(atlas.get(), xforms.data(), skRects.data(), nullptr,
+                       skRects.size(), blendMode, sampling, nullptr,
+                       paint.get());
 
     return jsi::Value::undefined();
   }

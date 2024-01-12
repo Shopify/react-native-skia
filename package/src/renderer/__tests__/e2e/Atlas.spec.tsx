@@ -26,4 +26,24 @@ describe("Atlas", () => {
     });
     checkImage(img, "snapshots/atlas/simple.png");
   });
+  it("should accept RSXform as JS", async () => {
+    const img = await surface.drawOffscreen((Skia, canvas) => {
+      const size = 200;
+      const texSurface = Skia.Surface.MakeOffscreen(size, size)!;
+      const texCanvas = texSurface.getCanvas();
+      texCanvas.drawColor(Skia.Color("red"));
+      const tex = texSurface.makeImageSnapshot();
+      const srcs = [
+        Skia.XYWHRect(0, 0, size, size),
+        Skia.XYWHRect(0, 0, size, size),
+      ];
+      const dsts = [
+        { scos: 0.5, ssin: 0, tx: 0, ty: 0 },
+        { scos: 0, ssin: 0.5, tx: 200, ty: 100 },
+      ];
+      const paint = Skia.Paint();
+      canvas.drawAtlas(tex, srcs, dsts, paint);
+    });
+    checkImage(img, "snapshots/atlas/simple.png");
+  });
 });

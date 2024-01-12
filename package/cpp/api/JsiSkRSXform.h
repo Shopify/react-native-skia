@@ -57,12 +57,10 @@ public:
     if (object.isHostObject(runtime)) {
       return object.asHostObject<JsiSkRSXform>(runtime)->getObject();
     } else {
-      auto scos =
-          object.getArray(runtime).getValueAtIndex(runtime, 0).asNumber();
-      auto ssin =
-          object.getArray(runtime).getValueAtIndex(runtime, 1).asNumber();
-      auto tx = object.getArray(runtime).getValueAtIndex(runtime, 2).asNumber();
-      auto ty = object.getArray(runtime).getValueAtIndex(runtime, 3).asNumber();
+      auto scos = object.getProperty(runtime, "scos").asNumber();
+      auto ssin = object.getProperty(runtime, "ssin").asNumber();
+      auto tx = object.getProperty(runtime, "tx").asNumber();
+      auto ty = object.getProperty(runtime, "ty").asNumber();
       return std::make_shared<SkRSXform>(SkRSXform::Make(scos, ssin, tx, ty));
     }
   }

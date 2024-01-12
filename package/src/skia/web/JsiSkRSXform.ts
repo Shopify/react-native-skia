@@ -2,14 +2,21 @@ import type { CanvasKit } from "canvaskit-wasm";
 
 import type { SkRSXform } from "../types";
 
-import { HostObject } from "./Host";
+import { BaseHostObject } from "./Host";
 
 export type RSXform = Float32Array;
 
 export class JsiSkRSXform
-  extends HostObject<RSXform, "RSXform">
+  extends BaseHostObject<RSXform, "RSXform">
   implements SkRSXform
 {
+  static fromValue(rsxform: SkRSXform) {
+    if (rsxform instanceof JsiSkRSXform) {
+      return rsxform.ref;
+    }
+    return Float32Array.of(rsxform.scos, rsxform.ssin, rsxform.tx, rsxform.ty);
+  }
+
   constructor(CanvasKit: CanvasKit, ref: RSXform) {
     super(CanvasKit, ref, "RSXform");
   }

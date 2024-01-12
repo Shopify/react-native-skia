@@ -41,7 +41,6 @@ import { JsiSkPicture } from "./JsiSkPicture";
 import { JsiSkMatrix } from "./JsiSkMatrix";
 import { JsiSkImageFilter } from "./JsiSkImageFilter";
 import { JsiSkPoint } from "./JsiSkPoint";
-import type { RSXform } from "./JsiSkRSXform";
 import { JsiSkRSXform } from "./JsiSkRSXform";
 
 export class JsiSkCanvas
@@ -400,9 +399,7 @@ export class JsiSkCanvas
     const src = srcs.flatMap((s) =>
       Array.from(JsiSkRect.fromValue(this.CanvasKit, s))
     );
-    const dst = dsts.flatMap((s) =>
-      Array.from(JsiSkRSXform.fromValue<RSXform>(s))
-    );
+    const dst = dsts.flatMap((s) => Array.from(JsiSkRSXform.fromValue(s)));
     const cls = colors?.flatMap(([r, g, b, a]) =>
       this.CanvasKit.ColorAsInt(r, g, b, a)
     );
