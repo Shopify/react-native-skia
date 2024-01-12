@@ -1,28 +1,31 @@
 import type { Canvas, CanvasKit } from "canvaskit-wasm";
 
-import type {
-  BlendMode,
-  ClipOp,
-  FilterMode,
-  MipmapMode,
-  PointMode,
-  SaveLayerFlag,
-  ImageInfo,
-  SkCanvas,
-  SkColor,
-  SkFont,
-  SkImage,
-  SkImageFilter,
-  SkMatrix,
-  SkPaint,
-  SkPath,
-  SkPicture,
-  SkPoint,
-  SkRect,
-  InputRRect,
-  SkSVG,
-  SkTextBlob,
-  SkVertices,
+import {
+  type BlendMode,
+  type ClipOp,
+  type FilterMode,
+  type MipmapMode,
+  type PointMode,
+  type SaveLayerFlag,
+  type ImageInfo,
+  type SkCanvas,
+  type SkColor,
+  type SkFont,
+  type SkImage,
+  type SkImageFilter,
+  type SkMatrix,
+  type SkPaint,
+  type SkPath,
+  type SkPicture,
+  type SkPoint,
+  type SkRect,
+  type InputRRect,
+  type SkSVG,
+  type SkTextBlob,
+  type SkVertices,
+  type SkRSXform,
+  type CubicResampler,
+  type FilterOptions,
 } from "../types";
 
 import { getEnum, HostObject } from "./Host";
@@ -38,6 +41,8 @@ import { JsiSkPicture } from "./JsiSkPicture";
 import { JsiSkMatrix } from "./JsiSkMatrix";
 import { JsiSkImageFilter } from "./JsiSkImageFilter";
 import { JsiSkPoint } from "./JsiSkPoint";
+import type { RSXform } from "./JsiSkRSXform";
+import { JsiSkRSXform } from "./JsiSkRSXform";
 
 export class JsiSkCanvas
   extends HostObject<Canvas, "Canvas">
@@ -381,6 +386,35 @@ export class JsiSkCanvas
 
   drawPicture(skp: SkPicture) {
     this.ref.drawPicture(JsiSkPicture.fromValue(skp));
+  }
+
+  drawAtlas(
+    atlas: SkImage,
+    srcs: SkRect[],
+    dsts: SkRSXform[],
+    paint: SkPaint,
+    blendMode?: BlendMode,
+    colors?: SkColor[],
+    _sampling?: CubicResampler | FilterOptions
+  ) {
+    const src = srcs.flatMap((s) =>
+      Array.from(JsiSkRect.fromValue(this.CanvasKit, s))
+    );
+    const dst = dsts.flatMap((s) =>
+      Array.from(JsiSkRSXform.fromValue<RSXform>(s))
+    );
+    const cls = colors?.flatMap(([r, g, b, a]) =>
+      this.CanvasKit.ColorAsInt(r, g, b, a)
+    );
+    // TODO: add support for sampling options
+    this.ref.drawAtlas(
+      JsiSkImage.fromValue(atlas),
+      src,
+      dst,
+      JsiSkPaint.fromValue(paint),
+      blendMode ? getEnum(this.CanvasKit.BlendMode, blendMode) : undefined,
+      cls
+    );
   }
 
   readPixels(srcX: number, srcY: number, imageInfo: ImageInfo) {
