@@ -74,7 +74,7 @@ describe("Atlas", () => {
     checkImage(img, "snapshots/atlas/simple2.png");
   });
   it("Simple Atlas identity", async () => {
-    const { Skia, rsx } = importSkia();
+    const { Skia } = importSkia();
     const size = 75;
     const texSurface = Skia.Surface.MakeOffscreen(size, size)!;
     const texCanvas = texSurface.getCanvas();
@@ -89,7 +89,7 @@ describe("Atlas", () => {
           },
           {
             rect: Skia.XYWHRect(0, 0, size, size),
-            transform: rsx(),
+            transform: { scos: 1, ssin: 0, tx: 0, ty: 0 },
           },
         ]}
       />

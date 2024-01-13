@@ -294,6 +294,13 @@ const serializeSkOjects = (obj: any): any => {
         context: skObj.context,
       };
     }
+  } else if (typeof obj === "object") {
+    const keys = Object.keys(obj);
+    const res: any = {};
+    keys.forEach((key) => {
+      res[key] = serializeSkOjects(obj[key]);
+    });
+    return res;
   }
   return obj;
 };

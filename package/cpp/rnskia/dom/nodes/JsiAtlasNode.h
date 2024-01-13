@@ -32,7 +32,7 @@ protected:
 
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
-    _atlasProp = container->defineProperty<AtlasProp>("atlas");
+    _atlasProp = container->defineProperty<AtlasProp>("rects");
     _imageProp = container->defineProperty<ImageProp>("image");
 
     _atlasProp->require();
