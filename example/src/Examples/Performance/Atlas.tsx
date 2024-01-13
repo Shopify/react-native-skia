@@ -1,11 +1,4 @@
-import {
-  Canvas,
-  Skia,
-  Atlas,
-  Image,
-  PaintStyle,
-  rsx,
-} from "@shopify/react-native-skia";
+import { Canvas, Skia, Atlas } from "@shopify/react-native-skia";
 import React, { useMemo, useState } from "react";
 import {
   StyleSheet,
@@ -13,7 +6,6 @@ import {
   View,
   Text,
   Button,
-  PixelRatio,
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -28,14 +20,25 @@ const SizeWidth = Size;
 const SizeHeight = Size * 0.45;
 const strokeWidth = 2;
 
+const rect = Skia.XYWHRect(
+  0,
+  0,
+  SizeWidth + strokeWidth,
+  SizeHeight + strokeWidth
+);
+
 export const PerformanceDrawingTest: React.FC = () => {
   const [numberOfBoxes, setNumberOfBoxes] = useState(150);
+  const RECTS = useMemo(
+    () => new Array(numberOfBoxes).fill(0),
+    [numberOfBoxes]
+  );
 
   const { width, height } = useWindowDimensions();
 
   const rct = useMemo(() => {
     // TODO: this could be done wit the JSX syntax
-    const rect = Skia.XYWHRect(
+    const rect2 = Skia.XYWHRect(
       strokeWidth,
       strokeWidth,
       SizeWidth - strokeWidth,
@@ -49,7 +52,7 @@ export const PerformanceDrawingTest: React.FC = () => {
     canvas.drawColor(Skia.Color("#4060A3"));
     const paint = Skia.Paint();
     paint.setColor(Skia.Color("#00ff00"));
-    canvas.drawRect(rect, paint);
+    canvas.drawRect(rect2, paint);
     surface.flush();
     // TODO run on the UI Thread
     // TODO: check how textures work on Web?
@@ -62,19 +65,13 @@ export const PerformanceDrawingTest: React.FC = () => {
   });
 
   const rects = useDerivedValue(() => {
-    return new Array(numberOfBoxes).fill(0).map((_, i) => {
+    return RECTS.map((_, i) => {
       const tx = 5 + ((i * Size) % width);
       const ty = 25 + Math.floor(i / (width / Size)) * Size;
-      const p2 = pos.value;
-      const r = Math.atan2(p2.y - ty, p2.x - tx);
+      const r = Math.atan2(pos.value.y - ty, pos.value.x - tx);
       return {
         // TODO: make rect optional
-        rect: Skia.XYWHRect(
-          0,
-          0,
-          SizeWidth + strokeWidth,
-          SizeHeight + strokeWidth
-        ),
+        rect,
         // TODO: make transform easier
         transform: {
           scos: 1 * Math.cos(r),
