@@ -36,12 +36,15 @@ export const PerformanceDrawingTest: React.FC = () => {
   const rct = useMemo(() => {
     // TODO: this could be done wit the JSX syntax
     const rect = Skia.XYWHRect(
-      strokeWidth / 2,
-      strokeWidth / 2,
+      strokeWidth,
+      strokeWidth,
       SizeWidth - strokeWidth,
       SizeHeight - strokeWidth
     );
-    const surface = Skia.Surface.MakeOffscreen(SizeWidth, SizeHeight)!;
+    const surface = Skia.Surface.MakeOffscreen(
+      SizeWidth + strokeWidth,
+      SizeHeight + strokeWidth
+    )!;
     const canvas = surface.getCanvas();
     canvas.drawColor(Skia.Color("#4060A3"));
     const paint = Skia.Paint();
@@ -66,7 +69,12 @@ export const PerformanceDrawingTest: React.FC = () => {
       const r = Math.atan2(p2.y - ty, p2.x - tx);
       return {
         // TODO: make rect optional
-        rect: Skia.XYWHRect(0, 0, SizeWidth, SizeHeight),
+        rect: Skia.XYWHRect(
+          0,
+          0,
+          SizeWidth + strokeWidth,
+          SizeHeight + strokeWidth
+        ),
         // TODO: make transform easier
         transform: {
           scos: 1 * Math.cos(r),
