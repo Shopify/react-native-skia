@@ -20,6 +20,7 @@
 #include "nodes/JsiPointsNode.h"
 #include "nodes/JsiRRectNode.h"
 #include "nodes/JsiRectNode.h"
+#include "nodes/JsiAtlasNode.h"
 
 #include "nodes/JsiBlurMaskNode.h"
 #include "nodes/JsiImageSvgNode.h"
@@ -66,6 +67,7 @@ public:
     installFunction("PatchNode", JsiPatchNode::createCtor(context));
     installFunction("PointsNode", JsiPointsNode::createCtor(context));
     installFunction("DiffRectNode", JsiDiffRectNode::createCtor(context));
+    installFunction("AtlasNode", JsiAtlasNode::createCtor(context));
 
     installFunction("FillNode", JsiFillNode::createCtor(context));
 

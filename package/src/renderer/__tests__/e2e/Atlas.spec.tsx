@@ -1,5 +1,8 @@
+import React from "react";
+
 import { checkImage } from "../../../__tests__/setup";
-import { surface } from "../setup";
+import { importSkia, surface } from "../setup";
+import { Atlas } from "../../components";
 
 describe("Atlas", () => {
   it("should read the RSXform properties", async () => {
@@ -45,5 +48,52 @@ describe("Atlas", () => {
       canvas.drawAtlas(tex, srcs, dsts, paint);
     });
     checkImage(img, "snapshots/atlas/simple.png");
+  });
+  it("Simple Atlas", async () => {
+    const { Skia } = importSkia();
+    const size = 75;
+    const texSurface = Skia.Surface.MakeOffscreen(size, size)!;
+    const texCanvas = texSurface.getCanvas();
+    texCanvas.drawColor(Skia.Color("red"));
+    const image = texSurface.makeImageSnapshot();
+    const img = await surface.draw(
+      <Atlas
+        image={image}
+        rects={[
+          {
+            rect: Skia.XYWHRect(0, 0, size, size),
+            transform: { scos: 0.5, ssin: 0, tx: 0, ty: 0 },
+          },
+          {
+            rect: Skia.XYWHRect(0, 0, size, size),
+            transform: { scos: 0, ssin: 0.5, tx: 50, ty: 50 },
+          },
+        ]}
+      />
+    );
+    checkImage(img, "snapshots/atlas/simple2.png");
+  });
+  it("Simple Atlas identity", async () => {
+    const { Skia, rsx } = importSkia();
+    const size = 75;
+    const texSurface = Skia.Surface.MakeOffscreen(size, size)!;
+    const texCanvas = texSurface.getCanvas();
+    texCanvas.drawColor(Skia.Color("red"));
+    const image = texSurface.makeImageSnapshot();
+    const img = await surface.draw(
+      <Atlas
+        image={image}
+        rects={[
+          {
+            rect: Skia.XYWHRect(0, 0, size, size),
+          },
+          {
+            rect: Skia.XYWHRect(0, 0, size, size),
+            transform: rsx(),
+          },
+        ]}
+      />
+    );
+    checkImage(img, "snapshots/atlas/identity.png");
   });
 });
