@@ -8,6 +8,7 @@
 
 #include "JsiHostObject.h"
 
+#include "nodes/JsiAtlasNode.h"
 #include "nodes/JsiCircleNode.h"
 #include "nodes/JsiDiffRectNode.h"
 #include "nodes/JsiFillNode.h"
@@ -20,7 +21,6 @@
 #include "nodes/JsiPointsNode.h"
 #include "nodes/JsiRRectNode.h"
 #include "nodes/JsiRectNode.h"
-#include "nodes/JsiAtlasNode.h"
 
 #include "nodes/JsiBlurMaskNode.h"
 #include "nodes/JsiImageSvgNode.h"
