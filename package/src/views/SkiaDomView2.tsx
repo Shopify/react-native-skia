@@ -44,7 +44,7 @@ export class SkiaDomView2 extends React.Component<
   }
 
   componentDidUpdate(prevProps: SkiaDomViewProps & { Skia: Skia }) {
-    const { root, onTouch, onSize, Skia } = this.props;
+    const { root, onTouch, onSize } = this.props;
     if (root !== prevProps.root && root !== undefined) {
       assertSkiaViewApi();
       this.draw();
