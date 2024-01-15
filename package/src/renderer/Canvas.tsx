@@ -15,9 +15,10 @@ import type {
 import type { LayoutChangeEvent } from "react-native";
 
 import { SkiaDomView } from "../views";
-import { SkiaDomView as SkiaDomViewWeb } from "../views/SkiaDomView.web";
 import { Skia } from "../skia/Skia";
 import type { TouchHandler, SkiaBaseViewProps } from "../views";
+import { SkiaDomView2 } from "../views/SkiaDomView2";
+import { Platform } from "../Platform";
 
 import { SkiaRoot } from "./Reconciler";
 import { NATIVE_DOM } from "./HostComponents";
@@ -90,7 +91,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       };
     }, [root]);
 
-    if (NATIVE_DOM) {
+    if (NATIVE_DOM || Platform.OS === "web") {
       return (
         <SkiaDomView
           ref={ref}
@@ -105,7 +106,8 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       );
     } else {
       return (
-        <SkiaDomViewWeb
+        <SkiaDomView2
+          Skia={Skia}
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ref={ref as any}
           style={style}
