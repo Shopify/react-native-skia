@@ -8,6 +8,7 @@ import { useCallback, useMemo } from "react";
 import type { SkPath, SkPoint } from "../../skia/types";
 import { interpolatePaths, interpolateVector } from "../../animation";
 import { Skia } from "../../skia";
+import { Platform } from "../../Platform";
 
 import {
   useAnimatedReaction,
@@ -15,7 +16,6 @@ import {
   useSharedValue,
   useDerivedValue,
 } from "./moduleWrapper";
-import { Platform } from "../../Platform";
 
 export const notifyChange = (value: SharedValue<unknown>) => {
   "worklet";
