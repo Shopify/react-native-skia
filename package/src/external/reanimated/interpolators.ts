@@ -15,10 +15,11 @@ import {
   useSharedValue,
   useDerivedValue,
 } from "./moduleWrapper";
+import { Platform } from "../../Platform";
 
 export const notifyChange = (value: SharedValue<unknown>) => {
   "worklet";
-  if (_WORKLET) {
+  if (_WORKLET || Platform.OS === "web") {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (value as any)._value = value.value;
   }
