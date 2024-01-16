@@ -76,7 +76,21 @@ public:
         return JsiSkColor::toValue(
             runtime, SkColorSetARGB(color.a * 255, color.r, color.g, color.b));
       } else if (arguments[0].isObject()) {
-        return arguments[0].getObject(runtime);
+        auto obj = arguments[0].getObject(runtime);
+        if (obj.isArrayBuffer(runtime)) {
+          return obj;
+        } else if (obj.isArray(runtime)) {
+          auto array = obj.asArray(runtime);
+          double r = std::clamp(array.getValueAtIndex(runtime, 0).getNumber(),
+                                0.0, 255.0);
+          double g = std::clamp(array.getValueAtIndex(runtime, 1).getNumber(),
+                                0.0, 255.0);
+          double b = std::clamp(array.getValueAtIndex(runtime, 2).getNumber(),
+                                0.0, 255.0);
+          double a = std::clamp(array.getValueAtIndex(runtime, 3).getNumber(),
+                                0.0, 255.0);
+          return JsiSkColor::toValue(runtime, SkColorSetARGB(a, r, g, b));
+        }
       }
       return jsi::Value::undefined();
     };
