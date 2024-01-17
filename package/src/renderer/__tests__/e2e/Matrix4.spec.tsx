@@ -227,6 +227,38 @@ describe("Matrix4", () => {
       0.1
     );
   });
+
+  it("Path.transform() should accept 4x4 (1)", async () => {
+    let result = await surface.eval((Skia) => {
+      const path = Skia.Path.MakeFromSVGString("M150 0L75 200L225 200L150 0Z")!;
+      path.transform([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+      return path.toSVGString();
+    });
+    expect(result).toEqual("M150 0L75 200L225 200L150 0Z");
+
+    result = await surface.eval((Skia) => {
+      const path = Skia.Path.MakeFromSVGString("M150 0L75 200L225 200L150 0Z")!;
+      path.transform([1, 0, 0, 0, 0, 1, 0, 0, 0]);
+      return path.toSVGString();
+    });
+    expect(result).not.toEqual("M150 0L75 200L225 200L150 0Z");
+  });
+  it("Path.transform() should accept 4x4 (2)", async () => {
+    let result = await surface.eval((Skia) => {
+      const path = Skia.Path.MakeFromSVGString("M150 0L75 200L225 200L150 0Z")!;
+      const m = [1, 0, 0, 100, 0, 1, 0, 100, 0, 0, 1, 0, 0, 0, 0, 1];
+      path.transform([m[0], m[1], m[3], m[4], m[5], m[7], m[12], m[13], m[15]]);
+      return path.toSVGString();
+    });
+    expect(result).toEqual("M250 100L175 300L325 300L250 100Z");
+
+    result = await surface.eval((Skia) => {
+      const path = Skia.Path.MakeFromSVGString("M150 0L75 200L225 200L150 0Z")!;
+      path.transform([1, 0, 0, 100, 0, 1, 0, 100, 0, 0, 1, 0, 0, 0, 0, 1]);
+      return path.toSVGString();
+    });
+    expect(result).toEqual("M250 100L175 300L325 300L250 100Z");
+  });
   it("should correctly transform a point with an identity matrix", () => {
     const identityMatrix = Matrix4();
     const point = [100, -100, 200] as const; // Define some test point
