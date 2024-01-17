@@ -8,6 +8,7 @@ import { useCallback, useMemo } from "react";
 import type { SkPath, SkPoint } from "../../skia/types";
 import { interpolatePaths, interpolateVector } from "../../animation";
 import { Skia } from "../../skia";
+import { Platform } from "../../Platform";
 
 import {
   useAnimatedReaction,
@@ -18,7 +19,7 @@ import {
 
 export const notifyChange = (value: SharedValue<unknown>) => {
   "worklet";
-  if (_WORKLET) {
+  if (_WORKLET || Platform.OS === "web") {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (value as any)._value = value.value;
   }

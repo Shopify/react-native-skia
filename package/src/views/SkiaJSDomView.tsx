@@ -16,7 +16,7 @@ const NativeSkiaPictureView: HostComponent<SkiaPictureViewProps> =
     : // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (null as any);
 
-export class SkiaDomView2 extends React.Component<
+export class SkiaJSDomView extends React.Component<
   SkiaDomViewProps & { Skia: Skia }
 > {
   constructor(props: SkiaDomViewProps & { Skia: Skia }) {
