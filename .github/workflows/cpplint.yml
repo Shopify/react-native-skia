@@ -1,5 +1,9 @@
 name: cpplint
-on: [push]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
 jobs:
   cpplint:
     runs-on: ubuntu-latest

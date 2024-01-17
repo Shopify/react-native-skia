@@ -68,8 +68,9 @@ Publish the NPM package manually. The output is found in the `dist` folder.
 
 - Install Cocoapods in the example/ios folder `cd example/ios && pod install && cd ..`
 
-### Contributing
+## Contributing
 
+When making contributions to the project, an important part is testing.
 In the `package` folder, we have several scripts set up to help you maintain the quality of the codebase and test your changes:
 
 - `yarn lint` — Lints the code for potential errors and to ensure consistency with our coding standards.
@@ -77,7 +78,7 @@ In the `package` folder, we have several scripts set up to help you maintain the
 - `yarn test` — Executes the unit tests to ensure existing features work as expected after changes.
 - `yarn e2e` — Runs end-to-end tests. For these tests to run properly, you need to have the example app running. Use `yarn ios` or `yarn android` in the `example` folder and navigate to the Tests screen within the app.
 
-#### Running End-to-End Tests
+## Running End-to-End Tests
 
 To ensure the best reliability, we encourage running end-to-end tests before submitting your changes:
 
@@ -86,6 +87,8 @@ To ensure the best reliability, we encourage running end-to-end tests before sub
 cd example
 yarn ios # or yarn android for Android testing
 ```
+
+Once the app is open in your simulator or device, press the "Tests" item at the bottom of the list.
    
 2. With the example app running and the Tests screen open, run the following command in the `package` folder:
 ```sh
@@ -93,10 +96,14 @@ yarn e2e
 ```
    
 This will run through the automated tests and verify that your changes have not introduced any regressions.
+You can also run a particular using the following command:
+```sh
+E2E=true yarn test -i e2e/Colors
+```
 
-#### Writing End-to-End Tests
+### Writing End-to-End Tests
 
-Contributing end-to-end tests to React Native Skia is invaluable. Below you'll find guidelines for writing tests using the `eval` and `draw` commands. 
+Contributing end-to-end tests to React Native Skia is extremely useful. Below you'll find guidelines for writing tests using the `eval`, `draw`, and `drawOffscreen` commands. 
 
 e2e tests are located in the `package/__tests__/e2e/` directory. You can create a file there or add a new test to an existing file depending on what is most sensible.
 When looking to contribute a new test, you can refer to existing tests to see how these can be built.
@@ -117,15 +124,18 @@ Both the `eval` and `draw` commands require a function that will be executed in 
 
 ```tsx
 it("should generate commands properly", async () => {
+  // Referencing the SVG variable directly in the tests would fail
+  // as the function wouldn't be able to run in an isolated context
+  const svg = "M 0 0, L 30 30";
   const result = await surface.eval((Skia, ctx) => {
     const path = Skia.Path.MakeFromSVGString(ctx.svg);
     return path.toCmds();
-  }, { svg: "M 0 0, L 30 30" });
+  }, { svg });
   expect(result).toEqual([[0, 0, 0], [1, 30, 30]]);
 });
 ```
 
-Another option is to use the `draw` command:
+A second option is to use the `draw` command where you can test the Skia components and get the resulting image:
 ```tsx
 it("Path with default fillType", async () => {
   const { Skia } = importSkia();
@@ -141,4 +151,17 @@ it("Path with default fillType", async () => {
 });
 ```
 
-Again, since `eval` and `draw` serialize the function's content, avoid any external dependencies that can't be serialized.
+Finally, you can use `drawOffscreen` to receive a canvas object as parameter. You will also get the resulting image:
+
+```tsx
+  it("Should draw cyan", async () => {
+    const image = await surface.drawOffscreen(
+      (Skia, canvas, { size }) => {
+        canvas.drawColor(Skia.Color("cyan"));
+      }
+    );
+    checkImage(image, "snapshots/cyan.png");
+  });
+```
+
+Again, since `eval`, `draw`, and `drawOffscreen` serialize the function's content, avoid any external dependencies that can't be serialized.
