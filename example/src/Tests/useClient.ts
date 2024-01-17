@@ -24,8 +24,6 @@ export const useClient = (): UseClient => {
 
     let it: ReturnType<typeof setTimeout>;
     const ws = new WebSocket(url);
-    console.log(`connecting to ${url} (attempt ${retry})`);
-
     ws.onopen = () => {
       setClient(ws);
       ws.send(JSON.stringify({ OS: Platform.OS, arch: "paper" }));
