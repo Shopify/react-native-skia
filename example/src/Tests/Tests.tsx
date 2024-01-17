@@ -104,7 +104,7 @@ export const Tests = ({ assets }: TestsProps) => {
   }, [client, screen]);
   return (
     <View style={{ flex: 1 }}>
-      <Text>
+      <Text style={{ color: "black" }}>
         {client === null ? "⚪️" : "🟢"} Waiting for the server to send tests
       </Text>
       <Canvas style={{ width: size, height: size }} ref={ref}>

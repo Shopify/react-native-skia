@@ -12,8 +12,10 @@ export const useClient = () => {
   useEffect(() => {
     if (client === null) {
       const makeConnection = () => {
+        console.log("Connecting to", url);
         const ws = new WebSocket(url);
         ws.onopen = () => {
+          console.log("Connected");
           setClient(ws);
           ws.send(JSON.stringify({ OS: Platform.OS, arch: "paper" }));
         };
