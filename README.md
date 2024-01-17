@@ -70,6 +70,7 @@ Publish the NPM package manually. The output is found in the `dist` folder.
 
 ## Contributing
 
+When making contributions to the project, an important part is testing.
 In the `package` folder, we have several scripts set up to help you maintain the quality of the codebase and test your changes:
 
 - `yarn lint` — Lints the code for potential errors and to ensure consistency with our coding standards.
@@ -124,7 +125,7 @@ Both the `eval` and `draw` commands require a function that will be executed in 
 ```tsx
 it("should generate commands properly", async () => {
   // Referencing the SVG variable directly in the tests would fail
-  // as the functiuon wouldn't be able to run in an isolated context
+  // as the function wouldn't be able to run in an isolated context
   const svg = "M 0 0, L 30 30";
   const result = await surface.eval((Skia, ctx) => {
     const path = Skia.Path.MakeFromSVGString(ctx.svg);
@@ -153,12 +154,11 @@ it("Path with default fillType", async () => {
 Finally, you can use `drawOffscreen` to receive a canvas object as parameter. You will also get the resulting image:
 
 ```tsx
-  it("Should draw cyab", async () => {
+  it("Should draw cyan", async () => {
     const image = await surface.drawOffscreen(
       (Skia, canvas, { size }) => {
         canvas.drawColor(Skia.Color("cyan"));
-      },
-      { size: surface.width }
+      }
     );
     checkImage(image, "snapshots/cyan.png");
   });
