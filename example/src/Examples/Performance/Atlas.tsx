@@ -29,7 +29,7 @@ const rect = Skia.XYWHRect(
 );
 
 export const PerformanceDrawingTest: React.FC = () => {
-  const [numberOfBoxes, setNumberOfBoxes] = useState(450);
+  const [numberOfBoxes, setNumberOfBoxes] = useState(1200);
 
   const rct = useMemo(() => {
     // TODO: this could be done wit the JSX syntax
@@ -67,12 +67,15 @@ export const PerformanceDrawingTest: React.FC = () => {
     y: height * 0.25,
   });
 
+  const buffer = sprites.map(() => Skia.RSXform(1, 0, 0, 0));
+
   const transforms = useDerivedValue(() => {
-    return sprites.map((_, i) => {
+    return buffer.map((val, i) => {
       const tx = 5 + ((i * Size) % width);
       const ty = 25 + Math.floor(i / (width / Size)) * Size;
       const r = Math.atan2(pos.value.y - ty, pos.value.x - tx);
-      return Skia.RSXform(Math.cos(r), Math.sin(r), tx, ty);
+      val.set(Math.cos(r), Math.sin(r), tx, ty);
+      return val;
     });
   });
 

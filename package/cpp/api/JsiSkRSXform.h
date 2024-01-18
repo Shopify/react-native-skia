@@ -40,13 +40,25 @@ public:
     return jsi::Value(SkScalarToDouble(getObject()->fTy));
   }
 
+  JSI_HOST_FUNCTION(set) {
+    auto scos = arguments[0].asNumber();
+    auto ssin = arguments[1].asNumber();
+    auto tx = arguments[2].asNumber();
+    auto ty = arguments[3].asNumber();
+    getObject()->set(scos, ssin, tx, ty);
+    return jsi::Value::undefined();
+  }
+
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkRSXform, __typename__),
                               JSI_EXPORT_PROP_GET(JsiSkRSXform, scos),
                               JSI_EXPORT_PROP_GET(JsiSkRSXform, ssin),
                               JSI_EXPORT_PROP_GET(JsiSkRSXform, tx),
                               JSI_EXPORT_PROP_GET(JsiSkRSXform, ty))
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkRSXform, dispose))
+  JSI_EXPORT_FUNCTIONS(
+    JSI_EXPORT_FUNC(JsiSkRSXform, set),
+    JSI_EXPORT_FUNC(JsiSkRSXform, dispose)
+  )
 
   /**
   Returns the underlying object from a host object of this type
