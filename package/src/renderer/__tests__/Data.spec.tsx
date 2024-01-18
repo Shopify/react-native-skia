@@ -45,7 +45,7 @@ const CheckTogglingImage = ({}: EmptyProps) => {
     if (oslo && zurich) {
       h.current = setTimeout(() => {
         setIdx(1);
-      }, 20);
+      }, 200);
     }
     return () => {
       clearTimeout(h.current);

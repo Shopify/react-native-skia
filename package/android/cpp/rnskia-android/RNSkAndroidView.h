@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 
-#include <RNSkJsView.h>
 #include <RNSkOpenGLCanvasProvider.h>
 #include <android/native_window.h>
 

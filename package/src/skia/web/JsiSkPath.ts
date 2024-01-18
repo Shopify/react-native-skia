@@ -1,4 +1,4 @@
-import type { CanvasKit, Path } from "canvaskit-wasm";
+import type { CanvasKit, Matrix3x3, Path } from "canvaskit-wasm";
 
 import { PathVerb } from "../types";
 import type {
@@ -11,6 +11,7 @@ import type {
   SkRect,
   InputRRect,
   StrokeOpts,
+  InputMatrix,
 } from "../types";
 
 import { getEnum, HostObject, optEnum } from "./Host";
@@ -339,8 +340,27 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     return result === null ? result : this;
   }
 
-  transform(m3: SkMatrix) {
-    this.ref.transform(Array.isArray(m3) ? m3 : JsiSkMatrix.fromValue(m3));
+  transform(m: InputMatrix) {
+    let matrix =
+      m instanceof JsiSkMatrix
+        ? Array.from(JsiSkMatrix.fromValue<Matrix3x3>(m))
+        : (m as Exclude<InputMatrix, SkMatrix>);
+    if (matrix.length === 16) {
+      matrix = [
+        matrix[0],
+        matrix[1],
+        matrix[3],
+        matrix[4],
+        matrix[5],
+        matrix[7],
+        matrix[12],
+        matrix[13],
+        matrix[15],
+      ];
+    } else if (matrix.length !== 9) {
+      throw new Error(`Invalid matrix length: ${matrix.length}`);
+    }
+    this.ref.transform(matrix);
     return this;
   }
 
