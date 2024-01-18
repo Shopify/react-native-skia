@@ -59,16 +59,11 @@ describe("Atlas", () => {
     const img = await surface.draw(
       <Atlas
         image={image}
-        rects={[
-          {
-            rect: Skia.XYWHRect(0, 0, size, size),
-            transform: { scos: 0.5, ssin: 0, tx: 0, ty: 0 },
-          },
-          {
-            rect: Skia.XYWHRect(0, 0, size, size),
-            transform: { scos: 0, ssin: 0.5, tx: 50, ty: 50 },
-          },
+        sprites={[
+          Skia.XYWHRect(0, 0, size, size),
+          Skia.XYWHRect(0, 0, size, size),
         ]}
+        transforms={[Skia.RSXform(0.5, 0, 0, 0), Skia.RSXform(0, 0.5, 50, 50)]}
       />
     );
     checkImage(img, "snapshots/atlas/simple2.png");
@@ -83,15 +78,11 @@ describe("Atlas", () => {
     const img = await surface.draw(
       <Atlas
         image={image}
-        rects={[
-          {
-            rect: Skia.XYWHRect(0, 0, size, size),
-          },
-          {
-            rect: Skia.XYWHRect(0, 0, size, size),
-            transform: { scos: 1, ssin: 0, tx: 0, ty: 0 },
-          },
+        sprites={[
+          Skia.XYWHRect(0, 0, size, size),
+          Skia.XYWHRect(0, 0, size, size),
         ]}
+        transforms={[Skia.RSXform(1, 0, 0, 0), Skia.RSXform(1, 0, 0, 0)]}
       />
     );
     checkImage(img, "snapshots/atlas/identity.png");

@@ -1,3 +1,4 @@
+import type { SkRect } from "@shopify/react-native-skia";
 import { Canvas, Skia, Atlas } from "@shopify/react-native-skia";
 import React, { useMemo, useState } from "react";
 import {
@@ -28,13 +29,7 @@ const rect = Skia.XYWHRect(
 );
 
 export const PerformanceDrawingTest: React.FC = () => {
-  const [numberOfBoxes, setNumberOfBoxes] = useState(150);
-  const RECTS = useMemo(
-    () => new Array(numberOfBoxes).fill(0),
-    [numberOfBoxes]
-  );
-
-  const { width, height } = useWindowDimensions();
+  const [numberOfBoxes, setNumberOfBoxes] = useState(450);
 
   const rct = useMemo(() => {
     // TODO: this could be done wit the JSX syntax
@@ -59,27 +54,25 @@ export const PerformanceDrawingTest: React.FC = () => {
     return surface.makeImageSnapshot().makeNonTextureImage();
   }, []);
 
+  const RECTS = useMemo(
+    () => new Array(numberOfBoxes).fill(0),
+    [numberOfBoxes]
+  );
+
+  const sprites = RECTS.map(() => rect);
+  const { width, height } = useWindowDimensions();
+
   const pos = useSharedValue<{ x: number; y: number }>({
     x: width / 2,
     y: height * 0.25,
   });
 
-  const rects = useDerivedValue(() => {
-    return RECTS.map((_, i) => {
+  const transforms = useDerivedValue(() => {
+    return sprites.map((_, i) => {
       const tx = 5 + ((i * Size) % width);
       const ty = 25 + Math.floor(i / (width / Size)) * Size;
       const r = Math.atan2(pos.value.y - ty, pos.value.x - tx);
-      return {
-        // TODO: make rect optional
-        rect,
-        // TODO: make transform easier
-        transform: {
-          scos: 1 * Math.cos(r),
-          ssin: Math.sin(r),
-          tx: tx,
-          ty: ty,
-        },
-      };
+      return Skia.RSXform(Math.cos(r), Math.sin(r), tx, ty);
     });
   });
 
@@ -104,7 +97,7 @@ export const PerformanceDrawingTest: React.FC = () => {
       </View>
       <View style={{ flex: 1 }}>
         <Canvas style={styles.container} mode="default">
-          <Atlas image={rct} rects={rects} />
+          <Atlas image={rct} sprites={sprites} transforms={transforms} />
         </Canvas>
         <GestureDetector gesture={gesture}>
           <Animated.View style={StyleSheet.absoluteFill} />

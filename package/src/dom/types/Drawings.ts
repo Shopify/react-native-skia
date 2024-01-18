@@ -59,14 +59,10 @@ export type RectProps = RectDef & DrawingNodeProps;
 
 export type RoundedRectProps = RRectDef & DrawingNodeProps;
 
-export interface AltasRect {
-  rect?: SkRect;
-  transform?: SkRSXform;
-}
-
 export interface AtlasProps extends DrawingNodeProps {
   image: SkImage;
-  rects: AltasRect[];
+  sprites: SkRect[];
+  transforms: SkRSXform[];
 }
 
 export interface CubicBezierHandle {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AtlasProps.h"
+#include "RectProp.h"
 #include "JsiDomDrawingNode.h"
 #include "SkImageProps.h"
 
@@ -17,31 +17,34 @@ public:
 
 protected:
   void draw(DrawingContext *context) override {
-    if (_atlasProp->isSet() && _imageProp->isSet()) {
+    if (_rectsProp->isSet() && _imageProp->isSet() && _rsxFormsProp->isSet()) {
       const auto image = _imageProp->getDerivedValue();
-      const auto values = _atlasProp->getDerivedValue();
-      const auto rects = std::get<0>(*values);
-      const auto xforms = std::get<1>(*values);
+      const auto sprites = _rectsProp->getDerivedValue();
+      const auto transforms = _rsxFormsProp->getDerivedValue();
+
       SkSamplingOptions sampling;
       SkPaint paint;
       context->getCanvas()->drawAtlas(
-          image.get(), xforms.data(), rects.data(), nullptr, rects.size(),
+          image.get(), transforms->data(), sprites->data(), nullptr, sprites->size(),
           SkBlendMode::kSrcOver, sampling, nullptr, &paint);
     }
   }
 
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
-    _atlasProp = container->defineProperty<AtlasProp>("rects");
+    _rectsProp = container->defineProperty<RectsProp>("sprites");
+    _rsxFormsProp = container->defineProperty<RSXFormsProp>("transforms");
     _imageProp = container->defineProperty<ImageProp>("image");
 
-    _atlasProp->require();
+	_rectsProp->require();
+	_rsxFormsProp->require();
     _imageProp->require();
   }
 
 private:
-  AtlasProp *_atlasProp;
   ImageProp *_imageProp;
+  RectsProp *_rectsProp;
+  RSXFormsProp *_rsxFormsProp;
 };
 
 } // namespace RNSkia
