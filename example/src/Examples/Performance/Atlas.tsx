@@ -1,4 +1,5 @@
 import { Canvas, Skia, Atlas } from "@shopify/react-native-skia";
+import { useAnimatedReaction } from "@shopify/react-native-skia/src/external/reanimated/moduleWrapper";
 import React, { useMemo, useState } from "react";
 import {
   StyleSheet,
@@ -28,7 +29,10 @@ const rect = Skia.XYWHRect(
 );
 
 export const PerformanceDrawingTest: React.FC = () => {
-  const [numberOfBoxes, setNumberOfBoxes] = useState(150);
+  const [numberOfBoxes, setNumberOfBoxes] = useState(450);
+  const sprites = useSharedValue(new Float32Array(numberOfBoxes * 4));
+  const transforms = useSharedValue(new Float32Array(numberOfBoxes * 4));
+
   const RECTS = useMemo(
     () => new Array(numberOfBoxes).fill(0),
     [numberOfBoxes]
@@ -36,6 +40,7 @@ export const PerformanceDrawingTest: React.FC = () => {
 
   const { width, height } = useWindowDimensions();
 
+  // TODO: move outside the component/factorize?
   const rct = useMemo(() => {
     // TODO: this could be done wit the JSX syntax
     const rect2 = Skia.XYWHRect(
@@ -64,24 +69,28 @@ export const PerformanceDrawingTest: React.FC = () => {
     y: height * 0.25,
   });
 
-  const rects = useDerivedValue(() => {
-    return RECTS.map((_, i) => {
-      const tx = 5 + ((i * Size) % width);
-      const ty = 25 + Math.floor(i / (width / Size)) * Size;
-      const r = Math.atan2(pos.value.y - ty, pos.value.x - tx);
-      return {
-        // TODO: make rect optional
-        rect,
-        // TODO: make transform easier
-        transform: {
-          scos: 1 * Math.cos(r),
-          ssin: Math.sin(r),
-          tx: tx,
-          ty: ty,
-        },
-      };
-    });
-  });
+  useAnimatedReaction(
+    () => pos.value,
+    () => {
+      RECTS.map((_, i) => {
+        const tx = 5 + ((i * Size) % width);
+        const ty = 25 + Math.floor(i / (width / Size)) * Size;
+        const r = Math.atan2(pos.value.y - ty, pos.value.x - tx);
+        sprites.value[i * 4 + 0] = rect.x;
+        sprites.value[i * 4 + 1] = rect.y;
+        sprites.value[i * 4 + 2] = rect.x + rect.width;
+        sprites.value[i * 4 + 3] = rect.y + rect.height;
+        transforms.value[i * 4 + 0] = Math.cos(r);
+        transforms.value[i * 4 + 1] = Math.sin(r);
+        transforms.value[i * 4 + 2] = tx;
+        transforms.value[i * 4 + 3] = ty;
+        return {
+          sprites,
+          transforms,
+        };
+      });
+    }
+  );
 
   const gesture = Gesture.Pan().onChange((e) => (pos.value = e));
 
@@ -103,8 +112,8 @@ export const PerformanceDrawingTest: React.FC = () => {
         </View>
       </View>
       <View style={{ flex: 1 }}>
-        <Canvas style={styles.container} mode="default">
-          <Atlas image={rct} rects={rects} />
+        <Canvas style={styles.container}>
+          <Atlas image={rct} sprites={sprites} transforms={transforms} />
         </Canvas>
         <GestureDetector gesture={gesture}>
           <Animated.View style={StyleSheet.absoluteFill} />

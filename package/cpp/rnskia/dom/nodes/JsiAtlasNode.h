@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AtlasProps.h"
+#include "BufferProp.h"
 #include "JsiDomDrawingNode.h"
 #include "SkImageProps.h"
 
@@ -17,30 +17,33 @@ public:
 
 protected:
   void draw(DrawingContext *context) override {
-    if (_atlasProp->isSet() && _imageProp->isSet()) {
+    if (_spritesProp->isSet() && _imageProp->isSet() && _transformsProp->isSet()) {
       const auto image = _imageProp->getDerivedValue();
-      const auto values = _atlasProp->getDerivedValue();
-      const auto rects = std::get<0>(*values);
-      const auto xforms = std::get<1>(*values);
+      auto sprites = reinterpret_cast<const SkRect*>(_spritesProp->getDerivedValue().get());
+      auto transforms = reinterpret_cast<const SkRSXform *>(_transformsProp->getDerivedValue().get());
       SkSamplingOptions sampling;
       SkPaint paint;
       context->getCanvas()->drawAtlas(
-          image.get(), xforms.data(), rects.data(), nullptr, rects.size(),
+          // TODO: add count
+          image.get(), transforms, sprites, nullptr, 450,
           SkBlendMode::kSrcOver, sampling, nullptr, &paint);
     }
   }
 
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
-    _atlasProp = container->defineProperty<AtlasProp>("rects");
+	_spritesProp = container->defineProperty<BufferProp>("sprites");
+    _transformsProp = container->defineProperty<BufferProp>("transforms");
     _imageProp = container->defineProperty<ImageProp>("image");
 
-    _atlasProp->require();
+	  _spritesProp->require();
+    _transformsProp->require();
     _imageProp->require();
   }
 
 private:
-  AtlasProp *_atlasProp;
+  BufferProp *_spritesProp;
+  BufferProp *_transformsProp;
   ImageProp *_imageProp;
 };
 

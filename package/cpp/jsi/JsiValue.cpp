@@ -31,7 +31,15 @@ void JsiValue::setCurrent(jsi::Runtime &runtime, const jsi::Value &value) {
   } else if (value.isNull()) {
     _type = PropType::Null;
   } else if (value.isObject()) {
-    setObject(runtime, value);
+    auto obj = value.asObject(runtime);
+    if (obj.isArrayBuffer(runtime)) {
+      _type = PropType::Buffer;
+      jsi::ArrayBuffer buffer = obj.getArrayBuffer(runtime);
+      // TODO: this probably need to be copied, double check
+      _bufferValue = reinterpret_cast<uint8_t*>(buffer.data(runtime));
+    } else {
+      setObject(runtime, value);
+    }
   } else {
     throw std::runtime_error("Could not store jsi::Value of provided type");
   }
@@ -52,6 +60,14 @@ double JsiValue::getAsNumber() const {
   }
   return _numberValue;
 }
+
+ void* JsiValue::getAsBuffer() const {
+  if (_type != PropType::Buffer) {
+    throw std::runtime_error("Expected type number, got " +
+                             getTypeAsString(_type));
+  }
+  return _bufferValue;
+ }
 
 const std::string &JsiValue::getAsString() const {
   if (_type == PropType::Number) {
@@ -137,6 +153,8 @@ std::string JsiValue::asString() const {
     return "[HostObject]";
   case PropType::HostFunction:
     return "[HostFunction]";
+  case PropType::Buffer:
+    return "[Buffer]";
   }
 }
 
@@ -160,6 +178,8 @@ jsi::Value JsiValue::getAsJsiValue(jsi::Runtime &runtime) const {
     return getHostObject(runtime);
   case PropType::HostFunction:
     return getHostFunction(runtime);
+   case PropType::Buffer:
+		  return getBuffer(runtime);
   }
 }
 
@@ -183,6 +203,8 @@ std::string JsiValue::getTypeAsString(PropType type) {
     return "hostobject";
   case PropType::HostFunction:
     return "hostfunction";
+	  case PropType::Buffer:
+		  return "buffer";
   }
 }
 
@@ -312,6 +334,10 @@ jsi::Object JsiValue::getHostFunction(jsi::Runtime &runtime) const {
   assert(_type == PropType::HostFunction);
   return jsi::Function::createFromHostFunction(
       runtime, jsi::PropNameID::forUtf8(runtime, "fn"), 0, _hostFunction);
+}
+
+jsi::Value JsiValue::getBuffer(jsi::Runtime &runtime) const {
+	return jsi::Value();
 }
 
 void JsiValue::setArray(jsi::Runtime &runtime, const jsi::Object &obj) {

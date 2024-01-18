@@ -21,7 +21,8 @@ enum struct PropType {
   Object = 5,
   HostObject = 6,
   HostFunction = 7,
-  Array = 8
+  Array = 8,
+  Buffer = 9
 };
 
 using PropId = const char *;
@@ -103,6 +104,11 @@ public:
   double getAsNumber() const;
 
   /**
+   * Returns the array buffer. Requires that the underlying type if a typed array 
+   */
+ void *getAsBuffer() const;
+
+  /**
    Returns the string value. Requires that the underlying type is string
    */
   const std::string &getAsString() const;
@@ -149,6 +155,8 @@ public:
    Returns the host function. Requires that the type is HostFunction
    */
   jsi::HostFunctionType getAsHostFunction() const;
+
+  jsi::Value getBuffer(jsi::Runtime &runtime) const;
 
   /**
    Returns a callable HostFunction representing the undderlying js function.
@@ -217,6 +225,7 @@ private:
   std::vector<JsiValue> _array;
   std::unordered_map<PropId, JsiValue> _props;
   std::vector<PropId> _keysCache;
+  uint8_t* _bufferValue;
 };
 
 } // namespace RNJsi
