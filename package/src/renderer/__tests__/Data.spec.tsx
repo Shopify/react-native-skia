@@ -1,11 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 
 import { processResult } from "../../__tests__/setup";
-import { Fill, Image } from "../components";
+import { Fill } from "../components";
 import * as SkiaRenderer from "../index";
 
 import type { EmptyProps } from "./setup";
-import { importSkia, mountCanvas, width, height, wait } from "./setup";
+import { importSkia, mountCanvas, wait } from "./setup";
 
 const CheckData = ({}: EmptyProps) => {
   const { useFont } = importSkia();
