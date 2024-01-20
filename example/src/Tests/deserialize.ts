@@ -66,6 +66,14 @@ const parseProp = (value: any, assets: Assets) => {
       return Skia.RuntimeEffect.Make(value.source);
     } else if (value.__typename__ === "SVG") {
       return Skia.SVG.MakeFromString(value.source);
+    } else if (value.__typename__ === "SkiaObject") {
+      // eslint-disable-next-line no-eval
+      return eval(
+        `(function Main(){return (${value.source})(this.Skia, this.ctx); })`
+      ).call({
+        Skia,
+        ctx: parseProps(value.context, assets),
+      });
     } else if (value.__typename__ === "Font") {
       const asset = assets[value.name];
       if (!asset) {

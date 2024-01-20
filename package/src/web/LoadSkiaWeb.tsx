@@ -10,11 +10,14 @@ declare global {
   var CanvasKit: CanvasKitType;
 }
 
+let ckSharedPromise: Promise<CanvasKitType>;
+
 export const LoadSkiaWeb = async (opts?: CanvasKitInitOptions) => {
   if (global.CanvasKit !== undefined) {
     return;
   }
-  const CanvasKit = await CanvasKitInit(opts);
+  ckSharedPromise = ckSharedPromise ?? CanvasKitInit(opts);
+  const CanvasKit = await ckSharedPromise;
   // The CanvasKit API is stored on the global object and used
   // to create the JsiSKApi in the Skia.web.ts file.
   global.CanvasKit = CanvasKit;
