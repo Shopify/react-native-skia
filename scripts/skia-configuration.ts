@@ -120,12 +120,18 @@ export const configurations: Configuration = {
         cpu: "arm64",
         args: [
           ["ios_min_target", '"13.0"'],
+          ["extra_cflags", '["-target", "arm64-apple-ios"]'],
+          ["extra_asmflags", '["-target", "arm64-apple-ios"]'],
+          ["extra_ldflags", '["-target", "arm64-apple-ios"]'],
         ],
       },
       "arm64-iphonesimulator": {
         cpu: "arm64",
         args: [
           ["ios_min_target", '"13.0"'],
+          ["extra_cflags", '["-target", "arm64-apple-ios-simulator"]'],
+          ["extra_asmflags", '["-target", "arm64-apple-ios-simulator"]'],
+          ["extra_ldflags", '["-target", "arm64-apple-ios-simulator"]'],
           ["ios_use_simulator", true],
         ],
       },
@@ -133,6 +139,9 @@ export const configurations: Configuration = {
         cpu: "x64",
         args: [
           ["ios_min_target", '"13.0"'],
+          ["extra_cflags", '["-target", "arm64-apple-ios-simulator"]'],
+          ["extra_asmflags", '["-target", "arm64-apple-ios-simulator"]'],
+          ["extra_ldflags", '["-target", "arm64-apple-ios-simulator"]'],
         ],
       },
     },
