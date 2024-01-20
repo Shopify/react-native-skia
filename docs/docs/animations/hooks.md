@@ -10,6 +10,7 @@ slug: /animations/hooks
 This hook interpolates between different path values based on a progress value, providing smooth transitions between the provided paths.
 
 Paths need to be interpolatable, meaning they must contain the same number and types of commands. If the paths have different commands or different numbers of commands, the interpolation may not behave as expected. Ensure that all paths in the `outputRange` array are structured similarly for proper interpolation.
+To interpolate two completely different paths, we found the [flubber library](https://github.com/veltman/flubber) to work well with Skia ([see example](https://github.com/wcandillon/can-it-be-done-in-react-native/blob/master/season5/src/Headspace/Play.tsx#L16)).
 
 ```tsx twoslash
 import React, { useEffect } from 'react';
