@@ -82,7 +82,7 @@ export const skHostConfig: SkiaHostConfig = {
   noTimeout: -1,
 
   appendChildToContainer(container, child) {
-    debug("appendChildToContainer", container, child);
+    debug("appendChildToContainer");
     appendNode(container.root, child);
   },
 

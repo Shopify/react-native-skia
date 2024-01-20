@@ -1,6 +1,10 @@
 name: Android
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
 
 jobs:
   build:
@@ -46,6 +50,7 @@ jobs:
           workflow: "build-skia.yml"
           repo: shopify/react-native-skia
           path: artifacts
+          branch: main
 
       - name: Copy Artifacts to libs folder
         run: yarn workflow-copy-libs
@@ -173,11 +178,11 @@ jobs:
         if: failure()
         with:
           path: package/src/__tests__/snapshots/
-          name: snapshots-screenshots
+          name: ${{ matrix.working-directory }}-snapshots-screenshots
 
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
           path: docs/static
-          name: docs-screenshots
+          name: ${{ matrix.working-directory }}-docs-screenshots
       

@@ -78,6 +78,116 @@ const textStyle = {
 };
 ```
 
+## Using Paints
+
+You can use paint objects for the foreground and the background of a text style.
+
+<img src={require("/static/img/paragraph/background-node.png").default} width="256" height="256" />
+
+Below we use a foreground and a background paint on a text style:
+
+```tsx twoslash
+import { useMemo } from "react";
+import { Paragraph, Skia, useFonts, Canvas, Rect, TileMode } from "@shopify/react-native-skia";
+
+// Our background shader
+const source = Skia.RuntimeEffect.Make(`
+uniform vec4 position;
+uniform vec4 colors[4];
+
+vec4 main(vec2 pos) {
+  vec2 uv = (pos - vec2(position.x, position.y))/vec2(position.z, position.w);
+  vec4 colorA = mix(colors[0], colors[1], uv.x);
+  vec4 colorB = mix(colors[2], colors[3], uv.x);
+  return mix(colorA, colorB, uv.y);
+}`)!;
+
+// Define an array of colors for the gradient to be used in shader uniform
+const colors = ["#dafb61", "#61DAFB", "#fb61da", "#61fbcf"].flatMap(
+  (c) => Array.from(Skia.Color(c))
+);
+
+const MyParagraph = () => {
+  const paragraph = useMemo(() => {
+
+    // Create a foreground paint.
+    const backgroundPaint = Skia.Paint();
+    backgroundPaint.setShader(
+      source.makeShader([0, 0, 256, 256, ...colors])
+    );
+
+    // Create a foreground paint. We use a radial gradient.
+    const foregroundPaint = Skia.Paint();
+    foregroundPaint.setShader(
+      Skia.Shader.MakeRadialGradient(
+        { x: 0, y: 0 },
+        256,
+        [Skia.Color("magenta"), Skia.Color("yellow")],
+        null,
+        TileMode.Clamp
+      )
+    );
+
+    const para = Skia.ParagraphBuilder.Make()
+     .pushStyle(
+        {
+          fontFamilies: ["Roboto"],
+          fontSize: 72,
+          fontStyle: { weight: 500 },
+          color: Skia.Color("black"),
+        },
+        foregroundPaint,
+        backgroundPaint
+      )
+      .addText("Say Hello to React Native Skia")
+      .pop()
+      .build();
+    return para;
+  }, []);
+  return (
+    <Canvas style={{ width: 256, height: 256 }}>
+      <Paragraph paragraph={paragraph} x={0} y={0} width={256} />
+    </Canvas>
+  );
+};
+```
+
+### Applying Effects
+
+The `Paragraph` component doesn't follow the same painting rules as other components.
+However you can apply effets using the `layer` property.
+For instance, in the example below, fopr  we apply a blur image filter.
+
+```tsx twoslash
+import React from "react";
+import { Canvas, ImageSVG, Skia, Group, Paint, Blur, Paragraph } from "@shopify/react-native-skia";
+
+const width = 256;
+const height = 256;
+
+export const Demo = () => {
+  const paragraph = Skia.ParagraphBuilder.Make()
+          .pushStyle({
+            color: Skia.Color("black"),
+            fontSize: 25,
+          })
+          .addText("Hello Skia")
+          .build();
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Group layer={<Paint><Blur blur={10} /></Paint>}>
+        <Paragraph paragraph={paragraph} x={0} y={0} width={width} />
+      </Group>
+    </Canvas>
+  );
+};
+```
+
+### Result
+
+<img src={require("/static/img/blurred-paragraph-node.png").default} width="256" height="256" />
+
+
 ## Paragraph Bounding Box
 
 Before getting the paragraph height and width, you need to compute its layout using `layout()` and and once done, you can invoke `getHeight()` for the height and `getLongestLine()` for the width.

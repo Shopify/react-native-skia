@@ -15,9 +15,9 @@ import type {
 import type { LayoutChangeEvent } from "react-native";
 
 import { SkiaDomView } from "../views";
-import { SkiaDomView as SkiaDomViewWeb } from "../views/SkiaDomView.web";
 import { Skia } from "../skia/Skia";
 import type { TouchHandler, SkiaBaseViewProps } from "../views";
+import { SkiaJSDomView } from "../views/SkiaJSDomView";
 
 import { SkiaRoot } from "./Reconciler";
 import { NATIVE_DOM } from "./HostComponents";
@@ -84,6 +84,12 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       root.render(children);
     }, [children, root, redraw]);
 
+    useEffect(() => {
+      return () => {
+        root.unmount();
+      };
+    }, [root]);
+
     if (NATIVE_DOM) {
       return (
         <SkiaDomView
@@ -99,7 +105,8 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       );
     } else {
       return (
-        <SkiaDomViewWeb
+        <SkiaJSDomView
+          Skia={Skia}
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ref={ref as any}
           style={style}
