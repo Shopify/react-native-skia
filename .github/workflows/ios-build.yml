@@ -39,6 +39,7 @@ jobs:
           workflow: "build-skia.yml"
           repo: shopify/react-native-skia
           path: artifacts
+          branch: main
 
       - name: Copy Artifacts to libs folder
         run: yarn workflow-copy-libs

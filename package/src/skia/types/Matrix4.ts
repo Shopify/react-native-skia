@@ -150,7 +150,10 @@ const rotatedUnitSinCos = (
   ];
 };
 
-const matrixVecMul4 = (m: Matrix4, v: Vec4) => {
+/**
+ * @worklet
+ */
+export const matrixVecMul4 = (m: Matrix4, v: Vec4): Vec4 => {
   "worklet";
   return [
     m[0] * v[0] + m[1] * v[1] + m[2] * v[2] + m[3] * v[3],
