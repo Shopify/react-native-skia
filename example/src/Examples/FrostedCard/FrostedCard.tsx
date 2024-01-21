@@ -1,3 +1,4 @@
+import type { SkRect, SkRRect } from "@shopify/react-native-skia";
 import {
   Canvas,
   Skia,
@@ -9,6 +10,8 @@ import {
   usePathValue,
   convertToColumnMajor,
   RoundedRect,
+  rect,
+  rrect,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions, View } from "react-native";
@@ -28,6 +31,17 @@ const rct = Skia.XYWHRect(
   CARD_HEIGHT
 );
 const rrct = Skia.RRectXY(rct, 10, 10);
+
+const inflate = (rct: SkRect, amount: number) =>
+  rect(
+    rct.x - amount,
+    rct.y - amount,
+    rct.width + 2 * amount,
+    rct.height + 2 * amount
+  );
+
+const inflateRounded = (rct: SkRRect, amount: number) =>
+  rrect(inflate(rct.rect, amount), rct.rx, rct.ry);
 
 const springConfig = (velocity: number) => {
   "worklet";
