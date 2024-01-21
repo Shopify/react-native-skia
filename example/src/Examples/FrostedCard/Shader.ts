@@ -59,7 +59,6 @@ vec4 main(vec2 xy) {
     return image.eval(xy);
   }
   vec3 color = blur(xy, direction, mix(0.1, ${maxSigma.toFixed(1)}, amount));
-  color += mix(vec3(0.1), vec3(0.0), amount);
   return vec4(color, 1.0);
 }
 `;
