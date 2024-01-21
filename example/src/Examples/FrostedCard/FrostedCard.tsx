@@ -8,6 +8,7 @@ import {
   Fill,
   usePathValue,
   convertToColumnMajor,
+  RoundedRect,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions, View } from "react-native";
@@ -28,7 +29,6 @@ const rct = Skia.XYWHRect(
 );
 const rrct = Skia.RRectXY(rct, 10, 10);
 
-const sf = 300;
 const springConfig = (velocity: number) => {
   "worklet";
   return {
@@ -43,53 +43,11 @@ const springConfig = (velocity: number) => {
 };
 
 export const FrostedCard = () => {
-  const image = useImage(require("./dynamo.jpg"));
-  const rotateX = useSharedValue(0);
-  const rotateY = useSharedValue(0);
-
-  const gesture = Gesture.Pan()
-    .onChange((event) => {
-      rotateY.value += event.changeX / sf;
-      rotateX.value -= event.changeY / sf;
-    })
-    .onEnd(({ velocityX, velocityY }) => {
-      rotateX.value = withSpring(0, springConfig(velocityY / sf));
-      rotateY.value = withSpring(0, springConfig(velocityX / sf));
-    });
-
-  const matrix = useDerivedValue(() => {
-    return processTransform3d([
-      { translate: [width / 2, height / 2] },
-      { perspective: 300 },
-      { rotateX: rotateX.value },
-      { rotateY: rotateY.value },
-      { translate: [-width / 2, -height / 2] },
-    ]);
-  });
-
-  const clip = usePathValue((path) => {
-    "worklet";
-    path.addRRect(rrct);
-    path.transform(matrix.value);
-  });
-
   return (
     <View style={{ flex: 1 }}>
-      <GestureDetector gesture={gesture}>
-        <Canvas style={{ flex: 1 }}>
-          <Image
-            image={image}
-            x={0}
-            y={0}
-            width={width}
-            height={height}
-            fit="cover"
-          />
-          <BackdropFilter filter={<BlurMask matrix={matrix} />} clip={clip}>
-            <Fill color="rgba(255, 255, 255, 0.1)" />
-          </BackdropFilter>
-        </Canvas>
-      </GestureDetector>
+      <Canvas style={{ flex: 1 }}>
+        <RoundedRect rect={rrct} />
+      </Canvas>
     </View>
   );
 };

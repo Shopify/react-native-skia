@@ -46,15 +46,10 @@ vec3 blur(vec2 uv, vec2 direction, float sigma) {
   return result;
 }
 
-float normalizeZValue(float z) {
-  const float r = 150.0;
-  return saturate((z + r) / (2.0 * r));
-}
-
 // main function
 vec4 main(vec2 xy) {
   vec4 prj = matrix * vec4(xy, 0.0, 1.0);
-  float amount = 1-normalizeZValue(prj.z);
+  float amount = 1;
   if (amount == 0.0) {
     return image.eval(xy);
   }
