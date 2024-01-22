@@ -24,4 +24,5 @@ export type StackParamList = {
   Transitions: undefined;
   Stickers: undefined;
   FrostedCard: undefined;
+  CrashingBlur: undefined;
 };

@@ -28,6 +28,7 @@ import {
   Transitions,
   Stickers,
   FrostedCard,
+  CrashingBlur,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
@@ -59,6 +60,7 @@ const linking: LinkingOptions<StackParamList> = {
       Transitions: "transitions",
       Stickers: "stickers",
       FrostedCard: "frosted-card",
+      CrashingBlur: "crashing-blur",
     },
   },
   prefixes: ["rnskia://"],
@@ -102,6 +104,13 @@ const App = () => {
               component={HomeScreen}
               options={{
                 title: "🎨 Skia",
+              }}
+            />
+            <Stack.Screen
+              name="CrashingBlur"
+              component={CrashingBlur}
+              options={{
+                header: () => null,
               }}
             />
             <Stack.Screen

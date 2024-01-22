@@ -13,6 +13,11 @@ export const HomeScreen = () => {
         testId="API"
       />
       <HomeScreenButton
+        title="Crashing Blur"
+        description="Crashing Blur"
+        route="CrashingBlur"
+      />
+      <HomeScreenButton
         title="🎥 Reanimated"
         description="Reanimated & Gesture Handler"
         route="Reanimated"
