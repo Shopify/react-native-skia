@@ -21,10 +21,11 @@ export class SkiaRoot {
 
   constructor(
     Skia: Skia,
+    native: boolean,
     redraw: () => void = () => {},
     getNativeId: () => number = () => 0
   ) {
-    this.container = new Container(Skia, redraw, getNativeId);
+    this.container = new Container(Skia, redraw, getNativeId, native);
     this.root = skiaReconciler.createContainer(
       this.container,
       0,
@@ -45,7 +46,9 @@ export class SkiaRoot {
   }
 
   unmount() {
-    skiaReconciler.updateContainer(null, this.root, null, () => {});
+    skiaReconciler.updateContainer(null, this.root, null, () => {
+      hostDebug("unmountContainer");
+    });
   }
 
   get dom() {

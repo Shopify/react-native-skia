@@ -25,7 +25,7 @@ export const makeOffscreenSurface = (width: number, height: number) => {
 };
 
 export const drawOffscreen = (surface: SkSurface, element: ReactNode) => {
-  const root = new SkiaRoot(Skia);
+  const root = new SkiaRoot(Skia, false);
   root.render(element);
   const canvas = surface.getCanvas();
   const ctx = new JsiDrawingContext(Skia, canvas);
