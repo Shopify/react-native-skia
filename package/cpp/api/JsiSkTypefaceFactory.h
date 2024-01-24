@@ -17,7 +17,8 @@ class JsiSkTypefaceFactory : public JsiSkHostObject {
 public:
   JSI_HOST_FUNCTION(MakeFreeTypeFaceFromData) {
     auto data = JsiSkData::fromValue(runtime, arguments[0]);
-    auto typeface = SkFontMgr::RefDefault()->makeFromData(std::move(data));
+    auto fontMgr = JsiSkFontMgrFactory::getFontMgr(getContext());
+    auto typeface = fontMgr->makeFromData(std::move(data));
     if (typeface == nullptr) {
       return jsi::Value::null();
     }
