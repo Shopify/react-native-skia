@@ -5,6 +5,9 @@ sidebar_label: Hooks
 slug: /animations/hooks
 ---
 
+Below are animations hooks we provide when using React Native Skia with Reanimated.
+We also provide hooks for [creating textures](/docs/animations/textures) when integrating with Reanimated.
+
 ## usePathInterpolation
 
 This hook interpolates between different path values based on a progress value, providing smooth transitions between the provided paths.
