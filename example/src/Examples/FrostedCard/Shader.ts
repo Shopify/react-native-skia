@@ -9,7 +9,7 @@ export const generateShader = () => {
   const halfWindowSize = (windowSize / 2).toFixed(1);
   const source = glsl`
 uniform shader image;
-uniform mat3 matrix;
+uniform mat4 matrix;
 
 uniform float2 direction;
 
@@ -31,7 +31,10 @@ vec3 blur(vec2 uv, vec2 direction, float sigma) {
       float weight = Gaussian(i, sigma);
       vec2 offset = vec2(direction * i);
       vec3 sample = image.eval(uv + offset).rgb;
-
+      // TODO: There is a probably a better way to check if we are out of bounds
+      if (image.eval(uv + offset).a == 0.0) {
+        continue;
+      }
       result += sample * weight;
       totalWeight += weight;
   }
@@ -43,10 +46,15 @@ vec3 blur(vec2 uv, vec2 direction, float sigma) {
   return result;
 }
 
+float normalizeZValue(float z) {
+  const float r = 150.0;
+  return saturate((z + r) / (2.0 * r));
+}
+
 // main function
 vec4 main(vec2 xy) {
-  vec3 prj = matrix * vec3(xy, 1.0);
-  float amount = clamp(prj.z/200.0, 0.0, 1.0);
+  vec4 prj = matrix * vec4(xy, 0.0, 1.0);
+  float amount = 1-normalizeZValue(prj.z);
   if (amount == 0.0) {
     return image.eval(xy);
   }
