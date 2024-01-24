@@ -6,7 +6,6 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkData.h"
-#include "JsiSkFontMgrFactory.h"
 #include "JsiSkHostObjects.h"
 #include "JsiSkTypeface.h"
 
