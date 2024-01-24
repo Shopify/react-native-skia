@@ -356,13 +356,13 @@ export const convertToColumnMajor = (rowMajorMatrix: Matrix4) => {
       colMajorMatrix[col * size + row] = rowMajorMatrix[row * size + col];
     }
   }
-  return colMajorMatrix;
+  return colMajorMatrix as unknown as Matrix4;
 };
 
 /**
  * @worklet
  */
-export const convertToAffineMatrix = (m4: number[]) => {
+export const convertToAffineMatrix = (m4: Matrix4) => {
   "worklet";
   // Extracting the relevant components from the 4x4 matrix
   const a = m4[0]; // Scale X

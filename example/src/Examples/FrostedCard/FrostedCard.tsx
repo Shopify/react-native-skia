@@ -6,13 +6,15 @@ import {
   Image,
   BackdropFilter,
   Fill,
-  Blur,
   usePathValue,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useSharedValue, withSpring } from "react-native-reanimated";
+import { useDerivedValue } from "@shopify/react-native-skia/src/external/reanimated/moduleWrapper";
+
+import { BlurMask } from "./BlurGradient";
 
 const { width, height } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.9;
@@ -54,19 +56,22 @@ export const FrostedCard = () => {
       rotateY.value = withSpring(0, springConfig(velocityX / sf));
     });
 
+  const matrix = useDerivedValue(() => {
+    return processTransform3d([
+      { translate: [width / 2, height / 2] },
+      { perspective: 300 },
+      { rotateX: rotateX.value },
+      { rotateY: rotateY.value },
+      { translate: [-width / 2, -height / 2] },
+    ]);
+  });
+
   const clip = usePathValue((path) => {
     "worklet";
     path.addRRect(rrct);
-    path.transform(
-      processTransform3d([
-        { translate: [width / 2, height / 2] },
-        { perspective: 300 },
-        { rotateX: rotateX.value },
-        { rotateY: rotateY.value },
-        { translate: [-width / 2, -height / 2] },
-      ])
-    );
+    path.transform(matrix.value);
   });
+
   return (
     <View style={{ flex: 1 }}>
       <GestureDetector gesture={gesture}>
@@ -79,7 +84,7 @@ export const FrostedCard = () => {
             height={height}
             fit="cover"
           />
-          <BackdropFilter filter={<Blur blur={30} mode="clamp" />} clip={clip}>
+          <BackdropFilter filter={<BlurMask matrix={matrix} />} clip={clip}>
             <Fill color="rgba(255, 255, 255, 0.1)" />
           </BackdropFilter>
         </Canvas>
