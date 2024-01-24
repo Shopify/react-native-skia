@@ -8,6 +8,7 @@
 #include "JsiSkData.h"
 #include "JsiSkHostObjects.h"
 #include "JsiSkTypeface.h"
+#include "JsiSkFontMgrFactory.h"
 
 namespace RNSkia {
 
@@ -17,7 +18,7 @@ class JsiSkTypefaceFactory : public JsiSkHostObject {
 public:
   JSI_HOST_FUNCTION(MakeFreeTypeFaceFromData) {
     auto data = JsiSkData::fromValue(runtime, arguments[0]);
-    auto typeface = SkFontMgr::RefDefault()->makeFromData(std::move(data));
+    auto typeface = JsiSkFontMgrFactory::getFontMgr(getContext())->makeFromData(std::move(data));
     if (typeface == nullptr) {
       return jsi::Value::null();
     }
