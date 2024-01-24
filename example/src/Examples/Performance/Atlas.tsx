@@ -1,15 +1,12 @@
-import type { SkRSXform } from "@shopify/react-native-skia";
 import {
   Canvas,
-  Skia,
   Atlas,
   useTextureValue,
   Group,
   rect,
   Rect,
-  notifyChange,
+  useRSXformBuffer,
 } from "@shopify/react-native-skia";
-import { useAnimatedReaction } from "@shopify/react-native-skia/src/external/reanimated/moduleWrapper";
 import React, { useMemo, useState } from "react";
 import {
   StyleSheet,
@@ -19,10 +16,7 @@ import {
   Button,
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, {
-  useDerivedValue,
-  useSharedValue,
-} from "react-native-reanimated";
+import Animated, { useSharedValue } from "react-native-reanimated";
 
 const Increaser = 50;
 
@@ -31,25 +25,6 @@ const strokeWidth = 2;
 const textureSize = {
   width: size.width + strokeWidth,
   height: size.height + strokeWidth,
-};
-
-const useRSXformBuffer = (
-  size: number,
-  modifier: (input: SkRSXform, index: number) => void,
-  deps: unknown[]
-) => {
-  const buffer = useMemo(
-    () => new Array(size).fill(0).map(() => Skia.RSXform(1, 0, 0, 0)),
-    [size]
-  );
-  const transforms = useSharedValue(buffer);
-  useDerivedValue(() => {
-    buffer.map((val, index) => {
-      modifier(val, index);
-    });
-    notifyChange(transforms);
-  }, deps);
-  return transforms;
 };
 
 export const PerformanceDrawingTest = () => {
