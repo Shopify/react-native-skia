@@ -60,7 +60,7 @@ export type RectProps = RectDef & DrawingNodeProps;
 export type RoundedRectProps = RRectDef & DrawingNodeProps;
 
 export interface AtlasProps extends DrawingNodeProps {
-  image: SkImage;
+  image: SkImage | null;
   sprites: SkRect[];
   transforms: SkRSXform[];
 }

@@ -250,7 +250,7 @@ export class JsiSkDOM implements SkDOM {
   }
 
   Atlas(props: AtlasProps) {
-    return NATIVE_DOM
+    return this.native
       ? global.SkiaDomApi.AtlasNode(props)
       : new AtlasNode(this.ctx, props);
   }

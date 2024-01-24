@@ -1,5 +1,12 @@
-import type { SkRect } from "@shopify/react-native-skia";
-import { Canvas, Skia, Atlas } from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Skia,
+  Atlas,
+  useTextureValue,
+  Group,
+  rect,
+  Rect,
+} from "@shopify/react-native-skia";
 import React, { useMemo, useState } from "react";
 import {
   StyleSheet,
@@ -14,52 +21,42 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 
-const Size = 25;
 const Increaser = 50;
 
-const SizeWidth = Size;
-const SizeHeight = Size * 0.45;
+const size = { width: 25, height: 25 * 0.45 };
 const strokeWidth = 2;
-
-const rect = Skia.XYWHRect(
-  0,
-  0,
-  SizeWidth + strokeWidth,
-  SizeHeight + strokeWidth
-);
+const textureSize = {
+  width: size.width + strokeWidth,
+  height: size.height + strokeWidth,
+};
 
 export const PerformanceDrawingTest: React.FC = () => {
-  const [numberOfBoxes, setNumberOfBoxes] = useState(1200);
+  const [numberOfBoxes, setNumberOfBoxes] = useState(300);
 
-  const rct = useMemo(() => {
-    // TODO: this could be done wit the JSX syntax
-    const rect2 = Skia.XYWHRect(
-      strokeWidth,
-      strokeWidth,
-      SizeWidth - strokeWidth,
-      SizeHeight - strokeWidth
-    );
-    const surface = Skia.Surface.MakeOffscreen(
-      SizeWidth + strokeWidth,
-      SizeHeight + strokeWidth
-    )!;
-    const canvas = surface.getCanvas();
-    canvas.drawColor(Skia.Color("#4060A3"));
-    const paint = Skia.Paint();
-    paint.setColor(Skia.Color("#00ff00"));
-    canvas.drawRect(rect2, paint);
-    surface.flush();
-    // TODO run on the UI Thread
-    // TODO: check how textures work on Web?
-    return surface.makeImageSnapshot().makeNonTextureImage();
-  }, []);
+  const texture = useTextureValue(
+    <Group>
+      <Rect
+        rect={rect(strokeWidth / 2, strokeWidth / 2, size.width, size.height)}
+        color="#00ff00"
+      />
+      <Rect
+        rect={rect(strokeWidth / 2, strokeWidth / 2, size.width, size.height)}
+        color="#4060A3"
+        style="stroke"
+        strokeWidth={strokeWidth}
+      />
+    </Group>,
+    textureSize
+  );
 
-  const RECTS = useMemo(
-    () => new Array(numberOfBoxes).fill(0),
+  const sprites = useMemo(
+    () =>
+      new Array(numberOfBoxes)
+        .fill(0)
+        .map(() => rect(0, 0, textureSize.width, textureSize.height)),
     [numberOfBoxes]
   );
 
-  const sprites = RECTS.map(() => rect);
   const { width, height } = useWindowDimensions();
 
   const pos = useSharedValue<{ x: number; y: number }>({
@@ -71,8 +68,8 @@ export const PerformanceDrawingTest: React.FC = () => {
 
   const transforms = useDerivedValue(() => {
     return buffer.map((val, i) => {
-      const tx = 5 + ((i * Size) % width);
-      const ty = 25 + Math.floor(i / (width / Size)) * Size;
+      const tx = 5 + ((i * size.width) % width);
+      const ty = 25 + Math.floor(i / (width / size.width)) * size.width;
       const r = Math.atan2(pos.value.y - ty, pos.value.x - tx);
       val.set(Math.cos(r), Math.sin(r), tx, ty);
       return val;
@@ -100,7 +97,7 @@ export const PerformanceDrawingTest: React.FC = () => {
       </View>
       <View style={{ flex: 1 }}>
         <Canvas style={styles.container} mode="default">
-          <Atlas image={rct} sprites={sprites} transforms={transforms} />
+          <Atlas image={texture} sprites={sprites} transforms={transforms} />
         </Canvas>
         <GestureDetector gesture={gesture}>
           <Animated.View style={StyleSheet.absoluteFill} />
