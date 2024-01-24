@@ -7,7 +7,6 @@ import {
   BackdropFilter,
   Fill,
   usePathValue,
-  convertToColumnMajor,
 } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions, View } from "react-native";
