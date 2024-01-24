@@ -31,9 +31,12 @@ export const Mock = (CanvasKit: CanvasKit) => {
     // Reanimated hooks
     useClock: NoopSharedValue,
     usePathInterpolation: NoopSharedValue,
+    useTextureValue: NoopSharedValue,
+    useTextureValueFromPicture: NoopSharedValue,
     useRawData: Noop,
     useData: Noop,
     useFont: () => Skia.Font(undefined, 0),
+    useFonts: Noop,
     useTypeface: () => null,
     useImage: () => null,
     useSVG: () => null,

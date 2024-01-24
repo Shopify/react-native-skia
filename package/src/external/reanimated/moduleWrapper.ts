@@ -63,6 +63,7 @@ export const stopMapper: (mapperID: number) => void =
   Reanimated2?.stopMapper || throwOnMissingReanimated;
 
 export const runOnJS = Reanimated2?.runOnJS || throwOnMissingReanimated;
+export const runOnUI = Reanimated2?.runOnUI || throwOnMissingReanimated;
 
 export const useAnimatedReaction: <T>(
   prepare: () => T,

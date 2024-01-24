@@ -5,7 +5,67 @@ sidebar_label: Textures
 slug: /animations/textures
 ---
 
-Reanimated 2 provides a [`runOnUI`](https://docs.swmansion.com/react-native-reanimated/docs/threading/runOnUI) function that enables the execution of JavaScript code on the UI thread. This function is particularly useful for creating GPU textures that can be directly rendered onto an onscreen canvas.
+In React Native Skia, Skia resources are shared across threads.
+We can use Reanimated to create textures on the UI thread, thus ensuring that we can display them onscreen canvas without needing to perform unnecessary copies.
+
+## `useTextureValue`
+
+The `useTextureValue` hook allows you to create textures from React elements. It takes a React element and its size as arguments, and returns a shared value containing the texture.
+
+```tsx twoslash
+import { useWindowDimensions } from "react-native";
+import { useTextureValue } from "@shopify/react-native-skia";
+import { Image, Rect, rect, Canvas, Fill } from "@shopify/react-native-skia";
+import React from "react";
+
+const Demo = () => {
+  const {width, height} = useWindowDimensions();
+  const texture = useTextureValue(
+      <Fill color="cyan" />,
+    { width, height }
+  );
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Image image={texture} rect={{ x: 0, y: 0, width, height }} />
+    </Canvas>
+  )
+}
+```
+
+## `useTextureValueFromPicture`
+
+The `useTextureValueFromPicture` hook is identical to `useTextureValue` but accepts a `SkPicture` as first argument instead of a React element.
+This is useful to either generate the drawing commands outside the React lifecycle or using the imperative API to build a texture.
+
+
+```tsx twoslash
+import {useWindowDimensions} from "react-native";
+import { useTextureValueFromPicture } from "@shopify/react-native-skia";
+import { Image, Rect, rect, Canvas, Fill, Skia } from "@shopify/react-native-skia";
+import React from "react";
+
+const rec = Skia.PictureRecorder();
+const canvas = rec.beginRecording();
+canvas.drawColor(Skia.Color("cyan"));
+const picture = rec.finishRecordingAsPicture();
+
+const Demo = () => {
+  const {width, height} = useWindowDimensions();
+  const texture = useTextureValueFromPicture(
+    picture,
+    { width, height }
+  );
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Image image={texture} rect={{ x: 0, y: 0, width, height }} />
+    </Canvas>
+  )
+}
+```
+
+## Under the hood
+
+Reanimated 2 provides a [`runOnUI`](https://docs.swmansion.com/react-native-reanimated/docs/threading/runOnUI) function that enables the execution of JavaScript code on the UI thread. This function is particularly useful for creating GPU textures that can be rendered directly onto an onscreen canvas.
 
 ```tsx twoslash
 import { useEffect } from "react";
