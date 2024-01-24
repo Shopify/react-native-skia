@@ -1,3 +1,4 @@
+import type { SkRSXform } from "@shopify/react-native-skia";
 import {
   Canvas,
   Skia,
@@ -6,7 +7,9 @@ import {
   Group,
   rect,
   Rect,
+  notifyChange,
 } from "@shopify/react-native-skia";
+import { useAnimatedReaction } from "@shopify/react-native-skia/src/external/reanimated/moduleWrapper";
 import React, { useMemo, useState } from "react";
 import {
   StyleSheet,
@@ -30,7 +33,30 @@ const textureSize = {
   height: size.height + strokeWidth,
 };
 
-export const PerformanceDrawingTest: React.FC = () => {
+const useRSXformBuffer = (
+  size: number,
+  modifier: (input: SkRSXform, index: number) => void,
+  deps: unknown[]
+) => {
+  const buffer = useMemo(
+    () => new Array(size).fill(0).map(() => Skia.RSXform(1, 0, 0, 0)),
+    [size]
+  );
+  const transforms = useSharedValue(buffer);
+  useAnimatedReaction(
+    () => deps[0].value,
+    () => {
+      buffer.map((val, index) => {
+        modifier(val, index);
+        val;
+      });
+      notifyChange(transforms);
+    }
+  );
+  return transforms;
+};
+
+export const PerformanceDrawingTest = () => {
   const [numberOfBoxes, setNumberOfBoxes] = useState(300);
 
   const texture = useTextureValue(
@@ -64,17 +90,17 @@ export const PerformanceDrawingTest: React.FC = () => {
     y: height * 0.25,
   });
 
-  const buffer = sprites.map(() => Skia.RSXform(1, 0, 0, 0));
-
-  const transforms = useDerivedValue(() => {
-    return buffer.map((val, i) => {
+  const transforms = useRSXformBuffer(
+    numberOfBoxes,
+    (val, i) => {
+      "worklet";
       const tx = 5 + ((i * size.width) % width);
       const ty = 25 + Math.floor(i / (width / size.width)) * size.width;
       const r = Math.atan2(pos.value.y - ty, pos.value.x - tx);
       val.set(Math.cos(r), Math.sin(r), tx, ty);
-      return val;
-    });
-  });
+    },
+    [pos]
+  );
 
   const gesture = Gesture.Pan().onChange((e) => (pos.value = e));
 
@@ -96,7 +122,7 @@ export const PerformanceDrawingTest: React.FC = () => {
         </View>
       </View>
       <View style={{ flex: 1 }}>
-        <Canvas style={styles.container} mode="default">
+        <Canvas style={styles.container} mode="continuous">
           <Atlas image={texture} sprites={sprites} transforms={transforms} />
         </Canvas>
         <GestureDetector gesture={gesture}>
