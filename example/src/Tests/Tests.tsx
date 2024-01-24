@@ -8,14 +8,7 @@ import {
   Skia,
 } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Button,
-  PixelRatio,
-  Platform,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { PixelRatio, Platform, Text, View } from "react-native";
 
 import type { SerializedNode } from "./deserialize";
 import { parseNode, parseProps } from "./deserialize";
@@ -37,8 +30,7 @@ interface TestsProps {
 export const Tests = ({ assets }: TestsProps) => {
   const viewRef = useRef<View>(null);
   const ref = useRef<SkiaDomView>(null);
-  const [client, hostname, setHostname] = useClient();
-  const [hostnameInput, setHostnameInput] = useState<string>(hostname);
+  const [client, hostname] = useClient();
   const [drawing, setDrawing] = useState<any>(null);
   const [screen, setScreen] = useState<any>(null);
   useEffect(() => {
@@ -114,23 +106,6 @@ export const Tests = ({ assets }: TestsProps) => {
   }, [client, screen]);
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
-      {client === null && (
-        <View>
-          <Text style={{ color: "black" }}>Enter hostname:</Text>
-          <TextInput
-            style={{ color: "black", borderColor: "black", borderWidth: 1 }}
-            placeholder="Hostname"
-            value={hostnameInput}
-            onChangeText={setHostnameInput}
-          />
-          <Button
-            title="Connect"
-            onPress={() => {
-              setHostname(hostnameInput);
-            }}
-          />
-        </View>
-      )}
       <Text style={{ color: "black" }}>
         {client === null
           ? `⚪️ Connecting to server: ${hostname}. Make sure to run \`yarn e2e\` or similar`
