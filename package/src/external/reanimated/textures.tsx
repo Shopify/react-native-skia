@@ -8,10 +8,7 @@ import { drawAsPicture } from "../../renderer/Offscreen";
 
 import { runOnUI, useSharedValue } from "./moduleWrapper";
 
-// TODO: Warning: here we don't need to scale to the pixel density even thought we are drawing offscreen
-// because of the way makeImageSnapshot() currently works (it redraws and scale the canvas to the pixel density).
-// This is quite a dangerous behaviour that we probably want to sanitize.
-// A first step would be to differentiate the implementation of makeImageSnapshot between onscreen and offscreen views
+// TODO: We're not sure yet why PixelRatio is not needed here.
 const pd = 1; //Platform.PixelRatio;
 
 const createTexture = (
@@ -38,6 +35,13 @@ export const useTextureValue = (element: ReactElement, size: SkSize) => {
   const picture = useMemo(() => {
     return drawAsPicture(element);
   }, [element]);
+  return useTextureValueFromPicture(picture, size);
+};
+
+export const useTextureValueFromPicture = (
+  picture: SkPicture,
+  size: SkSize
+) => {
   const texture = useSharedValue<SkImage | null>(null);
   useEffect(() => {
     runOnUI(createTexture)(texture, picture, size);
