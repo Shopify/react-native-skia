@@ -1,0 +1,40 @@
+name: Deploy Documentation
+
+on:
+  workflow_dispatch:
+    branches:
+      - main
+
+jobs:
+  build_and_deploy_docs:
+    runs-on: ubuntu-latest
+    env:
+      WORKING_DIRECTORY: ./
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn bootstrap
+
+      - name: Build Documentation
+        run: |
+          cd docs
+          yarn install
+          yarn build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
