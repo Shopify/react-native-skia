@@ -43,16 +43,12 @@ const useRSXformBuffer = (
     [size]
   );
   const transforms = useSharedValue(buffer);
-  useAnimatedReaction(
-    () => deps[0].value,
-    () => {
-      buffer.map((val, index) => {
-        modifier(val, index);
-        val;
-      });
-      notifyChange(transforms);
-    }
-  );
+  useDerivedValue(() => {
+    buffer.map((val, index) => {
+      modifier(val, index);
+    });
+    notifyChange(transforms);
+  }, deps);
   return transforms;
 };
 
