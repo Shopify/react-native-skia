@@ -175,7 +175,7 @@ export const importSkia = (): typeof SkiaExports => {
 
 export const getSkDOM = () => {
   const { Skia } = importSkia();
-  return new JsiSkDOM({ Skia });
+  return new JsiSkDOM({ Skia }, false);
 };
 
 export const PIXEL_RATIO = 3;
@@ -197,7 +197,7 @@ export const mountCanvas = (element: ReactNode) => {
   expect(ckSurface).toBeDefined();
   const canvas = ckSurface.getCanvas();
 
-  const root = new SkiaRoot(Skia);
+  const root = new SkiaRoot(Skia, false);
   root.render(element);
   return {
     surface: ckSurface,
