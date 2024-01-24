@@ -21,7 +21,7 @@ export class SkiaRoot {
 
   constructor(
     Skia: Skia,
-    native: boolean,
+    native = false,
     redraw: () => void = () => {},
     getNativeId: () => number = () => 0
   ) {
