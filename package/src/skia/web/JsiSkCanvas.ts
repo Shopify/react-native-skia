@@ -405,7 +405,7 @@ export class JsiSkCanvas
       cls = new Uint32Array(colors.length);
       for (let i = 0; i < colors.length; i++) {
         const [r, g, b, a] = colors[i];
-        cls[i] = this.CanvasKit.ColorAsInt(r, g, b, a);
+        cls[i] = this.CanvasKit.ColorAsInt(r * 255, g * 255, b * 255, a * 255);
       }
     }
     this.ref.drawAtlas(

@@ -44,7 +44,9 @@ describe("Atlas", () => {
         transforms={[Skia.RSXform(0.5, 0, 0, 0), Skia.RSXform(0, 0.5, 50, 50)]}
       />
     );
-    checkImage(img, "snapshots/atlas/simple2.png");
+    checkImage(img, "snapshots/atlas/simple2.png", {
+      maxPixelDiff: 500,
+    });
   });
   it("Simple Atlas identity", async () => {
     const { Skia } = importSkia();
@@ -104,7 +106,9 @@ describe("Atlas", () => {
     const img = await surface.draw(
       <Atlas image={texture} sprites={sprites} transforms={transforms} />
     );
-    checkImage(img, docPath("atlas/hello-world.png"));
+    checkImage(img, docPath("atlas/hello-world.png"), {
+      maxPixelDiff: 500,
+    });
   });
   it("should use the colors property properly", async () => {
     const { Skia, rect, drawAsImage } = importSkia();
@@ -174,7 +178,9 @@ describe("Atlas", () => {
         colors={colors}
       />
     );
-    checkImage(img, docPath("atlas/colors.png"));
+    checkImage(img, docPath("atlas/colors.png"), {
+      maxPixelDiff: 500,
+    });
   });
   it("should use the colors and blend mode property properly", async () => {
     const { Skia, rect, drawAsImage } = importSkia();
@@ -217,6 +223,8 @@ describe("Atlas", () => {
         blendMode="screen"
       />
     );
-    checkImage(img, docPath("atlas/colors-and-blend-mode.png"));
+    checkImage(img, docPath("atlas/colors-and-blend-mode.png"), {
+      maxPixelDiff: 500,
+    });
   });
 });

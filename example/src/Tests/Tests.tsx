@@ -58,7 +58,6 @@ export const Tests = ({ assets }: TestsProps) => {
           setScreen(React.createElement(Screen));
         } else {
           const node = parseNode(tree, assets);
-          console.log({ node });
           setDrawing(node as SerializedNode);
         }
       };

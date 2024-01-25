@@ -25,8 +25,8 @@ protected:
                                                : nullptr;
 	  const auto blendMode = _blendModeProp->isSet() ? *_blendModeProp->getDerivedValue() : SkBlendMode::kDstOver;
 	  auto paint = *context->getPaint();
-      SkSamplingOptions sampling;
-      context->getCanvas()->drawAtlas(
+    SkSamplingOptions sampling(SkFilterMode::kLinear, SkMipmapMode::kNone);
+    context->getCanvas()->drawAtlas(
           image.get(), transforms->data(), sprites->data(), colors == nullptr ? nullptr: colors->data(),
           sprites->size(), blendMode, sampling, nullptr, &paint);
     }
