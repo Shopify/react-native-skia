@@ -400,15 +400,22 @@ export class JsiSkCanvas
       Array.from(JsiSkRect.fromValue(this.CanvasKit, s))
     );
     const dst = dsts.flatMap((s) => Array.from(JsiSkRSXform.fromValue(s)));
-    const cls = colors?.flatMap(([r, g, b, a]) =>
-      this.CanvasKit.ColorAsInt(r, g, b, a)
-    );
+    let cls: Uint32Array | undefined;
+    if (colors) {
+      cls = new Uint32Array(colors.length);
+      for (let i = 0; i < colors.length; i++) {
+        const [r, g, b, a] = colors[i];
+        cls[i] = this.CanvasKit.ColorAsInt(r, g, b, a);
+      }
+    }
     this.ref.drawAtlas(
       JsiSkImage.fromValue(atlas),
       src,
       dst,
       JsiSkPaint.fromValue(paint),
-      blendMode ? getEnum(this.CanvasKit.BlendMode, blendMode) : undefined,
+      blendMode
+        ? getEnum(this.CanvasKit.BlendMode, blendMode)
+        : this.CanvasKit.BlendMode.DstOver,
       cls
     );
   }

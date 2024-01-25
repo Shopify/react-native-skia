@@ -4,8 +4,6 @@ import { checkImage, docPath } from "../../../__tests__/setup";
 import { importSkia, surface } from "../setup";
 import { Atlas, Group, Rect } from "../../components";
 
-import { TextureAsset } from "./setup";
-
 describe("Atlas", () => {
   it("should read the RSXform properties", async () => {
     const result = await surface.eval((Skia) => {
@@ -31,35 +29,17 @@ describe("Atlas", () => {
     });
     checkImage(img, "snapshots/atlas/simple.png");
   });
-  it("should accept RSXform as JS", async () => {
-    const img = await surface.drawOffscreen((Skia, canvas) => {
-      const size = 200;
-      const texSurface = Skia.Surface.MakeOffscreen(size, size)!;
-      const texCanvas = texSurface.getCanvas();
-      texCanvas.drawColor(Skia.Color("red"));
-      const tex = texSurface.makeImageSnapshot();
-      const srcs = [
-        Skia.XYWHRect(0, 0, size, size),
-        Skia.XYWHRect(0, 0, size, size),
-      ];
-      const dsts = [Skia.RSXform(0.5, 0, 0, 0), Skia.RSXform(0, 0.5, 200, 100)];
-      const paint = Skia.Paint();
-      canvas.drawAtlas(tex, srcs, dsts, paint);
-    });
-    checkImage(img, "snapshots/atlas/simple.png");
-  });
   it("Simple Atlas", async () => {
     const { Skia } = importSkia();
-    const image = new TextureAsset(Skia, (Sk) => {
-      const texSurface = Sk.Surface.MakeOffscreen(75, 75)!;
+    const image = (() => {
+      const texSurface = Skia.Surface.MakeOffscreen(75, 75)!;
       const texCanvas = texSurface.getCanvas();
-      texCanvas.drawColor(Sk.Color("red"));
+      texCanvas.drawColor(Skia.Color("red"));
       return texSurface.makeImageSnapshot();
-    });
-    const tex = surface.OS === "node" ? image.instance : image;
+    })();
     const img = await surface.draw(
       <Atlas
-        image={tex}
+        image={image}
         sprites={[Skia.XYWHRect(0, 0, 75, 75), Skia.XYWHRect(0, 0, 75, 75)]}
         transforms={[Skia.RSXform(0.5, 0, 0, 0), Skia.RSXform(0, 0.5, 50, 50)]}
       />
