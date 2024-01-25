@@ -60,7 +60,7 @@ jobs:
 
       - name: Get NPM Package version
         id: get_npm_package_version
-        run: echo "npm_package_version=$(yarn get-version-npm| tail -2)" >> "$GITHUB_OUTPUT"
+        run: echo "npm_package_version=$(yarn get-version-npm| tail -2| head -1)" >> "$GITHUB_OUTPUT"
 
       - name: Publish to NPM
         uses: JS-DevTools/npm-publish@v1
