@@ -35,7 +35,7 @@ export const parseProps = (props: SerializedProps, assets: Assets) => {
   return newProps;
 };
 
-const parseProp = (value: any, assets: Assets) => {
+const parseProp = (value: any, assets: Assets): any => {
   if (value && typeof value === "object" && "__typename__" in value) {
     if (value.__typename__ === "Paint") {
       const paint = Skia.Paint();

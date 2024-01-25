@@ -5,6 +5,8 @@
 #include "PointProp.h"
 
 #include <memory>
+#include <vector>
+#include <utility>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
