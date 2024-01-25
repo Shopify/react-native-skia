@@ -1,8 +1,8 @@
 import React from "react";
 
-import { checkImage } from "../../../__tests__/setup";
+import { checkImage, docPath } from "../../../__tests__/setup";
 import { importSkia, surface } from "../setup";
-import { Atlas } from "../../components";
+import { Atlas, Group, Rect } from "../../components";
 
 describe("Atlas", () => {
   it("should read the RSXform properties", async () => {
@@ -40,10 +40,7 @@ describe("Atlas", () => {
         Skia.XYWHRect(0, 0, size, size),
         Skia.XYWHRect(0, 0, size, size),
       ];
-      const dsts = [
-        { scos: 0.5, ssin: 0, tx: 0, ty: 0 },
-        { scos: 0, ssin: 0.5, tx: 200, ty: 100 },
-      ];
+      const dsts = [Skia.RSXform(0.5, 0, 0, 0), Skia.RSXform(0, 0.5, 200, 100)];
       const paint = Skia.Paint();
       canvas.drawAtlas(tex, srcs, dsts, paint);
     });
@@ -86,5 +83,46 @@ describe("Atlas", () => {
       />
     );
     checkImage(img, "snapshots/atlas/identity.png");
+  });
+  it("Atlas documentation example", async () => {
+    const { Skia, rect, createTexture } = importSkia();
+    const size = { width: 25, height: 25 * 0.45 };
+    const strokeWidth = 2;
+    const textureSize = {
+      width: size.width + strokeWidth,
+      height: size.height + strokeWidth,
+    };
+    const texture = createTexture(
+      <Group>
+        <Rect
+          rect={rect(strokeWidth / 2, strokeWidth / 2, size.width, size.height)}
+          color="#00ff00"
+        />
+        <Rect
+          rect={rect(strokeWidth / 2, strokeWidth / 2, size.width, size.height)}
+          color="#4060A3"
+          style="stroke"
+          strokeWidth={strokeWidth}
+        />
+      </Group>,
+      textureSize
+    );
+    const numberOfBoxes = 150;
+    const pos = { x: 128, y: 128 };
+    const width = 256;
+    const sprites = new Array(numberOfBoxes)
+      .fill(0)
+      .map(() => rect(0, 0, textureSize.width, textureSize.height));
+    const transforms = new Array(numberOfBoxes).fill(0).map((_, i) => {
+      const tx = 5 + ((i * size.width) % width);
+      const ty = 25 + Math.floor(i / (width / size.width)) * size.width;
+      const r = Math.atan2(pos.y - ty, pos.x - tx);
+      return Skia.RSXform(Math.cos(r), Math.sin(r), tx, ty);
+    });
+
+    const img = await surface.draw(
+      <Atlas image={texture} sprites={sprites} transforms={transforms} />
+    );
+    checkImage(img, docPath("atlas/hello-world.png"));
   });
 });

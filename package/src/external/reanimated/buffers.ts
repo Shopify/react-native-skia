@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import type { SkRSXform, SkRect } from "../../skia";
+import type { SkColor, SkPoint, SkRSXform, SkRect } from "../../skia/types";
 import { Skia } from "../../skia";
 
 import { useDerivedValue, useSharedValue } from "./moduleWrapper";
@@ -43,3 +43,17 @@ export const useRSXformBuffer = (
   modifier: (input: SkRSXform, index: number) => void,
   deps: unknown[]
 ) => useBuffer(size, () => Skia.RSXform(1, 0, 0, 0), modifier, deps);
+
+// Usage for Point Buffer
+export const usePointBuffer = (
+  size: number,
+  modifier: (input: SkPoint, index: number) => void,
+  deps: unknown[]
+) => useBuffer(size, () => Skia.Point(0, 0), modifier, deps);
+
+// Usage for Color Buffer
+export const useColorBuffer = (
+  size: number,
+  modifier: (input: SkColor, index: number) => void,
+  deps: unknown[]
+) => useBuffer(size, () => Skia.Color("black"), modifier, deps);

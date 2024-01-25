@@ -20,6 +20,12 @@ export class JsiSkRSXform
   constructor(CanvasKit: CanvasKit, ref: RSXform) {
     super(CanvasKit, ref, "RSXform");
   }
+  set(scos: number, ssin: number, tx: number, ty: number) {
+    this.ref[0] = scos;
+    this.ref[1] = ssin;
+    this.ref[2] = tx;
+    this.ref[3] = ty;
+  }
   get scos() {
     return this.ref[0];
   }

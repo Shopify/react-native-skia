@@ -16,6 +16,7 @@ import type {
   SkPaint,
   SkRect,
   SkRSXform,
+  SkColor,
 } from "../../skia/types";
 
 import type {
@@ -63,6 +64,7 @@ export interface AtlasProps extends DrawingNodeProps {
   image: SkImage | null;
   sprites: SkRect[];
   transforms: SkRSXform[];
+  colors?: SkColor[];
 }
 
 export interface CubicBezierHandle {

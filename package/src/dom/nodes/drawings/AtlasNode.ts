@@ -14,9 +14,8 @@ export class AtlasNode extends JsiDrawingNode<AtlasProps, null> {
 
   draw({ canvas, paint }: DrawingContext) {
     const { image, sprites, transforms } = this.props;
-    if (this.derived === undefined) {
-      throw new Error("RRectNode: rect is undefined");
+    if (image) {
+      canvas.drawAtlas(image, sprites, transforms, paint);
     }
-    canvas.drawAtlas(image, sprites, transforms, paint);
   }
 }
