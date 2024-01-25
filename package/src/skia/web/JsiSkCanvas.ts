@@ -403,7 +403,6 @@ export class JsiSkCanvas
     const cls = colors?.flatMap(([r, g, b, a]) =>
       this.CanvasKit.ColorAsInt(r, g, b, a)
     );
-    // TODO: add support for sampling options
     this.ref.drawAtlas(
       JsiSkImage.fromValue(atlas),
       src,

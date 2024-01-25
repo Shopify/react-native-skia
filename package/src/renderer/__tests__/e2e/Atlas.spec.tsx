@@ -123,6 +123,121 @@ describe("Atlas", () => {
     const img = await surface.draw(
       <Atlas image={texture} sprites={sprites} transforms={transforms} />
     );
-    checkImage(img, docPath("atlas/hello-world.png"), { overwrite: true });
+    checkImage(img, docPath("atlas/hello-world.png"));
+  });
+  it("should use the colors property properly", async () => {
+    const { Skia, rect, drawAsImage } = importSkia();
+    const size = { width: 25, height: 25 * 0.45 };
+    const strokeWidth = 2;
+    const textureSize = {
+      width: size.width + strokeWidth,
+      height: size.height + strokeWidth,
+    };
+    const texture = drawAsImage(
+      <Group>
+        <Rect
+          rect={rect(strokeWidth / 2, strokeWidth / 2, size.width, size.height)}
+          color="black"
+        />
+      </Group>,
+      textureSize
+    );
+    const numberOfBoxes = 150;
+    const pos = { x: 128, y: 128 };
+    const width = 256;
+    const sprites = new Array(numberOfBoxes)
+      .fill(0)
+      .map(() => rect(0, 0, textureSize.width, textureSize.height));
+    const transforms = new Array(numberOfBoxes).fill(0).map((_, i) => {
+      const tx = 5 + ((i * size.width) % width);
+      const ty = 25 + Math.floor(i / (width / size.width)) * size.width;
+      const r = Math.atan2(pos.y - ty, pos.x - tx);
+      return Skia.RSXform(Math.cos(r), Math.sin(r), tx, ty);
+    });
+    class SeededRandom {
+      private seed: number;
+
+      constructor(seed: number) {
+        this.seed = seed;
+      }
+
+      // Linear Congruential Generator
+      next(): number {
+        this.seed = (this.seed * 9301 + 49297) % 233280;
+        return this.seed / 233280;
+      }
+    }
+
+    function generateSeededRandomColor(seed: number): string {
+      const random = new SeededRandom(seed);
+
+      const red = Math.floor(random.next() * 256);
+      const green = Math.floor(random.next() * 256);
+      const blue = Math.floor(random.next() * 256);
+
+      const redHex = red.toString(16).padStart(2, "0");
+      const greenHex = green.toString(16).padStart(2, "0");
+      const blueHex = blue.toString(16).padStart(2, "0");
+
+      return `#${redHex}${greenHex}${blueHex}`;
+    }
+
+    const colors = new Array(numberOfBoxes)
+      .fill(0)
+      .map((_, i) => Skia.Color(generateSeededRandomColor(i)));
+    const img = await surface.draw(
+      <Atlas
+        image={texture}
+        sprites={sprites}
+        transforms={transforms}
+        colors={colors}
+      />
+    );
+    checkImage(img, docPath("atlas/colors.png"), { overwrite: true });
+  });
+  it("should use the colors and blend mode property properly", async () => {
+    const { Skia, rect, drawAsImage } = importSkia();
+    const size = { width: 25, height: 25 * 0.45 };
+    const strokeWidth = 2;
+    const textureSize = {
+      width: size.width + strokeWidth,
+      height: size.height + strokeWidth,
+    };
+    const texture = drawAsImage(
+      <Group>
+        <Rect
+          rect={rect(strokeWidth / 2, strokeWidth / 2, size.width, size.height)}
+          color="rgb(36,43,56)"
+        />
+      </Group>,
+      textureSize
+    );
+    const numberOfBoxes = 150;
+    const pos = { x: 128, y: 128 };
+    const width = 256;
+    const sprites = new Array(numberOfBoxes)
+      .fill(0)
+      .map(() => rect(0, 0, textureSize.width, textureSize.height));
+    const transforms = new Array(numberOfBoxes).fill(0).map((_, i) => {
+      const tx = 5 + ((i * size.width) % width);
+      const ty = 25 + Math.floor(i / (width / size.width)) * size.width;
+      const r = Math.atan2(pos.y - ty, pos.x - tx);
+      return Skia.RSXform(Math.cos(r), Math.sin(r), tx, ty);
+    });
+    const colors = new Array(numberOfBoxes)
+      .fill(0)
+      .map(() => Skia.Color("#61bea2"));
+    const img = await surface.draw(
+      <Atlas
+        image={texture}
+        sprites={sprites}
+        transforms={transforms}
+        colors={colors}
+        blendMode="screen"
+      />
+    );
+    checkImage(img, docPath("atlas/colors-and-blend-mode.png"), {
+      overwrite: true,
+    });
   });
 });
