@@ -14,6 +14,8 @@ In Skia, paths are semantically identical to [SVG Paths](https://developer.mozil
 | end       | `number` | Trims the end of the path. Value is in the range `[0, 1]` (default is 1). |
 | stroke    | `StrokeOptions` | Turns this path into the filled equivalent of the stroked path. This will fail if the path is a hairline. `StrokeOptions` describes how the stroked path should look. It contains three properties: `width`, `strokeMiterLimit` and, `precision` |
 
+React Native Skia also provides [Path Effects](/docs/path-effects) and [Path hooks](/docs/animations/hooks) for animations.
+
 ### Using SVG Notation
 
 ```tsx twoslash

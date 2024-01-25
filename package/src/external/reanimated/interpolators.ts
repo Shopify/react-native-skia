@@ -8,6 +8,7 @@ import { useCallback, useMemo } from "react";
 import type { SkPath, SkPoint } from "../../skia/types";
 import { interpolatePaths, interpolateVector } from "../../animation";
 import { Skia } from "../../skia";
+import { Platform } from "../../Platform";
 
 import {
   useAnimatedReaction,
@@ -18,7 +19,7 @@ import {
 
 export const notifyChange = (value: SharedValue<unknown>) => {
   "worklet";
-  if (_WORKLET) {
+  if (_WORKLET || Platform.OS === "web") {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (value as any)._value = value.value;
   }
@@ -86,8 +87,20 @@ export const usePathInterpolation = (
   input: number[],
   outputRange: SkPath[],
   options?: ExtrapolationType
-) =>
-  useInterpolator(
+) => {
+  // Check if all paths in outputRange are interpolable
+  const allPathsInterpolable = outputRange
+    .slice(1)
+    .every((path) => outputRange[0].isInterpolatable(path));
+  if (!allPathsInterpolable) {
+    // Handle the case where not all paths are interpolable
+    // For example, throw an error or return early
+    throw new Error(
+      `Not all paths in the output range are interpolable.
+See: https://shopify.github.io/react-native-skia/docs/animations/hooks#usepathinterpolation`
+    );
+  }
+  return useInterpolator(
     () => Skia.Path.Make(),
     value,
     interpolatePaths,
@@ -95,6 +108,7 @@ export const usePathInterpolation = (
     outputRange,
     options
   );
+};
 
 export const useVectorInterpolation = (
   value: SharedValue<number>,

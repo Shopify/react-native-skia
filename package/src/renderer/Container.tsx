@@ -13,9 +13,10 @@ export class Container {
   constructor(
     Skia: Skia,
     public redraw: () => void = () => {},
-    public getNativeId: () => number = () => 0
+    public getNativeId: () => number = () => 0,
+    native: boolean
   ) {
-    this.Sk = new JsiSkDOM({ Skia });
+    this.Sk = new JsiSkDOM({ Skia }, native);
     this._root = this.Sk.Group();
   }
 

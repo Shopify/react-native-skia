@@ -5,7 +5,6 @@
 #include <string>
 #include <utility>
 
-#include "JniSkiaDrawView.h"
 #include <RNSkManager.h>
 
 namespace RNSkia {

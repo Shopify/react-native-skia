@@ -50,7 +50,7 @@ jobs:
 
       - name: Get NPM Package name
         id: get_npm_package_name
-        run: echo "::set-output name=npm_package_name::$(yarn get-filename-npm| grep ^'shopify')"
+        run: echo "npm_package_name=$(yarn get-filename-npm| grep ^'shopify')" >> "$GITHUB_OUTPUT"
 
       - name: Upload artifacts - NPM Package
         uses: actions/upload-artifact@v2
@@ -60,7 +60,7 @@ jobs:
 
       - name: Get NPM Package version
         id: get_npm_package_version
-        run: echo "::set-output name=npm_package_version::$(yarn get-version-npm| tail -2)"
+        run: echo "npm_package_version=$(yarn get-version-npm| tail -2| head -1)" >> "$GITHUB_OUTPUT"
 
       - name: Publish to NPM
         uses: JS-DevTools/npm-publish@v1

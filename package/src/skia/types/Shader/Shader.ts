@@ -7,7 +7,12 @@ export const isShader = (obj: SkJSIInstance<string> | null): obj is SkShader =>
 
 export type SkShader = SkJSIInstance<"Shader">;
 
-export type Uniform = number | Vector | Float32Array | Uniform[];
+export type Uniform =
+  | number
+  | Vector
+  | Float32Array
+  | readonly Uniform[]
+  | Uniform[];
 
 export interface Uniforms {
   [name: string]: Uniform;

@@ -4,8 +4,7 @@
 
 #include <memory>
 
-#include <RNSkJsView.h>
-
+#include "RNSkView.h"
 #include "SkiaOpenGLSurfaceFactory.h"
 #include <android/native_window.h>
 
