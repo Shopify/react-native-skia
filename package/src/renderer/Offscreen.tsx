@@ -17,13 +17,13 @@ export const drawAsPicture = (element: ReactElement) => {
   return picture;
 };
 
-export const createTexture = (element: ReactElement, size: SkSize) => {
-  return createTextureFromPicture(drawAsPicture(element), size);
+export const drawAsImage = (element: ReactElement, size: SkSize) => {
+  return drawAsImageFromPicture(drawAsPicture(element), size);
 };
 
 // TODO: We're not sure yet why PixelRatio is not needed here.
 const pd = 1;
-export const createTextureFromPicture = (picture: SkPicture, size: SkSize) => {
+export const drawAsImageFromPicture = (picture: SkPicture, size: SkSize) => {
   "worklet";
   const surface = Skia.Surface.MakeOffscreen(
     size.width * pd,
@@ -33,13 +33,4 @@ export const createTextureFromPicture = (picture: SkPicture, size: SkSize) => {
   canvas.drawPicture(picture);
   surface.flush();
   return surface.makeImageSnapshot();
-};
-
-// We keep this function for backward compatibility.
-export const drawAsImage = (
-  element: ReactElement,
-  width: number,
-  height: number
-) => {
-  return createTexture(element, { width, height });
 };

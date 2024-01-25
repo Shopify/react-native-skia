@@ -4,7 +4,7 @@ import type { SharedValue } from "react-native-reanimated";
 
 import type { SkImage, SkPicture, SkSize } from "../../skia/types";
 import {
-  createTextureFromPicture,
+  drawAsImageFromPicture,
   drawAsPicture,
 } from "../../renderer/Offscreen";
 
@@ -16,7 +16,7 @@ const createTextureValue = (
   size: SkSize
 ) => {
   "worklet";
-  texture.value = createTextureFromPicture(picture, size);
+  texture.value = drawAsImageFromPicture(picture, size);
 };
 
 export const useTextureValue = (element: ReactElement, size: SkSize) => {

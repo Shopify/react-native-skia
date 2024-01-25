@@ -16,7 +16,7 @@ import {
   Button,
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, { useSharedValue } from "react-native-reanimated";
+import { useSharedValue } from "react-native-reanimated";
 
 const Increaser = 50;
 
@@ -34,11 +34,11 @@ export const PerformanceDrawingTest = () => {
     <Group>
       <Rect
         rect={rect(strokeWidth / 2, strokeWidth / 2, size.width, size.height)}
-        color="#00ff00"
+        color="cyan"
       />
       <Rect
         rect={rect(strokeWidth / 2, strokeWidth / 2, size.width, size.height)}
-        color="#4060A3"
+        color="blue"
         style="stroke"
         strokeWidth={strokeWidth}
       />
@@ -56,7 +56,7 @@ export const PerformanceDrawingTest = () => {
 
   const { width, height } = useWindowDimensions();
 
-  const pos = useSharedValue<{ x: number; y: number }>({
+  const pos = useSharedValue({
     x: width / 2,
     y: height * 0.25,
   });
@@ -93,11 +93,10 @@ export const PerformanceDrawingTest = () => {
         </View>
       </View>
       <View style={{ flex: 1 }}>
-        <Canvas style={styles.container} mode="continuous">
-          <Atlas image={texture} sprites={sprites} transforms={transforms} />
-        </Canvas>
         <GestureDetector gesture={gesture}>
-          <Animated.View style={StyleSheet.absoluteFill} />
+          <Canvas style={styles.container} mode="continuous">
+            <Atlas image={texture} sprites={sprites} transforms={transforms} />
+          </Canvas>
         </GestureDetector>
       </View>
     </View>

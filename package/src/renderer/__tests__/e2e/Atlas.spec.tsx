@@ -85,22 +85,22 @@ describe("Atlas", () => {
     checkImage(img, "snapshots/atlas/identity.png");
   });
   it("Atlas documentation example", async () => {
-    const { Skia, rect, createTexture } = importSkia();
+    const { Skia, rect, drawAsImage } = importSkia();
     const size = { width: 25, height: 25 * 0.45 };
     const strokeWidth = 2;
     const textureSize = {
       width: size.width + strokeWidth,
       height: size.height + strokeWidth,
     };
-    const texture = createTexture(
+    const texture = drawAsImage(
       <Group>
         <Rect
           rect={rect(strokeWidth / 2, strokeWidth / 2, size.width, size.height)}
-          color="#00ff00"
+          color="cyan"
         />
         <Rect
           rect={rect(strokeWidth / 2, strokeWidth / 2, size.width, size.height)}
-          color="#4060A3"
+          color="blue"
           style="stroke"
           strokeWidth={strokeWidth}
         />
@@ -123,6 +123,6 @@ describe("Atlas", () => {
     const img = await surface.draw(
       <Atlas image={texture} sprites={sprites} transforms={transforms} />
     );
-    checkImage(img, docPath("atlas/hello-world.png"));
+    checkImage(img, docPath("atlas/hello-world.png"), { overwrite: true });
   });
 });
