@@ -30,6 +30,7 @@ export const drawAsImageFromPicture = (picture: SkPicture, size: SkSize) => {
     size.height * pd
   )!;
   const canvas = surface.getCanvas();
+  canvas.scale(pd, pd);
   canvas.drawPicture(picture);
   surface.flush();
   return surface.makeImageSnapshot();

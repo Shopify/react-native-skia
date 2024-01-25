@@ -23,11 +23,12 @@ protected:
       const auto transforms = _rsxFormsProp->getDerivedValue();
       const auto colors = _colorsProp->isSet() ? _colorsProp->getDerivedValue()
                                                : nullptr;
+	  const auto blendMode = _blendModeProp->isSet() ? *_blendModeProp->getDerivedValue() : SkBlendMode::kDstOver;
+	  auto paint = *context->getPaint();
       SkSamplingOptions sampling;
-      SkPaint paint;
       context->getCanvas()->drawAtlas(
           image.get(), transforms->data(), sprites->data(), colors == nullptr ? nullptr: colors->data(),
-          sprites->size(), SkBlendMode::kDstOver, sampling, nullptr, &paint);
+          sprites->size(), blendMode, sampling, nullptr, &paint);
     }
   }
 
@@ -37,6 +38,7 @@ protected:
     _rsxFormsProp = container->defineProperty<RSXFormsProp>("transforms");
     _imageProp = container->defineProperty<ImageProp>("image");
     _colorsProp = container->defineProperty<ColorsProp>("colors");
+	_blendModeProp = container->defineProperty<BlendModeProp>("blendMode");
 
     _rectsProp->require();
     _rsxFormsProp->require();
@@ -48,6 +50,7 @@ private:
   RectsProp *_rectsProp;
   RSXFormsProp *_rsxFormsProp;
   ColorsProp *_colorsProp;
+  BlendModeProp *_blendModeProp;
 };
 
 } // namespace RNSkia
