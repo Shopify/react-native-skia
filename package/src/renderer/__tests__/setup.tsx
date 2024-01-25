@@ -293,7 +293,22 @@ const serializeSkOjects = (obj: any): any => {
         source: skObj.source,
         context: skObj.context,
       };
+    } else if (obj.__typename__ === "RSXform") {
+      return {
+        __typename__: "RSXform",
+        scos: obj.scos,
+        ssin: obj.ssin,
+        tx: obj.tx,
+        ty: obj.ty,
+      };
     }
+  } else if (typeof obj === "object") {
+    const keys = Object.keys(obj);
+    const res: any = {};
+    keys.forEach((key) => {
+      res[key] = serializeSkOjects(obj[key]);
+    });
+    return res;
   }
   return obj;
 };
