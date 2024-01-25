@@ -1,7 +1,7 @@
 #pragma once
 
-#include "RectProp.h"
 #include "JsiDomDrawingNode.h"
+#include "RectProp.h"
 #include "SkImageProps.h"
 
 #include <memory>
@@ -25,8 +25,8 @@ protected:
       SkSamplingOptions sampling;
       SkPaint paint;
       context->getCanvas()->drawAtlas(
-          image.get(), transforms->data(), sprites->data(), nullptr, sprites->size(),
-          SkBlendMode::kSrcOver, sampling, nullptr, &paint);
+          image.get(), transforms->data(), sprites->data(), nullptr,
+          sprites->size(), SkBlendMode::kSrcOver, sampling, nullptr, &paint);
     }
   }
 
@@ -36,8 +36,8 @@ protected:
     _rsxFormsProp = container->defineProperty<RSXFormsProp>("transforms");
     _imageProp = container->defineProperty<ImageProp>("image");
 
-	_rectsProp->require();
-	_rsxFormsProp->require();
+    _rectsProp->require();
+    _rsxFormsProp->require();
     _imageProp->require();
   }
 

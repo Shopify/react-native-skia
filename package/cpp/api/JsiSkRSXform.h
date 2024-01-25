@@ -55,10 +55,8 @@ public:
                               JSI_EXPORT_PROP_GET(JsiSkRSXform, tx),
                               JSI_EXPORT_PROP_GET(JsiSkRSXform, ty))
 
-  JSI_EXPORT_FUNCTIONS(
-    JSI_EXPORT_FUNC(JsiSkRSXform, set),
-    JSI_EXPORT_FUNC(JsiSkRSXform, dispose)
-  )
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkRSXform, set),
+                       JSI_EXPORT_FUNC(JsiSkRSXform, dispose))
 
   /**
   Returns the underlying object from a host object of this type

@@ -1,8 +1,8 @@
 #pragma once
 
+#include "JsiSkRSXform.h"
 #include "NodeProp.h"
 #include "PointProp.h"
-#include "JsiSkRSXform.h"
 
 #include <memory>
 
@@ -132,11 +132,10 @@ private:
   RectPropFromProps *_rectPropFromProps;
 };
 
-
 class RectsProp : public DerivedProp<std::vector<SkRect>> {
 public:
   explicit RectsProp(PropId name,
-                      const std::function<void(BaseNodeProp *)> &onChange)
+                     const std::function<void(BaseNodeProp *)> &onChange)
       : DerivedProp<std::vector<SkRect>>(onChange) {
     _rectsProp = defineProperty<NodeProp>(name);
   }
@@ -164,7 +163,7 @@ private:
 class RSXFormsProp : public DerivedProp<std::vector<SkRSXform>> {
 public:
   explicit RSXFormsProp(PropId name,
-                      const std::function<void(BaseNodeProp *)> &onChange)
+                        const std::function<void(BaseNodeProp *)> &onChange)
       : DerivedProp<std::vector<SkRSXform>>(onChange) {
     _rsxFormsProp = defineProperty<NodeProp>(name);
   }
@@ -178,7 +177,9 @@ public:
       for (size_t i = 0; i < rsxforms.size(); ++i) {
         auto val = rsxforms[i];
         if (val.getType() == PropType::HostObject) {
-          auto rsx = std::dynamic_pointer_cast<JsiSkRSXform>(val.getAsHostObject())->getObject();
+          auto rsx =
+              std::dynamic_pointer_cast<JsiSkRSXform>(val.getAsHostObject())
+                  ->getObject();
           derivedRSXForms.push_back(*rsx);
         }
       }
