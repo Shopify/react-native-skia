@@ -13,9 +13,38 @@ Its design particularly useful when using with [Reanimated](#animations).
 |:--------|:-----------------|:-----------------|
 | image   | `SkImage or null` | Altas: image containing the sprites. |
 | sprites | `SkRect[]` | locations of sprites in atlas.             |
-| transforms | `RSXForm[]` | Rotation/scale transforms to be applied for each sprite. |
+| transforms | `RSXform[]` | Rotation/scale transforms to be applied for each sprite. |
 | colors? | `SkColor[]` | Optional. Color to blend the sprites with. |
 | blendMode? | `BlendMode` | Optional. Blend mode used to combine sprites and colors together. |
+
+## RSXform
+
+The RSXform object used by the altas API is the compression of the following matrix: `[fSCos -fSSin fTx, fSSin fSCos fTy, 0, 0, 1]`. Below are few transformations that you will find useful:
+
+```tsx twoslash
+import {Skia} from "@shopify/react-native-skia";
+
+// 1. Identify (doesn't do anything)
+let rsxForm = Skia.RSXform(1, 0, 0, 0);
+
+// 2. Scale by 2 and translate by (50, 100)
+rsxForm = Skia.RSXform(2, 0, 50, 100);
+
+// 3. Rotate by Math.PI/6, default pivot point is (0,0)
+const r = Math.PI/4;
+const scos = Math.cos(r);
+const ssin = Math.sin(r);
+let tx = 50;
+let ty = 100;
+rsxForm = Skia.RSXform(scos, ssin, tx, ty);
+
+// 4. Rotate by Math.PI/6, with pivot point (25, 25)
+const px = 50;
+const py = 50;
+tx = px - scos * px + ssin * py;
+ty = py - ssin * px - scos * py
+rsxForm = Skia.RSXform(scos, ssin, px, py);
+```
 
 ## Hello World
 

@@ -29,6 +29,38 @@ describe("Atlas", () => {
     });
     checkImage(img, "snapshots/atlas/simple.png");
   });
+  it("should test the RSXforms", async () => {
+    const { Skia } = importSkia();
+    const image = (() => {
+      const texSurface = Skia.Surface.MakeOffscreen(50, 50)!;
+      const texCanvas = texSurface.getCanvas();
+      texCanvas.drawColor(Skia.Color("cyan"));
+      return texSurface.makeImageSnapshot();
+    })();
+    const rct = Skia.XYWHRect(0, 0, 50, 50);
+    const scos = Math.cos(Math.PI / 4);
+    const ssin = Math.sin(Math.PI / 4);
+    const px = 25;
+    const py = 25;
+    const tx = px - scos * px + ssin * py;
+    const ty = py - ssin * px - scos * py;
+    const img = await surface.draw(
+      <Atlas
+        image={image}
+        sprites={[rct, rct, rct, rct, rct]}
+        transforms={[
+          Skia.RSXform(1, 0, 0, 0),
+          Skia.RSXform(0.5, 0, 100, 12.5),
+          Skia.RSXform(scos, ssin, 200, 0),
+          Skia.RSXform(scos, ssin, 0, 200),
+          Skia.RSXform(scos, ssin, tx, ty + 100),
+        ]}
+      />
+    );
+    checkImage(img, "snapshots/atlas/rsxform.png", {
+      maxPixelDiff: 500,
+    });
+  });
   it("Simple Atlas", async () => {
     const { Skia } = importSkia();
     const image = (() => {
