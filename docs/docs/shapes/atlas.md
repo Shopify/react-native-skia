@@ -106,7 +106,7 @@ The example below is identical to the one above but the position is an animation
 
 
 ```tsx twoslash
-import {Skia, drawAsImage, Group, Rect, Canvas, Atlas, rect, useTextureValue} from "@shopify/react-native-skia";
+import {Skia, drawAsImage, Group, Rect, Canvas, Atlas, rect, useTextureValue, useRSXformBuffer} from "@shopify/react-native-skia";
 import {useSharedValue, useDerivedValue} from "react-native-reanimated";
 import {GestureDetector, Gesture} from "react-native-gesture-handler";
 
@@ -141,13 +141,13 @@ export const Demo = () => {
     .fill(0)
     .map(() => rect(0, 0, textureSize.width, textureSize.height));
 
-
-  const transforms = useDerivedValue(() => sprites.map((_, i) => {
+  const transforms = useRSXformBuffer(numberOfBoxes, (val, i) => {
+    "worklet";
     const tx = 5 + ((i * size.width) % width);
     const ty = 25 + Math.floor(i / (width / size.width)) * size.width;
     const r = Math.atan2(pos.value.y - ty, pos.value.x - tx);
-    return Skia.RSXform(Math.cos(r), Math.sin(r), tx, ty);
-  }));
+    val.set(Math.cos(r), Math.sin(r), tx, ty);
+  });
 
   return (
     <GestureDetector gesture={gesture}>

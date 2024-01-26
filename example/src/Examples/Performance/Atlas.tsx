@@ -61,17 +61,13 @@ export const PerformanceDrawingTest = () => {
     y: height * 0.25,
   });
 
-  const transforms = useRSXformBuffer(
-    numberOfBoxes,
-    (val, i) => {
-      "worklet";
-      const tx = 5 + ((i * size.width) % width);
-      const ty = 25 + Math.floor(i / (width / size.width)) * size.width;
-      const r = Math.atan2(pos.value.y - ty, pos.value.x - tx);
-      val.set(Math.cos(r), Math.sin(r), tx, ty);
-    },
-    [pos]
-  );
+  const transforms = useRSXformBuffer(numberOfBoxes, (val, i) => {
+    "worklet";
+    const tx = 5 + ((i * size.width) % width);
+    const ty = 25 + Math.floor(i / (width / size.width)) * size.width;
+    const r = Math.atan2(pos.value.y - ty, pos.value.x - tx);
+    val.set(Math.cos(r), Math.sin(r), tx, ty);
+  });
 
   const gesture = Gesture.Pan().onChange((e) => (pos.value = e));
 
