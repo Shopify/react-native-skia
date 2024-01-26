@@ -6,7 +6,7 @@ import type { SkTypeface, TypefaceFactory } from "./Typeface";
 import type { ImageFactory } from "./Image";
 import type { MaskFilterFactory } from "./MaskFilter";
 import type { SkPaint } from "./Paint";
-import type { SkRect } from "./Rect";
+import type { SkHostRect, SkRect } from "./Rect";
 import type { SkRRect } from "./RRect";
 import type {
   RuntimeEffectFactory,
@@ -36,10 +36,18 @@ import type { ParagraphBuilderFactory } from "./Paragraph/ParagraphBuilder";
  */
 export interface Skia {
   Point: (x: number, y: number) => SkPoint;
-  XYWHRect: (x: number, y: number, width: number, height: number) => SkRect;
+  XYWHRect: (x: number, y: number, width: number, height: number) => SkHostRect;
   RuntimeShaderBuilder: (rt: SkRuntimeEffect) => SkRuntimeShaderBuilder;
   RRectXY: (rect: SkRect, rx: number, ry: number) => SkRRect;
   RSXform: (scos: number, ssin: number, tx: number, ty: number) => SkRSXform;
+  RSXformFromRadians: (
+    scale: number,
+    radians: number,
+    tx: number,
+    ty: number,
+    px: number,
+    py: number
+  ) => SkRSXform;
   Color: (color: Color) => SkColor;
   ContourMeasureIter: (
     path: SkPath,

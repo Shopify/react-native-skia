@@ -51,6 +51,7 @@ const sidebars = {
         "shapes/path",
         "shapes/polygons",
         "shapes/ellipses",
+        "shapes/atlas",
         "shapes/vertices",
         "shapes/patch",
         "shapes/pictures",

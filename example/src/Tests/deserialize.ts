@@ -35,7 +35,7 @@ export const parseProps = (props: SerializedProps, assets: Assets) => {
   return newProps;
 };
 
-const parseProp = (value: any, assets: Assets) => {
+const parseProp = (value: any, assets: Assets): any => {
   if (value && typeof value === "object" && "__typename__" in value) {
     if (value.__typename__ === "Paint") {
       const paint = Skia.Paint();
@@ -80,6 +80,8 @@ const parseProp = (value: any, assets: Assets) => {
         throw new Error(`Asset ${value.name} not found`);
       }
       return Skia.Font(asset, value.size);
+    } else if (value.__typename__ === "RSXform") {
+      return Skia.RSXform(value.scos, value.ssin, value.tx, value.ty);
     } else if (value.__typename__ === "Function") {
       // eslint-disable-next-line no-eval
       return eval(
@@ -88,6 +90,8 @@ const parseProp = (value: any, assets: Assets) => {
         Skia,
       });
     }
+  } else if (Array.isArray(value)) {
+    return value.map((v) => parseProp(v, assets));
   }
   return value;
 };

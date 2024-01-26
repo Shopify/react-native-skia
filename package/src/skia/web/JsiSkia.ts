@@ -52,6 +52,21 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
     new JsiSkRRect(CanvasKit, rect, rx, ry),
   RSXform: (scos: number, ssin: number, tx: number, ty: number) =>
     new JsiSkRSXform(CanvasKit, Float32Array.of(scos, ssin, tx, ty)),
+  RSXformFromRadians: (
+    scale: number,
+    r: number,
+    tx: number,
+    ty: number,
+    px: number,
+    py: number
+  ) => {
+    const s = Math.sin(r) * scale;
+    const c = Math.cos(r) * scale;
+    return new JsiSkRSXform(
+      CanvasKit,
+      Float32Array.of(c, s, tx - c * px + s * py, ty - s * px - c * py)
+    );
+  },
   Color,
   ContourMeasureIter: (
     path: SkPath,

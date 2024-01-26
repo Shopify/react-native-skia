@@ -38,6 +38,7 @@ import type {
   BoxProps,
   BoxShadowProps,
   ChildrenProps,
+  AtlasProps,
 } from "../types";
 import type {
   BlendImageFilterProps,
@@ -79,6 +80,7 @@ import {
   BackdropFilterNode,
   BoxNode,
   BoxShadowNode,
+  AtlasNode,
 } from "./drawings";
 import {
   BlendImageFilterNode,
@@ -245,6 +247,12 @@ export class JsiSkDOM implements SkDOM {
     return this.native
       ? global.SkiaDomApi.PictureNode(props)
       : new PictureNode(this.ctx, props);
+  }
+
+  Atlas(props: AtlasProps) {
+    return this.native
+      ? global.SkiaDomApi.AtlasNode(props)
+      : new AtlasNode(this.ctx, props);
   }
 
   ImageSVG(props: ImageSVGProps) {

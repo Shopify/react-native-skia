@@ -6,7 +6,7 @@ export abstract class SkiaObject<
   R extends SkJSIInstance<string>
 > {
   protected _source: string;
-  protected instance: R;
+  protected _instance: R;
 
   constructor(
     Skia: Skia,
@@ -14,7 +14,7 @@ export abstract class SkiaObject<
     public _context: Ctx
   ) {
     this._source = fn.toString();
-    this.instance = fn(Skia, _context);
+    this._instance = fn(Skia, _context);
   }
 
   get source() {
@@ -23,5 +23,9 @@ export abstract class SkiaObject<
 
   get context() {
     return this._context;
+  }
+
+  get instance() {
+    return this._instance;
   }
 }
