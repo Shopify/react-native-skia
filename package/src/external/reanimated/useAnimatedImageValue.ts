@@ -1,4 +1,4 @@
-import { useLayoutEffect, useEffect } from "react";
+import { useEffect } from "react";
 import type { FrameInfo } from "react-native-reanimated";
 
 import { useAnimatedImage } from "../../skia/core/AnimatedImage";
