@@ -1,4 +1,4 @@
-import { SkJSIInstance } from "./JsiInstance";
+import type { SkJSIInstance } from "./JsiInstance";
 
 export interface SkRect {
   readonly x: number;
