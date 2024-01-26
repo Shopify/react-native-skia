@@ -56,6 +56,7 @@ export const useAnimatedImageValue = (source: DataSourceParam) => {
     return () => {
       animatedImage?.dispose();
     };
-  }, [animatedImage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return currentFrame;
 };
