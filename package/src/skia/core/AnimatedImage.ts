@@ -12,5 +12,6 @@ const animatedImgFactory = Skia.AnimatedImage.MakeAnimatedImageFromEncoded.bind(
  * */
 export const useAnimatedImage = (
   source: DataSourceParam,
-  onError?: (err: Error) => void
-) => useRawData(source, animatedImgFactory, onError);
+  onError?: (err: Error) => void,
+  managed = true
+) => useRawData(source, animatedImgFactory, onError, managed);
