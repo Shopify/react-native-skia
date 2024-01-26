@@ -15,6 +15,8 @@ import type {
   SkSVG,
   SkPaint,
   SkRect,
+  SkRSXform,
+  SkColor,
 } from "../../skia/types";
 
 import type {
@@ -57,6 +59,13 @@ export type OvalProps = RectDef & DrawingNodeProps;
 export type RectProps = RectDef & DrawingNodeProps;
 
 export type RoundedRectProps = RRectDef & DrawingNodeProps;
+
+export interface AtlasProps extends DrawingNodeProps {
+  image: SkImage | null;
+  sprites: SkRect[];
+  transforms: SkRSXform[];
+  colors?: SkColor[];
+}
 
 export interface CubicBezierHandle {
   pos: Vector;

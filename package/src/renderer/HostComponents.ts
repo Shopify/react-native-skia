@@ -50,6 +50,7 @@ import type {
   BoxProps,
   BoxShadowProps,
   ParagraphProps,
+  AtlasProps,
 } from "../dom/types";
 import type { ChildrenProps } from "../dom/types/Common";
 import type {
@@ -69,7 +70,6 @@ export const NATIVE_DOM = shouldUseJSDomOnNative ? false : !!global.SkiaDomApi;
 
 declare global {
   var SkiaDomApi: {
-    // FIXME: We need a better type for this
     RectNode: (props: RectProps) => JsiDrawingNode<RectProps, SkRect>;
     RRectNode: (
       props: RoundedRectProps
@@ -85,6 +85,8 @@ declare global {
     PatchNode: (props: PatchProps) => RenderNode<PatchProps>;
     PointsNode: (props: PointsProps) => RenderNode<PointsProps>;
     DiffRectNode: (props: DiffRectProps) => RenderNode<DiffRectProps>;
+    AtlasNode: (props: AtlasProps) => RenderNode<AtlasProps>;
+
     // Mask filters
     BlurMaskFilterNode: (
       props: BlurMaskFilterProps
@@ -207,6 +209,7 @@ declare global {
       skPoints: SkiaProps<PointsProps>;
       skRect: SkiaProps<RectProps>;
       skRRect: SkiaProps<RoundedRectProps>;
+      skAtlas: SkiaProps<AtlasProps>;
       skVertices: SkiaProps<VerticesProps>;
       skText: SkiaProps<TextProps>;
       skTextPath: SkiaProps<TextPathProps>;
@@ -313,6 +316,8 @@ export const createNode = (
       return Sk.TextBlob(props);
     case NodeType.Glyphs:
       return Sk.Glyphs(props);
+    case NodeType.Atlas:
+      return Sk.Atlas(props);
     case NodeType.DiffRect:
       return Sk.DiffRect(props);
     case NodeType.Picture:

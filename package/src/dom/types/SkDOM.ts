@@ -36,6 +36,7 @@ import type {
   DrawingNodeProps,
   BoxProps,
   BoxShadowProps,
+  AtlasProps,
 } from "./Drawings";
 import type { BlurMaskFilterProps } from "./MaskFilters";
 import type {
@@ -90,6 +91,7 @@ export interface SkDOM {
   DiffRect(props: DiffRectProps): DrawingNode<DiffRectProps>;
   Picture(props: PictureProps): DrawingNode<PictureProps>;
   ImageSVG(props: ImageSVGProps): DrawingNode<ImageSVGProps>;
+  Atlas(props: AtlasProps): DrawingNode<AtlasProps>;
 
   // BlurMaskFilters
   BlurMaskFilter(

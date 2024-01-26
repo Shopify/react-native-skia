@@ -8,6 +8,7 @@
 
 #include "JsiHostObject.h"
 
+#include "nodes/JsiAtlasNode.h"
 #include "nodes/JsiCircleNode.h"
 #include "nodes/JsiDiffRectNode.h"
 #include "nodes/JsiFillNode.h"
@@ -66,6 +67,7 @@ public:
     installFunction("PatchNode", JsiPatchNode::createCtor(context));
     installFunction("PointsNode", JsiPointsNode::createCtor(context));
     installFunction("DiffRectNode", JsiDiffRectNode::createCtor(context));
+    installFunction("AtlasNode", JsiAtlasNode::createCtor(context));
 
     installFunction("FillNode", JsiFillNode::createCtor(context));
 

@@ -7,7 +7,6 @@ import type { SkRSXform } from "../types/RSXform";
 import { Host } from "./Host";
 import { JsiSkFont } from "./JsiSkFont";
 import { JsiSkTextBlob } from "./JsiSkTextBlob";
-import type { RSXform } from "./JsiSkRSXform";
 import { JsiSkRSXform } from "./JsiSkRSXform";
 
 export class JsiSkTextBlobFactory extends Host implements TextBlobFactory {
@@ -34,20 +33,21 @@ export class JsiSkTextBlobFactory extends Host implements TextBlobFactory {
       this.CanvasKit,
       this.CanvasKit.TextBlob.MakeFromRSXform(
         str,
-        rsxforms
-          .map((f) => Array.from(JsiSkRSXform.fromValue<RSXform>(f)))
-          .flat(),
+        rsxforms.map((f) => Array.from(JsiSkRSXform.fromValue(f))).flat(),
         JsiSkFont.fromValue(font)
       )
     );
   }
 
   MakeFromRSXformGlyphs(glyphs: number[], rsxforms: SkRSXform[], font: SkFont) {
+    const transforms = rsxforms.flatMap((s) =>
+      Array.from(JsiSkRSXform.fromValue(s))
+    );
     return new JsiSkTextBlob(
       this.CanvasKit,
       this.CanvasKit.TextBlob.MakeFromRSXformGlyphs(
         glyphs,
-        rsxforms.map((f) => JsiSkRSXform.fromValue(f)),
+        transforms,
         JsiSkFont.fromValue(font)
       )
     );
