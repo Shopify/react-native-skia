@@ -1,4 +1,4 @@
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useEffect } from "react";
 import type { FrameInfo } from "react-native-reanimated";
 
 import { useAnimatedImage } from "../../skia/core/AnimatedImage";
@@ -9,7 +9,6 @@ import {
   useFrameCallback,
   useSharedValue,
 } from "./moduleWrapper";
-import { useEffect } from "react";
 
 const DEFAULT_FRAME_DURATION = 60;
 
@@ -17,26 +16,18 @@ export const useAnimatedImageValue = (source: DataSourceParam) => {
   throwOnMissingReanimated();
   const currentFrame = useSharedValue<null | SkImage>(null);
   const lastTimestamp = useSharedValue(0);
-  const animatedImage = useAnimatedImage(source, (err) => {
-    console.error(err);
-    throw new Error(`Could not load animated image - got '${err.message}'`);
-  }, false);
+  const animatedImage = useAnimatedImage(
+    source,
+    (err) => {
+      console.error(err);
+      throw new Error(`Could not load animated image - got '${err.message}'`);
+    },
+    false
+  );
   const frameDuration =
     animatedImage?.currentFrameDuration() || DEFAULT_FRAME_DURATION;
 
-  const isMounted = useSharedValue(true);
-
-  useLayoutEffect(() => {
-    return () => {
-      isMounted.value = false;
-    };
-  }, []);
-
   useFrameCallback((frameInfo: FrameInfo) => {
-    // Don't process the next frame if the component using this hook is already unmounted
-    if (!isMounted.value) {
-      return;
-    }
     if (!animatedImage) {
       currentFrame.value = null;
       return;
@@ -64,7 +55,7 @@ export const useAnimatedImageValue = (source: DataSourceParam) => {
   useEffect(() => {
     return () => {
       animatedImage?.dispose();
-    }
-  }, []);
+    };
+  }, [animatedImage]);
   return currentFrame;
 };
