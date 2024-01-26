@@ -2,7 +2,14 @@ import type { SkPaint } from "./Paint";
 import type { SkRect } from "./Rect";
 import type { SkFont } from "./Font";
 import type { SkPath } from "./Path";
-import type { SkImage, MipmapMode, FilterMode, ImageInfo } from "./Image";
+import type {
+  SkImage,
+  MipmapMode,
+  FilterMode,
+  ImageInfo,
+  CubicResampler,
+  FilterOptions,
+} from "./Image";
 import type { SkSVG } from "./SVG";
 import type { SkColor } from "./Color";
 import type { InputRRect } from "./RRect";
@@ -13,6 +20,7 @@ import type { SkImageFilter } from "./ImageFilter";
 import type { SkVertices } from "./Vertices";
 import type { SkTextBlob } from "./TextBlob";
 import type { SkPicture } from "./Picture";
+import type { SkRSXform } from "./RSXform";
 
 export enum ClipOp {
   Difference,
@@ -492,6 +500,29 @@ export interface SkCanvas {
    * @param skp
    */
   drawPicture(skp: SkPicture): void;
+
+  /**
+   * This method is used to draw an atlas on the canvas.
+   *
+   * @method drawAtlas
+   * @param {SkImage} atlas - The image to be drawn.
+   * @param {SkRect[]} srcs - The source rectangles.
+   * @param {SkRSXform[]} dsts - The destination transformations.
+   * @param {SkPaint} paint - The paint used for drawing.
+   * @param {BlendMode} [blendMode] - The blend mode used for drawing. Optional.
+   * @param {SkColor[]} [colors] - The colors used for drawing. Optional.
+   * @param {CubicResampler | FilterOptions} [sampling] - The sampling options. Optional.
+   * @returns {void} This method does not return anything.
+   */
+  drawAtlas(
+    atlas: SkImage,
+    srcs: SkRect[],
+    dsts: SkRSXform[],
+    paint: SkPaint,
+    blendMode?: BlendMode,
+    colors?: SkColor[],
+    sampling?: CubicResampler | FilterOptions
+  ): void;
 
   /** Read Image pixels
    *

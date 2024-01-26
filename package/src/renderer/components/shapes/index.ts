@@ -11,3 +11,4 @@ export * from "./Vertices";
 export * from "./Fill";
 export * from "./FitBox";
 export * from "./Box";
+export * from "./Atlas";

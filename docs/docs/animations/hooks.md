@@ -125,3 +125,40 @@ const Demo = () => {
   );
 };
 ```
+
+## useRectBuffer
+
+Creates an array for rectangle to be animated.
+Can be used by any component that takes an array of rectangles as property, like the [Atlas API](/docs/shapes/atlas).
+
+```tsx twoslash
+import {useRectBuffer} from "@shopify/react-native-skia";
+
+const width = 256;
+const size = 10;
+const rects = 100;
+// Important to not forget the worklet directive
+const rectBuffer = useRectBuffer(rects, (rect, i) => {
+  "worklet";
+  rect.setXYWH((i * size) % width, Math.floor(i / (width / size)) * size, size, size);
+}); 
+```
+
+## useRSXformBuffer
+
+Creates an array for [rotate scale transforms](/docs/shapes/atlas#rsxform) to be animated.
+Can be used by any component that takes an array of rotate scale transforms as property, like the [Atlas API](/docs/shapes/atlas).
+
+```tsx twoslash
+import {useRSXformBuffer} from "@shopify/react-native-skia";
+import {useSharedValue} from "react-native-reanimated";
+
+const xforms = 100;
+const pos = useSharedValue({ x: 0, y: 0 });
+// Important to not forget the worklet directive
+const transforms = useRSXformBuffer(xforms, (val, i) => {
+  "worklet";
+  const r = Math.atan2(pos.value.y, pos.value.x);
+  val.set(Math.cos(r), Math.sin(r), 0, 0);
+});
+```

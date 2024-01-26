@@ -18,7 +18,7 @@ import { SkiaRoot } from "../Reconciler";
 import { JsiDrawingContext } from "../../dom/types/DrawingContext";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
 
-import type { SkiaObject } from "./e2e/setup";
+import { SkiaObject } from "./e2e/setup";
 
 jest.setTimeout(180 * 1000);
 
@@ -231,7 +231,14 @@ const serializeSkOjects = (obj: any): any => {
   } else if (Array.isArray(obj)) {
     return obj.map((item) => serializeSkOjects(item));
   } else if (obj && typeof obj === "object" && "__typename__" in obj) {
-    if (obj.__typename__ === "Point") {
+    if (obj instanceof SkiaObject) {
+      const skObj: SkiaObject<EvalContext, any> = obj;
+      return {
+        __typename__: "SkiaObject",
+        source: skObj.source,
+        context: skObj.context,
+      };
+    } else if (obj.__typename__ === "Point") {
       return { __typename__: "Point", x: obj.x, y: obj.y };
     } else if (obj.__typename__ === "Paint") {
       return { __typename__: "Paint", color: Array.from(obj.getColor()) };
@@ -286,12 +293,13 @@ const serializeSkOjects = (obj: any): any => {
         __typename__: "SVG",
         source: obj.source(),
       };
-    } else if (obj.__typename__ === "Paragraph") {
-      const skObj: SkiaObject<EvalContext, any> = obj;
+    } else if (obj.__typename__ === "RSXform") {
       return {
-        __typename__: "SkiaObject",
-        source: skObj.source,
-        context: skObj.context,
+        __typename__: "RSXform",
+        scos: obj.scos,
+        ssin: obj.ssin,
+        tx: obj.tx,
+        ty: obj.ty,
       };
     }
   }
