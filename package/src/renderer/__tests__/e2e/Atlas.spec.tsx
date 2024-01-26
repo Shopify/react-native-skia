@@ -2,7 +2,7 @@ import React from "react";
 
 import { checkImage, docPath } from "../../../__tests__/setup";
 import { importSkia, surface } from "../setup";
-import { Atlas, Group, Rect } from "../../components";
+import { Atlas, Circle, Group, Rect } from "../../components";
 
 describe("Atlas", () => {
   it("should read the RSXform properties", async () => {
@@ -29,7 +29,68 @@ describe("Atlas", () => {
     });
     checkImage(img, "snapshots/atlas/simple.png");
   });
-  it("should test the RSXforms", async () => {
+  // it("should test the RSXforms (1)", async () => {
+  //   const { Skia } = importSkia();
+  //   const scos = Math.cos(Math.PI / 4);
+  //   const ssin = Math.sin(Math.PI / 4);
+  //   const px = 25;
+  //   const py = 25;
+  //   const tx = px - scos * px + ssin * py;
+  //   const ty = py - ssin * px - scos * py;
+  //   const f1 = Skia.RSXform(scos, ssin, tx, ty);
+  //   const result = await surface.eval((Sk) => {
+  //     const f2 = Sk.RSXformFromRadians(1, Math.PI / 4, 0, 0, 25, 25);
+  //     return [f2.scos, f2.ssin, f2.tx, f2.ty];
+  //   });
+  //   expect(result).toEqual([f1.scos, f1.ssin, f1.tx, f1.ty]);
+  // });
+  it("should test the RSXforms (2)", async () => {
+    const { Skia } = importSkia();
+    const f1 = Skia.RSXformFromRadians(1, Math.PI / 4, 0, 0, 25, 25);
+    const result = await surface.eval((Sk) => {
+      const f2 = Sk.RSXformFromRadians(1, Math.PI / 4, 0, 0, 25, 25);
+      return [f2.scos, f2.ssin, f2.tx, f2.ty];
+    });
+    expect(result[0]).toBeCloseTo(f1.scos);
+    expect(result[1]).toBeCloseTo(f1.ssin);
+    expect(result[2]).toBeCloseTo(f1.tx);
+    expect(result[3]).toBeCloseTo(f1.ty);
+  });
+  it("should test the RSXforms (3)", async () => {
+    const { Skia } = importSkia();
+    const image = (() => {
+      const texSurface = Skia.Surface.MakeOffscreen(50, 50)!;
+      const texCanvas = texSurface.getCanvas();
+      texCanvas.drawColor(Skia.Color("cyan"));
+      return texSurface.makeImageSnapshot();
+    })();
+    const rct = Skia.XYWHRect(0, 0, 50, 50);
+    const scos = Math.cos(Math.PI / 4);
+    const ssin = Math.sin(Math.PI / 4);
+    const px = 25;
+    const py = 25;
+    const tx = px - scos * px + ssin * py;
+    const ty = py - ssin * px - scos * py;
+    const img = await surface.draw(
+      <Group>
+        <Atlas
+          image={image}
+          sprites={[rct, rct, rct, rct]}
+          transforms={[
+            Skia.RSXform(scos, ssin, tx, ty),
+            Skia.RSXformFromRadians(1, Math.PI / 4, 0, 0, 25, 25),
+            Skia.RSXform(scos, ssin, 100 + tx, ty),
+            Skia.RSXformFromRadians(1, Math.PI / 4, 100, 0, 125, 25),
+          ]}
+        />
+        <Circle r={5} color="red" cx={px} cy={py} />
+      </Group>
+    );
+    checkImage(img, "snapshots/atlas/rsxform1.png", {
+      maxPixelDiff: 500,
+    });
+  });
+  it("should test the RSXforms (4)", async () => {
     const { Skia } = importSkia();
     const image = (() => {
       const texSurface = Skia.Surface.MakeOffscreen(50, 50)!;
@@ -53,7 +114,7 @@ describe("Atlas", () => {
           Skia.RSXform(0.5, 0, 100, 12.5),
           Skia.RSXform(scos, ssin, 200, 0),
           Skia.RSXform(scos, ssin, 0, 200),
-          Skia.RSXform(scos, ssin, tx, ty + 100),
+          Skia.RSXform(scos, ssin, tx, 100 + ty),
         ]}
       />
     );

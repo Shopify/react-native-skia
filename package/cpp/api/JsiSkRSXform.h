@@ -93,6 +93,26 @@ public:
    * class
    */
   static const jsi::HostFunctionType
+  createCtorFromRadians(std::shared_ptr<RNSkPlatformContext> context) {
+    return JSI_HOST_FUNCTION_LAMBDA {
+      auto rsxform = SkRSXform::MakeFromRadians(
+          arguments[0].asNumber(), arguments[1].asNumber(),
+          arguments[2].asNumber(), arguments[3].asNumber(),
+          arguments[4].asNumber(), arguments[5].asNumber());
+      // Return the newly constructed object
+      return jsi::Object::createFromHostObject(
+          runtime, std::make_shared<JsiSkRSXform>(std::move(context),
+                                                  std::move(rsxform)));
+    };
+  }
+  /**
+   * Creates the function for construction a new instance of the SkRSXform
+   * wrapper
+   * @param context platform context
+   * @return A function for creating a new host object wrapper for the SkRSXform
+   * class
+   */
+  static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
       auto rsxform =

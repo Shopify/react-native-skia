@@ -4,8 +4,8 @@
 #include "NodeProp.h"
 
 #include <memory>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

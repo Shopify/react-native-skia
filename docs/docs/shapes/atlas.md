@@ -30,20 +30,15 @@ let rsxForm = Skia.RSXform(1, 0, 0, 0);
 // 2. Scale by 2 and translate by (50, 100)
 rsxForm = Skia.RSXform(2, 0, 50, 100);
 
-// 3. Rotate by Math.PI/6, default pivot point is (0,0)
+// 3. Rotate by PI/4, default pivot point is (0,0), translate by (50, 100)
 const r = Math.PI/4;
-const scos = Math.cos(r);
-const ssin = Math.sin(r);
-let tx = 50;
-let ty = 100;
-rsxForm = Skia.RSXform(scos, ssin, tx, ty);
+rsxForm = Skia.RSXform(Math.cos(r), Math.sin(r), 50, 100);
 
-// 4. Rotate by Math.PI/6, with pivot point (25, 25)
-const px = 50;
-const py = 50;
-tx = px - scos * px + ssin * py;
-ty = py - ssin * px - scos * py
-rsxForm = Skia.RSXform(scos, ssin, px, py);
+// 4. Scale by 2, rotate by PI/4 with pivot point (25, 25)
+rsxForm = Skia.RSXformFromRadians(2, r, 0, 0, 25, 25);
+
+// 5. translate by (125, 0), rotate by PI/4 with pivot point (125, 25)
+rsxForm = Skia.RSXformFromRadians(1, r, 100, 0, 125, 25);
 ```
 
 ## Hello World

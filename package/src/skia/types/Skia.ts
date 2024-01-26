@@ -40,6 +40,14 @@ export interface Skia {
   RuntimeShaderBuilder: (rt: SkRuntimeEffect) => SkRuntimeShaderBuilder;
   RRectXY: (rect: SkRect, rx: number, ry: number) => SkRRect;
   RSXform: (scos: number, ssin: number, tx: number, ty: number) => SkRSXform;
+  RSXformFromRadians: (
+    scale: number,
+    radians: number,
+    tx: number,
+    ty: number,
+    px: number,
+    py: number
+  ) => SkRSXform;
   Color: (color: Color) => SkColor;
   ContourMeasureIter: (
     path: SkPath,
