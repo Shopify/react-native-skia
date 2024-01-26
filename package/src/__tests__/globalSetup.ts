@@ -23,7 +23,9 @@ const globalSetup = () => {
     } else {
       const port = 4242;
       global.testServer = new WebSocketServer({ port });
-      console.log(`\n\nTest server listening on port ${port} (waiting for the example app to open on E2E tests screen)`);
+      console.log(
+        `\n\nTest server listening on port ${port} (waiting for the example app to open on E2E tests screen)`
+      );
       global.testServer.on("connection", (client) => {
         global.testClient = client;
         client.once("message", (msg) => {
