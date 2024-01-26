@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type { FrameInfo } from "react-native-reanimated";
 
 import { useAnimatedImage } from "../../skia/core/AnimatedImage";
@@ -15,10 +16,14 @@ export const useAnimatedImageValue = (source: DataSourceParam) => {
   throwOnMissingReanimated();
   const currentFrame = useSharedValue<null | SkImage>(null);
   const lastTimestamp = useSharedValue(0);
-  const animatedImage = useAnimatedImage(source, (err) => {
-    console.error(err);
-    throw new Error(`Could not load animated image - got '${err.message}'`);
-  });
+  const animatedImage = useAnimatedImage(
+    source,
+    (err) => {
+      console.error(err);
+      throw new Error(`Could not load animated image - got '${err.message}'`);
+    },
+    false
+  );
   const frameDuration =
     animatedImage?.currentFrameDuration() || DEFAULT_FRAME_DURATION;
 
@@ -47,5 +52,11 @@ export const useAnimatedImageValue = (source: DataSourceParam) => {
     lastTimestamp.value = timestamp;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, true);
+  useEffect(() => {
+    return () => {
+      animatedImage?.dispose();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return currentFrame;
 };
