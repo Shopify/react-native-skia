@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect } from "react";
+import { useLayoutEffect } from "react";
 import type { FrameInfo } from "react-native-reanimated";
 
 import { useAnimatedImage } from "../../skia/core/AnimatedImage";
@@ -23,17 +23,17 @@ export const useAnimatedImageValue = (source: DataSourceParam) => {
   const frameDuration =
     animatedImage?.currentFrameDuration() || DEFAULT_FRAME_DURATION;
 
-  const isMounted = useRef<boolean>(true);
+  const isMounted = useSharedValue(true);
 
   useLayoutEffect(() => {
     return () => {
-      isMounted.current = false;
+      isMounted.value = false;
     };
   }, []);
 
   useFrameCallback((frameInfo: FrameInfo) => {
     // Don't process the next frame if the component using this hook is already unmounted
-    if (!isMounted.current) {
+    if (!isMounted.value) {
       return;
     }
     if (!animatedImage) {
