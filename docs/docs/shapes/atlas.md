@@ -24,7 +24,7 @@ The RSXform object used by the altas API is the compression of the following mat
 ```tsx twoslash
 import {Skia} from "@shopify/react-native-skia";
 
-// 1. Identify (doesn't do anything)
+// 1. Identity (doesn't do anything)
 let rsxForm = Skia.RSXform(1, 0, 0, 0);
 
 // 2. Scale by 2 and translate by (50, 100)
@@ -99,7 +99,7 @@ export const Demo = () => {
 ## Animations
 
 The Atlas component should usually be used with Reanimated.
-First, the [useTextueValue](/docs/animations/textures#usetexturevalue) hook will enable you to create a texture on the UI thread directly without needing to make any copies.
+First, the [useTextureValue](/docs/animations/textures#usetexturevalue) hook will enable you to create a texture on the UI thread directly without needing to make any copies.
 Secondly, we provide you with hooks such as [`useRectBuffer`](/docs/animations/hooks#userectbuffer) and [`useRSXformBuffer`](/docs/animations/hooks#usersxformbuffer) to efficiently animates on the sprites and transformations.
 
 The example below is identical to the one above but the position is an animation value bound to a gesture.
@@ -151,7 +151,7 @@ export const Demo = () => {
 
   return (
     <GestureDetector gesture={gesture}>
-      <Canvas style={{ flex: 1 }} mode="continuous">
+      <Canvas style={{ flex: 1 }}>
         <Atlas image={texture} sprites={sprites} transforms={transforms} />
       </Canvas>
     </GestureDetector>
