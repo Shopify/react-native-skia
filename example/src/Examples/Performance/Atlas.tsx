@@ -90,7 +90,7 @@ export const PerformanceDrawingTest = () => {
       </View>
       <View style={{ flex: 1 }}>
         <GestureDetector gesture={gesture}>
-          <Canvas style={styles.container} mode="continuous">
+          <Canvas style={styles.container}>
             <Atlas image={texture} sprites={sprites} transforms={transforms} />
           </Canvas>
         </GestureDetector>
