@@ -116,6 +116,7 @@ Last, you need to [load Skia](#loading-skia).
 You need to have Skia fully loaded and initialized before importing the Skia module.
 There are two ways you can control the way Skia should load:
 * With `<WithSkiaWeb />`: using code-splitting to defer loading the components that import Skia.
+* With `useLoadSkiaWeb()`: using hooks to conditionally render the components that import Skia.
 * With `LoadSkiaWeb()`: deferring the root component registration until Skia is loaded.
 
 ### Using Code-Splitting
@@ -137,6 +138,30 @@ export default function App() {
       fallback={<Text>Loading Skia...</Text>}
     />
   );
+}
+```
+
+### Using Hooks to Conditionally Render
+We provide a `useLoadSkiaWeb()` hook which allows you to conditionally render your app or components that depend on Skia.
+This approach let you decide what to do while Skia is being loaded, such as render loading screens.
+In the example below, we load Skia in our app's root file before rendering the our content.
+
+```tsx
+import { LoadSkiaWeb } from "@shopify/react-native-skia";
+
+function App() {
+  const [skiaLoaded, skiaError] = useLoadSkiaWeb();
+  // You can also load other stuff here, such as fonts, remote data, etc.
+
+  if (skiaError) {
+    return <Text>Failed to load Skia</Text>;
+  }
+
+  if (!skiaLoaded) {
+    return <Text>Loading Skia...</Text>;
+  }
+
+  return <MyRoutes />;
 }
 ```
 

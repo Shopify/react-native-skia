@@ -1,3 +1,8 @@
+import type { CanvasKit } from "canvaskit-wasm";
 import { JsiSkApi } from "./web";
 
-export const Skia = JsiSkApi(global.CanvasKit);
+export let Skia = JsiSkApi(global.CanvasKit);
+
+export const setSkiaCanvasKit = (CanvasKit: CanvasKit) => {
+  Skia = JsiSkApi(CanvasKit);
+}
