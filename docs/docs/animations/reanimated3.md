@@ -7,7 +7,7 @@ slug: /animations/animations
 
 React Native Skia offers integration with [Reanimated v3](https://docs.swmansion.com/react-native-reanimated/), enabling the execution of animations on the UI thread.
 
-Note: This integration is available starting from Reanimated v3. If you are using Reanimated v2, refer to the [Reanimated 2 support section](#reanimated-2).
+Note: This integration is available starting from Reanimated v3. If you are using Reanimated v2, refer to the [Reanimated 2 support section](/docs/animations/reanimated2).
 
 React Native Skia supports the direct usage of Reanimated's shared and derived values as properties. There is no need for functions like `createAnimatedComponent` or `useAnimatedProps`; simply pass the Reanimated values directly as properties.
 
