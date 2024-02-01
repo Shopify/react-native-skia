@@ -5,6 +5,7 @@ on:
       - 'package/ios/**'
       - 'package/cpp/**'
       - 'example/package.json'
+      - 'fabricexample/package.json'
       - '.github/workflows/**'
       - 'package/react-native-skia.podspec'
   push:
