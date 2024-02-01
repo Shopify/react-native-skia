@@ -1472,12 +1472,12 @@ SPEC CHECKSUMS:
   React-jsinspector: 194e32c6aab382d88713ad3dd0025c5f5c4ee072
   React-logger: cebf22b6cf43434e471dc561e5911b40ac01d289
   react-native-safe-area-context: 2364c50b45e31a9bd7a7f0b6fc8f529f1dd8aa05
-  react-native-skia: 28dca159f6f5ea30b35e6608a19319ca9a238d9a
+  react-native-skia: 462997a077c2428e9c859a6572a9e742c7069fc9
   React-NativeModulesApple: 02e35e9a51e10c6422f04f5e4076a7c02243fff2
   React-perflogger: e3596db7e753f51766bceadc061936ef1472edc3
   React-RCTActionSheet: 17ab132c748b4471012abbcdcf5befe860660485
   React-RCTAnimation: c8bbaab62be5817d2a31c36d5f2571e3f7dcf099
-  React-RCTAppDelegate: 7347d0d6f979e0ff694273dfc7a74df71a2a53a8
+  React-RCTAppDelegate: 4c3062b01f5f321d5cdd1603ffecbde943c8da96
   React-RCTBlob: 1bcf3a0341eb8d6950009b1ddb8aefaf46996b8c
   React-RCTFabric: 2d72175df6e0e230a13ec2a7eef184ac0a122fd3
   React-RCTImage: 670a3486b532292649b1aef3ffddd0b495a5cee4
