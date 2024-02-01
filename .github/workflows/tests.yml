@@ -56,6 +56,9 @@ jobs:
       - name: Install Example
         run: cd example; yarn install --frozen-lockfile
 
+      - name: Install Fabric Example
+        run: cd fabricexample; yarn install --frozen-lockfile
+
       - name: Lint Example
         run: cd example; yarn lint;
 
@@ -63,6 +66,15 @@ jobs:
         run: cd example; yarn tsc;
 
       - name: Run Example Unit tests
+        run: cd example; yarn test;
+
+      - name: Lint Fabric Example
+        run: cd example; yarn lint;
+  
+      - name: TypeScript Fabric Example
+        run: cd example; yarn tsc;
+  
+      - name: Run Fabric Example Unit tests
         run: cd example; yarn test;
 
       - name: Install Docs

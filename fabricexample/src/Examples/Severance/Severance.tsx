@@ -1,10 +1,14 @@
-import { Canvas, Fill, Group, useFont } from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Fill,
+  Group,
+  useClock,
+  useFont,
+} from "@shopify/react-native-skia";
 import React from "react";
 import { useWindowDimensions, StyleSheet, View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-
-import { useClock } from "../../components/Animations";
 
 import { CRT } from "./CRT";
 import { COLS, ROWS, Symbol } from "./Symbol";
@@ -24,7 +28,7 @@ export const Severance = () => {
   }
   return (
     <View style={{ flex: 1 }}>
-      <Canvas style={{ flex: 1 }} debug>
+      <Canvas style={{ flex: 1 }}>
         <CRT>
           <Group>
             <Fill color={BG} />
