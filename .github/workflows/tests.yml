@@ -15,7 +15,7 @@ jobs:
     env:
       WORKING_DIRECTORY: ./
     concurrency:
-      group: tests-${{ matrix.working-directory }}-${{ github.ref }}
+      group: tests-${{ matrix.directory }}-${{ github.ref }}
       cancel-in-progress: true
     steps:
       - name: checkout
