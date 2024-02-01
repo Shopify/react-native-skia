@@ -6,6 +6,7 @@ on:
       - 'package/cpp/**'
       - 'example/package.json'
       - '.github/workflows/**'
+      - 'package/react-native-skia.podspec'
   push:
     branches:
       - main
