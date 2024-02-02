@@ -269,6 +269,31 @@ These properties define the overall layout and behavior of a paragraph.
 | `textHeightBehavior`    | Controls the behavior of text ascent and descent in the first and last lines.         |
 | `textStyle`             | Default text style for the paragraph (can be overridden by individual text styles).   |
 
+Below is an example to center text with `textAlign` property:
+
+```tsx twoslash
+import { useMemo } from "react";
+import { Paragraph, Skia, TextAlign, Canvas, Rect } from "@shopify/react-native-skia";
+
+const MyParagraph = () => {
+  const paragraph = useMemo(() => {
+    const para = Skia.ParagraphBuilder.Make({
+          textAlign: TextAlign.Center,
+      })
+      .addText("Say Hello to React Native Skia")
+      .build();
+    return para;
+  }, []);
+
+  // Render the paragraph with the text center
+  return (
+    <Canvas style={{ width: 256, height: 256 }}>
+      <Paragraph paragraph={paragraph} x={0} y={0} width={200} />
+    </Canvas>
+  );
+};
+```
+
 ## Text Style Properties
 
 These properties are used to style specific segments of text within a paragraph.
