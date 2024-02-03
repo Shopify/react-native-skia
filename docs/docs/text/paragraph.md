@@ -5,8 +5,7 @@ sidebar_label: Paragraph
 slug: /text/paragraph
 ---
 
-React Native Skia offers an API to perform text layouts.
-Behind the scene, this API is the Skia Paragraph API.
+React Native Skia offers an API to perform text layouts using the Skia Paragraph API.
 
 ## Hello World
 
@@ -16,7 +15,7 @@ Other system fonts will are available as well.
 
 ```tsx twoslash
 import { useMemo } from "react";
-import { Paragraph, Skia, useFonts } from "@shopify/react-native-skia";
+import { Paragraph, Skia, useFonts, TextAlign } from "@shopify/react-native-skia";
 
 const MyParagraph = () => {
   const customFontMgr = useFonts({
@@ -31,12 +30,15 @@ const MyParagraph = () => {
     if (!customFontMgr) {
       return null;
     }
+    const paragraphStyle = {
+      textAlign: TextAlign.Center
+    };
     const textStyle = {
       color: Skia.Color("black"),
       fontFamilies: ["Roboto"],
       fontSize: 50,
     };
-    return Skia.ParagraphBuilder.Make({}, customFontMgr)
+    return Skia.ParagraphBuilder.Make(paragraphStyle, customFontMgr)
       .pushStyle(textStyle)
       .addText("Say Hello to ")
       .pushStyle({ ...textStyle, fontStyle: { weight: 500 } })
