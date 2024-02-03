@@ -108,7 +108,7 @@ export const Tests = ({ assets }: TestsProps) => {
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <Text style={{ color: "black" }}>
         {client === null
-          ? `⚪️ Connecting to server: ${hostname}. Make sure to run \`yarn e2e\` or similar`
+          ? `⚪️ Connecting to ${hostname}. Use yarn e2e to run tests.`
           : "🟢 Waiting for the server to send tests"}
       </Text>
       <Canvas style={{ width: size, height: size }} ref={ref}>
