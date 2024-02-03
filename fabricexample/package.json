@@ -7,7 +7,7 @@
     "ios": "react-native run-ios",
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --cache",
     "start": "react-native start",
-    "test": "jest",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "pod-install": "cd ios && pod install && cd ..",
     "android-reverse-tcp": "adb devices | grep '\t' | awk '{print $1}' | sed 's/\\s//g' | xargs -I {} adb -s {} reverse tcp:8081 tcp:8081"
   },
@@ -18,7 +18,7 @@
     "@react-navigation/native-stack": "^6.9.17",
     "@shopify/react-native-skia": "link:../package/",
     "@testing-library/react-native": "^12.3.2",
-    "@types/jest": "^29.5.8",
+    "@types/jest": "^29.2.1",
     "@types/react": "^18.2.37",
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
     "cdt2d": "^1.0.0",
@@ -46,6 +46,7 @@
     "eslint-plugin-reanimated": "2.0.0",
     "glob-to-regexp": "^0.4.1",
     "jest": "^29.2.1",
+    "jest-transform-stub": "^2.0.0",
     "metro-react-native-babel-preset": "0.76.8",
     "prettier": "^2.4.1",
     "react-test-renderer": "18.2.0",
@@ -57,5 +58,30 @@
   },
   "engines": {
     "node": ">=16"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ],
+    "moduleNameMapper": {
+      "^.+.(css|styl|less|sass|scss|png|jpg|ttf|otf|woff|woff2)$": "jest-transform-stub"
+    },
+    "modulePathIgnorePatterns": [
+      "<rootDir>/lib/typescript",
+      "setup.(ts|tsx)$"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/node_modules/react-native-gesture-handler/jestSetup.js",
+      "<rootDir>/jestSetup.mjs"
+    ],
+    "preset": "react-native",
+    "transformIgnorePatterns": [
+      "node_modules/(?!(@react-native|react-native|react-native.*|@?react-navigation.*)/)"
+    ]
   }
 }

@@ -10,7 +10,6 @@ import {
 
 // Create picture
 const picture = createPicture(
-  { x: 0, y: 0, width: 100, height: 100 },
   (canvas) => {
     const paint = Skia.Paint();
     paint.setColor(Skia.Color("pink"));
@@ -19,7 +18,8 @@ const picture = createPicture(
     const circlePaint = Skia.Paint();
     circlePaint.setColor(Skia.Color("orange"));
     canvas.drawCircle(50, 50, 50, circlePaint);
-  }
+  },
+  { x: 0, y: 0, width: 100, height: 100 }
 );
 
 export const PictureExample = () => {

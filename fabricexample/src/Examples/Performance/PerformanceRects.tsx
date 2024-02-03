@@ -26,7 +26,7 @@ export const PerformanceDrawingTest: React.FC = () => {
   const SizeWidth = Size;
   const SizeHeight = Size * 0.45;
 
-  const pos = useSharedValue<{ x: number; y: number }>({
+  const pos = useSharedValue({
     x: width / 2,
     y: height * 0.25,
   });

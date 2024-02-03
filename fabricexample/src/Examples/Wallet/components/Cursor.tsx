@@ -4,6 +4,9 @@ import type { SharedValue } from "react-native-reanimated";
 import {
   interpolateColor,
   useDerivedValue,
+  // In react-native-reanimated <= 3.1.0, convertToRGBA is not exported yet
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   convertToRGBA,
 } from "react-native-reanimated";
 

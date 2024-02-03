@@ -11,9 +11,9 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		65CEC211F21CC07184115C67 /* libPods-RNSkia.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1C5B093331D0DB85AD2A26B4 /* libPods-RNSkia.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		AAC7608471BC3ABBB108DC7C /* libPods-RNSkia-RNSkiaTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 72EE2DC955C5E0C05C9DC2AF /* libPods-RNSkia-RNSkiaTests.a */; };
-		DD55BFA782ECD8D743D9C44E /* libPods-RNSkia.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BF586BB9F86694D4FC32E804 /* libPods-RNSkia.a */; };
+		8F8FF25043AAD994AEA3E397 /* libPods-RNSkia-RNSkiaTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C94390D52E12564FD202D8F /* libPods-RNSkia-RNSkiaTests.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -30,20 +30,20 @@
 		00E356EE1AD99517003FC87E /* RNSkiaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RNSkiaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* RNSkiaTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNSkiaTests.m; sourceTree = "<group>"; };
+		0C94390D52E12564FD202D8F /* libPods-RNSkia-RNSkiaTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RNSkia-RNSkiaTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07F961A680F5B00A75B9A /* RNSkia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RNSkia.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = RNSkia/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = RNSkia/AppDelegate.mm; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = RNSkia/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = RNSkia/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = RNSkia/main.m; sourceTree = "<group>"; };
-		66B0A9120567498418F2985E /* Pods-RNSkia-RNSkiaTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNSkia-RNSkiaTests.release.xcconfig"; path = "Target Support Files/Pods-RNSkia-RNSkiaTests/Pods-RNSkia-RNSkiaTests.release.xcconfig"; sourceTree = "<group>"; };
-		72EE2DC955C5E0C05C9DC2AF /* libPods-RNSkia-RNSkiaTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RNSkia-RNSkiaTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		80A7A47173D40A96123D9E44 /* Pods-RNSkia.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNSkia.release.xcconfig"; path = "Target Support Files/Pods-RNSkia/Pods-RNSkia.release.xcconfig"; sourceTree = "<group>"; };
+		1C5B093331D0DB85AD2A26B4 /* libPods-RNSkia.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RNSkia.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		21F14B444010463B09A8E7AE /* Pods-RNSkia.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNSkia.release.xcconfig"; path = "Target Support Files/Pods-RNSkia/Pods-RNSkia.release.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = RNSkia/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		BF586BB9F86694D4FC32E804 /* libPods-RNSkia.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RNSkia.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C408D24EE7A2F33229F7218F /* Pods-RNSkia-RNSkiaTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNSkia-RNSkiaTests.debug.xcconfig"; path = "Target Support Files/Pods-RNSkia-RNSkiaTests/Pods-RNSkia-RNSkiaTests.debug.xcconfig"; sourceTree = "<group>"; };
-		DA85B34726311C865EFE533F /* Pods-RNSkia.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNSkia.debug.xcconfig"; path = "Target Support Files/Pods-RNSkia/Pods-RNSkia.debug.xcconfig"; sourceTree = "<group>"; };
+		B2E0087A6425ED62CB2FB20F /* Pods-RNSkia-RNSkiaTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNSkia-RNSkiaTests.debug.xcconfig"; path = "Target Support Files/Pods-RNSkia-RNSkiaTests/Pods-RNSkia-RNSkiaTests.debug.xcconfig"; sourceTree = "<group>"; };
+		B9CACF942446A69045D4A4D7 /* Pods-RNSkia.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNSkia.debug.xcconfig"; path = "Target Support Files/Pods-RNSkia/Pods-RNSkia.debug.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		F5D75D36CE379521C94A5766 /* Pods-RNSkia-RNSkiaTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNSkia-RNSkiaTests.release.xcconfig"; path = "Target Support Files/Pods-RNSkia-RNSkiaTests/Pods-RNSkia-RNSkiaTests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,7 +51,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AAC7608471BC3ABBB108DC7C /* libPods-RNSkia-RNSkiaTests.a in Frameworks */,
+				8F8FF25043AAD994AEA3E397 /* libPods-RNSkia-RNSkiaTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -59,7 +59,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DD55BFA782ECD8D743D9C44E /* libPods-RNSkia.a in Frameworks */,
+				65CEC211F21CC07184115C67 /* libPods-RNSkia.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -100,8 +100,8 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				BF586BB9F86694D4FC32E804 /* libPods-RNSkia.a */,
-				72EE2DC955C5E0C05C9DC2AF /* libPods-RNSkia-RNSkiaTests.a */,
+				1C5B093331D0DB85AD2A26B4 /* libPods-RNSkia.a */,
+				0C94390D52E12564FD202D8F /* libPods-RNSkia-RNSkiaTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -140,10 +140,10 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				DA85B34726311C865EFE533F /* Pods-RNSkia.debug.xcconfig */,
-				80A7A47173D40A96123D9E44 /* Pods-RNSkia.release.xcconfig */,
-				C408D24EE7A2F33229F7218F /* Pods-RNSkia-RNSkiaTests.debug.xcconfig */,
-				66B0A9120567498418F2985E /* Pods-RNSkia-RNSkiaTests.release.xcconfig */,
+				B9CACF942446A69045D4A4D7 /* Pods-RNSkia.debug.xcconfig */,
+				21F14B444010463B09A8E7AE /* Pods-RNSkia.release.xcconfig */,
+				B2E0087A6425ED62CB2FB20F /* Pods-RNSkia-RNSkiaTests.debug.xcconfig */,
+				F5D75D36CE379521C94A5766 /* Pods-RNSkia-RNSkiaTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -155,12 +155,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "RNSkiaTests" */;
 			buildPhases = (
-				798E4F844A391C0150D480EE /* [CP] Check Pods Manifest.lock */,
+				6DAB151E3865B22F8B013086 /* [CP] Check Pods Manifest.lock */,
 				00E356EA1AD99517003FC87E /* Sources */,
 				00E356EB1AD99517003FC87E /* Frameworks */,
 				00E356EC1AD99517003FC87E /* Resources */,
-				95A0A440548A3FB207EDFF04 /* [CP] Embed Pods Frameworks */,
-				76581CC4CA60349CCA3D087B /* [CP] Copy Pods Resources */,
+				7B1900A2EF777732A6FFE152 /* [CP] Embed Pods Frameworks */,
+				FA455C60CE873898904BF8B5 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -176,14 +176,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "RNSkia" */;
 			buildPhases = (
-				9430A72DAEC1183340D5B550 /* [CP] Check Pods Manifest.lock */,
+				56B72716D85A21D27BE9CF35 /* [CP] Check Pods Manifest.lock */,
 				FD10A7F022414F080027D42C /* Start Packager */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				6CC290E04FD94DDA91BB00C3 /* [CP] Embed Pods Frameworks */,
-				3EC190FA69FFB88129D12D66 /* [CP] Copy Pods Resources */,
+				159FF581008373739656B6C7 /* [CP] Embed Pods Frameworks */,
+				DE32C5A81445242A6145F9DE /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -266,24 +266,7 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"../node_modules/react-native/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"../node_modules/react-native/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
 		};
-		3EC190FA69FFB88129D12D66 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-RNSkia/Pods-RNSkia-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-RNSkia/Pods-RNSkia-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-RNSkia/Pods-RNSkia-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		6CC290E04FD94DDA91BB00C3 /* [CP] Embed Pods Frameworks */ = {
+		159FF581008373739656B6C7 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -300,46 +283,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-RNSkia/Pods-RNSkia-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		76581CC4CA60349CCA3D087B /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-RNSkia-RNSkiaTests/Pods-RNSkia-RNSkiaTests-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-RNSkia-RNSkiaTests/Pods-RNSkia-RNSkiaTests-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-RNSkia-RNSkiaTests/Pods-RNSkia-RNSkiaTests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		798E4F844A391C0150D480EE /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-RNSkia-RNSkiaTests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		9430A72DAEC1183340D5B550 /* [CP] Check Pods Manifest.lock */ = {
+		56B72716D85A21D27BE9CF35 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -361,7 +305,29 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		95A0A440548A3FB207EDFF04 /* [CP] Embed Pods Frameworks */ = {
+		6DAB151E3865B22F8B013086 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-RNSkia-RNSkiaTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		7B1900A2EF777732A6FFE152 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -376,6 +342,40 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-RNSkia-RNSkiaTests/Pods-RNSkia-RNSkiaTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		DE32C5A81445242A6145F9DE /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-RNSkia/Pods-RNSkia-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-RNSkia/Pods-RNSkia-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-RNSkia/Pods-RNSkia-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		FA455C60CE873898904BF8B5 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-RNSkia-RNSkiaTests/Pods-RNSkia-RNSkiaTests-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-RNSkia-RNSkiaTests/Pods-RNSkia-RNSkiaTests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-RNSkia-RNSkiaTests/Pods-RNSkia-RNSkiaTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		FD10A7F022414F080027D42C /* Start Packager */ = {
@@ -430,7 +430,7 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C408D24EE7A2F33229F7218F /* Pods-RNSkia-RNSkiaTests.debug.xcconfig */;
+			baseConfigurationReference = B2E0087A6425ED62CB2FB20F /* Pods-RNSkia-RNSkiaTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -457,7 +457,7 @@
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 66B0A9120567498418F2985E /* Pods-RNSkia-RNSkiaTests.release.xcconfig */;
+			baseConfigurationReference = F5D75D36CE379521C94A5766 /* Pods-RNSkia-RNSkiaTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
@@ -481,7 +481,7 @@
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DA85B34726311C865EFE533F /* Pods-RNSkia.debug.xcconfig */;
+			baseConfigurationReference = B9CACF942446A69045D4A4D7 /* Pods-RNSkia.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -508,7 +508,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 80A7A47173D40A96123D9E44 /* Pods-RNSkia.release.xcconfig */;
+			baseConfigurationReference = 21F14B444010463B09A8E7AE /* Pods-RNSkia.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;

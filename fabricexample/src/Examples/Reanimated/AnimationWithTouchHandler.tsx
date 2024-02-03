@@ -40,7 +40,7 @@ export const AnimationWithTouchHandler = () => {
 const styles = StyleSheet.create({
   canvas: {
     height: 80,
-    width: "100%",
-    backgroundColor: "#FEFEFE",
+    width: "100%" as const,
+    backgroundColor: "#FEFEFE" as const,
   },
 });
