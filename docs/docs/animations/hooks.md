@@ -43,13 +43,15 @@ const Demo = () => {
 
 This hooks offers an easy way to animate paths.
 Behind the scene, it make sure that everything is done as efficiently as possible.
+There is an optional second parameter available to set the default path value.
 
 ```tsx twoslash
 import {useSharedValue, withSpring} from "react-native-reanimated";
 import {Gesture, GestureDetector} from "react-native-gesture-handler";
 import {usePathValue, Canvas, Path, processTransform3d, Skia} from "@shopify/react-native-skia";
 
-const rrct = Skia.RRectXY(Skia.XYWHRect(0, 0, 100, 100), 10, 10);
+const rrct = Skia.Path.Make();
+rrct.addRRect(Skia.RRectXY(Skia.XYWHRect(0, 0, 100, 100), 10, 10));
 
 export const FrostedCard = () => {
   const rotateY = useSharedValue(0);
@@ -60,7 +62,6 @@ export const FrostedCard = () => {
 
   const clip = usePathValue((path) => {
     "worklet";
-    path.addRRect(rrct);
     path.transform(
       processTransform3d([
         { translate: [50, 50] },
@@ -69,7 +70,7 @@ export const FrostedCard = () => {
         { translate: [-50, -50] },
       ])
     );
-  });
+  }, rrct);
   return (
     <GestureDetector gesture={gesture}>
       <Canvas style={{ flex: 1 }}>
