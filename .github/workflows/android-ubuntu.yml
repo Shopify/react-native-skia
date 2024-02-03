@@ -10,12 +10,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 55
-    concurrency:
-      group: android-ubuntu-${{ github.ref }}
-      cancel-in-progress: true
     strategy:
       matrix:
         directory: [example, fabricexample] # Define directories here
+    concurrency:
+      group: android-ubuntu-${{ matrix.directory }}-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -65,10 +65,12 @@ jobs:
         working-directory: package
         run: yarn install
 
+      # Install node dependencies in specified directories using matrix
       - name: Install app node dependencies
         working-directory: ${{ matrix.directory }}
         run: yarn
 
+      # Cache hermes build for both directories
       - name: Cache hermes build
         uses: actions/cache@v3
         env:
@@ -77,6 +79,7 @@ jobs:
           path: ${{ matrix.directory }}/node_modules/react-native
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.directory }}-${{ hashFiles('**/react-native/package.json') }}
 
+      # Cache android libraries for both directories
       - name: Cache android libraries
         uses: actions/cache@v3
         env:
@@ -85,10 +88,12 @@ jobs:
           path: ${{ matrix.directory }}/android/app/build
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.directory }}-${{ hashFiles('**/react-native/package.json') }}
 
+      # Build Android app in specified directories using matrix
       - name: Build Android app
         working-directory: ${{ matrix.directory }}/android
         run: ./gradlew assembleDebug
 
+      # Cache apk for both directories
       - name: Cache apk
         uses: actions/cache/save@v3
         env:
