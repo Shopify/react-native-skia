@@ -11,8 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 55
     concurrency:
-      group: android-unbuntu-${{ github.ref }}
+      group: android-ubuntu-${{ github.ref }}
       cancel-in-progress: true
+    strategy:
+      matrix:
+        directory: [example, fabricexample] # Define directories here
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -33,7 +36,7 @@ jobs:
         uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
-          ndk-version: r21d
+          ndk-version: r23
 
       - name: Set ANDROID_NDK
         run: echo "ANDROID_NDK=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
@@ -62,8 +65,8 @@ jobs:
         working-directory: package
         run: yarn install
 
-      - name: Install example app node dependencies
-        working-directory: example
+      - name: Install app node dependencies
+        working-directory: ${{ matrix.directory }}
         run: yarn
 
       - name: Cache hermes build
@@ -71,19 +74,19 @@ jobs:
         env:
           cache-name: cache-rn-hermes-engine
         with:
-          path: example/node_modules/react-native
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-example-${{ hashFiles('**/react-native/package.json') }}
+          path: ${{ matrix.directory }}/node_modules/react-native
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.directory }}-${{ hashFiles('**/react-native/package.json') }}
 
       - name: Cache android libraries
         uses: actions/cache@v3
         env:
           cache-name: cache-rn
         with:
-          path: example/android/app/build
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-example-${{ hashFiles('**/react-native/package.json') }}
+          path: ${{ matrix.directory }}/android/app/build
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.directory }}-${{ hashFiles('**/react-native/package.json') }}
 
       - name: Build Android app
-        working-directory: example/android
+        working-directory: ${{ matrix.directory }}/android
         run: ./gradlew assembleDebug
 
       - name: Cache apk
@@ -91,5 +94,5 @@ jobs:
         env:
           cache-name: cache-apk
         with:
-          path: example/android/app/build/outputs/apk/debug/app-debug.apk
+          path: ${{ matrix.directory }}/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
