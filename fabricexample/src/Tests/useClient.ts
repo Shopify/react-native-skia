@@ -17,7 +17,7 @@ export const useClient = (): UseClient => {
     const ws = new WebSocket(url);
     ws.onopen = () => {
       setClient(ws);
-      ws.send(JSON.stringify({ OS: Platform.OS, arch: "paper" }));
+      ws.send(JSON.stringify({ OS: Platform.OS, arch: "fabric" }));
     };
     ws.onclose = () => {
       setClient(null);
