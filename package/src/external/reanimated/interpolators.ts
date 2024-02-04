@@ -25,11 +25,14 @@ export const notifyChange = (value: SharedValue<unknown>) => {
   }
 };
 
-export const usePathValue = (cb: (path: SkPath) => void) => {
+export const usePathValue = (cb: (path: SkPath) => void, init?: SkPath) => {
   const pathInit = useMemo(() => Skia.Path.Make(), []);
   const path = useSharedValue(pathInit);
   useDerivedValue(() => {
     path.value.reset();
+    if (init !== undefined) {
+      path.value.addPath(init);
+    }
     cb(path.value);
     notifyChange(path);
   });
