@@ -1,7 +1,8 @@
 import React from "react";
 import type { CubicBezierHandle } from "@shopify/react-native-skia";
 import { Line, Paint, Circle } from "@shopify/react-native-skia";
-import { useDerivedValue, type SharedValue } from "react-native-reanimated";
+import type { SharedValue } from "react-native-reanimated";
+import { useDerivedValue } from "react-native-reanimated";
 
 import { symmetric } from "./Math";
 
