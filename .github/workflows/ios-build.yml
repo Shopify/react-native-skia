@@ -74,10 +74,10 @@ jobs:
         working-directory: ${{ matrix.working-directory }}/ios
         run: |
           # Use git diff to get differences, excluding lines for 'COCOAPODS:' and filtering out 'React-RCTAppDelegate:'
-          if git diff --ignore-all-space -I 'COCOAPODS:' HEAD -- Podfile.lock | grep -v '^+.*React-RCTAppDelegate:' | grep -q .; then
+          if git diff --ignore-all-space -I 'COCOAPODS:' HEAD -- Podfile.lock | grep -v '^\+.*React-RCTAppDelegate:|^\-.*React-RCTAppDelegate:' | grep -q .; then
               echo "Podfile.lock has local changes, please update it."
               # Display diff, but exclude 'React-RCTAppDelegate:' changes for clarity
-              git diff --ignore-all-space -I 'COCOAPODS:' HEAD -- Podfile.lock | grep -v '^+.*React-RCTAppDelegate:'
+              git diff --ignore-all-space -I 'COCOAPODS:' HEAD -- Podfile.lock | grep -v '^\+.*React-RCTAppDelegate:|^\-.*React-RCTAppDelegate:'
               exit 1
           else
               echo "Podfile.lock is up to date."
