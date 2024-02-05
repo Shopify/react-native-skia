@@ -370,6 +370,11 @@ protected:
     enqueAsynOperation([child, weakSelf = weak_from_this()]() {
       auto self = weakSelf.lock();
       if (self) {
+        // Remove the existing instance of the child, before adding it to the end of the list
+        auto existingPosition = std::find(self->_children.begin(), self->_children.end(), child);
+        if (existingPosition != self->_children.end())
+            self->_children.erase(existingPosition);
+        
         self->_children.push_back(child);
         child->setParent(self.get());
       }
@@ -390,6 +395,11 @@ protected:
     enqueAsynOperation([child, before, weakSelf = weak_from_this()]() {
       auto self = weakSelf.lock();
       if (self) {
+        // Remove the existing instance of the child before adding it in the new position
+        auto existingPosition = std::find(self->_children.begin(), self->_children.end(), child);
+        if (existingPosition != self->_children.end())
+            self->_children.erase(existingPosition);
+        
         auto position =
             std::find(self->_children.begin(), self->_children.end(), before);
         self->_children.insert(position, child);
