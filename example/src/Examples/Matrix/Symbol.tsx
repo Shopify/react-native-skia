@@ -1,7 +1,8 @@
 import React, { useRef } from "react";
 import type { SkFont } from "@shopify/react-native-skia";
 import { interpolateColors, vec, Glyphs } from "@shopify/react-native-skia";
-import { useDerivedValue, type SharedValue } from "react-native-reanimated";
+import type { SharedValue } from "react-native-reanimated";
+import { useDerivedValue } from "react-native-reanimated";
 
 export const COLS = 15;
 export const ROWS = 30;
