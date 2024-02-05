@@ -1,5 +1,5 @@
-import { surface } from "../setup";
-import { checkImage } from "../../../__tests__/setup";
+import { importSkia, surface } from "../setup";
+import { checkImage, itRunsNodeOnly } from "../../../__tests__/setup";
 import { BlendMode } from "../../../skia/types";
 
 describe("Pictures", () => {
@@ -17,6 +17,32 @@ describe("Pictures", () => {
       { size: surface.width }
     );
     checkImage(image, "snapshots/pictures/simple-picture.png");
+  });
+  itRunsNodeOnly("Should use createPicture", async () => {
+    const { createPicture, Skia } = importSkia();
+    const picture = createPicture((canvas) => {
+      const size = 256;
+      const r = 0.33 * size;
+      const paint = Skia.Paint();
+      paint.setBlendMode(BlendMode.Multiply);
+
+      paint.setColor(Skia.Color("cyan"));
+      canvas.drawCircle(r, r, r, paint);
+
+      paint.setColor(Skia.Color("magenta"));
+      canvas.drawCircle(size - r, r, r, paint);
+
+      paint.setColor(Skia.Color("yellow"));
+      canvas.drawCircle(size / 2, size - r, r, paint);
+    });
+    expect(picture).toBeDefined();
+    const image = await surface.drawOffscreen(
+      (_, canvas, ctx) => {
+        canvas.drawPicture(ctx.picture);
+      },
+      { picture }
+    );
+    checkImage(image, "snapshots/pictures/create-picture.png");
   });
   it("Should draw the hello world example as picture", async () => {
     const image = await surface.drawOffscreen(
