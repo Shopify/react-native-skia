@@ -4763,7 +4763,7 @@ doctrine@^3.0.0:
   dependencies:
     esutils "^2.0.2"
 
-docusaurus-preset-shiki-twoslash@^1.1.33:
+docusaurus-preset-shiki-twoslash@1.1.41:
   version "1.1.41"
   resolved "https://registry.yarnpkg.com/docusaurus-preset-shiki-twoslash/-/docusaurus-preset-shiki-twoslash-1.1.41.tgz#f671573dd6ded6f64c4bdc99e47a82487f6f29b2"
   integrity sha512-Ny5Ot+r7dMnfkcD+YcdtSmM4LVWoLRGWe/A6AqzcN4h6mqE82EU6KMA53wVI50YqgTOIIrNNI6QJr70rPWebcw==

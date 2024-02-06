@@ -105,9 +105,16 @@ vec4 main(vec2 pos) {
 }`)!;
 
 // Define an array of colors for the gradient to be used in shader uniform
-const colors = ["#dafb61", "#61DAFB", "#fb61da", "#61fbcf"].map(
-  (c) => Array.from(Skia.Color(c))
-).flat();
+const colors = [
+  // #dafb61
+  0.85, 0.98, 0.38, 1.0,
+  // #61dafb
+  0.38, 0.85, 0.98, 1.0,
+  // #fb61da
+  0.98, 0.38, 0.85, 1.0,
+  // #61fbcf
+  0.38, 0.98, 0.81, 1.0
+];
 
 const MyParagraph = () => {
   const paragraph = useMemo(() => {
