@@ -67,17 +67,17 @@ jobs:
       - name: Install Pods
         working-directory: ${{ matrix.working-directory }}/ios
         run: pod install
-        
-      # Right now we also exclude changes to React-RCTAppDelegate because of
-      # https://github.com/facebook/react-native/issues/39971
+
       - name: Check if Podfile.lock has changed
         working-directory: ${{ matrix.working-directory }}/ios
         run: |
           # Use git diff to get differences, excluding lines for 'COCOAPODS:' and filtering out 'React-RCTAppDelegate:'
-          if git diff --ignore-all-space -I 'COCOAPODS:' HEAD -- Podfile.lock | grep -v '^+.*React-RCTAppDelegate:' | grep -q .; then
+          # Right now we also exclude changes to React-RCTAppDelegate because of
+          # https://github.com/facebook/react-native/issues/39971
+          if git diff --ignore-all-space -I 'COCOAPODS:' -I "React-RCTAppDelegate" HEAD -- example/ios/Podfile.lock | grep -q .; then
               echo "Podfile.lock has local changes, please update it."
               # Display diff, but exclude 'React-RCTAppDelegate:' changes for clarity
-              git diff --ignore-all-space -I 'COCOAPODS:' HEAD -- Podfile.lock | grep -v '^+.*React-RCTAppDelegate:'
+              git diff --ignore-all-space -I 'COCOAPODS:' -I "React-RCTAppDelegate" HEAD -- example/ios/Podfile.lock | grep -q .;
               exit 1
           else
               echo "Podfile.lock is up to date."
