@@ -60,7 +60,12 @@ describe("Paragraphs", () => {
           fontFamilies: ["Roboto", "Noto"],
           fontSize: 50,
         };
-        const para = Skia.ParagraphBuilder.Make({}, provider)
+        const para = Skia.ParagraphBuilder.Make(
+          {
+            textAlign: ctx.textAlign,
+          },
+          provider
+        )
           .pushStyle(textStyle)
           .addText("Say Hello to ")
           .pushStyle({ ...textStyle, fontStyle: { weight: 500 } })
@@ -75,6 +80,7 @@ describe("Paragraphs", () => {
         RobotoMedium,
         Noto: surface.OS === "node" ? Noto : [],
         OS: surface.OS,
+        textAlign: TextAlign.Center,
         width: surface.width,
       }
     );

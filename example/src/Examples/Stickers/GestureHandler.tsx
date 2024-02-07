@@ -70,7 +70,10 @@ export const GestureHandler = ({
         { translateX: -width / 2 },
         { translateY: -height / 2 },
         {
-          matrix: Platform.OS === "web" ? convertToAffineMatrix(m4) : m4,
+          matrix:
+            Platform.OS === "web"
+              ? convertToAffineMatrix(m4)
+              : (m4 as unknown as number[]),
         },
         { translateX: width / 2 },
         { translateY: height / 2 },

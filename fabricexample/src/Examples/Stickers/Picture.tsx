@@ -1,4 +1,4 @@
-import type { SkMatrix, SkImage } from "@shopify/react-native-skia";
+import type { SkImage, Matrix4 } from "@shopify/react-native-skia";
 import { Group, Image, rect } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions } from "react-native";
@@ -8,7 +8,7 @@ const { width, height } = Dimensions.get("window");
 export const PictureDimensions = rect(0, 0, width, height);
 
 interface PictureProps {
-  matrix: SharedValue<SkMatrix>;
+  matrix: SharedValue<Matrix4>;
   image: SkImage;
 }
 

@@ -30,14 +30,14 @@ DerivedData
 project.xcworkspace
 
 # Android/IntelliJ
-#
 build/
 .idea
 .gradle
 local.properties
 *.iml
 .cxx
-*.settings**
+# Legacy Eclipse Settings
+.settings/
 
 # Externals
 libs

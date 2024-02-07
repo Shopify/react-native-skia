@@ -1,8 +1,8 @@
+import type { Vector } from "@shopify/react-native-skia";
 import { useEffect } from "react";
 import {
   Easing,
   cancelAnimation,
-  useFrameCallback,
   useSharedValue,
   withRepeat,
   withTiming,
@@ -23,14 +23,13 @@ export const useLoop = ({ duration }: { duration: number }) => {
   return progress;
 };
 
-export const useClock = () => {
-  const clock = useSharedValue(0);
-  useFrameCallback((info) => {
-    clock.value = info.timeSinceFirstFrame;
-  });
-  return clock;
+export const translate = ({
+  x,
+  y,
+}: Vector): [{ translateX: number }, { translateY: number }] => {
+  "worklet";
+  return [{ translateX: x }, { translateY: y }];
 };
-
 const fade = (t: number) => {
   "worklet";
   return t * t * t * (t * (t * 6 - 15) + 10);

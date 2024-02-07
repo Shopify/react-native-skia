@@ -65,10 +65,10 @@ export const Snapshot = () => {
             <ImageShader
               image={image}
               fit="contain"
-              x={20}
-              y={20}
-              width={width - 40}
-              height={width - 120}
+              x={0}
+              y={0}
+              width={width}
+              height={width}
             />
           </Shader>
         </Fill>
@@ -81,6 +81,37 @@ const Component = () => {
   const [counter, setCounter] = useState(0);
   return (
     <ScrollView style={styles.scrollview}>
+      <View
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: 200,
+          height: 200,
+        }}
+      >
+        <View
+          style={{
+            position: "absolute",
+            transform: [{ translateX: 20 }, { translateY: 100 }],
+            top: 0,
+            left: 0,
+            width: 80,
+            height: 80,
+            backgroundColor: "red",
+          }}
+        />
+        <View
+          style={{
+            position: "absolute",
+            top: 100,
+            left: 100,
+            width: 80,
+            height: 80,
+            backgroundColor: "blue",
+          }}
+        />
+      </View>
       <Text>Hello World!</Text>
       <View style={{ flexDirection: "row" }}>
         <View
@@ -106,8 +137,13 @@ const Component = () => {
             height: 40,
             backgroundColor: "red",
             opacity: 0.5,
+            overflow: "hidden",
           }}
-        />
+        >
+          <View style={{ width: 150, height: 10, backgroundColor: "cyan" }}>
+            <View style={{ width: 20, height: 20, backgroundColor: "red" }} />
+          </View>
+        </View>
       </View>
       <Button
         title={"Press me to increment (" + counter + ")"}

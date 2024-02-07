@@ -10,7 +10,7 @@ export const PictureViewExample = () => {
   // Create picture
   const picture = useMemo(
     () =>
-      createPicture({ x: 0, y: 0, width: 100, height: 100 }, (canvas) => {
+      createPicture((canvas) => {
         const paint = Skia.Paint();
         paint.setColor(Skia.Color("pink"));
         canvas.drawRect({ x: 0, y: 0, width: 100, height: 100 }, paint);

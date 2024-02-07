@@ -1,9 +1,12 @@
 #pragma once
 
+#include "JsiSkRSXform.h"
 #include "NodeProp.h"
 #include "PointProp.h"
 
 #include <memory>
+#include <utility>
+#include <vector>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -130,4 +133,32 @@ private:
   RectProp *_rectProp;
   RectPropFromProps *_rectPropFromProps;
 };
+
+class RectsProp : public DerivedProp<std::vector<SkRect>> {
+public:
+  explicit RectsProp(PropId name,
+                     const std::function<void(BaseNodeProp *)> &onChange)
+      : DerivedProp<std::vector<SkRect>>(onChange) {
+    _rectsProp = defineProperty<NodeProp>(name);
+  }
+
+  void updateDerivedValue() override {
+    if (_rectsProp->isSet()) {
+      auto rects = _rectsProp->value().getAsArray();
+      std::vector<SkRect> derivedRects;
+      derivedRects.reserve(rects.size());
+
+      for (size_t i = 0; i < rects.size(); ++i) {
+        derivedRects.push_back(*RectProp::processRect(rects[i]));
+      }
+      setDerivedValue(std::move(derivedRects));
+    } else {
+      setDerivedValue(nullptr);
+    }
+  }
+
+private:
+  NodeProp *_rectsProp;
+};
+
 } // namespace RNSkia

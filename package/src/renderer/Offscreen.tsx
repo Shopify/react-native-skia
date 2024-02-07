@@ -1,24 +1,37 @@
 import type { ReactElement } from "react";
 
 import { JsiDrawingContext } from "../dom/types";
+import type { SkPicture, SkSize } from "../skia/types";
 import { Skia } from "../skia";
 
 import { SkiaRoot } from "./Reconciler";
 
-export const drawAsImage = (
-  element: ReactElement,
-  width: number,
-  height: number
-) => {
-  const surface = Skia.Surface.MakeOffscreen(width, height);
-  if (!surface) {
-    throw new Error("Could not create offscreen surface");
-  }
-  const canvas = surface.getCanvas();
-  const root = new SkiaRoot(Skia);
+export const drawAsPicture = (element: ReactElement) => {
+  const recorder = Skia.PictureRecorder();
+  const canvas = recorder.beginRecording();
+  const root = new SkiaRoot(Skia, false);
   root.render(element);
   const ctx = new JsiDrawingContext(Skia, canvas);
   root.dom.render(ctx);
+  const picture = recorder.finishRecordingAsPicture();
+  return picture;
+};
+
+export const drawAsImage = (element: ReactElement, size: SkSize) => {
+  return drawAsImageFromPicture(drawAsPicture(element), size);
+};
+
+// TODO: We're not sure yet why PixelRatio is not needed here.
+const pd = 1;
+export const drawAsImageFromPicture = (picture: SkPicture, size: SkSize) => {
+  "worklet";
+  const surface = Skia.Surface.MakeOffscreen(
+    size.width * pd,
+    size.height * pd
+  )!;
+  const canvas = surface.getCanvas();
+  canvas.scale(pd, pd);
+  canvas.drawPicture(picture);
   surface.flush();
   return surface.makeImageSnapshot();
 };
