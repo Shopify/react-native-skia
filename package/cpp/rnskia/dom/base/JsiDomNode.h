@@ -374,7 +374,7 @@ protected:
         auto existingPosition = std::find(self->_children.begin(), self->_children.end(), child);
         if (existingPosition != self->_children.end())
             self->_children.erase(existingPosition);
-        
+
         self->_children.push_back(child);
         child->setParent(self.get());
       }
@@ -399,7 +399,7 @@ protected:
         auto existingPosition = std::find(self->_children.begin(), self->_children.end(), child);
         if (existingPosition != self->_children.end())
             self->_children.erase(existingPosition);
-        
+
         auto position =
             std::find(self->_children.begin(), self->_children.end(), before);
         self->_children.insert(position, child);
