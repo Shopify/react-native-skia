@@ -38,6 +38,7 @@ export abstract class JsiNode<P> implements Node<P> {
   }
 
   addChild(child: Node<unknown>) {
+    this.removeChild(child);
     this._children.push(child as JsiNode<unknown>);
   }
 
