@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { setSkiaCanvasKit } from "../skia/Skia.web";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import CanvasKitInit from "canvaskit-wasm/bin/full/canvaskit";
 import type {
   CanvasKit as CanvasKitType,
