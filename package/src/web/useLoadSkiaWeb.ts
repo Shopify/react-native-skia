@@ -50,7 +50,7 @@ export const useLoadSkiaWeb = (opts?: CanvasKitInitOptions) => {
     });
   }, [setLoadState]);
 
-  // Even trough this is not the expected usage of the hook, it is possible that
+  // Even though this is not the expected usage of the hook, it is possible that
   // the user calls the hook multiple times, in this case we want to instantly return the
   // "loaded" state in true if the module has already been loaded, this is done by stopping the effect
   // from running and stopping the first render from happening. This would avoid any flicker effect
