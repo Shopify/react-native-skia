@@ -7,10 +7,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - directory: "example"
+          - directory: "fabricexample"
     env:
       WORKING_DIRECTORY: ./
     concurrency:
-      group: tests-${{ github.ref }}
+      group: tests-${{ matrix.directory }}-${{ github.ref }}
       cancel-in-progress: true
     steps:
       - name: checkout
@@ -53,17 +58,17 @@ jobs:
       - name: Run Package Unit tests
         run: cd package; yarn test;
 
-      - name: Install Example
-        run: cd example; yarn install --frozen-lockfile
+      - name: Install Example/Fabric Example
+        run: cd ${{ matrix.directory }}; yarn install --frozen-lockfile
 
-      - name: Lint Example
-        run: cd example; yarn lint;
+      - name: Lint Example/Fabric Example
+        run: cd ${{ matrix.directory }}; yarn lint;
 
-      - name: TypeScript Example
-        run: cd example; yarn tsc;
+      - name: TypeScript Example/Fabric Example
+        run: cd ${{ matrix.directory }}; yarn tsc;
 
-      - name: Run Example Unit tests
-        run: cd example; yarn test;
+      - name: Run Example/Fabric Example Unit tests
+        run: cd ${{ matrix.directory }}; yarn test;
 
       - name: Install Docs
         run: cd docs; yarn install --frozen-lockfile

@@ -7,10 +7,11 @@ import {
   Vertices,
   Skia,
   isEdge,
+  useClock,
 } from "@shopify/react-native-skia";
 import { useDerivedValue } from "react-native-reanimated";
 
-import { getSeed, perlin, useClock } from "../../components/Animations";
+import { getSeed, perlin } from "../../components/Animations";
 
 const N = 3;
 const n = new Array(N + 1).fill(0).map((_, i) => i);

@@ -10,16 +10,17 @@ import {
   Patch,
   vec,
   useImage,
+  useClock,
 } from "@shopify/react-native-skia";
 import { View, useWindowDimensions, StyleSheet } from "react-native";
+import type { SharedValue } from "react-native-reanimated";
 import Animated, {
   useDerivedValue,
-  type SharedValue,
   useSharedValue,
 } from "react-native-reanimated";
 import { GestureDetector } from "react-native-gesture-handler";
 
-import { getSeed, perlin, useClock } from "../../../components/Animations";
+import { getSeed, perlin } from "../../../components/Animations";
 
 import { symmetric } from "./Math";
 import { Cubic } from "./Cubic";

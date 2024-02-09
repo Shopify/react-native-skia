@@ -1,4 +1,3 @@
-/* eslint-disable import/no-default-export */
 import type { LinkingOptions } from "@react-navigation/native";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import React from "react";
@@ -28,6 +27,7 @@ import {
   Severance,
   Transitions,
   Stickers,
+  FrostedCard,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
@@ -58,6 +58,7 @@ const linking: LinkingOptions<StackParamList> = {
       Tests: "test",
       Transitions: "transitions",
       Stickers: "stickers",
+      FrostedCard: "frosted-card",
     },
   },
   prefixes: ["rnskia://"],
@@ -152,6 +153,13 @@ const App = () => {
                 header: () => null,
               }}
             />
+            <Stack.Screen
+              name="FrostedCard"
+              component={FrostedCard}
+              options={{
+                header: () => null,
+              }}
+            />
             <Stack.Screen name="Neumorphism" component={Neumorphism} />
             <Stack.Screen
               name="Wallpaper"
@@ -188,4 +196,5 @@ const App = () => {
   );
 };
 
+// eslint-disable-next-line import/no-default-export
 export default App;

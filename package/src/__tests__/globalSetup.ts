@@ -1,5 +1,5 @@
-import { WebSocketServer } from "ws";
 import type { Server, WebSocket } from "ws";
+import { WebSocketServer } from "ws";
 
 declare global {
   var testServer: Server;
@@ -21,7 +21,11 @@ const globalSetup = () => {
     if (process.env.E2E !== "true") {
       resolve();
     } else {
-      global.testServer = new WebSocketServer({ port: 4242 });
+      const port = 4242;
+      global.testServer = new WebSocketServer({ port });
+      console.log(
+        `\n\nTest server listening on port ${port} (waiting for the example app to open on E2E tests screen)`
+      );
       global.testServer.on("connection", (client) => {
         global.testClient = client;
         client.once("message", (msg) => {
@@ -35,6 +39,7 @@ const globalSetup = () => {
           }
           global.testOS = OS;
           global.testArch = arch;
+          console.log(`${OS} device connected (${arch})`);
           resolve();
         });
       });

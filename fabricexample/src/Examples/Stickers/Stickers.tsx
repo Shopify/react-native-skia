@@ -1,4 +1,4 @@
-import { Canvas, Skia, useFont, useImage } from "@shopify/react-native-skia";
+import { Canvas, Matrix4, useFont, useImage } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions, View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
@@ -14,9 +14,9 @@ const zurich = require("./assets/zurich.jpg");
 const aveny = require("./assets/aveny.ttf");
 
 export const Stickers = () => {
-  const pictureMatrix = useSharedValue(Skia.Matrix());
-  const helloMatrix = useSharedValue(Skia.Matrix());
-  const locationMatrix = useSharedValue(Skia.Matrix());
+  const pictureMatrix = useSharedValue(Matrix4());
+  const helloMatrix = useSharedValue(Matrix4());
+  const locationMatrix = useSharedValue(Matrix4());
   const image = useImage(zurich);
   const font = useFont(aveny, 56);
   if (!image || !font) {

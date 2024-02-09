@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+
 import { glsl } from "../../../components/ShaderLib";
 
 import type { Transition } from "./Base";
