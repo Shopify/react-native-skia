@@ -9,7 +9,7 @@ import { Aurora } from "./Aurora";
 import { Wallet } from "./Wallet";
 import { Vertices } from "./Vertices";
 import { Severance } from "./Severance";
-import { PerformanceDrawingTest } from "./Performance";
+import { PerformanceDrawingTest } from "./Performance/PerformanceRects";
 import { GraphsScreen } from "./Graphs";
 import { Neumorphism } from "./Neumorphism";
 import { Matrix } from "./Matrix";

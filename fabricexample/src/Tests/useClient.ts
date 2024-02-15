@@ -3,37 +3,36 @@ import { Platform } from "react-native";
 
 const ANDROID_WS_HOST = "10.0.2.2";
 const IOS_WS_HOST = "localhost";
-const url = `ws://${
-  Platform.OS === "android" ? ANDROID_WS_HOST : IOS_WS_HOST
-}:4242`;
+const HOST = Platform.OS === "android" ? ANDROID_WS_HOST : IOS_WS_HOST;
+const PORT = 4242;
 
-export const useClient = () => {
+type UseClient = [client: WebSocket | null, hostname: string];
+export const useClient = (): UseClient => {
   const [client, setClient] = useState<WebSocket | null>(null);
+  const [retry, setRetry] = useState<number>(0);
+
   useEffect(() => {
-    if (client === null) {
-      const makeConnection = () => {
-        const ws = new WebSocket(url);
-        ws.onopen = () => {
-          setClient(ws);
-          ws.send(JSON.stringify({ OS: Platform.OS, arch: "fabric" }));
-        };
-        ws.onclose = () => {
-          setClient(null);
-        };
-        ws.onerror = () => {
-          it = setTimeout(() => {
-            ws.close();
-            makeConnection();
-          }, 500);
-        };
-      };
-      makeConnection();
-      let it: ReturnType<typeof setTimeout>;
-      return () => {
-        clearTimeout(it);
-      };
-    }
-    return;
-  }, [client]);
-  return client;
+    const url = `ws://${HOST}:${PORT}`;
+    let it: ReturnType<typeof setTimeout>;
+    const ws = new WebSocket(url);
+    ws.onopen = () => {
+      setClient(ws);
+      ws.send(JSON.stringify({ OS: Platform.OS, arch: "fabric" }));
+    };
+    ws.onclose = () => {
+      setClient(null);
+    };
+    ws.onerror = () => {
+      it = setTimeout(() => {
+        ws.close();
+        // incrementing retry to rerun the effect
+        setRetry((r) => r + 1);
+      }, 500);
+    };
+    return () => {
+      ws.close();
+      clearTimeout(it);
+    };
+  }, [retry]);
+  return [client, HOST];
 };

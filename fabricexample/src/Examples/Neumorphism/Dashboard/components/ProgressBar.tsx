@@ -4,7 +4,6 @@ import {
   rrect,
   Group,
   LinearGradient,
-  translate,
   Circle,
   Skia,
   vec,
@@ -41,9 +40,9 @@ export const ProgressBar = ({ progress }: ProgressBarProps) => {
   if (font === null) {
     return null;
   }
-  const textWidth = font.getTextWidth("00°C");
+  const textWidth = font.measureText("00°C").width;
   return (
-    <Group transform={translate({ x: 100, y: 223 })}>
+    <Group transform={[{ translate: [100, 223] }]}>
       <Group>
         <LinearGradient
           start={vec(12, 12)}

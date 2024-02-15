@@ -102,8 +102,7 @@ describe("Offscreen Drawings", () => {
     const r = width / 2;
     const image = drawAsImage(
       <Circle r={r} cx={r} cy={r} color="lightblue" />,
-      width,
-      height
+      { width, height }
     );
     checkImage(image, docPath("offscreen/circle.png"));
   });

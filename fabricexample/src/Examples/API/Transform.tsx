@@ -2,10 +2,10 @@ import React, { useMemo } from "react";
 import { ScrollView, useWindowDimensions } from "react-native";
 import {
   Skia,
-  useDrawCallback,
-  SkiaView,
   PaintStyle,
   useImage,
+  createPicture,
+  SkiaPictureView,
 } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
@@ -32,132 +32,119 @@ export const Transform = () => {
   const CARD_WIDTH = width - 64;
   const CARD_HEIGHT = CARD_WIDTH * aspectRatio;
 
-  const onRotateDraw = useDrawCallback(
-    (canvas) => {
-      const rect = Skia.XYWHRect(
-        center.x - CARD_WIDTH / 2,
-        center.y - CARD_HEIGHT / 2,
-        CARD_WIDTH,
-        CARD_HEIGHT
-      );
-      if (image) {
-        const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
-        canvas.save();
-        canvas.rotate(-30, center.x, center.y);
+  const rotateDraw = createPicture((canvas) => {
+    const rect = Skia.XYWHRect(
+      center.x - CARD_WIDTH / 2,
+      center.y - CARD_HEIGHT / 2,
+      CARD_WIDTH,
+      CARD_HEIGHT
+    );
+    if (image) {
+      const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
+      canvas.save();
+      canvas.rotate(-30, center.x, center.y);
 
-        //  we pivot on the center of the card
-        canvas.translate(center.x, center.y);
-        canvas.scale(0.75, 0.75);
-        canvas.translate(-center.x, -center.y);
+      //  we pivot on the center of the card
+      canvas.translate(center.x, center.y);
+      canvas.scale(0.75, 0.75);
+      canvas.translate(-center.x, -center.y);
 
-        canvas.drawImageRect(image, imgRect, rect, paint);
-        canvas.restore();
-      }
-    },
-    [CARD_HEIGHT, CARD_WIDTH, center.x, center.y, image]
-  );
+      canvas.drawImageRect(image, imgRect, rect, paint);
+      canvas.restore();
+    }
+  });
 
-  const onSkewDraw = useDrawCallback(
-    (canvas) => {
-      const rect = Skia.XYWHRect(
-        center.x - CARD_WIDTH / 2,
-        center.y - CARD_HEIGHT / 2,
-        CARD_WIDTH,
-        CARD_HEIGHT
-      );
-      if (image) {
-        const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
-        canvas.save();
+  const skewDraw = createPicture((canvas) => {
+    const rect = Skia.XYWHRect(
+      center.x - CARD_WIDTH / 2,
+      center.y - CARD_HEIGHT / 2,
+      CARD_WIDTH,
+      CARD_HEIGHT
+    );
+    if (image) {
+      const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
+      canvas.save();
 
-        //  we pivot on the center of the card
-        canvas.translate(center.x, center.y);
-        canvas.skew(-Math.PI / 6, 0);
-        canvas.translate(-center.x, -center.y);
+      //  we pivot on the center of the card
+      canvas.translate(center.x, center.y);
+      canvas.skew(-Math.PI / 6, 0);
+      canvas.translate(-center.x, -center.y);
 
-        canvas.drawImageRect(image, imgRect, rect, paint);
-        canvas.restore();
-      }
-    },
-    [CARD_HEIGHT, CARD_WIDTH, center.x, center.y, image]
-  );
+      canvas.drawImageRect(image, imgRect, rect, paint);
+      canvas.restore();
+    }
+  });
 
-  const onMatrixDraw = useDrawCallback(
-    (canvas) => {
-      const rect = Skia.XYWHRect(
-        center.x - CARD_WIDTH / 2,
-        center.y - CARD_HEIGHT / 2,
-        CARD_WIDTH,
-        CARD_HEIGHT
-      );
-      if (image) {
-        const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
-        canvas.save();
+  const matrixDraw = createPicture((canvas) => {
+    const rect = Skia.XYWHRect(
+      center.x - CARD_WIDTH / 2,
+      center.y - CARD_HEIGHT / 2,
+      CARD_WIDTH,
+      CARD_HEIGHT
+    );
+    if (image) {
+      const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
+      canvas.save();
 
-        //  we pivot on the center of the card
-        canvas.translate(center.x, center.y);
-        canvas.skew(-Math.PI / 6, 0);
-        canvas.translate(-center.x, -center.y);
+      //  we pivot on the center of the card
+      canvas.translate(center.x, center.y);
+      canvas.skew(-Math.PI / 6, 0);
+      canvas.translate(-center.x, -center.y);
 
-        canvas.drawImageRect(image, imgRect, rect, paint);
-        canvas.restore();
-      }
-    },
-    [CARD_HEIGHT, CARD_WIDTH, center.x, center.y, image]
-  );
+      canvas.drawImageRect(image, imgRect, rect, paint);
+      canvas.restore();
+    }
+  });
 
-  const onMatrixDraw2 = useDrawCallback(
-    (canvas) => {
-      const rect = Skia.XYWHRect(
-        center.x - CARD_WIDTH / 2,
-        center.y - CARD_HEIGHT / 2,
-        CARD_WIDTH,
-        CARD_HEIGHT
-      );
-      if (image) {
-        const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
-        canvas.save();
-        const radians = -Math.PI / 2;
-        const scaleX = Math.cos(radians);
-        const skewX = Math.sin(radians);
-        const transX = 400;
-        const skewY = -Math.sin(radians);
-        const scaleY = Math.cos(radians);
-        const transY = 0;
-        const pers0 = 0;
-        const pers1 = 0;
-        const pers2 = 1;
-        const m = Skia.Matrix([
-          scaleX,
-          skewX,
-          transX,
-          skewY,
-          scaleY,
-          transY,
-          pers0,
-          pers1,
-          pers2,
-        ]);
-        //console.log({ matrix: m.get() });
-        canvas.concat(m);
+  const matrixDraw2 = createPicture((canvas) => {
+    const rect = Skia.XYWHRect(
+      center.x - CARD_WIDTH / 2,
+      center.y - CARD_HEIGHT / 2,
+      CARD_WIDTH,
+      CARD_HEIGHT
+    );
+    if (image) {
+      const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
+      canvas.save();
+      const radians = -Math.PI / 2;
+      const scaleX = Math.cos(radians);
+      const skewX = Math.sin(radians);
+      const transX = 400;
+      const skewY = -Math.sin(radians);
+      const scaleY = Math.cos(radians);
+      const transY = 0;
+      const pers0 = 0;
+      const pers1 = 0;
+      const pers2 = 1;
+      const m = Skia.Matrix([
+        scaleX,
+        skewX,
+        transX,
+        skewY,
+        scaleY,
+        transY,
+        pers0,
+        pers1,
+        pers2,
+      ]);
+      canvas.concat(m);
 
-        canvas.drawImageRect(image, imgRect, rect, paint);
-        canvas.restore();
-      }
-    },
-    [image]
-  );
+      canvas.drawImageRect(image, imgRect, rect, paint);
+      canvas.restore();
+    }
+  });
   const style = useMemo(() => ({ width: SIZE, height: SIZE }), [SIZE]);
 
   return (
     <ScrollView>
       <Title>Rotate & Scale</Title>
-      <SkiaView style={style} onDraw={onRotateDraw} />
+      <SkiaPictureView style={style} picture={rotateDraw} />
       <Title>Skew</Title>
-      <SkiaView style={style} onDraw={onSkewDraw} />
+      <SkiaPictureView style={style} picture={skewDraw} />
       <Title>Matrix</Title>
-      <SkiaView style={style} onDraw={onMatrixDraw} />
+      <SkiaPictureView style={style} picture={matrixDraw} />
       <Title>Matrix 2</Title>
-      <SkiaView style={style} onDraw={onMatrixDraw2} />
+      <SkiaPictureView style={style} picture={matrixDraw2} />
     </ScrollView>
   );
 };

@@ -5,8 +5,7 @@ sidebar_label: Paragraph
 slug: /text/paragraph
 ---
 
-React Native Skia offers an API to perform text layouts.
-Behind the scene, this API is the Skia Paragraph API.
+React Native Skia offers an API to perform text layouts using the Skia Paragraph API.
 
 ## Hello World
 
@@ -16,7 +15,7 @@ Other system fonts will are available as well.
 
 ```tsx twoslash
 import { useMemo } from "react";
-import { Paragraph, Skia, useFonts } from "@shopify/react-native-skia";
+import { Paragraph, Skia, useFonts, TextAlign } from "@shopify/react-native-skia";
 
 const MyParagraph = () => {
   const customFontMgr = useFonts({
@@ -31,12 +30,15 @@ const MyParagraph = () => {
     if (!customFontMgr) {
       return null;
     }
+    const paragraphStyle = {
+      textAlign: TextAlign.Center
+    };
     const textStyle = {
       color: Skia.Color("black"),
       fontFamilies: ["Roboto"],
       fontSize: 50,
     };
-    return Skia.ParagraphBuilder.Make({}, customFontMgr)
+    return Skia.ParagraphBuilder.Make(paragraphStyle, customFontMgr)
       .pushStyle(textStyle)
       .addText("Say Hello to ")
       .pushStyle({ ...textStyle, fontStyle: { weight: 500 } })
@@ -103,9 +105,16 @@ vec4 main(vec2 pos) {
 }`)!;
 
 // Define an array of colors for the gradient to be used in shader uniform
-const colors = ["#dafb61", "#61DAFB", "#fb61da", "#61fbcf"].flatMap(
-  (c) => Array.from(Skia.Color(c))
-);
+const colors = [
+  // #dafb61
+  0.85, 0.98, 0.38, 1.0,
+  // #61dafb
+  0.38, 0.85, 0.98, 1.0,
+  // #fb61da
+  0.98, 0.38, 0.85, 1.0,
+  // #61fbcf
+  0.38, 0.98, 0.81, 1.0
+];
 
 const MyParagraph = () => {
   const paragraph = useMemo(() => {
@@ -268,6 +277,31 @@ These properties define the overall layout and behavior of a paragraph.
 | `textDirection`         | Determines the text direction (RTL or LTR).                                           |
 | `textHeightBehavior`    | Controls the behavior of text ascent and descent in the first and last lines.         |
 | `textStyle`             | Default text style for the paragraph (can be overridden by individual text styles).   |
+
+Below is an example to center text with `textAlign` property:
+
+```tsx twoslash
+import { useMemo } from "react";
+import { Paragraph, Skia, TextAlign, Canvas, Rect } from "@shopify/react-native-skia";
+
+const MyParagraph = () => {
+  const paragraph = useMemo(() => {
+    const para = Skia.ParagraphBuilder.Make({
+          textAlign: TextAlign.Center,
+      })
+      .addText("Say Hello to React Native Skia")
+      .build();
+    return para;
+  }, []);
+
+  // Render the paragraph with the text center
+  return (
+    <Canvas style={{ width: 256, height: 256 }}>
+      <Paragraph paragraph={paragraph} x={0} y={0} width={200} />
+    </Canvas>
+  );
+};
+```
 
 ## Text Style Properties
 

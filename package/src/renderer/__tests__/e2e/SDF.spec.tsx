@@ -102,4 +102,47 @@ vec4 main(vec2 xy) {
     );
     checkImage(img, "snapshots/sdf/rectangle.png");
   });
+  it("should use the sdf of a heart", async () => {
+    const { Skia } = importSkia();
+    const source = Skia.RuntimeEffect.Make(`
+uniform float4 c1;
+uniform float4 c2;
+uniform float2 resolution;
+
+float dot2(in vec2 v) { return dot(v,v); }
+
+float sdHeart(in vec2 p)
+{
+    p.x = abs(p.x);
+
+    if( p.y+p.x>1.0 )
+        return sqrt(dot2(p-vec2(0.25,0.75))) - sqrt(2.0)/4.0;
+    return sqrt(min(dot2(p-vec2(0.00,1.00)),
+                    dot2(p-0.5*max(p.x+p.y,0.0)))) * sign(p.x-p.y);
+}
+
+vec4 main(vec2 xy) {
+  vec2 p = (xy*2.0-resolution.xy)/-resolution.y;
+  p.y += 0.5;
+  float d = sdHeart(p);
+  if (d < 0) {
+    return c2;
+  }
+  return c1;
+}
+`)!;
+    const c1 = Skia.Color("#61dafb");
+    const c2 = Skia.Color("#fb61da");
+    expect(source).toBeDefined();
+    const { width, height } = surface;
+    const img = await surface.draw(
+      <Fill>
+        <Shader
+          source={source}
+          uniforms={{ c1, c2, resolution: [width, height] }}
+        />
+      </Fill>
+    );
+    checkImage(img, "snapshots/sdf/heart.png");
+  });
 });

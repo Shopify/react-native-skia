@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import React, { useMemo } from "react";
 import { ScrollView, useWindowDimensions } from "react-native";
 import type { Vector } from "@shopify/react-native-skia";
@@ -8,7 +7,6 @@ import {
   sub,
   Canvas,
   Circle,
-  translate,
   Skia,
   PaintStyle,
   DiscretePathEffect,
@@ -23,9 +21,12 @@ import {
   processTransform2d,
 } from "@shopify/react-native-skia";
 
+import { translate } from "../../components/Animations";
+
 import { Title } from "./components/Title";
 
 const path = Skia.Path.MakeFromSVGString(
+  // eslint-disable-next-line max-len
   "M466 91C466 141.258 361.682 182 233 182C104.318 182 0 141.258 0 91C0 40.7421 104.318 0 233 0C361.682 0 466 40.7421 466 91Z"
 )!;
 

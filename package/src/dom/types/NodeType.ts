@@ -67,6 +67,7 @@ export const enum NodeType {
   Glyphs = "skGlyphs",
   Picture = "skPicture",
   ImageSVG = "skImageSVG",
+  Atlas = "skAtlas",
 
   // Paragraph
   Paragraph = "skParagraph",

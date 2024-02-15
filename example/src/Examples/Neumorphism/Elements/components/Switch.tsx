@@ -9,7 +9,8 @@ import {
   Circle,
 } from "@shopify/react-native-skia";
 import React from "react";
-import { useDerivedValue, type SharedValue } from "react-native-reanimated";
+import type { SharedValue } from "react-native-reanimated";
+import { useDerivedValue } from "react-native-reanimated";
 
 import { Theme } from "./Theme";
 
