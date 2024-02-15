@@ -120,7 +120,7 @@ export const Platform: IPlatform = {
   resolveAsset: (source: DataModule) => {
     if (isRNModule(source)) {
       throw new Error(
-        "Image source is a number - this is not supported on the web"
+        "Asset source is a number - this is not supported on the web"
       );
     }
     return source.default;
