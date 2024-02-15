@@ -27,7 +27,7 @@ Loading an image is an asynchronous operation, so the `useImage` hook will retur
 
 :::info
 
-If you're loading an Image on the Web with the Metro bundler (Expo, etc.), make sure you're [properly loading your assets](https://shopify.github.io/react-native-skia/docs/getting-started/web#loading-assets-on-the-web)
+If you're loading Images on the Web with the Metro bundler (Expo, etc.), make sure you're [properly loading your assets](https://shopify.github.io/react-native-skia/docs/getting-started/web#loading-assets-on-the-web)
 
 :::
 
