@@ -19,6 +19,7 @@ You can use React Native Skia without React Native Web.
 ## Expo
 
 Using React Native Skia on Expo web is reasonably straightforward.
+
 We provide a script that will work well with the setup:
 ```bash
 $ npx expo install @shopify/react-native-skia
@@ -34,7 +35,7 @@ Consider adding it to your `postinstall` script.
 
 Once you are done, you need to pick your strategy to [Load Skia](#loading-skia).
 
-If you are [loading CanvasKit from a CDN](#using-a-cdn), you don't need to run the `setup-skia-web` script. If you are not using `react-native-reanimated`, webpack will output a warning because React Native Skia refers to Reanimated. We describe how to fix this warning [here](#manual-webpack-installation).
+If you are [loading CanvasKit from a CDN](#using-a-cdn), you don't need to run the `setup-skia-web` script for webpack. If you are not using `react-native-reanimated`, webpack will output a warning because React Native Skia refers to Reanimated. We describe how to fix this warning [here](#manual-webpack-installation).
 
 ### Snack
 
@@ -43,6 +44,51 @@ To use React Native Skia on [snack](https://snack.expo.dev/), you will need to u
 
 <Snack id="@wcandillon/hello-snack" />
 
+### Expo Router
+
+If you're starting from scratch, you can use [this template](https://github.com/kimchouard/expo-router-skia-template) if to kick off an Expo Router universal app with React Native Skia:
+
+```bash
+npx create-expo-app@latest --template expo-router-skia-template MyUniversallyAnimatedApp
+```
+
+If you have a project with Expo Router running already, you can either use the [code-splitting](#using-code-splitting) method, or [deferred component registration](#using-deferred-component-registration) **(recommended)**.
+
+To use deferred component registration on Expo Router, you need to create a new entry script and link to it from your `package.json`.
+
+Say we've created a `index.js` and `index.web.js` file in our `src/` folder, our `package.json` will update to match:
+
+```json
+{
+  // (...)
+  "main": "src/index",
+  // (...)
+}
+```
+
+And here's the `src/index.web.js` code example:
+
+```tsx
+// This file should only import and register the root. No components or exports
+// should be added here.
+
+import '@expo/metro-runtime';
+import { App } from 'expo-router/build/qualified-entry';
+import { renderRootComponent } from 'expo-router/build/renderRootComponent';
+
+// RN Skia (WASM)
+import { LoadSkiaWeb } from '@shopify/react-native-skia/lib/module/web';
+
+LoadSkiaWeb({
+  locateFile: (file) => `/static/js/${file}`,
+}).then(async () => {
+  renderRootComponent(App);
+});
+```
+
+You can adapt it to [load the CanvasKit WASM from a CDN](#using-a-cdn) if you wish.
+
+For the native equivalent, `src/index.js`, you can call `renderRootComponent(App)` directly.
 
 ## Remotion
 
@@ -135,12 +181,6 @@ packageJsonDirect.browser = {
 fs.writeFileSync(packageJsonDirectPath, JSON.stringify(packageJsonDirect, null, 2));
 ```
 
-:::info
-
-If you're using [Expo Router](https://docs.expo.dev/router/introduction/), you can not defer the root component registration, so you'd have to load Skia using [code-splitting](#using-code-splitting).
-
-:::
-
 ## Loading Skia
 
 You need to have Skia fully loaded and initialized before importing the Skia module.
@@ -177,7 +217,7 @@ Otherwise your app will throw an `Error: Requiring unknown module "XXXX"` when y
 
 :::
 
-### Using Defered Component Registration
+### Using Deferred Component Registration
 
 We provide a `LoadSkiaWeb()` function you can use to load Skia before starting the React app.
 This is the approach we use for Remotion, for instance.
@@ -216,7 +256,7 @@ export default function App() {
 }
 ```
 
-Below is the same example but using defered component registration.
+Below is the same example but using deferred component registration.
  
  ```tsx
 import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
