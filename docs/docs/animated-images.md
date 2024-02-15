@@ -49,6 +49,12 @@ export const AnimatedImages = () => {
 
 ![bird](assets/bird.gif)
 
+:::info
+
+If you're loading Images on the Web with the Metro bundler (Expo, etc.), make sure you're [properly loading your assets](https://shopify.github.io/react-native-skia/docs/getting-started/web#loading-assets-on-the-web)
+
+:::
+
 ## Manual API
 
 To load an image as a `SkAnimatedImage` object, we offer a `useAnimatedImage` hook:

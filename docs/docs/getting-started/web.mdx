@@ -270,6 +270,30 @@ LoadSkiaWeb({
 });
 ```
 
+## Loading Assets on the Web
+
+If you need to load assets like fonts or images, you might run into issues on the Web with Metro (it should work fine with webpack).
+
+Metro indexes all the assets (js files, fonts, images, etc.) with unique `Module ID`s. When calling `require(...)`, it doesn't return an asset but a `number`, correspoding to Metro's Module ID for that asset. On the Web, Skia will then throw an error: `Asset source is a number - this is not supported on the web`, while it will work fine on Native.
+
+There is 2 ways you can go around this issue to get your `asset` for your `<Text>` or `<Image>`:
+- For publicly accessible folders (e.g. `public/` or `assets/`), you can adapt the loading based on the platform:
+```jsx
+// ONLY FOR PUBLIC FOLDER: Different loading method based on the platform
+import { Platform } from "react-native";
+// (...)
+const myAssetPath = 'assets/images/my-image.png';
+const relativePathToTheAssetFolder = '../../';
+const asset = (Platform.OS === 'web') ? `/${myAssetPath}` : require(`${relativePathToTheAssetFolder}${myAssetPath}`);
+```
+- If you want to load assets outside of those folders and are using `Expo`, you can use `expo-asset` (available with the basic expo package, no further install required):
+```jsx
+import { useAssets } from 'expo-asset';
+// (...)
+const [assets, error] = useAssets([require(`../random-folder/my-image.png`)]);
+const asset = (!error && assets) ? assets[0].uri : null;
+```
+
 ## Unsupported Features
 
 Below are the React Native Skia APIs which are not yet supported on React Native Web.

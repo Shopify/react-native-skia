@@ -80,6 +80,12 @@ const textStyle = {
 };
 ```
 
+:::info
+
+If you're loading Fonts on the Web with the Metro bundler (Expo, etc.), make sure you're [properly loading your assets](https://shopify.github.io/react-native-skia/docs/getting-started/web#loading-assets-on-the-web)
+
+:::
+
 ## Using Paints
 
 You can use paint objects for the foreground and the background of a text style.

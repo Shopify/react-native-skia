@@ -1,6 +1,7 @@
 import type { RefObject, CSSProperties } from "react";
 import React, { useLayoutEffect, useMemo, useRef } from "react";
 import type { LayoutChangeEvent, ViewComponent, ViewProps } from "react-native";
+import { AssetRegistry } from "react-native";
 
 import type { DataModule } from "../skia/types";
 import { isRNModule } from "../skia/types";
@@ -119,9 +120,13 @@ export const Platform: IPlatform = {
   PixelRatio: (typeof window !== 'undefined') ? window.devicePixelRatio : 1, // accounting for Metro bundler that might have an undefined `window` value
   resolveAsset: (source: DataModule) => {
     if (isRNModule(source)) {
-      throw new Error(
-        "Asset source is a number - this is not supported on the web"
-      );
+      // throw new Error(
+      //   "Asset source is a number - this is not supported on the web"
+      // );
+      const asset = AssetRegistry.getAssetByID(source);
+
+      console.log('Loading asset using AssetRegistry, from ID:', source, 'Asset:', asset);
+      return asset;
     }
     return source.default;
   },
