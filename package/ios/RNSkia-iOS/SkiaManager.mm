@@ -24,7 +24,9 @@
   _skManager = nullptr;
 }
 
-- (instancetype)initWithBridge:(RCTBridge *)bridge jsInvoker:(std::shared_ptr<facebook::react::CallInvoker>)jsInvoker {
+- (instancetype)initWithBridge:(RCTBridge *)bridge
+                     jsInvoker:(std::shared_ptr<facebook::react::CallInvoker>)
+                                   jsInvoker {
   self = [super init];
   if (self) {
     RCTCxxBridge *cxxBridge = (RCTCxxBridge *)bridge;
@@ -36,7 +38,8 @@
       // Create the RNSkiaManager (cross platform)
       _skManager = std::make_shared<RNSkia::RNSkManager>(
           jsRuntime, jsInvoker,
-          std::make_shared<RNSkia::RNSkiOSPlatformContext>(jsRuntime, bridge, jsInvoker));
+          std::make_shared<RNSkia::RNSkiOSPlatformContext>(jsRuntime, bridge,
+                                                           jsInvoker));
     }
   }
   return self;

@@ -29,7 +29,9 @@ static void handleNotification(CFNotificationCenterRef center, void *observer,
 
 class RNSkiOSPlatformContext : public RNSkPlatformContext {
 public:
-  RNSkiOSPlatformContext(jsi::Runtime *runtime, RCTBridge *bridge, std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker)
+  RNSkiOSPlatformContext(
+      jsi::Runtime *runtime, RCTBridge *bridge,
+      std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker)
       : RNSkPlatformContext(runtime, jsCallInvoker,
                             [[UIScreen mainScreen] scale]) {
 
