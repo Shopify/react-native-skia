@@ -2,7 +2,6 @@
 
 #import <React/RCTBridge+Private.h>
 #import <React/RCTBridge.h>
-#import <ReactCommon/RCTTurboModule.h>
 
 #include <functional>
 #include <memory>
@@ -30,8 +29,8 @@ static void handleNotification(CFNotificationCenterRef center, void *observer,
 
 class RNSkiOSPlatformContext : public RNSkPlatformContext {
 public:
-  RNSkiOSPlatformContext(jsi::Runtime *runtime, RCTBridge *bridge)
-      : RNSkPlatformContext(runtime, bridge.jsCallInvoker,
+  RNSkiOSPlatformContext(jsi::Runtime *runtime, RCTBridge *bridge, std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker)
+      : RNSkPlatformContext(runtime, jsCallInvoker,
                             [[UIScreen mainScreen] scale]) {
 
     // We need to make sure we invalidate when modules are freed
