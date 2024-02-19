@@ -1,7 +1,7 @@
 import {
   Canvas,
   Atlas,
-  useTextureValue,
+  useTexture,
   Group,
   rect,
   Rect,
@@ -30,7 +30,7 @@ const textureSize = {
 export const PerformanceDrawingTest = () => {
   const [numberOfBoxes, setNumberOfBoxes] = useState(300);
 
-  const texture = useTextureValue(
+  const texture = useTexture(
     <Group>
       <Rect
         rect={rect(strokeWidth / 2, strokeWidth / 2, size.width, size.height)}
