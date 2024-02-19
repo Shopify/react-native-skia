@@ -20,7 +20,7 @@ const useBuffer = <T>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [size]
   );
-  const transforms = useSharedValue(buffer);
+  const values = useSharedValue(buffer);
   const mod = modifier as WorkletFunction;
   const deps = Object.values(mod.__closure ?? {});
   const mapperId = startMapper(() => {
@@ -28,7 +28,7 @@ const useBuffer = <T>(
     buffer.forEach((val, index) => {
       modifier(val, index);
     });
-   notifyChange(transforms);
+   notifyChange(values);
   }, deps);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ const useBuffer = <T>(
     }
   }, [mapperId]);
 
-  return transforms;
+  return values;
 };
 
 export const useRectBuffer = (
