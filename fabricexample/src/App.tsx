@@ -28,6 +28,7 @@ import {
   Transitions,
   Stickers,
   FrostedCard,
+  SpeedTest,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
@@ -59,6 +60,7 @@ const linking: LinkingOptions<StackParamList> = {
       Transitions: "transitions",
       Stickers: "stickers",
       FrostedCard: "frosted-card",
+      SpeedTest: "speedtest",
     },
   },
   prefixes: ["rnskia://"],
@@ -142,6 +144,13 @@ const App = () => {
             <Stack.Screen
               name="Aurora"
               component={Aurora}
+              options={{
+                header: () => null,
+              }}
+            />
+            <Stack.Screen
+              name="SpeedTest"
+              component={SpeedTest}
               options={{
                 header: () => null,
               }}

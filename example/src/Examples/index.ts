@@ -22,3 +22,4 @@ export * from "./Severance";
 export * from "./Transitions";
 export * from "./Stickers";
 export * from "./FrostedCard";
+export * from "./SpeedTest";
