@@ -57,8 +57,12 @@ jobs:
 
       # We need a specific version of CocoaPods
       # see https://github.com/facebook/react-native/issues/42698
-      - name: Install CocoaPods
-        run: sudo gem install cocoapods -v 1.14.3
+      - name: Install Specific CocoaPods Version
+        run: |
+          sudo gem uninstall cocoapods --all --executables
+          sudo gem install cocoapods -v 1.14.3
+          pod --version
+          if [ $(pod --version) != "1.14.3" ]; then echo "CocoaPods version mismatch"; exit 1; fi
 
       - name: Restore Pods from cache
         uses: actions/cache@v3
