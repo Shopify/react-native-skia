@@ -12,6 +12,8 @@
 
 - (void)invalidate;
 
-- (instancetype)initWithBridge:(RCTBridge *)bridge;
+- (instancetype)initWithBridge:(RCTBridge *)bridge
+                     jsInvoker:(std::shared_ptr<facebook::react::CallInvoker>)
+                                   jsInvoker;
 
 @end

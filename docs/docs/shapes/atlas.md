@@ -99,14 +99,14 @@ export const Demo = () => {
 ## Animations
 
 The Atlas component should usually be used with Reanimated.
-First, the [useTextureValue](/docs/animations/textures#usetexturevalue) hook will enable you to create a texture on the UI thread directly without needing to make any copies.
+First, the [useTexture](/docs/animations/textures#usetexture) hook will enable you to create a texture on the UI thread directly without needing to make any copies.
 Secondly, we provide you with hooks such as [`useRectBuffer`](/docs/animations/hooks#userectbuffer) and [`useRSXformBuffer`](/docs/animations/hooks#usersxformbuffer) to efficiently animates on the sprites and transformations.
 
 The example below is identical to the one above but the position is an animation value bound to a gesture.
 
 
 ```tsx twoslash
-import {Skia, drawAsImage, Group, Rect, Canvas, Atlas, rect, useTextureValue, useRSXformBuffer} from "@shopify/react-native-skia";
+import {Skia, drawAsImage, Group, Rect, Canvas, Atlas, rect, useTexture, useRSXformBuffer} from "@shopify/react-native-skia";
 import {useSharedValue, useDerivedValue} from "react-native-reanimated";
 import {GestureDetector, Gesture} from "react-native-gesture-handler";
 
@@ -119,7 +119,7 @@ const textureSize = {
 
 export const Demo = () => {
   const pos = useSharedValue({ x: 0, y: 0 });
-  const texture = useTextureValue(
+  const texture = useTexture(
     <Group>
       <Rect
         rect={rect(strokeWidth / 2, strokeWidth / 2, size.width, size.height)}

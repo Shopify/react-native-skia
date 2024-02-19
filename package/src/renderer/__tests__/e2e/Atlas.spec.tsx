@@ -320,4 +320,39 @@ describe("Atlas", () => {
       maxPixelDiff: 500,
     });
   });
+  it("should accept null as a texture", async () => {
+    const { Skia, rect } = importSkia();
+    const size = { width: 25, height: 25 * 0.45 };
+    const textureSize = {
+      width: 0,
+      height: 0,
+    };
+    const numberOfBoxes = 150;
+    const pos = { x: 128, y: 128 };
+    const width = 256;
+    const sprites = new Array(numberOfBoxes)
+      .fill(0)
+      .map(() => rect(0, 0, textureSize.width, textureSize.height));
+    const transforms = new Array(numberOfBoxes).fill(0).map((_, i) => {
+      const tx = 5 + ((i * size.width) % width);
+      const ty = 25 + Math.floor(i / (width / size.width)) * size.width;
+      const r = Math.atan2(pos.y - ty, pos.x - tx);
+      return Skia.RSXform(Math.cos(r), Math.sin(r), tx, ty);
+    });
+    const colors = new Array(numberOfBoxes)
+      .fill(0)
+      .map(() => Skia.Color("#61bea2"));
+    const img = await surface.draw(
+      <Atlas
+        image={null}
+        sprites={sprites}
+        transforms={transforms}
+        colors={colors}
+        blendMode="screen"
+      />
+    );
+    checkImage(img, docPath("atlas/null.png"), {
+      maxPixelDiff: 500,
+    });
+  });
 });

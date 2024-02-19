@@ -6,8 +6,6 @@
 #import <React/RCTBridge.h>
 #import <React/RCTUIManager.h>
 
-#import <ReactCommon/RCTTurboModule.h>
-
 #import "RNSkiOSPlatformContext.h"
 
 @implementation SkiaManager {
@@ -26,7 +24,9 @@
   _skManager = nullptr;
 }
 
-- (instancetype)initWithBridge:(RCTBridge *)bridge {
+- (instancetype)initWithBridge:(RCTBridge *)bridge
+                     jsInvoker:(std::shared_ptr<facebook::react::CallInvoker>)
+                                   jsInvoker {
   self = [super init];
   if (self) {
     RCTCxxBridge *cxxBridge = (RCTCxxBridge *)bridge;
@@ -37,8 +37,9 @@
 
       // Create the RNSkiaManager (cross platform)
       _skManager = std::make_shared<RNSkia::RNSkManager>(
-          jsRuntime, bridge.jsCallInvoker,
-          std::make_shared<RNSkia::RNSkiOSPlatformContext>(jsRuntime, bridge));
+          jsRuntime, jsInvoker,
+          std::make_shared<RNSkia::RNSkiOSPlatformContext>(jsRuntime, bridge,
+                                                           jsInvoker));
     }
   }
   return self;
