@@ -46,7 +46,6 @@ protected:
 
     _rectsProp->require();
     _rsxFormsProp->require();
-    _imageProp->require();
   }
 
 private:
