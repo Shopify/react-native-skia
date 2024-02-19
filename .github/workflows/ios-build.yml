@@ -57,13 +57,16 @@ jobs:
 
       # We need a specific version of CocoaPods
       # see https://github.com/facebook/react-native/issues/42698
-      - name: Install Bundler and CocoaPods
+      - name: Install Bundler
+        run: sudo gem install bundler
+      
+      - name: Setup Gemfile
         run: |
-          sudo gem install bundler
-          bundle init
+          echo "source 'https://rubygems.org'" > Gemfile
           echo "gem 'cocoapods', '1.14.3'" >> Gemfile
-          bundle install
-          bundle exec pod --version
+      
+      - name: Bundle Install
+        run: bundle install
 
       - name: Restore Pods from cache
         uses: actions/cache@v3
@@ -74,9 +77,11 @@ jobs:
             ~/.cocoapods
           key: ${{ runner.os }}-pods-${{ matrix.working-directory }}-${{ hashFiles(format('{0}/ios/Podfile.lock', matrix.working-directory)) }}
 
+      # We need a specific version of CocoaPods
+      # see https://github.com/facebook/react-native/issues/42698
       - name: Install Pods
         working-directory: ${{ matrix.working-directory }}/ios
-        run: pod install
+        run: bundle exec pod install
 
       - name: Check if Podfile.lock has changed
         working-directory: ${{ matrix.working-directory }}/ios
