@@ -55,16 +55,6 @@ jobs:
         working-directory: ${{ matrix.working-directory }}
         run: yarn install --frozen-lockfile
 
-      # We need a specific version of CocoaPods
-      # see https://github.com/facebook/react-native/issues/42698
-      - name: Install Bundler
-        run: sudo gem install bundler
-      
-      - name: Setup Gemfile
-        run: |
-          echo "source 'https://rubygems.org'" > Gemfile
-          echo "gem 'cocoapods', '1.14.3'" >> Gemfile
-      
       - name: Bundle Install
         run: bundle install
 
@@ -77,13 +67,9 @@ jobs:
             ~/.cocoapods
           key: ${{ runner.os }}-pods-${{ matrix.working-directory }}-${{ hashFiles(format('{0}/ios/Podfile.lock', matrix.working-directory)) }}
 
-      # We need a specific version of CocoaPods
-      # see https://github.com/facebook/react-native/issues/42698
       - name: Install Pods
         working-directory: ${{ matrix.working-directory }}/ios
-        env:
-          BUNDLE_GEMFILE: ${{ github.workspace }}/Gemfile
-        run: bundle exec pod install
+        run: pod install
 
       - name: Check if Podfile.lock has changed
         working-directory: ${{ matrix.working-directory }}/ios
