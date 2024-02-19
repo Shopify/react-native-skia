@@ -116,11 +116,11 @@ const View = (({ children, onLayout, style: rawStyle }: ViewProps) => {
 
 export const Platform: IPlatform = {
   OS: "web",
-  PixelRatio: window.devicePixelRatio,
+  PixelRatio: typeof window !== "undefined" ? window.devicePixelRatio : 1, // window is not defined on node
   resolveAsset: (source: DataModule) => {
     if (isRNModule(source)) {
       throw new Error(
-        "Image source is a number - this is not supported on the web"
+        "Asset source is a number - this is not supported on the web"
       );
     }
     return source.default;
