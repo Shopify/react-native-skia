@@ -81,6 +81,8 @@ jobs:
       # see https://github.com/facebook/react-native/issues/42698
       - name: Install Pods
         working-directory: ${{ matrix.working-directory }}/ios
+        env:
+          BUNDLE_GEMFILE: ${{ github.workspace }}/Gemfile
         run: bundle exec pod install
 
       - name: Check if Podfile.lock has changed
