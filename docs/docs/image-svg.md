@@ -51,12 +51,6 @@ const ImageSVGDemo = () => {
 };
 ```
 
-:::info
-
-If you're loading an SVG on the Web with the Metro bundler (Expo, etc.), make sure you're [properly loading your assets](https://shopify.github.io/react-native-skia/docs/getting-started/web#loading-assets-on-the-web)
-
-:::
-
 You can also use an inlined string as SVG (using `Skia.SVG.MakeFromString`):
 
 ```tsx twoslash

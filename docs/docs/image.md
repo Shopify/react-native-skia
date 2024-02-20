@@ -25,12 +25,6 @@ const image3 = useImage("Logo");
 
 Loading an image is an asynchronous operation, so the `useImage` hook will return null until the image is fully loaded. You can use this behavior to conditionally render the `Image` component, as shown in the [example below](#example).
 
-:::info
-
-If you're loading Images on the Web with the Metro bundler (Expo, etc.), make sure you're [properly loading your assets](https://shopify.github.io/react-native-skia/docs/getting-started/web#loading-assets-on-the-web)
-
-:::
-
 The hook also provides an optional error handler as a second parameter.
 
 ### MakeImageFromEncoded
