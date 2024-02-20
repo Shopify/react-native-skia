@@ -123,7 +123,6 @@ export const Platform: IPlatform = {
         const {getAssetByID} =  require("react-native/Libraries/Image/AssetRegistry");
         const {httpServerLocation, name, type} = getAssetByID(source);
         const uri = `${httpServerLocation}/${name}.${type}`;
-        console.log(getAssetByID(source));
         return uri;
       }
       throw new Error(
