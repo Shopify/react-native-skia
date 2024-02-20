@@ -18,8 +18,10 @@
  * Usage:
  * $ `npx <script>`
  *
- * -> Copies the file to `<project>/web/js/canvaskit.wasm`
- * OR, if metro is detected, to `<project>/public/js/canvaskit.wasm`
+ * On webpack:
+ * -> Copies the file to `<project>/web/static/js/canvaskit.wasm`
+ * on metro:
+ * -> Copies the file to `<project>/public/js/canvaskit.wasm`
  *
  * Tooling that uses a custom static assets folder, like `/assets` for example:
  * $ `npx <script> assets`
@@ -71,7 +73,7 @@ function getWasmFilePath() {
 
 function getOutputFilePath(isAnExpoProjectWithMetro) {
   // Default to using `web` public path.
-  const publicFolder = path.resolve(args[0] || (isAnExpoProjectWithMetro) ? "public" : "web");
+  const publicFolder = path.resolve(args[0] || (isAnExpoProjectWithMetro) ? "public" : "web/static");
   const publicLocation = "./js/canvaskit.wasm";
   const output = path.join(publicFolder, publicLocation);
 
