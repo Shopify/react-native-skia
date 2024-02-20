@@ -181,19 +181,12 @@ import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
 export default function App() {
   return (
     <WithSkiaWeb
-      getComponent={() => import("./MySkiaComponent")} // use require(...) if you're using the metro bundler
+      getComponent={() => import("./MySkiaComponent")}
       fallback={<Text>Loading Skia...</Text>}
     />
   );
 }
 ```
-
-:::info
-
-If you're using the `metro` bundler instead of webpack (as required by Expo Router for example), make sure to replace the `import(...)` function by a `require(...)`. In our example it would become: `getComponent={() => require("./MySkiaComponent")}`.
-Otherwise your app will throw an `Error: Requiring unknown module "XXXX"` when you build for production.
-
-:::
 
 ### Using Deferred Component Registration
 
@@ -229,7 +222,7 @@ export default function App() {
   return (
     <WithSkiaWeb
       opts={{ locateFile: (file) => `https://cdn.jsdelivr.net/npm/canvaskit-wasm@${version}/bin/full/${file}` }}
-      getComponent={() => import("./MySkiaComponent")} // use require(...) if you're using the metro bundler
+      getComponent={() => import("./MySkiaComponent")}
   );
 }
 ```
