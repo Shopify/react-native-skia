@@ -119,9 +119,11 @@ export const Platform: IPlatform = {
   PixelRatio: typeof window !== "undefined" ? window.devicePixelRatio : 1, // window is not defined on node
   resolveAsset: (source: DataModule) => {
     if (isRNModule(source)) {
-      if (typeof source === 'number' && typeof require === 'function') {
-        const {getAssetByID} =  require("react-native/Libraries/Image/AssetRegistry");
-        const {httpServerLocation, name, type} = getAssetByID(source);
+      if (typeof source === "number" && typeof require === "function") {
+        const {
+          getAssetByID,
+        } = require("react-native/Libraries/Image/AssetRegistry");
+        const { httpServerLocation, name, type } = getAssetByID(source);
         const uri = `${httpServerLocation}/${name}.${type}`;
         return uri;
       }
