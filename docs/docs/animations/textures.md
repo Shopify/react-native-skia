@@ -6,21 +6,22 @@ slug: /animations/textures
 ---
 
 In React Native Skia, Skia resources are shared across threads.
-We can use Reanimated to create textures on the UI thread, thus ensuring that we can display them onscreen canvas without needing to perform unnecessary copies.
+We can use Reanimated to create textures on the UI thread, thus ensuring that we can display them on the onscreen canvas without needing to perform unnecessary copies.
 
-## `useTextureValue`
+## `useTexture`
 
-The `useTextureValue` hook allows you to create textures from React elements. It takes a React element and its size as arguments, and returns a shared value containing the texture.
+This hook allows you to allows you to create textures from React elements.
+It takes a React element and the dimensions of the texture as arguments and returns a Reanimated shared value that contains the texture.
 
 ```tsx twoslash
 import { useWindowDimensions } from "react-native";
-import { useTextureValue } from "@shopify/react-native-skia";
+import { useTexture } from "@shopify/react-native-skia";
 import { Image, Rect, rect, Canvas, Fill } from "@shopify/react-native-skia";
 import React from "react";
 
 const Demo = () => {
   const {width, height} = useWindowDimensions();
-  const texture = useTextureValue(
+  const texture = useTexture(
       <Fill color="cyan" />,
     { width, height }
   );
@@ -32,15 +33,39 @@ const Demo = () => {
 }
 ```
 
-## `useTextureValueFromPicture`
+## `useImageAsTexture`
 
-The `useTextureValueFromPicture` hook is identical to `useTextureValue` but accepts a `SkPicture` as first argument instead of a React element.
+This hook allows you to upload an image to the GPU.
+It accepts an image source as argument.
+It will first load the image from its source and then upload it to the GPU.
+
+```tsx twoslash
+import { useWindowDimensions } from "react-native";
+import { useImageAsTexture } from "@shopify/react-native-skia";
+import { Image, Rect, rect, Canvas, Fill } from "@shopify/react-native-skia";
+import React from "react";
+
+const Demo = () => {
+  const {width, height} = useWindowDimensions();
+  const texture = useImageAsTexture(
+    require("./assets/image.png")
+  );
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Image image={texture} rect={{ x: 0, y: 0, width, height }} />
+    </Canvas>
+  )
+}
+```
+
+## `usePictureAsTexture`
+
+The hook allows you to create a texture from an `SkPicture`.
 This is useful to either generate the drawing commands outside the React lifecycle or using the imperative API to build a texture.
-
 
 ```tsx twoslash
 import {useWindowDimensions} from "react-native";
-import { useTextureValueFromPicture } from "@shopify/react-native-skia";
+import { usePictureAsTexture } from "@shopify/react-native-skia";
 import { Image, Rect, rect, Canvas, Fill, Skia } from "@shopify/react-native-skia";
 import React from "react";
 
@@ -51,7 +76,7 @@ const picture = rec.finishRecordingAsPicture();
 
 const Demo = () => {
   const {width, height} = useWindowDimensions();
-  const texture = useTextureValueFromPicture(
+  const texture = usePictureAsTexture(
     picture,
     { width, height }
   );

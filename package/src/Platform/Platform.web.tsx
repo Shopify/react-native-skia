@@ -116,7 +116,7 @@ const View = (({ children, onLayout, style: rawStyle }: ViewProps) => {
 
 export const Platform: IPlatform = {
   OS: "web",
-  PixelRatio: (typeof window !== 'undefined') ? window.devicePixelRatio : 1, // accounting for Metro bundler that might have an undefined `window` value
+  PixelRatio: typeof window !== "undefined" ? window.devicePixelRatio : 1, // window is not defined on node
   resolveAsset: (source: DataModule) => {
     if (isRNModule(source)) {
       throw new Error(
