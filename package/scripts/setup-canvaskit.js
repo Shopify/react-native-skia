@@ -19,13 +19,13 @@
  * Usage:
  * $ `npx <script>`
  *
- * -> Copies the file to `<project>/web/static/js/canvaskit.wasm`
- * OR, if metro is detected, to `<project>/public/static/js/canvaskit.wasm` and update the canvas-kit package.json accordingly.
+ * -> Copies the file to `<project>/web/js/canvaskit.wasm`
+ * OR, if metro is detected, to `<project>/public/js/canvaskit.wasm` and update the canvas-kit package.json accordingly.
  *
  * Tooling that uses `/public`:
  * $ `npx <script> public`
  *
- * -> Copies the file to `<project>/public/static/js/canvaskit.wasm`
+ * -> Copies the file to `<project>/public/js/canvaskit.wasm`
  *
  */
 const fs = require("fs");
@@ -73,11 +73,11 @@ function getWasmFilePath() {
 function getOutputFilePath(isAnExpoProjectWithMetro) {
   // Default to using `web` public path.
   const publicFolder = path.resolve(args[0] || (isAnExpoProjectWithMetro) ? "public" : "web");
-  const publicLocation = "./static/js/canvaskit.wasm";
+  const publicLocation = "./js/canvaskit.wasm";
   const output = path.join(publicFolder, publicLocation);
 
   console.log(
-    `› Copying 'canvaskit.wasm' file to static folder:\n  ${gray(output)}\n`
+    `› Copying 'canvaskit.wasm' file to public folder:\n  ${gray(output)}\n`
   );
   return output;
 }
@@ -123,7 +123,7 @@ function resolveFsAndPath() {
   // Automatically detect if it's an expo project with a metro bundler
   const isAnExpoProjectWithMetro = getWetherItsAnExpoProjectWithMetro();
 
-  // Copy the WASM file to `<static>/static/js/canvaskit.wasm`
+  // Copy the WASM file to `<public>/js/canvaskit.wasm`
   copyFile(getWasmFilePath(), getOutputFilePath(isAnExpoProjectWithMetro));
 
   // Resolve fs and path modules for metro bundler
