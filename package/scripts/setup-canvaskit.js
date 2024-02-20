@@ -19,7 +19,7 @@
  * $ `npx <script>`
  *
  * -> Copies the file to `<project>/web/js/canvaskit.wasm`
- * OR, if metro is detected, to `<project>/public/js/canvaskit.wasm` and update the canvas-kit package.json accordingly.
+ * OR, if metro is detected, to `<project>/public/js/canvaskit.wasm`
  *
  * Tooling that uses a custom static assets folder, like `/assets` for example:
  * $ `npx <script> assets`
