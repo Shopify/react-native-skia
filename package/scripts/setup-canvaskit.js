@@ -13,7 +13,6 @@
  * 3. Resolve the installed wasm file `canvaskit-wasm/bin/full/canvaskit.wasm`
  *  from `@shopify/react-native-skia -> canvaskit`.
  * 4. Recursively ensure the path exists and copy the file into the desired location.
- * 5. OPTIONAL: If the metro bundler is detected, it updates the canvaskit package.json to resolve fs and path binary (necessary when bundling with metro)
  *
  *
  * Usage:
@@ -22,10 +21,10 @@
  * -> Copies the file to `<project>/web/js/canvaskit.wasm`
  * OR, if metro is detected, to `<project>/public/js/canvaskit.wasm` and update the canvas-kit package.json accordingly.
  *
- * Tooling that uses `/public`:
- * $ `npx <script> public`
+ * Tooling that uses a custom static assets folder, like `/assets` for example:
+ * $ `npx <script> assets`
  *
- * -> Copies the file to `<project>/public/js/canvaskit.wasm`
+ * -> Copies the file to `<project>/assets/js/canvaskit.wasm`
  *
  */
 const fs = require("fs");
@@ -88,48 +87,12 @@ function copyFile(from, to) {
   fs.writeFileSync(to, data);
 }
 
-function resolveFsAndPath() {
-  try {
-    const canvasKitPackageJsonPath = path.join(process.cwd(), 'node_modules', /* '@shopify', 'react-native-skia', 'node_modules', */ 'canvaskit-wasm', 'package.json');
-
-    console.log(
-      `› Optionnal metro bundler step:\n  ${gray(`Loading 'canvaskit-wasm' package.json from:\n  ${canvasKitPackageJsonPath}`)}`
-    );
-
-    const canvasKitPackageJson = require(canvasKitPackageJsonPath);
-    // eslint-disable-next-line import/no-dynamic-require
-    canvasKitPackageJson.browser = {
-      fs: false,
-      path: false,
-      os: false,
-    };
-    
-    console.log(`  ${gray(`Saving the updated 'canvaskit-wasm' package.json to resolve 'fs' and 'path' modules.`)}\n`);
-    
-    fs.writeFileSync(
-      canvasKitPackageJsonPath,
-      JSON.stringify(canvasKitPackageJson, null, 2)
-    );
-  } catch (error) {
-    // console.error(
-    //   `Could not update 'canvaskit-wasm' package.json to disable 'fs' and 'path' modules. Please install '@shopify/react-native-skia' and ensure it can be resolved from your project: ${process.cwd()}`
-    // );
-    console.log(error);
-    process.exit(1);
-  }
-}
-
 (() => {
   // Automatically detect if it's an expo project with a metro bundler
   const isAnExpoProjectWithMetro = getWetherItsAnExpoProjectWithMetro();
 
-  // Copy the WASM file to `<public>/js/canvaskit.wasm`
+  // Copy the WASM file to `<static>/js/canvaskit.wasm`
   copyFile(getWasmFilePath(), getOutputFilePath(isAnExpoProjectWithMetro));
-
-  // Resolve fs and path modules for metro bundler
-  if (isAnExpoProjectWithMetro === true) {
-    resolveFsAndPath();
-  }
 
   console.log(lime("› Success! You are almost there:"));
   console.log(

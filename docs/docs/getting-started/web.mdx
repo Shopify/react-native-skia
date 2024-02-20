@@ -159,28 +159,6 @@ const newConfiguration = {
 
 Last, you need to [load Skia](#loading-skia).
 
-### Metro
-
-The steps listed for Webpack holds true for Metro. The way you would resolve `fs` and `path` though is different.
-
-Add this JS script to your `postinstall` routine, in order to avoid canvaskit throwing an error:
-```js
-// To be added in package.json "postinstall": "(...) && node [name-of-this-file].js"
-const fs = require('fs');
-const path = require('path');
-
-const packageJsonDirectPath = path.join(__dirname, 'node_modules', /* '@shopify', 'react-native-skia', 'node_modules', */ 'canvaskit-wasm', 'package.json');
-// eslint-disable-next-line import/no-dynamic-require
-const packageJsonDirect = require(packageJsonDirectPath);
-packageJsonDirect.browser = {
-  fs: false,
-  path: false,
-  os: false,
-};
-
-fs.writeFileSync(packageJsonDirectPath, JSON.stringify(packageJsonDirect, null, 2));
-```
-
 ## Loading Skia
 
 You need to have Skia fully loaded and initialized before importing the Skia module.
