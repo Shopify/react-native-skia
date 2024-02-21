@@ -39,9 +39,8 @@ After setup, choose your method to [Load Skia](#loading-skia).
 
 ### Expo Router
 
-For projects already using Expo Router, select between the [code-splitting](#using-code-splitting) approach or [deferred component registration](#using-deferred-component-registration).
-
-To apply deferred component registration with Expo Router, create a new entry script and reference it in your `package.json`. For instance, if you've created `index.js` and `index.web.js` in the `src/` directory, update your `package.json` accordingly:
+For projects using Expo Router, you can use [code-splitting](#using-code-splitting) or [deferred component registration](#using-deferred-component-registration).
+If you wish to use deferred component registration with Expo Router, create a new entry script and reference it in your `package.json`. For instance, if you've created `index.js` and `index.web.js` in the `src/` directory, update your `package.json` accordingly:
 ```js
 // package.json
 {
@@ -64,7 +63,6 @@ LoadSkiaWeb().then(async () => {
 });
 ```
 
-Adapt this to [load the CanvasKit WASM from a CDN](#using-a-cdn) if preferred.
 For the `src/index.js` file, directly invoke `renderRootComponent(App)`.
 
 ### Snack
