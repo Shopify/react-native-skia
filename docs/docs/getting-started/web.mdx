@@ -59,9 +59,7 @@ import { renderRootComponent } from 'expo-router/build/renderRootComponent';
 
 import { LoadSkiaWeb } from '@shopify/react-native-skia/lib/module/web';
 
-LoadSkiaWeb({
-  locateFile: (file) => `/js/${file}`,
-}).then(async () => {
+LoadSkiaWeb().then(async () => {
   renderRootComponent(App);
 });
 ```
@@ -99,6 +97,7 @@ import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
 export default function App() {
   return (
     <WithSkiaWeb
+      // import() uses the default export of MySkiaComponent.tsx
       getComponent={() => import("./MySkiaComponent")}
       fallback={<Text>Loading Skia...</Text>}
     />
