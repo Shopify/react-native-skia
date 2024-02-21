@@ -21,12 +21,12 @@
  * On webpack:
  * -> Copies the file to `<project>/web/static/js/canvaskit.wasm`
  * on metro:
- * -> Copies the file to `<project>/public/js/canvaskit.wasm`
+ * -> Copies the file to `<project>/public/canvaskit.wasm`
  *
  * Tooling that uses a custom static assets folder, like `/assets` for example:
  * $ `npx <script> assets`
  *
- * -> Copies the file to `<project>/assets/js/canvaskit.wasm`
+ * -> Copies the file to `<project>/assets/canvaskit.wasm`
  *
  */
 const fs = require("fs");
@@ -73,8 +73,8 @@ function getWasmFilePath() {
 
 function getOutputFilePath(isAnExpoProjectWithMetro) {
   // Default to using `web` public path.
-  const publicFolder = path.resolve(args[0] || (isAnExpoProjectWithMetro) ? "public" : "web/static");
-  const publicLocation = "./js/canvaskit.wasm";
+  const publicFolder = path.resolve(args[0] || (isAnExpoProjectWithMetro) ? "public" : "web/static/js");
+  const publicLocation = "./canvaskit.wasm";
   const output = path.join(publicFolder, publicLocation);
 
   console.log(
@@ -93,7 +93,7 @@ function copyFile(from, to) {
   // Automatically detect if it's an expo project with a metro bundler
   const isAnExpoProjectWithMetro = getWetherItsAnExpoProjectWithMetro();
 
-  // Copy the WASM file to `<static>/js/canvaskit.wasm`
+  // Copy the WASM file to `<static>/canvaskit.wasm`
   copyFile(getWasmFilePath(), getOutputFilePath(isAnExpoProjectWithMetro));
 
   console.log(lime("› Success! You are almost there:"));
