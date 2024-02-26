@@ -5,6 +5,7 @@ import type { SkPicture, SkSize } from "../skia/types";
 import { Skia } from "../skia";
 
 import { SkiaRoot } from "./Reconciler";
+import { Platform } from "../Platform";
 
 export const drawAsPicture = (element: ReactElement) => {
   const recorder = Skia.PictureRecorder();
@@ -33,5 +34,11 @@ export const drawAsImageFromPicture = (picture: SkPicture, size: SkSize) => {
   canvas.scale(pd, pd);
   canvas.drawPicture(picture);
   surface.flush();
-  return surface.makeImageSnapshot();
+  const image = surface.makeImageSnapshot();
+  // If we are not on the UI thread, we need to make the image non-texture.
+  // On the web, everything is on the same thread
+  if (!_WORKLET && Platform.OS !== "web") {
+    image.makeNonTextureImage();
+  }
+  return image;
 };
