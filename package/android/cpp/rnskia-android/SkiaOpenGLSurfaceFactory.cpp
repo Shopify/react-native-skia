@@ -29,7 +29,8 @@ sk_sp<SkSurface> SkiaOpenGLSurfaceFactory::makeOffscreenSurface(int width,
   SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
   if (!SkiaOpenGLHelper::makeCurrent(
-          &ThreadContextHolder::ThreadSkiaOpenGLContext, ThreadContextHolder::ThreadSkiaOpenGLContext.gl1x1Surface)) {
+          &ThreadContextHolder::ThreadSkiaOpenGLContext,
+          ThreadContextHolder::ThreadSkiaOpenGLContext.gl1x1Surface)) {
     RNSkLogger::logToConsole(
         "Could not create EGL Surface from native window / surface. Could "
         "not set new surface as current surface.");
