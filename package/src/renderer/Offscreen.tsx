@@ -3,9 +3,9 @@ import type { ReactElement } from "react";
 import { JsiDrawingContext } from "../dom/types";
 import type { SkPicture, SkSize } from "../skia/types";
 import { Skia } from "../skia";
+import { Platform } from "../Platform";
 
 import { SkiaRoot } from "./Reconciler";
-import { Platform } from "../Platform";
 
 export const drawAsPicture = (element: ReactElement) => {
   const recorder = Skia.PictureRecorder();
