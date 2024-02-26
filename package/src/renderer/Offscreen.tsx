@@ -7,6 +7,15 @@ import { Platform } from "../Platform";
 
 import { SkiaRoot } from "./Reconciler";
 
+// We call it main thread because on web main is JS thread
+export const isOnMainThread = () => {
+  "worklet";
+  return (
+    (typeof _WORKLET !== "undefined" && _WORKLET === true) ||
+    Platform.OS === "web"
+  );
+};
+
 export const drawAsPicture = (element: ReactElement) => {
   const recorder = Skia.PictureRecorder();
   const canvas = recorder.beginRecording();
@@ -35,9 +44,8 @@ export const drawAsImageFromPicture = (picture: SkPicture, size: SkSize) => {
   canvas.drawPicture(picture);
   surface.flush();
   const image = surface.makeImageSnapshot();
-  // If we are not on the UI thread, we need to make the image non-texture.
-  // On the web, everything is on the same thread
-  if (!_WORKLET && Platform.OS !== "web") {
+  // If we are not on the main thread, we need to make the image non-texture.
+  if (isOnMainThread()) {
     image.makeNonTextureImage();
   }
   return image;
