@@ -45,7 +45,7 @@ export const drawAsImageFromPicture = (picture: SkPicture, size: SkSize) => {
   surface.flush();
   const image = surface.makeImageSnapshot();
   // If we are not on the main thread, we need to make the image non-texture.
-  if (isOnMainThread()) {
+  if (!isOnMainThread()) {
     image.makeNonTextureImage();
   }
   return image;
