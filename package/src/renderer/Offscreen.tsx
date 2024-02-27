@@ -3,8 +3,18 @@ import type { ReactElement } from "react";
 import { JsiDrawingContext } from "../dom/types";
 import type { SkPicture, SkSize } from "../skia/types";
 import { Skia } from "../skia";
+import { Platform } from "../Platform";
 
 import { SkiaRoot } from "./Reconciler";
+
+// We call it main thread because on web main is JS thread
+export const isOnMainThread = () => {
+  "worklet";
+  return (
+    (typeof _WORKLET !== "undefined" && _WORKLET === true) ||
+    Platform.OS === "web"
+  );
+};
 
 export const drawAsPicture = (element: ReactElement) => {
   const recorder = Skia.PictureRecorder();
@@ -33,5 +43,11 @@ export const drawAsImageFromPicture = (picture: SkPicture, size: SkSize) => {
   canvas.scale(pd, pd);
   canvas.drawPicture(picture);
   surface.flush();
-  return surface.makeImageSnapshot();
+  const image = surface.makeImageSnapshot();
+  // If we are not on the main thread, we need to make the image non-texture.
+  if (!isOnMainThread()) {
+    return image.makeNonTextureImage();
+  } else {
+    return image;
+  }
 };
