@@ -89,6 +89,7 @@ module.exports = {
         "react-native-reanimated/package.json"
       ),
       "react-native-reanimated": require.resolve("react-native-reanimated"),
+      "react-native/Libraries/Image/AssetRegistry": false,
     },
   },
   module: {
