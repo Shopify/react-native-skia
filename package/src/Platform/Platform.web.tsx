@@ -120,11 +120,9 @@ export const Platform: IPlatform = {
   resolveAsset: (source: DataModule) => {
     if (isRNModule(source)) {
       if (typeof source === "number" && typeof require === "function") {
-        // eslint-disable-next-line no-eval
-        const nonWebpackRequire = eval("require");
-        const { getAssetByID } = nonWebpackRequire(
-          "react-native/Libraries/Image/AssetRegistry"
-        );
+        const {
+          getAssetByID,
+        } = require("react-native/Libraries/Image/AssetRegistry");
         const { httpServerLocation, name, type } = getAssetByID(source);
         const uri = `${httpServerLocation}/${name}.${type}`;
         return uri;
