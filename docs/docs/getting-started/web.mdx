@@ -45,13 +45,13 @@ After setup, choose your method to [Load Skia](#loading-skia).
 
 For projects using Expo Router, you can use [code-splitting](#using-code-splitting) or [deferred component registration](#using-deferred-component-registration).
 If you wish to use deferred component registration with Expo Router, you need to create your own `main` property in `package.json`.
-For instance, if you've created `index.tsx` and `index.web.tsx` in the `app/` directory, update your `package.json` accordingly:
+For instance, if you've created `index.tsx` and `index.web.tsx` in your root directory, update your `package.json` accordingly:
 ```patch
 -  "main": "expo-router/entry",
-+  "main": "app/index",
++  "main": "index",
 ```
 
-Below is an example of `src/index.web.js`:
+Below is an example of `index.web.tsx`:
 
 ```tsx
 import '@expo/metro-runtime';
@@ -65,7 +65,7 @@ LoadSkiaWeb().then(async () => {
 });
 ```
 
-For the `app/index.tsx` file, directly invoke `renderRootComponent(App)`.
+For the `index.tsx` file, directly invoke `renderRootComponent(App)`.
 
 ### Snack
 
