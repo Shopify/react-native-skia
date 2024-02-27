@@ -37,21 +37,18 @@ $ yarn setup-skia-web
 
 Run `yarn setup-skia-web` each time you upgrade the `@shopify/react-native-skia` package.
 Consider incorporating it into your `postinstall` script for convenience.
+```
 
 :::
 
 After setup, choose your method to [Load Skia](#loading-skia).
 
-### Expo Router
-
 For projects using Expo Router, you can use [code-splitting](#using-code-splitting) or [deferred component registration](#using-deferred-component-registration).
-If you wish to use deferred component registration with Expo Router, create a new entry script and reference it in your `package.json`. For instance, if you've created `index.js` and `index.web.js` in the `src/` directory, update your `package.json` accordingly:
-```js
-// package.json
-{
-  "main": "src/index",
-  //...
-}
+If you wish to use deferred component registration with Expo Router, you need to create your own `main` property in `package.json`.
+For instance, if you've created `index.tsx` and `index.web.tsx` in the `app/` directory, update your `package.json` accordingly:
+```patch
+-  "main": "expo-router/entry",
++  "main": "app/index",
 ```
 
 Below is an example of `src/index.web.js`:
@@ -68,7 +65,7 @@ LoadSkiaWeb().then(async () => {
 });
 ```
 
-For the `src/index.js` file, directly invoke `renderRootComponent(App)`.
+For the `app/index.tsx` file, directly invoke `renderRootComponent(App)`.
 
 ### Snack
 
@@ -171,15 +168,15 @@ To request these features, please submit [a feature request on GitHub](https://g
 * `ImageSvg`
 
 
-## Manual Webpack Installation
+## Manual webpack Installation
 
-To enable React Native Skia on Web using Webpack, three key actions are required:
+To enable React Native Skia on Web using webpack, three key actions are required:
 
 - Ensure the `canvaskit.wasm` file is accessible to the build system.
 - Configure the build system to resolve the `fs` and `path` node modules, achievable via the [node polyfill plugin](https://www.npmjs.com/package/node-polyfill-webpack-plugin).
-- Address Webpack's warning about the absent `react-native-reanimated` module, as React Native Skia references it.
+- Update aliases for `react-native-reanimated` and `react-native/Libraries/Image/AssetRegistry` so webpack can do the bundle.
 
-Here is an example Webpack v5 configuration accommodating React Native Skia:
+Here is an example webpack v5 configuration accommodating React Native Skia:
 
 ```tsx
 import fs from "fs";
@@ -214,11 +211,15 @@ const newConfiguration = {
 
     new NodePolyfillPlugin()
   ],
-  externals: {
-    ...currentConfiguration.externals,
+  alias: {
+    ...currentConfiguration.alias,
     // 3. Suppress reanimated module warning
-    "react-native-reanimated": "require('react-native-reanimated')",
-    "react-native-reanimated/package.json": "require('react-native-reanimated/package.json')",
+    // This assumes Reanimated is installed, if not you can use false.
+    "react-native-reanimated/package.json": require.resolve(
+      "react-native-reanimated/package.json"
+    ),
+    "react-native-reanimated": require.resolve("react-native-reanimated"),
+    "react-native/Libraries/Image/AssetRegistry": false,
   },
 }
 ```

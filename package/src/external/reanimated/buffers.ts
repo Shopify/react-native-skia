@@ -1,11 +1,10 @@
 import { useEffect, useMemo } from "react";
-import { startMapper, stopMapper } from "react-native-reanimated";
 import type { WorkletFunction } from "react-native-reanimated/lib/typescript/reanimated2/commonTypes";
 
 import type { SkColor, SkHostRect, SkPoint, SkRSXform } from "../../skia/types";
 import { Skia } from "../../skia";
 
-import { useSharedValue } from "./moduleWrapper";
+import { startMapper, stopMapper, useSharedValue } from "./moduleWrapper";
 import { notifyChange } from "./interpolators";
 
 type Modifier<T> = (input: T, index: number) => void;
