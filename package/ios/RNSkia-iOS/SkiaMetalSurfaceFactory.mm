@@ -1,6 +1,6 @@
-#import <RNSkLog.h>
+#import "RNSkLog.h"
 
-#include <SkiaMetalSurfaceFactory.h>
+#include "SkiaMetalSurfaceFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

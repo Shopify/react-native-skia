@@ -1,6 +1,6 @@
 #pragma once
 
-#include <RNSkLog.h>
+#include "RNSkLog.h"
 
 #include <fbjni/fbjni.h>
 #include <jni.h>

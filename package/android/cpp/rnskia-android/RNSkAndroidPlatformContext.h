@@ -5,9 +5,9 @@
 #include <memory>
 #include <string>
 
-#include <JniPlatformContext.h>
-#include <RNSkPlatformContext.h>
-#include <SkiaOpenGLSurfaceFactory.h>
+#include "JniPlatformContext.h"
+#include "RNSkPlatformContext.h"
+#include "SkiaOpenGLSurfaceFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

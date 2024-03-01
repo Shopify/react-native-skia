@@ -6,9 +6,9 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <UIKit/UIKit.h>
 
-#import <RNSkManager.h>
-#import <RNSkiOSView.h>
-#import <SkiaManager.h>
+#import "RNSkManager.h"
+#import "RNSkiOSView.h"
+#import "SkiaManager.h"
 
 #if RCT_NEW_ARCH_ENABLED
 #import <React/RCTViewComponentView.h>

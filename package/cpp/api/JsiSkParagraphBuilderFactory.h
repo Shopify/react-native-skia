@@ -5,8 +5,8 @@
 
 #include <jsi/jsi.h>
 
-#include <JsiSkParagraphBuilder.h>
-#include <JsiSkParagraphStyle.h>
+#include "JsiSkParagraphBuilder.h"
+#include "JsiSkParagraphStyle.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

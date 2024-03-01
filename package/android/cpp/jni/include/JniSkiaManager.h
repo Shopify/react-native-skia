@@ -6,10 +6,10 @@
 #include <jsi/jsi.h>
 #include <memory>
 
-#include <JniPlatformContext.h>
-#include <RNSkAndroidPlatformContext.h>
-#include <RNSkLog.h>
-#include <RNSkManager.h>
+#include "JniPlatformContext.h"
+#include "RNSkAndroidPlatformContext.h"
+#include "RNSkLog.h"
+#include "RNSkManager.h"
 
 namespace RNSkia {
 

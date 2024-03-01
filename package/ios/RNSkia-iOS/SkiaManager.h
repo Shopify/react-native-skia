@@ -2,7 +2,7 @@
 
 #import <React/RCTBridge.h>
 
-#import <RNSkManager.h>
+#import "RNSkManager.h"
 
 @interface SkiaManager : NSObject
 

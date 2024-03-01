@@ -4,7 +4,7 @@
 #include <thread>
 #include <utility>
 
-#include <SkiaMetalSurfaceFactory.h>
+#include "SkiaMetalSurfaceFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
