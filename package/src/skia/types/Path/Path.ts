@@ -1,8 +1,8 @@
 import type { SkRect } from "../Rect";
 import type { SkPoint } from "../Point";
-import type { SkRRect } from "../RRect";
+import type { InputRRect } from "../RRect";
 import type { StrokeJoin, StrokeCap } from "../Paint";
-import type { SkMatrix } from "../Matrix";
+import type { InputMatrix, SkMatrix } from "../Matrix";
 import type { SkJSIInstance } from "../JsiInstance";
 
 /**
@@ -439,7 +439,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
    * @param rrect
    * @param isCCW
    */
-  addRRect(rrect: SkRRect, isCCW?: boolean): SkPath;
+  addRRect(rrect: InputRRect, isCCW?: boolean): SkPath;
 
   /** Appends src to SkPath, transformed by matrix. Transformed curves may have
      different verbs, SkPoint, and conic weights.
@@ -540,7 +540,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
   /**
    * Transforms the path by the specified matrix.
    */
-  transform(m3: SkMatrix): SkPath;
+  transform(m3: InputMatrix): SkPath;
 
   /**
    * Interpolates between Path with point array of equal size.

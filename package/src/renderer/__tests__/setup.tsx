@@ -6,19 +6,19 @@ import React from "react";
 import type { ReactNode } from "react";
 import type { Server, WebSocket } from "ws";
 
-import { DependencyManager } from "../DependencyManager";
-import { ValueApi } from "../../values/web";
 import type * as SkiaExports from "../../index";
 import { JsiSkApi } from "../../skia/web/JsiSkia";
 import type { Node } from "../../dom/nodes";
 import { JsiSkDOM } from "../../dom/nodes";
-import { Group, Paragraph } from "../components";
-import type { SkImage, SkFont, Skia, SkParagraph } from "../../skia/types";
+import { Group } from "../components";
+import type { SkImage, SkFont, Skia, SkCanvas } from "../../skia/types";
 import { isPath } from "../../skia/types";
 import { E2E } from "../../__tests__/setup";
 import { SkiaRoot } from "../Reconciler";
 import { JsiDrawingContext } from "../../dom/types/DrawingContext";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
+
+import { SkiaObject } from "./e2e/setup";
 
 jest.setTimeout(180 * 1000);
 
@@ -49,7 +49,6 @@ beforeAll(async () => {
   await LoadSkiaWeb();
   const Skia = JsiSkApi(global.CanvasKit);
   global.SkiaApi = Skia;
-  global.SkiaValueApi = ValueApi;
   surface = E2E ? new RemoteSurface() : new LocalSurface();
   const { fontSize } = surface;
   const NotoSansSCRegular = loadFont(
@@ -164,13 +163,11 @@ export const importSkia = (): typeof SkiaExports => {
   const offscreen = require("../Offscreen");
   // TODO: to remove
   const animation = require("../../animation");
-  const values = require("../../values");
   const useTouchHandler = require("../../views/useTouchHandler");
   return {
     ...skia,
     ...renderer,
     ...animation,
-    ...values,
     ...offscreen,
     ...useTouchHandler,
   };
@@ -178,8 +175,7 @@ export const importSkia = (): typeof SkiaExports => {
 
 export const getSkDOM = () => {
   const { Skia } = importSkia();
-  const depMgr = new DependencyManager(() => () => {});
-  return new JsiSkDOM({ Skia, depMgr });
+  return new JsiSkDOM({ Skia }, false);
 };
 
 export const PIXEL_RATIO = 3;
@@ -201,10 +197,9 @@ export const mountCanvas = (element: ReactNode) => {
   expect(ckSurface).toBeDefined();
   const canvas = ckSurface.getCanvas();
 
-  const root = new SkiaRoot(Skia);
+  const root = new SkiaRoot(Skia, false);
   root.render(element);
   return {
-    unmount: root.unmount.bind(root),
     surface: ckSurface,
     root: root.dom,
     draw: () => {
@@ -236,7 +231,14 @@ const serializeSkOjects = (obj: any): any => {
   } else if (Array.isArray(obj)) {
     return obj.map((item) => serializeSkOjects(item));
   } else if (obj && typeof obj === "object" && "__typename__" in obj) {
-    if (obj.__typename__ === "Point") {
+    if (obj instanceof SkiaObject) {
+      const skObj: SkiaObject<EvalContext, any> = obj;
+      return {
+        __typename__: "SkiaObject",
+        source: skObj.source,
+        context: skObj.context,
+      };
+    } else if (obj.__typename__ === "Point") {
       return { __typename__: "Point", x: obj.x, y: obj.y };
     } else if (obj.__typename__ === "Paint") {
       return { __typename__: "Paint", color: Array.from(obj.getColor()) };
@@ -291,6 +293,14 @@ const serializeSkOjects = (obj: any): any => {
         __typename__: "SVG",
         source: obj.source(),
       };
+    } else if (obj.__typename__ === "RSXform") {
+      return {
+        __typename__: "RSXform",
+        scos: obj.scos,
+        ssin: obj.ssin,
+        tx: obj.tx,
+        ty: obj.ty,
+      };
     }
   }
   return obj;
@@ -313,16 +323,15 @@ const serializeNode = (node: Node<any>): SerializedNode => {
   };
 };
 
-type EvalContext = Record<string, any>;
+export type EvalContext = Record<string, any>;
 
 interface TestingSurface {
   eval<Ctx extends EvalContext, R>(
     fn: (Skia: Skia, ctx: Ctx) => R,
     ctx?: Ctx
   ): Promise<R>;
-  drawParagraph<Ctx extends EvalContext>(
-    fn: (Skia: Skia, ctx: Ctx) => SkParagraph,
-    width?: number,
+  drawOffscreen<Ctx extends EvalContext, R>(
+    fn: (Skia: Skia, canvas: SkCanvas, ctx: Ctx) => R,
     ctx?: Ctx
   ): Promise<SkImage>;
   draw(node: ReactNode): Promise<SkImage>;
@@ -348,23 +357,23 @@ class LocalSurface implements TestingSurface {
     return Promise.resolve(fn(global.SkiaApi, ctx ?? ({} as any)));
   }
 
-  async drawParagraph<Ctx extends EvalContext>(
-    fn: (Skia: Skia, ctx: Ctx) => SkParagraph,
-    paragraphWidth?: number,
+  drawOffscreen<Ctx extends EvalContext>(
+    fn: (Skia: Skia, canvas: SkCanvas, ctx: Ctx) => void,
     ctx?: Ctx
-  ) {
-    const paragraph = await this.eval(fn, ctx);
-    const { surface: ckSurface, draw } = mountCanvas(
-      <Group transform={[{ scale: PIXEL_RATIO }]}>
-        <Paragraph
-          paragraph={paragraph}
-          width={paragraphWidth ?? this.width}
-          x={0}
-          y={0}
-        />
-      </Group>
+  ): Promise<SkImage> {
+    const ckSurface = global.SkiaApi.Surface.MakeOffscreen(
+      this.width * PIXEL_RATIO,
+      this.height * PIXEL_RATIO
     );
-    draw();
+    if (!ckSurface) {
+      throw new Error("Unable to create offscreen surface");
+    }
+    const canvas = ckSurface.getCanvas();
+    canvas.save();
+    canvas.scale(PIXEL_RATIO, PIXEL_RATIO);
+    fn(global.SkiaApi, canvas, ctx ?? ({} as any));
+    canvas.restore();
+    ckSurface.flush();
     return Promise.resolve(ckSurface.makeImageSnapshot());
   }
 
@@ -397,19 +406,36 @@ class RemoteSurface implements TestingSurface {
     return this.handleImageResponse<R>(JSON.stringify(body), true);
   }
 
-  async drawParagraph<Ctx extends EvalContext>(
-    fn: (Skia: Skia, ctx: Ctx) => SkParagraph,
-    paragraphWidth?: number,
+  async drawOffscreen<Ctx extends EvalContext>(
+    fn: (Skia: Skia, canvas: SkCanvas, ctx: Ctx) => void,
     context?: Ctx
   ) {
     const ctx = this.prepareContext(context);
-    const body = {
-      paragraph: fn.toString(),
-      ctx,
-      paragraphWidth: paragraphWidth ?? this.width,
-    };
-    this.client.send(JSON.stringify(body));
-    return this.handleImageResponse(JSON.stringify(body));
+    const code = `(Skia, ctx, size, scale) => {
+const surface = Skia.Surface.MakeOffscreen(size, size);
+if (!surface) {
+  throw new Error("Unable to create offscreen surface");
+}
+const canvas = surface.getCanvas();
+canvas.save();
+canvas.scale(scale, scale);
+(${fn.toString()})(Skia, canvas, ctx);
+canvas.restore();
+surface.flush();
+return surface.makeImageSnapshot().encodeToBase64();
+}`;
+    const body = { code, ctx };
+    const base64 = await this.handleImageResponse<string>(
+      JSON.stringify(body),
+      true
+    );
+    const Skia = global.SkiaApi;
+    const data = Skia.Data.fromBase64(base64);
+    const image = Skia.Image.MakeImageFromEncoded(data);
+    if (image === null) {
+      throw new Error("Unable to decode image");
+    }
+    return image;
   }
 
   draw(node: ReactNode) {

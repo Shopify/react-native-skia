@@ -1,3 +1,4 @@
+export * from "./AtlasNode";
 export * from "./CircleNode";
 export * from "./FillNode";
 export * from "./ImageNode";
@@ -9,7 +10,6 @@ export * from "./OvalNode";
 export * from "./LineNode";
 export * from "./PatchNode";
 export * from "./VerticesNode";
-export * from "./CustomDrawingNode";
 export * from "./Text";
 export * from "./PictureNode";
 export * from "./DiffRectNode";

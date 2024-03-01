@@ -7,7 +7,12 @@ export const isShader = (obj: SkJSIInstance<string> | null): obj is SkShader =>
 
 export type SkShader = SkJSIInstance<"Shader">;
 
-export type Uniform = number | Vector | Float32Array | Uniform[];
+export type Uniform =
+  | number
+  | Vector
+  | Float32Array
+  | readonly Uniform[]
+  | Uniform[];
 
 export interface Uniforms {
   [name: string]: Uniform;
@@ -40,7 +45,7 @@ export const processUniforms = (
   for (let i = 0; i < uniformsCount; i++) {
     const name = source.getUniformName(i);
     const value = uniforms[name];
-    if (!value === undefined) {
+    if (value === undefined) {
       throw new Error(
         // eslint-disable-next-line max-len
         `The runtime effect has the uniform value "${name}" declared, but it is missing from the uniforms property of the Runtime effect.`

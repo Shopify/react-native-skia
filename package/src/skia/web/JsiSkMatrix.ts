@@ -1,8 +1,12 @@
 import type { CanvasKit, Matrix3x3 } from "canvaskit-wasm";
 
-import type { SkMatrix } from "../types";
+import { toMatrix3 } from "../types";
+import type { SkMatrix, InputMatrix, Matrix4 } from "../types";
 
 import { HostObject } from "./Host";
+
+const isMatrixHostObject = (obj: InputMatrix): obj is SkMatrix =>
+  !Array.isArray(obj);
 
 export class JsiSkMatrix
   extends HostObject<Matrix3x3, "Matrix">
@@ -24,8 +28,15 @@ export class JsiSkMatrix
     // Do nothing - the matrix is represenetd by a Float32Array
   };
 
-  concat(matrix: SkMatrix) {
-    this.preMultiply(JsiSkMatrix.fromValue(matrix));
+  concat(matrix: InputMatrix) {
+    this.preMultiply(
+      // eslint-disable-next-line no-nested-ternary
+      isMatrixHostObject(matrix)
+        ? JsiSkMatrix.fromValue(matrix)
+        : matrix.length === 16
+        ? toMatrix3(matrix as Matrix4)
+        : [...matrix]
+    );
     return this;
   }
 

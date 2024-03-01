@@ -54,7 +54,6 @@ add_library(
         "${PROJECT_SOURCE_DIR}/../cpp/jsi/JsiPromises.cpp"
 
         "${PROJECT_SOURCE_DIR}/../cpp/rnskia/RNSkManager.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnskia/RNSkJsView.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnskia/RNSkDomView.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnskia/RNSkDispatchQueue.cpp"
 
@@ -62,6 +61,7 @@ add_library(
         "${PROJECT_SOURCE_DIR}/../cpp/rnskia/dom/base/ConcatablePaint.cpp"
 
         "${PROJECT_SOURCE_DIR}/../cpp/api/third_party/CSSColorParser.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/api/third_party/base64.cpp"
 
 )
 

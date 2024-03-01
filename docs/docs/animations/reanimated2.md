@@ -21,7 +21,7 @@ In the example below, the animation runs on the JS thread due to the use of Rean
 
 ```tsx twoslash
 import {useEffect} from "react";
-import {Canvas, Rect, mix, useValue} from "@shopify/react-native-skia";
+import {Canvas, Rect, mix} from "@shopify/react-native-skia";
 import {useSharedValue, withRepeat, withTiming, useDerivedValue} from "react-native-reanimated";
 
 const MyComponent = () => {

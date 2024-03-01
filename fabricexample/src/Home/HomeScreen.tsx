@@ -48,6 +48,11 @@ export const HomeScreen = () => {
         route="Aurora"
       />
       <HomeScreenButton
+        title="💯 SpeedTest"
+        description="SpeedTest network speedometer"
+        route="SpeedTest"
+      />
+      <HomeScreenButton
         title="📸 Stickers"
         description="Stickers"
         route="Stickers"
@@ -61,6 +66,11 @@ export const HomeScreen = () => {
         title="🪞 Glassmorphism"
         description="Glassmorphism"
         route="Glassmorphism"
+      />
+      <HomeScreenButton
+        title="☃️ Frosted Card"
+        description="Frosted Card"
+        route="FrostedCard"
       />
       <HomeScreenButton title="💳 Wallet" description="Wallet" route="Wallet" />
       <HomeScreenButton

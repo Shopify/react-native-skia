@@ -7,6 +7,7 @@
 
 #include <JsiSkFont.h>
 #include <JsiSkFontMgr.h>
+#include <JsiSkFontMgrFactory.h>
 #include <JsiSkHostObjects.h>
 #include <JsiSkParagraph.h>
 #include <JsiSkParagraphStyle.h>
@@ -113,7 +114,8 @@ public:
                                  sk_sp<SkFontMgr> fontManager)
       : JsiSkHostObject(std::move(context)) {
     _fontCollection = sk_make_sp<para::FontCollection>();
-    _fontCollection->setDefaultFontManager(getContext()->createFontMgr());
+    auto fontMgr = JsiSkFontMgrFactory::getFontMgr(getContext());
+    _fontCollection->setDefaultFontManager(fontMgr);
     if (fontManager != nullptr) {
       _fontCollection->setAssetFontManager(fontManager);
     }
@@ -125,35 +127,4 @@ private:
   std::unique_ptr<para::ParagraphBuilder> _builder;
   sk_sp<para::FontCollection> _fontCollection;
 };
-
-/**
- Implementation of the ParagraphBuilderFactory for making ParagraphBuilder JSI
- object
- */
-class JsiSkParagraphBuilderFactory : public JsiSkHostObject {
-public:
-  JSI_HOST_FUNCTION(Make) {
-    // Get paragraph style from params
-    auto paragraphStyle =
-        count > 0 ? JsiSkParagraphStyle::fromValue(runtime, arguments[0])
-                  : para::ParagraphStyle();
-
-    // get font manager
-    auto fontMgr =
-        count > 1 ? JsiSkTypefaceFontProvider::fromValue(runtime, arguments[1])
-                  : nullptr;
-
-    // Create the paragraph builder
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkParagraphBuilder>(
-                     getContext(), paragraphStyle, fontMgr));
-  }
-
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraphBuilderFactory, Make))
-
-  explicit JsiSkParagraphBuilderFactory(
-      std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(std::move(context)) {}
-};
-
 } // namespace RNSkia

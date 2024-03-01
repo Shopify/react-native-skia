@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { DependencyList } from "react";
 import type {
+  DerivedValue,
   FrameCallback,
   FrameInfo,
   SharedValue,
@@ -42,6 +43,11 @@ export const useSharedValue: <T>(
   oneWayReadsOnly?: boolean
 ) => SharedValue<T> = Reanimated2?.useSharedValue || throwOnMissingReanimated;
 
+export const useDerivedValue: <T>(
+  processor: () => T,
+  dependencies?: DependencyList
+) => DerivedValue<T> = Reanimated2?.useDerivedValue || throwOnMissingReanimated;
+
 export const useFrameCallback: (
   callback: (frameInfo: FrameInfo) => void,
   autostart?: boolean
@@ -57,6 +63,7 @@ export const stopMapper: (mapperID: number) => void =
   Reanimated2?.stopMapper || throwOnMissingReanimated;
 
 export const runOnJS = Reanimated2?.runOnJS || throwOnMissingReanimated;
+export const runOnUI = Reanimated2?.runOnUI || throwOnMissingReanimated;
 
 export const useAnimatedReaction: <T>(
   prepare: () => T,

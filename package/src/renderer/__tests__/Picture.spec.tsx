@@ -17,7 +17,7 @@ const CheckPicture = ({}: EmptyProps) => {
   }, [Skia]);
   const picture = useMemo(
     () =>
-      createPicture(Skia.XYWHRect(0, 0, r * 2, r * 2), (canvas) => {
+      createPicture((canvas) => {
         const paint = Skia.Paint();
         paint.setColor(Skia.Color(color));
         canvas.drawCircle(r, r, r, paint);
@@ -45,11 +45,11 @@ const CheckPicture2 = ({}: EmptyProps) => {
   }, [Skia]);
   const picture = useMemo(
     () =>
-      createPicture(Skia.XYWHRect(0, 0, r * 2, r * 2), (canvas) => {
+      createPicture((canvas) => {
         const paint = Skia.Paint();
         paint.setColor(Skia.Color(color));
         canvas.drawCircle(r, r, r, paint);
-      }),
+      }, Skia.XYWHRect(0, 0, r * 2, r * 2)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );

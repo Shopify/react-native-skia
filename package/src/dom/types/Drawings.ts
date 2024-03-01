@@ -15,6 +15,8 @@ import type {
   SkSVG,
   SkPaint,
   SkRect,
+  SkRSXform,
+  SkColor,
 } from "../../skia/types";
 
 import type {
@@ -26,7 +28,6 @@ import type {
   RRectDef,
   SkEnum,
 } from "./Common";
-import type { DrawingContext } from "./DrawingContext";
 
 export interface DrawingNodeProps extends GroupProps {
   paint?: SkPaint;
@@ -48,10 +49,6 @@ export interface PathProps extends DrawingNodeProps {
   fillType?: SkEnum<typeof FillType>;
 }
 
-export interface CustomDrawingNodeProps extends DrawingNodeProps {
-  drawing: (ctx: DrawingContext) => void;
-}
-
 export interface LineProps extends DrawingNodeProps {
   p1: Vector;
   p2: Vector;
@@ -62,6 +59,13 @@ export type OvalProps = RectDef & DrawingNodeProps;
 export type RectProps = RectDef & DrawingNodeProps;
 
 export type RoundedRectProps = RRectDef & DrawingNodeProps;
+
+export interface AtlasProps extends DrawingNodeProps {
+  image: SkImage | null;
+  sprites: SkRect[];
+  transforms: SkRSXform[];
+  colors?: SkColor[];
+}
 
 export interface CubicBezierHandle {
   pos: Vector;
@@ -114,7 +118,7 @@ export interface DiffRectProps extends DrawingNodeProps {
 }
 
 export interface TextProps extends DrawingNodeProps {
-  font?: SkFont | null;
+  font: SkFont | null;
   text: string;
   x: number;
   y: number;

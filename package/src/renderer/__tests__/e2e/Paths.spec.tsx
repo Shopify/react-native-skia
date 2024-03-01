@@ -19,6 +19,32 @@ const star = (Skia: Skia) => {
 };
 
 describe("Paths", () => {
+  it("can transform a path from a matrix array (1)", async () => {
+    const result = await surface.eval((Skia) => {
+      const path = Skia.Path.Make();
+      path.lineTo(30, 30);
+      path.transform([1, 0, 0, 0, 1, 0, 0, 0, 1]);
+      const cmds = path.toCmds();
+      return cmds;
+    });
+    expect(result).toEqual([
+      [0, 0, 0],
+      [1, 30, 30],
+    ]);
+  });
+  it("can transform a path from a matrix array (2)", async () => {
+    const result = await surface.eval((Skia) => {
+      const path = Skia.Path.Make();
+      path.lineTo(30, 30);
+      path.transform([2, 0, 0, 0, 2, 0, 0, 0, 1]);
+      const cmds = path.toCmds();
+      return cmds;
+    });
+    expect(result).toEqual([
+      [0, 0, 0],
+      [1, 60, 60],
+    ]);
+  });
   it("generate commands properly", async () => {
     const result = await surface.eval((Skia) => {
       const path = Skia.Path.Make();
@@ -144,7 +170,7 @@ describe("Paths", () => {
     ]);
   });
   it("should draw a pattern properly", async () => {
-    const { Skia, translate } = importSkia();
+    const { Skia } = importSkia();
 
     const center = { x: 492 / 2, y: 757 / 2 };
     const scale = 0.325;
@@ -227,7 +253,7 @@ describe("Paths", () => {
             </Group>
           );
         })}
-        <Group transform={translate(center)}>
+        <Group transform={[{ translate: [center.x, center.y] }]}>
           <Group transform={[{ translateY: -200 }]}>
             <Circles />
           </Group>

@@ -5,8 +5,7 @@ sidebar_label: Paragraph
 slug: /text/paragraph
 ---
 
-React Native Skia offers an API to perform text layouts.
-Behind the scene, this API is the Skia Paragraph API.
+React Native Skia offers an API to perform text layouts using the Skia Paragraph API.
 
 ## Hello World
 
@@ -16,7 +15,7 @@ Other system fonts will are available as well.
 
 ```tsx twoslash
 import { useMemo } from "react";
-import { Paragraph, Skia, useFonts } from "@shopify/react-native-skia";
+import { Paragraph, Skia, useFonts, TextAlign } from "@shopify/react-native-skia";
 
 const MyParagraph = () => {
   const customFontMgr = useFonts({
@@ -31,12 +30,15 @@ const MyParagraph = () => {
     if (!customFontMgr) {
       return null;
     }
+    const paragraphStyle = {
+      textAlign: TextAlign.Center
+    };
     const textStyle = {
       color: Skia.Color("black"),
       fontFamilies: ["Roboto"],
       fontSize: 50,
     };
-    return Skia.ParagraphBuilder.Make({}, customFontMgr)
+    return Skia.ParagraphBuilder.Make(paragraphStyle, customFontMgr)
       .pushStyle(textStyle)
       .addText("Say Hello to ")
       .pushStyle({ ...textStyle, fontStyle: { weight: 500 } })
@@ -77,6 +79,159 @@ const textStyle = {
   fontSize: 50,
 };
 ```
+
+## Using Paints
+
+You can use paint objects for the foreground and the background of a text style.
+
+<img src={require("/static/img/paragraph/background-node.png").default} width="256" height="256" />
+
+Below we use a foreground and a background paint on a text style:
+
+```tsx twoslash
+import { useMemo } from "react";
+import { Paragraph, Skia, useFonts, Canvas, Rect, TileMode } from "@shopify/react-native-skia";
+
+// Our background shader
+const source = Skia.RuntimeEffect.Make(`
+uniform vec4 position;
+uniform vec4 colors[4];
+
+vec4 main(vec2 pos) {
+  vec2 uv = (pos - vec2(position.x, position.y))/vec2(position.z, position.w);
+  vec4 colorA = mix(colors[0], colors[1], uv.x);
+  vec4 colorB = mix(colors[2], colors[3], uv.x);
+  return mix(colorA, colorB, uv.y);
+}`)!;
+
+// Define an array of colors for the gradient to be used in shader uniform
+const colors = [
+  // #dafb61
+  0.85, 0.98, 0.38, 1.0,
+  // #61dafb
+  0.38, 0.85, 0.98, 1.0,
+  // #fb61da
+  0.98, 0.38, 0.85, 1.0,
+  // #61fbcf
+  0.38, 0.98, 0.81, 1.0
+];
+
+const MyParagraph = () => {
+  const paragraph = useMemo(() => {
+
+    // Create a foreground paint.
+    const backgroundPaint = Skia.Paint();
+    backgroundPaint.setShader(
+      source.makeShader([0, 0, 256, 256, ...colors])
+    );
+
+    // Create a foreground paint. We use a radial gradient.
+    const foregroundPaint = Skia.Paint();
+    foregroundPaint.setShader(
+      Skia.Shader.MakeRadialGradient(
+        { x: 0, y: 0 },
+        256,
+        [Skia.Color("magenta"), Skia.Color("yellow")],
+        null,
+        TileMode.Clamp
+      )
+    );
+
+    const para = Skia.ParagraphBuilder.Make()
+     .pushStyle(
+        {
+          fontFamilies: ["Roboto"],
+          fontSize: 72,
+          fontStyle: { weight: 500 },
+          color: Skia.Color("black"),
+        },
+        foregroundPaint,
+        backgroundPaint
+      )
+      .addText("Say Hello to React Native Skia")
+      .pop()
+      .build();
+    return para;
+  }, []);
+  return (
+    <Canvas style={{ width: 256, height: 256 }}>
+      <Paragraph paragraph={paragraph} x={0} y={0} width={256} />
+    </Canvas>
+  );
+};
+```
+
+### Applying Effects
+
+The `Paragraph` component doesn't follow the same painting rules as other components.
+However you can apply effets using the `layer` property.
+For instance, in the example below, fopr  we apply a blur image filter.
+
+```tsx twoslash
+import React from "react";
+import { Canvas, ImageSVG, Skia, Group, Paint, Blur, Paragraph } from "@shopify/react-native-skia";
+
+const width = 256;
+const height = 256;
+
+export const Demo = () => {
+  const paragraph = Skia.ParagraphBuilder.Make()
+          .pushStyle({
+            color: Skia.Color("black"),
+            fontSize: 25,
+          })
+          .addText("Hello Skia")
+          .build();
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Group layer={<Paint><Blur blur={10} /></Paint>}>
+        <Paragraph paragraph={paragraph} x={0} y={0} width={width} />
+      </Group>
+    </Canvas>
+  );
+};
+```
+
+### Result
+
+<img src={require("/static/img/blurred-paragraph-node.png").default} width="256" height="256" />
+
+
+## Paragraph Bounding Box
+
+Before getting the paragraph height and width, you need to compute its layout using `layout()` and and once done, you can invoke `getHeight()` for the height and `getLongestLine()` for the width.
+
+```tsx twoslash
+import { useMemo } from "react";
+import { Paragraph, Skia, useFonts, Canvas, Rect } from "@shopify/react-native-skia";
+
+const MyParagraph = () => {
+  const paragraph = useMemo(() => {
+    const para = Skia.ParagraphBuilder.Make()
+      .addText("Say Hello to React Native Skia")
+      .build();
+    // Calculate the layout
+    para.layout(200);
+    return para;
+  }, []);
+  // Now the paragraph height is available
+  const height = paragraph.getHeight();
+  const width = paragraph.getLongestLine();
+  // Render the paragraph
+  return (
+    <Canvas style={{ width: 256, height: 256 }}>
+      {/* Maximum paragraph width */}
+      <Rect x={0} y={0} width={200} height={256} color="magenta" />
+      {/* Paragraph bounding box */}
+      <Rect x={0} y={0} width={width} height={height} color="cyan" />
+      <Paragraph paragraph={paragraph} x={0} y={0} width={200} />
+    </Canvas>
+  );
+};
+```
+
+<img src={require("/static/img/paragraph/boundingbox-node.png").default} width="256" height="256" />
+
 
 ## Fonts
 
@@ -122,6 +277,31 @@ These properties define the overall layout and behavior of a paragraph.
 | `textDirection`         | Determines the text direction (RTL or LTR).                                           |
 | `textHeightBehavior`    | Controls the behavior of text ascent and descent in the first and last lines.         |
 | `textStyle`             | Default text style for the paragraph (can be overridden by individual text styles).   |
+
+Below is an example to center text with `textAlign` property:
+
+```tsx twoslash
+import { useMemo } from "react";
+import { Paragraph, Skia, TextAlign, Canvas, Rect } from "@shopify/react-native-skia";
+
+const MyParagraph = () => {
+  const paragraph = useMemo(() => {
+    const para = Skia.ParagraphBuilder.Make({
+          textAlign: TextAlign.Center,
+      })
+      .addText("Say Hello to React Native Skia")
+      .build();
+    return para;
+  }, []);
+
+  // Render the paragraph with the text center
+  return (
+    <Canvas style={{ width: 256, height: 256 }}>
+      <Paragraph paragraph={paragraph} x={0} y={0} width={200} />
+    </Canvas>
+  );
+};
+```
 
 ## Text Style Properties
 

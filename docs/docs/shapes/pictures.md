@@ -11,7 +11,52 @@ A Picture renders a previously recorded list of drawing operations on the canvas
 | :------ | :---------- | :---------------- |
 | picture | `SkPicture` | Picture to render |
 
-### Example
+
+## Hello World
+
+```tsx twoslash
+import React, { useMemo } from "react";
+import {
+  createPicture,
+  Canvas,
+  Picture,
+  Skia,
+  Group,
+  BlendMode
+} from "@shopify/react-native-skia";
+
+export const HelloWorld = () => {
+  // Create a picture
+  const picture = useMemo(() => createPicture(
+    (canvas) => {
+      const size = 256;
+      const r = 0.33 * size;
+      const paint = Skia.Paint();
+      paint.setBlendMode(BlendMode.Multiply);
+
+      paint.setColor(Skia.Color("cyan"));
+      canvas.drawCircle(r, r, r, paint);
+
+      paint.setColor(Skia.Color("magenta"));
+      canvas.drawCircle(size - r, r, r, paint);
+
+      paint.setColor(Skia.Color("yellow"));
+      canvas.drawCircle(size / 2, size - r, r, paint);
+    }
+  ), []);
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Picture picture={picture} />
+    </Canvas>
+  );
+};
+```
+
+## Serialization
+
+You can serialize a picture to a byte array.
+Serialized pictures are only compatible with the version of Skia it was created with.
+You can use serialized pictures with the [Skia debugger](https://skia.org/docs/dev/tools/debugger/).
 
 ```tsx twoslash
 import React, { useMemo } from "react";
@@ -26,7 +71,6 @@ import {
 export const PictureExample = () => {
   // Create picture
   const picture = useMemo(() => createPicture(
-    { x: 0, y: 0, width: 100, height: 100 },
     (canvas) => {
       const paint = Skia.Paint();
       paint.setColor(Skia.Color("pink"));
@@ -35,7 +79,8 @@ export const PictureExample = () => {
       const circlePaint = Skia.Paint();
       circlePaint.setColor(Skia.Color("orange"));
       canvas.drawCircle(50, 50, 50, circlePaint);
-    }
+    },
+    { width: 100, height: 100 },
   ), []);
 
   // Serialize the picture

@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import React from "react";
 import {
   Skia,
@@ -6,8 +5,9 @@ import {
   Group,
   Path,
   Rect,
-  translate,
 } from "@shopify/react-native-skia";
+
+import { translate } from "../../../../components/Animations";
 
 const aspectRatio = 757 / 492;
 const center = { x: 492 / 2, y: 757 / 2 };
@@ -89,10 +89,12 @@ const Pattern = () => {
 };
 
 const borders = Skia.Path.MakeFromSVGString(
+  // eslint-disable-next-line max-len
   "M447.955 756.37H44.699C20.5664 756.37 0.820374 736.624 0.820374 712.492V44.8242C0.820374 20.6898 20.5664 0.945557 44.699 0.945557H447.955C472.088 0.945557 491.834 20.6898 491.834 44.8242V712.492C491.834 736.624 472.088 756.37 447.955 756.37Z"
 )!;
 
 const bg = Skia.Path.MakeFromSVGString(
+  // eslint-disable-next-line max-len
   "M423.554 40.0679H69.3443C51.3334 40.0679 36.6796 54.7199 36.6796 72.7307V685.881C36.6796 703.892 51.3334 718.546 69.3443 718.546H423.554C441.565 718.546 456.219 703.892 456.219 685.881V72.7307C456.219 54.7199 441.565 40.0679 423.554 40.0679Z"
 )!;
 

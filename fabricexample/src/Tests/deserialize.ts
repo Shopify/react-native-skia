@@ -35,7 +35,7 @@ export const parseProps = (props: SerializedProps, assets: Assets) => {
   return newProps;
 };
 
-const parseProp = (value: any, assets: Assets) => {
+const parseProp = (value: any, assets: Assets): any => {
   if (value && typeof value === "object" && "__typename__" in value) {
     if (value.__typename__ === "Paint") {
       const paint = Skia.Paint();
@@ -66,12 +66,22 @@ const parseProp = (value: any, assets: Assets) => {
       return Skia.RuntimeEffect.Make(value.source);
     } else if (value.__typename__ === "SVG") {
       return Skia.SVG.MakeFromString(value.source);
+    } else if (value.__typename__ === "SkiaObject") {
+      // eslint-disable-next-line no-eval
+      return eval(
+        `(function Main(){return (${value.source})(this.Skia, this.ctx); })`
+      ).call({
+        Skia,
+        ctx: parseProps(value.context, assets),
+      });
     } else if (value.__typename__ === "Font") {
       const asset = assets[value.name];
       if (!asset) {
         throw new Error(`Asset ${value.name} not found`);
       }
       return Skia.Font(asset, value.size);
+    } else if (value.__typename__ === "RSXform") {
+      return Skia.RSXform(value.scos, value.ssin, value.tx, value.ty);
     } else if (value.__typename__ === "Function") {
       // eslint-disable-next-line no-eval
       return eval(
@@ -80,6 +90,8 @@ const parseProp = (value: any, assets: Assets) => {
         Skia,
       });
     }
+  } else if (Array.isArray(value)) {
+    return value.map((v) => parseProp(v, assets));
   }
   return value;
 };

@@ -59,7 +59,37 @@ const RectDemo = () => {
 };
 ```
 
-![Rounded Rectangle](assets/polygons/rect.png)
+<img src={require("/static/img/rrect/uniform.png").default} width="256" height="256" />
+
+### Using Custom Radii
+
+You can set a different corner radius for each corner.
+
+```tsx twoslash
+import { Canvas, RoundedRect } from "@shopify/react-native-skia";
+
+const RectDemo = () => {
+  const size = 256;
+  const r = size * 0.2;
+  const rrct = {
+    rect: { x: 0, y: 0, width: size, height: size },
+    topLeft: { x: 0, y: 0 },
+    topRight: { x: r, y: r },
+    bottomRight: { x: 0, y: 0 },
+    bottomLeft: { x: r, y: r },
+  };
+  return (
+    <Canvas style={{ width: size, height: size }}>
+      <RoundedRect
+        rect={rrct}
+        color="lightblue"
+      />
+    </Canvas>
+  );
+};
+```
+
+<img src={require("/static/img/rrect/nonuniform.png").default} width="256" height="256" />
 
 ## DiffRect
 

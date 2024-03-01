@@ -28,11 +28,25 @@ sk_sp<SkSurface> SkiaOpenGLSurfaceFactory::makeOffscreenSurface(int width,
 
   SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
+  if (!SkiaOpenGLHelper::makeCurrent(
+          &ThreadContextHolder::ThreadSkiaOpenGLContext,
+          ThreadContextHolder::ThreadSkiaOpenGLContext.gl1x1Surface)) {
+    RNSkLogger::logToConsole(
+        "Could not create EGL Surface from native window / surface. Could "
+        "not set new surface as current surface.");
+    return nullptr;
+  }
+
   // Create texture
   auto texture =
       ThreadContextHolder::ThreadSkiaOpenGLContext.directContext
-          ->createBackendTexture(width, height, colorType, GrMipMapped::kNo,
-                                 GrRenderable::kYes);
+          ->createBackendTexture(width, height, colorType,
+                                 skgpu::Mipmapped::kNo, GrRenderable::kYes);
+
+  if (!texture.isValid()) {
+    RNSkLogger::logToConsole("couldn't create offscreen texture %dx%d", width,
+                             height);
+  }
 
   struct ReleaseContext {
     SkiaOpenGLContext *context;

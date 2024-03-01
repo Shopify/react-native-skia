@@ -5,6 +5,16 @@ import type { SkShader } from "../Shader";
 
 import type { ImageInfo } from "./ImageFactory";
 
+export interface CubicResampler {
+  B: number;
+  C: number;
+}
+
+export interface FilterOptions {
+  filter: FilterMode;
+  mipmap?: MipmapMode;
+}
+
 export enum FilterMode {
   Nearest,
   Linear,

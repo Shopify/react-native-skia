@@ -1,27 +1,54 @@
-import type { ExtrapolationType, SharedValue } from "react-native-reanimated";
-import { useMemo } from "react";
+import type {
+  ExtrapolationType,
+  FrameInfo,
+  SharedValue,
+} from "react-native-reanimated";
+import { useCallback, useMemo } from "react";
 
 import type { SkPath, SkPoint } from "../../skia/types";
 import { interpolatePaths, interpolateVector } from "../../animation";
 import { Skia } from "../../skia";
+import { isOnMainThread } from "../../renderer/Offscreen";
 
 import {
   useAnimatedReaction,
   useFrameCallback,
   useSharedValue,
+  useDerivedValue,
 } from "./moduleWrapper";
 
 export const notifyChange = (value: SharedValue<unknown>) => {
   "worklet";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (value as any)._value = value.value;
+  if (isOnMainThread()) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (value as any)._value = value.value;
+  }
+};
+
+export const usePathValue = (cb: (path: SkPath) => void, init?: SkPath) => {
+  const pathInit = useMemo(() => Skia.Path.Make(), []);
+  const path = useSharedValue(pathInit);
+  useDerivedValue(() => {
+    path.value.reset();
+    if (init !== undefined) {
+      path.value.addPath(init);
+    }
+    cb(path.value);
+    notifyChange(path);
+  });
+  return path;
 };
 
 export const useClock = () => {
   const clock = useSharedValue(0);
-  useFrameCallback((info) => {
-    clock.value = info.timeSinceFirstFrame;
-  });
+  const callback = useCallback(
+    (info: FrameInfo) => {
+      "worklet";
+      clock.value = info.timeSinceFirstFrame;
+    },
+    [clock]
+  );
+  useFrameCallback(callback);
   return clock;
 };
 
@@ -63,8 +90,20 @@ export const usePathInterpolation = (
   input: number[],
   outputRange: SkPath[],
   options?: ExtrapolationType
-) =>
-  useInterpolator(
+) => {
+  // Check if all paths in outputRange are interpolable
+  const allPathsInterpolable = outputRange
+    .slice(1)
+    .every((path) => outputRange[0].isInterpolatable(path));
+  if (!allPathsInterpolable) {
+    // Handle the case where not all paths are interpolable
+    // For example, throw an error or return early
+    throw new Error(
+      `Not all paths in the output range are interpolable.
+See: https://shopify.github.io/react-native-skia/docs/animations/hooks#usepathinterpolation`
+    );
+  }
+  return useInterpolator(
     () => Skia.Path.Make(),
     value,
     interpolatePaths,
@@ -72,6 +111,7 @@ export const usePathInterpolation = (
     outputRange,
     options
   );
+};
 
 export const useVectorInterpolation = (
   value: SharedValue<number>,

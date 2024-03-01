@@ -7,7 +7,6 @@
 
 #include <JsiSkApi.h>
 #include <RNSkJsiViewApi.h>
-#include <RNSkValueApi.h>
 #include <RNSkView.h>
 
 #include <JsiDomApi.h>
@@ -79,11 +78,6 @@ void RNSkManager::installBindings() {
   _jsRuntime->global().setProperty(
       *_jsRuntime, "SkiaViewApi",
       jsi::Object::createFromHostObject(*_jsRuntime, _viewApi));
-
-  auto skiaValueApi = std::make_shared<RNSkValueApi>(_platformContext);
-  _jsRuntime->global().setProperty(
-      *_jsRuntime, "SkiaValueApi",
-      jsi::Object::createFromHostObject(*_jsRuntime, std::move(skiaValueApi)));
 
   auto skiaDomApi = std::make_shared<JsiDomApi>(_platformContext);
   _jsRuntime->global().setProperty(

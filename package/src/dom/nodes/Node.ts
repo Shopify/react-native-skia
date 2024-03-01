@@ -5,22 +5,18 @@ import type {
   NodeType,
   DeclarationType,
 } from "../types";
-import type { DependencyManager } from "../../renderer/DependencyManager";
 import type { DeclarationContext } from "../types/DeclarationContext";
 
 export interface NodeContext {
   Skia: Skia;
-  depMgr: DependencyManager;
 }
 
 export abstract class JsiNode<P> implements Node<P> {
   protected _children: JsiNode<unknown>[] = [];
   protected Skia: Skia;
-  protected depMgr: DependencyManager;
 
   constructor(ctx: NodeContext, public type: NodeType, protected props: P) {
     this.Skia = ctx.Skia;
-    this.depMgr = ctx.depMgr;
   }
 
   setProps(props: P) {
@@ -42,11 +38,11 @@ export abstract class JsiNode<P> implements Node<P> {
   }
 
   addChild(child: Node<unknown>) {
+    this.removeChild(child);
     this._children.push(child as JsiNode<unknown>);
   }
 
   dispose() {
-    this.depMgr.unsubscribeNode(this);
     this._children.forEach((child) => child.dispose());
   }
 

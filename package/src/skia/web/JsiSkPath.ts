@@ -1,4 +1,4 @@
-import type { CanvasKit, Path } from "canvaskit-wasm";
+import type { CanvasKit, Matrix3x3, Path } from "canvaskit-wasm";
 
 import { PathVerb } from "../types";
 import type {
@@ -9,11 +9,12 @@ import type {
   SkPath,
   SkPoint,
   SkRect,
-  SkRRect,
+  InputRRect,
   StrokeOpts,
+  InputMatrix,
 } from "../types";
 
-import { ckEnum, HostObject, optEnum } from "./Host";
+import { getEnum, HostObject, optEnum } from "./Host";
 import { JsiSkPoint } from "./JsiSkPoint";
 import { JsiSkRect } from "./JsiSkRect";
 import { JsiSkRRect } from "./JsiSkRRect";
@@ -149,7 +150,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
   }
 
   setFillType(fill: FillType) {
-    this.ref.setFillType(ckEnum(fill));
+    this.ref.setFillType(getEnum(this.CanvasKit.FillType, fill));
     return this;
   }
 
@@ -167,8 +168,8 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
             // eslint-disable-next-line camelcase
             miter_limit: opts.width,
             precision: opts.width,
-            join: optEnum(opts.join),
-            cap: optEnum(opts.cap),
+            join: optEnum(this.CanvasKit.StrokeJoin, opts.join),
+            cap: optEnum(this.CanvasKit.StrokeCap, opts.cap),
           }
     );
     return result === null ? result : this;
@@ -285,7 +286,7 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     return this;
   }
 
-  addRRect(rrect: SkRRect, isCCW?: boolean) {
+  addRRect(rrect: InputRRect, isCCW?: boolean) {
     this.ref.addRRect(JsiSkRRect.fromValue(this.CanvasKit, rrect), isCCW);
     return this;
   }
@@ -315,7 +316,10 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
   }
 
   op(path: SkPath, op: PathOp) {
-    return this.ref.op(JsiSkPath.fromValue(path), ckEnum(op));
+    return this.ref.op(
+      JsiSkPath.fromValue(path),
+      getEnum(this.CanvasKit.PathOp, op)
+    );
   }
 
   simplify() {
@@ -336,8 +340,27 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     return result === null ? result : this;
   }
 
-  transform(m3: SkMatrix) {
-    this.ref.transform(JsiSkMatrix.fromValue(m3));
+  transform(m: InputMatrix) {
+    let matrix =
+      m instanceof JsiSkMatrix
+        ? Array.from(JsiSkMatrix.fromValue<Matrix3x3>(m))
+        : (m as Exclude<InputMatrix, SkMatrix>);
+    if (matrix.length === 16) {
+      matrix = [
+        matrix[0],
+        matrix[1],
+        matrix[3],
+        matrix[4],
+        matrix[5],
+        matrix[7],
+        matrix[12],
+        matrix[13],
+        matrix[15],
+      ];
+    } else if (matrix.length !== 9) {
+      throw new Error(`Invalid matrix length: ${matrix.length}`);
+    }
+    this.ref.transform(matrix);
     return this;
   }
 

@@ -3,7 +3,7 @@ import type { CanvasKit } from "canvaskit-wasm";
 import type { SkData, ImageInfo, SkImage } from "../types";
 import type { ImageFactory } from "../types/Image/ImageFactory";
 
-import { Host, ckEnum } from "./Host";
+import { Host, getEnum } from "./Host";
 import { JsiSkImage } from "./JsiSkImage";
 import { JsiSkData } from "./JsiSkData";
 
@@ -33,9 +33,9 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
     // see toSkImageInfo() from canvaskit
     const image = this.CanvasKit.MakeImage(
       {
-        alphaType: ckEnum(info.alphaType),
+        alphaType: getEnum(this.CanvasKit.AlphaType, info.alphaType),
         colorSpace: this.CanvasKit.ColorSpace.SRGB,
-        colorType: ckEnum(info.colorType),
+        colorType: getEnum(this.CanvasKit.ColorType, info.colorType),
         height: info.height,
         width: info.width,
       },

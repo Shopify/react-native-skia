@@ -17,9 +17,8 @@ import {
   TextPath,
   useFont,
   FitBox,
-  interpolatePaths,
+  usePathInterpolation,
 } from "@shopify/react-native-skia";
-import { useDerivedValue } from "react-native-reanimated";
 
 import { useLoop } from "../../components/Animations";
 
@@ -109,14 +108,10 @@ export const PathExample = () => {
   }, [circle, rect1]);
 
   const font = useFont(require("./Roboto-Regular.otf"), 32);
-  const path = useDerivedValue(
-    () =>
-      interpolatePaths(
-        progress.value,
-        [0, 0.5, 1],
-        [angryPath, normalPath, goodPath]
-      ),
-    [progress]
+  const path = usePathInterpolation(
+    progress,
+    [0, 0.5, 1],
+    [angryPath, normalPath, goodPath]
   );
   if (!font) {
     return null;

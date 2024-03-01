@@ -1,4 +1,8 @@
 export type StackParamList = {
+  Tests: {
+    title?: string;
+    path?: string[];
+  };
   Home: undefined;
   Vertices: undefined;
   API: undefined;
@@ -19,5 +23,6 @@ export type StackParamList = {
   Performance: undefined;
   Transitions: undefined;
   Stickers: undefined;
-  Tests: undefined;
+  FrostedCard: undefined;
+  SpeedTest: undefined;
 };

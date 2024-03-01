@@ -11,7 +11,7 @@ Please note that the y origin of the Text is the bottom of the text, not the top
 | Name        | Type       |  Description                                                    |
 |:------------|:-----------|:----------------------------------------------------------------|
 | text        | `string`   | Text to draw                                                    |
-| font        | `SkFont`   | Font to use (optional)                                          |
+| font        | `SkFont`   | Font to use                                                     |
 | x           | `number`   | Left position of the text (default is 0)                        |
 | y           | `number`   | Bottom position the text (default is 0, the )                   |
 
@@ -30,7 +30,6 @@ export const HelloWorld = () => {
         x={0}
         y={fontSize}
         text="Hello World"
-        // Font is optional
         font={font}
       />
     </Canvas>

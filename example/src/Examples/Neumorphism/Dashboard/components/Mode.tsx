@@ -9,7 +9,8 @@ import {
   Image,
 } from "@shopify/react-native-skia";
 import React from "react";
-import { useDerivedValue, type SharedValue } from "react-native-reanimated";
+import type { SharedValue } from "react-native-reanimated";
+import { useDerivedValue } from "react-native-reanimated";
 
 const clip = rrect(rect(0, 596, 390, 844), 40, 40);
 

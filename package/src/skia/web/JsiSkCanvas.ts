@@ -1,31 +1,34 @@
 import type { Canvas, CanvasKit } from "canvaskit-wasm";
 
-import type {
-  BlendMode,
-  ClipOp,
-  FilterMode,
-  MipmapMode,
-  PointMode,
-  SaveLayerFlag,
-  ImageInfo,
-  SkCanvas,
-  SkColor,
-  SkFont,
-  SkImage,
-  SkImageFilter,
-  SkMatrix,
-  SkPaint,
-  SkPath,
-  SkPicture,
-  SkPoint,
-  SkRect,
-  SkRRect,
-  SkSVG,
-  SkTextBlob,
-  SkVertices,
+import {
+  type BlendMode,
+  type ClipOp,
+  type FilterMode,
+  type MipmapMode,
+  type PointMode,
+  type SaveLayerFlag,
+  type ImageInfo,
+  type SkCanvas,
+  type SkColor,
+  type SkFont,
+  type SkImage,
+  type SkImageFilter,
+  type SkMatrix,
+  type SkPaint,
+  type SkPath,
+  type SkPicture,
+  type SkPoint,
+  type SkRect,
+  type InputRRect,
+  type SkSVG,
+  type SkTextBlob,
+  type SkVertices,
+  type SkRSXform,
+  type CubicResampler,
+  type FilterOptions,
 } from "../types";
 
-import { ckEnum, getCkEnum, HostObject } from "./Host";
+import { getEnum, HostObject } from "./Host";
 import { JsiSkPaint } from "./JsiSkPaint";
 import { JsiSkRect } from "./JsiSkRect";
 import { JsiSkRRect } from "./JsiSkRRect";
@@ -38,6 +41,7 @@ import { JsiSkPicture } from "./JsiSkPicture";
 import { JsiSkMatrix } from "./JsiSkMatrix";
 import { JsiSkImageFilter } from "./JsiSkImageFilter";
 import { JsiSkPoint } from "./JsiSkPoint";
+import { JsiSkRSXform } from "./JsiSkRSXform";
 
 export class JsiSkCanvas
   extends HostObject<Canvas, "Canvas">
@@ -113,8 +117,8 @@ export class JsiSkCanvas
       JsiSkImage.fromValue(img),
       left,
       top,
-      ckEnum(fm),
-      ckEnum(mm),
+      getEnum(this.CanvasKit.FilterMode, fm),
+      getEnum(this.CanvasKit.MipmapMode, mm),
       paint ? JsiSkPaint.fromValue(paint) : paint
     );
   }
@@ -130,7 +134,7 @@ export class JsiSkCanvas
       JsiSkImage.fromValue(img),
       Array.from(JsiSkRect.fromValue(this.CanvasKit, center)),
       JsiSkRect.fromValue(this.CanvasKit, dest),
-      ckEnum(filter),
+      getEnum(this.CanvasKit.FilterMode, filter),
       paint ? JsiSkPaint.fromValue(paint) : paint
     );
   }
@@ -165,8 +169,8 @@ export class JsiSkCanvas
       JsiSkImage.fromValue(img),
       JsiSkRect.fromValue(this.CanvasKit, src),
       JsiSkRect.fromValue(this.CanvasKit, dest),
-      ckEnum(fm),
-      ckEnum(mm),
+      getEnum(this.CanvasKit.FilterMode, fm),
+      getEnum(this.CanvasKit.MipmapMode, mm),
       paint ? JsiSkPaint.fromValue(paint) : paint
     );
   }
@@ -186,7 +190,7 @@ export class JsiSkCanvas
   drawVertices(verts: SkVertices, mode: BlendMode, paint: SkPaint) {
     this.ref.drawVertices(
       JsiSkVertices.fromValue(verts),
-      ckEnum(mode),
+      getEnum(this.CanvasKit.BlendMode, mode),
       JsiSkPaint.fromValue(paint)
     );
   }
@@ -202,7 +206,7 @@ export class JsiSkCanvas
       cubics.map(({ x, y }) => [x, y]).flat(),
       colors,
       texs ? texs.flatMap((p) => Array.from(JsiSkPoint.fromValue(p))) : texs,
-      mode ? ckEnum(mode) : null,
+      mode ? getEnum(this.CanvasKit.BlendMode, mode) : null,
       paint ? JsiSkPaint.fromValue(paint) : undefined
     );
   }
@@ -213,7 +217,7 @@ export class JsiSkCanvas
 
   drawPoints(mode: PointMode, points: SkPoint[], paint: SkPaint) {
     this.ref.drawPoints(
-      ckEnum(mode),
+      getEnum(this.CanvasKit.PointMode, mode),
       points.map(({ x, y }) => [x, y]).flat(),
       JsiSkPaint.fromValue(paint)
     );
@@ -235,14 +239,14 @@ export class JsiSkCanvas
     );
   }
 
-  drawRRect(rrect: SkRRect, paint: SkPaint) {
+  drawRRect(rrect: InputRRect, paint: SkPaint) {
     this.ref.drawRRect(
       JsiSkRRect.fromValue(this.CanvasKit, rrect),
       JsiSkPaint.fromValue(paint)
     );
   }
 
-  drawDRRect(outer: SkRRect, inner: SkRRect, paint: SkPaint) {
+  drawDRRect(outer: InputRRect, inner: InputRRect, paint: SkPaint) {
     this.ref.drawDRRect(
       JsiSkRRect.fromValue(this.CanvasKit, outer),
       JsiSkRRect.fromValue(this.CanvasKit, inner),
@@ -341,7 +345,10 @@ export class JsiSkCanvas
   }
 
   drawColor(color: SkColor, blendMode?: BlendMode) {
-    this.ref.drawColor(color, blendMode ? ckEnum(blendMode) : undefined);
+    this.ref.drawColor(
+      color,
+      blendMode ? getEnum(this.CanvasKit.BlendMode, blendMode) : undefined
+    );
   }
 
   clear(color: SkColor) {
@@ -349,31 +356,68 @@ export class JsiSkCanvas
   }
 
   clipPath(path: SkPath, op: ClipOp, doAntiAlias: boolean) {
-    this.ref.clipPath(JsiSkPath.fromValue(path), ckEnum(op), doAntiAlias);
+    this.ref.clipPath(
+      JsiSkPath.fromValue(path),
+      getEnum(this.CanvasKit.PathOp, op),
+      doAntiAlias
+    );
   }
 
   clipRect(rect: SkRect, op: ClipOp, doAntiAlias: boolean) {
     this.ref.clipRect(
       JsiSkRect.fromValue(this.CanvasKit, rect),
-      ckEnum(op),
+      getEnum(this.CanvasKit.PathOp, op),
       doAntiAlias
     );
   }
 
-  clipRRect(rrect: SkRRect, op: ClipOp, doAntiAlias: boolean) {
+  clipRRect(rrect: InputRRect, op: ClipOp, doAntiAlias: boolean) {
     this.ref.clipRRect(
       JsiSkRRect.fromValue(this.CanvasKit, rrect),
-      ckEnum(op),
+      getEnum(this.CanvasKit.PathOp, op),
       doAntiAlias
     );
   }
 
-  concat(m: SkMatrix) {
-    this.ref.concat(JsiSkMatrix.fromValue(m));
+  concat(m: SkMatrix | number[]) {
+    this.ref.concat(Array.isArray(m) ? m : JsiSkMatrix.fromValue(m));
   }
 
   drawPicture(skp: SkPicture) {
     this.ref.drawPicture(JsiSkPicture.fromValue(skp));
+  }
+
+  drawAtlas(
+    atlas: SkImage,
+    srcs: SkRect[],
+    dsts: SkRSXform[],
+    paint: SkPaint,
+    blendMode?: BlendMode,
+    colors?: SkColor[],
+    _sampling?: CubicResampler | FilterOptions
+  ) {
+    const src = srcs.flatMap((s) =>
+      Array.from(JsiSkRect.fromValue(this.CanvasKit, s))
+    );
+    const dst = dsts.flatMap((s) => Array.from(JsiSkRSXform.fromValue(s)));
+    let cls: Uint32Array | undefined;
+    if (colors) {
+      cls = new Uint32Array(colors.length);
+      for (let i = 0; i < colors.length; i++) {
+        const [r, g, b, a] = colors[i];
+        cls[i] = this.CanvasKit.ColorAsInt(r * 255, g * 255, b * 255, a * 255);
+      }
+    }
+    this.ref.drawAtlas(
+      JsiSkImage.fromValue(atlas),
+      src,
+      dst,
+      JsiSkPaint.fromValue(paint),
+      blendMode
+        ? getEnum(this.CanvasKit.BlendMode, blendMode)
+        : this.CanvasKit.BlendMode.DstOver,
+      cls
+    );
   }
 
   readPixels(srcX: number, srcY: number, imageInfo: ImageInfo) {
@@ -381,8 +425,8 @@ export class JsiSkCanvas
       width: imageInfo.width,
       height: imageInfo.height,
       colorSpace: this.CanvasKit.ColorSpace.SRGB,
-      alphaType: getCkEnum(this.CanvasKit.AlphaType, imageInfo.alphaType),
-      colorType: getCkEnum(this.CanvasKit.ColorType, imageInfo.colorType),
+      alphaType: getEnum(this.CanvasKit.AlphaType, imageInfo.alphaType),
+      colorType: getEnum(this.CanvasKit.ColorType, imageInfo.colorType),
     };
     return this.ref.readPixels(srcX, srcY, pxInfo);
   }

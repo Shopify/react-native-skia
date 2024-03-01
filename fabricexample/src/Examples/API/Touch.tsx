@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import type { SkPicture, SkSize } from "@shopify/react-native-skia";
+import type { SkPicture } from "@shopify/react-native-skia";
 import {
   Group,
   Fill,
@@ -38,11 +38,11 @@ paint.setColor(Skia.Color("cyan"));
 paint.setStyle(PaintStyle.Stroke);
 paint.setStrokeWidth(10);
 
-const drawTouches = (touches: TouchData[], size: SkSize, colors: string[]) => {
+const drawTouches = (touches: TouchData[], colors: string[]) => {
   "worklet";
   const recorder = Skia.PictureRecorder();
   const canvas = recorder.beginRecording(
-    Skia.XYWHRect(0, 0, size.width, size.height)
+    Skia.XYWHRect(0, 0, 2_000_000, 2_000_000)
   );
   touches.forEach((touch) => {
     const p = paint.copy();
@@ -54,16 +54,15 @@ const drawTouches = (touches: TouchData[], size: SkSize, colors: string[]) => {
 
 export const Touch = () => {
   const picture = useSharedValue<SkPicture>(emptyPicture);
-  const size = useSharedValue({ width: 0, height: 0 });
   const colors = useSharedValue<string[]>([]);
   const gesture = Gesture.Native()
     .onTouchesDown((event) => {
       const start = Math.round(Math.random() * 4);
       colors.value = Colors.slice(start, start + event.allTouches.length);
-      picture.value = drawTouches(event.allTouches, size.value, colors.value);
+      picture.value = drawTouches(event.allTouches, colors.value);
     })
     .onTouchesMove((event) => {
-      picture.value = drawTouches(event.allTouches, size.value, colors.value);
+      picture.value = drawTouches(event.allTouches, colors.value);
     })
     .onTouchesUp(() => {
       picture.value = emptyPicture;
@@ -72,7 +71,7 @@ export const Touch = () => {
     <View style={styles.container}>
       <Title>Touch handling</Title>
       <View style={{ flex: 1 }}>
-        <Canvas style={styles.container} onSize={size}>
+        <Canvas style={styles.container}>
           <Fill color="white" />
           <Group style="stroke" strokeWidth={8}>
             <Picture picture={picture} />

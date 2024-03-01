@@ -31,9 +31,7 @@ public:
             "Expected SkFont object or null/undefined for the Font property.");
       }
     } else {
-      auto font = std::make_shared<SkFont>(SkFont());
-      font->setSize(14);
-      setDerivedValue(font);
+      setDerivedValue(nullptr);
     }
   }
 

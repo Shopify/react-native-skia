@@ -19,7 +19,6 @@ import type {
   ImageProps,
   CircleProps,
   PathProps,
-  CustomDrawingNodeProps,
   LineProps,
   OvalProps,
   PatchProps,
@@ -37,6 +36,7 @@ import type {
   DrawingNodeProps,
   BoxProps,
   BoxShadowProps,
+  AtlasProps,
 } from "./Drawings";
 import type { BlurMaskFilterProps } from "./MaskFilters";
 import type {
@@ -77,9 +77,6 @@ export interface SkDOM {
   Image(props: ImageProps): DrawingNode<ImageProps>;
   Circle(props: CircleProps): DrawingNode<CircleProps>;
   Path(props: PathProps): DrawingNode<PathProps>;
-  CustomDrawing(
-    props: CustomDrawingNodeProps
-  ): DrawingNode<CustomDrawingNodeProps>;
   Line(props: LineProps): DrawingNode<LineProps>;
   Oval(props: OvalProps): DrawingNode<OvalProps>;
   Patch(props: PatchProps): DrawingNode<PatchProps>;
@@ -94,6 +91,7 @@ export interface SkDOM {
   DiffRect(props: DiffRectProps): DrawingNode<DiffRectProps>;
   Picture(props: PictureProps): DrawingNode<PictureProps>;
   ImageSVG(props: ImageSVGProps): DrawingNode<ImageSVGProps>;
+  Atlas(props: AtlasProps): DrawingNode<AtlasProps>;
 
   // BlurMaskFilters
   BlurMaskFilter(

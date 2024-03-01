@@ -2,22 +2,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SkiaDomView } from "@shopify/react-native-skia";
 import {
-  Group,
   Canvas,
-  Skia,
+  Group,
   makeImageFromView,
-  Paragraph,
+  Skia,
 } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
 import { PixelRatio, Platform, Text, View } from "react-native";
 
 import type { SerializedNode } from "./deserialize";
 import { parseNode, parseProps } from "./deserialize";
-import { useClient } from "./useClient";
 import { Screens } from "./Screens";
+import { useClient } from "./useClient";
 
 export const CI = process.env.CI === "true";
-const scale = 3 / PixelRatio.get();
+const s = 3;
+const scale = s / PixelRatio.get();
 const size = 256 * scale;
 // Maximum time to draw: 250 on iOS, 500ms on Android, 1000ms on CI
 // eslint-disable-next-line no-nested-ternary
@@ -30,7 +30,7 @@ interface TestsProps {
 export const Tests = ({ assets }: TestsProps) => {
   const viewRef = useRef<View>(null);
   const ref = useRef<SkiaDomView>(null);
-  const client = useClient();
+  const [client, hostname] = useClient();
   const [drawing, setDrawing] = useState<any>(null);
   const [screen, setScreen] = useState<any>(null);
   useEffect(() => {
@@ -41,27 +41,16 @@ export const Tests = ({ assets }: TestsProps) => {
           client.send(
             JSON.stringify(
               eval(
-                `(function Main(){return (${tree.code})(this.Skia, this.ctx); })`
+                `(function Main() {
+                  return (${tree.code})(this.Skia, this.ctx, this.size, this.scale);
+                })`
               ).call({
                 Skia,
                 ctx: parseProps(tree.ctx, assets),
+                size: size * PixelRatio.get(),
+                scale: s,
               })
             )
-          );
-        } else if (tree.paragraph) {
-          const paragraph = eval(
-            `(function Main(){return (${tree.paragraph})(this.Skia, this.ctx); })`
-          ).call({
-            Skia,
-            ctx: parseProps(tree.ctx, assets),
-          });
-          setDrawing(
-            <Paragraph
-              paragraph={paragraph}
-              width={tree.paragraphWidth}
-              x={0}
-              y={0}
-            />
           );
         } else if (typeof tree.screen === "string") {
           const Screen = Screens[tree.screen];
@@ -116,9 +105,11 @@ export const Tests = ({ assets }: TestsProps) => {
     return;
   }, [client, screen]);
   return (
-    <View style={{ flex: 1 }}>
-      <Text>
-        {client === null ? "⚪️" : "🟢"} Waiting for the server to send tests
+    <View style={{ flex: 1, backgroundColor: "white" }}>
+      <Text style={{ color: "black" }}>
+        {client === null
+          ? `⚪️ Connecting to ${hostname}. Use yarn e2e to run tests.`
+          : "🟢 Waiting for the server to send tests"}
       </Text>
       <Canvas style={{ width: size, height: size }} ref={ref}>
         <Group transform={[{ scale }]}>{drawing}</Group>

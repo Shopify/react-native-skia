@@ -1,4 +1,3 @@
-/* eslint-disable import/no-default-export */
 import type { LinkingOptions } from "@react-navigation/native";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import React from "react";
@@ -28,6 +27,8 @@ import {
   Severance,
   Transitions,
   Stickers,
+  FrostedCard,
+  SpeedTest,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
@@ -58,6 +59,8 @@ const linking: LinkingOptions<StackParamList> = {
       Tests: "test",
       Transitions: "transitions",
       Stickers: "stickers",
+      FrostedCard: "frosted-card",
+      SpeedTest: "speedtest",
     },
   },
   prefixes: ["rnskia://"],
@@ -146,8 +149,22 @@ const App = () => {
               }}
             />
             <Stack.Screen
+              name="SpeedTest"
+              component={SpeedTest}
+              options={{
+                header: () => null,
+              }}
+            />
+            <Stack.Screen
               name="Glassmorphism"
               component={Glassmorphism}
+              options={{
+                header: () => null,
+              }}
+            />
+            <Stack.Screen
+              name="FrostedCard"
+              component={FrostedCard}
               options={{
                 header: () => null,
               }}
@@ -188,4 +205,5 @@ const App = () => {
   );
 };
 
+// eslint-disable-next-line import/no-default-export
 export default App;

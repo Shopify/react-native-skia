@@ -89,7 +89,7 @@ describe("Test introductionary examples from our documentation", () => {
     const { surface, draw } = mountCanvas(<CheckEmptyCanvas />);
     draw();
     processResult(surface, "snapshots/green.png");
-    await wait(32);
+    await wait(1000);
     draw();
     processResult(surface, "snapshots/transparent.png");
   });

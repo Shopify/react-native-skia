@@ -2,7 +2,6 @@ import {
   Shadow,
   vec,
   Group,
-  translate,
   Text,
   Circle,
   LinearGradient,
@@ -38,9 +37,9 @@ export const Control = ({
   if (font === null) {
     return null;
   }
-  const labelWidth = font.getTextWidth(label);
+  const labelWidth = font.measureText(label).width;
   return (
-    <Group transform={translate({ x: x + 30, y: y + 30 })}>
+    <Group transform={[{ translate: [x + 30, y + 30] }]}>
       <Text
         x={2 * r - labelWidth - 16}
         y={r + font.getSize() / 2}
@@ -68,7 +67,7 @@ export const Control = ({
             strokeWidth={1}
           />
         </Group>
-        <Group transform={translate({ x: r / 2, y: r / 2 })}>
+        <Group transform={[{ translate: [r / 2, r / 2] }]}>
           <Group color="rgba(235, 235, 245, 0.6)">
             {active && (
               <LinearGradient

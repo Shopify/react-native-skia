@@ -5,12 +5,12 @@
 #include <utility>
 
 #include "JsiSkHostObjects.h"
+#include "third_party/base64.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "JsiSkImage.h"
-#include "SkBase64.h"
 #include "SkStream.h"
 #include "include/codec/SkEncodedImageFormat.h"
 

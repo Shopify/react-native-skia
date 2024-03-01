@@ -2,17 +2,25 @@ import type { SkPaint } from "./Paint";
 import type { SkRect } from "./Rect";
 import type { SkFont } from "./Font";
 import type { SkPath } from "./Path";
-import type { SkImage, MipmapMode, FilterMode, ImageInfo } from "./Image";
+import type {
+  SkImage,
+  MipmapMode,
+  FilterMode,
+  ImageInfo,
+  CubicResampler,
+  FilterOptions,
+} from "./Image";
 import type { SkSVG } from "./SVG";
 import type { SkColor } from "./Color";
-import type { SkRRect } from "./RRect";
+import type { InputRRect } from "./RRect";
 import type { BlendMode } from "./Paint/BlendMode";
 import type { SkPoint, PointMode } from "./Point";
-import type { SkMatrix } from "./Matrix";
+import type { InputMatrix } from "./Matrix";
 import type { SkImageFilter } from "./ImageFilter";
 import type { SkVertices } from "./Vertices";
 import type { SkTextBlob } from "./TextBlob";
 import type { SkPicture } from "./Picture";
+import type { SkRSXform } from "./RSXform";
 
 export enum ClipOp {
   Difference,
@@ -278,7 +286,7 @@ export interface SkCanvas {
    * @param rrect
    * @param paint
    */
-  drawRRect(rrect: SkRRect, paint: SkPaint): void;
+  drawRRect(rrect: InputRRect, paint: SkPaint): void;
 
   /**
    * Draws RRect outer and inner using clip, Matrix, and Paint paint.
@@ -287,7 +295,7 @@ export interface SkCanvas {
    * @param inner
    * @param paint
    */
-  drawDRRect(outer: SkRRect, inner: SkRRect, paint: SkPaint): void;
+  drawDRRect(outer: InputRRect, inner: InputRRect, paint: SkPaint): void;
 
   /**
    * Draws an oval bounded by the given rectangle using the current clip, current matrix,
@@ -479,19 +487,42 @@ export interface SkCanvas {
    * @param op
    * @param doAntiAlias
    */
-  clipRRect(rrect: SkRRect, op: ClipOp, doAntiAlias: boolean): void;
+  clipRRect(rrect: InputRRect, op: ClipOp, doAntiAlias: boolean): void;
 
   /**
    * Replaces current matrix with m premultiplied with the existing matrix.
    * @param m
    */
-  concat(m: SkMatrix): void;
+  concat(m: InputMatrix): void;
 
   /**
    * Draws the given picture using the current clip, current matrix, and the provided paint.
    * @param skp
    */
   drawPicture(skp: SkPicture): void;
+
+  /**
+   * This method is used to draw an atlas on the canvas.
+   *
+   * @method drawAtlas
+   * @param {SkImage} atlas - The image to be drawn.
+   * @param {SkRect[]} srcs - The source rectangles.
+   * @param {SkRSXform[]} dsts - The destination transformations.
+   * @param {SkPaint} paint - The paint used for drawing.
+   * @param {BlendMode} [blendMode] - The blend mode used for drawing. Optional.
+   * @param {SkColor[]} [colors] - The colors used for drawing. Optional.
+   * @param {CubicResampler | FilterOptions} [sampling] - The sampling options. Optional.
+   * @returns {void} This method does not return anything.
+   */
+  drawAtlas(
+    atlas: SkImage,
+    srcs: SkRect[],
+    dsts: SkRSXform[],
+    paint: SkPaint,
+    blendMode?: BlendMode,
+    colors?: SkColor[],
+    sampling?: CubicResampler | FilterOptions
+  ): void;
 
   /** Read Image pixels
    *

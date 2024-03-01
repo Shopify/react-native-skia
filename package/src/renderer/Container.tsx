@@ -7,18 +7,16 @@ import type {
 } from "../dom/types";
 import type { Skia } from "../skia/types";
 
-import type { DependencyManager } from "./DependencyManager";
-
 export class Container {
   private _root: RenderNode<GroupProps>;
   public Sk: SkDOM;
   constructor(
     Skia: Skia,
-    public depMgr: DependencyManager,
     public redraw: () => void = () => {},
-    public getNativeId: () => number = () => 0
+    public getNativeId: () => number = () => 0,
+    native: boolean
   ) {
-    this.Sk = new JsiSkDOM({ Skia, depMgr });
+    this.Sk = new JsiSkDOM({ Skia }, native);
     this._root = this.Sk.Group();
   }
 

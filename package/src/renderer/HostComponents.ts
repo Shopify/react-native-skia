@@ -8,7 +8,6 @@ import type {
   ImageProps,
   PaintProps,
   PathProps,
-  CustomDrawingNodeProps,
   LineProps,
   OvalProps,
   DiffRectProps,
@@ -51,6 +50,7 @@ import type {
   BoxProps,
   BoxShadowProps,
   ParagraphProps,
+  AtlasProps,
 } from "../dom/types";
 import type { ChildrenProps } from "../dom/types/Common";
 import type {
@@ -59,12 +59,10 @@ import type {
 } from "../dom/types/ImageFilters";
 import type { SkRect, SkRRect } from "../skia/types";
 import type { JsiDrawingNode } from "../dom/nodes/DrawingNode";
-import type { SkiaValue } from "../values";
 
 import type { Container } from "./Container";
 import { exhaustiveCheck } from "./typeddash";
 import type { SkiaProps } from "./processors";
-import type { DependencyManager } from "./DependencyManager";
 
 // This flag should only be turned on for debugging/testing
 const shouldUseJSDomOnNative = false;
@@ -72,11 +70,6 @@ export const NATIVE_DOM = shouldUseJSDomOnNative ? false : !!global.SkiaDomApi;
 
 declare global {
   var SkiaDomApi: {
-    DependencyManager: (
-      registerValues: (values: Array<SkiaValue<unknown>>) => () => void
-    ) => DependencyManager;
-
-    // FIXME: We need a better type for this
     RectNode: (props: RectProps) => JsiDrawingNode<RectProps, SkRect>;
     RRectNode: (
       props: RoundedRectProps
@@ -86,15 +79,14 @@ declare global {
     FillNode: (props: PaintProps) => RenderNode<PaintProps>;
     CircleNode: (props: CircleProps) => RenderNode<CircleProps>;
     PathNode: (props: PathProps) => RenderNode<PathProps>;
-    CustomDrawingNode: (
-      props: CustomDrawingNodeProps
-    ) => RenderNode<CustomDrawingNodeProps>;
     LineNode: (props: LineProps) => RenderNode<LineProps>;
     ImageNode: (props: ImageProps) => RenderNode<ImageProps>;
     OvalNode: (props: OvalProps) => RenderNode<OvalProps>;
     PatchNode: (props: PatchProps) => RenderNode<PatchProps>;
     PointsNode: (props: PointsProps) => RenderNode<PointsProps>;
     DiffRectNode: (props: DiffRectProps) => RenderNode<DiffRectProps>;
+    AtlasNode: (props: AtlasProps) => RenderNode<AtlasProps>;
+
     // Mask filters
     BlurMaskFilterNode: (
       props: BlurMaskFilterProps
@@ -211,13 +203,13 @@ declare global {
       skImage: SkiaProps<ImageProps>;
       skCircle: SkiaProps<CircleProps>;
       skPath: SkiaProps<PathProps>;
-      skDrawing: SkiaProps<CustomDrawingNodeProps>;
       skLine: SkiaProps<LineProps>;
       skOval: SkiaProps<OvalProps>;
       skPatch: SkiaProps<PatchProps>;
       skPoints: SkiaProps<PointsProps>;
       skRect: SkiaProps<RectProps>;
       skRRect: SkiaProps<RoundedRectProps>;
+      skAtlas: SkiaProps<AtlasProps>;
       skVertices: SkiaProps<VerticesProps>;
       skText: SkiaProps<TextProps>;
       skTextPath: SkiaProps<TextPathProps>;
@@ -302,8 +294,6 @@ export const createNode = (
       return Sk.Circle(props);
     case NodeType.Path:
       return Sk.Path(props);
-    case NodeType.Drawing:
-      return Sk.CustomDrawing(props);
     case NodeType.Line:
       return Sk.Line(props);
     case NodeType.Oval:
@@ -326,6 +316,8 @@ export const createNode = (
       return Sk.TextBlob(props);
     case NodeType.Glyphs:
       return Sk.Glyphs(props);
+    case NodeType.Atlas:
+      return Sk.Atlas(props);
     case NodeType.DiffRect:
       return Sk.DiffRect(props);
     case NodeType.Picture:

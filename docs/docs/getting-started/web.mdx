@@ -7,132 +7,97 @@ slug: /getting-started/web
 
 import {Snack} from '@site/src/components/Snack';
 
-React Native Skia runs in a web browser thanks to [CanvasKit](https://skia.org/docs/user/modules/canvaskit/), a WebAssembly build of Skia.
-The WebAssembly file is loaded asynchronously and has a size of 2.9MB gzipped.
-While this is a substantial file size, you have control over the user experience: you can decide when to load Skia and how the loading experience should be.
+React Native Skia runs in the browser via [CanvasKit](https://skia.org/docs/user/modules/canvaskit/), a WebAssembly (WASM) build of Skia.
+The CanvasKit WASM file, which is 2.9MB when gzipped, is loaded asynchronously.
+Despite its considerable size, it offers flexibility in determining when and how Skia loads, giving you full control over the user experience.
 
-We provide direct integrations with [Expo](#Expo) and [Remotion](#Remotion).
-Below you will also find the manual installation steps to run the module on any React Native Web projects.
+We support direct integration with [Expo](#expo) and [Remotion](#remotion).
+Additionally, you'll find manual installation steps for any webpack projects.
 
-You can use React Native Skia without React Native Web.
+It should also be mentionned that React Native Skia can be used on projects without the need to install React Native Web.
 
 ## Expo
 
-Using React Native Skia on Expo web is reasonably straightforward.
-We provide a script that will work well with the setup:
+:::info
+
+Metro and expo-router support is available from v0.1.240 and onwards.
+If you are using v0.1.221 (recommended version for Expo SDK 50), you can use [this patch](https://github.com/Shopify/react-native-skia/files/14357144/%40shopify%2Breact-native-skia%2B0.1.221.patch) (using [`patch-package`](https://www.npmjs.com/package/patch-package).
+
+:::
+
+Use the `setup-skia-web` script to ensure that the `canvaskit.wasm` file is accessible within your Expo project's public folder.
+If you're [loading CanvasKit from a CDN](#using-a-cdn), running the `setup-skia-web` script is unnecessary.
+
 ```bash
-$ expo install @shopify/react-native-skia
+$ npx expo install @shopify/react-native-skia
 $ yarn setup-skia-web
 ```
 
 :::info
 
-You need to run `yarn setup-skia-web` everytime you upgrade `@shopify/react-native-skia`.
-Consider adding it to your `postinstall` script.
+Run `yarn setup-skia-web` each time you upgrade the `@shopify/react-native-skia` package.
+Consider incorporating it into your `postinstall` script for convenience.
+```
 
 :::
 
-Once you are done, you need to pick your strategy to [Load Skia](#loading-skia).
+After setup, choose your method to [Load Skia](#loading-skia).
 
-If you are [loading CanvasKit from a CDN](#using-a-cdn), you don't need to run the `setup-skia-web` script. If you are not using `react-native-reanimated`, webpack will output a warning because React Native Skia refers to Reanimated. We describe how to fix this warning [here](#manual-webpack-installation).
+For projects using Expo Router, you can use [code-splitting](#using-code-splitting) or [deferred component registration](#using-deferred-component-registration).
+If you wish to use deferred component registration with Expo Router, you need to create your own `main` property in `package.json`.
+For instance, if you've created `index.tsx` and `index.web.tsx` in your root directory, update your `package.json` accordingly:
+```patch
+-  "main": "expo-router/entry",
++  "main": "index",
+```
+
+Below is an example of `index.web.tsx`:
+
+```tsx
+import '@expo/metro-runtime';
+import { App } from 'expo-router/build/qualified-entry';
+import { renderRootComponent } from 'expo-router/build/renderRootComponent';
+
+import { LoadSkiaWeb } from '@shopify/react-native-skia/lib/module/web';
+
+LoadSkiaWeb().then(async () => {
+  renderRootComponent(App);
+});
+```
+
+For the `index.tsx` file, directly invoke `renderRootComponent(App)`.
 
 ### Snack
 
-To use React Native Skia on [snack](https://snack.expo.dev/), you will need to use [code-splitting](#using-code-splitting) method.
-
+Utilize the [code-splitting](#using-code-splitting) method for incorporating React Native Skia on [snack](https://snack.expo.dev/).
 
 <Snack id="@wcandillon/hello-snack" />
 
-
 ## Remotion
 
-To use React Native Skia with Remotion, please follow [the following installation steps](https://remotion.dev/skia).
-
-## Manual Webpack Installation
-
-To run React Native Skia on Web, you need to do three things:
-
-- Make sure that the WebAssembly file is available from the build system.
-- Configure the build system to resolve the following two node modules: `fs` and `path`. One way to do it is to use the [node polyfill plugin](https://www.npmjs.com/package/node-polyfill-webpack-plugin).
-- If you are not using the `react-native-reanimated`, Webpack will throw a warning since React Native Skia refers to that module.
-
-So following is an example of a Webpack v5 configuration that supports React Native Skia.
-These three steps can easily be adapted to your build system.
-
-```tsx
-import fs from "fs";
-import { sources } from "webpack";
-import NodePolyfillPlugin from "node-polyfill-webpack-plugin";
-
-const newConfiguration = {
-  ...currentConfiguration,
-  plugins: [
-    ...currentConfiguration.plugins,
-    // 1. Make the wasm file available to the build system
-    new (class CopySkiaPlugin {
-      apply(compiler) {
-        compiler.hooks.thisCompilation.tap("AddSkiaPlugin", (compilation) => {
-          compilation.hooks.processAssets.tapPromise(
-            {
-              name: "copy-skia",
-              stage:
-                compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
-            },
-            async () => {
-              const src = require.resolve(
-                "canvaskit-wasm/bin/full/canvaskit.wasm"
-              );
-              if (compilation.getAsset(src)) {
-                // Skip emitting the asset again because it's immutable
-                return;
-              }
-
-              compilation.emitAsset(
-                "/canvaskit.wasm",
-                new sources.RawSource(await fs.promises.readFile(src))
-              );
-            }
-          );
-        });
-      }
-    })(),
-    // 2. Polyfill fs and path module from node
-    new NodePolyfillPlugin()
-  ],
-  externals: {
-    ...currentConfiguration.externals,
-    // 3. Avoid warning if reanimated is not present
-    "react-native-reanimated": "require('react-native-reanimated')",
-    "react-native-reanimated/package.json":
-      "require('react-native-reanimated/package.json')",
-  },
-}
-```
-
-Last, you need to [load Skia](#loading-skia).
+Follow these [installation steps](https://remotion.dev/skia) to use React Native Skia with Remotion.
 
 ## Loading Skia
 
-You need to have Skia fully loaded and initialized before importing the Skia module.
-There are two ways you can control the way Skia should load:
-* With `<WithSkiaWeb />`: using code-splitting to defer loading the components that import Skia.
-* With `LoadSkiaWeb()`: deferring the root component registration until Skia is loaded.
+Ensure Skia is fully loaded and initialized before importing the Skia module.
+Two methods facilitate Skia's loading:
+* `<WithSkiaWeb />` for code-splitting, delaying the loading of Skia-importing components.
+* `LoadSkiaWeb()` to defer root component registration until Skia loads.
 
 ### Using Code-Splitting
 
-We provide a `<WithSkiaWeb>` component which leverages [code splitting](https://reactjs.org/docs/code-splitting.html). In the example below, we load Skia before loading the `MySkiaComponent` component. 
+The `<WithSkiaWeb>` component utilizes [code splitting](https://reactjs.org/docs/code-splitting.html) to preload Skia.
+The following example demonstrates preloading Skia before rendering the `MySkiaComponent`:
 
 ```tsx
 import React from 'react';
 import { Text } from "react-native";
-// Notice the import path `@shopify/react-native-skia/lib/module/web`
-// This is important only to pull the code responsible for loading Skia.
-// @ts-expect-error
 import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
 
 export default function App() {
   return (
     <WithSkiaWeb
+      // import() uses the default export of MySkiaComponent.tsx
       getComponent={() => import("./MySkiaComponent")}
       fallback={<Text>Loading Skia...</Text>}
     />
@@ -140,16 +105,12 @@ export default function App() {
 }
 ```
 
-### Using Defered Component Registration
+### Using Deferred Component Registration
 
-We provide a `LoadSkiaWeb()` function you can use to load Skia before starting the React app.
-This is the approach we use for Remotion, for instance.
-The following is an example of an `index.web.js` file.
+The `LoadSkiaWeb()` function facilitates Skia's loading prior to the React app's initiation.
+Below is an `index.web.js` example:
 
 ```tsx
-// Notice the import path `@shopify/react-native-skia/lib/module/web`
-// This is important only to pull the code responsible for loading Skia.
-// @ts-expect-error
 import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
 
 LoadSkiaWeb().then(async () => {
@@ -160,11 +121,8 @@ LoadSkiaWeb().then(async () => {
 
 ## Using a CDN
 
-Another option is to load CanvasKit from a CDN.
-This is useful to load Skia Web without having to modify your build steps.
-It is imperative that you are using the exact same version of CanvasKit as the one used by React Native Skia.
-
-In the example below we load CanvasKit from a CDN using code-splitting.
+Below, CanvasKit loads via code-splitting from a CDN.
+It is critical that the CDN-hosted CanvasKit version aligns with React Native Skia's requirements.
 
 ```tsx
 import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
@@ -179,9 +137,9 @@ export default function App() {
 }
 ```
 
-Below is the same example but using defered component registration.
- 
- ```tsx
+Alternatively, use deferred component registration:
+
+```tsx
 import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
 import { version } from 'canvaskit-wasm/package.json';
 
@@ -195,8 +153,8 @@ LoadSkiaWeb({
 
 ## Unsupported Features
 
-Below are the React Native Skia APIs which are not yet supported on React Native Web.
-If you are interested to use one of these features, please make [a feature request on GitHub](https://github.com/Shopify/react-native-skia/issues/new/choose).
+The following React Native Skia APIs are currently unsupported on React Native Web.
+To request these features, please submit [a feature request on GitHub](https://github.com/Shopify/react-native-skia/issues/new/choose).
 
 **Unsupported**
 
@@ -208,3 +166,62 @@ If you are interested to use one of these features, please make [a feature reque
 **Unplanned**
 
 * `ImageSvg`
+
+
+## Manual webpack Installation
+
+To enable React Native Skia on Web using webpack, three key actions are required:
+
+- Ensure the `canvaskit.wasm` file is accessible to the build system.
+- Configure the build system to resolve the `fs` and `path` node modules, achievable via the [node polyfill plugin](https://www.npmjs.com/package/node-polyfill-webpack-plugin).
+- Update aliases for `react-native-reanimated` and `react-native/Libraries/Image/AssetRegistry` so webpack can do the bundle.
+
+Here is an example webpack v5 configuration accommodating React Native Skia:
+
+```tsx
+import fs from "fs";
+import { sources } from "webpack";
+import NodePolyfillPlugin from "node-polyfill-webpack-plugin";
+
+const newConfiguration = {
+  ...currentConfiguration,
+  plugins: [
+    ...currentConfiguration.plugins,
+    // 1. Ensure wasm file availability
+    new (class CopySkiaPlugin {
+      apply(compiler) {
+        compiler.hooks.thisCompilation.tap("AddSkiaPlugin", (compilation) => {
+          compilation.hooks.processAssets.tapPromise(
+            {
+              name: "copy-skia",
+              stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
+            },
+            async () => {
+              const src = require.resolve("canvaskit-wasm/bin/full/canvaskit.wasm");
+              if (!compilation.getAsset(src)) {
+                compilation.emitAsset("/canvaskit.wasm", new sources.RawSource(await fs.promises.readFile(src)));
+              }
+            }
+          );
+        });
+      }
+    })(),
+    // 2. Polyfill fs and path modules
+
+
+    new NodePolyfillPlugin()
+  ],
+  alias: {
+    ...currentConfiguration.alias,
+    // 3. Suppress reanimated module warning
+    // This assumes Reanimated is installed, if not you can use false.
+    "react-native-reanimated/package.json": require.resolve(
+      "react-native-reanimated/package.json"
+    ),
+    "react-native-reanimated": require.resolve("react-native-reanimated"),
+    "react-native/Libraries/Image/AssetRegistry": false,
+  },
+}
+```
+
+Finally, proceed to [load Skia](#loading-skia).

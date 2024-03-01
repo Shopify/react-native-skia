@@ -3,15 +3,16 @@ import type { ReactNode } from "react";
 import type {
   BlendMode,
   Color,
+  InputMatrix,
+  InputRRect,
   PaintStyle,
-  SkMatrix,
   SkPaint,
   SkPath,
   SkRect,
   SkRRect,
   StrokeCap,
   StrokeJoin,
-  Transforms2d,
+  Transforms3d,
   Vector,
 } from "../../skia/types";
 
@@ -48,7 +49,7 @@ export interface RRectCtor extends RectCtor {
 }
 
 export type RectDef = RectCtor | { rect: SkRect };
-export type RRectDef = RRectCtor | { rect: SkRRect };
+export type RRectDef = RRectCtor | { rect: InputRRect };
 
 export interface PointCircleDef {
   c?: Vector;
@@ -64,9 +65,9 @@ export interface ScalarCircleDef {
 export type CircleDef = PointCircleDef | ScalarCircleDef;
 
 export interface TransformProps {
-  transform?: Transforms2d;
+  transform?: Transforms3d;
   origin?: Vector;
-  matrix?: SkMatrix;
+  matrix?: InputMatrix;
 }
 
 export interface PaintProps extends ChildrenProps {

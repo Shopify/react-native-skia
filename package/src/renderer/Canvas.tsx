@@ -4,7 +4,6 @@ import React, {
   useMemo,
   forwardRef,
   useRef,
-  useLayoutEffect,
 } from "react";
 import type {
   RefObject,
@@ -13,17 +12,15 @@ import type {
   ForwardedRef,
   FunctionComponent,
 } from "react";
+import type { LayoutChangeEvent } from "react-native";
 
-import { SkiaDomView, SkiaView } from "../views";
+import { SkiaDomView } from "../views";
 import { Skia } from "../skia/Skia";
 import type { TouchHandler, SkiaBaseViewProps } from "../views";
-import type { SkiaValue } from "../values/types";
-import { JsiDrawingContext } from "../dom/types";
-import { useValue } from "../values";
+import { SkiaJSDomView } from "../views/SkiaJSDomView";
 
 import { SkiaRoot } from "./Reconciler";
 import { NATIVE_DOM } from "./HostComponents";
-import { isValue } from "./processors";
 
 export const useCanvasRef = () => useRef<SkiaDomView>(null);
 
@@ -33,34 +30,40 @@ export interface CanvasProps extends SkiaBaseViewProps {
   onTouch?: TouchHandler;
 }
 
-const useOnSizeEvent = (resultValue: SkiaBaseViewProps["onSize"]) => {
-  const onSize = useValue({
-    width: 0,
-    height: 0,
-  });
-
-  useLayoutEffect(() => {
-    if (!resultValue) {
-      return;
-    }
-    return onSize.addListener((newValue) => {
-      if (isValue(resultValue)) {
-        resultValue.current = newValue;
-      } else {
-        resultValue.value = newValue;
+const useOnSizeEvent = (
+  resultValue: SkiaBaseViewProps["onSize"],
+  onLayout?: (event: LayoutChangeEvent) => void
+) => {
+  return useCallback(
+    (event: LayoutChangeEvent) => {
+      if (onLayout) {
+        onLayout(event);
       }
-    });
-  }, [resultValue, onSize]);
+      const { width, height } = event.nativeEvent.layout;
 
-  return onSize;
+      if (resultValue) {
+        resultValue.value = { width, height };
+      }
+    },
+    [onLayout, resultValue]
+  );
 };
 
 export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
   (
-    { children, style, debug, mode, onTouch, onSize: _onSize, ...props },
+    {
+      children,
+      style,
+      debug,
+      mode,
+      onTouch,
+      onSize: _onSize,
+      onLayout: _onLayout,
+      ...props
+    },
     forwardedRef
   ) => {
-    const onSize = useOnSizeEvent(_onSize);
+    const onLayout = useOnSizeEvent(_onSize, _onLayout);
     const innerRef = useCanvasRef();
     const ref = useCombinedRefs(forwardedRef, innerRef);
     const redraw = useCallback(() => {
@@ -71,18 +74,9 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       return id;
     }, [innerRef]);
 
-    const registerValues = useCallback(
-      (values: Array<SkiaValue<unknown>>) => {
-        if (ref.current !== null) {
-          return ref.current.registerValues(values);
-        }
-        return () => {};
-      },
-      [ref]
-    );
     const root = useMemo(
-      () => new SkiaRoot(Skia, registerValues, redraw, getNativeId),
-      [redraw, registerValues, getNativeId]
+      () => new SkiaRoot(Skia, NATIVE_DOM, redraw, getNativeId),
+      [redraw, getNativeId]
     );
 
     // Render effect
@@ -95,6 +89,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
         root.unmount();
       };
     }, [root]);
+
     if (NATIVE_DOM) {
       return (
         <SkiaDomView
@@ -102,7 +97,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
           style={style}
           root={root.dom}
           onTouch={onTouch}
-          onSize={onSize}
+          onLayout={onLayout}
           mode={mode}
           debug={debug}
           {...props}
@@ -110,18 +105,16 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       );
     } else {
       return (
-        <SkiaView
+        <SkiaJSDomView
+          Skia={Skia}
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ref={ref as any}
           style={style}
+          root={root.dom}
+          onTouch={onTouch}
+          onLayout={onLayout}
           mode={mode}
           debug={debug}
-          onSize={onSize}
-          onDraw={(canvas, info) => {
-            onTouch && onTouch(info.touches);
-            const ctx = new JsiDrawingContext(Skia, canvas);
-            root.dom.render(ctx);
-          }}
           {...props}
         />
       );

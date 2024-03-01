@@ -25,6 +25,7 @@
 #include "JsiSkMatrix.h"
 #include "JsiSkPaint.h"
 #include "JsiSkParagraphBuilder.h"
+#include "JsiSkParagraphBuilderFactory.h"
 #include "JsiSkPath.h"
 #include "JsiSkPathEffect.h"
 #include "JsiSkPathEffectFactory.h"
@@ -62,10 +63,14 @@ public:
    */
   JsiSkApi(jsi::Runtime &runtime, std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(context) {
-
+    // We create the system font manager eagerly since it has proven to be too
+    // slow to do it on demand
+    JsiSkFontMgrFactory::getFontMgr(getContext());
     installFunction("Font", JsiSkFont::createCtor(context));
     installFunction("Paint", JsiSkPaint::createCtor(context));
     installFunction("RSXform", JsiSkRSXform::createCtor(context));
+    installFunction("RSXformFromRadians",
+                    JsiSkRSXform::createCtorFromRadians(context));
     installFunction("Matrix", JsiSkMatrix::createCtor(context));
     installFunction("XYWHRect", JsiSkRect::createCtor(context));
     installFunction("RRectXY", JsiSkRRect::createCtor(context));

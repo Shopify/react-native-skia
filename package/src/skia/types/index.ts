@@ -29,3 +29,4 @@ export * from "./Skia";
 export * from "./TextBlob";
 export * from "./Size";
 export * from "./Paragraph";
+export * from "./Matrix4";

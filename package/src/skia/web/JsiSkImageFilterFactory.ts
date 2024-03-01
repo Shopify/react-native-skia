@@ -13,7 +13,7 @@ import type {
   TileMode,
 } from "../types";
 
-import { Host, NotImplementedOnRNWeb, ckEnum } from "./Host";
+import { Host, NotImplementedOnRNWeb, getEnum } from "./Host";
 import { JsiSkImageFilter } from "./JsiSkImageFilter";
 import { JsiSkColorFilter } from "./JsiSkColorFilter";
 
@@ -42,8 +42,8 @@ export class JsiSkImageFilterFactory
     const inputFilter =
       input === null ? null : JsiSkImageFilter.fromValue<ImageFilter>(input);
     const filter = this.CanvasKit.ImageFilter.MakeDisplacementMap(
-      ckEnum(channelX),
-      ckEnum(channelY),
+      getEnum(this.CanvasKit.ColorChannel, channelX),
+      getEnum(this.CanvasKit.ColorChannel, channelY),
       scale,
       JsiSkImageFilter.fromValue(in1),
       inputFilter
@@ -69,7 +69,7 @@ export class JsiSkImageFilterFactory
       this.CanvasKit.ImageFilter.MakeBlur(
         sigmaX,
         sigmaY,
-        ckEnum(mode),
+        getEnum(this.CanvasKit.TileMode, mode),
         input === null ? null : JsiSkImageFilter.fromValue(input)
       )
     );
@@ -199,7 +199,7 @@ export class JsiSkImageFilterFactory
       );
     }
     const filter = this.CanvasKit.ImageFilter.MakeBlend(
-      ckEnum(mode),
+      getEnum(this.CanvasKit.BlendMode, mode),
       JsiSkImageFilter.fromValue(background),
       inputFilter
     );

@@ -23,7 +23,9 @@ const image2 = useImage("https://picsum.photos/200/300");
 const image3 = useImage("Logo");
 ```
 
-Loading an image is an asynchronous operation, so the `useImage` hook will return null until the image is fully loaded. You can use this behavior to conditionally render the `Image` component, as shown in the [example below](#example). The hook also provides an optional error handler as a second parameter.
+Loading an image is an asynchronous operation, so the `useImage` hook will return null until the image is fully loaded. You can use this behavior to conditionally render the `Image` component, as shown in the [example below](#example).
+
+The hook also provides an optional error handler as a second parameter.
 
 ### MakeImageFromEncoded
 
