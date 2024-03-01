@@ -297,8 +297,9 @@ extractJNIFiles.mustRunAfter extractAARHeaders
 if (ENABLE_PREFAB) {
     // Package all the cpp code in a flattened directory structure
     task prepareHeaders(type: Copy) {
+        from("../cpp")
         from("./cpp")
-        into "${project.buildDir}/headers/rnskia/"
+        into "${project.buildDir}/headers/rnskia/react-native-skia"
         includeEmptyDirs = false
         include "**/*.h"
         eachFile {
