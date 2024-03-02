@@ -161,6 +161,9 @@ android {
     }
 
     sourceSets.main {
+        jniLibs {
+            srcDirs += ['../libs/android']
+        }
         java {
             if (!isNewArchitectureEnabled()) {
                 srcDirs += [
