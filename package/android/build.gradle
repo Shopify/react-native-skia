@@ -305,9 +305,12 @@ if (ENABLE_PREFAB) {
         eachFile {
             String path = it.path
 
-            // Skip flattening third_party dir
             if (path.contains("api/third_party")) {
+                // Skip flattening third_party dir
                 path = path.substring("api/".length())
+            } else if (path.contains("skia/include/")) {
+                // Skip flattening Skia dir
+                path = path.substring("skia/".length())
             } else {
                 // flatten anything else
                 path = path.substring(path.lastIndexOf("/") + 1)
