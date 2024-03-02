@@ -308,7 +308,7 @@ if (ENABLE_PREFAB) {
             if (path.contains("api/third_party")) {
                 // Skip flattening third_party dir
                 path = path.substring("api/".length())
-            } else if (path.contains("skia/include/")) {
+            } else if (path.contains("skia/")) {
                 // Skip flattening Skia dir
                 path = path.substring("skia/".length())
             } else {
