@@ -12,7 +12,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "JsiSkRuntimeEffect.h"
-#include "include/core/SkRuntimeEffect.h"
+#include "include/effects/SkRuntimeEffect.h"
 
 #pragma clang diagnostic pop
 

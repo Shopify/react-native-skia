@@ -3,7 +3,7 @@
 #include "JsiDomDrawingNode.h"
 #include "RSXformProp.h"
 #include "RectProp.h"
-#include "include/core/SkImageProps.h"
+#include "SkImageProps.h"
 
 #include <memory>
 #include <tuple>

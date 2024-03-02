@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "RNSkView.h"
-#include "include/core/SkiaOpenGLSurfaceFactory.h"
+#include "SkiaOpenGLSurfaceFactory.h"
 #include <android/native_window.h>
 
 namespace RNSkia {

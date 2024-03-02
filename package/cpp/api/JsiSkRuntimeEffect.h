@@ -14,7 +14,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "include/core/SkRuntimeEffect.h"
+#include "include/effects/SkRuntimeEffect.h"
 
 #pragma clang diagnostic pop
 

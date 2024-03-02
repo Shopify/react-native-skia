@@ -13,7 +13,7 @@
 #include <thread>
 #include <unordered_map>
 
-#include "include/core/SkiaOpenGLHelper.h"
+#include "SkiaOpenGLHelper.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
