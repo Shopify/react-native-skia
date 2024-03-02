@@ -3,7 +3,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#import "SkCanvas.h"
+#import "include/core/SkCanvas.h"
 #import <include/gpu/GrDirectContext.h>
 
 #pragma clang diagnostic pop

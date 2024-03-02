@@ -10,7 +10,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkTrimPathEffect.h"
+#include "include/core/SkTrimPathEffect.h"
 
 #pragma clang diagnostic pop
 

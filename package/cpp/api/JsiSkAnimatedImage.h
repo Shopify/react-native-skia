@@ -11,7 +11,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "JsiSkImage.h"
-#include "SkStream.h"
+#include "include/core/SkStream.h"
 #include "include/codec/SkEncodedImageFormat.h"
 
 #include "include/android/SkAnimatedImage.h"

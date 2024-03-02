@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SkImage.h"
+#include "include/core/SkImage.h"
 #include <jsi/jsi.h>
 
 namespace RNSkia {

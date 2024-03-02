@@ -16,17 +16,17 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkDashPathEffect.h"
-#include "SkParsePath.h"
-#include "SkPath.h"
-#include "SkPathEffect.h"
-#include "SkPathOps.h"
-#include "SkPathTypes.h"
-#include "SkPathUtils.h"
-#include "SkString.h"
-#include "SkStrokeRec.h"
-#include "SkTextUtils.h"
-#include "SkTrimPathEffect.h"
+#include "include/core/SkDashPathEffect.h"
+#include "include/core/SkParsePath.h"
+#include "include/core/SkPath.h"
+#include "include/core/SkPathEffect.h"
+#include "include/core/SkPathOps.h"
+#include "include/core/SkPathTypes.h"
+#include "include/core/SkPathUtils.h"
+#include "include/core/SkString.h"
+#include "include/core/SkStrokeRec.h"
+#include "include/core/SkTextUtils.h"
+#include "include/core/SkTrimPathEffect.h"
 #include "src/core/SkPathPriv.h"
 
 #pragma clang diagnostic pop

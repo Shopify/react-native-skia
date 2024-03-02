@@ -1,5 +1,5 @@
-#include "SkiaOpenGLHelper.h"
-#include "SkiaOpenGLSurfaceFactory.h"
+#include "include/core/SkiaOpenGLHelper.h"
+#include "include/core/SkiaOpenGLSurfaceFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

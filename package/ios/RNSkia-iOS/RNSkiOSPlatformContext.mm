@@ -9,8 +9,8 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkFontMgr.h"
-#include "SkSurface.h"
+#include "include/core/SkFontMgr.h"
+#include "include/core/SkSurface.h"
 
 #include "include/ports/SkFontMgr_mac_ct.h"
 

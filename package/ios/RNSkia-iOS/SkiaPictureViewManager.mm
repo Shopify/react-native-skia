@@ -1,5 +1,5 @@
 
-#include "SkiaPictureViewManager.h"
+#include "include/core/SkiaPictureViewManager.h"
 #include <React/RCTBridge+Private.h>
 
 #include "RNSkIOSView.h"

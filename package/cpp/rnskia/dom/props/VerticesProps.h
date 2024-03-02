@@ -13,7 +13,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkVertices.h"
+#include "include/core/SkVertices.h"
 
 #pragma clang diagnostic pop
 

@@ -10,8 +10,8 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkColorFilter.h"
-#include "SkLumaColorFilter.h"
+#include "include/core/SkColorFilter.h"
+#include "include/core/SkLumaColorFilter.h"
 
 #pragma clang diagnostic pop
 

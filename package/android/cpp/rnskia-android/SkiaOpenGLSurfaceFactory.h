@@ -13,14 +13,14 @@
 #include <thread>
 #include <unordered_map>
 
-#include "SkiaOpenGLHelper.h"
+#include "include/core/SkiaOpenGLHelper.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkCanvas.h"
-#include "SkColorSpace.h"
-#include "SkSurface.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkColorSpace.h"
+#include "include/core/SkSurface.h"
 #include "include/gpu/GrBackendSurface.h"
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/ganesh/SkSurfaceGanesh.h"
