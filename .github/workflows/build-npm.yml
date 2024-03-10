@@ -71,8 +71,8 @@ jobs:
       - name: Create Github Release
         uses: ncipollo/release-action@v1
         with:
-          tag: "v${{steps.get_npm_package_version.outputs.npm_package_version}}-beta"
-          name: "Release ${{steps.get_npm_package_version.outputs.npm_package_version}} beta"
+          tag: "v${{steps.get_npm_package_version.outputs.npm_package_version}}"
+          name: "Release ${{steps.get_npm_package_version.outputs.npm_package_version}}"
           artifacts: ${{ env.WORKING_DIRECTORY }}/dist/${{steps.get_npm_package_name.outputs.npm_package_name}}
           artifactContentType: application/gzip
           generateReleaseNotes: true

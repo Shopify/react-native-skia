@@ -16,25 +16,12 @@ const pck = JSON.parse(fs.readFileSync("./package/package.json").toString());
  * The build script requires that we have valid Skia binaries
  * in the libs folder.
  *
- * The script requires a valid build number in the environment
- * varable GITHUB_RUN_NUMBER. The version of the package will
- * the version set in the package/package.json file, and will
- * use this as the build number.
- *
  */
 
 console.log("Building NPM package");
 console.log("");
 
 console.log("Checking prerequisites...");
-
-// test for valid build number
-if (process.env.GITHUB_RUN_NUMBER === undefined) {
-  console.log(
-    "Failed. Expected a valid build number in the environment variable GITHUB_RUN_NUMBER"
-  );
-  process.exit(1);
-}
 
 // Check that Android Skia libs are built
 ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"].forEach((cpu) => {
@@ -77,14 +64,10 @@ console.log("Prerequisites verified successfully.");
 ensureFolderExists(getDistFolder());
 
 // Update version and save package.json
-const majorMinor = pck.version.split(".").slice(0, 2).join(".");
-const nextVersion = majorMinor + "." + process.env.GITHUB_RUN_NUMBER;
-pck.version = nextVersion;
 pck.types = "lib/typescript/index.d.ts";
 pck.main = "lib/module/index.js";
 pck.module = "lib/module/index.js";
 pck["react-native"] = "src/index.ts";
-console.log("Building version:", nextVersion);
 
 // Overwrite the package.json file
 fs.writeFileSync("./package/package.json", JSON.stringify(pck, null, 2));
