@@ -46,7 +46,14 @@ jobs:
         run: yarn copy-skia-headers
 
       - name: Build NPM Package
-        run: cd package; yarn; cd ..; yarn build-npm
+        working-directory: package
+        run: yarn release
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
 
       - name: Get NPM Package name
         id: get_npm_package_name
