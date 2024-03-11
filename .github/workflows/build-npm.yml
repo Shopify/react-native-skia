@@ -56,7 +56,9 @@ jobs:
 
       - name: Build NPM Package
         working-directory: package
-        run: yarn release
+        run: |
+          yarn build
+          yarn release
 
       - name: Create New Branch
         run: |
