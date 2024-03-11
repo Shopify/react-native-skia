@@ -1,6 +1,5 @@
 #pragma once
 
-#include <ReactCommon/CallInvokerHolder.h>
 #include <fbjni/fbjni.h>
 
 #include <exception>
@@ -17,9 +16,6 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 namespace jni = facebook::jni;
-
-using JSCallInvokerHolder =
-    jni::alias_ref<facebook::react::CallInvokerHolder::javaobject>;
 
 class JniPlatformContext : public jni::HybridClass<JniPlatformContext> {
 public:

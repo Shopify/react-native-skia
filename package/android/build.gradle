@@ -167,6 +167,16 @@ android {
                     "src/paper/java",
                 ]
             }
+
+            if (REACT_NATIVE_VERSION >= 74) {
+                srcDirs += [
+                    "src/reactnative74/java"
+                ]
+            } else {
+                srcDirs += [
+                    "src/reactnative69/java"
+                ]
+            }
         }
     }
 
@@ -182,6 +192,8 @@ android {
              "**/libfbjni.so",
              "**/libjsi.so",
              "**/libreact_nativemodule_core.so",
+             "**/libreactnativejni.so",
+             "**/libruntimeexecutor.so",
              "**/libturbomodulejsijni.so",
              "META-INF/**"
         ]
