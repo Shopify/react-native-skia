@@ -63,14 +63,13 @@ jobs:
           git checkout -b release-$GITHUB_RUN_ID
           git push origin release-$GITHUB_RUN_ID
 
-      - name: Create Pull Request
-        uses: repo-sync/pull-request@v2
-        with:
-          source_branch: "release-$GITHUB_RUN_ID"
-          destination_branch: "main"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          pr_title: "Release ${{ steps.get_npm_package_version.outputs.npm_package_version }}"
-          pr_body: "Update release version"
+      - name: Create Pull Request using GitHub CLI
+        run: |
+          gh auth setup-git
+          gh pr create --base main --head ${{ env.NEW_BRANCH }} --title "Release ${{ steps.get_npm_package_version.outputs.npm_package_version }}" --body "📝 update changelog"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
 
       - name: Get NPM Package name
         id: get_npm_package_name
