@@ -58,11 +58,19 @@ jobs:
         working-directory: package
         run: yarn release
 
-      - name: Push changes
-        uses: ad-m/github-push-action@master
+      - name: Create New Branch
+        run: |
+          git checkout -b release-$GITHUB_RUN_ID
+          git push origin release-$GITHUB_RUN_ID
+
+      - name: Create Pull Request
+        uses: repo-sync/pull-request@v2
         with:
+          source_branch: "release-$GITHUB_RUN_ID"
+          destination_branch: "main"
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: main
+          pr_title: "Release ${{ steps.get_npm_package_version.outputs.npm_package_version }}"
+          pr_body: "Update release version"
 
       - name: Get NPM Package name
         id: get_npm_package_name
