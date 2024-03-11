@@ -32,6 +32,10 @@ jobs:
       - name: Install root node dependencies
         run: yarn
 
+      - name: Install package dependencies
+        working-directory: package
+        run: yarn
+
       - name: Download Skia Binary Artifacts
         uses: dawidd6/action-download-artifact@v2
         with:
