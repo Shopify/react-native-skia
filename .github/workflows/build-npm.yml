@@ -66,7 +66,9 @@ jobs:
       - name: Create Pull Request using GitHub CLI
         run: |
           gh auth setup-git
-          gh pr create --base main --head ${{ env.NEW_BRANCH }} --title "Release ${{ steps.get_npm_package_version.outputs.npm_package_version }}" --body "📝 update changelog"
+          TITLE="Release ${{ steps.get_npm_package_version.outputs.npm_package_version }}"
+          BODY="update changelog"
+          gh pr create --base main --head ${{ env.NEW_BRANCH }} --title "$TITLE" --body "$BODY"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
