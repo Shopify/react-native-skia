@@ -46,7 +46,14 @@ jobs:
         run: yarn copy-skia-headers
 
       - name: Build NPM Package
-        run: cd package; yarn; cd ..; yarn build-npm
+        working-directory: package
+        run: yarn release
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
 
       - name: Get NPM Package name
         id: get_npm_package_name
@@ -71,8 +78,8 @@ jobs:
       - name: Create Github Release
         uses: ncipollo/release-action@v1
         with:
-          tag: "v${{steps.get_npm_package_version.outputs.npm_package_version}}-beta"
-          name: "Release ${{steps.get_npm_package_version.outputs.npm_package_version}} beta"
+          tag: "v${{steps.get_npm_package_version.outputs.npm_package_version}}"
+          name: "Release ${{steps.get_npm_package_version.outputs.npm_package_version}}"
           artifacts: ${{ env.WORKING_DIRECTORY }}/dist/${{steps.get_npm_package_name.outputs.npm_package_name}}
           artifactContentType: application/gzip
           generateReleaseNotes: true
