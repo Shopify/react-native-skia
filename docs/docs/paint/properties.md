@@ -17,7 +17,7 @@ The following children can also be assigned to a Paint:
 
 Sets the alpha and RGB used when stroking and filling.
 The color is a string or a number.
-Any 
+Any valid [CSS color](https://www.w3.org/TR/css-color-3/) value is supported. 
 
 ```tsx twoslash
 import {Group, Circle, vec} from "@shopify/react-native-skia";
@@ -30,7 +30,7 @@ import {Group, Circle, vec} from "@shopify/react-native-skia";
   <Group color={0xffff0000}>
     <Circle c={vec(0, 0)} r={50} />
   </Group>
-  {/* Any CSS3 color is valid */}
+  {/* Any CSS color is valid */}
   <Group color="hsl(120, 100%, 50%)">
     <Circle c={vec(0, 0)} r={50} />
   </Group>
