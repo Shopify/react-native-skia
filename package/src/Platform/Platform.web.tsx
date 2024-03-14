@@ -97,13 +97,23 @@ const View = (({ children, onLayout, style: rawStyle }: ViewProps) => {
   useElementLayout(ref, onLayout);
   const cssStyles = useMemo(() => {
     return {
+      alignItems: "stretch" as const,
+      backgroundColor: "transparent" as const,
+      border: "0 solid black" as const,
+      boxSizing: "border-box" as const,
+      display: "flex" as const,
+      flexBasis: "auto" as const,
+      flexDirection: "column" as const,
+      flexShrink: 0,
+      listStyle: "none" as const,
+      margin: 0,
+      minHeight: 0,
+      minWidth: 0,
+      padding: 0,
+      position: "relative" as const,
+      textDecoration: "none" as const,
+      zIndex: 0,
       ...style,
-      display: "flex",
-      flexDirection: style.flexDirection || "inherit",
-      flexWrap: style.flexWrap || "nowrap",
-      justifyContent: style.justifyContent || "flex-start",
-      alignItems: style.alignItems || "stretch",
-      alignContent: style.alignContent || "stretch",
     };
   }, [style]);
 
