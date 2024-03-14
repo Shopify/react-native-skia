@@ -19,4 +19,17 @@ describe("Points", () => {
     );
     checkImage(img, "snapshots/points/points.png");
   });
+  it("should draw points with fill", async () => {
+    const { vec } = importSkia();
+    const img = await surface.draw(
+      <>
+        <Fill color="#add8e6" />
+        <Points
+          points={[{ x: 0, y: 0 }, vec(100, 100), vec(100, 200)]}
+          strokeWidth={4}
+        />
+      </>
+    );
+    checkImage(img, "snapshots/points/points2.png");
+  });
 });
