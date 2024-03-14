@@ -22,6 +22,12 @@ It can apply the following operations to its children:
 | invertClip? | `boolean`           | Invert the clipping region: parts outside the clipping region will be shown and, inside will be hidden.                                                                                                               |
 | layer?      | `RefObject<Paint>`  | Draws the children as a bitmap and applies the effects provided by the paint.                                                                                                                                         |
 
+The following three components are not being affected by the group properties. To apply paint effects on these component, you need to use [layer effects](#layer-effects).
+In each component reference, we also document how to apply paint effects on them.
+* [Picture](/docs/shapes/pictures#applying-effects)
+* [SVG](/docs/images-svg#applying-effects)
+* [Paragraph](/docs/text/paragraph#applying-effects)
+
 ## Paint Properties
 
 Its children will inherit all paint attributes applied to a group. These attributes can be properties like `color` or `style` or children like `<Shader />`, or `<ImageFilter />` for instance ([see painting](/docs/paint/overview)).

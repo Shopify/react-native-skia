@@ -169,7 +169,7 @@ For instance, in the example below, fopr  we apply a blur image filter.
 
 ```tsx twoslash
 import React from "react";
-import { Canvas, ImageSVG, Skia, Group, Paint, Blur, Paragraph } from "@shopify/react-native-skia";
+import { Canvas, Skia, Group, Paint, Blur, Paragraph } from "@shopify/react-native-skia";
 
 const width = 256;
 const height = 256;
