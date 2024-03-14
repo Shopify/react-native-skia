@@ -48,8 +48,8 @@ export const HomeScreen = () => {
         route="Aurora"
       />
       <HomeScreenButton
-        title="💯 SpeedTest"
-        description="SpeedTest network speedometer"
+        title="⭕️ Path Animation"
+        description="Path Animation"
         route="SpeedTest"
       />
       <HomeScreenButton
