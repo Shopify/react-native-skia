@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
   # optional - use expanded license entry instead:
   # s.license    = { :type => "MIT", :file => "LICENSE" }
   s.authors      = { "Your Name" => "yourname@email.com" }
-  s.platforms    = { :ios => "13.0" }
+  s.platforms    = { :ios => "13.0", :visionos => "1.0" }
   s.source       = { :git => "https://github.com/shopify/react-native-skia/react-native-skia.git", :tag => "#{s.version}" }
 
   s.requires_arc = true
@@ -28,7 +28,7 @@ Pod::Spec.new do |s|
     "HEADER_SEARCH_PATHS" => '"$(PODS_TARGET_SRCROOT)/cpp/"/**'
   }
 
-  s.frameworks = 'GLKit', 'MetalKit'
+  s.frameworks = 'MetalKit'
 
   s.ios.vendored_frameworks = [
     'libs/ios/libskia.xcframework', 
