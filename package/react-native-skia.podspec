@@ -28,7 +28,7 @@ Pod::Spec.new do |s|
     "HEADER_SEARCH_PATHS" => '"$(PODS_TARGET_SRCROOT)/cpp/"/**'
   }
 
-  s.frameworks = 'GLKit', 'MetalKit'
+  s.frameworks = 'MetalKit'
 
   s.ios.vendored_frameworks = [
     'libs/ios/libskia.xcframework', 
