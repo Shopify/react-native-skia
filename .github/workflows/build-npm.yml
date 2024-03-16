@@ -53,7 +53,7 @@ jobs:
         working-directory: package
         run: |
           yarn build
-          yarn release
+          npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
