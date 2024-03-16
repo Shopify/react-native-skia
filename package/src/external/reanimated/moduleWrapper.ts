@@ -64,6 +64,8 @@ export const stopMapper: (mapperID: number) => void =
 
 export const runOnJS = Reanimated2?.runOnJS || throwOnMissingReanimated;
 export const runOnUI = Reanimated2?.runOnUI || throwOnMissingReanimated;
+export const makeMutable: <T>(val: T) => SharedValue<T> =
+  Reanimated2?.makeMutable || throwOnMissingReanimated;
 
 export const useAnimatedReaction: <T>(
   prepare: () => T,
