@@ -11,23 +11,15 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      - name: Setup Nodejs and npm
-        uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
-          node-version: "16"
-
-      - name: Setup yarn
-        run: npm install -g yarn
-
-      - name: Setup Nodejs with yarn caching
-        uses: actions/setup-node@v2
-        with:
-          node-version: "16"
-          cache: yarn
+          node-version: "lts/*"
+          cache: 'yarn'
+          cache-dependency-path: 'package/yarn.lock'
 
       - name: Install root node dependencies
         run: yarn
