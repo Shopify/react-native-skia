@@ -21,17 +21,8 @@ jobs:
         uses: seanmiddleditch/gha-setup-ninja@master
 
       - name: Setup Nodejs and npm
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: "16"
-
-      - name: Setup yarn
-        run: npm install -g yarn
-
-      - name: Setup Nodejs with yarn caching
-        uses: actions/setup-node@v2
-        with:
-          node-version: "16"
           cache: yarn
 
       - name: Install root node dependencies
