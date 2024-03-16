@@ -23,7 +23,7 @@ jobs:
       - name: Setup Nodejs and npm
         uses: actions/setup-node@v3
         with:
-          cache: 'yarn'
+          cache: yarn
 
       - name: Install root node dependencies
         run: yarn
