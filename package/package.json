@@ -7,7 +7,7 @@
     "setup-skia-web": "./scripts/setup-canvaskit.js"
   },
   "title": "React Native Skia",
-  "version": "1.0.3",
+  "version": "0.0.0-development",
   "description": "High-performance React Native Graphics using Skia",
   "main": "lib/module/index.js",
   "react-native": "src/index.ts",
@@ -49,7 +49,7 @@
     "test": "jest",
     "e2e": "E2E=true yarn test -i e2e",
     "build": "bob build && merge-dirs lib/typescript/src lib/commonjs && merge-dirs lib/typescript/src lib/module",
-    "release": "standard-version"
+    "release": "semantic-release"
   },
   "repository": {
     "type": "git",
@@ -106,7 +106,7 @@
     "react-native": "0.72.6",
     "react-native-builder-bob": "0.18.2",
     "react-native-reanimated": "3.6.2",
-    "standard-version": "^9.5.0",
+    "semantic-release": "^23.0.3",
     "ts-jest": "29.1.1",
     "typescript": "5.1.6",
     "ws": "8.11.0"

@@ -15,11 +15,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup Git identity
-        run: |
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-
       - name: Setup Nodejs and npm
         uses: actions/setup-node@v2
         with:
@@ -59,50 +54,9 @@ jobs:
         run: |
           yarn build
           yarn release
-
-      - name: Create New Branch
-        run: |
-          git checkout -b release-$GITHUB_RUN_ID
-          git push origin release-$GITHUB_RUN_ID
-
-      - name: Create Pull Request using GitHub CLI
-        run: |
-          gh auth setup-git
-          TITLE="Release ${{ steps.get_npm_package_version.outputs.npm_package_version }}"
-          BODY="update changelog"
-          gh pr create --base main --head ${{ env.NEW_BRANCH }} --title "$TITLE" --body "$BODY"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
-
-      - name: Get NPM Package name
-        id: get_npm_package_name
-        run: echo "npm_package_name=$(yarn get-filename-npm| grep ^'shopify')" >> "$GITHUB_OUTPUT"
-
-      - name: Upload artifacts - NPM Package
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{steps.get_npm_package_name.outputs.npm_package_name}}
-          path: ${{ env.WORKING_DIRECTORY }}/dist/${{steps.get_npm_package_name.outputs.npm_package_name}}
-
-      - name: Get NPM Package version
-        id: get_npm_package_version
-        run: echo "npm_package_version=$(yarn get-version-npm| tail -2| head -1)" >> "$GITHUB_OUTPUT"
-
-      - name: Publish to NPM
-        uses: JS-DevTools/npm-publish@v1
-        with:
-          package: ./package/package.json
-          token: ${{ secrets.NPM_TOKEN }}
-
-      - name: Create Github Release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: "v${{steps.get_npm_package_version.outputs.npm_package_version}}"
-          name: "Release ${{steps.get_npm_package_version.outputs.npm_package_version}}"
-          generateReleaseNotes: true
-          replacesArtifacts: false
-          token: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Install & Build Docs
         run: cd package; yarn; cd ../docs; yarn; yarn build;
