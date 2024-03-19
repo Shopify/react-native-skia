@@ -5,14 +5,15 @@ import android.content.Context;
 import com.facebook.jni.HybridData;
 import com.facebook.jni.annotations.DoNotStrip;
 import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.uimanager.ThemedReactContext;
 
 public class SkiaDomView extends SkiaBaseView {
     @DoNotStrip
     private HybridData mHybridData;
 
-    public SkiaDomView(Context context) {
+    public SkiaDomView(ThemedReactContext context) {
         super(context);
-        RNSkiaModule skiaModule = ((ReactContext) context).getNativeModule(RNSkiaModule.class);
+        RNSkiaModule skiaModule = context.getReactApplicationContext().getNativeModule(RNSkiaModule.class);
         mHybridData = initHybrid(skiaModule.getSkiaManager());
     }
 

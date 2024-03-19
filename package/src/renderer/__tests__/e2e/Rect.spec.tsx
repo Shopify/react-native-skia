@@ -1,7 +1,7 @@
 import React from "react";
 
 import { checkImage, docPath } from "../../../__tests__/setup";
-import { Path, RoundedRect } from "../../components";
+import { Fill, Path, RoundedRect } from "../../components";
 import { importSkia, surface } from "../setup";
 
 describe("Rects and rounded rects", () => {
@@ -110,5 +110,13 @@ describe("Rects and rounded rects", () => {
     path.addRRect(rrct);
     const image = await surface.draw(<Path path={path} color="lightblue" />);
     checkImage(image, docPath("rrect/nonuniform.png"));
+  });
+  it("Supports CSS3 colors (1)", async () => {
+    const image = await surface.draw(<Fill color="hsl(120, 100%, 50%)" />);
+    checkImage(image, docPath("fill/green.png"));
+  });
+  it("Supports CSS3 colors (2)", async () => {
+    const image = await surface.draw(<Fill color="hsla(120, 100%, 50%, 1)" />);
+    checkImage(image, docPath("fill/green.png"));
   });
 });

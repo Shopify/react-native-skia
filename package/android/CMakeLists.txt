@@ -73,6 +73,8 @@ target_include_directories(
         "${NODE_MODULES_DIR}/react-native/ReactCommon/jsi"
         "${NODE_MODULES_DIR}/react-native/ReactCommon"
         "${NODE_MODULES_DIR}/react-native/ReactCommon/react/nativemodule/core"
+        "${NODE_MODULES_DIR}/react-native/ReactCommon/runtimeexecutor"
+        "${NODE_MODULES_DIR}/react-native/ReactAndroid/src/main/jni"
         "${NODE_MODULES_DIR}/react-native/ReactAndroid/src/main/java/com/facebook/react/turbomodule/core/jni"
 
         cpp/jni/include
@@ -178,6 +180,34 @@ else()
 endif()
 message("-- FBJNI   : " ${FBJNI_LIBRARY})
 
+unset(REACTNATIVEJNI_LIB CACHE)
+if(${REACT_NATIVE_VERSION} GREATER_EQUAL 71)
+    # RN 0.71 distributes prebuilt binaries.
+    set (REACTNATIVEJNI_LIB "ReactAndroid::reactnativejni")
+else()
+    find_library(
+            REACTNATIVEJNI_LIB
+            reactnativejni
+            PATHS ${LIBRN_DIR}
+            NO_CMAKE_FIND_ROOT_PATH
+    )
+endif()
+message("-- REACTNATIVEJNI   : " ${REACTNATIVEJNI_LIB})
+
+unset(RUNTIMEEXECUTOR_LIB CACHE)
+if(${REACT_NATIVE_VERSION} GREATER_EQUAL 71)
+    # RN 0.71 distributes prebuilt binaries.
+    set (RUNTIMEEXECUTOR_LIB "ReactAndroid::runtimeexecutor")
+else()
+    find_library(
+            RUNTIMEEXECUTOR_LIB
+            runtimeexecutor
+            PATHS ${LIBRN_DIR}
+            NO_CMAKE_FIND_ROOT_PATH
+    )
+endif()
+message("-- RUNTIMEEXECUTOR   : " ${RUNTIMEEXECUTOR_LIB})
+
 unset(TURBOMODULES_LIB CACHE)
 if(${REACT_NATIVE_VERSION} GREATER_EQUAL 71)
     # RN 0.71 distributes prebuilt binaries.
@@ -199,6 +229,8 @@ target_link_libraries(
         ${FBJNI_LIBRARY}
         ${REACT_LIB}
         ${JSI_LIB}
+        ${REACTNATIVEJNI_LIB}
+        ${RUNTIMEEXECUTOR_LIB}
         ${TURBOMODULES_LIB}
         ${SKIA_SVG_LIB}
         ${SKIA_SKSHAPER_LIB}

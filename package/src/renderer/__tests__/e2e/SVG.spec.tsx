@@ -25,6 +25,15 @@ const circle = new SVGAsset(
   20
 );
 
+const circleWithText = new SVGAsset(
+  `<svg viewBox='0 0 20 20' width="20" height="20" xmlns='http://www.w3.org/2000/svg'>
+<circle cx='10' cy='10' r='10' fill='#00FFFF'/>
+<text x="20" y="35" class="small">My</text>
+</svg>`,
+  20,
+  20
+);
+
 const tiger = new SVGAsset(
   fs.readFileSync("src/skia/__tests__/assets/tiger.svg", "utf-8"),
   800,
@@ -162,5 +171,21 @@ describe("Displays SVGs", () => {
       </>
     );
     checkImage(image, docPath("opacity-tiger.png"));
+  });
+
+  itRunsE2eOnly("text shouldn't crash on iOS", async () => {
+    const { rect } = importSkia();
+    const { width, height } = surface;
+    const src = rect(0, 0, circle.width(), circle.height());
+    const dst = rect(0, 0, width, height);
+    const image = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Group transform={fitbox("contain", src, dst)}>
+          <ImageSVG svg={circleWithText} />
+        </Group>
+      </>
+    );
+    checkImage(image, docPath("svg.png"));
   });
 });

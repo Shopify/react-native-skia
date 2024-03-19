@@ -22,7 +22,6 @@
     "copy-skia-include-headers": "yarn rimraf ./package/cpp/skia/include/ && cp -a ./externals/skia/include/. ./package/cpp/skia/include",
     "copy-skia-module-headers": "ts-node ./scripts/copy-skia-module-headers.ts",
     "copy-skia-headers": "yarn copy-skia-include-headers && yarn copy-skia-module-headers",
-    "build-npm": "yarn ts-node ./scripts/build-npm-package.ts",
     "get-filename-npm": "yarn ts-node ./scripts/get-npm-filename.ts",
     "get-version-npm": "yarn ts-node ./scripts/get-npm-version.ts",
     "build": "yarn build-skia && yarn copy-skia-headers",

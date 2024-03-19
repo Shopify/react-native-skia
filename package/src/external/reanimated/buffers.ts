@@ -4,27 +4,29 @@ import type { WorkletFunction } from "react-native-reanimated/lib/typescript/rea
 import type { SkColor, SkHostRect, SkPoint, SkRSXform } from "../../skia/types";
 import { Skia } from "../../skia";
 
-import { startMapper, stopMapper, useSharedValue } from "./moduleWrapper";
+import { startMapper, stopMapper, makeMutable } from "./moduleWrapper";
 import { notifyChange } from "./interpolators";
 
 type Modifier<T> = (input: T, index: number) => void;
+
+const useBufferValue = <T>(size: number, bufferInitializer: () => T) =>
+  useMemo(
+    () => makeMutable(new Array(size).fill(0).map(bufferInitializer)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [size]
+  );
 
 const useBuffer = <T>(
   size: number,
   bufferInitializer: () => T,
   modifier: Modifier<T>
 ) => {
-  const buffer = useMemo(
-    () => new Array(size).fill(0).map(bufferInitializer),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [size]
-  );
-  const values = useSharedValue(buffer);
+  const values = useBufferValue(size, bufferInitializer);
   const mod = modifier as WorkletFunction;
-  const deps = Object.values(mod.__closure ?? {});
+  const deps = [size, ...Object.values(mod.__closure ?? {})];
   const mapperId = startMapper(() => {
     "worklet";
-    buffer.forEach((val, index) => {
+    values.value.forEach((val, index) => {
       modifier(val, index);
     });
     notifyChange(values);

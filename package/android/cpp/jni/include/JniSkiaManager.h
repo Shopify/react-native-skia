@@ -5,6 +5,7 @@
 #include <fbjni/fbjni.h>
 #include <jsi/jsi.h>
 #include <memory>
+#include <react/jni/JRuntimeExecutor.h>
 
 #include "JniPlatformContext.h"
 #include "RNSkAndroidPlatformContext.h"
@@ -17,9 +18,6 @@ class RNSkManager;
 
 namespace jsi = facebook::jsi;
 
-using JSCallInvokerHolder =
-    jni::alias_ref<facebook::react::CallInvokerHolder::javaobject>;
-
 using JavaPlatformContext = jni::alias_ref<JniPlatformContext::javaobject>;
 
 class JniSkiaManager : public jni::HybridClass<JniSkiaManager> {
@@ -30,7 +28,8 @@ public:
 
   static jni::local_ref<jni::HybridClass<JniSkiaManager>::jhybriddata>
   initHybrid(jni::alias_ref<jhybridobject> jThis, jlong jsContext,
-             JSCallInvokerHolder jsCallInvokerHolder,
+             jni::alias_ref<facebook::react::JRuntimeExecutor::javaobject>
+                 jRuntimeExecutor,
              JavaPlatformContext platformContext);
 
   static void registerNatives();

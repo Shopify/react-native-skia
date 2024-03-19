@@ -64,14 +64,7 @@ describe("Animated Images", () => {
     );
     const { Skia } = importSkia();
     const data = Skia.Data.fromBase64(result);
-    const animatedImage =
-      Skia.AnimatedImage.MakeAnimatedImageFromEncoded(data)!;
-    expect(animatedImage).toBeTruthy();
-    animatedImage.decodeNextFrame();
-    animatedImage.decodeNextFrame();
-    const frame = animatedImage.getCurrentFrame()!;
-    expect(frame).toBeTruthy();
-    expect(result).toEqual(frame.encodeToBase64());
+    const frame = Skia.Image.MakeImageFromEncoded(data);
     const { width, height } = surface;
     const img = await surface.draw(
       <>

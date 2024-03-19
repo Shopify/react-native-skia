@@ -335,7 +335,7 @@ PODS:
     - RCTTypeSafety
     - React-Core
     - ReactCommon/turbomodule/core
-  - react-native-skia (0.1.0-development):
+  - react-native-skia (0.0.0):
     - RCT-Folly (= 2021.07.22.00)
     - React
     - React-callinvoker
@@ -642,7 +642,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 9885f6f94d231b95a739ef7bb50536fb87ce7539
   React-logger: 3f8ebad1be1bf3299d1ab6d7f971802d7395c7ef
   react-native-safe-area-context: dfe5aa13bee37a0c7e8059d14f72ffc076d120e9
-  react-native-skia: 3f6a881e3d923bb6fe2f0d0e3a4d459ac50f3614
+  react-native-skia: c2c416b864962e73d8b9c81f0fa399ee89c8435e
   React-perflogger: 2d505bbe298e3b7bacdd9e542b15535be07220f6
   React-RCTActionSheet: 0e96e4560bd733c9b37efbf68f5b1a47615892fb
   React-RCTAnimation: fd138e26f120371c87e406745a27535e2c8a04ef
@@ -664,6 +664,6 @@ SPEC CHECKSUMS:
   Yoga: d56980c8914db0b51692f55533409e844b66133c
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 3bf5d3cf7d3fe342535cb3ff9d97c0af632863ce
+PODFILE CHECKSUM: b6119b41acd610ac50d2967dabb3239ee5bbb4ec
 
-COCOAPODS: 1.14.3
+COCOAPODS: 1.15.2

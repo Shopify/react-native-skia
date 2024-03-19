@@ -24,7 +24,6 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
           cache: 'yarn'
 
       - name: Set up JDK 11

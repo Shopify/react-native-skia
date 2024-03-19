@@ -7,9 +7,12 @@
     "setup-skia-web": "./scripts/setup-canvaskit.js"
   },
   "title": "React Native Skia",
-  "version": "0.1.0-development",
+  "version": "0.0.0",
   "description": "High-performance React Native Graphics using Skia",
-  "main": "index.ts",
+  "main": "lib/module/index.js",
+  "react-native": "src/index.ts",
+  "module": "lib/module/index.js",
+  "types": "lib/typescript/index.d.ts",
   "files": [
     "src",
     "lib",
@@ -45,7 +48,8 @@
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --cache",
     "test": "jest",
     "e2e": "E2E=true yarn test -i e2e",
-    "build": "bob build && merge-dirs lib/typescript/src lib/commonjs && merge-dirs lib/typescript/src lib/module"
+    "build": "bob build && merge-dirs lib/typescript/src lib/commonjs && merge-dirs lib/typescript/src lib/module",
+    "release": "semantic-release"
   },
   "repository": {
     "type": "git",
