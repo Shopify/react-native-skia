@@ -24,4 +24,7 @@ describe("Snapshot", () => {
   itRunsE2eOnly("should respect overflow: hidden", async () => {
     await testSnapshot("Snapshot4");
   });
+  itRunsE2eOnly("should respect ScrollView offset and padding", async () => {
+    await testSnapshot("Snapshot5");
+  });
 });
