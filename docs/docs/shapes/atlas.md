@@ -158,3 +158,55 @@ export const Demo = () => {
   );
 };
 ```
+
+## Multiple Unique Sprites
+
+In the example below, we put multiple star shapes into the Atlas texture (one of each color). Then we initialize `sprites` and `transformations` to create a repeating grid pattern.
+
+```tsx twoslash
+import { Group, Canvas, Atlas, rect, useTexture, Path, Skia } from "@shopify/react-native-skia";
+
+const starPath = "M 32 0 L 42 20 L 64 23.25 L 48 38.75 L 51.75 61 L 32 50.5 L 12.25 61 L 16 38.75 L 0 23.25 L 22 20 L 32 0 Z";
+const colors = ["#EC5B88", "#B153E2", "#5d5cc6", "#43B1E5", "#97e672", "#ffa245"];
+const starSize = 64;
+const gridSize = 12;
+const textureSize = { width: starSize * colors.length, height: starSize };
+const scale = 0.25; // scale each sprite down to 25% of the original star size
+
+const Star = ({ color }) => <Path path={starPath} color={color} />;
+
+export const Demo = () => {
+  const texture = useTexture(
+    <Group>
+      {colors.map((color, i) => (
+        <Group key={color} transform={[{ translateX: i * starSize }]}>
+          <Star color={color} />
+        </Group>
+      ))}
+    </Group>,
+    textureSize
+  );
+
+  const sprites = [];
+  const transforms = [];
+  for (let y = 0; y < gridSize; y++) {
+    for (let x = 0; x < gridSize; x++) {
+      const colorIndex = (y + x) % colors.length;
+      // get the location of the colorIndex star in the texture
+      const sprite = rect(colorIndex * starSize, 0, starSize, starSize);
+      // create a transform to position the sprite in the grid
+      const xform = Skia.RSXform(scale, 0, x * (starSize * scale), y * (starSize * scale));
+      sprites.push(sprite);
+      transforms.push(xform);
+    }
+  }
+
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Atlas image={texture} sprites={sprites} transforms={transforms} />
+    </Canvas>
+  );
+};
+```
+
+<img src={require("/static/img/atlas/multiple-unique-sprites.png").default} width="256" height="256" />
