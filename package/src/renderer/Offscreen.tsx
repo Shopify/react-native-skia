@@ -24,6 +24,7 @@ export const drawAsPicture = (element: ReactElement) => {
   const ctx = new JsiDrawingContext(Skia, canvas);
   root.dom.render(ctx);
   const picture = recorder.finishRecordingAsPicture();
+  root.unmount();
   return picture;
 };
 
