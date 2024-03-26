@@ -6,6 +6,7 @@
  */
 
 #include "GrAHardwareBufferUtils.h"
+#if __ANDROID_API__ >= 26
 
 #define GL_GLEXT_PROTOTYPES
 #define EGL_EGLEXT_PROTOTYPES
@@ -236,3 +237,5 @@ MakeGLBackendTexture(GrDirectContext *dContext, AHardwareBuffer *hardwareBuffer,
 }
 
 } // namespace RNSkia
+
+#endif
