@@ -14,6 +14,7 @@ import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ScrollView;
 import androidx.annotation.NonNull;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.uimanager.UIManagerModule;
@@ -69,6 +70,17 @@ public class ViewScreenshotService {
         float combinedOpacity = parentOpacity * view.getAlpha();
         canvas.save();
         applyTransformations(canvas, view);
+
+        // If the view is a ScrollView or similar, clip to its bounds
+        if (view instanceof ScrollView) {
+            ScrollView scrollView = (ScrollView) view;
+            int clipLeft = scrollView.getScrollX();
+            int clipTop = scrollView.getScrollY();
+            int clipRight = clipLeft + scrollView.getWidth();
+            int clipBottom = clipTop + scrollView.getHeight();
+
+            canvas.clipRect(clipLeft, clipTop, clipRight, clipBottom);
+        }
 
         if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) view;
@@ -166,7 +178,10 @@ public class ViewScreenshotService {
     private static void applyTransformations(final Canvas c, @NonNull final View view) {
         final Matrix matrix = view.getMatrix();
         final Matrix translateMatrix = new Matrix();
-        translateMatrix.setTranslate(view.getLeft() + view.getPaddingLeft(), view.getTop() + view.getPaddingTop());
+
+        translateMatrix.setTranslate(view.getLeft() + view.getPaddingLeft() - view.getScrollX(),
+                view.getTop() + view.getPaddingTop() - view.getScrollY());
+
         c.concat(translateMatrix);
         c.concat(matrix);
     }
