@@ -1,3 +1,4 @@
+#include "GrAHardwareBufferUtils.h"
 #include "SkiaOpenGLHelper.h"
 #include <SkiaOpenGLSurfaceFactory.h>
 
@@ -11,6 +12,28 @@
 namespace RNSkia {
 
 thread_local SkiaOpenGLContext ThreadContextHolder::ThreadSkiaOpenGLContext;
+
+sk_sp<SkImage>
+SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(const SkImageInfo &info,
+                                                      const void *buffer) {
+#if __ANDROID_API__ >= 26
+  const AHardwareBuffer *hardwareBuffer =
+      static_cast<AHardwareBuffer *>(buffer);
+  auto backendTex = MakeGLBackendTexture(
+      ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(),
+      const_cast<AHardwareBuffer *>(hardwareBuffer), info.width(),
+      info.height(), nullptr, nullptr, nullptr, false,
+      GrBackendFormat::MakeGL(kRGBA8_GrPixelConfig), false);
+  sk_sp<SkImage> image = SkImages::BorrowTextureFrom(
+      fDirectContext, backendTex, kTopLeft_GrSurfaceOrigin,
+      kRGBA_8888_SkColorType, kPremul_SkAlphaType, nullptr);
+  return image;
+#else
+  RNSkLogger::logToConsole(
+      "Hardware buffer in only supported on Android API level 26 and above.");
+  return nullptr;
+#endif
+}
 
 sk_sp<SkSurface> SkiaOpenGLSurfaceFactory::makeOffscreenSurface(int width,
                                                                 int height) {
