@@ -45,10 +45,7 @@ public:
   static SkColor fromValue(jsi::Runtime &runtime, const jsi::Value &obj) {
     const auto &object = obj.asObject(runtime);
     jsi::ArrayBuffer buffer =
-        object
-            .getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
-            .asObject(runtime)
-            .getArrayBuffer(runtime);
+        object.getPropertyAsObject(runtime, "buffer").getArrayBuffer(runtime);
     auto bfrPtr = reinterpret_cast<float *>(buffer.data(runtime));
     if (bfrPtr[0] > 1 || bfrPtr[1] > 1 || bfrPtr[2] > 1 || bfrPtr[3] > 1) {
       return SK_ColorBLACK;
@@ -76,9 +73,24 @@ public:
         return JsiSkColor::toValue(
             runtime, SkColorSetARGB(color.a * 255, color.r, color.g, color.b));
       } else if (arguments[0].isObject()) {
-        return arguments[0].getObject(runtime);
+        auto obj = arguments[0].getObject(runtime);
+        if (obj.isArray(runtime)) {
+          auto array = obj.asArray(runtime);
+          // turn the array into a Float32Array
+          return runtime.global()
+              .getPropertyAsFunction(runtime, "Float32Array")
+              .callAsConstructor(runtime, array)
+              .getObject(runtime);
+        } else if (obj.hasProperty(runtime, "buffer") &&
+                   obj.getPropertyAsObject(runtime, "buffer")
+                       .isArrayBuffer(runtime)) {
+          return obj;
+        }
       }
-      return jsi::Value::undefined();
+      throw jsi::JSError(runtime,
+                         "Skia.Color expected number, Float32Array, number[], "
+                         "or string and got: " +
+                             arguments[0].toString(runtime).utf8(runtime));
     };
   }
 };

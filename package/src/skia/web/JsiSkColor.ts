@@ -1,4 +1,4 @@
-import type { SkColor, Color as InputColor } from "../types";
+import type { Color as InputColor, SkColor } from "../types";
 
 const alphaf = (c: number) => ((c >> 24) & 255) / 255;
 const red = (c: number) => (c >> 16) & 255;
@@ -329,12 +329,17 @@ export const Color = (color: InputColor): SkColor => {
       rgba[2] / 255,
       rgba[3]
     );
-  } else {
+  } else if (typeof color === "number") {
     return Float32Array.of(
       red(color) / 255,
       green(color) / 255,
       blue(color) / 255,
       alphaf(color)
+    );
+  } else {
+    // Exhaustive case (though not possible on the type level, could be possible at runtime)
+    throw new Error(
+      `Skia.Color expected number, Float32Array, number[], or string and got: ${color}`
     );
   }
 };
