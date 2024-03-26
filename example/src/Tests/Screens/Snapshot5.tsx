@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  View
-} from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 export const Snapshot5 = () => {
   return (
@@ -18,29 +14,29 @@ export const Snapshot5 = () => {
 const Component = () => {
   return (
     <>
-      <ScrollView style={styles.scrollview} ref={(ref) => { ref?.scrollTo({ y: 200 }) }}>
-        <View
-          style={[styles.verticalBox, { backgroundColor: 'cyan' }]}
-        />
-        <View
-          style={[styles.verticalBox, { backgroundColor: 'red' }]}
-        />
-        <View
-          style={[styles.verticalBox, { backgroundColor: 'green' }]}
-        />
+      <ScrollView
+        style={styles.scrollview}
+        ref={(ref) => {
+          ref?.scrollTo({ y: 200 });
+        }}
+      >
+        <View style={[styles.verticalBox, { backgroundColor: "cyan" }]} />
+        <View style={[styles.verticalBox, { backgroundColor: "red" }]} />
+        <View style={[styles.verticalBox, { backgroundColor: "green" }]} />
       </ScrollView>
 
-      <ScrollView style={styles.scrollViewHorizontal} horizontal ref={(ref) => { ref?.scrollTo({ x: 200 }) }}>
-        <View
-          style={[styles.horizontalBox, { backgroundColor: 'cyan' }]}
-        />
-        <View
-          style={[styles.horizontalBox, { backgroundColor: 'red' }]}
-        />
-        <View
-          style={[styles.horizontalBox, { backgroundColor: 'green' }]}
-        />
-      </ScrollView></>
+      <ScrollView
+        style={styles.scrollViewHorizontal}
+        horizontal
+        ref={(ref) => {
+          ref?.scrollTo({ x: 200 });
+        }}
+      >
+        <View style={[styles.horizontalBox, { backgroundColor: "cyan" }]} />
+        <View style={[styles.horizontalBox, { backgroundColor: "red" }]} />
+        <View style={[styles.horizontalBox, { backgroundColor: "green" }]} />
+      </ScrollView>
+    </>
   );
 };
 
@@ -66,7 +62,7 @@ const styles = StyleSheet.create({
   },
   horizontalBox: {
     width: 200,
-    height: '100%',
+    height: "100%",
     borderWidth: 5,
-  }
+  },
 });
