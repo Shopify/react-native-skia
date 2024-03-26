@@ -11,5 +11,5 @@ export const Screens: Record<string, FC> = {
   Snapshot2,
   Snapshot3,
   Snapshot4,
-  Snapshot5
+  Snapshot5,
 };
