@@ -9,7 +9,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkRefCnt.h"
+#include "include/core/SkRefCnt.h"
 
 #pragma clang diagnostic pop
 

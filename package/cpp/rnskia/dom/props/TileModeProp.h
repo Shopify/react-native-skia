@@ -5,7 +5,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkTileMode.h"
+#include "include/core/SkTileMode.h"
 
 #include <memory>
 #include <string>

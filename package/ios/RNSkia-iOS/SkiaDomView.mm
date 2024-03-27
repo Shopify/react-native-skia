@@ -1,13 +1,13 @@
 #ifdef RCT_NEW_ARCH_ENABLED
-#import <SkiaDomView.h>
+#import "SkiaDomView.h"
 
-#import <RNSkDomView.h>
-#import <RNSkIOSView.h>
-#import <RNSkPlatformContext.h>
+#import "RNSkDomView.h"
+#import "RNSkIOSView.h"
+#import "RNSkPlatformContext.h"
 
-#import <RNSkiaModule.h>
-#import <SkiaManager.h>
-#import <SkiaUIView.h>
+#import "RNSkiaModule.h"
+#import "SkiaManager.h"
+#import "SkiaUIView.h"
 
 #import <React/RCTBridge+Private.h>
 #import <React/RCTConversions.h>

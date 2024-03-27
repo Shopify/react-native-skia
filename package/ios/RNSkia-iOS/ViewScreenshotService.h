@@ -8,7 +8,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkImage.h"
+#include "include/core/SkImage.h"
 
 #pragma clang diagnostic pop
 

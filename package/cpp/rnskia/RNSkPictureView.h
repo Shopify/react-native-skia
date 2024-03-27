@@ -21,9 +21,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkBBHFactory.h"
-#include "SkCanvas.h"
-#include "SkPictureRecorder.h"
+#include "include/core/SkBBHFactory.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPictureRecorder.h"
 
 #pragma clang diagnostic pop
 

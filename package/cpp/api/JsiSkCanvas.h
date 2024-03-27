@@ -26,14 +26,14 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkCanvas.h"
-#include "SkFont.h"
-#include "SkPaint.h"
-#include "SkPath.h"
-#include "SkPicture.h"
-#include "SkRegion.h"
-#include "SkSurface.h"
-#include "SkTypeface.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkFont.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkPath.h"
+#include "include/core/SkPicture.h"
+#include "include/core/SkRegion.h"
+#include "include/core/SkSurface.h"
+#include "include/core/SkTypeface.h"
 
 #pragma clang diagnostic pop
 

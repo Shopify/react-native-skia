@@ -13,7 +13,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkFontMgr.h"
+#include "include/core/SkFontMgr.h"
 
 #pragma clang diagnostic pop
 

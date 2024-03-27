@@ -4,18 +4,18 @@
 #include <thread>
 #include <utility>
 
-#include "SkData.h"
-#include "SkRefCnt.h"
-#include "SkStream.h"
-#include "SkTypes.h"
+#include "include/core/SkData.h"
+#include "include/core/SkRefCnt.h"
+#include "include/core/SkStream.h"
+#include "include/core/SkTypes.h"
 
 #include <android/bitmap.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkBitmap.h"
-#include "SkPixmap.h"
+#include "include/core/SkBitmap.h"
+#include "include/core/SkPixmap.h"
 
 #pragma clang diagnostic pop
 

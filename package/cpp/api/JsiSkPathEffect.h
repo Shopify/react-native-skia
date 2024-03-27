@@ -10,7 +10,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkPathEffect.h"
+#include "include/core/SkPathEffect.h"
 
 #pragma clang diagnostic pop
 

@@ -5,7 +5,7 @@
 #include <memory>
 #include <utility>
 
-#include "SkBlurTypes.h"
+#include "include/core/SkBlurTypes.h"
 
 namespace RNSkia {
 

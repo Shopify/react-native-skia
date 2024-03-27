@@ -10,7 +10,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkImageInfo.h"
+#include "include/core/SkImageInfo.h"
 
 #pragma clang diagnostic pop
 

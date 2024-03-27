@@ -10,7 +10,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkRSXform.h"
+#include "include/core/SkRSXform.h"
 
 #pragma clang diagnostic pop
 

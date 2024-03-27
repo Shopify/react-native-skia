@@ -8,7 +8,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkCanvas.h"
+#include "include/core/SkCanvas.h"
 
 #pragma clang diagnostic pop
 

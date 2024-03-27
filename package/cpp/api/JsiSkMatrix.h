@@ -10,7 +10,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkMatrix.h"
+#include "include/core/SkMatrix.h"
 
 #pragma clang diagnostic pop
 

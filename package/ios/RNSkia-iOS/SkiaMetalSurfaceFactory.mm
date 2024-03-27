@@ -1,13 +1,13 @@
-#import <RNSkLog.h>
+#import "RNSkLog.h"
 
-#include <SkiaMetalSurfaceFactory.h>
+#include "SkiaMetalSurfaceFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#import "SkCanvas.h"
-#import "SkColorSpace.h"
-#import "SkSurface.h"
+#import "include/core/SkCanvas.h"
+#import "include/core/SkColorSpace.h"
+#import "include/core/SkSurface.h"
 
 #import <include/gpu/GrBackendSurface.h>
 #import <include/gpu/GrDirectContext.h>

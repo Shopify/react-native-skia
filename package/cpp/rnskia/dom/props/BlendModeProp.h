@@ -10,7 +10,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkBlendMode.h"
+#include "include/core/SkBlendMode.h"
 
 #pragma clang diagnostic pop
 

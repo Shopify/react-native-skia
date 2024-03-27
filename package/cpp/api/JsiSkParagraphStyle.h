@@ -9,8 +9,8 @@
 
 #include <jsi/jsi.h>
 
-#include <JsiSkStrutStyle.h>
-#include <JsiSkTextStyle.h>
+#include "JsiSkStrutStyle.h"
+#include "JsiSkTextStyle.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

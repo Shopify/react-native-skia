@@ -13,7 +13,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkStream.h"
+#include "include/core/SkStream.h"
 
 #pragma clang diagnostic pop
 
