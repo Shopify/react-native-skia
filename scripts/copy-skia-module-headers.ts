@@ -18,7 +18,10 @@ const copyModule = (module: string) => [
   `cp -a ./externals/skia/src/core/SkChecksum.h ./package/cpp/skia/src/core/.`,
   `cp -a ./externals/skia/src/core/SkTHash.h ./package/cpp/skia/src/core/.`,
 
-  "cp -a ./externals/skia/src/core/SkLRUCache.h ./package/cpp/skia/src/core/.",
+  "mkdir -p ./package/cpp/skia/src/gpu/ganesh/gl",
+  `cp -a ./externals/skia/src/gpu/ganesh/gl/GrGLDefines.h ./package/cpp/skia/src/gpu/ganesh/gl/.`,
+
+  `cp -a ./externals/skia/src/core/SkLRUCache.h ./package/cpp/skia/src/core/.`,
 
   "mkdir -p ./package/cpp/skia/src/base",
   "cp -a ./externals/skia/src/base/SkTInternalLList.h ./package/cpp/skia/src/base/.",

@@ -149,6 +149,9 @@ public:
    */
   static sk_sp<SkSurface> makeOffscreenSurface(int width, int height);
 
+  static sk_sp<SkImage> makeImageFromHardwareBuffer(const SkImageInfo &info,
+                                                    void *buffer);
+
   /**
    * Creates a windowed Skia Surface holder.
    * @param width Initial width of surface
