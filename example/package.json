@@ -26,6 +26,7 @@
     "babel-plugin-transform-inline-environment-variables": "0.4.4",
     "cdt2d": "1.0.0",
     "color": "4.2.1",
+    "geometry-extrude": "^0.2.1",
     "its-fine": "1.0.8",
     "react": "18.2.0",
     "react-dom": "18.0.0",
