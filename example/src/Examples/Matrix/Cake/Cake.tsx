@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Canvas, processTransform3d } from "@shopify/react-native-skia";
+import { Canvas, Fill, processTransform3d } from "@shopify/react-native-skia";
 import { extrudePolygon } from "geometry-extrude";
 import { Dimensions } from "react-native";
 import { useSharedValue } from "@shopify/react-native-skia/src/external/reanimated/moduleWrapper";
@@ -8,6 +8,7 @@ import { useDerivedValue, withDecay } from "react-native-reanimated";
 
 import { createObject, createCircle, normalizeRadians } from "./Geometry";
 import { Object3d } from "./Object3d";
+import { useMatrixTexture } from "./Texture";
 
 const { PI } = Math;
 
@@ -26,6 +27,7 @@ const triangle = [
 ];
 
 const d = height * 0.025;
+const textureSize = { width: 400, height: 400 };
 const cake = [
   ...createObject(
     extrudePolygon([triangle], {
@@ -37,13 +39,13 @@ const cake = [
       // smoothBevel: true,
     }),
     [{ translate: [width / 2, height / 2, -h / 2] }, { rotateX: 0 }],
-    { width, height }
+    textureSize
   ),
 ];
 
 // replace buggy uvs
-let side1 = cake[2];
-let side2 = cake[3];
+const side1 = cake[2];
+const side2 = cake[3];
 side1.forEach((tri, i) => {
   tri.uv = side2[i].uv;
 });
@@ -58,18 +60,14 @@ const plate = [
       { translate: [width / 2, height / 2, -d - h / 2] },
       //  { rotateX: Math.PI / 2 },
     ],
-    { width, height }
+    textureSize
   ),
 ];
-side1 = plate[2];
-side2 = plate[3];
-side1.forEach((tri, i) => {
-  tri.uv = side2[i].uv;
-});
 
 export const Cake = () => {
   const rotateX = useSharedValue(0);
   const rotateY = useSharedValue(0);
+  const texture = useMatrixTexture();
   const gesture = Gesture.Pan()
     .onChange((event) => {
       rotateY.value = event.changeX / width;
@@ -117,17 +115,18 @@ export const Cake = () => {
   return (
     <GestureDetector gesture={gesture}>
       <Canvas style={{ flex: 1 }}>
+        <Fill color="black" />
         <Object3d
           objects={objects}
           index={index1}
           matrix={matrix}
-          label="background"
+          texture={texture}
         />
         <Object3d
           objects={objects}
           index={index2}
           matrix={matrix}
-          label="foreground"
+          texture={texture}
         />
       </Canvas>
     </GestureDetector>

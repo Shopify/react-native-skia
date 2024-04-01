@@ -1,22 +1,32 @@
 import React from "react";
-import type { Matrix4 } from "@shopify/react-native-skia";
-import { Vertices, vec, mapPoint3d } from "@shopify/react-native-skia";
+import type { Matrix4, SkImage } from "@shopify/react-native-skia";
+import {
+  Vertices,
+  vec,
+  mapPoint3d,
+  ImageShader,
+} from "@shopify/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
 import { useDerivedValue } from "react-native-reanimated";
 
 import type { Faces } from "./Geometry";
 import { avg, avgDepth } from "./Geometry";
 
-const baseColors = ["#61DAFB", "#fb61da", "#dafb61", "#61fbcf", "#8f60da"];
+//const baseColors = ["#61DAFB", "#fb61da", "#dafb61", "#61fbcf", "#8f60da"];
 
 interface Object3dProps {
   objects: Faces[];
   matrix: SharedValue<Matrix4>;
   index: SharedValue<number>;
-  label: string;
+  texture: SharedValue<SkImage | null>;
 }
 
-export const Object3d = ({ objects, matrix, index, label }: Object3dProps) => {
+export const Object3d = ({
+  objects,
+  matrix,
+  index,
+  texture,
+}: Object3dProps) => {
   const object = useDerivedValue(() => {
     return objects[index.value];
   }, [index]);
@@ -49,23 +59,29 @@ export const Object3d = ({ objects, matrix, index, label }: Object3dProps) => {
       point.vertices.map((p) => vec(p[0], p[1]))
     );
   });
-  // //const textures = model.flatMap((point) => point.uv);
-  const colors = useDerivedValue(() => {
-    return model.value.flatMap(({ indices }) => {
-      return [
-        baseColors[indices[0] % baseColors.length],
-        baseColors[indices[1] % baseColors.length],
-        baseColors[indices[2] % baseColors.length],
-      ];
-    });
+  const textures = useDerivedValue(() => {
+    return model.value.flatMap((point) => point.uv);
   });
+  // const colors = useDerivedValue(() => {
+  //   return model.value.flatMap(({ indices }) => {
+  //     return [
+  //       baseColors[indices[0] % baseColors.length],
+  //       baseColors[indices[1] % baseColors.length],
+  //       baseColors[indices[2] % baseColors.length],
+  //     ];
+  //   });
+  // });
   return (
     <>
-      <Vertices vertices={vertices} colors={colors}>
-        {/* <SweepGradient
-          c={vec(width / 2, height / 2)}
-          colors={["cyan", "magenta", "yellow", "cyan"]}
-        /> */}
+      <Vertices vertices={vertices} textures={textures}>
+        <ImageShader
+          image={texture}
+          // x={0}
+          // y={0}
+          // width={400}
+          // height={400}
+          // fit="none"
+        />
       </Vertices>
     </>
   );

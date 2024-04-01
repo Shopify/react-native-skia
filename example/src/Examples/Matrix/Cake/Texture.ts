@@ -166,44 +166,7 @@ export const useMatrixTexture = () => {
     "worklet";
     const canvas = surface.getCanvas();
     drawTexture(font, canvas, timestamp);
-    const image = surface.makeImageSnapshot();
-
-    const p1 = Skia.Paint();
-
-    p1.setShader(
-      source.makeShaderWithChildren(
-        [400, 400],
-        [
-          image.makeShaderOptions(
-            TileMode.Repeat,
-            TileMode.Repeat,
-            FilterMode.Linear,
-            MipmapMode.Linear
-          ),
-        ]
-      )
-    );
-    //p1.setImageFilter(Skia.ImageFilter.MakeBlur(1, 1, TileMode.Repeat, null));
-
-    canvas.save();
-    canvas.translate(250, 0);
-    canvas.drawImage(image, 0, 0);
-    canvas.restore();
-
-    canvas.save();
-    canvas.translate(0, 250);
-    canvas.drawImage(image, 0, 0);
-    canvas.restore();
-
-    canvas.save();
-    canvas.translate(250, 250);
-    canvas.drawImage(image, 0, 0);
-    canvas.restore();
-
-    canvas.save();
-    canvas.translate(0, 500);
-    canvas.drawRect(Skia.XYWHRect(0, 0, 400, 400), p1);
-    canvas.restore();
+    return surface.makeImageSnapshot();
   }, textureSize);
   return texture;
 };
