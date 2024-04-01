@@ -8,10 +8,7 @@ import type {
 import {
   BlurStyle,
   ClipOp,
-  FilterMode,
-  MipmapMode,
   Skia,
-  TileMode,
   interpolateColors,
   useFont,
   vec,
@@ -35,25 +32,6 @@ export const useCanvasAsTexture = (
   return texture;
 };
 
-const source = Skia.RuntimeEffect.Make(`
-uniform shader image;
-uniform vec2 iResolution;
-vec4 main(vec2 fragCoord )
-{
-    float effectRadius = 1.0;
-    float effectAngle = 1.0 * 3.14159;
-    
-    vec2 center = vec2(.5, .5);
-    
-    vec2 uv = fragCoord.xy / iResolution.xy - center;
-    
-    float len = length(uv * vec2(iResolution.x / iResolution.y, 1.));
-    float angle = atan(uv.y, uv.x) + effectAngle * smoothstep(effectRadius, 0., len);
-    float radius = length(uv);
-
-    return image.eval((vec2(radius * cos(angle), radius * sin(angle)) + center)*iResolution.xy);
-}`)!;
-
 export const COLS = 16;
 export const ROWS = COLS;
 
@@ -61,14 +39,9 @@ const cols = new Array(COLS).fill(0).map((_, i) => i);
 const rows = new Array(ROWS).fill(0).map((_, i) => i);
 const pos = vec(0, 0);
 
-const textureSize = {
-  width: 1000,
-  height: 1000,
-};
-
 const size = {
-  width: 250,
-  height: 250,
+  width: 400,
+  height: 400,
 };
 const symbol = { width: size.width / COLS, height: size.height / ROWS };
 
@@ -121,7 +94,6 @@ const drawTexture = (
   const symbols = font.getGlyphIDs("abcdefghijklmnopqrstuvwxyz");
   canvas.save();
   //canvas.drawColor(Skia.Color("rgba(0,0,0,0)"));
-  canvas.clipRect(Skia.XYWHRect(0, 0, 256, 256), ClipOp.Intersect, false);
   canvas.drawColor(Skia.Color("rgba(0,20,0,0.3)"));
   cols.forEach((_i, i) =>
     rows.forEach((_j, j) => {
@@ -167,6 +139,6 @@ export const useMatrixTexture = () => {
     const canvas = surface.getCanvas();
     drawTexture(font, canvas, timestamp);
     return surface.makeImageSnapshot();
-  }, textureSize);
+  }, size);
   return texture;
 };

@@ -76,11 +76,11 @@ export const Object3d = ({
       <Vertices vertices={vertices} textures={textures}>
         <ImageShader
           image={texture}
-          // x={0}
-          // y={0}
-          // width={400}
-          // height={400}
-          // fit="none"
+          x={0}
+          y={0}
+          width={400}
+          height={400}
+          fit="none"
         />
       </Vertices>
     </>

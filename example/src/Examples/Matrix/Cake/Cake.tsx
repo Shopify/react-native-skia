@@ -1,5 +1,12 @@
-import React, { useEffect } from "react";
-import { Canvas, Fill, processTransform3d } from "@shopify/react-native-skia";
+import React from "react";
+import {
+  Blur,
+  Canvas,
+  Fill,
+  ImageShader,
+  processTransform3d,
+  rect,
+} from "@shopify/react-native-skia";
 import { extrudePolygon } from "geometry-extrude";
 import { Dimensions } from "react-native";
 import { useSharedValue } from "@shopify/react-native-skia/src/external/reanimated/moduleWrapper";
@@ -44,8 +51,8 @@ const cake = [
 ];
 
 // replace buggy uvs
-const side1 = cake[2];
-const side2 = cake[3];
+const side1 = cake[1];
+const side2 = cake[2];
 side1.forEach((tri, i) => {
   tri.uv = side2[i].uv;
 });
@@ -115,7 +122,15 @@ export const Cake = () => {
   return (
     <GestureDetector gesture={gesture}>
       <Canvas style={{ flex: 1 }}>
-        <Fill color="black" />
+        <Fill>
+          <ImageShader
+            image={texture}
+            rect={rect(0, 0, width, height)}
+            fit="cover"
+          />
+          <Blur blur={10} />
+        </Fill>
+        <Fill color="rgba(0, 0, 0, 0.7)" />
         <Object3d
           objects={objects}
           index={index1}
