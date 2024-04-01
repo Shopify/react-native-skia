@@ -18,8 +18,6 @@ import type {
 import { getEnum, HostObject } from "./Host";
 import { JsiSkMatrix } from "./JsiSkMatrix";
 import { JsiSkShader } from "./JsiSkShader";
-import { JsiSkImageFactory } from "./JsiSkImageFactory";
-import { JsiSkData } from "./JsiSkData";
 
 // https://github.com/google/skia/blob/1f193df9b393d50da39570dab77a0bb5d28ec8ef/modules/canvaskit/htmlcanvas/util.js
 export const toBase64String = (bytes: Uint8Array) => {
@@ -153,14 +151,20 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
   };
 
   makeNonTextureImage(): SkImage {
-    const bytes = this.readPixels()!;
-    const info = this.getImageInfo();
-    const data = new JsiSkData(this.CanvasKit, bytes);
-    const factory = new JsiSkImageFactory(this.CanvasKit);
-    const img = factory.MakeImage(info, data, info.width * 4);
+    const partialInfo = this.ref.getImageInfo();
+    const colorSpace = this.ref.getColorSpace();
+    const info = {
+      ...partialInfo,
+      colorSpace,
+    };
+    const pixels = this.ref.readPixels(0, 0, info) as Uint8Array | null;
+    if (!pixels) {
+      throw new Error("Could not create image from bytes");
+    }
+    const img = this.CanvasKit.MakeImage(info, pixels, info.width * 4);
     if (!img) {
       throw new Error("Could not create image from bytes");
     }
-    return img;
+    return new JsiSkImage(this.CanvasKit, img);
   }
 }
