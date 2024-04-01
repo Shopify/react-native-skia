@@ -151,9 +151,20 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
   };
 
   makeNonTextureImage(): SkImage {
-    return new JsiSkImage(
-      this.CanvasKit,
-      this.CanvasKit.MakeImageFromEncoded(this.encodeToBytes())!
-    );
+    const partialInfo = this.ref.getImageInfo();
+    const colorSpace = this.ref.getColorSpace();
+    const info = {
+      ...partialInfo,
+      colorSpace,
+    };
+    const pixels = this.ref.readPixels(0, 0, info) as Uint8Array | null;
+    if (!pixels) {
+      throw new Error("Could not create image from bytes");
+    }
+    const img = this.CanvasKit.MakeImage(info, pixels, info.width * 4);
+    if (!img) {
+      throw new Error("Could not create image from bytes");
+    }
+    return new JsiSkImage(this.CanvasKit, img);
   }
 }
