@@ -7,7 +7,6 @@ import type {
 } from "@shopify/react-native-skia";
 import {
   BlurStyle,
-  ClipOp,
   Skia,
   interpolateColors,
   useFont,

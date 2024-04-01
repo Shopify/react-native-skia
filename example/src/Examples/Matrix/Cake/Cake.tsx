@@ -17,8 +17,6 @@ import { createObject, createCircle, normalizeRadians } from "./Geometry";
 import { Object3d } from "./Object3d";
 import { useMatrixTexture } from "./Texture";
 
-const { PI } = Math;
-
 const { width, height } = Dimensions.get("window");
 const size = 165;
 const h = 0.35 * size;
