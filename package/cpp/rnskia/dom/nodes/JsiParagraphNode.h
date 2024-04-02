@@ -1,7 +1,7 @@
 #pragma once
 
 #include "JsiDomDrawingNode.h"
-#include "ParagraphProp.h"
+#include "modules/skparagraph/include/ParagraphProp.h"
 
 #include <memory>
 

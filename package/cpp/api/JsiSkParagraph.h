@@ -15,9 +15,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "Paragraph.h"
-#include "ParagraphBuilder.h"
-#include "ParagraphStyle.h"
+#include "modules/skparagraph/include/Paragraph.h"
+#include "modules/skparagraph/include/ParagraphBuilder.h"
+#include "modules/skparagraph/include/ParagraphStyle.h"
 
 #pragma clang diagnostic pop
 
