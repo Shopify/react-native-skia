@@ -45,7 +45,11 @@ export const toBase64String = (bytes: Uint8Array) => {
 };
 
 export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
-  constructor(CanvasKit: CanvasKit, ref: Image) {
+  constructor(
+    CanvasKit: CanvasKit,
+    ref: Image,
+    private releaseCtx?: () => void
+  ) {
     super(CanvasKit, ref, "Image");
   }
 
@@ -128,6 +132,8 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     return toBase64String(bytes);
   }
 
+  // TODO: this is leaking on Web
+  // Add signature with allocated buffer
   readPixels(srcX?: number, srcY?: number, imageInfo?: ImageInfo) {
     const info = this.getImageInfo();
     const pxInfo: CKImageInfo = {
@@ -148,6 +154,9 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
 
   dispose = () => {
     this.ref.delete();
+    if (this.releaseCtx) {
+      this.releaseCtx();
+    }
   };
 
   makeNonTextureImage(): SkImage {
@@ -157,7 +166,16 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
       ...partialInfo,
       colorSpace,
     };
-    const pixels = this.ref.readPixels(0, 0, info) as Uint8Array | null;
+
+    var pixelLen = info.width * info.height * 4;
+    const pixelPtr = this.CanvasKit.Malloc(Uint8Array, pixelLen);
+    const pixels = this.ref.readPixels(
+      0,
+      0,
+      info,
+      pixelPtr,
+      info.width * 4
+    ) as Uint8Array | null;
     if (!pixels) {
       throw new Error("Could not create image from bytes");
     }
@@ -165,6 +183,8 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     if (!img) {
       throw new Error("Could not create image from bytes");
     }
-    return new JsiSkImage(this.CanvasKit, img);
+    return new JsiSkImage(this.CanvasKit, img, () => {
+      this.CanvasKit.Free(pixelPtr);
+    });
   }
 }
