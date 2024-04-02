@@ -9,8 +9,6 @@ import { JsiDrawingContext } from "../dom/types";
 import type { SkSurface } from "../skia";
 import { Skia } from "../skia/types";
 
-export * from "../renderer/components";
-
 let Skia: Skia;
 
 export const makeOffscreenSurface = (width: number, height: number) => {
