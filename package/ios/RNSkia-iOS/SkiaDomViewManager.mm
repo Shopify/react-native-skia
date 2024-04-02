@@ -1,6 +1,6 @@
 
-#include <React/RCTBridge+Private.h>
 #include "SkiaDomViewManager.h"
+#include <React/RCTBridge+Private.h>
 
 #include "RNSkDomView.h"
 #include "RNSkIOSView.h"

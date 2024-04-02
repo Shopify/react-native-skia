@@ -11,11 +11,11 @@
 
 #include "include/core/SkColorFilter.h"
 #include "include/core/SkImageFilter.h"
-#include "include/effects/SkImageFilters.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPathEffect.h"
 #include "include/core/SkShader.h"
+#include "include/effects/SkImageFilters.h"
 
 #pragma clang diagnostic pop
 

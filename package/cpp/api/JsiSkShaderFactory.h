@@ -13,8 +13,8 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "include/core/SkColorFilter.h"
-#include "include/effects/SkPerlinNoiseShader.h"
 #include "include/effects/SkImageFilters.h"
+#include "include/effects/SkPerlinNoiseShader.h"
 
 #pragma clang diagnostic pop
 

@@ -1,7 +1,7 @@
 #import <React/RCTBridge.h>
 
-#import "SkiaUIView.h"
 #import "RNSkiaModule.h"
+#import "SkiaUIView.h"
 
 #include <utility>
 #include <vector>

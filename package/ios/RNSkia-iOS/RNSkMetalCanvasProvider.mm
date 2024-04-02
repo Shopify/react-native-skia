@@ -1,5 +1,5 @@
-#import "RNSkLog.h"
 #import "RNSkMetalCanvasProvider.h"
+#import "RNSkLog.h"
 #import "SkiaMetalSurfaceFactory.h"
 
 #pragma clang diagnostic push
