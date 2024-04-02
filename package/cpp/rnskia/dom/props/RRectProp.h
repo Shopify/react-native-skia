@@ -10,8 +10,8 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkRRect.h"
-#include "SkRect.h"
+#include "include/core/SkRRect.h"
+#include "include/core/SkRect.h"
 
 #pragma clang diagnostic pop
 

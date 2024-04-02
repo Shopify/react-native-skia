@@ -7,8 +7,8 @@
 #include <jni.h>
 #include <jsi/jsi.h>
 
-#include <JniSkiaManager.h>
-#include <RNSkAndroidView.h>
+#include "JniSkiaManager.h"
+#include "RNSkAndroidView.h"
 
 #include <android/bitmap.h>
 

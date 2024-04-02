@@ -15,9 +15,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkImage.h"
-#include "SkStream.h"
 #include "include/codec/SkEncodedImageFormat.h"
+#include "include/core/SkImage.h"
+#include "include/core/SkStream.h"
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkPngEncoder.h"
 #include "include/encode/SkWebpEncoder.h"

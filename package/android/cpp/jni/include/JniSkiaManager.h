@@ -7,10 +7,10 @@
 #include <memory>
 #include <react/jni/JRuntimeExecutor.h>
 
-#include <JniPlatformContext.h>
-#include <RNSkAndroidPlatformContext.h>
-#include <RNSkLog.h>
-#include <RNSkManager.h>
+#include "JniPlatformContext.h"
+#include "RNSkAndroidPlatformContext.h"
+#include "RNSkLog.h"
+#include "RNSkManager.h"
 
 namespace RNSkia {
 

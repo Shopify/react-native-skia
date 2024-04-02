@@ -10,8 +10,8 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkFont.h"
-#include "SkStream.h"
+#include "include/core/SkFont.h"
+#include "include/core/SkStream.h"
 
 #pragma clang diagnostic pop
 

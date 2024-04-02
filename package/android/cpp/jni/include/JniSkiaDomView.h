@@ -7,10 +7,10 @@
 #include <jni.h>
 #include <jsi/jsi.h>
 
-#include <JniSkiaBaseView.h>
-#include <JniSkiaManager.h>
-#include <RNSkAndroidView.h>
-#include <RNSkDomView.h>
+#include "JniSkiaBaseView.h"
+#include "JniSkiaManager.h"
+#include "RNSkAndroidView.h"
+#include "RNSkDomView.h"
 
 #include <android/native_window.h>
 #include <android/native_window_jni.h>

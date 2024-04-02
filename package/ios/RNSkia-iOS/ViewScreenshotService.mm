@@ -4,7 +4,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkData.h"
+#include "include/core/SkData.h"
 
 #pragma clang diagnostic pop
 

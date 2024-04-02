@@ -9,7 +9,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkContourMeasure.h"
+#include "include/core/SkContourMeasure.h"
 
 #include "JsiSkPath.h"
 
