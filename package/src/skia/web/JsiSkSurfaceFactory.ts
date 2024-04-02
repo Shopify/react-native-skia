@@ -11,11 +11,27 @@ export class JsiSkSurfaceFactory extends Host implements SurfaceFactory {
   }
 
   Make(width: number, height: number) {
-    const surface = this.CanvasKit.MakeSurface(width, height);
+    var pixelLen = width * height * 4; // it's 8888, so 4 bytes per pixel
+    // Allocate the buffer of pixels to be drawn into.
+    const pixelPtr = this.CanvasKit.Malloc(Uint8Array, pixelLen);
+    // MakeRasterDirectSurface
+    const surface = this.CanvasKit.MakeRasterDirectSurface(
+      {
+        width: width,
+        height: height,
+        colorType: this.CanvasKit.ColorType.RGBA_8888,
+        alphaType: this.CanvasKit.AlphaType.Unpremul,
+        colorSpace: this.CanvasKit.ColorSpace.SRGB,
+      },
+      pixelPtr,
+      width * 4
+    );
     if (!surface) {
       return null;
     }
-    return new JsiSkSurface(this.CanvasKit, surface);
+    return new JsiSkSurface(this.CanvasKit, surface, () => {
+      this.CanvasKit.Free(pixelPtr);
+    });
   }
 
   MakeOffscreen(width: number, height: number) {
