@@ -7,11 +7,8 @@ import { JsiSkApi } from "../skia/web";
 import { SkiaRoot } from "../renderer/Reconciler";
 import { JsiDrawingContext } from "../dom/types";
 import type { SkSurface } from "../skia";
-import { Skia } from "../skia/types";
 
-export * from "../renderer/components";
-
-let Skia: Skia;
+let Skia: ReturnType<typeof JsiSkApi>;
 
 export const makeOffscreenSurface = (width: number, height: number) => {
   if (!Skia) {
