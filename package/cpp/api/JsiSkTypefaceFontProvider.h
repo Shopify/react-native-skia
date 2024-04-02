@@ -15,7 +15,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "include/core/SkFont.h"
-#include "skparagraph/include/TypefaceFontProvider.h"
+#include "modules/skparagraph/include/TypefaceFontProvider.h"
 
 #pragma clang diagnostic pop
 
