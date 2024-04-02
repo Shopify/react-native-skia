@@ -27,6 +27,7 @@ export class JsiSkSurfaceFactory extends Host implements SurfaceFactory {
     if (!surface) {
       return null;
     }
+    surface.getCanvas().clear(this.CanvasKit.TRANSPARENT);
     return new JsiSkSurface(this.CanvasKit, surface, () => {
       this.CanvasKit.Free(pixelPtr);
     });
