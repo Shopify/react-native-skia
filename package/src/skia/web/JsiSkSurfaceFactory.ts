@@ -11,10 +11,8 @@ export class JsiSkSurfaceFactory extends Host implements SurfaceFactory {
   }
 
   Make(width: number, height: number) {
-    var pixelLen = width * height * 4; // it's 8888, so 4 bytes per pixel
-    // Allocate the buffer of pixels to be drawn into.
+    var pixelLen = width * height * 4;
     const pixelPtr = this.CanvasKit.Malloc(Uint8Array, pixelLen);
-    // MakeRasterDirectSurface
     const surface = this.CanvasKit.MakeRasterDirectSurface(
       {
         width: width,
