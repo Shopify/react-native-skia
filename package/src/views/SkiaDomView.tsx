@@ -67,6 +67,16 @@ export class SkiaDomView extends React.Component<SkiaDomViewProps> {
   }
 
   /**
+   * Creates a snapshot from the canvas in the surface
+   * @param rect Rect to use as bounds. Optional.
+   * @returns An Image object.
+   */
+  public makeImageSnapshotAsync(rect?: SkRect) {
+    assertSkiaViewApi();
+    return SkiaViewApi.makeImageSnapshotAsync(this._nativeId, rect);
+  }
+
+  /**
    * Sends a redraw request to the native SkiaView.
    */
   public redraw() {

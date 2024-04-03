@@ -31,6 +31,7 @@ export const Mock = (CanvasKit: CanvasKit) => {
     // Reanimated hooks
     useClock: NoopSharedValue,
     usePathInterpolation: NoopSharedValue,
+    useImageAsTexture: NoopSharedValue,
     useTextureValue: NoopSharedValue,
     useTextureValueFromPicture: NoopSharedValue,
     useRSXformBuffer: NoopSharedValue,

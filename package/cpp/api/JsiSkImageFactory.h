@@ -47,7 +47,6 @@ public:
         [context = std::move(context), viewTag](
             jsi::Runtime &runtime,
             std::shared_ptr<RNJsi::JsiPromises::Promise> promise) -> void {
-          // Create a stream operation - this will be run on the main thread
           context->makeViewScreenshot(
               viewTag, [&runtime, context = std::move(context),
                         promise = std::move(promise)](sk_sp<SkImage> image) {
