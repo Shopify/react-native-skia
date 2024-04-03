@@ -6,6 +6,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <utility>
 
 #include "JsiHostObject.h"
 #include "JsiValueWrapper.h"
@@ -180,7 +181,7 @@ public:
   JSI_HOST_FUNCTION(makeImageSnapshotAsync) {
     if (count < 1) {
       _platformContext->raiseError(
-          std::string("makeImageSnapshot: Expected at least 1 argument, got " +
+          std::string("makeImageSnapshotAsync: Expected at least 1 argument, got " +
                       std::to_string(count) + "."));
       return jsi::Value::undefined();
     }

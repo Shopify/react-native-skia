@@ -81,7 +81,6 @@ export const Tests = ({ assets }: TestsProps) => {
               height: size,
             })
             .then((image) => {
-              console.log({ image });
               if (image && client) {
                 const data = image.encodeToBytes();
                 client.send(data);
