@@ -5,8 +5,8 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "JsiHostObject.h"
 #include "JsiValueWrapper.h"
@@ -180,9 +180,9 @@ public:
 
   JSI_HOST_FUNCTION(makeImageSnapshotAsync) {
     if (count < 1) {
-      _platformContext->raiseError(
-          std::string("makeImageSnapshotAsync: Expected at least 1 argument, got " +
-                      std::to_string(count) + "."));
+      _platformContext->raiseError(std::string(
+          "makeImageSnapshotAsync: Expected at least 1 argument, got " +
+          std::to_string(count) + "."));
       return jsi::Value::undefined();
     }
 
@@ -201,18 +201,17 @@ public:
             ? JsiSkRect::fromValue(runtime, arguments[1])
             : nullptr;
     return RNJsi::JsiPromises::createPromiseAsJSIValue(
-        runtime,
-        [context = std::move(context), info,
-         bounds](jsi::Runtime &runtime,
-                 std::shared_ptr<RNJsi::JsiPromises::Promise> promise)  {
-          context->runOnMainThread(
-              [&runtime, info = std::move(info), promise = std::move(promise), context = std::move(context), bounds]() {
-                auto image = info->view->makeImageSnapshot(
-                    bounds == nullptr ? nullptr : bounds.get());
-                 context->runOnJavascriptThread([&runtime,
-                                                context = std::move(context),
-                                                promise = std::move(promise),
-                                                image = std::move(image)]() {
+        runtime, [context = std::move(context), info, bounds](
+                     jsi::Runtime &runtime,
+                     std::shared_ptr<RNJsi::JsiPromises::Promise> promise) {
+          context->runOnMainThread([&runtime, info = std::move(info),
+                                    promise = std::move(promise),
+                                    context = std::move(context), bounds]() {
+            auto image = info->view->makeImageSnapshot(
+                bounds == nullptr ? nullptr : bounds.get());
+            context->runOnJavascriptThread(
+                [&runtime, context = std::move(context),
+                 promise = std::move(promise), image = std::move(image)]() {
                   if (image == nullptr) {
                     promise->reject("Failed to make snapshot from view.");
                     return;
@@ -221,7 +220,7 @@ public:
                       runtime, std::make_shared<JsiSkImage>(std::move(context),
                                                             std::move(image))));
                 });
-              });
+          });
         });
   }
 
