@@ -95,13 +95,15 @@ void GLTextureHelper::rebind(GrDirectContext *dContext) {
   glBindTexture(fTexTarget, fTexID);
   GLenum status = GL_NO_ERROR;
   if ((status = glGetError()) != GL_NO_ERROR) {
-    SkDebugf("glBindTexture(%#x, %d) failed (%#x)", static_cast<int>(fTexTarget),
-             static_cast<int>(fTexID), static_cast<int>(status));
+    SkDebugf("glBindTexture(%#x, %d) failed (%#x)",
+             static_cast<int>(fTexTarget), static_cast<int>(fTexID),
+             static_cast<int>(status));
     return;
   }
   glEGLImageTargetTexture2DOES(fTexTarget, fImage);
   if ((status = glGetError()) != GL_NO_ERROR) {
-    SkDebugf("glEGLImageTargetTexture2DOES failed (%#x)", static_cast<int>(status));
+    SkDebugf("glEGLImageTargetTexture2DOES failed (%#x)",
+             static_cast<int>(status));
     return;
   }
   dContext->resetContext(kTextureBinding_GrGLBackendState);
@@ -145,7 +147,8 @@ static GrBackendTexture make_gl_backend_texture(
       eglCreateImageKHR(display, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID,
                         clientBuffer, attribs);
   if (EGL_NO_IMAGE_KHR == image) {
-    SkDebugf("Could not create EGL image, err = (%#x)", static_cast<int>(eglGetError()));
+    SkDebugf("Could not create EGL image, err = (%#x)",
+             static_cast<int>(eglGetError()));
     return GrBackendTexture();
   }
 
@@ -168,7 +171,8 @@ static GrBackendTexture make_gl_backend_texture(
   }
   glEGLImageTargetTexture2DOES(target, image);
   if ((status = glGetError()) != GL_NO_ERROR) {
-    SkDebugf("glEGLImageTargetTexture2DOES failed (%#x)", static_cast<int>(status));
+    SkDebugf("glEGLImageTargetTexture2DOES failed (%#x)",
+             static_cast<int>(status));
     glDeleteTextures(1, &texID);
     eglDestroyImageKHR(display, image);
     return GrBackendTexture();
