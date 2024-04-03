@@ -204,18 +204,23 @@ public:
         runtime,
         [context = std::move(context), info,
          bounds](jsi::Runtime &runtime,
-                 std::shared_ptr<RNJsi::JsiPromises::Promise> promise) -> void {
+                 std::shared_ptr<RNJsi::JsiPromises::Promise> promise)  {
           context->runOnMainThread(
-              [&runtime, info, promise, context, bounds]() -> void {
+              [&runtime, info = std::move(info), promise = std::move(promise), context = std::move(context), bounds]() {
                 auto image = info->view->makeImageSnapshot(
                     bounds == nullptr ? nullptr : bounds.get());
-                if (image == nullptr) {
-                  promise->reject("Failed to make snapshot from view.");
-                  return;
-                }
-                promise->resolve(jsi::Object::createFromHostObject(
-                    runtime, std::make_shared<JsiSkImage>(std::move(context),
-                                                          std::move(image))));
+                 context->runOnJavascriptThread([&runtime,
+                                                context = std::move(context),
+                                                promise = std::move(promise),
+                                                image = std::move(image)]() {
+                  if (image == nullptr) {
+                    promise->reject("Failed to make snapshot from view.");
+                    return;
+                  }
+                  promise->resolve(jsi::Object::createFromHostObject(
+                      runtime, std::make_shared<JsiSkImage>(std::move(context),
+                                                            std::move(image))));
+                });
               });
         });
   }
