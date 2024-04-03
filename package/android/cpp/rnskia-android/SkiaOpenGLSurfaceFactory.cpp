@@ -20,10 +20,13 @@ SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(const SkImageInfo &info,
 #if __ANDROID_API__ >= 26
   const AHardwareBuffer *hardwareBuffer =
       static_cast<AHardwareBuffer *>(buffer);
+  DeleteImageProc deleteImageProc = nullptr;
+  UpdateImageProc updateImageProc = nullptr;
+  TexImageCtx deleteImageCtx = nullptr;
   auto backendTex = MakeGLBackendTexture(
       ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(),
       const_cast<AHardwareBuffer *>(hardwareBuffer), info.width(),
-      info.height(), nullptr, nullptr, nullptr, false,
+      info.height(), &deleteImageProc, &updateImageProc, &deleteImageCtx, false,
       // GR_GL_RGBA8 0x8058
       // GR_GL_TEXTURE_EXTERNAL 0x8D65
       GrBackendFormats::MakeGL(0x8058, 0x8D65), false);
