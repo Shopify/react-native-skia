@@ -194,7 +194,7 @@ export const drawOnNode = (element: ReactNode) => {
 export const mountCanvas = (element: ReactNode) => {
   const Skia = global.SkiaApi;
   expect(Skia).toBeDefined();
-  const ckSurface = Skia.Surface.Make(width, height)!;
+  const ckSurface = Skia.Surface.MakeOffscreen(width, height)!;
   expect(ckSurface).toBeDefined();
   const canvas = ckSurface.getCanvas();
 

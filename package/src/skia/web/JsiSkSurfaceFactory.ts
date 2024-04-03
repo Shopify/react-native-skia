@@ -39,7 +39,7 @@ export class JsiSkSurfaceFactory extends Host implements SurfaceFactory {
     const OC = (globalThis as any).OffscreenCanvas;
     let surface: Surface | null;
     if (OC === undefined) {
-      surface = this.CanvasKit.MakeSurface(width, height);
+      return this.Make(width, height);
     } else {
       const offscreen = new OC(width, height);
       const webglContext = this.CanvasKit.GetWebGLContext(offscreen);
