@@ -1,4 +1,8 @@
-import { useImage, useTypeface } from "@shopify/react-native-skia";
+import {
+  useImage,
+  useImageAsTexture,
+  useTypeface,
+} from "@shopify/react-native-skia";
 import { useCallback, useState } from "react";
 import { Platform } from "react-native";
 
@@ -19,7 +23,7 @@ export const useAssets = () => {
   const [error, setError] = useState<Error | null>(null);
   const errorHandler = useCallback((e: Error) => setError(e), []);
   const mask = useImage(require("./assets/mask.png"), errorHandler);
-  const oslo = useImage(require("./assets/oslo.jpg"), errorHandler);
+  const oslo = useImageAsTexture(require("./assets/oslo.jpg"));
   const skiaLogoJpeg = useImage(SkiaLogoJpeg, errorHandler);
   const skiaLogoPng = useImage(SkiaLogo, errorHandler);
   const RobotoMedium = useTypeface(
