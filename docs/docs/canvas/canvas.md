@@ -25,7 +25,10 @@ If the size of the Canvas is unknown, there are two ways to access it:
 
 ## Getting a Canvas Snapshot
 
-You can save your drawings as an image, using `makeImageSnapshot`. This method will return an [Image instance](/docs/images#instance-methods). This instance can be used to draw it via the `<Image>` component, or be saved or shared using binary or base64 encoding.
+You can save your drawings as an image by using the `makeImageSnapshotAsync` method. This method returns a promise that resolves to an [Image](/docs/images).
+It executes on the UI thread, ensuring access to the same Skia context as your on-screen canvases, including [textures](https://shopify.github.io/react-native-skia/docs/animations/textures).
+
+If your drawing does not contain textures, you may also use the synchronous `makeImageSnapshot` method for simplicity.
 
 ### Example
 
