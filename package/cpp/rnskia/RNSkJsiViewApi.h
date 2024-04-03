@@ -177,9 +177,52 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(makeImageSnapshotAsync) {
+    if (count < 1) {
+      _platformContext->raiseError(
+          std::string("makeImageSnapshot: Expected at least 1 argument, got " +
+                      std::to_string(count) + "."));
+      return jsi::Value::undefined();
+    }
+
+    if (!arguments[0].isNumber()) {
+      _platformContext->raiseError(
+          "makeImageSnapshot: First argument must be a number");
+      return jsi::Value::undefined();
+    }
+
+    // find Skia view
+    int nativeId = arguments[0].asNumber();
+    auto info = getEnsuredViewInfo(nativeId);
+    auto context = _platformContext;
+    auto bounds =
+        count > 1 && !arguments[1].isUndefined() && !arguments[1].isNull()
+            ? JsiSkRect::fromValue(runtime, arguments[1])
+            : nullptr;
+    return RNJsi::JsiPromises::createPromiseAsJSIValue(
+        runtime,
+        [context = std::move(context), info,
+         bounds](jsi::Runtime &runtime,
+                 std::shared_ptr<RNJsi::JsiPromises::Promise> promise) -> void {
+          context->runOnMainThread(
+              [&runtime, info, promise, context, bounds]() -> void {
+                auto image = info->view->makeImageSnapshot(
+                    bounds == nullptr ? nullptr : bounds.get());
+                if (image == nullptr) {
+                  promise->reject("Failed to make snapshot from view.");
+                  return;
+                }
+                promise->resolve(jsi::Object::createFromHostObject(
+                    runtime, std::make_shared<JsiSkImage>(std::move(context),
+                                                          std::move(image))));
+              });
+        });
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setJsiProperty),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, callJsiMethod),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, requestRedraw),
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshotAsync),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshot))
 
   /**

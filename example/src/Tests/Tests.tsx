@@ -72,15 +72,24 @@ export const Tests = ({ assets }: TestsProps) => {
   useEffect(() => {
     if (drawing) {
       const it = setTimeout(() => {
-        const image = ref.current?.makeImageSnapshot({
-          x: 0,
-          y: 0,
-          width: size,
-          height: size,
-        });
-        if (image && client) {
-          const data = image.encodeToBytes();
-          client.send(data);
+        if (ref.current) {
+          ref.current
+            .makeImageSnapshotAsync({
+              x: 0,
+              y: 0,
+              width: size,
+              height: size,
+            })
+            .then((image) => {
+              console.log({ image });
+              if (image && client) {
+                const data = image.encodeToBytes();
+                client.send(data);
+              }
+            })
+            .catch((e) => {
+              console.error(e);
+            });
         }
       }, timeToDraw);
       return () => {
