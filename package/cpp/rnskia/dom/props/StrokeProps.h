@@ -8,7 +8,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkPaint.h"
+#include "include/core/SkPaint.h"
 
 #pragma clang diagnostic pop
 

@@ -5,13 +5,13 @@
 
 #include <jsi/jsi.h>
 
-#include <JsiSkParagraphBuilder.h>
-#include <JsiSkParagraphStyle.h>
+#include "JsiSkParagraphBuilder.h"
+#include "JsiSkParagraphStyle.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "ParagraphBuilder.h"
+#include "modules/skparagraph/include/ParagraphBuilder.h"
 
 #pragma clang diagnostic pop
 

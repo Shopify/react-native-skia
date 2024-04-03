@@ -15,13 +15,16 @@ You will notice in the example below that the import URL looks different than th
 
 ```tsx
 import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/commonjs/web/LoadSkiaWeb";
-import { Fill, makeOffscreenSurface, drawOffscreen } from "@shopify/react-native-skia/lib/commonjs/headless";
+import { Fill, makeOffscreenSurface, drawOffscreen, getSkiaExports } from "@shopify/react-native-skia/lib/commonjs/headless";
 
 (async () => {
   const width = 256;
   const height = 256;
   const r = size * 0.33;
   await LoadSkiaWeb();
+  // Once that CanvasKit is loaded, you can access Skia via getSkiaExports()
+  // Alternatively you can do const {Skia} = require("@shopify/react-native-skia")
+  const {Skia} = getSkiaExports();
   const surface = makeOffscreenSurface(width, height);
   const image = drawOffscreen(surface,
     <Group blendMode="multiply">

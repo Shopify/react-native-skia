@@ -11,7 +11,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkMaskFilter.h"
+#include "include/core/SkMaskFilter.h"
 
 #pragma clang diagnostic pop
 
