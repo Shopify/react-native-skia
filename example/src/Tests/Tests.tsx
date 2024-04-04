@@ -38,7 +38,6 @@ export const Tests = ({ assets }: TestsProps) => {
       client.onmessage = (e) => {
         const tree: any = JSON.parse(e.data);
         if (tree.code) {
-          console.log(tree.code);
           client.send(
             JSON.stringify(
               eval(
