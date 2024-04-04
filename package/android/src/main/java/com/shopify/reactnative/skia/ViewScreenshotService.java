@@ -17,7 +17,9 @@ import android.view.ViewGroup;
 import android.widget.ScrollView;
 import androidx.annotation.NonNull;
 import com.facebook.react.bridge.ReactContext;
-import com.facebook.react.uimanager.UIManagerModule;
+import com.facebook.react.bridge.UIManager;
+import com.facebook.react.uimanager.UIManagerHelper;
+import com.facebook.react.uimanager.common.UIManagerType;
 import com.facebook.react.views.view.ReactViewGroup;
 
 import java.lang.reflect.Method;
@@ -29,7 +31,7 @@ public class ViewScreenshotService {
     private static final String TAG = "SkiaScreenshot";
 
     public static Bitmap makeViewScreenshotFromTag(ReactContext context, int tag) {
-        UIManagerModule uiManager = context.getNativeModule(UIManagerModule.class);
+        UIManager uiManager = UIManagerHelper.getUIManager(context, BuildConfig.IS_NEW_ARCHITECTURE_ENABLED ?  UIManagerType.FABRIC : UIManagerType.DEFAULT);
         View view = null;
         try {
             view = uiManager.resolveView(tag);

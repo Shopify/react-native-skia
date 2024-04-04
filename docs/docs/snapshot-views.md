@@ -9,12 +9,6 @@ slug: /snapshotviews
 
 The function `makeImageFromView` lets you take a snapshot of another React Native View as a Skia SkImage. The function accepts a ref to a native view and returns a promise that resolves to an `SkImage` instance upon success.
 
-::::info
-
-`makeImageFromView` is not supported on Fabric yet ([see #2002](https://github.com/Shopify/react-native-skia/issues/2002)).
-
-::::info
-
 
 On Android, it is safer to use `collapsable=false` on the root view of the snapshot to prevent the root view from being removed by React Native.
 If the view is optimized away, `makeImageFromView` will crash.
