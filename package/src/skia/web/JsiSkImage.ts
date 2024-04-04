@@ -168,8 +168,6 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     if (!img) {
       throw new Error("Could not create image from bytes");
     }
-    this.ref.delete();
-    this.ref = img;
-    return this;
+    return new JsiSkImage(this.CanvasKit, img);
   }
 }
