@@ -45,11 +45,7 @@ export const toBase64String = (bytes: Uint8Array) => {
 };
 
 export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
-  constructor(
-    CanvasKit: CanvasKit,
-    ref: Image,
-    private releaseCtx?: () => void
-  ) {
+  constructor(CanvasKit: CanvasKit, ref: Image) {
     super(CanvasKit, ref, "Image");
   }
 
@@ -154,37 +150,26 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
 
   dispose = () => {
     this.ref.delete();
-    if (this.releaseCtx) {
-      this.releaseCtx();
-    }
   };
 
   makeNonTextureImage(): SkImage {
+    // if the image is already a non-texture image, this is a no-op
     const partialInfo = this.ref.getImageInfo();
     const colorSpace = this.ref.getColorSpace();
     const info = {
       ...partialInfo,
       colorSpace,
     };
-
-    var pixelLen = info.width * info.height * 4;
-    const pixelPtr = this.CanvasKit.Malloc(Uint8Array, pixelLen);
-    const pixels = this.ref.readPixels(
-      0,
-      0,
-      info,
-      pixelPtr,
-      info.width * 4
-    ) as Uint8Array | null;
+    const pixels = this.ref.readPixels(0, 0, info) as Uint8Array | null;
     if (!pixels) {
-      throw new Error("Could not create image from bytes");
+      throw new Error("Could not read pixels from image");
     }
     const img = this.CanvasKit.MakeImage(info, pixels, info.width * 4);
     if (!img) {
       throw new Error("Could not create image from bytes");
     }
-    return new JsiSkImage(this.CanvasKit, img, () => {
-      this.CanvasKit.Free(pixelPtr);
-    });
+    this.ref.delete();
+    this.ref = img;
+    return this;
   }
 }
