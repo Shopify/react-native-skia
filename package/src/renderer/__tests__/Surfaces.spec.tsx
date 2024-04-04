@@ -17,7 +17,8 @@ describe("Surface", () => {
       canvas.clear(Skia.Color("cyan"));
       surface.flush();
       const image = surface.makeImageSnapshot();
-      image.makeNonTextureImage();
+      const nonTextureImage = image.makeNonTextureImage();
+      expect(nonTextureImage).toBe(image);
       image.dispose();
       surface.dispose();
     }
