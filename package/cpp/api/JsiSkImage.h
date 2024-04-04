@@ -182,8 +182,10 @@ public:
 
   JSI_HOST_FUNCTION(makeNonTextureImage) {
     auto image = getObject()->makeNonTextureImage();
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+    if (image == nullptr) {
+      throw jsi::JSError(runtime, "makeNonTextureImage() failed");
+    }
+    return thisValue.getObject(runtime);
   }
 
   EXPORT_JSI_API_TYPENAME(JsiSkImage, Image)

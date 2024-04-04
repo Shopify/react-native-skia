@@ -6,6 +6,35 @@ import { Fill, Image as SkiaImage } from "../../components";
 import { AlphaType, ColorType } from "../../../skia/types";
 
 describe("Image loading from bundles", () => {
+  it("makeNonTextureImage returns the reference to the same image", async () => {
+    const result = await surface.eval(
+      (Skia, ctx) => {
+        const { alphaType, colorType } = ctx;
+        const pixels = new Uint8Array(256 * 256 * 4);
+        pixels.fill(255);
+        let i = 0;
+        for (let x = 0; x < 256 * 4; x++) {
+          for (let y = 0; y < 256 * 4; y++) {
+            pixels[i++] = (x * y) % 255;
+          }
+        }
+        const data = Skia.Data.fromBytes(pixels);
+        const img = Skia.Image.MakeImage(
+          {
+            width: 256,
+            height: 256,
+            alphaType,
+            colorType,
+          },
+          data,
+          256 * 4
+        )!;
+        return img === img.makeNonTextureImage();
+      },
+      { alphaType: AlphaType.Opaque, colorType: ColorType.RGBA_8888 }
+    );
+    expect(result).toBe(true);
+  });
   it("should render png, jpg from bundle", async () => {
     const { width } = surface;
     const size = width * 0.45;
