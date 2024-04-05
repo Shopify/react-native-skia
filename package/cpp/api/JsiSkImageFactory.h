@@ -28,7 +28,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(MakeImageFromPlatformBuffer) {
-    auto platformBufferPointer = static_cast<intptr_t>(arguments[0].asNumber());
+    jsi::BigInt pointer = arguments[0].asBigInt(runtime);
+    const uintptr_t platformBufferPointer = pointer.asUint64(runtime);
     auto image = getContext()->makeImageFromPlatformBuffer(
         (void *)platformBufferPointer);
     return jsi::Object::createFromHostObject(
