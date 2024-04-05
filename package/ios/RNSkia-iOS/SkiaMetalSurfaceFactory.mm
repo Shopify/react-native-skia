@@ -141,6 +141,10 @@ sk_sp<SkImage> SkiaMetalSurfaceFactory::makeImageFromCMSampleBuffer(
     return nullptr;
   }
 
+  if (!CMSampleBufferIsValid(sampleBuffer)) {
+    throw std::runtime_error("The given CMSampleBuffer is not valid!");
+  }
+
   CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
   double width = CVPixelBufferGetWidth(pixelBuffer);
   double height = CVPixelBufferGetHeight(pixelBuffer);
