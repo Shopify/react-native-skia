@@ -48,6 +48,10 @@ public:
     return SkiaOpenGLSurfaceFactory::makeOffscreenSurface(width, height);
   }
 
+  sk_sp<SkSurface> makeImageFromPlatformBuffer(void *buffer) override {
+    return SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(buffer);
+  }
+
   sk_sp<SkFontMgr> createFontMgr() override {
     return SkFontMgr_New_Android(nullptr);
   }

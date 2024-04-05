@@ -70,6 +70,19 @@ export interface ImageFactory {
   MakeImageFromEncoded: (encoded: SkData) => SkImage | null;
 
   /**
+   * Return an Image backed by the given native platform buffer.
+   * The platform buffer must be a valid owning reference.
+   *
+   * This API is used by [react-native-vision-camera](https://github.com/mrousavy/react-native-vision-camera)
+   * to render a Skia Camera preview.
+   *
+   * - On Android; This is an `AHardwareBuffer*`
+   * - On iOS, this is a `CMSampleBufferRef`
+   * @param platformBuffer A strong reference to the native platform buffer
+   */
+  MakeImageFromPlatformBuffer: (platformBuffer: number) => SkImage | null
+
+  /**
    * Returns an image that will be a screenshot of the view represented by
    * the view tag
    * @param viewTag - The tag of the view to make an image from.

@@ -134,6 +134,15 @@ public:
   virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) = 0;
 
   /**
+   * Creates an image from a native platform buffer.
+   * - On iOS, this is a `CMSampleBuffer`
+   * - On Android, this is a `AHardwareBuffer*`
+   * @param buffer The native platform buffer.
+   * @return sk_sp<SkImage>
+   */
+  virtual sk_sp<SkImage> makeImageFromPlatformBuffer(void *buffer);
+
+  /**
    * Return the Platform specific font manager
    */
   virtual sk_sp<SkFontMgr> createFontMgr() = 0;

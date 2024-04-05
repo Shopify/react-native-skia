@@ -4,6 +4,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #import "include/core/SkCanvas.h"
+#import <CoreMedia/CMSampleBuffer.h>
 #import <include/gpu/GrDirectContext.h>
 
 #pragma clang diagnostic pop
@@ -23,6 +24,9 @@ public:
   static sk_sp<SkSurface> makeWindowedSurface(id<MTLTexture> texture, int width,
                                               int height);
   static sk_sp<SkSurface> makeOffscreenSurface(int width, int height);
+
+  static sk_sp<SkImage>
+  makeImageFromCMSampleBuffer(CMSampleBufferRef sampleBuffer);
 
 private:
   static id<MTLDevice> device;

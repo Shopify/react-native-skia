@@ -1,5 +1,6 @@
 #include "RNSkiOSPlatformContext.h"
 
+#import <CoreMedia/CMSampleBuffer.h>
 #import <React/RCTUtils.h>
 #include <thread>
 #include <utility>
@@ -63,6 +64,12 @@ void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
 sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
                                                               int height) {
   return SkiaMetalSurfaceFactory::makeOffscreenSurface(width, height);
+}
+
+sk_sp<SkImage>
+RNSkiOSPlatformContext::makeImageFromPlatformBuffer(void *buffer) {
+  CMSampleBufferRef sampleBuffer = (CMSampleBufferRef)buffer;
+  return SkiaMetalSurfaceFactory::makeImageFromCMSampleBuffer(sampleBuffer);
 }
 
 sk_sp<SkFontMgr> RNSkiOSPlatformContext::createFontMgr() {

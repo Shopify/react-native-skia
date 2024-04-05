@@ -11,9 +11,25 @@
 
 #import <include/gpu/GrBackendSurface.h>
 #import <include/gpu/GrDirectContext.h>
+#import <include/gpu/ganesh/SkImageGanesh.h>
 #import <include/gpu/ganesh/SkSurfaceGanesh.h>
 
 #pragma clang diagnostic pop
+
+#include <TargetConditionals.h>
+#if TARGET_RT_BIG_ENDIAN
+#define FourCC2Str(fourcc)                                                     \
+  (const char[]) {                                                             \
+    *((char *)&fourcc), *(((char *)&fourcc) + 1), *(((char *)&fourcc) + 2),    \
+        *(((char *)&fourcc) + 3), 0                                            \
+  }
+#else
+#define FourCC2Str(fourcc)                                                     \
+  (const char[]) {                                                             \
+    *(((char *)&fourcc) + 3), *(((char *)&fourcc) + 2),                        \
+        *(((char *)&fourcc) + 1), *(((char *)&fourcc) + 0), 0                  \
+  }
+#endif
 
 thread_local SkiaMetalContext ThreadContextHolder::ThreadSkiaMetalContext;
 
@@ -102,4 +118,73 @@ sk_sp<SkSurface> SkiaMetalSurfaceFactory::makeOffscreenSurface(int width,
       [](void *addr) { delete (OffscreenRenderContext *)addr; }, ctx);
 
   return surface;
+}
+
+inline CVMetalTextureCacheRef getTextureCache() {
+  static CVMetalTextureCacheRef textureCache = nil;
+  if (textureCache == nil) {
+    // Create a new Texture Cache
+    auto result = CVMetalTextureCacheCreate(kCFAllocatorDefault, nil,
+                                            MTLCreateSystemDefaultDevice(), nil,
+                                            &textureCache);
+    if (result != kCVReturnSuccess || textureCache == nil) {
+      throw std::runtime_error("Failed to create Metal Texture Cache!");
+    }
+  }
+  return textureCache;
+}
+
+sk_sp<SkImage> SkiaMetalSurfaceFactory::makeImageFromCMSampleBuffer(
+    CMSampleBufferRef sampleBuffer) {
+  if (!SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
+          &ThreadContextHolder::ThreadSkiaMetalContext)) {
+    return nullptr;
+  }
+
+  CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+  double width = CVPixelBufferGetWidth(pixelBuffer);
+  double height = CVPixelBufferGetHeight(pixelBuffer);
+
+  // Make sure the format is RGB (BGRA_8888)
+  OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
+  if (format != kCVPixelFormatType_32BGRA) {
+    // TODO: Also support YUV (kCVPixelFormatType_420YpCbCr8Planar) as that is
+    // much more efficient!
+    auto error = std::string("CMSampleBuffer has unknown Pixel Format (") +
+                 FourCC2Str(format) +
+                 std::string(") - cannot convert to SkImage!");
+    throw std::runtime_error(error);
+  }
+
+  CVMetalTextureCacheRef textureCache = getTextureCache();
+
+  // Convert CMSampleBuffer* -> CVMetalTexture*
+  CVMetalTextureRef cvTexture;
+  CVMetalTextureCacheCreateTextureFromImage(
+      kCFAllocatorDefault, textureCache, pixelBuffer, nil,
+      MTLPixelFormatBGRA8Unorm, width, height,
+      0, // plane index
+      &cvTexture);
+  id<MTLTexture> mtlTexture = CVMetalTextureGetTexture(cvTexture);
+  if (mtlTexture == nil) {
+    throw std::runtime_error(
+        "Failed to convert CMSampleBuffer to SkImage - cannot get MTLTexture!");
+  }
+
+  // Convert the rendered MTLTexture to an SkImage
+  GrMtlTextureInfo textureInfo;
+  textureInfo.fTexture.retain((__bridge void *)mtlTexture);
+  GrBackendTexture backendTexture((int)mtlTexture.width, (int)mtlTexture.height,
+                                  skgpu::Mipmapped::kNo, textureInfo);
+
+  auto context = ThreadContextHolder::ThreadSkiaMetalContext.skContext;
+  // TODO: Adopt or Borrow?
+  auto image = SkImages::AdoptTextureFrom(
+      context.get(), backendTexture, kTopLeft_GrSurfaceOrigin,
+      kBGRA_8888_SkColorType, kOpaque_SkAlphaType, SkColorSpace::MakeSRGB());
+
+  // Release the Texture wrapper (it will still be strong)
+  CFRelease(cvTexture);
+
+  return image;
 }
