@@ -7,6 +7,7 @@ import {
   Text,
   useWindowDimensions,
   ScrollView,
+  Platform,
 } from "react-native";
 import { Canvas, RoundedRect, Image, Skia } from "@shopify/react-native-skia";
 import { Switch } from "react-native-gesture-handler";
@@ -55,7 +56,9 @@ const Component = () => {
           }}
         />
       </View>
-      <Text style={{ color: "#757500" }}>Hello World!</Text>
+      <Text style={{ color: Platform.select({ android: "#757500" }) }}>
+        Hello World!
+      </Text>
       <View style={{ flexDirection: "row" }}>
         <View
           style={{
