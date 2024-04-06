@@ -125,6 +125,7 @@ export const Tests = ({ assets }: TestsProps) => {
       <View
         style={{ width: size, height: size }}
         ref={viewRef}
+        collapsable={false}
       >
         {screen}
       </View>
