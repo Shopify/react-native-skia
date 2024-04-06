@@ -140,7 +140,7 @@ public:
    * @param buffer The native platform buffer.
    * @return sk_sp<SkImage>
    */
-  virtual sk_sp<SkImage> makeImageFromPlatformBuffer(void *buffer);
+  virtual sk_sp<SkImage> makeImageFromPlatformBuffer(void *buffer) = 0;
 
   /**
    * Return the Platform specific font manager
