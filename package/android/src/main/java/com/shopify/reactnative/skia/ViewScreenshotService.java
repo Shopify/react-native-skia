@@ -19,7 +19,6 @@ import androidx.annotation.NonNull;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.UIManager;
 import com.facebook.react.uimanager.UIManagerHelper;
-import com.facebook.react.uimanager.common.UIManagerType;
 import com.facebook.react.views.view.ReactViewGroup;
 
 import java.lang.reflect.Method;

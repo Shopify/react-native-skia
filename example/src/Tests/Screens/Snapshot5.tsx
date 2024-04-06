@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 export const Snapshot5 = () => {
@@ -12,12 +12,14 @@ export const Snapshot5 = () => {
 };
 
 const Component = () => {
+  const [, setRender] = useState(0);
   return (
     <>
       <ScrollView
         style={styles.scrollview}
         ref={(ref) => {
           ref?.scrollTo({ y: 200 });
+          setRender((p) => p + 1);
         }}
       >
         <View style={[styles.verticalBox, { backgroundColor: "cyan" }]} />
@@ -30,6 +32,7 @@ const Component = () => {
         horizontal
         ref={(ref) => {
           ref?.scrollTo({ x: 200 });
+          setRender((p) => p + 1);
         }}
       >
         <View style={[styles.horizontalBox, { backgroundColor: "cyan" }]} />
