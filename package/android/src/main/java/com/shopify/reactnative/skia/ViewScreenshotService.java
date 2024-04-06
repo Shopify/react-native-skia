@@ -31,7 +31,7 @@ public class ViewScreenshotService {
     private static final String TAG = "SkiaScreenshot";
 
     public static Bitmap makeViewScreenshotFromTag(ReactContext context, int tag) {
-        UIManager uiManager = UIManagerHelper.getUIManager(context, BuildConfig.IS_NEW_ARCHITECTURE_ENABLED ?  UIManagerType.FABRIC : UIManagerType.DEFAULT);
+        UIManager uiManager = UIManagerHelper.getUIManagerForReactTag(context, tag);
         View view = null;
         try {
             view = uiManager.resolveView(tag);

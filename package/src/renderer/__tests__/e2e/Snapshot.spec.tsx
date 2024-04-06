@@ -2,10 +2,8 @@ import { CI, checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
 import { surface } from "../setup";
 
 const testSnapshot = async (name: string) => {
-  if (surface.arch === "paper") {
-    const img = await surface.screen(name);
-    checkImage(img, output(name.toLowerCase()));
-  }
+  const img = await surface.screen(name);
+  checkImage(img, output(name.toLowerCase()));
 };
 
 const output = (name: string) =>

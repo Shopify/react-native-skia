@@ -55,7 +55,7 @@ const Component = () => {
           }}
         />
       </View>
-      <Text>Hello World!</Text>
+      <Text style={{ color: "#757500" }}>Hello World!</Text>
       <View style={{ flexDirection: "row" }}>
         <View
           style={{
