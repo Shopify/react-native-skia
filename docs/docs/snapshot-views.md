@@ -9,9 +9,14 @@ slug: /snapshotviews
 
 The function `makeImageFromView` lets you take a snapshot of another React Native View as a Skia SkImage. The function accepts a ref to a native view and returns a promise that resolves to an `SkImage` instance upon success.
 
+::::info
 
-On Android, it is safer to use `collapsable=false` on the root view of the snapshot to prevent the root view from being removed by React Native.
-If the view is optimized away, `makeImageFromView` will crash.
+It is safer to use `collapsable=false` on the root view of the snapshot to prevent the root view from being removed by React Native.
+If the view is optimized away, `makeImageFromView` will crash or return the wrong result.
+
+::::info
+
+
 
 ```tsx twoslash
 import { useState, useRef } from "react";
@@ -35,7 +40,11 @@ const Demo = () => {
   return (
     <View style={{ flex: 1 }}>
       <Pressable onPress={onPress}>
-        <View ref={ref} collapsable={false} style={{ backgroundColor: "cyan", flex: 1 }}>
+        <View
+          ref={ref}
+          // collapsable={false} is important here
+          collapsable={false}
+          style={{ backgroundColor: "cyan", flex: 1 }}>
           <Text>This is a React Native View</Text>
         </View>
       </Pressable>

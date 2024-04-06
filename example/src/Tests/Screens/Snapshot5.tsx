@@ -12,7 +12,8 @@ export const Snapshot5 = () => {
 };
 
 const Component = () => {
-  const [, setRender] = useState(0);
+  const [r, setRender] = useState(0);
+  console.log({ r });
   return (
     <>
       <ScrollView
