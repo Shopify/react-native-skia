@@ -47,7 +47,7 @@ export const makeImageFromView = <
       );
     }
   }
-  viewRef.current.setNativeProps({ collapsable: true });
+  viewRef.current.setNativeProps({ collapsable: false });
   const viewTag = Platform.findNodeHandle(viewRef.current);
   if (viewTag !== null && viewTag !== 0) {
     return Skia.Image.MakeImageFromViewTag(viewTag);
