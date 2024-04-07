@@ -1,9 +1,9 @@
 import { CI, checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
 import { surface } from "../setup";
 
-const testSnapshot = async (name: string) => {
+const testSnapshot = async (name: string, maxPixelDiff = 200) => {
   const img = await surface.screen(name);
-  checkImage(img, output(name.toLowerCase()));
+  checkImage(img, output(name.toLowerCase()), { maxPixelDiff });
 };
 
 const output = (name: string) =>
@@ -14,7 +14,8 @@ describe("Snapshot", () => {
     await testSnapshot("Snapshot1");
   });
   itRunsE2eOnly("should capture a somewhat complex snapshot", async () => {
-    await testSnapshot("Snapshot2");
+    // text spacing on the fabric example app is slightly different
+    await testSnapshot("Snapshot2", 1000);
   });
   itRunsE2eOnly("should respect overflow: hidden", async () => {
     await testSnapshot("Snapshot3");
