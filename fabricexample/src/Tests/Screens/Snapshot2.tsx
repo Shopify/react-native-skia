@@ -99,7 +99,9 @@ const Component = () => {
       <Canvas style={{ width: 100, height: 100 }}>
         <RoundedRect x={0} y={20} width={80} height={80} r={10} color="blue" />
       </Canvas>
-      <Text>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;👆 This is a Skia Canvas!</Text>
+      <Text style={{ color: Platform.select({ android: "#757500" }) }}>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;👆 This is a Skia Canvas!
+      </Text>
       <Interleaving />
     </ScrollView>
   );
