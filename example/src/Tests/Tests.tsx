@@ -8,7 +8,7 @@ import {
   Skia,
 } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
-import { PixelRatio, Platform, Text, View } from "react-native";
+import { PixelRatio, Text, View } from "react-native";
 
 import type { SerializedNode } from "./deserialize";
 import { parseNode, parseProps } from "./deserialize";
@@ -19,9 +19,7 @@ export const CI = process.env.CI === "true";
 const s = 3;
 const scale = s / PixelRatio.get();
 const size = 256 * scale;
-// Maximum time to draw: 250 on iOS, 500ms on Android, 1000ms on CI
-// eslint-disable-next-line no-nested-ternary
-const timeToDraw = CI ? 1500 : Platform.OS === "ios" ? 250 : 500;
+const timeToDraw = CI ? 1500 : 500;
 
 interface TestsProps {
   assets: { [key: string]: any };

@@ -983,7 +983,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-skia (1.0.2):
+  - react-native-skia (0.0.0):
     - hermes-engine
     - RCT-Folly (= 2021.07.22.00)
     - RCTRequired
@@ -1458,7 +1458,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 194e32c6aab382d88713ad3dd0025c5f5c4ee072
   React-logger: cebf22b6cf43434e471dc561e5911b40ac01d289
   react-native-safe-area-context: 2364c50b45e31a9bd7a7f0b6fc8f529f1dd8aa05
-  react-native-skia: a1e4a93c6216f7723cde7a5828739cbed1bda028
+  react-native-skia: edb65677e8c38621739d94aea8bb115e1fc4a410
   React-NativeModulesApple: 02e35e9a51e10c6422f04f5e4076a7c02243fff2
   React-perflogger: e3596db7e753f51766bceadc061936ef1472edc3
   React-RCTActionSheet: 17ab132c748b4471012abbcdcf5befe860660485
@@ -1487,4 +1487,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 11b69dd0fc6c98debdc2159576715a8d04f1a6a3
 
-COCOAPODS: 1.14.3
+COCOAPODS: 1.15.2
