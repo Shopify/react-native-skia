@@ -23,6 +23,14 @@ export class JsiSkSurface
     this.ref.flush();
   }
 
+  width(): number {
+    return this.ref.width()
+  }
+
+  height(): number {
+    return this.ref.width()
+  }
+
   getCanvas(): SkCanvas {
     return new JsiSkCanvas(this.CanvasKit, this.ref.getCanvas());
   }
