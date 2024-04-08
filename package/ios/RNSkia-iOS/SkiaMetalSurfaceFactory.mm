@@ -120,16 +120,23 @@ sk_sp<SkSurface> SkiaMetalSurfaceFactory::makeOffscreenSurface(int width,
   return surface;
 }
 
-inline CVMetalTextureCacheRef getTextureCache() {
+CVMetalTextureCacheRef SkiaMetalSurfaceFactory::getTextureCache() {
   static thread_local CVMetalTextureCacheRef textureCache = nil;
+  static thread_local size_t accessCounter = 0;
   if (textureCache == nil) {
     // Create a new Texture Cache
-    auto result = CVMetalTextureCacheCreate(kCFAllocatorDefault, nil,
-                                            MTLCreateSystemDefaultDevice(), nil,
-                                            &textureCache);
+    auto result = CVMetalTextureCacheCreate(kCFAllocatorDefault, nil, device,
+                                            nil, &textureCache);
     if (result != kCVReturnSuccess || textureCache == nil) {
       throw std::runtime_error("Failed to create Metal Texture Cache!");
     }
+  }
+  accessCounter++;
+  if (accessCounter > 5) {
+    // Every 5 accesses, we perform some internal recycling/housekeeping
+    // operations.
+    CVMetalTextureCacheFlush(textureCache, 0);
+    accessCounter = 0;
   }
   return textureCache;
 }

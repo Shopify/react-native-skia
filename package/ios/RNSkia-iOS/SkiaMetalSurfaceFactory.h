@@ -5,6 +5,7 @@
 
 #import "include/core/SkCanvas.h"
 #import <CoreMedia/CMSampleBuffer.h>
+#import <CoreVideo/CVMetalTextureCache.h>
 #import <include/gpu/GrDirectContext.h>
 
 #pragma clang diagnostic pop
@@ -32,4 +33,5 @@ private:
   static id<MTLDevice> device;
   static bool
   createSkiaDirectContextIfNecessary(SkiaMetalContext *threadContext);
+  static CVMetalTextureCacheRef getTextureCache();
 };
