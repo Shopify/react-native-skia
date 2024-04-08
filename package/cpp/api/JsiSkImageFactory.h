@@ -32,6 +32,9 @@ public:
     const uintptr_t platformBufferPointer = pointer.asUint64(runtime);
     auto image = getContext()->makeImageFromPlatformBuffer(
         (void *)platformBufferPointer);
+    if (image == nullptr) {
+      throw std::runtime_error("Failed to convert PlatformBuffer to SkImage!");
+    }
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }

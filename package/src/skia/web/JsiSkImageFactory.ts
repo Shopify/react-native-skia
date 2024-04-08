@@ -19,7 +19,7 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
     return Promise.resolve(null);
   }
 
-  MakeImageFromPlatformBuffer(platformBuffer: number): SkImage | null {
+  MakeImageFromPlatformBuffer(platformBuffer: bigint): SkImage {
     throw new Error(`MakeImageFromPlatformBuffer(${platformBuffer}) is only available on iOS and Android!`)
   }
 
