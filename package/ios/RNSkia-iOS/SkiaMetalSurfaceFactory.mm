@@ -138,7 +138,7 @@ sk_sp<SkImage> SkiaMetalSurfaceFactory::makeImageFromCMSampleBuffer(
     CMSampleBufferRef sampleBuffer) {
   if (!SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
           &ThreadContextHolder::ThreadSkiaMetalContext)) {
-    return nullptr;
+    throw std::runtime_error("Failed to create Skia Context for this Thread!");
   }
 
   if (!CMSampleBufferIsValid(sampleBuffer)) {

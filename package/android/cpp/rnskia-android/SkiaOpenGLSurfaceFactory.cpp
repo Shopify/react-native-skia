@@ -44,9 +44,9 @@ SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer) {
       kOpaque_SkAlphaType, nullptr);
   return image;
 #else
-  RNSkLogger::logToConsole(
-      "Hardware buffer in only supported on Android API level 26 and above.");
-  return nullptr;
+  throw std::runtime_error(
+      "HardwareBuffers are only supported on Android API 26 or higher! Set "
+      "your minSdk to 26 (or higher) and try again.");
 #endif
 }
 

@@ -79,8 +79,10 @@ export interface ImageFactory {
    * - On Android; This is an `AHardwareBuffer*`
    * - On iOS, this is a `CMSampleBufferRef`
    * @param platformBuffer A strong `uintptr_t` pointer to the native platform buffer
+   * @throws Throws an error if the Image could not be created, for example when the given
+   * platform buffer is invalid.
    */
-  MakeImageFromPlatformBuffer: (platformBuffer: bigint) => SkImage | null
+  MakeImageFromPlatformBuffer: (platformBuffer: bigint) => SkImage
 
   /**
    * Returns an image that will be a screenshot of the view represented by
