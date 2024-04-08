@@ -178,7 +178,7 @@ sk_sp<SkImage> SkiaMetalSurfaceFactory::makeImageFromCMSampleBuffer(
       &cvTexture);
   if (result != kCVReturnSuccess) {
     throw std::runtime_error(
-        "Failed to craete Metal Texture from CMSampleBuffer! Result: " +
+        "Failed to create Metal Texture from CMSampleBuffer! Result: " +
         std::to_string(result));
   }
 
