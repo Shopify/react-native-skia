@@ -7,6 +7,7 @@
 
 #include "include/gpu/ganesh/SkImageGanesh.h"
 #include "include/gpu/ganesh/gl/GrGLBackendSurface.h"
+#include "src/gpu/ganesh/gl/GrGLDefines.h"
 
 #pragma clang diagnostic pop
 
