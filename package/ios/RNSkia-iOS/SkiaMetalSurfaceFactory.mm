@@ -121,7 +121,7 @@ sk_sp<SkSurface> SkiaMetalSurfaceFactory::makeOffscreenSurface(int width,
 }
 
 inline CVMetalTextureCacheRef getTextureCache() {
-  static CVMetalTextureCacheRef textureCache = nil;
+  static thread_local CVMetalTextureCacheRef textureCache = nil;
   if (textureCache == nil) {
     // Create a new Texture Cache
     auto result = CVMetalTextureCacheCreate(kCFAllocatorDefault, nil,
