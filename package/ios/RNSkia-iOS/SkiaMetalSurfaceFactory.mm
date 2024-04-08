@@ -164,11 +164,17 @@ sk_sp<SkImage> SkiaMetalSurfaceFactory::makeImageFromCMSampleBuffer(
 
   // Convert CMSampleBuffer* -> CVMetalTexture*
   CVMetalTextureRef cvTexture;
-  CVMetalTextureCacheCreateTextureFromImage(
+  CVReturn result = CVMetalTextureCacheCreateTextureFromImage(
       kCFAllocatorDefault, textureCache, pixelBuffer, nil,
       MTLPixelFormatBGRA8Unorm, width, height,
       0, // plane index
       &cvTexture);
+  if (result != kCVReturnSuccess) {
+    throw std::runtime_error(
+        "Failed to craete Metal Texture from CMSampleBuffer! Result: " +
+        std::to_string(result));
+  }
+
   id<MTLTexture> mtlTexture = CVMetalTextureGetTexture(cvTexture);
   if (mtlTexture == nil) {
     throw std::runtime_error(
