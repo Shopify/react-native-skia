@@ -10,8 +10,10 @@
     "@types/node": "16.11.7",
     "clang-format": "1.6.0",
     "rimraf": "3.0.2",
+    "shelljs": "^0.8.5",
     "ts-node": "10.4.0",
-    "typescript": "5.3.3"
+    "typescript": "5.3.3",
+    "yargs": "^17.7.2"
   },
   "scripts": {
     "build-skia-ios-framework": "ts-node ./scripts/build-skia-ios-framework.ts",
@@ -22,11 +24,7 @@
     "copy-skia-include-headers": "yarn rimraf ./package/cpp/skia/include/ && cp -a ./externals/skia/include/. ./package/cpp/skia/include",
     "copy-skia-module-headers": "ts-node ./scripts/copy-skia-module-headers.ts",
     "copy-skia-headers": "yarn copy-skia-include-headers && yarn copy-skia-module-headers",
-    "get-filename-npm": "yarn ts-node ./scripts/get-npm-filename.ts",
-    "get-version-npm": "yarn ts-node ./scripts/get-npm-version.ts",
     "build": "yarn build-skia && yarn copy-skia-headers",
-    "precommit": "yarn lint-java && yarn clang-format",
-    "lint-java": "node ./scripts/lint-java.js",
     "clang-format": "yarn clang-format-ios && yarn clang-format-android && yarn clang-format-common",
     "clang-format-ios": "find package/ios/ -iname *.h -o -iname *.mm -o -iname *.cpp | xargs clang-format -i",
     "clang-format-android": "find package/android/cpp/ -iname *.h -o -iname *.m -o -iname *.cpp | xargs clang-format -i",
