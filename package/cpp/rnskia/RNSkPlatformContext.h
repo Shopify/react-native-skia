@@ -142,7 +142,9 @@ public:
    */
   virtual sk_sp<SkImage> makeImageFromPlatformBuffer(void *buffer) = 0;
 
-  virtual uint64_t makePlatformBuffer(const void* pixelData,
+  virtual void releasePlatformBuffer(uint64_t pointer) = 0;
+
+  virtual uint64_t makePlatformBuffer(const void *pixelData,
                                       size_t bytesPerRow) = 0;
 
   /**

@@ -1,5 +1,9 @@
 #pragma once
 
+// TODO: Add android flags
+#if __ANDROID_API__ >= 26
+#include <android/hardware_buffer.h>
+#endif
 #include <exception>
 #include <functional>
 #include <memory>
@@ -52,10 +56,58 @@ public:
     return SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(buffer);
   }
 
+  void releasePlatformBuffer(uint64_t pointer) override {
+    AHardwareBuffer *buffer = reinterpret_cast<AHardwareBuffer *>(pointer);
+    AHardwareBuffer_release(buffer);
+  }
 
-  virtual uint64_t makePlatformBuffer(const void* pixelData,
-                                      size_t bytesPerRow) override {
+  uint64_t makePlatformBuffer(const void *pixelData,
+                              size_t bytesPerRow) override {
+#if __ANDROID_API__ >= 26
+
+    // Define the buffer description
+    AHardwareBuffer_Desc desc = {};
+    // TODO: use image info here
+    desc.width = 256;
+    desc.height = 256;
+    desc.layers = 1;                                     // Single image layer
+    desc.format = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM; // Assuming the image
+                                                         // is in this format
+    desc.usage = AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN |
+                 AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN |
+                 AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT |
+                 AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE;
+    desc.stride = bytesPerRow; // Stride in pixels, not in bytes
+
+    // Allocate the buffer
+    AHardwareBuffer *buffer = nullptr;
+    if (AHardwareBuffer_allocate(&desc, &buffer) != 0) {
+      // Handle allocation failure
+      return 0;
+    }
+
+    // Map the buffer to gain access to its memory
+    void *mappedBuffer = nullptr;
+    AHardwareBuffer_lock(buffer, AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN, -1,
+                         nullptr, &mappedBuffer);
+    if (mappedBuffer == nullptr) {
+      // Handle mapping failure
+      AHardwareBuffer_release(buffer);
+      return 0;
+    }
+
+    // Copy the image data to the buffer
+    memcpy(mappedBuffer, pixelData, desc.height * bytesPerRow);
+
+    // Unmap the buffer
+    AHardwareBuffer_unlock(buffer, nullptr);
+
+    // Return the buffer pointer as a uint64_t. It's the caller's responsibility
+    // to manage this buffer.
+    return reinterpret_cast<uint64_t>(buffer);
+#else
     return 0;
+#endif
   }
 
   sk_sp<SkFontMgr> createFontMgr() override {
