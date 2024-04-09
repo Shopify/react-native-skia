@@ -11,13 +11,12 @@ The function `makeImageFromView` lets you take a snapshot of another React Nativ
 
 ::::info
 
-`makeImageFromView` is not supported on Fabric yet ([see #2002](https://github.com/Shopify/react-native-skia/issues/2002)).
+It is safer to use `collapsable=false` on the root view of the snapshot to prevent the root view from being removed by React Native.
+If the view is optimized away, `makeImageFromView` will crash or return the wrong result.
 
 ::::info
 
 
-On Android, it is safer to use `collapsable=false` on the root view of the snapshot to prevent the root view from being removed by React Native.
-If the view is optimized away, `makeImageFromView` will crash.
 
 ```tsx twoslash
 import { useState, useRef } from "react";
@@ -41,7 +40,11 @@ const Demo = () => {
   return (
     <View style={{ flex: 1 }}>
       <Pressable onPress={onPress}>
-        <View ref={ref} collapsable={false} style={{ backgroundColor: "cyan", flex: 1 }}>
+        <View
+          ref={ref}
+          // collapsable={false} is important here
+          collapsable={false}
+          style={{ backgroundColor: "cyan", flex: 1 }}>
           <Text>This is a React Native View</Text>
         </View>
       </Pressable>
