@@ -29,4 +29,14 @@ export interface SkSurface extends SkJSIInstance<"Surface"> {
    * Make sure any queued draws are sent to the screen or the GPU.
    */
   flush(): void;
+
+  /**
+   * Returns the possibly scaled width of the surface.
+   */
+  width(): number;
+
+  /**
+   * Returns the possibly scaled height of the surface.
+   */
+  height(): number;
 }
