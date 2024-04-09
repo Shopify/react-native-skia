@@ -61,6 +61,11 @@ public:
 
   sk_sp<SkImage> makeImageFromPlatformBuffer(void *buffer) override;
 
+  virtual uint64_t makePlatformBuffer(const void* pixelData,
+                                      size_t bytesPerRow) override {
+    return 0;
+  }
+
   virtual void performStreamOperation(
       const std::string &sourceUri,
       const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) override;

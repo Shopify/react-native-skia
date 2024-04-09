@@ -51,6 +51,28 @@ public:
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
 
+  JSI_HOST_FUNCTION(MakePlatformBuffer) {
+      auto image = JsiSkImage::fromValue(runtime, arguments[0]);
+      image->makeNonTextureImage();
+  
+      int bytesPerRow = image->width() * 4;
+      auto buf = SkData::MakeUninitialized(image->width() * image->height() * 4);
+      SkImageInfo info = SkImageInfo::Make(image->width(), image->height(), kRGBA_8888_SkColorType, kUnpremul_SkAlphaType);
+      image->readPixels(nullptr, info, const_cast<void *>(buf->data()), bytesPerRow, 0, 0);
+      jsi::HostFunctionType deleteFunc = [=](jsi::Runtime& runtime, const jsi::Value& thisArg, const jsi::Value* args,
+                                             size_t count) -> jsi::Value {
+        //AHardwareBuffer_release(hardwareBuffer);
+        return jsi::Value::undefined();
+      };
+
+      uint64_t pointer = 0;//getContext()->makePlatformBuffer(buf->data(), bytesPerRow);
+      jsi::Object buffer(runtime);
+      buffer.setProperty(runtime, "pointer", jsi::BigInt::fromUint64(runtime, pointer));
+      buffer.setProperty(runtime, "delete",
+                         jsi::Function::createFromHostFunction(runtime, jsi::PropNameID::forUtf8(runtime, "delete"), 0, deleteFunc));
+      return buffer;
+  }
+
   JSI_HOST_FUNCTION(MakeImageFromViewTag) {
     auto viewTag = arguments[0].asNumber();
     auto context = getContext();
@@ -80,9 +102,9 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromEncoded),
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTag),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory,
-                                       MakeImageFromPlatformBuffer),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage), )
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromPlatformBuffer),
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage), 
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakePlatformBuffer))
 
   explicit JsiSkImageFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

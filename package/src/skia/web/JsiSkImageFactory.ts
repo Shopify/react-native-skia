@@ -1,7 +1,7 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
 import type { SkData, ImageInfo, SkImage } from "../types";
-import type { ImageFactory } from "../types/Image/ImageFactory";
+import type { ImageFactory, PlatformBuffer } from "../types/Image/ImageFactory";
 
 import { Host, getEnum } from "./Host";
 import { JsiSkImage } from "./JsiSkImage";
@@ -12,6 +12,12 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
     super(CanvasKit);
   }
 
+  MakePlatformBuffer(_image: SkImage): PlatformBuffer {
+    throw new Error(
+      "MakePlatformBuffer() is only available on iOS and Android!"
+    );
+  }
+
   MakeImageFromViewTag(viewTag: number): Promise<SkImage | null> {
     const view = viewTag as unknown as HTMLElement;
     // TODO: Implement screenshot from view in React JS
@@ -19,8 +25,10 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
     return Promise.resolve(null);
   }
 
-  MakeImageFromPlatformBuffer(platformBuffer: bigint): SkImage {
-    throw new Error(`MakeImageFromPlatformBuffer(${platformBuffer}) is only available on iOS and Android!`)
+  MakeImageFromPlatformBuffer(_platformBuffer: bigint): SkImage {
+    throw new Error(
+      "MakeImageFromPlatformBuffer() is only available on iOS and Android!"
+    );
   }
 
   MakeImageFromEncoded(encoded: SkData) {

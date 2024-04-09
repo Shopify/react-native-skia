@@ -52,6 +52,12 @@ public:
     return SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(buffer);
   }
 
+
+  virtual uint64_t makePlatformBuffer(const void* pixelData,
+                                      size_t bytesPerRow) override {
+    return 0;
+  }
+
   sk_sp<SkFontMgr> createFontMgr() override {
     return SkFontMgr_New_Android(nullptr);
   }
