@@ -5,11 +5,9 @@ import { useAnimatedImage } from "../../skia/core/AnimatedImage";
 import type { DataSourceParam, SkImage } from "../../skia/types";
 
 import {
-  runOnJS,
   throwOnMissingReanimated,
   useFrameCallback,
   useSharedValue,
-  useAnimatedReaction,
 } from "./moduleWrapper";
 
 const DEFAULT_FRAME_DURATION = 60;
