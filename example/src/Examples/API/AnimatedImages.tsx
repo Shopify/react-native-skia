@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  Pressable,
-  ScrollView,
-  useWindowDimensions,
-} from "react-native";
+import { Pressable, ScrollView, useWindowDimensions } from "react-native";
 import {
   Canvas,
   Image,
