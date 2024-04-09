@@ -63,7 +63,7 @@ public:
 
   uint64_t makePlatformBuffer(sk_sp<SkImage> image) override {
 #if __ANDROID_API__ >= 26
-    auto bytesPerPixel = image->colorType().bytesPerPixel();
+    auto bytesPerPixel = image->imageInfo().bytesPerPixel();
     int bytesPerRow = image->width() * bytesPerPixel;
     auto buf = SkData::MakeUninitialized(image->width() * image->height() * bytesPerPixel);
     SkImageInfo info =
