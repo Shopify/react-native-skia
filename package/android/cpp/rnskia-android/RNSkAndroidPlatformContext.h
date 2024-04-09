@@ -12,6 +12,7 @@
 #include "JniPlatformContext.h"
 #include "RNSkPlatformContext.h"
 #include "SkiaOpenGLSurfaceFactory.h"
+#include "AHardwareBufferUtils.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -79,7 +80,7 @@ public:
     desc.width = image->width();
     desc.height = image->height();
     desc.layers = 1;                                     // Single image layer
-    desc.format = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM; // Assuming the image
+    desc.format = GetBufferFormatFromSkColorType(image->colorType()); // Assuming the image
                                                          // is in this format
     desc.usage = AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN |
                  AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN |
