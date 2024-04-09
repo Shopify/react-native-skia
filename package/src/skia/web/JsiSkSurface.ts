@@ -23,12 +23,12 @@ export class JsiSkSurface
     this.ref.flush();
   }
 
-  width(): number {
+  width() {
     return this.ref.width();
   }
 
-  height(): number {
-    return this.ref.width();
+  height() {
+    return this.ref.height();
   }
 
   getCanvas(): SkCanvas {
