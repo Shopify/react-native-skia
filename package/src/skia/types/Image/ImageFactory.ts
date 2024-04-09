@@ -82,7 +82,7 @@ export interface ImageFactory {
    * @throws Throws an error if the Image could not be created, for example when the given
    * platform buffer is invalid.
    */
-  MakeImageFromPlatformBuffer: (platformBuffer: bigint) => SkImage
+  MakeImageFromPlatformBuffer: (platformBuffer: bigint) => SkImage;
 
   /**
    * Returns an image that will be a screenshot of the view represented by
