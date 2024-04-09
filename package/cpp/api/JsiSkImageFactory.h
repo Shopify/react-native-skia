@@ -55,16 +55,8 @@ public:
     auto image = JsiSkImage::fromValue(runtime, arguments[0]);
     image->makeNonTextureImage();
 
-    int bytesPerRow = image->width() * 4;
-    auto buf = SkData::MakeUninitialized(image->width() * image->height() * 4);
-    SkImageInfo info =
-        SkImageInfo::Make(image->width(), image->height(),
-                          kRGBA_8888_SkColorType, kUnpremul_SkAlphaType);
-    image->readPixels(nullptr, info, const_cast<void *>(buf->data()),
-                      bytesPerRow, 0, 0);
-
     uint64_t pointer =
-        getContext()->makePlatformBuffer(buf->data(), bytesPerRow);
+        getContext()->makePlatformBuffer(image);
     jsi::HostFunctionType deleteFunc =
         [=](jsi::Runtime &runtime, const jsi::Value &thisArg,
             const jsi::Value *args, size_t count) -> jsi::Value {

@@ -61,8 +61,7 @@ public:
 
   sk_sp<SkImage> makeImageFromPlatformBuffer(void *buffer) override;
 
-  uint64_t makePlatformBuffer(const void *pixelData,
-                              size_t bytesPerRow) override {
+  uint64_t makePlatformBuffer(sk_sp<SkImage> image) override {
     return 0;
   }
 

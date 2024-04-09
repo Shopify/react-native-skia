@@ -61,15 +61,22 @@ public:
     AHardwareBuffer_release(buffer);
   }
 
-  uint64_t makePlatformBuffer(const void *pixelData,
-                              size_t bytesPerRow) override {
+  uint64_t makePlatformBuffer(sk_sp<SkImage> image) override {
 #if __ANDROID_API__ >= 26
+    int bytesPerRow = image->width() * 4;
+    auto buf = SkData::MakeUninitialized(image->width() * image->height() * 4);
+    SkImageInfo info =
+        SkImageInfo::Make(image->width(), image->height(),
+                          image->colorType(), image->alphaType());
+    image->readPixels(nullptr, info, const_cast<void *>(buf->data()),
+                      bytesPerRow, 0, 0);
+    const void* pixelData = buf->data();
 
     // Define the buffer description
     AHardwareBuffer_Desc desc = {};
     // TODO: use image info here
-    desc.width = 256;
-    desc.height = 256;
+    desc.width = image->width();
+    desc.height = image->height();
     desc.layers = 1;                                     // Single image layer
     desc.format = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM; // Assuming the image
                                                          // is in this format
