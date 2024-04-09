@@ -15,7 +15,7 @@ Other system fonts will are available as well.
 
 ```tsx twoslash
 import { useMemo } from "react";
-import { Paragraph, Skia, useFonts, TextAlign } from "@shopify/react-native-skia";
+import { Paragraph, Skia, useFonts, TextAlign, Canvas } from "@shopify/react-native-skia";
 
 const MyParagraph = () => {
   const customFontMgr = useFonts({
@@ -48,7 +48,11 @@ const MyParagraph = () => {
   }, [customFontMgr]);
 
   // Render the paragraph
-  return <Paragraph paragraph={paragraph} x={0} y={0} width={300} />;
+  return (
+    <Canvas style={{ width: 256, height: 256 }}>
+      <Paragraph paragraph={paragraph} x={0} y={0} width={300} />
+    </Canvas>
+  );
 };
 ```
 
