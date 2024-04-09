@@ -1,10 +1,16 @@
 import React from "react";
-import { ScrollView, useWindowDimensions } from "react-native";
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  useWindowDimensions,
+} from "react-native";
 import {
   Canvas,
   Image,
   useAnimatedImageValue,
 } from "@shopify/react-native-skia";
+import { useSharedValue } from "@shopify/react-native-skia/src/external/reanimated/moduleWrapper";
 
 export const AnimatedImages = () => {
   const { width: wWidth } = useWindowDimensions();
@@ -12,8 +18,10 @@ export const AnimatedImages = () => {
   const S2 = 60;
   const PAD = (SIZE - S2) / 2;
 
+  const pause = useSharedValue(false);
   const example1 = useAnimatedImageValue(
-    require("../../assets/birdFlying.gif")
+    require("../../assets/birdFlying.gif"),
+    pause
   );
   const example2 = useAnimatedImageValue(
     require("../../assets/birdFlying2.gif")
@@ -21,43 +29,45 @@ export const AnimatedImages = () => {
 
   return (
     <ScrollView>
-      <Canvas
-        style={{
-          alignSelf: "center",
-          width: 320,
-          height: 180,
-          marginVertical: PAD,
-        }}
-      >
-        <Image
-          image={example1}
-          x={0}
-          y={0}
-          width={320}
-          height={180}
-          fit="contain"
-        />
-      </Canvas>
-      <Canvas
-        style={{
-          alignSelf: "center",
-          width: 320,
-          height: 180,
-          borderColor: "#aaaaaa",
-          borderWidth: 1,
-          borderStyle: "solid",
-          marginVertical: PAD,
-        }}
-      >
-        <Image
-          image={example2}
-          x={0}
-          y={0}
-          width={320}
-          height={180}
-          fit="contain"
-        />
-      </Canvas>
+      <Pressable onPress={() => (pause.value = !pause.value)}>
+        <Canvas
+          style={{
+            alignSelf: "center",
+            width: 320,
+            height: 180,
+            marginVertical: PAD,
+          }}
+        >
+          <Image
+            image={example1}
+            x={0}
+            y={0}
+            width={320}
+            height={180}
+            fit="contain"
+          />
+        </Canvas>
+        <Canvas
+          style={{
+            alignSelf: "center",
+            width: 320,
+            height: 180,
+            borderColor: "#aaaaaa",
+            borderWidth: 1,
+            borderStyle: "solid",
+            marginVertical: PAD,
+          }}
+        >
+          <Image
+            image={example2}
+            x={0}
+            y={0}
+            width={320}
+            height={180}
+            fit="contain"
+          />
+        </Canvas>
+      </Pressable>
     </ScrollView>
   );
 };
