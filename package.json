@@ -10,10 +10,8 @@
     "@types/node": "16.11.7",
     "clang-format": "1.6.0",
     "rimraf": "3.0.2",
-    "shelljs": "^0.8.5",
     "ts-node": "10.4.0",
-    "typescript": "5.3.3",
-    "yargs": "^17.7.2"
+    "typescript": "5.3.3"
   },
   "scripts": {
     "build-skia-ios-framework": "ts-node ./scripts/build-skia-ios-framework.ts",
