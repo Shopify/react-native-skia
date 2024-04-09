@@ -177,7 +177,7 @@ public:
     if (!getObject()->readPixels(info, bfrPtr, bytesPerRow, srcX, srcY)) {
       return jsi::Value::null();
     }
-    return std::move(dest);
+    return dest;
   }
 
   JSI_HOST_FUNCTION(makeNonTextureImage) {

@@ -31,6 +31,12 @@ public:
 
   EXPORT_JSI_API_TYPENAME(JsiSkSurface, Surface)
 
+  // TODO-API: Properties?
+  JSI_HOST_FUNCTION(width) { return static_cast<double>(getObject()->width()); }
+  JSI_HOST_FUNCTION(height) {
+    return static_cast<double>(getObject()->height());
+  }
+
   JSI_HOST_FUNCTION(getCanvas) {
     return jsi::Object::createFromHostObject(
         runtime,
@@ -57,7 +63,9 @@ public:
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurface, getCanvas),
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurface, width),
+                       JSI_EXPORT_FUNC(JsiSkSurface, height),
+                       JSI_EXPORT_FUNC(JsiSkSurface, getCanvas),
                        JSI_EXPORT_FUNC(JsiSkSurface, makeImageSnapshot),
                        JSI_EXPORT_FUNC(JsiSkSurface, flush),
                        JSI_EXPORT_FUNC(JsiSkSurface, dispose))
