@@ -59,8 +59,12 @@ void RNSkiOSPlatformContext::performStreamOperation(
 
 void RNSkiOSPlatformContext::releasePlatformBuffer(uint64_t pointer) {
   CMSampleBufferRef sampleBuffer = reinterpret_cast<CMSampleBufferRef>(pointer);
+  CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
   if (sampleBuffer) {
-    // CFRelease(sampleBuffer);
+    CFRelease(sampleBuffer);
+  }
+  if (pixelBuffer) {
+    CFRelease(pixelBuffer);
   }
 }
 
