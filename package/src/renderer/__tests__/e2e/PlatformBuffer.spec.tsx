@@ -31,13 +31,26 @@ describe("Platform Buffers", () => {
       return;
     }
     const result = await surface.eval((Skia) => {
-      const sur = Skia.Surface.Make(256, 256)!;
-      const canvas = sur.getCanvas();
-      canvas.drawColor(Skia.Color("cyan"));
-      sur.flush();
-      const platformBuffer = Skia.Image.MakePlatformBuffer(
-        sur.makeImageSnapshot().makeNonTextureImage()
-      );
+      const pixels = new Uint8Array(256 * 256 * 4);
+      pixels.fill(255);
+      let i = 0;
+      for (let x = 0; x < 256 * 4; x++) {
+        for (let y = 0; y < 256 * 4; y++) {
+          pixels[i++] = (x * y) % 255;
+        }
+      }
+      const data = Skia.Data.fromBytes(pixels);
+      const img = Skia.Image.MakeImage(
+        {
+          width: 256,
+          height: 256,
+          alphaType: 1, //opaque
+          colorType: 4, // RGBA_8888
+        },
+        data,
+        256 * 4
+      )!;
+      const platformBuffer = Skia.Image.MakePlatformBuffer(img);
       const image = Skia.Image.MakeImageFromPlatformBuffer(
         platformBuffer.pointer
       ).encodeToBytes();
@@ -48,6 +61,6 @@ describe("Platform Buffers", () => {
       Sk.Data.fromBytes(new Uint8Array(result))
     )!;
     expect(image).not.toBeNull();
-    checkImage(image, "snapshots/cyan-buffer.png");
+    checkImage(image, "snapshots/platform-buffer.png");
   });
 });
