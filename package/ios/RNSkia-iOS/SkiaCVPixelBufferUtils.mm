@@ -23,48 +23,7 @@
   }
 #endif
 
-CVMetalTextureCacheRef SkiaCVPixelBufferUtils::getTextureCache() {
-  static thread_local CVMetalTextureCacheRef textureCache = nil;
-  static thread_local size_t accessCounter = 0;
-  if (textureCache == nil) {
-    // Create a new Texture Cache
-    auto result = CVMetalTextureCacheCreate(kCFAllocatorDefault, nil,
-                                            MTLCreateSystemDefaultDevice(), nil,
-                                            &textureCache);
-    if (result != kCVReturnSuccess || textureCache == nil) {
-      throw std::runtime_error("Failed to create Metal Texture Cache!");
-    }
-  }
-  accessCounter++;
-  if (accessCounter > 30) {
-    // Every 30 accesses, we perform some internal recycling/housekeeping
-    // operations.
-    CVMetalTextureCacheFlush(textureCache, 0);
-    accessCounter = 0;
-  }
-  return textureCache;
-}
-
-RGBFormatInfo SkiaCVPixelBufferUtils::getRGBCVPixelBufferFormatInfo(
-    CVPixelBufferRef pixelBuffer) {
-  OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
-
-  MTLPixelFormat metalFormat;
-  SkColorType skiaFormat;
-  switch (format) {
-  case kCVPixelFormatType_32BGRA:
-    [[likely]] metalFormat = MTLPixelFormatBGRA8Unorm;
-    skiaFormat = kBGRA_8888_SkColorType;
-    break;
-  // This can be extended with branches for specific RGB formats if new Apple
-  // uses new formats.
-  default:
-    [[unlikely]] throw std::runtime_error(
-        "CVPixelBuffer has unknown RGB format! " +
-        std::string(FourCC2Str(format)));
-  }
-  return RGBFormatInfo{.metalFormat = metalFormat, .skiaFormat = skiaFormat};
-}
+// pragma MARK: CVPixelBuffer -> Skia Texture
 
 GrBackendTexture SkiaCVPixelBufferUtils::getTextureFromCVPixelBuffer(
     CVPixelBufferRef pixelBuffer, size_t planeIndex,
@@ -102,6 +61,116 @@ GrBackendTexture SkiaCVPixelBufferUtils::getTextureFromCVPixelBuffer(
   return texture;
 }
 
+// pragma MARK: CVPixelBuffer -> Skia Texture (YUV-specific)
+
+GrYUVABackendTextures SkiaCVPixelBufferUtils::getYUVTexturesFromCVPixelBuffer(
+    CVPixelBufferRef pixelBuffer) {
+  // 1. Get all planes (YUV, Y_UV, Y_U_V or Y_U_V_A)
+  size_t planesCount = CVPixelBufferGetPlaneCount(pixelBuffer);
+  GrBackendTexture textures[planesCount];
+
+  for (size_t planeIndex = 0; planeIndex < planesCount; planeIndex++) {
+    MTLPixelFormat pixelFormat =
+        getMTLPixelFormatForCVPixelBufferPlane(pixelBuffer, planeIndex);
+    GrBackendTexture texture =
+        getTextureFromCVPixelBuffer(pixelBuffer, planeIndex, pixelFormat);
+    textures[planeIndex] = texture;
+  }
+
+  // 2. Wrap info about buffer
+  SkYUVAInfo info = getYUVAInfoForCVPixelBuffer(pixelBuffer);
+
+  // 3. Return all textures
+  return GrYUVABackendTextures(info, textures, kTopLeft_GrSurfaceOrigin);
+}
+
+// pragma MARK: getTextureCache()
+
+CVMetalTextureCacheRef SkiaCVPixelBufferUtils::getTextureCache() {
+  static thread_local CVMetalTextureCacheRef textureCache = nil;
+  static thread_local size_t accessCounter = 0;
+  if (textureCache == nil) {
+    // Create a new Texture Cache
+    auto result = CVMetalTextureCacheCreate(kCFAllocatorDefault, nil,
+                                            MTLCreateSystemDefaultDevice(), nil,
+                                            &textureCache);
+    if (result != kCVReturnSuccess || textureCache == nil) {
+      throw std::runtime_error("Failed to create Metal Texture Cache!");
+    }
+  }
+  accessCounter++;
+  if (accessCounter > 30) {
+    // Every 30 accesses, we perform some internal recycling/housekeeping
+    // operations.
+    CVMetalTextureCacheFlush(textureCache, 0);
+    accessCounter = 0;
+  }
+  return textureCache;
+}
+
+// pragma MARK: Get YUV Info
+
+SkYUVAInfo SkiaCVPixelBufferUtils::getYUVAInfoForCVPixelBuffer(
+    CVPixelBufferRef pixelBuffer) {
+  size_t width = CVPixelBufferGetWidth(pixelBuffer);
+  size_t height = CVPixelBufferGetHeight(pixelBuffer);
+  SkISize size =
+      SkISize::Make(static_cast<int>(width), static_cast<int>(height));
+
+  OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
+  SkYUVAInfo::PlaneConfig planeConfig = getPlaneConfig(format);
+  SkYUVAInfo::Subsampling subsampling = getSubsampling(format);
+  SkYUVColorSpace colorspace = getColorspace(format);
+
+  return SkYUVAInfo(size, planeConfig, subsampling, colorspace);
+}
+
+// pragma MARK: Get RGB Info
+
+RGBFormatInfo SkiaCVPixelBufferUtils::getRGBCVPixelBufferFormatInfo(
+    CVPixelBufferRef pixelBuffer) {
+  OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
+
+  MTLPixelFormat metalFormat;
+  SkColorType skiaFormat;
+  switch (format) {
+  case kCVPixelFormatType_32BGRA:
+    [[likely]] metalFormat = MTLPixelFormatBGRA8Unorm;
+    skiaFormat = kBGRA_8888_SkColorType;
+    break;
+  // This can be extended with branches for specific RGB formats if new Apple
+  // uses new formats.
+  default:
+    [[unlikely]] throw std::runtime_error(
+        "CVPixelBuffer has unknown RGB format! " +
+        std::string(FourCC2Str(format)));
+  }
+  return RGBFormatInfo{.metalFormat = metalFormat, .skiaFormat = skiaFormat};
+}
+
+// pragma MARK: Get CVPixelBuffer MTLPixelFormat
+
+MTLPixelFormat SkiaCVPixelBufferUtils::getMTLPixelFormatForCVPixelBufferPlane(
+    CVPixelBufferRef pixelBuffer, size_t planeIndex) {
+  size_t width = CVPixelBufferGetWidthOfPlane(pixelBuffer, planeIndex);
+  size_t bytesPerRow =
+      CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, planeIndex);
+  double bytesPerPixel = round(static_cast<double>(bytesPerRow) / width);
+  if (bytesPerPixel == 1) [[likely]] {
+    return MTLPixelFormatR8Unorm;
+  } else if (bytesPerPixel == 2) [[likely]] {
+    return MTLPixelFormatRG8Unorm;
+  } else if (bytesPerPixel == 4) {
+    return MTLPixelFormatBGRA8Unorm;
+  } else [[unlikely]] {
+    throw std::runtime_error("Invalid bytes per row! Expected 1 (R), 2 (RG) or "
+                             "4 (RGBA), but received " +
+                             std::to_string(bytesPerPixel));
+  }
+}
+
+// pragma MARK: YUV getPlaneConfig()
+
 SkYUVAInfo::PlaneConfig
 SkiaCVPixelBufferUtils::getPlaneConfig(OSType pixelFormat) {
   switch (pixelFormat) {
@@ -134,6 +203,9 @@ SkiaCVPixelBufferUtils::getPlaneConfig(OSType pixelFormat) {
                                           std::string(FourCC2Str(pixelFormat)));
   }
 }
+
+// pragma MARK: YUV getSubsampling()
+
 SkYUVAInfo::Subsampling
 SkiaCVPixelBufferUtils::getSubsampling(OSType pixelFormat) {
   switch (pixelFormat) {
@@ -178,6 +250,9 @@ SkiaCVPixelBufferUtils::getSubsampling(OSType pixelFormat) {
                                           std::string(FourCC2Str(pixelFormat)));
   }
 }
+
+// pragma MARK: YUV getColorspace()
+
 SkYUVColorSpace SkiaCVPixelBufferUtils::getColorspace(OSType pixelFormat) {
   switch (pixelFormat) {
   case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
@@ -212,60 +287,7 @@ SkYUVColorSpace SkiaCVPixelBufferUtils::getColorspace(OSType pixelFormat) {
   }
 }
 
-SkYUVAInfo SkiaCVPixelBufferUtils::getYUVAInfoForCVPixelBuffer(
-    CVPixelBufferRef pixelBuffer) {
-  size_t width = CVPixelBufferGetWidth(pixelBuffer);
-  size_t height = CVPixelBufferGetHeight(pixelBuffer);
-  SkISize size =
-      SkISize::Make(static_cast<int>(width), static_cast<int>(height));
-
-  OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
-  SkYUVAInfo::PlaneConfig planeConfig = getPlaneConfig(format);
-  SkYUVAInfo::Subsampling subsampling = getSubsampling(format);
-  SkYUVColorSpace colorspace = getColorspace(format);
-
-  return SkYUVAInfo(size, planeConfig, subsampling, colorspace);
-}
-
-MTLPixelFormat SkiaCVPixelBufferUtils::getMTLPixelFormatForCVPixelBufferPlane(
-    CVPixelBufferRef pixelBuffer, size_t planeIndex) {
-  size_t width = CVPixelBufferGetWidthOfPlane(pixelBuffer, planeIndex);
-  size_t bytesPerRow =
-      CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, planeIndex);
-  double bytesPerPixel = round(static_cast<double>(bytesPerRow) / width);
-  if (bytesPerPixel == 1) [[likely]] {
-    return MTLPixelFormatR8Unorm;
-  } else if (bytesPerPixel == 2) [[likely]] {
-    return MTLPixelFormatRG8Unorm;
-  } else if (bytesPerPixel == 4) {
-    return MTLPixelFormatBGRA8Unorm;
-  } else [[unlikely]] {
-    throw std::runtime_error("Invalid bytes per row! Expected 1 (R), 2 (RG) or "
-                             "4 (RGBA), but received " +
-                             std::to_string(bytesPerPixel));
-  }
-}
-
-GrYUVABackendTextures SkiaCVPixelBufferUtils::getYUVTexturesFromCVPixelBuffer(
-    CVPixelBufferRef pixelBuffer) {
-  // 1. Get all planes (YUV, Y_UV, Y_U_V or Y_U_V_A)
-  size_t planesCount = CVPixelBufferGetPlaneCount(pixelBuffer);
-  GrBackendTexture textures[planesCount];
-
-  for (size_t planeIndex = 0; planeIndex < planesCount; planeIndex++) {
-    MTLPixelFormat pixelFormat =
-        getMTLPixelFormatForCVPixelBufferPlane(pixelBuffer, planeIndex);
-    GrBackendTexture texture =
-        getTextureFromCVPixelBuffer(pixelBuffer, planeIndex, pixelFormat);
-    textures[planeIndex] = texture;
-  }
-
-  // 2. Wrap info about buffer
-  SkYUVAInfo info = getYUVAInfoForCVPixelBuffer(pixelBuffer);
-
-  // 3. Return all textures
-  return GrYUVABackendTextures(info, textures, kTopLeft_GrSurfaceOrigin);
-}
+// pragma MARK: getCVPixelBufferBaseFormat()
 
 CVPixelBufferBaseFormat SkiaCVPixelBufferUtils::getCVPixelBufferBaseFormat(
     CVPixelBufferRef pixelBuffer) {
