@@ -57,6 +57,77 @@ void RNSkiOSPlatformContext::performStreamOperation(
   std::thread(loader).detach();
 }
 
+void RNSkiOSPlatformContext::releasePlatformBuffer(uint64_t pointer) {
+  CMSampleBufferRef sampleBuffer = reinterpret_cast<CMSampleBufferRef>(pointer);
+  if (sampleBuffer) {
+    CFRelease(sampleBuffer);
+  }
+}
+
+uint64_t RNSkiOSPlatformContext::makePlatformBuffer(sk_sp<SkImage> image) {
+  auto bytesPerPixel = image->imageInfo().bytesPerPixel();
+  int bytesPerRow = image->width() * bytesPerPixel;
+  auto buf = SkData::MakeUninitialized(image->width() * image->height() *
+                                       bytesPerPixel);
+  SkImageInfo info = SkImageInfo::Make(image->width(), image->height(),
+                                       image->colorType(), image->alphaType());
+  image->readPixels(nullptr, info, const_cast<void *>(buf->data()), bytesPerRow,
+                    0, 0);
+  auto pixelData = const_cast<void *>(buf->data());
+
+  // Create a CVPixelBuffer from the raw pixel data
+  CVPixelBufferRef pixelBuffer = nullptr;
+  // OSType pixelFormatType = MapSkColorTypeToOSType(image->colorType());
+
+  // You will need to fill in the details for creating the pixel buffer
+  // CVPixelBufferCreateWithBytes or CVPixelBufferCreateWithPlanarBytes
+  // Create the CVPixelBuffer with the image data
+  CVReturn r = CVPixelBufferCreateWithBytes(
+      nullptr, // allocator
+      image->width(), image->height(), kCVPixelFormatType_32BGRA,
+      pixelData,   // pixel data
+      bytesPerRow, // bytes per row
+      nullptr,     // release callback
+      nullptr,     // release refCon
+      nullptr,     // pixel buffer attributes
+      &pixelBuffer // the newly created pixel buffer
+  );
+
+  // if (r != kCVReturnSuccess) {
+  //     return 1; // or handle error appropriately
+  // }
+
+  // Wrap the CVPixelBuffer in a CMSampleBuffer
+  CMSampleBufferRef sampleBuffer = nullptr;
+
+  CMFormatDescriptionRef formatDescription = nullptr;
+  CMVideoFormatDescriptionCreateForImageBuffer(kCFAllocatorDefault, pixelBuffer,
+                                               &formatDescription);
+
+  // Assuming no specific timing is required, we initialize the timing info to
+  // zero.
+  CMSampleTimingInfo timingInfo = {0};
+  timingInfo.duration = kCMTimeInvalid; // Indicate an unknown duration.
+  timingInfo.presentationTimeStamp = kCMTimeZero; // Start at time zero.
+  timingInfo.decodeTimeStamp = kCMTimeInvalid;    // No specific decode time.
+
+  // Create the sample buffer.
+  OSStatus status = CMSampleBufferCreateReadyWithImageBuffer(
+      kCFAllocatorDefault, pixelBuffer, formatDescription, &timingInfo,
+      &sampleBuffer);
+
+  if (status != noErr) {
+    // Handle error
+    if (pixelBuffer) {
+      CFRelease(pixelBuffer);
+    }
+    return 0;
+  }
+
+  // Return sampleBuffer casted to uint64_t
+  return reinterpret_cast<uint64_t>(sampleBuffer);
+}
+
 void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
   RCTFatal(RCTErrorWithMessage([NSString stringWithUTF8String:err.what()]));
 }

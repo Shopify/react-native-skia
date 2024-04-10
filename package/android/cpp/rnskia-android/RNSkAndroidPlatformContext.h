@@ -9,10 +9,10 @@
 #include <memory>
 #include <string>
 
+#include "AHardwareBufferUtils.h"
 #include "JniPlatformContext.h"
 #include "RNSkPlatformContext.h"
 #include "SkiaOpenGLSurfaceFactory.h"
-#include "AHardwareBufferUtils.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -66,22 +66,24 @@ public:
 #if __ANDROID_API__ >= 26
     auto bytesPerPixel = image->imageInfo().bytesPerPixel();
     int bytesPerRow = image->width() * bytesPerPixel;
-    auto buf = SkData::MakeUninitialized(image->width() * image->height() * bytesPerPixel);
+    auto buf = SkData::MakeUninitialized(image->width() * image->height() *
+                                         bytesPerPixel);
     SkImageInfo info =
-        SkImageInfo::Make(image->width(), image->height(),
-                          image->colorType(), image->alphaType());
+        SkImageInfo::Make(image->width(), image->height(), image->colorType(),
+                          image->alphaType());
     image->readPixels(nullptr, info, const_cast<void *>(buf->data()),
                       bytesPerRow, 0, 0);
-    const void* pixelData = buf->data();
+    const void *pixelData = buf->data();
 
     // Define the buffer description
     AHardwareBuffer_Desc desc = {};
     // TODO: use image info here
     desc.width = image->width();
     desc.height = image->height();
-    desc.layers = 1;                                     // Single image layer
-    desc.format = GetBufferFormatFromSkColorType(image->colorType()); // Assuming the image
-                                                         // is in this format
+    desc.layers = 1; // Single image layer
+    desc.format = GetBufferFormatFromSkColorType(
+        image->colorType()); // Assuming the image
+                             // is in this format
     desc.usage = AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN |
                  AHARDWAREBUFFER_USAGE_CPU_WRITE_OFTEN |
                  AHARDWAREBUFFER_USAGE_GPU_COLOR_OUTPUT |

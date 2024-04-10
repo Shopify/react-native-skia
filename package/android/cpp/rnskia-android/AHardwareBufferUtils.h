@@ -6,6 +6,6 @@ namespace RNSkia {
 
 uint32_t GetBufferFormatFromSkColorType(SkColorType bufferFormat);
 
-}  // namespace RNSkia
+} // namespace RNSkia
 
 #endif

@@ -61,11 +61,9 @@ public:
 
   sk_sp<SkImage> makeImageFromPlatformBuffer(void *buffer) override;
 
-  uint64_t makePlatformBuffer(sk_sp<SkImage> image) override {
-    return 0;
-  }
+  uint64_t makePlatformBuffer(sk_sp<SkImage> image) override;
 
-  void releasePlatformBuffer(uint64_t pointer) override {}
+  void releasePlatformBuffer(uint64_t pointer) override;
 
   virtual void performStreamOperation(
       const std::string &sourceUri,

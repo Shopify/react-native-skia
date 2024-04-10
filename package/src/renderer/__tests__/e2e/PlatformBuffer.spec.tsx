@@ -18,7 +18,7 @@ describe("Platform Buffers", () => {
       return r;
     });
     // Skip test on Fabric (it runs on API Level 21 which doesn't support platform buffers)
-    if (surface.arch === "fabric") {
+    if (surface.arch === "fabric" && surface.OS === "android") {
       expect(BigInt(result)).toBe(0);
     } else {
       expect(BigInt(result)).not.toBe(BigInt(0));
@@ -27,7 +27,7 @@ describe("Platform Buffers", () => {
   it("creates an image from a platform buffer", async () => {
     const { Skia: Sk } = setupSkia();
     // Skip test on Fabric (it runs on API Level 21 which doesn't support platform buffers)
-    if (surface.arch === "fabric") {
+    if (surface.arch === "fabric" && surface.OS === "android") {
       return;
     }
     const result = await surface.eval((Skia) => {

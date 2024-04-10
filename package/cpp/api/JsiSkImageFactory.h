@@ -55,8 +55,7 @@ public:
     auto image = JsiSkImage::fromValue(runtime, arguments[0]);
     image->makeNonTextureImage();
 
-    uint64_t pointer =
-        getContext()->makePlatformBuffer(image);
+    uint64_t pointer = getContext()->makePlatformBuffer(image);
     jsi::HostFunctionType deleteFunc =
         [=](jsi::Runtime &runtime, const jsi::Value &thisArg,
             const jsi::Value *args, size_t count) -> jsi::Value {
