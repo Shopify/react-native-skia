@@ -60,7 +60,7 @@ void RNSkiOSPlatformContext::performStreamOperation(
 void RNSkiOSPlatformContext::releasePlatformBuffer(uint64_t pointer) {
   CMSampleBufferRef sampleBuffer = reinterpret_cast<CMSampleBufferRef>(pointer);
   if (sampleBuffer) {
-    CFRelease(sampleBuffer);
+    // CFRelease(sampleBuffer);
   }
 }
 
@@ -82,13 +82,19 @@ uint64_t RNSkiOSPlatformContext::makePlatformBuffer(sk_sp<SkImage> image) {
   // You will need to fill in the details for creating the pixel buffer
   // CVPixelBufferCreateWithBytes or CVPixelBufferCreateWithPlanarBytes
   // Create the CVPixelBuffer with the image data
+  void *context = static_cast<void *>(
+      new sk_sp<SkData>(buf)); // Create a copy for the context
   CVReturn r = CVPixelBufferCreateWithBytes(
       nullptr, // allocator
       image->width(), image->height(), kCVPixelFormatType_32BGRA,
-      pixelData,   // pixel data
-      bytesPerRow, // bytes per row
-      nullptr,     // release callback
-      nullptr,     // release refCon
+      pixelData,                                         // pixel data
+      bytesPerRow,                                       // bytes per row
+      [](void *releaseRefCon, const void *baseAddress) { // release callback
+        auto buf = static_cast<sk_sp<SkData> *>(releaseRefCon);
+        buf->reset(); // This effectively calls unref on the SkData object
+        delete buf;   // Cleanup the dynamically allocated context
+      },
+      context,     // release callback context
       nullptr,     // pixel buffer attributes
       &pixelBuffer // the newly created pixel buffer
   );
@@ -117,7 +123,9 @@ uint64_t RNSkiOSPlatformContext::makePlatformBuffer(sk_sp<SkImage> image) {
       &sampleBuffer);
 
   if (status != noErr) {
-    // Handle error
+    if (formatDescription) {
+      CFRelease(formatDescription);
+    }
     if (pixelBuffer) {
       CFRelease(pixelBuffer);
     }
@@ -140,30 +148,31 @@ sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
 sk_sp<SkImage>
 RNSkiOSPlatformContext::makeImageFromPlatformBuffer(void *buffer) {
   CMSampleBufferRef sampleBuffer = (CMSampleBufferRef)buffer;
-	// Step 1: Extract the CVPixelBufferRef from the CMSampleBufferRef
-	CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+  // Step 1: Extract the CVPixelBufferRef from the CMSampleBufferRef
+  CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
 
-	// Step 2: Lock the pixel buffer to access the raw pixel data
-	CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+  // Step 2: Lock the pixel buffer to access the raw pixel data
+  CVPixelBufferLockBaseAddress(pixelBuffer, 0);
 
-	// Step 3: Get information about the image
-	void *baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer);
-	size_t width = CVPixelBufferGetWidth(pixelBuffer);
-	size_t height = CVPixelBufferGetHeight(pixelBuffer);
-	size_t bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer);
+  // Step 3: Get information about the image
+  void *baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer);
+  size_t width = CVPixelBufferGetWidth(pixelBuffer);
+  size_t height = CVPixelBufferGetHeight(pixelBuffer);
+  size_t bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer);
 
-	// Assuming the pixel format is 32BGRA, which is common for iOS video frames.
-	// You might need to adjust this based on the actual pixel format.
-	SkImageInfo info = SkImageInfo::Make(width, height, kRGBA_8888_SkColorType, kUnpremul_SkAlphaType);
+  // Assuming the pixel format is 32BGRA, which is common for iOS video frames.
+  // You might need to adjust this based on the actual pixel format.
+  SkImageInfo info = SkImageInfo::Make(width, height, kRGBA_8888_SkColorType,
+                                       kUnpremul_SkAlphaType);
 
-	// Step 4: Create an SkImage from the pixel buffer
-	sk_sp<SkData> data = SkData::MakeWithCopy(baseAddress, height * bytesPerRow);
-	sk_sp<SkImage> image = SkImages::RasterFromData(info, data, bytesPerRow);
+  // Step 4: Create an SkImage from the pixel buffer
+  sk_sp<SkData> data = SkData::MakeWithCopy(baseAddress, height * bytesPerRow);
+  sk_sp<SkImage> image = SkImages::RasterFromData(info, data, bytesPerRow);
 
-	// Step 5: Unlock the pixel buffer
-	CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+  // Step 5: Unlock the pixel buffer
+  CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
 
-	return image;
+  return image;
   // return SkiaMetalSurfaceFactory::makeImageFromCMSampleBuffer(sampleBuffer);
 }
 
