@@ -54,6 +54,7 @@ RGBFormatInfo SkiaCVPixelBufferUtils::getRGBCVPixelBufferFormatInfo(CVPixelBuffe
     case kCVPixelFormatType_32BGRA:
       metalFormat = MTLPixelFormatBGRA8Unorm;
       skiaFormat = kBGRA_8888_SkColorType;
+      break;
     // This can be extended with branches for specific RGB formats if new Apple uses new formats.
     default:
       throw std::runtime_error("CVPixelBuffer has unknown RGB format! " + std::string(FourCC2Str(format)));
