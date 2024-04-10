@@ -7,19 +7,17 @@
 #import <CoreMedia/CMSampleBuffer.h>
 #import <CoreVideo/CVMetalTextureCache.h>
 #import <include/gpu/GrDirectContext.h>
-#import <memory>
 
 #pragma clang diagnostic pop
 
 using SkiaMetalContext = struct SkiaMetalContext {
-  id<MTLDevice> device = nullptr;
   id<MTLCommandQueue> commandQueue = nullptr;
   sk_sp<GrDirectContext> skContext = nullptr;
 };
 
 class ThreadContextHolder {
 public:
-  static const std::unique_ptr<SkiaMetalContext>& getThreadSpecificSkiaContext();
+  static thread_local SkiaMetalContext ThreadSkiaMetalContext;
 };
 
 class SkiaMetalSurfaceFactory {
@@ -32,5 +30,8 @@ public:
   makeImageFromCMSampleBuffer(CMSampleBufferRef sampleBuffer);
 
 private:
+  static id<MTLDevice> device;
+  static bool
+  createSkiaDirectContextIfNecessary(SkiaMetalContext *threadContext);
   static CVMetalTextureCacheRef getTextureCache();
 };
