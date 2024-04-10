@@ -5,7 +5,7 @@ import { surface } from "../setup";
 describe("Platform Buffers", () => {
   it("creates a platform buffer from an image", async () => {
     // Skip outside iOS and Android
-    if (surface.OS === "web") {
+    if (surface.OS !== "ios" && surface.OS !== "android") {
       return;
     }
     const result = await surface.eval((Skia) => {
@@ -31,7 +31,7 @@ describe("Platform Buffers", () => {
   it("creates an image from a platform buffer", async () => {
     const { Skia: Sk } = setupSkia();
     // Skip outside iOS and Android
-    if (surface.OS === "web") {
+    if (surface.OS !== "ios" && surface.OS !== "android") {
       return;
     }
     // Skip test on Fabric (it runs on API Level 21 which doesn't support platform buffers)
