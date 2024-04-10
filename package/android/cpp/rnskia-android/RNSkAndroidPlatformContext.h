@@ -58,8 +58,10 @@ public:
   }
 
   void releasePlatformBuffer(uint64_t pointer) override {
-    AHardwareBuffer *buffer = reinterpret_cast<AHardwareBuffer *>(pointer);
+#if __ANDROID_API__ >= 26
+      AHardwareBuffer *buffer = reinterpret_cast<AHardwareBuffer *>(pointer);
     AHardwareBuffer_release(buffer);
+#endif
   }
 
   uint64_t makePlatformBuffer(sk_sp<SkImage> image) override {
