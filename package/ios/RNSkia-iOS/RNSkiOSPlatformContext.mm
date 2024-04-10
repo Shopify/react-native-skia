@@ -152,6 +152,7 @@ sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
 sk_sp<SkImage>
 RNSkiOSPlatformContext::makeImageFromPlatformBuffer(void *buffer) {
   CMSampleBufferRef sampleBuffer = (CMSampleBufferRef)buffer;
+  //DO the CPU transfer (debugging only)
   // Step 1: Extract the CVPixelBufferRef from the CMSampleBufferRef
   CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
 
@@ -170,14 +171,14 @@ RNSkiOSPlatformContext::makeImageFromPlatformBuffer(void *buffer) {
                                        kUnpremul_SkAlphaType);
 
   // Step 4: Create an SkImage from the pixel buffer
-  sk_sp<SkData> data = SkData::MakeWithCopy(baseAddress, height * bytesPerRow);
+  sk_sp<SkData> data = SkData::MakeWithoutCopy(baseAddress, height * bytesPerRow);
   sk_sp<SkImage> image = SkImages::RasterFromData(info, data, bytesPerRow);
 
   // Step 5: Unlock the pixel buffer
   CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
 
   return image;
-  // return SkiaMetalSurfaceFactory::makeImageFromCMSampleBuffer(sampleBuffer);
+  //return SkiaMetalSurfaceFactory::makeImageFromCMSampleBuffer(sampleBuffer);
 }
 
 sk_sp<SkFontMgr> RNSkiOSPlatformContext::createFontMgr() {
