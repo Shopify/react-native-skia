@@ -29,8 +29,7 @@ CVMetalTextureCacheRef SkiaCVPixelBufferUtils::getTextureCache() {
   static thread_local size_t accessCounter = 0;
   if (textureCache == nil) {
     // Create a new Texture Cache
-    const auto& context = ThreadContextHolder::getThreadSpecificSkiaContext();
-    auto result = CVMetalTextureCacheCreate(kCFAllocatorDefault, nil, context->device,
+    auto result = CVMetalTextureCacheCreate(kCFAllocatorDefault, nil, MTLCreateSystemDefaultDevice(),
                                             nil, &textureCache);
     if (result != kCVReturnSuccess || textureCache == nil) {
       throw std::runtime_error("Failed to create Metal Texture Cache!");
