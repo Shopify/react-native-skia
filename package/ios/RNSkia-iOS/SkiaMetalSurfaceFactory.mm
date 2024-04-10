@@ -121,11 +121,10 @@ sk_sp<SkImage> SkiaMetalSurfaceFactory::makeImageFromCMSampleBuffer(
 
   CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
 
-  // Make sure the format is RGB (BGRA_8888)
   CVPixelBufferBaseFormat baseFormat = SkiaCVPixelBufferUtils::getCVPixelBufferBaseFormat(pixelBuffer);
   switch (baseFormat) {
     case CVPixelBufferBaseFormat::rgb: {
-      // It's in RGB (BGRA_32), single plane
+      // It's in RGB, single plane
       RGBFormatInfo rgbInfo = SkiaCVPixelBufferUtils::getRGBCVPixelBufferFormatInfo(pixelBuffer);
       GrBackendTexture texture = SkiaCVPixelBufferUtils::getTextureFromCVPixelBuffer(pixelBuffer, /*planeIndex */ 0, rgbInfo.metalFormat);
       return SkImages::AdoptTextureFrom(context.skContext.get(), texture, kTopLeft_GrSurfaceOrigin, rgbInfo.skiaFormat, kOpaque_SkAlphaType);
