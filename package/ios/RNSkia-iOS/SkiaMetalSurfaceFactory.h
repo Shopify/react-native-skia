@@ -26,12 +26,10 @@ public:
                                               int height);
   static sk_sp<SkSurface> makeOffscreenSurface(int width, int height);
 
-  static sk_sp<SkImage>
-  makeImageFromCMSampleBuffer(CMSampleBufferRef sampleBuffer);
+  static sk_sp<SkImage> makeTextureFromImage(sk_sp<SkImage> image);
 
 private:
   static id<MTLDevice> device;
   static bool
   createSkiaDirectContextIfNecessary(SkiaMetalContext *threadContext);
-  static CVMetalTextureCacheRef getTextureCache();
 };

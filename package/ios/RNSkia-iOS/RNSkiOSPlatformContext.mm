@@ -174,12 +174,11 @@ RNSkiOSPlatformContext::makeImageFromPlatformBuffer(void *buffer) {
   sk_sp<SkData> data =
       SkData::MakeWithoutCopy(baseAddress, height * bytesPerRow);
   sk_sp<SkImage> image = SkImages::RasterFromData(info, data, bytesPerRow);
-
+  auto texture = SkiaMetalSurfaceFactory::makeTextureFromImage(image);
   // Step 5: Unlock the pixel buffer
   CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
-
-  return image;
-  // return SkiaMetalSurfaceFactory::makeImageFromCMSampleBuffer(sampleBuffer);
+  NSLog(@"%d", texture->isTextureBacked());
+  return texture;
 }
 
 sk_sp<SkFontMgr> RNSkiOSPlatformContext::createFontMgr() {

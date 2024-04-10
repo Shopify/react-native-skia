@@ -59,7 +59,7 @@ public:
 
   void releasePlatformBuffer(uint64_t pointer) override {
 #if __ANDROID_API__ >= 26
-      AHardwareBuffer *buffer = reinterpret_cast<AHardwareBuffer *>(pointer);
+    AHardwareBuffer *buffer = reinterpret_cast<AHardwareBuffer *>(pointer);
     AHardwareBuffer_release(buffer);
 #endif
   }
