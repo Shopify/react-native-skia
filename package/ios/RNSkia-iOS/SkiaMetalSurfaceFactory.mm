@@ -31,10 +31,11 @@
   }
 #endif
 
-thread_local std::unique_ptr<SkiaMetalContext> ThreadContextHolder::ThreadSkiaMetalContext = std::make_unique<SkiaMetalContext>();
-
 const std::unique_ptr<SkiaMetalContext>& ThreadContextHolder::getThreadSpecificSkiaContext() {
-  const std::unique_ptr<SkiaMetalContext>& context = ThreadContextHolder::ThreadSkiaMetalContext;
+  static thread_local std::unique_ptr<SkiaMetalContext> context;
+  if (context == nullptr) {
+    context = std::make_unique<SkiaMetalContext>();
+  }
   if (context->skContext == nullptr) {
     context->device = MTLCreateSystemDefaultDevice();
     context->commandQueue =

@@ -18,8 +18,6 @@ using SkiaMetalContext = struct SkiaMetalContext {
 };
 
 class ThreadContextHolder {
-private:
-  static thread_local std::unique_ptr<SkiaMetalContext> ThreadSkiaMetalContext;
 public:
   static const std::unique_ptr<SkiaMetalContext>& getThreadSpecificSkiaContext();
 };
