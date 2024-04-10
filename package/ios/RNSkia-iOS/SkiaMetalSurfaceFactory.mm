@@ -1,7 +1,7 @@
 #import "RNSkLog.h"
 
-#include "SkiaMetalSurfaceFactory.h"
 #import "SkiaCVPixelBufferUtils.h"
+#include "SkiaMetalSurfaceFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -16,7 +16,6 @@
 #import <include/gpu/ganesh/SkSurfaceGanesh.h>
 
 #pragma clang diagnostic pop
-
 
 thread_local SkiaMetalContext ThreadContextHolder::ThreadSkiaMetalContext;
 
@@ -113,7 +112,7 @@ sk_sp<SkImage> SkiaMetalSurfaceFactory::makeImageFromCMSampleBuffer(
           &ThreadContextHolder::ThreadSkiaMetalContext)) [[unlikely]] {
     throw std::runtime_error("Failed to create Skia Context for this Thread!");
   }
-  const SkiaMetalContext& context = ThreadContextHolder::ThreadSkiaMetalContext;
+  const SkiaMetalContext &context = ThreadContextHolder::ThreadSkiaMetalContext;
 
   if (!CMSampleBufferIsValid(sampleBuffer)) [[unlikely]] {
     throw std::runtime_error("The given CMSampleBuffer is not valid!");
@@ -121,21 +120,27 @@ sk_sp<SkImage> SkiaMetalSurfaceFactory::makeImageFromCMSampleBuffer(
 
   CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
 
-  CVPixelBufferBaseFormat baseFormat = SkiaCVPixelBufferUtils::getCVPixelBufferBaseFormat(pixelBuffer);
+  CVPixelBufferBaseFormat baseFormat =
+      SkiaCVPixelBufferUtils::getCVPixelBufferBaseFormat(pixelBuffer);
   switch (baseFormat) {
-    case CVPixelBufferBaseFormat::rgb: {
-      // It's in RGB, single plane
-      RGBFormatInfo rgbInfo = SkiaCVPixelBufferUtils::getRGBCVPixelBufferFormatInfo(pixelBuffer);
-      GrBackendTexture texture = SkiaCVPixelBufferUtils::getTextureFromCVPixelBuffer(pixelBuffer, /*planeIndex */ 0, rgbInfo.metalFormat);
-      return SkImages::AdoptTextureFrom(context.skContext.get(), texture, kTopLeft_GrSurfaceOrigin, rgbInfo.skiaFormat, kOpaque_SkAlphaType);
-    }
-    case CVPixelBufferBaseFormat::yuv: {
-      // It's in YUV, multi-plane
-      GrYUVABackendTextures textures = SkiaCVPixelBufferUtils::getYUVTexturesFromCVPixelBuffer(pixelBuffer);
-      return SkImages::TextureFromYUVATextures(context.skContext.get(), textures);
-    }
-    default: [[unlikely]] {
-      throw std::runtime_error("Unknown PixelBuffer format!");
-    }
+  case CVPixelBufferBaseFormat::rgb: {
+    // It's in RGB, single plane
+    RGBFormatInfo rgbInfo =
+        SkiaCVPixelBufferUtils::getRGBCVPixelBufferFormatInfo(pixelBuffer);
+    GrBackendTexture texture =
+        SkiaCVPixelBufferUtils::getTextureFromCVPixelBuffer(
+            pixelBuffer, /*planeIndex */ 0, rgbInfo.metalFormat);
+    return SkImages::AdoptTextureFrom(context.skContext.get(), texture,
+                                      kTopLeft_GrSurfaceOrigin,
+                                      rgbInfo.skiaFormat, kOpaque_SkAlphaType);
+  }
+  case CVPixelBufferBaseFormat::yuv: {
+    // It's in YUV, multi-plane
+    GrYUVABackendTextures textures =
+        SkiaCVPixelBufferUtils::getYUVTexturesFromCVPixelBuffer(pixelBuffer);
+    return SkImages::TextureFromYUVATextures(context.skContext.get(), textures);
+  }
+  default:
+    [[unlikely]] { throw std::runtime_error("Unknown PixelBuffer format!"); }
   }
 }

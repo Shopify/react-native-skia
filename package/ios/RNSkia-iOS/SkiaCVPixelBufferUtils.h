@@ -6,15 +6,12 @@
 //
 
 #pragma once
-#import <MetalKit/MetalKit.h>
 #import "include/gpu/GrYUVABackendTextures.h"
 #import <CoreMedia/CMSampleBuffer.h>
 #import <CoreVideo/CVMetalTextureCache.h>
+#import <MetalKit/MetalKit.h>
 
-enum class CVPixelBufferBaseFormat {
-  yuv,
-  rgb
-};
+enum class CVPixelBufferBaseFormat { yuv, rgb };
 
 struct RGBFormatInfo {
   MTLPixelFormat metalFormat;
@@ -25,32 +22,43 @@ class SkiaCVPixelBufferUtils {
 public:
   /**
    Get the base format of the given CVPixelBuffer.
-   Returns either RGB or YUV, or throws if the pixel-buffer is in an unknown format.
+   Returns either RGB or YUV, or throws if the pixel-buffer is in an unknown
+   format.
    */
-  static CVPixelBufferBaseFormat getCVPixelBufferBaseFormat(CVPixelBufferRef pixelBuffer);
+  static CVPixelBufferBaseFormat
+  getCVPixelBufferBaseFormat(CVPixelBufferRef pixelBuffer);
   /**
-   Gets RGB-specific information about a CVPixelBuffer, such as the Metal format and the Skia-specific format.
+   Gets RGB-specific information about a CVPixelBuffer, such as the Metal format
+   and the Skia-specific format.
    */
-  static RGBFormatInfo getRGBCVPixelBufferFormatInfo(CVPixelBufferRef pixelBuffer);
+  static RGBFormatInfo
+  getRGBCVPixelBufferFormatInfo(CVPixelBufferRef pixelBuffer);
   /**
    Get a Skia Texture backed by a MTLTexture from the given CVPixelBuffer.
    For RGB:
    ```
-   GrBackendTexture texture = getTextureFromCVPixelBuffer(pixelBuffer, 0, MTLPixelFormatBGRA8Unorm);
+   GrBackendTexture texture = getTextureFromCVPixelBuffer(pixelBuffer, 0,
+   MTLPixelFormatBGRA8Unorm);
    ```
-   For YUV use `getYUVTexturesFromCVPixelBuffer` instead, unless you want full control over the MTLPixelFormat per plane.
+   For YUV use `getYUVTexturesFromCVPixelBuffer` instead, unless you want full
+   control over the MTLPixelFormat per plane.
    */
-  static GrBackendTexture getTextureFromCVPixelBuffer(CVPixelBufferRef pixelBuffer, size_t planeIndex, MTLPixelFormat pixelFormat);
+  static GrBackendTexture
+  getTextureFromCVPixelBuffer(CVPixelBufferRef pixelBuffer, size_t planeIndex,
+                              MTLPixelFormat pixelFormat);
   /**
-   Get a Skia YUV Texture backed by multiple MTLTextures for the given CVPixelBuffer.
-   The CVPixelBuffer might be multi-planar (e.g. Y + UV) or single-planar.
-   Either way, it needs to be in a supported YUV format.
+   Get a Skia YUV Texture backed by multiple MTLTextures for the given
+   CVPixelBuffer. The CVPixelBuffer might be multi-planar (e.g. Y + UV) or
+   single-planar. Either way, it needs to be in a supported YUV format.
    */
-  static GrYUVABackendTextures getYUVTexturesFromCVPixelBuffer(CVPixelBufferRef pixelBuffer);
+  static GrYUVABackendTextures
+  getYUVTexturesFromCVPixelBuffer(CVPixelBufferRef pixelBuffer);
 
 private:
   static CVMetalTextureCacheRef getTextureCache();
-  static MTLPixelFormat getMTLPixelFormatForCVPixelBufferPlane(CVPixelBufferRef pixelBuffer, size_t planeIndex);
+  static MTLPixelFormat
+  getMTLPixelFormatForCVPixelBufferPlane(CVPixelBufferRef pixelBuffer,
+                                         size_t planeIndex);
 
   static SkYUVAInfo::PlaneConfig getPlaneConfig(OSType pixelFormat);
   static SkYUVAInfo::Subsampling getSubsampling(OSType pixelFormat);
