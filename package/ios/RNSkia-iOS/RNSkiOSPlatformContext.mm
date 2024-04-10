@@ -161,14 +161,15 @@ RNSkiOSPlatformContext::makeImageFromPlatformBuffer(void *buffer) {
   void *pixelData = CVPixelBufferGetBaseAddress(pixelBuffer);
 
   // Create SkImage from pixel data
+  SkImageInfo info = SkImageInfo::Make(width, height, kBGRA_8888_SkColorType, kUnpremul_SkAlphaType);
   SkBitmap bitmap;
-  bitmap.installPixels(SkImageInfo::MakeN32Premul(width, height), pixelData,
+  bitmap.installPixels(info, pixelData,
                        CVPixelBufferGetBytesPerRow(pixelBuffer));
   sk_sp<SkImage> image = SkImages::RasterFromBitmap(bitmap);
 
   CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
 
-  return image;
+  return image->makeNonTextureImage();
   // return SkiaMetalSurfaceFactory::makeImageFromCMSampleBuffer(sampleBuffer);
 }
 

@@ -1,4 +1,5 @@
 import { checkImage } from "../../../__tests__/setup";
+import { AlphaType, ColorType } from "../../../skia/types";
 import { setupSkia } from "../../../skia/__tests__/setup";
 import { surface } from "../setup";
 
@@ -30,37 +31,28 @@ describe("Platform Buffers", () => {
     if (surface.arch === "fabric" && surface.OS === "android") {
       return;
     }
-    const result = await surface.eval((Skia) => {
-      const pixels = new Uint8Array(256 * 256 * 4);
-      pixels.fill(255);
-      let i = 0;
-      for (let x = 0; x < 256 * 4; x++) {
-        for (let y = 0; y < 256 * 4; y++) {
-          pixels[i++] = (x * y) % 255;
-        }
-      }
-      const data = Skia.Data.fromBytes(pixels);
-      const img = Skia.Image.MakeImage(
-        {
-          width: 256,
-          height: 256,
-          alphaType: 1, //opaque
-          colorType: 4, // RGBA_8888
-        },
-        data,
-        256 * 4
-      )!;
-      const platformBuffer = Skia.Image.MakePlatformBuffer(img);
-      const image = Skia.Image.MakeImageFromPlatformBuffer(
-        platformBuffer.pointer
-      ).encodeToBytes();
-      platformBuffer.delete();
-      return Array.from(image);
-    });
+    const result = await surface.eval(
+      (Skia) => {
+        const pixels = new Uint8Array(256 * 256 * 4);
+        pixels.fill(255);
+        const sur = Skia.Surface.Make(256, 256)!;
+        const canvas = sur.getCanvas();
+        canvas.drawColor(Skia.Color("cyan"));
+        const platformBuffer = Skia.Image.MakePlatformBuffer(
+          sur.makeImageSnapshot()
+        );
+        const image = Skia.Image.MakeImageFromPlatformBuffer(
+          platformBuffer.pointer
+        ).encodeToBytes();
+        platformBuffer.delete();
+        return Array.from(image);
+      },
+      { alphaType: AlphaType.Unpremul, colorType: ColorType.BGRA_8888 }
+    );
     const image = Sk.Image.MakeImageFromEncoded(
       Sk.Data.fromBytes(new Uint8Array(result))
     )!;
     expect(image).not.toBeNull();
-    checkImage(image, "snapshots/platform-buffer.png");
+    checkImage(image, "snapshots/cyan-buffer.png.png");
   });
 });

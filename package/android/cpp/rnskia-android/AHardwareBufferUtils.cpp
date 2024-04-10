@@ -1,7 +1,6 @@
-#include "AHardwareBufferUtils.h"
-
 #if __ANDROID_API__ >= 26
 
+#include "AHardwareBufferUtils.h"
 #include <android/hardware_buffer.h>
 
 namespace RNSkia {
