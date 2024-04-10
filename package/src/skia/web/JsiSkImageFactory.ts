@@ -19,6 +19,12 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
     return Promise.resolve(null);
   }
 
+  MakeImageFromPlatformBuffer(platformBuffer: bigint): SkImage {
+    throw new Error(
+      `MakeImageFromPlatformBuffer(${platformBuffer}) is only available on iOS and Android!`
+    );
+  }
+
   MakeImageFromEncoded(encoded: SkData) {
     const image = this.CanvasKit.MakeImageFromEncoded(
       JsiSkData.fromValue(encoded)

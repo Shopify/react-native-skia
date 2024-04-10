@@ -27,6 +27,18 @@ public:
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
 
+  JSI_HOST_FUNCTION(MakeImageFromPlatformBuffer) {
+    jsi::BigInt pointer = arguments[0].asBigInt(runtime);
+    const uintptr_t platformBufferPointer = pointer.asUint64(runtime);
+    void *rawPointer = reinterpret_cast<void *>(platformBufferPointer);
+    auto image = getContext()->makeImageFromPlatformBuffer(rawPointer);
+    if (image == nullptr) {
+      throw std::runtime_error("Failed to convert PlatformBuffer to SkImage!");
+    }
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+  }
+
   JSI_HOST_FUNCTION(MakeImage) {
     auto imageInfo = JsiSkImageInfo::fromValue(runtime, arguments[0]);
     auto pixelData = JsiSkData::fromValue(runtime, arguments[1]);
@@ -68,6 +80,8 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromEncoded),
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTag),
+                       JSI_EXPORT_FUNC(JsiSkImageFactory,
+                                       MakeImageFromPlatformBuffer),
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage), )
 
   explicit JsiSkImageFactory(std::shared_ptr<RNSkPlatformContext> context)

@@ -7,6 +7,7 @@
 
 #include "include/gpu/ganesh/SkImageGanesh.h"
 #include "include/gpu/ganesh/gl/GrGLBackendSurface.h"
+#include "src/gpu/ganesh/gl/GrGLDefines.h"
 
 #pragma clang diagnostic pop
 
@@ -15,30 +16,38 @@ namespace RNSkia {
 thread_local SkiaOpenGLContext ThreadContextHolder::ThreadSkiaOpenGLContext;
 
 sk_sp<SkImage>
-SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(const SkImageInfo &info,
-                                                      void *buffer) {
+SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer) {
 #if __ANDROID_API__ >= 26
   const AHardwareBuffer *hardwareBuffer =
       static_cast<AHardwareBuffer *>(buffer);
   DeleteImageProc deleteImageProc = nullptr;
   UpdateImageProc updateImageProc = nullptr;
   TexImageCtx deleteImageCtx = nullptr;
+
+  AHardwareBuffer_Desc description;
+  AHardwareBuffer_describe(hardwareBuffer, &description);
+  if (description.format != AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM) {
+    throw std::runtime_error("AHardwareBuffer has unknown format (" +
+                             std::to_string(description.format) +
+                             ") - cannot convert to SkImage!");
+  }
+  GrBackendFormat format =
+      GrBackendFormats::MakeGL(GR_GL_RGBA8, GR_GL_TEXTURE_EXTERNAL);
+
   auto backendTex = MakeGLBackendTexture(
       ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(),
-      const_cast<AHardwareBuffer *>(hardwareBuffer), info.width(),
-      info.height(), &deleteImageProc, &updateImageProc, &deleteImageCtx, false,
-      // GR_GL_RGBA8 0x8058
-      // GR_GL_TEXTURE_EXTERNAL 0x8D65
-      GrBackendFormats::MakeGL(0x8058, 0x8D65), false);
+      const_cast<AHardwareBuffer *>(hardwareBuffer), description.width,
+      description.height, &deleteImageProc, &updateImageProc, &deleteImageCtx,
+      false, format, false);
   sk_sp<SkImage> image = SkImages::BorrowTextureFrom(
       ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(),
       backendTex, kTopLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType,
-      kPremul_SkAlphaType, nullptr);
+      kOpaque_SkAlphaType, nullptr);
   return image;
 #else
-  RNSkLogger::logToConsole(
-      "Hardware buffer in only supported on Android API level 26 and above.");
-  return nullptr;
+  throw std::runtime_error(
+      "HardwareBuffers are only supported on Android API 26 or higher! Set "
+      "your minSdk to 26 (or higher) and try again.");
 #endif
 }
 

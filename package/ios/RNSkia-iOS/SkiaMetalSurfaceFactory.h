@@ -4,6 +4,8 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #import "include/core/SkCanvas.h"
+#import <CoreMedia/CMSampleBuffer.h>
+#import <CoreVideo/CVMetalTextureCache.h>
 #import <include/gpu/GrDirectContext.h>
 
 #pragma clang diagnostic pop
@@ -24,8 +26,12 @@ public:
                                               int height);
   static sk_sp<SkSurface> makeOffscreenSurface(int width, int height);
 
+  static sk_sp<SkImage>
+  makeImageFromCMSampleBuffer(CMSampleBufferRef sampleBuffer);
+
 private:
   static id<MTLDevice> device;
   static bool
   createSkiaDirectContextIfNecessary(SkiaMetalContext *threadContext);
+  static CVMetalTextureCacheRef getTextureCache();
 };
