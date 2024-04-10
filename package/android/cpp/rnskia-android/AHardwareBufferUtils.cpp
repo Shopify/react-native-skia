@@ -1,4 +1,4 @@
-#include "include/android/AHardwareBufferUtils.h"
+#include "AHardwareBufferUtils.h"
 
 #if __ANDROID_API__ >= 26
 
