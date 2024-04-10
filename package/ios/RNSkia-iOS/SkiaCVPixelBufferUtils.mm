@@ -45,6 +45,22 @@ CVMetalTextureCacheRef SkiaCVPixelBufferUtils::getTextureCache() {
   return textureCache;
 }
 
+RGBFormatInfo SkiaCVPixelBufferUtils::getRGBCVPixelBufferFormatInfo(CVPixelBufferRef pixelBuffer) {
+  OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
+
+  MTLPixelFormat metalFormat;
+  SkColorType skiaFormat;
+  switch (format) {
+    case kCVPixelFormatType_32BGRA:
+      metalFormat = MTLPixelFormatBGRA8Unorm;
+      skiaFormat = kBGRA_8888_SkColorType;
+    // This can be extended with branches for specific RGB formats if new Apple uses new formats.
+    default:
+      throw std::runtime_error("CVPixelBuffer has unknown RGB format! " + std::string(FourCC2Str(format)));
+  }
+  return RGBFormatInfo { .metalFormat = metalFormat, .skiaFormat = skiaFormat };
+}
+
 GrBackendTexture SkiaCVPixelBufferUtils::getTextureFromCVPixelBuffer(CVPixelBufferRef pixelBuffer, size_t planeIndex, MTLPixelFormat pixelFormat) {
   // 1. Get cache
   CVMetalTextureCacheRef textureCache = getTextureCache();
@@ -99,6 +115,7 @@ SkYUVAInfo::PlaneConfig SkiaCVPixelBufferUtils::getPlaneConfig(OSType pixelForma
     case kCVPixelFormatType_420YpCbCr8VideoRange_8A_TriPlanar:
     case kCVPixelFormatType_444YpCbCr16VideoRange_16A_TriPlanar:
       return SkYUVAInfo::PlaneConfig::kY_U_V;
+    // This can be extended with branches for specific YUV formats if new Apple uses new formats.
     default:
       throw std::runtime_error("Invalid pixel format! " + std::string(FourCC2Str(pixelFormat)));
   }
@@ -139,6 +156,7 @@ SkYUVAInfo::Subsampling SkiaCVPixelBufferUtils::getSubsampling(OSType pixelForma
     case kCVPixelFormatType_422YpCbCr10BiPlanarFullRange:
     case kCVPixelFormatType_422YpCbCr16BiPlanarVideoRange:
       return SkYUVAInfo::Subsampling::k422;
+    // This can be extended with branches for specific YUV formats if new Apple uses new formats.
     default:
       throw std::runtime_error("Invalid pixel format! " + std::string(FourCC2Str(pixelFormat)));
   }
@@ -148,23 +166,26 @@ SkYUVColorSpace SkiaCVPixelBufferUtils::getColorspace(OSType pixelFormat) {
     case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
     case kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange:
     case kCVPixelFormatType_444YpCbCr8BiPlanarVideoRange:
-    case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
-    case kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange:
-    case kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange:
-    case kCVPixelFormatType_420YpCbCr8VideoRange_8A_TriPlanar:
-    case kCVPixelFormatType_422YpCbCr16BiPlanarVideoRange:
-    case kCVPixelFormatType_444YpCbCr16BiPlanarVideoRange:
-    case kCVPixelFormatType_444YpCbCr16VideoRange_16A_TriPlanar:
+      // 8-bit limited
       return SkYUVColorSpace::kRec709_Limited_SkYUVColorSpace;
     case kCVPixelFormatType_420YpCbCr8PlanarFullRange:
     case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
     case kCVPixelFormatType_422YpCbCr8BiPlanarFullRange:
     case kCVPixelFormatType_444YpCbCr8BiPlanarFullRange:
     case kCVPixelFormatType_422YpCbCr8FullRange:
+      // 8-bit full
+      return SkYUVColorSpace::kRec709_Full_SkYUVColorSpace;
+    case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
+    case kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange:
+    case kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange:
+      // 10-bit limited
+      return SkYUVColorSpace::kBT2020_10bit_Limited_SkYUVColorSpace;
     case kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:
     case kCVPixelFormatType_422YpCbCr10BiPlanarFullRange:
     case kCVPixelFormatType_444YpCbCr10BiPlanarFullRange:
-      return SkYUVColorSpace::kRec709_Full_SkYUVColorSpace;
+      // 10-bit full
+      return SkYUVColorSpace::kBT2020_10bit_Full_SkYUVColorSpace;
+    // This can be extended with branches for specific YUV formats if new Apple uses new formats.
     default:
       throw std::runtime_error("Invalid pixel format! " + std::string(FourCC2Str(pixelFormat)));
   }
@@ -192,7 +213,7 @@ MTLPixelFormat SkiaCVPixelBufferUtils::getMTLPixelFormatForCVPixelBufferPlane(CV
   } else if (bytesPerPixel == 2) {
     return MTLPixelFormatRG8Unorm;
   } else if (bytesPerPixel == 4) {
-    return MTLPixelFormatRGBA8Unorm;
+    return MTLPixelFormatBGRA8Unorm;
   } else {
     throw std::runtime_error("Invalid bytes per row! Expected 1 (R), 2 (RG) or 4 (RGBA), but received " + std::to_string(bytesPerPixel));
   }

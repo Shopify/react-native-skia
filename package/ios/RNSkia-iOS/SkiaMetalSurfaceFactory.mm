@@ -126,19 +126,14 @@ sk_sp<SkImage> SkiaMetalSurfaceFactory::makeImageFromCMSampleBuffer(
   switch (baseFormat) {
     case CVPixelBufferBaseFormat::rgb: {
       // It's in RGB (BGRA_32), single plane
-      GrBackendTexture backendTexture = SkiaCVPixelBufferUtils::getTextureFromCVPixelBuffer(pixelBuffer, /*planeIndex */ 0, MTLPixelFormatBGRA8Unorm);
-      auto image = SkImages::AdoptTextureFrom(context.skContext.get(), backendTexture, kTopLeft_GrSurfaceOrigin,
-                                              kBGRA_8888_SkColorType, kOpaque_SkAlphaType);
-      return image;
+      RGBFormatInfo rgbInfo = SkiaCVPixelBufferUtils::getRGBCVPixelBufferFormatInfo(pixelBuffer);
+      GrBackendTexture texture = SkiaCVPixelBufferUtils::getTextureFromCVPixelBuffer(pixelBuffer, /*planeIndex */ 0, rgbInfo.metalFormat);
+      return SkImages::AdoptTextureFrom(context.skContext.get(), texture, kTopLeft_GrSurfaceOrigin, rgbInfo.skiaFormat, kOpaque_SkAlphaType);
     }
     case CVPixelBufferBaseFormat::yuv: {
       // It's in YUV, multi-plane
       GrYUVABackendTextures textures = SkiaCVPixelBufferUtils::getYUVTexturesFromCVPixelBuffer(pixelBuffer);
-
-      auto image = SkImages::TextureFromYUVATextures(context.skContext.get(), textures, nullptr, [](void* context) {
-        // TODO: Proper cleanup
-      }, nullptr);
-      return image;
+      return SkImages::TextureFromYUVATextures(context.skContext.get(), textures);
     }
     default: {
       throw std::runtime_error("Unknown PixelBuffer format!");
