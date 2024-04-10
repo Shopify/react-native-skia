@@ -12,6 +12,7 @@
 
 #include "include/core/SkFontMgr.h"
 #include "include/core/SkSurface.h"
+#include "include/core/SkBitmap.h"
 
 #include "include/ports/SkFontMgr_mac_ct.h"
 
@@ -140,7 +141,34 @@ sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
 sk_sp<SkImage>
 RNSkiOSPlatformContext::makeImageFromPlatformBuffer(void *buffer) {
   CMSampleBufferRef sampleBuffer = (CMSampleBufferRef)buffer;
-  return SkiaMetalSurfaceFactory::makeImageFromCMSampleBuffer(sampleBuffer);
+    if (!CMSampleBufferIsValid(sampleBuffer)) {
+    throw std::runtime_error("The given CMSampleBuffer is not valid!");
+  }
+
+  CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+  double width = CVPixelBufferGetWidth(pixelBuffer);
+  double height = CVPixelBufferGetHeight(pixelBuffer);
+
+  // Make sure the format is RGB (BGRA_8888)
+  OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
+  if (format != kCVPixelFormatType_32BGRA) {
+    auto error = std::string("CMSampleBuffer has unknown Pixel Format - cannot convert to SkImage!");
+    throw std::runtime_error(error);
+  }
+
+  CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+  void* pixelData = CVPixelBufferGetBaseAddress(pixelBuffer);
+
+  // Create SkImage from pixel data
+  SkBitmap bitmap;
+  bitmap.installPixels(SkImageInfo::MakeN32Premul(width, height),
+                       pixelData, CVPixelBufferGetBytesPerRow(pixelBuffer));
+  sk_sp<SkImage> image = SkImages::RasterFromBitmap(bitmap);
+
+  CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+
+  return image;
+  //return SkiaMetalSurfaceFactory::makeImageFromCMSampleBuffer(sampleBuffer);
 }
 
 sk_sp<SkFontMgr> RNSkiOSPlatformContext::createFontMgr() {

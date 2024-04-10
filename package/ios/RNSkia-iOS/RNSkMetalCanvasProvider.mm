@@ -16,9 +16,9 @@
 #pragma clang diagnostic pop
 
 RNSkMetalCanvasProvider::RNSkMetalCanvasProvider(
-    std::function<void()> requestRedraw,
-    std::shared_ptr<RNSkia::RNSkPlatformContext> context)
-    : RNSkCanvasProvider(requestRedraw), _context(context) {
+	std::function<void()> requestRedraw,
+	std::shared_ptr<RNSkia::RNSkPlatformContext> context)
+	: RNSkCanvasProvider(requestRedraw), _context(context) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   _layer = [CAMetalLayer layer];
@@ -51,9 +51,9 @@ float RNSkMetalCanvasProvider::getScaledHeight() {
  Render to a canvas
  */
 bool RNSkMetalCanvasProvider::renderToCanvas(
-    const std::function<void(SkCanvas *)> &cb) {
+	const std::function<void(SkCanvas *)> &cb) {
   if (_width <= 0 || _height <= 0) {
-    return false;
+	return false;
   }
 
   // Make sure to NOT render or try any render operations while we're in the
@@ -63,39 +63,40 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
   // NOTE: UIApplication.sharedApplication.applicationState can only be
   // accessed from the main thread so we need to check here.
   if ([[NSThread currentThread] isMainThread]) {
-    auto state = UIApplication.sharedApplication.applicationState;
-    if (state == UIApplicationStateBackground) {
-      // Request a redraw in the next run loop callback
-      _requestRedraw();
-      // and don't draw now since it might cause errors in the metal renderer if
-      // we try to render while in the background. (see above issue)
-      return false;
-    }
+	auto state = UIApplication.sharedApplication.applicationState;
+	if (state == UIApplicationStateBackground) {
+	  // Request a redraw in the next run loop callback
+	  _requestRedraw();
+	  // and don't draw now since it might cause errors in the metal renderer if
+	  // we try to render while in the background. (see above issue)
+	  return false;
+	}
   }
   // Wrap in auto release pool since we want the system to clean up after
   // rendering and not wait until later - we've seen some example of memory
   // usage growing very fast in the simulator without this.
   @autoreleasepool {
-    id<CAMetalDrawable> currentDrawable = [_layer nextDrawable];
-    if (currentDrawable == nullptr) {
-      return false;
-    }
+	id<CAMetalDrawable> currentDrawable = [_layer nextDrawable];
+	if (currentDrawable == nullptr) {
+	  return false;
+	}
 
-    auto skSurface = SkiaMetalSurfaceFactory::makeWindowedSurface(
-        currentDrawable.texture, _layer.drawableSize.width,
-        _layer.drawableSize.height);
+	auto skSurface = SkiaMetalSurfaceFactory::makeWindowedSurface(
+		currentDrawable.texture, _layer.drawableSize.width,
+		_layer.drawableSize.height);
 
-    SkCanvas *canvas = skSurface->getCanvas();
-    cb(canvas);
+	SkCanvas *canvas = skSurface->getCanvas();
+	cb(canvas);
 
-    if (auto dContext = GrAsDirectContext(skSurface->recordingContext())) {
-      dContext->flushAndSubmit();
-    }
+	if (auto dContext = GrAsDirectContext(skSurface->recordingContext())) {
+	  dContext->flushAndSubmit();
+	}
 
-    const auto& context = ThreadContextHolder::getThreadSpecificSkiaContext();
-    id<MTLCommandBuffer> commandBuffer([context->commandQueue commandBuffer]);
-    [commandBuffer presentDrawable:currentDrawable];
-    [commandBuffer commit];
+	id<MTLCommandBuffer> commandBuffer(
+		[ThreadContextHolder::ThreadSkiaMetalContext
+				.commandQueue commandBuffer]);
+	[commandBuffer presentDrawable:currentDrawable];
+	[commandBuffer commit];
   }
   return true;
 };
@@ -105,7 +106,7 @@ void RNSkMetalCanvasProvider::setSize(int width, int height) {
   _height = height;
   _layer.frame = CGRectMake(0, 0, width, height);
   _layer.drawableSize = CGSizeMake(width * _context->getPixelDensity(),
-                                   height * _context->getPixelDensity());
+								   height * _context->getPixelDensity());
 
   _requestRedraw();
 }
