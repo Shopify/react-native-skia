@@ -205,7 +205,6 @@ GrYUVABackendTextures SkiaCVPixelBufferUtils::getYUVTexturesFromCVPixelBuffer(CV
 
   for (size_t planeIndex = 0; planeIndex < planesCount; planeIndex++) {
     MTLPixelFormat pixelFormat = getMTLPixelFormatForCVPixelBufferPlane(pixelBuffer, planeIndex);
-    NSLog(@"Plane %zu is in %zu", planeIndex, pixelFormat);
     GrBackendTexture texture = getTextureFromCVPixelBuffer(pixelBuffer, planeIndex, pixelFormat);
     textures[planeIndex] = texture;
   }
