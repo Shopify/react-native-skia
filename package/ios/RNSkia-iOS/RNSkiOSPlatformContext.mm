@@ -10,7 +10,6 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "include/core/SkBitmap.h"
 #include "include/core/SkFontMgr.h"
 #include "include/core/SkSurface.h"
 
@@ -94,9 +93,9 @@ uint64_t RNSkiOSPlatformContext::makePlatformBuffer(sk_sp<SkImage> image) {
       &pixelBuffer // the newly created pixel buffer
   );
 
-  // if (r != kCVReturnSuccess) {
-  //     return 1; // or handle error appropriately
-  // }
+  if (r != kCVReturnSuccess) {
+    return 0; // or handle error appropriately
+  }
 
   // Wrap the CVPixelBuffer in a CMSampleBuffer
   CMSampleBufferRef sampleBuffer = nullptr;
@@ -141,35 +140,30 @@ sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
 sk_sp<SkImage>
 RNSkiOSPlatformContext::makeImageFromPlatformBuffer(void *buffer) {
   CMSampleBufferRef sampleBuffer = (CMSampleBufferRef)buffer;
-  if (!CMSampleBufferIsValid(sampleBuffer)) {
-    throw std::runtime_error("The given CMSampleBuffer is not valid!");
-  }
+	// Step 1: Extract the CVPixelBufferRef from the CMSampleBufferRef
+	CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
 
-  CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-  double width = CVPixelBufferGetWidth(pixelBuffer);
-  double height = CVPixelBufferGetHeight(pixelBuffer);
+	// Step 2: Lock the pixel buffer to access the raw pixel data
+	CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
 
-  // Make sure the format is RGB (BGRA_8888)
-  OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
-  if (format != kCVPixelFormatType_32BGRA) {
-    auto error = std::string(
-        "CMSampleBuffer has unknown Pixel Format - cannot convert to SkImage!");
-    throw std::runtime_error(error);
-  }
+	// Step 3: Get information about the image
+	void *baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer);
+	size_t width = CVPixelBufferGetWidth(pixelBuffer);
+	size_t height = CVPixelBufferGetHeight(pixelBuffer);
+	size_t bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer);
 
-  CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-  void *pixelData = CVPixelBufferGetBaseAddress(pixelBuffer);
+	// Assuming the pixel format is 32BGRA, which is common for iOS video frames.
+	// You might need to adjust this based on the actual pixel format.
+	SkImageInfo info = SkImageInfo::Make(width, height, kRGBA_8888_SkColorType, kUnpremul_SkAlphaType);
 
-  // Create SkImage from pixel data
-  SkImageInfo info = SkImageInfo::Make(width, height, kBGRA_8888_SkColorType, kUnpremul_SkAlphaType);
-  SkBitmap bitmap;
-  bitmap.installPixels(info, pixelData,
-                       CVPixelBufferGetBytesPerRow(pixelBuffer));
-  sk_sp<SkImage> image = SkImages::RasterFromBitmap(bitmap);
+	// Step 4: Create an SkImage from the pixel buffer
+	sk_sp<SkData> data = SkData::MakeWithCopy(baseAddress, height * bytesPerRow);
+	sk_sp<SkImage> image = SkImages::RasterFromData(info, data, bytesPerRow);
 
-  CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+	// Step 5: Unlock the pixel buffer
+	CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
 
-  return image->makeNonTextureImage();
+	return image;
   // return SkiaMetalSurfaceFactory::makeImageFromCMSampleBuffer(sampleBuffer);
 }
 

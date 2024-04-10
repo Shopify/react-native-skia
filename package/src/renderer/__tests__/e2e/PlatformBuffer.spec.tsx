@@ -53,6 +53,6 @@ describe("Platform Buffers", () => {
       Sk.Data.fromBytes(new Uint8Array(result))
     )!;
     expect(image).not.toBeNull();
-    checkImage(image, "snapshots/cyan-buffer.png.png");
+    checkImage(image, "snapshots/cyan-buffer.png");
   });
 });
