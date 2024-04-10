@@ -92,9 +92,8 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
       dContext->flushAndSubmit();
     }
 
-    id<MTLCommandBuffer> commandBuffer(
-        [ThreadContextHolder::ThreadSkiaMetalContext
-                .commandQueue commandBuffer]);
+    const auto& context = ThreadContextHolder::getThreadSpecificSkiaContext();
+    id<MTLCommandBuffer> commandBuffer([context->commandQueue commandBuffer]);
     [commandBuffer presentDrawable:currentDrawable];
     [commandBuffer commit];
   }

@@ -1,6 +1,6 @@
 ---
 id: animations
-title: Animations with Reanimated
+title: Animations
 sidebar_label: Animations
 slug: /animations/animations
 ---

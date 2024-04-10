@@ -30,8 +30,8 @@ public:
   JSI_HOST_FUNCTION(MakeImageFromPlatformBuffer) {
     jsi::BigInt pointer = arguments[0].asBigInt(runtime);
     const uintptr_t platformBufferPointer = pointer.asUint64(runtime);
-    auto image = getContext()->makeImageFromPlatformBuffer(
-        reinterpret_cast<void *>(platformBufferPointer));
+    void *rawPointer = reinterpret_cast<void *>(platformBufferPointer);
+    auto image = getContext()->makeImageFromPlatformBuffer(rawPointer);
     if (image == nullptr) {
       throw std::runtime_error("Failed to convert PlatformBuffer to SkImage!");
     }
