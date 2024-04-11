@@ -51,27 +51,6 @@ public:
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
 
-  JSI_HOST_FUNCTION(MakePlatformBuffer) {
-    auto image = JsiSkImage::fromValue(runtime, arguments[0]);
-    image->makeNonTextureImage();
-
-    uint64_t pointer = getContext()->makePlatformBuffer(image);
-    jsi::HostFunctionType deleteFunc =
-        [=](jsi::Runtime &runtime, const jsi::Value &thisArg,
-            const jsi::Value *args, size_t count) -> jsi::Value {
-      getContext()->releasePlatformBuffer(pointer);
-      return jsi::Value::undefined();
-    };
-    jsi::Object buffer(runtime);
-    buffer.setProperty(runtime, "pointer",
-                       jsi::BigInt::fromUint64(runtime, pointer));
-    buffer.setProperty(runtime, "delete",
-                       jsi::Function::createFromHostFunction(
-                           runtime, jsi::PropNameID::forUtf8(runtime, "delete"),
-                           0, deleteFunc));
-    return buffer;
-  }
-
   JSI_HOST_FUNCTION(MakeImageFromViewTag) {
     auto viewTag = arguments[0].asNumber();
     auto context = getContext();
@@ -103,8 +82,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTag),
                        JSI_EXPORT_FUNC(JsiSkImageFactory,
                                        MakeImageFromPlatformBuffer),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakePlatformBuffer))
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage))
 
   explicit JsiSkImageFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

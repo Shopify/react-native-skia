@@ -56,22 +56,6 @@ export interface ImageInfo {
   width: number;
 }
 
-export interface PlatformBuffer {
-  /**
-   * A uint64_t/uintptr_t to the native platform buffer.
-   * - On iOS; this points to a `CMSampleBufferRef`
-   * - On Android; this points to a `AHardwareBuffer*`
-   */
-  pointer: bigint;
-  /**
-   * Delete this reference to the platform buffer again.
-   * There might still be other references, so it does not guarantee buffer deletion.
-   *
-   * This must always be called, otherwise the pipeline will stall.
-   */
-  delete(): void;
-}
-
 export interface ImageFactory {
   /**
    * Return an Image backed by the encoded data, but attempt to defer decoding until the image
@@ -84,12 +68,6 @@ export interface ImageFactory {
    *  image, nullptr is returned.
    */
   MakeImageFromEncoded: (encoded: SkData) => SkImage | null;
-
-  /**
-   * Copy pixels to a platform-specific buffer. (for testing purposes)
-   * TODO: Move to its own factory
-   */
-  MakePlatformBuffer: (image: SkImage) => PlatformBuffer;
 
   /**
    * Return an Image backed by the given native platform buffer.
