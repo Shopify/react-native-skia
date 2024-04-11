@@ -140,7 +140,7 @@ describe("Platform Buffers", () => {
         return Array.from(image.encodeToBytes());
       },
       {
-        alphaType: AlphaType.Opaque,
+        alphaType: AlphaType.Unpremul,
         colorType:
           surface.OS === "android" ? ColorType.RGBA_8888 : ColorType.BGRA_8888,
         originalPixels: surface.OS === "android" ? rgbaPixels : bgraPixels,
