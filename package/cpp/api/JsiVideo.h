@@ -45,7 +45,7 @@ public:
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiVideo, nextImage))
 
   JsiVideo(std::shared_ptr<RNSkPlatformContext> context,
-           std::shared_ptr<RNSkVideo> &video)
+           std::shared_ptr<RNSkVideo> video)
       : JsiSkWrappingSharedPtrHostObject(std::move(context), std::move(video)) {
   }
 
@@ -62,10 +62,9 @@ public:
       auto url = arguments[0].asString(runtime).utf8(runtime);
       auto video = context->createVideo(url);
       // Return the newly constructed object
-      return nullptr;
-      // return jsi::Object::createFromHostObject(
-      //     runtime, std::make_shared<JsiVideo>(std::move(context),
-      //     std::move(video)));
+       return jsi::Object::createFromHostObject(
+           runtime, std::make_shared<JsiVideo>(std::move(context),
+           std::move(video)));
     };
   }
 };

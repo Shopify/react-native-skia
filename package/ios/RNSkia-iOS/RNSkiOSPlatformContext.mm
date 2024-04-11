@@ -183,7 +183,7 @@ RNSkiOSPlatformContext::makeImageFromPlatformBuffer(void *buffer) {
 
 std::shared_ptr<RNSkVideo>
 RNSkiOSPlatformContext::createVideo(const std::string &url) {
-  return std::make_shared<RNSkiOSVideo>(url);
+  return std::make_shared<RNSkiOSVideo>(url, this);
 }
 
 sk_sp<SkFontMgr> RNSkiOSPlatformContext::createFontMgr() {
