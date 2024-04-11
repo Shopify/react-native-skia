@@ -1,11 +1,12 @@
-#include "RNSkiOSPlatformContext.h"
+#import "RNSkiOSPlatformContext.h"
 
 #import <CoreMedia/CMSampleBuffer.h>
 #import <React/RCTUtils.h>
 #include <thread>
 #include <utility>
 
-#include "SkiaMetalSurfaceFactory.h"
+#import "SkiaMetalSurfaceFactory.h"
+#import "SkiaCVPixelBufferUtils.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -152,32 +153,7 @@ sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
 sk_sp<SkImage>
 RNSkiOSPlatformContext::makeImageFromPlatformBuffer(void *buffer) {
   CMSampleBufferRef sampleBuffer = (CMSampleBufferRef)buffer;
-  // DO the CPU transfer (debugging only)
-  //  Step 1: Extract the CVPixelBufferRef from the CMSampleBufferRef
-  CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-
-  // Step 2: Lock the pixel buffer to access the raw pixel data
-  CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-
-  // Step 3: Get information about the image
-  void *baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer);
-  size_t width = CVPixelBufferGetWidth(pixelBuffer);
-  size_t height = CVPixelBufferGetHeight(pixelBuffer);
-  size_t bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer);
-
-  // Assuming the pixel format is 32BGRA, which is common for iOS video frames.
-  // You might need to adjust this based on the actual pixel format.
-  SkImageInfo info = SkImageInfo::Make(width, height, kRGBA_8888_SkColorType,
-                                       kUnpremul_SkAlphaType);
-
-  // Step 4: Create an SkImage from the pixel buffer
-  sk_sp<SkData> data =
-      SkData::MakeWithoutCopy(baseAddress, height * bytesPerRow);
-  sk_sp<SkImage> image = SkImages::RasterFromData(info, data, bytesPerRow);
-  auto texture = SkiaMetalSurfaceFactory::makeTextureFromImage(image);
-  // Step 5: Unlock the pixel buffer
-  CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
-  return texture;
+  return SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(sampleBuffer);
 }
 
 sk_sp<SkFontMgr> RNSkiOSPlatformContext::createFontMgr() {
