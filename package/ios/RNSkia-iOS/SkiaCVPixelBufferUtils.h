@@ -13,12 +13,13 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 #import "include/core/SkColorSpace.h"
-#import <include/gpu/GrBackendSurface.h>
+#import "include/gpu/GrBackendSurface.h"
+#import "include/gpu/GrYUVABackendTextures.h"
 #pragma clang diagnostic pop
 
 class SkiaCVPixelBufferUtils {
 public:
-  enum class CVPixelBufferBaseFormat { rgb };
+  enum class CVPixelBufferBaseFormat { rgb, yuv };
 
   /**
    Get the base format (currently only RGB) of the PixelBuffer.
@@ -39,6 +40,21 @@ public:
      */
     static GrBackendTexture
     getSkiaTextureForCVPixelBuffer(CVPixelBufferRef pixelBuffer);
+  };
+  
+  class YUV {
+  public:
+    /**
+     Gets one or more GPU-backed Skia Textures for the given YUV CVPixelBuffer.
+     The size of the resulting textures depends on the amount of planes in the CVPixelBuffer.
+     */
+    static GrYUVABackendTextures getSkiaTextureForCVPixelBuffer(CVPixelBufferRef pixelBuffer);
+    
+  private:
+    static SkYUVAInfo::PlaneConfig getPlaneConfig(OSType pixelFormat);
+    static SkYUVAInfo::Subsampling getSubsampling(OSType pixelFormat);
+    static SkYUVColorSpace getColorspace(OSType pixelFormat);
+    static SkYUVAInfo getYUVAInfoForCVPixelBuffer(CVPixelBufferRef pixelBuffer);
   };
 
 private:
