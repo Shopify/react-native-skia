@@ -121,12 +121,25 @@ sk_sp<SkImage> SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(
 
   CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
 
-  // Assume the CMSampleBuffer is in RGB.
-  SkColorType colorType =
-      SkiaCVPixelBufferUtils::RGB::getCVPixelBufferColorType(pixelBuffer);
-  GrBackendTexture texture =
-      SkiaCVPixelBufferUtils::RGB::getSkiaTextureForCVPixelBuffer(pixelBuffer);
-  return SkImages::AdoptTextureFrom(context.skContext.get(), texture,
-                                    kTopLeft_GrSurfaceOrigin, colorType,
-                                    kOpaque_SkAlphaType);
+  SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat format =
+      SkiaCVPixelBufferUtils::getCVPixelBufferBaseFormat(pixelBuffer);
+  switch (format) {
+  case SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat::rgb: {
+    // CVPixelBuffer is in any RGB format.
+    SkColorType colorType =
+        SkiaCVPixelBufferUtils::RGB::getCVPixelBufferColorType(pixelBuffer);
+    GrBackendTexture texture =
+        SkiaCVPixelBufferUtils::RGB::getSkiaTextureForCVPixelBuffer(
+            pixelBuffer);
+    return SkImages::AdoptTextureFrom(context.skContext.get(), texture,
+                                      kTopLeft_GrSurfaceOrigin, colorType,
+                                      kOpaque_SkAlphaType);
+  }
+  default:
+    [[unlikely]] {
+      throw std::runtime_error("Failed to convert PlatformBuffer to SkImage - "
+                               "PlatformBuffer has unsupported PixelFormat! " +
+                               std::to_string(static_cast<int>(format)));
+    }
+  }
 }

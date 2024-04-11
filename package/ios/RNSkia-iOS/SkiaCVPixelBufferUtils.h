@@ -18,6 +18,16 @@
 
 class SkiaCVPixelBufferUtils {
 public:
+  enum class CVPixelBufferBaseFormat { rgb };
+
+  /**
+   Get the base format (currently only RGB) of the PixelBuffer.
+   Depending on the base-format, different methods have to be used to create
+   Skia buffers.
+   */
+  static CVPixelBufferBaseFormat
+  getCVPixelBufferBaseFormat(CVPixelBufferRef pixelBuffer);
+
   class RGB {
   public:
     /**

@@ -29,6 +29,24 @@
   }
 #endif
 
+// pragma MARK: Base
+
+SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat
+SkiaCVPixelBufferUtils::getCVPixelBufferBaseFormat(
+    CVPixelBufferRef pixelBuffer) {
+  OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
+
+  switch (format) {
+  case kCVPixelFormatType_32BGRA:
+  case kCVPixelFormatType_32RGBA:
+    return CVPixelBufferBaseFormat::rgb;
+  default:
+    [[unlikely]] throw std::runtime_error(
+        "CVPixelBuffer has unsupported pixel-format! " +
+        std::string(FourCC2Str(format)));
+  }
+}
+
 // pragma MARK: RGB
 
 SkColorType SkiaCVPixelBufferUtils::RGB::getCVPixelBufferColorType(
