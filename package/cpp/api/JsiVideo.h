@@ -14,6 +14,8 @@
 #include "JsiSkRect.h"
 #include "JsiSkTypeface.h"
 
+#include "RNSkVideo.h"
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -26,9 +28,8 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiVideo : public JsiSkWrappingSharedPtrHostObject<Video> {
+class JsiVideo : public JsiSkWrappingSharedPtrHostObject<RNSkVideo> {
 public:
- 
   EXPORT_JSI_API_TYPENAME(JsiVideo, Video)
 
   JSI_HOST_FUNCTION(nextImage) {
@@ -43,11 +44,10 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiVideo, nextImage))
 
-  JsiVideo(std::shared_ptr<RNSkPlatformContext> context, std::shared_ptr<Video> &video)
-      : JsiSkWrappingSharedPtrHostObject(std::move(context),
-                                         std::move(video)) {}
-
-
+  JsiVideo(std::shared_ptr<RNSkPlatformContext> context,
+           std::shared_ptr<RNSkVideo> &video)
+      : JsiSkWrappingSharedPtrHostObject(std::move(context), std::move(video)) {
+  }
 
   /**
    * Creates the function for construction a new instance of the SkFont
@@ -59,13 +59,14 @@ public:
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
-        auto url = arguments[0].asString(runtime).utf8(runtime);
-        auto video = context->createVideo(url);
-        // Return the newly constructed object
-        return nullptr;
-        // return jsi::Object::createFromHostObject(
-        //     runtime, std::make_shared<JsiVideo>(std::move(context), std::move(video)));
-	};
+      auto url = arguments[0].asString(runtime).utf8(runtime);
+      auto video = context->createVideo(url);
+      // Return the newly constructed object
+      return nullptr;
+      // return jsi::Object::createFromHostObject(
+      //     runtime, std::make_shared<JsiVideo>(std::move(context),
+      //     std::move(video)));
+    };
   }
 };
 

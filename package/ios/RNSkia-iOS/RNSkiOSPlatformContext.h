@@ -65,7 +65,7 @@ public:
 
   void releasePlatformBuffer(uint64_t pointer) override;
 
-  std::shared_ptr<Video> createVideo(const std::string &url) override;
+  std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override;
 
   virtual void performStreamOperation(
       const std::string &sourceUri,

@@ -11,10 +11,10 @@
 
 namespace RNSkia {
 
-class Video {
+class RNSkVideo {
 public:
-  virtual ~Video() = default;
-  sk_sp<SkImage> nextImage(double* timeStamp = nullptr);
+  virtual ~RNSkVideo() = default;
+  virtual sk_sp<SkImage> nextImage(double *timeStamp = nullptr) = 0;
 };
 
 } // namespace RNSkia

@@ -1,37 +1,24 @@
 #pragma once
 
-#import <memory>
+#include <string>
 
-#import "RNSkMetalCanvasProvider.h"
-#import "RNSkView.h"
-#import "RNSkiOSPlatformContext.h"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
 
-class RNSkBaseiOSView {
-public:
-  virtual CALayer *getLayer() = 0;
-  virtual void setSize(int width, int height) = 0;
-  virtual std::shared_ptr<RNSkia::RNSkView> getDrawView() = 0;
-};
+#include "include/core/SkImage.h"
 
-template <class T> class RNSkiOSView : public RNSkBaseiOSView, public T {
-public:
-  RNSkiOSView(std::shared_ptr<RNSkia::RNSkPlatformContext> context)
-      : T(context,
-          std::make_shared<RNSkMetalCanvasProvider>(
-              std::bind(&RNSkia::RNSkView::requestRedraw, this), context)) {}
+#pragma clang diagnostic pop
 
-  CALayer *getLayer() override {
-    return std::static_pointer_cast<RNSkMetalCanvasProvider>(
-               this->getCanvasProvider())
-        ->getLayer();
-  }
+#include "RNSkiOSVideo.h"
 
-  void setSize(int width, int height) override {
-    std::static_pointer_cast<RNSkMetalCanvasProvider>(this->getCanvasProvider())
-        ->setSize(width, height);
-  }
+namespace RNSkia {
 
-  std::shared_ptr<RNSkia::RNSkView> getDrawView() override {
-    return this->shared_from_this();
-  }
-};
+RNSkiOSVideo::RNSkiOSVideo(std::string url) {
+
+}
+
+sk_sp<SkImage> RNSkiOSVideo::nextImage(double *timeStamp) {
+    return nullptr;
+}
+
+} // namespace RNSkia

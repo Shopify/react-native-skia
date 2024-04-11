@@ -9,15 +9,15 @@
 
 #pragma clang diagnostic pop
 
-#include "Video.h"
+#include "RNSkVideo.h"
 
 namespace RNSkia {
 
-class RNSkiOSVideo: public Video {
+class RNSkiOSVideo : public RNSkVideo {
 public:
   RNSkiOSVideo(std::string url);
-
-  sk_sp<SkImage> nextImage(double* timeStamp = nullptr);
+  ~RNSkiOSVideo() override {}
+  sk_sp<SkImage> nextImage(double *timeStamp = nullptr) override;
 };
 
 } // namespace RNSkia
