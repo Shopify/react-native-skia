@@ -2,10 +2,42 @@ import { checkImage } from "../../../__tests__/setup";
 import { setupSkia } from "../../../skia/__tests__/setup";
 import { surface } from "../setup";
 
+const shouldPlatformBufferTestRun = () => {
+  // Skip outside iOS and Android
+  if (surface.OS !== "ios" && surface.OS !== "android") {
+    return false;
+  }
+  // Skip test on Fabric (it runs on API Level 21 which doesn't support platform buffers)
+  if (surface.arch === "fabric" && surface.OS === "android") {
+    return false;
+  }
+  return true;
+};
+
 describe("Platform Buffers", () => {
+  it("On non supported platforms MakeImageFromPlatformBuffer() should throw", async () => {
+    const { Skia: Sk } = setupSkia();
+    if (!shouldPlatformBufferTestRun()) {
+      return;
+    }
+    const result = await surface.eval((Skia) => {
+      const sur = Skia.Surface.Make(256, 256)!;
+      const canvas = sur.getCanvas();
+      canvas.drawColor(Skia.Color("cyan"));
+      const platformBuffer = Skia.Image.MakePlatformBuffer(
+        sur.makeImageSnapshot()
+      );
+      return platformBuffer.pointer.toString();
+    });
+    const pointer = BigInt(result);
+    expect(pointer).not.toBe(BigInt(0));
+    const t = () => {
+      Sk.Image.MakeImageFromPlatformBuffer(pointer);
+    };
+    expect(t).toThrow(Error);
+  });
   it("creates a platform buffer from an image", async () => {
-    // Skip outside iOS and Android
-    if (surface.OS !== "ios" && surface.OS !== "android") {
+    if (!shouldPlatformBufferTestRun()) {
       return;
     }
     const result = await surface.eval((Skia) => {
@@ -21,21 +53,12 @@ describe("Platform Buffers", () => {
       platformBuffer.delete();
       return r;
     });
-    // Skip test on Fabric (it runs on API Level 21 which doesn't support platform buffers)
-    if (surface.arch === "fabric" && surface.OS === "android") {
-      expect(BigInt(result)).toBe(0);
-    } else {
-      expect(BigInt(result)).not.toBe(BigInt(0));
-    }
+    expect(BigInt(result)).not.toBe(BigInt(0));
   });
   it("creates an image from a platform buffer", async () => {
     const { Skia: Sk } = setupSkia();
     // Skip outside iOS and Android
-    if (surface.OS !== "ios" && surface.OS !== "android") {
-      return;
-    }
-    // Skip test on Fabric (it runs on API Level 21 which doesn't support platform buffers)
-    if (surface.arch === "fabric" && surface.OS === "android") {
+    if (!shouldPlatformBufferTestRun()) {
       return;
     }
     const result = await surface.eval((Skia) => {
@@ -47,9 +70,10 @@ describe("Platform Buffers", () => {
       );
       const image = Skia.Image.MakeImageFromPlatformBuffer(
         platformBuffer.pointer
-      ).encodeToBytes();
+      );
+
       platformBuffer.delete();
-      return Array.from(image);
+      return Array.from(image.encodeToBytes());
     });
     const image = Sk.Image.MakeImageFromEncoded(
       Sk.Data.fromBytes(new Uint8Array(result))

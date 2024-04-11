@@ -177,7 +177,6 @@ RNSkiOSPlatformContext::makeImageFromPlatformBuffer(void *buffer) {
   auto texture = SkiaMetalSurfaceFactory::makeTextureFromImage(image);
   // Step 5: Unlock the pixel buffer
   CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
-  NSLog(@"%d", texture->isTextureBacked());
   return texture;
 }
 
