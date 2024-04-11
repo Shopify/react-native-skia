@@ -69,20 +69,8 @@ void RNSkiOSPlatformContext::releasePlatformBuffer(uint64_t pointer) {
   }
 }
 
-OSType getCVPixelBufferPixelFormatForSkColorType(SkColorType colorType) {
-  // iOS only supports 32BGRA and 32ARGB for RGB CVPixelBuffers. Other formats
-  // are not supported.
-  switch (colorType) {
-  case SkColorType::kBGRA_8888_SkColorType:
-    return kCVPixelFormatType_32BGRA;
-  default:
-    throw std::runtime_error("Cannot convert unknown SkColorType #" +
-                             std::to_string(colorType) +
-                             " to CVPixelBuffer PixelFormat!");
-  }
-}
-
 uint64_t RNSkiOSPlatformContext::makePlatformBuffer(sk_sp<SkImage> image) {
+  // 0. If Image is not in BGRA, convert to BGRA as only BGRA is supported.
   if (image->colorType() != kBGRA_8888_SkColorType) {
     // on iOS, 32_BGRA is the only supported RGB format for CVPixelBuffers.
     image = image->makeColorTypeAndColorSpace(
@@ -95,66 +83,80 @@ uint64_t RNSkiOSPlatformContext::makePlatformBuffer(sk_sp<SkImage> image) {
     }
   }
 
+  // 1. Get image info
   auto bytesPerPixel = image->imageInfo().bytesPerPixel();
   int bytesPerRow = image->width() * bytesPerPixel;
   auto buf = SkData::MakeUninitialized(image->width() * image->height() *
                                        bytesPerPixel);
   SkImageInfo info = SkImageInfo::Make(image->width(), image->height(),
                                        image->colorType(), image->alphaType());
+  // 2. Copy pixels into our buffer
   image->readPixels(nullptr, info, const_cast<void *>(buf->data()), bytesPerRow,
                     0, 0);
-  auto pixelData = const_cast<void *>(buf->data());
 
-  // Create a CVPixelBuffer from the raw pixel data
+  // 3. Create an IOSurface (GPU + CPU memory)
+  CFMutableDictionaryRef dict = CFDictionaryCreateMutable(
+      kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks,
+      &kCFTypeDictionaryValueCallBacks);
+  int width = image->width();
+  int height = image->height();
+  int pitch = width * bytesPerPixel;
+  int size = width * height * bytesPerPixel;
+  OSType pixelFormat = kCVPixelFormatType_32BGRA;
+  CFDictionarySetValue(
+      dict, kIOSurfaceBytesPerRow,
+      CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &pitch));
+  CFDictionarySetValue(
+      dict, kIOSurfaceBytesPerElement,
+      CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &bytesPerPixel));
+  CFDictionarySetValue(
+      dict, kIOSurfaceWidth,
+      CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &width));
+  CFDictionarySetValue(
+      dict, kIOSurfaceHeight,
+      CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &height));
+  CFDictionarySetValue(
+      dict, kIOSurfacePixelFormat,
+      CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &pixelFormat));
+  CFDictionarySetValue(
+      dict, kIOSurfaceAllocSize,
+      CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &size));
+  IOSurfaceRef surface = IOSurfaceCreate(dict);
+  if (surface == nil) {
+    throw std::runtime_error("Failed to create " + std::to_string(width) + "x" +
+                             std::to_string(height) + " IOSurface!");
+  }
+
+  // 4. Copy over the memory from the pixels into the IOSurface
+  IOSurfaceLock(surface, 0, nil);
+  void *base = IOSurfaceGetBaseAddress(surface);
+  memcpy(base, buf->data(), buf->size());
+  IOSurfaceUnlock(surface, 0, nil);
+
+  // 5. Create a CVPixelBuffer from the IOSurface
   CVPixelBufferRef pixelBuffer = nullptr;
-  OSType pixelFormatType =
-      getCVPixelBufferPixelFormatForSkColorType(image->colorType());
-
-  // You will need to fill in the details for creating the pixel buffer
-  // CVPixelBufferCreateWithBytes or CVPixelBufferCreateWithPlanarBytes
-  // Create the CVPixelBuffer with the image data
-  void *context = static_cast<void *>(
-      new sk_sp<SkData>(buf)); // Create a copy for the context
-  CVReturn result = CVPixelBufferCreateWithBytes(
-      nullptr, // allocator
-      image->width(), image->height(), pixelFormatType,
-      pixelData,                                         // pixel data
-      bytesPerRow,                                       // bytes per row
-      [](void *releaseRefCon, const void *baseAddress) { // release callback
-        auto buf = static_cast<sk_sp<SkData> *>(releaseRefCon);
-        buf->reset(); // This effectively calls unref on the SkData object
-        delete buf;   // Cleanup the dynamically allocated context
-      },
-      context,     // release callback context
-      nullptr,     // pixel buffer attributes
-      &pixelBuffer // the newly created pixel buffer
-  );
-
+  CVReturn result =
+      CVPixelBufferCreateWithIOSurface(nil, surface, nil, &pixelBuffer);
   if (result != kCVReturnSuccess) {
     throw std::runtime_error(
         "Failed to create CVPixelBuffer from SkImage! Return value: " +
         std::to_string(result));
   }
 
-  // Wrap the CVPixelBuffer in a CMSampleBuffer
-  CMSampleBufferRef sampleBuffer = nullptr;
-
+  // 6. Create CMSampleBuffer base information
   CMFormatDescriptionRef formatDescription = nullptr;
   CMVideoFormatDescriptionCreateForImageBuffer(kCFAllocatorDefault, pixelBuffer,
                                                &formatDescription);
-
-  // Assuming no specific timing is required, we initialize the timing info to
-  // zero.
   CMSampleTimingInfo timingInfo = {0};
-  timingInfo.duration = kCMTimeInvalid; // Indicate an unknown duration.
-  timingInfo.presentationTimeStamp = kCMTimeZero; // Start at time zero.
-  timingInfo.decodeTimeStamp = kCMTimeInvalid;    // No specific decode time.
+  timingInfo.duration = kCMTimeInvalid;
+  timingInfo.presentationTimeStamp = kCMTimeZero;
+  timingInfo.decodeTimeStamp = kCMTimeInvalid;
 
-  // Create the sample buffer.
+  // 7. Wrap the CVPixelBuffer in a CMSampleBuffer
+  CMSampleBufferRef sampleBuffer = nullptr;
   OSStatus status = CMSampleBufferCreateReadyWithImageBuffer(
       kCFAllocatorDefault, pixelBuffer, formatDescription, &timingInfo,
       &sampleBuffer);
-
   if (status != noErr) {
     if (formatDescription) {
       CFRelease(formatDescription);
@@ -167,7 +169,7 @@ uint64_t RNSkiOSPlatformContext::makePlatformBuffer(sk_sp<SkImage> image) {
         std::to_string(status));
   }
 
-  // Return sampleBuffer casted to uint64_t
+  // 8. Return CMsampleBuffer casted to uint64_t
   return reinterpret_cast<uint64_t>(sampleBuffer);
 }
 
