@@ -136,11 +136,12 @@ sk_sp<SkImage> SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(
                                       kOpaque_SkAlphaType);
   }
   case SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat::yuv: {
-      // CVPixelBuffer is in any YUV format, multi-plane
-      GrYUVABackendTextures textures =
-          SkiaCVPixelBufferUtils::YUV::getSkiaTextureForCVPixelBuffer(pixelBuffer);
-      return SkImages::TextureFromYUVATextures(context.skContext.get(), textures);
-    }
+    // CVPixelBuffer is in any YUV format, multi-plane
+    GrYUVABackendTextures textures =
+        SkiaCVPixelBufferUtils::YUV::getSkiaTextureForCVPixelBuffer(
+            pixelBuffer);
+    return SkImages::TextureFromYUVATextures(context.skContext.get(), textures);
+  }
   default:
     [[unlikely]] {
       throw std::runtime_error("Failed to convert PlatformBuffer to SkImage - "

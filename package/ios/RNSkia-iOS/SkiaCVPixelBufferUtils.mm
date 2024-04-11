@@ -35,7 +35,7 @@ SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat
 SkiaCVPixelBufferUtils::getCVPixelBufferBaseFormat(
     CVPixelBufferRef pixelBuffer) {
   OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
-  
+
   switch (format) {
   // 8-bit YUV formats
   case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
@@ -64,9 +64,10 @@ SkiaCVPixelBufferUtils::getCVPixelBufferBaseFormat(
   case kCVPixelFormatType_30RGB:
     return CVPixelBufferBaseFormat::rgb;
   default:
-    [[unlikely]] throw std::runtime_error("CVPixelBuffer has unknown pixel format! " +
-                                          std::string("Expected: any RGB or YUV format, Received: ") +
-                                          std::string(FourCC2Str(format)));
+    [[unlikely]] throw std::runtime_error(
+        "CVPixelBuffer has unknown pixel format! " +
+        std::string("Expected: any RGB or YUV format, Received: ") +
+        std::string(FourCC2Str(format)));
   }
 }
 
@@ -97,13 +98,16 @@ GrBackendTexture SkiaCVPixelBufferUtils::RGB::getSkiaTextureForCVPixelBuffer(
 
 // pragma MARK: YUV
 
-GrYUVABackendTextures SkiaCVPixelBufferUtils::YUV::getSkiaTextureForCVPixelBuffer(CVPixelBufferRef pixelBuffer) {
+GrYUVABackendTextures
+SkiaCVPixelBufferUtils::YUV::getSkiaTextureForCVPixelBuffer(
+    CVPixelBufferRef pixelBuffer) {
   // 1. Get all planes (YUV, Y_UV, Y_U_V or Y_U_V_A)
   size_t planesCount = CVPixelBufferGetPlaneCount(pixelBuffer);
   GrBackendTexture textures[planesCount];
 
   for (size_t planeIndex = 0; planeIndex < planesCount; planeIndex++) {
-    textures[planeIndex] = getSkiaTextureForCVPixelBufferPlane(pixelBuffer, planeIndex);
+    textures[planeIndex] =
+        getSkiaTextureForCVPixelBufferPlane(pixelBuffer, planeIndex);
   }
 
   // 2. Wrap info about buffer

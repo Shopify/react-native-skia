@@ -41,15 +41,17 @@ public:
     static GrBackendTexture
     getSkiaTextureForCVPixelBuffer(CVPixelBufferRef pixelBuffer);
   };
-  
+
   class YUV {
   public:
     /**
      Gets one or more GPU-backed Skia Textures for the given YUV CVPixelBuffer.
-     The size of the resulting textures depends on the amount of planes in the CVPixelBuffer.
+     The size of the resulting textures depends on the amount of planes in the
+     CVPixelBuffer.
      */
-    static GrYUVABackendTextures getSkiaTextureForCVPixelBuffer(CVPixelBufferRef pixelBuffer);
-    
+    static GrYUVABackendTextures
+    getSkiaTextureForCVPixelBuffer(CVPixelBufferRef pixelBuffer);
+
   private:
     static SkYUVAInfo::PlaneConfig getPlaneConfig(OSType pixelFormat);
     static SkYUVAInfo::Subsampling getSubsampling(OSType pixelFormat);
