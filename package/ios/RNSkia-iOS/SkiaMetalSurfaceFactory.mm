@@ -1,7 +1,7 @@
 #import "RNSkLog.h"
 
-#import "SkiaMetalSurfaceFactory.h"
 #import "SkiaCVPixelBufferUtils.h"
+#import "SkiaMetalSurfaceFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -107,8 +107,8 @@ sk_sp<SkSurface> SkiaMetalSurfaceFactory::makeOffscreenSurface(int width,
   return surface;
 }
 
-sk_sp<SkImage>
-SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(CMSampleBufferRef sampleBuffer) {
+sk_sp<SkImage> SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(
+    CMSampleBufferRef sampleBuffer) {
   if (!SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
           &ThreadContextHolder::ThreadSkiaMetalContext)) [[unlikely]] {
     throw std::runtime_error("Failed to create Skia Context for this Thread!");
@@ -122,8 +122,10 @@ SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(CMSampleBufferRef sampleB
   CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
 
   // Assume the CMSampleBuffer is in RGB.
-  SkiaCVPixelBufferUtils::RGB::FormatInfo rgbInfo = SkiaCVPixelBufferUtils::RGB::getCVPixelBufferFormatInfo(pixelBuffer);
-  GrBackendTexture texture = SkiaCVPixelBufferUtils::RGB::getSkiaTextureForCVPixelBuffer(pixelBuffer);
+  SkiaCVPixelBufferUtils::RGB::FormatInfo rgbInfo =
+      SkiaCVPixelBufferUtils::RGB::getCVPixelBufferFormatInfo(pixelBuffer);
+  GrBackendTexture texture =
+      SkiaCVPixelBufferUtils::RGB::getSkiaTextureForCVPixelBuffer(pixelBuffer);
   return SkImages::AdoptTextureFrom(context.skContext.get(), texture,
                                     kTopLeft_GrSurfaceOrigin,
                                     rgbInfo.skiaFormat, kOpaque_SkAlphaType);

@@ -10,8 +10,8 @@
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
-#import <include/gpu/GrBackendSurface.h>
 #import "include/core/SkColorSpace.h"
+#import <include/gpu/GrBackendSurface.h>
 #pragma clang diagnostic pop
 
 #include <TargetConditionals.h>
@@ -29,10 +29,10 @@
   }
 #endif
 
-
 // pragma MARK: RGB
 
-SkiaCVPixelBufferUtils::RGB::FormatInfo SkiaCVPixelBufferUtils::RGB::getCVPixelBufferFormatInfo(
+SkiaCVPixelBufferUtils::RGB::FormatInfo
+SkiaCVPixelBufferUtils::RGB::getCVPixelBufferFormatInfo(
     CVPixelBufferRef pixelBuffer) {
   OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
 
@@ -50,16 +50,19 @@ SkiaCVPixelBufferUtils::RGB::FormatInfo SkiaCVPixelBufferUtils::RGB::getCVPixelB
         "CVPixelBuffer has unknown RGB format! " +
         std::string(FourCC2Str(format)));
   }
-  return SkiaCVPixelBufferUtils::RGB::FormatInfo{.metalFormat = metalFormat, .skiaFormat = skiaFormat};
+  return SkiaCVPixelBufferUtils::RGB::FormatInfo{.metalFormat = metalFormat,
+                                                 .skiaFormat = skiaFormat};
 }
 
-GrBackendTexture SkiaCVPixelBufferUtils::RGB::getSkiaTextureForCVPixelBuffer(CVPixelBufferRef pixelBuffer) {
+GrBackendTexture SkiaCVPixelBufferUtils::RGB::getSkiaTextureForCVPixelBuffer(
+    CVPixelBufferRef pixelBuffer) {
   return getSkiaTextureForCVPixelBufferPlane(pixelBuffer, /* planeIndex */ 0);
 }
 
 // pragma MARK: CVPixelBuffer -> Skia Texture
 
-GrBackendTexture SkiaCVPixelBufferUtils::getSkiaTextureForCVPixelBufferPlane(CVPixelBufferRef pixelBuffer, size_t planeIndex) {
+GrBackendTexture SkiaCVPixelBufferUtils::getSkiaTextureForCVPixelBufferPlane(
+    CVPixelBufferRef pixelBuffer, size_t planeIndex) {
   // 1. Get cache
   CVMetalTextureCacheRef textureCache = getTextureCache();
 
@@ -67,7 +70,8 @@ GrBackendTexture SkiaCVPixelBufferUtils::getSkiaTextureForCVPixelBufferPlane(CVP
   CVMetalTextureRef textureHolder;
   size_t width = CVPixelBufferGetWidthOfPlane(pixelBuffer, planeIndex);
   size_t height = CVPixelBufferGetHeightOfPlane(pixelBuffer, planeIndex);
-  MTLPixelFormat pixelFormat = getMTLPixelFormatForCVPixelBufferPlane(pixelBuffer, planeIndex);
+  MTLPixelFormat pixelFormat =
+      getMTLPixelFormatForCVPixelBufferPlane(pixelBuffer, planeIndex);
   CVReturn result = CVMetalTextureCacheCreateTextureFromImage(
       kCFAllocatorDefault, textureCache, pixelBuffer, nil, pixelFormat, width,
       height, planeIndex, &textureHolder);

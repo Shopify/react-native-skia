@@ -12,32 +12,36 @@
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
-#import <include/gpu/GrBackendSurface.h>
 #import "include/core/SkColorSpace.h"
+#import <include/gpu/GrBackendSurface.h>
 #pragma clang diagnostic pop
 
 class SkiaCVPixelBufferUtils {
 public:
-
-class RGB {
-public:
-  struct FormatInfo {
-    MTLPixelFormat metalFormat;
-    SkColorType skiaFormat;
+  class RGB {
+  public:
+    struct FormatInfo {
+      MTLPixelFormat metalFormat;
+      SkColorType skiaFormat;
+    };
+    /**
+     Gets RGB-specific information about a CVPixelBuffer, such as the Metal
+     format and the Skia-specific format.
+     */
+    static FormatInfo getCVPixelBufferFormatInfo(CVPixelBufferRef pixelBuffer);
+    /**
+     Gets a GPU-backed Skia Texture for the given RGB CVPixelBuffer.
+     */
+    static GrBackendTexture
+    getSkiaTextureForCVPixelBuffer(CVPixelBufferRef pixelBuffer);
   };
-  /**
-   Gets RGB-specific information about a CVPixelBuffer, such as the Metal format
-   and the Skia-specific format.
-   */
-  static FormatInfo getCVPixelBufferFormatInfo(CVPixelBufferRef pixelBuffer);
-  /**
-   Gets a GPU-backed Skia Texture for the given RGB CVPixelBuffer.
-   */
-  static GrBackendTexture getSkiaTextureForCVPixelBuffer(CVPixelBufferRef pixelBuffer);
-};
 
 private:
   static CVMetalTextureCacheRef getTextureCache();
-  static GrBackendTexture getSkiaTextureForCVPixelBufferPlane(CVPixelBufferRef pixelBuffer, size_t planeIndex);
-  static MTLPixelFormat getMTLPixelFormatForCVPixelBufferPlane(CVPixelBufferRef pixelBuffer, size_t planeIndex);
+  static GrBackendTexture
+  getSkiaTextureForCVPixelBufferPlane(CVPixelBufferRef pixelBuffer,
+                                      size_t planeIndex);
+  static MTLPixelFormat
+  getMTLPixelFormatForCVPixelBufferPlane(CVPixelBufferRef pixelBuffer,
+                                         size_t planeIndex);
 };
