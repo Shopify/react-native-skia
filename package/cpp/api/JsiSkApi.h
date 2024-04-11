@@ -6,6 +6,7 @@
 
 #include "JsiSkHostObjects.h"
 
+#include "JsiPlatformBuffer.h"
 #include "JsiSkAnimatedImage.h"
 #include "JsiSkAnimatedImageFactory.h"
 #include "JsiSkColor.h"
@@ -122,6 +123,9 @@ public:
     installReadonlyProperty(
         "ParagraphBuilder",
         std::make_shared<JsiSkParagraphBuilderFactory>(context));
+
+    installReadonlyProperty(
+        "PlatformBuffer", std::make_shared<JsiPlatformBufferFactory>(context));
   }
 };
 } // namespace RNSkia

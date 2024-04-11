@@ -82,7 +82,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTag),
                        JSI_EXPORT_FUNC(JsiSkImageFactory,
                                        MakeImageFromPlatformBuffer),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage), )
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage))
 
   explicit JsiSkImageFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

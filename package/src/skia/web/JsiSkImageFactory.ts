@@ -1,7 +1,12 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
-import type { SkData, ImageInfo, SkImage } from "../types";
-import type { ImageFactory } from "../types/Image/ImageFactory";
+import type {
+  SkData,
+  ImageInfo,
+  SkImage,
+  PlatformBuffer,
+  ImageFactory,
+} from "../types";
 
 import { Host, getEnum } from "./Host";
 import { JsiSkImage } from "./JsiSkImage";
@@ -19,9 +24,9 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
     return Promise.resolve(null);
   }
 
-  MakeImageFromPlatformBuffer(platformBuffer: bigint): SkImage {
+  MakeImageFromPlatformBuffer(_platformBuffer: PlatformBuffer): SkImage {
     throw new Error(
-      `MakeImageFromPlatformBuffer(${platformBuffer}) is only available on iOS and Android!`
+      "MakeImageFromPlatformBuffer() is only available on iOS and Android!"
     );
   }
 

@@ -142,6 +142,10 @@ public:
    */
   virtual sk_sp<SkImage> makeImageFromPlatformBuffer(void *buffer) = 0;
 
+  virtual void releasePlatformBuffer(uint64_t pointer) = 0;
+
+  virtual uint64_t makePlatformBuffer(sk_sp<SkImage> image) = 0;
+
   /**
    * Return the Platform specific font manager
    */

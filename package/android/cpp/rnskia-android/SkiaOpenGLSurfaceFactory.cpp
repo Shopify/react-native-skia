@@ -18,6 +18,15 @@ thread_local SkiaOpenGLContext ThreadContextHolder::ThreadSkiaOpenGLContext;
 sk_sp<SkImage>
 SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer) {
 #if __ANDROID_API__ >= 26
+  // Setup OpenGL and Skia:
+  if (!SkiaOpenGLHelper::createSkiaDirectContextIfNecessary(
+          &ThreadContextHolder::ThreadSkiaOpenGLContext)) {
+
+    RNSkLogger::logToConsole(
+        "Could not create Skia Surface from native window / surface. "
+        "Failed creating Skia Direct Context");
+    return nullptr;
+  }
   const AHardwareBuffer *hardwareBuffer =
       static_cast<AHardwareBuffer *>(buffer);
   DeleteImageProc deleteImageProc = nullptr;

@@ -29,3 +29,4 @@ export * from "./TextBlob";
 export * from "./Size";
 export * from "./Paragraph";
 export * from "./Matrix4";
+export * from "./PlatformBuffer";

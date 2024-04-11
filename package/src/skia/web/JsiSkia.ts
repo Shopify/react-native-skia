@@ -41,6 +41,7 @@ import { JsiSkTypefaceFontProviderFactory } from "./JsiSkTypefaceFontProviderFac
 import { JsiSkFontMgrFactory } from "./JsiSkFontMgrFactory";
 import { JsiSkAnimatedImageFactory } from "./JsiSkAnimatedImageFactory";
 import { JsiSkParagraphBuilderFactory } from "./JsiSkParagraphBuilderFactory";
+import { JsiSkPlatformBufferFactory } from "./JsiSkPlatformBufferFactory";
 
 export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   Point: (x: number, y: number) =>
@@ -125,4 +126,5 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   TypefaceFontProvider: new JsiSkTypefaceFontProviderFactory(CanvasKit),
   FontMgr: new JsiSkFontMgrFactory(CanvasKit),
   ParagraphBuilder: new JsiSkParagraphBuilderFactory(CanvasKit),
+  PlatformBuffer: new JsiSkPlatformBufferFactory(CanvasKit),
 });
