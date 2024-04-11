@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { StyleSheet, useWindowDimensions } from "react-native";
+import { Image, StyleSheet, useWindowDimensions } from "react-native";
 import {
   BlurMask,
   vec,
@@ -9,6 +9,7 @@ import {
   Group,
   polar2Canvas,
   mix,
+  Skia,
 } from "@shopify/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
 import { useDerivedValue } from "react-native-reanimated";
@@ -18,6 +19,10 @@ import { useLoop } from "../../components/Animations";
 const c1 = "#61bea2";
 const c2 = "#529ca0";
 
+const url = Image.resolveAssetSource(require("./sample.mp4")).uri;
+const video = Skia.Video(url);
+
+console.log(url);
 interface RingProps {
   index: number;
   progress: SharedValue<number>;

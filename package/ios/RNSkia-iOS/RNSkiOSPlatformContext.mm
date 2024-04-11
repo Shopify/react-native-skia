@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "SkiaMetalSurfaceFactory.h"
+#include "RNSkiOSVideo.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -179,6 +180,11 @@ RNSkiOSPlatformContext::makeImageFromPlatformBuffer(void *buffer) {
   CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
   return texture;
 }
+
+std::shared_ptr<Video> RNSkiOSPlatformContext::createVideo(const std::string &url) {
+	return std::make_shared<RNSkiOSVideo>(url);
+}
+
 
 sk_sp<SkFontMgr> RNSkiOSPlatformContext::createFontMgr() {
   return SkFontMgr_New_CoreText(nullptr);
