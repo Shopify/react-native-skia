@@ -69,6 +69,19 @@ void RNSkiOSPlatformContext::releasePlatformBuffer(uint64_t pointer) {
   }
 }
 
+OSType getCVPixelBufferPixelFormatForSkColorType(SkColorType colorType) {
+  switch (colorType) {
+  case SkColorType::kRGBA_8888_SkColorType:
+    return kCVPixelFormatType_32RGBA;
+  case SkColorType::kBGRA_8888_SkColorType:
+    return kCVPixelFormatType_32BGRA;
+  default:
+    throw std::runtime_error("Cannot convert unknown SkColorType #" +
+                             std::to_string(colorType) +
+                             " to CVPixelBuffer PixelFormat!");
+  }
+}
+
 uint64_t RNSkiOSPlatformContext::makePlatformBuffer(sk_sp<SkImage> image) {
   auto bytesPerPixel = image->imageInfo().bytesPerPixel();
   int bytesPerRow = image->width() * bytesPerPixel;
@@ -82,7 +95,8 @@ uint64_t RNSkiOSPlatformContext::makePlatformBuffer(sk_sp<SkImage> image) {
 
   // Create a CVPixelBuffer from the raw pixel data
   CVPixelBufferRef pixelBuffer = nullptr;
-  // OSType pixelFormatType = MapSkColorTypeToOSType(image->colorType());
+  OSType pixelFormatType =
+      getCVPixelBufferPixelFormatForSkColorType(image->colorType());
 
   // You will need to fill in the details for creating the pixel buffer
   // CVPixelBufferCreateWithBytes or CVPixelBufferCreateWithPlanarBytes
@@ -91,7 +105,7 @@ uint64_t RNSkiOSPlatformContext::makePlatformBuffer(sk_sp<SkImage> image) {
       new sk_sp<SkData>(buf)); // Create a copy for the context
   CVReturn r = CVPixelBufferCreateWithBytes(
       nullptr, // allocator
-      image->width(), image->height(), kCVPixelFormatType_32BGRA,
+      image->width(), image->height(), pixelFormatType,
       pixelData,                                         // pixel data
       bytesPerRow,                                       // bytes per row
       [](void *releaseRefCon, const void *baseAddress) { // release callback
