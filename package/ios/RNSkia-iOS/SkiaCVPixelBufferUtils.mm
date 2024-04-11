@@ -31,18 +31,15 @@
 
 // pragma MARK: RGB
 
-SkiaCVPixelBufferUtils::RGB::FormatInfo
-SkiaCVPixelBufferUtils::RGB::getCVPixelBufferFormatInfo(
+SkColorType SkiaCVPixelBufferUtils::RGB::getCVPixelBufferColorType(
     CVPixelBufferRef pixelBuffer) {
   OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
 
-  MTLPixelFormat metalFormat;
-  SkColorType skiaFormat;
   switch (format) {
   case kCVPixelFormatType_32BGRA:
-    [[likely]] metalFormat = MTLPixelFormatBGRA8Unorm;
-    skiaFormat = kBGRA_8888_SkColorType;
-    break;
+    [[likely]] return kBGRA_8888_SkColorType;
+  case kCVPixelFormatType_32RGBA:
+    return kRGBA_8888_SkColorType;
   // This can be extended with branches for specific RGB formats if new Apple
   // uses new formats.
   default:
@@ -50,8 +47,6 @@ SkiaCVPixelBufferUtils::RGB::getCVPixelBufferFormatInfo(
         "CVPixelBuffer has unknown RGB format! " +
         std::string(FourCC2Str(format)));
   }
-  return SkiaCVPixelBufferUtils::RGB::FormatInfo{.metalFormat = metalFormat,
-                                                 .skiaFormat = skiaFormat};
 }
 
 GrBackendTexture SkiaCVPixelBufferUtils::RGB::getSkiaTextureForCVPixelBuffer(

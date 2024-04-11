@@ -20,15 +20,10 @@ class SkiaCVPixelBufferUtils {
 public:
   class RGB {
   public:
-    struct FormatInfo {
-      MTLPixelFormat metalFormat;
-      SkColorType skiaFormat;
-    };
     /**
-     Gets RGB-specific information about a CVPixelBuffer, such as the Metal
-     format and the Skia-specific format.
+     Gets the Skia Color Type of the RGB pixel-buffer.
      */
-    static FormatInfo getCVPixelBufferFormatInfo(CVPixelBufferRef pixelBuffer);
+    static SkColorType getCVPixelBufferColorType(CVPixelBufferRef pixelBuffer);
     /**
      Gets a GPU-backed Skia Texture for the given RGB CVPixelBuffer.
      */
