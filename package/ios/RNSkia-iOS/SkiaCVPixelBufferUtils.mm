@@ -125,9 +125,9 @@ MTLPixelFormat SkiaCVPixelBufferUtils::getMTLPixelFormatForCVPixelBufferPlane(
   size_t bytesPerRow =
       CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, planeIndex);
   double bytesPerPixel = round(static_cast<double>(bytesPerRow) / width);
-  if (bytesPerPixel == 1) [[likely]] {
+  if (bytesPerPixel == 1) {
     return MTLPixelFormatR8Unorm;
-  } else if (bytesPerPixel == 2) [[likely]] {
+  } else if (bytesPerPixel == 2) {
     return MTLPixelFormatRG8Unorm;
   } else if (bytesPerPixel == 4) {
     return MTLPixelFormatBGRA8Unorm;
