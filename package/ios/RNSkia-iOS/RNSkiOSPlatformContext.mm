@@ -112,7 +112,7 @@ uint64_t RNSkiOSPlatformContext::makePlatformBuffer(sk_sp<SkImage> image) {
   // Create the CVPixelBuffer with the image data
   void *context = static_cast<void *>(
       new sk_sp<SkData>(buf)); // Create a copy for the context
-  CVReturn r = CVPixelBufferCreateWithBytes(
+  CVReturn result = CVPixelBufferCreateWithBytes(
       nullptr, // allocator
       image->width(), image->height(), pixelFormatType,
       pixelData,                                         // pixel data
@@ -127,8 +127,8 @@ uint64_t RNSkiOSPlatformContext::makePlatformBuffer(sk_sp<SkImage> image) {
       &pixelBuffer // the newly created pixel buffer
   );
 
-  if (r != kCVReturnSuccess) {
-    return 0; // or handle error appropriately
+  if (result != kCVReturnSuccess) {
+    throw std::runtime_error("Failed to create CVPixelBuffer from SkImage! Return value: " + std::to_string(result));
   }
 
   // Wrap the CVPixelBuffer in a CMSampleBuffer
@@ -157,7 +157,7 @@ uint64_t RNSkiOSPlatformContext::makePlatformBuffer(sk_sp<SkImage> image) {
     if (pixelBuffer) {
       CFRelease(pixelBuffer);
     }
-    return 0;
+    throw std::runtime_error("Failed to wrap CVPixelBuffer in CMSampleBuffer! Return value: " + std::to_string(status));
   }
 
   // Return sampleBuffer casted to uint64_t
