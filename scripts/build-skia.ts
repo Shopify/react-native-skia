@@ -1,8 +1,11 @@
 import { executeCmd, executeCmdSync } from "./utils";
 import { exit } from "process";
 import { commonArgs, configurations, PlatformName } from "./skia-configuration";
-const fs = require("fs");
+import { cpus } from "os";
+import { existsSync, mkdirSync } from "fs";
+
 const typedKeys = <T extends object>(obj: T) => Object.keys(obj) as (keyof T)[];
+const cores = cpus().length;
 
 /**
  * This build script builds the Skia Binaries from the Skia repositories
@@ -124,7 +127,7 @@ const buildPlatform = (
   // We need to include the path to our custom python2 -> python3 mapping script
   // to make sure we can run all scripts that uses #!/usr/bin/env python as shebang
   // https://groups.google.com/g/skia-discuss/c/BYyB-TwA8ow
-  const command = `PATH=${process.cwd()}/../bin:$PATH ninja -C ${getOutDir(
+  const command = `PATH=${process.cwd()}/../bin:$PATH ninja -j ${cores} -C ${getOutDir(
     platform,
     targetName
   )}`;
@@ -147,9 +150,9 @@ const processOutput = (platformName: PlatformName, targetName: string) => {
       targetDir = `${currentDir}/${configurations[platformName].outputRoot}/${target.output}`;
     }
 
-    if (!fs.existsSync(targetDir)) {
+    if (!existsSync(targetDir)) {
       console.log(`Creating directory '${targetDir}'...`);
-      fs.mkdirSync(targetDir + "/", { recursive: true });
+      mkdirSync(targetDir + "/", { recursive: true });
     }
 
     libNames.forEach((libName) => {
