@@ -70,9 +70,8 @@ void RNSkiOSPlatformContext::releasePlatformBuffer(uint64_t pointer) {
 }
 
 OSType getCVPixelBufferPixelFormatForSkColorType(SkColorType colorType) {
+  // iOS only supports 32BGRA and 32ARGB for RGB CVPixelBuffers. Other formats are not supported.
   switch (colorType) {
-  case SkColorType::kRGBA_8888_SkColorType:
-    return kCVPixelFormatType_32RGBA;
   case SkColorType::kBGRA_8888_SkColorType:
     return kCVPixelFormatType_32BGRA;
   default:
@@ -83,6 +82,16 @@ OSType getCVPixelBufferPixelFormatForSkColorType(SkColorType colorType) {
 }
 
 uint64_t RNSkiOSPlatformContext::makePlatformBuffer(sk_sp<SkImage> image) {
+  if (image->colorType() != kBGRA_8888_SkColorType) {
+    // on iOS, 32_BGRA is the only supported RGB format for CVPixelBuffers.
+    image = image->makeColorTypeAndColorSpace(ThreadContextHolder::ThreadSkiaMetalContext.skContext.get(),
+                                              kBGRA_8888_SkColorType,
+                                              SkColorSpace::MakeSRGB());
+    if (image == nullptr) {
+      throw std::runtime_error("Failed to convert image to BGRA_8888 colortype! Only BGRA_8888 PlatformBuffers are supported.");
+    }
+  }
+  
   auto bytesPerPixel = image->imageInfo().bytesPerPixel();
   int bytesPerRow = image->width() * bytesPerPixel;
   auto buf = SkData::MakeUninitialized(image->width() * image->height() *
