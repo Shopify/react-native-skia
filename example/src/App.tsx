@@ -123,7 +123,7 @@ const App = () => {
               }}
             />
             <Stack.Screen name="API" component={API} />
-            <Stack.Screen name="Breathe" component={Breathe} />
+            <Stack.Screen name="Video" component={Breathe} />
             <Stack.Screen name="Filters" component={Filters} />
             <Stack.Screen name="Gooey" component={Gooey} />
             <Stack.Screen name="Hue" component={Hue} />

@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Dimensions, Image as RNImage } from "react-native";
 import type { SkImage } from "@shopify/react-native-skia";
-import { Canvas, Skia, Image, useClock } from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Skia,
+  Image,
+  useClock,
+  ImageShader,
+  Shader,
+  Fill,
+} from "@shopify/react-native-skia";
 import {
   useFrameCallback,
   useSharedValue,
@@ -10,7 +18,7 @@ import type { Video } from "@shopify/react-native-skia/src/skia/types/Video";
 
 const { width, height } = Dimensions.get("window");
 
-const useVideo = () => {
+const useVideo = (_uri: string) => {
   const [video, setVideo] = useState<Video | null>(null);
   const { uri } = RNImage.resolveAssetSource(require("./sample.mp4"));
   useEffect(() => {
@@ -25,26 +33,37 @@ const useVideo = () => {
   return video;
 };
 
+const source = Skia.RuntimeEffect.Make(`
+uniform shader image;
+
+half4 main(vec2 fragcoord) { 
+  return image.eval(fragcoord.xy).bgra;
+}
+`)!;
+
 export const Breathe = () => {
   const image = useSharedValue<SkImage | null>(null);
-  const video = useVideo();
+  const video = useVideo(require("./sample.mp4"));
   useFrameCallback(({ timestamp }) => {
     if (video === null) {
       return;
     }
-    console.log({ timestamp });
-    image.value = video.nextImage(10000);
+    image.value = video.nextImage(timestamp);
   });
   return (
     <Canvas style={{ flex: 1 }} mode="continuous">
-      <Image
-        image={image}
-        x={0}
-        y={0}
-        width={width}
-        height={height}
-        fit="contain"
-      />
+      <Fill>
+        <Shader source={source}>
+          <ImageShader
+            image={image}
+            x={0}
+            y={0}
+            width={width}
+            height={height}
+            fit="cover"
+          />
+        </Shader>
+      </Fill>
     </Canvas>
   );
 };
