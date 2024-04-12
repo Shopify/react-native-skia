@@ -24,7 +24,7 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
     return Promise.resolve(null);
   }
 
-  MakeImageFromPlatformBuffer(_platformBuffer: PlatformBuffer): SkImage {
+  MakeImageFromNativeBuffer(_platformBuffer: PlatformBuffer): SkImage {
     throw new Error(
       "MakeImageFromPlatformBuffer() is only available on iOS and Android!"
     );
