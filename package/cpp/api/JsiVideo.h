@@ -33,7 +33,8 @@ public:
   EXPORT_JSI_API_TYPENAME(JsiVideo, Video)
 
   JSI_HOST_FUNCTION(nextImage) {
-    auto image = getObject()->nextImage();
+    double timestamp = arguments[0].asNumber();
+    auto image = getObject()->nextImage(&timestamp);
     if (!image) {
       // TODO: throw an exception instead of returning null
       return jsi::Value::null();

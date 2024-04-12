@@ -58,6 +58,30 @@ void RNSkiOSPlatformContext::performStreamOperation(
   std::thread(loader).detach();
 }
 
+std::string RNSkiOSPlatformContext::writeToFile(const std::string &fileName, uint8_t* data, size_t size) {
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths objectAtIndex:0];
+	NSString *fileNameNSString = [NSString stringWithUTF8String:fileName.c_str()];
+
+    // Append the file name to the documents directory to get the full file path
+    NSString *filePath = [documentsDirectory stringByAppendingPathComponent:fileNameNSString];
+	NSData *dataToWrite = [NSData dataWithBytes:data length:size];
+
+    // Write the string to the file at filePath
+	NSError *error = nil;
+	 BOOL success = [dataToWrite writeToFile:filePath options:NSDataWritingAtomic error:&error];
+	 
+    
+    if (success) {
+        NSLog(@"File written successfully");
+    } else {
+        NSLog(@"Error writing file at %@: %@", filePath, error.localizedDescription);
+    }
+    std::string resultPath = [filePath UTF8String];
+    return resultPath;
+}
+
+
 void RNSkiOSPlatformContext::releasePlatformBuffer(uint64_t pointer) {
   CMSampleBufferRef sampleBuffer = reinterpret_cast<CMSampleBufferRef>(pointer);
   CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
