@@ -124,6 +124,7 @@ CVMetalTextureCacheRef SkiaCVPixelBufferUtils::getTextureCache() {
       throw std::runtime_error("Failed to create Metal Texture Cache!");
     }
   }
+  return textureCache;
 }
 
 // pragma MARK: Get CVPixelBuffer MTLPixelFormat
