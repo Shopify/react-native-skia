@@ -34,7 +34,7 @@ If your drawing does not contain textures, you may also use the synchronous `mak
 
 ```tsx twoslash
 import {useEffect} from "react";
-import {Canvas, Image, useCanvasRef, Circle} from "@shopify/react-native-skia";
+import {Canvas, useCanvasRef, Circle} from "@shopify/react-native-skia";
 
 export const Demo = () => {
   const ref = useCanvasRef();
