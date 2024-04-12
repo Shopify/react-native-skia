@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Dimensions, Image as RNImage } from "react-native";
 import type { SkImage } from "@shopify/react-native-skia";
-import { Canvas, Skia, Image } from "@shopify/react-native-skia";
-import { useSharedValue } from "@shopify/react-native-skia/src/external/reanimated/moduleWrapper";
+import { Canvas, Skia, Image, useClock } from "@shopify/react-native-skia";
+import {
+  useFrameCallback,
+  useSharedValue,
+} from "@shopify/react-native-skia/src/external/reanimated/moduleWrapper";
 import type { Video } from "@shopify/react-native-skia/src/skia/types/Video";
 
 const { width, height } = Dimensions.get("window");
@@ -25,13 +28,13 @@ const useVideo = () => {
 export const Breathe = () => {
   const image = useSharedValue<SkImage | null>(null);
   const video = useVideo();
-  useEffect(() => {
+  useFrameCallback(({ timestamp }) => {
     if (video === null) {
       return;
     }
-    video.nextImage(10000);
+    console.log({ timestamp });
     image.value = video.nextImage(10000);
-  }, [video]);
+  });
   return (
     <Canvas style={{ flex: 1 }} mode="continuous">
       <Image
