@@ -1,4 +1,5 @@
 import { checkImage } from "../../../__tests__/setup";
+import { AlphaType, ColorType } from "../../../skia/types";
 import { setupSkia } from "../../../skia/__tests__/setup";
 import { surface } from "../setup";
 
@@ -13,6 +14,31 @@ const shouldPlatformBufferTestRun = () => {
   }
   return true;
 };
+
+const rgbaPixels = new Array(256 * 256 * 4).fill(0);
+rgbaPixels.fill(255);
+let i = 0;
+for (let x = 0; x < 256 * 4; x++) {
+  for (let y = 0; y < 256 * 4; y++) {
+    rgbaPixels[i++] = (x * y) % 255;
+  }
+}
+
+const bgraPixels = new Array(256 * 256 * 4).fill(0);
+bgraPixels.fill(255);
+// Conversion from RGBA to BGRA
+for (let j = 0; j < rgbaPixels.length; j += 4) {
+  const r = rgbaPixels[j];
+  const g = rgbaPixels[j + 1];
+  const b = rgbaPixels[j + 2];
+  const a = rgbaPixels[j + 3];
+
+  // In BGRA, the blue and red channels are swapped
+  bgraPixels[j] = b; // Blue
+  bgraPixels[j + 1] = g; // Green remains the same
+  bgraPixels[j + 2] = r; // Red
+  bgraPixels[j + 3] = a; // Alpha remains the same
+}
 
 describe("Platform Buffers", () => {
   it("On non supported platforms MakeImageFromPlatformBuffer() should throw", async () => {
@@ -86,5 +112,44 @@ describe("Platform Buffers", () => {
     )!;
     expect(image).not.toBeNull();
     checkImage(image, "snapshots/cyan-buffer.png");
+  });
+  it("creates an image from native color type", async () => {
+    const { Skia: Sk } = setupSkia();
+    // Skip outside iOS and Android
+    if (!shouldPlatformBufferTestRun()) {
+      return;
+    }
+    const result = await surface.eval(
+      (Skia, { alphaType, colorType, ...ctx }) => {
+        const pixels = new Uint8Array(ctx.originalPixels);
+        const data = Skia.Data.fromBytes(pixels);
+        const img = Skia.Image.MakeImage(
+          {
+            width: 256,
+            height: 256,
+            alphaType,
+            colorType,
+          },
+          data,
+          256 * 4
+        )!;
+
+        const platformBuffer = Skia.PlatformBuffer.MakeFromImage(img);
+        const image = Skia.Image.MakeImageFromPlatformBuffer(platformBuffer);
+        Skia.PlatformBuffer.Release(platformBuffer);
+        return Array.from(image.encodeToBytes());
+      },
+      {
+        alphaType: AlphaType.Unpremul,
+        colorType:
+          surface.OS === "android" ? ColorType.RGBA_8888 : ColorType.BGRA_8888,
+        originalPixels: surface.OS === "android" ? rgbaPixels : bgraPixels,
+      }
+    );
+    const image = Sk.Image.MakeImageFromEncoded(
+      Sk.Data.fromBytes(new Uint8Array(result))
+    )!;
+    expect(image).not.toBeNull();
+    checkImage(image, "snapshots/platform-buffer.png", { overwrite: true });
   });
 });
