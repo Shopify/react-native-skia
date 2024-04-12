@@ -53,18 +53,18 @@ public:
     return SkiaOpenGLSurfaceFactory::makeOffscreenSurface(width, height);
   }
 
-  sk_sp<SkImage> makeImageFromPlatformBuffer(void *buffer) override {
+  sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override {
     return SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(buffer);
   }
 
-  void releasePlatformBuffer(uint64_t pointer) override {
+  void releaseNativeBuffer(uint64_t pointer) override {
 #if __ANDROID_API__ >= 26
     AHardwareBuffer *buffer = reinterpret_cast<AHardwareBuffer *>(pointer);
     AHardwareBuffer_release(buffer);
 #endif
   }
 
-  uint64_t makePlatformBuffer(sk_sp<SkImage> image) override {
+uint64_t makeNativeBuffer(sk_sp<SkImage> image) override {
 #if __ANDROID_API__ >= 26
     auto bytesPerPixel = image->imageInfo().bytesPerPixel();
     int bytesPerRow = image->width() * bytesPerPixel;

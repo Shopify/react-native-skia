@@ -58,7 +58,7 @@ void RNSkiOSPlatformContext::performStreamOperation(
   std::thread(loader).detach();
 }
 
-void RNSkiOSPlatformContext::releasePlatformBuffer(uint64_t pointer) {
+void RNSkiOSPlatformContext::releaseNativeBuffer(uint64_t pointer) {
   CMSampleBufferRef sampleBuffer = reinterpret_cast<CMSampleBufferRef>(pointer);
   CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
   if (sampleBuffer) {
@@ -69,7 +69,7 @@ void RNSkiOSPlatformContext::releasePlatformBuffer(uint64_t pointer) {
   }
 }
 
-uint64_t RNSkiOSPlatformContext::makePlatformBuffer(sk_sp<SkImage> image) {
+uint64_t RNSkiOSPlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
   // 0. If Image is not in BGRA, convert to BGRA as only BGRA is supported.
   if (image->colorType() != kBGRA_8888_SkColorType) {
     // on iOS, 32_BGRA is the only supported RGB format for CVPixelBuffers.
@@ -183,7 +183,7 @@ sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
 }
 
 sk_sp<SkImage>
-RNSkiOSPlatformContext::makeImageFromPlatformBuffer(void *buffer) {
+RNSkiOSPlatformContext::makeImageFromNativeBuffer(void *buffer) {
   CMSampleBufferRef sampleBuffer = (CMSampleBufferRef)buffer;
   return SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(sampleBuffer);
 }

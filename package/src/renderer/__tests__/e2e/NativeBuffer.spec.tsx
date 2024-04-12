@@ -3,7 +3,7 @@ import { AlphaType, ColorType } from "../../../skia/types";
 import { setupSkia } from "../../../skia/__tests__/setup";
 import { surface } from "../setup";
 
-const shouldPlatformBufferTestRun = () => {
+const shouldNativeBufferTestRun = () => {
   // Skip outside iOS and Android
   if (surface.OS !== "ios" && surface.OS !== "android") {
     return false;
@@ -40,17 +40,17 @@ for (let j = 0; j < rgbaPixels.length; j += 4) {
   bgraPixels[j + 3] = a; // Alpha remains the same
 }
 
-describe("Platform Buffers", () => {
+describe("Native Buffers", () => {
   it("On non supported platforms MakeImageFromPlatformBuffer() should throw", async () => {
     const { Skia: Sk } = setupSkia();
-    if (!shouldPlatformBufferTestRun()) {
+    if (!shouldNativeBufferTestRun()) {
       return;
     }
     const result = await surface.eval((Skia) => {
       const sur = Skia.Surface.Make(256, 256)!;
       const canvas = sur.getCanvas();
       canvas.drawColor(Skia.Color("cyan"));
-      const platformBuffer = Skia.PlatformBuffer.MakeFromImage(
+      const platformBuffer = Skia.NativeBuffer.MakeFromImage(
         sur.makeImageSnapshot()
       );
       return platformBuffer.toString();
@@ -64,7 +64,7 @@ describe("Platform Buffers", () => {
     // Now we need to release the platform buffer
     const success = await surface.eval(
       (Skia, ctx) => {
-        Skia.PlatformBuffer.Release(BigInt(ctx.pointer));
+        Skia.NativeBuffer.Release(BigInt(ctx.pointer));
         return true;
       },
       { pointer: pointer.toString() }
@@ -72,7 +72,7 @@ describe("Platform Buffers", () => {
     expect(success).toBe(true);
   });
   it("creates a platform buffer from an image", async () => {
-    if (!shouldPlatformBufferTestRun()) {
+    if (!shouldNativeBufferTestRun()) {
       return;
     }
     const result = await surface.eval((Skia) => {
@@ -81,11 +81,11 @@ describe("Platform Buffers", () => {
       const paint = Skia.Paint();
       paint.setColor(Skia.Color("cyan"));
       canvas.drawCircle(128, 128, 128, paint);
-      const platformBuffer = Skia.PlatformBuffer.MakeFromImage(
+      const platformBuffer = Skia.NativeBuffer.MakeFromImage(
         sur.makeImageSnapshot()
       );
       const r = platformBuffer.toString();
-      Skia.PlatformBuffer.Release(platformBuffer);
+      Skia.NativeBuffer.Release(platformBuffer);
       return r;
     });
     expect(BigInt(result)).not.toBe(BigInt(0));
@@ -93,18 +93,18 @@ describe("Platform Buffers", () => {
   it("creates an image from a platform buffer", async () => {
     const { Skia: Sk } = setupSkia();
     // Skip outside iOS and Android
-    if (!shouldPlatformBufferTestRun()) {
+    if (!shouldNativeBufferTestRun()) {
       return;
     }
     const result = await surface.eval((Skia) => {
       const sur = Skia.Surface.Make(256, 256)!;
       const canvas = sur.getCanvas();
       canvas.drawColor(Skia.Color("cyan"));
-      const platformBuffer = Skia.PlatformBuffer.MakeFromImage(
+      const platformBuffer = Skia.NativeBuffer.MakeFromImage(
         sur.makeImageSnapshot()
       );
       const image = Skia.Image.MakeImageFromPlatformBuffer(platformBuffer);
-      Skia.PlatformBuffer.Release(platformBuffer);
+      Skia.NativeBuffer.Release(platformBuffer);
       return Array.from(image.encodeToBytes());
     });
     const image = Sk.Image.MakeImageFromEncoded(
@@ -116,7 +116,7 @@ describe("Platform Buffers", () => {
   it("creates an image from native color type", async () => {
     const { Skia: Sk } = setupSkia();
     // Skip outside iOS and Android
-    if (!shouldPlatformBufferTestRun()) {
+    if (!shouldNativeBufferTestRun()) {
       return;
     }
     const result = await surface.eval(
@@ -134,9 +134,9 @@ describe("Platform Buffers", () => {
           256 * 4
         )!;
 
-        const platformBuffer = Skia.PlatformBuffer.MakeFromImage(img);
-        const image = Skia.Image.MakeImageFromPlatformBuffer(platformBuffer);
-        Skia.PlatformBuffer.Release(platformBuffer);
+        const nativeBuffer = Skia.NativeBuffer.MakeFromImage(img);
+        const image = Skia.Image.MakeImageFromPlatformBuffer(nativeBuffer);
+        Skia.NativeBuffer.Release(nativeBuffer);
         return Array.from(image.encodeToBytes());
       },
       {

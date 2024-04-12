@@ -1,12 +1,12 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
-import type { PlatformBuffer, PlatformBufferFactory, SkImage } from "../types";
+import type { PlatformBuffer, NativeBufferFactory, SkImage } from "../types";
 
 import { Host, NotImplementedOnRNWeb } from "./Host";
 
-export class JsiSkPlatformBufferFactory
+export class JsiSkNativeBufferFactory
   extends Host
-  implements PlatformBufferFactory
+  implements NativeBufferFactory
 {
   constructor(CanvasKit: CanvasKit) {
     super(CanvasKit);

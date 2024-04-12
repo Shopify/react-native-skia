@@ -2,7 +2,7 @@ import type { SkImage } from "../Image";
 
 export type PlatformBuffer = bigint;
 
-export interface PlatformBufferFactory {
+export interface NativeBufferFactory {
   /**
    * Copy pixels to a platform buffer. (for testing purposes)
    */
