@@ -13,6 +13,7 @@
 #include "RNSkiOSVideo.h"
 #include <CoreVideo/CoreVideo.h>
 #include <AVFoundation/AVFoundation.h>
+#include <mach/mach_time.h>
 
 // To convert from SampleBufferRef to SkImage use:
 // auto skImage = _context->makeImageFromPlatformBuffer(reinterpret_cast<void *>(imageBuffer));
@@ -66,10 +67,17 @@ sk_sp<SkImage> RNSkiOSVideo::nextImage(double* timeStamp) {
 //        CFRelease(sampleBuffer);
 //        return nullptr;
 //    }
-    
+	uint64_t start = mach_absolute_time();
     // Assuming makeSkiaImageFromCVBuffer is defined and converts a CVPixelBufferRef to sk_sp<SkImage>
 	auto skImage = _context->makeImageFromPlatformBuffer(reinterpret_cast<void *>(sampleBuffer));
-    
+	uint64_t end = mach_absolute_time();
+	uint64_t elapsed = end - start;
+	mach_timebase_info_data_t info;
+	mach_timebase_info(&info);
+	uint64_t nanos = elapsed * info.numer / info.denom;
+
+	// Log the time taken
+	NSLog(@"Time taken: %llu ns", nanos);
     if (timeStamp) {
         CMTime time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
         *timeStamp = CMTimeGetSeconds(time);
