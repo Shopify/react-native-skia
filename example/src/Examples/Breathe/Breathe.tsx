@@ -36,8 +36,18 @@ const useVideo = (_uri: string) => {
 const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
 
+
 half4 main(vec2 fragcoord) { 
-  return image.eval(fragcoord.xy).bgra;
+  float2 iResolution = vec2(${width}.0, ${height}.0);
+  float2 uv = fragcoord / iResolution;
+
+  float y = uv.y * 3.0;
+  half4 c = image.eval(vec2(uv.x, mod(y, 1.0)) * vec2(400.0, 640.0)).bgra;
+  return vec4(
+    c.r * step(2.0, y) * step(y, 3.0),
+    c.g * step(1.0, y) * step(y, 2.0),
+    c.b * step(0.0, y) * step(y, 1.0),
+    1.0);
 }
 `)!;
 
@@ -60,7 +70,7 @@ export const Breathe = () => {
             y={0}
             width={width}
             height={height}
-            fit="cover"
+            fit="none"
           />
         </Shader>
       </Fill>
