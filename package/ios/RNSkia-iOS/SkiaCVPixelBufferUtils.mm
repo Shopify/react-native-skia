@@ -293,7 +293,6 @@ GrBackendTexture SkiaCVPixelBufferUtils::getSkiaTextureForCVPixelBufferPlane(
 
 CVMetalTextureCacheRef SkiaCVPixelBufferUtils::getTextureCache() {
   static thread_local CVMetalTextureCacheRef textureCache = nil;
-  static thread_local size_t accessCounter = 0;
   if (textureCache == nil) {
     // Create a new Texture Cache
     auto result = CVMetalTextureCacheCreate(kCFAllocatorDefault, nil,
@@ -302,13 +301,6 @@ CVMetalTextureCacheRef SkiaCVPixelBufferUtils::getTextureCache() {
     if (result != kCVReturnSuccess || textureCache == nil) {
       throw std::runtime_error("Failed to create Metal Texture Cache!");
     }
-  }
-  accessCounter++;
-  if (accessCounter > 30) {
-    // Every 30 accesses, we perform some internal recycling/housekeeping
-    // operations.
-    CVMetalTextureCacheFlush(textureCache, 0);
-    accessCounter = 0;
   }
   return textureCache;
 }
