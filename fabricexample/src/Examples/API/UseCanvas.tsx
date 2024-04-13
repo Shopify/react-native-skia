@@ -13,7 +13,7 @@ interface MyCompProps {
 
 const MyComp = ({ size }: MyCompProps) => {
   const navigation = useNavigation();
-  const { routeNames } = navigation.getState();
+  const { routeNames } = navigation.getState()!;
   console.log({ routeNames });
   const rct = useDerivedValue(() => {
     return rect(0, 0, size.value.width, size.value.height / 2);
