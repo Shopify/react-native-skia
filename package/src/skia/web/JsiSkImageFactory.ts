@@ -1,11 +1,12 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
-import type {
-  SkData,
-  ImageInfo,
-  SkImage,
-  NativeBuffer,
-  ImageFactory,
+import {
+  type SkData,
+  type ImageInfo,
+  type SkImage,
+  type NativeBuffer,
+  type ImageFactory,
+  isNativeBufferWeb,
 } from "../types";
 
 import { Host, getEnum } from "./Host";
@@ -24,10 +25,13 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
     return Promise.resolve(null);
   }
 
-  MakeImageFromNativeBuffer(_platformBuffer: NativeBuffer): SkImage {
-    throw new Error(
-      "MakeImageFromPlatformBuffer() is only available on iOS and Android!"
-    );
+  MakeImageFromNativeBuffer(buffer: NativeBuffer) {
+    if (!isNativeBufferWeb(buffer)) {
+      throw new Error("Invalid NativeBuffer");
+    }
+    // TODO: this is way way to slow
+    const image = this.CanvasKit.MakeImageFromCanvasImageSource(buffer);
+    return new JsiSkImage(this.CanvasKit, image);
   }
 
   MakeImageFromEncoded(encoded: SkData) {

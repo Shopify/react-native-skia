@@ -1,8 +1,12 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
-import type { NativeBuffer, NativeBufferFactory, SkImage } from "../types";
+import {
+  type NativeBuffer,
+  type NativeBufferFactory,
+  type SkImage,
+} from "../types";
 
-import { Host, NotImplementedOnRNWeb } from "./Host";
+import { Host } from "./Host";
 
 export class JsiSkNativeBufferFactory
   extends Host
@@ -12,11 +16,20 @@ export class JsiSkNativeBufferFactory
     super(CanvasKit);
   }
 
-  MakeFromImage(_image: SkImage): NativeBuffer {
-    throw new NotImplementedOnRNWeb();
+  MakeFromImage(image: SkImage): NativeBuffer {
+    const info = image.getImageInfo();
+    const uint8ClampedArray = new Uint8ClampedArray(image.readPixels()!);
+    const imageData = new ImageData(uint8ClampedArray, info.width, info.height);
+    const canvas = new OffscreenCanvas(info.width, info.height);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      throw new Error("Failed to get 2d context from canvas");
+    }
+    ctx.putImageData(imageData, 0, 0);
+    return canvas;
   }
 
   Release(_platformBuffer: NativeBuffer) {
-    throw new NotImplementedOnRNWeb();
+    // it's a noop on Web
   }
 }
