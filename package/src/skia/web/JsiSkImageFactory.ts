@@ -2,12 +2,11 @@ import type { CanvasKit, Image } from "canvaskit-wasm";
 
 import { isNativeBufferWeb } from "../types";
 import type {
-  SkSurface,
-  type SkData,
-  type ImageInfo,
-  type SkImage,
-  type NativeBuffer,
-  type ImageFactory,
+  SkData,
+  ImageInfo,
+  SkImage,
+  NativeBuffer,
+  ImageFactory,
 } from "../types";
 
 import { Host, getEnum } from "./Host";
