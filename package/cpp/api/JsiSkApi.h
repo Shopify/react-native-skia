@@ -124,8 +124,8 @@ public:
         "ParagraphBuilder",
         std::make_shared<JsiSkParagraphBuilderFactory>(context));
 
-    installReadonlyProperty(
-        "NativeBuffer", std::make_shared<JsiNativeBufferFactory>(context));
+    installReadonlyProperty("NativeBuffer",
+                            std::make_shared<JsiNativeBufferFactory>(context));
   }
 };
 } // namespace RNSkia

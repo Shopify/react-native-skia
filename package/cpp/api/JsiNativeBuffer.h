@@ -36,8 +36,7 @@ public:
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiNativeBufferFactory, Release),
                        JSI_EXPORT_FUNC(JsiNativeBufferFactory, MakeFromImage))
 
-  explicit JsiNativeBufferFactory(
-      std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiNativeBufferFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };
 

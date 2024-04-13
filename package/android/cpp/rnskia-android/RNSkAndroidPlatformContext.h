@@ -64,7 +64,7 @@ public:
 #endif
   }
 
-uint64_t makeNativeBuffer(sk_sp<SkImage> image) override {
+  uint64_t makeNativeBuffer(sk_sp<SkImage> image) override {
 #if __ANDROID_API__ >= 26
     auto bytesPerPixel = image->imageInfo().bytesPerPixel();
     int bytesPerRow = image->width() * bytesPerPixel;
