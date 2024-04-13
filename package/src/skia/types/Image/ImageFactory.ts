@@ -1,5 +1,5 @@
 import type { SkData } from "../Data";
-import type { PlatformBuffer } from "../NativeBuffer";
+import type { NativeBuffer } from "../NativeBuffer";
 
 import type { SkImage } from "./Image";
 
@@ -66,7 +66,7 @@ export interface ImageFactory {
    * @throws Throws an error if the Image could not be created, for example when the given
    * platform buffer is invalid.
    */
-  MakeImageFromNativeBuffer: (nativeBuffer: PlatformBuffer) => SkImage;
+  MakeImageFromNativeBuffer: (nativeBuffer: NativeBuffer) => SkImage;
 
   /**
    * Returns an image that will be a screenshot of the view represented by

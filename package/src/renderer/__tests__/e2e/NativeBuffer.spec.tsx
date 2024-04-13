@@ -1,4 +1,5 @@
 import { checkImage } from "../../../__tests__/setup";
+import type { NativeBufferAddr } from "../../../skia/types";
 import { AlphaType, ColorType } from "../../../skia/types";
 import { setupSkia } from "../../../skia/__tests__/setup";
 import { surface } from "../setup";
@@ -53,7 +54,7 @@ describe("Native Buffers", () => {
       const nativeBuffer = Skia.NativeBuffer.MakeFromImage(
         sur.makeImageSnapshot()
       );
-      return nativeBuffer.toString();
+      return (nativeBuffer as NativeBufferAddr).toString();
     });
     const pointer = BigInt(result);
     expect(pointer).not.toBe(BigInt(0));
@@ -84,7 +85,7 @@ describe("Native Buffers", () => {
       const nativeBuffer = Skia.NativeBuffer.MakeFromImage(
         sur.makeImageSnapshot()
       );
-      const r = nativeBuffer.toString();
+      const r = (nativeBuffer as NativeBufferAddr).toString();
       Skia.NativeBuffer.Release(nativeBuffer);
       return r;
     });

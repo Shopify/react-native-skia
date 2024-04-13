@@ -4,7 +4,7 @@ import type {
   SkData,
   ImageInfo,
   SkImage,
-  PlatformBuffer,
+  NativeBuffer,
   ImageFactory,
 } from "../types";
 
@@ -24,7 +24,7 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
     return Promise.resolve(null);
   }
 
-  MakeImageFromNativeBuffer(_platformBuffer: PlatformBuffer): SkImage {
+  MakeImageFromNativeBuffer(_platformBuffer: NativeBuffer): SkImage {
     throw new Error(
       "MakeImageFromPlatformBuffer() is only available on iOS and Android!"
     );

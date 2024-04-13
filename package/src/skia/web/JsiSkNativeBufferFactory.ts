@@ -1,6 +1,6 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
-import type { PlatformBuffer, NativeBufferFactory, SkImage } from "../types";
+import type { NativeBuffer, NativeBufferFactory, SkImage } from "../types";
 
 import { Host, NotImplementedOnRNWeb } from "./Host";
 
@@ -12,11 +12,11 @@ export class JsiSkNativeBufferFactory
     super(CanvasKit);
   }
 
-  MakeFromImage(_image: SkImage): PlatformBuffer {
+  MakeFromImage(_image: SkImage): NativeBuffer {
     throw new NotImplementedOnRNWeb();
   }
 
-  Release(_platformBuffer: PlatformBuffer) {
+  Release(_platformBuffer: NativeBuffer) {
     throw new NotImplementedOnRNWeb();
   }
 }
