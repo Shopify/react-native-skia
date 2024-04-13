@@ -1,4 +1,5 @@
 import type { SkData } from "../Data";
+import type { NativeBuffer } from "../NativeBuffer";
 
 import type { SkImage } from "./Image";
 
@@ -52,19 +53,20 @@ export interface ImageFactory {
   MakeImageFromEncoded: (encoded: SkData) => SkImage | null;
 
   /**
-   * Return an Image backed by the given native platform buffer.
+   * Return an Image backed by a given native buffer.
    * The platform buffer must be a valid owning reference.
    *
-   * This API is used by [react-native-vision-camera](https://github.com/mrousavy/react-native-vision-camera)
+   * For instance, this API is used by
+   * [react-native-vision-camera](https://github.com/mrousavy/react-native-vision-camera)
    * to render a Skia Camera preview.
    *
    * - On Android; This is an `AHardwareBuffer*`
    * - On iOS, this is a `CMSampleBufferRef`
-   * @param platformBuffer A strong `uintptr_t` pointer to the native platform buffer
+   * @param nativeBuffer A strong `uintptr_t` pointer to the native platform buffer
    * @throws Throws an error if the Image could not be created, for example when the given
    * platform buffer is invalid.
    */
-  MakeImageFromPlatformBuffer: (platformBuffer: bigint) => SkImage;
+  MakeImageFromNativeBuffer: (nativeBuffer: NativeBuffer) => SkImage;
 
   /**
    * Returns an image that will be a screenshot of the view represented by
