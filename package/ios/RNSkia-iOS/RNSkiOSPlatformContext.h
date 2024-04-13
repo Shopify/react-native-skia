@@ -59,11 +59,11 @@ public:
 
   sk_sp<SkImage> takeScreenshotFromViewTag(size_t tag) override;
 
-  sk_sp<SkImage> makeImageFromPlatformBuffer(void *buffer) override;
+  sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override;
 
-  uint64_t makePlatformBuffer(sk_sp<SkImage> image) override;
+  uint64_t makeNativeBuffer(sk_sp<SkImage> image) override;
 
-  void releasePlatformBuffer(uint64_t pointer) override;
+  void releaseNativeBuffer(uint64_t pointer) override;
 
   std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override;
   std::string writeToFile(const std::string &filename, uint8_t* data, size_t size) override;

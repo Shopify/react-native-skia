@@ -30,8 +30,8 @@ import type { Color, SkColor } from "./Color";
 import type { TypefaceFontProviderFactory } from "./Paragraph/TypefaceFontProviderFactory";
 import type { AnimatedImageFactory } from "./AnimatedImage";
 import type { ParagraphBuilderFactory } from "./Paragraph/ParagraphBuilder";
-import type { PlatformBufferFactory } from "./PlatformBuffer";
 import type { Video } from "./Video";
+import type { NativeBufferFactory } from "./NativeBuffer";
 
 /**
  * Declares the interface for the native Skia API
@@ -96,6 +96,6 @@ export interface Skia {
   TextBlob: TextBlobFactory;
   Surface: SurfaceFactory;
   ParagraphBuilder: ParagraphBuilderFactory;
-  PlatformBuffer: PlatformBufferFactory;
   Video: (url: string) => Video;
+  NativeBuffer: NativeBufferFactory;
 }

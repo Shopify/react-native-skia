@@ -135,17 +135,17 @@ public:
   virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) = 0;
 
   /**
-   * Creates an image from a native platform buffer.
+   * Creates an image from a native buffer.
    * - On iOS, this is a `CMSampleBuffer`
    * - On Android, this is a `AHardwareBuffer*`
    * @param buffer The native platform buffer.
    * @return sk_sp<SkImage>
    */
-  virtual sk_sp<SkImage> makeImageFromPlatformBuffer(void *buffer) = 0;
+  virtual sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) = 0;
 
-  virtual void releasePlatformBuffer(uint64_t pointer) = 0;
+  virtual void releaseNativeBuffer(uint64_t pointer) = 0;
 
-  virtual uint64_t makePlatformBuffer(sk_sp<SkImage> image) = 0;
+  virtual uint64_t makeNativeBuffer(sk_sp<SkImage> image) = 0;
 
   virtual std::shared_ptr<RNSkVideo> createVideo(const std::string &url) = 0;
   virtual std::string writeToFile(const std::string &filename, uint8_t* data, size_t size) = 0;
