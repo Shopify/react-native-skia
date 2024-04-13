@@ -9,10 +9,12 @@
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* RNSkiaTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* RNSkiaTests.m */; };
 		0A6C33F97CFB5A301FC62C22 /* libPods-RNSkia.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DA3AEA9438F7550E6C6FA83B /* libPods-RNSkia.a */; };
+		0C90514580200F2E7CDB77C4 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F5BE6A669903412DE65A78 /* ExpoModulesProvider.swift */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		920236303BDDC53C86EFF4D2 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01DC46369C0C317A156CF6C5 /* ExpoModulesProvider.swift */; };
 		D555C8696CC0DBC087E2CA02 /* libPods-RNSkia-RNSkiaTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CB0B997B3D2380C2BA6A654 /* libPods-RNSkia-RNSkiaTests.a */; };
 /* End PBXBuildFile section */
 
@@ -30,12 +32,14 @@
 		00E356EE1AD99517003FC87E /* RNSkiaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RNSkiaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* RNSkiaTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNSkiaTests.m; sourceTree = "<group>"; };
+		01DC46369C0C317A156CF6C5 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-RNSkia-RNSkiaTests/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* RNSkia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RNSkia.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = RNSkia/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = RNSkia/AppDelegate.mm; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = RNSkia/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = RNSkia/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = RNSkia/main.m; sourceTree = "<group>"; };
+		40F5BE6A669903412DE65A78 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-RNSkia/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		41987422003F3BF9FA22C92C /* Pods-RNSkia-RNSkiaTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNSkia-RNSkiaTests.debug.xcconfig"; path = "Target Support Files/Pods-RNSkia-RNSkiaTests/Pods-RNSkia-RNSkiaTests.debug.xcconfig"; sourceTree = "<group>"; };
 		44AC55D436C4FEDA9C7B9C6A /* Pods-RNSkia.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RNSkia.debug.xcconfig"; path = "Target Support Files/Pods-RNSkia/Pods-RNSkia.debug.xcconfig"; sourceTree = "<group>"; };
 		4CB0B997B3D2380C2BA6A654 /* libPods-RNSkia-RNSkiaTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RNSkia-RNSkiaTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -83,6 +87,14 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		0196E9C003880C7ED54660F3 /* RNSkia */ = {
+			isa = PBXGroup;
+			children = (
+				40F5BE6A669903412DE65A78 /* ExpoModulesProvider.swift */,
+			);
+			name = RNSkia;
+			sourceTree = "<group>";
+		};
 		13B07FAE1A68108700A75B9A /* RNSkia */ = {
 			isa = PBXGroup;
 			children = (
@@ -106,6 +118,23 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		463814AE1F2375C9617AE0A6 /* ExpoModulesProviders */ = {
+			isa = PBXGroup;
+			children = (
+				0196E9C003880C7ED54660F3 /* RNSkia */,
+				525ABBBC0B5CF24BCCF04819 /* RNSkiaTests */,
+			);
+			name = ExpoModulesProviders;
+			sourceTree = "<group>";
+		};
+		525ABBBC0B5CF24BCCF04819 /* RNSkiaTests */ = {
+			isa = PBXGroup;
+			children = (
+				01DC46369C0C317A156CF6C5 /* ExpoModulesProvider.swift */,
+			);
+			name = RNSkiaTests;
+			sourceTree = "<group>";
+		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
@@ -122,6 +151,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
+				463814AE1F2375C9617AE0A6 /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -405,6 +435,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				00E356F31AD99517003FC87E /* RNSkiaTests.m in Sources */,
+				920236303BDDC53C86EFF4D2 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -414,6 +445,7 @@
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+				0C90514580200F2E7CDB77C4 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -438,7 +470,7 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = RNSkiaTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -449,6 +481,7 @@
 					"-lc++",
 					"$(inherited)",
 				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RNSkia.app/RNSkia";
@@ -462,7 +495,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				INFOPLIST_FILE = RNSkiaTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -473,6 +506,7 @@
 					"-lc++",
 					"$(inherited)",
 				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RNSkia.app/RNSkia";
@@ -498,6 +532,7 @@
 					"-ObjC",
 					"-lc++",
 				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = RNSkia;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -524,6 +559,7 @@
 					"-ObjC",
 					"-lc++",
 				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = RNSkia;
 				SWIFT_VERSION = 5.0;
@@ -580,7 +616,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",
@@ -645,7 +681,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",
