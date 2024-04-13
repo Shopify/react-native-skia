@@ -86,18 +86,9 @@ public:
         runtime, std::make_shared<JsiSkData>(getContext(), std::move(data)));
   }
 
-  JSI_HOST_FUNCTION(writeToFile) {
-    auto data = JsiSkData::fromValue(runtime, arguments[0]);
-    auto ptr = data->bytes();
-    auto size = data->size();
-    auto path = getContext()->writeToFile("test.mp4", const_cast<uint8_t*>(ptr), size);
-    return jsi::String::createFromAscii(runtime, path);
-  }
-
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkDataFactory, fromURI),
                        JSI_EXPORT_FUNC(JsiSkDataFactory, fromBytes),
-                       JSI_EXPORT_FUNC(JsiSkDataFactory, fromBase64),
-                       JSI_EXPORT_FUNC(JsiSkDataFactory, writeToFile))
+                       JSI_EXPORT_FUNC(JsiSkDataFactory, fromBase64))
 
   explicit JsiSkDataFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

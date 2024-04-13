@@ -148,7 +148,6 @@ public:
   virtual uint64_t makeNativeBuffer(sk_sp<SkImage> image) = 0;
 
   virtual std::shared_ptr<RNSkVideo> createVideo(const std::string &url) = 0;
-  virtual std::string writeToFile(const std::string &filename, uint8_t* data, size_t size) = 0;
 
   /**
    * Return the Platform specific font manager

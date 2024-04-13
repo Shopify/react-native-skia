@@ -63,9 +63,9 @@ public:
       auto url = arguments[0].asString(runtime).utf8(runtime);
       auto video = context->createVideo(url);
       // Return the newly constructed object
-       return jsi::Object::createFromHostObject(
-           runtime, std::make_shared<JsiVideo>(std::move(context),
-           std::move(video)));
+      return jsi::Object::createFromHostObject(
+          runtime,
+          std::make_shared<JsiVideo>(std::move(context), std::move(video)));
     };
   }
 };
