@@ -62,18 +62,10 @@ void RNSkiOSVideo::initializeReader() {
 sk_sp<SkImage> RNSkiOSVideo::nextImage(double *timeStamp) {
   CMSampleBufferRef sampleBuffer = [_trackOutput copyNextSampleBuffer];
   if (!sampleBuffer) {
-    NSLog(@"No more sample buffers.");
+    NSLog(@"No sample buffer.");
     return nullptr;
   }
 
-  //    CVPixelBufferRef imageBuffer =
-  //    CMSampleBufferGetImageBuffer(sampleBuffer); if (!imageBuffer) {
-  //        NSLog(@"Failed to get image buffer from sample buffer.");
-  //        CFRelease(sampleBuffer);
-  //        return nullptr;
-  //    }
-  // Assuming makeSkiaImageFromCVBuffer is defined and converts a
-  // CVPixelBufferRef to sk_sp<SkImage>
   auto skImage = _context->makeImageFromNativeBuffer(
       reinterpret_cast<void *>(sampleBuffer));
 
@@ -88,4 +80,3 @@ sk_sp<SkImage> RNSkiOSVideo::nextImage(double *timeStamp) {
 
 } // namespace RNSkia
 
-// Remember to define makeSkiaImageFromCVBuffer somewhere in your project.

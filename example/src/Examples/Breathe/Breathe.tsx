@@ -51,13 +51,17 @@ half4 main(vec2 fragcoord) {
 `)!;
 
 export const Breathe = () => {
+  const lastTimestamp = useSharedValue<number>(0);
   const image = useSharedValue<SkImage | null>(null);
   const video = useVideo(require("./sample.mp4"));
   useFrameCallback(({ timestamp }) => {
     if (video === null) {
       return;
     }
-    image.value = video.nextImage(timestamp);
+    if (timestamp - lastTimestamp.value > 32) {
+      lastTimestamp.value = timestamp;
+      image.value = video.nextImage(timestamp);
+    }
   });
   return (
     <Canvas style={{ flex: 1 }} mode="continuous">

@@ -28,6 +28,7 @@ public:
 
   static sk_sp<SkImage>
   makeTextureFromCMSampleBuffer(CMSampleBufferRef sampleBuffer);
+  static sk_sp<SkImage> makeTextureFromImage(sk_sp<SkImage> image);
 
 private:
   static id<MTLDevice> device;
