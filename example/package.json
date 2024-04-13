@@ -5,7 +5,7 @@
   "scripts": {
     "android": "react-native run-android --active-arch-only",
     "ios": "react-native run-ios",
-    "start": "react-native start",
+    "start": "expo start",
     "web": "webpack serve --mode=development --config webpack.config.js",
     "build:web": "rm -rf dist/ && webpack --mode=production --config webpack.config.js",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",

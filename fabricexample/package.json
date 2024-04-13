@@ -6,7 +6,7 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --cache",
-    "start": "react-native start",
+    "start": "expo start",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "pod-install": "cd ios && pod install && cd ..",
     "android-reverse-tcp": "adb devices | grep '\t' | awk '{print $1}' | sed 's/\\s//g' | xargs -I {} adb -s {} reverse tcp:8081 tcp:8081"
@@ -24,6 +24,7 @@
     "cdt2d": "1.0.0",
     "color": "4.2.3",
     "expo": "^49.0.0",
+    "expo-asset": "~8.10.1",
     "its-fine": "1.1.1",
     "react": "18.2.0",
     "react-native": "0.72.6",
