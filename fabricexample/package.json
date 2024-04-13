@@ -23,6 +23,7 @@
     "babel-plugin-transform-inline-environment-variables": "0.4.4",
     "cdt2d": "1.0.0",
     "color": "4.2.3",
+    "expo": "^49.0.0",
     "its-fine": "1.1.1",
     "react": "18.2.0",
     "react-native": "0.72.6",
