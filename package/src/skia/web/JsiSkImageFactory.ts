@@ -1,17 +1,19 @@
-import type { CanvasKit } from "canvaskit-wasm";
+import type { CanvasKit, Image } from "canvaskit-wasm";
 
-import {
+import { isNativeBufferWeb } from "../types";
+import type {
+  SkSurface,
   type SkData,
   type ImageInfo,
   type SkImage,
   type NativeBuffer,
   type ImageFactory,
-  isNativeBufferWeb,
 } from "../types";
 
 import { Host, getEnum } from "./Host";
 import { JsiSkImage } from "./JsiSkImage";
 import { JsiSkData } from "./JsiSkData";
+import type { JsiSkSurface } from "./JsiSkSurface";
 
 export class JsiSkImageFactory extends Host implements ImageFactory {
   constructor(CanvasKit: CanvasKit) {
@@ -25,13 +27,30 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
     return Promise.resolve(null);
   }
 
-  MakeImageFromNativeBuffer(buffer: NativeBuffer) {
+  MakeImageFromNativeBuffer(
+    buffer: NativeBuffer,
+    surface?: JsiSkSurface,
+    image?: JsiSkImage
+  ) {
     if (!isNativeBufferWeb(buffer)) {
       throw new Error("Invalid NativeBuffer");
     }
-    // TODO: this is way way to slow
-    const image = this.CanvasKit.MakeImageFromCanvasImageSource(buffer);
-    return new JsiSkImage(this.CanvasKit, image);
+    if (!surface) {
+      // TODO: this is way to slow
+      const img = this.CanvasKit.MakeImageFromCanvasImageSource(buffer);
+      return new JsiSkImage(this.CanvasKit, img);
+    } else if (!image) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const img = (surface as any).makeImageFromTextureSource(buffer) as Image;
+      return new JsiSkImage(this.CanvasKit, img);
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const img = (surface as any).updateTextureFromSource(
+        image,
+        buffer
+      ) as Image;
+      return new JsiSkImage(this.CanvasKit, img);
+    }
   }
 
   MakeImageFromEncoded(encoded: SkData) {
