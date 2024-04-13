@@ -25,7 +25,7 @@ const useVideo = (_uri: string) => {
       return;
     }
     const asset = assets[0];
-    const v = Skia.Video(asset.localUri);
+    const v = Skia.Video(asset.localUri!);
     setVideo(v);
   }, [assets]);
   return video;
@@ -60,6 +60,9 @@ export const Breathe = () => {
     }
     if (timestamp - lastTimestamp.value > 32) {
       lastTimestamp.value = timestamp;
+      if (image.value) {
+        image.value.dispose();
+      }
       image.value = video.nextImage(timestamp);
     }
   });
