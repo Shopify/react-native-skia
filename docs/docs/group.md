@@ -114,8 +114,6 @@ import {
   Group,
   Image,
   useImage,
-  Skia,
-  rrect,
   rect,
   Fill,
 } from "@shopify/react-native-skia";
@@ -155,7 +153,6 @@ import {
   Group,
   Image,
   useImage,
-  Skia,
   rrect,
   rect,
 } from "@shopify/react-native-skia";
