@@ -59,11 +59,11 @@ public:
 
   sk_sp<SkImage> takeScreenshotFromViewTag(size_t tag) override;
 
-  sk_sp<SkImage> makeImageFromPlatformBuffer(void *buffer) override;
+  sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override;
 
-  uint64_t makePlatformBuffer(sk_sp<SkImage> image) override;
+  uint64_t makeNativeBuffer(sk_sp<SkImage> image) override;
 
-  void releasePlatformBuffer(uint64_t pointer) override;
+  void releaseNativeBuffer(uint64_t pointer) override;
 
   virtual void performStreamOperation(
       const std::string &sourceUri,
