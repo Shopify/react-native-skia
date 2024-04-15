@@ -82,7 +82,7 @@ SkColorType SkiaCVPixelBufferUtils::RGB::getCVPixelBufferColorType(
     [[likely]] return kBGRA_8888_SkColorType;
   case kCVPixelFormatType_32RGBA:
     return kRGBA_8888_SkColorType;
-  // This can be extended with branches for specific RGB formats if new Apple
+  // This can be extended with branches for specific RGB formats if Apple
   // uses new formats.
   default:
     [[unlikely]] throw std::runtime_error(
@@ -159,7 +159,7 @@ SkiaCVPixelBufferUtils::YUV::getPlaneConfig(OSType pixelFormat) {
   case kCVPixelFormatType_420YpCbCr8VideoRange_8A_TriPlanar:
   case kCVPixelFormatType_444YpCbCr16VideoRange_16A_TriPlanar:
     return SkYUVAInfo::PlaneConfig::kY_U_V;
-  // This can be extended with branches for specific YUV formats if new Apple
+  // This can be extended with branches for specific YUV formats if Apple
   // uses new formats.
   default:
     [[unlikely]] throw std::runtime_error("Invalid pixel format! " +
@@ -206,7 +206,7 @@ SkiaCVPixelBufferUtils::YUV::getSubsampling(OSType pixelFormat) {
   case kCVPixelFormatType_422YpCbCr10BiPlanarFullRange:
   case kCVPixelFormatType_422YpCbCr16BiPlanarVideoRange:
     return SkYUVAInfo::Subsampling::k422;
-  // This can be extended with branches for specific YUV formats if new Apple
+  // This can be extended with branches for specific YUV formats if Apple
   // uses new formats.
   default:
     [[unlikely]] throw std::runtime_error("Invalid pixel format! " +
@@ -242,7 +242,7 @@ SkYUVColorSpace SkiaCVPixelBufferUtils::YUV::getColorspace(OSType pixelFormat) {
   case kCVPixelFormatType_444YpCbCr10BiPlanarFullRange:
     // 10-bit full
     return SkYUVColorSpace::kBT2020_10bit_Full_SkYUVColorSpace;
-  // This can be extended with branches for specific YUV formats if new Apple
+  // This can be extended with branches for specific YUV formats if Apple
   // uses new formats.
   default:
     [[unlikely]] throw std::runtime_error("Invalid pixel format! " +
