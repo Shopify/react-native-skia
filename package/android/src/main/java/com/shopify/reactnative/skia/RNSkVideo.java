@@ -29,7 +29,7 @@ public class RNSkVideo {
     RNSkVideo(Context context, String localUri) {
         this.uri = Uri.parse(localUri);
         this.context = context;
-        //this.initializeReader();
+        this.initializeReader();
     }
 
     private void initializeReader() {
@@ -44,8 +44,7 @@ public class RNSkVideo {
             MediaFormat format = extractor.getTrackFormat(trackIndex);
             int width = format.getInteger(MediaFormat.KEY_WIDTH);
             int height = format.getInteger(MediaFormat.KEY_HEIGHT);
-            // YUV_420_888
-            imageReader = ImageReader.newInstance(width, height, ImageFormat.FLEX_RGBA_8888, 2);
+            imageReader = ImageReader.newInstance(width, height, ImageFormat.YUV_420_888, 2);
             outputSurface = imageReader.getSurface();
 
             // Create a decoder for the format
