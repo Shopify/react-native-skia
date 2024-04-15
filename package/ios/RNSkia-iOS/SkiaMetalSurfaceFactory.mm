@@ -40,8 +40,14 @@ struct OffscreenRenderContext {
 const SkiaMetalContext &SkiaMetalSurfaceFactory::getSkiaContext() {
   static const auto key = "SkiaContext";
 
-  void *state = dispatch_queue_get_specific(dispatch_get_current_queue(), key);
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+  dispatch_queue_t currentQueue = dispatch_get_current_queue();
+#pragma clang diagnostic pop
+
+  void *state = dispatch_queue_get_specific(currentQueue, key);
   if (state == nullptr) {
+    NSLog(@"Re-creating SkiaContext...");
     SkiaMetalContext *context = new SkiaMetalContext();
     context->device = MTLCreateSystemDefaultDevice();
     context->commandQueue = [context->device newCommandQueue];
@@ -54,11 +60,9 @@ const SkiaMetalContext &SkiaMetalSurfaceFactory::getSkiaContext() {
     context->skContext = skContext;
 
     state = reinterpret_cast<SkiaMetalContext *>(context);
-    dispatch_queue_set_specific(
-        dispatch_get_current_queue(), key, state, [](void *data) {
-          SkiaMetalContext *casted = reinterpret_cast<SkiaMetalContext *>(data);
-          delete casted;
-        });
+    dispatch_queue_set_specific(currentQueue, key, state, [](void *data) {
+      delete reinterpret_cast<SkiaMetalContext *>(data);
+    });
   }
 
   SkiaMetalContext *currentContext =
