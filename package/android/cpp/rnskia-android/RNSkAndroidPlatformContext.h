@@ -59,7 +59,7 @@ public:
   }
 
   std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override {
-      return std::make_shared<RNSkAndroidVideo>(url, this);
+      return std::make_shared<RNSkAndroidVideo>(url);
   }
 
   void releaseNativeBuffer(uint64_t pointer) override {

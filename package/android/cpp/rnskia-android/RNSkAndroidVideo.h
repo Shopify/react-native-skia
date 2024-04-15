@@ -2,7 +2,6 @@
 
 #include <string>
 
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -10,7 +9,6 @@
 
 #pragma clang diagnostic pop
 
-#include "RNSkPlatformContext.h"
 #include "RNSkVideo.h"
 
 namespace RNSkia {
@@ -18,10 +16,9 @@ namespace RNSkia {
 class RNSkAndroidVideo : public RNSkVideo {
 private:
   std::string _url;
-  RNSkPlatformContext *_context;
 
 public:
-  RNSkAndroidVideo(std::string url, RNSkPlatformContext *context);
+  RNSkAndroidVideo(const std::string &url);
   ~RNSkAndroidVideo();
   sk_sp<SkImage> nextImage(double *timeStamp = nullptr) override;
 };
