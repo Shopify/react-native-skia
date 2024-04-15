@@ -11,9 +11,9 @@
 
 #include "AHardwareBufferUtils.h"
 #include "JniPlatformContext.h"
+#include "RNSkAndroidVideo.h"
 #include "RNSkPlatformContext.h"
 #include "SkiaOpenGLSurfaceFactory.h"
-#include "RNSkAndroidVideo.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -59,8 +59,13 @@ public:
   }
 
   std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override {
-      auto jniVideo = _jniPlatformContext->createVideo(url);
-      return std::make_shared<RNSkAndroidVideo>(url);
+    std::string modifiedUrl = url;
+    // Remove "file://" prefix if it exists
+    const std::string prefix = "file://";
+    if (modifiedUrl.substr(0, prefix.size()) == prefix) {
+      modifiedUrl.erase(0, prefix.size());
+    }
+    return std::make_shared<RNSkAndroidVideo>(modifiedUrl);
   }
 
   void releaseNativeBuffer(uint64_t pointer) override {

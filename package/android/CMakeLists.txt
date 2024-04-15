@@ -220,6 +220,9 @@ else()
 endif()
 message("-- TURBO   : " ${TURBOMODULES_LIB})
 
+# Find the Media NDK library
+find_library(MEDIA_NDK_LIBRARY mediandk)
+
 # Link
 target_link_libraries(
         ${PACKAGE_NAME}
@@ -239,4 +242,5 @@ target_link_libraries(
         -lGLESv2
         -lEGL
         -landroid
+        ${MEDIA_NDK_LIBRARY}
     )

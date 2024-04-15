@@ -79,4 +79,3 @@ sk_sp<SkImage> RNSkiOSVideo::nextImage(double *timeStamp) {
 }
 
 } // namespace RNSkia
-

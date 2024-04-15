@@ -144,7 +144,8 @@ sk_sp<SkImage> SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(
   }
 }
 
-sk_sp<SkImage> SkiaMetalSurfaceFactory::makeTextureFromImage(sk_sp<SkImage> image) {
+sk_sp<SkImage>
+SkiaMetalSurfaceFactory::makeTextureFromImage(sk_sp<SkImage> image) {
   if (!SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
           &ThreadContextHolder::ThreadSkiaMetalContext)) {
     throw std::runtime_error("Failed to create Skia Context for this Thread!");

@@ -75,27 +75,31 @@ TSelf JniPlatformContext::initHybrid(jni::alias_ref<jhybridobject> jThis,
   return makeCxxInstance(jThis, pixelDensity);
 }
 
-jni::local_ref<jobject> JniPlatformContext::createVideo(const std::string& url) {
-    jni::ThreadScope ts;  // Manages JNI thread attachment/detachment
+jni::local_ref<jobject>
+JniPlatformContext::createVideo(const std::string &url) {
+  jni::ThreadScope ts; // Manages JNI thread attachment/detachment
 
-    // Get the JNI environment
-    JNIEnv* env = jni::Environment::current();
+  // Get the JNI environment
+  JNIEnv *env = jni::Environment::current();
 
-    // Convert std::string to jstring
-    jstring jUrl = env->NewStringUTF(url.c_str());
+  // Convert std::string to jstring
+  jstring jUrl = env->NewStringUTF(url.c_str());
 
-    // Get the method ID for the createVideo method
-    // Replace "Lcom/yourpackage/RNSkVideo;" with the actual return type descriptor
-    static auto method = javaPart_->getClass()->getMethod<jobject(jstring)>("createVideo");
+  // Get the method ID for the createVideo method
+  // Replace "Lcom/yourpackage/RNSkVideo;" with the actual return type
+  // descriptor
+  static auto method =
+      javaPart_->getClass()->getMethod<jobject(jstring)>("createVideo");
 
-    // Call the method and receive a local reference to the video object
-    auto videoObject = method(javaPart_.get(), jUrl);
+  // Call the method and receive a local reference to the video object
+  auto videoObject = method(javaPart_.get(), jUrl);
 
-    // Clean up the jstring local reference
-    env->DeleteLocalRef(jUrl);
+  // Clean up the jstring local reference
+  env->DeleteLocalRef(jUrl);
 
-    // Return the video object; it remains a local ref that needs managing on the C++ side
-    return videoObject;
+  // Return the video object; it remains a local ref that needs managing on the
+  // C++ side
+  return videoObject;
 }
 
 sk_sp<SkImage> JniPlatformContext::takeScreenshotFromViewTag(size_t tag) {
