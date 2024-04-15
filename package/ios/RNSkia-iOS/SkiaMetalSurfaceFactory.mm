@@ -18,8 +18,6 @@
 
 #pragma clang diagnostic pop
 
-thread_local SkiaMetalContext ThreadContextHolder::ThreadSkiaMetalContext;
-
 struct OffscreenRenderContext {
   id<MTLTexture> texture;
 
@@ -39,40 +37,47 @@ struct OffscreenRenderContext {
   }
 };
 
-id<MTLDevice> SkiaMetalSurfaceFactory::device = MTLCreateSystemDefaultDevice();
+const SkiaMetalContext &SkiaMetalSurfaceFactory::getSkiaContext() {
+  static const auto key = "SkiaContext";
 
-bool SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
-    SkiaMetalContext *skiaMetalContext) {
-  if (skiaMetalContext->skContext == nullptr) {
-    skiaMetalContext->commandQueue =
-        id<MTLCommandQueue>(CFRetain((GrMTLHandle)[device newCommandQueue]));
-    skiaMetalContext->skContext = GrDirectContext::MakeMetal(
-        (__bridge void *)device,
-        (__bridge void *)skiaMetalContext->commandQueue);
-    if (skiaMetalContext->skContext == nullptr) {
-      RNSkia::RNSkLogger::logToConsole("Couldn't create a Skia Metal Context");
-      return false;
+  void *state = dispatch_queue_get_specific(dispatch_get_current_queue(), key);
+  if (state == nullptr) {
+    SkiaMetalContext *context = new SkiaMetalContext();
+    context->device = MTLCreateSystemDefaultDevice();
+    context->commandQueue = [context->device newCommandQueue];
+    sk_sp<GrDirectContext> skContext =
+        GrDirectContext::MakeMetal((__bridge void *)context->device,
+                                   (__bridge void *)context->commandQueue);
+    if (skContext == nullptr) {
+      throw std::runtime_error("Failed to create Metal Skia Context!");
     }
+    context->skContext = skContext;
+
+    state = reinterpret_cast<SkiaMetalContext *>(context);
+    dispatch_queue_set_specific(
+        dispatch_get_current_queue(), key, state, [](void *data) {
+          SkiaMetalContext *casted = reinterpret_cast<SkiaMetalContext *>(data);
+          delete casted;
+        });
   }
-  return true;
+
+  SkiaMetalContext *currentContext =
+      reinterpret_cast<SkiaMetalContext *>(state);
+  return *currentContext;
 }
 
 sk_sp<SkSurface>
 SkiaMetalSurfaceFactory::makeWindowedSurface(id<MTLTexture> texture, int width,
                                              int height) {
-  // Get render context for current thread
-  if (!SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
-          &ThreadContextHolder::ThreadSkiaMetalContext)) {
-    return nullptr;
-  }
   GrMtlTextureInfo fbInfo;
   fbInfo.fTexture.retain((__bridge void *)texture);
 
   GrBackendRenderTarget backendRT(width, height, fbInfo);
 
+  auto &context = getSkiaContext();
   auto skSurface = SkSurfaces::WrapBackendRenderTarget(
-      ThreadContextHolder::ThreadSkiaMetalContext.skContext.get(), backendRT,
-      kTopLeft_GrSurfaceOrigin, kBGRA_8888_SkColorType, nullptr, nullptr);
+      context.skContext.get(), backendRT, kTopLeft_GrSurfaceOrigin,
+      kBGRA_8888_SkColorType, nullptr, nullptr);
 
   if (skSurface == nullptr || skSurface->getCanvas() == nullptr) {
     RNSkia::RNSkLogger::logToConsole(
@@ -84,13 +89,9 @@ SkiaMetalSurfaceFactory::makeWindowedSurface(id<MTLTexture> texture, int width,
 
 sk_sp<SkSurface> SkiaMetalSurfaceFactory::makeOffscreenSurface(int width,
                                                                int height) {
-  if (!SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
-          &ThreadContextHolder::ThreadSkiaMetalContext)) {
-    return nullptr;
-  }
-  auto ctx = new OffscreenRenderContext(
-      device, ThreadContextHolder::ThreadSkiaMetalContext.skContext,
-      ThreadContextHolder::ThreadSkiaMetalContext.commandQueue, width, height);
+  auto &context = getSkiaContext();
+  auto ctx = new OffscreenRenderContext(context.device, context.skContext,
+                                        context.commandQueue, width, height);
 
   // Create a GrBackendTexture from the Metal texture
   GrMtlTextureInfo info;
@@ -99,9 +100,8 @@ sk_sp<SkSurface> SkiaMetalSurfaceFactory::makeOffscreenSurface(int width,
 
   // Create a SkSurface from the GrBackendTexture
   auto surface = SkSurfaces::WrapBackendTexture(
-      ThreadContextHolder::ThreadSkiaMetalContext.skContext.get(),
-      backendTexture, kTopLeft_GrSurfaceOrigin, 0, kBGRA_8888_SkColorType,
-      nullptr, nullptr,
+      context.skContext.get(), backendTexture, kTopLeft_GrSurfaceOrigin, 0,
+      kBGRA_8888_SkColorType, nullptr, nullptr,
       [](void *addr) { delete (OffscreenRenderContext *)addr; }, ctx);
 
   return surface;
@@ -109,11 +109,7 @@ sk_sp<SkSurface> SkiaMetalSurfaceFactory::makeOffscreenSurface(int width,
 
 sk_sp<SkImage> SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(
     CMSampleBufferRef sampleBuffer) {
-  if (!SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
-          &ThreadContextHolder::ThreadSkiaMetalContext)) [[unlikely]] {
-    throw std::runtime_error("Failed to create Skia Context for this Thread!");
-  }
-  const SkiaMetalContext &context = ThreadContextHolder::ThreadSkiaMetalContext;
+  auto &context = getSkiaContext();
 
   if (!CMSampleBufferIsValid(sampleBuffer)) [[unlikely]] {
     throw std::runtime_error("The given CMSampleBuffer is not valid!");
@@ -125,7 +121,7 @@ sk_sp<SkImage> SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(
       SkiaCVPixelBufferUtils::getCVPixelBufferBaseFormat(pixelBuffer);
   switch (format) {
   case SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat::rgb: {
-    // CVPixelBuffer is in any RGB format.
+    // CVPixelBuffer is in any RGB format, single-plane
     SkColorType colorType =
         SkiaCVPixelBufferUtils::RGB::getCVPixelBufferColorType(pixelBuffer);
     GrBackendTexture texture =
@@ -134,6 +130,13 @@ sk_sp<SkImage> SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(
     return SkImages::AdoptTextureFrom(context.skContext.get(), texture,
                                       kTopLeft_GrSurfaceOrigin, colorType,
                                       kOpaque_SkAlphaType);
+  }
+  case SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat::yuv: {
+    // CVPixelBuffer is in any YUV format, multi-plane
+    GrYUVABackendTextures textures =
+        SkiaCVPixelBufferUtils::YUV::getSkiaTextureForCVPixelBuffer(
+            pixelBuffer);
+    return SkImages::TextureFromYUVATextures(context.skContext.get(), textures);
   }
   default:
     [[unlikely]] {
