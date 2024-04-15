@@ -125,7 +125,7 @@ sk_sp<SkImage> SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(
       SkiaCVPixelBufferUtils::getCVPixelBufferBaseFormat(pixelBuffer);
   switch (format) {
   case SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat::rgb: {
-    // CVPixelBuffer is in any RGB format
+    // CVPixelBuffer is in any RGB format.
     SkColorType colorType =
         SkiaCVPixelBufferUtils::RGB::getCVPixelBufferColorType(pixelBuffer);
     GrBackendTexture texture =
