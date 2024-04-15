@@ -186,8 +186,7 @@ sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
 sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeBuffer(void *buffer) {
   CMSampleBufferRef sampleBuffer = (CMSampleBufferRef)buffer;
   // TODO: to debug, we may need to remove makeTextureFromCMSampleBuffer
-  // return
-  // SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(sampleBuffer);
+  //return SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(sampleBuffer);
   //  Step 1: Extract the CVPixelBufferRef from the CMSampleBufferRef
   CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
 

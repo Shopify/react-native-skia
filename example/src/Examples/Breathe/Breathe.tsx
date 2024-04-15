@@ -8,26 +8,35 @@ import {
   Shader,
   Fill,
 } from "@shopify/react-native-skia";
+import type { SharedValue } from "react-native-reanimated";
 import {
+  runOnUI,
   useFrameCallback,
   useSharedValue,
-} from "@shopify/react-native-skia/src/external/reanimated/moduleWrapper";
+} from "react-native-reanimated";
 import type { Video } from "@shopify/react-native-skia/src/skia/types/Video";
 import { useAssets } from "expo-asset";
 
 const { width, height } = Dimensions.get("window");
 
+const createVideo = (video: SharedValue<Video | null>, uri: string) => {
+  "worklet";
+  const v = Skia.Video(uri);
+  video.value = v;
+};
+
 const useVideo = (_uri: string) => {
-  const [assets, error] = useAssets([require("./sample.mp4")]);
-  const [video, setVideo] = useState<Video | null>(null);
+  const [assets] = useAssets([require("./sample.mp4")]);
+  const video = useSharedValue<Video | null>(null);
   useEffect(() => {
     if (assets === undefined) {
       return;
     }
     const asset = assets[0];
-    const v = Skia.Video(asset.localUri!);
-    setVideo(v);
-  }, [assets]);
+    if (video.value === null) {
+      runOnUI(createVideo)(video, asset.localUri!);
+    }
+  }, [assets, video]);
   return video;
 };
 
@@ -55,15 +64,16 @@ export const Breathe = () => {
   const image = useSharedValue<SkImage | null>(null);
   const video = useVideo(require("./sample.mp4"));
   useFrameCallback(({ timestamp }) => {
-    if (video === null) {
+    if (video.value === null) {
       return;
     }
-    if (timestamp - lastTimestamp.value > 32) {
+    if (timestamp - lastTimestamp.value > 500) {
       lastTimestamp.value = timestamp;
       if (image.value) {
         image.value.dispose();
       }
-      image.value = video.nextImage(timestamp);
+      console.log("nextImage()");
+      image.value = video.value.nextImage(timestamp);
     }
   });
   return (

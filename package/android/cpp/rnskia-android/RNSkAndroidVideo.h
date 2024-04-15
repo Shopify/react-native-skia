@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include <android/native_window_jni.h>
 #include <media/NdkMediaCodec.h>
 #include <media/NdkMediaExtractor.h>
 
@@ -23,6 +24,7 @@ private:
   AMediaExtractor *extractor;
   AMediaCodec *codec;
   AMediaFormat *format;
+  ANativeWindow *window;
   size_t videoTrackIndex;
   bool isExtractorAtEnd = false;
   int32_t width;
