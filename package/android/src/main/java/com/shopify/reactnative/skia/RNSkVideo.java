@@ -29,7 +29,7 @@ public class RNSkVideo {
     RNSkVideo(Context context, String localUri) {
         this.uri = Uri.parse(localUri);
         this.context = context;
-        this.initializeReader();
+        //this.initializeReader();
     }
 
     private void initializeReader() {
