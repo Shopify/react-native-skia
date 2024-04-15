@@ -40,12 +40,7 @@ struct OffscreenRenderContext {
 const SkiaMetalContext &SkiaMetalSurfaceFactory::getSkiaContext() {
   static const auto key = "SkiaContext";
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-  dispatch_queue_t currentQueue = dispatch_get_current_queue();
-#pragma clang diagnostic pop
-
-  void *state = dispatch_queue_get_specific(currentQueue, key);
+  void *state = dispatch_get_specific(key);
   if (state == nullptr) {
     NSLog(@"Re-creating SkiaContext...");
     SkiaMetalContext *context = new SkiaMetalContext();
@@ -59,7 +54,19 @@ const SkiaMetalContext &SkiaMetalSurfaceFactory::getSkiaContext() {
     }
     context->skContext = skContext;
 
-    state = reinterpret_cast<SkiaMetalContext *>(context);
+    state = reinterpret_cast<void *>(context);
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    // Instead of using thread_local, we store the current SkContext
+    // in the current dispatch queue's specific storage.
+    // The problem with thread_local is that Dispatch Queues on iOS
+    // may use multiple Threads, even when using serial (non-concurrent)
+    // attributes, which caused the SkContext to re-initialize
+    // even though it should remain the same - this caused flickering
+    // in NativeBuffer() APIs (e.g. VisionCamera or Video)
+    dispatch_queue_t currentQueue = dispatch_get_current_queue();
+#pragma clang diagnostic pop
     dispatch_queue_set_specific(currentQueue, key, state, [](void *data) {
       delete reinterpret_cast<SkiaMetalContext *>(data);
     });
