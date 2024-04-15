@@ -38,9 +38,10 @@ struct OffscreenRenderContext {
 };
 
 const SkiaMetalContext &SkiaMetalSurfaceFactory::getSkiaContext() {
-  static const auto key = "SkiaContext";
+  // this key is just used as a pointer reference.
+  static const auto key = 1;
 
-  void *state = dispatch_get_specific(key);
+  void *state = dispatch_get_specific(&key);
   if (state == nullptr) {
     NSLog(@"Re-creating SkiaContext...");
     SkiaMetalContext *context = new SkiaMetalContext();
@@ -67,7 +68,7 @@ const SkiaMetalContext &SkiaMetalSurfaceFactory::getSkiaContext() {
     // in NativeBuffer() APIs (e.g. VisionCamera or Video)
     dispatch_queue_t currentQueue = dispatch_get_current_queue();
 #pragma clang diagnostic pop
-    dispatch_queue_set_specific(currentQueue, key, state, [](void *data) {
+    dispatch_queue_set_specific(currentQueue, &key, state, [](void *data) {
       delete reinterpret_cast<SkiaMetalContext *>(data);
     });
   }
