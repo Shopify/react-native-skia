@@ -29,6 +29,30 @@
   }
 #endif
 
+// pragma MARK: TextureHolder
+
+TextureHolder::TextureHolder(CVMetalTextureRef texture): _texture(texture) { }
+TextureHolder::~TextureHolder() {
+  CFRelease(_texture);
+}
+
+GrBackendTexture TextureHolder::toGrBackendTexture() {
+  // Unwrap the underlying MTLTexture
+  id<MTLTexture> mtlTexture = CVMetalTextureGetTexture(_texture);
+  if (mtlTexture == nil) [[unlikely]] {
+    throw std::runtime_error(
+        "Failed to get MTLTexture from CVMetalTextureRef!");
+  }
+
+  // Wrap MTLTexture in Skia's GrBackendTexture
+  GrMtlTextureInfo textureInfo;
+  textureInfo.fTexture.retain((__bridge void *)mtlTexture);
+  GrBackendTexture texture =
+      GrBackendTexture((int)mtlTexture.width, (int)mtlTexture.height,
+                       skgpu::Mipmapped::kNo, textureInfo);
+  return texture;
+}
+
 // pragma MARK: Base
 
 SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat
@@ -67,14 +91,14 @@ SkColorType SkiaCVPixelBufferUtils::RGB::getCVPixelBufferColorType(
   }
 }
 
-GrBackendTexture SkiaCVPixelBufferUtils::RGB::getSkiaTextureForCVPixelBuffer(
+TextureHolder* SkiaCVPixelBufferUtils::RGB::getSkiaTextureForCVPixelBuffer(
     CVPixelBufferRef pixelBuffer) {
   return getSkiaTextureForCVPixelBufferPlane(pixelBuffer, /* planeIndex */ 0);
 }
 
 // pragma MARK: CVPixelBuffer -> Skia Texture
 
-GrBackendTexture SkiaCVPixelBufferUtils::getSkiaTextureForCVPixelBufferPlane(
+TextureHolder* SkiaCVPixelBufferUtils::getSkiaTextureForCVPixelBufferPlane(
     CVPixelBufferRef pixelBuffer, size_t planeIndex) {
   // 1. Get cache
   CVMetalTextureCacheRef textureCache = getTextureCache();
@@ -94,21 +118,7 @@ GrBackendTexture SkiaCVPixelBufferUtils::getSkiaTextureForCVPixelBufferPlane(
         std::to_string(result));
   }
 
-  // 2. Unwrap the underlying MTLTexture
-  id<MTLTexture> mtlTexture = CVMetalTextureGetTexture(textureHolder);
-  if (mtlTexture == nil) [[unlikely]] {
-    throw std::runtime_error(
-        "Failed to get MTLTexture from CVMetalTextureRef!");
-  }
-
-  // 3. Wrap MTLTexture in Skia's GrBackendTexture
-  GrMtlTextureInfo textureInfo;
-  textureInfo.fTexture.retain((__bridge void *)mtlTexture);
-  GrBackendTexture texture =
-      GrBackendTexture((int)mtlTexture.width, (int)mtlTexture.height,
-                       skgpu::Mipmapped::kNo, textureInfo);
-  CFRelease(textureHolder);
-  return texture;
+  return new TextureHolder(textureHolder);
 }
 
 // pragma MARK: getTextureCache()

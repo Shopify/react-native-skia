@@ -16,6 +16,16 @@
 #import <include/gpu/GrBackendSurface.h>
 #pragma clang diagnostic pop
 
+class TextureHolder {
+public:
+  explicit TextureHolder(CVMetalTextureRef texture);
+  ~TextureHolder();
+  
+  GrBackendTexture toGrBackendTexture();
+private:
+  CVMetalTextureRef _texture;
+};
+
 class SkiaCVPixelBufferUtils {
 public:
   enum class CVPixelBufferBaseFormat { rgb };
@@ -37,13 +47,13 @@ public:
     /**
      Gets a GPU-backed Skia Texture for the given RGB CVPixelBuffer.
      */
-    static GrBackendTexture
+    static TextureHolder*
     getSkiaTextureForCVPixelBuffer(CVPixelBufferRef pixelBuffer);
   };
 
 private:
   static CVMetalTextureCacheRef getTextureCache();
-  static GrBackendTexture
+  static TextureHolder*
   getSkiaTextureForCVPixelBufferPlane(CVPixelBufferRef pixelBuffer,
                                       size_t planeIndex);
   static MTLPixelFormat
