@@ -20,8 +20,8 @@ namespace RNSkia {
 class RNSkiOSVideo : public RNSkVideo {
 private:
   std::string _url;
-  AVAssetReader *_reader = nullptr;
-  AVAssetReaderTrackOutput *_trackOutput = nullptr;
+  AVPlayer* _player;
+  AVPlayerItemVideoOutput* _videoOutput;
   RNSkPlatformContext *_context;
 
 public:
@@ -29,7 +29,7 @@ public:
   ~RNSkiOSVideo();
   sk_sp<SkImage> nextImage(double *timeStamp = nullptr) override;
 
-  // Utility function to initialize the video reader
+  // Rename to initializePlayer
   void initializeReader();
 };
 

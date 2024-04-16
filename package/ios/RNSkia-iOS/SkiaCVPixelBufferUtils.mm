@@ -114,7 +114,7 @@ GrBackendTexture SkiaCVPixelBufferUtils::getSkiaTextureForCVPixelBufferPlane(
 // pragma MARK: getTextureCache()
 
 CVMetalTextureCacheRef SkiaCVPixelBufferUtils::getTextureCache() {
-  static thread_local CVMetalTextureCacheRef textureCache = nil;
+  static CVMetalTextureCacheRef textureCache = nil;
   if (textureCache == nil) {
     // Create a new Texture Cache
     auto result = CVMetalTextureCacheCreate(kCFAllocatorDefault, nil,
