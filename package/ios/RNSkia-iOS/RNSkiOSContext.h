@@ -35,7 +35,7 @@ public:
     return skContext != nullptr;
   }
   
-  std::shared_ptr<GrDirectContext> getDirectContext() override {
+  sk_sp<GrDirectContext> getDirectContext() override {
     return skContext;
   }
   
