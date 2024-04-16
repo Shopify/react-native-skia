@@ -16,11 +16,32 @@
 #import <include/gpu/GrBackendSurface.h>
 #pragma clang diagnostic pop
 
+/**
+ Holds a Metal Texture.
+ When the `TextureHolder` is destroyed, the underlying Metal Texture
+ is marked as invalid and might be overwritten by the Texture Cache,
+ so make sure to delete the `TextureHolder` only when the `SkImage`
+ has been deleted.
+
+ For example, use the `releaseProc` parameter in `BorrowImageFromTexture`
+ to delete the `TextureHolder`.
+ */
 class TextureHolder {
 public:
+  /**
+   Create a new instance of TextureHolder which holds
+   the given `CVMetalTextureRef`.
+
+   The given `CVMetalTextureRef` is assumed to already be
+   retained with `CFRetain`, and will later be manually
+   released with `CFRelease`.
+   */
   explicit TextureHolder(CVMetalTextureRef texture);
   ~TextureHolder();
 
+  /**
+   Converts this Texture to a Skia GrBackendTexture.
+   */
   GrBackendTexture toGrBackendTexture();
 
 private:
