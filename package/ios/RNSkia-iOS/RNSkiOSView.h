@@ -17,17 +17,17 @@ template <class T> class RNSkiOSView : public RNSkBaseiOSView, public T {
 public:
   RNSkiOSView(std::shared_ptr<RNSkia::RNSkPlatformContext> context)
       : T(context,
-          std::make_shared<RNSkMetalCanvasProvider>(
+          std::make_shared<RNSkia::RNSkMetalCanvasProvider>(
               std::bind(&RNSkia::RNSkView::requestRedraw, this), context)) {}
 
   CALayer *getLayer() override {
-    return std::static_pointer_cast<RNSkMetalCanvasProvider>(
+    return std::static_pointer_cast<RNSkia::RNSkMetalCanvasProvider>(
                this->getCanvasProvider())
         ->getLayer();
   }
 
   void setSize(int width, int height) override {
-    std::static_pointer_cast<RNSkMetalCanvasProvider>(this->getCanvasProvider())
+    std::static_pointer_cast<RNSkia::RNSkMetalCanvasProvider>(this->getCanvasProvider())
         ->setSize(width, height);
   }
 
