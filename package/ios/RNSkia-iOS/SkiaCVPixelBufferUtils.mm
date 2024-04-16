@@ -31,10 +31,8 @@
 
 // pragma MARK: TextureHolder
 
-TextureHolder::TextureHolder(CVMetalTextureRef texture): _texture(texture) { }
-TextureHolder::~TextureHolder() {
-  CFRelease(_texture);
-}
+TextureHolder::TextureHolder(CVMetalTextureRef texture) : _texture(texture) {}
+TextureHolder::~TextureHolder() { CFRelease(_texture); }
 
 GrBackendTexture TextureHolder::toGrBackendTexture() {
   // Unwrap the underlying MTLTexture
@@ -91,27 +89,29 @@ SkColorType SkiaCVPixelBufferUtils::RGB::getCVPixelBufferColorType(
   }
 }
 
-TextureHolder* SkiaCVPixelBufferUtils::RGB::getSkiaTextureForCVPixelBuffer(
+TextureHolder *SkiaCVPixelBufferUtils::RGB::getSkiaTextureForCVPixelBuffer(
     CVPixelBufferRef pixelBuffer) {
   return getSkiaTextureForCVPixelBufferPlane(pixelBuffer, /* planeIndex */ 0);
 }
 
 // pragma MARK: CVPixelBuffer -> Skia Texture
 
-TextureHolder* SkiaCVPixelBufferUtils::getSkiaTextureForCVPixelBufferPlane(
+TextureHolder *SkiaCVPixelBufferUtils::getSkiaTextureForCVPixelBufferPlane(
     CVPixelBufferRef pixelBuffer, size_t planeIndex) {
   // 1. Get cache
   CVMetalTextureCacheRef textureCache = getTextureCache();
 
   // 2. Get MetalTexture from CMSampleBuffer
-  CVMetalTextureRef textureHolder;
   size_t width = CVPixelBufferGetWidthOfPlane(pixelBuffer, planeIndex);
   size_t height = CVPixelBufferGetHeightOfPlane(pixelBuffer, planeIndex);
   MTLPixelFormat pixelFormat =
       getMTLPixelFormatForCVPixelBufferPlane(pixelBuffer, planeIndex);
+
+  CVMetalTextureRef textureHolder;
   CVReturn result = CVMetalTextureCacheCreateTextureFromImage(
       kCFAllocatorDefault, textureCache, pixelBuffer, nil, pixelFormat, width,
       height, planeIndex, &textureHolder);
+
   if (result != kCVReturnSuccess) [[unlikely]] {
     throw std::runtime_error(
         "Failed to create Metal Texture from CMSampleBuffer! Result: " +

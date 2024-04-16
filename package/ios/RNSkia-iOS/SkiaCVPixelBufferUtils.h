@@ -20,8 +20,9 @@ class TextureHolder {
 public:
   explicit TextureHolder(CVMetalTextureRef texture);
   ~TextureHolder();
-  
+
   GrBackendTexture toGrBackendTexture();
+
 private:
   CVMetalTextureRef _texture;
 };
@@ -47,13 +48,13 @@ public:
     /**
      Gets a GPU-backed Skia Texture for the given RGB CVPixelBuffer.
      */
-    static TextureHolder*
+    static TextureHolder *
     getSkiaTextureForCVPixelBuffer(CVPixelBufferRef pixelBuffer);
   };
 
 private:
   static CVMetalTextureCacheRef getTextureCache();
-  static TextureHolder*
+  static TextureHolder *
   getSkiaTextureForCVPixelBufferPlane(CVPixelBufferRef pixelBuffer,
                                       size_t planeIndex);
   static MTLPixelFormat
