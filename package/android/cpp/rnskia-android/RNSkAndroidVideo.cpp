@@ -2,7 +2,7 @@
 #include <string>
 
 #if __ANDROID_API__ >= 26
-#include <android/hardware_buffer.h>
+#include <android/hardware_buffer_jni.h>
 #endif
 
 #pragma clang diagnostic push
