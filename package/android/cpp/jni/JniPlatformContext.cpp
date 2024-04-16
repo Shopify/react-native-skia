@@ -92,7 +92,6 @@ jni::global_ref<jobject> JniPlatformContext::createVideo(const std::string& url)
     auto videoObject = method(javaPart_.get(), jUrl);
     // Clean up the jstring local reference
     auto result = jni::make_global(videoObject);
-    // Return the video object; it remains a local ref that needs managing on the C++ side
     return result;
 }
 

@@ -14,6 +14,8 @@ import android.view.Surface;
 
 import androidx.annotation.RequiresApi;
 
+import com.facebook.jni.annotations.DoNotStrip;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -59,13 +61,20 @@ public class RNSkVideo {
         }
     }
 
+    @DoNotStrip
     @RequiresApi(api = Build.VERSION_CODES.P)
-    public HardwareBuffer nextFrame() throws InterruptedException {
+    public HardwareBuffer nextImage() {
+        if (!decoderOutputAvailable()) {
+            decodeFrame();
+        }
+
         Image image = imageReader.acquireNextImage();
         if (image != null) {
-            return image.getHardwareBuffer();
+            HardwareBuffer hardwareBuffer = image.getHardwareBuffer();
+            image.close();  // Make sure to close the Image to free up the buffer
+            return hardwareBuffer;
         }
-        return null; // Modify this according to how you handle AHardwareBuffer
+        return null;
     }
 
 
@@ -81,39 +90,46 @@ public class RNSkVideo {
         return -1;
     }
 
-    private void decode() {
+    private boolean decoderOutputAvailable() {
         MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
+        int outputBufferId = decoder.dequeueOutputBuffer(info, 0);
+        if (outputBufferId >= 0) {
+            // If a buffer is available, release it immediately back since we are just checking
+            decoder.releaseOutputBuffer(outputBufferId, true);
+            return true;
+        }
+        return false;
+    }
+
+    private void decodeFrame() {
+        MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
+        long timeoutUs = 10000;
         boolean isEOS = false;
-        long timeoutUs = 10000; // Timeout for dequeue operations
 
-        while (!isEOS) {
-            if (!isEOS) {
-                int inputBufferId = decoder.dequeueInputBuffer(timeoutUs);
-                if (inputBufferId >= 0) {
-                    ByteBuffer inputBuffer = decoder.getInputBuffer(inputBufferId);
-                    int sampleSize = extractor.readSampleData(inputBuffer, 0);
-                    if (sampleSize < 0) {
-                        decoder.queueInputBuffer(inputBufferId, 0, 0, 0L, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
-                        isEOS = true;
-                    } else {
-                        long presentationTimeUs = extractor.getSampleTime();
-                        decoder.queueInputBuffer(inputBufferId, 0, sampleSize, presentationTimeUs, 0);
-                        extractor.advance();
-                    }
-                }
-            }
-
-            int outputBufferId = decoder.dequeueOutputBuffer(info, timeoutUs);
-            if (outputBufferId >= 0) {
-                if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
-                    isEOS = true;
-                }
-                // Release the buffer so it can be rendered to the surface (ImageReader's surface)
-                decoder.releaseOutputBuffer(outputBufferId, true);
+        int inputBufferId = decoder.dequeueInputBuffer(timeoutUs);
+        if (inputBufferId >= 0) {
+            ByteBuffer inputBuffer = decoder.getInputBuffer(inputBufferId);
+            int sampleSize = extractor.readSampleData(inputBuffer, 0);
+            if (sampleSize < 0) {
+                // End of stream, make sure to send this information to the decoder
+                decoder.queueInputBuffer(inputBufferId, 0, 0, 0L, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
+                isEOS = true;
+            } else {
+                long presentationTimeUs = extractor.getSampleTime();
+                decoder.queueInputBuffer(inputBufferId, 0, sampleSize, presentationTimeUs, 0);
+                extractor.advance();
             }
         }
 
-        release();  // Ensure resources are cleaned up
+        int outputBufferId = decoder.dequeueOutputBuffer(info, timeoutUs);
+        if (outputBufferId >= 0) {
+            // If we have a valid buffer, release it to make it available to the ImageReader's surface
+            decoder.releaseOutputBuffer(outputBufferId, true);
+
+            if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+                isEOS = true;
+            }
+        }
     }
 
     public void release() {
