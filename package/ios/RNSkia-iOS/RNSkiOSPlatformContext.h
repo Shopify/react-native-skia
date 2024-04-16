@@ -57,6 +57,8 @@ public:
 
   void runOnMainThread(std::function<void()>) override;
 
+  std::shared_ptr<RNSkContext> createSkiaContext() override;
+
   sk_sp<SkImage> takeScreenshotFromViewTag(size_t tag) override;
 
   sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override;

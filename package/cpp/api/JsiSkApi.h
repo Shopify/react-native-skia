@@ -50,6 +50,8 @@
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkTypefaceFontProviderFactory.h"
 #include "JsiSkVertices.h"
+#include "JsiSkContext.h"
+#include "JsiSkContextFactory.h"
 
 namespace RNSkia {
 
@@ -85,6 +87,7 @@ public:
                     JsiSkPictureRecorder::createCtor(context));
     installFunction("Color", JsiSkColor::createCtor());
 
+    installReadonlyProperty("Context", std::make_shared<JsiSkContextFactory>(context));
     installReadonlyProperty("SVG", std::make_shared<JsiSkSVGFactory>(context));
     installReadonlyProperty("Image",
                             std::make_shared<JsiSkImageFactory>(context));

@@ -10,6 +10,7 @@
 #include <utility>
 
 #include "RNSkDispatchQueue.h"
+#include "RNSkContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -124,6 +125,12 @@ public:
    * @param err Error to raise
    */
   virtual void raiseError(const std::exception &err) = 0;
+
+  /**
+   * Creates a Skia context using the underlying native platform graphics
+   * APIs.
+   */
+  virtual std::shared_ptr<RNSkContext> createSkiaContext() = 0;
 
   /**
    * Creates an offscreen surface

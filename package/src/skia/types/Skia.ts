@@ -31,6 +31,7 @@ import type { TypefaceFontProviderFactory } from "./Paragraph/TypefaceFontProvid
 import type { AnimatedImageFactory } from "./AnimatedImage";
 import type { ParagraphBuilderFactory } from "./Paragraph/ParagraphBuilder";
 import type { NativeBufferFactory } from "./NativeBuffer";
+import { ContextFactory } from "./Context";
 
 /**
  * Declares the interface for the native Skia API
@@ -70,6 +71,7 @@ export interface Skia {
   ImageFilter: ImageFilterFactory;
   Shader: ShaderFactory;
   PathEffect: PathEffectFactory;
+  Context: ContextFactory;
   /**
    * Returns an Vertices based on the given positions and optional parameters.
    * See SkVertices.h (especially the Builder) for more details.

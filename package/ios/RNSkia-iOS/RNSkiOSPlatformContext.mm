@@ -7,6 +7,7 @@
 
 #import "SkiaCVPixelBufferUtils.h"
 #import "SkiaMetalSurfaceFactory.h"
+#import "RNSkiOSContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -56,6 +57,11 @@ void RNSkiOSPlatformContext::performStreamOperation(
 
   // Fire and forget the thread - will be resolved on completion
   std::thread(loader).detach();
+}
+
+
+std::shared_ptr<RNSkContext> RNSkiOSPlatformContext::createSkiaContext() {
+  return std::make_shared<RNSkiOSContext>();
 }
 
 void RNSkiOSPlatformContext::releaseNativeBuffer(uint64_t pointer) {

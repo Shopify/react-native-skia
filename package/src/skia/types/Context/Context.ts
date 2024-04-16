@@ -1,4 +1,4 @@
-import type { SkJSIInstance } from "./JsiInstance";
+import type { SkJSIInstance } from "../JsiInstance";
 
 /**
  * Represents a Skia Context for the native graphics API.
