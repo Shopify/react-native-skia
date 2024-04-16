@@ -75,11 +75,11 @@ TSelf JniPlatformContext::initHybrid(jni::alias_ref<jhybridobject> jThis,
   return makeCxxInstance(jThis, pixelDensity);
 }
 
-jni::local_ref<jobject> JniPlatformContext::createVideo(const std::string& url) {
+jni::global_ref<jobject> JniPlatformContext::createVideo(const std::string& url) {
     jni::ThreadScope ts;  // Manages JNI thread attachment/detachment
 
     // Get the JNI environment
-    JNIEnv* env = jni::Environment::current();
+    JNIEnv *env = facebook::jni::Environment::current();
 
     // Convert std::string to jstring
     jstring jUrl = env->NewStringUTF(url.c_str());
@@ -90,12 +90,10 @@ jni::local_ref<jobject> JniPlatformContext::createVideo(const std::string& url) 
 
     // Call the method and receive a local reference to the video object
     auto videoObject = method(javaPart_.get(), jUrl);
-
     // Clean up the jstring local reference
-    env->DeleteLocalRef(jUrl);
-
+    auto result = jni::make_global(videoObject);
     // Return the video object; it remains a local ref that needs managing on the C++ side
-    return videoObject;
+    return result;
 }
 
 sk_sp<SkImage> JniPlatformContext::takeScreenshotFromViewTag(size_t tag) {

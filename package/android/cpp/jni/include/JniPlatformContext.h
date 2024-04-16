@@ -50,7 +50,7 @@ public:
     _onNotifyDrawLoop = callback;
   }
 
-  jni::local_ref<jobject> createVideo(const std::string& url);
+  jni::global_ref<jobject> createVideo(const std::string& url);
 
 private:
   friend HybridBase;

@@ -2,6 +2,10 @@
 
 #include <string>
 
+#include <jni.h>
+#include <jsi/jsi.h>
+#include <fbjni/fbjni.h>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -13,12 +17,15 @@
 
 namespace RNSkia {
 
+namespace jsi = facebook::jsi;
+namespace jni = facebook::jni;
+
 class RNSkAndroidVideo : public RNSkVideo {
 private:
-  std::string _url;
+  jni::global_ref<jobject> _jniVideo;
 
 public:
-  RNSkAndroidVideo(const std::string &url);
+  RNSkAndroidVideo(jni::global_ref<jobject> jniVideo);
   ~RNSkAndroidVideo();
   sk_sp<SkImage> nextImage(double *timeStamp = nullptr) override;
 };

@@ -60,7 +60,7 @@ public:
 
   std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override {
       auto jniVideo = _jniPlatformContext->createVideo(url);
-      return std::make_shared<RNSkAndroidVideo>(url);
+      return std::make_shared<RNSkAndroidVideo>(jniVideo);
   }
 
   void releaseNativeBuffer(uint64_t pointer) override {
