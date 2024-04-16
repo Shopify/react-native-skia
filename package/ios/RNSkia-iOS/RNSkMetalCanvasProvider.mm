@@ -1,6 +1,7 @@
 #import "RNSkMetalCanvasProvider.h"
 #import "RNSkLog.h"
 #import "SkiaMetalSurfaceFactory.h"
+#import "RNSkiOSContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -15,10 +16,12 @@
 
 #pragma clang diagnostic pop
 
+namespace RNSkia {
+
 RNSkMetalCanvasProvider::RNSkMetalCanvasProvider(
-    std::function<void()> requestRedraw,
-    std::shared_ptr<RNSkia::RNSkPlatformContext> context)
-    : RNSkCanvasProvider(requestRedraw), _context(context) {
+                                                 std::function<void()> requestRedraw,
+                                                 std::shared_ptr<RNSkia::RNSkPlatformContext> context)
+: RNSkCanvasProvider(requestRedraw), _context(context) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   _layer = [CAMetalLayer layer];
@@ -51,11 +54,17 @@ float RNSkMetalCanvasProvider::getScaledHeight() {
  Render to a canvas
  */
 bool RNSkMetalCanvasProvider::renderToCanvas(
-    const std::function<void(SkCanvas *)> &cb) {
+                                             const std::function<void(SkCanvas *)> &cb) {
   if (_width <= 0 || _height <= 0) {
     return false;
   }
-
+  
+  // TODO: How do we get the Runtime-specific Context here now??
+  std::shared_ptr<RNSkia::RNSkiOSContext> context = nullptr;
+  if (context == nullptr) {
+    throw std::runtime_error("Skia Context cannot be null here - how do we get it here?");
+  }
+  
   // Make sure to NOT render or try any render operations while we're in the
   // background or inactive. This will cause an error that might clear the
   // CAMetalLayer so that the canvas is empty when the app receives focus again.
@@ -80,21 +89,21 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
     if (currentDrawable == nullptr) {
       return false;
     }
-
+    
     auto skSurface = SkiaMetalSurfaceFactory::makeWindowedSurface(
-        currentDrawable.texture, _layer.drawableSize.width,
-        _layer.drawableSize.height);
-
+                                                                  context,
+                                                                  currentDrawable.texture, _layer.drawableSize.width,
+                                                                  _layer.drawableSize.height);
+    
     SkCanvas *canvas = skSurface->getCanvas();
     cb(canvas);
-
+    
     if (auto dContext = GrAsDirectContext(skSurface->recordingContext())) {
       dContext->flushAndSubmit();
     }
-
-    id<MTLCommandBuffer> commandBuffer(
-        [ThreadContextHolder::ThreadSkiaMetalContext
-                .commandQueue commandBuffer]);
+    
+    id<MTLCommandQueue> commandQueue = context->getCommandQueue();
+    id<MTLCommandBuffer> commandBuffer = [commandQueue commandBuffer];
     [commandBuffer presentDrawable:currentDrawable];
     [commandBuffer commit];
   }
@@ -107,8 +116,10 @@ void RNSkMetalCanvasProvider::setSize(int width, int height) {
   _layer.frame = CGRectMake(0, 0, width, height);
   _layer.drawableSize = CGSizeMake(width * _context->getPixelDensity(),
                                    height * _context->getPixelDensity());
-
+  
   _requestRedraw();
 }
 
 CALayer *RNSkMetalCanvasProvider::getLayer() { return _layer; }
+
+} // namespace RNSkia

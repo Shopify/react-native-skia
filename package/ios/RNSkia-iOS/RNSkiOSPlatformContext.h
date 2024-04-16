@@ -10,6 +10,7 @@
 #include "DisplayLink.h"
 #include "RNSkPlatformContext.h"
 #include "ViewScreenshotService.h"
+#include "RNSkContext.h"
 
 #include <jsi/jsi.h>
 
@@ -61,9 +62,9 @@ public:
 
   sk_sp<SkImage> takeScreenshotFromViewTag(size_t tag) override;
 
-  sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override;
+  sk_sp<SkImage> makeImageFromNativeBuffer(std::shared_ptr<RNSkContext> context, void *buffer) override;
 
-  uint64_t makeNativeBuffer(sk_sp<SkImage> image) override;
+  uint64_t makeNativeBuffer(std::shared_ptr<RNSkContext> skiaContext, sk_sp<SkImage> image) override;
 
   void releaseNativeBuffer(uint64_t pointer) override;
 
@@ -72,7 +73,7 @@ public:
       const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) override;
 
   void raiseError(const std::exception &err) override;
-  sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override;
+  sk_sp<SkSurface> makeOffscreenSurface(std::shared_ptr<RNSkContext> context, int width, int height) override;
   sk_sp<SkFontMgr> createFontMgr() override;
 
   void willInvalidateModules() {

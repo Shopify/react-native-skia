@@ -91,7 +91,12 @@ public:
                               std::function<void()> requestRedraw, float width,
                               float height)
       : RNSkCanvasProvider(requestRedraw), _width(width), _height(height) {
-    _surface = context->makeOffscreenSurface(_width, _height);
+    // TODO: How do we get the Runtime-specific Context here now??
+    std::shared_ptr<RNSkContext> skiaContext = nullptr;
+    if (skiaContext == nullptr) {
+      throw std::runtime_error("Skia Context cannot be null here - how do we get it here?");
+    }
+    _surface = context->makeOffscreenSurface(skiaContext, _width, _height);
     _pd = context->getPixelDensity();
   }
 

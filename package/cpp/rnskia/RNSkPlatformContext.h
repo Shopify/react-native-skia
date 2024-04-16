@@ -134,24 +134,26 @@ public:
 
   /**
    * Creates an offscreen surface
+   * @param context The Skia context to use for allocating the surface
    * @param width Width of the offscreen surface
    * @param height Height of the offscreen surface
    * @return sk_sp<SkSurface>
    */
-  virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) = 0;
+  virtual sk_sp<SkSurface> makeOffscreenSurface(std::shared_ptr<RNSkContext> context, int width, int height) = 0;
 
   /**
    * Creates an image from a native buffer.
    * - On iOS, this is a `CMSampleBuffer`
    * - On Android, this is a `AHardwareBuffer*`
-   * @param buffer The native platform buffer.
+   * @param context The Skia context to use for allocating textures
+   * @param buffer The native platform buffer
    * @return sk_sp<SkImage>
    */
-  virtual sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) = 0;
+  virtual sk_sp<SkImage> makeImageFromNativeBuffer(std::shared_ptr<RNSkContext> context, void *buffer) = 0;
 
   virtual void releaseNativeBuffer(uint64_t pointer) = 0;
 
-  virtual uint64_t makeNativeBuffer(sk_sp<SkImage> image) = 0;
+  virtual uint64_t makeNativeBuffer(std::shared_ptr<RNSkContext> skiaContext, sk_sp<SkImage> image) = 0;
 
   /**
    * Return the Platform specific font manager

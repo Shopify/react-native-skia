@@ -39,6 +39,14 @@ public:
     return skContext;
   }
   
+  id<MTLDevice> getDevice() {
+    return device;
+  }
+  
+  id<MTLCommandQueue> getCommandQueue() {
+    return commandQueue;
+  }
+  
 private:
   id<MTLDevice> device = nil;
   id<MTLCommandQueue> commandQueue = nil;

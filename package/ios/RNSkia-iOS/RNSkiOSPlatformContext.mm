@@ -75,12 +75,12 @@ void RNSkiOSPlatformContext::releaseNativeBuffer(uint64_t pointer) {
   }
 }
 
-uint64_t RNSkiOSPlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
+uint64_t RNSkiOSPlatformContext::makeNativeBuffer(std::shared_ptr<RNSkContext> skiaContext, sk_sp<SkImage> image) {
   // 0. If Image is not in BGRA, convert to BGRA as only BGRA is supported.
   if (image->colorType() != kBGRA_8888_SkColorType) {
     // on iOS, 32_BGRA is the only supported RGB format for CVPixelBuffers.
     image = image->makeColorTypeAndColorSpace(
-        ThreadContextHolder::ThreadSkiaMetalContext.skContext.get(),
+        skiaContext->getDirectContext().get(),
         kBGRA_8888_SkColorType, SkColorSpace::MakeSRGB());
     if (image == nullptr) {
       throw std::runtime_error(
@@ -183,14 +183,17 @@ void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
   RCTFatal(RCTErrorWithMessage([NSString stringWithUTF8String:err.what()]));
 }
 
-sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
+sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(std::shared_ptr<RNSkContext> context,
+                                                              int width,
                                                               int height) {
-  return SkiaMetalSurfaceFactory::makeOffscreenSurface(width, height);
+  std::shared_ptr<RNSkiOSContext> iosContext = std::static_pointer_cast<RNSkiOSContext>(context);
+  return SkiaMetalSurfaceFactory::makeOffscreenSurface(iosContext, width, height);
 }
 
-sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeBuffer(void *buffer) {
+sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeBuffer(std::shared_ptr<RNSkContext> context, void *buffer) {
+  std::shared_ptr<RNSkiOSContext> iosContext = std::static_pointer_cast<RNSkiOSContext>(context);
   CMSampleBufferRef sampleBuffer = (CMSampleBufferRef)buffer;
-  return SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(sampleBuffer);
+  return SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(iosContext, sampleBuffer);
 }
 
 sk_sp<SkFontMgr> RNSkiOSPlatformContext::createFontMgr() {
