@@ -41,8 +41,9 @@ RNSkAndroidVideo::RNSkAndroidVideo(const std::string &url) {
 }
 
 RNSkAndroidVideo::~RNSkAndroidVideo() {
-  if (window) {
-    ANativeWindow_release(window);
+  // DO we need this a property
+  if (format){
+    AMediaFormat_delete(format);
   }
   if (codec) {
     AMediaCodec_stop(codec);
@@ -51,12 +52,11 @@ RNSkAndroidVideo::~RNSkAndroidVideo() {
   if (extractor) {
     AMediaExtractor_delete(extractor);
   }
-  fclose(fp);
 }
 
 void RNSkAndroidVideo::initializeDecoder(const std::string &url) {
   extractor = AMediaExtractor_new();
-  fp = fopen(url.c_str(), "rb");
+  auto fp = fopen(url.c_str(), "rb");
   if (fp == nullptr) {
     throw std::runtime_error("Failed to open video file");
   }
@@ -68,12 +68,15 @@ void RNSkAndroidVideo::initializeDecoder(const std::string &url) {
     fclose(fp);
     throw std::runtime_error("Failed to create extractor from file descriptor");
   }
+  fclose(fp);
   size_t numTracks = AMediaExtractor_getTrackCount(extractor);
   if (numTracks == 0) {
     throw std::runtime_error("No tracks found in video file");
   }
   for (size_t i = 0; i < numTracks; ++i) {
     format = AMediaExtractor_getTrackFormat(extractor, i);
+    const char *formatStr = AMediaFormat_toString(format);
+    RNSkLogger::logToConsole("Track %zu format: %s", i, formatStr);
     const char *mime;
     if (AMediaFormat_getString(format, AMEDIAFORMAT_KEY_MIME, &mime)) {
       if (strncmp(mime, "video/", 6) == 0) {
@@ -92,13 +95,42 @@ void RNSkAndroidVideo::initializeDecoder(const std::string &url) {
         break;
       }
     }
-    AMediaFormat_delete(format);
   }
   AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_WIDTH, &width);
   AMediaFormat_getInt32(format, AMEDIAFORMAT_KEY_HEIGHT, &height);
 }
 
 sk_sp<SkImage> RNSkAndroidVideo::nextImage(double *timeStamp) {
+  if (!AMediaExtractor_advance(extractor)) {
+    RNSkLogger::logToConsole("Failed to advance the media extractor.");
+    return nullptr;
+}
+  size_t bufferSize;
+  auto bufferIndex = AMediaCodec_dequeueInputBuffer(codec, 3 * 10000); // 2000
+  if (bufferIndex < 0) {
+      RNSkLogger::logToConsole("Failed to dequeue input buffer, status: %zd", bufferIndex);
+      throw std::runtime_error("Couldn't dequeue input buffer");
+  }
+  auto inputBuffer = AMediaCodec_getInputBuffer(codec, bufferIndex, &bufferSize);
+  if (inputBuffer == nullptr) {
+      RNSkLogger::logToConsole("Failed to get input buffer for index: %zd", bufferIndex);
+      return nullptr;
+  }
+  RNSkLogger::logToConsole("Dequeued input buffer index: %zd with size: %zu", bufferIndex, bufferSize);
+  size_t sampleSize = AMediaExtractor_readSampleData(extractor, inputBuffer, 0);
+  if (sampleSize == (size_t)-1) {
+      RNSkLogger::logToConsole("No more data available in extractor or read failed");
+      return nullptr;
+  }
+  auto presentationTimeUs = AMediaExtractor_getSampleTime(extractor);
+  RNSkLogger::logToConsole("Read sample data size: %zu, PTS: %lld us", sampleSize, presentationTimeUs);
+  
+  size_t bufIndex;
+  media_status_t queueStatus =AMediaCodec_queueInputBuffer(codec, bufIndex, 0, sampleSize, presentationTimeUs, 0);
+  if (queueStatus != AMEDIA_OK) {
+      RNSkLogger::logToConsole("Failed to queue input buffer, status: %d", queueStatus);
+      return nullptr;
+  }
 
   AMediaCodecBufferInfo info;
   int bufIdx = AMediaCodec_dequeueOutputBuffer(codec, &info, 0);
@@ -112,10 +144,10 @@ sk_sp<SkImage> RNSkAndroidVideo::nextImage(double *timeStamp) {
     auto imageInfo = SkImageInfo::Make(width, height, kRGBA_8888_SkColorType,
                                        kUnpremul_SkAlphaType);
     sk_sp<SkImage> image = SkImages::RasterFromData(imageInfo, data, width * 4);
-    AMediaCodec_releaseOutputBuffer(codec, bufIdx, false);
 
     if (timeStamp) {
       *timeStamp = (double)info.presentationTimeUs / 1e6;
+      AMediaCodec_releaseOutputBuffer(codec, bufIdx, false);
     }
 
     AMediaCodec_releaseOutputBuffer(codec, bufIdx, false);

@@ -20,11 +20,9 @@ namespace RNSkia {
 
 class RNSkAndroidVideo : public RNSkVideo {
 private:
-  FILE *fp;
   AMediaExtractor *extractor;
   AMediaCodec *codec;
   AMediaFormat *format;
-  ANativeWindow *window;
   size_t videoTrackIndex;
   bool isExtractorAtEnd = false;
   int32_t width;
