@@ -40,7 +40,6 @@ public:
    */
   TextureHolder(CVMetalTextureRef texture);
   ~TextureHolder();
-  TextureHolder &operator=(const TextureHolder &other);
 
   /**
    Converts this Texture to a Skia GrBackendTexture.
@@ -49,6 +48,18 @@ public:
 
 private:
   CVMetalTextureRef _texture;
+};
+
+/**
+ Same as `TextureHolder`, but for multiple planar textures (e.g. YUVA)
+ */
+class MultiTexturesHolder {
+public:
+  ~MultiTexturesHolder();
+  void addTexture(TextureHolder *texture);
+
+private:
+  std::vector<TextureHolder *> _textures;
 };
 
 class SkiaCVPixelBufferUtils {

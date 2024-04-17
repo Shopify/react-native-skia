@@ -33,14 +33,9 @@
 // pragma MARK: TextureHolder
 
 TextureHolder::TextureHolder(CVMetalTextureRef texture) : _texture(texture) {}
-TextureHolder::~TextureHolder() { CFRelease(_texture); }
-
-TextureHolder &TextureHolder::operator=(const TextureHolder &other) {
-  if (this != &other) {
-    _texture = other._texture;
-    CFRetain(_texture);
-  }
-  return *this;
+TextureHolder::~TextureHolder() {
+  // ARC will now automatically release _texture.
+  CFRelease(_texture);
 }
 
 GrBackendTexture TextureHolder::toGrBackendTexture() {
@@ -58,6 +53,16 @@ GrBackendTexture TextureHolder::toGrBackendTexture() {
       GrBackendTexture((int)mtlTexture.width, (int)mtlTexture.height,
                        skgpu::Mipmapped::kNo, textureInfo);
   return texture;
+}
+
+MultiTexturesHolder::~MultiTexturesHolder() {
+  for (TextureHolder *texture : _textures) {
+    delete texture;
+  }
+}
+
+void MultiTexturesHolder::addTexture(TextureHolder *texture) {
+  _textures.push_back(texture);
 }
 
 // pragma MARK: Base
@@ -144,14 +149,14 @@ sk_sp<SkImage> SkiaCVPixelBufferUtils::YUV::makeSkImageFromCVPixelBuffer(
     GrDirectContext *context, CVPixelBufferRef pixelBuffer) {
   // 1. Get all planes (YUV, Y_UV, Y_U_V or Y_U_V_A)
   size_t planesCount = CVPixelBufferGetPlaneCount(pixelBuffer);
-  TextureHolder **textureHolders = new TextureHolder *[planesCount];
+  MultiTexturesHolder *texturesHolder = new MultiTexturesHolder();
   GrBackendTexture textures[planesCount];
 
   for (size_t planeIndex = 0; planeIndex < planesCount; planeIndex++) {
     TextureHolder *textureHolder =
         getSkiaTextureForCVPixelBufferPlane(pixelBuffer, planeIndex);
-    textureHolders[planeIndex] = textureHolder;
     textures[planeIndex] = textureHolder->toGrBackendTexture();
+    texturesHolder->addTexture(textureHolder);
   }
 
   // 2. Wrap info about buffer
@@ -163,8 +168,10 @@ sk_sp<SkImage> SkiaCVPixelBufferUtils::YUV::makeSkImageFromCVPixelBuffer(
   // 4. Wrap into SkImage type with manualy memory cleanup
   return SkImages::TextureFromYUVATextures(
       context, yuvaTextures, nullptr,
-      [](void *textureHolders) { delete[](TextureHolder *) textureHolders; },
-      (void *)textureHolders);
+      [](void *textureHolders) {
+        delete (MultiTexturesHolder *)textureHolders;
+      },
+      (void *)texturesHolder);
 }
 
 SkYUVAInfo SkiaCVPixelBufferUtils::YUV::getYUVAInfoForCVPixelBuffer(
