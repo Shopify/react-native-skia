@@ -107,19 +107,13 @@ sk_sp<SkSurface> SkiaMetalSurfaceFactory::makeOffscreenSurface(int width,
   return surface;
 }
 
-sk_sp<SkImage> SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(
-    CMSampleBufferRef sampleBuffer) {
+sk_sp<SkImage> SkiaMetalSurfaceFactory::makeTextureFromCVPixelBuffer(
+    CVPixelBufferRef pixelBuffer) {
   if (!SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
           &ThreadContextHolder::ThreadSkiaMetalContext)) [[unlikely]] {
     throw std::runtime_error("Failed to create Skia Context for this Thread!");
   }
   const SkiaMetalContext &context = ThreadContextHolder::ThreadSkiaMetalContext;
-
-  if (!CMSampleBufferIsValid(sampleBuffer)) [[unlikely]] {
-    throw std::runtime_error("The given CMSampleBuffer is not valid!");
-  }
-
-  CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
 
   SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat format =
       SkiaCVPixelBufferUtils::getCVPixelBufferBaseFormat(pixelBuffer);
