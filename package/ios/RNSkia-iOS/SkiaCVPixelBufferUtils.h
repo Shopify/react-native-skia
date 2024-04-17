@@ -13,6 +13,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 #import "include/core/SkColorSpace.h"
+#import "include/core/SkImage.h"
 #import "include/gpu/GrBackendSurface.h"
 #import "include/gpu/GrYUVABackendTextures.h"
 #pragma clang diagnostic pop
@@ -37,8 +38,9 @@ public:
    retained with `CFRetain`, and will later be manually
    released with `CFRelease`.
    */
-  explicit TextureHolder(CVMetalTextureRef texture);
+  TextureHolder(CVMetalTextureRef texture);
   ~TextureHolder();
+  TextureHolder &operator=(const TextureHolder &other);
 
   /**
    Converts this Texture to a Skia GrBackendTexture.
@@ -64,25 +66,26 @@ public:
   class RGB {
   public:
     /**
-     Gets the Skia Color Type of the RGB pixel-buffer.
+     Creates a GPU-backed Skia Texture (SkImage) with the given RGB
+     CVPixelBuffer.
      */
+    static sk_sp<SkImage>
+    makeSkImageFromCVPixelBuffer(GrDirectContext *context,
+                                 CVPixelBufferRef pixelBuffer);
+
+  private:
     static SkColorType getCVPixelBufferColorType(CVPixelBufferRef pixelBuffer);
-    /**
-     Gets a GPU-backed Skia Texture for the given RGB CVPixelBuffer.
-     */
-    static TextureHolder *
-    getSkiaTextureForCVPixelBuffer(CVPixelBufferRef pixelBuffer);
   };
 
   class YUV {
   public:
     /**
-     Gets one or more GPU-backed Skia Textures for the given YUV CVPixelBuffer.
-     The size of the resulting textures depends on the amount of planes in the
+     Creates a GPU-backed Skia Texture (SkImage) with the given YUV
      CVPixelBuffer.
      */
-    static GrYUVABackendTextures
-    getSkiaTextureForCVPixelBuffer(CVPixelBufferRef pixelBuffer);
+    static sk_sp<SkImage>
+    makeSkImageFromCVPixelBuffer(GrDirectContext *context,
+                                 CVPixelBufferRef pixelBuffer);
 
   private:
     static SkYUVAInfo::PlaneConfig getPlaneConfig(OSType pixelFormat);

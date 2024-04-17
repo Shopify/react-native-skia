@@ -12,6 +12,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 #import "include/core/SkColorSpace.h"
 #import <include/gpu/GrBackendSurface.h>
+#import <include/gpu/ganesh/SkImageGanesh.h>
 #pragma clang diagnostic pop
 
 #include <TargetConditionals.h>
@@ -33,6 +34,14 @@
 
 TextureHolder::TextureHolder(CVMetalTextureRef texture) : _texture(texture) {}
 TextureHolder::~TextureHolder() { CFRelease(_texture); }
+
+TextureHolder &TextureHolder::operator=(const TextureHolder &other) {
+  if (this != &other) {
+    _texture = other._texture;
+    CFRetain(_texture);
+  }
+  return *this;
+}
 
 GrBackendTexture TextureHolder::toGrBackendTexture() {
   // Unwrap the underlying MTLTexture
@@ -113,30 +122,49 @@ SkColorType SkiaCVPixelBufferUtils::RGB::getCVPixelBufferColorType(
   }
 }
 
-TextureHolder *SkiaCVPixelBufferUtils::RGB::getSkiaTextureForCVPixelBuffer(
-    CVPixelBufferRef pixelBuffer) {
-  return getSkiaTextureForCVPixelBufferPlane(pixelBuffer, /* planeIndex */ 0);
+sk_sp<SkImage> SkiaCVPixelBufferUtils::RGB::makeSkImageFromCVPixelBuffer(
+    GrDirectContext *context, CVPixelBufferRef pixelBuffer) {
+  // 1. Get Skia color type for RGB buffer
+  SkColorType colorType = getCVPixelBufferColorType(pixelBuffer);
+
+  // 2. Get texture, RGB buffers only have one plane
+  TextureHolder *texture =
+      getSkiaTextureForCVPixelBufferPlane(pixelBuffer, /* planeIndex */ 0);
+
+  // 3. Convert to image with manual memory cleanup
+  return SkImages::BorrowTextureFrom(
+      context, texture->toGrBackendTexture(), kTopLeft_GrSurfaceOrigin,
+      colorType, kOpaque_SkAlphaType, nullptr,
+      [](void *texture) { delete (TextureHolder *)texture; }, (void *)texture);
 }
 
 // pragma MARK: YUV
 
-GrYUVABackendTextures
-SkiaCVPixelBufferUtils::YUV::getSkiaTextureForCVPixelBuffer(
-    CVPixelBufferRef pixelBuffer) {
+sk_sp<SkImage> SkiaCVPixelBufferUtils::YUV::makeSkImageFromCVPixelBuffer(
+    GrDirectContext *context, CVPixelBufferRef pixelBuffer) {
   // 1. Get all planes (YUV, Y_UV, Y_U_V or Y_U_V_A)
   size_t planesCount = CVPixelBufferGetPlaneCount(pixelBuffer);
+  TextureHolder **textureHolders = new TextureHolder *[planesCount];
   GrBackendTexture textures[planesCount];
 
   for (size_t planeIndex = 0; planeIndex < planesCount; planeIndex++) {
-    textures[planeIndex] =
+    TextureHolder *textureHolder =
         getSkiaTextureForCVPixelBufferPlane(pixelBuffer, planeIndex);
+    textureHolders[planeIndex] = textureHolder;
+    textures[planeIndex] = textureHolder->toGrBackendTexture();
   }
 
   // 2. Wrap info about buffer
   SkYUVAInfo info = getYUVAInfoForCVPixelBuffer(pixelBuffer);
 
-  // 3. Return all textures
-  return GrYUVABackendTextures(info, textures, kTopLeft_GrSurfaceOrigin);
+  // 3. Wrap as YUVA textures type
+  GrYUVABackendTextures yuvaTextures(info, textures, kTopLeft_GrSurfaceOrigin);
+
+  // 4. Wrap into SkImage type with manualy memory cleanup
+  return SkImages::TextureFromYUVATextures(
+      context, yuvaTextures, nullptr,
+      [](void *textureHolders) { delete[](TextureHolder *) textureHolders; },
+      (void *)textureHolders);
 }
 
 SkYUVAInfo SkiaCVPixelBufferUtils::YUV::getYUVAInfoForCVPixelBuffer(

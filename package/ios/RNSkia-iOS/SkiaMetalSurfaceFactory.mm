@@ -120,23 +120,13 @@ sk_sp<SkImage> SkiaMetalSurfaceFactory::makeTextureFromCVPixelBuffer(
   switch (format) {
   case SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat::rgb: {
     // CVPixelBuffer is in any RGB format, single-plane
-    SkColorType colorType =
-        SkiaCVPixelBufferUtils::RGB::getCVPixelBufferColorType(pixelBuffer);
-    TextureHolder *texture =
-        SkiaCVPixelBufferUtils::RGB::getSkiaTextureForCVPixelBuffer(
-            pixelBuffer);
-    return SkImages::BorrowTextureFrom(
-        context.skContext.get(), texture->toGrBackendTexture(),
-        kTopLeft_GrSurfaceOrigin, colorType, kOpaque_SkAlphaType, nullptr,
-        [](void *texture) { delete (TextureHolder *)texture; },
-        (void *)texture);
+    return SkiaCVPixelBufferUtils::RGB::makeSkImageFromCVPixelBuffer(
+        context.skContext.get(), pixelBuffer);
   }
   case SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat::yuv: {
     // CVPixelBuffer is in any YUV format, multi-plane
-    GrYUVABackendTextures textures =
-        SkiaCVPixelBufferUtils::YUV::getSkiaTextureForCVPixelBuffer(
-            pixelBuffer);
-    return SkImages::TextureFromYUVATextures(context.skContext.get(), textures);
+    return SkiaCVPixelBufferUtils::YUV::makeSkImageFromCVPixelBuffer(
+        context.skContext.get(), pixelBuffer);
   }
   default:
     [[unlikely]] {
