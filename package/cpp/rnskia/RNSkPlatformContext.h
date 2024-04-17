@@ -134,8 +134,8 @@ public:
   virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) = 0;
 
   /**
-   * Creates an image from a native buffer. (for testing purposes only)
-   * - On iOS, this is a `CVPixelBufferRef*`
+   * Creates an image from a native buffer.
+   * - On iOS, this is a `CVPixelBufferRef`
    * - On Android, this is a `AHardwareBuffer*`
    * @param buffer The native platform buffer.
    * @return sk_sp<SkImage>
