@@ -4,23 +4,26 @@ import type { WorkletFunction } from "react-native-reanimated/lib/typescript/rea
 import type { SkColor, SkHostRect, SkPoint, SkRSXform } from "../../skia/types";
 import { Skia } from "../../skia";
 
-import { startMapper, stopMapper, makeMutable } from "./moduleWrapper";
 import { notifyChange } from "./interpolators";
+import { Reanimated } from "./ReanimatedProxy";
 
 type Modifier<T> = (input: T, index: number) => void;
 
-const useBufferValue = <T>(size: number, bufferInitializer: () => T) =>
-  useMemo(
+const useBufferValue = <T>(size: number, bufferInitializer: () => T) => {
+  const { makeMutable } = Reanimated;
+  return useMemo(
     () => makeMutable(new Array(size).fill(0).map(bufferInitializer)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [size]
   );
+};
 
 const useBuffer = <T>(
   size: number,
   bufferInitializer: () => T,
   modifier: Modifier<T>
 ) => {
+  const { startMapper, stopMapper } = Reanimated;
   const values = useBufferValue(size, bufferInitializer);
   const mod = modifier as WorkletFunction;
   const deps = [size, ...Object.values(mod.__closure ?? {})];
@@ -36,6 +39,7 @@ const useBuffer = <T>(
     return () => {
       stopMapper(mapperId);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapperId]);
 
   return values;

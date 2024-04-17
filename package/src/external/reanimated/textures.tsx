@@ -14,7 +14,9 @@ import {
 } from "../../renderer/Offscreen";
 import { Skia, useImage } from "../../skia";
 
-import { runOnUI, useSharedValue } from "./moduleWrapper";
+import { Reanimated } from "./ReanimatedProxy";
+
+const { runOnUI, useSharedValue } = Reanimated;
 
 const createTexture = (
   texture: SharedValue<SkImage | null>,

@@ -5,17 +5,15 @@ import type { AnimatedProps } from "../../renderer/processors";
 import type { Node } from "../../dom/types";
 
 import {
-  startMapper,
-  stopMapper,
-  isSharedValue,
-  HAS_REANIMATED3,
   HAS_REANIMATED2,
-  runOnJS,
-} from "./moduleWrapper";
+  HAS_REANIMATED3,
+  Reanimated,
+} from "./ReanimatedProxy";
 
 const _bindings = new WeakMap<Node<unknown>, unknown>();
 
 export const unbindReanimatedNode = (node: Node<unknown>) => {
+  const { stopMapper } = Reanimated;
   const previousMapperId = _bindings.get(node);
   if (previousMapperId !== undefined) {
     stopMapper(previousMapperId as number);
@@ -26,6 +24,7 @@ export function extractReanimatedProps(props: AnimatedProps<any>) {
   if (!HAS_REANIMATED3 && !HAS_REANIMATED2) {
     return [props, {}];
   }
+  const { isSharedValue } = Reanimated;
   const reanimatedProps = {} as AnimatedProps<any>;
   const otherProps = {} as AnimatedProps<any>;
   for (const propName in props) {
@@ -48,6 +47,7 @@ function bindReanimatedProps2(
   node: Node<any>,
   reanimatedProps: AnimatedProps<any>
 ) {
+  const { stopMapper, startMapper, runOnJS } = Reanimated;
   const sharedValues = Object.values(reanimatedProps);
   const previousMapperId = _bindings.get(node);
   if (previousMapperId !== undefined) {
@@ -89,6 +89,7 @@ export function bindReanimatedProps(
   if (!HAS_REANIMATED3) {
     return;
   }
+  const { stopMapper, startMapper } = Reanimated;
   const sharedValues = Object.values(reanimatedProps);
   const previousMapperId = _bindings.get(node);
   if (previousMapperId !== undefined) {
