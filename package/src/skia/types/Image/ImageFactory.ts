@@ -61,7 +61,7 @@ export interface ImageFactory {
    * to render a Skia Camera preview.
    *
    * - On Android; This is an `AHardwareBuffer*`
-   * - On iOS, this is a `CMSampleBufferRef`
+   * - On iOS, this is a `CVPixelBufferRef`
    * @param nativeBuffer A strong `uintptr_t` pointer to the native platform buffer
    * @throws Throws an error if the Image could not be created, for example when the given
    * platform buffer is invalid.
