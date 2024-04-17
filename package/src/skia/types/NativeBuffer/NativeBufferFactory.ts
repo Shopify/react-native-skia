@@ -28,7 +28,7 @@ export const isNativeBufferNode = (
 
 export interface NativeBufferFactory {
   /**
-   * Copy pixels to a platform buffer. (for testing purposes)
+   * Copy pixels to a native buffer.
    */
   MakeFromImage: (image: SkImage) => NativeBuffer;
   /**
