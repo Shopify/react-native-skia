@@ -107,19 +107,13 @@ sk_sp<SkSurface> SkiaMetalSurfaceFactory::makeOffscreenSurface(int width,
   return surface;
 }
 
-sk_sp<SkImage> SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(
-    CMSampleBufferRef sampleBuffer) {
+sk_sp<SkImage> SkiaMetalSurfaceFactory::makeTextureFromCVPixelBuffer(
+    CVPixelBufferRef pixelBuffer) {
   if (!SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
           &ThreadContextHolder::ThreadSkiaMetalContext)) [[unlikely]] {
     throw std::runtime_error("Failed to create Skia Context for this Thread!");
   }
   const SkiaMetalContext &context = ThreadContextHolder::ThreadSkiaMetalContext;
-
-  if (!CMSampleBufferIsValid(sampleBuffer)) [[unlikely]] {
-    throw std::runtime_error("The given CMSampleBuffer is not valid!");
-  }
-
-  CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
 
   SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat format =
       SkiaCVPixelBufferUtils::getCVPixelBufferBaseFormat(pixelBuffer);
@@ -128,12 +122,14 @@ sk_sp<SkImage> SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(
     // CVPixelBuffer is in any RGB format, single-plane
     SkColorType colorType =
         SkiaCVPixelBufferUtils::RGB::getCVPixelBufferColorType(pixelBuffer);
-    GrBackendTexture texture =
+    TextureHolder *texture =
         SkiaCVPixelBufferUtils::RGB::getSkiaTextureForCVPixelBuffer(
             pixelBuffer);
-    return SkImages::AdoptTextureFrom(context.skContext.get(), texture,
-                                      kTopLeft_GrSurfaceOrigin, colorType,
-                                      kOpaque_SkAlphaType);
+    return SkImages::BorrowTextureFrom(
+        context.skContext.get(), texture->toGrBackendTexture(),
+        kTopLeft_GrSurfaceOrigin, colorType, kOpaque_SkAlphaType, nullptr,
+        [](void *texture) { delete (TextureHolder *)texture; },
+        (void *)texture);
   }
   case SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat::yuv: {
     // CVPixelBuffer is in any YUV format, multi-plane

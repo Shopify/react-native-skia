@@ -143,34 +143,8 @@ uint64_t RNSkiOSPlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
         std::to_string(result));
   }
 
-  // 6. Create CMSampleBuffer base information
-  CMFormatDescriptionRef formatDescription = nullptr;
-  CMVideoFormatDescriptionCreateForImageBuffer(kCFAllocatorDefault, pixelBuffer,
-                                               &formatDescription);
-  CMSampleTimingInfo timingInfo = {0};
-  timingInfo.duration = kCMTimeInvalid;
-  timingInfo.presentationTimeStamp = kCMTimeZero;
-  timingInfo.decodeTimeStamp = kCMTimeInvalid;
-
-  // 7. Wrap the CVPixelBuffer in a CMSampleBuffer
-  CMSampleBufferRef sampleBuffer = nullptr;
-  OSStatus status = CMSampleBufferCreateReadyWithImageBuffer(
-      kCFAllocatorDefault, pixelBuffer, formatDescription, &timingInfo,
-      &sampleBuffer);
-  if (status != noErr) {
-    if (formatDescription) {
-      CFRelease(formatDescription);
-    }
-    if (pixelBuffer) {
-      CFRelease(pixelBuffer);
-    }
-    throw std::runtime_error(
-        "Failed to wrap CVPixelBuffer in CMSampleBuffer! Return value: " +
-        std::to_string(status));
-  }
-
-  // 8. Return CMsampleBuffer casted to uint64_t
-  return reinterpret_cast<uint64_t>(sampleBuffer);
+  // 8. Return CVPixelBuffer casted to uint64_t
+  return reinterpret_cast<uint64_t>(pixelBuffer);
 }
 
 void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
@@ -183,8 +157,8 @@ sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
 }
 
 sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeBuffer(void *buffer) {
-  CMSampleBufferRef sampleBuffer = (CMSampleBufferRef)buffer;
-  return SkiaMetalSurfaceFactory::makeTextureFromCMSampleBuffer(sampleBuffer);
+  CVPixelBufferRef sampleBuffer = (CVPixelBufferRef)buffer;
+  return SkiaMetalSurfaceFactory::makeTextureFromCVPixelBuffer(sampleBuffer);
 }
 
 sk_sp<SkFontMgr> RNSkiOSPlatformContext::createFontMgr() {

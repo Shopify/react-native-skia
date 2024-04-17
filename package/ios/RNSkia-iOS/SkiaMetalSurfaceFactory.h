@@ -27,7 +27,7 @@ public:
   static sk_sp<SkSurface> makeOffscreenSurface(int width, int height);
 
   static sk_sp<SkImage>
-  makeTextureFromCMSampleBuffer(CMSampleBufferRef sampleBuffer);
+  makeTextureFromCVPixelBuffer(CVPixelBufferRef pixelBuffer);
 
 private:
   static id<MTLDevice> device;
