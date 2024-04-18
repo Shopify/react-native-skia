@@ -13,6 +13,9 @@ import {
 const _bindings = new WeakMap<Node<unknown>, unknown>();
 
 export const unbindReanimatedNode = (node: Node<unknown>) => {
+  if (!HAS_REANIMATED2) {
+    return;
+  }
   const { stopMapper } = Reanimated;
   const previousMapperId = _bindings.get(node);
   if (previousMapperId !== undefined) {
@@ -21,7 +24,7 @@ export const unbindReanimatedNode = (node: Node<unknown>) => {
 };
 
 export function extractReanimatedProps(props: AnimatedProps<any>) {
-  if (!HAS_REANIMATED3 && !HAS_REANIMATED2) {
+  if (!HAS_REANIMATED2) {
     return [props, {}];
   }
   const { isSharedValue } = Reanimated;

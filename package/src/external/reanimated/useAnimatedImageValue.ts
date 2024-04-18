@@ -6,14 +6,13 @@ import type { DataSourceParam, SkImage } from "../../skia/types";
 
 import { Reanimated } from "./ReanimatedProxy";
 
-const { useFrameCallback, useSharedValue } = Reanimated;
-
 const DEFAULT_FRAME_DURATION = 60;
 
 export const useAnimatedImageValue = (
   source: DataSourceParam,
   paused?: SharedValue<boolean>
 ) => {
+  const { useFrameCallback, useSharedValue } = Reanimated;
   const defaultPaused = useSharedValue(false);
   const isPaused = paused ?? defaultPaused;
   const currentFrame = useSharedValue<null | SkImage>(null);

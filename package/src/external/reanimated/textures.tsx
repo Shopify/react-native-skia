@@ -16,8 +16,6 @@ import { Skia, useImage } from "../../skia";
 
 import { Reanimated } from "./ReanimatedProxy";
 
-const { runOnUI, useSharedValue } = Reanimated;
-
 const createTexture = (
   texture: SharedValue<SkImage | null>,
   picture: SkPicture,
@@ -59,10 +57,10 @@ export const usePictureAsTexture = (
   picture: SkPicture | null,
   size: SkSize
 ) => {
-  const texture = useSharedValue<SkImage | null>(null);
+  const texture = Reanimated.useSharedValue<SkImage | null>(null);
   useEffect(() => {
     if (picture !== null) {
-      runOnUI(createTexture)(texture, picture, size);
+      Reanimated.runOnUI(createTexture)(texture, picture, size);
     }
   }, [texture, picture, size]);
   return texture;

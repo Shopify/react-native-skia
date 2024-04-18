@@ -20,15 +20,6 @@ try {
   HAS_REANIMATED2 = false;
 }
 
-export function throwOnMissingReanimated() {
-  if (!HAS_REANIMATED2) {
-    throw new Error(
-      "Reanimated was not found, make sure react-native-reanimated package is installed if you want to use \
-      react-native-skia's integration layer API."
-    );
-  }
-}
-
 export const Reanimated = createModuleProxy<TReanimated>(
   "react-native-reanimated",
   () => {
