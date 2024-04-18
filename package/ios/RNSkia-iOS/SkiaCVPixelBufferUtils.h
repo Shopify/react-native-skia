@@ -6,6 +6,8 @@
 //
 
 #pragma once
+#include <vector>
+
 #import <CoreMedia/CMSampleBuffer.h>
 #import <CoreVideo/CVMetalTextureCache.h>
 #import <MetalKit/MetalKit.h>
