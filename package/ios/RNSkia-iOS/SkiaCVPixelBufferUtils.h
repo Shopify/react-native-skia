@@ -13,7 +13,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 #import "include/core/SkColorSpace.h"
-#import <include/gpu/GrBackendSurface.h>
+#import "include/core/SkImage.h"
+#import "include/gpu/GrBackendSurface.h"
+#import "include/gpu/GrYUVABackendTextures.h"
 #pragma clang diagnostic pop
 
 /**
@@ -36,7 +38,7 @@ public:
    retained with `CFRetain`, and will later be manually
    released with `CFRelease`.
    */
-  explicit TextureHolder(CVMetalTextureRef texture);
+  TextureHolder(CVMetalTextureRef texture);
   ~TextureHolder();
 
   /**
@@ -48,9 +50,21 @@ private:
   CVMetalTextureRef _texture;
 };
 
+/**
+ Same as `TextureHolder`, but for multiple planar textures (e.g. YUVA)
+ */
+class MultiTexturesHolder {
+public:
+  ~MultiTexturesHolder();
+  void addTexture(TextureHolder *texture);
+
+private:
+  std::vector<TextureHolder *> _textures;
+};
+
 class SkiaCVPixelBufferUtils {
 public:
-  enum class CVPixelBufferBaseFormat { rgb };
+  enum class CVPixelBufferBaseFormat { rgb, yuv };
 
   /**
    Get the base format (currently only RGB) of the PixelBuffer.
@@ -63,14 +77,32 @@ public:
   class RGB {
   public:
     /**
-     Gets the Skia Color Type of the RGB pixel-buffer.
+     Creates a GPU-backed Skia Texture (SkImage) with the given RGB
+     CVPixelBuffer.
      */
+    static sk_sp<SkImage>
+    makeSkImageFromCVPixelBuffer(GrDirectContext *context,
+                                 CVPixelBufferRef pixelBuffer);
+
+  private:
     static SkColorType getCVPixelBufferColorType(CVPixelBufferRef pixelBuffer);
+  };
+
+  class YUV {
+  public:
     /**
-     Gets a GPU-backed Skia Texture for the given RGB CVPixelBuffer.
+     Creates a GPU-backed Skia Texture (SkImage) with the given YUV
+     CVPixelBuffer.
      */
-    static TextureHolder *
-    getSkiaTextureForCVPixelBuffer(CVPixelBufferRef pixelBuffer);
+    static sk_sp<SkImage>
+    makeSkImageFromCVPixelBuffer(GrDirectContext *context,
+                                 CVPixelBufferRef pixelBuffer);
+
+  private:
+    static SkYUVAInfo::PlaneConfig getPlaneConfig(OSType pixelFormat);
+    static SkYUVAInfo::Subsampling getSubsampling(OSType pixelFormat);
+    static SkYUVColorSpace getColorspace(OSType pixelFormat);
+    static SkYUVAInfo getYUVAInfoForCVPixelBuffer(CVPixelBufferRef pixelBuffer);
   };
 
 private:
