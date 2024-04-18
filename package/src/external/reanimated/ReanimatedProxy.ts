@@ -10,7 +10,7 @@ const Reanimated = createModuleProxy<TReanimated>(() => {
   try {
     return require("react-native-worklets-core");
   } catch (e) {
-    throw new OptionalDependencyNotInstalledError("react-native-worklets-core");
+    throw new OptionalDependencyNotInstalledError("react-native-reanimated");
   }
 });
 
