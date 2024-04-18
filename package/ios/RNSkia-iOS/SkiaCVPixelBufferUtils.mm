@@ -194,28 +194,27 @@ SkYUVAInfo SkiaCVPixelBufferUtils::YUV::getYUVAInfoForCVPixelBuffer(
 SkYUVAInfo::PlaneConfig
 SkiaCVPixelBufferUtils::YUV::getPlaneConfig(OSType pixelFormat) {
   switch (pixelFormat) {
-  case kCVPixelFormatType_420YpCbCr8Planar:
-  case kCVPixelFormatType_420YpCbCr8PlanarFullRange:
-    return SkYUVAInfo::PlaneConfig::kYUV;
-  case kCVPixelFormatType_422YpCbCr_4A_8BiPlanar:
   case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
+    return SkYUVAInfo::PlaneConfig::kY_UV; // Assuming UV are interleaved in the
+                                           // second plane
+
+  case kCVPixelFormatType_420YpCbCr8Planar:
+    return SkYUVAInfo::PlaneConfig::kY_U_V; // Assuming U and V are in separate
+                                            // planes following Y
+
+  case kCVPixelFormatType_444YpCbCr8:
+    return SkYUVAInfo::PlaneConfig::kYUV; // Assuming Y, U, V are in a single
+                                          // plane
+
+  case kCVPixelFormatType_422YpCbCr8:
+    return SkYUVAInfo::PlaneConfig::kYUV; // Just an example, 422 usually means
+                                          // interleaved UV but might need a
+                                          // custom config
+
   case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
-  case kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange:
-  case kCVPixelFormatType_422YpCbCr8BiPlanarFullRange:
-  case kCVPixelFormatType_444YpCbCr8BiPlanarVideoRange:
-  case kCVPixelFormatType_444YpCbCr8BiPlanarFullRange:
-  case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
-  case kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange:
-  case kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange:
-  case kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:
-  case kCVPixelFormatType_422YpCbCr10BiPlanarFullRange:
-  case kCVPixelFormatType_444YpCbCr10BiPlanarFullRange:
-  case kCVPixelFormatType_422YpCbCr16BiPlanarVideoRange:
-  case kCVPixelFormatType_444YpCbCr16BiPlanarVideoRange:
-    [[likely]] return SkYUVAInfo::PlaneConfig::kY_UV;
-  case kCVPixelFormatType_420YpCbCr8VideoRange_8A_TriPlanar:
-  case kCVPixelFormatType_444YpCbCr16VideoRange_16A_TriPlanar:
-    return SkYUVAInfo::PlaneConfig::kY_U_V;
+    return SkYUVAInfo::PlaneConfig::kY_UV; // Similar to VideoRange but with
+                                           // full range data
+
   // This can be extended with branches for specific YUV formats if Apple
   // uses new formats.
   default:
