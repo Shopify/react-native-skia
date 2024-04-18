@@ -42,7 +42,7 @@ for (let j = 0; j < rgbaPixels.length; j += 4) {
 }
 
 describe("Native Buffers", () => {
-  it("On non supported platforms MakeImageFromPlatformBuffer() should throw", async () => {
+  it("On non supported platforms MakeImageFromNativeBuffer() should throw", async () => {
     const { Skia: Sk } = setupSkia();
     if (!shouldNativeBufferTestRun()) {
       return;

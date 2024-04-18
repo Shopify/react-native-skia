@@ -75,7 +75,7 @@ uint64_t RNSkiOSPlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
     if (image == nullptr) {
       throw std::runtime_error(
           "Failed to convert image to BGRA_8888 colortype! Only BGRA_8888 "
-          "PlatformBuffers are supported.");
+          "NativeBuffer are supported.");
     }
   }
 

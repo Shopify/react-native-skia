@@ -34,5 +34,5 @@ export interface NativeBufferFactory {
   /**
    * Release a platform buffer that was created with `MakeFromImage`.
    */
-  Release: (platformBuffer: NativeBuffer) => void;
+  Release: (nativeBuffer: NativeBuffer) => void;
 }
