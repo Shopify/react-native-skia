@@ -4,16 +4,29 @@ import type { Container } from "../../renderer/Container";
 import type { AnimatedProps } from "../../renderer/processors";
 import type { Node } from "../../dom/types";
 
-import {
-  HAS_REANIMATED2,
-  HAS_REANIMATED3,
-  Reanimated,
-} from "./ReanimatedProxy";
+import { Reanimated } from "./ReanimatedProxy";
+
+let HAS_REANIMATED = false;
+let HAS_REANIMATED_3 = false;
+try {
+  require("react-native-reanimated");
+  HAS_REANIMATED = true;
+  const reanimatedVersion =
+    require("react-native-reanimated/package.json").version;
+  if (
+    reanimatedVersion &&
+    (reanimatedVersion >= "3.0.0" || reanimatedVersion.includes("3.0.0-"))
+  ) {
+    HAS_REANIMATED_3 = true;
+  }
+} catch (e) {
+  HAS_REANIMATED = false;
+}
 
 const _bindings = new WeakMap<Node<unknown>, unknown>();
 
 export const unbindReanimatedNode = (node: Node<unknown>) => {
-  if (!HAS_REANIMATED2) {
+  if (!HAS_REANIMATED) {
     return;
   }
   const { stopMapper } = Reanimated;
@@ -24,7 +37,7 @@ export const unbindReanimatedNode = (node: Node<unknown>) => {
 };
 
 export function extractReanimatedProps(props: AnimatedProps<any>) {
-  if (!HAS_REANIMATED2) {
+  if (!HAS_REANIMATED) {
     return [props, {}];
   }
   const { isSharedValue } = Reanimated;
@@ -86,10 +99,10 @@ export function bindReanimatedProps(
   node: Node<any>,
   reanimatedProps: AnimatedProps<any>
 ) {
-  if (HAS_REANIMATED2 && !HAS_REANIMATED3) {
+  if (HAS_REANIMATED && !HAS_REANIMATED_3) {
     return bindReanimatedProps2(container, node, reanimatedProps);
   }
-  if (!HAS_REANIMATED3) {
+  if (!HAS_REANIMATED) {
     return;
   }
   const { stopMapper, startMapper } = Reanimated;
