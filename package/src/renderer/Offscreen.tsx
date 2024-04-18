@@ -32,16 +32,10 @@ export const drawAsImage = (element: ReactElement, size: SkSize) => {
   return drawAsImageFromPicture(drawAsPicture(element), size);
 };
 
-// TODO: We're not sure yet why PixelRatio is not needed here.
-const pd = 1;
 export const drawAsImageFromPicture = (picture: SkPicture, size: SkSize) => {
   "worklet";
-  const surface = Skia.Surface.MakeOffscreen(
-    size.width * pd,
-    size.height * pd
-  )!;
+  const surface = Skia.Surface.MakeOffscreen(size.width, size.height)!;
   const canvas = surface.getCanvas();
-  canvas.scale(pd, pd);
   canvas.drawPicture(picture);
   surface.flush();
   const image = surface.makeImageSnapshot();

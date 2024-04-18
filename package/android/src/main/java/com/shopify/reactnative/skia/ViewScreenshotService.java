@@ -162,16 +162,21 @@ public class ViewScreenshotService {
                 latch.await(SURFACE_VIEW_READ_PIXELS_TIMEOUT, TimeUnit.SECONDS);
             } catch (Exception e) {
                 Log.e(TAG, "Cannot PixelCopy for " + sv, e);
+                drawSurfaceViewFromCache(canvas, sv, paint, opacity);
             }
         } else {
-            Bitmap cache = sv.getDrawingCache();
-            if (cache != null) {
-                canvas.save();
-                applyTransformations(canvas, sv);
-                paint.setAlpha(Math.round(opacity * 255)); // Set paint alpha based on opacity
-                canvas.drawBitmap(cache, 0, 0, paint);
-                canvas.restore();
-            }
+            drawSurfaceViewFromCache(canvas, sv, paint, opacity);
+        }
+    }
+
+    private static void drawSurfaceViewFromCache(Canvas canvas, SurfaceView sv, Paint paint, float opacity) {
+        Bitmap cache = sv.getDrawingCache();
+        if (cache != null) {
+            canvas.save();
+            applyTransformations(canvas, sv);
+            paint.setAlpha(Math.round(opacity * 255)); // Set paint alpha based on opacity
+            canvas.drawBitmap(cache, 0, 0, paint);
+            canvas.restore();
         }
     }
 
