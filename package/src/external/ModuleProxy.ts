@@ -6,7 +6,6 @@ type ImportType = ReturnType<typeof require>;
  * This is useful for lazily requiring optional dependencies.
  */
 export const createModuleProxy = <TModule>(
-  name: string,
   getModule: () => ImportType
 ): TModule => {
   const holder: { module: TModule | undefined } = { module: undefined };
@@ -14,14 +13,18 @@ export const createModuleProxy = <TModule>(
   const proxy = new Proxy(holder, {
     get: (target, property) => {
       if (target.module == null) {
-        try {
-          target.module = getModule() as TModule;
-        } catch (e) {
-          throw new Error(`${name} is not installed!`);
-        }
+        // lazy initialize module via require()
+        // caller needs to make sure the require() call is wrapped in a try/catch
+        target.module = getModule() as TModule;
       }
       return target.module[property as keyof typeof holder.module];
     },
   });
   return proxy as unknown as TModule;
 };
+
+export class OptionalDependencyNotInstalledError extends Error {
+  constructor(name: string) {
+    super(`${name} is not installed!`);
+  }
+}
