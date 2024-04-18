@@ -8,7 +8,7 @@ type TReanimated = typeof ReanimatedT;
 
 const Reanimated = createModuleProxy<TReanimated>(() => {
   try {
-    return require("react-native-worklets-core");
+    return require("react-native-reanimated");
   } catch (e) {
     throw new OptionalDependencyNotInstalledError("react-native-reanimated");
   }
