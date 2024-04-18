@@ -5,14 +5,13 @@ import type { SkColor, SkHostRect, SkPoint, SkRSXform } from "../../skia/types";
 import { Skia } from "../../skia";
 
 import { notifyChange } from "./interpolators";
-import { Reanimated } from "./ReanimatedProxy";
+import Rea from "./ReanimatedProxy";
 
 type Modifier<T> = (input: T, index: number) => void;
 
 const useBufferValue = <T>(size: number, bufferInitializer: () => T) => {
-  const { makeMutable } = Reanimated;
   return useMemo(
-    () => makeMutable(new Array(size).fill(0).map(bufferInitializer)),
+    () => Rea.makeMutable(new Array(size).fill(0).map(bufferInitializer)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [size]
   );
@@ -23,11 +22,10 @@ const useBuffer = <T>(
   bufferInitializer: () => T,
   modifier: Modifier<T>
 ) => {
-  const { startMapper, stopMapper } = Reanimated;
   const values = useBufferValue(size, bufferInitializer);
   const mod = modifier as WorkletFunction;
   const deps = [size, ...Object.values(mod.__closure ?? {})];
-  const mapperId = startMapper(() => {
+  const mapperId = Rea.startMapper(() => {
     "worklet";
     values.value.forEach((val, index) => {
       modifier(val, index);
@@ -37,9 +35,8 @@ const useBuffer = <T>(
 
   useEffect(() => {
     return () => {
-      stopMapper(mapperId);
+      Rea.stopMapper(mapperId);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapperId]);
 
   return values;

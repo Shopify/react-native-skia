@@ -14,7 +14,7 @@ import {
 } from "../../renderer/Offscreen";
 import { Skia, useImage } from "../../skia";
 
-import { Reanimated } from "./ReanimatedProxy";
+import Rea from "./ReanimatedProxy";
 
 const createTexture = (
   texture: SharedValue<SkImage | null>,
@@ -57,10 +57,10 @@ export const usePictureAsTexture = (
   picture: SkPicture | null,
   size: SkSize
 ) => {
-  const texture = Reanimated.useSharedValue<SkImage | null>(null);
+  const texture = Rea.useSharedValue<SkImage | null>(null);
   useEffect(() => {
     if (picture !== null) {
-      Reanimated.runOnUI(createTexture)(texture, picture, size);
+      Rea.runOnUI(createTexture)(texture, picture, size);
     }
   }, [texture, picture, size]);
   return texture;

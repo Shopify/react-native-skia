@@ -5,7 +5,7 @@ import {
   Image,
   useAnimatedImageValue,
 } from "@shopify/react-native-skia";
-import { useSharedValue } from "@shopify/react-native-skia/src/external/reanimated/moduleWrapper";
+import { useSharedValue } from "react-native-reanimated";
 
 export const AnimatedImages = () => {
   const { width: wWidth } = useWindowDimensions();
