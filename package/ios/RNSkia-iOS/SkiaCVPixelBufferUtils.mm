@@ -74,18 +74,16 @@ SkiaCVPixelBufferUtils::getCVPixelBufferBaseFormat(
 
   switch (format) {
   // 8-bit YUV formats
+  case kCVPixelFormatType_420YpCbCr8Planar:
+  case kCVPixelFormatType_420YpCbCr8PlanarFullRange:
   case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
   case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
-  case kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange:
-  case kCVPixelFormatType_422YpCbCr8BiPlanarFullRange:
-  case kCVPixelFormatType_444YpCbCr8BiPlanarVideoRange:
-  case kCVPixelFormatType_444YpCbCr8BiPlanarFullRange:
   // 10-bit YUV formats
   case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
-  case kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange:
-  case kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange:
   case kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:
+  case kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange:
   case kCVPixelFormatType_422YpCbCr10BiPlanarFullRange:
+  case kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange:
   case kCVPixelFormatType_444YpCbCr10BiPlanarFullRange:
     return CVPixelBufferBaseFormat::yuv;
   case kCVPixelFormatType_24RGB:
@@ -94,10 +92,6 @@ SkiaCVPixelBufferUtils::getCVPixelBufferBaseFormat(
   case kCVPixelFormatType_32BGRA:
   case kCVPixelFormatType_32ABGR:
   case kCVPixelFormatType_32RGBA:
-  case kCVPixelFormatType_64ARGB:
-  case kCVPixelFormatType_64RGBALE:
-  case kCVPixelFormatType_48RGB:
-  case kCVPixelFormatType_30RGB:
     return CVPixelBufferBaseFormat::rgb;
   default:
     [[unlikely]] throw std::runtime_error(
@@ -197,25 +191,16 @@ SkiaCVPixelBufferUtils::YUV::getPlaneConfig(OSType pixelFormat) {
   case kCVPixelFormatType_420YpCbCr8Planar:
   case kCVPixelFormatType_420YpCbCr8PlanarFullRange:
     return SkYUVAInfo::PlaneConfig::kYUV;
-  case kCVPixelFormatType_422YpCbCr_4A_8BiPlanar:
   case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
   case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
-  case kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange:
-  case kCVPixelFormatType_422YpCbCr8BiPlanarFullRange:
-  case kCVPixelFormatType_444YpCbCr8BiPlanarVideoRange:
-  case kCVPixelFormatType_444YpCbCr8BiPlanarFullRange:
   case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
-  case kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange:
-  case kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange:
   case kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:
+  case kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange:
   case kCVPixelFormatType_422YpCbCr10BiPlanarFullRange:
+  case kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange:
   case kCVPixelFormatType_444YpCbCr10BiPlanarFullRange:
-  case kCVPixelFormatType_422YpCbCr16BiPlanarVideoRange:
-  case kCVPixelFormatType_444YpCbCr16BiPlanarVideoRange:
     [[likely]] return SkYUVAInfo::PlaneConfig::kY_UV;
-  case kCVPixelFormatType_420YpCbCr8VideoRange_8A_TriPlanar:
-  case kCVPixelFormatType_444YpCbCr16VideoRange_16A_TriPlanar:
-    return SkYUVAInfo::PlaneConfig::kY_U_V;
+
   // This can be extended with branches for specific YUV formats if Apple
   // uses new formats.
   default:
@@ -235,34 +220,13 @@ SkiaCVPixelBufferUtils::YUV::getSubsampling(OSType pixelFormat) {
   case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
   case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
   case kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:
-  case kCVPixelFormatType_420YpCbCr8VideoRange_8A_TriPlanar:
     [[likely]] return SkYUVAInfo::Subsampling::k420;
-  case kCVPixelFormatType_4444YpCbCrA8:
-  case kCVPixelFormatType_4444YpCbCrA8R:
-  case kCVPixelFormatType_4444AYpCbCr8:
-  case kCVPixelFormatType_4444AYpCbCr16:
-  case kCVPixelFormatType_4444AYpCbCrFloat:
-  case kCVPixelFormatType_444YpCbCr8:
-  case kCVPixelFormatType_444YpCbCr10:
-  case kCVPixelFormatType_444YpCbCr8BiPlanarVideoRange:
-  case kCVPixelFormatType_444YpCbCr8BiPlanarFullRange:
-  case kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange:
-  case kCVPixelFormatType_444YpCbCr10BiPlanarFullRange:
-  case kCVPixelFormatType_444YpCbCr16BiPlanarVideoRange:
-  case kCVPixelFormatType_444YpCbCr16VideoRange_16A_TriPlanar:
-    return SkYUVAInfo::Subsampling::k444;
-  case kCVPixelFormatType_422YpCbCr8:
-  case kCVPixelFormatType_422YpCbCr16:
-  case kCVPixelFormatType_422YpCbCr10:
-  case kCVPixelFormatType_422YpCbCr_4A_8BiPlanar:
-  case kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange:
-  case kCVPixelFormatType_422YpCbCr8BiPlanarFullRange:
-  case kCVPixelFormatType_422YpCbCr8_yuvs:
-  case kCVPixelFormatType_422YpCbCr8FullRange:
   case kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange:
   case kCVPixelFormatType_422YpCbCr10BiPlanarFullRange:
-  case kCVPixelFormatType_422YpCbCr16BiPlanarVideoRange:
     return SkYUVAInfo::Subsampling::k422;
+  case kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange:
+  case kCVPixelFormatType_444YpCbCr10BiPlanarFullRange:
+    return SkYUVAInfo::Subsampling::k444;
   // This can be extended with branches for specific YUV formats if Apple
   // uses new formats.
   default:
@@ -276,16 +240,12 @@ SkiaCVPixelBufferUtils::YUV::getSubsampling(OSType pixelFormat) {
 SkYUVColorSpace SkiaCVPixelBufferUtils::YUV::getColorspace(OSType pixelFormat) {
   switch (pixelFormat) {
   case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
-  case kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange:
-  case kCVPixelFormatType_444YpCbCr8BiPlanarVideoRange:
     [[likely]]
     // 8-bit limited
     return SkYUVColorSpace::kRec709_Limited_SkYUVColorSpace;
+  case kCVPixelFormatType_420YpCbCr8Planar:
   case kCVPixelFormatType_420YpCbCr8PlanarFullRange:
   case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
-  case kCVPixelFormatType_422YpCbCr8BiPlanarFullRange:
-  case kCVPixelFormatType_444YpCbCr8BiPlanarFullRange:
-  case kCVPixelFormatType_422YpCbCr8FullRange:
     [[likely]]
     // 8-bit full
     return SkYUVColorSpace::kRec709_Full_SkYUVColorSpace;
