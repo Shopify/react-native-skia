@@ -29,6 +29,9 @@ const copyModule = (module: string) => [
 
   "mkdir -p ./package/cpp/skia/modules/skunicode/include/",
   "cp -a externals/skia/modules/skunicode/include/SkUnicode.h ./package/cpp/skia/modules/skunicode/include/.",
+
+  `rm ./package/cpp/skia/include/gpu/GrBackendDrawableInfo.h`, // Remove since there are now (Skia M123) two headers with the same name
+
 ].map((cmd) => {
   console.log(cmd);
   executeCmdSync(cmd);
