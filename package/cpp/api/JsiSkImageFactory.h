@@ -29,11 +29,11 @@ public:
 
   JSI_HOST_FUNCTION(MakeImageFromNativeBuffer) {
     jsi::BigInt pointer = arguments[0].asBigInt(runtime);
-    const uintptr_t platformBufferPointer = pointer.asUint64(runtime);
-    void *rawPointer = reinterpret_cast<void *>(platformBufferPointer);
+    const uintptr_t nativeBufferPointer = pointer.asUint64(runtime);
+    void *rawPointer = reinterpret_cast<void *>(nativeBufferPointer);
     auto image = getContext()->makeImageFromNativeBuffer(rawPointer);
     if (image == nullptr) {
-      throw std::runtime_error("Failed to convert PlatformBuffer to SkImage!");
+      throw std::runtime_error("Failed to convert NativeBuffer to SkImage!");
     }
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));

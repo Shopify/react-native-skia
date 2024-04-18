@@ -130,8 +130,8 @@ sk_sp<SkImage> SkiaMetalSurfaceFactory::makeTextureFromCVPixelBuffer(
   }
   default:
     [[unlikely]] {
-      throw std::runtime_error("Failed to convert PlatformBuffer to SkImage - "
-                               "PlatformBuffer has unsupported PixelFormat! " +
+      throw std::runtime_error("Failed to convert NativeBuffer to SkImage - "
+                               "NativeBuffer has unsupported PixelFormat! " +
                                std::to_string(static_cast<int>(format)));
     }
   }

@@ -29,7 +29,7 @@ export class JsiSkNativeBufferFactory
     return canvas;
   }
 
-  Release(_platformBuffer: NativeBuffer) {
+  Release(_nativeBuffer: NativeBuffer) {
     // it's a noop on Web
   }
 }
