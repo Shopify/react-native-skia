@@ -32,22 +32,13 @@ export const drawAsImage = (element: ReactElement, size: SkSize) => {
   return drawAsImageFromPicture(drawAsPicture(element), size);
 };
 
-// Offscreen there is no notion of pixel density
-// However, some users might be confused when using useTexture, using dimensions in points not pixels
-// If we were to do the scaling here, APIs that textures as input (e.g Atlas)
-// would need to adapt to the pixel density
-// We are not sure yet if the APIs could be more ergonomic there
-// We could also in the case of Atlas set the default matrix to scale by the pixel density
-// Other some other texture sources like Images have only pixel dimensions
-const pd = 1;
 export const drawAsImageFromPicture = (picture: SkPicture, size: SkSize) => {
   "worklet";
   const surface = Skia.Surface.MakeOffscreen(
-    size.width * pd,
-    size.height * pd
+    size.width,
+    size.height
   )!;
   const canvas = surface.getCanvas();
-  canvas.scale(pd, pd);
   canvas.drawPicture(picture);
   surface.flush();
   const image = surface.makeImageSnapshot();
