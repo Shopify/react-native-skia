@@ -32,7 +32,7 @@ export interface NativeBufferFactory {
    */
   MakeFromImage: (image: SkImage) => NativeBuffer;
   /**
-   * Release a platform buffer that was created with `MakeFromImage`.
+   * Release a native buffer that was created with `MakeFromImage`.
    */
   Release: (nativeBuffer: NativeBuffer) => void;
 }

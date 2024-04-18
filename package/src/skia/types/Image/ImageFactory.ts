@@ -54,7 +54,7 @@ export interface ImageFactory {
 
   /**
    * Return an Image backed by a given native buffer.
-   * The platform buffer must be a valid owning reference.
+   * The native buffer must be a valid owning reference.
    *
    * For instance, this API is used by
    * [react-native-vision-camera](https://github.com/mrousavy/react-native-vision-camera)
@@ -62,9 +62,9 @@ export interface ImageFactory {
    *
    * - On Android; This is an `AHardwareBuffer*`
    * - On iOS, this is a `CVPixelBufferRef`
-   * @param nativeBuffer A strong `uintptr_t` pointer to the native platform buffer
+   * @param nativeBuffer A strong `uintptr_t` pointer to the native buffer
    * @throws Throws an error if the Image could not be created, for example when the given
-   * platform buffer is invalid.
+   * native buffer is invalid.
    */
   MakeImageFromNativeBuffer: (nativeBuffer: NativeBuffer) => SkImage;
 

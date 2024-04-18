@@ -137,7 +137,7 @@ public:
    * Creates an image from a native buffer.
    * - On iOS, this is a `CVPixelBufferRef`
    * - On Android, this is a `AHardwareBuffer*`
-   * @param buffer The native platform buffer.
+   * @param buffer The native buffer.
    * @return sk_sp<SkImage>
    */
   virtual sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) = 0;
