@@ -10,12 +10,7 @@ import { interpolatePaths, interpolateVector } from "../../animation";
 import { Skia } from "../../skia";
 import { isOnMainThread } from "../../renderer/Offscreen";
 
-import {
-  useAnimatedReaction,
-  useFrameCallback,
-  useSharedValue,
-  useDerivedValue,
-} from "./moduleWrapper";
+import Rea from "./ReanimatedProxy";
 
 export const notifyChange = (value: SharedValue<unknown>) => {
   "worklet";
@@ -27,8 +22,8 @@ export const notifyChange = (value: SharedValue<unknown>) => {
 
 export const usePathValue = (cb: (path: SkPath) => void, init?: SkPath) => {
   const pathInit = useMemo(() => Skia.Path.Make(), []);
-  const path = useSharedValue(pathInit);
-  useDerivedValue(() => {
+  const path = Rea.useSharedValue(pathInit);
+  Rea.useDerivedValue(() => {
     path.value.reset();
     if (init !== undefined) {
       path.value.addPath(init);
@@ -40,7 +35,7 @@ export const usePathValue = (cb: (path: SkPath) => void, init?: SkPath) => {
 };
 
 export const useClock = () => {
-  const clock = useSharedValue(0);
+  const clock = Rea.useSharedValue(0);
   const callback = useCallback(
     (info: FrameInfo) => {
       "worklet";
@@ -48,7 +43,7 @@ export const useClock = () => {
     },
     [clock]
   );
-  useFrameCallback(callback);
+  Rea.useFrameCallback(callback);
   return clock;
 };
 
@@ -73,8 +68,8 @@ const useInterpolator = <T>(
 ) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const init = useMemo(() => factory(), []);
-  const result = useSharedValue(init);
-  useAnimatedReaction(
+  const result = Rea.useSharedValue(init);
+  Rea.useAnimatedReaction(
     () => value.value,
     (val) => {
       result.value = interpolator(val, input, output, options, result.value);

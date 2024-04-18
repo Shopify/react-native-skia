@@ -11,8 +11,11 @@ import {
 import React from "react";
 import { Dimensions, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { useSharedValue, withSpring } from "react-native-reanimated";
-import { useDerivedValue } from "@shopify/react-native-skia/src/external/reanimated/moduleWrapper";
+import {
+  useSharedValue,
+  withSpring,
+  useDerivedValue,
+} from "react-native-reanimated";
 
 import { BlurMask } from "./BlurGradient";
 

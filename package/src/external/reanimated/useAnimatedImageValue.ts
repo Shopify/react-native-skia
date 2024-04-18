@@ -4,11 +4,7 @@ import { type FrameInfo, type SharedValue } from "react-native-reanimated";
 import { useAnimatedImage } from "../../skia/core/AnimatedImage";
 import type { DataSourceParam, SkImage } from "../../skia/types";
 
-import {
-  throwOnMissingReanimated,
-  useFrameCallback,
-  useSharedValue,
-} from "./moduleWrapper";
+import Rea from "./ReanimatedProxy";
 
 const DEFAULT_FRAME_DURATION = 60;
 
@@ -16,11 +12,10 @@ export const useAnimatedImageValue = (
   source: DataSourceParam,
   paused?: SharedValue<boolean>
 ) => {
-  throwOnMissingReanimated();
-  const defaultPaused = useSharedValue(false);
+  const defaultPaused = Rea.useSharedValue(false);
   const isPaused = paused ?? defaultPaused;
-  const currentFrame = useSharedValue<null | SkImage>(null);
-  const lastTimestamp = useSharedValue(-1);
+  const currentFrame = Rea.useSharedValue<null | SkImage>(null);
+  const lastTimestamp = Rea.useSharedValue(-1);
   const animatedImage = useAnimatedImage(
     source,
     (err) => {
@@ -32,7 +27,7 @@ export const useAnimatedImageValue = (
   const frameDuration =
     animatedImage?.currentFrameDuration() || DEFAULT_FRAME_DURATION;
 
-  useFrameCallback((frameInfo: FrameInfo) => {
+  Rea.useFrameCallback((frameInfo: FrameInfo) => {
     if (!animatedImage) {
       currentFrame.value = null;
       return;
