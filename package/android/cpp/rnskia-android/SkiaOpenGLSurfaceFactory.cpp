@@ -20,12 +20,8 @@ SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer) {
 #if __ANDROID_API__ >= 26
   // Setup OpenGL and Skia:
   if (!SkiaOpenGLHelper::createSkiaDirectContextIfNecessary(
-          &ThreadContextHolder::ThreadSkiaOpenGLContext)) {
-
-    RNSkLogger::logToConsole(
-        "Could not create Skia Surface from native window / surface. "
-        "Failed creating Skia Direct Context");
-    return nullptr;
+          &ThreadContextHolder::ThreadSkiaOpenGLContext)) [[unlikely]] {
+    throw std::runtime_error("Failed to create Skia Context for this Thread!");
   }
   const AHardwareBuffer *hardwareBuffer =
       static_cast<AHardwareBuffer *>(buffer);
@@ -35,7 +31,7 @@ SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer) {
 
   AHardwareBuffer_Desc description;
   AHardwareBuffer_describe(hardwareBuffer, &description);
-  if (description.format != AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM) {
+  if (description.format != AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM) [[unlikely]] {
     throw std::runtime_error("AHardwareBuffer has unknown format (" +
                              std::to_string(description.format) +
                              ") - cannot convert to SkImage!");
@@ -48,6 +44,9 @@ SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer) {
       const_cast<AHardwareBuffer *>(hardwareBuffer), description.width,
       description.height, &deleteImageProc, &updateImageProc, &deleteImageCtx,
       false, format, false);
+  if (!backendTex.isValid()) [[unlikely]] {
+    throw std::runtime_error("Failed to convert HardwareBuffer to OpenGL Texture!");
+  }
   sk_sp<SkImage> image = SkImages::BorrowTextureFrom(
       ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(),
       backendTex, kTopLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType,
