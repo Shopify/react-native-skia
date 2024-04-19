@@ -52,7 +52,7 @@ SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer) {
   sk_sp<SkImage> image = SkImages::BorrowTextureFrom(
       ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(),
       backendTex, kTopLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType,
-      kOpaque_SkAlphaType, nullptr);
+      kOpaque_SkAlphaType, nullptr, deleteImageProc, deleteImageCtx);
   return image;
 #else
   throw std::runtime_error(
