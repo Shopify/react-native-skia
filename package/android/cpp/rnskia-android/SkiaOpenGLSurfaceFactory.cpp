@@ -31,7 +31,8 @@ SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer) {
 
   AHardwareBuffer_Desc description;
   AHardwareBuffer_describe(hardwareBuffer, &description);
-  if (description.format != AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM) [[unlikely]] {
+  if (description.format != AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM)
+      [[unlikely]] {
     throw std::runtime_error("AHardwareBuffer has unknown format (" +
                              std::to_string(description.format) +
                              ") - cannot convert to SkImage!");
@@ -45,7 +46,8 @@ SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer) {
       description.height, &deleteImageProc, &updateImageProc, &deleteImageCtx,
       false, format, false);
   if (!backendTex.isValid()) [[unlikely]] {
-    throw std::runtime_error("Failed to convert HardwareBuffer to OpenGL Texture!");
+    throw std::runtime_error(
+        "Failed to convert HardwareBuffer to OpenGL Texture!");
   }
   sk_sp<SkImage> image = SkImages::BorrowTextureFrom(
       ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(),
