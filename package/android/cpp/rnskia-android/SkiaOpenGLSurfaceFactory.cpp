@@ -15,8 +15,9 @@ namespace RNSkia {
 
 thread_local SkiaOpenGLContext ThreadContextHolder::ThreadSkiaOpenGLContext;
 
-sk_sp<SkImage> SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(
-    void *buffer, bool requireKnownFormat) {
+sk_sp<SkImage>
+SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer,
+                                                      bool requireKnownFormat) {
 #if __ANDROID_API__ >= 26
   // Setup OpenGL and Skia:
   if (!SkiaOpenGLHelper::createSkiaDirectContextIfNecessary(
