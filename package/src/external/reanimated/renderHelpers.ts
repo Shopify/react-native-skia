@@ -5,23 +5,9 @@ import type { AnimatedProps } from "../../renderer/processors";
 import type { Node } from "../../dom/types";
 
 import Rea from "./ReanimatedProxy";
+import { getReanimatedStatus } from "./reanimatedStatus";
 
-let HAS_REANIMATED = false;
-let HAS_REANIMATED_3 = false;
-try {
-  require("react-native-reanimated");
-  HAS_REANIMATED = true;
-  const reanimatedVersion =
-    require("react-native-reanimated/package.json").version;
-  if (
-    reanimatedVersion &&
-    (reanimatedVersion >= "3.0.0" || reanimatedVersion.includes("3.0.0-"))
-  ) {
-    HAS_REANIMATED_3 = true;
-  }
-} catch (e) {
-  HAS_REANIMATED = false;
-}
+const { HAS_REANIMATED, HAS_REANIMATED_3 } = getReanimatedStatus();
 
 const _bindings = new WeakMap<Node<unknown>, unknown>();
 
