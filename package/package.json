@@ -27,6 +27,8 @@
     "android/src/**",
     "libs/android/**",
     "index.js",
+    "web.js",
+    "react-native-web.js",
     "jestSetup.js",
     "jestSetup.mjs",
     "jestEnv.mjs",
