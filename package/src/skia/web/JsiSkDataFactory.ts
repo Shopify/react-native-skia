@@ -21,7 +21,8 @@ export class JsiSkDataFactory extends Host implements DataFactory {
    * @param bytes An array of bytes representing the data
    */
   fromBytes(bytes: Uint8Array) {
-    return new JsiSkData(this.CanvasKit, bytes as ArrayBuffer);
+    // FIXME: Bun type error, might be resolved with a newer version
+    return new JsiSkData(this.CanvasKit, bytes as unknown as ArrayBuffer);
   }
   /**
    * Creates a new Data object from a base64 encoded string.

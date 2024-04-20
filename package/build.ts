@@ -43,7 +43,7 @@ export const bundleSkia = async (
 
   const outputs = await build({
     plugins: [reactNativePlugin],
-    entrypoints: ["./src/index.ts"],
+    entrypoints: ["./src/web/for-bundling.ts"],
     // Don't bundle these dependencies
     external: [
       "react-native",
@@ -62,26 +62,13 @@ export const bundleSkia = async (
   Bun.write(output, await bundled.text());
 };
 
-const bundleSkiaWeb = async () => {
-  const outputs = await build({
-    entrypoints: ["./src/web/index.ts"],
-    // Don't bundle these dependencies
-    external: [
-      "react-native",
-      "canvaskit-wasm",
-      "react",
-      "scheduler",
-      "react-reconciler",
-    ],
-  });
-  if (!outputs.success) {
-    console.error(outputs.logs);
-    throw new Error("Build failed");
-  }
-  const bundled = outputs.outputs[0];
-  Bun.write("webindex.js", await bundled.text());
-};
-
-await bundleSkia(true, "web.js");
-await bundleSkia(false, "react-native-web.js");
-await bundleSkiaWeb();
+await bundleSkia(true, "lib/web/pure.js");
+await bundleSkia(false, "lib/web/react-native-web.js");
+Bun.write(
+  "lib/web/pure.d.ts",
+  'export * from "../typescript/src/web/for-bundling";'
+);
+Bun.write(
+  "lib/web/react-native-web.d.ts",
+  'export * from "../typescript/src/web/for-bundling";'
+);
