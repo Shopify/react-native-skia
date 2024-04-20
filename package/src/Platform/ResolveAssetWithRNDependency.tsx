@@ -1,7 +1,8 @@
 // In `package/build.ts`, this file will be replaced with
 //  `ResolveAssetWithNoDependency.tsx` in order to remove React Native dependencies.
 
-import { DataModule, isRNModule } from "../skia/types";
+import type { DataModule } from "../skia/types";
+import { isRNModule } from "../skia/types";
 
 export const resolveAsset = (source: DataModule) => {
   if (isRNModule(source)) {

@@ -1,10 +1,11 @@
 import type * as ReanimatedT from "react-native-reanimated";
+
 import {
   createModuleProxy,
   OptionalDependencyNotInstalledError,
 } from "../ModuleProxy";
 
-import original from "./ReanimatedProxy";
+import type original from "./ReanimatedProxy";
 type TReanimated = typeof ReanimatedT;
 
 const Reanimated: typeof original = createModuleProxy<TReanimated>(() => {

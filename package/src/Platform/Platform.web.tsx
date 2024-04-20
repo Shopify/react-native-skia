@@ -1,8 +1,8 @@
 import type { RefObject, CSSProperties } from "react";
 import React, { useLayoutEffect, useMemo, useRef } from "react";
 import type { LayoutChangeEvent, ViewComponent, ViewProps } from "react-native";
-import { resolveAsset } from "./ResolveAssetWithRNDependency";
 
+import { resolveAsset } from "./ResolveAssetWithRNDependency";
 import type { IPlatform } from "./IPlatform";
 
 // eslint-disable-next-line max-len
