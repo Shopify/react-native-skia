@@ -21,7 +21,6 @@ Apply a black and white color matrix to the clipping area:
 import {
   Canvas,
   BackdropFilter,
-  Fill,
   Image,
   ColorMatrix,
   useImage,
@@ -65,7 +64,6 @@ import {
   Fill,
   Image,
   BackdropBlur,
-  ColorMatrix,
   useImage,
 } from "@shopify/react-native-skia";
 
