@@ -1,3 +1,13 @@
+// Execute this file with `bun build.ts`
+
+// Generates two files:
+// `@Shopify/react-native-skia/web` -> `lib/web/pure.js`
+// -> A version of RN Skia that has no React Native dependency
+//    and therefore no Webpack override is necessary
+// `@Shopify/react-native-skia/react-native-web` -> lib/web/react-native-web.js
+// -> A version of RN Skia for the web that has a React Native dependency
+//    that can be overriden with Webpack in order to support React Native-style assets
+
 import { build, BunPlugin } from "bun";
 import pathModule from "path";
 
@@ -11,7 +21,8 @@ export const bundleSkia = async (
       build.onResolve(
         { filter: /.*/ },
         async ({ importer, namespace, path }) => {
-          // Don't resolve the file with the RN dependency if building for web
+          // If there should be no react-native dependency,
+          // override it with a no-dependency version
           if (noReactNativeDependency) {
             path = path.replace(
               /ResolveAssetWithRNDependency/,
