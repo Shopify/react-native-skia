@@ -1,8 +1,6 @@
 import type { ComponentProps, ComponentType } from "react";
 import React, { useMemo, lazy, Suspense } from "react";
 
-import { Platform } from "../Platform";
-
 import { LoadSkiaWeb } from "./LoadSkiaWeb";
 
 interface WithSkiaProps {

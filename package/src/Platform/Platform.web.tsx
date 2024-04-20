@@ -1,9 +1,7 @@
 import type { RefObject, CSSProperties } from "react";
 import React, { useLayoutEffect, useMemo, useRef } from "react";
 import type { LayoutChangeEvent, ViewComponent, ViewProps } from "react-native";
-
-import type { DataModule } from "../skia/types";
-import { isRNModule } from "../skia/types";
+import { resolveAsset } from "./ResolveAssetWithRNDependency";
 
 import type { IPlatform } from "./IPlatform";
 
@@ -127,22 +125,7 @@ const View = (({ children, onLayout, style: rawStyle }: ViewProps) => {
 export const Platform: IPlatform = {
   OS: "web",
   PixelRatio: typeof window !== "undefined" ? window.devicePixelRatio : 1, // window is not defined on node
-  resolveAsset: (source: DataModule) => {
-    if (isRNModule(source)) {
-      if (typeof source === "number" && typeof require === "function") {
-        const {
-          getAssetByID,
-        } = require("react-native/Libraries/Image/AssetRegistry");
-        const { httpServerLocation, name, type } = getAssetByID(source);
-        const uri = `${httpServerLocation}/${name}.${type}`;
-        return uri;
-      }
-      throw new Error(
-        "Asset source is a number - this is not supported on the web"
-      );
-    }
-    return source.default;
-  },
+  resolveAsset: resolveAsset,
   findNodeHandle: () => {
     throw new Error("findNodeHandle is not supported on the web");
   },
