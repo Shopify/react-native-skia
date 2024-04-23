@@ -100,7 +100,7 @@ The `fillType` property defines the algorithm to use to determine the inside par
 Possible values are: `winding`, `evenOdd`, `inverseWinding`, `inverseEvenOdd`. Default value is `winding`.
 
 ```tsx twoslash
-import {Canvas, Group, TextPath, Skia, useFont, vec, Fill, Path} from "@shopify/react-native-skia";
+import {Canvas, Skia, Fill, Path} from "@shopify/react-native-skia";
 
 const star = () => {
   const R = 115.2;
