@@ -9,7 +9,7 @@ Image filters are effects that operate on all the color bits of pixels that make
 
 ## Composing Filters
 
-Color Filters and Shaders and also be used as Image filters.
+Color Filters and Shaders can also be used as Image filters.
 In the example below, we first apply a color matrix to the content and a blur image filter.
 
 ```tsx twoslash
