@@ -73,7 +73,7 @@ function getWasmFilePath() {
 
 function getOutputFilePath(isAnExpoProjectWithMetro) {
   // Default to using `web` public path.
-  const publicFolder = path.resolve(args[0] || (isAnExpoProjectWithMetro) ? "public" : "web/static/js");
+  const publicFolder = path.resolve(args[0] || ((isAnExpoProjectWithMetro) ? "public" : "web/static/js"));
   const publicLocation = "./canvaskit.wasm";
   const output = path.join(publicFolder, publicLocation);
 
