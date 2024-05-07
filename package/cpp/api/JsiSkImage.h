@@ -21,8 +21,8 @@
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkPngEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
-#include "include/gpu/ganesh/SkImageGanesh.h"
 #include "include/gpu/GrBackendSurface.h"
+#include "include/gpu/ganesh/SkImageGanesh.h"
 
 #pragma clang diagnostic pop
 
@@ -189,24 +189,25 @@ public:
   }
 
   JSI_HOST_FUNCTION(makeTextureImage) {
-   auto image = getObject();
-   // Retrieve the backend texture from the input image
-   GrBackendTexture backendTexture;
-   if (!SkImages::GetBackendTextureFromImage(image, &backendTexture, false)) {
-	   return jsi::Value::null();
-   }
+    auto image = getObject();
+    // Retrieve the backend texture from the input image
+    GrBackendTexture backendTexture;
+    if (!SkImages::GetBackendTextureFromImage(image, &backendTexture, false)) {
+      return jsi::Value::null();
+    }
 
-   // Adopt the backend texture in the target direct context
-   sk_sp<SkImage> adoptedImage = SkImages::AdoptTextureFrom(
-	   getContext()->getSkiaContext(), backendTexture, GrSurfaceOrigin::kTopLeft_GrSurfaceOrigin,
-	   image->colorType());
+    // Adopt the backend texture in the target direct context
+    sk_sp<SkImage> adoptedImage = SkImages::AdoptTextureFrom(
+        getContext()->getSkiaContext(), backendTexture,
+        GrSurfaceOrigin::kTopLeft_GrSurfaceOrigin, image->colorType());
 
-   // Check if the adoption was successful
-   if (!adoptedImage) {
-	   return jsi::Value::null();
-   }
+    // Check if the adoption was successful
+    if (!adoptedImage) {
+      return jsi::Value::null();
+    }
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(adoptedImage)));
+        runtime,
+        std::make_shared<JsiSkImage>(getContext(), std::move(adoptedImage)));
   }
 
   EXPORT_JSI_API_TYPENAME(JsiSkImage, Image)

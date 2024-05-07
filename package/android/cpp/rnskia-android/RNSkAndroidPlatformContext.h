@@ -123,7 +123,7 @@ public:
 #endif
   }
 
-  GrDirectContext* getSkiaContext() override {
+  GrDirectContext *getSkiaContext() override {
     return ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get();
   }
 

@@ -152,7 +152,7 @@ sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
   return SkiaMetalSurfaceFactory::makeOffscreenSurface(width, height);
 }
 
-GrRecordingContext* RNSkiOSPlatformContext::getSkiaContext(){
+GrRecordingContext *RNSkiOSPlatformContext::getSkiaContext() {
   return ThreadContextHolder::ThreadSkiaMetalContext.skContext.get();
 }
 
