@@ -152,6 +152,10 @@ sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
   return SkiaMetalSurfaceFactory::makeOffscreenSurface(width, height);
 }
 
+GrRecordingContext* RNSkiOSPlatformContext::getSkiaContext(){
+  return ThreadContextHolder::ThreadSkiaMetalContext.skContext.get();
+}
+
 sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeBuffer(void *buffer) {
   CVPixelBufferRef sampleBuffer = (CVPixelBufferRef)buffer;
   return SkiaMetalSurfaceFactory::makeTextureFromCVPixelBuffer(sampleBuffer);

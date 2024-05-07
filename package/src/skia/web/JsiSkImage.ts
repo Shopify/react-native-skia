@@ -13,11 +13,13 @@ import type {
   TileMode,
   ImageFormat,
   ImageInfo,
+  SkSurface,
 } from "../types";
 
 import { getEnum, HostObject } from "./Host";
 import { JsiSkMatrix } from "./JsiSkMatrix";
 import { JsiSkShader } from "./JsiSkShader";
+import type { JsiSkSurface } from "./JsiSkSurface";
 
 // https://github.com/google/skia/blob/1f193df9b393d50da39570dab77a0bb5d28ec8ef/modules/canvaskit/htmlcanvas/util.js
 export const toBase64String = (bytes: Uint8Array) => {
@@ -151,6 +153,10 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
   dispose = () => {
     this.ref.delete();
   };
+
+  makeTextureImage(): SkImage {
+    throw new Error("makeTextureImage() is not implemented on Web");
+  }
 
   makeNonTextureImage(): SkImage {
     // if the image is already a non-texture image, this is a no-op

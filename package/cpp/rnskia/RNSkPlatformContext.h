@@ -146,6 +146,8 @@ public:
 
   virtual uint64_t makeNativeBuffer(sk_sp<SkImage> image) = 0;
 
+  virtual GrRecordingContext* getSkiaContext() = 0;
+
   /**
    * Return the Platform specific font manager
    */
