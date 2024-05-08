@@ -26,4 +26,7 @@ describe("Snapshot", () => {
   // itRunsE2eOnly("should respect ScrollView offset and padding", async () => {
   //   await testSnapshot("Snapshot5");
   // });
+  itRunsE2eOnly("test makeImageTexture()", async () => {
+    await testSnapshot("Snapshot6");
+  });
 });

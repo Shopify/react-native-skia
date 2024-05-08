@@ -123,6 +123,10 @@ public:
 #endif
   }
 
+  GrDirectContext *getSkiaContext() override {
+    return ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get();
+  }
+
   sk_sp<SkFontMgr> createFontMgr() override {
     return SkFontMgr_New_Android(nullptr);
   }

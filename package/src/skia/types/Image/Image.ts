@@ -130,4 +130,10 @@ export interface SkImage extends SkJSIInstance<"Image"> {
    * bitmap, or if encoded in a stream.
    */
   makeNonTextureImage(): SkImage;
+
+  /*
+   * Transfer the texture its original Skia context to the current Skia context
+   * Each thread has its own Skia context
+   */
+  makeTextureImage(): SkImage;
 }
