@@ -14,6 +14,7 @@ import {
   Aurora,
   Breathe,
   Filters,
+  MagnifyingGlass,
   Gooey,
   GraphsScreen,
   Hue,
@@ -43,6 +44,7 @@ const linking: LinkingOptions<StackParamList> = {
       API: "api",
       Breathe: "breathe",
       Filters: "filters",
+      MagnifyingGlass: "magnifying-glass",
       Gooey: "gooey",
       Hue: "hue",
       Matrix: "matrix",
@@ -125,6 +127,7 @@ const App = () => {
             <Stack.Screen name="API" component={API} />
             <Stack.Screen name="Breathe" component={Breathe} />
             <Stack.Screen name="Filters" component={Filters} />
+            <Stack.Screen name="MagnifyingGlass" component={MagnifyingGlass} />
             <Stack.Screen name="Gooey" component={Gooey} />
             <Stack.Screen name="Hue" component={Hue} />
             <Stack.Screen
