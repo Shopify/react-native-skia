@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Dimensions, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import {
@@ -13,6 +13,7 @@ import {
   ImageShader,
   Shader,
   clamp,
+  useVideo,
 } from "@shopify/react-native-skia";
 
 import { snapPoint } from "./Math";
@@ -48,18 +49,18 @@ const at = <T,>(array: T[] | null, index: number): T | null => {
 const duration = 100;
 
 export const Transitions = () => {
-  const offset = useSharedValue(0);
+  const [offset, setOffset] = useState(0);
   const progressLeft = useSharedValue(0);
   const progressRight = useSharedValue(0);
   const assets = useAssets();
   const next = useCallback(() => {
-    offset.value += 1;
+    setOffset((o) => o + 1);
     progressLeft.value = 0;
-  }, [offset, progressLeft]);
+  }, [progressLeft]);
   const previous = useCallback(() => {
-    offset.value -= 1;
+    setOffset((o) => o - 1);
     progressRight.value = 0;
-  }, [offset, progressRight]);
+  }, [progressRight]);
   const panRight = useMemo(
     () =>
       Gesture.Pan()
@@ -116,24 +117,16 @@ export const Transitions = () => {
     };
   });
   const transition1 = useDerivedValue(() => {
-    return at(transitions, offset.value - 1)!;
+    return at(transitions, offset - 1)!;
   });
 
   const transition2 = useDerivedValue(() => {
-    return at(transitions, offset.value)!;
+    return at(transitions, offset)!;
   });
 
-  const assets1 = useDerivedValue(() => {
-    return at(assets, offset.value - 1);
-  });
-
-  const assets2 = useDerivedValue(() => {
-    return at(assets, offset.value);
-  });
-
-  const assets3 = useDerivedValue(() => {
-    return at(assets, offset.value + 1);
-  });
+  const video1 = useVideo(at(assets, offset - 1), true);
+  const video2 = useVideo(at(assets, offset), true);
+  const video3 = useVideo(at(assets, offset + 1), true);
 
   if (!assets) {
     return null;
@@ -146,20 +139,20 @@ export const Transitions = () => {
             <Shader source={transition1} uniforms={uniformsRight}>
               <Shader source={transition2} uniforms={uniformsLeft}>
                 <ImageShader
-                  image={assets2}
+                  image={video1}
                   fit="cover"
                   width={width}
                   height={height}
                 />
                 <ImageShader
-                  image={assets3}
+                  image={video2}
                   fit="cover"
                   width={width}
                   height={height}
                 />
               </Shader>
               <ImageShader
-                image={assets1}
+                image={video3}
                 fit="cover"
                 width={width}
                 height={height}
