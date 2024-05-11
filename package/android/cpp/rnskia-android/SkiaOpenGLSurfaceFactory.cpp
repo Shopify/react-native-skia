@@ -37,7 +37,6 @@ SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer,
   // TODO: find out if we can detect, which graphic buffers support
   // GR_GL_TEXTURE_2D
   case AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM:
-  case AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM:
     format = GrBackendFormats::MakeGL(GR_GL_RGBA8, GR_GL_TEXTURE_EXTERNAL);
   case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
     format = GrBackendFormats::MakeGL(GR_GL_RGBA16F, GR_GL_TEXTURE_EXTERNAL);

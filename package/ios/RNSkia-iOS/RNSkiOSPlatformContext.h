@@ -65,6 +65,8 @@ public:
 
   void releaseNativeBuffer(uint64_t pointer) override;
 
+  std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override;
+
   virtual void performStreamOperation(
       const std::string &sourceUri,
       const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) override;

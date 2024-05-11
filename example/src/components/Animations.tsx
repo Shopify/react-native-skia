@@ -1,4 +1,6 @@
 import type { Vector } from "@shopify/react-native-skia";
+import { useVideo } from "@shopify/react-native-skia";
+import { useAssets } from "expo-asset";
 import { useEffect } from "react";
 import {
   Easing,
@@ -8,6 +10,13 @@ import {
   withTiming,
 } from "react-native-reanimated";
 
+export const useVideoFromAsset = (mod: number) => {
+  const [assets, error] = useAssets([mod]);
+  if (error) {
+    throw error;
+  }
+  return useVideo(assets ? assets[0].localUri : null);
+};
 export const useLoop = ({ duration }: { duration: number }) => {
   const progress = useSharedValue(0);
   useEffect(() => {
