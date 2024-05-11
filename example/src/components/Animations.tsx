@@ -15,8 +15,9 @@ export const useVideoFromAsset = (mod: number) => {
   if (error) {
     throw error;
   }
-  return useVideo(assets ? assets[0].localUri : null);
+  return useVideo(assets ? assets[0].localUri : null, true);
 };
+
 export const useLoop = ({ duration }: { duration: number }) => {
   const progress = useSharedValue(0);
   useEffect(() => {

@@ -61,6 +61,7 @@ public:
     JSI_EXPORT_FUNC(JsiVideo, duration),
     JSI_EXPORT_FUNC(JsiVideo, framerate),
     JSI_EXPORT_FUNC(JsiVideo, seek),
+    JSI_EXPORT_FUNC(JsiVideo, dispose)
   )
 
   JsiVideo(std::shared_ptr<RNSkPlatformContext> context,

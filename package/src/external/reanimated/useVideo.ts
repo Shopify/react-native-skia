@@ -21,6 +21,7 @@ export const useVideo = (
     () => (video ? (1 / video.framerate()) * 1000 : -1),
     [video]
   );
+  const duration = useMemo(() => (video ? video.duration() : -1), [video]);
 
   Rea.useFrameCallback((frameInfo: FrameInfo) => {
     if (!video) {
@@ -32,11 +33,8 @@ export const useVideo = (
     const { timestamp } = frameInfo;
     const elapsed = timestamp - lastTimestamp.value;
 
-    if (elapsed > frameDuration && looped) {
-      video.seek(0);
-      lastTimestamp.value = timestamp;
-    }
-    // Check if it's time to switch frames based on GIF frame duration
+
+    // Check if it's time to switch frames based on frame duration
     if (elapsed < frameDuration) {
       return;
     }
@@ -47,9 +45,10 @@ export const useVideo = (
       if (currentFrame.value) {
         currentFrame.value.dispose();
       }
-      currentFrame.value = img;
       if (Platform.OS === "android") {
-        currentFrame.value = currentFrame.value.makeNonTextureImage();
+        currentFrame.value = img.makeNonTextureImage();
+      } else {
+        currentFrame.value = img;
       }
     }
 
