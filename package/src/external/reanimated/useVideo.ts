@@ -17,6 +17,7 @@ export const useVideo = (
   const isPaused = paused ?? defaultPaused;
   const currentFrame = Rea.useSharedValue<null | SkImage>(null);
   const lastTimestamp = Rea.useSharedValue(-1);
+  const startTimestamp = Rea.useSharedValue(-1);
   const frameDuration = useMemo(
     () => (video ? (1 / video.framerate()) * 1000 : -1),
     [video]
@@ -33,13 +34,20 @@ export const useVideo = (
     const { timestamp } = frameInfo;
     const elapsed = timestamp - lastTimestamp.value;
 
-
     // Check if it's time to switch frames based on frame duration
     if (elapsed < frameDuration) {
       return;
     }
 
     // Update the current frame
+    if (startTimestamp.value === -1) {
+      startTimestamp.value = timestamp;
+    }
+    const currentTimestamp = timestamp - startTimestamp.value;
+    if (currentTimestamp > duration && looped) {
+      video.seek(0);
+      startTimestamp.value = timestamp;
+    }
     const img = video.nextImage();
     if (img) {
       if (currentFrame.value) {
