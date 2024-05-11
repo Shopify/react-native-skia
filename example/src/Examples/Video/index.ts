@@ -1,1 +1,1 @@
-export * from "./Video";
+export { Transitions as Video } from "./Transitions";
