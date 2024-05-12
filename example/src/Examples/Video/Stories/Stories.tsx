@@ -16,28 +16,13 @@ import {
   useVideo,
 } from "@shopify/react-native-skia";
 
-import {
-  transition,
-  cube,
-  pageCurl,
-  glitchMemories,
-  swirl,
-  swap,
-} from "../gltransitions/index";
 import { snapPoint } from "../../../components/Animations";
+import { cube, transition } from "../gltransitions";
 
 import { useAssets } from "./Assets";
 
 const { width, height } = Dimensions.get("window");
-const transitions = [
-  cube,
-  pageCurl,
-  cube,
-  glitchMemories,
-  swirl,
-  swap,
-  cube,
-].map((t) => transition(t));
+const transitions = [cube, cube, cube].map((t) => transition(t));
 
 const at = <T,>(array: T[] | null, index: number): T | null => {
   "worklet";
@@ -49,7 +34,7 @@ const at = <T,>(array: T[] | null, index: number): T | null => {
 
 const duration = 100;
 
-export const Transitions = () => {
+export const Stories = () => {
   const [offset, setOffset] = useState(0);
   const progressLeft = useSharedValue(0);
   const progressRight = useSharedValue(0);
