@@ -152,10 +152,6 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     this.ref.delete();
   };
 
-  makeTextureImage(): SkImage {
-    throw new Error("makeTextureImage() is not implemented on Web");
-  }
-
   makeNonTextureImage(): SkImage {
     // if the image is already a non-texture image, this is a no-op
     const partialInfo = this.ref.getImageInfo();
