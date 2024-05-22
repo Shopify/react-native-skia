@@ -6,15 +6,19 @@ import { useSharedValue } from "react-native-reanimated";
 import { useVideoFromAsset } from "../../components/Animations";
 
 export const Video = () => {
-  const isPaused = useSharedValue(false);
+  const paused = useSharedValue(false);
   const { width, height } = useWindowDimensions();
   const video = useVideoFromAsset(
-    require("../../Tests/assets/BigBuckBunny.mp4")
+    require("../../Tests/assets/BigBuckBunny.mp4"),
+    {
+      paused,
+      looping: false,
+    }
   );
   return (
     <Pressable
       style={{ flex: 1 }}
-      onPress={() => (isPaused.value = !isPaused.value)}
+      onPress={() => (paused.value = !paused.value)}
     >
       <Canvas style={{ flex: 1 }}>
         <Fill>

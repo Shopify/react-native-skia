@@ -10,7 +10,10 @@ import {
   withTiming,
 } from "react-native-reanimated";
 
-export const useVideoFromAsset = (mod: number) => {
+export const useVideoFromAsset = (
+  mod: number,
+  options?: Parameters<typeof useVideo>[1]
+) => {
   const [assets, error] = useAssets([mod]);
   if (error) {
     throw error;
@@ -20,7 +23,7 @@ export const useVideoFromAsset = (mod: number) => {
     const img = video.nextImage();
     console.log(img);
   }
-  return useVideo(assets ? assets[0].localUri : null, true);
+  return useVideo(assets ? assets[0].localUri : null, options);
 };
 
 export const useLoop = ({ duration }: { duration: number }) => {
