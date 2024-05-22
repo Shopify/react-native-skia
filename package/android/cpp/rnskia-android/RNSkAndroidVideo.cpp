@@ -24,11 +24,10 @@ RNSkAndroidVideo::RNSkAndroidVideo(jni::global_ref<jobject> jniVideo)
     : _jniVideo(jniVideo) {}
 
 RNSkAndroidVideo::~RNSkAndroidVideo() {
-  JNIEnv *env = facebook::jni::Environment::current();
-  env->DeleteGlobalRef(_jniVideo.get());
 }
 
 sk_sp<SkImage> RNSkAndroidVideo::nextImage(double *timeStamp) {
+#if __ANDROID_API__ >= 26
   JNIEnv *env = facebook::jni::Environment::current();
   // Get the Java class and method ID
   jclass cls = env->GetObjectClass(_jniVideo.get());
@@ -50,6 +49,9 @@ sk_sp<SkImage> RNSkAndroidVideo::nextImage(double *timeStamp) {
   AHardwareBuffer *buffer =
       AHardwareBuffer_fromHardwareBuffer(env, jHardwareBuffer);
   return SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(buffer);
+#else
+  return nullptr;
+#endif
 }
 
 double RNSkAndroidVideo::duration() {
