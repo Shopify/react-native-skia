@@ -21,10 +21,13 @@ namespace jsi = facebook::jsi;
 namespace jni = facebook::jni;
 
 RNSkAndroidVideo::RNSkAndroidVideo(jni::global_ref<jobject> jniVideo)
-    : _jniVideo(jniVideo) {}
-
-RNSkAndroidVideo::~RNSkAndroidVideo() {
+    : _jniVideo(jniVideo) {
+#if __ANDROID_API__ < 26
+  throw std::runtime_error("Skia Videos are only support on API 26 and above");
+#endif
 }
+
+RNSkAndroidVideo::~RNSkAndroidVideo() {}
 
 sk_sp<SkImage> RNSkAndroidVideo::nextImage(double *timeStamp) {
 #if __ANDROID_API__ >= 26
