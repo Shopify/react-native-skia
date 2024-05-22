@@ -82,7 +82,6 @@ public class RNSkVideo {
     }
 
     @DoNotStrip
-    @RequiresApi(api = Build.VERSION_CODES.P)
     public HardwareBuffer nextImage() {
         if (!decoderOutputAvailable()) {
             decodeFrame();

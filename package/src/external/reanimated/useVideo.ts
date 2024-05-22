@@ -53,6 +53,7 @@ export const useVideo = (
       if (currentFrame.value) {
         currentFrame.value.dispose();
       }
+      // TODO: remove
       if (Platform.OS === "android") {
         currentFrame.value = img.makeNonTextureImage();
       } else {

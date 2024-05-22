@@ -1,5 +1,5 @@
 import type { Vector } from "@shopify/react-native-skia";
-import { useVideo } from "@shopify/react-native-skia";
+import { Skia, useVideo } from "@shopify/react-native-skia";
 import { useAssets } from "expo-asset";
 import { useEffect } from "react";
 import {
@@ -14,6 +14,11 @@ export const useVideoFromAsset = (mod: number) => {
   const [assets, error] = useAssets([mod]);
   if (error) {
     throw error;
+  }
+  if (assets && assets[0].localUri) {
+    const video = Skia.Video(assets[0].localUri);
+    const img = video.nextImage();
+    console.log(img);
   }
   return useVideo(assets ? assets[0].localUri : null, true);
 };
