@@ -34,7 +34,8 @@ public:
 
   JSI_HOST_FUNCTION(nextImage) {
     double timestamp = 0;
-    auto image = getObject()->nextImage(&timestamp);
+    auto video = getObject();
+    auto image = video->nextImage(&timestamp);
     if (!image) {
       return jsi::Value::null();
     }

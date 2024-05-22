@@ -1,5 +1,9 @@
-import type { FrameInfo, SharedValue } from "react-native-reanimated";
-import { useEffect, useMemo } from "react";
+import {
+  runOnUI,
+  type FrameInfo,
+  type SharedValue,
+} from "react-native-reanimated";
+import { useCallback, useEffect, useMemo } from "react";
 
 import { Skia } from "../../skia/Skia";
 import type { SkImage } from "../../skia/types";
@@ -18,11 +22,17 @@ export const useVideo = (
   const currentFrame = Rea.useSharedValue<null | SkImage>(null);
   const lastTimestamp = Rea.useSharedValue(-1);
   const startTimestamp = Rea.useSharedValue(-1);
-  const frameDuration = useMemo(
-    () => (video ? (1 / video.framerate()) * 1000 : -1),
-    [video]
-  );
+
+  const framerate = useMemo(() => (video ? video.framerate() : -1), [video]);
   const duration = useMemo(() => (video ? video.duration() : -1), [video]);
+  const frameDuration = useMemo(
+    () => (framerate > 0 ? 1000 / framerate : -1),
+    [framerate]
+  );
+  const disposeVideo = useCallback(() => {
+    "worklet";
+    video?.dispose();
+  }, [video]);
 
   Rea.useFrameCallback((frameInfo: FrameInfo) => {
     if (!video) {
@@ -32,42 +42,47 @@ export const useVideo = (
       return;
     }
     const { timestamp } = frameInfo;
-    const elapsed = timestamp - lastTimestamp.value;
 
-    // Check if it's time to switch frames based on frame duration
-    if (elapsed < frameDuration) {
-      return;
-    }
-
-    // Update the current frame
+    // Initialize start timestamp
     if (startTimestamp.value === -1) {
       startTimestamp.value = timestamp;
     }
+
+    // Calculate the current time in the video
     const currentTimestamp = timestamp - startTimestamp.value;
+
+    // Handle looping
     if (currentTimestamp > duration && looped) {
       video.seek(0);
       startTimestamp.value = timestamp;
     }
-    const img = video.nextImage();
-    if (img) {
-      if (currentFrame.value) {
-        currentFrame.value.dispose();
-      }
-      // TODO: remove
-      if (Platform.OS === "android") {
-        currentFrame.value = img.makeNonTextureImage();
-      } else {
-        currentFrame.value = img;
-      }
-    }
 
-    // Update the last timestamp
-    lastTimestamp.value = timestamp;
+    // Update frame only if the elapsed time since last update is greater than the frame duration
+    if (
+      lastTimestamp.value === -1 ||
+      timestamp - lastTimestamp.value >= frameDuration
+    ) {
+      const img = video.nextImage();
+      if (img) {
+        if (currentFrame.value) {
+          currentFrame.value.dispose();
+        }
+        if (Platform.OS === "android") {
+          currentFrame.value = img; //.makeNonTextureImage();
+        } else {
+          currentFrame.value = img;
+        }
+      }
+      lastTimestamp.value = timestamp;
+    }
   });
+
   useEffect(() => {
     return () => {
-      video?.dispose();
+      // TODO: should video simply be a shared value instead?
+      runOnUI(disposeVideo)();
     };
-  }, [video]);
+  }, [disposeVideo, video]);
+
   return currentFrame;
 };
