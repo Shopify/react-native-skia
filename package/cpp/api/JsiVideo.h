@@ -43,13 +43,9 @@ public:
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
 
-  JSI_HOST_FUNCTION(duration) {
-    return getObject()->duration();
-  }
+  JSI_HOST_FUNCTION(duration) { return getObject()->duration(); }
 
-  JSI_HOST_FUNCTION(framerate) {
-    return getObject()->framerate();
-  }
+  JSI_HOST_FUNCTION(framerate) { return getObject()->framerate(); }
 
   JSI_HOST_FUNCTION(seek) {
     double timestamp = arguments[0].asNumber();
@@ -57,13 +53,11 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_EXPORT_FUNCTIONS(
-    JSI_EXPORT_FUNC(JsiVideo, nextImage),
-    JSI_EXPORT_FUNC(JsiVideo, duration),
-    JSI_EXPORT_FUNC(JsiVideo, framerate),
-    JSI_EXPORT_FUNC(JsiVideo, seek),
-    JSI_EXPORT_FUNC(JsiVideo, dispose)
-  )
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiVideo, nextImage),
+                       JSI_EXPORT_FUNC(JsiVideo, duration),
+                       JSI_EXPORT_FUNC(JsiVideo, framerate),
+                       JSI_EXPORT_FUNC(JsiVideo, seek),
+                       JSI_EXPORT_FUNC(JsiVideo, dispose))
 
   JsiVideo(std::shared_ptr<RNSkPlatformContext> context,
            std::shared_ptr<RNSkVideo> video)

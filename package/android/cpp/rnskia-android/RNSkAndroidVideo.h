@@ -2,9 +2,9 @@
 
 #include <string>
 
+#include <fbjni/fbjni.h>
 #include <jni.h>
 #include <jsi/jsi.h>
-#include <fbjni/fbjni.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

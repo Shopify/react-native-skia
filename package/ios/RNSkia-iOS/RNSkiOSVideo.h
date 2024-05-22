@@ -26,7 +26,7 @@ private:
   double _duration = 0;
   double _framerate = 0;
   void setupReader(CMTimeRange timeRange);
-  NSDictionary* getOutputSettings();
+  NSDictionary *getOutputSettings();
 
 public:
   RNSkiOSVideo(std::string url, RNSkPlatformContext *context);

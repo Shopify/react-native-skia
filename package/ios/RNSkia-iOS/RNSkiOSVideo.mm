@@ -23,41 +23,46 @@ RNSkiOSVideo::RNSkiOSVideo(std::string url, RNSkPlatformContext *context)
 
 RNSkiOSVideo::~RNSkiOSVideo() {}
 
-
 void RNSkiOSVideo::setupReader(CMTimeRange timeRange) {
-    NSError *error = nil;
+  NSError *error = nil;
 
-    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:[NSURL URLWithString:@(_url.c_str())] options:nil];
-    AVAssetReader *assetReader = [[AVAssetReader alloc] initWithAsset:asset error:&error];
-    if (error) {
-        NSLog(@"Error initializing asset reader: %@", error.localizedDescription);
-        return;
-    }
+  AVURLAsset *asset =
+      [AVURLAsset URLAssetWithURL:[NSURL URLWithString:@(_url.c_str())]
+                          options:nil];
+  AVAssetReader *assetReader = [[AVAssetReader alloc] initWithAsset:asset
+                                                              error:&error];
+  if (error) {
+    NSLog(@"Error initializing asset reader: %@", error.localizedDescription);
+    return;
+  }
 
-    CMTime time = [asset duration];
-    if (time.timescale == 0) {
-        NSLog(@"Error: Timescale of the asset is zero.");
-        return;
-    }
+  CMTime time = [asset duration];
+  if (time.timescale == 0) {
+    NSLog(@"Error: Timescale of the asset is zero.");
+    return;
+  }
 
-    _duration = CMTimeGetSeconds(time) * 1000; // Store duration in milliseconds
-    AVAssetTrack *videoTrack = [[asset tracksWithMediaType:AVMediaTypeVideo] firstObject];
-    _framerate = videoTrack.nominalFrameRate;
+  _duration = CMTimeGetSeconds(time) * 1000; // Store duration in milliseconds
+  AVAssetTrack *videoTrack =
+      [[asset tracksWithMediaType:AVMediaTypeVideo] firstObject];
+  _framerate = videoTrack.nominalFrameRate;
 
-    NSDictionary *outputSettings = getOutputSettings();
-    AVAssetReaderTrackOutput *trackOutput = [[AVAssetReaderTrackOutput alloc] initWithTrack:videoTrack outputSettings:outputSettings];
+  NSDictionary *outputSettings = getOutputSettings();
+  AVAssetReaderTrackOutput *trackOutput =
+      [[AVAssetReaderTrackOutput alloc] initWithTrack:videoTrack
+                                       outputSettings:outputSettings];
 
-    assetReader.timeRange = timeRange;
-    if ([assetReader canAddOutput:trackOutput]) {
-        [assetReader addOutput:trackOutput];
-        [assetReader startReading];
-    } else {
-        NSLog(@"Cannot add output to asset reader.");
-        return;
-    }
+  assetReader.timeRange = timeRange;
+  if ([assetReader canAddOutput:trackOutput]) {
+    [assetReader addOutput:trackOutput];
+    [assetReader startReading];
+  } else {
+    NSLog(@"Cannot add output to asset reader.");
+    return;
+  }
 
-    _reader = assetReader;
-    _trackOutput = trackOutput;
+  _reader = assetReader;
+  _trackOutput = trackOutput;
 }
 
 sk_sp<SkImage> RNSkiOSVideo::nextImage(double *timeStamp) {
@@ -67,7 +72,7 @@ sk_sp<SkImage> RNSkiOSVideo::nextImage(double *timeStamp) {
     return nullptr;
   }
 
- // Extract the pixel buffer from the sample buffer
+  // Extract the pixel buffer from the sample buffer
   CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
   if (!pixelBuffer) {
     NSLog(@"No pixel buffer.");
@@ -87,32 +92,28 @@ sk_sp<SkImage> RNSkiOSVideo::nextImage(double *timeStamp) {
   return skImage;
 }
 
-NSDictionary* RNSkiOSVideo::getOutputSettings() {
-    return @{
-        (id)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA),
-        (id)kCVPixelBufferMetalCompatibilityKey: @YES
-    };
+NSDictionary *RNSkiOSVideo::getOutputSettings() {
+  return @{
+    (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA),
+    (id)kCVPixelBufferMetalCompatibilityKey : @YES
+  };
 }
 
 void RNSkiOSVideo::seek(double timeInMilliseconds) {
-    if (_reader) {
-        [_reader cancelReading];
-        _reader = nil;
-        _trackOutput = nil;
-    }
+  if (_reader) {
+    [_reader cancelReading];
+    _reader = nil;
+    _trackOutput = nil;
+  }
 
-    CMTime startTime = CMTimeMakeWithSeconds(timeInMilliseconds / 1000.0, NSEC_PER_SEC);
-    CMTimeRange timeRange = CMTimeRangeMake(startTime, kCMTimePositiveInfinity);
-    setupReader(timeRange);
+  CMTime startTime =
+      CMTimeMakeWithSeconds(timeInMilliseconds / 1000.0, NSEC_PER_SEC);
+  CMTimeRange timeRange = CMTimeRangeMake(startTime, kCMTimePositiveInfinity);
+  setupReader(timeRange);
 }
 
-double RNSkiOSVideo::duration() {
-  return _duration;
-}
+double RNSkiOSVideo::duration() { return _duration; }
 
-double RNSkiOSVideo::framerate() {
-  return _framerate;
-}
+double RNSkiOSVideo::framerate() { return _framerate; }
 
 } // namespace RNSkia
-

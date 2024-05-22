@@ -12,7 +12,6 @@ import { Platform } from "../../Platform";
 
 import Rea from "./ReanimatedProxy";
 
-
 type Animated<T> = SharedValue<T> | T;
 
 export interface PlaybackOptions {
@@ -27,14 +26,14 @@ const defaultOptions = {
   paused: false,
 };
 
-
 const useOption = <T>(value: Animated<T>) => {
   "worklet";
   // TODO: only create defaultValue is needed (via makeMutable)
-  const defaultValue = useSharedValue(Rea.isSharedValue(value) ? value.value : value);
+  const defaultValue = useSharedValue(
+    Rea.isSharedValue(value) ? value.value : value
+  );
   return Rea.isSharedValue(value) ? value : defaultValue;
 };
-
 
 export const useVideo = (
   source: string | null,
@@ -43,7 +42,9 @@ export const useVideo = (
   const video = useMemo(() => (source ? Skia.Video(source) : null), [source]);
   const isPaused = useOption(userOptions?.paused ?? defaultOptions.paused);
   const looping = useOption(userOptions?.looping ?? defaultOptions.looping);
-  const playbackSpeed = useOption(userOptions?.playbackSpeed ?? defaultOptions.playbackSpeed);
+  const playbackSpeed = useOption(
+    userOptions?.playbackSpeed ?? defaultOptions.playbackSpeed
+  );
   const currentFrame = Rea.useSharedValue<null | SkImage>(null);
   const lastTimestamp = Rea.useSharedValue(-1);
   const startTimestamp = Rea.useSharedValue(-1);
@@ -94,7 +95,7 @@ export const useVideo = (
           currentFrame.value.dispose();
         }
         if (Platform.OS === "android") {
-          currentFrame.value = img; //.makeNonTextureImage();
+          currentFrame.value = img.makeNonTextureImage();
         } else {
           currentFrame.value = img;
         }
