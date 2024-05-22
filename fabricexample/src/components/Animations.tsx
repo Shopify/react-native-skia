@@ -1,4 +1,6 @@
 import type { Vector } from "@shopify/react-native-skia";
+import { useVideo } from "@shopify/react-native-skia";
+import { useAssets } from "expo-asset";
 import { useEffect } from "react";
 import {
   Easing,
@@ -7,6 +9,17 @@ import {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
+
+export const useVideoFromAsset = (
+  mod: number,
+  options?: Parameters<typeof useVideo>[1]
+) => {
+  const [assets, error] = useAssets([mod]);
+  if (error) {
+    throw error;
+  }
+  return useVideo(assets ? assets[0].localUri : null, options);
+};
 
 export const useLoop = ({ duration }: { duration: number }) => {
   const progress = useSharedValue(0);
@@ -30,51 +43,15 @@ export const translate = ({
   "worklet";
   return [{ translateX: x }, { translateY: y }];
 };
-const fade = (t: number) => {
+
+export const snapPoint = (
+  value: number,
+  velocity: number,
+  points: ReadonlyArray<number>
+): number => {
   "worklet";
-  return t * t * t * (t * (t * 6 - 15) + 10);
-};
-
-const lerp = (a: number, b: number, t: number) => {
-  "worklet";
-  return (1 - t) * a + t * b;
-};
-
-const grad = (hash: number, x: number, y: number) => {
-  "worklet";
-  const h = hash & 15;
-  //const grad = 1 + (h & 7); // Gradient value is one of 8 possible values (1, 2, ..., 8)
-  return (h & 8 ? -x : x) + (h & 4 ? -y : y);
-};
-
-// This is the "seed" for the noise. The permutation table. Randomly shuffle it for different results.
-const shuffleArray = (array: number[]) => {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-};
-
-export const getSeed = () => {
-  let p = [...Array(512)].map(() => Math.floor(Math.random() * 256));
-  shuffleArray(p);
-  p = p.concat(p);
-  return p;
-};
-
-export const perlin = (seed: number[], x: number, y: number) => {
-  "worklet";
-  const X = Math.floor(x) & 255;
-  const Y = Math.floor(y) & 255;
-  x -= Math.floor(x);
-  y -= Math.floor(y);
-  const u = fade(x);
-  const v = fade(y);
-  const a = seed[X] + Y;
-  const b = seed[X + 1] + Y;
-  return lerp(
-    lerp(grad(seed[a], x, y), grad(seed[b], x - 1, y), u),
-    lerp(grad(seed[a + 1], x, y - 1), grad(seed[b + 1], x - 1, y - 1), u),
-    v
-  );
+  const point = value + 0.2 * velocity;
+  const deltas = points.map((p) => Math.abs(point - p));
+  const minDelta = Math.min.apply(null, deltas);
+  return points.filter((p) => Math.abs(point - p) === minDelta)[0];
 };
