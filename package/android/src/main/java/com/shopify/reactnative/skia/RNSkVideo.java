@@ -55,7 +55,18 @@ public class RNSkVideo {
             }
             int width = format.getInteger(MediaFormat.KEY_WIDTH);
             int height = format.getInteger(MediaFormat.KEY_HEIGHT);
-            imageReader = ImageReader.newInstance(width, height, ImageFormat.YUV_420_888, 2);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                imageReader = ImageReader.newInstance(
+                        width,
+                        height,
+                        ImageFormat.PRIVATE,
+                        2,
+                        HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE
+                );
+            } else {
+                imageReader = ImageReader.newInstance(width, height,
+                        ImageFormat.PRIVATE, 2);
+            }
             outputSurface = imageReader.getSurface();
 
             // Create a decoder for the format
