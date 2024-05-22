@@ -64,8 +64,9 @@ SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer,
       description.height, &deleteImageProc, &updateImageProc, &deleteImageCtx,
       false, format, false);
   if (!backendTex.isValid()) [[unlikely]] {
-    throw std::runtime_error(
+    RNSkLogger::logToConsole(
         "Failed to convert HardwareBuffer to OpenGL Texture!");
+    return nullptr;
   }
   sk_sp<SkImage> image = SkImages::BorrowTextureFrom(
       ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(),
