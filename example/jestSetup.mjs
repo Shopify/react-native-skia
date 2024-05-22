@@ -10,7 +10,9 @@ JestUtils.setUpTests();
 global.__reanimatedWorkletInit = () => {};
 global.CanvasKit = await CanvasKitInit({});
 
-jest.mock("expo-asset");
+jest.mock("expo-asset", () => ({
+  useAssets: () => [[], undefined],
+}));
 
 jest.mock("react-native-reanimated", () => {
   // The mock for `call` immediately calls the callback which is incorrect
