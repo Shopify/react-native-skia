@@ -25,7 +25,7 @@ private:
   jni::global_ref<jobject> _jniVideo;
 
 public:
-  RNSkAndroidVideo(jni::global_ref<jobject> jniVideo);
+  explicit RNSkAndroidVideo(jni::global_ref<jobject> jniVideo);
   ~RNSkAndroidVideo();
   sk_sp<SkImage> nextImage(double *timeStamp = nullptr) override;
   double duration() override;
