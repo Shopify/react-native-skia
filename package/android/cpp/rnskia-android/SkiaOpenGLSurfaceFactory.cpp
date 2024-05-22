@@ -63,7 +63,7 @@ SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer,
       const_cast<AHardwareBuffer *>(hardwareBuffer), description.width,
       description.height, &deleteImageProc, &updateImageProc, &deleteImageCtx,
       false, format, false);
-  if (!backendTex.isValid()) [[unlikely]] {
+  if (!backendTex.isValid()) {
     RNSkLogger::logToConsole(
         "Failed to convert HardwareBuffer to OpenGL Texture!");
     return nullptr;
