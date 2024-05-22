@@ -1,5 +1,10 @@
 import React from "react";
-import { Canvas, Fill, ImageShader } from "@shopify/react-native-skia";
+import {
+  Canvas,
+  ColorMatrix,
+  Fill,
+  ImageShader,
+} from "@shopify/react-native-skia";
 import { Pressable, useWindowDimensions } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 
@@ -12,7 +17,7 @@ export const Video = () => {
     require("../../Tests/assets/BigBuckBunny.mp4"),
     {
       paused,
-      looping: false,
+      looping: true,
     }
   );
   return (
@@ -29,6 +34,12 @@ export const Video = () => {
             width={width}
             height={height}
             fit="cover"
+          />
+          <ColorMatrix
+            matrix={[
+              0.95, 0, 0, 0, 0.05, 0.65, 0, 0, 0, 0.15, 0.15, 0, 0, 0, 0.5, 0,
+              0, 0, 1, 0,
+            ]}
           />
         </Fill>
       </Canvas>
