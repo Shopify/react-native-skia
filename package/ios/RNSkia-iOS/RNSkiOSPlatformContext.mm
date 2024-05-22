@@ -5,6 +5,7 @@
 #include <thread>
 #include <utility>
 
+#include "RNSkiOSVideo.h"
 #import "SkiaCVPixelBufferUtils.h"
 #import "SkiaMetalSurfaceFactory.h"
 
@@ -141,6 +142,11 @@ uint64_t RNSkiOSPlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
 
   // 8. Return CVPixelBuffer casted to uint64_t
   return reinterpret_cast<uint64_t>(pixelBuffer);
+}
+
+std::shared_ptr<RNSkVideo>
+RNSkiOSPlatformContext::createVideo(const std::string &url) {
+  return std::make_shared<RNSkiOSVideo>(url, this);
 }
 
 void RNSkiOSPlatformContext::raiseError(const std::exception &err) {

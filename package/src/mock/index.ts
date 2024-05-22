@@ -46,5 +46,6 @@ export const Mock = (CanvasKit: CanvasKit) => {
     useTypeface: () => null,
     useImage: () => null,
     useSVG: () => null,
+    useVideo: () => null,
   };
 };

@@ -11,6 +11,7 @@
 
 #include "AHardwareBufferUtils.h"
 #include "JniPlatformContext.h"
+#include "RNSkAndroidVideo.h"
 #include "RNSkPlatformContext.h"
 #include "SkiaOpenGLSurfaceFactory.h"
 
@@ -55,6 +56,11 @@ public:
 
   sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override {
     return SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(buffer);
+  }
+
+  std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override {
+    auto jniVideo = _jniPlatformContext->createVideo(url);
+    return std::make_shared<RNSkAndroidVideo>(jniVideo);
   }
 
   void releaseNativeBuffer(uint64_t pointer) override {
