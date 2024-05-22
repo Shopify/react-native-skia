@@ -25,8 +25,7 @@ RNSkAndroidVideo::RNSkAndroidVideo(jni::global_ref<jobject> jniVideo)
 
 RNSkAndroidVideo::~RNSkAndroidVideo() {
   JNIEnv *env = facebook::jni::Environment::current();
-  // TODO: Delete the global reference to the Java object
-  // env->DeleteGlobalRef(_jniVideo);
+  env->DeleteGlobalRef(_jniVideo.get());
 }
 
 sk_sp<SkImage> RNSkAndroidVideo::nextImage(double *timeStamp) {
