@@ -84,11 +84,11 @@ export const useVideo = (
     }
 
     // Update frame only if the elapsed time since last update is greater than the frame duration
-    const currentFrameDuration = frameDuration / playbackSpeed.value;
-    if (
-      lastTimestamp.value === -1 ||
-      timestamp - lastTimestamp.value >= currentFrameDuration
-    ) {
+    const currentFrameDuration = Math.floor(
+      frameDuration / playbackSpeed.value
+    );
+    const delta = Math.floor(timestamp - lastTimestamp.value);
+    if (lastTimestamp.value === -1 || delta >= currentFrameDuration) {
       const img = video.nextImage();
       if (img) {
         if (currentFrame.value) {
