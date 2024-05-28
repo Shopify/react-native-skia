@@ -18,12 +18,16 @@ export interface PlaybackOptions {
   playbackSpeed: Animated<number>;
   looping: Animated<boolean>;
   paused: Animated<boolean>;
+  seek: Animated<number | null>;
+  currentTime: Animated<number>;
 }
 
 const defaultOptions = {
   playbackSpeed: 1,
   looping: true,
   paused: false,
+  seek: null,
+  currentTime: 0,
 };
 
 const useOption = <T>(value: Animated<T>) => {
@@ -42,6 +46,10 @@ export const useVideo = (
   const video = useMemo(() => (source ? Skia.Video(source) : null), [source]);
   const isPaused = useOption(userOptions?.paused ?? defaultOptions.paused);
   const looping = useOption(userOptions?.looping ?? defaultOptions.looping);
+  const seek = useOption(userOptions?.seek ?? defaultOptions.seek);
+  const currentTime = useOption(
+    userOptions?.currentTime ?? defaultOptions.currentTime
+  );
   const playbackSpeed = useOption(
     userOptions?.playbackSpeed ?? defaultOptions.playbackSpeed
   );
@@ -64,6 +72,12 @@ export const useVideo = (
     if (!video) {
       return;
     }
+    if (seek.value !== null) {
+      video.seek(seek.value);
+      seek.value = null;
+      lastTimestamp.value = -1;
+      startTimestamp.value = -1;
+    }
     if (isPaused.value && lastTimestamp.value !== -1) {
       return;
     }
@@ -76,6 +90,7 @@ export const useVideo = (
 
     // Calculate the current time in the video
     const currentTimestamp = timestamp - startTimestamp.value;
+    currentTime.value = currentTimestamp;
 
     // Handle looping
     if (currentTimestamp > duration && looping.value) {

@@ -5,8 +5,7 @@ sidebar_label: Video
 slug: /video
 ---
 
-React Native Skia provides a way to load video frames as images, enabling rich multimedia experiences within your applications.
-A video frame can be used anywhere a Skia image is accepted: `Image`, `ImageShader`, and `Atlas`.
+React Native Skia provides a way to load video frames as images, enabling rich multimedia experiences within your applications. A video frame can be used anywhere a Skia image is accepted: `Image`, `ImageShader`, and `Atlas`.
 
 ## Requirements
 
@@ -35,7 +34,7 @@ interface VideoExampleProps {
     localVideoFile: string;
 }
 
-// The URL needs to be a local path, we usually use expo-asset for that.
+// The URL needs to be a local path; we usually use expo-asset for that.
 export const VideoExample = ({ localVideoFile }: VideoExampleProps) => {
   const paused = useSharedValue(false);
   const { width, height } = useWindowDimensions();
@@ -75,7 +74,7 @@ export const VideoExample = ({ localVideoFile }: VideoExampleProps) => {
 
 ## Using expo-asset
 
-Below is an example where we use [expo-asset](https://docs.expo.dev/versions/latest/sdk/asset/) to load the video.
+Below is an example of how to use [expo-asset](https://docs.expo.dev/versions/latest/sdk/asset/) to load the video.
 
 ```tsx twoslash
 import { useVideo } from "@shopify/react-native-skia";
@@ -92,5 +91,69 @@ export const useVideoFromAsset = (
     throw error;
   }
   return useVideo(assets ? assets[0].localUri : null, options);
+};
+```
+
+## Playback Options
+
+You can seek a video via the `seek` playback option. By default, the seek option is null. If you set a value in milliseconds, it will seek to that point in the video and then set the option value to null again.
+
+There is also the `currentTime` option, which is a Reanimated value that contains the current playback time of the video.
+
+`looping` indicates whether the video should be looped or not.
+
+`playbackSpeed` indicates the playback speed of the video (default is 1).
+
+In the example below, every time we tap on the video, we set the video to 2 seconds.
+
+```tsx twoslash
+import React from "react";
+import {
+  Canvas,
+  Fill,
+  Image,
+  useVideo
+} from "@shopify/react-native-skia";
+import { Pressable, useWindowDimensions } from "react-native";
+import { useSharedValue } from "react-native-reanimated";
+
+interface VideoExampleProps {
+    localVideoFile: string;
+}
+
+export const VideoExample = ({ localVideoFile }: VideoExampleProps) => {
+  const seek = useSharedValue<null | number>(null);
+  // Set this value to true to pause the video
+  const paused = useSharedValue(false);
+  // Contains the current playback time of the video
+  const currentTime = useSharedValue(0);
+  const { width, height } = useWindowDimensions();
+  const video = useVideo(
+    require(localVideoFile),
+    {
+      seek,
+      paused,
+      currentTime,
+      looping: true,
+      playbackSpeed: 1
+    }
+  );
+  return (
+    <Pressable
+      style={{ flex: 1 }}
+      onPress={() => (seek.value = 2000)}
+    >
+      <Canvas style={{ flex: 1 }}>
+        <Image
+          image={video}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fit="cover"
+        />
+      </Canvas>
+    </Pressable>
+  );
 };
 ```
