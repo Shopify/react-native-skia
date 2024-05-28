@@ -47,7 +47,9 @@ export const useVideo = (
   const isPaused = useOption(userOptions?.paused ?? defaultOptions.paused);
   const looping = useOption(userOptions?.looping ?? defaultOptions.looping);
   const seek = useOption(userOptions?.seek ?? defaultOptions.seek);
-  const currentTime = useOption(userOptions?.currentTime ?? defaultOptions.currentTime);
+  const currentTime = useOption(
+    userOptions?.currentTime ?? defaultOptions.currentTime
+  );
   const playbackSpeed = useOption(
     userOptions?.playbackSpeed ?? defaultOptions.playbackSpeed
   );

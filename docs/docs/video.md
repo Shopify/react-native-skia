@@ -34,7 +34,7 @@ interface VideoExampleProps {
     localVideoFile: string;
 }
 
-// The URL needs to be a local path, we usually use expo-asset for that.
+// The URL needs to be a local path; we usually use expo-asset for that.
 export const VideoExample = ({ localVideoFile }: VideoExampleProps) => {
   const paused = useSharedValue(false);
   const { width, height } = useWindowDimensions();
@@ -74,7 +74,7 @@ export const VideoExample = ({ localVideoFile }: VideoExampleProps) => {
 
 ## Using expo-asset
 
-Below is an example where we use [expo-asset](https://docs.expo.dev/versions/latest/sdk/asset/) to load the video.
+Below is an example of how to use [expo-asset](https://docs.expo.dev/versions/latest/sdk/asset/) to load the video.
 
 ```tsx twoslash
 import { useVideo } from "@shopify/react-native-skia";
@@ -98,9 +98,9 @@ export const useVideoFromAsset = (
 
 You can seek a video via the `seek` playback option. By default, the seek option is null. If you set a value in milliseconds, it will seek to that point in the video and then set the option value to null again.
 
-There are also the `currentTime` option which is a Reanimated value that contains the current playback time of the video.
+There is also the `currentTime` option, which is a Reanimated value that contains the current playback time of the video.
 
-`looping` indicates if the video should be looped or not.
+`looping` indicates whether the video should be looped or not.
 
 `playbackSpeed` indicates the playback speed of the video (default is 1).
 
@@ -110,7 +110,6 @@ In the example below, every time we tap on the video, we set the video to 2 seco
 import React from "react";
 import {
   Canvas,
-  ColorMatrix,
   Fill,
   Image,
   useVideo
