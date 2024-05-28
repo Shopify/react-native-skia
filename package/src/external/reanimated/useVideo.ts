@@ -19,6 +19,7 @@ export interface PlaybackOptions {
   looping: Animated<boolean>;
   paused: Animated<boolean>;
   seek: Animated<number | null>;
+  currentTime: Animated<number>;
 }
 
 const defaultOptions = {
@@ -26,6 +27,7 @@ const defaultOptions = {
   looping: true,
   paused: false,
   seek: null,
+  currentTime: 0,
 };
 
 const useOption = <T>(value: Animated<T>) => {
@@ -45,6 +47,7 @@ export const useVideo = (
   const isPaused = useOption(userOptions?.paused ?? defaultOptions.paused);
   const looping = useOption(userOptions?.looping ?? defaultOptions.looping);
   const seek = useOption(userOptions?.seek ?? defaultOptions.seek);
+  const currentTime = useOption(userOptions?.currentTime ?? defaultOptions.currentTime);
   const playbackSpeed = useOption(
     userOptions?.playbackSpeed ?? defaultOptions.playbackSpeed
   );
@@ -85,6 +88,7 @@ export const useVideo = (
 
     // Calculate the current time in the video
     const currentTimestamp = timestamp - startTimestamp.value;
+    currentTime.value = currentTimestamp;
 
     // Handle looping
     if (currentTimestamp > duration && looping.value) {
