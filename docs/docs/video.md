@@ -94,9 +94,15 @@ export const useVideoFromAsset = (
 };
 ```
 
-## Seeking
+## Playback Options
 
-You can seek a video via the playback option. By default, the seek option is null. If you set a value in milliseconds, it will seek to that point in the video and then set the option value to null again.
+You can seek a video via the `seek` playback option. By default, the seek option is null. If you set a value in milliseconds, it will seek to that point in the video and then set the option value to null again.
+
+There are also the `currentTime` option which is a Reanimated value that contains the current playback time of the video.
+
+`looping` indicates if the video should be looped or not.
+
+`playbackSpeed` indicates the playback speed of the video (default is 1).
 
 In the example below, every time we tap on the video, we set the video to 2 seconds.
 
@@ -118,11 +124,19 @@ interface VideoExampleProps {
 
 export const VideoExample = ({ localVideoFile }: VideoExampleProps) => {
   const seek = useSharedValue<null | number>(null);
+  // Set this value to true to pause the video
+  const paused = useSharedValue(false);
+  // Contains the current playback time of the video
+  const currentTime = useSharedValue(0);
   const { width, height } = useWindowDimensions();
   const video = useVideo(
     require(localVideoFile),
     {
       seek,
+      paused,
+      currentTime,
+      looping: true,
+      playbackSpeed: 1
     }
   );
   return (
