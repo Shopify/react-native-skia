@@ -25,7 +25,7 @@ const defaultOptions = {
   playbackSpeed: 1,
   looping: true,
   paused: false,
-  seek: null
+  seek: null,
 };
 
 const useOption = <T>(value: Animated<T>) => {
