@@ -18,12 +18,14 @@ export interface PlaybackOptions {
   playbackSpeed: Animated<number>;
   looping: Animated<boolean>;
   paused: Animated<boolean>;
+  seek: Animated<number | null>;
 }
 
 const defaultOptions = {
   playbackSpeed: 1,
   looping: true,
   paused: false,
+  seek: null
 };
 
 const useOption = <T>(value: Animated<T>) => {
@@ -42,6 +44,7 @@ export const useVideo = (
   const video = useMemo(() => (source ? Skia.Video(source) : null), [source]);
   const isPaused = useOption(userOptions?.paused ?? defaultOptions.paused);
   const looping = useOption(userOptions?.looping ?? defaultOptions.looping);
+  const seek = useOption(userOptions?.seek ?? defaultOptions.seek);
   const playbackSpeed = useOption(
     userOptions?.playbackSpeed ?? defaultOptions.playbackSpeed
   );
@@ -63,6 +66,12 @@ export const useVideo = (
   Rea.useFrameCallback((frameInfo: FrameInfo) => {
     if (!video) {
       return;
+    }
+    if (seek.value !== null) {
+      video.seek(seek.value);
+      seek.value = null;
+      lastTimestamp.value = -1;
+      startTimestamp.value = -1;
     }
     if (isPaused.value && lastTimestamp.value !== -1) {
       return;

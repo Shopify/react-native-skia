@@ -94,3 +94,56 @@ export const useVideoFromAsset = (
   return useVideo(assets ? assets[0].localUri : null, options);
 };
 ```
+
+## Seeking
+
+You can seek a video via the playback option.
+By default, the seek option is null, if you set a value in milliseconds, it will seek to that point in the video and then set the option value to null again.
+
+In the example below, everytime we tap on the video, we set the video at 2 seconds.
+
+```tsx twoslash
+import React from "react";
+import {
+  Canvas,
+  ColorMatrix,
+  Fill,
+  Image,
+  useVideo
+} from "@shopify/react-native-skia";
+import { Pressable, useWindowDimensions } from "react-native";
+import { useSharedValue } from "react-native-reanimated";
+
+interface VideoExampleProps {
+    localVideoFile: string;
+}
+
+export const VideoExample = ({ localVideoFile }: VideoExampleProps) => {
+  const seek = useSharedValue<null | number>(null);
+  const { width, height } = useWindowDimensions();
+  const video = useVideo(
+    require(localVideoFile),
+    {
+      seek,
+    }
+  );
+  return (
+    <Pressable
+      style={{ flex: 1 }}
+      onPress={() => (seek.value = 2000)}
+    >
+      <Canvas style={{ flex: 1 }}>
+        <Image
+          image={video}
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fit="cover"
+        />
+      </Canvas>
+    </Pressable>
+  );
+};
+```
+
