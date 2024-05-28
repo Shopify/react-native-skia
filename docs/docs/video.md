@@ -5,8 +5,7 @@ sidebar_label: Video
 slug: /video
 ---
 
-React Native Skia provides a way to load video frames as images, enabling rich multimedia experiences within your applications.
-A video frame can be used anywhere a Skia image is accepted: `Image`, `ImageShader`, and `Atlas`.
+React Native Skia provides a way to load video frames as images, enabling rich multimedia experiences within your applications. A video frame can be used anywhere a Skia image is accepted: `Image`, `ImageShader`, and `Atlas`.
 
 ## Requirements
 
@@ -97,10 +96,9 @@ export const useVideoFromAsset = (
 
 ## Seeking
 
-You can seek a video via the playback option.
-By default, the seek option is null, if you set a value in milliseconds, it will seek to that point in the video and then set the option value to null again.
+You can seek a video via the playback option. By default, the seek option is null. If you set a value in milliseconds, it will seek to that point in the video and then set the option value to null again.
 
-In the example below, everytime we tap on the video, we set the video at 2 seconds.
+In the example below, every time we tap on the video, we set the video to 2 seconds.
 
 ```tsx twoslash
 import React from "react";
@@ -146,4 +144,3 @@ export const VideoExample = ({ localVideoFile }: VideoExampleProps) => {
   );
 };
 ```
-
