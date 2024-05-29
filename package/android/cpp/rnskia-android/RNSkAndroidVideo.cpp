@@ -91,15 +91,15 @@ void RNSkAndroidVideo::seek(double timestamp) {
 }
 
 float RNSkAndroidVideo::getRotationInDegrees() {
-JNIEnv *env = facebook::jni::Environment::current();
-    jclass cls = env->GetObjectClass(_jniVideo.get());
-    jmethodID mid = env->GetMethodID(cls, "getRotationDegrees", "()I");
-    if (!mid) {
-        RNSkLogger::logToConsole("getRotationDegrees method not found");
-        return 0;
-    }
-    auto rotation = env->CallIntMethod(_jniVideo.get(), mid);
-    return static_cast<float>(rotation);
+  JNIEnv *env = facebook::jni::Environment::current();
+  jclass cls = env->GetObjectClass(_jniVideo.get());
+  jmethodID mid = env->GetMethodID(cls, "getRotationDegrees", "()I");
+  if (!mid) {
+    RNSkLogger::logToConsole("getRotationDegrees method not found");
+    return 0;
+  }
+  auto rotation = env->CallIntMethod(_jniVideo.get(), mid);
+  return static_cast<float>(rotation);
 }
 
 } // namespace RNSkia
