@@ -49,7 +49,7 @@ export const useVideo = (
   const lastTimestamp = Rea.useSharedValue(-1);
   const duration = useMemo(() => video?.duration() ?? 0, [video]);
   const framerate = useMemo(() => video?.framerate() ?? 0, [video]);
-  const preferedMatrix = useMemo(() => video?.preferedMatrix() ?? Skia.Matrix(), [video]);
+  const rotationInDegrees = useMemo(() => video?.getRotationInDegrees() ?? Skia.Matrix(), [video]);
   Rea.useFrameCallback((frameInfo: FrameInfo) => {
     processVideoState(
       video,
@@ -75,5 +75,5 @@ export const useVideo = (
     };
   }, [video]);
 
-  return { currentFrame, currentTime, duration, framerate, preferedMatrix };
+  return { currentFrame, currentTime, duration, framerate, rotationInDegrees };
 };

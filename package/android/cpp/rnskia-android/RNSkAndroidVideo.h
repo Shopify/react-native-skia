@@ -31,7 +31,7 @@ public:
   double duration() override;
   double framerate() override;
   void seek(double timestamp) override;
-  SkMatrix preferedMatrix() override;
+  float getRotationInDegrees() override;
 };
 
 } // namespace RNSkia

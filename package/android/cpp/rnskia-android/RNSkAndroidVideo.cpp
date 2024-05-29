@@ -9,7 +9,6 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "include/core/SkImage.h"
-#include "include/core/SkMatrix.h"
 
 #pragma clang diagnostic pop
 
@@ -91,21 +90,16 @@ void RNSkAndroidVideo::seek(double timestamp) {
   env->CallVoidMethod(_jniVideo.get(), mid, static_cast<jlong>(timestamp));
 }
 
-SkMatrix RNSkAndroidVideo::preferedMatrix() {
+float RNSkAndroidVideo::getRotationInDegrees() {
 JNIEnv *env = facebook::jni::Environment::current();
     jclass cls = env->GetObjectClass(_jniVideo.get());
     jmethodID mid = env->GetMethodID(cls, "getRotationDegrees", "()I");
     if (!mid) {
         RNSkLogger::logToConsole("getRotationDegrees method not found");
-        return SkMatrix::I();
+        return 0;
     }
     auto rotation = env->CallIntMethod(_jniVideo.get(), mid);
-    SkMatrix matrix;
-    matrix.setIdentity();
-    if (rotation != 0) {
-      matrix.preRotate(static_cast<float>(rotation), 0, 0);
-    }
-    return matrix;
+    return static_cast<float>(rotation);
 }
 
 } // namespace RNSkia
