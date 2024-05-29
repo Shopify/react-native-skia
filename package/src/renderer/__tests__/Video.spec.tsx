@@ -34,6 +34,7 @@ describe("Video Player", () => {
       duration: jest.fn().mockReturnValue(duration),
       seek: jest.fn(),
       nextImage: jest.fn().mockReturnValue({} as SkImage),
+      getRotationInDegrees: jest.fn().mockReturnValue(0),
     };
     options = {
       playbackSpeed: 1,
