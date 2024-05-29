@@ -7,7 +7,7 @@ import {
 import { useCallback, useEffect, useMemo } from "react";
 
 import { Skia } from "../../skia/Skia";
-import type { SkImage } from "../../skia/types";
+import type { SkImage, Video } from "../../skia/types";
 import { Platform } from "../../Platform";
 
 import Rea from "./ReanimatedProxy";
@@ -19,7 +19,12 @@ export interface PlaybackOptions {
   looping: Animated<boolean>;
   paused: Animated<boolean>;
   seek: Animated<number | null>;
-  currentTime: Animated<number>;
+}
+
+interface PlaybackState {
+  currentTime: number;
+  currentFrame: SkImage | null;
+  lastTimestamp: number;
 }
 
 const defaultOptions = {
@@ -39,6 +44,16 @@ const useOption = <T>(value: Animated<T>) => {
   return Rea.isSharedValue(value) ? value : defaultValue;
 };
 
+const processVideoState = (
+  video: Video | null,
+  currentTimestamp: number
+  // options: PlaybackOptions,
+  // state: PlaybackState
+) => {
+  "worklet";
+  return 1;
+};
+
 export const useVideo = (
   source: string | null,
   userOptions?: Partial<PlaybackOptions>
@@ -47,9 +62,6 @@ export const useVideo = (
   const isPaused = useOption(userOptions?.paused ?? defaultOptions.paused);
   const looping = useOption(userOptions?.looping ?? defaultOptions.looping);
   const seek = useOption(userOptions?.seek ?? defaultOptions.seek);
-  const currentTime = useOption(
-    userOptions?.currentTime ?? defaultOptions.currentTime
-  );
   const playbackSpeed = useOption(
     userOptions?.playbackSpeed ?? defaultOptions.playbackSpeed
   );
@@ -69,7 +81,8 @@ export const useVideo = (
   }, [video]);
 
   Rea.useFrameCallback((frameInfo: FrameInfo) => {
-    if (!video) {
+    processVideoState(video, frameInfo.timestamp);
+    if (video === null) {
       return;
     }
     if (seek.value !== null) {
@@ -90,7 +103,6 @@ export const useVideo = (
 
     // Calculate the current time in the video
     const currentTimestamp = timestamp - startTimestamp.value;
-    currentTime.value = currentTimestamp;
 
     // Handle looping
     if (currentTimestamp > duration && looping.value) {
