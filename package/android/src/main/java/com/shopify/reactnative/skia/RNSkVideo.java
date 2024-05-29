@@ -29,6 +29,7 @@ public class RNSkVideo {
     private Surface outputSurface;
     private double durationMs;
     private double frameRate;
+    private int rotationDegrees = 0;
 
     RNSkVideo(Context context, String localUri) {
         this.uri = Uri.parse(localUri);
@@ -52,6 +53,9 @@ public class RNSkVideo {
             }
             if (format.containsKey(MediaFormat.KEY_FRAME_RATE)) {
                 frameRate = format.getInteger(MediaFormat.KEY_FRAME_RATE);
+            }
+            if (format.containsKey(MediaFormat.KEY_ROTATION)) {
+                rotationDegrees = format.getInteger(MediaFormat.KEY_ROTATION);
             }
             int width = format.getInteger(MediaFormat.KEY_WIDTH);
             int height = format.getInteger(MediaFormat.KEY_HEIGHT);
@@ -87,9 +91,13 @@ public class RNSkVideo {
     }
 
     @DoNotStrip
-
     public double getFrameRate() {
         return frameRate;
+    }
+
+    @DoNotStrip
+    public int getRotationDegrees() {
+        return rotationDegrees;
     }
 
     @DoNotStrip

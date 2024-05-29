@@ -18,6 +18,7 @@ public:
   virtual double duration() = 0;
   virtual double framerate() = 0;
   virtual void seek(double timestamp) = 0;
+  virtual SkMatrix preferedMatrix() = 0;
 };
 
 } // namespace RNSkia

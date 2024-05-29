@@ -1,5 +1,3 @@
-#pragma once
-
 #include <memory>
 #include <string>
 
@@ -7,6 +5,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "include/core/SkImage.h"
+#include "include/core/SkMatrix.h"
 
 #pragma clang diagnostic pop
 
@@ -46,6 +45,7 @@ void RNSkiOSVideo::setupReader(CMTimeRange timeRange) {
   AVAssetTrack *videoTrack =
       [[asset tracksWithMediaType:AVMediaTypeVideo] firstObject];
   _framerate = videoTrack.nominalFrameRate;
+  _preferredTransform = videoTrack.preferredTransform;
 
   NSDictionary *outputSettings = getOutputSettings();
   AVAssetReaderTrackOutput *trackOutput =
@@ -98,6 +98,21 @@ NSDictionary *RNSkiOSVideo::getOutputSettings() {
     (id)kCVPixelBufferMetalCompatibilityKey : @YES
   };
 }
+
+SkMatrix RNSkiOSVideo::preferedMatrix() {
+  return SkMatrix::MakeAll(
+    _preferredTransform.a,  // scaleX
+    _preferredTransform.c,  // skewX
+    _preferredTransform.tx, // transX
+    _preferredTransform.b,  // skewY
+    _preferredTransform.d,  // scaleY
+    _preferredTransform.ty, // transY
+    0,            // pers0
+    0,            // pers1
+    1             // pers2
+  );
+}
+
 
 void RNSkiOSVideo::seek(double timeInMilliseconds) {
   if (_reader) {
