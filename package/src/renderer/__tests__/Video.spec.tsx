@@ -1,57 +1,15 @@
 import type { SharedValue } from "react-native-reanimated";
 
 import type { SkImage, Video } from "../../skia/types";
+import type { MaterializedPlaybackOptions } from "../../external/reanimated/useVideo";
+import { processVideoState } from "../../external/reanimated/useVideo";
 
 const createValue = <T,>(value: T) => ({ value } as unknown as SharedValue<T>);
-
-interface PlaybackOptions {
-  playbackSpeed: number;
-  looping: boolean;
-  paused: boolean;
-}
-
-const processVideoState = (
-  video: Video,
-  currentTimestamp: number,
-  options: PlaybackOptions,
-  currentTime: SharedValue<number>,
-  currentFrame: SharedValue<SkImage | null>,
-  lastTimestamp: SharedValue<number>,
-  seek: SharedValue<number | null>
-) => {
-  "worklet";
-  if (options.paused) {
-    return;
-  }
-  const delta = currentTimestamp - lastTimestamp.value;
-
-  const frameDuration = 1000 / video.framerate();
-  const currentFrameDuration = Math.floor(
-    frameDuration / options.playbackSpeed
-  );
-  if (currentTime.value + delta >= video.duration() && options.looping) {
-    seek.value = 0;
-  }
-  if (seek.value !== null) {
-    video.seek(seek.value);
-    currentTime.value = seek.value;
-    currentFrame.value = video.nextImage();
-    lastTimestamp.value = currentTimestamp;
-    seek.value = null;
-    return;
-  }
-
-  if (delta >= currentFrameDuration) {
-    currentFrame.value = video.nextImage();
-    currentTime.value += delta;
-    lastTimestamp.value = currentTimestamp;
-  }
-};
 
 // Test cases
 describe("Video Player", () => {
   let mockVideo: Video;
-  let options: PlaybackOptions;
+  let options: MaterializedPlaybackOptions;
   let currentTimestamp: number;
 
   const currentTime = createValue(0);

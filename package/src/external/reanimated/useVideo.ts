@@ -21,11 +21,13 @@ export interface PlaybackOptions {
   seek: Animated<number | null>;
 }
 
-interface PlaybackState {
-  currentTime: number;
-  currentFrame: SkImage | null;
-  lastTimestamp: number;
-}
+type Materialized<T> = {
+  [K in keyof T]: T[K] extends Animated<infer U> ? U : T[K];
+};
+
+export type MaterializedPlaybackOptions = Materialized<
+  Omit<PlaybackOptions, "seek">
+>;
 
 const defaultOptions = {
   playbackSpeed: 1,
@@ -44,14 +46,58 @@ const useOption = <T>(value: Animated<T>) => {
   return Rea.isSharedValue(value) ? value : defaultValue;
 };
 
-const processVideoState = (
+/**
+      const img = video.nextImage();
+      if (img) {
+        if (currentFrame.value) {
+          currentFrame.value.dispose();
+        }
+        if (Platform.OS === "android") {
+          currentFrame.value = img.makeNonTextureImage();
+        } else {
+          currentFrame.value = img;
+        }
+      }
+ */
+export const processVideoState = (
   video: Video | null,
-  currentTimestamp: number
-  // options: PlaybackOptions,
-  // state: PlaybackState
+  currentTimestamp: number,
+  options: Materialized<Omit<PlaybackOptions, "seek">>,
+  currentTime: SharedValue<number>,
+  currentFrame: SharedValue<SkImage | null>,
+  lastTimestamp: SharedValue<number>,
+  seek: SharedValue<number | null>
 ) => {
   "worklet";
-  return 1;
+  if (!video) {
+    return;
+  }
+  if (options.paused) {
+    return;
+  }
+  const delta = currentTimestamp - lastTimestamp.value;
+
+  const frameDuration = 1000 / video.framerate();
+  const currentFrameDuration = Math.floor(
+    frameDuration / options.playbackSpeed
+  );
+  if (currentTime.value + delta >= video.duration() && options.looping) {
+    seek.value = 0;
+  }
+  if (seek.value !== null) {
+    video.seek(seek.value);
+    currentTime.value = seek.value;
+    currentFrame.value = video.nextImage();
+    lastTimestamp.value = currentTimestamp;
+    seek.value = null;
+    return;
+  }
+
+  if (delta >= currentFrameDuration) {
+    currentFrame.value = video.nextImage();
+    currentTime.value += delta;
+    lastTimestamp.value = currentTimestamp;
+  }
 };
 
 export const useVideo = (
@@ -66,69 +112,27 @@ export const useVideo = (
     userOptions?.playbackSpeed ?? defaultOptions.playbackSpeed
   );
   const currentFrame = Rea.useSharedValue<null | SkImage>(null);
+  const currentTime = Rea.useSharedValue(0);
   const lastTimestamp = Rea.useSharedValue(-1);
-  const startTimestamp = Rea.useSharedValue(-1);
-
-  const framerate = useMemo(() => (video ? video.framerate() : -1), [video]);
-  const duration = useMemo(() => (video ? video.duration() : -1), [video]);
-  const frameDuration = useMemo(
-    () => (framerate > 0 ? 1000 / framerate : -1),
-    [framerate]
-  );
   const disposeVideo = useCallback(() => {
     "worklet";
     video?.dispose();
   }, [video]);
 
   Rea.useFrameCallback((frameInfo: FrameInfo) => {
-    processVideoState(video, frameInfo.timestamp);
-    if (video === null) {
-      return;
-    }
-    if (seek.value !== null) {
-      video.seek(seek.value);
-      seek.value = null;
-      lastTimestamp.value = -1;
-      startTimestamp.value = -1;
-    }
-    if (isPaused.value && lastTimestamp.value !== -1) {
-      return;
-    }
-    const { timestamp } = frameInfo;
-
-    // Initialize start timestamp
-    if (startTimestamp.value === -1) {
-      startTimestamp.value = timestamp;
-    }
-
-    // Calculate the current time in the video
-    const currentTimestamp = timestamp - startTimestamp.value;
-
-    // Handle looping
-    if (currentTimestamp > duration && looping.value) {
-      video.seek(0);
-      startTimestamp.value = timestamp;
-    }
-
-    // Update frame only if the elapsed time since last update is greater than the frame duration
-    const currentFrameDuration = Math.floor(
-      frameDuration / playbackSpeed.value
+    processVideoState(
+      video,
+      frameInfo.timestamp,
+      {
+        paused: isPaused.value,
+        looping: looping.value,
+        playbackSpeed: playbackSpeed.value,
+      },
+      currentTime,
+      currentFrame,
+      lastTimestamp,
+      seek
     );
-    const delta = Math.floor(timestamp - lastTimestamp.value);
-    if (lastTimestamp.value === -1 || delta >= currentFrameDuration) {
-      const img = video.nextImage();
-      if (img) {
-        if (currentFrame.value) {
-          currentFrame.value.dispose();
-        }
-        if (Platform.OS === "android") {
-          currentFrame.value = img.makeNonTextureImage();
-        } else {
-          currentFrame.value = img;
-        }
-      }
-      lastTimestamp.value = timestamp;
-    }
   });
 
   useEffect(() => {
