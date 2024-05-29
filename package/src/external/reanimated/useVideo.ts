@@ -46,19 +46,21 @@ const useOption = <T>(value: Animated<T>) => {
   return Rea.isSharedValue(value) ? value : defaultValue;
 };
 
-/**
-      const img = video.nextImage();
-      if (img) {
-        if (currentFrame.value) {
-          currentFrame.value.dispose();
-        }
-        if (Platform.OS === "android") {
-          currentFrame.value = img.makeNonTextureImage();
-        } else {
-          currentFrame.value = img;
-        }
-      }
- */
+const setFrame = (video: Video, currentFrame: SharedValue<SkImage | null>) => {
+  "worklet";
+  const img = video.nextImage();
+  if (img) {
+    if (currentFrame.value) {
+      currentFrame.value.dispose();
+    }
+    if (Platform.OS === "android") {
+      currentFrame.value = img.makeNonTextureImage();
+    } else {
+      currentFrame.value = img;
+    }
+  }
+};
+
 export const processVideoState = (
   video: Video | null,
   currentTimestamp: number,
@@ -87,14 +89,14 @@ export const processVideoState = (
   if (seek.value !== null) {
     video.seek(seek.value);
     currentTime.value = seek.value;
-    currentFrame.value = video.nextImage();
+    setFrame(video, currentFrame);
     lastTimestamp.value = currentTimestamp;
     seek.value = null;
     return;
   }
 
   if (delta >= currentFrameDuration) {
-    currentFrame.value = video.nextImage();
+    setFrame(video, currentFrame);
     currentTime.value += delta;
     lastTimestamp.value = currentTimestamp;
   }
@@ -142,5 +144,5 @@ export const useVideo = (
     };
   }, [disposeVideo, video]);
 
-  return currentFrame;
+  return { currentFrame, currentTime };
 };
