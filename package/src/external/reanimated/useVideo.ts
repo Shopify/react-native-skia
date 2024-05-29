@@ -1,33 +1,15 @@
-import {
-  runOnUI,
-  useSharedValue,
-  type FrameInfo,
-  type SharedValue,
-} from "react-native-reanimated";
-import { useCallback, useEffect, useMemo } from "react";
+import { type FrameInfo } from "react-native-reanimated";
+import { useEffect, useMemo } from "react";
 
 import { Skia } from "../../skia/Skia";
 import type { SkImage, Video } from "../../skia/types";
-import { Platform } from "../../Platform";
 
 import Rea from "./ReanimatedProxy";
-
-type Animated<T> = SharedValue<T> | T;
-
-export interface PlaybackOptions {
-  playbackSpeed: Animated<number>;
-  looping: Animated<boolean>;
-  paused: Animated<boolean>;
-  seek: Animated<number | null>;
-}
-
-type Materialized<T> = {
-  [K in keyof T]: T[K] extends Animated<infer U> ? U : T[K];
-};
-
-export type MaterializedPlaybackOptions = Materialized<
-  Omit<PlaybackOptions, "seek">
->;
+import {
+  processVideoState,
+  type Animated,
+  type PlaybackOptions,
+} from "./video";
 
 const defaultOptions = {
   playbackSpeed: 1,
@@ -40,66 +22,15 @@ const defaultOptions = {
 const useOption = <T>(value: Animated<T>) => {
   "worklet";
   // TODO: only create defaultValue is needed (via makeMutable)
-  const defaultValue = useSharedValue(
+  const defaultValue = Rea.useSharedValue(
     Rea.isSharedValue(value) ? value.value : value
   );
   return Rea.isSharedValue(value) ? value : defaultValue;
 };
 
-const setFrame = (video: Video, currentFrame: SharedValue<SkImage | null>) => {
+const disposeVideo = (video: Video | null) => {
   "worklet";
-  const img = video.nextImage();
-  if (img) {
-    if (currentFrame.value) {
-      currentFrame.value.dispose();
-    }
-    if (Platform.OS === "android") {
-      currentFrame.value = img.makeNonTextureImage();
-    } else {
-      currentFrame.value = img;
-    }
-  }
-};
-
-export const processVideoState = (
-  video: Video | null,
-  currentTimestamp: number,
-  options: Materialized<Omit<PlaybackOptions, "seek">>,
-  currentTime: SharedValue<number>,
-  currentFrame: SharedValue<SkImage | null>,
-  lastTimestamp: SharedValue<number>,
-  seek: SharedValue<number | null>
-) => {
-  "worklet";
-  if (!video) {
-    return;
-  }
-  if (options.paused) {
-    return;
-  }
-  const delta = currentTimestamp - lastTimestamp.value;
-
-  const frameDuration = 1000 / video.framerate();
-  const currentFrameDuration = Math.floor(
-    frameDuration / options.playbackSpeed
-  );
-  if (currentTime.value + delta >= video.duration() && options.looping) {
-    seek.value = 0;
-  }
-  if (seek.value !== null) {
-    video.seek(seek.value);
-    currentTime.value = seek.value;
-    setFrame(video, currentFrame);
-    lastTimestamp.value = currentTimestamp;
-    seek.value = null;
-    return;
-  }
-
-  if (delta >= currentFrameDuration) {
-    setFrame(video, currentFrame);
-    currentTime.value += delta;
-    lastTimestamp.value = currentTimestamp;
-  }
+  video?.dispose();
 };
 
 export const useVideo = (
@@ -116,14 +47,14 @@ export const useVideo = (
   const currentFrame = Rea.useSharedValue<null | SkImage>(null);
   const currentTime = Rea.useSharedValue(0);
   const lastTimestamp = Rea.useSharedValue(-1);
-  const disposeVideo = useCallback(() => {
-    "worklet";
-    video?.dispose();
-  }, [video]);
+  const duration = useMemo(() => video?.duration() ?? 0, [video]);
+  const framerate = useMemo(() => video?.framerate() ?? 0, [video]);
 
   Rea.useFrameCallback((frameInfo: FrameInfo) => {
     processVideoState(
       video,
+      duration,
+      framerate,
       frameInfo.timestamp,
       {
         paused: isPaused.value,
@@ -140,9 +71,9 @@ export const useVideo = (
   useEffect(() => {
     return () => {
       // TODO: should video simply be a shared value instead?
-      runOnUI(disposeVideo)();
+      Rea.runOnUI(disposeVideo)(video);
     };
-  }, [disposeVideo, video]);
+  }, [video]);
 
-  return { currentFrame, currentTime };
+  return { currentFrame, currentTime, duration, framerate };
 };

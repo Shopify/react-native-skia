@@ -1,10 +1,18 @@
 import type { SharedValue } from "react-native-reanimated";
 
 import type { SkImage, Video } from "../../skia/types";
-import type { MaterializedPlaybackOptions } from "../../external/reanimated/useVideo";
-import { processVideoState } from "../../external/reanimated/useVideo";
+import {
+  processVideoState,
+  type MaterializedPlaybackOptions,
+} from "../../external/reanimated/video";
 
 const createValue = <T,>(value: T) => ({ value } as unknown as SharedValue<T>);
+
+jest.mock("../../Platform", () => ({
+  Platform: {
+    OS: "ios",
+  },
+}));
 
 // Test cases
 describe("Video Player", () => {
@@ -16,13 +24,14 @@ describe("Video Player", () => {
   const currentFrame = createValue<SkImage | null>(null);
   const lastTimestamp = createValue(0);
   const seek = createValue<null | number>(null);
-
+  const framerate = 30;
+  const duration = 5000;
   beforeEach(() => {
     mockVideo = {
       __typename__: "Video",
       dispose: jest.fn(),
-      framerate: jest.fn().mockReturnValue(30),
-      duration: jest.fn().mockReturnValue(5000),
+      framerate: jest.fn().mockReturnValue(framerate),
+      duration: jest.fn().mockReturnValue(duration),
       seek: jest.fn(),
       nextImage: jest.fn().mockReturnValue({} as SkImage),
     };
@@ -41,6 +50,8 @@ describe("Video Player", () => {
     options.paused = true;
     processVideoState(
       mockVideo,
+      duration,
+      framerate,
       currentTimestamp,
       options,
       currentTime,
@@ -58,6 +69,8 @@ describe("Video Player", () => {
     lastTimestamp.value = 0;
     processVideoState(
       mockVideo,
+      duration,
+      framerate,
       currentTimestamp,
       options,
       currentTime,
@@ -77,6 +90,8 @@ describe("Video Player", () => {
     options.looping = true;
     processVideoState(
       mockVideo,
+      duration,
+      framerate,
       currentTimestamp,
       options,
       currentTime,
@@ -92,6 +107,8 @@ describe("Video Player", () => {
     seek.value = 2000;
     processVideoState(
       mockVideo,
+      duration,
+      framerate,
       currentTimestamp,
       options,
       currentTime,
@@ -111,6 +128,8 @@ describe("Video Player", () => {
     lastTimestamp.value = 0;
     processVideoState(
       mockVideo,
+      duration,
+      framerate,
       currentTimestamp,
       options,
       currentTime,
@@ -129,6 +148,8 @@ describe("Video Player", () => {
     lastTimestamp.value = 0;
     processVideoState(
       mockVideo,
+      duration,
+      framerate,
       currentTimestamp,
       options,
       currentTime,
