@@ -30,3 +30,4 @@ export * from "./Size";
 export * from "./Paragraph";
 export * from "./Matrix4";
 export * from "./NativeBuffer";
+export * from "./Video";

@@ -27,6 +27,7 @@ private:
   double _framerate = 0;
   void setupReader(CMTimeRange timeRange);
   NSDictionary *getOutputSettings();
+  CGAffineTransform _preferredTransform;
 
 public:
   RNSkiOSVideo(std::string url, RNSkPlatformContext *context);
@@ -35,6 +36,7 @@ public:
   double duration() override;
   double framerate() override;
   void seek(double timestamp) override;
+  float getRotationInDegrees() override;
 };
 
 } // namespace RNSkia

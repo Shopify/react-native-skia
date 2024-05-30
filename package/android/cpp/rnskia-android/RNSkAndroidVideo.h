@@ -31,6 +31,7 @@ public:
   double duration() override;
   double framerate() override;
   void seek(double timestamp) override;
+  float getRotationInDegrees() override;
 };
 
 } // namespace RNSkia

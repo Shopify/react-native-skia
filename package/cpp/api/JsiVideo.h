@@ -53,10 +53,17 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(getRotationInDegrees) {
+    auto context = getContext();
+    auto rot = getObject()->getRotationInDegrees();
+    return jsi::Value(static_cast<double>(rot));
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiVideo, nextImage),
                        JSI_EXPORT_FUNC(JsiVideo, duration),
                        JSI_EXPORT_FUNC(JsiVideo, framerate),
                        JSI_EXPORT_FUNC(JsiVideo, seek),
+                       JSI_EXPORT_FUNC(JsiVideo, getRotationInDegrees),
                        JSI_EXPORT_FUNC(JsiVideo, dispose))
 
   JsiVideo(std::shared_ptr<RNSkPlatformContext> context,

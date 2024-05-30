@@ -1,5 +1,3 @@
-#pragma once
-
 #include <memory>
 #include <string>
 
@@ -46,6 +44,7 @@ void RNSkiOSVideo::setupReader(CMTimeRange timeRange) {
   AVAssetTrack *videoTrack =
       [[asset tracksWithMediaType:AVMediaTypeVideo] firstObject];
   _framerate = videoTrack.nominalFrameRate;
+  _preferredTransform = videoTrack.preferredTransform;
 
   NSDictionary *outputSettings = getOutputSettings();
   AVAssetReaderTrackOutput *trackOutput =
@@ -97,6 +96,27 @@ NSDictionary *RNSkiOSVideo::getOutputSettings() {
     (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32BGRA),
     (id)kCVPixelBufferMetalCompatibilityKey : @YES
   };
+}
+
+float RNSkiOSVideo::getRotationInDegrees() {
+  CGFloat rotationAngle = 0.0;
+  auto transform = _preferredTransform;
+  // Determine the rotation angle in radians
+  if (transform.a == 0 && transform.b == 1 && transform.c == -1 &&
+      transform.d == 0) {
+    rotationAngle = M_PI_2; // 90 degrees
+  } else if (transform.a == 0 && transform.b == -1 && transform.c == 1 &&
+             transform.d == 0) {
+    rotationAngle = -M_PI_2; // -90 degrees
+  } else if (transform.a == -1 && transform.b == 0 && transform.c == 0 &&
+             transform.d == -1) {
+    rotationAngle = M_PI; // 180 degrees
+  } else if (transform.a == 1 && transform.b == 0 && transform.c == 0 &&
+             transform.d == 1) {
+    rotationAngle = 0.0; // 0 degrees
+  }
+  // Convert the rotation angle from radians to degrees
+  return rotationAngle * 180 / M_PI;
 }
 
 void RNSkiOSVideo::seek(double timeInMilliseconds) {
