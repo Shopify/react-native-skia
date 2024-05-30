@@ -13,7 +13,7 @@ import { useVideoFromAsset } from "../../components/Animations";
 export const Video = () => {
   const paused = useSharedValue(false);
   const { width, height } = useWindowDimensions();
-  const video = useVideoFromAsset(
+  const { currentFrame } = useVideoFromAsset(
     require("../../Tests/assets/BigBuckBunny.mp4"),
     {
       paused,
@@ -28,7 +28,7 @@ export const Video = () => {
       <Canvas style={{ flex: 1 }}>
         <Fill>
           <ImageShader
-            image={video}
+            image={currentFrame}
             x={0}
             y={0}
             width={width}
