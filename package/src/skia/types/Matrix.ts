@@ -30,6 +30,7 @@ export const processTransform = <T extends SkMatrix | SkCanvas>(
   m: T,
   transforms: Transforms3d
 ) => {
+  "worklet";
   const m3 = processTransform3d(transforms);
   m.concat(m3);
   return m;

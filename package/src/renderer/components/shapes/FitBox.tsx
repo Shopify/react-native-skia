@@ -14,6 +14,7 @@ interface FitProps {
 }
 
 export const fitbox = (fit: Fit, src: SkRect, dst: SkRect) => {
+  "worklet";
   const rects = fitRects(fit, src, dst);
   return rect2rect(rects.src, rects.dst);
 };

@@ -7,4 +7,5 @@ export interface Video extends SkJSIInstance<"Video"> {
   nextImage(): SkImage | null;
   seek(time: number): void;
   getRotationInDegrees(): number;
+  size(): { width: number; height: number };
 }

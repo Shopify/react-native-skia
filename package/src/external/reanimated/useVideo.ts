@@ -49,6 +49,7 @@ export const useVideo = (
   const lastTimestamp = Rea.useSharedValue(-1);
   const duration = useMemo(() => video?.duration() ?? 0, [video]);
   const framerate = useMemo(() => video?.framerate() ?? 0, [video]);
+  const size = useMemo(() => video?.size() ?? { width: 0, height: 0 }, [video]);
   const rotationInDegrees = useMemo(
     () => video?.getRotationInDegrees() ?? 0,
     [video]
@@ -78,5 +79,5 @@ export const useVideo = (
     };
   }, [video]);
 
-  return { currentFrame, currentTime, duration, framerate, rotationInDegrees };
+  return { currentFrame, currentTime, duration, framerate, rotationInDegrees, size };
 };

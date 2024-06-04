@@ -45,7 +45,9 @@ void RNSkiOSVideo::setupReader(CMTimeRange timeRange) {
       [[asset tracksWithMediaType:AVMediaTypeVideo] firstObject];
   _framerate = videoTrack.nominalFrameRate;
   _preferredTransform = videoTrack.preferredTransform;
-
+  CGSize videoSize = videoTrack.naturalSize;
+  _videoWidth = videoSize.width;
+  _videoHeight = videoSize.height;
   NSDictionary *outputSettings = getOutputSettings();
   AVAssetReaderTrackOutput *trackOutput =
       [[AVAssetReaderTrackOutput alloc] initWithTrack:videoTrack
@@ -135,5 +137,9 @@ void RNSkiOSVideo::seek(double timeInMilliseconds) {
 double RNSkiOSVideo::duration() { return _duration; }
 
 double RNSkiOSVideo::framerate() { return _framerate; }
+
+SkISize RNSkiOSVideo::getSize() {
+  return SkISize::Make(_videoWidth, _videoHeight);
+}
 
 } // namespace RNSkia
