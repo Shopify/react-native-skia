@@ -327,7 +327,7 @@ const serializeNode = (node: Node<any>): SerializedNode => {
 export type EvalContext = Record<string, any>;
 
 interface TestingSurface {
-  eval<Ctx extends EvalContext, R>(
+  eval<Ctx extends EvalContext = EvalContext, R = any>(
     fn: (Skia: Skia, ctx: Ctx) => R,
     ctx?: Ctx
   ): Promise<R>;

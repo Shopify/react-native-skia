@@ -50,6 +50,7 @@
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkTypefaceFontProviderFactory.h"
 #include "JsiSkVertices.h"
+#include "JsiVideo.h"
 
 namespace RNSkia {
 
@@ -67,6 +68,7 @@ public:
     // We create the system font manager eagerly since it has proven to be too
     // slow to do it on demand
     JsiSkFontMgrFactory::getFontMgr(getContext());
+    installFunction("Video", JsiVideo::createCtor(context));
     installFunction("Font", JsiSkFont::createCtor(context));
     installFunction("Paint", JsiSkPaint::createCtor(context));
     installFunction("RSXform", JsiSkRSXform::createCtor(context));

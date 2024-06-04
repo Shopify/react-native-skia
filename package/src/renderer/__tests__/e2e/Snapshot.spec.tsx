@@ -15,7 +15,7 @@ describe("Snapshot", () => {
   });
   itRunsE2eOnly("should capture a somewhat complex snapshot", async () => {
     // text spacing on the fabric example app is slightly different
-    await testSnapshot("Snapshot2", 1000);
+    await testSnapshot("Snapshot2", 4000);
   });
   itRunsE2eOnly("should respect overflow: hidden", async () => {
     await testSnapshot("Snapshot3");

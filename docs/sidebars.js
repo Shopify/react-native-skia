@@ -64,6 +64,11 @@ const sidebars = {
       items: ["image", "animated-images", "image-svg", "snapshotviews"],
     },
     {
+      type: "doc",
+      label: "Video",
+      id: "video",
+    },
+    {
       collapsed: true,
       type: "category",
       label: "Text",

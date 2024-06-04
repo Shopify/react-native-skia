@@ -54,7 +54,7 @@ export const Snapshot = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <View ref={viewRef} style={styles.view} collapsable={false}>
+      <View ref={viewRef} style={styles.view}>
         <Component />
       </View>
       <Button title="Take snapshot" onPress={takeSnapshot} />
