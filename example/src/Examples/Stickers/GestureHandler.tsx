@@ -21,12 +21,14 @@ interface GestureHandlerProps {
   matrix: SharedValue<Matrix4>;
   dimensions: SkRect;
   debug?: boolean;
+  label: string;
 }
 
 export const GestureHandler = ({
   matrix,
   dimensions,
   debug,
+  label,
 }: GestureHandlerProps) => {
   const { x, y, width, height } = dimensions;
   const origin = useSharedValue({ x: 0, y: 0 });
@@ -83,7 +85,11 @@ export const GestureHandler = ({
   const gesture = Gesture.Race(pinch, rotate, pan);
   return (
     <GestureDetector gesture={gesture}>
-      <Animated.View style={style} />
+      <Animated.View
+        style={style}
+        accessible={true}
+        accessibilityLabel={label}
+      />
     </GestureDetector>
   );
 };
