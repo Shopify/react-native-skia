@@ -38,7 +38,7 @@ describe("FitBox", () => {
     );
     processResult(surface, "snapshots/drawings/lightblue-quarter-circle.png");
   });
-  it("Should scale the image", () => {
+  it("Should scale the image (1)", () => {
     const { Skia, rect } = importSkia();
     const image = Skia.Image.MakeImageFromEncoded(
       Skia.Data.fromBytes(
@@ -65,5 +65,34 @@ describe("FitBox", () => {
       </Group>
     );
     processResult(surface, "snapshots/drawings/scaled-image.png");
+  });
+  it("Should scale the image (2)", () => {
+    const { Skia, rect } = importSkia();
+    const image = Skia.Image.MakeImageFromEncoded(
+      Skia.Data.fromBytes(
+        fs.readFileSync(
+          path.resolve(__dirname, "../../skia/__tests__/assets/box.png")
+        )
+      )
+    )!;
+    const screen = rect(256, 128, 256, 512);
+    const surface = drawOnNode(
+      <Group>
+        <Image
+          image={image}
+          x={0}
+          y={0}
+          width={image.width()}
+          height={image.height()}
+          transform={fitbox(
+            "cover",
+            rect(0, 0, image.width(), image.height()),
+            screen
+          )}
+        />
+        <Rect rect={screen} color="green" opacity={0.5} />
+      </Group>
+    );
+    processResult(surface, "snapshots/drawings/scaled-image2.png", true);
   });
 });
