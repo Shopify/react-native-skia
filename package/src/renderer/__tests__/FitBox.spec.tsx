@@ -115,6 +115,7 @@ describe("FitBox", () => {
           y={0}
           width={image.width()}
           height={image.height()}
+          fit="none"
           transform={transform}
         />
         <Rect rect={screen} color="green" opacity={0.5} />

@@ -96,7 +96,53 @@ export const useVideoFromAsset = (
 
 ## Returned Values
 
-The `useVideo` hook returns `currentFrame` which contains the current video frame, as well as `currentTime`, and `rotationInDegrees`.
+The `useVideo` hook returns `currentFrame` which contains the current video frame, as well as `currentTime`, `rotation`, and `size`.
+
+## Rotated Video
+
+`rotation` can either be `0`, `90`, `180`, or `270`.
+We provide a `fitbox` function that can help rotating and scaling the video.
+
+```tsx twoslash
+import React from "react";
+import {
+  Canvas,
+  Image,
+  useVideo,
+  fitbox,
+  rect
+} from "@shopify/react-native-skia";
+import { Pressable, useWindowDimensions } from "react-native";
+import { useSharedValue } from "react-native-reanimated";
+
+interface VideoExampleProps {
+    localVideoFile: string;
+}
+
+// The URL needs to be a local path; we usually use expo-asset for that.
+export const VideoExample = ({ localVideoFile }: VideoExampleProps) => {
+  const paused = useSharedValue(false);
+  const { width, height } = useWindowDimensions();
+  const { currentFrame, rotation, size } = useVideo(require(localVideoFile));
+  const src = rect(0, 0, size.width, size.height);
+  const dst = rect(0, 0, width, height)
+  const transform = fitbox("cover", src, dst, rotation);
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Image
+        image={currentFrame}
+        x={0}
+        y={0}
+        width={width}
+        height={height}
+        fit="none"
+        transform={transform}
+      />
+    </Canvas>
+  );
+};
+```
+
 
 ## Playback Options
 
