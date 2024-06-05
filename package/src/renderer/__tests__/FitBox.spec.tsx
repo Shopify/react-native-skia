@@ -112,6 +112,18 @@ describe("FitBox", () => {
         ? rect(0, 0, image.height(), image.width())
         : rect(0, 0, image.width(), image.height());
     const transform = fitbox("contain", imageRect, screen);
+
+    let translationToTopLeft: { translate: [number, number] } = {
+      translate: [0, 0],
+    };
+    if (rotate === -Math.PI / 2) {
+      translationToTopLeft = { translate: [0, image.width()] };
+    } else if (rotate === Math.PI / 2) {
+      translationToTopLeft = { translate: [image.height(), 0] };
+    } else if (rotate === Math.PI) {
+      translationToTopLeft = { translate: [image.width(), image.height()] };
+    }
+    console.log(translationToTopLeft);
     const surface = drawOnNode(
       <Group>
         <Image
@@ -124,11 +136,9 @@ describe("FitBox", () => {
             // Scale the rotated image
             ...transform,
             // Translate to top left corner
-            { translate: [-128, 512 - 384] },
+            translationToTopLeft,
             // Rotation Transform
-            { translate: [image.width() / 2, image.height() / 2] },
             { rotate },
-            { translate: [-image.width() / 2, -image.height() / 2] },
           ]}
         />
         <Rect rect={screen} color="green" opacity={0.5} />
