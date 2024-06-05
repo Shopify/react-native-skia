@@ -6,7 +6,7 @@ import {
   ImageShader,
 } from "@shopify/react-native-skia";
 import { Pressable, useWindowDimensions } from "react-native";
-import { useSharedValue } from "react-native-reanimated";
+import { useAnimatedReaction, useSharedValue } from "react-native-reanimated";
 
 import { useVideoFromAsset } from "../../components/Animations";
 
@@ -14,12 +14,18 @@ export const Video = () => {
   const paused = useSharedValue(false);
   const seek = useSharedValue(0);
   const { width, height } = useWindowDimensions();
-  const { currentFrame } = useVideoFromAsset(
+  const { currentFrame, currentTime } = useVideoFromAsset(
     require("../../Tests/assets/BigBuckBunny.mp4"),
     {
       paused,
       looping: true,
       seek,
+    }
+  );
+  useAnimatedReaction(
+    () => currentTime.value,
+    (time) => {
+      console.log({ time });
     }
   );
   return (

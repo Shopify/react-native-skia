@@ -4,7 +4,7 @@ import type { SkImage, Video } from "../../skia/types";
 import { Platform } from "../../Platform";
 
 export type Animated<T> = SharedValue<T> | T;
-
+// TODO: Move to useVideo.ts
 export interface PlaybackOptions {
   playbackSpeed: Animated<number>;
   looping: Animated<boolean>;
@@ -20,6 +20,7 @@ export type MaterializedPlaybackOptions = Materialized<
   Omit<PlaybackOptions, "seek">
 >;
 
+// TODO: move
 export const setFrame = (
   video: Video,
   currentFrame: SharedValue<SkImage | null>
@@ -35,48 +36,5 @@ export const setFrame = (
     } else {
       currentFrame.value = img;
     }
-  }
-};
-
-export const processVideoState = (
-  video: Video | null,
-  duration: number,
-  framerate: number,
-  currentTimestamp: number,
-  options: Materialized<Omit<PlaybackOptions, "seek">>,
-  currentTime: SharedValue<number>,
-  currentFrame: SharedValue<SkImage | null>,
-  lastTimestamp: SharedValue<number>,
-  seek: SharedValue<number | null>
-) => {
-  "worklet";
-  if (!video) {
-    return;
-  }
-  // if (options.paused) {
-  //   return;
-  // }
-  const delta = currentTimestamp - lastTimestamp.value;
-
-  const frameDuration = 1000 / framerate;
-  const currentFrameDuration = Math.floor(
-    frameDuration / options.playbackSpeed
-  );
-  // if (currentTime.value + delta >= duration && options.looping) {
-  //   seek.value = 0;
-  // }
-  // if (seek.value !== null) {
-  //   video.seek(seek.value);
-  //   currentTime.value = seek.value;
-  //   setFrame(video, currentFrame);
-  //   lastTimestamp.value = currentTimestamp;
-  //   seek.value = null;
-  //   return;
-  // }
-
-  if (delta >= currentFrameDuration) {
-    setFrame(video, currentFrame);
-    currentTime.value += delta;
-    lastTimestamp.value = currentTimestamp;
   }
 };

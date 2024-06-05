@@ -5,11 +5,7 @@ import { Skia } from "../../skia/Skia";
 import type { SkImage, Video } from "../../skia/types";
 
 import Rea from "./ReanimatedProxy";
-import {
-  processVideoState,
-  type Animated,
-  type PlaybackOptions,
-} from "./video";
+import { setFrame, type Animated, type PlaybackOptions } from "./video";
 
 const defaultOptions = {
   playbackSpeed: 1,
@@ -57,6 +53,7 @@ export const useVideo = (
       if (paused) {
         video?.pause();
       } else {
+        lastTimestamp.value = -1;
         video?.play();
       }
     }
@@ -71,21 +68,33 @@ export const useVideo = (
     }
   );
   Rea.useFrameCallback((frameInfo: FrameInfo) => {
-    processVideoState(
-      video,
-      duration,
-      framerate,
-      frameInfo.timestamp,
-      {
-        paused: isPaused.value,
-        looping: looping.value,
-        playbackSpeed: playbackSpeed.value,
-      },
-      currentTime,
-      currentFrame,
-      lastTimestamp,
-      seek
+    "worklet";
+    if (!video) {
+      return;
+    }
+    if (isPaused.value) {
+      return;
+    }
+    const currentTimestamp = frameInfo.timestamp;
+    if (lastTimestamp.value === -1) {
+      lastTimestamp.value = currentTimestamp;
+    }
+    const delta = currentTimestamp - lastTimestamp.value;
+
+    const frameDuration = 1000 / framerate;
+    const currentFrameDuration = Math.floor(
+      frameDuration / playbackSpeed.value
     );
+    if (currentTime.value + delta >= duration && looping) {
+      seek.value = 0;
+      currentTime.value = seek.value;
+      lastTimestamp.value = currentTimestamp;
+    }
+    if (delta >= currentFrameDuration) {
+      setFrame(video, currentFrame);
+      currentTime.value += delta;
+      lastTimestamp.value = currentTimestamp;
+    }
   });
 
   useEffect(() => {
