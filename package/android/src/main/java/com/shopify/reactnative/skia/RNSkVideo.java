@@ -11,6 +11,7 @@ import android.media.MediaFormat;
 import android.net.Uri;
 import android.os.Build;
 import android.view.Surface;
+import android.graphics.Point;
 
 import androidx.annotation.RequiresApi;
 
@@ -30,6 +31,8 @@ public class RNSkVideo {
     private double durationMs;
     private double frameRate;
     private int rotationDegrees = 0;
+    private int width = 0;
+    private int height = 0;
 
     RNSkVideo(Context context, String localUri) {
         this.uri = Uri.parse(localUri);
@@ -57,8 +60,8 @@ public class RNSkVideo {
             if (format.containsKey(MediaFormat.KEY_ROTATION)) {
                 rotationDegrees = format.getInteger(MediaFormat.KEY_ROTATION);
             }
-            int width = format.getInteger(MediaFormat.KEY_WIDTH);
-            int height = format.getInteger(MediaFormat.KEY_HEIGHT);
+            width = format.getInteger(MediaFormat.KEY_WIDTH);
+            height = format.getInteger(MediaFormat.KEY_HEIGHT);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 imageReader = ImageReader.newInstance(
                         width,
@@ -123,6 +126,11 @@ public class RNSkVideo {
         if (decoder != null) {
             decoder.flush();
         }
+    }
+
+    @DoNotStrip
+    public Point getSize() {
+        return new Point(width, height);
     }
 
     private int selectVideoTrack(MediaExtractor extractor) {

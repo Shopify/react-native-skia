@@ -7,7 +7,10 @@ export interface Size {
   height: number;
 }
 
-export const size = (width = 0, height = 0) => ({ width, height });
+export const size = (width = 0, height = 0) => {
+  "worklet";
+  return { width, height };
+};
 
 export const rect2rect = (
   src: SkRect,
@@ -18,6 +21,7 @@ export const rect2rect = (
   { scaleX: number },
   { scaleY: number }
 ] => {
+  "worklet";
   const scaleX = dst.width / src.width;
   const scaleY = dst.height / src.height;
   const translateX = dst.x - src.x * scaleX;

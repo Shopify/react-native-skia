@@ -9,6 +9,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "include/core/SkImage.h"
+#include "include/core/SkSize.h"
 
 #pragma clang diagnostic pop
 
@@ -101,5 +102,30 @@ float RNSkAndroidVideo::getRotationInDegrees() {
   auto rotation = env->CallIntMethod(_jniVideo.get(), mid);
   return static_cast<float>(rotation);
 }
+
+SkISize RNSkAndroidVideo::getSize() {
+  JNIEnv *env = facebook::jni::Environment::current();
+  jclass cls = env->GetObjectClass(_jniVideo.get());
+  jmethodID mid = env->GetMethodID(cls, "getSize", "()Landroid/graphics/Point;");
+  if (!mid) {
+    RNSkLogger::logToConsole("getSize method not found");
+    return SkISize::Make(0, 0);
+  }
+  jobject jPoint = env->CallObjectMethod(_jniVideo.get(), mid);
+  jclass pointCls = env->GetObjectClass(jPoint);
+  
+  jfieldID xFid = env->GetFieldID(pointCls, "x", "I");
+  jfieldID yFid = env->GetFieldID(pointCls, "y", "I");
+  if (!xFid || !yFid) {
+    RNSkLogger::logToConsole("Point class fields not found");
+    return SkISize::Make(0, 0);
+  }
+
+  jint width = env->GetIntField(jPoint, xFid);
+  jint height = env->GetIntField(jPoint, yFid);
+
+  return SkISize::Make(width, height);
+}
+
 
 } // namespace RNSkia
