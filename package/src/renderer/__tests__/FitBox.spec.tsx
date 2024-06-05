@@ -105,25 +105,33 @@ describe("FitBox", () => {
       )
     )!;
     const screen = rect(256, 128, 256, 512);
+    const transform = fitbox(
+      "contain",
+      rect(0, 0, image.height(), image.width()),
+      screen
+    );
     const surface = drawOnNode(
       <Group>
-        <Group transform={[{ translate: [-128, 512 - 384] }]}>
-          <Image
-            image={image}
-            x={0}
-            y={0}
-            width={image.width()}
-            height={image.height()}
-            transform={[
-              { translate: [image.width() / 2, image.height() / 2] },
-              { rotate: -Math.PI / 2 },
-              { translate: [-image.width() / 2, -image.height() / 2] },
-            ]}
-          />
-        </Group>
+        <Image
+          image={image}
+          x={0}
+          y={0}
+          width={image.width()}
+          height={image.height()}
+          transform={[
+            // Scale the rotated image
+            ...transform,
+            // Translate to top left corner
+            { translate: [-128, 512 - 384] },
+            // Rotation Transform
+            { translate: [image.width() / 2, image.height() / 2] },
+            { rotate: -Math.PI / 2 },
+            { translate: [-image.width() / 2, -image.height() / 2] },
+          ]}
+        />
         <Rect rect={screen} color="green" opacity={0.5} />
       </Group>
     );
-    processResult(surface, "snapshots/drawings/rotated-scaled-image.png", true);
+    processResult(surface, "snapshots/drawings/rotated-scaled-image.png");
   });
 });
