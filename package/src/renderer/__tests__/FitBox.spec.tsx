@@ -104,12 +104,14 @@ describe("FitBox", () => {
         )
       )
     )!;
+    // rotate can be PI/2, -PI/2, or PI
+    const rotate = -Math.PI / 2;
     const screen = rect(256, 128, 256, 512);
-    const transform = fitbox(
-      "contain",
-      rect(0, 0, image.height(), image.width()),
-      screen
-    );
+    const imageRect =
+      rotate === Math.PI / 2 || rotate === -Math.PI / 2
+        ? rect(0, 0, image.height(), image.width())
+        : rect(0, 0, image.width(), image.height());
+    const transform = fitbox("contain", imageRect, screen);
     const surface = drawOnNode(
       <Group>
         <Image
@@ -125,7 +127,7 @@ describe("FitBox", () => {
             { translate: [-128, 512 - 384] },
             // Rotation Transform
             { translate: [image.width() / 2, image.height() / 2] },
-            { rotate: -Math.PI / 2 },
+            { rotate },
             { translate: [-image.width() / 2, -image.height() / 2] },
           ]}
         />
