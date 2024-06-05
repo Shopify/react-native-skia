@@ -106,19 +106,15 @@ float RNSkiOSVideo::getRotationInDegrees() {
   // Determine the rotation angle in radians
   if (transform.a == 0 && transform.b == 1 && transform.c == -1 &&
       transform.d == 0) {
-    rotationAngle = M_PI_2; // 90 degrees
+    rotationAngle = 90;
   } else if (transform.a == 0 && transform.b == -1 && transform.c == 1 &&
              transform.d == 0) {
-    rotationAngle = -M_PI_2; // -90 degrees
+    rotationAngle = 270;
   } else if (transform.a == -1 && transform.b == 0 && transform.c == 0 &&
              transform.d == -1) {
-    rotationAngle = M_PI; // 180 degrees
-  } else if (transform.a == 1 && transform.b == 0 && transform.c == 0 &&
-             transform.d == 1) {
-    rotationAngle = 0.0; // 0 degrees
+    rotationAngle = 180;
   }
-  // Convert the rotation angle from radians to degrees
-  return rotationAngle * 180 / M_PI;
+  return rotationAngle;
 }
 
 void RNSkiOSVideo::seek(double timeInMilliseconds) {

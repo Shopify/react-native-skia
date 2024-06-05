@@ -79,5 +79,12 @@ export const useVideo = (
     };
   }, [video]);
 
-  return { currentFrame, currentTime, duration, framerate, rotationInDegrees, size };
+  return {
+    currentFrame,
+    currentTime,
+    duration,
+    framerate,
+    rotationInDegrees,
+    size,
+  };
 };
