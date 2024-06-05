@@ -50,7 +50,7 @@ export const useVideo = (
   const duration = useMemo(() => video?.duration() ?? 0, [video]);
   const framerate = useMemo(() => video?.framerate() ?? 0, [video]);
   const size = useMemo(() => video?.size() ?? { width: 0, height: 0 }, [video]);
-  const rotation = useMemo(() => video?.getRotationInDegrees() ?? 0, [video]);
+  const rotation = useMemo(() => video?.rotation() ?? 0, [video]);
   Rea.useFrameCallback((frameInfo: FrameInfo) => {
     processVideoState(
       video,
