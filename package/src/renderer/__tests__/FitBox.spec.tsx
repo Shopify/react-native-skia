@@ -1,7 +1,10 @@
+import fs from "fs";
+import path from "path";
+
 import React from "react";
 
 import { processResult } from "../../__tests__/setup";
-import { Circle, FitBox, Rect } from "../components";
+import { Circle, FitBox, Rect, Image, Group, fitbox } from "../components";
 
 import { drawOnNode, width, height, importSkia } from "./setup";
 
@@ -34,5 +37,33 @@ describe("FitBox", () => {
       </FitBox>
     );
     processResult(surface, "snapshots/drawings/lightblue-quarter-circle.png");
+  });
+  it("Should scale the image", () => {
+    const { Skia, rect } = importSkia();
+    const image = Skia.Image.MakeImageFromEncoded(
+      Skia.Data.fromBytes(
+        fs.readFileSync(
+          path.resolve(__dirname, "../../skia/__tests__/assets/box.png")
+        )
+      )
+    )!;
+    const surface = drawOnNode(
+      <Group
+        transform={fitbox(
+          "cover",
+          rect(0, 0, image.width(), image.height()),
+          rect(0, 0, width, height)
+        )}
+      >
+        <Image
+          image={image}
+          x={0}
+          y={0}
+          width={image.width()}
+          height={image.height()}
+        />
+      </Group>
+    );
+    processResult(surface, "snapshots/drawings/scaled-image.png");
   });
 });
