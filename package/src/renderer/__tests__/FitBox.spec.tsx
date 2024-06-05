@@ -93,6 +93,37 @@ describe("FitBox", () => {
         <Rect rect={screen} color="green" opacity={0.5} />
       </Group>
     );
-    processResult(surface, "snapshots/drawings/scaled-image2.png", true);
+    processResult(surface, "snapshots/drawings/scaled-image2.png");
+  });
+  it("Should rotate and scale the image", () => {
+    const { Skia, rect } = importSkia();
+    const image = Skia.Image.MakeImageFromEncoded(
+      Skia.Data.fromBytes(
+        fs.readFileSync(
+          path.resolve(__dirname, "../../skia/__tests__/assets/box2.png")
+        )
+      )
+    )!;
+    const screen = rect(256, 128, 256, 512);
+    const surface = drawOnNode(
+      <Group>
+        <Group transform={[{ translate: [-128, 512 - 384] }]}>
+          <Image
+            image={image}
+            x={0}
+            y={0}
+            width={image.width()}
+            height={image.height()}
+            transform={[
+              { translate: [image.width() / 2, image.height() / 2] },
+              { rotate: -Math.PI / 2 },
+              { translate: [-image.width() / 2, -image.height() / 2] },
+            ]}
+          />
+        </Group>
+        <Rect rect={screen} color="green" opacity={0.5} />
+      </Group>
+    );
+    processResult(surface, "snapshots/drawings/rotated-scaled-image.png", true);
   });
 });
