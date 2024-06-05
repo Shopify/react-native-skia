@@ -51,6 +51,25 @@ export const useVideo = (
   const framerate = useMemo(() => video?.framerate() ?? 0, [video]);
   const size = useMemo(() => video?.size() ?? { width: 0, height: 0 }, [video]);
   const rotation = useMemo(() => video?.rotation() ?? 0, [video]);
+  Rea.useAnimatedReaction(
+    () => isPaused.value,
+    (paused) => {
+      if (paused) {
+        video?.pause();
+      } else {
+        video?.play();
+      }
+    }
+  );
+  Rea.useAnimatedReaction(
+    () => seek.value,
+    (value) => {
+      if (value !== null) {
+        video?.seek(value);
+        seek.value = null;
+      }
+    }
+  );
   Rea.useFrameCallback((frameInfo: FrameInfo) => {
     processVideoState(
       video,

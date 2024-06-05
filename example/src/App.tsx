@@ -98,7 +98,7 @@ const App = () => {
             screenOptions={{
               headerLeft: HeaderLeft,
             }}
-            initialRouteName={CI ? "Tests" : "Home"}
+            initialRouteName={CI ? "Tests" : "Video"}
           >
             <Stack.Screen
               name="Home"

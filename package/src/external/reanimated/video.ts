@@ -53,26 +53,26 @@ export const processVideoState = (
   if (!video) {
     return;
   }
-  if (options.paused) {
-    return;
-  }
+  // if (options.paused) {
+  //   return;
+  // }
   const delta = currentTimestamp - lastTimestamp.value;
 
   const frameDuration = 1000 / framerate;
   const currentFrameDuration = Math.floor(
     frameDuration / options.playbackSpeed
   );
-  if (currentTime.value + delta >= duration && options.looping) {
-    seek.value = 0;
-  }
-  if (seek.value !== null) {
-    video.seek(seek.value);
-    currentTime.value = seek.value;
-    setFrame(video, currentFrame);
-    lastTimestamp.value = currentTimestamp;
-    seek.value = null;
-    return;
-  }
+  // if (currentTime.value + delta >= duration && options.looping) {
+  //   seek.value = 0;
+  // }
+  // if (seek.value !== null) {
+  //   video.seek(seek.value);
+  //   currentTime.value = seek.value;
+  //   setFrame(video, currentFrame);
+  //   lastTimestamp.value = currentTimestamp;
+  //   seek.value = null;
+  //   return;
+  // }
 
   if (delta >= currentFrameDuration) {
     setFrame(video, currentFrame);

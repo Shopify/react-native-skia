@@ -12,12 +12,14 @@ import { useVideoFromAsset } from "../../components/Animations";
 
 export const Video = () => {
   const paused = useSharedValue(false);
+  const seek = useSharedValue(0);
   const { width, height } = useWindowDimensions();
   const { currentFrame } = useVideoFromAsset(
     require("../../Tests/assets/BigBuckBunny.mp4"),
     {
       paused,
       looping: true,
+      seek,
     }
   );
   return (
