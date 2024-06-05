@@ -106,14 +106,15 @@ float RNSkAndroidVideo::getRotationInDegrees() {
 SkISize RNSkAndroidVideo::getSize() {
   JNIEnv *env = facebook::jni::Environment::current();
   jclass cls = env->GetObjectClass(_jniVideo.get());
-  jmethodID mid = env->GetMethodID(cls, "getSize", "()Landroid/graphics/Point;");
+  jmethodID mid =
+      env->GetMethodID(cls, "getSize", "()Landroid/graphics/Point;");
   if (!mid) {
     RNSkLogger::logToConsole("getSize method not found");
     return SkISize::Make(0, 0);
   }
   jobject jPoint = env->CallObjectMethod(_jniVideo.get(), mid);
   jclass pointCls = env->GetObjectClass(jPoint);
-  
+
   jfieldID xFid = env->GetFieldID(pointCls, "x", "I");
   jfieldID yFid = env->GetFieldID(pointCls, "y", "I");
   if (!xFid || !yFid) {
@@ -126,6 +127,5 @@ SkISize RNSkAndroidVideo::getSize() {
 
   return SkISize::Make(width, height);
 }
-
 
 } // namespace RNSkia
