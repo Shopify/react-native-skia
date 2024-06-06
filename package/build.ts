@@ -11,6 +11,10 @@
 import { build, BunPlugin } from "bun";
 import pathModule from "path";
 
+if (process.env.NODE_ENV !== "production") {
+  throw new Error("This script needs to be run with NODE_ENV=production.");
+}
+
 export const bundleSkia = async (
   noReactNativeDependency: boolean,
   output: string
