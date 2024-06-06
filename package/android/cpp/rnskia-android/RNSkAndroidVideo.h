@@ -36,7 +36,6 @@ public:
   void play() override;
   void pause() override;
   void setVolume(float volume) override;
-
 };
 
 } // namespace RNSkia

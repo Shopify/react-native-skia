@@ -1,12 +1,11 @@
-import type { SharedValue,  FrameInfo } from "react-native-reanimated";
+import type { SharedValue, FrameInfo } from "react-native-reanimated";
 import { useEffect, useMemo } from "react";
 
 import { Skia } from "../../skia/Skia";
 import type { SkImage, Video } from "../../skia/types";
-
-import Rea from "./ReanimatedProxy";
 import { Platform } from "../../Platform";
 
+import Rea from "./ReanimatedProxy";
 
 export type Animated<T> = SharedValue<T> | T;
 // TODO: Move to useVideo.ts
@@ -44,7 +43,6 @@ export const setFrame = (
     }
   }
 };
-
 
 const defaultOptions = {
   playbackSpeed: 1,
@@ -107,7 +105,7 @@ export const useVideo = (
         seek.value = null;
       }
     }
-  ); 
+  );
   Rea.useAnimatedReaction(
     () => volume.value,
     (value) => {
@@ -132,7 +130,7 @@ export const useVideo = (
     const currentFrameDuration = Math.floor(
       frameDuration / playbackSpeed.value
     );
-    const isOver = currentTime.value + delta > duration
+    const isOver = currentTime.value + delta > duration;
     if (isOver && looping.value) {
       seek.value = 0;
       currentTime.value = seek.value;

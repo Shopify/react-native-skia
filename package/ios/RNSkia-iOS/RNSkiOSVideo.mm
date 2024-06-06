@@ -32,7 +32,8 @@ void RNSkiOSVideo::setupPlayer() {
   _playerItem = playerItem;
 
   NSDictionary *outputSettings = getOutputSettings();
-  _videoOutput = [[AVPlayerItemVideoOutput alloc] initWithOutputSettings:outputSettings];
+  _videoOutput =
+      [[AVPlayerItemVideoOutput alloc] initWithOutputSettings:outputSettings];
   [playerItem addOutput:_videoOutput];
 
   CMTime time = playerItem.asset.duration;
@@ -40,7 +41,8 @@ void RNSkiOSVideo::setupPlayer() {
     _duration = CMTimeGetSeconds(time) * 1000; // Store duration in milliseconds
   }
 
-  AVAssetTrack *videoTrack = [[playerItem.asset tracksWithMediaType:AVMediaTypeVideo] firstObject];
+  AVAssetTrack *videoTrack =
+      [[playerItem.asset tracksWithMediaType:AVMediaTypeVideo] firstObject];
   if (videoTrack) {
     _framerate = videoTrack.nominalFrameRate;
     _preferredTransform = videoTrack.preferredTransform;
@@ -53,7 +55,9 @@ void RNSkiOSVideo::setupPlayer() {
 
 sk_sp<SkImage> RNSkiOSVideo::nextImage(double *timeStamp) {
   CMTime currentTime = [_player currentTime];
-  CVPixelBufferRef pixelBuffer = [_videoOutput copyPixelBufferForItemTime:currentTime itemTimeForDisplay:nullptr];
+  CVPixelBufferRef pixelBuffer =
+      [_videoOutput copyPixelBufferForItemTime:currentTime
+                            itemTimeForDisplay:nullptr];
   if (!pixelBuffer) {
     NSLog(@"No pixel buffer.");
     return nullptr;
@@ -94,12 +98,16 @@ float RNSkiOSVideo::getRotationInDegrees() {
 }
 
 void RNSkiOSVideo::seek(double timeInMilliseconds) {
-	CMTime seekTime = CMTimeMakeWithSeconds(timeInMilliseconds / 1000.0, NSEC_PER_SEC);
-	[_player seekToTime:seekTime toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero completionHandler:^(BOOL finished) {
-	  if (!finished) {
-		NSLog(@"Seek failed or was interrupted.");
-	  }
-	}];
+  CMTime seekTime =
+      CMTimeMakeWithSeconds(timeInMilliseconds / 1000.0, NSEC_PER_SEC);
+  [_player seekToTime:seekTime
+        toleranceBefore:kCMTimeZero
+         toleranceAfter:kCMTimeZero
+      completionHandler:^(BOOL finished) {
+        if (!finished) {
+          NSLog(@"Seek failed or was interrupted.");
+        }
+      }];
 }
 
 void RNSkiOSVideo::play() {
@@ -124,8 +132,6 @@ SkISize RNSkiOSVideo::getSize() {
   return SkISize::Make(_videoWidth, _videoHeight);
 }
 
-void RNSkiOSVideo::setVolume(float volume) {
-	_player.volume = volume;
-}
+void RNSkiOSVideo::setVolume(float volume) { _player.volume = volume; }
 
 } // namespace RNSkia
