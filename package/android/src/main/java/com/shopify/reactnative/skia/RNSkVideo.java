@@ -140,18 +140,32 @@ public class RNSkVideo {
 
     @DoNotStrip
     public void seek(double timestamp) {
-        // Seek to the closest sync frame at or before the specified time
-        long timestampUs = (long)(timestamp * 1000);
+        // Log the values for debugging
+
+        long timestampUs = (long)(timestamp * 1000); // Convert milliseconds to microseconds
+
         extractor.seekTo(timestampUs, MediaExtractor.SEEK_TO_CLOSEST_SYNC);
         if (mediaPlayer != null) {
-            int timestampMs = (int)timestamp; // Convert to milliseconds
-            mediaPlayer.seekTo(timestampMs);
+            int timestampMs = (int) timestamp; // Convert to milliseconds
+            mediaPlayer.seekTo(timestampMs, MediaPlayer.SEEK_CLOSEST);
         }
+
         // Flush the codec to reset internal state and buffers
         if (decoder != null) {
             decoder.flush();
+
+            // Decode frames until reaching the exact timestamp
+            boolean isSeeking = true;
+            while (isSeeking) {
+                decodeFrame();
+                long currentTimestampUs = extractor.getSampleTime();
+                if (currentTimestampUs >= timestampUs) {
+                    isSeeking = false;
+                }
+            }
         }
     }
+
 
     @DoNotStrip
     public Point getSize() {
