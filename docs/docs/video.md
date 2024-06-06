@@ -14,9 +14,7 @@ React Native Skia provides a way to load video frames as images, enabling rich m
 
 ## Example
 
-Here is an example of how to use the video support in React Native Skia.
-This example demonstrates how to load and display video frames within a canvas, applying a color matrix for visual effects.
-Tapping the screen will pause and play the video.
+Here is an example of how to use the video support in React Native Skia. This example demonstrates how to load and display video frames within a canvas, applying a color matrix for visual effects. Tapping the screen will pause and play the video.
 
 The video can be a remote (`http://...`) or local URL (`file://`), as well as a [video from the bundle](#using-assets).
 
@@ -71,15 +69,19 @@ export const VideoExample = () => {
 
 ## Returned Values
 
-The `useVideo` hook returns `currentFrame` which contains the current video frame, as well as `currentTime`, `rotation`, and `size`.
+The `useVideo` hook returns `currentFrame`, which contains the current video frame, as well as `currentTime`, `rotation`, and `size`.
 
 ## Playback Options
 
-You can seek a video via the `seek` playback option. By default, the seek option is null. If you set a value in milliseconds, it will seek to that point in the video and then set the option value to null again.
+The following table describes the playback options available for the `useVideo` hook:
 
-`looping` indicates whether the video should be looped or not.
-
-`volume` is a 0 to 1 value (at 0 the value is muted and 1 is the maxium volume).
+| Option        | Description                                                                                  |
+|---------------|----------------------------------------------------------------------------------------------|
+| `seek`        | Allows seeking to a specific point in the video in milliseconds. Default is `null`.         |
+| `paused`      | Indicates whether the video is paused.                                                      |
+| `looping`     | Indicates whether the video should loop.                                                    |
+| `volume`      | A value from 0 to 1 representing the volume level (0 is muted, 1 is the maximum volume).     |
+| `playbackSpeed` | Adjusts the speed of video playback.                                                      |
 
 In the example below, every time we tap on the video, we set the video to 2 seconds.
 
@@ -130,8 +132,7 @@ export const VideoExample = () => {
 
 ## Rotated Video
 
-`rotation` can either be `0`, `90`, `180`, or `270`.
-We provide a `fitbox` function that can help rotating and scaling the video.
+The `rotation` property can be `0`, `90`, `180`, or `270`. We provide a `fitbox` function that can help with rotating and scaling the video.
 
 ```tsx twoslash
 import React from "react";
