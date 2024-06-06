@@ -64,8 +64,10 @@ export const useVideo = (
     () => seek.value,
     (value) => {
       if (value !== null) {
+        video?.pause();
         video?.seek(value);
         seek.value = null;
+        video?.play();
       }
     }
   ); 
@@ -93,12 +95,13 @@ export const useVideo = (
     const currentFrameDuration = Math.floor(
       frameDuration / playbackSpeed.value
     );
-    if (currentTime.value + delta >= duration && looping.value) {
+    const isOver = currentTime.value + delta > duration
+    if (isOver && looping.value) {
       seek.value = 0;
       currentTime.value = seek.value;
       lastTimestamp.value = currentTimestamp;
     }
-    if (delta >= currentFrameDuration) {
+    if (delta >= currentFrameDuration && !isOver) {
       setFrame(video, currentFrame);
       currentTime.value += delta;
       lastTimestamp.value = currentTimestamp;
