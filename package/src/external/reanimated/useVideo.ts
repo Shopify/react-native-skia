@@ -102,6 +102,7 @@ export const useVideo = (
     (value) => {
       if (value !== null) {
         video?.seek(value);
+        currentTime.value = value;
         seek.value = null;
       }
     }
