@@ -16,10 +16,7 @@ interface PlaybackOptions {
   volume: Animated<number>;
 }
 
-const setFrame = (
-  video: Video,
-  currentFrame: SharedValue<SkImage | null>
-) => {
+const setFrame = (video: Video, currentFrame: SharedValue<SkImage | null>) => {
   "worklet";
   const img = video.nextImage();
   if (img) {
@@ -73,9 +70,7 @@ export const useVideo = (
   const size = useMemo(() => video?.size() ?? { width: 0, height: 0 }, [video]);
   const rotation = useMemo(() => video?.rotation() ?? 0, [video]);
   const frameDuration = 1000 / framerate;
-  const currentFrameDuration = Math.floor(
-    frameDuration
-  );
+  const currentFrameDuration = Math.floor(frameDuration);
   Rea.useAnimatedReaction(
     () => isPaused.value,
     (paused) => {
