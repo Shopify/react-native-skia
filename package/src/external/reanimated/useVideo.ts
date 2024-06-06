@@ -7,26 +7,16 @@ import { Platform } from "../../Platform";
 
 import Rea from "./ReanimatedProxy";
 
-export type Animated<T> = SharedValue<T> | T;
-// TODO: Move to useVideo.ts
-export interface PlaybackOptions {
-  playbackSpeed: Animated<number>;
+type Animated<T> = SharedValue<T> | T;
+
+interface PlaybackOptions {
   looping: Animated<boolean>;
   paused: Animated<boolean>;
   seek: Animated<number | null>;
   volume: Animated<number>;
 }
 
-type Materialized<T> = {
-  [K in keyof T]: T[K] extends Animated<infer U> ? U : T[K];
-};
-
-export type MaterializedPlaybackOptions = Materialized<
-  Omit<PlaybackOptions, "seek">
->;
-
-// TODO: move
-export const setFrame = (
+const setFrame = (
   video: Video,
   currentFrame: SharedValue<SkImage | null>
 ) => {
@@ -45,7 +35,6 @@ export const setFrame = (
 };
 
 const defaultOptions = {
-  playbackSpeed: 1,
   looping: true,
   paused: false,
   seek: null,
@@ -76,9 +65,6 @@ export const useVideo = (
   const looping = useOption(userOptions?.looping ?? defaultOptions.looping);
   const seek = useOption(userOptions?.seek ?? defaultOptions.seek);
   const volume = useOption(userOptions?.volume ?? defaultOptions.volume);
-  const playbackSpeed = useOption(
-    userOptions?.playbackSpeed ?? defaultOptions.playbackSpeed
-  );
   const currentFrame = Rea.useSharedValue<null | SkImage>(null);
   const currentTime = Rea.useSharedValue(0);
   const lastTimestamp = Rea.useSharedValue(-1);
@@ -86,6 +72,10 @@ export const useVideo = (
   const framerate = useMemo(() => video?.framerate() ?? 0, [video]);
   const size = useMemo(() => video?.size() ?? { width: 0, height: 0 }, [video]);
   const rotation = useMemo(() => video?.rotation() ?? 0, [video]);
+  const frameDuration = 1000 / framerate;
+  const currentFrameDuration = Math.floor(
+    frameDuration
+  );
   Rea.useAnimatedReaction(
     () => isPaused.value,
     (paused) => {
@@ -127,10 +117,6 @@ export const useVideo = (
     }
     const delta = currentTimestamp - lastTimestamp.value;
 
-    const frameDuration = 1000 / framerate;
-    const currentFrameDuration = Math.floor(
-      frameDuration / playbackSpeed.value
-    );
     const isOver = currentTime.value + delta > duration;
     if (isOver && looping.value) {
       seek.value = 0;

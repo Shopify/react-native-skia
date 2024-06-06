@@ -7,15 +7,18 @@ slug: /video
 
 React Native Skia provides a way to load video frames as images, enabling rich multimedia experiences within your applications. A video frame can be used anywhere a Skia image is accepted: `Image`, `ImageShader`, and `Atlas`.
 
-## Requirements
+### Requirements
 
 - **Reanimated** version 3 or higher.
 - **Android:** API level 26 or higher.
-- **Video URL:** Must be a local path. We recommend using it in combination with [expo-asset](https://docs.expo.dev/versions/latest/sdk/asset/) to download the video.
 
 ## Example
 
-Here is an example of how to use the video support in React Native Skia. This example demonstrates how to load and display video frames within a canvas, applying a color matrix for visual effects. Tapping the screen will pause and play the video.
+Here is an example of how to use the video support in React Native Skia.
+This example demonstrates how to load and display video frames within a canvas, applying a color matrix for visual effects.
+Tapping the screen will pause and play the video.
+
+The video can be a remote (`http://...`) or local URL (`file://`), as well as a [video from the bundle](#using-assets).
 
 ```tsx twoslash
 import React from "react";
@@ -29,16 +32,11 @@ import {
 import { Pressable, useWindowDimensions } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 
-interface VideoExampleProps {
-    localVideoFile: string;
-}
-
-// The URL needs to be a local path; we usually use expo-asset for that.
-export const VideoExample = ({ localVideoFile }: VideoExampleProps) => {
+export const VideoExample = () => {
   const paused = useSharedValue(false);
   const { width, height } = useWindowDimensions();
   const { currentFrame } = useVideo(
-    require(localVideoFile),
+    "https://bit.ly/skia-video",
     {
       paused,
     }
@@ -71,77 +69,9 @@ export const VideoExample = ({ localVideoFile }: VideoExampleProps) => {
 };
 ```
 
-## Using expo-asset
-
-Below is an example of how to use [expo-asset](https://docs.expo.dev/versions/latest/sdk/asset/) to load the video.
-
-```tsx twoslash
-import { useVideo } from "@shopify/react-native-skia";
-import { useAssets } from "expo-asset";
-
-// Example usage:
-// const video = useVideoFromAsset(require("./BigBuckBunny.mp4"));
-export const useVideoFromAsset = (
-  mod: number,
-  options?: Parameters<typeof useVideo>[1]
-) => {
-  const [assets, error] = useAssets([mod]);
-  if (error) {
-    throw error;
-  }
-  return useVideo(assets ? assets[0].localUri : null, options);
-};
-```
-
 ## Returned Values
 
 The `useVideo` hook returns `currentFrame` which contains the current video frame, as well as `currentTime`, `rotation`, and `size`.
-
-## Rotated Video
-
-`rotation` can either be `0`, `90`, `180`, or `270`.
-We provide a `fitbox` function that can help rotating and scaling the video.
-
-```tsx twoslash
-import React from "react";
-import {
-  Canvas,
-  Image,
-  useVideo,
-  fitbox,
-  rect
-} from "@shopify/react-native-skia";
-import { Pressable, useWindowDimensions } from "react-native";
-import { useSharedValue } from "react-native-reanimated";
-
-interface VideoExampleProps {
-    localVideoFile: string;
-}
-
-// The URL needs to be a local path; we usually use expo-asset for that.
-export const VideoExample = ({ localVideoFile }: VideoExampleProps) => {
-  const paused = useSharedValue(false);
-  const { width, height } = useWindowDimensions();
-  const { currentFrame, rotation, size } = useVideo(require(localVideoFile));
-  const src = rect(0, 0, size.width, size.height);
-  const dst = rect(0, 0, width, height)
-  const transform = fitbox("cover", src, dst, rotation);
-  return (
-    <Canvas style={{ flex: 1 }}>
-      <Image
-        image={currentFrame}
-        x={0}
-        y={0}
-        width={width}
-        height={height}
-        fit="none"
-        transform={transform}
-      />
-    </Canvas>
-  );
-};
-```
-
 
 ## Playback Options
 
@@ -149,7 +79,7 @@ You can seek a video via the `seek` playback option. By default, the seek option
 
 `looping` indicates whether the video should be looped or not.
 
-`playbackSpeed` indicates the playback speed of the video (default is 1).
+`volume` is a 0 to 1 value (at 0 the value is muted and 1 is the maxium volume).
 
 In the example below, every time we tap on the video, we set the video to 2 seconds.
 
@@ -164,17 +94,13 @@ import {
 import { Pressable, useWindowDimensions } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 
-interface VideoExampleProps {
-    localVideoFile: string;
-}
-
-export const VideoExample = ({ localVideoFile }: VideoExampleProps) => {
+export const VideoExample = () => {
   const seek = useSharedValue<null | number>(null);
   // Set this value to true to pause the video
   const paused = useSharedValue(false);
   const { width, height } = useWindowDimensions();
   const {currentFrame, currentTime} = useVideo(
-    require(localVideoFile),
+    "https://bit.ly/skia-video",
     {
       seek,
       paused,
@@ -199,5 +125,67 @@ export const VideoExample = ({ localVideoFile }: VideoExampleProps) => {
       </Canvas>
     </Pressable>
   );
+};
+```
+
+## Rotated Video
+
+`rotation` can either be `0`, `90`, `180`, or `270`.
+We provide a `fitbox` function that can help rotating and scaling the video.
+
+```tsx twoslash
+import React from "react";
+import {
+  Canvas,
+  Image,
+  useVideo,
+  fitbox,
+  rect
+} from "@shopify/react-native-skia";
+import { Pressable, useWindowDimensions } from "react-native";
+import { useSharedValue } from "react-native-reanimated";
+
+export const VideoExample = () => {
+  const paused = useSharedValue(false);
+  const { width, height } = useWindowDimensions();
+  const { currentFrame, rotation, size } = useVideo("https://bit.ly/skia-video");
+  const src = rect(0, 0, size.width, size.height);
+  const dst = rect(0, 0, width, height)
+  const transform = fitbox("cover", src, dst, rotation);
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Image
+        image={currentFrame}
+        x={0}
+        y={0}
+        width={width}
+        height={height}
+        fit="none"
+        transform={transform}
+      />
+    </Canvas>
+  );
+};
+```
+
+## Using Assets
+
+Below is an example where we use [expo-asset](https://docs.expo.dev/versions/latest/sdk/asset/) to load a video file from the bundle.
+
+```tsx twoslash
+import { useVideo } from "@shopify/react-native-skia";
+import { useAssets } from "expo-asset";
+
+// Example usage:
+// const video = useVideoFromAsset(require("./BigBuckBunny.mp4"));
+export const useVideoFromAsset = (
+  mod: number,
+  options?: Parameters<typeof useVideo>[1]
+) => {
+  const [assets, error] = useAssets([mod]);
+  if (error) {
+    throw error;
+  }
+  return useVideo(assets ? assets[0].localUri : null, options);
 };
 ```
