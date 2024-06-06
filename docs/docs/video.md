@@ -11,10 +11,6 @@ React Native Skia provides a way to load video frames as images, enabling rich m
 
 - **Reanimated** version 3 or higher.
 - **Android:** API level 26 or higher.
-<<<<<<< HEAD
-=======
-- **Video URL:** Must be a local path. We recommend using it in combination with [expo-asset](https://docs.expo.dev/versions/latest/sdk/asset/) to download the video.
->>>>>>> main
 
 ## Example
 
@@ -194,3 +190,7 @@ export const useVideoFromAsset = (
   return useVideo(assets ? assets[0].localUri : null, options);
 };
 ```
+
+## Video Encoding
+
+To encode videos from Skia images, you can use ffmpeg or also look into [react-native-skia-video](https://github.com/AzzappApp/react-native-skia-video).
