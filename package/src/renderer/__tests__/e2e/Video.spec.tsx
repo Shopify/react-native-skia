@@ -15,8 +15,8 @@ describe("Videos", () => {
     expect(result).toEqual({
       duration: 5280,
       framerate: 25,
-      height: 0,
-      width: 0,
+      height: 720,
+      width: 1280,
     });
   });
   // TODO: We need to reanable these tests once we can run them on the UI thread
