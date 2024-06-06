@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Button, LayoutChangeEvent, PixelRatio, StyleSheet, Text, View } from "react-native";
+import type { LayoutChangeEvent } from "react-native";
+import { Button, PixelRatio, StyleSheet, Text, View } from "react-native";
 import {
   Canvas,
   Group,
@@ -12,6 +13,7 @@ import {
   vec,
 } from "@shopify/react-native-skia";
 import { useDerivedValue, useSharedValue } from "react-native-reanimated";
+
 import { Slider } from "../SpeedTest/Slider";
 
 const pd = PixelRatio.get();
@@ -19,10 +21,10 @@ const pd = PixelRatio.get();
 const source = Skia.RuntimeEffect.Make(`
 uniform shader image;
 uniform vec2 screen;
-uniform vec2 touch_pos;
+uniform vec2 touchPos;
 uniform float drawing;
-uniform float zoom_level;
-uniform float is_fixed;
+uniform float zoomLevel;
+uniform float isFixed;
 
 const vec2 magnifier_center = vec2(80);
 
@@ -33,7 +35,7 @@ half4 main(vec2 pos) {
     // Convert to UV coordinates, accounting for aspect ratio
     vec2 uv = pos / screen.y / ${pd};
 
-    vec2 touch = touch_pos.xy;
+    vec2 touch = touchPos.xy;
     if (touch == vec2(0))
         touch = screen.xy / 2 / ${pd};
 
@@ -58,14 +60,14 @@ half4 main(vec2 pos) {
     // Draw the texture
     half4 fragColor = image.eval(uv * screen.y * ${pd});
 
-    if (is_fixed == 1) {
+    if (isFixed == 1) {
         // Draw the outline of the glass
         if (magnifier_dist < 0.102)
             fragColor = half4(0.01, 0.01, 0.01, 1);
     
         // Draw a zoomed-in version of the texture
         if (magnifier_dist < 0.1)
-            fragColor = image.eval((touch_uv - ((magnifier_uv - uv) * zoom_level)) * screen.y * ${pd});
+            fragColor = image.eval((touch_uv - ((magnifier_uv - uv) * zoomLevel)) * screen.y * ${pd});
     } else {
         // Draw the outline of the glass
         if (touch_dist < 0.102)
@@ -73,7 +75,7 @@ half4 main(vec2 pos) {
     
         // Draw a zoomed-in version of the texture
         if (touch_dist < 0.1)
-            fragColor = image.eval((uv + (touch_uv - uv) * (1 - zoom_level)) * screen.y * ${pd});
+            fragColor = image.eval((uv + (touch_uv - uv) * (1 - zoomLevel)) * screen.y * ${pd});
     }
 
     return fragColor;
@@ -95,36 +97,34 @@ export const MagnifyingGlass = () => {
 
   const image = useImage(require("../../assets/oslo2.jpg"));
 
-  const onTouch = useTouchHandler(
-    {
-      onStart: ({x, y}) => {
-        touchPosX.value = x;
-        touchPosY.value = y;
-        drawing.value = 1;
-      },
-      onActive: ({x, y}) => {
-        touchPosX.value = x;
-        touchPosY.value = y;
-      },
-      onEnd: () => {
-        drawing.value = 0;
-      },
+  const onTouch = useTouchHandler({
+    onStart: ({ x, y }) => {
+      touchPosX.value = x;
+      touchPosY.value = y;
+      drawing.value = 1;
     },
-  );
+    onActive: ({ x, y }) => {
+      touchPosX.value = x;
+      touchPosY.value = y;
+    },
+    onEnd: () => {
+      drawing.value = 0;
+    },
+  });
 
   const uniforms = useDerivedValue(() => {
     return {
       screen: vec(canvasWidth.value, canvasHeight.value),
-      touch_pos: vec(touchPosX.value, touchPosY.value),
+      touchPos: vec(touchPosX.value, touchPosY.value),
       drawing: drawing.value,
-      zoom_level: zoomLevel.value,
-      is_fixed: isFixedSharedValue.value,
+      zoomLevel: zoomLevel.value,
+      isFixed: isFixedSharedValue.value,
     };
   }, [drawing, canvasWidth, canvasHeight, zoomLevel, isFixedSharedValue]);
 
   if (!image) {
     return (
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text>Loading image...</Text>
       </View>
     );
@@ -136,21 +136,21 @@ export const MagnifyingGlass = () => {
   };
 
   return (
-    <View style={{flex: 1, flexDirection: "column-reverse"}}>
+    <View style={{ flex: 1, flexDirection: "column-reverse" }}>
       <Canvas
         style={StyleSheet.absoluteFill}
         mode="continuous"
         onTouch={onTouch}
         onLayout={handleCanvasLayoutChange}
       >
-        <Group transform={[{scale: 1 / pd}]}>
+        <Group transform={[{ scale: 1 / pd }]}>
           <Group
             layer={
               <Paint>
-                <RuntimeShader source={source} uniforms={uniforms}/>
+                <RuntimeShader source={source} uniforms={uniforms} />
               </Paint>
             }
-            transform={[{scale: pd}]}
+            transform={[{ scale: pd }]}
           >
             <Image
               image={image}
@@ -163,26 +163,28 @@ export const MagnifyingGlass = () => {
           </Group>
         </Group>
       </Canvas>
-      <View style={{
-        height: 60,
-        flexDirection: 'row',
-        justifyContent: 'space-evenly',
-        alignItems: 'center',
-        backgroundColor: 'black'
-      }}>
+      <View
+        style={{
+          height: 60,
+          flexDirection: "row",
+          justifyContent: "space-evenly",
+          alignItems: "center",
+          backgroundColor: "black",
+        }}
+      >
         <Slider
           initialValue={0.5}
           minValue={1}
           maxValue={0}
-          onValueChange={(value) => zoomLevel.value = value}
+          onValueChange={(value) => (zoomLevel.value = value)}
         />
         <Button
           title={isFixed ? "Fixed" : "Following"}
           onPress={() => {
             setIsFixed((prev) => {
-              isFixedSharedValue.value = !prev ? 1 : 0
-              return !prev
-            })
+              isFixedSharedValue.value = !prev ? 1 : 0;
+              return !prev;
+            });
           }}
         />
       </View>

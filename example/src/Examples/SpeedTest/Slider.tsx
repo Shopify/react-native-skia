@@ -39,8 +39,8 @@ export const Slider: React.FC<Props> = ({
   const initialTranslateX = interpolate(
     initialValue,
     [minValue, maxValue],
-    [-pickerR, sliderWidth - pickerR],
-  )
+    [-pickerR, sliderWidth - pickerR]
+  );
 
   const translateX = useSharedValue(initialTranslateX);
   const contextX = useSharedValue(0);
