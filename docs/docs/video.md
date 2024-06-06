@@ -9,10 +9,9 @@ React Native Skia provides a way to load video frames as images, enabling rich m
 
 ## Requirements
 
+- **Reanimated** version 3 or higher.
 - **Android:** API level 26 or higher.
 - **Video URL:** Must be a local path. We recommend using it in combination with [expo-asset](https://docs.expo.dev/versions/latest/sdk/asset/) to download the video.
-- **Animated Playback:** Available only via [Reanimated 3](/docs/animations/animations) and above.
-- **Sound Playback:** Coming soon. In the meantime, audio can be played using [expo-av](https://docs.expo.dev/versions/latest/sdk/av/).
 
 ## Example
 
