@@ -83,7 +83,7 @@ The following table describes the playback options available for the `useVideo` 
 | `volume`      | A value from 0 to 1 representing the volume level (0 is muted, 1 is the maximum volume).     |
 | `playbackSpeed` | Adjusts the speed of video playback.                                                      |
 
-In the example below, every time we tap on the video, we set the video to 2 seconds.
+In the example below, every time we tap on the video, we set the video seek at 2 seconds.
 
 ```tsx twoslash
 import React from "react";
