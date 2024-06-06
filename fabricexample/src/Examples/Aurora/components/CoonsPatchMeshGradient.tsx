@@ -20,7 +20,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { GestureDetector } from "react-native-gesture-handler";
 
-import { getSeed, perlin } from "../../../components/Animations";
+import { createNoise2D } from "../../../components/SimpleNoise";
 
 import { symmetric } from "./Math";
 import { Cubic } from "./Cubic";
@@ -140,34 +140,32 @@ export const CoonsPatchMeshGradient = ({
       })
     )
     .flat();
-  const seeds = defaultMesh.map(() => [getSeed(), getSeed(), getSeed()]);
+  const noises = defaultMesh.map(() => [
+    createNoise2D(),
+    createNoise2D(),
+    createNoise2D(),
+  ]);
   const meshNoise = useDerivedValue(() => {
     return defaultMesh.map((pt, i) => {
       if (isEdge(pt.pos, window)) {
         return pt;
       }
-      const [noisePos, noiseC1, noiseC2] = seeds[i];
+      const [noisePos, noiseC1, noiseC2] = noises[i];
       return {
         pos: add(
           pt.pos,
           vec(
-            A * perlin(noisePos, clock.value / F, 0),
-            A * perlin(noisePos, 0, clock.value / F)
+            A * noisePos(clock.value / F, 0),
+            A * noisePos(0, clock.value / F)
           )
         ),
         c1: add(
           pt.c1,
-          vec(
-            A * perlin(noiseC1, clock.value / F, 0),
-            A * perlin(noiseC1, 0, clock.value / F)
-          )
+          vec(A * noiseC1(clock.value / F, 0), A * noiseC1(0, clock.value / F))
         ),
         c2: add(
           pt.c1,
-          vec(
-            A * perlin(noiseC2, clock.value / F, 0),
-            A * perlin(noiseC2, 0, clock.value / F)
-          )
+          vec(A * noiseC2(clock.value / F, 0), A * noiseC2(0, clock.value / F))
         ),
       };
     });

@@ -37,7 +37,6 @@ SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer,
   // TODO: find out if we can detect, which graphic buffers support
   // GR_GL_TEXTURE_2D
   case AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM:
-  case AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM:
     format = GrBackendFormats::MakeGL(GR_GL_RGBA8, GR_GL_TEXTURE_EXTERNAL);
   case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
     format = GrBackendFormats::MakeGL(GR_GL_RGBA16F, GR_GL_TEXTURE_EXTERNAL);
@@ -64,9 +63,10 @@ SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer,
       const_cast<AHardwareBuffer *>(hardwareBuffer), description.width,
       description.height, &deleteImageProc, &updateImageProc, &deleteImageCtx,
       false, format, false);
-  if (!backendTex.isValid()) [[unlikely]] {
-    throw std::runtime_error(
+  if (!backendTex.isValid()) {
+    RNSkLogger::logToConsole(
         "Failed to convert HardwareBuffer to OpenGL Texture!");
+    return nullptr;
   }
   sk_sp<SkImage> image = SkImages::BorrowTextureFrom(
       ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(),

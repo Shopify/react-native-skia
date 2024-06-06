@@ -1,1 +1,1 @@
-export { Neumorphism } from "./Elements";
+export { Neumorphism } from "./Dashboard";

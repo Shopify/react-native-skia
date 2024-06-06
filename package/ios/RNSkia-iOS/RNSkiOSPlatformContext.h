@@ -65,7 +65,7 @@ public:
 
   void releaseNativeBuffer(uint64_t pointer) override;
 
-  GrRecordingContext *getSkiaContext() override;
+  std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override;
 
   virtual void performStreamOperation(
       const std::string &sourceUri,

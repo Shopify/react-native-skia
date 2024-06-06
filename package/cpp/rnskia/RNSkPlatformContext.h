@@ -10,6 +10,7 @@
 #include <utility>
 
 #include "RNSkDispatchQueue.h"
+#include "RNSkVideo.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -146,7 +147,7 @@ public:
 
   virtual uint64_t makeNativeBuffer(sk_sp<SkImage> image) = 0;
 
-  virtual GrRecordingContext *getSkiaContext() = 0;
+  virtual std::shared_ptr<RNSkVideo> createVideo(const std::string &url) = 0;
 
   /**
    * Return the Platform specific font manager
