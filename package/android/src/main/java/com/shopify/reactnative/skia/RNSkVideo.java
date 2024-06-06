@@ -166,7 +166,6 @@ public class RNSkVideo {
         }
     }
 
-
     @DoNotStrip
     public Point getSize() {
         return new Point(width, height);
