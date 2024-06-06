@@ -1,11 +1,50 @@
-import { type FrameInfo } from "react-native-reanimated";
+import type { SharedValue,  FrameInfo } from "react-native-reanimated";
 import { useEffect, useMemo } from "react";
 
 import { Skia } from "../../skia/Skia";
 import type { SkImage, Video } from "../../skia/types";
 
 import Rea from "./ReanimatedProxy";
-import { setFrame, type Animated, type PlaybackOptions } from "./video";
+import { Platform } from "../../Platform";
+
+
+export type Animated<T> = SharedValue<T> | T;
+// TODO: Move to useVideo.ts
+export interface PlaybackOptions {
+  playbackSpeed: Animated<number>;
+  looping: Animated<boolean>;
+  paused: Animated<boolean>;
+  seek: Animated<number | null>;
+  volume: Animated<number>;
+}
+
+type Materialized<T> = {
+  [K in keyof T]: T[K] extends Animated<infer U> ? U : T[K];
+};
+
+export type MaterializedPlaybackOptions = Materialized<
+  Omit<PlaybackOptions, "seek">
+>;
+
+// TODO: move
+export const setFrame = (
+  video: Video,
+  currentFrame: SharedValue<SkImage | null>
+) => {
+  "worklet";
+  const img = video.nextImage();
+  if (img) {
+    if (currentFrame.value) {
+      currentFrame.value.dispose();
+    }
+    if (Platform.OS === "android") {
+      currentFrame.value = img.makeNonTextureImage();
+    } else {
+      currentFrame.value = img;
+    }
+  }
+};
+
 
 const defaultOptions = {
   playbackSpeed: 1,

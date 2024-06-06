@@ -7,12 +7,8 @@ import {
   Text,
   useFont,
 } from "@shopify/react-native-skia";
-import { Alert, Pressable, View, useWindowDimensions } from "react-native";
-import {
-  useAnimatedReaction,
-  useDerivedValue,
-  useSharedValue,
-} from "react-native-reanimated";
+import { Pressable, View, useWindowDimensions } from "react-native";
+import { useDerivedValue, useSharedValue } from "react-native-reanimated";
 import Slider from "@react-native-community/slider";
 
 import { useVideoFromAsset } from "../../components/Animations";
@@ -68,6 +64,10 @@ export const Video = () => {
           maximumTrackTintColor="#000000"
           onSlidingComplete={(value) => {
             seek.value = value * duration;
+            paused.value = false;
+          }}
+          onSlidingStart={() => {
+            paused.value = true;
           }}
         />
       </View>
