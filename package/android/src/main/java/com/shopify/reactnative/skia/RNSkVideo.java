@@ -3,11 +3,15 @@ package com.shopify.reactnative.skia;
 import android.content.Context;
 import android.graphics.ImageFormat;
 import android.hardware.HardwareBuffer;
-import android.media.Image;
-import android.media.ImageReader;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.MediaCodec;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
+import android.media.MediaPlayer;
+import android.media.MediaSync;
+import android.media.Image;
+import android.media.ImageReader;
 import android.net.Uri;
 import android.os.Build;
 import android.view.Surface;
@@ -28,11 +32,15 @@ public class RNSkVideo {
     private MediaCodec decoder;
     private ImageReader imageReader;
     private Surface outputSurface;
+    private MediaPlayer mediaPlayer;
+    private MediaSync mediaSync;
     private double durationMs;
     private double frameRate;
     private int rotationDegrees = 0;
     private int width = 0;
     private int height = 0;
+
+    private boolean isPlaying = false;
 
     RNSkVideo(Context context, String localUri) {
         this.uri = Uri.parse(localUri);
@@ -50,6 +58,18 @@ public class RNSkVideo {
             }
             extractor.selectTrack(trackIndex);
             MediaFormat format = extractor.getTrackFormat(trackIndex);
+
+            // Initialize MediaPlayer
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setDataSource(context, uri);
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mediaPlayer.setOnPreparedListener(mp -> {
+                durationMs = mp.getDuration();
+                mp.start();
+                isPlaying = true;
+            });
+            mediaPlayer.prepareAsync();
+
             // Retrieve and store video properties
             if (format.containsKey(MediaFormat.KEY_DURATION)) {
                 durationMs = format.getLong(MediaFormat.KEY_DURATION) / 1000;  // Convert microseconds to milliseconds
@@ -126,6 +146,10 @@ public class RNSkVideo {
         if (decoder != null) {
             decoder.flush();
         }
+
+        if (mediaPlayer != null) {
+            mediaPlayer.seekTo((int) timestamp);
+        }
     }
 
     @DoNotStrip
@@ -187,7 +211,31 @@ public class RNSkVideo {
         }
     }
 
+    public void play() {
+        if (mediaPlayer != null && !isPlaying) {
+            mediaPlayer.start();
+            isPlaying = true;
+        }
+    }
+
+    public void pause() {
+        if (mediaPlayer != null && isPlaying) {
+            mediaPlayer.pause();
+            isPlaying = false;
+        }
+    }
+
+    public void setVolume(float volume) {
+        if (mediaPlayer != null) {
+            mediaPlayer.setVolume(volume, volume);
+        }
+    }
+
     public void release() {
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
         if (decoder != null) {
             decoder.stop();
             decoder.release();

@@ -33,6 +33,10 @@ public:
   void seek(double timestamp) override;
   float getRotationInDegrees() override;
   SkISize getSize() override;
+  void play() override;
+  void pause() override;
+  void setVolume(float volume) override;
+
 };
 
 } // namespace RNSkia

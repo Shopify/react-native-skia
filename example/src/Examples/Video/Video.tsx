@@ -52,7 +52,12 @@ export const Video = () => {
               ]}
             />
           </Fill>
-          <Text x={20} y={height - 200 - fontSize} text={text} font={font} />
+          <Text
+            x={20}
+            y={height - 200 - 2 * fontSize}
+            text={text}
+            font={font}
+          />
         </Canvas>
       </Pressable>
       <View style={{ height: 200 }}>

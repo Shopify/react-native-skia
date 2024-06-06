@@ -128,4 +128,36 @@ SkISize RNSkAndroidVideo::getSize() {
   return SkISize::Make(width, height);
 }
 
+void RNSkAndroidVideo::play() {
+  JNIEnv *env = facebook::jni::Environment::current();
+  jclass cls = env->GetObjectClass(_jniVideo.get());
+  jmethodID mid = env->GetMethodID(cls, "play", "()V");
+  if (!mid) {
+    RNSkLogger::logToConsole("play method not found");
+    return;
+  }
+  env->CallVoidMethod(_jniVideo.get(), mid);
+}
+
+void RNSkAndroidVideo::pause() {
+  JNIEnv *env = facebook::jni::Environment::current();
+  jclass cls = env->GetObjectClass(_jniVideo.get());
+  jmethodID mid = env->GetMethodID(cls, "pause", "()V");
+  if (!mid) {
+    RNSkLogger::logToConsole("pause method not found");
+    return;
+  }
+  env->CallVoidMethod(_jniVideo.get(), mid);
+}
+
+void RNSkAndroidVideo::setVolume(float volume) {
+  JNIEnv *env = facebook::jni::Environment::current();
+  jclass cls = env->GetObjectClass(_jniVideo.get());
+  jmethodID mid = env->GetMethodID(cls, "setVolume", "(F)V");
+  if (!mid) {
+    RNSkLogger::logToConsole("setVolume method not found");
+    return;
+  }
+  env->CallVoidMethod(_jniVideo.get(), mid, volume);
+}
 } // namespace RNSkia
