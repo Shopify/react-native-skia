@@ -16,78 +16,60 @@ namespace RNSkia {
 
 RNSkiOSVideo::RNSkiOSVideo(std::string url, RNSkPlatformContext *context)
     : _url(std::move(url)), _context(context) {
-  setupReader(CMTimeRangeMake(kCMTimeZero, kCMTimePositiveInfinity));
+  setupPlayer();
 }
 
-RNSkiOSVideo::~RNSkiOSVideo() {}
-
-void RNSkiOSVideo::setupReader(CMTimeRange timeRange) {
-  NSError *error = nil;
-
-  AVURLAsset *asset =
-      [AVURLAsset URLAssetWithURL:[NSURL URLWithString:@(_url.c_str())]
-                          options:nil];
-  AVAssetReader *assetReader = [[AVAssetReader alloc] initWithAsset:asset
-                                                              error:&error];
-  if (error) {
-    NSLog(@"Error initializing asset reader: %@", error.localizedDescription);
-    return;
+RNSkiOSVideo::~RNSkiOSVideo() {
+  if (_player) {
+    [_player pause];
   }
+}
 
-  CMTime time = [asset duration];
-  if (time.timescale == 0) {
-    NSLog(@"Error: Timescale of the asset is zero.");
-    return;
-  }
-
-  _duration = CMTimeGetSeconds(time) * 1000; // Store duration in milliseconds
-  AVAssetTrack *videoTrack =
-      [[asset tracksWithMediaType:AVMediaTypeVideo] firstObject];
-  _framerate = videoTrack.nominalFrameRate;
-  _preferredTransform = videoTrack.preferredTransform;
+void RNSkiOSVideo::setupPlayer() {
+  NSURL *videoURL = [NSURL URLWithString:@(_url.c_str())];
+  AVPlayerItem *playerItem = [AVPlayerItem playerItemWithURL:videoURL];
+  _player = [AVPlayer playerWithPlayerItem:playerItem];
+  _playerItem = playerItem;
 
   NSDictionary *outputSettings = getOutputSettings();
-  AVAssetReaderTrackOutput *trackOutput =
-      [[AVAssetReaderTrackOutput alloc] initWithTrack:videoTrack
-                                       outputSettings:outputSettings];
+  _videoOutput =
+      [[AVPlayerItemVideoOutput alloc] initWithOutputSettings:outputSettings];
+  [playerItem addOutput:_videoOutput];
 
-  assetReader.timeRange = timeRange;
-  if ([assetReader canAddOutput:trackOutput]) {
-    [assetReader addOutput:trackOutput];
-    [assetReader startReading];
-  } else {
-    NSLog(@"Cannot add output to asset reader.");
-    return;
+  CMTime time = playerItem.asset.duration;
+  if (time.timescale != 0) {
+    _duration = CMTimeGetSeconds(time) * 1000; // Store duration in milliseconds
   }
 
-  _reader = assetReader;
-  _trackOutput = trackOutput;
+  AVAssetTrack *videoTrack =
+      [[playerItem.asset tracksWithMediaType:AVMediaTypeVideo] firstObject];
+  if (videoTrack) {
+    _framerate = videoTrack.nominalFrameRate;
+    _preferredTransform = videoTrack.preferredTransform;
+    CGSize videoSize = videoTrack.naturalSize;
+    _videoWidth = videoSize.width;
+    _videoHeight = videoSize.height;
+  }
+  play();
 }
 
 sk_sp<SkImage> RNSkiOSVideo::nextImage(double *timeStamp) {
-  CMSampleBufferRef sampleBuffer = [_trackOutput copyNextSampleBuffer];
-  if (!sampleBuffer) {
-    NSLog(@"No sample buffer.");
-    return nullptr;
-  }
-
-  // Extract the pixel buffer from the sample buffer
-  CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+  CMTime currentTime = [_player currentTime];
+  CVPixelBufferRef pixelBuffer =
+      [_videoOutput copyPixelBufferForItemTime:currentTime
+                            itemTimeForDisplay:nullptr];
   if (!pixelBuffer) {
     NSLog(@"No pixel buffer.");
-    CFRelease(sampleBuffer);
     return nullptr;
   }
 
-  auto skImage = _context->makeImageFromNativeBuffer(
-      reinterpret_cast<void *>(pixelBuffer));
+  auto skImage = _context->makeImageFromNativeBuffer((void *)pixelBuffer);
 
   if (timeStamp) {
-    CMTime time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
-    *timeStamp = CMTimeGetSeconds(time);
+    *timeStamp = CMTimeGetSeconds(currentTime);
   }
 
-  CFRelease(sampleBuffer);
+  CVPixelBufferRelease(pixelBuffer);
   return skImage;
 }
 
@@ -104,36 +86,52 @@ float RNSkiOSVideo::getRotationInDegrees() {
   // Determine the rotation angle in radians
   if (transform.a == 0 && transform.b == 1 && transform.c == -1 &&
       transform.d == 0) {
-    rotationAngle = M_PI_2; // 90 degrees
+    rotationAngle = 90;
   } else if (transform.a == 0 && transform.b == -1 && transform.c == 1 &&
              transform.d == 0) {
-    rotationAngle = -M_PI_2; // -90 degrees
+    rotationAngle = 270;
   } else if (transform.a == -1 && transform.b == 0 && transform.c == 0 &&
              transform.d == -1) {
-    rotationAngle = M_PI; // 180 degrees
-  } else if (transform.a == 1 && transform.b == 0 && transform.c == 0 &&
-             transform.d == 1) {
-    rotationAngle = 0.0; // 0 degrees
+    rotationAngle = 180;
   }
-  // Convert the rotation angle from radians to degrees
-  return rotationAngle * 180 / M_PI;
+  return rotationAngle;
 }
 
 void RNSkiOSVideo::seek(double timeInMilliseconds) {
-  if (_reader) {
-    [_reader cancelReading];
-    _reader = nil;
-    _trackOutput = nil;
-  }
-
-  CMTime startTime =
+  CMTime seekTime =
       CMTimeMakeWithSeconds(timeInMilliseconds / 1000.0, NSEC_PER_SEC);
-  CMTimeRange timeRange = CMTimeRangeMake(startTime, kCMTimePositiveInfinity);
-  setupReader(timeRange);
+  [_player seekToTime:seekTime
+        toleranceBefore:kCMTimeZero
+         toleranceAfter:kCMTimeZero
+      completionHandler:^(BOOL finished) {
+        if (!finished) {
+          NSLog(@"Seek failed or was interrupted.");
+        }
+      }];
+}
+
+void RNSkiOSVideo::play() {
+  if (_player) {
+    [_player play];
+    _isPlaying = true;
+  }
+}
+
+void RNSkiOSVideo::pause() {
+  if (_player) {
+    [_player pause];
+    _isPlaying = false;
+  }
 }
 
 double RNSkiOSVideo::duration() { return _duration; }
 
 double RNSkiOSVideo::framerate() { return _framerate; }
+
+SkISize RNSkiOSVideo::getSize() {
+  return SkISize::Make(_videoWidth, _videoHeight);
+}
+
+void RNSkiOSVideo::setVolume(float volume) { _player.volume = volume; }
 
 } // namespace RNSkia

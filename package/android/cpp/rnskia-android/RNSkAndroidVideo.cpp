@@ -9,6 +9,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "include/core/SkImage.h"
+#include "include/core/SkSize.h"
 
 #pragma clang diagnostic pop
 
@@ -82,7 +83,7 @@ double RNSkAndroidVideo::framerate() {
 void RNSkAndroidVideo::seek(double timestamp) {
   JNIEnv *env = facebook::jni::Environment::current();
   jclass cls = env->GetObjectClass(_jniVideo.get());
-  jmethodID mid = env->GetMethodID(cls, "seek", "(J)V");
+  jmethodID mid = env->GetMethodID(cls, "seek", "(D)V");
   if (!mid) {
     RNSkLogger::logToConsole("seek method not found");
     return;
@@ -102,4 +103,61 @@ float RNSkAndroidVideo::getRotationInDegrees() {
   return static_cast<float>(rotation);
 }
 
+SkISize RNSkAndroidVideo::getSize() {
+  JNIEnv *env = facebook::jni::Environment::current();
+  jclass cls = env->GetObjectClass(_jniVideo.get());
+  jmethodID mid =
+      env->GetMethodID(cls, "getSize", "()Landroid/graphics/Point;");
+  if (!mid) {
+    RNSkLogger::logToConsole("getSize method not found");
+    return SkISize::Make(0, 0);
+  }
+  jobject jPoint = env->CallObjectMethod(_jniVideo.get(), mid);
+  jclass pointCls = env->GetObjectClass(jPoint);
+
+  jfieldID xFid = env->GetFieldID(pointCls, "x", "I");
+  jfieldID yFid = env->GetFieldID(pointCls, "y", "I");
+  if (!xFid || !yFid) {
+    RNSkLogger::logToConsole("Point class fields not found");
+    return SkISize::Make(0, 0);
+  }
+
+  jint width = env->GetIntField(jPoint, xFid);
+  jint height = env->GetIntField(jPoint, yFid);
+
+  return SkISize::Make(width, height);
+}
+
+void RNSkAndroidVideo::play() {
+  JNIEnv *env = facebook::jni::Environment::current();
+  jclass cls = env->GetObjectClass(_jniVideo.get());
+  jmethodID mid = env->GetMethodID(cls, "play", "()V");
+  if (!mid) {
+    RNSkLogger::logToConsole("play method not found");
+    return;
+  }
+  env->CallVoidMethod(_jniVideo.get(), mid);
+}
+
+void RNSkAndroidVideo::pause() {
+  JNIEnv *env = facebook::jni::Environment::current();
+  jclass cls = env->GetObjectClass(_jniVideo.get());
+  jmethodID mid = env->GetMethodID(cls, "pause", "()V");
+  if (!mid) {
+    RNSkLogger::logToConsole("pause method not found");
+    return;
+  }
+  env->CallVoidMethod(_jniVideo.get(), mid);
+}
+
+void RNSkAndroidVideo::setVolume(float volume) {
+  JNIEnv *env = facebook::jni::Environment::current();
+  jclass cls = env->GetObjectClass(_jniVideo.get());
+  jmethodID mid = env->GetMethodID(cls, "setVolume", "(F)V");
+  if (!mid) {
+    RNSkLogger::logToConsole("setVolume method not found");
+    return;
+  }
+  env->CallVoidMethod(_jniVideo.get(), mid, volume);
+}
 } // namespace RNSkia

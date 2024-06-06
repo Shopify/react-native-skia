@@ -53,18 +53,43 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_HOST_FUNCTION(getRotationInDegrees) {
+  JSI_HOST_FUNCTION(rotation) {
     auto context = getContext();
     auto rot = getObject()->getRotationInDegrees();
     return jsi::Value(static_cast<double>(rot));
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiVideo, nextImage),
-                       JSI_EXPORT_FUNC(JsiVideo, duration),
-                       JSI_EXPORT_FUNC(JsiVideo, framerate),
-                       JSI_EXPORT_FUNC(JsiVideo, seek),
-                       JSI_EXPORT_FUNC(JsiVideo, getRotationInDegrees),
-                       JSI_EXPORT_FUNC(JsiVideo, dispose))
+  JSI_HOST_FUNCTION(size) {
+    auto context = getContext();
+    auto size = getObject()->getSize();
+    auto result = jsi::Object(runtime);
+    result.setProperty(runtime, "width", static_cast<double>(size.width()));
+    result.setProperty(runtime, "height", static_cast<double>(size.height()));
+    return result;
+  }
+
+  JSI_HOST_FUNCTION(play) {
+    getObject()->play();
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(pause) {
+    getObject()->pause();
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setVolume) {
+    auto volume = arguments[0].asNumber();
+    getObject()->setVolume(static_cast<float>(volume));
+    return jsi::Value::undefined();
+  }
+
+  JSI_EXPORT_FUNCTIONS(
+      JSI_EXPORT_FUNC(JsiVideo, nextImage), JSI_EXPORT_FUNC(JsiVideo, duration),
+      JSI_EXPORT_FUNC(JsiVideo, framerate), JSI_EXPORT_FUNC(JsiVideo, seek),
+      JSI_EXPORT_FUNC(JsiVideo, rotation), JSI_EXPORT_FUNC(JsiVideo, size),
+      JSI_EXPORT_FUNC(JsiVideo, play), JSI_EXPORT_FUNC(JsiVideo, pause),
+      JSI_EXPORT_FUNC(JsiVideo, setVolume), JSI_EXPORT_FUNC(JsiVideo, dispose))
 
   JsiVideo(std::shared_ptr<RNSkPlatformContext> context,
            std::shared_ptr<RNSkVideo> video)

@@ -8,9 +8,16 @@ describe("Videos", () => {
       return {
         duration: video.duration(),
         framerate: video.framerate(),
+        width: video.size().width,
+        height: video.size().height,
       };
     });
-    expect(result).toEqual({ duration: 5280, framerate: 25 });
+    expect(result).toEqual({
+      duration: 5280,
+      framerate: 25,
+      height: 720,
+      width: 1280,
+    });
   });
   // TODO: We need to reanable these tests once we can run them on the UI thread
   // itRunsE2eOnly("get frame", async () => {

@@ -19,6 +19,10 @@ public:
   virtual double framerate() = 0;
   virtual void seek(double timestamp) = 0;
   virtual float getRotationInDegrees() = 0;
+  virtual SkISize getSize() = 0;
+  virtual void play() = 0;
+  virtual void pause() = 0;
+  virtual void setVolume(float volume) = 0;
 };
 
 } // namespace RNSkia
