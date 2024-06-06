@@ -18,8 +18,9 @@ export const Video = () => {
     require("../../Tests/assets/BigBuckBunny.mp4"),
     {
       paused,
-      looping: true,
+      looping: false,
       seek,
+      volume: 0.2,
     }
   );
   useAnimatedReaction(

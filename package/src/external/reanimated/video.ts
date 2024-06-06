@@ -10,6 +10,7 @@ export interface PlaybackOptions {
   looping: Animated<boolean>;
   paused: Animated<boolean>;
   seek: Animated<number | null>;
+  volume: Animated<number>;
 }
 
 type Materialized<T> = {

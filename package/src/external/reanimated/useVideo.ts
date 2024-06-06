@@ -13,6 +13,7 @@ const defaultOptions = {
   paused: false,
   seek: null,
   currentTime: 0,
+  volume: 0,
 };
 
 const useOption = <T>(value: Animated<T>) => {
@@ -37,6 +38,7 @@ export const useVideo = (
   const isPaused = useOption(userOptions?.paused ?? defaultOptions.paused);
   const looping = useOption(userOptions?.looping ?? defaultOptions.looping);
   const seek = useOption(userOptions?.seek ?? defaultOptions.seek);
+  const volume = useOption(userOptions?.volume ?? defaultOptions.volume);
   const playbackSpeed = useOption(
     userOptions?.playbackSpeed ?? defaultOptions.playbackSpeed
   );
@@ -66,6 +68,12 @@ export const useVideo = (
         seek.value = null;
       }
     }
+  ); 
+  Rea.useAnimatedReaction(
+    () => volume.value,
+    (value) => {
+      video?.setVolume(value);
+    }
   );
   Rea.useFrameCallback((frameInfo: FrameInfo) => {
     "worklet";
@@ -85,7 +93,7 @@ export const useVideo = (
     const currentFrameDuration = Math.floor(
       frameDuration / playbackSpeed.value
     );
-    if (currentTime.value + delta >= duration && looping) {
+    if (currentTime.value + delta >= duration && looping.value) {
       seek.value = 0;
       currentTime.value = seek.value;
       lastTimestamp.value = currentTimestamp;
