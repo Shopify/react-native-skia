@@ -9,6 +9,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "include/core/SkImage.h"
+#include "include/core/SkSize.h"
 
 #pragma clang diagnostic pop
 
@@ -25,6 +26,8 @@ private:
   RNSkPlatformContext *_context;
   double _duration = 0;
   double _framerate = 0;
+  float _videoWidth = 0;
+  float _videoHeight = 0;
   void setupReader(CMTimeRange timeRange);
   NSDictionary *getOutputSettings();
   CGAffineTransform _preferredTransform;
@@ -37,6 +40,7 @@ public:
   double framerate() override;
   void seek(double timestamp) override;
   float getRotationInDegrees() override;
+  SkISize getSize() override;
 };
 
 } // namespace RNSkia

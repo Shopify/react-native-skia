@@ -53,17 +53,27 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_HOST_FUNCTION(getRotationInDegrees) {
+  JSI_HOST_FUNCTION(rotation) {
     auto context = getContext();
     auto rot = getObject()->getRotationInDegrees();
     return jsi::Value(static_cast<double>(rot));
+  }
+
+  JSI_HOST_FUNCTION(size) {
+    auto context = getContext();
+    auto size = getObject()->getSize();
+    auto result = jsi::Object(runtime);
+    result.setProperty(runtime, "width", static_cast<double>(size.width()));
+    result.setProperty(runtime, "height", static_cast<double>(size.height()));
+    return result;
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiVideo, nextImage),
                        JSI_EXPORT_FUNC(JsiVideo, duration),
                        JSI_EXPORT_FUNC(JsiVideo, framerate),
                        JSI_EXPORT_FUNC(JsiVideo, seek),
-                       JSI_EXPORT_FUNC(JsiVideo, getRotationInDegrees),
+                       JSI_EXPORT_FUNC(JsiVideo, rotation),
+                       JSI_EXPORT_FUNC(JsiVideo, size),
                        JSI_EXPORT_FUNC(JsiVideo, dispose))
 
   JsiVideo(std::shared_ptr<RNSkPlatformContext> context,

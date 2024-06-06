@@ -32,6 +32,7 @@ public:
   double framerate() override;
   void seek(double timestamp) override;
   float getRotationInDegrees() override;
+  SkISize getSize() override;
 };
 
 } // namespace RNSkia
