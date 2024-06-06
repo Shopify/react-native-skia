@@ -10,4 +10,7 @@ export interface Video extends SkJSIInstance<"Video"> {
   seek(time: number): void;
   rotation(): VideoRotation;
   size(): { width: number; height: number };
+  pause(): void;
+  play(): void;
+  setVolume(volume: number): void;
 }
