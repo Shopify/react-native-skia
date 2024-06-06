@@ -81,7 +81,6 @@ The following table describes the playback options available for the `useVideo` 
 | `paused`      | Indicates whether the video is paused.                                                      |
 | `looping`     | Indicates whether the video should loop.                                                    |
 | `volume`      | A value from 0 to 1 representing the volume level (0 is muted, 1 is the maximum volume).     |
-| `playbackSpeed` | Adjusts the speed of video playback.                                                      |
 
 In the example below, every time we tap on the video, we set the video seek at 2 seconds.
 
@@ -106,8 +105,7 @@ export const VideoExample = () => {
     {
       seek,
       paused,
-      looping: true,
-      playbackSpeed: 1
+      looping: true
     }
   );
   return (
