@@ -83,7 +83,7 @@ double RNSkAndroidVideo::framerate() {
 void RNSkAndroidVideo::seek(double timestamp) {
   JNIEnv *env = facebook::jni::Environment::current();
   jclass cls = env->GetObjectClass(_jniVideo.get());
-  jmethodID mid = env->GetMethodID(cls, "seek", "(J)V");
+  jmethodID mid = env->GetMethodID(cls, "seek", "(D)V");
   if (!mid) {
     RNSkLogger::logToConsole("seek method not found");
     return;

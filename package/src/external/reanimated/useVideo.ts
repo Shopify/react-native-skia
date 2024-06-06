@@ -104,6 +104,7 @@ export const useVideo = (
     (value) => {
       if (value !== null) {
         video?.pause();
+        console.log("seeking to ", value, " seconds.");
         video?.seek(value);
         seek.value = null;
         video?.play();
