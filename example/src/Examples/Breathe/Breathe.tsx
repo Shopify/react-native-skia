@@ -1,19 +1,34 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Canvas } from "@shopify/react-native-skia";
+import { Canvas, Rect, rect } from "@shopify/react-native-skia";
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
-import { useSharedValue } from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  useDerivedValue,
+  useSharedValue,
+} from "react-native-reanimated";
+
+import { useLoop } from "../../components/Animations";
 
 import { BreatheScreen } from "./BreatheScreen";
 
 const Screen = () => {
+  const progress = useLoop({ duration: 3000 });
+  const style = useAnimatedStyle(() => ({
+    width: progress.value * 100,
+    height: 100,
+  }));
   const size = useSharedValue({ width: 0, height: 0 });
+  const rct = useDerivedValue(() =>
+    rect(0, 0, size.value.width, size.value.height / 2)
+  );
   return (
-    <View style={{ width: 100, height: 100 }}>
+    <Animated.View style={style}>
       <Canvas style={StyleSheet.absoluteFill} onSize={size}>
         <BreatheScreen />
+        <Rect rect={rct} color="rgba(100, 200, 255, 0.5)" />
       </Canvas>
-    </View>
+    </Animated.View>
   );
 };
 
