@@ -14,14 +14,14 @@ Behind the scenes, it is using its own React renderer.
 | style?   | `ViewStyle` | View style |
 | ref?   | `Ref<SkiaView>` | Reference to the `SkiaView` object |
 | mode?   | `default` or `continuous` | By default, the canvas is only updated when the drawing tree or animation values change. With `mode="continuous"`, the canvas will redraw on every frame |
-| onSize? | `SharedValue<Size>` | Reanimated value to which the canvas size will be assigned  (see [canvas size](/docs/animations/animations#canvas-size)) |
+| onSize? | `SharedValue<Size>` | Reanimated value to which the canvas size will be assigned  (see [canvas size](/docs/animations/hooks#canvas-size)) |
 | onLayout? | `NativeEvent<LayoutEvent>` | Invoked on mount and on layout changes (see [onLayout](https://reactnative.dev/docs/view#onlayout)) |
 
 ## Getting the Canvas size
 
 If the size of the Canvas is unknown, there are two ways to access it:
   * **On the JS thread**, using the [`onLayout`](https://reactnative.dev/docs/view#onlayout) prop, like you would on any regular React Native View. 
-  * **On the UI thread**, using the [`onSize`](/docs/animations/animations#canvas-size) prop with [Reanimated](/docs/animations/animations).
+  * **On the UI thread**, using the [`onSize`](/docs/animations/hooks#canvas-size) prop with [Reanimated](/docs/animations/animations).
 
 ## Getting a Canvas Snapshot
 
