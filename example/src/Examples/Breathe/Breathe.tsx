@@ -1,86 +1,65 @@
-import React, { useMemo } from "react";
-import { StyleSheet, useWindowDimensions } from "react-native";
-import {
-  BlurMask,
-  vec,
-  Canvas,
-  Circle,
-  Fill,
-  Group,
-  polar2Canvas,
-  mix,
-} from "@shopify/react-native-skia";
-import type { SharedValue } from "react-native-reanimated";
-import { useDerivedValue } from "react-native-reanimated";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Canvas } from "@shopify/react-native-skia";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet } from "react-native";
+import { useSharedValue } from "react-native-reanimated";
 
-import { useLoop } from "../../components/Animations";
+import { BreatheScreen } from "./BreatheScreen";
 
-const c1 = "#61bea2";
-const c2 = "#529ca0";
-
-interface RingProps {
-  index: number;
-  progress: SharedValue<number>;
-}
-
-const Ring = ({ index, progress }: RingProps) => {
-  const { width, height } = useWindowDimensions();
-  const R = width / 4;
-  const center = useMemo(
-    () => vec(width / 2, height / 2 - 64),
-    [height, width]
-  );
-
-  const theta = (index * (2 * Math.PI)) / 6;
-  const transform = useDerivedValue(() => {
-    const { x, y } = polar2Canvas(
-      { theta, radius: progress.value * R },
-      { x: 0, y: 0 }
-    );
-    const scale = mix(progress.value, 0.3, 1);
-    return [{ translateX: x }, { translateY: y }, { scale }];
-  }, [progress, R]);
-
+const Screen = () => {
+  const size = useSharedValue({ width: 0, height: 0 });
   return (
-    <Circle
-      c={center}
-      r={R}
-      color={index % 2 ? c1 : c2}
-      origin={center}
-      transform={transform}
-    />
+    <View style={{ width: 100, height: 100 }}>
+      <Canvas style={StyleSheet.absoluteFill} onSize={size}>
+        <BreatheScreen />
+      </Canvas>
+    </View>
   );
+};
+
+const getRandomInt = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
 export const Breathe = () => {
-  const { width, height } = useWindowDimensions();
-  const center = useMemo(
-    () => vec(width / 2, height / 2 - 64),
-    [height, width]
-  );
+  const [screens, setScreens] = useState<any>([]);
 
-  const progress = useLoop({ duration: 3000 });
+  const addScreen = () => {
+    setScreens((prevScreens: any) => [
+      ...prevScreens,
+      { id: Date.now() + Math.random(), component: <Screen /> },
+    ]);
+  };
 
-  const transform = useDerivedValue(
-    () => [{ rotate: mix(progress.value, -Math.PI, 0) }],
-    [progress]
-  );
+  const removeScreen = () => {
+    setScreens((prevScreens: any) => {
+      if (prevScreens.length === 0) {
+        return prevScreens;
+      }
+      const indexToRemove = Math.floor(Math.random() * prevScreens.length);
+      return prevScreens.filter(
+        (_: any, index: number) => index !== indexToRemove
+      );
+    });
+  };
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (Math.random() > 0.5) {
+        addScreen();
+      } else {
+        removeScreen();
+      }
+    }, 100);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   return (
-    <Canvas style={styles.container}>
-      <Fill color="rgb(36,43,56)" />
-      <Group origin={center} transform={transform} blendMode="screen">
-        <BlurMask style="solid" blur={40} />
-        {new Array(6).fill(0).map((_, index) => {
-          return <Ring key={index} index={index} progress={progress} />;
-        })}
-      </Group>
-    </Canvas>
+    <View style={{ flex: 1 }}>
+      {screens.map((screen: any) => (
+        <React.Fragment key={screen.id}>{screen.component}</React.Fragment>
+      ))}
+    </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
