@@ -313,9 +313,9 @@ private:
    * @return The callback info object for the requested view
    */
   RNSkViewInfo *getEnsuredViewInfo(size_t nativeId) {
+    std::lock_guard<std::mutex> lock(_mutex);
     if (_viewInfos.count(nativeId) == 0) {
       RNSkViewInfo info;
-      std::lock_guard<std::mutex> lock(_mutex);
       _viewInfos.emplace(nativeId, info);
     }
     return &_viewInfos.at(nativeId);
