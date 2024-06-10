@@ -5,7 +5,7 @@ import { cpus } from "os";
 import { existsSync, mkdirSync } from "fs";
 
 const typedKeys = <T extends object>(obj: T) => Object.keys(obj) as (keyof T)[];
-const cores = cpus().length;
+const cores = Math.max(1, cpus().length - 2);
 
 /**
  * This build script builds the Skia Binaries from the Skia repositories

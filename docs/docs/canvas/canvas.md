@@ -57,6 +57,13 @@ export const Demo = () => {
   );
 };
 ```
+
+## Accessibilty
+
+The Canvas component supports the same properties as a View component including its [accessibility properties](https://reactnative.dev/docs/accessibility#accessible).
+You can make elements inside the canvas accessible as well by overlayings views on top of your canvas.
+This is the same recipe used for [applying gestures on specific canvas elements](https://shopify.github.io/react-native-skia/docs/animations/gestures/#element-tracking).
+
 <!-- 
 ## Offscreen rendering
 

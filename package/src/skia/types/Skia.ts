@@ -30,6 +30,7 @@ import type { Color, SkColor } from "./Color";
 import type { TypefaceFontProviderFactory } from "./Paragraph/TypefaceFontProviderFactory";
 import type { AnimatedImageFactory } from "./AnimatedImage";
 import type { ParagraphBuilderFactory } from "./Paragraph/ParagraphBuilder";
+import type { Video } from "./Video";
 import type { NativeBufferFactory } from "./NativeBuffer";
 
 /**
@@ -95,5 +96,6 @@ export interface Skia {
   TextBlob: TextBlobFactory;
   Surface: SurfaceFactory;
   ParagraphBuilder: ParagraphBuilderFactory;
+  Video: (url: string) => Video;
   NativeBuffer: NativeBufferFactory;
 }

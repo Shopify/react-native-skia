@@ -7,7 +7,10 @@ export interface Size {
   height: number;
 }
 
-export const size = (width = 0, height = 0) => ({ width, height });
+export const size = (width = 0, height = 0) => {
+  "worklet";
+  return { width, height };
+};
 
 export const rect2rect = (
   src: SkRect,
@@ -18,6 +21,7 @@ export const rect2rect = (
   { scaleX: number },
   { scaleY: number }
 ] => {
+  "worklet";
   const scaleX = dst.width / src.width;
   const scaleY = dst.height / src.height;
   const translateX = dst.x - src.x * scaleX;
@@ -25,30 +29,11 @@ export const rect2rect = (
   return [{ translateX }, { translateY }, { scaleX }, { scaleY }];
 };
 
-export const fitRects = (
-  fit: Fit,
-  rect: SkRect,
-  { x, y, width, height }: SkRect
-) => {
-  const sizes = applyBoxFit(
-    fit,
-    { width: rect.width, height: rect.height },
-    { width, height }
-  );
-  const src = inscribe(sizes.src, rect);
-  const dst = inscribe(sizes.dst, {
-    x,
-    y,
-    width,
-    height,
-  });
-  return { src, dst };
-};
-
 const inscribe = (
   { width, height }: Size,
   rect: { x: number; y: number; width: number; height: number }
 ) => {
+  "worklet";
   const halfWidthDelta = (rect.width - width) / 2.0;
   const halfHeightDelta = (rect.height - height) / 2.0;
   return {
@@ -60,6 +45,7 @@ const inscribe = (
 };
 
 const applyBoxFit = (fit: Fit, input: Size, output: Size) => {
+  "worklet";
   let src = size(),
     dst = size();
   if (
@@ -120,5 +106,26 @@ const applyBoxFit = (fit: Fit, input: Size, output: Size) => {
     default:
       exhaustiveCheck(fit);
   }
+  return { src, dst };
+};
+
+export const fitRects = (
+  fit: Fit,
+  rect: SkRect,
+  { x, y, width, height }: SkRect
+) => {
+  "worklet";
+  const sizes = applyBoxFit(
+    fit,
+    { width: rect.width, height: rect.height },
+    { width, height }
+  );
+  const src = inscribe(sizes.src, rect);
+  const dst = inscribe(sizes.dst, {
+    x,
+    y,
+    width,
+    height,
+  });
   return { src, dst };
 };
