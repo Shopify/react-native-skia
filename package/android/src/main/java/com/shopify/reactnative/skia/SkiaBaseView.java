@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.TextureView;
 
 import com.facebook.react.views.view.ReactViewGroup;
@@ -101,7 +102,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
         Log.i(tag, "onSurfaceTextureAvailable " + width + "/" + height);
-        surfaceAvailable(surface, width, height);
+        surfaceAvailable(new Surface(surface), width, height);
     }
 
     @Override

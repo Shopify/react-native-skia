@@ -47,29 +47,11 @@ public:
   WindowSurfaceHolder(jobject jSurfaceTexture, int width, int height)
       : _width(width), _height(height) {
     JNIEnv *env = facebook::jni::Environment::current();
-    _jSurfaceTexture = env->NewGlobalRef(jSurfaceTexture);
-    jclass surfaceClass = env->FindClass("android/view/Surface");
-    jmethodID surfaceConstructor = env->GetMethodID(
-        surfaceClass, "<init>", "(Landroid/graphics/SurfaceTexture;)V");
-    // Create a new Surface instance
-    jobject jSurface =
-        env->NewObject(surfaceClass, surfaceConstructor, jSurfaceTexture);
-
-    jclass surfaceTextureClass = env->GetObjectClass(_jSurfaceTexture);
-    _updateTexImageMethod =
-        env->GetMethodID(surfaceTextureClass, "updateTexImage", "()V");
-
     // Acquire the native window from the Surface
-    _window = ANativeWindow_fromSurface(env, jSurface);
-    // Clean up local references
-    env->DeleteLocalRef(jSurface);
-    env->DeleteLocalRef(surfaceClass);
-    env->DeleteLocalRef(surfaceTextureClass);
+    _window = ANativeWindow_fromSurface(env, jSurfaceTexture);
   }
 
   ~WindowSurfaceHolder() {
-    JNIEnv *env = facebook::jni::Environment::current();
-    env->DeleteGlobalRef(_jSurfaceTexture);
     ANativeWindow_release(_window);
   }
 
@@ -80,20 +62,6 @@ public:
    * Ensures that the holder has a valid surface and returns the surface.
    */
   sk_sp<SkSurface> getSurface();
-
-  void updateTexImage() {
-    JNIEnv *env = facebook::jni::Environment::current();
-
-    // Call updateTexImage on the SurfaceTexture object
-    env->CallVoidMethod(_jSurfaceTexture, _updateTexImageMethod);
-
-    // Check for exceptions
-    if (env->ExceptionCheck()) {
-      RNSkLogger::logToConsole("updateAndRelease() failed. The exception above "
-                               "can safely be ignored");
-      env->ExceptionClear();
-    }
-  }
 
   /**
    * Resizes the surface
@@ -132,9 +100,7 @@ public:
 private:
   ANativeWindow *_window;
   sk_sp<SkSurface> _skSurface = nullptr;
-  jobject _jSurfaceTexture = nullptr;
   EGLSurface _glSurface = EGL_NO_SURFACE;
-  jmethodID _updateTexImageMethod = nullptr;
   int _width = 0;
   int _height = 0;
 };
