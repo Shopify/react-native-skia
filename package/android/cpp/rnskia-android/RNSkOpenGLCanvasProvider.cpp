@@ -78,6 +78,11 @@ void RNSkOpenGLCanvasProvider::surfaceSizeChanged(int width, int height) {
     return;
   }
 
+  if (_surfaceHolder == nullptr) {
+    // No surface holder, nothing to do
+    return;
+  }
+
   // Recreate RenderContext surface based on size change???
   _surfaceHolder->resize(width, height);
 
