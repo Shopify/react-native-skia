@@ -21,29 +21,6 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         addView(mTexture);
     }
 
-    public void destroySurface() {
-        Log.i(tag, "destroySurface");
-        surfaceDestroyed();
-    }
-
-    private void createSurfaceTexture() {
-        // This API Level is >= 26, we created our own SurfaceTexture to have a faster time to first frame
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Log.i(tag, "Create SurfaceTexture");
-            SurfaceTexture surface = new SurfaceTexture(false);
-            mTexture.setSurfaceTexture(surface);
-            this.onSurfaceTextureAvailable(surface, this.getMeasuredWidth(), this.getMeasuredHeight());
-        }
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        if (this.getMeasuredWidth() == 0) {
-            createSurfaceTexture();
-        }
-    }
-
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         Log.i(tag, "onLayout " + this.getMeasuredWidth() + "/" + this.getMeasuredHeight());
@@ -137,12 +114,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
         Log.i(tag, "onSurfaceTextureDestroyed");
         // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
-        destroySurface();
-        // Because of React Native Screens (which dettach the view), we always keep the surface alive.
-        // If not, Texture view will recreate the texture surface by itself and
-        // we will lose the fast first time to frame.
-        // We only delete the surface when the view is dropped (destroySurface invoked by SkiaBaseViewManager);
-        createSurfaceTexture();
+        surfaceDestroyed();
         return false;
     }
 
