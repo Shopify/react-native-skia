@@ -12,6 +12,10 @@ export class SkiaDomView extends SkiaBaseWebView<SkiaDomViewProps> {
 
   protected renderInCanvas(canvas: SkCanvas, touches: TouchInfo[]): void {
     if (this.props.onTouch) {
+      console.warn(
+        `The onTouch property is deprecated and will be removed in the next Skia release.
+See: https://shopify.github.io/react-native-skia/docs/animations/gestures`
+      );
       this.props.onTouch([touches]);
     }
     if (this.props.onSize) {
