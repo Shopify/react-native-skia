@@ -25,8 +25,6 @@ const videoURL =
     ? require("./assets/BigBuckBunny.mp4").default
     : "https://bit.ly/skia-video-short";
 
-console.log(videoURL);
-
 export const useAssets = () => {
   const [error, setError] = useState<Error | null>(null);
   const errorHandler = useCallback((e: Error) => setError(e), []);
