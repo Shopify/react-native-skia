@@ -5,7 +5,6 @@ import {
 } from "@shopify/react-native-skia";
 import { useCallback, useState } from "react";
 import { Platform } from "react-native";
-import { useAssets as useExpoAssets } from "expo-asset";
 
 const SkiaLogo =
   Platform.OS === "web" ? require("./assets/skia_logo.png") : "skia_logo";
@@ -20,10 +19,15 @@ const NotoColorEmojiSrc =
     ? require("./assets/Roboto-Medium.ttf")
     : require("./assets/NotoColorEmoji.ttf");
 
+// on Web because of CORS we need to use a local video
+const videoURL =
+  Platform.OS === "web"
+    ? require("./assets/BigBuckBunny.mp4").default
+    : "https://bit.ly/skia-video-short";
+
+console.log(videoURL);
+
 export const useAssets = () => {
-  const [expoAssets, expoAssetsError] = useExpoAssets([
-    require("./assets/BigBuckBunny.mp4"),
-  ]);
   const [error, setError] = useState<Error | null>(null);
   const errorHandler = useCallback((e: Error) => setError(e), []);
   const mask = useImage(require("./assets/mask.png"), errorHandler);
@@ -50,11 +54,7 @@ export const useAssets = () => {
   if (error) {
     throw new Error("Failed to load assets: " + error.message);
   }
-  if (expoAssetsError) {
-    throw new Error("Failed to load expo assets: " + expoAssetsError.message);
-  }
   if (
-    !expoAssets ||
     !RobotoMedium ||
     !oslo ||
     !NotoColorEmoji ||
@@ -68,7 +68,7 @@ export const useAssets = () => {
     return null;
   }
   return {
-    localAssets: expoAssets.map((asset) => asset.localUri),
+    localAssets: [videoURL],
     RobotoMedium,
     NotoColorEmoji,
     NotoSansSCRegular,
