@@ -54,6 +54,17 @@ const fontLoaderConfiguration = {
   },
 };
 
+const videoLoaderConfiguration = {
+  test: /\.(mp4)$/,
+  use: {
+    loader: "file-loader",
+    options: {
+      name: "[name].[ext]",
+      outputPath: "videos",
+    },
+  },
+};
+
 module.exports = {
   entry: {
     app: path.join(__dirname, "index.web.js"),
@@ -98,6 +109,7 @@ module.exports = {
       imageLoaderConfiguration,
       fontLoaderConfiguration,
       svgLoaderConfiguration,
+      videoLoaderConfiguration,
     ],
   },
   plugins: [
