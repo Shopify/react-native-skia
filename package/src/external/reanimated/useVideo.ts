@@ -28,7 +28,6 @@ const copyFrameOnAndroid = (currentFrame: SharedValue<SkImage | null>) => {
   if (Platform.OS === "android") {
     const tex = currentFrame.value;
     if (tex) {
-      console.log("Copying frame on Android");
       currentFrame.value = tex.makeNonTextureImage();
       tex.dispose();
     }
