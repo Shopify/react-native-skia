@@ -1,5 +1,5 @@
-import type { SharedValue, FrameInfo } from "react-native-reanimated";
-import { useEffect, useMemo } from "react";
+import { type SharedValue, type FrameInfo, createWorkletRuntime, runOnJS, runOnRuntime } from "react-native-reanimated";
+import { useEffect, useMemo, useState } from "react";
 
 import { Skia } from "../../skia/Skia";
 import type { SkImage, Video } from "../../skia/types";
@@ -53,11 +53,31 @@ const disposeVideo = (video: Video | null) => {
   video?.dispose();
 };
 
+const runtime = createWorkletRuntime('video-metadata-runtime');
+
+type VideoSource = string | null;
+
+const useVideoLoading = (source: VideoSource) => {
+  const [video, setVideo] = useState<Video | null>(null);
+  const cb = (src: string) => {
+    "worklet";
+    const vid = Skia.Video(src);
+    runOnJS(setVideo)(vid);
+  };
+  useEffect(() => {
+    if (source) {
+      runOnRuntime(runtime, cb)(source);
+    }
+  }, [source]);
+  return video;
+};
+
+
 export const useVideo = (
   source: string | null,
   userOptions?: Partial<PlaybackOptions>
 ) => {
-  const video = useMemo(() => (source ? Skia.Video(source) : null), [source]);
+  const video = useVideoLoading(source);
   const isPaused = useOption(userOptions?.paused ?? defaultOptions.paused);
   const looping = useOption(userOptions?.looping ?? defaultOptions.looping);
   const seek = useOption(userOptions?.seek ?? defaultOptions.seek);
