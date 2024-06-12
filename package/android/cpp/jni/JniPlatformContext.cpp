@@ -87,9 +87,6 @@ JniPlatformContext::createVideo(const std::string &url) {
   // Convert std::string to jstring
   jstring jUrl = env->NewStringUTF(url.c_str());
 
-  // Get the method ID for the createVideo method
-  // Replace "Lcom/yourpackage/RNSkVideo;" with the actual return type
-  // descriptor
   static auto method =
       javaPart_->getClass()->getMethod<jobject(jstring)>("createVideo");
 
