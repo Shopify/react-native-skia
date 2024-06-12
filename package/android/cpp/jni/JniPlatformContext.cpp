@@ -77,6 +77,8 @@ TSelf JniPlatformContext::initHybrid(jni::alias_ref<jhybridobject> jThis,
 
 jni::global_ref<jobject>
 JniPlatformContext::createVideo(const std::string &url) {
+  jni::Environment::ensureCurrentThreadIsAttached();
+
   jni::ThreadScope ts; // Manages JNI thread attachment/detachment
 
   // Get the JNI environment
@@ -93,6 +95,8 @@ JniPlatformContext::createVideo(const std::string &url) {
 
   // Call the method and receive a local reference to the video object
   auto videoObject = method(javaPart_.get(), jUrl);
+  env->DeleteLocalRef(jUrl);
+
   // Clean up the jstring local reference
   auto result = jni::make_global(videoObject);
   return result;
