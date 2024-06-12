@@ -22,6 +22,19 @@ interface PlaybackOptions {
   volume: Animated<number>;
 }
 
+const copyFrameOnAndroid = (currentFrame: SharedValue<SkImage | null>) => {
+  "worklet";
+  // on android we need to copy the texture before it's invalidated
+  if (Platform.OS === "android") {
+    const tex = currentFrame.value;
+    if (tex) {
+      console.log("Copying frame on Android");
+      currentFrame.value = tex.makeNonTextureImage();
+      tex.dispose();
+    }
+  }
+};
+
 const setFrame = (video: Video, currentFrame: SharedValue<SkImage | null>) => {
   "worklet";
   const img = video.nextImage();
@@ -29,11 +42,9 @@ const setFrame = (video: Video, currentFrame: SharedValue<SkImage | null>) => {
     if (currentFrame.value) {
       currentFrame.value.dispose();
     }
-    if (Platform.OS === "android") {
-      currentFrame.value = img.makeNonTextureImage();
-    } else {
-      currentFrame.value = img;
-    }
+    currentFrame.value = img;
+  } else {
+    copyFrameOnAndroid(currentFrame);
   }
 };
 
@@ -111,6 +122,7 @@ export const useVideo = (
     () => seek.value,
     (value) => {
       if (value !== null) {
+        copyFrameOnAndroid(currentFrame);
         video?.seek(value);
         currentTime.value = value;
         seek.value = null;
