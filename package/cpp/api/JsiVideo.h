@@ -103,17 +103,39 @@ public:
    * @return A function for creating a new host object wrapper for the SkFont
    * class
    */
-  static const jsi::HostFunctionType
-  createCtor(std::shared_ptr<RNSkPlatformContext> context) {
-    return JSI_HOST_FUNCTION_LAMBDA {
-      auto url = arguments[0].asString(runtime).utf8(runtime);
-      auto video = context->createVideo(url);
-      // Return the newly constructed object
-      return jsi::Object::createFromHostObject(
-          runtime,
-          std::make_shared<JsiVideo>(std::move(context), std::move(video)));
-    };
-  }
+static const jsi::HostFunctionType createCtor(std::shared_ptr<RNSkPlatformContext> context) {
+  return JSI_HOST_FUNCTION_LAMBDA {
+    if (count < 1) {
+      context->raiseError("createCtor: Expected at least 1 argument, got " + std::to_string(count) + ".");
+      return jsi::Value::undefined();
+    }
+
+    if (!arguments[0].isString()) {
+      context->raiseError("createCtor: First argument must be a string");
+      return jsi::Value::undefined();
+    }
+
+    auto url = arguments[0].asString(runtime).utf8(runtime);
+    auto jsContext = context;
+    return RNJsi::JsiPromises::createPromiseAsJSIValue(
+        runtime, [jsContext, url = std::move(url)](
+                     jsi::Runtime &runtime,
+                     std::shared_ptr<RNJsi::JsiPromises::Promise> promise) {
+          jsContext->runOnMainThread([&runtime, jsContext, url = std::move(url), promise = std::move(promise)]() {
+            auto video = jsContext->createVideo(url);
+            jsContext->runOnJavascriptThread([&runtime, jsContext, promise = std::move(promise), video = std::move(video)]() {
+              if (video == nullptr) {
+                promise->reject("Failed to create video object.");
+                return;
+              }
+              promise->resolve(jsi::Object::createFromHostObject(
+                  runtime, std::make_shared<JsiVideo>(std::move(jsContext), std::move(video))));
+            });
+          });
+        });
+  };
+}
+
 };
 
 } // namespace RNSkia

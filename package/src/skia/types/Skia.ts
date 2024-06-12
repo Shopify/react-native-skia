@@ -96,6 +96,6 @@ export interface Skia {
   TextBlob: TextBlobFactory;
   Surface: SurfaceFactory;
   ParagraphBuilder: ParagraphBuilderFactory;
-  Video: (url: string) => Video;
+  Video: (url: string) => Promise<Video>;
   NativeBuffer: NativeBufferFactory;
 }
