@@ -1,4 +1,10 @@
-import { type SharedValue, type FrameInfo, createWorkletRuntime, runOnJS, runOnRuntime } from "react-native-reanimated";
+import {
+  type SharedValue,
+  type FrameInfo,
+  createWorkletRuntime,
+  runOnJS,
+  runOnRuntime,
+} from "react-native-reanimated";
 import { useEffect, useMemo, useState } from "react";
 
 import { Skia } from "../../skia/Skia";
@@ -53,7 +59,7 @@ const disposeVideo = (video: Video | null) => {
   video?.dispose();
 };
 
-const runtime = createWorkletRuntime('video-metadata-runtime');
+const runtime = createWorkletRuntime("video-metadata-runtime");
 
 type VideoSource = string | null;
 
@@ -71,7 +77,6 @@ const useVideoLoading = (source: VideoSource) => {
   }, [source]);
   return video;
 };
-
 
 export const useVideo = (
   source: string | null,
