@@ -16,7 +16,7 @@ import Slider from "@react-native-community/slider";
 const videoURL =
   Platform.OS === "web"
     ? require("../../Tests/assets/BigBuckBunny.mp4").default
-    : "https://bit.ly/skia-video-short";
+    : "https://bit.ly/skia-video";
 
 export const Video = () => {
   const paused = useSharedValue(false);
