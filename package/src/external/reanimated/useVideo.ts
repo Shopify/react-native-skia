@@ -1,5 +1,11 @@
-import type { SharedValue, FrameInfo } from "react-native-reanimated";
-import { useEffect, useMemo } from "react";
+import {
+  type SharedValue,
+  type FrameInfo,
+  createWorkletRuntime,
+  runOnJS,
+  runOnRuntime,
+} from "react-native-reanimated";
+import { useEffect, useMemo, useState } from "react";
 
 import { Skia } from "../../skia/Skia";
 import type { SkImage, Video } from "../../skia/types";
@@ -16,6 +22,19 @@ interface PlaybackOptions {
   volume: Animated<number>;
 }
 
+const copyFrameOnAndroid = (currentFrame: SharedValue<SkImage | null>) => {
+  "worklet";
+  // on android we need to copy the texture before it's invalidated
+  if (Platform.OS === "android") {
+    const tex = currentFrame.value;
+    if (tex) {
+      console.log("Copying frame on Android");
+      currentFrame.value = tex.makeNonTextureImage();
+      tex.dispose();
+    }
+  }
+};
+
 const setFrame = (video: Video, currentFrame: SharedValue<SkImage | null>) => {
   "worklet";
   const img = video.nextImage();
@@ -23,11 +42,9 @@ const setFrame = (video: Video, currentFrame: SharedValue<SkImage | null>) => {
     if (currentFrame.value) {
       currentFrame.value.dispose();
     }
-    if (Platform.OS === "android") {
-      currentFrame.value = img.makeNonTextureImage();
-    } else {
-      currentFrame.value = img;
-    }
+    currentFrame.value = img;
+  } else {
+    copyFrameOnAndroid(currentFrame);
   }
 };
 
@@ -53,11 +70,30 @@ const disposeVideo = (video: Video | null) => {
   video?.dispose();
 };
 
+const runtime = createWorkletRuntime("video-metadata-runtime");
+
+type VideoSource = string | null;
+
+const useVideoLoading = (source: VideoSource) => {
+  const [video, setVideo] = useState<Video | null>(null);
+  const cb = (src: string) => {
+    "worklet";
+    const vid = Skia.Video(src);
+    runOnJS(setVideo)(vid);
+  };
+  useEffect(() => {
+    if (source) {
+      runOnRuntime(runtime, cb)(source);
+    }
+  }, [source]);
+  return video;
+};
+
 export const useVideo = (
   source: string | null,
   userOptions?: Partial<PlaybackOptions>
 ) => {
-  const video = useMemo(() => (source ? Skia.Video(source) : null), [source]);
+  const video = useVideoLoading(source);
   const isPaused = useOption(userOptions?.paused ?? defaultOptions.paused);
   const looping = useOption(userOptions?.looping ?? defaultOptions.looping);
   const seek = useOption(userOptions?.seek ?? defaultOptions.seek);
@@ -86,6 +122,7 @@ export const useVideo = (
     () => seek.value,
     (value) => {
       if (value !== null) {
+        copyFrameOnAndroid(currentFrame);
         video?.seek(value);
         currentTime.value = value;
         seek.value = null;
