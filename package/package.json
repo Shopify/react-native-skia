@@ -49,7 +49,8 @@
     "test": "jest",
     "e2e": "E2E=true yarn test -i e2e",
     "build": "bob build && merge-dirs lib/typescript/src lib/commonjs && merge-dirs lib/typescript/src lib/module",
-    "release": "semantic-release"
+    "release": "semantic-release",
+    "build:web": "NODE_ENV=production bun build.ts"
   },
   "repository": {
     "type": "git",
@@ -111,6 +112,7 @@
     "ws": "8.11.0"
   },
   "dependencies": {
+    "@types/bun": "^1.1.4",
     "canvaskit-wasm": "0.39.1",
     "react-reconciler": "0.27.0"
   },
