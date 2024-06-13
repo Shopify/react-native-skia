@@ -1,17 +1,11 @@
-import {
-  type SharedValue,
-  type FrameInfo,
-  createWorkletRuntime,
-  runOnJS,
-  runOnRuntime,
-} from "react-native-reanimated";
-import { useEffect, useMemo, useState } from "react";
+import type { SharedValue, FrameInfo } from "react-native-reanimated";
+import { useEffect, useMemo } from "react";
 
-import { Skia } from "../../skia/Skia";
 import type { SkImage, Video } from "../../skia/types";
 import { Platform } from "../../Platform";
 
 import Rea from "./ReanimatedProxy";
+import { useVideoLoading } from "./useVideoLoading";
 
 type Animated<T> = SharedValue<T> | T;
 
@@ -67,25 +61,6 @@ const useOption = <T>(value: Animated<T>) => {
 const disposeVideo = (video: Video | null) => {
   "worklet";
   video?.dispose();
-};
-
-const runtime = createWorkletRuntime("video-metadata-runtime");
-
-type VideoSource = string | null;
-
-const useVideoLoading = (source: VideoSource) => {
-  const [video, setVideo] = useState<Video | null>(null);
-  const cb = (src: string) => {
-    "worklet";
-    const vid = Skia.Video(src);
-    runOnJS(setVideo)(vid);
-  };
-  useEffect(() => {
-    if (source) {
-      runOnRuntime(runtime, cb)(source);
-    }
-  }, [source]);
-  return video;
 };
 
 export const useVideo = (

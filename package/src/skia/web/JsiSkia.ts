@@ -42,6 +42,7 @@ import { JsiSkFontMgrFactory } from "./JsiSkFontMgrFactory";
 import { JsiSkAnimatedImageFactory } from "./JsiSkAnimatedImageFactory";
 import { JsiSkParagraphBuilderFactory } from "./JsiSkParagraphBuilderFactory";
 import { JsiSkNativeBufferFactory } from "./JsiSkNativeBufferFactory";
+import { JsiVideo } from "./JsiVideo";
 
 export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   Point: (x: number, y: number) =>
@@ -127,7 +128,20 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   FontMgr: new JsiSkFontMgrFactory(CanvasKit),
   ParagraphBuilder: new JsiSkParagraphBuilderFactory(CanvasKit),
   NativeBuffer: new JsiSkNativeBufferFactory(CanvasKit),
-  Video: (_localUri: string) => {
-    throw new Error("Not implemented on React Native Web");
+  Video: (url: string) => {
+    const video = document.createElement("video");
+    return new Promise((resolve, reject) => {
+      video.src = url;
+      video.style.display = "none";
+      video.crossOrigin = "anonymous";
+      video.volume = 0;
+      video.addEventListener("loadedmetadata", () => {
+        document.body.appendChild(video);
+        resolve(new JsiVideo(CanvasKit, video));
+      });
+      video.addEventListener("error", () => {
+        reject(new Error(`Failed to load video from URL: ${url}`));
+      });
+    });
   },
 });
