@@ -4,6 +4,26 @@ import type { Video } from "../types";
 
 import { JsiSkImage } from "./JsiSkImage";
 
+export const createVideo = async (
+  CanvasKit: CanvasKit,
+  url: string
+): Promise<Video> => {
+  const video = document.createElement("video");
+  return new Promise((resolve, reject) => {
+    video.src = url;
+    video.style.display = "none";
+    video.crossOrigin = "anonymous";
+    video.volume = 0;
+    video.addEventListener("loadedmetadata", () => {
+      document.body.appendChild(video);
+      resolve(new JsiVideo(CanvasKit, video));
+    });
+    video.addEventListener("error", () => {
+      reject(new Error(`Failed to load video from URL: ${url}`));
+    });
+  });
+};
+
 export class JsiVideo implements Video {
   __typename__ = "Video" as const;
 
@@ -12,8 +32,7 @@ export class JsiVideo implements Video {
 
   constructor(
     private CanvasKit: CanvasKit,
-    private videoElement: HTMLVideoElement,
-    private fps = 30
+    private videoElement: HTMLVideoElement
   ) {
     document.body.appendChild(this.videoElement);
   }
@@ -23,7 +42,7 @@ export class JsiVideo implements Video {
   }
 
   framerate(): number {
-    return this.fps;
+    throw new Error("Video.frame is not available on React Native Web");
   }
 
   setSurface(surface: Surface) {

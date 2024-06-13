@@ -76,7 +76,10 @@ export const useVideo = (
   const currentTime = Rea.useSharedValue(0);
   const lastTimestamp = Rea.useSharedValue(-1);
   const duration = useMemo(() => video?.duration() ?? 0, [video]);
-  const framerate = useMemo(() => video?.framerate() ?? 0, [video]);
+  const framerate = useMemo(
+    () => (Platform.OS === "web" ? -1 : video?.framerate() ?? 0),
+    [video]
+  );
   const size = useMemo(() => video?.size() ?? { width: 0, height: 0 }, [video]);
   const rotation = useMemo(() => video?.rotation() ?? 0, [video]);
   const frameDuration = 1000 / framerate;
@@ -129,7 +132,9 @@ export const useVideo = (
       currentTime.value = seek.value;
       lastTimestamp.value = currentTimestamp;
     }
-    if (delta >= currentFrameDuration && !isOver) {
+    // On Web the framerate is uknown.
+    // This could be optimized by using requestVideoFrameCallback (Chrome only)
+    if ((delta >= currentFrameDuration && !isOver) || Platform.OS === "web") {
       setFrame(video, currentFrame);
       currentTime.value += delta;
       lastTimestamp.value = currentTimestamp;
