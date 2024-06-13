@@ -14,6 +14,7 @@ interface Props {
   onValueChange: (value: number) => void;
   minValue: number;
   maxValue: number;
+  initialValue?: number;
 }
 
 const size = 32;
@@ -27,6 +28,7 @@ export const Slider: React.FC<Props> = ({
   onValueChange,
   minValue,
   maxValue,
+  initialValue = minValue,
 }) => {
   const { width } = useWindowDimensions();
 
@@ -34,7 +36,13 @@ export const Slider: React.FC<Props> = ({
   const pickerR = size / 2;
   const progressBarHeight = 3;
 
-  const translateX = useSharedValue(-pickerR);
+  const initialTranslateX = interpolate(
+    initialValue,
+    [minValue, maxValue],
+    [-pickerR, sliderWidth - pickerR]
+  );
+
+  const translateX = useSharedValue(initialTranslateX);
   const contextX = useSharedValue(0);
   const scale = useSharedValue(1);
 

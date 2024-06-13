@@ -5,7 +5,9 @@ sidebar_label: Video
 slug: /video
 ---
 
-React Native Skia provides a way to load video frames as images, enabling rich multimedia experiences within your applications. A video frame can be used anywhere a Skia image is accepted: `Image`, `ImageShader`, and `Atlas`.
+React Native Skia provides a way to load video frames as images, enabling rich multimedia experiences within your applications.
+A video frame can be used anywhere a Skia image is accepted: `Image`, `ImageShader`, and `Atlas`.
+Videos are also supported on Web.
 
 ### Requirements
 
