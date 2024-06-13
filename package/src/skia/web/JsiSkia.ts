@@ -42,7 +42,7 @@ import { JsiSkFontMgrFactory } from "./JsiSkFontMgrFactory";
 import { JsiSkAnimatedImageFactory } from "./JsiSkAnimatedImageFactory";
 import { JsiSkParagraphBuilderFactory } from "./JsiSkParagraphBuilderFactory";
 import { JsiSkNativeBufferFactory } from "./JsiSkNativeBufferFactory";
-import { createVideo, JsiVideo } from "./JsiVideo";
+import { createVideo } from "./JsiVideo";
 
 export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   Point: (x: number, y: number) =>
