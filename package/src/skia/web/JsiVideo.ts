@@ -1,13 +1,11 @@
-import type { CanvasKit, Surface } from "canvaskit-wasm";
+import type { Surface } from "canvaskit-wasm";
 
-import type { Video } from "../types";
+import type { CanvasKitWebGLBuffer, Video } from "../types";
+import { Skia } from "../Skia";
 
-import { JsiSkImage } from "./JsiSkImage";
+import { CanvasKitWebGLBufferImpl } from "./CanvasKitWebGLBufferImpl";
 
-export const createVideo = async (
-  CanvasKit: CanvasKit,
-  url: string
-): Promise<Video> => {
+export const createVideo = async (url: string): Promise<Video> => {
   const video = document.createElement("video");
   return new Promise((resolve, reject) => {
     video.src = url;
@@ -16,7 +14,7 @@ export const createVideo = async (
     video.volume = 0;
     video.addEventListener("loadedmetadata", () => {
       document.body.appendChild(video);
-      resolve(new JsiVideo(CanvasKit, video));
+      resolve(new JsiVideo(video));
     });
     video.addEventListener("error", () => {
       reject(new Error(`Failed to load video from URL: ${url}`));
@@ -27,13 +25,9 @@ export const createVideo = async (
 export class JsiVideo implements Video {
   __typename__ = "Video" as const;
 
-  private surface: Surface | null = null;
-  private img: JsiSkImage | null = null;
+  private webglBuffer: CanvasKitWebGLBuffer | null = null;
 
-  constructor(
-    private CanvasKit: CanvasKit,
-    private videoElement: HTMLVideoElement
-  ) {
+  constructor(private videoElement: HTMLVideoElement) {
     document.body.appendChild(this.videoElement);
   }
 
@@ -46,25 +40,15 @@ export class JsiVideo implements Video {
   }
 
   setSurface(surface: Surface) {
-    if (!this.surface) {
-      this.surface = surface;
-      const img = surface.makeImageFromTextureSource(this.videoElement);
-      if (img) {
-        this.img = new JsiSkImage(this.CanvasKit, img);
-      } else {
-        this.img = null;
-      }
-    }
+    // If we have the surface, we can use the WebGL buffer which is slightly faster
+    // This is because WebGL cannot be shared across contextes.
+    // This can be removed with WebGPU
+    this.webglBuffer = new CanvasKitWebGLBufferImpl(surface, this.videoElement);
   }
 
   nextImage() {
-    if (this.img && this.surface) {
-      this.surface.updateTextureFromSource(this.img.ref, this.videoElement);
-      return this.img;
-    }
-    return new JsiSkImage(
-      this.CanvasKit,
-      this.CanvasKit.MakeLazyImageFromTextureSource(this.videoElement)
+    return Skia.Image.MakeImageFromNativeBuffer(
+      this.webglBuffer ? this.webglBuffer : this.videoElement
     );
   }
 
