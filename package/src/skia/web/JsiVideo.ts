@@ -1,11 +1,14 @@
-import type { Surface } from "canvaskit-wasm";
+import type { CanvasKit, Surface } from "canvaskit-wasm";
 
-import type { CanvasKitWebGLBuffer, Video } from "../types";
-import { Skia } from "../Skia";
+import type { CanvasKitWebGLBuffer, Video, ImageFactory } from "../types";
 
 import { CanvasKitWebGLBufferImpl } from "./CanvasKitWebGLBufferImpl";
+import { JsiSkImageFactory } from "./JsiSkImageFactory";
 
-export const createVideo = async (url: string): Promise<Video> => {
+export const createVideo = async (
+  CanvasKit: CanvasKit,
+  url: string
+): Promise<Video> => {
   const video = document.createElement("video");
   return new Promise((resolve, reject) => {
     video.src = url;
@@ -14,7 +17,7 @@ export const createVideo = async (url: string): Promise<Video> => {
     video.volume = 0;
     video.addEventListener("loadedmetadata", () => {
       document.body.appendChild(video);
-      resolve(new JsiVideo(video));
+      resolve(new JsiVideo(new JsiSkImageFactory(CanvasKit), video));
     });
     video.addEventListener("error", () => {
       reject(new Error(`Failed to load video from URL: ${url}`));
@@ -27,7 +30,10 @@ export class JsiVideo implements Video {
 
   private webglBuffer: CanvasKitWebGLBuffer | null = null;
 
-  constructor(private videoElement: HTMLVideoElement) {
+  constructor(
+    private ImageFactory: ImageFactory,
+    private videoElement: HTMLVideoElement
+  ) {
     document.body.appendChild(this.videoElement);
   }
 
@@ -47,7 +53,7 @@ export class JsiVideo implements Video {
   }
 
   nextImage() {
-    return Skia.Image.MakeImageFromNativeBuffer(
+    return this.ImageFactory.MakeImageFromNativeBuffer(
       this.webglBuffer ? this.webglBuffer : this.videoElement
     );
   }

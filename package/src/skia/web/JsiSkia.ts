@@ -128,5 +128,5 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   FontMgr: new JsiSkFontMgrFactory(CanvasKit),
   ParagraphBuilder: new JsiSkParagraphBuilderFactory(CanvasKit),
   NativeBuffer: new JsiSkNativeBufferFactory(CanvasKit),
-  Video: createVideo,
+  Video: createVideo.bind(null, CanvasKit),
 });
