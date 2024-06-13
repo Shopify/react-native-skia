@@ -1,17 +1,11 @@
-import {
-  type SharedValue,
-  type FrameInfo,
-  createWorkletRuntime,
-  runOnJS,
-  runOnRuntime,
-} from "react-native-reanimated";
-import { useEffect, useMemo, useState } from "react";
+import type { SharedValue, FrameInfo } from "react-native-reanimated";
+import { useEffect, useMemo } from "react";
 
-import { Skia } from "../../skia/Skia";
 import type { SkImage, Video } from "../../skia/types";
 import { Platform } from "../../Platform";
 
 import Rea from "./ReanimatedProxy";
+import { useVideoLoading } from "./useVideoLoading";
 
 type Animated<T> = SharedValue<T> | T;
 
@@ -28,7 +22,6 @@ const copyFrameOnAndroid = (currentFrame: SharedValue<SkImage | null>) => {
   if (Platform.OS === "android") {
     const tex = currentFrame.value;
     if (tex) {
-      console.log("Copying frame on Android");
       currentFrame.value = tex.makeNonTextureImage();
       tex.dispose();
     }
@@ -70,25 +63,6 @@ const disposeVideo = (video: Video | null) => {
   video?.dispose();
 };
 
-const runtime = createWorkletRuntime("video-metadata-runtime");
-
-type VideoSource = string | null;
-
-const useVideoLoading = (source: VideoSource) => {
-  const [video, setVideo] = useState<Video | null>(null);
-  const cb = (src: string) => {
-    "worklet";
-    const vid = Skia.Video(src);
-    runOnJS(setVideo)(vid);
-  };
-  useEffect(() => {
-    if (source) {
-      runOnRuntime(runtime, cb)(source);
-    }
-  }, [source]);
-  return video;
-};
-
 export const useVideo = (
   source: string | null,
   userOptions?: Partial<PlaybackOptions>
@@ -102,7 +76,10 @@ export const useVideo = (
   const currentTime = Rea.useSharedValue(0);
   const lastTimestamp = Rea.useSharedValue(-1);
   const duration = useMemo(() => video?.duration() ?? 0, [video]);
-  const framerate = useMemo(() => video?.framerate() ?? 0, [video]);
+  const framerate = useMemo(
+    () => (Platform.OS === "web" ? -1 : video?.framerate() ?? 0),
+    [video]
+  );
   const size = useMemo(() => video?.size() ?? { width: 0, height: 0 }, [video]);
   const rotation = useMemo(() => video?.rotation() ?? 0, [video]);
   const frameDuration = 1000 / framerate;
@@ -155,7 +132,9 @@ export const useVideo = (
       currentTime.value = seek.value;
       lastTimestamp.value = currentTimestamp;
     }
-    if (delta >= currentFrameDuration && !isOver) {
+    // On Web the framerate is uknown.
+    // This could be optimized by using requestVideoFrameCallback (Chrome only)
+    if ((delta >= currentFrameDuration && !isOver) || Platform.OS === "web") {
       setFrame(video, currentFrame);
       currentTime.value += delta;
       lastTimestamp.value = currentTimestamp;

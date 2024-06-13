@@ -1,6 +1,6 @@
 import type { CanvasKit, Image } from "canvaskit-wasm";
 
-import { isNativeBufferWeb } from "../types";
+import { CanvasKitWebGLBuffer, isNativeBufferWeb } from "../types";
 import type {
   SkData,
   ImageInfo,
@@ -13,6 +13,7 @@ import { Host, getEnum } from "./Host";
 import { JsiSkImage } from "./JsiSkImage";
 import { JsiSkData } from "./JsiSkData";
 import type { JsiSkSurface } from "./JsiSkSurface";
+import type { CanvasKitWebGLBufferImpl } from "./CanvasKitWebGLBufferImpl";
 
 export class JsiSkImageFactory extends Host implements ImageFactory {
   constructor(CanvasKit: CanvasKit) {
@@ -35,8 +36,20 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
       throw new Error("Invalid NativeBuffer");
     }
     if (!surface) {
-      // TODO: this is way to slow
-      const img = this.CanvasKit.MakeImageFromCanvasImageSource(buffer);
+      let img: Image;
+      if (
+        buffer instanceof HTMLImageElement ||
+        buffer instanceof HTMLVideoElement ||
+        buffer instanceof ImageBitmap
+      ) {
+        img = this.CanvasKit.MakeLazyImageFromTextureSource(buffer);
+      } else if (buffer instanceof CanvasKitWebGLBuffer) {
+        img = (
+          buffer as CanvasKitWebGLBuffer as CanvasKitWebGLBufferImpl
+        ).toImage();
+      } else {
+        img = this.CanvasKit.MakeImageFromCanvasImageSource(buffer);
+      }
       return new JsiSkImage(this.CanvasKit, img);
     } else if (!image) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
