@@ -54,7 +54,6 @@ public:
     auto nativeId = arguments[0].asNumber();
     auto info = getEnsuredViewInfo(nativeId);
 
-    std::lock_guard<std::mutex> lock(_mutex);
     info->props.insert_or_assign(arguments[1].asString(runtime).utf8(runtime),
                                  RNJsi::JsiValueWrapper(runtime, arguments[2]));
 
@@ -191,20 +190,15 @@ public:
       : JsiHostObject(), _platformContext(platformContext) {}
 
   /**
-   * Invalidates the Skia View Api object
-   */
-  void invalidate() { unregisterAll(); }
-
-  /**
    Call to remove all draw view infos
    */
   void unregisterAll() {
+    std::lock_guard<std::mutex> lock(_mutex);
     // Unregister all views
     auto tempList = _viewInfos;
     for (const auto &info : tempList) {
       unregisterSkiaView(info.first);
     }
-    std::lock_guard<std::mutex> lock(_mutex);
     _viewInfos.clear();
   }
 
@@ -214,8 +208,8 @@ public:
    * @param view View to register
    */
   void registerSkiaView(size_t nativeId, std::shared_ptr<RNSkView> view) {
-    auto info = getEnsuredViewInfo(nativeId);
     std::lock_guard<std::mutex> lock(_mutex);
+    auto info = getEnsuredViewInfo(nativeId);
     info->view = view;
     info->view->setNativeId(nativeId);
     info->view->setJsiProperties(info->props);
@@ -227,12 +221,12 @@ public:
    * @param nativeId View id
    */
   void unregisterSkiaView(size_t nativeId) {
+    std::lock_guard<std::mutex> lock(_mutex);
     if (_viewInfos.count(nativeId) == 0) {
       return;
     }
     auto info = getEnsuredViewInfo(nativeId);
 
-    std::lock_guard<std::mutex> lock(_mutex);
     info->view = nullptr;
     _viewInfos.erase(nativeId);
   }
@@ -244,11 +238,11 @@ public:
    or a valid view, effectively toggling the view's availability.
    */
   void setSkiaView(size_t nativeId, std::shared_ptr<RNSkView> view) {
+    std::lock_guard<std::mutex> lock(_mutex);
     if (_viewInfos.find(nativeId) == _viewInfos.end()) {
       return;
     }
     auto info = getEnsuredViewInfo(nativeId);
-    std::lock_guard<std::mutex> lock(_mutex);
     if (view != nullptr) {
       info->view = view;
       info->view->setNativeId(nativeId);
@@ -266,9 +260,9 @@ private:
    * @return The callback info object for the requested view
    */
   RNSkViewInfo *getEnsuredViewInfo(size_t nativeId) {
+    std::lock_guard<std::mutex> lock(_mutex);
     if (_viewInfos.count(nativeId) == 0) {
       RNSkViewInfo info;
-      std::lock_guard<std::mutex> lock(_mutex);
       _viewInfos.emplace(nativeId, info);
     }
     return &_viewInfos.at(nativeId);
