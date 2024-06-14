@@ -6,12 +6,17 @@ import {
   ImageShader,
   Text,
   useFont,
+  useVideo,
 } from "@shopify/react-native-skia";
-import { Pressable, View, useWindowDimensions } from "react-native";
+import { Platform, Pressable, View, useWindowDimensions } from "react-native";
 import { useDerivedValue, useSharedValue } from "react-native-reanimated";
 import Slider from "@react-native-community/slider";
 
-import { useVideoFromAsset } from "../../components/Animations";
+// on Web because of CORS we need to use a local video
+const videoURL =
+  Platform.OS === "web"
+    ? require("../../Tests/assets/BigBuckBunny.mp4").default
+    : "https://bit.ly/skia-video";
 
 export const Video = () => {
   const paused = useSharedValue(false);
@@ -19,15 +24,12 @@ export const Video = () => {
   const { width, height } = useWindowDimensions();
   const fontSize = 20;
   const font = useFont(require("../../assets/SF-Mono-Semibold.otf"), fontSize);
-  const { currentFrame, currentTime, duration } = useVideoFromAsset(
-    require("../../Tests/assets/BigBuckBunny.mp4"),
-    {
-      paused,
-      looping: true,
-      seek,
-      volume: 0,
-    }
-  );
+  const { currentFrame, currentTime, duration } = useVideo(videoURL, {
+    paused,
+    looping: true,
+    seek,
+    volume: 0,
+  });
   const text = useDerivedValue(() => currentTime.value.toFixed(0));
   return (
     <View style={{ flex: 1 }}>
@@ -47,8 +49,8 @@ export const Video = () => {
             />
             <ColorMatrix
               matrix={[
-                0.95, 0, 0, 0, 0.05, 0.65, 0, 0, 0, 0.15, 0.15, 0, 0, 0, 0.5, 0,
-                0, 0, 1, 0,
+                -0.578, 0.99, 0.588, 0, 0, 0.469, 0.535, -0.003, 0, 0, 0.015,
+                1.69, -0.703, 0, 0, 0, 0, 0, 1, 0,
               ]}
             />
           </Fill>

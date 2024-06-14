@@ -46,7 +46,7 @@ void RNSkManager::invalidate() {
   _isInvalidated = true;
 
   // Invalidate members
-  _viewApi->invalidate();
+  _viewApi->unregisterAll();
   _platformContext->invalidate();
 }
 

@@ -1,10 +1,11 @@
 import { itRunsE2eOnly } from "../../../__tests__/setup";
+import type { Video } from "../../../skia/types";
 import { surface } from "../setup";
 
 describe("Videos", () => {
   itRunsE2eOnly("get video duration and framerate", async () => {
     const result = await surface.eval((Skia, ctx) => {
-      const video = Skia.Video(ctx.localAssets[0]);
+      const video = Skia.Video(ctx.localAssets[0]) as Video;
       return {
         duration: video.duration(),
         framerate: video.framerate(),
@@ -57,7 +58,7 @@ describe("Videos", () => {
   // });
   itRunsE2eOnly("seek non existing frame returns null", async () => {
     const result = await surface.eval((Skia, ctx) => {
-      const video = Skia.Video(ctx.localAssets[0]);
+      const video = Skia.Video(ctx.localAssets[0]) as Video;
       video.seek(100000);
       const image = video.nextImage();
       return image === null;
