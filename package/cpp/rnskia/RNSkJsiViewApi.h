@@ -23,8 +23,7 @@ using RNSkViewInfo = struct RNSkViewInfo {
   std::unordered_map<std::string, RNJsi::JsiValueWrapper> props;
 };
 
-class RNSkJsiViewApi : public RNJsi::JsiHostObject,
-                       public std::enable_shared_from_this<RNSkJsiViewApi> {
+class RNSkJsiViewApi : public RNJsi::JsiHostObject {
 public:
   /**
    Sets a custom property on a view given a view id. The property name/value

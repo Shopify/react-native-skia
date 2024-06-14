@@ -35,9 +35,7 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class RNSkPictureRenderer
-    : public RNSkRenderer,
-      public std::enable_shared_from_this<RNSkPictureRenderer> {
+class RNSkPictureRenderer : public RNSkRenderer {
 public:
   RNSkPictureRenderer(std::function<void()> requestRedraw,
                       std::shared_ptr<RNSkPlatformContext> context)
