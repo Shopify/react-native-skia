@@ -174,17 +174,6 @@ public:
   }
 
   /**
-   Calls a custom action.
-   */
-  virtual jsi::Value callJsiMethod(jsi::Runtime &runtime,
-                                   const std::string &name,
-                                   const jsi::Value *arguments, size_t count) {
-    throw std::runtime_error(
-        "The base Skia View does not support any commands. Command " + name +
-        " not found.");
-  }
-
-  /**
    * Repaints the Skia view using the underlying context and the drawcallback.
    * This method schedules a draw request that will be run on the correct
    * thread and js runtime.

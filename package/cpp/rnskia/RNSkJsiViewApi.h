@@ -69,52 +69,6 @@ public:
     return jsi::Value::undefined();
   }
 
-  /**
-   Calls a custom command / method on a view by the view id.
-   */
-  JSI_HOST_FUNCTION(callJsiMethod) {
-    if (count < 2) {
-      _platformContext->raiseError(
-          std::string("callCustomCommand: Expected at least 2 arguments, got " +
-                      std::to_string(count) + "."));
-
-      return jsi::Value::undefined();
-    }
-
-    if (!arguments[0].isNumber()) {
-      _platformContext->raiseError(
-          "callCustomCommand: First argument must be a number");
-
-      return jsi::Value::undefined();
-    }
-
-    if (!arguments[1].isString()) {
-      _platformContext->raiseError("callCustomCommand: Second argument must be "
-                                   "the name of the action to call.");
-
-      return jsi::Value::undefined();
-    }
-
-    auto nativeId = arguments[0].asNumber();
-    auto action = arguments[1].asString(runtime).utf8(runtime);
-
-    auto info = getEnsuredViewInfo(nativeId);
-
-    if (info->view == nullptr) {
-      throw jsi::JSError(
-          runtime, std::string("callCustomCommand: Could not call action " +
-                               action + " on view - view not ready.")
-                       .c_str());
-
-      return jsi::Value::undefined();
-    }
-
-    // Get arguments
-    size_t paramsCount = count - 2;
-    const jsi::Value *params = paramsCount > 0 ? &arguments[2] : nullptr;
-    return info->view->callJsiMethod(runtime, action, params, paramsCount);
-  }
-
   JSI_HOST_FUNCTION(requestRedraw) {
     if (count != 1) {
       _platformContext->raiseError(
@@ -225,7 +179,6 @@ public:
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setJsiProperty),
-                       JSI_EXPORT_FUNC(RNSkJsiViewApi, callJsiMethod),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, requestRedraw),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshotAsync),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshot))
