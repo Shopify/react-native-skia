@@ -121,7 +121,6 @@ const assertSkiaViewApi = () => {
   if (
     SkiaViewApi === null ||
     SkiaViewApi.setJsiProperty === null ||
-    SkiaViewApi.callJsiMethod === null ||
     SkiaViewApi.requestRedraw === null ||
     SkiaViewApi.makeImageSnapshot === null
   ) {
