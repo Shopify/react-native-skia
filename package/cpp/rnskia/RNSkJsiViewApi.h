@@ -51,7 +51,9 @@ public:
 
       return jsi::Value::undefined();
     }
+
     auto nativeId = arguments[0].asNumber();
+    std::lock_guard<std::mutex> lock(_mutex);
     auto info = getEnsuredViewInfo(nativeId);
 
     info->props.insert_or_assign(arguments[1].asString(runtime).utf8(runtime),
@@ -86,7 +88,7 @@ public:
 
     // find Skia View
     int nativeId = arguments[0].asNumber();
-
+    std::lock_guard<std::mutex> lock(_mutex);
     auto info = getEnsuredViewInfo(nativeId);
     if (info->view != nullptr) {
       info->view->requestRedraw();
@@ -111,13 +113,18 @@ public:
     // find Skia view
     int nativeId = arguments[0].asNumber();
     sk_sp<SkImage> image;
-    auto info = getEnsuredViewInfo(nativeId);
-    if (info->view != nullptr) {
+    std::shared_ptr<RNSkView> view;
+    {
+      std::lock_guard<std::mutex> lock(_mutex);
+      auto info = getEnsuredViewInfo(nativeId);
+      view = info->view;
+    }
+    if (view != nullptr) {
       if (count > 1 && !arguments[1].isUndefined() && !arguments[1].isNull()) {
         auto rect = JsiSkRect::fromValue(runtime, arguments[1]);
-        image = info->view->makeImageSnapshot(rect.get());
+        image = view->makeImageSnapshot(rect.get());
       } else {
-        image = info->view->makeImageSnapshot(nullptr);
+        image = view->makeImageSnapshot(nullptr);
       }
       if (image == nullptr) {
         throw jsi::JSError(runtime,
@@ -147,20 +154,25 @@ public:
 
     // find Skia view
     int nativeId = arguments[0].asNumber();
-    auto info = getEnsuredViewInfo(nativeId);
+    std::shared_ptr<RNSkView> view;
+    {
+      std::lock_guard<std::mutex> lock(_mutex);
+      auto info = getEnsuredViewInfo(nativeId);
+      view = info->view;
+    }
     auto context = _platformContext;
     auto bounds =
         count > 1 && !arguments[1].isUndefined() && !arguments[1].isNull()
             ? JsiSkRect::fromValue(runtime, arguments[1])
             : nullptr;
     return RNJsi::JsiPromises::createPromiseAsJSIValue(
-        runtime, [context = std::move(context), info, bounds](
+        runtime, [context = std::move(context), view, bounds](
                      jsi::Runtime &runtime,
                      std::shared_ptr<RNJsi::JsiPromises::Promise> promise) {
-          context->runOnMainThread([&runtime, info = std::move(info),
+          context->runOnMainThread([&runtime, view = std::move(view),
                                     promise = std::move(promise),
                                     context = std::move(context), bounds]() {
-            auto image = info->view->makeImageSnapshot(
+            auto image = view->makeImageSnapshot(
                 bounds == nullptr ? nullptr : bounds.get());
             context->runOnJavascriptThread(
                 [&runtime, context = std::move(context),
@@ -260,7 +272,6 @@ private:
    * @return The callback info object for the requested view
    */
   RNSkViewInfo *getEnsuredViewInfo(size_t nativeId) {
-    std::lock_guard<std::mutex> lock(_mutex);
     if (_viewInfos.count(nativeId) == 0) {
       RNSkViewInfo info;
       _viewInfos.emplace(nativeId, info);
