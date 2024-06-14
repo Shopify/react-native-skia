@@ -9,10 +9,10 @@ import {
   Skia,
   RuntimeShader,
   useImage,
-  useTouchHandler,
   vec,
 } from "@shopify/react-native-skia";
 import { useDerivedValue, useSharedValue } from "react-native-reanimated";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 import { Slider } from "../SpeedTest/Slider";
 
@@ -97,20 +97,20 @@ export const MagnifyingGlass = () => {
 
   const image = useImage(require("../../assets/oslo2.jpg"));
 
-  const onTouch = useTouchHandler({
-    onStart: ({ x, y }) => {
-      touchPosX.value = x;
-      touchPosY.value = y;
+  const gesture = Gesture.Pan()
+    .minDistance(0)
+    .onBegin((e) => {
+      touchPosX.value = e.x;
+      touchPosY.value = e.y;
       drawing.value = 1;
-    },
-    onActive: ({ x, y }) => {
-      touchPosX.value = x;
-      touchPosY.value = y;
-    },
-    onEnd: () => {
+    })
+    .onChange((e) => {
+      touchPosX.value = e.x;
+      touchPosY.value = e.y;
+    })
+    .onFinalize(() => {
       drawing.value = 0;
-    },
-  });
+    });
 
   const uniforms = useDerivedValue(() => {
     return {
@@ -137,32 +137,33 @@ export const MagnifyingGlass = () => {
 
   return (
     <View style={{ flex: 1, flexDirection: "column-reverse" }}>
-      <Canvas
-        style={StyleSheet.absoluteFill}
-        mode="continuous"
-        onTouch={onTouch}
-        onLayout={handleCanvasLayoutChange}
-      >
-        <Group transform={[{ scale: 1 / pd }]}>
-          <Group
-            layer={
-              <Paint>
-                <RuntimeShader source={source} uniforms={uniforms} />
-              </Paint>
-            }
-            transform={[{ scale: pd }]}
-          >
-            <Image
-              image={image}
-              fit="cover"
-              x={0}
-              y={0}
-              width={canvasWidth}
-              height={canvasHeight}
-            />
+      <GestureDetector gesture={gesture}>
+        <Canvas
+          style={StyleSheet.absoluteFill}
+          mode="continuous"
+          onLayout={handleCanvasLayoutChange}
+        >
+          <Group transform={[{ scale: 1 / pd }]}>
+            <Group
+              layer={
+                <Paint>
+                  <RuntimeShader source={source} uniforms={uniforms} />
+                </Paint>
+              }
+              transform={[{ scale: pd }]}
+            >
+              <Image
+                image={image}
+                fit="cover"
+                x={0}
+                y={0}
+                width={canvasWidth}
+                height={canvasHeight}
+              />
+            </Group>
           </Group>
-        </Group>
-      </Canvas>
+        </Canvas>
+      </GestureDetector>
       <View
         style={{
           height: 60,
