@@ -2,7 +2,6 @@ export * from "./Reanimated";
 export * from "./API";
 export * from "./Breathe";
 export * from "./Filters";
-export * from "./MagnifyingGlass";
 export * from "./Gooey";
 export * from "./Matrix";
 export * from "./Graphs";

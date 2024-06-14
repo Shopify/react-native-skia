@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { type FrameInfo, type SharedValue } from "react-native-reanimated";
+import type { FrameInfo, SharedValue } from "react-native-reanimated";
 
 import { useAnimatedImage } from "../../skia/core/AnimatedImage";
 import type { DataSourceParam, SkImage } from "../../skia/types";

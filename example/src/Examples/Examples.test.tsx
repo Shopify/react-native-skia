@@ -16,7 +16,6 @@ import { Matrix } from "./Matrix";
 import { Hue } from "./Hue";
 import { Glassmorphism } from "./Glassmorphism";
 import { Filters } from "./Filters";
-import { MagnifyingGlass } from "./MagnifyingGlass";
 
 it("should render the Breathe example correctly", () => {
   render(<Breathe />);
@@ -68,10 +67,6 @@ it("should render the Glassmorphism example correctly", () => {
 
 it("should render the Filter example correctly", () => {
   render(<Filters />);
-});
-
-it("should render the MagnifyingGlass example correctly", () => {
-  render(<MagnifyingGlass />);
 });
 
 afterEach(cleanup);
