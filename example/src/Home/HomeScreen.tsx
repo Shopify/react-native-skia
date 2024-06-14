@@ -28,11 +28,6 @@ export const HomeScreen = () => {
         route="Filters"
       />
       <HomeScreenButton
-        title="🔍 Magnifying Glass"
-        description="Magnifying glass filter"
-        route="MagnifyingGlass"
-      />
-      <HomeScreenButton
         title="🟣 Gooey Effect"
         description="Simple Gooey effect"
         route="Gooey"

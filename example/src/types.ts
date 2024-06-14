@@ -8,7 +8,6 @@ export type StackParamList = {
   API: undefined;
   Breathe: undefined;
   Filters: undefined;
-  MagnifyingGlass: undefined;
   Gooey: undefined;
   Hue: undefined;
   Matrix: undefined;
