@@ -1,9 +1,10 @@
 import type { CanvasKit, TypefaceFontProvider } from "canvaskit-wasm";
 
 import type { SkTypefaceFontProvider } from "../types/Paragraph/TypefaceFontProvider";
+import { JsiSkTypeface } from "./JsiSkTypeface";
 import type { FontStyle, SkTypeface } from "../types";
 
-import { HostObject, NotImplementedOnRNWeb } from "./Host";
+import { HostObject, optEnum } from "./Host";
 
 export class JsiSkTypefaceFontProvider
   extends HostObject<TypefaceFontProvider, "FontMgr">
@@ -15,8 +16,18 @@ export class JsiSkTypefaceFontProvider
     super(CanvasKit, ref, "FontMgr");
   }
 
-  matchFamilyStyle(_name: string, _style: FontStyle): SkTypeface {
-    throw new NotImplementedOnRNWeb();
+  matchFamilyStyle(name: string, style: FontStyle): SkTypeface | null {
+    const fontStyles = {
+      weight: optEnum(style.weight),
+      width: optEnum(style.width),
+      slant: optEnum(style.slant),
+    }
+
+    const tf = this.ref.matchFamilyStyle(name, fontStyles);
+    if (tf == null) {
+      return null;
+    }
+    return new JsiSkTypeface(this.CanvasKit, tf);
   }
   countFamilies() {
     return this.ref.countFamilies();
