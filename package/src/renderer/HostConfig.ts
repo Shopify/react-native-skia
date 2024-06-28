@@ -13,7 +13,7 @@ import type { Container } from "./Container";
 import { createNode } from "./HostComponents";
 import { shallowEq } from "./typeddash";
 
-const DEBUG = false;
+const DEBUG = true;
 export const debug = (...args: Parameters<typeof console.log>) => {
   if (DEBUG) {
     console.log(...args);
@@ -71,9 +71,9 @@ export const skHostConfig: SkiaHostConfig = {
    * This function is used by the reconciler in order to calculate current time for prioritising work.
    */
   now: Date.now,
-  supportsMutation: true,
+  supportsMutation: false,
   isPrimaryRenderer: false,
-  supportsPersistence: false,
+  supportsPersistence: true,
   supportsHydration: false,
   //supportsMicrotask: true,
 
@@ -241,4 +241,54 @@ export const skHostConfig: SkiaHostConfig = {
   beforeActiveInstanceBlur: () => {},
   afterActiveInstanceBlur: () => {},
   detachDeletedInstance: () => {},
+
+  cloneInstance: (
+    instance: Instance,
+    type: string,
+    oldProps: Props,
+    newProps: Props,
+    keepChildren: boolean,
+    children?: readonly Instance[]
+  ) => {
+    debug("cloneInstance", type, oldProps, newProps, keepChildren, children);
+    return instance;
+  },
+  createContainerChildSet: (): Array<Instance | TextInstance> => {
+    debug("createContainerChildSet");
+    return [];
+  },
+  appendChildToContainerChildSet: (
+    childSet: Array<Instance | TextInstance>,
+    child: Instance | TextInstance
+  ) => {
+    debug("appendChildToContainerChildSet", childSet, child);
+    childSet.push(child);
+  },
+  replaceContainerChildren: (
+    container: Container,
+    newChildren: Array<Instance | TextInstance>
+  ) => {
+    debug("replaceContainerChildren", container, newChildren);
+  },
+  cloneHiddenInstance: (instance: Instance, type: string, props: Props) => {
+    debug("cloneHiddenInstance", instance, type, props);
+    return instance;
+  },
+  cloneHiddenTextInstance: (instance: TextInstance, text: string) => {
+    debug("cloneHiddenTextInstance", instance, text);
+    return instance;
+  },
+  finalizeContainerChildren: (
+    container: Container,
+    newChildren: Array<Instance | TextInstance>
+  ) => {
+    debug("finalizeContainerChildren", container, newChildren);
+    // if (
+    //   newChildren.length === 1 &&
+    //   newChildren[0].text === "Error when completing root"
+    // ) {
+    //   // Trigger an error for testing purposes
+    //   throw Error("Error when completing root");
+    // }
+  },
 };
