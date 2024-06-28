@@ -105,8 +105,8 @@ export default function App() {
 ```
 :::info
 
-When using expo router in dev mode you CANNOT load components that are inside the app directory, as they will get evaluated by the router before CanvasKit has loaded.
-Make syure the component to load lies outside the 'app' directory (or whatever has been configured as the router folder).
+When using expo router in dev mode you cannot load components that are inside the app directory, as they will get evaluated by the router before CanvasKit is loaded.
+Make sure the component to load lies outside the 'app' directory.
 
 :::
 
@@ -167,11 +167,6 @@ To request these features, please submit [a feature request on GitHub](https://g
 * `PathEffectFactory.MakeCompose()`
 * `PathFactory.MakeFromText()`
 * `ShaderFilter`
-
-**Unplanned**
-
-* `ImageSvg`
-
 
 ## Manual webpack Installation
 
