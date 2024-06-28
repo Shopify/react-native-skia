@@ -1,8 +1,6 @@
 import type { ComponentProps, ComponentType } from "react";
 import React, { useMemo, lazy, Suspense } from "react";
 
-import { Platform } from "../Platform";
-
 import { LoadSkiaWeb } from "./LoadSkiaWeb";
 
 interface WithSkiaProps {
@@ -21,13 +19,7 @@ export const WithSkiaWeb = ({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (): any =>
       lazy(async () => {
-        if (Platform.OS === "web") {
-          await LoadSkiaWeb(opts);
-        } else {
-          console.warn(
-            "<WithSkiaWeb /> is only necessary on web. Consider not using on native."
-          );
-        }
+        await LoadSkiaWeb(opts);
         return getComponent();
       }),
     [getComponent, opts]

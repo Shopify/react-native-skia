@@ -34,6 +34,7 @@
     "metro.config.js",
     "jest.config.js",
     "lib",
-    "scripts"
+    "scripts",
+    "build.ts"
   ]
 }

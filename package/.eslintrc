@@ -4,6 +4,7 @@
   "parserOptions": {
     "project": "./tsconfig.json"
   },
+  "ignorePatterns": "build.ts",
   "rules": {
     "prefer-destructuring": [
       "error",

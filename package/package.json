@@ -27,6 +27,8 @@
     "android/src/**",
     "libs/android/**",
     "index.js",
+    "web.js",
+    "react-native-web.js",
     "jestSetup.js",
     "jestSetup.mjs",
     "jestEnv.mjs",
@@ -48,7 +50,7 @@
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --cache",
     "test": "jest",
     "e2e": "E2E=true yarn test -i e2e",
-    "build": "bob build && merge-dirs lib/typescript/src lib/commonjs && merge-dirs lib/typescript/src lib/module",
+    "build": "bob build && merge-dirs lib/typescript/src lib/commonjs && merge-dirs lib/typescript/src lib/module && NODE_ENV=production bun build.ts",
     "release": "semantic-release"
   },
   "repository": {
