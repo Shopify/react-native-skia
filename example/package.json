@@ -29,6 +29,7 @@
     "color": "4.2.1",
     "expo": "^48.0.0",
     "expo-asset": "~8.9.1",
+    "expo-image": "~1.0.2",
     "its-fine": "1.0.8",
     "react": "18.2.0",
     "react-dom": "18.0.0",
