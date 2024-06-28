@@ -1,10 +1,5 @@
 import type { Skia } from "../../skia/types";
-import type {
-  Node,
-  DeclarationNode,
-  NodeType,
-  DeclarationType,
-} from "../types";
+import type { Node, DeclarationNode, NodeType } from "../types";
 import type { DeclarationContext } from "../types/DeclarationContext";
 
 export interface NodeContext {
@@ -72,12 +67,7 @@ export abstract class JsiDeclarationNode<P>
 {
   private invalidate: Invalidate = () => {};
 
-  constructor(
-    ctx: NodeContext,
-    public declarationType: DeclarationType,
-    type: NodeType,
-    props: P
-  ) {
+  constructor(ctx: NodeContext, type: NodeType, props: P) {
     super(ctx, type, props);
   }
 

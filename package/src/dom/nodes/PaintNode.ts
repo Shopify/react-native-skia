@@ -1,6 +1,6 @@
 import { StrokeCap, StrokeJoin, PaintStyle, BlendMode } from "../../skia/types";
 import type { DeclarationNode, PaintProps } from "../types";
-import { DeclarationType, NodeType } from "../types";
+import { NodeType } from "../types";
 import type { DeclarationContext } from "../types/DeclarationContext";
 
 import { enumKey } from "./datatypes";
@@ -12,7 +12,7 @@ export class PaintNode
   implements DeclarationNode<PaintProps>
 {
   constructor(ctx: NodeContext, props: PaintProps = {}) {
-    super(ctx, DeclarationType.Paint, NodeType.Paint, props);
+    super(ctx, NodeType.Paint, props);
   }
 
   decorate(ctx: DeclarationContext) {

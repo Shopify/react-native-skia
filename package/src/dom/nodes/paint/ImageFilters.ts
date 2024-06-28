@@ -15,7 +15,7 @@ import type {
   OffsetImageFilterProps,
   RuntimeShaderImageFilterProps,
 } from "../../types";
-import { DeclarationType, NodeType } from "../../types";
+import { NodeType } from "../../types";
 import { processRadius, enumKey } from "../datatypes";
 import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
@@ -58,7 +58,7 @@ const MakeInnerShadow = (
 
 export abstract class ImageFilterDeclaration<P> extends JsiDeclarationNode<P> {
   constructor(ctx: NodeContext, type: NodeType, props: P) {
-    super(ctx, DeclarationType.ImageFilter, type, props);
+    super(ctx, type, props);
   }
 
   protected input(ctx: DeclarationContext) {
