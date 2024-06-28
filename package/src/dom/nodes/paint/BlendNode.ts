@@ -1,6 +1,6 @@
 import type { BlendProps } from "../../types/ImageFilters";
 import { BlendMode } from "../../../skia/types";
-import { DeclarationType, NodeType } from "../../types/NodeType";
+import { NodeType } from "../../types/NodeType";
 import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
 import { enumKey } from "../datatypes";
@@ -9,7 +9,7 @@ import { composeDeclarations } from "../../types/DeclarationContext";
 
 export class BlendNode extends JsiDeclarationNode<BlendProps> {
   constructor(ctx: NodeContext, props: BlendProps) {
-    super(ctx, DeclarationType.ImageFilter, NodeType.Blend, props);
+    super(ctx, NodeType.Blend, props);
   }
 
   decorate(ctx: DeclarationContext) {

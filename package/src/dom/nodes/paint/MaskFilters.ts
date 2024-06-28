@@ -2,13 +2,13 @@ import { BlurStyle } from "../../../skia/types";
 import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
 import type { BlurMaskFilterProps } from "../../types";
-import { DeclarationType, NodeType } from "../../types";
+import { NodeType } from "../../types";
 import { enumKey } from "../datatypes";
 import type { DeclarationContext } from "../../types/DeclarationContext";
 
 export class BlurMaskFilterNode extends JsiDeclarationNode<BlurMaskFilterProps> {
   constructor(ctx: NodeContext, props: BlurMaskFilterProps) {
-    super(ctx, DeclarationType.MaskFilter, NodeType.BlurMaskFilter, props);
+    super(ctx, NodeType.BlurMaskFilter, props);
   }
 
   decorate(ctx: DeclarationContext) {

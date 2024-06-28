@@ -10,7 +10,7 @@ import type {
   Path1DPathEffectProps,
   Path2DPathEffectProps,
 } from "../../types";
-import { DeclarationType, NodeType } from "../../types";
+import { NodeType } from "../../types";
 import { enumKey } from "../datatypes/Enum";
 import { processPath } from "../datatypes";
 import type { DeclarationContext } from "../../types/DeclarationContext";
@@ -18,7 +18,7 @@ import { composeDeclarations } from "../../types/DeclarationContext";
 
 abstract class PathEffectDeclaration<P> extends JsiDeclarationNode<P> {
   constructor(ctx: NodeContext, type: NodeType, props: P) {
-    super(ctx, DeclarationType.PathEffect, type, props);
+    super(ctx, type, props);
   }
 
   protected composeAndPush(ctx: DeclarationContext, pe1: SkPathEffect) {
