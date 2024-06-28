@@ -85,6 +85,7 @@ Images can be drawn by specifying the output rectangle and how the image should 
 | width  | `number`  | The width of the destination image.                                                                                                                               |
 | height | `number`  | The height of the destination image.                                                                                                                              |
 | fit?   | `Fit`     | The method used to fit the image into the rectangle. Values can be `contain`, `fill`, `cover`, `fitHeight`, `fitWidth`, `scaleDown`, or `none` (the default is `contain`). |
+| cubicSampling? | `boolean` | use cubic sampling. |
 
 ### Example
 
