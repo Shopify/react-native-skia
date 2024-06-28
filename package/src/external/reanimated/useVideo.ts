@@ -36,7 +36,6 @@ const setFrame = (video: Video, currentFrame: SharedValue<SkImage | null>) => {
       currentFrame.value.dispose();
     }
     currentFrame.value = img;
-  } else {
     copyFrameOnAndroid(currentFrame);
   }
 };
@@ -99,7 +98,6 @@ export const useVideo = (
     () => seek.value,
     (value) => {
       if (value !== null) {
-        copyFrameOnAndroid(currentFrame);
         video?.seek(value);
         currentTime.value = value;
         seek.value = null;
