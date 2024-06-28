@@ -12,13 +12,19 @@ export const isEdge = (pos: Vector, b: SkRect) => {
 };
 
 // We have an issue to check property existence on JSI backed instances
-const isRRectCtor = (def: RRectDef): def is RRectCtor =>
-  (def as any).rect === undefined;
+const isRRectCtor = (def: RRectDef): def is RRectCtor => {
+  "worklet";
+  return (def as any).rect === undefined;
+};
+
 // We have an issue to check property existence on JSI backed instances
-const isRectCtor = (def: RectDef): def is RectCtor =>
-  (def as any).rect === undefined;
+const isRectCtor = (def: RectDef): def is RectCtor => {
+  "worklet";
+  return (def as any).rect === undefined;
+};
 
 export const processRect = (Skia: Skia, def: RectDef) => {
+  "worklet";
   if (isRectCtor(def)) {
     return Skia.XYWHRect(def.x ?? 0, def.y ?? 0, def.width, def.height);
   } else {
@@ -27,6 +33,7 @@ export const processRect = (Skia: Skia, def: RectDef) => {
 };
 
 export const processRRect = (Skia: Skia, def: RRectDef) => {
+  "worklet";
   if (isRRectCtor(def)) {
     const r = processRadius(Skia, def.r ?? 0);
     return Skia.RRectXY(
