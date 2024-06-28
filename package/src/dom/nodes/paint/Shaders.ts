@@ -18,7 +18,7 @@ import type {
   TurbulenceProps,
   TwoPointConicalGradientProps,
 } from "../../types";
-import { DeclarationType, NodeType } from "../../types";
+import { NodeType } from "../../types";
 import {
   enumKey,
   fitRects,
@@ -30,7 +30,7 @@ import {
 
 export abstract class ShaderDeclaration<P> extends JsiDeclarationNode<P> {
   constructor(ctx: NodeContext, type: NodeType, props: P) {
-    super(ctx, DeclarationType.Shader, type, props);
+    super(ctx, type, props);
   }
 }
 

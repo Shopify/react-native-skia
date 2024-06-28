@@ -72,13 +72,3 @@ export const enum NodeType {
   // Paragraph
   Paragraph = "skParagraph",
 }
-
-export const enum DeclarationType {
-  Paint,
-  Shader,
-  ImageFilter,
-  ColorFilter,
-  PathEffect,
-  MaskFilter,
-  Unknown,
-}
