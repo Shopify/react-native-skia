@@ -17,12 +17,14 @@ protected:
   void draw(DrawingContext *context) override {
     auto rects = _imageProps->getDerivedValue();
     auto image = _imageProps->getImage();
+    auto cubicSampling = _imageProps->getCubicSampling();
     if (image == nullptr) {
       return;
     }
 
     context->getCanvas()->drawImageRect(
-        image, rects->src, rects->dst, SkSamplingOptions(),
+        image, rects->src, rects->dst,
+        cubicSampling ? SkSamplingOptions({0, 0}) : SkSamplingOptions(),
         context->getPaint().get(), SkCanvas::kStrict_SrcRectConstraint);
   }
 

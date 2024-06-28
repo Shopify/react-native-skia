@@ -37,6 +37,7 @@ export type ImageProps = DrawingNodeProps &
   RectDef & {
     fit?: Fit;
     image: SkImage | null;
+    cubicSampling?: boolean;
   };
 
 export type CircleProps = CircleDef & DrawingNodeProps;

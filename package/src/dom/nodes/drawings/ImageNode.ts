@@ -37,13 +37,15 @@ export class ImageNode extends JsiDrawingNode<
   }
 
   draw({ canvas, paint }: DrawingContext) {
-    const { image } = this.props;
+    const { image, cubicSampling } = this.props;
     if (!this.derived) {
       throw new Error("ImageNode: src and dst are undefined");
     }
     const { src, dst } = this.derived;
-    if (image) {
+    if (image && !cubicSampling) {
       canvas.drawImageRect(image, src, dst, paint);
+    } else if (image) {
+      canvas.drawImageRectCubic(image, src, dst, 0, 0, paint);
     }
   }
 }
