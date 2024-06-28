@@ -4,7 +4,7 @@ import type { AnimatedProps } from "../renderer";
 import Rea from "../external/reanimated/ReanimatedProxy";
 import { exhaustiveCheck } from "../renderer/typeddash";
 
-import type { DrawingContext } from "./Common";
+import { processContext, type DrawingContext } from "./Context";
 import {
   renderAtlas,
   renderCircle,
@@ -47,6 +47,9 @@ const materialize = <P>(props: AnimatedProps<P>) => {
 export const renderNode = (ctx: DrawingContext, node: SGNode) => {
   "worklet";
   const materializedProps = materialize(node.props);
+  const { restore, restorePaint } = processContext(ctx, materializedProps);
+  //const { invertClip, layer, matrix, transform } = materializedProps;
+
   switch (node.type) {
     case NodeType.Circle:
       return renderCircle(ctx, materializedProps);
@@ -92,5 +95,11 @@ export const renderNode = (ctx: DrawingContext, node: SGNode) => {
       return renderAtlas(ctx, materializedProps);
     default:
       return exhaustiveCheck(node.type);
+  }
+  if (restore) {
+    ctx.canvas.restore();
+  }
+  if (restorePaint) {
+    //ctx.paint.restore();
   }
 };

@@ -26,7 +26,7 @@ import { saturate } from "../renderer";
 import { BlendMode, FillType, PointMode, VertexMode } from "../skia";
 import type { Skia } from "../skia/types";
 
-import type { DrawingContext } from "./Common";
+import type { DrawingContext } from "./Context";
 
 export const renderCircle = (ctx: DrawingContext, props: CircleProps) => {
   "worklet";
