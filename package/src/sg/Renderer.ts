@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { GroupProps } from "../dom/types";
 import { NodeType } from "../dom/types";
 import type { AnimatedProps } from "../renderer";
 import { exhaustiveCheck } from "../renderer/typeddash";
+import { processTransform3d } from "../skia/types";
 
 import { type DrawingContext } from "./Context";
 import {
@@ -77,6 +79,7 @@ import {
 } from "./Mixed";
 
 const isSharedValueKind = (value: unknown): value is { value: unknown } => {
+  "worklet";
   return typeof value === "object" && value !== null && "value" in value;
 };
 
@@ -94,16 +97,35 @@ const materialize = <P>(props: AnimatedProps<P>) => {
   return materializedProps as any;
 };
 
+const processContext = (ctx: DrawingContext, props: GroupProps) => {
+  "worklet";
+  let restore = false;
+  if (props.matrix) {
+    ctx.canvas.save();
+    ctx.canvas.concat(props.matrix);
+    restore = true;
+  } else if (props.transform) {
+    ctx.canvas.save();
+    ctx.canvas.concat(processTransform3d(props.transform));
+    restore = true;
+  }
+
+  return { restore };
+};
+
 export const renderNode = (ctx: DrawingContext, node: SGNode) => {
   "worklet";
   const materializedProps = materialize(node.props) as unknown;
-  //const { restore, restorePaint } = processContext(ctx, materializedProps as PropMap[typeof node.type]);
-  //const { invertClip, layer, matrix, transform } = materializedProps;
-
+  let restore = false;
   switch (node.type) {
     case NodeType.Group:
-      // nothing to do here
-      //renderGroup(ctx, materializedProps as PropMap[typeof node.type]);
+      const result = processContext(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
+      // eslint-disable-next-line prefer-destructuring
+      restore = result.restore;
+      node.children?.forEach((child) => renderNode(ctx, child));
       break;
     case NodeType.Layer:
       renderLayer(ctx, materializedProps as PropMap[typeof node.type]);
@@ -333,9 +355,9 @@ export const renderNode = (ctx: DrawingContext, node: SGNode) => {
     default:
       return exhaustiveCheck(node.type);
   }
-  // if (restore) {
-  //   ctx.canvas.restore();
-  // }
+  if (restore) {
+    ctx.canvas.restore();
+  }
   // if (restorePaint) {
   //   //ctx.paint.restore();
   // }
