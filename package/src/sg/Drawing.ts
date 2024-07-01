@@ -26,7 +26,7 @@ import {
   processRect,
 } from "../dom/nodes";
 import { saturate } from "../renderer";
-import { BlendMode, FillType, PointMode, VertexMode } from "../skia";
+import { BlendMode, FillType, PointMode, VertexMode } from "../skia/types";
 import type { Skia } from "../skia/types";
 
 import { getPaint, type DrawingContext } from "./Context";

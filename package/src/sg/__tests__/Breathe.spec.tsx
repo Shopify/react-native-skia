@@ -1,9 +1,10 @@
 import { importSkia, width, height } from "../../renderer/__tests__/setup";
-import { setupSkia } from "../../skia/__tests__/setup";
 import { processResult } from "../../__tests__/setup";
+import type { SGNode } from "../Node";
 import { createNode } from "../Node";
 import { NodeType } from "../../dom/types";
 import { renderNode } from "../Renderer";
+import { setupSkia } from "../../skia/__tests__/setup";
 
 describe("Breathe", () => {
   it("Apple Breathe Demo", () => {
@@ -22,7 +23,7 @@ describe("Breathe", () => {
       respectCTM: true,
     });
 
-    const ringChildren = [];
+    const ringChildren: SGNode[] = [];
     for (let i = 0; i < 6; i++) {
       const theta = (i * (2 * Math.PI)) / 6;
       const matrix = Skia.Matrix();

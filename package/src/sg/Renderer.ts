@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NodeType } from "../dom/types";
 import type { AnimatedProps } from "../renderer";
-import Rea from "../external/reanimated/ReanimatedProxy";
 import { exhaustiveCheck } from "../renderer/typeddash";
 
 import { type DrawingContext } from "./Context";
@@ -77,12 +76,16 @@ import {
   renderBoxShadow,
 } from "./Mixed";
 
+const isSharedValueKind = (value: unknown): value is { value: unknown } => {
+  return typeof value === "object" && value !== null && "value" in value;
+};
+
 const materialize = <P>(props: AnimatedProps<P>) => {
   "worklet";
   const materializedProps: Record<string, unknown> = {};
   for (const key in props) {
     const value = props[key];
-    if (Rea.isSharedValue(value)) {
+    if (isSharedValueKind(value)) {
       materializedProps[key] = value.value;
     } else {
       materializedProps[key] = value;
