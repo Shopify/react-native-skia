@@ -2,7 +2,6 @@
 import { NodeType } from "../dom/types";
 import type { AnimatedProps } from "../renderer";
 import Rea from "../external/reanimated/ReanimatedProxy";
-import { exhaustiveCheck } from "../renderer/typeddash";
 
 import { processContext, type DrawingContext } from "./Context";
 import {
@@ -21,14 +20,6 @@ import {
   renderRect,
   renderVertices,
 } from "./Drawing";
-
-type UnknownProps = Record<string, any>;
-
-interface SGNode<P = UnknownProps> {
-  type: NodeType;
-  props: AnimatedProps<P>;
-  children: SGNode[];
-}
 
 const materialize = <P>(props: AnimatedProps<P>) => {
   "worklet";
@@ -52,19 +43,26 @@ export const renderNode = (ctx: DrawingContext, node: SGNode) => {
 
   switch (node.type) {
     case NodeType.Circle:
-      return renderCircle(ctx, materializedProps);
+      renderCircle(ctx, materializedProps);
+      break;
     case NodeType.Fill:
-      return renderFill(ctx);
+      renderFill(ctx);
+      break;
     case NodeType.Points:
-      return renderPoints(ctx, materializedProps);
+      renderPoints(ctx, materializedProps);
+      break;
     case NodeType.Path:
-      return renderPath(ctx, materializedProps);
+      renderPath(ctx, materializedProps);
+      break;
     case NodeType.Rect:
-      return renderRect(ctx, materializedProps);
+      renderRect(ctx, materializedProps);
+      break;
     case NodeType.RRect:
-      return renderRRect(ctx, materializedProps);
+      renderRRect(ctx, materializedProps);
+      break;
     case NodeType.Oval:
-      return renderOval(ctx, materializedProps);
+      renderOval(ctx, materializedProps);
+      break;
     // case NodeType.Group:
     //   return renderGroup(ctx, materializedProps);
     // case NodeType.Paint:
@@ -72,13 +70,17 @@ export const renderNode = (ctx: DrawingContext, node: SGNode) => {
     // case NodeType.Image:
     //   return renderImage(ctx, materializedProps);
     case NodeType.Line:
-      return renderLine(ctx, materializedProps);
+      renderLine(ctx, materializedProps);
+      break;
     case NodeType.Patch:
-      return renderPatch(ctx, materializedProps);
+      renderPatch(ctx, materializedProps);
+      break;
     case NodeType.Vertices:
-      return renderVertices(ctx, materializedProps);
+      renderVertices(ctx, materializedProps);
+      break;
     case NodeType.DiffRect:
-      return renderDiffRect(ctx, materializedProps);
+      renderDiffRect(ctx, materializedProps);
+      break;
     // case NodeType.Text:
     //   return renderText(ctx, materializedProps);
     // case NodeType.TextPath:
@@ -88,13 +90,17 @@ export const renderNode = (ctx: DrawingContext, node: SGNode) => {
     // case NodeType.Glyphs:
     //   return renderGlyphs(ctx, materializedProps);
     case NodeType.Picture:
-      return renderPicture(ctx, materializedProps);
+      renderPicture(ctx, materializedProps);
+      break;
     case NodeType.ImageSVG:
-      return renderImageSVG(ctx, materializedProps);
+      renderImageSVG(ctx, materializedProps);
+      break;
     case NodeType.Atlas:
-      return renderAtlas(ctx, materializedProps);
+      renderAtlas(ctx, materializedProps);
+      break;
     default:
-      return exhaustiveCheck(node.type);
+      throw new Error(`Unsupported node type: ${node.type}`);
+    //return exhaustiveCheck(node.type);
   }
   if (restore) {
     ctx.canvas.restore();

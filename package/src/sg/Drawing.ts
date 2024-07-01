@@ -1,3 +1,5 @@
+import type { AnimatedProps } from "react-native-reanimated";
+
 import type {
   AtlasProps,
   CircleProps,
@@ -13,6 +15,7 @@ import type {
   RectProps,
   RoundedRectProps,
   VerticesProps,
+  NodeType,
 } from "../dom/nodes";
 import {
   enumKey,
