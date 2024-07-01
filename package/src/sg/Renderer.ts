@@ -49,6 +49,24 @@ import {
   renderMatrixColorFilter,
   renderSRGBToLinearGammaColorFilter,
 } from "./ColorFilters";
+import {
+  renderColorShader,
+  renderFractalNoise,
+  renderImageShader,
+  renderLinearGradient,
+  renderRadialGradient,
+  renderShader,
+  renderSweepGradient,
+  renderTurbulence,
+  renderTwoPointConicalGradient,
+} from "./Shaders";
+import {
+  renderCornerPathEffect,
+  renderDashPathEffect,
+  renderDiscretePathEffect,
+  renderPath1DPathEffect,
+  renderPath2DPathEffect,
+} from "./PathEffects";
 
 const materialize = <P>(props: AnimatedProps<P>) => {
   "worklet";
