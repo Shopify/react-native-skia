@@ -1,5 +1,6 @@
 import type {
   GlyphsProps,
+  ParagraphProps,
   TextBlobProps,
   TextPathProps,
   TextProps,
@@ -32,5 +33,13 @@ export const renderGlyphs = (_ctx: DrawingContext, _props: GlyphsProps) => {
   "worklet";
   // const { glyphs, positions, font } = processGlyphs(ctx.Skia, props);
   // ctx.canvas.drawGlyphs(glyphs, positions, font, ctx.paint);
+  throw new Error("Not implemented");
+};
+
+export const renderParagraph = (
+  _ctx: DrawingContext,
+  _props: ParagraphProps
+) => {
+  "worklet";
   throw new Error("Not implemented");
 };

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
   SkCanvas,
   SkColorFilter,
@@ -25,10 +24,10 @@ export interface PaintingContext {
   colorFilters: SkColorFilter[];
 }
 
-export const processContext = (
-  ctx: DrawingContext,
-  props: Record<string, any>
-) => {
-  "worklet";
-  return { restore: false, restorePaint: false };
-};
+// export const processContext = (
+//   ctx: DrawingContext,
+//   props: Record<string, any>
+// ) => {
+//   "worklet";
+//   return { restore: false, restorePaint: false };
+// };

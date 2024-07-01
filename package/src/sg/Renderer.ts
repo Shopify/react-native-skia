@@ -27,6 +27,7 @@ import {
 import type { PropMap, SGNode } from "./Node";
 import {
   renderGlyphs,
+  renderParagraph,
   renderText,
   renderTextBlob,
   renderTextPath,
@@ -64,9 +65,17 @@ import {
   renderCornerPathEffect,
   renderDashPathEffect,
   renderDiscretePathEffect,
+  renderLine2DPathEffect,
   renderPath1DPathEffect,
   renderPath2DPathEffect,
+  renderSumPathEffect,
 } from "./PathEffects";
+import {
+  renderBackdropFilter,
+  renderBlend,
+  renderBox,
+  renderBoxShadow,
+} from "./Mixed";
 
 const materialize = <P>(props: AnimatedProps<P>) => {
   "worklet";

@@ -1,6 +1,5 @@
 import type {
   ColorProps,
-  DiscretePathEffectProps,
   ImageShaderProps,
   LinearGradientProps,
   RadialGradientProps,

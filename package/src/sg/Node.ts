@@ -53,7 +53,7 @@ import type {
   ColorProps,
   NodeType,
 } from "../dom/types";
-import type { AnimatedProps } from "../renderer";
+import type { AnimatedProps, BackdropFilterProps } from "../renderer";
 
 export interface PropMap {
   [NodeType.Group]: GroupProps;
@@ -109,7 +109,7 @@ export interface PropMap {
   [NodeType.SumPathEffect]: ChildrenProps;
   [NodeType.Line2DPathEffect]: Line2DPathEffectProps;
   [NodeType.Blend]: BlendProps;
-  [NodeType.BackdropFilter]: ChildrenProps;
+  [NodeType.BackdropFilter]: BackdropFilterProps;
   [NodeType.Box]: BoxProps;
   [NodeType.BoxShadow]: BoxShadowProps;
   [NodeType.Paragraph]: ParagraphProps;

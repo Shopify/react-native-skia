@@ -1,7 +1,9 @@
 import type {
+  ChildrenProps,
   CornerPathEffectProps,
   DashPathEffectProps,
   DiscretePathEffectProps,
+  Line2DPathEffectProps,
   Path1DPathEffectProps,
   Path2DPathEffectProps,
 } from "../dom/types";
@@ -43,6 +45,22 @@ export const renderPath2DPathEffect = (
 export const renderCornerPathEffect = (
   _ctx: DrawingContext,
   _props: CornerPathEffectProps
+) => {
+  "worklet";
+  throw new Error("Not implemented");
+};
+
+export const renderSumPathEffect = (
+  _ctx: DrawingContext,
+  _props: ChildrenProps
+) => {
+  "worklet";
+  throw new Error("Not implemented");
+};
+
+export const renderLine2DPathEffect = (
+  _ctx: DrawingContext,
+  _props: Line2DPathEffectProps
 ) => {
   "worklet";
   throw new Error("Not implemented");

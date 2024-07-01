@@ -1,5 +1,3 @@
-import type { AnimatedProps } from "react-native-reanimated";
-
 import type {
   AtlasProps,
   CircleProps,
