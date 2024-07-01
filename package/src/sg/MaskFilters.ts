@@ -7,5 +7,5 @@ export const renderBlurMaskFilter = (
   _props: BlurMaskFilterProps
 ) => {
   "worklet";
-  throw new Error("Not implemented");
+  console.warn("Not implemented");
 };
