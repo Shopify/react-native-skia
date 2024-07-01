@@ -15,7 +15,9 @@ import type {
   RectProps,
   RoundedRectProps,
   VerticesProps,
-  NodeType,
+  ChildrenProps,
+  PaintProps,
+  DrawingNodeProps,
 } from "../dom/nodes";
 import {
   enumKey,
@@ -37,7 +39,7 @@ export const renderCircle = (ctx: DrawingContext, props: CircleProps) => {
   ctx.canvas.drawCircle(c.x, c.y, r, ctx.paint);
 };
 
-export const renderFill = (ctx: DrawingContext) => {
+export const renderFill = (ctx: DrawingContext, _props: DrawingNodeProps) => {
   "worklet";
   ctx.canvas.drawPaint(ctx.paint);
 };
@@ -241,4 +243,14 @@ export const renderAtlas = (ctx: DrawingContext, props: AtlasProps) => {
   if (image) {
     ctx.canvas.drawAtlas(image, sprites, transforms, ctx.paint, blend, colors);
   }
+};
+
+export const renderLayer = (_ctx: DrawingContext, _props: ChildrenProps) => {
+  "worklet";
+  throw new Error("Not implemented");
+};
+
+export const renderPaint = (_ctx: DrawingContext, _props: PaintProps) => {
+  "worklet";
+  throw new Error("Not implemented");
 };

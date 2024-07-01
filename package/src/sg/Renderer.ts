@@ -4,15 +4,18 @@ import type { AnimatedProps } from "../renderer";
 import Rea from "../external/reanimated/ReanimatedProxy";
 import { exhaustiveCheck } from "../renderer/typeddash";
 
-import { processContext, type DrawingContext } from "./Context";
+import { type DrawingContext } from "./Context";
 import {
   renderAtlas,
   renderCircle,
   renderDiffRect,
   renderFill,
+  renderImage,
   renderImageSVG,
+  renderLayer,
   renderLine,
   renderOval,
+  renderPaint,
   renderPatch,
   renderPath,
   renderPicture,
@@ -21,7 +24,31 @@ import {
   renderRect,
   renderVertices,
 } from "./Drawing";
-import type { SGNode } from "./Node";
+import type { PropMap, SGNode } from "./Node";
+import {
+  renderGlyphs,
+  renderText,
+  renderTextBlob,
+  renderTextPath,
+} from "./Text";
+import { renderBlurMaskFilter } from "./MaskFilters";
+import {
+  renderBlendImageFilter,
+  renderBlurImageFilter,
+  renderDisplacementMapImageFilter,
+  renderDropShadowImageFilter,
+  renderLumaColorFilter,
+  renderMorphologyImageFilter,
+  renderOffsetImageFilter,
+  renderRuntimeShaderImageFilter,
+} from "./ImageFilters";
+import {
+  renderBlendColorFilter,
+  renderLerpColorFilter,
+  renderLinearToSRGBGammaColorFilter,
+  renderMatrixColorFilter,
+  renderSRGBToLinearGammaColorFilter,
+} from "./ColorFilters";
 
 const materialize = <P>(props: AnimatedProps<P>) => {
   "worklet";
@@ -39,189 +66,247 @@ const materialize = <P>(props: AnimatedProps<P>) => {
 
 export const renderNode = (ctx: DrawingContext, node: SGNode) => {
   "worklet";
-  const materializedProps = materialize(node.props);
-  const { restore, restorePaint } = processContext(ctx, materializedProps);
+  const materializedProps = materialize(node.props) as unknown;
+  //const { restore, restorePaint } = processContext(ctx, materializedProps as PropMap[typeof node.type]);
   //const { invertClip, layer, matrix, transform } = materializedProps;
 
   switch (node.type) {
     case NodeType.Group:
-      renderGroup(ctx, materializedProps);
+      // nothing to do here
+      //renderGroup(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Layer:
-      renderLayer(ctx, materializedProps);
+      renderLayer(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Paint:
-      renderPaint(ctx, materializedProps);
+      renderPaint(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Fill:
-      renderFill(ctx, materializedProps);
+      renderFill(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Image:
-      renderImage(ctx, materializedProps);
+      renderImage(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Circle:
-      renderCircle(ctx, materializedProps);
+      renderCircle(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Path:
-      renderPath(ctx, materializedProps);
+      renderPath(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Line:
-      renderLine(ctx, materializedProps);
+      renderLine(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Oval:
-      renderOval(ctx, materializedProps);
+      renderOval(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Patch:
-      renderPatch(ctx, materializedProps);
+      renderPatch(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Points:
-      renderPoints(ctx, materializedProps);
+      renderPoints(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Rect:
-      renderRect(ctx, materializedProps);
+      renderRect(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.RRect:
-      renderRRect(ctx, materializedProps);
+      renderRRect(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Atlas:
-      renderAtlas(ctx, materializedProps);
+      renderAtlas(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Vertices:
-      renderVertices(ctx, materializedProps);
+      renderVertices(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Text:
-      renderText(ctx, materializedProps);
+      renderText(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.TextPath:
-      renderTextPath(ctx, materializedProps);
+      renderTextPath(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.TextBlob:
-      renderTextBlob(ctx, materializedProps);
+      renderTextBlob(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Glyphs:
-      renderGlyphs(ctx, materializedProps);
+      renderGlyphs(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.DiffRect:
-      renderDiffRect(ctx, materializedProps);
+      renderDiffRect(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Picture:
-      renderPicture(ctx, materializedProps);
+      renderPicture(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.ImageSVG:
-      renderImageSVG(ctx, materializedProps);
+      renderImageSVG(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.BlurMaskFilter:
-      renderBlurMaskFilter(ctx, materializedProps);
+      renderBlurMaskFilter(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.BlendImageFilter:
-      renderBlendImageFilter(ctx, materializedProps);
+      renderBlendImageFilter(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
       break;
     case NodeType.BlurImageFilter:
-      renderBlurImageFilter(ctx, materializedProps);
+      renderBlurImageFilter(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
       break;
     case NodeType.OffsetImageFilter:
-      renderOffsetImageFilter(ctx, materializedProps);
+      renderOffsetImageFilter(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
       break;
     case NodeType.DropShadowImageFilter:
-      renderDropShadowImageFilter(ctx, materializedProps);
+      renderDropShadowImageFilter(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
       break;
     case NodeType.DisplacementMapImageFilter:
-      renderDisplacementMapImageFilter(ctx, materializedProps);
+      renderDisplacementMapImageFilter(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
       break;
     case NodeType.RuntimeShaderImageFilter:
-      renderRuntimeShaderImageFilter(ctx, materializedProps);
+      renderRuntimeShaderImageFilter(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
       break;
     case NodeType.MorphologyImageFilter:
-      renderMorphologyImageFilter(ctx, materializedProps);
+      renderMorphologyImageFilter(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
       break;
     case NodeType.MatrixColorFilter:
-      renderMatrixColorFilter(ctx, materializedProps);
+      renderMatrixColorFilter(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
       break;
     case NodeType.BlendColorFilter:
-      renderBlendColorFilter(ctx, materializedProps);
+      renderBlendColorFilter(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
       break;
     case NodeType.LinearToSRGBGammaColorFilter:
-      renderLinearToSRGBGammaColorFilter(ctx, materializedProps);
+      renderLinearToSRGBGammaColorFilter(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
       break;
     case NodeType.SRGBToLinearGammaColorFilter:
-      renderSRGBToLinearGammaColorFilter(ctx, materializedProps);
+      renderSRGBToLinearGammaColorFilter(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
       break;
     case NodeType.LumaColorFilter:
-      renderLumaColorFilter(ctx, materializedProps);
+      renderLumaColorFilter(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
       break;
     case NodeType.LerpColorFilter:
-      renderLerpColorFilter(ctx, materializedProps);
+      renderLerpColorFilter(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
       break;
     case NodeType.Shader:
-      renderShader(ctx, materializedProps);
+      renderShader(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.ImageShader:
-      renderImageShader(ctx, materializedProps);
+      renderImageShader(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.ColorShader:
-      renderColorShader(ctx, materializedProps);
+      renderColorShader(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Turbulence:
-      renderTurbulence(ctx, materializedProps);
+      renderTurbulence(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.FractalNoise:
-      renderFractalNoise(ctx, materializedProps);
+      renderFractalNoise(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.LinearGradient:
-      renderLinearGradient(ctx, materializedProps);
+      renderLinearGradient(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.RadialGradient:
-      renderRadialGradient(ctx, materializedProps);
+      renderRadialGradient(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.SweepGradient:
-      renderSweepGradient(ctx, materializedProps);
+      renderSweepGradient(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.TwoPointConicalGradient:
-      renderTwoPointConicalGradient(ctx, materializedProps);
+      renderTwoPointConicalGradient(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
       break;
     case NodeType.DiscretePathEffect:
-      renderDiscretePathEffect(ctx, materializedProps);
+      renderDiscretePathEffect(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
       break;
     case NodeType.DashPathEffect:
-      renderDashPathEffect(ctx, materializedProps);
+      renderDashPathEffect(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Path1DPathEffect:
-      renderPath1DPathEffect(ctx, materializedProps);
+      renderPath1DPathEffect(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
       break;
     case NodeType.Path2DPathEffect:
-      renderPath2DPathEffect(ctx, materializedProps);
+      renderPath2DPathEffect(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
       break;
     case NodeType.CornerPathEffect:
-      renderCornerPathEffect(ctx, materializedProps);
+      renderCornerPathEffect(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
       break;
     case NodeType.SumPathEffect:
-      renderSumPathEffect(ctx, materializedProps);
+      renderSumPathEffect(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Line2DPathEffect:
-      renderLine2DPathEffect(ctx, materializedProps);
+      renderLine2DPathEffect(
+        ctx,
+        materializedProps as PropMap[typeof node.type]
+      );
       break;
     case NodeType.Blend:
-      renderBlend(ctx, materializedProps);
+      renderBlend(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.BackdropFilter:
-      renderBackdropFilter(ctx, materializedProps);
+      renderBackdropFilter(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Box:
-      renderBox(ctx, materializedProps);
+      renderBox(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.BoxShadow:
-      renderBoxShadow(ctx, materializedProps);
+      renderBoxShadow(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     case NodeType.Paragraph:
-      renderParagraph(ctx, materializedProps);
+      renderParagraph(ctx, materializedProps as PropMap[typeof node.type]);
       break;
     default:
       return exhaustiveCheck(node.type);
   }
-  if (restore) {
-    ctx.canvas.restore();
-  }
-  if (restorePaint) {
-    //ctx.paint.restore();
-  }
+  // if (restore) {
+  //   ctx.canvas.restore();
+  // }
+  // if (restorePaint) {
+  //   //ctx.paint.restore();
+  // }
 };
