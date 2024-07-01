@@ -29,23 +29,26 @@ import { saturate } from "../renderer";
 import { BlendMode, FillType, PointMode, VertexMode } from "../skia";
 import type { Skia } from "../skia/types";
 
-import type { DrawingContext } from "./Context";
+import { getPaint, type DrawingContext } from "./Context";
 
 export const renderCircle = (ctx: DrawingContext, props: CircleProps) => {
   "worklet";
   const { c, r } = processCircle(ctx.Skia, props);
-  ctx.canvas.drawCircle(c.x, c.y, r, ctx.paint);
+  const paint = getPaint(ctx);
+  ctx.canvas.drawCircle(c.x, c.y, r, paint);
 };
 
 export const renderFill = (ctx: DrawingContext, _props: DrawingNodeProps) => {
   "worklet";
-  ctx.canvas.drawPaint(ctx.paint);
+  const paint = getPaint(ctx);
+  ctx.canvas.drawPaint(paint);
 };
 
 export const renderPoints = (ctx: DrawingContext, props: PointsProps) => {
   "worklet";
   const { points, mode } = props;
-  ctx.canvas.drawPoints(PointMode[enumKey(mode)], points, ctx.paint);
+  const paint = getPaint(ctx);
+  ctx.canvas.drawPoints(PointMode[enumKey(mode)], points, paint);
 };
 
 const computePath = (ctx: DrawingContext, props: PathProps) => {
@@ -82,25 +85,29 @@ const computePath = (ctx: DrawingContext, props: PathProps) => {
 export const renderPath = (ctx: DrawingContext, props: PathProps) => {
   "worklet";
   const path = computePath(ctx, props);
-  ctx.canvas.drawPath(path, ctx.paint);
+  const paint = getPaint(ctx);
+  ctx.canvas.drawPath(path, paint);
 };
 
 export const renderRect = (ctx: DrawingContext, props: RectProps) => {
   "worklet";
   const rect = processRect(ctx.Skia, props);
-  ctx.canvas.drawRect(rect, ctx.paint);
+  const paint = getPaint(ctx);
+  ctx.canvas.drawRect(rect, paint);
 };
 
 export const renderRRect = (ctx: DrawingContext, props: RoundedRectProps) => {
   "worklet";
   const rrect = processRRect(ctx.Skia, props);
-  ctx.canvas.drawRRect(rrect, ctx.paint);
+  const paint = getPaint(ctx);
+  ctx.canvas.drawRRect(rrect, paint);
 };
 
 export const renderOval = (ctx: DrawingContext, props: OvalProps) => {
   "worklet";
   const oval = processRect(ctx.Skia, props);
-  ctx.canvas.drawOval(oval, ctx.paint);
+  const paint = getPaint(ctx);
+  ctx.canvas.drawOval(oval, paint);
 };
 
 const processImage = (Skia: Skia, props: ImageProps) => {
@@ -134,13 +141,15 @@ export const renderImage = (ctx: DrawingContext, props: ImageProps) => {
   if (!image) {
     return;
   }
-  ctx.canvas.drawImageRect(image, src, dst, ctx.paint);
+  const paint = getPaint(ctx);
+  ctx.canvas.drawImageRect(image, src, dst, paint);
 };
 
 export const renderLine = (ctx: DrawingContext, props: LineProps) => {
   "worklet";
   const { p1, p2 } = props;
-  ctx.canvas.drawLine(p1.x, p1.y, p2.x, p2.y, ctx.paint);
+  const paint = getPaint(ctx);
+  ctx.canvas.drawLine(p1.x, p1.y, p2.x, p2.y, paint);
 };
 
 const processPatch = (Skia: Skia, props: PatchProps) => {
@@ -177,7 +186,8 @@ export const renderPatch = (ctx: DrawingContext, props: PatchProps) => {
   "worklet";
   const { texture } = props;
   const { colors, points, mode } = processPatch(ctx.Skia, props);
-  ctx.canvas.drawPatch(points, colors, texture, mode, ctx.paint);
+  const paint = getPaint(ctx);
+  ctx.canvas.drawPatch(points, colors, texture, mode, paint);
 };
 
 export const renderVertices = (ctx: DrawingContext, props: VerticesProps) => {
@@ -194,13 +204,15 @@ export const renderVertices = (ctx: DrawingContext, props: VerticesProps) => {
     colors ? colors.map((c) => ctx.Skia.Color(c)) : undefined,
     indices
   );
-  ctx.canvas.drawVertices(vert, blend, ctx.paint);
+  const paint = getPaint(ctx);
+  ctx.canvas.drawVertices(vert, blend, paint);
 };
 
 export const renderDiffRect = (ctx: DrawingContext, props: DiffRectProps) => {
   "worklet";
   const { outer, inner } = props;
-  ctx.canvas.drawDRRect(outer, inner, ctx.paint);
+  const paint = getPaint(ctx);
+  ctx.canvas.drawDRRect(outer, inner, paint);
 };
 
 export const renderPicture = (ctx: DrawingContext, props: PictureProps) => {
@@ -239,7 +251,8 @@ export const renderAtlas = (ctx: DrawingContext, props: AtlasProps) => {
   const { image, sprites, transforms, colors, blendMode } = props;
   const blend = blendMode ? BlendMode[enumKey(blendMode)] : undefined;
   if (image) {
-    ctx.canvas.drawAtlas(image, sprites, transforms, ctx.paint, blend, colors);
+    const paint = getPaint(ctx);
+    ctx.canvas.drawAtlas(image, sprites, transforms, paint, blend, colors);
   }
 };
 

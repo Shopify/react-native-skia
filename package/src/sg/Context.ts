@@ -1,28 +1,23 @@
-import type {
-  SkCanvas,
-  SkColorFilter,
-  SkImageFilter,
-  SkMaskFilter,
-  SkPaint,
-  SkPathEffect,
-  SkShader,
-  Skia,
-} from "../skia/types";
-
-export interface DrawingContext {
-  Skia: Skia;
-  canvas: SkCanvas;
-  paint: SkPaint;
-}
+import type { SkCanvas, SkPaint, Skia } from "../skia/types";
 
 export interface PaintingContext {
   paints: SkPaint[];
-  maskFilters: SkMaskFilter[];
-  shaders: SkShader[];
-  pathEffects: SkPathEffect[];
-  imageFilters: SkImageFilter[];
-  colorFilters: SkColorFilter[];
+  // maskFilters: SkMaskFilter[];
+  // shaders: SkShader[];
+  // pathEffects: SkPathEffect[];
+  // imageFilters: SkImageFilter[];
+  // colorFilters: SkColorFilter[];
 }
+
+export interface DrawingContext extends PaintingContext {
+  Skia: Skia;
+  canvas: SkCanvas;
+}
+
+export const getPaint = (ctx: DrawingContext) => {
+  "worklet";
+  return ctx.paints[ctx.paints.length - 1];
+};
 
 // export const processContext = (
 //   ctx: DrawingContext,

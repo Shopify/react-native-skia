@@ -121,13 +121,14 @@ type UnknownProps = Record<string, any>;
 export interface SGNode<P extends object = UnknownProps> {
   type: NodeType;
   props: AnimatedProps<P>;
-  //  children?: SGNode[];
+  children?: SGNode[];
 }
 
 export const createNode = <T extends NodeType>(
   type: T,
-  props: AnimatedProps<PropMap[T]>
+  props: AnimatedProps<PropMap[T]>,
+  children?: SGNode[]
 ): SGNode<PropMap[T]> => {
   "worklet";
-  return { type, props };
+  return { type, props, children };
 };
