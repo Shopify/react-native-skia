@@ -29,6 +29,10 @@ export class SkiaJSDomView extends React.Component<
     }
     if (onTouch) {
       assertSkiaViewApi();
+      console.warn(
+        `The onTouch property is deprecated and will be removed in the next Skia release.
+See: https://shopify.github.io/react-native-skia/docs/animations/gestures`
+      );
       SkiaViewApi.setJsiProperty(this._nativeId, "onTouch", onTouch);
     }
     if (onSize) {
@@ -117,7 +121,6 @@ const assertSkiaViewApi = () => {
   if (
     SkiaViewApi === null ||
     SkiaViewApi.setJsiProperty === null ||
-    SkiaViewApi.callJsiMethod === null ||
     SkiaViewApi.requestRedraw === null ||
     SkiaViewApi.makeImageSnapshot === null
   ) {

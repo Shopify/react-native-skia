@@ -14,7 +14,7 @@ import {
 } from "../../renderer/Offscreen";
 import { Skia, useImage } from "../../skia";
 
-import { runOnUI, useSharedValue } from "./moduleWrapper";
+import Rea from "./ReanimatedProxy";
 
 const createTexture = (
   texture: SharedValue<SkImage | null>,
@@ -26,9 +26,15 @@ const createTexture = (
 };
 
 export const useTexture = (element: ReactElement, size: SkSize) => {
+  const { width, height } = size;
   const picture = useMemo(() => {
-    return drawAsPicture(element);
-  }, [element]);
+    return drawAsPicture(element, {
+      x: 0,
+      y: 0,
+      width,
+      height,
+    });
+  }, [element, width, height]);
   return usePictureAsTexture(picture, size);
 };
 
@@ -51,10 +57,10 @@ export const usePictureAsTexture = (
   picture: SkPicture | null,
   size: SkSize
 ) => {
-  const texture = useSharedValue<SkImage | null>(null);
+  const texture = Rea.useSharedValue<SkImage | null>(null);
   useEffect(() => {
     if (picture !== null) {
-      runOnUI(createTexture)(texture, picture, size);
+      Rea.runOnUI(createTexture)(texture, picture, size);
     }
   }, [texture, picture, size]);
   return texture;

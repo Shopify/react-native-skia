@@ -59,6 +59,14 @@ public:
 
   sk_sp<SkImage> takeScreenshotFromViewTag(size_t tag) override;
 
+  sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override;
+
+  uint64_t makeNativeBuffer(sk_sp<SkImage> image) override;
+
+  void releaseNativeBuffer(uint64_t pointer) override;
+
+  std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override;
+
   virtual void performStreamOperation(
       const std::string &sourceUri,
       const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) override;

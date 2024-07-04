@@ -10,7 +10,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkFontStyle.h"
+#include "include/core/SkFontStyle.h"
 
 #pragma clang diagnostic pop
 

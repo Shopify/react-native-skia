@@ -46,6 +46,9 @@ add_library(
         "${PROJECT_SOURCE_DIR}/cpp/jni/JniPlatformContext.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/RNSkOpenGLCanvasProvider.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/SkiaOpenGLSurfaceFactory.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/GrAHardwareBufferUtils.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/AHardwareBufferUtils.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/RNSkAndroidVideo.cpp"
 
         "${PROJECT_SOURCE_DIR}/../cpp/jsi/JsiHostObject.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/jsi/JsiValue.cpp"
@@ -80,14 +83,9 @@ target_include_directories(
         cpp/jni/include
         cpp/rnskia-android
 
-        ../cpp/skia/include/config/
-        ../cpp/skia/include/core/
-        ../cpp/skia/include/effects/
-        ../cpp/skia/include/utils/
-        ../cpp/skia/include/pathops/
-        ../cpp/skia/modules/
-        ../cpp/skia/modules/skparagraph/include/
-        ../cpp/skia/include/
+        # Skia headers have to be included with "fully"-qualified paths,
+        # so "include/core/SkRef.h" instead of "SkRef.h", as otherwise
+        # the prefab cannot be shipped.
         ../cpp/skia
 
         ../cpp/api

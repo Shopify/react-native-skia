@@ -185,15 +185,16 @@ export const height = 256 * PIXEL_RATIO;
 export const center = { x: width / 2, y: height / 2 };
 
 export const drawOnNode = (element: ReactNode) => {
-  const { surface: ckSurface, draw } = mountCanvas(element);
+  const { surface: ckSurface, draw, root } = mountCanvas(element);
   draw();
+  root.unmount();
   return ckSurface;
 };
 
 export const mountCanvas = (element: ReactNode) => {
   const Skia = global.SkiaApi;
   expect(Skia).toBeDefined();
-  const ckSurface = Skia.Surface.Make(width, height)!;
+  const ckSurface = Skia.Surface.MakeOffscreen(width, height)!;
   expect(ckSurface).toBeDefined();
   const canvas = ckSurface.getCanvas();
 
@@ -201,7 +202,7 @@ export const mountCanvas = (element: ReactNode) => {
   root.render(element);
   return {
     surface: ckSurface,
-    root: root.dom,
+    root,
     draw: () => {
       const ctx = new JsiDrawingContext(Skia, canvas);
       root.dom.render(ctx);
@@ -211,7 +212,7 @@ export const mountCanvas = (element: ReactNode) => {
 
 export const serialize = (element: ReactNode) => {
   const { root } = mountCanvas(element);
-  const serialized = serializeNode(root);
+  const serialized = serializeNode(root.dom);
   return JSON.stringify(serialized);
 };
 
@@ -326,7 +327,7 @@ const serializeNode = (node: Node<any>): SerializedNode => {
 export type EvalContext = Record<string, any>;
 
 interface TestingSurface {
-  eval<Ctx extends EvalContext, R>(
+  eval<Ctx extends EvalContext = EvalContext, R = any>(
     fn: (Skia: Skia, ctx: Ctx) => R,
     ctx?: Ctx
   ): Promise<R>;

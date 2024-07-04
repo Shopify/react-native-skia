@@ -1,4 +1,8 @@
-import { useImage, useTypeface } from "@shopify/react-native-skia";
+import {
+  useImage,
+  useImageAsTexture,
+  useTypeface,
+} from "@shopify/react-native-skia";
 import { useCallback, useState } from "react";
 import { Platform } from "react-native";
 
@@ -15,11 +19,17 @@ const NotoColorEmojiSrc =
     ? require("./assets/Roboto-Medium.ttf")
     : require("./assets/NotoColorEmoji.ttf");
 
+// on Web because of CORS we need to use a local video
+const videoURL =
+  Platform.OS === "web"
+    ? require("./assets/BigBuckBunny.mp4").default
+    : "https://bit.ly/skia-video-short";
+
 export const useAssets = () => {
   const [error, setError] = useState<Error | null>(null);
   const errorHandler = useCallback((e: Error) => setError(e), []);
   const mask = useImage(require("./assets/mask.png"), errorHandler);
-  const oslo = useImage(require("./assets/oslo.jpg"), errorHandler);
+  const oslo = useImageAsTexture(require("./assets/oslo.jpg"));
   const skiaLogoJpeg = useImage(SkiaLogoJpeg, errorHandler);
   const skiaLogoPng = useImage(SkiaLogo, errorHandler);
   const RobotoMedium = useTypeface(
@@ -56,6 +66,7 @@ export const useAssets = () => {
     return null;
   }
   return {
+    localAssets: [videoURL],
     RobotoMedium,
     NotoColorEmoji,
     NotoSansSCRegular,

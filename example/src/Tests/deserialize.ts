@@ -28,6 +28,7 @@ export const parseNode = (
 
 export const parseProps = (props: SerializedProps, assets: Assets) => {
   const newProps: SerializedProps = {};
+  newProps.localAssets = assets.localAssets.map((asset: string) => asset);
   Object.keys(props).forEach((key) => {
     const value = parseProp(props[key], assets);
     newProps[key] = value;
@@ -60,6 +61,9 @@ const parseProp = (value: any, assets: Assets): any => {
       const asset = assets[value.name];
       if (!asset) {
         throw new Error(`Asset ${value.name} not found`);
+      }
+      if (asset.value) {
+        return asset.value;
       }
       return asset;
     } else if (value.__typename__ === "RuntimeEffect") {

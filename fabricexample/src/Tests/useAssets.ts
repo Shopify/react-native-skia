@@ -1,6 +1,11 @@
-import { useImage, useTypeface } from "@shopify/react-native-skia";
+import {
+  useImage,
+  useImageAsTexture,
+  useTypeface,
+} from "@shopify/react-native-skia";
 import { useCallback, useState } from "react";
 import { Platform } from "react-native";
+import { useAssets as useExpoAssets } from "expo-asset";
 
 const SkiaLogo =
   Platform.OS === "web" ? require("./assets/skia_logo.png") : "skia_logo";
@@ -16,10 +21,13 @@ const NotoColorEmojiSrc =
     : require("./assets/NotoColorEmoji.ttf");
 
 export const useAssets = () => {
+  const [expoAssets, expoAssetsError] = useExpoAssets([
+    require("./assets/BigBuckBunny.mp4"),
+  ]);
   const [error, setError] = useState<Error | null>(null);
   const errorHandler = useCallback((e: Error) => setError(e), []);
   const mask = useImage(require("./assets/mask.png"), errorHandler);
-  const oslo = useImage(require("./assets/oslo.jpg"), errorHandler);
+  const oslo = useImageAsTexture(require("./assets/oslo.jpg"));
   const skiaLogoJpeg = useImage(SkiaLogoJpeg, errorHandler);
   const skiaLogoPng = useImage(SkiaLogo, errorHandler);
   const RobotoMedium = useTypeface(
@@ -42,7 +50,11 @@ export const useAssets = () => {
   if (error) {
     throw new Error("Failed to load assets: " + error.message);
   }
+  if (expoAssetsError) {
+    throw new Error("Failed to load expo assets: " + expoAssetsError.message);
+  }
   if (
+    !expoAssets ||
     !RobotoMedium ||
     !oslo ||
     !NotoColorEmoji ||
@@ -56,6 +68,7 @@ export const useAssets = () => {
     return null;
   }
   return {
+    localAssets: expoAssets.map((asset) => asset.localUri),
     RobotoMedium,
     NotoColorEmoji,
     NotoSansSCRegular,

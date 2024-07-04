@@ -31,6 +31,7 @@ export const Mock = (CanvasKit: CanvasKit) => {
     // Reanimated hooks
     useClock: NoopSharedValue,
     usePathInterpolation: NoopSharedValue,
+    useImageAsTexture: NoopSharedValue,
     useTextureValue: NoopSharedValue,
     useTextureValueFromPicture: NoopSharedValue,
     useRSXformBuffer: NoopSharedValue,
@@ -45,5 +46,6 @@ export const Mock = (CanvasKit: CanvasKit) => {
     useTypeface: () => null,
     useImage: () => null,
     useSVG: () => null,
+    useVideo: () => null,
   };
 };

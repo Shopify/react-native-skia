@@ -128,6 +128,8 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     return toBase64String(bytes);
   }
 
+  // TODO: this is leaking on Web
+  // Add signature with allocated buffer
   readPixels(srcX?: number, srcY?: number, imageInfo?: ImageInfo) {
     const info = this.getImageInfo();
     const pxInfo: CKImageInfo = {
@@ -151,6 +153,7 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
   };
 
   makeNonTextureImage(): SkImage {
+    // if the image is already a non-texture image, this is a no-op
     const partialInfo = this.ref.getImageInfo();
     const colorSpace = this.ref.getColorSpace();
     const info = {
@@ -159,7 +162,7 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     };
     const pixels = this.ref.readPixels(0, 0, info) as Uint8Array | null;
     if (!pixels) {
-      throw new Error("Could not create image from bytes");
+      throw new Error("Could not read pixels from image");
     }
     const img = this.CanvasKit.MakeImage(info, pixels, info.width * 4);
     if (!img) {

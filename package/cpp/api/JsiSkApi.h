@@ -6,6 +6,7 @@
 
 #include "JsiSkHostObjects.h"
 
+#include "JsiNativeBuffer.h"
 #include "JsiSkAnimatedImage.h"
 #include "JsiSkAnimatedImageFactory.h"
 #include "JsiSkColor.h"
@@ -49,6 +50,7 @@
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkTypefaceFontProviderFactory.h"
 #include "JsiSkVertices.h"
+#include "JsiVideo.h"
 
 namespace RNSkia {
 
@@ -66,6 +68,7 @@ public:
     // We create the system font manager eagerly since it has proven to be too
     // slow to do it on demand
     JsiSkFontMgrFactory::getFontMgr(getContext());
+    installFunction("Video", JsiVideo::createCtor(context));
     installFunction("Font", JsiSkFont::createCtor(context));
     installFunction("Paint", JsiSkPaint::createCtor(context));
     installFunction("RSXform", JsiSkRSXform::createCtor(context));
@@ -122,6 +125,9 @@ public:
     installReadonlyProperty(
         "ParagraphBuilder",
         std::make_shared<JsiSkParagraphBuilderFactory>(context));
+
+    installReadonlyProperty("NativeBuffer",
+                            std::make_shared<JsiNativeBufferFactory>(context));
   }
 };
 } // namespace RNSkia

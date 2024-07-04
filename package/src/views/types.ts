@@ -48,23 +48,11 @@ export type TouchHandlers = {
 
 export type TouchHandler = (touchInfo: Array<Array<TouchInfo>>) => void;
 
-/**
- * Listener interface for value changes
- */
-export interface ValueListener {
-  addListener: (callback: () => void) => number;
-  removeListener: (id: number) => void;
-}
-
 export interface ISkiaViewApi {
   setJsiProperty: <T>(nativeId: number, name: string, value: T) => void;
-  callJsiMethod: <T extends Array<unknown>>(
-    nativeId: number,
-    name: string,
-    ...args: T
-  ) => void;
   requestRedraw: (nativeId: number) => void;
   makeImageSnapshot: (nativeId: number, rect?: SkRect) => SkImage;
+  makeImageSnapshotAsync: (nativeId: number, rect?: SkRect) => Promise<SkImage>;
 }
 
 export interface SkiaBaseViewProps extends ViewProps {

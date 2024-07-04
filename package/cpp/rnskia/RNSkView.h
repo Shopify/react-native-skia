@@ -16,8 +16,8 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkCanvas.h"
-#include "SkSurface.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkSurface.h"
 
 #pragma clang diagnostic pop
 
@@ -171,17 +171,6 @@ public:
   virtual void setJsiProperties(
       std::unordered_map<std::string, RNJsi::JsiValueWrapper> &props) {
     // Nothing here...
-  }
-
-  /**
-   Calls a custom action.
-   */
-  virtual jsi::Value callJsiMethod(jsi::Runtime &runtime,
-                                   const std::string &name,
-                                   const jsi::Value *arguments, size_t count) {
-    throw std::runtime_error(
-        "The base Skia View does not support any commands. Command " + name +
-        " not found.");
   }
 
   /**

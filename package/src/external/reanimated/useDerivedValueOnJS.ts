@@ -1,11 +1,6 @@
 import { useEffect, useMemo } from "react";
 
-import {
-  useSharedValue,
-  runOnJS,
-  startMapper,
-  stopMapper,
-} from "./moduleWrapper";
+import Rea from "./ReanimatedProxy";
 
 export const useDerivedValueOnJS = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -13,13 +8,13 @@ export const useDerivedValueOnJS = (
   deps: unknown[]
 ) => {
   const init = useMemo(() => fn(), [fn]);
-  const value = useSharedValue(init);
+  const value = Rea.useSharedValue(init);
   useEffect(() => {
-    const mapperId = startMapper(() => {
+    const mapperId = Rea.startMapper(() => {
       "worklet";
-      runOnJS(fn)();
+      Rea.runOnJS(fn)();
     }, deps);
-    return () => stopMapper(mapperId);
+    return () => Rea.stopMapper(mapperId);
   }, [deps, fn]);
   return value;
 };

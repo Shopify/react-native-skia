@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include <RNSkOpenGLCanvasProvider.h>
+#include "RNSkOpenGLCanvasProvider.h"
 #include <android/native_window.h>
 
 namespace RNSkia {

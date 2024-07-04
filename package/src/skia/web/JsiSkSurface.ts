@@ -16,11 +16,19 @@ export class JsiSkSurface
   }
 
   dispose = () => {
-    this.ref.delete();
+    this.ref.dispose();
   };
 
   flush() {
     this.ref.flush();
+  }
+
+  width() {
+    return this.ref.width();
+  }
+
+  height() {
+    return this.ref.height();
   }
 
   getCanvas(): SkCanvas {

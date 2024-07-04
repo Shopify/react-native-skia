@@ -11,8 +11,11 @@ import {
 import React from "react";
 import { Dimensions, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { useSharedValue, withSpring } from "react-native-reanimated";
-import { useDerivedValue } from "@shopify/react-native-skia/src/external/reanimated/moduleWrapper";
+import {
+  useSharedValue,
+  withSpring,
+  useDerivedValue,
+} from "react-native-reanimated";
 
 import { BlurMask } from "./BlurGradient";
 
@@ -26,6 +29,8 @@ const rct = Skia.XYWHRect(
   CARD_HEIGHT
 );
 const rrct = Skia.RRectXY(rct, 10, 10);
+const roundedRectPath = Skia.Path.Make();
+roundedRectPath.addRRect(rrct);
 
 const sf = 300;
 const springConfig = (velocity: number) => {
@@ -68,9 +73,8 @@ export const FrostedCard = () => {
 
   const clip = usePathValue((path) => {
     "worklet";
-    path.addRRect(rrct);
     path.transform(matrix.value);
-  });
+  }, roundedRectPath);
 
   return (
     <View style={{ flex: 1 }}>

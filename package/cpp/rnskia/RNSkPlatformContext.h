@@ -10,15 +10,16 @@
 #include <utility>
 
 #include "RNSkDispatchQueue.h"
+#include "RNSkVideo.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkData.h"
-#include "SkFontMgr.h"
-#include "SkImage.h"
-#include "SkStream.h"
-#include "SkSurface.h"
+#include "include/core/SkData.h"
+#include "include/core/SkFontMgr.h"
+#include "include/core/SkImage.h"
+#include "include/core/SkStream.h"
+#include "include/core/SkSurface.h"
 
 #pragma clang diagnostic pop
 
@@ -132,6 +133,21 @@ public:
    * @return sk_sp<SkSurface>
    */
   virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) = 0;
+
+  /**
+   * Creates an image from a native buffer.
+   * - On iOS, this is a `CVPixelBufferRef`
+   * - On Android, this is a `AHardwareBuffer*`
+   * @param buffer The native buffer.
+   * @return sk_sp<SkImage>
+   */
+  virtual sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) = 0;
+
+  virtual void releaseNativeBuffer(uint64_t pointer) = 0;
+
+  virtual uint64_t makeNativeBuffer(sk_sp<SkImage> image) = 0;
+
+  virtual std::shared_ptr<RNSkVideo> createVideo(const std::string &url) = 0;
 
   /**
    * Return the Platform specific font manager

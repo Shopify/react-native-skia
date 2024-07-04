@@ -9,13 +9,13 @@
 
 #include <jsi/jsi.h>
 
-#include <JsiSkStrutStyle.h>
-#include <JsiSkTextStyle.h>
+#include "JsiSkStrutStyle.h"
+#include "JsiSkTextStyle.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "Paragraph.h"
+#include "modules/skparagraph/include/Paragraph.h"
 
 #pragma clang diagnostic pop
 

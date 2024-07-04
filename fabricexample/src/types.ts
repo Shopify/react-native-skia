@@ -25,4 +25,5 @@ export type StackParamList = {
   Stickers: undefined;
   FrostedCard: undefined;
   SpeedTest: undefined;
+  Video: undefined;
 };

@@ -1,21 +1,21 @@
 import { useEffect } from "react";
-import type { FrameInfo } from "react-native-reanimated";
+import type { FrameInfo, SharedValue } from "react-native-reanimated";
 
 import { useAnimatedImage } from "../../skia/core/AnimatedImage";
 import type { DataSourceParam, SkImage } from "../../skia/types";
 
-import {
-  throwOnMissingReanimated,
-  useFrameCallback,
-  useSharedValue,
-} from "./moduleWrapper";
+import Rea from "./ReanimatedProxy";
 
 const DEFAULT_FRAME_DURATION = 60;
 
-export const useAnimatedImageValue = (source: DataSourceParam) => {
-  throwOnMissingReanimated();
-  const currentFrame = useSharedValue<null | SkImage>(null);
-  const lastTimestamp = useSharedValue(0);
+export const useAnimatedImageValue = (
+  source: DataSourceParam,
+  paused?: SharedValue<boolean>
+) => {
+  const defaultPaused = Rea.useSharedValue(false);
+  const isPaused = paused ?? defaultPaused;
+  const currentFrame = Rea.useSharedValue<null | SkImage>(null);
+  const lastTimestamp = Rea.useSharedValue(-1);
   const animatedImage = useAnimatedImage(
     source,
     (err) => {
@@ -27,12 +27,14 @@ export const useAnimatedImageValue = (source: DataSourceParam) => {
   const frameDuration =
     animatedImage?.currentFrameDuration() || DEFAULT_FRAME_DURATION;
 
-  useFrameCallback((frameInfo: FrameInfo) => {
+  Rea.useFrameCallback((frameInfo: FrameInfo) => {
     if (!animatedImage) {
       currentFrame.value = null;
       return;
     }
-
+    if (isPaused.value && lastTimestamp.value !== -1) {
+      return;
+    }
     const { timestamp } = frameInfo;
     const elapsed = timestamp - lastTimestamp.value;
 
@@ -50,8 +52,7 @@ export const useAnimatedImageValue = (source: DataSourceParam) => {
 
     // Update the last timestamp
     lastTimestamp.value = timestamp;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, true);
+  });
   useEffect(() => {
     return () => {
       animatedImage?.dispose();

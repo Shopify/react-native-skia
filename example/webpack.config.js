@@ -29,7 +29,7 @@ const svgLoaderConfiguration = {
   test: /\.(svg)$/,
   use: [
     {
-      loader: "@svgr/webpack",
+      loader: "raw-loader",
     },
   ],
 };
@@ -50,6 +50,17 @@ const fontLoaderConfiguration = {
     loader: "url-loader",
     options: {
       name: "[name].[ext]",
+    },
+  },
+};
+
+const videoLoaderConfiguration = {
+  test: /\.(mp4)$/,
+  use: {
+    loader: "file-loader",
+    options: {
+      name: "[name].[ext]",
+      outputPath: "videos",
     },
   },
 };
@@ -98,6 +109,7 @@ module.exports = {
       imageLoaderConfiguration,
       fontLoaderConfiguration,
       svgLoaderConfiguration,
+      videoLoaderConfiguration,
     ],
   },
   plugins: [

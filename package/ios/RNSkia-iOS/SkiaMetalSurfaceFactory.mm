@@ -1,17 +1,20 @@
-#import <RNSkLog.h>
+#import "RNSkLog.h"
 
-#include <SkiaMetalSurfaceFactory.h>
+#import "SkiaCVPixelBufferUtils.h"
+#import "SkiaMetalSurfaceFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#import "SkCanvas.h"
-#import "SkColorSpace.h"
-#import "SkSurface.h"
+#import "include/core/SkCanvas.h"
+#import "include/core/SkColorSpace.h"
+#import "include/core/SkSurface.h"
 
 #import <include/gpu/GrBackendSurface.h>
 #import <include/gpu/GrDirectContext.h>
+#import <include/gpu/ganesh/SkImageGanesh.h>
 #import <include/gpu/ganesh/SkSurfaceGanesh.h>
+#import <include/gpu/ganesh/mtl/SkSurfaceMetal.h>
 
 #pragma clang diagnostic pop
 
@@ -102,4 +105,34 @@ sk_sp<SkSurface> SkiaMetalSurfaceFactory::makeOffscreenSurface(int width,
       [](void *addr) { delete (OffscreenRenderContext *)addr; }, ctx);
 
   return surface;
+}
+
+sk_sp<SkImage> SkiaMetalSurfaceFactory::makeTextureFromCVPixelBuffer(
+    CVPixelBufferRef pixelBuffer) {
+  if (!SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
+          &ThreadContextHolder::ThreadSkiaMetalContext)) [[unlikely]] {
+    throw std::runtime_error("Failed to create Skia Context for this Thread!");
+  }
+  const SkiaMetalContext &context = ThreadContextHolder::ThreadSkiaMetalContext;
+
+  SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat format =
+      SkiaCVPixelBufferUtils::getCVPixelBufferBaseFormat(pixelBuffer);
+  switch (format) {
+  case SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat::rgb: {
+    // CVPixelBuffer is in any RGB format, single-plane
+    return SkiaCVPixelBufferUtils::RGB::makeSkImageFromCVPixelBuffer(
+        context.skContext.get(), pixelBuffer);
+  }
+  case SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat::yuv: {
+    // CVPixelBuffer is in any YUV format, multi-plane
+    return SkiaCVPixelBufferUtils::YUV::makeSkImageFromCVPixelBuffer(
+        context.skContext.get(), pixelBuffer);
+  }
+  default:
+    [[unlikely]] {
+      throw std::runtime_error("Failed to convert NativeBuffer to SkImage - "
+                               "NativeBuffer has unsupported PixelFormat! " +
+                               std::to_string(static_cast<int>(format)));
+    }
+  }
 }

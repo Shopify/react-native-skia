@@ -6,14 +6,14 @@ import type {
   BlendColorFilterProps,
   MatrixColorFilterProps,
 } from "../../types";
-import { DeclarationType, NodeType } from "../../types";
+import { NodeType } from "../../types";
 import { enumKey } from "../datatypes/Enum";
 import type { LerpColorFilterProps } from "../../types/ColorFilters";
 import type { DeclarationContext } from "../../types/DeclarationContext";
 
 export abstract class ColorFilterDeclaration<P> extends JsiDeclarationNode<P> {
   constructor(ctx: NodeContext, type: NodeType, props: P) {
-    super(ctx, DeclarationType.ColorFilter, type, props);
+    super(ctx, type, props);
   }
 
   protected composeAndPush(ctx: DeclarationContext, cf1: SkColorFilter) {

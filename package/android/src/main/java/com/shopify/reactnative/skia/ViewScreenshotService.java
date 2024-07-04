@@ -14,9 +14,11 @@ import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ScrollView;
 import androidx.annotation.NonNull;
 import com.facebook.react.bridge.ReactContext;
-import com.facebook.react.uimanager.UIManagerModule;
+import com.facebook.react.bridge.UIManager;
+import com.facebook.react.uimanager.UIManagerHelper;
 import com.facebook.react.views.view.ReactViewGroup;
 
 import java.lang.reflect.Method;
@@ -28,7 +30,7 @@ public class ViewScreenshotService {
     private static final String TAG = "SkiaScreenshot";
 
     public static Bitmap makeViewScreenshotFromTag(ReactContext context, int tag) {
-        UIManagerModule uiManager = context.getNativeModule(UIManagerModule.class);
+        UIManager uiManager = UIManagerHelper.getUIManagerForReactTag(context, tag);
         View view = null;
         try {
             view = uiManager.resolveView(tag);
@@ -69,6 +71,17 @@ public class ViewScreenshotService {
         float combinedOpacity = parentOpacity * view.getAlpha();
         canvas.save();
         applyTransformations(canvas, view);
+
+        // If the view is a ScrollView or similar, clip to its bounds
+        if (view instanceof ScrollView) {
+            ScrollView scrollView = (ScrollView) view;
+            int clipLeft = scrollView.getScrollX();
+            int clipTop = scrollView.getScrollY();
+            int clipRight = clipLeft + scrollView.getWidth();
+            int clipBottom = clipTop + scrollView.getHeight();
+
+            canvas.clipRect(clipLeft, clipTop, clipRight, clipBottom);
+        }
 
         if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) view;
@@ -149,16 +162,21 @@ public class ViewScreenshotService {
                 latch.await(SURFACE_VIEW_READ_PIXELS_TIMEOUT, TimeUnit.SECONDS);
             } catch (Exception e) {
                 Log.e(TAG, "Cannot PixelCopy for " + sv, e);
+                drawSurfaceViewFromCache(canvas, sv, paint, opacity);
             }
         } else {
-            Bitmap cache = sv.getDrawingCache();
-            if (cache != null) {
-                canvas.save();
-                applyTransformations(canvas, sv);
-                paint.setAlpha(Math.round(opacity * 255)); // Set paint alpha based on opacity
-                canvas.drawBitmap(cache, 0, 0, paint);
-                canvas.restore();
-            }
+            drawSurfaceViewFromCache(canvas, sv, paint, opacity);
+        }
+    }
+
+    private static void drawSurfaceViewFromCache(Canvas canvas, SurfaceView sv, Paint paint, float opacity) {
+        Bitmap cache = sv.getDrawingCache();
+        if (cache != null) {
+            canvas.save();
+            applyTransformations(canvas, sv);
+            paint.setAlpha(Math.round(opacity * 255)); // Set paint alpha based on opacity
+            canvas.drawBitmap(cache, 0, 0, paint);
+            canvas.restore();
         }
     }
 
@@ -166,7 +184,10 @@ public class ViewScreenshotService {
     private static void applyTransformations(final Canvas c, @NonNull final View view) {
         final Matrix matrix = view.getMatrix();
         final Matrix translateMatrix = new Matrix();
-        translateMatrix.setTranslate(view.getLeft() + view.getPaddingLeft(), view.getTop() + view.getPaddingTop());
+
+        translateMatrix.setTranslate(view.getLeft() + view.getPaddingLeft() - view.getScrollX(),
+                view.getTop() + view.getPaddingTop() - view.getScrollY());
+
         c.concat(translateMatrix);
         c.concat(matrix);
     }

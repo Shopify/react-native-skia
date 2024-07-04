@@ -1,4 +1,5 @@
 import type { SkData } from "../Data";
+import type { NativeBuffer } from "../NativeBuffer";
 
 import type { SkImage } from "./Image";
 
@@ -27,24 +28,6 @@ export enum ColorType {
   RGBA_F16Norm, // pixel with half floats in [0,1] for red, green, blue, alpha; in 64-bit word
   RGBA_F16, // pixel with half floats for red, green, blue, alpha; in 64-bit word
   RGBA_F32, // pixel using C float for red, green, blue, alpha; in 128-bit word
-
-  // The following 6 colortypes are just for reading from - not for rendering to
-  R8G8_unorm, // pixel with a uint8_t for red and green
-
-  A16_float, // pixel with a half float for alpha
-  R16G16_float, // pixel with a half float for red and green
-
-  A16_unorm, // pixel with a little endian uint16_t for alpha
-  R16G16_unorm, // pixel with a little endian uint16_t for red and green
-  R16G16B16A16_unorm, // pixel with a little endian uint16_t for red, green, blue, and alpha
-
-  SRGBA_8888,
-  R8_unorm,
-
-  // The `kN32_SkColorType` is platform dependent in the original enum,
-  // and TypeScript doesn't support conditional compilation natively.
-  // You might need to handle it differently based on your use case.
-  N32_SkColorType, // either BGRA_8888 or RGBA_8888 based on the platform
 }
 
 export interface ImageInfo {
@@ -68,6 +51,22 @@ export interface ImageFactory {
    *  image, nullptr is returned.
    */
   MakeImageFromEncoded: (encoded: SkData) => SkImage | null;
+
+  /**
+   * Return an Image backed by a given native buffer.
+   * The native buffer must be a valid owning reference.
+   *
+   * For instance, this API is used by
+   * [react-native-vision-camera](https://github.com/mrousavy/react-native-vision-camera)
+   * to render a Skia Camera preview.
+   *
+   * - On Android; This is an `AHardwareBuffer*`
+   * - On iOS, this is a `CVPixelBufferRef`
+   * @param nativeBuffer A strong `uintptr_t` pointer to the native buffer
+   * @throws Throws an error if the Image could not be created, for example when the given
+   * native buffer is invalid.
+   */
+  MakeImageFromNativeBuffer: (nativeBuffer: NativeBuffer) => SkImage;
 
   /**
    * Returns an image that will be a screenshot of the view represented by

@@ -13,17 +13,14 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
 
     private String tag = "SkiaView";
 
+    private boolean isDropped = false;
+
     public SkiaBaseView(Context context) {
         super(context);
         mTexture = new TextureView(context);
         mTexture.setSurfaceTextureListener(this);
         mTexture.setOpaque(false);
         addView(mTexture);
-    }
-
-    public void destroySurface() {
-        Log.i(tag, "destroySurface");
-        surfaceDestroyed();
     }
 
     private void createSurfaceTexture() {
@@ -34,6 +31,11 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
             mTexture.setSurfaceTexture(surface);
             this.onSurfaceTextureAvailable(surface, this.getMeasuredWidth(), this.getMeasuredHeight());
         }
+    }
+
+    void dropInstance() {
+        isDropped = true;
+        unregisterView();
     }
 
     @Override
@@ -129,6 +131,9 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+        if (isDropped) {
+            return;
+        }
         Log.i(tag, "onSurfaceTextureSizeChanged " + width + "/" + height);
         surfaceSizeChanged(width, height);
     }
@@ -137,12 +142,14 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
         Log.i(tag, "onSurfaceTextureDestroyed");
         // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
-        destroySurface();
+        surfaceDestroyed();
         // Because of React Native Screens (which dettach the view), we always keep the surface alive.
         // If not, Texture view will recreate the texture surface by itself and
         // we will lose the fast first time to frame.
         // We only delete the surface when the view is dropped (destroySurface invoked by SkiaBaseViewManager);
-        createSurfaceTexture();
+        if (!isDropped) {
+            createSurfaceTexture();
+        }
         return false;
     }
 

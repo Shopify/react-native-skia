@@ -11,11 +11,10 @@ export class JsiSkSurfaceFactory extends Host implements SurfaceFactory {
   }
 
   Make(width: number, height: number) {
-    const surface = this.CanvasKit.MakeSurface(width, height);
-    if (!surface) {
-      return null;
-    }
-    return new JsiSkSurface(this.CanvasKit, surface);
+    return new JsiSkSurface(
+      this.CanvasKit,
+      this.CanvasKit.MakeSurface(width, height)!
+    );
   }
 
   MakeOffscreen(width: number, height: number) {
@@ -24,7 +23,7 @@ export class JsiSkSurfaceFactory extends Host implements SurfaceFactory {
     const OC = (globalThis as any).OffscreenCanvas;
     let surface: Surface | null;
     if (OC === undefined) {
-      surface = this.CanvasKit.MakeSurface(width, height);
+      return this.Make(width, height);
     } else {
       const offscreen = new OC(width, height);
       const webglContext = this.CanvasKit.GetWebGLContext(offscreen);

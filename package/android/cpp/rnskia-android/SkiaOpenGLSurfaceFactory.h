@@ -1,6 +1,6 @@
 #pragma once
 
-#include <RNSkLog.h>
+#include "RNSkLog.h"
 
 #include <fbjni/fbjni.h>
 #include <jni.h>
@@ -18,9 +18,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkCanvas.h"
-#include "SkColorSpace.h"
-#include "SkSurface.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkColorSpace.h"
+#include "include/core/SkSurface.h"
 #include "include/gpu/GrBackendSurface.h"
 #include "include/gpu/GrDirectContext.h"
 #include "include/gpu/ganesh/SkSurfaceGanesh.h"
@@ -148,6 +148,9 @@ public:
    * @return An SkSurface backed by a texture.
    */
   static sk_sp<SkSurface> makeOffscreenSurface(int width, int height);
+
+  static sk_sp<SkImage>
+  makeImageFromHardwareBuffer(void *buffer, bool requireKnownFormat = false);
 
   /**
    * Creates a windowed Skia Surface holder.

@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 
 import { JsiDrawingContext } from "../dom/types";
-import type { SkPicture, SkSize } from "../skia/types";
+import type { SkPicture, SkRect, SkSize } from "../skia/types";
 import { Skia } from "../skia";
 import { Platform } from "../Platform";
 
@@ -16,9 +16,9 @@ export const isOnMainThread = () => {
   );
 };
 
-export const drawAsPicture = (element: ReactElement) => {
+export const drawAsPicture = (element: ReactElement, bounds?: SkRect) => {
   const recorder = Skia.PictureRecorder();
-  const canvas = recorder.beginRecording();
+  const canvas = recorder.beginRecording(bounds);
   const root = new SkiaRoot(Skia, false);
   root.render(element);
   const ctx = new JsiDrawingContext(Skia, canvas);
@@ -32,16 +32,10 @@ export const drawAsImage = (element: ReactElement, size: SkSize) => {
   return drawAsImageFromPicture(drawAsPicture(element), size);
 };
 
-// TODO: We're not sure yet why PixelRatio is not needed here.
-const pd = 1;
 export const drawAsImageFromPicture = (picture: SkPicture, size: SkSize) => {
   "worklet";
-  const surface = Skia.Surface.MakeOffscreen(
-    size.width * pd,
-    size.height * pd
-  )!;
+  const surface = Skia.Surface.MakeOffscreen(size.width, size.height)!;
   const canvas = surface.getCanvas();
-  canvas.scale(pd, pd);
   canvas.drawPicture(picture);
   surface.flush();
   const image = surface.makeImageSnapshot();

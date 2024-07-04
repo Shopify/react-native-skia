@@ -25,7 +25,9 @@ export const processResult = (
   surface.flush();
   const image = surface.makeImageSnapshot();
   surface.getCanvas().clear(Float32Array.of(0, 0, 0, 0));
-  return checkImage(image, relPath, { overwrite });
+  const result = checkImage(image, relPath, { overwrite });
+  image.dispose();
+  return result;
 };
 
 interface CheckImageOptions {

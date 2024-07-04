@@ -38,6 +38,11 @@ public class PlatformContext {
         mHybridData = initHybrid(reactContext.getResources().getDisplayMetrics().density);
     }
 
+    @DoNotStrip
+    public Object createVideo(String url) {
+        return new RNSkVideo(mContext, url);
+    }
+
     private byte[] getStreamAsBytes(InputStream is) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         int nRead;

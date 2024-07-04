@@ -1,5 +1,5 @@
 import type { GroupProps } from "./Common";
-import type { DeclarationType, NodeType } from "./NodeType";
+import type { NodeType } from "./NodeType";
 import type { DeclarationContext } from "./DeclarationContext";
 import type { DrawingContext } from "./DrawingContext";
 
@@ -19,7 +19,7 @@ export interface Node<P> {
 export type Invalidate = () => void;
 
 export interface DeclarationNode<P> extends Node<P> {
-  declarationType: DeclarationType;
+  //declarationType: DeclarationType;
   decorate(ctx: DeclarationContext): void;
 
   setInvalidate(invalidate: Invalidate): void;

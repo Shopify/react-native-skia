@@ -1,16 +1,84 @@
+#include "SkiaOpenGLSurfaceFactory.h"
+#include "GrAHardwareBufferUtils.h"
 #include "SkiaOpenGLHelper.h"
-#include <SkiaOpenGLSurfaceFactory.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#include "include/gpu/ganesh/SkImageGanesh.h"
 #include "include/gpu/ganesh/gl/GrGLBackendSurface.h"
+#include "src/gpu/ganesh/gl/GrGLDefines.h"
 
 #pragma clang diagnostic pop
 
 namespace RNSkia {
 
 thread_local SkiaOpenGLContext ThreadContextHolder::ThreadSkiaOpenGLContext;
+
+sk_sp<SkImage>
+SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer,
+                                                      bool requireKnownFormat) {
+#if __ANDROID_API__ >= 26
+  // Setup OpenGL and Skia:
+  if (!SkiaOpenGLHelper::createSkiaDirectContextIfNecessary(
+          &ThreadContextHolder::ThreadSkiaOpenGLContext)) [[unlikely]] {
+    throw std::runtime_error("Failed to create Skia Context for this Thread!");
+  }
+  const AHardwareBuffer *hardwareBuffer =
+      static_cast<AHardwareBuffer *>(buffer);
+  DeleteImageProc deleteImageProc = nullptr;
+  UpdateImageProc updateImageProc = nullptr;
+  TexImageCtx deleteImageCtx = nullptr;
+
+  AHardwareBuffer_Desc description;
+  AHardwareBuffer_describe(hardwareBuffer, &description);
+  GrBackendFormat format;
+  switch (description.format) {
+  // TODO: find out if we can detect, which graphic buffers support
+  // GR_GL_TEXTURE_2D
+  case AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM:
+    format = GrBackendFormats::MakeGL(GR_GL_RGBA8, GR_GL_TEXTURE_EXTERNAL);
+  case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
+    format = GrBackendFormats::MakeGL(GR_GL_RGBA16F, GR_GL_TEXTURE_EXTERNAL);
+  case AHARDWAREBUFFER_FORMAT_R5G6B5_UNORM:
+    format = GrBackendFormats::MakeGL(GR_GL_RGB565, GR_GL_TEXTURE_EXTERNAL);
+  case AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM:
+    format = GrBackendFormats::MakeGL(GR_GL_RGB10_A2, GR_GL_TEXTURE_EXTERNAL);
+  case AHARDWAREBUFFER_FORMAT_R8G8B8_UNORM:
+    format = GrBackendFormats::MakeGL(GR_GL_RGB8, GR_GL_TEXTURE_EXTERNAL);
+#if __ANDROID_API__ >= 33
+  case AHARDWAREBUFFER_FORMAT_R8_UNORM:
+    format = GrBackendFormats::MakeGL(GR_GL_R8, GR_GL_TEXTURE_EXTERNAL);
+#endif
+  default:
+    if (requireKnownFormat) {
+      format = GrBackendFormat();
+    } else {
+      format = GrBackendFormats::MakeGL(GR_GL_RGBA8, GR_GL_TEXTURE_EXTERNAL);
+    }
+  }
+
+  auto backendTex = MakeGLBackendTexture(
+      ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(),
+      const_cast<AHardwareBuffer *>(hardwareBuffer), description.width,
+      description.height, &deleteImageProc, &updateImageProc, &deleteImageCtx,
+      false, format, false);
+  if (!backendTex.isValid()) {
+    RNSkLogger::logToConsole(
+        "Failed to convert HardwareBuffer to OpenGL Texture!");
+    return nullptr;
+  }
+  sk_sp<SkImage> image = SkImages::BorrowTextureFrom(
+      ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(),
+      backendTex, kTopLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType,
+      kOpaque_SkAlphaType, nullptr, deleteImageProc, deleteImageCtx);
+  return image;
+#else
+  throw std::runtime_error(
+      "HardwareBuffers are only supported on Android API 26 or higher! Set "
+      "your minSdk to 26 (or higher) and try again.");
+#endif
+}
 
 sk_sp<SkSurface> SkiaOpenGLSurfaceFactory::makeOffscreenSurface(int width,
                                                                 int height) {

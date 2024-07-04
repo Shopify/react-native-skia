@@ -13,7 +13,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkSurface.h"
+#include "include/core/SkSurface.h"
 #include "include/gpu/GrDirectContext.h"
 
 #pragma clang diagnostic pop
@@ -30,6 +30,12 @@ public:
                                                 std::move(surface)) {}
 
   EXPORT_JSI_API_TYPENAME(JsiSkSurface, Surface)
+
+  // TODO-API: Properties?
+  JSI_HOST_FUNCTION(width) { return static_cast<double>(getObject()->width()); }
+  JSI_HOST_FUNCTION(height) {
+    return static_cast<double>(getObject()->height());
+  }
 
   JSI_HOST_FUNCTION(getCanvas) {
     return jsi::Object::createFromHostObject(
@@ -57,7 +63,9 @@ public:
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurface, getCanvas),
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurface, width),
+                       JSI_EXPORT_FUNC(JsiSkSurface, height),
+                       JSI_EXPORT_FUNC(JsiSkSurface, getCanvas),
                        JSI_EXPORT_FUNC(JsiSkSurface, makeImageSnapshot),
                        JSI_EXPORT_FUNC(JsiSkSurface, flush),
                        JSI_EXPORT_FUNC(JsiSkSurface, dispose))

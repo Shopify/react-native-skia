@@ -11,7 +11,7 @@ import {
 } from "@shopify/react-native-skia";
 import { useDerivedValue } from "react-native-reanimated";
 
-import { getSeed, perlin } from "../../components/Animations";
+import { createNoise2D } from "../../components/SimpleNoise";
 
 const N = 3;
 const n = new Array(N + 1).fill(0).map((_, i) => i);
@@ -48,7 +48,10 @@ export const Demo = () => {
   );
 
   const clock = useClock();
-  const seeds = new Array(defaultVertices.length).fill(0).map(() => getSeed());
+  const noises = useMemo(
+    () => defaultVertices.map(() => createNoise2D()),
+    [defaultVertices]
+  );
 
   const vertices = useDerivedValue(
     () =>
@@ -56,9 +59,10 @@ export const Demo = () => {
         if (isEdge(vertex, window)) {
           return vertex;
         }
+        const noise2d = noises[i];
         return {
-          x: vertex.x + AX * perlin(seeds[i], clock.value / F, 0),
-          y: vertex.y + AY * perlin(seeds[i], 0, clock.value / F),
+          x: vertex.x + AX * noise2d(clock.value / F, 0),
+          y: vertex.y + AY * noise2d(0, clock.value / F),
         };
       }),
     [clock]

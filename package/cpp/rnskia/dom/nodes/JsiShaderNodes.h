@@ -17,7 +17,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "SkShader.h"
+#include "include/core/SkShader.h"
 
 #pragma clang diagnostic pop
 

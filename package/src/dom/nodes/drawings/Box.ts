@@ -1,7 +1,7 @@
 import type { SkRRect, Skia } from "../../../skia/types";
 import { BlurStyle, ClipOp, isRRect } from "../../../skia/types";
 import type { DrawingContext } from "../../types";
-import { DeclarationType, NodeType } from "../../types";
+import { NodeType } from "../../types";
 import type { BoxShadowProps, BoxProps } from "../../types/Drawings";
 import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
@@ -38,7 +38,7 @@ const deflate = (
 
 export class BoxShadowNode extends JsiDeclarationNode<BoxShadowProps> {
   constructor(ctx: NodeContext, props: BoxShadowProps) {
-    super(ctx, DeclarationType.Unknown, NodeType.BoxShadow, props);
+    super(ctx, NodeType.BoxShadow, props);
   }
 
   decorate(_ctx: DeclarationContext) {

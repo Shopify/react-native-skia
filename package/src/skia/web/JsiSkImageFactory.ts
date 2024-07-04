@@ -1,11 +1,19 @@
-import type { CanvasKit } from "canvaskit-wasm";
+import type { CanvasKit, Image } from "canvaskit-wasm";
 
-import type { SkData, ImageInfo, SkImage } from "../types";
-import type { ImageFactory } from "../types/Image/ImageFactory";
+import { CanvasKitWebGLBuffer, isNativeBufferWeb } from "../types";
+import type {
+  SkData,
+  ImageInfo,
+  SkImage,
+  NativeBuffer,
+  ImageFactory,
+} from "../types";
 
 import { Host, getEnum } from "./Host";
 import { JsiSkImage } from "./JsiSkImage";
 import { JsiSkData } from "./JsiSkData";
+import type { JsiSkSurface } from "./JsiSkSurface";
+import type { CanvasKitWebGLBufferImpl } from "./CanvasKitWebGLBufferImpl";
 
 export class JsiSkImageFactory extends Host implements ImageFactory {
   constructor(CanvasKit: CanvasKit) {
@@ -17,6 +25,44 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
     // TODO: Implement screenshot from view in React JS
     console.log(view);
     return Promise.resolve(null);
+  }
+
+  MakeImageFromNativeBuffer(
+    buffer: NativeBuffer,
+    surface?: JsiSkSurface,
+    image?: JsiSkImage
+  ) {
+    if (!isNativeBufferWeb(buffer)) {
+      throw new Error("Invalid NativeBuffer");
+    }
+    if (!surface) {
+      let img: Image;
+      if (
+        buffer instanceof HTMLImageElement ||
+        buffer instanceof HTMLVideoElement ||
+        buffer instanceof ImageBitmap
+      ) {
+        img = this.CanvasKit.MakeLazyImageFromTextureSource(buffer);
+      } else if (buffer instanceof CanvasKitWebGLBuffer) {
+        img = (
+          buffer as CanvasKitWebGLBuffer as CanvasKitWebGLBufferImpl
+        ).toImage();
+      } else {
+        img = this.CanvasKit.MakeImageFromCanvasImageSource(buffer);
+      }
+      return new JsiSkImage(this.CanvasKit, img);
+    } else if (!image) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const img = (surface as any).makeImageFromTextureSource(buffer) as Image;
+      return new JsiSkImage(this.CanvasKit, img);
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const img = (surface as any).updateTextureFromSource(
+        image,
+        buffer
+      ) as Image;
+      return new JsiSkImage(this.CanvasKit, img);
+    }
   }
 
   MakeImageFromEncoded(encoded: SkData) {

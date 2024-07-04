@@ -4,26 +4,39 @@ import type { Container } from "../../renderer/Container";
 import type { AnimatedProps } from "../../renderer/processors";
 import type { Node } from "../../dom/types";
 
-import {
-  startMapper,
-  stopMapper,
-  isSharedValue,
-  HAS_REANIMATED3,
-  HAS_REANIMATED2,
-  runOnJS,
-} from "./moduleWrapper";
+import Rea from "./ReanimatedProxy";
+
+let HAS_REANIMATED = false;
+let HAS_REANIMATED_3 = false;
+try {
+  require("react-native-reanimated");
+  HAS_REANIMATED = true;
+  const reanimatedVersion =
+    require("react-native-reanimated/package.json").version;
+  if (
+    reanimatedVersion &&
+    (reanimatedVersion >= "3.0.0" || reanimatedVersion.includes("3.0.0-"))
+  ) {
+    HAS_REANIMATED_3 = true;
+  }
+} catch (e) {
+  HAS_REANIMATED = false;
+}
 
 const _bindings = new WeakMap<Node<unknown>, unknown>();
 
 export const unbindReanimatedNode = (node: Node<unknown>) => {
+  if (!HAS_REANIMATED) {
+    return;
+  }
   const previousMapperId = _bindings.get(node);
   if (previousMapperId !== undefined) {
-    stopMapper(previousMapperId as number);
+    Rea.stopMapper(previousMapperId as number);
   }
 };
 
 export function extractReanimatedProps(props: AnimatedProps<any>) {
-  if (!HAS_REANIMATED3 && !HAS_REANIMATED2) {
+  if (!HAS_REANIMATED) {
     return [props, {}];
   }
   const reanimatedProps = {} as AnimatedProps<any>;
@@ -33,7 +46,7 @@ export function extractReanimatedProps(props: AnimatedProps<any>) {
       continue;
     }
     const propValue = props[propName];
-    if (isSharedValue(propValue)) {
+    if (Rea.isSharedValue(propValue)) {
       reanimatedProps[propName] = propValue;
       otherProps[propName] = propValue.value;
     } else {
@@ -51,7 +64,7 @@ function bindReanimatedProps2(
   const sharedValues = Object.values(reanimatedProps);
   const previousMapperId = _bindings.get(node);
   if (previousMapperId !== undefined) {
-    stopMapper(previousMapperId as number);
+    Rea.stopMapper(previousMapperId as number);
   }
   if (sharedValues.length > 0) {
     const viewId = container.getNativeId();
@@ -70,9 +83,9 @@ function bindReanimatedProps2(
         container.redraw();
       }
     };
-    const mapperId = startMapper(() => {
+    const mapperId = Rea.startMapper(() => {
       "worklet";
-      runOnJS(updateProps)();
+      Rea.runOnJS(updateProps)();
     }, sharedValues);
     _bindings.set(node, mapperId);
   }
@@ -83,21 +96,21 @@ export function bindReanimatedProps(
   node: Node<any>,
   reanimatedProps: AnimatedProps<any>
 ) {
-  if (HAS_REANIMATED2 && !HAS_REANIMATED3) {
+  if (HAS_REANIMATED && !HAS_REANIMATED_3) {
     return bindReanimatedProps2(container, node, reanimatedProps);
   }
-  if (!HAS_REANIMATED3) {
+  if (!HAS_REANIMATED) {
     return;
   }
   const sharedValues = Object.values(reanimatedProps);
   const previousMapperId = _bindings.get(node);
   if (previousMapperId !== undefined) {
-    stopMapper(previousMapperId as number);
+    Rea.stopMapper(previousMapperId as number);
   }
   if (sharedValues.length > 0) {
     const viewId = container.getNativeId();
     const { SkiaViewApi } = global;
-    const mapperId = startMapper(() => {
+    const mapperId = Rea.startMapper(() => {
       "worklet";
       if (node) {
         for (const propName in reanimatedProps) {

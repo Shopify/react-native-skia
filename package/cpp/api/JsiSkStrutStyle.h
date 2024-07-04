@@ -10,7 +10,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#include "Paragraph.h"
+#include "modules/skparagraph/include/Paragraph.h"
 
 #pragma clang diagnostic pop
 

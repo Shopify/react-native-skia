@@ -10,8 +10,7 @@ import type { SkSurface } from "../skia";
 
 export * from "../renderer/components";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let Skia: any;
+let Skia: ReturnType<typeof JsiSkApi>;
 
 export const makeOffscreenSurface = (width: number, height: number) => {
   if (!Skia) {
@@ -24,12 +23,20 @@ export const makeOffscreenSurface = (width: number, height: number) => {
   return surface;
 };
 
+export const getSkiaExports = () => {
+  if (!Skia) {
+    Skia = JsiSkApi(CanvasKit);
+  }
+  return { Skia };
+};
+
 export const drawOffscreen = (surface: SkSurface, element: ReactNode) => {
   const root = new SkiaRoot(Skia, false);
   root.render(element);
   const canvas = surface.getCanvas();
   const ctx = new JsiDrawingContext(Skia, canvas);
   root.dom.render(ctx);
+  root.unmount();
   surface.flush();
   return surface.makeImageSnapshot();
 };

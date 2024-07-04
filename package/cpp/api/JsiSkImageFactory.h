@@ -27,6 +27,18 @@ public:
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
 
+  JSI_HOST_FUNCTION(MakeImageFromNativeBuffer) {
+    jsi::BigInt pointer = arguments[0].asBigInt(runtime);
+    const uintptr_t nativeBufferPointer = pointer.asUint64(runtime);
+    void *rawPointer = reinterpret_cast<void *>(nativeBufferPointer);
+    auto image = getContext()->makeImageFromNativeBuffer(rawPointer);
+    if (image == nullptr) {
+      throw std::runtime_error("Failed to convert NativeBuffer to SkImage!");
+    }
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+  }
+
   JSI_HOST_FUNCTION(MakeImage) {
     auto imageInfo = JsiSkImageInfo::fromValue(runtime, arguments[0]);
     auto pixelData = JsiSkData::fromValue(runtime, arguments[1]);
@@ -47,7 +59,6 @@ public:
         [context = std::move(context), viewTag](
             jsi::Runtime &runtime,
             std::shared_ptr<RNJsi::JsiPromises::Promise> promise) -> void {
-          // Create a stream operation - this will be run on the main thread
           context->makeViewScreenshot(
               viewTag, [&runtime, context = std::move(context),
                         promise = std::move(promise)](sk_sp<SkImage> image) {
@@ -69,7 +80,9 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromEncoded),
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTag),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage), )
+                       JSI_EXPORT_FUNC(JsiSkImageFactory,
+                                       MakeImageFromNativeBuffer),
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage))
 
   explicit JsiSkImageFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

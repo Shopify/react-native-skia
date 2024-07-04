@@ -1,7 +1,8 @@
 import { executeCmd, executeCmdSync } from "./utils";
 import { exit } from "process";
 import { commonArgs, configurations, PlatformName } from "./skia-configuration";
-const fs = require("fs");
+import { existsSync, mkdirSync } from "fs";
+
 const typedKeys = <T extends object>(obj: T) => Object.keys(obj) as (keyof T)[];
 
 /**
@@ -147,9 +148,9 @@ const processOutput = (platformName: PlatformName, targetName: string) => {
       targetDir = `${currentDir}/${configurations[platformName].outputRoot}/${target.output}`;
     }
 
-    if (!fs.existsSync(targetDir)) {
+    if (!existsSync(targetDir)) {
       console.log(`Creating directory '${targetDir}'...`);
-      fs.mkdirSync(targetDir + "/", { recursive: true });
+      mkdirSync(targetDir + "/", { recursive: true });
     }
 
     libNames.forEach((libName) => {
