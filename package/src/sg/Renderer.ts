@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { GroupProps } from "../dom/types";
 import { NodeType } from "../dom/types";
 import type { AnimatedProps } from "../renderer";
 import { exhaustiveCheck } from "../renderer/typeddash";
-import { processTransform3d } from "../skia/types";
 
-import { type DrawingContext } from "./Context";
+import { processContext, type DrawingContext } from "./Context";
 import {
   renderAtlas,
   renderCircle,
@@ -95,22 +93,6 @@ const materialize = <P>(props: AnimatedProps<P>) => {
     }
   }
   return materializedProps as any;
-};
-
-const processContext = (ctx: DrawingContext, props: GroupProps) => {
-  "worklet";
-  let restore = false;
-  if (props.matrix) {
-    ctx.canvas.save();
-    ctx.canvas.concat(props.matrix);
-    restore = true;
-  } else if (props.transform) {
-    ctx.canvas.save();
-    ctx.canvas.concat(processTransform3d(props.transform));
-    restore = true;
-  }
-
-  return { restore };
 };
 
 export const renderNode = (ctx: DrawingContext, node: SGNode) => {

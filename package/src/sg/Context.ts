@@ -1,4 +1,10 @@
-import type { SkCanvas, SkPaint, Skia } from "../skia/types";
+import type { GroupProps } from "../dom/types";
+import {
+  processTransform3d,
+  type SkCanvas,
+  type SkPaint,
+  type Skia,
+} from "../skia/types";
 
 export interface PaintingContext {
   paints: SkPaint[];
@@ -19,10 +25,21 @@ export const getPaint = (ctx: DrawingContext) => {
   return ctx.paints[ctx.paints.length - 1];
 };
 
-// export const processContext = (
-//   ctx: DrawingContext,
-//   props: Record<string, any>
-// ) => {
-//   "worklet";
-//   return { restore: false, restorePaint: false };
-// };
+export const processContext = (ctx: DrawingContext, props: GroupProps) => {
+  "worklet";
+  let restore = false;
+  if (props.matrix) {
+    ctx.canvas.save();
+    ctx.canvas.concat(props.matrix);
+    restore = true;
+  } else if (props.transform) {
+    ctx.canvas.save();
+    ctx.canvas.concat(processTransform3d(props.transform));
+    restore = true;
+  }
+  if (props.color) {
+    const paint = getPaint(ctx);
+    paint.setColor(ctx.Skia.Color(props.color));
+  }
+  return { restore };
+};
