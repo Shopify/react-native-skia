@@ -101,7 +101,50 @@ describe("FontMgr", () => {
       expect(width).not.toEqual([0, 0]);
     }
   });
-  // Add test
-  //     *  Passing |nullptr| as the parameter for |familyName| will return the
-  // *  default system font.
+  itRunsE2eOnly("Shouldn't crash the font cannot be resolved", async () => {
+    const result = await surface.eval(
+      (Skia, { fonts }) => {
+        const fontMgr = Skia.TypefaceFontProvider.Make();
+        (Object.keys(fonts) as (keyof typeof fonts)[]).flatMap((familyName) => {
+          const typefaces = fonts[familyName];
+          typefaces.forEach((typeface) => {
+            const data = Skia.Data.fromBytes(new Uint8Array(typeface));
+            fontMgr.registerFont(
+              Skia.Typeface.MakeFreeTypeFaceFromData(data)!,
+              familyName
+            );
+          });
+        });
+        let exists1 = true;
+        let exists2 = true;
+        let exists3 = true;
+        try {
+          fontMgr.matchFamilyStyle("Robot", {
+            weight: 400,
+          });
+        } catch {
+          exists1 = false;
+        }
+        try {
+          fontMgr.matchFamilyStyle("Roboto", {
+            weight: 100,
+          });
+        } catch {
+          exists2 = false;
+        }
+        try {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
+          fontMgr.matchFamilyStyle();
+        } catch {
+          exists3 = false;
+        }
+        return { exists1, exists2, exists3 };
+      },
+      { fonts: testingFonts }
+    );
+    expect(result.exists1).toBe(false);
+    expect(result.exists2).toBe(true);
+    expect(result.exists3).toBe(false);
+  });
 });

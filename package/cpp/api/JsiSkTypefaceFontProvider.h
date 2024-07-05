@@ -45,10 +45,13 @@ public:
   }
 
   JSI_HOST_FUNCTION(matchFamilyStyle) {
-    auto name = arguments[0].asString(runtime).utf8(runtime);
-    auto fontStyle = JsiSkFontStyle::fromValue(runtime, arguments[1]);
+    auto name = count > 0 ? arguments[0].asString(runtime).utf8(runtime) : "";
+    auto fontStyle = count > 1 ? JsiSkFontStyle::fromValue(runtime, arguments[1]) : nullptr;
+    if (name == "" || fontStyle == nullptr) {
+      throw std::runtime_error("matchFamilyStyle requires a name and a style");
+    }
     auto set = getObject()->onMatchFamily(name.c_str());
-    if (!set) {
+    if (!set) { 
       throw std::runtime_error("Could not find font family " + name);
     }
     auto typeface = set->matchStyle(*fontStyle);
