@@ -43,6 +43,13 @@ export const HelloWorld = () => {
 
 Once the fonts are loaded, we provide a `matchFont` function that given a font style will return a font object that you can use directly.
 
+:::info
+
+For font matching we recommend using the [Paragraph API](/docs/text/paragraph/) instead.
+The APIs belows were made available before the Paragraph API was released.
+
+:::
+
 ```tsx twoslash
 import {useFonts, Text, matchFont} from "@shopify/react-native-skia";
 

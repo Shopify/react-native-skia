@@ -45,10 +45,20 @@ public:
   }
 
   JSI_HOST_FUNCTION(matchFamilyStyle) {
-    auto name = arguments[0].asString(runtime).utf8(runtime);
-    auto fontStyle = JsiSkFontStyle::fromValue(runtime, arguments[1]);
-    sk_sp<SkFontStyleSet> set(getObject()->onMatchFamily(name.c_str()));
-    sk_sp<SkTypeface> typeface(set->matchStyle(*fontStyle));
+    auto name = count > 0 ? arguments[0].asString(runtime).utf8(runtime) : "";
+    auto fontStyle =
+        count > 1 ? JsiSkFontStyle::fromValue(runtime, arguments[1]) : nullptr;
+    if (name == "" || fontStyle == nullptr) {
+      throw std::runtime_error("matchFamilyStyle requires a name and a style");
+    }
+    auto set = getObject()->onMatchFamily(name.c_str());
+    if (!set) {
+      throw std::runtime_error("Could not find font family " + name);
+    }
+    auto typeface = set->matchStyle(*fontStyle);
+    if (!typeface) {
+      throw std::runtime_error("Could not find font style for " + name);
+    }
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkTypeface>(getContext(), typeface));
   }
