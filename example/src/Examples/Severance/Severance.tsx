@@ -6,7 +6,7 @@ import {
   useFont,
 } from "@shopify/react-native-skia";
 import React from "react";
-import { useWindowDimensions, StyleSheet, View } from "react-native";
+import { useWindowDimensions, View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
@@ -28,29 +28,29 @@ export const Severance = () => {
   }
   return (
     <View style={{ flex: 1 }}>
-      <Canvas style={{ flex: 1 }}>
-        <CRT>
-          <Group>
-            <Fill color={BG} />
-            {rows.map((_i, i) =>
-              cols.map((_j, j) => {
-                return (
-                  <Symbol
-                    key={`${i}-${j}`}
-                    i={i}
-                    j={j}
-                    font={font}
-                    pointer={pointer}
-                    clock={clock}
-                  />
-                );
-              })
-            )}
-          </Group>
-        </CRT>
-      </Canvas>
+      {" "}
       <GestureDetector gesture={gesture}>
-        <View style={StyleSheet.absoluteFill} />
+        <Canvas style={{ flex: 1 }}>
+          <CRT>
+            <Group>
+              <Fill color={BG} />
+              {rows.map((_i, i) =>
+                cols.map((_j, j) => {
+                  return (
+                    <Symbol
+                      key={`${i}-${j}`}
+                      i={i}
+                      j={j}
+                      font={font}
+                      pointer={pointer}
+                      clock={clock}
+                    />
+                  );
+                })
+              )}
+            </Group>
+          </CRT>
+        </Canvas>
       </GestureDetector>
     </View>
   );

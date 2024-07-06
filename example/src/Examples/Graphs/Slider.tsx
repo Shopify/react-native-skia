@@ -54,30 +54,29 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
   });
   return (
     <View style={{ height, marginBottom: 10 }}>
-      <Canvas style={styles.graph}>
-        <Fill color="black" />
-        <Path
-          path={path}
-          strokeWidth={4}
-          style="stroke"
-          strokeJoin="round"
-          strokeCap="round"
-        >
-          <LinearGradient
-            start={vec(0, height * 0.5)}
-            end={vec(width * 0.5, height * 0.5)}
-            colors={["black", "#DA4167"]}
-          />
-        </Path>
-        <Group color="#fff">
-          <Circle c={touchPos} r={10} />
-          <Circle color="#DA4167" c={touchPos} r={7.5} />
-          <SkiaText font={font} x={textX} y={textY} text={label} />
-          <Line p1={lineP1} p2={lineP2} />
-        </Group>
-      </Canvas>
       <GestureDetector gesture={gesture}>
-        <Animated.View style={StyleSheet.absoluteFill} />
+        <Canvas style={styles.graph}>
+          <Fill color="black" />
+          <Path
+            path={path}
+            strokeWidth={4}
+            style="stroke"
+            strokeJoin="round"
+            strokeCap="round"
+          >
+            <LinearGradient
+              start={vec(0, height * 0.5)}
+              end={vec(width * 0.5, height * 0.5)}
+              colors={["black", "#DA4167"]}
+            />
+          </Path>
+          <Group color="#fff">
+            <Circle c={touchPos} r={10} />
+            <Circle color="#DA4167" c={touchPos} r={7.5} />
+            <SkiaText font={font} x={textX} y={textY} text={label} />
+            <Line p1={lineP1} p2={lineP2} />
+          </Group>
+        </Canvas>
       </GestureDetector>
       <Text>Touch and drag to move center point</Text>
     </View>

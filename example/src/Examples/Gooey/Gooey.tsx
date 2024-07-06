@@ -111,42 +111,47 @@ export const Gooey = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <Canvas style={{ flex: 1 }}>
-        <Fill color={BG} />
-        <Group
-          layer={
-            <Paint>
-              <ColorMatrix
-                matrix={[
-                  1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18, -7,
-                ]}
+      <GestureDetector gesture={gesture}>
+        <Canvas style={{ flex: 1 }}>
+          <Fill color={BG} />
+          <Group
+            layer={
+              <Paint>
+                <ColorMatrix
+                  matrix={[
+                    1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 18,
+                    -7,
+                  ]}
+                />
+                <Blur blur={20} />
+              </Paint>
+            }
+          >
+            {icons.map((icon, i) => (
+              <IconBackground
+                key={i}
+                progress={progress}
+                c={c}
+                dst={icon.dst}
               />
-              <Blur blur={20} />
-            </Paint>
-          }
-        >
+            ))}
+            <Group transform={translate(c)}>
+              <Circle r={R} color={FG} />
+            </Group>
+          </Group>
           {icons.map((icon, i) => (
-            <IconBackground key={i} progress={progress} c={c} dst={icon.dst} />
+            <IconForeground
+              key={i}
+              progress={progress}
+              c={c}
+              dst={icon.dst}
+              path={icon.path}
+            />
           ))}
           <Group transform={translate(c)}>
-            <Circle r={R} color={FG} />
+            <Hamburger />
           </Group>
-        </Group>
-        {icons.map((icon, i) => (
-          <IconForeground
-            key={i}
-            progress={progress}
-            c={c}
-            dst={icon.dst}
-            path={icon.path}
-          />
-        ))}
-        <Group transform={translate(c)}>
-          <Hamburger />
-        </Group>
-      </Canvas>
-      <GestureDetector gesture={gesture}>
-        <Animated.View style={StyleSheet.absoluteFill} />
+        </Canvas>
       </GestureDetector>
     </View>
   );
