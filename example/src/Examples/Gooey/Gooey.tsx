@@ -15,9 +15,9 @@ import {
   Blur,
   ColorMatrix,
 } from "@shopify/react-native-skia";
-import { View, useWindowDimensions, StyleSheet } from "react-native";
+import { View, useWindowDimensions } from "react-native";
 import type { SharedValue } from "react-native-reanimated";
-import Animated, {
+import {
   useDerivedValue,
   useSharedValue,
   withSpring,
