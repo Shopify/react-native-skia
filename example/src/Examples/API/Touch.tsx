@@ -71,14 +71,13 @@ export const Touch = () => {
     <View style={styles.container}>
       <Title>Touch handling</Title>
       <View style={{ flex: 1 }}>
-        <Canvas style={styles.container}>
-          <Fill color="white" />
-          <Group style="stroke" strokeWidth={8}>
-            <Picture picture={picture} />
-          </Group>
-        </Canvas>
         <GestureDetector gesture={gesture}>
-          <View style={StyleSheet.absoluteFill} />
+          <Canvas style={styles.container}>
+            <Fill color="white" />
+            <Group style="stroke" strokeWidth={8}>
+              <Picture picture={picture} />
+            </Group>
+          </Canvas>
         </GestureDetector>
       </View>
     </View>
