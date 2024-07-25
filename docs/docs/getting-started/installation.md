@@ -8,10 +8,11 @@ slug: /getting-started/installation
 React Native Skia brings the [Skia Graphics Library](https://skia.org/) to React Native.
 Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flutter, Mozilla Firefox, Firefox OS, and many other products.
 
-> **Version compatibility:**  
-> `react-native@>=0.66` and `react@>=18` are required.
-> In addition you should make sure you're on at least `iOS 13` and `Android API level 16` or above.
-> To use React Native Skia with the new architecture, `react-native@>=0.72` is required.
+**Version compatibility:**  
+`react-native@>=0.69` and `react@>=18` are required. <br />
+In addition you should make sure you're on at least `iOS 13` and `Android API level 16` or above. <br />
+To use React Native Skia with the new architecture, `react-native@>=0.72` is required. <br />
+To use React Native Skia with video support, `Android API level 26` or above is required.
 
 **Install the library using yarn:**
 
