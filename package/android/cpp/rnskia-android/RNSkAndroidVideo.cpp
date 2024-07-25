@@ -88,7 +88,7 @@ void RNSkAndroidVideo::seek(double timestamp) {
     RNSkLogger::logToConsole("seek method not found");
     return;
   }
-  env->CallVoidMethod(_jniVideo.get(), mid, static_cast<jlong>(timestamp));
+  env->CallVoidMethod(_jniVideo.get(), mid, static_cast<jdouble>(timestamp));
 }
 
 float RNSkAndroidVideo::getRotationInDegrees() {
