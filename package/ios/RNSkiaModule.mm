@@ -9,6 +9,7 @@
 }
 
 RCT_EXPORT_MODULE()
+@synthesize bridge = _bridge;
 
 #pragma Accessors
 
@@ -34,11 +35,11 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(install) {
     // Already initialized, ignore call.
     return @true;
   }
-  RCTBridge *bridge = [RCTBridge currentBridge];
+  RCTCxxBridge *cxxBridge = (RCTCxxBridge *)self.bridge;
   if (!jsInvoker) {
-    jsInvoker = bridge.jsCallInvoker;
+    jsInvoker = cxxBridge.jsCallInvoker;
   }
-  skiaManager = [[SkiaManager alloc] initWithBridge:bridge jsInvoker:jsInvoker];
+  skiaManager = [[SkiaManager alloc] initWithBridge:cxxBridge jsInvoker:jsInvoker];
   return @true;
 }
 
