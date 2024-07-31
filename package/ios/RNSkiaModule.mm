@@ -39,7 +39,8 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(install) {
   if (!jsInvoker) {
     jsInvoker = cxxBridge.jsCallInvoker;
   }
-  skiaManager = [[SkiaManager alloc] initWithBridge:cxxBridge jsInvoker:jsInvoker];
+  skiaManager = [[SkiaManager alloc] initWithBridge:cxxBridge
+                                          jsInvoker:jsInvoker];
   return @true;
 }
 
