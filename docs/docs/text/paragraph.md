@@ -123,7 +123,7 @@ const colors = [
 const MyParagraph = () => {
   const paragraph = useMemo(() => {
 
-    // Create a foreground paint.
+    // Create a background paint.
     const backgroundPaint = Skia.Paint();
     backgroundPaint.setShader(
       source.makeShader([0, 0, 256, 256, ...colors])
