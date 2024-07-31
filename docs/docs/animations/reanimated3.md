@@ -24,7 +24,7 @@ import {
 export const HelloWorld = () => {
   const size = 256;
   const r = useSharedValue(0);
-  const c = useDerivedValue(() => size - r.value);
+  const c = useDerivedValue(() => size - r.value, [r.value]);
   useEffect(() => {
     r.value = withRepeat(withTiming(size * 0.33, { duration: 1000 }), -1);
   }, [r, size]);
