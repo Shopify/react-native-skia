@@ -20,6 +20,7 @@ export type StackParamList = {
   Graphs: undefined;
   Animation: undefined;
   Reanimated: undefined;
+  ImperativeWorklet: undefined;
   Performance: undefined;
   Transitions: undefined;
   Stickers: undefined;

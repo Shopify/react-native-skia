@@ -1,7 +1,13 @@
 import type { ViewProps } from "react-native";
 
 import type { GroupProps, RenderNode } from "../dom/types";
-import type { SkImage, SkPicture, SkRect, SkSize } from "../skia/types";
+import type {
+  SkCanvas,
+  SkImage,
+  SkPicture,
+  SkRect,
+  SkSize,
+} from "../skia/types";
 import type { SharedValueType } from "../renderer/processors/Animations/Animations";
 
 export type DrawMode = "continuous" | "default";
@@ -49,7 +55,9 @@ export type TouchHandlers = {
 export type TouchHandler = (touchInfo: Array<Array<TouchInfo>>) => void;
 
 export interface ISkiaViewApi {
+  getCanvas: (nativeId: number) => SkCanvas | null;
   setJsiProperty: <T>(nativeId: number, name: string, value: T) => void;
+  renderImmediate: (nativeId: number) => void;
   requestRedraw: (nativeId: number) => void;
   makeImageSnapshot: (nativeId: number, rect?: SkRect) => SkImage;
   makeImageSnapshotAsync: (nativeId: number, rect?: SkRect) => Promise<SkImage>;

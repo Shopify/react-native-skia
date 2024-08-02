@@ -18,6 +18,11 @@ export const HomeScreen = () => {
         route="Reanimated"
       />
       <HomeScreenButton
+        title="🎥 Imperative Worklet"
+        description="Imperative with worklets"
+        route="ImperativeWorklet"
+      />
+      <HomeScreenButton
         title="🧘 Breathe"
         description="Simple declarative example"
         route="Breathe"

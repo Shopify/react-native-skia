@@ -69,6 +69,39 @@ public:
 
     return jsi::Value::undefined();
   }
+                         
+  JSI_HOST_FUNCTION(getCanvas) {
+    if (count != 1) {
+      _platformContext->raiseError(
+          std::string("getCanvas: Expected 1 arguments, got " +
+                      std::to_string(count) + "."));
+
+      return jsi::Value::undefined();
+    }
+
+    if (!arguments[0].isNumber()) {
+      _platformContext->raiseError(
+          "getCanvas: First argument must be a number");
+
+      return jsi::Value::undefined();
+    }
+
+    // find Skia View
+    int nativeId = arguments[0].asNumber();
+    std::lock_guard<std::mutex> lock(_mutex);
+    auto info = getEnsuredViewInfo(nativeId);
+    if (info->view != nullptr) {
+      auto canvas = info->view->getCanvas();
+
+      if (canvas != nullptr) {
+          return jsi::Object::createFromHostObject(
+                  runtime,
+                  std::make_shared<JsiSkCanvas>(_platformContext, canvas));
+      }
+    }
+
+    return jsi::Value::undefined();
+  }
 
   JSI_HOST_FUNCTION(requestRedraw) {
     if (count != 1) {
@@ -94,6 +127,32 @@ public:
       info->view->requestRedraw();
     }
     return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(renderImmediate) {
+      if (count != 1) {
+          _platformContext->raiseError(
+                  std::string("renderImmediate: Expected 1 arguments, got " +
+                              std::to_string(count) + "."));
+
+          return jsi::Value::undefined();
+      }
+
+      if (!arguments[0].isNumber()) {
+          _platformContext->raiseError(
+                  "renderImmediate: First argument must be a number");
+
+          return jsi::Value::undefined();
+      }
+
+      // find Skia View
+      int nativeId = arguments[0].asNumber();
+      std::lock_guard<std::mutex> lock(_mutex);
+      auto info = getEnsuredViewInfo(nativeId);
+      if (info->view != nullptr) {
+          info->view->renderImmediate();
+      }
+      return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(makeImageSnapshot) {
@@ -191,6 +250,8 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setJsiProperty),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, requestRedraw),
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, renderImmediate),
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, getCanvas),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshotAsync),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshot))
 

@@ -45,6 +45,8 @@ public:
    */
   virtual bool renderToCanvas(const std::function<void(SkCanvas *)> &) = 0;
 
+  virtual SkCanvas* getCanvas() = 0;
+
 protected:
   std::function<void()> _requestRedraw;
 };
@@ -128,6 +130,10 @@ public:
     cb(_surface->getCanvas());
     return true;
   };
+
+  SkCanvas* getCanvas() override {
+      return nullptr;
+  }
 
 private:
   float _width;
@@ -239,6 +245,10 @@ public:
   }
 
   std::shared_ptr<RNSkRenderer> getRenderer() { return _renderer; }
+
+  SkCanvas* getCanvas() {
+      return _canvasProvider->getCanvas();
+  }
 
 protected:
   std::shared_ptr<RNSkPlatformContext> getPlatformContext() {

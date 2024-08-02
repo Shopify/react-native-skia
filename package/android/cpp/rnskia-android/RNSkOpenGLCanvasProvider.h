@@ -32,6 +32,8 @@ public:
 
   void surfaceSizeChanged(int width, int height);
 
+  SkCanvas* getCanvas() override;
+
 private:
   std::unique_ptr<WindowSurfaceHolder> _surfaceHolder = nullptr;
   std::shared_ptr<RNSkPlatformContext> _platformContext;

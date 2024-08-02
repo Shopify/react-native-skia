@@ -35,6 +35,7 @@ import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
 import type { StackParamList } from "./types";
 import { useAssets } from "./Tests/useAssets";
+import { ImperativeWorkletExample } from "./Examples/Reanimated/ImperativeWorklet";
 
 const linking: LinkingOptions<StackParamList> = {
   config: {
@@ -56,6 +57,7 @@ const linking: LinkingOptions<StackParamList> = {
       Graphs: "graphs",
       Animation: "animation",
       Reanimated: "reanimated",
+      ImperativeWorklet: "imperative-worklet",
       Performance: "performance",
       Tests: "test",
       Transitions: "transitions",
@@ -188,6 +190,10 @@ const App = () => {
             />
             <Stack.Screen name="Graphs" component={GraphsScreen} />
             <Stack.Screen name="Reanimated" component={ReanimatedExample} />
+            <Stack.Screen
+              name="ImperativeWorklet"
+              component={ImperativeWorkletExample}
+            />
             <Stack.Screen name="Stickers" component={Stickers} />
             <Stack.Screen
               name="Transitions"

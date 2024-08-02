@@ -27,6 +27,10 @@ float RNSkOpenGLCanvasProvider::getScaledHeight() {
   return _surfaceHolder ? _surfaceHolder->getHeight() : 0;
 }
 
+SkCanvas* RNSkOpenGLCanvasProvider::getCanvas() {
+    return _surfaceHolder ? _surfaceHolder->getSurface()->getCanvas() : nullptr;
+}
+
 bool RNSkOpenGLCanvasProvider::renderToCanvas(
     const std::function<void(SkCanvas *)> &cb) {
 
