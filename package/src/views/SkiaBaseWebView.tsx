@@ -148,15 +148,8 @@ export abstract class SkiaBaseWebView<
   }
 
   private handleTouchEvent(evt: PointerEvent, touchType: TouchType) {
-    this._touches.push({
-      id: evt.pointerId,
-      x: evt.clientX - evt.currentTarget.getClientRects()[0].left,
-      y: evt.clientY - evt.currentTarget.getClientRects()[0].top,
-      force: evt.pressure,
-      type: touchType,
-      timestamp: Date.now(),
-    });
-    this.redraw();
+    // Disabled touch event handling
+    return;
   }
 
   createTouchHandler(touchType: TouchType) {
@@ -176,12 +169,6 @@ export abstract class SkiaBaseWebView<
         <canvas
           ref={this._canvasRef}
           style={{ display: "flex", flex: 1 }}
-          onPointerDown={this.onStart}
-          onPointerMove={this.onActive}
-          onPointerUp={this.onEnd}
-          onPointerCancel={this.onCancel}
-          onPointerLeave={this.onEnd}
-          onPointerOut={this.onEnd}
         />
       </Platform.View>
     );
