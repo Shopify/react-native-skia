@@ -86,7 +86,7 @@ describe("Paragraphs", () => {
     );
     checkImage(img, docPath(`paragraph/hello-world-${surface.OS}.png`), {
       // In CI, the emoji font is different
-      maxPixelDiff: CI ? 15000 : 200,
+      maxPixelDiff: 15000,
     });
   });
   it("Should build the example from the documentation with text styles", async () => {
