@@ -4,12 +4,15 @@ package com.shopify.reactnative.skia;
 
 import android.util.Log;
 
+import com.facebook.react.bridge.JavaScriptContextHolder;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.module.annotations.ReactModule;
 
 import java.lang.ref.WeakReference;
+import java.util.HashSet;
+import java.util.Set;
 
 @ReactModule(name="RNSkiaModule")
 public class RNSkiaModule extends NativeSkiaModuleSpec implements LifecycleEventListener {
@@ -17,6 +20,9 @@ public class RNSkiaModule extends NativeSkiaModuleSpec implements LifecycleEvent
 
     private final WeakReference<ReactApplicationContext> weakReactContext;
     private SkiaManager skiaManager;
+
+    private final Object mContextLock = new Object();
+    private final Set<Integer> mSurfaceContextsIds = new HashSet<>();
 
     public RNSkiaModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -67,6 +73,30 @@ public class RNSkiaModule extends NativeSkiaModuleSpec implements LifecycleEvent
         } catch (Exception exception) {
             Log.e(NAME, "Failed to initialize Skia Manager!", exception);
             return false;
+        }
+    }
+
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    public boolean createSurfaceContext(double contextId) {
+      waitForNativeSurface((int)contextId);
+  
+      ReactApplicationContext context = getReactApplicationContext();
+      JavaScriptContextHolder jsContext = context.getJavaScriptContextHolder();
+      skiaManager.createSurfaceContext(jsContext.get(), (int)contextId);
+      return true;
+    }
+
+
+    private void waitForNativeSurface(Integer contextId) {
+        synchronized (mContextLock) {
+            while (!mSurfaceContextsIds.contains(contextId)) {
+                try {
+                    mContextLock.wait();
+                } catch (InterruptedException e) {
+                    Log.e("RNWebGPU", "Unable to create a context");
+                    return;
+                }
+            }
         }
     }
 

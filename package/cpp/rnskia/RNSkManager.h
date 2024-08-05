@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "RNSkPlatformContext.h"
+#include "SurfaceRegistry.h"
 
 namespace facebook {
 namespace react {
@@ -64,6 +65,8 @@ public:
   std::shared_ptr<RNSkPlatformContext> getPlatformContext() {
     return _platformContext;
   }
+
+  SurfaceRegistry surfacesRegistry;
 
 private:
   /**

@@ -11,6 +11,7 @@
 #include "RNSkAndroidPlatformContext.h"
 #include "RNSkLog.h"
 #include "RNSkManager.h"
+#include "JsiSkSurface.h"
 
 namespace RNSkia {
 
@@ -51,6 +52,28 @@ public:
     return _context;
   }
   std::shared_ptr<RNSkManager> getSkiaManager() { return _skManager; }
+
+  void createSurfaceContext(jni::alias_ref<jhybridobject> jThis, jlong jsRuntime, int contextId) {
+      auto surface = _skManager->surfacesRegistry.getSurface(contextId);
+      if (surface == nullptr) {
+        throw std::runtime_error("Surface haven't configured yet");
+      }
+
+      auto runtime = reinterpret_cast<facebook::jsi::Runtime *>(jsRuntime);
+      auto skiaContextRegistry = runtime->global().getPropertyAsObject(
+          *runtime, "__SkiaContextRegistry");
+      if (skiaContextRegistry.hasProperty(*runtime,
+                                            std::to_string(contextId).c_str())) {
+        return;
+      }
+
+      auto label = "Context: " + std::to_string(contextId);
+      auto jsiSurface =
+          std::make_shared<JsiSkSurface>(_context, surface);
+      auto surfaceJS =
+          facebook::jsi::Object::createFromHostObject(*runtime, jsiSurface);
+      skiaContextRegistry.setProperty(*runtime, std::to_string(contextId).c_str(), surfaceJS);
+  }
 
   void invalidate() {
     _context->stopDrawLoop();

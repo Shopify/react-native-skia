@@ -53,5 +53,6 @@ public class SkiaManager {
 
     private native void initializeRuntime();
     public native void invalidate();
+    public native void createSurfaceContext(long jsContext, int contextId);
 
 }
