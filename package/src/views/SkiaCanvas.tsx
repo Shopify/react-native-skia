@@ -6,7 +6,7 @@ import React, {
 } from "react";
 import type { ViewProps } from "react-native";
 
-import type { SkSurface } from "../skia";
+import type { SkSurface } from "../skia/types";
 import SkiaNativeView from "../specs/SkiaViewNativeComponent";
 import SkiaNativeModule from "../specs/NativeSkiaModule";
 
@@ -22,11 +22,11 @@ declare global {
 global.__SkiaContextRegistry = {};
 const SkiaContextRegistry = global.__SkiaContextRegistry;
 
-export interface CanvasRef {
+export interface SkiaCanvasRef {
   getContext(contextName: "skia"): SkSurface | null;
 }
 
-export const Canvas = forwardRef<CanvasRef, ViewProps>((props, ref) => {
+export const SkiaCanvas = forwardRef<SkiaCanvasRef, ViewProps>((props, ref) => {
   const [contextId, _] = useState(() => generateContextId());
 
   useImperativeHandle(ref, () => ({

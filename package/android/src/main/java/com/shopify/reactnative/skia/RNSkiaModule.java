@@ -100,6 +100,13 @@ public class RNSkiaModule extends NativeSkiaModuleSpec implements LifecycleEvent
         }
     }
 
+    protected void onSurfaceCreated(Integer contextId) {
+        synchronized (mContextLock) {
+            mSurfaceContextsIds.add(contextId);
+            mContextLock.notifyAll();
+        }
+    }
+
     @Override
     public void onHostResume() {
         if(skiaManager != null) skiaManager.onHostResume();
