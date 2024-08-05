@@ -1,10 +1,5 @@
 import { resolveFile, surface } from "../setup";
-import {
-  CI,
-  checkImage,
-  docPath,
-  itRunsE2eOnly,
-} from "../../../__tests__/setup";
+import { checkImage, docPath, itRunsE2eOnly } from "../../../__tests__/setup";
 import {
   FontStyle,
   TextAlign,
