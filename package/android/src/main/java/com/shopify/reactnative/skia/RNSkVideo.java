@@ -64,7 +64,6 @@ public class RNSkVideo {
             mediaPlayer.setDataSource(context, uri);
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mediaPlayer.setOnPreparedListener(mp -> {
-                durationMs = mp.getDuration();
                 mp.start();
                 isPlaying = true;
             });
@@ -72,7 +71,7 @@ public class RNSkVideo {
 
             // Retrieve and store video properties
             if (format.containsKey(MediaFormat.KEY_DURATION)) {
-                durationMs = format.getLong(MediaFormat.KEY_DURATION) / 1000;  // Convert microseconds to milliseconds
+                durationMs = (double) format.getLong(MediaFormat.KEY_DURATION) / 1000;  // Convert microseconds to milliseconds
             }
             if (format.containsKey(MediaFormat.KEY_FRAME_RATE)) {
                 frameRate = format.getInteger(MediaFormat.KEY_FRAME_RATE);
