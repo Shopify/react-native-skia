@@ -56,3 +56,10 @@ jest.mock("@react-navigation/native", () => {
     }),
   };
 });
+
+jest.mock("react-native-gesture-handler", () => {
+  return {
+    ...jest.requireActual("react-native-gesture-handler"),
+    GestureDetector: jest.fn(),
+  };
+});

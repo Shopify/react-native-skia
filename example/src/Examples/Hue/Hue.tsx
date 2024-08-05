@@ -12,9 +12,9 @@ import {
   polar2Canvas,
   Shader,
 } from "@shopify/react-native-skia";
-import { StyleSheet, View, useWindowDimensions } from "react-native";
+import { View, useWindowDimensions } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, { useSharedValue } from "react-native-reanimated";
+import { useSharedValue } from "react-native-reanimated";
 
 import { polar2Color } from "./Helpers";
 
@@ -57,19 +57,18 @@ export const Hue = () => {
   });
   return (
     <View style={{ flex: 1 }}>
-      <Canvas style={{ flex: 1 }}>
-        <Fill color={color} />
-        <Circle c={c} r={r}>
-          <BlurMask blur={40} style="solid" />
-          <Shader source={source} uniforms={{ c, r }} />
-        </Circle>
-        <Circle r={20} color="black" cx={translateX} cy={translateY}>
-          <BlurMask blur={10} style="solid" />
-        </Circle>
-        <Circle r={15} color={color} cx={translateX} cy={translateY} />
-      </Canvas>
       <GestureDetector gesture={gesture}>
-        <Animated.View style={StyleSheet.absoluteFill} />
+        <Canvas style={{ flex: 1 }}>
+          <Fill color={color} />
+          <Circle c={c} r={r}>
+            <BlurMask blur={40} style="solid" />
+            <Shader source={source} uniforms={{ c, r }} />
+          </Circle>
+          <Circle r={20} color="black" cx={translateX} cy={translateY}>
+            <BlurMask blur={10} style="solid" />
+          </Circle>
+          <Circle r={15} color={color} cx={translateX} cy={translateY} />
+        </Canvas>
       </GestureDetector>
     </View>
   );

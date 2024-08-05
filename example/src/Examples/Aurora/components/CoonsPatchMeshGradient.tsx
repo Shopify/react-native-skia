@@ -12,12 +12,9 @@ import {
   useImage,
   useClock,
 } from "@shopify/react-native-skia";
-import { View, useWindowDimensions, StyleSheet } from "react-native";
+import { View, useWindowDimensions } from "react-native";
 import type { SharedValue } from "react-native-reanimated";
-import Animated, {
-  useDerivedValue,
-  useSharedValue,
-} from "react-native-reanimated";
+import { useDerivedValue, useSharedValue } from "react-native-reanimated";
 import { GestureDetector } from "react-native-gesture-handler";
 
 import { createNoise2D } from "../../../components/SimpleNoise";
@@ -178,39 +175,38 @@ export const CoonsPatchMeshGradient = ({
 
   return (
     <View>
-      <Canvas style={{ width, height }}>
-        <Group>
-          <ImageShader image={image} tx="repeat" ty="repeat" />
-          {rects.map((r, i) => {
+      <GestureDetector gesture={gesture}>
+        <Canvas style={{ width, height }}>
+          <Group>
+            <ImageShader image={image} tx="repeat" ty="repeat" />
+            {rects.map((r, i) => {
+              return (
+                <RectPatch
+                  key={i}
+                  r={r}
+                  mesh={mesh}
+                  debug={debug}
+                  lines={lines}
+                  colors={colors}
+                  defaultMesh={defaultMesh}
+                />
+              );
+            })}
+          </Group>
+          {defaultMesh.map(({ pos }, index) => {
+            if (isEdge(pos, window) || !handles) {
+              return null;
+            }
             return (
-              <RectPatch
-                key={i}
-                r={r}
+              <Cubic
+                key={index}
                 mesh={mesh}
-                debug={debug}
-                lines={lines}
-                colors={colors}
-                defaultMesh={defaultMesh}
+                index={index}
+                color={colors[index]}
               />
             );
           })}
-        </Group>
-        {defaultMesh.map(({ pos }, index) => {
-          if (isEdge(pos, window) || !handles) {
-            return null;
-          }
-          return (
-            <Cubic
-              key={index}
-              mesh={mesh}
-              index={index}
-              color={colors[index]}
-            />
-          );
-        })}
-      </Canvas>
-      <GestureDetector gesture={gesture}>
-        <Animated.View style={StyleSheet.absoluteFill} />
+        </Canvas>
       </GestureDetector>
     </View>
   );

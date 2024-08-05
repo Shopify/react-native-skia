@@ -206,11 +206,6 @@ public:
    */
   void unregisterAll() {
     std::lock_guard<std::mutex> lock(_mutex);
-    // Unregister all views
-    auto tempList = _viewInfos;
-    for (const auto &info : tempList) {
-      unregisterSkiaView(info.first);
-    }
     _viewInfos.clear();
   }
 

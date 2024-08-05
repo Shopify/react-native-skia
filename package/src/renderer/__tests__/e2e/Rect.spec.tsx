@@ -111,6 +111,23 @@ describe("Rects and rounded rects", () => {
     const image = await surface.draw(<Path path={path} color="lightblue" />);
     checkImage(image, docPath("rrect/nonuniform.png"));
   });
+  it("Should draw a rounded rect with non-uniform values (3)", async () => {
+    const { Skia } = importSkia();
+    const { width, height } = surface;
+    const r = width * 0.2;
+    const barPath = Skia.Path.Make();
+    barPath.addRRect({
+      rect: { x: 0, y: 0, width, height },
+      topLeft: { x: r, y: r },
+      topRight: { x: r, y: r },
+      bottomLeft: { x: 0, y: 0 },
+      bottomRight: { x: 0, y: 0 },
+    });
+    const image = await surface.draw(<Path path={barPath} color="lightblue" />);
+    checkImage(image, docPath("rrect/test.png"));
+  });
+  /*
+   */
   it("Supports CSS3 colors (1)", async () => {
     const image = await surface.draw(<Fill color="hsl(120, 100%, 50%)" />);
     checkImage(image, docPath("fill/green.png"));

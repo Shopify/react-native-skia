@@ -10,10 +10,7 @@ import {
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import type { SharedValue } from "react-native-reanimated";
-import Animated, {
-  useDerivedValue,
-  useSharedValue,
-} from "react-native-reanimated";
+import { useDerivedValue, useSharedValue } from "react-native-reanimated";
 
 const Size = 25;
 const Increaser = 50;
@@ -66,13 +63,12 @@ export const PerformanceDrawingTest: React.FC = () => {
         </View>
       </View>
       <View style={{ flex: 1 }}>
-        <Canvas style={styles.container} mode="default">
-          {rects.map((_, i) => (
-            <Rct pos={pos} key={i} rct={rects[i]} />
-          ))}
-        </Canvas>
         <GestureDetector gesture={gesture}>
-          <Animated.View style={StyleSheet.absoluteFill} />
+          <Canvas style={styles.container} mode="default">
+            {rects.map((_, i) => (
+              <Rct pos={pos} key={i} rct={rects[i]} />
+            ))}
+          </Canvas>
         </GestureDetector>
       </View>
     </View>
