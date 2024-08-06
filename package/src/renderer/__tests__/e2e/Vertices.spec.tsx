@@ -16,4 +16,15 @@ describe("Vertices", () => {
     );
     checkImage(img, "snapshots/vertices/vertices.png");
   });
+  it("should draw a single triangle strip", async () => {
+    const { vec } = importSkia();
+    const vertices = [vec(0, 0), vec(128, 0), vec(0, 256), vec(128, 256)];
+    const colors = ["#61dafb", "#fb61da", "#dafb61", "cyan"];
+    const img = await surface.draw(
+      <>
+        <Vertices vertices={vertices} colors={colors} mode="triangleStrip" />
+      </>
+    );
+    checkImage(img, "snapshots/vertices/strip.png");
+  });
 });
