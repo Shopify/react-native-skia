@@ -95,7 +95,11 @@ describe("Enums", () => {
   });
   it("Should match VertexMode enums values with CanvasKit", () => {
     const { CanvasKit } = setupSkia();
-    checkEnum(VertexMode, CanvasKit.VertexMode);
+    expect(VertexMode.TriangleFan).toBe(CanvasKit.VertexMode.TriangleFan.value);
+    expect(VertexMode.TriangleStrip).toBe(
+      CanvasKit.VertexMode.TrianglesStrip.value
+    );
+    expect(VertexMode.Triangles).toBe(CanvasKit.VertexMode.Triangles.value);
   });
   it("Should match Canvas enums values with CanvasKit", () => {
     const { CanvasKit } = setupSkia();
