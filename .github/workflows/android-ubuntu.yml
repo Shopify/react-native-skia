@@ -39,6 +39,15 @@ jobs:
       - name: Set ANDROID_NDK
         run: echo "ANDROID_NDK=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
 
+      - name: Disk Cleanup
+        run: |
+          sudo apt-get clean
+          sudo rm -rf /var/lib/apt/lists/*
+          sudo rm -rf ~/.cache
+
+      - name: Prune Docker system
+        run: docker system prune -f --volumes
+
       - name: Install root node dependencies
         run: yarn
 
@@ -89,7 +98,7 @@ jobs:
       # Build Android app in specified directories using matrix
       - name: Build Android app
         working-directory: ${{ matrix.directory }}/android
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug --daemon --build-cache --parallel --max-workers=2
 
       # Cache apk for both directories
       - name: Cache apk
