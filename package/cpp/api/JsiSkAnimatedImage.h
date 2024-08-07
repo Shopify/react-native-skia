@@ -35,6 +35,10 @@ public:
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
 
+  JSI_HOST_FUNCTION(getFrameCount) {
+    return static_cast<int>(getObject()->getFrameCount());
+  }
+
   JSI_HOST_FUNCTION(currentFrameDuration) {
     return static_cast<int>(getObject()->currentFrameDuration());
   }
@@ -43,9 +47,10 @@ public:
     return static_cast<int>(getObject()->decodeNextFrame());
   }
 
-  EXPORT_JSI_API_TYPENAME(JsiSkAnimatedImage, "AnimatedImage")
+  EXPORT_JSI_API_TYPENAME(JsiSkAnimatedImage, AnimatedImage)
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkAnimatedImage, dispose),
+                       JSI_EXPORT_FUNC(JsiSkAnimatedImage, getFrameCount),
                        JSI_EXPORT_FUNC(JsiSkAnimatedImage, getCurrentFrame),
                        JSI_EXPORT_FUNC(JsiSkAnimatedImage,
                                        currentFrameDuration),
