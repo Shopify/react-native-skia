@@ -32,6 +32,8 @@ namespace para = skia::textlayout;
  */
 class JsiSkParagraph : public JsiSkHostObject {
 public:
+  EXPORT_JSI_API_TYPENAME(JsiSkParagraph, Paragraph)
+
   JSI_HOST_FUNCTION(layout) {
     auto width = getArgumentAsNumber(runtime, arguments, count, 0);
     _paragraph->layout(width);
