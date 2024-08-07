@@ -25,5 +25,11 @@ export interface SkAnimatedImage extends SkJSIInstance<"AnimatedImage"> {
    */
   currentFrameDuration(): number;
 
+  /**
+   *  Returns the number of frames in the animation.
+   *
+   */
+  getFrameCount(): number;
+
   // TODO - add the rest of the methods from the Skia API (see SkAnimatedImage.h)
 }
