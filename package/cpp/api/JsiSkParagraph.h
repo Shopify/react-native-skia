@@ -123,10 +123,10 @@ public:
     }
     return returnValue;
   }
-  
+
   JSI_HOST_FUNCTION(dispose) {
     _paragraph = nullptr;
-    
+
     return jsi::Value::undefined();
   }
 
