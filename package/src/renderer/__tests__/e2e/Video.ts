@@ -1,9 +1,10 @@
-import { itRunsE2eOnly } from "../../../__tests__/setup";
+/* eslint-disable jest/no-disabled-tests */
 import type { Video } from "../../../skia/types";
 import { surface } from "../setup";
 
+// TODO: to reanable these tests we need to run them on the UI thread
 describe("Videos", () => {
-  itRunsE2eOnly("get video duration and framerate", async () => {
+  it.skip("get video duration and framerate", async () => {
     const result = await surface.eval((Skia, ctx) => {
       const video = Skia.Video(ctx.localAssets[0]) as Video;
       return {
@@ -56,7 +57,7 @@ describe("Videos", () => {
   //   expect(img).not.toBeNull();
   //   checkImage(img!, "snapshots/video/frame100.png");
   // });
-  itRunsE2eOnly("seek non existing frame returns null", async () => {
+  it.skip("seek non existing frame returns null", async () => {
     const result = await surface.eval((Skia, ctx) => {
       const video = Skia.Video(ctx.localAssets[0]) as Video;
       video.seek(100000);

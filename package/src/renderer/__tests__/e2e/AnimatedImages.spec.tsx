@@ -15,6 +15,11 @@ describe("Animated Images", () => {
       if (!animatedImage) {
         return false;
       }
+
+      if (animatedImage.getFrameCount() !== 1) {
+        return false;
+      }
+
       animatedImage.decodeNextFrame();
       animatedImage.getCurrentFrame();
       animatedImage.currentFrameDuration();

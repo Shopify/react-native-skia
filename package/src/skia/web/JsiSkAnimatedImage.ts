@@ -21,6 +21,10 @@ export class JsiSkAnimatedImage
     return this.ref.currentFrameDuration();
   }
 
+  getFrameCount() {
+    return this.ref.getFrameCount();
+  }
+
   getCurrentFrame() {
     const image = this.ref.makeImageAtCurrentFrame();
     if (image === null) {
