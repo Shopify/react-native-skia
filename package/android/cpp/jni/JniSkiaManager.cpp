@@ -21,14 +21,13 @@ public:
       : runtimeExecutor_(std::move(runtimeExecutor)) {}
 
   void invokeAsync(facebook::react::CallFunc &&func) noexcept override {
-    runtimeExecutor_(
-        [func = std::move(func)](facebook::jsi::Runtime &runtime) {
+    runtimeExecutor_([func = std::move(func)](facebook::jsi::Runtime &runtime) {
 #if REACT_NATIVE_VERSION >= 75
-    func(runtime);
+      func(runtime);
 #else
-    func();
+      func();
 #endif
-        });
+    });
   }
 
   void invokeSync(facebook::react::CallFunc &&func) override {
