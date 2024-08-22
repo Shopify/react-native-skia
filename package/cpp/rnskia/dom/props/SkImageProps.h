@@ -22,6 +22,7 @@ struct FitRects {
 
 static PropId PropNameImage = JsiPropId::get("image");
 static PropId PropNameFit = JsiPropId::get("fit");
+static PropId PropNameCubicSampling = JsiPropId::get("cubicSampling");
 
 class ImageProp : public DerivedSkProp<SkImage> {
 public:
@@ -69,6 +70,7 @@ public:
   explicit ImageProps(const std::function<void(BaseNodeProp *)> &onChange)
       : DerivedProp<FitRects>(onChange) {
     _fitProp = defineProperty<NodeProp>(PropNameFit);
+    _cubicSamplingProp = defineProperty<NodeProp>(PropNameCubicSampling);
     _imageProp = defineProperty<ImageProp>(PropNameImage);
     _rectProp = defineProperty<RectProps>(PropNameRect);
   }
@@ -93,6 +95,11 @@ public:
 
   std::shared_ptr<const SkRect> getRect() {
     return _rectProp->getDerivedValue();
+  }
+
+  bool getCubicSampling() {
+    return _cubicSamplingProp->isSet() &&
+           _cubicSamplingProp->value().getAsBool();
   }
 
   SkMatrix rect2rect(SkRect src, SkRect dst) {
@@ -192,5 +199,6 @@ private:
   NodeProp *_fitProp;
   ImageProp *_imageProp;
   RectProps *_rectProp;
+  NodeProp *_cubicSamplingProp;
 };
 } // namespace RNSkia
