@@ -172,13 +172,15 @@ android {
                 ]
             }
 
-            if (REACT_NATIVE_VERSION >= 74) {
+            if (REACT_NATIVE_VERSION == 74) {
                 srcDirs += [
                     "src/reactnative74/java"
                 ]
             } else {
+                // the name latest here might be confusing as it applies for versions
+                // below 74 as well
                 srcDirs += [
-                    "src/reactnative69/java"
+                    "src/latest/java"
                 ]
             }
         }
