@@ -3,7 +3,7 @@ import type { SkJSIInstance } from "../JsiInstance";
 
 export enum VertexMode {
   Triangles,
-  TrianglesStrip,
+  TriangleStrip,
   TriangleFan,
 }
 
