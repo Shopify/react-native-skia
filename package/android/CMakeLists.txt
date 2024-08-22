@@ -220,6 +220,8 @@ else()
 endif()
 message("-- TURBO   : " ${TURBOMODULES_LIB})
 
+add_definitions(-DREACT_NATIVE_VERSION=${REACT_NATIVE_VERSION})
+
 # Link
 target_link_libraries(
         ${PACKAGE_NAME}
