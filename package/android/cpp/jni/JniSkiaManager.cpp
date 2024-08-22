@@ -20,12 +20,18 @@ public:
       facebook::react::RuntimeExecutor runtimeExecutor)
       : runtimeExecutor_(std::move(runtimeExecutor)) {}
 
-  void invokeAsync(std::function<void()> &&func) noexcept override {
+  void invokeAsync(facebook::react::CallFunc &&func) noexcept override {
     runtimeExecutor_(
-        [func = std::move(func)](facebook::jsi::Runtime &runtime) { func(); });
+        [func = std::move(func)](facebook::jsi::Runtime &runtime) {
+#if REACT_NATIVE_VERSION >= 75
+    func(runtime);
+#else
+    func();
+#endif
+        });
   }
 
-  void invokeSync(std::function<void()> &&func) override {
+  void invokeSync(facebook::react::CallFunc &&func) override {
     throw std::runtime_error(
         "Synchronous native -> JS calls are currently not supported.");
   }
