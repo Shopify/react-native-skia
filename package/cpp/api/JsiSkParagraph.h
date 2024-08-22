@@ -32,6 +32,8 @@ namespace para = skia::textlayout;
  */
 class JsiSkParagraph : public JsiSkHostObject {
 public:
+  EXPORT_JSI_API_TYPENAME(JsiSkParagraph, Paragraph)
+
   JSI_HOST_FUNCTION(layout) {
     auto width = getArgumentAsNumber(runtime, arguments, count, 0);
     _paragraph->layout(width);
@@ -122,6 +124,12 @@ public:
     return returnValue;
   }
 
+  JSI_HOST_FUNCTION(dispose) {
+    _paragraph = nullptr;
+
+    return jsi::Value::undefined();
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraph, layout),
                        JSI_EXPORT_FUNC(JsiSkParagraph, paint),
                        JSI_EXPORT_FUNC(JsiSkParagraph, getMaxWidth),
@@ -133,7 +141,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkParagraph,
                                        getGlyphPositionAtCoordinate),
                        JSI_EXPORT_FUNC(JsiSkParagraph, getRectsForRange),
-                       JSI_EXPORT_FUNC(JsiSkParagraph, getLineMetrics))
+                       JSI_EXPORT_FUNC(JsiSkParagraph, getLineMetrics),
+                       JSI_EXPORT_FUNC(JsiSkParagraph, dispose))
 
   explicit JsiSkParagraph(std::shared_ptr<RNSkPlatformContext> context,
                           para::ParagraphBuilder *paragraphBuilder)
