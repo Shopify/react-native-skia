@@ -49,7 +49,7 @@ if (process.argv.length !== 4) {
 }
 
 const currentDir = process.cwd();
-const SkiaDir = "./externals/skia";
+const SkiaDir = "../externals/skia";
 const SelectedPlatform = (process.argv[2] as PlatformName) ?? "";
 const SelectedTarget = process.argv[3] ?? "";
 

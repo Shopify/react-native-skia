@@ -38,7 +38,7 @@ export const getDistFolder = () => "./dist";
 export const ensureFolderExists = (dirPath: string) => {
   try {
     console.log(`Ensuring that ${dirPath} exists...`);
-    return fs.mkdirSync(dirPath, { recursive: true });
+    fs.mkdirSync(dirPath, { recursive: true });
   } catch (err) {
     // @ts-ignore
     if (err.code !== "EEXIST") throw err;
