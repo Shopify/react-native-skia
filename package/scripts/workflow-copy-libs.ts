@@ -68,10 +68,10 @@ const copyFiles = (from: string, to: string, files: string[]) => {
 
 console.log("Copying android files...");
 destinations.forEach((d, i) => {
-  copyFiles(sources[i], "./package/libs/android/" + d, androidFiles);
+  copyFiles(sources[i], "./libs/android/" + d, androidFiles);
 });
 
 console.log("Copying ios files...");
-copyFiles("skia-ios-xcframeworks", "./package/libs/ios", iosFiles);
+copyFiles("skia-ios-xcframeworks", "./libs/ios", iosFiles);
 
 console.log("Done copying artifacts.");
