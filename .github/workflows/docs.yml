@@ -22,6 +22,7 @@ jobs:
           cache: yarn
 
       - name: Install dependencies
+        working-directory: package
         run: yarn bootstrap
 
       - name: Build Documentation

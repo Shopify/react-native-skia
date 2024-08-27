@@ -43,6 +43,7 @@ And then the _SDK Location_ section. It will show you the NDK path, or the optio
 
 ### Building
 
+- Go to the package folder `cd package`
 - Install dependencies `yarn bootstrap`
 - Build the Skia libraries with `yarn build-skia` (this can take a while)
 - Copy Skia headers `yarn copy-skia-headers`
