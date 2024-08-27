@@ -21,9 +21,6 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: 'package/yarn.lock'
 
-      - name: Install root node dependencies
-        run: yarn
-
       - name: Install package dependencies
         working-directory: package
         run: yarn
@@ -36,9 +33,11 @@ jobs:
           branch: main
 
       - name: Copy Artifacts to libs folder
+        working-directory: package
         run: yarn workflow-copy-libs
 
       - name: Copy Skia Headers
+        working-directory: package
         run: yarn copy-skia-headers
 
       - name: Build NPM Package
