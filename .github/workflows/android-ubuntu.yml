@@ -25,6 +25,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           cache: 'yarn'
+          cache-dependency-path: package/yarn.lock
 
       - name: Set up JDK 11
         uses: actions/setup-java@v1

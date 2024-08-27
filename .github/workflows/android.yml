@@ -25,6 +25,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16
+          cache-dependency-path: package/yarn.lock
           cache: 'yarn'
 
       - name: Set up JDK 11

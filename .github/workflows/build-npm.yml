@@ -18,8 +18,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "lts/*"
-          cache: 'yarn'
           cache-dependency-path: package/yarn.lock
+          cache: 'yarn'
 
       - name: Install package dependencies
         working-directory: package
