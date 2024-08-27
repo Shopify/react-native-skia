@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: "lts/*"
           cache: 'yarn'
-          cache-dependency-path: 'package/yarn.lock'
+          cache-dependency-path: package/yarn.lock
 
       - name: Install package dependencies
         working-directory: package

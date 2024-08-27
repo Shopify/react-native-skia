@@ -27,6 +27,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
+          cache-dependency-path: package/yarn.lock
           cache: 'yarn'
 
       - name: Install Package
