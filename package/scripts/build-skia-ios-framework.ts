@@ -20,9 +20,9 @@ console.log("Checking prerequisites...");
 Object.keys(configurations.ios.targets).forEach((targetKey) => {
   configurations.ios.outputNames.forEach((out) => {
     checkFileExists(
-      `package/libs/ios/${targetKey}/${out}`,
-      `package/libs/ios/${targetKey}/${out}`,
-      `package/libs/ios/${targetKey}/${out} not found`
+      `libs/ios/${targetKey}/${out}`,
+      `libs/ios/${targetKey}/${out}`,
+      `libs/ios/${targetKey}/${out} not found`
     );
   });
 });
@@ -35,7 +35,7 @@ console.log("Building fat binary for iphone simulator");
 configurations.ios.outputNames.forEach((out) => {
   console.log(`Building fat binary for simulator for file ${out}`);
   executeCmdSync(
-    `lipo -create package/libs/ios/x64/${out} package/libs/ios/arm64-iphonesimulator/${out} -output package/libs/ios/${
+    `lipo -create libs/ios/x64/${out} libs/ios/arm64-iphonesimulator/${out} -output libs/ios/${
       out.split(".")[0]
     }.a`
   );
@@ -50,9 +50,9 @@ configurations.ios.outputNames.forEach((out) => {
   executeCmdSync(`rm -rf ./package/libs/ios/${libName}.xcframework`);
   executeCmdSync(
     "xcodebuild -create-xcframework " +
-      `-library ./package/libs/ios/${libName}.a ` +
-      `-library ./package/libs/ios/arm64-iphoneos/${libName}.a ` +
-      ` -output ./package/libs/ios/${libName}.xcframework `
+      `-library libs/ios/${libName}.a ` +
+      `-library libs/ios/arm64-iphoneos/${libName}.a ` +
+      ` -output libs/ios/${libName}.xcframework `
   );
 });
 
