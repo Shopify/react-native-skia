@@ -40,8 +40,11 @@ export const ensureFolderExists = (dirPath: string) => {
     console.log(`Ensuring that ${dirPath} exists...`);
     fs.mkdirSync(dirPath, { recursive: true });
   } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    if (err.code !== "EEXIST") throw err;
+    if (err.code !== "EEXIST") {
+      throw err;
+    }
   }
 };
 

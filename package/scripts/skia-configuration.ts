@@ -159,6 +159,6 @@ export const configurations: Configuration = {
       "libskottie.a",
       "libsksg.a",
       ...ParagraphOutputs,
-    ]
+    ],
   },
 };

@@ -1,7 +1,9 @@
-import { executeCmd, executeCmdSync } from "./utils";
 import { exit } from "process";
-import { commonArgs, configurations, PlatformName } from "./skia-configuration";
 import { existsSync, mkdirSync } from "fs";
+
+import { executeCmd, executeCmdSync } from "./utils";
+import type { PlatformName } from "./skia-configuration";
+import { commonArgs, configurations } from "./skia-configuration";
 
 const typedKeys = <T extends object>(obj: T) => Object.keys(obj) as (keyof T)[];
 
@@ -102,6 +104,7 @@ const configurePlatform = (platform: PlatformName, targetName: string) => {
       target.options?.reduce((a, cur) => (a += `--${cur[0]}=${cur[1]} `), "") ||
       "";
 
+    // eslint-disable-next-line max-len
     const command = `${commandline} ${options} ${targetOptions} --script-executable=python3 --args='target_os="${platform}" target_cpu="${target.cpu}" ${common}${args}${targetArgs}'`;
     console.log("Command:");
     console.log(command);

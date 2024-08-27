@@ -1,4 +1,5 @@
 import fs from "fs";
+
 import { ensureFolderExists, copyRecursiveSync } from "./utils";
 /**
  * This build script prepares the npm build command by copying

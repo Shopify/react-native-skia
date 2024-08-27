@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import { configurations } from "./skia-configuration";
 import { executeCmdSync, checkFileExists } from "./utils";
 
