@@ -27,7 +27,7 @@ message("-- PREBUILT: " ${PREBUILT_DIR})
 message("-- BUILD   : " ${build_DIR})
 message("-- LIBRN   : " ${LIBRN_DIR})
 
-link_directories(../libs/android/${ANDROID_ABI}/)
+link_directories(./libs/android/${ANDROID_ABI}/)
 
 if(${REACT_NATIVE_VERSION} LESS 66)
         file(
@@ -102,7 +102,7 @@ target_include_directories(
 )
 
 # Import prebuilt SKIA libraries
-set (SKIA_LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../libs/android/${ANDROID_ABI}")
+set (SKIA_LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libs/android/${ANDROID_ABI}")
 
 add_library(skia STATIC IMPORTED)
 set_property(TARGET skia PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskia.a")

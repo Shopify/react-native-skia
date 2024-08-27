@@ -31,11 +31,11 @@ Pod::Spec.new do |s|
   s.frameworks = 'MetalKit'
 
   s.ios.vendored_frameworks = [
-    'libs/ios/libskia.xcframework', 
-    'libs/ios/libsvg.xcframework', 
-    'libs/ios/libskshaper.xcframework',
-    'libs/ios/libskparagraph.xcframework',
-    'libs/ios/libskunicode.xcframework',
+    'package/libs/ios/libskia.xcframework', 
+    'package/libs/ios/libsvg.xcframework', 
+    'package/libs/ios/libskshaper.xcframework',
+    'package/libs/ios/libskparagraph.xcframework',
+    'package/libs/ios/libskunicode.xcframework',
   ]
 
   # All iOS cpp/h files
