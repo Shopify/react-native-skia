@@ -41,8 +41,9 @@ jobs:
       - name: Set ANDROID_NDK
         run: echo "ANDROID_NDK=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
 
-      - name: Install root node dependencies
-        run: yarn
+      - name: Install Package
+        working-directory: package
+        run: yarn install
 
       - name: Download Skia Binary Artifacts
         uses: dawidd6/action-download-artifact@v2
@@ -53,17 +54,15 @@ jobs:
           branch: main
 
       - name: Copy Artifacts to libs folder
+        working-directory: package
         run: yarn workflow-copy-libs
 
       - name: Copy Skia Headers
+        working-directory: package
         run: yarn copy-skia-headers
               
       - name: SDKs - accept licenses
         run: y | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-
-      - name: Install Package
-        working-directory: package
-        run: yarn install
 
       - name: Install example app node dependencies
         working-directory: ${{ matrix.working-directory }}
