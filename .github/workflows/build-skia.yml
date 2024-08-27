@@ -26,10 +26,11 @@ jobs:
           cache: yarn
 
       - name: Install root node dependencies
+        working-directory: ${{ env.WORKING_DIRECTORY }}
         run: yarn
 
       - name: Build Skia
-        working-directory: ${{ env.WORKING_DIRECTORY }}/
+        working-directory: ${{ env.WORKING_DIRECTORY }}
         env:
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: yarn build-skia
