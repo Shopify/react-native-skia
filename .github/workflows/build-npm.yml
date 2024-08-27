@@ -29,7 +29,7 @@ jobs:
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: "build-skia.yml"
-          path: artifacts
+          path: package/artifacts
           branch: main
 
       - name: Copy Artifacts to libs folder
