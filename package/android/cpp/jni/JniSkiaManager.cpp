@@ -9,6 +9,12 @@
 
 namespace {
 
+#ifdef REACT_NATIVE_VERSION >= 75
+using CallFuncType = facebook::react::CallFunc;
+#else
+using CallFuncType = std::function<void()>;
+#endif
+
 // For bridgeless mode, currently we don't have a way to get the JSCallInvoker
 // from Java. Workaround to use RuntimeExecutor to simulate the behavior of
 // JSCallInvoker. In the future when bridgeless mode is a standard and no more
@@ -20,7 +26,7 @@ public:
       facebook::react::RuntimeExecutor runtimeExecutor)
       : runtimeExecutor_(std::move(runtimeExecutor)) {}
 
-  void invokeAsync(facebook::react::CallFunc &&func) noexcept override {
+  void invokeAsync(CallFuncType &&func) noexcept override {
     runtimeExecutor_([func = std::move(func)](facebook::jsi::Runtime &runtime) {
 #if REACT_NATIVE_VERSION >= 75
       func(runtime);
@@ -30,7 +36,7 @@ public:
     });
   }
 
-  void invokeSync(facebook::react::CallFunc &&func) override {
+  void invokeSync(CallFuncType &&func) override {
     throw std::runtime_error(
         "Synchronous native -> JS calls are currently not supported.");
   }
