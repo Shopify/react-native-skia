@@ -118,6 +118,7 @@ jobs:
           cache: 'yarn'
 
       - name: Install root dependencies
+        working-directory: package
         run: yarn bootstrap
       
       - name: Restore APK
