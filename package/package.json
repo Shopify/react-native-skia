@@ -49,7 +49,22 @@
     "test": "jest",
     "e2e": "E2E=true yarn test -i e2e",
     "build": "bob build && merge-dirs lib/typescript/src lib/commonjs && merge-dirs lib/typescript/src lib/module",
-    "release": "semantic-release"
+    "release": "semantic-release",
+    "build-skia-ios-framework": "ts-node ./scripts/build-skia-ios-framework.ts",
+    "build-skia-ios": "ts-node ./scripts/build-skia-ios.ts && yarn build-skia-ios-framework",
+    "build-skia-android": "ts-node ./scripts/build-skia-android.ts",
+    "clean-skia": "yarn rimraf ./libs && yarn rimraf ../externals/skia/out",
+    "copy-skia-include-headers": "yarn rimraf ./cpp/skia/include/ && cp -a ../externals/skia/include/. ./cpp/skia/include",
+    "copy-skia-module-headers": "ts-node ./scripts/copy-skia-module-headers.ts",
+    "copy-skia-headers": "yarn copy-skia-include-headers && yarn copy-skia-module-headers",
+    "build-skia": "yarn build-skia-ios && yarn build-skia-android && yarn copy-skia-headers",
+    "clang-format": "yarn clang-format-ios && yarn clang-format-android && yarn clang-format-common",
+    "clang-format-ios": "find ios/ -iname *.h -o -iname *.mm -o -iname *.cpp | xargs clang-format -i",
+    "clang-format-android": "find android/cpp/ -iname *.h -o -iname *.m -o -iname *.cpp | xargs clang-format -i",
+    "clang-format-common": "find cpp/ -iname *.h -o -iname *.m -o -iname *.cpp | xargs clang-format -i",
+    "workflow-copy-libs": "yarn ts-node ./scripts/workflow-copy-libs.ts",
+    "bootstrap": "yarn && cd .. && cd ./example && yarn && cd .. && cd ./fabricexample && yarn && cd ..",
+    "cpplint": "cpplint --linelength=230 --filter=-legal/copyright,-whitespace/indent,-whitespace/comments,-whitespace/ending_newline,-build/include_order,-runtime/references,-readability/todo,-whitespace/blank_line,-whitespace/todo,-runtime/int,-build/c++11,-whitespace/parens --exclude=package/cpp/skia --exclude=package/ios --exclude=package/android/build --exclude=package/node_modules --recursive package"
   },
   "repository": {
     "type": "git",
@@ -106,7 +121,9 @@
     "react-native": "0.72.6",
     "react-native-builder-bob": "0.18.2",
     "react-native-reanimated": "3.6.2",
+    "rimraf": "3.0.2",
     "ts-jest": "29.1.1",
+    "ts-node": "^10.9.2",
     "typescript": "5.1.6",
     "ws": "8.18.0"
   },

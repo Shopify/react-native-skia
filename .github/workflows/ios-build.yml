@@ -27,28 +27,28 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
+          cache-dependency-path: package/yarn.lock
           cache: 'yarn'
 
-      - name: Install root node dependencies
-        run: yarn
+      - name: Install Package
+        working-directory: package
+        run: yarn install --frozen-lockfile
 
       - name: Download Skia Binary Artifacts
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: "build-skia.yml"
           repo: shopify/react-native-skia
-          path: artifacts
+          path: package/artifacts
           branch: main
 
       - name: Copy Artifacts to libs folder
+        working-directory: package
         run: yarn workflow-copy-libs
 
       - name: Copy Skia Headers
-        run: yarn copy-skia-headers
-
-      - name: Install Package
         working-directory: package
-        run: yarn install --frozen-lockfile
+        run: yarn copy-skia-headers
 
       - name: Install app node_modules
         working-directory: ${{ matrix.working-directory }}

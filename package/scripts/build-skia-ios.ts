@@ -13,5 +13,5 @@ Object.keys(configuration.targets).forEach((targetKey) => {
 });
 
 executeCmd(command, "iOS", () => {
-  console.log(`Done building skia for iOS.`);
+  console.log("Done building skia for iOS.");
 });

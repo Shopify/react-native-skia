@@ -1,36 +1,7 @@
 {
   "name": "react-native-skia-dev-tools",
   "version": "1.0.0",
-  "description": "## Getting started",
-  "main": "index.js",
-  "directories": {
-    "example": "example"
-  },
-  "devDependencies": {
-    "@types/node": "16.11.7",
-    "clang-format": "1.6.0",
-    "rimraf": "3.0.2",
-    "ts-node": "10.4.0",
-    "typescript": "5.3.3"
-  },
-  "scripts": {
-    "build-skia-ios-framework": "ts-node ./scripts/build-skia-ios-framework.ts",
-    "build-skia-ios": "ts-node ./scripts/build-skia-ios.ts && yarn build-skia-ios-framework",
-    "build-skia-android": "ts-node ./scripts/build-skia-android.ts",
-    "build-skia": "yarn build-skia-ios && yarn build-skia-android",
-    "clean-skia": "yarn rimraf ./package/libs && yarn rimraf ./externals/skia/out",
-    "copy-skia-include-headers": "yarn rimraf ./package/cpp/skia/include/ && cp -a ./externals/skia/include/. ./package/cpp/skia/include",
-    "copy-skia-module-headers": "ts-node ./scripts/copy-skia-module-headers.ts",
-    "copy-skia-headers": "yarn copy-skia-include-headers && yarn copy-skia-module-headers",
-    "build": "yarn build-skia && yarn copy-skia-headers",
-    "clang-format": "yarn clang-format-ios && yarn clang-format-android && yarn clang-format-common",
-    "clang-format-ios": "find package/ios/ -iname *.h -o -iname *.mm -o -iname *.cpp | xargs clang-format -i",
-    "clang-format-android": "find package/android/cpp/ -iname *.h -o -iname *.m -o -iname *.cpp | xargs clang-format -i",
-    "clang-format-common": "find package/cpp/ -iname *.h -o -iname *.m -o -iname *.cpp | xargs clang-format -i",
-    "workflow-copy-libs": "yarn ts-node ./scripts/workflow-copy-libs.ts",
-    "bootstrap": "yarn && cd ./package && yarn && cd .. && cd ./example && yarn && cd .. && cd ./fabricexample && yarn && cd ..",
-    "cpplint": "cpplint --linelength=230 --filter=-legal/copyright,-whitespace/indent,-whitespace/comments,-whitespace/ending_newline,-build/include_order,-runtime/references,-readability/todo,-whitespace/blank_line,-whitespace/todo,-runtime/int,-build/c++11,-whitespace/parens --exclude=package/cpp/skia --exclude=package/ios --exclude=package/android/build --exclude=package/node_modules --recursive package"
-  },
+  "private": true,
   "license": "MIT",
   "licenseFilename": "LICENSE.md",
   "readmeFilename": "README.md",

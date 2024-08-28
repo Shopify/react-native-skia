@@ -104,7 +104,7 @@ export const configurations: Configuration = {
       ],
       ...ParagraphArgsAndroid,
     ],
-    outputRoot: "package/libs/android",
+    outputRoot: "libs/android",
     outputNames: [
       "libskia.a",
       "libskshaper.a",
@@ -151,7 +151,7 @@ export const configurations: Configuration = {
       ["cxx", '"clang++"'],
       ...ParagraphArgsIOS,
     ],
-    outputRoot: "package/libs/ios",
+    outputRoot: "libs/ios",
     outputNames: [
       "libskia.a",
       "libskshaper.a",
@@ -159,6 +159,6 @@ export const configurations: Configuration = {
       "libskottie.a",
       "libsksg.a",
       ...ParagraphOutputs,
-    ]
+    ],
   },
 };
