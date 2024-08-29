@@ -106,4 +106,14 @@ describe("Text", () => {
     );
     checkImage(image, `snapshots/text/text-path2-${surface.OS}.png`);
   });
+  
+  it("should recognize packaged fonts", async () => {
+    const fontFamilies = await surface.eval((Skia) => {
+      const fontMgr = Skia.FontMgr.System();
+      return new Array(fontMgr.countFamilies())
+      .fill(0)
+      .map((_, i) => fontMgr.getFamilyName(i));
+    });
+    expect(fontFamilies.includes("Roboto")).toBe(true);
+  });
 });
