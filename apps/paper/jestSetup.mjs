@@ -4,7 +4,7 @@ import CanvasKitInit from "canvaskit-wasm/bin/full/canvaskit";
 import JestUtils from "react-native-reanimated/lib/module/reanimated2/jestUtils";
 import Reanimated from "react-native-reanimated/mock";
 
-import Mock from "../package/src/mock";
+import Mock from "../../packages/skia/src/mock";
 
 JestUtils.setUpTests();
 global.__reanimatedWorkletInit = () => {};
@@ -29,8 +29,10 @@ jest.mock("react-native-reanimated", () => {
 // Silence the warning: Animated: `useNativeDriver` is not supported because the native animated module is missing
 jest.mock("react-native/Libraries/Animated/NativeAnimatedHelper");
 
+jest.mock("@react-native-community/slider", () => {});
+
 jest.mock("@shopify/react-native-skia", () => {
-  jest.mock("../package/src/Platform", () => {
+  jest.mock("../../packages/skia/src/Platform", () => {
     const Noop = () => undefined;
     return {
       OS: "web",
