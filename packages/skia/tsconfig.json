@@ -5,6 +5,7 @@
       "dom",
       "es2019"
     ],
+    "noEmit": true,
     "allowJs": true,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
