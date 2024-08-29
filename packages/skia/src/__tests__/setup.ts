@@ -15,7 +15,7 @@ export const itRunsNodeOnly = E2E ? it.skip : it;
 export const itRunsCIAndNodeOnly = CI || !E2E ? it : it.skip;
 
 export const docPath = (relPath: string) =>
-  path.resolve(process.cwd(), `../docs/static/img/${relPath}`);
+  path.resolve(process.cwd(), `../../apps/docs/static/img/${relPath}`);
 
 export const processResult = (
   surface: SkSurface,
