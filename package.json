@@ -1,5 +1,5 @@
 {
-  "name": "react-native-skia-dev-tools",
+  "name": "react-native-skia",
   "version": "1.0.0",
   "private": true,
   "license": "MIT",
@@ -16,5 +16,9 @@
       "email": "wcandillon@gmail.com"
     }
   ],
-  "dependencies": {}
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "packageManager": "yarn@3.6.4"
 }

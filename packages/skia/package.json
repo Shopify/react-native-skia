@@ -1,0 +1,168 @@
+{
+  "name": "@shopify/react-native-skia",
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    "setup-skia-web": "./scripts/setup-canvaskit.js"
+  },
+  "title": "React Native Skia",
+  "version": "0.0.0",
+  "description": "High-performance React Native Graphics using Skia",
+  "main": "lib/module/index.js",
+  "react-native": "src/index.ts",
+  "module": "lib/module/index.js",
+  "types": "lib/typescript/index.d.ts",
+  "files": [
+    "src",
+    "lib",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
+    "README.md",
+    "LICENSE.md",
+    "android/build.gradle",
+    "android/CMakeLists.txt",
+    "android/cpp/**",
+    "android/src/**",
+    "libs/android/**",
+    "index.js",
+    "jestSetup.js",
+    "jestSetup.mjs",
+    "jestEnv.mjs",
+    "cpp/**/*.{h,cpp}",
+    "ios",
+    "libs/ios/libskia.xcframework",
+    "libs/ios/libskshaper.xcframework",
+    "libs/ios/libsvg.xcframework",
+    "libs/ios/libskottie.xcframework",
+    "libs/ios/libsksg.xcframework",
+    "libs/ios/libskparagraph.xcframework",
+    "libs/ios/libskunicode.xcframework",
+    "react-native-skia.podspec",
+    "scripts/setup-canvaskit.js",
+    "dist/**"
+  ],
+  "scripts": {
+    "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --cache",
+    "test": "jest",
+    "e2e": "E2E=true yarn test -i e2e",
+    "build": "bob build && merge-dirs lib/typescript/src lib/commonjs && merge-dirs lib/typescript/src lib/module",
+    "release": "semantic-release",
+    "build-skia-ios-framework": "ts-node ./scripts/build-skia-ios-framework.ts",
+    "build-skia-ios": "ts-node ./scripts/build-skia-ios.ts && yarn build-skia-ios-framework",
+    "build-skia-android": "ts-node ./scripts/build-skia-android.ts",
+    "clean-skia": "yarn rimraf ./libs && yarn rimraf ../externals/skia/out",
+    "copy-skia-include-headers": "yarn rimraf ./cpp/skia/include/ && cp -a ../externals/skia/include/. ./cpp/skia/include",
+    "copy-skia-module-headers": "ts-node ./scripts/copy-skia-module-headers.ts",
+    "copy-skia-headers": "yarn copy-skia-include-headers && yarn copy-skia-module-headers",
+    "build-skia": "yarn build-skia-ios && yarn build-skia-android && yarn copy-skia-headers",
+    "clang-format": "yarn clang-format-ios && yarn clang-format-android && yarn clang-format-common",
+    "clang-format-ios": "find ios/ -iname *.h -o -iname *.mm -o -iname *.cpp | xargs clang-format -i",
+    "clang-format-android": "find android/cpp/ -iname *.h -o -iname *.m -o -iname *.cpp | xargs clang-format -i",
+    "clang-format-common": "find cpp/ -iname *.h -o -iname *.m -o -iname *.cpp | xargs clang-format -i",
+    "workflow-copy-libs": "yarn ts-node ./scripts/workflow-copy-libs.ts",
+    "bootstrap": "yarn && cd .. && cd ./example && yarn && cd .. && cd ./fabricexample && yarn && cd ..",
+    "cpplint": "cpplint --linelength=230 --filter=-legal/copyright,-whitespace/indent,-whitespace/comments,-whitespace/ending_newline,-build/include_order,-runtime/references,-readability/todo,-whitespace/blank_line,-whitespace/todo,-runtime/int,-build/c++11,-whitespace/parens --exclude=package/cpp/skia --exclude=package/ios --exclude=package/android/build --exclude=package/node_modules --recursive package"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shopify/react-native-skia.git",
+    "baseUrl": "https://github.com/Shopify/react-native-skia"
+  },
+  "keywords": [
+    "react-native"
+  ],
+  "author": "Shopify Inc.",
+  "contributors": [
+    {
+      "name": "Christian Falch",
+      "email": "christian.falch@gmail.com"
+    },
+    {
+      "name": "William Candillon",
+      "email": "wcandillon@gmail.com"
+    }
+  ],
+  "license": "MIT",
+  "licenseFilename": "LICENSE.md",
+  "readmeFilename": "README.md",
+  "peerDependencies": {
+    "react": ">=18.0",
+    "react-native": ">=0.64",
+    "react-native-reanimated": ">=2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react-native": {
+      "optional": true
+    },
+    "react-native-reanimated": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-nullish-coalescing-operator": "7.18.6",
+    "@types/jest": "29.5.6",
+    "@types/pixelmatch": "5.2.4",
+    "@types/pngjs": "6.0.1",
+    "@types/react": "^18.2.6",
+    "@types/react-reconciler": "0.26.7",
+    "@types/ws": "8.5.3",
+    "eslint": "8.21.0",
+    "eslint-config-react-native-wcandillon": "3.10.2",
+    "eslint-plugin-reanimated": "2.0.0",
+    "jest": "29.6.4",
+    "jest-diff": "29.7.0",
+    "merge-dirs": "0.2.1",
+    "pixelmatch": "5.3.0",
+    "pngjs": "6.0.0",
+    "react": "18.3.1",
+    "react-native": "0.75.2",
+    "react-native-builder-bob": "0.18.2",
+    "react-native-reanimated": "^3.15.1",
+    "rimraf": "3.0.2",
+    "ts-jest": "29.1.1",
+    "ts-node": "^10.9.2",
+    "typescript": "5.1.6",
+    "ws": "8.18.0"
+  },
+  "dependencies": {
+    "canvaskit-wasm": "0.39.1",
+    "react-reconciler": "0.27.0"
+  },
+  "eslintIgnore": [
+    "node_modules/",
+    "lib/"
+  ],
+  "codegenConfig": {
+    "name": "rnskia",
+    "type": "all",
+    "jsSrcsDir": "src/specs",
+    "android": {
+      "javaPackageName": "com.shopify.reactnative.skia"
+    }
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      "commonjs",
+      [
+        "module",
+        {
+          "configFile": "./.babelrc"
+        }
+      ],
+      [
+        "typescript",
+        {
+          "project": "tsconfig.build.json"
+        }
+      ]
+    ]
+  },
+  "resolutions": {
+    "@typescript-eslint/eslint-plugin": "6.10.0",
+    "@typescript-eslint/parser": "6.10.0"
+  }
+}
