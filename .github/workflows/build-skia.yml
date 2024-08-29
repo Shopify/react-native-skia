@@ -56,13 +56,13 @@ jobs:
         with:
           name: skia-android-arm-64
           path: |
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/arm64/libskia.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/arm64/libskshaper.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/arm64/libsvg.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/arm64/libskottie.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/arm64/libsksg.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/arm64/libskparagraph.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/arm64/libskunicode.a
+            ./externals/skia/out/android/arm64/libskia.a
+            ./externals/skia/out/android/arm64/libskshaper.a
+            ./externals/skia/out/android/arm64/libsvg.a
+            ./externals/skia/out/android/arm64/libskottie.a
+            ./externals/skia/out/android/arm64/libsksg.a
+            ./externals/skia/out/android/arm64/libskparagraph.a
+            ./externals/skia/out/android/arm64/libskunicode.a
 
       - name: Upload artifacts - Android x86
         if: github.ref == 'refs/heads/main'
@@ -70,13 +70,13 @@ jobs:
         with:
           name: skia-android-arm-x86
           path: |
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/x86/libskia.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/x86/libskshaper.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/x86/libsvg.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/x86/libskottie.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/x86/libsksg.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/x86/libskparagraph.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/x86/libskunicode.a
+            ./externals/skia/out/android/x86/libskia.a
+            ./externals/skia/out/android/x86/libskshaper.a
+            ./externals/skia/out/android/x86/libsvg.a
+            ./externals/skia/out/android/x86/libskottie.a
+            ./externals/skia/out/android/x86/libsksg.a
+            ./externals/skia/out/android/x86/libskparagraph.a
+            ./externals/skia/out/android/x86/libskunicode.a
 
       - name: Upload artifacts - Android x64
         if: github.ref == 'refs/heads/main'
@@ -84,13 +84,13 @@ jobs:
         with:
           name: skia-android-arm-x64
           path: |
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/x64/libskia.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/x64/libskshaper.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/x64/libsvg.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/x64/libskottie.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/x64/libsksg.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/x64/libskparagraph.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/x64/libskunicode.a
+            ./externals/skia/out/android/x64/libskia.a
+            ./externals/skia/out/android/x64/libskshaper.a
+            ./externals/skia/out/android/x64/libsvg.a
+            ./externals/skia/out/android/x64/libskottie.a
+            ./externals/skia/out/android/x64/libsksg.a
+            ./externals/skia/out/android/x64/libskparagraph.a
+            ./externals/skia/out/android/x64/libskunicode.a
 
       - name: Upload artifacts - iOS xcframeworks
         if: github.ref == 'refs/heads/main'
@@ -98,10 +98,10 @@ jobs:
         with:
           name: skia-ios-xcframeworks
           path: |
-            ${{ env.WORKING_DIRECTORY }}/../package/libs/ios/libskia.xcframework
-            ${{ env.WORKING_DIRECTORY }}/../package/libs/ios/libskshaper.xcframework
-            ${{ env.WORKING_DIRECTORY }}/../package/libs/ios/libsvg.xcframework
-            ${{ env.WORKING_DIRECTORY }}/../package/libs/ios/libskottie.xcframework
-            ${{ env.WORKING_DIRECTORY }}/../package/libs/ios/libsksg.xcframework
-            ${{ env.WORKING_DIRECTORY }}/../package/libs/ios/libskparagraph.xcframework
-            ${{ env.WORKING_DIRECTORY }}/../package/libs/ios/libskunicode.xcframework
+            ./package/libs/ios/libskia.xcframework
+            ./package/libs/ios/libskshaper.xcframework
+            ./package/libs/ios/libsvg.xcframework
+            ./package/libs/ios/libskottie.xcframework
+            ./package/libs/ios/libsksg.xcframework
+            ./package/libs/ios/libskparagraph.xcframework
+            ./package/libs/ios/libskunicode.xcframework
