@@ -16,7 +16,7 @@
     "@react-navigation/elements": "1.3.21",
     "@react-navigation/native": "6.1.9",
     "@react-navigation/native-stack": "6.9.17",
-    "@shopify/react-native-skia": "link:../package/",
+    "@shopify/react-native-skia": "*",
     "@testing-library/react-native": "12.3.2",
     "@types/jest": "29.2.1",
     "@types/react": "18.2.37",
