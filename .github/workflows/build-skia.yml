@@ -42,13 +42,13 @@ jobs:
         with:
           name: skia-android-arm
           path: |
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/arm/libskia.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/arm/libskshaper.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/arm/libsvg.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/arm/libskottie.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/arm/libsksg.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/arm/libskparagraph.a
-            ${{ env.WORKING_DIRECTORY }}/../externals/skia/out/android/arm/libskunicode.a
+            ./externals/skia/out/android/arm/libskia.a
+            ./externals/skia/out/android/arm/libskshaper.a
+            ./externals/skia/out/android/arm/libsvg.a
+            ./externals/skia/out/android/arm/libskottie.a
+            ./externals/skia/out/android/arm/libsksg.a
+            ./externals/skia/out/android/arm/libskparagraph.a
+            ./externals/skia/out/android/arm/libskunicode.a
 
       - name: Upload artifacts - Android arm64
         if: github.ref == 'refs/heads/main'
