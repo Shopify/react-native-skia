@@ -25,7 +25,6 @@
     ],
     "react/jsx-uses-react": "error",
     "react/react-in-jsx-scope": "error",
-    "import/no-cycle": [2, { "ignoreExternal": true }],
-    "reanimated/js-function-in-worklet": 2
+    "import/no-cycle": [2, { "ignoreExternal": true }]
   }
 }

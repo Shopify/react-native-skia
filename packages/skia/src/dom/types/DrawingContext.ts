@@ -137,7 +137,7 @@ class ConcatablePaint {
 
   private setValue<T extends keyof typeof this>(
     key: T,
-    value?: (typeof this)[T]
+    value?: typeof this[T]
   ) {
     if (value !== undefined) {
       this[key] = value;

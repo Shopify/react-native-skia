@@ -1,10 +1,6 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
-import {
-  type NativeBuffer,
-  type NativeBufferFactory,
-  type SkImage,
-} from "../types";
+import type { NativeBuffer, NativeBufferFactory, SkImage } from "../types";
 
 import { Host } from "./Host";
 

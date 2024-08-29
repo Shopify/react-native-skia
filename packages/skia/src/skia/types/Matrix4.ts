@@ -94,7 +94,7 @@ export const Matrix4 = (): Matrix4 => {
 /**
  * @worklet
  */
-export const translate = (x: number, y: number, z: number = 0): Matrix4 => {
+export const translate = (x: number, y: number, z = 0): Matrix4 => {
   "worklet";
   return [1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z, 0, 0, 0, 1];
 };
@@ -228,12 +228,7 @@ export const pivot = (m: Matrix4, p: Point) => {
 /**
  * @worklet
  */
-export const scale = (
-  sx: number,
-  sy: number,
-  sz: number = 1,
-  p?: Point
-): Matrix4 => {
+export const scale = (sx: number, sy: number, sz = 1, p?: Point): Matrix4 => {
   "worklet";
   const m4: Matrix4 = [sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, 0, 0, 0, 1];
   if (p) {

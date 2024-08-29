@@ -1,5 +1,6 @@
 import { Skia } from "../Skia";
-import { isRect, type SkCanvas, type SkRect, type SkSize } from "../types";
+import type { SkCanvas, SkRect, SkSize } from "../types";
+import { isRect } from "../types";
 
 /**
  * Memoizes and returns an SkPicture that can be drawn to another canvas.
