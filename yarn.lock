@@ -5036,7 +5036,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@shopify/react-native-skia@*, @shopify/react-native-skia@workspace:packages/skia":
+"@shopify/react-native-skia@*, @shopify/react-native-skia@workspace:*, @shopify/react-native-skia@workspace:packages/skia":
   version: 0.0.0-use.local
   resolution: "@shopify/react-native-skia@workspace:packages/skia"
   dependencies:
@@ -5976,12 +5976,12 @@ __metadata:
   linkType: hard
 
 "@types/react@npm:*":
-  version: 18.3.4
-  resolution: "@types/react@npm:18.3.4"
+  version: 18.3.5
+  resolution: "@types/react@npm:18.3.5"
   dependencies:
     "@types/prop-types": "*"
     csstype: ^3.0.2
-  checksum: 555ccd1af86a23c781dea0360de64b2f7a0708cdcbf9e6496744b77630065868526fd55147c727dc5ef11b7fd712b04f7898757a84c67e2eb9dfd4c4ead10d95
+  checksum: 63d2ff473b348c902b68c20be55d2c5124d078c4336c2d1778f316c27789ed596657e8e714022ce14fb24994b0960fc64c913e629bb0bf85815355b0c31eb46b
   languageName: node
   linkType: hard
 
@@ -8153,9 +8153,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.0, caniuse-lite@npm:^1.0.30001646":
-  version: 1.0.30001653
-  resolution: "caniuse-lite@npm:1.0.30001653"
-  checksum: 289cf06c26a46f3e6460ccd5feffa788ab0ab35d306898c48120c65cfb11959bfa560e9f739393769b4fd01150c69b0747ad3ad5ec3abf3dfafd66df3c59254e
+  version: 1.0.30001655
+  resolution: "caniuse-lite@npm:1.0.30001655"
+  checksum: 3739c8f6d0fb55cff3c631d28c4fdafc81ab28756ce17a373428042c06f84a5877288d89fbe41be5ac494dd5092dca38ab91c9304e81935b9f2938419d2c23b3
   languageName: node
   linkType: hard
 
@@ -10252,9 +10252,9 @@ __metadata:
   linkType: hard
 
 "escalade@npm:^3.1.1, escalade@npm:^3.1.2":
-  version: 3.1.2
-  resolution: "escalade@npm:3.1.2"
-  checksum: 1ec0977aa2772075493002bdbd549d595ff6e9393b1cb0d7d6fcaf78c750da0c158f180938365486f75cb69fba20294351caddfce1b46552a7b6c3cde52eaa02
+  version: 3.2.0
+  resolution: "escalade@npm:3.2.0"
+  checksum: 47b029c83de01b0d17ad99ed766347b974b0d628e848de404018f3abee728e987da0d2d370ad4574aa3d5b5bfc368754fd085d69a30f8e75903486ec4b5b709e
   languageName: node
   linkType: hard
 
@@ -11595,9 +11595,9 @@ __metadata:
   linkType: hard
 
 "flow-parser@npm:0.*":
-  version: 0.244.0
-  resolution: "flow-parser@npm:0.244.0"
-  checksum: 0d714d18c82d6cbefc556c306970af4710e77a17de78848e5a03a55207116719d9947f4ccba4666c13409e23bd9cbba2bcf45eb92cb55dd0e0b08747576c1b02
+  version: 0.245.0
+  resolution: "flow-parser@npm:0.245.0"
+  checksum: 42ef1c9ed8beec9880e72955130d88643e3d2431e43bd34ce25c4d89cf79e8978d094f5e56a17b4d17074fe9b15da43efd89e9cfa221d7d0627821edffe620a9
   languageName: node
   linkType: hard
 
@@ -19977,7 +19977,7 @@ __metadata:
     "@react-navigation/elements": 1.3.6
     "@react-navigation/native": 6.0.13
     "@react-navigation/native-stack": 6.9.0
-    "@shopify/react-native-skia": "*"
+    "@shopify/react-native-skia": "workspace:*"
     "@svgr/webpack": 6.2.1
     "@testing-library/jest-native": 5.4.2
     "@testing-library/react-hooks": 8.0.1

@@ -19,7 +19,7 @@
     "@react-navigation/elements": "1.3.6",
     "@react-navigation/native": "6.0.13",
     "@react-navigation/native-stack": "6.9.0",
-    "@shopify/react-native-skia": "*",
+    "@shopify/react-native-skia": "workspace:*",
     "@svgr/webpack": "6.2.1",
     "@testing-library/jest-native": "5.4.2",
     "@testing-library/react-hooks": "8.0.1",
