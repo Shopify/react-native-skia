@@ -42,3 +42,4 @@ runs:
     - name: Copy Artifacts to libs folder
       working-directory: packages/skia
       run: yarn workflow-copy-libs
+      shell: bash
