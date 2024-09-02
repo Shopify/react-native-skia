@@ -15,44 +15,19 @@ jobs:
     runs-on: macos-12
     strategy:
       matrix:
-        working-directory: [example, fabricexample]
+        working-directory: [apps/paper] # app/fabric
     concurrency:
       group: ios-example-${{ matrix.working-directory }}-${{ github.ref }}
       cancel-in-progress: true
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
           submodules: recursive
-
-      - uses: actions/setup-node@v3
+      - name: Setup
+        uses: ./.github/actions/setup
         with:
-          cache-dependency-path: package/yarn.lock
-          cache: 'yarn'
-
-      - name: Install Package
-        working-directory: package
-        run: yarn install --frozen-lockfile
-
-      - name: Download Skia Binary Artifacts
-        uses: dawidd6/action-download-artifact@v2
-        with:
-          workflow: "build-skia.yml"
-          repo: shopify/react-native-skia
-          path: package/artifacts
-          branch: main
-
-      - name: Copy Artifacts to libs folder
-        working-directory: package
-        run: yarn workflow-copy-libs
-
-      - name: Copy Skia Headers
-        working-directory: package
-        run: yarn copy-skia-headers
-
-      - name: Install app node_modules
-        working-directory: ${{ matrix.working-directory }}
-        run: yarn install --frozen-lockfile
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Restore Pods from cache
         uses: actions/cache@v3
@@ -66,21 +41,6 @@ jobs:
       - name: Install Pods
         working-directory: ${{ matrix.working-directory }}/ios
         run: pod install
-
-      - name: Check if Podfile.lock has changed
-        working-directory: ${{ matrix.working-directory }}/ios
-        run: |
-          # Use git diff to get differences, excluding lines for 'COCOAPODS:' and filtering out 'React-RCTAppDelegate:'
-          # Right now we also exclude changes to React-RCTAppDelegate because of
-          # https://github.com/facebook/react-native/issues/39971
-          if git diff --ignore-all-space -I 'COCOAPODS:' -I "React-RCTAppDelegate" HEAD -- example/ios/Podfile.lock | grep -q .; then
-              echo "Podfile.lock has local changes, please update it."
-              # Display diff, but exclude 'React-RCTAppDelegate:' changes for clarity
-              git diff --ignore-all-space -I 'COCOAPODS:' -I "React-RCTAppDelegate" HEAD -- example/ios/Podfile.lock | grep -q .;
-              exit 1
-          else
-              echo "Podfile.lock is up to date."
-          fi
 
       - name: Restore build artifacts from cache
         uses: actions/cache@v3

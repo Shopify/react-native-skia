@@ -43,3 +43,8 @@ runs:
       working-directory: packages/skia
       run: yarn workflow-copy-libs
       shell: bash
+
+    - name: Copy Skia Headers
+      working-directory: packages/skia
+      run: yarn copy-skia-headers
+      shell: bash
