@@ -40,8 +40,9 @@ jobs:
       #   working-directory: packages/skia
       #   run: yarn clang-format-common --dry-run --Werror
 
-      # - name: Lint Package
-      #   run: yarn lint;
+      - name: Lint Package
+        working-directory: packages/skia
+        run: yarn lint;
 
       - name: TypeScript Package
         working-directory: packages/skia

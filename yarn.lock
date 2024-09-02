@@ -13542,6 +13542,7 @@ __metadata:
     cdt2d: ^1.0.0
     eslint: 8
     eslint-config-react-native-wcandillon: ^3.10.2
+    eslint-plugin-prettier: ^4.2.1
     its-fine: ^1.2.5
     jest: ^29.6.3
     jest-transform-stub: ^2.0.0
