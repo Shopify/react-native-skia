@@ -111,9 +111,9 @@ jobs:
         run: adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
         timeout-minutes: 10
 
-      - name: Reverse TCP
-        working-directory: ${{ matrix.working-directory }}
-        run: yarn android-reverse-tcp
+      # - name: Reverse TCP
+      #   working-directory: ${{ matrix.working-directory }}
+      #   run: yarn android-reverse-tcp
 
       - name: Start Package Manager
         working-directory: ${{ matrix.working-directory }}
