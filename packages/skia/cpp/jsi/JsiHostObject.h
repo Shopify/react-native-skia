@@ -47,12 +47,10 @@
  * Creates a JSI export function declaration
  */
 #define JSI_EXPORT_FUNC(CLASS, FUNCTION)                                       \
-  {                                                                            \
-#FUNCTION, (jsi::Value(JsiHostObject::*)(                                  \
-                   jsi::Runtime & runtime, const jsi::Value &thisValue,        \
-                   const jsi::Value *arguments, size_t)) &                     \
-                   CLASS::FUNCTION                                             \
-  }
+  {#FUNCTION, (jsi::Value(JsiHostObject::*)(                                   \
+                  jsi::Runtime & runtime, const jsi::Value &thisValue,         \
+                  const jsi::Value *arguments, size_t)) &                      \
+                  CLASS::FUNCTION}
 
 /**
  * Creates a JSI export functions statement
@@ -67,10 +65,8 @@
  * Creates a JSI export getter declaration
  */
 #define JSI_EXPORT_PROP_GET(CLASS, FUNCTION)                                   \
-  {                                                                            \
-#FUNCTION, (jsi::Value(JsiHostObject::*)(jsi::Runtime & runtime)) &        \
-                   CLASS::STR_CAT(STR_GET, FUNCTION)                           \
-  }
+  {#FUNCTION, (jsi::Value(JsiHostObject::*)(jsi::Runtime & runtime)) &         \
+                  CLASS::STR_CAT(STR_GET, FUNCTION)}
 
 /**
  * Creates a JSI export getters statement
@@ -86,11 +82,9 @@
  * Creates a JSI export setter declaration
  */
 #define JSI_EXPORT_PROP_SET(CLASS, FUNCTION)                                   \
-  {                                                                            \
-#FUNCTION,                                                                 \
-        (void(JsiHostObject::*)(jsi::Runtime & runtime, const jsi::Value &)) & \
-            CLASS::STR_CAT(STR_SET, FUNCTION)                                  \
-  }
+  {#FUNCTION,                                                                  \
+   (void(JsiHostObject::*)(jsi::Runtime & runtime, const jsi::Value &)) &      \
+       CLASS::STR_CAT(STR_SET, FUNCTION)}
 
 /**
  * Creates a JSI export setters statement

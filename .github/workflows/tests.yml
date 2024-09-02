@@ -20,6 +20,10 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: recursive
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install clang-format
         run: sudo apt-get install -y clang-format
@@ -35,11 +39,6 @@ jobs:
       - name: Run clang-format-common
         working-directory: packages/skia
         run: yarn clang-format-common --dry-run --Werror
-
-      - name: Setup
-        uses: ./.github/actions/setup
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Lint Package
         working-directory: packages/skia
