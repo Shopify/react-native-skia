@@ -26,7 +26,7 @@ import { useHandles } from "./useHandles";
 
 const rectToTexture = (
   vertices: CubicBezierHandle[],
-  [tl, tr, br, bl]: number[]
+  [tl, tr, br, bl]: number[],
 ) =>
   [
     vertices[tl].pos,
@@ -44,7 +44,7 @@ const rectToColors = (colors: string[], [tl, tr, br, bl]: number[]) => [
 
 const useRectToPatch = (
   mesh: SharedValue<CubicBezierHandle[]>,
-  indices: number[]
+  indices: number[],
 ): SharedValue<
   [CubicBezierHandle, CubicBezierHandle, CubicBezierHandle, CubicBezierHandle]
 > =>
@@ -102,7 +102,7 @@ export const CoonsPatchMeshGradient = ({
   const { width, height } = useWindowDimensions();
   const win = useMemo(
     () => Skia.XYWHRect(0, 0, width, height),
-    [height, width]
+    [height, width],
   );
 
   const clock = useClock();
@@ -121,7 +121,7 @@ export const CoonsPatchMeshGradient = ({
           c1: add(pos, vec(C, 0)),
           c2: add(pos, vec(0, C)),
         };
-      })
+      }),
     )
     .flat(2);
   const rects = new Array(rows)
@@ -134,7 +134,7 @@ export const CoonsPatchMeshGradient = ({
         const bl = (row + 1) * l + col;
         const br = bl + 1;
         return [tl, tr, br, bl];
-      })
+      }),
     )
     .flat();
   const noises = defaultMesh.map(() => [
@@ -153,16 +153,16 @@ export const CoonsPatchMeshGradient = ({
           pt.pos,
           vec(
             A * noisePos(clock.value / F, 0),
-            A * noisePos(0, clock.value / F)
-          )
+            A * noisePos(0, clock.value / F),
+          ),
         ),
         c1: add(
           pt.c1,
-          vec(A * noiseC1(clock.value / F, 0), A * noiseC1(0, clock.value / F))
+          vec(A * noiseC1(clock.value / F, 0), A * noiseC1(0, clock.value / F)),
         ),
         c2: add(
           pt.c1,
-          vec(A * noiseC2(clock.value / F, 0), A * noiseC2(0, clock.value / F))
+          vec(A * noiseC2(clock.value / F, 0), A * noiseC2(0, clock.value / F)),
         ),
       };
     });

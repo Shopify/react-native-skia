@@ -348,7 +348,7 @@ export type NoiseFunction4D = (
   x: number,
   y: number,
   z: number,
-  w: number
+  w: number,
 ) => number;
 
 /**

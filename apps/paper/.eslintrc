@@ -1,9 +1,10 @@
 {
-  "extends": "react-native-wcandillon",
+  "extends": ["react-native-wcandillon", "prettier"],
   "parserOptions": {
     "project": "./tsconfig.json"
   },
   "rules": {
+    "prettier/prettier": ["error", { "singleQuote": false, "bracketSpacing": true, "arrowParens": "always"}],
     "prefer-destructuring": [
       "error",
       {

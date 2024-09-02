@@ -23,27 +23,27 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
   const font = useFont(require("../../assets/SF-Pro-Display-Bold.otf"), 17);
   const path = useMemo(
     () => createGraphPath(width, height, 60, false),
-    [height, width]
+    [height, width],
   );
 
   const touchPos = useSharedValue(
-    getPointAtPositionInPath(width / 2, width, 60, path)
+    getPointAtPositionInPath(width / 2, width, 60, path),
   );
 
   const label = useDerivedValue(
     () => "$ " + (touchPos.value ? (touchPos.value.y * -1).toFixed(2) : "-"),
-    [touchPos]
+    [touchPos],
   );
 
   const textX = useDerivedValue(() => touchPos.value.x - 24, [touchPos]);
   const textY = useDerivedValue(() => touchPos.value.y - 18, [touchPos]);
   const lineP1 = useDerivedValue(
     () => vec(touchPos.value.x, touchPos.value.y + 14),
-    [touchPos]
+    [touchPos],
   );
   const lineP2 = useDerivedValue(
     () => vec(touchPos.value.x, height),
-    [touchPos]
+    [touchPos],
   );
 
   const gesture = Gesture.Pan().onChange((e) => {
@@ -59,8 +59,7 @@ export const Slider: React.FC<GraphProps> = ({ height, width }) => {
             strokeWidth={4}
             style="stroke"
             strokeJoin="round"
-            strokeCap="round"
-          >
+            strokeCap="round">
             <LinearGradient
               start={vec(0, height * 0.5)}
               end={vec(width * 0.5, height * 0.5)}
@@ -84,7 +83,7 @@ const getPointAtPositionInPath = (
   x: number,
   width: number,
   steps: number,
-  path: SkPath
+  path: SkPath,
 ) => {
   "worklet";
   const index = Math.max(0, Math.floor(x / (width / steps)));

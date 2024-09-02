@@ -55,7 +55,7 @@ export const GestureHandler = ({
     .onChange((e) => {
       matrix.value = multiply4(
         offset.value,
-        scale(e.scale, e.scale, 1, origin.value)
+        scale(e.scale, e.scale, 1, origin.value),
       );
     });
 

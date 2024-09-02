@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import React from "react";
 import { View, StyleSheet, Text, TouchableWithoutFeedback } from "react-native";
 import { useNavigation } from "@react-navigation/native";
@@ -32,8 +31,7 @@ export const Header = () => {
             height: 48,
             justifyContent: "center",
             alignItems: "center",
-          }}
-        >
+          }}>
           <Canvas style={{ width: 32, height: 32 }}>
             <Path
               fillType="evenOdd"

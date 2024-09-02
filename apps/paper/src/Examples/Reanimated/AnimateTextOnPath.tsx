@@ -32,7 +32,7 @@ export const AnimateTextOnPath = () => {
       (width - Padding * 2) / 2,
       ExampleHeight,
       width - Padding * 2,
-      ExampleHeight / 2
+      ExampleHeight / 2,
     );
     p1.simplify();
 
@@ -42,7 +42,7 @@ export const AnimateTextOnPath = () => {
       (width - Padding * 2) / 2,
       0,
       width - Padding * 2,
-      ExampleHeight / 2
+      ExampleHeight / 2,
     );
     p2.simplify();
     return { path1: p1, path2: p2 };
@@ -53,7 +53,7 @@ export const AnimateTextOnPath = () => {
     progress.value = withRepeat(
       withTiming(1, { duration: 700, easing: Easing.inOut(Easing.cubic) }),
       -1,
-      true
+      true,
     );
   }, [progress]);
 

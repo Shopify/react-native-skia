@@ -42,7 +42,7 @@ const drawTouches = (touches: TouchData[], colors: string[]) => {
   "worklet";
   const recorder = Skia.PictureRecorder();
   const canvas = recorder.beginRecording(
-    Skia.XYWHRect(0, 0, 2_000_000, 2_000_000)
+    Skia.XYWHRect(0, 0, 2_000_000, 2_000_000),
   );
   touches.forEach((touch) => {
     const p = paint.copy();

@@ -90,7 +90,7 @@ const cubicBezier = (
   from: number,
   c1: number,
   c2: number,
-  to: number
+  to: number,
 ) => {
   "worklet";
   const term = 1 - t;
@@ -107,7 +107,7 @@ export const cubicBezierYForX = (
   b: Vector,
   c: Vector,
   d: Vector,
-  precision = 2
+  precision = 2,
 ) => {
   "worklet";
   const pa = -a.x + 3 * b.x - 3 * c.x + d.x;
@@ -167,7 +167,7 @@ export const controlPoint = (
   previous: Vector,
   next: Vector,
   reverse: boolean,
-  smoothing: number
+  smoothing: number,
 ) => {
   "worklet";
   const p = previous || current;
@@ -189,7 +189,7 @@ export const controlPoint = (
 export const curveLines = (
   points: Vector[],
   smoothing: number,
-  strategy: "complex" | "bezier" | "simple"
+  strategy: "complex" | "bezier" | "simple",
 ) => {
   "worklet";
   const path = Skia.Path.Make();
@@ -229,7 +229,7 @@ export const curveLines = (
             points[points.length - 1].x,
             points[points.length - 1].y,
             points[points.length - 1].x,
-            points[points.length - 1].y
+            points[points.length - 1].y,
           );
         }
         break;

@@ -58,8 +58,7 @@ export const Button = ({ x, y, children }: ButtonProps) => {
       </Group>
       <Group
         transform={[{ translateX: r1 - 6 }, { translateY: r1 - 6 }]}
-        color="rgba(235, 235, 245, 0.6)"
-      >
+        color="rgba(235, 235, 245, 0.6)">
         {children}
       </Group>
     </Group>

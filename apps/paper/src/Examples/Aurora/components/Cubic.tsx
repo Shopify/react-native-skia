@@ -16,12 +16,12 @@ export const Cubic = ({ mesh, index, color }: CubicProps) => {
   const c1 = useDerivedValue(() => mesh.value[index].c1, [mesh]);
   const c1S = useDerivedValue(
     () => symmetric(mesh.value[index].c1, mesh.value[index].pos),
-    [mesh]
+    [mesh],
   );
   const c2 = useDerivedValue(() => mesh.value[index].c2, [mesh]);
   const c2S = useDerivedValue(
     () => symmetric(mesh.value[index].c2, mesh.value[index].pos),
-    [mesh]
+    [mesh],
   );
   const pos = useDerivedValue(() => mesh.value[index].pos, [mesh]);
   return (

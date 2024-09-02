@@ -26,8 +26,7 @@ import { translate } from "../../components/Animations";
 import { Title } from "./components/Title";
 
 const path = Skia.Path.MakeFromSVGString(
-  // eslint-disable-next-line max-len
-  "M466 91C466 141.258 361.682 182 233 182C104.318 182 0 141.258 0 91C0 40.7421 104.318 0 233 0C361.682 0 466 40.7421 466 91Z"
+  "M466 91C466 141.258 361.682 182 233 182C104.318 182 0 141.258 0 91C0 40.7421 104.318 0 233 0C361.682 0 466 40.7421 466 91Z",
 )!;
 
 const vWidth = 466;
@@ -65,8 +64,7 @@ const Logo: React.FC<{ center: Vector; origin: Vector; scale: number }> = ({
             ...translate(sub(center, origin)),
             { scale },
             ...transformOrigin(vOrigin, [{ rotate: Math.PI / 3 }]),
-          ]}
-        >
+          ]}>
           <Path path={path} style="stroke" strokeWidth={15} />
         </Group>
         <Group
@@ -74,8 +72,7 @@ const Logo: React.FC<{ center: Vector; origin: Vector; scale: number }> = ({
             ...translate(sub(center, origin)),
             { scale },
             ...transformOrigin(vOrigin, [{ rotate: -Math.PI / 3 }]),
-          ]}
-        >
+          ]}>
           <Path path={path} style="stroke" strokeWidth={15} />
         </Group>
       </Group>
@@ -101,8 +98,7 @@ const SquaredLogo: React.FC<{
             ...translate(sub(center, origin)),
             { scale },
             ...transformOrigin(vOrigin, [{ rotate: Math.PI / 3 }]),
-          ]}
-        >
+          ]}>
           <Rect rect={rect1} />
         </Group>
         <Group
@@ -110,8 +106,7 @@ const SquaredLogo: React.FC<{
             ...translate(sub(center, origin)),
             { scale },
             ...transformOrigin(vOrigin, [{ rotate: -Math.PI / 3 }]),
-          ]}
-        >
+          ]}>
           <Rect rect={rect1} />
         </Group>
       </Group>

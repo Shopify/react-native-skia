@@ -41,14 +41,14 @@ export const Tests = ({ assets }: TestsProps) => {
               eval(
                 `(function Main() {
                   return (${tree.code})(this.Skia, this.ctx, this.size, this.scale);
-                })`
+                })`,
               ).call({
                 Skia,
                 ctx: parseProps(tree.ctx, assets),
                 size: size * PixelRatio.get(),
                 scale: s,
-              })
-            )
+              }),
+            ),
           );
         } else if (typeof tree.screen === "string") {
           const Screen = Screens[tree.screen];
@@ -123,8 +123,7 @@ export const Tests = ({ assets }: TestsProps) => {
       <View
         style={{ width: size, height: size }}
         ref={viewRef}
-        collapsable={false}
-      >
+        collapsable={false}>
         {screen}
       </View>
     </View>

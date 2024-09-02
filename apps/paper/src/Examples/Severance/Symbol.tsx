@@ -48,7 +48,7 @@ export const Symbol = ({ i, j, font, pointer, clock }: SymbolProps) => {
         }),
       },
     ],
-    [pointer]
+    [pointer],
   );
   const dx = useDerivedValue(() => {
     const d = A * noise(x, clock.value * F);

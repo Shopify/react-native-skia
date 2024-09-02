@@ -18,8 +18,7 @@ export const Neumorphism = () => {
       onPress={() => {
         pressed.value = withTiming(pressed.value ? 0 : 1, { duration: 150 });
       }}
-      style={{ flex: 1 }}
-    >
+      style={{ flex: 1 }}>
       <Canvas style={{ flex: 1 }}>
         <Fill color="#F0F0F3" />
         <Switch x={x} y={y} width={size} pressed={pressed} />

@@ -58,7 +58,7 @@ export const Selection = ({ state, transition, graphs }: SelectionProps) => {
         translateX: mix(
           transition.value,
           current * buttonWidth,
-          next * buttonWidth
+          next * buttonWidth,
         ),
       },
     ];
@@ -86,8 +86,7 @@ export const Selection = ({ state, transition, graphs }: SelectionProps) => {
               transition.value = withTiming(1, {
                 duration: 750,
               });
-            }}
-          >
+            }}>
             <View style={styles.button}>
               <Text style={styles.label}>{graph.label}</Text>
             </View>

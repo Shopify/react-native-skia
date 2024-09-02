@@ -19,7 +19,7 @@ const picture = createPicture(
     circlePaint.setColor(Skia.Color("orange"));
     canvas.drawCircle(50, 50, 50, circlePaint);
   },
-  { x: 0, y: 0, width: 100, height: 100 }
+  { x: 0, y: 0, width: 100, height: 100 },
 );
 
 export const PictureExample = () => {
@@ -28,7 +28,7 @@ export const PictureExample = () => {
   // Create a copy from serialized data
   const copyOfPicture = useMemo(
     () => (serialized ? Skia.Picture.MakePicture(serialized) : null),
-    [serialized]
+    [serialized],
   );
 
   return (

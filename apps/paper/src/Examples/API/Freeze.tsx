@@ -17,7 +17,7 @@ export const FreezeExample = () => {
   const clock = useClock();
   const transform = useDerivedValue(
     () => [{ translateY: 100 }, { rotate: (Math.PI * clock.value) / 4000 }],
-    [clock]
+    [clock],
   );
 
   return (

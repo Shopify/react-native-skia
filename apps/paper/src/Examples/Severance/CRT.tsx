@@ -67,8 +67,7 @@ export const CRT = ({ children }: CRTProps) => {
             uniforms={{ resolution: vec(width, height) }}
           />
         </Paint>
-      }
-    >
+      }>
       {children}
     </Group>
   );

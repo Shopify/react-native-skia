@@ -28,14 +28,14 @@ const Ring = ({ index, progress }: RingProps) => {
   const R = width / 4;
   const center = useMemo(
     () => vec(width / 2, height / 2 - 64),
-    [height, width]
+    [height, width],
   );
 
   const theta = (index * (2 * Math.PI)) / 6;
   const transform = useDerivedValue(() => {
     const { x, y } = polar2Canvas(
       { theta, radius: progress.value * R },
-      { x: 0, y: 0 }
+      { x: 0, y: 0 },
     );
     const scale = mix(progress.value, 0.3, 1);
     return [{ translateX: x }, { translateY: y }, { scale }];
@@ -56,14 +56,14 @@ export const Breathe = () => {
   const { width, height } = useWindowDimensions();
   const center = useMemo(
     () => vec(width / 2, height / 2 - 64),
-    [height, width]
+    [height, width],
   );
 
   const progress = useLoop({ duration: 3000 });
 
   const transform = useDerivedValue(
     () => [{ rotate: mix(progress.value, -Math.PI, 0) }],
-    [progress]
+    [progress],
   );
 
   return (

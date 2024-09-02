@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import { Circle, Group, Path } from "@shopify/react-native-skia";
 import React from "react";
 

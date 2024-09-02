@@ -98,8 +98,7 @@ const App = () => {
             screenOptions={{
               headerLeft: HeaderLeft,
             }}
-            initialRouteName={CI ? "Tests" : "Home"}
-          >
+            initialRouteName={CI ? "Tests" : "Home"}>
             <Stack.Screen
               name="Home"
               key="Home"
@@ -113,8 +112,7 @@ const App = () => {
               name="Tests"
               options={{
                 title: "🔧 Tests",
-              }}
-            >
+              }}>
               {(props) => <Tests {...props} assets={assets} />}
             </Stack.Screen>
             <Stack.Screen

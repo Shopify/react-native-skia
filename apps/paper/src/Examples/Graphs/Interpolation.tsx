@@ -23,7 +23,7 @@ import type { GraphProps } from "./types";
 
 export const Interpolation: React.FC<GraphProps> = ({ height, width }) => {
   const [currentPath, setCurrentPath] = useState(() =>
-    createGraphPath(width, height, 60)
+    createGraphPath(width, height, 60),
   );
 
   useEffect(() => {
@@ -78,9 +78,9 @@ const TransitioningPath = ({
       interpolatePaths(
         progress.value,
         [0, 1],
-        [currentPathRef.value, nextPathRef.value]
+        [currentPathRef.value, nextPathRef.value],
       ),
-    [progress, path]
+    [progress, path],
   );
 
   useEffect(() => {

@@ -49,7 +49,7 @@ export const Hue = () => {
     const { theta, radius } = canvas2Polar(e, center);
     const { x, y } = polar2Canvas(
       { theta, radius: Math.min(radius, r) },
-      center
+      center,
     );
     translateX.value = x;
     translateY.value = y;

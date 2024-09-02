@@ -126,8 +126,7 @@ export const List = () => {
           onPress={() => {
             navigate(thumbnail.screen);
           }}
-          testID={thumbnail.screen}
-        >
+          testID={thumbnail.screen}>
           <View style={styles.thumbnail}>
             <Text style={styles.title}>{thumbnail.title}</Text>
           </View>

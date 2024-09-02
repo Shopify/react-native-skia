@@ -22,7 +22,7 @@ export const Glassmorphism = () => {
   const titleFont = useFont(require("../../assets/SF-Mono-Semibold.otf"), 24);
   const subtitleFont = useFont(
     require("../../assets/SF-Mono-Semibold.otf"),
-    18
+    18,
   );
   const font = useFont(require("../../assets/SF-Mono-Semibold.otf"), 12);
   const { width, height } = useWindowDimensions();
@@ -30,7 +30,7 @@ export const Glassmorphism = () => {
   const CARD_HEIGHT = CARD_WIDTH * 0.61;
   const clip = useMemo(
     () => rrect(rect(0, 0, CARD_WIDTH, CARD_HEIGHT), 20, 20),
-    [CARD_HEIGHT, CARD_WIDTH]
+    [CARD_HEIGHT, CARD_WIDTH],
   );
 
   const x = useSharedValue((width - CARD_WIDTH) / 2);
@@ -55,8 +55,7 @@ export const Glassmorphism = () => {
           clip={clip}
           blur={15}
           color="rgba(255, 255, 255, 0.1)"
-          transform={transform}
-        >
+          transform={transform}>
           <Paint>
             <LinearGradient
               start={vec(0, 0)}

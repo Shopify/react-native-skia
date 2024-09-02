@@ -22,21 +22,21 @@ export const Glassmorphism = () => {
   const r = c.x - 32;
   const rect = useMemo(
     () => ({ x: 0, y: c.y, width, height: c.y }),
-    [c.y, width]
+    [c.y, width],
   );
 
   const progress = useLoop({ duration: 2000 });
   const start = useDerivedValue(
     () => sub(c, vec(0, mix(progress.value, r, r / 2))),
-    [progress]
+    [progress],
   );
   const end = useDerivedValue(
     () => add(c, vec(0, mix(progress.value, r, r / 2))),
-    []
+    [],
   );
   const radius = useDerivedValue(
     () => mix(progress.value, r, r / 2),
-    [progress]
+    [progress],
   );
 
   return (

@@ -26,7 +26,7 @@ const rct = Skia.XYWHRect(
   (width - CARD_WIDTH) / 2,
   (height - CARD_HEIGHT) / 2,
   CARD_WIDTH,
-  CARD_HEIGHT
+  CARD_HEIGHT,
 );
 const rrct = Skia.RRectXY(rct, 10, 10);
 const roundedRectPath = Skia.Path.Make();

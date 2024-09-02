@@ -73,8 +73,7 @@ export const Neumorphism = () => {
           label="Ac"
           active={true}
           progress={progress}
-          font={font}
-        >
+          font={font}>
           <Snow />
         </Control>
         <Mode translateY={translateY} />

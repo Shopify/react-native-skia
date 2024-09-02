@@ -21,15 +21,14 @@ export const HomeScreenButton: React.FC<Props> = ({
       CommonActions.navigate({
         name: route,
         params: {},
-      })
+      }),
     );
   }, [route, navigation]);
   return (
     <TouchableOpacity
       onPress={gotoRoute}
       style={styles.container}
-      testID={testId}
-    >
+      testID={testId}>
       <View>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.description}>{description}</Text>

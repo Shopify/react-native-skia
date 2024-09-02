@@ -25,7 +25,7 @@ const img = Skia.Image.MakeImage(
     colorType: ColorType.RGBA_8888,
   },
   data,
-  256 * 4
+  256 * 4,
 )!;
 
 export const Data = () => {

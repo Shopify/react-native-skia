@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import { Canvas, Circle, Path } from "@shopify/react-native-skia";
 import type { ReactNode } from "react";
 import React from "react";
@@ -62,8 +61,7 @@ export const List = () => {
         borderTopRightRadius: 32,
         overflow: "hidden",
       }}
-      contentContainerStyle={{ paddingHorizontal: 16 }}
-    >
+      contentContainerStyle={{ paddingHorizontal: 16 }}>
       <Link title="Website" subtitle="ethereum.org">
         <Icon
           color="#F7931A"

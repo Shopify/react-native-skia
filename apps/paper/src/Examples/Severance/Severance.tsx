@@ -46,7 +46,7 @@ export const Severance = () => {
                       clock={clock}
                     />
                   );
-                })
+                }),
               )}
             </Group>
           </CRT>

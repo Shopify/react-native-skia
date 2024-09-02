@@ -4,7 +4,7 @@ export const createGraphPath = (
   width: number,
   height: number,
   steps: number,
-  round = true
+  round = true,
 ) => {
   const retVal = Skia.Path.Make();
   let y = height / 2;
@@ -31,7 +31,7 @@ export const createGraphPath = (
 export const createZeroPath = (
   width: number,
   height: number,
-  steps: number
+  steps: number,
 ) => {
   const retVal = Skia.Path.Make();
   const y = height / 2;

@@ -41,7 +41,7 @@ export const Snapshot = () => {
   const progress = useLoop({ duration: 1500 });
   const uniforms = useDerivedValue(
     () => ({ r: mix(progress.value, 1, 100) }),
-    [progress]
+    [progress],
   );
 
   const image = useSharedValue<SkImage | null>(null);
@@ -88,8 +88,7 @@ const Component = () => {
           left: 0,
           width: 200,
           height: 200,
-        }}
-      >
+        }}>
         <View
           style={{
             position: "absolute",
@@ -120,8 +119,7 @@ const Component = () => {
             height: 80,
             backgroundColor: "blue",
             opacity: 0.5,
-          }}
-        >
+          }}>
           <View
             style={{
               width: 40,
@@ -138,8 +136,7 @@ const Component = () => {
             backgroundColor: "red",
             opacity: 0.5,
             overflow: "hidden",
-          }}
-        >
+          }}>
           <View style={{ width: 150, height: 10, backgroundColor: "cyan" }}>
             <View style={{ width: 20, height: 20, backgroundColor: "red" }} />
           </View>

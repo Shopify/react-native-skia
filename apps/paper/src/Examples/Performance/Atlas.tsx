@@ -43,7 +43,7 @@ export const PerformanceDrawingTest = () => {
         strokeWidth={strokeWidth}
       />
     </Group>,
-    textureSize
+    textureSize,
   );
 
   const sprites = useMemo(
@@ -51,7 +51,7 @@ export const PerformanceDrawingTest = () => {
       new Array(numberOfBoxes)
         .fill(0)
         .map(() => rect(0, 0, textureSize.width, textureSize.height)),
-    [numberOfBoxes]
+    [numberOfBoxes],
   );
 
   const { width, height } = useWindowDimensions();

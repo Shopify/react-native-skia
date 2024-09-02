@@ -52,7 +52,7 @@ const buildGraph = (
   datapoints: DataPoints,
   label: string,
   WIDTH: number,
-  HEIGHT: number
+  HEIGHT: number,
 ) => {
   const AJUSTED_SIZE = HEIGHT - PADDING * 2;
   const priceList = datapoints.prices.slice(0, POINTS);

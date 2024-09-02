@@ -53,7 +53,7 @@ const normalizeRad = (value: number) => {
 export const polar2Color = (
   theta: number,
   radius: number,
-  maxRadius: number
+  maxRadius: number,
 ) => {
   "worklet";
   const h = normalizeRad(theta) / TAU;

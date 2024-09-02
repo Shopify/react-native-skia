@@ -42,7 +42,7 @@ export const Paragraphs = () => {
 
   const loopedWidth = useDerivedValue(
     () => mix(progress.value, width * 0.2, width * 0.8),
-    [progress]
+    [progress],
   );
 
   const customFontMgr = useFonts(fonts);
@@ -125,7 +125,7 @@ export const Paragraphs = () => {
       .addText("on iOS.")
       .pushStyle(textStyle)
       .addText(
-        "\n\nOn Android we use built-in ICU while on web we use CanvasKit's."
+        "\n\nOn Android we use built-in ICU while on web we use CanvasKit's.",
       )
       .pop()
       .pushStyle(crazyStyle, strokePaint)
@@ -142,8 +142,7 @@ export const Paragraphs = () => {
         style={{
           width,
           height,
-        }}
-      >
+        }}>
         <Group transform={[{ translateX: 30 }, { translateY: 30 }]}>
           <Paragraph paragraph={paragraph} x={0} y={0} width={loopedWidth} />
           <Rect x={loopedWidth} y={0} width={1} height={300} />

@@ -82,8 +82,7 @@ export const Wallet = () => {
               path={path}
               strokeWidth={4}
               strokeJoin="round"
-              strokeCap="round"
-            >
+              strokeCap="round">
               <LinearGradient
                 start={vec(0, 0)}
                 end={vec(width, 0)}

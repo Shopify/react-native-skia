@@ -52,8 +52,8 @@ jobs:
         working-directory: packages/skia
         run: yarn test;
 
-      # - name: Lint Example/Fabric Example
-      #   run: cd ${{ matrix.directory }}; yarn lint;
+      - name: Lint Example/Fabric Example
+        run: cd ${{ matrix.directory }}; yarn lint;
 
       - name: TypeScript Example/Fabric Example
         run: cd ${{ matrix.directory }}; yarn tsc;

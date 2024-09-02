@@ -67,7 +67,7 @@ export const SpeedTest = () => {
 
   const sweepAngle = useDerivedValue(() => {
     const output = ticks.map(
-      (_, i, arr) => (i * arcAnglesDiff) / (arr.length - 1)
+      (_, i, arr) => (i * arcAnglesDiff) / (arr.length - 1),
     );
 
     return interpolate(speed.value, ticks, output);
@@ -99,7 +99,7 @@ export const SpeedTest = () => {
           height: r * 2,
         },
         endAngle,
-        -(arcAnglesDiff - sweepAngle.value)
+        -(arcAnglesDiff - sweepAngle.value),
       );
       return path;
     });
@@ -128,7 +128,7 @@ export const SpeedTest = () => {
           height: r * 2,
         },
         startAngle,
-        sweepAngle.value
+        sweepAngle.value,
       );
 
       return path;
@@ -145,7 +145,7 @@ export const SpeedTest = () => {
           height: r * 2,
         },
         startAngle,
-        sweepAngle.value
+        sweepAngle.value,
       );
 
       return path;
@@ -158,8 +158,7 @@ export const SpeedTest = () => {
           path={shadowPath}
           style="stroke"
           strokeWidth={strokeWidth * 1.5}
-          opacity={0.3}
-        >
+          opacity={0.3}>
           <BlurMask blur={50} respectCTM={false} />
         </Path>
         <ArcGradient />
@@ -181,7 +180,7 @@ export const SpeedTest = () => {
           height: r * 2,
         },
         startAngle,
-        -(360 - sweepAngle.value)
+        -(360 - sweepAngle.value),
       );
 
       return path;
@@ -292,7 +291,7 @@ export const SpeedTest = () => {
       alpha.value = interpolate(
         speed.value,
         [0, value - 10, value],
-        [0.5, 0.5, 1]
+        [0.5, 0.5, 1],
       );
 
       const textStyle = {
@@ -321,8 +320,7 @@ export const SpeedTest = () => {
       style={{
         flex: 1,
         backgroundColor,
-      }}
-    >
+      }}>
       <Header />
       <Canvas style={{ flex: 3 }}>
         <ActiveArc />

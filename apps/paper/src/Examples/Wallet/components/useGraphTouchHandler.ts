@@ -13,7 +13,7 @@ export const useGraphTouchHandler = (x: SharedValue<number>, width: number) => {
         .onEnd(({ velocityX }) => {
           x.value = withDecay({ velocity: velocityX, clamp: [0, width] });
         }),
-    [width, x]
+    [width, x],
   );
   return gesture;
 };

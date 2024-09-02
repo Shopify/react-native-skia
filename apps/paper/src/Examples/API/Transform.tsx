@@ -37,7 +37,7 @@ export const Transform = () => {
       center.x - CARD_WIDTH / 2,
       center.y - CARD_HEIGHT / 2,
       CARD_WIDTH,
-      CARD_HEIGHT
+      CARD_HEIGHT,
     );
     if (image) {
       const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
@@ -59,7 +59,7 @@ export const Transform = () => {
       center.x - CARD_WIDTH / 2,
       center.y - CARD_HEIGHT / 2,
       CARD_WIDTH,
-      CARD_HEIGHT
+      CARD_HEIGHT,
     );
     if (image) {
       const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
@@ -80,7 +80,7 @@ export const Transform = () => {
       center.x - CARD_WIDTH / 2,
       center.y - CARD_HEIGHT / 2,
       CARD_WIDTH,
-      CARD_HEIGHT
+      CARD_HEIGHT,
     );
     if (image) {
       const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
@@ -101,7 +101,7 @@ export const Transform = () => {
       center.x - CARD_WIDTH / 2,
       center.y - CARD_HEIGHT / 2,
       CARD_WIDTH,
-      CARD_HEIGHT
+      CARD_HEIGHT,
     );
     if (image) {
       const imgRect = Skia.XYWHRect(0, 0, image.width(), image.height());
