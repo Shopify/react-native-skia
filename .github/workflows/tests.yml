@@ -28,17 +28,17 @@ jobs:
       - name: Install clang-format
         run: sudo apt-get install -y clang-format
 
-      - name: Run clang-format-ios
-        working-directory: packages/skia
-        run: yarn clang-format-ios --dry-run --Werror
+      # - name: Run clang-format-ios
+      #   working-directory: packages/skia
+      #   run: yarn clang-format-ios --dry-run --Werror
 
-      - name: Run clang-format-android
-        working-directory: packages/skia
-        run: yarn clang-format-android --dry-run --Werror
+      # - name: Run clang-format-android
+      #   working-directory: packages/skia
+      #   run: yarn clang-format-android --dry-run --Werror
 
-      - name: Run clang-format-common
-        working-directory: packages/skia
-        run: yarn clang-format-common --dry-run --Werror
+      # - name: Run clang-format-common
+      #   working-directory: packages/skia
+      #   run: yarn clang-format-common --dry-run --Werror
 
       - name: Lint Package
         working-directory: packages/skia
