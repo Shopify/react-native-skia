@@ -1,6 +1,5 @@
 {
   "extends": "react-native-wcandillon",
-  "plugins": ["reanimated"],
   "parserOptions": {
     "project": "./tsconfig.json"
   },
@@ -23,8 +22,7 @@
         "additionalHooks": "(useFrame)"
       }
     ],
-    "react/jsx-uses-react": "error",
-    "react/react-in-jsx-scope": "error",
     "import/no-cycle": [2, { "ignoreExternal": true }]
   }
 }
+
