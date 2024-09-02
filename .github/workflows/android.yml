@@ -132,7 +132,7 @@ jobs:
       #   run: echo "PACKAGE_NAME=${{ env.PACKAGE_NAME }}" >> $GITHUB_ENV
       - name: Launch APK
         env:
-          PACKAGE_NAME: ${{ matrix.working-directory == 'fabricexample' && 'com.fabricexample' || 'com.rnskia' }}  
+          PACKAGE_NAME: ${{ matrix.working-directory == 'fabricexample' && 'com.fabricexample' || 'com.paper' }}  
         run: adb shell monkey -p ${{ env.PACKAGE_NAME }} 1  
 
       # On fabric, the system fonts are slightly different
