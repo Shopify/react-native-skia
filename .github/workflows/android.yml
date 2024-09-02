@@ -73,10 +73,10 @@ jobs:
           key: apk-${{ github.sha }}
   test:
     needs: build
-    runs-on: macos-12
+    runs-on: macos-latest
     strategy:
       matrix:
-        working-directory: [example, fabricexample]
+        working-directory: [apps/paper]
     concurrency:
       group: android-example-${{ matrix.working-directory }}-${{ github.ref }}
       cancel-in-progress: true
@@ -86,15 +86,10 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: actions/setup-node@v3
+      - name: Setup
+        uses: ./.github/actions/setup
         with:
-          node-version: 16
-          cache-dependency-path: package/yarn.lock
-          cache: 'yarn'
-
-      - name: Install root dependencies
-        working-directory: package
-        run: yarn bootstrap
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Restore APK
         id: cache-apk
