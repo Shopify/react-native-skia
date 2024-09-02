@@ -31,7 +31,11 @@ const getObserver = () => {
               onLayout({
                 timeStamp: Date.now(),
                 nativeEvent: { layout: { x: left, y: top, width, height } },
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
                 currentTarget: 0,
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
                 target: 0,
                 bubbles: false,
                 cancelable: false,

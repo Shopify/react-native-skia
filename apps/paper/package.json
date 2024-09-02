@@ -15,6 +15,7 @@
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/native-stack": "^6.10.0",
     "@shopify/react-native-skia": "workspace:*",
+    "@testing-library/react-native": "^12.6.1",
     "cdt2d": "^1.0.0",
     "its-fine": "^1.2.5",
     "react": "18.3.1",

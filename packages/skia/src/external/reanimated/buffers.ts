@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import type { WorkletFunction } from "react-native-reanimated/lib/typescript/reanimated2/commonTypes";
+import type { WorkletFunction } from "react-native-reanimated/lib/typescript/commonTypes";
 
 import type { SkColor, SkHostRect, SkPoint, SkRSXform } from "../../skia/types";
 import { Skia } from "../../skia";
