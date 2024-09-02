@@ -140,9 +140,9 @@ jobs:
       - name: Run e2e Tests
         working-directory: package
         run: |
-          if [ "${{ matrix.working-directory }}" = "example" ]; then
+          if [ "${{ matrix.working-directory }}" = "paper" ]; then
             CI=true yarn e2e
-          elif [ "${{ matrix.working-directory }}" = "fabricexample" ]; then
+          elif [ "${{ matrix.working-directory }}" = "fabric" ]; then
             CI=true yarn e2e --testPathIgnorePatterns Paragraphs
           fi
 
