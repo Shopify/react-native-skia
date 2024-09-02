@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-12
+    runs-on: macos-latest
     strategy:
       matrix:
         working-directory: [apps/paper] # app/fabric
