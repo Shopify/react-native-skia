@@ -10,10 +10,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - directory: "example"
-          - directory: "fabricexample"
-    env:
-      WORKING_DIRECTORY: ./
+          - directory: "apps/paper"
+#          - directory: "apps/fabric"
     concurrency:
       group: tests-${{ matrix.directory }}-${{ github.ref }}
       cancel-in-progress: true
@@ -27,48 +25,36 @@ jobs:
         run: sudo apt-get install -y clang-format
 
       - name: Run clang-format-ios
-        working-directory: package
+        working-directory: packages/skia
         run: yarn clang-format-ios --dry-run --Werror
 
       - name: Run clang-format-android
-        working-directory: package
+        working-directory: packages/skia
         run: yarn clang-format-android --dry-run --Werror
 
       - name: Run clang-format-common
-        working-directory: package
+        working-directory: packages/skia
         run: yarn clang-format-common --dry-run --Werror
 
       - uses: actions/setup-node@v3
         with:
-          cache-dependency-path: package/yarn.lock
+          cache-dependency-path: yarn.lock
           cache: 'yarn'
 
       - name: Install root node dependencies
-        working-directory: package
-        run: yarn install --frozen-lockfile
-
-      - name: Typecheck the build scripts
-        working-directory: package
-        run: yarn tsc
-
-      - name: Install Package
-        working-directory: package
-        run: yarn install --frozen-lockfile
+        run: yarn install
 
       - name: Lint Package
-        working-directory: package
+        working-directory: packages/skia
         run: yarn lint;
 
       - name: TypeScript Package
-        working-directory: package
+        working-directory: packages/skia
         run: yarn tsc;
 
       - name: Run Package Unit tests
-        working-directory: package
+        working-directory: packages/skia
         run: yarn test;
-
-      - name: Install Example/Fabric Example
-        run: cd ${{ matrix.directory }}; yarn install --frozen-lockfile
 
       - name: Lint Example/Fabric Example
         run: cd ${{ matrix.directory }}; yarn lint;
@@ -79,8 +65,5 @@ jobs:
       - name: Run Example/Fabric Example Unit tests
         run: cd ${{ matrix.directory }}; yarn test;
 
-      - name: Install Docs
-        run: cd docs; yarn install --frozen-lockfile
-
       - name: TypeScript Example Docs
-        run: cd docs; yarn build;
+        run: cd apps/docs; yarn build;
