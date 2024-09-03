@@ -8,8 +8,10 @@ const NoopValue = () => ({ current: 0 });
 const NoopSharedValue = () => ({ value: 0 });
 
 export const Mock = (CanvasKit: CanvasKit) => {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   global.SkiaApi = JsiSkApi(CanvasKit);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const Skia = global.SkiaApi;
   return {
