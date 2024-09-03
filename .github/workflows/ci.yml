@@ -44,28 +44,8 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-
       - name: Test files
         run: yarn test
-
-  build-library:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: packages/webgpu
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Setup
-        uses: ./.github/actions/setup
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build package
-        run: yarn prepare
 
   build-android:
     runs-on: macos-latest
