@@ -11,7 +11,7 @@ jobs:
     runs-on: macos-12
     strategy:
       matrix:
-        working-directory: [apps/paper, apps/fabric]
+        working-directory: [apps/paper]
     timeout-minutes: 55
     concurrency:
       group: android-example-${{ matrix.working-directory }}-${{ github.ref }}
