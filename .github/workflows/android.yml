@@ -142,8 +142,8 @@ jobs:
         run: |
           if [ "${{ matrix.working-directory }}" = "apps/paper" ]; then
             CI=true yarn e2e
-          elif [ "${{ matrix.working-directory }}" = "apps/fabric" ]; then
-            #CI=true yarn e2e --testPathIgnorePatterns Paragraphs
+          elif [ "${{ matrix.working-directory }}" = "apps/none" ]; then
+            CI=true yarn e2e --testPathIgnorePatterns Paragraphs
           fi
 
       - uses: actions/upload-artifact@v2

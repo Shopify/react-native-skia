@@ -12,7 +12,7 @@ jobs:
     timeout-minutes: 55
     strategy:
       matrix:
-        directory: [apps/paper, apps/fabric]
+        directory: [apps/paper] # , apps/fabric
     concurrency:
       group: android-ubuntu-${{ matrix.directory }}-${{ github.ref }}
       cancel-in-progress: true
