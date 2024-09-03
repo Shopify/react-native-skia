@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace global {
   var _IS_FABRIC: boolean;
 }
@@ -21,7 +22,12 @@ export const useClient = (): UseClient => {
     const ws = new WebSocket(url);
     ws.onopen = () => {
       setClient(ws);
-      ws.send(JSON.stringify({ OS: Platform.OS, arch: global._IS_FABRIC ? "fabric" : "paper" }));
+      ws.send(
+        JSON.stringify({
+          OS: Platform.OS,
+          arch: global._IS_FABRIC ? "fabric" : "paper",
+        }),
+      );
     };
     ws.onclose = () => {
       setClient(null);
