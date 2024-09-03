@@ -8,7 +8,9 @@ const NoopValue = () => ({ current: 0 });
 const NoopSharedValue = () => ({ value: 0 });
 
 export const Mock = (CanvasKit: CanvasKit) => {
+  // @ts-ignore
   global.SkiaApi = JsiSkApi(CanvasKit);
+  // @ts-ignore
   const Skia = global.SkiaApi;
   return {
     Skia,
