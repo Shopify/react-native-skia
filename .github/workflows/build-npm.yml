@@ -15,33 +15,18 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: actions/setup-node@v3
+      - name: checkout
+        uses: actions/checkout@v2
         with:
-          node-version: "lts/*"
-          cache-dependency-path: package/yarn.lock
-          cache: 'yarn'
+          submodules: recursive
 
-      - name: Install package dependencies
-        working-directory: package
-        run: yarn
-
-      - name: Download Skia Binary Artifacts
-        uses: dawidd6/action-download-artifact@v2
+      - name: Setup
+        uses: ./.github/actions/setup
         with:
-          workflow: "build-skia.yml"
-          path: package/artifacts
-          branch: main
-
-      - name: Copy Artifacts to libs folder
-        working-directory: package
-        run: yarn workflow-copy-libs
-
-      - name: Copy Skia Headers
-        working-directory: package
-        run: yarn copy-skia-headers
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build NPM Package
-        working-directory: package
+        working-directory: packages/skia
         run: |
           yarn build
           npx semantic-release
@@ -50,12 +35,12 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Install & Build Docs
-        run: cd package; yarn; cd ../docs; yarn; yarn build;
+        run: cd apps/docs; yarn build;
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/build
+          publish_dir: ./apps/docs/build
           user_name: github-actions[bot]
           user_email: 41898282+github-actions[bot]@users.noreply.github.com
