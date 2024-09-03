@@ -24,7 +24,8 @@
     "tsc": "turbo run tsc",
     "lint": "turbo run lint",
     "build:ios": "turbo run build:ios",
-    "build:android": "turbo run build:android"
+    "build:android": "turbo run build:android",
+    "test": "turbo run test"
   },
   "packageManager": "yarn@3.6.4",
   "devDependencies": {

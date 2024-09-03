@@ -7,11 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        working-directory: [apps/paper, apps/fabric]
     concurrency:
-      group: tests-${{ matrix.working-directory }}-${{ github.ref }}
+      group: tests-${{ github.ref }}
       cancel-in-progress: true
     steps:
       - name: checkout
@@ -37,27 +34,15 @@ jobs:
       # - name: Run clang-format-common
       #   working-directory: packages/skia
       #   run: yarn clang-format-common --dry-run --Werror
-
-      - name: Lint Package
-        working-directory: packages/skia
-        run: yarn lint;
-
-      - name: TypeScript Package
-        working-directory: packages/skia
-        run: yarn tsc;
-
-      - name: Run Package Unit tests
-        working-directory: packages/skia
-        run: yarn test;
-
+  
       - name: Lint Example/Fabric Example
-        run: cd ${{ matrix.working-directory }}; yarn lint;
+        run: yarn lint
 
       - name: TypeScript Example/Fabric Example
-        run: cd ${{ matrix.working-directory }}; yarn tsc;
+        run: yarn tsc
 
       - name: Run Example/Fabric Example Unit tests
-        run: cd ${{ matrix.working-directory }}; yarn test;
+        run: yarn test
 
       - name: TypeScript Example Docs
         run: cd apps/docs; yarn build;
