@@ -15,7 +15,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        working-directory: [apps/paper, app/fabric]
+        working-directory: [apps/paper, apps/fabric]
     concurrency:
       group: ios-example-${{ matrix.working-directory }}-${{ github.ref }}
       cancel-in-progress: true
