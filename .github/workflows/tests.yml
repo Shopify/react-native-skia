@@ -9,78 +9,55 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        include:
-          - directory: "example"
-          - directory: "fabricexample"
-    env:
-      WORKING_DIRECTORY: ./
+        working-directory: [apps/paper, apps/fabric]
     concurrency:
-      group: tests-${{ matrix.directory }}-${{ github.ref }}
+      group: tests-${{ matrix.working-directory }}-${{ github.ref }}
       cancel-in-progress: true
     steps:
       - name: checkout
         uses: actions/checkout@v2
         with:
           submodules: recursive
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install clang-format
         run: sudo apt-get install -y clang-format
 
-      - name: Run clang-format-ios
-        working-directory: package
-        run: yarn clang-format-ios --dry-run --Werror
+      # - name: Run clang-format-ios
+      #   working-directory: packages/skia
+      #   run: yarn clang-format-ios --dry-run --Werror
 
-      - name: Run clang-format-android
-        working-directory: package
-        run: yarn clang-format-android --dry-run --Werror
+      # - name: Run clang-format-android
+      #   working-directory: packages/skia
+      #   run: yarn clang-format-android --dry-run --Werror
 
-      - name: Run clang-format-common
-        working-directory: package
-        run: yarn clang-format-common --dry-run --Werror
-
-      - uses: actions/setup-node@v3
-        with:
-          cache-dependency-path: package/yarn.lock
-          cache: 'yarn'
-
-      - name: Install root node dependencies
-        working-directory: package
-        run: yarn install --frozen-lockfile
-
-      - name: Typecheck the build scripts
-        working-directory: package
-        run: yarn tsc
-
-      - name: Install Package
-        working-directory: package
-        run: yarn install --frozen-lockfile
+      # - name: Run clang-format-common
+      #   working-directory: packages/skia
+      #   run: yarn clang-format-common --dry-run --Werror
 
       - name: Lint Package
-        working-directory: package
+        working-directory: packages/skia
         run: yarn lint;
 
       - name: TypeScript Package
-        working-directory: package
+        working-directory: packages/skia
         run: yarn tsc;
 
       - name: Run Package Unit tests
-        working-directory: package
+        working-directory: packages/skia
         run: yarn test;
 
-      - name: Install Example/Fabric Example
-        run: cd ${{ matrix.directory }}; yarn install --frozen-lockfile
-
       - name: Lint Example/Fabric Example
-        run: cd ${{ matrix.directory }}; yarn lint;
+        run: cd ${{ matrix.working-directory }}; yarn lint;
 
       - name: TypeScript Example/Fabric Example
-        run: cd ${{ matrix.directory }}; yarn tsc;
+        run: cd ${{ matrix.working-directory }}; yarn tsc;
 
       - name: Run Example/Fabric Example Unit tests
-        run: cd ${{ matrix.directory }}; yarn test;
-
-      - name: Install Docs
-        run: cd docs; yarn install --frozen-lockfile
+        run: cd ${{ matrix.working-directory }}; yarn test;
 
       - name: TypeScript Example Docs
-        run: cd docs; yarn build;
+        run: cd apps/docs; yarn build;

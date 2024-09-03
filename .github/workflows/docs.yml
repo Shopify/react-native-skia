@@ -8,8 +8,6 @@ on:
 jobs:
   build_and_deploy_docs:
     runs-on: ubuntu-latest
-    env:
-      WORKING_DIRECTORY: ./
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -21,13 +19,9 @@ jobs:
         with:
           cache: yarn
 
-      - name: Install dependencies
-        working-directory: package
-        run: yarn bootstrap
-
       - name: Build Documentation
         run: |
-          cd docs
+          cd apps/docs
           yarn install
           yarn build
 
@@ -35,6 +29,6 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/build
+          publish_dir: ./apps/docs/build
           user_name: github-actions[bot]
           user_email: 41898282+github-actions[bot]@users.noreply.github.com

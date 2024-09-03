@@ -1,0 +1,28 @@
+{
+  "extends": "react-native-wcandillon",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "rules": {
+    "prefer-destructuring": [
+      "error",
+      {
+        "object": true,
+        "array": false
+      }
+    ],
+    "no-bitwise": "off",
+    "no-var": "off",
+    "@typescript-eslint/no-var-requires": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-empty-function": "off",
+    "react-hooks/exhaustive-deps": [
+      "error",
+      {
+        "additionalHooks": "(useFrame)"
+      }
+    ],
+    "import/no-cycle": [2, { "ignoreExternal": true }]
+  }
+}
+
