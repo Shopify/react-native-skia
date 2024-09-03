@@ -7,7 +7,9 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
-    "test": "node --experimental-vm-modules ../../node_modules/.bin/jest"
+    "test": "node --experimental-vm-modules ../../node_modules/.bin/jest",
+    "build:android": "cd android && ./gradlew assembleDebug --no-daemon --console=plain",
+    "build:ios": "cd ios && xcodebuild -scheme Paper -workspace Paper.xcworkspace -configuration Debug -sdk iphonesimulator | xcpretty"
   },
   "dependencies": {
     "@react-native-community/slider": "^4.5.2",

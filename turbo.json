@@ -1,0 +1,49 @@
+{
+    "$schema": "https://turbo.build/schema.json",
+    "tasks": {
+      "build:android": {
+        "outputs": [
+          "apps/paper/android/app/build/**/*",
+          "apps/paper/android/.gradle/**/*",
+          "apps/paper/android/build/**/*",
+          "apps/fabric/android/app/build/**/*",
+          "apps/fabric/android/.gradle/**/*",
+          "apps/fabric/android/build/**/*"
+        ],
+        "inputs": [
+          "apps/*/android/build.gradle",
+          "apps/*/android/app/build.gradle",
+          "apps/*/android/gradle.properties",
+          "!apps/*/android/.gradle",
+          "!apps/*/android/build",
+          "!apps/*/android/app/build",
+          "packages/skia/package.json",
+          "packages/skia/android",
+          "!packages/skia/android/build",
+          "packages/skia/src",
+          "packages/skia/cpp"
+        ]
+      },
+      "build:ios": {
+        "outputs": [
+          "apps/*/ios/Build/**/*",
+          "apps/*/ios/Pods/**/*",
+          "apps/*/ios/Podfile.lock"
+        ],
+        "inputs": [
+          "apps/*/ios/Podfile",
+          "apps/*/ios/Podfile.lock",
+          "apps/*/ios/Pods/**/*",
+          "!apps/*/ios/build",
+          "!apps/*/ios/Pods",
+          "packages/skia/package.json",
+          "packages/skia/*.podspec",
+          "packages/skia/ios",
+          "packages/skia/src",
+          "packages/skia/cpp"
+        ]
+      },
+      "lint": {},
+      "tsc": {}
+    }
+  }
