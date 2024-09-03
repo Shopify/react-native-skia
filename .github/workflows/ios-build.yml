@@ -1,18 +1,15 @@
 name: Test iOS build
 on:
-  pull_request:
-    paths:
-      - 'package/ios/**'
-      - 'package/cpp/**'
-      - 'example/package.json'
-      - '.github/workflows/**'
   push:
     branches:
       - main
+  pull_request:
 
 jobs:
   build:
     runs-on: macos-latest
+    env:
+      TURBO_CACHE_DIR: .turbo/ios
     strategy:
       matrix:
         working-directory: [apps/paper, apps/fabric]
@@ -29,28 +26,44 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Restore Pods from cache
+      - name: Cache turborepo for iOS
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.TURBO_CACHE_DIR }}
+          key: ${{ runner.os }}-turborepo-ios-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-turborepo-ios-
+  
+      - name: Check turborepo cache for iOS
+        run: |
+          TURBO_CACHE_STATUS=$(node -p "($(yarn turbo run build:ios --cache-dir="${{ env.TURBO_CACHE_DIR }}" --dry=json)).tasks.find(t => t.task === 'build:ios').cache.status")
+
+          if [[ $TURBO_CACHE_STATUS == "HIT" ]]; then
+            echo "turbo_cache_hit=1" >> $GITHUB_ENV
+          fi
+  
+      - name: Cache cocoapods
+        if: env.turbo_cache_hit != 1
+        id: cocoapods-cache
         uses: actions/cache@v3
         with:
           path: |
-            ${{ matrix.working-directory }}/ios/Pods
-            ~/Library/Caches/CocoaPods
-            ~/.cocoapods
-          key: ${{ runner.os }}-pods-${{ matrix.working-directory }}-${{ hashFiles(format('{0}/ios/Podfile.lock', matrix.working-directory)) }}
+            **/ios/Pods
+          key: ${{ runner.os }}-cocoapods-${{ hashFiles('./apps/paper/ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cocoapods-
 
-      - name: Install Pods
-        working-directory: ${{ matrix.working-directory }}/ios
-        run: pod install
+      - name: Install cocoapods
+        if: env.turbo_cache_hit != 1 && steps.cocoapods-cache.outputs.cache-hit != 'true'
+        run: |
+          cd apps/paper/ios
+          pod install
+        env:
+          NO_FLIPPER: 1
 
-      - name: Restore build artifacts from cache
-        uses: actions/cache@v3
-        with:
-          path: ~/Library/Developer/Xcode/DerivedData
-          key: ${{ runner.os }}-ios-derived-data-${{ hashFiles(format('{0}/ios/Podfile.lock', matrix.working-directory)) }}
-  
-      - name: Build app
-        working-directory: ${{ matrix.working-directory }}
-        run: CI=true yarn ios --simulator 'iPhone 14 Pro'
+      - name: Build example for iOS
+        run: |
+          yarn turbo run build:ios --cache-dir="${{ env.TURBO_CACHE_DIR }}"
 
       # - name: Run e2e tests
       #   working-directory: package
