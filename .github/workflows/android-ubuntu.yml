@@ -49,7 +49,7 @@ jobs:
         env:
           cache-name: cache-rn-hermes-engine
         with:
-          path: ${{ matrix.directory }}/node_modules/react-native
+          path: node_modules/react-native
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.directory }}-${{ hashFiles('**/react-native/package.json') }}
 
       # Cache android libraries for both directories
