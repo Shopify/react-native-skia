@@ -11,7 +11,7 @@ jobs:
     runs-on: macos-12
     strategy:
       matrix:
-        working-directory: [apps/paper]
+        working-directory: [apps/paper, apps/fabric]
     timeout-minutes: 55
     concurrency:
       group: android-example-${{ matrix.working-directory }}-${{ github.ref }}
@@ -143,7 +143,7 @@ jobs:
           if [ "${{ matrix.working-directory }}" = "apps/paper" ]; then
             CI=true yarn e2e
           elif [ "${{ matrix.working-directory }}" = "apps/fabric" ]; then
-            CI=true yarn e2e --testPathIgnorePatterns Paragraphs
+            #CI=true yarn e2e --testPathIgnorePatterns Paragraphs
           fi
 
       - uses: actions/upload-artifact@v2
