@@ -138,7 +138,7 @@ jobs:
       # On fabric, the system fonts are slightly different
       # so wont run the paragraph tests there for now
       - name: Run e2e Tests
-        working-directory: package
+        working-directory: packages/skia
         run: |
           if [ "${{ matrix.working-directory }}" = "paper" ]; then
             CI=true yarn e2e
@@ -149,12 +149,12 @@ jobs:
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
-          path: package/src/__tests__/snapshots/
+          path: packages/skia/src/__tests__/snapshots/
           name: ${{ matrix.working-directory }}-snapshots-screenshots
 
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
-          path: docs/static
+          path: apps/docs/static
           name: ${{ matrix.working-directory }}-docs-screenshots
       
