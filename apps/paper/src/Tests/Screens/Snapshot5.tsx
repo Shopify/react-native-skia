@@ -21,7 +21,8 @@ const Component = () => {
         ref={(ref) => {
           ref?.scrollTo({ y: 200 });
           setRender((p) => p + 1);
-        }}>
+        }}
+      >
         <View style={[styles.verticalBox, { backgroundColor: "cyan" }]} />
         <View style={[styles.verticalBox, { backgroundColor: "red" }]} />
         <View style={[styles.verticalBox, { backgroundColor: "green" }]} />
@@ -33,7 +34,8 @@ const Component = () => {
         ref={(ref) => {
           ref?.scrollTo({ x: 200 });
           setRender((p) => p + 1);
-        }}>
+        }}
+      >
         <View style={[styles.horizontalBox, { backgroundColor: "cyan" }]} />
         <View style={[styles.horizontalBox, { backgroundColor: "red" }]} />
         <View style={[styles.horizontalBox, { backgroundColor: "green" }]} />

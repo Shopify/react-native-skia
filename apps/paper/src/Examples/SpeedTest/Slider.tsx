@@ -59,11 +59,11 @@ export const Slider: React.FC<Props> = ({
       const progress = interpolate(
         value,
         [-pickerR, sliderWidth - pickerR],
-        [minValue, maxValue],
+        [minValue, maxValue]
       );
 
       runOnJS(onValueChange)(progress);
-    },
+    }
   );
 
   const rPickerStyle = useAnimatedStyle(() => {
@@ -86,7 +86,7 @@ export const Slider: React.FC<Props> = ({
       translateX.value = clamp(
         contextX.value + event.translationX,
         -pickerR,
-        sliderWidth - pickerR,
+        sliderWidth - pickerR
       );
     })
     .onFinalize(() => {

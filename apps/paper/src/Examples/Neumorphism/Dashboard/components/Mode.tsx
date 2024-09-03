@@ -21,7 +21,7 @@ interface ModeProps {
 export const Mode = ({ translateY }: ModeProps) => {
   const transform = useDerivedValue(
     () => [{ translateY: translateY.value }],
-    [translateY],
+    [translateY]
   );
   const image = useImage(require("./settings.png"));
 

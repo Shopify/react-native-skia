@@ -25,8 +25,8 @@ export const useClient = (): UseClient => {
       ws.send(
         JSON.stringify({
           OS: Platform.OS,
-          arch: global._IS_FABRIC ? "fabric" : "paper",
-        }),
+          arch: "paper",
+        })
       );
     };
     ws.onclose = () => {

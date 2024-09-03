@@ -29,7 +29,7 @@ export const Filters = () => {
 
   const uniforms = useDerivedValue(
     () => ({ r: mix(progress.value, 1, 100) }),
-    [progress],
+    [progress]
   );
 
   const image = useImage(require("../../assets/oslo.jpg"));

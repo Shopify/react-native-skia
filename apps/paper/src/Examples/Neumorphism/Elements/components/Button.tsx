@@ -35,11 +35,11 @@ export const Button = ({
 }: ButtonProps) => {
   const c1 = useDerivedValue(
     () => `rgba(255, 255, 255, ${mix(pressed.value, 0, 0.7)})"`,
-    [pressed],
+    [pressed]
   );
   const c2 = useDerivedValue(
     () => `rgba(174, 174, 192, ${mix(pressed.value, 0, 0.5)})"`,
-    [pressed],
+    [pressed]
   );
   return (
     <FitBox src={rect(0, 0, 24, 24)} dst={rect(x, y, width, height)}>

@@ -29,7 +29,7 @@ export const InterpolationWithEasing = () => {
     progress.value = withRepeat(
       withTiming(1, { duration: 1000, easing: Easing.inOut(Easing.cubic) }),
       -1,
-      true,
+      true
     );
   }, [progress]);
   return (

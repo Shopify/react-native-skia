@@ -47,9 +47,9 @@ export const Symbol = ({
       interpolateColors(
         opacity.value,
         [0.8, 1],
-        ["rgb(0, 255, 70)", "rgb(140, 255, 170)"],
+        ["rgb(0, 255, 70)", "rgb(140, 255, 170)"]
       ),
-    [opacity],
+    [opacity]
   );
 
   return (

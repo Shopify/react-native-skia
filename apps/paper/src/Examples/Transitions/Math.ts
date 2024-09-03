@@ -1,7 +1,7 @@
 export const snapPoint = (
   value: number,
   velocity: number,
-  points: ReadonlyArray<number>,
+  points: ReadonlyArray<number>
 ): number => {
   "worklet";
   const point = value + 0.2 * velocity;

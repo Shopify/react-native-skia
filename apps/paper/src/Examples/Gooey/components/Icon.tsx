@@ -13,7 +13,8 @@ export const Icon = ({ path }: IconProps) => {
     <>
       <Group
         origin={vec(12)}
-        transform={[{ translateX: -12 }, { translateY: -12 }, { scale: 2 }]}>
+        transform={[{ translateX: -12 }, { translateY: -12 }, { scale: 2 }]}
+      >
         <Path path={path} color="white" />
       </Group>
     </>

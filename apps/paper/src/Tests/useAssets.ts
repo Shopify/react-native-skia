@@ -36,20 +36,20 @@ export const useAssets = () => {
   const skiaLogoPng = useImage(SkiaLogo, errorHandler);
   const RobotoMedium = useTypeface(
     require("./assets/Roboto-Medium.ttf"),
-    errorHandler,
+    errorHandler
   );
   const NotoColorEmoji = useTypeface(NotoColorEmojiSrc, errorHandler);
   const UberMoveMediumMono = useTypeface(
     require("./assets/UberMove-Medium_mono.ttf"),
-    errorHandler,
+    errorHandler
   );
   const NotoSansSCRegular = useTypeface(
     require("./assets/NotoSansSC-Regular.otf"),
-    errorHandler,
+    errorHandler
   );
   const DinMedium = useTypeface(
     require("./assets/DIN-Medium.ttf"),
-    errorHandler,
+    errorHandler
   );
   if (error) {
     throw new Error("Failed to load assets: " + error.message);

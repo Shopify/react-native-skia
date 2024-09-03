@@ -28,7 +28,7 @@ const streams = cols.map(() =>
       ...randomArray(4, 16),
       ...randomArray(2, 8, true),
     ])
-    .flat(),
+    .flat()
 );
 
 export const Matrix = () => {
@@ -57,7 +57,7 @@ export const Matrix = () => {
               stream={streams[i]}
               symbol={symbol}
             />
-          )),
+          ))
         )}
       </Group>
     </Canvas>

@@ -46,10 +46,11 @@ export const Wallpaper = () => {
                 scaleY: interpolate(
                   i,
                   [0, (length - 1) / 2, length - 1],
-                  [1, 0.6, 1],
+                  [1, 0.6, 1]
                 ),
               },
-            ]}>
+            ]}
+          >
             <Mask
               mask={
                 <Group>
@@ -62,7 +63,8 @@ export const Wallpaper = () => {
                   <Shadow dx={10} dy={0} blur={20} color="black" />
                   <Rect x={0} y={0} width={width} height={height} />
                 </Group>
-              }>
+              }
+            >
               <Rect x={0} y={0} width={width} height={height} />
             </Mask>
           </Group>

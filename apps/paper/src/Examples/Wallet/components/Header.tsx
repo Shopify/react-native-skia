@@ -31,7 +31,8 @@ export const Header = () => {
             height: 48,
             justifyContent: "center",
             alignItems: "center",
-          }}>
+          }}
+        >
           <Canvas style={{ width: 32, height: 32 }}>
             <Path
               fillType="evenOdd"

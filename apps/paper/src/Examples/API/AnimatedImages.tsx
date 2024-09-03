@@ -16,10 +16,10 @@ export const AnimatedImages = () => {
   const pause = useSharedValue(false);
   const example1 = useAnimatedImageValue(
     require("../../assets/birdFlying.gif"),
-    pause,
+    pause
   );
   const example2 = useAnimatedImageValue(
-    require("../../assets/birdFlying2.gif"),
+    require("../../assets/birdFlying2.gif")
   );
 
   return (
@@ -31,7 +31,8 @@ export const AnimatedImages = () => {
             width: 320,
             height: 180,
             marginVertical: PAD,
-          }}>
+          }}
+        >
           <Image
             image={example1}
             x={0}
@@ -50,7 +51,8 @@ export const AnimatedImages = () => {
             borderWidth: 1,
             borderStyle: "solid",
             marginVertical: PAD,
-          }}>
+          }}
+        >
           <Image
             image={example2}
             x={0}

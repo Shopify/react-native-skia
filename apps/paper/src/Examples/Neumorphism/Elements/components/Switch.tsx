@@ -28,7 +28,7 @@ interface SwitchProps {
 export const Switch = ({ x, y, width, pressed }: SwitchProps) => {
   const transform = useDerivedValue(
     () => [{ translateX: mix(pressed.value, 0, 24) }],
-    [pressed],
+    [pressed]
   );
   const r = useDerivedValue(() => mix(pressed.value, 0, 2), [pressed]);
   return (

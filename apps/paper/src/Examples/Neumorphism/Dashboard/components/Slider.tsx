@@ -24,7 +24,7 @@ export const Slider = ({ x, y, progress }: SliderProps) => {
   const width = useDerivedValue(() => progress.value * 192, [progress]);
   const transform = useDerivedValue(
     () => [{ translateX: progress.value * 192 }],
-    [progress],
+    [progress]
   );
   return (
     <Group transform={[{ translate: [x, y] }]}>

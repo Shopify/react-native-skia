@@ -24,7 +24,7 @@ export const Demo = () => {
 
   const win = useMemo(
     () => Skia.XYWHRect(0, 0, width, height),
-    [height, width],
+    [height, width]
   );
 
   const hSize = width / N;
@@ -38,19 +38,19 @@ export const Demo = () => {
 
   const triangles = useMemo(
     () => cdt2d(defaultVertices.map(({ x, y }) => [x, y])),
-    [defaultVertices],
+    [defaultVertices]
   );
 
   const indices = useMemo(() => triangles.flat(), [triangles]);
   const colors = useMemo(
     () => indices.map((i) => palette[i % palette.length]),
-    [indices],
+    [indices]
   );
 
   const clock = useClock();
   const noises = useMemo(
     () => defaultVertices.map(() => createNoise2D()),
-    [defaultVertices],
+    [defaultVertices]
   );
 
   const vertices = useDerivedValue(
@@ -65,7 +65,7 @@ export const Demo = () => {
           y: vertex.y + AY * noise2d(0, clock.value / F),
         };
       }),
-    [clock],
+    [clock]
   );
 
   return (

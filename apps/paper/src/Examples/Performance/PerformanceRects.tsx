@@ -37,10 +37,10 @@ export const PerformanceDrawingTest: React.FC = () => {
             5 + ((i * Size) % width),
             25 + Math.floor(i / (width / Size)) * Size,
             SizeWidth,
-            SizeHeight,
-          ),
+            SizeHeight
+          )
         ),
-    [numberOfBoxes, width, SizeWidth, SizeHeight],
+    [numberOfBoxes, width, SizeWidth, SizeHeight]
   );
 
   const gesture = Gesture.Pan().onChange((e) => (pos.value = e));

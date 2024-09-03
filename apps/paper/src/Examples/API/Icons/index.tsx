@@ -32,10 +32,10 @@ const useLoadSVGs = () => {
   const github = useSVGPicture(require("../../../assets/icons8-github.svg"));
   const octocat = useSVGPicture(require("../../../assets/icons8-octocat.svg"));
   const stackExchange = useSVGPicture(
-    require("../../../assets/icons8-stack-exchange.svg"),
+    require("../../../assets/icons8-stack-exchange.svg")
   );
   const overflow = useSVGPicture(
-    require("../../../assets/icons8-stack-overflow.svg"),
+    require("../../../assets/icons8-stack-overflow.svg")
   );
   if (github && octocat && stackExchange && overflow) {
     return {
@@ -87,7 +87,8 @@ const Screen: React.FC<Props> = ({ color }) => {
         flexDirection: "row",
         alignItems: "center",
         backgroundColor: "#EFFFE0",
-      }}>
+      }}
+    >
       <View style={{ flex: 1, alignItems: "center" }}>
         <Text>React Native Skia Picture</Text>
         <Icon icon={github} />

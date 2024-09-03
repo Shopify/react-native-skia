@@ -10,7 +10,8 @@ export const OnLayoutDemo = () => {
       <Text>{`OnLayout: ${layout?.width} / ${layout?.height}`}</Text>
       <Canvas
         style={{ flex: 1 }}
-        onLayout={(evt) => setLayout(evt.nativeEvent.layout)}>
+        onLayout={(evt) => setLayout(evt.nativeEvent.layout)}
+      >
         <Fill color="red" />
       </Canvas>
     </>

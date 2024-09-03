@@ -35,7 +35,8 @@ export const Video = () => {
     <View style={{ flex: 1 }}>
       <Pressable
         style={{ flex: 1 }}
-        onPress={() => (paused.value = !paused.value)}>
+        onPress={() => (paused.value = !paused.value)}
+      >
         <Canvas style={{ flex: 1 }}>
           <Fill>
             <ImageShader

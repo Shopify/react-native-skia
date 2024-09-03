@@ -16,7 +16,7 @@ export const PerformanceDrawingTest: React.FC = () => {
     setItems(
       new Array(numberOfItems)
         .fill(0)
-        .map((_) => ({ visible: Math.random() > 0.5 })),
+        .map((_) => ({ visible: Math.random() > 0.5 }))
     );
   };
   useEffect(() => {
@@ -40,7 +40,8 @@ export const PerformanceDrawingTest: React.FC = () => {
               height: 40,
               backgroundColor: "red",
               margin: 2,
-            }}>
+            }}
+          >
             {item.visible && (
               <Canvas style={styles.container}>
                 <Image

@@ -38,8 +38,8 @@ export const Label = ({ state, y, graphs, width, height }: LabelProps) => {
       interpolate(
         y.value,
         [0, AJUSTED_SIZE],
-        [graph.data.maxPrice, graph.data.minPrice],
-      ),
+        [graph.data.maxPrice, graph.data.minPrice]
+      )
     );
   }, [y, state]);
   const subtitle = "+ $314,15";

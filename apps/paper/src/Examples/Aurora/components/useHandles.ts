@@ -14,7 +14,7 @@ type TouchSelection = null | {
 export const useHandles = (
   mesh: SharedValue<CubicBezierHandle[]>,
   defaultMesh: CubicBezierHandle[],
-  win: SkRect,
+  win: SkRect
 ) => {
   const selection = useSharedValue<TouchSelection>(null);
   return Gesture.Pan()

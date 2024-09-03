@@ -77,7 +77,7 @@ export const Transitions = () => {
           progressRight.value = clamp(
             progressRight.value + pos.changeX / width,
             0,
-            1,
+            1
           );
         })
         .onEnd(({ velocityX }) => {
@@ -86,7 +86,7 @@ export const Transitions = () => {
             runOnJS(previous)();
           });
         }),
-    [previous, progressRight],
+    [previous, progressRight]
   );
   const panLeft = useMemo(
     () =>
@@ -96,7 +96,7 @@ export const Transitions = () => {
           progressLeft.value = clamp(
             progressLeft.value - pos.changeX / width,
             0,
-            1,
+            1
           );
         })
         .onEnd(({ velocityX }) => {
@@ -105,7 +105,7 @@ export const Transitions = () => {
             runOnJS(next)();
           });
         }),
-    [next, progressLeft],
+    [next, progressLeft]
   );
 
   const uniformsRight = useDerivedValue(() => {

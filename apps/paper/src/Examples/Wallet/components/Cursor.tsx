@@ -24,9 +24,9 @@ export const Cursor = ({ x, y, width }: CursorProps) => {
       interpolateColor(
         x.value / width,
         COLORS.map((_, i) => i / COLORS.length),
-        COLORS,
-      ),
-    ),
+        COLORS
+      )
+    )
   );
   const transform = useDerivedValue(() => [
     { translateX: x.value },

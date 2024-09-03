@@ -14,7 +14,7 @@ export const useLoop = ({ duration }: { duration: number }) => {
     progress.value = withRepeat(
       withTiming(1, { duration, easing: Easing.inOut(Easing.ease) }),
       -1,
-      true,
+      true
     );
     return () => {
       cancelAnimation(progress);
@@ -34,7 +34,7 @@ export const translate = ({
 export const snapPoint = (
   value: number,
   velocity: number,
-  points: ReadonlyArray<number>,
+  points: ReadonlyArray<number>
 ): number => {
   "worklet";
   const point = value + 0.2 * velocity;

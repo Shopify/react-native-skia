@@ -43,17 +43,17 @@ export const Shapes = () => {
       vec(c.x - S, c.y - 2 * S),
       vec(c.x - S, c.y - S),
     ],
-    [c.x, c.y],
+    [c.x, c.y]
   );
 
   const c2 = useMemo(
     () => [vec(c.x, c.y - 2 * S), vec(c.x + S, c.y), vec(c.x + S, c.y - S)],
-    [c.x, c.y],
+    [c.x, c.y]
   );
 
   const c3 = useMemo(
     () => [vec(c.x - 10, c.y + 10), vec(c.x + S, c.y), vec(c.x + S, c.y + S)],
-    [c.x, c.y],
+    [c.x, c.y]
   );
 
   const c4 = useMemo(
@@ -62,32 +62,32 @@ export const Shapes = () => {
       vec(c.x - S, c.y + 2 * S),
       vec(c.x - S, c.y + S),
     ],
-    [c.x, c.y],
+    [c.x, c.y]
   );
 
   const cubics = useMemo(() => [...c1, ...c2, ...c3, ...c4], [c1, c2, c3, c4]);
 
   const outer = useMemo(
     () => rrect(rect(2 * SIZE + 3 * 16, PADDING, SIZE, SIZE), 25, 25),
-    [SIZE],
+    [SIZE]
   );
   const inner = useMemo(
     () =>
       rrect(
         rect(2 * SIZE + 4 * PADDING, 2 * PADDING, SIZE - 32, SIZE - 32),
         0,
-        0,
+        0
       ),
-    [SIZE],
+    [SIZE]
   );
 
   const topLeft = useMemo(
     () => ({ pos: vec(16, 0), c1: vec(0, 15), c2: vec(15, 0) }),
-    [],
+    []
   );
   const topRight = useMemo(
     () => ({ pos: vec(100, 0), c1: vec(80, 15), c2: vec(85, 0) }),
-    [],
+    []
   );
   const bottomRight = useMemo(
     () => ({
@@ -95,11 +95,11 @@ export const Shapes = () => {
       c1: vec(100, 85),
       c2: vec(85, 100),
     }),
-    [],
+    []
   );
   const bottomLeft = useMemo(
     () => ({ pos: vec(16, 100), c1: vec(0, 85), c2: vec(15, 100) }),
-    [],
+    []
   );
 
   const style = useMemo(() => ({ width, height: SIZE + 32 }), [SIZE, width]);
@@ -128,7 +128,8 @@ export const Shapes = () => {
               style="stroke"
               color="#61fbcf"
               strokeWidth={10}
-              opacity={0.5}>
+              opacity={0.5}
+            >
               <DashPathEffect intervals={[10, 10]} />
             </Paint>
           </Oval>

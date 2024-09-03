@@ -4,7 +4,7 @@ import { mixColors, dist, vec } from "@shopify/react-native-skia";
 export const bilinearInterpolate = (
   [color0, color1, color2, color3]: Color[],
   size: Vector,
-  pos: Vector,
+  pos: Vector
 ) => {
   "worklet";
   const uv = vec(pos.x / size.x, pos.y / size.y);

@@ -19,7 +19,7 @@ export const ExportableCanvas = ({ children, style }: CanvasProps) => {
       });
     } else {
       Alert.alert(
-        "An error occurred when creating a snapshot of your drawing.",
+        "An error occurred when creating a snapshot of your drawing."
       );
     }
   }, [ref]);

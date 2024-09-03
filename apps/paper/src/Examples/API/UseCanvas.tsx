@@ -36,7 +36,7 @@ export const UseCanvas = () => {
         toValue: 500,
         duration: 4000,
         useNativeDriver: false,
-      }),
+      })
     ).start();
   }, []);
 

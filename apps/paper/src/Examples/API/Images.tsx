@@ -19,14 +19,14 @@ export const Images = () => {
   useImage(new Uint8Array([0, 0, 0, 255]), (err) => {
     if (err.message !== "Could not load data") {
       throw new Error(
-        `Expected error message to be 'Could not load data' - got '${err.message}'`,
+        `Expected error message to be 'Could not load data' - got '${err.message}'`
       );
     }
   });
   useImage("https://reactjs.org/invalid.jpg", (err) => {
     if (err.message !== "Could not load data") {
       throw new Error(
-        `Expected error message to be 'Could not load data' - got '${err.message}'`,
+        `Expected error message to be 'Could not load data' - got '${err.message}'`
       );
     }
   });
@@ -49,7 +49,7 @@ export const Images = () => {
       { x: SIZE + PAD, y: 0, width: S2, height: SIZE },
       { x: 2 * SIZE, y: 0, width: SIZE, height: SIZE },
     ],
-    [PAD, SIZE],
+    [PAD, SIZE]
   );
 
   return (
@@ -89,7 +89,8 @@ export const Images = () => {
           width: 320,
           height: 180,
           marginVertical: PAD,
-        }}>
+        }}
+      >
         <Image
           image={coffee}
           x={0}

@@ -16,13 +16,13 @@ type Assets = { [name: string]: any };
 
 export const parseNode = (
   serializedNode: SerializedNode,
-  assets: Assets,
+  assets: Assets
 ): any => {
   const { type, props, children } = serializedNode;
   return React.createElement(
     type,
     { ...parseProps(props, assets), key: `${Math.random()}` },
-    children.map((child) => parseNode(child, assets)),
+    children.map((child) => parseNode(child, assets))
   );
 };
 
@@ -51,7 +51,7 @@ const parseProp = (value: any, assets: Assets): any => {
       return Skia.RRectXY(
         Skia.XYWHRect(value.x, value.y, value.width, value.height),
         value.rx,
-        value.ry,
+        value.ry
       );
     } else if (value.__typename__ === "Path") {
       return Skia.Path.MakeFromCmds(value.cmds);
@@ -73,7 +73,7 @@ const parseProp = (value: any, assets: Assets): any => {
     } else if (value.__typename__ === "SkiaObject") {
       // eslint-disable-next-line no-eval
       return eval(
-        `(function Main(){return (${value.source})(this.Skia, this.ctx); })`,
+        `(function Main(){return (${value.source})(this.Skia, this.ctx); })`
       ).call({
         Skia,
         ctx: parseProps(value.context, assets),
@@ -89,7 +89,7 @@ const parseProp = (value: any, assets: Assets): any => {
     } else if (value.__typename__ === "Function") {
       // eslint-disable-next-line no-eval
       return eval(
-        `(function Main(){ const {Skia} = this; return (${value.source}); })`,
+        `(function Main(){ const {Skia} = this; return (${value.source}); })`
       ).call({
         Skia,
       });

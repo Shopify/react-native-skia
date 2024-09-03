@@ -19,7 +19,7 @@ export const PictureViewExample = () => {
         circlePaint.setColor(Skia.Color("orange"));
         canvas.drawCircle(50, 50, 50, circlePaint);
       }),
-    [],
+    []
   );
 
   return <SkiaPictureView style={styles.container} picture={picture} debug />;
