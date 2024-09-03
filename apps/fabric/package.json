@@ -3,11 +3,11 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --fix",
     "android": "react-native run-android",
     "ios": "react-native run-ios",
-    "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "node --experimental-vm-modules ../../node_modules/.bin/jest"
   },
   "dependencies": {
     "@react-native-community/slider": "^4.5.2",
