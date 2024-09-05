@@ -34,10 +34,6 @@ jobs:
       - name: Typecheck files
         run: yarn tsc
 
-      - name: Codegen
-        working-directory: packages/skia
-        run: yarn codegen
-
   test:
     runs-on: ubuntu-latest
     steps:
@@ -69,7 +65,7 @@ jobs:
 
       - name: Build package
         working-directory: packages/skia
-        run: yarn prepare
+        run: yarn build
 
   build-android:
     runs-on: macos-latest-large
