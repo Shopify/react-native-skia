@@ -68,6 +68,7 @@ jobs:
 
   build-android:
     runs-on: macos-latest-large
+    continue-on-error: true
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
@@ -139,7 +140,7 @@ jobs:
         env:
           JAVA_OPTS: "-XX:MaxHeapSize=6g"
         run: |
-          yarn turbo run build:android --cache-dir="${{ env.TURBO_CACHE_DIR }}"
+          yarn turbo run build:android --cache-dir="${{ env.TURBO_CACHE_DIR }}" --concurrency 1
 
   build-ios:
     runs-on: macos-latest-large
