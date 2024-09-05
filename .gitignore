@@ -1,3 +1,5 @@
+.turbo
+
 # Yarn
 .yarn/*
 !.yarn/patches

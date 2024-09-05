@@ -20,5 +20,16 @@
     "packages/*",
     "apps/*"
   ],
-  "packageManager": "yarn@3.6.4"
+  "scripts": {
+    "lint": "turbo run lint",
+    "tsc": "turbo run tsc",
+    "test": "turbo run test",
+    "build": "turbo run build",
+    "build:ios": "turbo run build:ios",
+    "build:android": "turbo run build:android"
+  },
+  "packageManager": "yarn@3.6.4",
+  "devDependencies": {
+    "turbo": "^2.1.1"
+  }
 }
