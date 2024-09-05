@@ -64,7 +64,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build package
-        working-directory: packages/skia
         run: yarn build
 
   build-android:
@@ -185,6 +184,8 @@ jobs:
       - name: Install cocoapods
         run: |
           cd apps/paper/ios
+          pod install
+          cd ../../fabric/ios
           pod install
         env:
           NO_FLIPPER: 1
