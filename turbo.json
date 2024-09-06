@@ -23,7 +23,8 @@
       "build:ios": {
         "dependsOn": ["pod:install"],
         "outputs": [
-          "apps/*/ios/build/**"
+          "apps/*/ios/build/**",
+          "!apps/*/ios/.ios.xcode.env.local"
         ],
         "inputs": [
           "packages/*/package.json",
@@ -34,6 +35,7 @@
           "packages/*/*.podspec",
           "packages/*/ios",
           "apps/*/ios",
+          "!apps/*/ios/.ios.xcode.env.local",
           "!apps/*/ios/build",
           "!apps/*/ios/Pods"
         ]
