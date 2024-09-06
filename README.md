@@ -47,7 +47,7 @@ And then the _SDK Location_ section. It will show you the NDK path, or the optio
 - Go to the package folder `cd packages/skia`
 - Build the Skia libraries with `yarn build-skia` (this can take a while)
 - Copy Skia headers `yarn copy-skia-headers`
-- run `pod install` in `apps/papepr/ios` and `apps/fabric/ios`
+- run `yarn pod:install`
 
 ### Upgrading
 

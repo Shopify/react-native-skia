@@ -14943,9 +14943,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-skia@workspace:.":
+"react-native-skia-monorepo@workspace:.":
   version: 0.0.0-use.local
-  resolution: "react-native-skia@workspace:."
+  resolution: "react-native-skia-monorepo@workspace:."
   dependencies:
     turbo: ^2.1.1
   languageName: unknown
