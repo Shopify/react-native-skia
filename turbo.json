@@ -16,7 +16,9 @@
           "!apps/*/src/build",
           "!apps/*/src/app/build"
         ],
-        "outputs": []
+        "outputs": [
+          "apps/*/ios/android/**"
+        ]
       },
       "build:ios": {
         "dependsOn": ["pod:install"],
