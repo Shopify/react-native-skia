@@ -3,6 +3,7 @@
     "tasks": {
       "build:android": {
         "env": ["JAVA_HOME", "ANDROID_NDK", "ANDROID_SDK", "ANDROID_HOME"],
+        "cache": false,
         "outputs": [
           "apps/*/android/build/**"
         ],
@@ -20,6 +21,7 @@
       },
       "build:ios": {
         "dependsOn": ["pod:install"],
+        "cache": false,
         "outputs": [
           "apps/*/ios/build/**"
         ],
