@@ -4,47 +4,43 @@
       "build:android": {
         "env": ["JAVA_HOME", "ANDROID_NDK", "ANDROID_SDK", "ANDROID_HOME"],
         "outputs": [
-          "apps/*/android",
-          "!apps/*/android/.gradle",
-          "!apps/*/android/build",
-          "!apps/*/android/app/build"
+          "apps/*/android/build/**"
         ],
         "inputs": [
           "**/*/package.json",
-          "packages/skia/android",
+          "packages/skia/android/**",
+          "packages/skia/src/**",
+          "packages/skia/cpp/**",
           "!packages/skia/android/build",
-          "packages/skia/src/*.ts",
-          "packages/skia/src/*.tsx",
+          "app/*/src/**",
           "apps/*/package.json",
-          "apps/*/android",
-          "apps/*/android/app/build.gradle",
-          "apps/*/android/build.gradle",
-          "apps/*/android/gradle.properties",
-          "apps/*/android/local.properties",
-          "!apps/*/android/.gradle",
-          "!apps/*/android/build",
-          "!apps/*/android/app/build"
+          "app/*/android/**",
+          "!app/*/android/build"
         ]
       },
       "build:ios": {
+        "dependsOn": ["pod:install"],
         "outputs": [
-          "apps/*/ios/build",
-          "apps/*/ios/Pods"
+          "apps/*/ios/build/**"
         ],
         "inputs": [
           "package.json",
-          "*.podspec",
-          "ios",
-          "ios/Podfile",
-          "ios/*.xcconfig",
-          "ios/**/*.plist",
-          "packages/skia/src/*.ts",
-          "packages/skia/src/*.tsx",
+          "**/*.podspec",
+          "packages/skia/android/**",
+          "packages/skia/src/**",
+          "packages/skia/cpp/**",
+          "packages/skia/ios/*",
           "apps/*/package.json",
-          "apps/*/ios",
+          "app/*/src/**",
+          "apps/*/ios/**",
           "!apps/*/ios/build",
           "!apps/*/ios/Pods"
         ]
+      },
+      "pod:install": {
+        "cache": false,
+        "inputs": ["**/ios/Podfile", "**/ios/Podfile.lock"],
+        "outputs": ["**/ios/Pods/**"]
       },
       "lint": {},
       "tsc": {},

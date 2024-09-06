@@ -234,9 +234,6 @@ jobs:
     strategy:
       matrix:
         working-directory: [apps/paper]
-    concurrency:
-      group: android-example-${{ matrix.working-directory }}-${{ github.ref }}
-      cancel-in-progress: true
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -252,7 +249,7 @@ jobs:
         id: cache-apk
         uses: actions/cache/restore@v3
         with:
-          path: apps/paper/android/app/build/outputs/apk/debug/app-debug.apk
+          path: ${{ matrix.working-directory }}/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
       
       - name: SKDs - download required images
@@ -342,23 +339,9 @@ jobs:
             echo "turbo_cache_hit=1" >> $GITHUB_ENV
           fi
 
-      - name: Cache cocoapods
-        if: env.turbo_cache_hit != 1
-        id: cocoapods-cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            **/ios/Pods
-          key: ${{ runner.os }}-cocoapods-${{ hashFiles('./apps/paper/ios/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cocoapods-
-
       - name: Install cocoapods
         run: |
-          cd apps/paper/ios
-          pod install
-          cd ../../fabric/ios
-          pod install
+          yarn pod:install
         env:
           NO_FLIPPER: 1
 
