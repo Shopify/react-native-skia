@@ -10,6 +10,10 @@ on:
     types:
       - checks_requested
 
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     runs-on: ubuntu-latest
