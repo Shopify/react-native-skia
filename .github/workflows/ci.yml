@@ -218,7 +218,7 @@ jobs:
         env:
           JAVA_OPTS: "-XX:MaxHeapSize=6g"
         run: |
-          yarn turbo run build:android --cache-dir="${{ env.TURBO_CACHE_DIR }}" --concurrency 1
+          yarn turbo run build:android --cache-dir="${{ env.TURBO_CACHE_DIR }}" --concurrency 1 --force
 
       - name: Cache apk
         uses: actions/cache/save@v3
@@ -341,4 +341,4 @@ jobs:
 
       - name: Build example for iOS
         run: |
-          yarn turbo run build:ios --cache-dir="${{ env.TURBO_CACHE_DIR }}" --concurrency 1
+          yarn turbo run build:ios --cache-dir="${{ env.TURBO_CACHE_DIR }}" --concurrency 1 --force

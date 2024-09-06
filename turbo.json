@@ -20,7 +20,6 @@
       },
       "build:ios": {
         "dependsOn": ["pod:install"],
-        "cache": false,
         "outputs": [
           "apps/*/ios/build/**"
         ],
