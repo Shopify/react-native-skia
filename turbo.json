@@ -3,21 +3,20 @@
     "tasks": {
       "build:android": {
         "env": ["JAVA_HOME", "ANDROID_NDK", "ANDROID_SDK", "ANDROID_HOME"],
-        "cache": false,
-        "outputs": [
-          "apps/*/android/build/**"
-        ],
         "inputs": [
-          "**/*/package.json",
-          "packages/skia/android/**",
-          "packages/skia/src/**",
-          "packages/skia/cpp/**",
-          "!packages/skia/android/build",
-          "app/*/src/**",
-          "apps/*/package.json",
-          "app/*/android/**",
-          "!app/*/android/build"
-        ]
+          "packages/*/package.json",
+          "packages/app/package.json",
+          "packages/*/src/*.{ts,tsx}",
+          "apps/*/src/*.{ts,tsx}",
+          "apps/*/cpp/*.{cpp,h}",
+          "packages/*/android",
+          "!packages/*/android/build",
+          "apps/*/src/android",
+          "!apps/*/src/.gradle",
+          "!apps/*/src/build",
+          "!apps/*/src/app/build"
+        ],
+        "outputs": []
       },
       "build:ios": {
         "dependsOn": ["pod:install"],
@@ -26,15 +25,14 @@
           "apps/*/ios/build/**"
         ],
         "inputs": [
-          "package.json",
-          "**/*.podspec",
-          "packages/skia/android/**",
-          "packages/skia/src/**",
-          "packages/skia/cpp/**",
-          "packages/skia/ios/*",
-          "apps/*/package.json",
-          "app/*/src/**",
-          "apps/*/ios/**",
+          "packages/*/package.json",
+          "packages/app/package.json",
+          "packages/*/src/*.{ts,tsx}",
+          "apps/*/src/*.{ts,tsx}",
+          "apps/*/cpp/*.{cpp,h}",
+          "packages/*/*.podspec",
+          "packages/*/ios",
+          "apps/*/ios",
           "!apps/*/ios/build",
           "!apps/*/ios/Pods"
         ]
