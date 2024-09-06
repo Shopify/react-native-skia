@@ -3,48 +3,47 @@
     "tasks": {
       "build:android": {
         "env": ["JAVA_HOME", "ANDROID_NDK", "ANDROID_SDK", "ANDROID_HOME"],
-        "outputs": [
-          "apps/*/android",
-          "!apps/*/android/.gradle",
-          "!apps/*/android/build",
-          "!apps/*/android/app/build"
-        ],
         "inputs": [
-          "**/*/package.json",
-          "packages/skia/android",
-          "!packages/skia/android/build",
-          "packages/skia/src/*.ts",
-          "packages/skia/src/*.tsx",
-          "apps/*/package.json",
-          "apps/*/android",
-          "apps/*/android/app/build.gradle",
-          "apps/*/android/build.gradle",
-          "apps/*/android/gradle.properties",
-          "apps/*/android/local.properties",
-          "!apps/*/android/.gradle",
-          "!apps/*/android/build",
-          "!apps/*/android/app/build"
+          "packages/*/package.json",
+          "packages/app/package.json",
+          "packages/*/src/*.{ts,tsx}",
+          "apps/*/src/*.{ts,tsx}",
+          "apps/*/cpp/*.{cpp,h}",
+          "packages/*/android",
+          "!packages/*/android/build",
+          "apps/*/src/android",
+          "!apps/*/src/.gradle",
+          "!apps/*/src/build",
+          "!apps/*/src/app/build"
+        ],
+        "outputs": [
+          "apps/*/ios/android/**"
         ]
       },
       "build:ios": {
+        "dependsOn": ["pod:install"],
         "outputs": [
-          "apps/*/ios/build",
-          "apps/*/ios/Pods"
+          "apps/*/ios/build/**",
+          "!apps/*/ios/.ios.xcode.env.local"
         ],
         "inputs": [
-          "package.json",
-          "*.podspec",
-          "ios",
-          "ios/Podfile",
-          "ios/*.xcconfig",
-          "ios/**/*.plist",
-          "packages/skia/src/*.ts",
-          "packages/skia/src/*.tsx",
-          "apps/*/package.json",
+          "packages/*/package.json",
+          "packages/app/package.json",
+          "packages/*/src/*.{ts,tsx}",
+          "apps/*/src/*.{ts,tsx}",
+          "apps/*/cpp/*.{cpp,h}",
+          "packages/*/*.podspec",
+          "packages/*/ios",
           "apps/*/ios",
+          "!apps/*/ios/.ios.xcode.env.local",
           "!apps/*/ios/build",
           "!apps/*/ios/Pods"
         ]
+      },
+      "pod:install": {
+        "cache": false,
+        "inputs": ["**/ios/Podfile", "**/ios/Podfile.lock"],
+        "outputs": ["**/ios/Pods/**"]
       },
       "lint": {},
       "tsc": {},

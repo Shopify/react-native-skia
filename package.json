@@ -26,7 +26,8 @@
     "test": "turbo run test",
     "build": "turbo run build",
     "build:ios": "turbo run build:ios",
-    "build:android": "turbo run build:android"
+    "build:android": "turbo run build:android",
+    "pod:install": "turbo run pod:install"
   },
   "packageManager": "yarn@3.6.4",
   "devDependencies": {
