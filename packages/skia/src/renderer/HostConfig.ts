@@ -53,9 +53,13 @@ const appendNode = (parent: Node<unknown>, child: Node<unknown>) => {
   parent.addChild(child);
 };
 
-const removeNode = (parent: Node<unknown>, child: Node<unknown>) => {
+const removeNode = (parent: Node<unknown>, child: Node<unknown>, unmounted = false) => {
+  // If the drawing is unmounted we don't want to update it.
+  // We can just stop the reanimated mappers
   unbindReanimatedNode(child);
-  return parent.removeChild(child);
+  if (!unmounted) {
+    parent.removeChild(child);
+  }
 };
 
 const insertBefore = (
@@ -224,7 +228,7 @@ export const skHostConfig: SkiaHostConfig = {
   },
 
   removeChildFromContainer: (container, child) => {
-    removeNode(container.root, child);
+    removeNode(container.root, child, container.unmounted);
   },
 
   insertInContainerBefore: (container, child, before) => {

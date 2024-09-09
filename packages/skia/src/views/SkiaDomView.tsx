@@ -88,14 +88,6 @@ See: https://shopify.github.io/react-native-skia/docs/animations/gestures`
     SkiaViewApi.requestRedraw(this._nativeId);
   }
 
-  /**
-   * Clear up the dom node when unmounting to release resources.
-   */
-  componentWillUnmount(): void {
-    assertSkiaViewApi();
-    SkiaViewApi.setJsiProperty(this._nativeId, "root", null);
-  }
-
   render() {
     const { mode, debug = false, ...viewProps } = this.props;
     return (
