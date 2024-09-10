@@ -19,7 +19,7 @@
     "@docusaurus/core": "2.4.3",
     "@docusaurus/preset-classic": "2.4.3",
     "@mdx-js/react": "^1.6.21",
-    "@shopify/react-native-skia": "link:../package/",
+    "@shopify/react-native-skia": "workspace:*",
     "@svgr/webpack": "^5.5.0",
     "clsx": "^1.1.1",
     "docusaurus-preset-shiki-twoslash": "1.1.41",
