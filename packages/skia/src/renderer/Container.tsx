@@ -10,6 +10,7 @@ import type { Skia } from "../skia/types";
 export class Container {
   private _root: RenderNode<GroupProps>;
   public Sk: SkDOM;
+  public unmounted = false;
   constructor(
     Skia: Skia,
     public redraw: () => void = () => {},

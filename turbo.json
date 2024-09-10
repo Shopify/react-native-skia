@@ -17,7 +17,7 @@
           "!apps/*/src/app/build"
         ],
         "outputs": [
-          "apps/*/ios/android/**"
+          "apps/*/android/**"
         ]
       },
       "build:ios": {
