@@ -3721,12 +3721,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@shopify/react-native-skia@link:../package/::locator=docs%40workspace%3Aapps%2Fdocs":
-  version: 0.0.0-use.local
-  resolution: "@shopify/react-native-skia@link:../package/::locator=docs%40workspace%3Aapps%2Fdocs"
-  languageName: node
-  linkType: soft
-
 "@shopify/react-native-skia@workspace:*, @shopify/react-native-skia@workspace:packages/skia":
   version: 0.0.0-use.local
   resolution: "@shopify/react-native-skia@workspace:packages/skia"
@@ -7734,7 +7728,7 @@ __metadata:
     "@docusaurus/module-type-aliases": 2.4.3
     "@docusaurus/preset-classic": 2.4.3
     "@mdx-js/react": ^1.6.21
-    "@shopify/react-native-skia": "link:../package/"
+    "@shopify/react-native-skia": "workspace:*"
     "@svgr/webpack": ^5.5.0
     "@tsconfig/docusaurus": ^1.0.4
     clsx: ^1.1.1
