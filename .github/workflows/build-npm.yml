@@ -31,7 +31,7 @@ jobs:
       - name: Build NPM Package
         working-directory: packages/skia
         run: |
-          npx semantic-release
+          yarn release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
