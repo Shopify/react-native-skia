@@ -182,10 +182,12 @@ jobs:
 
       - name: Check turborepo cache for Android
         run: |
-          TURBO_CACHE_STATUS=$(node -p "($(yarn turbo run build:android --cache-dir="${{ env.TURBO_CACHE_DIR }}" --dry=json)).tasks.find(t => t.task === 'build:android').cache.status")
+          TURBO_CACHE_STATUS=$(node -p "($(yarn turbo run build:android --cache-dir="${{ env.TURBO_CACHE_DIR }}" --dry=json)).tasks.find(t => t.taskId === 'paper#build:android').cache.status")
+          TURBO_HASH=$(node -p "($(yarn turbo run build:android --cache-dir="${{ env.TURBO_CACHE_DIR }}" --dry=json)).tasks.find(t => t.taskId === 'paper#build:android').hash")
 
           if [[ $TURBO_CACHE_STATUS == "HIT" ]]; then
             echo "turbo_cache_hit=1" >> $GITHUB_ENV
+            echo "turbo_hash=$TURBO_HASH" >> $GITHUB_ENV
           fi
 
       - name: Install JDK
@@ -233,16 +235,19 @@ jobs:
           yarn turbo run build:android --cache-dir="${{ env.TURBO_CACHE_DIR }}" --concurrency 1
 
       - name: Cache apk
+        if: env.turbo_cache_hit != 1
         uses: actions/cache/save@v3
         env:
           cache-name: cache-apk
         with:
           path: apps/paper/android/app/build/outputs/apk/debug/app-debug.apk
-          key: apk-${{ github.sha }}
+          key: apk-${{ env.turbo_hash }}
 
   test-android:
     needs: build-android
     runs-on: macos-latest-large
+    env:
+      TURBO_CACHE_DIR: .turbo/android
     strategy:
       matrix:
         working-directory: [apps/paper]
@@ -256,13 +261,21 @@ jobs:
         uses: ./.github/actions/setup
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-      
+
+      - name: Check turborepo cache for Android
+        run: |
+          TURBO_HASH=$(node -p "($(yarn turbo run build:android --cache-dir="${{ env.TURBO_CACHE_DIR }}" --dry=json)).tasks.find(t => t.taskId === 'paper#build:android').hash")
+
+          if [[ $TURBO_CACHE_STATUS == "HIT" ]]; then
+            echo "turbo_hash=$TURBO_HASH" >> $GITHUB_ENV
+          fi
+
       - name: Restore APK
         id: cache-apk
         uses: actions/cache/restore@v3
         with:
           path: ${{ matrix.working-directory }}/android/app/build/outputs/apk/debug/app-debug.apk
-          key: apk-${{ github.sha }}
+          key: apk-${{ env.turbo_hash }}
       
       - name: SKDs - download required images
         run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
