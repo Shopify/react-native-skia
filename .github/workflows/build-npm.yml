@@ -25,17 +25,16 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build package and documentation
+        run: yarn build
+
       - name: Build NPM Package
         working-directory: packages/skia
         run: |
-          yarn build
           npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Install & Build Docs
-        run: cd apps/docs; yarn build;
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

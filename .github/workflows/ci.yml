@@ -74,6 +74,14 @@ jobs:
       - name: Build package
         run: yarn build
 
+      - name: Build dry run release
+        working-directory: packages/skia
+        run: |
+          npx semantic-release --dry-run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
   build-android-ubuntu:
     runs-on: ubuntu-latest
     continue-on-error: true
