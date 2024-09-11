@@ -16,9 +16,6 @@
   "files": [
     "src/**",
     "lib/**",
-    "!**/__tests__",
-    "!**/__fixtures__",
-    "!**/__mocks__",
     "README.md",
     "LICENSE.md",
     "android/build.gradle",
