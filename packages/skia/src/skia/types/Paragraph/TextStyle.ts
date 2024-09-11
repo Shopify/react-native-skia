@@ -50,7 +50,7 @@ export enum TextBaseline {
 export interface SkTextStyle {
   backgroundColor?: SkColor;
   color?: SkColor;
-  decoration?: number;
+  decoration?: TextDecoration;
   decorationColor?: SkColor;
   decorationThickness?: number;
   decorationStyle?: TextDecorationStyle;
