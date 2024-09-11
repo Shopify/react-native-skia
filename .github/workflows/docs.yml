@@ -10,14 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Setup
+        uses: ./.github/actions/setup
         with:
-          cache: yarn
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Documentation
         run: |
