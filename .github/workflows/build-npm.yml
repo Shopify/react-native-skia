@@ -15,11 +15,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
       - name: Setup
         uses: ./.github/actions/setup
         with:
