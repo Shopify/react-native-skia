@@ -53,7 +53,7 @@ export interface SkTextStyle {
   decoration?: number;
   decorationColor?: SkColor;
   decorationThickness?: number;
-  decorationStyle?: TextDecoration;
+  decorationStyle?: TextDecorationStyle;
   fontFamilies?: string[];
   fontFeatures?: SkTextFontFeatures[];
   fontSize?: number;
