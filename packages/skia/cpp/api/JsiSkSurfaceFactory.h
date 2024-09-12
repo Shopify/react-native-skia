@@ -35,17 +35,6 @@ public:
         std::make_shared<JsiSkSurface>(getContext(), std::move(surface)));
   }
 
-  JSI_HOST_FUNCTION(MakeFromNativeSurface) {
-    jsi::BigInt pointer = arguments[0].asBigInt(runtime);
-    const uintptr_t nativeBufferPointer = pointer.asUint64(runtime);
-    void *surface = reinterpret_cast<void *>(nativeBufferPointer);
-    auto width = static_cast<int>(arguments[1].asNumber());
-    auto height = static_cast<int>(arguments[2].asNumber());
-    auto context = getContext();
-    auto result = context->makeSurfaceFromNativeSurface(surface, width, height);
-    return jsi::Value::null();
-  }
-
   JSI_HOST_FUNCTION(MakeOffscreen) {
     auto width = static_cast<int>(arguments[0].asNumber());
     auto height = static_cast<int>(arguments[1].asNumber());
@@ -60,8 +49,7 @@ public:
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurfaceFactory, Make),
-                       JSI_EXPORT_FUNC(JsiSkSurfaceFactory, MakeOffscreen),
-                       JSI_EXPORT_FUNC(JsiSkSurfaceFactory, MakeFromNativeSurface))
+                       JSI_EXPORT_FUNC(JsiSkSurfaceFactory, MakeOffscreen))
 
   explicit JsiSkSurfaceFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

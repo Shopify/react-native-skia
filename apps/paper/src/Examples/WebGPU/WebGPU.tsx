@@ -6,7 +6,7 @@ import { Canvas, useCanvasEffect } from "react-native-wgpu";
 export function WebGPU() {
   const ref = useCanvasEffect(() => {
     const nativeSurface = ref.current!.getNativeSurface();
-    const surface = Skia.Surface.MakeFromNativeSurface(
+    const surface = Skia.Context(
       nativeSurface.surface,
       nativeSurface.width,
       nativeSurface.height
