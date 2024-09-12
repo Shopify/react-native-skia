@@ -33,7 +33,7 @@ import type { ParagraphBuilderFactory } from "./Paragraph/ParagraphBuilder";
 import type { Video } from "./Video";
 import type { NativeBufferFactory } from "./NativeBuffer";
 
-interface SkiaContext {
+export interface SkiaContext {
   getSurface(): SkSurface;
   present(): void;
 }
