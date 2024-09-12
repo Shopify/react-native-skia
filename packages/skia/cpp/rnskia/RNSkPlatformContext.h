@@ -134,6 +134,8 @@ public:
    */
   virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) = 0;
 
+  virtual sk_sp<SkSurface> makeSurfaceFromNativeSurface(void *surface, int width, int height) = 0;
+
   /**
    * Creates an image from a native buffer.
    * - On iOS, this is a `CVPixelBufferRef`

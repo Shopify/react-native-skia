@@ -54,6 +54,10 @@ public:
     return SkiaOpenGLSurfaceFactory::makeOffscreenSurface(width, height);
   }
 
+  sk_sp<SkSurface> makeSurfaceFromNativeSurface(void *surface, int width, int height) override {
+    return nullptr;
+  }
+
   sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override {
     return SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(buffer);
   }
