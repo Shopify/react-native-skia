@@ -6,12 +6,15 @@ import { Canvas, useCanvasEffect } from "react-native-wgpu";
 export function WebGPU() {
   const ref = useCanvasEffect(() => {
     const nativeSurface = ref.current!.getNativeSurface();
-    const surface = Skia.Context(
+    const ctx = Skia.Context(
       nativeSurface.surface,
       nativeSurface.width,
       nativeSurface.height
     );
-    console.log({ surface });
+    const surface = ctx.getSurface();
+    const canvas = surface.getCanvas();
+    canvas.drawColor(Skia.Color("cyan"));
+    ctx.present();
   });
 
   return (

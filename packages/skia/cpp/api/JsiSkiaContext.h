@@ -33,10 +33,14 @@ public:
   EXPORT_JSI_API_TYPENAME(JsiSkiaContext, SkiaContext)
 
   JSI_HOST_FUNCTION(getSurface) {
-    return jsi::Value::null();
+    auto surface = getObject()->getSurface();
+        return jsi::Object::createFromHostObject(
+        runtime,
+        std::make_shared<JsiSkSurface>(getContext(), std::move(surface)));
   }
 
   JSI_HOST_FUNCTION(present) {
+    getObject()->present();
     return jsi::Value::undefined();
   }
 

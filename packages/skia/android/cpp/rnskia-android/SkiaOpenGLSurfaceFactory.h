@@ -149,17 +149,22 @@ public:
   ~AndroidSkiaContext() {
   }
 
-    sk_sp<SkSurface> getSurface() override {
-      return nullptr;
-    }
+  sk_sp<SkSurface> getSurface() override;
 
   void present() override {
+    // Flush and submit the direct context
+    ThreadContextHolder::ThreadSkiaOpenGLContext.directContext
+        ->flushAndSubmit();
 
+    // Swap buffers
+    SkiaOpenGLHelper::swapBuffers(
+        &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
   }
 
 private:
   ANativeWindow *_window;
   sk_sp<SkSurface> _skSurface = nullptr;
+  EGLSurface _glSurface = EGL_NO_SURFACE;
   int _width = 0;
   int _height = 0;
 };
