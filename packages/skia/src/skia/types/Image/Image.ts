@@ -130,4 +130,17 @@ export interface SkImage extends SkJSIInstance<"Image"> {
    * bitmap, or if encoded in a stream.
    */
   makeNonTextureImage(): SkImage;
+
+  /**
+   * Returns true if the image is backed by a GPU texture.
+   * Usually true if the image was uploaded manually to GPU (ImageFactory.MakeTextureFromImage)
+   * or if the image is a snapshot of a GPU backed surface (surface.makeImageSnapshot).
+   */
+  isTextureBacked(): boolean;
+
+  /**
+   * Returns an approximation of the amount of texture memory used by the image.
+   * Returns zero if the image is not texture backed or if the texture has an external format.
+   */
+  textureSize(): number;
 }
