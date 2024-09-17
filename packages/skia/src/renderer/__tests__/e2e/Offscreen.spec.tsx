@@ -30,7 +30,11 @@ describe("Offscreen Drawings", () => {
         if (!r2) {
           return [];
         }
-        return [r0.isTextureBacked(), r1.isTextureBacked(), r2.isTextureBacked()];
+        return [
+          r0.isTextureBacked(),
+          r1.isTextureBacked(),
+          r2.isTextureBacked(),
+        ];
       },
       { width, height, CI }
     );
