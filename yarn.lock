@@ -15399,7 +15399,7 @@ __metadata:
     react-native-safe-area-context: ^4.10.9
     react-native-screens: ^3.34.0
     react-native-svg: ^15.6.0
-    react-native-wgpu: ^0.1.6
+    react-native-wgpu: ^0.1.7
     react-test-renderer: 18.3.1
     typescript: ^5.2.2
   languageName: unknown
@@ -16920,13 +16920,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-wgpu@npm:^0.1.6":
-  version: 0.1.6
-  resolution: "react-native-wgpu@npm:0.1.6"
+"react-native-wgpu@npm:^0.1.7":
+  version: 0.1.7
+  resolution: "react-native-wgpu@npm:0.1.7"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 2537a58be7a2d5ad7c335ea94d7e31bd7da1aa871343e1d1b4667b876e24013ed9d8500fcb8aa2815f75574c8aae0eabaf9539994418c16d35cdcfc3ce87f88f
+  checksum: cbd0e0fa6fc859ceb4686cb1baeb804686c561ff7d9083b58a4e0c7037766e797d92f5fe895a9716c3ce5f8540033b5c5073ce64a85cd3aefae584d33ac7b47c
   languageName: node
   linkType: hard
 

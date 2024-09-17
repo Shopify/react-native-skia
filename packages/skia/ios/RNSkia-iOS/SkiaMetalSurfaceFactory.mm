@@ -57,6 +57,12 @@ bool SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
   return true;
 }
 
+std::shared_ptr<RNSkia::SkiaContext>
+SkiaMetalSurfaceFactory::makeWindowedSurface(CALayer* texture, int width, int height) {
+	return std::make_shared<IOSSkiaContext>(texture, width, height);
+}
+
+
 sk_sp<SkSurface>
 SkiaMetalSurfaceFactory::makeWindowedSurface(id<MTLTexture> texture, int width,
                                              int height) {
