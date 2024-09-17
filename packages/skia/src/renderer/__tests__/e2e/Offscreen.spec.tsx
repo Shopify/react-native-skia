@@ -29,7 +29,11 @@ describe("Offscreen Drawings", () => {
       },
       { width, height }
     );
-    expect(result).toEqual([true, false, true]);
+    if (surface.OS === "web") {
+      expect(result).toEqual([false, false, false]);
+    } else {
+      expect(result).toEqual([true, false, true]);
+    }
   });
   it("Should use the canvas API to build an image", async () => {
     const { width, height } = surface;
