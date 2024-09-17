@@ -49,6 +49,14 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     super(CanvasKit, ref, "Image");
   }
 
+  isTextureBacked(): boolean {
+    return false;
+  }
+
+  textureSize(): number {
+    return 0;
+  }
+
   height() {
     return this.ref.height();
   }

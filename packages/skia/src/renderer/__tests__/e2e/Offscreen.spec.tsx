@@ -5,6 +5,32 @@ import { Circle } from "../../components";
 import { surface, importSkia } from "../setup";
 
 describe("Offscreen Drawings", () => {
+  it("isTextureBacked()", async () => {
+    const { width, height } = surface;
+    const result = await surface.eval(
+      (Skia, ctx) => {
+        const r = ctx.width / 2;
+        const offscreen = Skia.Surface.MakeOffscreen(ctx.width, ctx.height)!;
+        if (!offscreen) {
+          throw new Error("Could not create offscreen surface");
+        }
+        const canvas = offscreen.getCanvas();
+        const paint = Skia.Paint();
+        paint.setColor(Skia.Color("lightblue"));
+        canvas.drawCircle(r, r, r, paint);
+        offscreen.flush();
+        const r0 = offscreen.makeImageSnapshot();
+        const r1 = r0.makeNonTextureImage();
+        const r2 = Skia.Image.MakeTextureFromImage(r1);
+        if (!r2) {
+          return [];
+        }
+        return [r0.isTextureBacked(), r1.isTextureBacked(), r2.isTextureBacked()];
+      },
+      { width, height }
+    );
+    expect(result).toEqual([true, false, true]);
+  });
   it("Should use the canvas API to build an image", async () => {
     const { width, height } = surface;
     const raw = await surface.eval(
