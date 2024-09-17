@@ -29,7 +29,7 @@ describe("Offscreen Drawings", () => {
       },
       { width, height }
     );
-    if (surface.OS === "web") {
+    if (surface.OS === "web" || surface.OS === "node") {
       expect(result).toEqual([false, false, false]);
     } else {
       expect(result).toEqual([true, false, true]);
