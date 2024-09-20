@@ -7,6 +7,7 @@ import { surface, importSkia } from "../setup";
 describe("Offscreen Drawings", () => {
   it("isTextureBacked()", async () => {
     const { width, height } = surface;
+    const supported = surface.OS !== "web" && surface.OS !== "node";
     const result = await surface.eval(
       (Skia, ctx) => {
         const r = ctx.width / 2;
@@ -19,9 +20,9 @@ describe("Offscreen Drawings", () => {
         paint.setColor(Skia.Color("lightblue"));
         canvas.drawCircle(r, r, r, paint);
         offscreen.flush();
-        // Currently GPU is not available in CI (software adapter)
+        // Currently GPU is not available in github action (software adapter)
         // therefore these would fail
-        if (ctx.CI) {
+        if (ctx.CI && ctx.supported) {
           return [true, false, true];
         }
         const r0 = offscreen.makeImageSnapshot();
@@ -36,9 +37,9 @@ describe("Offscreen Drawings", () => {
           r2.isTextureBacked(),
         ];
       },
-      { width, height, CI }
+      { width, height, CI, supported }
     );
-    if (surface.OS === "web" || surface.OS === "node") {
+    if (!supported) {
       expect(result).toEqual([false, false, false]);
     } else {
       expect(result).toEqual([true, false, true]);
