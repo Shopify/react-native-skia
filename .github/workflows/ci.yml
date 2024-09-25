@@ -321,16 +321,16 @@ jobs:
             CI=true yarn e2e --testPathIgnorePatterns Paragraphs
           fi
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           path: packages/skia/src/__tests__/snapshots/
           name: ${{ matrix.working-directory }}-snapshots-screenshots
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          path: apps/docs/static
+          path: apps/docs/static/
           name: ${{ matrix.working-directory }}-docs-screenshots
 
   build-ios:
