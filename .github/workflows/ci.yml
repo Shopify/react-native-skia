@@ -325,13 +325,13 @@ jobs:
         if: failure()
         with:
           path: packages/skia/src/__tests__/snapshots/
-          name: ${{ matrix.working-directory }}-snapshots-screenshots
+          name: apps-paper-snapshots-screenshots
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           path: apps/docs/static/
-          name: ${{ matrix.working-directory }}-docs-screenshots
+          name: apps-paper-docs-screenshots
 
   build-ios:
     runs-on: macos-latest-large
