@@ -232,7 +232,7 @@ jobs:
         env:
           JAVA_OPTS: "-XX:MaxHeapSize=6g"
         run: |
-          yarn turbo run build:android --cache-dir="${{ env.TURBO_CACHE_DIR }}" --concurrency 1
+          yarn turbo run build:android --cache-dir="${{ env.TURBO_CACHE_DIR }}" --force --concurrency 1
 
       - name: Cache apk
         if: env.turbo_cache_hit != 1
