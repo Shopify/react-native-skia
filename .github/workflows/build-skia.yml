@@ -66,7 +66,7 @@ jobs:
 
       - name: Upload artifacts - Android x86
         if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: skia-android-arm-x86
           path: |
@@ -80,7 +80,7 @@ jobs:
 
       - name: Upload artifacts - Android x64
         if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: skia-android-arm-x64
           path: |
@@ -94,14 +94,8 @@ jobs:
 
       - name: Upload artifacts - iOS xcframeworks
         if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: skia-ios-xcframeworks
           path: |
-            ./package/libs/ios/libskia.xcframework
-            ./package/libs/ios/libskshaper.xcframework
-            ./package/libs/ios/libsvg.xcframework
-            ./package/libs/ios/libskottie.xcframework
-            ./package/libs/ios/libsksg.xcframework
-            ./package/libs/ios/libskparagraph.xcframework
-            ./package/libs/ios/libskunicode.xcframework
+            ./packages/skia/libs/ios/*.xcframework
