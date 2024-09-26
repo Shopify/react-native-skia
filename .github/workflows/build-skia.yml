@@ -3,8 +3,6 @@ on: workflow_dispatch
 jobs:
   build:
     runs-on: macos-latest
-    env:
-      WORKING_DIRECTORY: ./package
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -20,18 +18,13 @@ jobs:
       - name: Setup Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
 
-      - name: Setup Nodejs and npm
-        uses: actions/setup-node@v3
+      - name: Setup
+        uses: ./.github/actions/setup
         with:
-          cache-dependency-path: package/yarn.lock
-          cache: yarn
-
-      - name: Install root node dependencies
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: yarn
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Skia
-        working-directory: ${{ env.WORKING_DIRECTORY }}
+        working-directory: ./packages/skia
         env:
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: yarn build-skia
