@@ -2,7 +2,7 @@ import React from "react";
 
 import { surface, importSkia } from "../setup";
 import { Fill, Group, Path, Rect } from "../../components";
-import { checkImage, docPath } from "../../../__tests__/setup";
+import { checkImage, docPath, itRunsNodeOnly } from "../../../__tests__/setup";
 import type { Skia } from "../../../skia/types";
 import { PaintStyle } from "../../../skia/types";
 
@@ -94,7 +94,7 @@ describe("Paths", () => {
     });
     expect(result).toEqual("M20 20L20 40L40 20");
   });
-  it("should accept [0.0001, 1.00001] as trim value", async () => {
+  itRunsNodeOnly("should accept [0.0001, 1.00001] as trim value", async () => {
     const result = await surface.eval((Skia) => {
       const path = Skia.Path.Make();
       path.moveTo(20, 20);
@@ -116,7 +116,7 @@ describe("Paths", () => {
     });
     expect(result).toEqual("M20 20L20 40L40 20");
   });
-  it("interpolation values can overshoot", async () => {
+  itRunsNodeOnly("interpolation values can overshoot", async () => {
     const result = await surface.eval((Skia) => {
       const path2 = Skia.Path.Make();
       path2.moveTo(0, 0);
