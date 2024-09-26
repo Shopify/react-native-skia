@@ -3,8 +3,6 @@ on: workflow_dispatch
 jobs:
   build:
     runs-on: macos-latest
-    env:
-      WORKING_DIRECTORY: ./package
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -26,7 +24,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Skia
-        working-directory: ${{ env.WORKING_DIRECTORY }}
+        working-directory: ./packages/skia
         env:
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: yarn build-skia
