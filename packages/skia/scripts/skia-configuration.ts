@@ -32,8 +32,12 @@ const ParagraphArgsIOS = BUILD_WITH_PARAGRAPH
     ]
   : NoParagraphArgs;
 
-const ParagraphOutputs = BUILD_WITH_PARAGRAPH
-  ? ["libskparagraph.a", "libskunicode.a"]
+const ParagraphIOS = BUILD_WITH_PARAGRAPH
+  ? ["libskparagraph.a", "libskunicode_core.a", "libskunicode_libgrapheme.a"]
+  : [];
+
+const ParagraphOutputsAndroid = BUILD_WITH_PARAGRAPH
+  ? ["libskparagraph.a", "libskunicode_core.a", "libskunicode_icu.a"]
   : [];
 
 export const commonArgs = [
@@ -111,7 +115,7 @@ export const configurations: Configuration = {
       "libsvg.a",
       "libskottie.a",
       "libsksg.a",
-      ...ParagraphOutputs,
+      ...ParagraphOutputsAndroid,
     ],
   },
   ios: {
@@ -158,7 +162,7 @@ export const configurations: Configuration = {
       "libsvg.a",
       "libskottie.a",
       "libsksg.a",
-      ...ParagraphOutputs,
+      ...ParagraphIOS,
     ],
   },
 };
