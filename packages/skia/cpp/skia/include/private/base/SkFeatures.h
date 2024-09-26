@@ -65,6 +65,10 @@
   #define SK_CPU_X86 1
 #endif
 
+#if defined(__loongarch__) || defined (__loongarch64)
+  #define SK_CPU_LOONGARCH 1
+#endif
+
 /**
  *  SK_CPU_SSE_LEVEL
  *
@@ -81,7 +85,16 @@
 #define SK_CPU_SSE_LEVEL_AVX2     52
 #define SK_CPU_SSE_LEVEL_SKX      60
 
-// TODO(brianosman,kjlubick) clean up these checks
+/**
+ *  SK_CPU_LSX_LEVEL
+ *
+ *  If defined, SK_CPU_LSX_LEVEL should be set to the highest supported level.
+ *  On non-loongarch CPU this should be undefined.
+ */
+#define SK_CPU_LSX_LEVEL_LSX      70
+#define SK_CPU_LSX_LEVEL_LASX     80
+
+// TODO(kjlubick) clean up these checks
 
 // Are we in GCC/Clang?
 #ifndef SK_CPU_SSE_LEVEL
@@ -104,6 +117,14 @@
         #define SK_CPU_SSE_LEVEL    SK_CPU_SSE_LEVEL_SSE3
     #elif defined(__SSE2__)
         #define SK_CPU_SSE_LEVEL    SK_CPU_SSE_LEVEL_SSE2
+    #endif
+#endif
+
+#ifndef SK_CPU_LSX_LEVEL
+    #if defined(__loongarch_asx)
+        #define SK_CPU_LSX_LEVEL    SK_CPU_LSX_LEVEL_LASX
+    #elif defined(__loongarch_sx)
+        #define SK_CPU_LSX_LEVEL    SK_CPU_LSX_LEVEL_LSX
     #endif
 #endif
 

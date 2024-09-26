@@ -9,7 +9,12 @@
 #define SkStrokeRec_DEFINED
 
 #include "include/core/SkPaint.h"
+#include "include/core/SkScalar.h"
+#include "include/core/SkTypes.h"
 #include "include/private/base/SkMacros.h"
+
+#include <cmath>
+#include <cstdint>
 
 class SkPath;
 
@@ -68,7 +73,7 @@ public:
     }
 
     void setResScale(SkScalar rs) {
-        SkASSERT(rs > 0 && SkScalarIsFinite(rs));
+        SkASSERT(rs > 0 && std::isfinite(rs));
         fResScale = rs;
     }
 

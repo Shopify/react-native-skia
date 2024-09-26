@@ -8,17 +8,19 @@
 #ifndef SkSVGStop_DEFINED
 #define SkSVGStop_DEFINED
 
+#include "include/core/SkRefCnt.h"
+#include "include/private/base/SkAPI.h"
 #include "modules/svg/include/SkSVGHiddenContainer.h"
+#include "modules/svg/include/SkSVGNode.h"
 #include "modules/svg/include/SkSVGTypes.h"
-
-class SkSVGLengthContext;
 
 class SK_API SkSVGStop : public SkSVGHiddenContainer {
 public:
+    static constexpr SkSVGTag tag = SkSVGTag::kStop;
+
     static sk_sp<SkSVGStop> Make() {
         return sk_sp<SkSVGStop>(new SkSVGStop());
     }
-
 
     SVG_ATTR(Offset, SkSVGLength, SkSVGLength(0, SkSVGLength::Unit::kPercentage))
 

@@ -10,6 +10,7 @@ const copyModule = (module: string) => [
   ...copyModule("svg"),
   ...copyModule("skresources"),
   ...copyModule("skparagraph"),
+  ...copyModule("skshaper"),
   "cp -a ../../externals/skia/modules/skcms/. ./cpp/skia/modules/skcms",
   "mkdir -p ./cpp/skia/src/",
   "mkdir -p ./cpp/skia/src/core/",
@@ -24,14 +25,13 @@ const copyModule = (module: string) => [
   "cp -a ../../externals/skia/src/core/SkLRUCache.h ./cpp/skia/src/core/.",
 
   "mkdir -p ./cpp/skia/src/base",
+  "cp -a ../../externals/skia/src/base/SkTLazy.h ./cpp/skia/src/base/.",
+  "cp -a ../../externals/skia/src/base/SkMathPriv.h ./cpp/skia/src/base/.",
   "cp -a ../../externals/skia/src/base/SkTInternalLList.h ./cpp/skia/src/base/.",
   "cp -a ../../externals/skia/src/base/SkUTF.h ./cpp/skia/src/base/.",
 
   "mkdir -p ./cpp/skia/modules/skunicode/include/",
   "cp -a ../../externals/skia/modules/skunicode/include/SkUnicode.h ./cpp/skia/modules/skunicode/include/.",
-
-  // eslint-disable-next-line max-len
-  "rm ./cpp/skia/include/gpu/GrBackendDrawableInfo.h", // Remove since there are now (Skia M123) two headers with the same name
 ].map((cmd) => {
   console.log(cmd);
   executeCmdSync(cmd);

@@ -11,6 +11,8 @@
 #include "include/private/base/SkAPI.h"
 #include "include/private/base/SkMath.h"
 
+#include <optional>
+
 namespace skgpu { class ShaderErrorHandler; }
 
 namespace skgpu::graphite {
@@ -71,10 +73,15 @@ struct SK_API ContextOptions {
 #endif
 
     /**
-     * Can the glyph atlas use multiple textures. If allowed, the each texture's size is bound by
-     * fGlypheCacheTextureMaximumBytes.
+     * The maximum size of textures used for Skia's PathAtlas caches.
      */
-    bool fAllowMultipleGlyphCacheTextures = true;
+    int fMaxPathAtlasTextureSize = 8192;  // oversized, PathAtlas will likely be smaller
+
+    /**
+     * Can the glyph and path atlases use multiple textures. If allowed, each texture's size is
+     * bound by fGlyphCacheTextureMaximumBytes and fMaxPathAtlasTextureSize, respectively.
+     */
+    bool fAllowMultipleAtlasTextures = true;
     bool fSupportBilerpFromGlyphAtlas = false;
 
     /**
@@ -90,6 +97,26 @@ struct SK_API ContextOptions {
      * What is the budget for GPU resources allocated and held by the Context.
      */
     size_t fGpuBudgetInBytes = kDefaultContextBudget;
+
+    /**
+     * Whether labels will be set on backend resources.
+     */
+#if defined(SK_DEBUG)
+    bool fSetBackendLabels = true;
+#else
+    bool fSetBackendLabels = false;
+#endif
+
+    /**
+     * If Skia is creating a default VMA allocator for the Vulkan backend this value will be used
+     * for the preferredLargeHeapBlockSize. If the value is not set, then Skia will use an
+     * inernally defined default size.
+     *
+     * However, it is highly discouraged to have Skia make a default allocator (and support for
+     * doing so will be removed soon,  b/321962001). Instead clients should create their own
+     * allocator to pass into Skia where they can fine tune this value themeselves.
+     */
+    std::optional<uint64_t> fVulkanVMALargeHeapBlockSize;
 
     /**
      * Private options that are only meant for testing within Skia's tools.

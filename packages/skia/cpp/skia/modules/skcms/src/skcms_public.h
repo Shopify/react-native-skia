@@ -258,16 +258,44 @@ SKCMS_API bool skcms_ApproximateCurve(const skcms_Curve* curve,
 SKCMS_API bool skcms_GetCHAD(const skcms_ICCProfile*, skcms_Matrix3x3*);
 SKCMS_API bool skcms_GetWTPT(const skcms_ICCProfile*, float xyz[3]);
 
+// Returns the number of channels of input data that are expected on the "A" side of the profile.
+// This is useful for image codecs, where the image data and the accompanying profile might have
+// conflicting data shapes. In some cases, the result is unclear or invalid. In that case, the
+// function will return a negative value to signal an error.
+SKCMS_API int skcms_GetInputChannelCount(const skcms_ICCProfile*);
+
 // These are common ICC signature values
 enum {
-    // data_color_space
+    // common data_color_space values
     skcms_Signature_CMYK = 0x434D594B,
     skcms_Signature_Gray = 0x47524159,
     skcms_Signature_RGB  = 0x52474220,
 
-    // pcs
+    // pcs (or data_color_space)
     skcms_Signature_Lab  = 0x4C616220,
     skcms_Signature_XYZ  = 0x58595A20,
+
+    // other, less common data_color_space values
+    skcms_Signature_CIELUV = 0x4C757620,
+    skcms_Signature_YCbCr  = 0x59436272,
+    skcms_Signature_CIEYxy = 0x59787920,
+    skcms_Signature_HSV    = 0x48535620,
+    skcms_Signature_HLS    = 0x484C5320,
+    skcms_Signature_CMY    = 0x434D5920,
+    skcms_Signature_2CLR   = 0x32434C52,
+    skcms_Signature_3CLR   = 0x33434C52,
+    skcms_Signature_4CLR   = 0x34434C52,
+    skcms_Signature_5CLR   = 0x35434C52,
+    skcms_Signature_6CLR   = 0x36434C52,
+    skcms_Signature_7CLR   = 0x37434C52,
+    skcms_Signature_8CLR   = 0x38434C52,
+    skcms_Signature_9CLR   = 0x39434C52,
+    skcms_Signature_10CLR  = 0x41434C52,
+    skcms_Signature_11CLR  = 0x42434C52,
+    skcms_Signature_12CLR  = 0x43434C52,
+    skcms_Signature_13CLR  = 0x44434C52,
+    skcms_Signature_14CLR  = 0x45434C52,
+    skcms_Signature_15CLR  = 0x46434C52,
 };
 
 typedef enum skcms_PixelFormat {
@@ -275,6 +303,8 @@ typedef enum skcms_PixelFormat {
     skcms_PixelFormat_A_8_,
     skcms_PixelFormat_G_8,
     skcms_PixelFormat_G_8_,
+    skcms_PixelFormat_GA_88,  // Grayscale with alpha.
+    skcms_PixelFormat_GA_88_,
 
     skcms_PixelFormat_RGB_565,
     skcms_PixelFormat_BGR_565,
@@ -286,39 +316,41 @@ typedef enum skcms_PixelFormat {
     skcms_PixelFormat_BGR_888,
     skcms_PixelFormat_RGBA_8888,
     skcms_PixelFormat_BGRA_8888,
-    skcms_PixelFormat_RGBA_8888_sRGB,   // Automatic sRGB encoding / decoding.
-    skcms_PixelFormat_BGRA_8888_sRGB,   // (Generally used with linear transfer functions.)
+    skcms_PixelFormat_RGBA_8888_sRGB,  // Automatic sRGB encoding / decoding.
+    skcms_PixelFormat_BGRA_8888_sRGB,  // (Generally used with linear transfer functions.)
 
     skcms_PixelFormat_RGBA_1010102,
     skcms_PixelFormat_BGRA_1010102,
 
-    skcms_PixelFormat_RGB_161616LE,     // Little-endian.  Pointers must be 16-bit aligned.
+    skcms_PixelFormat_RGB_161616LE,  // Little-endian.  Pointers must be 16-bit aligned.
     skcms_PixelFormat_BGR_161616LE,
     skcms_PixelFormat_RGBA_16161616LE,
     skcms_PixelFormat_BGRA_16161616LE,
 
-    skcms_PixelFormat_RGB_161616BE,     // Big-endian.  Pointers must be 16-bit aligned.
+    skcms_PixelFormat_RGB_161616BE,  // Big-endian.  Pointers must be 16-bit aligned.
     skcms_PixelFormat_BGR_161616BE,
     skcms_PixelFormat_RGBA_16161616BE,
     skcms_PixelFormat_BGRA_16161616BE,
 
-    skcms_PixelFormat_RGB_hhh_Norm,   // 1-5-10 half-precision float in [0,1]
-    skcms_PixelFormat_BGR_hhh_Norm,   // Pointers must be 16-bit aligned.
+    skcms_PixelFormat_RGB_hhh_Norm,  // 1-5-10 half-precision float in [0,1]
+    skcms_PixelFormat_BGR_hhh_Norm,  // Pointers must be 16-bit aligned.
     skcms_PixelFormat_RGBA_hhhh_Norm,
     skcms_PixelFormat_BGRA_hhhh_Norm,
 
-    skcms_PixelFormat_RGB_hhh,        // 1-5-10 half-precision float.
-    skcms_PixelFormat_BGR_hhh,        // Pointers must be 16-bit aligned.
+    skcms_PixelFormat_RGB_hhh,  // 1-5-10 half-precision float.
+    skcms_PixelFormat_BGR_hhh,  // Pointers must be 16-bit aligned.
     skcms_PixelFormat_RGBA_hhhh,
     skcms_PixelFormat_BGRA_hhhh,
 
-    skcms_PixelFormat_RGB_fff,        // 1-8-23 single-precision float (the normal kind).
-    skcms_PixelFormat_BGR_fff,        // Pointers must be 32-bit aligned.
+    skcms_PixelFormat_RGB_fff,  // 1-8-23 single-precision float (the normal kind).
+    skcms_PixelFormat_BGR_fff,  // Pointers must be 32-bit aligned.
     skcms_PixelFormat_RGBA_ffff,
     skcms_PixelFormat_BGRA_ffff,
 
-    skcms_PixelFormat_RGB_101010x_XR,  // Note: This is located here to signal no clamping.
-    skcms_PixelFormat_BGR_101010x_XR,  // Compatible with MTLPixelFormatBGR10_XR.
+    skcms_PixelFormat_RGB_101010x_XR,    // Note: This is located here to signal no clamping.
+    skcms_PixelFormat_BGR_101010x_XR,    // Compatible with MTLPixelFormatBGR10_XR.
+    skcms_PixelFormat_RGBA_10101010_XR,  // Note: This is located here to signal no clamping.
+    skcms_PixelFormat_BGRA_10101010_XR,  // Compatible with MTLPixelFormatBGRA10_XR.
 } skcms_PixelFormat;
 
 // We always store any alpha channel linearly.  In the chart below, tf-1() is the inverse

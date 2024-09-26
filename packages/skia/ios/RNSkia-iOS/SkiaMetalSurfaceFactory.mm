@@ -15,6 +15,9 @@
 #import <include/gpu/ganesh/SkImageGanesh.h>
 #import <include/gpu/ganesh/SkSurfaceGanesh.h>
 #import <include/gpu/ganesh/mtl/SkSurfaceMetal.h>
+#import <include/gpu/ganesh/mtl/GrMtlDirectContext.h>
+#import <include/gpu/ganesh/mtl/GrMtlBackendContext.h>
+#import <include/gpu/ganesh/mtl/GrMtlBackendSurface.h>
 
 #pragma clang diagnostic pop
 
@@ -46,9 +49,14 @@ bool SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
   if (skiaMetalContext->skContext == nullptr) {
     skiaMetalContext->commandQueue =
         id<MTLCommandQueue>(CFRetain((GrMTLHandle)[device newCommandQueue]));
-    skiaMetalContext->skContext = GrDirectContext::MakeMetal(
-        (__bridge void *)device,
-        (__bridge void *)skiaMetalContext->commandQueue);
+   
+  GrMtlBackendContext backendContext = {};
+  backendContext.fDevice.reset((__bridge void*)device);
+  backendContext.fQueue.reset((__bridge void*)skiaMetalContext->commandQueue);
+  GrContextOptions grContextOptions;  // set different options here.
+
+   // Create the Skia Direct Context
+   skiaMetalContext->skContext = GrDirectContexts::MakeMetal(backendContext);
     if (skiaMetalContext->skContext == nullptr) {
       RNSkia::RNSkLogger::logToConsole("Couldn't create a Skia Metal Context");
       return false;
@@ -68,7 +76,7 @@ SkiaMetalSurfaceFactory::makeWindowedSurface(id<MTLTexture> texture, int width,
   GrMtlTextureInfo fbInfo;
   fbInfo.fTexture.retain((__bridge void *)texture);
 
-  GrBackendRenderTarget backendRT(width, height, fbInfo);
+  GrBackendRenderTarget backendRT = GrBackendRenderTargets::MakeMtl(width, height,fbInfo);
 
   auto skSurface = SkSurfaces::WrapBackendRenderTarget(
       ThreadContextHolder::ThreadSkiaMetalContext.skContext.get(), backendRT,
@@ -95,7 +103,7 @@ sk_sp<SkSurface> SkiaMetalSurfaceFactory::makeOffscreenSurface(int width,
   // Create a GrBackendTexture from the Metal texture
   GrMtlTextureInfo info;
   info.fTexture.retain((__bridge void *)ctx->texture);
-  GrBackendTexture backendTexture(width, height, skgpu::Mipmapped::kNo, info);
+  GrBackendTexture backendTexture = GrBackendTextures::MakeMtl(width, height, skgpu::Mipmapped::kNo, info);
 
   // Create a SkSurface from the GrBackendTexture
   auto surface = SkSurfaces::WrapBackendTexture(

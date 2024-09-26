@@ -8,9 +8,19 @@
 #ifndef SkSVGEllipse_DEFINED
 #define SkSVGEllipse_DEFINED
 
+#include "include/core/SkPath.h"
+#include "include/core/SkRefCnt.h"
+#include "include/private/base/SkAPI.h"
+#include "modules/svg/include/SkSVGNode.h"
 #include "modules/svg/include/SkSVGShape.h"
 #include "modules/svg/include/SkSVGTypes.h"
+#include "src/base/SkTLazy.h"
 
+class SkCanvas;
+class SkPaint;
+class SkSVGLengthContext;
+class SkSVGRenderContext;
+enum class SkPathFillType;
 struct SkRect;
 
 class SK_API SkSVGEllipse final : public SkSVGShape {
@@ -19,8 +29,9 @@ public:
 
     SVG_ATTR(Cx, SkSVGLength, SkSVGLength(0))
     SVG_ATTR(Cy, SkSVGLength, SkSVGLength(0))
-    SVG_ATTR(Rx, SkSVGLength, SkSVGLength(0))
-    SVG_ATTR(Ry, SkSVGLength, SkSVGLength(0))
+
+    SVG_OPTIONAL_ATTR(Rx, SkSVGLength)
+    SVG_OPTIONAL_ATTR(Ry, SkSVGLength)
 
 protected:
     bool parseAndSetAttribute(const char*, const char*) override;

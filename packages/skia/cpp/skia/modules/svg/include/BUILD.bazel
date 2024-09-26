@@ -1,8 +1,10 @@
-load("//bazel:skia_rules.bzl", "exports_files_legacy", "skia_filegroup")
+load("//bazel:skia_rules.bzl", "skia_filegroup")
+
+package(
+    default_applicable_licenses = ["//:license"],
+)
 
 licenses(["notice"])
-
-exports_files_legacy()
 
 # This group is exported as //modules/svg/svg.gni:skia_svg_public
 skia_filegroup(
@@ -19,6 +21,7 @@ skia_filegroup(
         "SkSVGFe.h",
         "SkSVGFeBlend.h",
         "SkSVGFeColorMatrix.h",
+        "SkSVGFeComponentTransfer.h",
         "SkSVGFeComposite.h",
         "SkSVGFeDisplacementMap.h",
         "SkSVGFeFlood.h",
@@ -26,6 +29,7 @@ skia_filegroup(
         "SkSVGFeImage.h",
         "SkSVGFeLightSource.h",
         "SkSVGFeLighting.h",
+        "SkSVGFeMerge.h",
         "SkSVGFeMorphology.h",
         "SkSVGFeOffset.h",
         "SkSVGFeTurbulence.h",
@@ -56,4 +60,5 @@ skia_filegroup(
         "SkSVGUse.h",
         "SkSVGValue.h",
     ],
+    visibility = ["//modules/svg:__pkg__"],
 )

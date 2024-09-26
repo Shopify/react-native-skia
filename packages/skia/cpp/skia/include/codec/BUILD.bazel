@@ -1,32 +1,10 @@
-load("//bazel:skia_rules.bzl", "exports_files_legacy", "skia_filegroup")
+load("//bazel:skia_rules.bzl", "skia_filegroup")
+
+package(
+    default_applicable_licenses = ["//:license"],
+)
 
 licenses(["notice"])
-
-exports_files_legacy()
-
-skia_filegroup(
-    name = "public_hdrs",
-    srcs = [
-        "SkAndroidCodec.h",
-        "SkAvifDecoder.h",
-        "SkBmpDecoder.h",
-        "SkCodec.h",
-        "SkCodecAnimation.h",
-        "SkEncodedImageFormat.h",
-        "SkEncodedOrigin.h",
-        "SkGifDecoder.h",
-        "SkIcoDecoder.h",
-        "SkJpegDecoder.h",
-        "SkJpegxlDecoder.h",
-        "SkPixmapUtils.h",
-        "SkPngChunkReader.h",
-        "SkPngDecoder.h",
-        "SkRawDecoder.h",
-        "SkWbmpDecoder.h",
-        "SkWebpDecoder.h",
-    ],
-    visibility = ["//include:__pkg__"],
-)
 
 skia_filegroup(
     name = "core_hdrs",
@@ -43,6 +21,14 @@ skia_filegroup(
         "SkCodecAnimation.h",
         "SkEncodedImageFormat.h",
         "SkPixmapUtils.h",
+    ],
+    visibility = ["//src/codec:__pkg__"],
+)
+
+skia_filegroup(
+    name = "android_public_hdrs",
+    srcs = [
+        "SkAndroidCodec.h",
     ],
     visibility = ["//src/codec:__pkg__"],
 )

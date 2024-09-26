@@ -138,8 +138,8 @@ public:
 
 //SkStreamMemory
     /** Returns the starting address for the data. If this cannot be done, returns NULL. */
-    //TODO: replace with virtual const SkData* getData()
     virtual const void* getMemoryBase() { return nullptr; }
+    virtual sk_sp<SkData> getData() const { return nullptr; }
 
 private:
     virtual SkStream* onDuplicate() const { return nullptr; }
@@ -392,10 +392,9 @@ public:
     */
     void setMemoryOwned(const void* data, size_t length);
 
-    sk_sp<SkData> asData() const { return fData; }
+    sk_sp<SkData> getData() const override { return fData; }
     void setData(sk_sp<SkData> data);
 
-    void skipToAlign4();
     const void* getAtPos();
 
     size_t read(void* buffer, size_t size) override;

@@ -8,12 +8,19 @@
 #ifndef SkSVGFe_DEFINED
 #define SkSVGFe_DEFINED
 
-#include <vector>
-
+#include "include/core/SkRect.h"
+#include "include/core/SkRefCnt.h"
+#include "include/private/base/SkAPI.h"
 #include "modules/svg/include/SkSVGHiddenContainer.h"
+#include "modules/svg/include/SkSVGNode.h"
+#include "modules/svg/include/SkSVGTypes.h"
+#include "src/base/SkTLazy.h"
+
+#include <vector>
 
 class SkImageFilter;
 class SkSVGFilterContext;
+class SkSVGRenderContext;
 
 class SK_API SkSVGFe : public SkSVGHiddenContainer {
 public:
@@ -21,12 +28,14 @@ public:
         switch (node->tag()) {
             case SkSVGTag::kFeBlend:
             case SkSVGTag::kFeColorMatrix:
+            case SkSVGTag::kFeComponentTransfer:
             case SkSVGTag::kFeComposite:
             case SkSVGTag::kFeDiffuseLighting:
             case SkSVGTag::kFeDisplacementMap:
             case SkSVGTag::kFeFlood:
             case SkSVGTag::kFeGaussianBlur:
             case SkSVGTag::kFeImage:
+            case SkSVGTag::kFeMerge:
             case SkSVGTag::kFeMorphology:
             case SkSVGTag::kFeOffset:
             case SkSVGTag::kFeSpecularLighting:

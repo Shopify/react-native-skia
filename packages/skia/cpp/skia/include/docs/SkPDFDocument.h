@@ -4,22 +4,25 @@
 #define SkPDFDocument_DEFINED
 
 #include "include/core/SkDocument.h"
-
-#include <vector>
-
-#include "include/core/SkColor.h"
 #include "include/core/SkMilestone.h"
+#include "include/core/SkRefCnt.h"
 #include "include/core/SkScalar.h"
 #include "include/core/SkString.h"
+#include "include/private/base/SkAPI.h"
 #include "include/private/base/SkNoncopyable.h"
-#include "src/base/SkTime.h"
 
-#define SKPDF_STRING(X) SKPDF_STRING_IMPL(X)
-#define SKPDF_STRING_IMPL(X) #X
+#include <cstdint>
+#include <memory>
+#include <vector>
 
+class SkCanvas;
 class SkExecutor;
 class SkPDFArray;
 class SkPDFTagTree;
+class SkWStream;
+
+#define SKPDF_STRING(X) SKPDF_STRING_IMPL(X)
+#define SKPDF_STRING_IMPL(X) #X
 
 namespace SkPDF {
 
@@ -179,15 +182,9 @@ struct Metadata {
         HighButSlow = 9,
     } fCompressionLevel = CompressionLevel::Default;
 
-    /** Preferred Subsetter. Only respected if both are compiled in.
-
-        The Sfntly subsetter is deprecated.
-
-        Experimental.
-    */
+    /** Preferred Subsetter. */
     enum Subsetter {
         kHarfbuzz_Subsetter,
-        kSfntly_Subsetter,
     } fSubsetter = kHarfbuzz_Subsetter;
 };
 

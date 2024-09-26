@@ -8,8 +8,15 @@
 #ifndef SkSVGContainer_DEFINED
 #define SkSVGContainer_DEFINED
 
+#include "include/core/SkPath.h"
+#include "include/core/SkRect.h"
+#include "include/core/SkRefCnt.h"
+#include "include/private/base/SkAPI.h"
 #include "include/private/base/SkTArray.h"
+#include "modules/svg/include/SkSVGNode.h"
 #include "modules/svg/include/SkSVGTransformableNode.h"
+
+class SkSVGRenderContext;
 
 class SK_API SkSVGContainer : public SkSVGTransformableNode {
 public:
@@ -26,7 +33,16 @@ protected:
 
     bool hasChildren() const final;
 
-    // TODO: add some sort of child iterator, and hide the container.
+    template <typename NodeType, typename Func>
+    void forEachChild(Func func) const {
+        for (const auto& child : fChildren) {
+            if (child->tag() == NodeType::tag) {
+                func(static_cast<const NodeType*>(child.get()));
+            }
+        }
+    }
+
+    // TODO: convert remaining direct users to iterators, and make the container private.
     skia_private::STArray<1, sk_sp<SkSVGNode>, true> fChildren;
 
 private:

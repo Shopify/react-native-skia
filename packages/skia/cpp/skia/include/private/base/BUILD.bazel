@@ -1,8 +1,10 @@
-load("//bazel:skia_rules.bzl", "exports_files_legacy", "generate_cpp_files_for_header_list", "skia_filegroup")
+load("//bazel:skia_rules.bzl", "generate_cpp_files_for_headers", "skia_filegroup")
+
+package(
+    default_applicable_licenses = ["//:license"],
+)
 
 licenses(["notice"])
-
-exports_files_legacy()
 
 # In own skia_filegroup for mapping to //gn/gpu.gni:skia_shared_gpu_sources.
 SHARED_GPU_HEADERS = ["SingleOwner.h"]
@@ -15,6 +17,7 @@ skia_filegroup(
 # Headers with no corresponding .cpp files
 IWYU_HDRS = [
     "SkAPI.h",
+    "SkASAN.h",
     "SkAlign.h",
     "SkAlignedStorage.h",
     "SkAnySubclass.h",
@@ -24,7 +27,6 @@ IWYU_HDRS = [
     "SkDebug.h",
     "SkFeatures.h",
     "SkFixed.h",
-    "SkFloatBits.h",
     "SkLoadUserConfig.h",
     "SkMacros.h",
     "SkMath.h",
@@ -44,25 +46,6 @@ IWYU_HDRS = [
     "SkTypeTraits.h",
 ]
 
-generate_cpp_files_for_header_list(
-    name = "generated_base_header_cpps1",
-    headers = IWYU_HDRS,
-)
-
-generate_cpp_files_for_header_list(
-    name = "generated_base_header_cpps2",
-    headers = SHARED_GPU_HEADERS,
-)
-
-filegroup(
-    name = "generated_base_header_cpps",
-    srcs = [
-        ":generated_base_header_cpps1",
-        ":generated_base_header_cpps2",
-    ],
-    visibility = ["//src/base:__pkg__"],
-)
-
 skia_filegroup(
     name = "private_hdrs",
     srcs = IWYU_HDRS + [
@@ -76,8 +59,12 @@ skia_filegroup(
         ":shared_gpu_private_hdrs",
     ],
     visibility = [
-        "//include/private:__pkg__",
         "//src/base:__pkg__",
         "//src/opts:__pkg__",
     ],
+)
+
+generate_cpp_files_for_headers(
+    name = "headers_to_compile",
+    headers = IWYU_HDRS + SHARED_GPU_HEADERS,
 )

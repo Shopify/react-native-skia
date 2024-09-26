@@ -29,6 +29,7 @@ enum SkColorType : int {
     kRGB_101010x_SkColorType,  //!< pixel with 10 bits each for red, green, blue; in 32-bit word
     kBGR_101010x_SkColorType,  //!< pixel with 10 bits each for blue, green, red; in 32-bit word
     kBGR_101010x_XR_SkColorType, //!< pixel with 10 bits each for blue, green, red; in 32-bit word, extended range
+    kBGRA_10101010_XR_SkColorType, //!< pixel with 10 bits each for blue, green, red, alpha; in 64-bit word, extended range
     kRGBA_10x6_SkColorType,    //!< pixel with 10 used bits (most significant) followed by 6 unused
                                //   bits for red, green, blue, alpha; in 64-bit word
     kGray_8_SkColorType,       //!< pixel with grayscale level in 8-bit byte
@@ -36,6 +37,7 @@ enum SkColorType : int {
                                //   in 64-bit word
     kRGBA_F16_SkColorType,     //!< pixel with half floats for red, green, blue, alpha;
                                //   in 64-bit word
+    kRGB_F16F16F16x_SkColorType,     //!< pixel with half floats for red, green, blue; in 64-bit word
     kRGBA_F32_SkColorType,     //!< pixel using C float for red, green, blue, alpha; in 128-bit word
 
     // The following 6 colortypes are just for reading from - not for rendering to

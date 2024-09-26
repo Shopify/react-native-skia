@@ -10,6 +10,8 @@
 
 #include "include/core/SkColor.h"
 #include "include/core/SkColorSpace.h"
+#include "include/core/SkRefCnt.h"
+class SkData;
 
 /**
  *  Gainmap rendering parameters. Suppose our display has HDR to SDR ratio of H and we wish to
@@ -73,10 +75,54 @@ struct SkGainmapInfo {
     BaseImageType fBaseImageType = BaseImageType::kSDR;
 
     /**
+     *  The type of the gainmap image. If the type is kApple, then the gainmap image was originally
+     *  encoded according to the specification at [0], and can be converted to the kDefault type by
+     *  applying the transformation described at [1].
+     *  [0] https://developer.apple.com/documentation/appkit/images_and_pdf/
+     *      applying_apple_hdr_effect_to_your_photos
+     *  [1] https://docs.google.com/document/d/1iUpYAThVV_FuDdeiO3t0vnlfoA1ryq0WfGS9FuydwKc
+     */
+    enum class Type {
+        kDefault,
+        kApple,
+    };
+    Type fType = Type::kDefault;
+
+    /**
      * If specified, color space to apply the gainmap in, otherwise the base image's color space
      * is used. Only the color primaries are used, the transfer function is irrelevant.
      */
     sk_sp<SkColorSpace> fGainmapMathColorSpace = nullptr;
+
+    /**
+     * Return true if this can be encoded as an UltraHDR v1 image.
+     */
+    bool isUltraHDRv1Compatible() const;
+
+    /**
+     * If |data| contains an ISO 21496-1 version that is supported, return true. Otherwise return
+     * false.
+     */
+    static bool ParseVersion(const SkData* data);
+
+    /**
+     * If |data| constains ISO 21496-1 metadata then parse that metadata then use it to populate
+     * |info| and return true, otherwise return false. If |data| indicates that that the base image
+     * color space primaries should be used for gainmap application then set
+     * |fGainmapMathColorSpace| to nullptr, otherwise set |fGainmapMathColorSpace| to sRGB (the
+     * default, to be overwritten by the image decoder).
+     */
+    static bool Parse(const SkData* data, SkGainmapInfo& info);
+
+    /**
+     * Serialize an ISO 21496-1 version 0 blob containing only the version structure.
+     */
+    static sk_sp<SkData> SerializeVersion();
+
+    /**
+     * Serialize an ISO 21496-1 version 0 blob containing this' gainmap parameters.
+     */
+    sk_sp<SkData> serialize() const;
 
     inline bool operator==(const SkGainmapInfo& other) const {
         return fGainmapRatioMin == other.fGainmapRatioMin &&
@@ -84,17 +130,11 @@ struct SkGainmapInfo {
                fEpsilonSdr == other.fEpsilonSdr && fEpsilonHdr == other.fEpsilonHdr &&
                fDisplayRatioSdr == other.fDisplayRatioSdr &&
                fDisplayRatioHdr == other.fDisplayRatioHdr &&
-               fBaseImageType == other.fBaseImageType &&
+               fBaseImageType == other.fBaseImageType && fType == other.fType &&
                SkColorSpace::Equals(fGainmapMathColorSpace.get(),
                                     other.fGainmapMathColorSpace.get());
     }
     inline bool operator!=(const SkGainmapInfo& other) const { return !(*this == other); }
-
-    // TODO(ccameron): Remove these parameters once we are certain they are not used in Android.
-    enum class Type {
-        kDefault,
-    };
-    Type fType = Type::kDefault;
 };
 
 #endif
