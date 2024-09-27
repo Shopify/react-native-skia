@@ -6,15 +6,16 @@ const copyModule = (module: string) => [
 ];
 
 [
-  "yarn rimraf ./cpp/skia/modules/",
-  "yarn rimraf ./cpp/skia/include/",
-  "yarn rimraf ./cpp/skia/src/",
+  //"yarn rimraf ./cpp/skia/",
+  "mkdir -p ./cpp/skia/",
+  "mkdir -p ./cpp/skia/include/",
+  "mkdir -p ./cpp/skia/modules/",
+  "mkdir -p ./cpp/skia/src",
   "cp -a ../../externals/skia/include/. ./cpp/skia/include",
   ...copyModule("svg"),
   ...copyModule("skresources"),
   ...copyModule("skparagraph"),
   ...copyModule("skshaper"),
-  "cp -a ../../externals/skia/include/. ./cpp/skia/include",
   "cp -a ../../externals/skia/modules/skcms/. ./cpp/skia/modules/skcms",
   "mkdir -p ./cpp/skia/src/",
   "mkdir -p ./cpp/skia/src/core/",
