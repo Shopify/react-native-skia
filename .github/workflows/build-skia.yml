@@ -28,6 +28,7 @@ jobs:
         working-directory: ./packages/skia
         env:
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
+          GIT_SYNC_DEPS_SKIP_EMSDK: 'true'
         run: yarn build-skia
 
       - name: Upload artifacts - Android arm
