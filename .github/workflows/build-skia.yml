@@ -21,12 +21,14 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
         with:
+          download_skia: 'false'
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Skia
         working-directory: ./packages/skia
         env:
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
+          GIT_SYNC_DEPS_SKIP_EMSDK: 'true'
         run: yarn build-skia
 
       - name: Upload artifacts - Android arm
@@ -41,7 +43,8 @@ jobs:
             ./externals/skia/out/android/arm/libskottie.a
             ./externals/skia/out/android/arm/libsksg.a
             ./externals/skia/out/android/arm/libskparagraph.a
-            ./externals/skia/out/android/arm/libskunicode.a
+            ./externals/skia/out/android/arm/libskunicode_core.a
+            ./externals/skia/out/android/arm/libskunicode_icu.a
 
       - name: Upload artifacts - Android arm64
         if: github.ref == 'refs/heads/main'
@@ -55,7 +58,8 @@ jobs:
             ./externals/skia/out/android/arm64/libskottie.a
             ./externals/skia/out/android/arm64/libsksg.a
             ./externals/skia/out/android/arm64/libskparagraph.a
-            ./externals/skia/out/android/arm64/libskunicode.a
+            ./externals/skia/out/android/arm64/libskunicode_core.a
+            ./externals/skia/out/android/arm64/libskunicode_icu.a
 
       - name: Upload artifacts - Android x86
         if: github.ref == 'refs/heads/main'
@@ -69,7 +73,8 @@ jobs:
             ./externals/skia/out/android/x86/libskottie.a
             ./externals/skia/out/android/x86/libsksg.a
             ./externals/skia/out/android/x86/libskparagraph.a
-            ./externals/skia/out/android/x86/libskunicode.a
+            ./externals/skia/out/android/x86/libskunicode_core.a
+            ./externals/skia/out/android/x86/libskunicode_icu.a
 
       - name: Upload artifacts - Android x64
         if: github.ref == 'refs/heads/main'
@@ -83,7 +88,8 @@ jobs:
             ./externals/skia/out/android/x64/libskottie.a
             ./externals/skia/out/android/x64/libsksg.a
             ./externals/skia/out/android/x64/libskparagraph.a
-            ./externals/skia/out/android/x64/libskunicode.a
+            ./externals/skia/out/android/x64/libskunicode_core.a
+            ./externals/skia/out/android/x64/libskunicode_icu.a
 
       - name: Upload artifacts - iOS xcframeworks
         if: github.ref == 'refs/heads/main'
