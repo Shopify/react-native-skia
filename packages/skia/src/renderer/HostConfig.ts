@@ -53,7 +53,11 @@ const appendNode = (parent: Node<unknown>, child: Node<unknown>) => {
   parent.addChild(child);
 };
 
-const removeNode = (parent: Node<unknown>, child: Node<unknown>, unmounted = false) => {
+const removeNode = (
+  parent: Node<unknown>,
+  child: Node<unknown>,
+  unmounted = false
+) => {
   // If the drawing is unmounted we don't want to update it.
   // We can just stop the reanimated mappers
   unbindReanimatedNode(child);
