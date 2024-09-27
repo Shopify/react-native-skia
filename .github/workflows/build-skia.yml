@@ -2,17 +2,12 @@ name: Build SKIA
 on: workflow_dispatch
 jobs:
   build:
-    runs-on: macos-latest-large
+    runs-on: macos-latest
     steps:
       - name: checkout
         uses: actions/checkout@v3
         with:
           submodules: recursive
-      
-      - name: List Contents of externals/skia
-        run: |
-          echo "Listing contents of externals/skia:"
-          ls -la externals/skia
 
       - name: Setup Android NDK
         id: setup-ndk
