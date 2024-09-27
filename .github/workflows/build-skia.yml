@@ -7,11 +7,12 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
         with:
-          submodules: false
-
-      - name: Initialize and Update Submodules
+          submodules: recursive
+      
+      - name: List Contents of externals/skia
         run: |
-          git submodule update --recursive --remote
+          echo "Listing contents of externals/skia:"
+          ls -la externals/skia
 
       - name: Setup Android NDK
         id: setup-ndk
