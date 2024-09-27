@@ -5,12 +5,22 @@ const copyModule = (module: string) => [
   `cp -a ../../externals/skia/modules/${module}/include/. ./cpp/skia/modules/${module}/include`,
 ];
 
+["yarn rimraf ./cpp/skia/"].map((cmd) => {
+  console.log(cmd);
+  executeCmdSync(cmd);
+});
+
 [
-  //"yarn rimraf ./cpp/skia/",
   "mkdir -p ./cpp/skia/",
   "mkdir -p ./cpp/skia/include/",
   "mkdir -p ./cpp/skia/modules/",
   "mkdir -p ./cpp/skia/src",
+].map((cmd) => {
+  console.log(cmd);
+  executeCmdSync(cmd);
+});
+
+[
   "cp -a ../../externals/skia/include/. ./cpp/skia/include",
   ...copyModule("svg"),
   ...copyModule("skresources"),
