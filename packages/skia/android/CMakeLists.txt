@@ -10,7 +10,8 @@ set (SKIA_LIB "skia")
 set (SKIA_SVG_LIB "svg")
 set (SKIA_SKSHAPER_LIB "skshaper")
 set (SKIA_SKPARAGRAPH_LIB "skparagraph")
-set (SKIA_SKUNICODE_LIB "skunicode")
+set (SKIA_SKUNICODE_CORE_LIB "skunicode_core")
+set (SKIA_SKUNICODE_ICU_LIB "skunicode_icu")
 
 # Clear some variables
 unset(LIBRN_DIR CACHE)
@@ -116,8 +117,11 @@ set_property(TARGET skshaper PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libsk
 add_library(skparagraph STATIC IMPORTED)
 set_property(TARGET skparagraph PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskparagraph.a")
 
-add_library(skunicode STATIC IMPORTED)
-set_property(TARGET skunicode PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskunicode.a")
+add_library(skunicode_core STATIC IMPORTED)
+set_property(TARGET skunicode_core PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskunicode_core.a")
+
+add_library(skunicode_icu STATIC IMPORTED)
+set_property(TARGET skunicode_icu PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskunicode_icu.a")
 
 
 find_library(
@@ -235,7 +239,8 @@ target_link_libraries(
         ${SKIA_SVG_LIB}
         ${SKIA_SKSHAPER_LIB}
         ${SKIA_SKPARAGRAPH_LIB}
-        ${SKIA_SKUNICODE_LIB}
+        ${SKIA_SKUNICODE_CORE_LIB}
+        ${SKIA_SKUNICODE_ICU_LIB}
         ${SKIA_LIB}
         -ljnigraphics
         -lGLESv2
