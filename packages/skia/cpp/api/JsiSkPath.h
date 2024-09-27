@@ -510,15 +510,15 @@ public:
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkPath>(getContext(), std::move(result)));
   }
-JSI_HOST_FUNCTION(toCmds) {
-  auto path = *getObject();
-  std::vector<jsi::Array> cmdList;
-  SkPoint pts[4];
-  SkPath::Iter iter(path, false);
-  SkPath::Verb verb;
+  JSI_HOST_FUNCTION(toCmds) {
+    auto path = *getObject();
+    std::vector<jsi::Array> cmdList;
+    SkPoint pts[4];
+    SkPath::Iter iter(path, false);
+    SkPath::Verb verb;
 
-  while ((verb = iter.next(pts)) != SkPath::kDone_Verb) {
-    switch (verb) {
+    while ((verb = iter.next(pts)) != SkPath::kDone_Verb) {
+      switch (verb) {
       case SkPath::kMove_Verb: {
         auto cmd = jsi::Array(runtime, 3);
         cmd.setValueAtIndex(runtime, 0, static_cast<double>(MOVE));
@@ -552,7 +552,8 @@ JSI_HOST_FUNCTION(toCmds) {
         cmd.setValueAtIndex(runtime, 2, static_cast<double>(pts[1].y()));
         cmd.setValueAtIndex(runtime, 3, static_cast<double>(pts[2].x()));
         cmd.setValueAtIndex(runtime, 4, static_cast<double>(pts[2].y()));
-        cmd.setValueAtIndex(runtime, 5, static_cast<double>(iter.conicWeight()));
+        cmd.setValueAtIndex(runtime, 5,
+                            static_cast<double>(iter.conicWeight()));
         cmdList.push_back(std::move(cmd));
         break;
       }
@@ -576,17 +577,17 @@ JSI_HOST_FUNCTION(toCmds) {
       }
       default:
         break;
+      }
     }
-  }
 
-  // Create the jsi::Array with the exact size
-  auto cmds = jsi::Array(runtime, cmdList.size());
-  for (size_t i = 0; i < cmdList.size(); ++i) {
-    cmds.setValueAtIndex(runtime, i, cmdList[i]);
-  }
+    // Create the jsi::Array with the exact size
+    auto cmds = jsi::Array(runtime, cmdList.size());
+    for (size_t i = 0; i < cmdList.size(); ++i) {
+      cmds.setValueAtIndex(runtime, i, cmdList[i]);
+    }
 
-  return cmds;
-}
+    return cmds;
+  }
 
   EXPORT_JSI_API_TYPENAME(JsiSkPath, Path)
 

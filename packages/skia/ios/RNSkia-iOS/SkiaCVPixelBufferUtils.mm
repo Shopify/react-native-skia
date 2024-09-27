@@ -55,8 +55,8 @@ GrBackendTexture TextureHolder::toGrBackendTexture() {
   GrMtlTextureInfo textureInfo;
   textureInfo.fTexture.retain((__bridge void *)mtlTexture);
   GrBackendTexture texture =
-	GrBackendTextures::MakeMtl((int)mtlTexture.width, (int)mtlTexture.height,
-                       skgpu::Mipmapped::kNo, textureInfo);
+      GrBackendTextures::MakeMtl((int)mtlTexture.width, (int)mtlTexture.height,
+                                 skgpu::Mipmapped::kNo, textureInfo);
   return texture;
 }
 
