@@ -27,9 +27,6 @@ const copyModule = (module: string) => [
   "cp -a ../../externals/skia/src/base/SkMathPriv.h ./cpp/skia/src/base/.",
   "cp -a ../../externals/skia/src/base/SkTInternalLList.h ./cpp/skia/src/base/.",
   "cp -a ../../externals/skia/src/base/SkUTF.h ./cpp/skia/src/base/.",
-
-  "mkdir -p ./cpp/skia/modules/skunicode/include/",
-  "cp -a ../../externals/skia/modules/skunicode/include/SkUnicode.h ./cpp/skia/modules/skunicode/include/.",
 ].map((cmd) => {
   console.log(cmd);
   executeCmdSync(cmd);
