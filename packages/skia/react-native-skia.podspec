@@ -35,7 +35,8 @@ Pod::Spec.new do |s|
     'libs/ios/libsvg.xcframework', 
     'libs/ios/libskshaper.xcframework',
     'libs/ios/libskparagraph.xcframework',
-    'libs/ios/libskunicode.xcframework',
+    'libs/ios/libskunicode_core.xcframework',
+    'libs/ios/libskunicode_libgrapheme.xcframework',
   ]
 
   # All iOS cpp/h files

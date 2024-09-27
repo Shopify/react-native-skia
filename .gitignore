@@ -50,8 +50,8 @@ local.properties
 .settings/
 
 # Externals
-libs
-package/cpp/skia/
+packages/skia/libs
+packages/skia/cpp/skia/
 
 # BUCK
 buck-out/

@@ -27,7 +27,6 @@
 #include "include/pathops/SkPathOps.h"
 #include "include/utils/SkParsePath.h"
 #include "include/utils/SkTextUtils.h"
-#include "src/core/SkPathPriv.h"
 
 #pragma clang diagnostic pop
 
@@ -510,51 +509,54 @@ public:
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkPath>(getContext(), std::move(result)));
   }
-
   JSI_HOST_FUNCTION(toCmds) {
     auto path = *getObject();
-    auto cmds = jsi::Array(runtime, path.countVerbs());
-    auto j = 0;
-    for (auto [verb, pts, w] : SkPathPriv::Iterate(path)) {
+    std::vector<jsi::Array> cmdList;
+    SkPoint pts[4];
+    SkPath::Iter iter(path, false);
+    SkPath::Verb verb;
+
+    while ((verb = iter.next(pts)) != SkPath::kDone_Verb) {
       switch (verb) {
-      case SkPathVerb::kMove: {
+      case SkPath::kMove_Verb: {
         auto cmd = jsi::Array(runtime, 3);
         cmd.setValueAtIndex(runtime, 0, static_cast<double>(MOVE));
         cmd.setValueAtIndex(runtime, 1, static_cast<double>(pts[0].x()));
         cmd.setValueAtIndex(runtime, 2, static_cast<double>(pts[0].y()));
-        cmds.setValueAtIndex(runtime, j, cmd);
+        cmdList.push_back(std::move(cmd));
         break;
       }
-      case SkPathVerb::kLine: {
+      case SkPath::kLine_Verb: {
         auto cmd = jsi::Array(runtime, 3);
         cmd.setValueAtIndex(runtime, 0, static_cast<double>(LINE));
         cmd.setValueAtIndex(runtime, 1, static_cast<double>(pts[1].x()));
         cmd.setValueAtIndex(runtime, 2, static_cast<double>(pts[1].y()));
-        cmds.setValueAtIndex(runtime, j, cmd);
+        cmdList.push_back(std::move(cmd));
         break;
       }
-      case SkPathVerb::kQuad: {
+      case SkPath::kQuad_Verb: {
         auto cmd = jsi::Array(runtime, 5);
         cmd.setValueAtIndex(runtime, 0, static_cast<double>(QUAD));
         cmd.setValueAtIndex(runtime, 1, static_cast<double>(pts[1].x()));
         cmd.setValueAtIndex(runtime, 2, static_cast<double>(pts[1].y()));
         cmd.setValueAtIndex(runtime, 3, static_cast<double>(pts[2].x()));
         cmd.setValueAtIndex(runtime, 4, static_cast<double>(pts[2].y()));
-        cmds.setValueAtIndex(runtime, j, cmd);
+        cmdList.push_back(std::move(cmd));
         break;
       }
-      case SkPathVerb::kConic: {
+      case SkPath::kConic_Verb: {
         auto cmd = jsi::Array(runtime, 6);
         cmd.setValueAtIndex(runtime, 0, static_cast<double>(CONIC));
         cmd.setValueAtIndex(runtime, 1, static_cast<double>(pts[1].x()));
         cmd.setValueAtIndex(runtime, 2, static_cast<double>(pts[1].y()));
         cmd.setValueAtIndex(runtime, 3, static_cast<double>(pts[2].x()));
         cmd.setValueAtIndex(runtime, 4, static_cast<double>(pts[2].y()));
-        cmd.setValueAtIndex(runtime, 5, static_cast<double>(*w));
-        cmds.setValueAtIndex(runtime, j, cmd);
+        cmd.setValueAtIndex(runtime, 5,
+                            static_cast<double>(iter.conicWeight()));
+        cmdList.push_back(std::move(cmd));
         break;
       }
-      case SkPathVerb::kCubic: {
+      case SkPath::kCubic_Verb: {
         auto cmd = jsi::Array(runtime, 7);
         cmd.setValueAtIndex(runtime, 0, static_cast<double>(CUBIC));
         cmd.setValueAtIndex(runtime, 1, static_cast<double>(pts[1].x()));
@@ -563,18 +565,26 @@ public:
         cmd.setValueAtIndex(runtime, 4, static_cast<double>(pts[2].y()));
         cmd.setValueAtIndex(runtime, 5, static_cast<double>(pts[3].x()));
         cmd.setValueAtIndex(runtime, 6, static_cast<double>(pts[3].y()));
-        cmds.setValueAtIndex(runtime, j, cmd);
+        cmdList.push_back(std::move(cmd));
         break;
       }
-      case SkPathVerb::kClose: {
+      case SkPath::kClose_Verb: {
         auto cmd = jsi::Array(runtime, 1);
         cmd.setValueAtIndex(runtime, 0, static_cast<double>(CLOSE));
-        cmds.setValueAtIndex(runtime, j, cmd);
+        cmdList.push_back(std::move(cmd));
         break;
       }
+      default:
+        break;
       }
-      j++;
     }
+
+    // Create the jsi::Array with the exact size
+    auto cmds = jsi::Array(runtime, cmdList.size());
+    for (size_t i = 0; i < cmdList.size(); ++i) {
+      cmds.setValueAtIndex(runtime, i, cmdList[i]);
+    }
+
     return cmds;
   }
 
