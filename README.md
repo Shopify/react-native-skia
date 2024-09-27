@@ -20,29 +20,14 @@ React Native Skia brings the Skia Graphics Library to React Native. Skia serves 
 
 To develop react-native-skia, you need to build the skia libraries on your computer.
 
-Make sure to check out the sub modules:
-
-`git submodule update --init --recursive`
-
-You also need to install some tools for the build scripts to work. Run `yarn` in the root of the project to install them.
-
-Make sure you have all the tools required for building the skia libraries (XCode, Ninja, CMake, Android NDK / build tools).
-
-On MacOS you can install Ninja via homebrew:
-
-```sh
-brew install ninja
-```
-
 If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
 `ANDROID_NDK=/Users/username/Library/Android/sdk/ndk/<version>` for instance.
-
 If the NDK is not installed, you can install it via Android Studio by going to the menu _File > Project Structure_.
-
 And then the _SDK Location_ section. It will show you the NDK path, or the option to Download it if you don't have it installed.
 
 ### Building
 
+- Checkout submodules `git submodule update --init --recursive`
 - Install dependencies `yarn`
 - Go to the package folder `cd packages/skia`
 - Build the Skia libraries with `yarn build-skia` (this can take a while)
