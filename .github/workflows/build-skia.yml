@@ -2,7 +2,7 @@ name: Build SKIA
 on: workflow_dispatch
 jobs:
   build:
-    runs-on: macos-latest-large
+    runs-on: macos-latest
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -41,7 +41,8 @@ jobs:
             ./externals/skia/out/android/arm/libskottie.a
             ./externals/skia/out/android/arm/libsksg.a
             ./externals/skia/out/android/arm/libskparagraph.a
-            ./externals/skia/out/android/arm/libskunicode.a
+            ./externals/skia/out/android/arm/libskunicode_core.a
+            ./externals/skia/out/android/arm/libskunicode_icu.a
 
       - name: Upload artifacts - Android arm64
         if: github.ref == 'refs/heads/main'
@@ -55,7 +56,8 @@ jobs:
             ./externals/skia/out/android/arm64/libskottie.a
             ./externals/skia/out/android/arm64/libsksg.a
             ./externals/skia/out/android/arm64/libskparagraph.a
-            ./externals/skia/out/android/arm64/libskunicode.a
+            ./externals/skia/out/android/arm64/libskunicode_core.a
+            ./externals/skia/out/android/arm64/libskunicode_icu.a
 
       - name: Upload artifacts - Android x86
         if: github.ref == 'refs/heads/main'
@@ -69,7 +71,8 @@ jobs:
             ./externals/skia/out/android/x86/libskottie.a
             ./externals/skia/out/android/x86/libsksg.a
             ./externals/skia/out/android/x86/libskparagraph.a
-            ./externals/skia/out/android/x86/libskunicode.a
+            ./externals/skia/out/android/x86/libskunicode_core.a
+            ./externals/skia/out/android/x86/libskunicode_icu.a
 
       - name: Upload artifacts - Android x64
         if: github.ref == 'refs/heads/main'
@@ -83,7 +86,8 @@ jobs:
             ./externals/skia/out/android/x64/libskottie.a
             ./externals/skia/out/android/x64/libsksg.a
             ./externals/skia/out/android/x64/libskparagraph.a
-            ./externals/skia/out/android/x64/libskunicode.a
+            ./externals/skia/out/android/x64/libskunicode_core.a
+            ./externals/skia/out/android/x64/libskunicode_icu.a
 
       - name: Upload artifacts - iOS xcframeworks
         if: github.ref == 'refs/heads/main'
