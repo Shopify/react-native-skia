@@ -511,13 +511,8 @@ public:
         runtime, std::make_shared<JsiSkPath>(getContext(), std::move(result)));
   }
 JSI_HOST_FUNCTION(toCmds) {
-  auto svgString = SkParsePath::ToSVGString(*getObject());
-  SkPath path;
-  SkParsePath::FromSVGString(svgString.c_str(), &path);
-
-  auto cmds = jsi::Array(runtime, path.countVerbs());
-  int j = 0;
-
+  auto path = *getObject();
+  std::vector<jsi::Array> cmdList;
   SkPoint pts[4];
   SkPath::Iter iter(path, false);
   SkPath::Verb verb;
@@ -529,7 +524,7 @@ JSI_HOST_FUNCTION(toCmds) {
         cmd.setValueAtIndex(runtime, 0, static_cast<double>(MOVE));
         cmd.setValueAtIndex(runtime, 1, static_cast<double>(pts[0].x()));
         cmd.setValueAtIndex(runtime, 2, static_cast<double>(pts[0].y()));
-        cmds.setValueAtIndex(runtime, j++, cmd);
+        cmdList.push_back(std::move(cmd));
         break;
       }
       case SkPath::kLine_Verb: {
@@ -537,7 +532,7 @@ JSI_HOST_FUNCTION(toCmds) {
         cmd.setValueAtIndex(runtime, 0, static_cast<double>(LINE));
         cmd.setValueAtIndex(runtime, 1, static_cast<double>(pts[1].x()));
         cmd.setValueAtIndex(runtime, 2, static_cast<double>(pts[1].y()));
-        cmds.setValueAtIndex(runtime, j++, cmd);
+        cmdList.push_back(std::move(cmd));
         break;
       }
       case SkPath::kQuad_Verb: {
@@ -547,7 +542,7 @@ JSI_HOST_FUNCTION(toCmds) {
         cmd.setValueAtIndex(runtime, 2, static_cast<double>(pts[1].y()));
         cmd.setValueAtIndex(runtime, 3, static_cast<double>(pts[2].x()));
         cmd.setValueAtIndex(runtime, 4, static_cast<double>(pts[2].y()));
-        cmds.setValueAtIndex(runtime, j++, cmd);
+        cmdList.push_back(std::move(cmd));
         break;
       }
       case SkPath::kConic_Verb: {
@@ -558,7 +553,7 @@ JSI_HOST_FUNCTION(toCmds) {
         cmd.setValueAtIndex(runtime, 3, static_cast<double>(pts[2].x()));
         cmd.setValueAtIndex(runtime, 4, static_cast<double>(pts[2].y()));
         cmd.setValueAtIndex(runtime, 5, static_cast<double>(iter.conicWeight()));
-        cmds.setValueAtIndex(runtime, j++, cmd);
+        cmdList.push_back(std::move(cmd));
         break;
       }
       case SkPath::kCubic_Verb: {
@@ -570,13 +565,13 @@ JSI_HOST_FUNCTION(toCmds) {
         cmd.setValueAtIndex(runtime, 4, static_cast<double>(pts[2].y()));
         cmd.setValueAtIndex(runtime, 5, static_cast<double>(pts[3].x()));
         cmd.setValueAtIndex(runtime, 6, static_cast<double>(pts[3].y()));
-        cmds.setValueAtIndex(runtime, j++, cmd);
+        cmdList.push_back(std::move(cmd));
         break;
       }
       case SkPath::kClose_Verb: {
         auto cmd = jsi::Array(runtime, 1);
         cmd.setValueAtIndex(runtime, 0, static_cast<double>(CLOSE));
-        cmds.setValueAtIndex(runtime, j++, cmd);
+        cmdList.push_back(std::move(cmd));
         break;
       }
       default:
@@ -584,9 +579,14 @@ JSI_HOST_FUNCTION(toCmds) {
     }
   }
 
+  // Create the jsi::Array with the exact size
+  auto cmds = jsi::Array(runtime, cmdList.size());
+  for (size_t i = 0; i < cmdList.size(); ++i) {
+    cmds.setValueAtIndex(runtime, i, cmdList[i]);
+  }
+
   return cmds;
 }
-
 
   EXPORT_JSI_API_TYPENAME(JsiSkPath, Path)
 
