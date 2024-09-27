@@ -69,7 +69,7 @@ describe("Paths", () => {
     const ref = Skia.Path.Make();
     ref.moveTo(0, 0).lineTo(1, 0).lineTo(1, 1);
     ref.close();
-    const cmds = ref.toCmds();
+    const cmds = Skia.Path.MakeFromSVGString(ref.toSVGString())!.toCmds();
     expect(result).toEqual(cmds);
   });
   it("toCmd should work properly", async () => {
