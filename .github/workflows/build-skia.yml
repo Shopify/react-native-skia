@@ -7,7 +7,11 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
         with:
-          submodules: recursive
+          submodules: false
+
+      - name: Initialize and Update Submodules
+        run: |
+          git submodule update --recursive --remote
 
       - name: Setup Android NDK
         id: setup-ndk

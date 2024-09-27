@@ -2,6 +2,9 @@ name: Setup
 description: Setup Node.js and install dependencies
 
 inputs:
+  github_token:
+    description: 'GitHub Token'
+    required: false
   download_skia:
     description: 'Download Skia Binary Artifacts'
     required: false
