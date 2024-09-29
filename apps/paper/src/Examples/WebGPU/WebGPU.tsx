@@ -1,13 +1,14 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import {  useFrameCallback } from "react-native-reanimated";
+import { useFrameCallback } from "react-native-reanimated";
 import { Canvas } from "react-native-wgpu";
+
 import { useLoop } from "../../components/Animations";
+
 import { drawBreatheDemo, useSkiaContext } from "./utils";
 
-
 export function WebGPU() {
-  const {ref, context} = useSkiaContext();
+  const { ref, context } = useSkiaContext();
 
   const progress = useLoop({ duration: 3000 });
 

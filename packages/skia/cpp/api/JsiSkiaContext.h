@@ -45,8 +45,8 @@ public:
   }
 
   JSI_EXPORT_FUNCTIONS(
-      JSI_EXPORT_FUNC(JsiSkiaContext, getSurface),
-      JSI_EXPORT_FUNC(JsiSkiaContext, present)
+    JSI_EXPORT_FUNC(JsiSkiaContext, getSurface),
+    JSI_EXPORT_FUNC(JsiSkiaContext, present)
   )
 
   JsiSkiaContext(std::shared_ptr<RNSkPlatformContext> context,
