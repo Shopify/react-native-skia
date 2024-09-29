@@ -49,7 +49,10 @@ export const drawBreatheDemo = (ctx: SkiaContext, progress: number) => {
   canvas.save();
   canvas.scale(pd, pd);
   canvas.rotate(progress * -180, center.x, center.y);
-
+  const offscreen = Skia.Surface.MakeOffscreen(256, 256)!;
+  const offscreenCanvas = offscreen.getCanvas();
+  offscreenCanvas.clear(Skia.Color("green"));
+  canvas.drawImage(offscreen.makeImageSnapshot(), 0, 0);
   new Array(6).fill(0).map((_, index) => {
     canvas.save();
     const theta = (index * (2 * Math.PI)) / 6;

@@ -51,7 +51,7 @@ public:
     auto pd = 3;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
-    _layer = (CAMetalLayer*)layer;
+    _layer = (CAMetalLayer *)layer;
 #pragma clang diagnostic pop
     _layer.framebufferOnly = NO;
     _layer.device = MTLCreateSystemDefaultDevice();
@@ -67,6 +67,9 @@ public:
   ~IOSSkiaContext() {}
 
   sk_sp<SkSurface> getSurface() override {
+    if (_skSurface) {
+      return _skSurface;
+    }
     // Create the Skia Direct Context if it doesn't exist
     if (!SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
             &ThreadContextHolder::ThreadSkiaMetalContext)) {
@@ -98,6 +101,7 @@ public:
                 .commandQueue commandBuffer]);
     [commandBuffer presentDrawable:_currentDrawable];
     [commandBuffer commit];
+    _skSurface = nullptr;
   }
 
 private:

@@ -150,6 +150,13 @@ public:
   sk_sp<SkSurface> getSurface() override;
 
   void present() override {
+    if (!SkiaOpenGLHelper::makeCurrent(
+            &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface)) {
+      RNSkLogger::logToConsole(
+          "Could not create EGL Surface from native window / surface. Could "
+          "not set new surface as current surface.");
+      return;
+    }
     // Flush and submit the direct context
     ThreadContextHolder::ThreadSkiaOpenGLContext.directContext
         ->flushAndSubmit();
