@@ -30,7 +30,7 @@ import {
   FrostedCard,
   SpeedTest,
   Video,
-  WebGPU
+  WebGPU,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
