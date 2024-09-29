@@ -54,6 +54,12 @@ public:
     return SkiaOpenGLSurfaceFactory::makeOffscreenSurface(width, height);
   }
 
+  std::shared_ptr<SkiaContext>
+  makeContextFromNativeSurface(void *surface, int width, int height) override {
+    return SkiaOpenGLSurfaceFactory::makeContext(
+        reinterpret_cast<ANativeWindow *>(surface), width, height);
+  }
+
   sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override {
     return SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(buffer);
   }

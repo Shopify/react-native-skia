@@ -4,7 +4,11 @@ description: Setup Node.js and install dependencies
 inputs:
   github_token:
     description: 'GitHub Token'
-    required: true
+    required: false
+  download_skia:
+    description: 'Download Skia Binary Artifacts'
+    required: false
+    default: 'true'
 
 runs:
   using: composite
@@ -32,6 +36,7 @@ runs:
       shell: bash
 
     - name: Download Skia Binary Artifacts
+      if: ${{ inputs.download_skia == 'true' }}
       uses: dawidd6/action-download-artifact@v2
       with:
         workflow: "build-skia.yml"
@@ -40,11 +45,13 @@ runs:
         branch: main
 
     - name: Copy Artifacts to libs folder
+      if: ${{ inputs.download_skia == 'true' }}
       working-directory: packages/skia
       run: yarn workflow-copy-libs
       shell: bash
 
     - name: Copy Skia Headers
+      if: ${{ inputs.download_skia == 'true' }}
       working-directory: packages/skia
       run: yarn copy-skia-headers
       shell: bash

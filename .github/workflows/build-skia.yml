@@ -3,8 +3,6 @@ on: workflow_dispatch
 jobs:
   build:
     runs-on: macos-latest
-    env:
-      WORKING_DIRECTORY: ./package
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -20,25 +18,22 @@ jobs:
       - name: Setup Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
 
-      - name: Setup Nodejs and npm
-        uses: actions/setup-node@v3
+      - name: Setup
+        uses: ./.github/actions/setup
         with:
-          cache-dependency-path: package/yarn.lock
-          cache: yarn
-
-      - name: Install root node dependencies
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: yarn
+          download_skia: 'false'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Skia
-        working-directory: ${{ env.WORKING_DIRECTORY }}
+        working-directory: ./packages/skia
         env:
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
+          GIT_SYNC_DEPS_SKIP_EMSDK: 'true'
         run: yarn build-skia
 
       - name: Upload artifacts - Android arm
         if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: skia-android-arm
           path: |
@@ -48,11 +43,12 @@ jobs:
             ./externals/skia/out/android/arm/libskottie.a
             ./externals/skia/out/android/arm/libsksg.a
             ./externals/skia/out/android/arm/libskparagraph.a
-            ./externals/skia/out/android/arm/libskunicode.a
+            ./externals/skia/out/android/arm/libskunicode_core.a
+            ./externals/skia/out/android/arm/libskunicode_icu.a
 
       - name: Upload artifacts - Android arm64
         if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: skia-android-arm-64
           path: |
@@ -62,11 +58,12 @@ jobs:
             ./externals/skia/out/android/arm64/libskottie.a
             ./externals/skia/out/android/arm64/libsksg.a
             ./externals/skia/out/android/arm64/libskparagraph.a
-            ./externals/skia/out/android/arm64/libskunicode.a
+            ./externals/skia/out/android/arm64/libskunicode_core.a
+            ./externals/skia/out/android/arm64/libskunicode_icu.a
 
       - name: Upload artifacts - Android x86
         if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: skia-android-arm-x86
           path: |
@@ -76,11 +73,12 @@ jobs:
             ./externals/skia/out/android/x86/libskottie.a
             ./externals/skia/out/android/x86/libsksg.a
             ./externals/skia/out/android/x86/libskparagraph.a
-            ./externals/skia/out/android/x86/libskunicode.a
+            ./externals/skia/out/android/x86/libskunicode_core.a
+            ./externals/skia/out/android/x86/libskunicode_icu.a
 
       - name: Upload artifacts - Android x64
         if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: skia-android-arm-x64
           path: |
@@ -90,18 +88,13 @@ jobs:
             ./externals/skia/out/android/x64/libskottie.a
             ./externals/skia/out/android/x64/libsksg.a
             ./externals/skia/out/android/x64/libskparagraph.a
-            ./externals/skia/out/android/x64/libskunicode.a
+            ./externals/skia/out/android/x64/libskunicode_core.a
+            ./externals/skia/out/android/x64/libskunicode_icu.a
 
       - name: Upload artifacts - iOS xcframeworks
         if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: skia-ios-xcframeworks
           path: |
-            ./package/libs/ios/libskia.xcframework
-            ./package/libs/ios/libskshaper.xcframework
-            ./package/libs/ios/libsvg.xcframework
-            ./package/libs/ios/libskottie.xcframework
-            ./package/libs/ios/libsksg.xcframework
-            ./package/libs/ios/libskparagraph.xcframework
-            ./package/libs/ios/libskunicode.xcframework
+            ./packages/skia/libs/ios/*.xcframework

@@ -13,6 +13,11 @@
 #import "include/core/SkColorSpace.h"
 #import <include/gpu/GrBackendSurface.h>
 #import <include/gpu/ganesh/SkImageGanesh.h>
+#import <include/gpu/ganesh/mtl/GrMtlBackendContext.h>
+#import <include/gpu/ganesh/mtl/GrMtlBackendSurface.h>
+#import <include/gpu/ganesh/mtl/GrMtlDirectContext.h>
+#import <include/gpu/ganesh/mtl/GrMtlTypes.h>
+#import <include/gpu/ganesh/mtl/SkSurfaceMetal.h>
 #pragma clang diagnostic pop
 
 #include <TargetConditionals.h>
@@ -50,8 +55,8 @@ GrBackendTexture TextureHolder::toGrBackendTexture() {
   GrMtlTextureInfo textureInfo;
   textureInfo.fTexture.retain((__bridge void *)mtlTexture);
   GrBackendTexture texture =
-      GrBackendTexture((int)mtlTexture.width, (int)mtlTexture.height,
-                       skgpu::Mipmapped::kNo, textureInfo);
+      GrBackendTextures::MakeMtl((int)mtlTexture.width, (int)mtlTexture.height,
+                                 skgpu::Mipmapped::kNo, textureInfo);
   return texture;
 }
 

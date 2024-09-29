@@ -22,6 +22,13 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
+// Helper to see a bit pattern as a float (w/o aliasing warnings)
+static inline float SkBits2Float(uint32_t bits) {
+  float value;
+  memcpy(&value, &bits, sizeof(float));
+  return value;
+}
+
 struct RuntimeEffectUniform {
   int columns;
   int rows;
