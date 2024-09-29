@@ -13,6 +13,7 @@
 #include <thread>
 #include <unordered_map>
 
+#include "SkiaContext.h"
 #include "SkiaOpenGLHelper.h"
 
 #pragma clang diagnostic push
@@ -139,6 +140,40 @@ private:
   int _height = 0;
 };
 
+class AndroidSkiaContext : public SkiaContext {
+public:
+  AndroidSkiaContext(ANativeWindow *window, int width, int height)
+      : _window(window), _width(width), _height(height) {}
+
+  ~AndroidSkiaContext() {}
+
+  sk_sp<SkSurface> getSurface() override;
+
+  void present() override {
+    if (!SkiaOpenGLHelper::makeCurrent(
+            &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface)) {
+      RNSkLogger::logToConsole(
+          "Could not create EGL Surface from native window / surface. Could "
+          "not set new surface as current surface.");
+      return;
+    }
+    // Flush and submit the direct context
+    ThreadContextHolder::ThreadSkiaOpenGLContext.directContext
+        ->flushAndSubmit();
+
+    // Swap buffers
+    SkiaOpenGLHelper::swapBuffers(&ThreadContextHolder::ThreadSkiaOpenGLContext,
+                                  _glSurface);
+  }
+
+private:
+  ANativeWindow *_window;
+  sk_sp<SkSurface> _skSurface = nullptr;
+  EGLSurface _glSurface = EGL_NO_SURFACE;
+  int _width = 0;
+  int _height = 0;
+};
+
 class SkiaOpenGLSurfaceFactory {
 public:
   /**
@@ -151,6 +186,11 @@ public:
 
   static sk_sp<SkImage>
   makeImageFromHardwareBuffer(void *buffer, bool requireKnownFormat = false);
+
+  static std::shared_ptr<AndroidSkiaContext>
+  makeContext(ANativeWindow *surface, int width, int height) {
+    return std::make_shared<AndroidSkiaContext>(surface, width, height);
+  }
 
   /**
    * Creates a windowed Skia Surface holder.

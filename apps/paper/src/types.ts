@@ -1,4 +1,5 @@
 export type StackParamList = {
+  WebGPU: undefined;
   Tests: {
     title?: string;
     path?: string[];
