@@ -89,7 +89,7 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
     cb(canvas);
 
     if (auto dContext = GrAsDirectContext(skSurface->recordingContext())) {
-      dContext->flushAndSubmit();
+		dContext->flushAndSubmit();
     }
 
     id<MTLCommandBuffer> commandBuffer(

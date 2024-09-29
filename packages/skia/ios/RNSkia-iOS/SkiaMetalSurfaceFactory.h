@@ -48,10 +48,10 @@ private:
 class IOSSkiaContext : public RNSkia::SkiaContext {
 public:
   IOSSkiaContext(CALayer *layer, int width, int height) {
-    auto pd = 1;
+    auto pd = 3;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
-    _layer = [CAMetalLayer layer];
+    _layer = (CAMetalLayer*)layer;
 #pragma clang diagnostic pop
     _layer.framebufferOnly = NO;
     _layer.device = MTLCreateSystemDefaultDevice();

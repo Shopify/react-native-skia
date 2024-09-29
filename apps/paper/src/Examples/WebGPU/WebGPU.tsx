@@ -16,6 +16,7 @@ export function WebGPU() {
     if (!context.value) {
       return;
     }
+
     const ctx = context.value;
     drawBreatheDemo(ctx, progress.value);
     ctx.present();
