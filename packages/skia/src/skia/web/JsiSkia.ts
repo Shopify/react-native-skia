@@ -129,4 +129,7 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   ParagraphBuilder: new JsiSkParagraphBuilderFactory(CanvasKit),
   NativeBuffer: new JsiSkNativeBufferFactory(CanvasKit),
   Video: createVideo.bind(null, CanvasKit),
+  Context: (_surface: bigint, _width: number, _height: number) => {
+    throw new Error("Not implemented on React Native Web");
+  }
 });

@@ -18,6 +18,7 @@ export const HomeScreen = () => {
         route="API"
         testId="API"
       />
+      <HomeScreenButton title="🏔️ WebGPU" description="WebGPU" route="WebGPU" />
       <HomeScreenButton
         title="🎥 Reanimated"
         description="Reanimated & Gesture Handler"
