@@ -218,9 +218,8 @@ sk_sp<SkSurface> WindowSurfaceHolder::getSurface() {
   return _skSurface;
 }
 
-
 sk_sp<SkSurface> AndroidSkiaContext::getSurface() {
-    if (_skSurface == nullptr) {
+  if (_skSurface == nullptr) {
 
     // Setup OpenGL and Skia
     if (!SkiaOpenGLHelper::createSkiaDirectContextIfNecessary(

@@ -150,10 +150,11 @@ RNSkiOSPlatformContext::createVideo(const std::string &url) {
 }
 
 std::shared_ptr<SkiaContext>
-RNSkiOSPlatformContext::makeContextFromNativeSurface(void *surface, int width, int height) {
-	return SkiaMetalSurfaceFactory::makeContext((__bridge CALayer *)surface, width, height);
+RNSkiOSPlatformContext::makeContextFromNativeSurface(void *surface, int width,
+                                                     int height) {
+  return SkiaMetalSurfaceFactory::makeContext((__bridge CALayer *)surface,
+                                              width, height);
 }
-
 
 void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
   RCTFatal(RCTErrorWithMessage([NSString stringWithUTF8String:err.what()]));

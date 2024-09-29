@@ -46,7 +46,7 @@ export const drawBreatheDemo = (ctx: SkiaContext, progress: number) => {
 
   const surface = ctx.getSurface();
   const canvas = surface.getCanvas();
-  canvas.clear(Skia.Color("rgb(36,43,56)"));
+  canvas.clear(Skia.Color("rgb(36, 43, 56)"));
   canvas.save();
   canvas.scale(pd, pd);
   canvas.rotate(progress * -180, center.x, center.y);

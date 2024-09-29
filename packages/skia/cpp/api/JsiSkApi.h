@@ -50,8 +50,8 @@
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkTypefaceFontProviderFactory.h"
 #include "JsiSkVertices.h"
-#include "JsiVideo.h"
 #include "JsiSkiaContext.h"
+#include "JsiVideo.h"
 
 namespace RNSkia {
 

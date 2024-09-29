@@ -13,8 +13,8 @@
 #include <thread>
 #include <unordered_map>
 
-#include "SkiaOpenGLHelper.h"
 #include "SkiaContext.h"
+#include "SkiaOpenGLHelper.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -140,14 +140,12 @@ private:
   int _height = 0;
 };
 
-class AndroidSkiaContext: public SkiaContext {
+class AndroidSkiaContext : public SkiaContext {
 public:
-  AndroidSkiaContext(ANativeWindow* window, int width, int height)
-      : _window(window), _width(width), _height(height) {
-  }
+  AndroidSkiaContext(ANativeWindow *window, int width, int height)
+      : _window(window), _width(width), _height(height) {}
 
-  ~AndroidSkiaContext() {
-  }
+  ~AndroidSkiaContext() {}
 
   sk_sp<SkSurface> getSurface() override;
 
@@ -157,8 +155,8 @@ public:
         ->flushAndSubmit();
 
     // Swap buffers
-    SkiaOpenGLHelper::swapBuffers(
-        &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
+    SkiaOpenGLHelper::swapBuffers(&ThreadContextHolder::ThreadSkiaOpenGLContext,
+                                  _glSurface);
   }
 
 private:
@@ -183,10 +181,9 @@ public:
   makeImageFromHardwareBuffer(void *buffer, bool requireKnownFormat = false);
 
   static std::shared_ptr<AndroidSkiaContext>
-  makeContext(ANativeWindow* surface, int width, int height) {
+  makeContext(ANativeWindow *surface, int width, int height) {
     return std::make_shared<AndroidSkiaContext>(surface, width, height);
   }
-  
 
   /**
    * Creates a windowed Skia Surface holder.

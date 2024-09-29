@@ -34,7 +34,7 @@ public:
 
   JSI_HOST_FUNCTION(getSurface) {
     auto surface = getObject()->getSurface();
-        return jsi::Object::createFromHostObject(
+    return jsi::Object::createFromHostObject(
         runtime,
         std::make_shared<JsiSkSurface>(getContext(), std::move(surface)));
   }
@@ -44,15 +44,12 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_EXPORT_FUNCTIONS(
-    JSI_EXPORT_FUNC(JsiSkiaContext, getSurface),
-    JSI_EXPORT_FUNC(JsiSkiaContext, present)
-  )
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkiaContext, getSurface),
+                       JSI_EXPORT_FUNC(JsiSkiaContext, present))
 
   JsiSkiaContext(std::shared_ptr<RNSkPlatformContext> context,
-           std::shared_ptr<SkiaContext> ctx)
-      : JsiSkWrappingSharedPtrHostObject(std::move(context), std::move(ctx)) {
-  }
+                 std::shared_ptr<SkiaContext> ctx)
+      : JsiSkWrappingSharedPtrHostObject(std::move(context), std::move(ctx)) {}
 
   /**
    * Creates the function for construction a new instance of the SkFont
@@ -69,11 +66,12 @@ public:
       void *surface = reinterpret_cast<void *>(nativeBufferPointer);
       auto width = static_cast<int>(arguments[1].asNumber());
       auto height = static_cast<int>(arguments[2].asNumber());
-      auto result = context->makeContextFromNativeSurface(surface, width, height);
+      auto result =
+          context->makeContextFromNativeSurface(surface, width, height);
       // Return the newly constructed object
       return jsi::Object::createFromHostObject(
-          runtime,
-          std::make_shared<JsiSkiaContext>(std::move(context), std::move(result)));
+          runtime, std::make_shared<JsiSkiaContext>(std::move(context),
+                                                    std::move(result)));
     };
   }
 };
