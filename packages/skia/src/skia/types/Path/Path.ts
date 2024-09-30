@@ -486,7 +486,7 @@ export interface SkPath extends SkJSIInstance<"Path"> {
       @param radius  distance from center to edge      
       @return        reference to SkPath
   */
-  addCircle(x: number, y: number, r: number): SkPath;
+  addCircle(x: number, y: number, r: number, isCCW?: boolean): SkPath;
 
   getLastPt(): { x: number; y: number };
 
