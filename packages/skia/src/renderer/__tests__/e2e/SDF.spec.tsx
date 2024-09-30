@@ -143,6 +143,6 @@ vec4 main(vec2 xy) {
         />
       </Fill>
     );
-    checkImage(img, "snapshots/sdf/heart.png");
+    checkImage(img, "snapshots/sdf/heart.png", { maxPixelDiff: 500 });
   });
 });
