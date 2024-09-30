@@ -9,7 +9,7 @@ export const PictureDimensions = rect(0, 0, width, height);
 
 interface PictureProps {
   matrix: SharedValue<Matrix4>;
-  image: SkImage;
+  image: SkImage | SharedValue<SkImage>;
 }
 
 export const Picture = ({ matrix, image }: PictureProps) => {

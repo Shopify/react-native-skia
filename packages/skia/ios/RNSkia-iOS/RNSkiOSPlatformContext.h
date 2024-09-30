@@ -78,6 +78,8 @@ public:
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override;
   sk_sp<SkFontMgr> createFontMgr() override;
 
+  GrDirectContext *getDirectContext() override;
+
   void willInvalidateModules() {
     // We need to do some house-cleaning here!
     invalidate();

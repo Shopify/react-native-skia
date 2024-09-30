@@ -202,4 +202,8 @@ void RNSkiOSPlatformContext::stopDrawLoop() {
   }
 }
 
+GrDirectContext *RNSkiOSPlatformContext::getDirectContext() {
+  return ThreadContextHolder::ThreadSkiaMetalContext.skContext.get();
+}
+
 } // namespace RNSkia
