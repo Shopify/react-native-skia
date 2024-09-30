@@ -1,7 +1,6 @@
 import React from "react";
 import { Pressable, useWindowDimensions } from "react-native";
 import {
-  useImage,
   Canvas,
   ImageShader,
   Skia,

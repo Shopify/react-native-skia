@@ -67,6 +67,10 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     };
   }
 
+  isTextureBacked() {
+    return false;
+  }
+
   makeShaderOptions(
     tx: TileMode,
     ty: TileMode,

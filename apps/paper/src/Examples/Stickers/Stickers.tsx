@@ -1,4 +1,10 @@
-import { Canvas, Matrix4, useFont, useImage, useImageAsTexture } from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Matrix4,
+  useFont,
+  useImage,
+  useImageAsTexture,
+} from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions, View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
