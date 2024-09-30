@@ -11,6 +11,7 @@ import {
   Rect,
   Skia,
   TextDecoration,
+  TextDecorationStyle,
   mix,
   useFonts,
 } from "@shopify/react-native-skia";
@@ -92,8 +93,8 @@ export const Paragraphs = () => {
       ],
       decorationColor: Skia.Color("#00223A"),
       decorationThickness: 2,
-      decoration: 1,
-      decorationStyle: TextDecoration.Overline,
+      decoration: TextDecoration.Underline,
+      decorationStyle: TextDecorationStyle.Dotted,
     };
 
     paragraphBuilder
