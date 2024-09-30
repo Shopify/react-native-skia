@@ -2,7 +2,6 @@ import {
   Canvas,
   Matrix4,
   useFont,
-  useImage,
   useImageAsTexture,
 } from "@shopify/react-native-skia";
 import React from "react";
