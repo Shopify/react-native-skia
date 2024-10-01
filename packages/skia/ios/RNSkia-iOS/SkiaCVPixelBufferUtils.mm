@@ -11,7 +11,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 #import "include/core/SkColorSpace.h"
-#import <include/gpu/GrBackendSurface.h>
+#import <include/gpu/ganesh/GrBackendSurface.h>
 #import <include/gpu/ganesh/SkImageGanesh.h>
 #import <include/gpu/ganesh/mtl/GrMtlBackendContext.h>
 #import <include/gpu/ganesh/mtl/GrMtlBackendSurface.h>
