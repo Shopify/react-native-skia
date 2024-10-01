@@ -11,7 +11,7 @@
 #import "include/core/SkCanvas.h"
 #import <CoreMedia/CMSampleBuffer.h>
 #import <CoreVideo/CVMetalTextureCache.h>
-#import <include/gpu/GrDirectContext.h>
+#import <include/gpu/ganesh/GrDirectContext.h>
 
 #pragma clang diagnostic pop
 
