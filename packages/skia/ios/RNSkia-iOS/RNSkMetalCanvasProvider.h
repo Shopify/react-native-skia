@@ -9,7 +9,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#import <include/gpu/GrDirectContext.h>
+#import <include/gpu/ganesh/GrDirectContext.h>
 
 #pragma clang diagnostic pop
 
