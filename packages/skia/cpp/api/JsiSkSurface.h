@@ -14,7 +14,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "include/core/SkSurface.h"
-#include "include/gpu/GrDirectContext.h"
+#include "include/gpu/ganesh/GrDirectContext.h"
 
 #pragma clang diagnostic pop
 

@@ -10,8 +10,8 @@
 #import "include/core/SkColorSpace.h"
 #import "include/core/SkSurface.h"
 
-#import <include/gpu/GrBackendSurface.h>
-#import <include/gpu/GrDirectContext.h>
+#import <include/gpu/ganesh/GrBackendSurface.h>
+#import <include/gpu/ganesh/GrDirectContext.h>
 #import <include/gpu/ganesh/SkImageGanesh.h>
 #import <include/gpu/ganesh/SkSurfaceGanesh.h>
 #import <include/gpu/ganesh/mtl/GrMtlBackendContext.h>

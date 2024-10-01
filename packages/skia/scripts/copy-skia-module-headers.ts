@@ -38,7 +38,29 @@ const copyModule = (module: string) => [
   "mkdir -p ./cpp/skia/modules/skunicode/include/",
   "cp -a ../../externals/skia/modules/skunicode/include/SkUnicode.h ./cpp/skia/modules/skunicode/include/.",
 
-  "mkdir -p ./cpp/skia/include/gpu/graphite",
+  // Remove migrated headers
+  //grep -R "Delete this after migrating clients" cpp
+  "rm -rf ./cpp/skia/include/gpu/GrContextThreadSafeProxy.h",
+  "rm -rf ./cpp/skia/include/gpu/GrDirectContext.h",
+  "rm -rf ./cpp/skia/include/gpu/GrBackendSemaphore.h",
+  "rm -rf ./cpp/skia/include/gpu/mock/GrMockTypes.h",
+  "rm -rf ./cpp/skia/include/gpu/GrDriverBugWorkaroundsAutogen.h",
+  "rm -rf ./cpp/skia/include/gpu/GrTypes.h",
+  "rm -rf ./cpp/skia/include/gpu/vk/GrVkTypes.h",
+  "rm -rf ./cpp/skia/include/gpu/GrDriverBugWorkarounds.h",
+  "rm -rf ./cpp/skia/include/gpu/GrContextOptions.h",
+  "rm -rf ./cpp/skia/include/gpu/gl/GrGLExtensions.h",
+  "rm -rf ./cpp/skia/include/gpu/gl/GrGLAssembleInterface.h",
+  "rm -rf ./cpp/skia/include/gpu/gl/GrGLTypes.h",
+  "rm -rf ./cpp/skia/include/gpu/gl/GrGLConfig.h",
+  "rm -rf ./cpp/skia/include/gpu/gl/GrGLFunctions.h",
+  "rm -rf ./cpp/skia/include/gpu/gl/GrGLAssembleHelpers.h",
+  "rm -rf ./cpp/skia/include/gpu/gl/GrGLInterface.h",
+  "rm -rf ./cpp/skia/include/gpu/GrYUVABackendTextures.h",
+  "rm -rf ./cpp/skia/include/gpu/GrRecordingContext.h",
+  "rm -rf ./cpp/skia/include/gpu/GrBackendSurface.h",
+  "rm -rf ./cpp/skia/include/gpu/d3d/GrD3DBackendContext.h",
+  "rm -rf ./cpp/skia/include/gpu/d3d/GrD3DTypes.h",
 ].map((cmd) => {
   console.log(cmd);
   executeCmdSync(cmd);

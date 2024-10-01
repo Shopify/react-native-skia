@@ -17,8 +17,8 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 #import "include/core/SkColorSpace.h"
 #import "include/core/SkImage.h"
-#import "include/gpu/GrBackendSurface.h"
-#import "include/gpu/GrYUVABackendTextures.h"
+#import "include/gpu/ganesh/GrBackendSurface.h"
+#import "include/gpu/ganesh/GrYUVABackendTextures.h"
 #pragma clang diagnostic pop
 
 /**

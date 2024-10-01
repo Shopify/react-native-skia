@@ -15,9 +15,9 @@
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColorSpace.h"
 #include "include/core/SkSurface.h"
-#include "include/gpu/GrDirectContext.h"
+#include "include/gpu/ganesh/GrDirectContext.h"
 #include "include/gpu/ganesh/gl/GrGLDirectContext.h"
-#include "include/gpu/gl/GrGLInterface.h"
+#include "include/gpu/ganesh/gl/GrGLInterface.h"
 
 #pragma clang diagnostic pop
 
