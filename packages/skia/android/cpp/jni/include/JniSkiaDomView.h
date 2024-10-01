@@ -42,17 +42,11 @@ public:
                           JniSkiaDomView::surfaceSizeChanged),
          makeNativeMethod("setMode", JniSkiaDomView::setMode),
          makeNativeMethod("setDebugMode", JniSkiaDomView::setDebugMode),
-         makeNativeMethod("updateTouchPoints",
-                          JniSkiaDomView::updateTouchPoints),
          makeNativeMethod("registerView", JniSkiaDomView::registerView),
          makeNativeMethod("unregisterView", JniSkiaDomView::unregisterView)});
   }
 
 protected:
-  void updateTouchPoints(jni::JArrayDouble touches) override {
-    JniSkiaBaseView::updateTouchPoints(touches);
-  }
-
   void surfaceAvailable(jobject surface, int width, int height) override {
     JniSkiaBaseView::surfaceAvailable(surface, width, height);
   }
