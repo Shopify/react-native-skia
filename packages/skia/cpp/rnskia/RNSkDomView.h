@@ -50,29 +50,19 @@ public:
 
   void setRoot(std::shared_ptr<JsiDomRenderNode> node);
 
-  void setOnTouchCallback(std::shared_ptr<jsi::Function> onTouchCallback);
-
-  void updateTouches(std::vector<RNSkTouchInfo> &touches);
-
 private:
-  void callOnTouch();
   void renderCanvas(SkCanvas *canvas, float scaledWidth, float scaledHeight);
   void renderDebugOverlays(SkCanvas *canvas);
 
   std::shared_ptr<RNSkPlatformContext> _platformContext;
-  std::shared_ptr<jsi::Function> _touchCallback;
 
   std::shared_ptr<std::timed_mutex> _renderLock;
-  std::shared_ptr<std::timed_mutex> _touchCallbackLock;
 
   std::shared_ptr<JsiDomRenderNode> _root;
   std::shared_ptr<DrawingContext> _drawingContext;
 
   RNSkTimingInfo _renderTimingInfo;
 
-  std::mutex _touchMutex;
-  std::vector<std::vector<RNSkTouchInfo>> _currentTouches;
-  std::vector<std::vector<RNSkTouchInfo>> _touchesCache;
   std::mutex _rootLock;
 };
 
@@ -87,40 +77,13 @@ public:
                  std::make_shared<RNSkDomRenderer>(
                      std::bind(&RNSkView::requestRedraw, this), context)) {}
 
-  void updateTouchState(std::vector<RNSkTouchInfo> &touches) override {
-    std::static_pointer_cast<RNSkDomRenderer>(getRenderer())
-        ->updateTouches(touches);
-    RNSkView::updateTouchState(touches);
-  }
-
   void setJsiProperties(
       std::unordered_map<std::string, JsiValueWrapper> &props) override {
 
     RNSkView::setJsiProperties(props);
 
     for (auto &prop : props) {
-      if (prop.first == "onTouch") {
-        if (prop.second.isUndefinedOrNull()) {
-          // Clear touchCallback
-          std::static_pointer_cast<RNSkDomRenderer>(getRenderer())
-              ->setOnTouchCallback(nullptr);
-          requestRedraw();
-          continue;
-
-        } else if (prop.second.getType() != JsiWrapperValueType::Function) {
-          // We expect a function for the draw callback custom property
-          throw std::runtime_error(
-              "Expected a function for the onTouch property.");
-        }
-
-        // Save callback
-        std::static_pointer_cast<RNSkDomRenderer>(getRenderer())
-            ->setOnTouchCallback(prop.second.getAsFunction());
-
-        // Request redraw
-        requestRedraw();
-
-      } else if (prop.first == "root") {
+      if (prop.first == "root") {
         // Save root
         if (prop.second.isUndefined() || prop.second.isNull()) {
           std::static_pointer_cast<RNSkDomRenderer>(getRenderer())

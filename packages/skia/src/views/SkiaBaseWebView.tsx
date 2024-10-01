@@ -1,14 +1,12 @@
 /* global HTMLCanvasElement */
 import React from "react";
-import type { PointerEvent } from "react";
 import type { LayoutChangeEvent } from "react-native";
 
 import type { SkRect, SkCanvas } from "../skia/types";
 import { JsiSkSurface } from "../skia/web/JsiSkSurface";
 import { Platform } from "../Platform";
 
-import type { DrawMode, SkiaBaseViewProps, TouchInfo } from "./types";
-import { TouchType } from "./types";
+import type { DrawMode, SkiaBaseViewProps } from "./types";
 
 const pd = Platform.PixelRatio;
 
@@ -22,7 +20,6 @@ export abstract class SkiaBaseWebView<
 
   private _surface: JsiSkSurface | null = null;
   private _unsubscriptions: Array<() => void> = [];
-  private _touches: Array<TouchInfo> = [];
   private _canvas: SkCanvas | null = null;
   private _canvasRef = React.createRef<HTMLCanvasElement>();
   private _mode: DrawMode;
@@ -95,7 +92,7 @@ export abstract class SkiaBaseWebView<
    */
   public makeImageSnapshot(rect?: SkRect) {
     this._canvas!.clear(CanvasKit.TRANSPARENT);
-    this.renderInCanvas(this._canvas!, []);
+    this.renderInCanvas(this._canvas!);
     this._surface?.ref.flush();
     return this._surface?.makeImageSnapshot(rect);
   }
@@ -103,10 +100,7 @@ export abstract class SkiaBaseWebView<
   /**
    * Override to render
    */
-  protected abstract renderInCanvas(
-    canvas: SkCanvas,
-    touches: TouchInfo[]
-  ): void;
+  protected abstract renderInCanvas(canvas: SkCanvas): void;
 
   /**
    * Sends a redraw request to the native SkiaView.
@@ -115,13 +109,11 @@ export abstract class SkiaBaseWebView<
     if (this._mode === "continuous" || this._redrawRequests > 0) {
       this._redrawRequests = 0;
       if (this._canvas) {
-        const touches = [...this._touches];
-        this._touches = [];
         const canvas = this._canvas!;
         canvas.clear(Float32Array.of(0, 0, 0, 0));
         canvas.save();
         canvas.scale(pd, pd);
-        this.renderInCanvas(canvas, touches);
+        this.renderInCanvas(canvas);
         canvas.restore();
         this._surface?.ref.flush();
       }
@@ -147,42 +139,13 @@ export abstract class SkiaBaseWebView<
     this.tick();
   }
 
-  private handleTouchEvent(evt: PointerEvent, touchType: TouchType) {
-    this._touches.push({
-      id: evt.pointerId,
-      x: evt.clientX - evt.currentTarget.getClientRects()[0].left,
-      y: evt.clientY - evt.currentTarget.getClientRects()[0].top,
-      force: evt.pressure,
-      type: touchType,
-      timestamp: Date.now(),
-    });
-    this.redraw();
-  }
-
-  createTouchHandler(touchType: TouchType) {
-    return (evt: PointerEvent) => this.handleTouchEvent(evt, touchType);
-  }
-
-  private onStart = this.createTouchHandler(TouchType.Start);
-  private onActive = this.createTouchHandler(TouchType.Active);
-  private onCancel = this.createTouchHandler(TouchType.Cancelled);
-  private onEnd = this.createTouchHandler(TouchType.End);
   private onLayout = this.onLayoutEvent.bind(this);
 
   render() {
     const { mode, debug = false, ...viewProps } = this.props;
     return (
       <Platform.View {...viewProps} onLayout={this.onLayout}>
-        <canvas
-          ref={this._canvasRef}
-          style={{ display: "flex", flex: 1 }}
-          onPointerDown={this.onStart}
-          onPointerMove={this.onActive}
-          onPointerUp={this.onEnd}
-          onPointerCancel={this.onCancel}
-          onPointerLeave={this.onEnd}
-          onPointerOut={this.onEnd}
-        />
+        <canvas ref={this._canvasRef} style={{ display: "flex", flex: 1 }} />
       </Platform.View>
     );
   }

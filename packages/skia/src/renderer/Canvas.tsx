@@ -16,7 +16,7 @@ import type { LayoutChangeEvent } from "react-native";
 
 import { SkiaDomView } from "../views";
 import { Skia } from "../skia/Skia";
-import type { TouchHandler, SkiaBaseViewProps } from "../views";
+import type { SkiaBaseViewProps } from "../views";
 import { SkiaJSDomView } from "../views/SkiaJSDomView";
 
 import { SkiaRoot } from "./Reconciler";
@@ -27,7 +27,6 @@ export const useCanvasRef = () => useRef<SkiaDomView>(null);
 export interface CanvasProps extends SkiaBaseViewProps {
   ref?: RefObject<SkiaDomView>;
   children: ReactNode;
-  onTouch?: TouchHandler;
 }
 
 const useOnSizeEvent = (
@@ -56,7 +55,6 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       style,
       debug,
       mode,
-      onTouch,
       onSize: _onSize,
       onLayout: _onLayout,
       ...props
@@ -96,7 +94,6 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
           ref={ref}
           style={style}
           root={root.dom}
-          onTouch={onTouch}
           onLayout={onLayout}
           mode={mode}
           debug={debug}
@@ -111,7 +108,6 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
           ref={ref as any}
           style={style}
           root={root.dom}
-          onTouch={onTouch}
           onLayout={onLayout}
           mode={mode}
           debug={debug}

@@ -11,42 +11,11 @@ export type NativeSkiaViewProps = ViewProps & {
   debug?: boolean;
 };
 
-export enum TouchType {
-  Start,
-  Active,
-  End,
-  Cancelled,
-}
-
-export interface TouchInfo {
-  x: number;
-  y: number;
-  force: number;
-  type: TouchType;
-  id: number;
-  timestamp: number;
-}
-
 export interface DrawingInfo {
   width: number;
   height: number;
   timestamp: number;
-  touches: Array<Array<TouchInfo>>;
 }
-
-export type ExtendedTouchInfo = TouchInfo & {
-  // points per second
-  velocityX: number;
-  velocityY: number;
-};
-
-export type TouchHandlers = {
-  onStart?: (touchInfo: TouchInfo) => void;
-  onActive?: (touchInfo: ExtendedTouchInfo) => void;
-  onEnd?: (touchInfo: ExtendedTouchInfo) => void;
-};
-
-export type TouchHandler = (touchInfo: Array<Array<TouchInfo>>) => void;
 
 export interface ISkiaViewApi {
   setJsiProperty: <T>(nativeId: number, name: string, value: T) => void;
@@ -82,5 +51,4 @@ export interface SkiaPictureViewProps extends SkiaBaseViewProps {
 
 export interface SkiaDomViewProps extends SkiaBaseViewProps {
   root?: RenderNode<GroupProps>;
-  onTouch?: TouchHandler;
 }
