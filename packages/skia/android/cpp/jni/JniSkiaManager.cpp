@@ -9,7 +9,7 @@
 
 namespace {
 
-#ifdef REACT_NATIVE_VERSION >= 75
+#if REACT_NATIVE_VERSION >= 75
 using CallFuncType = facebook::react::CallFunc;
 #else
 using CallFuncType = std::function<void()>;
