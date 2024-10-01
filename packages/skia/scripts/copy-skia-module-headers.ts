@@ -37,8 +37,6 @@ const copyModule = (module: string) => [
 
   "mkdir -p ./cpp/skia/modules/skunicode/include/",
   "cp -a ../../externals/skia/modules/skunicode/include/SkUnicode.h ./cpp/skia/modules/skunicode/include/.",
-
-  "mkdir -p ./cpp/skia/include/gpu/graphite",
 ].map((cmd) => {
   console.log(cmd);
   executeCmdSync(cmd);
