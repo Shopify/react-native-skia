@@ -186,6 +186,14 @@ public:
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
 
+  JSI_HOST_FUNCTION(isTextureBacked) {
+    return static_cast<bool>(getObject()->isTextureBacked());
+  }
+
+  JSI_HOST_FUNCTION(textureSize) {
+    return static_cast<double>(getObject()->textureSize());
+  }
+
   EXPORT_JSI_API_TYPENAME(JsiSkImage, Image)
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImage, width),
@@ -197,6 +205,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkImage, encodeToBase64),
                        JSI_EXPORT_FUNC(JsiSkImage, readPixels),
                        JSI_EXPORT_FUNC(JsiSkImage, makeNonTextureImage),
+                       JSI_EXPORT_FUNC(JsiSkImage, isTextureBacked),
+                       JSI_EXPORT_FUNC(JsiSkImage, textureSize),
                        JSI_EXPORT_FUNC(JsiSkImage, dispose))
 
   JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
