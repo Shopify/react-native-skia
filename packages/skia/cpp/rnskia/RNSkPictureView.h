@@ -13,7 +13,6 @@
 #include "RNSkView.h"
 
 #include "JsiSkPicture.h"
-#include "RNSkInfoParameter.h"
 #include "RNSkLog.h"
 #include "RNSkPlatformContext.h"
 #include "RNSkTimingInfo.h"
