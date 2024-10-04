@@ -1,10 +1,50 @@
 import React from "react";
 
-import { checkImage, docPath } from "../../../__tests__/setup";
+import { checkImage, CI, docPath } from "../../../__tests__/setup";
 import { Circle } from "../../components";
 import { surface, importSkia } from "../setup";
 
 describe("Offscreen Drawings", () => {
+  it("isTextureBacked()", async () => {
+    const { width, height } = surface;
+    const supported = surface.OS !== "web" && surface.OS !== "node";
+    const result = await surface.eval(
+      (Skia, ctx) => {
+        const r = ctx.width / 2;
+        const offscreen = Skia.Surface.MakeOffscreen(ctx.width, ctx.height)!;
+        if (!offscreen) {
+          throw new Error("Could not create offscreen surface");
+        }
+        const canvas = offscreen.getCanvas();
+        const paint = Skia.Paint();
+        paint.setColor(Skia.Color("lightblue"));
+        canvas.drawCircle(r, r, r, paint);
+        offscreen.flush();
+        // Currently GPU is not available in github action (software adapter)
+        // therefore these would fail
+        if (ctx.CI && ctx.supported) {
+          return [true, false, true];
+        }
+        const r0 = offscreen.makeImageSnapshot();
+        const r1 = r0.makeNonTextureImage();
+        const r2 = Skia.Image.MakeTextureFromImage(r1);
+        if (!r2) {
+          return [];
+        }
+        return [
+          r0.isTextureBacked(),
+          r1.isTextureBacked(),
+          r2.isTextureBacked(),
+        ];
+      },
+      { width, height, CI, supported }
+    );
+    if (!supported) {
+      expect(result).toEqual([false, false, false]);
+    } else {
+      expect(result).toEqual([true, false, true]);
+    }
+  });
   it("Should use the canvas API to build an image", async () => {
     const { width, height } = surface;
     const raw = await surface.eval(

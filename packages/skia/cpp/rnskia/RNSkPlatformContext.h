@@ -253,6 +253,8 @@ public:
   virtual void startDrawLoop() {}
   virtual void stopDrawLoop() {}
 
+  virtual GrDirectContext *getDirectContext() = 0;
+
 private:
   float _pixelDensity;
 

@@ -27,6 +27,10 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
     return Promise.resolve(null);
   }
 
+  MakeTextureFromImage(image: SkImage): SkImage | null {
+    return image;
+  }
+
   MakeImageFromNativeBuffer(
     buffer: NativeBuffer,
     surface?: JsiSkSurface,

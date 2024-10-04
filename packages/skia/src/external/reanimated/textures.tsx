@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import type { ReactElement } from "react";
-import type { SharedValue } from "react-native-reanimated";
+import { type SharedValue } from "react-native-reanimated";
 
 import type {
   DataSourceParam,
@@ -67,27 +67,14 @@ export const usePictureAsTexture = (
 };
 
 export const useImageAsTexture = (source: DataSourceParam) => {
+  const texture = Rea.useSharedValue<SkImage | null>(null);
   const image = useImage(source);
-  const size = useMemo(() => {
-    if (image) {
-      return { width: image.width(), height: image.height() };
+  useEffect(() => {
+    if (image !== null) {
+      Rea.runOnUI(() => {
+        texture.value = Skia.Image.MakeTextureFromImage(image);
+      })();
     }
-    return { width: 0, height: 0 };
-  }, [image]);
-  const picture = useMemo(() => {
-    if (image) {
-      const recorder = Skia.PictureRecorder();
-      const canvas = recorder.beginRecording({
-        x: 0,
-        y: 0,
-        width: size.width,
-        height: size.height,
-      });
-      canvas.drawImage(image, 0, 0);
-      return recorder.finishRecordingAsPicture();
-    } else {
-      return null;
-    }
-  }, [size, image]);
-  return usePictureAsTexture(picture, size);
+  });
+  return texture;
 };
