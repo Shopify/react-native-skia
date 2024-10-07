@@ -40,6 +40,10 @@ public:
 
   ~RNSkAndroidPlatformContext() { stopDrawLoop(); }
 
+  float getPixelDensity() override {
+    return _jniPlatformContext->getPixelDensity(); 
+  }
+
   void performStreamOperation(
       const std::string &sourceUri,
       const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) override {

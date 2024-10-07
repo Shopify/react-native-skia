@@ -27,6 +27,9 @@ public:
 
   static void registerNatives();
 
+  float getPixelDensity();
+  void setPixelDensity(float pixelDensity);
+
   void performStreamOperation(
       const std::string &sourceUri,
       const std::function<void(std::unique_ptr<SkStreamAsset>)> &op);
@@ -41,8 +44,6 @@ public:
   void notifyTaskReadyExternal();
 
   void runTaskOnMainThread(std::function<void()> task);
-
-  float getPixelDensity() { return _pixelDensity; }
 
   sk_sp<SkImage> takeScreenshotFromViewTag(size_t tag);
 
