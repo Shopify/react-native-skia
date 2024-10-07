@@ -186,7 +186,7 @@ public:
   /**
    * @return Current scale factor for pixels
    */
-  float getPixelDensity() { return _pixelDensity; }
+  virtual float getPixelDensity() { return _pixelDensity; }
 
   /**
    * Starts (if not started) a loop that will call back on display sync
