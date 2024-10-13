@@ -23,6 +23,7 @@
 #include "include/core/SkBBHFactory.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPictureRecorder.h"
+#include "include/core/SkFont.h"
 
 #pragma clang diagnostic pop
 
@@ -63,6 +64,7 @@ private:
   RNSkTimingInfo _renderTimingInfo;
 
   std::mutex _rootLock;
+  SkFont _font;
 };
 
 class RNSkDomView : public RNSkView {

@@ -17,7 +17,13 @@ RNSkDomRenderer::RNSkDomRenderer(std::function<void()> requestRedraw,
                                  std::shared_ptr<RNSkPlatformContext> context)
     : RNSkRenderer(requestRedraw), _platformContext(std::move(context)),
       _renderLock(std::make_shared<std::timed_mutex>()),
-      _renderTimingInfo("SKIA/RENDER") {}
+      _renderTimingInfo("SKIA/RENDER") {
+
+  auto style = SkFontStyle::Normal();
+  auto fontMgr = _platformContext->createFontMgr();
+  auto _typeface = fontMgr->matchFamilyStyle("Arial", style);
+  _font = SkFont(_typeface, 14);
+}
 
 RNSkDomRenderer::~RNSkDomRenderer() {
   if (_root != nullptr) {
@@ -130,12 +136,10 @@ void RNSkDomRenderer::renderDebugOverlays(SkCanvas *canvas) {
   std::string debugString = stream.str();
 
   // Set up debug font/paints
-  auto font = SkFont();
-  font.setSize(14);
   auto paint = SkPaint();
   paint.setColor(SkColors::kRed);
   canvas->drawSimpleText(debugString.c_str(), debugString.size(),
-                         SkTextEncoding::kUTF8, 8, 18, font, paint);
+                         SkTextEncoding::kUTF8, 8, 18, _font, paint);
 }
 
 } // namespace RNSkia
