@@ -12,6 +12,7 @@
 
     if (@available(iOS 15.0, *)) {
         CAFrameRateRange rate;
+        rate.minimum = 120;
         rate.maximum = 120;
         rate.preferred = 120;
         _displayLink.preferredFrameRateRange = rate;
