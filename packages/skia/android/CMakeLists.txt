@@ -155,10 +155,13 @@ endif()
 message("-- JSI     : " ${JSI_LIB})
 
 unset(REACT_LIB CACHE)
-if(${REACT_NATIVE_VERSION} GREATER_EQUAL 71)
+if(${REACT_NATIVE_VERSION} GREATER_EQUAL 76)
+    # RN 0.76 packs react_nativemodule_core into ReactAndroid::reactnative
+    set (REACT_LIB ReactAndroid::reactnative)
+elseif(${REACT_NATIVE_VERSION} GREATER_EQUAL 71)
     # RN 0.71 distributes prebuilt binaries.
     set (REACT_LIB ReactAndroid::react_nativemodule_core)
-else()
+    else()
     find_library(
             REACT_LIB
             react_nativemodule_core
@@ -183,7 +186,10 @@ endif()
 message("-- FBJNI   : " ${FBJNI_LIBRARY})
 
 unset(REACTNATIVEJNI_LIB CACHE)
-if(${REACT_NATIVE_VERSION} GREATER_EQUAL 71)
+if(${REACT_NATIVE_VERSION} GREATER_EQUAL 76)
+    # RN 0.76 doesn't have reactnativejni
+    # DO NOTHING, we'll not link these libraries
+elseif(${REACT_NATIVE_VERSION} GREATER_EQUAL 71)
     # RN 0.71 distributes prebuilt binaries.
     set (REACTNATIVEJNI_LIB "ReactAndroid::reactnativejni")
 else()
@@ -197,7 +203,10 @@ endif()
 message("-- REACTNATIVEJNI   : " ${REACTNATIVEJNI_LIB})
 
 unset(RUNTIMEEXECUTOR_LIB CACHE)
-if(${REACT_NATIVE_VERSION} GREATER_EQUAL 71)
+if(${REACT_NATIVE_VERSION} GREATER_EQUAL 76)
+    # RN 0.76 doesn't have runtimeexecutor
+    # DO NOTHING, we'll not link these libraries
+elseif(${REACT_NATIVE_VERSION} GREATER_EQUAL 71)
     # RN 0.71 distributes prebuilt binaries.
     set (RUNTIMEEXECUTOR_LIB "ReactAndroid::runtimeexecutor")
 else()
@@ -211,7 +220,10 @@ endif()
 message("-- RUNTIMEEXECUTOR   : " ${RUNTIMEEXECUTOR_LIB})
 
 unset(TURBOMODULES_LIB CACHE)
-if(${REACT_NATIVE_VERSION} GREATER_EQUAL 71)
+if(${REACT_NATIVE_VERSION} GREATER_EQUAL 76)
+    # RN 0.76 doesn't have turbomodulejsijni
+    # DO NOTHING, we'll not link these libraries
+elseif(${REACT_NATIVE_VERSION} GREATER_EQUAL 71)
     # RN 0.71 distributes prebuilt binaries.
     set (TURBOMODULES_LIB "ReactAndroid::turbomodulejsijni")
 else()
@@ -227,7 +239,26 @@ message("-- TURBO   : " ${TURBOMODULES_LIB})
 add_definitions(-DREACT_NATIVE_VERSION=${REACT_NATIVE_VERSION})
 
 # Link
-target_link_libraries(
+if(${REACT_NATIVE_VERSION} GREATER_EQUAL 76)
+    target_link_libraries(
+        ${PACKAGE_NAME}
+        ${LOG_LIB}
+        ${REACT_LIB}
+        ${FBJNI_LIBRARY}
+        ${JSI_LIB}
+        ${SKIA_SVG_LIB}
+        ${SKIA_SKSHAPER_LIB}
+        ${SKIA_SKPARAGRAPH_LIB}
+        ${SKIA_SKUNICODE_CORE_LIB}
+        ${SKIA_SKUNICODE_ICU_LIB}
+        ${SKIA_LIB}
+        -ljnigraphics
+        -lGLESv2
+        -lEGL
+        -landroid
+    )
+else()
+    target_link_libraries(
         ${PACKAGE_NAME}
         ${LOG_LIB}
         ${FBJNI_LIBRARY}
@@ -247,3 +278,4 @@ target_link_libraries(
         -lEGL
         -landroid
     )
+endif()

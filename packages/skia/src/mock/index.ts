@@ -26,7 +26,6 @@ export const Mock = (CanvasKit: CanvasKit) => {
     // Skia Animations
     useValue: NoopValue,
     useComputedValue: NoopValue,
-    useTouchHandler: Noop,
     useTiming: NoopValue,
     useLoop: NoopValue,
     useSpring: NoopValue,
