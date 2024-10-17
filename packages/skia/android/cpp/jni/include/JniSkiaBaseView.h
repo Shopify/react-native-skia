@@ -29,9 +29,6 @@ public:
   }
 
 protected:
-  virtual void updateTouchPoints(jni::JArrayDouble touches) {
-    _skiaAndroidView->updateTouchPoints(touches);
-  }
 
   virtual void surfaceAvailable(jobject surface, int width, int height) {
     _skiaAndroidView->surfaceAvailable(surface, width, height);

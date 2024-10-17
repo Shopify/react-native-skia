@@ -138,16 +138,6 @@ private:
 
 enum RNSkDrawingMode { Default, Continuous };
 
-using RNSkTouchInfo = struct {
-  enum TouchType { Start, Active, End, Cancelled };
-  double x;
-  double y;
-  double force;
-  TouchType type;
-  size_t id;
-  long timestamp;
-};
-
 class RNSkView : public std::enable_shared_from_this<RNSkView> {
 public:
   /**
@@ -215,13 +205,6 @@ public:
    */
   void setShowDebugOverlays(bool show) {
     _renderer->setShowDebugOverlays(show);
-    requestRedraw();
-  }
-
-  /**
-    Update touch state with new touch points
-   */
-  virtual void updateTouchState(std::vector<RNSkTouchInfo> &) {
     requestRedraw();
   }
 

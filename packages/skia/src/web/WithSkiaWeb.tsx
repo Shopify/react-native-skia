@@ -5,17 +5,28 @@ import { Platform } from "../Platform";
 
 import { LoadSkiaWeb } from "./LoadSkiaWeb";
 
-interface WithSkiaProps {
-  fallback?: ComponentProps<typeof Suspense>["fallback"];
-  getComponent: () => Promise<{ default: ComponentType }>;
-  opts?: Parameters<typeof LoadSkiaWeb>[0];
-}
+type NonOptionalKeys<T> = {
+  [k in keyof T]-?: undefined extends T[k] ? never : k;
+}[keyof T];
 
-export const WithSkiaWeb = ({
+type WithSkiaProps<TProps> = {
+  fallback?: ComponentProps<typeof Suspense>["fallback"];
+  getComponent: () => Promise<{ default: ComponentType<TProps> }>;
+  opts?: Parameters<typeof LoadSkiaWeb>[0];
+} & (NonOptionalKeys<TProps> extends never
+  ? {
+      componentProps?: TProps;
+    }
+  : {
+      componentProps: TProps;
+    });
+
+export const WithSkiaWeb = <TProps extends object>({
   getComponent,
   fallback,
   opts,
-}: WithSkiaProps) => {
+  componentProps,
+}: WithSkiaProps<TProps>) => {
   const Inner = useMemo(
     // TODO: investigate
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,7 +45,7 @@ export const WithSkiaWeb = ({
   );
   return (
     <Suspense fallback={fallback ?? null}>
-      <Inner />
+      <Inner {...componentProps} />
     </Suspense>
   );
 };

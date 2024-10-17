@@ -12,11 +12,12 @@ Pod::Spec.new do |s|
                   @shopify/react-native-skia
                    DESC
   s.homepage     = "https://github.com/shopify/react-native-skia"
-  # brief license entry:
   s.license      = "MIT"
-  # optional - use expanded license entry instead:
-  # s.license    = { :type => "MIT", :file => "LICENSE" }
-  s.authors      = { "Your Name" => "yourname@email.com" }
+  s.license    = { :type => "MIT", :file => "LICENSE.md" }
+  s.authors      = { 
+    "Christian Falch" => "christian.falch@gmail.com",
+    "William Candillon" => "wcandillon@gmail.com"
+  }
   s.platforms    = { :ios => "13.0" }
   s.source       = { :git => "https://github.com/shopify/react-native-skia/react-native-skia.git", :tag => "#{s.version}" }
 

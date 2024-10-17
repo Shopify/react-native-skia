@@ -6,8 +6,8 @@
 
 #if __ANDROID_API__ >= 26
 
-#include "include/gpu/GrBackendSurface.h"
-#include "include/gpu/GrTypes.h"
+#include "include/gpu/ganesh/GrBackendSurface.h"
+#include "include/gpu/ganesh/GrTypes.h"
 
 class GrDirectContext;
 

@@ -2,48 +2,13 @@
     "$schema": "https://turbo.build/schema.json",
     "tasks": {
       "build:android": {
-        "env": ["JAVA_HOME", "ANDROID_NDK", "ANDROID_SDK", "ANDROID_HOME"],
-        "inputs": [
-          "packages/*/package.json",
-          "packages/app/package.json",
-          "packages/*/src/*.{ts,tsx}",
-          "apps/*/src/*.{ts,tsx}",
-          "apps/*/cpp/*.{cpp,h}",
-          "packages/*/android",
-          "!packages/*/android/build",
-          "apps/*/src/android",
-          "!apps/*/src/.gradle",
-          "!apps/*/src/build",
-          "!apps/*/src/app/build"
-        ],
-        "outputs": [
-          "apps/*/android/**"
-        ]
+        "env": ["JAVA_HOME", "ANDROID_NDK", "ANDROID_SDK", "ANDROID_HOME"]
       },
       "build:ios": {
-        "dependsOn": ["pod:install"],
-        "outputs": [
-          "apps/*/ios/build/**",
-          "!apps/*/ios/.ios.xcode.env.local"
-        ],
-        "inputs": [
-          "packages/*/package.json",
-          "packages/app/package.json",
-          "packages/*/src/*.{ts,tsx}",
-          "apps/*/src/*.{ts,tsx}",
-          "apps/*/cpp/*.{cpp,h}",
-          "packages/*/*.podspec",
-          "packages/*/ios",
-          "apps/*/ios",
-          "!apps/*/ios/.ios.xcode.env.local",
-          "!apps/*/ios/build",
-          "!apps/*/ios/Pods"
-        ]
+        "dependsOn": ["pod:install"]
       },
       "pod:install": {
-        "cache": false,
-        "inputs": ["**/ios/Podfile", "**/ios/Podfile.lock"],
-        "outputs": ["**/ios/Pods/**"]
+        "cache": false
       },
       "lint": {},
       "tsc": {},

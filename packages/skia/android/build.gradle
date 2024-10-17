@@ -201,6 +201,7 @@ android {
              "**/libreactnativejni.so",
              "**/libruntimeexecutor.so",
              "**/libturbomodulejsijni.so",
+             "**/libreactnative.so",
              "META-INF/**"
         ]
     }
