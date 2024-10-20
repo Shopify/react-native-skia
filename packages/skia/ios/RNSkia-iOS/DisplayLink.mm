@@ -11,13 +11,10 @@
                                                selector:@selector(update:)];
 
     if (@available(iOS 15.0, *)) {
-        CAFrameRateRange rate;
-        rate.minimum = 120;
-        rate.maximum = 120;
-        rate.preferred = 120;
-        _displayLink.preferredFrameRateRange = rate;
+      CAFrameRateRange rate = CAFrameRateRangeMake(60, 120, 120);
+      _displayLink.preferredFrameRateRange = rate;
     } else {
-        _displayLink.preferredFramesPerSecond = 120;
+      _displayLink.preferredFramesPerSecond = 60;
     }
 
     // add the display link to the main run loop
