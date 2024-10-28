@@ -9,6 +9,7 @@ export interface SkRect {
 
 export interface SkHostRect extends SkRect, SkJSIInstance<"Rect"> {
   setXYWH(x: number, y: number, width: number, height: number): void;
+  intersects(other: SkRect): boolean;
 }
 
 export const isRect = (def: unknown): def is SkRect => {
@@ -24,3 +25,8 @@ export const isRect = (def: unknown): def is SkRect => {
   }
   return false;
 };
+
+export const intersects = (rectA: SkRect, rectB: SkRect): boolean =>{
+  'worklet';
+  return (rectA as SkHostRect).intersects(rectB);
+}
