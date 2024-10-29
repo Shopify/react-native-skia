@@ -12,6 +12,9 @@ set (SKIA_SKSHAPER_LIB "skshaper")
 set (SKIA_SKPARAGRAPH_LIB "skparagraph")
 set (SKIA_SKUNICODE_CORE_LIB "skunicode_core")
 set (SKIA_SKUNICODE_ICU_LIB "skunicode_icu")
+set (DAWN_NATIVE_LIB "libdawn_native_static")
+set (DAWN_PLATFORM_LIB "libdawn_platform_static")
+set (DAWN_PROC_LIB "libdawn_proc_static")
 
 # Clear some variables
 unset(LIBRN_DIR CACHE)
@@ -88,6 +91,7 @@ target_include_directories(
         # so "include/core/SkRef.h" instead of "SkRef.h", as otherwise
         # the prefab cannot be shipped.
         ../cpp/skia
+        ../cpp/dawn
 
         ../cpp/api
         ../cpp/jsi
@@ -123,6 +127,14 @@ set_property(TARGET skunicode_core PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}
 add_library(skunicode_icu STATIC IMPORTED)
 set_property(TARGET skunicode_icu PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskunicode_icu.a")
 
+add_library(libdawn_native_static STATIC IMPORTED)
+set_property(TARGET libdawn_native_static PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_native_static.a")
+
+add_library(libdawn_platform_static STATIC IMPORTED)
+set_property(TARGET libdawn_platform_static PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_platform_static.a")
+
+add_library(libdawn_proc_static STATIC IMPORTED)
+set_property(TARGET libdawn_proc_static PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_proc_static.a")
 
 find_library(
         LOG_LIB
@@ -252,6 +264,9 @@ if(${REACT_NATIVE_VERSION} GREATER_EQUAL 76)
         ${SKIA_SKUNICODE_CORE_LIB}
         ${SKIA_SKUNICODE_ICU_LIB}
         ${SKIA_LIB}
+        ${DAWN_NATIVE_LIB}
+        ${DAWN_PLATFORM_LIB}
+        ${DAWN_PROC_LIB}
         -ljnigraphics
         -lGLESv2
         -lEGL
@@ -273,6 +288,9 @@ else()
         ${SKIA_SKUNICODE_CORE_LIB}
         ${SKIA_SKUNICODE_ICU_LIB}
         ${SKIA_LIB}
+        ${DAWN_NATIVE_LIB}
+        ${DAWN_PLATFORM_LIB}
+        ${DAWN_PROC_LIB}
         -ljnigraphics
         -lGLESv2
         -lEGL

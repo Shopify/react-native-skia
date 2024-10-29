@@ -236,6 +236,11 @@ export const copyHeaders = () => {
     "mkdir -p ./cpp/skia/modules/skunicode/include/",
     "cp -a ../../externals/skia/modules/skunicode/include/SkUnicode.h ./cpp/skia/modules/skunicode/include/.",
 
+    // Remove duplicated WebGPU headers
+    "rm -rf ./cpp/dawn/include/webgpu/webgpu_cpp.h",
+    "rm -rf ./cpp/dawn/include/webgpu/webgpu.h",
+    "rm -rf ./cpp/dawn/include/dawn/wire",
+
     // Remove migrated headers
     //grep -R "Delete this after migrating clients" cpp
     "rm -rf ./cpp/skia/include/gpu/GrContextThreadSafeProxy.h",
