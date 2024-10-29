@@ -49,6 +49,12 @@ const ParagraphOutputsAndroid = BUILD_WITH_PARAGRAPH
   ? ["libskparagraph.a", "libskunicode_core.a", "libskunicode_icu.a"]
   : [];
 
+const DawnOutput = [
+  "libdawn_native_static.a",
+  "libdawn_platform_static.a",
+  "libdawn_proc_static.a",
+];
+
 export const commonArgs = [
   ["skia_use_piex", true],
   ["skia_use_sfntly", false],
@@ -132,6 +138,7 @@ export const configurations = {
       "libskottie.a",
       "libsksg.a",
       ...ParagraphOutputsAndroid,
+      ...DawnOutput,
     ],
   },
   ios: {
@@ -179,6 +186,7 @@ export const configurations = {
       "libskottie.a",
       "libsksg.a",
       ...ParagraphIOS,
+      ...DawnOutput,
     ],
   },
 };
@@ -192,11 +200,14 @@ export const copyHeaders = () => {
   process.chdir(PackageRoot);
   [
     "rm -rf ./cpp/skia",
+    "rm -rf ./cpp/dawn",
 
-    "mkdir -p ./cpp/skia",
+    "mkdir -p ./cpp/dawn/include",
     "mkdir -p ./cpp/skia/include",
     "mkdir -p ./cpp/skia/modules",
     "mkdir -p ./cpp/skia/src",
+
+    "cp -a ../../externals/skia/third_party/externals/dawn/include/. ./cpp/dawn/include",
 
     "cp -a ../../externals/skia/include/. ./cpp/skia/include",
     ...copyModule("svg"),
