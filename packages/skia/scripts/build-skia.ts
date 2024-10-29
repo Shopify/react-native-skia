@@ -1,82 +1,43 @@
 import { exit } from "process";
-import { existsSync, mkdirSync } from "fs";
 
-import { executeCmd, executeCmdSync } from "./utils";
-import type { PlatformName } from "./skia-configuration";
-import { commonArgs, configurations } from "./skia-configuration";
-
-const typedKeys = <T extends object>(obj: T) => Object.keys(obj) as (keyof T)[];
-
-/**
- * This build script builds the Skia Binaries from the Skia repositories
- * that are added as submodules to this repo. Both the Skia repo and
- * the depottools (build tools) for building is included.
- *
- * The build script does not have any other requirements than that the
- * Android NDK should be installed.
- *
- * This build script is run by the build-skia.yml github workflow
- *
- * Arguments:
- * @param platform the current platform as defined in the file skia-configuration.ts
- * @param cpu the cpu platform as defined in the file skia-configuration.ts
- *
- */
-
-console.log("Starting SKIA Build.");
-console.log("");
-
-// Test for existence of Android SDK
-if (!process.env.ANDROID_NDK) {
-  console.log("ANDROID_NDK not set.");
-  exit(1);
-} else {
-  console.log("☑ ANDROID_NDK");
-}
-
-console.log("");
-console.log("Requirements met. Starting build.");
-console.log("");
-
-if (process.argv.length !== 4) {
-  console.log("Missing platform/target arguments");
-  console.log("Available platforms/targets:");
-  console.log("");
-  typedKeys(configurations).forEach((platform) => {
-    console.log(platform);
-    const config = configurations[platform];
-    Object.keys(config.targets).forEach((target) => console.log("  " + target));
-  });
-  exit(1);
-}
-
-const currentDir = process.cwd();
-const SkiaDir = "../../externals/skia";
-const SelectedPlatform = (process.argv[2] as PlatformName) ?? "";
-const SelectedTarget = process.argv[3] ?? "";
-
-if (SkiaDir === undefined) {
-  throw new Error("No Skia root directory specified.");
-}
+import type { Platform, PlatformName } from "./skia-configuration";
+import {
+  commonArgs,
+  configurations,
+  copyHeaders,
+  OutFolder,
+  PackageRoot,
+  ProjectRoot,
+  SkiaSrc,
+} from "./skia-configuration";
+import { $, mapKeys, runAsync } from "./utils";
 
 const getOutDir = (platform: PlatformName, targetName: string) => {
-  return `out/${platform}/${targetName}`;
+  return `${OutFolder}/${platform}/${targetName}`;
 };
 
-const configurePlatform = (platform: PlatformName, targetName: string) => {
-  console.log(`Configuring platform "${platform}" for target "${targetName}"`);
+const configurePlatform = (
+  platformName: PlatformName,
+  configuration: Platform,
+  targetName: string
+) => {
+  process.chdir(SkiaSrc);
+  console.log(
+    `Configuring platform "${platformName}" for target "${targetName}"`
+  );
   console.log("Current directory", process.cwd());
 
-  const configuration = configurations[platform];
   if (configuration) {
     const target = configuration.targets[targetName];
     if (!target) {
-      console.log(`Target ${targetName} not found for platform ${platform}`);
+      console.log(
+        `Target ${targetName} not found for platform ${platformName}`
+      );
       exit(1);
     }
 
     const commandline = `PATH=../depot_tools/:$PATH gn gen ${getOutDir(
-      platform,
+      platformName,
       targetName
     )}`;
 
@@ -105,25 +66,25 @@ const configurePlatform = (platform: PlatformName, targetName: string) => {
       "";
 
     // eslint-disable-next-line max-len
-    const command = `${commandline} ${options} ${targetOptions} --script-executable=python3 --args='target_os="${platform}" target_cpu="${target.cpu}" ${common}${args}${targetArgs}'`;
+    const command = `${commandline} ${options} ${targetOptions} --script-executable=python3 --args='target_os="${platformName}" target_cpu="${target.cpu}" ${common}${args}${targetArgs}'`;
     console.log("Command:");
     console.log(command);
     console.log("===============================");
-    executeCmdSync(command);
+    $(command);
     return true;
   } else {
     console.log(
-      `Could not find platform "${platform}" for target "${targetName}" `
+      `Could not find platform "${platformName}" for target "${targetName}" `
     );
     return false;
   }
 };
 
-const buildPlatform = (
+export const buildPlatform = async (
   platform: PlatformName,
-  targetName: string,
-  callback: () => void
+  targetName: string
 ) => {
+  process.chdir(SkiaSrc);
   console.log(`Building platform "${platform}" for target "${targetName}"`);
   // We need to include the path to our custom python2 -> python3 mapping script
   // to make sure we can run all scripts that uses #!/usr/bin/env python as shebang
@@ -132,87 +93,88 @@ const buildPlatform = (
     platform,
     targetName
   )}`;
-  console.log(command);
-  executeCmd(command, `${platform}/${targetName}`, callback);
+  await runAsync(command, `${platform}/${targetName}`);
 };
 
-const processOutput = (platformName: PlatformName, targetName: string) => {
-  console.log(
-    `Copying output for platform "${platformName}" and cpu "${targetName}"`
-  );
-  const source = getOutDir(platformName, targetName);
-  const configuration = configurations[platformName];
-  if (configuration) {
-    const libNames = configuration.outputNames;
-    let targetDir = `${currentDir}/${configurations[platformName].outputRoot}/${targetName}`;
-    // Check if we have any output mappings here
-    const target = configuration.targets[targetName];
-    if (target.output) {
-      targetDir = `${currentDir}/${configurations[platformName].outputRoot}/${target.output}`;
-    }
+export const copyLib = (
+  os: PlatformName,
+  cpu: string,
+  platform: string,
+  outputNames: string[]
+) => {
+  const dstPath = `${PackageRoot}/libs/${os}/${platform}/`;
+  $(`mkdir -p ${dstPath}`);
 
-    if (!existsSync(targetDir)) {
-      console.log(`Creating directory '${targetDir}'...`);
-      mkdirSync(targetDir + "/", { recursive: true });
-    }
-
-    libNames.forEach((libName) => {
-      console.log(`Copying ${source}/${libName} to ${targetDir}/`);
-      console.log(`cp ${source}/${libName} ${targetDir}/.`);
-      executeCmdSync(`cp ${source}/${libName} ${targetDir}/.`);
+  outputNames
+    .map((name) => `${OutFolder}/${os}/${cpu}/${name}`)
+    .forEach((lib) => {
+      const libPath = lib;
+      console.log(`Copying ${libPath} to ${dstPath}`);
+      console.log(`cp ${libPath} ${dstPath}`);
+      $(`cp ${libPath} ${dstPath}`);
     });
-  } else {
-    throw new Error(
-      `Could not find platform "${platformName}" for tagetCpu "${targetName}" `
-    );
-  }
 };
 
-try {
-  console.log(`Entering directory ${SkiaDir}`);
-  process.chdir(SkiaDir);
-
-  // Find platform/target
-  const platform = configurations[SelectedPlatform];
-  if (!platform) {
-    console.log(`Could not find platform ${SelectedPlatform}`);
-    exit(1);
-  }
-  const target = platform.targets[SelectedTarget];
-  if (!target) {
-    console.log(
-      `Could not find target ${SelectedTarget} for platform ${SelectedPlatform}`
+const buildXCFrameworks = () => {
+  const os: PlatformName = "ios";
+  const { outputNames } = configurations.ios;
+  process.chdir(SkiaSrc);
+  outputNames.forEach((name) => {
+    console.log("Building XCFramework for " + name);
+    const prefix = `${OutFolder}/${os}`;
+    $(`mkdir -p ${OutFolder}/${os}/iphonesimulator`);
+    $(`rm -rf ${OutFolder}/${os}/iphonesimulator/${name}`);
+    $(
+      // eslint-disable-next-line max-len
+      `lipo -create ${OutFolder}/${os}/x64/${name} ${OutFolder}/${os}/arm64-iphonesimulator/${name} -output ${OutFolder}/${os}/iphonesimulator/${name}`
     );
+    const [lib] = name.split(".");
+    const dstPath = `${PackageRoot}/libs/${os}/${lib}.xcframework`;
+    $(
+      "xcodebuild -create-xcframework " +
+        `-library ${prefix}/arm64-iphoneos/${name} ` +
+        `-library ${prefix}/iphonesimulator/${name} ` +
+        ` -output ${dstPath}`
+    );
+  });
+};
+
+(async () => {
+  // Test for existence of Android SDK
+  if (!process.env.ANDROID_NDK) {
+    console.log("ANDROID_NDK not set.");
     exit(1);
+  } else {
+    console.log("☑ ANDROID_NDK");
   }
 
   // Run glient sync
   console.log("Running gclient sync...");
-
   // Start by running sync
-  executeCmdSync("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
+  process.chdir(SkiaSrc);
+  $("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
   console.log("gclient sync done");
-
-  try {
-    // Configure the platform
-    if (!configurePlatform(SelectedPlatform, SelectedTarget)) {
-      throw Error(
-        `Error configuring platform "${SelectedPlatform}" for cpu "${SelectedTarget}"`
-      );
+  $(`rm -rf ${PackageRoot}/libs`);
+  for (const key of mapKeys(configurations)) {
+    const configuration = configurations[key];
+    for (const target of mapKeys(configuration.targets)) {
+      if (!configurePlatform(key as PlatformName, configuration, target)) {
+        throw Error(`Error configuring platform "${key}" for cpu "${target}"`);
+      }
+      await buildPlatform(key as PlatformName, target);
+      process.chdir(ProjectRoot);
+      if (key === "android") {
+        copyLib(
+          key,
+          target,
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
+          configuration.targets[target].output,
+          configuration.outputNames
+        );
+      }
     }
-    // Spawn build
-    buildPlatform(SelectedPlatform, SelectedTarget, () => {
-      process.chdir(SkiaDir);
-      // Copy the output
-      processOutput(SelectedPlatform, SelectedTarget);
-      // Revert back to original directory
-      process.chdir(currentDir);
-    });
-  } catch (err) {
-    console.log(`ERROR ${SelectedPlatform}/${SelectedTarget}: ${err}`);
   }
-
-  process.chdir(currentDir);
-} catch (err) {
-  console.log(err);
-}
+  buildXCFrameworks();
+  copyHeaders();
+})();
