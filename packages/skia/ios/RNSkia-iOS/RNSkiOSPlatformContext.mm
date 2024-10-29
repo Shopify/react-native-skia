@@ -8,6 +8,7 @@
 #include "RNSkiOSVideo.h"
 #import "SkiaCVPixelBufferUtils.h"
 #import "SkiaMetalSurfaceFactory.h"
+#import "SkiaDawnSurfaceFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

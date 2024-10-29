@@ -38,6 +38,9 @@ Pod::Spec.new do |s|
     'libs/ios/libskparagraph.xcframework',
     'libs/ios/libskunicode_core.xcframework',
     'libs/ios/libskunicode_libgrapheme.xcframework',
+    'libs/ios/libdawn_native_static.xcframework',
+    'libs/ios/libdawn_platform_static.xcframework',
+    'libs/ios/libdawn_proc_static.xcframework',
   ]
 
   # All iOS cpp/h files
