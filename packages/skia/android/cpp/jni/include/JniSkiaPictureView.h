@@ -49,7 +49,6 @@ public:
   }
 
 protected:
-
   void surfaceAvailable(jobject surface, int width, int height) override {
     JniSkiaBaseView::surfaceAvailable(surface, width, height);
   }
