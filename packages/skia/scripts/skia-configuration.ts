@@ -7,7 +7,7 @@ export const ProjectRoot = path.join(__dirname, "../../..");
 export const PackageRoot = path.join(__dirname, "..");
 export const OutFolder = path.join(SkiaSrc, "out");
 
-const NdkDir: string = process.env.ANDROID_NDK ?? "";
+const NdkDir = process.env.ANDROID_NDK ?? "";
 
 export const BUILD_WITH_PARAGRAPH = true;
 const NoParagraphArgs = [
@@ -65,7 +65,9 @@ export const commonArgs = [
   ["skia_enable_flutter_defines", true],
   ["paragraph_tests_enabled", false],
   ["is_component_build", false],
-  // ["skia_enable_graphite", true],
+  // Graphite
+  ["skia_enable_graphite", true],
+  ["skia_use_dawn", true],
 ];
 
 export type PlatformName = "ios" | "android";
@@ -85,6 +87,9 @@ export type Platform = {
   outputNames: string[];
   options?: Arg[];
 };
+
+const androidMinSDK = 26;
+const iosMinTarget = '"15.1"';
 
 export const configurations = {
   android: {
@@ -107,6 +112,7 @@ export const configurations = {
       },
     },
     args: [
+      ["ndk_api", androidMinSDK],
       ["ndk", `"${NdkDir}"`],
       ["skia_use_system_freetype2", false],
       ["skia_use_gl", true],
@@ -133,7 +139,7 @@ export const configurations = {
       "arm64-iphoneos": {
         cpu: "arm64",
         args: [
-          ["ios_min_target", '"13.0"'],
+          ["ios_min_target", iosMinTarget],
           ["extra_cflags", '["-target", "arm64-apple-ios"]'],
           ["extra_asmflags", '["-target", "arm64-apple-ios"]'],
           ["extra_ldflags", '["-target", "arm64-apple-ios"]'],
@@ -142,7 +148,7 @@ export const configurations = {
       "arm64-iphonesimulator": {
         cpu: "arm64",
         args: [
-          ["ios_min_target", '"13.0"'],
+          ["ios_min_target", iosMinTarget],
           ["extra_cflags", '["-target", "arm64-apple-ios-simulator"]'],
           ["extra_asmflags", '["-target", "arm64-apple-ios-simulator"]'],
           ["extra_ldflags", '["-target", "arm64-apple-ios-simulator"]'],
@@ -152,7 +158,7 @@ export const configurations = {
       x64: {
         cpu: "x64",
         args: [
-          ["ios_min_target", '"13.0"'],
+          ["ios_min_target", iosMinTarget],
           ["extra_cflags", '["-target", "arm64-apple-ios-simulator"]'],
           ["extra_asmflags", '["-target", "arm64-apple-ios-simulator"]'],
           ["extra_ldflags", '["-target", "arm64-apple-ios-simulator"]'],

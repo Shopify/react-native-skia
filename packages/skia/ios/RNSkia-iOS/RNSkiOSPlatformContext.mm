@@ -165,6 +165,11 @@ sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
   return SkiaMetalSurfaceFactory::makeOffscreenSurface(width, height);
 }
 
+sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurfaceGraphite(int width,
+                                                              int height) {
+  return SkiaDawnSurfaceFactory::makeOffscreenSurface(width, height);
+}
+
 sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeBuffer(void *buffer) {
   CVPixelBufferRef sampleBuffer = (CVPixelBufferRef)buffer;
   return SkiaMetalSurfaceFactory::makeTextureFromCVPixelBuffer(sampleBuffer);
