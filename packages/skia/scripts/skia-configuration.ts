@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import path from "path";
 
 import { $ } from "./utils";
@@ -237,8 +238,11 @@ export const copyHeaders = () => {
     "cp -a ../../externals/skia/modules/skunicode/include/SkUnicode.h ./cpp/skia/modules/skunicode/include/.",
 
     // Remove duplicated WebGPU headers
-    "rm -rf ./cpp/dawn/include/webgpu/webgpu.h",
-    "rm -rf ./cpp/dawn/include/webgpu/webgpu_cpp.h",
+    "sed -i '' 's/#include \"dawn\\/webgpu.h\"/#include \"webgpu\\/webgpu.h\"/' ./cpp/dawn/include/dawn/dawn_proc_table.h",
+    "cp ./cpp/dawn/include/dawn/webgpu.h ./cpp/dawn/include/webgpu/webgpu.h",
+    "cp ./cpp/dawn/include/dawn/webgpu_cpp.h ./cpp/dawn/include/webgpu/webgpu_cpp.h",
+    "rm -rf ./cpp/dawn/include/dawn/webgpu.h",
+    "rm -rf ./cpp/dawn/include/dawn/webgpu_cpp.h",
     "rm -rf ./cpp/dawn/include/dawn/wire",
 
     // Remove migrated headers
