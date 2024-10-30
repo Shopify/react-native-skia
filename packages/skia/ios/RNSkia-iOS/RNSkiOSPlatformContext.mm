@@ -8,7 +8,6 @@
 #include "RNSkiOSVideo.h"
 #import "SkiaCVPixelBufferUtils.h"
 #import "SkiaMetalSurfaceFactory.h"
-#import "SkiaDawnSurfaceFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -164,11 +163,6 @@ void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
 sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
                                                               int height) {
   return SkiaMetalSurfaceFactory::makeOffscreenSurface(width, height);
-}
-
-sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurfaceGraphite(int width,
-                                                              int height) {
-  return SkiaDawnSurfaceFactory::makeOffscreenSurface(width, height);
 }
 
 sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeBuffer(void *buffer) {

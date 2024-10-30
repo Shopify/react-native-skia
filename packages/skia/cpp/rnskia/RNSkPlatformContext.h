@@ -134,7 +134,6 @@ public:
    * @return sk_sp<SkSurface>
    */
   virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) = 0;
-  virtual sk_sp<SkSurface> makeOffscreenSurfaceGraphite(int width, int height) = 0;
 
   virtual std::shared_ptr<SkiaContext>
   makeContextFromNativeSurface(void *surface, int width, int height) = 0;
