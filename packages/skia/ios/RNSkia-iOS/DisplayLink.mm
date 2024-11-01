@@ -10,6 +10,13 @@
     _displayLink = [CADisplayLink displayLinkWithTarget:self
                                                selector:@selector(update:)];
 
+    if (@available(iOS 15.0, *)) {
+      CAFrameRateRange rate = CAFrameRateRangeMake(60, 120, 120);
+      _displayLink.preferredFrameRateRange = rate;
+    } else {
+      _displayLink.preferredFramesPerSecond = 60;
+    }
+
     // add the display link to the main run loop
     [_displayLink addToRunLoop:[NSRunLoop mainRunLoop]
                        forMode:NSRunLoopCommonModes];

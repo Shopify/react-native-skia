@@ -29,7 +29,6 @@ public:
   }
 
 protected:
-
   virtual void surfaceAvailable(jobject surface, int width, int height) {
     _skiaAndroidView->surfaceAvailable(surface, width, height);
   }
