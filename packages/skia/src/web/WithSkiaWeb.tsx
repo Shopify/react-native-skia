@@ -41,7 +41,9 @@ export const WithSkiaWeb = <TProps extends object>({
         }
         return getComponent();
       }),
-    [getComponent, opts]
+    // We we to run this only once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
   return (
     <Suspense fallback={fallback ?? null}>
