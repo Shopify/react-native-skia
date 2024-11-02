@@ -28,8 +28,12 @@ private:
 public:
   ~DawnContext() { fBackendContext.fDevice = nullptr; }
 
-  static std::unique_ptr<DawnContext> Make(wgpu::BackendType backend,
-                                           bool useTintIR) {
+  static std::unique_ptr<DawnContext> Make() {
+	  auto useTintIR = true;
+	  /*
+	   wgpu::BackendType backend,
+												bool useTintIR
+	   */
     static std::unique_ptr<dawn::native::Instance> sInstance;
     static SkOnce sOnce;
     static constexpr const char *kToggles[] = {
@@ -62,8 +66,9 @@ public:
     dawn::native::Adapter matchedAdaptor;
 
     wgpu::RequestAdapterOptions options;
-    options.compatibilityMode = backend == wgpu::BackendType::OpenGL ||
-                                backend == wgpu::BackendType::OpenGLES;
+	options.compatibilityMode = true;
+//    options.compatibilityMode = backend == wgpu::BackendType::OpenGL ||
+//                                backend == wgpu::BackendType::OpenGLES;
     options.nextInChain = &togglesDesc;
     std::vector<dawn::native::Adapter> adapters =
         sInstance->EnumerateAdapters(&options);
@@ -83,10 +88,10 @@ public:
     for (const auto &adapter : adapters) {
       wgpu::AdapterInfo props;
       adapter.GetInfo(&props);
-      if (backend == props.backendType) {
-        matchedAdaptor = adapter;
-        break;
-      }
+//      if (backend == props.backendType) {
+//        matchedAdaptor = adapter;
+//        break;
+//      }
     }
 
     if (!matchedAdaptor) {
@@ -161,6 +166,19 @@ public:
     backendContext.fDevice = device;
     backendContext.fQueue = device.GetQueue();
     return std::unique_ptr<DawnContext>(new DawnContext(backendContext));
+  }
+
+  std::unique_ptr<skgpu::graphite::Context> makeContext() {
+    skgpu::graphite::ContextOptions options;
+    // Needed to make synchronous readPixels work
+    //		options.fOptionsPriv->fStoreContextRefInRecorder = true;
+    //
+    //		auto backendContext = fBackendContext;
+    //		if (options.fNeverYieldToWebGPU) {
+    //			backendContext.fTick = nullptr;
+    //		}
+
+    return skgpu::graphite::ContextFactory::MakeDawn(fBackendContext, options);
   }
 };
 } // namespace RNSkia

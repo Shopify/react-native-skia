@@ -9,11 +9,15 @@ import {
   Group,
   polar2Canvas,
   mix,
+  Skia,
 } from "@shopify/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
 import { useDerivedValue } from "react-native-reanimated";
 
 import { useLoop } from "../../components/Animations";
+
+const surface = Skia.Surface.__MakeGraphite(256, 256);
+console.log({ surface });
 
 const c1 = "#61bea2";
 const c2 = "#529ca0";

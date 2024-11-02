@@ -8,11 +8,13 @@
 #include "JsiSkHostObjects.h"
 
 #include "JsiSkSurface.h"
+#include "DawnContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "include/core/SkSurface.h"
+#include "include/gpu/graphite/Surface.h"
 
 #pragma clang diagnostic pop
 
@@ -49,10 +51,20 @@ public:
   }
 
   JSI_HOST_FUNCTION(__MakeGraphite) {
+    //SkSurfaces::RenderTarget
     auto width = static_cast<int>(arguments[0].asNumber());
     auto height = static_cast<int>(arguments[1].asNumber());
-    auto context = getContext();
-    auto surface = nullptr;
+
+    auto ctx = DawnContext::Make()->makeContext();
+    std::unique_ptr<skgpu::graphite::Recorder> recorder = ctx->makeRecorder();
+    SkColorType colorType = kRGBA_8888_SkColorType;
+
+    // Create the SkSurface
+    sk_sp<SkSurface> surface = SkSurfaces::RenderTarget(
+        recorder.get(),                       // Recorder to manage the surface
+        SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType)
+    );
+
     if (surface == nullptr) {
       return jsi::Value::null();
     }
