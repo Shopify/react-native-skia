@@ -21,9 +21,11 @@
 #include "include/gpu/graphite/dawn/DawnUtils.h"
 #include "include/private/base/SkOnce.h"
 
+#include "src/gpu/graphite/ContextOptionsPriv.h"
+
 namespace RNSkia {
 
-class SkiaDawnFactory {
+class RNSkiaDawnContext {
 public:
 	
 	std::unique_ptr<dawn::native::Instance> instance;
@@ -31,19 +33,19 @@ public:
 	std::unique_ptr<skgpu::graphite::Recorder> fGraphiteRecorder;
 
   // Delete copy constructor and assignment operator
-  SkiaDawnFactory(const SkiaDawnFactory &) = delete;
-  SkiaDawnFactory &operator=(const SkiaDawnFactory &) = delete;
+  RNSkiaDawnContext(const RNSkiaDawnContext &) = delete;
+  RNSkiaDawnContext &operator=(const RNSkiaDawnContext &) = delete;
 
   // Get instance for current thread
-  static SkiaDawnFactory &getInstance() {
-    static thread_local SkiaDawnFactory instance;
+  static RNSkiaDawnContext &getInstance() {
+    static thread_local RNSkiaDawnContext instance;
     return instance;
   }
 
   // Create offscreen surface
   sk_sp<SkSurface> MakeOffscreen(int width, int height) {
     // Create SkImageInfo for offscreen surface
-    // Is premultiplied ok here?
+    // TODO: RGBA on Android here
     SkImageInfo imageInfo = SkImageInfo::Make(
         width, height, kBGRA_8888_SkColorType, kPremul_SkAlphaType);
 
@@ -70,7 +72,7 @@ public:
 private:
   skgpu::graphite::DawnBackendContext backendContext;
 
-  SkiaDawnFactory() {
+  RNSkiaDawnContext() {
     auto useTintIR = true;
     static SkOnce sOnce;
     static constexpr const char *kToggles[] = {
@@ -210,6 +212,9 @@ private:
     backendContext.fDevice = device;
     backendContext.fQueue = device.GetQueue();
     skgpu::graphite::ContextOptions ctxOptions;
+    //skgpu::graphite::ContextOptionsPriv contextOptionsPriv;
+    //ctxOptions.fOptionsPriv = &contextOptionsPriv;
+   // ctxOptions.fOptionsPriv->fStoreContextRefInRecorder = true;
     fGraphiteContext =
         skgpu::graphite::ContextFactory::MakeDawn(backendContext, ctxOptions);
     if (!fGraphiteContext) {

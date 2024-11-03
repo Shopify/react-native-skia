@@ -8,7 +8,7 @@
 #include "JsiSkHostObjects.h"
 
 #include "JsiSkSurface.h"
-#include "SkiaDawnFactory.h"
+#include "RNSkiaDawnContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -55,7 +55,7 @@ public:
     auto width = static_cast<int>(arguments[0].asNumber());
     auto height = static_cast<int>(arguments[1].asNumber());
 
-    auto surface = SkiaDawnFactory::getInstance().MakeOffscreen(width, height);
+    auto surface = RNSkiaDawnContext::getInstance().MakeOffscreen(width, height);
 
     if (surface == nullptr) {
       return jsi::Value::null();

@@ -9,7 +9,7 @@
 
 #include "JsiSkCanvas.h"
 #include "JsiSkImage.h"
-#include "SkiaDawnFactory.h"
+#include "RNSkiaDawnContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -60,11 +60,11 @@ public:
     }
     if (surface->recorder()) {
 		auto sync = skgpu::graphite::SyncToCpu::kNo;
-      SkiaDawnFactory::getInstance().fGraphiteContext->submit(sync);
+		RNSkiaDawnContext::getInstance().fGraphiteContext->submit(sync);
       if (sync == skgpu::graphite::SyncToCpu::kNo) {
-        while (SkiaDawnFactory::getInstance().fGraphiteContext->hasUnfinishedGpuWork()) {
-            SkiaDawnFactory::getInstance().tick();
-            SkiaDawnFactory::getInstance().fGraphiteContext->checkAsyncWorkCompletion();
+        while (RNSkiaDawnContext::getInstance().fGraphiteContext->hasUnfinishedGpuWork()) {
+			RNSkiaDawnContext::getInstance().tick();
+			RNSkiaDawnContext::getInstance().fGraphiteContext->checkAsyncWorkCompletion();
         }
     }
     }
@@ -85,9 +85,10 @@ public:
         auto img = SkSurfaces::AsImageCopy(surface);
         auto info = img->imageInfo();
         auto bounds = img->bounds();
+//      SkPixmap pixmap(info, nullptr, info.minRowBytes());
+//      auto result = surface->readPixels(pixmap, 0, 0);
 
-
-		  SkiaDawnFactory::getInstance().fGraphiteContext->asyncRescaleAndReadPixels(
+		  RNSkiaDawnContext::getInstance().fGraphiteContext->asyncRescaleAndReadPixels(
             img.get(), info, bounds, SkImage::RescaleGamma::kSrc,
             SkImage::RescaleMode::kRepeatedLinear,
             [](void *c,
@@ -97,14 +98,15 @@ public:
               context->fCalled = true;
             },
             &asyncContext);
+            
 		  // TODO: sync cpu yes?
-		  SkiaDawnFactory::getInstance().fGraphiteContext->submit();
+		  RNSkiaDawnContext::getInstance().fGraphiteContext->submit();
               if (!asyncContext.fCalled) {
                    // context->submit();
                 }
                 while (!asyncContext.fCalled) {
-					SkiaDawnFactory::getInstance().tick();
-					SkiaDawnFactory::getInstance().fGraphiteContext->checkAsyncWorkCompletion();
+					RNSkiaDawnContext::getInstance().tick();
+					RNSkiaDawnContext::getInstance().fGraphiteContext->checkAsyncWorkCompletion();
                 }
                 if (!asyncContext.fResult) {
 					
