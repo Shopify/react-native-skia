@@ -54,8 +54,19 @@ public:
   }
 
   JSI_HOST_FUNCTION(flush) {
-    if (auto dContext = GrAsDirectContext(getObject()->recordingContext())) {
+    auto surface = getObject();
+    if (auto dContext = GrAsDirectContext(surface->recordingContext())) {
       dContext->flushAndSubmit();
+    }
+    if (surface->recorder()) {
+		auto sync = skgpu::graphite::SyncToCpu::kNo;
+      SkiaDawnFactory::getInstance().fGraphiteContext->submit(sync);
+      if (sync == skgpu::graphite::SyncToCpu::kNo) {
+        while (SkiaDawnFactory::getInstance().fGraphiteContext->hasUnfinishedGpuWork()) {
+            SkiaDawnFactory::getInstance().tick();
+            SkiaDawnFactory::getInstance().fGraphiteContext->checkAsyncWorkCompletion();
+        }
+    }
     }
     return jsi::Value::undefined();
   }
@@ -71,13 +82,12 @@ public:
       auto surface = getObject();
       auto recorder = surface->recorder();
       if (recorder) {
-        auto ctx = SkiaDawnFactory::getInstance().getContext();
         auto img = SkSurfaces::AsImageCopy(surface);
         auto info = img->imageInfo();
         auto bounds = img->bounds();
 
 
-        ctx->asyncRescaleAndReadPixels(
+		  SkiaDawnFactory::getInstance().fGraphiteContext->asyncRescaleAndReadPixels(
             img.get(), info, bounds, SkImage::RescaleGamma::kSrc,
             SkImage::RescaleMode::kRepeatedLinear,
             [](void *c,
@@ -87,19 +97,27 @@ public:
               context->fCalled = true;
             },
             &asyncContext);
-            ctx->submit();
+		  // TODO: sync cpu yes?
+		  SkiaDawnFactory::getInstance().fGraphiteContext->submit();
               if (!asyncContext.fCalled) {
                    // context->submit();
                 }
                 while (!asyncContext.fCalled) {
 					SkiaDawnFactory::getInstance().tick();
-                    ctx->checkAsyncWorkCompletion();
+					SkiaDawnFactory::getInstance().fGraphiteContext->checkAsyncWorkCompletion();
                 }
                 if (!asyncContext.fResult) {
 					
                 }
+		   auto rowBytes = asyncContext.fResult->rowBytes(0);
+		   auto bytesPerPixel = info.bytesPerPixel();
 		  // TODO: MakeWithoutCopy ?
-		  auto data = SkData::MakeWithCopy(asyncContext.fResult->data(0), asyncContext.fResult->rowBytes(0) * info.height());
+		  auto size = info.computeMinByteSize();
+		  auto data = SkData::MakeWithCopy(asyncContext.fResult->data(0), size);
+		  auto pixel1B = ((uint8_t *)asyncContext.fResult->data(0))[0];
+		  auto pixel1R = ((uint8_t *)asyncContext.fResult->data(0))[1];
+		  auto pixel1G = ((uint8_t *)asyncContext.fResult->data(0))[2];
+		  auto pixel1A = ((uint8_t *)asyncContext.fResult->data(0))[3];
 		  image = SkImages::RasterFromData(info, data, asyncContext.fResult->rowBytes(0));
 
       } else {

@@ -25,6 +25,11 @@ namespace RNSkia {
 
 class SkiaDawnFactory {
 public:
+	
+	std::unique_ptr<dawn::native::Instance> instance;
+	std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
+	std::unique_ptr<skgpu::graphite::Recorder> fGraphiteRecorder;
+
   // Delete copy constructor and assignment operator
   SkiaDawnFactory(const SkiaDawnFactory &) = delete;
   SkiaDawnFactory &operator=(const SkiaDawnFactory &) = delete;
@@ -60,17 +65,10 @@ public:
     return nullptr;
   }
 
-  std::unique_ptr<skgpu::graphite::Context> getContext() {
-    return std::move(fGraphiteContext);
-  }
-
   void tick() { backendContext.fTick(backendContext.fInstance); }
 
 private:
   skgpu::graphite::DawnBackendContext backendContext;
-  std::unique_ptr<dawn::native::Instance> instance;
-  std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
-  std::unique_ptr<skgpu::graphite::Recorder> fGraphiteRecorder;
 
   SkiaDawnFactory() {
     auto useTintIR = true;
