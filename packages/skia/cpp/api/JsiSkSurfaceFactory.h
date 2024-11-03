@@ -8,7 +8,7 @@
 #include "JsiSkHostObjects.h"
 
 #include "JsiSkSurface.h"
-#include "DawnContext.h"
+#include "SkiaDawnFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -51,19 +51,11 @@ public:
   }
 
   JSI_HOST_FUNCTION(__MakeGraphite) {
-    //SkSurfaces::RenderTarget
+    // SkSurfaces::RenderTarget
     auto width = static_cast<int>(arguments[0].asNumber());
     auto height = static_cast<int>(arguments[1].asNumber());
 
-    auto ctx = DawnContext::Make()->makeContext();
-    std::unique_ptr<skgpu::graphite::Recorder> recorder = ctx->makeRecorder();
-    SkColorType colorType = kRGBA_8888_SkColorType;
-
-    // Create the SkSurface
-    sk_sp<SkSurface> surface = SkSurfaces::RenderTarget(
-        recorder.get(),                       // Recorder to manage the surface
-        SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType)
-    );
+    auto surface = SkiaDawnFactory::getInstance().MakeOffscreen(width, height);
 
     if (surface == nullptr) {
       return jsi::Value::null();

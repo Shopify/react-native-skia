@@ -16,8 +16,15 @@ import { useDerivedValue } from "react-native-reanimated";
 
 import { useLoop } from "../../components/Animations";
 
-// const surface = Skia.Surface.__MakeGraphite(256, 256);
-// console.log({ surface });
+const surface = Skia.Surface.__MakeGraphite(256, 256);
+const canvas = surface.getCanvas();
+canvas.clear(Skia.Color("rgb(64, 128, 256)"));
+//canvas.drawCircle(128, 128, 128, Skia.Paint());
+//surface.flush();
+const image = surface.makeImageSnapshot().encodeToBase64();
+//.makeNonTextureImage(); //.encodeToBase64();
+
+console.log(image);
 
 const c1 = "#61bea2";
 const c2 = "#529ca0";

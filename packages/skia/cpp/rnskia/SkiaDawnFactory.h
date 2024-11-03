@@ -7,34 +7,73 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
 
+#include "SkiaContext.h"
+
+#include "include/gpu/graphite/BackendTexture.h"
 #include "include/gpu/graphite/Context.h"
 #include "include/gpu/graphite/ContextOptions.h"
+#include "include/gpu/graphite/GraphiteTypes.h"
+#include "include/gpu/graphite/Recorder.h"
+#include "include/gpu/graphite/Recording.h"
+#include "include/gpu/graphite/Surface.h"
 #include "include/gpu/graphite/dawn/DawnBackendContext.h"
 #include "include/gpu/graphite/dawn/DawnTypes.h"
 #include "include/gpu/graphite/dawn/DawnUtils.h"
 #include "include/private/base/SkOnce.h"
 
-#define LOG_ADAPTER 1
-
 namespace RNSkia {
 
-class DawnContext {
-private:
-  DawnContext(const skgpu::graphite::DawnBackendContext &backendContext)
-      : fBackendContext(backendContext) {}
-
-  skgpu::graphite::DawnBackendContext fBackendContext;
-
+class SkiaDawnFactory {
 public:
-  ~DawnContext() { fBackendContext.fDevice = nullptr; }
+  // Delete copy constructor and assignment operator
+  SkiaDawnFactory(const SkiaDawnFactory &) = delete;
+  SkiaDawnFactory &operator=(const SkiaDawnFactory &) = delete;
 
-  static std::unique_ptr<DawnContext> Make() {
-	  auto useTintIR = true;
-	  /*
-	   wgpu::BackendType backend,
-												bool useTintIR
-	   */
-    static std::unique_ptr<dawn::native::Instance> sInstance;
+  // Get instance for current thread
+  static SkiaDawnFactory &getInstance() {
+    static thread_local SkiaDawnFactory instance;
+    return instance;
+  }
+
+  // Create offscreen surface
+  sk_sp<SkSurface> MakeOffscreen(int width, int height) {
+    // Create SkImageInfo for offscreen surface
+    // Is premultiplied ok here?
+    SkImageInfo imageInfo = SkImageInfo::Make(
+        width, height, kBGRA_8888_SkColorType, kPremul_SkAlphaType);
+
+    // Create an offscreen SkSurface
+    sk_sp<SkSurface> skSurface =
+        SkSurfaces::RenderTarget(fGraphiteRecorder.get(), imageInfo);
+
+    if (!skSurface) {
+      throw std::runtime_error("Failed to create offscreen Skia surface.");
+    }
+
+    return skSurface;
+  }
+
+  // Create onscreen surface with window
+  std::unique_ptr<SkiaContext> MakeOnscreen(void *window, int width,
+                                            int height) {
+    // Implementation to be added
+    return nullptr;
+  }
+
+  std::unique_ptr<skgpu::graphite::Context> getContext() {
+    return std::move(fGraphiteContext);
+  }
+
+  void tick() { backendContext.fTick(backendContext.fInstance); }
+
+private:
+  skgpu::graphite::DawnBackendContext backendContext;
+  std::unique_ptr<dawn::native::Instance> instance;
+  std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
+  std::unique_ptr<skgpu::graphite::Recorder> fGraphiteRecorder;
+
+  SkiaDawnFactory() {
+    auto useTintIR = true;
     static SkOnce sOnce;
     static constexpr const char *kToggles[] = {
         "allow_unsafe_apis", // Needed for dual-source blending.
@@ -60,21 +99,29 @@ public:
       WGPUInstanceDescriptor desc{};
       // need for WaitAny with timeout > 0
       desc.features.timedWaitAnyEnable = true;
-      sInstance = std::make_unique<dawn::native::Instance>(&desc);
+      instance = std::make_unique<dawn::native::Instance>(&desc);
     });
 
     dawn::native::Adapter matchedAdaptor;
 
     wgpu::RequestAdapterOptions options;
-	options.compatibilityMode = true;
-//    options.compatibilityMode = backend == wgpu::BackendType::OpenGL ||
-//                                backend == wgpu::BackendType::OpenGLES;
+    options.compatibilityMode = true;
+#ifdef __APPLE__
+    constexpr auto kDefaultBackendType = wgpu::BackendType::Metal;
+#else
+    constexpr auto kDefaultBackendType = wgpu::BackendType::Vulkan;
+#endif
+    //    options.compatibilityMode = backend == wgpu::BackendType::OpenGL ||
+    //                                backend == wgpu::BackendType::OpenGLES;
+    options.backendType = kDefaultBackendType;
     options.nextInChain = &togglesDesc;
     std::vector<dawn::native::Adapter> adapters =
-        sInstance->EnumerateAdapters(&options);
+        instance->EnumerateAdapters(&options);
     SkASSERT(!adapters.empty());
     // Sort adapters by adapterType(DiscreteGPU, IntegratedGPU, CPU) and
     // backendType(WebGPU, D3D11, D3D12, Metal, Vulkan, OpenGL, OpenGLES).
+    // TODO: is Vulkan not available or is Vulkan Software adapter we may want
+    // to switch to OpenGL with compability mode true
     std::sort(adapters.begin(), adapters.end(),
               [](dawn::native::Adapter a, dawn::native::Adapter b) {
                 wgpu::AdapterInfo infoA;
@@ -88,14 +135,14 @@ public:
     for (const auto &adapter : adapters) {
       wgpu::AdapterInfo props;
       adapter.GetInfo(&props);
-//      if (backend == props.backendType) {
-//        matchedAdaptor = adapter;
-//        break;
-//      }
+      if (kDefaultBackendType == props.backendType) {
+        matchedAdaptor = adapter;
+        break;
+      }
     }
 
     if (!matchedAdaptor) {
-      return nullptr;
+      throw std::runtime_error("No matching adapter found");
     }
 
 #if LOG_ADAPTER
@@ -161,24 +208,21 @@ public:
         wgpu::Device::Acquire(matchedAdaptor.CreateDevice(&desc));
     SkASSERT(device);
 
-    skgpu::graphite::DawnBackendContext backendContext;
-    backendContext.fInstance = wgpu::Instance(sInstance->Get());
+    backendContext.fInstance = wgpu::Instance(instance->Get());
     backendContext.fDevice = device;
     backendContext.fQueue = device.GetQueue();
-    return std::unique_ptr<DawnContext>(new DawnContext(backendContext));
-  }
-
-  std::unique_ptr<skgpu::graphite::Context> makeContext() {
-    skgpu::graphite::ContextOptions options;
-    // Needed to make synchronous readPixels work
-    //		options.fOptionsPriv->fStoreContextRefInRecorder = true;
-    //
-    //		auto backendContext = fBackendContext;
-    //		if (options.fNeverYieldToWebGPU) {
-    //			backendContext.fTick = nullptr;
-    //		}
-
-    return skgpu::graphite::ContextFactory::MakeDawn(fBackendContext, options);
+    skgpu::graphite::ContextOptions ctxOptions;
+    fGraphiteContext =
+        skgpu::graphite::ContextFactory::MakeDawn(backendContext, ctxOptions);
+    if (!fGraphiteContext) {
+      throw std::runtime_error("Failed to create graphite context");
+    }
+    skgpu::graphite::RecorderOptions recorderOptions;
+    fGraphiteRecorder = fGraphiteContext->makeRecorder(recorderOptions);
+    if (!fGraphiteRecorder) {
+      throw std::runtime_error("Failed to create graphite context");
+    }
   }
 };
+
 } // namespace RNSkia
