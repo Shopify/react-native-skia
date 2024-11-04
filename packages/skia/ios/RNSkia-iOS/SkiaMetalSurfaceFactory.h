@@ -106,6 +106,14 @@ public:
 
   void resize(int width, int height) override { _skSurface = nullptr; }
 
+  int getWidth() override {
+    return _layer.frame.size.width;
+  };
+
+  int getHeight() override {
+    return _layer.frame.size.height;
+  };
+
 private:
   sk_sp<SkSurface> _skSurface = nullptr;
 #pragma clang diagnostic push

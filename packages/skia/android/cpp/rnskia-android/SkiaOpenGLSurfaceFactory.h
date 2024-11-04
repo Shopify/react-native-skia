@@ -70,6 +70,14 @@ public:
     _width = width;
     _height = height;
   }
+  
+  int getWidth() override {
+    return _width;
+  };
+
+  int getHeight() override {
+    return _height;
+  };
 
 private:
   ANativeWindow *_window;

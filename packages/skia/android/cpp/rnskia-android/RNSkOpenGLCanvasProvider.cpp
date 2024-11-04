@@ -22,18 +22,16 @@ RNSkOpenGLCanvasProvider::RNSkOpenGLCanvasProvider(
 RNSkOpenGLCanvasProvider::~RNSkOpenGLCanvasProvider() {}
 
 float RNSkOpenGLCanvasProvider::getScaledWidth() {
-  // if (_surfaceHolder) {
-  //   auto surface = _surfaceHolder->getSurface();
-  //   return static_cast<float>(surface->width());
-  // }
+  if (_surfaceHolder) {
+    return static_cast<float>(_surfaceHolder->getWidth());
+  }
   return 0;
 }
 
 float RNSkOpenGLCanvasProvider::getScaledHeight() {
-  // if (_surfaceHolder) {
-  //   auto surface = _surfaceHolder->getSurface();
-  //   return static_cast<float>(surface->height());
-  // }
+  if (_surfaceHolder) {
+    return static_cast<float>(_surfaceHolder->getHeight());
+  }
   return 0;
 }
 
