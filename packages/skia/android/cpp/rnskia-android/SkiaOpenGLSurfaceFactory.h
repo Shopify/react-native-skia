@@ -31,38 +31,28 @@
 
 namespace RNSkia {
 
-/**
- * Holder of the thread local SkiaOpenGLContext member
- */
-class ThreadContextHolder {
-public:
-  static thread_local SkiaOpenGLContext ThreadSkiaOpenGLContext;
-};
-
 class AndroidSkiaContext : public WindowContext {
 public:
-  AndroidSkiaContext(ANativeWindow *window, int width, int height)
-      : _window(window), _width(width), _height(height) {}
+  AndroidSkiaContext(SkiaOpenGLContext *context, ANativeWindow *window,
+                     int width, int height)
+      : _context(context), _window(window), _width(width), _height(height) {}
 
   ~AndroidSkiaContext() = default;
 
   sk_sp<SkSurface> getSurface() override;
 
   void present() override {
-    if (!SkiaOpenGLHelper::makeCurrent(
-            &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface)) {
+    if (!SkiaOpenGLHelper::makeCurrent(_context, _glSurface)) {
       RNSkLogger::logToConsole(
           "Could not create EGL Surface from native window / surface. Could "
           "not set new surface as current surface.");
       return;
     }
     // Flush and submit the direct context
-    ThreadContextHolder::ThreadSkiaOpenGLContext.directContext
-        ->flushAndSubmit();
+    _context->directContext->flushAndSubmit();
 
     // Swap buffers
-    SkiaOpenGLHelper::swapBuffers(&ThreadContextHolder::ThreadSkiaOpenGLContext,
-                                  _glSurface);
+    SkiaOpenGLHelper::swapBuffers(_context, _glSurface);
   }
 
   void resize(int width, int height) override {
@@ -79,6 +69,7 @@ private:
   ANativeWindow *_window;
   sk_sp<SkSurface> _skSurface = nullptr;
   EGLSurface _glSurface = EGL_NO_SURFACE;
+  SkiaOpenGLContext *_context;
   int _width = 0;
   int _height = 0;
 };
@@ -91,14 +82,18 @@ public:
    * @param height Height of surface
    * @return An SkSurface backed by a texture.
    */
-  static sk_sp<SkSurface> makeOffscreenSurface(int width, int height);
+  static sk_sp<SkSurface> makeOffscreenSurface(SkiaOpenGLContext *context,
+                                               int width, int height);
 
   static sk_sp<SkImage>
-  makeImageFromHardwareBuffer(void *buffer, bool requireKnownFormat = false);
+  makeImageFromHardwareBuffer(SkiaOpenGLContext *context, void *buffer,
+                              bool requireKnownFormat = false);
 
   static std::unique_ptr<AndroidSkiaContext>
-  makeContext(ANativeWindow *surface, int width, int height) {
-    return std::make_unique<AndroidSkiaContext>(surface, width, height);
+  makeContext(SkiaOpenGLContext *context, ANativeWindow *surface, int width,
+              int height) {
+    return std::make_unique<AndroidSkiaContext>(context, surface, width,
+                                                height);
   }
 };
 

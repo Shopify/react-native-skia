@@ -13,8 +13,8 @@
 
 #pragma clang diagnostic pop
 
-#include "RNSkAndroidVideo.h"
 #include "OpenGLContext.h"
+#include "RNSkAndroidVideo.h"
 
 namespace RNSkia {
 

@@ -13,17 +13,9 @@
 
 namespace RNSkia {
 
-thread_local SkiaOpenGLContext ThreadContextHolder::ThreadSkiaOpenGLContext;
-
-sk_sp<SkImage>
-SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer,
-                                                      bool requireKnownFormat) {
+sk_sp<SkImage> SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(
+    SkiaOpenGLContext *context, void *buffer, bool requireKnownFormat) {
 #if __ANDROID_API__ >= 26
-  // Setup OpenGL and Skia:
-  if (!SkiaOpenGLHelper::createSkiaDirectContextIfNecessary(
-          &ThreadContextHolder::ThreadSkiaOpenGLContext)) [[unlikely]] {
-    throw std::runtime_error("Failed to create Skia Context for this Thread!");
-  }
   const AHardwareBuffer *hardwareBuffer =
       static_cast<AHardwareBuffer *>(buffer);
   DeleteImageProc deleteImageProc = nullptr;
@@ -59,7 +51,7 @@ SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer,
   }
 
   auto backendTex = MakeGLBackendTexture(
-      ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(),
+      context->directContext.get(),
       const_cast<AHardwareBuffer *>(hardwareBuffer), description.width,
       description.height, &deleteImageProc, &updateImageProc, &deleteImageCtx,
       false, format, false);
@@ -69,9 +61,9 @@ SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer,
     return nullptr;
   }
   sk_sp<SkImage> image = SkImages::BorrowTextureFrom(
-      ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(),
-      backendTex, kTopLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType,
-      kOpaque_SkAlphaType, nullptr, deleteImageProc, deleteImageCtx);
+      context->directContext.get(), backendTex, kTopLeft_GrSurfaceOrigin,
+      kRGBA_8888_SkColorType, kOpaque_SkAlphaType, nullptr, deleteImageProc,
+      deleteImageCtx);
   return image;
 #else
   throw std::runtime_error(
@@ -80,25 +72,15 @@ SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(void *buffer,
 #endif
 }
 
-sk_sp<SkSurface> SkiaOpenGLSurfaceFactory::makeOffscreenSurface(int width,
-                                                                int height) {
-  // Setup OpenGL and Skia:
-  if (!SkiaOpenGLHelper::createSkiaDirectContextIfNecessary(
-          &ThreadContextHolder::ThreadSkiaOpenGLContext)) {
-
-    RNSkLogger::logToConsole(
-        "Could not create Skia Surface from native window / surface. "
-        "Failed creating Skia Direct Context");
-    return nullptr;
-  }
+sk_sp<SkSurface>
+SkiaOpenGLSurfaceFactory::makeOffscreenSurface(SkiaOpenGLContext *context,
+                                               int width, int height) {
 
   auto colorType = kN32_SkColorType;
 
   SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
-  if (!SkiaOpenGLHelper::makeCurrent(
-          &ThreadContextHolder::ThreadSkiaOpenGLContext,
-          ThreadContextHolder::ThreadSkiaOpenGLContext.gl1x1Surface)) {
+  if (!SkiaOpenGLHelper::makeCurrent(context, context->gl1x1Surface)) {
     RNSkLogger::logToConsole(
         "Could not create EGL Surface from native window / surface. Could "
         "not set new surface as current surface.");
@@ -106,10 +88,8 @@ sk_sp<SkSurface> SkiaOpenGLSurfaceFactory::makeOffscreenSurface(int width,
   }
 
   // Create texture
-  auto texture =
-      ThreadContextHolder::ThreadSkiaOpenGLContext.directContext
-          ->createBackendTexture(width, height, colorType,
-                                 skgpu::Mipmapped::kNo, GrRenderable::kYes);
+  auto texture = context->directContext->createBackendTexture(
+      width, height, colorType, skgpu::Mipmapped::kNo, GrRenderable::kYes);
 
   if (!texture.isValid()) {
     RNSkLogger::logToConsole("couldn't create offscreen texture %dx%d", width,
@@ -121,13 +101,12 @@ sk_sp<SkSurface> SkiaOpenGLSurfaceFactory::makeOffscreenSurface(int width,
     GrBackendTexture texture;
   };
 
-  auto releaseCtx = new ReleaseContext(
-      {&ThreadContextHolder::ThreadSkiaOpenGLContext, texture});
+  auto releaseCtx = new ReleaseContext({context, texture});
 
   // Create a SkSurface from the GrBackendTexture
   return SkSurfaces::WrapBackendTexture(
-      ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(), texture,
-      kTopLeft_GrSurfaceOrigin, 0, colorType, nullptr, &props,
+      context->directContext.get(), texture, kTopLeft_GrSurfaceOrigin, 0,
+      colorType, nullptr, &props,
       [](void *addr) {
         auto releaseCtx = reinterpret_cast<ReleaseContext *>(addr);
 
@@ -140,15 +119,6 @@ sk_sp<SkSurface> SkiaOpenGLSurfaceFactory::makeOffscreenSurface(int width,
 sk_sp<SkSurface> AndroidSkiaContext::getSurface() {
   if (_skSurface == nullptr) {
 
-    // Setup OpenGL and Skia
-    if (!SkiaOpenGLHelper::createSkiaDirectContextIfNecessary(
-            &ThreadContextHolder::ThreadSkiaOpenGLContext)) {
-      RNSkLogger::logToConsole(
-          "Could not create Skia Surface from native window / surface. "
-          "Failed creating Skia Direct Context");
-      return nullptr;
-    }
-
     // Now we can create a surface
     _glSurface = SkiaOpenGLHelper::createWindowedSurface(_window);
     if (_glSurface == EGL_NO_SURFACE) {
@@ -158,8 +128,7 @@ sk_sp<SkSurface> AndroidSkiaContext::getSurface() {
     }
 
     // Now make this one current
-    if (!SkiaOpenGLHelper::makeCurrent(
-            &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface)) {
+    if (!SkiaOpenGLHelper::makeCurrent(_context, _glSurface)) {
       RNSkLogger::logToConsole(
           "Could not create EGL Surface from native window / surface. Could "
           "not set new surface as current surface.");
@@ -185,8 +154,7 @@ sk_sp<SkSurface> AndroidSkiaContext::getSurface() {
     auto colorType = kN32_SkColorType;
 
     auto maxSamples =
-        ThreadContextHolder::ThreadSkiaOpenGLContext.directContext
-            ->maxSurfaceSampleCountForColorType(colorType);
+        _context->directContext->maxSurfaceSampleCountForColorType(colorType);
 
     if (samples > maxSamples) {
       samples = maxSamples;
@@ -205,8 +173,8 @@ sk_sp<SkSurface> AndroidSkiaContext::getSurface() {
 
     // Create surface object
     _skSurface = SkSurfaces::WrapBackendRenderTarget(
-        ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get(),
-        renderTarget, kBottomLeft_GrSurfaceOrigin, colorType, nullptr, &props,
+        _context->directContext.get(), renderTarget,
+        kBottomLeft_GrSurfaceOrigin, colorType, nullptr, &props,
         [](void *addr) {
           auto releaseCtx = reinterpret_cast<ReleaseContext *>(addr);
           SkiaOpenGLHelper::destroySurface(releaseCtx->glSurface);

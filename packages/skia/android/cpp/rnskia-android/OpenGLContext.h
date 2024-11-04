@@ -18,20 +18,25 @@ public:
   }
 
   sk_sp<SkSurface> MakeOffscreen(int width, int height) {
-    return RNSkia::SkiaOpenGLSurfaceFactory::makeOffscreenSurface(width,
-                                                                  height);
+    return RNSkia::SkiaOpenGLSurfaceFactory::makeOffscreenSurface(
+        &_context, width, height);
   }
 
   sk_sp<SkImage> MakeImageFromBuffer(void *buffer) {
     return RNSkia::SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(
-        buffer);
+        &_context, buffer);
   }
 
   std::unique_ptr<RNSkia::WindowContext> MakeWindow(ANativeWindow *window,
                                                     int width, int height) {
-    return RNSkia::SkiaOpenGLSurfaceFactory::makeContext(window, width, height);
+    return RNSkia::SkiaOpenGLSurfaceFactory::makeContext(&_context, window,
+                                                         width, height);
   }
 
 private:
-  OpenGLContext() {}
+  RNSkia::SkiaOpenGLContext _context;
+
+  OpenGLContext() {
+    RNSkia::SkiaOpenGLHelper::createSkiaDirectContextIfNecessary(&_context);
+  }
 };
