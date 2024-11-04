@@ -68,7 +68,7 @@ public:
     metalSurfaceDesc.layer = window;
     surfaceDescriptor.nextInChain = &metalSurfaceDesc;
 #elif __ANDROID__
-    wgpu::SurfaceSource androidSurfaceDesc;
+    wgpu::SurfaceDescriptorFromAndroidNativeWindow androidSurfaceDesc;
     androidSurfaceDesc.window = window;
     surfaceDescriptor.nextInChain = &androidSurfaceDesc;
 #endif

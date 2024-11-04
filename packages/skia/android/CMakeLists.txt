@@ -91,7 +91,7 @@ target_include_directories(
         # so "include/core/SkRef.h" instead of "SkRef.h", as otherwise
         # the prefab cannot be shipped.
         ../cpp/skia
-        ../cpp/dawn
+        ../cpp/dawn/include
 
         ../cpp/api
         ../cpp/jsi

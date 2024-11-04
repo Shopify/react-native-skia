@@ -31,7 +31,7 @@ public:
     config.width = _width;
     config.height = _height;
     _surface.Configure(&config);
-  }
+  }	
 
   sk_sp<SkSurface> getSurface() override {
     wgpu::SurfaceTexture surfaceTexture;
@@ -43,11 +43,11 @@ public:
         /*sampleCount=*/1, skgpu::Mipmapped::kNo, _format, texture.GetUsage(),
         wgpu::TextureAspect::All);
     auto backendTex = skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
-    sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
+    //sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
     SkSurfaceProps surfaceProps(0, kRGB_H_SkPixelGeometry);
     auto surface = SkSurfaces::WrapBackendTexture(_recorder, backendTex,
                                                   kBGRA_8888_SkColorType,
-                                                  colorSpace, &surfaceProps);
+                                                  nullptr, &surfaceProps);
     return surface;
   }
 

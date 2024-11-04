@@ -14,6 +14,7 @@
 #include "RNSkAndroidVideo.h"
 #include "RNSkPlatformContext.h"
 #include "SkiaOpenGLSurfaceFactory.h"
+#include "RNSkiaDawnContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -56,8 +57,7 @@ public:
 
   std::shared_ptr<SkiaContext>
   makeContextFromNativeSurface(void *surface, int width, int height) override {
-    return SkiaOpenGLSurfaceFactory::makeContext(
-        reinterpret_cast<ANativeWindow *>(surface), width, height);
+    return RNSkiaDawnContext::getInstance().MakeOnscreen(surface, width, height);
   }
 
   sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override {
