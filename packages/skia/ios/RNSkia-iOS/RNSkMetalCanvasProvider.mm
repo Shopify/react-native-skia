@@ -1,6 +1,6 @@
 #import "RNSkMetalCanvasProvider.h"
-#import "RNSkLog.h"
 #include "MetalContext.h"
+#import "RNSkLog.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -81,9 +81,7 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
       return false;
     }
     auto ctx = MetalContext::getInstance().MakeWindow(
-      _layer, _layer.drawableSize.width,
-        _layer.drawableSize.height
-    );
+        _layer, _layer.drawableSize.width, _layer.drawableSize.height);
     auto skSurface = ctx->getSurface();
     SkCanvas *canvas = skSurface->getCanvas();
     cb(canvas);

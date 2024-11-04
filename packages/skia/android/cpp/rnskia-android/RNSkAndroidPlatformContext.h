@@ -11,6 +11,7 @@
 
 #include "AHardwareBufferUtils.h"
 #include "JniPlatformContext.h"
+#include "OpenGLContext.h"
 #include "RNSkAndroidVideo.h"
 #include "RNSkPlatformContext.h"
 #include "SkiaOpenGLSurfaceFactory.h"
@@ -51,12 +52,12 @@ public:
   }
 
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override {
-    return SkiaOpenGLSurfaceFactory::makeOffscreenSurface(width, height);
+    return OpenGLContext::getInstance().MakeOffscreen(width, height);
   }
 
   std::shared_ptr<WindowContext>
   makeContextFromNativeSurface(void *surface, int width, int height) override {
-    return SkiaOpenGLSurfaceFactory::makeContext(
+    return OpenGLContext::getInstance().MakeWindow(
         reinterpret_cast<ANativeWindow *>(surface), width, height);
   }
 

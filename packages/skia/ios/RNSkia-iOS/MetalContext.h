@@ -1,7 +1,7 @@
 #pragma once
 
-#include "WindowContext.h"
 #include "SkiaMetalSurfaceFactory.h"
+#include "WindowContext.h"
 
 #include "include/core/SkSurface.h"
 
@@ -16,15 +16,14 @@ public:
   }
 
   sk_sp<SkSurface> MakeOffscreen(int width, int height) {
-    return SkiaMetalSurfaceFactory::makeOffscreenSurface(width, height);  
+    return SkiaMetalSurfaceFactory::makeOffscreenSurface(width, height);
   }
 
-	std::unique_ptr<RNSkia::WindowContext> MakeWindow(CALayer* window, int width, int height) {
+  std::unique_ptr<RNSkia::WindowContext> MakeWindow(CALayer *window, int width,
+                                                    int height) {
     return SkiaMetalSurfaceFactory::makeContext(window, width, height);
   }
 
 private:
-    MetalContext() {
-
-    }
+  MetalContext() {}
 };

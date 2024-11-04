@@ -17,6 +17,7 @@ public:
   virtual ~WindowContext() = default;
   virtual sk_sp<SkSurface> getSurface() = 0;
   virtual void present() = 0;
+  virtual void resize(int width, int height) = 0;
 };
 
 } // namespace RNSkia

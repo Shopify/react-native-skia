@@ -5,9 +5,10 @@
 #include <thread>
 #include <utility>
 
+#include "MetalContext.h"
 #include "RNSkiOSVideo.h"
 #import "SkiaCVPixelBufferUtils.h"
-#import "SkiaMetalSurfaceFactory.h"
+#include "SkiaMetalSurfaceFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -152,8 +153,8 @@ RNSkiOSPlatformContext::createVideo(const std::string &url) {
 std::shared_ptr<WindowContext>
 RNSkiOSPlatformContext::makeContextFromNativeSurface(void *surface, int width,
                                                      int height) {
-  return SkiaMetalSurfaceFactory::makeContext((__bridge CALayer *)surface,
-                                              width, height);
+  return MetalContext::getInstance().MakeWindow((__bridge CALayer *)surface,
+                                                width, height);
 }
 
 void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
@@ -162,7 +163,7 @@ void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
 
 sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
                                                               int height) {
-  return SkiaMetalSurfaceFactory::makeOffscreenSurface(width, height);
+  return MetalContext::getInstance().MakeOffscreen(width, height);
 }
 
 sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeBuffer(void *buffer) {

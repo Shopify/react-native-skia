@@ -104,6 +104,12 @@ public:
     _skSurface = nullptr;
   }
 
+  void resize(int width, int height) {
+    _skSurface = nullptr;
+    _width = width;
+    _height = height;
+  }
+
 private:
   sk_sp<SkSurface> _skSurface = nullptr;
 #pragma clang diagnostic push
