@@ -7,7 +7,6 @@
 
 #include "MetalContext.h"
 #include "RNSkiOSVideo.h"
-#import "SkiaCVPixelBufferUtils.h"
 #include "SkiaMetalSurfaceFactory.h"
 
 #pragma clang diagnostic push
@@ -15,6 +14,7 @@
 
 #include "include/core/SkFontMgr.h"
 #include "include/core/SkSurface.h"
+#import "include/core/SkColorSpace.h"
 
 #include "include/ports/SkFontMgr_mac_ct.h"
 
