@@ -13,7 +13,7 @@
 #include <thread>
 #include <unordered_map>
 
-#include "SkiaContext.h"
+#include "WindowContext.h"
 #include "SkiaOpenGLHelper.h"
 
 #pragma clang diagnostic push
@@ -140,7 +140,7 @@ private:
   int _height = 0;
 };
 
-class AndroidSkiaContext : public SkiaContext {
+class AndroidSkiaContext : public WindowContext {
 public:
   AndroidSkiaContext(ANativeWindow *window, int width, int height)
       : _window(window), _width(width), _height(height) {}

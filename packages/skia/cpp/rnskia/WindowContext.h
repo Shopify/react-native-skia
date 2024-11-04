@@ -12,9 +12,9 @@
 
 namespace RNSkia {
 
-class SkiaContext {
+class WindowContext {
 public:
-  virtual ~SkiaContext() = default;
+  virtual ~WindowContext() = default;
   virtual sk_sp<SkSurface> getSurface() = 0;
   virtual void present() = 0;
 };

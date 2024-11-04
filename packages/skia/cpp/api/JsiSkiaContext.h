@@ -14,7 +14,7 @@
 #include "JsiSkRect.h"
 #include "JsiSkTypeface.h"
 
-#include "SkiaContext.h"
+#include "WindowContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -28,7 +28,7 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiSkiaContext : public JsiSkWrappingSharedPtrHostObject<SkiaContext> {
+class JsiSkiaContext : public JsiSkWrappingSharedPtrHostObject<WindowContext> {
 public:
   EXPORT_JSI_API_TYPENAME(JsiSkiaContext, SkiaContext)
 
@@ -48,7 +48,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkiaContext, present))
 
   JsiSkiaContext(std::shared_ptr<RNSkPlatformContext> context,
-                 std::shared_ptr<SkiaContext> ctx)
+                 std::shared_ptr<WindowContext> ctx)
       : JsiSkWrappingSharedPtrHostObject(std::move(context), std::move(ctx)) {}
 
   /**

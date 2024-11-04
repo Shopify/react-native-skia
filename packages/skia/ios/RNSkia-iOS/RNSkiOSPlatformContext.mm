@@ -149,7 +149,7 @@ RNSkiOSPlatformContext::createVideo(const std::string &url) {
   return std::make_shared<RNSkiOSVideo>(url, this);
 }
 
-std::shared_ptr<SkiaContext>
+std::shared_ptr<WindowContext>
 RNSkiOSPlatformContext::makeContextFromNativeSurface(void *surface, int width,
                                                      int height) {
   return SkiaMetalSurfaceFactory::makeContext((__bridge CALayer *)surface,

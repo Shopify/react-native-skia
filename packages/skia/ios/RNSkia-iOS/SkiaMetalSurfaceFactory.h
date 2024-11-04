@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "RNSkLog.h"
-#include "SkiaContext.h"
+#include "WindowContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -36,7 +36,7 @@ public:
   static sk_sp<SkImage>
   makeTextureFromCVPixelBuffer(CVPixelBufferRef pixelBuffer);
 
-  static std::shared_ptr<RNSkia::SkiaContext>
+  static std::shared_ptr<RNSkia::WindowContext>
   makeContext(CALayer *texture, int width, int height);
 
 private:
@@ -45,7 +45,7 @@ private:
   createSkiaDirectContextIfNecessary(SkiaMetalContext *threadContext);
 };
 
-class IOSSkiaContext : public RNSkia::SkiaContext {
+class IOSSkiaContext : public RNSkia::WindowContext {
 public:
   IOSSkiaContext(CALayer *layer, int width, int height) {
     auto pd = 3;
