@@ -11,9 +11,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#import "include/core/SkColorSpace.h"
 #include "include/core/SkFontMgr.h"
 #include "include/core/SkSurface.h"
-#import "include/core/SkColorSpace.h"
 
 #include "include/ports/SkFontMgr_mac_ct.h"
 
@@ -71,7 +71,7 @@ uint64_t RNSkiOSPlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
   if (image->colorType() != kBGRA_8888_SkColorType) {
     // on iOS, 32_BGRA is the only supported RGB format for CVPixelBuffers.
     image = image->makeColorTypeAndColorSpace(
-        ThreadContextHolder::ThreadSkiaMetalContext.skContext.get(),
+        MetalContext::getInstance()._context.skContext.get(),
         kBGRA_8888_SkColorType, SkColorSpace::MakeSRGB());
     if (image == nullptr) {
       throw std::runtime_error(
@@ -166,7 +166,7 @@ sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
 }
 
 sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeBuffer(void *buffer) {
-	return MetalContext::getInstance().MakeImageFromBuffer(buffer);
+  return MetalContext::getInstance().MakeImageFromBuffer(buffer);
 }
 
 sk_sp<SkFontMgr> RNSkiOSPlatformContext::createFontMgr() {

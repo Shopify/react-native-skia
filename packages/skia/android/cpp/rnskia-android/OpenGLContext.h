@@ -23,7 +23,8 @@ public:
   }
 
   sk_sp<SkImage> MakeImageFromBuffer(void *buffer) {
-    return RNSkia::SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(buffer);
+    return RNSkia::SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(
+        buffer);
   }
 
   std::unique_ptr<RNSkia::WindowContext> MakeWindow(ANativeWindow *window,

@@ -5,7 +5,12 @@
 
 #include "include/core/SkSurface.h"
 
+namespace RNSkia {
+class RNSkiOSPlatformContext;
+}
+
 class MetalContext {
+
 public:
   MetalContext(const MetalContext &) = delete;
   MetalContext &operator=(const MetalContext &) = delete;
@@ -16,19 +21,26 @@ public:
   }
 
   sk_sp<SkSurface> MakeOffscreen(int width, int height) {
-    return SkiaMetalSurfaceFactory::makeOffscreenSurface(width, height);
+    return SkiaMetalSurfaceFactory::makeOffscreenSurface(_device, &_context,
+                                                         width, height);
   }
-	
+
   sk_sp<SkImage> MakeImageFromBuffer(void *buffer) {
-	CVPixelBufferRef sampleBuffer = (CVPixelBufferRef)buffer;
-	return SkiaMetalSurfaceFactory::makeTextureFromCVPixelBuffer(sampleBuffer);
+    CVPixelBufferRef sampleBuffer = (CVPixelBufferRef)buffer;
+    return SkiaMetalSurfaceFactory::makeTextureFromCVPixelBuffer(&_context,
+                                                                 sampleBuffer);
   }
 
   std::unique_ptr<RNSkia::WindowContext> MakeWindow(CALayer *window, int width,
                                                     int height) {
-    return SkiaMetalSurfaceFactory::makeContext(window, width, height);
+    return SkiaMetalSurfaceFactory::makeContext(&_context, window, width,
+                                                height);
   }
 
 private:
-  MetalContext() {}
+  friend class RNSkia::RNSkiOSPlatformContext;
+  id<MTLDevice> _device;
+  SkiaMetalContext _context;
+
+  MetalContext();
 };
