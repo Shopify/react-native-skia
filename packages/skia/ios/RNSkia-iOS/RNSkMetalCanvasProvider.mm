@@ -1,6 +1,6 @@
 #import "RNSkMetalCanvasProvider.h"
 #import "RNSkLog.h"
-#import "SkiaMetalSurfaceFactory.h"
+#import "RNSkiaDawnContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -80,10 +80,9 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
     if (currentDrawable == nullptr) {
       return false;
     }
-
-    auto skSurface = SkiaMetalSurfaceFactory::makeWindowedSurface(
-        currentDrawable.texture, _layer.drawableSize.width,
-        _layer.drawableSize.height);
+	  auto ctx = RNSkia::RNSkiaDawnContext::getInstance().MakeOnscreen((__bridge void*)_layer,  _layer.drawableSize.width,
+															   _layer.drawableSize.height);
+	  auto skSurface = ctx->getSurface();
 
     SkCanvas *canvas = skSurface->getCanvas();
     cb(canvas);
@@ -92,11 +91,7 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
       dContext->flushAndSubmit();
     }
 
-    id<MTLCommandBuffer> commandBuffer(
-        [ThreadContextHolder::ThreadSkiaMetalContext
-                .commandQueue commandBuffer]);
-    [commandBuffer presentDrawable:currentDrawable];
-    [commandBuffer commit];
+	  ctx->present();
   }
   return true;
 };
