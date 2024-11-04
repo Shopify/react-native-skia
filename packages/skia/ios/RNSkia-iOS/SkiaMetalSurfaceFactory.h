@@ -61,9 +61,7 @@ public:
     _layer.contentsScale = pd;
     _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _layer.contentsGravity = kCAGravityBottomLeft;
-
     _layer.frame = CGRectMake(0, 0, width, height);
-    _layer.drawableSize = CGSizeMake(width * pd, height * pd);
   }
 
   ~IOSSkiaContext() {}
@@ -88,8 +86,8 @@ public:
 
     // Get the texture from the drawable
     _skSurface = SkiaMetalSurfaceFactory::makeWindowedSurface(
-        _currentDrawable.texture, _layer.drawableSize.width,
-        _layer.drawableSize.height);
+        _currentDrawable.texture, _layer.frame.size.width,
+        _layer.frame.size.height);
     return _skSurface;
   }
 
@@ -106,9 +104,7 @@ public:
     _skSurface = nullptr;
   }
 
-  void resize(int width, int height) override {
-    _skSurface = nullptr;
-  }
+  void resize(int width, int height) override { _skSurface = nullptr; }
 
 private:
   sk_sp<SkSurface> _skSurface = nullptr;
