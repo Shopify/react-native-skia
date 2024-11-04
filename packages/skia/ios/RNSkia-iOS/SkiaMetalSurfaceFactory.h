@@ -36,7 +36,7 @@ public:
   static sk_sp<SkImage>
   makeTextureFromCVPixelBuffer(CVPixelBufferRef pixelBuffer);
 
-  static std::shared_ptr<RNSkia::WindowContext>
+  static std::unique_ptr<RNSkia::WindowContext>
   makeContext(CALayer *texture, int width, int height);
 
 private:

@@ -19,10 +19,9 @@ public:
     return SkiaMetalSurfaceFactory::makeOffscreenSurface(width, height);  
   }
 
-  std::unique_ptr<RNSkia::WindowContext> MakeOffscreen(void* window, int width, int height) {
-    return SkiaMetalSurfaceFactory::makeContext((__bridge *CALayer)window, width, height);
+	std::unique_ptr<RNSkia::WindowContext> MakeWindow(CALayer* window, int width, int height) {
+    return SkiaMetalSurfaceFactory::makeContext(window, width, height);
   }
-
 
 private:
     MetalContext() {
