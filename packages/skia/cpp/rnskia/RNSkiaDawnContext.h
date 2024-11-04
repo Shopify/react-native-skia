@@ -7,7 +7,7 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
 
-#include "SkiaContext.h"
+#include "OnscreenContext.h"
 
 #include "include/gpu/graphite/BackendTexture.h"
 #include "include/gpu/graphite/Context.h"
@@ -27,10 +27,9 @@ namespace RNSkia {
 
 class RNSkiaDawnContext {
 public:
-	
-	std::unique_ptr<dawn::native::Instance> instance;
-	std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
-	std::unique_ptr<skgpu::graphite::Recorder> fGraphiteRecorder;
+  std::unique_ptr<dawn::native::Instance> instance;
+  std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
+  std::unique_ptr<skgpu::graphite::Recorder> fGraphiteRecorder;
 
   // Delete copy constructor and assignment operator
   RNSkiaDawnContext(const RNSkiaDawnContext &) = delete;
@@ -63,8 +62,20 @@ public:
   // Create onscreen surface with window
   std::unique_ptr<SkiaContext> MakeOnscreen(void *window, int width,
                                             int height) {
-    // Implementation to be added
-    return nullptr;
+    // 1. Create Surface
+    wgpu::SurfaceDescriptor surfaceDescriptor;
+#ifdef __APPLE__
+    wgpu::SurfaceDescriptorFromMetalLayer metalSurfaceDesc;
+    metalSurfaceDesc.layer = window;
+    surfaceDescriptor.nextInChain = &metalSurfaceDesc;
+#elif __ANDROID__
+    wgpu::SurfaceDescriptorFromAndroidSurface androidSurfaceDesc;
+    androidSurfaceDesc.window = window;
+    surfaceDescriptor.nextInChain = &androidSurfaceDesc;
+#endif
+    auto surface = wgpu::Instance(instance->Get()).CreateSurface(&surfaceDescriptor);
+    return std::make_unique<OnscreenContext>(fGraphiteRecorder.get(), backendContext.fDevice, surface,
+                                             width, height);
   }
 
   void tick() { backendContext.fTick(backendContext.fInstance); }
@@ -108,7 +119,7 @@ private:
     options.compatibilityMode = true;
 #ifdef __APPLE__
     constexpr auto kDefaultBackendType = wgpu::BackendType::Metal;
-#else
+#elif __ANDROID__
     constexpr auto kDefaultBackendType = wgpu::BackendType::Vulkan;
 #endif
     //    options.compatibilityMode = backend == wgpu::BackendType::OpenGL ||
@@ -212,9 +223,9 @@ private:
     backendContext.fDevice = device;
     backendContext.fQueue = device.GetQueue();
     skgpu::graphite::ContextOptions ctxOptions;
-    //skgpu::graphite::ContextOptionsPriv contextOptionsPriv;
-    //ctxOptions.fOptionsPriv = &contextOptionsPriv;
-   // ctxOptions.fOptionsPriv->fStoreContextRefInRecorder = true;
+    // skgpu::graphite::ContextOptionsPriv contextOptionsPriv;
+    // ctxOptions.fOptionsPriv = &contextOptionsPriv;
+    // ctxOptions.fOptionsPriv->fStoreContextRefInRecorder = true;
     fGraphiteContext =
         skgpu::graphite::ContextFactory::MakeDawn(backendContext, ctxOptions);
     if (!fGraphiteContext) {

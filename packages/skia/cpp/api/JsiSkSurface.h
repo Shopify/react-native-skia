@@ -59,14 +59,16 @@ public:
       dContext->flushAndSubmit();
     }
     if (surface->recorder()) {
-		auto sync = skgpu::graphite::SyncToCpu::kNo;
-		RNSkiaDawnContext::getInstance().fGraphiteContext->submit(sync);
+      auto sync = skgpu::graphite::SyncToCpu::kNo;
+      RNSkiaDawnContext::getInstance().fGraphiteContext->submit(sync);
       if (sync == skgpu::graphite::SyncToCpu::kNo) {
-        while (RNSkiaDawnContext::getInstance().fGraphiteContext->hasUnfinishedGpuWork()) {
-			RNSkiaDawnContext::getInstance().tick();
-			RNSkiaDawnContext::getInstance().fGraphiteContext->checkAsyncWorkCompletion();
+        while (RNSkiaDawnContext::getInstance()
+                   .fGraphiteContext->hasUnfinishedGpuWork()) {
+          RNSkiaDawnContext::getInstance().tick();
+          RNSkiaDawnContext::getInstance()
+              .fGraphiteContext->checkAsyncWorkCompletion();
         }
-    }
+      }
     }
     return jsi::Value::undefined();
   }
@@ -85,42 +87,44 @@ public:
         auto img = SkSurfaces::AsImageCopy(surface);
         auto info = img->imageInfo();
         auto bounds = img->bounds();
-//      SkPixmap pixmap(info, nullptr, info.minRowBytes());
-//      auto result = surface->readPixels(pixmap, 0, 0);
+        //      SkPixmap pixmap(info, nullptr, info.minRowBytes());
+        //      auto result = surface->readPixels(pixmap, 0, 0);
 
-		  RNSkiaDawnContext::getInstance().fGraphiteContext->asyncRescaleAndReadPixels(
-            img.get(), info, bounds, SkImage::RescaleGamma::kSrc,
-            SkImage::RescaleMode::kRepeatedLinear,
-            [](void *c,
-               std::unique_ptr<const SkImage::AsyncReadResult> result) {
-              auto context = static_cast<AsyncContext *>(c);
-              context->fResult = std::move(result);
-              context->fCalled = true;
-            },
-            &asyncContext);
-            
-		  // TODO: sync cpu yes?
-		  RNSkiaDawnContext::getInstance().fGraphiteContext->submit();
-              if (!asyncContext.fCalled) {
-                   // context->submit();
-                }
-                while (!asyncContext.fCalled) {
-					RNSkiaDawnContext::getInstance().tick();
-					RNSkiaDawnContext::getInstance().fGraphiteContext->checkAsyncWorkCompletion();
-                }
-                if (!asyncContext.fResult) {
-					
-                }
-		   auto rowBytes = asyncContext.fResult->rowBytes(0);
-		   auto bytesPerPixel = info.bytesPerPixel();
-		  // TODO: MakeWithoutCopy ?
-		  auto size = info.computeMinByteSize();
-		  auto data = SkData::MakeWithCopy(asyncContext.fResult->data(0), size);
-		  auto pixel1B = ((uint8_t *)asyncContext.fResult->data(0))[0];
-		  auto pixel1R = ((uint8_t *)asyncContext.fResult->data(0))[1];
-		  auto pixel1G = ((uint8_t *)asyncContext.fResult->data(0))[2];
-		  auto pixel1A = ((uint8_t *)asyncContext.fResult->data(0))[3];
-		  image = SkImages::RasterFromData(info, data, asyncContext.fResult->rowBytes(0));
+        RNSkiaDawnContext::getInstance()
+            .fGraphiteContext->asyncRescaleAndReadPixels(
+                img.get(), info, bounds, SkImage::RescaleGamma::kSrc,
+                SkImage::RescaleMode::kRepeatedLinear,
+                [](void *c,
+                   std::unique_ptr<const SkImage::AsyncReadResult> result) {
+                  auto context = static_cast<AsyncContext *>(c);
+                  context->fResult = std::move(result);
+                  context->fCalled = true;
+                },
+                &asyncContext);
+
+        // TODO: sync cpu yes?
+        RNSkiaDawnContext::getInstance().fGraphiteContext->submit();
+        if (!asyncContext.fCalled) {
+          // context->submit();
+        }
+        while (!asyncContext.fCalled) {
+          RNSkiaDawnContext::getInstance().tick();
+          RNSkiaDawnContext::getInstance()
+              .fGraphiteContext->checkAsyncWorkCompletion();
+        }
+        if (!asyncContext.fResult) {
+        }
+        auto rowBytes = asyncContext.fResult->rowBytes(0);
+        auto bytesPerPixel = info.bytesPerPixel();
+        // TODO: MakeWithoutCopy ?
+        auto size = info.computeMinByteSize();
+        auto data = SkData::MakeWithCopy(asyncContext.fResult->data(0), size);
+        auto pixel1B = ((uint8_t *)asyncContext.fResult->data(0))[0];
+        auto pixel1R = ((uint8_t *)asyncContext.fResult->data(0))[1];
+        auto pixel1G = ((uint8_t *)asyncContext.fResult->data(0))[2];
+        auto pixel1A = ((uint8_t *)asyncContext.fResult->data(0))[3];
+        image = SkImages::RasterFromData(info, data,
+                                         asyncContext.fResult->rowBytes(0));
 
       } else {
         image = getObject()->makeImageSnapshot();
