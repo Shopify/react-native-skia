@@ -7,7 +7,6 @@
 
 #include "MetalContext.h"
 #include "RNSkiOSVideo.h"
-#include "SkiaMetalSurfaceFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -167,8 +166,7 @@ sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
 }
 
 sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeBuffer(void *buffer) {
-  CVPixelBufferRef sampleBuffer = (CVPixelBufferRef)buffer;
-  return SkiaMetalSurfaceFactory::makeTextureFromCVPixelBuffer(sampleBuffer);
+	return MetalContext::getInstance().MakeImageFromBuffer(buffer);
 }
 
 sk_sp<SkFontMgr> RNSkiOSPlatformContext::createFontMgr() {
