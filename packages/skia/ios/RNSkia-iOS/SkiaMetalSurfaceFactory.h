@@ -1,3 +1,5 @@
+#pragma once
+
 #import <MetalKit/MetalKit.h>
 
 #include <memory>
@@ -104,10 +106,8 @@ public:
     _skSurface = nullptr;
   }
 
-  void resize(int width, int height) {
+  void resize(int width, int height) override {
     _skSurface = nullptr;
-    _width = width;
-    _height = height;
   }
 
 private:
