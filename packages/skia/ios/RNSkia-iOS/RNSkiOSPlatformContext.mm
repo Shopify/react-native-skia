@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "RNSkiOSVideo.h"
+#import "RNSkiaDawnContext.h"
 #import "SkiaCVPixelBufferUtils.h"
 #import "SkiaMetalSurfaceFactory.h"
 
@@ -152,8 +153,7 @@ RNSkiOSPlatformContext::createVideo(const std::string &url) {
 std::shared_ptr<SkiaContext>
 RNSkiOSPlatformContext::makeContextFromNativeSurface(void *surface, int width,
                                                      int height) {
-  return SkiaMetalSurfaceFactory::makeContext((__bridge CALayer *)surface,
-                                              width, height);
+  return RNSkiaDawnContext::getInstance().MakeOnscreen(surface, width, height);
 }
 
 void RNSkiOSPlatformContext::raiseError(const std::exception &err) {

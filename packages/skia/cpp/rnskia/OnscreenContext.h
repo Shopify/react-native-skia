@@ -19,17 +19,19 @@ namespace RNSkia {
 
 class OnscreenContext : public SkiaContext {
 public:
-  OnscreenContext(skgpu::graphite::Recorder *recorder, wgpu::Device device, wgpu::Surface surface, int width,
-                  int height)
-      : _recorder(recorder), _device(device), _surface(surface), _width(width), _height(height) {
-        wgpu::SurfaceConfiguration config;
-        config.device = _device;
-        config.format = _format;
-        // TODO: alpha mode
-        config.width = _width;
-        config.height = _height;
-        _surface.Configure(&config);
-      }
+  OnscreenContext(skgpu::graphite::Context *context,
+                  skgpu::graphite::Recorder *recorder, wgpu::Device device,
+                  wgpu::Surface surface, int width, int height)
+      : _context(context), _recorder(recorder), _device(device),
+        _surface(surface), _width(width), _height(height) {
+    wgpu::SurfaceConfiguration config;
+    config.device = _device;
+    config.format = _format;
+    // TODO: alpha mode
+    config.width = _width;
+    config.height = _height;
+    _surface.Configure(&config);
+  }
 
   sk_sp<SkSurface> getSurface() override {
     wgpu::SurfaceTexture surfaceTexture;
@@ -37,28 +39,31 @@ public:
     SkASSERT(surfaceTexture.texture);
     auto texture = surfaceTexture.texture;
 
-    skgpu::graphite::DawnTextureInfo info(/*sampleCount=*/1,
-                                          skgpu::Mipmapped::kNo,
-                                          _format,
-                                          texture.GetUsage(),
-                                          wgpu::TextureAspect::All);
+    skgpu::graphite::DawnTextureInfo info(
+        /*sampleCount=*/1, skgpu::Mipmapped::kNo, _format, texture.GetUsage(),
+        wgpu::TextureAspect::All);
     auto backendTex = skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
     sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
     SkSurfaceProps surfaceProps(0, kRGB_H_SkPixelGeometry);
-    auto surface = SkSurfaces::WrapBackendTexture(_recorder,
-                                                  backendTex,
+    auto surface = SkSurfaces::WrapBackendTexture(_recorder, backendTex,
                                                   kBGRA_8888_SkColorType,
-                                                  colorSpace,
-                                                  &surfaceProps);
+                                                  colorSpace, &surfaceProps);
     return surface;
   }
 
   void present() override {
-    // Snap recording and submit
+    std::unique_ptr<skgpu::graphite::Recording> recording = _recorder->snap();
+    if (recording) {
+      skgpu::graphite::InsertRecordingInfo info;
+      info.fRecording = recording.get();
+      _context->insertRecording(info);
+      _context->submit(skgpu::graphite::SyncToCpu::kNo);
+    }
     _surface.Present();
   }
 
 private:
+  skgpu::graphite::Context *_context;
   skgpu::graphite::Recorder *_recorder;
   wgpu::Device _device;
   wgpu::Surface _surface;

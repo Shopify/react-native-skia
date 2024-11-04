@@ -19,7 +19,6 @@
 #include "include/gpu/graphite/dawn/DawnBackendContext.h"
 #include "include/gpu/graphite/dawn/DawnTypes.h"
 #include "include/gpu/graphite/dawn/DawnUtils.h"
-#include "include/private/base/SkOnce.h"
 
 #include "src/gpu/graphite/ContextOptionsPriv.h"
 
@@ -48,7 +47,7 @@ public:
     SkImageInfo imageInfo = SkImageInfo::Make(
         width, height, kBGRA_8888_SkColorType, kPremul_SkAlphaType);
 
-    // Create an offscreen SkSurface
+    // Create an offscreen	 SkSurface
     sk_sp<SkSurface> skSurface =
         SkSurfaces::RenderTarget(fGraphiteRecorder.get(), imageInfo);
 
@@ -69,13 +68,15 @@ public:
     metalSurfaceDesc.layer = window;
     surfaceDescriptor.nextInChain = &metalSurfaceDesc;
 #elif __ANDROID__
-    wgpu::SurfaceDescriptorFromAndroidSurface androidSurfaceDesc;
+    wgpu::SurfaceSource androidSurfaceDesc;
     androidSurfaceDesc.window = window;
     surfaceDescriptor.nextInChain = &androidSurfaceDesc;
 #endif
-    auto surface = wgpu::Instance(instance->Get()).CreateSurface(&surfaceDescriptor);
-    return std::make_unique<OnscreenContext>(fGraphiteRecorder.get(), backendContext.fDevice, surface,
-                                             width, height);
+    auto surface =
+        wgpu::Instance(instance->Get()).CreateSurface(&surfaceDescriptor);
+    return std::make_unique<OnscreenContext>(
+        fGraphiteContext.get(), fGraphiteRecorder.get(), backendContext.fDevice,
+        surface, width, height);
   }
 
   void tick() { backendContext.fTick(backendContext.fInstance); }
@@ -85,7 +86,6 @@ private:
 
   RNSkiaDawnContext() {
     auto useTintIR = true;
-    static SkOnce sOnce;
     static constexpr const char *kToggles[] = {
         "allow_unsafe_apis", // Needed for dual-source blending.
         "use_user_defined_labels_in_backend",
@@ -104,14 +104,16 @@ private:
     // expensive the first time, but then the results are cached on the Instance
     // object. So save the Instance here so we can avoid the overhead of
     // EnumerateAdapters on every test.
-    sOnce([&] {
+    // sOnce([&] {
+    {
       DawnProcTable backendProcs = dawn::native::GetProcs();
       dawnProcSetProcs(&backendProcs);
       WGPUInstanceDescriptor desc{};
       // need for WaitAny with timeout > 0
       desc.features.timedWaitAnyEnable = true;
       instance = std::make_unique<dawn::native::Instance>(&desc);
-    });
+    }
+    //});
 
     dawn::native::Adapter matchedAdaptor;
 
