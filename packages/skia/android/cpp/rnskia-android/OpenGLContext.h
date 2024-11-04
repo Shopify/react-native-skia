@@ -22,6 +22,10 @@ public:
                                                                   height);
   }
 
+  sk_sp<SkImage> MakeImageFromBuffer(void *buffer) {
+    return RNSkia::SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(buffer);
+  }
+
   std::unique_ptr<RNSkia::WindowContext> MakeWindow(ANativeWindow *window,
                                                     int width, int height) {
     return RNSkia::SkiaOpenGLSurfaceFactory::makeContext(window, width, height);

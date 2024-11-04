@@ -14,7 +14,6 @@
 #include "OpenGLContext.h"
 #include "RNSkAndroidVideo.h"
 #include "RNSkPlatformContext.h"
-#include "SkiaOpenGLSurfaceFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -62,7 +61,7 @@ public:
   }
 
   sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override {
-    return SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(buffer);
+    return OpenGLContext::getInstance().MakeImageFromBuffer(buffer);
   }
 
   std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override {
