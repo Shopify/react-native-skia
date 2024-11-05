@@ -1,9 +1,11 @@
+#pragma once
+
 #import <MetalKit/MetalKit.h>
 
 #include <memory>
 
 #include "RNSkLog.h"
-#include "SkiaContext.h"
+#include "WindowContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -20,35 +22,31 @@ using SkiaMetalContext = struct SkiaMetalContext {
   sk_sp<GrDirectContext> skContext = nullptr;
 };
 
-class ThreadContextHolder {
-public:
-  static thread_local SkiaMetalContext ThreadSkiaMetalContext;
-};
-
 class SkiaMetalSurfaceFactory {
   friend class IOSSkiaContext;
 
 public:
-  static sk_sp<SkSurface> makeWindowedSurface(id<MTLTexture> texture, int width,
+  static sk_sp<SkSurface> makeWindowedSurface(SkiaMetalContext *context,
+                                              id<MTLTexture> texture, int width,
                                               int height);
-  static sk_sp<SkSurface> makeOffscreenSurface(int width, int height);
+  static sk_sp<SkSurface> makeOffscreenSurface(id<MTLDevice> device,
+                                               SkiaMetalContext *context,
+                                               int width, int height);
 
   static sk_sp<SkImage>
-  makeTextureFromCVPixelBuffer(CVPixelBufferRef pixelBuffer);
+  makeTextureFromCVPixelBuffer(SkiaMetalContext *context,
+                               CVPixelBufferRef pixelBuffer);
 
-  static std::shared_ptr<RNSkia::SkiaContext>
-  makeContext(CALayer *texture, int width, int height);
-
-private:
-  static id<MTLDevice> device;
-  static bool
-  createSkiaDirectContextIfNecessary(SkiaMetalContext *threadContext);
+  static std::unique_ptr<RNSkia::WindowContext>
+  makeContext(SkiaMetalContext *context, CALayer *texture, int width,
+              int height);
 };
 
-class IOSSkiaContext : public RNSkia::SkiaContext {
+class IOSSkiaContext : public RNSkia::WindowContext {
 public:
-  IOSSkiaContext(CALayer *layer, int width, int height) {
-    auto pd = 3;
+  IOSSkiaContext(SkiaMetalContext *context, CALayer *layer, int width,
+                 int height)
+      : _context(context) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
     _layer = (CAMetalLayer *)layer;
@@ -56,12 +54,10 @@ public:
     _layer.framebufferOnly = NO;
     _layer.device = MTLCreateSystemDefaultDevice();
     _layer.opaque = false;
-    _layer.contentsScale = pd;
+    _layer.contentsScale = 3;
     _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _layer.contentsGravity = kCAGravityBottomLeft;
-
-    _layer.frame = CGRectMake(0, 0, width, height);
-    _layer.drawableSize = CGSizeMake(width * pd, height * pd);
+    _layer.drawableSize = CGSizeMake(width, height);
   }
 
   ~IOSSkiaContext() {}
@@ -69,11 +65,6 @@ public:
   sk_sp<SkSurface> getSurface() override {
     if (_skSurface) {
       return _skSurface;
-    }
-    // Create the Skia Direct Context if it doesn't exist
-    if (!SkiaMetalSurfaceFactory::createSkiaDirectContextIfNecessary(
-            &ThreadContextHolder::ThreadSkiaMetalContext)) {
-      return nullptr;
     }
 
     // Get the next drawable from the CAMetalLayer
@@ -86,7 +77,7 @@ public:
 
     // Get the texture from the drawable
     _skSurface = SkiaMetalSurfaceFactory::makeWindowedSurface(
-        _currentDrawable.texture, _layer.drawableSize.width,
+        _context, _currentDrawable.texture, _layer.drawableSize.width,
         _layer.drawableSize.height);
     return _skSurface;
   }
@@ -96,15 +87,20 @@ public:
       dContext->flushAndSubmit();
     }
 
-    id<MTLCommandBuffer> commandBuffer(
-        [ThreadContextHolder::ThreadSkiaMetalContext
-                .commandQueue commandBuffer]);
+    id<MTLCommandBuffer> commandBuffer([_context->commandQueue commandBuffer]);
     [commandBuffer presentDrawable:_currentDrawable];
     [commandBuffer commit];
     _skSurface = nullptr;
   }
 
+  void resize(int width, int height) override { _skSurface = nullptr; }
+
+  int getWidth() override { return _layer.frame.size.width; };
+
+  int getHeight() override { return _layer.frame.size.height; };
+
 private:
+  SkiaMetalContext *_context;
   sk_sp<SkSurface> _skSurface = nullptr;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
