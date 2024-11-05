@@ -47,7 +47,6 @@ public:
   IOSSkiaContext(SkiaMetalContext *context, CALayer *layer, int width,
                  int height)
       : _context(context) {
-    auto pd = 3;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
     _layer = (CAMetalLayer *)layer;
@@ -55,10 +54,10 @@ public:
     _layer.framebufferOnly = NO;
     _layer.device = MTLCreateSystemDefaultDevice();
     _layer.opaque = false;
-    _layer.contentsScale = pd;
+    _layer.contentsScale = 3;
     _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _layer.contentsGravity = kCAGravityBottomLeft;
-    _layer.frame = CGRectMake(0, 0, width, height);
+    _layer.drawableSize = CGSize(width, height);
   }
 
   ~IOSSkiaContext() {}
@@ -78,8 +77,8 @@ public:
 
     // Get the texture from the drawable
     _skSurface = SkiaMetalSurfaceFactory::makeWindowedSurface(
-        _context, _currentDrawable.texture, _layer.frame.size.width,
-        _layer.frame.size.height);
+        _context, _currentDrawable.texture, _layer.drawableSize.width,
+        _layer.drawableSize.height);
     return _skSurface;
   }
 

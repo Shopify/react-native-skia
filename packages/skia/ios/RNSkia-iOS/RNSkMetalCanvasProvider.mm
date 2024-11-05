@@ -23,12 +23,6 @@ RNSkMetalCanvasProvider::RNSkMetalCanvasProvider(
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   _layer = [CAMetalLayer layer];
 #pragma clang diagnostic pop
-  _layer.framebufferOnly = NO;
-  _layer.device = MTLCreateSystemDefaultDevice();
-  _layer.opaque = false;
-  _layer.contentsScale = _context->getPixelDensity();
-  _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
-  _layer.contentsGravity = kCAGravityBottomLeft;
 }
 
 RNSkMetalCanvasProvider::~RNSkMetalCanvasProvider() {}
@@ -80,8 +74,8 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
     if (currentDrawable == nullptr) {
       return false;
     }
-    auto ctx = MetalContext::getInstance().MakeWindow(
-        _layer, _layer.drawableSize.width, _layer.drawableSize.height);
+    auto ctx = MetalContext::getInstance().MakeWindow(_layer, getScaledWidth(),
+                                                      getScaledHeight());
     auto skSurface = ctx->getSurface();
     SkCanvas *canvas = skSurface->getCanvas();
     cb(canvas);
@@ -99,9 +93,6 @@ void RNSkMetalCanvasProvider::setSize(int width, int height) {
   _width = width;
   _height = height;
   _layer.frame = CGRectMake(0, 0, width, height);
-  _layer.drawableSize = CGSizeMake(width * _context->getPixelDensity(),
-                                   height * _context->getPixelDensity());
-
   _requestRedraw();
 }
 

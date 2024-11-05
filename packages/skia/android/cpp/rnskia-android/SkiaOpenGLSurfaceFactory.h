@@ -37,9 +37,7 @@ public:
                      int width, int height)
       : _context(context), _window(window), _width(width), _height(height) {}
 
-  ~AndroidSkiaContext() {
-    ANativeWindow_release(_window);
-  }
+  ~AndroidSkiaContext() { ANativeWindow_release(_window); }
 
   sk_sp<SkSurface> getSurface() override;
 
