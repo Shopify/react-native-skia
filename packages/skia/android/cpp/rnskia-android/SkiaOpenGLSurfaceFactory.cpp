@@ -182,8 +182,6 @@ sk_sp<SkSurface> AndroidSkiaContext::getSurface() {
         },
         reinterpret_cast<void *>(releaseCtx));
   }
-  // TODO: add this back
-  //_surfaceHolder->updateTexImage();
   return _skSurface;
 }
 

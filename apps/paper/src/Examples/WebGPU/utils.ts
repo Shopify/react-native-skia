@@ -44,6 +44,9 @@ p2.setColor(Skia.Color(c2));
 export const drawBreatheDemo = (ctx: SkiaContext, progress: number) => {
   "worklet";
   const surface = ctx.getSurface();
+  if (surface === null) {
+    throw new Error("No surface available");
+  }
   const canvas = surface.getCanvas();
   canvas.clear(Skia.Color("rgb(36, 43, 56)"));
   canvas.save();

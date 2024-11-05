@@ -34,6 +34,9 @@ public:
 
   JSI_HOST_FUNCTION(getSurface) {
     auto surface = getObject()->getSurface();
+    if (surface == nullptr) {
+      return jsi::Value::null();
+    }
     return jsi::Object::createFromHostObject(
         runtime,
         std::make_shared<JsiSkSurface>(getContext(), std::move(surface)));
