@@ -54,7 +54,7 @@ public:
     _layer.framebufferOnly = NO;
     _layer.device = MTLCreateSystemDefaultDevice();
     _layer.opaque = false;
-    _layer.contentsScale = 3;
+    _layer.contentsScale = [UIScreen mainScreen].scale;
     _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _layer.contentsGravity = kCAGravityBottomLeft;
     _layer.drawableSize = CGSizeMake(width, height);
