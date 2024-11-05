@@ -11,9 +11,9 @@
 
 #include "AHardwareBufferUtils.h"
 #include "JniPlatformContext.h"
+#include "OpenGLContext.h"
 #include "RNSkAndroidVideo.h"
 #include "RNSkPlatformContext.h"
-#include "SkiaOpenGLSurfaceFactory.h"
 #include "RNSkiaDawnContext.h"
 
 #pragma clang diagnostic push
@@ -52,16 +52,16 @@ public:
   }
 
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override {
-    return SkiaOpenGLSurfaceFactory::makeOffscreenSurface(width, height);
+    return OpenGLContext::getInstance().MakeOffscreen(width, height);
   }
 
-  std::shared_ptr<SkiaContext>
+  std::shared_ptr<WindowContext>
   makeContextFromNativeSurface(void *surface, int width, int height) override {
     return RNSkiaDawnContext::getInstance().MakeOnscreen(surface, width, height);
   }
 
   sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override {
-    return SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(buffer);
+    return OpenGLContext::getInstance().MakeImageFromBuffer(buffer);
   }
 
   std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override {

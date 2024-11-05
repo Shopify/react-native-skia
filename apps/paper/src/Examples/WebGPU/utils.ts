@@ -7,18 +7,19 @@ import {
   Skia,
 } from "@shopify/react-native-skia";
 import { Dimensions, PixelRatio } from "react-native";
-import { useSharedValue } from "react-native-reanimated";
+import { runOnUI, useSharedValue } from "react-native-reanimated";
 import { useCanvasEffect } from "react-native-wgpu";
+
+const pd = PixelRatio.get();
 
 export const useSkiaContext = () => {
   const context = useSharedValue<SkiaContext | null>(null);
   const ref = useCanvasEffect(() => {
     const nativeSurface = ref.current!.getNativeSurface();
-    context.value = Skia.Context(
-      nativeSurface.surface,
-      nativeSurface.width * pd,
-      nativeSurface.height * pd
-    );
+    const { surface, width, height } = nativeSurface;
+    runOnUI(() => {
+      context.value = Skia.Context(surface, width * pd, height * pd);
+    })();
   });
   return {
     context,
@@ -26,7 +27,6 @@ export const useSkiaContext = () => {
   };
 };
 
-const pd = PixelRatio.get();
 const { width, height } = Dimensions.get("window");
 const center = { x: width / 2, y: height / 2 };
 const R = width / 4;
@@ -44,6 +44,9 @@ p2.setColor(Skia.Color(c2));
 export const drawBreatheDemo = (ctx: SkiaContext, progress: number) => {
   "worklet";
   const surface = ctx.getSurface();
+  if (surface === null) {
+    throw new Error("No surface available");
+  }
   const canvas = surface.getCanvas();
   canvas.clear(Skia.Color("rgb(36, 43, 56)"));
   canvas.save();

@@ -5,14 +5,14 @@
 #include <thread>
 #include <utility>
 
+#include "MetalContext.h"
 #include "RNSkiOSVideo.h"
 #import "RNSkiaDawnContext.h"
-#import "SkiaCVPixelBufferUtils.h"
-#import "SkiaMetalSurfaceFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#import "include/core/SkColorSpace.h"
 #include "include/core/SkFontMgr.h"
 #include "include/core/SkSurface.h"
 
@@ -72,7 +72,7 @@ uint64_t RNSkiOSPlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
   if (image->colorType() != kBGRA_8888_SkColorType) {
     // on iOS, 32_BGRA is the only supported RGB format for CVPixelBuffers.
     image = image->makeColorTypeAndColorSpace(
-        ThreadContextHolder::ThreadSkiaMetalContext.skContext.get(),
+        MetalContext::getInstance()._context.skContext.get(),
         kBGRA_8888_SkColorType, SkColorSpace::MakeSRGB());
     if (image == nullptr) {
       throw std::runtime_error(
@@ -150,7 +150,7 @@ RNSkiOSPlatformContext::createVideo(const std::string &url) {
   return std::make_shared<RNSkiOSVideo>(url, this);
 }
 
-std::shared_ptr<SkiaContext>
+std::shared_ptr<WindowContext>
 RNSkiOSPlatformContext::makeContextFromNativeSurface(void *surface, int width,
                                                      int height) {
   return RNSkiaDawnContext::getInstance().MakeOnscreen(surface, width, height);
@@ -162,12 +162,11 @@ void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
 
 sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
                                                               int height) {
-  return SkiaMetalSurfaceFactory::makeOffscreenSurface(width, height);
+  return MetalContext::getInstance().MakeOffscreen(width, height);
 }
 
 sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeBuffer(void *buffer) {
-  CVPixelBufferRef sampleBuffer = (CVPixelBufferRef)buffer;
-  return SkiaMetalSurfaceFactory::makeTextureFromCVPixelBuffer(sampleBuffer);
+  return MetalContext::getInstance().MakeImageFromBuffer(buffer);
 }
 
 sk_sp<SkFontMgr> RNSkiOSPlatformContext::createFontMgr() {

@@ -13,8 +13,8 @@
 
 #pragma clang diagnostic pop
 
+#include "OpenGLContext.h"
 #include "RNSkAndroidVideo.h"
-#include "SkiaOpenGLSurfaceFactory.h"
 
 namespace RNSkia {
 
@@ -52,7 +52,7 @@ sk_sp<SkImage> RNSkAndroidVideo::nextImage(double *timeStamp) {
   // Convert jobject to AHardwareBuffer
   AHardwareBuffer *buffer =
       AHardwareBuffer_fromHardwareBuffer(env, jHardwareBuffer);
-  return SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(buffer);
+  return OpenGLContext::getInstance().MakeImageFromBuffer(buffer);
 #else
   return nullptr;
 #endif

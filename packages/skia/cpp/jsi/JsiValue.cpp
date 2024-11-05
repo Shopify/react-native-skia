@@ -55,9 +55,8 @@ double JsiValue::getAsNumber() const {
 
 const std::string &JsiValue::getAsString() const {
   if (_type == PropType::Number) {
-    return std::move(std::to_string(_numberValue));
+    return std::to_string(_numberValue);
   }
-
   if (_type != PropType::String) {
     throw std::runtime_error("Expected type string, got " +
                              getTypeAsString(_type));

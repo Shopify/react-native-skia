@@ -1,4 +1,5 @@
 #import "RNSkMetalCanvasProvider.h"
+#include "MetalContext.h"
 #import "RNSkLog.h"
 #import "RNSkiaDawnContext.h"
 
@@ -23,12 +24,6 @@ RNSkMetalCanvasProvider::RNSkMetalCanvasProvider(
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   _layer = [CAMetalLayer layer];
 #pragma clang diagnostic pop
-  _layer.framebufferOnly = NO;
-  _layer.device = MTLCreateSystemDefaultDevice();
-  _layer.opaque = false;
-  _layer.contentsScale = _context->getPixelDensity();
-  _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
-  _layer.contentsGravity = kCAGravityBottomLeft;
 }
 
 RNSkMetalCanvasProvider::~RNSkMetalCanvasProvider() {}
@@ -36,16 +31,12 @@ RNSkMetalCanvasProvider::~RNSkMetalCanvasProvider() {}
 /**
  Returns the scaled width of the view
  */
-float RNSkMetalCanvasProvider::getScaledWidth() {
-  return _width * _context->getPixelDensity();
-};
+float RNSkMetalCanvasProvider::getScaledWidth() { return _width; };
 
 /**
  Returns the scaled height of the view
  */
-float RNSkMetalCanvasProvider::getScaledHeight() {
-  return _height * _context->getPixelDensity();
-};
+float RNSkMetalCanvasProvider::getScaledHeight() { return _height; };
 
 /**
  Render to a canvas
@@ -97,12 +88,9 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
 };
 
 void RNSkMetalCanvasProvider::setSize(int width, int height) {
-  _width = width;
-  _height = height;
   _layer.frame = CGRectMake(0, 0, width, height);
-  _layer.drawableSize = CGSizeMake(width * _context->getPixelDensity(),
-                                   height * _context->getPixelDensity());
-
+  _width = width * _context->getPixelDensity();
+  _height = height * _context->getPixelDensity();
   _requestRedraw();
 }
 

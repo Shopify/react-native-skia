@@ -13,8 +13,8 @@
 #include <thread>
 #include <unordered_map>
 
-#include "SkiaContext.h"
 #include "SkiaOpenGLHelper.h"
+#include "WindowContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -31,145 +31,45 @@
 
 namespace RNSkia {
 
-/**
- * Holder of the thread local SkiaOpenGLContext member
- */
-class ThreadContextHolder {
+class AndroidSkiaContext : public WindowContext {
 public:
-  static thread_local SkiaOpenGLContext ThreadSkiaOpenGLContext;
-};
+  AndroidSkiaContext(SkiaOpenGLContext *context, ANativeWindow *window,
+                     int width, int height)
+      : _context(context), _window(window), _width(width), _height(height) {}
 
-/**
- * Holder of the Windowed SkSurface with support for making current
- * and presenting to screen
- */
-class WindowSurfaceHolder {
-public:
-  WindowSurfaceHolder(jobject jSurfaceTexture, int width, int height)
-      : _width(width), _height(height) {
-    JNIEnv *env = facebook::jni::Environment::current();
-    _jSurfaceTexture = env->NewGlobalRef(jSurfaceTexture);
-    jclass surfaceClass = env->FindClass("android/view/Surface");
-    jmethodID surfaceConstructor = env->GetMethodID(
-        surfaceClass, "<init>", "(Landroid/graphics/SurfaceTexture;)V");
-    // Create a new Surface instance
-    jobject jSurface =
-        env->NewObject(surfaceClass, surfaceConstructor, jSurfaceTexture);
-
-    jclass surfaceTextureClass = env->GetObjectClass(_jSurfaceTexture);
-    _updateTexImageMethod =
-        env->GetMethodID(surfaceTextureClass, "updateTexImage", "()V");
-
-    // Acquire the native window from the Surface
-    _window = ANativeWindow_fromSurface(env, jSurface);
-    // Clean up local references
-    env->DeleteLocalRef(jSurface);
-    env->DeleteLocalRef(surfaceClass);
-    env->DeleteLocalRef(surfaceTextureClass);
-  }
-
-  ~WindowSurfaceHolder() {
-    JNIEnv *env = facebook::jni::Environment::current();
-    env->DeleteGlobalRef(_jSurfaceTexture);
-    ANativeWindow_release(_window);
-  }
-
-  int getWidth() { return _width; }
-  int getHeight() { return _height; }
-
-  /*
-   * Ensures that the holder has a valid surface and returns the surface.
-   */
-  sk_sp<SkSurface> getSurface();
-
-  void updateTexImage() {
-    JNIEnv *env = facebook::jni::Environment::current();
-
-    // Call updateTexImage on the SurfaceTexture object
-    env->CallVoidMethod(_jSurfaceTexture, _updateTexImageMethod);
-
-    // Check for exceptions
-    if (env->ExceptionCheck()) {
-      RNSkLogger::logToConsole("updateAndRelease() failed. The exception above "
-                               "can safely be ignored");
-      env->ExceptionClear();
-    }
-  }
-
-  /**
-   * Resizes the surface
-   * @param width
-   * @param height
-   */
-  void resize(int width, int height) {
-    _width = width;
-    _height = height;
-    _skSurface = nullptr;
-  }
-
-  /**
-   * Sets the current surface as the active surface
-   * @return true if make current succeeds
-   */
-  bool makeCurrent() {
-    return SkiaOpenGLHelper::makeCurrent(
-        &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
-  }
-
-  /**
-   * Presents the current drawing operations by swapping buffers
-   * @return true if make current succeeds
-   */
-  bool present() {
-    // Flush and submit the direct context
-    ThreadContextHolder::ThreadSkiaOpenGLContext.directContext
-        ->flushAndSubmit();
-
-    // Swap buffers
-    return SkiaOpenGLHelper::swapBuffers(
-        &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface);
-  }
-
-private:
-  ANativeWindow *_window;
-  sk_sp<SkSurface> _skSurface = nullptr;
-  jobject _jSurfaceTexture = nullptr;
-  EGLSurface _glSurface = EGL_NO_SURFACE;
-  jmethodID _updateTexImageMethod = nullptr;
-  int _width = 0;
-  int _height = 0;
-};
-
-class AndroidSkiaContext : public SkiaContext {
-public:
-  AndroidSkiaContext(ANativeWindow *window, int width, int height)
-      : _window(window), _width(width), _height(height) {}
-
-  ~AndroidSkiaContext() {}
+  ~AndroidSkiaContext() { ANativeWindow_release(_window); }
 
   sk_sp<SkSurface> getSurface() override;
 
   void present() override {
-    if (!SkiaOpenGLHelper::makeCurrent(
-            &ThreadContextHolder::ThreadSkiaOpenGLContext, _glSurface)) {
+    if (!SkiaOpenGLHelper::makeCurrent(_context, _glSurface)) {
       RNSkLogger::logToConsole(
           "Could not create EGL Surface from native window / surface. Could "
           "not set new surface as current surface.");
       return;
     }
     // Flush and submit the direct context
-    ThreadContextHolder::ThreadSkiaOpenGLContext.directContext
-        ->flushAndSubmit();
+    _context->directContext->flushAndSubmit();
 
     // Swap buffers
-    SkiaOpenGLHelper::swapBuffers(&ThreadContextHolder::ThreadSkiaOpenGLContext,
-                                  _glSurface);
+    SkiaOpenGLHelper::swapBuffers(_context, _glSurface);
   }
+
+  void resize(int width, int height) override {
+    _skSurface = nullptr;
+    _width = width;
+    _height = height;
+  }
+
+  int getWidth() override { return _width; };
+
+  int getHeight() override { return _height; };
 
 private:
   ANativeWindow *_window;
   sk_sp<SkSurface> _skSurface = nullptr;
   EGLSurface _glSurface = EGL_NO_SURFACE;
+  SkiaOpenGLContext *_context;
   int _width = 0;
   int _height = 0;
 };
@@ -182,26 +82,18 @@ public:
    * @param height Height of surface
    * @return An SkSurface backed by a texture.
    */
-  static sk_sp<SkSurface> makeOffscreenSurface(int width, int height);
+  static sk_sp<SkSurface> makeOffscreenSurface(SkiaOpenGLContext *context,
+                                               int width, int height);
 
   static sk_sp<SkImage>
-  makeImageFromHardwareBuffer(void *buffer, bool requireKnownFormat = false);
+  makeImageFromHardwareBuffer(SkiaOpenGLContext *context, void *buffer,
+                              bool requireKnownFormat = false);
 
-  static std::shared_ptr<AndroidSkiaContext>
-  makeContext(ANativeWindow *surface, int width, int height) {
-    return std::make_shared<AndroidSkiaContext>(surface, width, height);
-  }
-
-  /**
-   * Creates a windowed Skia Surface holder.
-   * @param width Initial width of surface
-   * @param height Initial height of surface
-   * @param window Window coming from Java
-   * @return A Surface holder
-   */
-  static std::unique_ptr<WindowSurfaceHolder>
-  makeWindowedSurface(jobject window, int width, int height) {
-    return std::make_unique<WindowSurfaceHolder>(window, width, height);
+  static std::unique_ptr<AndroidSkiaContext>
+  makeContext(SkiaOpenGLContext *context, ANativeWindow *surface, int width,
+              int height) {
+    return std::make_unique<AndroidSkiaContext>(context, surface, width,
+                                                height);
   }
 };
 
