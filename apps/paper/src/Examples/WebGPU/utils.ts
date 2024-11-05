@@ -10,15 +10,15 @@ import { Dimensions, PixelRatio } from "react-native";
 import { runOnUI, useSharedValue } from "react-native-reanimated";
 import { useCanvasEffect } from "react-native-wgpu";
 
+const pd = PixelRatio.get();
+
 export const useSkiaContext = () => {
   const context = useSharedValue<SkiaContext | null>(null);
   const ref = useCanvasEffect(() => {
     const nativeSurface = ref.current!.getNativeSurface();
-    const { surface } = nativeSurface;
-    const width = nativeSurface.width * pd;
-    const height = nativeSurface.height * pd;
+    const { surface, width, height } = nativeSurface;
     runOnUI(() => {
-      context.value = Skia.Context(surface, width, height);
+      context.value = Skia.Context(surface, width * pd, height * pd);
     })();
   });
   return {
@@ -27,7 +27,6 @@ export const useSkiaContext = () => {
   };
 };
 
-const pd = PixelRatio.get();
 const { width, height } = Dimensions.get("window");
 const center = { x: width / 2, y: height / 2 };
 const R = width / 4;
