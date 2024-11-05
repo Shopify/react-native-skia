@@ -1,7 +1,5 @@
 #pragma once
 
-#pragma once
-
 #include "SkiaOpenGLSurfaceFactory.h"
 #include "WindowContext.h"
 
@@ -11,6 +9,7 @@ class OpenGLContext {
 public:
   OpenGLContext(const OpenGLContext &) = delete;
   OpenGLContext &operator=(const OpenGLContext &) = delete;
+  // TODO: ANativeWindow_release(_window);
 
   static OpenGLContext &getInstance() {
     static thread_local OpenGLContext instance;
