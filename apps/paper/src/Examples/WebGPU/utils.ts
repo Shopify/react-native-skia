@@ -7,18 +7,19 @@ import {
   Skia,
 } from "@shopify/react-native-skia";
 import { Dimensions, PixelRatio } from "react-native";
-import { useSharedValue } from "react-native-reanimated";
+import { runOnUI, useSharedValue } from "react-native-reanimated";
 import { useCanvasEffect } from "react-native-wgpu";
 
 export const useSkiaContext = () => {
   const context = useSharedValue<SkiaContext | null>(null);
   const ref = useCanvasEffect(() => {
     const nativeSurface = ref.current!.getNativeSurface();
-    context.value = Skia.Context(
-      nativeSurface.surface,
-      nativeSurface.width * pd,
-      nativeSurface.height * pd
-    );
+    const { surface } = nativeSurface;
+    const width = nativeSurface.width * pd;
+    const height = nativeSurface.height * pd;
+    runOnUI(() => {
+      context.value = Skia.Context(surface, width, height);
+    })();
   });
   return {
     context,
