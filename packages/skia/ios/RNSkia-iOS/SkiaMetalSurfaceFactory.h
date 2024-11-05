@@ -57,7 +57,7 @@ public:
     _layer.contentsScale = 3;
     _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _layer.contentsGravity = kCAGravityBottomLeft;
-    _layer.drawableSize = CGSize(width, height);
+    _layer.drawableSize = CGSizeMake(width, height);
   }
 
   ~IOSSkiaContext() {}
