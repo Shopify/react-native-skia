@@ -71,7 +71,7 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
     if (currentDrawable == nullptr) {
       return false;
     }
-	  auto ctx = RNSkia::RNSkiaDawnContext::getInstance().MakeOnscreen((__bridge void*)_layer,  _layer.drawableSize.width,
+	  auto ctx = RNSkia::RNSkiaDawnContext::getInstance().MakeWindow((__bridge void*)_layer,  _layer.drawableSize.width,
 															   _layer.drawableSize.height);
 	  auto skSurface = ctx->getSurface();
 

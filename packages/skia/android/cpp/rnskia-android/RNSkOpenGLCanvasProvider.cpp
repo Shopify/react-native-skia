@@ -2,7 +2,16 @@
 
 #include <memory>
 
-#include "OpenGLContext.h"
+
+#include <fbjni/fbjni.h>
+#include <jni.h>
+
+#include <android/native_window_jni.h>
+#include <android/surface_texture.h>
+#include <android/surface_texture_jni.h>
+
+#include "RNSkiaDawnContext.h"
+#include "RNSkLog.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -45,8 +54,8 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
 
     // Check for exceptions
     if (env->ExceptionCheck()) {
-      RNSkLogger::logToConsole("updateAndRelease() failed. The exception above "
-                               "can safely be ignored");
+      //RNSkLogger::logToConsole("updateAndRelease() failed. The exception above "
+      //                         "can safely be ignored");
       env->ExceptionClear();
     }
     if (surface) {
@@ -90,7 +99,7 @@ void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurfaceTexture,
   env->DeleteLocalRef(surfaceClass);
   env->DeleteLocalRef(surfaceTextureClass);
   _surfaceHolder =
-      OpenGLContext::getInstance().MakeWindow(window, width, height);
+      RNSkiaDawnContext::getInstance().MakeWindow(window, width, height);
 
   // Post redraw request to ensure we paint in the next draw cycle.
   _requestRedraw();

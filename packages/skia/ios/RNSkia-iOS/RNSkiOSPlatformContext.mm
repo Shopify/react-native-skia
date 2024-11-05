@@ -153,7 +153,7 @@ RNSkiOSPlatformContext::createVideo(const std::string &url) {
 std::shared_ptr<WindowContext>
 RNSkiOSPlatformContext::makeContextFromNativeSurface(void *surface, int width,
                                                      int height) {
-  return RNSkiaDawnContext::getInstance().MakeOnscreen(surface, width, height);
+  return RNSkiaDawnContext::getInstance().MakeWindow(surface, width, height);
 }
 
 void RNSkiOSPlatformContext::raiseError(const std::exception &err) {

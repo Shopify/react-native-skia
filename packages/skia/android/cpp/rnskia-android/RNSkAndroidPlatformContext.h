@@ -57,7 +57,7 @@ public:
 
   std::shared_ptr<WindowContext>
   makeContextFromNativeSurface(void *surface, int width, int height) override {
-    return RNSkiaDawnContext::getInstance().MakeOnscreen(surface, width, height);
+    return RNSkiaDawnContext::getInstance().MakeWindow(surface, width, height);
   }
 
   sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override {

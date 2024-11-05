@@ -59,7 +59,7 @@ public:
   }
 
   // Create onscreen surface with window
-  std::unique_ptr<SkiaContext> MakeOnscreen(void *window, int width,
+  std::unique_ptr<WindowContext> MakeWindow(void *window, int width,
                                             int height) {
     // 1. Create Surface
     wgpu::SurfaceDescriptor surfaceDescriptor;
@@ -100,11 +100,6 @@ private:
     togglesDesc.enabledToggleCount = std::size(kToggles) - (useTintIR ? 0 : 1);
     togglesDesc.enabledToggles = kToggles;
 
-    // Creation of Instance is cheap but calling EnumerateAdapters can be
-    // expensive the first time, but then the results are cached on the Instance
-    // object. So save the Instance here so we can avoid the overhead of
-    // EnumerateAdapters on every test.
-    // sOnce([&] {
     {
       DawnProcTable backendProcs = dawn::native::GetProcs();
       dawnProcSetProcs(&backendProcs);
@@ -113,8 +108,7 @@ private:
       desc.features.timedWaitAnyEnable = true;
       instance = std::make_unique<dawn::native::Instance>(&desc);
     }
-    //});
-
+  
     dawn::native::Adapter matchedAdaptor;
 
     wgpu::RequestAdapterOptions options;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SkiaContext.h"
+#include "WindowContext.h"
 
 #include "webgpu/webgpu_cpp.h"
 
@@ -17,7 +17,7 @@
 
 namespace RNSkia {
 
-class OnscreenContext : public SkiaContext {
+class OnscreenContext : public WindowContext {
 public:
   OnscreenContext(skgpu::graphite::Context *context,
                   skgpu::graphite::Recorder *recorder, wgpu::Device device,
@@ -36,7 +36,7 @@ public:
   sk_sp<SkSurface> getSurface() override {
     wgpu::SurfaceTexture surfaceTexture;
     _surface.GetCurrentTexture(&surfaceTexture);
-    SkASSERT(surfaceTexture.texture);
+    //SkASSERT(surfaceTexture.texture);
     auto texture = surfaceTexture.texture;
 
     skgpu::graphite::DawnTextureInfo info(
@@ -60,6 +60,18 @@ public:
       _context->submit(skgpu::graphite::SyncToCpu::kNo);
     }
     _surface.Present();
+  }
+
+  void resize(int width, int height) {
+    // TODO: implement
+  }
+
+  int getWidth() {
+    return _width;
+  }
+
+  int getHeight() {
+    return _height;
   }
 
 private:
