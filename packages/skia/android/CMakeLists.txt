@@ -266,8 +266,6 @@ if(${REACT_NATIVE_VERSION} GREATER_EQUAL 76)
         ${DAWN_PLATFORM_LIB}
         ${DAWN_PROC_LIB}
         -ljnigraphics
-        -lGLESv2
-        -lEGL
         -landroid
     )
 else()
@@ -290,8 +288,6 @@ else()
         ${DAWN_PLATFORM_LIB}
         ${DAWN_PROC_LIB}
         -ljnigraphics
-        -lGLESv2
-        -lEGL
         -landroid
     )
 endif()

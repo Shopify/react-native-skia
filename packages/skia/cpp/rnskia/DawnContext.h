@@ -129,6 +129,7 @@ private:
     options.nextInChain = &togglesDesc;
     std::vector<dawn::native::Adapter> adapters =
         instance->EnumerateAdapters(&options);
+    // TODO: throw instead
     SkASSERT(!adapters.empty());
     // Sort adapters by adapterType(DiscreteGPU, IntegratedGPU, CPU) and
     // backendType(WebGPU, D3D11, D3D12, Metal, Vulkan, OpenGL, OpenGLES).

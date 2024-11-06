@@ -45,15 +45,14 @@ float RNSkOpenGLCanvasProvider::getScaledHeight() {
 
 bool RNSkOpenGLCanvasProvider::renderToCanvas(
     const std::function<void(SkCanvas *)> &cb) {
-  JNIEnv *env = facebook::jni::Environment::current();
   if (_surfaceHolder != nullptr && cb != nullptr) {
     auto surface = _surfaceHolder->getSurface();
     if (surface) {
       // Draw into canvas using callback
-      cb(surface->getCanvas());
+    cb(surface->getCanvas());
 
       // Swap buffers and show on screen
-      _surfaceHolder->present();
+   _surfaceHolder->present();
 
       return true;
     } else {
@@ -70,7 +69,6 @@ void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurface,
   // Create renderer!
   JNIEnv *env = facebook::jni::Environment::current();
 
-  // Acquire the native window from the Surface
   auto window = ANativeWindow_fromSurface(env, jSurface);
   _surfaceHolder =
       DawnContext::getInstance().MakeWindow(window, width, height);
