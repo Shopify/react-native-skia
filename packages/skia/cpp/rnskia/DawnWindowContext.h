@@ -30,9 +30,13 @@ public:
     wgpu::SurfaceConfiguration config;
     config.device = _device;
     config.format = _format;
-    // TODO: alpha mode
     config.width = _width;
     config.height = _height;
+#ifdef __APPLE__
+	config.alphaMode = wgpu::CompositeAlphaMode::Premultiplied;
+#elif
+	config.alphaMode = wgpu::CompositeAlphaMode::Opaque;
+#endif
     _surface.Configure(&config);
   }
 
