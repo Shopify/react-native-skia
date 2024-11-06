@@ -7,7 +7,7 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
 
-#include "OnscreenContext.h"
+#include "DawnWindowContext.h"
 
 #include "include/gpu/graphite/BackendTexture.h"
 #include "include/gpu/graphite/Context.h"
@@ -24,20 +24,25 @@
 
 namespace RNSkia {
 
-class RNSkiaDawnContext {
+class DawnContext {
 public:
   std::unique_ptr<dawn::native::Instance> instance;
   std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
   std::unique_ptr<skgpu::graphite::Recorder> fGraphiteRecorder;
 
   // Delete copy constructor and assignment operator
-  RNSkiaDawnContext(const RNSkiaDawnContext &) = delete;
-  RNSkiaDawnContext &operator=(const RNSkiaDawnContext &) = delete;
+  DawnContext(const DawnContext &) = delete;
+  DawnContext &operator=(const DawnContext &) = delete;
 
   // Get instance for current thread
-  static RNSkiaDawnContext &getInstance() {
-    static thread_local RNSkiaDawnContext instance;
+  static DawnContext &getInstance() {
+    static thread_local DawnContext instance;
     return instance;
+  }
+
+  sk_sp<SkImage> MakeImageFromBuffer(void *buffer) {
+    // TODO: implement
+    return nullptr;
   }
 
   // Create offscreen surface
@@ -74,7 +79,7 @@ public:
 #endif
     auto surface =
         wgpu::Instance(instance->Get()).CreateSurface(&surfaceDescriptor);
-    return std::make_unique<OnscreenContext>(
+    return std::make_unique<DawnWindowContext>(
         fGraphiteContext.get(), fGraphiteRecorder.get(), backendContext.fDevice,
         surface, width, height);
   }
@@ -84,7 +89,7 @@ public:
 private:
   skgpu::graphite::DawnBackendContext backendContext;
 
-  RNSkiaDawnContext() {
+  DawnContext() {
     auto useTintIR = true;
     static constexpr const char *kToggles[] = {
         "allow_unsafe_apis", // Needed for dual-source blending.
@@ -108,7 +113,7 @@ private:
       desc.features.timedWaitAnyEnable = true;
       instance = std::make_unique<dawn::native::Instance>(&desc);
     }
-  
+
     dawn::native::Adapter matchedAdaptor;
 
     wgpu::RequestAdapterOptions options;

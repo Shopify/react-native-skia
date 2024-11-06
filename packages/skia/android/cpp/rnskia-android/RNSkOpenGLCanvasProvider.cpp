@@ -2,7 +2,6 @@
 
 #include <memory>
 
-
 #include <fbjni/fbjni.h>
 #include <jni.h>
 
@@ -10,7 +9,7 @@
 #include <android/surface_texture.h>
 #include <android/surface_texture_jni.h>
 
-#include "RNSkiaDawnContext.h"
+#include "DawnContext.h"
 #include "RNSkLog.h"
 
 #pragma clang diagnostic push
@@ -54,8 +53,9 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
 
     // Check for exceptions
     if (env->ExceptionCheck()) {
-      //RNSkLogger::logToConsole("updateAndRelease() failed. The exception above "
-      //                         "can safely be ignored");
+      // RNSkLogger::logToConsole("updateAndRelease() failed. The exception
+      // above "
+      //                          "can safely be ignored");
       env->ExceptionClear();
     }
     if (surface) {

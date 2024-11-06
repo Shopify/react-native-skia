@@ -7,9 +7,9 @@
 
 #include "JsiSkHostObjects.h"
 
+#include "DawnContext.h"
 #include "JsiSkCanvas.h"
 #include "JsiSkImage.h"
-#include "RNSkiaDawnContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -60,12 +60,12 @@ public:
     }
     if (surface->recorder()) {
       auto sync = skgpu::graphite::SyncToCpu::kNo;
-      RNSkiaDawnContext::getInstance().fGraphiteContext->submit(sync);
+      DawnContext::getInstance().fGraphiteContext->submit(sync);
       if (sync == skgpu::graphite::SyncToCpu::kNo) {
-        while (RNSkiaDawnContext::getInstance()
+        while (DawnContext::getInstance()
                    .fGraphiteContext->hasUnfinishedGpuWork()) {
-          RNSkiaDawnContext::getInstance().tick();
-          RNSkiaDawnContext::getInstance()
+          DawnContext::getInstance().tick();
+          DawnContext::getInstance()
               .fGraphiteContext->checkAsyncWorkCompletion();
         }
       }
@@ -90,26 +90,25 @@ public:
         //      SkPixmap pixmap(info, nullptr, info.minRowBytes());
         //      auto result = surface->readPixels(pixmap, 0, 0);
 
-        RNSkiaDawnContext::getInstance()
-            .fGraphiteContext->asyncRescaleAndReadPixels(
-                img.get(), info, bounds, SkImage::RescaleGamma::kSrc,
-                SkImage::RescaleMode::kRepeatedLinear,
-                [](void *c,
-                   std::unique_ptr<const SkImage::AsyncReadResult> result) {
-                  auto context = static_cast<AsyncContext *>(c);
-                  context->fResult = std::move(result);
-                  context->fCalled = true;
-                },
-                &asyncContext);
+        DawnContext::getInstance().fGraphiteContext->asyncRescaleAndReadPixels(
+            img.get(), info, bounds, SkImage::RescaleGamma::kSrc,
+            SkImage::RescaleMode::kRepeatedLinear,
+            [](void *c,
+               std::unique_ptr<const SkImage::AsyncReadResult> result) {
+              auto context = static_cast<AsyncContext *>(c);
+              context->fResult = std::move(result);
+              context->fCalled = true;
+            },
+            &asyncContext);
 
         // TODO: sync cpu yes?
-        RNSkiaDawnContext::getInstance().fGraphiteContext->submit();
+        DawnContext::getInstance().fGraphiteContext->submit();
         if (!asyncContext.fCalled) {
           // context->submit();
         }
         while (!asyncContext.fCalled) {
-          RNSkiaDawnContext::getInstance().tick();
-          RNSkiaDawnContext::getInstance()
+          DawnContext::getInstance().tick();
+          DawnContext::getInstance()
               .fGraphiteContext->checkAsyncWorkCompletion();
         }
         if (!asyncContext.fResult) {
@@ -119,10 +118,6 @@ public:
         // TODO: MakeWithoutCopy ?
         auto size = info.computeMinByteSize();
         auto data = SkData::MakeWithCopy(asyncContext.fResult->data(0), size);
-        auto pixel1B = ((uint8_t *)asyncContext.fResult->data(0))[0];
-        auto pixel1R = ((uint8_t *)asyncContext.fResult->data(0))[1];
-        auto pixel1G = ((uint8_t *)asyncContext.fResult->data(0))[2];
-        auto pixel1A = ((uint8_t *)asyncContext.fResult->data(0))[3];
         image = SkImages::RasterFromData(info, data,
                                          asyncContext.fResult->rowBytes(0));
 

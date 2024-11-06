@@ -73,6 +73,7 @@ export const commonArgs = [
   ["paragraph_tests_enabled", false],
   ["is_component_build", false],
   // Graphite
+  // TODO: disable ganesh
   ["skia_enable_graphite", true],
   ["skia_use_dawn", true],
 ];
@@ -226,6 +227,7 @@ export const copyHeaders = () => {
     "cp -a ../../externals/skia/src/core/SkChecksum.h ./cpp/skia/src/core/.",
     "cp -a ../../externals/skia/src/core/SkTHash.h ./cpp/skia/src/core/.",
 
+    // TODO: remove ganesh
     "mkdir -p ./cpp/skia/src/gpu/ganesh/gl",
     "cp -a ../../externals/skia/src/gpu/ganesh/gl/GrGLDefines.h ./cpp/skia/src/gpu/ganesh/gl/.",
 

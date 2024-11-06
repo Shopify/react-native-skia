@@ -2,6 +2,7 @@
 
 #include "WindowContext.h"
 
+#include "dawn/native/MetalBackend.h"
 #include "webgpu/webgpu_cpp.h"
 
 #include "include/gpu/graphite/BackendTexture.h"
@@ -17,11 +18,11 @@
 
 namespace RNSkia {
 
-class OnscreenContext : public WindowContext {
+class DawnWindowContext : public WindowContext {
 public:
-  OnscreenContext(skgpu::graphite::Context *context,
-                  skgpu::graphite::Recorder *recorder, wgpu::Device device,
-                  wgpu::Surface surface, int width, int height)
+  DawnWindowContext(skgpu::graphite::Context *context,
+                    skgpu::graphite::Recorder *recorder, wgpu::Device device,
+                    wgpu::Surface surface, int width, int height)
       : _context(context), _recorder(recorder), _device(device),
         _surface(surface), _width(width), _height(height) {
     wgpu::SurfaceConfiguration config;
@@ -31,23 +32,22 @@ public:
     config.width = _width;
     config.height = _height;
     _surface.Configure(&config);
-  }	
+  }
 
   sk_sp<SkSurface> getSurface() override {
     wgpu::SurfaceTexture surfaceTexture;
     _surface.GetCurrentTexture(&surfaceTexture);
-    //SkASSERT(surfaceTexture.texture);
+    // SkASSERT(surfaceTexture.texture);
     auto texture = surfaceTexture.texture;
 
     skgpu::graphite::DawnTextureInfo info(
         /*sampleCount=*/1, skgpu::Mipmapped::kNo, _format, texture.GetUsage(),
         wgpu::TextureAspect::All);
     auto backendTex = skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
-    //sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
+    // sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
     SkSurfaceProps surfaceProps(0, kRGB_H_SkPixelGeometry);
-    auto surface = SkSurfaces::WrapBackendTexture(_recorder, backendTex,
-                                                  kBGRA_8888_SkColorType,
-                                                  nullptr, &surfaceProps);
+    auto surface = SkSurfaces::WrapBackendTexture(
+        _recorder, backendTex, kBGRA_8888_SkColorType, nullptr, &surfaceProps);
     return surface;
   }
 
@@ -59,20 +59,21 @@ public:
       _context->insertRecording(info);
       _context->submit(skgpu::graphite::SyncToCpu::kNo);
     }
+#ifdef __APPLE__
+    dawn::native::metal::WaitForCommandsToBeScheduled(_device.Get());
+#endif
     _surface.Present();
   }
 
-  void resize(int width, int height) {
+  void resize(int width, int height) override {
     // TODO: implement
+    _width = width;
+    _height = height;
   }
 
-  int getWidth() {
-    return _width;
-  }
+  int getWidth() { return _width; }
 
-  int getHeight() {
-    return _height;
-  }
+  int getHeight() { return _height; }
 
 private:
   skgpu::graphite::Context *_context;
