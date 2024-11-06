@@ -5,6 +5,8 @@
 #include "dawn/native/MetalBackend.h"
 #include "webgpu/webgpu_cpp.h"
 
+#include "include/core/SkColorSpace.h"
+
 #include "include/gpu/graphite/BackendTexture.h"
 #include "include/gpu/graphite/Context.h"
 #include "include/gpu/graphite/ContextOptions.h"
@@ -44,10 +46,10 @@ public:
         /*sampleCount=*/1, skgpu::Mipmapped::kNo, _format, texture.GetUsage(),
         wgpu::TextureAspect::All);
     auto backendTex = skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
-    // sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
+    sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
     SkSurfaceProps surfaceProps(0, kRGB_H_SkPixelGeometry);
     auto surface = SkSurfaces::WrapBackendTexture(
-        _recorder, backendTex, kBGRA_8888_SkColorType, nullptr, &surfaceProps);
+        _recorder, backendTex, kBGRA_8888_SkColorType, colorSpace, &surfaceProps);
     return surface;
   }
 
@@ -71,9 +73,9 @@ public:
     _height = height;
   }
 
-  int getWidth() { return _width; }
+  int getWidth() override { return _width; }
 
-  int getHeight() { return _height; }
+  int getHeight() override { return _height; }
 
 private:
   skgpu::graphite::Context *_context;
