@@ -8,6 +8,7 @@
 #include "dawn/native/DawnNative.h"
 
 #include "DawnWindowContext.h"
+#include "ImageProvider.h"
 
 #include "include/gpu/graphite/BackendTexture.h"
 #include "include/gpu/graphite/Context.h"
@@ -114,57 +115,28 @@ private:
       instance = std::make_unique<dawn::native::Instance>(&desc);
     }
 
-    dawn::native::Adapter matchedAdaptor;
-
     wgpu::RequestAdapterOptions options;
 #ifdef __APPLE__
     constexpr auto kDefaultBackendType = wgpu::BackendType::Metal;
 #elif __ANDROID__
     constexpr auto kDefaultBackendType = wgpu::BackendType::Vulkan;
 #endif
-    //    options.compatibilityMode = backend == wgpu::BackendType::OpenGL ||
-    //                                backend == wgpu::BackendType::OpenGLES;
     options.backendType = kDefaultBackendType;
     options.nextInChain = &togglesDesc;
     std::vector<dawn::native::Adapter> adapters =
         instance->EnumerateAdapters(&options);
-    // TODO: throw instead
-    SkASSERT(!adapters.empty());
-    // Sort adapters by adapterType(DiscreteGPU, IntegratedGPU, CPU) and
-    // backendType(WebGPU, D3D11, D3D12, Metal, Vulkan, OpenGL, OpenGLES).
-    // TODO: is Vulkan not available or is Vulkan Software adapter we may want
-    // to switch to OpenGL with compability mode true
-    std::sort(adapters.begin(), adapters.end(),
-              [](dawn::native::Adapter a, dawn::native::Adapter b) {
-                wgpu::AdapterInfo infoA;
-                wgpu::AdapterInfo infoB;
-                a.GetInfo(&infoA);
-                b.GetInfo(&infoB);
-                return std::tuple(infoA.adapterType, infoA.backendType) <
-                       std::tuple(infoB.adapterType, infoB.backendType);
-              });
 
-    for (const auto &adapter : adapters) {
-      wgpu::AdapterInfo props;
-      adapter.GetInfo(&props);
-      if (kDefaultBackendType == props.backendType) {
-        matchedAdaptor = adapter;
-        break;
-      }
-    }
-
-    if (!matchedAdaptor) {
+    if (adapters.empty()) {
       throw std::runtime_error("No matching adapter found");
     }
 
-#if LOG_ADAPTER
-    wgpu::AdapterInfo info;
+	wgpu::Adapter adapter = adapters[0].Get();
+
+    //wgpu::AdapterInfo info;
     // sAdapter.GetInfo(&info);
     // SkDebugf("GPU: %s\nDriver: %s\n", info.device, info.description);
-#endif
 
     std::vector<wgpu::FeatureName> features;
-    wgpu::Adapter adapter = matchedAdaptor.Get();
     if (adapter.HasFeature(wgpu::FeatureName::MSAARenderToSingleSampled)) {
       features.push_back(wgpu::FeatureName::MSAARenderToSingleSampled);
     }
@@ -216,23 +188,23 @@ private:
           SkDebugf("Device error: %s\n", message);
         });
 
-    wgpu::Device device =
-        wgpu::Device::Acquire(matchedAdaptor.CreateDevice(&desc));
+    wgpu::Device device = adapter.CreateDevice(&desc);
     SkASSERT(device);
 
     backendContext.fInstance = wgpu::Instance(instance->Get());
     backendContext.fDevice = device;
     backendContext.fQueue = device.GetQueue();
     skgpu::graphite::ContextOptions ctxOptions;
-    // skgpu::graphite::ContextOptionsPriv contextOptionsPriv;
-    // ctxOptions.fOptionsPriv = &contextOptionsPriv;
-    // ctxOptions.fOptionsPriv->fStoreContextRefInRecorder = true;
+    skgpu::graphite::ContextOptionsPriv contextOptionsPriv;
+    ctxOptions.fOptionsPriv = &contextOptionsPriv;
+    ctxOptions.fOptionsPriv->fStoreContextRefInRecorder = true;
     fGraphiteContext =
         skgpu::graphite::ContextFactory::MakeDawn(backendContext, ctxOptions);
     if (!fGraphiteContext) {
       throw std::runtime_error("Failed to create graphite context");
     }
     skgpu::graphite::RecorderOptions recorderOptions;
+    recorderOptions.fImageProvider.reset(new ImageProvider());
     fGraphiteRecorder = fGraphiteContext->makeRecorder(recorderOptions);
     if (!fGraphiteRecorder) {
       throw std::runtime_error("Failed to create graphite context");

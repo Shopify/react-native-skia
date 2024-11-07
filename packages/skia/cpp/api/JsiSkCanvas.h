@@ -3,7 +3,7 @@
 #include <memory>
 #include <utility>
 #include <vector>
-d
+
 #include "JsiSkFont.h"
 #include "JsiSkHostObjects.h"
 #include "JsiSkImage.h"
