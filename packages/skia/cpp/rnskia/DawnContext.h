@@ -117,7 +117,6 @@ private:
     dawn::native::Adapter matchedAdaptor;
 
     wgpu::RequestAdapterOptions options;
-    options.compatibilityMode = true;
 #ifdef __APPLE__
     constexpr auto kDefaultBackendType = wgpu::BackendType::Metal;
 #elif __ANDROID__
