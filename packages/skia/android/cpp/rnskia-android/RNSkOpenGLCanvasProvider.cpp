@@ -71,7 +71,7 @@ void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurface,
   // TODO: fix size
   auto window = ANativeWindow_fromSurface(env, jSurface);
   _surfaceHolder =
-      DawnContext::getInstance().MakeWindow(window, 300, 300);
+      DawnContext::getInstance().MakeWindow(window, width, height);
 
   // Post redraw request to ensure we paint in the next draw cycle.
   _requestRedraw();

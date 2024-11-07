@@ -48,14 +48,9 @@ public:
 
   // Create offscreen surface
   sk_sp<SkSurface> MakeOffscreen(int width, int height) {
-    // Create SkImageInfo for offscreen surface
-    // TODO: RGBA on Android here
-    SkImageInfo imageInfo = SkImageInfo::Make(
-        width, height, kBGRA_8888_SkColorType, kPremul_SkAlphaType);
-
-    // Create an offscreen	 SkSurface
+    SkImageInfo info = SkImageInfo::MakeN32Premul(SkISize::Make(width, height));
     sk_sp<SkSurface> skSurface =
-        SkSurfaces::RenderTarget(fGraphiteRecorder.get(), imageInfo);
+        SkSurfaces::RenderTarget(fGraphiteRecorder.get(), info);
 
     if (!skSurface) {
       throw std::runtime_error("Failed to create offscreen Skia surface.");

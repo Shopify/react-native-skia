@@ -34,8 +34,6 @@ public:
     config.height = _height;
 #ifdef __APPLE__
 	config.alphaMode = wgpu::CompositeAlphaMode::Premultiplied;
-#elif
-	config.alphaMode = wgpu::CompositeAlphaMode::Opaque;
 #endif
     _surface.Configure(&config);
   }
@@ -53,7 +51,7 @@ public:
     sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
     SkSurfaceProps surfaceProps(0, kRGB_H_SkPixelGeometry);
     auto surface = SkSurfaces::WrapBackendTexture(
-        _recorder, backendTex, kBGRA_8888_SkColorType, colorSpace, &surfaceProps);
+        _recorder, backendTex, kN32_SkColorType, colorSpace, &surfaceProps);
     return surface;
   }
 
