@@ -204,7 +204,7 @@ private:
       throw std::runtime_error("Failed to create graphite context");
     }
     skgpu::graphite::RecorderOptions recorderOptions;
-    recorderOptions.fImageProvider.reset(new ImageProvider());
+    recorderOptions.fImageProvider = ImageProvider::Make();
     fGraphiteRecorder = fGraphiteContext->makeRecorder(recorderOptions);
     if (!fGraphiteRecorder) {
       throw std::runtime_error("Failed to create graphite context");

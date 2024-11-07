@@ -21,6 +21,10 @@ public:
     ImageProvider() : fCache(kDefaultNumCachedImages) {}
     ~ImageProvider() override {}
 
+    static sk_sp<ImageProvider> Make() {
+        return sk_ref_sp(new ImageProvider);
+    }
+
     sk_sp<SkImage> findOrCreate(skgpu::graphite::Recorder* recorder,
                                 const SkImage* image,
                                 SkImage::RequiredProperties requiredProps) override {
