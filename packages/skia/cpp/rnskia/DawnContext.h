@@ -48,7 +48,7 @@ public:
 
   // Create offscreen surface
   sk_sp<SkSurface> MakeOffscreen(int width, int height) {
-    SkImageInfo info = SkImageInfo::MakeN32Premul(SkISize::Make(width, height));
+    SkImageInfo info = SkImageInfo::Make(width, height, _colorType, kPremul_SkAlphaType);
     sk_sp<SkSurface> skSurface =
         SkSurfaces::RenderTarget(fGraphiteRecorder.get(), info);
 
@@ -84,6 +84,11 @@ public:
 
 private:
   skgpu::graphite::DawnBackendContext backendContext;
+#ifdef __APPLE__
+  SkColorType  _colorType = kBGRA_8888_SkColorType;
+#else
+  SkColorType _colorType = kRGBA_8888_SkColorType;
+#endif
 
   DawnContext() {
     auto useTintIR = true;

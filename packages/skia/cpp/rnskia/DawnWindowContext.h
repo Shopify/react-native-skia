@@ -41,17 +41,15 @@ public:
   sk_sp<SkSurface> getSurface() override {
     wgpu::SurfaceTexture surfaceTexture;
     _surface.GetCurrentTexture(&surfaceTexture);
-    // SkASSERT(surfaceTexture.texture);
     auto texture = surfaceTexture.texture;
-
     skgpu::graphite::DawnTextureInfo info(
         /*sampleCount=*/1, skgpu::Mipmapped::kNo, _format, texture.GetUsage(),
         wgpu::TextureAspect::All);
     auto backendTex = skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
     sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
-    SkSurfaceProps surfaceProps(0, kRGB_H_SkPixelGeometry);
+    SkSurfaceProps surfaceProps;
     auto surface = SkSurfaces::WrapBackendTexture(
-        _recorder, backendTex, kN32_SkColorType, colorSpace, &surfaceProps);
+        _recorder, backendTex, _colorType, colorSpace, &surfaceProps);
     return surface;
   }
 
@@ -86,8 +84,10 @@ private:
   wgpu::Surface _surface;
 #ifdef __APPLE__
   wgpu::TextureFormat _format = wgpu::TextureFormat::BGRA8Unorm;
+  SkColorType _colorType = kBGRA_8888_SkColorType;
 #elif __ANDROID__
   wgpu::TextureFormat _format = wgpu::TextureFormat::RGBA8Unorm;
+  SkColorType _colorType = kRGBA_8888_SkColorType;
 #endif
   int _width;
   int _height;
