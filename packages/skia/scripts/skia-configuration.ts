@@ -209,8 +209,14 @@ export const copyHeaders = () => {
     "mkdir -p ./cpp/skia/modules",
     "mkdir -p ./cpp/skia/src",
 
+    // "mkdir -p ./cpp/skia/src/image",
+    // "cp -a ../../externals/skia/src/image/SkSurface_Base.h ./cpp/skia/src/image/.",
+
     "mkdir -p ./cpp/skia/src/gpu/graphite",
+    // "cp -a ../../externals/skia/src/gpu/SkBackingFit.h ./cpp/skia/src/gpu/.",
     "cp -a ../../externals/skia/src/gpu/graphite/ContextOptionsPriv.h ./cpp/skia/src/gpu/graphite/.",
+    "cp -a ../../externals/skia/src/gpu/graphite/ResourceTypes.h ./cpp/skia/src/gpu/graphite/.",
+    "cp -a ../../externals/skia/src/gpu/graphite/TextureProxyView.h ./cpp/skia/src/gpu/graphite/.",
 
     "cp -a ../../externals/skia/out/android/arm/gen/third_party/externals/dawn/include/. ./cpp/dawn/include",
     "cp -a ../../externals/skia/third_party/externals/dawn/include/. ./cpp/dawn/include",

@@ -27,9 +27,6 @@ namespace RNSkia {
 
 class DawnContext {
 public:
-  std::unique_ptr<dawn::native::Instance> instance;
-  std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
-  std::unique_ptr<skgpu::graphite::Recorder> fGraphiteRecorder;
 
   // Delete copy constructor and assignment operator
   DawnContext(const DawnContext &) = delete;
@@ -37,8 +34,16 @@ public:
 
   // Get instance for current thread
   static DawnContext &getInstance() {
-    static thread_local DawnContext instance;
+    static DawnContext instance;
     return instance;
+  }
+
+  void submitRecording(skgpu::graphite::Recording* recording) {
+      std::lock_guard<std::mutex> lock(_mutex);
+      skgpu::graphite::InsertRecordingInfo info;
+      info.fRecording = recording;
+	  fGraphiteContext->insertRecording(info);
+	  fGraphiteContext->submit(skgpu::graphite::SyncToCpu::kNo);
   }
 
   sk_sp<SkImage> MakeImageFromBuffer(void *buffer) {
@@ -50,7 +55,7 @@ public:
   sk_sp<SkSurface> MakeOffscreen(int width, int height) {
     SkImageInfo info = SkImageInfo::Make(width, height, _colorType, kPremul_SkAlphaType);
     sk_sp<SkSurface> skSurface =
-        SkSurfaces::RenderTarget(fGraphiteRecorder.get(), info);
+	  SkSurfaces::RenderTarget(getRecorder(), info);
 
     if (!skSurface) {
       throw std::runtime_error("Failed to create offscreen Skia surface.");
@@ -75,15 +80,17 @@ public:
 #endif
     auto surface =
         wgpu::Instance(instance->Get()).CreateSurface(&surfaceDescriptor);
-    return std::make_unique<DawnWindowContext>(
-        fGraphiteContext.get(), fGraphiteRecorder.get(), backendContext.fDevice,
+    return std::make_unique<DawnWindowContext>(getRecorder(), backendContext.fDevice,
         surface, width, height);
   }
 
   void tick() { backendContext.fTick(backendContext.fInstance); }
 
 private:
+  std::unique_ptr<dawn::native::Instance> instance;
+  std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
   skgpu::graphite::DawnBackendContext backendContext;
+  std::mutex _mutex;
 #ifdef __APPLE__
   SkColorType  _colorType = kBGRA_8888_SkColorType;
 #else
@@ -203,13 +210,16 @@ private:
     if (!fGraphiteContext) {
       throw std::runtime_error("Failed to create graphite context");
     }
-    skgpu::graphite::RecorderOptions recorderOptions;
-    recorderOptions.fImageProvider = ImageProvider::Make();
-    fGraphiteRecorder = fGraphiteContext->makeRecorder(recorderOptions);
-    if (!fGraphiteRecorder) {
-      throw std::runtime_error("Failed to create graphite context");
-    }
   }
+
+ skgpu::graphite::Recorder* getRecorder() {
+   static thread_local skgpu::graphite::RecorderOptions recorderOptions;
+   static thread_local auto recorder = fGraphiteContext->makeRecorder(recorderOptions);
+   if (!recorder) {
+	 throw std::runtime_error("Failed to create graphite context");
+   }
+   return recorder.get();
+ }
 };
 
 } // namespace RNSkia

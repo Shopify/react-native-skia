@@ -22,10 +22,9 @@ namespace RNSkia {
 
 class DawnWindowContext : public WindowContext {
 public:
-  DawnWindowContext(skgpu::graphite::Context *context,
-                    skgpu::graphite::Recorder *recorder, wgpu::Device device,
+  DawnWindowContext(skgpu::graphite::Recorder *recorder, wgpu::Device device,
                     wgpu::Surface surface, int width, int height)
-      : _context(context), _recorder(recorder), _device(device),
+      : _recorder(recorder), _device(device),
         _surface(surface), _width(width), _height(height) {
     wgpu::SurfaceConfiguration config;
     config.device = _device;
@@ -53,24 +52,10 @@ public:
     return surface;
   }
 
-  void present() override {
-    std::unique_ptr<skgpu::graphite::Recording> recording = _recorder->snap();
-    if (recording) {
-      skgpu::graphite::InsertRecordingInfo info;
-      info.fRecording = recording.get();
-      _context->insertRecording(info);
-      _context->submit(skgpu::graphite::SyncToCpu::kNo);
-    }
-#ifdef __APPLE__
-    dawn::native::metal::WaitForCommandsToBeScheduled(_device.Get());
-#endif
-    _surface.Present();
-  }
+  void present() override;
 
   void resize(int width, int height) override {
-    // TODO: implement
-    _width = width;
-    _height = height;
+	  throw std::runtime_error("resize not implemented yet");
   }
 
   int getWidth() override { return _width; }
@@ -78,8 +63,8 @@ public:
   int getHeight() override { return _height; }
 
 private:
-  skgpu::graphite::Context *_context;
   skgpu::graphite::Recorder *_recorder;
+  // TODO: keep device in DawnContext
   wgpu::Device _device;
   wgpu::Surface _surface;
 #ifdef __APPLE__

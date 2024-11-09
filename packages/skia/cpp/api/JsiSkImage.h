@@ -153,7 +153,7 @@ public:
     SkImageInfo info =
         (count > 2 && !arguments[2].isUndefined())
             ? *JsiSkImageInfo::fromValue(runtime, arguments[2])
-            : SkImageInfo::MakeN32(getObject()->width(), getObject()->height(),
+	  : SkImageInfo::Make(getObject()->width(), getObject()->height(), getObject()->imageInfo().colorType(),
                                    getObject()->imageInfo().alphaType());
     size_t bytesPerRow = 0;
     if (count > 4 && !arguments[4].isUndefined()) {
@@ -182,10 +182,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(makeNonTextureImage) {
-    //	  auto image = getObject();
-    //	  image->context
-    //    auto image = getObject()->makeNonTextureImage();
-    sk_sp<SkImage> image = nullptr;
+    auto image = getObject()->makeNonTextureImage();
     if (image == nullptr) {
       return jsi::Value::null();
     }

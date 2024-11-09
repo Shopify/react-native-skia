@@ -10,20 +10,30 @@ import {
   polar2Canvas,
   mix,
   Skia,
+  ColorType,
+  AlphaType,
 } from "@shopify/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
-import { useDerivedValue } from "react-native-reanimated";
+import { runOnUI, useDerivedValue } from "react-native-reanimated";
 
 import { useLoop } from "../../components/Animations";
 
-const surface = Skia.Surface.MakeOffscreen(256, 256)!;
-const canvas = surface.getCanvas();
-canvas.drawColor(Skia.Color("rgb(64, 128, 256)"));
-//canvas.drawCircle(128, 128, 128, Skia.Paint());
-surface.flush();
-const image = surface.makeImageSnapshot().encodeToBase64();
-//.makeNonTextureImage(); //.encodeToBase64();
-console.log(image);
+// runOnUI(() => {
+//   const surface = Skia.Surface.MakeOffscreen(256, 256)!;
+//   const canvas = surface.getCanvas();
+//   canvas.drawColor(Skia.Color("rgb(64, 128, 256)"));
+//   canvas.drawCircle(128, 128, 128, Skia.Paint());
+//   surface.flush();
+//   const image = surface.makeImageSnapshot();
+//   console.log(image.makeNonTextureImage());
+// })();
+// const pixel = canvas.readPixels(0, 0, {
+//   width: 2,
+//   height: 2,
+//   colorType: ColorType.BGRA_8888,
+//   alphaType: AlphaType.Unpremul,
+// });
+// console.log(pixel);
 
 const c1 = "#61bea2";
 const c2 = "#529ca0";
@@ -80,7 +90,7 @@ export const Breathe = () => {
     <Canvas style={styles.container}>
       <Fill color="rgb(36,43,56)" />
       <Group origin={center} transform={transform} blendMode="screen">
-        <BlurMask style="solid" blur={40} />
+        {/* <BlurMask style="solid" blur={40} /> */}
         {new Array(6).fill(0).map((_, index) => {
           return <Ring key={index} index={index} progress={progress} />;
         })}
