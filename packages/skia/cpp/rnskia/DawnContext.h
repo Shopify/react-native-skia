@@ -2,11 +2,7 @@
 
 #include <memory>
 
-#include "webgpu/webgpu_cpp.h"
-
-#include "dawn/dawn_proc.h"
-#include "dawn/native/DawnNative.h"
-
+#include "DawnUtils.h"
 #include "DawnWindowContext.h"
 #include "ImageProvider.h"
 
@@ -27,7 +23,6 @@ namespace RNSkia {
 
 class DawnContext {
 public:
-
   // Delete copy constructor and assignment operator
   DawnContext(const DawnContext &) = delete;
   DawnContext &operator=(const DawnContext &) = delete;
@@ -38,12 +33,12 @@ public:
     return instance;
   }
 
-  void submitRecording(skgpu::graphite::Recording* recording) {
-      std::lock_guard<std::mutex> lock(_mutex);
-      skgpu::graphite::InsertRecordingInfo info;
-      info.fRecording = recording;
-	  fGraphiteContext->insertRecording(info);
-	  fGraphiteContext->submit(skgpu::graphite::SyncToCpu::kNo);
+  void submitRecording(skgpu::graphite::Recording *recording) {
+    std::lock_guard<std::mutex> lock(_mutex);
+    skgpu::graphite::InsertRecordingInfo info;
+    info.fRecording = recording;
+    fGraphiteContext->insertRecording(info);
+    fGraphiteContext->submit(skgpu::graphite::SyncToCpu::kNo);
   }
 
   sk_sp<SkImage> MakeImageFromBuffer(void *buffer) {
@@ -53,9 +48,9 @@ public:
 
   // Create offscreen surface
   sk_sp<SkSurface> MakeOffscreen(int width, int height) {
-    SkImageInfo info = SkImageInfo::Make(width, height, _colorType, kPremul_SkAlphaType);
-    sk_sp<SkSurface> skSurface =
-	  SkSurfaces::RenderTarget(getRecorder(), info);
+    SkImageInfo info =
+        SkImageInfo::Make(width, height, DawnUtils::PreferedColorType, kPremul_SkAlphaType);
+    sk_sp<SkSurface> skSurface = SkSurfaces::RenderTarget(getRecorder(), info);
 
     if (!skSurface) {
       throw std::runtime_error("Failed to create offscreen Skia surface.");
@@ -80,8 +75,8 @@ public:
 #endif
     auto surface =
         wgpu::Instance(instance->Get()).CreateSurface(&surfaceDescriptor);
-    return std::make_unique<DawnWindowContext>(getRecorder(), backendContext.fDevice,
-        surface, width, height);
+    return std::make_unique<DawnWindowContext>(
+        getRecorder(), backendContext.fDevice, surface, width, height);
   }
 
   void tick() { backendContext.fTick(backendContext.fInstance); }
@@ -91,135 +86,40 @@ private:
   std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
   skgpu::graphite::DawnBackendContext backendContext;
   std::mutex _mutex;
-#ifdef __APPLE__
-  SkColorType  _colorType = kBGRA_8888_SkColorType;
-#else
-  SkColorType _colorType = kRGBA_8888_SkColorType;
-#endif
 
   DawnContext() {
-    auto useTintIR = true;
-    static constexpr const char *kToggles[] = {
-        "allow_unsafe_apis", // Needed for dual-source blending.
-        "use_user_defined_labels_in_backend",
-        // Robustness impacts performance and is always disabled when running
-        // Graphite in Chrome, so this keeps Skia's tests operating closer to
-        // real-use behavior.
-        "disable_robustness",
-        // Must be last to correctly respond to `useTintIR` parameter.
-        "use_tint_ir",
-    };
-    wgpu::DawnTogglesDescriptor togglesDesc;
-    togglesDesc.enabledToggleCount = std::size(kToggles) - (useTintIR ? 0 : 1);
-    togglesDesc.enabledToggles = kToggles;
+    DawnProcTable backendProcs = dawn::native::GetProcs();
+    dawnProcSetProcs(&backendProcs);
+    WGPUInstanceDescriptor desc{};
+    desc.features.timedWaitAnyEnable = true;
+    instance = std::make_unique<dawn::native::Instance>(&desc);
 
-    {
-      DawnProcTable backendProcs = dawn::native::GetProcs();
-      dawnProcSetProcs(&backendProcs);
-      WGPUInstanceDescriptor desc{};
-      // need for WaitAny with timeout > 0
-      desc.features.timedWaitAnyEnable = true;
-      instance = std::make_unique<dawn::native::Instance>(&desc);
-    }
+    backendContext = DawnUtils::createDawnBackendContext(instance.get());
 
-    wgpu::RequestAdapterOptions options;
-#ifdef __APPLE__
-    constexpr auto kDefaultBackendType = wgpu::BackendType::Metal;
-#elif __ANDROID__
-    constexpr auto kDefaultBackendType = wgpu::BackendType::Vulkan;
-#endif
-    options.backendType = kDefaultBackendType;
-    options.nextInChain = &togglesDesc;
-    std::vector<dawn::native::Adapter> adapters =
-        instance->EnumerateAdapters(&options);
-
-    if (adapters.empty()) {
-      throw std::runtime_error("No matching adapter found");
-    }
-
-	wgpu::Adapter adapter = adapters[0].Get();
-
-    //wgpu::AdapterInfo info;
-    // sAdapter.GetInfo(&info);
-    // SkDebugf("GPU: %s\nDriver: %s\n", info.device, info.description);
-
-    std::vector<wgpu::FeatureName> features;
-    if (adapter.HasFeature(wgpu::FeatureName::MSAARenderToSingleSampled)) {
-      features.push_back(wgpu::FeatureName::MSAARenderToSingleSampled);
-    }
-    if (adapter.HasFeature(wgpu::FeatureName::TransientAttachments)) {
-      features.push_back(wgpu::FeatureName::TransientAttachments);
-    }
-    if (adapter.HasFeature(wgpu::FeatureName::Unorm16TextureFormats)) {
-      features.push_back(wgpu::FeatureName::Unorm16TextureFormats);
-    }
-    if (adapter.HasFeature(wgpu::FeatureName::DualSourceBlending)) {
-      features.push_back(wgpu::FeatureName::DualSourceBlending);
-    }
-    if (adapter.HasFeature(wgpu::FeatureName::FramebufferFetch)) {
-      features.push_back(wgpu::FeatureName::FramebufferFetch);
-    }
-    if (adapter.HasFeature(wgpu::FeatureName::BufferMapExtendedUsages)) {
-      features.push_back(wgpu::FeatureName::BufferMapExtendedUsages);
-    }
-    if (adapter.HasFeature(wgpu::FeatureName::TextureCompressionETC2)) {
-      features.push_back(wgpu::FeatureName::TextureCompressionETC2);
-    }
-    if (adapter.HasFeature(wgpu::FeatureName::TextureCompressionBC)) {
-      features.push_back(wgpu::FeatureName::TextureCompressionBC);
-    }
-    if (adapter.HasFeature(wgpu::FeatureName::R8UnormStorage)) {
-      features.push_back(wgpu::FeatureName::R8UnormStorage);
-    }
-    if (adapter.HasFeature(wgpu::FeatureName::DawnLoadResolveTexture)) {
-      features.push_back(wgpu::FeatureName::DawnLoadResolveTexture);
-    }
-    if (adapter.HasFeature(wgpu::FeatureName::DawnPartialLoadResolveTexture)) {
-      features.push_back(wgpu::FeatureName::DawnPartialLoadResolveTexture);
-    }
-
-    wgpu::DeviceDescriptor desc;
-    desc.requiredFeatureCount = features.size();
-    desc.requiredFeatures = features.data();
-    desc.nextInChain = &togglesDesc;
-    desc.SetDeviceLostCallback(
-        wgpu::CallbackMode::AllowSpontaneous,
-        [](const wgpu::Device &, wgpu::DeviceLostReason reason,
-           const char *message) {
-          if (reason != wgpu::DeviceLostReason::Destroyed) {
-            SK_ABORT("Device lost: %s\n", message);
-          }
-        });
-    desc.SetUncapturedErrorCallback(
-        [](const wgpu::Device &, wgpu::ErrorType, const char *message) {
-          SkDebugf("Device error: %s\n", message);
-        });
-
-    wgpu::Device device = adapter.CreateDevice(&desc);
-    SkASSERT(device);
-
-    backendContext.fInstance = wgpu::Instance(instance->Get());
-    backendContext.fDevice = device;
-    backendContext.fQueue = device.GetQueue();
     skgpu::graphite::ContextOptions ctxOptions;
     skgpu::graphite::ContextOptionsPriv contextOptionsPriv;
     ctxOptions.fOptionsPriv = &contextOptionsPriv;
     ctxOptions.fOptionsPriv->fStoreContextRefInRecorder = true;
     fGraphiteContext =
         skgpu::graphite::ContextFactory::MakeDawn(backendContext, ctxOptions);
+
     if (!fGraphiteContext) {
       throw std::runtime_error("Failed to create graphite context");
     }
   }
 
- skgpu::graphite::Recorder* getRecorder() {
-   static thread_local skgpu::graphite::RecorderOptions recorderOptions;
-   static thread_local auto recorder = fGraphiteContext->makeRecorder(recorderOptions);
-   if (!recorder) {
-	 throw std::runtime_error("Failed to create graphite context");
-   }
-   return recorder.get();
- }
+  skgpu::graphite::Recorder *getRecorder() {
+    static thread_local skgpu::graphite::RecorderOptions recorderOptions;
+    static thread_local auto imageProvider = ImageProvider::Make();
+    recorderOptions.fImageProvider = imageProvider;
+    static thread_local auto recorder =
+        fGraphiteContext->makeRecorder(recorderOptions);
+        recorderOptions.fImageProvider = ImageProvider::Make();
+    if (!recorder) {
+      throw std::runtime_error("Failed to create graphite context");
+    }
+    return recorder.get();
+  }
 };
 
 } // namespace RNSkia

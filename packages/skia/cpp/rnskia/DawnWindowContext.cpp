@@ -5,15 +5,15 @@
 namespace RNSkia {
 
 void DawnWindowContext::present() {
-    std::unique_ptr<skgpu::graphite::Recording> recording = _recorder->snap();
-    if (!recording) {
-      throw std::runtime_error("Failed to create graphite recording");
-    }
-    DawnContext::getInstance().submitRecording(recording.get());
+  std::unique_ptr<skgpu::graphite::Recording> recording = _recorder->snap();
+  if (!recording) {
+    throw std::runtime_error("Failed to create graphite recording");
+  }
+  DawnContext::getInstance().submitRecording(recording.get());
 #ifdef __APPLE__
-    dawn::native::metal::WaitForCommandsToBeScheduled(_device.Get());
+  dawn::native::metal::WaitForCommandsToBeScheduled(_device.Get());
 #endif
-    _surface.Present();
+  _surface.Present();
 }
 
 } // namespace RNSkia

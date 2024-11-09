@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DawnUtils.h"
 #include "WindowContext.h"
 
 #include "dawn/native/MetalBackend.h"
@@ -24,15 +25,15 @@ class DawnWindowContext : public WindowContext {
 public:
   DawnWindowContext(skgpu::graphite::Recorder *recorder, wgpu::Device device,
                     wgpu::Surface surface, int width, int height)
-      : _recorder(recorder), _device(device),
-        _surface(surface), _width(width), _height(height) {
+      : _recorder(recorder), _device(device), _surface(surface), _width(width),
+        _height(height) {
     wgpu::SurfaceConfiguration config;
     config.device = _device;
-    config.format = _format;
+    config.format = DawnUtils::PreferredTextureFormat;
     config.width = _width;
     config.height = _height;
 #ifdef __APPLE__
-	config.alphaMode = wgpu::CompositeAlphaMode::Premultiplied;
+    config.alphaMode = wgpu::CompositeAlphaMode::Premultiplied;
 #endif
     _surface.Configure(&config);
   }
@@ -42,20 +43,21 @@ public:
     _surface.GetCurrentTexture(&surfaceTexture);
     auto texture = surfaceTexture.texture;
     skgpu::graphite::DawnTextureInfo info(
-        /*sampleCount=*/1, skgpu::Mipmapped::kNo, _format, texture.GetUsage(),
+										  /*sampleCount=*/1, skgpu::Mipmapped::kNo, DawnUtils::PreferredTextureFormat, texture.GetUsage(),
         wgpu::TextureAspect::All);
     auto backendTex = skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
     sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
     SkSurfaceProps surfaceProps;
-    auto surface = SkSurfaces::WrapBackendTexture(
-        _recorder, backendTex, _colorType, colorSpace, &surfaceProps);
+    auto surface = SkSurfaces::WrapBackendTexture(_recorder, backendTex,
+                                                  DawnUtils::PreferedColorType,
+                                                  colorSpace, &surfaceProps);
     return surface;
   }
 
   void present() override;
 
   void resize(int width, int height) override {
-	  throw std::runtime_error("resize not implemented yet");
+    throw std::runtime_error("resize not implemented yet");
   }
 
   int getWidth() override { return _width; }
@@ -64,16 +66,9 @@ public:
 
 private:
   skgpu::graphite::Recorder *_recorder;
-  // TODO: keep device in DawnContext
+  // TODO: keep device in DawnContext? Do we need it for resizing?
   wgpu::Device _device;
   wgpu::Surface _surface;
-#ifdef __APPLE__
-  wgpu::TextureFormat _format = wgpu::TextureFormat::BGRA8Unorm;
-  SkColorType _colorType = kBGRA_8888_SkColorType;
-#elif __ANDROID__
-  wgpu::TextureFormat _format = wgpu::TextureFormat::RGBA8Unorm;
-  SkColorType _colorType = kRGBA_8888_SkColorType;
-#endif
   int _width;
   int _height;
 };

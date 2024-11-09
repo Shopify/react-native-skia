@@ -45,33 +45,32 @@ float RNSkOpenGLCanvasProvider::getScaledHeight() {
 
 bool RNSkOpenGLCanvasProvider::renderToCanvas(
     const std::function<void(SkCanvas *)> &cb) {
- if (_surfaceHolder != nullptr && cb != nullptr) {
-   auto surface = _surfaceHolder->getSurface();
-   if (surface) {
-     // Draw into canvas using callback
-   cb(surface->getCanvas());
+  if (_surfaceHolder != nullptr && cb != nullptr) {
+    auto surface = _surfaceHolder->getSurface();
+    if (surface) {
+      // Draw into canvas using callback
+      cb(surface->getCanvas());
 
-     // Swap buffers and show on screen
-  _surfaceHolder->present();
+      // Swap buffers and show on screen
+      _surfaceHolder->present();
 
-     return true;
-   } else {
-     // the render context did not provide a surface
-     return false;
-   }
- }
+      return true;
+    } else {
+      // the render context did not provide a surface
+      return false;
+    }
+  }
 
- return false;
+  return false;
 }
 
-void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurface,
-                                                int width, int height) {
+void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurface, int width,
+                                                int height) {
   // Create renderer!
   JNIEnv *env = facebook::jni::Environment::current();
   // TODO: fix size
   auto window = ANativeWindow_fromSurface(env, jSurface);
-  _surfaceHolder =
-      DawnContext::getInstance().MakeWindow(window, width, height);
+  _surfaceHolder = DawnContext::getInstance().MakeWindow(window, width, height);
 
   // Post redraw request to ensure we paint in the next draw cycle.
   _requestRedraw();

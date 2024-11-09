@@ -50,14 +50,15 @@ public:
 
   JSI_HOST_FUNCTION(flush) {
     auto surface = getObject();
-	  
-//	  std::unique_ptr<skgpu::graphite::Recording> recording = DawnContext::getInstance().fGraphiteRecorder->snap();
-//		   if (recording) {
-//			   skgpu::graphite::InsertRecordingInfo info;
-//			   info.fRecording = recording.get();
-//			   DawnContext::getInstance().fGraphiteContext->insertRecording(info);
-//			   DawnContext::getInstance().fGraphiteContext->submit(skgpu::graphite::SyncToCpu::kYes);
-//		   }
+
+    //	  std::unique_ptr<skgpu::graphite::Recording> recording =
+    // DawnContext::getInstance().fGraphiteRecorder->snap(); 		   if
+    // (recording) { 			   skgpu::graphite::InsertRecordingInfo
+    // info; 			   info.fRecording
+    //= recording.get();
+    //			   DawnContext::getInstance().fGraphiteContext->insertRecording(info);
+    //			   DawnContext::getInstance().fGraphiteContext->submit(skgpu::graphite::SyncToCpu::kYes);
+    //		   }
     return jsi::Value::undefined();
   }
 
