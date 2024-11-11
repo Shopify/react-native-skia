@@ -18,15 +18,15 @@ import { runOnUI, useDerivedValue } from "react-native-reanimated";
 
 import { useLoop } from "../../components/Animations";
 
-// runOnUI(() => {
-//   const surface = Skia.Surface.MakeOffscreen(256, 256)!;
-//   const canvas = surface.getCanvas();
-//   canvas.drawColor(Skia.Color("rgb(64, 128, 256)"));
-//   canvas.drawCircle(128, 128, 128, Skia.Paint());
-//   surface.flush();
-//   const image = surface.makeImageSnapshot();
-//   console.log(image.makeNonTextureImage());
-// })();
+const surface = Skia.Surface.MakeOffscreen(256, 256)!;
+const canvas = surface.getCanvas();
+canvas.drawColor(Skia.Color("cyan"));
+canvas.drawCircle(128, 128, 128, Skia.Paint());
+surface.flush();
+const image = surface.makeImageSnapshot();
+console.log(image);
+// console.log(image.makeNonTextureImage());
+
 // const pixel = canvas.readPixels(0, 0, {
 //   width: 2,
 //   height: 2,

@@ -12,16 +12,18 @@ namespace DawnUtils {
 
 #ifdef __APPLE__
 static const SkColorType PreferedColorType = kBGRA_8888_SkColorType;
-static const wgpu::TextureFormat PreferredTextureFormat = wgpu::TextureFormat::BGRA8Unorm;
+static const wgpu::TextureFormat PreferredTextureFormat =
+    wgpu::TextureFormat::BGRA8Unorm;
 #else
 static const SkColorType PreferedColorType = kRGBA_8888_SkColorType;
-static const wgpu::TextureFormat PreferredTextureFormat = wgpu::TextureFormat::RGBA8Unorm;
+static const wgpu::TextureFormat PreferredTextureFormat =
+    wgpu::TextureFormat::RGBA8Unorm;
 #endif
 
 inline skgpu::graphite::DawnBackendContext
 createDawnBackendContext(dawn::native::Instance *instance) {
 
-  auto useTintIR = true;
+  auto useTintIR = false;
   static constexpr const char *kToggles[] = {
       "allow_unsafe_apis",
       "use_user_defined_labels_in_backend",

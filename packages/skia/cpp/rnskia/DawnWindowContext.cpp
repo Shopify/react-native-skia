@@ -5,7 +5,7 @@
 namespace RNSkia {
 
 void DawnWindowContext::present() {
-  std::unique_ptr<skgpu::graphite::Recording> recording = _recorder->snap();
+  auto recording = _recorder->snap();
   if (!recording) {
     throw std::runtime_error("Failed to create graphite recording");
   }

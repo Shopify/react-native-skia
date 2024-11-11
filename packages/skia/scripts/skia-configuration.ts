@@ -3,10 +3,12 @@ import path from "path";
 
 import { $ } from "./utils";
 
+const DEBUG = false;
+
 export const SkiaSrc = path.join(__dirname, "../../../externals/skia");
 export const ProjectRoot = path.join(__dirname, "../../..");
 export const PackageRoot = path.join(__dirname, "..");
-export const OutFolder = path.join(SkiaSrc, "out");
+export const OutFolder = path.join(SkiaSrc, DEBUG ? "debug" : "out");
 
 const NdkDir = process.env.ANDROID_NDK ?? "";
 
@@ -65,9 +67,9 @@ export const commonArgs = [
   ["skia_use_system_libwebp", false],
   ["skia_use_system_zlib", false],
   ["skia_enable_tools", false],
-  ["is_official_build", true],
+  ["is_official_build", !DEBUG],
   ["skia_enable_skottie", true],
-  ["is_debug", false],
+  ["is_debug", DEBUG],
   ["skia_enable_pdf", false],
   ["skia_enable_flutter_defines", true],
   ["paragraph_tests_enabled", false],

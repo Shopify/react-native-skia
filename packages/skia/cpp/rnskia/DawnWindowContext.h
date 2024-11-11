@@ -43,7 +43,8 @@ public:
     _surface.GetCurrentTexture(&surfaceTexture);
     auto texture = surfaceTexture.texture;
     skgpu::graphite::DawnTextureInfo info(
-										  /*sampleCount=*/1, skgpu::Mipmapped::kNo, DawnUtils::PreferredTextureFormat, texture.GetUsage(),
+        /*sampleCount=*/1, skgpu::Mipmapped::kNo,
+        DawnUtils::PreferredTextureFormat, texture.GetUsage(),
         wgpu::TextureAspect::All);
     auto backendTex = skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
     sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();

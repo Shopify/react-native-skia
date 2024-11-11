@@ -50,25 +50,26 @@ public:
 
   JSI_HOST_FUNCTION(flush) {
     auto surface = getObject();
-
-    //	  std::unique_ptr<skgpu::graphite::Recording> recording =
-    // DawnContext::getInstance().fGraphiteRecorder->snap(); 		   if
-    // (recording) { 			   skgpu::graphite::InsertRecordingInfo
-    // info; 			   info.fRecording
-    //= recording.get();
-    //			   DawnContext::getInstance().fGraphiteContext->insertRecording(info);
-    //			   DawnContext::getInstance().fGraphiteContext->submit(skgpu::graphite::SyncToCpu::kYes);
-    //		   }
+    DawnContext::getInstance().getRecorder();
+    auto recording = surface->recorder()->snap();
+    DawnContext::getInstance().submitRecording(
+        recording.get(), skgpu::graphite::SyncToCpu::kYes);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(makeImageSnapshot) {
+    auto surface = getObject();
+    sk_sp<SkImage> image = nullptr;
+
     if (count == 1) {
       auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
-      // image = getObject()->makeImageSnapshot(SkIRect::MakeXYWH(
-      //     rect->x(), rect->y(), rect->width(), rect->height()));
+      auto bounds = SkIRect::MakeXYWH(rect->x(), rect->y(), rect->width(),
+                                      rect->height());
+      auto image = SkSurfaces::AsImageCopy(getObject(), &bounds);
+    } else {
+      auto image = SkSurfaces::AsImageCopy(getObject());
     }
-    auto image = SkSurfaces::AsImageCopy(getObject());
+    // TODO: throw instead?
     if (image == nullptr) {
       return jsi::Value::null();
     }
@@ -76,10 +77,28 @@ public:
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
 
+  JSI_HOST_FUNCTION(_rasterImage) {
+    auto surface = getObject();
+    int width = surface->width();
+    int height = surface->height();
+    auto imageInfo = surface->imageInfo(); // Color space
+
+    size_t rowBytes = imageInfo.minRowBytes(); // Calculate proper row bytes
+    std::vector<uint8_t> pixels(imageInfo.computeMinByteSize());
+
+    // Create pixmap
+    SkPixmap pixmap(imageInfo, pixels.data(), imageInfo.minRowBytes());
+
+    // Read pixels using the pixmap version
+    bool success = surface->readPixels(pixmap, 0, 0);
+    return jsi::Value(success);
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurface, width),
                        JSI_EXPORT_FUNC(JsiSkSurface, height),
                        JSI_EXPORT_FUNC(JsiSkSurface, getCanvas),
                        JSI_EXPORT_FUNC(JsiSkSurface, makeImageSnapshot),
+                       JSI_EXPORT_FUNC(JsiSkSurface, _rasterImage),
                        JSI_EXPORT_FUNC(JsiSkSurface, flush),
                        JSI_EXPORT_FUNC(JsiSkSurface, dispose))
 };

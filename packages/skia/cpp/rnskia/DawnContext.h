@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
 
 #include "DawnUtils.h"
 #include "DawnWindowContext.h"
@@ -23,22 +24,25 @@ namespace RNSkia {
 
 class DawnContext {
 public:
-  // Delete copy constructor and assignment operator
+  // TODO: remove;
+  friend class JsiSkImage;
+  friend class JsiSkSurface;
+
   DawnContext(const DawnContext &) = delete;
   DawnContext &operator=(const DawnContext &) = delete;
 
-  // Get instance for current thread
   static DawnContext &getInstance() {
     static DawnContext instance;
     return instance;
   }
 
-  void submitRecording(skgpu::graphite::Recording *recording) {
+  void submitRecording(skgpu::graphite::Recording *recording,
+                       skgpu::graphite::SyncToCpu syncToCpu = skgpu::graphite::SyncToCpu::kNo) {
     std::lock_guard<std::mutex> lock(_mutex);
     skgpu::graphite::InsertRecordingInfo info;
     info.fRecording = recording;
     fGraphiteContext->insertRecording(info);
-    fGraphiteContext->submit(skgpu::graphite::SyncToCpu::kNo);
+    fGraphiteContext->submit(syncToCpu);
   }
 
   sk_sp<SkImage> MakeImageFromBuffer(void *buffer) {
@@ -48,15 +52,15 @@ public:
 
   // Create offscreen surface
   sk_sp<SkSurface> MakeOffscreen(int width, int height) {
-    SkImageInfo info =
-        SkImageInfo::Make(width, height, DawnUtils::PreferedColorType, kPremul_SkAlphaType);
-    sk_sp<SkSurface> skSurface = SkSurfaces::RenderTarget(getRecorder(), info);
+    SkImageInfo info = SkImageInfo::Make(
+        width, height, DawnUtils::PreferedColorType, kPremul_SkAlphaType);
+    sk_sp<SkSurface> surface = SkSurfaces::RenderTarget(getRecorder(), info);
 
-    if (!skSurface) {
+    if (!surface) {
       throw std::runtime_error("Failed to create offscreen Skia surface.");
     }
 
-    return skSurface;
+    return surface;
   }
 
   // Create onscreen surface with window
@@ -68,7 +72,7 @@ public:
     wgpu::SurfaceDescriptorFromMetalLayer metalSurfaceDesc;
     metalSurfaceDesc.layer = window;
     surfaceDescriptor.nextInChain = &metalSurfaceDesc;
-#elif __ANDROID__
+#else
     wgpu::SurfaceDescriptorFromAndroidNativeWindow androidSurfaceDesc;
     androidSurfaceDesc.window = window;
     surfaceDescriptor.nextInChain = &androidSurfaceDesc;
@@ -97,9 +101,9 @@ private:
     backendContext = DawnUtils::createDawnBackendContext(instance.get());
 
     skgpu::graphite::ContextOptions ctxOptions;
-    skgpu::graphite::ContextOptionsPriv contextOptionsPriv;
-    ctxOptions.fOptionsPriv = &contextOptionsPriv;
-    ctxOptions.fOptionsPriv->fStoreContextRefInRecorder = true;
+    // skgpu::graphite::ContextOptionsPriv contextOptionsPriv;
+    // ctxOptions.fOptionsPriv = &contextOptionsPriv;
+    // ctxOptions.fOptionsPriv->fStoreContextRefInRecorder = true;
     fGraphiteContext =
         skgpu::graphite::ContextFactory::MakeDawn(backendContext, ctxOptions);
 
@@ -114,7 +118,7 @@ private:
     recorderOptions.fImageProvider = imageProvider;
     static thread_local auto recorder =
         fGraphiteContext->makeRecorder(recorderOptions);
-        recorderOptions.fImageProvider = ImageProvider::Make();
+    recorderOptions.fImageProvider = ImageProvider::Make();
     if (!recorder) {
       throw std::runtime_error("Failed to create graphite context");
     }

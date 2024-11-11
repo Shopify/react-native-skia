@@ -31,7 +31,7 @@ export const useAssets = () => {
   const [error, setError] = useState<Error | null>(null);
   const errorHandler = useCallback((e: Error) => setError(e), []);
   const mask = useImage(require("./assets/mask.png"), errorHandler);
-  const oslo = useImageAsTexture(require("./assets/oslo.jpg"));
+  const oslo = useImage(require("./assets/oslo.jpg")); // TODO: useImageAsTexture
   const skiaLogoJpeg = useImage(SkiaLogoJpeg, errorHandler);
   const skiaLogoPng = useImage(SkiaLogo, errorHandler);
   const RobotoMedium = useTypeface(
