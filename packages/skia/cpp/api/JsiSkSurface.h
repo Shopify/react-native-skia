@@ -53,7 +53,7 @@ public:
     DawnContext::getInstance().getRecorder();
     auto recording = surface->recorder()->snap();
     DawnContext::getInstance().submitRecording(
-        recording.get(), skgpu::graphite::SyncToCpu::kYes);
+        recording.get(), skgpu::graphite::SyncToCpu::kNo);
     return jsi::Value::undefined();
   }
 
@@ -65,9 +65,9 @@ public:
       auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
       auto bounds = SkIRect::MakeXYWH(rect->x(), rect->y(), rect->width(),
                                       rect->height());
-      auto image = SkSurfaces::AsImageCopy(getObject(), &bounds);
+      auto image = SkSurfaces::AsImageCopy(surface, &bounds);
     } else {
-      auto image = SkSurfaces::AsImageCopy(getObject());
+      auto image = SkSurfaces::AsImageCopy(surface);
     }
     // TODO: throw instead?
     if (image == nullptr) {

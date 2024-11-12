@@ -21,7 +21,7 @@ import { useLoop } from "../../components/Animations";
 const surface = Skia.Surface.MakeOffscreen(256, 256)!;
 const canvas = surface.getCanvas();
 canvas.drawColor(Skia.Color("cyan"));
-canvas.drawCircle(128, 128, 128, Skia.Paint());
+canvas.drawCircle(0, 128, 128, Skia.Paint());
 surface.flush();
 const image = surface.makeImageSnapshot();
 console.log(image);
