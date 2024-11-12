@@ -114,11 +114,12 @@ private:
 
   skgpu::graphite::Recorder *getRecorder() {
     static thread_local skgpu::graphite::RecorderOptions recorderOptions;
-    static thread_local auto imageProvider = ImageProvider::Make();
-    recorderOptions.fImageProvider = imageProvider;
+    if (!recorderOptions.fImageProvider) {
+      auto imageProvider = ImageProvider::Make();
+      recorderOptions.fImageProvider = imageProvider;
+    }
     static thread_local auto recorder =
         fGraphiteContext->makeRecorder(recorderOptions);
-    recorderOptions.fImageProvider = ImageProvider::Make();
     if (!recorder) {
       throw std::runtime_error("Failed to create graphite context");
     }
