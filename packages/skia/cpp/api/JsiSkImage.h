@@ -98,9 +98,10 @@ public:
                        ? arguments[1].asNumber()
                        : 100.0;
     auto image = getObject();
-    if (image->isTextureBacked()) {
-      image = image->makeNonTextureImage();
-    }
+	  // TODO: migrate this
+//    if (image->isTextureBacked()) {
+//      image = image->makeNonTextureImage();
+//    }
     sk_sp<SkData> data;
 
     if (format == SkEncodedImageFormat::kJPEG) {
@@ -199,11 +200,12 @@ public:
   JSI_HOST_FUNCTION(makeNonTextureImage) {
     auto image = getObject();
     AsyncContext asyncContext;
-    image->asyncRescaleAndReadPixels(
-        image->imageInfo(), image->imageInfo().bounds(),
+	DawnContext::getInstance().fGraphiteContext->asyncRescaleAndReadPixels(
+        image.get(),
+																		   image->imageInfo(), image->imageInfo().bounds(),
         SkImage::RescaleGamma::kSrc, SkImage::RescaleMode::kNearest,
         async_callback, &asyncContext);
-    DawnContext::getInstance().fGraphiteContext->submit();
+	DawnContext::getInstance().fGraphiteContext->submit();
     while (!asyncContext.fCalled) {
       DawnContext::getInstance().tick();
       DawnContext::getInstance().fGraphiteContext->checkAsyncWorkCompletion();
@@ -215,7 +217,7 @@ public:
     auto rasterImage =
         SkImages::RasterFromData(image->imageInfo(), data, bytesPerRow);
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(rasterImage)));
   }
 
   EXPORT_JSI_API_TYPENAME(JsiSkImage, Image)

@@ -4,6 +4,7 @@ import path from "path";
 import { $ } from "./utils";
 
 const DEBUG = false;
+const GRAPHITE = true;
 
 export const SkiaSrc = path.join(__dirname, "../../../externals/skia");
 export const ProjectRoot = path.join(__dirname, "../../..");
@@ -71,12 +72,10 @@ export const commonArgs = [
   ["skia_enable_skottie", true],
   ["is_debug", DEBUG],
   ["skia_enable_pdf", false],
-  ["skia_enable_flutter_defines", true],
   ["paragraph_tests_enabled", false],
   ["is_component_build", false],
-  // Graphite
-  // TODO: disable ganesh
-  ["skia_enable_graphite", true],
+  ["skia_enable_ganesh", !GRAPHITE],
+  ["skia_enable_graphite", GRAPHITE],
   ["skia_use_dawn", true],
 ];
 
@@ -125,7 +124,7 @@ export const configurations = {
       ["ndk_api", androidMinSDK],
       ["ndk", `"${NdkDir}"`],
       ["skia_use_system_freetype2", false],
-      ["skia_use_gl", true],
+      ["skia_use_gl", !GRAPHITE],
       ["cc", '"clang"'],
       ["cxx", '"clang++"'],
       [

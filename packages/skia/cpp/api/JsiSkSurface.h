@@ -53,28 +53,18 @@ public:
     DawnContext::getInstance().getRecorder();
     auto recording = surface->recorder()->snap();
     DawnContext::getInstance().submitRecording(
-        recording.get(), skgpu::graphite::SyncToCpu::kNo);
+        recording.get());
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(makeImageSnapshot) {
     auto surface = getObject();
-    sk_sp<SkImage> image = nullptr;
-
-    if (count == 1) {
-      auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
-      auto bounds = SkIRect::MakeXYWH(rect->x(), rect->y(), rect->width(),
-                                      rect->height());
-      auto image = SkSurfaces::AsImageCopy(surface, &bounds);
-    } else {
-      auto image = SkSurfaces::AsImageCopy(surface);
-    }
-    // TODO: throw instead?
+	sk_sp<SkImage> image = SkSurfaces::AsImage(surface);
     if (image == nullptr) {
       return jsi::Value::null();
     }
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+        runtime, std::make_shared<JsiSkImage>(getContext(), image));
   }
 
   JSI_HOST_FUNCTION(_rasterImage) {
