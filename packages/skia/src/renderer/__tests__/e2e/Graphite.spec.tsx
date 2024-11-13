@@ -6,7 +6,6 @@ import { checkImage } from "../../../__tests__/setup";
 
 describe("Graphite", () => {
   it("should draw a cyan circle", async () => {
-    // https://fiddle.skia.org/c/@Path_isInterpolatable
     const { Skia } = importSkia();
     const path = Skia.Path.Make();
     const r = 128;
@@ -15,7 +14,6 @@ describe("Graphite", () => {
     checkImage(img, "snapshots/drawings/graphite/cyan-circle.png");
   });
   it("should draw a red circle", async () => {
-    // https://fiddle.skia.org/c/@Path_isInterpolatable
     const { Skia } = importSkia();
     const path = Skia.Path.Make();
     const r = 128;
