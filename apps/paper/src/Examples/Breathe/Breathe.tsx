@@ -25,7 +25,7 @@ canvas.drawCircle(0, 128, 128, Skia.Paint());
 surface.flush();
 const image = surface.makeImageSnapshot();
 console.log(image);
-console.log(image.makeNonTextureImage().encodeToBase64());
+console.log(image.encodeToBase64());
 
 // const pixel = canvas.readPixels(0, 0, {
 //   width: 2,

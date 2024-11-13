@@ -85,10 +85,9 @@ public:
                        ? arguments[1].asNumber()
                        : 100.0;
     auto image = getObject();
-    // TODO: migrate this
-    //    if (image->isTextureBacked()) {
-    //      image = image->makeNonTextureImage();
-    //    }
+    if (image->isTextureBacked()) {
+      image = DawnContext::getInstance().makeNonImageTexture(image);
+    }
     sk_sp<SkData> data;
 
     if (format == SkEncodedImageFormat::kJPEG) {
