@@ -50,45 +50,25 @@ public:
 
   JSI_HOST_FUNCTION(flush) {
     auto surface = getObject();
-    DawnContext::getInstance().getRecorder();
     auto recording = surface->recorder()->snap();
-    DawnContext::getInstance().submitRecording(
-        recording.get());
+    DawnContext::getInstance().submitRecording(recording.get());
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(makeImageSnapshot) {
     auto surface = getObject();
-	sk_sp<SkImage> image = SkSurfaces::AsImage(surface);
+    sk_sp<SkImage> image = SkSurfaces::AsImage(surface);
     if (image == nullptr) {
-      return jsi::Value::null();
+      throw new std::runtime_error("Failed to create image snapshot");
     }
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImage>(getContext(), image));
-  }
-
-  JSI_HOST_FUNCTION(_rasterImage) {
-    auto surface = getObject();
-    int width = surface->width();
-    int height = surface->height();
-    auto imageInfo = surface->imageInfo(); // Color space
-
-    size_t rowBytes = imageInfo.minRowBytes(); // Calculate proper row bytes
-    std::vector<uint8_t> pixels(imageInfo.computeMinByteSize());
-
-    // Create pixmap
-    SkPixmap pixmap(imageInfo, pixels.data(), imageInfo.minRowBytes());
-
-    // Read pixels using the pixmap version
-    bool success = surface->readPixels(pixmap, 0, 0);
-    return jsi::Value(success);
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurface, width),
                        JSI_EXPORT_FUNC(JsiSkSurface, height),
                        JSI_EXPORT_FUNC(JsiSkSurface, getCanvas),
                        JSI_EXPORT_FUNC(JsiSkSurface, makeImageSnapshot),
-                       JSI_EXPORT_FUNC(JsiSkSurface, _rasterImage),
                        JSI_EXPORT_FUNC(JsiSkSurface, flush),
                        JSI_EXPORT_FUNC(JsiSkSurface, dispose))
 };

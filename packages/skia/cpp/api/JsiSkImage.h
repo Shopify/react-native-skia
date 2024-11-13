@@ -32,18 +32,8 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-struct AsyncContext {
-  bool fCalled = false;
-  std::unique_ptr<const SkSurface::AsyncReadResult> fResult;
-};
 
-static void
-async_callback(void *c,
-               std::unique_ptr<const SkImage::AsyncReadResult> result) {
-  auto context = static_cast<AsyncContext *>(c);
-  context->fResult = std::move(result);
-  context->fCalled = true;
-}
+
 
 class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
 public:
@@ -98,10 +88,10 @@ public:
                        ? arguments[1].asNumber()
                        : 100.0;
     auto image = getObject();
-	  // TODO: migrate this
-//    if (image->isTextureBacked()) {
-//      image = image->makeNonTextureImage();
-//    }
+    // TODO: migrate this
+    //    if (image->isTextureBacked()) {
+    //      image = image->makeNonTextureImage();
+    //    }
     sk_sp<SkData> data;
 
     if (format == SkEncodedImageFormat::kJPEG) {
@@ -199,25 +189,10 @@ public:
 
   JSI_HOST_FUNCTION(makeNonTextureImage) {
     auto image = getObject();
-    AsyncContext asyncContext;
-	DawnContext::getInstance().fGraphiteContext->asyncRescaleAndReadPixels(
-        image.get(),
-																		   image->imageInfo(), image->imageInfo().bounds(),
-        SkImage::RescaleGamma::kSrc, SkImage::RescaleMode::kNearest,
-        async_callback, &asyncContext);
-	DawnContext::getInstance().fGraphiteContext->submit();
-    while (!asyncContext.fCalled) {
-      DawnContext::getInstance().tick();
-      DawnContext::getInstance().fGraphiteContext->checkAsyncWorkCompletion();
-    }
-    auto bytesPerRow = asyncContext.fResult->rowBytes(0);
-    auto bufferSize = bytesPerRow * image->imageInfo().height();
-    auto data =
-        SkData::MakeFromMalloc(asyncContext.fResult->data(0), bufferSize);
-    auto rasterImage =
-        SkImages::RasterFromData(image->imageInfo(), data, bytesPerRow);
+    auto rasterImage = DawnContext::getInstance().makeNonImageTexture(image);
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(rasterImage)));
+        runtime,
+        std::make_shared<JsiSkImage>(getContext(), rasterImage));
   }
 
   EXPORT_JSI_API_TYPENAME(JsiSkImage, Image)

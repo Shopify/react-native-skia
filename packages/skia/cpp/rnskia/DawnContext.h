@@ -7,6 +7,7 @@
 #include "DawnWindowContext.h"
 #include "ImageProvider.h"
 
+#include "include/core/SkData.h"
 #include "include/gpu/graphite/BackendTexture.h"
 #include "include/gpu/graphite/Context.h"
 #include "include/gpu/graphite/ContextOptions.h"
@@ -22,11 +23,21 @@
 
 namespace RNSkia {
 
+struct AsyncContext {
+  bool fCalled = false;
+  std::unique_ptr<const SkSurface::AsyncReadResult> fResult;
+};
+
+static void
+async_callback(void *c,
+               std::unique_ptr<const SkImage::AsyncReadResult> result) {
+  auto context = static_cast<AsyncContext *>(c);
+  context->fResult = std::move(result);
+  context->fCalled = true;
+}
+
 class DawnContext {
 public:
-  // TODO: remove;
-  friend class JsiSkImage;
-  friend class JsiSkSurface;
 
   DawnContext(const DawnContext &) = delete;
   DawnContext &operator=(const DawnContext &) = delete;
@@ -36,8 +47,29 @@ public:
     return instance;
   }
 
-  void submitRecording(skgpu::graphite::Recording *recording,
-                       skgpu::graphite::SyncToCpu syncToCpu = skgpu::graphite::SyncToCpu::kNo) {
+  sk_sp<SkImage> makeNonImageTexture(sk_sp<SkImage> image) {
+    AsyncContext asyncContext;
+    fGraphiteContext->asyncRescaleAndReadPixels(
+        image.get(), image->imageInfo(), image->imageInfo().bounds(),
+        SkImage::RescaleGamma::kSrc, SkImage::RescaleMode::kNearest,
+        async_callback, &asyncContext);
+    fGraphiteContext->submit();
+    while (!asyncContext.fCalled) {
+      tick();
+      fGraphiteContext->checkAsyncWorkCompletion();
+    }
+    auto bytesPerRow = asyncContext.fResult->rowBytes(0);
+    auto bufferSize = bytesPerRow * image->imageInfo().height();
+    auto data = SkData::MakeFromMalloc(asyncContext.fResult->data(0), bufferSize);
+    auto rasterImage =
+        SkImages::RasterFromData(image->imageInfo(), data, bytesPerRow);
+    return rasterImage;
+  }
+
+
+  void submitRecording(
+      skgpu::graphite::Recording *recording,
+      skgpu::graphite::SyncToCpu syncToCpu = skgpu::graphite::SyncToCpu::kNo) {
     std::lock_guard<std::mutex> lock(_mutex);
     skgpu::graphite::InsertRecordingInfo info;
     info.fRecording = recording;
