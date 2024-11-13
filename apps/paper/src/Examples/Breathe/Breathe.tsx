@@ -12,6 +12,7 @@ import {
   Skia,
   ColorType,
   AlphaType,
+  BlurStyle,
 } from "@shopify/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
 import { runOnUI, useDerivedValue } from "react-native-reanimated";
@@ -21,19 +22,13 @@ import { useLoop } from "../../components/Animations";
 const surface = Skia.Surface.MakeOffscreen(256, 256)!;
 const canvas = surface.getCanvas();
 canvas.drawColor(Skia.Color("cyan"));
-canvas.drawCircle(0, 128, 128, Skia.Paint());
+const paint = Skia.Paint();
+paint.setColor(Skia.Color("red"));
+paint.setMaskFilter(Skia.MaskFilter.MakeBlur(BlurStyle.Solid, 10, false));
+canvas.drawCircle(0, 128, 128, paint);
 surface.flush();
 const image = surface.makeImageSnapshot();
-console.log(image);
 console.log(image.encodeToBase64());
-
-// const pixel = canvas.readPixels(0, 0, {
-//   width: 2,
-//   height: 2,
-//   colorType: ColorType.BGRA_8888,
-//   alphaType: AlphaType.Unpremul,
-// });
-// console.log(pixel);
 
 const c1 = "#61bea2";
 const c2 = "#529ca0";

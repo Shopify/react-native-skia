@@ -56,13 +56,19 @@ public:
   }
 
   JSI_HOST_FUNCTION(makeImageSnapshot) {
-    auto surface = getObject();
-    sk_sp<SkImage> image = SkSurfaces::AsImage(surface);
-    if (image == nullptr) {
-      throw new std::runtime_error("Failed to create image snapshot");
-    }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), image));
+	  auto surface = getObject();
+	  sk_sp<SkImage> image;
+	  if (count == 1) {
+		auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
+		image = surface->makeImageSnapshot(SkIRect::MakeXYWH(
+			rect->x(), rect->y(), rect->width(), rect->height()));
+	  } else {
+		image = surface->makeImageSnapshot();
+	  }
+	  auto recording = surface->recorder()->snap();
+	  DawnContext::getInstance().submitRecording(recording.get());
+	  return jsi::Object::createFromHostObject(
+		  runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurface, width),

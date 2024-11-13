@@ -47,6 +47,7 @@ public:
   }
 
   sk_sp<SkImage> makeRasterImage(sk_sp<SkImage> image) {
+    // TODO: make it thread safe
     if (!image->isTextureBacked()) {
       return image;
     }
