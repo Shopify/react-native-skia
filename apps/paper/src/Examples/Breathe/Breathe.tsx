@@ -10,25 +10,12 @@ import {
   polar2Canvas,
   mix,
   Skia,
-  ColorType,
-  AlphaType,
   BlurStyle,
 } from "@shopify/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
-import { runOnUI, useDerivedValue } from "react-native-reanimated";
+import { useDerivedValue } from "react-native-reanimated";
 
 import { useLoop } from "../../components/Animations";
-
-const surface = Skia.Surface.MakeOffscreen(256, 256)!;
-const canvas = surface.getCanvas();
-canvas.drawColor(Skia.Color("cyan"));
-const paint = Skia.Paint();
-paint.setColor(Skia.Color("red"));
-paint.setMaskFilter(Skia.MaskFilter.MakeBlur(BlurStyle.Solid, 10, false));
-canvas.drawCircle(0, 128, 128, paint);
-surface.flush();
-const image = surface.makeImageSnapshot();
-console.log(image.encodeToBase64());
 
 const c1 = "#61bea2";
 const c2 = "#529ca0";
@@ -85,7 +72,7 @@ export const Breathe = () => {
     <Canvas style={styles.container}>
       <Fill color="rgb(36,43,56)" />
       <Group origin={center} transform={transform} blendMode="screen">
-        {/* <BlurMask style="solid" blur={40} /> */}
+        <BlurMask style="solid" blur={40} />
         {new Array(6).fill(0).map((_, index) => {
           return <Ring key={index} index={index} progress={progress} />;
         })}

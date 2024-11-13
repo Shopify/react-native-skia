@@ -76,7 +76,7 @@ export const commonArgs = [
   ["is_component_build", false],
   ["skia_enable_ganesh", !GRAPHITE],
   ["skia_enable_graphite", GRAPHITE],
-  ["skia_use_dawn", true],
+  ["skia_use_dawn", GRAPHITE],
 ];
 
 export type PlatformName = "ios" | "android";

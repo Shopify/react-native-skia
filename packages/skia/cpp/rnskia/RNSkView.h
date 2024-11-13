@@ -108,7 +108,7 @@ public:
     } else {
       image = _surface->makeImageSnapshot();
     }
-    return image->makeNonTextureImage();
+	return DawnContext::getInstance().MakeRasterImage(image);
   }
 
   /**

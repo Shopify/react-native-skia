@@ -84,7 +84,7 @@ public:
     auto quality = (count >= 2 && arguments[1].isNumber())
                        ? arguments[1].asNumber()
                        : 100.0;
-    auto image = DawnContext::getInstance().makeRasterImage(getObject());
+    auto image = DawnContext::getInstance().MakeRasterImage(getObject());
     sk_sp<SkData> data;
 
     if (format == SkEncodedImageFormat::kJPEG) {
@@ -182,7 +182,7 @@ public:
 
   JSI_HOST_FUNCTION(makeNonTextureImage) {
     auto image = getObject();
-    auto rasterImage = DawnContext::getInstance().makeRasterImage(image);
+    auto rasterImage = DawnContext::getInstance().MakeRasterImage(image);
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImage>(getContext(), rasterImage));
   }
