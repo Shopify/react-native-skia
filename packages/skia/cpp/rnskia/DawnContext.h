@@ -38,7 +38,6 @@ async_callback(void *c,
 
 class DawnContext {
 public:
-
   DawnContext(const DawnContext &) = delete;
   DawnContext &operator=(const DawnContext &) = delete;
 
@@ -60,12 +59,19 @@ public:
     }
     auto bytesPerRow = asyncContext.fResult->rowBytes(0);
     auto bufferSize = bytesPerRow * image->imageInfo().height();
-    auto data = SkData::MakeFromMalloc(asyncContext.fResult->data(0), bufferSize);
+    auto data = SkData::MakeWithProc(
+        asyncContext.fResult->data(0), bufferSize,
+        [](const void *ptr, void *context) {
+          auto *result =
+              reinterpret_cast<const SkSurface::AsyncReadResult *>(context);
+          delete result;
+        },
+        reinterpret_cast<void *>(const_cast<SkSurface::AsyncReadResult *>(
+            asyncContext.fResult.release())));
     auto rasterImage =
         SkImages::RasterFromData(image->imageInfo(), data, bytesPerRow);
     return rasterImage;
   }
-
 
   void submitRecording(
       skgpu::graphite::Recording *recording,
@@ -115,8 +121,6 @@ public:
         getRecorder(), backendContext.fDevice, surface, width, height);
   }
 
-  void tick() { backendContext.fTick(backendContext.fInstance); }
-
 private:
   std::unique_ptr<dawn::native::Instance> instance;
   std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
@@ -133,9 +137,9 @@ private:
     backendContext = DawnUtils::createDawnBackendContext(instance.get());
 
     skgpu::graphite::ContextOptions ctxOptions;
-    // skgpu::graphite::ContextOptionsPriv contextOptionsPriv;
-    // ctxOptions.fOptionsPriv = &contextOptionsPriv;
-    // ctxOptions.fOptionsPriv->fStoreContextRefInRecorder = true;
+    skgpu::graphite::ContextOptionsPriv contextOptionsPriv;
+    ctxOptions.fOptionsPriv = &contextOptionsPriv;
+    ctxOptions.fOptionsPriv->fStoreContextRefInRecorder = true;
     fGraphiteContext =
         skgpu::graphite::ContextFactory::MakeDawn(backendContext, ctxOptions);
 
@@ -143,6 +147,8 @@ private:
       throw std::runtime_error("Failed to create graphite context");
     }
   }
+
+  void tick() { backendContext.fTick(backendContext.fInstance); }
 
   skgpu::graphite::Recorder *getRecorder() {
     static thread_local skgpu::graphite::RecorderOptions recorderOptions;

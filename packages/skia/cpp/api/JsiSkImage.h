@@ -32,9 +32,6 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-
-
-
 class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
 public:
   // TODO-API: Properties?
@@ -191,8 +188,7 @@ public:
     auto image = getObject();
     auto rasterImage = DawnContext::getInstance().makeNonImageTexture(image);
     return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkImage>(getContext(), rasterImage));
+        runtime, std::make_shared<JsiSkImage>(getContext(), rasterImage));
   }
 
   EXPORT_JSI_API_TYPENAME(JsiSkImage, Image)
