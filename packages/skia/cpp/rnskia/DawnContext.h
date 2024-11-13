@@ -46,7 +46,10 @@ public:
     return instance;
   }
 
-  sk_sp<SkImage> makeNonImageTexture(sk_sp<SkImage> image) {
+  sk_sp<SkImage> makeRasterImage(sk_sp<SkImage> image) {
+    if (!image->isTextureBacked()) {
+      return image;
+    }
     AsyncContext asyncContext;
     fGraphiteContext->asyncRescaleAndReadPixels(
         image.get(), image->imageInfo(), image->imageInfo().bounds(),
