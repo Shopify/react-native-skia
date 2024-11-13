@@ -47,10 +47,10 @@ public:
   }
 
   sk_sp<SkImage> MakeRasterImage(sk_sp<SkImage> image) {
-    std::lock_guard<std::mutex> lock(_mutex);
     if (!image->isTextureBacked()) {
       return image;
     }
+    std::lock_guard<std::mutex> lock(_mutex);
     AsyncContext asyncContext;
     fGraphiteContext->asyncRescaleAndReadPixels(
         image.get(), image->imageInfo(), image->imageInfo().bounds(),
