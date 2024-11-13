@@ -12,7 +12,7 @@ describe("Graphite", () => {
     const r = 128;
     path.addCircle(r, r, r);
     const img = await surface.draw(<Circle color="cyan" cx={r} cy={r} r={r} />);
-    checkImage(img, "snapshots/drawings/graphite-cyan-circle.png");
+    checkImage(img, "snapshots/drawings/graphite/cyan-circle.png");
   });
   it("should draw a red circle", async () => {
     // https://fiddle.skia.org/c/@Path_isInterpolatable
@@ -21,6 +21,6 @@ describe("Graphite", () => {
     const r = 128;
     path.addCircle(r, r, r);
     const img = await surface.draw(<Circle color="red" cx={r} cy={r} r={r} />);
-    checkImage(img, "snapshots/drawings/graphite-red-circle.png");
+    checkImage(img, "snapshots/drawings/graphite/red-circle.png");
   });
 });
