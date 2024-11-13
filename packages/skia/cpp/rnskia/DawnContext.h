@@ -47,7 +47,7 @@ public:
   }
 
   sk_sp<SkImage> makeRasterImage(sk_sp<SkImage> image) {
-    // TODO: make it thread safe
+    std::lock_guard<std::mutex> lock(_mutex);
     if (!image->isTextureBacked()) {
       return image;
     }
