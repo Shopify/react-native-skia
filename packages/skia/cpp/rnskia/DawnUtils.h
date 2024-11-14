@@ -113,5 +113,4 @@ createDawnBackendContext(dawn::native::Instance *instance) {
 
   return backendContext;
 }
-
 } // namespace DawnUtils

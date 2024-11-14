@@ -38,6 +38,9 @@ async_callback(void *c,
 
 class DawnContext {
 public:
+  // TODO: remove
+  friend class RNSkiOSPlatformContext;
+
   DawnContext(const DawnContext &) = delete;
   DawnContext &operator=(const DawnContext &) = delete;
 
@@ -168,5 +171,4 @@ private:
     return recorder.get();
   }
 };
-
 } // namespace RNSkia

@@ -13,6 +13,11 @@
 #include "DawnContext.h"
 #include "RNSkTypedArray.h"
 
+#if defined(SK_GRAPHITE)
+#include "DawnContext.h"
+#include "include/gpu/graphite/Context.h"
+#endif
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -84,7 +89,14 @@ public:
     auto quality = (count >= 2 && arguments[1].isNumber())
                        ? arguments[1].asNumber()
                        : 100.0;
-    auto image = DawnContext::getInstance().MakeRasterImage(getObject());
+    auto image = getObject();
+#if defined(SK_GRAPHITE)
+    image = DawnContext::getInstance().MakeRasterImage(image);
+#else
+    if (image->isTextureBacked()) {
+      image = image->makeNonTextureImage();
+    }
+#endif
     sk_sp<SkData> data;
 
     if (format == SkEncodedImageFormat::kJPEG) {
@@ -181,8 +193,11 @@ public:
   }
 
   JSI_HOST_FUNCTION(makeNonTextureImage) {
-    auto image = getObject();
-    auto rasterImage = DawnContext::getInstance().MakeRasterImage(image);
+#if defined(SK_GRAPHITE)
+    auto rasterImage = DawnContext::getInstance().MakeRasterImage(getObject());
+#else
+    auto rasterImage = getObject()->makeNonTextureImage();
+#endif
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImage>(getContext(), rasterImage));
   }

@@ -11,6 +11,10 @@
 #include "JsiSkCanvas.h"
 #include "JsiSkImage.h"
 
+#if defined(SK_GRAPHITE)
+#include "DawnContext.h"
+#endif
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -50,8 +54,14 @@ public:
 
   JSI_HOST_FUNCTION(flush) {
     auto surface = getObject();
+#if defined(SK_GRAPHITE)
     auto recording = surface->recorder()->snap();
     DawnContext::getInstance().submitRecording(recording.get());
+#else
+    if (auto dContext = GrAsDirectContext(surface->recordingContext())) {
+      dContext->flushAndSubmit();
+    }
+#endif
     return jsi::Value::undefined();
   }
 
@@ -65,8 +75,10 @@ public:
     } else {
       image = surface->makeImageSnapshot();
     }
+#if defined(SK_GRAPHITE)
     auto recording = surface->recorder()->snap();
     DawnContext::getInstance().submitRecording(recording.get());
+#endif
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }

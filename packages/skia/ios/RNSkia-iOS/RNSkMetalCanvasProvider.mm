@@ -1,7 +1,12 @@
 #import "RNSkMetalCanvasProvider.h"
 
-#import "DawnContext.h"
 #import "RNSkLog.h"
+
+#if defined(SK_GRAPHITE)
+#import "DawnContext.h"
+#else
+#import "MetalContext.h"
+#endif
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -72,8 +77,12 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
     if (currentDrawable == nullptr) {
       return false;
     }
+#if defined(SK_GRAPHITE)
     auto ctx = RNSkia::DawnContext::getInstance().MakeWindow(
         (__bridge void *)_layer, _width, _height);
+#else
+    auto ctx = MetalContext::getInstance().MakeWindow(_layer, _width, _height);
+#endif
     auto skSurface = ctx->getSurface();
 
     SkCanvas *canvas = skSurface->getCanvas();

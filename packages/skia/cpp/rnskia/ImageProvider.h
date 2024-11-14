@@ -96,5 +96,4 @@ private:
 
   SkLRUCache<ImageKey, sk_sp<SkImage>, ImageHash> fCache;
 };
-
 } // namespace RNSkia

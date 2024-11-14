@@ -5,7 +5,12 @@
 #include <thread>
 #include <utility>
 
-#import "DawnContext.h"
+#if defined(SK_GRAPHITE)
+#include "DawnContext.h"
+#else
+#include "MetalContext.h"
+#endif
+
 #include "RNSkiOSVideo.h"
 
 #pragma clang diagnostic push
@@ -70,85 +75,87 @@ uint64_t RNSkiOSPlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
   // TODO: implement
   return 0;
   // 0. If Image is not in BGRA, convert to BGRA as only BGRA is supported.
-  //  if (image->colorType() != kBGRA_8888_SkColorType) {
-  //    // on iOS, 32_BGRA is the only supported RGB format for CVPixelBuffers.
-  //    image = image->makeColorTypeAndColorSpace(
-  //        DawnContext::getInstance()._context.skContext.get(),
-  //        kBGRA_8888_SkColorType, SkColorSpace::MakeSRGB());
-  //    if (image == nullptr) {
-  //      throw std::runtime_error(
-  //          "Failed to convert image to BGRA_8888 colortype! Only BGRA_8888 "
-  //          "NativeBuffers are supported.");
-  //    }
-  //  }
-  //
-  //  // 1. Get image info
-  //  auto bytesPerPixel = image->imageInfo().bytesPerPixel();
-  //  int bytesPerRow = image->width() * bytesPerPixel;
-  //  auto buf = SkData::MakeUninitialized(image->width() * image->height() *
-  //                                       bytesPerPixel);
-  //  SkImageInfo info = SkImageInfo::Make(image->width(), image->height(),
-  //                                       image->colorType(),
-  //                                       image->alphaType());
-  //  // 2. Copy pixels into our buffer
-  //  image->readPixels(nullptr, info, const_cast<void *>(buf->data()),
-  //  bytesPerRow,
-  //                    0, 0);
-  //
-  //  // 3. Create an IOSurface (GPU + CPU memory)
-  //  CFMutableDictionaryRef dict = CFDictionaryCreateMutable(
-  //      kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks,
-  //      &kCFTypeDictionaryValueCallBacks);
-  //  int width = image->width();
-  //  int height = image->height();
-  //  int pitch = width * bytesPerPixel;
-  //  int size = width * height * bytesPerPixel;
-  //  OSType pixelFormat = kCVPixelFormatType_32BGRA;
-  //  CFDictionarySetValue(
-  //      dict, kIOSurfaceBytesPerRow,
-  //      CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &pitch));
-  //  CFDictionarySetValue(
-  //      dict, kIOSurfaceBytesPerElement,
-  //      CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type,
-  //      &bytesPerPixel));
-  //  CFDictionarySetValue(
-  //      dict, kIOSurfaceWidth,
-  //      CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &width));
-  //  CFDictionarySetValue(
-  //      dict, kIOSurfaceHeight,
-  //      CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &height));
-  //  CFDictionarySetValue(
-  //      dict, kIOSurfacePixelFormat,
-  //      CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type,
-  //      &pixelFormat));
-  //  CFDictionarySetValue(
-  //      dict, kIOSurfaceAllocSize,
-  //      CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &size));
-  //  IOSurfaceRef surface = IOSurfaceCreate(dict);
-  //  if (surface == nil) {
-  //    throw std::runtime_error("Failed to create " + std::to_string(width) +
-  //    "x" +
-  //                             std::to_string(height) + " IOSurface!");
-  //  }
-  //
-  //  // 4. Copy over the memory from the pixels into the IOSurface
-  //  IOSurfaceLock(surface, 0, nil);
-  //  void *base = IOSurfaceGetBaseAddress(surface);
-  //  memcpy(base, buf->data(), buf->size());
-  //  IOSurfaceUnlock(surface, 0, nil);
-  //
-  //  // 5. Create a CVPixelBuffer from the IOSurface
-  //  CVPixelBufferRef pixelBuffer = nullptr;
-  //  CVReturn result =
-  //      CVPixelBufferCreateWithIOSurface(nil, surface, nil, &pixelBuffer);
-  //  if (result != kCVReturnSuccess) {
-  //    throw std::runtime_error(
-  //        "Failed to create CVPixelBuffer from SkImage! Return value: " +
-  //        std::to_string(result));
-  //  }
-  //
-  //  // 8. Return CVPixelBuffer casted to uint64_t
-  //  return reinterpret_cast<uint64_t>(pixelBuffer);
+  if (image->colorType() != kBGRA_8888_SkColorType) {
+#if defined(SK_GRAPHITE)
+    SkImage::RequiredProperties requiredProps;
+    image = image->makeColorTypeAndColorSpace(
+        DawnContext::getInstance().getRecorder(), kBGRA_8888_SkColorType,
+        SkColorSpace::MakeSRGB(), requiredProps);
+#else
+    // on iOS, 32_BGRA is the only supported RGB format for CVPixelBuffers.
+    image = image->makeColorTypeAndColorSpace(
+        MetalContext::getInstance()._context.skContext.get(),
+        kBGRA_8888_SkColorType, SkColorSpace::MakeSRGB());
+#endif
+    if (image == nullptr) {
+      throw std::runtime_error(
+          "Failed to convert image to BGRA_8888 colortype! Only BGRA_8888 "
+          "NativeBuffers are supported.");
+    }
+  }
+
+  // 1. Get image info
+  auto bytesPerPixel = image->imageInfo().bytesPerPixel();
+  int bytesPerRow = image->width() * bytesPerPixel;
+  auto buf = SkData::MakeUninitialized(image->width() * image->height() *
+                                       bytesPerPixel);
+  SkImageInfo info = SkImageInfo::Make(image->width(), image->height(),
+                                       image->colorType(), image->alphaType());
+  // 2. Copy pixels into our buffer
+  image->readPixels(nullptr, info, const_cast<void *>(buf->data()), bytesPerRow,
+                    0, 0);
+
+  // 3. Create an IOSurface (GPU + CPU memory)
+  CFMutableDictionaryRef dict = CFDictionaryCreateMutable(
+      kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks,
+      &kCFTypeDictionaryValueCallBacks);
+  int width = image->width();
+  int height = image->height();
+  int pitch = width * bytesPerPixel;
+  int size = width * height * bytesPerPixel;
+  OSType pixelFormat = kCVPixelFormatType_32BGRA;
+  CFDictionarySetValue(
+      dict, kIOSurfaceBytesPerRow,
+      CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &pitch));
+  CFDictionarySetValue(
+      dict, kIOSurfaceBytesPerElement,
+      CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &bytesPerPixel));
+  CFDictionarySetValue(
+      dict, kIOSurfaceWidth,
+      CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &width));
+  CFDictionarySetValue(
+      dict, kIOSurfaceHeight,
+      CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &height));
+  CFDictionarySetValue(
+      dict, kIOSurfacePixelFormat,
+      CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &pixelFormat));
+  CFDictionarySetValue(
+      dict, kIOSurfaceAllocSize,
+      CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &size));
+  IOSurfaceRef surface = IOSurfaceCreate(dict);
+  if (surface == nil) {
+    throw std::runtime_error("Failed to create " + std::to_string(width) + "x" +
+                             std::to_string(height) + " IOSurface!");
+  }
+
+  // 4. Copy over the memory from the pixels into the IOSurface
+  IOSurfaceLock(surface, 0, nil);
+  void *base = IOSurfaceGetBaseAddress(surface);
+  memcpy(base, buf->data(), buf->size());
+  IOSurfaceUnlock(surface, 0, nil);
+
+  // 5. Create a CVPixelBuffer from the IOSurface
+  CVPixelBufferRef pixelBuffer = nullptr;
+  CVReturn result =
+      CVPixelBufferCreateWithIOSurface(nil, surface, nil, &pixelBuffer);
+  if (result != kCVReturnSuccess) {
+    throw std::runtime_error(
+        "Failed to create CVPixelBuffer from SkImage! Return value: " +
+        std::to_string(result));
+  }
+
+  // 8. Return CVPixelBuffer casted to uint64_t
+  return reinterpret_cast<uint64_t>(pixelBuffer);
 }
 
 std::shared_ptr<RNSkVideo>
@@ -159,7 +166,12 @@ RNSkiOSPlatformContext::createVideo(const std::string &url) {
 std::shared_ptr<WindowContext>
 RNSkiOSPlatformContext::makeContextFromNativeSurface(void *surface, int width,
                                                      int height) {
+#if defined(SK_GRAPHITE)
   return DawnContext::getInstance().MakeWindow(surface, width, height);
+#else
+  return MetalContext::getInstance().MakeWindow((__bridge CALayer *)surface,
+                                                width, height);
+#endif
 }
 
 void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
@@ -168,11 +180,19 @@ void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
 
 sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
                                                               int height) {
+#if defined(SK_GRAPHITE)
   return DawnContext::getInstance().MakeOffscreen(width, height);
+#else
+  return MetalContext::getInstance().MakeOffscreen(width, height);
+#endif
 }
 
 sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeBuffer(void *buffer) {
+#if defined(SK_GRAPHITE)
   return DawnContext::getInstance().MakeImageFromBuffer(buffer);
+#else
+  return MetalContext::getInstance().MakeImageFromBuffer(buffer);
+#endif
 }
 
 sk_sp<SkFontMgr> RNSkiOSPlatformContext::createFontMgr() {

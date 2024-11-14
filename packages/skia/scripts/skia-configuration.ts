@@ -4,7 +4,8 @@ import path from "path";
 import { $ } from "./utils";
 
 const DEBUG = false;
-const GRAPHITE = true;
+const GRAPHITE = !!process.env.SK_GRAPHITE;
+const BUILD_WITH_PARAGRAPH = true;
 
 export const SkiaSrc = path.join(__dirname, "../../../externals/skia");
 export const ProjectRoot = path.join(__dirname, "../../..");
@@ -13,7 +14,6 @@ export const OutFolder = path.join(SkiaSrc, DEBUG ? "debug" : "out");
 
 const NdkDir = process.env.ANDROID_NDK ?? "";
 
-export const BUILD_WITH_PARAGRAPH = true;
 const NoParagraphArgs = [
   ["skia_use_harfbuzz", false],
   ["skia_use_icu", false],
@@ -23,7 +23,7 @@ const NoParagraphArgs = [
 // On Android: we use system ICU
 // On iOS: we use libgrapheme
 const CommonParagraphArgs = [
-  ["skia_enable_paragraph", true],
+  ["skia_enable_skparagraph", true],
   ["skia_use_system_icu", false],
   ["skia_use_harfbuzz", true],
   ["skia_use_system_harfbuzz", false],
@@ -53,11 +53,13 @@ const ParagraphOutputsAndroid = BUILD_WITH_PARAGRAPH
   ? ["libskparagraph.a", "libskunicode_core.a", "libskunicode_icu.a"]
   : [];
 
-const DawnOutput = [
-  "libdawn_native_static.a",
-  "libdawn_platform_static.a",
-  "libdawn_proc_static.a",
-];
+const DawnOutput = GRAPHITE
+  ? [
+      "libdawn_native_static.a",
+      "libdawn_platform_static.a",
+      "libdawn_proc_static.a",
+    ]
+  : [];
 
 export const commonArgs = [
   ["skia_use_piex", true],
@@ -74,7 +76,7 @@ export const commonArgs = [
   ["skia_enable_pdf", false],
   ["paragraph_tests_enabled", false],
   ["is_component_build", false],
-  ["skia_enable_ganesh", !GRAPHITE],
+  //["skia_enable_ganesh", !GRAPHITE],
   ["skia_enable_graphite", GRAPHITE],
   ["skia_use_dawn", GRAPHITE],
 ];
@@ -97,8 +99,7 @@ export type Platform = {
   options?: Arg[];
 };
 
-const androidMinSDK = 26;
-const iosMinTarget = '"15.1"';
+const iosMinTarget = GRAPHITE ? '"15.1"' : '"13.0"';
 
 export const configurations = {
   android: {
@@ -121,7 +122,7 @@ export const configurations = {
       },
     },
     args: [
-      ["ndk_api", androidMinSDK],
+      ...(GRAPHITE ? [["ndk_api", 26]] : []),
       ["ndk", `"${NdkDir}"`],
       ["skia_use_system_freetype2", false],
       ["skia_use_gl", !GRAPHITE],
@@ -199,29 +200,40 @@ const copyModule = (module: string) => [
   `cp -a ../../externals/skia/modules/${module}/include/. ./cpp/skia/modules/${module}/include`,
 ];
 
+const copyGraphite = () =>
+  GRAPHITE
+    ? [
+        "mkdir -p ./cpp/dawn/include",
+        "mkdir -p ./cpp/skia/src/gpu/graphite",
+        "cp -a ../../externals/skia/src/gpu/graphite/ContextOptionsPriv.h ./cpp/skia/src/gpu/graphite/.",
+        "cp -a ../../externals/skia/src/gpu/graphite/ResourceTypes.h ./cpp/skia/src/gpu/graphite/.",
+        "cp -a ../../externals/skia/src/gpu/graphite/TextureProxyView.h ./cpp/skia/src/gpu/graphite/.",
+
+        "cp -a ../../externals/skia/out/android/arm/gen/third_party/externals/dawn/include/. ./cpp/dawn/include",
+        "cp -a ../../externals/skia/third_party/externals/dawn/include/. ./cpp/dawn/include",
+        "cp -a ../../externals/skia/third_party/externals/dawn/include/. ./cpp/dawn/include",
+
+        // Remove duplicated WebGPU headers
+        "sed -i '' 's/#include \"dawn\\/webgpu.h\"/#include \"webgpu\\/webgpu.h\"/' ./cpp/dawn/include/dawn/dawn_proc_table.h",
+        "cp ./cpp/dawn/include/dawn/webgpu.h ./cpp/dawn/include/webgpu/webgpu.h",
+        "cp ./cpp/dawn/include/dawn/webgpu_cpp.h ./cpp/dawn/include/webgpu/webgpu_cpp.h",
+        "rm -rf ./cpp/dawn/include/dawn/webgpu.h",
+        "rm -rf ./cpp/dawn/include/dawn/webgpu_cpp.h",
+        "rm -rf ./cpp/dawn/include/dawn/wire",
+      ]
+    : [];
+
 export const copyHeaders = () => {
   process.chdir(PackageRoot);
   [
     "rm -rf ./cpp/skia",
     "rm -rf ./cpp/dawn",
 
-    "mkdir -p ./cpp/dawn/include",
     "mkdir -p ./cpp/skia/include",
     "mkdir -p ./cpp/skia/modules",
     "mkdir -p ./cpp/skia/src",
 
-    // "mkdir -p ./cpp/skia/src/image",
-    // "cp -a ../../externals/skia/src/image/SkSurface_Base.h ./cpp/skia/src/image/.",
-
-    "mkdir -p ./cpp/skia/src/gpu/graphite",
-    // "cp -a ../../externals/skia/src/gpu/SkBackingFit.h ./cpp/skia/src/gpu/.",
-    "cp -a ../../externals/skia/src/gpu/graphite/ContextOptionsPriv.h ./cpp/skia/src/gpu/graphite/.",
-    "cp -a ../../externals/skia/src/gpu/graphite/ResourceTypes.h ./cpp/skia/src/gpu/graphite/.",
-    "cp -a ../../externals/skia/src/gpu/graphite/TextureProxyView.h ./cpp/skia/src/gpu/graphite/.",
-
-    "cp -a ../../externals/skia/out/android/arm/gen/third_party/externals/dawn/include/. ./cpp/dawn/include",
-    "cp -a ../../externals/skia/third_party/externals/dawn/include/. ./cpp/dawn/include",
-    "cp -a ../../externals/skia/third_party/externals/dawn/include/. ./cpp/dawn/include",
+    ...copyGraphite(),
 
     "cp -a ../../externals/skia/include/. ./cpp/skia/include",
     ...copyModule("svg"),
@@ -234,9 +246,12 @@ export const copyHeaders = () => {
     "cp -a ../../externals/skia/src/core/SkChecksum.h ./cpp/skia/src/core/.",
     "cp -a ../../externals/skia/src/core/SkTHash.h ./cpp/skia/src/core/.",
 
-    // TODO: remove ganesh
-    "mkdir -p ./cpp/skia/src/gpu/ganesh/gl",
-    "cp -a ../../externals/skia/src/gpu/ganesh/gl/GrGLDefines.h ./cpp/skia/src/gpu/ganesh/gl/.",
+    ...(GRAPHITE
+      ? []
+      : [
+          "mkdir -p ./cpp/skia/src/gpu/ganesh/gl",
+          "cp -a ../../externals/skia/src/gpu/ganesh/gl/GrGLDefines.h ./cpp/skia/src/gpu/ganesh/gl/.",
+        ]),
 
     "cp -a ../../externals/skia/src/core/SkLRUCache.h ./cpp/skia/src/core/.",
 

@@ -73,5 +73,4 @@ private:
   int _width;
   int _height;
 };
-
 } // namespace RNSkia
