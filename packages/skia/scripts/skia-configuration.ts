@@ -4,7 +4,7 @@ import path from "path";
 import { $ } from "./utils";
 
 const DEBUG = false;
-const GRAPHITE = false;
+const GRAPHITE = true;
 const BUILD_WITH_PARAGRAPH = true;
 
 export const SkiaSrc = path.join(__dirname, "../../../externals/skia");
@@ -76,7 +76,7 @@ export const commonArgs = [
   ["skia_enable_pdf", false],
   ["paragraph_tests_enabled", false],
   ["is_component_build", false],
-  ["skia_enable_ganesh", !GRAPHITE],
+  //["skia_enable_ganesh", !GRAPHITE],
   ["skia_enable_graphite", GRAPHITE],
   ["skia_use_dawn", GRAPHITE],
 ];
@@ -99,7 +99,7 @@ export type Platform = {
   options?: Arg[];
 };
 
-const iosMinTarget = GRAPHITE ? '"13.0"' : '"15.1"';
+const iosMinTarget = GRAPHITE ? '"15.1"' : '"13.0"';
 
 export const configurations = {
   android: {
@@ -246,9 +246,12 @@ export const copyHeaders = () => {
     "cp -a ../../externals/skia/src/core/SkChecksum.h ./cpp/skia/src/core/.",
     "cp -a ../../externals/skia/src/core/SkTHash.h ./cpp/skia/src/core/.",
 
-    // TODO: remove ganesh
-    "mkdir -p ./cpp/skia/src/gpu/ganesh/gl",
-    "cp -a ../../externals/skia/src/gpu/ganesh/gl/GrGLDefines.h ./cpp/skia/src/gpu/ganesh/gl/.",
+    ...(GRAPHITE
+      ? []
+      : [
+          "mkdir -p ./cpp/skia/src/gpu/ganesh/gl",
+          "cp -a ../../externals/skia/src/gpu/ganesh/gl/GrGLDefines.h ./cpp/skia/src/gpu/ganesh/gl/.",
+        ]),
 
     "cp -a ../../externals/skia/src/core/SkLRUCache.h ./cpp/skia/src/core/.",
 
