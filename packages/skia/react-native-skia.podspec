@@ -64,6 +64,14 @@ Pod::Spec.new do |s|
     "cpp/**/*.{h,cpp}"
   ]
 
+  graphite_exclusions = [
+    'cpp/rnskia/DawnContext.h',
+    'cpp/rnskia/DawnUtils.h',
+    'cpp/rnskia/DawnWindowContext.h', 
+    'cpp/rnskia/DawnWindowContext.cpp',
+    'cpp/rnskia/ImageProvider.h'
+  ]
+  s.exclude_files = graphite_exclusions unless use_graphite 
 
   if defined?(install_modules_dependencies()) != nil
     install_modules_dependencies(s)
