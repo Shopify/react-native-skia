@@ -66,18 +66,18 @@ public:
   std::shared_ptr<WindowContext>
   makeContextFromNativeSurface(void *surface, int width, int height) override {
 #if defined(SK_GRAPHITE)
-      return DawnContext::getInstance().MakeWindow(surface, width, height);
+    return DawnContext::getInstance().MakeWindow(surface, width, height);
 #else
-      return OpenGLContext::getInstance().MakeWindow(
+    return OpenGLContext::getInstance().MakeWindow(
         reinterpret_cast<ANativeWindow *>(surface), width, height);
 #endif
   }
 
   sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override {
 #if defined(SK_GRAPHITE)
-      return DawnContext::getInstance().MakeImageFromBuffer(buffer);
+    return DawnContext::getInstance().MakeImageFromBuffer(buffer);
 #else
-      return OpenGLContext::getInstance().MakeImageFromBuffer(buffer);
+    return OpenGLContext::getInstance().MakeImageFromBuffer(buffer);
 #endif
   }
 

@@ -60,7 +60,7 @@ sk_sp<SkImage> RNSkAndroidVideo::nextImage(double *timeStamp) {
   AHardwareBuffer *buffer =
       AHardwareBuffer_fromHardwareBuffer(env, jHardwareBuffer);
 #if defined(SK_GRAPHITE)
-    return DawnContext::getInstance().MakeImageFromBuffer(buffer);
+  return DawnContext::getInstance().MakeImageFromBuffer(buffer);
 #else
   return OpenGLContext::getInstance().MakeImageFromBuffer(buffer);
 #endif

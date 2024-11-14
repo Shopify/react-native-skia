@@ -77,7 +77,8 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
       return false;
     }
 #if defined(SK_GRAPHITE)
-	auto ctx = RNSkia::DawnContext::getInstance().MakeWindow((__bridge  void*)_layer, _width, _height);
+    auto ctx = RNSkia::DawnContext::getInstance().MakeWindow(
+        (__bridge void *)_layer, _width, _height);
 #else
     auto ctx = MetalContext::getInstance().MakeWindow(_layer, _width, _height);
 #endif

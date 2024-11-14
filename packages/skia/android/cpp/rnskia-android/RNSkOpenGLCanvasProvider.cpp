@@ -1,9 +1,9 @@
 #include "RNSkOpenGLCanvasProvider.h"
 
-#include <memory>
+#include <android/native_window_jni.h>
 #include <fbjni/fbjni.h>
 #include <jni.h>
-#include <android/native_window_jni.h>
+#include <memory>
 
 #include "RNSkLog.h"
 
@@ -99,8 +99,7 @@ void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurfaceTexture,
   env->DeleteLocalRef(surfaceClass);
   env->DeleteLocalRef(surfaceTextureClass);
 #if defined(SK_GRAPHITE)
-  _surfaceHolder =
-      DawnContext::getInstance().MakeWindow(window, width, height);
+  _surfaceHolder = DawnContext::getInstance().MakeWindow(window, width, height);
 #else
   _surfaceHolder =
       OpenGLContext::getInstance().MakeWindow(window, width, height);

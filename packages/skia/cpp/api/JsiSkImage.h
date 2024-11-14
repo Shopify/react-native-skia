@@ -12,6 +12,11 @@
 
 #include "RNSkTypedArray.h"
 
+#if defined(SK_GRAPHITE)
+#include "DawnContext.h"
+#include "include/gpu/graphite/Context.h"
+#endif
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -83,9 +88,13 @@ public:
                        ? arguments[1].asNumber()
                        : 100.0;
     auto image = getObject();
+#if defined(SK_GRAPHITE)
     if (image->isTextureBacked()) {
       image = image->makeNonTextureImage();
     }
+#else
+    image = DawnContext::getInstance().MakeRasterImage(image);
+#endif
     sk_sp<SkData> data;
 
     if (format == SkEncodedImageFormat::kJPEG) {
@@ -181,9 +190,13 @@ public:
   }
 
   JSI_HOST_FUNCTION(makeNonTextureImage) {
-    auto image = getObject()->makeNonTextureImage();
+#if defined(SK_GRAPHITE)
+    auto rasterImage = DawnContext::getInstance().MakeRasterImage(getObject());
+#else
+    auto rasterImage = getObject()->makeNonTextureImage();
+#endif
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+        runtime, std::make_shared<JsiSkImage>(getContext(), rasterImage));
   }
 
   EXPORT_JSI_API_TYPENAME(JsiSkImage, Image)

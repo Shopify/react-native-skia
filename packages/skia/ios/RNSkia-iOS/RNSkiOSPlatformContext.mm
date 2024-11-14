@@ -74,10 +74,10 @@ uint64_t RNSkiOSPlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
   // 0. If Image is not in BGRA, convert to BGRA as only BGRA is supported.
   if (image->colorType() != kBGRA_8888_SkColorType) {
 #if defined(SK_GRAPHITE)
-	SkImage::RequiredProperties requiredProps;
-	image = image->makeColorTypeAndColorSpace(
-		DawnContext::getInstance().getRecorder(),
-		  kBGRA_8888_SkColorType, SkColorSpace::MakeSRGB(), requiredProps);
+    SkImage::RequiredProperties requiredProps;
+    image = image->makeColorTypeAndColorSpace(
+        DawnContext::getInstance().getRecorder(), kBGRA_8888_SkColorType,
+        SkColorSpace::MakeSRGB(), requiredProps);
 #else
     // on iOS, 32_BGRA is the only supported RGB format for CVPixelBuffers.
     image = image->makeColorTypeAndColorSpace(
@@ -167,7 +167,7 @@ RNSkiOSPlatformContext::makeContextFromNativeSurface(void *surface, int width,
   return DawnContext::getInstance().MakeWindow(surface, width, height);
 #else
   return MetalContext::getInstance().MakeWindow((__bridge CALayer *)surface,
-											   width, height);
+                                                width, height);
 #endif
 }
 
@@ -186,9 +186,9 @@ sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
 
 sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeBuffer(void *buffer) {
 #if defined(SK_GRAPHITE)
-	return DawnContext::getInstance().MakeImageFromBuffer(buffer);
+  return DawnContext::getInstance().MakeImageFromBuffer(buffer);
 #else
-	return MetalContext::getInstance().MakeImageFromBuffer(buffer);
+  return MetalContext::getInstance().MakeImageFromBuffer(buffer);
 #endif
 }
 
