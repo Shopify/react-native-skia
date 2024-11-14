@@ -108,7 +108,12 @@ public:
     } else {
       image = _surface->makeImageSnapshot();
     }
+#if defined(SK_GRAPHITE)
     return image->makeNonTextureImage();
+#else
+	  DawnContext::getInstance().submitRecording(_surface->recorder()->snap().get());
+	  return DawnContext::getInstance().MakeRasterImage(image);
+#endif
   }
 
   /**

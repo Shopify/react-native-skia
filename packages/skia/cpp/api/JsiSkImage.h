@@ -89,11 +89,11 @@ public:
                        : 100.0;
     auto image = getObject();
 #if defined(SK_GRAPHITE)
-    if (image->isTextureBacked()) {
-      image = image->makeNonTextureImage();
-    }
+	image = DawnContext::getInstance().MakeRasterImage(image);
 #else
-    image = DawnContext::getInstance().MakeRasterImage(image);
+   if (image->isTextureBacked()) {
+	 image = image->makeNonTextureImage();
+   }
 #endif
     sk_sp<SkData> data;
 
