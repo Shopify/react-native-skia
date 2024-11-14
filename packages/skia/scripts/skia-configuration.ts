@@ -4,7 +4,7 @@ import path from "path";
 import { $ } from "./utils";
 
 const DEBUG = false;
-const GRAPHITE = false;
+const GRAPHITE = !!process.env.SK_GRAPHITE;
 const BUILD_WITH_PARAGRAPH = true;
 
 export const SkiaSrc = path.join(__dirname, "../../../externals/skia");
