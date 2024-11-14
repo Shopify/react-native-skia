@@ -9,9 +9,14 @@
 #include <memory>
 #include <string>
 
+#if defined(SK_GRAPHITE)
+#include "DawnContext.h"
+#else
+#include "OpenGLContext.h"
+#endif
+
 #include "AHardwareBufferUtils.h"
 #include "JniPlatformContext.h"
-#include "OpenGLContext.h"
 #include "RNSkAndroidVideo.h"
 #include "RNSkPlatformContext.h"
 
@@ -51,17 +56,29 @@ public:
   }
 
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override {
+#if defined(SK_GRAPHITE)
+    return DawnContext::getInstance().MakeOffscreen(width, height);
+#else
     return OpenGLContext::getInstance().MakeOffscreen(width, height);
+#endif
   }
 
   std::shared_ptr<WindowContext>
   makeContextFromNativeSurface(void *surface, int width, int height) override {
+#if defined(SK_GRAPHITE)
+    return DawnContext::getInstance().MakeWindow(surface, width, height);
+#else
     return OpenGLContext::getInstance().MakeWindow(
         reinterpret_cast<ANativeWindow *>(surface), width, height);
+#endif
   }
 
   sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override {
+#if defined(SK_GRAPHITE)
+    return DawnContext::getInstance().MakeImageFromBuffer(buffer);
+#else
     return OpenGLContext::getInstance().MakeImageFromBuffer(buffer);
+#endif
   }
 
   std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override {

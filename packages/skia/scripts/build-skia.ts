@@ -16,7 +16,7 @@ const getOutDir = (platform: PlatformName, targetName: string) => {
   return `${OutFolder}/${platform}/${targetName}`;
 };
 
-const configurePlatform = (
+const configurePlatform = async (
   platformName: PlatformName,
   configuration: Platform,
   targetName: string
@@ -67,10 +67,7 @@ const configurePlatform = (
 
     // eslint-disable-next-line max-len
     const command = `${commandline} ${options} ${targetOptions} --script-executable=python3 --args='target_os="${platformName}" target_cpu="${target.cpu}" ${common}${args}${targetArgs}'`;
-    console.log("Command:");
-    console.log(command);
-    console.log("===============================");
-    $(command);
+    await runAsync(command, "⚙️");
     return true;
   } else {
     console.log(
@@ -140,13 +137,15 @@ const buildXCFrameworks = () => {
 };
 
 (async () => {
-  // Test for existence of Android SDK
-  if (!process.env.ANDROID_NDK) {
-    console.log("ANDROID_NDK not set.");
-    exit(1);
-  } else {
-    console.log("☑ ANDROID_NDK");
-  }
+  ["ANDROID_NDK", "ANDROID_HOME"].forEach((name) => {
+    // Test for existence of Android SDK
+    if (!process.env[name]) {
+      console.log(`${name} not set.`);
+      exit(1);
+    } else {
+      console.log(`✅ ${name}`);
+    }
+  });
 
   // Run glient sync
   console.log("Running gclient sync...");
@@ -158,9 +157,7 @@ const buildXCFrameworks = () => {
   for (const key of mapKeys(configurations)) {
     const configuration = configurations[key];
     for (const target of mapKeys(configuration.targets)) {
-      if (!configurePlatform(key as PlatformName, configuration, target)) {
-        throw Error(`Error configuring platform "${key}" for cpu "${target}"`);
-      }
+      await configurePlatform(key as PlatformName, configuration, target);
       await buildPlatform(key as PlatformName, target);
       process.chdir(ProjectRoot);
       if (key === "android") {
