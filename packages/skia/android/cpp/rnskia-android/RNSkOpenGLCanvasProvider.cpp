@@ -1,8 +1,17 @@
 #include "RNSkOpenGLCanvasProvider.h"
 
 #include <memory>
+#include <fbjni/fbjni.h>
+#include <jni.h>
+#include <android/native_window_jni.h>
 
+#include "RNSkLog.h"
+
+#if defined(SK_GRAPHITE)
+#include "DawnContext.h"
+#else
 #include "OpenGLContext.h"
+#endif
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -89,8 +98,13 @@ void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurfaceTexture,
   env->DeleteLocalRef(jSurface);
   env->DeleteLocalRef(surfaceClass);
   env->DeleteLocalRef(surfaceTextureClass);
+#if defined(SK_GRAPHITE)
+  _surfaceHolder =
+      DawnContext::getInstance().MakeWindow(window, width, height);
+#else
   _surfaceHolder =
       OpenGLContext::getInstance().MakeWindow(window, width, height);
+#endif
 
   // Post redraw request to ensure we paint in the next draw cycle.
   _requestRedraw();

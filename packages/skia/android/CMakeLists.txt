@@ -40,9 +40,9 @@ if(SK_GRAPHITE)
     set(DAWN_PLATFORM_LIB "libdawn_platform_static")
     set(DAWN_PROC_LIB "libdawn_proc_static")
     set(BACKEND_SOURCES
-        ""
+    #TODO: is this source needed to be added?
+        "${PROJECT_SOURCE_DIR}/../cpp/rnskia/DawnWindowContext.cpp"
     )
-    # "${PROJECT_SOURCE_DIR}/../cpp/rnskia/DawnWindowContext.cpp"
     add_library(libdawn_native_static STATIC IMPORTED)
     set_property(TARGET libdawn_native_static PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_native_static.a")
 
@@ -56,8 +56,6 @@ else()
     set(BACKEND_SOURCES
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/SkiaOpenGLSurfaceFactory.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/GrAHardwareBufferUtils.cpp"
-        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/AHardwareBufferUtils.cpp"
-        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/RNSkAndroidVideo.cpp"
     )
 endif()
 
@@ -77,6 +75,8 @@ add_library(
 
         "${PROJECT_SOURCE_DIR}/cpp/jni/JniPlatformContext.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/RNSkOpenGLCanvasProvider.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/AHardwareBufferUtils.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/RNSkAndroidVideo.cpp"OpenGLContext.h
 
         "${PROJECT_SOURCE_DIR}/../cpp/jsi/JsiHostObject.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/jsi/JsiValue.cpp"
