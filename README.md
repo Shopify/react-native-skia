@@ -151,3 +151,11 @@ Finally, you can use `drawOffscreen` to receive a canvas object as parameter. Yo
 ```
 
 Again, since `eval`, `draw`, and `drawOffscreen` serialize the function's content, avoid any external dependencies that can't be serialized.
+
+## Graphite
+
+We have experimental support for Graphite.
+To enable it, you need follow these steps:
+* Build Skia using `SK_GRAPHITE=1 yarn build-skia`
+* Install iOS pods using `SK_GRAPHITE=1 pod install`
+* Update the Android [CMakeLists](/packages/skia/android/CMakeLists.txt) to use `set(SK_GRAPHITE ON)`
