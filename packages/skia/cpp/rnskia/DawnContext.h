@@ -25,6 +25,7 @@
 #include <CoreVideo/CVPixelBuffer.h>
 #else
 #include <android/hardware_buffer.h>
+#include <android/hardware_buffer_jni.h>
 #endif
 
 namespace RNSkia {
@@ -105,9 +106,13 @@ public:
   int height = static_cast<int>(IOSurfaceGetHeight(ioSurface));
 #else
     wgpu::SharedTextureMemoryAHardwareBufferDescriptor platformDesc;
-    platformDesc.handle = (HardwareBuffer*)aHardwareBuffer;
+    auto ahb = (AHardwareBuffer*)buffer;
+    platformDesc.handle = ahb;
     platformDesc.useExternalFormat = true;
-
+    AHardwareBuffer_Desc adesc;
+    AHardwareBuffer_describe(ahb, &adesc);
+    int width = adesc.width;
+    int height = adesc.height;
 #endif
 
     wgpu::SharedTextureMemoryDescriptor desc = {};
