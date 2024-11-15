@@ -21,6 +21,12 @@
 
 #include "src/gpu/graphite/ContextOptionsPriv.h"
 
+#ifdef __APPLE__
+#include <CoreVideo/CVPixelBuffer.h>
+#else
+#include <android/hardware_buffer.h>
+#endif
+
 namespace RNSkia {
 
 struct AsyncContext {
@@ -91,7 +97,18 @@ public:
   }
 
   sk_sp<SkImage> MakeImageFromBuffer(void *buffer) {
-    // TODO: implement
+#ifdef __APPLE__
+  wgpu::SharedTextureMemoryIOSurfaceDescriptor platformDesc;
+  platformDesc.ioSurface = CVPixelBufferGetIOSurface((CVPixelBufferRef)buffer);
+#else
+    wgpu::SharedTextureMemoryAHardwareBufferDescriptor platformDesc;
+    platformDesc.handle = (HardwareBuffer*)aHardwareBuffer;
+    platformDesc.useExternalFormat = true;
+#endif
+
+    wgpu::SharedTextureMemoryDescriptor desc = {};
+    desc.nextInChain = &platformDesc;
+    wgpu::SharedTextureMemory memory = backendContext.fDevice.ImportSharedTextureMemory(&desc);
     return nullptr;
   }
 

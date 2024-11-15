@@ -85,6 +85,15 @@ createDawnBackendContext(dawn::native::Instance *instance) {
   if (adapter.HasFeature(wgpu::FeatureName::DawnPartialLoadResolveTexture)) {
     features.push_back(wgpu::FeatureName::DawnPartialLoadResolveTexture);
   }
+#ifdef __APPLE__
+  if (adapter.HasFeature(wgpu::FeatureName::SharedTextureMemoryIOSurface)) {
+    features.push_back(wgpu::FeatureName::SharedTextureMemoryIOSurface);
+  }
+#else
+  if (adapter.HasFeature(wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer)) {
+    features.push_back(wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer);
+  }
+#endif
 
   wgpu::DeviceDescriptor desc;
   desc.requiredFeatureCount = features.size();
