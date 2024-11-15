@@ -99,16 +99,55 @@ public:
   sk_sp<SkImage> MakeImageFromBuffer(void *buffer) {
 #ifdef __APPLE__
   wgpu::SharedTextureMemoryIOSurfaceDescriptor platformDesc;
-  platformDesc.ioSurface = CVPixelBufferGetIOSurface((CVPixelBufferRef)buffer);
+  auto ioSurface = CVPixelBufferGetIOSurface((CVPixelBufferRef)buffer);
+  platformDesc.ioSurface = ioSurface;
+  int width = static_cast<int>(IOSurfaceGetWidth(ioSurface));
+  int height = static_cast<int>(IOSurfaceGetHeight(ioSurface));
 #else
     wgpu::SharedTextureMemoryAHardwareBufferDescriptor platformDesc;
     platformDesc.handle = (HardwareBuffer*)aHardwareBuffer;
     platformDesc.useExternalFormat = true;
+
 #endif
 
     wgpu::SharedTextureMemoryDescriptor desc = {};
     desc.nextInChain = &platformDesc;
     wgpu::SharedTextureMemory memory = backendContext.fDevice.ImportSharedTextureMemory(&desc);
+
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.format = DawnUtils::PreferredTextureFormat;
+    textureDesc.dimension = wgpu::TextureDimension::e2D;
+    textureDesc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc;
+    textureDesc.size = {static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1};
+
+    wgpu::Texture texture = memory.CreateTexture(&textureDesc);
+
+    wgpu::SharedTextureMemoryBeginAccessDescriptor beginAccessDesc;
+    beginAccessDesc.initialized = true;
+    beginAccessDesc.fenceCount = 0;
+    bool success = memory.BeginAccess(texture, &beginAccessDesc);
+
+      if (success) {
+    skgpu::graphite::BackendTexture betFromView = skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
+    auto result = SkImages::WrapTexture(
+        getRecorder(), 
+        betFromView, 
+        DawnUtils::PreferedColorType, 
+        kPremul_SkAlphaType, 
+        nullptr, 
+        [](void* context) {
+            auto handle = static_cast<WGPUSharedTextureMemory>(context);
+            wgpu::SharedTextureMemory memory(handle);
+            // TODO: 
+            //memory.EndAccess();
+        }, 
+        memory.MoveToCHandle()
+    );
+    return result;
+      }
+    if (!success) {
+        return nullptr;
+    }
     return nullptr;
   }
 
