@@ -35,6 +35,11 @@ struct AsyncContext {
   std::unique_ptr<const SkSurface::AsyncReadResult> fResult;
 };
 
+struct SharedTextureContext {
+    wgpu::SharedTextureMemory sharedTextureMemory;
+    wgpu::Texture texture;
+};
+
 static void
 async_callback(void *c,
                std::unique_ptr<const SkImage::AsyncReadResult> result) {
@@ -141,12 +146,12 @@ public:
         kPremul_SkAlphaType, 
         nullptr, 
         [](void* context) {
-            auto handle = static_cast<WGPUSharedTextureMemory>(context);
-            wgpu::SharedTextureMemory memory(handle);
-            // TODO: 
-            //memory.EndAccess();
-        }, 
-        memory.MoveToCHandle()
+            auto ctx = static_cast<SharedTextureContext *>(context);
+            wgpu::SharedTextureMemoryEndAccessState endState = {};
+            ctx->sharedTextureMemory.EndAccess(ctx->texture, &endState);
+            delete ctx;
+        },
+        new SharedTextureContext{memory, texture}
     );
     return result;
       }
