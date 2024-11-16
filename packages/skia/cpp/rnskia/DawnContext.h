@@ -21,11 +21,23 @@
 
 #include "src/gpu/graphite/ContextOptionsPriv.h"
 
+#ifdef __APPLE__
+#include <CoreVideo/CVPixelBuffer.h>
+#else
+#include <android/hardware_buffer.h>
+#include <android/hardware_buffer_jni.h>
+#endif
+
 namespace RNSkia {
 
 struct AsyncContext {
   bool fCalled = false;
   std::unique_ptr<const SkSurface::AsyncReadResult> fResult;
+};
+
+struct SharedTextureContext {
+    wgpu::SharedTextureMemory sharedTextureMemory;
+    wgpu::Texture texture;
 };
 
 static void
@@ -91,7 +103,61 @@ public:
   }
 
   sk_sp<SkImage> MakeImageFromBuffer(void *buffer) {
-    // TODO: implement
+#ifdef __APPLE__
+    wgpu::SharedTextureMemoryIOSurfaceDescriptor platformDesc;
+    auto ioSurface = CVPixelBufferGetIOSurface((CVPixelBufferRef)buffer);
+    platformDesc.ioSurface = ioSurface;
+    int width = static_cast<int>(IOSurfaceGetWidth(ioSurface));
+    int height = static_cast<int>(IOSurfaceGetHeight(ioSurface));
+#else
+    wgpu::SharedTextureMemoryAHardwareBufferDescriptor platformDesc;
+    auto ahb = (AHardwareBuffer*)buffer;
+    platformDesc.handle = ahb;
+    platformDesc.useExternalFormat = true;
+    AHardwareBuffer_Desc adesc;
+    AHardwareBuffer_describe(ahb, &adesc);
+    int width = adesc.width;
+    int height = adesc.height;
+#endif
+
+    wgpu::SharedTextureMemoryDescriptor desc = {};
+    desc.nextInChain = &platformDesc;
+    wgpu::SharedTextureMemory memory = backendContext.fDevice.ImportSharedTextureMemory(&desc);
+
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.format = DawnUtils::PreferredTextureFormat;
+    textureDesc.dimension = wgpu::TextureDimension::e2D;
+    textureDesc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc;
+    textureDesc.size = {static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1};
+
+    wgpu::Texture texture = memory.CreateTexture(&textureDesc);
+
+    wgpu::SharedTextureMemoryBeginAccessDescriptor beginAccessDesc;
+    beginAccessDesc.initialized = true;
+    beginAccessDesc.fenceCount = 0;
+    bool success = memory.BeginAccess(texture, &beginAccessDesc);
+
+      if (success) {
+    skgpu::graphite::BackendTexture betFromView = skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
+    auto result = SkImages::WrapTexture(
+        getRecorder(), 
+        betFromView, 
+        DawnUtils::PreferedColorType, 
+        kPremul_SkAlphaType, 
+        nullptr, 
+        [](void* context) {
+            auto ctx = static_cast<SharedTextureContext *>(context);
+            wgpu::SharedTextureMemoryEndAccessState endState = {};
+            ctx->sharedTextureMemory.EndAccess(ctx->texture, &endState);
+            delete ctx;
+        },
+        new SharedTextureContext{memory, texture}
+    );
+    return result;
+      }
+    if (!success) {
+        return nullptr;
+    }
     return nullptr;
   }
 

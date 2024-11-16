@@ -4,7 +4,7 @@ import path from "path";
 import { $ } from "./utils";
 
 const DEBUG = false;
-const GRAPHITE = !!process.env.SK_GRAPHITE;
+export const GRAPHITE = !!process.env.SK_GRAPHITE;
 const BUILD_WITH_PARAGRAPH = true;
 
 export const SkiaSrc = path.join(__dirname, "../../../externals/skia");
@@ -200,29 +200,6 @@ const copyModule = (module: string) => [
   `cp -a ../../externals/skia/modules/${module}/include/. ./cpp/skia/modules/${module}/include`,
 ];
 
-const copyGraphite = () =>
-  GRAPHITE
-    ? [
-        "mkdir -p ./cpp/dawn/include",
-        "mkdir -p ./cpp/skia/src/gpu/graphite",
-        "cp -a ../../externals/skia/src/gpu/graphite/ContextOptionsPriv.h ./cpp/skia/src/gpu/graphite/.",
-        "cp -a ../../externals/skia/src/gpu/graphite/ResourceTypes.h ./cpp/skia/src/gpu/graphite/.",
-        "cp -a ../../externals/skia/src/gpu/graphite/TextureProxyView.h ./cpp/skia/src/gpu/graphite/.",
-
-        "cp -a ../../externals/skia/out/android/arm/gen/third_party/externals/dawn/include/. ./cpp/dawn/include",
-        "cp -a ../../externals/skia/third_party/externals/dawn/include/. ./cpp/dawn/include",
-        "cp -a ../../externals/skia/third_party/externals/dawn/include/. ./cpp/dawn/include",
-
-        // Remove duplicated WebGPU headers
-        "sed -i '' 's/#include \"dawn\\/webgpu.h\"/#include \"webgpu\\/webgpu.h\"/' ./cpp/dawn/include/dawn/dawn_proc_table.h",
-        "cp ./cpp/dawn/include/dawn/webgpu.h ./cpp/dawn/include/webgpu/webgpu.h",
-        "cp ./cpp/dawn/include/dawn/webgpu_cpp.h ./cpp/dawn/include/webgpu/webgpu_cpp.h",
-        "rm -rf ./cpp/dawn/include/dawn/webgpu.h",
-        "rm -rf ./cpp/dawn/include/dawn/webgpu_cpp.h",
-        "rm -rf ./cpp/dawn/include/dawn/wire",
-      ]
-    : [];
-
 export const copyHeaders = () => {
   process.chdir(PackageRoot);
   [
@@ -233,7 +210,27 @@ export const copyHeaders = () => {
     "mkdir -p ./cpp/skia/modules",
     "mkdir -p ./cpp/skia/src",
 
-    ...copyGraphite(),
+    ...(GRAPHITE
+      ? [
+          "mkdir -p ./cpp/dawn/include",
+          "mkdir -p ./cpp/skia/src/gpu/graphite",
+          "cp -a ../../externals/skia/src/gpu/graphite/ContextOptionsPriv.h ./cpp/skia/src/gpu/graphite/.",
+          "cp -a ../../externals/skia/src/gpu/graphite/ResourceTypes.h ./cpp/skia/src/gpu/graphite/.",
+          "cp -a ../../externals/skia/src/gpu/graphite/TextureProxyView.h ./cpp/skia/src/gpu/graphite/.",
+
+          "cp -a ../../externals/skia/out/android/arm/gen/third_party/externals/dawn/include/. ./cpp/dawn/include",
+          "cp -a ../../externals/skia/third_party/externals/dawn/include/. ./cpp/dawn/include",
+          "cp -a ../../externals/skia/third_party/externals/dawn/include/. ./cpp/dawn/include",
+
+          // Remove duplicated WebGPU headers
+          "sed -i '' 's/#include \"dawn\\/webgpu.h\"/#include \"webgpu\\/webgpu.h\"/' ./cpp/dawn/include/dawn/dawn_proc_table.h",
+          "cp ./cpp/dawn/include/dawn/webgpu.h ./cpp/dawn/include/webgpu/webgpu.h",
+          "cp ./cpp/dawn/include/dawn/webgpu_cpp.h ./cpp/dawn/include/webgpu/webgpu_cpp.h",
+          "rm -rf ./cpp/dawn/include/dawn/webgpu.h",
+          "rm -rf ./cpp/dawn/include/dawn/webgpu_cpp.h",
+          "rm -rf ./cpp/dawn/include/dawn/wire",
+        ]
+      : []),
 
     "cp -a ../../externals/skia/include/. ./cpp/skia/include",
     ...copyModule("svg"),
@@ -246,12 +243,9 @@ export const copyHeaders = () => {
     "cp -a ../../externals/skia/src/core/SkChecksum.h ./cpp/skia/src/core/.",
     "cp -a ../../externals/skia/src/core/SkTHash.h ./cpp/skia/src/core/.",
 
-    ...(GRAPHITE
-      ? []
-      : [
-          "mkdir -p ./cpp/skia/src/gpu/ganesh/gl",
-          "cp -a ../../externals/skia/src/gpu/ganesh/gl/GrGLDefines.h ./cpp/skia/src/gpu/ganesh/gl/.",
-        ]),
+    // TODO: Remove this once migrated to Graphite
+    "mkdir -p ./cpp/skia/src/gpu/ganesh/gl",
+    "cp -a ../../externals/skia/src/gpu/ganesh/gl/GrGLDefines.h ./cpp/skia/src/gpu/ganesh/gl/.",
 
     "cp -a ../../externals/skia/src/core/SkLRUCache.h ./cpp/skia/src/core/.",
 

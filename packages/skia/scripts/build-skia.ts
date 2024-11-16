@@ -5,6 +5,7 @@ import {
   commonArgs,
   configurations,
   copyHeaders,
+  GRAPHITE,
   OutFolder,
   PackageRoot,
   ProjectRoot,
@@ -90,7 +91,10 @@ export const buildPlatform = async (
     platform,
     targetName
   )}`;
-  await runAsync(command, `${platform}/${targetName}`);
+  await runAsync(
+    command,
+    `${platform === "android" ? "🤖" : "🍏"} ${targetName}`
+  );
 };
 
 export const copyLib = (
@@ -137,6 +141,11 @@ const buildXCFrameworks = () => {
 };
 
 (async () => {
+  if (GRAPHITE) {
+    console.log("🪨 Skia Graphite");
+  } else {
+    console.log("🐘 Skia Ganesh");
+  }
   ["ANDROID_NDK", "ANDROID_HOME"].forEach((name) => {
     // Test for existence of Android SDK
     if (!process.env[name]) {
