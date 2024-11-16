@@ -11,7 +11,7 @@
 
 #include "RNSkDispatchQueue.h"
 #include "RNSkVideo.h"
-#include "SkiaContext.h"
+#include "WindowContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -135,7 +135,7 @@ public:
    */
   virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) = 0;
 
-  virtual std::shared_ptr<SkiaContext>
+  virtual std::shared_ptr<WindowContext>
   makeContextFromNativeSurface(void *surface, int width, int height) = 0;
 
   /**

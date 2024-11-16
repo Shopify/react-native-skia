@@ -3,7 +3,6 @@ package com.shopify.reactnative.skia;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.TextureView;
 
 import com.facebook.react.views.view.ReactViewGroup;

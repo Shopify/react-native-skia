@@ -34,14 +34,7 @@
   UIGraphicsImageRendererFormat *format =
       [UIGraphicsImageRendererFormat defaultFormat];
   format.opaque = NO;
-
-  // Explicitly ask for the standard format to get ARGB 32bits and not 64bits.
-  if (@available(iOS 12.0, *)) {
-    format.preferredRange = UIGraphicsImageRendererFormatRangeStandard;
-  } else {
-    // Fallback on earlier versions
-    format.prefersExtendedRange = false;
-  }
+  format.preferredRange = UIGraphicsImageRendererFormatRangeStandard;
 
   UIGraphicsImageRenderer *renderer =
       [[UIGraphicsImageRenderer alloc] initWithSize:size format:format];

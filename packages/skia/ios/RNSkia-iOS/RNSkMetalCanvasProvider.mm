@@ -1,6 +1,12 @@
 #import "RNSkMetalCanvasProvider.h"
+
 #import "RNSkLog.h"
-#import "SkiaMetalSurfaceFactory.h"
+
+#if defined(SK_GRAPHITE)
+#import "DawnContext.h"
+#else
+#import "MetalContext.h"
+#endif
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -23,12 +29,6 @@ RNSkMetalCanvasProvider::RNSkMetalCanvasProvider(
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   _layer = [CAMetalLayer layer];
 #pragma clang diagnostic pop
-  _layer.framebufferOnly = NO;
-  _layer.device = MTLCreateSystemDefaultDevice();
-  _layer.opaque = false;
-  _layer.contentsScale = _context->getPixelDensity();
-  _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
-  _layer.contentsGravity = kCAGravityBottomLeft;
 }
 
 RNSkMetalCanvasProvider::~RNSkMetalCanvasProvider() {}
@@ -36,16 +36,12 @@ RNSkMetalCanvasProvider::~RNSkMetalCanvasProvider() {}
 /**
  Returns the scaled width of the view
  */
-float RNSkMetalCanvasProvider::getScaledWidth() {
-  return _width * _context->getPixelDensity();
-};
+float RNSkMetalCanvasProvider::getScaledWidth() { return _width; };
 
 /**
  Returns the scaled height of the view
  */
-float RNSkMetalCanvasProvider::getScaledHeight() {
-  return _height * _context->getPixelDensity();
-};
+float RNSkMetalCanvasProvider::getScaledHeight() { return _height; };
 
 /**
  Render to a canvas
@@ -80,11 +76,13 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
     if (currentDrawable == nullptr) {
       return false;
     }
-
-    auto skSurface = SkiaMetalSurfaceFactory::makeWindowedSurface(
-        currentDrawable.texture, _layer.drawableSize.width,
-        _layer.drawableSize.height);
-
+#if defined(SK_GRAPHITE)
+    auto ctx = RNSkia::DawnContext::getInstance().MakeWindow(
+        (__bridge void *)_layer, _width, _height);
+#else
+    auto ctx = MetalContext::getInstance().MakeWindow(_layer, _width, _height);
+#endif
+    auto skSurface = ctx->getSurface();
     SkCanvas *canvas = skSurface->getCanvas();
     cb(canvas);
 
@@ -92,22 +90,15 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
       dContext->flushAndSubmit();
     }
 
-    id<MTLCommandBuffer> commandBuffer(
-        [ThreadContextHolder::ThreadSkiaMetalContext
-                .commandQueue commandBuffer]);
-    [commandBuffer presentDrawable:currentDrawable];
-    [commandBuffer commit];
+    ctx->present();
   }
   return true;
 };
 
 void RNSkMetalCanvasProvider::setSize(int width, int height) {
-  _width = width;
-  _height = height;
   _layer.frame = CGRectMake(0, 0, width, height);
-  _layer.drawableSize = CGSizeMake(width * _context->getPixelDensity(),
-                                   height * _context->getPixelDensity());
-
+  _width = width * _context->getPixelDensity();
+  _height = height * _context->getPixelDensity();
   _requestRedraw();
 }
 
