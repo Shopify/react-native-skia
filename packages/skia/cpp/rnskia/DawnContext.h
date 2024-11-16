@@ -104,11 +104,11 @@ public:
 
   sk_sp<SkImage> MakeImageFromBuffer(void *buffer) {
 #ifdef __APPLE__
-  wgpu::SharedTextureMemoryIOSurfaceDescriptor platformDesc;
-  auto ioSurface = CVPixelBufferGetIOSurface((CVPixelBufferRef)buffer);
-  platformDesc.ioSurface = ioSurface;
-  int width = static_cast<int>(IOSurfaceGetWidth(ioSurface));
-  int height = static_cast<int>(IOSurfaceGetHeight(ioSurface));
+    wgpu::SharedTextureMemoryIOSurfaceDescriptor platformDesc;
+    auto ioSurface = CVPixelBufferGetIOSurface((CVPixelBufferRef)buffer);
+    platformDesc.ioSurface = ioSurface;
+    int width = static_cast<int>(IOSurfaceGetWidth(ioSurface));
+    int height = static_cast<int>(IOSurfaceGetHeight(ioSurface));
 #else
     wgpu::SharedTextureMemoryAHardwareBufferDescriptor platformDesc;
     auto ahb = (AHardwareBuffer*)buffer;
