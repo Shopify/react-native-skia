@@ -61,4 +61,4 @@ buck-out/
 
 # Build
 dist
-package/lib
+packages/*/lib/*
