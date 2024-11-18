@@ -11,9 +11,19 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #import "include/core/SkCanvas.h"
+#import "include/core/SkColorSpace.h"
+
 #import <CoreMedia/CMSampleBuffer.h>
 #import <CoreVideo/CVMetalTextureCache.h>
+
+#import <include/gpu/ganesh/GrBackendSurface.h>
 #import <include/gpu/ganesh/GrDirectContext.h>
+#import <include/gpu/ganesh/SkImageGanesh.h>
+#import <include/gpu/ganesh/SkSurfaceGanesh.h>
+#import <include/gpu/ganesh/mtl/GrMtlBackendContext.h>
+#import <include/gpu/ganesh/mtl/GrMtlBackendSurface.h>
+#import <include/gpu/ganesh/mtl/GrMtlDirectContext.h>
+#import <include/gpu/ganesh/mtl/SkSurfaceMetal.h>
 
 #pragma clang diagnostic pop
 
@@ -26,9 +36,6 @@ class SkiaMetalSurfaceFactory {
   friend class IOSSkiaContext;
 
 public:
-  static sk_sp<SkSurface> makeWindowedSurface(SkiaMetalContext *context,
-                                              id<MTLTexture> texture, int width,
-                                              int height);
   static sk_sp<SkSurface> makeOffscreenSurface(id<MTLDevice> device,
                                                SkiaMetalContext *context,
                                                int width, int height);
@@ -76,9 +83,16 @@ public:
     }
 
     // Get the texture from the drawable
-    _skSurface = SkiaMetalSurfaceFactory::makeWindowedSurface(
-        _context, _currentDrawable.texture, _layer.drawableSize.width,
-        _layer.drawableSize.height);
+    GrMtlTextureInfo fbInfo;
+    fbInfo.fTexture.retain((__bridge void *)_currentDrawable.texture);
+
+    GrBackendRenderTarget backendRT = GrBackendRenderTargets::MakeMtl(
+        _layer.drawableSize.width, _layer.drawableSize.height, fbInfo);
+
+    _skSurface = SkSurfaces::WrapBackendRenderTarget(
+        _context->skContext.get(), backendRT, kTopLeft_GrSurfaceOrigin,
+        kBGRA_8888_SkColorType, nullptr, nullptr);
+
     return _skSurface;
   }
 

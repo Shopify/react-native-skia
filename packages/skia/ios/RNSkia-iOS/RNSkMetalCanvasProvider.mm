@@ -89,7 +89,8 @@ void RNSkMetalCanvasProvider::setSize(int width, int height) {
   auto w = width * _context->getPixelDensity();
   auto h = height * _context->getPixelDensity();
 #if defined(SK_GRAPHITE)
-  _ctx = RNSkia::DawnContext::getInstance().MakeWindow((__bridge void *)_layer, w, h);
+  _ctx = RNSkia::DawnContext::getInstance().MakeWindow((__bridge void *)_layer,
+                                                       w, h);
 #else
   _ctx = MetalContext::getInstance().MakeWindow(_layer, w, h);
 #endif
