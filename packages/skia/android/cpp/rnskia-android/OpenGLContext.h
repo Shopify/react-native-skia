@@ -32,7 +32,10 @@ public:
   }
 
 private:
-  RNSkia::SkiaOpenGLContext _context;
+  EGLDisplay glDisplay;
+  EGLContext glContext;
+  EGLSurface gl1x1Surface;
+  sk_sp<GrDirectContext> directContext;
 
   OpenGLContext() {
     RNSkia::SkiaOpenGLHelper::createSkiaDirectContextIfNecessary(&_context);
