@@ -112,6 +112,7 @@ SkiaOpenGLSurfaceFactory::makeOffscreenSurface(SkiaOpenGLContext *context,
 
         releaseCtx->context->directContext->deleteBackendTexture(
             releaseCtx->texture);
+        delete releaseCtx;
       },
       releaseCtx);
 }
