@@ -5,8 +5,6 @@
 #include <fbjni/fbjni.h>
 #include <jni.h>
 
-#include <atomic>
-
 #include "RNSkLog.h"
 
 #pragma clang diagnostic push
@@ -75,7 +73,7 @@ private:
 
 public:
   static OpenGLResourceHolder &getInstance() {
-    static OpenGLResourceHolder Instance;
+    static thread_local OpenGLResourceHolder Instance;
     return Instance;
   }
 
@@ -84,16 +82,16 @@ public:
    * and will be used as the parent / shareable context when creating subsequent
    * contexts.
    */
-  std::atomic<EGLContext> glContext = EGL_NO_CONTEXT;
+  EGLContext glContext = EGL_NO_CONTEXT;
   /**
    * Shared egl display
    */
-  std::atomic<EGLDisplay> glDisplay = EGL_NO_DISPLAY;
+  EGLDisplay glDisplay = EGL_NO_DISPLAY;
 
   /**
    * Shared eglConfig
    */
-  std::atomic<EGLConfig> glConfig = 0;
+  EGLConfig glConfig = 0;
 
 private:
   /**
