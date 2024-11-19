@@ -17,13 +17,12 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
     // Now make this one current
     _context->makeCurrent(*_surface);
 
-
     // Set up parameters for the render target so that it
     // matches the underlying OpenGL context.
     GrGLFramebufferInfo fboInfo;
 
     // We pass 0 as the framebuffer id, since the
-  // underlying Skia GrGlGpu will read this when wrapping the context in the
+    // underlying Skia GrGlGpu will read this when wrapping the context in the
     // render target and the GrGlGpu object.
     fboInfo.fFBOID = 0;
     fboInfo.fFormat = 0x8058; // GL_RGBA8
@@ -57,11 +56,11 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
 
     // Create surface object
     _skSurface = SkSurfaces::WrapBackendRenderTarget(
-        _directContext, renderTarget,
-        kBottomLeft_GrSurfaceOrigin, colorType, nullptr, &props,
+        _directContext, renderTarget, kBottomLeft_GrSurfaceOrigin, colorType,
+        nullptr, &props,
         [](void *addr) {
           auto releaseCtx = reinterpret_cast<ReleaseContext *>(addr);
-          ///SkiaOpenGLHelper::destroySurface(releaseCtx->glSurface);
+          /// SkiaOpenGLHelper::destroySurface(releaseCtx->glSurface);
           delete releaseCtx;
         },
         reinterpret_cast<void *>(releaseCtx));

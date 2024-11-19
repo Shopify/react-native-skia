@@ -66,7 +66,8 @@ private:
     return EGL_TRUE;
   }
 
-  Context(EGLDisplay display, EGLContext context): _display(display), _context(context) {}
+  Context(EGLDisplay display, EGLContext context)
+      : _display(display), _context(context) {}
 
   Context(const Context &) = delete;
 

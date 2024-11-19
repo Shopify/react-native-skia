@@ -33,14 +33,15 @@ namespace RNSkia {
 
 class OpenGLWindowContext : public WindowContext {
 public:
-  OpenGLWindowContext(Display *display, Context* context, GrDirectContext* directContext, ANativeWindow *window,
-                     int width, int height)
-      : _directContext(directContext), _context(context), _window(window), _width(width), _height(height) {
-        // TODO: reuse config?
-        auto config = display->chooseConfig();
-        _surface = display->makeWindowSurface(config, window);
-      }
-
+  OpenGLWindowContext(Display *display, Context *context,
+                      GrDirectContext *directContext, ANativeWindow *window,
+                      int width, int height)
+      : _directContext(directContext), _context(context), _window(window),
+        _width(width), _height(height) {
+    // TODO: reuse config?
+    auto config = display->chooseConfig();
+    _surface = display->makeWindowSurface(config, window);
+  }
 
   ~OpenGLWindowContext() { ANativeWindow_release(_window); }
 
@@ -48,7 +49,7 @@ public:
 
   void present() override {
     _context->makeCurrent(*_surface);
-  
+
     // Flush and submit the direct context
     _directContext->flushAndSubmit();
 
@@ -70,8 +71,8 @@ private:
   ANativeWindow *_window;
   sk_sp<SkSurface> _skSurface = nullptr;
   std::unique_ptr<Surface> _surface;
-  Context* _context;
-  GrDirectContext* _directContext;
+  Context *_context;
+  GrDirectContext *_directContext;
   int _width = 0;
   int _height = 0;
 };
