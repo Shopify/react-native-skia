@@ -49,11 +49,7 @@ public:
 
   void present() override {
     _context->makeCurrent(*_surface);
-
-    // Flush and submit the direct context
     _directContext->flushAndSubmit();
-
-    // Swap buffers
     _surface->Present();
   }
 
