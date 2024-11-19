@@ -46,26 +46,6 @@ SkiaMetalSurfaceFactory::makeContext(SkiaMetalContext *context,
   return std::make_unique<IOSSkiaContext>(context, texture, width, height);
 }
 
-sk_sp<SkSurface> SkiaMetalSurfaceFactory::makeWindowedSurface(
-    SkiaMetalContext *context, id<MTLTexture> texture, int width, int height) {
-  GrMtlTextureInfo fbInfo;
-  fbInfo.fTexture.retain((__bridge void *)texture);
-
-  GrBackendRenderTarget backendRT =
-      GrBackendRenderTargets::MakeMtl(width, height, fbInfo);
-
-  auto skSurface = SkSurfaces::WrapBackendRenderTarget(
-      context->skContext.get(), backendRT, kTopLeft_GrSurfaceOrigin,
-      kBGRA_8888_SkColorType, nullptr, nullptr);
-
-  if (skSurface == nullptr || skSurface->getCanvas() == nullptr) {
-    RNSkia::RNSkLogger::logToConsole(
-        "Skia surface could not be created from parameters.");
-    return nullptr;
-  }
-  return skSurface;
-}
-
 sk_sp<SkSurface> SkiaMetalSurfaceFactory::makeOffscreenSurface(
     id<MTLDevice> device, SkiaMetalContext *context, int width, int height) {
 
