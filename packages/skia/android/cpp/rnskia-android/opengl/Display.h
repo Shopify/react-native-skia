@@ -5,6 +5,7 @@
 #include "EGL/egl.h"
 #include "GLES2/gl2.h"
 
+#include "opengl/Context.h"
 #include "opengl/Error.h"
 
 namespace RNSkia {
@@ -21,12 +22,12 @@ public:
       LOG_EGL_ERROR;
       return;
     }
-    display_ = display;
+    _display = display;
   }
 
-  virtual ~Display() {
-    if (display_ != EGL_NO_DISPLAY) {
-      if (eglTerminate(display_) != EGL_TRUE) {
+  ~Display() {
+    if (_display != EGL_NO_DISPLAY) {
+      if (eglTerminate(_display) != EGL_TRUE) {
         LOG_EGL_ERROR;
       }
     }
@@ -34,7 +35,7 @@ public:
 
   bool isValid() const { return _display != EGL_NO_DISPLAY; }
 
-  EGLConfig ChooseConfig() const {
+  EGLConfig chooseConfig() const {
 
     EGLint att[] = {EGL_RENDERABLE_TYPE,
                     EGL_OPENGL_ES2_BIT,
@@ -65,30 +66,25 @@ public:
     return glConfig;
   }
 
-  std::unique_ptr<Context> CreateContext(const Config &config,
-                                         const Context *share_context) {}
+  std::unique_ptr<Context> makeContext(const EGLConfig &config,
+                                       const Context *share_context) {
+    EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+    auto context = eglCreateContext(
+        _display, config,
+        share_context != nullptr ? share_context->getHandle() : nullptr,
+        contextAttribs);
 
-  std::unique_ptr<Surface> CreateWindowSurface(const Config &config,
-                                               EGLNativeWindowType window) {
-    const EGLint attribs[] = {EGL_NONE};
-    auto surface = eglCreateWindowSurface(display_,           // display
-                                          config.GetHandle(), // config
-                                          window,             // window
-                                          attribs             // attrib_list
-    );
-    if (surface == EGL_NO_SURFACE) {
-      IMPELLER_LOG_EGL_ERROR;
+    if (context == EGL_NO_CONTEXT) {
+      LOG_EGL_ERROR;
       return nullptr;
     }
-    return std::unique_ptr<Surface>(new Surface(display_, surface));
+    return std::unique_ptr<Context>(new Context(_display, context));
   }
 
-  std::unique_ptr<Surface>
-  CreatePixelBufferSurface(const Config &config, size_t width, size_t height) {
-    const EGLint attribs[] = {EGL_WIDTH, static_cast<EGLint>(width), EGL_HEIGHT,
-                              static_cast<EGLint>(height), EGL_NONE};
-    auto surface =
-        eglCreatePbufferSurface(_display, config.getHandle(), attribs);
+  std::unique_ptr<Surface> makeWindowSurface(const EGLConfig &config,
+                                             EGLNativeWindowType window) {
+    const EGLint attribs[] = {EGL_NONE};
+    auto surface = eglCreateWindowSurface(_display, config, window, attribs);
     if (surface == EGL_NO_SURFACE) {
       LOG_EGL_ERROR;
       return nullptr;
@@ -96,7 +92,19 @@ public:
     return std::unique_ptr<Surface>(new Surface(_display, surface));
   }
 
-  const EGLDisplay &GetHandle() const { return _display; }
+  std::unique_ptr<Surface> makePixelBufferSurface(const EGLConfig &config,
+                                                  size_t width, size_t height) {
+    const EGLint attribs[] = {EGL_WIDTH, static_cast<EGLint>(width), EGL_HEIGHT,
+                              static_cast<EGLint>(height), EGL_NONE};
+    auto surface = eglCreatePbufferSurface(_display, config, attribs);
+    if (surface == EGL_NO_SURFACE) {
+      LOG_EGL_ERROR;
+      return nullptr;
+    }
+    return std::unique_ptr<Surface>(new Surface(_display, surface));
+  }
+
+  const EGLDisplay &getHandle() const { return _display; }
 
 private:
   EGLDisplay _display = EGL_NO_DISPLAY;

@@ -1,7 +1,9 @@
 #pragma once
 
 #include "SkiaOpenGLSurfaceFactory.h"
+
 #include "WindowContext.h"
+#include "opengl/Display.h"
 
 #include "include/core/SkSurface.h"
 
@@ -32,12 +34,12 @@ public:
   }
 
 private:
-  EGLDisplay glDisplay;
-  EGLContext glContext;
-  EGLSurface gl1x1Surface;
+  RNSkia::SkiaOpenGLContext _context;
+  std::unique_ptr<RNSkia::Display> _display;
   sk_sp<GrDirectContext> directContext;
 
   OpenGLContext() {
+    _display = std::make_unique<RNSkia::Display>();
     RNSkia::SkiaOpenGLHelper::createSkiaDirectContextIfNecessary(&_context);
   }
 };

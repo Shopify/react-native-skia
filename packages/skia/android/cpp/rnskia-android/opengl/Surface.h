@@ -6,6 +6,14 @@ namespace RNSkia {
 
 class Surface {
 public:
+  ~Surface() {
+    if (_surface != EGL_NO_SURFACE) {
+      if (eglDestroySurface(_display, _surface) != EGL_TRUE) {
+        LOG_EGL_ERROR;
+      }
+    }
+  }
+
   bool isValid() { return _surface != EGL_NO_SURFACE; }
 
   const EGLSurface &getHandle() const { return _surface; }
@@ -27,17 +35,9 @@ private:
   Surface(EGLDisplay display, EGLSurface surface)
       : _display(display), _surface(surface) {}
 
-  ~Surface() {
-    if (surface_ != EGL_NO_SURFACE) {
-      if (eglDestroySurface(_display, _surface) != EGL_TRUE) {
-        LOG_EGL_ERROR;
-      }
-    }
-  }
-
   Surface(const Surface &) = delete;
 
   Surface &operator=(const Surface &) = delete;
-}
+};
 
 } // Namespace RNSkia

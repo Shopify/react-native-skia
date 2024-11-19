@@ -3,8 +3,6 @@
 #include "EGL/egl.h"
 #include "GLES2/gl2.h"
 
-#include "RNSkLog.h"
-
 #define LOG_EGL_ERROR LogEGLError(__FILE__, __LINE__);
 
 static const char *EGLErrorToString(EGLint error) {
@@ -43,8 +41,4 @@ static const char *EGLErrorToString(EGLint error) {
   return "Unknown";
 }
 
-void LogEGLError(const char *file, int line) {
-  const auto error = eglGetError();
-  RNSkLogger::logToConsole("EGL Error: %s (%d) in %s:%d",
-                           EGLErrorToString(error), error, file, line);
-}
+void LogEGLError(const char *file, int line);
