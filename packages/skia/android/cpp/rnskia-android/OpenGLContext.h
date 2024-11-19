@@ -124,11 +124,12 @@ public:
   std::unique_ptr<RNSkia::WindowContext> MakeWindow(ANativeWindow *window,
                                                     int width, int height) {
     return std::make_unique<RNSkia::OpenGLWindowContext>(
-        _display.get(), _ctx.get(), _directContext.get(), window, width,
-        height);
+        _config, _display.get(), _ctx.get(), _directContext.get(), window,
+        width, height);
   }
 
 private:
+  EGLConfig _config;
   std::unique_ptr<RNSkia::Display> _display;
   std::unique_ptr<RNSkia::Context> _ctx;
   std::unique_ptr<RNSkia::Surface> _surface;
@@ -136,9 +137,9 @@ private:
 
   OpenGLContext() {
     _display = std::make_unique<RNSkia::Display>();
-    auto config = _display->chooseConfig();
-    _ctx = _display->makeContext(config, nullptr);
-    _surface = _display->makePixelBufferSurface(config, 1, 1);
+    _config = _display->chooseConfig();
+    _ctx = _display->makeContext(_config, nullptr);
+    _surface = _display->makePixelBufferSurface(_config, 1, 1);
     _ctx->makeCurrent(*_surface);
     auto backendInterface = GrGLMakeNativeInterface();
     _directContext = GrDirectContexts::MakeGL(backendInterface);

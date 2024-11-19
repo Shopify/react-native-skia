@@ -14,8 +14,17 @@ namespace RNSkia {
 
 sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
   if (_skSurface == nullptr) {
+
+    struct ReleaseContext {
+      std::unique_ptr<Surface> surface = nullptr;
+    };
+
+    auto releaseCtx = new ReleaseContext();
+    releaseCtx->surface = _display->makeWindowSurface(_config, _window);
+    _surface = releaseCtx->surface.get();
+  
     // Now make this one current
-    _context->makeCurrent(*_surface);
+    _context->makeCurrent(*releaseCtx->surface);
 
     // Set up parameters for the render target so that it
     // matches the underlying OpenGL context.
@@ -47,10 +56,16 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
+  
     // Create surface object
     _skSurface = SkSurfaces::WrapBackendRenderTarget(
         _directContext, renderTarget, kBottomLeft_GrSurfaceOrigin, colorType,
-        nullptr, &props);
+        nullptr, &props,
+        [](void *addr) {
+          auto releaseCtx = reinterpret_cast<ReleaseContext *>(addr);
+          delete releaseCtx;
+        },
+        reinterpret_cast<void *>(releaseCtx));
   }
   return _skSurface;
 }
