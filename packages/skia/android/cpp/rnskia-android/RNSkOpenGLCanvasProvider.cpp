@@ -71,7 +71,6 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
       return false;
     }
   }
-
   return false;
 }
 
