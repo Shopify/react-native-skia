@@ -47,23 +47,10 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
-    // TODO: this probably not needed here
-    struct ReleaseContext {
-      EGLSurface glSurface;
-    };
-
-    auto releaseCtx = new ReleaseContext({0});
-
     // Create surface object
     _skSurface = SkSurfaces::WrapBackendRenderTarget(
         _directContext, renderTarget, kBottomLeft_GrSurfaceOrigin, colorType,
-        nullptr, &props,
-        [](void *addr) {
-          auto releaseCtx = reinterpret_cast<ReleaseContext *>(addr);
-          /// SkiaOpenGLHelper::destroySurface(releaseCtx->glSurface);
-          delete releaseCtx;
-        },
-        reinterpret_cast<void *>(releaseCtx));
+        nullptr, &props);
   }
   return _skSurface;
 }

@@ -7,11 +7,11 @@
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColorSpace.h"
 #include "include/core/SkSurface.h"
-#include "include/gpu/ganesh/SkImageGanesh.h"
 #include "include/gpu/ganesh/GrDirectContext.h"
+#include "include/gpu/ganesh/SkImageGanesh.h"
+#include "include/gpu/ganesh/gl/GrGLBackendSurface.h"
 #include "include/gpu/ganesh/gl/GrGLDirectContext.h"
 #include "include/gpu/ganesh/gl/GrGLInterface.h"
-#include "include/gpu/ganesh/gl/GrGLBackendSurface.h"
 #include "src/gpu/ganesh/gl/GrGLDefines.h"
 
 class OpenGLContext {
@@ -63,13 +63,14 @@ public:
         releaseCtx);
   }
 
-  sk_sp<SkImage> MakeImageFromBuffer(void *buffer, bool requireKnownFormat = false) {
+  sk_sp<SkImage> MakeImageFromBuffer(void *buffer,
+                                     bool requireKnownFormat = false) {
 #if __ANDROID_API__ >= 26
     const AHardwareBuffer *hardwareBuffer =
         static_cast<AHardwareBuffer *>(buffer);
     RNSkia::DeleteImageProc deleteImageProc = nullptr;
-      RNSkia::UpdateImageProc updateImageProc = nullptr;
-      RNSkia::TexImageCtx deleteImageCtx = nullptr;
+    RNSkia::UpdateImageProc updateImageProc = nullptr;
+    RNSkia::TexImageCtx deleteImageCtx = nullptr;
 
     AHardwareBuffer_Desc description;
     AHardwareBuffer_describe(hardwareBuffer, &description);
@@ -100,10 +101,9 @@ public:
     }
 
     auto backendTex = RNSkia::MakeGLBackendTexture(
-        _directContext.get(),
-        const_cast<AHardwareBuffer *>(hardwareBuffer), description.width,
-        description.height, &deleteImageProc, &updateImageProc, &deleteImageCtx,
-        false, format, false);
+        _directContext.get(), const_cast<AHardwareBuffer *>(hardwareBuffer),
+        description.width, description.height, &deleteImageProc,
+        &updateImageProc, &deleteImageCtx, false, format, false);
     if (!backendTex.isValid()) {
       RNSkia::RNSkLogger::logToConsole(
           "Failed to convert HardwareBuffer to OpenGL Texture!");
