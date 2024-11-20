@@ -61,13 +61,14 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
   }
 
   render() {
-    const { mode, debug = false, ...viewProps } = this.props;
+    const { mode, debug = false, opaque = false, ...viewProps } = this.props;
     return (
       <NativeSkiaPictureView
         collapsable={false}
         nativeID={`${this._nativeId}`}
         mode={mode ?? "default"}
         debug={debug}
+        opaque={opaque}
         {...viewProps}
       />
     );

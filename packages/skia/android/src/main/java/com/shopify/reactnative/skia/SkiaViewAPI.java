@@ -8,5 +8,4 @@ public interface SkiaViewAPI {
     void onSurfaceChanged(Surface surface, int width, int height);
 
     void onSurfaceDestroyed();
-
 }

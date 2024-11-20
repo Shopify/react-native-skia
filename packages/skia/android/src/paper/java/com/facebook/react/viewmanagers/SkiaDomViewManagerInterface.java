@@ -15,4 +15,5 @@ import androidx.annotation.Nullable;
 public interface SkiaDomViewManagerInterface<T extends View> {
   void setMode(T view, @Nullable String value);
   void setDebug(T view, boolean value);
+  void setOpaque(T view, boolean value);
 }

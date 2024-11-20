@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
-import android.graphics.SurfaceTexture;
 import android.hardware.HardwareBuffer;
 import android.media.Image;
 import android.media.ImageReader;
@@ -38,8 +37,6 @@ public class SkiaAHBView extends View implements ImageReader.OnImageAvailableLis
     }
 
     private ImageReader createReader() {
-        int w = getWidth();
-        int h = getHeight();
         ImageReader reader = ImageReader.newInstance(getWidth(), getHeight(), PixelFormat.RGBA_8888, 2, HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE |
                 HardwareBuffer.USAGE_GPU_COLOR_OUTPUT);
         reader.setOnImageAvailableListener(this, null);

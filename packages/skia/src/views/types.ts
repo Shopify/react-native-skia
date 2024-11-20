@@ -9,6 +9,7 @@ export type DrawMode = "continuous" | "default";
 export type NativeSkiaViewProps = ViewProps & {
   mode?: DrawMode;
   debug?: boolean;
+  opaque?: boolean;
 };
 
 export interface DrawingInfo {
@@ -43,6 +44,8 @@ export interface SkiaBaseViewProps extends ViewProps {
    * the Skia view is resized.
    */
   onSize?: SharedValueType<SkSize>;
+
+  opaque?: boolean;
 }
 
 export interface SkiaPictureViewProps extends SkiaBaseViewProps {
