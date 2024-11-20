@@ -1,9 +1,9 @@
 #pragma once
 
-#include "opengl/Error.h"
-#include "opengl/Surface.h"
+#include "gl/Error.h"
+#include "gl/Surface.h"
 
-namespace RNSkia {
+namespace gl {
 
 class Surface;
 class Display;
@@ -74,4 +74,4 @@ private:
   Context &operator=(const Context &) = delete;
 };
 
-} // namespace RNSkia
+} // namespace gl

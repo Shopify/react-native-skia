@@ -2,7 +2,7 @@
 
 #include "GrAHardwareBufferUtils.h"
 #include "OpenGLWindowContext.h"
-#include "opengl/Display.h"
+#include "gl/Display.h"
 
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColorSpace.h"
@@ -14,8 +14,12 @@
 #include "include/gpu/ganesh/gl/GrGLInterface.h"
 #include "src/gpu/ganesh/gl/GrGLDefines.h"
 
+namespace RNSkia {
+
 class OpenGLContext {
 public:
+  friend class OpenGLWindowContext;
+
   OpenGLContext(const OpenGLContext &) = delete;
   OpenGLContext &operator=(const OpenGLContext &) = delete;
 
@@ -29,7 +33,7 @@ public:
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
-    auto result = _ctx->makeCurrent(*_surface);
+    auto result = _glContext->makeCurrent(*_glSurface);
     if (!result) {
       return nullptr;
     }
@@ -39,8 +43,8 @@ public:
         width, height, colorType, skgpu::Mipmapped::kNo, GrRenderable::kYes);
 
     if (!texture.isValid()) {
-      RNSkia::RNSkLogger::logToConsole(
-          "couldn't create offscreen texture %dx%d", width, height);
+      RNSkLogger::logToConsole("couldn't create offscreen texture %dx%d", width,
+                               height);
     }
 
     struct ReleaseContext {
@@ -68,9 +72,9 @@ public:
 #if __ANDROID_API__ >= 26
     const AHardwareBuffer *hardwareBuffer =
         static_cast<AHardwareBuffer *>(buffer);
-    RNSkia::DeleteImageProc deleteImageProc = nullptr;
-    RNSkia::UpdateImageProc updateImageProc = nullptr;
-    RNSkia::TexImageCtx deleteImageCtx = nullptr;
+    DeleteImageProc deleteImageProc = nullptr;
+    UpdateImageProc updateImageProc = nullptr;
+    TexImageCtx deleteImageCtx = nullptr;
 
     AHardwareBuffer_Desc description;
     AHardwareBuffer_describe(hardwareBuffer, &description);
@@ -100,12 +104,12 @@ public:
       }
     }
 
-    auto backendTex = RNSkia::MakeGLBackendTexture(
+    auto backendTex = MakeGLBackendTexture(
         _directContext.get(), const_cast<AHardwareBuffer *>(hardwareBuffer),
         description.width, description.height, &deleteImageProc,
         &updateImageProc, &deleteImageCtx, false, format, false);
     if (!backendTex.isValid()) {
-      RNSkia::RNSkLogger::logToConsole(
+      RNSkLogger::logToConsole(
           "Failed to convert HardwareBuffer to OpenGL Texture!");
       return nullptr;
     }
@@ -121,26 +125,24 @@ public:
 #endif
   }
 
-  std::unique_ptr<RNSkia::WindowContext> MakeWindow(ANativeWindow *window,
-                                                    int width, int height) {
-    return std::make_unique<RNSkia::OpenGLWindowContext>(
-        _config, _display.get(), _ctx.get(), _directContext.get(), window,
-        width, height);
+  std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window, int width,
+                                            int height) {
+    return std::make_unique<OpenGLWindowContext>(this, window, width, height);
   }
 
 private:
-  EGLConfig _config;
-  std::unique_ptr<RNSkia::Display> _display;
-  std::unique_ptr<RNSkia::Context> _ctx;
-  std::unique_ptr<RNSkia::Surface> _surface;
+  EGLConfig _glConfig;
+  std::unique_ptr<gl::Display> _glDisplay;
+  std::unique_ptr<gl::Context> _glContext;
+  std::unique_ptr<gl::Surface> _glSurface;
   sk_sp<GrDirectContext> _directContext;
 
   OpenGLContext() {
-    _display = std::make_unique<RNSkia::Display>();
-    _config = _display->chooseConfig();
-    _ctx = _display->makeContext(_config, nullptr);
-    _surface = _display->makePixelBufferSurface(_config, 1, 1);
-    _ctx->makeCurrent(*_surface);
+    _glDisplay = std::make_unique<gl::Display>();
+    _glConfig = _glDisplay->chooseConfig();
+    _glContext = _glDisplay->makeContext(_glConfig, nullptr);
+    _glSurface = _glDisplay->makePixelBufferSurface(_glConfig, 1, 1);
+    _glContext->makeCurrent(*_glSurface);
     auto backendInterface = GrGLMakeNativeInterface();
     _directContext = GrDirectContexts::MakeGL(backendInterface);
 
@@ -149,3 +151,5 @@ private:
     }
   }
 };
+
+} // namespace RNSkia

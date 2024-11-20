@@ -1,6 +1,8 @@
 #include "OpenGLWindowContext.h"
 #include "GrAHardwareBufferUtils.h"
 
+#include "OpenGLContext.h"
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -16,15 +18,16 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
   if (_skSurface == nullptr) {
 
     struct ReleaseContext {
-      std::unique_ptr<Surface> surface = nullptr;
+      std::unique_ptr<gl::Surface> surface = nullptr;
     };
 
     auto releaseCtx = new ReleaseContext();
-    releaseCtx->surface = _display->makeWindowSurface(_config, _window);
-    _surface = releaseCtx->surface.get();
-  
+    releaseCtx->surface =
+        _context->_glDisplay->makeWindowSurface(_context->_glConfig, _window);
+    _glSurface = releaseCtx->surface.get();
+
     // Now make this one current
-    _context->makeCurrent(*releaseCtx->surface);
+    _context->_glContext->makeCurrent(*releaseCtx->surface);
 
     // Set up parameters for the render target so that it
     // matches the underlying OpenGL context.
@@ -45,7 +48,7 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
     auto colorType = kN32_SkColorType;
 
     auto maxSamples =
-        _directContext->maxSurfaceSampleCountForColorType(colorType);
+        _context->_directContext->maxSurfaceSampleCountForColorType(colorType);
 
     if (samples > maxSamples) {
       samples = maxSamples;
@@ -56,11 +59,10 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
-  
     // Create surface object
     _skSurface = SkSurfaces::WrapBackendRenderTarget(
-        _directContext, renderTarget, kBottomLeft_GrSurfaceOrigin, colorType,
-        nullptr, &props,
+        _context->_directContext.get(), renderTarget,
+        kBottomLeft_GrSurfaceOrigin, colorType, nullptr, &props,
         [](void *addr) {
           auto releaseCtx = reinterpret_cast<ReleaseContext *>(addr);
           delete releaseCtx;
@@ -68,6 +70,12 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
         reinterpret_cast<void *>(releaseCtx));
   }
   return _skSurface;
+}
+
+void OpenGLWindowContext::present() {
+  _context->_glContext->makeCurrent(*_glSurface);
+  _context->_directContext->flushAndSubmit();
+  _glSurface->present();
 }
 
 } // namespace RNSkia
