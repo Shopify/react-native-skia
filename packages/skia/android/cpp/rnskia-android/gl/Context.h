@@ -22,7 +22,7 @@ public:
 
   const EGLContext &getHandle() const { return _context; }
 
-  bool makeCurrent(const Surface* surface) const {
+  bool makeCurrent(const Surface* surface) {
     if (_context == EGL_NO_CONTEXT) {
       return false;
     }
@@ -35,7 +35,7 @@ public:
     return result;
   }
 
-  bool clearCurrent() const {
+  bool clearCurrent() {
     const auto result =
         eglMakeCurrentIfNecessary(_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
                                   EGL_NO_CONTEXT) == EGL_TRUE;

@@ -35,7 +35,7 @@ public:
 
   bool isValid() const { return _display != EGL_NO_DISPLAY; }
 
-  EGLConfig chooseConfig() const {
+  EGLConfig chooseConfig() {
 
     EGLint att[] = {EGL_RENDERABLE_TYPE,
                     EGL_OPENGL_ES2_BIT,

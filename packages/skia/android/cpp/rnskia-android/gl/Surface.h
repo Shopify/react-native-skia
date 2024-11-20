@@ -20,7 +20,7 @@ public:
 
   const EGLSurface &getHandle() const { return _surface; }
 
-  bool present() const {
+  bool present() {
     const auto result = eglSwapBuffers(_display, _surface) == EGL_TRUE;
     if (!result) {
       LOG_EGL_ERROR;
