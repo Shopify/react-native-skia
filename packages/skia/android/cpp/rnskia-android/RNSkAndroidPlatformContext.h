@@ -68,8 +68,8 @@ public:
 #if defined(SK_GRAPHITE)
     return DawnContext::getInstance().MakeWindow(surface, width, height);
 #else
-    return OpenGLContext::getInstance().MakeWindow(
-        reinterpret_cast<ANativeWindow *>(surface), width, height);
+    auto aWindow = reinterpret_cast<ANativeWindow *>(surface);
+    return OpenGLContext::getInstance().MakeWindow(aWindow, width, height);
 #endif
   }
 

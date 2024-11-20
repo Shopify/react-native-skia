@@ -6,7 +6,8 @@ namespace gl {
 
 class Surface {
 public:
-  Surface(EGLDisplay display, EGLSurface surface): _display(display), _surface(surface) {}
+  Surface(EGLDisplay display, EGLSurface surface)
+      : _display(display), _surface(surface) {}
 
   ~Surface() {
     if (_surface != EGL_NO_SURFACE) {

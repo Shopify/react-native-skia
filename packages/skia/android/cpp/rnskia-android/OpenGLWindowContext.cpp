@@ -21,6 +21,9 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
       std::unique_ptr<gl::Surface> surface = nullptr;
     };
 
+    if (!_window) {
+      throw std::runtime_error("No native window provided");
+    }
     auto releaseCtx = new ReleaseContext();
     releaseCtx->surface =
         _context->_glDisplay->makeWindowSurface(_context->_glConfig, _window);

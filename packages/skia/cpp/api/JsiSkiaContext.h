@@ -69,6 +69,9 @@ public:
       void *surface = reinterpret_cast<void *>(nativeBufferPointer);
       auto width = static_cast<int>(arguments[1].asNumber());
       auto height = static_cast<int>(arguments[2].asNumber());
+      if (surface == nullptr) {
+        throw std::runtime_error("Surface is null");
+      }
       auto result =
           context->makeContextFromNativeSurface(surface, width, height);
       // Return the newly constructed object

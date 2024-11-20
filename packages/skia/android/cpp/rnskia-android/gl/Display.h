@@ -82,7 +82,7 @@ public:
   }
 
   std::unique_ptr<Surface> makeWindowSurface(const EGLConfig &config,
-                                             ANativeWindow* window) {
+                                             ANativeWindow *window) {
     const EGLint attribs[] = {EGL_NONE};
     auto surface = eglCreateWindowSurface(_display, config, window, attribs);
     if (surface == EGL_NO_SURFACE) {
