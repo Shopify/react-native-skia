@@ -46,8 +46,8 @@ public class SkiaAHBView extends View implements ImageReader.OnImageAvailableLis
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        int width = right - left;
-        int height = bottom - top;
+        int width = getWidth();
+        int height = getHeight();
         if (mReader == null) {
             mReader = createReader();
             mApi.onSurfaceCreated(mReader.getSurface(), width, height);
