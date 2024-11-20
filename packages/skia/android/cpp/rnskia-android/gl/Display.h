@@ -5,10 +5,10 @@
 #include "EGL/egl.h"
 #include "GLES2/gl2.h"
 
-#include "opengl/Context.h"
-#include "opengl/Error.h"
+#include "gl/Context.h"
+#include "gl/Error.h"
 
-namespace RNSkia {
+namespace gl {
 
 class Context;
 class Surface;
@@ -114,4 +114,4 @@ private:
   Display &operator=(const Display &) = delete;
 };
 
-} // namespace RNSkia
+} // namespace gl

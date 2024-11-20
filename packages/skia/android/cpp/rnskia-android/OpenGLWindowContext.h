@@ -14,7 +14,7 @@
 #include <unordered_map>
 
 #include "WindowContext.h"
-#include "opengl/Display.h"
+#include "gl/Display.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -33,7 +33,7 @@ namespace RNSkia {
 
 class OpenGLWindowContext : public WindowContext {
 public:
-  OpenGLWindowContext(EGLConfig &config, Display *display, Context *context,
+  OpenGLWindowContext(EGLConfig &config, gl::Display *display, gl::Context *context,
                       GrDirectContext *directContext, ANativeWindow *window,
                       int width, int height)
       : _config(config), _display(display), _directContext(directContext),
@@ -46,7 +46,7 @@ public:
   void present() override {
     _context->makeCurrent(*_surface);
     _directContext->flushAndSubmit();
-    _surface->Present();
+    _surface->present();
   }
 
   void resize(int width, int height) override {
@@ -63,9 +63,9 @@ private:
   ANativeWindow *_window;
   sk_sp<SkSurface> _skSurface = nullptr;
   EGLConfig _config;
-  Context *_context;
-  Surface* _surface;
-  Display *_display;
+  gl::Context *_context;
+  gl::Surface* _surface;
+  gl::Display *_display;
   GrDirectContext *_directContext;
   int _width = 0;
   int _height = 0;

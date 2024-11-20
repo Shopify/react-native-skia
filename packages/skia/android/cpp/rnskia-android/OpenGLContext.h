@@ -2,7 +2,7 @@
 
 #include "GrAHardwareBufferUtils.h"
 #include "OpenGLWindowContext.h"
-#include "opengl/Display.h"
+#include "gl/Display.h"
 
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColorSpace.h"
@@ -130,13 +130,13 @@ public:
 
 private:
   EGLConfig _config;
-  std::unique_ptr<RNSkia::Display> _display;
-  std::unique_ptr<RNSkia::Context> _ctx;
-  std::unique_ptr<RNSkia::Surface> _surface;
+  std::unique_ptr<gl::Display> _display;
+  std::unique_ptr<gl::Context> _ctx;
+  std::unique_ptr<gl::Surface> _surface;
   sk_sp<GrDirectContext> _directContext;
 
   OpenGLContext() {
-    _display = std::make_unique<RNSkia::Display>();
+    _display = std::make_unique<gl::Display>();
     _config = _display->chooseConfig();
     _ctx = _display->makeContext(_config, nullptr);
     _surface = _display->makePixelBufferSurface(_config, 1, 1);

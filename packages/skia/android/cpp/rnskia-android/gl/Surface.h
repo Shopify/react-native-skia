@@ -1,8 +1,8 @@
 #pragma once
 
-#include "opengl/Error.h"
+#include "gl/Error.h"
 
-namespace RNSkia {
+namespace gl {
 
 class Surface {
 public:
@@ -18,7 +18,7 @@ public:
 
   const EGLSurface &getHandle() const { return _surface; }
 
-  bool Present() const {
+  bool present() const {
     const auto result = eglSwapBuffers(_display, _surface) == EGL_TRUE;
     if (!result) {
       LOG_EGL_ERROR;
@@ -40,4 +40,4 @@ private:
   Surface &operator=(const Surface &) = delete;
 };
 
-} // Namespace RNSkia
+} // Namespace gl

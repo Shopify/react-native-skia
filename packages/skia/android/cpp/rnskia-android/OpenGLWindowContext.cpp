@@ -16,7 +16,7 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
   if (_skSurface == nullptr) {
 
     struct ReleaseContext {
-      std::unique_ptr<Surface> surface = nullptr;
+      std::unique_ptr<gl::Surface> surface = nullptr;
     };
 
     auto releaseCtx = new ReleaseContext();
