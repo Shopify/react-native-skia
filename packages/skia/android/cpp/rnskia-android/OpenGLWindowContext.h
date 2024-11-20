@@ -31,23 +31,19 @@
 
 namespace RNSkia {
 
+class OpenGLContext;
+
 class OpenGLWindowContext : public WindowContext {
 public:
-  OpenGLWindowContext(EGLConfig &config, gl::Display *display, gl::Context *context,
-                      GrDirectContext *directContext, ANativeWindow *window,
-                      int width, int height)
-      : _config(config), _display(display), _directContext(directContext),
-        _context(context), _window(window), _width(width), _height(height) {}
+  OpenGLWindowContext(OpenGLContext *context, ANativeWindow *window, int width,
+                      int height)
+      : _context(context), _window(window), _width(width), _height(height) {}
 
   ~OpenGLWindowContext() { ANativeWindow_release(_window); }
 
   sk_sp<SkSurface> getSurface() override;
 
-  void present() override {
-    _context->makeCurrent(*_surface);
-    _directContext->flushAndSubmit();
-    _surface->present();
-  }
+  void present() override;
 
   void resize(int width, int height) override {
     _skSurface = nullptr;
@@ -60,13 +56,10 @@ public:
   int getHeight() override { return _height; };
 
 private:
+  OpenGLContext *_context;
   ANativeWindow *_window;
   sk_sp<SkSurface> _skSurface = nullptr;
-  EGLConfig _config;
-  gl::Context *_context;
-  gl::Surface* _surface;
-  gl::Display *_display;
-  GrDirectContext *_directContext;
+  gl::Surface *_surface = nullptr;
   int _width = 0;
   int _height = 0;
 };

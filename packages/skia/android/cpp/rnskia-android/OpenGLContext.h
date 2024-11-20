@@ -18,6 +18,8 @@ namespace RNSkia {
 
 class OpenGLContext {
 public:
+  friend class OpenGLWindowContext;
+
   OpenGLContext(const OpenGLContext &) = delete;
   OpenGLContext &operator=(const OpenGLContext &) = delete;
 
@@ -41,8 +43,8 @@ public:
         width, height, colorType, skgpu::Mipmapped::kNo, GrRenderable::kYes);
 
     if (!texture.isValid()) {
-      RNSkLogger::logToConsole(
-          "couldn't create offscreen texture %dx%d", width, height);
+      RNSkLogger::logToConsole("couldn't create offscreen texture %dx%d", width,
+                               height);
     }
 
     struct ReleaseContext {
@@ -123,11 +125,9 @@ public:
 #endif
   }
 
-  std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window,
-                                                    int width, int height) {
-    return std::make_unique<OpenGLWindowContext>(
-        _config, _display.get(), _ctx.get(), _directContext.get(), window,
-        width, height);
+  std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window, int width,
+                                            int height) {
+    return std::make_unique<OpenGLWindowContext>(this, window, width, height);
   }
 
 private:
