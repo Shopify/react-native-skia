@@ -79,7 +79,11 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
 }
 
 void OpenGLWindowContext::present() {
+<<<<<<< HEAD
   _context->_glContext->makeCurrent(_glSurface);
+=======
+  _context->_glContext->makeCurrent(*_glSurface);
+>>>>>>> main
   _context->_directContext->flushAndSubmit();
   _glSurface->present();
 }

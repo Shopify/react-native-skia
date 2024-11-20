@@ -33,7 +33,11 @@ public:
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
+<<<<<<< HEAD
     auto result = _glContext->makeCurrent(_glSurface.get());
+=======
+    auto result = _glContext->makeCurrent(*_glSurface);
+>>>>>>> main
     if (!result) {
       return nullptr;
     }
