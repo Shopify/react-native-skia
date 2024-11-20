@@ -14,7 +14,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
 
     public SkiaBaseView(Context context) {
         super(context);
-        boolean debug = false;
+        boolean debug = true;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             mView = new SkiaAHBView(context, this, debug);
         } else {
@@ -39,8 +39,8 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
     }
 
     @Override
-    public void onSurfaceChanged(int width, int height) {
-        surfaceSizeChanged(width, height);
+    public void onSurfaceChanged(Surface surface, int width, int height) {
+        surfaceSizeChanged(surface, width, height);
     }
 
     @Override
@@ -51,7 +51,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
 
     protected abstract void surfaceAvailable(Object surface, int width, int height);
 
-    protected abstract void surfaceSizeChanged(int width, int height);
+    protected abstract void surfaceSizeChanged(Object surface, int width, int height);
 
     protected abstract void surfaceDestroyed();
 

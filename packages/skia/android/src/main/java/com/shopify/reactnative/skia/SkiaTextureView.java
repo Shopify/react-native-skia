@@ -8,8 +8,6 @@ import android.view.Surface;
 import android.view.TextureView;
 import androidx.annotation.NonNull;
 
-import com.shopify.reactnative.skia.SkiaViewAPI;
-
 @SuppressLint("ViewConstructor")
 public class SkiaTextureView extends TextureView implements TextureView.SurfaceTextureListener {
 
@@ -32,7 +30,8 @@ public class SkiaTextureView extends TextureView implements TextureView.SurfaceT
 
     @Override
     public void onSurfaceTextureSizeChanged(@NonNull SurfaceTexture surfaceTexture, int width, int height) {
-        mApi.onSurfaceChanged(width, height);
+        Surface surface = new Surface(surfaceTexture);
+        mApi.onSurfaceChanged(surface, width, height);
     }
 
     @Override
@@ -43,7 +42,7 @@ public class SkiaTextureView extends TextureView implements TextureView.SurfaceT
 
     private long _prevTimestamp = 0;
     @Override
-    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+    public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surface) {
         if (!mDebug) {
             return;
         }

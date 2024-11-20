@@ -38,6 +38,8 @@ public class SkiaAHBView extends View implements ImageReader.OnImageAvailableLis
     }
 
     private ImageReader createReader() {
+        int w = getWidth();
+        int h = getHeight();
         ImageReader reader = ImageReader.newInstance(getWidth(), getHeight(), PixelFormat.RGBA_8888, 2, HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE |
                 HardwareBuffer.USAGE_GPU_COLOR_OUTPUT);
         reader.setOnImageAvailableListener(this, null);
@@ -53,7 +55,8 @@ public class SkiaAHBView extends View implements ImageReader.OnImageAvailableLis
             mReader = createReader();
             mApi.onSurfaceCreated(mReader.getSurface(), width, height);
         } else {
-            mApi.onSurfaceChanged(width, height);
+            mReader = createReader();
+            mApi.onSurfaceChanged(mReader.getSurface(), width, height);
         }
     }
 

@@ -65,8 +65,8 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
   return false;
 }
 
-void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurface,
-                                                int width, int height) {
+void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurface, int width,
+                                                int height) {
   // Create renderer!
   JNIEnv *env = facebook::jni::Environment::current();
   // Acquire the native window from the Surface
@@ -87,15 +87,20 @@ void RNSkOpenGLCanvasProvider::surfaceDestroyed() {
   _surfaceHolder = nullptr;
 }
 
-void RNSkOpenGLCanvasProvider::surfaceSizeChanged(int width, int height) {
+void RNSkOpenGLCanvasProvider::surfaceSizeChanged(jobject jSurface, int width,
+                                                  int height) {
   if (width == 0 && height == 0) {
     // Setting width/height to zero is nothing we need to care about when
     // it comes to invalidating the surface.
     return;
   }
 
-  // Recreate RenderContext surface based on size change???
-  _surfaceHolder->resize(width, height);
+  JNIEnv *env = facebook::jni::Environment::current();
+  // Acquire the native window from the Surface
+  auto window = ANativeWindow_fromSurface(env, jSurface);
+  _surfaceHolder = nullptr;
+  _surfaceHolder =
+      OpenGLContext::getInstance().MakeWindow(window, width, height);
 
   // Redraw after size change
   _requestRedraw();

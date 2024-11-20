@@ -53,8 +53,8 @@ protected:
     JniSkiaBaseView::surfaceAvailable(surface, width, height);
   }
 
-  void surfaceSizeChanged(int width, int height) override {
-    JniSkiaBaseView::surfaceSizeChanged(width, height);
+  void surfaceSizeChanged(jobject surface, int width, int height) override {
+    JniSkiaBaseView::surfaceSizeChanged(surface, width, height);
   }
 
   void surfaceDestroyed() override { JniSkiaBaseView::surfaceDestroyed(); }
