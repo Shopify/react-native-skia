@@ -33,7 +33,7 @@ public:
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
-    auto result = _glContext->makeCurrent(*_glSurface);
+    auto result = _glContext->makeCurrent(_glSurface.get());
     if (!result) {
       return nullptr;
     }
@@ -142,7 +142,7 @@ private:
     _glConfig = _glDisplay->chooseConfig();
     _glContext = _glDisplay->makeContext(_glConfig, nullptr);
     _glSurface = _glDisplay->makePixelBufferSurface(_glConfig, 1, 1);
-    _glContext->makeCurrent(*_glSurface);
+    _glContext->makeCurrent(_glSurface.get());
     auto backendInterface = GrGLMakeNativeInterface();
     _directContext = GrDirectContexts::MakeGL(backendInterface);
 

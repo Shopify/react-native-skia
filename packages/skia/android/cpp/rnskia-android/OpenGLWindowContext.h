@@ -39,7 +39,7 @@ public:
                       int height)
       : _context(context), _window(window), _width(width), _height(height) {}
 
-  ~OpenGLWindowContext() { ANativeWindow_release(_window); }
+  ~OpenGLWindowContext() = default;
 
   sk_sp<SkSurface> getSurface() override;
 
