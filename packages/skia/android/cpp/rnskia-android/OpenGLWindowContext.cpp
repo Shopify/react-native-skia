@@ -21,13 +21,22 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
       std::unique_ptr<gl::Surface> surface = nullptr;
     };
 
+    if (!_window) {
+      throw std::runtime_error("No native window provided");
+    }
     auto releaseCtx = new ReleaseContext();
     releaseCtx->surface =
         _context->_glDisplay->makeWindowSurface(_context->_glConfig, _window);
+    if (!releaseCtx->surface) {
+      throw std::runtime_error("Failed to create window surface");
+    }
     _glSurface = releaseCtx->surface.get();
 
     // Now make this one current
-    _context->_glContext->makeCurrent(*releaseCtx->surface);
+    auto success = _context->_glContext->makeCurrent(releaseCtx->surface.get());
+    if (!success) {
+      throw std::runtime_error("Failed to make window surface current");
+    }
 
     // Set up parameters for the render target so that it
     // matches the underlying OpenGL context.
@@ -73,7 +82,7 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
 }
 
 void OpenGLWindowContext::present() {
-  _context->_glContext->makeCurrent(*_glSurface);
+  _context->_glContext->makeCurrent(_glSurface);
   _context->_directContext->flushAndSubmit();
   _glSurface->present();
 }

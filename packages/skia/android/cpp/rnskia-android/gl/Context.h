@@ -22,20 +22,20 @@ public:
 
   const EGLContext &getHandle() const { return _context; }
 
-  bool makeCurrent(const Surface &surface) const {
+  bool makeCurrent(const Surface *surface) {
     if (_context == EGL_NO_CONTEXT) {
       return false;
     }
     const auto result =
-        eglMakeCurrentIfNecessary(_display, surface.getHandle(),
-                                  surface.getHandle(), _context) == EGL_TRUE;
+        eglMakeCurrentIfNecessary(_display, surface->getHandle(),
+                                  surface->getHandle(), _context) == EGL_TRUE;
     if (!result) {
       LOG_EGL_ERROR;
     }
     return result;
   }
 
-  bool clearCurrent() const {
+  bool clearCurrent() {
     const auto result =
         eglMakeCurrentIfNecessary(_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
                                   EGL_NO_CONTEXT) == EGL_TRUE;

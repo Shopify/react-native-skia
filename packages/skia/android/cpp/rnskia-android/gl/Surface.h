@@ -6,6 +6,9 @@ namespace gl {
 
 class Surface {
 public:
+  Surface(EGLDisplay display, EGLSurface surface)
+      : _display(display), _surface(surface) {}
+
   ~Surface() {
     if (_surface != EGL_NO_SURFACE) {
       if (eglDestroySurface(_display, _surface) != EGL_TRUE) {
@@ -18,7 +21,7 @@ public:
 
   const EGLSurface &getHandle() const { return _surface; }
 
-  bool present() const {
+  bool present() {
     const auto result = eglSwapBuffers(_display, _surface) == EGL_TRUE;
     if (!result) {
       LOG_EGL_ERROR;
@@ -31,9 +34,6 @@ private:
 
   EGLDisplay _display = EGL_NO_DISPLAY;
   EGLSurface _surface = EGL_NO_SURFACE;
-
-  Surface(EGLDisplay display, EGLSurface surface)
-      : _display(display), _surface(surface) {}
 
   Surface(const Surface &) = delete;
 

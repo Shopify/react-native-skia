@@ -37,9 +37,15 @@ class OpenGLWindowContext : public WindowContext {
 public:
   OpenGLWindowContext(OpenGLContext *context, ANativeWindow *window, int width,
                       int height)
-      : _context(context), _window(window), _width(width), _height(height) {}
+      : _context(context), _window(window), _width(width), _height(height) {
+    ANativeWindow_acquire(_window);
+  }
 
-  ~OpenGLWindowContext() { ANativeWindow_release(_window); }
+  ~OpenGLWindowContext() {
+    _skSurface = nullptr;
+    _glSurface = nullptr;
+    ANativeWindow_release(_window);
+  }
 
   sk_sp<SkSurface> getSurface() override;
 

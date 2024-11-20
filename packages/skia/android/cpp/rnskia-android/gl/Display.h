@@ -35,7 +35,7 @@ public:
 
   bool isValid() const { return _display != EGL_NO_DISPLAY; }
 
-  EGLConfig chooseConfig() const {
+  EGLConfig chooseConfig() {
 
     EGLint att[] = {EGL_RENDERABLE_TYPE,
                     EGL_OPENGL_ES2_BIT,
@@ -82,14 +82,14 @@ public:
   }
 
   std::unique_ptr<Surface> makeWindowSurface(const EGLConfig &config,
-                                             EGLNativeWindowType window) {
+                                             ANativeWindow *window) {
     const EGLint attribs[] = {EGL_NONE};
     auto surface = eglCreateWindowSurface(_display, config, window, attribs);
     if (surface == EGL_NO_SURFACE) {
       LOG_EGL_ERROR;
       return nullptr;
     }
-    return std::unique_ptr<Surface>(new Surface(_display, surface));
+    return std::make_unique<Surface>(_display, surface);
   }
 
   std::unique_ptr<Surface> makePixelBufferSurface(const EGLConfig &config,
@@ -101,7 +101,7 @@ public:
       LOG_EGL_ERROR;
       return nullptr;
     }
-    return std::unique_ptr<Surface>(new Surface(_display, surface));
+    return std::make_unique<Surface>(_display, surface);
   }
 
   const EGLDisplay &getHandle() const { return _display; }
