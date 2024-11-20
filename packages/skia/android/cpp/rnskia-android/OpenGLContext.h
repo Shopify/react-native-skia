@@ -14,6 +14,8 @@
 #include "include/gpu/ganesh/gl/GrGLInterface.h"
 #include "src/gpu/ganesh/gl/GrGLDefines.h"
 
+namespace RNSkia {
+
 class OpenGLContext {
 public:
   OpenGLContext(const OpenGLContext &) = delete;
@@ -39,7 +41,7 @@ public:
         width, height, colorType, skgpu::Mipmapped::kNo, GrRenderable::kYes);
 
     if (!texture.isValid()) {
-      RNSkia::RNSkLogger::logToConsole(
+      RNSkLogger::logToConsole(
           "couldn't create offscreen texture %dx%d", width, height);
     }
 
@@ -68,9 +70,9 @@ public:
 #if __ANDROID_API__ >= 26
     const AHardwareBuffer *hardwareBuffer =
         static_cast<AHardwareBuffer *>(buffer);
-    RNSkia::DeleteImageProc deleteImageProc = nullptr;
-    RNSkia::UpdateImageProc updateImageProc = nullptr;
-    RNSkia::TexImageCtx deleteImageCtx = nullptr;
+    DeleteImageProc deleteImageProc = nullptr;
+    UpdateImageProc updateImageProc = nullptr;
+    TexImageCtx deleteImageCtx = nullptr;
 
     AHardwareBuffer_Desc description;
     AHardwareBuffer_describe(hardwareBuffer, &description);
@@ -100,12 +102,12 @@ public:
       }
     }
 
-    auto backendTex = RNSkia::MakeGLBackendTexture(
+    auto backendTex = MakeGLBackendTexture(
         _directContext.get(), const_cast<AHardwareBuffer *>(hardwareBuffer),
         description.width, description.height, &deleteImageProc,
         &updateImageProc, &deleteImageCtx, false, format, false);
     if (!backendTex.isValid()) {
-      RNSkia::RNSkLogger::logToConsole(
+      RNSkLogger::logToConsole(
           "Failed to convert HardwareBuffer to OpenGL Texture!");
       return nullptr;
     }
@@ -121,9 +123,9 @@ public:
 #endif
   }
 
-  std::unique_ptr<RNSkia::WindowContext> MakeWindow(ANativeWindow *window,
+  std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window,
                                                     int width, int height) {
-    return std::make_unique<RNSkia::OpenGLWindowContext>(
+    return std::make_unique<OpenGLWindowContext>(
         _config, _display.get(), _ctx.get(), _directContext.get(), window,
         width, height);
   }
@@ -149,3 +151,5 @@ private:
     }
   }
 };
+
+} // namespace RNSkia
