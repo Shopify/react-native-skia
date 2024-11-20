@@ -59,7 +59,7 @@ private:
   OpenGLContext *_context;
   ANativeWindow *_window;
   sk_sp<SkSurface> _skSurface = nullptr;
-  gl::Surface *_surface = nullptr;
+  gl::Surface *_glSurface = nullptr;
   int _width = 0;
   int _height = 0;
 };

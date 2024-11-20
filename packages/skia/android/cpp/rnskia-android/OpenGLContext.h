@@ -33,7 +33,7 @@ public:
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
-    auto result = _ctx->makeCurrent(*_surface);
+    auto result = _glContext->makeCurrent(*_glSurface);
     if (!result) {
       return nullptr;
     }
@@ -131,18 +131,18 @@ public:
   }
 
 private:
-  EGLConfig _config;
-  std::unique_ptr<gl::Display> _display;
-  std::unique_ptr<gl::Context> _ctx;
-  std::unique_ptr<gl::Surface> _surface;
+  EGLConfig _glConfig;
+  std::unique_ptr<gl::Display> _glDisplay;
+  std::unique_ptr<gl::Context> _glContext;
+  std::unique_ptr<gl::Surface> _glSurface;
   sk_sp<GrDirectContext> _directContext;
 
   OpenGLContext() {
-    _display = std::make_unique<gl::Display>();
-    _config = _display->chooseConfig();
-    _ctx = _display->makeContext(_config, nullptr);
-    _surface = _display->makePixelBufferSurface(_config, 1, 1);
-    _ctx->makeCurrent(*_surface);
+    _glDisplay = std::make_unique<gl::Display>();
+    _glConfig = _glDisplay->chooseConfig();
+    _glContext = _glDisplay->makeContext(_glConfig, nullptr);
+    _glSurface = _glDisplay->makePixelBufferSurface(_glConfig, 1, 1);
+    _glContext->makeCurrent(*_glSurface);
     auto backendInterface = GrGLMakeNativeInterface();
     _directContext = GrDirectContexts::MakeGL(backendInterface);
 

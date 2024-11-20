@@ -23,11 +23,11 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
 
     auto releaseCtx = new ReleaseContext();
     releaseCtx->surface =
-        _context->_display->makeWindowSurface(_context->_config, _window);
-    _surface = releaseCtx->surface.get();
+        _context->_glDisplay->makeWindowSurface(_context->_glConfig, _window);
+    _glSurface = releaseCtx->surface.get();
 
     // Now make this one current
-    _context->_ctx->makeCurrent(*releaseCtx->surface);
+    _context->_glContext->makeCurrent(*releaseCtx->surface);
 
     // Set up parameters for the render target so that it
     // matches the underlying OpenGL context.
@@ -73,9 +73,9 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
 }
 
 void OpenGLWindowContext::present() {
-  _context->_ctx->makeCurrent(*_surface);
+  _context->_glContext->makeCurrent(*_glSurface);
   _context->_directContext->flushAndSubmit();
-  _surface->present();
+  _glSurface->present();
 }
 
 } // namespace RNSkia
