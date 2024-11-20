@@ -1,6 +1,7 @@
 package com.shopify.reactnative.skia;
 
 import android.content.Context;
+import android.os.Build;
 import android.view.Surface;
 import android.view.View;
 
@@ -13,7 +14,12 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
 
     public SkiaBaseView(Context context) {
         super(context);
-        mView = new SkiaTextureView(context, this);
+        boolean debug = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            mView = new SkiaAHBView(context, this, debug);
+        } else {
+            mView = new SkiaTextureView(context, this, debug);
+        }
         addView(mView);
     }
 
