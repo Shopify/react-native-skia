@@ -1,5 +1,6 @@
-import type { SkCanvas } from "@shopify/react-native-skia";
+import type { SkCanvas, SkImage } from "@shopify/react-native-skia";
 import { Skia } from "@shopify/react-native-skia";
+import { type SharedValue } from "react-native-reanimated";
 
 import type { ChatType, MessageType } from "../data/types";
 import { WINDOW_HEIGHT } from "../constants";
@@ -26,6 +27,7 @@ type ChatUIType = {
     top: number;
     bottom: number;
   };
+  images: Record<string, SkImage>;
   chatId: string;
   stageHeight: number;
   data: ChatType | null;
@@ -38,6 +40,7 @@ type ChatUIType = {
     }
   ): void;
   _processData(): void;
+  loadImage(id: string, image: SkImage): void;
   addMessage(message: MessageType): void;
   dispose(): void;
   onFrame(ctx: SkCanvas, scrollOffset: number, forceRerender: boolean): boolean;
@@ -61,6 +64,9 @@ function ChatUI(chatId: string) {
     currentOffset: -1,
     messages: [],
 
+    // placeholder for images, we will set the real shared value later
+    images: {},
+
     isDirty: false,
 
     gradient: createGradient(),
@@ -79,6 +85,10 @@ function ChatUI(chatId: string) {
       this._processData();
     },
 
+    loadImage(id, image) {
+      this.images[id] = image;
+    },
+
     addMessage(message) {
       if (this.data === null) {
         return;
@@ -94,6 +104,10 @@ function ChatUI(chatId: string) {
 
       this.messages.forEach((message) => {
         message.dispose();
+      });
+
+      Object.keys(this.images).forEach((key) => {
+        this.images[key].dispose();
       });
     },
 
@@ -184,7 +198,7 @@ function ChatUI(chatId: string) {
       }
 
       this.messages = this.data.messages.map((message) => {
-        return MessageUI(message);
+        return MessageUI(message, this.images[message.id]);
       });
 
       this.stageHeight =

@@ -7,11 +7,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 type ChatInputProps = {
   chatId: string;
   onSend: (text: string) => void;
+  onDraw: () => void;
 };
 
 export const INPUT_HEIGHT = 50;
 
-export function ChatInput({ onSend }: ChatInputProps) {
+export function ChatInput({ onSend, onDraw }: ChatInputProps) {
   const [value, setValue] = React.useState("");
 
   const handleSend = () => {
@@ -29,6 +30,16 @@ export function ChatInput({ onSend }: ChatInputProps) {
         },
       ]}
     >
+      <TouchableOpacity
+        style={styles.drawButton}
+        activeOpacity={0.8}
+        onPress={onDraw}
+      >
+        <Image
+          source={require("../../../assets/pencil.png")}
+          style={styles.icon}
+        />
+      </TouchableOpacity>
       {/* <BlurView
         tint="systemThickMaterial"
         style={styles.inputContainer}
@@ -51,7 +62,7 @@ export function ChatInput({ onSend }: ChatInputProps) {
       >
         <Image
           source={require("../../../assets/send.png")}
-          style={styles.sendIcon}
+          style={styles.icon}
         />
       </TouchableOpacity>
     </View>
@@ -66,9 +77,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     paddingHorizontal: 12,
     backgroundColor: "transparent",
+    flexDirection: "row",
   },
 
   inputContainer: {
+    flex: 1,
     height: INPUT_HEIGHT,
     borderRadius: 50,
     overflow: "hidden",
@@ -95,7 +108,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#007AFF",
     borderRadius: 50,
   },
-  sendIcon: {
+  drawButton: {
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    height: INPUT_HEIGHT - 8,
+    width: INPUT_HEIGHT - 8,
+    backgroundColor: "black",
+    borderRadius: 50,
+    marginRight: 8,
+  },
+  icon: {
     width: 20,
     height: 20,
     right: 1,

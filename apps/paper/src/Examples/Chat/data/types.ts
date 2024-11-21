@@ -14,5 +14,6 @@ export type UserType = {
 export type MessageType = {
   id: string;
   text: string;
+  image?: string;
   userId: string; // from users of the chat
 };

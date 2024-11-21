@@ -1,4 +1,4 @@
-import type { SkCanvas } from "@shopify/react-native-skia";
+import type { SkCanvas, SkImage } from "@shopify/react-native-skia";
 import { rect, rrect, Skia } from "@shopify/react-native-skia";
 
 import type { MessageType } from "../data/types";
@@ -23,8 +23,18 @@ const tail = Skia.Path.MakeFromSVGString(
 );
 
 // TODO: Migrate this to es6 classes when they finally work in Reanimated
-export function MessageUI(props: MessageType) {
+export function MessageUI(props: MessageType, image?: SkImage) {
   "worklet";
+
+  let imageWidth = 0;
+  let imageHeight = 0;
+
+  if (image) {
+    // resize image to fit within the bubble
+    const aspectRatio = image.width() / image.height();
+    imageHeight = MAX_PARAGRAPH_WIDTH / aspectRatio;
+    imageWidth = MAX_PARAGRAPH_WIDTH;
+  }
 
   const textColor = props.userId === "user_2" ? white : black;
 
@@ -35,14 +45,14 @@ export function MessageUI(props: MessageType) {
       color: textColor,
     },
   })
-    .addText(props.text)
+    .addText(props.text ?? "")
     .build();
   paragraph.layout(MAX_PARAGRAPH_WIDTH);
 
   const width = paragraph
     .getLineMetrics()
-    .reduce((a, b) => Math.max(a, b.width), 0);
-  const height = paragraph.getHeight();
+    .reduce((a, b) => Math.max(a, b.width), imageWidth);
+  const height = paragraph.getHeight() + imageHeight;
 
   const dimensions = rect(
     0,
@@ -52,6 +62,7 @@ export function MessageUI(props: MessageType) {
   );
   const bubble = rrect(dimensions, 16, 16);
   const bubblePaint = Paint();
+  const imagePaint = Paint();
 
   const isMine = props.userId === "user_2";
 
@@ -78,7 +89,16 @@ export function MessageUI(props: MessageType) {
     }
 
     ctx.drawRRect(bubble, bubblePaint);
-    paragraph.paint(ctx, MESSAGE_PADDING, MESSAGE_PADDING);
+
+    if (image) {
+      ctx.drawImageRect(
+        image,
+        rect(0, 0, image.width(), image.height()),
+        rect(0, 0, imageWidth, imageHeight),
+        imagePaint
+      );
+    }
+    paragraph.paint(ctx, MESSAGE_PADDING, MESSAGE_PADDING + imageHeight);
   };
 
   function makeTexture() {

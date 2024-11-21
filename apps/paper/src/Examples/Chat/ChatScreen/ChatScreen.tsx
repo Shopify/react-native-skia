@@ -6,7 +6,7 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 import type { SkCanvas } from "@shopify/react-native-skia";
-import { Canvas, Image } from "@shopify/react-native-skia";
+import { Canvas, Image, Skia } from "@shopify/react-native-skia";
 import type { RouteProp } from "@react-navigation/native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -24,6 +24,7 @@ import { WINDOW_HEIGHT, WINDOW_WIDTH } from "../constants";
 import { ChatInput, INPUT_HEIGHT } from "./ChatInput";
 import { OFFSCREEN_RENDERING } from "./config";
 import { resolveOffscreenChat } from "./ChatUI";
+import { DrawingOverlay } from "./DrawingOverlay";
 
 export function ChatScreen() {
   const nav =
@@ -35,6 +36,8 @@ export function ChatScreen() {
     () => DATA.find((chat) => chat.id === chatId) as ChatType,
     [chatId]
   );
+
+  const [isDrawing, setIsDrawing] = React.useState(false);
 
   useLayoutEffect(() => {
     nav.setOptions({
@@ -62,6 +65,35 @@ export function ChatScreen() {
         resolveOffscreenChat(chatId).addMessage({
           id: `${Date.now()}`,
           text,
+          userId: "user_2",
+        });
+      })();
+    },
+    [chatId]
+  );
+
+  const onSendDrawing = useCallback(
+    (base64: string) => {
+      setIsDrawing(false);
+
+      // load image on JS thread to not block UI thread
+      const image = Skia.Image.MakeImageFromEncoded(
+        Skia.Data.fromBase64(base64)
+      );
+
+      runOnUI(() => {
+        if (!image) {
+          return;
+        }
+
+        const id = `${Date.now()}`;
+
+        resolveOffscreenChat(chatId).loadImage(id, image);
+
+        resolveOffscreenChat(chatId).addMessage({
+          id,
+          text: "drawing...",
+          image: id,
           userId: "user_2",
         });
       })();
@@ -115,7 +147,18 @@ export function ChatScreen() {
         <Animated.View style={[styles.stage, { height: stageHeight }]} />
       </Animated.ScrollView>
 
-      <ChatInput chatId={chatId} onSend={onSend} />
+      {isDrawing ? (
+        <DrawingOverlay
+          onSend={onSendDrawing}
+          onCancel={() => setIsDrawing(false)}
+        />
+      ) : (
+        <ChatInput
+          onDraw={() => setIsDrawing(true)}
+          chatId={chatId}
+          onSend={onSend}
+        />
+      )}
     </View>
   );
 }
