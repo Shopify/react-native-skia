@@ -1,5 +1,4 @@
 import React from "react";
-import { useWindowDimensions } from "react-native";
 import {
   AlphaType,
   Canvas,
@@ -28,12 +27,19 @@ const img = Skia.Image.MakeImage(
   256 * 4
 )!;
 
+const surface = Skia.Surface.MakeOffscreen(256, 256)!;
+const canvas = surface.getCanvas();
+canvas.drawColor(Skia.Color("cyan"));
+const paint = Skia.Paint();
+paint.setColor(Skia.Color("magenta"));
+canvas.drawCircle(128, 128, 128, paint);
+const img1 = surface.makeImageSnapshot().makeNonTextureImage();
+
 export const Data = () => {
-  const { width } = useWindowDimensions();
-  const SIZE = width;
   return (
-    <Canvas style={{ width: SIZE, height: SIZE }}>
+    <Canvas style={{ width: 256, height: 512 }}>
       <Image image={img} x={0} y={0} width={256} height={256} fit="cover" />
+      <Image image={img1} x={0} y={256} width={256} height={256} fit="cover" />
     </Canvas>
   );
 };
