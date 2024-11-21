@@ -43,7 +43,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
     @Override
     public void onSurfaceTextureSizeChanged(@NonNull SurfaceTexture surface, int width, int height) {
         Log.i(tag, "onSurfaceTextureSizeChanged " + width + "/" + height);
-        surfaceSizeChanged(width, height);
+        surfaceSizeChanged(new Surface(surface), width, height);
     }
 
     @Override
@@ -65,7 +65,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
 
     protected abstract void surfaceAvailable(Object surface, int width, int height);
 
-    protected abstract void surfaceSizeChanged(int width, int height);
+    protected abstract void surfaceSizeChanged(Object surface, int width, int height);
 
     protected abstract void surfaceDestroyed();
 
