@@ -9,11 +9,16 @@
 #include <memory>
 #include <string>
 
+#if defined(SK_GRAPHITE)
+#include "DawnContext.h"
+#else
+#include "OpenGLContext.h"
+#endif
+
 #include "AHardwareBufferUtils.h"
 #include "JniPlatformContext.h"
 #include "RNSkAndroidVideo.h"
 #include "RNSkPlatformContext.h"
-#include "SkiaOpenGLSurfaceFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -51,17 +56,29 @@ public:
   }
 
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override {
-    return SkiaOpenGLSurfaceFactory::makeOffscreenSurface(width, height);
+#if defined(SK_GRAPHITE)
+    return DawnContext::getInstance().MakeOffscreen(width, height);
+#else
+    return OpenGLContext::getInstance().MakeOffscreen(width, height);
+#endif
   }
 
-  std::shared_ptr<SkiaContext>
+  std::shared_ptr<WindowContext>
   makeContextFromNativeSurface(void *surface, int width, int height) override {
-    return SkiaOpenGLSurfaceFactory::makeContext(
-        reinterpret_cast<ANativeWindow *>(surface), width, height);
+#if defined(SK_GRAPHITE)
+    return DawnContext::getInstance().MakeWindow(surface, width, height);
+#else
+    auto aWindow = reinterpret_cast<ANativeWindow *>(surface);
+    return OpenGLContext::getInstance().MakeWindow(aWindow, width, height);
+#endif
   }
 
   sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override {
-    return SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(buffer);
+#if defined(SK_GRAPHITE)
+    return DawnContext::getInstance().MakeImageFromBuffer(buffer);
+#else
+    return OpenGLContext::getInstance().MakeImageFromBuffer(buffer);
+#endif
   }
 
   std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override {

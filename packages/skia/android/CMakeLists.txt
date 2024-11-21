@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.4.1)
 
 set (CMAKE_VERBOSE_MAKEFILE ON)
 set (CMAKE_CXX_STANDARD 17)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSK_GL -DSK_GANESH -DSK_BUILD_FOR_ANDROID -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_HAVE_MEMRCHR=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_MOBILE=1 -DON_ANDROID -DONANDROID")
-
+set(SK_GRAPHITE OFF)
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSK_BUILD_FOR_ANDROID -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_HAVE_MEMRCHR=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_MOBILE=1 -DON_ANDROID -DONANDROID")
 set (PACKAGE_NAME "rnskia")
 set (SKIA_LIB "skia")
 set (SKIA_SVG_LIB "svg")
@@ -12,6 +12,7 @@ set (SKIA_SKSHAPER_LIB "skshaper")
 set (SKIA_SKPARAGRAPH_LIB "skparagraph")
 set (SKIA_SKUNICODE_CORE_LIB "skunicode_core")
 set (SKIA_SKUNICODE_ICU_LIB "skunicode_icu")
+
 
 # Clear some variables
 unset(LIBRN_DIR CACHE)
@@ -30,6 +31,34 @@ message("-- LIBRN   : " ${LIBRN_DIR})
 
 link_directories(../libs/android/${ANDROID_ABI}/)
 
+# Import prebuilt SKIA libraries
+set (SKIA_LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../libs/android/${ANDROID_ABI}")
+
+if(SK_GRAPHITE)
+    add_definitions(-DSK_GRAPHITE)
+    set(DAWN_NATIVE_LIB "libdawn_native_static")
+    set(DAWN_PLATFORM_LIB "libdawn_platform_static")
+    set(DAWN_PROC_LIB "libdawn_proc_static")
+    set(BACKEND_SOURCES
+    #TODO: is this source needed to be added?
+        "${PROJECT_SOURCE_DIR}/../cpp/rnskia/DawnWindowContext.cpp"
+    )
+    add_library(libdawn_native_static STATIC IMPORTED)
+    set_property(TARGET libdawn_native_static PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_native_static.a")
+
+    add_library(libdawn_platform_static STATIC IMPORTED)
+    set_property(TARGET libdawn_platform_static PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_platform_static.a")
+
+    add_library(libdawn_proc_static STATIC IMPORTED)
+    set_property(TARGET libdawn_proc_static PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_proc_static.a")
+else()
+    add_definitions(-DSK_GL -DSK_GANESH)
+    set(BACKEND_SOURCES
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/OpenGLWindowContext.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/GrAHardwareBufferUtils.cpp"
+    )
+endif()
+
 if(${REACT_NATIVE_VERSION} LESS 66)
         file(
                 TO_CMAKE_PATH
@@ -45,9 +74,8 @@ add_library(
         "${PROJECT_SOURCE_DIR}/cpp/jni/JniSkiaManager.cpp"
 
         "${PROJECT_SOURCE_DIR}/cpp/jni/JniPlatformContext.cpp"
+        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/gl/Error.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/RNSkOpenGLCanvasProvider.cpp"
-        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/SkiaOpenGLSurfaceFactory.cpp"
-        "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/GrAHardwareBufferUtils.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/AHardwareBufferUtils.cpp"
         "${PROJECT_SOURCE_DIR}/cpp/rnskia-android/RNSkAndroidVideo.cpp"
 
@@ -66,8 +94,9 @@ add_library(
 
         "${PROJECT_SOURCE_DIR}/../cpp/api/third_party/CSSColorParser.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/api/third_party/base64.cpp"
-
+        ${BACKEND_SOURCES}
 )
+
 
 target_include_directories(
         ${PACKAGE_NAME}
@@ -88,6 +117,7 @@ target_include_directories(
         # so "include/core/SkRef.h" instead of "SkRef.h", as otherwise
         # the prefab cannot be shipped.
         ../cpp/skia
+        ../cpp/dawn/include
 
         ../cpp/api
         ../cpp/jsi
@@ -101,9 +131,6 @@ target_include_directories(
 
         ${libfbjni_include_DIRS}
 )
-
-# Import prebuilt SKIA libraries
-set (SKIA_LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../libs/android/${ANDROID_ABI}")
 
 add_library(skia STATIC IMPORTED)
 set_property(TARGET skia PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskia.a")
@@ -240,8 +267,7 @@ add_definitions(-DREACT_NATIVE_VERSION=${REACT_NATIVE_VERSION})
 
 # Link
 if(${REACT_NATIVE_VERSION} GREATER_EQUAL 76)
-    target_link_libraries(
-        ${PACKAGE_NAME}
+    set(COMMON_LIBS
         ${LOG_LIB}
         ${REACT_LIB}
         ${FBJNI_LIBRARY}
@@ -258,8 +284,7 @@ if(${REACT_NATIVE_VERSION} GREATER_EQUAL 76)
         -landroid
     )
 else()
-    target_link_libraries(
-        ${PACKAGE_NAME}
+    set(COMMON_LIBS
         ${LOG_LIB}
         ${FBJNI_LIBRARY}
         ${REACT_LIB}
@@ -277,5 +302,20 @@ else()
         -lGLESv2
         -lEGL
         -landroid
+    )
+endif()
+
+if(SK_GRAPHITE)
+    target_link_libraries(${PACKAGE_NAME}
+        ${COMMON_LIBS}
+        ${DAWN_NATIVE_LIB}
+        ${DAWN_PLATFORM_LIB}
+        ${DAWN_PROC_LIB}
+    )
+else()
+    target_link_libraries(${PACKAGE_NAME}
+        ${COMMON_LIBS}
+        -lGLESv2
+        -lEGL
     )
 endif()

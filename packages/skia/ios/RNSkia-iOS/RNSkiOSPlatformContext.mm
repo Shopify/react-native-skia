@@ -5,13 +5,17 @@
 #include <thread>
 #include <utility>
 
+#if defined(SK_GRAPHITE)
+#include "DawnContext.h"
+#else
+#include "MetalContext.h"
+#endif
 #include "RNSkiOSVideo.h"
-#import "SkiaCVPixelBufferUtils.h"
-#import "SkiaMetalSurfaceFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#import "include/core/SkColorSpace.h"
 #include "include/core/SkFontMgr.h"
 #include "include/core/SkSurface.h"
 
@@ -69,10 +73,17 @@ void RNSkiOSPlatformContext::releaseNativeBuffer(uint64_t pointer) {
 uint64_t RNSkiOSPlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
   // 0. If Image is not in BGRA, convert to BGRA as only BGRA is supported.
   if (image->colorType() != kBGRA_8888_SkColorType) {
+#if defined(SK_GRAPHITE)
+    SkImage::RequiredProperties requiredProps;
+    image = image->makeColorTypeAndColorSpace(
+        DawnContext::getInstance().getRecorder(), kBGRA_8888_SkColorType,
+        SkColorSpace::MakeSRGB(), requiredProps);
+#else
     // on iOS, 32_BGRA is the only supported RGB format for CVPixelBuffers.
     image = image->makeColorTypeAndColorSpace(
-        ThreadContextHolder::ThreadSkiaMetalContext.skContext.get(),
+        MetalContext::getInstance()._context.skContext.get(),
         kBGRA_8888_SkColorType, SkColorSpace::MakeSRGB());
+#endif
     if (image == nullptr) {
       throw std::runtime_error(
           "Failed to convert image to BGRA_8888 colortype! Only BGRA_8888 "
@@ -149,11 +160,15 @@ RNSkiOSPlatformContext::createVideo(const std::string &url) {
   return std::make_shared<RNSkiOSVideo>(url, this);
 }
 
-std::shared_ptr<SkiaContext>
+std::shared_ptr<WindowContext>
 RNSkiOSPlatformContext::makeContextFromNativeSurface(void *surface, int width,
                                                      int height) {
-  return SkiaMetalSurfaceFactory::makeContext((__bridge CALayer *)surface,
-                                              width, height);
+#if defined(SK_GRAPHITE)
+  return DawnContext::getInstance().MakeWindow(surface, width, height);
+#else
+  return MetalContext::getInstance().MakeWindow((__bridge CALayer *)surface,
+                                                width, height);
+#endif
 }
 
 void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
@@ -162,12 +177,19 @@ void RNSkiOSPlatformContext::raiseError(const std::exception &err) {
 
 sk_sp<SkSurface> RNSkiOSPlatformContext::makeOffscreenSurface(int width,
                                                               int height) {
-  return SkiaMetalSurfaceFactory::makeOffscreenSurface(width, height);
+#if defined(SK_GRAPHITE)
+  return DawnContext::getInstance().MakeOffscreen(width, height);
+#else
+  return MetalContext::getInstance().MakeOffscreen(width, height);
+#endif
 }
 
 sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeBuffer(void *buffer) {
-  CVPixelBufferRef sampleBuffer = (CVPixelBufferRef)buffer;
-  return SkiaMetalSurfaceFactory::makeTextureFromCVPixelBuffer(sampleBuffer);
+#if defined(SK_GRAPHITE)
+  return DawnContext::getInstance().MakeImageFromBuffer(buffer);
+#else
+  return MetalContext::getInstance().MakeImageFromBuffer(buffer);
+#endif
 }
 
 sk_sp<SkFontMgr> RNSkiOSPlatformContext::createFontMgr() {

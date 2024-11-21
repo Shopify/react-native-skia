@@ -40,7 +40,7 @@ public:
     sk_sp<SkTypeface> typeface =
         JsiSkTypeface::fromValue(runtime, arguments[0]);
     SkString familyName(arguments[1].asString(runtime).utf8(runtime).c_str());
-    auto result = getObject()->registerTypeface(typeface, familyName);
+    getObject()->registerTypeface(typeface, familyName);
     return jsi::Value::undefined();
   }
 

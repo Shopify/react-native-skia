@@ -10,6 +10,10 @@
 #include "JsiSkCanvas.h"
 #include "JsiSkImage.h"
 
+#if defined(SK_GRAPHITE)
+#include "DawnContext.h"
+#endif
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -44,21 +48,32 @@ public:
   }
 
   JSI_HOST_FUNCTION(flush) {
-    if (auto dContext = GrAsDirectContext(getObject()->recordingContext())) {
+    auto surface = getObject();
+#if defined(SK_GRAPHITE)
+    auto recording = surface->recorder()->snap();
+    DawnContext::getInstance().submitRecording(recording.get());
+#else
+    if (auto dContext = GrAsDirectContext(surface->recordingContext())) {
       dContext->flushAndSubmit();
     }
+#endif
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(makeImageSnapshot) {
+    auto surface = getObject();
     sk_sp<SkImage> image;
     if (count == 1) {
       auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
-      image = getObject()->makeImageSnapshot(SkIRect::MakeXYWH(
+      image = surface->makeImageSnapshot(SkIRect::MakeXYWH(
           rect->x(), rect->y(), rect->width(), rect->height()));
     } else {
-      image = getObject()->makeImageSnapshot();
+      image = surface->makeImageSnapshot();
     }
+#if defined(SK_GRAPHITE)
+    auto recording = surface->recorder()->snap();
+    DawnContext::getInstance().submitRecording(recording.get());
+#endif
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
