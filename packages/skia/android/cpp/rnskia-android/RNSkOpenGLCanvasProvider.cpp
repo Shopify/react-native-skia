@@ -71,12 +71,15 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
       return false;
     }
   }
-
   return false;
 }
 
 void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurfaceTexture,
                                                 int width, int height) {
+  // If the surface is 0, we can skip it
+  if (width == 0 && height == 0) {
+    return;
+  }
   // Create renderer!
   JNIEnv *env = facebook::jni::Environment::current();
 
@@ -119,15 +122,20 @@ void RNSkOpenGLCanvasProvider::surfaceDestroyed() {
   }
 }
 
-void RNSkOpenGLCanvasProvider::surfaceSizeChanged(int width, int height) {
+void RNSkOpenGLCanvasProvider::surfaceSizeChanged(jobject jSurfaceTexture,
+                                                  int width, int height) {
   if (width == 0 && height == 0) {
     // Setting width/height to zero is nothing we need to care about when
     // it comes to invalidating the surface.
     return;
   }
 
-  // Recreate RenderContext surface based on size change???
-  _surfaceHolder->resize(width, height);
+  if (_surfaceHolder == nullptr) {
+    _surfaceHolder = nullptr;
+    surfaceAvailable(jSurfaceTexture, width, height);
+  } else {
+    _surfaceHolder->resize(width, height);
+  }
 
   // Redraw after size change
   _requestRedraw();

@@ -77,6 +77,9 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
   // usage growing very fast in the simulator without this.
   @autoreleasepool {
     auto surface = _ctx->getSurface();
+    if (!surface) {
+      return false;
+    }
     auto canvas = surface->getCanvas();
     cb(canvas);
     _ctx->present();

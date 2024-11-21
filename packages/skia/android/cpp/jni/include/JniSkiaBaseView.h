@@ -33,8 +33,8 @@ protected:
     _skiaAndroidView->surfaceAvailable(surface, width, height);
   }
 
-  virtual void surfaceSizeChanged(int width, int height) {
-    _skiaAndroidView->surfaceSizeChanged(width, height);
+  virtual void surfaceSizeChanged(jobject surface, int width, int height) {
+    _skiaAndroidView->surfaceSizeChanged(surface, width, height);
   }
 
   virtual void surfaceDestroyed() { _skiaAndroidView->surfaceDestroyed(); }
