@@ -37,8 +37,6 @@ public class SkiaDomView extends SkiaBaseView {
 
     protected native void setDebugMode(boolean show);
 
-    protected native void updateTouchPoints(double[] points);
-
     protected native void registerView(int nativeId);
 
     protected native void unregisterView();

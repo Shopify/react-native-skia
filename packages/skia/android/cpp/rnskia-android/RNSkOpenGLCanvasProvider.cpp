@@ -126,8 +126,8 @@ void RNSkOpenGLCanvasProvider::surfaceSizeChanged(jobject jSurfaceTexture,
     return;
   }
 
-  // Recreate RenderContext surface based on size change???
-  _surfaceHolder->resize(width, height);
+  _surfaceHolder = nullptr;
+  surfaceAvailable(jSurfaceTexture, width, height);
 
   // Redraw after size change
   _requestRedraw();
