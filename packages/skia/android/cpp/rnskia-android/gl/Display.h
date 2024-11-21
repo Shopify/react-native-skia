@@ -35,6 +35,10 @@ public:
 
   bool isValid() const { return _display != EGL_NO_DISPLAY; }
 
+  void clearContext() {
+    eglMakeCurrent(_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+  }
+
   EGLConfig chooseConfig() {
 
     EGLint att[] = {EGL_RENDERABLE_TYPE,

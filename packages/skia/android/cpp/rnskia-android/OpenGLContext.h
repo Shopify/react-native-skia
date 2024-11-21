@@ -127,7 +127,7 @@ public:
 
   std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window, int width,
                                             int height) {
-    return std::make_unique<OpenGLWindowContext>(this, window, width, height);
+    return std::make_unique<OpenGLWindowContext>(this, window);
   }
 
 private:
@@ -149,6 +149,13 @@ private:
     if (_directContext == nullptr) {
       throw std::runtime_error("GrDirectContexts::MakeGL failed");
     }
+  }
+
+  ~OpenGLContext() {
+    _glDisplay->clearContext();
+    _glSurface = nullptr;
+    _glContext = nullptr;
+    _directContext = nullptr;
   }
 };
 

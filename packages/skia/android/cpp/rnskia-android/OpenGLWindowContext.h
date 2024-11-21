@@ -35,11 +35,7 @@ class OpenGLContext;
 
 class OpenGLWindowContext : public WindowContext {
 public:
-  OpenGLWindowContext(OpenGLContext *context, ANativeWindow *window, int width,
-                      int height)
-      : _context(context), _window(window), _width(width), _height(height) {
-    ANativeWindow_acquire(_window);
-  }
+  OpenGLWindowContext(OpenGLContext *context, ANativeWindow *window);
 
   ~OpenGLWindowContext() {
     _skSurface = nullptr;
@@ -51,12 +47,6 @@ public:
 
   void present() override;
 
-  void resize(int width, int height) override {
-    _skSurface = nullptr;
-    _width = width;
-    _height = height;
-  }
-
   int getWidth() override { return _width; };
 
   int getHeight() override { return _height; };
@@ -65,7 +55,7 @@ private:
   OpenGLContext *_context;
   ANativeWindow *_window;
   sk_sp<SkSurface> _skSurface = nullptr;
-  gl::Surface *_glSurface = nullptr;
+  std::unique_ptr<gl::Surface> _glSurface;
   int _width = 0;
   int _height = 0;
 };
