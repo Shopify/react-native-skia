@@ -95,7 +95,10 @@ public:
 #else
     if (image->isTextureBacked()) {
       auto grContext = OpenGLContext::getInstance().getDirectContext();
-      image = image->makeNonTextureImage(grContext);
+      image = image->makeRasterImage(grContext);
+      if (!image) {
+        return nullptr;
+      }
     }
 #endif
     sk_sp<SkData> data;
@@ -124,6 +127,9 @@ public:
 
   JSI_HOST_FUNCTION(encodeToBytes) {
     auto data = encodeImageData(arguments, count);
+    if (!data) {
+      return jsi::Value::null();
+    }
 
     auto arrayCtor =
         runtime.global().getPropertyAsFunction(runtime, "Uint8Array");
@@ -144,6 +150,9 @@ public:
 
   JSI_HOST_FUNCTION(encodeToBase64) {
     auto data = encodeImageData(arguments, count);
+    if (!data) {
+      return jsi::Value::null();
+    }
 
     auto len = Base64::Encode(data->bytes(), data->size(), nullptr);
     auto buffer = std::string(len, 0);
@@ -202,7 +211,7 @@ public:
     auto rasterImage = DawnContext::getInstance().MakeRasterImage(getObject());
 #else
     auto grContext = OpenGLContext::getInstance().getDirectContext();
-    auto rasterImage = getObject()->makeNonTextureImage(grContext);
+    auto rasterImage = getObject()->makeRasterImage(grContext);
 #endif
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImage>(getContext(), rasterImage));
