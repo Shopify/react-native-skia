@@ -65,8 +65,10 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
   return false;
 }
 
-void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurface, int width,
-                                                int height) {
+
+void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurface,
+                                                int width, int height) {
+
   // Create renderer!
   JNIEnv *env = facebook::jni::Environment::current();
   // Acquire the native window from the Surface

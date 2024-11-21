@@ -31,7 +31,7 @@ public:
 
   void surfaceDestroyed();
 
-  void surfaceSizeChanged(jobject surface, int width, int height);
+  void surfaceSizeChanged(jobject jSurface, int width, int height);
 
 private:
   std::unique_ptr<WindowContext> _surfaceHolder = nullptr;

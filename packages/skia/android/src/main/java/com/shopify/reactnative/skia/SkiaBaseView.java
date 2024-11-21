@@ -48,6 +48,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
 
     @Override
     public void onSurfaceChanged(Surface surface, int width, int height) {
+        Log.i(tag, "onSurfaceTextureSizeChanged " + width + "/" + height);
         surfaceSizeChanged(surface, width, height);
     }
 
