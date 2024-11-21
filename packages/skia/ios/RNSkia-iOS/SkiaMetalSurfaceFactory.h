@@ -115,6 +115,8 @@ public:
     return _layer.frame.size.height * _layer.contentsScale;
   };
 
+  void resize(int width, int height) override { _skSurface = nullptr; }
+
 private:
   SkiaMetalContext *_context;
   sk_sp<SkSurface> _skSurface = nullptr;
