@@ -15,7 +15,7 @@ interface OnscreenCanvasState {
   forceRerender: boolean;
 }
 
-const { getNativeSurface } = RNWebGPU;
+const getNativeSurface = global.RNWebGPU?.getNativeSurface;
 function useSkiaContext() {
   const { ref, context } = useGPUContext();
   const state = useSharedValue<{
