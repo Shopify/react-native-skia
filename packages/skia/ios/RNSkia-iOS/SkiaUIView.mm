@@ -50,7 +50,7 @@
 }
 
 - (SkiaManager *)skiaManager {
-  auto bridge = [RCTBridge currentBridge];
+  auto bridge = [SkiaManager originalBridge];
   auto skiaModule = (RNSkiaModule *)[bridge moduleForName:@"RNSkiaModule"];
   return [skiaModule manager];
 }
