@@ -107,8 +107,6 @@ public:
     _skSurface = nullptr;
   }
 
-  void resize(int width, int height) override { _skSurface = nullptr; }
-
   int getWidth() override {
     return _layer.frame.size.width * _layer.contentsScale;
   };
