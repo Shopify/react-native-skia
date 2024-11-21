@@ -15,7 +15,7 @@ public:
 
   virtual void surfaceDestroyed() = 0;
 
-  virtual void surfaceSizeChanged(int width, int height) = 0;
+  virtual void surfaceSizeChanged(jobject surface, int width, int height) = 0;
 
   virtual float getPixelDensity() = 0;
 
@@ -50,9 +50,9 @@ public:
         ->surfaceDestroyed();
   }
 
-  void surfaceSizeChanged(int width, int height) override {
+  void surfaceSizeChanged(jobject surface, int width, int height) override {
     std::static_pointer_cast<RNSkOpenGLCanvasProvider>(T::getCanvasProvider())
-        ->surfaceSizeChanged(width, height);
+        ->surfaceSizeChanged(surface, width, height);
     // This is only need for the first time to frame, this renderImmediate call
     // will invoke updateTexImage for the previous frame
     RNSkView::renderImmediate();
