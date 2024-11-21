@@ -113,7 +113,8 @@ public:
         _surface->recorder()->snap().get());
     return DawnContext::getInstance().MakeRasterImage(image);
 #else
-    return image->makeNonTextureImage();
+    auto grContext = OpenGLContext::getInstance().getDirectContext();
+    return image->makeNonTextureImage(grContext);
 #endif
   }
 

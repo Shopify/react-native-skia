@@ -15,6 +15,8 @@
 #if defined(SK_GRAPHITE)
 #include "DawnContext.h"
 #include "include/gpu/graphite/Context.h"
+#else
+#include "OpenGLContext.h"
 #endif
 
 #pragma clang diagnostic push
@@ -92,7 +94,8 @@ public:
     image = DawnContext::getInstance().MakeRasterImage(image);
 #else
     if (image->isTextureBacked()) {
-      image = image->makeNonTextureImage();
+      auto grContext = OpenGLContext::getInstance().getDirectContext();
+      image = image->makeNonTextureImage(grContext);
     }
 #endif
     sk_sp<SkData> data;
@@ -182,10 +185,15 @@ public:
             .asObject(runtime)
             .getArrayBuffer(runtime);
     auto bfrPtr = reinterpret_cast<void *>(buffer.data(runtime));
-
-    if (!getObject()->readPixels(info, bfrPtr, bytesPerRow, srcX, srcY)) {
+#if defined(SK_GRAPHITE)
+    throw std::runtime_error("Not implemented yet");
+#else
+    auto grContext = OpenGLContext::getInstance().getDirectContext();
+    if (!getObject()->readPixels(grContext, info, bfrPtr, bytesPerRow, srcX,
+                                 srcY)) {
       return jsi::Value::null();
     }
+#endif
     return dest;
   }
 
@@ -193,7 +201,8 @@ public:
 #if defined(SK_GRAPHITE)
     auto rasterImage = DawnContext::getInstance().MakeRasterImage(getObject());
 #else
-    auto rasterImage = getObject()->makeNonTextureImage();
+    auto grContext = OpenGLContext::getInstance().getDirectContext();
+    auto rasterImage = getObject()->makeNonTextureImage(grContext);
 #endif
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImage>(getContext(), rasterImage));
