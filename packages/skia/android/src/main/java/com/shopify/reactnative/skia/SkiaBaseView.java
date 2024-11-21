@@ -51,16 +51,16 @@ public abstract class SkiaBaseView extends ReactViewGroup implements TextureView
         Log.i(tag, "onSurfaceTextureDestroyed");
         // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
         surfaceDestroyed();
-        return false;
+        return true;
     }
 
-    //private long _prevTimestamp = 0;
+    private long _prevTimestamp = 0;
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-//        long timestamp = surface.getTimestamp();
-//        long frameDuration = (timestamp - _prevTimestamp)/1000000;
-//        Log.i(tag, "onSurfaceTextureUpdated "+frameDuration+"ms");
-//        _prevTimestamp = timestamp;
+        long timestamp = surface.getTimestamp();
+        long frameDuration = (timestamp - _prevTimestamp)/1000000;
+        Log.i(tag, "onSurfaceTextureUpdated "+frameDuration+"ms");
+        _prevTimestamp = timestamp;
     }
 
     protected abstract void surfaceAvailable(Object surface, int width, int height);

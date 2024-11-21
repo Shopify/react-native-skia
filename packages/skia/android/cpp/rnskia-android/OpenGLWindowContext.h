@@ -34,20 +34,15 @@ namespace RNSkia {
 class OpenGLWindowContext : public WindowContext {
 public:
   OpenGLWindowContext(sk_sp<GrDirectContext> directContext,
-                      gl::Display *display, ANativeWindow *window)
-      : _directContext(directContext), _display(display), _window(window) {
+                      gl::Display *display, gl::Context* glContext, ANativeWindow *window)
+      : _directContext(directContext), _display(display), _glContext(glContext), _window(window) {
     ANativeWindow_acquire(_window);
-    _width = ANativeWindow_getWidth(_window);
-    _height = ANativeWindow_getHeight(_window);
     auto config = display->chooseConfig();
     _glSurface = display->makeWindowSurface(config, _window);
-    _glContext = display->makeContext(config, nullptr);
   }
 
   ~OpenGLWindowContext() {
     _skSurface = nullptr;
-    _display->clearContext();
-    _glContext = nullptr;
     _glSurface = nullptr;
     ANativeWindow_release(_window);
   }
@@ -56,19 +51,17 @@ public:
 
   void present() override;
 
-  int getWidth() override { return _width; };
+  int getWidth() override { return ANativeWindow_getWidth(_window); };
 
-  int getHeight() override { return _height; };
+  int getHeight() override { return ANativeWindow_getHeight(_window); };
 
 private:
   sk_sp<GrDirectContext> _directContext;
   gl::Display *_display;
   ANativeWindow *_window;
   sk_sp<SkSurface> _skSurface = nullptr;
-  std::unique_ptr<gl::Context> _glContext = nullptr;
+  gl::Context* _glContext = nullptr;
   std::unique_ptr<gl::Surface> _glSurface = nullptr;
-  int _width = 0;
-  int _height = 0;
 };
 
 } // namespace RNSkia

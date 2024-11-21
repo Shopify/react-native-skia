@@ -99,9 +99,9 @@ void RNSkOpenGLCanvasProvider::surfaceSizeChanged(jobject jSurface, int width,
 
   JNIEnv *env = facebook::jni::Environment::current();
   // Acquire the native window from the Surface
-  auto window = ANativeWindow_fromSurface(env, jSurface);
-  _surfaceHolder =
-      OpenGLContext::getInstance().MakeWindow(window, width, height);
+  // auto window = ANativeWindow_fromSurface(env, jSurface);
+  // _surfaceHolder =
+  //     OpenGLContext::getInstance().MakeWindow(window, width, height);
 
   // Redraw after size change
   _requestRedraw();

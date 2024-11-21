@@ -16,7 +16,7 @@ namespace RNSkia {
 
 sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
   if (_skSurface == nullptr) {
-
+    _glContext->makeCurrent(_glSurface.get());
     GLint stencil;
     glGetIntegerv(GL_STENCIL_BITS, &stencil);
 
@@ -38,7 +38,9 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
     // fbInfo.fProtected =
     // skgpu::Protected(fDisplayParams.fCreateProtectedNativeBackend);
 
-    auto backendRT = GrBackendRenderTargets::MakeGL(_width, _height, samples,
+    auto width = ANativeWindow_getWidth(_window);
+    auto height = ANativeWindow_getHeight(_window);
+    auto backendRT = GrBackendRenderTargets::MakeGL(width, height, samples,
                                                     stencil, fbInfo);
     sk_sp<SkColorSpace> colorSpace(nullptr);
     SkSurfaceProps surfaceProps(0, kRGB_H_SkPixelGeometry);

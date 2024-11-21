@@ -128,8 +128,7 @@ public:
   // TODO: remove width, height
   std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window, int width,
                                             int height) {
-    return std::make_unique<OpenGLWindowContext>(_directContext,
-                                                 _glDisplay.get(), window);
+    return std::make_unique<OpenGLWindowContext>(_directContext, _glDisplay.get(), _glContext.get(), window);
   }
 
 private:
