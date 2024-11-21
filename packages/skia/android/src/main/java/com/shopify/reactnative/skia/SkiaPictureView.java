@@ -26,7 +26,7 @@ public class SkiaPictureView extends SkiaBaseView {
 
     protected native void surfaceAvailable(Object surface, int width, int height);
 
-    protected native void surfaceSizeChanged(int width, int height);
+    protected native void surfaceSizeChanged(Object surface, int width, int height);
 
     protected native void surfaceDestroyed();
 
@@ -35,8 +35,6 @@ public class SkiaPictureView extends SkiaBaseView {
     protected native void setMode(String mode);
 
     protected native void setDebugMode(boolean show);
-
-    protected native void updateTouchPoints(double[] points);
 
     protected native void registerView(int nativeId);
 
