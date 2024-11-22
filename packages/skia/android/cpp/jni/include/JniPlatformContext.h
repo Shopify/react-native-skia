@@ -33,10 +33,6 @@ public:
 
   void raiseError(const std::exception &err);
 
-  void startDrawLoop();
-  void stopDrawLoop();
-
-
   void notifyTaskReadyExternal();
 
   void runTaskOnMainThread(std::function<void()> task);

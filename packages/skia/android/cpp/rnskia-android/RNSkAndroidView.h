@@ -72,7 +72,7 @@ public:
 
   void setShowDebugInfo(bool show) override { T::setShowDebugOverlays(show); }
 
-  void viewDidUnmount() override { }
+  void viewDidUnmount() override {}
 
   std::shared_ptr<RNSkView> getSkiaView() override {
     return T::shared_from_this();

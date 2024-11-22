@@ -132,22 +132,6 @@ sk_sp<SkImage> JniPlatformContext::takeScreenshotFromViewTag(size_t tag) {
   return skImage;
 }
 
-void JniPlatformContext::startDrawLoop() {
-  jni::ThreadScope ts;
-  // Start drawing loop
-  static auto method =
-      javaPart_->getClass()->getMethod<void(void)>("beginDrawLoop");
-  method(javaPart_.get());
-}
-
-void JniPlatformContext::stopDrawLoop() {
-  jni::ThreadScope ts;
-  // Stop drawing loop
-  static auto method =
-      javaPart_->getClass()->getMethod<void(void)>("endDrawLoop");
-  method(javaPart_.get());
-}
-
 void JniPlatformContext::runTaskOnMainThread(std::function<void()> task) {
   _taskMutex->lock();
   _taskCallbacks.push(task);

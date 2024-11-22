@@ -161,7 +161,7 @@ public:
   /**
    Destructor
    */
-  virtual ~RNSkView() { }
+  virtual ~RNSkView() {}
 
   /**
    Sets custom properties. Custom properties are properties that are set
@@ -172,28 +172,25 @@ public:
     // Nothing here...
   }
 
-  /**
-   * Repaints the Skia view using the underlying context and the drawcallback.
-   * This method schedules a draw request that will be run on the correct
-   * thread and js runtime.
-   */
-  void requestRedraw() { _redrawRequestCounter++; }
+  void requestRedraw() {
+    if (!_redrawRequested) {
+      _redrawRequested = true;
+      _platformContext->runOnMainThread([this]() {
+        _renderer->renderImmediate(_canvasProvider);
+        _redrawRequested = false;
+      });
+    }
+  }
 
-  /**
-   Renders immediate. Be carefull to not call this method from another thread
-   than the UI thread
-   */
   void renderImmediate() {
     _renderer->renderImmediate(_canvasProvider);
-    _redrawRequestCounter = 0;
+    _redrawRequested = false;
   }
 
   /**
    Sets the native id of the view
    */
-  virtual void setNativeId(size_t nativeId) {
-    _nativeId = nativeId;
-  }
+  virtual void setNativeId(size_t nativeId) { _nativeId = nativeId; }
 
   /**
    Returns the native id
@@ -239,10 +236,7 @@ protected:
     return _canvasProvider;
   }
 
-
 private:
-
-
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   std::shared_ptr<RNSkCanvasProvider> _canvasProvider;
   std::shared_ptr<RNSkRenderer> _renderer;
@@ -250,7 +244,7 @@ private:
   RNSkDrawingMode _drawingMode = RNSkDrawingMode::Default;
   size_t _nativeId;
 
-  std::atomic<int> _redrawRequestCounter = {1};
+  std::atomic<bool> _redrawRequested = {false};
 };
 
 } // namespace RNSkia

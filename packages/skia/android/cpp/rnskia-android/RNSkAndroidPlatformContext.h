@@ -37,11 +37,9 @@ public:
       std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker)
       : RNSkPlatformContext(runtime, jsCallInvoker,
                             jniPlatformContext->getPixelDensity()),
-        _jniPlatformContext(jniPlatformContext) {
+        _jniPlatformContext(jniPlatformContext) {}
 
-  }
-
-  ~RNSkAndroidPlatformContext() { }
+  ~RNSkAndroidPlatformContext() {}
 
   void performStreamOperation(
       const std::string &sourceUri,
