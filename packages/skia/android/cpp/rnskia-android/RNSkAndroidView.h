@@ -42,7 +42,7 @@ public:
 
     // Try to render directly when the surface has been set so that
     // we don't have to wait until the draw loop returns.
-    RNSkView::renderImmediate();
+    RNSkView::redraw();
   }
 
   void surfaceDestroyed() override {
@@ -55,7 +55,7 @@ public:
         ->surfaceSizeChanged(surface, width, height);
     // This is only need for the first time to frame, this renderImmediate call
     // will invoke updateTexImage for the previous frame
-    RNSkView::renderImmediate();
+    RNSkView::redraw();
   }
 
   float getPixelDensity() override {
