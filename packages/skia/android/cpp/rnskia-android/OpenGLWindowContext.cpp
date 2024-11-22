@@ -16,74 +16,45 @@ namespace RNSkia {
 
 sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
   if (_skSurface == nullptr) {
-
-    struct ReleaseContext {
-      std::unique_ptr<gl::Surface> surface = nullptr;
-    };
-
-    if (!_window) {
-      throw std::runtime_error("No native window provided");
-    }
-    auto releaseCtx = new ReleaseContext();
-    releaseCtx->surface =
-        _context->_glDisplay->makeWindowSurface(_context->_glConfig, _window);
-    if (!releaseCtx->surface) {
-      throw std::runtime_error("Failed to create window surface");
-    }
-    _glSurface = releaseCtx->surface.get();
-
-    // Now make this one current
-    auto success = _context->_glContext->makeCurrent(releaseCtx->surface.get());
-    if (!success) {
-      throw std::runtime_error("Failed to make window surface current");
-    }
-
-    // Set up parameters for the render target so that it
-    // matches the underlying OpenGL context.
-    GrGLFramebufferInfo fboInfo;
-
-    // We pass 0 as the framebuffer id, since the
-    // underlying Skia GrGlGpu will read this when wrapping the context in the
-    // render target and the GrGlGpu object.
-    fboInfo.fFBOID = 0;
-    fboInfo.fFormat = 0x8058; // GL_RGBA8
-
+    _glContext->makeCurrent(_glSurface.get());
     GLint stencil;
     glGetIntegerv(GL_STENCIL_BITS, &stencil);
 
     GLint samples;
     glGetIntegerv(GL_SAMPLES, &samples);
 
-    auto colorType = kN32_SkColorType;
+    auto colorType = kRGBA_8888_SkColorType;
 
     auto maxSamples =
-        _context->_directContext->maxSurfaceSampleCountForColorType(colorType);
+        _directContext->maxSurfaceSampleCountForColorType(colorType);
 
     if (samples > maxSamples) {
       samples = maxSamples;
     }
 
-    auto renderTarget = GrBackendRenderTargets::MakeGL(_width, _height, samples,
-                                                       stencil, fboInfo);
+    GrGLFramebufferInfo fbInfo;
+    fbInfo.fFBOID = 0;
+    fbInfo.fFormat = GR_GL_RGBA8;
+    // fbInfo.fProtected =
+    // skgpu::Protected(fDisplayParams.fCreateProtectedNativeBackend);
 
-    SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
-
-    // Create surface object
+    auto width = ANativeWindow_getWidth(_window);
+    auto height = ANativeWindow_getHeight(_window);
+    auto backendRT =
+        GrBackendRenderTargets::MakeGL(width, height, samples, stencil, fbInfo);
+    sk_sp<SkColorSpace> colorSpace(nullptr);
+    SkSurfaceProps surfaceProps(0, kRGB_H_SkPixelGeometry);
     _skSurface = SkSurfaces::WrapBackendRenderTarget(
-        _context->_directContext.get(), renderTarget,
-        kBottomLeft_GrSurfaceOrigin, colorType, nullptr, &props,
-        [](void *addr) {
-          auto releaseCtx = reinterpret_cast<ReleaseContext *>(addr);
-          delete releaseCtx;
-        },
-        reinterpret_cast<void *>(releaseCtx));
+        _directContext.get(), backendRT, kBottomLeft_GrSurfaceOrigin,
+        kRGBA_8888_SkColorType, colorSpace, &surfaceProps);
   }
   return _skSurface;
 }
 
 void OpenGLWindowContext::present() {
-  _context->_glContext->makeCurrent(_glSurface);
-  _context->_directContext->flushAndSubmit();
+  _glContext->makeCurrent(_glSurface.get());
+  // TODO: is flushAndSubmit needed here?
+  _directContext->flushAndSubmit();
   _glSurface->present();
 }
 
