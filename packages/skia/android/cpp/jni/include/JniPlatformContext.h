@@ -36,7 +36,6 @@ public:
   void startDrawLoop();
   void stopDrawLoop();
 
-  void notifyDrawLoopExternal();
 
   void notifyTaskReadyExternal();
 
@@ -46,10 +45,6 @@ public:
 
   sk_sp<SkImage> takeScreenshotFromViewTag(size_t tag);
 
-  void setOnNotifyDrawLoop(const std::function<void(void)> &callback) {
-    _onNotifyDrawLoop = callback;
-  }
-
   jni::global_ref<jobject> createVideo(const std::string &url);
 
 private:
@@ -57,8 +52,6 @@ private:
   jni::global_ref<JniPlatformContext::javaobject> javaPart_;
 
   float _pixelDensity;
-
-  std::function<void(void)> _onNotifyDrawLoop;
 
   std::queue<std::function<void()>> _taskCallbacks;
 

@@ -63,8 +63,6 @@ using TSelf = jni::local_ref<JniPlatformContext::jhybriddata>;
 void JniPlatformContext::registerNatives() {
   registerHybrid({
       makeNativeMethod("initHybrid", JniPlatformContext::initHybrid),
-      makeNativeMethod("notifyDrawLoop",
-                       JniPlatformContext::notifyDrawLoopExternal),
       makeNativeMethod("notifyTaskReady",
                        JniPlatformContext::notifyTaskReadyExternal),
   });
@@ -148,11 +146,6 @@ void JniPlatformContext::stopDrawLoop() {
   static auto method =
       javaPart_->getClass()->getMethod<void(void)>("endDrawLoop");
   method(javaPart_.get());
-}
-
-void JniPlatformContext::notifyDrawLoopExternal() {
-  jni::ThreadScope ts;
-  _onNotifyDrawLoop();
 }
 
 void JniPlatformContext::runTaskOnMainThread(std::function<void()> task) {

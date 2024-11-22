@@ -25,9 +25,6 @@ public class PlatformContext {
 
     private final ReactContext mContext;
 
-    private boolean _drawLoopActive = false;
-    private boolean _isPaused = false;
-
     private final String TAG = "PlatformContext";
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -53,21 +50,6 @@ public class PlatformContext {
         return buffer.toByteArray();
     }
 
-    private void postFrameLoop() {
-        Choreographer.FrameCallback frameCallback = new Choreographer.FrameCallback() {
-            @Override
-            public void doFrame(long frameTimeNanos) {
-                if (_drawLoopActive) {
-                    Choreographer.getInstance().postFrameCallback(this);
-                }
-                if (_isPaused) {
-                    return;
-                }
-                notifyDrawLoop();
-            }
-        };
-        Choreographer.getInstance().postFrameCallback(frameCallback);
-    }
 
 
     @DoNotStrip
@@ -93,27 +75,6 @@ public class PlatformContext {
                 mContext.handleException(new Exception(message));
             }
         });
-    }
-
-    @DoNotStrip
-    public void beginDrawLoop() {
-        if (_drawLoopActive) {
-            return;
-        }
-        _drawLoopActive = true;
-        mainHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                postFrameLoop();
-            }
-        });
-    }
-
-    @DoNotStrip
-    public void endDrawLoop() {
-        if (_drawLoopActive) {
-            _drawLoopActive = false;
-        }
     }
 
     @DoNotStrip
@@ -163,25 +124,6 @@ public class PlatformContext {
         return null;
     }
 
-    void onPause() {
-        Log.i(TAG, "Paused");
-        _isPaused = true;
-    }
-
-    void onResume() {
-        _isPaused = false;
-        Log.i(TAG, "Resume");
-        if(_drawLoopActive) {
-            // Restart draw loop
-            mainHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    postFrameLoop();
-                }
-            });
-        }
-    }
-
     @Override
     protected void finalize() throws Throwable {
         mHybridData.resetNative();
@@ -190,6 +132,5 @@ public class PlatformContext {
 
     // Private c++ native methods
     private native HybridData initHybrid(float pixelDensity);
-    private native void notifyDrawLoop();
     private native void notifyTaskReady();
 }

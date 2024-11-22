@@ -38,12 +38,10 @@ public:
       : RNSkPlatformContext(runtime, jsCallInvoker,
                             jniPlatformContext->getPixelDensity()),
         _jniPlatformContext(jniPlatformContext) {
-    // Hook onto the notify draw loop callback in the platform context
-    jniPlatformContext->setOnNotifyDrawLoop(
-        [this]() { notifyDrawLoop(false); });
+
   }
 
-  ~RNSkAndroidPlatformContext() { stopDrawLoop(); }
+  ~RNSkAndroidPlatformContext() { }
 
   void performStreamOperation(
       const std::string &sourceUri,
@@ -169,10 +167,6 @@ public:
   sk_sp<SkImage> takeScreenshotFromViewTag(size_t tag) override {
     return _jniPlatformContext->takeScreenshotFromViewTag(tag);
   }
-
-  void startDrawLoop() override { _jniPlatformContext->startDrawLoop(); }
-
-  void stopDrawLoop() override { _jniPlatformContext->stopDrawLoop(); }
 
 private:
   JniPlatformContext *_jniPlatformContext;

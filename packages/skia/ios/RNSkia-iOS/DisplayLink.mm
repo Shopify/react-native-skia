@@ -2,6 +2,8 @@
 
 @implementation DisplayLink
 
+// TODO: to delete
+
 - (void)start:(block_t)block {
   self.updateBlock = block;
   // check whether the loop is already running

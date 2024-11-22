@@ -214,20 +214,4 @@ RNSkiOSPlatformContext::takeScreenshotFromViewTag(size_t viewTag) {
       screenshotOfViewWithTag:[NSNumber numberWithLong:viewTag]];
 }
 
-void RNSkiOSPlatformContext::startDrawLoop() {
-  if (_displayLink == nullptr) {
-    _displayLink = [[DisplayLink alloc] init];
-    [_displayLink start:^(double time) {
-      notifyDrawLoop(false);
-    }];
-  }
-}
-
-void RNSkiOSPlatformContext::stopDrawLoop() {
-  if (_displayLink != nullptr) {
-    [_displayLink stop];
-    _displayLink = nullptr;
-  }
-}
-
 } // namespace RNSkia

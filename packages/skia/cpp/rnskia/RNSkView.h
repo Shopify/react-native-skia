@@ -161,7 +161,7 @@ public:
   /**
    Destructor
    */
-  virtual ~RNSkView() { endDrawingLoop(); }
+  virtual ~RNSkView() { }
 
   /**
    Sets custom properties. Custom properties are properties that are set
@@ -193,7 +193,6 @@ public:
    */
   virtual void setNativeId(size_t nativeId) {
     _nativeId = nativeId;
-    beginDrawingLoop();
   }
 
   /**
@@ -240,51 +239,9 @@ protected:
     return _canvasProvider;
   }
 
-  /**
-   Ends an ongoing beginDrawCallback loop for this view. This method is made
-   protected if the drawing loop should be stopped before reaching the
-   destructor (like we do for Android views)
-   */
-  void endDrawingLoop() {
-    if (_drawingLoopId != 0) {
-      _drawingLoopId = 0;
-      _platformContext->endDrawLoop(_nativeId);
-    }
-  }
 
 private:
-  /**
-   Starts beginDrawCallback loop if the drawing mode is continuous
-   */
-  void beginDrawingLoop() {
-    if (_drawingLoopId != 0 || _nativeId == 0) {
-      return;
-    }
-    // Set to zero to avoid calling beginDrawLoop before we return
-    _drawingLoopId = _platformContext->beginDrawLoop(
-        _nativeId, [weakSelf = weak_from_this()](bool invalidated) {
-          auto self = weakSelf.lock();
-          if (self) {
-            self->drawLoopCallback(invalidated);
-          }
-        });
-  }
 
-  /**
-    Draw loop callback
-   */
-  void drawLoopCallback(bool invalidated) {
-    if (_redrawRequestCounter > 0 ||
-        _drawingMode == RNSkDrawingMode::Continuous) {
-      _redrawRequestCounter = 0;
-
-      if (!_renderer->tryRender(_canvasProvider)) {
-        // The renderer could not render cause it was busy, just schedule
-        // redrawing on the next frame.
-        requestRedraw();
-      }
-    }
-  }
 
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   std::shared_ptr<RNSkCanvasProvider> _canvasProvider;
@@ -293,7 +250,6 @@ private:
   RNSkDrawingMode _drawingMode = RNSkDrawingMode::Default;
   size_t _nativeId;
 
-  size_t _drawingLoopId = 0;
   std::atomic<int> _redrawRequestCounter = {1};
 };
 

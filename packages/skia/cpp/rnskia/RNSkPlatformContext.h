@@ -48,23 +48,7 @@ public:
     _jsThreadId = std::this_thread::get_id();
   }
 
-  /**
-   * Destructor
-   */
-  virtual ~RNSkPlatformContext() { invalidate(); }
-
-  void invalidate() {
-    if (!_isValid) {
-      return;
-    }
-    // Stop the refresh loop
-    stopDrawLoop();
-    // Notify draw loop listeners once with the invalidated parameter
-    // set to true signalling that we are done and can clean up.
-    notifyDrawLoop(true);
-    _isValid = false;
-  }
-
+  virtual ~RNSkPlatformContext() = default;
   /*
    Returns true if the current execution context is the javascript thread.
    */
@@ -77,9 +61,6 @@ public:
    * @param func Function to run
    */
   void runOnJavascriptThread(std::function<void()> func) {
-    if (!_isValid) {
-      return;
-    }
     _callInvoker->invokeAsync(std::move(func));
   }
 
@@ -87,9 +68,6 @@ public:
    Runs the function on the render thread
    */
   void runOnRenderThread(std::function<void()> func) {
-    if (!_isValid) {
-      return;
-    }
     _dispatchQueue->dispatch(std::move(func));
   }
 
@@ -192,82 +170,11 @@ public:
    */
   float getPixelDensity() { return _pixelDensity; }
 
-  /**
-   * Starts (if not started) a loop that will call back on display sync
-   * @param callback Callback to call on sync
-   * @returns Identifier of the draw loop entry
-   */
-  size_t beginDrawLoop(size_t nativeId, std::function<void(bool)> callback) {
-    if (!_isValid) {
-      return 0;
-    }
-    auto shouldStart = false;
-    {
-      std::lock_guard<std::mutex> lock(_drawCallbacksLock);
-      _drawCallbacks.emplace(nativeId, std::move(callback));
-      shouldStart = _drawCallbacks.size() == 1;
-    }
-    if (shouldStart) {
-      // Start
-      startDrawLoop();
-    }
-    return nativeId;
-  }
-
-  /**
-   * Ends (if running) the drawing loop that was started with beginDrawLoop.
-   * This method must be called symmetrically with the beginDrawLoop method.
-   * @param nativeId Identifier of view to end
-   */
-  void endDrawLoop(size_t nativeId) {
-    if (!_isValid) {
-      return;
-    }
-    auto shouldStop = false;
-    {
-      std::lock_guard<std::mutex> lock(_drawCallbacksLock);
-      if (_drawCallbacks.count(nativeId) > 0) {
-        _drawCallbacks.erase(nativeId);
-      }
-      shouldStop = _drawCallbacks.size() == 0;
-    }
-    if (shouldStop) {
-      stopDrawLoop();
-    }
-  }
-
-  /**
-   * Notifies all drawing callbacks
-   * @param invalidated True if the context was invalidated, otherwise false.
-   * This can be used to receive a notification that we have stopped the main
-   * drawloop
-   */
-  void notifyDrawLoop(bool invalidated) {
-    if (!_isValid) {
-      return;
-    }
-    std::lock_guard<std::mutex> lock(_drawCallbacksLock);
-    for (auto it = _drawCallbacks.begin(); it != _drawCallbacks.end(); it++) {
-      it->second(invalidated);
-    }
-  }
-
-  // default implementation does nothing, so it can be called from virtual
-  // destructor.
-  virtual void startDrawLoop() {}
-  virtual void stopDrawLoop() {}
-
 private:
   float _pixelDensity;
-
-  std::thread::id _jsThreadId;
-
   jsi::Runtime *_jsRuntime;
   std::shared_ptr<react::CallInvoker> _callInvoker;
   std::unique_ptr<RNSkDispatchQueue> _dispatchQueue;
-
-  std::unordered_map<size_t, std::function<void(bool)>> _drawCallbacks;
-  std::mutex _drawCallbacksLock;
-  std::atomic<bool> _isValid = {true};
+  std::thread::id _jsThreadId;
 };
 } // namespace RNSkia
