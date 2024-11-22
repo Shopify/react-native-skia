@@ -152,6 +152,12 @@ public:
 #endif
   }
 
+#if !defined(SK_GRAPHITE)
+  GrDirectContext *getDirectContext() override {
+    return OpenGLContext::getInstance().getDirectContext();
+  }
+#endif
+
   sk_sp<SkFontMgr> createFontMgr() override {
     return SkFontMgr_New_Android(nullptr);
   }

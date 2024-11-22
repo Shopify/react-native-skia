@@ -192,6 +192,12 @@ sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeBuffer(void *buffer) {
 #endif
 }
 
+#if !defined(SK_GRAPHITE)
+GrDirectContext *RNSkiOSPlatformContext::getDirectContext() {
+  return MetalContext::getInstance().getDirectContext();
+}
+#endif
+
 sk_sp<SkFontMgr> RNSkiOSPlatformContext::createFontMgr() {
   return SkFontMgr_New_CoreText(nullptr);
 }

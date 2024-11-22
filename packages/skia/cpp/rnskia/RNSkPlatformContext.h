@@ -147,6 +147,10 @@ public:
    */
   virtual sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) = 0;
 
+#if !defined(SK_GRAPHITE)
+  virtual GrDirectContext *getDirectContext() = 0;
+#endif
+
   virtual void releaseNativeBuffer(uint64_t pointer) = 0;
 
   virtual uint64_t makeNativeBuffer(sk_sp<SkImage> image) = 0;
