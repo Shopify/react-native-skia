@@ -15,8 +15,6 @@
 #if defined(SK_GRAPHITE)
 #include "DawnContext.h"
 #include "include/gpu/graphite/Context.h"
-#else
-#include "OpenGLContext.h"
 #endif
 
 #pragma clang diagnostic push
@@ -94,7 +92,7 @@ public:
     image = DawnContext::getInstance().MakeRasterImage(image);
 #else
     if (image->isTextureBacked()) {
-      auto grContext = OpenGLContext::getInstance().getDirectContext();
+      auto grContext = getContext()->getDirectContext();
       image = image->makeRasterImage(grContext);
       if (!image) {
         return nullptr;
@@ -197,7 +195,7 @@ public:
 #if defined(SK_GRAPHITE)
     throw std::runtime_error("Not implemented yet");
 #else
-    auto grContext = OpenGLContext::getInstance().getDirectContext();
+    auto grContext = getContext()->getDirectContext();
     if (!getObject()->readPixels(grContext, info, bfrPtr, bytesPerRow, srcX,
                                  srcY)) {
       return jsi::Value::null();
@@ -210,7 +208,7 @@ public:
 #if defined(SK_GRAPHITE)
     auto rasterImage = DawnContext::getInstance().MakeRasterImage(getObject());
 #else
-    auto grContext = OpenGLContext::getInstance().getDirectContext();
+    auto grContext = getContext()->getDirectContext();
     auto rasterImage = getObject()->makeRasterImage(grContext);
 #endif
     return jsi::Object::createFromHostObject(

@@ -76,6 +76,9 @@ public:
 
   void raiseError(const std::exception &err) override;
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override;
+#if !defined(SK_GRAPHITE)
+  GrDirectContext *getDirectContext() override;
+#endif
   sk_sp<SkFontMgr> createFontMgr() override;
 
   void willInvalidateModules() {

@@ -90,7 +90,8 @@ public:
   RNSkOffscreenCanvasProvider(std::shared_ptr<RNSkPlatformContext> context,
                               std::function<void()> requestRedraw, float width,
                               float height)
-      : RNSkCanvasProvider(requestRedraw), _width(width), _height(height) {
+      : RNSkCanvasProvider(requestRedraw), _context(context), _width(width),
+        _height(height) {
     _surface = context->makeOffscreenSurface(_width, _height);
     _pd = context->getPixelDensity();
   }
@@ -113,8 +114,8 @@ public:
         _surface->recorder()->snap().get());
     return DawnContext::getInstance().MakeRasterImage(image);
 #else
-    auto grContext = OpenGLContext::getInstance().getDirectContext();
-    return image->makeNonTextureImage(grContext);
+    auto grContext = _context->getDirectContext();
+    return image->makeRasterImage(grContext);
 #endif
   }
 
@@ -141,6 +142,7 @@ private:
   float _height;
   float _pd = 1.0f;
   sk_sp<SkSurface> _surface;
+  std::shared_ptr<RNSkPlatformContext> _context;
 };
 
 enum RNSkDrawingMode { Default, Continuous };
