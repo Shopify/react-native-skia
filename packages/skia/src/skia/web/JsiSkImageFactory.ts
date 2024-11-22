@@ -20,9 +20,14 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
     super(CanvasKit);
   }
 
+  MakeTextureFromImage(image: SkImage) {
+    return image;
+  }
+
   MakeImageFromViewTag(viewTag: number): Promise<SkImage | null> {
     const view = viewTag as unknown as HTMLElement;
-    // TODO: Implement screenshot from view in React JS
+    // TODO: implement once this API is available:
+    // https://x.com/fserb/status/1794058245901824349
     console.log(view);
     return Promise.resolve(null);
   }

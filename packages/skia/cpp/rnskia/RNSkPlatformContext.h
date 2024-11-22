@@ -177,6 +177,8 @@ public:
     });
   }
 
+  virtual GrDirectContext *getDirectContext() = 0;
+
   /**
    * Raises an exception on the platform. This function does not necessarily
    * throw an exception and stop execution, so it is important to stop execution

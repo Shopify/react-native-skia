@@ -87,4 +87,12 @@ export interface ImageFactory {
    * @param bytesPerRow
    */
   MakeImage(info: ImageInfo, data: SkData, bytesPerRow: number): SkImage | null;
+
+  /**
+   * Uploads image to GPU memory and in case of success returns a texture backed image.
+   * The old image can be safely disposed.
+   * @param image - Image to be uploaded to GPU
+   * @returns Returns texture backed image if the image is valid, null otherwise.
+   */
+  MakeTextureFromImage(image: SkImage): SkImage | null;
 }

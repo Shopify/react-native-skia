@@ -174,6 +174,10 @@ public:
 
   void stopDrawLoop() override { _jniPlatformContext->stopDrawLoop(); }
 
+  GrDirectContext *getDirectContext() override {
+    return ThreadContextHolder::ThreadSkiaOpenGLContext.directContext.get();
+  }
+
 private:
   JniPlatformContext *_jniPlatformContext;
 };

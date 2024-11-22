@@ -10,6 +10,7 @@
 #include "JsiSkHostObjects.h"
 #include "JsiSkImage.h"
 #include "JsiSkImageInfo.h"
+#include <include/gpu/ganesh/SkImageGanesh.h>
 
 namespace RNSkia {
 
@@ -78,11 +79,32 @@ public:
         });
   }
 
+  JSI_HOST_FUNCTION(MakeTextureFromImage) {
+    auto directContext = getContext()->getDirectContext();
+
+    if (directContext == nullptr) {
+      return jsi::Value::null();
+    }
+
+    auto image = JsiSkImage::fromValue(runtime, arguments[0]);
+
+    auto texture = SkImages::TextureFromImage(directContext, image);
+
+    if (texture == nullptr) {
+      return jsi::Value::null();
+    }
+
+    return jsi::Object::createFromHostObject(
+        runtime,
+        std::make_shared<JsiSkImage>(getContext(), std::move(texture)));
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromEncoded),
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTag),
                        JSI_EXPORT_FUNC(JsiSkImageFactory,
                                        MakeImageFromNativeBuffer),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage))
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage),
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeTextureFromImage))
 
   explicit JsiSkImageFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

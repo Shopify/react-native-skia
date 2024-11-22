@@ -74,6 +74,7 @@ public:
       const std::string &sourceUri,
       const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) override;
 
+  GrDirectContext *getDirectContext() override;
   void raiseError(const std::exception &err) override;
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override;
 #if !defined(SK_GRAPHITE)
