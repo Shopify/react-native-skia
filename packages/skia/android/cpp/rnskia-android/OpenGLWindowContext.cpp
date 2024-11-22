@@ -55,7 +55,7 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
     sk_sp<SkColorSpace> colorSpace(nullptr);
     SkSurfaceProps surfaceProps(0, kRGB_H_SkPixelGeometry);
     _skSurface = SkSurfaces::WrapBackendRenderTarget(
-        _directContext.get(), backendRT, kBottomLeft_GrSurfaceOrigin,
+        _directContext, backendRT, kBottomLeft_GrSurfaceOrigin,
         kRGBA_8888_SkColorType, colorSpace, &surfaceProps);
   }
   return _skSurface;

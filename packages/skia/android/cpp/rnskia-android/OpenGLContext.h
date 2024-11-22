@@ -130,8 +130,10 @@ public:
                                             int height) {
 
     return std::make_unique<OpenGLWindowContext>(
-        _directContext, _glDisplay.get(), _glContext.get(), window);
+        _directContext.get(), _glDisplay.get(), _glContext.get(), window);
   }
+
+  GrDirectContext *getDirectContext() { return _directContext.get(); }
 
 private:
   EGLConfig _glConfig;

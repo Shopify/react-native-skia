@@ -37,6 +37,8 @@ public:
                                                 height);
   }
 
+  GrDirectContext *getDirectContext() { return _context.skContext.get(); }
+
 private:
   friend class RNSkia::RNSkiOSPlatformContext;
   id<MTLDevice> _device;
