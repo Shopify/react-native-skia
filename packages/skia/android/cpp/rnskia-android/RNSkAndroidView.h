@@ -19,8 +19,6 @@ public:
 
   virtual float getPixelDensity() = 0;
 
-  virtual void setMode(std::string mode) = 0;
-
   virtual void setShowDebugInfo(bool show) = 0;
 
   virtual void viewDidUnmount() = 0;
@@ -60,14 +58,6 @@ public:
 
   float getPixelDensity() override {
     return T::getPlatformContext()->getPixelDensity();
-  }
-
-  void setMode(std::string mode) override {
-    if (mode.compare("continuous") == 0) {
-      T::setDrawingMode(RNSkDrawingMode::Continuous);
-    } else {
-      T::setDrawingMode(RNSkDrawingMode::Default);
-    }
   }
 
   void setShowDebugInfo(bool show) override { T::setShowDebugOverlays(show); }

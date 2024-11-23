@@ -82,7 +82,6 @@ export class SkiaDomView extends React.Component<SkiaDomViewProps> {
       <NativeSkiaDomView
         collapsable={false}
         nativeID={`${this._nativeId}`}
-        mode={mode}
         debug={debug}
         {...viewProps}
       />

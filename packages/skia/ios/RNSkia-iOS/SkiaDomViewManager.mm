@@ -26,12 +26,6 @@ RCT_CUSTOM_VIEW_PROPERTY(nativeID, NSNumber, SkiaUIView) {
   [(SkiaUIView *)view setNativeId:nativeId];
 }
 
-RCT_CUSTOM_VIEW_PROPERTY(mode, NSString, SkiaUIView) {
-  std::string mode =
-      json != NULL ? [[RCTConvert NSString:json] UTF8String] : "default";
-  [(SkiaUIView *)view setDrawingMode:mode];
-}
-
 RCT_CUSTOM_VIEW_PROPERTY(debug, BOOL, SkiaUIView) {
   bool debug = json != NULL ? [RCTConvert BOOL:json] : false;
   [(SkiaUIView *)view setDebugMode:debug];

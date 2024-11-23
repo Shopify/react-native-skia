@@ -97,7 +97,6 @@ export class SkiaJSDomView extends React.Component<
       <NativeSkiaPictureView
         collapsable={false}
         nativeID={`${this._nativeId}`}
-        mode={mode}
         debug={debug}
         {...viewProps}
       />

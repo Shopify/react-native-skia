@@ -145,8 +145,6 @@ private:
   std::shared_ptr<RNSkPlatformContext> _context;
 };
 
-enum RNSkDrawingMode { Default, Continuous };
-
 class RNSkView : public std::enable_shared_from_this<RNSkView> {
 public:
   /**
@@ -200,14 +198,6 @@ public:
   size_t getNativeId() { return _nativeId; }
 
   /**
-   Sets the drawing mode for the view
-   */
-  void setDrawingMode(RNSkDrawingMode mode) {
-    _drawingMode = mode;
-    requestRedraw();
-  }
-
-  /**
    * Set to true to show the debug overlays on render
    */
   void setShowDebugOverlays(bool show) {
@@ -243,7 +233,6 @@ private:
   std::shared_ptr<RNSkCanvasProvider> _canvasProvider;
   std::shared_ptr<RNSkRenderer> _renderer;
 
-  RNSkDrawingMode _drawingMode = RNSkDrawingMode::Default;
   size_t _nativeId;
 
   std::atomic<bool> _redrawRequested = {false};

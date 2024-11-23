@@ -15,7 +15,6 @@ export abstract class SkiaBaseWebView<
 > extends React.Component<TProps> {
   constructor(props: TProps) {
     super(props);
-    this._mode = props.mode ?? "default";
   }
 
   private _surface: JsiSkSurface | null = null;
