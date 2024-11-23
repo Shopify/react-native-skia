@@ -55,7 +55,6 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
 
       // Swap buffers and show on screen
       _surfaceHolder->present();
-
       return true;
     } else {
       // the render context did not provide a surface

@@ -40,7 +40,6 @@ public:
          makeNativeMethod("surfaceDestroyed", JniSkiaDomView::surfaceDestroyed),
          makeNativeMethod("surfaceSizeChanged",
                           JniSkiaDomView::surfaceSizeChanged),
-         makeNativeMethod("setMode", JniSkiaDomView::setMode),
          makeNativeMethod("setDebugMode", JniSkiaDomView::setDebugMode),
          makeNativeMethod("registerView", JniSkiaDomView::registerView),
          makeNativeMethod("unregisterView", JniSkiaDomView::unregisterView)});
@@ -56,8 +55,6 @@ protected:
   }
 
   void surfaceDestroyed() override { JniSkiaBaseView::surfaceDestroyed(); }
-
-  void setMode(std::string mode) override { JniSkiaBaseView::setMode(mode); }
 
   void setDebugMode(bool show) override { JniSkiaBaseView::setDebugMode(show); }
 

@@ -39,8 +39,6 @@ protected:
 
   virtual void surfaceDestroyed() { _skiaAndroidView->surfaceDestroyed(); }
 
-  virtual void setMode(std::string mode) { _skiaAndroidView->setMode(mode); }
-
   virtual void setDebugMode(bool show) {
     _skiaAndroidView->setShowDebugInfo(show);
   }
