@@ -42,17 +42,9 @@ public:
                       float pixelDensity)
       : _pixelDensity(pixelDensity), _jsRuntime(runtime),
         _callInvoker(callInvoker) {
-    _jsThreadId = std::this_thread::get_id();
   }
 
   virtual ~RNSkPlatformContext() = default;
-  /*
-   Returns true if the current execution context is the javascript thread.
-   */
-  // TODO: remove this function
-  bool isOnJavascriptThread() {
-    return _jsThreadId == std::this_thread::get_id();
-  }
 
   /**
    * Schedules the function to be run on the javascript thread async
@@ -165,6 +157,5 @@ private:
   float _pixelDensity;
   jsi::Runtime *_jsRuntime;
   std::shared_ptr<react::CallInvoker> _callInvoker;
-  std::thread::id _jsThreadId;
 };
 } // namespace RNSkia
