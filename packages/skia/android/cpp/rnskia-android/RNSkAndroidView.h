@@ -19,8 +19,6 @@ public:
 
   virtual float getPixelDensity() = 0;
 
-  virtual void setMode(std::string mode) = 0;
-
   virtual void setShowDebugInfo(bool show) = 0;
 
   virtual void viewDidUnmount() = 0;
@@ -42,7 +40,7 @@ public:
 
     // Try to render directly when the surface has been set so that
     // we don't have to wait until the draw loop returns.
-    RNSkView::renderImmediate();
+    RNSkView::redraw();
   }
 
   void surfaceDestroyed() override {
@@ -55,24 +53,16 @@ public:
         ->surfaceSizeChanged(surface, width, height);
     // This is only need for the first time to frame, this renderImmediate call
     // will invoke updateTexImage for the previous frame
-    RNSkView::renderImmediate();
+    RNSkView::redraw();
   }
 
   float getPixelDensity() override {
     return T::getPlatformContext()->getPixelDensity();
   }
 
-  void setMode(std::string mode) override {
-    if (mode.compare("continuous") == 0) {
-      T::setDrawingMode(RNSkDrawingMode::Continuous);
-    } else {
-      T::setDrawingMode(RNSkDrawingMode::Default);
-    }
-  }
-
   void setShowDebugInfo(bool show) override { T::setShowDebugOverlays(show); }
 
-  void viewDidUnmount() override { T::endDrawingLoop(); }
+  void viewDidUnmount() override {}
 
   std::shared_ptr<RNSkView> getSkiaView() override {
     return T::shared_from_this();

@@ -33,11 +33,6 @@ public:
 
   void raiseError(const std::exception &err);
 
-  void startDrawLoop();
-  void stopDrawLoop();
-
-  void notifyDrawLoopExternal();
-
   void notifyTaskReadyExternal();
 
   void runTaskOnMainThread(std::function<void()> task);
@@ -45,10 +40,6 @@ public:
   float getPixelDensity() { return _pixelDensity; }
 
   sk_sp<SkImage> takeScreenshotFromViewTag(size_t tag);
-
-  void setOnNotifyDrawLoop(const std::function<void(void)> &callback) {
-    _onNotifyDrawLoop = callback;
-  }
 
   jni::global_ref<jobject> createVideo(const std::string &url);
 
@@ -58,16 +49,9 @@ private:
 
   float _pixelDensity;
 
-  std::function<void(void)> _onNotifyDrawLoop;
-
-  std::queue<std::function<void()>> _taskCallbacks;
-
-  std::shared_ptr<std::mutex> _taskMutex;
-
   explicit JniPlatformContext(
       jni::alias_ref<JniPlatformContext::jhybridobject> jThis,
       const float pixelDensity)
-      : _taskMutex(std::make_shared<std::mutex>()),
-        javaPart_(jni::make_global(jThis)), _pixelDensity(pixelDensity) {}
+      : javaPart_(jni::make_global(jThis)), _pixelDensity(pixelDensity) {}
 };
 } // namespace RNSkia

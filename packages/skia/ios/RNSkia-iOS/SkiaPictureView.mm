@@ -53,7 +53,6 @@ using namespace facebook::react;
   int nativeId =
       [[RCTConvert NSString:RCTNSStringFromString(newProps.nativeId)] intValue];
   [self setNativeId:nativeId];
-  [self setDrawingMode:newProps.mode];
   [self setDebugMode:newProps.debug];
 }
 

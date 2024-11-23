@@ -12,7 +12,7 @@ import com.facebook.react.module.annotations.ReactModule;
 import java.lang.ref.WeakReference;
 
 @ReactModule(name="RNSkiaModule")
-public class RNSkiaModule extends NativeSkiaModuleSpec implements LifecycleEventListener {
+public class RNSkiaModule extends NativeSkiaModuleSpec {
     public static final String NAME = "RNSkiaModule";
 
     private final WeakReference<ReactApplicationContext> weakReactContext;
@@ -21,16 +21,11 @@ public class RNSkiaModule extends NativeSkiaModuleSpec implements LifecycleEvent
     public RNSkiaModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.weakReactContext = new WeakReference<>(reactContext);
-        reactContext.addLifecycleEventListener(this);
     }
 
     @Override
     public void invalidate() {
         super.invalidate();
-
-        if (getReactApplicationContext() != null) {
-            getReactApplicationContext().removeLifecycleEventListener(this);
-        }
 
         if (this.skiaManager != null) {
             this.skiaManager.invalidate();
@@ -68,20 +63,5 @@ public class RNSkiaModule extends NativeSkiaModuleSpec implements LifecycleEvent
             Log.e(NAME, "Failed to initialize Skia Manager!", exception);
             return false;
         }
-    }
-
-    @Override
-    public void onHostResume() {
-        if(skiaManager != null) skiaManager.onHostResume();
-    }
-
-    @Override
-    public void onHostPause() {
-        if(skiaManager != null) skiaManager.onHostPause();
-    }
-
-    @Override
-    public void onHostDestroy() {
-
     }
 }
