@@ -97,6 +97,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
           root={root.dom}
           onLayout={onLayout}
           debug={debug}
+          mode={mode}
           {...props}
         />
       );
@@ -104,6 +105,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       return (
         <SkiaJSDomView
           Skia={Skia}
+          mode={mode}
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ref={ref as any}
           style={style}

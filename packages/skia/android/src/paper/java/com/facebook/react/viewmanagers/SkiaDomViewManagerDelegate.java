@@ -22,7 +22,7 @@ public class SkiaDomViewManagerDelegate<T extends View, U extends BaseViewManage
   public void setProperty(T view, String propName, @Nullable Object value) {
     switch (propName) {
       case "debug":
-        mViewManager.setDebug(view, value == null ? false : (boolean) value);
+        mViewManager.setDebug(view, value != null && (boolean) value);
         break;
       default:
         super.setProperty(view, propName, value);
