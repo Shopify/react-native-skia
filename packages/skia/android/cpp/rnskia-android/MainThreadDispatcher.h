@@ -28,16 +28,16 @@ public:
     }
 
     void post(std::function<void()> task) {
-        if (ALooper_forThread() == mainLooper) {
-            task();
-        } else {
+        // if (ALooper_forThread() == mainLooper) {
+        //     task();
+        // } else {
             {
                 std::lock_guard<std::mutex> lock(queueMutex);
                 taskQueue.push(std::move(task));
             }
             char wake = 1;
             write(messagePipe[1], &wake, 1);
-        }
+       // }
     }
 
     ~MainThreadDispatcher() {
