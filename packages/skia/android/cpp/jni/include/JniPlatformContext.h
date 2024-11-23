@@ -49,14 +49,9 @@ private:
 
   float _pixelDensity;
 
-  std::queue<std::function<void()>> _taskCallbacks;
-
-  std::shared_ptr<std::mutex> _taskMutex;
-
   explicit JniPlatformContext(
       jni::alias_ref<JniPlatformContext::jhybridobject> jThis,
       const float pixelDensity)
-      : _taskMutex(std::make_shared<std::mutex>()),
-        javaPart_(jni::make_global(jThis)), _pixelDensity(pixelDensity) {}
+      : javaPart_(jni::make_global(jThis)), _pixelDensity(pixelDensity) {}
 };
 } // namespace RNSkia

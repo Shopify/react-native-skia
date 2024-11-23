@@ -27,9 +27,6 @@ public class PlatformContext {
 
     private final String TAG = "PlatformContext";
 
-    private final Handler mainHandler = new Handler(Looper.getMainLooper());
-
-
     public PlatformContext(ReactContext reactContext) {
         mContext = reactContext;
         mHybridData = initHybrid(reactContext.getResources().getDisplayMetrics().density);
@@ -50,31 +47,9 @@ public class PlatformContext {
         return buffer.toByteArray();
     }
 
-
-
-    @DoNotStrip
-    public void notifyTaskReadyOnMainThread() {
-        mainHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                notifyTaskReady();
-            }
-        });
-    }
-
     @DoNotStrip
     Object takeScreenshotFromViewTag(int tag) {
         return ViewScreenshotService.makeViewScreenshotFromTag(mContext, tag);
-    }
-
-    @DoNotStrip
-    public void raise(final String message) {
-        mainHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mContext.handleException(new Exception(message));
-            }
-        });
     }
 
     @DoNotStrip
@@ -132,5 +107,4 @@ public class PlatformContext {
 
     // Private c++ native methods
     private native HybridData initHybrid(float pixelDensity);
-    private native void notifyTaskReady();
 }

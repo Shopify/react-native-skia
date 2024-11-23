@@ -63,8 +63,6 @@ using TSelf = jni::local_ref<JniPlatformContext::jhybriddata>;
 void JniPlatformContext::registerNatives() {
   registerHybrid({
       makeNativeMethod("initHybrid", JniPlatformContext::initHybrid),
-      makeNativeMethod("notifyTaskReady",
-                       JniPlatformContext::notifyTaskReadyExternal),
   });
 }
 
@@ -130,31 +128,6 @@ sk_sp<SkImage> JniPlatformContext::takeScreenshotFromViewTag(size_t tag) {
 
   // Return our newly created SkImage!
   return skImage;
-}
-
-// TODO: delete
-void JniPlatformContext::runTaskOnMainThread(std::function<void()> task) {
-  _taskMutex->lock();
-  _taskCallbacks.push(task);
-  _taskMutex->unlock();
-
-  // Notify Java that task is ready
-  static auto method = javaPart_->getClass()->getMethod<void(void)>(
-      "notifyTaskReadyOnMainThread");
-  method(javaPart_.get());
-}
-
-void JniPlatformContext::notifyTaskReadyExternal() {
-  jni::ThreadScope ts;
-  _taskMutex->lock();
-  auto task = _taskCallbacks.front();
-  if (task != nullptr) {
-    _taskCallbacks.pop();
-    _taskMutex->unlock();
-    task();
-  } else {
-    _taskMutex->unlock();
-  }
 }
 
 void JniPlatformContext::performStreamOperation(
