@@ -27,6 +27,7 @@ export const useCanvasRef = () => useRef<SkiaDomView>(null);
 export interface CanvasProps extends SkiaBaseViewProps {
   ref?: RefObject<SkiaDomView>;
   children: ReactNode;
+  mode?: "default" | "continuous";
 }
 
 const useOnSizeEvent = (
@@ -54,7 +55,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       children,
       style,
       debug,
-      mode,
+      mode = "default",
       onSize: _onSize,
       onLayout: _onLayout,
       ...props
@@ -95,7 +96,6 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
           style={style}
           root={root.dom}
           onLayout={onLayout}
-          mode={mode}
           debug={debug}
           {...props}
         />
@@ -109,7 +109,6 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
           style={style}
           root={root.dom}
           onLayout={onLayout}
-          mode={mode}
           debug={debug}
           {...props}
         />

@@ -4,8 +4,6 @@ import type { GroupProps, RenderNode } from "../dom/types";
 import type { SkImage, SkPicture, SkRect, SkSize } from "../skia/types";
 import type { SharedValueType } from "../renderer/processors/Animations/Animations";
 
-export type DrawMode = "continuous" | "default";
-
 export type NativeSkiaViewProps = ViewProps & {
   debug?: boolean;
 };
@@ -36,10 +34,10 @@ export interface SkiaBaseViewProps extends ViewProps {
   onSize?: SharedValueType<SkSize>;
 }
 
-export interface SkiaPictureViewProps extends SkiaBaseViewProps {
+export interface SkiaPictureViewNativeProps extends SkiaBaseViewProps {
   picture?: SkPicture;
 }
 
-export interface SkiaDomViewProps extends SkiaBaseViewProps {
+export interface SkiaDomViewNativeProps extends SkiaBaseViewProps {
   root?: RenderNode<GroupProps>;
 }

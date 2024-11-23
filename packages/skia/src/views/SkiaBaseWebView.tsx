@@ -6,7 +6,7 @@ import type { SkRect, SkCanvas } from "../skia/types";
 import { JsiSkSurface } from "../skia/web/JsiSkSurface";
 import { Platform } from "../Platform";
 
-import type { DrawMode, SkiaBaseViewProps } from "./types";
+import type { SkiaBaseViewProps } from "./types";
 
 const pd = Platform.PixelRatio;
 
@@ -21,7 +21,6 @@ export abstract class SkiaBaseWebView<
   private _unsubscriptions: Array<() => void> = [];
   private _canvas: SkCanvas | null = null;
   private _canvasRef = React.createRef<HTMLCanvasElement>();
-  private _mode: DrawMode;
   private _redrawRequests = 0;
   private requestId = 0;
 
@@ -105,7 +104,7 @@ export abstract class SkiaBaseWebView<
    * Sends a redraw request to the native SkiaView.
    */
   private tick() {
-    if (this._mode === "continuous" || this._redrawRequests > 0) {
+    if (this._redrawRequests > 0) {
       this._redrawRequests = 0;
       if (this._canvas) {
         const canvas = this._canvas!;
@@ -124,24 +123,10 @@ export abstract class SkiaBaseWebView<
     this._redrawRequests++;
   }
 
-  /**
-   * Updates the drawing mode for the skia view. This is the same
-   * as declaratively setting the mode property on the SkiaView.
-   * There are two drawing modes, "continuous" and "default",
-   * where the continuous mode will continuously redraw the view and
-   * the default mode will only redraw when any of the regular react
-   * properties are changed like size and margins.
-   * @param mode Drawing mode to use.
-   */
-  public setDrawMode(mode: DrawMode) {
-    this._mode = mode;
-    this.tick();
-  }
-
   private onLayout = this.onLayoutEvent.bind(this);
 
   render() {
-    const { mode, debug = false, ...viewProps } = this.props;
+    const { debug = false, ...viewProps } = this.props;
     return (
       <Platform.View {...viewProps} onLayout={this.onLayout}>
         <canvas ref={this._canvasRef} style={{ display: "flex", flex: 1 }} />
