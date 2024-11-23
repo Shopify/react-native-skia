@@ -6,6 +6,7 @@ import {
   Image,
   Skia,
 } from "@shopify/react-native-skia";
+import { PixelRatio } from "react-native";
 
 const pixels = new Uint8Array(256 * 256 * 4);
 pixels.fill(255);
@@ -27,12 +28,16 @@ const img = Skia.Image.MakeImage(
   256 * 4
 )!;
 
-const surface = Skia.Surface.MakeOffscreen(256, 256)!;
+const pd = PixelRatio.get();
+const surface = Skia.Surface.MakeOffscreen(256 * pd, 256 * pd)!;
 const canvas = surface.getCanvas();
+canvas.save();
+canvas.scale(pd, pd);
 canvas.drawColor(Skia.Color("cyan"));
 const paint = Skia.Paint();
 paint.setColor(Skia.Color("magenta"));
 canvas.drawCircle(128, 128, 128, paint);
+canvas.restore();
 const img1 = surface.makeImageSnapshot().makeNonTextureImage();
 
 export const Data = () => {
