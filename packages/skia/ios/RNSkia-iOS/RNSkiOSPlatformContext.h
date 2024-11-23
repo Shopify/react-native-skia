@@ -22,9 +22,6 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-static void handleNotification(CFNotificationCenterRef center, void *observer,
-                               CFStringRef name, const void *object,
-                               CFDictionaryRef userInfo);
 
 class RNSkiOSPlatformContext : public RNSkPlatformContext {
 public:
@@ -34,21 +31,12 @@ public:
       : RNSkPlatformContext(runtime, jsCallInvoker,
                             [[UIScreen mainScreen] scale]) {
 
-    // We need to make sure we invalidate when modules are freed
-    CFNotificationCenterAddObserver(
-        CFNotificationCenterGetLocalCenter(), this, &handleNotification,
-        (__bridge CFStringRef)RCTBridgeWillInvalidateModulesNotification, NULL,
-        CFNotificationSuspensionBehaviorDeliverImmediately);
-
     // Create screenshot manager
     _screenshotService =
         [[ViewScreenshotService alloc] initWithUiManager:bridge.uiManager];
   }
 
-  ~RNSkiOSPlatformContext() {
-    CFNotificationCenterRemoveEveryObserver(
-        CFNotificationCenterGetLocalCenter(), this);
-  }
+	~RNSkiOSPlatformContext() = default;
 
   void runOnMainThread(std::function<void()>) override;
 
@@ -79,11 +67,5 @@ public:
 private:
   ViewScreenshotService *_screenshotService;
 };
-
-static void handleNotification(CFNotificationCenterRef center, void *observer,
-                               CFStringRef name, const void *object,
-                               CFDictionaryRef userInfo) {
-  (static_cast<RNSkiOSPlatformContext *>(observer))->willInvalidateModules();
-}
 
 } // namespace RNSkia
