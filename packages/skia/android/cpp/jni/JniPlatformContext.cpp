@@ -132,6 +132,7 @@ sk_sp<SkImage> JniPlatformContext::takeScreenshotFromViewTag(size_t tag) {
   return skImage;
 }
 
+// TODO: delete
 void JniPlatformContext::runTaskOnMainThread(std::function<void()> task) {
   _taskMutex->lock();
   _taskCallbacks.push(task);

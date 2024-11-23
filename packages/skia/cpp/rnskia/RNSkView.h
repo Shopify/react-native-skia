@@ -176,10 +176,10 @@ public:
     if (!_redrawRequested) {
       _redrawRequested = true;
       _platformContext->runOnMainThread([this]() {
-		  if (_renderer) {
-			  _renderer->renderImmediate(_canvasProvider);
-			  _redrawRequested = false;
-		  }
+        if (_renderer) {
+          _renderer->renderImmediate(_canvasProvider);
+          _redrawRequested = false;
+        }
       });
     }
   }

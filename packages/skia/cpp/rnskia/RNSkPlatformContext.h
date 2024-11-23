@@ -9,7 +9,6 @@
 #include <unordered_map>
 #include <utility>
 
-#include "RNSkDispatchQueue.h"
 #include "RNSkVideo.h"
 #include "WindowContext.h"
 
@@ -42,9 +41,7 @@ public:
                       std::shared_ptr<react::CallInvoker> callInvoker,
                       float pixelDensity)
       : _pixelDensity(pixelDensity), _jsRuntime(runtime),
-        _callInvoker(callInvoker),
-        _dispatchQueue(
-            std::make_unique<RNSkDispatchQueue>("skia-render-thread")) {
+        _callInvoker(callInvoker) {
     _jsThreadId = std::this_thread::get_id();
   }
 
@@ -62,13 +59,6 @@ public:
    */
   void runOnJavascriptThread(std::function<void()> func) {
     _callInvoker->invokeAsync(std::move(func));
-  }
-
-  /**
-   Runs the function on the render thread
-   */
-  void runOnRenderThread(std::function<void()> func) {
-    _dispatchQueue->dispatch(std::move(func));
   }
 
   /**
@@ -174,7 +164,6 @@ private:
   float _pixelDensity;
   jsi::Runtime *_jsRuntime;
   std::shared_ptr<react::CallInvoker> _callInvoker;
-  std::unique_ptr<RNSkDispatchQueue> _dispatchQueue;
   std::thread::id _jsThreadId;
 };
 } // namespace RNSkia

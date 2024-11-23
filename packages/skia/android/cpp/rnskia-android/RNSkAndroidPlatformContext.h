@@ -17,6 +17,7 @@
 
 #include "AHardwareBufferUtils.h"
 #include "JniPlatformContext.h"
+#include "MainThreadDispatcher.h"
 #include "RNSkAndroidVideo.h"
 #include "RNSkPlatformContext.h"
 
@@ -159,7 +160,7 @@ public:
   }
 
   void runOnMainThread(std::function<void()> task) override {
-    _jniPlatformContext->runTaskOnMainThread(task);
+    MainThreadDispatcher::getInstance().post(std::move(task));
   }
 
   sk_sp<SkImage> takeScreenshotFromViewTag(size_t tag) override {
