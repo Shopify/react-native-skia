@@ -96,32 +96,6 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_HOST_FUNCTION(redraw) {
-    if (count != 1) {
-      _platformContext->raiseError(
-          std::string("requestRedraw: Expected 1 arguments, got " +
-                      std::to_string(count) + "."));
-
-      return jsi::Value::undefined();
-    }
-
-    if (!arguments[0].isNumber()) {
-      _platformContext->raiseError(
-          "requestRedraw: First argument must be a number");
-
-      return jsi::Value::undefined();
-    }
-
-    // find Skia View
-    int nativeId = arguments[0].asNumber();
-    std::lock_guard<std::mutex> lock(_mutex);
-    auto info = getEnsuredViewInfo(nativeId);
-    if (info->view != nullptr) {
-      info->view->redraw();
-    }
-    return jsi::Value::undefined();
-  }
-
   JSI_HOST_FUNCTION(makeImageSnapshot) {
     if (count < 1) {
       _platformContext->raiseError(
@@ -217,7 +191,6 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setJsiProperty),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, requestRedraw),
-                       JSI_EXPORT_FUNC(RNSkJsiViewApi, redraw),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshotAsync),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshot))
 

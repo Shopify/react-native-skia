@@ -49,6 +49,7 @@ public:
   /*
    Returns true if the current execution context is the javascript thread.
    */
+  // TODO: remove this function
   bool isOnJavascriptThread() {
     return _jsThreadId == std::this_thread::get_id();
   }
