@@ -53,7 +53,6 @@ protected:
         _skiaAndroidView->getSkiaView()->getNativeId(), nullptr);
     getSkiaManager()->unregisterSkiaView(
         _skiaAndroidView->getSkiaView()->getNativeId());
-    _skiaAndroidView->viewDidUnmount();
   }
 
 private:

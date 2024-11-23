@@ -76,8 +76,6 @@ public:
 #endif
   sk_sp<SkFontMgr> createFontMgr() override;
 
-  void willInvalidateModules() {}
-
 private:
   ViewScreenshotService *_screenshotService;
 };
