@@ -135,14 +135,14 @@ jobs:
           path: |
             ~/.gradle/wrapper
             ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('./apps/paper/android/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('./apps/fabric/android/gradle/wrapper/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('./apps/paper/android/gradle/wrapper/gradle-wrapper.properties') }}
             ${{ runner.os }}-gradle-
 
       - name: Build example for Android
         env:
           JAVA_OPTS: "-XX:MaxHeapSize=6g"
         run: |
-          yarn turbo run build:android --concurrency 1 --force
+          yarn turbo run build:android --concurrency 1 --filter=paper --force
 
   build-android:
     runs-on: macos-latest-large
