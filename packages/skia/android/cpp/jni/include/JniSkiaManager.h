@@ -53,8 +53,6 @@ public:
   std::shared_ptr<RNSkManager> getSkiaManager() { return _skManager; }
 
   void invalidate() {
-    _context->stopDrawLoop();
-    _context->notifyDrawLoop(true);
     _skManager = nullptr;
     _context = nullptr;
   }

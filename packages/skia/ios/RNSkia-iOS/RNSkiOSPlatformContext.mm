@@ -192,6 +192,12 @@ sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeBuffer(void *buffer) {
 #endif
 }
 
+#if !defined(SK_GRAPHITE)
+GrDirectContext *RNSkiOSPlatformContext::getDirectContext() {
+  return MetalContext::getInstance().getDirectContext();
+}
+#endif
+
 sk_sp<SkFontMgr> RNSkiOSPlatformContext::createFontMgr() {
   return SkFontMgr_New_CoreText(nullptr);
 }
@@ -206,22 +212,6 @@ sk_sp<SkImage>
 RNSkiOSPlatformContext::takeScreenshotFromViewTag(size_t viewTag) {
   return [_screenshotService
       screenshotOfViewWithTag:[NSNumber numberWithLong:viewTag]];
-}
-
-void RNSkiOSPlatformContext::startDrawLoop() {
-  if (_displayLink == nullptr) {
-    _displayLink = [[DisplayLink alloc] init];
-    [_displayLink start:^(double time) {
-      notifyDrawLoop(false);
-    }];
-  }
-}
-
-void RNSkiOSPlatformContext::stopDrawLoop() {
-  if (_displayLink != nullptr) {
-    [_displayLink stop];
-    _displayLink = nullptr;
-  }
 }
 
 } // namespace RNSkia

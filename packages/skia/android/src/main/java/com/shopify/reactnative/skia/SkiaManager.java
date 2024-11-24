@@ -43,10 +43,6 @@ public class SkiaManager {
         return mPlatformContext;
     }
 
-    public void onHostResume() { mPlatformContext.onResume(); }
-
-    public void onHostPause() {  mPlatformContext.onPause(); }
-
     // private C++ functions
     private native HybridData initHybrid(long jsContext, RuntimeExecutor runtimeExecutor,
             PlatformContext platformContext);

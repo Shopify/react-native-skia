@@ -11,7 +11,6 @@
 @implementation SkiaUIView {
   std::shared_ptr<RNSkBaseiOSView> _impl;
   RNSkia::RNSkManager *_manager;
-  RNSkia::RNSkDrawingMode _drawingMode;
   std::function<std::shared_ptr<RNSkBaseiOSView>(
       std::shared_ptr<RNSkia::RNSkPlatformContext>)>
       _factory;
@@ -45,7 +44,6 @@
   _manager = manager;
   _nativeId = 0;
   _debugMode = false;
-  _drawingMode = RNSkia::RNSkDrawingMode::Default;
   _factory = factory;
 }
 
@@ -86,7 +84,6 @@
       if (_nativeId != 0) {
         _manager->setSkiaView(_nativeId, _impl->getDrawView());
       }
-      _impl->getDrawView()->setDrawingMode(_drawingMode);
       _impl->getDrawView()->setShowDebugOverlays(_debugMode);
     }
   }
@@ -131,7 +128,7 @@
   // We override drawRect to ensure we to direct rendering when the
   // underlying OS view needs to render:
   if (_impl != nullptr) {
-    _impl->getDrawView()->renderImmediate();
+    _impl->getDrawView()->redraw();
   }
 }
 
@@ -145,16 +142,6 @@
 }
 
 #pragma mark Properties
-
-- (void)setDrawingMode:(std::string)mode {
-  _drawingMode = mode.compare("continuous") == 0
-                     ? RNSkia::RNSkDrawingMode::Continuous
-                     : RNSkia::RNSkDrawingMode::Default;
-
-  if (_impl != nullptr) {
-    _impl->getDrawView()->setDrawingMode(_drawingMode);
-  }
-}
 
 - (void)setDebugMode:(bool)debugMode {
   _debugMode = debugMode;

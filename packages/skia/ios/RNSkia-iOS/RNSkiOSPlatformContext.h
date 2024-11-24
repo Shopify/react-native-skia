@@ -7,7 +7,6 @@
 #include <memory>
 #include <string>
 
-#include "DisplayLink.h"
 #include "RNSkPlatformContext.h"
 #include "ViewScreenshotService.h"
 
@@ -49,11 +48,7 @@ public:
   ~RNSkiOSPlatformContext() {
     CFNotificationCenterRemoveEveryObserver(
         CFNotificationCenterGetLocalCenter(), this);
-    stopDrawLoop();
   }
-
-  void startDrawLoop() override;
-  void stopDrawLoop() override;
 
   void runOnMainThread(std::function<void()>) override;
 
@@ -76,15 +71,14 @@ public:
 
   void raiseError(const std::exception &err) override;
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override;
+#if !defined(SK_GRAPHITE)
+  GrDirectContext *getDirectContext() override;
+#endif
   sk_sp<SkFontMgr> createFontMgr() override;
 
-  void willInvalidateModules() {
-    // We need to do some house-cleaning here!
-    invalidate();
-  }
+  void willInvalidateModules() {}
 
 private:
-  DisplayLink *_displayLink;
   ViewScreenshotService *_screenshotService;
 };
 
