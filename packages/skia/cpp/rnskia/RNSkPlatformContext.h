@@ -41,8 +41,7 @@ public:
                       std::shared_ptr<react::CallInvoker> callInvoker,
                       float pixelDensity)
       : _pixelDensity(pixelDensity), _jsRuntime(runtime),
-        _callInvoker(callInvoker) {
-  }
+        _callInvoker(callInvoker) {}
 
   virtual ~RNSkPlatformContext() = default;
 
