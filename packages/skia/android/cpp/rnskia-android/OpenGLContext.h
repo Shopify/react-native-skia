@@ -16,6 +16,30 @@
 
 namespace RNSkia {
 
+class OpenGLSharedContext {
+public:
+  OpenGLSharedContext(const OpenGLSharedContext &) = delete;
+  OpenGLSharedContext &operator=(const OpenGLSharedContext &) = delete;
+
+  static OpenGLSharedContext &getInstance() {
+    static OpenGLSharedContext instance;
+    return instance;
+  }
+
+  gl::Display* getDisplay() { return _glDisplay.get(); }
+  gl::Context* getContext() { return _glContext.get(); }
+
+private:
+  std::unique_ptr<gl::Display> _glDisplay;
+  std::unique_ptr<gl::Context> _glContext;
+
+  OpenGLSharedContext() {
+    _glDisplay = std::make_unique<gl::Display>();
+    auto glConfig = _glDisplay->chooseConfig();
+    _glContext = _glDisplay->makeContext(glConfig, nullptr);
+  }
+}
+
 class OpenGLContext {
 public:
   friend class OpenGLWindowContext;
@@ -128,24 +152,24 @@ public:
   // TODO: remove width, height
   std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window, int width,
                                             int height) {
+    auto display = OpenGLSharedContext::getInstance().getDisplay();
     return std::make_unique<OpenGLWindowContext>(
-        _directContext.get(), _glDisplay.get(), _glContext.get(), window);
+        _directContext.get(), display, _glContext.get(), window);
   }
 
   GrDirectContext *getDirectContext() { return _directContext.get(); }
 
 private:
-  EGLConfig _glConfig;
-  std::unique_ptr<gl::Display> _glDisplay;
   std::unique_ptr<gl::Context> _glContext;
   std::unique_ptr<gl::Surface> _glSurface;
   sk_sp<GrDirectContext> _directContext;
 
   OpenGLContext() {
-    _glDisplay = std::make_unique<gl::Display>();
-    _glConfig = _glDisplay->chooseConfig();
-    _glContext = _glDisplay->makeContext(_glConfig, nullptr);
-    _glSurface = _glDisplay->makePixelBufferSurface(_glConfig, 1, 1);
+    auto display = OpenGLSharedContext::getInstance().getDisplay();
+    auto sharedContext = OpenGLSharedContext::getInstance().getContext();
+    auto glConfig = _glDisplay->chooseConfig();
+    _glContext = _glDisplay->makeContext(glConfig, sharedContext);
+    _glSurface = _glDisplay->makePixelBufferSurface(glConfig, 1, 1);
     _glContext->makeCurrent(_glSurface.get());
     auto backendInterface = GrGLMakeNativeInterface();
     _directContext = GrDirectContexts::MakeGL(backendInterface);
