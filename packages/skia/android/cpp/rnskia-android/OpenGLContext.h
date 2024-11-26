@@ -38,7 +38,7 @@ private:
     auto glConfig = _glDisplay->chooseConfig();
     _glContext = _glDisplay->makeContext(glConfig, nullptr);
   }
-}
+};
 
 class OpenGLContext {
 public:
@@ -167,9 +167,9 @@ private:
   OpenGLContext() {
     auto display = OpenGLSharedContext::getInstance().getDisplay();
     auto sharedContext = OpenGLSharedContext::getInstance().getContext();
-    auto glConfig = _glDisplay->chooseConfig();
-    _glContext = _glDisplay->makeContext(glConfig, sharedContext);
-    _glSurface = _glDisplay->makePixelBufferSurface(glConfig, 1, 1);
+    auto glConfig = display->chooseConfig();
+    _glContext = display->makeContext(glConfig, sharedContext);
+    _glSurface = display->makePixelBufferSurface(glConfig, 1, 1);
     _glContext->makeCurrent(_glSurface.get());
     auto backendInterface = GrGLMakeNativeInterface();
     _directContext = GrDirectContexts::MakeGL(backendInterface);
