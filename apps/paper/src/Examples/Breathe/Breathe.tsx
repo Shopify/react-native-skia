@@ -1,5 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { StyleSheet, useWindowDimensions, View } from "react-native";
+import type { SkImage } from "@shopify/react-native-skia";
 import {
   BlurMask,
   vec,
@@ -9,9 +10,16 @@ import {
   Group,
   polar2Canvas,
   mix,
+  Skia,
+  Image,
+  useCanvasRef,
 } from "@shopify/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
-import { useDerivedValue } from "react-native-reanimated";
+import {
+  runOnUI,
+  useDerivedValue,
+  useSharedValue,
+} from "react-native-reanimated";
 
 import { useLoop } from "../../components/Animations";
 
@@ -52,7 +60,18 @@ const Ring = ({ index, progress }: RingProps) => {
   );
 };
 
+const surface = Skia.Surface.MakeOffscreen(256, 256)!;
+surface.getCanvas().drawColor(Skia.Color("cyan"));
+const paint = Skia.Paint();
+paint.setColor(Skia.Color("red"));
+surface.getCanvas().drawCircle(128, 128, 128, paint);
+surface.flush();
+const jsImg = surface.makeImageSnapshot();
+jsImg.makeShareable();
+
 export const Breathe = () => {
+  const ref = useCanvasRef();
+  const image = useSharedValue<null | SkImage>(null);
   const { width, height } = useWindowDimensions();
   const center = useMemo(
     () => vec(width / 2, height / 2 - 64),
@@ -61,14 +80,19 @@ export const Breathe = () => {
 
   const progress = useLoop({ duration: 3000 });
 
-  const transform = useDerivedValue(
-    () => [{ rotate: mix(progress.value, -Math.PI, 0) }],
-    [progress]
-  );
+  const transform = useDerivedValue(() => {
+    return [{ rotate: mix(progress.value, -Math.PI, 0) }];
+  }, [progress]);
+
+  useEffect(() => {
+    runOnUI(() => {
+      image.value = jsImg.transferToCurrentContext();
+    })();
+  }, [image]);
 
   return (
     <View style={{ flex: 1 }}>
-      <Canvas style={styles.container}>
+      <Canvas style={styles.container} ref={ref}>
         <Fill color="rgb(36,43,56)" />
         <Group origin={center} transform={transform} blendMode="screen">
           <BlurMask style="solid" blur={40} />
@@ -76,6 +100,7 @@ export const Breathe = () => {
             return <Ring key={index} index={index} progress={progress} />;
           })}
         </Group>
+        <Image image={image} x={0} y={0} width={256} height={256} />
       </Canvas>
     </View>
   );

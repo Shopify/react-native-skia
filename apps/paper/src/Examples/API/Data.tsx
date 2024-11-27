@@ -38,13 +38,13 @@ const paint = Skia.Paint();
 paint.setColor(Skia.Color("magenta"));
 canvas.drawCircle(128, 128, 128, paint);
 canvas.restore();
-const img1 = surface.makeImageSnapshot().makeNonTextureImage();
+//const img1 = surface.makeImageSnapshot().makeNonTextureImage();
 
 export const Data = () => {
   return (
     <Canvas style={{ width: 256, height: 512 }}>
       <Image image={img} x={0} y={0} width={256} height={256} fit="cover" />
-      <Image image={img1} x={0} y={256} width={256} height={256} fit="cover" />
+      {/* <Image image={img1} x={0} y={256} width={256} height={256} fit="cover" /> */}
     </Canvas>
   );
 };

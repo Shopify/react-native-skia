@@ -74,8 +74,9 @@ public:
     auto recording = surface->recorder()->snap();
     DawnContext::getInstance().submitRecording(recording.get());
 #endif
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+      auto result = std::make_shared<JsiSkImage>(getContext(), std::move(image));
+      return jsi::Object::createFromHostObject(
+        runtime, result);
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurface, width),

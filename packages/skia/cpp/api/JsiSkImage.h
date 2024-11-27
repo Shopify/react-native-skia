@@ -15,6 +15,8 @@
 #if defined(SK_GRAPHITE)
 #include "DawnContext.h"
 #include "include/gpu/graphite/Context.h"
+#else
+#include "OpenGLContext.h"
 #endif
 
 #pragma clang diagnostic push
@@ -37,6 +39,8 @@ namespace jsi = facebook::jsi;
 
 class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
 public:
+  void* sharedImage;
+
   // TODO-API: Properties?
   JSI_HOST_FUNCTION(width) { return static_cast<double>(getObject()->width()); }
   JSI_HOST_FUNCTION(height) {
@@ -46,6 +50,11 @@ public:
   JSI_HOST_FUNCTION(getImageInfo) {
     return JsiSkImageInfo::toValue(runtime, getContext(),
                                    getObject()->imageInfo());
+  }
+
+  JSI_HOST_FUNCTION(makeShareable) {
+      sharedImage = OpenGLContext::getInstance().shareImage(getObject());
+      return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(makeShaderOptions) {
@@ -215,6 +224,13 @@ public:
         runtime, std::make_shared<JsiSkImage>(getContext(), rasterImage));
   }
 
+  JSI_HOST_FUNCTION(transferToCurrentContext) {
+    auto image = getObject();
+    auto textureImage = OpenGLContext::getInstance().importImage(sharedImage, image->width(), image->height());
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkImage>(getContext(), textureImage));
+  }
+
   EXPORT_JSI_API_TYPENAME(JsiSkImage, Image)
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImage, width),
@@ -226,6 +242,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkImage, encodeToBase64),
                        JSI_EXPORT_FUNC(JsiSkImage, readPixels),
                        JSI_EXPORT_FUNC(JsiSkImage, makeNonTextureImage),
+                       JSI_EXPORT_FUNC(JsiSkImage, transferToCurrentContext),
+                       JSI_EXPORT_FUNC(JsiSkImage, makeShareable),
                        JSI_EXPORT_FUNC(JsiSkImage, dispose))
 
   JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
