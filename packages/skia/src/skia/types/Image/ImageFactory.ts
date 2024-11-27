@@ -10,6 +10,7 @@ export enum AlphaType {
   Unpremul,
 }
 
+// the ordering must match the C++ enum SkColorType in skia/include/core/SkColorType.h
 export enum ColorType {
   Unknown, // uninitialized
   Alpha_8, // pixel with alpha in 8-bit byte
@@ -23,10 +24,12 @@ export enum ColorType {
   RGB_101010x, // pixel with 10 bits each for red, green, blue; in 32-bit word
   BGR_101010x, // pixel with 10 bits each for blue, green, red; in 32-bit word
   BGR_101010x_XR, // pixel with 10 bits each for blue, green, red; in 32-bit word, extended range
+  BGRA_10101010_XR, // pixel with 10 bits each for blue, green, red, alpha; in 64-bit word, extended range
   RGBA_10x6, // pixel with 10 used bits (most significant) followed by 6 unused
   Gray_8, // pixel with grayscale level in 8-bit byte
   RGBA_F16Norm, // pixel with half floats in [0,1] for red, green, blue, alpha; in 64-bit word
   RGBA_F16, // pixel with half floats for red, green, blue, alpha; in 64-bit word
+  RGB_F16F16F16x, // pixel with half floats for red, green, blue; in 64-bit word
   RGBA_F32, // pixel using C float for red, green, blue, alpha; in 128-bit word
 }
 
