@@ -14,16 +14,6 @@
 
 namespace RNSkia {
 
-OpenGLWindowContext::OpenGLWindowContext(OpenGLContext *context,
-                                         ANativeWindow *window)
-    : _context(context), _window(window) {
-  ANativeWindow_acquire(_window);
-  _width = ANativeWindow_getWidth(_window);
-  _height = ANativeWindow_getHeight(_window);
-  _glSurface =
-      _context->_glDisplay->makeWindowSurface(_context->_glConfig, _window);
-}
-
 sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
   if (_skSurface == nullptr) {
     _glContext->makeCurrent(_glSurface.get());
