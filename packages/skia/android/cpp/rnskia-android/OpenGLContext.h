@@ -106,7 +106,8 @@ public:
         }
 
         glEGLImageTargetTexture2DOES(target, eglImage);
-        _glContext->makeCurrent(_glSurface.get());
+            glFinish();
+
 
         // Reset context state since we modified it
         _directContext->resetContext(kTextureBinding_GrGLBackendState);
@@ -177,6 +178,10 @@ public:
             LOG_EGL_ERROR;
             return nullptr;
         }
+         EGLSyncKHR sync = eglCreateSyncKHR(display->getHandle(), EGL_SYNC_FENCE_KHR, nullptr);
+    eglClientWaitSyncKHR(display->getHandle(), sync, EGL_SYNC_FLUSH_COMMANDS_BIT_KHR, EGL_FOREVER_KHR);
+    eglDestroySyncKHR(display->getHandle(), sync);
+   
     return eglImage;
   }
 
