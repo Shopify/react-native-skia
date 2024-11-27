@@ -49,6 +49,18 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
   if (_surfaceHolder != nullptr && cb != nullptr) {
     // Get the surface
     auto surface = _surfaceHolder->getSurface();
+    if (_jSurfaceTexture) {
+      JNIEnv *env = facebook::jni::Environment::current();
+      env->CallVoidMethod(_jSurfaceTexture, _updateTexImageMethod);
+
+      // Check for exceptions
+      if (env->ExceptionCheck()) {
+        RNSkLogger::logToConsole(
+            "updateAndRelease() failed. The exception above "
+            "can safely be ignored");
+        env->ExceptionClear();
+      }
+    }
     if (surface) {
       // Draw into canvas using callback
       cb(surface->getCanvas());
@@ -64,16 +76,37 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
   return false;
 }
 
-
-void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurface,
-                                                int width, int height, bool opaque) {
+void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurfaceTexture,
+                                                int width, int height,
+                                                bool opaque) {
   // Release the old surface
   _surfaceHolder = nullptr;
 
   // Create renderer!
+  ANativeWindow *window = nullptr;
   JNIEnv *env = facebook::jni::Environment::current();
-  // Acquire the native window from the Surface
-  auto window = ANativeWindow_fromSurface(env, jSurface);
+  if (!opaque) {
+    _jSurfaceTexture = env->NewGlobalRef(jSurfaceTexture);
+    jclass surfaceClass = env->FindClass("android/view/Surface");
+    jmethodID surfaceConstructor = env->GetMethodID(
+        surfaceClass, "<init>", "(Landroid/graphics/SurfaceTexture;)V");
+    // Create a new Surface instance
+    auto jSurface =
+        env->NewObject(surfaceClass, surfaceConstructor, jSurfaceTexture);
+    window = ANativeWindow_fromSurface(env, jSurface);
+
+    jclass surfaceTextureClass = env->GetObjectClass(_jSurfaceTexture);
+    _updateTexImageMethod =
+        env->GetMethodID(surfaceTextureClass, "updateTexImage", "()V");
+
+    // Acquire the native window from the Surface
+    // Clean up local references
+    env->DeleteLocalRef(jSurface);
+    env->DeleteLocalRef(surfaceClass);
+    env->DeleteLocalRef(surfaceTextureClass);
+  } else {
+    window = ANativeWindow_fromSurface(env, jSurfaceTexture);
+  }
 #if defined(SK_GRAPHITE)
   _surfaceHolder = DawnContext::getInstance().MakeWindow(window, width, height);
 #else
@@ -88,24 +121,27 @@ void RNSkOpenGLCanvasProvider::surfaceDestroyed() {
   // destroy the renderer (a unique pointer so the dtor will be called
   // immediately.)
   _surfaceHolder = nullptr;
+  if (_jSurfaceTexture) {
+    JNIEnv *env = facebook::jni::Environment::current();
+    env->DeleteGlobalRef(_jSurfaceTexture);
+    _jSurfaceTexture = nullptr;
+  }
 }
 
 void RNSkOpenGLCanvasProvider::surfaceSizeChanged(jobject jSurface, int width,
                                                   int height, bool opaque) {
-  // Release the old surface
-  _surfaceHolder = nullptr;
   if (width == 0 && height == 0) {
     // Setting width/height to zero is nothing we need to care about when
     // it comes to invalidating the surface.
     return;
   }
 
-  JNIEnv *env = facebook::jni::Environment::current();
-  // Acquire the native window from the Surface
-  auto window = ANativeWindow_fromSurface(env, jSurface);
-  _surfaceHolder = nullptr;
-  _surfaceHolder =
-      OpenGLContext::getInstance().MakeWindow(window, width, height);
+  if (_surfaceHolder == nullptr) {
+    _surfaceHolder = nullptr;
+    surfaceAvailable(jSurface, width, height, opaque);
+  } else {
+    _surfaceHolder->resize(width, height);
+  }
 
   // Redraw after size change
   _requestRedraw();

@@ -48,11 +48,13 @@ public:
   }
 
 protected:
-  void surfaceAvailable(jobject surface, int width, int height, bool opaque) override {
+  void surfaceAvailable(jobject surface, int width, int height,
+                        bool opaque) override {
     JniSkiaBaseView::surfaceAvailable(surface, width, height, opaque);
   }
 
-  void surfaceSizeChanged(jobject surface, int width, int height, bool opaque) override {
+  void surfaceSizeChanged(jobject surface, int width, int height,
+                          bool opaque) override {
     JniSkiaBaseView::surfaceSizeChanged(surface, width, height, opaque);
   }
 
