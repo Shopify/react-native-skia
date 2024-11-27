@@ -173,10 +173,17 @@ public:
   void requestRedraw() {
     if (!_redrawRequested) {
       _redrawRequested = true;
-      _platformContext->runOnMainThread([this]() {
-        if (_renderer) {
-          _renderer->renderImmediate(_canvasProvider);
-          _redrawRequested = false;
+      // Capture a weak pointer to this
+      auto weakThis = std::weak_ptr<RNSkView>(shared_from_this());
+
+      _platformContext->runOnMainThread([weakThis]() {
+        // Try to lock the weak pointer
+        if (auto strongThis = weakThis.lock()) {
+          // Only proceed if the object still exists
+          if (strongThis->_renderer) {
+            strongThis->_renderer->renderImmediate(strongThis->_canvasProvider);
+            strongThis->_redrawRequested = false;
+          }
         }
       });
     }
