@@ -1,7 +1,6 @@
 import React from "react";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { NavigationContainer } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { HomeScreen } from "./HomeScreen";
@@ -34,7 +33,7 @@ export const Chat = () => {
           name="ChatIndex"
           component={ChatScreen}
           options={{
-            animation: "ios",
+            animation: "ios_from_right",
             headerBackTitleVisible: false,
             headerTintColor: "black",
           }}

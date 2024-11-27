@@ -1283,7 +1283,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-wgpu (0.1.19):
+  - react-native-wgpu (0.1.20):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1650,7 +1650,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (3.34.0):
+  - RNScreens (4.3.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1937,7 +1937,7 @@ SPEC CHECKSUMS:
   react-native-safe-area-context: ab8f4a3d8180913bd78ae75dd599c94cce3d5e9a
   react-native-skia: 1549ee5068efc5a004b84b2e0ba109c6234e2fde
   react-native-slider: 97ce0bd921f40de79cead9754546d5e4e7ba44f8
-  react-native-wgpu: 8d0437a304318e0e3d6ccbfed2a39880f8eae4dd
+  react-native-wgpu: efaa8c7c3ae15b346d887d13cca2fe72ed5ea105
   React-nativeconfig: 57781b79e11d5af7573e6f77cbf1143b71802a6d
   React-NativeModulesApple: 7ff2e2cfb2e5fa5bdedcecf28ce37e696c6ef1e1
   React-perflogger: 8a360ccf603de6ddbe9ff8f54383146d26e6c936
@@ -1966,7 +1966,7 @@ SPEC CHECKSUMS:
   ReactCommon: 6ef348087d250257c44c0204461c03f036650e9b
   RNGestureHandler: 939f21fabf5d45a725c0bf175eb819dd25cf2e70
   RNReanimated: 190c12cb20dfa828353e99775beaa1bdf36e7ed9
-  RNScreens: 19719a9c326e925498ac3b2d35c4e50fe87afc06
+  RNScreens: b03d696c70cc5235ce4587fcc27ae1a93a48f98c
   RNSVG: 5da7a24f31968ec74f0b091e3440080f347e279b
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
   Yoga: 2a45d7e59592db061217551fd3bbe2dd993817ae

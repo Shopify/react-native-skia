@@ -14,8 +14,6 @@ const ratio = PixelRatio.get();
 interface OnscreenCanvasState {
   forceRerender: boolean;
 }
-
-const getNativeSurface = global.RNWebGPU?.getNativeSurface;
 function useSkiaContext() {
   const { ref, context } = useGPUContext();
   const state = useSharedValue<{
@@ -33,6 +31,8 @@ function useSkiaContext() {
     cachedSurface: null,
     cachedCanvas: null,
   });
+
+  const getNativeSurface = RNWebGPU?.getNativeSurface;
 
   const createContext = useCallback(
     (currentContextId?: number) => {
@@ -55,7 +55,7 @@ function useSkiaContext() {
         nativeSurface.height * ratio
       );
     },
-    [state]
+    [state, getNativeSurface]
   );
 
   useEffect(() => {
