@@ -1,5 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { StyleSheet, useWindowDimensions, View } from "react-native";
+import type { SkImage, SkSurface } from "@shopify/react-native-skia";
 import {
   BlurMask,
   vec,
@@ -9,9 +10,17 @@ import {
   Group,
   polar2Canvas,
   mix,
+  Skia,
+  Image,
 } from "@shopify/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
-import { useDerivedValue } from "react-native-reanimated";
+import {
+  runOnJS,
+  runOnUI,
+  useAnimatedReaction,
+  useDerivedValue,
+  useSharedValue,
+} from "react-native-reanimated";
 
 import { useLoop } from "../../components/Animations";
 
@@ -53,6 +62,9 @@ const Ring = ({ index, progress }: RingProps) => {
 };
 
 export const Breathe = () => {
+  const surface = useSharedValue<SkSurface | null>(null);
+  const image = useSharedValue<SkImage | null>(null);
+  const done = useSharedValue(false);
   const { width, height } = useWindowDimensions();
   const center = useMemo(
     () => vec(width / 2, height / 2 - 64),
@@ -66,6 +78,41 @@ export const Breathe = () => {
     [progress]
   );
 
+  // const image = useDerivedValue(() => {
+  //   if (!surface.value) {
+  //     return null;
+  //   }
+  //   surface.value.getCanvas().drawColor(Skia.Color("rgba(60, 120, 180, 0.5)"));
+  //   surface.value.flush();
+  //   return surface.value?.makeImageSnapshot();
+  // });
+
+  const cb = () => {
+    //surface.value!.drawExample();
+    done.value = true;
+  };
+
+  useEffect(() => {
+    runOnUI(() => {
+      surface.value = Skia.Surface.MakeOffscreen(256, 256)!;
+      //surface.value.getDDL();
+      runOnJS(cb)();
+    })();
+  });
+
+  useAnimatedReaction(
+    () => done.value,
+    () => {
+      if (done.value) {
+        surface.value?.getCanvas().drawColor(Skia.Color("pink"));
+        // surface.value.drawDDL();
+        //surface.value.flush();
+        image.value = surface.value?.makeImageSnapshot();
+        done.value = false;
+      }
+    }
+  );
+
   return (
     <View style={{ flex: 1 }}>
       <Canvas style={styles.container}>
@@ -76,6 +123,7 @@ export const Breathe = () => {
             return <Ring key={index} index={index} progress={progress} />;
           })}
         </Group>
+        <Image image={image} x={0} y={0} width={256} height={256} />
       </Canvas>
     </View>
   );
