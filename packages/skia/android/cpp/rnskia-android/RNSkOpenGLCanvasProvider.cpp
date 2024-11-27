@@ -66,7 +66,9 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
 
 
 void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurface,
-                                                int width, int height) {
+                                                int width, int height, bool opaque) {
+  // Release the old surface
+  _surfaceHolder = nullptr;
 
   // Create renderer!
   JNIEnv *env = facebook::jni::Environment::current();
@@ -89,7 +91,9 @@ void RNSkOpenGLCanvasProvider::surfaceDestroyed() {
 }
 
 void RNSkOpenGLCanvasProvider::surfaceSizeChanged(jobject jSurface, int width,
-                                                  int height) {
+                                                  int height, bool opaque) {
+  // Release the old surface
+  _surfaceHolder = nullptr;
   if (width == 0 && height == 0) {
     // Setting width/height to zero is nothing we need to care about when
     // it comes to invalidating the surface.

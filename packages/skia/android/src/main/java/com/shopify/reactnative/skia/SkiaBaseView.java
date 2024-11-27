@@ -1,6 +1,7 @@
 package com.shopify.reactnative.skia;
 
 import android.content.Context;
+import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.util.Log;
 import android.view.Surface;
@@ -16,11 +17,11 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
 
     public SkiaBaseView(Context context) {
         super(context);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            mView = new SkiaAHBView(context, this, debug);
-        } else {
-            mView = new SkiaTextureView(context, this, debug);
-        }
+        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        //    mView = new SkiaAHBView(context, this, debug);
+        //} else {
+        mView = new SkiaTextureView(context, this, debug);
+       // }
         addView(mView);
     }
 
@@ -33,6 +34,9 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
     }
 
     void dropInstance() {
+        if (mView instanceof SkiaTextureView) {
+            ((SkiaTextureView) mView).dropInstance();
+        }
         unregisterView();
     }
 
@@ -44,13 +48,24 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
 
     @Override
     public void onSurfaceCreated(Surface surface, int width, int height) {
-        surfaceAvailable(surface, width, height);
+        surfaceAvailable(surface, width, height, true);
     }
 
     @Override
     public void onSurfaceChanged(Surface surface, int width, int height) {
         Log.i(tag, "onSurfaceTextureSizeChanged " + width + "/" + height);
-        surfaceSizeChanged(surface, width, height);
+        surfaceSizeChanged(surface, width, height, true);
+    }
+
+    @Override
+    public void onSurfaceTextureCreated(SurfaceTexture surface, int width, int height) {
+        surfaceAvailable(surface, width, height, false);
+    }
+
+    @Override
+    public void onSurfaceTextureChanged(SurfaceTexture surface, int width, int height) {
+        Log.i(tag, "onSurfaceTextureSizeChanged " + width + "/" + height);
+        surfaceSizeChanged(surface, width, height, false);
     }
 
     @Override
@@ -58,9 +73,9 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
         surfaceDestroyed();
     }
 
-    protected abstract void surfaceAvailable(Object surface, int width, int height);
+    protected abstract void surfaceAvailable(Object surface, int width, int height, boolean opaque);
 
-    protected abstract void surfaceSizeChanged(Object surface, int width, int height);
+    protected abstract void surfaceSizeChanged(Object surface, int width, int height, boolean opaque);
 
     protected abstract void surfaceDestroyed();
 
