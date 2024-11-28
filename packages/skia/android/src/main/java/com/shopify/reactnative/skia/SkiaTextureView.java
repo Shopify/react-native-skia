@@ -16,6 +16,8 @@ public class SkiaTextureView extends TextureView implements TextureView.SurfaceT
     SkiaViewAPI mApi;
     boolean mDebug;
 
+    public boolean isDropped = false;
+
     public SkiaTextureView(Context context, SkiaViewAPI api, boolean debug) {
         super(context);
         mApi = api;
@@ -56,13 +58,22 @@ public class SkiaTextureView extends TextureView implements TextureView.SurfaceT
 
     @Override
     public void onSurfaceTextureSizeChanged(@NonNull SurfaceTexture surfaceTexture, int width, int height) {
+        if (isDropped) {
+            return;
+        }
         mApi.onSurfaceTextureCreated(surfaceTexture, width, height);
     }
 
     @Override
     public boolean onSurfaceTextureDestroyed(@NonNull SurfaceTexture surfaceTexture) {
         mApi.onSurfaceDestroyed();
-        reCreateSurfaceTexture();
+        // Because of React Native Screens (which dettach the view), we always keep the surface alive.
+        // If not, Texture view will recreate the texture surface by itself and
+        // we will lose the fast first time to frame.
+        // We only delete the surface when the view is dropped (destroySurface invoked by SkiaBaseViewManager);
+        if (!isDropped) {
+            reCreateSurfaceTexture();
+        }
         return false;
     }
 
