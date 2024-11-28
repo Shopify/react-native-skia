@@ -8,7 +8,6 @@
 
 #include "JsiValueWrapper.h"
 #include "RNSkPlatformContext.h"
-#include "MainThreadDispatcher.h"
 
 #include "JsiSkImage.h"
 #include "JsiSkPoint.h"
@@ -191,10 +190,6 @@ public:
   }
 
   void redraw() {
-      auto isOnMainThread = MainThreadDispatcher::getInstance().isOnMainThread();
-      if (!isOnMainThread) {
-          throw std::runtime_error("WRONG THREAD!");
-      }
     _renderer->renderImmediate(_canvasProvider);
     _redrawRequested = false;
   }
