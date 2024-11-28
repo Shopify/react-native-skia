@@ -35,6 +35,7 @@ public:
   static void registerNatives() {
     registerHybrid(
         {makeNativeMethod("initHybrid", JniSkiaPictureView::initHybrid),
+         makeNativeMethod("drawBitmap", JniSkiaPictureView::drawBitmap),
          makeNativeMethod("surfaceAvailable",
                           JniSkiaPictureView::surfaceAvailable),
          makeNativeMethod("surfaceDestroyed",
@@ -48,6 +49,10 @@ public:
   }
 
 protected:
+  void drawBitmap(jobject bitmap, int width, int height) override {
+    JniSkiaBaseView::drawBitmap(bitmap, width, height);
+  }
+
   void surfaceAvailable(jobject surface, int width, int height,
                         bool opaque) override {
     JniSkiaBaseView::surfaceAvailable(surface, width, height, opaque);

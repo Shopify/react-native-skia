@@ -1,5 +1,6 @@
 #include "RNSkOpenGLCanvasProvider.h"
 
+#include <android/bitmap.h>
 #include <android/native_window_jni.h>
 #include <fbjni/fbjni.h>
 #include <jni.h>
@@ -16,6 +17,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#include "include/core/SkBitmap.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkSurface.h"
 
@@ -28,7 +30,13 @@ RNSkOpenGLCanvasProvider::RNSkOpenGLCanvasProvider(
     std::shared_ptr<RNSkia::RNSkPlatformContext> platformContext)
     : RNSkCanvasProvider(requestRedraw), _platformContext(platformContext) {}
 
-RNSkOpenGLCanvasProvider::~RNSkOpenGLCanvasProvider() {}
+RNSkOpenGLCanvasProvider::~RNSkOpenGLCanvasProvider() {
+  if (_jBitmap) {
+    JNIEnv *env = facebook::jni::Environment::current();
+    env->DeleteGlobalRef(_jBitmap);
+    _jBitmap = nullptr;
+  }
+}
 
 float RNSkOpenGLCanvasProvider::getScaledWidth() {
   if (_surfaceHolder) {
@@ -72,8 +80,42 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
       // the render context did not provide a surface
       return false;
     }
+  } else if (_jBitmap) {
+    JNIEnv *env = facebook::jni::Environment::current();
+    // Get the Android Bitmap info
+    AndroidBitmapInfo info;
+    if (AndroidBitmap_getInfo(env, _jBitmap, &info) < 0) {
+      return false;
+    }
+
+    // Lock the pixels of the bitmap
+    void *pixels = nullptr;
+    if (AndroidBitmap_lockPixels(env, _jBitmap, &pixels) < 0) {
+      return false;
+    }
+
+    // Create an SkBitmap from the Android Bitmap
+    SkBitmap skBitmap;
+    SkImageInfo imageInfo = SkImageInfo::Make(
+        info.width, info.height, kRGBA_8888_SkColorType, kPremul_SkAlphaType);
+    skBitmap.installPixels(imageInfo, pixels, info.stride);
+
+    // Create a canvas to draw on the SkBitmap
+    SkCanvas canvas(skBitmap);
+    cb(&canvas);
+
+    // Unlock the pixels
+    AndroidBitmap_unlockPixels(env, _jBitmap);
+    return true;
   }
   return false;
+}
+
+void RNSkOpenGLCanvasProvider::drawBitmap(jobject bitmap, int width,
+                                          int height) {
+
+  JNIEnv *env = facebook::jni::Environment::current();
+  _jBitmap = env->NewGlobalRef(bitmap);
 }
 
 void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurfaceTexture,

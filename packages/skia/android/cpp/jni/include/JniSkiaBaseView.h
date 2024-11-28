@@ -29,6 +29,10 @@ public:
   }
 
 protected:
+  virtual void drawBitmap(jobject bitmap, int width, int height) {
+    _skiaAndroidView->drawBitmap(bitmap, width, height);
+  }
+
   virtual void surfaceAvailable(jobject surface, int width, int height,
                                 bool opaque) {
     _skiaAndroidView->surfaceAvailable(surface, width, height, opaque);

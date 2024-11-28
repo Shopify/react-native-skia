@@ -27,6 +27,8 @@ public:
 
   bool renderToCanvas(const std::function<void(SkCanvas *)> &cb) override;
 
+  void drawBitmap(jobject bitmap, int width, int height);
+
   void surfaceAvailable(jobject surface, int width, int height, bool opaque);
 
   void surfaceDestroyed();
@@ -37,6 +39,7 @@ private:
   std::unique_ptr<WindowContext> _surfaceHolder = nullptr;
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   jobject _jSurfaceTexture = nullptr;
+  jobject _jBitmap = nullptr;
   jmethodID _updateTexImageMethod = nullptr;
 };
 } // namespace RNSkia

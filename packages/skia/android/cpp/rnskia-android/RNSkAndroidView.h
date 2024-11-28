@@ -11,6 +11,8 @@ namespace RNSkia {
 
 class RNSkBaseAndroidView {
 public:
+  virtual void drawBitmap(jobject bitmap, int width, int height) = 0;
+
   virtual void surfaceAvailable(jobject surface, int width, int height,
                                 bool opaque) = 0;
 
@@ -36,13 +38,16 @@ public:
           std::make_shared<RNSkOpenGLCanvasProvider>(
               std::bind(&RNSkia::RNSkView::requestRedraw, this), context)) {}
 
+  virtual void drawBitmap(jobject bitmap, int width, int height) override {
+    std::static_pointer_cast<RNSkOpenGLCanvasProvider>(T::getCanvasProvider())
+        ->drawBitmap(bitmap, width, height);
+    RNSkView::redraw();
+  }
+
   void surfaceAvailable(jobject surface, int width, int height,
                         bool opaque) override {
     std::static_pointer_cast<RNSkOpenGLCanvasProvider>(T::getCanvasProvider())
         ->surfaceAvailable(surface, width, height, opaque);
-
-    // Try to render directly when the surface has been set so that
-    // we don't have to wait until the draw loop returns.
     RNSkView::redraw();
   }
 

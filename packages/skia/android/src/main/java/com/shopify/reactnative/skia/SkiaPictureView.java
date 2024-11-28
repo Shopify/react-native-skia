@@ -24,6 +24,8 @@ public class SkiaPictureView extends SkiaBaseView {
 
     private native HybridData initHybrid(SkiaManager skiaManager);
 
+    protected native void drawBitmap(Object bitmap, int width, int height);
+
     protected native void surfaceAvailable(Object surface, int width, int height, boolean opaque);
 
     protected native void surfaceSizeChanged(Object surface, int width, int height, boolean opaque);
