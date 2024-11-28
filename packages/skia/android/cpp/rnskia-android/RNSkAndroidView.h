@@ -40,9 +40,6 @@ public:
                         bool opaque) override {
     std::static_pointer_cast<RNSkOpenGLCanvasProvider>(T::getCanvasProvider())
         ->surfaceAvailable(surface, width, height, opaque);
-
-    // Try to render directly when the surface has been set so that
-    // we don't have to wait until the draw loop returns.
     RNSkView::redraw();
   }
 

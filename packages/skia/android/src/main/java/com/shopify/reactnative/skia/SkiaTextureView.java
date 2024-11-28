@@ -22,6 +22,25 @@ public class SkiaTextureView extends TextureView implements TextureView.SurfaceT
         mDebug = debug;
         setOpaque(false);
         setSurfaceTextureListener(this);
+        createSurface();
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        boolean firstAttachement = getMeasuredWidth() == 0;
+        if (firstAttachement) {
+            //createSurface();
+        }
+    }
+
+    private void createSurface() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O && getSurfaceTexture() != null) {
+            Log.i(tag, "Create SurfaceTexture");
+            SurfaceTexture surfaceTexture = new SurfaceTexture(false);
+            setSurfaceTexture(surfaceTexture);
+            onSurfaceTextureAvailable(surfaceTexture, this.getMeasuredWidth(), this.getMeasuredHeight());
+        }
     }
 
     @Override
@@ -36,10 +55,9 @@ public class SkiaTextureView extends TextureView implements TextureView.SurfaceT
 
     @Override
     public boolean onSurfaceTextureDestroyed(@NonNull SurfaceTexture surfaceTexture) {
-        Log.i(tag, "onSurfaceTextureDestroyed");
-        // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
         mApi.onSurfaceDestroyed();
-        return true;
+        createSurface();
+        return false;
     }
 
     private long _prevTimestamp = 0;
