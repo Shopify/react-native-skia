@@ -42,7 +42,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        mView.layout(0, 0, this.getMeasuredWidth(), this.getMeasuredHeight());
+        mView.layout(0, 0, getWidth(), getHeight());
     }
 
     @Override

@@ -31,17 +31,17 @@ public class SkiaTextureView extends TextureView implements TextureView.SurfaceT
         super.onAttachedToWindow();
         int count = getWindowAttachCount();
         if (count == 1) {
-            createSurfaceTexture();
+          createSurfaceTexture();
         }
     }
 
     private void createSurfaceTexture() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Log.i(tag, "Create SurfaceTexture");
-            SurfaceTexture surfaceTexture = new SurfaceTexture(false);
-            setSurfaceTexture(surfaceTexture);
-            onSurfaceTextureAvailable(surfaceTexture, this.getMeasuredWidth(), this.getMeasuredHeight());
-        }
+//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+//            Log.i(tag, "Create SurfaceTexture");
+//            SurfaceTexture surfaceTexture = new SurfaceTexture(false);
+//            setSurfaceTexture(surfaceTexture);
+//            onSurfaceTextureAvailable(surfaceTexture, getWidth(), getHeight());
+//        }
     }
 
     private void reCreateSurfaceTexture() {
@@ -53,11 +53,13 @@ public class SkiaTextureView extends TextureView implements TextureView.SurfaceT
 
     @Override
     public void onSurfaceTextureAvailable(@NonNull SurfaceTexture surfaceTexture, int width, int height) {
+        Log.i(tag, "onSurfaceTextureAvailable: isNull(" + (surfaceTexture == null) + ") " + width + "x" + height);
         mApi.onSurfaceTextureCreated(surfaceTexture, width, height);
     }
 
     @Override
     public void onSurfaceTextureSizeChanged(@NonNull SurfaceTexture surfaceTexture, int width, int height) {
+        Log.i(tag, "onSurfaceTextureSizeChanged: isNull(" + (surfaceTexture == null) + ") " + width + "x" + height);
         if (isDropped) {
             return;
         }

@@ -64,7 +64,6 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
     if (surface) {
       // Draw into canvas using callback
       cb(surface->getCanvas());
-
       // Swap buffers and show on screen
       _surfaceHolder->present();
       return true;

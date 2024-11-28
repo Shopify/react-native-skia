@@ -8,6 +8,7 @@
 
 #include "JsiValueWrapper.h"
 #include "RNSkPlatformContext.h"
+#include "MainThreadDispatcher.h"
 
 #include "JsiSkImage.h"
 #include "JsiSkPoint.h"
@@ -52,7 +53,7 @@ protected:
 class RNSkRenderer {
 public:
   explicit RNSkRenderer(std::function<void()> requestRedraw)
-      : _requestRedraw(requestRedraw) {}
+      : _requestRedraw(std::move(requestRedraw)), _showDebugOverlays(false) {}
 
   /**
    Tries to render the current set of drawing operations. If we're busy we'll
@@ -78,7 +79,7 @@ public:
   void setShowDebugOverlays(bool showDebugOverlays) {
     _showDebugOverlays = showDebugOverlays;
   }
-  bool getShowDebugOverlays() { return _showDebugOverlays; }
+  bool getShowDebugOverlays() const { return _showDebugOverlays; }
 
 protected:
   std::function<void()> _requestRedraw;
@@ -180,7 +181,7 @@ public:
         // Try to lock the weak pointer
         if (auto strongThis = weakThis.lock()) {
           // Only proceed if the object still exists
-          if (strongThis->_renderer) {
+          if (strongThis->_renderer && strongThis->_redrawRequested) {
             strongThis->_renderer->renderImmediate(strongThis->_canvasProvider);
             strongThis->_redrawRequested = false;
           }
@@ -190,6 +191,10 @@ public:
   }
 
   void redraw() {
+      auto isOnMainThread = MainThreadDispatcher::getInstance().isOnMainThread();
+      if (!isOnMainThread) {
+          throw std::runtime_error("WRONG THREAD!");
+      }
     _renderer->renderImmediate(_canvasProvider);
     _redrawRequested = false;
   }
