@@ -26,7 +26,11 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
     }
 
     public void setOpaque(boolean value) {
-        if (value) {
+        if (value && mView instanceof SkiaTextureView) {
+            removeView(mView);
+            mView = new SkiaSurfaceView(getContext(), this, debug);
+            addView(mView);
+        } else if (!value && mView instanceof SkiaSurfaceView) {
             removeView(mView);
             mView = new SkiaSurfaceView(getContext(), this, debug);
             addView(mView);
@@ -34,9 +38,6 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
     }
 
     void dropInstance() {
-        if (mView instanceof SkiaTextureView) {
-            ((SkiaTextureView) mView).dropInstance();
-        }
         unregisterView();
     }
 

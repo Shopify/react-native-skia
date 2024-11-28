@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 public class SkiaTextureView extends TextureView implements TextureView.SurfaceTextureListener {
 
     private String tag = "SkiaTextureView";
-    private boolean isDropped = false;
 
     SkiaViewAPI mApi;
     boolean mDebug;
@@ -24,30 +23,6 @@ public class SkiaTextureView extends TextureView implements TextureView.SurfaceT
         setOpaque(false);
         setSurfaceTextureListener(this);
     }
-
-
-    void dropInstance() {
-        isDropped = true;
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        if (this.getMeasuredWidth() == 0) {
-            createSurfaceTexture();
-        }
-    }
-
-    private void createSurfaceTexture() {
-        // This API Level is >= 26, we created our own SurfaceTexture to have a faster time to first frame
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Log.i(tag, "Create SurfaceTexture");
-            SurfaceTexture surface = new SurfaceTexture(false);
-            setSurfaceTexture(surface);
-            onSurfaceTextureAvailable(surface, this.getMeasuredWidth(), this.getMeasuredHeight());
-        }
-    }
-
 
     @Override
     public void onSurfaceTextureAvailable(@NonNull SurfaceTexture surfaceTexture, int width, int height) {
@@ -64,14 +39,7 @@ public class SkiaTextureView extends TextureView implements TextureView.SurfaceT
         Log.i(tag, "onSurfaceTextureDestroyed");
         // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
         mApi.onSurfaceDestroyed();
-        // Because of React Native Screens (which dettach the view), we always keep the surface alive.
-        // If not, Texture view will recreate the texture surface by itself and
-        // we will lose the fast first time to frame.
-        // We only delete the surface when the view is dropped (destroySurface invoked by SkiaBaseViewManager);
-        if (!isDropped) {
-            createSurfaceTexture();
-        }
-        return false;
+        return true;
     }
 
     private long _prevTimestamp = 0;
