@@ -32,6 +32,16 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
         }
     }
 
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (getMeasuredWidth() == 0) {
+            if (mView instanceof SkiaTextureView) {
+                ((SkiaTextureView) mView).createSurfaceTexture();
+            }
+        }
+    }
+
     void dropInstance() {
         if (mView instanceof SkiaTextureView) {
             ((SkiaTextureView)mView).isDropped = true;
@@ -42,7 +52,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        mView.layout(0, 0, getWidth(), getHeight());
+        mView.layout(0, 0, right - left, bottom - top);
     }
 
     @Override

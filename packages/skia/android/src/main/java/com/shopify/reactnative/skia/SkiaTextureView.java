@@ -15,6 +15,7 @@ public class SkiaTextureView extends TextureView implements TextureView.SurfaceT
 
     SkiaViewAPI mApi;
     boolean mDebug;
+    boolean pristine = true;
 
     public boolean isDropped = false;
 
@@ -26,22 +27,13 @@ public class SkiaTextureView extends TextureView implements TextureView.SurfaceT
         setSurfaceTextureListener(this);
     }
 
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        int count = getWindowAttachCount();
-        if (count == 1) {
-          createSurfaceTexture();
+    public void createSurfaceTexture() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Log.i(tag, "Create SurfaceTexture");
+            SurfaceTexture surfaceTexture = new SurfaceTexture(false);
+            setSurfaceTexture(surfaceTexture);
+            onSurfaceTextureAvailable(surfaceTexture, getWidth(), getHeight());
         }
-    }
-
-    private void createSurfaceTexture() {
-//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-//            Log.i(tag, "Create SurfaceTexture");
-//            SurfaceTexture surfaceTexture = new SurfaceTexture(false);
-//            setSurfaceTexture(surfaceTexture);
-//            onSurfaceTextureAvailable(surfaceTexture, getWidth(), getHeight());
-//        }
     }
 
     private void reCreateSurfaceTexture() {
@@ -52,14 +44,19 @@ public class SkiaTextureView extends TextureView implements TextureView.SurfaceT
     }
 
     @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+    }
+
+    @Override
     public void onSurfaceTextureAvailable(@NonNull SurfaceTexture surfaceTexture, int width, int height) {
-        Log.i(tag, "onSurfaceTextureAvailable: isNull(" + (surfaceTexture == null) + ") " + width + "x" + height);
+        Log.i(tag, "onSurfaceTextureAvailable:  " + width + "x" + height);
         mApi.onSurfaceTextureCreated(surfaceTexture, width, height);
     }
 
     @Override
     public void onSurfaceTextureSizeChanged(@NonNull SurfaceTexture surfaceTexture, int width, int height) {
-        Log.i(tag, "onSurfaceTextureSizeChanged: isNull(" + (surfaceTexture == null) + ") " + width + "x" + height);
+        Log.i(tag, "onSurfaceTextureSizeChanged:  " + width + "x" + height);
         if (isDropped) {
             return;
         }
