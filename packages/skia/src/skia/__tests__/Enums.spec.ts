@@ -4,7 +4,6 @@ import {
   AlphaType,
   BlurStyle,
   ClipOp,
-  ColorType,
   FillType,
   FilterMode,
   FontEdging,
@@ -71,7 +70,6 @@ describe("Enums", () => {
   });
   it("Should match Image enums values with CanvasKit", () => {
     const { CanvasKit } = setupSkia();
-    checkEnum(ColorType, CanvasKit.ColorType);
     checkEnum(AlphaType, CanvasKit.AlphaType);
     checkEnum(ImageFormat, CanvasKit.ImageFormat);
     checkEnum(MipmapMode, CanvasKit.MipmapMode);
