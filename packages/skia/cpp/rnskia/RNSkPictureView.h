@@ -42,10 +42,6 @@ public:
                       std::shared_ptr<RNSkPlatformContext> context)
       : RNSkRenderer(std::move(requestRedraw)), _platformContext(std::move(context)) {}
 
-  bool tryRender(std::shared_ptr<RNSkCanvasProvider> canvasProvider) override {
-    return performDraw(canvasProvider);
-  }
-
   void
   renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvasProvider) override {
     performDraw(canvasProvider);
