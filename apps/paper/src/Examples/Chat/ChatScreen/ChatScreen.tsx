@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo } from "react";
-import { StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import Animated, {
   runOnUI,
   useAnimatedScrollHandler,
@@ -11,18 +11,15 @@ import type { RouteProp } from "@react-navigation/native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Canvas as WebGPUCanvas } from "react-native-wgpu";
 import type { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
 
 import type { RootStackParamList } from "../ChatExample";
 import DATA from "../data/data.json";
 import type { ChatType } from "../data/types";
-import { useOnscreenCanvas } from "../utils/useOnscreenCanvas";
 import { useOffscreenCanvas } from "../utils/useOffscreenRendering";
 import { WINDOW_HEIGHT, WINDOW_WIDTH } from "../constants";
 
 import { ChatInput, INPUT_HEIGHT } from "./ChatInput";
-import { OFFSCREEN_RENDERING } from "./config";
 import { resolveOffscreenChat } from "./ChatUI";
 import { DrawingOverlay } from "./DrawingOverlay";
 
@@ -138,11 +135,8 @@ export function ChatScreen() {
 
   return (
     <View style={styles.container}>
-      {OFFSCREEN_RENDERING ? (
-        <OffscreenCanvas render={render} />
-      ) : (
-        <OnscreenCanvas render={render} />
-      )}
+      <OffscreenCanvas render={render} />
+
       <Animated.ScrollView style={styles.inverted} onScroll={onScroll}>
         <Animated.View style={[styles.stage, { height: stageHeight }]} />
       </Animated.ScrollView>
@@ -176,16 +170,10 @@ function OffscreenCanvas({ render }: CanvasProps) {
   const [texture] = useOffscreenCanvas(render);
 
   return (
-    <Canvas style={StyleSheet.absoluteFill}>
+    <Canvas opaque={Platform.OS === "android"} style={StyleSheet.absoluteFill}>
       <Image image={texture} width={WINDOW_WIDTH} height={WINDOW_HEIGHT} />
     </Canvas>
   );
-}
-
-function OnscreenCanvas({ render }: CanvasProps) {
-  const [ref] = useOnscreenCanvas(render);
-
-  return <WebGPUCanvas ref={ref} style={StyleSheet.absoluteFill} />;
 }
 
 const styles = StyleSheet.create({
