@@ -4,7 +4,6 @@ import {
   AlphaType,
   BlurStyle,
   ClipOp,
-  ColorType,
   FillType,
   FilterMode,
   FontEdging,
@@ -27,6 +26,7 @@ import {
 import { Path1DEffectStyle } from "../types/PathEffect";
 import { BlendMode } from "../types/Paint/BlendMode";
 import { mapKeys } from "../../renderer/typeddash";
+import { ColorTypeCanvasKit } from "../types/Image/ColorType.web";
 
 import { setupSkia } from "./setup";
 
@@ -71,7 +71,7 @@ describe("Enums", () => {
   });
   it("Should match Image enums values with CanvasKit", () => {
     const { CanvasKit } = setupSkia();
-    checkEnum(ColorType, CanvasKit.ColorType);
+    checkEnum(ColorTypeCanvasKit, CanvasKit.ColorType);
     checkEnum(AlphaType, CanvasKit.AlphaType);
     checkEnum(ImageFormat, CanvasKit.ImageFormat);
     checkEnum(MipmapMode, CanvasKit.MipmapMode);

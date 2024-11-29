@@ -31,6 +31,11 @@ RCT_CUSTOM_VIEW_PROPERTY(debug, BOOL, SkiaUIView) {
   [(SkiaUIView *)view setDebugMode:debug];
 }
 
+RCT_CUSTOM_VIEW_PROPERTY(opaque, BOOL, SkiaUIView) {
+  bool opaque = json != NULL ? [RCTConvert BOOL:json] : false;
+  [(SkiaUIView *)view setOpaque:opaque];
+}
+
 - (UIView *)view {
   auto skManager = [[self skiaManager] skManager];
   // Pass SkManager as a raw pointer to avoid circular dependenciesr

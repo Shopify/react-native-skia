@@ -53,7 +53,6 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
 
 void OpenGLWindowContext::present() {
   _glContext->makeCurrent(_glSurface.get());
-  // TODO: is flushAndSubmit needed here?
   _directContext->flushAndSubmit();
   _glSurface->present();
 }

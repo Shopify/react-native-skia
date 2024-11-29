@@ -2,6 +2,7 @@
 
 #include <android/looper.h>
 #include <unistd.h>
+#include <queue>
 
 class MainThreadDispatcher {
 private:
@@ -25,6 +26,10 @@ public:
   static MainThreadDispatcher &getInstance() {
     static MainThreadDispatcher instance;
     return instance;
+  }
+
+  bool isOnMainThread() {
+      return ALooper_forThread() == mainLooper;
   }
 
   void post(std::function<void()> task) {

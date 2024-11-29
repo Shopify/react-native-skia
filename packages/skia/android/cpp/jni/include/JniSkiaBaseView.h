@@ -29,12 +29,14 @@ public:
   }
 
 protected:
-  virtual void surfaceAvailable(jobject surface, int width, int height) {
-    _skiaAndroidView->surfaceAvailable(surface, width, height);
+  virtual void surfaceAvailable(jobject surface, int width, int height,
+                                bool opaque) {
+    _skiaAndroidView->surfaceAvailable(surface, width, height, opaque);
   }
 
-  virtual void surfaceSizeChanged(jobject surface, int width, int height) {
-    _skiaAndroidView->surfaceSizeChanged(surface, width, height);
+  virtual void surfaceSizeChanged(jobject surface, int width, int height,
+                                  bool opaque) {
+    _skiaAndroidView->surfaceSizeChanged(surface, width, height, opaque);
   }
 
   virtual void surfaceDestroyed() { _skiaAndroidView->surfaceDestroyed(); }

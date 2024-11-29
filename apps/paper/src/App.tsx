@@ -7,6 +7,7 @@ import type { HeaderBackButtonProps } from "@react-navigation/elements";
 import { HeaderBackButton } from "@react-navigation/elements";
 import { FiberProvider } from "its-fine";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { enableScreens } from "react-native-screens";
 
 import {
   ReanimatedExample,
@@ -85,6 +86,8 @@ const HeaderLeft = (props: HeaderBackButtonProps) => {
     />
   );
 };
+
+enableScreens(true);
 
 const App = () => {
   const Stack = createNativeStackNavigator<StackParamList>();
