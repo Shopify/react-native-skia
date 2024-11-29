@@ -6,6 +6,7 @@ import type { SharedValueType } from "../renderer/processors/Animations/Animatio
 
 export type NativeSkiaViewProps = ViewProps & {
   debug?: boolean;
+  opaque?: boolean;
 };
 
 export interface DrawingInfo {
@@ -32,6 +33,8 @@ export interface SkiaBaseViewProps extends ViewProps {
    * the Skia view is resized.
    */
   onSize?: SharedValueType<SkSize>;
+
+  opaque?: boolean;
 }
 
 export interface SkiaPictureViewNativeProps extends SkiaBaseViewProps {

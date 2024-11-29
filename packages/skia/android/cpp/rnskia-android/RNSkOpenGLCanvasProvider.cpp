@@ -46,22 +46,24 @@ float RNSkOpenGLCanvasProvider::getScaledHeight() {
 
 bool RNSkOpenGLCanvasProvider::renderToCanvas(
     const std::function<void(SkCanvas *)> &cb) {
-  JNIEnv *env = facebook::jni::Environment::current();
   if (_surfaceHolder != nullptr && cb != nullptr) {
     // Get the surface
     auto surface = _surfaceHolder->getSurface();
-    env->CallVoidMethod(_jSurfaceTexture, _updateTexImageMethod);
+    if (_jSurfaceTexture) {
+      JNIEnv *env = facebook::jni::Environment::current();
+      env->CallVoidMethod(_jSurfaceTexture, _updateTexImageMethod);
 
-    // Check for exceptions
-    if (env->ExceptionCheck()) {
-      RNSkLogger::logToConsole("updateAndRelease() failed. The exception above "
-                               "can safely be ignored");
-      env->ExceptionClear();
+      // Check for exceptions
+      if (env->ExceptionCheck()) {
+        RNSkLogger::logToConsole(
+            "updateAndRelease() failed. The exception above "
+            "can safely be ignored");
+        env->ExceptionClear();
+      }
     }
     if (surface) {
       // Draw into canvas using callback
       cb(surface->getCanvas());
-
       // Swap buffers and show on screen
       _surfaceHolder->present();
       return true;
@@ -74,32 +76,36 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
 }
 
 void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurfaceTexture,
-                                                int width, int height) {
-  // If the surface is 0, we can skip it
-  if (width == 0 && height == 0) {
-    return;
-  }
+                                                int width, int height,
+                                                bool opaque) {
+  // Release the old surface
+  _surfaceHolder = nullptr;
+
   // Create renderer!
+  ANativeWindow *window = nullptr;
   JNIEnv *env = facebook::jni::Environment::current();
+  if (!opaque) {
+    _jSurfaceTexture = env->NewGlobalRef(jSurfaceTexture);
+    jclass surfaceClass = env->FindClass("android/view/Surface");
+    jmethodID surfaceConstructor = env->GetMethodID(
+        surfaceClass, "<init>", "(Landroid/graphics/SurfaceTexture;)V");
+    // Create a new Surface instance
+    auto jSurface =
+        env->NewObject(surfaceClass, surfaceConstructor, jSurfaceTexture);
+    window = ANativeWindow_fromSurface(env, jSurface);
 
-  _jSurfaceTexture = env->NewGlobalRef(jSurfaceTexture);
-  jclass surfaceClass = env->FindClass("android/view/Surface");
-  jmethodID surfaceConstructor = env->GetMethodID(
-      surfaceClass, "<init>", "(Landroid/graphics/SurfaceTexture;)V");
-  // Create a new Surface instance
-  jobject jSurface =
-      env->NewObject(surfaceClass, surfaceConstructor, jSurfaceTexture);
+    jclass surfaceTextureClass = env->GetObjectClass(_jSurfaceTexture);
+    _updateTexImageMethod =
+        env->GetMethodID(surfaceTextureClass, "updateTexImage", "()V");
 
-  jclass surfaceTextureClass = env->GetObjectClass(_jSurfaceTexture);
-  _updateTexImageMethod =
-      env->GetMethodID(surfaceTextureClass, "updateTexImage", "()V");
-
-  // Acquire the native window from the Surface
-  auto window = ANativeWindow_fromSurface(env, jSurface);
-  // Clean up local references
-  env->DeleteLocalRef(jSurface);
-  env->DeleteLocalRef(surfaceClass);
-  env->DeleteLocalRef(surfaceTextureClass);
+    // Acquire the native window from the Surface
+    // Clean up local references
+    env->DeleteLocalRef(jSurface);
+    env->DeleteLocalRef(surfaceClass);
+    env->DeleteLocalRef(surfaceTextureClass);
+  } else {
+    window = ANativeWindow_fromSurface(env, jSurfaceTexture);
+  }
 #if defined(SK_GRAPHITE)
   _surfaceHolder = DawnContext::getInstance().MakeWindow(window, width, height);
 #else
@@ -121,8 +127,8 @@ void RNSkOpenGLCanvasProvider::surfaceDestroyed() {
   }
 }
 
-void RNSkOpenGLCanvasProvider::surfaceSizeChanged(jobject jSurfaceTexture,
-                                                  int width, int height) {
+void RNSkOpenGLCanvasProvider::surfaceSizeChanged(jobject jSurface, int width,
+                                                  int height, bool opaque) {
   if (width == 0 && height == 0) {
     // Setting width/height to zero is nothing we need to care about when
     // it comes to invalidating the surface.
@@ -131,7 +137,7 @@ void RNSkOpenGLCanvasProvider::surfaceSizeChanged(jobject jSurfaceTexture,
 
   if (_surfaceHolder == nullptr) {
     _surfaceHolder = nullptr;
-    surfaceAvailable(jSurfaceTexture, width, height);
+    surfaceAvailable(jSurface, width, height, opaque);
   } else {
     _surfaceHolder->resize(width, height);
   }

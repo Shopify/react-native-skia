@@ -42,8 +42,6 @@ public:
 
   ~RNSkDomRenderer();
 
-  bool tryRender(std::shared_ptr<RNSkCanvasProvider> canvasProvider) override;
-
   void
   renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvasProvider) override;
 
