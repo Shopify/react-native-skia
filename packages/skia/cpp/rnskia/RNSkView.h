@@ -52,7 +52,7 @@ protected:
 class RNSkRenderer {
 public:
   explicit RNSkRenderer(std::function<void()> requestRedraw)
-      : _requestRedraw(requestRedraw) {}
+      : _requestRedraw(std::move(requestRedraw)), _showDebugOverlays(false) {}
 
   virtual void
   renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvasProvider) = 0;
@@ -60,7 +60,7 @@ public:
   void setShowDebugOverlays(bool showDebugOverlays) {
     _showDebugOverlays = showDebugOverlays;
   }
-  bool getShowDebugOverlays() { return _showDebugOverlays; }
+  bool getShowDebugOverlays() const { return _showDebugOverlays; }
 
 protected:
   std::function<void()> _requestRedraw;
@@ -162,7 +162,7 @@ public:
         // Try to lock the weak pointer
         if (auto strongThis = weakThis.lock()) {
           // Only proceed if the object still exists
-          if (strongThis->_renderer) {
+          if (strongThis->_renderer && strongThis->_redrawRequested) {
             strongThis->_renderer->renderImmediate(strongThis->_canvasProvider);
             strongThis->_redrawRequested = false;
           }

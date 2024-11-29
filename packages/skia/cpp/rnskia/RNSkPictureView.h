@@ -40,7 +40,7 @@ class RNSkPictureRenderer
 public:
   RNSkPictureRenderer(std::function<void()> requestRedraw,
                       std::shared_ptr<RNSkPlatformContext> context)
-      : RNSkRenderer(requestRedraw), _platformContext(context) {}
+      : RNSkRenderer(std::move(requestRedraw)), _platformContext(std::move(context)) {}
 
   void
   renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvasProvider) override {
@@ -51,31 +51,28 @@ public:
     if (picture == nullptr) {
       _picture = nullptr;
     } else {
-      _picture = std::dynamic_pointer_cast<JsiSkPicture>(picture);
+      _picture = std::dynamic_pointer_cast<JsiSkPicture>(picture)->getObject();
     }
     _requestRedraw();
   }
 
 private:
   bool performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
-    canvasProvider->renderToCanvas([=](SkCanvas *canvas) {
+    return canvasProvider->renderToCanvas([=](SkCanvas *canvas) {
       // Make sure to scale correctly
       auto pd = _platformContext->getPixelDensity();
       canvas->clear(SK_ColorTRANSPARENT);
       canvas->save();
       canvas->scale(pd, pd);
-
       if (_picture != nullptr) {
-        canvas->drawPicture(_picture->getObject());
+        canvas->drawPicture(_picture);
       }
-
       canvas->restore();
     });
-    return true;
   }
 
   std::shared_ptr<RNSkPlatformContext> _platformContext;
-  std::shared_ptr<JsiSkPicture> _picture;
+  sk_sp<SkPicture> _picture;
 };
 
 class RNSkPictureView : public RNSkView {
