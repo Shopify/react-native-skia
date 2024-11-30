@@ -13,7 +13,7 @@ Behind the scenes, it is using its own React renderer.
 |:-----|:---------|:-----------------|
 | style?   | `ViewStyle` | View style |
 | ref?   | `Ref<SkiaView>` | Reference to the `SkiaView` object |
-| mode?   | `default` or `continuous` | By default, the canvas is only updated when the drawing tree or animation values change. With `mode="continuous"`, the canvas will redraw on every frame |
+| opaque?   | `boolean` | By default, the canvas is transparent but on Android, you can make it opaque to improve performance. |
 | onSize? | `SharedValue<Size>` | Reanimated value to which the canvas size will be assigned  (see [canvas size](/docs/animations/hooks#canvas-size)) |
 | onLayout? | `NativeEvent<LayoutEvent>` | Invoked on mount and on layout changes (see [onLayout](https://reactnative.dev/docs/view#onlayout)) |
 

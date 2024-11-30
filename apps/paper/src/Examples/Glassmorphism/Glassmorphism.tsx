@@ -40,7 +40,7 @@ export const Glassmorphism = () => {
   );
 
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas style={{ flex: 1 }} opaque>
       <Fill color="black" />
       <Circle c={c} r={radius}>
         <LinearGradient

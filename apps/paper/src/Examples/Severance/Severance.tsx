@@ -29,7 +29,7 @@ export const Severance = () => {
   return (
     <View style={{ flex: 1 }}>
       <GestureDetector gesture={gesture}>
-        <Canvas style={{ flex: 1 }}>
+        <Canvas style={{ flex: 1 }} opaque>
           <CRT>
             <Group>
               <Fill color={BG} />

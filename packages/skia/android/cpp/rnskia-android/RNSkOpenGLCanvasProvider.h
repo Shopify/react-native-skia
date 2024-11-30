@@ -27,11 +27,11 @@ public:
 
   bool renderToCanvas(const std::function<void(SkCanvas *)> &cb) override;
 
-  void surfaceAvailable(jobject surface, int width, int height);
+  void surfaceAvailable(jobject surface, int width, int height, bool opaque);
 
   void surfaceDestroyed();
 
-  void surfaceSizeChanged(jobject jSurface, int width, int height);
+  void surfaceSizeChanged(jobject jSurface, int width, int height, bool opaque);
 
 private:
   std::unique_ptr<WindowContext> _surfaceHolder = nullptr;

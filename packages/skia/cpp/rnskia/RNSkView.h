@@ -52,33 +52,15 @@ protected:
 class RNSkRenderer {
 public:
   explicit RNSkRenderer(std::function<void()> requestRedraw)
-      : _requestRedraw(requestRedraw) {}
+      : _requestRedraw(std::move(requestRedraw)), _showDebugOverlays(false) {}
 
-  /**
-   Tries to render the current set of drawing operations. If we're busy we'll
-   return false so that the calling RNSkBaseDrawView can request a new render
-   next frame. The tryRender method is typically called on each frame if there
-   are any redraw requests. The method will be called from the main thread, so
-   the implementor must make sure any thread requirements are met before
-   rendering. This method will also allow the rendering to be dispatched to
-   another thread.
-   */
-  virtual bool
-  tryRender(std::shared_ptr<RNSkCanvasProvider> canvasProvider) = 0;
-
-  /**
-   Renders directly to the canvas in the canvas provider. This method is called
-   from a Javascript call to render a snapshot of the SkiaView to an image, and
-   can therefore run outside the tryRender loop and directly in the javascript
-   thread.
-   */
   virtual void
   renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvasProvider) = 0;
 
   void setShowDebugOverlays(bool showDebugOverlays) {
     _showDebugOverlays = showDebugOverlays;
   }
-  bool getShowDebugOverlays() { return _showDebugOverlays; }
+  bool getShowDebugOverlays() const { return _showDebugOverlays; }
 
 protected:
   std::function<void()> _requestRedraw;
@@ -173,10 +155,17 @@ public:
   void requestRedraw() {
     if (!_redrawRequested) {
       _redrawRequested = true;
-      _platformContext->runOnMainThread([this]() {
-        if (_renderer) {
-          _renderer->renderImmediate(_canvasProvider);
-          _redrawRequested = false;
+      // Capture a weak pointer to this
+      auto weakThis = std::weak_ptr<RNSkView>(shared_from_this());
+
+      _platformContext->runOnMainThread([weakThis]() {
+        // Try to lock the weak pointer
+        if (auto strongThis = weakThis.lock()) {
+          // Only proceed if the object still exists
+          if (strongThis->_renderer && strongThis->_redrawRequested) {
+            strongThis->_renderer->renderImmediate(strongThis->_canvasProvider);
+            strongThis->_redrawRequested = false;
+          }
         }
       });
     }

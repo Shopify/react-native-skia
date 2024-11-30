@@ -15,6 +15,7 @@
       std::shared_ptr<RNSkia::RNSkPlatformContext>)>
       _factory;
   bool _debugMode;
+  bool _opaque;
   size_t _nativeId;
 }
 
@@ -148,6 +149,10 @@
   if (_impl != nullptr) {
     _impl->getDrawView()->setShowDebugOverlays(debugMode);
   }
+}
+
+- (void)setOpaque:(bool)opaque {
+    _opaque = opaque;
 }
 
 - (void)setNativeId:(size_t)nativeId {
