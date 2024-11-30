@@ -26,8 +26,8 @@ public:
     return instance;
   }
 
-  gl::Display* getDisplay() { return _glDisplay.get(); }
-  gl::Context* getContext() { return _glContext.get(); }
+  gl::Display *getDisplay() { return _glDisplay.get(); }
+  gl::Context *getContext() { return _glContext.get(); }
 
 private:
   std::unique_ptr<gl::Display> _glDisplay;
@@ -63,8 +63,11 @@ public:
     }
 
     // Create texture
+    auto GL_RGBA8 = 0x8058;
+    auto format = GrBackendFormats::MakeGL(GL_RGBA8, GL_TEXTURE_2D);
     auto texture = _directContext->createBackendTexture(
-        width, height, colorType, skgpu::Mipmapped::kNo, GrRenderable::kYes);
+        width, height, format, SkColors::kTransparent, skgpu::Mipmapped::kNo,
+        GrRenderable::kYes);
 
     if (!texture.isValid()) {
       RNSkLogger::logToConsole("couldn't create offscreen texture %dx%d", width,
@@ -153,8 +156,8 @@ public:
   std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window, int width,
                                             int height) {
     auto display = OpenGLSharedContext::getInstance().getDisplay();
-    return std::make_unique<OpenGLWindowContext>(
-        _directContext.get(), display, _glContext.get(), window);
+    return std::make_unique<OpenGLWindowContext>(_directContext.get(), display,
+                                                 _glContext.get(), window);
   }
 
   GrDirectContext *getDirectContext() { return _directContext.get(); }
