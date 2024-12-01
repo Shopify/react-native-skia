@@ -1,6 +1,7 @@
 #import "RNSkiOSPlatformContext.h"
 
 #import <CoreMedia/CMSampleBuffer.h>
+#include <Metal/Metal.h>
 #import <React/RCTUtils.h>
 #include <thread>
 #include <utility>
@@ -155,6 +156,40 @@ uint64_t RNSkiOSPlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
   return reinterpret_cast<uint64_t>(pixelBuffer);
 }
 
+jsi::Value
+RNSkiOSPlatformContext::getImageBackendTexture(jsi::Runtime &runtime,
+                                               sk_sp<SkImage> image) {
+  GrBackendTexture texture;
+  if (!SkImages::GetBackendTextureFromImage(image, &texture, true)) {
+    return jsi::Value::null();
+  }
+  if (!texture.isValid()) {
+    return jsi::Value::null();
+  }
+  GrMtlTextureInfo textureInfo;
+  if (!GrBackendTextures::GetMtlTextureInfo(texture, &textureInfo)) {
+    return jsi::Value::null();
+  }
+  auto pointer = reinterpret_cast<uint64_t>(textureInfo.fTexture.get());
+  return jsi::BigInt::fromUint64(runtime, pointer);
+}
+
+jsi::Value
+RNSkiOSPlatformContext::getSurfaceBackendTexture(jsi::Runtime &runtime,
+                                                 sk_sp<SkSurface> surface) {
+  GrBackendTexture texture = SkSurfaces::GetBackendTexture(
+      surface.get(), SkSurfaces::BackendHandleAccess::kFlushRead);
+  if (!texture.isValid()) {
+    return jsi::Value::null();
+  }
+  GrMtlTextureInfo textureInfo;
+  if (!GrBackendTextures::GetMtlTextureInfo(texture, &textureInfo)) {
+    return jsi::Value::null();
+  }
+  auto pointer = reinterpret_cast<uint64_t>(textureInfo.fTexture.get());
+  return jsi::BigInt::fromUint64(runtime, pointer);
+}
+
 std::shared_ptr<RNSkVideo>
 RNSkiOSPlatformContext::createVideo(const std::string &url) {
   return std::make_shared<RNSkiOSVideo>(url, this);
@@ -190,6 +225,64 @@ sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeBuffer(void *buffer) {
 #else
   return MetalContext::getInstance().MakeImageFromBuffer(buffer);
 #endif
+}
+
+sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeTexture(
+    jsi::Runtime &runtime, jsi::Value jsiTextureInfo, int width, int height,
+    bool mipMapped) {
+  if (!jsiTextureInfo.isBigInt()) {
+    throw std::runtime_error("Invalid textureInfo");
+  }
+  auto pointer = (void *)jsiTextureInfo.asBigInt(runtime).asUint64(runtime);
+  id<MTLTexture> mtlTexture = (__bridge id<MTLTexture>)(pointer);
+
+  SkColorType colorType = mtlPixelFormatToSkColorType(mtlTexture.pixelFormat);
+  if (colorType == SkColorType::kUnknown_SkColorType) {
+    throw std::runtime_error("Unsupported pixelFormat");
+  }
+
+  GrMtlTextureInfo textureInfo;
+  textureInfo.fTexture.retain((__bridge const void *)mtlTexture);
+
+  GrBackendTexture texture = GrBackendTextures::MakeMtl(
+      width, height, mipMapped ? skgpu::Mipmapped::kYes : skgpu::Mipmapped::kNo,
+      textureInfo);
+
+  return SkImages::BorrowTextureFrom(getDirectContext(), texture,
+                                     kTopLeft_GrSurfaceOrigin, colorType,
+                                     kPremul_SkAlphaType, nullptr);
+}
+
+SkColorType RNSkiOSPlatformContext::mtlPixelFormatToSkColorType(
+    MTLPixelFormat pixelFormat) {
+  switch (pixelFormat) {
+  case MTLPixelFormatRGBA8Unorm:
+    return kRGBA_8888_SkColorType;
+  case MTLPixelFormatBGRA8Unorm:
+    return kBGRA_8888_SkColorType;
+  case MTLPixelFormatRGB10A2Unorm:
+    return kRGBA_1010102_SkColorType;
+  case MTLPixelFormatR8Unorm:
+    return kGray_8_SkColorType;
+  case MTLPixelFormatRGBA16Float:
+    return kRGBA_F16_SkColorType;
+  case MTLPixelFormatRG8Unorm:
+    return kR8G8_unorm_SkColorType;
+  case MTLPixelFormatR16Float:
+    return kA16_float_SkColorType;
+  case MTLPixelFormatRG16Float:
+    return kR16G16_float_SkColorType;
+  case MTLPixelFormatR16Unorm:
+    return kA16_unorm_SkColorType;
+  case MTLPixelFormatRG16Unorm:
+    return kR16G16_unorm_SkColorType;
+  case MTLPixelFormatRGBA16Unorm:
+    return kR16G16B16A16_unorm_SkColorType;
+  case MTLPixelFormatRGBA8Unorm_sRGB:
+    return kSRGBA_8888_SkColorType;
+  default:
+    return kUnknown_SkColorType;
+  }
 }
 
 #if !defined(SK_GRAPHITE)

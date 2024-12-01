@@ -56,7 +56,18 @@ public:
 
   sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override;
 
+  sk_sp<SkImage> makeImageFromNativeTexture(jsi::Runtime &runtime,
+                                            jsi::Value textureInfo, int width,
+                                            int height,
+                                            bool mipMapped) override;
+
   uint64_t makeNativeBuffer(sk_sp<SkImage> image) override;
+
+  jsi::Value getSurfaceBackendTexture(jsi::Runtime &runtime,
+                                      sk_sp<SkSurface> image) override;
+
+  jsi::Value getImageBackendTexture(jsi::Runtime &runtime,
+                                    sk_sp<SkImage> image) override;
 
   void releaseNativeBuffer(uint64_t pointer) override;
 
@@ -80,6 +91,8 @@ public:
 
 private:
   ViewScreenshotService *_screenshotService;
+
+  SkColorType mtlPixelFormatToSkColorType(MTLPixelFormat pixelFormat);
 };
 
 static void handleNotification(CFNotificationCenterRef center, void *observer,
