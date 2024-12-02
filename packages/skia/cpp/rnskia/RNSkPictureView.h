@@ -9,8 +9,8 @@
 
 #include <jsi/jsi.h>
 
-#include "ViewProperty.h"
 #include "RNSkView.h"
+#include "ViewProperty.h"
 
 #include "JsiSkPicture.h"
 #include "RNSkLog.h"
@@ -40,7 +40,8 @@ class RNSkPictureRenderer
 public:
   RNSkPictureRenderer(std::function<void()> requestRedraw,
                       std::shared_ptr<RNSkPlatformContext> context)
-      : RNSkRenderer(std::move(requestRedraw)), _platformContext(std::move(context)) {}
+      : RNSkRenderer(std::move(requestRedraw)),
+        _platformContext(std::move(context)) {}
 
   void
   renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvasProvider) override {

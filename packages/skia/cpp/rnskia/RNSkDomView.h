@@ -9,8 +9,8 @@
 
 #include <jsi/jsi.h>
 
-#include "ViewProperty.h"
 #include "RNSkView.h"
+#include "ViewProperty.h"
 
 #include "JsiDomRenderNode.h"
 #include "RNSkLog.h"

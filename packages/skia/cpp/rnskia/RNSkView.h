@@ -6,8 +6,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "ViewProperty.h"
 #include "RNSkPlatformContext.h"
+#include "ViewProperty.h"
 
 #include "JsiSkImage.h"
 #include "JsiSkPoint.h"

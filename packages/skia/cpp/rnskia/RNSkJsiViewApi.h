@@ -9,9 +9,9 @@
 #include <vector>
 
 #include "JsiHostObject.h"
-#include "ViewProperty.h"
 #include "RNSkPlatformContext.h"
 #include "RNSkView.h"
+#include "ViewProperty.h"
 #include <jsi/jsi.h>
 
 namespace RNSkia {
