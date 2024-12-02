@@ -77,8 +77,6 @@ public:
   void setJsiProperties(
       std::unordered_map<std::string, ViewProperty> &props) override {
 
-    RNSkView::setJsiProperties(props);
-
     for (auto &prop : props) {
       if (prop.first == "root") {
         // Save root
