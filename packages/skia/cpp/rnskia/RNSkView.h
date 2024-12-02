@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "JsiValueWrapper.h"
+#include "ViewProperty.h"
 #include "RNSkPlatformContext.h"
 
 #include "JsiSkImage.h"
@@ -148,7 +148,7 @@ public:
    directly from Javascript without having to go through the async bridge.
    */
   virtual void setJsiProperties(
-      std::unordered_map<std::string, RNJsi::JsiValueWrapper> &props) {
+      std::unordered_map<std::string, RNJsi::ViewProperty> &props) {
     // Nothing here...
   }
 

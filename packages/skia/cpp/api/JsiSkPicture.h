@@ -5,6 +5,8 @@
 #include "JsiSkData.h"
 #include "JsiSkHostObjects.h"
 #include "JsiSkShader.h"
+#include "JsiSkMatrix.h"
+#include "JsiSkRect.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

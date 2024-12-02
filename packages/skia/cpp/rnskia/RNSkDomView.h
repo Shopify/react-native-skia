@@ -9,7 +9,7 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiValueWrapper.h"
+#include "ViewProperty.h"
 #include "RNSkView.h"
 
 #include "JsiDomRenderNode.h"
@@ -75,20 +75,19 @@ public:
                      std::bind(&RNSkView::requestRedraw, this), context)) {}
 
   void setJsiProperties(
-      std::unordered_map<std::string, JsiValueWrapper> &props) override {
+      std::unordered_map<std::string, ViewProperty> &props) override {
 
     RNSkView::setJsiProperties(props);
 
     for (auto &prop : props) {
       if (prop.first == "root") {
         // Save root
-        if (prop.second.isUndefined() || prop.second.isNull()) {
+        if (prop.second.isNull()) {
           std::static_pointer_cast<RNSkDomRenderer>(getRenderer())
               ->setRoot(nullptr);
         } else {
           std::static_pointer_cast<RNSkDomRenderer>(getRenderer())
-              ->setRoot(std::dynamic_pointer_cast<JsiDomRenderNode>(
-                  prop.second.getAsHostObject()));
+              ->setRoot(prop.second.getDomRenderNode());
         }
 
         // Request redraw
