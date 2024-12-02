@@ -10,11 +10,6 @@
 namespace RNJsi {
 namespace jsi = facebook::jsi;
 
-/**
- Implements a simple wrapper class for JSI values where the value can be read
- without asking the runtime for any assistance Meaning that we can access
- members without being on the JS thread.
- */
 class ViewProperty {
 public:
   ViewProperty(jsi::Runtime &runtime, const jsi::Value &value) {
