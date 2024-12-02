@@ -79,9 +79,10 @@ public:
   }
 
   JSI_HOST_FUNCTION(MakeImageFromNativeTexture) {
+    auto texInfo = JsiTextureInfo::fromValue(runtime, arguments[0]);
     auto image = getContext()->makeImageFromNativeTexture(
-        runtime, jsi::Value(runtime, arguments[0]), arguments[1].asNumber(),
-        arguments[2].asNumber(), count > 3 && arguments[3].asBool());
+        texInfo, arguments[1].asNumber(), arguments[2].asNumber(),
+        count > 3 && arguments[3].asBool());
     if (image == nullptr) {
       throw std::runtime_error("Failed to convert native texture to SkImage!");
     }

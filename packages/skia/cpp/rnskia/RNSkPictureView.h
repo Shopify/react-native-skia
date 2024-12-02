@@ -40,7 +40,8 @@ class RNSkPictureRenderer
 public:
   RNSkPictureRenderer(std::function<void()> requestRedraw,
                       std::shared_ptr<RNSkPlatformContext> context)
-      : RNSkRenderer(std::move(requestRedraw)), _platformContext(std::move(context)) {}
+      : RNSkRenderer(std::move(requestRedraw)),
+        _platformContext(std::move(context)) {}
 
   void
   renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvasProvider) override {

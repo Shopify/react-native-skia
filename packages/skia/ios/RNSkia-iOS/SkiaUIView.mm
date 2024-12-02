@@ -152,7 +152,7 @@
 }
 
 - (void)setOpaque:(bool)opaque {
-    _opaque = opaque;
+  _opaque = opaque;
 }
 
 - (void)setNativeId:(size_t)nativeId {

@@ -78,24 +78,16 @@ public:
 #endif
   }
 
-  sk_sp<SkImage> makeImageFromNativeTexture(jsi::Runtime &runtime,
-                                            jsi::Value jsiTextureInfo,
+  sk_sp<SkImage> makeImageFromNativeTexture(std::shared_ptr<TextureInfo> texInfo,
                                             int width, int height,
                                             bool mipMapped) override {
-    if (!jsiTextureInfo.isObject()) {
-      throw new std::runtime_error("Invalid textureInfo");
-    }
-    auto jsiTextureInfoObj = jsiTextureInfo.asObject(runtime);
+
 
     GrGLTextureInfo textureInfo;
-    textureInfo.fTarget =
-        (GrGLenum)jsiTextureInfoObj.getProperty(runtime, "fTarget").asNumber();
-    textureInfo.fID =
-        (GrGLuint)jsiTextureInfoObj.getProperty(runtime, "fID").asNumber();
-    textureInfo.fFormat =
-        (GrGLenum)jsiTextureInfoObj.getProperty(runtime, "fFormat").asNumber();
-    textureInfo.fProtected =
-        jsiTextureInfoObj.getProperty(runtime, "fProtected").asBool()
+    textureInfo.fTarget = texInfo->glTarget;
+    textureInfo.fID = texInfo->glID;
+    textureInfo.fFormat = texInfo->glFormat;
+    textureInfo.fProtected = texInfo->glProtected
             ? skgpu::Protected::kYes
             : skgpu::Protected::kNo;
 
@@ -185,43 +177,38 @@ public:
 #endif
   }
 
-  jsi::Value getImageBackendTexture(jsi::Runtime &runtime,
-                                    sk_sp<SkImage> image) override {
+  std::shared_ptr<TextureInfo> getImageBackendTexture(sk_sp<SkImage> image) override {
     GrBackendTexture texture;
     if (!SkImages::GetBackendTextureFromImage(image, &texture, true)) {
-      return jsi::Value::null();
+      return nullptr;
     }
-    return getJSITextureInfo(runtime, texture);
+    return getJSITextureInfo(texture);
   }
 
-  jsi::Value getSurfaceBackendTexture(jsi::Runtime &runtime,
-                                      sk_sp<SkSurface> surface) override {
+  std::shared_ptr<TextureInfo> getSurfaceBackendTexture(sk_sp<SkSurface> surface) override {
     GrBackendTexture texture = SkSurfaces::GetBackendTexture(
         surface.get(), SkSurface::BackendHandleAccess::kFlushRead);
-    return getJSITextureInfo(runtime, texture);
+    return getJSITextureInfo(texture);
   }
 
-  static jsi::Value getJSITextureInfo(jsi::Runtime &runtime,
-                                      const GrBackendTexture &texture) {
+  static std::shared_ptr<TextureInfo> getJSITextureInfo( const GrBackendTexture &texture) {
     if (!texture.isValid()) {
-      return jsi::Value::null();
+      return nullptr;
     }
     GrGLTextureInfo textureInfo;
     if (!GrBackendTextures::GetGLTextureInfo(texture, &textureInfo)) {
-      return jsi::Value::null();
+      return nullptr;
     }
 
     OpenGLContext::getInstance().makeCurrent();
     glFlush();
 
-    jsi::Object jsiTextureInfo = jsi::Object(runtime);
-    jsiTextureInfo.setProperty(runtime, "fTarget", (int)textureInfo.fTarget);
-    jsiTextureInfo.setProperty(runtime, "fFormat", (int)textureInfo.fFormat);
-    jsiTextureInfo.setProperty(runtime, "fID", (int)textureInfo.fID);
-    jsiTextureInfo.setProperty(runtime, "fProtected",
-                               (bool)textureInfo.fProtected);
-
-    return jsiTextureInfo;
+    std::shared_ptr<TextureInfo> texInfo = std::make_shared<TextureInfo>();
+    texInfo->glTarget = textureInfo.fTarget;
+    texInfo->glFormat = textureInfo.fFormat;
+    texInfo->glID = textureInfo.fID;
+    texInfo->glProtected = textureInfo.fProtected == skgpu::Protected::kYes;
+    return texInfo;
   }
 
 #if !defined(SK_GRAPHITE)

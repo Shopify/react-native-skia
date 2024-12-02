@@ -79,7 +79,10 @@ public:
   }
 
   JSI_HOST_FUNCTION(getBackendTexture) {
-    return getContext()->getSurfaceBackendTexture(runtime, getObject());
+    auto texInfo = getContext()->getSurfaceBackendTexture(getObject());
+    return jsi::Object::createFromHostObject(
+        runtime,
+        std::make_shared<JsiTextureInfo>(getContext(), std::move(texInfo)));
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurface, width),

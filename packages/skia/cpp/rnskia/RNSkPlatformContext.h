@@ -32,6 +32,14 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 namespace react = facebook::react;
 
+struct TextureInfo {
+  const void *mtlTexture;
+  unsigned int glTarget;
+  unsigned int glID;
+  unsigned int glFormat;
+  bool glProtected;
+};
+
 class RNSkPlatformContext {
 public:
   /**
@@ -107,10 +115,9 @@ public:
    */
   virtual sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) = 0;
 
-  virtual sk_sp<SkImage> makeImageFromNativeTexture(jsi::Runtime &runtime,
-                                                    jsi::Value textureInfo,
-                                                    int width, int height,
-                                                    bool mipMapped) = 0;
+  virtual sk_sp<SkImage>
+  makeImageFromNativeTexture(std::shared_ptr<TextureInfo> textureInfo,
+                             int width, int height, bool mipMapped) = 0;
 
 #if !defined(SK_GRAPHITE)
   virtual GrDirectContext *getDirectContext() = 0;
@@ -120,11 +127,11 @@ public:
 
   virtual uint64_t makeNativeBuffer(sk_sp<SkImage> image) = 0;
 
-  virtual jsi::Value getSurfaceBackendTexture(jsi::Runtime &runtime,
-                                              sk_sp<SkSurface> image) = 0;
+  virtual std::shared_ptr<TextureInfo>
+  getSurfaceBackendTexture(sk_sp<SkSurface> image) = 0;
 
-  virtual jsi::Value getImageBackendTexture(jsi::Runtime &runtime,
-                                            sk_sp<SkImage> image) = 0;
+  virtual std::shared_ptr<TextureInfo>
+  getImageBackendTexture(sk_sp<SkImage> image) = 0;
 
   virtual std::shared_ptr<RNSkVideo> createVideo(const std::string &url) = 0;
 

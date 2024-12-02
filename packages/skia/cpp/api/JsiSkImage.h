@@ -8,6 +8,7 @@
 #include "JsiSkImageInfo.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkShader.h"
+#include "JsiTextureInfo.h"
 #include "third_party/base64.h"
 
 #include "RNSkTypedArray.h"
@@ -220,7 +221,9 @@ public:
     if (!image->isTextureBacked()) {
       return jsi::Value::null();
     }
-    return getContext()->getImageBackendTexture(runtime, image);
+    auto texInfo = getContext()->getImageBackendTexture(image);
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiTextureInfo>(getContext(), texInfo));
   }
 
   EXPORT_JSI_API_TYPENAME(JsiSkImage, Image)
