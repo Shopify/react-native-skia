@@ -26,10 +26,9 @@ namespace jsi = facebook::jsi;
 class RNSkiOSPlatformContext : public RNSkPlatformContext {
 public:
   RNSkiOSPlatformContext(
-      jsi::Runtime *runtime, RCTBridge *bridge,
+      RCTBridge *bridge,
       std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker)
-      : RNSkPlatformContext(runtime, jsCallInvoker,
-                            [[UIScreen mainScreen] scale]) {
+      : RNSkPlatformContext(jsCallInvoker, [[UIScreen mainScreen] scale]) {
 
     // Create screenshot manager
     _screenshotService =
