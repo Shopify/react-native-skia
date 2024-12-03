@@ -37,11 +37,9 @@ public:
   /**
    * Constructor
    */
-  RNSkPlatformContext(jsi::Runtime *runtime,
-                      std::shared_ptr<react::CallInvoker> callInvoker,
+  RNSkPlatformContext(std::shared_ptr<react::CallInvoker> callInvoker,
                       float pixelDensity)
-      : _pixelDensity(pixelDensity), _jsRuntime(runtime),
-        _callInvoker(callInvoker) {}
+      : _pixelDensity(pixelDensity), _callInvoker(callInvoker) {}
 
   virtual ~RNSkPlatformContext() = default;
 
@@ -64,11 +62,6 @@ public:
    * @param tag React view tag
    */
   virtual sk_sp<SkImage> takeScreenshotFromViewTag(size_t tag) = 0;
-
-  /**
-   Returns the javascript runtime
-   */
-  jsi::Runtime *getJsRuntime() { return _jsRuntime; }
 
   /**
    * Returns an SkStream wrapping the require uri provided.
@@ -154,7 +147,6 @@ public:
 
 private:
   float _pixelDensity;
-  jsi::Runtime *_jsRuntime;
   std::shared_ptr<react::CallInvoker> _callInvoker;
 };
 } // namespace RNSkia
