@@ -14,7 +14,7 @@
 #include "JsiSkRect.h"
 #include "JsiSkTypeface.h"
 
-#include "SkiaContext.h"
+#include "WindowContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -28,12 +28,15 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiSkiaContext : public JsiSkWrappingSharedPtrHostObject<SkiaContext> {
+class JsiSkiaContext : public JsiSkWrappingSharedPtrHostObject<WindowContext> {
 public:
   EXPORT_JSI_API_TYPENAME(JsiSkiaContext, SkiaContext)
 
   JSI_HOST_FUNCTION(getSurface) {
     auto surface = getObject()->getSurface();
+    if (surface == nullptr) {
+      return jsi::Value::null();
+    }
     return jsi::Object::createFromHostObject(
         runtime,
         std::make_shared<JsiSkSurface>(getContext(), std::move(surface)));
@@ -48,7 +51,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkiaContext, present))
 
   JsiSkiaContext(std::shared_ptr<RNSkPlatformContext> context,
-                 std::shared_ptr<SkiaContext> ctx)
+                 std::shared_ptr<WindowContext> ctx)
       : JsiSkWrappingSharedPtrHostObject(std::move(context), std::move(ctx)) {}
 
   /**
@@ -66,6 +69,9 @@ public:
       void *surface = reinterpret_cast<void *>(nativeBufferPointer);
       auto width = static_cast<int>(arguments[1].asNumber());
       auto height = static_cast<int>(arguments[2].asNumber());
+      if (surface == nullptr) {
+        throw std::runtime_error("Surface is null");
+      }
       auto result =
           context->makeContextFromNativeSurface(surface, width, height);
       // Return the newly constructed object

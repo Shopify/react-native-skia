@@ -6,34 +6,56 @@ body:
     attributes:
       value: |
         Please provide all the information requested. Issues that do not follow this format are likely to stall.
+        
   - type: textarea
     id: description
     attributes:
       label: Description
+      description: Briefly describe the issue and the expected versus actual behavior.
     validations:
       required: true
+
   - type: input
-    id: version
+    id: skia_version
     attributes:
-      label: Version
-      description: What react-native-skia version does this appear on?
+      label: React Native Skia Version
+      description: Specify the version of react-native-skia where the issue occurs.
     validations:
       required: true
+
+  - type: input
+    id: react_native_version
+    attributes:
+      label: React Native Version
+      description: Specify the version of React Native used.
+    validations:
+      required: true
+
+  - type: checkbox
+    id: new_architecture
+    attributes:
+      label: Using New Architecture
+      description: Check this box if the new architecture is enabled.
+      options:
+        - label: Enabled
+          required: false
+
   - type: textarea
     id: reproduction
     attributes:
-      label: Steps to reproduce
+      label: Steps to Reproduce
       description: Provide a detailed list of steps that reproduce the issue.
     validations:
       required: true
+
   - type: textarea
     id: extra
     attributes:
-      label: Snack, code example, screenshot, or link to a repository
+      label: Snack, Code Example, Screenshot, or Link to Repository
       description: |
-        Please provide a Snack (https://snack.expo.io/), a link to a repository on GitHub, or provide a minimal code example that reproduces the problem.
+        Please provide a Snack (https://snack.expo.io/), a link to a repository on GitHub, or a minimal code example that reproduces the problem.
         You may provide a screenshot of the application if you think it is relevant to your bug report.
-        Here are some tips for providing a minimal example: https://stackoverflow.com/help/mcve
-        Please note that a reproducer is mandatory. Issues without reproducer are more likely to stall and will be closed.
+        Here are some tips for providing a minimal example: https://stackoverflow.com/help/mcve.
+        A reproducer is mandatory. Issues without reproducers are more likely to stall and may be closed.
     validations:
       required: true

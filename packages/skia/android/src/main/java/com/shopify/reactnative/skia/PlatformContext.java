@@ -25,13 +25,7 @@ public class PlatformContext {
 
     private final ReactContext mContext;
 
-    private boolean _drawLoopActive = false;
-    private boolean _isPaused = false;
-
     private final String TAG = "PlatformContext";
-
-    private final Handler mainHandler = new Handler(Looper.getMainLooper());
-
 
     public PlatformContext(ReactContext reactContext) {
         mContext = reactContext;
@@ -55,67 +49,9 @@ public class PlatformContext {
         return buffer.toByteArray();
     }
 
-    private void postFrameLoop() {
-        Choreographer.FrameCallback frameCallback = new Choreographer.FrameCallback() {
-            @Override
-            public void doFrame(long frameTimeNanos) {
-                if (_drawLoopActive) {
-                    Choreographer.getInstance().postFrameCallback(this);
-                }
-                if (_isPaused) {
-                    return;
-                }
-                notifyDrawLoop();
-            }
-        };
-        Choreographer.getInstance().postFrameCallback(frameCallback);
-    }
-
-
-    @DoNotStrip
-    public void notifyTaskReadyOnMainThread() {
-        mainHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                notifyTaskReady();
-            }
-        });
-    }
-
     @DoNotStrip
     Object takeScreenshotFromViewTag(int tag) {
         return ViewScreenshotService.makeViewScreenshotFromTag(mContext, tag);
-    }
-
-    @DoNotStrip
-    public void raise(final String message) {
-        mainHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mContext.handleException(new Exception(message));
-            }
-        });
-    }
-
-    @DoNotStrip
-    public void beginDrawLoop() {
-        if (_drawLoopActive) {
-            return;
-        }
-        _drawLoopActive = true;
-        mainHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                postFrameLoop();
-            }
-        });
-    }
-
-    @DoNotStrip
-    public void endDrawLoop() {
-        if (_drawLoopActive) {
-            _drawLoopActive = false;
-        }
     }
 
     @DoNotStrip
@@ -165,11 +101,6 @@ public class PlatformContext {
         return null;
     }
 
-    void onPause() {
-        Log.i(TAG, "Paused");
-        _isPaused = true;
-    }
-
     void onResume() {
         _isPaused = false;
         Log.i(TAG, "Resume");
@@ -177,16 +108,6 @@ public class PlatformContext {
         float density = mContext.getResources().getDisplayMetrics().density;
         //Log.d(TAG, "density=" + Float.toString(density));
         setPixelDensity(density);
-
-        if(_drawLoopActive) {
-            // Restart draw loop
-            mainHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    postFrameLoop();
-                }
-            });
-        }
     }
 
     @Override
@@ -199,6 +120,4 @@ public class PlatformContext {
     private native HybridData initHybrid(float pixelDensity);
     private native float getPixelDensity();
     private native void setPixelDensity(float pixelDensity);
-    private native void notifyDrawLoop();
-    private native void notifyTaskReady();
 }

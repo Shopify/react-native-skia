@@ -26,6 +26,11 @@ public abstract class SkiaBaseViewManager<T extends SkiaBaseView> extends ReactV
         ((SkiaBaseView)view).setDebugMode(show);
     }
 
+    @ReactProp(name = "opaque")
+    public void setOpaque(T view, boolean value) {
+        ((SkiaBaseView)view).setOpaque(value);
+    }
+
     @Override
     public void onDropViewInstance(@NonNull ReactViewGroup view) {
         super.onDropViewInstance(view);

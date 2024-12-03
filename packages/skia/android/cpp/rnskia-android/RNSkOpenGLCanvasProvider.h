@@ -5,7 +5,8 @@
 #include <memory>
 
 #include "RNSkView.h"
-#include "SkiaOpenGLSurfaceFactory.h"
+#include "WindowContext.h"
+
 #include <android/native_window.h>
 
 namespace RNSkia {
@@ -26,14 +27,16 @@ public:
 
   bool renderToCanvas(const std::function<void(SkCanvas *)> &cb) override;
 
-  void surfaceAvailable(jobject surface, int width, int height);
+  void surfaceAvailable(jobject surface, int width, int height, bool opaque);
 
   void surfaceDestroyed();
 
-  void surfaceSizeChanged(int width, int height);
+  void surfaceSizeChanged(jobject jSurface, int width, int height, bool opaque);
 
 private:
-  std::unique_ptr<WindowSurfaceHolder> _surfaceHolder = nullptr;
+  std::unique_ptr<WindowContext> _surfaceHolder = nullptr;
   std::shared_ptr<RNSkPlatformContext> _platformContext;
+  jobject _jSurfaceTexture = nullptr;
+  jmethodID _updateTexImageMethod = nullptr;
 };
 } // namespace RNSkia

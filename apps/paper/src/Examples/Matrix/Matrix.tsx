@@ -41,7 +41,7 @@ export const Matrix = () => {
   }
   const symbols = font.getGlyphIDs("abcdefghijklmnopqrstuvwxyz");
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas style={{ flex: 1 }} opaque>
       <Fill color="black" />
       <Group>
         <BlurMask blur={8} style="solid" />

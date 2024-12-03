@@ -9,11 +9,17 @@
 #include <memory>
 #include <string>
 
+#if defined(SK_GRAPHITE)
+#include "DawnContext.h"
+#else
+#include "OpenGLContext.h"
+#endif
+
 #include "AHardwareBufferUtils.h"
 #include "JniPlatformContext.h"
+#include "MainThreadDispatcher.h"
 #include "RNSkAndroidVideo.h"
 #include "RNSkPlatformContext.h"
-#include "SkiaOpenGLSurfaceFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -28,17 +34,13 @@ namespace jsi = facebook::jsi;
 class RNSkAndroidPlatformContext : public RNSkPlatformContext {
 public:
   RNSkAndroidPlatformContext(
-      JniPlatformContext *jniPlatformContext, jsi::Runtime *runtime,
+      JniPlatformContext *jniPlatformContext,
       std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker)
-      : RNSkPlatformContext(runtime, jsCallInvoker,
+      : RNSkPlatformContext(jsCallInvoker,
                             jniPlatformContext->getPixelDensity()),
-        _jniPlatformContext(jniPlatformContext) {
-    // Hook onto the notify draw loop callback in the platform context
-    jniPlatformContext->setOnNotifyDrawLoop(
-        [this]() { notifyDrawLoop(false); });
-  }
+        _jniPlatformContext(jniPlatformContext) {}
 
-  ~RNSkAndroidPlatformContext() { stopDrawLoop(); }
+  ~RNSkAndroidPlatformContext() {}
 
   float getPixelDensity() override {
     return _jniPlatformContext->getPixelDensity(); 
@@ -55,17 +57,29 @@ public:
   }
 
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override {
-    return SkiaOpenGLSurfaceFactory::makeOffscreenSurface(width, height);
+#if defined(SK_GRAPHITE)
+    return DawnContext::getInstance().MakeOffscreen(width, height);
+#else
+    return OpenGLContext::getInstance().MakeOffscreen(width, height);
+#endif
   }
 
-  std::shared_ptr<SkiaContext>
+  std::shared_ptr<WindowContext>
   makeContextFromNativeSurface(void *surface, int width, int height) override {
-    return SkiaOpenGLSurfaceFactory::makeContext(
-        reinterpret_cast<ANativeWindow *>(surface), width, height);
+#if defined(SK_GRAPHITE)
+    return DawnContext::getInstance().MakeWindow(surface, width, height);
+#else
+    auto aWindow = reinterpret_cast<ANativeWindow *>(surface);
+    return OpenGLContext::getInstance().MakeWindow(aWindow, width, height);
+#endif
   }
 
   sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override {
-    return SkiaOpenGLSurfaceFactory::makeImageFromHardwareBuffer(buffer);
+#if defined(SK_GRAPHITE)
+    return DawnContext::getInstance().MakeImageFromBuffer(buffer);
+#else
+    return OpenGLContext::getInstance().MakeImageFromBuffer(buffer);
+#endif
   }
 
   std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override {
@@ -139,21 +153,23 @@ public:
 #endif
   }
 
+#if !defined(SK_GRAPHITE)
+  GrDirectContext *getDirectContext() override {
+    return OpenGLContext::getInstance().getDirectContext();
+  }
+#endif
+
   sk_sp<SkFontMgr> createFontMgr() override {
     return SkFontMgr_New_Android(nullptr);
   }
 
   void runOnMainThread(std::function<void()> task) override {
-    _jniPlatformContext->runTaskOnMainThread(task);
+    MainThreadDispatcher::getInstance().post(std::move(task));
   }
 
   sk_sp<SkImage> takeScreenshotFromViewTag(size_t tag) override {
     return _jniPlatformContext->takeScreenshotFromViewTag(tag);
   }
-
-  void startDrawLoop() override { _jniPlatformContext->startDrawLoop(); }
-
-  void stopDrawLoop() override { _jniPlatformContext->stopDrawLoop(); }
 
 private:
   JniPlatformContext *_jniPlatformContext;

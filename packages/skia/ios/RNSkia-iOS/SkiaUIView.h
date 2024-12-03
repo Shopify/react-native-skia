@@ -14,8 +14,6 @@
 #import <React/RCTViewComponentView.h>
 #endif // RCT_NEW_ARCH_ENABLED
 
-class RNSkiOSJsView;
-
 @interface SkiaUIView :
 #if RCT_NEW_ARCH_ENABLED
     RCTViewComponentView
@@ -33,8 +31,8 @@ class RNSkiOSJsView;
 - (std::shared_ptr<RNSkBaseiOSView>)impl;
 - (SkiaManager *)skiaManager;
 
-- (void)setDrawingMode:(std::string)mode;
 - (void)setDebugMode:(bool)debugMode;
+- (void)setOpaque:(bool)opaque;
 - (void)setNativeId:(size_t)nativeId;
 
 @end

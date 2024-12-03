@@ -67,10 +67,6 @@ void JniPlatformContext::registerNatives() {
                        JniPlatformContext::getPixelDensity),
       makeNativeMethod("setPixelDensity",
                        JniPlatformContext::setPixelDensity),
-      makeNativeMethod("notifyDrawLoop",
-                       JniPlatformContext::notifyDrawLoopExternal),
-      makeNativeMethod("notifyTaskReady",
-                       JniPlatformContext::notifyTaskReadyExternal),
   });
 }
 
@@ -144,51 +140,6 @@ sk_sp<SkImage> JniPlatformContext::takeScreenshotFromViewTag(size_t tag) {
 
   // Return our newly created SkImage!
   return skImage;
-}
-
-void JniPlatformContext::startDrawLoop() {
-  jni::ThreadScope ts;
-  // Start drawing loop
-  static auto method =
-      javaPart_->getClass()->getMethod<void(void)>("beginDrawLoop");
-  method(javaPart_.get());
-}
-
-void JniPlatformContext::stopDrawLoop() {
-  jni::ThreadScope ts;
-  // Stop drawing loop
-  static auto method =
-      javaPart_->getClass()->getMethod<void(void)>("endDrawLoop");
-  method(javaPart_.get());
-}
-
-void JniPlatformContext::notifyDrawLoopExternal() {
-  jni::ThreadScope ts;
-  _onNotifyDrawLoop();
-}
-
-void JniPlatformContext::runTaskOnMainThread(std::function<void()> task) {
-  _taskMutex->lock();
-  _taskCallbacks.push(task);
-  _taskMutex->unlock();
-
-  // Notify Java that task is ready
-  static auto method = javaPart_->getClass()->getMethod<void(void)>(
-      "notifyTaskReadyOnMainThread");
-  method(javaPart_.get());
-}
-
-void JniPlatformContext::notifyTaskReadyExternal() {
-  jni::ThreadScope ts;
-  _taskMutex->lock();
-  auto task = _taskCallbacks.front();
-  if (task != nullptr) {
-    _taskCallbacks.pop();
-    _taskMutex->unlock();
-    task();
-  } else {
-    _taskMutex->unlock();
-  }
 }
 
 void JniPlatformContext::performStreamOperation(

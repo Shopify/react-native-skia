@@ -1,4 +1,4 @@
-import fs from "fs";
+import { existsSync } from "fs";
 
 import { ensureFolderExists, copyRecursiveSync } from "./utils";
 /**
@@ -45,7 +45,7 @@ const copyFiles = (from: string, to: string, files: string[]) => {
   files.forEach((f) => {
     const source = "./artifacts/" + from + "/" + f;
     const target = to + "/" + f;
-    if (!fs.existsSync(source)) {
+    if (!existsSync(source)) {
       console.log(
         "Copying failed, the artifact source",
         source,
@@ -54,7 +54,7 @@ const copyFiles = (from: string, to: string, files: string[]) => {
       );
       process.exit(1);
     }
-    if (!fs.existsSync(to)) {
+    if (!existsSync(to)) {
       console.log(
         "Copying failed, the destination",
         to,

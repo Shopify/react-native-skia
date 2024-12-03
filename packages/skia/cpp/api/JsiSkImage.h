@@ -12,6 +12,11 @@
 
 #include "RNSkTypedArray.h"
 
+#if defined(SK_GRAPHITE)
+#include "DawnContext.h"
+#include "include/gpu/graphite/Context.h"
+#endif
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -83,9 +88,17 @@ public:
                        ? arguments[1].asNumber()
                        : 100.0;
     auto image = getObject();
+#if defined(SK_GRAPHITE)
+    image = DawnContext::getInstance().MakeRasterImage(image);
+#else
     if (image->isTextureBacked()) {
-      image = image->makeNonTextureImage();
+      auto grContext = getContext()->getDirectContext();
+      image = image->makeRasterImage(grContext);
+      if (!image) {
+        return nullptr;
+      }
     }
+#endif
     sk_sp<SkData> data;
 
     if (format == SkEncodedImageFormat::kJPEG) {
@@ -112,6 +125,9 @@ public:
 
   JSI_HOST_FUNCTION(encodeToBytes) {
     auto data = encodeImageData(arguments, count);
+    if (!data) {
+      return jsi::Value::null();
+    }
 
     auto arrayCtor =
         runtime.global().getPropertyAsFunction(runtime, "Uint8Array");
@@ -132,6 +148,9 @@ public:
 
   JSI_HOST_FUNCTION(encodeToBase64) {
     auto data = encodeImageData(arguments, count);
+    if (!data) {
+      return jsi::Value::null();
+    }
 
     auto len = Base64::Encode(data->bytes(), data->size(), nullptr);
     auto buffer = std::string(len, 0);
@@ -173,17 +192,27 @@ public:
             .asObject(runtime)
             .getArrayBuffer(runtime);
     auto bfrPtr = reinterpret_cast<void *>(buffer.data(runtime));
-
-    if (!getObject()->readPixels(info, bfrPtr, bytesPerRow, srcX, srcY)) {
+#if defined(SK_GRAPHITE)
+    throw std::runtime_error("Not implemented yet");
+#else
+    auto grContext = getContext()->getDirectContext();
+    if (!getObject()->readPixels(grContext, info, bfrPtr, bytesPerRow, srcX,
+                                 srcY)) {
       return jsi::Value::null();
     }
+#endif
     return dest;
   }
 
   JSI_HOST_FUNCTION(makeNonTextureImage) {
-    auto image = getObject()->makeNonTextureImage();
+#if defined(SK_GRAPHITE)
+    auto rasterImage = DawnContext::getInstance().MakeRasterImage(getObject());
+#else
+    auto grContext = getContext()->getDirectContext();
+    auto rasterImage = getObject()->makeRasterImage(grContext);
+#endif
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+        runtime, std::make_shared<JsiSkImage>(getContext(), rasterImage));
   }
 
   EXPORT_JSI_API_TYPENAME(JsiSkImage, Image)

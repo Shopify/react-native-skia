@@ -4,11 +4,9 @@ import type { GroupProps, RenderNode } from "../dom/types";
 import type { SkImage, SkPicture, SkRect, SkSize } from "../skia/types";
 import type { SharedValueType } from "../renderer/processors/Animations/Animations";
 
-export type DrawMode = "continuous" | "default";
-
 export type NativeSkiaViewProps = ViewProps & {
-  mode?: DrawMode;
   debug?: boolean;
+  opaque?: boolean;
 };
 
 export interface DrawingInfo {
@@ -26,14 +24,6 @@ export interface ISkiaViewApi {
 
 export interface SkiaBaseViewProps extends ViewProps {
   /**
-   * Sets the drawing mode for the skia view. There are two drawing
-   * modes, "continuous" and "default", where the continuous mode will
-   * continuously redraw the view, and the default mode will only
-   * redraw when any of the regular react properties are changed like
-   * sizes and margins.
-   */
-  mode?: DrawMode;
-  /**
    * When set to true the view will display information about the
    * average time it takes to render.
    */
@@ -43,12 +33,14 @@ export interface SkiaBaseViewProps extends ViewProps {
    * the Skia view is resized.
    */
   onSize?: SharedValueType<SkSize>;
+
+  opaque?: boolean;
 }
 
-export interface SkiaPictureViewProps extends SkiaBaseViewProps {
+export interface SkiaPictureViewNativeProps extends SkiaBaseViewProps {
   picture?: SkPicture;
 }
 
-export interface SkiaDomViewProps extends SkiaBaseViewProps {
+export interface SkiaDomViewNativeProps extends SkiaBaseViewProps {
   root?: RenderNode<GroupProps>;
 }

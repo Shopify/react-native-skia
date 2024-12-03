@@ -4,12 +4,18 @@ import type { SkRect } from "../skia/types";
 import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeComponent";
 
 import { SkiaViewApi } from "./api";
-import type { SkiaPictureViewProps } from "./types";
+import type { SkiaPictureViewNativeProps } from "./types";
 import { SkiaViewNativeId } from "./SkiaViewNativeId";
 
 const NativeSkiaPictureView = SkiaPictureViewNativeComponent;
 
+interface SkiaPictureViewProps extends SkiaPictureViewNativeProps {
+  mode?: "default" | "continuous";
+}
+
 export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
+  private requestId = 0;
+
   constructor(props: SkiaPictureViewProps) {
     super(props);
     this._nativeId = SkiaViewNativeId.current++;
@@ -22,6 +28,7 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
       assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "onSize", onSize);
     }
+    this.tick();
   }
 
   private _nativeId: number;
@@ -31,6 +38,7 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
   }
 
   componentDidUpdate(prevProps: SkiaPictureViewProps) {
+    console.log("componentDidUpdate");
     const { picture, onSize } = this.props;
     if (picture !== prevProps.picture) {
       assertSkiaViewApi();
@@ -39,6 +47,20 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
     if (onSize !== prevProps.onSize) {
       assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "onSize", onSize);
+    }
+    this.tick();
+  }
+
+  componentWillUnmount() {
+    if (this.requestId) {
+      cancelAnimationFrame(this.requestId);
+    }
+  }
+
+  private tick() {
+    this.redraw();
+    if (this.props.mode === "continuous") {
+      this.requestId = requestAnimationFrame(this.tick.bind(this));
     }
   }
 
@@ -57,17 +79,18 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
    */
   public redraw() {
     assertSkiaViewApi();
+    console.log("Request redraw: ", this._nativeId);
     SkiaViewApi.requestRedraw(this._nativeId);
   }
 
   render() {
-    const { mode, debug = false, ...viewProps } = this.props;
+    const { mode, debug = false, opaque = false, ...viewProps } = this.props;
     return (
       <NativeSkiaPictureView
         collapsable={false}
         nativeID={`${this._nativeId}`}
-        mode={mode ?? "default"}
         debug={debug}
+        opaque={opaque}
         {...viewProps}
       />
     );
