@@ -40,6 +40,7 @@ runs:
       uses: actions/download-artifact@v4
       with:
         merge-multiple: true
+        pattern: skia-*
         path: packages/skia/artifacts
 
     - name: Copy Artifacts to libs folder
