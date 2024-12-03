@@ -37,12 +37,10 @@ runs:
 
     - name: Download Skia Binary Artifacts
       if: ${{ inputs.download_skia == 'true' }}
-      uses: dawidd6/action-download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
-        workflow: "build-skia.yml"
-        repo: shopify/react-native-skia
+        merge-multiple: true
         path: packages/skia/artifacts
-        branch: main
 
     - name: Copy Artifacts to libs folder
       if: ${{ inputs.download_skia == 'true' }}
