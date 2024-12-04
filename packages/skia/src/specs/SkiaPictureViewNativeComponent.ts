@@ -2,8 +2,8 @@ import codegenNativeComponent from "react-native/Libraries/Utilities/codegenNati
 import type { ViewProps } from "react-native";
 
 export interface NativeProps extends ViewProps {
-  mode: string;
   debug?: boolean;
+  opaque?: boolean;
 }
 
 // eslint-disable-next-line import/no-default-export

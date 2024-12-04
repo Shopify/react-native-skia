@@ -9,8 +9,8 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiValueWrapper.h"
 #include "RNSkView.h"
+#include "ViewProperty.h"
 
 #include "JsiDomRenderNode.h"
 #include "RNSkLog.h"
@@ -41,8 +41,6 @@ public:
                   std::shared_ptr<RNSkPlatformContext> context);
 
   ~RNSkDomRenderer();
-
-  bool tryRender(std::shared_ptr<RNSkCanvasProvider> canvasProvider) override;
 
   void
   renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvasProvider) override;
@@ -77,20 +75,17 @@ public:
                      std::bind(&RNSkView::requestRedraw, this), context)) {}
 
   void setJsiProperties(
-      std::unordered_map<std::string, JsiValueWrapper> &props) override {
-
-    RNSkView::setJsiProperties(props);
+      std::unordered_map<std::string, ViewProperty> &props) override {
 
     for (auto &prop : props) {
       if (prop.first == "root") {
         // Save root
-        if (prop.second.isUndefined() || prop.second.isNull()) {
+        if (prop.second.isNull()) {
           std::static_pointer_cast<RNSkDomRenderer>(getRenderer())
               ->setRoot(nullptr);
         } else {
           std::static_pointer_cast<RNSkDomRenderer>(getRenderer())
-              ->setRoot(std::dynamic_pointer_cast<JsiDomRenderNode>(
-                  prop.second.getAsHostObject()));
+              ->setRoot(prop.second.getDomRenderNode());
         }
 
         // Request redraw

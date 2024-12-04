@@ -7,19 +7,29 @@ import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeCompon
 import { JsiDrawingContext } from "../dom/types";
 
 import { SkiaViewApi } from "./api";
-import type { SkiaPictureViewProps, SkiaDomViewProps } from "./types";
+import type {
+  SkiaPictureViewNativeProps,
+  SkiaDomViewNativeProps,
+} from "./types";
 import { SkiaViewNativeId } from "./SkiaViewNativeId";
 
-const NativeSkiaPictureView: HostComponent<SkiaPictureViewProps> =
+const NativeSkiaPictureView: HostComponent<SkiaPictureViewNativeProps> =
   Platform.OS !== "web"
     ? SkiaPictureViewNativeComponent
     : // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (null as any);
 
-export class SkiaJSDomView extends React.Component<
-  SkiaDomViewProps & { Skia: Skia }
-> {
-  constructor(props: SkiaDomViewProps & { Skia: Skia }) {
+interface SkiaDomViewProps extends SkiaDomViewNativeProps {
+  mode?: "default" | "continuous";
+}
+
+type SkiaJSDomViewProps = SkiaDomViewProps & {
+  Skia: Skia;
+  mode?: "default" | "continuous";
+};
+
+export class SkiaJSDomView extends React.Component<SkiaJSDomViewProps> {
+  constructor(props: SkiaJSDomViewProps) {
     super(props);
     this._nativeId = SkiaViewNativeId.current++;
     const { root, onSize } = props;
@@ -31,9 +41,18 @@ export class SkiaJSDomView extends React.Component<
       assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "onSize", onSize);
     }
+    this.tick();
   }
 
   private _nativeId: number;
+  private requestId = 0;
+
+  private tick() {
+    this.redraw();
+    if (this.props.mode === "continuous") {
+      this.requestId = requestAnimationFrame(this.tick.bind(this));
+    }
+  }
 
   public get nativeId() {
     return this._nativeId;
@@ -49,6 +68,7 @@ export class SkiaJSDomView extends React.Component<
       assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "onSize", onSize);
     }
+    this.tick();
   }
 
   /**
@@ -67,7 +87,6 @@ export class SkiaJSDomView extends React.Component<
   public redraw() {
     assertSkiaViewApi();
     this.draw();
-    //SkiaViewApi.requestRedraw(this._nativeId);
   }
 
   private draw() {
@@ -89,15 +108,17 @@ export class SkiaJSDomView extends React.Component<
   componentWillUnmount(): void {
     assertSkiaViewApi();
     SkiaViewApi.setJsiProperty(this._nativeId, "picture", null);
+    if (this.requestId) {
+      cancelAnimationFrame(this.requestId);
+    }
   }
 
   render() {
-    const { mode, debug = false, ...viewProps } = this.props;
+    const { debug = false, ...viewProps } = this.props;
     return (
       <NativeSkiaPictureView
         collapsable={false}
         nativeID={`${this._nativeId}`}
-        mode={mode}
         debug={debug}
         {...viewProps}
       />

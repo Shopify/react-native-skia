@@ -9,8 +9,8 @@ use_graphite = ENV['SK_GRAPHITE'] == '1'
 
 # Set preprocessor definitions based on GRAPHITE flag
 preprocessor_defs = use_graphite ? 
-  '$(inherited) SK_GRAPHITE=1' : 
-  '$(inherited) SK_METAL=1 SK_GANESH=1'
+  '$(inherited) SK_GRAPHITE=1 SK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API=1' : 
+  '$(inherited) SK_METAL=1 SK_GANESH=1 SK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API=1'
 
 # Define base frameworks
 base_frameworks = ['libs/ios/libskia.xcframework', 

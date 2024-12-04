@@ -1650,7 +1650,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (3.34.0):
+  - RNScreens (4.3.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1672,7 +1672,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNSVG (15.6.0):
+  - RNSVG (15.9.0):
     - React-Core
   - SocketRocket (0.7.0)
   - Yoga (0.0.0)
@@ -1748,7 +1748,7 @@ DEPENDENCIES:
   - RNGestureHandler (from `../../../node_modules/react-native-gesture-handler`)
   - RNReanimated (from `../../../node_modules/react-native-reanimated`)
   - RNScreens (from `../../../node_modules/react-native-screens`)
-  - RNSVG (from `../../../node_modules/react-native-svg`)
+  - RNSVG (from `../node_modules/react-native-svg`)
   - Yoga (from `../../../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -1894,7 +1894,7 @@ EXTERNAL SOURCES:
   RNScreens:
     :path: "../../../node_modules/react-native-screens"
   RNSVG:
-    :path: "../../../node_modules/react-native-svg"
+    :path: "../node_modules/react-native-svg"
   Yoga:
     :path: "../../../node_modules/react-native/ReactCommon/yoga"
 
@@ -1935,7 +1935,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 1c08607305558666fd16678b85ef135e455d5c96
   React-microtasksnativemodule: 87b8de96f937faefece8afd2cb3a518321b2ef99
   react-native-safe-area-context: ab8f4a3d8180913bd78ae75dd599c94cce3d5e9a
-  react-native-skia: 1f36fe252564881d77ad424f84a8986098cc73b7
+  react-native-skia: 1549ee5068efc5a004b84b2e0ba109c6234e2fde
   react-native-slider: 97ce0bd921f40de79cead9754546d5e4e7ba44f8
   react-native-wgpu: 8d0437a304318e0e3d6ccbfed2a39880f8eae4dd
   React-nativeconfig: 57781b79e11d5af7573e6f77cbf1143b71802a6d
@@ -1966,8 +1966,8 @@ SPEC CHECKSUMS:
   ReactCommon: 6ef348087d250257c44c0204461c03f036650e9b
   RNGestureHandler: 939f21fabf5d45a725c0bf175eb819dd25cf2e70
   RNReanimated: 190c12cb20dfa828353e99775beaa1bdf36e7ed9
-  RNScreens: 19719a9c326e925498ac3b2d35c4e50fe87afc06
-  RNSVG: 5da7a24f31968ec74f0b091e3440080f347e279b
+  RNScreens: b03d696c70cc5235ce4587fcc27ae1a93a48f98c
+  RNSVG: 3d2bdcaef51c8071880a9c0072fe324f4423a3ba
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
   Yoga: 2a45d7e59592db061217551fd3bbe2dd993817ae
 

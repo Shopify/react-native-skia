@@ -44,8 +44,8 @@ public:
       JniPlatformContext *platformContext)
       : _javaPart(jni::make_global(jThis)), _jsRuntime(runtime),
         _jsCallInvoker(jsCallInvoker),
-        _context(std::make_shared<RNSkAndroidPlatformContext>(
-            platformContext, runtime, jsCallInvoker)) {}
+        _context(std::make_shared<RNSkAndroidPlatformContext>(platformContext,
+                                                              jsCallInvoker)) {}
 
   std::shared_ptr<RNSkAndroidPlatformContext> getPlatformContext() {
     return _context;
@@ -53,8 +53,6 @@ public:
   std::shared_ptr<RNSkManager> getSkiaManager() { return _skManager; }
 
   void invalidate() {
-    _context->stopDrawLoop();
-    _context->notifyDrawLoop(true);
     _skManager = nullptr;
     _context = nullptr;
   }

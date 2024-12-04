@@ -31,8 +31,8 @@
 - (std::shared_ptr<RNSkBaseiOSView>)impl;
 - (SkiaManager *)skiaManager;
 
-- (void)setDrawingMode:(std::string)mode;
 - (void)setDebugMode:(bool)debugMode;
+- (void)setOpaque:(bool)opaque;
 - (void)setNativeId:(size_t)nativeId;
 
 @end
