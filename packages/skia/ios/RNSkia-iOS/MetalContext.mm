@@ -1,5 +1,7 @@
 #include "MetalContext.h"
 
+#include "RNSkLog.h"
+
 #import <MetalKit/MetalKit.h>
 
 #pragma clang diagnostic push
