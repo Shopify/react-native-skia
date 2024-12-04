@@ -3,97 +3,88 @@ package com.shopify.reactnative.skia;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.util.Log;
-import android.view.TextureView;
+import android.view.Surface;
+import android.view.View;
 
 import com.facebook.react.views.view.ReactViewGroup;
 
-public abstract class SkiaBaseView extends ReactViewGroup implements TextureView.SurfaceTextureListener {
-    private TextureView mTexture;
+public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI {
+    private View mView;
 
-    private String tag = "SkiaView";
-
-    private boolean isDropped = false;
+    private final boolean debug = false;
+    private final String tag = "SkiaView";
 
     public SkiaBaseView(Context context) {
         super(context);
-        mTexture = new TextureView(context);
-        mTexture.setSurfaceTextureListener(this);
-        mTexture.setOpaque(false);
-        addView(mTexture);
+        mView = new SkiaTextureView(context, this, debug);
+        addView(mView);
     }
 
-    private void createSurfaceTexture() {
-        // This API Level is >= 26, we created our own SurfaceTexture to have a faster time to first frame
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Log.i(tag, "Create SurfaceTexture");
-            SurfaceTexture surface = new SurfaceTexture(false);
-            mTexture.setSurfaceTexture(surface);
-            this.onSurfaceTextureAvailable(surface, this.getMeasuredWidth(), this.getMeasuredHeight());
+    public void setOpaque(boolean value) {
+        if (value && mView instanceof SkiaTextureView) {
+            removeView(mView);
+            mView = new SkiaSurfaceView(getContext(), this, debug);
+            addView(mView);
+        } else if (!value && mView instanceof SkiaSurfaceView) {
+            removeView(mView);
+            mView = new SkiaTextureView(getContext(), this, debug);
+            addView(mView);
         }
-    }
-
-    void dropInstance() {
-        isDropped = true;
-        unregisterView();
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (this.getMeasuredWidth() == 0) {
-            createSurfaceTexture();
+        if (getMeasuredWidth() == 0) {
+            if (mView instanceof SkiaTextureView) {
+                ((SkiaTextureView) mView).createSurfaceTexture();
+            }
         }
+    }
+
+    void dropInstance() {
+        if (mView instanceof SkiaTextureView) {
+            ((SkiaTextureView)mView).isDropped = true;
+        }
+        unregisterView();
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        Log.i(tag, "onLayout " + this.getMeasuredWidth() + "/" + this.getMeasuredHeight());
         super.onLayout(changed, left, top, right, bottom);
-        mTexture.layout(0, 0, this.getMeasuredWidth(), this.getMeasuredHeight());
+        mView.layout(0, 0, right - left, bottom - top);
     }
 
     @Override
-    public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        Log.i(tag, "onSurfaceTextureAvailable " + width + "/" + height);
-        surfaceAvailable(surface, width, height);
+    public void onSurfaceCreated(Surface surface, int width, int height) {
+        surfaceAvailable(surface, width, height, true);
     }
 
     @Override
-    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-        if (isDropped) {
-            return;
-        }
+    public void onSurfaceChanged(Surface surface, int width, int height) {
         Log.i(tag, "onSurfaceTextureSizeChanged " + width + "/" + height);
-        surfaceSizeChanged(surface, width, height);
+        surfaceSizeChanged(surface, width, height, true);
     }
 
     @Override
-    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-        Log.i(tag, "onSurfaceTextureDestroyed");
-        // https://developer.android.com/reference/android/view/TextureView.SurfaceTextureListener#onSurfaceTextureDestroyed(android.graphics.SurfaceTexture)
+    public void onSurfaceTextureCreated(SurfaceTexture surface, int width, int height) {
+        surfaceAvailable(surface, width, height, false);
+    }
+
+    @Override
+    public void onSurfaceTextureChanged(SurfaceTexture surface, int width, int height) {
+        Log.i(tag, "onSurfaceTextureSizeChanged " + width + "/" + height);
+        surfaceSizeChanged(surface, width, height, false);
+    }
+
+    @Override
+    public void onSurfaceDestroyed() {
         surfaceDestroyed();
-        // Because of React Native Screens (which dettach the view), we always keep the surface alive.
-        // If not, Texture view will recreate the texture surface by itself and
-        // we will lose the fast first time to frame.
-        // We only delete the surface when the view is dropped (destroySurface invoked by SkiaBaseViewManager);
-        if (!isDropped) {
-            createSurfaceTexture();
-        }
-        return false;
     }
 
-    private long _prevTimestamp = 0;
-    @Override
-    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-        long timestamp = surface.getTimestamp();
-        long frameDuration = (timestamp - _prevTimestamp)/1000000;
-        Log.i(tag, "onSurfaceTextureUpdated "+frameDuration+"ms");
-        _prevTimestamp = timestamp;
-    }
+    protected abstract void surfaceAvailable(Object surface, int width, int height, boolean opaque);
 
-    protected abstract void surfaceAvailable(Object surface, int width, int height);
-
-    protected abstract void surfaceSizeChanged(Object surface, int width, int height);
+    protected abstract void surfaceSizeChanged(Object surface, int width, int height, boolean opaque);
 
     protected abstract void surfaceDestroyed();
 

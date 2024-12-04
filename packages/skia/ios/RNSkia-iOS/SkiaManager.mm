@@ -41,8 +41,7 @@ static RCTBridge *originalBridgeInstance = nil;
       // Create the RNSkiaManager (cross platform)
       _skManager = std::make_shared<RNSkia::RNSkManager>(
           jsRuntime, jsInvoker,
-          std::make_shared<RNSkia::RNSkiOSPlatformContext>(jsRuntime, bridge,
-                                                           jsInvoker));
+          std::make_shared<RNSkia::RNSkiOSPlatformContext>(bridge, jsInvoker));
     }
   }
   return self;

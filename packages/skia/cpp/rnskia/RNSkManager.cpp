@@ -47,13 +47,12 @@ void RNSkManager::invalidate() {
 
   // Invalidate members
   _viewApi->unregisterAll();
-  _platformContext->invalidate();
 }
 
 void RNSkManager::registerSkiaView(size_t nativeId,
                                    std::shared_ptr<RNSkView> view) {
   if (!_isInvalidated && _viewApi != nullptr)
-    _viewApi->registerSkiaView(nativeId, view);
+    _viewApi->registerSkiaView(nativeId, std::move(view));
 }
 
 void RNSkManager::unregisterSkiaView(size_t nativeId) {
@@ -63,7 +62,7 @@ void RNSkManager::unregisterSkiaView(size_t nativeId) {
 
 void RNSkManager::setSkiaView(size_t nativeId, std::shared_ptr<RNSkView> view) {
   if (!_isInvalidated && _viewApi != nullptr)
-    _viewApi->setSkiaView(nativeId, view);
+    _viewApi->setSkiaView(nativeId, std::move(view));
 }
 
 void RNSkManager::installBindings() {

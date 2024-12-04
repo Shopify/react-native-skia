@@ -6,14 +6,18 @@ import { Platform } from "../Platform";
 import SkiaDomViewNativeComponent from "../specs/SkiaDomViewNativeComponent";
 
 import { SkiaViewApi } from "./api";
-import type { SkiaDomViewProps } from "./types";
+import type { SkiaDomViewNativeProps } from "./types";
 import { SkiaViewNativeId } from "./SkiaViewNativeId";
 
-const NativeSkiaDomView: HostComponent<SkiaDomViewProps> =
+const NativeSkiaDomView: HostComponent<SkiaDomViewNativeProps> =
   Platform.OS !== "web"
     ? SkiaDomViewNativeComponent
     : // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (null as any);
+
+interface SkiaDomViewProps extends SkiaDomViewNativeProps {
+  mode?: "default" | "continuous";
+}
 
 export class SkiaDomView extends React.Component<SkiaDomViewProps> {
   constructor(props: SkiaDomViewProps) {
@@ -28,9 +32,11 @@ export class SkiaDomView extends React.Component<SkiaDomViewProps> {
       assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "onSize", onSize);
     }
+    this.tick();
   }
 
   private _nativeId: number;
+  private requestId = 0;
 
   public get nativeId() {
     return this._nativeId;
@@ -45,6 +51,20 @@ export class SkiaDomView extends React.Component<SkiaDomViewProps> {
     if (onSize !== prevProps.onSize) {
       assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "onSize", onSize);
+    }
+    this.tick();
+  }
+
+  componentWillUnmount(): void {
+    if (this.requestId) {
+      cancelAnimationFrame(this.requestId);
+    }
+  }
+
+  private tick() {
+    this.redraw();
+    if (this.props.mode === "continuous") {
+      this.requestId = requestAnimationFrame(this.tick.bind(this));
     }
   }
 
@@ -77,13 +97,13 @@ export class SkiaDomView extends React.Component<SkiaDomViewProps> {
   }
 
   render() {
-    const { mode, debug = false, ...viewProps } = this.props;
+    const { debug = false, opaque = false, ...viewProps } = this.props;
     return (
       <NativeSkiaDomView
         collapsable={false}
         nativeID={`${this._nativeId}`}
-        mode={mode}
         debug={debug}
+        opaque={opaque}
         {...viewProps}
       />
     );

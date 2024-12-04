@@ -9,8 +9,8 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiValueWrapper.h"
 #include "RNSkView.h"
+#include "ViewProperty.h"
 
 #include "JsiSkPicture.h"
 #include "RNSkLog.h"
@@ -40,46 +40,36 @@ class RNSkPictureRenderer
 public:
   RNSkPictureRenderer(std::function<void()> requestRedraw,
                       std::shared_ptr<RNSkPlatformContext> context)
-      : RNSkRenderer(requestRedraw), _platformContext(context) {}
-
-  bool tryRender(std::shared_ptr<RNSkCanvasProvider> canvasProvider) override {
-    return performDraw(canvasProvider);
-  }
+      : RNSkRenderer(std::move(requestRedraw)),
+        _platformContext(std::move(context)) {}
 
   void
   renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvasProvider) override {
     performDraw(canvasProvider);
   }
 
-  void setPicture(std::shared_ptr<jsi::HostObject> picture) {
-    if (picture == nullptr) {
-      _picture = nullptr;
-    } else {
-      _picture = std::dynamic_pointer_cast<JsiSkPicture>(picture);
-    }
+  void setPicture(sk_sp<SkPicture> picture) {
+    _picture = picture;
     _requestRedraw();
   }
 
 private:
   bool performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
-    canvasProvider->renderToCanvas([=](SkCanvas *canvas) {
+    return canvasProvider->renderToCanvas([=](SkCanvas *canvas) {
       // Make sure to scale correctly
       auto pd = _platformContext->getPixelDensity();
       canvas->clear(SK_ColorTRANSPARENT);
       canvas->save();
       canvas->scale(pd, pd);
-
       if (_picture != nullptr) {
-        canvas->drawPicture(_picture->getObject());
+        canvas->drawPicture(_picture);
       }
-
       canvas->restore();
     });
-    return true;
   }
 
   std::shared_ptr<RNSkPlatformContext> _platformContext;
-  std::shared_ptr<JsiSkPicture> _picture;
+  sk_sp<SkPicture> _picture;
 };
 
 class RNSkPictureView : public RNSkView {
@@ -95,27 +85,20 @@ public:
                 std::bind(&RNSkPictureView::requestRedraw, this), context)) {}
 
   void setJsiProperties(
-      std::unordered_map<std::string, RNJsi::JsiValueWrapper> &props) override {
-
-    RNSkView::setJsiProperties(props);
+      std::unordered_map<std::string, RNJsi::ViewProperty> &props) override {
 
     for (auto &prop : props) {
       if (prop.first == "picture") {
-        if (prop.second.isUndefinedOrNull()) {
+        if (prop.second.isNull()) {
           // Clear picture
           std::static_pointer_cast<RNSkPictureRenderer>(getRenderer())
               ->setPicture(nullptr);
           continue;
-        } else if (prop.second.getType() !=
-                   RNJsi::JsiWrapperValueType::HostObject) {
-          // We expect a function for the picture custom property
-          throw std::runtime_error(
-              "Expected an object for the picture custom property.");
         }
 
         // Save picture
         std::static_pointer_cast<RNSkPictureRenderer>(getRenderer())
-            ->setPicture(prop.second.getAsHostObject());
+            ->setPicture(prop.second.getPicture());
       }
     }
   }

@@ -17,6 +17,7 @@
 
 #include "AHardwareBufferUtils.h"
 #include "JniPlatformContext.h"
+#include "MainThreadDispatcher.h"
 #include "RNSkAndroidVideo.h"
 #include "RNSkPlatformContext.h"
 
@@ -33,17 +34,13 @@ namespace jsi = facebook::jsi;
 class RNSkAndroidPlatformContext : public RNSkPlatformContext {
 public:
   RNSkAndroidPlatformContext(
-      JniPlatformContext *jniPlatformContext, jsi::Runtime *runtime,
+      JniPlatformContext *jniPlatformContext,
       std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker)
-      : RNSkPlatformContext(runtime, jsCallInvoker,
+      : RNSkPlatformContext(jsCallInvoker,
                             jniPlatformContext->getPixelDensity()),
-        _jniPlatformContext(jniPlatformContext) {
-    // Hook onto the notify draw loop callback in the platform context
-    jniPlatformContext->setOnNotifyDrawLoop(
-        [this]() { notifyDrawLoop(false); });
-  }
+        _jniPlatformContext(jniPlatformContext) {}
 
-  ~RNSkAndroidPlatformContext() { stopDrawLoop(); }
+  ~RNSkAndroidPlatformContext() {}
 
   void performStreamOperation(
       const std::string &sourceUri,
@@ -152,21 +149,23 @@ public:
 #endif
   }
 
+#if !defined(SK_GRAPHITE)
+  GrDirectContext *getDirectContext() override {
+    return OpenGLContext::getInstance().getDirectContext();
+  }
+#endif
+
   sk_sp<SkFontMgr> createFontMgr() override {
     return SkFontMgr_New_Android(nullptr);
   }
 
   void runOnMainThread(std::function<void()> task) override {
-    _jniPlatformContext->runTaskOnMainThread(task);
+    MainThreadDispatcher::getInstance().post(std::move(task));
   }
 
   sk_sp<SkImage> takeScreenshotFromViewTag(size_t tag) override {
     return _jniPlatformContext->takeScreenshotFromViewTag(tag);
   }
-
-  void startDrawLoop() override { _jniPlatformContext->startDrawLoop(); }
-
-  void stopDrawLoop() override { _jniPlatformContext->stopDrawLoop(); }
 
 private:
   JniPlatformContext *_jniPlatformContext;

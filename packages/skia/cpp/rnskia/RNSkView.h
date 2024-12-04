@@ -6,8 +6,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "JsiValueWrapper.h"
 #include "RNSkPlatformContext.h"
+#include "ViewProperty.h"
 
 #include "JsiSkImage.h"
 #include "JsiSkPoint.h"
@@ -52,33 +52,15 @@ protected:
 class RNSkRenderer {
 public:
   explicit RNSkRenderer(std::function<void()> requestRedraw)
-      : _requestRedraw(requestRedraw) {}
+      : _requestRedraw(std::move(requestRedraw)), _showDebugOverlays(false) {}
 
-  /**
-   Tries to render the current set of drawing operations. If we're busy we'll
-   return false so that the calling RNSkBaseDrawView can request a new render
-   next frame. The tryRender method is typically called on each frame if there
-   are any redraw requests. The method will be called from the main thread, so
-   the implementor must make sure any thread requirements are met before
-   rendering. This method will also allow the rendering to be dispatched to
-   another thread.
-   */
-  virtual bool
-  tryRender(std::shared_ptr<RNSkCanvasProvider> canvasProvider) = 0;
-
-  /**
-   Renders directly to the canvas in the canvas provider. This method is called
-   from a Javascript call to render a snapshot of the SkiaView to an image, and
-   can therefore run outside the tryRender loop and directly in the javascript
-   thread.
-   */
   virtual void
   renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvasProvider) = 0;
 
   void setShowDebugOverlays(bool showDebugOverlays) {
     _showDebugOverlays = showDebugOverlays;
   }
-  bool getShowDebugOverlays() { return _showDebugOverlays; }
+  bool getShowDebugOverlays() const { return _showDebugOverlays; }
 
 protected:
   std::function<void()> _requestRedraw;
@@ -90,7 +72,8 @@ public:
   RNSkOffscreenCanvasProvider(std::shared_ptr<RNSkPlatformContext> context,
                               std::function<void()> requestRedraw, float width,
                               float height)
-      : RNSkCanvasProvider(requestRedraw), _width(width), _height(height) {
+      : RNSkCanvasProvider(requestRedraw), _context(context), _width(width),
+        _height(height) {
     _surface = context->makeOffscreenSurface(_width, _height);
     _pd = context->getPixelDensity();
   }
@@ -113,7 +96,8 @@ public:
         _surface->recorder()->snap().get());
     return DawnContext::getInstance().MakeRasterImage(image);
 #else
-    return image->makeNonTextureImage();
+    auto grContext = _context->getDirectContext();
+    return image->makeRasterImage(grContext);
 #endif
   }
 
@@ -140,9 +124,8 @@ private:
   float _height;
   float _pd = 1.0f;
   sk_sp<SkSurface> _surface;
+  std::shared_ptr<RNSkPlatformContext> _context;
 };
-
-enum RNSkDrawingMode { Default, Continuous };
 
 class RNSkView : public std::enable_shared_from_this<RNSkView> {
 public:
@@ -158,53 +141,44 @@ public:
   /**
    Destructor
    */
-  virtual ~RNSkView() { endDrawingLoop(); }
+  virtual ~RNSkView() {}
 
-  /**
-   Sets custom properties. Custom properties are properties that are set
-   directly from Javascript without having to go through the async bridge.
-   */
   virtual void setJsiProperties(
-      std::unordered_map<std::string, RNJsi::JsiValueWrapper> &props) {
-    // Nothing here...
+      std::unordered_map<std::string, RNJsi::ViewProperty> &props) = 0;
+
+  void requestRedraw() {
+    if (!_redrawRequested) {
+      _redrawRequested = true;
+      // Capture a weak pointer to this
+      auto weakThis = std::weak_ptr<RNSkView>(shared_from_this());
+
+      _platformContext->runOnMainThread([weakThis]() {
+        // Try to lock the weak pointer
+        if (auto strongThis = weakThis.lock()) {
+          // Only proceed if the object still exists
+          if (strongThis->_renderer && strongThis->_redrawRequested) {
+            strongThis->_renderer->renderImmediate(strongThis->_canvasProvider);
+            strongThis->_redrawRequested = false;
+          }
+        }
+      });
+    }
   }
 
-  /**
-   * Repaints the Skia view using the underlying context and the drawcallback.
-   * This method schedules a draw request that will be run on the correct
-   * thread and js runtime.
-   */
-  void requestRedraw() { _redrawRequestCounter++; }
-
-  /**
-   Renders immediate. Be carefull to not call this method from another thread
-   than the UI thread
-   */
-  void renderImmediate() {
+  void redraw() {
     _renderer->renderImmediate(_canvasProvider);
-    _redrawRequestCounter = 0;
+    _redrawRequested = false;
   }
 
   /**
    Sets the native id of the view
    */
-  virtual void setNativeId(size_t nativeId) {
-    _nativeId = nativeId;
-    beginDrawingLoop();
-  }
+  virtual void setNativeId(size_t nativeId) { _nativeId = nativeId; }
 
   /**
    Returns the native id
    */
   size_t getNativeId() { return _nativeId; }
-
-  /**
-   Sets the drawing mode for the view
-   */
-  void setDrawingMode(RNSkDrawingMode mode) {
-    _drawingMode = mode;
-    requestRedraw();
-  }
 
   /**
    * Set to true to show the debug overlays on render
@@ -237,61 +211,14 @@ protected:
     return _canvasProvider;
   }
 
-  /**
-   Ends an ongoing beginDrawCallback loop for this view. This method is made
-   protected if the drawing loop should be stopped before reaching the
-   destructor (like we do for Android views)
-   */
-  void endDrawingLoop() {
-    if (_drawingLoopId != 0) {
-      _drawingLoopId = 0;
-      _platformContext->endDrawLoop(_nativeId);
-    }
-  }
-
 private:
-  /**
-   Starts beginDrawCallback loop if the drawing mode is continuous
-   */
-  void beginDrawingLoop() {
-    if (_drawingLoopId != 0 || _nativeId == 0) {
-      return;
-    }
-    // Set to zero to avoid calling beginDrawLoop before we return
-    _drawingLoopId = _platformContext->beginDrawLoop(
-        _nativeId, [weakSelf = weak_from_this()](bool invalidated) {
-          auto self = weakSelf.lock();
-          if (self) {
-            self->drawLoopCallback(invalidated);
-          }
-        });
-  }
-
-  /**
-    Draw loop callback
-   */
-  void drawLoopCallback(bool invalidated) {
-    if (_redrawRequestCounter > 0 ||
-        _drawingMode == RNSkDrawingMode::Continuous) {
-      _redrawRequestCounter = 0;
-
-      if (!_renderer->tryRender(_canvasProvider)) {
-        // The renderer could not render cause it was busy, just schedule
-        // redrawing on the next frame.
-        requestRedraw();
-      }
-    }
-  }
-
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   std::shared_ptr<RNSkCanvasProvider> _canvasProvider;
   std::shared_ptr<RNSkRenderer> _renderer;
 
-  RNSkDrawingMode _drawingMode = RNSkDrawingMode::Default;
   size_t _nativeId;
 
-  size_t _drawingLoopId = 0;
-  std::atomic<int> _redrawRequestCounter = {1};
+  std::atomic<bool> _redrawRequested = {false};
 };
 
 } // namespace RNSkia

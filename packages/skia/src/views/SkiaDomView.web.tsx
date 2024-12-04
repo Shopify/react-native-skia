@@ -3,10 +3,10 @@ import type { SkCanvas } from "../skia/types";
 import { JsiDrawingContext } from "../dom/types/DrawingContext";
 
 import { SkiaBaseWebView } from "./SkiaBaseWebView";
-import type { SkiaDomViewProps } from "./types";
+import type { SkiaDomViewNativeProps } from "./types";
 
-export class SkiaDomView extends SkiaBaseWebView<SkiaDomViewProps> {
-  constructor(props: SkiaDomViewProps) {
+export class SkiaDomView extends SkiaBaseWebView<SkiaDomViewNativeProps> {
+  constructor(props: SkiaDomViewNativeProps) {
     super(props);
   }
 

@@ -37,7 +37,7 @@ export const Video = () => {
         style={{ flex: 1 }}
         onPress={() => (paused.value = !paused.value)}
       >
-        <Canvas style={{ flex: 1 }}>
+        <Canvas style={{ flex: 1 }} opaque>
           <Fill>
             <ImageShader
               image={currentFrame}
@@ -62,7 +62,7 @@ export const Video = () => {
           />
         </Canvas>
       </Pressable>
-      <View style={{ height: 200 }}>
+      <View style={{ height: 200, backgroundColor: "white" }}>
         <Slider
           style={{ width, height: 40 }}
           minimumValue={0}

@@ -45,7 +45,7 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
     sk_sp<SkColorSpace> colorSpace(nullptr);
     SkSurfaceProps surfaceProps(0, kRGB_H_SkPixelGeometry);
     _skSurface = SkSurfaces::WrapBackendRenderTarget(
-        _directContext.get(), backendRT, kBottomLeft_GrSurfaceOrigin,
+        _directContext, backendRT, kBottomLeft_GrSurfaceOrigin,
         kRGBA_8888_SkColorType, colorSpace, &surfaceProps);
   }
   return _skSurface;
@@ -53,7 +53,6 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
 
 void OpenGLWindowContext::present() {
   _glContext->makeCurrent(_glSurface.get());
-  // TODO: is flushAndSubmit needed here?
   _directContext->flushAndSubmit();
   _glSurface->present();
 }
