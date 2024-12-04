@@ -8,8 +8,9 @@ class SkiaMetalContext;
 
 class MetalWindowContext : public RNSkia::WindowContext {
 public:
-  MetalWindowContext(SkiaMetalContext *context, CALayer *layer, int width,
-                 int height);
+  MetalWindowContext(GrDirectContext *directContext,
+                     id<MTLCommandQueue> commandQueue, CALayer *layer,
+                     int width, int height);
   ~MetalWindowContext() = default;
 
   sk_sp<SkSurface> getSurface() override;
@@ -27,7 +28,8 @@ public:
   void resize(int width, int height) override { _skSurface = nullptr; }
 
 private:
-  SkiaMetalContext *_context;
+  GrDirectContext *_directContext;
+  id<MTLCommandQueue> _commandQueue;
   sk_sp<SkSurface> _skSurface = nullptr;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
