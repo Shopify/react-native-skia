@@ -100,6 +100,11 @@ public:
    */
   virtual sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) = 0;
 
+  virtual sk_sp<SkImage> makeImageFromNativeTexture(jsi::Runtime &runtime,
+                                                    jsi::Value textureInfo,
+                                                    int width, int height,
+                                                    bool mipMapped) = 0;
+
 #if !defined(SK_GRAPHITE)
   virtual GrDirectContext *getDirectContext() = 0;
 #endif
@@ -107,6 +112,12 @@ public:
   virtual void releaseNativeBuffer(uint64_t pointer) = 0;
 
   virtual uint64_t makeNativeBuffer(sk_sp<SkImage> image) = 0;
+
+  virtual jsi::Value getTexture(jsi::Runtime &runtime,
+                                sk_sp<SkSurface> image) = 0;
+
+  virtual jsi::Value getTexture(jsi::Runtime &runtime,
+                                sk_sp<SkImage> image) = 0;
 
   virtual std::shared_ptr<RNSkVideo> createVideo(const std::string &url) = 0;
 

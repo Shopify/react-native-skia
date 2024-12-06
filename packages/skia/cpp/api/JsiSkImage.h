@@ -215,6 +215,14 @@ public:
         runtime, std::make_shared<JsiSkImage>(getContext(), rasterImage));
   }
 
+  JSI_HOST_FUNCTION(getNativeTextureUnstable) {
+    auto image = getObject();
+    if (!image->isTextureBacked()) {
+      return jsi::Value::null();
+    }
+    return getContext()->getTexture(runtime, image);
+  }
+
   EXPORT_JSI_API_TYPENAME(JsiSkImage, Image)
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImage, width),
@@ -226,6 +234,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkImage, encodeToBase64),
                        JSI_EXPORT_FUNC(JsiSkImage, readPixels),
                        JSI_EXPORT_FUNC(JsiSkImage, makeNonTextureImage),
+                       JSI_EXPORT_FUNC(JsiSkImage, getNativeTextureUnstable),
                        JSI_EXPORT_FUNC(JsiSkImage, dispose))
 
   JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
