@@ -6,18 +6,25 @@
 //
 
 #import "SkiaCVPixelBufferUtils.h"
-#import "SkiaMetalSurfaceFactory.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
+
+#import "include/core/SkCanvas.h"
 #import "include/core/SkColorSpace.h"
+
+#import <CoreMedia/CMSampleBuffer.h>
+#import <CoreVideo/CVMetalTextureCache.h>
+
 #import <include/gpu/ganesh/GrBackendSurface.h>
+#import <include/gpu/ganesh/GrDirectContext.h>
 #import <include/gpu/ganesh/SkImageGanesh.h>
+#import <include/gpu/ganesh/SkSurfaceGanesh.h>
 #import <include/gpu/ganesh/mtl/GrMtlBackendContext.h>
 #import <include/gpu/ganesh/mtl/GrMtlBackendSurface.h>
 #import <include/gpu/ganesh/mtl/GrMtlDirectContext.h>
-#import <include/gpu/ganesh/mtl/GrMtlTypes.h>
 #import <include/gpu/ganesh/mtl/SkSurfaceMetal.h>
+
 #pragma clang diagnostic pop
 
 #include <TargetConditionals.h>
