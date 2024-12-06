@@ -22,7 +22,6 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-
 class RNSkiOSPlatformContext : public RNSkPlatformContext {
 public:
   RNSkiOSPlatformContext(
@@ -35,7 +34,7 @@ public:
         [[ViewScreenshotService alloc] initWithUiManager:bridge.uiManager];
   }
 
-	~RNSkiOSPlatformContext() = default;
+  ~RNSkiOSPlatformContext() = default;
 
   void runOnMainThread(std::function<void()>) override;
 
@@ -43,7 +42,16 @@ public:
 
   sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override;
 
+  sk_sp<SkImage> makeImageFromNativeTexture(jsi::Runtime &runtime,
+                                            jsi::Value textureInfo, int width,
+                                            int height,
+                                            bool mipMapped) override;
+
   uint64_t makeNativeBuffer(sk_sp<SkImage> image) override;
+
+  jsi::Value getTexture(jsi::Runtime &runtime, sk_sp<SkSurface> image) override;
+
+  jsi::Value getTexture(jsi::Runtime &runtime, sk_sp<SkImage> image) override;
 
   void releaseNativeBuffer(uint64_t pointer) override;
 
@@ -65,6 +73,8 @@ public:
 
 private:
   ViewScreenshotService *_screenshotService;
+
+  SkColorType mtlPixelFormatToSkColorType(MTLPixelFormat pixelFormat);
 };
 
 } // namespace RNSkia
