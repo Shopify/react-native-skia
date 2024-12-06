@@ -63,12 +63,24 @@ using TSelf = jni::local_ref<JniPlatformContext::jhybriddata>;
 void JniPlatformContext::registerNatives() {
   registerHybrid({
       makeNativeMethod("initHybrid", JniPlatformContext::initHybrid),
+      makeNativeMethod("getPixelDensity",
+                       JniPlatformContext::getPixelDensity),
+      makeNativeMethod("setPixelDensity",
+                       JniPlatformContext::setPixelDensity),
   });
 }
 
 TSelf JniPlatformContext::initHybrid(jni::alias_ref<jhybridobject> jThis,
                                      float pixelDensity) {
   return makeCxxInstance(jThis, pixelDensity);
+}
+
+float JniPlatformContext::getPixelDensity() {
+  return _pixelDensity;
+}
+
+void JniPlatformContext::setPixelDensity(float pixelDensity) { 
+  _pixelDensity=pixelDensity; 
 }
 
 jni::global_ref<jobject>

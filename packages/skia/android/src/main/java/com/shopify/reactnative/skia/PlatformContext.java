@@ -29,7 +29,9 @@ public class PlatformContext {
 
     public PlatformContext(ReactContext reactContext) {
         mContext = reactContext;
-        mHybridData = initHybrid(reactContext.getResources().getDisplayMetrics().density);
+        float density = mContext.getResources().getDisplayMetrics().density;
+        //Log.d(TAG, "density=" + Float.toString(density));
+        mHybridData = initHybrid(density);
     }
 
     @DoNotStrip
@@ -99,6 +101,15 @@ public class PlatformContext {
         return null;
     }
 
+    void onResume() {
+        _isPaused = false;
+        Log.i(TAG, "Resume");
+
+        float density = mContext.getResources().getDisplayMetrics().density;
+        //Log.d(TAG, "density=" + Float.toString(density));
+        setPixelDensity(density);
+    }
+
     @Override
     protected void finalize() throws Throwable {
         mHybridData.resetNative();
@@ -107,4 +118,6 @@ public class PlatformContext {
 
     // Private c++ native methods
     private native HybridData initHybrid(float pixelDensity);
+    private native float getPixelDensity();
+    private native void setPixelDensity(float pixelDensity);
 }
