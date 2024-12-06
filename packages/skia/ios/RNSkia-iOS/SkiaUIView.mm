@@ -82,15 +82,15 @@
 - (void)removeFromSuperview {
   // Cleanup when removed from view hierarchy
   if (_impl != nullptr) {
-	[_impl->getLayer() removeFromSuperlayer];
-	
-	if (_nativeId != 0 && _manager != nullptr) {
-	  _manager->setSkiaView(_nativeId, nullptr);
-	}
-	
-	_impl = nullptr;
+    [_impl->getLayer() removeFromSuperlayer];
+
+    if (_nativeId != 0 && _manager != nullptr) {
+      _manager->setSkiaView(_nativeId, nullptr);
+    }
+
+    _impl = nullptr;
   }
-  
+
   [super removeFromSuperview];
 }
 
