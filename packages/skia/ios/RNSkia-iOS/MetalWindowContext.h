@@ -8,8 +8,7 @@ class SkiaMetalContext;
 
 class MetalWindowContext : public RNSkia::WindowContext {
 public:
-  MetalWindowContext(GrDirectContext *directContext,
-					 id<MTLDevice> device,
+  MetalWindowContext(GrDirectContext *directContext, id<MTLDevice> device,
                      id<MTLCommandQueue> commandQueue, CALayer *layer,
                      int width, int height);
   ~MetalWindowContext() = default;
