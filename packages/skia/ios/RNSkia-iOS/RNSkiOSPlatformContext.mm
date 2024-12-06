@@ -81,8 +81,8 @@ uint64_t RNSkiOSPlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
 #else
     // on iOS, 32_BGRA is the only supported RGB format for CVPixelBuffers.
     image = image->makeColorTypeAndColorSpace(
-        MetalContext::getInstance()._context.skContext.get(),
-        kBGRA_8888_SkColorType, SkColorSpace::MakeSRGB());
+        MetalContext::getInstance().getDirectContext(), kBGRA_8888_SkColorType,
+        SkColorSpace::MakeSRGB());
 #endif
     if (image == nullptr) {
       throw std::runtime_error(
