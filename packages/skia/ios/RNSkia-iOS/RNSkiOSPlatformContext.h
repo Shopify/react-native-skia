@@ -29,10 +29,9 @@ static void handleNotification(CFNotificationCenterRef center, void *observer,
 class RNSkiOSPlatformContext : public RNSkPlatformContext {
 public:
   RNSkiOSPlatformContext(
-      jsi::Runtime *runtime, RCTBridge *bridge,
+      RCTBridge *bridge,
       std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker)
-      : RNSkPlatformContext(runtime, jsCallInvoker,
-                            [[UIScreen mainScreen] scale]) {
+      : RNSkPlatformContext(jsCallInvoker, [[UIScreen mainScreen] scale]) {
 
     // We need to make sure we invalidate when modules are freed
     CFNotificationCenterAddObserver(

@@ -34,9 +34,9 @@ namespace jsi = facebook::jsi;
 class RNSkAndroidPlatformContext : public RNSkPlatformContext {
 public:
   RNSkAndroidPlatformContext(
-      JniPlatformContext *jniPlatformContext, jsi::Runtime *runtime,
+      JniPlatformContext *jniPlatformContext,
       std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker)
-      : RNSkPlatformContext(runtime, jsCallInvoker,
+      : RNSkPlatformContext(jsCallInvoker,
                             jniPlatformContext->getPixelDensity()),
         _jniPlatformContext(jniPlatformContext) {}
 
