@@ -22,7 +22,6 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-
 class RNSkiOSPlatformContext : public RNSkPlatformContext {
 public:
   RNSkiOSPlatformContext(
@@ -35,7 +34,7 @@ public:
         [[ViewScreenshotService alloc] initWithUiManager:bridge.uiManager];
   }
 
-	~RNSkiOSPlatformContext() = default;
+  ~RNSkiOSPlatformContext() = default;
 
   void runOnMainThread(std::function<void()>) override;
 
@@ -50,11 +49,9 @@ public:
 
   uint64_t makeNativeBuffer(sk_sp<SkImage> image) override;
 
-  jsi::Value getSurfaceBackendTexture(jsi::Runtime &runtime,
-                                      sk_sp<SkSurface> image) override;
+  jsi::Value getTexture(jsi::Runtime &runtime, sk_sp<SkSurface> image) override;
 
-  jsi::Value getImageBackendTexture(jsi::Runtime &runtime,
-                                    sk_sp<SkImage> image) override;
+  jsi::Value getTexture(jsi::Runtime &runtime, sk_sp<SkImage> image) override;
 
   void releaseNativeBuffer(uint64_t pointer) override;
 

@@ -113,11 +113,11 @@ public:
 
   virtual uint64_t makeNativeBuffer(sk_sp<SkImage> image) = 0;
 
-  virtual jsi::Value getSurfaceBackendTexture(jsi::Runtime &runtime,
-                                              sk_sp<SkSurface> image) = 0;
+  virtual jsi::Value getTexture(jsi::Runtime &runtime,
+                                sk_sp<SkSurface> image) = 0;
 
-  virtual jsi::Value getImageBackendTexture(jsi::Runtime &runtime,
-                                            sk_sp<SkImage> image) = 0;
+  virtual jsi::Value getTexture(jsi::Runtime &runtime,
+                                sk_sp<SkImage> image) = 0;
 
   virtual std::shared_ptr<RNSkVideo> createVideo(const std::string &url) = 0;
 

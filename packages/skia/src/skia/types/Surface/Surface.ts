@@ -24,7 +24,7 @@ export interface SkSurface extends SkJSIInstance<"Surface"> {
    *
    * @return backend texture of the surface or null
    */
-  getBackendTexture(): unknown;
+  getNativeTextureUnstable(): unknown;
 
   /** Returns Image capturing Surface contents. Subsequent drawing to
      Surface contents are not captured.

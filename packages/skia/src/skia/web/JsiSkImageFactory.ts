@@ -75,7 +75,7 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
     return new JsiSkImage(this.CanvasKit, image);
   }
 
-  MakeImageFromNativeTexture(): SkImage {
+  MakeImageFromNativeTextureUnstable(): SkImage {
     throw new Error("MakeImageFromNativeTexture is not implemented on web");
   }
 

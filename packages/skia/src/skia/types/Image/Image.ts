@@ -57,7 +57,7 @@ export interface SkImage extends SkJSIInstance<"Image"> {
    *
    * @return backend texture of the image or null
    */
-  getBackendTexture(): unknown;
+  getNativeTextureUnstable(): unknown;
 
   /**
    * Returns this image as a shader with the specified tiling. It will use cubic sampling.

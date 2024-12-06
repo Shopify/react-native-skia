@@ -185,8 +185,7 @@ public:
 #endif
   }
 
-  jsi::Value getImageBackendTexture(jsi::Runtime &runtime,
-                                    sk_sp<SkImage> image) override {
+  jsi::Value getTexture(jsi::Runtime &runtime, sk_sp<SkImage> image) override {
     GrBackendTexture texture;
     if (!SkImages::GetBackendTextureFromImage(image, &texture, true)) {
       return jsi::Value::null();
@@ -194,8 +193,8 @@ public:
     return getJSITextureInfo(runtime, texture);
   }
 
-  jsi::Value getSurfaceBackendTexture(jsi::Runtime &runtime,
-                                      sk_sp<SkSurface> surface) override {
+  jsi::Value getTexture(jsi::Runtime &runtime,
+                        sk_sp<SkSurface> surface) override {
     GrBackendTexture texture = SkSurfaces::GetBackendTexture(
         surface.get(), SkSurface::BackendHandleAccess::kFlushRead);
     return getJSITextureInfo(runtime, texture);

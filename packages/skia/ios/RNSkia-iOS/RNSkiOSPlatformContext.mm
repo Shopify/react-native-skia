@@ -156,9 +156,8 @@ uint64_t RNSkiOSPlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
   return reinterpret_cast<uint64_t>(pixelBuffer);
 }
 
-jsi::Value
-RNSkiOSPlatformContext::getImageBackendTexture(jsi::Runtime &runtime,
-                                               sk_sp<SkImage> image) {
+jsi::Value RNSkiOSPlatformContext::getTexture(jsi::Runtime &runtime,
+                                              sk_sp<SkImage> image) {
   GrBackendTexture texture;
   if (!SkImages::GetBackendTextureFromImage(image, &texture, true)) {
     return jsi::Value::null();
@@ -174,9 +173,8 @@ RNSkiOSPlatformContext::getImageBackendTexture(jsi::Runtime &runtime,
   return jsi::BigInt::fromUint64(runtime, pointer);
 }
 
-jsi::Value
-RNSkiOSPlatformContext::getSurfaceBackendTexture(jsi::Runtime &runtime,
-                                                 sk_sp<SkSurface> surface) {
+jsi::Value RNSkiOSPlatformContext::getTexture(jsi::Runtime &runtime,
+                                              sk_sp<SkSurface> surface) {
   GrBackendTexture texture = SkSurfaces::GetBackendTexture(
       surface.get(), SkSurfaces::BackendHandleAccess::kFlushRead);
   if (!texture.isValid()) {

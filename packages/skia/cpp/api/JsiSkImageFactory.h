@@ -78,7 +78,7 @@ public:
         });
   }
 
-  JSI_HOST_FUNCTION(MakeImageFromNativeTexture) {
+  JSI_HOST_FUNCTION(MakeImageFromNativeTextureUnstable) {
     auto image = getContext()->makeImageFromNativeTexture(
         runtime, jsi::Value(runtime, arguments[0]), arguments[1].asNumber(),
         arguments[2].asNumber(), count > 3 && arguments[3].asBool());
@@ -94,7 +94,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkImageFactory,
                                        MakeImageFromNativeBuffer),
                        JSI_EXPORT_FUNC(JsiSkImageFactory,
-                                       MakeImageFromNativeTexture),
+                                       MakeImageFromNativeTextureUnstable),
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage))
 
   explicit JsiSkImageFactory(std::shared_ptr<RNSkPlatformContext> context)

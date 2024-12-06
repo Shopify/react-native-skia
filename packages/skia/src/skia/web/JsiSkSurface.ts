@@ -44,7 +44,7 @@ export class JsiSkSurface
     return new JsiSkImage(this.CanvasKit, image);
   }
 
-  getBackendTexture(): unknown {
+  getNativeTextureUnstable(): unknown {
     console.warn("getBackendTexture is not implemented on Web");
     return null;
   }

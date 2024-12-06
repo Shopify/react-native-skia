@@ -66,7 +66,7 @@ export interface ImageFactory {
    *
    * @returns Returns a valid SkImage, if the texture is invalid, an error is thrown.
    */
-  MakeImageFromNativeTexture: (
+  MakeImageFromNativeTextureUnstable: (
     texture: unknown,
     width: number,
     height: number,
