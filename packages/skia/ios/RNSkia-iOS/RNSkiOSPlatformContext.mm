@@ -156,36 +156,36 @@ uint64_t RNSkiOSPlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
   return reinterpret_cast<uint64_t>(pixelBuffer);
 }
 
-jsi::Value RNSkiOSPlatformContext::getTexture(jsi::Runtime &runtime,
-                                              sk_sp<SkImage> image) {
+const TextureInfo RNSkiOSPlatformContext::getTexture(sk_sp<SkImage> image) {
   GrBackendTexture texture;
+  TextureInfo result;
   if (!SkImages::GetBackendTextureFromImage(image, &texture, true)) {
-    return jsi::Value::null();
+    throw std::runtime_error("Couldn't get backend texture");
   }
   if (!texture.isValid()) {
-    return jsi::Value::null();
+    throw std::runtime_error("Invalid backend texture");
   }
   GrMtlTextureInfo textureInfo;
   if (!GrBackendTextures::GetMtlTextureInfo(texture, &textureInfo)) {
-    return jsi::Value::null();
+    throw std::runtime_error("Couldn't get Metal texture info");
   }
-  auto pointer = reinterpret_cast<uint64_t>(textureInfo.fTexture.get());
-  return jsi::BigInt::fromUint64(runtime, pointer);
+  result.mtlTexture = textureInfo.fTexture.get();
+  return result;
 }
 
-jsi::Value RNSkiOSPlatformContext::getTexture(jsi::Runtime &runtime,
-                                              sk_sp<SkSurface> surface) {
+const TextureInfo RNSkiOSPlatformContext::getTexture(sk_sp<SkSurface> surface) {
   GrBackendTexture texture = SkSurfaces::GetBackendTexture(
       surface.get(), SkSurfaces::BackendHandleAccess::kFlushRead);
+  TextureInfo result;
   if (!texture.isValid()) {
-    return jsi::Value::null();
+    throw std::runtime_error("Invalid backend texture");
   }
   GrMtlTextureInfo textureInfo;
   if (!GrBackendTextures::GetMtlTextureInfo(texture, &textureInfo)) {
-    return jsi::Value::null();
+    throw std::runtime_error("Couldn't get Metal texture info");
   }
-  auto pointer = reinterpret_cast<uint64_t>(textureInfo.fTexture.get());
-  return jsi::BigInt::fromUint64(runtime, pointer);
+  result.mtlTexture = textureInfo.fTexture.get();
+  return result;
 }
 
 std::shared_ptr<RNSkVideo>
@@ -225,14 +225,9 @@ sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeBuffer(void *buffer) {
 #endif
 }
 
-sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeTexture(
-    jsi::Runtime &runtime, jsi::Value jsiTextureInfo, int width, int height,
+sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeTexture(const TextureInfo& texInfo, int width, int height,
     bool mipMapped) {
-  if (!jsiTextureInfo.isBigInt()) {
-    throw std::runtime_error("Invalid textureInfo");
-  }
-  auto pointer = (void *)jsiTextureInfo.asBigInt(runtime).asUint64(runtime);
-  id<MTLTexture> mtlTexture = (__bridge id<MTLTexture>)(pointer);
+  id<MTLTexture> mtlTexture = (__bridge id<MTLTexture>)(texInfo.mtlTexture);
 
   SkColorType colorType = mtlPixelFormatToSkColorType(mtlTexture.pixelFormat);
   if (colorType == SkColorType::kUnknown_SkColorType) {

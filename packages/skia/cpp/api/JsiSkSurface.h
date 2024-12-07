@@ -5,6 +5,7 @@
 
 #include <jsi/jsi.h>
 
+#include "JsiTextureInfo.h"
 #include "JsiSkHostObjects.h"
 
 #include "JsiSkCanvas.h"
@@ -79,7 +80,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(getNativeTextureUnstable) {
-    return getContext()->getTexture(runtime, getObject());
+    auto texInfo = getContext()->getTexture(getObject());
+    return JsiTextureInfo::toValue(runtime, texInfo);
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurface, width),

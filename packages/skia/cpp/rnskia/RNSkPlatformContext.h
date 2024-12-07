@@ -23,14 +23,20 @@
 
 #pragma clang diagnostic pop
 
-#include <jsi/jsi.h>
-
 #include <ReactCommon/CallInvoker.h>
 
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 namespace react = facebook::react;
+
+struct TextureInfo {
+  const void *mtlTexture = nullptr;
+  unsigned int glTarget = 0;
+  unsigned int glID = 0;
+  unsigned int glFormat = 0;
+  bool glProtected = false;
+};
 
 class RNSkPlatformContext {
 public:
@@ -100,10 +106,9 @@ public:
    */
   virtual sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) = 0;
 
-  virtual sk_sp<SkImage> makeImageFromNativeTexture(jsi::Runtime &runtime,
-                                                    jsi::Value textureInfo,
-                                                    int width, int height,
-                                                    bool mipMapped) = 0;
+  virtual sk_sp<SkImage>
+  makeImageFromNativeTexture(const TextureInfo &textureInfo, int width,
+                             int height, bool mipMapped) = 0;
 
 #if !defined(SK_GRAPHITE)
   virtual GrDirectContext *getDirectContext() = 0;
@@ -113,11 +118,9 @@ public:
 
   virtual uint64_t makeNativeBuffer(sk_sp<SkImage> image) = 0;
 
-  virtual jsi::Value getTexture(jsi::Runtime &runtime,
-                                sk_sp<SkSurface> image) = 0;
+  virtual const TextureInfo getTexture(sk_sp<SkSurface> image) = 0;
 
-  virtual jsi::Value getTexture(jsi::Runtime &runtime,
-                                sk_sp<SkImage> image) = 0;
+  virtual const TextureInfo getTexture(sk_sp<SkImage> image) = 0;
 
   virtual std::shared_ptr<RNSkVideo> createVideo(const std::string &url) = 0;
 
