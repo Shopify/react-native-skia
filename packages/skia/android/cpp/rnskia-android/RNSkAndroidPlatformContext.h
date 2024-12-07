@@ -77,15 +77,15 @@ public:
 #endif
   }
 
-  sk_sp<SkImage> makeImageFromNativeTexture(const TextureInfo& texInfo, int width, int height,
+  sk_sp<SkImage> makeImageFromNativeTexture(const TextureInfo &texInfo,
+                                            int width, int height,
                                             bool mipMapped) override {
     GrGLTextureInfo textureInfo;
     textureInfo.fTarget = (GrGLenum)texInfo.glTarget;
     textureInfo.fID = (GrGLuint)texInfo.glID;
     textureInfo.fFormat = (GrGLenum)texInfo.glFormat;
-    textureInfo.fProtected = texInfo.glProtected
-            ? skgpu::Protected::kYes
-            : skgpu::Protected::kNo;
+    textureInfo.fProtected =
+        texInfo.glProtected ? skgpu::Protected::kYes : skgpu::Protected::kNo;
 
     OpenGLContext::getInstance().makeCurrent();
     if (glIsTexture(textureInfo.fID) == GL_FALSE) {
@@ -193,7 +193,7 @@ public:
     }
     GrGLTextureInfo textureInfo;
     if (!GrBackendTextures::GetGLTextureInfo(texture, &textureInfo)) {
-       throw std::runtime_error("couldn't get OpenGL texture");
+      throw std::runtime_error("couldn't get OpenGL texture");
     }
 
     OpenGLContext::getInstance().makeCurrent();

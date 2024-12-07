@@ -10,8 +10,8 @@
 #include "JsiSkShader.h"
 #include "third_party/base64.h"
 
-#include "RNSkTypedArray.h"
 #include "JsiTextureInfo.h"
+#include "RNSkTypedArray.h"
 
 #if defined(SK_GRAPHITE)
 #include "DawnContext.h"
@@ -221,7 +221,7 @@ public:
     if (!image->isTextureBacked()) {
       return jsi::Value::null();
     }
-	auto texInfo = getContext()->getTexture(image);
+    auto texInfo = getContext()->getTexture(image);
     return JsiTextureInfo::toValue(runtime, texInfo);
   }
 

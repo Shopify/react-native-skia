@@ -225,8 +225,8 @@ sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeBuffer(void *buffer) {
 #endif
 }
 
-sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeTexture(const TextureInfo& texInfo, int width, int height,
-    bool mipMapped) {
+sk_sp<SkImage> RNSkiOSPlatformContext::makeImageFromNativeTexture(
+    const TextureInfo &texInfo, int width, int height, bool mipMapped) {
   id<MTLTexture> mtlTexture = (__bridge id<MTLTexture>)(texInfo.mtlTexture);
 
   SkColorType colorType = mtlPixelFormatToSkColorType(mtlTexture.pixelFormat);
