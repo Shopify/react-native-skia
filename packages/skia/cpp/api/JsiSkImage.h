@@ -10,6 +10,7 @@
 #include "JsiSkShader.h"
 #include "third_party/base64.h"
 
+#include "JsiTextureInfo.h"
 #include "RNSkTypedArray.h"
 
 #if defined(SK_GRAPHITE)
@@ -220,7 +221,8 @@ public:
     if (!image->isTextureBacked()) {
       return jsi::Value::null();
     }
-    return getContext()->getTexture(runtime, image);
+    auto texInfo = getContext()->getTexture(image);
+    return JsiTextureInfo::toValue(runtime, texInfo);
   }
 
   EXPORT_JSI_API_TYPENAME(JsiSkImage, Image)
