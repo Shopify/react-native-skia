@@ -35,7 +35,7 @@ RNSkAndroidVideo::RNSkAndroidVideo(jni::global_ref<jobject> jniVideo)
 #endif
 }
 
-RNSkAndroidVideo::~RNSkAndroidVideo() {}
+RNSkAndroidVideo::~RNSkAndroidVideo() = default;
 
 sk_sp<SkImage> RNSkAndroidVideo::nextImage(double *timeStamp) {
 #if __ANDROID_API__ >= 26
