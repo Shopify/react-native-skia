@@ -27,7 +27,6 @@
 
 namespace RNSkia {
 
-namespace jsi = facebook::jsi;
 namespace react = facebook::react;
 
 struct TextureInfo {

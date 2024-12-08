@@ -10,8 +10,6 @@
 #include "RNSkPlatformContext.h"
 #include "ViewScreenshotService.h"
 
-#include <jsi/jsi.h>
-
 namespace facebook {
 namespace react {
 class CallInvoker;
@@ -19,8 +17,6 @@ class CallInvoker;
 } // namespace facebook
 
 namespace RNSkia {
-
-namespace jsi = facebook::jsi;
 
 class RNSkiOSPlatformContext : public RNSkPlatformContext {
 public:

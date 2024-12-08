@@ -1,6 +1,5 @@
 #pragma once
 
-// TODO: Add android flags
 #if __ANDROID_API__ >= 26
 #include <android/hardware_buffer.h>
 #endif
@@ -28,7 +27,6 @@
 #pragma clang diagnostic pop
 
 namespace RNSkia {
-namespace jsi = facebook::jsi;
 
 class RNSkAndroidPlatformContext : public RNSkPlatformContext {
 public:
@@ -178,16 +176,16 @@ public:
     if (!SkImages::GetBackendTextureFromImage(image, &texture, true)) {
       throw std::runtime_error("Couldn't get backend texture from image.");
     }
-    return getJSITextureInfo(texture);
+    return getTextureInfo(texture);
   }
 
   const TextureInfo getTexture(sk_sp<SkSurface> surface) override {
     GrBackendTexture texture = SkSurfaces::GetBackendTexture(
         surface.get(), SkSurface::BackendHandleAccess::kFlushRead);
-    return getJSITextureInfo(texture);
+    return getTextureInfo(texture);
   }
 
-  static const TextureInfo getJSITextureInfo(const GrBackendTexture &texture) {
+  static const TextureInfo getTextureInfo(const GrBackendTexture &texture) {
     if (!texture.isValid()) {
       throw std::runtime_error("invalid backend texture");
     }
