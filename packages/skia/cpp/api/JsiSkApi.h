@@ -64,7 +64,7 @@ public:
    * and provide functions for accessing and creating the Skia wrapper objects
    * @param context Platform context
    */
-  JsiSkApi(jsi::Runtime &runtime, std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiSkApi(const std::shared_ptr<RNSkPlatformContext> &context)
       : JsiSkHostObject(context) {
     // We create the system font manager eagerly since it has proven to be too
     // slow to do it on demand

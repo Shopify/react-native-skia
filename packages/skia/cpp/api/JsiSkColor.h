@@ -24,7 +24,7 @@ class JsiSkColor : public RNJsi::JsiHostObject {
 public:
   JsiSkColor() : JsiHostObject() {}
 
-  ~JsiSkColor() {}
+  ~JsiSkColor() override = default;
 
   static jsi::Object toValue(jsi::Runtime &runtime, SkColor color) {
     auto result = runtime.global()
@@ -63,7 +63,7 @@ public:
    * @return A function for creating a new host object wrapper for the SkColor
    * class
    */
-  static const jsi::HostFunctionType createCtor() {
+  static jsi::HostFunctionType createCtor() {
     return JSI_HOST_FUNCTION_LAMBDA {
       if (arguments[0].isNumber()) {
         return JsiSkColor::toValue(runtime, arguments[0].getNumber());

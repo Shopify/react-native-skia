@@ -41,7 +41,7 @@ GrBackendFormat GetGLBackendFormat(GrDirectContext *dContext,
                                    bool requireKnownFormat) {
   GrBackendApi backend = dContext->backend();
   if (backend != GrBackendApi::kOpenGL) {
-    return GrBackendFormat();
+    return {};
   }
   switch (bufferFormat) {
   // TODO: find out if we can detect, which graphic buffers support
@@ -63,7 +63,7 @@ GrBackendFormat GetGLBackendFormat(GrDirectContext *dContext,
 #endif
   default:
     if (requireKnownFormat) {
-      return GrBackendFormat();
+      return {};
     } else {
       return GrBackendFormats::MakeGL(GR_GL_RGBA8, GR_GL_TEXTURE_EXTERNAL);
     }
@@ -110,12 +110,12 @@ void GLTextureHelper::rebind(GrDirectContext *dContext) {
 }
 
 void delete_gl_texture(void *context) {
-  GLTextureHelper *cleanupHelper = static_cast<GLTextureHelper *>(context);
+  auto cleanupHelper = static_cast<GLTextureHelper *>(context);
   delete cleanupHelper;
 }
 
 void update_gl_texture(void *context, GrDirectContext *dContext) {
-  GLTextureHelper *cleanupHelper = static_cast<GLTextureHelper *>(context);
+  auto cleanupHelper = static_cast<GLTextureHelper *>(context);
   cleanupHelper->rebind(dContext);
 }
 
@@ -127,13 +127,13 @@ static GrBackendTexture make_gl_backend_texture(
   while (GL_NO_ERROR != glGetError()) {
   } // clear GL errors
 
-  EGLGetNativeClientBufferANDROIDProc eglGetNativeClientBufferANDROID =
+  auto eglGetNativeClientBufferANDROID =
       (EGLGetNativeClientBufferANDROIDProc)eglGetProcAddress(
           "eglGetNativeClientBufferANDROID");
   if (!eglGetNativeClientBufferANDROID) {
     RNSkLogger::logToConsole(
         "Failed to get the eglGetNativeClientBufferAndroid proc");
-    return GrBackendTexture();
+    return {};
   }
 
   EGLClientBuffer clientBuffer =
@@ -149,14 +149,14 @@ static GrBackendTexture make_gl_backend_texture(
   if (EGL_NO_IMAGE_KHR == image) {
     SkDebugf("Could not create EGL image, err = (%#x)",
              static_cast<int>(eglGetError()));
-    return GrBackendTexture();
+    return {};
   }
 
   GrGLuint texID;
   glGenTextures(1, &texID);
   if (!texID) {
     eglDestroyImageKHR(display, image);
-    return GrBackendTexture();
+    return {};
   }
 
   GrGLuint target = isRenderable ? GR_GL_TEXTURE_2D : GR_GL_TEXTURE_EXTERNAL;
@@ -167,7 +167,7 @@ static GrBackendTexture make_gl_backend_texture(
     SkDebugf("glBindTexture failed (%#x)", static_cast<int>(status));
     glDeleteTextures(1, &texID);
     eglDestroyImageKHR(display, image);
-    return GrBackendTexture();
+    return {};
   }
   glEGLImageTargetTexture2DOES(target, image);
   if ((status = glGetError()) != GL_NO_ERROR) {
@@ -175,7 +175,7 @@ static GrBackendTexture make_gl_backend_texture(
              static_cast<int>(status));
     glDeleteTextures(1, &texID);
     eglDestroyImageKHR(display, image);
-    return GrBackendTexture();
+    return {};
   }
   dContext->resetContext(kTextureBinding_GrGLBackendState);
 
@@ -223,16 +223,16 @@ MakeGLBackendTexture(GrDirectContext *dContext, AHardwareBuffer *hardwareBuffer,
                      bool isProtectedContent,
                      const GrBackendFormat &backendFormat, bool isRenderable) {
   SkASSERT(dContext);
-  if (!dContext || dContext->abandoned()) {
-    return GrBackendTexture();
+  if (dContext->abandoned()) {
+    return {};
   }
 
   if (GrBackendApi::kOpenGL != dContext->backend()) {
-    return GrBackendTexture();
+    return {};
   }
 
   if (isProtectedContent && !can_import_protected_content(dContext)) {
-    return GrBackendTexture();
+    return {};
   }
 
   return make_gl_backend_texture(

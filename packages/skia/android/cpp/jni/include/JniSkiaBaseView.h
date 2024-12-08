@@ -20,9 +20,9 @@ class JniSkiaBaseView {
 public:
   JniSkiaBaseView(jni::alias_ref<JniSkiaManager::javaobject> skiaManager,
                   std::shared_ptr<RNSkBaseAndroidView> skiaView)
-      : _manager(skiaManager->cthis()), _skiaAndroidView(skiaView) {}
+      : _manager(skiaManager->cthis()), _skiaAndroidView(std::move(skiaView)) {}
 
-  ~JniSkiaBaseView() {}
+  ~JniSkiaBaseView() = default;
 
   std::shared_ptr<RNSkManager> getSkiaManager() {
     return _manager->getSkiaManager();

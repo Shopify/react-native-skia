@@ -33,11 +33,11 @@ public:
   RNSkAndroidPlatformContext(
       JniPlatformContext *jniPlatformContext,
       std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker)
-      : RNSkPlatformContext(jsCallInvoker,
+      : RNSkPlatformContext(std::move(jsCallInvoker),
                             jniPlatformContext->getPixelDensity()),
         _jniPlatformContext(jniPlatformContext) {}
 
-  ~RNSkAndroidPlatformContext() {}
+  ~RNSkAndroidPlatformContext() override = default;
 
   void performStreamOperation(
       const std::string &sourceUri,
@@ -63,7 +63,7 @@ public:
     return DawnContext::getInstance().MakeWindow(surface, width, height);
 #else
     auto aWindow = reinterpret_cast<ANativeWindow *>(surface);
-    return OpenGLContext::getInstance().MakeWindow(aWindow, width, height);
+    return OpenGLContext::getInstance().MakeWindow(aWindow);
 #endif
   }
 
@@ -87,7 +87,7 @@ public:
 
     OpenGLContext::getInstance().makeCurrent();
     if (glIsTexture(textureInfo.fID) == GL_FALSE) {
-      throw new std::runtime_error("Invalid textureInfo");
+      throw std::runtime_error("Invalid textureInfo");
     }
 
     GrBackendTexture backendTexture = GrBackendTextures::MakeGL(
@@ -107,7 +107,7 @@ public:
 
   void releaseNativeBuffer(uint64_t pointer) override {
 #if __ANDROID_API__ >= 26
-    AHardwareBuffer *buffer = reinterpret_cast<AHardwareBuffer *>(pointer);
+    auto *buffer = reinterpret_cast<AHardwareBuffer *>(pointer);
     AHardwareBuffer_release(buffer);
 #endif
   }
@@ -185,7 +185,7 @@ public:
     return getTextureInfo(texture);
   }
 
-  static const TextureInfo getTextureInfo(const GrBackendTexture &texture) {
+  static TextureInfo getTextureInfo(const GrBackendTexture &texture) {
     if (!texture.isValid()) {
       throw std::runtime_error("invalid backend texture");
     }

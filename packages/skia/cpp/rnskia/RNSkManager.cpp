@@ -69,7 +69,7 @@ void RNSkManager::installBindings() {
   // Create the API objects and install it on the global object in the
   // provided runtime.
 
-  auto skiaApi = std::make_shared<JsiSkApi>(*_jsRuntime, _platformContext);
+  auto skiaApi = std::make_shared<JsiSkApi>(_platformContext);
   _jsRuntime->global().setProperty(
       *_jsRuntime, "SkiaApi",
       jsi::Object::createFromHostObject(*_jsRuntime, std::move(skiaApi)));

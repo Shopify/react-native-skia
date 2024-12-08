@@ -26,8 +26,8 @@ namespace RNSkia {
 
 Base64::Error Base64::Decode(const void *srcv, size_t srcLength, void *dstv,
                              size_t *dstLength) {
-  const unsigned char *src = static_cast<const unsigned char *>(srcv);
-  unsigned char *dst = static_cast<unsigned char *>(dstv);
+  auto *src = static_cast<const unsigned char *>(srcv);
+  auto *dst = static_cast<unsigned char *>(dstv);
 
   int i = 0;
   bool padTwo = false;
@@ -112,8 +112,8 @@ Base64::Error Base64::Decode(const void *srcv, size_t srcLength, void *dstv,
 }
 
 size_t Base64::Encode(const void *srcv, size_t length, void *dstv) {
-  const unsigned char *src = static_cast<const unsigned char *>(srcv);
-  unsigned char *dst = static_cast<unsigned char *>(dstv);
+  auto *src = static_cast<const unsigned char *>(srcv);
+  auto *dst = static_cast<unsigned char *>(dstv);
 
   const char *encode = kDefaultEncode;
   if (dst) {

@@ -6,8 +6,8 @@
 
 class MainThreadDispatcher {
 private:
-  ALooper *mainLooper;
-  int messagePipe[2];
+  ALooper *mainLooper = nullptr;
+  int messagePipe[2] = { -1, -1 };
   std::queue<std::function<void()>> taskQueue;
   std::mutex queueMutex;
 
