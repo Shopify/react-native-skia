@@ -13,8 +13,6 @@
   __weak RCTBridge *weakBridge;
 }
 
-static RCTBridge *originalBridgeInstance = nil;
-
 - (std::shared_ptr<RNSkia::RNSkManager>)skManager {
   return _skManager;
 }
@@ -32,7 +30,6 @@ static RCTBridge *originalBridgeInstance = nil;
   self = [super init];
   if (self) {
     RCTCxxBridge *cxxBridge = (RCTCxxBridge *)bridge;
-    originalBridgeInstance = bridge;
     if (cxxBridge.runtime) {
 
       facebook::jsi::Runtime *jsRuntime =

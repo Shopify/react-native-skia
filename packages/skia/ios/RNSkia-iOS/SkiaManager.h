@@ -16,6 +16,4 @@
                      jsInvoker:(std::shared_ptr<facebook::react::CallInvoker>)
                                    jsInvoker;
 
-+ (RCTBridge *)originalBridge;
-
 @end
