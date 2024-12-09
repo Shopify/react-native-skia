@@ -24,10 +24,10 @@ using namespace facebook::react;
 
 - (instancetype)initWithFrame:(CGRect)frame {
   if (self = [super initWithFrame:frame]) {
-    auto skManager = [[self skiaManager] skManager];
-    // Pass SkManager as a raw pointer to avoid circular dependenciesr
+    // Pass SkManager as a raw pointer to avoid circular dependencies
+    auto skManager = [SkiaManager latestActiveSkManager].get();
     [self
-        initCommon:skManager.get()
+        initCommon:skManager
            factory:[](std::shared_ptr<RNSkia::RNSkPlatformContext> context) {
              return std::make_shared<RNSkiOSView<RNSkia::RNSkDomView>>(context);
            }];
@@ -51,6 +51,7 @@ using namespace facebook::react;
   int nativeId =
       [[RCTConvert NSString:RCTNSStringFromString(newProps.nativeId)] intValue];
   [self setNativeId:nativeId];
+  [self setDrawingMode:newProps.mode];
   [self setDebugMode:newProps.debug];
 }
 
