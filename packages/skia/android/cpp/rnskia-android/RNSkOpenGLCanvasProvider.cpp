@@ -26,9 +26,9 @@ namespace RNSkia {
 RNSkOpenGLCanvasProvider::RNSkOpenGLCanvasProvider(
     std::function<void()> requestRedraw,
     std::shared_ptr<RNSkia::RNSkPlatformContext> platformContext)
-    : RNSkCanvasProvider(requestRedraw), _platformContext(platformContext) {}
+    : RNSkCanvasProvider(std::move(requestRedraw)), _platformContext(std::move(platformContext)) {}
 
-RNSkOpenGLCanvasProvider::~RNSkOpenGLCanvasProvider() {}
+RNSkOpenGLCanvasProvider::~RNSkOpenGLCanvasProvider() = default;
 
 float RNSkOpenGLCanvasProvider::getScaledWidth() {
   if (_surfaceHolder) {
@@ -110,7 +110,7 @@ void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurfaceTexture,
   _surfaceHolder = DawnContext::getInstance().MakeWindow(window, width, height);
 #else
   _surfaceHolder =
-      OpenGLContext::getInstance().MakeWindow(window, width, height);
+      OpenGLContext::getInstance().MakeWindow(window);
 #endif
 
   // Post redraw request to ensure we paint in the next draw cycle.
