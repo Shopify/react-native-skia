@@ -48,12 +48,6 @@
   _factory = factory;
 }
 
-- (SkiaManager *)skiaManager {
-  auto bridge = [RCTBridge currentBridge];
-  auto skiaModule = (RNSkiaModule *)[bridge moduleForName:@"RNSkiaModule"];
-  return [skiaModule manager];
-}
-
 - (void)willInvalidateModules {
   _impl = nullptr;
   _manager = nullptr;
@@ -114,7 +108,7 @@
     // this flag is only set when the view is inserted and we want to set the
     // manager here since the view could be recycled or the app could be
     // refreshed and we would have a stale manager then
-    _manager = [[self skiaManager] skManager].get();
+    _manager = [SkiaManager latestActiveSkManager].get();
   }
 }
 #endif // RCT_NEW_ARCH_ENABLED

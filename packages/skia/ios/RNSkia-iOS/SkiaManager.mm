@@ -8,6 +8,8 @@
 
 #import "RNSkiOSPlatformContext.h"
 
+static __weak SkiaManager *sharedInstance = nil;
+
 @implementation SkiaManager {
   std::shared_ptr<RNSkia::RNSkManager> _skManager;
   __weak RCTBridge *weakBridge;
@@ -29,6 +31,7 @@
                                    jsInvoker {
   self = [super init];
   if (self) {
+    sharedInstance = self;
     RCTCxxBridge *cxxBridge = (RCTCxxBridge *)bridge;
     if (cxxBridge.runtime) {
 
@@ -44,4 +47,18 @@
   return self;
 }
 
+- (void)dealloc
+{
+  sharedInstance = nil;
+}
+
+#ifdef RCT_NEW_ARCH_ENABLED
++ (std::shared_ptr<RNSkia::RNSkManager>)latestActiveSkManager
+{
+  if (sharedInstance != nil) {
+    return [sharedInstance skManager];
+  }
+  return nullptr;
+}
+#endif // RCT_NEW_ARCH_ENABLED
 @end
