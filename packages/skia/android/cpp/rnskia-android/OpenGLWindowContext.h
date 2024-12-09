@@ -42,7 +42,7 @@ public:
     _glSurface = display->makeWindowSurface(config, _window);
   }
 
-  ~OpenGLWindowContext() {
+  ~OpenGLWindowContext() override {
     _skSurface = nullptr;
     _glSurface = nullptr;
     ANativeWindow_release(_window);

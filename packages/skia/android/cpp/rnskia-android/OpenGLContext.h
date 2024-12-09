@@ -117,17 +117,23 @@ public:
     // GR_GL_TEXTURE_2D
     case AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM:
       format = GrBackendFormats::MakeGL(GR_GL_RGBA8, GR_GL_TEXTURE_EXTERNAL);
+      break;
     case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
       format = GrBackendFormats::MakeGL(GR_GL_RGBA16F, GR_GL_TEXTURE_EXTERNAL);
+      break;
     case AHARDWAREBUFFER_FORMAT_R5G6B5_UNORM:
-      format = GrBackendFormats::MakeGL(GR_GL_RGB565, GR_GL_TEXTURE_EXTERNAL);
+        GrBackendFormats::MakeGL(GR_GL_RGB565, GR_GL_TEXTURE_EXTERNAL);
+        break;
     case AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM:
       format = GrBackendFormats::MakeGL(GR_GL_RGB10_A2, GR_GL_TEXTURE_EXTERNAL);
+      break;
     case AHARDWAREBUFFER_FORMAT_R8G8B8_UNORM:
       format = GrBackendFormats::MakeGL(GR_GL_RGB8, GR_GL_TEXTURE_EXTERNAL);
+      break;
 #if __ANDROID_API__ >= 33
     case AHARDWAREBUFFER_FORMAT_R8_UNORM:
       format = GrBackendFormats::MakeGL(GR_GL_R8, GR_GL_TEXTURE_EXTERNAL);
+      break;
 #endif
     default:
       if (requireKnownFormat) {
@@ -136,10 +142,11 @@ public:
         format = GrBackendFormats::MakeGL(GR_GL_RGBA8, GR_GL_TEXTURE_EXTERNAL);
       }
     }
-
+    auto width = static_cast<int>(description.width);
+    auto height = static_cast<int>(description.height);
     auto backendTex = MakeGLBackendTexture(
         _directContext.get(), const_cast<AHardwareBuffer *>(hardwareBuffer),
-        description.width, description.height, &deleteImageProc,
+        width, height, &deleteImageProc,
         &updateImageProc, &deleteImageCtx, false, format, false);
     if (!backendTex.isValid()) {
       RNSkLogger::logToConsole(
@@ -159,8 +166,7 @@ public:
   }
 
   // TODO: remove width, height
-  std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window, int width,
-                                            int height) {
+  std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window) {
     auto display = OpenGLSharedContext::getInstance().getDisplay();
     return std::make_unique<OpenGLWindowContext>(
         _directContext.get(), display, _glContext.get(), window,
