@@ -43,9 +43,6 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
     }
 
     void dropInstance() {
-        if (mView instanceof SkiaTextureView) {
-            ((SkiaTextureView)mView).isDropped = true;
-        }
         unregisterView();
     }
 
