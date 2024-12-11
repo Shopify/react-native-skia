@@ -24,22 +24,6 @@ public class SkiaTextureView extends TextureView implements TextureView.SurfaceT
         setSurfaceTextureListener(this);
     }
 
-    public void createSurfaceTexture() {
-//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-//            Log.i(tag, "Create SurfaceTexture");
-//            SurfaceTexture surfaceTexture = new SurfaceTexture(false);
-//            setSurfaceTexture(surfaceTexture);
-//            onSurfaceTextureAvailable(surfaceTexture, getWidth(), getHeight());
-//        }
-    }
-
-    private void reCreateSurfaceTexture() {
-        boolean surfaceIsAlreadyAvailable = getSurfaceTexture() != null;
-        if (surfaceIsAlreadyAvailable) {
-            createSurfaceTexture();
-        }
-    }
-
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
