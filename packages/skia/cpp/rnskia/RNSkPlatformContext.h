@@ -156,7 +156,7 @@ public:
   /**
    * @return Current scale factor for pixels
    */
-  float getPixelDensity() { return _pixelDensity; }
+  virtual float getPixelDensity() { return _pixelDensity; }
 
 private:
   float _pixelDensity;
