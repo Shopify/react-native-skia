@@ -331,15 +331,12 @@ export class JsiSkDOM implements SkDOM {
   }
 
   LinearToSRGBGammaColorFilter() {
-    return global.SkiaDomApi &&
-      global.SkiaDomApi.LinearToSRGBGammaColorFilterNode
-      ? global.SkiaDomApi.LinearToSRGBGammaColorFilterNode()
+    return this.native? global.SkiaDomApi.LinearToSRGBGammaColorFilterNode()
       : new LinearToSRGBGammaColorFilterNode(this.ctx);
   }
 
   SRGBToLinearGammaColorFilter() {
-    return global.SkiaDomApi &&
-      global.SkiaDomApi.SRGBToLinearGammaColorFilterNode
+    return this.native
       ? global.SkiaDomApi.SRGBToLinearGammaColorFilterNode()
       : new SRGBToLinearGammaColorFilterNode(this.ctx);
   }
