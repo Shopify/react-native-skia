@@ -52,7 +52,9 @@ export class SkiaDomView extends React.Component<SkiaDomViewProps> {
       assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "onSize", onSize);
     }
-    this.tick();
+    if (onSize !== prevProps.onSize || root !== prevProps.root) {
+      this.tick();
+    }
   }
 
   componentWillUnmount(): void {
