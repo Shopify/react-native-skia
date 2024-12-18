@@ -380,7 +380,7 @@ export interface ImageFilterFactory {
   MakeDilate: (
     rx: number,
     ry: number,
-    input: SkImageFilter | null,
+    input?: SkImageFilter | null,
     cropRect?: SkRect | null
   ) => SkImageFilter;
   /**
