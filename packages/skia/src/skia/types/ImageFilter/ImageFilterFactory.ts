@@ -1,7 +1,9 @@
 import type { SkColor } from "../Color";
 import type { SkColorFilter } from "../ColorFilter/ColorFilter";
 import type { FilterMode, MipmapMode, SkImage } from "../Image/Image";
+import type { SkMatrix } from "../Matrix";
 import type { BlendMode } from "../Paint";
+import type { SkPicture } from "../Picture";
 import type { SkRect } from "../Rect";
 import type { SkRuntimeShaderBuilder } from "../RuntimeEffect";
 import type { SkShader } from "../Shader";
@@ -261,7 +263,7 @@ export interface ImageFilterFactory {
    *  @param input      The image filter to transform, or null to use the source image.
    */
   MakeMatrixTransform(
-    matrix: number[],
+    matrix: SkMatrix,
     filterMode?: FilterMode,
     mipmap?: MipmapMode,
     input?: SkImageFilter | null
@@ -299,7 +301,7 @@ export interface ImageFilterFactory {
    *  @param picture    The picture that is drawn for the filter output.
    *  @param targetRect The drawing region for the picture. If null, the picture's bounds are used.
    */
-  MakePicture(picture: SkImage, targetRect?: SkRect | null): SkImageFilter;
+  MakePicture(picture: SkPicture, targetRect?: SkRect | null): SkImageFilter;
   /**
    *  Create a filter that fills the output with the per-pixel evaluation of the SkShader produced
    *  by the SkRuntimeShaderBuilder. The shader is defined in the image filter's local coordinate
@@ -342,20 +344,20 @@ export interface ImageFilterFactory {
    */
   MakeRuntimeShaderWithChildren: (
     builder: SkRuntimeShaderBuilder,
-    childShaderNames: string[],
     sampleRadius: number,
+    childShaderNames: string[],
     inputs: Array<SkImageFilter | null>
   ) => SkImageFilter;
   /**
    * Transforms a shader into an impage filter
    *
    * @param shader - The Shader to be transformed
-   * @param input - if null, it will use the dynamic source image
+   * @param dither 
    * @param cropRect - Optional rectangle to crop input and output.
    */
   MakeShader(
     shader: SkShader,
-    input?: SkImageFilter | null,
+    dither?: boolean,
     cropRect?: SkRect | null
   ): SkImageFilter;
   /**

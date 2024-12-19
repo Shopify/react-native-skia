@@ -14,6 +14,7 @@ import {
   type SkImage,
   type FilterMode,
   type MipmapMode,
+  SkMatrix,
 } from "../types";
 
 import { Host, NotImplementedOnRNWeb, getEnum } from "./Host";
@@ -241,7 +242,7 @@ export class JsiSkImageFilterFactory
   }
 
   MakeMatrixTransform(
-    matrix: number[],
+    matrix: SkMatrix,
     filterMode?: FilterMode,
     mipmap?: MipmapMode,
     input?: SkImageFilter | null
@@ -257,7 +258,7 @@ export class JsiSkImageFilterFactory
     const inputFilter =
       input == null ? null : JsiSkImageFilter.fromValue<ImageFilter>(input);
     const filter = this.CanvasKit.ImageFilter.MakeMatrixTransform(
-      matrix,
+      matrix.get(),
       sampling,
       inputFilter
     );
@@ -293,7 +294,7 @@ export class JsiSkImageFilterFactory
 
   MakeShader(
     shader: SkShader,
-    input: SkImageFilter | null,
+    dither?: boolean,
     cropRect?: SkRect | null
   ): SkImageFilter {
     if (cropRect) {
@@ -301,9 +302,9 @@ export class JsiSkImageFilterFactory
         "The cropRect argument is not yet supported on React Native Web."
       );
     }
-    if (input) {
+    if (dither != null) {
       throw new NotImplementedOnRNWeb(
-        "The input argument is not yet supported on React Native Web."
+        "The dither argument is not yet supported on React Native Web."
       );
     }
     const filter = this.CanvasKit.ImageFilter.MakeShader(
