@@ -1,5 +1,6 @@
 import type { DrawingContext } from "./DrawingContext";
 import type { Node } from "./Node";
+import { draw } from "./Nodes";
 
 export class Container {
   root: Node[] = [];
@@ -14,5 +15,9 @@ export class Container {
     console.log("redraw container");
   }
 
-  render(_ctx: DrawingContext) {}
+  render(ctx: DrawingContext) {
+    this.root.forEach((node) => {
+      draw(ctx, node);
+    });
+  }
 }
