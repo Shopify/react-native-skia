@@ -25,41 +25,25 @@ export class SkiaSGView extends React.Component<SkiaSGViewProps> {
   constructor(props: SkiaSGViewProps) {
     super(props);
     this._nativeId = SkiaViewNativeId.current++;
-    const { root, onSize } = props;
-    if (root) {
-      assertSkiaViewApi();
-      SkiaViewApi.setJsiProperty(this._nativeId, "root", root);
-    }
+    const { onSize } = props;
     if (onSize) {
-      assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "onSize", onSize);
     }
-    this.tick();
+    this.redraw();
   }
 
   private _nativeId: number;
-  private requestId = 0;
-
-  private tick() {
-    this.redraw();
-    this.requestId = requestAnimationFrame(this.tick.bind(this));
-  }
 
   public get nativeId() {
     return this._nativeId;
   }
 
-  componentDidUpdate(prevProps: SkiaSGViewProps & { Skia: Skia }) {
-    const { root, onSize } = this.props;
-    if (root !== prevProps.root && root !== undefined) {
-      assertSkiaViewApi();
-      this.draw();
-    }
+  componentDidUpdate(prevProps: SkiaSGViewProps) {
+    const { onSize } = this.props;
     if (onSize !== prevProps.onSize) {
-      assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "onSize", onSize);
     }
-    this.tick();
+    this.redraw();
   }
 
   /**
@@ -68,40 +52,23 @@ export class SkiaSGView extends React.Component<SkiaSGViewProps> {
    * @returns An Image object.
    */
   public makeImageSnapshot(rect?: SkRect) {
-    assertSkiaViewApi();
     return SkiaViewApi.makeImageSnapshot(this._nativeId, rect);
   }
 
   public makeImageSnapshotAsync(rect?: SkRect) {
-    assertSkiaViewApi();
     return SkiaViewApi.makeImageSnapshotAsync(this._nativeId, rect);
   }
 
-  /**
-   * Sends a redraw request to the native SkiaView.
-   */
   public redraw() {
-    assertSkiaViewApi();
-    this.draw();
-  }
-
-  private draw() {
     const { root } = this.props;
     if (root !== undefined) {
-      assertSkiaViewApi();
+      console.log("redraw");
       root.draw();
     }
   }
 
-  /**
-   * Clear up the dom node when unmounting to release resources.
-   */
-  componentWillUnmount(): void {
-    assertSkiaViewApi();
+  componentWillUnmount() {
     SkiaViewApi.setJsiProperty(this._nativeId, "picture", null);
-    if (this.requestId) {
-      cancelAnimationFrame(this.requestId);
-    }
   }
 
   render() {
@@ -116,14 +83,3 @@ export class SkiaSGView extends React.Component<SkiaSGViewProps> {
     );
   }
 }
-
-const assertSkiaViewApi = () => {
-  if (
-    SkiaViewApi === null ||
-    SkiaViewApi.setJsiProperty === null ||
-    SkiaViewApi.requestRedraw === null ||
-    SkiaViewApi.makeImageSnapshot === null
-  ) {
-    throw Error("Skia View Api was not found.");
-  }
-};

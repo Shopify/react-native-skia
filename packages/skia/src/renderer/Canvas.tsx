@@ -18,8 +18,6 @@ import { SkiaDomView } from "../views";
 import { Skia } from "../skia/Skia";
 import type { SkiaBaseViewProps } from "../views";
 import { SkiaJSDomView } from "../views/SkiaJSDomView";
-import { SkiaSGRoot } from "../sksg/Reconciler";
-import { SkiaSGView } from "../views/SkiaSGView";
 
 import { SkiaRoot } from "./Reconciler";
 import { NATIVE_DOM } from "./HostComponents";
@@ -85,43 +83,17 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       [experimental, redraw, getNativeId]
     );
 
-    const sksgRoot = useMemo(
-      () => (experimental ? new SkiaSGRoot(Skia, getNativeId) : null),
-      [experimental, getNativeId]
-    );
-
     // Render effect
     useEffect(() => {
-      if (sksgRoot) {
-        sksgRoot.render(children);
-      } else {
-        root!.render(children);
-      }
-    }, [children, root, redraw, sksgRoot]);
+      root!.render(children);
+    }, [children, root, redraw]);
 
     useEffect(() => {
       return () => {
-        if (sksgRoot) {
-          sksgRoot.unmount();
-        } else {
-          root!.unmount();
-        }
+        root!.unmount();
       };
-    }, [root, sksgRoot]);
-    if (sksgRoot) {
-      return (
-        <SkiaSGView
-          Skia={Skia}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ref={ref as any}
-          style={style}
-          root={sksgRoot}
-          onLayout={onLayout}
-          debug={debug}
-          {...props}
-        />
-      );
-    } else if (NATIVE_DOM) {
+    }, [root]);
+    if (NATIVE_DOM) {
       return (
         <SkiaDomView
           ref={ref}
