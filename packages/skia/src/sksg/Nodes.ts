@@ -1,17 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { enumKey, processCircle } from "../dom/nodes";
 import type {
   BlurMaskFilterProps,
   CircleProps,
   DrawingNodeProps,
+  PaintProps,
+  TransformProps,
 } from "../dom/types";
 import { NodeType } from "../dom/types";
 import { BlurStyle } from "../skia/types";
 
-import {
-  postProcessContext,
-  preProcessContext,
-  type DrawingContext,
-} from "./DrawingContext";
+import type { DrawingContext } from "./DrawingContext";
 import type { Node } from "./Node";
 
 const drawCircle = (ctx: DrawingContext, props: CircleProps) => {
@@ -26,12 +25,50 @@ const drawFill = (ctx: DrawingContext, _props: DrawingNodeProps) => {
   ctx.canvas.drawPaint(ctx.paint);
 };
 
-const drawBlurMaskFilter = (
+interface ContextProcessingResult {
+  shouldRestoreMatrix: boolean;
+  shouldRestorePaint: boolean;
+}
+
+const preProcessContext = (
   ctx: DrawingContext,
-  props: BlurMaskFilterProps
+  props: PaintProps & TransformProps,
+  children: Node<any>[]
 ) => {
   "worklet";
-  const { style, blur, respectCTM } = props;
+  const shouldRestoreMatrix = ctx.processMatrix(props);
+  ctx.declCtx.save();
+  children.forEach((node) => {
+    switch (node.type) {
+      case NodeType.BlurMaskFilter:
+        declareBlurMaskFilter(ctx, node);
+        break;
+    }
+  });
+  ctx.declCtx.restore();
+  const shouldRestorePaint = ctx.processPaint(props);
+  return { shouldRestoreMatrix, shouldRestorePaint };
+};
+
+const postProcessContext = (
+  ctx: DrawingContext,
+  { shouldRestoreMatrix, shouldRestorePaint }: ContextProcessingResult
+) => {
+  "worklet";
+  if (shouldRestoreMatrix) {
+    ctx.canvas.restore();
+  }
+  if (shouldRestorePaint) {
+    ctx.restore();
+  }
+};
+
+const declareBlurMaskFilter = (
+  ctx: DrawingContext,
+  node: Node<BlurMaskFilterProps>
+) => {
+  "worklet";
+  const { style, blur, respectCTM } = node.props;
   const mf = ctx.Skia.MaskFilter.MakeBlur(
     BlurStyle[enumKey(style)],
     blur,
@@ -40,7 +77,6 @@ const drawBlurMaskFilter = (
   ctx.declCtx.maskFilters.push(mf);
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const draw = (ctx: DrawingContext, node: Node<any>) => {
   "worklet";
   const { type, props, children } = node;
@@ -54,9 +90,6 @@ export const draw = (ctx: DrawingContext, node: Node<any>) => {
       break;
     case NodeType.Group:
       // TODO: do nothing
-      break;
-    case NodeType.BlurMaskFilter:
-      drawBlurMaskFilter(ctx, props);
       break;
     // TODO: exhaustive check
   }
