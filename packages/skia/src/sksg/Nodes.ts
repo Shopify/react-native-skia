@@ -91,7 +91,7 @@ export const draw = (ctx: DrawingContext, node: Node<any>) => {
     case NodeType.Group:
       // TODO: do nothing
       break;
-    // TODO: exhaustive check
+    // TODO: exhaustive check?
   }
   children.forEach((child) => {
     if (!child.isDeclaration) {
