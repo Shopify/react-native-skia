@@ -83,6 +83,9 @@ export class DrawingContext {
       paint.setBlendMode(BlendMode[enumKey(blendMode)]);
     }
     if (style !== undefined) {
+      console.log("style", style);
+      console.log("style", enumKey(style));
+      console.log("style", PaintStyle[enumKey(style)]);
       paint.setStyle(PaintStyle[enumKey(style)]);
     }
     if (strokeJoin !== undefined) {

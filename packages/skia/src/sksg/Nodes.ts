@@ -77,6 +77,15 @@ const declareBlurMaskFilter = (
   ctx.declCtx.maskFilters.push(mf);
 };
 
+const isDrawingNode = (node: Node) => {
+  "worklet";
+  return (
+    node.type === NodeType.Circle ||
+    node.type === NodeType.Fill ||
+    node.type === NodeType.Group
+  );
+};
+
 export const draw = (ctx: DrawingContext, node: Node<any>) => {
   "worklet";
   const { type, props, children } = node;
@@ -94,7 +103,9 @@ export const draw = (ctx: DrawingContext, node: Node<any>) => {
     // TODO: exhaustive check
   }
   children.forEach((child) => {
-    draw(ctx, child);
+    if (isDrawingNode(child)) {
+      draw(ctx, child);
+    }
   });
   postProcessContext(ctx, result);
 };

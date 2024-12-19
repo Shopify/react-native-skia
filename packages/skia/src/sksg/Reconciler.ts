@@ -14,7 +14,7 @@ skiaReconciler.injectIntoDevTools({
   rendererPackageName: "react-native-skia",
 });
 
-export class SkiaRoot {
+export class SkiaSGRoot {
   private root: OpaqueRoot;
   private container: Container;
 

@@ -3,6 +3,8 @@ import type { HostConfig } from "react-reconciler";
 import { DefaultEventPriority } from "react-reconciler/constants";
 
 import type { NodeType } from "../dom/types";
+import type { AnimatedProps } from "../renderer";
+import Rea from "../external/reanimated/ReanimatedProxy";
 
 import type { Node } from "./Node";
 import type { Container } from "./Container";
@@ -12,6 +14,24 @@ export const debug = (...args: Parameters<typeof console.log>) => {
   if (DEBUG) {
     console.log(...args);
   }
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const materialize = (props: AnimatedProps<any>) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const otherProps = {} as AnimatedProps<any>;
+  for (const propName in props) {
+    if (propName === "children") {
+      continue;
+    }
+    const propValue = props[propName];
+    if (Rea.isSharedValue(propValue)) {
+      otherProps[propName] = propValue.value;
+    } else {
+      otherProps[propName] = propValue;
+    }
+  }
+  return otherProps;
 };
 
 type Instance = Node;
@@ -91,7 +111,7 @@ export const sksgHostConfig: SkiaHostConfig = {
     _internalInstanceHandle
   ) {
     debug("createInstance", type);
-    return { type, props, children: [] };
+    return { type, props: materialize(props), children: [] };
   },
 
   appendInitialChild(parentInstance: Instance, child: Instance | TextInstance) {
@@ -157,7 +177,7 @@ export const sksgHostConfig: SkiaHostConfig = {
     console.log({ cloneInstance: { type } });
     return {
       type: instance.type,
-      props: newProps,
+      props: materialize(newProps),
       children: keepChildren ? instance.children : newChildSet ?? [],
     };
   },
