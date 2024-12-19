@@ -1,6 +1,7 @@
 import type { CanvasKit, Image, ImageFilter } from "canvaskit-wasm";
 
-import {
+import type {
+  SkMatrix,
   type ColorChannel,
   type ImageFilterFactory,
   type SkColor,
@@ -14,7 +15,6 @@ import {
   type SkImage,
   type FilterMode,
   type MipmapMode,
-  SkMatrix,
 } from "../types";
 
 import { Host, NotImplementedOnRNWeb, getEnum } from "./Host";

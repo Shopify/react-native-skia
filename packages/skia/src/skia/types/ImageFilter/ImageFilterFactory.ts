@@ -352,7 +352,7 @@ export interface ImageFilterFactory {
    * Transforms a shader into an impage filter
    *
    * @param shader - The Shader to be transformed
-   * @param dither 
+   * @param dither
    * @param cropRect - Optional rectangle to crop input and output.
    */
   MakeShader(
