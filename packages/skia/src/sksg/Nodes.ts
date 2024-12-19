@@ -1,6 +1,11 @@
-import { processCircle } from "../dom/nodes";
-import type { CircleProps, DrawingNodeProps } from "../dom/types";
+import { enumKey, processCircle } from "../dom/nodes";
+import type {
+  BlurMaskFilterProps,
+  CircleProps,
+  DrawingNodeProps,
+} from "../dom/types";
 import { NodeType } from "../dom/types";
+import { BlurStyle } from "../skia/types";
 
 import {
   postProcessContext,
@@ -21,6 +26,20 @@ const drawFill = (ctx: DrawingContext, _props: DrawingNodeProps) => {
   ctx.canvas.drawPaint(ctx.paint);
 };
 
+const drawBlurMaskFilter = (
+  ctx: DrawingContext,
+  props: BlurMaskFilterProps
+) => {
+  "worklet";
+  const { style, blur, respectCTM } = props;
+  const mf = ctx.Skia.MaskFilter.MakeBlur(
+    BlurStyle[enumKey(style)],
+    blur,
+    respectCTM
+  );
+  ctx.declCtx.maskFilters.push(mf);
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const draw = (ctx: DrawingContext, node: Node<any>) => {
   "worklet";
@@ -36,7 +55,13 @@ export const draw = (ctx: DrawingContext, node: Node<any>) => {
     case NodeType.Group:
       // TODO: do nothing
       break;
+    case NodeType.BlurMaskFilter:
+      drawBlurMaskFilter(ctx, props);
+      break;
     // TODO: exhaustive check
   }
+  children.forEach((child) => {
+    draw(ctx, child);
+  });
   postProcessContext(ctx, result);
 };
