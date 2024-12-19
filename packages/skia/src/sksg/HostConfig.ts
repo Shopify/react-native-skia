@@ -2,7 +2,7 @@
 import type { HostConfig } from "react-reconciler";
 import { DefaultEventPriority } from "react-reconciler/constants";
 
-import type { NodeType } from "../dom/types";
+import { NodeType } from "../dom/types";
 import type { AnimatedProps } from "../renderer";
 import Rea from "../external/reanimated/ReanimatedProxy";
 
@@ -14,6 +14,52 @@ export const debug = (...args: Parameters<typeof console.log>) => {
   if (DEBUG) {
     console.log(...args);
   }
+};
+
+const isDeclaration = (type: NodeType) => {
+  "worklet";
+  return (
+    // BlurMaskFilters
+    type === NodeType.BlurMaskFilter ||
+    // ImageFilters
+    type === NodeType.BlendImageFilter ||
+    type === NodeType.BlurImageFilter ||
+    type === NodeType.OffsetImageFilter ||
+    type === NodeType.DropShadowImageFilter ||
+    type === NodeType.MorphologyImageFilter ||
+    type === NodeType.DisplacementMapImageFilter ||
+    type === NodeType.RuntimeShaderImageFilter ||
+    // ColorFilters
+    type === NodeType.MatrixColorFilter ||
+    type === NodeType.BlendColorFilter ||
+    type === NodeType.LumaColorFilter ||
+    type === NodeType.LinearToSRGBGammaColorFilter ||
+    type === NodeType.SRGBToLinearGammaColorFilter ||
+    type === NodeType.LerpColorFilter ||
+    // Shaders
+    type === NodeType.Shader ||
+    type === NodeType.ImageShader ||
+    type === NodeType.ColorShader ||
+    type === NodeType.Turbulence ||
+    type === NodeType.FractalNoise ||
+    type === NodeType.LinearGradient ||
+    type === NodeType.RadialGradient ||
+    type === NodeType.SweepGradient ||
+    type === NodeType.TwoPointConicalGradient ||
+    // Path Effects
+    type === NodeType.CornerPathEffect ||
+    type === NodeType.DiscretePathEffect ||
+    type === NodeType.DashPathEffect ||
+    type === NodeType.Path1DPathEffect ||
+    type === NodeType.Path2DPathEffect ||
+    type === NodeType.SumPathEffect ||
+    type === NodeType.Line2DPathEffect ||
+    // Mixed
+    type === NodeType.Blend ||
+    type === NodeType.BoxShadow ||
+    // Paint
+    type === NodeType.Paint
+  );
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -111,7 +157,12 @@ export const sksgHostConfig: SkiaHostConfig = {
     _internalInstanceHandle
   ) {
     debug("createInstance", type);
-    return { type, props: materialize(props), children: [] };
+    return {
+      type,
+      isDeclaration: isDeclaration(type),
+      props: materialize(props),
+      children: [],
+    };
   },
 
   appendInitialChild(parentInstance: Instance, child: Instance | TextInstance) {
