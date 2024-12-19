@@ -213,6 +213,18 @@ export const sksgHostConfig: SkiaHostConfig = {
     container.clear();
   },
 
+  prepareUpdate(
+    _instance: Instance,
+    _type: string,
+    _oldProps: Props,
+    _newProps: Props,
+    _rootContainer: Container,
+    _hostContext: HostContext
+  ) {
+    debug("prepareUpdate");
+    return null;
+  },
+
   preparePortalMount: () => {
     debug("preparePortalMount");
   },
