@@ -2,19 +2,19 @@ import type { CanvasKit, Image, ImageFilter } from "canvaskit-wasm";
 
 import type {
   SkMatrix,
-  type ColorChannel,
-  type ImageFilterFactory,
-  type SkColor,
-  type SkColorFilter,
-  type SkImageFilter,
-  type BlendMode,
-  type SkRect,
-  type SkRuntimeShaderBuilder,
-  type SkShader,
-  type TileMode,
-  type SkImage,
-  type FilterMode,
-  type MipmapMode,
+  ColorChannel,
+  ImageFilterFactory,
+  SkColor,
+  SkColorFilter,
+  SkImageFilter,
+  BlendMode,
+  SkRect,
+  SkRuntimeShaderBuilder,
+  SkShader,
+  TileMode,
+  SkImage,
+  FilterMode,
+  MipmapMode,
 } from "../types";
 
 import { Host, NotImplementedOnRNWeb, getEnum } from "./Host";
