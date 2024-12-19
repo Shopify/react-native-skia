@@ -2,9 +2,10 @@ import type { ReactNode } from "react";
 import type { OpaqueRoot } from "react-reconciler";
 import ReactReconciler from "react-reconciler";
 
+import type { SkCanvas, Skia } from "../skia/types";
+
 import { debug, sksgHostConfig } from "./HostConfig";
 import { Container } from "./Container";
-import type { DrawingContext } from "./DrawingContext";
 
 const skiaReconciler = ReactReconciler(sksgHostConfig);
 
@@ -18,8 +19,8 @@ export class SkiaSGRoot {
   private root: OpaqueRoot;
   private container: Container;
 
-  constructor() {
-    this.container = new Container();
+  constructor(Skia: Skia, nativeId: () => number = () => 0) {
+    this.container = new Container(Skia, nativeId);
     this.root = skiaReconciler.createContainer(
       this.container,
       0,
@@ -39,8 +40,13 @@ export class SkiaSGRoot {
     });
   }
 
-  draw(ctx: DrawingContext) {
-    this.container.render(ctx);
+  // TODO: rename to Draw on nativeView
+  draw() {
+    this.container.render();
+  }
+
+  drawOnCanvas(canvas: SkCanvas) {
+    this.container.drawOnCanvas(canvas);
   }
 
   unmount() {

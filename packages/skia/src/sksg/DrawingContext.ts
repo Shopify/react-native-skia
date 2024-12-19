@@ -1,3 +1,5 @@
+"worklet";
+
 import { enumKey, processTransformProps2 } from "../dom/nodes";
 import type { PaintProps, TransformProps } from "../dom/types";
 import { DeclarationContext } from "../dom/types";
@@ -14,8 +16,12 @@ import {
 export class DrawingContext {
   private paints: SkPaint[];
   public declCtx: DeclarationContext;
+  public Skia: Skia;
+  public canvas: SkCanvas;
 
-  constructor(public Skia: Skia, public canvas: SkCanvas) {
+  constructor(Skia: Skia, canvas: SkCanvas) {
+    this.Skia = Skia;
+    this.canvas = canvas;
     this.paints = [Skia.Paint()];
     this.declCtx = new DeclarationContext(this.Skia);
   }

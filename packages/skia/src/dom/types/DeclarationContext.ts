@@ -1,3 +1,5 @@
+"worklet";
+
 import type {
   SkShader,
   SkPaint,
@@ -25,8 +27,11 @@ export const composeDeclarations = <T>(filters: T[], composer: Composer<T>) => {
 class Declaration<T> {
   private decls: T[] = [];
   private indexes = [0];
+  private composer?: Composer<T>;
 
-  constructor(private composer?: Composer<T>) {}
+  constructor(composer?: Composer<T>) {
+    this.composer = composer;
+  }
 
   private get index() {
     return this.indexes[this.indexes.length - 1];
@@ -62,6 +67,7 @@ class Declaration<T> {
 }
 
 export class DeclarationContext {
+  public Skia: Skia;
   readonly paints: Declaration<SkPaint>;
   readonly maskFilters: Declaration<SkMaskFilter>;
   readonly shaders: Declaration<SkShader>;
@@ -69,7 +75,8 @@ export class DeclarationContext {
   readonly imageFilters: Declaration<SkImageFilter>;
   readonly colorFilters: Declaration<SkColorFilter>;
 
-  constructor(public Skia: Skia) {
+  constructor(Skia: Skia) {
+    this.Skia = Skia;
     const peComp = this.Skia.PathEffect.MakeCompose.bind(this.Skia.PathEffect);
     const ifComp = this.Skia.ImageFilter.MakeCompose.bind(
       this.Skia.ImageFilter

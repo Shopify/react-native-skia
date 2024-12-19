@@ -1,12 +1,15 @@
-import type { DrawingContext } from "./DrawingContext";
+import Rea from "../external/reanimated/ReanimatedProxy";
+import type { SkCanvas, Skia } from "../skia/types";
+
+import { DrawingContext } from "./DrawingContext";
 import type { Node } from "./Node";
 import { draw } from "./Nodes";
 
 export class Container {
-  root: Node[] = [];
+  public root: Node[] = [];
   public unmounted = false;
 
-  constructor() {}
+  constructor(public Skia: Skia, private nativeId: () => number) {}
 
   clear() {
     console.log("clear container");
@@ -15,9 +18,28 @@ export class Container {
     console.log("redraw container");
   }
 
-  render(ctx: DrawingContext) {
+  getNativeId() {
+    return this.nativeId();
+  }
+
+  drawOnCanvas(canvas: SkCanvas) {
+    const ctx = new DrawingContext(this.Skia, canvas);
     this.root.forEach((node) => {
       draw(ctx, node);
     });
+  }
+
+  render() {
+    // TODO: this can be pofiled if Reanimated is not installed
+    Rea.runOnUI((Skia: Skia, nativeId: number, root: Node[]) => {
+      const rec = Skia.PictureRecorder();
+      const canvas = rec.beginRecording();
+      const ctx = new DrawingContext(Skia, canvas);
+      root.forEach((node) => {
+        draw(ctx, node);
+      });
+      const picture = rec.finishRecordingAsPicture();
+      SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
+    })(this.Skia, this.nativeId(), this.root);
   }
 }

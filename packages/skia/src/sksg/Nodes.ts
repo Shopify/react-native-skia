@@ -25,6 +25,20 @@ const drawFill = (ctx: DrawingContext, _props: DrawingNodeProps) => {
   ctx.canvas.drawPaint(ctx.paint);
 };
 
+const declareBlurMaskFilter = (
+  ctx: DrawingContext,
+  node: Node<BlurMaskFilterProps>
+) => {
+  "worklet";
+  const { style, blur, respectCTM } = node.props;
+  const mf = ctx.Skia.MaskFilter.MakeBlur(
+    BlurStyle[enumKey(style)],
+    blur,
+    respectCTM
+  );
+  ctx.declCtx.maskFilters.push(mf);
+};
+
 interface ContextProcessingResult {
   shouldRestoreMatrix: boolean;
   shouldRestorePaint: boolean;
@@ -63,21 +77,7 @@ const postProcessContext = (
   }
 };
 
-const declareBlurMaskFilter = (
-  ctx: DrawingContext,
-  node: Node<BlurMaskFilterProps>
-) => {
-  "worklet";
-  const { style, blur, respectCTM } = node.props;
-  const mf = ctx.Skia.MaskFilter.MakeBlur(
-    BlurStyle[enumKey(style)],
-    blur,
-    respectCTM
-  );
-  ctx.declCtx.maskFilters.push(mf);
-};
-
-export const draw = (ctx: DrawingContext, node: Node<any>) => {
+export function draw(ctx: DrawingContext, node: Node<any>) {
   "worklet";
   const { type, props, children } = node;
   const result = preProcessContext(ctx, props, children);
@@ -99,4 +99,4 @@ export const draw = (ctx: DrawingContext, node: Node<any>) => {
     }
   });
   postProcessContext(ctx, result);
-};
+}

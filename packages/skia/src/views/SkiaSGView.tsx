@@ -4,7 +4,6 @@ import type { HostComponent } from "react-native";
 import type { Skia, SkRect } from "../skia/types";
 import { Platform } from "../Platform";
 import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeComponent";
-import { DrawingContext } from "../sksg/DrawingContext";
 import type { SkiaSGRoot } from "../sksg/Reconciler";
 
 import { SkiaViewApi } from "./api";
@@ -87,15 +86,10 @@ export class SkiaSGView extends React.Component<SkiaSGViewProps> {
   }
 
   private draw() {
-    const { root, Skia } = this.props;
+    const { root } = this.props;
     if (root !== undefined) {
       assertSkiaViewApi();
-      const rec = Skia.PictureRecorder();
-      const canvas = rec.beginRecording();
-      const ctx = new DrawingContext(Skia, canvas);
-      root.draw(ctx);
-      const picture = rec.finishRecordingAsPicture();
-      SkiaViewApi.setJsiProperty(this._nativeId, "picture", picture);
+      root.draw();
     }
   }
 

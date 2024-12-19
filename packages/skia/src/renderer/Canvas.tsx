@@ -86,8 +86,8 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
     );
 
     const sksgRoot = useMemo(
-      () => (experimental ? new SkiaSGRoot() : null),
-      [experimental]
+      () => (experimental ? new SkiaSGRoot(Skia, getNativeId) : null),
+      [experimental, getNativeId]
     );
 
     // Render effect

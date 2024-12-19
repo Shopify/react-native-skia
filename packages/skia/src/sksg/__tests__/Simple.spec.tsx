@@ -1,10 +1,9 @@
 import React from "react";
 
 import { importSkia } from "../../renderer/__tests__/setup";
-import { SkiaRoot } from "../Reconciler";
+import { SkiaSGRoot } from "../Reconciler";
 import { checkImage } from "../../__tests__/setup";
 import { mix, polar2Canvas } from "../../renderer";
-import { DrawingContext } from "../DrawingContext";
 
 interface RingProps {
   index: number;
@@ -42,12 +41,12 @@ const Ring = ({ index, progress, width, center }: RingProps) => {
 describe("Simple", () => {
   it("should have a simple render (1)", () => {
     const { Skia } = importSkia();
-    const root = new SkiaRoot();
+    const root = new SkiaSGRoot(Skia);
     root.render(<skCircle r={128} color="cyan" />);
     const surface = Skia.Surface.Make(768, 768)!;
     expect(surface).toBeDefined();
     const canvas = surface.getCanvas();
-    root.draw(new DrawingContext(Skia, canvas));
+    root.drawOnCanvas(canvas);
     surface.flush();
     const image = surface.makeImageSnapshot();
     expect(image).toBeDefined();
@@ -55,7 +54,7 @@ describe("Simple", () => {
   });
   it("should have a simple render (2)", () => {
     const { Skia } = importSkia();
-    const root = new SkiaRoot();
+    const root = new SkiaSGRoot(Skia);
     root.render(
       <>
         <skFill color="magenta" />
@@ -65,7 +64,7 @@ describe("Simple", () => {
     const surface = Skia.Surface.Make(768, 768)!;
     expect(surface).toBeDefined();
     const canvas = surface.getCanvas();
-    root.draw(new DrawingContext(Skia, canvas));
+    root.drawOnCanvas(canvas);
     surface.flush();
     const image = surface.makeImageSnapshot();
     expect(image).toBeDefined();
@@ -73,7 +72,7 @@ describe("Simple", () => {
   });
   it("simple demo", () => {
     const { Skia } = importSkia();
-    const root = new SkiaRoot();
+    const root = new SkiaSGRoot(Skia);
     const width = 768;
     const height = 768;
     const center = { x: width / 2, y: height / 2 };
@@ -102,7 +101,7 @@ describe("Simple", () => {
     const surface = Skia.Surface.Make(width, height)!;
     expect(surface).toBeDefined();
     const canvas = surface.getCanvas();
-    root.draw(new DrawingContext(Skia, canvas));
+    root.drawOnCanvas(canvas);
     surface.flush();
     const image = surface.makeImageSnapshot();
     expect(image).toBeDefined();
@@ -111,7 +110,7 @@ describe("Simple", () => {
 
   it("simple demo (2)", () => {
     const { Skia } = importSkia();
-    const root = new SkiaRoot();
+    const root = new SkiaSGRoot(Skia);
     const width = 768;
     const height = 768;
     const center = { x: width / 2, y: height / 2 };
@@ -140,7 +139,7 @@ describe("Simple", () => {
     const surface = Skia.Surface.Make(width, height)!;
     expect(surface).toBeDefined();
     const canvas = surface.getCanvas();
-    root.draw(new DrawingContext(Skia, canvas));
+    root.drawOnCanvas(canvas);
     surface.flush();
     const image = surface.makeImageSnapshot();
     expect(image).toBeDefined();
