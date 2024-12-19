@@ -11,7 +11,7 @@ import {
   type SkPaint,
 } from "../skia/types";
 
-import { isDeclarationNode, type Node } from "./Node";
+import type { Node } from "./Node";
 
 interface ContextProcessingResult {
   shouldRestoreMatrix: boolean;
@@ -26,10 +26,10 @@ export const preProcessContext = (
   "worklet";
   const shouldRestoreMatrix = ctx.processMatrix(props);
   ctx.declCtx.save();
-  children.forEach((child) => {
-    if (isDeclarationNode(child)) {
-      child.declare(ctx.declCtx);
-    }
+  children.forEach((_child) => {
+    // if (isDeclarationNode(child)) {
+    //   child.declare(ctx.declCtx);
+    // }
   });
   ctx.declCtx.restore();
   const shouldRestorePaint = ctx.processPaint(props);

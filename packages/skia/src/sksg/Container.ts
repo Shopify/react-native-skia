@@ -1,9 +1,8 @@
 import type { DrawingContext } from "./DrawingContext";
 import type { Node } from "./Node";
-import { isDrawingNode } from "./Node";
 
 export class Container {
-  root: Node<unknown>[] = [];
+  root: Node[] = [];
   public unmounted = false;
 
   constructor() {}
@@ -15,11 +14,5 @@ export class Container {
     console.log("redraw container");
   }
 
-  render(ctx: DrawingContext) {
-    this.root.forEach((node) => {
-      if (isDrawingNode(node)) {
-        node.draw(ctx);
-      }
-    });
-  }
+  render(_ctx: DrawingContext) {}
 }

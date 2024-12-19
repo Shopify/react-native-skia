@@ -2,17 +2,10 @@
 import type { HostConfig } from "react-reconciler";
 import { DefaultEventPriority } from "react-reconciler/constants";
 
-import type {
-  BlurMaskFilterProps,
-  CircleProps,
-  GroupProps,
-} from "../dom/types";
-import { NodeType } from "../dom/types";
+import type { NodeType } from "../dom/types";
 
 import type { Node } from "./Node";
 import type { Container } from "./Container";
-import { CircleNode, FillNode, GroupNode } from "./DrawingNodes";
-import { BlurMaskFilterNode } from "./DeclarationNodes";
 
 const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
@@ -21,16 +14,16 @@ export const debug = (...args: Parameters<typeof console.log>) => {
   }
 };
 
-type Instance = Node<unknown>;
+type Instance = Node;
 
 type Props = object;
-type TextInstance = Node<unknown>;
+type TextInstance = Node;
 type SuspenseInstance = Instance;
 type HydratableInstance = Instance;
 type PublicInstance = Instance;
 type HostContext = null;
 type UpdatePayload = Container;
-type ChildSet = Node<unknown>[];
+type ChildSet = Node[];
 type TimeoutHandle = NodeJS.Timeout;
 type NoTimeout = -1;
 
@@ -98,18 +91,7 @@ export const sksgHostConfig: SkiaHostConfig = {
     _internalInstanceHandle
   ) {
     debug("createInstance", type);
-    switch (type) {
-      case NodeType.Circle:
-        return new CircleNode(props as CircleProps);
-      case NodeType.Fill:
-        return new FillNode(props as CircleProps);
-      case NodeType.Group:
-        return new GroupNode(props as GroupProps);
-      case NodeType.BlurMaskFilter:
-        return new BlurMaskFilterNode(props as BlurMaskFilterProps);
-      default:
-        throw new Error(`Unknown type: ${type}`);
-    }
+    return { type, props, children: [] };
   },
 
   appendInitialChild(parentInstance: Instance, child: Instance | TextInstance) {
@@ -167,20 +149,17 @@ export const sksgHostConfig: SkiaHostConfig = {
   cloneInstance(
     instance: Instance,
     type: string,
-    oldProps: Props,
+    _oldProps: Props,
     newProps: Props,
     keepChildren: boolean,
     newChildSet?: ChildSet
   ) {
-    console.log(
-      "cloneInstance",
-      instance,
-      type,
-      oldProps,
-      newProps,
-      keepChildren,
-      newChildSet
-    );
+    console.log({ cloneInstance: { type } });
+    return {
+      type: instance.type,
+      props: newProps,
+      children: keepChildren ? instance.children : newChildSet ?? [],
+    };
   },
 
   createContainerChildSet(): ChildSet {
