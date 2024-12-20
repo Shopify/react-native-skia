@@ -14,7 +14,6 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 * [Metaball Animation in React Native (youtu.be)](https://www.youtube.com/watch?v=HOxZegqnDC4)
 * [Grid Magnification in React Native Skia (youtu.be)](https://www.youtube.com/watch?v=zV0SGIlrtug)
 * [Arc Slider with React-Native Skia, React-Native Gesture Handler and Reanimated 2 (youtu.be)](https://www.youtube.com/watch?v=fWLyKzEXaJI)
-* [Confetti Animation with React-Native Skia (youtu.be)](https://www.youtube.com/watch?v=qOhYFDOEOmo)
 * [Pixelated Image with React-Native Skia (youtu.be)](https://www.youtube.com/watch?v=_iU9i9ivTrU)
 * [Typography Metaball with React Native Skia (youtu.be)](https://www.youtube.com/watch?v=B8a8ty54_OI)
 * [Color Pixelated (youtu.be)](https://youtu.be/mc56FIJgDAE)
@@ -28,9 +27,6 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 
 ## Charts
 * [Charts in React Native Skia (youtu.be)](https://www.youtube.com/watch?v=xeLdmn3se1I)
-* [D3 Charts and React Native Skia for Beginners (youtu.be)](https://www.youtube.com/watch?v=-a-3gAQB4eg)
-* [How to build Animated D3 Bar Charts with React-Native Skia (youtu.be)](https://www.youtube.com/watch?v=NLvNSxIUN0w)
-* [How to build an Animated Donut Chart with React-Native Skia (youtu.be)](https://www.youtube.com/watch?v=VSynoqXjQvg)
 * [Circular Progress in React Native (youtu.be)](https://www.youtube.com/watch?v=5-95kYTJMb4)
 
 ## Image Filters
@@ -55,8 +51,9 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 ## Paths
 * [Gradient along Path (youtu.be)](https://www.youtube.com/watch?v=7SCzL-XnfUU)
 * [Headspace Player - “Can it be done in React Native?” (youtu.be)](https://www.youtube.com/watch?v=pErnuAx5GjE)
-* [Make an Animated Wave Slider Effect with React-Native Skia (youtu.be)](https://www.youtube.com/watch?v=I6elFawLceY)
 * [Liquid Wave Progress Indicator. Skia, Reanimated, D3. (youtu.be)](https://youtu.be/CGcLDoZWciA)
+* [Basic 3D Graphics with Linear Algebra and React-Native Skia](https://youtu.be/uZBGcbKFhXE?si=AAEbWab7mx7RNAgg)
+* [Add Computer Vision to your Expo iOS App using React-Native Skia](https://www.youtube.com/watch?v=a51ofzf2rDo)
 
 ## Vertices
 * [Song of Bloom - “Can it be done in React Native?” (youtu.be)](https://www.youtube.com/watch?v=PfCQEA72ljU)
@@ -64,3 +61,6 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 
 ## Native Views
 * [Telegram Dark Mode - “Can it be done in React Native?” (youtu.be)](https://www.youtube.com/watch?v=vKYEFpO06Tk)
+
+## Games
+* [Introduction to Game Development with Expo, Skia and Reanimated](https://youtu.be/Af2-OT9mE14?si=yMoznK-EpDPIYvXE)
