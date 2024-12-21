@@ -13,7 +13,7 @@ export class Container {
   public root: Node[] = [];
   public unmounted = false;
 
-  constructor(public Skia: Skia, private nativeId: () => number) {}
+  constructor(public Skia: Skia, private nativeId: number) {}
 
   clear() {
     console.log("clear container");
@@ -23,7 +23,7 @@ export class Container {
   }
 
   getNativeId() {
-    return this.nativeId();
+    return this.nativeId;
   }
 
   drawOnCanvas(canvas: SkCanvas) {
@@ -56,6 +56,6 @@ export class Container {
         SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
         redrawRequested.value = false;
       }
-    )(this.Skia, this.nativeId(), this.root, this.redrawRequested);
+    )(this.Skia, this.nativeId, this.root, this.redrawRequested);
   }
 }

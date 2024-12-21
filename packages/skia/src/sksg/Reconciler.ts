@@ -19,7 +19,7 @@ export class SkiaSGRoot {
   private root: OpaqueRoot;
   private container: Container;
 
-  constructor(Skia: Skia, nativeId: () => number = () => 0) {
+  constructor(Skia: Skia, nativeId = -1) {
     this.container = new Container(Skia, nativeId);
     this.root = skiaReconciler.createContainer(
       this.container,

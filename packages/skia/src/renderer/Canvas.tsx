@@ -28,7 +28,6 @@ export interface CanvasProps extends SkiaBaseViewProps {
   ref?: RefObject<SkiaDomView>;
   children: ReactNode;
   mode?: "default" | "continuous";
-  experimental?: boolean;
 }
 
 const useOnSizeEvent = (
@@ -59,7 +58,6 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
       mode = "default",
       onSize: _onSize,
       onLayout: _onLayout,
-      experimental,
       ...props
     },
     forwardedRef
@@ -76,11 +74,8 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
     }, [innerRef]);
 
     const root = useMemo(
-      () =>
-        !experimental
-          ? new SkiaRoot(Skia, NATIVE_DOM, redraw, getNativeId)
-          : null,
-      [experimental, redraw, getNativeId]
+      () => new SkiaRoot(Skia, NATIVE_DOM, redraw, getNativeId),
+      [redraw, getNativeId]
     );
 
     // Render effect

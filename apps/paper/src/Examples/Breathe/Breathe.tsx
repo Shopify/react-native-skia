@@ -3,7 +3,7 @@ import { StyleSheet, useWindowDimensions, View } from "react-native";
 import {
   BlurMask,
   vec,
-  Canvas,
+  Canvas2,
   Circle,
   Fill,
   Group,
@@ -68,7 +68,7 @@ export const Breathe = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <Canvas style={styles.container} opaque experimental>
+      <Canvas2 style={styles.container} opaque>
         <Fill color="rgb(36,43,56)" />
         <Group origin={center} transform={transform} blendMode="screen">
           <BlurMask style="solid" blur={40} />
@@ -76,7 +76,7 @@ export const Breathe = () => {
             return <Ring key={index} index={index} progress={progress} />;
           })}
         </Group>
-      </Canvas>
+      </Canvas2>
     </View>
   );
 };
