@@ -17,6 +17,8 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 * [Pixelated Image with React-Native Skia (youtu.be)](https://www.youtube.com/watch?v=_iU9i9ivTrU)
 * [Typography Metaball with React Native Skia (youtu.be)](https://www.youtube.com/watch?v=B8a8ty54_OI)
 * [Color Pixelated (youtu.be)](https://youtu.be/mc56FIJgDAE)
+* [Animated Loader with React Native Skia (youtu.be)](https://www.youtube.com/watch?v=7pCiGUrJuow)
+* [Animated Blur Cards with React Native Skia (youtu.be)](https://www.youtube.com/watch?v=SveA2QjmEzM)
 
 ## Gestures
 * [Instagram Stickers - “Can it be done in React Native?” (youtu.be)](https://www.youtube.com/watch?v=5yM4NPcTwY4)
