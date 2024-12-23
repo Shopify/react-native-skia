@@ -58,9 +58,9 @@ public:
 
   void resize(int width, int height) override {
     if (_skSurface != nullptr) {
-       _glContext->makeCurrent(_glSurface.get());
-       _skSurface->getCanvas()->clear(SK_ColorTRANSPARENT);
-       present();
+      // Let's make sure there is no pending work
+      _glContext->makeCurrent(_glSurface.get());
+      _glSurface->present();
       _skSurface = nullptr;
     }
   }
