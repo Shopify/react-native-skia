@@ -2623,13 +2623,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/js@npm:8.57.1":
-  version: 8.57.1
-  resolution: "@eslint/js@npm:8.57.1"
-  checksum: 2afb77454c06e8316793d2e8e79a0154854d35e6782a1217da274ca60b5044d2c69d6091155234ed0551a1e408f86f09dd4ece02752c59568fa403e60611e880
-  languageName: node
-  linkType: hard
-
 "@expo/config-plugins@npm:~8.0.8":
   version: 8.0.8
   resolution: "@expo/config-plugins@npm:8.0.8"
@@ -2759,17 +2752,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@humanwhocodes/config-array@npm:^0.13.0":
-  version: 0.13.0
-  resolution: "@humanwhocodes/config-array@npm:0.13.0"
-  dependencies:
-    "@humanwhocodes/object-schema": ^2.0.3
-    debug: ^4.3.1
-    minimatch: ^3.0.5
-  checksum: eae69ff9134025dd2924f0b430eb324981494be26f0fddd267a33c28711c4db643242cf9fddf7dadb9d16c96b54b2d2c073e60a56477df86e0173149313bd5d6
-  languageName: node
-  linkType: hard
-
 "@humanwhocodes/gitignore-to-minimatch@npm:^1.0.2":
   version: 1.0.2
   resolution: "@humanwhocodes/gitignore-to-minimatch@npm:1.0.2"
@@ -2791,7 +2773,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@humanwhocodes/object-schema@npm:^2.0.2, @humanwhocodes/object-schema@npm:^2.0.3":
+"@humanwhocodes/object-schema@npm:^2.0.2":
   version: 2.0.3
   resolution: "@humanwhocodes/object-schema@npm:2.0.3"
   checksum: d3b78f6c5831888c6ecc899df0d03bcc25d46f3ad26a11d7ea52944dc36a35ef543fad965322174238d677a43d5c694434f6607532cff7077062513ad7022631
@@ -10101,54 +10083,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^8.19.0":
-  version: 8.57.1
-  resolution: "eslint@npm:8.57.1"
-  dependencies:
-    "@eslint-community/eslint-utils": ^4.2.0
-    "@eslint-community/regexpp": ^4.6.1
-    "@eslint/eslintrc": ^2.1.4
-    "@eslint/js": 8.57.1
-    "@humanwhocodes/config-array": ^0.13.0
-    "@humanwhocodes/module-importer": ^1.0.1
-    "@nodelib/fs.walk": ^1.2.8
-    "@ungap/structured-clone": ^1.2.0
-    ajv: ^6.12.4
-    chalk: ^4.0.0
-    cross-spawn: ^7.0.2
-    debug: ^4.3.2
-    doctrine: ^3.0.0
-    escape-string-regexp: ^4.0.0
-    eslint-scope: ^7.2.2
-    eslint-visitor-keys: ^3.4.3
-    espree: ^9.6.1
-    esquery: ^1.4.2
-    esutils: ^2.0.2
-    fast-deep-equal: ^3.1.3
-    file-entry-cache: ^6.0.1
-    find-up: ^5.0.0
-    glob-parent: ^6.0.2
-    globals: ^13.19.0
-    graphemer: ^1.4.0
-    ignore: ^5.2.0
-    imurmurhash: ^0.1.4
-    is-glob: ^4.0.0
-    is-path-inside: ^3.0.3
-    js-yaml: ^4.1.0
-    json-stable-stringify-without-jsonify: ^1.0.1
-    levn: ^0.4.1
-    lodash.merge: ^4.6.2
-    minimatch: ^3.1.2
-    natural-compare: ^1.4.0
-    optionator: ^0.9.3
-    strip-ansi: ^6.0.1
-    text-table: ^0.2.0
-  bin:
-    eslint: bin/eslint.js
-  checksum: e2489bb7f86dd2011967759a09164e65744ef7688c310bc990612fc26953f34cc391872807486b15c06833bdff737726a23e9b4cdba5de144c311377dc41d91b
-  languageName: node
-  linkType: hard
-
 "espree@npm:^9.3.3, espree@npm:^9.4.0, espree@npm:^9.6.0, espree@npm:^9.6.1":
   version: 9.6.1
   resolution: "espree@npm:9.6.1"
@@ -10438,48 +10372,6 @@ __metadata:
   checksum: a50a8309ca65ea5d426382ff09f33586527882cf532931cb08ca786ea3146c0553310bda688710ff61d7668eba9f96b923fe1420cdf56a2c3eaf30fcab87b515
   languageName: node
   linkType: hard
-
-"fabric@workspace:apps/fabric":
-  version: 0.0.0-use.local
-  resolution: "fabric@workspace:apps/fabric"
-  dependencies:
-    "@babel/core": ^7.20.0
-    "@babel/preset-env": ^7.20.0
-    "@babel/runtime": ^7.20.0
-    "@react-native-community/slider": ^4.5.2
-    "@react-native/babel-preset": 0.75.2
-    "@react-native/metro-config": 0.75.2
-    "@react-native/typescript-config": 0.75.2
-    "@react-navigation/bottom-tabs": ^6.6.1
-    "@react-navigation/elements": ^1.3.31
-    "@react-navigation/native": ^6.1.17
-    "@react-navigation/native-stack": ^6.10.0
-    "@shopify/react-native-skia": "workspace:*"
-    "@testing-library/react-native": ^12.6.1
-    "@types/react": ^18.2.6
-    "@types/react-test-renderer": ^18.0.0
-    babel-jest: ^29.6.3
-    babel-plugin-module-resolver: ^5.0.2
-    babel-plugin-transform-inline-environment-variables: ^0.4.4
-    cdt2d: ^1.0.0
-    eslint: 8
-    eslint-config-react-native-wcandillon: ^3.10.2
-    eslint-plugin-import: 2.27.5
-    its-fine: ^1.2.5
-    jest: ^29.6.3
-    jest-transform-stub: ^2.0.0
-    prettier: 2.8.7
-    react: 18.3.1
-    react-native: 0.75.2
-    react-native-gesture-handler: ^2.18.1
-    react-native-reanimated: ^3.16.5
-    react-native-safe-area-context: ^4.10.9
-    react-native-screens: ^4.3.0
-    react-native-svg: ^15.6.0
-    react-test-renderer: 18.3.1
-    typescript: ^5.2.2
-  languageName: unknown
-  linkType: soft
 
 "fast-deep-equal@npm:^3.1.1, fast-deep-equal@npm:^3.1.3":
   version: 3.1.3
@@ -16995,15 +16887,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:2.8.8":
-  version: 2.8.8
-  resolution: "prettier@npm:2.8.8"
-  bin:
-    prettier: bin-prettier.js
-  checksum: b49e409431bf129dd89238d64299ba80717b57ff5a6d1c1a8b1a28b590d998a34e083fa13573bc732bb8d2305becb4c9a4407f8486c81fa7d55100eb08263cf8
-  languageName: node
-  linkType: hard
-
 "pretty-error@npm:^4.0.0":
   version: 4.0.0
   resolution: "pretty-error@npm:4.0.0"
@@ -17700,6 +17583,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-screens@npm:^3.34.0":
+  version: 3.35.0
+  resolution: "react-native-screens@npm:3.35.0"
+  dependencies:
+    react-freeze: ^1.0.0
+    warn-once: ^0.1.0
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: cb8a0c8d8a41a8a1065cc2253e4272a970366a7d80bc54e889b2f48de7ccccd3e828e2701de39c0453a67956ec0cad140fb506324cce04419b5e2eb495c038c2
+  languageName: node
+  linkType: hard
+
 "react-native-screens@npm:^4.3.0":
   version: 4.3.0
   resolution: "react-native-screens@npm:4.3.0"
@@ -17721,21 +17617,41 @@ __metadata:
     "@babel/preset-env": ^7.20.0
     "@babel/runtime": ^7.20.0
     "@callstack/react-native-visionos": ^0.75.0
+    "@react-native-community/slider": ^4.5.2
     "@react-native/babel-preset": 0.75.2
     "@react-native/eslint-config": 0.75.2
     "@react-native/metro-config": 0.75.2
     "@react-native/typescript-config": 0.75.2
+    "@react-navigation/bottom-tabs": ^6.6.1
+    "@react-navigation/elements": ^1.3.31
+    "@react-navigation/native": ^6.1.17
+    "@react-navigation/native-stack": ^6.10.0
     "@rnx-kit/metro-config": ^2.0.0
+    "@shopify/react-native-skia": "workspace:*"
+    "@testing-library/react-native": ^12.6.1
     "@types/react": ^18.2.6
     "@types/react-test-renderer": ^18.0.0
     babel-jest: ^29.6.3
-    eslint: ^8.19.0
+    babel-plugin-module-resolver: ^5.0.2
+    babel-plugin-transform-inline-environment-variables: ^0.4.4
+    cdt2d: ^1.0.0
+    eslint: 8
+    eslint-config-react-native-wcandillon: ^3.10.2
+    eslint-plugin-import: 2.27.5
+    its-fine: ^1.2.5
     jest: ^29.6.3
-    prettier: 2.8.8
+    jest-transform-stub: ^2.0.0
+    prettier: 2.8.7
     react: 18.3.1
     react-native: 0.75.2
+    react-native-gesture-handler: ^2.18.1
     react-native-macos: ^0.75.0
+    react-native-reanimated: ^3.15.1
+    react-native-safe-area-context: ^4.10.9
+    react-native-screens: ^3.34.0
+    react-native-svg: ^15.6.0
     react-native-test-app: ^4.0.2
+    react-native-wgpu: 0.1.19
     react-test-renderer: 18.3.1
     typescript: 5.0.4
   languageName: unknown
