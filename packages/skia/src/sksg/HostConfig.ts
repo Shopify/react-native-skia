@@ -3,7 +3,10 @@ import type { HostConfig } from "react-reconciler";
 import { DefaultEventPriority } from "react-reconciler/constants";
 
 import { NodeType } from "../dom/types";
-import { extractReanimatedProps } from "../external/reanimated/renderHelpers2";
+import {
+  bindReanimatedProps,
+  extractReanimatedProps,
+} from "../external/reanimated/renderHelpers2";
 
 import type { Node } from "./Node";
 import type { Container } from "./Container";
@@ -133,19 +136,19 @@ export const sksgHostConfig: SkiaHostConfig = {
   createInstance(
     type,
     rawProps,
-    _container,
+    container,
     _hostContext,
     _internalInstanceHandle
   ) {
     debug("createInstance", type);
-    const [props] = extractReanimatedProps(rawProps);
+    const [props, reaProps] = extractReanimatedProps(rawProps);
     const instance: Node = {
       type,
       isDeclaration: isDeclaration(type),
       props,
       children: [],
     };
-    //bindReanimatedProps(container, instance, reaProps);
+    bindReanimatedProps(container, instance, reaProps);
     return instance;
   },
 

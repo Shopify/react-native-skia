@@ -29,7 +29,7 @@ export class Container {
     });
   }
 
-  render() {
+  draw() {
     // TODO: this can be polyfilled if Reanimated is not installed
     Rea.runOnUI(
       (

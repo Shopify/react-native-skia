@@ -27,6 +27,7 @@ export const Canvas2 = forwardRef(
     // Render effects
     useEffect(() => {
       root.render(children);
+      root.draw();
     }, [children, root]);
 
     useEffect(() => {

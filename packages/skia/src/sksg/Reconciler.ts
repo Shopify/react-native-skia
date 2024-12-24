@@ -38,12 +38,10 @@ export class SkiaSGRoot {
     skiaReconciler.updateContainer(element as any, this.root, null, () => {
       debug("updateContainer");
     });
-    this.container.render();
   }
 
-  // TODO: rename to Draw on nativeView
   draw() {
-    this.container.render();
+    this.container.draw();
   }
 
   drawOnCanvas(canvas: SkCanvas) {
