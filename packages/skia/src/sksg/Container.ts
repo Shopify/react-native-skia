@@ -1,4 +1,4 @@
-import type { SharedValue } from "react-native-reanimated";
+import { type SharedValue } from "react-native-reanimated";
 
 import Rea from "../external/reanimated/ReanimatedProxy";
 import type { Skia, SkCanvas } from "../skia/types";
@@ -59,8 +59,18 @@ export class Container {
   clear() {
     console.log("clear container");
   }
+
   redraw() {
-    console.log("redraw container");
+    const isOnscreen = this.nativeId !== -1;
+    if (HAS_REANIMATED && !HAS_REANIMATED_3) {
+      throw new Error("React Native Skia only supports Reanimated 3 and above");
+    }
+    if (isOnscreen) {
+      const { nativeId, Skia, root } = this;
+      Rea.runOnUI(() => {
+        drawOnscreen(Skia, nativeId, root);
+      })();
+    }
   }
 
   getNativeId() {
