@@ -37,27 +37,43 @@ import {
   drawTextPath,
   drawVertices,
 } from "./drawings";
+import { declareShader } from "./shaders";
 
 interface ContextProcessingResult {
   shouldRestoreMatrix: boolean;
   shouldRestorePaint: boolean;
 }
 
-const preProcessContext = (
-  ctx: DrawingContext,
-  props: PaintProps & TransformProps,
-  children: Node<any>[]
-) => {
-  const shouldRestoreMatrix = ctx.processMatrix(props);
+function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
+  if (root.children.length === 0) {
+    return;
+  }
   ctx.declCtx.save();
-  children.forEach((node) => {
+  root.children.forEach((node: Node<any>) => {
+    processDeclaration(ctx, node);
     switch (node.type) {
+      case NodeType.Shader:
+        declareShader(ctx, node);
+        break;
       case NodeType.BlurMaskFilter:
         declareBlurMaskFilter(ctx, node);
         break;
+      default:
+        if (node.isDeclaration) {
+          console.log("Unknown declaration node: ", node.type);
+        }
     }
   });
   ctx.declCtx.restore();
+}
+
+const preProcessContext = (
+  ctx: DrawingContext,
+  props: PaintProps & TransformProps,
+  node: Node<any>
+) => {
+  const shouldRestoreMatrix = ctx.processMatrix(props);
+  processDeclaration(ctx, node);
   const shouldRestorePaint = ctx.processPaint(props);
   return { shouldRestoreMatrix, shouldRestorePaint };
 };
@@ -95,7 +111,7 @@ const materialize = <T extends object>(props: T) => {
 export function draw(ctx: DrawingContext, node: Node<any>) {
   const { type, props: rawProps, children } = node;
   const props = materialize(rawProps);
-  const result = preProcessContext(ctx, props, children);
+  const result = preProcessContext(ctx, props, node);
   switch (type) {
     case NodeType.Layer:
       drawLayer(ctx, props);
