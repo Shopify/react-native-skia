@@ -15,8 +15,9 @@ const inflate = (
   dy: number,
   tx = 0,
   ty = 0
-) =>
-  Skia.RRectXY(
+) => {
+  "worklet";
+  return Skia.RRectXY(
     Skia.XYWHRect(
       box.rect.x - dx + tx,
       box.rect.y - dy + ty,
@@ -26,6 +27,7 @@ const inflate = (
     box.rx + dx,
     box.ry + dy
   );
+};
 
 const deflate = (
   Skia: Skia,
@@ -34,7 +36,10 @@ const deflate = (
   dy: number,
   tx = 0,
   ty = 0
-) => inflate(Skia, box, -dx, -dy, tx, ty);
+) => {
+  "worklet";
+  return inflate(Skia, box, -dx, -dy, tx, ty);
+};
 
 export class BoxShadowNode extends JsiDeclarationNode<BoxShadowProps> {
   constructor(ctx: NodeContext, props: BoxShadowProps) {

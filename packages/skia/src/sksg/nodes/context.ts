@@ -13,11 +13,28 @@ import { declareBlurMaskFilter } from "./imageFilters";
 import type { Node } from "./Node";
 import {
   drawAtlas,
+  drawBox,
+  drawBoxShadow,
   drawCircle,
+  drawDiffRect,
   drawFill,
+  drawGlyphs,
+  drawImage,
   drawImageSVG,
+  drawLayer,
+  drawLine,
+  drawOval,
   drawParagraph,
+  drawPatch,
+  drawPath,
   drawPicture,
+  drawPoints,
+  drawRect,
+  drawRRect,
+  drawText,
+  drawTextBlob,
+  drawTextPath,
+  drawVertices,
 } from "./drawings";
 
 interface ContextProcessingResult {
@@ -85,23 +102,56 @@ export function draw(ctx: DrawingContext, node: Node<any>) {
   const result = preProcessContext(ctx, props, children);
   switch (type) {
     case NodeType.Layer:
+      drawLayer(ctx, props);
+      break;
     case NodeType.Box:
+      drawBox(ctx, props);
+      break;
     case NodeType.BoxShadow:
-    case NodeType.Paint:
+      drawBoxShadow(ctx, props);
+      break;
     case NodeType.Image:
+      drawImage(ctx, props);
+      break;
     case NodeType.Points:
+      drawPoints(ctx, props);
+      break;
     case NodeType.Path:
+      drawPath(ctx, props);
+      break;
     case NodeType.Rect:
+      drawRect(ctx, props);
+      break;
     case NodeType.RRect:
+      drawRRect(ctx, props);
+      break;
     case NodeType.Oval:
+      drawOval(ctx, props);
+      break;
     case NodeType.Line:
+      drawLine(ctx, props);
+      break;
     case NodeType.Patch:
+      drawPatch(ctx, props);
+      break;
     case NodeType.Vertices:
+      drawVertices(ctx, props);
+      break;
     case NodeType.DiffRect:
+      drawDiffRect(ctx, props);
+      break;
     case NodeType.Text:
+      drawText(ctx, props);
+      break;
     case NodeType.TextPath:
+      drawTextPath(ctx, props);
+      break;
     case NodeType.TextBlob:
+      drawTextBlob(ctx, props);
+      break;
     case NodeType.Glyphs:
+      drawGlyphs(ctx, props);
+      break;
     case NodeType.Picture:
       drawPicture(ctx, props);
       break;
@@ -123,6 +173,10 @@ export function draw(ctx: DrawingContext, node: Node<any>) {
     case NodeType.Group:
       // TODO: do nothing
       break;
+    default:
+      if (!node.isDeclaration) {
+        throw new Error(`Unsupported node type: ${type}`);
+      }
   }
   children.forEach((child) => {
     if (!child.isDeclaration) {
