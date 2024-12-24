@@ -2,15 +2,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SharedValue } from "react-native-reanimated";
 
-import {
-  NodeType,
-  type PaintProps,
-  type TransformProps,
-} from "../../dom/types";
+import { NodeType } from "../../dom/types";
+import type { GroupProps } from "../../dom/types";
 import type { DrawingContext } from "../DrawingContext";
 import { mapKeys } from "../../renderer/typeddash";
 
-import { declareBlurMaskFilter } from "./imageFilters";
+import {
+  declareBlurImageFilter,
+  declareBlurMaskFilter,
+  declareDropShadowImageFilter,
+  declareMorphologyImageFilter,
+  declareOffsetImageFilter,
+  declareDisplacementMapImageFilter,
+} from "./imageFilters";
 import type { Node } from "./Node";
 import {
   drawAtlas,
@@ -37,12 +41,17 @@ import {
   drawTextPath,
   drawVertices,
 } from "./drawings";
-import { declareShader } from "./shaders";
+import {
+  declareImageShader,
+  declareShader,
+  declareTurbulenceShader,
+} from "./shaders";
 import {
   declareBlendColorFilter,
   declareLerpColorFilter,
   declareLinearToSRGBGammaColorFilter,
   declareMatrixColorFilter,
+  declarePaint,
   declareSRGBToLinearGammaColorFilter,
 } from "./colorFilters";
 
@@ -61,12 +70,33 @@ function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
     processDeclaration(ctx, node);
     const { type, props } = node;
     switch (type) {
+      // Shaders
       case NodeType.Shader:
         declareShader(ctx, props);
         break;
+      case NodeType.ImageShader:
+        declareImageShader(ctx, props);
+        break;
+      case NodeType.Turbulence:
+        declareTurbulenceShader(ctx, props);
+        break;
+      // Image Filters
       case NodeType.BlurMaskFilter:
         declareBlurMaskFilter(ctx, props);
         break;
+      case NodeType.MorphologyImageFilter:
+        declareMorphologyImageFilter(ctx, props);
+        break;
+      case NodeType.OffsetImageFilter:
+        declareOffsetImageFilter(ctx, props);
+        break;
+      case NodeType.DropShadowImageFilter:
+        declareDropShadowImageFilter(ctx, props);
+        break;
+      case NodeType.DisplacementMapImageFilter:
+        declareDisplacementMapImageFilter(ctx, props);
+        break;
+      // Color Filters
       case NodeType.BlendColorFilter:
         declareBlendColorFilter(ctx, props);
         break;
@@ -82,6 +112,13 @@ function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
       case NodeType.LerpColorFilter:
         declareLerpColorFilter(ctx, props);
         break;
+      // Paint
+      case NodeType.Paint:
+        declarePaint(ctx, props);
+        break;
+      case NodeType.BlurImageFilter:
+        declareBlurImageFilter(ctx, props);
+        break;
       default:
         if (node.isDeclaration) {
           console.log("Unknown declaration node: ", type);
@@ -93,10 +130,10 @@ function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
 
 const preProcessContext = (
   ctx: DrawingContext,
-  props: PaintProps & TransformProps,
+  props: GroupProps,
   node: Node<any>
 ) => {
-  const shouldRestoreMatrix = ctx.processMatrix(props);
+  const shouldRestoreMatrix = ctx.processMatrixAndClipping(props, props.layer);
   processDeclaration(ctx, node);
   const shouldRestorePaint = ctx.processPaint(props);
   return { shouldRestoreMatrix, shouldRestorePaint };

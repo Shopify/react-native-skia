@@ -1,17 +1,49 @@
 "worklet";
 
-import { enumKey, processTransformProps2 } from "../dom/nodes";
-import type { PaintProps, TransformProps } from "../dom/types";
+import {
+  enumKey,
+  isPathDef,
+  processPath,
+  processTransformProps2,
+} from "../dom/nodes";
+import type { ClipDef, GroupProps, PaintProps } from "../dom/types";
 import { DeclarationContext } from "../dom/types";
 import {
   BlendMode,
+  ClipOp,
+  isRRect,
   PaintStyle,
   StrokeCap,
   StrokeJoin,
-  type SkCanvas,
-  type Skia,
-  type SkPaint,
 } from "../skia/types";
+import type {
+  SkPath,
+  SkRect,
+  SkRRect,
+  SkCanvas,
+  Skia,
+  SkPaint,
+} from "../skia/types";
+
+const computeClip = (
+  Skia: Skia,
+  clip: ClipDef | undefined
+):
+  | undefined
+  | { clipPath: SkPath }
+  | { clipRect: SkRect }
+  | { clipRRect: SkRRect } => {
+  if (clip) {
+    if (isPathDef(clip)) {
+      return { clipPath: processPath(Skia, clip) };
+    } else if (isRRect(clip)) {
+      return { clipRRect: clip };
+    } else {
+      return { clipRect: clip };
+    }
+  }
+  return undefined;
+};
 
 export class DrawingContext {
   private paints: SkPaint[];
@@ -129,13 +161,38 @@ export class DrawingContext {
     return shouldRestore;
   }
 
-  processMatrix(props: TransformProps) {
+  processMatrixAndClipping(props: GroupProps, layer?: boolean | SkPaint) {
+    const hasTransform =
+      props.matrix !== undefined || props.transform !== undefined;
+    const clip = computeClip(this.Skia, props.clip);
+    const hasClip = clip !== undefined;
+    const op = props.invertClip ? ClipOp.Difference : ClipOp.Intersect;
     const m3 = processTransformProps2(this.Skia, props);
-    if (m3) {
-      this.canvas.save();
-      this.canvas.concat(m3);
-      return true;
+    const shouldSave = hasTransform || hasClip || !!layer;
+    if (shouldSave) {
+      if (layer) {
+        if (typeof layer === "boolean") {
+          this.canvas.saveLayer();
+        } else {
+          this.canvas.saveLayer(layer);
+        }
+      } else {
+        this.canvas.save();
+      }
     }
-    return false;
+
+    if (m3) {
+      this.canvas.concat(m3);
+    }
+    if (clip) {
+      if ("clipRect" in clip) {
+        this.canvas.clipRect(clip.clipRect, op, true);
+      } else if ("clipRRect" in clip) {
+        this.canvas.clipRRect(clip.clipRRect, op, true);
+      } else {
+        this.canvas.clipPath(clip.clipPath, op, true);
+      }
+    }
+    return shouldSave;
   }
 }

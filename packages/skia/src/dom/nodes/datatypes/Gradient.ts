@@ -32,6 +32,7 @@ export const getRect = (
   Skia: Skia,
   props: Omit<ImageShaderProps, "tx" | "ty" | "fm" | "mm" | "fit" | "image">
 ): SkRect | undefined => {
+  "worklet";
   const { x, y, width, height } = props;
   if (props.rect) {
     return props.rect;
