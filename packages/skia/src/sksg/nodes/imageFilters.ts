@@ -2,7 +2,7 @@ import { enumKey } from "../../dom/nodes";
 import type { BlurMaskFilterProps } from "../../dom/types";
 import { BlurStyle } from "../../skia/types";
 import type { DrawingContext } from "../DrawingContext";
-import type { Node } from "../Node";
+import type { Node } from "./Node";
 
 export const declareBlurMaskFilter = (
   ctx: DrawingContext,

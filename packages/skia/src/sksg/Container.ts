@@ -8,8 +8,8 @@ import {
 } from "../external/reanimated/renderHelpers";
 
 import { DrawingContext } from "./DrawingContext";
-import type { Node } from "./Node";
-import { draw, isSharedValue } from "./Nodes";
+import type { Node } from "./nodes";
+import { draw, isSharedValue } from "./nodes";
 
 const drawOnscreen = (Skia: Skia, nativeId: number, root: Node[]) => {
   "worklet";

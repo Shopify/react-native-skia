@@ -1,19 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SharedValue } from "react-native-reanimated";
 
-import { enumKey } from "../dom/nodes";
-import type {
-  BlurMaskFilterProps,
-  PaintProps,
-  TransformProps,
-} from "../dom/types";
-import { NodeType } from "../dom/types";
-import { mapKeys } from "../renderer/typeddash";
+import {
+  NodeType,
+  type PaintProps,
+  type TransformProps,
+} from "../../dom/types";
+import type { DrawingContext } from "../DrawingContext";
+import { mapKeys } from "../../renderer/typeddash";
 
-import type { DrawingContext } from "./DrawingContext";
+import { declareBlurMaskFilter } from "./imageFilters";
 import type { Node } from "./Node";
-import { declareBlurMaskFilter } from "./nodes/imageFilters";
-import { drawCircle, drawFill } from "./nodes/drawings";
+import {
+  drawAtlas,
+  drawCircle,
+  drawFill,
+  drawImageSVG,
+  drawParagraph,
+  drawPicture,
+} from "./drawings";
 
 interface ContextProcessingResult {
   shouldRestoreMatrix: boolean;
@@ -79,6 +84,36 @@ export function draw(ctx: DrawingContext, node: Node<any>) {
   const props = materialize(rawProps);
   const result = preProcessContext(ctx, props, children);
   switch (type) {
+    case NodeType.Layer:
+    case NodeType.Box:
+    case NodeType.BoxShadow:
+    case NodeType.Paint:
+    case NodeType.Image:
+    case NodeType.Points:
+    case NodeType.Path:
+    case NodeType.Rect:
+    case NodeType.RRect:
+    case NodeType.Oval:
+    case NodeType.Line:
+    case NodeType.Patch:
+    case NodeType.Vertices:
+    case NodeType.DiffRect:
+    case NodeType.Text:
+    case NodeType.TextPath:
+    case NodeType.TextBlob:
+    case NodeType.Glyphs:
+    case NodeType.Picture:
+      drawPicture(ctx, props);
+      break;
+    case NodeType.ImageSVG:
+      drawImageSVG(ctx, props);
+      break;
+    case NodeType.Paragraph:
+      drawParagraph(ctx, props);
+      break;
+    case NodeType.Atlas:
+      drawAtlas(ctx, props);
+      break;
     case NodeType.Circle:
       drawCircle(ctx, props);
       break;
@@ -88,7 +123,6 @@ export function draw(ctx: DrawingContext, node: Node<any>) {
     case NodeType.Group:
       // TODO: do nothing
       break;
-    // TODO: exhaustive check?
   }
   children.forEach((child) => {
     if (!child.isDeclaration) {
