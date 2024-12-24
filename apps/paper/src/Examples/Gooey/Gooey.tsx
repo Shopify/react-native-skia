@@ -12,7 +12,7 @@ import {
   Circle,
   Blur,
   ColorMatrix,
-  Canvas2,
+  Canvas,
 } from "@shopify/react-native-skia";
 import { View, useWindowDimensions } from "react-native";
 import type { SharedValue } from "react-native-reanimated";
@@ -111,7 +111,7 @@ export const Gooey = () => {
   return (
     <View style={{ flex: 1 }}>
       <GestureDetector gesture={gesture}>
-        <Canvas2 style={{ flex: 1 }}>
+        <Canvas style={{ flex: 1 }}>
           <Fill color={BG} />
           <Group
             layer={
@@ -150,7 +150,7 @@ export const Gooey = () => {
           <Group transform={translate(c)}>
             <Hamburger />
           </Group>
-        </Canvas2>
+        </Canvas>
       </GestureDetector>
     </View>
   );
