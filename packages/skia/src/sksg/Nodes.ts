@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { SharedValue } from "react-native-reanimated";
+
 import { enumKey, processCircle } from "../dom/nodes";
 import type {
   BlurMaskFilterProps,
@@ -9,6 +11,7 @@ import type {
 } from "../dom/types";
 import { NodeType } from "../dom/types";
 import { BlurStyle } from "../skia/types";
+import { mapKeys } from "../renderer/typeddash";
 
 import type { DrawingContext } from "./DrawingContext";
 import type { Node } from "./Node";
@@ -77,9 +80,30 @@ const postProcessContext = (
   }
 };
 
+const isSharedValue = <T = unknown>(
+  value: unknown
+): value is SharedValue<T> => {
+  "worklet";
+  // We cannot use `in` operator here because `value` could be a HostObject and therefore we cast.
+  return (value as Record<string, unknown>)?._isReanimatedSharedValue === true;
+};
+
+const materialize = <T extends object>(props: T) => {
+  "worklet";
+  const result: T = Object.assign({}, props);
+  mapKeys(result).forEach((key) => {
+    const value = result[key];
+    if (isSharedValue(value)) {
+      result[key] = value.value as any;
+    }
+  });
+  return result;
+};
+
 export function draw(ctx: DrawingContext, node: Node<any>) {
   "worklet";
-  const { type, props, children } = node;
+  const { type, props: rawProps, children } = node;
+  const props = materialize(rawProps);
   const result = preProcessContext(ctx, props, children);
   switch (type) {
     case NodeType.Circle:

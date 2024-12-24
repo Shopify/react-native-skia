@@ -3,7 +3,6 @@ import type { HostConfig } from "react-reconciler";
 import { DefaultEventPriority } from "react-reconciler/constants";
 
 import { NodeType } from "../dom/types";
-import { extractReanimatedProps } from "../external/reanimated/renderHelpers2";
 
 import type { Node } from "./Node";
 import type { Container } from "./Container";
@@ -132,20 +131,19 @@ export const sksgHostConfig: SkiaHostConfig = {
 
   createInstance(
     type,
-    rawProps,
-    _container,
+    props,
+    container,
     _hostContext,
     _internalInstanceHandle
   ) {
     debug("createInstance", type);
-    const [props] = extractReanimatedProps(rawProps);
-    const instance: Node = {
+    container.registerValues(props);
+    const instance = {
       type,
       isDeclaration: isDeclaration(type),
       props,
       children: [],
     };
-    //bindReanimatedProps(container, instance, reaProps);
     return instance;
   },
 
@@ -200,12 +198,14 @@ export const sksgHostConfig: SkiaHostConfig = {
   prepareUpdate(
     _instance: Instance,
     _type: string,
-    _oldProps: Props,
-    _newProps: Props,
-    _rootContainer: Container,
+    oldProps: Props,
+    newProps: Props,
+    container: Container,
     _hostContext: HostContext
   ) {
     debug("prepareUpdate");
+    container.unregisterValues(oldProps);
+    container.registerValues(newProps);
     return null;
   },
 
@@ -215,15 +215,12 @@ export const sksgHostConfig: SkiaHostConfig = {
 
   cloneInstance(
     instance: Instance,
-    type: string,
+    _type: string,
     _oldProps: Props,
-    newProps: Props,
+    props: Props,
     keepChildren: boolean,
     newChildSet?: ChildSet
   ) {
-    console.log({ cloneInstance: { type } });
-    const [props] = extractReanimatedProps(newProps);
-    //bindReanimatedProps(container, instance, reaProps);
     return {
       type: instance.type,
       props,
