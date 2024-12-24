@@ -42,9 +42,15 @@ import {
   drawVertices,
 } from "./drawings";
 import {
+  declareColorShader,
+  declareFractalNoiseShader,
   declareImageShader,
+  declareLinearGradientShader,
+  declareRadialGradientShader,
   declareShader,
+  declareSweepGradientShader,
   declareTurbulenceShader,
+  declareTwoPointConicalGradientShader,
 } from "./shaders";
 import {
   declareBlendColorFilter,
@@ -54,6 +60,15 @@ import {
   declarePaint,
   declareSRGBToLinearGammaColorFilter,
 } from "./colorFilters";
+import {
+  declareCornerPathEffect,
+  declareDashPathEffect,
+  declareDiscretePathEffect,
+  declareLine2DPathEffect,
+  declarePath1DPathEffect,
+  declarePath2DPathEffect,
+  declareSumPathEffect,
+} from "./pathEffects";
 
 interface ContextProcessingResult {
   shouldRestoreMatrix: boolean;
@@ -79,6 +94,24 @@ function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
         break;
       case NodeType.Turbulence:
         declareTurbulenceShader(ctx, props);
+        break;
+      case NodeType.LinearGradient:
+        declareLinearGradientShader(ctx, props);
+        break;
+      case NodeType.SweepGradient:
+        declareSweepGradientShader(ctx, props);
+        break;
+      case NodeType.RadialGradient:
+        declareRadialGradientShader(ctx, props);
+        break;
+      case NodeType.TwoPointConicalGradient:
+        declareTwoPointConicalGradientShader(ctx, props);
+        break;
+      case NodeType.FractalNoise:
+        declareFractalNoiseShader(ctx, props);
+        break;
+      case NodeType.ColorShader:
+        declareColorShader(ctx, props);
         break;
       // Image Filters
       case NodeType.BlurMaskFilter:
@@ -111,6 +144,28 @@ function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
         break;
       case NodeType.LerpColorFilter:
         declareLerpColorFilter(ctx, props);
+        break;
+      // Path Effects
+      case NodeType.CornerPathEffect:
+        declareCornerPathEffect(ctx, props);
+        break;
+      case NodeType.DiscretePathEffect:
+        declareDiscretePathEffect(ctx, props);
+        break;
+      case NodeType.Path2DPathEffect:
+        declarePath2DPathEffect(ctx, props);
+        break;
+      case NodeType.DashPathEffect:
+        declareDashPathEffect(ctx, props);
+        break;
+      case NodeType.SumPathEffect:
+        declareSumPathEffect(ctx);
+        break;
+      case NodeType.Line2DPathEffect:
+        declareLine2DPathEffect(ctx, props);
+        break;
+      case NodeType.Path1DPathEffect:
+        declarePath1DPathEffect(ctx, props);
         break;
       // Paint
       case NodeType.Paint:
