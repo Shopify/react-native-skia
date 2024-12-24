@@ -38,6 +38,12 @@ import {
   drawVertices,
 } from "./drawings";
 import { declareShader } from "./shaders";
+import {
+  declareLerpColorFilter,
+  declareLinearToSRGBGammaColorFilter,
+  declareMatrixColorFilter,
+  declareSRGBToLinearGammaColorFilter,
+} from "./colorFilters";
 
 interface ContextProcessingResult {
   shouldRestoreMatrix: boolean;
@@ -51,16 +57,29 @@ function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
   ctx.declCtx.save();
   root.children.forEach((node: Node<any>) => {
     processDeclaration(ctx, node);
-    switch (node.type) {
+    const { type, props } = node;
+    switch (type) {
       case NodeType.Shader:
-        declareShader(ctx, node);
+        declareShader(ctx, props);
         break;
       case NodeType.BlurMaskFilter:
-        declareBlurMaskFilter(ctx, node);
+        declareBlurMaskFilter(ctx, props);
+        break;
+      case NodeType.SRGBToLinearGammaColorFilter:
+        declareSRGBToLinearGammaColorFilter(ctx);
+        break;
+      case NodeType.LinearToSRGBGammaColorFilter:
+        declareLinearToSRGBGammaColorFilter(ctx);
+        break;
+      case NodeType.MatrixColorFilter:
+        declareMatrixColorFilter(ctx, props);
+        break;
+      case NodeType.LerpColorFilter:
+        declareLerpColorFilter(ctx, props);
         break;
       default:
         if (node.isDeclaration) {
-          console.log("Unknown declaration node: ", node.type);
+          console.log("Unknown declaration node: ", type);
         }
     }
   });
