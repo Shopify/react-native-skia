@@ -1,46 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SharedValue } from "react-native-reanimated";
 
-import { enumKey, processCircle } from "../dom/nodes";
+import { enumKey } from "../dom/nodes";
 import type {
   BlurMaskFilterProps,
-  CircleProps,
-  DrawingNodeProps,
   PaintProps,
   TransformProps,
 } from "../dom/types";
 import { NodeType } from "../dom/types";
-import { BlurStyle } from "../skia/types";
 import { mapKeys } from "../renderer/typeddash";
 
 import type { DrawingContext } from "./DrawingContext";
 import type { Node } from "./Node";
-
-const drawCircle = (ctx: DrawingContext, props: CircleProps) => {
-  "worklet";
-  const { c } = processCircle(props);
-  const { r } = props;
-  ctx.canvas.drawCircle(c.x, c.y, r, ctx.paint);
-};
-
-const drawFill = (ctx: DrawingContext, _props: DrawingNodeProps) => {
-  "worklet";
-  ctx.canvas.drawPaint(ctx.paint);
-};
-
-const declareBlurMaskFilter = (
-  ctx: DrawingContext,
-  node: Node<BlurMaskFilterProps>
-) => {
-  "worklet";
-  const { style, blur, respectCTM } = node.props;
-  const mf = ctx.Skia.MaskFilter.MakeBlur(
-    BlurStyle[enumKey(style)],
-    blur,
-    respectCTM
-  );
-  ctx.declCtx.maskFilters.push(mf);
-};
+import { declareBlurMaskFilter } from "./nodes/imageFilters";
+import { drawCircle, drawFill } from "./nodes/drawings";
 
 interface ContextProcessingResult {
   shouldRestoreMatrix: boolean;
