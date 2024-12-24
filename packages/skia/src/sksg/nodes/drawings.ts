@@ -53,11 +53,11 @@ export const drawOval = (ctx: DrawingContext, props: OvalProps) => {
 };
 
 export const drawBox = (_ctx: DrawingContext, _props: BoxProps) => {
-  throw new Error("drawBoxShadow(): not implemented yet");
+  //throw new Error("drawBoxShadow(): not implemented yet");
 };
 
 export const drawBoxShadow = (_ctx: DrawingContext, _props: BoxShadowProps) => {
-  throw new Error("drawBoxShadow(): not implemented yet");
+  //throw new Error("drawBoxShadow(): not implemented yet");
 };
 
 export const drawImage = (ctx: DrawingContext, props: ImageProps) => {

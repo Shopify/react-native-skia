@@ -171,7 +171,7 @@ export function draw(ctx: DrawingContext, node: Node<any>) {
       break;
     default:
       if (!node.isDeclaration) {
-        throw new Error(`Unsupported node type: ${type}`);
+        console.warn(`Unsupported node type: ${type}`);
       }
   }
   children.forEach((child) => {
