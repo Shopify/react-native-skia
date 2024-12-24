@@ -39,6 +39,7 @@ import {
 } from "./drawings";
 import { declareShader } from "./shaders";
 import {
+  declareBlendColorFilter,
   declareLerpColorFilter,
   declareLinearToSRGBGammaColorFilter,
   declareMatrixColorFilter,
@@ -54,8 +55,9 @@ function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
   if (root.children.length === 0) {
     return;
   }
-  ctx.declCtx.save();
   root.children.forEach((node: Node<any>) => {
+    ctx.declCtx.save();
+
     processDeclaration(ctx, node);
     const { type, props } = node;
     switch (type) {
@@ -64,6 +66,9 @@ function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
         break;
       case NodeType.BlurMaskFilter:
         declareBlurMaskFilter(ctx, props);
+        break;
+      case NodeType.BlendColorFilter:
+        declareBlendColorFilter(ctx, props);
         break;
       case NodeType.SRGBToLinearGammaColorFilter:
         declareSRGBToLinearGammaColorFilter(ctx);
@@ -82,8 +87,8 @@ function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
           console.log("Unknown declaration node: ", type);
         }
     }
+    ctx.declCtx.restore();
   });
-  ctx.declCtx.restore();
 }
 
 const preProcessContext = (

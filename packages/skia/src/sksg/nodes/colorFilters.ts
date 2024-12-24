@@ -1,16 +1,28 @@
 "worklet";
 
+import { enumKey } from "../../dom/nodes";
 import type {
+  BlendColorFilterProps,
   LerpColorFilterProps,
   MatrixColorFilterProps,
 } from "../../dom/types";
-import type { SkColorFilter } from "../../skia/types";
+import { BlendMode, type SkColorFilter } from "../../skia/types";
 import type { DrawingContext } from "../DrawingContext";
 
 const composeAndPush = (ctx: DrawingContext, cf1: SkColorFilter) => {
   const cf2 = ctx.declCtx.colorFilters.popAllAsOne();
   const cf = cf2 ? ctx.Skia.ColorFilter.MakeCompose(cf1, cf2) : cf1;
   ctx.declCtx.colorFilters.push(cf);
+};
+
+export const declareBlendColorFilter = (
+  ctx: DrawingContext,
+  props: BlendColorFilterProps
+) => {
+  const { mode } = props;
+  const color = ctx.Skia.Color(props.color);
+  const cf = ctx.Skia.ColorFilter.MakeBlend(color, BlendMode[enumKey(mode)]);
+  composeAndPush(ctx, cf);
 };
 
 export const declareSRGBToLinearGammaColorFilter = (ctx: DrawingContext) => {
