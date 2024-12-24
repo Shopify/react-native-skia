@@ -2,15 +2,21 @@ import type { SharedValue } from "react-native-reanimated";
 
 import Rea from "../external/reanimated/ReanimatedProxy";
 import type { Skia, SkCanvas } from "../skia/types";
+import {
+  HAS_REANIMATED,
+  HAS_REANIMATED_3,
+} from "../external/reanimated/renderHelpers";
 
 import { DrawingContext } from "./DrawingContext";
 import type { Node } from "./Node";
-import { draw } from "./Nodes";
+import { draw, isSharedValue } from "./Nodes";
 
 const drawOnscreen = (Skia: Skia, nativeId: number, root: Node[]) => {
   "worklet";
   const rec = Skia.PictureRecorder();
   const canvas = rec.beginRecording();
+  // TODO: This is only support from 3.15 and above (check the exact version)
+  // This could be polyfilled in C++ if needed (or in JS via functions only?)
   const ctx = new DrawingContext(Skia, canvas);
   root.forEach((node) => {
     draw(ctx, node);
@@ -34,6 +40,9 @@ export class Container {
 
   set root(root: Node[]) {
     const isOnscreen = this.nativeId !== -1;
+    if (HAS_REANIMATED && !HAS_REANIMATED_3) {
+      throw new Error("React Native Skia only supports Reanimated 3 and above");
+    }
     if (isOnscreen) {
       if (this.mapperId !== null) {
         Rea.stopMapper(this.mapperId);
@@ -60,7 +69,7 @@ export class Container {
 
   unregisterValues(values: object) {
     Object.values(values)
-      .filter(Rea.isSharedValue)
+      .filter(isSharedValue)
       .forEach((value) => {
         this.values.delete(value);
       });
@@ -68,7 +77,7 @@ export class Container {
 
   registerValues(values: object) {
     Object.values(values)
-      .filter(Rea.isSharedValue)
+      .filter(isSharedValue)
       .forEach((value) => {
         this.values.add(value);
       });

@@ -80,7 +80,7 @@ const postProcessContext = (
   }
 };
 
-const isSharedValue = <T = unknown>(
+export const isSharedValue = <T = unknown>(
   value: unknown
 ): value is SharedValue<T> => {
   "worklet";

@@ -2,7 +2,7 @@ import React from "react";
 import { Pressable, useWindowDimensions } from "react-native";
 import {
   useImage,
-  Canvas,
+  Canvas2,
   ImageShader,
   Skia,
   Shader,
@@ -36,7 +36,7 @@ export const Filters = () => {
 
   return (
     <Pressable style={{ width, height }} onPress={() => setState((i) => i + 1)}>
-      <Canvas style={{ width, height }}>
+      <Canvas2 style={{ width, height }}>
         <Fill>
           <Shader source={source} uniforms={uniforms}>
             <ImageShader
@@ -51,7 +51,7 @@ export const Filters = () => {
             />
           </Shader>
         </Fill>
-      </Canvas>
+      </Canvas2>
     </Pressable>
   );
 };
