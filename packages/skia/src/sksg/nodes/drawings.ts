@@ -1,3 +1,5 @@
+"worklet";
+
 import {
   enumKey,
   fitRects,
@@ -36,35 +38,29 @@ import { BlendMode, FillType, PointMode, VertexMode } from "../../skia/types";
 import type { DrawingContext } from "../DrawingContext";
 
 export const drawLayer = (_ctx: DrawingContext, _props: DrawingNodeProps) => {
-  "worklet";
   // Handle layer drawing operations
   // throw new Error("drawBoxShadow(): not implemented yet");
 };
 
 export const drawLine = (ctx: DrawingContext, props: LineProps) => {
-  "worklet";
   const { p1, p2 } = props;
   ctx.canvas.drawLine(p1.x, p1.y, p2.x, p2.y, ctx.paint);
 };
 
 export const drawOval = (ctx: DrawingContext, props: OvalProps) => {
-  "worklet";
   const rect = processRect(ctx.Skia, props);
   ctx.canvas.drawOval(rect, ctx.paint);
 };
 
 export const drawBox = (_ctx: DrawingContext, _props: BoxProps) => {
-  "worklet";
   throw new Error("drawBoxShadow(): not implemented yet");
 };
 
 export const drawBoxShadow = (_ctx: DrawingContext, _props: BoxShadowProps) => {
-  "worklet";
   throw new Error("drawBoxShadow(): not implemented yet");
 };
 
 export const drawImage = (ctx: DrawingContext, props: ImageProps) => {
-  "worklet";
   const { image } = props;
   if (image) {
     const fit = props.fit ?? "contain";
@@ -84,13 +80,11 @@ export const drawImage = (ctx: DrawingContext, props: ImageProps) => {
 };
 
 export const drawPoints = (ctx: DrawingContext, props: PointsProps) => {
-  "worklet";
   const { points, mode } = props;
   ctx.canvas.drawPoints(PointMode[enumKey(mode)], points, ctx.paint);
 };
 
 export const drawVertices = (ctx: DrawingContext, props: VerticesProps) => {
-  "worklet";
   const { mode, textures, colors, indices, blendMode } = props;
   const vertexMode = mode ? VertexMode[enumKey(mode)] : VertexMode.Triangles;
   const vertices = ctx.Skia.MakeVertices(
@@ -107,13 +101,11 @@ export const drawVertices = (ctx: DrawingContext, props: VerticesProps) => {
 };
 
 export const drawDiffRect = (ctx: DrawingContext, props: DiffRectProps) => {
-  "worklet";
   const { outer, inner } = props;
   ctx.canvas.drawDRRect(outer, inner, ctx.paint);
 };
 
 export const drawTextPath = (ctx: DrawingContext, props: TextPathProps) => {
-  "worklet";
   const path = processPath(ctx.Skia, props.path);
   const { font, initialOffset } = props;
   if (font) {
@@ -152,7 +144,6 @@ export const drawTextPath = (ctx: DrawingContext, props: TextPathProps) => {
 };
 
 export const drawText = (ctx: DrawingContext, props: TextProps) => {
-  "worklet";
   const { text, x, y, font } = props;
   if (font != null) {
     ctx.canvas.drawText(text, x, y, ctx.paint, font);
@@ -160,7 +151,6 @@ export const drawText = (ctx: DrawingContext, props: TextProps) => {
 };
 
 export const drawPatch = (ctx: DrawingContext, props: PatchProps) => {
-  "worklet";
   const { texture, blendMode, patch } = props;
   const defaultBlendMode = props.colors ? BlendMode.DstOver : BlendMode.SrcOver;
   const mode = blendMode ? BlendMode[enumKey(blendMode)] : defaultBlendMode;
@@ -191,7 +181,6 @@ export const drawPatch = (ctx: DrawingContext, props: PatchProps) => {
 };
 
 export const drawPath = (ctx: DrawingContext, props: PathProps) => {
-  "worklet";
   const {
     start: trimStart,
     end: trimEnd,
@@ -222,19 +211,16 @@ export const drawPath = (ctx: DrawingContext, props: PathProps) => {
 };
 
 export const drawRect = (ctx: DrawingContext, props: RectProps) => {
-  "worklet";
   const derived = processRect(ctx.Skia, props);
   ctx.canvas.drawRect(derived, ctx.paint);
 };
 
 export const drawRRect = (ctx: DrawingContext, props: RoundedRectProps) => {
-  "worklet";
   const derived = processRRect(ctx.Skia, props);
   ctx.canvas.drawRRect(derived, ctx.paint);
 };
 
 export const drawTextBlob = (ctx: DrawingContext, props: TextBlobProps) => {
-  "worklet";
   const { blob, x, y } = props;
   ctx.canvas.drawTextBlob(blob, x, y, ctx.paint);
 };
@@ -245,7 +231,6 @@ interface ProcessedGlyphs {
 }
 
 export const drawGlyphs = (ctx: DrawingContext, props: GlyphsProps) => {
-  "worklet";
   const derived = props.glyphs.reduce<ProcessedGlyphs>(
     (acc, glyph) => {
       const { id, pos } = glyph;
@@ -263,7 +248,6 @@ export const drawGlyphs = (ctx: DrawingContext, props: GlyphsProps) => {
 };
 
 export const drawImageSVG = (ctx: DrawingContext, props: ImageSVGProps) => {
-  "worklet";
   const { canvas } = ctx;
   const { svg } = props;
   const { x, y, width, height } = props.rect
@@ -281,7 +265,6 @@ export const drawImageSVG = (ctx: DrawingContext, props: ImageSVGProps) => {
 };
 
 export const drawParagraph = (ctx: DrawingContext, props: ParagraphProps) => {
-  "worklet";
   const { paragraph, x, y, width } = props;
   if (paragraph) {
     paragraph.layout(width);
@@ -290,13 +273,11 @@ export const drawParagraph = (ctx: DrawingContext, props: ParagraphProps) => {
 };
 
 export const drawPicture = (ctx: DrawingContext, props: PictureProps) => {
-  "worklet";
   const { picture } = props;
   ctx.canvas.drawPicture(picture);
 };
 
 export const drawAtlas = (ctx: DrawingContext, props: AtlasProps) => {
-  "worklet";
   const { image, sprites, transforms, colors, blendMode } = props;
   const blend = blendMode ? BlendMode[enumKey(blendMode)] : undefined;
   if (image) {
@@ -305,13 +286,11 @@ export const drawAtlas = (ctx: DrawingContext, props: AtlasProps) => {
 };
 
 export const drawCircle = (ctx: DrawingContext, props: CircleProps) => {
-  "worklet";
   const { c } = processCircle(props);
   const { r } = props;
   ctx.canvas.drawCircle(c.x, c.y, r, ctx.paint);
 };
 
 export const drawFill = (ctx: DrawingContext, _props: DrawingNodeProps) => {
-  "worklet";
   ctx.canvas.drawPaint(ctx.paint);
 };

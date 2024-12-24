@@ -1,3 +1,4 @@
+"worklet";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SharedValue } from "react-native-reanimated";
 
@@ -47,7 +48,6 @@ const preProcessContext = (
   props: PaintProps & TransformProps,
   children: Node<any>[]
 ) => {
-  "worklet";
   const shouldRestoreMatrix = ctx.processMatrix(props);
   ctx.declCtx.save();
   children.forEach((node) => {
@@ -66,7 +66,6 @@ const postProcessContext = (
   ctx: DrawingContext,
   { shouldRestoreMatrix, shouldRestorePaint }: ContextProcessingResult
 ) => {
-  "worklet";
   if (shouldRestoreMatrix) {
     ctx.canvas.restore();
   }
@@ -78,13 +77,11 @@ const postProcessContext = (
 export const isSharedValue = <T = unknown>(
   value: unknown
 ): value is SharedValue<T> => {
-  "worklet";
   // We cannot use `in` operator here because `value` could be a HostObject and therefore we cast.
   return (value as Record<string, unknown>)?._isReanimatedSharedValue === true;
 };
 
 const materialize = <T extends object>(props: T) => {
-  "worklet";
   const result: T = Object.assign({}, props);
   mapKeys(result).forEach((key) => {
     const value = result[key];
@@ -96,7 +93,6 @@ const materialize = <T extends object>(props: T) => {
 };
 
 export function draw(ctx: DrawingContext, node: Node<any>) {
-  "worklet";
   const { type, props: rawProps, children } = node;
   const props = materialize(rawProps);
   const result = preProcessContext(ctx, props, children);
