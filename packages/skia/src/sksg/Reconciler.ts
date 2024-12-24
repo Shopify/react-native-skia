@@ -3,6 +3,7 @@ import type { OpaqueRoot } from "react-reconciler";
 import ReactReconciler from "react-reconciler";
 
 import type { SkCanvas, Skia } from "../skia/types";
+import { NodeType } from "../dom/types";
 
 import { debug, sksgHostConfig } from "./HostConfig";
 import { Container } from "./Container";
@@ -31,6 +32,11 @@ export class SkiaSGRoot {
       console.error,
       null
     );
+  }
+
+  get sg() {
+    const children = this.container.root;
+    return { type: NodeType.Group, props: {}, children, isDeclaration: false };
   }
 
   render(element: ReactNode) {
