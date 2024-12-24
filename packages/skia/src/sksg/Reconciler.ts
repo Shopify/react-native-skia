@@ -40,10 +40,6 @@ export class SkiaSGRoot {
     });
   }
 
-  draw() {
-    this.container.draw();
-  }
-
   drawOnCanvas(canvas: SkCanvas) {
     this.container.drawOnCanvas(canvas);
   }

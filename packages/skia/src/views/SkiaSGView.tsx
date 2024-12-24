@@ -60,11 +60,7 @@ export class SkiaSGView extends React.Component<SkiaSGViewProps> {
   }
 
   public redraw() {
-    const { root } = this.props;
-    if (root !== undefined) {
-      console.log("redraw");
-      root.draw();
-    }
+    SkiaViewApi.requestRedraw(this._nativeId);
   }
 
   componentWillUnmount() {

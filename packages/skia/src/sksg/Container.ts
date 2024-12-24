@@ -7,6 +7,18 @@ import { DrawingContext } from "./DrawingContext";
 import type { Node } from "./Node";
 import { draw } from "./Nodes";
 
+const drawOnscreen = (Skia: Skia, nativeId: number, root: Node[]) => {
+  "worklet";
+  const rec = Skia.PictureRecorder();
+  const canvas = rec.beginRecording();
+  const ctx = new DrawingContext(Skia, canvas);
+  root.forEach((node) => {
+    draw(ctx, node);
+  });
+  const picture = rec.finishRecordingAsPicture();
+  SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
+};
+
 export class Container {
   public _root: Node[] = [];
   public unmounted = false;
@@ -21,21 +33,15 @@ export class Container {
   }
 
   set root(root: Node[]) {
-    if (this.mapperId !== null) {
-      Rea.stopMapper(this.mapperId);
-    } else {
+    const isOnscreen = this.nativeId !== -1;
+    if (isOnscreen) {
+      if (this.mapperId !== null) {
+        Rea.stopMapper(this.mapperId);
+      }
       const { nativeId, Skia } = this;
-      Rea.startMapper(() => {
+      this.mapperId = Rea.startMapper(() => {
         "worklet";
-        const rec = Skia.PictureRecorder();
-        const canvas = rec.beginRecording();
-        const ctx = new DrawingContext(Skia, canvas);
-        root.forEach((node) => {
-          draw(ctx, node);
-        });
-        const picture = rec.finishRecordingAsPicture();
-        SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
-        SkiaViewApi.requestRedraw(nativeId);
+        drawOnscreen(Skia, nativeId, root);
       }, Array.from(this.values));
     }
     this._root = root;
@@ -73,19 +79,5 @@ export class Container {
     this.root.forEach((node) => {
       draw(ctx, node);
     });
-  }
-
-  draw() {
-    // TODO: this can be polyfilled if Reanimated is not installed
-    Rea.runOnUI((Skia: Skia, nativeId: number, root: Node[]) => {
-      const rec = Skia.PictureRecorder();
-      const canvas = rec.beginRecording();
-      const ctx = new DrawingContext(Skia, canvas);
-      root.forEach((node) => {
-        draw(ctx, node);
-      });
-      const picture = rec.finishRecordingAsPicture();
-      SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
-    })(this.Skia, this.nativeId, this.root);
   }
 }
