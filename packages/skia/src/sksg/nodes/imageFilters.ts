@@ -5,13 +5,11 @@ import type { BlurMaskFilterProps } from "../../dom/types";
 import { BlurStyle } from "../../skia/types";
 import type { DrawingContext } from "../DrawingContext";
 
-import type { Node } from "./Node";
-
 export const declareBlurMaskFilter = (
   ctx: DrawingContext,
-  node: Node<BlurMaskFilterProps>
+  props: BlurMaskFilterProps
 ) => {
-  const { style, blur, respectCTM } = node.props;
+  const { style, blur, respectCTM } = props;
   const mf = ctx.Skia.MaskFilter.MakeBlur(
     BlurStyle[enumKey(style)],
     blur,
