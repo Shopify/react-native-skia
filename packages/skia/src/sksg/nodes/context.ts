@@ -29,7 +29,6 @@ import {
   drawGlyphs,
   drawImage,
   drawImageSVG,
-  drawLayer,
   drawLine,
   drawOval,
   drawParagraph,
@@ -253,21 +252,48 @@ const drawBackdropFilter = (ctx: DrawingContext, node: Node) => {
   canvas.restore();
 };
 
+const drawLayer = (ctx: DrawingContext, node: Node) => {
+  let hasLayer = false;
+  const [layer, ...children] = node.children;
+  if (layer.isDeclaration) {
+    const { declCtx } = ctx;
+    declCtx.save();
+    processDeclaration(ctx, node);
+    const paint = declCtx.paints.pop();
+    declCtx.restore();
+    if (paint) {
+      hasLayer = true;
+      ctx.canvas.saveLayer(paint);
+    }
+  }
+  children.map((child) => {
+    if (!child.isDeclaration) {
+      draw(ctx, child);
+    }
+  });
+  if (hasLayer) {
+    ctx.canvas.restore();
+  }
+};
+
 export function draw(ctx: DrawingContext, node: Node<any>) {
   const { type, props: rawProps, children } = node;
+  // Special mixed nodes
   if (type === NodeType.BackdropFilter) {
     drawBackdropFilter(ctx, node);
     return;
   }
+  if (type === NodeType.Layer) {
+    drawLayer(ctx, node);
+    return;
+  }
+  // Regular nodes
   const props = materialize(rawProps);
   const result = preProcessContext(ctx, props, node);
   const paints = ctx.getLocalPaints();
   paints.forEach((paint) => {
     const lctx = { paint, Skia: ctx.Skia, canvas: ctx.canvas };
     switch (type) {
-      case NodeType.Layer:
-        drawLayer(lctx, props);
-        break;
       case NodeType.Box:
         drawBox(lctx, props);
         break;

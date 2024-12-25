@@ -48,14 +48,6 @@ interface LocalDrawingContext {
   paint: SkPaint;
 }
 
-export const drawLayer = (
-  _ctx: LocalDrawingContext,
-  _props: DrawingNodeProps
-) => {
-  // Handle layer drawing operations
-  // throw new Error("drawBoxShadow(): not implemented yet");
-};
-
 export const drawLine = (ctx: LocalDrawingContext, props: LineProps) => {
   const { p1, p2 } = props;
   ctx.canvas.drawLine(p1.x, p1.y, p2.x, p2.y, ctx.paint);
