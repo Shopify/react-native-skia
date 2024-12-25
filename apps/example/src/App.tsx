@@ -199,7 +199,7 @@ const App = () => {
               }}
             />
             <Stack.Screen name="Graphs" component={GraphsScreen} />
-            <Stack.Screen name="Reanimated" component={ReanimatedExample} />
+            {/* <Stack.Screen name="Reanimated" component={ReanimatedExample} /> */}
             <Stack.Screen name="Stickers" component={Stickers} />
             <Stack.Screen
               name="Transitions"

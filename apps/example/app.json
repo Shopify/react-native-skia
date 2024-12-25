@@ -9,6 +9,9 @@
       "slug": "skia-example"
     }
   ],
+  "plugins": [
+    "react-native-test-app/plugins/reanimated.js"
+  ],
   "resources": {
     "android": [
       "dist/res",
