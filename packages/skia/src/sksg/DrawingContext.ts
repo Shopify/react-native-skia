@@ -74,6 +74,11 @@ export class DrawingContext {
     return paint;
   }
 
+  getLocalPaints() {
+    const { paint } = this;
+    return [paint, ...this.declCtx.paints.popAll()];
+  }
+
   processPaint({
     opacity,
     color,

@@ -33,34 +33,51 @@ import type {
   VerticesProps,
 } from "../../dom/types";
 import { saturate } from "../../renderer/processors";
-import type { SkPoint, SkRSXform } from "../../skia/types";
+import type {
+  SkCanvas,
+  Skia,
+  SkPaint,
+  SkPoint,
+  SkRSXform,
+} from "../../skia/types";
 import { BlendMode, FillType, PointMode, VertexMode } from "../../skia/types";
-import type { DrawingContext } from "../DrawingContext";
 
-export const drawLayer = (_ctx: DrawingContext, _props: DrawingNodeProps) => {
+interface LocalDrawingContext {
+  Skia: Skia;
+  canvas: SkCanvas;
+  paint: SkPaint;
+}
+
+export const drawLayer = (
+  _ctx: LocalDrawingContext,
+  _props: DrawingNodeProps
+) => {
   // Handle layer drawing operations
   // throw new Error("drawBoxShadow(): not implemented yet");
 };
 
-export const drawLine = (ctx: DrawingContext, props: LineProps) => {
+export const drawLine = (ctx: LocalDrawingContext, props: LineProps) => {
   const { p1, p2 } = props;
   ctx.canvas.drawLine(p1.x, p1.y, p2.x, p2.y, ctx.paint);
 };
 
-export const drawOval = (ctx: DrawingContext, props: OvalProps) => {
+export const drawOval = (ctx: LocalDrawingContext, props: OvalProps) => {
   const rect = processRect(ctx.Skia, props);
   ctx.canvas.drawOval(rect, ctx.paint);
 };
 
-export const drawBox = (_ctx: DrawingContext, _props: BoxProps) => {
+export const drawBox = (_ctx: LocalDrawingContext, _props: BoxProps) => {
   //throw new Error("drawBoxShadow(): not implemented yet");
 };
 
-export const drawBoxShadow = (_ctx: DrawingContext, _props: BoxShadowProps) => {
+export const drawBoxShadow = (
+  _ctx: LocalDrawingContext,
+  _props: BoxShadowProps
+) => {
   //throw new Error("drawBoxShadow(): not implemented yet");
 };
 
-export const drawImage = (ctx: DrawingContext, props: ImageProps) => {
+export const drawImage = (ctx: LocalDrawingContext, props: ImageProps) => {
   const { image } = props;
   if (image) {
     const fit = props.fit ?? "contain";
@@ -79,12 +96,15 @@ export const drawImage = (ctx: DrawingContext, props: ImageProps) => {
   }
 };
 
-export const drawPoints = (ctx: DrawingContext, props: PointsProps) => {
+export const drawPoints = (ctx: LocalDrawingContext, props: PointsProps) => {
   const { points, mode } = props;
   ctx.canvas.drawPoints(PointMode[enumKey(mode)], points, ctx.paint);
 };
 
-export const drawVertices = (ctx: DrawingContext, props: VerticesProps) => {
+export const drawVertices = (
+  ctx: LocalDrawingContext,
+  props: VerticesProps
+) => {
   const { mode, textures, colors, indices, blendMode } = props;
   const vertexMode = mode ? VertexMode[enumKey(mode)] : VertexMode.Triangles;
   const vertices = ctx.Skia.MakeVertices(
@@ -100,12 +120,18 @@ export const drawVertices = (ctx: DrawingContext, props: VerticesProps) => {
   ctx.canvas.drawVertices(vertices, blend, ctx.paint);
 };
 
-export const drawDiffRect = (ctx: DrawingContext, props: DiffRectProps) => {
+export const drawDiffRect = (
+  ctx: LocalDrawingContext,
+  props: DiffRectProps
+) => {
   const { outer, inner } = props;
   ctx.canvas.drawDRRect(outer, inner, ctx.paint);
 };
 
-export const drawTextPath = (ctx: DrawingContext, props: TextPathProps) => {
+export const drawTextPath = (
+  ctx: LocalDrawingContext,
+  props: TextPathProps
+) => {
   const path = processPath(ctx.Skia, props.path);
   const { font, initialOffset } = props;
   if (font) {
@@ -143,14 +169,14 @@ export const drawTextPath = (ctx: DrawingContext, props: TextPathProps) => {
   }
 };
 
-export const drawText = (ctx: DrawingContext, props: TextProps) => {
+export const drawText = (ctx: LocalDrawingContext, props: TextProps) => {
   const { text, x, y, font } = props;
   if (font != null) {
     ctx.canvas.drawText(text, x, y, ctx.paint, font);
   }
 };
 
-export const drawPatch = (ctx: DrawingContext, props: PatchProps) => {
+export const drawPatch = (ctx: LocalDrawingContext, props: PatchProps) => {
   const { texture, blendMode, patch } = props;
   const defaultBlendMode = props.colors ? BlendMode.DstOver : BlendMode.SrcOver;
   const mode = blendMode ? BlendMode[enumKey(blendMode)] : defaultBlendMode;
@@ -180,7 +206,7 @@ export const drawPatch = (ctx: DrawingContext, props: PatchProps) => {
   ctx.canvas.drawPatch(points, colors, texture, mode, ctx.paint);
 };
 
-export const drawPath = (ctx: DrawingContext, props: PathProps) => {
+export const drawPath = (ctx: LocalDrawingContext, props: PathProps) => {
   const {
     start: trimStart,
     end: trimEnd,
@@ -210,17 +236,23 @@ export const drawPath = (ctx: DrawingContext, props: PathProps) => {
   ctx.canvas.drawPath(path, ctx.paint);
 };
 
-export const drawRect = (ctx: DrawingContext, props: RectProps) => {
+export const drawRect = (ctx: LocalDrawingContext, props: RectProps) => {
   const derived = processRect(ctx.Skia, props);
   ctx.canvas.drawRect(derived, ctx.paint);
 };
 
-export const drawRRect = (ctx: DrawingContext, props: RoundedRectProps) => {
+export const drawRRect = (
+  ctx: LocalDrawingContext,
+  props: RoundedRectProps
+) => {
   const derived = processRRect(ctx.Skia, props);
   ctx.canvas.drawRRect(derived, ctx.paint);
 };
 
-export const drawTextBlob = (ctx: DrawingContext, props: TextBlobProps) => {
+export const drawTextBlob = (
+  ctx: LocalDrawingContext,
+  props: TextBlobProps
+) => {
   const { blob, x, y } = props;
   ctx.canvas.drawTextBlob(blob, x, y, ctx.paint);
 };
@@ -230,7 +262,7 @@ interface ProcessedGlyphs {
   positions: SkPoint[];
 }
 
-export const drawGlyphs = (ctx: DrawingContext, props: GlyphsProps) => {
+export const drawGlyphs = (ctx: LocalDrawingContext, props: GlyphsProps) => {
   const derived = props.glyphs.reduce<ProcessedGlyphs>(
     (acc, glyph) => {
       const { id, pos } = glyph;
@@ -247,7 +279,10 @@ export const drawGlyphs = (ctx: DrawingContext, props: GlyphsProps) => {
   }
 };
 
-export const drawImageSVG = (ctx: DrawingContext, props: ImageSVGProps) => {
+export const drawImageSVG = (
+  ctx: LocalDrawingContext,
+  props: ImageSVGProps
+) => {
   const { canvas } = ctx;
   const { svg } = props;
   const { x, y, width, height } = props.rect
@@ -264,7 +299,10 @@ export const drawImageSVG = (ctx: DrawingContext, props: ImageSVGProps) => {
   canvas.restore();
 };
 
-export const drawParagraph = (ctx: DrawingContext, props: ParagraphProps) => {
+export const drawParagraph = (
+  ctx: LocalDrawingContext,
+  props: ParagraphProps
+) => {
   const { paragraph, x, y, width } = props;
   if (paragraph) {
     paragraph.layout(width);
@@ -272,12 +310,12 @@ export const drawParagraph = (ctx: DrawingContext, props: ParagraphProps) => {
   }
 };
 
-export const drawPicture = (ctx: DrawingContext, props: PictureProps) => {
+export const drawPicture = (ctx: LocalDrawingContext, props: PictureProps) => {
   const { picture } = props;
   ctx.canvas.drawPicture(picture);
 };
 
-export const drawAtlas = (ctx: DrawingContext, props: AtlasProps) => {
+export const drawAtlas = (ctx: LocalDrawingContext, props: AtlasProps) => {
   const { image, sprites, transforms, colors, blendMode } = props;
   const blend = blendMode ? BlendMode[enumKey(blendMode)] : undefined;
   if (image) {
@@ -285,12 +323,15 @@ export const drawAtlas = (ctx: DrawingContext, props: AtlasProps) => {
   }
 };
 
-export const drawCircle = (ctx: DrawingContext, props: CircleProps) => {
+export const drawCircle = (ctx: LocalDrawingContext, props: CircleProps) => {
   const { c } = processCircle(props);
   const { r } = props;
   ctx.canvas.drawCircle(c.x, c.y, r, ctx.paint);
 };
 
-export const drawFill = (ctx: DrawingContext, _props: DrawingNodeProps) => {
+export const drawFill = (
+  ctx: LocalDrawingContext,
+  _props: DrawingNodeProps
+) => {
   ctx.canvas.drawPaint(ctx.paint);
 };

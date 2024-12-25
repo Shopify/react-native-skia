@@ -228,84 +228,88 @@ export function draw(ctx: DrawingContext, node: Node<any>) {
   const { type, props: rawProps, children } = node;
   const props = materialize(rawProps);
   const result = preProcessContext(ctx, props, node);
-  switch (type) {
-    case NodeType.Layer:
-      drawLayer(ctx, props);
-      break;
-    case NodeType.Box:
-      drawBox(ctx, props);
-      break;
-    case NodeType.BoxShadow:
-      drawBoxShadow(ctx, props);
-      break;
-    case NodeType.Image:
-      drawImage(ctx, props);
-      break;
-    case NodeType.Points:
-      drawPoints(ctx, props);
-      break;
-    case NodeType.Path:
-      drawPath(ctx, props);
-      break;
-    case NodeType.Rect:
-      drawRect(ctx, props);
-      break;
-    case NodeType.RRect:
-      drawRRect(ctx, props);
-      break;
-    case NodeType.Oval:
-      drawOval(ctx, props);
-      break;
-    case NodeType.Line:
-      drawLine(ctx, props);
-      break;
-    case NodeType.Patch:
-      drawPatch(ctx, props);
-      break;
-    case NodeType.Vertices:
-      drawVertices(ctx, props);
-      break;
-    case NodeType.DiffRect:
-      drawDiffRect(ctx, props);
-      break;
-    case NodeType.Text:
-      drawText(ctx, props);
-      break;
-    case NodeType.TextPath:
-      drawTextPath(ctx, props);
-      break;
-    case NodeType.TextBlob:
-      drawTextBlob(ctx, props);
-      break;
-    case NodeType.Glyphs:
-      drawGlyphs(ctx, props);
-      break;
-    case NodeType.Picture:
-      drawPicture(ctx, props);
-      break;
-    case NodeType.ImageSVG:
-      drawImageSVG(ctx, props);
-      break;
-    case NodeType.Paragraph:
-      drawParagraph(ctx, props);
-      break;
-    case NodeType.Atlas:
-      drawAtlas(ctx, props);
-      break;
-    case NodeType.Circle:
-      drawCircle(ctx, props);
-      break;
-    case NodeType.Fill:
-      drawFill(ctx, props);
-      break;
-    case NodeType.Group:
-      // TODO: do nothing
-      break;
-    default:
-      if (!node.isDeclaration) {
-        console.warn(`Unsupported node type: ${type}`);
-      }
-  }
+  const paints = ctx.getLocalPaints();
+  paints.forEach((paint) => {
+    const lctx = { paint, Skia: ctx.Skia, canvas: ctx.canvas };
+    switch (type) {
+      case NodeType.Layer:
+        drawLayer(lctx, props);
+        break;
+      case NodeType.Box:
+        drawBox(lctx, props);
+        break;
+      case NodeType.BoxShadow:
+        drawBoxShadow(lctx, props);
+        break;
+      case NodeType.Image:
+        drawImage(lctx, props);
+        break;
+      case NodeType.Points:
+        drawPoints(lctx, props);
+        break;
+      case NodeType.Path:
+        drawPath(lctx, props);
+        break;
+      case NodeType.Rect:
+        drawRect(lctx, props);
+        break;
+      case NodeType.RRect:
+        drawRRect(lctx, props);
+        break;
+      case NodeType.Oval:
+        drawOval(lctx, props);
+        break;
+      case NodeType.Line:
+        drawLine(lctx, props);
+        break;
+      case NodeType.Patch:
+        drawPatch(lctx, props);
+        break;
+      case NodeType.Vertices:
+        drawVertices(lctx, props);
+        break;
+      case NodeType.DiffRect:
+        drawDiffRect(lctx, props);
+        break;
+      case NodeType.Text:
+        drawText(lctx, props);
+        break;
+      case NodeType.TextPath:
+        drawTextPath(lctx, props);
+        break;
+      case NodeType.TextBlob:
+        drawTextBlob(lctx, props);
+        break;
+      case NodeType.Glyphs:
+        drawGlyphs(lctx, props);
+        break;
+      case NodeType.Picture:
+        drawPicture(lctx, props);
+        break;
+      case NodeType.ImageSVG:
+        drawImageSVG(lctx, props);
+        break;
+      case NodeType.Paragraph:
+        drawParagraph(lctx, props);
+        break;
+      case NodeType.Atlas:
+        drawAtlas(lctx, props);
+        break;
+      case NodeType.Circle:
+        drawCircle(lctx, props);
+        break;
+      case NodeType.Fill:
+        drawFill(lctx, props);
+        break;
+      case NodeType.Group:
+        // TODO: do nothing
+        break;
+      default:
+        if (!node.isDeclaration) {
+          console.warn(`Unsupported node type: ${type}`);
+        }
+    }
+  });
   children.forEach((child) => {
     if (!child.isDeclaration) {
       draw(ctx, child);

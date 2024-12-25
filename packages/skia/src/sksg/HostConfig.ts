@@ -8,7 +8,7 @@ import { shallowEq } from "../renderer/typeddash";
 import type { Node } from "./nodes/Node";
 import type { Container } from "./Container";
 
-const DEBUG = true;
+const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
   if (DEBUG) {
     console.log(...args);
@@ -147,9 +147,6 @@ export const sksgHostConfig: SkiaHostConfig = {
   },
 
   appendInitialChild(parentInstance: Instance, child: Instance | TextInstance) {
-    console.log(`has children: ${!!parentInstance.children}`);
-    console.log(`type: ${parentInstance.type}`);
-    console.log(Array.isArray(parentInstance.children));
     parentInstance.children.push(child);
   },
 
