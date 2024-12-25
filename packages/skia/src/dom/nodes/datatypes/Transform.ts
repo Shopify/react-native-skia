@@ -3,6 +3,7 @@ import type { Skia, SkMatrix } from "../../../skia/types";
 import { processTransform } from "../../../skia/types";
 
 export const processTransformProps = (m3: SkMatrix, props: TransformProps) => {
+  "worklet";
   const { transform, origin, matrix } = props;
   if (matrix) {
     if (origin) {

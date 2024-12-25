@@ -47,8 +47,10 @@ export enum PathVerb {
 
 export type PathCommand = number[];
 
-export const isPath = (obj: SkJSIInstance<string> | null): obj is SkPath =>
-  obj !== null && obj.__typename__ === "Path";
+export const isPath = (obj: SkJSIInstance<string> | null): obj is SkPath => {
+  "worklet";
+  return obj !== null && obj.__typename__ === "Path";
+};
 
 export interface SkPath extends SkJSIInstance<"Path"> {
   /**

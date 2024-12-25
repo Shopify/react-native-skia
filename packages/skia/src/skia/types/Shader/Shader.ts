@@ -18,12 +18,15 @@ export interface Uniforms {
   [name: string]: Uniform;
 }
 
-const isVector = (obj: unknown): obj is Vector =>
+const isVector = (obj: unknown): obj is Vector => {
+  "worklet";
   // We have an issue to check property existence on JSI backed instances
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (obj as any).x !== undefined && (obj as any).y !== undefined;
+  return (obj as any).x !== undefined && (obj as any).y !== undefined;
+};
 
 const processValue = (values: number[], value: Uniform) => {
+  "worklet";
   if (typeof value === "number") {
     values.push(value);
   } else if (Array.isArray(value)) {
@@ -40,6 +43,7 @@ export const processUniforms = (
   uniforms: Uniforms,
   builder?: SkRuntimeShaderBuilder
 ) => {
+  "worklet";
   const result: number[] = [];
   const uniformsCount = source.getUniformCount();
   for (let i = 0; i < uniformsCount; i++) {
