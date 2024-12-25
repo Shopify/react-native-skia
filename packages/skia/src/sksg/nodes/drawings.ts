@@ -35,10 +35,10 @@ import type {
 import { saturate } from "../../renderer/processors";
 import type {
   SkCanvas,
-  Skia,
   SkPaint,
   SkPoint,
   SkRSXform,
+  Skia,
 } from "../../skia/types";
 import { BlendMode, FillType, PointMode, VertexMode } from "../../skia/types";
 

@@ -6,6 +6,7 @@ import { NodeType } from "../../dom/types";
 import type { DrawingNodeProps } from "../../dom/types";
 import type { DrawingContext } from "../DrawingContext";
 import { mapKeys } from "../../renderer/typeddash";
+import type { SkImageFilter } from "../../skia/types";
 
 import {
   declareBlurImageFilter,
@@ -195,10 +196,8 @@ const preProcessContext = (
   node: Node<any>
 ) => {
   const shouldRestoreMatrix = ctx.processMatrixAndClipping(props, props.layer);
-  // ctx.declCtx.save();
   processDeclaration(ctx, node);
   const shouldRestorePaint = ctx.processPaint(props);
-  // ctx.declCtx.restore();
   return { shouldRestoreMatrix, shouldRestorePaint };
 };
 
@@ -232,8 +231,34 @@ const materialize = <T extends object>(props: T) => {
   return result;
 };
 
+const drawBackdropFilter = (ctx: DrawingContext, node: Node) => {
+  const { canvas, Skia } = ctx;
+  const child = node.children[0];
+  let imageFilter: SkImageFilter | null = null;
+  if (child.isDeclaration) {
+    ctx.declCtx.save();
+    processDeclaration(ctx, node);
+    const imgf = ctx.declCtx.imageFilters.pop();
+    if (imgf) {
+      imageFilter = imgf;
+    } else {
+      const cf = ctx.declCtx.colorFilters.pop();
+      if (cf) {
+        imageFilter = Skia.ImageFilter.MakeColorFilter(cf, null);
+      }
+    }
+    ctx.declCtx.restore();
+  }
+  canvas.saveLayer(undefined, null, imageFilter);
+  canvas.restore();
+};
+
 export function draw(ctx: DrawingContext, node: Node<any>) {
   const { type, props: rawProps, children } = node;
+  if (type === NodeType.BackdropFilter) {
+    drawBackdropFilter(ctx, node);
+    return;
+  }
   const props = materialize(rawProps);
   const result = preProcessContext(ctx, props, node);
   const paints = ctx.getLocalPaints();
