@@ -3,7 +3,7 @@
 import type { SharedValue } from "react-native-reanimated";
 
 import { NodeType } from "../../dom/types";
-import type { GroupProps } from "../../dom/types";
+import type { DrawingNodeProps } from "../../dom/types";
 import type { DrawingContext } from "../DrawingContext";
 import { mapKeys } from "../../renderer/typeddash";
 
@@ -185,7 +185,7 @@ function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
 
 const preProcessContext = (
   ctx: DrawingContext,
-  props: GroupProps,
+  props: DrawingNodeProps,
   node: Node<any>
 ) => {
   const shouldRestoreMatrix = ctx.processMatrixAndClipping(props, props.layer);

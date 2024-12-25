@@ -6,7 +6,7 @@ import {
   processPath,
   processTransformProps2,
 } from "../dom/nodes";
-import type { ClipDef, GroupProps, PaintProps } from "../dom/types";
+import type { ClipDef, DrawingNodeProps, GroupProps } from "../dom/types";
 import { DeclarationContext } from "../dom/types";
 import {
   BlendMode,
@@ -90,7 +90,12 @@ export class DrawingContext {
     strokeMiter,
     antiAlias,
     dither,
-  }: PaintProps) {
+    paint: paintProp,
+  }: DrawingNodeProps) {
+    if (paintProp) {
+      this.declCtx.paints.push(paintProp);
+      return true;
+    }
     let shouldRestore = false;
     if (
       opacity !== undefined ||
