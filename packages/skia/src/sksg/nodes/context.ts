@@ -77,118 +77,120 @@ interface ContextProcessingResult {
   shouldRestoreMatrix: boolean;
   shouldRestorePaint: boolean;
 }
+function processDeclaration(ctx: DrawingContext, node: Node<any>) {
+  const { type, props } = node;
+  switch (type) {
+    case NodeType.Blend:
+      declareBlend(ctx, props);
+      break;
+    // Shaders
+    case NodeType.Shader:
+      declareShader(ctx, props);
+      break;
+    case NodeType.ImageShader:
+      declareImageShader(ctx, props);
+      break;
+    case NodeType.Turbulence:
+      declareTurbulenceShader(ctx, props);
+      break;
+    case NodeType.LinearGradient:
+      declareLinearGradientShader(ctx, props);
+      break;
+    case NodeType.SweepGradient:
+      declareSweepGradientShader(ctx, props);
+      break;
+    case NodeType.RadialGradient:
+      declareRadialGradientShader(ctx, props);
+      break;
+    case NodeType.TwoPointConicalGradient:
+      declareTwoPointConicalGradientShader(ctx, props);
+      break;
+    case NodeType.FractalNoise:
+      declareFractalNoiseShader(ctx, props);
+      break;
+    case NodeType.ColorShader:
+      declareColorShader(ctx, props);
+      break;
+    // Image Filters
+    case NodeType.BlendImageFilter:
+      declareBlendImageFilter(ctx, props);
+      break;
+    case NodeType.BlurImageFilter:
+      declareBlurImageFilter(ctx, props);
+      break;
+    case NodeType.BlurMaskFilter:
+      declareBlurMaskFilter(ctx, props);
+      break;
+    case NodeType.MorphologyImageFilter:
+      declareMorphologyImageFilter(ctx, props);
+      break;
+    case NodeType.OffsetImageFilter:
+      declareOffsetImageFilter(ctx, props);
+      break;
+    case NodeType.DropShadowImageFilter:
+      declareDropShadowImageFilter(ctx, props);
+      break;
+    case NodeType.DisplacementMapImageFilter:
+      declareDisplacementMapImageFilter(ctx, props);
+      break;
+    // Color Filters
+    case NodeType.BlendColorFilter:
+      declareBlendColorFilter(ctx, props);
+      break;
+    case NodeType.SRGBToLinearGammaColorFilter:
+      declareSRGBToLinearGammaColorFilter(ctx);
+      break;
+    case NodeType.LinearToSRGBGammaColorFilter:
+      declareLinearToSRGBGammaColorFilter(ctx);
+      break;
+    case NodeType.MatrixColorFilter:
+      declareMatrixColorFilter(ctx, props);
+      break;
+    case NodeType.LerpColorFilter:
+      declareLerpColorFilter(ctx, props);
+      break;
+    case NodeType.LumaColorFilter:
+      declareLumaColorFilter(ctx);
+      break;
+    // Path Effects
+    case NodeType.CornerPathEffect:
+      declareCornerPathEffect(ctx, props);
+      break;
+    case NodeType.DiscretePathEffect:
+      declareDiscretePathEffect(ctx, props);
+      break;
+    case NodeType.Path2DPathEffect:
+      declarePath2DPathEffect(ctx, props);
+      break;
+    case NodeType.DashPathEffect:
+      declareDashPathEffect(ctx, props);
+      break;
+    case NodeType.SumPathEffect:
+      declareSumPathEffect(ctx);
+      break;
+    case NodeType.Line2DPathEffect:
+      declareLine2DPathEffect(ctx, props);
+      break;
+    case NodeType.Path1DPathEffect:
+      declarePath1DPathEffect(ctx, props);
+      break;
+    // Paint
+    case NodeType.Paint:
+      declarePaint(ctx, props);
+      break;
+    default:
+      console.log("Unknown declaration node: ", type);
+  }
+}
 
 function processDeclarations(ctx: DrawingContext, root: Node<unknown>) {
   if (root.children.length === 0) {
     return;
   }
   root.children.forEach((node: Node<any>) => {
-    if (!node.isDeclaration) {
-      return;
-    }
-    processDeclarations(ctx, node);
-    const { type, props } = node;
-    switch (type) {
-      case NodeType.Blend:
-        declareBlend(ctx, props);
-        break;
-      // Shaders
-      case NodeType.Shader:
-        declareShader(ctx, props);
-        break;
-      case NodeType.ImageShader:
-        declareImageShader(ctx, props);
-        break;
-      case NodeType.Turbulence:
-        declareTurbulenceShader(ctx, props);
-        break;
-      case NodeType.LinearGradient:
-        declareLinearGradientShader(ctx, props);
-        break;
-      case NodeType.SweepGradient:
-        declareSweepGradientShader(ctx, props);
-        break;
-      case NodeType.RadialGradient:
-        declareRadialGradientShader(ctx, props);
-        break;
-      case NodeType.TwoPointConicalGradient:
-        declareTwoPointConicalGradientShader(ctx, props);
-        break;
-      case NodeType.FractalNoise:
-        declareFractalNoiseShader(ctx, props);
-        break;
-      case NodeType.ColorShader:
-        declareColorShader(ctx, props);
-        break;
-      // Image Filters
-      case NodeType.BlendImageFilter:
-        declareBlendImageFilter(ctx, props);
-        break;
-      case NodeType.BlurImageFilter:
-        declareBlurImageFilter(ctx, props);
-        break;
-      case NodeType.BlurMaskFilter:
-        declareBlurMaskFilter(ctx, props);
-        break;
-      case NodeType.MorphologyImageFilter:
-        declareMorphologyImageFilter(ctx, props);
-        break;
-      case NodeType.OffsetImageFilter:
-        declareOffsetImageFilter(ctx, props);
-        break;
-      case NodeType.DropShadowImageFilter:
-        declareDropShadowImageFilter(ctx, props);
-        break;
-      case NodeType.DisplacementMapImageFilter:
-        declareDisplacementMapImageFilter(ctx, props);
-        break;
-      // Color Filters
-      case NodeType.BlendColorFilter:
-        declareBlendColorFilter(ctx, props);
-        break;
-      case NodeType.SRGBToLinearGammaColorFilter:
-        declareSRGBToLinearGammaColorFilter(ctx);
-        break;
-      case NodeType.LinearToSRGBGammaColorFilter:
-        declareLinearToSRGBGammaColorFilter(ctx);
-        break;
-      case NodeType.MatrixColorFilter:
-        declareMatrixColorFilter(ctx, props);
-        break;
-      case NodeType.LerpColorFilter:
-        declareLerpColorFilter(ctx, props);
-        break;
-      case NodeType.LumaColorFilter:
-        declareLumaColorFilter(ctx);
-        break;
-      // Path Effects
-      case NodeType.CornerPathEffect:
-        declareCornerPathEffect(ctx, props);
-        break;
-      case NodeType.DiscretePathEffect:
-        declareDiscretePathEffect(ctx, props);
-        break;
-      case NodeType.Path2DPathEffect:
-        declarePath2DPathEffect(ctx, props);
-        break;
-      case NodeType.DashPathEffect:
-        declareDashPathEffect(ctx, props);
-        break;
-      case NodeType.SumPathEffect:
-        declareSumPathEffect(ctx);
-        break;
-      case NodeType.Line2DPathEffect:
-        declareLine2DPathEffect(ctx, props);
-        break;
-      case NodeType.Path1DPathEffect:
-        declarePath1DPathEffect(ctx, props);
-        break;
-      // Paint
-      case NodeType.Paint:
-        declarePaint(ctx, props);
-        break;
-      default:
-        console.log("Unknown declaration node: ", type);
+    if (node.isDeclaration) {
+      processDeclarations(ctx, node);
+      processDeclaration(ctx, node);
     }
   });
 }
