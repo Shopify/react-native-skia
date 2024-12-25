@@ -60,7 +60,6 @@ import {
   declareLinearToSRGBGammaColorFilter,
   declareLumaColorFilter,
   declareMatrixColorFilter,
-  declarePaint,
   declareSRGBToLinearGammaColorFilter,
 } from "./colorFilters";
 import {
@@ -72,6 +71,7 @@ import {
   declarePath2DPathEffect,
   declareSumPathEffect,
 } from "./pathEffects";
+import { declarePaint } from "./paint";
 
 interface ContextProcessingResult {
   shouldRestoreMatrix: boolean;
