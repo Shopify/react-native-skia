@@ -119,6 +119,7 @@ export const declareLerpColorFilter = (
   const { t } = props;
   const second = ctx.declCtx.colorFilters.pop();
   const first = ctx.declCtx.colorFilters.pop();
+  console.log({ t, first: !!first, second: !!second });
   if (!first || !second) {
     throw new Error(
       "LerpColorFilterNode: missing two color filters as children"
@@ -135,5 +136,10 @@ export const declareMatrixColorFilter = (
 ) => {
   const { matrix } = props;
   const cf = ctx.Skia.ColorFilter.MakeMatrix(matrix);
+  composeAndPush(ctx, cf);
+};
+
+export const declareLumaColorFilter = (ctx: DrawingContext) => {
+  const cf = ctx.Skia.ColorFilter.MakeLumaColorFilter();
   composeAndPush(ctx, cf);
 };

@@ -58,6 +58,7 @@ import {
   declareBlendColorFilter,
   declareLerpColorFilter,
   declareLinearToSRGBGammaColorFilter,
+  declareLumaColorFilter,
   declareMatrixColorFilter,
   declarePaint,
   declareSRGBToLinearGammaColorFilter,
@@ -123,6 +124,9 @@ function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
       case NodeType.BlendImageFilter:
         declareBlendImageFilter(ctx, props);
         break;
+      case NodeType.BlurImageFilter:
+        declareBlurImageFilter(ctx, props);
+        break;
       case NodeType.BlurMaskFilter:
         declareBlurMaskFilter(ctx, props);
         break;
@@ -154,6 +158,9 @@ function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
       case NodeType.LerpColorFilter:
         declareLerpColorFilter(ctx, props);
         break;
+      case NodeType.LumaColorFilter:
+        declareLumaColorFilter(ctx);
+        break;
       // Path Effects
       case NodeType.CornerPathEffect:
         declareCornerPathEffect(ctx, props);
@@ -179,9 +186,6 @@ function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
       // Paint
       case NodeType.Paint:
         declarePaint(ctx, props);
-        break;
-      case NodeType.BlurImageFilter:
-        declareBlurImageFilter(ctx, props);
         break;
       default:
         console.log("Unknown declaration node: ", type);
