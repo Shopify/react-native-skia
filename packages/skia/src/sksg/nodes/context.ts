@@ -78,7 +78,7 @@ interface ContextProcessingResult {
   shouldRestorePaint: boolean;
 }
 
-function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
+function processDeclarations(ctx: DrawingContext, root: Node<unknown>) {
   if (root.children.length === 0) {
     return;
   }
@@ -86,7 +86,7 @@ function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
     if (!node.isDeclaration) {
       return;
     }
-    processDeclaration(ctx, node);
+    processDeclarations(ctx, node);
     const { type, props } = node;
     switch (type) {
       case NodeType.Blend:
@@ -199,7 +199,7 @@ const preProcessContext = (
   node: Node<any>
 ) => {
   const shouldRestoreMatrix = ctx.processMatrixAndClipping(props, props.layer);
-  processDeclaration(ctx, node);
+  processDeclarations(ctx, node);
   const shouldRestorePaint = ctx.processPaint(props);
   return { shouldRestoreMatrix, shouldRestorePaint };
 };
@@ -240,7 +240,7 @@ const drawBackdropFilter = (ctx: DrawingContext, node: Node) => {
   let imageFilter: SkImageFilter | null = null;
   if (child.isDeclaration) {
     ctx.declCtx.save();
-    processDeclaration(ctx, node);
+    processDeclarations(ctx, node);
     const imgf = ctx.declCtx.imageFilters.pop();
     if (imgf) {
       imageFilter = imgf;
@@ -262,7 +262,7 @@ const drawLayer = (ctx: DrawingContext, node: Node) => {
   if (layer.isDeclaration) {
     const { declCtx } = ctx;
     declCtx.save();
-    processDeclaration(ctx, node);
+    processDeclarations(ctx, node);
     const paint = declCtx.paints.pop();
     declCtx.restore();
     if (paint) {
