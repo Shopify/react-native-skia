@@ -134,6 +134,9 @@ function processDeclaration(ctx: DrawingContext, node: Node<any>) {
       declareDisplacementMapImageFilter(ctx, props);
       break;
     // Color Filters
+    case NodeType.LerpColorFilter:
+      declareLerpColorFilter(ctx, props);
+      break;
     case NodeType.BlendColorFilter:
       declareBlendColorFilter(ctx, props);
       break;
@@ -145,9 +148,6 @@ function processDeclaration(ctx: DrawingContext, node: Node<any>) {
       break;
     case NodeType.MatrixColorFilter:
       declareMatrixColorFilter(ctx, props);
-      break;
-    case NodeType.LerpColorFilter:
-      declareLerpColorFilter(ctx, props);
       break;
     case NodeType.LumaColorFilter:
       declareLumaColorFilter(ctx);
@@ -183,7 +183,7 @@ function processDeclaration(ctx: DrawingContext, node: Node<any>) {
   }
 }
 
-function processDeclarations(ctx: DrawingContext, root: Node<unknown>) {
+function processDeclarations(ctx: DrawingContext, root: Node<any>) {
   if (root.children.length === 0) {
     return;
   }

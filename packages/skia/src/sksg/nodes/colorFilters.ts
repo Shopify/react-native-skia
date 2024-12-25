@@ -119,7 +119,6 @@ export const declareLerpColorFilter = (
   const { t } = props;
   const second = ctx.declCtx.colorFilters.pop();
   const first = ctx.declCtx.colorFilters.pop();
-  console.log({ t, first: !!first, second: !!second });
   if (!first || !second) {
     throw new Error(
       "LerpColorFilterNode: missing two color filters as children"
