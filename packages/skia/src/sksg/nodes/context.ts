@@ -14,6 +14,8 @@ import {
   declareMorphologyImageFilter,
   declareOffsetImageFilter,
   declareDisplacementMapImageFilter,
+  declareBlendImageFilter,
+  declareBlend,
 } from "./imageFilters";
 import type { Node } from "./Node";
 import {
@@ -86,6 +88,9 @@ function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
     processDeclaration(ctx, node);
     const { type, props } = node;
     switch (type) {
+      case NodeType.Blend:
+        declareBlend(ctx, props);
+        break;
       // Shaders
       case NodeType.Shader:
         declareShader(ctx, props);
@@ -115,6 +120,9 @@ function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
         declareColorShader(ctx, props);
         break;
       // Image Filters
+      case NodeType.BlendImageFilter:
+        declareBlendImageFilter(ctx, props);
+        break;
       case NodeType.BlurMaskFilter:
         declareBlurMaskFilter(ctx, props);
         break;

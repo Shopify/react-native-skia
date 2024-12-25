@@ -1,7 +1,9 @@
 "worklet";
 
-import { enumKey, processRadius } from "../../dom/nodes";
+import { composeDeclarations, enumKey, processRadius } from "../../dom/nodes";
 import type {
+  BlendImageFilterProps,
+  BlendProps,
   BlurImageFilterProps,
   BlurMaskFilterProps,
   DeclarationContext,
@@ -72,6 +74,22 @@ const composeAndPush = (ctx: DrawingContext, imgf1: SkImageFilter) => {
   ctx.declCtx.imageFilters.push(imgf);
 };
 
+export const declareBlend = (ctx: DrawingContext, props: BlendProps) => {
+  const { Skia } = ctx;
+  const blend = BlendMode[enumKey(props.mode)];
+  // Blend ImageFilters
+  const imageFilters = ctx.declCtx.imageFilters.popAll();
+  if (imageFilters.length > 0) {
+    const composer = Skia.ImageFilter.MakeBlend.bind(Skia.ImageFilter, blend);
+    ctx.declCtx.imageFilters.push(composeDeclarations(imageFilters, composer));
+  }
+  // Blend Shaders
+  const shaders = ctx.declCtx.shaders.popAll();
+  if (shaders.length > 0) {
+    const composer = Skia.Shader.MakeBlend.bind(Skia.Shader, blend);
+    ctx.declCtx.shaders.push(composeDeclarations(shaders, composer));
+  }
+};
 export const declareBlurMaskFilter = (
   ctx: DrawingContext,
   props: BlurMaskFilterProps
@@ -129,6 +147,20 @@ export const declareOffsetImageFilter = (
 ) => {
   const { x, y } = props;
   const imgf = ctx.Skia.ImageFilter.MakeOffset(x, y, null);
+  composeAndPush(ctx, imgf);
+};
+
+export const declareBlendImageFilter = (
+  ctx: DrawingContext,
+  props: BlendImageFilterProps
+) => {
+  const { mode } = props;
+  const a = ctx.declCtx.imageFilters.pop();
+  const b = ctx.declCtx.imageFilters.pop();
+  if (!a || !b) {
+    throw new Error("BlendImageFilter requires two image filters");
+  }
+  const imgf = ctx.Skia.ImageFilter.MakeBlend(mode, a, b);
   composeAndPush(ctx, imgf);
 };
 
