@@ -97,6 +97,11 @@ export class DrawingContext {
       return true;
     }
     let shouldRestore = false;
+    const colorFilter = this.declCtx.colorFilters.popAllAsOne();
+    const imageFilter = this.declCtx.imageFilters.popAllAsOne();
+    const shader = this.declCtx.shaders.pop();
+    const maskFilter = this.declCtx.maskFilters.pop();
+    const pathEffect = this.declCtx.pathEffects.popAllAsOne();
     if (
       opacity !== undefined ||
       color !== undefined ||
@@ -107,7 +112,12 @@ export class DrawingContext {
       strokeCap !== undefined ||
       strokeMiter !== undefined ||
       antiAlias !== undefined ||
-      dither !== undefined
+      dither !== undefined ||
+      colorFilter !== undefined ||
+      imageFilter !== undefined ||
+      shader !== undefined ||
+      maskFilter !== undefined ||
+      pathEffect !== undefined
     ) {
       if (!shouldRestore) {
         this.save();
@@ -148,11 +158,6 @@ export class DrawingContext {
     if (dither !== undefined) {
       paint.setDither(dither);
     }
-    const colorFilter = this.declCtx.colorFilters.popAllAsOne();
-    const imageFilter = this.declCtx.imageFilters.popAllAsOne();
-    const shader = this.declCtx.shaders.pop();
-    const maskFilter = this.declCtx.maskFilters.pop();
-    const pathEffect = this.declCtx.pathEffects.popAllAsOne();
     if (colorFilter) {
       paint.setColorFilter(colorFilter);
     }

@@ -60,11 +60,8 @@ const input = (ctx: DeclarationContext) => {
 };
 
 const composeAndPush = (ctx: DrawingContext, imgf1: SkImageFilter) => {
-  //ctx.save();
-  //this.decorateChildren(ctx);
   let imgf2 = ctx.declCtx.imageFilters.popAllAsOne();
   const cf = ctx.declCtx.colorFilters.popAllAsOne();
-  //ctx.restore();
   if (cf) {
     imgf2 = ctx.Skia.ImageFilter.MakeCompose(
       imgf2 ?? null,

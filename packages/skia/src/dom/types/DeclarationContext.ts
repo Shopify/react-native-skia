@@ -58,6 +58,9 @@ class Declaration<T> {
   }
 
   popAllAsOne() {
+    if (this.decls.length === 0) {
+      return undefined;
+    }
     if (!this.composer) {
       throw new Error("No composer for this type of declaration");
     }

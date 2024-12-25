@@ -80,8 +80,9 @@ function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
     return;
   }
   root.children.forEach((node: Node<any>) => {
-    ctx.declCtx.save();
-
+    if (!node.isDeclaration) {
+      return;
+    }
     processDeclaration(ctx, node);
     const { type, props } = node;
     switch (type) {
@@ -175,11 +176,8 @@ function processDeclaration(ctx: DrawingContext, root: Node<unknown>) {
         declareBlurImageFilter(ctx, props);
         break;
       default:
-        if (node.isDeclaration) {
-          console.log("Unknown declaration node: ", type);
-        }
+        console.log("Unknown declaration node: ", type);
     }
-    ctx.declCtx.restore();
   });
 }
 
@@ -189,8 +187,10 @@ const preProcessContext = (
   node: Node<any>
 ) => {
   const shouldRestoreMatrix = ctx.processMatrixAndClipping(props, props.layer);
+  // ctx.declCtx.save();
   processDeclaration(ctx, node);
   const shouldRestorePaint = ctx.processPaint(props);
+  // ctx.declCtx.restore();
   return { shouldRestoreMatrix, shouldRestorePaint };
 };
 
