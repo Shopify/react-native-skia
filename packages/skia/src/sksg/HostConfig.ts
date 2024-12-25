@@ -1,13 +1,14 @@
 /*global NodeJS*/
-import type { HostConfig } from "react-reconciler";
+import type { Fiber, HostConfig } from "react-reconciler";
 import { DefaultEventPriority } from "react-reconciler/constants";
 
 import { NodeType } from "../dom/types";
+import { shallowEq } from "../renderer/typeddash";
 
 import type { Node } from "./nodes/Node";
 import type { Container } from "./Container";
 
-const DEBUG = false;
+const DEBUG = true;
 export const debug = (...args: Parameters<typeof console.log>) => {
   if (DEBUG) {
     console.log(...args);
@@ -93,13 +94,11 @@ export const sksgHostConfig: SkiaHostConfig = {
   /**
    * This function is used by the reconciler in order to calculate current time for prioritising work.
    */
-  now: Date.now,
   supportsMutation: false,
   isPrimaryRenderer: false,
   supportsPersistence: true,
   supportsHydration: false,
   //supportsMicrotask: true,
-
   scheduleTimeout: setTimeout,
   cancelTimeout: clearTimeout,
   noTimeout: -1,
@@ -148,6 +147,9 @@ export const sksgHostConfig: SkiaHostConfig = {
   },
 
   appendInitialChild(parentInstance: Instance, child: Instance | TextInstance) {
+    console.log(`has children: ${!!parentInstance.children}`);
+    console.log(`type: ${parentInstance.type}`);
+    console.log(Array.isArray(parentInstance.children));
     parentInstance.children.push(child);
   },
 
@@ -204,9 +206,13 @@ export const sksgHostConfig: SkiaHostConfig = {
     _hostContext: HostContext
   ) {
     debug("prepareUpdate");
+    const propsAreEqual = shallowEq(oldProps, newProps);
+    if (propsAreEqual) {
+      return null;
+    }
     container.unregisterValues(oldProps);
     container.registerValues(newProps);
-    return null;
+    return container;
   },
 
   preparePortalMount: () => {
@@ -214,18 +220,22 @@ export const sksgHostConfig: SkiaHostConfig = {
   },
 
   cloneInstance(
-    instance: Instance,
-    _type: string,
-    _oldProps: Props,
-    props: Props,
+    instance,
+    _updatePayload,
+    _type,
+    _oldProps,
+    newProps,
+    _internalInstanceHandle,
     keepChildren: boolean,
-    newChildSet?: ChildSet
+    _recyclableInstance: null | Instance
   ) {
+    debug("cloneInstance");
+
     return {
       type: instance.type,
-      props,
-      children: keepChildren ? instance.children : newChildSet ?? [],
-      isDeclaration: isDeclaration(instance.type),
+      props: newProps,
+      children: keepChildren ? [...instance.children] : [],
+      isDeclaration: instance.isDeclaration,
     };
   },
 
@@ -259,15 +269,23 @@ export const sksgHostConfig: SkiaHostConfig = {
     debug("cloneHiddenInstance");
     throw new Error("Not yet implemented.");
   },
+
   cloneHiddenTextInstance(_instance: Instance, _text: string): TextInstance {
     debug("cloneHiddenTextInstance");
     throw new Error("Not yet implemented.");
   },
   // see https://github.com/pmndrs/react-three-fiber/pull/2360#discussion_r916356874
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
   getCurrentEventPriority: () => DefaultEventPriority,
   beforeActiveInstanceBlur: () => {},
   afterActiveInstanceBlur: () => {},
   detachDeletedInstance: () => {},
+  getInstanceFromNode: function (_node): Fiber | null | undefined {
+    throw new Error("Function not implemented.");
+  },
+  prepareScopeUpdate: function (_scopeInstance, _instance): void {
+    throw new Error("Function not implemented.");
+  },
+  getInstanceFromScope: function (_scopeInstance): Instance | null {
+    throw new Error("Function not implemented.");
+  },
 };
