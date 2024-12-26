@@ -17,7 +17,7 @@ const SkiaLogoJpeg = require("./assets/skia_logo_jpeg.jpg");
 
 // NotoColorEmoji.ttf is only available on iOS
 const NotoColorEmojiSrc =
-  Platform.OS === "ios"
+  (Platform.OS === "ios" || Platform.OS === "macos")
     ? require("./assets/Roboto-Medium.ttf")
     : require("./assets/NotoColorEmoji.ttf");
 
