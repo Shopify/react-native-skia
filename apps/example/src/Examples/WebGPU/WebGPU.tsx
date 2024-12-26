@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { useFrameCallback } from "react-native-reanimated";
-import { Canvas } from "react-native-wgpu";
+// import { Canvas } from "react-native-wgpu";
 
 import { useLoop } from "../../components/Animations";
 
@@ -24,7 +24,7 @@ export function WebGPU() {
 
   return (
     <View style={style.container}>
-      <Canvas ref={ref} style={style.webgpu} />
+      {/* <Canvas ref={ref} style={style.webgpu} /> */}
     </View>
   );
 }
