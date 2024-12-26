@@ -258,41 +258,37 @@ const drawBackdropFilter = (ctx: DrawingContext, node: Node) => {
   canvas.restore();
 };
 
-const drawLayer = (ctx: DrawingContext, node: Node) => {
-  let hasLayer = false;
-  const [layer, ...children] = node.children;
-  if (layer.isDeclaration) {
-    const { declCtx } = ctx;
-    declCtx.save();
-    processDeclarations(ctx, node);
-    const paint = declCtx.paints.pop();
-    declCtx.restore();
-    if (paint) {
-      hasLayer = true;
-      ctx.canvas.saveLayer(paint);
-    }
-  }
-  children.map((child) => {
-    if (!child.isDeclaration) {
-      draw(ctx, child);
-    }
-  });
-  if (hasLayer) {
-    ctx.canvas.restore();
-  }
-};
-
 export function draw(ctx: DrawingContext, node: Node<any>) {
-  const { type, props: rawProps, children } = node;
   // Special mixed nodes
-  if (type === NodeType.BackdropFilter) {
+  if (node.type === NodeType.BackdropFilter) {
     drawBackdropFilter(ctx, node);
     return;
   }
-  if (type === NodeType.Layer) {
-    drawLayer(ctx, node);
+  if (node.type === NodeType.Layer) {
+    let hasLayer = false;
+    const [layer, ...children] = node.children;
+    if (layer.isDeclaration) {
+      const { declCtx } = ctx;
+      declCtx.save();
+      processDeclarations(ctx, node);
+      const paint = declCtx.paints.pop();
+      declCtx.restore();
+      if (paint) {
+        hasLayer = true;
+        ctx.canvas.saveLayer(paint);
+      }
+    }
+    children.map((child) => {
+      if (!child.isDeclaration) {
+        draw(ctx, child);
+      }
+    });
+    if (hasLayer) {
+      ctx.canvas.restore();
+    }
     return;
   }
+  const { type, props: rawProps, children } = node;
   // Regular nodes
   const props = materialize(rawProps);
   const result = preProcessContext(ctx, props, node);

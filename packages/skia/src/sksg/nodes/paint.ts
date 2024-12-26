@@ -1,3 +1,5 @@
+"worklet";
+
 import { enumKey } from "../../dom/nodes";
 import type { PaintProps } from "../../dom/types";
 import { BlendMode, PaintStyle, StrokeCap, StrokeJoin } from "../../skia/types";
