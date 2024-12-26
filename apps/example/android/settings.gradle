@@ -6,7 +6,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = "react-native-skia-example"
+rootProject.name = "skia-example"
 
 apply(from: {
     def searchDir = rootDir.toPath()

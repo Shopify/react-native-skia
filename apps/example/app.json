@@ -1,10 +1,12 @@
 {
-  "name": "react-native-skia-example",
-  "displayName": "react-native-skia-example",
+  "name": "skia-example",
+  "displayName": "skia-example",
+  "singleApp": "skia-example",
   "components": [
     {
-      "appKey": "react-native-skia-example",
-      "displayName": "react-native-skia-example"
+      "appKey": "skia-example",
+      "displayName": "React Native Skia",
+      "slug": "skia-example"
     }
   ],
   "resources": {
