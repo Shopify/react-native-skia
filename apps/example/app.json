@@ -1,12 +1,94 @@
 {
   "name": "skia-example",
   "displayName": "skia-example",
-  "singleApp": "skia-example",
   "components": [
     {
-      "appKey": "skia-example",
-      "displayName": "React Native Skia",
-      "slug": "skia-example"
+      "appKey": "Aurora",
+      "displayName": "Aurora"
+    },
+    {
+      "appKey": "Boxes",
+      "displayName": "Boxes"
+    },
+    {
+      "appKey": "Breathe",
+      "displayName": "Breathe"
+    },
+    {
+      "appKey": "Filters",
+      "displayName": "Filters"
+    },
+    {
+      "appKey": "FrostedCard",
+      "displayName": "FrostedCard"
+    },
+    {
+      "appKey": "GlassMorphism",
+      "displayName": "GlassMorphism"
+    },
+    {
+      "appKey": "Gooey",
+      "displayName": "Gooey"
+    },
+    {
+      "appKey": "Graphs",
+      "displayName": "Graphs"
+    },
+    {
+      "appKey": "Hue",
+      "displayName": "Hue"
+    },
+    {
+      "appKey": "Matrix",
+      "displayName": "Matrix"
+    },
+    {
+      "appKey": "Neomorphism",
+      "displayName": "Neomorphism"
+    },
+    {
+      "appKey": "Performance",
+      "displayName": "Performance"
+    },
+    {
+      "appKey": "Reanimated",
+      "displayName": "Reanimated"
+    },
+    {
+      "appKey": "Severance",
+      "displayName": "Severance"
+    },
+    {
+      "appKey": "SppedTest",
+      "displayName": "SpeedTest"
+    },
+    {
+      "appKey": "Stickers",
+      "displayName": "Stickers"
+    },
+    {
+      "appKey": "Transitions",
+      "displayName": "Transitions"
+    },
+    {
+      "appKey": "Vertices",
+      "displayName": "Vertices"
+    },
+    {
+      "appKey": "Video",
+      "displayName": "Video"
+    },
+    {
+      "appKey": "Wallet",
+      "displayName": "Wallet"
+    },
+    {
+      "appKey": "Wallpaper",
+      "displayName": "Wallpaper"
+    },
+    {
+      "appKey": "WebGPU",
+      "displayName": "WebGPU"
     }
   ],
   "plugins": [

@@ -10,7 +10,7 @@ import {
 } from "@shopify/react-native-skia";
 import { Platform, Pressable, View, useWindowDimensions } from "react-native";
 import { useDerivedValue, useSharedValue } from "react-native-reanimated";
-import Slider from "@react-native-community/slider";
+// import Slider from "@react-native-community/slider";
 
 // on Web because of CORS we need to use a local video
 const videoURL =
@@ -63,7 +63,7 @@ export const Video = () => {
         </Canvas>
       </Pressable>
       <View style={{ height: 200, backgroundColor: "white" }}>
-        <Slider
+        {/* <Slider
           style={{ width, height: 40 }}
           minimumValue={0}
           maximumValue={1}
@@ -76,7 +76,7 @@ export const Video = () => {
           onSlidingStart={() => {
             paused.value = true;
           }}
-        />
+        /> */}
       </View>
     </View>
   );
