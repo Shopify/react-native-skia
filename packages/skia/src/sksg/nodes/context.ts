@@ -90,10 +90,6 @@ const composeImageFilters = (
 };
 
 function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
-  if (!node.isDeclaration) {
-    node.children.forEach((child) => processDeclarations(ctx, child));
-    return;
-  }
   const { type } = node;
   const props = materialize(node.props);
   switch (type) {
@@ -186,8 +182,14 @@ const preProcessContext = (
   node: Node<any>
 ) => {
   const shouldRestoreMatrix = ctx.processMatrixAndClipping(props, props.layer);
-  processDeclarations(ctx.declCtx, node);
+  ctx.declCtx.save();
+  node.children.forEach((child) => {
+    if (child.isDeclaration) {
+      processDeclarations(ctx.declCtx, child);
+    }
+  });
   const shouldRestorePaint = ctx.processPaint(props);
+  ctx.declCtx.restore();
   return { shouldRestoreMatrix, shouldRestorePaint };
 };
 
