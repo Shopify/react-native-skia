@@ -29,36 +29,36 @@ const makeLerpColorFilter = (children: SkColorFilter[]) => ({
   tag: `Lerp(0.5, ${children[0].tag}, ${children[1].tag})`,
 });
 
+const composeColorFilters = (
+  ctx: DeclarationContext,
+  node: Node<any>,
+  cf: SkColorFilter
+) => {
+  ctx.save();
+  node.children.forEach((child) => processContext(ctx, child));
+  const cf1 = ctx.colorFilters.popAllAsOne();
+  ctx.restore();
+  ctx.colorFilters.push(cf1 ? compose(cf, cf1) : cf);
+};
+
 const processContext = (ctx: DeclarationContext, node: Node<any>) => {
   switch (node.type) {
     case NodeType.Group:
       node.children.forEach((child) => processContext(ctx, child));
       break;
     case NodeType.SRGBToLinearGammaColorFilter: {
-      ctx.save();
-      node.children.forEach((child) => processContext(ctx, child));
-      const cf1 = ctx.colorFilters.popAllAsOne();
-      ctx.restore();
       const cf = makeSRGBToLinearGammaColorFilter();
-      ctx.colorFilters.push(cf1 ? compose(cf, cf1) : cf);
+      composeColorFilters(ctx, node, cf);
       break;
     }
     case NodeType.BlendColorFilter: {
-      ctx.save();
-      node.children.forEach((child) => processContext(ctx, child));
-      const cf1 = ctx.colorFilters.popAllAsOne();
-      ctx.restore();
       const cf = makeBlendColorFilter();
-      ctx.colorFilters.push(cf1 ? compose(cf, cf1) : cf);
+      composeColorFilters(ctx, node, cf);
       break;
     }
     case NodeType.MatrixColorFilter: {
-      ctx.save();
-      node.children.forEach((child) => processContext(ctx, child));
-      const cf1 = ctx.colorFilters.popAllAsOne();
-      ctx.restore();
       const cf = makeMatrixColorFilter();
-      ctx.colorFilters.push(cf1 ? compose(cf, cf1) : cf);
+      composeColorFilters(ctx, node, cf);
       break;
     }
     case NodeType.LerpColorFilter: {
