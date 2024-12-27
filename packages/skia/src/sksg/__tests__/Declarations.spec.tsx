@@ -27,6 +27,20 @@ function compose(a: Filter, b: Filter): Filter {
   return { tag: `Compose(${a.tag}, ${b.tag})` };
 }
 
+const composeFilter = (node: Node<any>, base: Filter) => {
+  const childFilters = node.children
+    .map((child) => createFilterFromTree(child))
+    .filter((f): f is Filter => f !== null);
+
+  // Compose with children if any
+  if (childFilters.length === 0) {
+    return base;
+  } else {
+    // Compose them all with the base
+    return childFilters.reduce((acc, cur) => compose(acc, cur), base);
+  }
+};
+
 export function createFilterFromTree(node: Node<any>): Filter | null {
   if (!node.isDeclaration) {
     //
@@ -46,46 +60,23 @@ export function createFilterFromTree(node: Node<any>): Filter | null {
     // Compose them all in a left-to-right fold
     return childFilters.reduce((acc, cur) => compose(acc, cur));
   } else {
-    //
-    // 2. DECLARATION node logic
-    //
-    //    Depending on the node.type, we need to create the filter differently.
-    //    Some declarations take multiple children (like LerpColorFilter),
-    //    some take exactly one child, some don’t need a child at all.
-    //
-
     switch (node.type) {
       case NodeType.SRGBToLinearGammaColorFilter: {
-        // e.g. SRGB->Linear filter that might have 0 or 1 child
-        // If it has exactly one child, we can compose them.
-        const childFilters = node.children
-          .map((child) => createFilterFromTree(child))
-          .filter((f): f is Filter => f !== null);
-
-        // Base filter
         const base = createSRGBToLinearGammaFilter();
-
-        // Compose with children if any
-        if (childFilters.length === 0) {
-          return base;
-        } else {
-          // Compose them all with the base
-          return childFilters.reduce((acc, cur) => compose(acc, cur), base);
-        }
+        return composeFilter(node, base);
       }
 
       case NodeType.BlendColorFilter: {
-        // In your example, BlendColorFilter might not require children,
-        // but if it did, we’d handle them similarly.
-        // Otherwise, just create it directly:
+        // Base filter
         const { color, mode } = node.props;
-        return createBlendFilter({ color, mode });
+        const base = createBlendFilter({ color, mode });
+        return composeFilter(node, base);
       }
 
       case NodeType.MatrixColorFilter: {
-        // No children needed, just create
         const { values } = node.props;
-        return createMatrixFilter(values);
+        const base = createMatrixFilter(values);
+        return composeFilter(node, base);
       }
 
       case NodeType.LerpColorFilter: {
@@ -233,6 +224,37 @@ describe("Declarations", () => {
     const filter = createFilterFromTree(tree);
     expect(filter).toEqual({
       tag: "Compose(Matrix(), Compose(SRGBToLinearGamma, Lerp(0.5, Matrix(), Matrix())))",
+    });
+  });
+
+  it("should create a filter from a tree 4", () => {
+    const tree: Node = {
+      type: NodeType.Group,
+      isDeclaration: false,
+      props: {},
+      children: [
+        {
+          type: NodeType.MatrixColorFilter,
+          isDeclaration: true,
+          props: {
+            value: [],
+          },
+          children: [
+            {
+              type: NodeType.MatrixColorFilter,
+              isDeclaration: true,
+              props: {
+                value: [],
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+    };
+    const filter = createFilterFromTree(tree);
+    expect(filter).toEqual({
+      tag: "Compose(Matrix(), Matrix())",
     });
   });
 });
