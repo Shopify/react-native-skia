@@ -4,6 +4,12 @@ import type { Node } from "../nodes";
 
 enum DeclarationType {
   ColorFilter,
+  ImageFilter,
+}
+
+interface SkImageFilter {
+  type: DeclarationType.ImageFilter;
+  tag: string;
 }
 
 interface SkColorFilter {
@@ -11,75 +17,106 @@ interface SkColorFilter {
   tag: string;
 }
 
-function createSRGBToLinearGammaFilter(): SkColorFilter {
-  return { type: DeclarationType.ColorFilter, tag: "SRGBToLinearGamma" };
+interface DeclarationContext {
+  colorFilter: SkColorFilter | null;
+  imageFilter: SkImageFilter | null;
+}
+
+// const makeContext = (): DeclarationContext => ({
+//   colorFilter: null,
+//   imageFilter: null,
+// });
+
+function createSRGBToLinearGammaFilter(): DeclarationContext {
+  return {
+    colorFilter: {
+      type: DeclarationType.ColorFilter,
+      tag: "SRGBToLinearGamma",
+    },
+    imageFilter: null,
+  };
 }
 
 function createBlendFilter(opts: {
   color: string;
   mode: string;
-}): SkColorFilter {
+}): DeclarationContext {
   return {
-    type: DeclarationType.ColorFilter,
-    tag: `Blend(${opts.color}, ${opts.mode})`,
+    colorFilter: {
+      type: DeclarationType.ColorFilter,
+      tag: `Blend(${opts.color}, ${opts.mode})`,
+    },
+    imageFilter: null,
   };
 }
 
-function createMatrixFilter(_values: number[]): SkColorFilter {
-  return { type: DeclarationType.ColorFilter, tag: "Matrix()" };
+function createMatrixFilter(_values: number[]): DeclarationContext {
+  return {
+    colorFilter: { type: DeclarationType.ColorFilter, tag: "Matrix()" },
+    imageFilter: null,
+  };
 }
 
 function createLerpFilter(
   t: number,
-  c1: SkColorFilter,
-  c2: SkColorFilter
-): SkColorFilter {
+  c1: DeclarationContext,
+  c2: DeclarationContext
+): DeclarationContext {
+  if (!c1.colorFilter || !c2.colorFilter) {
+    throw new Error("LerpFilter requires valid color filters");
+  }
+
   return {
-    type: DeclarationType.ColorFilter,
-    tag: `Lerp(${t}, ${c1.tag}, ${c2.tag})`,
+    colorFilter: {
+      type: DeclarationType.ColorFilter,
+      tag: `Lerp(${t}, ${c1.colorFilter.tag}, ${c2.colorFilter.tag})`,
+    },
+    imageFilter: null,
   };
 }
 
-// The function that composes two filters into one.
-function compose(a: SkColorFilter, b: SkColorFilter): SkColorFilter {
+function compose(
+  a: DeclarationContext,
+  b: DeclarationContext
+): DeclarationContext {
+  if (!a.colorFilter || !b.colorFilter) {
+    throw new Error("Cannot compose contexts without color filters");
+  }
+
   return {
-    type: DeclarationType.ColorFilter,
-    tag: `Compose(${a.tag}, ${b.tag})`,
+    colorFilter: {
+      type: DeclarationType.ColorFilter,
+      tag: `Compose(${a.colorFilter.tag}, ${b.colorFilter.tag})`,
+    },
+    imageFilter: null,
   };
 }
 
-const composeFilter = (node: Node<any>, base: SkColorFilter) => {
-  const childFilters = node.children
+const composeFilter = (node: Node<any>, base: DeclarationContext) => {
+  const childContexts = node.children
     .map((child) => createFilterFromTree(child))
-    .filter((f): f is SkColorFilter => f !== null);
+    .filter((ctx): ctx is DeclarationContext => ctx !== null);
 
-  // Compose with children if any
-  if (childFilters.length === 0) {
+  if (childContexts.length === 0) {
     return base;
   } else {
-    // Compose them all with the base
-    return childFilters.reduce((acc, cur) => compose(acc, cur), base);
+    return childContexts.reduce((acc, cur) => compose(acc, cur), base);
   }
 };
 
-export function createFilterFromTree(node: Node<any>): SkColorFilter | null {
+export function createFilterFromTree(
+  node: Node<any>
+): DeclarationContext | null {
   if (!node.isDeclaration) {
-    //
-    // 1. GROUP node logic
-    //
-    //    Gather all child filters and compose them together into a single filter.
-    //    If there are no children, we return null (meaning no filter).
-    //
-    const childFilters = node.children
+    const childContexts = node.children
       .map((child) => createFilterFromTree(child))
-      .filter((f): f is SkColorFilter => f !== null);
+      .filter((ctx): ctx is DeclarationContext => ctx !== null);
 
-    if (childFilters.length === 0) {
+    if (childContexts.length === 0) {
       return null;
     }
 
-    // Compose them all in a left-to-right fold
-    return childFilters.reduce((acc, cur) => compose(acc, cur));
+    return childContexts.reduce((acc, cur) => compose(acc, cur));
   } else {
     switch (node.type) {
       case NodeType.SRGBToLinearGammaColorFilter: {
@@ -88,7 +125,6 @@ export function createFilterFromTree(node: Node<any>): SkColorFilter | null {
       }
 
       case NodeType.BlendColorFilter: {
-        // Base filter
         const { color, mode } = node.props;
         const base = createBlendFilter({ color, mode });
         return composeFilter(node, base);
@@ -101,10 +137,6 @@ export function createFilterFromTree(node: Node<any>): SkColorFilter | null {
       }
 
       case NodeType.LerpColorFilter: {
-        // Lerp needs exactly 2 child filters
-        // child 1 => c1
-        // child 2 => c2
-        // then we create a LERP filter out of c1, c2 and t
         if (node.children.length < 2) {
           throw new Error("LerpColorFilter requires exactly 2 children");
         }
@@ -151,11 +183,12 @@ describe("Declarations", () => {
       ],
     };
     const filter = createFilterFromTree(tree);
-    expect(filter).toEqual({
+    expect(filter?.colorFilter).toEqual({
       tag: "Compose(SRGBToLinearGamma, Blend(lightblue, srcIn))",
       type: DeclarationType.ColorFilter,
     });
   });
+
   it("should create a filter from a tree 2", () => {
     const tree: Node = {
       type: NodeType.Group,
@@ -190,7 +223,7 @@ describe("Declarations", () => {
       ],
     };
     const filter = createFilterFromTree(tree);
-    expect(filter).toEqual({
+    expect(filter?.colorFilter).toEqual({
       tag: "Lerp(0.5, Matrix(), Matrix())",
       type: DeclarationType.ColorFilter,
     });
@@ -245,7 +278,7 @@ describe("Declarations", () => {
       ],
     };
     const filter = createFilterFromTree(tree);
-    expect(filter).toEqual({
+    expect(filter?.colorFilter).toEqual({
       tag: "Compose(Matrix(), Compose(SRGBToLinearGamma, Lerp(0.5, Matrix(), Matrix())))",
       type: DeclarationType.ColorFilter,
     });
@@ -277,7 +310,7 @@ describe("Declarations", () => {
       ],
     };
     const filter = createFilterFromTree(tree);
-    expect(filter).toEqual({
+    expect(filter?.colorFilter).toEqual({
       tag: "Compose(Matrix(), Matrix())",
       type: DeclarationType.ColorFilter,
     });
