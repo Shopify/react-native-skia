@@ -2,35 +2,56 @@
 import { NodeType } from "../../dom/types";
 import type { Node } from "../nodes";
 
-interface Filter {
+enum DeclarationType {
+  ColorFilter,
+}
+
+interface SkColorFilter {
+  type: DeclarationType.ColorFilter;
   tag: string;
 }
 
-function createSRGBToLinearGammaFilter(): Filter {
-  return { tag: "SRGBToLinearGamma" };
+function createSRGBToLinearGammaFilter(): SkColorFilter {
+  return { type: DeclarationType.ColorFilter, tag: "SRGBToLinearGamma" };
 }
 
-function createBlendFilter(opts: { color: string; mode: string }): Filter {
-  return { tag: `Blend(${opts.color}, ${opts.mode})` };
+function createBlendFilter(opts: {
+  color: string;
+  mode: string;
+}): SkColorFilter {
+  return {
+    type: DeclarationType.ColorFilter,
+    tag: `Blend(${opts.color}, ${opts.mode})`,
+  };
 }
 
-function createMatrixFilter(_values: number[]): Filter {
-  return { tag: "Matrix()" };
+function createMatrixFilter(_values: number[]): SkColorFilter {
+  return { type: DeclarationType.ColorFilter, tag: "Matrix()" };
 }
 
-function createLerpFilter(t: number, c1: Filter, c2: Filter): Filter {
-  return { tag: `Lerp(${t}, ${c1.tag}, ${c2.tag})` };
+function createLerpFilter(
+  t: number,
+  c1: SkColorFilter,
+  c2: SkColorFilter
+): SkColorFilter {
+  return {
+    type: DeclarationType.ColorFilter,
+    tag: `Lerp(${t}, ${c1.tag}, ${c2.tag})`,
+  };
 }
 
 // The function that composes two filters into one.
-function compose(a: Filter, b: Filter): Filter {
-  return { tag: `Compose(${a.tag}, ${b.tag})` };
+function compose(a: SkColorFilter, b: SkColorFilter): SkColorFilter {
+  return {
+    type: DeclarationType.ColorFilter,
+    tag: `Compose(${a.tag}, ${b.tag})`,
+  };
 }
 
-const composeFilter = (node: Node<any>, base: Filter) => {
+const composeFilter = (node: Node<any>, base: SkColorFilter) => {
   const childFilters = node.children
     .map((child) => createFilterFromTree(child))
-    .filter((f): f is Filter => f !== null);
+    .filter((f): f is SkColorFilter => f !== null);
 
   // Compose with children if any
   if (childFilters.length === 0) {
@@ -41,7 +62,7 @@ const composeFilter = (node: Node<any>, base: Filter) => {
   }
 };
 
-export function createFilterFromTree(node: Node<any>): Filter | null {
+export function createFilterFromTree(node: Node<any>): SkColorFilter | null {
   if (!node.isDeclaration) {
     //
     // 1. GROUP node logic
@@ -51,7 +72,7 @@ export function createFilterFromTree(node: Node<any>): Filter | null {
     //
     const childFilters = node.children
       .map((child) => createFilterFromTree(child))
-      .filter((f): f is Filter => f !== null);
+      .filter((f): f is SkColorFilter => f !== null);
 
     if (childFilters.length === 0) {
       return null;
@@ -132,6 +153,7 @@ describe("Declarations", () => {
     const filter = createFilterFromTree(tree);
     expect(filter).toEqual({
       tag: "Compose(SRGBToLinearGamma, Blend(lightblue, srcIn))",
+      type: DeclarationType.ColorFilter,
     });
   });
   it("should create a filter from a tree 2", () => {
@@ -170,6 +192,7 @@ describe("Declarations", () => {
     const filter = createFilterFromTree(tree);
     expect(filter).toEqual({
       tag: "Lerp(0.5, Matrix(), Matrix())",
+      type: DeclarationType.ColorFilter,
     });
   });
 
@@ -224,6 +247,7 @@ describe("Declarations", () => {
     const filter = createFilterFromTree(tree);
     expect(filter).toEqual({
       tag: "Compose(Matrix(), Compose(SRGBToLinearGamma, Lerp(0.5, Matrix(), Matrix())))",
+      type: DeclarationType.ColorFilter,
     });
   });
 
@@ -255,6 +279,7 @@ describe("Declarations", () => {
     const filter = createFilterFromTree(tree);
     expect(filter).toEqual({
       tag: "Compose(Matrix(), Matrix())",
+      type: DeclarationType.ColorFilter,
     });
   });
 });
