@@ -3,21 +3,11 @@
 import type { SharedValue } from "react-native-reanimated";
 
 import { NodeType } from "../../dom/types";
-import type { DrawingNodeProps } from "../../dom/types";
+import type { DeclarationContext, DrawingNodeProps } from "../../dom/types";
 import type { DrawingContext } from "../DrawingContext";
 import { mapKeys } from "../../renderer/typeddash";
-import type { SkImageFilter } from "../../skia/types";
+import type { SkColorFilter, SkImageFilter } from "../../skia/types";
 
-import {
-  declareBlurImageFilter,
-  declareBlurMaskFilter,
-  declareDropShadowImageFilter,
-  declareMorphologyImageFilter,
-  declareOffsetImageFilter,
-  declareDisplacementMapImageFilter,
-  declareBlendImageFilter,
-  declareBlend,
-} from "./imageFilters";
 import type { Node } from "./Node";
 import {
   drawAtlas,
@@ -44,155 +34,80 @@ import {
   drawVertices,
 } from "./drawings";
 import {
-  declareColorShader,
-  declareFractalNoiseShader,
-  declareImageShader,
-  declareLinearGradientShader,
-  declareRadialGradientShader,
-  declareShader,
-  declareSweepGradientShader,
-  declareTurbulenceShader,
-  declareTwoPointConicalGradientShader,
-} from "./shaders";
-import {
-  declareBlendColorFilter,
-  declareLerpColorFilter,
-  declareLinearToSRGBGammaColorFilter,
-  declareLumaColorFilter,
-  declareMatrixColorFilter,
-  declareSRGBToLinearGammaColorFilter,
+  makeBlendColorFilter,
+  makeLerpColorFilter,
+  makeLinearToSRGBGammaColorFilter,
+  makeLumaColorFilter,
+  makeMatrixColorFilter,
+  makeSRGBToLinearGammaColorFilter,
 } from "./colorFilters";
-import {
-  declareCornerPathEffect,
-  declareDashPathEffect,
-  declareDiscretePathEffect,
-  declareLine2DPathEffect,
-  declarePath1DPathEffect,
-  declarePath2DPathEffect,
-  declareSumPathEffect,
-} from "./pathEffects";
-import { declarePaint } from "./paint";
 
 interface ContextProcessingResult {
   shouldRestoreMatrix: boolean;
   shouldRestorePaint: boolean;
 }
-function processDeclaration(ctx: DrawingContext, node: Node<any>) {
+
+const composeColorFilters = (
+  ctx: DeclarationContext,
+  node: Node<any>,
+  cf: SkColorFilter
+) => {
+  const { Skia } = ctx;
+  ctx.save();
+  node.children.forEach((child) => processDeclarations(ctx, child));
+  const cf1 = ctx.colorFilters.popAllAsOne();
+  ctx.restore();
+  ctx.colorFilters.push(cf1 ? Skia.ColorFilter.MakeCompose(cf, cf1) : cf);
+};
+
+function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
+  if (!node.isDeclaration) {
+    node.children.forEach((child) => processDeclarations(ctx, child));
+    return;
+  }
   const { type, props } = node;
   switch (type) {
-    case NodeType.Blend:
-      declareBlend(ctx, props);
-      break;
-    // Shaders
-    case NodeType.Shader:
-      declareShader(ctx, props);
-      break;
-    case NodeType.ImageShader:
-      declareImageShader(ctx, props);
-      break;
-    case NodeType.Turbulence:
-      declareTurbulenceShader(ctx, props);
-      break;
-    case NodeType.LinearGradient:
-      declareLinearGradientShader(ctx, props);
-      break;
-    case NodeType.SweepGradient:
-      declareSweepGradientShader(ctx, props);
-      break;
-    case NodeType.RadialGradient:
-      declareRadialGradientShader(ctx, props);
-      break;
-    case NodeType.TwoPointConicalGradient:
-      declareTwoPointConicalGradientShader(ctx, props);
-      break;
-    case NodeType.FractalNoise:
-      declareFractalNoiseShader(ctx, props);
-      break;
-    case NodeType.ColorShader:
-      declareColorShader(ctx, props);
-      break;
-    // Image Filters
-    case NodeType.BlendImageFilter:
-      declareBlendImageFilter(ctx, props);
-      break;
-    case NodeType.BlurImageFilter:
-      declareBlurImageFilter(ctx, props);
-      break;
-    case NodeType.BlurMaskFilter:
-      declareBlurMaskFilter(ctx, props);
-      break;
-    case NodeType.MorphologyImageFilter:
-      declareMorphologyImageFilter(ctx, props);
-      break;
-    case NodeType.OffsetImageFilter:
-      declareOffsetImageFilter(ctx, props);
-      break;
-    case NodeType.DropShadowImageFilter:
-      declareDropShadowImageFilter(ctx, props);
-      break;
-    case NodeType.DisplacementMapImageFilter:
-      declareDisplacementMapImageFilter(ctx, props);
-      break;
     // Color Filters
-    case NodeType.LerpColorFilter:
-      declareLerpColorFilter(ctx, props);
+    case NodeType.LerpColorFilter: {
+      node.children.forEach((child) => processDeclarations(ctx, child));
+      const cf = makeLerpColorFilter(ctx, props);
+      ctx.colorFilters.push(cf);
       break;
-    case NodeType.BlendColorFilter:
-      declareBlendColorFilter(ctx, props);
+    }
+    case NodeType.BlendColorFilter: {
+      const cf = makeBlendColorFilter(ctx, props);
+      composeColorFilters(ctx, node, cf);
       break;
-    case NodeType.SRGBToLinearGammaColorFilter:
-      declareSRGBToLinearGammaColorFilter(ctx);
+    }
+    case NodeType.SRGBToLinearGammaColorFilter: {
+      const cf = makeSRGBToLinearGammaColorFilter(ctx);
+      composeColorFilters(ctx, node, cf);
       break;
-    case NodeType.LinearToSRGBGammaColorFilter:
-      declareLinearToSRGBGammaColorFilter(ctx);
+    }
+    case NodeType.LinearToSRGBGammaColorFilter: {
+      const cf = makeLinearToSRGBGammaColorFilter(ctx);
+      composeColorFilters(ctx, node, cf);
       break;
-    case NodeType.MatrixColorFilter:
-      declareMatrixColorFilter(ctx, props);
+    }
+    case NodeType.MatrixColorFilter: {
+      const cf = makeMatrixColorFilter(ctx, props);
+      composeColorFilters(ctx, node, cf);
       break;
-    case NodeType.LumaColorFilter:
-      declareLumaColorFilter(ctx);
+    }
+    case NodeType.LumaColorFilter: {
+      const cf = makeLumaColorFilter(ctx);
+      composeColorFilters(ctx, node, cf);
       break;
+    }
     // Path Effects
-    case NodeType.CornerPathEffect:
-      declareCornerPathEffect(ctx, props);
-      break;
-    case NodeType.DiscretePathEffect:
-      declareDiscretePathEffect(ctx, props);
-      break;
-    case NodeType.Path2DPathEffect:
-      declarePath2DPathEffect(ctx, props);
-      break;
-    case NodeType.DashPathEffect:
-      declareDashPathEffect(ctx, props);
-      break;
-    case NodeType.SumPathEffect:
-      declareSumPathEffect(ctx);
-      break;
-    case NodeType.Line2DPathEffect:
-      declareLine2DPathEffect(ctx, props);
-      break;
-    case NodeType.Path1DPathEffect:
-      declarePath1DPathEffect(ctx, props);
-      break;
+
     // Paint
-    case NodeType.Paint:
-      declarePaint(ctx, props);
-      break;
+    // case NodeType.Paint:
+    //   declarePaint(ctx, props);
+    //   break;
     default:
       console.log("Unknown declaration node: ", type);
   }
-}
-
-function processDeclarations(ctx: DrawingContext, root: Node<any>) {
-  if (root.children.length === 0) {
-    return;
-  }
-  root.children.forEach((node: Node<any>) => {
-    if (node.isDeclaration) {
-      processDeclarations(ctx, node);
-      processDeclaration(ctx, node);
-    }
-  });
 }
 
 const preProcessContext = (
@@ -201,7 +116,7 @@ const preProcessContext = (
   node: Node<any>
 ) => {
   const shouldRestoreMatrix = ctx.processMatrixAndClipping(props, props.layer);
-  processDeclarations(ctx, node);
+  processDeclarations(ctx.declCtx, node);
   const shouldRestorePaint = ctx.processPaint(props);
   return { shouldRestoreMatrix, shouldRestorePaint };
 };
@@ -242,7 +157,7 @@ const drawBackdropFilter = (ctx: DrawingContext, node: Node) => {
   let imageFilter: SkImageFilter | null = null;
   if (child.isDeclaration) {
     ctx.declCtx.save();
-    processDeclarations(ctx, node);
+    processDeclarations(ctx.declCtx, node);
     const imgf = ctx.declCtx.imageFilters.pop();
     if (imgf) {
       imageFilter = imgf;
@@ -270,7 +185,7 @@ export function draw(ctx: DrawingContext, node: Node<any>) {
     if (layer.isDeclaration) {
       const { declCtx } = ctx;
       declCtx.save();
-      processDeclarations(ctx, node);
+      processDeclarations(ctx.declCtx, node);
       const paint = declCtx.paints.pop();
       declCtx.restore();
       if (paint) {
