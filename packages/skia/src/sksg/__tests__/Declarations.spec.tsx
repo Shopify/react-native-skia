@@ -3,7 +3,11 @@ import { NodeType } from "../../dom/types";
 import type { Node } from "../nodes";
 
 import type { SkColorFilter } from "./MockDeclaration";
-import { DeclarationContext, DeclarationType } from "./MockDeclaration";
+import {
+  compose,
+  DeclarationContext,
+  DeclarationType,
+} from "./MockDeclaration";
 
 const makeSRGBToLinearGammaColorFilter = () => ({
   type: DeclarationType.ColorFilter as const,
@@ -31,21 +35,30 @@ const processContext = (ctx: DeclarationContext, node: Node<any>) => {
       node.children.forEach((child) => processContext(ctx, child));
       break;
     case NodeType.SRGBToLinearGammaColorFilter: {
+      ctx.save();
       node.children.forEach((child) => processContext(ctx, child));
+      const cf1 = ctx.colorFilters.popAllAsOne();
+      ctx.restore();
       const cf = makeSRGBToLinearGammaColorFilter();
-      ctx.colorFilters.push(cf);
+      ctx.colorFilters.push(cf1 ? compose(cf, cf1) : cf);
       break;
     }
     case NodeType.BlendColorFilter: {
+      ctx.save();
       node.children.forEach((child) => processContext(ctx, child));
+      const cf1 = ctx.colorFilters.popAllAsOne();
+      ctx.restore();
       const cf = makeBlendColorFilter();
-      ctx.colorFilters.push(cf);
+      ctx.colorFilters.push(cf1 ? compose(cf, cf1) : cf);
       break;
     }
     case NodeType.MatrixColorFilter: {
+      ctx.save();
       node.children.forEach((child) => processContext(ctx, child));
+      const cf1 = ctx.colorFilters.popAllAsOne();
+      ctx.restore();
       const cf = makeMatrixColorFilter();
-      ctx.colorFilters.push(cf);
+      ctx.colorFilters.push(cf1 ? compose(cf, cf1) : cf);
       break;
     }
     case NodeType.LerpColorFilter: {
@@ -84,7 +97,6 @@ describe("Declarations", () => {
     };
     const ctx = new DeclarationContext();
     processContext(ctx, tree);
-    expect(ctx.colorFilters.decls.length).toBe(2);
     const cf = ctx.colorFilters.popAllAsOne();
     expect(cf).toBeDefined();
     expect(cf!.tag).toBe("Compose(SRGBToLinearGamma, Blend)");
