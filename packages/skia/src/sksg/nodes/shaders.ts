@@ -10,6 +10,7 @@ import {
 } from "../../dom/nodes";
 import type {
   ColorProps,
+  DeclarationContext,
   FractalNoiseProps,
   ImageShaderProps,
   LinearGradientProps,
@@ -25,28 +26,30 @@ import {
   processUniforms,
   TileMode,
 } from "../../skia/types";
-import type { DrawingContext } from "../DrawingContext";
 
-export const declareShader = (ctx: DrawingContext, props: ShaderProps) => {
+export const declareShader = (ctx: DeclarationContext, props: ShaderProps) => {
   const { source, uniforms, ...transform } = props;
   const m3 = ctx.Skia.Matrix();
   processTransformProps(m3, transform);
   const shader = source.makeShaderWithChildren(
     processUniforms(source, uniforms),
-    ctx.declCtx.shaders.popAll(),
+    ctx.shaders.popAll(),
     m3
   );
-  ctx.declCtx.shaders.push(shader);
+  ctx.shaders.push(shader);
 };
 
-export const declareColorShader = (ctx: DrawingContext, props: ColorProps) => {
+export const declareColorShader = (
+  ctx: DeclarationContext,
+  props: ColorProps
+) => {
   const { color } = props;
   const shader = ctx.Skia.Shader.MakeColor(ctx.Skia.Color(color));
-  ctx.declCtx.shaders.push(shader);
+  ctx.shaders.push(shader);
 };
 
 export const declareFractalNoiseShader = (
-  ctx: DrawingContext,
+  ctx: DeclarationContext,
   props: FractalNoiseProps
 ) => {
   const { freqX, freqY, octaves, seed, tileWidth, tileHeight } = props;
@@ -58,11 +61,11 @@ export const declareFractalNoiseShader = (
     tileWidth,
     tileHeight
   );
-  ctx.declCtx.shaders.push(shader);
+  ctx.shaders.push(shader);
 };
 
 export const declareTwoPointConicalGradientShader = (
-  ctx: DrawingContext,
+  ctx: DeclarationContext,
   props: TwoPointConicalGradientProps
 ) => {
   const { startR, endR, start, end } = props;
@@ -81,11 +84,11 @@ export const declareTwoPointConicalGradientShader = (
     localMatrix,
     flags
   );
-  ctx.declCtx.shaders.push(shader);
+  ctx.shaders.push(shader);
 };
 
 export const declareRadialGradientShader = (
-  ctx: DrawingContext,
+  ctx: DeclarationContext,
   props: RadialGradientProps
 ) => {
   const { c, r } = props;
@@ -102,11 +105,11 @@ export const declareRadialGradientShader = (
     localMatrix,
     flags
   );
-  ctx.declCtx.shaders.push(shader);
+  ctx.shaders.push(shader);
 };
 
 export const declareSweepGradientShader = (
-  ctx: DrawingContext,
+  ctx: DeclarationContext,
   props: SweepGradientProps
 ) => {
   const { c, start, end } = props;
@@ -125,11 +128,11 @@ export const declareSweepGradientShader = (
     start,
     end
   );
-  ctx.declCtx.shaders.push(shader);
+  ctx.shaders.push(shader);
 };
 
 export const declareLinearGradientShader = (
-  ctx: DrawingContext,
+  ctx: DeclarationContext,
   props: LinearGradientProps
 ) => {
   const { start, end } = props;
@@ -146,11 +149,11 @@ export const declareLinearGradientShader = (
     localMatrix,
     flags
   );
-  ctx.declCtx.shaders.push(shader);
+  ctx.shaders.push(shader);
 };
 
 export const declareTurbulenceShader = (
-  ctx: DrawingContext,
+  ctx: DeclarationContext,
   props: TurbulenceProps
 ) => {
   const { freqX, freqY, octaves, seed, tileWidth, tileHeight } = props;
@@ -162,11 +165,11 @@ export const declareTurbulenceShader = (
     tileWidth,
     tileHeight
   );
-  ctx.declCtx.shaders.push(shader);
+  ctx.shaders.push(shader);
 };
 
 export const declareImageShader = (
-  ctx: DrawingContext,
+  ctx: DeclarationContext,
   props: ImageShaderProps
 ) => {
   const { fit, image, tx, ty, fm, mm, ...imageShaderProps } = props;
@@ -196,5 +199,5 @@ export const declareImageShader = (
     MipmapMode[enumKey(mm)],
     lm
   );
-  ctx.declCtx.shaders.push(shader);
+  ctx.shaders.push(shader);
 };

@@ -49,6 +49,17 @@ import {
   makeRuntimeShaderImageFilter,
 } from "./imageFilters";
 import { materialize } from "./utils";
+import {
+  declareColorShader,
+  declareFractalNoiseShader,
+  declareImageShader,
+  declareLinearGradientShader,
+  declareRadialGradientShader,
+  declareShader,
+  declareSweepGradientShader,
+  declareTurbulenceShader,
+  declareTwoPointConicalGradientShader,
+} from "./shaders";
 
 interface ContextProcessingResult {
   shouldRestoreMatrix: boolean;
@@ -127,6 +138,43 @@ function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
     case NodeType.LumaColorFilter: {
       const cf = makeLumaColorFilter(ctx);
       composeColorFilters(ctx, node, cf);
+      break;
+    }
+    // Shaders
+    case NodeType.Shader: {
+      declareShader(ctx, props);
+      break;
+    }
+    case NodeType.ImageShader: {
+      declareImageShader(ctx, props);
+      break;
+    }
+    case NodeType.ColorShader: {
+      declareColorShader(ctx, props);
+      break;
+    }
+    case NodeType.Turbulence: {
+      declareTurbulenceShader(ctx, props);
+      break;
+    }
+    case NodeType.FractalNoise: {
+      declareFractalNoiseShader(ctx, props);
+      break;
+    }
+    case NodeType.LinearGradient: {
+      declareLinearGradientShader(ctx, props);
+      break;
+    }
+    case NodeType.RadialGradient: {
+      declareRadialGradientShader(ctx, props);
+      break;
+    }
+    case NodeType.SweepGradient: {
+      declareSweepGradientShader(ctx, props);
+      break;
+    }
+    case NodeType.TwoPointConicalGradient: {
+      declareTwoPointConicalGradientShader(ctx, props);
       break;
     }
     // Image Filters
