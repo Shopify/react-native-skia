@@ -1,9 +1,8 @@
 "worklet";
 
-import { composeDeclarations, enumKey, processRadius } from "../../dom/nodes";
+import { enumKey, processRadius } from "../../dom/nodes";
 import type {
   BlendImageFilterProps,
-  BlendProps,
   BlurImageFilterProps,
   BlurMaskFilterProps,
   DeclarationContext,
@@ -11,10 +10,16 @@ import type {
   DropShadowImageFilterProps,
   MorphologyImageFilterProps,
   OffsetImageFilterProps,
+  RuntimeShaderImageFilterProps,
 } from "../../dom/types";
 import type { SkColor, Skia, SkImageFilter } from "../../skia/types";
-import { BlendMode, BlurStyle, ColorChannel, TileMode } from "../../skia/types";
-import type { DrawingContext } from "../DrawingContext";
+import {
+  BlendMode,
+  BlurStyle,
+  ColorChannel,
+  processUniforms,
+  TileMode,
+} from "../../skia/types";
 
 export enum MorphologyOperator {
   Erode,
@@ -61,54 +66,20 @@ const input = (ctx: DeclarationContext) => {
   return ctx.imageFilters.pop() ?? null;
 };
 
-const composeAndPush = (ctx: DrawingContext, imgf1: SkImageFilter) => {
-  let imgf2 = ctx.declCtx.imageFilters.popAllAsOne();
-  const cf = ctx.declCtx.colorFilters.popAllAsOne();
-  if (cf) {
-    imgf2 = ctx.Skia.ImageFilter.MakeCompose(
-      imgf2 ?? null,
-      ctx.Skia.ImageFilter.MakeColorFilter(cf, null)
-    );
-  }
-  const imgf = imgf2 ? ctx.Skia.ImageFilter.MakeCompose(imgf1, imgf2) : imgf1;
-  ctx.declCtx.imageFilters.push(imgf);
-};
-
-export const declareBlend = (ctx: DrawingContext, props: BlendProps) => {
-  const { Skia } = ctx;
-  const blend = BlendMode[enumKey(props.mode)];
-  // Blend ImageFilters
-  const imageFilters = ctx.declCtx.imageFilters.popAll();
-  if (imageFilters.length > 0) {
-    const composer = Skia.ImageFilter.MakeBlend.bind(Skia.ImageFilter, blend);
-    ctx.declCtx.imageFilters.push(composeDeclarations(imageFilters, composer));
-  }
-  // Blend Shaders
-  const shaders = ctx.declCtx.shaders.popAll();
-  if (shaders.length > 0) {
-    const composer = Skia.Shader.MakeBlend.bind(Skia.Shader, blend);
-    ctx.declCtx.shaders.push(composeDeclarations(shaders, composer));
-  }
-};
-export const declareBlurMaskFilter = (
-  ctx: DrawingContext,
-  props: BlurMaskFilterProps
+export const makeOffsetImageFilter = (
+  ctx: DeclarationContext,
+  props: OffsetImageFilterProps
 ) => {
-  const { style, blur, respectCTM } = props;
-  const mf = ctx.Skia.MaskFilter.MakeBlur(
-    BlurStyle[enumKey(style)],
-    blur,
-    respectCTM
-  );
-  ctx.declCtx.maskFilters.push(mf);
+  const { x, y } = props;
+  return ctx.Skia.ImageFilter.MakeOffset(x, y, null);
 };
 
 export const declareDisplacementMapImageFilter = (
-  ctx: DrawingContext,
+  ctx: DeclarationContext,
   props: DisplacementMapImageFilterProps
 ) => {
   const { channelX, channelY, scale } = props;
-  const shader = ctx.declCtx.shaders.pop();
+  const shader = ctx.shaders.pop();
   if (!shader) {
     throw new Error("DisplacementMap expects a shader as child");
   }
@@ -118,13 +89,28 @@ export const declareDisplacementMapImageFilter = (
     ColorChannel[enumKey(channelY)],
     scale,
     map,
-    input(ctx.declCtx)
+    input(ctx)
   );
-  ctx.declCtx.imageFilters.push(imgf);
+  ctx.imageFilters.push(imgf);
 };
 
-export const declareDropShadowImageFilter = (
-  ctx: DrawingContext,
+export const makeBlurImageFilter = (
+  ctx: DeclarationContext,
+  props: BlurImageFilterProps
+) => {
+  const { mode, blur } = props;
+  const sigma = processRadius(ctx.Skia, blur);
+  const imgf = ctx.Skia.ImageFilter.MakeBlur(
+    sigma.x,
+    sigma.y,
+    TileMode[enumKey(mode)],
+    input(ctx)
+  );
+  return imgf;
+};
+
+export const makeDropShadowImageFilter = (
+  ctx: DeclarationContext,
   props: DropShadowImageFilterProps
 ) => {
   const { dx, dy, blur, shadowOnly, color: cl, inner } = props;
@@ -137,59 +123,62 @@ export const declareDropShadowImageFilter = (
       ? ctx.Skia.ImageFilter.MakeDropShadowOnly.bind(ctx.Skia.ImageFilter)
       : ctx.Skia.ImageFilter.MakeDropShadow.bind(ctx.Skia.ImageFilter);
   }
-  const imgf = factory(dx, dy, blur, blur, color, input(ctx.declCtx));
-  composeAndPush(ctx, imgf);
+  const imgf = factory(dx, dy, blur, blur, color, input(ctx));
+  return imgf;
 };
 
-export const declareOffsetImageFilter = (
-  ctx: DrawingContext,
-  props: OffsetImageFilterProps
-) => {
-  const { x, y } = props;
-  const imgf = ctx.Skia.ImageFilter.MakeOffset(x, y, null);
-  composeAndPush(ctx, imgf);
-};
-
-export const declareBlendImageFilter = (
-  ctx: DrawingContext,
-  props: BlendImageFilterProps
-) => {
-  const { mode } = props;
-  const a = ctx.declCtx.imageFilters.pop();
-  const b = ctx.declCtx.imageFilters.pop();
-  if (!a || !b) {
-    throw new Error("BlendImageFilter requires two image filters");
-  }
-  const imgf = ctx.Skia.ImageFilter.MakeBlend(mode, a, b);
-  composeAndPush(ctx, imgf);
-};
-
-export const declareMorphologyImageFilter = (
-  ctx: DrawingContext,
+export const makeMorphologyImageFilter = (
+  ctx: DeclarationContext,
   props: MorphologyImageFilterProps
 ) => {
   const { operator } = props;
   const r = processRadius(ctx.Skia, props.radius);
   let imgf;
   if (MorphologyOperator[enumKey(operator)] === MorphologyOperator.Erode) {
-    imgf = ctx.Skia.ImageFilter.MakeErode(r.x, r.y, input(ctx.declCtx));
+    imgf = ctx.Skia.ImageFilter.MakeErode(r.x, r.y, input(ctx));
   } else {
-    imgf = ctx.Skia.ImageFilter.MakeDilate(r.x, r.y, input(ctx.declCtx));
+    imgf = ctx.Skia.ImageFilter.MakeDilate(r.x, r.y, input(ctx));
   }
-  composeAndPush(ctx, imgf);
+  return imgf;
 };
 
-export const declareBlurImageFilter = (
-  ctx: DrawingContext,
-  props: BlurImageFilterProps
+export const makeRuntimeShaderImageFilter = (
+  ctx: DeclarationContext,
+  props: RuntimeShaderImageFilterProps
 ) => {
-  const { mode, blur } = props;
+  const { source, uniforms } = props;
+  const rtb = ctx.Skia.RuntimeShaderBuilder(source);
+  if (uniforms) {
+    processUniforms(source, uniforms, rtb);
+  }
+  const imgf = ctx.Skia.ImageFilter.MakeRuntimeShader(rtb, null, input(ctx));
+  return imgf;
+};
+
+export const declareBlendImageFilter = (
+  ctx: DeclarationContext,
+  props: BlendImageFilterProps
+) => {
+  const { mode } = props;
+  const a = ctx.imageFilters.pop();
+  const b = ctx.imageFilters.pop();
+  if (!a || !b) {
+    throw new Error("BlendImageFilter requires two image filters");
+  }
+  const imgf = ctx.Skia.ImageFilter.MakeBlend(mode, a, b);
+  ctx.imageFilters.push(imgf);
+};
+
+export const declareBlurMaskFilter = (
+  ctx: DeclarationContext,
+  props: BlurMaskFilterProps
+) => {
+  const { blur, style, respectCTM } = props;
   const sigma = processRadius(ctx.Skia, blur);
-  const imgf = ctx.Skia.ImageFilter.MakeBlur(
+  const mf = ctx.Skia.MaskFilter.MakeBlur(
     sigma.x,
-    sigma.y,
-    TileMode[enumKey(mode)],
-    input(ctx.declCtx)
+    BlurStyle[enumKey(style)],
+    respectCTM
   );
-  composeAndPush(ctx, imgf);
+  ctx.maskFilters.push(mf);
 };

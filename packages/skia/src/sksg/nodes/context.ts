@@ -1,11 +1,8 @@
 "worklet";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { SharedValue } from "react-native-reanimated";
-
 import { NodeType } from "../../dom/types";
 import type { DeclarationContext, DrawingNodeProps } from "../../dom/types";
 import type { DrawingContext } from "../DrawingContext";
-import { mapKeys } from "../../renderer/typeddash";
 import type { SkColorFilter, SkImageFilter } from "../../skia/types";
 
 import type { Node } from "./Node";
@@ -34,13 +31,24 @@ import {
   drawVertices,
 } from "./drawings";
 import {
+  declareLerpColorFilter,
   makeBlendColorFilter,
-  makeLerpColorFilter,
   makeLinearToSRGBGammaColorFilter,
   makeLumaColorFilter,
   makeMatrixColorFilter,
   makeSRGBToLinearGammaColorFilter,
 } from "./colorFilters";
+import {
+  declareBlendImageFilter,
+  declareBlurMaskFilter,
+  declareDisplacementMapImageFilter,
+  makeBlurImageFilter,
+  makeDropShadowImageFilter,
+  makeMorphologyImageFilter,
+  makeOffsetImageFilter,
+  makeRuntimeShaderImageFilter,
+} from "./imageFilters";
+import { materialize } from "./utils";
 
 interface ContextProcessingResult {
   shouldRestoreMatrix: boolean;
@@ -60,18 +68,44 @@ const composeColorFilters = (
   ctx.colorFilters.push(cf1 ? Skia.ColorFilter.MakeCompose(cf, cf1) : cf);
 };
 
+const composeImageFilters = (
+  ctx: DeclarationContext,
+  node: Node<any>,
+  imgf1: SkImageFilter
+) => {
+  const { Skia } = ctx;
+  ctx.save();
+  node.children.forEach((child) => processDeclarations(ctx, child));
+  let imgf2 = ctx.imageFilters.popAllAsOne();
+  const cf = ctx.colorFilters.popAllAsOne();
+  ctx.restore();
+  if (cf) {
+    imgf2 = Skia.ImageFilter.MakeCompose(
+      imgf2 ?? null,
+      Skia.ImageFilter.MakeColorFilter(cf, null)
+    );
+  }
+  const imgf = imgf2 ? Skia.ImageFilter.MakeCompose(imgf1, imgf2) : imgf1;
+  ctx.imageFilters.push(imgf);
+};
+
 function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
   if (!node.isDeclaration) {
     node.children.forEach((child) => processDeclarations(ctx, child));
     return;
   }
-  const { type, props } = node;
+  const { type } = node;
+  const props = materialize(node.props);
   switch (type) {
+    // Mask Filter
+    case NodeType.BlurMaskFilter: {
+      declareBlurMaskFilter(ctx, props);
+      break;
+    }
     // Color Filters
     case NodeType.LerpColorFilter: {
       node.children.forEach((child) => processDeclarations(ctx, child));
-      const cf = makeLerpColorFilter(ctx, props);
-      ctx.colorFilters.push(cf);
+      declareLerpColorFilter(ctx, props);
       break;
     }
     case NodeType.BlendColorFilter: {
@@ -97,6 +131,42 @@ function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
     case NodeType.LumaColorFilter: {
       const cf = makeLumaColorFilter(ctx);
       composeColorFilters(ctx, node, cf);
+      break;
+    }
+    // Image Filters
+    case NodeType.BlurImageFilter: {
+      const imgf = makeBlurImageFilter(ctx, props);
+      composeImageFilters(ctx, node, imgf);
+      break;
+    }
+    case NodeType.OffsetImageFilter: {
+      const imgf = makeOffsetImageFilter(ctx, props);
+      composeImageFilters(ctx, node, imgf);
+      break;
+    }
+    case NodeType.DisplacementMapImageFilter: {
+      node.children.forEach((child) => processDeclarations(ctx, child));
+      declareDisplacementMapImageFilter(ctx, props);
+      break;
+    }
+    case NodeType.DropShadowImageFilter: {
+      const imgf = makeDropShadowImageFilter(ctx, props);
+      composeImageFilters(ctx, node, imgf);
+      break;
+    }
+    case NodeType.MorphologyImageFilter: {
+      const imgf = makeMorphologyImageFilter(ctx, props);
+      composeImageFilters(ctx, node, imgf);
+      break;
+    }
+    case NodeType.BlendImageFilter: {
+      node.children.forEach((child) => processDeclarations(ctx, child));
+      declareBlendImageFilter(ctx, props);
+      break;
+    }
+    case NodeType.RuntimeShaderImageFilter: {
+      const imgf = makeRuntimeShaderImageFilter(ctx, props);
+      composeImageFilters(ctx, node, imgf);
       break;
     }
     // Path Effects
@@ -131,24 +201,6 @@ const postProcessContext = (
   if (shouldRestorePaint) {
     ctx.restore();
   }
-};
-
-export const isSharedValue = <T = unknown>(
-  value: unknown
-): value is SharedValue<T> => {
-  // We cannot use `in` operator here because `value` could be a HostObject and therefore we cast.
-  return (value as Record<string, unknown>)?._isReanimatedSharedValue === true;
-};
-
-const materialize = <T extends object>(props: T) => {
-  const result: T = Object.assign({}, props);
-  mapKeys(result).forEach((key) => {
-    const value = result[key];
-    if (isSharedValue(value)) {
-      result[key] = value.value as any;
-    }
-  });
-  return result;
 };
 
 const drawBackdropFilter = (ctx: DrawingContext, node: Node) => {

@@ -29,7 +29,7 @@ export const makeLinearToSRGBGammaColorFilter = (ctx: DeclarationContext) => {
   return cf;
 };
 
-export const makeLerpColorFilter = (
+export const declareLerpColorFilter = (
   ctx: DeclarationContext,
   props: LerpColorFilterProps
 ) => {
@@ -41,7 +41,8 @@ export const makeLerpColorFilter = (
       "LerpColorFilterNode: missing two color filters as children"
     );
   }
-  return ctx.Skia.ColorFilter.MakeLerp(t, first, second);
+  const cf = ctx.Skia.ColorFilter.MakeLerp(t, first, second);
+  ctx.colorFilters.push(cf);
 };
 
 export const makeMatrixColorFilter = (
