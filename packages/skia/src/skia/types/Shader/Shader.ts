@@ -1,3 +1,5 @@
+"worklet";
+
 import type { SkJSIInstance } from "../JsiInstance";
 import type { Vector } from "../Point";
 import type { SkRuntimeEffect, SkRuntimeShaderBuilder } from "../RuntimeEffect";
@@ -19,14 +21,12 @@ export interface Uniforms {
 }
 
 const isVector = (obj: unknown): obj is Vector => {
-  "worklet";
   // We have an issue to check property existence on JSI backed instances
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (obj as any).x !== undefined && (obj as any).y !== undefined;
 };
 
-const processValue = (values: number[], value: Uniform) => {
-  "worklet";
+function processValue(values: number[], value: Uniform) {
   if (typeof value === "number") {
     values.push(value);
   } else if (Array.isArray(value)) {
@@ -36,14 +36,13 @@ const processValue = (values: number[], value: Uniform) => {
   } else if (value instanceof Float32Array) {
     values.push(...value);
   }
-};
+}
 
 export const processUniforms = (
   source: SkRuntimeEffect,
   uniforms: Uniforms,
   builder?: SkRuntimeShaderBuilder
 ) => {
-  "worklet";
   const result: number[] = [];
   const uniformsCount = source.getUniformCount();
   for (let i = 0; i < uniformsCount; i++) {
