@@ -174,9 +174,8 @@ export const declareBlurMaskFilter = (
   props: BlurMaskFilterProps
 ) => {
   const { blur, style, respectCTM } = props;
-  const sigma = processRadius(ctx.Skia, blur);
   const mf = ctx.Skia.MaskFilter.MakeBlur(
-    sigma.x,
+    blur,
     BlurStyle[enumKey(style)],
     respectCTM
   );
