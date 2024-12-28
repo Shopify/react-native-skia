@@ -220,6 +220,8 @@ interface SerializedNode {
 const serializeSkOjects = (obj: any): any => {
   if (typeof obj === "function") {
     return { __typename__: "Function", source: `${obj.toString()}` };
+  } else if (obj instanceof Float32Array) {
+    return { __typename__: "Float32Array", value: Array.from(obj) };
   } else if (Array.isArray(obj)) {
     return obj.map((item) => serializeSkOjects(item));
   } else if (obj && typeof obj === "object" && "__typename__" in obj) {
@@ -294,6 +296,14 @@ const serializeSkOjects = (obj: any): any => {
         ty: obj.ty,
       };
     }
+  } else if (obj && typeof obj === "object") {
+    const result = Object.keys(obj).reduce((acc, key) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      acc[key] = serializeSkOjects(obj[key]);
+      return acc;
+    }, {});
+    return result;
   }
   return obj;
 };
