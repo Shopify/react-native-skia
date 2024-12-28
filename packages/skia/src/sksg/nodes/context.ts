@@ -347,7 +347,7 @@ export function draw(ctx: DrawingContext, node: Node<any>) {
     const lctx = { paint, Skia: ctx.Skia, canvas: ctx.canvas };
     switch (type) {
       case NodeType.Box:
-        drawBox(lctx, props);
+        drawBox(lctx, props, node.children);
         break;
       case NodeType.BoxShadow:
         drawBoxShadow(lctx, props);
