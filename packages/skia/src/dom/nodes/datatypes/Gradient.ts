@@ -1,3 +1,5 @@
+"worklet";
+
 import type { Skia, SkRect, Transforms3d, Vector } from "../../../skia/types";
 import { TileMode } from "../../../skia/types";
 import type { GradientProps, ImageShaderProps } from "../../types";
@@ -32,7 +34,6 @@ export const getRect = (
   Skia: Skia,
   props: Omit<ImageShaderProps, "tx" | "ty" | "fm" | "mm" | "fit" | "image">
 ): SkRect | undefined => {
-  "worklet";
   const { x, y, width, height } = props;
   if (props.rect) {
     return props.rect;

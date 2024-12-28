@@ -76,27 +76,27 @@ interface ContextProcessingResult {
   shouldRestorePaint: boolean;
 }
 
-const composeColorFilters = (
+function composeColorFilters(
   ctx: DeclarationContext,
-  node: Node<any>,
-  cf: SkColorFilter
-) => {
+  cf: SkColorFilter,
+  processChildren: () => void
+) {
   const { Skia } = ctx;
   ctx.save();
-  node.children.forEach((child) => processDeclarations(ctx, child));
+  processChildren();
   const cf1 = ctx.colorFilters.popAllAsOne();
   ctx.restore();
   ctx.colorFilters.push(cf1 ? Skia.ColorFilter.MakeCompose(cf, cf1) : cf);
-};
+}
 
-const composeImageFilters = (
+function composeImageFilters(
   ctx: DeclarationContext,
-  node: Node<any>,
-  imgf1: SkImageFilter
-) => {
+  imgf1: SkImageFilter,
+  processChildren: () => void
+) {
   const { Skia } = ctx;
   ctx.save();
-  node.children.forEach((child) => processDeclarations(ctx, child));
+  processChildren();
   let imgf2 = ctx.imageFilters.popAllAsOne();
   const cf = ctx.colorFilters.popAllAsOne();
   ctx.restore();
@@ -108,9 +108,11 @@ const composeImageFilters = (
   }
   const imgf = imgf2 ? Skia.ImageFilter.MakeCompose(imgf1, imgf2) : imgf1;
   ctx.imageFilters.push(imgf);
-};
+}
 
 function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
+  const processChildren = () =>
+    node.children.forEach((child) => processDeclarations(ctx, child));
   const { type } = node;
   const props = materialize(node.props);
   switch (type) {
@@ -148,27 +150,27 @@ function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
     }
     case NodeType.BlendColorFilter: {
       const cf = makeBlendColorFilter(ctx, props);
-      composeColorFilters(ctx, node, cf);
+      composeColorFilters(ctx, cf, processChildren);
       break;
     }
     case NodeType.SRGBToLinearGammaColorFilter: {
       const cf = makeSRGBToLinearGammaColorFilter(ctx);
-      composeColorFilters(ctx, node, cf);
+      composeColorFilters(ctx, cf, processChildren);
       break;
     }
     case NodeType.LinearToSRGBGammaColorFilter: {
       const cf = makeLinearToSRGBGammaColorFilter(ctx);
-      composeColorFilters(ctx, node, cf);
+      composeColorFilters(ctx, cf, processChildren);
       break;
     }
     case NodeType.MatrixColorFilter: {
       const cf = makeMatrixColorFilter(ctx, props);
-      composeColorFilters(ctx, node, cf);
+      composeColorFilters(ctx, cf, processChildren);
       break;
     }
     case NodeType.LumaColorFilter: {
       const cf = makeLumaColorFilter(ctx);
-      composeColorFilters(ctx, node, cf);
+      composeColorFilters(ctx, cf, processChildren);
       break;
     }
     // Shaders
@@ -212,12 +214,12 @@ function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
     // Image Filters
     case NodeType.BlurImageFilter: {
       const imgf = makeBlurImageFilter(ctx, props);
-      composeImageFilters(ctx, node, imgf);
+      composeImageFilters(ctx, imgf, processChildren);
       break;
     }
     case NodeType.OffsetImageFilter: {
       const imgf = makeOffsetImageFilter(ctx, props);
-      composeImageFilters(ctx, node, imgf);
+      composeImageFilters(ctx, imgf, processChildren);
       break;
     }
     case NodeType.DisplacementMapImageFilter: {
@@ -227,12 +229,12 @@ function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
     }
     case NodeType.DropShadowImageFilter: {
       const imgf = makeDropShadowImageFilter(ctx, props);
-      composeImageFilters(ctx, node, imgf);
+      composeImageFilters(ctx, imgf, processChildren);
       break;
     }
     case NodeType.MorphologyImageFilter: {
       const imgf = makeMorphologyImageFilter(ctx, props);
-      composeImageFilters(ctx, node, imgf);
+      composeImageFilters(ctx, imgf, processChildren);
       break;
     }
     case NodeType.BlendImageFilter: {
@@ -242,7 +244,7 @@ function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
     }
     case NodeType.RuntimeShaderImageFilter: {
       const imgf = makeRuntimeShaderImageFilter(ctx, props);
-      composeImageFilters(ctx, node, imgf);
+      composeImageFilters(ctx, imgf, processChildren);
       break;
     }
     // Path Effects

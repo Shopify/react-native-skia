@@ -41,7 +41,7 @@ export const Canvas = forwardRef(
         return SkiaViewApi.makeImageSnapshot(nativeId, rect);
       },
       makeImageSnapshotAsync: (rect?: SkRect) => {
-        return SkiaViewApi.makeImageSnapshot(nativeId, rect);
+        return SkiaViewApi.makeImageSnapshotAsync(nativeId, rect);
       },
       redraw: () => {
         SkiaViewApi.requestRedraw(nativeId);

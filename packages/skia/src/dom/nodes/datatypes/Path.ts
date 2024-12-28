@@ -1,9 +1,10 @@
+"worklet";
+
 import type { Skia } from "../../../skia/types";
 import { isPath } from "../../../skia/types";
 import type { PathDef } from "../../types";
 
 export const processPath = (Skia: Skia, rawPath: PathDef) => {
-  "worklet";
   const path =
     typeof rawPath === "string"
       ? Skia.Path.MakeFromSVGString(rawPath)
