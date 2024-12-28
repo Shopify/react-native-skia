@@ -1,9 +1,18 @@
 "worklet";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { NodeType } from "../../dom/types";
-import type { DeclarationContext, DrawingNodeProps } from "../../dom/types";
+import { composeDeclarations, NodeType } from "../../dom/types";
+import type {
+  BlendProps,
+  DeclarationContext,
+  DrawingNodeProps,
+} from "../../dom/types";
 import type { DrawingContext } from "../DrawingContext";
-import type { SkColorFilter, SkImageFilter } from "../../skia/types";
+import {
+  BlendMode,
+  type SkColorFilter,
+  type SkImageFilter,
+} from "../../skia/types";
+import { enumKey } from "../../dom/nodes";
 
 import type { Node } from "./Node";
 import {
@@ -114,6 +123,27 @@ function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
     case NodeType.LerpColorFilter: {
       node.children.forEach((child) => processDeclarations(ctx, child));
       declareLerpColorFilter(ctx, props);
+      break;
+    }
+    case NodeType.Blend: {
+      node.children.forEach((child) => processDeclarations(ctx, child));
+      const { Skia } = ctx;
+      const blend = BlendMode[enumKey(props.mode as BlendProps["mode"])];
+      // Blend ImageFilters
+      const imageFilters = ctx.imageFilters.popAll();
+      if (imageFilters.length > 0) {
+        const composer = Skia.ImageFilter.MakeBlend.bind(
+          Skia.ImageFilter,
+          blend
+        );
+        ctx.imageFilters.push(composeDeclarations(imageFilters, composer));
+      }
+      // Blend Shaders
+      const shaders = ctx.shaders.popAll();
+      if (shaders.length > 0) {
+        const composer = Skia.Shader.MakeBlend.bind(Skia.Shader, blend);
+        ctx.shaders.push(composeDeclarations(shaders, composer));
+      }
       break;
     }
     case NodeType.BlendColorFilter: {
