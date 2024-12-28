@@ -60,6 +60,7 @@ import {
   declareTurbulenceShader,
   declareTwoPointConicalGradientShader,
 } from "./shaders";
+import { declarePaint } from "./paint";
 
 interface ContextProcessingResult {
   shouldRestoreMatrix: boolean;
@@ -217,9 +218,10 @@ function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
     // Path Effects
 
     // Paint
-    // case NodeType.Paint:
-    //   declarePaint(ctx, props);
-    //   break;
+    case NodeType.Paint:
+      node.children.forEach((child) => processDeclarations(ctx, child));
+      declarePaint(ctx, props);
+      break;
     default:
       console.log("Unknown declaration node: ", type);
   }
@@ -260,7 +262,7 @@ const drawBackdropFilter = (ctx: DrawingContext, node: Node) => {
   let imageFilter: SkImageFilter | null = null;
   if (child.isDeclaration) {
     ctx.declCtx.save();
-    processDeclarations(ctx.declCtx, node);
+    processDeclarations(ctx.declCtx, child);
     const imgf = ctx.declCtx.imageFilters.pop();
     if (imgf) {
       imageFilter = imgf;
@@ -288,7 +290,7 @@ export function draw(ctx: DrawingContext, node: Node<any>) {
     if (layer.isDeclaration) {
       const { declCtx } = ctx;
       declCtx.save();
-      processDeclarations(ctx.declCtx, node);
+      processDeclarations(ctx.declCtx, layer);
       const paint = declCtx.paints.pop();
       declCtx.restore();
       if (paint) {

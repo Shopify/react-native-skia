@@ -1,11 +1,10 @@
 "worklet";
 
 import { enumKey } from "../../dom/nodes";
-import type { PaintProps } from "../../dom/types";
+import type { DeclarationContext, PaintProps } from "../../dom/types";
 import { BlendMode, PaintStyle, StrokeCap, StrokeJoin } from "../../skia/types";
-import type { DrawingContext } from "../DrawingContext";
 
-export const declarePaint = (ctx: DrawingContext, props: PaintProps) => {
+export const declarePaint = (ctx: DeclarationContext, props: PaintProps) => {
   const {
     color,
     strokeWidth,
@@ -51,11 +50,11 @@ export const declarePaint = (ctx: DrawingContext, props: PaintProps) => {
   }
   //ctx.save();
 
-  const colorFilter = ctx.declCtx.colorFilters.popAllAsOne();
-  const imageFilter = ctx.declCtx.imageFilters.popAllAsOne();
-  const shader = ctx.declCtx.shaders.pop();
-  const maskFilter = ctx.declCtx.maskFilters.pop();
-  const pathEffect = ctx.declCtx.pathEffects.popAllAsOne();
+  const colorFilter = ctx.colorFilters.popAllAsOne();
+  const imageFilter = ctx.imageFilters.popAllAsOne();
+  const shader = ctx.shaders.pop();
+  const maskFilter = ctx.maskFilters.pop();
+  const pathEffect = ctx.pathEffects.popAllAsOne();
   //ctx.restore();
   if (imageFilter) {
     paint.setImageFilter(imageFilter);
@@ -72,5 +71,5 @@ export const declarePaint = (ctx: DrawingContext, props: PaintProps) => {
   if (maskFilter) {
     paint.setMaskFilter(maskFilter);
   }
-  ctx.declCtx.paints.push(paint);
+  ctx.paints.push(paint);
 };
