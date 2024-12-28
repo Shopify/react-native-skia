@@ -175,8 +175,8 @@ export const declareBlurMaskFilter = (
 ) => {
   const { blur, style, respectCTM } = props;
   const mf = ctx.Skia.MaskFilter.MakeBlur(
-    blur,
     BlurStyle[enumKey(style)],
+    blur,
     respectCTM
   );
   ctx.maskFilters.push(mf);
