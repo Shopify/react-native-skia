@@ -142,6 +142,7 @@ function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
     }
     // Shaders
     case NodeType.Shader: {
+      node.children.forEach((child) => processDeclarations(ctx, child));
       declareShader(ctx, props);
       break;
     }
