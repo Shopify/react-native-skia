@@ -10,27 +10,18 @@ import type {
   Path1DPathEffectProps,
   Path2DPathEffectProps,
 } from "../../dom/types";
-import { Path1DEffectStyle, type SkPathEffect } from "../../skia/types";
-import type { DrawingContext } from "../DrawingContext";
+import { Path1DEffectStyle } from "../../skia/types";
 
-const composeAndPush = (ctx: DeclarationContext, pe1: SkPathEffect) => {
-  const pe2 = ctx.pathEffects.popAllAsOne();
-  ctx.restore();
-  const pe = pe2 ? ctx.Skia.PathEffect.MakeCompose(pe1, pe2) : pe1;
-  ctx.pathEffects.push(pe);
-};
-
-export const declareDiscretePathEffect = (
-  ctx: DrawingContext,
+export const makeDiscretePathEffect = (
+  ctx: DeclarationContext,
   props: DiscretePathEffectProps
 ) => {
   const { length, deviation, seed } = props;
-  const pe = ctx.Skia.PathEffect.MakeDiscrete(length, deviation, seed);
-  composeAndPush(ctx.declCtx, pe);
+  return ctx.Skia.PathEffect.MakeDiscrete(length, deviation, seed);
 };
 
-export const declarePath2DPathEffect = (
-  ctx: DrawingContext,
+export const makePath2DPathEffect = (
+  ctx: DeclarationContext,
   props: Path2DPathEffectProps
 ) => {
   const { matrix } = props;
@@ -39,20 +30,20 @@ export const declarePath2DPathEffect = (
   if (pe === null) {
     throw new Error("Path2DPathEffect: invalid path");
   }
-  composeAndPush(ctx.declCtx, pe);
+  return pe;
 };
 
-export const declareDashPathEffect = (
-  ctx: DrawingContext,
+export const makeDashPathEffect = (
+  ctx: DeclarationContext,
   props: DashPathEffectProps
 ) => {
   const { intervals, phase } = props;
   const pe = ctx.Skia.PathEffect.MakeDash(intervals, phase);
-  composeAndPush(ctx.declCtx, pe);
+  return pe;
 };
 
-export const declareCornerPathEffect = (
-  ctx: DrawingContext,
+export const makeCornerPathEffect = (
+  ctx: DeclarationContext,
   props: CornerPathEffectProps
 ) => {
   const { r } = props;
@@ -60,21 +51,21 @@ export const declareCornerPathEffect = (
   if (pe === null) {
     throw new Error("CornerPathEffect: couldn't create path effect");
   }
-  composeAndPush(ctx.declCtx, pe);
+  return pe;
 };
 
-export const declareSumPathEffect = (ctx: DrawingContext) => {
+export const declareSumPathEffect = (ctx: DeclarationContext) => {
   // Note: decorateChildren functionality needs to be handled differently
-  const pes = ctx.declCtx.pathEffects.popAll();
+  const pes = ctx.pathEffects.popAll();
   const pe = composeDeclarations(
     pes,
     ctx.Skia.PathEffect.MakeSum.bind(ctx.Skia.PathEffect)
   );
-  ctx.declCtx.pathEffects.push(pe);
+  ctx.pathEffects.push(pe);
 };
 
-export const declareLine2DPathEffect = (
-  ctx: DrawingContext,
+export const makeLine2DPathEffect = (
+  ctx: DeclarationContext,
   props: Line2DPathEffectProps
 ) => {
   const { width, matrix } = props;
@@ -82,11 +73,11 @@ export const declareLine2DPathEffect = (
   if (pe === null) {
     throw new Error("Line2DPathEffect: could not create path effect");
   }
-  composeAndPush(ctx.declCtx, pe);
+  return pe;
 };
 
-export const declarePath1DPathEffect = (
-  ctx: DrawingContext,
+export const makePath1DPathEffect = (
+  ctx: DeclarationContext,
   props: Path1DPathEffectProps
 ) => {
   const { advance, phase, style } = props;
@@ -100,5 +91,5 @@ export const declarePath1DPathEffect = (
   if (pe === null) {
     throw new Error("Path1DPathEffect: could not create path effect");
   }
-  composeAndPush(ctx.declCtx, pe);
+  return pe;
 };

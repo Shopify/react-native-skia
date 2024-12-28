@@ -7,10 +7,11 @@ import type {
   DrawingNodeProps,
 } from "../../dom/types";
 import type { DrawingContext } from "../DrawingContext";
-import {
-  BlendMode,
-  type SkColorFilter,
-  type SkImageFilter,
+import { BlendMode } from "../../skia/types";
+import type {
+  SkPathEffect,
+  SkColorFilter,
+  SkImageFilter,
 } from "../../skia/types";
 import { enumKey } from "../../dom/nodes";
 
@@ -70,6 +71,15 @@ import {
   declareTwoPointConicalGradientShader,
 } from "./shaders";
 import { declarePaint } from "./paint";
+import {
+  declareSumPathEffect,
+  makeCornerPathEffect,
+  makeDashPathEffect,
+  makeDiscretePathEffect,
+  makeLine2DPathEffect,
+  makePath1DPathEffect,
+  makePath2DPathEffect,
+} from "./pathEffects";
 
 interface ContextProcessingResult {
   shouldRestoreMatrix: boolean;
@@ -87,6 +97,19 @@ function composeColorFilters(
   const cf1 = ctx.colorFilters.popAllAsOne();
   ctx.restore();
   ctx.colorFilters.push(cf1 ? Skia.ColorFilter.MakeCompose(cf, cf1) : cf);
+}
+
+function composePathEffects(
+  ctx: DeclarationContext,
+  pe: SkPathEffect,
+  processChildren: () => void
+) {
+  const { Skia } = ctx;
+  ctx.save();
+  processChildren();
+  const pe1 = ctx.pathEffects.popAllAsOne();
+  ctx.restore();
+  ctx.pathEffects.push(pe1 ? Skia.PathEffect.MakeCompose(pe, pe1) : pe);
 }
 
 function composeImageFilters(
@@ -248,7 +271,41 @@ function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
       break;
     }
     // Path Effects
-
+    case NodeType.SumPathEffect: {
+      node.children.forEach((child) => processDeclarations(ctx, child));
+      declareSumPathEffect(ctx);
+      break;
+    }
+    case NodeType.CornerPathEffect: {
+      const pf = makeCornerPathEffect(ctx, props);
+      composePathEffects(ctx, pf, processChildren);
+      break;
+    }
+    case NodeType.Path1DPathEffect: {
+      const pf = makePath1DPathEffect(ctx, props);
+      composePathEffects(ctx, pf, processChildren);
+      break;
+    }
+    case NodeType.Path2DPathEffect: {
+      const pf = makePath2DPathEffect(ctx, props);
+      composePathEffects(ctx, pf, processChildren);
+      break;
+    }
+    case NodeType.Line2DPathEffect: {
+      const pf = makeLine2DPathEffect(ctx, props);
+      composePathEffects(ctx, pf, processChildren);
+      break;
+    }
+    case NodeType.DashPathEffect: {
+      const pf = makeDashPathEffect(ctx, props);
+      composePathEffects(ctx, pf, processChildren);
+      break;
+    }
+    case NodeType.DiscretePathEffect: {
+      const pf = makeDiscretePathEffect(ctx, props);
+      composePathEffects(ctx, pf, processChildren);
+      break;
+    }
     // Paint
     case NodeType.Paint:
       node.children.forEach((child) => processDeclarations(ctx, child));
