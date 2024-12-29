@@ -131,7 +131,15 @@ export class DrawingContext {
     if (color !== undefined) {
       const currentOpacity = paint.getAlphaf();
       paint.setShader(null);
-      paint.setColor(this.Skia.Color(color));
+      if (typeof color === "string") {
+        paint.setColor(this.Skia.Color(color));
+      } else if (Array.isArray(color)) {
+        paint.setColor(new Float32Array(color));
+      } else if (color instanceof Float32Array) {
+        paint.setColor(color);
+      } else {
+        throw new Error("Invalid color");
+      }
       paint.setAlphaf(currentOpacity * paint.getAlphaf());
     }
     if (strokeWidth !== undefined) {
