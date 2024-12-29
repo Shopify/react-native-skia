@@ -20,8 +20,8 @@ public:
 
   ~RNSkMetalCanvasProvider();
 
-  float getScaledWidth() override;
-  float getScaledHeight() override;
+  int getScaledWidth() override;
+  int getScaledHeight() override;
 
   bool renderToCanvas(const std::function<void(SkCanvas *)> &cb) override;
 

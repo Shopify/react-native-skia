@@ -33,12 +33,12 @@ public:
   /**
    Returns the scaled width of the view
    */
-  virtual float getScaledWidth() = 0;
+  virtual int getScaledWidth() = 0;
 
   /**
    Returns the scaled height of the view
    */
-  virtual float getScaledHeight() = 0;
+  virtual int getScaledHeight() = 0;
 
   /**
    Render to a canvas
@@ -104,12 +104,12 @@ public:
   /**
    Returns the scaled width of the view
    */
-  float getScaledWidth() override { return _width; };
+  int getScaledWidth() override { return _width; };
 
   /**
    Returns the scaled height of the view
    */
-  float getScaledHeight() override { return _height; };
+  int getScaledHeight() override { return _height; };
 
   /**
    Render to a canvas
@@ -120,8 +120,8 @@ public:
   };
 
 private:
-  float _width;
-  float _height;
+  int _width;
+  int _height;
   float _pd = 1.0f;
   sk_sp<SkSurface> _surface;
   std::shared_ptr<RNSkPlatformContext> _context;

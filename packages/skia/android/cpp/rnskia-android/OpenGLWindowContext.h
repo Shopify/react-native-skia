@@ -56,7 +56,14 @@ public:
 
   int getHeight() override { return ANativeWindow_getHeight(_window); };
 
-  void resize(int width, int height) override { _skSurface = nullptr; }
+  void resize(int width, int height) override {
+    if (_skSurface != nullptr) {
+      // Let's make sure there is no pending work
+      _glContext->makeCurrent(_glSurface.get());
+      _glSurface->present();
+      _skSurface = nullptr;
+    }
+  }
 
 private:
   GrDirectContext *_directContext;
