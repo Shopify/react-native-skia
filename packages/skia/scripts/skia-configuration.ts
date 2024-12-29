@@ -187,22 +187,11 @@ export const configurations = {
         platformGroup: "macosx",
         cpu: "arm64",
         platform: "mac",
-        args: [
-          ["extra_cflags", '["-target", "arm64-apple-macosx"]'],
-          ["extra_asmflags", '["-target", "arm64-apple-macosx"]'],
-          ["extra_ldflags", '["-target", "arm64-apple-macosx"]'],
-        ],
       },
       "x64-macosx": {
         platformGroup: "macosx",
         cpu: "x64",
         platform: "mac",
-        // These don't work for some reason
-        // args: [
-        //   ["extra_cflags", '["-target", "x64-apple-macosx"]'],
-        //   ["extra_asmflags", '["-target", "x64-apple-macosx"]'],
-        //   ["extra_ldflags", '["-target", "x64-apple-macosx"]'],
-        // ],
       },
     },
     args: [
