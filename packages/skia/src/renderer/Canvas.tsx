@@ -81,7 +81,6 @@ export const Canvas = forwardRef(
 
     const requestRedraw = useCallback(() => {
       rafId.current = requestAnimationFrame(() => {
-        console.log("redraw: " + Date.now());
         root.render(children);
         if (mode === "continuous") {
           requestRedraw();
