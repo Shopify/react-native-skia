@@ -37,13 +37,8 @@ export const getRect = (
   const { x, y, width, height } = props;
   if (props.rect) {
     return props.rect;
-  } else if (
-    x !== undefined &&
-    y !== undefined &&
-    width !== undefined &&
-    height !== undefined
-  ) {
-    return Skia.XYWHRect(x, y, width, height);
+  } else if (width !== undefined && height !== undefined) {
+    return Skia.XYWHRect(x ?? 0, y ?? 0, width, height);
   } else {
     return undefined;
   }
