@@ -302,6 +302,14 @@ const serializeSkOjects = (obj: any): any => {
         ty: obj.ty,
       };
     }
+  } else if (obj && typeof obj === "object") {
+    const result = Object.keys(obj).reduce((acc, key) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      acc[key] = serializeSkOjects(obj[key]);
+      return acc;
+    }, {});
+    return result;
   }
   return obj;
 };

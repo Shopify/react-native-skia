@@ -9,7 +9,7 @@ In React Native Skia, we can use Reanimated to create textures on the UI thread 
 
 ## `useTexture`
 
-This hook allows you to allows you to create textures from React elements.
+This hook allows you to create textures from React elements.
 It takes a React element and the dimensions of the texture as arguments and returns a Reanimated shared value that contains the texture.
 
 ```tsx twoslash
