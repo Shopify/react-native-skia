@@ -38,7 +38,9 @@ export const parseProps = (props: SerializedProps, assets: Assets) => {
 
 const parseProp = (value: any, assets: Assets): any => {
   if (value && typeof value === "object" && "__typename__" in value) {
-    if (value.__typename__ === "Paint") {
+    if (value.__typename__ === "Float32Array") {
+      return new Float32Array(value.value);
+    } else if (value.__typename__ === "Paint") {
       const paint = Skia.Paint();
       paint.setColor(Float32Array.of(...value.color));
       return paint;
@@ -96,6 +98,13 @@ const parseProp = (value: any, assets: Assets): any => {
     }
   } else if (Array.isArray(value)) {
     return value.map((v) => parseProp(v, assets));
+  } else if (value && typeof value === "object") {
+    const parsed: Record<string, any> = {};
+    Object.keys(value).forEach((key) => {
+      parsed[key] = parseProp(value[key], assets);
+    });
+    console.log({ parsed });
+    return parsed;
   }
   return value;
 };
