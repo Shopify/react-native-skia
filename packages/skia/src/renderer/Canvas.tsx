@@ -1,21 +1,61 @@
-import { forwardRef, useEffect, useImperativeHandle, useMemo } from "react";
-import type { ViewProps } from "react-native";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+} from "react";
+import type { LayoutChangeEvent, ViewProps } from "react-native";
+import type { SharedValue } from "react-native-reanimated";
 
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
 import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeComponent";
-import type { SkRect } from "../skia/types";
+import type { SkRect, SkSize } from "../skia/types";
 import { SkiaSGRoot } from "../sksg/Reconciler";
 import { Skia } from "../skia";
+import type { SkiaBaseViewProps } from "../views";
 
 const NativeSkiaPictureView = SkiaPictureViewNativeComponent;
+
+// TODO: no need to go through the JS thread for this
+const useOnSizeEvent = (
+  resultValue: SkiaBaseViewProps["onSize"],
+  onLayout?: (event: LayoutChangeEvent) => void
+) => {
+  return useCallback(
+    (event: LayoutChangeEvent) => {
+      if (onLayout) {
+        onLayout(event);
+      }
+      const { width, height } = event.nativeEvent.layout;
+
+      if (resultValue) {
+        resultValue.value = { width, height };
+      }
+    },
+    [onLayout, resultValue]
+  );
+};
 
 interface CanvasProps extends ViewProps {
   debug?: boolean;
   opaque?: boolean;
+  onSize?: SharedValue<SkSize>;
 }
 
 export const Canvas = forwardRef(
-  ({ debug, opaque, children, ...viewProps }: CanvasProps, ref) => {
+  (
+    {
+      debug,
+      opaque,
+      children,
+      onSize,
+      onLayout: _onLayout,
+      ...viewProps
+    }: CanvasProps,
+    ref
+  ) => {
+    const onLayout = useOnSizeEvent(onSize, _onLayout);
     // Native ID
     const nativeId = useMemo(() => {
       return SkiaViewNativeId.current++;
@@ -56,6 +96,7 @@ export const Canvas = forwardRef(
         nativeID={`${nativeId}`}
         debug={debug}
         opaque={opaque}
+        onLayout={onLayout}
         {...viewProps}
       />
     );
