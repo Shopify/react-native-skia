@@ -117,7 +117,7 @@ export const Tests = ({ assets }: TestsProps) => {
           ? `⚪️ Connecting to ${hostname}. Use yarn e2e to run tests.`
           : "🟢 Waiting for the server to send tests"}
       </Text>
-      <Canvas style={{ width: size, height: size }} ref={ref} experimental>
+      <Canvas style={{ width: size, height: size }} ref={ref}>
         <Group transform={[{ scale }]}>{drawing}</Group>
       </Canvas>
       <View

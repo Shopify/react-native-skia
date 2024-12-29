@@ -4,6 +4,7 @@ import {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
 } from "react";
 import type { LayoutChangeEvent, ViewProps } from "react-native";
 import type { SharedValue } from "react-native-reanimated";
@@ -37,15 +38,17 @@ const useOnSizeEvent = (
   );
 };
 
-interface CanvasProps extends ViewProps {
+export interface CanvasProps extends ViewProps {
   debug?: boolean;
   opaque?: boolean;
   onSize?: SharedValue<SkSize>;
+  mode?: "continuous" | "default";
 }
 
 export const Canvas = forwardRef(
   (
     {
+      mode,
       debug,
       opaque,
       children,
@@ -55,6 +58,7 @@ export const Canvas = forwardRef(
     }: CanvasProps,
     ref
   ) => {
+    const rafId = useRef<number | null>(null);
     const onLayout = useOnSizeEvent(onSize, _onLayout);
     // Native ID
     const nativeId = useMemo(() => {
@@ -74,6 +78,27 @@ export const Canvas = forwardRef(
         root.unmount();
       };
     }, [root]);
+
+    const requestRedraw = useCallback(() => {
+      rafId.current = requestAnimationFrame(() => {
+        console.log("redraw: " + Date.now());
+        root.render(children);
+        if (mode === "continuous") {
+          requestRedraw();
+        }
+      });
+    }, [children, mode, root]);
+
+    useEffect(() => {
+      if (mode === "continuous") {
+        requestRedraw();
+      }
+      return () => {
+        if (rafId.current !== null) {
+          cancelAnimationFrame(rafId.current);
+        }
+      };
+    }, [mode, requestRedraw]);
 
     // Component methods
     useImperativeHandle(ref, () => ({
