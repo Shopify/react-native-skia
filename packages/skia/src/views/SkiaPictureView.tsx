@@ -38,7 +38,6 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
   }
 
   componentDidUpdate(prevProps: SkiaPictureViewProps) {
-    console.log("componentDidUpdate");
     const { picture, onSize } = this.props;
     if (picture !== prevProps.picture) {
       assertSkiaViewApi();
@@ -79,7 +78,6 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
    */
   public redraw() {
     assertSkiaViewApi();
-    console.log("Request redraw: ", this._nativeId);
     SkiaViewApi.requestRedraw(this._nativeId);
   }
 

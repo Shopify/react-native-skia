@@ -5,12 +5,11 @@ sidebar_label: Textures
 slug: /animations/textures
 ---
 
-In React Native Skia, Skia resources are shared across threads.
-We can use Reanimated to create textures on the UI thread, thus ensuring that we can display them on the onscreen canvas without needing to perform unnecessary copies.
+In React Native Skia, we can use Reanimated to create textures on the UI thread directly.
 
 ## `useTexture`
 
-This hook allows you to allows you to create textures from React elements.
+This hook allows you to create textures from React elements.
 It takes a React element and the dimensions of the texture as arguments and returns a Reanimated shared value that contains the texture.
 
 ```tsx twoslash
