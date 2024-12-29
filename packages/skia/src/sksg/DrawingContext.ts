@@ -131,7 +131,7 @@ export class DrawingContext {
     if (color !== undefined) {
       const currentOpacity = paint.getAlphaf();
       paint.setShader(null);
-      if (typeof color === "string") {
+      if (typeof color === "string" || typeof color === "number") {
         paint.setColor(this.Skia.Color(color));
       } else if (Array.isArray(color)) {
         paint.setColor(new Float32Array(color));
