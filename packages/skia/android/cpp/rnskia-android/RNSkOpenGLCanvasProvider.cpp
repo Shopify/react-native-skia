@@ -30,16 +30,16 @@ RNSkOpenGLCanvasProvider::RNSkOpenGLCanvasProvider(
 
 RNSkOpenGLCanvasProvider::~RNSkOpenGLCanvasProvider() = default;
 
-float RNSkOpenGLCanvasProvider::getScaledWidth() {
+int RNSkOpenGLCanvasProvider::getScaledWidth() {
   if (_surfaceHolder) {
-    return static_cast<float>(_surfaceHolder->getWidth());
+    return _surfaceHolder->getWidth();
   }
   return 0;
 }
 
-float RNSkOpenGLCanvasProvider::getScaledHeight() {
+int RNSkOpenGLCanvasProvider::getScaledHeight() {
   if (_surfaceHolder) {
-    return static_cast<float>(_surfaceHolder->getHeight());
+    return _surfaceHolder->getHeight();
   }
   return 0;
 }
