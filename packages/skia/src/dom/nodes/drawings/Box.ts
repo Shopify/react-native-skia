@@ -1,4 +1,3 @@
-import type { SkRRect, Skia } from "../../../skia/types";
 import { BlurStyle, ClipOp, isRRect } from "../../../skia/types";
 import type { DrawingContext } from "../../types";
 import { NodeType } from "../../types";
