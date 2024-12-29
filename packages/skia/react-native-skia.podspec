@@ -13,18 +13,18 @@ preprocessor_defs = use_graphite ?
   '$(inherited) SK_METAL=1 SK_GANESH=1 SK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API=1'
 
 # Define base frameworks
-base_frameworks = ['libs/ios/libskia.xcframework', 
-'libs/ios/libsvg.xcframework', 
-'libs/ios/libskshaper.xcframework',
-'libs/ios/libskparagraph.xcframework',
-'libs/ios/libskunicode_core.xcframework',
-'libs/ios/libskunicode_libgrapheme.xcframework',]
+base_frameworks = ['libs/apple/libskia.xcframework', 
+'libs/apple/libsvg.xcframework', 
+'libs/apple/libskshaper.xcframework',
+'libs/apple/libskparagraph.xcframework',
+'libs/apple/libskunicode_core.xcframework',
+'libs/apple/libskunicode_libgrapheme.xcframework',]
 
 # Add Graphite frameworks if enabled
 graphite_frameworks = [
-  'libs/ios/libdawn_native_static.xcframework',
-  'libs/ios/libdawn_platform_static.xcframework', 
-  'libs/ios/libdawn_proc_static.xcframework'
+  'libs/apple/libdawn_native_static.xcframework',
+  'libs/apple/libdawn_platform_static.xcframework', 
+  'libs/apple/libdawn_proc_static.xcframework'
 ]
 
 Pod::Spec.new do |s|

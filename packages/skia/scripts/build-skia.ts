@@ -67,7 +67,7 @@ const configurePlatform = async (
       "";
 
     // eslint-disable-next-line max-len
-    const command = `${commandline} ${options} ${targetOptions} --script-executable=python3 --args='target_os="${platformName}" target_cpu="${target.cpu}" ${common}${args}${targetArgs}'`;
+    const command = `${commandline} ${options} ${targetOptions} --script-executable=python3 --args='target_os="${target.platform}" target_cpu="${target.cpu}" ${common}${args}${targetArgs}'`;
     await runAsync(command, "⚙️");
     return true;
   } else {
@@ -117,8 +117,8 @@ export const copyLib = (
 };
 
 const buildXCFrameworks = () => {
-  const os: PlatformName = "ios";
-  const { outputNames } = configurations.ios;
+  const os: PlatformName = "apple";
+  const { outputNames } = configurations.apple;
   process.chdir(SkiaSrc);
   outputNames.forEach((name) => {
     console.log("Building XCFramework for " + name);
@@ -127,7 +127,13 @@ const buildXCFrameworks = () => {
     $(`rm -rf ${OutFolder}/${os}/iphonesimulator/${name}`);
     $(
       // eslint-disable-next-line max-len
-      `lipo -create ${OutFolder}/${os}/x64/${name} ${OutFolder}/${os}/arm64-iphonesimulator/${name} -output ${OutFolder}/${os}/iphonesimulator/${name}`
+      `lipo -create ${OutFolder}/${os}/x64-iphonesimulator/${name} ${OutFolder}/${os}/arm64-iphonesimulator/${name} -output ${OutFolder}/${os}/iphonesimulator/${name}`
+    );
+    $(`mkdir -p ${OutFolder}/${os}/macosx`);
+    $(`rm -rf ${OutFolder}/${os}/macosx/${name}`);
+    $(
+      // eslint-disable-next-line max-len
+      `lipo -create ${OutFolder}/${os}/x64-macosx/${name} ${OutFolder}/${os}/arm64-macosx/${name} -output ${OutFolder}/${os}/macosx/${name}`
     );
     const [lib] = name.split(".");
     const dstPath = `${PackageRoot}/libs/${os}/${lib}.xcframework`;
@@ -135,6 +141,7 @@ const buildXCFrameworks = () => {
       "xcodebuild -create-xcframework " +
         `-library ${prefix}/arm64-iphoneos/${name} ` +
         `-library ${prefix}/iphonesimulator/${name} ` +
+        `-library ${prefix}/macosx/${name} ` +
         ` -output ${dstPath}`
     );
   });
