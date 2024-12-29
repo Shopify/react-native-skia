@@ -97,4 +97,4 @@ jobs:
         with:
           name: skia-ios-xcframeworks
           path: |
-            ./packages/skia/libs/ios/*.xcframework
+            ./packages/skia/libs/apple/*.xcframework
