@@ -1,6 +1,6 @@
 import { vec, Fill } from "@shopify/react-native-skia";
 
-import { Canvas } from "../components";
+import { Background, Canvas } from "../components";
 import {
   useAnimation,
   makeAnimation,
@@ -65,53 +65,21 @@ export const Playground = () => {
       <Canvas
         typefaces={{ RubikMedium: require("./assets/Rubik-Medium.otf") }}
         images={{
-          expo: require("./assets/tiles/sdk46.png"),
-          skia: require("./assets/tiles/skia.png"),
-          remotion: require("./assets/tiles/remotion.png"),
-          snack: require("./assets/tiles/snack.png"),
-          web: require("./assets/tiles/react-native-web.png"),
-          ui: require("./assets/tiles/ui.png"),
-          reconciler: require("./assets/tiles/reconciler.png"),
-          pictures: require("./assets/tiles/pictures.png"),
+     
         }}
       >
         <Fill color="black" />
         <Tiles />
       </Canvas>
-      {/* <Sequence from={0} durationInFrames={durationInFrames} layout="none">
-        <Audio src={audio} startFrom={0} endAt={durationInFrames} />
-      </Sequence> */}
     </>
   );
 };
 
 const Tiles = () => {
-  const { skia, remotion, expo, snack, web, ui, reconciler, pictures } =
-    useImages();
-  const {
-    expoProgress,
-    snackProgress,
-    remotionProgress,
-    skiaProgress,
-    webProgress,
-    uiProgress,
-    reconcilerProgress,
-    picturesProgress,
-  } = useAnimation(state);
+
   return (
     <>
-      <Tile image={expo} pos={expoPos} progress={expoProgress} />
-      <Tile image={snack} pos={snackPos} progress={snackProgress} />
-      <Tile image={remotion} pos={remotionPos} progress={remotionProgress} />
-      <Tile image={skia} pos={skiaPos} progress={skiaProgress} />
-      <Tile image={web} pos={webPos} progress={webProgress} />
-      <Tile image={ui} pos={uiPos} progress={uiProgress} />
-      <Tile
-        image={reconciler}
-        pos={reconcilerPos}
-        progress={reconcilerProgress}
-      />
-      <Tile image={pictures} pos={picturesPos} progress={picturesProgress} />
+      <Background />
     </>
   );
 };
