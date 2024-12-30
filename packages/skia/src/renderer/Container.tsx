@@ -1,29 +1,21 @@
 import { JsiSkDOM } from "../dom/nodes";
 import type {
-  GroupProps,
-  DrawingContext,
-  RenderNode,
+  Node,
   SkDOM,
 } from "../dom/types";
-import type { Skia } from "../skia/types";
 
 export class Container {
-  private _root: RenderNode<GroupProps>;
+  private _root: Node<unknown>;
   public Sk: SkDOM;
   public unmounted = false;
   constructor(
-    Skia: Skia,
     public redraw: () => void = () => {},
-    public getNativeId: () => number = () => 0,
-    native: boolean
+    public getNativeId: () => number = () => 0
   ) {
-    this.Sk = new JsiSkDOM({ Skia }, native);
+    this.Sk = new JsiSkDOM();
     this._root = this.Sk.Group();
   }
 
-  draw(ctx: DrawingContext) {
-    this._root.render(ctx);
-  }
 
   get root() {
     return this._root;
