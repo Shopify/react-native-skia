@@ -331,7 +331,8 @@ export class JsiSkDOM implements SkDOM {
   }
 
   LinearToSRGBGammaColorFilter() {
-    return this.native? global.SkiaDomApi.LinearToSRGBGammaColorFilterNode()
+    return this.native
+      ? global.SkiaDomApi.LinearToSRGBGammaColorFilterNode()
       : new LinearToSRGBGammaColorFilterNode(this.ctx);
   }
 
