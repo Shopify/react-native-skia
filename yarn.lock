@@ -4167,7 +4167,7 @@ __metadata:
     "@types/pixelmatch": 5.2.4
     "@types/pngjs": 6.0.1
     "@types/react": ^18.2.6
-    "@types/react-reconciler": 0.26.7
+    "@types/react-reconciler": 0.28.9
     "@types/ws": 8.5.3
     canvaskit-wasm: 0.39.1
     eslint: 8
@@ -5055,12 +5055,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-reconciler@npm:0.26.7":
-  version: 0.26.7
-  resolution: "@types/react-reconciler@npm:0.26.7"
-  dependencies:
+"@types/react-reconciler@npm:0.28.9":
+  version: 0.28.9
+  resolution: "@types/react-reconciler@npm:0.28.9"
+  peerDependencies:
     "@types/react": "*"
-  checksum: 4122d2b08580f775d0aeae9bd10b68248f894096ed14c0ebbc143ef712e21b159e89d0c628bd95dd3329947fc1ee94a0cb1d2d32b32b1d5d225e70030e91e58f
+  checksum: 06257f693c7b148a4258c0d0a958288116100014e7b3c21ceaea2d55a668c71718f79b4105a9a0f35b480f3729e46960b40026d685719f9386b4ed63108dda09
   languageName: node
   linkType: hard
 
