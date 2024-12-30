@@ -109,7 +109,7 @@ export class DisplacementMapImageFilterNode extends ImageFilterDeclaration<Displ
     if (!shader) {
       throw new Error("DisplacementMap expects a shader as child");
     }
-    const map = this.Skia.ImageFilter.MakeShader(shader, null);
+    const map = this.Skia.ImageFilter.MakeShader(shader);
     const imgf = this.Skia.ImageFilter.MakeDisplacementMap(
       ColorChannel[enumKey(channelX)],
       ColorChannel[enumKey(channelY)],
