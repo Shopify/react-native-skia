@@ -37,6 +37,16 @@ Config.overrideWebpackConfig((currentConfiguration) => {
       ],
     })
   );
+  if (!currentConfiguration.resolve) {
+    currentConfiguration.resolve = {};
+  }
+  if (!currentConfiguration.resolve.alias) {
+    currentConfiguration.resolve.alias = {};
+  }
+  // @ts-expect-error
+  currentConfiguration.resolve.alias["react-native-reanimated"] = false;
+  // @ts-expect-error
+  currentConfiguration.resolve.alias["react-native-reanimated/package.json"] = false;
   return {
     ...currentConfiguration,
     resolve: {
@@ -57,11 +67,6 @@ Config.overrideWebpackConfig((currentConfiguration) => {
         ".sksl",
         "...",
       ],
-    },
-    externals: {
-      "react-native-reanimated": "require('react-native-reanimated')",
-      "react-native-reanimated/package.json":
-        "require('react-native-reanimated/package.json')",
     },
   };
 });

@@ -9,10 +9,9 @@ import Rea from "./ReanimatedProxy";
 let HAS_REANIMATED = false;
 let HAS_REANIMATED_3 = false;
 try {
-  require("react-native-reanimated");
-  HAS_REANIMATED = true;
   const reanimatedVersion =
     require("react-native-reanimated/package.json").version;
+  HAS_REANIMATED = !!reanimatedVersion;
   if (
     reanimatedVersion &&
     (reanimatedVersion >= "3.0.0" || reanimatedVersion.includes("3.0.0-"))
