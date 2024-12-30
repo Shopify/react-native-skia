@@ -1,4 +1,3 @@
-import type { SkRRect, Skia } from "../../../skia/types";
 import { BlurStyle, ClipOp, isRRect } from "../../../skia/types";
 import type { DrawingContext } from "../../types";
 import { NodeType } from "../../types";
@@ -7,34 +6,7 @@ import type { NodeContext } from "../Node";
 import { JsiDeclarationNode } from "../Node";
 import { JsiRenderNode } from "../RenderNode";
 import type { DeclarationContext } from "../../types/DeclarationContext";
-
-const inflate = (
-  Skia: Skia,
-  box: SkRRect,
-  dx: number,
-  dy: number,
-  tx = 0,
-  ty = 0
-) =>
-  Skia.RRectXY(
-    Skia.XYWHRect(
-      box.rect.x - dx + tx,
-      box.rect.y - dy + ty,
-      box.rect.width + 2 * dx,
-      box.rect.height + 2 * dy
-    ),
-    box.rx + dx,
-    box.ry + dy
-  );
-
-const deflate = (
-  Skia: Skia,
-  box: SkRRect,
-  dx: number,
-  dy: number,
-  tx = 0,
-  ty = 0
-) => inflate(Skia, box, -dx, -dy, tx, ty);
+import { deflate, inflate } from "../datatypes";
 
 export class BoxShadowNode extends JsiDeclarationNode<BoxShadowProps> {
   constructor(ctx: NodeContext, props: BoxShadowProps) {
