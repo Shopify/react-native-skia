@@ -6,37 +6,6 @@ import type { RectCtor, RectDef, RRectCtor, RRectDef } from "../../types";
 
 import { processRadius } from "./Radius";
 
-export const inflate = (
-  Skia: Skia,
-  box: SkRRect,
-  dx: number,
-  dy: number,
-  tx = 0,
-  ty = 0
-) => {
-  return Skia.RRectXY(
-    Skia.XYWHRect(
-      box.rect.x - dx + tx,
-      box.rect.y - dy + ty,
-      box.rect.width + 2 * dx,
-      box.rect.height + 2 * dy
-    ),
-    box.rx + dx,
-    box.ry + dy
-  );
-};
-
-export const deflate = (
-  Skia: Skia,
-  box: SkRRect,
-  dx: number,
-  dy: number,
-  tx = 0,
-  ty = 0
-) => {
-  return inflate(Skia, box, -dx, -dy, tx, ty);
-};
-
 export const isEdge = (pos: Vector, b: SkRect) => {
   return (
     pos.x === b.x || pos.y === b.y || pos.x === b.width || pos.y === b.height
