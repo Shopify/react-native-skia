@@ -1,4 +1,5 @@
 import { Fill } from "@shopify/react-native-skia";
+import { useCurrentFrame } from "remotion";
 
 import { Background, Canvas } from "../components";
 import {
@@ -6,6 +7,8 @@ import {
   stagger,
   timing,
 } from "../components/animations/Animations";
+
+import { Breathe } from "./Breathe";
 const duration = 20;
 
 const playground = {
