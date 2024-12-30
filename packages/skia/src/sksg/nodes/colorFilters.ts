@@ -7,7 +7,21 @@ import type {
   LerpColorFilterProps,
   MatrixColorFilterProps,
 } from "../../dom/types";
+import type { SkColorFilter } from "../../skia/types";
 import { BlendMode } from "../../skia/types";
+
+export const composeColorFilters = (
+  ctx: DeclarationContext,
+  cf: SkColorFilter,
+  processChildren: () => void
+) => {
+  const { Skia } = ctx;
+  ctx.save();
+  processChildren();
+  const cf1 = ctx.colorFilters.popAllAsOne();
+  ctx.restore();
+  ctx.colorFilters.push(cf1 ? Skia.ColorFilter.MakeCompose(cf, cf1) : cf);
+};
 
 export const makeBlendColorFilter = (
   ctx: DeclarationContext,

@@ -1,8 +1,9 @@
 "worklet";
 
-import { enumKey, processRadius } from "../../dom/nodes";
+import { composeDeclarations, enumKey, processRadius } from "../../dom/nodes";
 import type {
   BlendImageFilterProps,
+  BlendProps,
   BlurImageFilterProps,
   BlurMaskFilterProps,
   DeclarationContext,
@@ -60,6 +61,44 @@ const MakeInnerShadow = (
     input,
     Skia.ImageFilter.MakeBlend(BlendMode.SrcOver, sourceGraphic, f4)
   );
+};
+
+export const declareBlend = (ctx: DeclarationContext, props: BlendProps) => {
+  const { Skia } = ctx;
+  const blend = BlendMode[enumKey(props.mode as BlendProps["mode"])];
+  // Blend ImageFilters
+  const imageFilters = ctx.imageFilters.popAll();
+  if (imageFilters.length > 0) {
+    const composer = Skia.ImageFilter.MakeBlend.bind(Skia.ImageFilter, blend);
+    ctx.imageFilters.push(composeDeclarations(imageFilters, composer));
+  }
+  // Blend Shaders
+  const shaders = ctx.shaders.popAll();
+  if (shaders.length > 0) {
+    const composer = Skia.Shader.MakeBlend.bind(Skia.Shader, blend);
+    ctx.shaders.push(composeDeclarations(shaders, composer));
+  }
+};
+
+export const composeImageFilters = (
+  ctx: DeclarationContext,
+  imgf1: SkImageFilter,
+  processChildren: () => void
+) => {
+  const { Skia } = ctx;
+  ctx.save();
+  processChildren();
+  let imgf2 = ctx.imageFilters.popAllAsOne();
+  const cf = ctx.colorFilters.popAllAsOne();
+  ctx.restore();
+  if (cf) {
+    imgf2 = Skia.ImageFilter.MakeCompose(
+      imgf2 ?? null,
+      Skia.ImageFilter.MakeColorFilter(cf, null)
+    );
+  }
+  const imgf = imgf2 ? Skia.ImageFilter.MakeCompose(imgf1, imgf2) : imgf1;
+  ctx.imageFilters.push(imgf);
 };
 
 const input = (ctx: DeclarationContext) => {

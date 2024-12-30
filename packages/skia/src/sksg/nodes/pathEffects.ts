@@ -10,7 +10,21 @@ import type {
   Path1DPathEffectProps,
   Path2DPathEffectProps,
 } from "../../dom/types";
+import type { SkPathEffect } from "../../skia/types";
 import { Path1DEffectStyle } from "../../skia/types";
+
+export const composePathEffects = (
+  ctx: DeclarationContext,
+  pe: SkPathEffect,
+  processChildren: () => void
+) => {
+  const { Skia } = ctx;
+  ctx.save();
+  processChildren();
+  const pe1 = ctx.pathEffects.popAllAsOne();
+  ctx.restore();
+  ctx.pathEffects.push(pe1 ? Skia.PathEffect.MakeCompose(pe, pe1) : pe);
+};
 
 export const makeDiscretePathEffect = (
   ctx: DeclarationContext,
