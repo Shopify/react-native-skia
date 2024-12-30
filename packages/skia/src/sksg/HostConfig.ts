@@ -55,7 +55,6 @@ const isDeclaration = (type: NodeType) => {
     type === NodeType.Line2DPathEffect ||
     // Mixed
     type === NodeType.Blend ||
-    type === NodeType.BoxShadow ||
     // Paint
     type === NodeType.Paint
   );

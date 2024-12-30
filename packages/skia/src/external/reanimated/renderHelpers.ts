@@ -6,8 +6,8 @@ import type { Node } from "../../dom/types";
 
 import Rea from "./ReanimatedProxy";
 
-let HAS_REANIMATED = false;
-let HAS_REANIMATED_3 = false;
+export let HAS_REANIMATED = false;
+export let HAS_REANIMATED_3 = false;
 try {
   require("react-native-reanimated");
   HAS_REANIMATED = true;
