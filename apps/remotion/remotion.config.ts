@@ -21,12 +21,12 @@ Config.overrideWebpackConfig((currentConfiguration) => {
     test: /\.js$/,
     exclude: /node_modules\/(?!@react-native)/,
     use: {
-      loader: 'babel-loader',
+      loader: "babel-loader",
       options: {
-        presets: ['@babel/preset-flow'],
-        plugins: ['@babel/plugin-transform-flow-strip-types']
-      }
-    }
+        presets: ["@babel/preset-flow"],
+        plugins: ["@babel/plugin-transform-flow-strip-types"],
+      },
+    },
   });
   currentConfiguration.plugins!.push(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -43,10 +43,13 @@ Config.overrideWebpackConfig((currentConfiguration) => {
   if (!currentConfiguration.resolve.alias) {
     currentConfiguration.resolve.alias = {};
   }
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
   currentConfiguration.resolve.alias["react-native-reanimated"] = false;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
-  currentConfiguration.resolve.alias["react-native-reanimated/package.json"] = false;
+  currentConfiguration.resolve.alias["react-native-reanimated/package.json"] =
+    false;
   return {
     ...currentConfiguration,
     resolve: {

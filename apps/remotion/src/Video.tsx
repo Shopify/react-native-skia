@@ -6,7 +6,6 @@ import {
 } from "./Playground";
 import { CANVAS, fps } from "./components/Theme";
 
-
 const { width, height } = CANVAS;
 
 export const RemotionVideo = () => {

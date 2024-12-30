@@ -1,16 +1,11 @@
-import { vec, Fill } from "@shopify/react-native-skia";
+import { Fill } from "@shopify/react-native-skia";
 
 import { Background, Canvas } from "../components";
 import {
-  useAnimation,
   makeAnimation,
   stagger,
   timing,
 } from "../components/animations/Animations";
-import { useImages } from "../components/Canvas";
-
-import { Tile } from "./components/Tile";
-
 const duration = 20;
 
 const playground = {
@@ -48,15 +43,6 @@ const state = makeAnimation(function* ({
 },
 playground);
 
-const remotionPos = vec(50, 565);
-const skiaPos = vec(1220, 565);
-const expoPos = vec(50, 50);
-const snackPos = vec(1945, 50);
-const webPos = vec(2679, 565);
-const uiPos = vec(50, 1645);
-const reconcilerPos = vec(1001, 1645);
-const picturesPos = vec(1952, 1645);
-
 export const durationInFrames = state.duration;
 
 export const Playground = () => {
@@ -64,9 +50,7 @@ export const Playground = () => {
     <>
       <Canvas
         typefaces={{ RubikMedium: require("./assets/Rubik-Medium.otf") }}
-        images={{
-     
-        }}
+        images={{}}
       >
         <Fill color="black" />
         <Tiles />
@@ -76,7 +60,6 @@ export const Playground = () => {
 };
 
 const Tiles = () => {
-
   return (
     <>
       <Background />

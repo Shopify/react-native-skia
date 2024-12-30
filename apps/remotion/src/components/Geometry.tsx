@@ -92,7 +92,8 @@ export const splitCanvas = (ratio: number) => [
 ];
 
 export const zoomTo = (dst: SkRect) => {
-  const transform = fitbox("cover", dst, CANVAS);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transform = fitbox("cover", dst, CANVAS) as any;
   let matrix = translate(transform[0].translateX, transform[1].translateY);
   matrix = multiply4(matrix, scale(transform[2].scaleX, transform[3].scaleY));
   return matrix;
