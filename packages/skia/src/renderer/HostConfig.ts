@@ -1,5 +1,5 @@
 /*global NodeJS*/
-import type { HostConfig } from "react-reconciler";
+import type { Fiber, HostConfig } from "react-reconciler";
 import { DefaultEventPriority } from "react-reconciler/constants";
 
 import type { NodeType, Node } from "../dom/types";
@@ -243,10 +243,16 @@ export const skHostConfig: SkiaHostConfig = {
     insertBefore(parent, child, before);
   },
   // see https://github.com/pmndrs/react-three-fiber/pull/2360#discussion_r916356874
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
   getCurrentEventPriority: () => DefaultEventPriority,
   beforeActiveInstanceBlur: () => {},
   afterActiveInstanceBlur: () => {},
   detachDeletedInstance: () => {},
+
+  getInstanceFromNode: function (_node): Fiber | null | undefined {
+    return null;
+  },
+  prepareScopeUpdate: function (_scopeInstance, _instance): void {},
+  getInstanceFromScope: function (_scopeInstance): Instance | null {
+    return null;
+  },
 };
