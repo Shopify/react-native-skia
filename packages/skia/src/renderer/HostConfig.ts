@@ -242,18 +242,17 @@ export const skHostConfig: SkiaHostConfig = {
     insertBefore(parent, child, before);
   },
 
+  // see https://github.com/pmndrs/react-three-fiber/pull/2360#discussion_r916356874
   getCurrentEventPriority: () => DefaultEventPriority,
   beforeActiveInstanceBlur: () => {},
   afterActiveInstanceBlur: () => {},
   detachDeletedInstance: () => {},
 
   getInstanceFromNode: function (_node): Fiber | null | undefined {
-    throw new Error("Function not implemented.");
+    return null;
   },
-  prepareScopeUpdate: function (_scopeInstance, _instance): void {
-    throw new Error("Function not implemented.");
-  },
+  prepareScopeUpdate: function (_scopeInstance, _instance): void {},
   getInstanceFromScope: function (_scopeInstance): Instance | null {
-    throw new Error("Function not implemented.");
+    return null;
   },
 };
