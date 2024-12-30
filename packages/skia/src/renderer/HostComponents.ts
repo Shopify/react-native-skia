@@ -57,8 +57,6 @@ import type {
   BlendProps,
   MorphologyImageFilterProps,
 } from "../dom/types/ImageFilters";
-import type { SkRect, SkRRect } from "../skia/types";
-import type { JsiDrawingNode } from "../dom/nodes/DrawingNode";
 
 import type { Container } from "./Container";
 import { exhaustiveCheck } from "./typeddash";
@@ -66,10 +64,8 @@ import type { SkiaProps } from "./processors";
 
 declare global {
   var SkiaDomApi: {
-    RectNode: (props: RectProps) => JsiDrawingNode<RectProps, SkRect>;
-    RRectNode: (
-      props: RoundedRectProps
-    ) => JsiDrawingNode<RoundedRectProps, SkRRect>;
+    RectNode: (props: RectProps) => RenderNode<RectProps>;
+    RRectNode: (props: RoundedRectProps) => RenderNode<RoundedRectProps>;
     GroupNode: (props: GroupProps) => RenderNode<GroupProps>;
     PaintNode: (props: PaintProps) => DeclarationNode<PaintProps>;
     FillNode: (props: PaintProps) => RenderNode<PaintProps>;

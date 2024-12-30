@@ -1,13 +1,11 @@
 import { JsiSkDOM } from "../dom/nodes";
 import type {
-  GroupProps,
-  DrawingContext,
-  RenderNode,
+  Node,
   SkDOM,
 } from "../dom/types";
 
 export class Container {
-  private _root: RenderNode<GroupProps>;
+  private _root: Node<unknown>;
   public Sk: SkDOM;
   public unmounted = false;
   constructor(
@@ -18,9 +16,6 @@ export class Container {
     this._root = this.Sk.Group();
   }
 
-  draw(ctx: DrawingContext) {
-    this._root.render(ctx);
-  }
 
   get root() {
     return this._root;
