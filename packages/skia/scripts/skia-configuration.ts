@@ -21,7 +21,7 @@ const NoParagraphArgs = [
 
 // To build the paragraph API:
 // On Android: we use system ICU
-// On iOS: we use libgrapheme
+// On Apple: we use libgrapheme
 const CommonParagraphArgs = [
   ["skia_enable_skparagraph", true],
   ["skia_use_system_icu", false],
@@ -36,7 +36,7 @@ const ParagraphArgsAndroid = BUILD_WITH_PARAGRAPH
     ]
   : NoParagraphArgs;
 
-const ParagraphArgsIOS = BUILD_WITH_PARAGRAPH
+const ParagraphArgsApple = BUILD_WITH_PARAGRAPH
   ? [
       ...CommonParagraphArgs,
       ["skia_use_icu", false],
@@ -45,7 +45,7 @@ const ParagraphArgsIOS = BUILD_WITH_PARAGRAPH
     ]
   : NoParagraphArgs;
 
-const ParagraphIOS = BUILD_WITH_PARAGRAPH
+const ParagraphApple = BUILD_WITH_PARAGRAPH
   ? ["libskparagraph.a", "libskunicode_core.a", "libskunicode_libgrapheme.a"]
   : [];
 
@@ -81,12 +81,13 @@ export const commonArgs = [
   ["skia_use_dawn", GRAPHITE],
 ];
 
-export type PlatformName = "ios" | "android";
+export type PlatformName = "apple" | "android";
 
 type Arg = (string | boolean | number)[];
 export type Target = {
   args?: Arg[];
   cpu: string;
+  platform?: string;
   output?: string;
   options?: Arg[];
 };
@@ -105,18 +106,22 @@ export const configurations = {
   android: {
     targets: {
       arm: {
+        platform: "android",
         cpu: "arm",
         output: "armeabi-v7a",
       },
       arm64: {
+        platform: "android",
         cpu: "arm64",
         output: "arm64-v8a",
       },
       x86: {
+        platform: "android",
         cpu: "x86",
         output: "x86",
       },
       x64: {
+        platform: "android",
         cpu: "x64",
         output: "x86_64",
       },
@@ -145,10 +150,11 @@ export const configurations = {
       ...DawnOutput,
     ],
   },
-  ios: {
+  apple: {
     targets: {
       "arm64-iphoneos": {
         cpu: "arm64",
+        platform: "ios",
         args: [
           ["ios_min_target", iosMinTarget],
           ["extra_cflags", '["-target", "arm64-apple-ios"]'],
@@ -158,6 +164,7 @@ export const configurations = {
       },
       "arm64-iphonesimulator": {
         cpu: "arm64",
+        platform: "ios",
         args: [
           ["ios_min_target", iosMinTarget],
           ["extra_cflags", '["-target", "arm64-apple-ios-simulator"]'],
@@ -166,30 +173,41 @@ export const configurations = {
           ["ios_use_simulator", true],
         ],
       },
-      x64: {
+      "x64-iphonesimulator": {
         cpu: "x64",
+        platform: "ios",
         args: [
           ["ios_min_target", iosMinTarget],
-          ["extra_cflags", '["-target", "arm64-apple-ios-simulator"]'],
-          ["extra_asmflags", '["-target", "arm64-apple-ios-simulator"]'],
-          ["extra_ldflags", '["-target", "arm64-apple-ios-simulator"]'],
+          ["extra_cflags", '["-target", "x64-apple-ios-simulator"]'],
+          ["extra_asmflags", '["-target", "x64-apple-ios-simulator"]'],
+          ["extra_ldflags", '["-target", "x64-apple-ios-simulator"]'],
         ],
+      },
+      "arm64-macosx": {
+        platformGroup: "macosx",
+        cpu: "arm64",
+        platform: "mac",
+      },
+      "x64-macosx": {
+        platformGroup: "macosx",
+        cpu: "x64",
+        platform: "mac",
       },
     },
     args: [
       ["skia_use_metal", true],
       ["cc", '"clang"'],
       ["cxx", '"clang++"'],
-      ...ParagraphArgsIOS,
+      ...ParagraphArgsApple,
     ],
-    outputRoot: "libs/ios",
+    outputRoot: "libs/apple",
     outputNames: [
       "libskia.a",
       "libskshaper.a",
       "libsvg.a",
       "libskottie.a",
       "libsksg.a",
-      ...ParagraphIOS,
+      ...ParagraphApple,
       ...DawnOutput,
     ],
   },
