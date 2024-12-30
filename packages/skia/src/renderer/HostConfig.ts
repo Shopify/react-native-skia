@@ -78,7 +78,6 @@ export const skHostConfig: SkiaHostConfig = {
   /**
    * This function is used by the reconciler in order to calculate current time for prioritising work.
    */
-  now: Date.now,
   supportsMutation: true,
   isPrimaryRenderer: false,
   supportsPersistence: false,
@@ -242,6 +241,7 @@ export const skHostConfig: SkiaHostConfig = {
   insertBefore: (parent, child, before) => {
     insertBefore(parent, child, before);
   },
+
   // see https://github.com/pmndrs/react-three-fiber/pull/2360#discussion_r916356874
   getCurrentEventPriority: () => DefaultEventPriority,
   beforeActiveInstanceBlur: () => {},

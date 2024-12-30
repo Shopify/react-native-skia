@@ -8,15 +8,13 @@ import type { Server, WebSocket } from "ws";
 
 import type * as SkiaExports from "../../index";
 import { JsiSkApi } from "../../skia/web/JsiSkia";
-import type { Node } from "../../dom/nodes";
-import { JsiSkDOM } from "../../dom/nodes";
 import { Group } from "../components";
 import type { SkImage, SkFont, Skia, SkCanvas } from "../../skia/types";
 import { isPath } from "../../skia/types";
 import { E2E } from "../../__tests__/setup";
-import { SkiaRoot } from "../Reconciler";
-import { JsiDrawingContext } from "../../dom/types/DrawingContext";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
+import { SkiaSGRoot } from "../../sksg/Reconciler";
+import type { Node } from "../../sksg/nodes";
 
 import { SkiaObject } from "./e2e/setup";
 
@@ -172,11 +170,6 @@ export const importSkia = (): typeof SkiaExports => {
   };
 };
 
-export const getSkDOM = () => {
-  const { Skia } = importSkia();
-  return new JsiSkDOM({ Skia }, false);
-};
-
 export const PIXEL_RATIO = 3;
 export const fontSize = 32 * PIXEL_RATIO;
 export const width = 256 * PIXEL_RATIO;
@@ -197,21 +190,20 @@ export const mountCanvas = (element: ReactNode) => {
   expect(ckSurface).toBeDefined();
   const canvas = ckSurface.getCanvas();
 
-  const root = new SkiaRoot(Skia, false);
+  const root = new SkiaSGRoot(Skia);
   root.render(element);
   return {
     surface: ckSurface,
     root,
     draw: () => {
-      const ctx = new JsiDrawingContext(Skia, canvas);
-      root.dom.render(ctx);
+      root.drawOnCanvas(canvas);
     },
   };
 };
 
 export const serialize = (element: ReactNode) => {
   const { root } = mountCanvas(element);
-  const serialized = serializeNode(root.dom);
+  const serialized = serializeNode(root.sg);
   return JSON.stringify(serialized);
 };
 
@@ -228,6 +220,8 @@ interface SerializedNode {
 const serializeSkOjects = (obj: any): any => {
   if (typeof obj === "function") {
     return { __typename__: "Function", source: `${obj.toString()}` };
+  } else if (obj instanceof Float32Array) {
+    return { __typename__: "Float32Array", value: Array.from(obj) };
   } else if (Array.isArray(obj)) {
     return obj.map((item) => serializeSkOjects(item));
   } else if (obj && typeof obj === "object" && "__typename__" in obj) {
@@ -316,7 +310,7 @@ const serializeSkOjects = (obj: any): any => {
 
 const serializeNode = (node: Node<any>): SerializedNode => {
   const props: any = {};
-  const ogProps = node.getProps();
+  const ogProps = node.props;
   if (ogProps) {
     Object.keys(ogProps)
       .filter((key) => key !== "children")
@@ -327,7 +321,7 @@ const serializeNode = (node: Node<any>): SerializedNode => {
   return {
     type: node.type,
     props,
-    children: node.children().map((child) => serializeNode(child)),
+    children: node.children.map((child) => serializeNode(child)),
   };
 };
 

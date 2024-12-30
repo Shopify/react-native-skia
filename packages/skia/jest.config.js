@@ -6,7 +6,7 @@ module.exports = {
   // not be probed for tests
   modulePathIgnorePatterns: [
     "<rootDir>/lib",
-    "(setup)|(setup.(ts|tsx))$|globalSetup.ts|globalTeardown.ts",
+    "(setup)|(setup.(ts|tsx))$|globalSetup.ts|globalTeardown.ts|MockDeclaration.ts",
   ],
   transform: {
     "^.+\\.(ts|tsx)$": ["ts-jest", { tsconfig: "./tsconfig.test.json" }],

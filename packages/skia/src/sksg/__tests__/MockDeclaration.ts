@@ -1,16 +1,47 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "worklet";
 
-import type {
-  SkShader,
-  SkPaint,
-  SkImageFilter,
-  SkMaskFilter,
-  SkPathEffect,
-  Skia,
-  SkColorFilter,
-} from "../../skia/types";
+export enum DeclarationType {
+  ColorFilter,
+  ImageFilter,
+  Shader,
+  MaskFilter,
+  PathEffect,
+  Paint,
+}
+
+interface Filter {
+  tag: string;
+}
+
+export interface SkColorFilter extends Filter {
+  type: DeclarationType.ColorFilter;
+}
+
+interface SkImageFilter extends Filter {
+  type: DeclarationType.ImageFilter;
+}
+
+interface SkShader extends Filter {
+  type: DeclarationType.Shader;
+}
+
+interface SkMaskFilter extends Filter {
+  type: DeclarationType.MaskFilter;
+}
+
+interface SkPathEffect extends Filter {
+  type: DeclarationType.PathEffect;
+}
+
+interface SkPaint extends Filter {
+  type: DeclarationType.Paint;
+}
 
 type Composer<T> = (outer: T, inner: T) => T;
+export const compose: any = <T extends Filter>(outer: T, inner: T) => ({
+  tag: `Compose(${outer.tag}, ${inner.tag})`,
+});
 
 export const composeDeclarations = <T>(filters: T[], composer: Composer<T>) => {
   if (filters.length <= 1) {
@@ -24,10 +55,10 @@ export const composeDeclarations = <T>(filters: T[], composer: Composer<T>) => {
   });
 };
 
-class Declaration<T> {
-  private decls: T[] = [];
-  private indexes = [0];
-  private composer?: Composer<T>;
+class Declaration<T extends Filter> {
+  public decls: T[] = [];
+  public indexes = [0];
+  public composer?: Composer<T>;
 
   constructor(composer?: Composer<T>) {
     this.composer = composer;
@@ -70,7 +101,6 @@ class Declaration<T> {
 }
 
 export class DeclarationContext {
-  public Skia: Skia;
   readonly paints: Declaration<SkPaint>;
   readonly maskFilters: Declaration<SkMaskFilter>;
   readonly shaders: Declaration<SkShader>;
@@ -78,15 +108,10 @@ export class DeclarationContext {
   readonly imageFilters: Declaration<SkImageFilter>;
   readonly colorFilters: Declaration<SkColorFilter>;
 
-  constructor(Skia: Skia) {
-    this.Skia = Skia;
-    const peComp = this.Skia.PathEffect.MakeCompose.bind(this.Skia.PathEffect);
-    const ifComp = this.Skia.ImageFilter.MakeCompose.bind(
-      this.Skia.ImageFilter
-    );
-    const cfComp = this.Skia.ColorFilter.MakeCompose.bind(
-      this.Skia.ColorFilter
-    );
+  constructor() {
+    const peComp: Composer<SkPathEffect> = compose;
+    const ifComp: Composer<SkImageFilter> = compose;
+    const cfComp: Composer<SkColorFilter> = compose;
     this.paints = new Declaration<SkPaint>();
     this.maskFilters = new Declaration<SkMaskFilter>();
     this.shaders = new Declaration<SkShader>();

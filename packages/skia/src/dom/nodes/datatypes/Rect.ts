@@ -7,18 +7,19 @@ import type { RectCtor, RectDef, RRectCtor, RRectDef } from "../../types";
 import { processRadius } from "./Radius";
 
 export const isEdge = (pos: Vector, b: SkRect) => {
-  "worklet";
   return (
     pos.x === b.x || pos.y === b.y || pos.x === b.width || pos.y === b.height
   );
 };
 
 // We have an issue to check property existence on JSI backed instances
-const isRRectCtor = (def: RRectDef): def is RRectCtor =>
-  (def as any).rect === undefined;
+const isRRectCtor = (def: RRectDef): def is RRectCtor => {
+  return (def as any).rect === undefined;
+};
 // We have an issue to check property existence on JSI backed instances
-const isRectCtor = (def: RectDef): def is RectCtor =>
-  (def as any).rect === undefined;
+const isRectCtor = (def: RectDef): def is RectCtor => {
+  return (def as any).rect === undefined;
+};
 
 export const processRect = (Skia: Skia, def: RectDef) => {
   if (isRectCtor(def)) {
