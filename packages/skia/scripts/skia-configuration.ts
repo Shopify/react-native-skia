@@ -155,9 +155,7 @@ export const configurations = {
       "arm64-iphoneos": {
         cpu: "arm64",
         platform: "ios",
-        args: [
-          ["ios_min_target", iosMinTarget]
-        ],
+        args: [["ios_min_target", iosMinTarget]],
       },
       "arm64-iphonesimulator": {
         cpu: "arm64",
@@ -170,9 +168,7 @@ export const configurations = {
       "x64-iphonesimulator": {
         cpu: "x64",
         platform: "ios",
-        args: [
-          ["ios_min_target", iosMinTarget]
-        ],
+        args: [["ios_min_target", iosMinTarget]],
       },
       "arm64-macosx": {
         platformGroup: "macosx",
