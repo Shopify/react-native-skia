@@ -4,9 +4,9 @@
   "description": "My Remotion video",
   "scripts": {
     "start": "remotion preview src/index.tsx",
-    "build": "remotion render src/index.tsx HelloGPU current.mov --gl=angle --pixel-format=yuva444p10le --codec=prores --prores-profile=4444",
+    "build": "remotion render src/index.tsx Playground current.mov --gl=angle --pixel-format=yuva444p10le --codec=prores --prores-profile=4444",
     "upgrade": "remotion upgrade",
-    "build:sequence": "remotion render src/index.tsx HelloGPU stills --sequence --gl=angle",
+    "build:sequence": "remotion render src/index.tsx Playground stills --sequence --gl=angle",
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --cache",
     "test": "jest",
     "ci": "yarn lint && yarn tsc && yarn test"
