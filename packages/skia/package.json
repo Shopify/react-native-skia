@@ -95,7 +95,7 @@
     "@types/pixelmatch": "5.2.4",
     "@types/pngjs": "6.0.1",
     "@types/react": "^18.2.6",
-    "@types/react-reconciler": "0.26.7",
+    "@types/react-reconciler": "0.28.9",
     "@types/ws": "8.5.3",
     "eslint": "8",
     "eslint-config-react-native-wcandillon": "^3.10.2",
