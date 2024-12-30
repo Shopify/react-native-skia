@@ -38,7 +38,7 @@ const useOnSizeEvent = (
   );
 };
 
-export interface CanvasProps extends ViewProps {
+export interface Canvas2Props extends ViewProps {
   debug?: boolean;
   opaque?: boolean;
   onSize?: SharedValue<SkSize>;
@@ -55,7 +55,7 @@ export const Canvas2 = forwardRef(
       onSize,
       onLayout: _onLayout,
       ...viewProps
-    }: CanvasProps,
+    }: Canvas2Props,
     ref
   ) => {
     const rafId = useRef<number | null>(null);
