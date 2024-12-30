@@ -1,4 +1,5 @@
 "worklet";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Skia, SkRect, SkRRect, Vector } from "../../../skia/types";
 import type { RectCtor, RectDef, RRectCtor, RRectDef } from "../../types";
@@ -70,4 +71,35 @@ export const processRRect = (Skia: Skia, def: RRectDef) => {
   } else {
     return def.rect;
   }
+};
+
+export const inflate = (
+  Skia: Skia,
+  box: SkRRect,
+  dx: number,
+  dy: number,
+  tx = 0,
+  ty = 0
+) => {
+  return Skia.RRectXY(
+    Skia.XYWHRect(
+      box.rect.x - dx + tx,
+      box.rect.y - dy + ty,
+      box.rect.width + 2 * dx,
+      box.rect.height + 2 * dy
+    ),
+    box.rx + dx,
+    box.ry + dy
+  );
+};
+
+export const deflate = (
+  Skia: Skia,
+  box: SkRRect,
+  dx: number,
+  dy: number,
+  tx = 0,
+  ty = 0
+) => {
+  return inflate(Skia, box, -dx, -dy, tx, ty);
 };
