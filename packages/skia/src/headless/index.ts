@@ -4,9 +4,8 @@ import CanvasKitInit from "canvaskit-wasm/bin/full/canvaskit";
 import type { ReactNode } from "react";
 
 import { JsiSkApi } from "../skia/web";
-import { SkiaRoot } from "../renderer/Reconciler";
-import { JsiDrawingContext } from "../dom/types";
 import type { SkSurface } from "../skia";
+import { SkiaSGRoot } from "../sksg/Reconciler";
 
 export * from "../renderer/components";
 
@@ -31,11 +30,10 @@ export const getSkiaExports = () => {
 };
 
 export const drawOffscreen = (surface: SkSurface, element: ReactNode) => {
-  const root = new SkiaRoot(Skia, false);
+  const root = new SkiaSGRoot(Skia);
   root.render(element);
   const canvas = surface.getCanvas();
-  const ctx = new JsiDrawingContext(Skia, canvas);
-  root.dom.render(ctx);
+  root.drawOnCanvas(canvas);
   root.unmount();
   surface.flush();
   return surface.makeImageSnapshot();

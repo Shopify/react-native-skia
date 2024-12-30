@@ -1,11 +1,9 @@
 import type { ReactElement } from "react";
 
-import { JsiDrawingContext } from "../dom/types";
 import type { SkPicture, SkRect, SkSize } from "../skia/types";
 import { Skia } from "../skia";
 import { Platform } from "../Platform";
-
-import { SkiaRoot } from "./Reconciler";
+import { SkiaSGRoot } from "../sksg/Reconciler";
 
 // We call it main thread because on web main is JS thread
 export const isOnMainThread = () => {
@@ -19,10 +17,9 @@ export const isOnMainThread = () => {
 export const drawAsPicture = (element: ReactElement, bounds?: SkRect) => {
   const recorder = Skia.PictureRecorder();
   const canvas = recorder.beginRecording(bounds);
-  const root = new SkiaRoot(Skia, false);
+  const root = new SkiaSGRoot(Skia);
   root.render(element);
-  const ctx = new JsiDrawingContext(Skia, canvas);
-  root.dom.render(ctx);
+  root.drawOnCanvas(canvas);
   const picture = recorder.finishRecordingAsPicture();
   root.unmount();
   return picture;

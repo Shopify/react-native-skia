@@ -74,7 +74,7 @@ export const Canvas = forwardRef<SkiaDomView, CanvasProps>(
     }, [innerRef]);
 
     const root = useMemo(
-      () => new SkiaRoot(Skia, NATIVE_DOM, redraw, getNativeId),
+      () => new SkiaRoot(redraw, getNativeId),
       [redraw, getNativeId]
     );
 
