@@ -103,7 +103,6 @@ const parseProp = (value: any, assets: Assets): any => {
     Object.keys(value).forEach((key) => {
       parsed[key] = parseProp(value[key], assets);
     });
-    console.log({ parsed });
     return parsed;
   }
   return value;

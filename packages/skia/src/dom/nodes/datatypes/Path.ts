@@ -16,5 +16,6 @@ export const processPath = (Skia: Skia, rawPath: PathDef) => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const isPathDef = (def: any): def is PathDef =>
-  typeof def === "string" || isPath(def);
+export const isPathDef = (def: any): def is PathDef => {
+  return typeof def === "string" || isPath(def);
+};

@@ -1,8 +1,4 @@
-export type SharedValueType<T = number> = {
-  value: T;
-};
-
-export type AnimatedProp<T> = T | SharedValueType<T>;
+export type AnimatedProp<T> = T | { value: T };
 
 export type AnimatedProps<T, O extends keyof T | never = never> = {
   [K in keyof T]: K extends "children"
