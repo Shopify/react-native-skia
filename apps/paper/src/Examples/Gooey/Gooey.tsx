@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import type { SkPath, Vector } from "@shopify/react-native-skia";
 import {
+  Canvas,
   Fill,
   Skia,
   vec,
@@ -12,7 +13,6 @@ import {
   Circle,
   Blur,
   ColorMatrix,
-  Canvas,
 } from "@shopify/react-native-skia";
 import { View, useWindowDimensions } from "react-native";
 import type { SharedValue } from "react-native-reanimated";

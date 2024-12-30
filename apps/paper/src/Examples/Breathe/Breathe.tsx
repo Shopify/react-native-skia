@@ -3,13 +3,12 @@ import { StyleSheet, useWindowDimensions, View } from "react-native";
 import {
   BlurMask,
   vec,
+  Canvas,
   Circle,
   Fill,
   Group,
   polar2Canvas,
   mix,
-  Canvas,
-  ColorMatrix,
 } from "@shopify/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
 import { useDerivedValue } from "react-native-reanimated";
@@ -18,10 +17,6 @@ import { useLoop } from "../../components/Animations";
 
 const c1 = "#61bea2";
 const c2 = "#529ca0";
-
-const purple = [
-  1, -0.2, 0, 0, 0, 0, 1, 0, -0.1, 0, 0, 1.2, 1, 0.1, 0, 0, 0, 1.7, 1, 0,
-];
 
 interface RingProps {
   index: number;
@@ -77,7 +72,6 @@ export const Breathe = () => {
         <Fill color="rgb(36,43,56)" />
         <Group origin={center} transform={transform} blendMode="screen">
           <BlurMask style="solid" blur={40} />
-          <ColorMatrix matrix={purple} />
           {new Array(6).fill(0).map((_, index) => {
             return <Ring key={index} index={index} progress={progress} />;
           })}
