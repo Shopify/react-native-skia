@@ -64,10 +64,6 @@ import type { Container } from "./Container";
 import { exhaustiveCheck } from "./typeddash";
 import type { SkiaProps } from "./processors";
 
-// This flag should only be turned on for debugging/testing
-const shouldUseJSDomOnNative = false;
-export const NATIVE_DOM = shouldUseJSDomOnNative ? false : !!global.SkiaDomApi;
-
 declare global {
   var SkiaDomApi: {
     RectNode: (props: RectProps) => JsiDrawingNode<RectProps, SkRect>;
