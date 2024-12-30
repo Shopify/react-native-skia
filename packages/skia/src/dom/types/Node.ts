@@ -1,7 +1,6 @@
 import type { GroupProps } from "./Common";
 import type { NodeType } from "./NodeType";
 import type { DeclarationContext } from "./DeclarationContext";
-import type { DrawingContext } from "./DrawingContext";
 
 export interface Node<P> {
   type: NodeType;
@@ -25,6 +24,4 @@ export interface DeclarationNode<P> extends Node<P> {
   setInvalidate(invalidate: Invalidate): void;
 }
 
-export interface RenderNode<P extends GroupProps> extends Node<P> {
-  render(ctx: DrawingContext): void;
-}
+export type RenderNode<P extends GroupProps> = Node<P>;

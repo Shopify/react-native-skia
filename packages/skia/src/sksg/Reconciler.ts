@@ -20,7 +20,7 @@ export class SkiaSGRoot {
   private root: OpaqueRoot;
   private container: Container;
 
-  constructor(Skia: Skia, nativeId = -1) {
+  constructor(public Skia: Skia, nativeId = -1) {
     this.container = new Container(Skia, nativeId);
     this.root = skiaReconciler.createContainer(
       this.container,
@@ -48,6 +48,13 @@ export class SkiaSGRoot {
 
   drawOnCanvas(canvas: SkCanvas) {
     this.container.drawOnCanvas(canvas);
+  }
+
+  getPicture() {
+    const recorder = this.Skia.PictureRecorder();
+    const canvas = recorder.beginRecording();
+    this.drawOnCanvas(canvas);
+    return recorder.finishRecordingAsPicture();
   }
 
   unmount() {
