@@ -1,3 +1,5 @@
+"worklet";
+
 import type { Skia } from "../../../skia/types";
 import { isPath } from "../../../skia/types";
 import type { PathDef } from "../../types";

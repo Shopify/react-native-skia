@@ -16,7 +16,7 @@ It can apply the following operations to its children:
 
 | Name        | Type                | Description                                                                                                                                                                                                           |
 | :---------- | :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| transform?  | `Transform2d`       | [Same API that's in React Native](https://reactnative.dev/docs/transforms). The default origin of the transformation is, however, different. It is the center object in React Native and the top-left corner in Skia. |
+| transform?  | `Transform2d` | [Same API that's in React Native](https://reactnative.dev/docs/transforms) except for two differences: the default origin of the transformation is at the top-left corner (React Native views use the center), and all rotations are in radians. |
 | origin?     | `Point`             | Sets the origin of the transformation. This property is not inherited by its children.                                                                                                                                |
 | clip?       | `RectOrRRectOrPath` | Rectangle, rounded rectangle, or Path to use to clip the children.                                                                                                                                                    |
 | invertClip? | `boolean`           | Invert the clipping region: parts outside the clipping region will be shown and, inside will be hidden.                                                                                                               |
@@ -57,6 +57,7 @@ export const PaintDemo = () => {
 The transform property is identical to its [homonymous property in React Native](https://reactnative.dev/docs/transforms) except for one significant difference: in React Native, the origin of transformation is the center of the object, whereas it is the top-left position of the object in Skia.
 
 The origin property is a helper to set the origin of the transformation. This property is not inherited by its children.
+All rotations are in radians.
 
 ### Simple Transformation
 
