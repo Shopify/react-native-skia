@@ -1,5 +1,3 @@
-"worklet";
-
 import {
   enumKey,
   isPathDef,
@@ -34,6 +32,7 @@ const computeClip = (
   | { clipPath: SkPath }
   | { clipRect: SkRect }
   | { clipRRect: SkRRect } => {
+  "worklet";
   if (clip) {
     if (isPathDef(clip)) {
       return { clipPath: processPath(Skia, clip) };
@@ -50,6 +49,7 @@ const processColor = (
   Skia: Skia,
   color: number | string | Float32Array | number[]
 ) => {
+  "worklet";
   if (typeof color === "string" || typeof color === "number") {
     return Skia.Color(color);
   } else if (Array.isArray(color) || color instanceof Float32Array) {
@@ -62,6 +62,7 @@ const processColor = (
 };
 
 export const createDrawingContext = (Skia: Skia, canvas: SkCanvas) => {
+  "worklet";
   const state = {
     paints: [Skia.Paint()],
   };

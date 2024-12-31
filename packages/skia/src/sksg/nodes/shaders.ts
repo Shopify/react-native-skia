@@ -1,5 +1,3 @@
-"worklet";
-
 import {
   enumKey,
   fitRects,
@@ -28,6 +26,7 @@ import {
 import type { DeclarationContext } from "../DeclarationContext";
 
 export const declareShader = (ctx: DeclarationContext, props: ShaderProps) => {
+  "worklet";
   const { source, uniforms, ...transform } = props;
   const m3 = ctx.Skia.Matrix();
   processTransformProps(m3, transform);
@@ -43,6 +42,7 @@ export const declareColorShader = (
   ctx: DeclarationContext,
   props: ColorProps
 ) => {
+  "worklet";
   const { color } = props;
   const shader = ctx.Skia.Shader.MakeColor(ctx.Skia.Color(color));
   ctx.shaders.push(shader);
@@ -52,6 +52,7 @@ export const declareFractalNoiseShader = (
   ctx: DeclarationContext,
   props: FractalNoiseProps
 ) => {
+  "worklet";
   const { freqX, freqY, octaves, seed, tileWidth, tileHeight } = props;
   const shader = ctx.Skia.Shader.MakeFractalNoise(
     freqX,
@@ -68,6 +69,7 @@ export const declareTwoPointConicalGradientShader = (
   ctx: DeclarationContext,
   props: TwoPointConicalGradientProps
 ) => {
+  "worklet";
   const { startR, endR, start, end } = props;
   const { colors, positions, mode, localMatrix, flags } = processGradientProps(
     ctx.Skia,
@@ -91,6 +93,7 @@ export const declareRadialGradientShader = (
   ctx: DeclarationContext,
   props: RadialGradientProps
 ) => {
+  "worklet";
   const { c, r } = props;
   const { colors, positions, mode, localMatrix, flags } = processGradientProps(
     ctx.Skia,
@@ -112,6 +115,7 @@ export const declareSweepGradientShader = (
   ctx: DeclarationContext,
   props: SweepGradientProps
 ) => {
+  "worklet";
   const { c, start, end } = props;
   const { colors, positions, mode, localMatrix, flags } = processGradientProps(
     ctx.Skia,
@@ -135,6 +139,7 @@ export const declareLinearGradientShader = (
   ctx: DeclarationContext,
   props: LinearGradientProps
 ) => {
+  "worklet";
   const { start, end } = props;
   const { colors, positions, mode, localMatrix, flags } = processGradientProps(
     ctx.Skia,
@@ -156,6 +161,7 @@ export const declareTurbulenceShader = (
   ctx: DeclarationContext,
   props: TurbulenceProps
 ) => {
+  "worklet";
   const { freqX, freqY, octaves, seed, tileWidth, tileHeight } = props;
   const shader = ctx.Skia.Shader.MakeTurbulence(
     freqX,
@@ -172,6 +178,7 @@ export const declareImageShader = (
   ctx: DeclarationContext,
   props: ImageShaderProps
 ) => {
+  "worklet";
   const { fit, image, tx, ty, fm, mm, ...imageShaderProps } = props;
   if (!image) {
     return;

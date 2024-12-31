@@ -1,5 +1,3 @@
-"worklet";
-
 import type {
   SkShader,
   SkPaint,
@@ -13,6 +11,7 @@ import type {
 type Composer<T> = (outer: T, inner: T) => T;
 
 export const composeDeclarations = <T>(filters: T[], composer: Composer<T>) => {
+  "worklet";
   const len = filters.length;
   if (len <= 1) {
     return filters[0];
@@ -23,6 +22,7 @@ export const composeDeclarations = <T>(filters: T[], composer: Composer<T>) => {
 };
 
 const createDeclaration = <T>(composer?: Composer<T>) => {
+  "worklet";
   const state = {
     decls: [] as T[],
     indexes: [0],
@@ -65,6 +65,7 @@ const createDeclaration = <T>(composer?: Composer<T>) => {
 };
 
 export const createDeclarationContext = (Skia: Skia) => {
+  "worklet";
   const composers = {
     pathEffect: Skia.PathEffect.MakeCompose.bind(Skia.PathEffect),
     imageFilter: Skia.ImageFilter.MakeCompose.bind(Skia.ImageFilter),

@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"worklet";
-
 export enum DeclarationType {
   ColorFilter,
   ImageFilter,

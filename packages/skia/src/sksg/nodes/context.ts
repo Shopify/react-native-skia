@@ -1,4 +1,3 @@
-"worklet";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NodeType } from "../../dom/types";
 import type { DrawingNodeProps } from "../../dom/types";
@@ -13,7 +12,6 @@ import type { Node } from "./Node";
 import {
   drawAtlas,
   drawBox,
-  drawBoxShadow,
   drawCircle,
   drawDiffRect,
   drawFill,
@@ -80,6 +78,7 @@ import {
 } from "./pathEffects";
 
 function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
+  "worklet";
   const processChildren = () =>
     node.children.forEach((child) => processDeclarations(ctx, child));
   const { type } = node;
@@ -251,6 +250,7 @@ const preProcessContext = (
   props: DrawingNodeProps,
   node: Node<any>
 ) => {
+  "worklet";
   const shouldRestoreMatrix = ctx.processMatrixAndClipping(props, props.layer);
   const declCtx = createDeclarationContext(ctx.Skia);
   node.children.forEach((child) => {
@@ -267,6 +267,7 @@ const preProcessContext = (
 };
 
 const drawBackdropFilter = (ctx: DrawingContext, node: Node) => {
+  "worklet";
   const { canvas, Skia } = ctx;
   const child = node.children[0];
   let imageFilter: SkImageFilter | null = null;
@@ -288,6 +289,7 @@ const drawBackdropFilter = (ctx: DrawingContext, node: Node) => {
 };
 
 export function draw(ctx: DrawingContext, node: Node<any>) {
+  "worklet";
   // Special mixed nodes
   if (node.type === NodeType.BackdropFilter) {
     drawBackdropFilter(ctx, node);
@@ -326,9 +328,6 @@ export function draw(ctx: DrawingContext, node: Node<any>) {
     switch (type) {
       case NodeType.Box:
         drawBox(lctx, props, node.children);
-        break;
-      case NodeType.BoxShadow:
-        drawBoxShadow(lctx, props);
         break;
       case NodeType.Image:
         drawImage(lctx, props);

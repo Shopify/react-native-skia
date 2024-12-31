@@ -1,5 +1,3 @@
-"worklet";
-
 import { enumKey, processRadius } from "../../dom/nodes";
 import type {
   BlendImageFilterProps,
@@ -40,6 +38,7 @@ const MakeInnerShadow = (
   color: SkColor,
   input: SkImageFilter | null
 ) => {
+  "worklet";
   const sourceGraphic = Skia.ImageFilter.MakeColorFilter(
     Skia.ColorFilter.MakeBlend(Black, BlendMode.Dst),
     null
@@ -65,6 +64,7 @@ const MakeInnerShadow = (
 };
 
 export const declareBlend = (ctx: DeclarationContext, props: BlendProps) => {
+  "worklet";
   const { Skia } = ctx;
   const blend = BlendMode[enumKey(props.mode as BlendProps["mode"])];
   // Blend ImageFilters
@@ -86,6 +86,7 @@ export const composeImageFilters = (
   imgf1: SkImageFilter,
   processChildren: () => void
 ) => {
+  "worklet";
   const { Skia } = ctx;
   ctx.imageFilters.save();
   ctx.colorFilters.save();
@@ -105,6 +106,7 @@ export const composeImageFilters = (
 };
 
 const input = (ctx: DeclarationContext) => {
+  "worklet";
   return ctx.imageFilters.pop() ?? null;
 };
 
@@ -112,6 +114,7 @@ export const makeOffsetImageFilter = (
   ctx: DeclarationContext,
   props: OffsetImageFilterProps
 ) => {
+  "worklet";
   const { x, y } = props;
   return ctx.Skia.ImageFilter.MakeOffset(x, y, null);
 };
@@ -120,6 +123,7 @@ export const declareDisplacementMapImageFilter = (
   ctx: DeclarationContext,
   props: DisplacementMapImageFilterProps
 ) => {
+  "worklet";
   const { channelX, channelY, scale } = props;
   const shader = ctx.shaders.pop();
   if (!shader) {
@@ -140,6 +144,7 @@ export const makeBlurImageFilter = (
   ctx: DeclarationContext,
   props: BlurImageFilterProps
 ) => {
+  "worklet";
   const { mode, blur } = props;
   const sigma = processRadius(ctx.Skia, blur);
   const imgf = ctx.Skia.ImageFilter.MakeBlur(
@@ -155,6 +160,7 @@ export const makeDropShadowImageFilter = (
   ctx: DeclarationContext,
   props: DropShadowImageFilterProps
 ) => {
+  "worklet";
   const { dx, dy, blur, shadowOnly, color: cl, inner } = props;
   const color = ctx.Skia.Color(cl);
   let factory;
@@ -173,6 +179,7 @@ export const makeMorphologyImageFilter = (
   ctx: DeclarationContext,
   props: MorphologyImageFilterProps
 ) => {
+  "worklet";
   const { operator } = props;
   const r = processRadius(ctx.Skia, props.radius);
   let imgf;
@@ -188,6 +195,7 @@ export const makeRuntimeShaderImageFilter = (
   ctx: DeclarationContext,
   props: RuntimeShaderImageFilterProps
 ) => {
+  "worklet";
   const { source, uniforms } = props;
   const rtb = ctx.Skia.RuntimeShaderBuilder(source);
   if (uniforms) {
@@ -201,6 +209,7 @@ export const declareBlendImageFilter = (
   ctx: DeclarationContext,
   props: BlendImageFilterProps
 ) => {
+  "worklet";
   const { mode } = props;
   const a = ctx.imageFilters.pop();
   const b = ctx.imageFilters.pop();
@@ -215,6 +224,7 @@ export const declareBlurMaskFilter = (
   ctx: DeclarationContext,
   props: BlurMaskFilterProps
 ) => {
+  "worklet";
   const { blur, style, respectCTM } = props;
   const mf = ctx.Skia.MaskFilter.MakeBlur(
     BlurStyle[enumKey(style)],

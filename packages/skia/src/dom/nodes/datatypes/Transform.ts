@@ -1,10 +1,10 @@
-"worklet";
-
 import type { TransformProps } from "../../types";
 import type { Skia, SkMatrix } from "../../../skia/types";
 import { processTransform } from "../../../skia/types";
 
 export const processTransformProps = (m3: SkMatrix, props: TransformProps) => {
+  "worklet";
+
   const { transform, origin, matrix } = props;
   if (matrix) {
     if (origin) {
@@ -26,6 +26,8 @@ export const processTransformProps = (m3: SkMatrix, props: TransformProps) => {
 };
 
 export const processTransformProps2 = (Skia: Skia, props: TransformProps) => {
+  "worklet";
+
   const { transform, origin, matrix } = props;
   if (matrix) {
     const m3 = Skia.Matrix();
