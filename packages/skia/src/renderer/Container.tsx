@@ -1,8 +1,5 @@
 import { JsiSkDOM } from "../dom/nodes";
-import type {
-  Node,
-  SkDOM,
-} from "../dom/types";
+import type { Node, SkDOM } from "../dom/types";
 
 export class Container {
   private _root: Node<unknown>;
@@ -15,7 +12,6 @@ export class Container {
     this.Sk = new JsiSkDOM();
     this._root = this.Sk.Group();
   }
-
 
   get root() {
     return this._root;
