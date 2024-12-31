@@ -10,7 +10,7 @@ import type { LayoutChangeEvent, ViewProps } from "react-native";
 import type { SharedValue } from "react-native-reanimated";
 
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
-import type { SkPicture, SkRect, SkSize } from "../skia/types";
+import type { SkRect, SkSize } from "../skia/types";
 import { SkiaSGRoot } from "../sksg/Reconciler";
 import { Skia } from "../skia";
 import type { SkiaBaseViewProps } from "../views";
@@ -56,7 +56,7 @@ export const Canvas = forwardRef(
     }: CanvasProps,
     ref
   ) => {
-    const picture = useRef<SkPicture | undefined>(undefined);
+    const viewRef = useRef<SkiaPictureView>(null);
     const rafId = useRef<number | null>(null);
     const onLayout = useOnSizeEvent(onSize, _onLayout);
     // Native ID
@@ -70,7 +70,9 @@ export const Canvas = forwardRef(
     // Render effects
     useEffect(() => {
       root.render(children);
-      picture.current = root.getPicture();
+      if (viewRef.current) {
+        viewRef.current.setPicture(root.getPicture());
+      }
     }, [children, root]);
 
     useEffect(() => {
@@ -82,7 +84,9 @@ export const Canvas = forwardRef(
     const requestRedraw = useCallback(() => {
       rafId.current = requestAnimationFrame(() => {
         root.render(children);
-        picture.current = root.getPicture();
+        if (viewRef.current) {
+          viewRef.current.setPicture(root.getPicture());
+        }
         if (mode === "continuous") {
           requestRedraw();
         }
@@ -109,7 +113,7 @@ export const Canvas = forwardRef(
         return SkiaViewApi.makeImageSnapshotAsync(nativeId, rect);
       },
       redraw: () => {
-        picture.current = root.getPicture();
+        viewRef.current?.redraw();
       },
       getNativeId: () => {
         return nativeId;
@@ -117,7 +121,7 @@ export const Canvas = forwardRef(
     }));
     return (
       <SkiaPictureView
-        picture={picture.current}
+        ref={viewRef}
         collapsable={false}
         nativeID={`${nativeId}`}
         debug={debug}
