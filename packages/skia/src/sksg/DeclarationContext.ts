@@ -67,7 +67,7 @@ export const createDeclarationContext = (Skia: Skia) => {
   const ifComp = Skia.ImageFilter.MakeCompose.bind(Skia.ImageFilter);
   const cfComp = Skia.ColorFilter.MakeCompose.bind(Skia.ColorFilter);
 
-  const context = {
+  return {
     Skia,
     paints: createDeclaration<SkPaint>(),
     maskFilters: createDeclaration<SkMaskFilter>(),
@@ -75,26 +75,6 @@ export const createDeclarationContext = (Skia: Skia) => {
     pathEffects: createDeclaration<SkPathEffect>(peComp),
     imageFilters: createDeclaration<SkImageFilter>(ifComp),
     colorFilters: createDeclaration<SkColorFilter>(cfComp),
-  };
-
-  return {
-    ...context,
-    save: () => {
-      context.paints.save();
-      context.maskFilters.save();
-      context.shaders.save();
-      context.pathEffects.save();
-      context.imageFilters.save();
-      context.colorFilters.save();
-    },
-    restore: () => {
-      context.paints.restore();
-      context.maskFilters.restore();
-      context.shaders.restore();
-      context.pathEffects.restore();
-      context.imageFilters.restore();
-      context.colorFilters.restore();
-    },
   };
 };
 

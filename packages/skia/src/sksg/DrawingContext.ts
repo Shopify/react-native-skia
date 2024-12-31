@@ -24,7 +24,7 @@ import type {
   SkPaint,
 } from "../skia/types";
 
-import { createDeclarationContext } from "./DeclarationContext";
+import type { DeclarationContext } from "./DeclarationContext";
 
 const computeClip = (
   Skia: Skia,
@@ -49,7 +49,6 @@ const computeClip = (
 export const createDrawingContext = (Skia: Skia, canvas: SkCanvas) => {
   const state = {
     paints: [Skia.Paint()],
-    declCtx: createDeclarationContext(Skia),
   };
 
   const getPaint = () => {
@@ -60,33 +59,32 @@ export const createDrawingContext = (Skia: Skia, canvas: SkCanvas) => {
     return paint;
   };
 
-  const getLocalPaints = () => {
-    return [getPaint(), ...state.declCtx.paints.popAll()];
-  };
-
-  const processPaint = ({
-    opacity,
-    color,
-    strokeWidth,
-    blendMode,
-    style,
-    strokeJoin,
-    strokeCap,
-    strokeMiter,
-    antiAlias,
-    dither,
-    paint: paintProp,
-  }: DrawingNodeProps) => {
+  const processPaint = (
+    {
+      opacity,
+      color,
+      strokeWidth,
+      blendMode,
+      style,
+      strokeJoin,
+      strokeCap,
+      strokeMiter,
+      antiAlias,
+      dither,
+      paint: paintProp,
+    }: DrawingNodeProps,
+    declCtx: DeclarationContext
+  ) => {
     if (paintProp) {
-      state.declCtx.paints.push(paintProp);
+      declCtx.paints.push(paintProp);
       return true;
     }
     let shouldRestore = false;
-    const colorFilter = state.declCtx.colorFilters.popAllAsOne();
-    const imageFilter = state.declCtx.imageFilters.popAllAsOne();
-    const shader = state.declCtx.shaders.pop();
-    const maskFilter = state.declCtx.maskFilters.pop();
-    const pathEffect = state.declCtx.pathEffects.popAllAsOne();
+    const colorFilter = declCtx.colorFilters.popAllAsOne();
+    const imageFilter = declCtx.imageFilters.popAllAsOne();
+    const shader = declCtx.shaders.pop();
+    const maskFilter = declCtx.maskFilters.pop();
+    const pathEffect = declCtx.pathEffects.popAllAsOne();
 
     if (
       opacity !== undefined ||
@@ -213,13 +211,11 @@ export const createDrawingContext = (Skia: Skia, canvas: SkCanvas) => {
   return {
     Skia,
     canvas,
-    declCtx: state.declCtx,
     save: () => state.paints.push(getPaint().copy()),
     restore: () => state.paints.pop(),
     get paint() {
       return getPaint();
     },
-    getLocalPaints,
     processPaint,
     processMatrixAndClipping,
   };

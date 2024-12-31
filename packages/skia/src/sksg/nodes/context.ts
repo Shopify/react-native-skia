@@ -4,7 +4,10 @@ import { NodeType } from "../../dom/types";
 import type { DrawingNodeProps } from "../../dom/types";
 import type { DrawingContext } from "../DrawingContext";
 import type { SkImageFilter } from "../../skia/types";
-import type { DeclarationContext } from "../DeclarationContext";
+import {
+  createDeclarationContext,
+  type DeclarationContext,
+} from "../DeclarationContext";
 
 import type { Node } from "./Node";
 import {
@@ -249,15 +252,18 @@ const preProcessContext = (
   node: Node<any>
 ) => {
   const shouldRestoreMatrix = ctx.processMatrixAndClipping(props, props.layer);
-  ctx.declCtx.save();
+  const declCtx = createDeclarationContext(ctx.Skia);
   node.children.forEach((child) => {
     if (child.isDeclaration) {
-      processDeclarations(ctx.declCtx, child);
+      processDeclarations(declCtx, child);
     }
   });
-  const shouldRestorePaint = ctx.processPaint(props);
-  ctx.declCtx.restore();
-  return { shouldRestoreMatrix, shouldRestorePaint };
+  const shouldRestorePaint = ctx.processPaint(props, declCtx);
+  return {
+    shouldRestoreMatrix,
+    shouldRestorePaint,
+    extraPaints: declCtx.paints.popAll(),
+  };
 };
 
 const drawBackdropFilter = (ctx: DrawingContext, node: Node) => {
@@ -265,18 +271,17 @@ const drawBackdropFilter = (ctx: DrawingContext, node: Node) => {
   const child = node.children[0];
   let imageFilter: SkImageFilter | null = null;
   if (child.isDeclaration) {
-    ctx.declCtx.save();
-    processDeclarations(ctx.declCtx, child);
-    const imgf = ctx.declCtx.imageFilters.pop();
+    const declCtx = createDeclarationContext(ctx.Skia);
+    processDeclarations(declCtx, child);
+    const imgf = declCtx.imageFilters.pop();
     if (imgf) {
       imageFilter = imgf;
     } else {
-      const cf = ctx.declCtx.colorFilters.pop();
+      const cf = declCtx.colorFilters.pop();
       if (cf) {
         imageFilter = Skia.ImageFilter.MakeColorFilter(cf, null);
       }
     }
-    ctx.declCtx.restore();
   }
   canvas.saveLayer(undefined, null, imageFilter);
   canvas.restore();
@@ -292,11 +297,9 @@ export function draw(ctx: DrawingContext, node: Node<any>) {
     let hasLayer = false;
     const [layer, ...children] = node.children;
     if (layer.isDeclaration) {
-      const { declCtx } = ctx;
-      declCtx.save();
-      processDeclarations(ctx.declCtx, layer);
+      const declCtx = createDeclarationContext(ctx.Skia);
+      processDeclarations(declCtx, layer);
       const paint = declCtx.paints.pop();
-      declCtx.restore();
       if (paint) {
         hasLayer = true;
         ctx.canvas.saveLayer(paint);
@@ -315,12 +318,9 @@ export function draw(ctx: DrawingContext, node: Node<any>) {
   const { type, props: rawProps, children } = node;
   // Regular nodes
   const props = materialize(rawProps);
-  const { shouldRestoreMatrix, shouldRestorePaint } = preProcessContext(
-    ctx,
-    props,
-    node
-  );
-  const paints = ctx.getLocalPaints();
+  const { shouldRestoreMatrix, shouldRestorePaint, extraPaints } =
+    preProcessContext(ctx, props, node);
+  const paints = [ctx.paint, ...extraPaints];
   paints.forEach((paint) => {
     const lctx = { paint, Skia: ctx.Skia, canvas: ctx.canvas };
     switch (type) {
