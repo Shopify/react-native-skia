@@ -16,10 +16,10 @@ export const composeColorFilters = (
   processChildren: () => void
 ) => {
   const { Skia } = ctx;
-  ctx.save();
+  ctx.colorFilters.save();
   processChildren();
   const cf1 = ctx.colorFilters.popAllAsOne();
-  ctx.restore();
+  ctx.colorFilters.restore();
   ctx.colorFilters.push(cf1 ? Skia.ColorFilter.MakeCompose(cf, cf1) : cf);
 };
 

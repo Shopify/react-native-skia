@@ -22,10 +22,10 @@ export const composePathEffects = (
   processChildren: () => void
 ) => {
   const { Skia } = ctx;
-  ctx.save();
+  ctx.pathEffects.save();
   processChildren();
   const pe1 = ctx.pathEffects.popAllAsOne();
-  ctx.restore();
+  ctx.pathEffects.restore();
   ctx.pathEffects.push(pe1 ? Skia.PathEffect.MakeCompose(pe, pe1) : pe);
 };
 

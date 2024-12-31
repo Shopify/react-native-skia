@@ -87,11 +87,13 @@ export const composeImageFilters = (
   processChildren: () => void
 ) => {
   const { Skia } = ctx;
-  ctx.save();
+  ctx.imageFilters.save();
+  ctx.colorFilters.save();
   processChildren();
   let imgf2 = ctx.imageFilters.popAllAsOne();
   const cf = ctx.colorFilters.popAllAsOne();
-  ctx.restore();
+  ctx.imageFilters.restore();
+  ctx.colorFilters.restore();
   if (cf) {
     imgf2 = Skia.ImageFilter.MakeCompose(
       imgf2 ?? null,
