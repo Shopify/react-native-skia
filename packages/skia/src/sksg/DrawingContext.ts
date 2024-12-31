@@ -213,9 +213,7 @@ export const createDrawingContext = (Skia: Skia, canvas: SkCanvas) => {
     canvas,
     save: () => state.paints.push(getPaint().copy()),
     restore: () => state.paints.pop(),
-    get paint() {
-      return getPaint();
-    },
+    getPaint,
     processPaint,
     processMatrixAndClipping,
   };

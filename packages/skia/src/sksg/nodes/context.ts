@@ -320,7 +320,7 @@ export function draw(ctx: DrawingContext, node: Node<any>) {
   const props = materialize(rawProps);
   const { shouldRestoreMatrix, shouldRestorePaint, extraPaints } =
     preProcessContext(ctx, props, node);
-  const paints = [ctx.paint, ...extraPaints];
+  const paints = [ctx.getPaint(), ...extraPaints];
   paints.forEach((paint) => {
     const lctx = { paint, Skia: ctx.Skia, canvas: ctx.canvas };
     switch (type) {

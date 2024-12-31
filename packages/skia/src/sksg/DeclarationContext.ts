@@ -13,15 +13,13 @@ import type {
 type Composer<T> = (outer: T, inner: T) => T;
 
 export const composeDeclarations = <T>(filters: T[], composer: Composer<T>) => {
-  if (filters.length <= 1) {
+  const len = filters.length;
+  if (len <= 1) {
     return filters[0];
   }
-  return filters.reverse().reduce((inner, outer) => {
-    if (!inner) {
-      return outer;
-    }
-    return composer(outer, inner);
-  });
+  return filters.reduceRight((inner, outer) =>
+    inner ? composer(outer, inner) : outer
+  );
 };
 
 const createDeclaration = <T>(composer?: Composer<T>) => {
@@ -29,8 +27,6 @@ const createDeclaration = <T>(composer?: Composer<T>) => {
     decls: [] as T[],
     indexes: [0],
   };
-
-  const getIndex = () => state.indexes[state.indexes.length - 1];
 
   return {
     save: () => {
@@ -44,7 +40,8 @@ const createDeclaration = <T>(composer?: Composer<T>) => {
       state.decls.push(decl);
     },
     popAll: () => {
-      return state.decls.splice(getIndex(), state.decls.length - getIndex());
+      const idx = state.indexes[state.indexes.length - 1];
+      return state.decls.splice(idx, state.decls.length - idx);
     },
     popAllAsOne: () => {
       if (state.decls.length === 0) {
@@ -53,28 +50,34 @@ const createDeclaration = <T>(composer?: Composer<T>) => {
       if (!composer) {
         throw new Error("No composer for this type of declaration");
       }
-      const decls = state.decls.splice(
-        getIndex(),
-        state.decls.length - getIndex()
-      );
+      if (!state.decls.length) {
+        return undefined;
+      }
+      if (!composer) {
+        throw new Error("No composer for this type of declaration");
+      }
+
+      const idx = state.indexes[state.indexes.length - 1];
+      const decls = state.decls.splice(idx, state.decls.length - idx);
       return composeDeclarations(decls, composer);
     },
   };
 };
 
 export const createDeclarationContext = (Skia: Skia) => {
-  const peComp = Skia.PathEffect.MakeCompose.bind(Skia.PathEffect);
-  const ifComp = Skia.ImageFilter.MakeCompose.bind(Skia.ImageFilter);
-  const cfComp = Skia.ColorFilter.MakeCompose.bind(Skia.ColorFilter);
-
+  const composers = {
+    pathEffect: Skia.PathEffect.MakeCompose.bind(Skia.PathEffect),
+    imageFilter: Skia.ImageFilter.MakeCompose.bind(Skia.ImageFilter),
+    colorFilter: Skia.ColorFilter.MakeCompose.bind(Skia.ColorFilter),
+  };
   return {
     Skia,
     paints: createDeclaration<SkPaint>(),
     maskFilters: createDeclaration<SkMaskFilter>(),
     shaders: createDeclaration<SkShader>(),
-    pathEffects: createDeclaration<SkPathEffect>(peComp),
-    imageFilters: createDeclaration<SkImageFilter>(ifComp),
-    colorFilters: createDeclaration<SkColorFilter>(cfComp),
+    pathEffects: createDeclaration<SkPathEffect>(composers.pathEffect),
+    imageFilters: createDeclaration<SkImageFilter>(composers.imageFilter),
+    colorFilters: createDeclaration<SkColorFilter>(composers.colorFilter),
   };
 };
 
