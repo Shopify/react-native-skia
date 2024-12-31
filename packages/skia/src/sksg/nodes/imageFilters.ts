@@ -1,11 +1,9 @@
-"worklet";
-
 import { enumKey, processRadius } from "../../dom/nodes";
 import type {
   BlendImageFilterProps,
+  BlendProps,
   BlurImageFilterProps,
   BlurMaskFilterProps,
-  DeclarationContext,
   DisplacementMapImageFilterProps,
   DropShadowImageFilterProps,
   MorphologyImageFilterProps,
@@ -20,6 +18,8 @@ import {
   processUniforms,
   TileMode,
 } from "../../skia/types";
+import type { DeclarationContext } from "../DeclarationContext";
+import { composeDeclarations } from "../DeclarationContext";
 
 export enum MorphologyOperator {
   Erode,
@@ -38,6 +38,7 @@ const MakeInnerShadow = (
   color: SkColor,
   input: SkImageFilter | null
 ) => {
+  "worklet";
   const sourceGraphic = Skia.ImageFilter.MakeColorFilter(
     Skia.ColorFilter.MakeBlend(Black, BlendMode.Dst),
     null
@@ -62,7 +63,50 @@ const MakeInnerShadow = (
   );
 };
 
+export const declareBlend = (ctx: DeclarationContext, props: BlendProps) => {
+  "worklet";
+  const { Skia } = ctx;
+  const blend = BlendMode[enumKey(props.mode as BlendProps["mode"])];
+  // Blend ImageFilters
+  const imageFilters = ctx.imageFilters.popAll();
+  if (imageFilters.length > 0) {
+    const composer = Skia.ImageFilter.MakeBlend.bind(Skia.ImageFilter, blend);
+    ctx.imageFilters.push(composeDeclarations(imageFilters, composer));
+  }
+  // Blend Shaders
+  const shaders = ctx.shaders.popAll();
+  if (shaders.length > 0) {
+    const composer = Skia.Shader.MakeBlend.bind(Skia.Shader, blend);
+    ctx.shaders.push(composeDeclarations(shaders, composer));
+  }
+};
+
+export const composeImageFilters = (
+  ctx: DeclarationContext,
+  imgf1: SkImageFilter,
+  processChildren: () => void
+) => {
+  "worklet";
+  const { Skia } = ctx;
+  ctx.imageFilters.save();
+  ctx.colorFilters.save();
+  processChildren();
+  let imgf2 = ctx.imageFilters.popAllAsOne();
+  const cf = ctx.colorFilters.popAllAsOne();
+  ctx.imageFilters.restore();
+  ctx.colorFilters.restore();
+  if (cf) {
+    imgf2 = Skia.ImageFilter.MakeCompose(
+      imgf2 ?? null,
+      Skia.ImageFilter.MakeColorFilter(cf, null)
+    );
+  }
+  const imgf = imgf2 ? Skia.ImageFilter.MakeCompose(imgf1, imgf2) : imgf1;
+  ctx.imageFilters.push(imgf);
+};
+
 const input = (ctx: DeclarationContext) => {
+  "worklet";
   return ctx.imageFilters.pop() ?? null;
 };
 
@@ -70,6 +114,7 @@ export const makeOffsetImageFilter = (
   ctx: DeclarationContext,
   props: OffsetImageFilterProps
 ) => {
+  "worklet";
   const { x, y } = props;
   return ctx.Skia.ImageFilter.MakeOffset(x, y, null);
 };
@@ -78,6 +123,7 @@ export const declareDisplacementMapImageFilter = (
   ctx: DeclarationContext,
   props: DisplacementMapImageFilterProps
 ) => {
+  "worklet";
   const { channelX, channelY, scale } = props;
   const shader = ctx.shaders.pop();
   if (!shader) {
@@ -98,6 +144,7 @@ export const makeBlurImageFilter = (
   ctx: DeclarationContext,
   props: BlurImageFilterProps
 ) => {
+  "worklet";
   const { mode, blur } = props;
   const sigma = processRadius(ctx.Skia, blur);
   const imgf = ctx.Skia.ImageFilter.MakeBlur(
@@ -113,6 +160,7 @@ export const makeDropShadowImageFilter = (
   ctx: DeclarationContext,
   props: DropShadowImageFilterProps
 ) => {
+  "worklet";
   const { dx, dy, blur, shadowOnly, color: cl, inner } = props;
   const color = ctx.Skia.Color(cl);
   let factory;
@@ -131,6 +179,7 @@ export const makeMorphologyImageFilter = (
   ctx: DeclarationContext,
   props: MorphologyImageFilterProps
 ) => {
+  "worklet";
   const { operator } = props;
   const r = processRadius(ctx.Skia, props.radius);
   let imgf;
@@ -146,6 +195,7 @@ export const makeRuntimeShaderImageFilter = (
   ctx: DeclarationContext,
   props: RuntimeShaderImageFilterProps
 ) => {
+  "worklet";
   const { source, uniforms } = props;
   const rtb = ctx.Skia.RuntimeShaderBuilder(source);
   if (uniforms) {
@@ -159,6 +209,7 @@ export const declareBlendImageFilter = (
   ctx: DeclarationContext,
   props: BlendImageFilterProps
 ) => {
+  "worklet";
   const { mode } = props;
   const a = ctx.imageFilters.pop();
   const b = ctx.imageFilters.pop();
@@ -173,6 +224,7 @@ export const declareBlurMaskFilter = (
   ctx: DeclarationContext,
   props: BlurMaskFilterProps
 ) => {
+  "worklet";
   const { blur, style, respectCTM } = props;
   const mf = ctx.Skia.MaskFilter.MakeBlur(
     BlurStyle[enumKey(style)],

@@ -1,4 +1,3 @@
-export * from "./DeclarationContext";
 export * from "./Node";
 export * from "./NodeType";
 export * from "./SkDOM";

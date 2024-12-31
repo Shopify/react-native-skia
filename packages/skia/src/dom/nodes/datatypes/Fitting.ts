@@ -1,5 +1,3 @@
-"worklet";
-
 import { exhaustiveCheck } from "../../../renderer/typeddash";
 import type { SkRect } from "../../../skia/types";
 import type { Fit } from "../../types";
@@ -10,6 +8,7 @@ export interface Size {
 }
 
 export const size = (width = 0, height = 0) => {
+  "worklet";
   return { width, height };
 };
 
@@ -22,6 +21,7 @@ export const rect2rect = (
   { scaleX: number },
   { scaleY: number }
 ] => {
+  "worklet";
   const scaleX = dst.width / src.width;
   const scaleY = dst.height / src.height;
   const translateX = dst.x - src.x * scaleX;
@@ -33,6 +33,7 @@ const inscribe = (
   { width, height }: Size,
   rect: { x: number; y: number; width: number; height: number }
 ) => {
+  "worklet";
   const halfWidthDelta = (rect.width - width) / 2.0;
   const halfHeightDelta = (rect.height - height) / 2.0;
   return {
@@ -44,6 +45,7 @@ const inscribe = (
 };
 
 const applyBoxFit = (fit: Fit, input: Size, output: Size) => {
+  "worklet";
   let src = size(),
     dst = size();
   if (
@@ -112,6 +114,7 @@ export const fitRects = (
   rect: SkRect,
   { x, y, width, height }: SkRect
 ) => {
+  "worklet";
   const sizes = applyBoxFit(
     fit,
     { width: rect.width, height: rect.height },

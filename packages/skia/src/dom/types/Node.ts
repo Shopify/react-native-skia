@@ -1,6 +1,6 @@
 import type { GroupProps } from "./Common";
 import type { NodeType } from "./NodeType";
-import type { DeclarationContext } from "./DeclarationContext";
+import type { DeclarationContext } from "../../sksg/DeclarationContext";
 
 export interface Node<P> {
   type: NodeType;

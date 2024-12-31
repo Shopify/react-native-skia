@@ -1,25 +1,17 @@
-"worklet";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { composeDeclarations, NodeType } from "../../dom/types";
-import type {
-  BlendProps,
-  DeclarationContext,
-  DrawingNodeProps,
-} from "../../dom/types";
+import { NodeType } from "../../dom/types";
+import type { DrawingNodeProps } from "../../dom/types";
 import type { DrawingContext } from "../DrawingContext";
-import { BlendMode } from "../../skia/types";
-import type {
-  SkPathEffect,
-  SkColorFilter,
-  SkImageFilter,
-} from "../../skia/types";
-import { enumKey } from "../../dom/nodes";
+import type { SkImageFilter } from "../../skia/types";
+import {
+  createDeclarationContext,
+  type DeclarationContext,
+} from "../DeclarationContext";
 
 import type { Node } from "./Node";
 import {
   drawAtlas,
   drawBox,
-  drawBoxShadow,
   drawCircle,
   drawDiffRect,
   drawFill,
@@ -41,6 +33,7 @@ import {
   drawVertices,
 } from "./drawings";
 import {
+  composeColorFilters,
   declareLerpColorFilter,
   makeBlendColorFilter,
   makeLinearToSRGBGammaColorFilter,
@@ -49,6 +42,8 @@ import {
   makeSRGBToLinearGammaColorFilter,
 } from "./colorFilters";
 import {
+  composeImageFilters,
+  declareBlend,
   declareBlendImageFilter,
   declareBlurMaskFilter,
   declareDisplacementMapImageFilter,
@@ -72,6 +67,7 @@ import {
 } from "./shaders";
 import { declarePaint } from "./paint";
 import {
+  composePathEffects,
   declareSumPathEffect,
   makeCornerPathEffect,
   makeDashPathEffect,
@@ -81,59 +77,8 @@ import {
   makePath2DPathEffect,
 } from "./pathEffects";
 
-interface ContextProcessingResult {
-  shouldRestoreMatrix: boolean;
-  shouldRestorePaint: boolean;
-}
-
-function composeColorFilters(
-  ctx: DeclarationContext,
-  cf: SkColorFilter,
-  processChildren: () => void
-) {
-  const { Skia } = ctx;
-  ctx.save();
-  processChildren();
-  const cf1 = ctx.colorFilters.popAllAsOne();
-  ctx.restore();
-  ctx.colorFilters.push(cf1 ? Skia.ColorFilter.MakeCompose(cf, cf1) : cf);
-}
-
-function composePathEffects(
-  ctx: DeclarationContext,
-  pe: SkPathEffect,
-  processChildren: () => void
-) {
-  const { Skia } = ctx;
-  ctx.save();
-  processChildren();
-  const pe1 = ctx.pathEffects.popAllAsOne();
-  ctx.restore();
-  ctx.pathEffects.push(pe1 ? Skia.PathEffect.MakeCompose(pe, pe1) : pe);
-}
-
-function composeImageFilters(
-  ctx: DeclarationContext,
-  imgf1: SkImageFilter,
-  processChildren: () => void
-) {
-  const { Skia } = ctx;
-  ctx.save();
-  processChildren();
-  let imgf2 = ctx.imageFilters.popAllAsOne();
-  const cf = ctx.colorFilters.popAllAsOne();
-  ctx.restore();
-  if (cf) {
-    imgf2 = Skia.ImageFilter.MakeCompose(
-      imgf2 ?? null,
-      Skia.ImageFilter.MakeColorFilter(cf, null)
-    );
-  }
-  const imgf = imgf2 ? Skia.ImageFilter.MakeCompose(imgf1, imgf2) : imgf1;
-  ctx.imageFilters.push(imgf);
-}
-
 function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
+  "worklet";
   const processChildren = () =>
     node.children.forEach((child) => processDeclarations(ctx, child));
   const { type } = node;
@@ -146,29 +91,13 @@ function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
     }
     // Color Filters
     case NodeType.LerpColorFilter: {
-      node.children.forEach((child) => processDeclarations(ctx, child));
+      processChildren();
       declareLerpColorFilter(ctx, props);
       break;
     }
     case NodeType.Blend: {
-      node.children.forEach((child) => processDeclarations(ctx, child));
-      const { Skia } = ctx;
-      const blend = BlendMode[enumKey(props.mode as BlendProps["mode"])];
-      // Blend ImageFilters
-      const imageFilters = ctx.imageFilters.popAll();
-      if (imageFilters.length > 0) {
-        const composer = Skia.ImageFilter.MakeBlend.bind(
-          Skia.ImageFilter,
-          blend
-        );
-        ctx.imageFilters.push(composeDeclarations(imageFilters, composer));
-      }
-      // Blend Shaders
-      const shaders = ctx.shaders.popAll();
-      if (shaders.length > 0) {
-        const composer = Skia.Shader.MakeBlend.bind(Skia.Shader, blend);
-        ctx.shaders.push(composeDeclarations(shaders, composer));
-      }
+      processChildren();
+      declareBlend(ctx, props);
       break;
     }
     case NodeType.BlendColorFilter: {
@@ -198,7 +127,7 @@ function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
     }
     // Shaders
     case NodeType.Shader: {
-      node.children.forEach((child) => processDeclarations(ctx, child));
+      processChildren();
       declareShader(ctx, props);
       break;
     }
@@ -246,7 +175,7 @@ function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
       break;
     }
     case NodeType.DisplacementMapImageFilter: {
-      node.children.forEach((child) => processDeclarations(ctx, child));
+      processChildren();
       declareDisplacementMapImageFilter(ctx, props);
       break;
     }
@@ -261,7 +190,7 @@ function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
       break;
     }
     case NodeType.BlendImageFilter: {
-      node.children.forEach((child) => processDeclarations(ctx, child));
+      processChildren();
       declareBlendImageFilter(ctx, props);
       break;
     }
@@ -272,7 +201,7 @@ function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
     }
     // Path Effects
     case NodeType.SumPathEffect: {
-      node.children.forEach((child) => processDeclarations(ctx, child));
+      processChildren();
       declareSumPathEffect(ctx);
       break;
     }
@@ -308,7 +237,7 @@ function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
     }
     // Paint
     case NodeType.Paint:
-      node.children.forEach((child) => processDeclarations(ctx, child));
+      processChildren();
       declarePaint(ctx, props);
       break;
     default:
@@ -321,53 +250,46 @@ const preProcessContext = (
   props: DrawingNodeProps,
   node: Node<any>
 ) => {
+  "worklet";
   const shouldRestoreMatrix = ctx.processMatrixAndClipping(props, props.layer);
-  ctx.declCtx.save();
+  const declCtx = createDeclarationContext(ctx.Skia);
   node.children.forEach((child) => {
     if (child.isDeclaration) {
-      processDeclarations(ctx.declCtx, child);
+      processDeclarations(declCtx, child);
     }
   });
-  const shouldRestorePaint = ctx.processPaint(props);
-  ctx.declCtx.restore();
-  return { shouldRestoreMatrix, shouldRestorePaint };
-};
-
-const postProcessContext = (
-  ctx: DrawingContext,
-  { shouldRestoreMatrix, shouldRestorePaint }: ContextProcessingResult
-) => {
-  if (shouldRestoreMatrix) {
-    ctx.canvas.restore();
-  }
-  if (shouldRestorePaint) {
-    ctx.restore();
-  }
+  const shouldRestorePaint = ctx.processPaint(props, declCtx);
+  return {
+    shouldRestoreMatrix,
+    shouldRestorePaint,
+    extraPaints: declCtx.paints.popAll(),
+  };
 };
 
 const drawBackdropFilter = (ctx: DrawingContext, node: Node) => {
+  "worklet";
   const { canvas, Skia } = ctx;
   const child = node.children[0];
   let imageFilter: SkImageFilter | null = null;
   if (child.isDeclaration) {
-    ctx.declCtx.save();
-    processDeclarations(ctx.declCtx, child);
-    const imgf = ctx.declCtx.imageFilters.pop();
+    const declCtx = createDeclarationContext(ctx.Skia);
+    processDeclarations(declCtx, child);
+    const imgf = declCtx.imageFilters.pop();
     if (imgf) {
       imageFilter = imgf;
     } else {
-      const cf = ctx.declCtx.colorFilters.pop();
+      const cf = declCtx.colorFilters.pop();
       if (cf) {
         imageFilter = Skia.ImageFilter.MakeColorFilter(cf, null);
       }
     }
-    ctx.declCtx.restore();
   }
   canvas.saveLayer(undefined, null, imageFilter);
   canvas.restore();
 };
 
 export function draw(ctx: DrawingContext, node: Node<any>) {
+  "worklet";
   // Special mixed nodes
   if (node.type === NodeType.BackdropFilter) {
     drawBackdropFilter(ctx, node);
@@ -377,11 +299,9 @@ export function draw(ctx: DrawingContext, node: Node<any>) {
     let hasLayer = false;
     const [layer, ...children] = node.children;
     if (layer.isDeclaration) {
-      const { declCtx } = ctx;
-      declCtx.save();
-      processDeclarations(ctx.declCtx, layer);
+      const declCtx = createDeclarationContext(ctx.Skia);
+      processDeclarations(declCtx, layer);
       const paint = declCtx.paints.pop();
-      declCtx.restore();
       if (paint) {
         hasLayer = true;
         ctx.canvas.saveLayer(paint);
@@ -400,16 +320,14 @@ export function draw(ctx: DrawingContext, node: Node<any>) {
   const { type, props: rawProps, children } = node;
   // Regular nodes
   const props = materialize(rawProps);
-  const result = preProcessContext(ctx, props, node);
-  const paints = ctx.getLocalPaints();
+  const { shouldRestoreMatrix, shouldRestorePaint, extraPaints } =
+    preProcessContext(ctx, props, node);
+  const paints = [ctx.getPaint(), ...extraPaints];
   paints.forEach((paint) => {
     const lctx = { paint, Skia: ctx.Skia, canvas: ctx.canvas };
     switch (type) {
       case NodeType.Box:
         drawBox(lctx, props, node.children);
-        break;
-      case NodeType.BoxShadow:
-        drawBoxShadow(lctx, props);
         break;
       case NodeType.Image:
         drawImage(lctx, props);
@@ -485,5 +403,10 @@ export function draw(ctx: DrawingContext, node: Node<any>) {
       draw(ctx, child);
     }
   });
-  postProcessContext(ctx, result);
+  if (shouldRestoreMatrix) {
+    ctx.canvas.restore();
+  }
+  if (shouldRestorePaint) {
+    ctx.restore();
+  }
 }

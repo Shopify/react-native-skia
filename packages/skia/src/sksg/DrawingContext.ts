@@ -1,5 +1,3 @@
-"worklet";
-
 import {
   enumKey,
   isPathDef,
@@ -7,7 +5,6 @@ import {
   processTransformProps2,
 } from "../dom/nodes";
 import type { ClipDef, DrawingNodeProps, GroupProps } from "../dom/types";
-import { DeclarationContext } from "../dom/types";
 import {
   BlendMode,
   ClipOp,
@@ -25,6 +22,8 @@ import type {
   SkPaint,
 } from "../skia/types";
 
+import type { DeclarationContext } from "./DeclarationContext";
+
 const computeClip = (
   Skia: Skia,
   clip: ClipDef | undefined
@@ -33,6 +32,7 @@ const computeClip = (
   | { clipPath: SkPath }
   | { clipRect: SkRect }
   | { clipRRect: SkRRect } => {
+  "worklet";
   if (clip) {
     if (isPathDef(clip)) {
       return { clipPath: processPath(Skia, clip) };
@@ -45,63 +45,59 @@ const computeClip = (
   return undefined;
 };
 
-export class DrawingContext {
-  private paints: SkPaint[];
-  public declCtx: DeclarationContext;
-  public Skia: Skia;
-  public canvas: SkCanvas;
-
-  constructor(Skia: Skia, canvas: SkCanvas) {
-    this.Skia = Skia;
-    this.canvas = canvas;
-    this.paints = [Skia.Paint()];
-    this.declCtx = new DeclarationContext(this.Skia);
+const processColor = (
+  Skia: Skia,
+  color: number | string | Float32Array | number[]
+) => {
+  "worklet";
+  if (typeof color === "string" || typeof color === "number") {
+    return Skia.Color(color);
+  } else if (Array.isArray(color) || color instanceof Float32Array) {
+    return color instanceof Float32Array ? color : new Float32Array(color);
+  } else {
+    throw new Error(
+      `Invalid color type: ${typeof color}. Expected number, string, or array.`
+    );
   }
+};
 
-  save() {
-    this.paints.push(this.paint.copy());
-  }
+export const createDrawingContext = (Skia: Skia, canvas: SkCanvas) => {
+  "worklet";
+  const state = {
+    paints: [Skia.Paint()],
+  };
 
-  restore() {
-    this.paints.pop();
-  }
+  const getPaint = () => {
+    return state.paints[state.paints.length - 1];
+  };
 
-  get paint() {
-    const paint = this.paints[this.paints.length - 1];
-    if (!paint) {
-      throw new Error("Paint is undefined");
-    }
-    return paint;
-  }
-
-  getLocalPaints() {
-    const { paint } = this;
-    return [paint, ...this.declCtx.paints.popAll()];
-  }
-
-  processPaint({
-    opacity,
-    color,
-    strokeWidth,
-    blendMode,
-    style,
-    strokeJoin,
-    strokeCap,
-    strokeMiter,
-    antiAlias,
-    dither,
-    paint: paintProp,
-  }: DrawingNodeProps) {
+  const processPaint = (
+    {
+      opacity,
+      color,
+      strokeWidth,
+      blendMode,
+      style,
+      strokeJoin,
+      strokeCap,
+      strokeMiter,
+      antiAlias,
+      dither,
+      paint: paintProp,
+    }: DrawingNodeProps,
+    declCtx: DeclarationContext
+  ) => {
     if (paintProp) {
-      this.declCtx.paints.push(paintProp);
+      declCtx.paints.push(paintProp);
       return true;
     }
     let shouldRestore = false;
-    const colorFilter = this.declCtx.colorFilters.popAllAsOne();
-    const imageFilter = this.declCtx.imageFilters.popAllAsOne();
-    const shader = this.declCtx.shaders.pop();
-    const maskFilter = this.declCtx.maskFilters.pop();
-    const pathEffect = this.declCtx.pathEffects.popAllAsOne();
+    const colorFilter = declCtx.colorFilters.popAllAsOne();
+    const imageFilter = declCtx.imageFilters.popAllAsOne();
+    const shader = declCtx.shaders.pop();
+    const maskFilter = declCtx.maskFilters.pop();
+    const pathEffect = declCtx.pathEffects.popAllAsOne();
+
     if (
       opacity !== undefined ||
       color !== undefined ||
@@ -120,26 +116,19 @@ export class DrawingContext {
       pathEffect !== undefined
     ) {
       if (!shouldRestore) {
-        this.save();
+        state.paints.push(getPaint().copy());
         shouldRestore = true;
       }
     }
-    const { paint } = this;
+
+    const paint = getPaint();
     if (opacity !== undefined) {
       paint.setAlphaf(paint.getAlphaf() * opacity);
     }
     if (color !== undefined) {
       const currentOpacity = paint.getAlphaf();
       paint.setShader(null);
-      if (typeof color === "string" || typeof color === "number") {
-        paint.setColor(this.Skia.Color(color));
-      } else if (Array.isArray(color)) {
-        paint.setColor(new Float32Array(color));
-      } else if (color instanceof Float32Array) {
-        paint.setColor(color);
-      } else {
-        throw new Error("Invalid color");
-      }
+      paint.setColor(processColor(Skia, color));
       paint.setAlphaf(currentOpacity * paint.getAlphaf());
     }
     if (strokeWidth !== undefined) {
@@ -182,40 +171,56 @@ export class DrawingContext {
       paint.setPathEffect(pathEffect);
     }
     return shouldRestore;
-  }
+  };
 
-  processMatrixAndClipping(props: GroupProps, layer?: boolean | SkPaint) {
+  const processMatrixAndClipping = (
+    props: GroupProps,
+    layer?: boolean | SkPaint
+  ) => {
     const hasTransform =
       props.matrix !== undefined || props.transform !== undefined;
-    const clip = computeClip(this.Skia, props.clip);
+    const clip = computeClip(Skia, props.clip);
     const hasClip = clip !== undefined;
     const op = props.invertClip ? ClipOp.Difference : ClipOp.Intersect;
-    const m3 = processTransformProps2(this.Skia, props);
+    const m3 = processTransformProps2(Skia, props);
     const shouldSave = hasTransform || hasClip || !!layer;
+
     if (shouldSave) {
       if (layer) {
         if (typeof layer === "boolean") {
-          this.canvas.saveLayer();
+          canvas.saveLayer();
         } else {
-          this.canvas.saveLayer(layer);
+          canvas.saveLayer(layer);
         }
       } else {
-        this.canvas.save();
+        canvas.save();
       }
     }
 
     if (m3) {
-      this.canvas.concat(m3);
+      canvas.concat(m3);
     }
     if (clip) {
       if ("clipRect" in clip) {
-        this.canvas.clipRect(clip.clipRect, op, true);
+        canvas.clipRect(clip.clipRect, op, true);
       } else if ("clipRRect" in clip) {
-        this.canvas.clipRRect(clip.clipRRect, op, true);
+        canvas.clipRRect(clip.clipRRect, op, true);
       } else {
-        this.canvas.clipPath(clip.clipPath, op, true);
+        canvas.clipPath(clip.clipPath, op, true);
       }
     }
     return shouldSave;
-  }
-}
+  };
+
+  return {
+    Skia,
+    canvas,
+    save: () => state.paints.push(getPaint().copy()),
+    restore: () => state.paints.pop(),
+    getPaint,
+    processPaint,
+    processMatrixAndClipping,
+  };
+};
+
+export type DrawingContext = ReturnType<typeof createDrawingContext>;

@@ -10,11 +10,13 @@ import type { LayoutChangeEvent, ViewProps } from "react-native";
 import type { SharedValue } from "react-native-reanimated";
 
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
+import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeComponent";
 import type { SkRect, SkSize } from "../skia/types";
 import { SkiaSGRoot } from "../sksg/Reconciler";
 import { Skia } from "../skia";
 import type { SkiaBaseViewProps } from "../views";
-import { SkiaPictureView } from "../views/SkiaPictureView.web";
+
+const NativeSkiaPictureView = SkiaPictureViewNativeComponent;
 
 // TODO: no need to go through the JS thread for this
 const useOnSizeEvent = (
@@ -36,14 +38,14 @@ const useOnSizeEvent = (
   );
 };
 
-export interface CanvasProps extends ViewProps {
+export interface Canvas2Props extends ViewProps {
   debug?: boolean;
   opaque?: boolean;
   onSize?: SharedValue<SkSize>;
   mode?: "continuous" | "default";
 }
 
-export const Canvas = forwardRef(
+export const Canvas2 = forwardRef(
   (
     {
       mode,
@@ -53,10 +55,9 @@ export const Canvas = forwardRef(
       onSize,
       onLayout: _onLayout,
       ...viewProps
-    }: CanvasProps,
+    }: Canvas2Props,
     ref
   ) => {
-    const viewRef = useRef<SkiaPictureView>(null);
     const rafId = useRef<number | null>(null);
     const onLayout = useOnSizeEvent(onSize, _onLayout);
     // Native ID
@@ -65,14 +66,11 @@ export const Canvas = forwardRef(
     }, []);
 
     // Root
-    const root = useMemo(() => new SkiaSGRoot(Skia), []);
+    const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
 
     // Render effects
     useEffect(() => {
       root.render(children);
-      if (viewRef.current) {
-        viewRef.current.setPicture(root.getPicture());
-      }
     }, [children, root]);
 
     useEffect(() => {
@@ -84,9 +82,6 @@ export const Canvas = forwardRef(
     const requestRedraw = useCallback(() => {
       rafId.current = requestAnimationFrame(() => {
         root.render(children);
-        if (viewRef.current) {
-          viewRef.current.setPicture(root.getPicture());
-        }
         if (mode === "continuous") {
           requestRedraw();
         }
@@ -113,15 +108,14 @@ export const Canvas = forwardRef(
         return SkiaViewApi.makeImageSnapshotAsync(nativeId, rect);
       },
       redraw: () => {
-        viewRef.current?.redraw();
+        SkiaViewApi.requestRedraw(nativeId);
       },
       getNativeId: () => {
         return nativeId;
       },
     }));
     return (
-      <SkiaPictureView
-        ref={viewRef}
+      <NativeSkiaPictureView
         collapsable={false}
         nativeID={`${nativeId}`}
         debug={debug}
