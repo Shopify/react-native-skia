@@ -1,10 +1,9 @@
 "worklet";
 
-import { composeDeclarations, enumKey, processPath } from "../../dom/nodes";
+import { enumKey, processPath } from "../../dom/nodes";
 import type {
   CornerPathEffectProps,
   DashPathEffectProps,
-  DeclarationContext,
   DiscretePathEffectProps,
   Line2DPathEffectProps,
   Path1DPathEffectProps,
@@ -12,6 +11,10 @@ import type {
 } from "../../dom/types";
 import type { SkPathEffect } from "../../skia/types";
 import { Path1DEffectStyle } from "../../skia/types";
+import {
+  composeDeclarations,
+  type DeclarationContext,
+} from "../DeclarationContext";
 
 export const composePathEffects = (
   ctx: DeclarationContext,

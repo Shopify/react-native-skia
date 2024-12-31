@@ -7,7 +7,6 @@ import {
   processTransformProps2,
 } from "../dom/nodes";
 import type { ClipDef, DrawingNodeProps, GroupProps } from "../dom/types";
-import { createDeclarationContext } from "../dom/types";
 import {
   BlendMode,
   ClipOp,
@@ -24,6 +23,8 @@ import type {
   Skia,
   SkPaint,
 } from "../skia/types";
+
+import { createDeclarationContext } from "./DeclarationContext";
 
 const computeClip = (
   Skia: Skia,

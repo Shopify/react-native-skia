@@ -1,9 +1,10 @@
 "worklet";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NodeType } from "../../dom/types";
-import type { DeclarationContext, DrawingNodeProps } from "../../dom/types";
+import type { DrawingNodeProps } from "../../dom/types";
 import type { DrawingContext } from "../DrawingContext";
 import type { SkImageFilter } from "../../skia/types";
+import type { DeclarationContext } from "../DeclarationContext";
 
 import type { Node } from "./Node";
 import {

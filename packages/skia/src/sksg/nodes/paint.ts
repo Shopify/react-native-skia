@@ -1,8 +1,9 @@
 "worklet";
 
 import { enumKey } from "../../dom/nodes";
-import type { DeclarationContext, PaintProps } from "../../dom/types";
+import type { PaintProps } from "../../dom/types";
 import { BlendMode, PaintStyle, StrokeCap, StrokeJoin } from "../../skia/types";
+import type { DeclarationContext } from "../DeclarationContext";
 
 export const declarePaint = (ctx: DeclarationContext, props: PaintProps) => {
   const {

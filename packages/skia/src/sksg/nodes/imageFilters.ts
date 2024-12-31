@@ -1,12 +1,11 @@
 "worklet";
 
-import { composeDeclarations, enumKey, processRadius } from "../../dom/nodes";
+import { enumKey, processRadius } from "../../dom/nodes";
 import type {
   BlendImageFilterProps,
   BlendProps,
   BlurImageFilterProps,
   BlurMaskFilterProps,
-  DeclarationContext,
   DisplacementMapImageFilterProps,
   DropShadowImageFilterProps,
   MorphologyImageFilterProps,
@@ -21,6 +20,8 @@ import {
   processUniforms,
   TileMode,
 } from "../../skia/types";
+import type { DeclarationContext } from "../DeclarationContext";
+import { composeDeclarations } from "../DeclarationContext";
 
 export enum MorphologyOperator {
   Erode,

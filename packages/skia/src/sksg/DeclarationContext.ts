@@ -8,7 +8,7 @@ import type {
   SkPathEffect,
   Skia,
   SkColorFilter,
-} from "../../skia/types";
+} from "../skia/types";
 
 type Composer<T> = (outer: T, inner: T) => T;
 

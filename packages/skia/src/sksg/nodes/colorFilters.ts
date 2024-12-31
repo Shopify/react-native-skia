@@ -3,12 +3,12 @@
 import { enumKey } from "../../dom/nodes";
 import type {
   BlendColorFilterProps,
-  DeclarationContext,
   LerpColorFilterProps,
   MatrixColorFilterProps,
 } from "../../dom/types";
 import type { SkColorFilter } from "../../skia/types";
 import { BlendMode } from "../../skia/types";
+import type { DeclarationContext } from "../DeclarationContext";
 
 export const composeColorFilters = (
   ctx: DeclarationContext,

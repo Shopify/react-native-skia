@@ -10,7 +10,6 @@ import {
 } from "../../dom/nodes";
 import type {
   ColorProps,
-  DeclarationContext,
   FractalNoiseProps,
   ImageShaderProps,
   LinearGradientProps,
@@ -26,6 +25,7 @@ import {
   processUniforms,
   TileMode,
 } from "../../skia/types";
+import type { DeclarationContext } from "../DeclarationContext";
 
 export const declareShader = (ctx: DeclarationContext, props: ShaderProps) => {
   const { source, uniforms, ...transform } = props;
