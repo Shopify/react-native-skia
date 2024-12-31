@@ -55,7 +55,9 @@ const processColor = (
   } else if (Array.isArray(color) || color instanceof Float32Array) {
     return color instanceof Float32Array ? color : new Float32Array(color);
   } else {
-    throw new Error("Invalid color");
+    throw new Error(
+      `Invalid color type: ${typeof color}. Expected number, string, or array.`
+    );
   }
 };
 
