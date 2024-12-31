@@ -46,17 +46,26 @@ const computeClip = (
   return undefined;
 };
 
+const processColor = (
+  Skia: Skia,
+  color: number | string | Float32Array | number[]
+) => {
+  if (typeof color === "string" || typeof color === "number") {
+    return Skia.Color(color);
+  } else if (Array.isArray(color) || color instanceof Float32Array) {
+    return color instanceof Float32Array ? color : new Float32Array(color);
+  } else {
+    throw new Error("Invalid color");
+  }
+};
+
 export const createDrawingContext = (Skia: Skia, canvas: SkCanvas) => {
   const state = {
     paints: [Skia.Paint()],
   };
 
   const getPaint = () => {
-    const paint = state.paints[state.paints.length - 1];
-    if (!paint) {
-      throw new Error("Paint is undefined");
-    }
-    return paint;
+    return state.paints[state.paints.length - 1];
   };
 
   const processPaint = (
@@ -116,15 +125,7 @@ export const createDrawingContext = (Skia: Skia, canvas: SkCanvas) => {
     if (color !== undefined) {
       const currentOpacity = paint.getAlphaf();
       paint.setShader(null);
-      if (typeof color === "string" || typeof color === "number") {
-        paint.setColor(Skia.Color(color));
-      } else if (Array.isArray(color)) {
-        paint.setColor(new Float32Array(color));
-      } else if (color instanceof Float32Array) {
-        paint.setColor(color);
-      } else {
-        throw new Error("Invalid color");
-      }
+      paint.setColor(processColor(Skia, color));
       paint.setAlphaf(currentOpacity * paint.getAlphaf());
     }
     if (strokeWidth !== undefined) {
