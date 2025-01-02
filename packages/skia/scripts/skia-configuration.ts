@@ -100,7 +100,8 @@ export type Platform = {
   options?: Arg[];
 };
 
-const iosMinTarget = GRAPHITE ? '"15.1"' : '"13.0"';
+const appleMinTarget = GRAPHITE ? '15.1' : '13.0';
+const iosMinTarget = `"${appleMinTarget}"`;
 
 export const configurations = {
   android: {
@@ -169,6 +170,35 @@ export const configurations = {
         cpu: "x64",
         platform: "ios",
         args: [["ios_min_target", iosMinTarget]],
+      },
+      "arm64-tvos": {
+        cpu: "arm64",
+        platform: "tvos",
+        args: [
+          ["extra_cflags", `["-target", "arm64-apple-tvos", "-mappletvos-version-min=${appleMinTarget}"]`],
+          ["extra_asmflags", `["-target", "arm64-apple-tvos", "-mappletvos-version-min=${appleMinTarget}"]`],
+          ["extra_ldflags", `["-target", "arm64-apple-tvos", "-mappletvos-version-min=${appleMinTarget}"]`],
+        ],
+      },
+      "arm64-tvsimulator": {
+        cpu: "arm64",
+        platform: "tvos",
+        args: [
+          ["ios_use_simulator", true],
+          ["extra_cflags", `["-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleMinTarget}"]`],
+          ["extra_asmflags", `["-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleMinTarget}"]`],
+          ["extra_ldflags", `["-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleMinTarget}"]`],
+        ],
+      },
+      "x64-tvsimulator": {
+        cpu: "x64",
+        platform: "tvos",
+        args: [
+          ["ios_use_simulator", true],
+          ["extra_cflags", `["-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleMinTarget}"]`],
+          ["extra_asmflags", `["-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleMinTarget}"]`],
+          ["extra_ldflags", `["-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleMinTarget}"]`],
+        ],
       },
       "arm64-macosx": {
         platformGroup: "macosx",
