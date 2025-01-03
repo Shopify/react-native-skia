@@ -22,7 +22,7 @@ import type {
   SkPaint,
 } from "../skia/types";
 
-import type { DeclarationContext } from "./DeclarationContext";
+import { createDeclarationContext } from "./DeclarationContext";
 import type { StaticContext } from "./StaticContext";
 
 const computeClip = (
@@ -70,6 +70,7 @@ export const createDrawingContext = (
   "worklet";
   const state = {
     staticCtx,
+    declCtx: createDeclarationContext(Skia),
     paints: [Skia.Paint()],
   };
 
@@ -77,22 +78,20 @@ export const createDrawingContext = (
     return state.paints[state.paints.length - 1];
   };
 
-  const processPaint = (
-    {
-      opacity,
-      color,
-      strokeWidth,
-      blendMode,
-      style,
-      strokeJoin,
-      strokeCap,
-      strokeMiter,
-      antiAlias,
-      dither,
-      paint: paintProp,
-    }: DrawingNodeProps,
-    declCtx: DeclarationContext
-  ) => {
+  const processPaint = ({
+    opacity,
+    color,
+    strokeWidth,
+    blendMode,
+    style,
+    strokeJoin,
+    strokeCap,
+    strokeMiter,
+    antiAlias,
+    dither,
+    paint: paintProp,
+  }: DrawingNodeProps) => {
+    const { declCtx } = state;
     if (paintProp) {
       declCtx.paints.push(paintProp);
       return true;
@@ -232,6 +231,7 @@ export const createDrawingContext = (
     getPaint,
     processPaint,
     processMatrixAndClipping,
+    declCtx: state.declCtx,
   };
 };
 

@@ -6,3 +6,19 @@ export interface Node<Props = unknown> {
   props: Props;
   children: Node[];
 }
+
+export const sortNodes = (children: Node[]) => {
+  "worklet";
+  const declarations: Node[] = [];
+  const drawings: Node[] = [];
+
+  children.forEach((node) => {
+    if (node.isDeclaration) {
+      declarations.push(node);
+    } else {
+      drawings.push(node);
+    }
+  });
+
+  return { declarations, drawings };
+};

@@ -22,8 +22,6 @@ const drawOnscreen = (
   "worklet";
   const rec = Skia.PictureRecorder();
   const canvas = rec.beginRecording();
-  // TODO: This is only support from 3.15 and above (check the exact version)
-  // This could be polyfilled in C++ if needed (or in JS via functions only?)
   const start = performance.now();
   const ctx = createDrawingContext(Skia, canvas, staticCtx);
   root.forEach((node) => {
@@ -32,7 +30,6 @@ const drawOnscreen = (
   const picture = rec.finishRecordingAsPicture();
   const end = performance.now();
   console.log("Recording time: ", end - start);
-  console.log("Static context paints: ", staticCtx.paints.length);
   SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
 };
 
