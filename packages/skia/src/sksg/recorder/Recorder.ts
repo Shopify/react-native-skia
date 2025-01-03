@@ -21,6 +21,7 @@ import type {
   TextProps,
   VerticesProps,
 } from "../../dom/types";
+import type { Node } from "../nodes";
 import { splitProps } from "../nodes";
 
 import type { PaintProps } from "./Paint";
@@ -50,6 +51,9 @@ export enum CommandType {
   DrawText,
   DrawTextPath,
   DrawTextBlob,
+  BackdropFilter,
+  PushLayer,
+  PopLayer,
 }
 
 type CommandProps = {
@@ -77,6 +81,9 @@ type CommandProps = {
   [CommandType.DrawText]: TextProps;
   [CommandType.DrawTextPath]: TextPathProps;
   [CommandType.DrawTextBlob]: TextProps;
+  [CommandType.BackdropFilter]: Node;
+  [CommandType.PushLayer]: Node[];
+  [CommandType.PopLayer]: null;
 };
 
 type AnimatedProps<T> = {
@@ -107,6 +114,14 @@ export class Recorder {
 
   popCTM() {
     this.commands.push({ type: CommandType.PopCTM, props: null });
+  }
+
+  pushLayer(props: Node[]) {
+    this.commands.push({ type: CommandType.PushLayer, props });
+  }
+
+  popLayer() {
+    this.commands.push({ type: CommandType.PopLayer, props: null });
   }
 
   draw<T extends CommandType>(type: T, drawProps: CommandProps[T]) {

@@ -81,6 +81,7 @@ export function record(recorder: Recorder, root: Node<any>) {
   const { drawings, declarations } = sortNodes(children);
   const paint = processPaint(props, declarations);
   const ctm = processCTM(props);
+  let skipChildren = false;
   if (paint) {
     recorder.pushPaint(paint);
   }
@@ -88,6 +89,18 @@ export function record(recorder: Recorder, root: Node<any>) {
     recorder.pushCTM(ctm);
   }
   switch (type) {
+    case NodeType.BackdropFilter:
+      recorder.draw(CommandType.BackdropFilter, declarations[0]);
+      skipChildren = true;
+      break;
+    case NodeType.Layer:
+      recorder.pushLayer(declarations);
+      drawings.forEach((child) => {
+        record(recorder, child);
+      });
+      recorder.popLayer();
+      skipChildren = true;
+      break;
     case NodeType.Glyphs:
       recorder.draw(CommandType.DrawGlyphs, props);
       break;
@@ -152,12 +165,14 @@ export function record(recorder: Recorder, root: Node<any>) {
       recorder.draw(CommandType.DrawCircle, props);
       break;
     case NodeType.Fill:
-      recorder.draw(CommandType.DrawPaint, props);
+      recorder.draw(CommandType.DrawPaint, null);
       break;
   }
-  drawings.forEach((child) => {
-    record(recorder, child);
-  });
+  if (!skipChildren) {
+    drawings.forEach((child) => {
+      record(recorder, child);
+    });
+  }
   if (paint) {
     recorder.popPaint();
   }

@@ -34,7 +34,15 @@ import {
   StrokeCap,
   StrokeJoin,
 } from "../../skia/types";
-import type { SkPath, SkRect, SkRRect, Skia, SkCanvas } from "../../skia/types";
+import type {
+  SkPath,
+  SkRect,
+  SkRRect,
+  Skia,
+  SkCanvas,
+  SkImageFilter,
+} from "../../skia/types";
+import type { Node } from "../nodes";
 import { isSharedValue, processDeclarations } from "../nodes";
 import {
   drawAtlas,
@@ -251,6 +259,36 @@ export const playback = (
             canvas.clipPath(clip.clipPath, op, true);
           }
         }
+        break;
+      }
+      case CommandType.PushLayer: {
+        const dCtx = createDeclarationContext(ctx.Skia);
+        processDeclarations(dCtx, props as Node);
+        const p = dCtx.paints.pop();
+        if (p) {
+          ctx.canvas.saveLayer(p);
+        }
+        break;
+      }
+      case CommandType.PopLayer:
+        canvas.restore();
+        break;
+      case CommandType.BackdropFilter: {
+        let imageFilter: SkImageFilter | null = null;
+        // TODO: can  we use the main declaration context here?
+        const dCtx = createDeclarationContext(ctx.Skia);
+        processDeclarations(dCtx, props as Node);
+        const imgf = dCtx.imageFilters.pop();
+        if (imgf) {
+          imageFilter = imgf;
+        } else {
+          const cf = dCtx.colorFilters.pop();
+          if (cf) {
+            imageFilter = Skia.ImageFilter.MakeColorFilter(cf, null);
+          }
+        }
+        canvas.saveLayer(undefined, null, imageFilter);
+        canvas.restore();
         break;
       }
       case CommandType.PopCTM:
