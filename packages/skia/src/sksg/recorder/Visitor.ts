@@ -56,20 +56,29 @@ function processPaint(
   return null;
 }
 
-function processCTM({ clip, invertClip, transform, origin, matrix }: CTMProps) {
+function processCTM({
+  clip,
+  invertClip,
+  transform,
+  origin,
+  matrix,
+  layer,
+}: CTMProps) {
   const ctm: CTMProps = {
     clip,
     invertClip,
     transform,
     origin,
     matrix,
+    layer,
   };
   if (
     clip !== undefined ||
     invertClip !== undefined ||
     transform !== undefined ||
     origin !== undefined ||
-    matrix !== undefined
+    matrix !== undefined ||
+    layer !== undefined
   ) {
     return ctm;
   }
@@ -96,6 +105,23 @@ const extraPaints = (node: Node) => {
 };
 
 export function record(recorder: Recorder, root: Node<any>) {
+  if (root.type === NodeType.Layer) {
+    const [layer, ...remainingChildren] = root.children;
+    let hasLayer = false;
+    if (layer.isDeclaration) {
+      hasLayer = true;
+      recorder.pushLayer(layer);
+    }
+    remainingChildren.forEach((child) => {
+      if (!child.isDeclaration) {
+        record(recorder, child);
+      }
+    });
+    if (hasLayer) {
+      recorder.popLayer();
+    }
+    return;
+  }
   const { type, props, children } = root;
   if (props.paint) {
     recorder.pushStaticPaint(props.paint);
@@ -136,23 +162,6 @@ export function record(recorder: Recorder, root: Node<any>) {
   switch (type) {
     case NodeType.BackdropFilter:
       recorder.draw(CommandType.BackdropFilter, declarations[0]);
-      skipChildren = true;
-      break;
-    case NodeType.Layer:
-      const [layer, ...remainingChildren] = children;
-      let hasLayer = false;
-      if (layer && layer.isDeclaration && layer.type === NodeType.Paint) {
-        hasLayer = true;
-        recorder.pushLayer(layer);
-      }
-      remainingChildren.forEach((child) => {
-        if (!child.isDeclaration) {
-          record(recorder, child);
-        }
-      });
-      if (hasLayer) {
-        recorder.popLayer();
-      }
       skipChildren = true;
       break;
     /*
