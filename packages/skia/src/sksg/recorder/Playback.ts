@@ -263,7 +263,7 @@ export const playback = (
       }
       case CommandType.PushLayer: {
         const dCtx = createDeclarationContext(ctx.Skia);
-        processDeclarations(dCtx, props as Node);
+        processDeclarations(dCtx, (props as Node[])[0]);
         const p = dCtx.paints.pop();
         if (p) {
           ctx.canvas.saveLayer(p);

@@ -76,6 +76,25 @@ function processCTM({ clip, invertClip, transform, origin, matrix }: CTMProps) {
   return null;
 }
 
+const extraPaints = (node: Node) => {
+  const nodes: Node[] = [];
+  node.children.forEach((child) => {
+    if (child.type === NodeType.Paint) {
+      const clone: Node = {
+        type: node.type,
+        isDeclaration: node.isDeclaration,
+        children: [...child.children],
+        props: { ...node.props, ...child.props },
+      };
+      nodes.push(clone);
+    }
+  });
+  if (nodes.length === 0) {
+    return null;
+  }
+  return nodes;
+};
+
 export function record(recorder: Recorder, root: Node<any>) {
   const { type, props, children } = root;
   const { drawings, declarations } = sortNodes(children);
@@ -88,6 +107,7 @@ export function record(recorder: Recorder, root: Node<any>) {
   if (ctm) {
     recorder.pushCTM(ctm);
   }
+
   switch (type) {
     case NodeType.BackdropFilter:
       recorder.draw(CommandType.BackdropFilter, declarations[0]);
@@ -167,6 +187,13 @@ export function record(recorder: Recorder, root: Node<any>) {
     case NodeType.Fill:
       recorder.draw(CommandType.DrawPaint, null);
       break;
+  }
+  const nodes = extraPaints(root);
+  if (nodes) {
+    nodes.forEach((node) => {
+      record(recorder, node);
+    });
+    return;
   }
   if (!skipChildren) {
     drawings.forEach((child) => {
