@@ -20,8 +20,7 @@ function processPaint(
     strokeMiter,
     antiAlias,
     dither,
-  }: //  paint: paintProp,
-  DrawingNodeProps,
+  }: DrawingNodeProps,
   children: Node[]
 ) {
   const paint: PaintProps = {
@@ -89,10 +88,10 @@ const extraPaints = (node: Node) => {
   const nodes: Node[] = [];
   node.children.forEach((child) => {
     if (child.type === NodeType.Paint) {
-      const clone: Node = {
+      const clone = {
         type: node.type,
         isDeclaration: node.isDeclaration,
-        children: [...child.children],
+        children: child.children,
         props: { ...node.props, ...child.props },
       };
       nodes.push(clone);
@@ -107,21 +106,16 @@ const extraPaints = (node: Node) => {
 export function record(recorder: Recorder, root: Node<any>) {
   if (root.type === NodeType.Layer) {
     const [layer, ...remainingChildren] = root.children;
-    let hasLayer = false;
-    if (layer.isDeclaration) {
-      hasLayer = true;
+    if (layer.isDeclaration && layer.type === NodeType.Paint) {
       recorder.pushLayer(layer);
-    }
-    remainingChildren.forEach((child) => {
-      if (!child.isDeclaration) {
+      remainingChildren.forEach((child) => {
         record(recorder, child);
-      }
-    });
-    if (hasLayer) {
+      });
       recorder.popLayer();
     }
     return;
   }
+
   const { type, props, children } = root;
   if (props.paint) {
     recorder.pushStaticPaint(props.paint);
@@ -142,7 +136,7 @@ export function record(recorder: Recorder, root: Node<any>) {
         antiAlias: undefined,
         dither: undefined,
       },
-      children: [...root.children],
+      children: root.children,
     };
     record(recorder, clone);
     recorder.popPaint();
@@ -164,30 +158,6 @@ export function record(recorder: Recorder, root: Node<any>) {
       recorder.draw(CommandType.BackdropFilter, declarations[0]);
       skipChildren = true;
       break;
-    /*
-      if (node.type === NodeType.Layer) {
-          let hasLayer = false;
-          const [layer, ...children] = node.children;
-          if (layer.isDeclaration) {
-            const declCtx = createDeclarationContext(ctx.Skia);
-            processDeclarations(declCtx, layer);
-            const paint = declCtx.paints.pop();
-            if (paint) {
-              hasLayer = true;
-              ctx.canvas.saveLayer(paint);
-            }
-          }
-          children.map((child) => {
-            if (!child.isDeclaration) {
-              draw(ctx, child);
-            }
-          });
-          if (hasLayer) {
-            ctx.canvas.restore();
-          }
-          return;
-        }
-          */
     case NodeType.Glyphs:
       recorder.draw(CommandType.DrawGlyphs, props);
       break;
