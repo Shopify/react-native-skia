@@ -4,6 +4,7 @@ import type { SharedValue } from "react-native-reanimated";
 
 import type {
   AtlasProps,
+  BoxProps,
   CircleProps,
   ClipDef,
   CTMProps,
@@ -47,6 +48,7 @@ import type { Node } from "../nodes";
 import { isSharedValue, processDeclarations } from "../nodes";
 import {
   drawAtlas,
+  drawBox,
   drawCircle,
   drawDiffRect,
   drawGlyphs,
@@ -299,6 +301,10 @@ export const playback = (
       }
       case CommandType.PopCTM:
         canvas.restore();
+        break;
+      case CommandType.DrawBox:
+        const payload = props as { props: BoxProps; children: Node[] };
+        drawBox(ctx, payload.props, payload.children);
         break;
       case CommandType.DrawPaint:
         canvas.drawPaint(paint);

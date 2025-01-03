@@ -2,6 +2,7 @@ import type { SharedValue } from "react-native-reanimated";
 
 import type {
   AtlasProps,
+  BoxProps,
   CircleProps,
   CTMProps,
   DiffRectProps,
@@ -52,6 +53,7 @@ export enum CommandType {
   DrawText,
   DrawTextPath,
   DrawTextBlob,
+  DrawBox,
   BackdropFilter,
   PushLayer,
   PopLayer,
@@ -87,6 +89,7 @@ type CommandProps = {
   [CommandType.PushLayer]: Node[];
   [CommandType.PopLayer]: null;
   [CommandType.PushStaticPaint]: SkPaint;
+  [CommandType.DrawBox]: { props: BoxProps; children: Node[] };
 };
 
 type AnimatedProps<T> = {
