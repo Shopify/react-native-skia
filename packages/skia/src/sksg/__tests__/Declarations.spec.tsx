@@ -119,7 +119,6 @@ describe("Declarations", () => {
     });
     const cf = ctx.colorFilters.popAllAsOne();
     expect(cf).toBeDefined();
-    console.log(cf!.tag);
   });
   it("should create a filter from a tree 1", () => {
     const tree: Node = {

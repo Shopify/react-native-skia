@@ -16,7 +16,7 @@ export const composeDeclarations = <T>(filters: T[], composer: Composer<T>) => {
   if (len <= 1) {
     return filters[0];
   }
-  return filters.reduceRight((inner, outer) =>
+  return filters.reduce((inner, outer) =>
     inner ? composer(outer, inner) : outer
   );
 };

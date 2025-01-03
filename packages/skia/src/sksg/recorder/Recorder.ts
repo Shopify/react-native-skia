@@ -40,6 +40,8 @@ export enum CommandType {
   PushStaticPaint = "PushStaticPaint",
   PushColorFilter = "PushColorFilter",
   PopColorFilter = "PopColorFilter",
+  FinishDeclaration = "FinishDeclaration",
+  PushBlurMaskFilter = "PushBlurMaskFilter",
 }
 
 type AnimatedProps<T> = {
@@ -69,6 +71,10 @@ export class Recorder {
     this.commands.push({ type: CommandType.PopColorFilter, props, nodeType });
   }
 
+  pushBlurMaskFilter(props: object) {
+    this.commands.push({ type: CommandType.PushBlurMaskFilter, props });
+  }
+
   pushPaint(props: PaintProps) {
     this.commands.push({ type: CommandType.PushPaint, props });
   }
@@ -96,6 +102,10 @@ export class Recorder {
 
   popLayer() {
     this.commands.push({ type: CommandType.PopLayer, props: null });
+  }
+
+  finishDeclaration() {
+    this.commands.push({ type: CommandType.FinishDeclaration, props: null });
   }
 
   drawBox(props: BoxProps, children: Node[]) {

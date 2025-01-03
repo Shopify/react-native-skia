@@ -115,6 +115,9 @@ function processCTM({
 
 const recordDeclaration = (recorder: Recorder, decl: Node) => {
   switch (decl.type) {
+    case NodeType.BlurMaskFilter:
+      recorder.pushBlurMaskFilter(decl.props);
+      break;
     case NodeType.LumaColorFilter:
     case NodeType.SRGBToLinearGammaColorFilter:
     case NodeType.LinearToSRGBGammaColorFilter:
@@ -204,6 +207,9 @@ export function record(recorder: Recorder, root: Node<any>) {
   declarations.forEach((decl) => {
     recordDeclaration(recorder, decl);
   });
+  if (paint) {
+    recorder.finishDeclaration();
+  }
 
   switch (type) {
     case NodeType.Box:

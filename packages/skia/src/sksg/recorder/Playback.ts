@@ -6,6 +6,7 @@ import type { SharedValue } from "react-native-reanimated";
 import type {
   AtlasProps,
   BlendColorFilterProps,
+  BlurMaskFilterProps,
   BoxProps,
   CircleProps,
   ClipDef,
@@ -31,6 +32,7 @@ import type {
 import { exhaustiveCheck } from "../../renderer/typeddash";
 import {
   BlendMode,
+  BlurStyle,
   ClipOp,
   isRRect,
   PaintStyle,
@@ -79,6 +81,7 @@ import {
   processPath,
   processTransformProps2,
 } from "../../dom/nodes";
+import type { DeclarationContext } from "../DeclarationContext";
 import { createDeclarationContext } from "../DeclarationContext";
 
 import type { PaintProps } from "./Paint";
@@ -123,6 +126,29 @@ const processColor = (
     throw new Error(
       `Invalid color type: ${typeof color}. Expected number, string, or array.`
     );
+  }
+};
+
+const materializePaint = (paint: SkPaint, declCtx: DeclarationContext) => {
+  const colorFilter = declCtx.colorFilters.popAllAsOne();
+  const imageFilter = declCtx.imageFilters.popAllAsOne();
+  const shader = declCtx.shaders.pop();
+  const maskFilter = declCtx.maskFilters.pop();
+  const pathEffect = declCtx.pathEffects.popAllAsOne();
+  if (colorFilter) {
+    paint.setColorFilter(colorFilter);
+  }
+  if (imageFilter) {
+    paint.setImageFilter(imageFilter);
+  }
+  if (shader) {
+    paint.setShader(shader);
+  }
+  if (maskFilter) {
+    paint.setMaskFilter(maskFilter);
+  }
+  if (pathEffect) {
+    paint.setPathEffect(pathEffect);
   }
 };
 
@@ -205,26 +231,6 @@ export const playback = (
         if (dither !== undefined) {
           paint.setDither(dither);
         }
-        const colorFilter = declCtx.colorFilters.popAllAsOne();
-        const imageFilter = declCtx.imageFilters.popAllAsOne();
-        const shader = declCtx.shaders.pop();
-        const maskFilter = declCtx.maskFilters.pop();
-        const pathEffect = declCtx.pathEffects.popAllAsOne();
-        if (colorFilter) {
-          paint.setColorFilter(colorFilter);
-        }
-        if (imageFilter) {
-          paint.setImageFilter(imageFilter);
-        }
-        if (shader) {
-          paint.setShader(shader);
-        }
-        if (maskFilter) {
-          paint.setMaskFilter(maskFilter);
-        }
-        if (pathEffect) {
-          paint.setPathEffect(pathEffect);
-        }
         break;
       }
       case CommandType.PushStaticPaint:
@@ -233,11 +239,19 @@ export const playback = (
       case CommandType.PopPaint:
         paints.pop();
         break;
+      case CommandType.PushBlurMaskFilter:
+        const { style, blur, respectCTM } = props as BlurMaskFilterProps;
+        const maskFilter = Skia.MaskFilter.MakeBlur(
+          BlurStyle[enumKey(style)],
+          blur,
+          respectCTM
+        );
+        declCtx.maskFilters.push(maskFilter);
+        break;
       case CommandType.PushColorFilter:
         declCtx.colorFilters.save();
         break;
       case CommandType.PopColorFilter:
-        const cf = declCtx.colorFilters.popAllAsOne();
         let outer: SkColorFilter;
         switch (command.nodeType) {
           case NodeType.SRGBToLinearGammaColorFilter:
@@ -273,11 +287,7 @@ export const playback = (
             outer = Skia.ColorFilter.MakeLerp(t, first, second);
             break;
         }
-        if (cf) {
-          declCtx.colorFilters.push(Skia.ColorFilter.MakeCompose(outer!, cf));
-        } else {
-          declCtx.colorFilters.push(outer!);
-        }
+        declCtx.colorFilters.push(outer!);
         break;
       case CommandType.PushCTM: {
         const {
@@ -329,6 +339,9 @@ export const playback = (
       }
       case CommandType.PopLayer:
         canvas.restore();
+        break;
+      case CommandType.FinishDeclaration:
+        materializePaint(paint, declCtx);
         break;
       case CommandType.BackdropFilter: {
         let imageFilter: SkImageFilter | null = null;
