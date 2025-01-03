@@ -4,15 +4,12 @@ import type { NodeType } from "../../dom/types";
 
 import { isSharedValue } from "./utils";
 
-type UnknownProps = Record<string, unknown>;
-
 type AnimatedProps<T> = Partial<{ [K in keyof T]: SharedValue<T[K]> }>;
 
-export interface Node<Props extends UnknownProps = UnknownProps> {
+export interface Node<Props extends object = object> {
   type: NodeType;
   isDeclaration: boolean;
   props: Props;
-  animatedProps?: AnimatedProps<Props>;
   children: Node[];
 }
 

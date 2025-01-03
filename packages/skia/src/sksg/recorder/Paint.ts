@@ -1,8 +1,3 @@
-import type { SkEnum } from "../../dom/types";
-import type { BlendMode, Color } from "../../skia/types";
+import type { PaintProps as CompPaintProps } from "../../dom/types";
 
-export interface PaintProps {
-  color?: Color;
-  opacity?: number;
-  blendMode?: SkEnum<typeof BlendMode>;
-}
+export type PaintProps = CompPaintProps;
