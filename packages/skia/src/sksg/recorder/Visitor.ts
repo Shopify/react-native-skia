@@ -97,6 +97,18 @@ const extraPaints = (node: Node) => {
 
 export function record(recorder: Recorder, root: Node<any>) {
   const { type, props, children } = root;
+  if (props.paint) {
+    recorder.pushStaticPaint(props.paint);
+    const clone = {
+      type: root.type,
+      isDeclaration: root.isDeclaration,
+      props: { ...root.props, paint: undefined },
+      children: [...root.children],
+    };
+    record(recorder, clone);
+    recorder.popPaint();
+    return;
+  }
   const { drawings, declarations } = sortNodes(children);
   const paint = processPaint(props, declarations);
   const ctm = processCTM(props);
@@ -114,8 +126,8 @@ export function record(recorder: Recorder, root: Node<any>) {
       skipChildren = true;
       break;
     case NodeType.Layer:
-      recorder.pushLayer(declarations);
-      drawings.forEach((child) => {
+      recorder.pushLayer(children[0]);
+      children.forEach((child) => {
         record(recorder, child);
       });
       recorder.popLayer();

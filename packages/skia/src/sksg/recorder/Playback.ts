@@ -41,6 +41,7 @@ import type {
   Skia,
   SkCanvas,
   SkImageFilter,
+  SkPaint,
 } from "../../skia/types";
 import type { Node } from "../nodes";
 import { isSharedValue, processDeclarations } from "../nodes";
@@ -193,31 +194,37 @@ export const playback = (
         if (dither !== undefined) {
           paint.setDither(dither);
         }
-        (props as PaintProps).children.forEach((child) => {
-          processDeclarations(declCtx, child);
-        });
-        const colorFilter = declCtx.colorFilters.popAllAsOne();
-        const imageFilter = declCtx.imageFilters.popAllAsOne();
-        const shader = declCtx.shaders.pop();
-        const maskFilter = declCtx.maskFilters.pop();
-        const pathEffect = declCtx.pathEffects.popAllAsOne();
-        if (colorFilter) {
-          paint.setColorFilter(colorFilter);
-        }
-        if (imageFilter) {
-          paint.setImageFilter(imageFilter);
-        }
-        if (shader) {
-          paint.setShader(shader);
-        }
-        if (maskFilter) {
-          paint.setMaskFilter(maskFilter);
-        }
-        if (pathEffect) {
-          paint.setPathEffect(pathEffect);
+        const pProps = props as PaintProps;
+        if (pProps.children.length > 0) {
+          pProps.children.forEach((child) => {
+            processDeclarations(declCtx, child);
+          });
+          const colorFilter = declCtx.colorFilters.popAllAsOne();
+          const imageFilter = declCtx.imageFilters.popAllAsOne();
+          const shader = declCtx.shaders.pop();
+          const maskFilter = declCtx.maskFilters.pop();
+          const pathEffect = declCtx.pathEffects.popAllAsOne();
+          if (colorFilter) {
+            paint.setColorFilter(colorFilter);
+          }
+          if (imageFilter) {
+            paint.setImageFilter(imageFilter);
+          }
+          if (shader) {
+            paint.setShader(shader);
+          }
+          if (maskFilter) {
+            paint.setMaskFilter(maskFilter);
+          }
+          if (pathEffect) {
+            paint.setPathEffect(pathEffect);
+          }
         }
         break;
       }
+      case CommandType.PushStaticPaint:
+        paints.push(props as SkPaint);
+        break;
       case CommandType.PopPaint:
         paints.pop();
         break;
@@ -263,10 +270,14 @@ export const playback = (
       }
       case CommandType.PushLayer: {
         const dCtx = createDeclarationContext(ctx.Skia);
-        processDeclarations(dCtx, (props as Node[])[0]);
-        const p = dCtx.paints.pop();
-        if (p) {
-          ctx.canvas.saveLayer(p);
+        if (props) {
+          processDeclarations(dCtx, props as Node);
+          const p = dCtx.paints.pop();
+          if (p) {
+            ctx.canvas.saveLayer(p);
+          }
+        } else {
+          ctx.canvas.saveLayer();
         }
         break;
       }

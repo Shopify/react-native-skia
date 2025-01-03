@@ -23,6 +23,7 @@ import type {
 } from "../../dom/types";
 import type { Node } from "../nodes";
 import { splitProps } from "../nodes";
+import type { SkPaint } from "../../skia";
 
 import type { PaintProps } from "./Paint";
 
@@ -54,6 +55,7 @@ export enum CommandType {
   BackdropFilter,
   PushLayer,
   PopLayer,
+  PushStaticPaint,
 }
 
 type CommandProps = {
@@ -84,6 +86,7 @@ type CommandProps = {
   [CommandType.BackdropFilter]: Node;
   [CommandType.PushLayer]: Node[];
   [CommandType.PopLayer]: null;
+  [CommandType.PushStaticPaint]: SkPaint;
 };
 
 type AnimatedProps<T> = {
@@ -103,6 +106,10 @@ export class Recorder {
     this.commands.push({ type: CommandType.PushPaint, props });
   }
 
+  pushStaticPaint(props: SkPaint) {
+    this.commands.push({ type: CommandType.PushStaticPaint, props });
+  }
+
   popPaint() {
     this.commands.push({ type: CommandType.PopPaint, props: null });
   }
@@ -116,7 +123,7 @@ export class Recorder {
     this.commands.push({ type: CommandType.PopCTM, props: null });
   }
 
-  pushLayer(props: Node[]) {
+  pushLayer(props: Node) {
     this.commands.push({ type: CommandType.PushLayer, props });
   }
 
