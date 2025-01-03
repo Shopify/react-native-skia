@@ -113,6 +113,25 @@ function processCTM({
   return null;
 }
 
+const recordDeclaration = (recorder: Recorder, decl: Node) => {
+  switch (decl.type) {
+    case NodeType.LumaColorFilter:
+    case NodeType.SRGBToLinearGammaColorFilter:
+    case NodeType.LinearToSRGBGammaColorFilter:
+    case NodeType.LerpColorFilter:
+    case NodeType.BlendColorFilter:
+    case NodeType.MatrixColorFilter:
+      recorder.pushColorFilter();
+      decl.children.forEach((child) => {
+        if (child.isDeclaration) {
+          recordDeclaration(recorder, child);
+        }
+      });
+      recorder.popColorFilter(decl.type, decl.props);
+      break;
+  }
+};
+
 const extraPaints = (node: Node) => {
   const nodes: Node[] = [];
   node.children.forEach((child) => {
@@ -183,20 +202,7 @@ export function record(recorder: Recorder, root: Node<any>) {
   }
 
   declarations.forEach((decl) => {
-    switch (decl.type) {
-      case NodeType.LumaColorFilter:
-      case NodeType.SRGBToLinearGammaColorFilter:
-      case NodeType.LinearToSRGBGammaColorFilter:
-      case NodeType.LerpColorFilter:
-      case NodeType.BlendColorFilter:
-      case NodeType.MatrixColorFilter:
-        recorder.pushColorFilter();
-        decl.children.forEach((child) => {
-          record(recorder, child);
-        });
-        recorder.popColorFilter(decl.type, decl.props);
-        break;
-    }
+    recordDeclaration(recorder, decl);
   });
 
   switch (type) {
