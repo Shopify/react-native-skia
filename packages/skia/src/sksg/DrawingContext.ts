@@ -23,6 +23,7 @@ import type {
 } from "../skia/types";
 
 import type { DeclarationContext } from "./DeclarationContext";
+import type { StaticContext } from "./StaticContext";
 
 const computeClip = (
   Skia: Skia,
@@ -61,9 +62,14 @@ const processColor = (
   }
 };
 
-export const createDrawingContext = (Skia: Skia, canvas: SkCanvas) => {
+export const createDrawingContext = (
+  Skia: Skia,
+  canvas: SkCanvas,
+  staticCtx: StaticContext
+) => {
   "worklet";
   const state = {
+    staticCtx,
     paints: [Skia.Paint()],
   };
 
@@ -116,7 +122,14 @@ export const createDrawingContext = (Skia: Skia, canvas: SkCanvas) => {
       pathEffect !== undefined
     ) {
       if (!shouldRestore) {
-        state.paints.push(getPaint().copy());
+        const i = state.paints.length;
+        if (!state.staticCtx.paints[i]) {
+          state.staticCtx.paints.push(Skia.Paint());
+        }
+        const paint = state.staticCtx.paints[i];
+        const parentPaint = getPaint();
+        paint.assign(parentPaint);
+        state.paints.push(paint);
         shouldRestore = true;
       }
     }
@@ -215,7 +228,6 @@ export const createDrawingContext = (Skia: Skia, canvas: SkCanvas) => {
   return {
     Skia,
     canvas,
-    save: () => state.paints.push(getPaint().copy()),
     restore: () => state.paints.pop(),
     getPaint,
     processPaint,

@@ -7,26 +7,38 @@ import {
   HAS_REANIMATED_3,
 } from "../external/reanimated/renderHelpers";
 
+import type { StaticContext } from "./StaticContext";
+import { createStaticContext } from "./StaticContext";
 import { createDrawingContext } from "./DrawingContext";
 import type { Node } from "./nodes";
 import { draw, isSharedValue } from "./nodes";
 
-const drawOnscreen = (Skia: Skia, nativeId: number, root: Node[]) => {
+const drawOnscreen = (
+  Skia: Skia,
+  nativeId: number,
+  root: Node[],
+  staticCtx: StaticContext
+) => {
   "worklet";
   const rec = Skia.PictureRecorder();
   const canvas = rec.beginRecording();
   // TODO: This is only support from 3.15 and above (check the exact version)
   // This could be polyfilled in C++ if needed (or in JS via functions only?)
-  const ctx = createDrawingContext(Skia, canvas);
+  const start = performance.now();
+  const ctx = createDrawingContext(Skia, canvas, staticCtx);
   root.forEach((node) => {
     draw(ctx, node);
   });
   const picture = rec.finishRecordingAsPicture();
+  const end = performance.now();
+  console.log("Recording time: ", end - start);
+  console.log("Static context paints: ", staticCtx.paints.length);
   SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
 };
 
 export class Container {
-  public _root: Node[] = [];
+  private _root: Node[] = [];
+  private _staticCtx: StaticContext | null = null;
   public unmounted = false;
 
   private values = new Set<SharedValue<unknown>>();
@@ -47,13 +59,14 @@ export class Container {
       if (this.mapperId !== null) {
         Rea.stopMapper(this.mapperId);
       }
-      const { nativeId, Skia } = this;
+      const { nativeId, Skia, _staticCtx } = this;
       this.mapperId = Rea.startMapper(() => {
         "worklet";
-        drawOnscreen(Skia, nativeId, root);
+        drawOnscreen(Skia, nativeId, root, _staticCtx!);
       }, Array.from(this.values));
     }
     this._root = root;
+    this._staticCtx = createStaticContext(this.Skia);
   }
 
   clear() {
@@ -66,9 +79,9 @@ export class Container {
       throw new Error("React Native Skia only supports Reanimated 3 and above");
     }
     if (isOnscreen) {
-      const { nativeId, Skia, root } = this;
+      const { nativeId, Skia, root, _staticCtx } = this;
       Rea.runOnUI(() => {
-        drawOnscreen(Skia, nativeId, root);
+        drawOnscreen(Skia, nativeId, root, _staticCtx!);
       })();
     }
   }
@@ -94,7 +107,7 @@ export class Container {
   }
 
   drawOnCanvas(canvas: SkCanvas) {
-    const ctx = createDrawingContext(this.Skia, canvas);
+    const ctx = createDrawingContext(this.Skia, canvas, this._staticCtx!);
     this.root.forEach((node) => {
       draw(ctx, node);
     });
