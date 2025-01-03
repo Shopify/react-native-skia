@@ -155,7 +155,7 @@ export function record(recorder: Recorder, root: Node<any>) {
 
   switch (type) {
     case NodeType.Box:
-      recorder.draw(CommandType.DrawBox, { props, children });
+      recorder.drawBox(props, children);
       skipChildren = true;
       break;
     case NodeType.BackdropFilter:

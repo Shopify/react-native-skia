@@ -3,7 +3,6 @@ import {
   enumKey,
   fitRects,
   inflate,
-  NodeType,
   processCircle,
   processPath,
   processRect,
@@ -51,9 +50,6 @@ import {
   VertexMode,
 } from "../../skia/types";
 
-import type { Node } from "./Node";
-import { materialize } from "./utils";
-
 interface LocalDrawingContext {
   Skia: Skia;
   canvas: SkCanvas;
@@ -75,22 +71,14 @@ export const drawOval = (ctx: LocalDrawingContext, props: OvalProps) => {
 export const drawBox = (
   ctx: LocalDrawingContext,
   props: BoxProps,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  children: Node<any>[]
+  shadows: BoxShadowProps[]
 ) => {
   "worklet";
   const { paint, Skia, canvas } = ctx;
   const { box: defaultBox } = props;
   const opacity = paint.getAlphaf();
   const box = isRRect(defaultBox) ? defaultBox : Skia.RRectXY(defaultBox, 0, 0);
-  const shadows = children
-    .map((node) => {
-      if (node.type === NodeType.BoxShadow) {
-        return materialize(node.props);
-      }
-      return null;
-    })
-    .filter((n): n is BoxShadowProps => n !== null);
+
   shadows
     .filter((shadow) => !shadow.inner)
     .map((shadow) => {

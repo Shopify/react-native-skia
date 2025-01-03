@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "worklet";
 
 import type { SharedValue } from "react-native-reanimated";
@@ -121,6 +122,15 @@ const processColor = (
   }
 };
 
+const materializeProps = (props: any, animatedProps?: any) => {
+  if (animatedProps) {
+    Object.keys(animatedProps).forEach((key) => {
+      props[key] = animatedProps[key].value;
+    });
+  }
+  return props;
+};
+
 export const playback = (
   Skia: Skia,
   canvas: SkCanvas,
@@ -132,14 +142,9 @@ export const playback = (
   for (let i = 0; i < commands.length; i++) {
     const command = commands[i];
     let paint = paints[paints.length - 1];
-    const { props } = command;
-    if (command.animatedProps) {
-      Object.keys(command.animatedProps).forEach((key) => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        props[key] = command.animatedProps[key].value;
-      });
-    }
+    const { props, payload, animatedProps } = command;
+    materializeProps(props, animatedProps);
+
     const ctx = { canvas, Skia, paint };
     switch (command.type) {
       case CommandType.PushPaint: {
@@ -303,8 +308,11 @@ export const playback = (
         canvas.restore();
         break;
       case CommandType.DrawBox:
-        const payload = props as { props: BoxProps; children: Node[] };
-        drawBox(ctx, payload.props, payload.children);
+        drawBox(
+          ctx,
+          props as BoxProps,
+          payload.map((s: any) => materializeProps(s.props, s.animatedProps))
+        );
         break;
       case CommandType.DrawPaint:
         canvas.drawPaint(paint);

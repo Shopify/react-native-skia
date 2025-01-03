@@ -1,26 +1,28 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SharedValue } from "react-native-reanimated";
 
-import type {
-  AtlasProps,
-  BoxProps,
-  CircleProps,
-  CTMProps,
-  DiffRectProps,
-  GlyphsProps,
-  ImageProps,
-  ImageSVGProps,
-  LineProps,
-  OvalProps,
-  ParagraphProps,
-  PatchProps,
-  PathProps,
-  PictureProps,
-  PointsProps,
-  RectProps,
-  RoundedRectProps,
-  TextPathProps,
-  TextProps,
-  VerticesProps,
+import {
+  NodeType,
+  type AtlasProps,
+  type BoxProps,
+  type CircleProps,
+  type CTMProps,
+  type DiffRectProps,
+  type GlyphsProps,
+  type ImageProps,
+  type ImageSVGProps,
+  type LineProps,
+  type OvalProps,
+  type ParagraphProps,
+  type PatchProps,
+  type PathProps,
+  type PictureProps,
+  type PointsProps,
+  type RectProps,
+  type RoundedRectProps,
+  type TextPathProps,
+  type TextProps,
+  type VerticesProps,
 } from "../../dom/types";
 import type { Node } from "../nodes";
 import { splitProps } from "../nodes";
@@ -100,6 +102,7 @@ export interface Command<T extends CommandType = CommandType> {
   type: T;
   props: CommandProps[T];
   animatedProps?: Partial<AnimatedProps<CommandProps[T]>>;
+  payload?: any;
 }
 
 export class Recorder {
@@ -132,6 +135,17 @@ export class Recorder {
 
   popLayer() {
     this.commands.push({ type: CommandType.PopLayer, props: null });
+  }
+
+  drawBox(props: BoxProps, children: Node[]) {
+    this.commands.push({
+      type: CommandType.DrawBox,
+      props,
+      payload: children
+        .filter((child) => child.type === NodeType.BoxShadow)
+        .map((child) => child.props)
+        .map((p) => splitProps(p)),
+    });
   }
 
   draw<T extends CommandType>(type: T, drawProps: CommandProps[T]) {
