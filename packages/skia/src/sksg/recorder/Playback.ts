@@ -11,7 +11,7 @@ import type {
 import { exhaustiveCheck } from "../../renderer/typeddash";
 import { BlendMode, ClipOp, isRRect } from "../../skia/types";
 import type { SkPath, SkRect, SkRRect, Skia } from "../../skia/types";
-import { isSharedValue } from "../nodes";
+import { isSharedValue, processDeclarations } from "../nodes";
 import { drawCircle, drawGlyphs } from "../nodes/drawings";
 import type { StaticContext } from "../StaticContext";
 import {
@@ -20,6 +20,7 @@ import {
   processPath,
   processTransformProps2,
 } from "../../dom/nodes";
+import { createDeclarationContext } from "../DeclarationContext";
 
 import type { PaintProps } from "./Paint";
 import { CommandType } from "./Recorder";
@@ -69,6 +70,7 @@ export const playback = (Skia: Skia, staticCtx: StaticContext) => {
   const recorder = Skia.PictureRecorder();
   const canvas = recorder.beginRecording();
   const { commands } = staticCtx;
+  const declCtx = createDeclarationContext(Skia);
   const paints = [staticCtx.paints[0]];
   for (let i = 0; i < commands.length; i++) {
     const command = commands[i];
@@ -104,6 +106,29 @@ export const playback = (Skia: Skia, staticCtx: StaticContext) => {
         }
         if (blendMode !== undefined) {
           paint.setBlendMode(BlendMode[enumKey(materializeValue(blendMode))]);
+        }
+        (props as PaintProps).children.forEach((child) => {
+          processDeclarations(declCtx, child);
+        });
+        const colorFilter = declCtx.colorFilters.popAllAsOne();
+        const imageFilter = declCtx.imageFilters.popAllAsOne();
+        const shader = declCtx.shaders.pop();
+        const maskFilter = declCtx.maskFilters.pop();
+        const pathEffect = declCtx.pathEffects.popAllAsOne();
+        if (colorFilter) {
+          paint.setColorFilter(colorFilter);
+        }
+        if (imageFilter) {
+          paint.setImageFilter(imageFilter);
+        }
+        if (shader) {
+          paint.setShader(shader);
+        }
+        if (maskFilter) {
+          paint.setMaskFilter(maskFilter);
+        }
+        if (pathEffect) {
+          paint.setPathEffect(pathEffect);
         }
         break;
       }

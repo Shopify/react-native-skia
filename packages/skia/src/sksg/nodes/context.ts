@@ -77,7 +77,7 @@ import {
   makePath2DPathEffect,
 } from "./pathEffects";
 
-function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
+export function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
   "worklet";
   const processChildren = () =>
     node.children.forEach((child) => processDeclarations(ctx, child));

@@ -35,6 +35,7 @@ function processPaint(
     strokeMiter,
     antiAlias,
     dither,
+    children,
   };
 
   if (
