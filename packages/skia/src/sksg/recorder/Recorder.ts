@@ -2,7 +2,7 @@
 
 import type { SharedValue } from "react-native-reanimated";
 
-import type { GlyphsProps } from "../../dom/types";
+import type { CircleProps, GlyphsProps } from "../../dom/types";
 import { splitProps } from "../nodes";
 
 import type { PaintProps } from "./Paint";
@@ -12,6 +12,7 @@ export enum CommandType {
   PopPaint,
   DrawPaint,
   DrawGlyphs,
+  DrawCircle,
 }
 
 type CommandProps = {
@@ -19,6 +20,7 @@ type CommandProps = {
   [CommandType.PopPaint]: null;
   [CommandType.DrawPaint]: null;
   [CommandType.DrawGlyphs]: GlyphsProps;
+  [CommandType.DrawCircle]: CircleProps;
 };
 
 type AnimatedProps<T> = {
@@ -49,5 +51,10 @@ export class Recorder {
   drawGlyphs(glyphsProps: GlyphsProps) {
     const { props, animatedProps } = splitProps(glyphsProps);
     this.commands.push({ type: CommandType.DrawGlyphs, props, animatedProps });
+  }
+
+  drawCircle(circleProps: CircleProps) {
+    const { props, animatedProps } = splitProps(circleProps);
+    this.commands.push({ type: CommandType.DrawCircle, props, animatedProps });
   }
 }

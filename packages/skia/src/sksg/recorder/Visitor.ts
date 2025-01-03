@@ -47,9 +47,9 @@ function processPaint({
   //   if (strokeWidth !== undefined) {
   //     paint.setStrokeWidth(strokeWidth);
   //   }
-  //   if (blendMode !== undefined) {
-  //     paint.setBlendMode(BlendMode[enumKey(blendMode)]);
-  //   }
+  if (blendMode !== undefined) {
+    paint.blendMode = blendMode;
+  }
   //   if (style !== undefined) {
   //     paint.setStyle(PaintStyle[enumKey(style)]);
   //   }
@@ -86,6 +86,9 @@ export function record(recorder: Recorder, root: Node<any>) {
       break;
     case NodeType.Glyphs:
       recorder.drawGlyphs(props);
+      break;
+    case NodeType.Circle:
+      recorder.drawCircle(props);
       break;
   }
   children.forEach((child) => {

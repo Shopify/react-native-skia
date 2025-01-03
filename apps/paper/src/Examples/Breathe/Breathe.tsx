@@ -9,6 +9,7 @@ import {
   Group,
   polar2Canvas,
   mix,
+  Canvas2,
 } from "@shopify/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
 import { useDerivedValue } from "react-native-reanimated";
@@ -68,7 +69,7 @@ export const Breathe = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <Canvas style={styles.container} opaque>
+      <Canvas2 style={styles.container} opaque>
         <Fill color="rgb(36,43,56)" />
         <Group origin={center} transform={transform} blendMode="screen">
           <BlurMask style="solid" blur={40} />
@@ -78,7 +79,7 @@ export const Breathe = () => {
             );
           })}
         </Group>
-      </Canvas>
+      </Canvas2>
     </View>
   );
 };

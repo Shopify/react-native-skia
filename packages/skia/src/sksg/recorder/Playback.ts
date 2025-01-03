@@ -2,12 +2,13 @@
 
 import type { SharedValue } from "react-native-reanimated";
 
-import type { GlyphsProps } from "../../dom/types";
+import type { CircleProps, GlyphsProps } from "../../dom/types";
 import { exhaustiveCheck } from "../../renderer/typeddash";
-import type { Skia } from "../../skia/types";
+import { BlendMode, type Skia } from "../../skia/types";
 import { isSharedValue } from "../nodes";
-import { drawGlyphs } from "../nodes/drawings";
+import { drawCircle, drawGlyphs } from "../nodes/drawings";
 import type { StaticContext } from "../StaticContext";
+import { enumKey } from "../../dom/nodes";
 
 import type { PaintProps } from "./Paint";
 import { CommandType } from "./Recorder";
@@ -59,7 +60,7 @@ export const playback = (Skia: Skia, staticCtx: StaticContext) => {
         childPaint.assign(paint);
         paints.push(childPaint);
         paint = childPaint;
-        const { opacity, color } = props as PaintProps;
+        const { opacity, color, blendMode } = props as PaintProps;
         if (opacity !== undefined) {
           paint.setAlphaf(paint.getAlphaf() * materializeValue(opacity));
         }
@@ -68,6 +69,9 @@ export const playback = (Skia: Skia, staticCtx: StaticContext) => {
           paint.setShader(null);
           paint.setColor(processColor(Skia, materializeValue(color)));
           paint.setAlphaf(currentOpacity * paint.getAlphaf());
+        }
+        if (blendMode !== undefined) {
+          paint.setBlendMode(BlendMode[enumKey(materializeValue(blendMode))]);
         }
         break;
       }
@@ -79,6 +83,9 @@ export const playback = (Skia: Skia, staticCtx: StaticContext) => {
         break;
       case CommandType.DrawGlyphs:
         drawGlyphs(ctx, props as GlyphsProps);
+        break;
+      case CommandType.DrawCircle:
+        drawCircle(ctx, props as CircleProps);
         break;
       default:
         exhaustiveCheck(command.type);
