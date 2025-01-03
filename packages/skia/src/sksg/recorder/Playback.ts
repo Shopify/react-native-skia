@@ -3,16 +3,53 @@
 import type { SharedValue } from "react-native-reanimated";
 
 import type {
+  AtlasProps,
   CircleProps,
   ClipDef,
   CTMProps,
+  DiffRectProps,
   GlyphsProps,
+  ImageProps,
+  ImageSVGProps,
+  LineProps,
+  OvalProps,
+  ParagraphProps,
+  PatchProps,
+  PathProps,
+  PictureProps,
+  PointsProps,
+  RectProps,
+  RoundedRectProps,
+  TextBlobProps,
+  TextPathProps,
+  TextProps,
+  VerticesProps,
 } from "../../dom/types";
 import { exhaustiveCheck } from "../../renderer/typeddash";
 import { BlendMode, ClipOp, isRRect } from "../../skia/types";
 import type { SkPath, SkRect, SkRRect, Skia } from "../../skia/types";
 import { isSharedValue, processDeclarations } from "../nodes";
-import { drawCircle, drawGlyphs } from "../nodes/drawings";
+import {
+  drawAtlas,
+  drawCircle,
+  drawDiffRect,
+  drawGlyphs,
+  drawImage,
+  drawImageSVG,
+  drawLine,
+  drawOval,
+  drawParagraph,
+  drawPatch,
+  drawPath,
+  drawPicture,
+  drawPoints,
+  drawRect,
+  drawRRect,
+  drawText,
+  drawTextBlob,
+  drawTextPath,
+  drawVertices,
+} from "../nodes/drawings";
 import type { StaticContext } from "../StaticContext";
 import {
   enumKey,
@@ -186,6 +223,57 @@ export const playback = (Skia: Skia, staticCtx: StaticContext) => {
         break;
       case CommandType.DrawCircle:
         drawCircle(ctx, props as CircleProps);
+        break;
+      case CommandType.DrawImage:
+        drawImage(ctx, props as ImageProps);
+        break;
+      case CommandType.DrawAtlas:
+        drawAtlas(ctx, props as AtlasProps);
+        break;
+      case CommandType.DrawDiffRect:
+        drawDiffRect(ctx, props as DiffRectProps);
+        break;
+      case CommandType.DrawImageSVG:
+        drawImageSVG(ctx, props as ImageSVGProps);
+        break;
+      case CommandType.DrawLine:
+        drawLine(ctx, props as LineProps);
+        break;
+      case CommandType.DrawOval:
+        drawOval(ctx, props as OvalProps);
+        break;
+      case CommandType.DrawParagraph:
+        drawParagraph(ctx, props as ParagraphProps);
+        break;
+      case CommandType.DrawPatch:
+        drawPatch(ctx, props as PatchProps);
+        break;
+      case CommandType.DrawPath:
+        drawPath(ctx, props as PathProps);
+        break;
+      case CommandType.DrawPicture:
+        drawPicture(ctx, props as PictureProps);
+        break;
+      case CommandType.DrawPoints:
+        drawPoints(ctx, props as PointsProps);
+        break;
+      case CommandType.DrawRect:
+        drawRect(ctx, props as RectProps);
+        break;
+      case CommandType.DrawRRect:
+        drawRRect(ctx, props as RoundedRectProps);
+        break;
+      case CommandType.DrawText:
+        drawText(ctx, props as TextProps);
+        break;
+      case CommandType.DrawTextBlob:
+        drawTextBlob(ctx, props as TextBlobProps);
+        break;
+      case CommandType.DrawTextPath:
+        drawTextPath(ctx, props as TextPathProps);
+        break;
+      case CommandType.DrawVertices:
+        drawVertices(ctx, props as VerticesProps);
         break;
       default:
         exhaustiveCheck(command.type);

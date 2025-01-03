@@ -1,8 +1,26 @@
-"worklet";
-
 import type { SharedValue } from "react-native-reanimated";
 
-import type { CircleProps, CTMProps, GlyphsProps } from "../../dom/types";
+import type {
+  AtlasProps,
+  CircleProps,
+  CTMProps,
+  DiffRectProps,
+  GlyphsProps,
+  ImageProps,
+  ImageSVGProps,
+  LineProps,
+  OvalProps,
+  ParagraphProps,
+  PatchProps,
+  PathProps,
+  PictureProps,
+  PointsProps,
+  RectProps,
+  RoundedRectProps,
+  TextPathProps,
+  TextProps,
+  VerticesProps,
+} from "../../dom/types";
 import { splitProps } from "../nodes";
 
 import type { PaintProps } from "./Paint";
@@ -15,6 +33,23 @@ export enum CommandType {
   DrawPaint,
   DrawGlyphs,
   DrawCircle,
+  DrawImage,
+  DrawPicture,
+  DrawImageSVG,
+  DrawParagraph,
+  DrawAtlas,
+  DrawPoints,
+  DrawPath,
+  DrawRect,
+  DrawRRect,
+  DrawOval,
+  DrawLine,
+  DrawPatch,
+  DrawVertices,
+  DrawDiffRect,
+  DrawText,
+  DrawTextPath,
+  DrawTextBlob,
 }
 
 type CommandProps = {
@@ -25,6 +60,23 @@ type CommandProps = {
   [CommandType.DrawPaint]: null;
   [CommandType.DrawGlyphs]: GlyphsProps;
   [CommandType.DrawCircle]: CircleProps;
+  [CommandType.DrawImage]: ImageProps;
+  [CommandType.DrawPicture]: PictureProps;
+  [CommandType.DrawImageSVG]: ImageSVGProps;
+  [CommandType.DrawParagraph]: ParagraphProps;
+  [CommandType.DrawAtlas]: AtlasProps;
+  [CommandType.DrawPoints]: PointsProps;
+  [CommandType.DrawPath]: PathProps;
+  [CommandType.DrawRect]: RectProps;
+  [CommandType.DrawRRect]: RoundedRectProps;
+  [CommandType.DrawOval]: OvalProps;
+  [CommandType.DrawLine]: LineProps;
+  [CommandType.DrawPatch]: PatchProps;
+  [CommandType.DrawVertices]: VerticesProps;
+  [CommandType.DrawDiffRect]: DiffRectProps;
+  [CommandType.DrawText]: TextProps;
+  [CommandType.DrawTextPath]: TextPathProps;
+  [CommandType.DrawTextBlob]: TextProps;
 };
 
 type AnimatedProps<T> = {
@@ -57,17 +109,8 @@ export class Recorder {
     this.commands.push({ type: CommandType.PopCTM, props: null });
   }
 
-  drawPaint() {
-    this.commands.push({ type: CommandType.DrawPaint, props: null });
-  }
-
-  drawGlyphs(glyphsProps: GlyphsProps) {
-    const { props, animatedProps } = splitProps(glyphsProps);
-    this.commands.push({ type: CommandType.DrawGlyphs, props, animatedProps });
-  }
-
-  drawCircle(circleProps: CircleProps) {
-    const { props, animatedProps } = splitProps(circleProps);
-    this.commands.push({ type: CommandType.DrawCircle, props, animatedProps });
+  draw<T extends CommandType>(type: T, drawProps: CommandProps[T]) {
+    const { props, animatedProps } = splitProps(drawProps);
+    this.commands.push({ type, props, animatedProps });
   }
 }

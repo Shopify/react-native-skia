@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import type { SharedValue } from "react-native-reanimated";
 
 import type { NodeType } from "../../dom/types";
@@ -13,17 +14,20 @@ export interface Node<Props extends object = object> {
   children: Node[];
 }
 
-export const splitProps = <T extends object>(props: T) => {
+export const splitProps = <T extends object | null>(props: T) => {
   "worklet";
+  if (props === null) {
+    return { props: null };
+  }
   let hasAnimatedProps = false;
   const animatedProps: Partial<AnimatedProps<T>> = {};
   Object.keys(props).forEach((key) => {
-    const name = key as keyof T;
-    const value = props[name];
+    // @ts-ignore
+    const value = props[key];
     if (isSharedValue(value)) {
       hasAnimatedProps = true;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      animatedProps[name] = value as any;
+      // @ts-ignore
+      animatedProps[key] = value;
     }
   });
   return {

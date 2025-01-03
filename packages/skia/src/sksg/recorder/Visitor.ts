@@ -6,7 +6,7 @@ import { NodeType } from "../../dom/types";
 import { sortNodes, type Node } from "../nodes";
 
 import type { PaintProps } from "./Paint";
-import type { Recorder } from "./Recorder";
+import { CommandType, type Recorder } from "./Recorder";
 
 function processPaint(
   {
@@ -88,14 +88,71 @@ export function record(recorder: Recorder, root: Node<any>) {
     recorder.pushCTM(ctm);
   }
   switch (type) {
-    case NodeType.Fill:
-      recorder.drawPaint();
-      break;
     case NodeType.Glyphs:
-      recorder.drawGlyphs(props);
+      recorder.draw(CommandType.DrawGlyphs, props);
       break;
     case NodeType.Circle:
-      recorder.drawCircle(props);
+      recorder.draw(CommandType.DrawCircle, props);
+      break;
+    case NodeType.Image:
+      recorder.draw(CommandType.DrawImage, props);
+      break;
+    case NodeType.Points:
+      recorder.draw(CommandType.DrawPoints, props);
+      break;
+    case NodeType.Path:
+      recorder.draw(CommandType.DrawPath, props);
+      break;
+    case NodeType.Rect:
+      recorder.draw(CommandType.DrawRect, props);
+      break;
+    case NodeType.RRect:
+      recorder.draw(CommandType.DrawRRect, props);
+      break;
+    case NodeType.Oval:
+      recorder.draw(CommandType.DrawOval, props);
+      break;
+    case NodeType.Line:
+      recorder.draw(CommandType.DrawLine, props);
+      break;
+    case NodeType.Patch:
+      recorder.draw(CommandType.DrawPatch, props);
+      break;
+    case NodeType.Vertices:
+      recorder.draw(CommandType.DrawVertices, props);
+      break;
+    case NodeType.DiffRect:
+      recorder.draw(CommandType.DrawDiffRect, props);
+      break;
+    case NodeType.Text:
+      recorder.draw(CommandType.DrawText, props);
+      break;
+    case NodeType.TextPath:
+      recorder.draw(CommandType.DrawTextPath, props);
+      break;
+    case NodeType.TextBlob:
+      recorder.draw(CommandType.DrawTextBlob, props);
+      break;
+    case NodeType.Glyphs:
+      recorder.draw(CommandType.DrawGlyphs, props);
+      break;
+    case NodeType.Picture:
+      recorder.draw(CommandType.DrawPicture, props);
+      break;
+    case NodeType.ImageSVG:
+      recorder.draw(CommandType.DrawImageSVG, props);
+      break;
+    case NodeType.Paragraph:
+      recorder.draw(CommandType.DrawParagraph, props);
+      break;
+    case NodeType.Atlas:
+      recorder.draw(CommandType.DrawAtlas, props);
+      break;
+    case NodeType.Circle:
+      recorder.draw(CommandType.DrawCircle, props);
+      break;
+    case NodeType.Fill:
+      recorder.draw(CommandType.DrawPaint, props);
       break;
   }
   drawings.forEach((child) => {
