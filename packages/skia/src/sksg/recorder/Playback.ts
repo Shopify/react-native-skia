@@ -2,19 +2,51 @@
 
 import type { SharedValue } from "react-native-reanimated";
 
-import type { CircleProps, GlyphsProps } from "../../dom/types";
+import type {
+  CircleProps,
+  ClipDef,
+  CTMProps,
+  GlyphsProps,
+} from "../../dom/types";
 import { exhaustiveCheck } from "../../renderer/typeddash";
-import { BlendMode, type Skia } from "../../skia/types";
+import { BlendMode, ClipOp, isRRect } from "../../skia/types";
+import type { SkPath, SkRect, SkRRect, Skia } from "../../skia/types";
 import { isSharedValue } from "../nodes";
 import { drawCircle, drawGlyphs } from "../nodes/drawings";
 import type { StaticContext } from "../StaticContext";
-import { enumKey } from "../../dom/nodes";
+import {
+  enumKey,
+  isPathDef,
+  processPath,
+  processTransformProps2,
+} from "../../dom/nodes";
 
 import type { PaintProps } from "./Paint";
 import { CommandType } from "./Recorder";
 
 const materializeValue = <T>(value: T | SharedValue<T>) => {
   return (isSharedValue(value) ? value.value : value) as T;
+};
+
+const computeClip = (
+  Skia: Skia,
+  clip: ClipDef | undefined
+):
+  | undefined
+  | { clipPath: SkPath }
+  | { clipRect: SkRect }
+  | { clipRRect: SkRRect } => {
+  "worklet";
+  if (clip) {
+    if (isPathDef(clip)) {
+      return { clipPath: processPath(Skia, clip) };
+    } else if (isRRect(clip)) {
+      return { clipRRect: clip };
+    } else {
+      return { clipRect: clip };
+    }
+  }
+  return undefined;
 };
 
 const processColor = (
@@ -77,6 +109,49 @@ export const playback = (Skia: Skia, staticCtx: StaticContext) => {
       }
       case CommandType.PopPaint:
         paints.pop();
+        break;
+      case CommandType.PushCTM: {
+        const {
+          clip: rawClip,
+          invertClip,
+          matrix,
+          transform,
+          origin,
+          layer,
+        } = props as CTMProps;
+        const hasTransform = matrix !== undefined || transform !== undefined;
+        const clip = computeClip(Skia, rawClip);
+        const hasClip = clip !== undefined;
+        const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
+        const m3 = processTransformProps2(Skia, { matrix, transform, origin });
+        const shouldSave = hasTransform || hasClip || !!layer;
+        if (shouldSave) {
+          if (layer) {
+            if (typeof layer === "boolean") {
+              canvas.saveLayer();
+            } else {
+              canvas.saveLayer(layer);
+            }
+          } else {
+            canvas.save();
+          }
+        }
+        if (m3) {
+          canvas.concat(m3);
+        }
+        if (clip) {
+          if ("clipRect" in clip) {
+            canvas.clipRect(clip.clipRect, op, true);
+          } else if ("clipRRect" in clip) {
+            canvas.clipRRect(clip.clipRRect, op, true);
+          } else {
+            canvas.clipPath(clip.clipPath, op, true);
+          }
+        }
+        break;
+      }
+      case CommandType.PopCTM:
+        canvas.restore();
         break;
       case CommandType.DrawPaint:
         canvas.drawPaint(paint);

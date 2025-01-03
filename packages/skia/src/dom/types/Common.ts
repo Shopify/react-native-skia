@@ -70,6 +70,12 @@ export interface TransformProps {
   matrix?: InputMatrix;
 }
 
+export interface CTMProps extends TransformProps {
+  clip?: ClipDef;
+  invertClip?: boolean;
+  layer?: SkPaint | boolean;
+}
+
 export interface PaintProps extends ChildrenProps {
   color?: Color;
   strokeWidth?: number;
@@ -83,8 +89,4 @@ export interface PaintProps extends ChildrenProps {
   dither?: boolean;
 }
 
-export interface GroupProps extends PaintProps, TransformProps {
-  clip?: ClipDef;
-  invertClip?: boolean;
-  layer?: SkPaint | boolean;
-}
+export interface GroupProps extends PaintProps, CTMProps {}

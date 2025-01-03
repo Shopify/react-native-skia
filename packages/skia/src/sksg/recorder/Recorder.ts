@@ -2,7 +2,7 @@
 
 import type { SharedValue } from "react-native-reanimated";
 
-import type { CircleProps, GlyphsProps } from "../../dom/types";
+import type { CircleProps, CTMProps, GlyphsProps } from "../../dom/types";
 import { splitProps } from "../nodes";
 
 import type { PaintProps } from "./Paint";
@@ -10,6 +10,8 @@ import type { PaintProps } from "./Paint";
 export enum CommandType {
   PushPaint,
   PopPaint,
+  PushCTM,
+  PopCTM,
   DrawPaint,
   DrawGlyphs,
   DrawCircle,
@@ -18,6 +20,8 @@ export enum CommandType {
 type CommandProps = {
   [CommandType.PushPaint]: PaintProps;
   [CommandType.PopPaint]: null;
+  [CommandType.PushCTM]: CTMProps;
+  [CommandType.PopCTM]: null;
   [CommandType.DrawPaint]: null;
   [CommandType.DrawGlyphs]: GlyphsProps;
   [CommandType.DrawCircle]: CircleProps;
@@ -42,6 +46,15 @@ export class Recorder {
 
   popPaint() {
     this.commands.push({ type: CommandType.PopPaint, props: null });
+  }
+
+  pushCTM(ctmProps: CTMProps) {
+    const { props, animatedProps } = splitProps(ctmProps);
+    this.commands.push({ type: CommandType.PushCTM, props, animatedProps });
+  }
+
+  popCTM() {
+    this.commands.push({ type: CommandType.PopCTM, props: null });
   }
 
   drawPaint() {

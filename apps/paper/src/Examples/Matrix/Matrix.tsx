@@ -1,7 +1,6 @@
 import {
   BlurMask,
   Canvas,
-  Canvas2,
   Fill,
   Group,
   useClock,
@@ -42,7 +41,7 @@ export const Matrix = () => {
   }
   const symbols = font.getGlyphIDs("abcdefghijklmnopqrstuvwxyz");
   return (
-    <Canvas2 style={{ flex: 1 }} opaque>
+    <Canvas style={{ flex: 1 }} opaque>
       <Fill color="black" />
       <Group>
         <BlurMask blur={8} style="solid" />
@@ -61,6 +60,6 @@ export const Matrix = () => {
           ))
         )}
       </Group>
-    </Canvas2>
+    </Canvas>
   );
 };

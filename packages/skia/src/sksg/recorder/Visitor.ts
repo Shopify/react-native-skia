@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "worklet";
 
-import type { DrawingNodeProps } from "../../dom/types";
+import type { CTMProps, DrawingNodeProps } from "../../dom/types";
 import { NodeType } from "../../dom/types";
 import type { Node } from "../nodes";
 
@@ -21,8 +21,19 @@ function processPaint({
   dither,
   paint: paintProp,
 }: DrawingNodeProps) {
-  let shouldRestore = false;
-  const paint: PaintProps = {};
+  const paint: PaintProps = {
+    opacity,
+    color,
+    strokeWidth,
+    blendMode,
+    style,
+    strokeJoin,
+    strokeCap,
+    strokeMiter,
+    antiAlias,
+    dither,
+  };
+
   if (
     opacity !== undefined ||
     color !== undefined ||
@@ -35,41 +46,27 @@ function processPaint({
     antiAlias !== undefined ||
     dither !== undefined
   ) {
-    shouldRestore = true;
-  }
-
-  if (opacity !== undefined) {
-    paint.opacity = opacity;
-  }
-  if (color !== undefined) {
-    paint.color = color;
-  }
-  //   if (strokeWidth !== undefined) {
-  //     paint.setStrokeWidth(strokeWidth);
-  //   }
-  if (blendMode !== undefined) {
-    paint.blendMode = blendMode;
-  }
-  //   if (style !== undefined) {
-  //     paint.setStyle(PaintStyle[enumKey(style)]);
-  //   }
-  //   if (strokeJoin !== undefined) {
-  //     paint.setStrokeJoin(StrokeJoin[enumKey(strokeJoin)]);
-  //   }
-  //   if (strokeCap !== undefined) {
-  //     paint.setStrokeCap(StrokeCap[enumKey(strokeCap)]);
-  //   }
-  //   if (strokeMiter !== undefined) {
-  //     paint.setStrokeMiter(strokeMiter);
-  //   }
-  //   if (antiAlias !== undefined) {
-  //     paint.setAntiAlias(antiAlias);
-  //   }
-  //   if (dither !== undefined) {
-  //     paint.setDither(dither);
-  //   }
-  if (shouldRestore) {
     return paint;
+  }
+  return null;
+}
+
+function processCTM({ clip, invertClip, transform, origin, matrix }: CTMProps) {
+  const ctm: CTMProps = {
+    clip,
+    invertClip,
+    transform,
+    origin,
+    matrix,
+  };
+  if (
+    clip !== undefined ||
+    invertClip !== undefined ||
+    transform !== undefined ||
+    origin !== undefined ||
+    matrix !== undefined
+  ) {
+    return ctm;
   }
   return null;
 }
@@ -77,8 +74,12 @@ function processPaint({
 export function record(recorder: Recorder, root: Node<any>) {
   const { type, props, children } = root;
   const paint = processPaint(props as DrawingNodeProps);
+  const ctm = processCTM(props as DrawingNodeProps);
   if (paint) {
     recorder.pushPaint(paint);
+  }
+  if (ctm) {
+    recorder.pushCTM(ctm);
   }
   switch (type) {
     case NodeType.Fill:
@@ -96,5 +97,8 @@ export function record(recorder: Recorder, root: Node<any>) {
   });
   if (paint) {
     recorder.popPaint();
+  }
+  if (ctm) {
+    recorder.popCTM();
   }
 }
