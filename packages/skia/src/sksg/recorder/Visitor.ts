@@ -3,24 +3,27 @@
 
 import type { CTMProps, DrawingNodeProps } from "../../dom/types";
 import { NodeType } from "../../dom/types";
-import type { Node } from "../nodes";
+import { sortNodes, type Node } from "../nodes";
 
 import type { PaintProps } from "./Paint";
 import type { Recorder } from "./Recorder";
 
-function processPaint({
-  opacity,
-  color,
-  strokeWidth,
-  blendMode,
-  style,
-  strokeJoin,
-  strokeCap,
-  strokeMiter,
-  antiAlias,
-  dither,
-  paint: paintProp,
-}: DrawingNodeProps) {
+function processPaint(
+  {
+    opacity,
+    color,
+    strokeWidth,
+    blendMode,
+    style,
+    strokeJoin,
+    strokeCap,
+    strokeMiter,
+    antiAlias,
+    dither,
+    paint: paintProp,
+  }: DrawingNodeProps,
+  children: Node[]
+) {
   const paint: PaintProps = {
     opacity,
     color,
@@ -44,7 +47,8 @@ function processPaint({
     strokeCap !== undefined ||
     strokeMiter !== undefined ||
     antiAlias !== undefined ||
-    dither !== undefined
+    dither !== undefined ||
+    children.length > 0
   ) {
     return paint;
   }
@@ -73,8 +77,9 @@ function processCTM({ clip, invertClip, transform, origin, matrix }: CTMProps) {
 
 export function record(recorder: Recorder, root: Node<any>) {
   const { type, props, children } = root;
-  const paint = processPaint(props as DrawingNodeProps);
-  const ctm = processCTM(props as DrawingNodeProps);
+  const { drawings, declarations } = sortNodes(children);
+  const paint = processPaint(props, declarations);
+  const ctm = processCTM(props);
   if (paint) {
     recorder.pushPaint(paint);
   }
@@ -92,7 +97,7 @@ export function record(recorder: Recorder, root: Node<any>) {
       recorder.drawCircle(props);
       break;
   }
-  children.forEach((child) => {
+  drawings.forEach((child) => {
     record(recorder, child);
   });
   if (paint) {
