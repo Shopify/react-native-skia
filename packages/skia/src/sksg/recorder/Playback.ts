@@ -79,6 +79,7 @@ import {
 import { createDeclarationContext } from "../DeclarationContext";
 
 import type { PaintProps } from "./Paint";
+import type { DrawBoxCommand } from "./Recorder";
 import { CommandType } from "./Recorder";
 
 const materializeValue = <T>(value: T | SharedValue<T>) => {
@@ -142,7 +143,7 @@ export const playback = (
   for (let i = 0; i < commands.length; i++) {
     const command = commands[i];
     let paint = paints[paints.length - 1];
-    const { props, payload, animatedProps } = command;
+    const { props, animatedProps } = command;
     materializeProps(props, animatedProps);
 
     const ctx = { canvas, Skia, paint };
@@ -308,10 +309,13 @@ export const playback = (
         canvas.restore();
         break;
       case CommandType.DrawBox:
+        const drawCommand = command as DrawBoxCommand;
         drawBox(
           ctx,
           props as BoxProps,
-          payload.map((s: any) => materializeProps(s.props, s.animatedProps))
+          drawCommand.shadows.map((s: any) =>
+            materializeProps(s.props, s.animatedProps)
+          )
         );
         break;
       case CommandType.DrawPaint:
