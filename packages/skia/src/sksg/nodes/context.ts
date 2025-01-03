@@ -8,7 +8,7 @@ import {
   type DeclarationContext,
 } from "../DeclarationContext";
 
-import type { Node } from "./Node";
+import { sortNodes, type Node } from "./Node";
 import {
   drawAtlas,
   drawBox,
@@ -248,21 +248,18 @@ function processDeclarations(ctx: DeclarationContext, node: Node<any>) {
 const preProcessContext = (
   ctx: DrawingContext,
   props: DrawingNodeProps,
-  node: Node<any>
+  declarationChildren: Node<any>[]
 ) => {
   "worklet";
   const shouldRestoreMatrix = ctx.processMatrixAndClipping(props, props.layer);
-  const declCtx = createDeclarationContext(ctx.Skia);
-  node.children.forEach((child) => {
-    if (child.isDeclaration) {
-      processDeclarations(declCtx, child);
-    }
+  declarationChildren.forEach((child) => {
+    processDeclarations(ctx.declCtx, child);
   });
-  const shouldRestorePaint = ctx.processPaint(props, declCtx);
+  const shouldRestorePaint = ctx.processPaint(props);
   return {
     shouldRestoreMatrix,
     shouldRestorePaint,
-    extraPaints: declCtx.paints.popAll(),
+    extraPaints: ctx.declCtx.paints.popAll(),
   };
 };
 
@@ -318,10 +315,12 @@ export function draw(ctx: DrawingContext, node: Node<any>) {
     return;
   }
   const { type, props: rawProps, children } = node;
+
   // Regular nodes
   const props = materialize(rawProps);
+  const { declarations, drawings } = sortNodes(children);
   const { shouldRestoreMatrix, shouldRestorePaint, extraPaints } =
-    preProcessContext(ctx, props, node);
+    preProcessContext(ctx, props, declarations);
   const paints = [ctx.getPaint(), ...extraPaints];
   paints.forEach((paint) => {
     const lctx = { paint, Skia: ctx.Skia, canvas: ctx.canvas };
@@ -398,10 +397,8 @@ export function draw(ctx: DrawingContext, node: Node<any>) {
         }
     }
   });
-  children.forEach((child) => {
-    if (!child.isDeclaration) {
-      draw(ctx, child);
-    }
+  drawings.forEach((child) => {
+    draw(ctx, child);
   });
   if (shouldRestoreMatrix) {
     ctx.canvas.restore();

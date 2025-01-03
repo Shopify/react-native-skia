@@ -22,7 +22,8 @@ import type {
   SkPaint,
 } from "../skia/types";
 
-import type { DeclarationContext } from "./DeclarationContext";
+import { createDeclarationContext } from "./DeclarationContext";
+import type { StaticContext } from "./StaticContext";
 
 const computeClip = (
   Skia: Skia,
@@ -61,9 +62,15 @@ const processColor = (
   }
 };
 
-export const createDrawingContext = (Skia: Skia, canvas: SkCanvas) => {
+export const createDrawingContext = (
+  Skia: Skia,
+  canvas: SkCanvas,
+  staticCtx: StaticContext
+) => {
   "worklet";
   const state = {
+    staticCtx,
+    declCtx: createDeclarationContext(Skia),
     paints: [Skia.Paint()],
   };
 
@@ -71,22 +78,20 @@ export const createDrawingContext = (Skia: Skia, canvas: SkCanvas) => {
     return state.paints[state.paints.length - 1];
   };
 
-  const processPaint = (
-    {
-      opacity,
-      color,
-      strokeWidth,
-      blendMode,
-      style,
-      strokeJoin,
-      strokeCap,
-      strokeMiter,
-      antiAlias,
-      dither,
-      paint: paintProp,
-    }: DrawingNodeProps,
-    declCtx: DeclarationContext
-  ) => {
+  const processPaint = ({
+    opacity,
+    color,
+    strokeWidth,
+    blendMode,
+    style,
+    strokeJoin,
+    strokeCap,
+    strokeMiter,
+    antiAlias,
+    dither,
+    paint: paintProp,
+  }: DrawingNodeProps) => {
+    const { declCtx } = state;
     if (paintProp) {
       declCtx.paints.push(paintProp);
       return true;
@@ -116,7 +121,14 @@ export const createDrawingContext = (Skia: Skia, canvas: SkCanvas) => {
       pathEffect !== undefined
     ) {
       if (!shouldRestore) {
-        state.paints.push(getPaint().copy());
+        const i = state.paints.length;
+        if (!state.staticCtx.paints[i]) {
+          state.staticCtx.paints.push(Skia.Paint());
+        }
+        const paint = state.staticCtx.paints[i];
+        const parentPaint = getPaint();
+        paint.assign(parentPaint);
+        state.paints.push(paint);
         shouldRestore = true;
       }
     }
@@ -215,11 +227,11 @@ export const createDrawingContext = (Skia: Skia, canvas: SkCanvas) => {
   return {
     Skia,
     canvas,
-    save: () => state.paints.push(getPaint().copy()),
     restore: () => state.paints.pop(),
     getPaint,
     processPaint,
     processMatrixAndClipping,
+    declCtx: state.declCtx,
   };
 };
 
