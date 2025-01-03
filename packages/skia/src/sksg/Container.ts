@@ -9,9 +9,8 @@ import {
 
 import type { StaticContext } from "./StaticContext";
 import { createStaticContext } from "./StaticContext";
-import { createDrawingContext } from "./DrawingContext";
 import type { Node } from "./nodes";
-import { draw, isSharedValue } from "./nodes";
+import { isSharedValue } from "./nodes";
 import { Recorder } from "./recorder/Recorder";
 import { record } from "./recorder/Visitor";
 import { playback } from "./recorder/Playback";
@@ -23,7 +22,11 @@ const drawOnscreen = (
 ) => {
   "worklet";
   const start = performance.now();
-  const picture = playback(Skia, staticCtx);
+
+  const recorder = Skia.PictureRecorder();
+  const canvas = recorder.beginRecording();
+  playback(Skia, canvas, staticCtx);
+  const picture = recorder.finishRecordingAsPicture();
   const end = performance.now();
   console.log("Recording time: ", end - start);
   SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
@@ -105,9 +108,6 @@ export class Container {
   }
 
   drawOnCanvas(canvas: SkCanvas) {
-    const ctx = createDrawingContext(this.Skia, canvas, this._staticCtx!);
-    this.root.forEach((node) => {
-      draw(ctx, node);
-    });
+    playback(this.Skia, canvas, this._staticCtx!);
   }
 }

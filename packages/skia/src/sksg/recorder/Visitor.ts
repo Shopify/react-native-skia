@@ -20,8 +20,8 @@ function processPaint(
     strokeMiter,
     antiAlias,
     dither,
-    paint: paintProp,
-  }: DrawingNodeProps,
+  }: //  paint: paintProp,
+  DrawingNodeProps,
   children: Node[]
 ) {
   const paint: PaintProps = {

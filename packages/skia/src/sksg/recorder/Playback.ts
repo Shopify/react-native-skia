@@ -26,8 +26,15 @@ import type {
   VerticesProps,
 } from "../../dom/types";
 import { exhaustiveCheck } from "../../renderer/typeddash";
-import { BlendMode, ClipOp, isRRect } from "../../skia/types";
-import type { SkPath, SkRect, SkRRect, Skia } from "../../skia/types";
+import {
+  BlendMode,
+  ClipOp,
+  isRRect,
+  PaintStyle,
+  StrokeCap,
+  StrokeJoin,
+} from "../../skia/types";
+import type { SkPath, SkRect, SkRRect, Skia, SkCanvas } from "../../skia/types";
 import { isSharedValue, processDeclarations } from "../nodes";
 import {
   drawAtlas,
@@ -103,9 +110,11 @@ const processColor = (
   }
 };
 
-export const playback = (Skia: Skia, staticCtx: StaticContext) => {
-  const recorder = Skia.PictureRecorder();
-  const canvas = recorder.beginRecording();
+export const playback = (
+  Skia: Skia,
+  canvas: SkCanvas,
+  staticCtx: StaticContext
+) => {
   const { commands } = staticCtx;
   const declCtx = createDeclarationContext(Skia);
   const paints = [staticCtx.paints[0]];
@@ -131,7 +140,18 @@ export const playback = (Skia: Skia, staticCtx: StaticContext) => {
         childPaint.assign(paint);
         paints.push(childPaint);
         paint = childPaint;
-        const { opacity, color, blendMode } = props as PaintProps;
+        const {
+          opacity,
+          color,
+          blendMode,
+          strokeWidth,
+          style,
+          strokeJoin,
+          strokeCap,
+          strokeMiter,
+          antiAlias,
+          dither,
+        } = props as PaintProps;
         if (opacity !== undefined) {
           paint.setAlphaf(paint.getAlphaf() * materializeValue(opacity));
         }
@@ -143,6 +163,27 @@ export const playback = (Skia: Skia, staticCtx: StaticContext) => {
         }
         if (blendMode !== undefined) {
           paint.setBlendMode(BlendMode[enumKey(materializeValue(blendMode))]);
+        }
+        if (strokeWidth !== undefined) {
+          paint.setStrokeWidth(strokeWidth);
+        }
+        if (style !== undefined) {
+          paint.setStyle(PaintStyle[enumKey(style)]);
+        }
+        if (strokeJoin !== undefined) {
+          paint.setStrokeJoin(StrokeJoin[enumKey(strokeJoin)]);
+        }
+        if (strokeCap !== undefined) {
+          paint.setStrokeCap(StrokeCap[enumKey(strokeCap)]);
+        }
+        if (strokeMiter !== undefined) {
+          paint.setStrokeMiter(strokeMiter);
+        }
+        if (antiAlias !== undefined) {
+          paint.setAntiAlias(antiAlias);
+        }
+        if (dither !== undefined) {
+          paint.setDither(dither);
         }
         (props as PaintProps).children.forEach((child) => {
           processDeclarations(declCtx, child);
@@ -279,5 +320,4 @@ export const playback = (Skia: Skia, staticCtx: StaticContext) => {
         exhaustiveCheck(command.type);
     }
   }
-  return recorder.finishRecordingAsPicture();
 };
