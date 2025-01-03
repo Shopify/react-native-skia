@@ -129,12 +129,15 @@ export const sksgHostConfig: SkiaHostConfig = {
 
   createInstance(
     type,
-    props,
+    rawProps,
     container,
     _hostContext,
     _internalInstanceHandle
   ) {
     debug("createInstance", type);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const { children, ...props } = rawProps;
     container.registerValues(props);
     const instance = {
       type,
