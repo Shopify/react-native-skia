@@ -12,22 +12,18 @@ import { createStaticContext } from "./StaticContext";
 import { createDrawingContext } from "./DrawingContext";
 import type { Node } from "./nodes";
 import { draw, isSharedValue } from "./nodes";
+import { Recorder } from "./recorder/Recorder";
+import { record } from "./recorder/Visitor";
+import { playback } from "./recorder/Playback";
 
 const drawOnscreen = (
   Skia: Skia,
   nativeId: number,
-  root: Node[],
   staticCtx: StaticContext
 ) => {
   "worklet";
-  const rec = Skia.PictureRecorder();
-  const canvas = rec.beginRecording();
   const start = performance.now();
-  const ctx = createDrawingContext(Skia, canvas, staticCtx);
-  root.forEach((node) => {
-    draw(ctx, node);
-  });
-  const picture = rec.finishRecordingAsPicture();
+  const picture = playback(Skia, staticCtx);
   const end = performance.now();
   console.log("Recording time: ", end - start);
   SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
@@ -59,11 +55,16 @@ export class Container {
       const { nativeId, Skia, _staticCtx } = this;
       this.mapperId = Rea.startMapper(() => {
         "worklet";
-        drawOnscreen(Skia, nativeId, root, _staticCtx!);
+        drawOnscreen(Skia, nativeId, _staticCtx!);
       }, Array.from(this.values));
     }
     this._root = root;
     this._staticCtx = createStaticContext(this.Skia);
+    const recorder = new Recorder();
+    root.forEach((node) => {
+      record(recorder, node);
+    });
+    this._staticCtx.commands = recorder.commands;
   }
 
   clear() {
@@ -76,9 +77,9 @@ export class Container {
       throw new Error("React Native Skia only supports Reanimated 3 and above");
     }
     if (isOnscreen) {
-      const { nativeId, Skia, root, _staticCtx } = this;
+      const { nativeId, Skia, _staticCtx } = this;
       Rea.runOnUI(() => {
-        drawOnscreen(Skia, nativeId, root, _staticCtx!);
+        drawOnscreen(Skia, nativeId, _staticCtx!);
       })();
     }
   }
