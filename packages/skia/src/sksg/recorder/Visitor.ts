@@ -102,7 +102,20 @@ export function record(recorder: Recorder, root: Node<any>) {
     const clone = {
       type: root.type,
       isDeclaration: root.isDeclaration,
-      props: { ...root.props, paint: undefined },
+      props: {
+        ...root.props,
+        paint: undefined,
+        color: undefined,
+        strokeWidth: undefined,
+        blendMode: undefined,
+        style: undefined,
+        strokeJoin: undefined,
+        strokeCap: undefined,
+        strokeMiter: undefined,
+        opacity: undefined,
+        antiAlias: undefined,
+        dither: undefined,
+      },
       children: [...root.children],
     };
     record(recorder, clone);
@@ -126,13 +139,46 @@ export function record(recorder: Recorder, root: Node<any>) {
       skipChildren = true;
       break;
     case NodeType.Layer:
-      recorder.pushLayer(children[0]);
-      children.forEach((child) => {
-        record(recorder, child);
+      const [layer, ...remainingChildren] = children;
+      let hasLayer = false;
+      if (layer && layer.isDeclaration && layer.type === NodeType.Paint) {
+        hasLayer = true;
+        recorder.pushLayer(layer);
+      }
+      remainingChildren.forEach((child) => {
+        if (!child.isDeclaration) {
+          record(recorder, child);
+        }
       });
-      recorder.popLayer();
+      if (hasLayer) {
+        recorder.popLayer();
+      }
       skipChildren = true;
       break;
+    /*
+      if (node.type === NodeType.Layer) {
+          let hasLayer = false;
+          const [layer, ...children] = node.children;
+          if (layer.isDeclaration) {
+            const declCtx = createDeclarationContext(ctx.Skia);
+            processDeclarations(declCtx, layer);
+            const paint = declCtx.paints.pop();
+            if (paint) {
+              hasLayer = true;
+              ctx.canvas.saveLayer(paint);
+            }
+          }
+          children.map((child) => {
+            if (!child.isDeclaration) {
+              draw(ctx, child);
+            }
+          });
+          if (hasLayer) {
+            ctx.canvas.restore();
+          }
+          return;
+        }
+          */
     case NodeType.Glyphs:
       recorder.draw(CommandType.DrawGlyphs, props);
       break;
