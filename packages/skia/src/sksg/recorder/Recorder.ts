@@ -1,29 +1,7 @@
 import type { SharedValue } from "react-native-reanimated";
 
 import { NodeType } from "../../dom/types";
-import type {
-  BoxShadowProps,
-  AtlasProps,
-  BoxProps,
-  CircleProps,
-  CTMProps,
-  DiffRectProps,
-  GlyphsProps,
-  ImageProps,
-  ImageSVGProps,
-  LineProps,
-  OvalProps,
-  ParagraphProps,
-  PatchProps,
-  PathProps,
-  PictureProps,
-  PointsProps,
-  RectProps,
-  RoundedRectProps,
-  TextPathProps,
-  TextProps,
-  VerticesProps,
-} from "../../dom/types";
+import type { BoxShadowProps, BoxProps, CTMProps } from "../../dom/types";
 import type { Node } from "../nodes";
 import { splitProps } from "../nodes";
 import type { SkPaint } from "../../skia";
@@ -60,48 +38,19 @@ export enum CommandType {
   PushLayer,
   PopLayer,
   PushStaticPaint,
+  PushColorFilter,
+  PopColorFilter,
 }
-
-type CommandProps = {
-  [CommandType.PushPaint]: PaintProps;
-  [CommandType.PopPaint]: null;
-  [CommandType.PushCTM]: CTMProps;
-  [CommandType.PopCTM]: null;
-  [CommandType.DrawPaint]: null;
-  [CommandType.DrawGlyphs]: GlyphsProps;
-  [CommandType.DrawCircle]: CircleProps;
-  [CommandType.DrawImage]: ImageProps;
-  [CommandType.DrawPicture]: PictureProps;
-  [CommandType.DrawImageSVG]: ImageSVGProps;
-  [CommandType.DrawParagraph]: ParagraphProps;
-  [CommandType.DrawAtlas]: AtlasProps;
-  [CommandType.DrawPoints]: PointsProps;
-  [CommandType.DrawPath]: PathProps;
-  [CommandType.DrawRect]: RectProps;
-  [CommandType.DrawRRect]: RoundedRectProps;
-  [CommandType.DrawOval]: OvalProps;
-  [CommandType.DrawLine]: LineProps;
-  [CommandType.DrawPatch]: PatchProps;
-  [CommandType.DrawVertices]: VerticesProps;
-  [CommandType.DrawDiffRect]: DiffRectProps;
-  [CommandType.DrawText]: TextProps;
-  [CommandType.DrawTextPath]: TextPathProps;
-  [CommandType.DrawTextBlob]: TextProps;
-  [CommandType.BackdropFilter]: Node;
-  [CommandType.PushLayer]: Node[];
-  [CommandType.PopLayer]: null;
-  [CommandType.PushStaticPaint]: SkPaint;
-  [CommandType.DrawBox]: { props: BoxProps; children: Node[] };
-};
 
 type AnimatedProps<T> = {
   [P in keyof T]: SharedValue<T[P]>;
 };
 
-export interface Command<T extends CommandType = CommandType> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface Command<T extends CommandType = CommandType, Props = any> {
   type: T;
-  props: CommandProps[T];
-  animatedProps?: Partial<AnimatedProps<CommandProps[T]>>;
+  props: Props;
+  animatedProps?: Partial<AnimatedProps<Props>>;
 }
 
 export interface DrawBoxCommand extends Command<CommandType.DrawBox> {
@@ -151,7 +100,7 @@ export class Recorder {
     } as Command);
   }
 
-  draw<T extends CommandType>(type: T, drawProps: CommandProps[T]) {
+  draw<T extends CommandType>(type: T, drawProps: object) {
     const { props, animatedProps } = splitProps(drawProps);
     this.commands.push({ type, props, animatedProps });
   }

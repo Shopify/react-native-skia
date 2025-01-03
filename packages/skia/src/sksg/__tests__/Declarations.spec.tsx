@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NodeType } from "../../dom/types";
 import type { Node } from "../nodes";
+import { CommandType } from "../recorder/Recorder";
 
 import type { SkColorFilter } from "./MockDeclaration";
 import {
@@ -71,6 +72,55 @@ const processContext = (ctx: DeclarationContext, node: Node<any>) => {
 };
 
 describe("Declarations", () => {
+  it("Deeply nested declarations can be flattened", () => {
+    const commands = [
+      {
+        type: CommandType.PushColorFilter,
+      },
+      {
+        type: CommandType.PushColorFilter,
+      },
+      {
+        type: CommandType.PopColorFilter,
+        nodeType: NodeType.BlendColorFilter,
+        props: {
+          color: "lightblue",
+          mode: "srcIn",
+        },
+      },
+      {
+        type: CommandType.PopColorFilter,
+        nodeType: NodeType.SRGBToLinearGammaColorFilter,
+        props: {},
+      },
+    ];
+    const ctx = new DeclarationContext();
+    commands.forEach((command) => {
+      switch (command.type) {
+        case CommandType.PushColorFilter:
+          ctx.colorFilters.save();
+          break;
+        case CommandType.PopColorFilter:
+          const { nodeType } = command;
+          switch (nodeType) {
+            case NodeType.SRGBToLinearGammaColorFilter:
+              ctx.colorFilters.push(makeSRGBToLinearGammaColorFilter());
+              break;
+            case NodeType.BlendColorFilter:
+              const cf = ctx.colorFilters.popAllAsOne();
+              if (cf) {
+                ctx.colorFilters.push(compose(makeBlendColorFilter(), cf));
+              } else {
+                ctx.colorFilters.push(makeBlendColorFilter());
+              }
+              break;
+          }
+      }
+    });
+    const cf = ctx.colorFilters.popAllAsOne();
+    expect(cf).toBeDefined();
+    console.log(cf!.tag);
+  });
   it("should create a filter from a tree 1", () => {
     const tree: Node = {
       type: NodeType.Group,
