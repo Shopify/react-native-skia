@@ -5,6 +5,7 @@ import type { SharedValue } from "react-native-reanimated";
 
 import type {
   AtlasProps,
+  BlendColorFilterProps,
   BoxProps,
   CircleProps,
   ClipDef,
@@ -44,6 +45,7 @@ import type {
   SkCanvas,
   SkImageFilter,
   SkPaint,
+  SkColorFilter,
 } from "../../skia/types";
 import type { Node } from "../nodes";
 import { isSharedValue, processDeclarations } from "../nodes";
@@ -73,6 +75,7 @@ import type { StaticContext } from "../StaticContext";
 import {
   enumKey,
   isPathDef,
+  NodeType,
   processPath,
   processTransformProps2,
 } from "../../dom/nodes";
@@ -202,31 +205,25 @@ export const playback = (
         if (dither !== undefined) {
           paint.setDither(dither);
         }
-        const pProps = props as PaintProps;
-        if (pProps.children.length > 0) {
-          pProps.children.forEach((child) => {
-            processDeclarations(declCtx, child);
-          });
-          const colorFilter = declCtx.colorFilters.popAllAsOne();
-          const imageFilter = declCtx.imageFilters.popAllAsOne();
-          const shader = declCtx.shaders.pop();
-          const maskFilter = declCtx.maskFilters.pop();
-          const pathEffect = declCtx.pathEffects.popAllAsOne();
-          if (colorFilter) {
-            paint.setColorFilter(colorFilter);
-          }
-          if (imageFilter) {
-            paint.setImageFilter(imageFilter);
-          }
-          if (shader) {
-            paint.setShader(shader);
-          }
-          if (maskFilter) {
-            paint.setMaskFilter(maskFilter);
-          }
-          if (pathEffect) {
-            paint.setPathEffect(pathEffect);
-          }
+        const colorFilter = declCtx.colorFilters.popAllAsOne();
+        const imageFilter = declCtx.imageFilters.popAllAsOne();
+        const shader = declCtx.shaders.pop();
+        const maskFilter = declCtx.maskFilters.pop();
+        const pathEffect = declCtx.pathEffects.popAllAsOne();
+        if (colorFilter) {
+          paint.setColorFilter(colorFilter);
+        }
+        if (imageFilter) {
+          paint.setImageFilter(imageFilter);
+        }
+        if (shader) {
+          paint.setShader(shader);
+        }
+        if (maskFilter) {
+          paint.setMaskFilter(maskFilter);
+        }
+        if (pathEffect) {
+          paint.setPathEffect(pathEffect);
         }
         break;
       }
@@ -235,6 +232,52 @@ export const playback = (
         break;
       case CommandType.PopPaint:
         paints.pop();
+        break;
+      case CommandType.PushColorFilter:
+        declCtx.colorFilters.save();
+        break;
+      case CommandType.PopColorFilter:
+        const cf = declCtx.colorFilters.popAllAsOne();
+        let outer: SkColorFilter;
+        switch (command.nodeType) {
+          case NodeType.SRGBToLinearGammaColorFilter:
+            outer = Skia.ColorFilter.MakeSRGBToLinearGamma();
+            break;
+          case NodeType.LinearToSRGBGammaColorFilter:
+            outer = Skia.ColorFilter.MakeLinearToSRGBGamma();
+            break;
+          case NodeType.BlendColorFilter:
+            const { mode } = props as BlendColorFilterProps;
+            const color = ctx.Skia.Color(props.color);
+            outer = ctx.Skia.ColorFilter.MakeBlend(
+              color,
+              BlendMode[enumKey(mode)]
+            );
+            break;
+          case NodeType.MatrixColorFilter:
+            const { matrix } = props;
+            outer = ctx.Skia.ColorFilter.MakeMatrix(matrix);
+            break;
+          case NodeType.LumaColorFilter:
+            outer = Skia.ColorFilter.MakeLumaColorFilter();
+            break;
+          case NodeType.LerpColorFilter:
+            const { t } = props;
+            const second = declCtx.colorFilters.pop();
+            const first = declCtx.colorFilters.pop();
+            if (!first || !second) {
+              throw new Error(
+                "LerpColorFilterNode: missing two color filters as children"
+              );
+            }
+            outer = Skia.ColorFilter.MakeLerp(t, first, second);
+            break;
+        }
+        if (cf) {
+          declCtx.colorFilters.push(Skia.ColorFilter.MakeCompose(outer!, cf));
+        } else {
+          declCtx.colorFilters.push(outer!);
+        }
         break;
       case CommandType.PushCTM: {
         const {

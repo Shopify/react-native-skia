@@ -23,19 +23,37 @@ function processPaint(
   }: DrawingNodeProps,
   children: Node[]
 ) {
-  const paint: PaintProps = {
-    opacity,
-    color,
-    strokeWidth,
-    blendMode,
-    style,
-    strokeJoin,
-    strokeCap,
-    strokeMiter,
-    antiAlias,
-    dither,
-    children,
-  };
+  const paint: PaintProps = {};
+  if (opacity) {
+    paint.opacity = opacity;
+  }
+  if (color) {
+    paint.color = color;
+  }
+  if (strokeWidth) {
+    paint.strokeWidth = strokeWidth;
+  }
+  if (blendMode) {
+    paint.blendMode = blendMode;
+  }
+  if (style) {
+    paint.style = style;
+  }
+  if (strokeJoin) {
+    paint.strokeJoin = strokeJoin;
+  }
+  if (strokeCap) {
+    paint.strokeCap = strokeCap;
+  }
+  if (strokeMiter) {
+    paint.strokeMiter = strokeMiter;
+  }
+  if (antiAlias) {
+    paint.antiAlias = antiAlias;
+  }
+  if (dither) {
+    paint.dither = dither;
+  }
 
   if (
     opacity !== undefined ||
@@ -63,14 +81,25 @@ function processCTM({
   matrix,
   layer,
 }: CTMProps) {
-  const ctm: CTMProps = {
-    clip,
-    invertClip,
-    transform,
-    origin,
-    matrix,
-    layer,
-  };
+  const ctm: CTMProps = {};
+  if (clip) {
+    ctm.clip = clip;
+  }
+  if (invertClip) {
+    ctm.invertClip = invertClip;
+  }
+  if (transform) {
+    ctm.transform = transform;
+  }
+  if (origin) {
+    ctm.origin = origin;
+  }
+  if (matrix) {
+    ctm.matrix = matrix;
+  }
+  if (layer) {
+    ctm.layer = layer;
+  }
   if (
     clip !== undefined ||
     invertClip !== undefined ||
@@ -124,20 +153,20 @@ export function record(recorder: Recorder, root: Node<any>) {
       isDeclaration: root.isDeclaration,
       props: {
         ...root.props,
-        paint: undefined,
-        color: undefined,
-        strokeWidth: undefined,
-        blendMode: undefined,
-        style: undefined,
-        strokeJoin: undefined,
-        strokeCap: undefined,
-        strokeMiter: undefined,
-        opacity: undefined,
-        antiAlias: undefined,
-        dither: undefined,
       },
       children: root.children,
     };
+    delete clone.props.paint;
+    delete clone.props.color;
+    delete clone.props.strokeWidth;
+    delete clone.props.blendMode;
+    delete clone.props.style;
+    delete clone.props.strokeJoin;
+    delete clone.props.strokeCap;
+    delete clone.props.strokeMiter;
+    delete clone.props.opacity;
+    delete clone.props.antiAlias;
+    delete clone.props.dither;
     record(recorder, clone);
     recorder.popPaint();
     return;
@@ -152,6 +181,23 @@ export function record(recorder: Recorder, root: Node<any>) {
   if (ctm) {
     recorder.pushCTM(ctm);
   }
+
+  declarations.forEach((decl) => {
+    switch (decl.type) {
+      case NodeType.LumaColorFilter:
+      case NodeType.SRGBToLinearGammaColorFilter:
+      case NodeType.LinearToSRGBGammaColorFilter:
+      case NodeType.LerpColorFilter:
+      case NodeType.BlendColorFilter:
+      case NodeType.MatrixColorFilter:
+        recorder.pushColorFilter();
+        decl.children.forEach((child) => {
+          record(recorder, child);
+        });
+        recorder.popColorFilter(decl.type, decl.props);
+        break;
+    }
+  });
 
   switch (type) {
     case NodeType.Box:

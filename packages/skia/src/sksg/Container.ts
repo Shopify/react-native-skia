@@ -67,6 +67,7 @@ export class Container {
     root.forEach((node) => {
       record(recorder, node);
     });
+    console.log(recorder.commands);
     this._staticCtx.commands = recorder.commands;
   }
 
