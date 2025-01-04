@@ -9,6 +9,7 @@ import {
   setColorFilters,
 } from "./commands/ColorFilters";
 import { saveCTM } from "./commands/CTM";
+import { setPaintProperties } from "./commands/Paint";
 import {
   CommandType,
   isCommand,
@@ -20,8 +21,9 @@ import type { DrawingContext } from "./DrawingContext";
 
 const play = (ctx: DrawingContext, command: Command) => {
   materializeProps(command);
-  if (isCommand(command, CommandType.SavePaint)) {
+  if (isDrawCommand(command, CommandType.SavePaint)) {
     ctx.savePaint();
+    setPaintProperties(ctx.Skia, ctx.paint, command.props);
   } else if (isCommand(command, CommandType.RestorePaint)) {
     ctx.restorePaint();
   } else if (isCommand(command, CommandType.ComposeColorFilter)) {

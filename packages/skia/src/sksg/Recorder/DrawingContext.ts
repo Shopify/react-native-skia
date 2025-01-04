@@ -1,6 +1,11 @@
 "worklet";
 
-import type { SkCanvas, SkColorFilter, Skia, SkPaint } from "../../skia/types";
+import {
+  type Skia,
+  type SkCanvas,
+  type SkColorFilter,
+  type SkPaint,
+} from "../../skia/types";
 
 export class DrawingContext {
   Skia: Skia;

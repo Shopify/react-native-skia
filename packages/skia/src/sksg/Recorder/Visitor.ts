@@ -1,10 +1,71 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { CTMProps } from "../../dom/types";
+import type { CTMProps, DrawingNodeProps, PaintProps } from "../../dom/types";
 import { NodeType } from "../../dom/types";
 import type { Node } from "../nodes";
 import { sortNodeChildren } from "../nodes";
 
 import type { Recorder } from "./Recorder";
+
+export const processPaint = ({
+  opacity,
+  color,
+  strokeWidth,
+  blendMode,
+  style,
+  strokeJoin,
+  strokeCap,
+  strokeMiter,
+  antiAlias,
+  dither,
+}: DrawingNodeProps) => {
+  const paint: PaintProps = {};
+  if (opacity) {
+    paint.opacity = opacity;
+  }
+  if (color) {
+    paint.color = color;
+  }
+  if (strokeWidth) {
+    paint.strokeWidth = strokeWidth;
+  }
+  if (blendMode) {
+    paint.blendMode = blendMode;
+  }
+  if (style) {
+    paint.style = style;
+  }
+  if (strokeJoin) {
+    paint.strokeJoin = strokeJoin;
+  }
+  if (strokeCap) {
+    paint.strokeCap = strokeCap;
+  }
+  if (strokeMiter) {
+    paint.strokeMiter = strokeMiter;
+  }
+  if (antiAlias) {
+    paint.antiAlias = antiAlias;
+  }
+  if (dither) {
+    paint.dither = dither;
+  }
+
+  if (
+    opacity !== undefined ||
+    color !== undefined ||
+    strokeWidth !== undefined ||
+    blendMode !== undefined ||
+    style !== undefined ||
+    strokeJoin !== undefined ||
+    strokeCap !== undefined ||
+    strokeMiter !== undefined ||
+    antiAlias !== undefined ||
+    dither !== undefined
+  ) {
+    return paint;
+  }
+  return null;
+};
 
 const processCTM = ({
   clip,
@@ -63,9 +124,10 @@ const pushColorFilters = (recorder: Recorder, colorFilters: Node<any>[]) => {
 
 const visitNode = (recorder: Recorder, node: Node<any>) => {
   const { colorFilters, drawings } = sortNodeChildren(node);
-  const shouldPushPaint = colorFilters.length > 0;
+  const paint = processPaint(node.props);
+  const shouldPushPaint = paint || colorFilters.length > 0;
   if (shouldPushPaint) {
-    recorder.savePaint({});
+    recorder.savePaint(paint ?? {});
     pushColorFilters(recorder, colorFilters);
     if (colorFilters.length > 0) {
       recorder.composeColorFilters();

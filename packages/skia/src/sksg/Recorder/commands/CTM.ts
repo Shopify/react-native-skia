@@ -1,3 +1,5 @@
+"worklet";
+
 import {
   isPathDef,
   processPath,
