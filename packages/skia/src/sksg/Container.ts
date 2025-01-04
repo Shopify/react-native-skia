@@ -114,6 +114,7 @@ export class Container {
 
   drawOnCanvas(canvas: SkCanvas) {
     const ctx = new DrawingContext(this.Skia, canvas);
+    console.log(this._recording);
     replay(ctx, this._recording!);
   }
 }

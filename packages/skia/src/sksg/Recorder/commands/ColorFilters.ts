@@ -73,10 +73,11 @@ const isSRGBToLinearGammaColorFilter = (
 export const composeColorFilters = (ctx: DrawingContext) => {
   const inner = ctx.colorFilters.pop();
   const outer = ctx.colorFilters.pop();
-  if (!inner || !outer) {
-    throw new Error("Missing color filters to compose");
+  if (inner && outer) {
+    ctx.colorFilters.push(ctx.Skia.ColorFilter.MakeCompose(outer, inner));
+  } else if (inner) {
+    ctx.colorFilters.push(inner);
   }
-  ctx.colorFilters.push(ctx.Skia.ColorFilter.MakeCompose(outer, inner));
 };
 
 export const setColorFilters = (ctx: DrawingContext) => {

@@ -65,6 +65,16 @@ describe("Color Filter Composition", () => {
     const { oslo } = images;
     const { width, height } = surface;
 
+    // Push Matrix
+
+    // Push  Matrix
+    // Push  Matrix
+    // Push  Lerp
+    // Push LinearToSRGBGamma
+    // Compose
+
+    // Compose
+
     const image = await surface.draw(
       <Image x={0} y={0} width={width} height={height} image={oslo} fit="cover">
         <ColorMatrix matrix={matrix} />
