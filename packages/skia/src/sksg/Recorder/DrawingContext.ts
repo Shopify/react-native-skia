@@ -6,6 +6,7 @@ import type {
   SkColorFilter,
   SkPaint,
   SkShader,
+  SkImageFilter,
 } from "../../skia/types";
 
 export class DrawingContext {
@@ -14,6 +15,7 @@ export class DrawingContext {
   paints: SkPaint[] = [];
   colorFilters: SkColorFilter[] = [];
   shaders: SkShader[] = [];
+  imageFilters: SkImageFilter[] = [];
 
   constructor(Skia: Skia, canvas: SkCanvas) {
     this.Skia = Skia;

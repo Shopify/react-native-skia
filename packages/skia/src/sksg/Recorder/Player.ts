@@ -29,7 +29,13 @@ import {
   setColorFilters,
 } from "./commands/ColorFilters";
 import { saveCTM } from "./commands/CTM";
-import { setBlurMaskFilter } from "./commands/ImageFilters";
+import {
+  setBlurMaskFilter,
+  isPushImageFilter,
+  pushImageFilter,
+  composeImageFilters,
+  setImageFilters,
+} from "./commands/ImageFilters";
 import { setPaintProperties } from "./commands/Paint";
 import { isPushShader, pushShader, setShaders } from "./commands/Shaders";
 import {
@@ -53,10 +59,15 @@ const play = (ctx: DrawingContext, command: Command) => {
   } else if (isCommand(command, CommandType.MaterializePaint)) {
     setColorFilters(ctx);
     setShaders(ctx);
+    setImageFilters(ctx);
   } else if (isPushColorFilter(command)) {
     pushColorFilter(ctx, command);
   } else if (isPushShader(command)) {
     pushShader(ctx, command);
+  } else if (isPushImageFilter(command)) {
+    pushImageFilter(ctx, command);
+  } else if (isCommand(command, CommandType.ComposeImageFilter)) {
+    composeImageFilters(ctx);
   } else if (isDrawCommand(command, CommandType.PushBlurMaskFilter)) {
     setBlurMaskFilter(ctx, command.props);
   } else if (isDrawCommand(command, CommandType.SaveCTM)) {

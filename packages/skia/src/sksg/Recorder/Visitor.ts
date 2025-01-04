@@ -117,7 +117,22 @@ const pushColorFilters = (recorder: Recorder, colorFilters: Node<any>[]) => {
       colorFilter.type !== NodeType.LerpColorFilter &&
       colorFilter.children.length > 0;
     if (needsComposition) {
-      recorder.composeColorFilters();
+      recorder.composeColorFilter();
+    }
+  });
+};
+
+const pushImageFilters = (recorder: Recorder, imageFilters: Node<any>[]) => {
+  imageFilters.forEach((imageFilter) => {
+    if (imageFilter.children.length > 0) {
+      pushImageFilters(recorder, imageFilter.children);
+    }
+    recorder.pushImageFilter(imageFilter.type, imageFilter.props);
+    const needsComposition =
+      imageFilter.type !== NodeType.BlendImageFilter &&
+      imageFilter.children.length > 0;
+    if (needsComposition) {
+      recorder.composeImageFilter();
     }
   });
 };
@@ -139,7 +154,7 @@ const pushMaskFilters = (recorder: Recorder, maskFilters: Node<any>[]) => {
 
 const visitNode = (recorder: Recorder, node: Node<any>) => {
   const { props } = node;
-  const { colorFilters, maskFilters, drawings, shaders } =
+  const { colorFilters, maskFilters, drawings, shaders, imageFilters } =
     sortNodeChildren(node);
   const paint = processPaint(props);
   const shouldPushPaint =
@@ -150,6 +165,7 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
   if (shouldPushPaint) {
     recorder.savePaint(paint ?? {});
     pushColorFilters(recorder, colorFilters);
+    pushImageFilters(recorder, imageFilters);
     pushMaskFilters(recorder, maskFilters);
     pushShaders(recorder, shaders);
     recorder.materializePaint();

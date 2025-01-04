@@ -34,8 +34,10 @@ export enum CommandType {
   RestoreCTM = "RestoreCTM",
   PushColorFilter = "PushColorFilter",
   PushBlurMaskFilter = "PushBlurMaskFilter",
+  PushImageFilter = "PushImageFilter",
   PushShader = "PushShader",
   ComposeColorFilter = "ComposeColorFilter",
+  ComposeImageFilter = "ComposeImageFilter",
   MaterializePaint = "MaterializePaint",
   // Drawing
   DrawImage = "DrawImage",

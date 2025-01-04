@@ -27,6 +27,7 @@ import type {
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer";
 import { isSharedValue } from "../nodes/utils";
+import { isColorFilter, isImageFilter, isShader } from "../nodes";
 
 import { CommandType } from "./Core";
 import type { Command } from "./Core";
@@ -66,7 +67,21 @@ export class Recorder {
     this.add({ type: CommandType.MaterializePaint });
   }
 
+  pushImageFilter(imageFilterType: NodeType, props: AnimatedProps<unknown>) {
+    if (!isImageFilter(imageFilterType)) {
+      throw new Error("Invalid color filter type: " + imageFilterType);
+    }
+    this.add({
+      type: CommandType.PushImageFilter,
+      imageFilterType,
+      props,
+    });
+  }
+
   pushColorFilter(colorFilterType: NodeType, props: AnimatedProps<unknown>) {
+    if (!isColorFilter(colorFilterType)) {
+      throw new Error("Invalid color filter type: " + colorFilterType);
+    }
     this.add({
       type: CommandType.PushColorFilter,
       colorFilterType,
@@ -75,6 +90,9 @@ export class Recorder {
   }
 
   pushShader(shaderType: NodeType, props: AnimatedProps<unknown>) {
+    if (!isShader(shaderType)) {
+      throw new Error("Invalid color filter type: " + shaderType);
+    }
     this.add({ type: CommandType.PushShader, shaderType, props });
   }
 
@@ -82,8 +100,12 @@ export class Recorder {
     this.add({ type: CommandType.PushBlurMaskFilter, props });
   }
 
-  composeColorFilters() {
+  composeColorFilter() {
     this.add({ type: CommandType.ComposeColorFilter });
+  }
+
+  composeImageFilter() {
+    this.add({ type: CommandType.ComposeImageFilter });
   }
 
   saveCTM(props: AnimatedProps<CTMProps>) {

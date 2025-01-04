@@ -24,6 +24,59 @@ export const sortNodes = (children: Node[]) => {
   return { declarations, drawings };
 };
 
+export const isColorFilter = (type: NodeType) => {
+  "worklet";
+  return (
+    type === NodeType.BlendColorFilter ||
+    type === NodeType.MatrixColorFilter ||
+    type === NodeType.LerpColorFilter ||
+    type === NodeType.LumaColorFilter ||
+    type === NodeType.SRGBToLinearGammaColorFilter ||
+    type === NodeType.LinearToSRGBGammaColorFilter
+  );
+};
+
+export const isPathEffect = (type: NodeType) => {
+  "worklet";
+  return (
+    type === NodeType.DiscretePathEffect ||
+    type === NodeType.DashPathEffect ||
+    type === NodeType.Path1DPathEffect ||
+    type === NodeType.Path2DPathEffect ||
+    type === NodeType.CornerPathEffect ||
+    type === NodeType.SumPathEffect ||
+    type === NodeType.Line2DPathEffect
+  );
+};
+
+export const isImageFilter = (type: NodeType) => {
+  "worklet";
+  return (
+    type === NodeType.OffsetImageFilter ||
+    type === NodeType.DisplacementMapImageFilter ||
+    type === NodeType.BlurImageFilter ||
+    type === NodeType.DropShadowImageFilter ||
+    type === NodeType.MorphologyImageFilter ||
+    type === NodeType.BlendImageFilter ||
+    type === NodeType.RuntimeShaderImageFilter
+  );
+};
+
+export const isShader = (type: NodeType) => {
+  "worklet";
+  return (
+    type === NodeType.Shader ||
+    type === NodeType.ImageShader ||
+    type === NodeType.ColorShader ||
+    type === NodeType.Turbulence ||
+    type === NodeType.FractalNoise ||
+    type === NodeType.LinearGradient ||
+    type === NodeType.RadialGradient ||
+    type === NodeType.SweepGradient ||
+    type === NodeType.TwoPointConicalGradient
+  );
+};
+
 export const sortNodeChildren = (parent: Node) => {
   "worklet";
   const maskFilters: Node[] = [];
@@ -34,51 +87,15 @@ export const sortNodeChildren = (parent: Node) => {
   const drawings: Node[] = [];
   const declarations: Node[] = [];
   parent.children.forEach((node) => {
-    if (
-      node.type === NodeType.BlendColorFilter ||
-      node.type === NodeType.MatrixColorFilter ||
-      node.type === NodeType.LerpColorFilter ||
-      node.type === NodeType.LumaColorFilter ||
-      node.type === NodeType.SRGBToLinearGammaColorFilter ||
-      node.type === NodeType.LinearToSRGBGammaColorFilter
-    ) {
+    if (isColorFilter(node.type)) {
       colorFilters.push(node);
     } else if (node.type === NodeType.BlurMaskFilter) {
       maskFilters.push(node);
-    } else if (
-      // Path Effects
-      node.type === NodeType.DiscretePathEffect ||
-      node.type === NodeType.DashPathEffect ||
-      node.type === NodeType.Path1DPathEffect ||
-      node.type === NodeType.Path2DPathEffect ||
-      node.type === NodeType.CornerPathEffect ||
-      node.type === NodeType.SumPathEffect ||
-      node.type === NodeType.Line2DPathEffect
-    ) {
+    } else if (isPathEffect(node.type)) {
       pathEffects.push(node);
-    } else if (
-      // Image Filters
-      node.type === NodeType.OffsetImageFilter ||
-      node.type === NodeType.DisplacementMapImageFilter ||
-      node.type === NodeType.BlurImageFilter ||
-      node.type === NodeType.DropShadowImageFilter ||
-      node.type === NodeType.MorphologyImageFilter ||
-      node.type === NodeType.BlendImageFilter ||
-      node.type === NodeType.RuntimeShaderImageFilter
-    ) {
+    } else if (isImageFilter(node.type)) {
       imageFilters.push(node);
-    } else if (
-      // Shaders
-      node.type === NodeType.Shader ||
-      node.type === NodeType.ImageShader ||
-      node.type === NodeType.ColorShader ||
-      node.type === NodeType.Turbulence ||
-      node.type === NodeType.FractalNoise ||
-      node.type === NodeType.LinearGradient ||
-      node.type === NodeType.RadialGradient ||
-      node.type === NodeType.SweepGradient ||
-      node.type === NodeType.TwoPointConicalGradient
-    ) {
+    } else if (isShader(node.type)) {
       shaders.push(node);
     } else if (node.isDeclaration) {
       declarations.push(node);
