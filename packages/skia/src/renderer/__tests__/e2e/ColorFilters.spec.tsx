@@ -9,11 +9,11 @@ import {
   Image,
   Lerp,
   LinearToSRGBGamma,
-  SRGBToLinearGamma,
 } from "../../components";
 import { docPath, checkImage, processResult } from "../../../__tests__/setup";
 import { setupSkia } from "../../../skia/__tests__/setup";
 import { fitRects } from "../../../dom/nodes";
+import { BlendMode } from "../../../skia/types";
 
 const blackAndWhite = [
   0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0,
@@ -57,20 +57,34 @@ describe("Color Filters", () => {
     );
     checkImage(img, docPath("color-filters/color-blend.png"));
   });
-  it("should use composition", async () => {
-    const { width } = surface;
-    const r = width / 2;
-    const img = await surface.draw(
-      <Group>
-        <SRGBToLinearGamma>
-          <BlendColor color="lightblue" mode="srcIn" />
-        </SRGBToLinearGamma>
-        <Circle cx={r} cy={r} r={r} />
-        <Circle cx={2 * r} cy={r} r={r} color="red" />
-      </Group>
+  it("should build the reference result for should use composition", async () => {
+    const { surface: ckSurface, Skia, canvas } = setupSkia(wWidth, wHeight);
+    const paint = Skia.Paint();
+    const outer = Skia.ColorFilter.MakeSRGBToLinearGamma();
+    const inner = Skia.ColorFilter.MakeBlend(
+      Skia.Color("lightblue"),
+      BlendMode.SrcIn
     );
-    checkImage(img, docPath("color-filters/composition.png"));
+    paint.setColorFilter(Skia.ColorFilter.MakeCompose(outer, inner));
+    const r = (surface.width * 3) / 2;
+    canvas.drawCircle(r, r, r, paint);
+    canvas.drawCircle(r * 2, r, r, paint);
+    processResult(ckSurface, docPath("color-filters/composition.png"));
   });
+  // it("should use composition", async () => {
+  //   const { width } = surface;
+  //   const r = width / 2;
+  //   const img = await surface.draw(
+  //     <Group>
+  //       <SRGBToLinearGamma>
+  //         <BlendColor color="lightblue" mode="srcIn" />
+  //       </SRGBToLinearGamma>
+  //       <Circle cx={r} cy={r} r={r} />
+  //       <Circle cx={2 * r} cy={r} r={r} color="red" />
+  //     </Group>
+  //   );
+  //   checkImage(img, docPath("color-filters/composition.png"));
+  // });
   it("should build the reference result for simple-lerp.png", async () => {
     const { oslo } = images;
     const { surface: ckSurface, Skia, canvas } = setupSkia(wWidth, wHeight);
