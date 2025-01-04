@@ -34,40 +34,11 @@ interface PushColorFilter<T extends keyof Props>
   props: Props[T];
 }
 
-const isBlendColorFilter = (
-  command: Command<CommandType.PushColorFilter>
-): command is PushColorFilter<NodeType.BlendColorFilter> => {
-  return command.colorFilterType === NodeType.BlendColorFilter;
-};
-
-const isMatrixColorFilter = (
-  command: Command<CommandType.PushColorFilter>
-): command is PushColorFilter<NodeType.MatrixColorFilter> => {
-  return command.colorFilterType === NodeType.MatrixColorFilter;
-};
-
-const isLerpColorFilter = (
-  command: Command<CommandType.PushColorFilter>
-): command is PushColorFilter<NodeType.LerpColorFilter> => {
-  return command.colorFilterType === NodeType.LerpColorFilter;
-};
-
-const isLumaColorFilter = (
-  command: Command<CommandType.PushColorFilter>
-): command is PushColorFilter<NodeType.LumaColorFilter> => {
-  return command.colorFilterType === NodeType.LumaColorFilter;
-};
-
-const isLinearToSRGBGammaColorFilter = (
-  command: Command<CommandType.PushColorFilter>
-): command is PushColorFilter<NodeType.LinearToSRGBGammaColorFilter> => {
-  return command.colorFilterType === NodeType.LinearToSRGBGammaColorFilter;
-};
-
-const isSRGBToLinearGammaColorFilter = (
-  command: Command<CommandType.PushColorFilter>
-): command is PushColorFilter<NodeType.SRGBToLinearGammaColorFilter> => {
-  return command.colorFilterType === NodeType.SRGBToLinearGammaColorFilter;
+const isColorFilter = <T extends keyof Props>(
+  command: Command<CommandType.PushColorFilter>,
+  type: T
+): command is PushColorFilter<T> => {
+  return command.colorFilterType === type;
 };
 
 export const composeColorFilters = (ctx: DrawingContext) => {
@@ -93,15 +64,15 @@ export const pushColorFilter = (
   command: Command<CommandType.PushColorFilter>
 ) => {
   let cf: SkColorFilter | undefined;
-  if (isBlendColorFilter(command)) {
+  if (isColorFilter(command, NodeType.BlendColorFilter)) {
     const { props } = command;
     const { mode } = props;
     const color = ctx.Skia.Color(props.color);
     cf = ctx.Skia.ColorFilter.MakeBlend(color, BlendMode[enumKey(mode)]);
-  } else if (isMatrixColorFilter(command)) {
+  } else if (isColorFilter(command, NodeType.MatrixColorFilter)) {
     const { matrix } = command.props;
     cf = ctx.Skia.ColorFilter.MakeMatrix(matrix);
-  } else if (isLerpColorFilter(command)) {
+  } else if (isColorFilter(command, NodeType.LerpColorFilter)) {
     const { props } = command;
     const { t } = props;
     const second = ctx.colorFilters.pop();
@@ -110,11 +81,11 @@ export const pushColorFilter = (
       throw new Error("LerpColorFilter requires two color filters");
     }
     cf = ctx.Skia.ColorFilter.MakeLerp(t, first, second);
-  } else if (isLumaColorFilter(command)) {
+  } else if (isColorFilter(command, NodeType.LumaColorFilter)) {
     cf = ctx.Skia.ColorFilter.MakeLumaColorFilter();
-  } else if (isLinearToSRGBGammaColorFilter(command)) {
+  } else if (isColorFilter(command, NodeType.LinearToSRGBGammaColorFilter)) {
     cf = ctx.Skia.ColorFilter.MakeLinearToSRGBGamma();
-  } else if (isSRGBToLinearGammaColorFilter(command)) {
+  } else if (isColorFilter(command, NodeType.SRGBToLinearGammaColorFilter)) {
     cf = ctx.Skia.ColorFilter.MakeSRGBToLinearGamma();
   }
   if (!cf) {

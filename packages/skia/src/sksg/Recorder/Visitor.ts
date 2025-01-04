@@ -122,6 +122,15 @@ const pushColorFilters = (recorder: Recorder, colorFilters: Node<any>[]) => {
   });
 };
 
+const pushShaders = (recorder: Recorder, shaders: Node<any>[]) => {
+  shaders.forEach((shader) => {
+    if (shader.children.length > 0) {
+      pushShaders(recorder, shader.children);
+    }
+    recorder.pushShader(shader.type, shader.props);
+  });
+};
+
 const pushMaskFilters = (recorder: Recorder, maskFilters: Node<any>[]) => {
   if (maskFilters.length > 0) {
     recorder.pushBlurMaskFilter(maskFilters[maskFilters.length - 1].props);
@@ -130,14 +139,19 @@ const pushMaskFilters = (recorder: Recorder, maskFilters: Node<any>[]) => {
 
 const visitNode = (recorder: Recorder, node: Node<any>) => {
   const { props } = node;
-  const { colorFilters, maskFilters, drawings } = sortNodeChildren(node);
+  const { colorFilters, maskFilters, drawings, shaders } =
+    sortNodeChildren(node);
   const paint = processPaint(props);
   const shouldPushPaint =
-    paint || colorFilters.length > 0 || maskFilters.length > 0;
+    paint ||
+    colorFilters.length > 0 ||
+    maskFilters.length > 0 ||
+    shaders.length > 0;
   if (shouldPushPaint) {
     recorder.savePaint(paint ?? {});
     pushColorFilters(recorder, colorFilters);
     pushMaskFilters(recorder, maskFilters);
+    pushShaders(recorder, shaders);
     recorder.materializePaint();
   }
   const ctm = processCTM(props);

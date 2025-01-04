@@ -1,12 +1,19 @@
 "worklet";
 
-import type { Skia, SkCanvas, SkColorFilter, SkPaint } from "../../skia/types";
+import type {
+  Skia,
+  SkCanvas,
+  SkColorFilter,
+  SkPaint,
+  SkShader,
+} from "../../skia/types";
 
 export class DrawingContext {
   Skia: Skia;
   canvas: SkCanvas;
   paints: SkPaint[] = [];
   colorFilters: SkColorFilter[] = [];
+  shaders: SkShader[] = [];
 
   constructor(Skia: Skia, canvas: SkCanvas) {
     this.Skia = Skia;

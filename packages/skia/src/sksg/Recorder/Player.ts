@@ -31,6 +31,7 @@ import {
 import { saveCTM } from "./commands/CTM";
 import { setBlurMaskFilter } from "./commands/ImageFilters";
 import { setPaintProperties } from "./commands/Paint";
+import { isPushShader, pushShader, setShaders } from "./commands/Shaders";
 import {
   CommandType,
   isCommand,
@@ -51,8 +52,11 @@ const play = (ctx: DrawingContext, command: Command) => {
     composeColorFilters(ctx);
   } else if (isCommand(command, CommandType.MaterializePaint)) {
     setColorFilters(ctx);
+    setShaders(ctx);
   } else if (isPushColorFilter(command)) {
     pushColorFilter(ctx, command);
+  } else if (isPushShader(command)) {
+    pushShader(ctx, command);
   } else if (isDrawCommand(command, CommandType.PushBlurMaskFilter)) {
     setBlurMaskFilter(ctx, command.props);
   } else if (isDrawCommand(command, CommandType.SaveCTM)) {

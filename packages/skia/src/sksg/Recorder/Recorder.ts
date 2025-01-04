@@ -74,6 +74,10 @@ export class Recorder {
     });
   }
 
+  pushShader(sharderType: NodeType, props: AnimatedProps<unknown>) {
+    this.add({ type: CommandType.PushShader, sharderType, props });
+  }
+
   pushBlurMaskFilter(props: AnimatedProps<BlurMaskFilterProps>) {
     this.add({ type: CommandType.PushBlurMaskFilter, props });
   }
