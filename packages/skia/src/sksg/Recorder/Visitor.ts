@@ -6,19 +6,18 @@ import { sortNodeChildren } from "../nodes";
 import type { Recorder } from "./Recorder";
 
 const pushColorFilters = (recorder: Recorder, colorFilters: Node<any>[]) => {
-  //let lastFilter: NodeType | null = null;
   colorFilters.forEach((colorFilter) => {
     if (colorFilter.children.length > 0) {
       pushColorFilters(recorder, colorFilter.children);
     }
     recorder.pushColorFilter(colorFilter.type, colorFilter.props);
-    //lastFilter = colorFilter.type;
+    const needsComposition =
+      colorFilter.type !== NodeType.LerpColorFilter &&
+      colorFilter.children.length > 0;
+    if (needsComposition) {
+      recorder.composeColorFilters();
+    }
   });
-  // If the filter doesn't need children, we compose it
-  //   const needsComposition = lastFilter !== NodeType.LerpColorFilter;
-  //   if (needsComposition) {
-  //     recorder.composeColorFilters();
-  //   }
 };
 
 const visitNode = (recorder: Recorder, node: Node<any>) => {
@@ -27,8 +26,6 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
   if (shouldPushPaint) {
     recorder.savePaint({});
     pushColorFilters(recorder, colorFilters);
-    recorder.composeColorFilters();
-    recorder.composeColorFilters();
     recorder.materializePaint();
   }
   if (node.type === NodeType.Image) {
