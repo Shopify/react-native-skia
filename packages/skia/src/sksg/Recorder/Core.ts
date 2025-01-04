@@ -41,6 +41,7 @@ export enum CommandType {
   MaterializePaint = "MaterializePaint",
   SaveBackdropFilter = "SaveBackdropFilter",
   // Drawing
+  DrawBox = "DrawBox",
   DrawImage = "DrawImage",
   DrawCircle = "DrawCircle",
   DrawPaint = "DrawPaint",
@@ -68,15 +69,13 @@ export type Command<T extends CommandType = CommandType> = {
   [key: string]: unknown;
 };
 
-export const materializeProps = (command: Command) => {
+export const materializeProps = (command: {
+  props: Record<string, unknown>;
+  animatedProps?: Record<string, SharedValue<unknown>>;
+}) => {
   if (command.animatedProps) {
-    const animatedProps = command.animatedProps as Record<
-      string,
-      SharedValue<unknown>
-    >;
-    const commandProps = command.props as Record<string, unknown>;
-    for (const key in animatedProps) {
-      commandProps[key] = animatedProps[key].value;
+    for (const key in command.animatedProps) {
+      command.props[key] = command.animatedProps[key].value;
     }
   }
 };

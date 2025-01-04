@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { CTMProps, DrawingNodeProps, PaintProps } from "../../dom/types";
+import type {
+  CTMProps,
+  DrawingNodeProps,
+  PaintProps,
+  BoxShadowProps,
+} from "../../dom/types";
 import { NodeType } from "../../dom/types";
 import type { Node } from "../nodes";
 import { isImageFilter, isShader, sortNodeChildren } from "../nodes";
@@ -192,6 +197,13 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
     recorder.saveCTM(ctm);
   }
   switch (node.type) {
+    case NodeType.Box:
+      const shadows = node.children
+        .filter((n) => n.type === NodeType.BoxShadow)
+        // eslint-disable-next-line @typescript-eslint/no-shadow
+        .map(({ props }) => ({ props } as { props: BoxShadowProps }));
+      recorder.drawBox(props, shadows);
+      break;
     case NodeType.Fill:
       recorder.drawPaint();
       break;

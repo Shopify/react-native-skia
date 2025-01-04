@@ -24,6 +24,8 @@ import type {
   ImageSVGProps,
   ParagraphProps,
   AtlasProps,
+  BoxProps,
+  BoxShadowProps,
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer";
 import { isSharedValue } from "../nodes/utils";
@@ -122,6 +124,34 @@ export class Recorder {
 
   saveBackdropFilter() {
     this.add({ type: CommandType.SaveBackdropFilter });
+  }
+
+  drawBox(
+    boxProps: AnimatedProps<BoxProps>,
+    shadows: {
+      props: BoxShadowProps;
+      animatedProps?: Record<string, SharedValue<unknown>>;
+    }[]
+  ) {
+    shadows.forEach((shadow) => {
+      if (shadow.props) {
+        const props = shadow.props as unknown as Record<string, unknown>;
+        const animatedProps: Record<string, SharedValue<unknown>> = {};
+        let hasAnimatedProps = false;
+        for (const key in shadow.props) {
+          const prop = props[key];
+          if (isSharedValue(prop)) {
+            props[key] = prop.value;
+            animatedProps[key] = prop;
+            hasAnimatedProps = true;
+          }
+        }
+        if (hasAnimatedProps) {
+          shadow.animatedProps = animatedProps;
+        }
+      }
+    });
+    this.add({ type: CommandType.DrawBox, props: boxProps, shadows });
   }
 
   drawImage(props: AnimatedProps<ImageProps>) {

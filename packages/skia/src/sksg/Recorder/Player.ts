@@ -22,6 +22,7 @@ import {
   drawPatch,
 } from "../nodes/drawings";
 
+import { drawBox, isBoxCommand } from "./commands/Box";
 import {
   composeColorFilters,
   isPushColorFilter,
@@ -46,7 +47,8 @@ import {
 import type { DrawingContext } from "./DrawingContext";
 
 const play = (ctx: DrawingContext, command: Command) => {
-  materializeProps(command);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  materializeProps(command as any);
   if (isCommand(command, CommandType.SaveBackdropFilter)) {
     ctx.saveBackdropFilter();
   } else if (isDrawCommand(command, CommandType.SavePaint)) {
@@ -72,6 +74,8 @@ const play = (ctx: DrawingContext, command: Command) => {
     saveCTM(ctx, command.props);
   } else if (isCommand(command, CommandType.RestoreCTM)) {
     ctx.canvas.restore();
+  } else if (isBoxCommand(command)) {
+    drawBox(ctx, command);
   } else if (isCommand(command, CommandType.DrawPaint)) {
     ctx.canvas.drawPaint(ctx.paint);
   } else if (isDrawCommand(command, CommandType.DrawImage)) {
