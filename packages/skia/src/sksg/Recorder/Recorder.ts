@@ -7,6 +7,23 @@ import type {
   CTMProps,
   ImageProps,
   PaintProps,
+  PointsProps,
+  PathProps,
+  RectProps,
+  RoundedRectProps,
+  OvalProps,
+  LineProps,
+  PatchProps,
+  VerticesProps,
+  DiffRectProps,
+  TextProps,
+  TextPathProps,
+  TextBlobProps,
+  GlyphsProps,
+  PictureProps,
+  ImageSVGProps,
+  ParagraphProps,
+  AtlasProps,
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer";
 import { isSharedValue } from "../nodes/utils";
@@ -83,5 +100,72 @@ export class Recorder {
 
   drawCircle(props: AnimatedProps<CircleProps>) {
     this.add({ type: CommandType.DrawCircle, props });
+  }
+  drawPoints(props: AnimatedProps<PointsProps>) {
+    this.add({ type: CommandType.DrawPoints, props });
+  }
+
+  drawPath(props: AnimatedProps<PathProps>) {
+    this.add({ type: CommandType.DrawPath, props });
+  }
+
+  drawRect(props: AnimatedProps<RectProps>) {
+    this.add({ type: CommandType.DrawRect, props });
+  }
+
+  drawRRect(props: AnimatedProps<RoundedRectProps>) {
+    this.add({ type: CommandType.DrawRRect, props });
+  }
+
+  drawOval(props: AnimatedProps<OvalProps>) {
+    this.add({ type: CommandType.DrawOval, props });
+  }
+
+  drawLine(props: AnimatedProps<LineProps>) {
+    this.add({ type: CommandType.DrawLine, props });
+  }
+
+  drawPatch(props: AnimatedProps<PatchProps>) {
+    this.add({ type: CommandType.DrawPatch, props });
+  }
+
+  drawVertices(props: AnimatedProps<VerticesProps>) {
+    this.add({ type: CommandType.DrawVertices, props });
+  }
+
+  drawDiffRect(props: AnimatedProps<DiffRectProps>) {
+    this.add({ type: CommandType.DrawDiffRect, props });
+  }
+
+  drawText(props: AnimatedProps<TextProps>) {
+    this.add({ type: CommandType.DrawText, props });
+  }
+
+  drawTextPath(props: AnimatedProps<TextPathProps>) {
+    this.add({ type: CommandType.DrawTextPath, props });
+  }
+
+  drawTextBlob(props: AnimatedProps<TextBlobProps>) {
+    this.add({ type: CommandType.DrawTextBlob, props });
+  }
+
+  drawGlyphs(props: AnimatedProps<GlyphsProps>) {
+    this.add({ type: CommandType.DrawGlyphs, props });
+  }
+
+  drawPicture(props: AnimatedProps<PictureProps>) {
+    this.add({ type: CommandType.DrawPicture, props });
+  }
+
+  drawImageSVG(props: AnimatedProps<ImageSVGProps>) {
+    this.add({ type: CommandType.DrawImageSVG, props });
+  }
+
+  drawParagraph(props: AnimatedProps<ParagraphProps>) {
+    this.add({ type: CommandType.DrawParagraph, props });
+  }
+
+  drawAtlas(props: AnimatedProps<AtlasProps>) {
+    this.add({ type: CommandType.DrawAtlas, props });
   }
 }

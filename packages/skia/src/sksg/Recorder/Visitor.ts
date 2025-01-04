@@ -129,8 +129,9 @@ const pushMaskFilters = (recorder: Recorder, maskFilters: Node<any>[]) => {
 };
 
 const visitNode = (recorder: Recorder, node: Node<any>) => {
+  const { props } = node;
   const { colorFilters, maskFilters, drawings } = sortNodeChildren(node);
-  const paint = processPaint(node.props);
+  const paint = processPaint(props);
   const shouldPushPaint =
     paint || colorFilters.length > 0 || maskFilters.length > 0;
   if (shouldPushPaint) {
@@ -139,7 +140,7 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
     pushMaskFilters(recorder, maskFilters);
     recorder.materializePaint();
   }
-  const ctm = processCTM(node.props);
+  const ctm = processCTM(props);
   if (ctm) {
     recorder.saveCTM(ctm);
   }
@@ -152,6 +153,57 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
       break;
     case NodeType.Circle:
       recorder.drawCircle(node.props);
+      break;
+    case NodeType.Points:
+      recorder.drawPoints(props);
+      break;
+    case NodeType.Path:
+      recorder.drawPath(props);
+      break;
+    case NodeType.Rect:
+      recorder.drawRect(props);
+      break;
+    case NodeType.RRect:
+      recorder.drawRRect(props);
+      break;
+    case NodeType.Oval:
+      recorder.drawOval(props);
+      break;
+    case NodeType.Line:
+      recorder.drawLine(props);
+      break;
+    case NodeType.Patch:
+      recorder.drawPatch(props);
+      break;
+    case NodeType.Vertices:
+      recorder.drawVertices(props);
+      break;
+    case NodeType.DiffRect:
+      recorder.drawDiffRect(props);
+      break;
+    case NodeType.Text:
+      recorder.drawText(props);
+      break;
+    case NodeType.TextPath:
+      recorder.drawTextPath(props);
+      break;
+    case NodeType.TextBlob:
+      recorder.drawTextBlob(props);
+      break;
+    case NodeType.Glyphs:
+      recorder.drawGlyphs(props);
+      break;
+    case NodeType.Picture:
+      recorder.drawPicture(props);
+      break;
+    case NodeType.ImageSVG:
+      recorder.drawImageSVG(props);
+      break;
+    case NodeType.Paragraph:
+      recorder.drawParagraph(props);
+      break;
+    case NodeType.Atlas:
+      recorder.drawAtlas(props);
       break;
   }
   drawings.forEach((drawing) => {

@@ -1,6 +1,26 @@
 "worklet";
 
-import { drawCircle, drawImage } from "../nodes/drawings";
+import {
+  drawCircle,
+  drawImage,
+  drawOval,
+  drawPath,
+  drawPoints,
+  drawRect,
+  drawRRect,
+  drawLine,
+  drawAtlas,
+  drawParagraph,
+  drawImageSVG,
+  drawPicture,
+  drawGlyphs,
+  drawTextBlob,
+  drawTextPath,
+  drawText,
+  drawDiffRect,
+  drawVertices,
+  drawPatch,
+} from "../nodes/drawings";
 
 import {
   composeColorFilters,
@@ -45,6 +65,40 @@ const play = (ctx: DrawingContext, command: Command) => {
     drawImage(ctx, command.props);
   } else if (isDrawCommand(command, CommandType.DrawCircle)) {
     drawCircle(ctx, command.props);
+  } else if (isDrawCommand(command, CommandType.DrawPoints)) {
+    drawPoints(ctx, command.props);
+  } else if (isDrawCommand(command, CommandType.DrawPath)) {
+    drawPath(ctx, command.props);
+  } else if (isDrawCommand(command, CommandType.DrawRect)) {
+    drawRect(ctx, command.props);
+  } else if (isDrawCommand(command, CommandType.DrawRRect)) {
+    drawRRect(ctx, command.props);
+  } else if (isDrawCommand(command, CommandType.DrawOval)) {
+    drawOval(ctx, command.props);
+  } else if (isDrawCommand(command, CommandType.DrawLine)) {
+    drawLine(ctx, command.props);
+  } else if (isDrawCommand(command, CommandType.DrawPatch)) {
+    drawPatch(ctx, command.props);
+  } else if (isDrawCommand(command, CommandType.DrawVertices)) {
+    drawVertices(ctx, command.props);
+  } else if (isDrawCommand(command, CommandType.DrawDiffRect)) {
+    drawDiffRect(ctx, command.props);
+  } else if (isDrawCommand(command, CommandType.DrawText)) {
+    drawText(ctx, command.props);
+  } else if (isDrawCommand(command, CommandType.DrawTextPath)) {
+    drawTextPath(ctx, command.props);
+  } else if (isDrawCommand(command, CommandType.DrawTextBlob)) {
+    drawTextBlob(ctx, command.props);
+  } else if (isDrawCommand(command, CommandType.DrawGlyphs)) {
+    drawGlyphs(ctx, command.props);
+  } else if (isDrawCommand(command, CommandType.DrawPicture)) {
+    drawPicture(ctx, command.props);
+  } else if (isDrawCommand(command, CommandType.DrawImageSVG)) {
+    drawImageSVG(ctx, command.props);
+  } else if (isDrawCommand(command, CommandType.DrawParagraph)) {
+    drawParagraph(ctx, command.props);
+  } else if (isDrawCommand(command, CommandType.DrawAtlas)) {
+    drawAtlas(ctx, command.props);
   } else {
     console.warn(`Unknown command: ${command.type}`);
   }

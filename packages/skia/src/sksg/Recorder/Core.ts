@@ -6,6 +6,23 @@ import type {
   CTMProps,
   ImageProps,
   PaintProps,
+  PointsProps,
+  PathProps,
+  RectProps,
+  RoundedRectProps,
+  OvalProps,
+  LineProps,
+  PatchProps,
+  VerticesProps,
+  DiffRectProps,
+  TextProps,
+  TextPathProps,
+  TextBlobProps,
+  GlyphsProps,
+  PictureProps,
+  ImageSVGProps,
+  ParagraphProps,
+  AtlasProps,
 } from "../../dom/types";
 
 // TODO: remove string labels
@@ -23,6 +40,23 @@ export enum CommandType {
   DrawImage = "DrawImage",
   DrawCircle = "DrawCircle",
   DrawPaint = "DrawPaint",
+  DrawPoints = "DrawPoints",
+  DrawPath = "DrawPath",
+  DrawRect = "DrawRect",
+  DrawRRect = "DrawRRect",
+  DrawOval = "DrawOval",
+  DrawLine = "DrawLine",
+  DrawPatch = "DrawPatch",
+  DrawVertices = "DrawVertices",
+  DrawDiffRect = "DrawDiffRect",
+  DrawText = "DrawText",
+  DrawTextPath = "DrawTextPath",
+  DrawTextBlob = "DrawTextBlob",
+  DrawGlyphs = "DrawGlyphs",
+  DrawPicture = "DrawPicture",
+  DrawImageSVG = "DrawImageSVG",
+  DrawParagraph = "DrawParagraph",
+  DrawAtlas = "DrawAtlas",
 }
 
 export type Command<T extends CommandType = CommandType> = {
@@ -56,6 +90,23 @@ interface Props {
   [CommandType.SaveCTM]: CTMProps;
   [CommandType.SavePaint]: PaintProps;
   [CommandType.PushBlurMaskFilter]: BlurMaskFilterProps;
+  [CommandType.DrawPoints]: PointsProps;
+  [CommandType.DrawPath]: PathProps;
+  [CommandType.DrawRect]: RectProps;
+  [CommandType.DrawRRect]: RoundedRectProps;
+  [CommandType.DrawOval]: OvalProps;
+  [CommandType.DrawLine]: LineProps;
+  [CommandType.DrawPatch]: PatchProps;
+  [CommandType.DrawVertices]: VerticesProps;
+  [CommandType.DrawDiffRect]: DiffRectProps;
+  [CommandType.DrawText]: TextProps;
+  [CommandType.DrawTextPath]: TextPathProps;
+  [CommandType.DrawTextBlob]: TextBlobProps;
+  [CommandType.DrawGlyphs]: GlyphsProps;
+  [CommandType.DrawPicture]: PictureProps;
+  [CommandType.DrawImageSVG]: ImageSVGProps;
+  [CommandType.DrawParagraph]: ParagraphProps;
+  [CommandType.DrawAtlas]: AtlasProps;
 }
 
 interface DrawCommand<T extends CommandType> extends Command<T> {
