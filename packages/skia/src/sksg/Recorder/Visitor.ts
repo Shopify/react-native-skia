@@ -154,13 +154,21 @@ const pushMaskFilters = (recorder: Recorder, maskFilters: Node<any>[]) => {
 
 const visitNode = (recorder: Recorder, node: Node<any>) => {
   const { props } = node;
-  const { colorFilters, maskFilters, drawings, shaders, imageFilters } =
-    sortNodeChildren(node);
+  const {
+    colorFilters,
+    maskFilters,
+    drawings,
+    shaders,
+    imageFilters,
+    pathEffects,
+  } = sortNodeChildren(node);
   const paint = processPaint(props);
   const shouldPushPaint =
     paint ||
     colorFilters.length > 0 ||
     maskFilters.length > 0 ||
+    imageFilters.length > 0 ||
+    pathEffects.length > 0 ||
     shaders.length > 0;
   if (shouldPushPaint) {
     recorder.savePaint(paint ?? {});
