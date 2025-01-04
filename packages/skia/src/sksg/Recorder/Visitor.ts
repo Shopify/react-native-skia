@@ -1,9 +1,50 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { CTMProps } from "../../dom/types";
 import { NodeType } from "../../dom/types";
 import type { Node } from "../nodes";
 import { sortNodeChildren } from "../nodes";
 
 import type { Recorder } from "./Recorder";
+
+const processCTM = ({
+  clip,
+  invertClip,
+  transform,
+  origin,
+  matrix,
+  layer,
+}: CTMProps) => {
+  const ctm: CTMProps = {};
+  if (clip) {
+    ctm.clip = clip;
+  }
+  if (invertClip) {
+    ctm.invertClip = invertClip;
+  }
+  if (transform) {
+    ctm.transform = transform;
+  }
+  if (origin) {
+    ctm.origin = origin;
+  }
+  if (matrix) {
+    ctm.matrix = matrix;
+  }
+  if (layer) {
+    ctm.layer = layer;
+  }
+  if (
+    clip !== undefined ||
+    invertClip !== undefined ||
+    transform !== undefined ||
+    origin !== undefined ||
+    matrix !== undefined ||
+    layer !== undefined
+  ) {
+    return ctm;
+  }
+  return null;
+};
 
 const pushColorFilters = (recorder: Recorder, colorFilters: Node<any>[]) => {
   colorFilters.forEach((colorFilter) => {
@@ -31,6 +72,10 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
     }
     recorder.materializePaint();
   }
+  const ctm = processCTM(node.props);
+  if (ctm) {
+    recorder.saveCTM(ctm);
+  }
   switch (node.type) {
     case NodeType.Image:
       recorder.drawImage(node.props);
@@ -44,6 +89,9 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
   });
   if (shouldPushPaint) {
     recorder.restorePaint();
+  }
+  if (ctm) {
+    recorder.restoreCTM();
   }
 };
 

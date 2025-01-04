@@ -143,6 +143,7 @@ export const drawImage = (ctx: LocalDrawingContext, props: ImageProps) => {
       },
       rect
     );
+    console.log({ src, dst, fit });
     ctx.canvas.drawImageRect(image, src, dst, ctx.paint);
   }
 };

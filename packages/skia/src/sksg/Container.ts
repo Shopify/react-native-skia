@@ -15,8 +15,8 @@ import { draw, isSharedValue } from "./nodes";
 import type { Command } from "./Recorder/Core";
 import { Recorder } from "./Recorder/Recorder";
 import { visit } from "./Recorder/Visitor";
-import { DrawingContext } from "./Recorder/DrawingContext";
 import { replay } from "./Recorder/Player";
+import { DrawingContext } from "./Recorder/DrawingContext";
 
 const drawOnscreen = (
   Skia: Skia,
