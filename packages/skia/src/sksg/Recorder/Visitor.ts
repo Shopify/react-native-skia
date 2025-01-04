@@ -181,7 +181,9 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
     pushMaskFilters(recorder, maskFilters);
     pushShaders(recorder, shaders);
     // For mixed nodes like BackdropFilters we don't materialize the paint
-    if (node.type !== NodeType.BackdropFilter) {
+    if (node.type === NodeType.BackdropFilter) {
+      recorder.saveBackdropFilter();
+    } else {
       recorder.materializePaint();
     }
   }
@@ -190,9 +192,6 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
     recorder.saveCTM(ctm);
   }
   switch (node.type) {
-    case NodeType.BackdropFilter:
-      recorder.saveBackdropFilter();
-      break;
     case NodeType.Fill:
       recorder.drawPaint();
       break;
