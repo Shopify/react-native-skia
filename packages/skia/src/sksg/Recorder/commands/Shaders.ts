@@ -233,7 +233,7 @@ type Props = {
 
 interface PushShader<T extends keyof Props>
   extends Command<CommandType.PushShader> {
-  colorFilterType: T;
+  shaderType: T;
   props: Props[T];
 }
 
@@ -241,7 +241,7 @@ const isShader = <T extends keyof Props>(
   command: Command<CommandType.PushShader>,
   type: T
 ): command is PushShader<T> => {
-  return command.colorFilterType === type;
+  return command.shaderType === type;
 };
 
 export const pushShader = (
@@ -266,5 +266,7 @@ export const pushShader = (
     declareSweepGradientShader(ctx, command.props);
   } else if (isShader(command, NodeType.TwoPointConicalGradient)) {
     declareTwoPointConicalGradientShader(ctx, command.props);
+  } else {
+    throw new Error(`Unknown shader type: ${command.shaderType}`);
   }
 };
