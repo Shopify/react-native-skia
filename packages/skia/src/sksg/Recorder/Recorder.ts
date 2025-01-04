@@ -120,6 +120,10 @@ export class Recorder {
     this.add({ type: CommandType.DrawPaint });
   }
 
+  saveBackdropFilter() {
+    this.add({ type: CommandType.SaveBackdropFilter });
+  }
+
   drawImage(props: AnimatedProps<ImageProps>) {
     this.add({ type: CommandType.DrawImage, props });
   }

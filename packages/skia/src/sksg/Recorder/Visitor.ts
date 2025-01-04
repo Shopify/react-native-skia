@@ -180,13 +180,19 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
     pushImageFilters(recorder, imageFilters);
     pushMaskFilters(recorder, maskFilters);
     pushShaders(recorder, shaders);
-    recorder.materializePaint();
+    // For mixed nodes like BackdropFilters we don't materialize the paint
+    if (node.type !== NodeType.BackdropFilter) {
+      recorder.materializePaint();
+    }
   }
   const ctm = processCTM(props);
   if (ctm) {
     recorder.saveCTM(ctm);
   }
   switch (node.type) {
+    case NodeType.BackdropFilter:
+      recorder.saveBackdropFilter();
+      break;
     case NodeType.Fill:
       recorder.drawPaint();
       break;
