@@ -81,11 +81,9 @@ export const composeColorFilters = (ctx: DrawingContext) => {
 };
 
 export const setColorFilters = (ctx: DrawingContext) => {
-  ctx.paint.setColorFilter(
-    ctx.colorFilters.reduceRight((inner, outer) =>
-      inner ? ctx.Skia.ColorFilter.MakeCompose(outer, inner) : outer
-    )
-  );
+  if (ctx.colorFilters.length > 0) {
+    ctx.paint.setColorFilter(ctx.colorFilters[ctx.colorFilters.length - 1]);
+  }
 };
 
 export const pushColorFilter = (

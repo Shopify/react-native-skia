@@ -26,6 +26,9 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
   if (shouldPushPaint) {
     recorder.savePaint({});
     pushColorFilters(recorder, colorFilters);
+    if (colorFilters.length > 0) {
+      recorder.composeColorFilters();
+    }
     recorder.materializePaint();
   }
   if (node.type === NodeType.Image) {
