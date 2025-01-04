@@ -2,7 +2,7 @@
 import type { CTMProps, DrawingNodeProps, PaintProps } from "../../dom/types";
 import { NodeType } from "../../dom/types";
 import type { Node } from "../nodes";
-import { sortNodeChildren } from "../nodes";
+import { isImageFilter, isShader, sortNodeChildren } from "../nodes";
 
 import type { Recorder } from "./Recorder";
 
@@ -127,7 +127,11 @@ const pushImageFilters = (recorder: Recorder, imageFilters: Node<any>[]) => {
     if (imageFilter.children.length > 0) {
       pushImageFilters(recorder, imageFilter.children);
     }
-    recorder.pushImageFilter(imageFilter.type, imageFilter.props);
+    if (isImageFilter(imageFilter.type)) {
+      recorder.pushImageFilter(imageFilter.type, imageFilter.props);
+    } else if (isShader(imageFilter.type)) {
+      recorder.pushShader(imageFilter.type, imageFilter.props);
+    }
     const needsComposition =
       imageFilter.type !== NodeType.BlendImageFilter &&
       imageFilter.children.length > 0;

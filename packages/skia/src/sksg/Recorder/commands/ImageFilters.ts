@@ -13,7 +13,12 @@ import type {
 } from "../../../dom/types";
 import { NodeType } from "../../../dom/types";
 import type { SkColor, Skia, SkImageFilter } from "../../../skia/types";
-import { BlendMode, BlurStyle, TileMode } from "../../../skia/types";
+import {
+  BlendMode,
+  BlurStyle,
+  ColorChannel,
+  TileMode,
+} from "../../../skia/types";
 import type { Command } from "../Core";
 import { CommandType } from "../Core";
 import type { DrawingContext } from "../DrawingContext";
@@ -121,6 +126,42 @@ export const declareDropShadowImageFilter = (
   ctx.imageFilters.push(imgf);
 };
 
+export const declareBlendImageFilter = (
+  ctx: DrawingContext,
+  props: BlendImageFilterProps
+) => {
+  "worklet";
+  const { mode } = props;
+  const a = ctx.imageFilters.pop();
+  const b = ctx.imageFilters.pop();
+  if (!a || !b) {
+    throw new Error("BlendImageFilter requires two image filters");
+  }
+  const imgf = ctx.Skia.ImageFilter.MakeBlend(mode, a, b);
+  ctx.imageFilters.push(imgf);
+};
+
+export const declareDisplacementMapImageFilter = (
+  ctx: DrawingContext,
+  props: DisplacementMapImageFilterProps
+) => {
+  "worklet";
+  const { channelX, channelY, scale } = props;
+  const shader = ctx.shaders.pop();
+  if (!shader) {
+    throw new Error("DisplacementMap expects a shader as child");
+  }
+  const map = ctx.Skia.ImageFilter.MakeShader(shader, null);
+  const imgf = ctx.Skia.ImageFilter.MakeDisplacementMap(
+    ColorChannel[enumKey(channelX)],
+    ColorChannel[enumKey(channelY)],
+    scale,
+    map,
+    null
+  );
+  ctx.imageFilters.push(imgf);
+};
+
 export const composeImageFilters = (ctx: DrawingContext) => {
   if (ctx.imageFilters.length > 1) {
     const outer = ctx.imageFilters.pop()!;
@@ -181,7 +222,9 @@ export const pushImageFilter = (
   } else if (isImageFilter(command, NodeType.MorphologyImageFilter)) {
     declareMorphologyImageFilter(ctx, command.props);
   } else if (isImageFilter(command, NodeType.BlendImageFilter)) {
+    declareBlendImageFilter(ctx, command.props);
   } else if (isImageFilter(command, NodeType.DisplacementMapImageFilter)) {
+    declareDisplacementMapImageFilter(ctx, command.props);
   } else if (isImageFilter(command, NodeType.DropShadowImageFilter)) {
     declareDropShadowImageFilter(ctx, command.props);
   } else if (isImageFilter(command, NodeType.OffsetImageFilter)) {

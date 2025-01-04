@@ -191,6 +191,7 @@ describe("Test Image Filters", () => {
       threshold: 0.05,
     });
   });
+  // TODO: build reference result here
   it("should show outer and inner shadows on text", async () => {
     const path =
       // eslint-disable-next-line max-len
