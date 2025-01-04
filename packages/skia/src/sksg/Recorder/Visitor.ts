@@ -31,8 +31,13 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
     }
     recorder.materializePaint();
   }
-  if (node.type === NodeType.Image) {
-    recorder.drawImage(node.props);
+  switch (node.type) {
+    case NodeType.Image:
+      recorder.drawImage(node.props);
+      break;
+    case NodeType.Circle:
+      recorder.drawCircle(node.props);
+      break;
   }
   drawings.forEach((drawing) => {
     visitNode(recorder, drawing);

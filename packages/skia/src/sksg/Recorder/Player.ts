@@ -1,6 +1,6 @@
 "worklet";
 
-import { drawImage } from "../nodes/drawings";
+import { drawCircle, drawImage } from "../nodes/drawings";
 
 import {
   composeColorFilters,
@@ -31,6 +31,8 @@ const play = (ctx: DrawingContext, command: Command) => {
     pushColorFilter(ctx, command);
   } else if (isDrawCommand(command, CommandType.DrawImage)) {
     drawImage(ctx, command.props);
+  } else if (isDrawCommand(command, CommandType.DrawCircle)) {
+    drawCircle(ctx, command.props);
   } else {
     console.warn(`Unknown command: ${command.type}`);
   }

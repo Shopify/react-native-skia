@@ -1,6 +1,6 @@
 import type { SharedValue } from "react-native-reanimated";
 
-import type { ImageProps } from "../../dom/types";
+import type { CircleProps, ImageProps } from "../../dom/types";
 
 // TODO: remove string labels
 export enum CommandType {
@@ -14,6 +14,7 @@ export enum CommandType {
   MaterializePaint = "MaterializePaint",
   // Drawing
   DrawImage = "DrawImage",
+  DrawCircle = "DrawCircle",
 }
 
 export type Command<T extends CommandType = CommandType> = {
@@ -43,6 +44,7 @@ export const isCommand = <T extends CommandType>(
 
 interface Props {
   [CommandType.DrawImage]: ImageProps;
+  [CommandType.DrawCircle]: CircleProps;
 }
 
 interface DrawCommand<T extends CommandType> extends Command<T> {

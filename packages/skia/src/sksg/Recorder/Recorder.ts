@@ -1,6 +1,7 @@
 import type { SharedValue } from "react-native-reanimated";
 
 import type {
+  CircleProps,
   CTMProps,
   ImageProps,
   NodeType,
@@ -69,5 +70,9 @@ export class Recorder {
 
   drawImage(props: AnimatedProps<ImageProps>) {
     this.add({ type: CommandType.DrawImage, props });
+  }
+
+  drawCircle(props: AnimatedProps<CircleProps>) {
+    this.add({ type: CommandType.DrawCircle, props });
   }
 }
