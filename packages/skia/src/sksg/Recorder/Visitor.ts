@@ -122,13 +122,21 @@ const pushColorFilters = (recorder: Recorder, colorFilters: Node<any>[]) => {
   });
 };
 
+const pushMaskFilters = (recorder: Recorder, maskFilters: Node<any>[]) => {
+  if (maskFilters.length > 0) {
+    recorder.pushBlurMaskFilter(maskFilters[maskFilters.length - 1].props);
+  }
+};
+
 const visitNode = (recorder: Recorder, node: Node<any>) => {
-  const { colorFilters, drawings } = sortNodeChildren(node);
+  const { colorFilters, maskFilters, drawings } = sortNodeChildren(node);
   const paint = processPaint(node.props);
-  const shouldPushPaint = paint || colorFilters.length > 0;
+  const shouldPushPaint =
+    paint || colorFilters.length > 0 || maskFilters.length > 0;
   if (shouldPushPaint) {
     recorder.savePaint(paint ?? {});
     pushColorFilters(recorder, colorFilters);
+    pushMaskFilters(recorder, maskFilters);
     recorder.materializePaint();
   }
   const ctm = processCTM(node.props);
@@ -136,6 +144,9 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
     recorder.saveCTM(ctm);
   }
   switch (node.type) {
+    case NodeType.Fill:
+      recorder.drawPaint();
+      break;
     case NodeType.Image:
       recorder.drawImage(node.props);
       break;

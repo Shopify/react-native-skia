@@ -9,6 +9,7 @@ import {
   setColorFilters,
 } from "./commands/ColorFilters";
 import { saveCTM } from "./commands/CTM";
+import { setBlurMaskFilter } from "./commands/ImageFilters";
 import { setPaintProperties } from "./commands/Paint";
 import {
   CommandType,
@@ -32,10 +33,14 @@ const play = (ctx: DrawingContext, command: Command) => {
     setColorFilters(ctx);
   } else if (isPushColorFilter(command)) {
     pushColorFilter(ctx, command);
+  } else if (isDrawCommand(command, CommandType.PushBlurMaskFilter)) {
+    setBlurMaskFilter(ctx, command.props);
   } else if (isDrawCommand(command, CommandType.SaveCTM)) {
     saveCTM(ctx, command.props);
   } else if (isCommand(command, CommandType.RestoreCTM)) {
     ctx.canvas.restore();
+  } else if (isCommand(command, CommandType.DrawPaint)) {
+    ctx.canvas.drawPaint(ctx.paint);
   } else if (isDrawCommand(command, CommandType.DrawImage)) {
     drawImage(ctx, command.props);
   } else if (isDrawCommand(command, CommandType.DrawCircle)) {

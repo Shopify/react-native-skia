@@ -1,10 +1,11 @@
 import type { SharedValue } from "react-native-reanimated";
 
 import type {
+  NodeType,
+  BlurMaskFilterProps,
   CircleProps,
   CTMProps,
   ImageProps,
-  NodeType,
   PaintProps,
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer";
@@ -56,6 +57,10 @@ export class Recorder {
     });
   }
 
+  pushBlurMaskFilter(props: AnimatedProps<BlurMaskFilterProps>) {
+    this.add({ type: CommandType.PushBlurMaskFilter, props });
+  }
+
   composeColorFilters() {
     this.add({ type: CommandType.ComposeColorFilter });
   }
@@ -66,6 +71,10 @@ export class Recorder {
 
   restoreCTM() {
     this.add({ type: CommandType.RestoreCTM });
+  }
+
+  drawPaint() {
+    this.add({ type: CommandType.DrawPaint });
   }
 
   drawImage(props: AnimatedProps<ImageProps>) {

@@ -1,6 +1,7 @@
 import type { SharedValue } from "react-native-reanimated";
 
 import type {
+  BlurMaskFilterProps,
   CircleProps,
   CTMProps,
   ImageProps,
@@ -15,11 +16,13 @@ export enum CommandType {
   SaveCTM = "SaveCTM",
   RestoreCTM = "RestoreCTM",
   PushColorFilter = "PushColorFilter",
+  PushBlurMaskFilter = "PushBlurMaskFilter",
   ComposeColorFilter = "ComposeColorFilter",
   MaterializePaint = "MaterializePaint",
   // Drawing
   DrawImage = "DrawImage",
   DrawCircle = "DrawCircle",
+  DrawPaint = "DrawPaint",
 }
 
 export type Command<T extends CommandType = CommandType> = {
@@ -52,6 +55,7 @@ interface Props {
   [CommandType.DrawCircle]: CircleProps;
   [CommandType.SaveCTM]: CTMProps;
   [CommandType.SavePaint]: PaintProps;
+  [CommandType.PushBlurMaskFilter]: BlurMaskFilterProps;
 }
 
 interface DrawCommand<T extends CommandType> extends Command<T> {

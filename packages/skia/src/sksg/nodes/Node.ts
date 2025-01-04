@@ -26,6 +26,7 @@ export const sortNodes = (children: Node[]) => {
 
 export const sortNodeChildren = (parent: Node) => {
   "worklet";
+  const maskFilters: Node[] = [];
   const colorFilters: Node[] = [];
   const drawings: Node[] = [];
   const declarations: Node[] = [];
@@ -39,11 +40,13 @@ export const sortNodeChildren = (parent: Node) => {
       node.type === NodeType.LinearToSRGBGammaColorFilter
     ) {
       colorFilters.push(node);
+    } else if (node.type === NodeType.BlurMaskFilter) {
+      maskFilters.push(node);
     } else if (node.isDeclaration) {
       declarations.push(node);
     } else {
       drawings.push(node);
     }
   });
-  return { colorFilters, drawings, declarations };
+  return { colorFilters, drawings, declarations, maskFilters };
 };
