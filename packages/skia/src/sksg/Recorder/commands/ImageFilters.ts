@@ -165,16 +165,6 @@ interface PushImageFilter<T extends keyof Props>
   props: Props[T];
 }
 
-export const setImageFilters = (ctx: DrawingContext) => {
-  if (ctx.imageFilters.length > 0) {
-    ctx.paint.setImageFilter(
-      ctx.imageFilters.reduceRight((inner, outer) =>
-        inner ? ctx.Skia.ImageFilter.MakeCompose(outer, inner) : outer
-      )
-    );
-  }
-};
-
 const isImageFilter = <T extends keyof Props>(
   command: Command<CommandType.PushImageFilter>,
   type: T

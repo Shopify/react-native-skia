@@ -212,13 +212,6 @@ export const isPushShader = (
   return command.type === CommandType.PushShader;
 };
 
-export const setShaders = (ctx: DrawingContext) => {
-  "worklet";
-  if (ctx.shaders.length > 0) {
-    ctx.paint.setShader(ctx.shaders[ctx.shaders.length - 1]);
-  }
-};
-
 type Props = {
   [NodeType.Shader]: ShaderProps;
   [NodeType.ImageShader]: ImageShaderProps;

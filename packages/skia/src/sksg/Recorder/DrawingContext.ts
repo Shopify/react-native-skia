@@ -34,4 +34,30 @@ export class DrawingContext {
   restorePaint() {
     this.paints.pop();
   }
+
+  materializePaint() {
+    // Color Filters
+    if (this.colorFilters.length > 0) {
+      this.paint.setColorFilter(
+        this.colorFilters.reduceRight((inner, outer) =>
+          inner ? this.Skia.ColorFilter.MakeCompose(outer, inner) : outer
+        )
+      );
+    }
+    // Shaders
+    if (this.shaders.length > 0) {
+      this.paint.setShader(this.shaders[this.shaders.length - 1]);
+    }
+    // Image Filters
+    if (this.imageFilters.length > 0) {
+      this.paint.setImageFilter(
+        this.imageFilters.reduceRight((inner, outer) =>
+          inner ? this.Skia.ImageFilter.MakeCompose(outer, inner) : outer
+        )
+      );
+    }
+    this.colorFilters = [];
+    this.shaders = [];
+    this.imageFilters = [];
+  }
 }

@@ -26,7 +26,6 @@ import {
   composeColorFilters,
   isPushColorFilter,
   pushColorFilter,
-  setColorFilters,
 } from "./commands/ColorFilters";
 import { saveCTM } from "./commands/CTM";
 import {
@@ -34,10 +33,9 @@ import {
   isPushImageFilter,
   pushImageFilter,
   composeImageFilters,
-  setImageFilters,
 } from "./commands/ImageFilters";
 import { setPaintProperties } from "./commands/Paint";
-import { isPushShader, pushShader, setShaders } from "./commands/Shaders";
+import { isPushShader, pushShader } from "./commands/Shaders";
 import {
   CommandType,
   isCommand,
@@ -57,9 +55,7 @@ const play = (ctx: DrawingContext, command: Command) => {
   } else if (isCommand(command, CommandType.ComposeColorFilter)) {
     composeColorFilters(ctx);
   } else if (isCommand(command, CommandType.MaterializePaint)) {
-    setColorFilters(ctx);
-    setShaders(ctx);
-    setImageFilters(ctx);
+    ctx.materializePaint();
   } else if (isPushColorFilter(command)) {
     pushColorFilter(ctx, command);
   } else if (isPushShader(command)) {
