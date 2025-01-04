@@ -129,9 +129,6 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
   if (shouldPushPaint) {
     recorder.savePaint(paint ?? {});
     pushColorFilters(recorder, colorFilters);
-    if (colorFilters.length > 0) {
-      recorder.composeColorFilters();
-    }
     recorder.materializePaint();
   }
   const ctm = processCTM(node.props);

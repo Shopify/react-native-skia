@@ -71,18 +71,20 @@ const isSRGBToLinearGammaColorFilter = (
 };
 
 export const composeColorFilters = (ctx: DrawingContext) => {
-  const inner = ctx.colorFilters.pop();
-  const outer = ctx.colorFilters.pop();
-  if (inner && outer) {
+  if (ctx.colorFilters.length > 1) {
+    const outer = ctx.colorFilters.pop()!;
+    const inner = ctx.colorFilters.pop()!;
     ctx.colorFilters.push(ctx.Skia.ColorFilter.MakeCompose(outer, inner));
-  } else if (inner) {
-    ctx.colorFilters.push(inner);
   }
 };
 
 export const setColorFilters = (ctx: DrawingContext) => {
   if (ctx.colorFilters.length > 0) {
-    ctx.paint.setColorFilter(ctx.colorFilters[ctx.colorFilters.length - 1]);
+    ctx.paint.setColorFilter(
+      ctx.colorFilters.reduceRight((inner, outer) =>
+        inner ? ctx.Skia.ColorFilter.MakeCompose(outer, inner) : outer
+      )
+    );
   }
 };
 

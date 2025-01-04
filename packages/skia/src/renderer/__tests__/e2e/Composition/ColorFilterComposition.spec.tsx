@@ -7,12 +7,20 @@ import {
   height as wHeight,
 } from "../../setup";
 import {
+  BlendColor,
+  Circle,
   ColorMatrix,
+  Group,
   Image,
   Lerp,
   LinearToSRGBGamma,
+  SRGBToLinearGamma,
 } from "../../../components";
-import { checkImage, processResult } from "../../../../__tests__/setup";
+import {
+  checkImage,
+  docPath,
+  processResult,
+} from "../../../../__tests__/setup";
 import { setupSkia } from "../../../../skia/__tests__/setup";
 import { fitRects } from "../../../../dom/nodes";
 
@@ -60,7 +68,6 @@ describe("Color Filter Composition", () => {
       "snapshots/color-filter/color-filter-composition.png"
     );
   });
-  // TODO: a bug should be reported here
   it("should apply a color matrix to an image", async () => {
     const { oslo } = images;
     const { width, height } = surface;
@@ -77,5 +84,19 @@ describe("Color Filter Composition", () => {
       </Image>
     );
     checkImage(image, "snapshots/color-filter/color-filter-composition.png");
+  });
+  it("should use composition", async () => {
+    const { width } = surface;
+    const r = width / 2;
+    const img = await surface.draw(
+      <Group>
+        <SRGBToLinearGamma>
+          <BlendColor color="lightblue" mode="srcIn" />
+        </SRGBToLinearGamma>
+        <Circle cx={r} cy={r} r={r} />
+        <Circle cx={2 * r} cy={r} r={r} color="red" />
+      </Group>
+    );
+    checkImage(img, docPath("color-filters/composition.png"));
   });
 });
