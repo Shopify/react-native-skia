@@ -1,6 +1,6 @@
 import type { SharedValue } from "react-native-reanimated";
 
-import type { ImageProps, NodeType } from "../../dom/types";
+import type { ImageProps } from "../../dom/types";
 
 // TODO: remove string labels
 export enum CommandType {

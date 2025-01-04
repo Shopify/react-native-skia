@@ -1,6 +1,5 @@
 import {
   BlurMask,
-  Canvas,
   Canvas2,
   Fill,
   Group,

@@ -12,6 +12,11 @@ import { createStaticContext } from "./StaticContext";
 import { createDrawingContext } from "./DrawingContext";
 import type { Node } from "./nodes";
 import { draw, isSharedValue } from "./nodes";
+import type { Command } from "./Recorder/Core";
+import { Recorder } from "./Recorder/Recorder";
+import { visit } from "./Recorder/Visitor";
+import { DrawingContext } from "./Recorder/DrawingContext";
+import { replay } from "./Recorder/Player";
 
 const drawOnscreen = (
   Skia: Skia,
@@ -36,6 +41,7 @@ const drawOnscreen = (
 export class Container {
   private _root: Node[] = [];
   private _staticCtx: StaticContext | null = null;
+  private _recording: Command[] | null = null;
   public unmounted = false;
 
   private values = new Set<SharedValue<unknown>>();
@@ -64,6 +70,9 @@ export class Container {
     }
     this._root = root;
     this._staticCtx = createStaticContext(this.Skia);
+    const recorder = new Recorder();
+    visit(recorder, root);
+    this._recording = recorder.commands;
   }
 
   clear() {
@@ -104,9 +113,7 @@ export class Container {
   }
 
   drawOnCanvas(canvas: SkCanvas) {
-    const ctx = createDrawingContext(this.Skia, canvas, this._staticCtx!);
-    this.root.forEach((node) => {
-      draw(ctx, node);
-    });
+    const ctx = new DrawingContext(this.Skia, canvas);
+    replay(ctx, this._recording!);
   }
 }
