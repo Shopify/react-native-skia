@@ -1,6 +1,5 @@
 "worklet";
 
-import type { SkImageFilter } from "../../skia";
 import {
   drawCircle,
   drawImage,
@@ -49,18 +48,7 @@ import type { DrawingContext } from "./DrawingContext";
 const play = (ctx: DrawingContext, command: Command) => {
   materializeProps(command);
   if (isCommand(command, CommandType.SaveBackdropFilter)) {
-    let imageFilter: SkImageFilter | null = null;
-    const imgf = ctx.imageFilters.pop();
-    if (imgf) {
-      imageFilter = imgf;
-    } else {
-      const cf = ctx.colorFilters.pop();
-      if (cf) {
-        imageFilter = ctx.Skia.ImageFilter.MakeColorFilter(cf, null);
-      }
-    }
-    ctx.canvas.saveLayer(undefined, null, imageFilter);
-    ctx.canvas.restore();
+    ctx.saveBackdropFilter();
   } else if (isDrawCommand(command, CommandType.SavePaint)) {
     ctx.savePaint();
     setPaintProperties(ctx.Skia, ctx.paint, command.props);

@@ -27,6 +27,21 @@ export class DrawingContext {
     this.paints.push(this.paint.copy());
   }
 
+  saveBackdropFilter() {
+    let imageFilter: SkImageFilter | null = null;
+    const imgf = this.imageFilters.pop();
+    if (imgf) {
+      imageFilter = imgf;
+    } else {
+      const cf = this.colorFilters.pop();
+      if (cf) {
+        imageFilter = this.Skia.ImageFilter.MakeColorFilter(cf, null);
+      }
+    }
+    this.canvas.saveLayer(undefined, null, imageFilter);
+    this.canvas.restore();
+  }
+
   get paint() {
     return this.paints[this.paints.length - 1];
   }
