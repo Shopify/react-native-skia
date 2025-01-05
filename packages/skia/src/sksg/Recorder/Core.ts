@@ -1,5 +1,3 @@
-"worklet";
-
 import type { SharedValue } from "react-native-reanimated";
 
 import type {
@@ -119,6 +117,7 @@ export const materializeProps = (command: {
   props: Record<string, unknown>;
   animatedProps?: Record<string, SharedValue<unknown>>;
 }) => {
+  "worklet";
   if (command.animatedProps) {
     for (const key in command.animatedProps) {
       command.props[key] = command.animatedProps[key].value;
@@ -130,6 +129,7 @@ export const isCommand = <T extends CommandType>(
   command: Command,
   type: T
 ): command is Command<T> => {
+  "worklet";
   return command.type === type;
 };
 
@@ -166,5 +166,6 @@ export const isDrawCommand = <T extends keyof Props>(
   command: Command,
   type: T
 ): command is DrawCommand<T> => {
+  "worklet";
   return command.type === type;
 };

@@ -1,5 +1,3 @@
-"worklet";
-
 import { enumKey } from "../../../dom/nodes";
 import type {
   BlendColorFilterProps,
@@ -16,6 +14,7 @@ import type { DrawingContext } from "../DrawingContext";
 export const isPushColorFilter = (
   command: Command
 ): command is Command<CommandType.PushColorFilter> => {
+  "worklet";
   return command.type === CommandType.PushColorFilter;
 };
 
@@ -38,10 +37,12 @@ const isColorFilter = <T extends keyof Props>(
   command: Command<CommandType.PushColorFilter>,
   type: T
 ): command is PushColorFilter<T> => {
+  "worklet";
   return command.colorFilterType === type;
 };
 
 export const composeColorFilters = (ctx: DrawingContext) => {
+  "worklet";
   if (ctx.colorFilters.length > 1) {
     const outer = ctx.colorFilters.pop()!;
     const inner = ctx.colorFilters.pop()!;
@@ -53,6 +54,7 @@ export const pushColorFilter = (
   ctx: DrawingContext,
   command: Command<CommandType.PushColorFilter>
 ) => {
+  "worklet";
   let cf: SkColorFilter | undefined;
   if (isColorFilter(command, NodeType.BlendColorFilter)) {
     const { props } = command;

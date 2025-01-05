@@ -1,5 +1,3 @@
-"worklet";
-
 import { enumKey, processPath } from "../../../dom/nodes";
 import { NodeType } from "../../../dom/types";
 import type {
@@ -109,6 +107,7 @@ const declarePath1DPathEffect = (
 export const isPushPathEffect = (
   command: Command
 ): command is Command<CommandType.PushPathEffect> => {
+  "worklet";
   return command.type === CommandType.PushPathEffect;
 };
 
@@ -132,10 +131,12 @@ const isPathEffect = <T extends keyof Props>(
   command: Command<CommandType.PushPathEffect>,
   type: T
 ): command is PushPathEffect<T> => {
+  "worklet";
   return command.pathEffectType === type;
 };
 
 export const composePathEffects = (ctx: DrawingContext) => {
+  "worklet";
   if (ctx.pathEffects.length > 1) {
     const outer = ctx.pathEffects.pop()!;
     const inner = ctx.pathEffects.pop()!;
@@ -147,6 +148,7 @@ export const pushPathEffect = (
   ctx: DrawingContext,
   command: Command<CommandType.PushPathEffect>
 ) => {
+  "worklet";
   if (isPathEffect(command, NodeType.DiscretePathEffect)) {
     declareDiscretePathEffect(ctx, command.props);
   } else if (isPathEffect(command, NodeType.DashPathEffect)) {

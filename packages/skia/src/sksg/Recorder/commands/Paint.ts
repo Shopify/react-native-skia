@@ -1,5 +1,3 @@
-"worklet";
-
 import { enumKey } from "../../../dom/nodes";
 import type { PaintProps } from "../../../dom/types";
 import {
@@ -42,6 +40,7 @@ export const setPaintProperties = (
     dither,
   }: PaintProps
 ) => {
+  "worklet";
   if (opacity !== undefined) {
     paint.setAlphaf(paint.getAlphaf() * opacity);
   }

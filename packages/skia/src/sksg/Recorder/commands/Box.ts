@@ -1,5 +1,3 @@
-"worklet";
-
 import { deflate, inflate } from "../../../dom/nodes";
 import type { BoxProps, BoxShadowProps } from "../../../dom/types";
 import { BlurStyle, ClipOp, isRRect } from "../../../skia/types";
@@ -13,10 +11,12 @@ interface BoxCommand extends Command<CommandType.DrawBox> {
 }
 
 export const isBoxCommand = (command: Command): command is BoxCommand => {
+  "worklet";
   return command.type === CommandType.DrawBox;
 };
 
 export const drawBox = (ctx: DrawingContext, command: BoxCommand) => {
+  "worklet";
   command.shadows.forEach((shadow) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     materializeProps(shadow as any);

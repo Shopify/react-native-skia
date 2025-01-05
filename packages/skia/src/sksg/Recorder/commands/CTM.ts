@@ -1,5 +1,3 @@
-"worklet";
-
 import {
   isPathDef,
   processPath,
@@ -32,6 +30,7 @@ const computeClip = (
 };
 
 export const saveCTM = (ctx: DrawingContext, props: CTMProps) => {
+  "worklet";
   const { canvas, Skia } = ctx;
   const {
     clip: rawClip,

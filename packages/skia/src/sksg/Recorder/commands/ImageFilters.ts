@@ -1,5 +1,3 @@
-"worklet";
-
 import { enumKey, processRadius } from "../../../dom/nodes";
 import type {
   BlendImageFilterProps,
@@ -168,6 +166,7 @@ const declareRuntimeShaderImageFilter = (
   ctx: DrawingContext,
   props: RuntimeShaderImageFilterProps
 ) => {
+  "worklet";
   const { source, uniforms } = props;
   const rtb = ctx.Skia.RuntimeShaderBuilder(source);
   if (uniforms) {
@@ -178,6 +177,7 @@ const declareRuntimeShaderImageFilter = (
 };
 
 export const composeImageFilters = (ctx: DrawingContext) => {
+  "worklet";
   if (ctx.imageFilters.length > 1) {
     const outer = ctx.imageFilters.pop()!;
     const inner = ctx.imageFilters.pop()!;
@@ -202,6 +202,7 @@ export const setBlurMaskFilter = (
 export const isPushImageFilter = (
   command: Command
 ): command is Command<CommandType.PushImageFilter> => {
+  "worklet";
   return command.type === CommandType.PushImageFilter;
 };
 
@@ -225,6 +226,7 @@ const isImageFilter = <T extends keyof Props>(
   command: Command<CommandType.PushImageFilter>,
   type: T
 ): command is PushImageFilter<T> => {
+  "worklet";
   return command.imageFilterType === type;
 };
 
@@ -232,6 +234,7 @@ export const pushImageFilter = (
   ctx: DrawingContext,
   command: Command<CommandType.PushImageFilter>
 ) => {
+  "worklet";
   if (isImageFilter(command, NodeType.BlurImageFilter)) {
     declareBlurImageFilter(ctx, command.props);
   } else if (isImageFilter(command, NodeType.MorphologyImageFilter)) {

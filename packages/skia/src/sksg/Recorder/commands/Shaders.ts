@@ -1,5 +1,3 @@
-"worklet";
-
 import {
   enumKey,
   fitRects,
@@ -212,6 +210,7 @@ const declareImageShader = (ctx: DrawingContext, props: ImageShaderProps) => {
 };
 
 const declareBlend = (ctx: DrawingContext, props: BlendProps) => {
+  "worklet";
   const blend = BlendMode[enumKey(props.mode as BlendProps["mode"])];
   const shaders = ctx.shaders.splice(0, ctx.shaders.length);
   if (shaders.length > 0) {
@@ -223,6 +222,7 @@ const declareBlend = (ctx: DrawingContext, props: BlendProps) => {
 export const isPushShader = (
   command: Command
 ): command is Command<CommandType.PushShader> => {
+  "worklet";
   return command.type === CommandType.PushShader;
 };
 
@@ -249,6 +249,7 @@ const isShader = <T extends keyof Props>(
   command: Command<CommandType.PushShader>,
   type: T
 ): command is PushShader<T> => {
+  "worklet";
   return command.shaderType === type;
 };
 
@@ -256,6 +257,7 @@ export const pushShader = (
   ctx: DrawingContext,
   command: Command<CommandType.PushShader>
 ) => {
+  "worklet";
   if (isShader(command, NodeType.Shader)) {
     declareShader(ctx, command.props);
   } else if (isShader(command, NodeType.ImageShader)) {

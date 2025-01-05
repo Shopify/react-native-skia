@@ -1,5 +1,3 @@
-"worklet";
-
 import {
   drawCircle,
   drawImage,
@@ -51,6 +49,8 @@ import {
 import type { DrawingContext } from "./DrawingContext";
 
 const play = (ctx: DrawingContext, command: Command) => {
+  "worklet";
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   materializeProps(command as any);
   if (isCommand(command, CommandType.SaveBackdropFilter)) {
@@ -153,6 +153,7 @@ const play = (ctx: DrawingContext, command: Command) => {
 };
 
 export const replay = (ctx: DrawingContext, commands: Command[]) => {
+  "worklet";
   commands.forEach((command) => {
     play(ctx, command);
   });
