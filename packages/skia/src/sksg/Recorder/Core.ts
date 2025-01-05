@@ -45,7 +45,7 @@ export enum CommandType {
   MaterializePaint = "MaterializePaint",
   SaveBackdropFilter = "SaveBackdropFilter",
   SaveLayer = "SaveLayer",
-  PushPaintDeclaration = "PushPaintDeclaration",
+  RestorePaintDeclaration = "RestorePaintDeclaration",
   // Drawing
   DrawBox = "DrawBox",
   DrawImage = "DrawImage",

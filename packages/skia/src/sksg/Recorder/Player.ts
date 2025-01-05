@@ -70,7 +70,7 @@ const play = (ctx: DrawingContext, command: Command) => {
     ctx.restorePaint();
   } else if (isCommand(command, CommandType.ComposeColorFilter)) {
     composeColorFilters(ctx);
-  } else if (isCommand(command, CommandType.PushPaintDeclaration)) {
+  } else if (isCommand(command, CommandType.RestorePaintDeclaration)) {
     const paint = ctx.restorePaint();
     if (!paint) {
       throw new Error("No paint declaration to push");
@@ -98,6 +98,8 @@ const play = (ctx: DrawingContext, command: Command) => {
     ctx.canvas.restore();
   } else {
     const paints = [ctx.paint, ...ctx.paintDeclarations];
+    ctx.paintDeclarations = [];
+    console.log({ paints });
     paints.forEach((p) => {
       ctx.paints.push(p);
       if (isBoxCommand(command)) {

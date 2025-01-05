@@ -191,7 +191,7 @@ const pushPaints = (recorder: Recorder, paints: Node<any>[]) => {
     pushMaskFilters(recorder, maskFilters);
     pushShaders(recorder, shaders);
     pushPathEffects(recorder, pathEffects);
-    recorder.pushPaintDeclaration();
+    recorder.restorePaintDeclaration();
   });
 };
 

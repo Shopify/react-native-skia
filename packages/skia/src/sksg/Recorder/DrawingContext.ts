@@ -86,6 +86,5 @@ export class DrawingContext {
     this.shaders = [];
     this.imageFilters = [];
     this.pathEffects = [];
-    this.paintDeclarations = [];
   }
 }

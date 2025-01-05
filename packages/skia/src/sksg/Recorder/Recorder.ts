@@ -76,8 +76,8 @@ export class Recorder {
     this.add({ type: CommandType.RestorePaint });
   }
 
-  pushPaintDeclaration() {
-    this.add({ type: CommandType.PushPaintDeclaration });
+  restorePaintDeclaration() {
+    this.add({ type: CommandType.RestorePaintDeclaration });
   }
 
   materializePaint() {

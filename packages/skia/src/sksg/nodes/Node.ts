@@ -98,10 +98,10 @@ export const sortNodeChildren = (parent: Node) => {
       imageFilters.push(node);
     } else if (isShader(node.type)) {
       shaders.push(node);
-    } else if (node.isDeclaration) {
-      declarations.push(node);
     } else if (node.type === NodeType.Paint) {
       paints.push(node);
+    } else if (node.isDeclaration) {
+      declarations.push(node);
     } else {
       drawings.push(node);
     }
