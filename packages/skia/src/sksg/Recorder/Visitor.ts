@@ -220,7 +220,6 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
     pushImageFilters(recorder, imageFilters);
     pushMaskFilters(recorder, maskFilters);
     pushShaders(recorder, shaders);
-    pushPaints(recorder, paints);
     pushPathEffects(recorder, pathEffects);
     // For mixed nodes like BackdropFilters we don't materialize the paint
     if (node.type === NodeType.BackdropFilter) {
@@ -231,6 +230,7 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
       recorder.materializePaint();
     }
   }
+  pushPaints(recorder, paints);
   const ctm = processCTM(props);
   const shouldRestore = !!ctm || node.type === NodeType.Layer;
   if (ctm) {

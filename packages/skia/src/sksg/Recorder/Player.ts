@@ -71,6 +71,7 @@ const play = (ctx: DrawingContext, command: Command) => {
   } else if (isCommand(command, CommandType.ComposeColorFilter)) {
     composeColorFilters(ctx);
   } else if (isCommand(command, CommandType.RestorePaintDeclaration)) {
+    ctx.materializePaint();
     const paint = ctx.restorePaint();
     if (!paint) {
       throw new Error("No paint declaration to push");
