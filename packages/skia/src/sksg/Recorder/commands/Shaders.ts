@@ -1,3 +1,5 @@
+"worklet";
+
 import {
   enumKey,
   fitRects,

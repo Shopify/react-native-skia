@@ -1,3 +1,5 @@
+"worklet";
+
 import { enumKey, processPath } from "../../../dom/nodes";
 import { NodeType } from "../../../dom/types";
 import type {
@@ -14,7 +16,7 @@ import type { Command } from "../Core";
 import { CommandType } from "../Core";
 import type { DrawingContext } from "../DrawingContext";
 
-export const declareDiscretePathEffect = (
+const declareDiscretePathEffect = (
   ctx: DrawingContext,
   props: DiscretePathEffectProps
 ) => {
@@ -24,7 +26,7 @@ export const declareDiscretePathEffect = (
   ctx.pathEffects.push(pe);
 };
 
-export const declarePath2DPathEffect = (
+const declarePath2DPathEffect = (
   ctx: DrawingContext,
   props: Path2DPathEffectProps
 ) => {
@@ -38,7 +40,7 @@ export const declarePath2DPathEffect = (
   ctx.pathEffects.push(pe);
 };
 
-export const declareDashPathEffect = (
+const declareDashPathEffect = (
   ctx: DrawingContext,
   props: DashPathEffectProps
 ) => {
@@ -48,7 +50,7 @@ export const declareDashPathEffect = (
   ctx.pathEffects.push(pe);
 };
 
-export const declareCornerPathEffect = (
+const declareCornerPathEffect = (
   ctx: DrawingContext,
   props: CornerPathEffectProps
 ) => {
@@ -61,7 +63,7 @@ export const declareCornerPathEffect = (
   return pe;
 };
 
-export const declareSumPathEffect = (ctx: DrawingContext) => {
+const declareSumPathEffect = (ctx: DrawingContext) => {
   "worklet";
   // Note: decorateChildren functionality needs to be handled differently
   const pes = ctx.pathEffects.splice(0, ctx.pathEffects.length);
@@ -72,7 +74,7 @@ export const declareSumPathEffect = (ctx: DrawingContext) => {
   ctx.pathEffects.push(pe);
 };
 
-export const declareLine2DPathEffect = (
+const declareLine2DPathEffect = (
   ctx: DrawingContext,
   props: Line2DPathEffectProps
 ) => {
@@ -85,7 +87,7 @@ export const declareLine2DPathEffect = (
   return pe;
 };
 
-export const declarePath1DPathEffect = (
+const declarePath1DPathEffect = (
   ctx: DrawingContext,
   props: Path1DPathEffectProps
 ) => {

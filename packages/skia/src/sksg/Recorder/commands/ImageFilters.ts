@@ -17,6 +17,7 @@ import {
   BlendMode,
   BlurStyle,
   ColorChannel,
+  processUniforms,
   TileMode,
 } from "../../../skia/types";
 import type { Command } from "../Core";
@@ -97,7 +98,7 @@ const declareMorphologyImageFilter = (
   ctx.imageFilters.push(imgf);
 };
 
-export const declareOffsetImageFilter = (
+const declareOffsetImageFilter = (
   ctx: DrawingContext,
   props: OffsetImageFilterProps
 ) => {
@@ -107,7 +108,7 @@ export const declareOffsetImageFilter = (
   ctx.imageFilters.push(imgf);
 };
 
-export const declareDropShadowImageFilter = (
+const declareDropShadowImageFilter = (
   ctx: DrawingContext,
   props: DropShadowImageFilterProps
 ) => {
@@ -126,7 +127,7 @@ export const declareDropShadowImageFilter = (
   ctx.imageFilters.push(imgf);
 };
 
-export const declareBlendImageFilter = (
+const declareBlendImageFilter = (
   ctx: DrawingContext,
   props: BlendImageFilterProps
 ) => {
@@ -141,7 +142,7 @@ export const declareBlendImageFilter = (
   ctx.imageFilters.push(imgf);
 };
 
-export const declareDisplacementMapImageFilter = (
+const declareDisplacementMapImageFilter = (
   ctx: DrawingContext,
   props: DisplacementMapImageFilterProps
 ) => {
@@ -159,6 +160,19 @@ export const declareDisplacementMapImageFilter = (
     map,
     null
   );
+  ctx.imageFilters.push(imgf);
+};
+
+const declareRuntimeShaderImageFilter = (
+  ctx: DrawingContext,
+  props: RuntimeShaderImageFilterProps
+) => {
+  const { source, uniforms } = props;
+  const rtb = ctx.Skia.RuntimeShaderBuilder(source);
+  if (uniforms) {
+    processUniforms(source, uniforms, rtb);
+  }
+  const imgf = ctx.Skia.ImageFilter.MakeRuntimeShader(rtb, null, null);
   ctx.imageFilters.push(imgf);
 };
 
@@ -229,6 +243,8 @@ export const pushImageFilter = (
     declareDropShadowImageFilter(ctx, command.props);
   } else if (isImageFilter(command, NodeType.OffsetImageFilter)) {
     declareOffsetImageFilter(ctx, command.props);
+  } else if (isImageFilter(command, NodeType.RuntimeShaderImageFilter)) {
+    declareRuntimeShaderImageFilter(ctx, command.props);
   } else {
     throw new Error("Invalid image filter type: " + command.imageFilterType);
   }

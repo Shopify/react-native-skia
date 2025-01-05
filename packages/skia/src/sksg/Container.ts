@@ -9,9 +9,8 @@ import {
 
 import type { StaticContext } from "./StaticContext";
 import { createStaticContext } from "./StaticContext";
-import { createDrawingContext } from "./DrawingContext";
 import type { Node } from "./nodes";
-import { draw, isSharedValue } from "./nodes";
+import { isSharedValue } from "./nodes";
 import type { Command } from "./Recorder/Core";
 import { Recorder } from "./Recorder/Recorder";
 import { visit } from "./Recorder/Visitor";
@@ -21,17 +20,17 @@ import { DrawingContext } from "./Recorder/DrawingContext";
 const drawOnscreen = (
   Skia: Skia,
   nativeId: number,
-  root: Node[],
-  staticCtx: StaticContext
+  recording: Command[],
+  _staticCtx: StaticContext
 ) => {
   "worklet";
   const rec = Skia.PictureRecorder();
   const canvas = rec.beginRecording();
   const start = performance.now();
-  const ctx = createDrawingContext(Skia, canvas, staticCtx);
-  root.forEach((node) => {
-    draw(ctx, node);
-  });
+
+  const ctx = new DrawingContext(Skia, canvas);
+  //console.log(this._recording);
+  replay(ctx, recording);
   const picture = rec.finishRecordingAsPicture();
   const end = performance.now();
   console.log("Recording time: ", end - start);
@@ -62,10 +61,10 @@ export class Container {
       if (this.mapperId !== null) {
         Rea.stopMapper(this.mapperId);
       }
-      const { nativeId, Skia, _staticCtx } = this;
+      const { nativeId, Skia, _staticCtx, _recording } = this;
       this.mapperId = Rea.startMapper(() => {
         "worklet";
-        drawOnscreen(Skia, nativeId, root, _staticCtx!);
+        drawOnscreen(Skia, nativeId, _recording!, _staticCtx!);
       }, Array.from(this.values));
     }
     this._root = root;
@@ -85,9 +84,9 @@ export class Container {
       throw new Error("React Native Skia only supports Reanimated 3 and above");
     }
     if (isOnscreen) {
-      const { nativeId, Skia, root, _staticCtx } = this;
+      const { nativeId, Skia, _recording, _staticCtx } = this;
       Rea.runOnUI(() => {
-        drawOnscreen(Skia, nativeId, root, _staticCtx!);
+        drawOnscreen(Skia, nativeId, _recording!, _staticCtx!);
       })();
     }
   }

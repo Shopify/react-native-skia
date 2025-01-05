@@ -1,3 +1,5 @@
+"worklet";
+
 import { deflate, inflate } from "../../../dom/nodes";
 import type { BoxProps, BoxShadowProps } from "../../../dom/types";
 import { BlurStyle, ClipOp, isRRect } from "../../../skia/types";
