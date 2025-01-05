@@ -13,7 +13,7 @@ import { Recorder } from "./Recorder/Recorder";
 import { visit } from "./Recorder/Visitor";
 import { replay } from "./Recorder/Player";
 import { DrawingContext } from "./Recorder/DrawingContext";
-import type { Recording } from "./Recorder/Recording";
+import { createRecording, type Recording } from "./Recorder/Recording";
 
 const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   "worklet";
@@ -21,6 +21,7 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   const canvas = rec.beginRecording();
   // const start = performance.now();
 
+  // TODO: because the pool is not a shared value here, it is copied on every frame
   const ctx = new DrawingContext(Skia, recording.paintPool, canvas);
   //console.log(recording.commands);
   replay(ctx, recording.commands);
@@ -62,7 +63,7 @@ export class Container {
     this._root = root;
     const recorder = new Recorder();
     visit(recorder, root);
-    this._recording = recorder.finishAsRecording(this.Skia);
+    this._recording = createRecording(recorder.commands);
   }
 
   clear() {

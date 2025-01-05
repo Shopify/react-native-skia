@@ -24,19 +24,19 @@ export class DrawingContext {
   constructor(Skia: Skia, paintPool: SkPaint[], canvas: SkCanvas) {
     this.Skia = Skia;
     this.canvas = canvas;
-    this.paints.push(Skia.Paint());
+    paintPool[0] = this.Skia.Paint();
+    this.paints.push(paintPool[0]);
     this.paintPool = paintPool;
   }
 
   savePaint() {
     const i = this.paints.length;
     if (!this.paintPool[i]) {
-      this.paintPool.push(this.Skia.Paint());
+      this.paintPool[i] = this.Skia.Paint();
     }
-    const paint = this.paintPool[i];
-    const parentPaint = this.paint;
-    paint.assign(parentPaint);
-    this.paints.push(paint);
+    this.paintPool[i].reset();
+    this.paintPool[i].assign(this.paint);
+    this.paints.push(this.paintPool[i]);
   }
 
   saveBackdropFilter() {
