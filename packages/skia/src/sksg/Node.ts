@@ -2,27 +2,9 @@ import { NodeType } from "../dom/types";
 
 export interface Node<Props = unknown> {
   type: NodeType;
-  isDeclaration: boolean;
   props: Props;
   children: Node[];
 }
-
-// TODO: Remove
-export const sortNodes = (children: Node[]) => {
-  "worklet";
-  const declarations: Node[] = [];
-  const drawings: Node[] = [];
-
-  children.forEach((node) => {
-    if (node.isDeclaration) {
-      declarations.push(node);
-    } else {
-      drawings.push(node);
-    }
-  });
-
-  return { declarations, drawings };
-};
 
 export const isColorFilter = (type: NodeType) => {
   "worklet";
@@ -107,9 +89,6 @@ export const sortNodeChildren = (parent: Node) => {
         node.type = NodeType.Blend;
         shaders.push(node);
       }
-      // TODO: remove isDeclaration from node
-    } else if (node.isDeclaration) {
-      throw new Error("Unknown declaration type: " + node.type);
     } else {
       drawings.push(node);
     }

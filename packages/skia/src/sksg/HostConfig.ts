@@ -2,7 +2,7 @@
 import type { Fiber, HostConfig } from "react-reconciler";
 import { DefaultEventPriority } from "react-reconciler/constants";
 
-import { NodeType } from "../dom/types";
+import type { NodeType } from "../dom/types";
 import { shallowEq } from "../renderer/typeddash";
 
 import type { Node } from "./Node";
@@ -13,51 +13,6 @@ export const debug = (...args: Parameters<typeof console.log>) => {
   if (DEBUG) {
     console.log(...args);
   }
-};
-
-const isDeclaration = (type: NodeType) => {
-  "worklet";
-  return (
-    // BlurMaskFilters
-    type === NodeType.BlurMaskFilter ||
-    // ImageFilters
-    type === NodeType.BlendImageFilter ||
-    type === NodeType.BlurImageFilter ||
-    type === NodeType.OffsetImageFilter ||
-    type === NodeType.DropShadowImageFilter ||
-    type === NodeType.MorphologyImageFilter ||
-    type === NodeType.DisplacementMapImageFilter ||
-    type === NodeType.RuntimeShaderImageFilter ||
-    // ColorFilters
-    type === NodeType.MatrixColorFilter ||
-    type === NodeType.BlendColorFilter ||
-    type === NodeType.LumaColorFilter ||
-    type === NodeType.LinearToSRGBGammaColorFilter ||
-    type === NodeType.SRGBToLinearGammaColorFilter ||
-    type === NodeType.LerpColorFilter ||
-    // Shaders
-    type === NodeType.Shader ||
-    type === NodeType.ImageShader ||
-    type === NodeType.ColorShader ||
-    type === NodeType.Turbulence ||
-    type === NodeType.FractalNoise ||
-    type === NodeType.LinearGradient ||
-    type === NodeType.RadialGradient ||
-    type === NodeType.SweepGradient ||
-    type === NodeType.TwoPointConicalGradient ||
-    // Path Effects
-    type === NodeType.CornerPathEffect ||
-    type === NodeType.DiscretePathEffect ||
-    type === NodeType.DashPathEffect ||
-    type === NodeType.Path1DPathEffect ||
-    type === NodeType.Path2DPathEffect ||
-    type === NodeType.SumPathEffect ||
-    type === NodeType.Line2DPathEffect ||
-    // Mixed
-    type === NodeType.Blend ||
-    // Paint
-    type === NodeType.Paint
-  );
 };
 
 type Instance = Node;
@@ -140,7 +95,6 @@ export const sksgHostConfig: SkiaHostConfig = {
     container.registerValues(props);
     const instance = {
       type,
-      isDeclaration: isDeclaration(type),
       props,
       children: [],
     };
@@ -233,7 +187,6 @@ export const sksgHostConfig: SkiaHostConfig = {
       type: instance.type,
       props: newProps,
       children: keepChildren ? [...instance.children] : [],
-      isDeclaration: instance.isDeclaration,
     };
   },
 
