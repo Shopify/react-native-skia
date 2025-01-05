@@ -40,6 +40,7 @@ export enum CommandType {
   ComposeImageFilter = "ComposeImageFilter",
   MaterializePaint = "MaterializePaint",
   SaveBackdropFilter = "SaveBackdropFilter",
+  SaveLayer = "SaveLayer",
   // Drawing
   DrawBox = "DrawBox",
   DrawImage = "DrawImage",

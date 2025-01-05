@@ -188,11 +188,14 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
     // For mixed nodes like BackdropFilters we don't materialize the paint
     if (node.type === NodeType.BackdropFilter) {
       recorder.saveBackdropFilter();
+    } else if (node.type === NodeType.Layer) {
+      recorder.saveLayer();
     } else {
       recorder.materializePaint();
     }
   }
   const ctm = processCTM(props);
+  const shouldRestore = !!ctm || node.type === NodeType.Layer;
   if (ctm) {
     recorder.saveCTM(ctm);
   }
@@ -271,7 +274,7 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
   if (shouldPushPaint) {
     recorder.restorePaint();
   }
-  if (ctm) {
+  if (shouldRestore) {
     recorder.restoreCTM();
   }
 };

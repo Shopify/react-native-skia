@@ -51,6 +51,9 @@ const play = (ctx: DrawingContext, command: Command) => {
   materializeProps(command as any);
   if (isCommand(command, CommandType.SaveBackdropFilter)) {
     ctx.saveBackdropFilter();
+  } else if (isCommand(command, CommandType.SaveLayer)) {
+    const paint = ctx.Skia.Paint();
+    ctx.canvas.saveLayer(paint);
   } else if (isDrawCommand(command, CommandType.SavePaint)) {
     ctx.savePaint();
     setPaintProperties(ctx.Skia, ctx.paint, command.props);
