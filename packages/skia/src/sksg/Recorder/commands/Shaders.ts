@@ -10,6 +10,7 @@ import {
 } from "../../../dom/nodes";
 import { NodeType } from "../../../dom/types";
 import type {
+  BlendProps,
   ColorProps,
   FractalNoiseProps,
   ImageShaderProps,
@@ -21,11 +22,13 @@ import type {
   TwoPointConicalGradientProps,
 } from "../../../dom/types";
 import {
+  BlendMode,
   FilterMode,
   MipmapMode,
   processUniforms,
   TileMode,
 } from "../../../skia/types";
+import { composeDeclarations } from "../../DeclarationContext";
 import type { Command } from "../Core";
 import { CommandType } from "../Core";
 import type { DrawingContext } from "../DrawingContext";
@@ -208,6 +211,15 @@ const declareImageShader = (ctx: DrawingContext, props: ImageShaderProps) => {
   ctx.shaders.push(shader);
 };
 
+const declareBlend = (ctx: DrawingContext, props: BlendProps) => {
+  const blend = BlendMode[enumKey(props.mode as BlendProps["mode"])];
+  const shaders = ctx.shaders.splice(0, ctx.shaders.length);
+  if (shaders.length > 0) {
+    const composer = ctx.Skia.Shader.MakeBlend.bind(ctx.Skia.Shader, blend);
+    ctx.shaders.push(composeDeclarations(shaders, composer));
+  }
+};
+
 export const isPushShader = (
   command: Command
 ): command is Command<CommandType.PushShader> => {
@@ -224,6 +236,7 @@ type Props = {
   [NodeType.RadialGradient]: RadialGradientProps;
   [NodeType.SweepGradient]: SweepGradientProps;
   [NodeType.TwoPointConicalGradient]: TwoPointConicalGradientProps;
+  [NodeType.Blend]: BlendProps;
 };
 
 interface PushShader<T extends keyof Props>
@@ -261,6 +274,8 @@ export const pushShader = (
     declareSweepGradientShader(ctx, command.props);
   } else if (isShader(command, NodeType.TwoPointConicalGradient)) {
     declareTwoPointConicalGradientShader(ctx, command.props);
+  } else if (isShader(command, NodeType.Blend)) {
+    declareBlend(ctx, command.props);
   } else {
     throw new Error(`Unknown shader type: ${command.shaderType}`);
   }

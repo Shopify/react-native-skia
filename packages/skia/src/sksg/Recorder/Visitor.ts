@@ -24,38 +24,38 @@ export const processPaint = ({
   paint: paintRef,
 }: DrawingNodeProps) => {
   const paint: DrawingNodeProps = {};
-  if (opacity) {
+  if (opacity !== undefined) {
     paint.opacity = opacity;
   }
-  if (color) {
+  if (color !== undefined) {
     paint.color = color;
   }
-  if (strokeWidth) {
+  if (strokeWidth !== undefined) {
     paint.strokeWidth = strokeWidth;
   }
-  if (blendMode) {
+  if (blendMode !== undefined) {
     paint.blendMode = blendMode;
   }
-  if (style) {
+  if (style !== undefined) {
     paint.style = style;
   }
-  if (strokeJoin) {
+  if (strokeJoin !== undefined) {
     paint.strokeJoin = strokeJoin;
   }
-  if (strokeCap) {
+  if (strokeCap !== undefined) {
     paint.strokeCap = strokeCap;
   }
-  if (strokeMiter) {
+  if (strokeMiter !== undefined) {
     paint.strokeMiter = strokeMiter;
   }
-  if (antiAlias) {
+  if (antiAlias !== undefined) {
     paint.antiAlias = antiAlias;
   }
-  if (dither) {
+  if (dither !== undefined) {
     paint.dither = dither;
   }
 
-  if (paintRef) {
+  if (paintRef !== undefined) {
     paint.paint = paintRef;
   }
 
@@ -224,13 +224,14 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
     // For mixed nodes like BackdropFilters we don't materialize the paint
     if (node.type === NodeType.BackdropFilter) {
       recorder.saveBackdropFilter();
-    } else if (node.type === NodeType.Layer) {
-      recorder.saveLayer();
     } else {
       recorder.materializePaint();
     }
   }
   pushPaints(recorder, paints);
+  if (node.type === NodeType.Layer) {
+    recorder.saveLayer();
+  }
   const ctm = processCTM(props);
   const shouldRestore = !!ctm || node.type === NodeType.Layer;
   if (ctm) {

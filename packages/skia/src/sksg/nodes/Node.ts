@@ -86,7 +86,6 @@ export const sortNodeChildren = (parent: Node) => {
   const pathEffects: Node[] = [];
   const drawings: Node[] = [];
   const paints: Node[] = [];
-  const declarations: Node[] = [];
   parent.children.forEach((node) => {
     if (isColorFilter(node.type)) {
       colorFilters.push(node);
@@ -100,8 +99,17 @@ export const sortNodeChildren = (parent: Node) => {
       shaders.push(node);
     } else if (node.type === NodeType.Paint) {
       paints.push(node);
+    } else if (node.type === NodeType.Blend) {
+      if (node.children[0] && isImageFilter(node.children[0].type)) {
+        node.type = NodeType.BlendImageFilter;
+        imageFilters.push(node);
+      } else {
+        node.type = NodeType.Blend;
+        shaders.push(node);
+      }
+      // TODO: remove isDeclaration from node
     } else if (node.isDeclaration) {
-      declarations.push(node);
+      throw new Error("Unknown declaration type: " + node.type);
     } else {
       drawings.push(node);
     }
@@ -109,7 +117,6 @@ export const sortNodeChildren = (parent: Node) => {
   return {
     colorFilters,
     drawings,
-    declarations,
     maskFilters,
     shaders,
     pathEffects,

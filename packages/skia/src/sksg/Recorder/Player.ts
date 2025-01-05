@@ -57,6 +57,7 @@ const play = (ctx: DrawingContext, command: Command) => {
   if (isCommand(command, CommandType.SaveBackdropFilter)) {
     ctx.saveBackdropFilter();
   } else if (isCommand(command, CommandType.SaveLayer)) {
+    ctx.materializePaint();
     const paint = ctx.paintDeclarations.pop();
     ctx.canvas.saveLayer(paint);
   } else if (isDrawCommand(command, CommandType.SavePaint)) {

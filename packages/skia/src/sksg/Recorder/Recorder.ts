@@ -1,7 +1,7 @@
 import type { SharedValue } from "react-native-reanimated";
 
+import { NodeType } from "../../dom/types";
 import type {
-  NodeType,
   BlurMaskFilterProps,
   CircleProps,
   CTMProps,
@@ -118,7 +118,7 @@ export class Recorder {
   }
 
   pushShader(shaderType: NodeType, props: AnimatedProps<unknown>) {
-    if (!isShader(shaderType)) {
+    if (!isShader(shaderType) && !(shaderType === NodeType.Blend)) {
       throw new Error("Invalid color filter type: " + shaderType);
     }
     this.add({ type: CommandType.PushShader, shaderType, props });

@@ -210,13 +210,16 @@ export const declareBlendImageFilter = (
   props: BlendImageFilterProps
 ) => {
   "worklet";
-  const { mode } = props;
   const a = ctx.imageFilters.pop();
   const b = ctx.imageFilters.pop();
   if (!a || !b) {
     throw new Error("BlendImageFilter requires two image filters");
   }
-  const imgf = ctx.Skia.ImageFilter.MakeBlend(mode, a, b);
+  const imgf = ctx.Skia.ImageFilter.MakeBlend(
+    BlendMode[enumKey(props.mode)],
+    a,
+    b
+  );
   ctx.imageFilters.push(imgf);
 };
 

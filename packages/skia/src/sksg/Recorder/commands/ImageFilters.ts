@@ -12,7 +12,7 @@ import type {
   RuntimeShaderImageFilterProps,
 } from "../../../dom/types";
 import { NodeType } from "../../../dom/types";
-import type { SkColor, Skia, SkImageFilter } from "../../../skia/types";
+import type { SkColor, SkImageFilter, Skia } from "../../../skia/types";
 import {
   BlendMode,
   BlurStyle,
@@ -20,6 +20,7 @@ import {
   processUniforms,
   TileMode,
 } from "../../../skia/types";
+import { composeDeclarations } from "../../DeclarationContext";
 import type { Command } from "../Core";
 import { CommandType } from "../Core";
 import type { DrawingContext } from "../DrawingContext";
@@ -132,14 +133,14 @@ const declareBlendImageFilter = (
   props: BlendImageFilterProps
 ) => {
   "worklet";
-  const { mode } = props;
-  const a = ctx.imageFilters.pop();
-  const b = ctx.imageFilters.pop();
-  if (!a || !b) {
-    throw new Error("BlendImageFilter requires two image filters");
-  }
-  const imgf = ctx.Skia.ImageFilter.MakeBlend(mode, a, b);
-  ctx.imageFilters.push(imgf);
+  const blend = BlendMode[enumKey(props.mode)];
+  // Blend ImageFilters
+  const imageFilters = ctx.imageFilters.splice(0, ctx.imageFilters.length);
+  const composer = ctx.Skia.ImageFilter.MakeBlend.bind(
+    ctx.Skia.ImageFilter,
+    blend
+  );
+  ctx.imageFilters.push(composeDeclarations(imageFilters, composer));
 };
 
 const declareDisplacementMapImageFilter = (
