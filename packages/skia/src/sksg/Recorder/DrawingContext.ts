@@ -20,6 +20,7 @@ export class DrawingContext {
   pathEffects: SkPathEffect[] = [];
   paintDeclarations: SkPaint[] = [];
   paintPool: SkPaint[] = [];
+  nextPaintIndex = 1;
 
   constructor(Skia: Skia, paintPool: SkPaint[], canvas: SkCanvas) {
     this.Skia = Skia;
@@ -30,7 +31,15 @@ export class DrawingContext {
   }
 
   savePaint() {
-    this.paints.push(this.paint.copy());
+    // Get next available paint from pool or create new one if needed
+    if (this.nextPaintIndex >= this.paintPool.length) {
+      this.paintPool.push(this.Skia.Paint());
+    }
+
+    const nextPaint = this.paintPool[this.nextPaintIndex];
+    nextPaint.assign(this.paint); // Reuse allocation by copying properties
+    this.paints.push(nextPaint);
+    this.nextPaintIndex++;
   }
 
   saveBackdropFilter() {
