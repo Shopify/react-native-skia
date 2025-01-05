@@ -85,6 +85,7 @@ export const sortNodeChildren = (parent: Node) => {
   const imageFilters: Node[] = [];
   const pathEffects: Node[] = [];
   const drawings: Node[] = [];
+  const paints: Node[] = [];
   const declarations: Node[] = [];
   parent.children.forEach((node) => {
     if (isColorFilter(node.type)) {
@@ -99,6 +100,8 @@ export const sortNodeChildren = (parent: Node) => {
       shaders.push(node);
     } else if (node.isDeclaration) {
       declarations.push(node);
+    } else if (node.type === NodeType.Paint) {
+      paints.push(node);
     } else {
       drawings.push(node);
     }
@@ -111,5 +114,6 @@ export const sortNodeChildren = (parent: Node) => {
     shaders,
     pathEffects,
     imageFilters,
+    paints,
   };
 };

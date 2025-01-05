@@ -29,7 +29,7 @@ import type {
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer";
 import { isSharedValue } from "../nodes/utils";
-import { isColorFilter, isImageFilter, isShader } from "../nodes";
+import { isColorFilter, isImageFilter, isPathEffect, isShader } from "../nodes";
 
 import { CommandType } from "./Core";
 import type { Command } from "./Core";
@@ -76,8 +76,23 @@ export class Recorder {
     this.add({ type: CommandType.RestorePaint });
   }
 
+  pushPaintDeclaration() {
+    this.add({ type: CommandType.PushPaintDeclaration });
+  }
+
   materializePaint() {
     this.add({ type: CommandType.MaterializePaint });
+  }
+
+  pushPathEffect(pathEffectType: NodeType, props: AnimatedProps<unknown>) {
+    if (!isPathEffect(pathEffectType)) {
+      throw new Error("Invalid color filter type: " + pathEffectType);
+    }
+    this.add({
+      type: CommandType.PushPathEffect,
+      pathEffectType,
+      props,
+    });
   }
 
   pushImageFilter(imageFilterType: NodeType, props: AnimatedProps<unknown>) {
@@ -111,6 +126,10 @@ export class Recorder {
 
   pushBlurMaskFilter(props: AnimatedProps<BlurMaskFilterProps>) {
     this.add({ type: CommandType.PushBlurMaskFilter, props });
+  }
+
+  composePathEffect() {
+    this.add({ type: CommandType.ComposePathEffect });
   }
 
   composeColorFilter() {

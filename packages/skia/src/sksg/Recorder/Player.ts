@@ -36,6 +36,11 @@ import {
   composeImageFilters,
 } from "./commands/ImageFilters";
 import { setPaintProperties } from "./commands/Paint";
+import {
+  composePathEffects,
+  isPushPathEffect,
+  pushPathEffect,
+} from "./commands/PathEffects";
 import { isPushShader, pushShader } from "./commands/Shaders";
 import {
   CommandType,
@@ -52,7 +57,7 @@ const play = (ctx: DrawingContext, command: Command) => {
   if (isCommand(command, CommandType.SaveBackdropFilter)) {
     ctx.saveBackdropFilter();
   } else if (isCommand(command, CommandType.SaveLayer)) {
-    const paint = ctx.Skia.Paint();
+    const paint = ctx.paintDeclarations.pop();
     ctx.canvas.saveLayer(paint);
   } else if (isDrawCommand(command, CommandType.SavePaint)) {
     ctx.savePaint();
@@ -61,6 +66,12 @@ const play = (ctx: DrawingContext, command: Command) => {
     ctx.restorePaint();
   } else if (isCommand(command, CommandType.ComposeColorFilter)) {
     composeColorFilters(ctx);
+  } else if (isCommand(command, CommandType.PushPaintDeclaration)) {
+    const paint = ctx.restorePaint();
+    if (!paint) {
+      throw new Error("No paint declaration to push");
+    }
+    ctx.paintDeclarations.push(paint);
   } else if (isCommand(command, CommandType.MaterializePaint)) {
     ctx.materializePaint();
   } else if (isPushColorFilter(command)) {
@@ -69,6 +80,10 @@ const play = (ctx: DrawingContext, command: Command) => {
     pushShader(ctx, command);
   } else if (isPushImageFilter(command)) {
     pushImageFilter(ctx, command);
+  } else if (isPushPathEffect(command)) {
+    pushPathEffect(ctx, command);
+  } else if (isCommand(command, CommandType.ComposePathEffect)) {
+    composePathEffects(ctx);
   } else if (isCommand(command, CommandType.ComposeImageFilter)) {
     composeImageFilters(ctx);
   } else if (isDrawCommand(command, CommandType.PushBlurMaskFilter)) {

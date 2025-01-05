@@ -7,6 +7,7 @@ import type {
   SkPaint,
   SkShader,
   SkImageFilter,
+  SkPathEffect,
 } from "../../skia/types";
 
 export class DrawingContext {
@@ -16,6 +17,8 @@ export class DrawingContext {
   colorFilters: SkColorFilter[] = [];
   shaders: SkShader[] = [];
   imageFilters: SkImageFilter[] = [];
+  pathEffects: SkPathEffect[] = [];
+  paintDeclarations: SkPaint[] = [];
 
   constructor(Skia: Skia, canvas: SkCanvas) {
     this.Skia = Skia;
@@ -47,7 +50,7 @@ export class DrawingContext {
   }
 
   restorePaint() {
-    this.paints.pop();
+    return this.paints.pop();
   }
 
   materializePaint() {
@@ -71,8 +74,18 @@ export class DrawingContext {
         )
       );
     }
+    // Path Effects
+    if (this.pathEffects.length > 0) {
+      this.paint.setPathEffect(
+        this.pathEffects.reduceRight((inner, outer) =>
+          inner ? this.Skia.PathEffect.MakeCompose(outer, inner) : outer
+        )
+      );
+    }
     this.colorFilters = [];
     this.shaders = [];
     this.imageFilters = [];
+    this.pathEffects = [];
+    this.paintDeclarations = [];
   }
 }

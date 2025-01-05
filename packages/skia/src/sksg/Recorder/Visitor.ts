@@ -127,6 +127,21 @@ const pushColorFilters = (recorder: Recorder, colorFilters: Node<any>[]) => {
   });
 };
 
+const pushPathEffects = (recorder: Recorder, pathEffects: Node<any>[]) => {
+  pathEffects.forEach((pathEffect) => {
+    if (pathEffect.children.length > 0) {
+      pushPathEffects(recorder, pathEffect.children);
+    }
+    recorder.pushPathEffect(pathEffect.type, pathEffect.props);
+    const needsComposition =
+      pathEffect.type !== NodeType.SumPathEffect &&
+      pathEffect.children.length > 0;
+    if (needsComposition) {
+      recorder.composePathEffect();
+    }
+  });
+};
+
 const pushImageFilters = (recorder: Recorder, imageFilters: Node<any>[]) => {
   imageFilters.forEach((imageFilter) => {
     if (imageFilter.children.length > 0) {
@@ -161,6 +176,20 @@ const pushMaskFilters = (recorder: Recorder, maskFilters: Node<any>[]) => {
   }
 };
 
+const pushPaints = (recorder: Recorder, paints: Node<any>[]) => {
+  paints.forEach((paint) => {
+    recorder.savePaint(paint.props);
+    const { colorFilters, maskFilters, shaders, imageFilters, pathEffects } =
+      sortNodeChildren(paint);
+    pushColorFilters(recorder, colorFilters);
+    pushImageFilters(recorder, imageFilters);
+    pushMaskFilters(recorder, maskFilters);
+    pushShaders(recorder, shaders);
+    pushPathEffects(recorder, pathEffects);
+    recorder.pushPaintDeclaration();
+  });
+};
+
 const visitNode = (recorder: Recorder, node: Node<any>) => {
   const { props } = node;
   const {
@@ -170,6 +199,7 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
     shaders,
     imageFilters,
     pathEffects,
+    paints,
   } = sortNodeChildren(node);
   const paint = processPaint(props);
   const shouldPushPaint =
@@ -185,6 +215,8 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
     pushImageFilters(recorder, imageFilters);
     pushMaskFilters(recorder, maskFilters);
     pushShaders(recorder, shaders);
+    pushPaints(recorder, paints);
+    pushPathEffects(recorder, pathEffects);
     // For mixed nodes like BackdropFilters we don't materialize the paint
     if (node.type === NodeType.BackdropFilter) {
       recorder.saveBackdropFilter();
