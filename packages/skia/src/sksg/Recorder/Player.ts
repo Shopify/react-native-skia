@@ -1,5 +1,7 @@
 "worklet";
 
+import type { SkPaint } from "../../skia";
+
 import {
   drawCircle,
   drawImage,
@@ -49,6 +51,7 @@ import {
   type Command,
 } from "./Core";
 import type { DrawingContext } from "./DrawingContext";
+import type { Recording } from "./Recording";
 
 const play = (ctx: DrawingContext, command: Command) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

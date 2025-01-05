@@ -19,15 +19,24 @@ export class DrawingContext {
   imageFilters: SkImageFilter[] = [];
   pathEffects: SkPathEffect[] = [];
   paintDeclarations: SkPaint[] = [];
+  paintPool: SkPaint[] = [];
 
-  constructor(Skia: Skia, canvas: SkCanvas) {
+  constructor(Skia: Skia, paintPool: SkPaint[], canvas: SkCanvas) {
     this.Skia = Skia;
     this.canvas = canvas;
     this.paints.push(Skia.Paint());
+    this.paintPool = paintPool;
   }
 
   savePaint() {
-    this.paints.push(this.paint.copy());
+    const i = this.paints.length;
+    if (!this.paintPool[i]) {
+      this.paintPool.push(this.Skia.Paint());
+    }
+    const paint = this.paintPool[i];
+    const parentPaint = this.paint;
+    paint.assign(parentPaint);
+    this.paints.push(paint);
   }
 
   saveBackdropFilter() {

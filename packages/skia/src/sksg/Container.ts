@@ -7,30 +7,23 @@ import {
   HAS_REANIMATED_3,
 } from "../external/reanimated/renderHelpers";
 
-import type { StaticContext } from "./StaticContext";
-import { createStaticContext } from "./StaticContext";
 import type { Node } from "./Node";
 import { isSharedValue } from "./utils";
-import type { Command } from "./Recorder/Core";
 import { Recorder } from "./Recorder/Recorder";
 import { visit } from "./Recorder/Visitor";
 import { replay } from "./Recorder/Player";
 import { DrawingContext } from "./Recorder/DrawingContext";
+import type { Recording } from "./Recorder/Recording";
 
-const drawOnscreen = (
-  Skia: Skia,
-  nativeId: number,
-  recording: Command[],
-  _staticCtx: StaticContext
-) => {
+const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   "worklet";
   const rec = Skia.PictureRecorder();
   const canvas = rec.beginRecording();
   const start = performance.now();
 
-  const ctx = new DrawingContext(Skia, canvas);
+  const ctx = new DrawingContext(Skia, recording.paintPool, canvas);
   //console.log(this._recording);
-  replay(ctx, recording);
+  replay(ctx, recording.commands);
   const picture = rec.finishRecordingAsPicture();
   const end = performance.now();
   console.log("Recording time: ", end - start);
@@ -39,8 +32,7 @@ const drawOnscreen = (
 
 export class Container {
   private _root: Node[] = [];
-  private _staticCtx: StaticContext | null = null;
-  private _recording: Command[] | null = null;
+  private _recording: Recording | null = null;
   public unmounted = false;
 
   private values = new Set<SharedValue<unknown>>();
@@ -61,17 +53,16 @@ export class Container {
       if (this.mapperId !== null) {
         Rea.stopMapper(this.mapperId);
       }
-      const { nativeId, Skia, _staticCtx, _recording } = this;
+      const { nativeId, Skia, _recording } = this;
       this.mapperId = Rea.startMapper(() => {
         "worklet";
-        drawOnscreen(Skia, nativeId, _recording!, _staticCtx!);
+        drawOnscreen(Skia, nativeId, _recording!);
       }, Array.from(this.values));
     }
     this._root = root;
-    this._staticCtx = createStaticContext(this.Skia);
     const recorder = new Recorder();
     visit(recorder, root);
-    this._recording = recorder.commands;
+    this._recording = recorder.finishAsRecording(this.Skia);
   }
 
   clear() {
@@ -84,9 +75,9 @@ export class Container {
       throw new Error("React Native Skia only supports Reanimated 3 and above");
     }
     if (isOnscreen) {
-      const { nativeId, Skia, _recording, _staticCtx } = this;
+      const { nativeId, Skia, _recording } = this;
       Rea.runOnUI(() => {
-        drawOnscreen(Skia, nativeId, _recording!, _staticCtx!);
+        drawOnscreen(Skia, nativeId, _recording!);
       })();
     }
   }
@@ -112,8 +103,15 @@ export class Container {
   }
 
   drawOnCanvas(canvas: SkCanvas) {
-    const ctx = new DrawingContext(this.Skia, canvas);
+    if (!this._recording) {
+      throw new Error("No recording to draw");
+    }
+    const ctx = new DrawingContext(
+      this.Skia,
+      this._recording.paintPool,
+      canvas
+    );
     //console.log(this._recording);
-    replay(ctx, this._recording!);
+    replay(ctx, this._recording.commands);
   }
 }

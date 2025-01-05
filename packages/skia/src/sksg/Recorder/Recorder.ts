@@ -30,9 +30,11 @@ import type {
 import type { AnimatedProps } from "../../renderer";
 import { isSharedValue } from "../utils";
 import { isColorFilter, isImageFilter, isPathEffect, isShader } from "../Node";
+import type { Skia } from "../../skia/types";
 
 import { CommandType } from "./Core";
 import type { Command } from "./Core";
+import { createRecording } from "./Recording";
 
 export class Recorder {
   commands: Command[] = [];
@@ -66,6 +68,10 @@ export class Recorder {
       }
     }
     this.commands.push(command);
+  }
+
+  finishAsRecording(Skia: Skia) {
+    return createRecording(Skia, this.commands);
   }
 
   savePaint(props: AnimatedProps<PaintProps>) {
