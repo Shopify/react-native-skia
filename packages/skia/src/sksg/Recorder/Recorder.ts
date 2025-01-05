@@ -28,8 +28,8 @@ import type {
   BoxShadowProps,
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer";
-import { isSharedValue } from "../nodes/utils";
-import { isColorFilter, isImageFilter, isPathEffect, isShader } from "../nodes";
+import { isSharedValue } from "../utils";
+import { isColorFilter, isImageFilter, isPathEffect, isShader } from "../Node";
 
 import { CommandType } from "./Core";
 import type { Command } from "./Core";

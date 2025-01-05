@@ -1,6 +1,5 @@
 import type { GroupProps } from "./Common";
 import type { NodeType } from "./NodeType";
-import type { DeclarationContext } from "../../sksg/DeclarationContext";
 
 export interface Node<P> {
   type: NodeType;
@@ -18,9 +17,6 @@ export interface Node<P> {
 export type Invalidate = () => void;
 
 export interface DeclarationNode<P> extends Node<P> {
-  //declarationType: DeclarationType;
-  decorate(ctx: DeclarationContext): void;
-
   setInvalidate(invalidate: Invalidate): void;
 }
 

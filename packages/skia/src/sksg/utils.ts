@@ -1,6 +1,6 @@
 import type { SharedValue } from "react-native-reanimated";
 
-import { mapKeys } from "../../renderer/typeddash";
+import { mapKeys } from "../renderer/typeddash";
 
 export const isSharedValue = <T = unknown>(
   value: unknown
@@ -20,4 +20,17 @@ export const materialize = <T extends object>(props: T) => {
     }
   });
   return result;
+};
+
+type Composer<T> = (outer: T, inner: T) => T;
+
+export const composeDeclarations = <T>(filters: T[], composer: Composer<T>) => {
+  "worklet";
+  const len = filters.length;
+  if (len <= 1) {
+    return filters[0];
+  }
+  return filters.reduceRight((inner, outer) =>
+    inner ? composer(outer, inner) : outer
+  );
 };

@@ -5,8 +5,8 @@ import type {
   BoxShadowProps,
 } from "../../dom/types";
 import { NodeType } from "../../dom/types";
-import type { Node } from "../nodes";
-import { isImageFilter, isShader, sortNodeChildren } from "../nodes";
+import type { Node } from "../Node";
+import { isImageFilter, isShader, sortNodeChildren } from "../Node";
 
 import type { Recorder } from "./Recorder";
 

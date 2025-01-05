@@ -14,7 +14,7 @@ import { isPath } from "../../skia/types";
 import { E2E } from "../../__tests__/setup";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
 import { SkiaSGRoot } from "../../sksg/Reconciler";
-import type { Node } from "../../sksg/nodes";
+import type { Node } from "../../sksg/Node";
 
 import { SkiaObject } from "./e2e/setup";
 

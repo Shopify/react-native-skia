@@ -28,7 +28,7 @@ import {
   processUniforms,
   TileMode,
 } from "../../../skia/types";
-import { composeDeclarations } from "../../DeclarationContext";
+import { composeDeclarations } from "../../utils";
 import type { Command } from "../Core";
 import { CommandType } from "../Core";
 import type { DrawingContext } from "../DrawingContext";

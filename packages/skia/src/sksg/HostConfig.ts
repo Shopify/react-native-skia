@@ -5,7 +5,7 @@ import { DefaultEventPriority } from "react-reconciler/constants";
 import { NodeType } from "../dom/types";
 import { shallowEq } from "../renderer/typeddash";
 
-import type { Node } from "./nodes/Node";
+import type { Node } from "./Node";
 import type { Container } from "./Container";
 
 const DEBUG = false;

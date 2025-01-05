@@ -9,8 +9,8 @@ import {
 
 import type { StaticContext } from "./StaticContext";
 import { createStaticContext } from "./StaticContext";
-import type { Node } from "./nodes";
-import { isSharedValue } from "./nodes";
+import type { Node } from "./Node";
+import { isSharedValue } from "./utils";
 import type { Command } from "./Recorder/Core";
 import { Recorder } from "./Recorder/Recorder";
 import { visit } from "./Recorder/Visitor";

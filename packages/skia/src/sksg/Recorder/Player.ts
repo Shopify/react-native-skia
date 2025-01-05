@@ -20,8 +20,7 @@ import {
   drawDiffRect,
   drawVertices,
   drawPatch,
-} from "../nodes/drawings";
-
+} from "./commands/Drawing";
 import { drawBox, isBoxCommand } from "./commands/Box";
 import {
   composeColorFilters,

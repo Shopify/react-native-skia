@@ -8,7 +8,7 @@ import {
   processPath,
   processRect,
   processRRect,
-} from "../../dom/nodes";
+} from "../../../dom/nodes";
 import type {
   AtlasProps,
   BoxProps,
@@ -32,15 +32,15 @@ import type {
   TextPathProps,
   TextProps,
   VerticesProps,
-} from "../../dom/types";
-import { saturate } from "../../renderer/processors";
+} from "../../../dom/types";
+import { saturate } from "../../../renderer/processors";
 import type {
   SkCanvas,
   SkPaint,
   SkPoint,
   SkRSXform,
   Skia,
-} from "../../skia/types";
+} from "../../../skia/types";
 import {
   BlendMode,
   BlurStyle,
@@ -49,10 +49,9 @@ import {
   isRRect,
   PointMode,
   VertexMode,
-} from "../../skia/types";
-
-import type { Node } from "./Node";
-import { materialize } from "./utils";
+} from "../../../skia/types";
+import type { Node } from "../../Node";
+import { materialize } from "../../utils";
 
 interface LocalDrawingContext {
   Skia: Skia;
