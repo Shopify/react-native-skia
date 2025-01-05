@@ -60,7 +60,7 @@ const declareCornerPathEffect = (
   if (pe === null) {
     throw new Error("CornerPathEffect: couldn't create path effect");
   }
-  return pe;
+  ctx.pathEffects.push(pe);
 };
 
 const declareSumPathEffect = (ctx: DrawingContext) => {
@@ -84,7 +84,7 @@ const declareLine2DPathEffect = (
   if (pe === null) {
     throw new Error("Line2DPathEffect: could not create path effect");
   }
-  return pe;
+  ctx.pathEffects.push(pe);
 };
 
 const declarePath1DPathEffect = (
@@ -103,7 +103,7 @@ const declarePath1DPathEffect = (
   if (pe === null) {
     throw new Error("Path1DPathEffect: could not create path effect");
   }
-  return pe;
+  ctx.pathEffects.push(pe);
 };
 
 export const isPushPathEffect = (
