@@ -34,13 +34,7 @@ import type {
   VerticesProps,
 } from "../../../dom/types";
 import { saturate } from "../../../renderer/processors";
-import type {
-  SkCanvas,
-  SkPaint,
-  SkPoint,
-  SkRSXform,
-  Skia,
-} from "../../../skia/types";
+import type { SkPoint, SkRSXform } from "../../../skia/types";
 import {
   BlendMode,
   BlurStyle,
@@ -52,27 +46,22 @@ import {
 } from "../../../skia/types";
 import type { Node } from "../../Node";
 import { materialize } from "../../utils";
+import type { DrawingContext } from "../DrawingContext";
 
-interface LocalDrawingContext {
-  Skia: Skia;
-  canvas: SkCanvas;
-  paint: SkPaint;
-}
-
-export const drawLine = (ctx: LocalDrawingContext, props: LineProps) => {
+export const drawLine = (ctx: DrawingContext, props: LineProps) => {
   "worklet";
   const { p1, p2 } = props;
   ctx.canvas.drawLine(p1.x, p1.y, p2.x, p2.y, ctx.paint);
 };
 
-export const drawOval = (ctx: LocalDrawingContext, props: OvalProps) => {
+export const drawOval = (ctx: DrawingContext, props: OvalProps) => {
   "worklet";
   const rect = processRect(ctx.Skia, props);
   ctx.canvas.drawOval(rect, ctx.paint);
 };
 
 export const drawBox = (
-  ctx: LocalDrawingContext,
+  ctx: DrawingContext,
   props: BoxProps,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   children: Node<any>[]
@@ -126,7 +115,7 @@ export const drawBox = (
     });
 };
 
-export const drawImage = (ctx: LocalDrawingContext, props: ImageProps) => {
+export const drawImage = (ctx: DrawingContext, props: ImageProps) => {
   "worklet";
   const { image } = props;
   if (image) {
@@ -146,16 +135,13 @@ export const drawImage = (ctx: LocalDrawingContext, props: ImageProps) => {
   }
 };
 
-export const drawPoints = (ctx: LocalDrawingContext, props: PointsProps) => {
+export const drawPoints = (ctx: DrawingContext, props: PointsProps) => {
   "worklet";
   const { points, mode } = props;
   ctx.canvas.drawPoints(PointMode[enumKey(mode)], points, ctx.paint);
 };
 
-export const drawVertices = (
-  ctx: LocalDrawingContext,
-  props: VerticesProps
-) => {
+export const drawVertices = (ctx: DrawingContext, props: VerticesProps) => {
   "worklet";
   const { mode, textures, colors, indices, blendMode } = props;
   const vertexMode = mode ? VertexMode[enumKey(mode)] : VertexMode.Triangles;
@@ -172,19 +158,13 @@ export const drawVertices = (
   ctx.canvas.drawVertices(vertices, blend, ctx.paint);
 };
 
-export const drawDiffRect = (
-  ctx: LocalDrawingContext,
-  props: DiffRectProps
-) => {
+export const drawDiffRect = (ctx: DrawingContext, props: DiffRectProps) => {
   "worklet";
   const { outer, inner } = props;
   ctx.canvas.drawDRRect(outer, inner, ctx.paint);
 };
 
-export const drawTextPath = (
-  ctx: LocalDrawingContext,
-  props: TextPathProps
-) => {
+export const drawTextPath = (ctx: DrawingContext, props: TextPathProps) => {
   "worklet";
   const path = processPath(ctx.Skia, props.path);
   const { font, initialOffset } = props;
@@ -223,7 +203,7 @@ export const drawTextPath = (
   }
 };
 
-export const drawText = (ctx: LocalDrawingContext, props: TextProps) => {
+export const drawText = (ctx: DrawingContext, props: TextProps) => {
   "worklet";
   const { text, x, y, font } = props;
   if (font != null) {
@@ -231,7 +211,7 @@ export const drawText = (ctx: LocalDrawingContext, props: TextProps) => {
   }
 };
 
-export const drawPatch = (ctx: LocalDrawingContext, props: PatchProps) => {
+export const drawPatch = (ctx: DrawingContext, props: PatchProps) => {
   "worklet";
   const { texture, blendMode, patch } = props;
   const defaultBlendMode = props.colors ? BlendMode.DstOver : BlendMode.SrcOver;
@@ -262,7 +242,7 @@ export const drawPatch = (ctx: LocalDrawingContext, props: PatchProps) => {
   ctx.canvas.drawPatch(points, colors, texture, mode, ctx.paint);
 };
 
-export const drawPath = (ctx: LocalDrawingContext, props: PathProps) => {
+export const drawPath = (ctx: DrawingContext, props: PathProps) => {
   "worklet";
   const {
     start: trimStart,
@@ -293,25 +273,19 @@ export const drawPath = (ctx: LocalDrawingContext, props: PathProps) => {
   ctx.canvas.drawPath(path, ctx.paint);
 };
 
-export const drawRect = (ctx: LocalDrawingContext, props: RectProps) => {
+export const drawRect = (ctx: DrawingContext, props: RectProps) => {
   "worklet";
   const derived = processRect(ctx.Skia, props);
   ctx.canvas.drawRect(derived, ctx.paint);
 };
 
-export const drawRRect = (
-  ctx: LocalDrawingContext,
-  props: RoundedRectProps
-) => {
+export const drawRRect = (ctx: DrawingContext, props: RoundedRectProps) => {
   "worklet";
   const derived = processRRect(ctx.Skia, props);
   ctx.canvas.drawRRect(derived, ctx.paint);
 };
 
-export const drawTextBlob = (
-  ctx: LocalDrawingContext,
-  props: TextBlobProps
-) => {
+export const drawTextBlob = (ctx: DrawingContext, props: TextBlobProps) => {
   "worklet";
   const { blob, x, y } = props;
   ctx.canvas.drawTextBlob(blob, x, y, ctx.paint);
@@ -322,7 +296,7 @@ interface ProcessedGlyphs {
   positions: SkPoint[];
 }
 
-export const drawGlyphs = (ctx: LocalDrawingContext, props: GlyphsProps) => {
+export const drawGlyphs = (ctx: DrawingContext, props: GlyphsProps) => {
   "worklet";
   const derived = props.glyphs.reduce<ProcessedGlyphs>(
     (acc, glyph) => {
@@ -340,10 +314,7 @@ export const drawGlyphs = (ctx: LocalDrawingContext, props: GlyphsProps) => {
   }
 };
 
-export const drawImageSVG = (
-  ctx: LocalDrawingContext,
-  props: ImageSVGProps
-) => {
+export const drawImageSVG = (ctx: DrawingContext, props: ImageSVGProps) => {
   "worklet";
   const { canvas } = ctx;
   const { svg } = props;
@@ -361,10 +332,7 @@ export const drawImageSVG = (
   canvas.restore();
 };
 
-export const drawParagraph = (
-  ctx: LocalDrawingContext,
-  props: ParagraphProps
-) => {
+export const drawParagraph = (ctx: DrawingContext, props: ParagraphProps) => {
   "worklet";
   const { paragraph, x, y, width } = props;
   if (paragraph) {
@@ -373,13 +341,13 @@ export const drawParagraph = (
   }
 };
 
-export const drawPicture = (ctx: LocalDrawingContext, props: PictureProps) => {
+export const drawPicture = (ctx: DrawingContext, props: PictureProps) => {
   "worklet";
   const { picture } = props;
   ctx.canvas.drawPicture(picture);
 };
 
-export const drawAtlas = (ctx: LocalDrawingContext, props: AtlasProps) => {
+export const drawAtlas = (ctx: DrawingContext, props: AtlasProps) => {
   "worklet";
   const { image, sprites, transforms, colors, blendMode } = props;
   const blend = blendMode ? BlendMode[enumKey(blendMode)] : undefined;
@@ -388,17 +356,14 @@ export const drawAtlas = (ctx: LocalDrawingContext, props: AtlasProps) => {
   }
 };
 
-export const drawCircle = (ctx: LocalDrawingContext, props: CircleProps) => {
+export const drawCircle = (ctx: DrawingContext, props: CircleProps) => {
   "worklet";
   const { c } = processCircle(props);
   const { r } = props;
   ctx.canvas.drawCircle(c.x, c.y, r, ctx.paint);
 };
 
-export const drawFill = (
-  ctx: LocalDrawingContext,
-  _props: DrawingNodeProps
-) => {
+export const drawFill = (ctx: DrawingContext, _props: DrawingNodeProps) => {
   "worklet";
   ctx.canvas.drawPaint(ctx.paint);
 };
