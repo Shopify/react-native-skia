@@ -30,13 +30,7 @@ export class DrawingContext {
   }
 
   savePaint() {
-    const i = this.paints.length;
-    if (!this.paintPool[i]) {
-      this.paintPool[i] = this.Skia.Paint();
-    }
-    this.paintPool[i].reset();
-    this.paintPool[i].assign(this.paint);
-    this.paints.push(this.paintPool[i]);
+    this.paints.push(this.paint.copy());
   }
 
   saveBackdropFilter() {
