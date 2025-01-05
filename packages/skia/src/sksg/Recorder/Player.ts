@@ -99,7 +99,6 @@ const play = (ctx: DrawingContext, command: Command) => {
   } else {
     const paints = [ctx.paint, ...ctx.paintDeclarations];
     ctx.paintDeclarations = [];
-    console.log({ paints });
     paints.forEach((p) => {
       ctx.paints.push(p);
       if (isBoxCommand(command)) {
