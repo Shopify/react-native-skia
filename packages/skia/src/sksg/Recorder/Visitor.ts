@@ -2,7 +2,6 @@
 import type {
   CTMProps,
   DrawingNodeProps,
-  PaintProps,
   BoxShadowProps,
 } from "../../dom/types";
 import { NodeType } from "../../dom/types";
@@ -22,8 +21,9 @@ export const processPaint = ({
   strokeMiter,
   antiAlias,
   dither,
+  paint: paintRef,
 }: DrawingNodeProps) => {
-  const paint: PaintProps = {};
+  const paint: DrawingNodeProps = {};
   if (opacity) {
     paint.opacity = opacity;
   }
@@ -55,6 +55,10 @@ export const processPaint = ({
     paint.dither = dither;
   }
 
+  if (paintRef) {
+    paint.paint = paintRef;
+  }
+
   if (
     opacity !== undefined ||
     color !== undefined ||
@@ -65,7 +69,8 @@ export const processPaint = ({
     strokeCap !== undefined ||
     strokeMiter !== undefined ||
     antiAlias !== undefined ||
-    dither !== undefined
+    dither !== undefined ||
+    paintRef !== undefined
   ) {
     return paint;
   }

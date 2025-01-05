@@ -60,8 +60,12 @@ const play = (ctx: DrawingContext, command: Command) => {
     const paint = ctx.paintDeclarations.pop();
     ctx.canvas.saveLayer(paint);
   } else if (isDrawCommand(command, CommandType.SavePaint)) {
-    ctx.savePaint();
-    setPaintProperties(ctx.Skia, ctx.paint, command.props);
+    if (command.props.paint) {
+      ctx.paints.push(command.props.paint);
+    } else {
+      ctx.savePaint();
+      setPaintProperties(ctx.Skia, ctx.paint, command.props);
+    }
   } else if (isCommand(command, CommandType.RestorePaint)) {
     ctx.restorePaint();
   } else if (isCommand(command, CommandType.ComposeColorFilter)) {

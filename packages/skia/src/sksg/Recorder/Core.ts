@@ -5,7 +5,6 @@ import type {
   CircleProps,
   CTMProps,
   ImageProps,
-  PaintProps,
   PointsProps,
   PathProps,
   RectProps,
@@ -23,6 +22,7 @@ import type {
   ImageSVGProps,
   ParagraphProps,
   AtlasProps,
+  DrawingNodeProps,
 } from "../../dom/types";
 
 // TODO: remove string labels
@@ -95,7 +95,7 @@ interface Props {
   [CommandType.DrawImage]: ImageProps;
   [CommandType.DrawCircle]: CircleProps;
   [CommandType.SaveCTM]: CTMProps;
-  [CommandType.SavePaint]: PaintProps;
+  [CommandType.SavePaint]: DrawingNodeProps;
   [CommandType.PushBlurMaskFilter]: BlurMaskFilterProps;
   [CommandType.DrawPoints]: PointsProps;
   [CommandType.DrawPath]: PathProps;
