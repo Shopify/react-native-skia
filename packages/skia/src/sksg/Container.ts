@@ -19,14 +19,14 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   "worklet";
   const rec = Skia.PictureRecorder();
   const canvas = rec.beginRecording();
-  const start = performance.now();
+  // const start = performance.now();
 
   const ctx = new DrawingContext(Skia, recording.paintPool, canvas);
-  //console.log(this._recording);
+  //console.log(recording.commands);
   replay(ctx, recording.commands);
   const picture = rec.finishRecordingAsPicture();
-  const end = performance.now();
-  console.log("Recording time: ", end - start);
+  //const end = performance.now();
+  //console.log("Recording time: ", end - start);
   SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
 };
 
