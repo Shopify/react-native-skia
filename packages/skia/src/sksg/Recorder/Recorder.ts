@@ -37,20 +37,31 @@ import type { Command } from "./Core";
 export class Recorder {
   commands: Command[] = [];
 
+  private processProps(props: Record<string, unknown>) {
+    const animatedProps: Record<string, SharedValue<unknown>> = {};
+    let hasAnimatedProps = false;
+
+    for (const key in props) {
+      const prop = props[key];
+      if (isSharedValue(prop)) {
+        props[key] = prop.value;
+        animatedProps[key] = prop;
+        hasAnimatedProps = true;
+      }
+    }
+
+    return {
+      props,
+      animatedProps: hasAnimatedProps ? animatedProps : undefined,
+    };
+  }
+
   private add(command: Command) {
     if (command.props) {
-      const props = command.props as Record<string, unknown>;
-      const animatedProps: Record<string, SharedValue<unknown>> = {};
-      let hasAnimatedProps = false;
-      for (const key in command.props) {
-        const prop = props[key];
-        if (isSharedValue(prop)) {
-          props[key] = prop.value;
-          animatedProps[key] = prop;
-          hasAnimatedProps = true;
-        }
-      }
-      if (hasAnimatedProps) {
+      const { animatedProps } = this.processProps(
+        command.props as Record<string, unknown>
+      );
+      if (animatedProps) {
         command.animatedProps = animatedProps;
       }
     }
@@ -122,6 +133,10 @@ export class Recorder {
     this.add({ type: CommandType.DrawPaint });
   }
 
+  saveLayer() {
+    this.add({ type: CommandType.SaveLayer });
+  }
+
   saveBackdropFilter() {
     this.add({ type: CommandType.SaveBackdropFilter });
   }
@@ -135,19 +150,13 @@ export class Recorder {
   ) {
     shadows.forEach((shadow) => {
       if (shadow.props) {
-        const props = shadow.props as unknown as Record<string, unknown>;
-        const animatedProps: Record<string, SharedValue<unknown>> = {};
-        let hasAnimatedProps = false;
-        for (const key in shadow.props) {
-          const prop = props[key];
-          if (isSharedValue(prop)) {
-            props[key] = prop.value;
-            animatedProps[key] = prop;
-            hasAnimatedProps = true;
+        if (shadow.props) {
+          const { animatedProps } = this.processProps(
+            shadow.props as unknown as Record<string, unknown>
+          );
+          if (animatedProps) {
+            shadow.animatedProps = animatedProps;
           }
-        }
-        if (hasAnimatedProps) {
-          shadow.animatedProps = animatedProps;
         }
       }
     });
