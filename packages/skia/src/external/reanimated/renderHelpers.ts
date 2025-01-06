@@ -6,7 +6,6 @@ import type { Node } from "../../dom/types";
 
 import Rea from "./ReanimatedProxy";
 
-export let HAS_REANIMATED = false;
 export let HAS_REANIMATED_3 = false;
 try {
   // This logic is convoluted but necessary
@@ -16,7 +15,6 @@ try {
   const reanimatedVersion =
     require("react-native-reanimated/package.json").version;
   require("react-native-reanimated");
-  HAS_REANIMATED = !!reanimatedVersion;
   if (
     reanimatedVersion &&
     (reanimatedVersion >= "3.0.0" || reanimatedVersion.includes("3.0.0-"))
@@ -24,13 +22,13 @@ try {
     HAS_REANIMATED_3 = true;
   }
 } catch (e) {
-  HAS_REANIMATED = false;
+  // do nothing
 }
 
 const _bindings = new WeakMap<Node<unknown>, unknown>();
 
 export const unbindReanimatedNode = (node: Node<unknown>) => {
-  if (!HAS_REANIMATED) {
+  if (!HAS_REANIMATED_3) {
     return;
   }
   const previousMapperId = _bindings.get(node);
@@ -40,7 +38,7 @@ export const unbindReanimatedNode = (node: Node<unknown>) => {
 };
 
 export function extractReanimatedProps(props: AnimatedProps<any>) {
-  if (!HAS_REANIMATED) {
+  if (!HAS_REANIMATED_3) {
     return [props, {}];
   }
   const reanimatedProps = {} as AnimatedProps<any>;
@@ -60,50 +58,12 @@ export function extractReanimatedProps(props: AnimatedProps<any>) {
   return [otherProps, reanimatedProps];
 }
 
-function bindReanimatedProps2(
-  container: Container,
-  node: Node<any>,
-  reanimatedProps: AnimatedProps<any>
-) {
-  const sharedValues = Object.values(reanimatedProps);
-  const previousMapperId = _bindings.get(node);
-  if (previousMapperId !== undefined) {
-    Rea.stopMapper(previousMapperId as number);
-  }
-  if (sharedValues.length > 0) {
-    const viewId = container.getNativeId();
-    const { SkiaViewApi } = global;
-    const updateProps = () => {
-      for (const propName in reanimatedProps) {
-        node && node.setProp(propName, reanimatedProps[propName].value);
-      }
-      // On React Native we use the SkiaViewApi to redraw because it can
-      // run on the worklet thread (container.redraw can't)
-      // if SkiaViewApi is undefined, we are on web and container.redraw()
-      // can safely be invoked
-      if (SkiaViewApi) {
-        SkiaViewApi.requestRedraw(viewId);
-      } else {
-        container.redraw();
-      }
-    };
-    const mapperId = Rea.startMapper(() => {
-      "worklet";
-      Rea.runOnJS(updateProps)();
-    }, sharedValues);
-    _bindings.set(node, mapperId);
-  }
-}
-
 export function bindReanimatedProps(
   container: Container,
   node: Node<any>,
   reanimatedProps: AnimatedProps<any>
 ) {
-  if (HAS_REANIMATED && !HAS_REANIMATED_3) {
-    return bindReanimatedProps2(container, node, reanimatedProps);
-  }
-  if (!HAS_REANIMATED) {
+  if (!HAS_REANIMATED_3) {
     return;
   }
   const sharedValues = Object.values(reanimatedProps);
