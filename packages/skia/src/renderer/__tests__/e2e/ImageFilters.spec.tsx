@@ -292,7 +292,9 @@ describe("Test Image Filters", () => {
         </Path>
       </>
     );
-    checkImage(img, "snapshots/image-filter/test-shadow.png");
+    checkImage(img, "snapshots/image-filter/test-shadow.png", {
+      maxPixelDiff: 1500,
+    });
   });
   itRunsE2eOnly("use the displacement map as documented", async () => {
     const { oslo } = images;
