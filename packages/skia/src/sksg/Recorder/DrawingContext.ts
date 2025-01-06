@@ -1,5 +1,3 @@
-"worklet";
-
 import type {
   Skia,
   SkCanvas,
@@ -10,93 +8,123 @@ import type {
   SkPathEffect,
 } from "../../skia/types";
 
-export class DrawingContext {
-  Skia: Skia;
-  canvas: SkCanvas;
-  paints: SkPaint[] = [];
-  colorFilters: SkColorFilter[] = [];
-  shaders: SkShader[] = [];
-  imageFilters: SkImageFilter[] = [];
-  pathEffects: SkPathEffect[] = [];
-  paintDeclarations: SkPaint[] = [];
-  paintPool: SkPaint[] = [];
-  nextPaintIndex = 1;
+export const createDrawingContext = (
+  Skia: Skia,
+  paintPool: SkPaint[],
+  canvas: SkCanvas
+) => {
+  "worklet";
 
-  constructor(Skia: Skia, paintPool: SkPaint[], canvas: SkCanvas) {
-    this.Skia = Skia;
-    this.canvas = canvas;
-    paintPool[0] = this.Skia.Paint();
-    this.paints.push(paintPool[0]);
-    this.paintPool = paintPool;
-  }
+  // State (formerly class fields)
+  const paints: SkPaint[] = [];
+  const colorFilters: SkColorFilter[] = [];
+  const shaders: SkShader[] = [];
+  const imageFilters: SkImageFilter[] = [];
+  const pathEffects: SkPathEffect[] = [];
+  const paintDeclarations: SkPaint[] = [];
 
-  savePaint() {
+  let nextPaintIndex = 1;
+
+  // Initialize first paint
+  paintPool[0] = Skia.Paint();
+  paints.push(paintPool[0]);
+
+  // Methods (formerly class methods)
+  const savePaint = () => {
     // Get next available paint from pool or create new one if needed
-    if (this.nextPaintIndex >= this.paintPool.length) {
-      this.paintPool.push(this.Skia.Paint());
+    if (nextPaintIndex >= paintPool.length) {
+      paintPool.push(Skia.Paint());
     }
 
-    const nextPaint = this.paintPool[this.nextPaintIndex];
-    nextPaint.assign(this.paint); // Reuse allocation by copying properties
-    this.paints.push(nextPaint);
-    this.nextPaintIndex++;
-  }
+    const nextPaint = paintPool[nextPaintIndex];
+    nextPaint.assign(getCurrentPaint()); // Reuse allocation by copying properties
+    paints.push(nextPaint);
+    nextPaintIndex++;
+  };
 
-  saveBackdropFilter() {
+  const saveBackdropFilter = () => {
     let imageFilter: SkImageFilter | null = null;
-    const imgf = this.imageFilters.pop();
+    const imgf = imageFilters.pop();
     if (imgf) {
       imageFilter = imgf;
     } else {
-      const cf = this.colorFilters.pop();
+      const cf = colorFilters.pop();
       if (cf) {
-        imageFilter = this.Skia.ImageFilter.MakeColorFilter(cf, null);
+        imageFilter = Skia.ImageFilter.MakeColorFilter(cf, null);
       }
     }
-    this.canvas.saveLayer(undefined, null, imageFilter);
-    this.canvas.restore();
-  }
+    canvas.saveLayer(undefined, null, imageFilter);
+    canvas.restore();
+  };
 
-  get paint() {
-    return this.paints[this.paints.length - 1];
-  }
+  // Equivalent to the `get paint()` getter in the original class
+  const getCurrentPaint = () => {
+    return paints[paints.length - 1];
+  };
 
-  restorePaint() {
-    return this.paints.pop();
-  }
+  const restorePaint = () => {
+    return paints.pop();
+  };
 
-  materializePaint() {
+  const materializePaint = () => {
     // Color Filters
-    if (this.colorFilters.length > 0) {
-      this.paint.setColorFilter(
-        this.colorFilters.reduceRight((inner, outer) =>
-          inner ? this.Skia.ColorFilter.MakeCompose(outer, inner) : outer
+    if (colorFilters.length > 0) {
+      getCurrentPaint().setColorFilter(
+        colorFilters.reduceRight((inner, outer) =>
+          inner ? Skia.ColorFilter.MakeCompose(outer, inner) : outer
         )
       );
     }
     // Shaders
-    if (this.shaders.length > 0) {
-      this.paint.setShader(this.shaders[this.shaders.length - 1]);
+    if (shaders.length > 0) {
+      getCurrentPaint().setShader(shaders[shaders.length - 1]);
     }
     // Image Filters
-    if (this.imageFilters.length > 0) {
-      this.paint.setImageFilter(
-        this.imageFilters.reduceRight((inner, outer) =>
-          inner ? this.Skia.ImageFilter.MakeCompose(outer, inner) : outer
+    if (imageFilters.length > 0) {
+      getCurrentPaint().setImageFilter(
+        imageFilters.reduceRight((inner, outer) =>
+          inner ? Skia.ImageFilter.MakeCompose(outer, inner) : outer
         )
       );
     }
     // Path Effects
-    if (this.pathEffects.length > 0) {
-      this.paint.setPathEffect(
-        this.pathEffects.reduceRight((inner, outer) =>
-          inner ? this.Skia.PathEffect.MakeCompose(outer, inner) : outer
+    if (pathEffects.length > 0) {
+      getCurrentPaint().setPathEffect(
+        pathEffects.reduceRight((inner, outer) =>
+          inner ? Skia.PathEffect.MakeCompose(outer, inner) : outer
         )
       );
     }
-    this.colorFilters = [];
-    this.shaders = [];
-    this.imageFilters = [];
-    this.pathEffects = [];
-  }
-}
+
+    // Clear arrays
+    colorFilters.length = 0;
+    shaders.length = 0;
+    imageFilters.length = 0;
+    pathEffects.length = 0;
+  };
+
+  // Return an object containing the Skia reference, the canvas, and the methods
+  return {
+    // Public fields
+    Skia,
+    canvas,
+    paints,
+    colorFilters,
+    shaders,
+    imageFilters,
+    pathEffects,
+    paintDeclarations,
+    paintPool,
+
+    // Public methods
+    savePaint,
+    saveBackdropFilter,
+    get paint() {
+      return paints[paints.length - 1];
+    }, // the "getter" for the current paint
+    restorePaint,
+    materializePaint,
+  };
+};
+
+export type DrawingContext = ReturnType<typeof createDrawingContext>;

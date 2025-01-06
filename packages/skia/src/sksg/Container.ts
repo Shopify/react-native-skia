@@ -12,7 +12,7 @@ import { isSharedValue } from "./utils";
 import { Recorder } from "./Recorder/Recorder";
 import { visit } from "./Recorder/Visitor";
 import { replay } from "./Recorder/Player";
-import { DrawingContext } from "./Recorder/DrawingContext";
+import { createDrawingContext } from "./Recorder/DrawingContext";
 import { createRecording, type Recording } from "./Recorder/Recording";
 
 const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
@@ -22,7 +22,7 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   // const start = performance.now();
 
   // TODO: because the pool is not a shared value here, it is copied on every frame
-  const ctx = new DrawingContext(Skia, recording.paintPool, canvas);
+  const ctx = createDrawingContext(Skia, recording.paintPool, canvas);
   //console.log(recording.commands);
   replay(ctx, recording.commands);
   const picture = rec.finishRecordingAsPicture();
@@ -107,7 +107,7 @@ export class Container {
     if (!this._recording) {
       throw new Error("No recording to draw");
     }
-    const ctx = new DrawingContext(
+    const ctx = createDrawingContext(
       this.Skia,
       this._recording.paintPool,
       canvas

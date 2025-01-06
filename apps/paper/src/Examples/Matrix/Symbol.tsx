@@ -5,7 +5,7 @@ import type { SharedValue } from "react-native-reanimated";
 import { useDerivedValue } from "react-native-reanimated";
 
 export const COLS = 8;
-export const ROWS = 16;
+export const ROWS = 15;
 const pos = vec(0, 0);
 
 interface SymbolProps {
