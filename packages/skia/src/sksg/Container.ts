@@ -2,10 +2,6 @@ import { type SharedValue } from "react-native-reanimated";
 
 import Rea from "../external/reanimated/ReanimatedProxy";
 import type { Skia, SkCanvas } from "../skia/types";
-import {
-  HAS_REANIMATED,
-  HAS_REANIMATED_3,
-} from "../external/reanimated/renderHelpers";
 
 import { createDrawingContext } from "./DrawingContext";
 import type { Node } from "./nodes";
@@ -40,9 +36,6 @@ export class Container {
 
   set root(root: Node[]) {
     const isOnscreen = this.nativeId !== -1;
-    if (HAS_REANIMATED && !HAS_REANIMATED_3) {
-      throw new Error("React Native Skia only supports Reanimated 3 and above");
-    }
     if (isOnscreen) {
       if (this.mapperId !== null) {
         Rea.stopMapper(this.mapperId);
@@ -62,9 +55,6 @@ export class Container {
 
   redraw() {
     const isOnscreen = this.nativeId !== -1;
-    if (HAS_REANIMATED && !HAS_REANIMATED_3) {
-      throw new Error("React Native Skia only supports Reanimated 3 and above");
-    }
     if (isOnscreen) {
       const { nativeId, Skia, root } = this;
       Rea.runOnUI(() => {
