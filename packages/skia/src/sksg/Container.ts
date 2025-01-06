@@ -3,26 +3,33 @@ import { type SharedValue } from "react-native-reanimated";
 import Rea from "../external/reanimated/ReanimatedProxy";
 import type { Skia, SkCanvas } from "../skia/types";
 
-import { createDrawingContext } from "./DrawingContext";
-import type { Node } from "./nodes";
-import { draw, isSharedValue } from "./nodes";
+import type { Node } from "./Node";
+import { isSharedValue } from "./utils";
+import { Recorder } from "./Recorder/Recorder";
+import { visit } from "./Recorder/Visitor";
+import { replay } from "./Recorder/Player";
+import { createDrawingContext } from "./Recorder/DrawingContext";
+import { createRecording, type Recording } from "./Recorder/Recording";
 
-const drawOnscreen = (Skia: Skia, nativeId: number, root: Node[]) => {
+const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   "worklet";
   const rec = Skia.PictureRecorder();
   const canvas = rec.beginRecording();
-  // TODO: This is only support from 3.15 and above (check the exact version)
-  // This could be polyfilled in C++ if needed (or in JS via functions only?)
-  const ctx = createDrawingContext(Skia, canvas);
-  root.forEach((node) => {
-    draw(ctx, node);
-  });
+  // const start = performance.now();
+
+  // TODO: because the pool is not a shared value here, it is copied on every frame
+  const ctx = createDrawingContext(Skia, recording.paintPool, canvas);
+  //console.log(recording.commands);
+  replay(ctx, recording.commands);
   const picture = rec.finishRecordingAsPicture();
+  //const end = performance.now();
+  //console.log("Recording time: ", end - start);
   SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
 };
 
 export class Container {
-  public _root: Node[] = [];
+  private _root: Node[] = [];
+  private _recording: Recording | null = null;
   public unmounted = false;
 
   private values = new Set<SharedValue<unknown>>();
@@ -40,13 +47,16 @@ export class Container {
       if (this.mapperId !== null) {
         Rea.stopMapper(this.mapperId);
       }
-      const { nativeId, Skia } = this;
+      const { nativeId, Skia, _recording } = this;
       this.mapperId = Rea.startMapper(() => {
         "worklet";
-        drawOnscreen(Skia, nativeId, root);
+        drawOnscreen(Skia, nativeId, _recording!);
       }, Array.from(this.values));
     }
     this._root = root;
+    const recorder = new Recorder();
+    visit(recorder, root);
+    this._recording = createRecording(recorder.commands);
   }
 
   clear() {
@@ -56,9 +66,9 @@ export class Container {
   redraw() {
     const isOnscreen = this.nativeId !== -1;
     if (isOnscreen) {
-      const { nativeId, Skia, root } = this;
+      const { nativeId, Skia, _recording } = this;
       Rea.runOnUI(() => {
-        drawOnscreen(Skia, nativeId, root);
+        drawOnscreen(Skia, nativeId, _recording!);
       })();
     }
   }
@@ -84,9 +94,15 @@ export class Container {
   }
 
   drawOnCanvas(canvas: SkCanvas) {
-    const ctx = createDrawingContext(this.Skia, canvas);
-    this.root.forEach((node) => {
-      draw(ctx, node);
-    });
+    if (!this._recording) {
+      throw new Error("No recording to draw");
+    }
+    const ctx = createDrawingContext(
+      this.Skia,
+      this._recording.paintPool,
+      canvas
+    );
+    //console.log(this._recording);
+    replay(ctx, this._recording.commands);
   }
 }

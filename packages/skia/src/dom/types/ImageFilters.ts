@@ -24,8 +24,9 @@ export interface RuntimeShaderImageFilterProps extends ChildrenProps {
   uniforms?: Uniforms;
 }
 
+// TODO: delete
 export interface BlendImageFilterProps extends ChildrenProps {
-  mode: BlendMode;
+  mode: SkEnum<typeof BlendMode>;
 }
 
 export interface MorphologyImageFilterProps extends ChildrenProps {

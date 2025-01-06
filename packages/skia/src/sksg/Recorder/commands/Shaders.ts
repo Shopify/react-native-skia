@@ -5,8 +5,10 @@ import {
   processGradientProps,
   processTransformProps,
   rect2rect,
-} from "../../dom/nodes";
+} from "../../../dom/nodes";
+import { NodeType } from "../../../dom/types";
 import type {
+  BlendProps,
   ColorProps,
   FractalNoiseProps,
   ImageShaderProps,
@@ -16,40 +18,41 @@ import type {
   SweepGradientProps,
   TurbulenceProps,
   TwoPointConicalGradientProps,
-} from "../../dom/types";
+} from "../../../dom/types";
 import {
+  BlendMode,
   FilterMode,
   MipmapMode,
   processUniforms,
   TileMode,
-} from "../../skia/types";
-import type { DeclarationContext } from "../DeclarationContext";
+} from "../../../skia/types";
+import { composeDeclarations } from "../../utils";
+import type { Command } from "../Core";
+import { CommandType } from "../Core";
+import type { DrawingContext } from "../DrawingContext";
 
-export const declareShader = (ctx: DeclarationContext, props: ShaderProps) => {
+const declareShader = (ctx: DrawingContext, props: ShaderProps) => {
   "worklet";
   const { source, uniforms, ...transform } = props;
   const m3 = ctx.Skia.Matrix();
   processTransformProps(m3, transform);
   const shader = source.makeShaderWithChildren(
     processUniforms(source, uniforms),
-    ctx.shaders.popAll(),
+    ctx.shaders.splice(0, ctx.shaders.length),
     m3
   );
   ctx.shaders.push(shader);
 };
 
-export const declareColorShader = (
-  ctx: DeclarationContext,
-  props: ColorProps
-) => {
+const declareColorShader = (ctx: DrawingContext, props: ColorProps) => {
   "worklet";
   const { color } = props;
   const shader = ctx.Skia.Shader.MakeColor(ctx.Skia.Color(color));
   ctx.shaders.push(shader);
 };
 
-export const declareFractalNoiseShader = (
-  ctx: DeclarationContext,
+const declareFractalNoiseShader = (
+  ctx: DrawingContext,
   props: FractalNoiseProps
 ) => {
   "worklet";
@@ -65,8 +68,8 @@ export const declareFractalNoiseShader = (
   ctx.shaders.push(shader);
 };
 
-export const declareTwoPointConicalGradientShader = (
-  ctx: DeclarationContext,
+const declareTwoPointConicalGradientShader = (
+  ctx: DrawingContext,
   props: TwoPointConicalGradientProps
 ) => {
   "worklet";
@@ -89,8 +92,8 @@ export const declareTwoPointConicalGradientShader = (
   ctx.shaders.push(shader);
 };
 
-export const declareRadialGradientShader = (
-  ctx: DeclarationContext,
+const declareRadialGradientShader = (
+  ctx: DrawingContext,
   props: RadialGradientProps
 ) => {
   "worklet";
@@ -111,8 +114,8 @@ export const declareRadialGradientShader = (
   ctx.shaders.push(shader);
 };
 
-export const declareSweepGradientShader = (
-  ctx: DeclarationContext,
+const declareSweepGradientShader = (
+  ctx: DrawingContext,
   props: SweepGradientProps
 ) => {
   "worklet";
@@ -135,8 +138,8 @@ export const declareSweepGradientShader = (
   ctx.shaders.push(shader);
 };
 
-export const declareLinearGradientShader = (
-  ctx: DeclarationContext,
+const declareLinearGradientShader = (
+  ctx: DrawingContext,
   props: LinearGradientProps
 ) => {
   "worklet";
@@ -157,8 +160,8 @@ export const declareLinearGradientShader = (
   ctx.shaders.push(shader);
 };
 
-export const declareTurbulenceShader = (
-  ctx: DeclarationContext,
+const declareTurbulenceShader = (
+  ctx: DrawingContext,
   props: TurbulenceProps
 ) => {
   "worklet";
@@ -174,10 +177,7 @@ export const declareTurbulenceShader = (
   ctx.shaders.push(shader);
 };
 
-export const declareImageShader = (
-  ctx: DeclarationContext,
-  props: ImageShaderProps
-) => {
+const declareImageShader = (ctx: DrawingContext, props: ImageShaderProps) => {
   "worklet";
   const { fit, image, tx, ty, fm, mm, ...imageShaderProps } = props;
   if (!image) {
@@ -207,4 +207,78 @@ export const declareImageShader = (
     lm
   );
   ctx.shaders.push(shader);
+};
+
+const declareBlend = (ctx: DrawingContext, props: BlendProps) => {
+  "worklet";
+  const blend = BlendMode[enumKey(props.mode as BlendProps["mode"])];
+  const shaders = ctx.shaders.splice(0, ctx.shaders.length);
+  if (shaders.length > 0) {
+    const composer = ctx.Skia.Shader.MakeBlend.bind(ctx.Skia.Shader, blend);
+    ctx.shaders.push(composeDeclarations(shaders, composer));
+  }
+};
+
+export const isPushShader = (
+  command: Command
+): command is Command<CommandType.PushShader> => {
+  "worklet";
+  return command.type === CommandType.PushShader;
+};
+
+type Props = {
+  [NodeType.Shader]: ShaderProps;
+  [NodeType.ImageShader]: ImageShaderProps;
+  [NodeType.ColorShader]: ColorProps;
+  [NodeType.Turbulence]: TurbulenceProps;
+  [NodeType.FractalNoise]: FractalNoiseProps;
+  [NodeType.LinearGradient]: LinearGradientProps;
+  [NodeType.RadialGradient]: RadialGradientProps;
+  [NodeType.SweepGradient]: SweepGradientProps;
+  [NodeType.TwoPointConicalGradient]: TwoPointConicalGradientProps;
+  [NodeType.Blend]: BlendProps;
+};
+
+interface PushShader<T extends keyof Props>
+  extends Command<CommandType.PushShader> {
+  shaderType: T;
+  props: Props[T];
+}
+
+const isShader = <T extends keyof Props>(
+  command: Command<CommandType.PushShader>,
+  type: T
+): command is PushShader<T> => {
+  "worklet";
+  return command.shaderType === type;
+};
+
+export const pushShader = (
+  ctx: DrawingContext,
+  command: Command<CommandType.PushShader>
+) => {
+  "worklet";
+  if (isShader(command, NodeType.Shader)) {
+    declareShader(ctx, command.props);
+  } else if (isShader(command, NodeType.ImageShader)) {
+    declareImageShader(ctx, command.props);
+  } else if (isShader(command, NodeType.ColorShader)) {
+    declareColorShader(ctx, command.props);
+  } else if (isShader(command, NodeType.Turbulence)) {
+    declareTurbulenceShader(ctx, command.props);
+  } else if (isShader(command, NodeType.FractalNoise)) {
+    declareFractalNoiseShader(ctx, command.props);
+  } else if (isShader(command, NodeType.LinearGradient)) {
+    declareLinearGradientShader(ctx, command.props);
+  } else if (isShader(command, NodeType.RadialGradient)) {
+    declareRadialGradientShader(ctx, command.props);
+  } else if (isShader(command, NodeType.SweepGradient)) {
+    declareSweepGradientShader(ctx, command.props);
+  } else if (isShader(command, NodeType.TwoPointConicalGradient)) {
+    declareTwoPointConicalGradientShader(ctx, command.props);
+  } else if (isShader(command, NodeType.Blend)) {
+    declareBlend(ctx, command.props);
+  } else {
+    throw new Error(`Unknown shader type: ${command.shaderType}`);
+  }
 };
