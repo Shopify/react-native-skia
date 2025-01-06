@@ -1,7 +1,8 @@
-import { type SharedValue } from "react-native-reanimated";
+import type { SharedValue } from "react-native-reanimated";
 
 import Rea from "../external/reanimated/ReanimatedProxy";
 import type { Skia, SkCanvas } from "../skia/types";
+import { HAS_REANIMATED_3 } from "../external/reanimated/renderHelpers";
 
 import type { Node } from "./Node";
 import { isSharedValue } from "./utils";
@@ -35,15 +36,22 @@ export class Container {
   private values = new Set<SharedValue<unknown>>();
   private mapperId: number | null = null;
 
-  constructor(public Skia: Skia, private nativeId: number) {}
+  constructor(public Skia: Skia, private nativeId: number) {
+    console.log({ HAS_REANIMATED_3 });
+  }
 
   get root() {
     return this._root;
   }
 
   set root(root: Node[]) {
+    console.log({ HAS_REANIMATED_3 });
     const isOnscreen = this.nativeId !== -1;
-    if (isOnscreen) {
+    this._root = root;
+    const recorder = new Recorder();
+    visit(recorder, root);
+    this._recording = createRecording(recorder.commands);
+    if (isOnscreen && HAS_REANIMATED_3) {
       if (this.mapperId !== null) {
         Rea.stopMapper(this.mapperId);
       }
@@ -53,10 +61,6 @@ export class Container {
         drawOnscreen(Skia, nativeId, _recording!);
       }, Array.from(this.values));
     }
-    this._root = root;
-    const recorder = new Recorder();
-    visit(recorder, root);
-    this._recording = createRecording(recorder.commands);
   }
 
   clear() {
@@ -67,9 +71,14 @@ export class Container {
     const isOnscreen = this.nativeId !== -1;
     if (isOnscreen) {
       const { nativeId, Skia, _recording } = this;
-      Rea.runOnUI(() => {
+      console.log({ HAS_REANIMATED_3 });
+      if (HAS_REANIMATED_3) {
+        Rea.runOnUI(() => {
+          drawOnscreen(Skia, nativeId, _recording!);
+        })();
+      } else {
         drawOnscreen(Skia, nativeId, _recording!);
-      })();
+      }
     }
   }
 
