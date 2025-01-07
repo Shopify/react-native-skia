@@ -30,12 +30,31 @@ import type {
 import type { AnimatedProps } from "../../renderer";
 import { isSharedValue } from "../utils";
 import { isColorFilter, isImageFilter, isPathEffect, isShader } from "../Node";
+import type { SkPaint } from "../../skia/types";
 
 import { CommandType } from "./Core";
 import type { Command } from "./Core";
 
+export interface Recording {
+  commands: Command[];
+  paintPool: SkPaint[];
+}
+
+interface AnimationValues {
+  animationValues: Set<SharedValue<unknown>>;
+}
+
 export class Recorder {
   commands: Command[] = [];
+  animationValues: Set<SharedValue<unknown>> = new Set();
+
+  getRecording(): Recording & AnimationValues {
+    return {
+      commands: this.commands,
+      paintPool: [],
+      animationValues: this.animationValues,
+    };
+  }
 
   private processProps(props: Record<string, unknown>) {
     const animatedProps: Record<string, SharedValue<unknown>> = {};
@@ -44,6 +63,7 @@ export class Recorder {
     for (const key in props) {
       const prop = props[key];
       if (isSharedValue(prop)) {
+        this.animationValues.add(prop);
         props[key] = prop.value;
         animatedProps[key] = prop;
         hasAnimatedProps = true;

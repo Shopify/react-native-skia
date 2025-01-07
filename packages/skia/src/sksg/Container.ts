@@ -5,16 +5,18 @@ import type { Skia, SkCanvas } from "../skia/types";
 import { HAS_REANIMATED_3 } from "../external/reanimated/renderHelpers";
 
 import type { Node } from "./Node";
-import { isSharedValue } from "./utils";
+import type { Recording } from "./Recorder/Recorder";
 import { Recorder } from "./Recorder/Recorder";
 import { visit } from "./Recorder/Visitor";
 import { replay } from "./Recorder/Player";
 import { createDrawingContext } from "./Recorder/DrawingContext";
-import { createRecording, type Recording } from "./Recorder/Recording";
 
 const drawOnscreen = (
   Skia: Skia,
   nativeId: number,
+  //
+  // TODO: because the pool is not a shared value here, it is copied on every frame
+  // Also animation value set doesn't seen to be shared here
   recording: SharedValue<Recording | null>
 ) => {
   "worklet";
@@ -25,7 +27,6 @@ const drawOnscreen = (
   const canvas = rec.beginRecording();
   // const start = performance.now();
 
-  // TODO: because the pool is not a shared value here, it is copied on every frame
   const ctx = createDrawingContext(Skia, recording.value.paintPool, canvas);
   //console.log(recording.commands);
   replay(ctx, recording.value.commands);
@@ -37,28 +38,19 @@ const drawOnscreen = (
 
 export interface Container {
   drawOnCanvas(canvas: SkCanvas): void;
-  get root(): Node[];
   set root(root: Node[]);
   redraw(): void;
-  registerAnimationValues(values: object): void;
-  unregisterAnimationValues(values: object): void;
 }
 
 class StaticContainer implements Container {
-  protected _root: Node[] = [];
   protected _recording: Recording | null = null;
 
   constructor(private Skia: Skia, private nativeId: number) {}
 
-  get root() {
-    return this._root;
-  }
-
   set root(root: Node[]) {
-    this._root = root;
     const recorder = new Recorder();
     visit(recorder, root);
-    this._recording = createRecording(recorder.commands);
+    this._recording = recorder.getRecording();
     this.redraw();
   }
 
@@ -82,67 +74,45 @@ class StaticContainer implements Container {
     const picture = rec.finishRecordingAsPicture();
     SkiaViewApi.setJsiProperty(this.nativeId, "picture", picture);
   }
-
-  unregisterAnimationValues(_values: object) {
-    // Nothing to do here
-  }
-
-  registerAnimationValues(_values: object) {
-    // Nothing to do here
-  }
 }
 
 class ReanimatedContainer implements Container {
-  private _root: Node[] = [];
-  protected _recording: SharedValue<Recording | null>;
+  private recording: SharedValue<Recording | null>;
 
-  private values = new Set<SharedValue<unknown>>();
   private mapperId: number | null = null;
 
   constructor(private Skia: Skia, private nativeId: number) {
-    this._recording = Rea.makeMutable<Recording | null>(null);
-  }
-
-  get root() {
-    return this._root;
+    this.recording = Rea.makeMutable<Recording | null>(null);
   }
 
   set root(root: Node[]) {
+    const recorder = new Recorder();
+    visit(recorder, root);
+    const record = recorder.getRecording();
+    const { animationValues } = record;
+    this.recording.value = {
+      commands: record.commands,
+      paintPool: record.paintPool,
+    };
+
     if (this.mapperId !== null) {
       Rea.stopMapper(this.mapperId);
     }
-    const { nativeId, Skia, _recording } = this;
-    this.mapperId = Rea.startMapper(() => {
-      "worklet";
-      drawOnscreen(Skia, nativeId, _recording!);
-    }, Array.from(this.values));
-    this._root = root;
-    const recorder = new Recorder();
-    visit(recorder, root);
-    this._recording.value = createRecording(recorder.commands);
+
+    if (animationValues.size > 0) {
+      const { nativeId, Skia, recording } = this;
+      this.mapperId = Rea.startMapper(() => {
+        "worklet";
+        drawOnscreen(Skia, nativeId, recording!);
+      }, Array.from(animationValues));
+    }
   }
 
   redraw() {
-    const { nativeId, Skia, _recording } = this;
+    const { nativeId, Skia, recording } = this;
     Rea.runOnUI(() => {
-      drawOnscreen(Skia, nativeId, _recording!);
+      drawOnscreen(Skia, nativeId, recording);
     })();
-  }
-
-  unregisterAnimationValues(values: object) {
-    Object.values(values)
-      .filter(isSharedValue)
-      .forEach((value) => {
-        this.values.delete(value);
-      });
-  }
-
-  registerAnimationValues(values: object) {
-    Object.values(values)
-      .filter(isSharedValue)
-      .forEach((value) => {
-        this.values.add(value);
-      });
   }
 
   drawOnCanvas(_canvas: SkCanvas) {
