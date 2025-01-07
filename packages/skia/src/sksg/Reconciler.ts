@@ -58,7 +58,6 @@ export class SkiaSGRoot {
   }
 
   unmount() {
-    this.container.unmounted = true;
     skiaReconciler.updateContainer(null, this.root, null, () => {
       debug("unmountContainer");
     });

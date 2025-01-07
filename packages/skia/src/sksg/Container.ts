@@ -20,7 +20,6 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
 
   // TODO: because the pool is not a shared value here, it is copied on every frame
   const ctx = createDrawingContext(Skia, recording.paintPool, canvas);
-  //console.log(recording.commands);
   replay(ctx, recording.commands);
   const picture = rec.finishRecordingAsPicture();
   //const end = performance.now();
@@ -36,9 +35,7 @@ export class Container {
   private values = new Set<SharedValue<unknown>>();
   private mapperId: number | null = null;
 
-  constructor(public Skia: Skia, private nativeId: number) {
-    console.log({ HAS_REANIMATED_3 });
-  }
+  constructor(public Skia: Skia, private nativeId: number) {}
 
   get root() {
     return this._root;
