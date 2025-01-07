@@ -92,7 +92,7 @@ export const sksgHostConfig: SkiaHostConfig = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { children, ...props } = propsWithChildren as any;
     debug("createInstance", type);
-    container.registerValues(props);
+    container.registerAnimationValues(props);
     const instance = {
       type,
       props,
@@ -144,9 +144,8 @@ export const sksgHostConfig: SkiaHostConfig = {
     //  textInstance.instance = newText;
   },
 
-  clearContainer: (container) => {
+  clearContainer: (_container) => {
     debug("clearContainer");
-    container.clear();
   },
 
   prepareUpdate(
@@ -162,8 +161,8 @@ export const sksgHostConfig: SkiaHostConfig = {
     if (propsAreEqual) {
       return null;
     }
-    container.unregisterValues(oldProps);
-    container.registerValues(newProps);
+    container.unregisterAnimationValues(oldProps);
+    container.registerAnimationValues(newProps);
     return container;
   },
 
