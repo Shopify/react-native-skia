@@ -1,4 +1,4 @@
-import type { SharedValue } from "react-native-reanimated";
+import { type SharedValue } from "react-native-reanimated";
 
 import Rea from "../external/reanimated/ReanimatedProxy";
 import type { Skia, SkCanvas } from "../skia/types";
@@ -20,6 +20,7 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
 
   // TODO: because the pool is not a shared value here, it is copied on every frame
   const ctx = createDrawingContext(Skia, recording.paintPool, canvas);
+  //console.log(recording.commands);
   replay(ctx, recording.commands);
   const picture = rec.finishRecordingAsPicture();
   //const end = performance.now();
@@ -43,20 +44,24 @@ export class Container {
 
   set root(root: Node[]) {
     const isOnscreen = this.nativeId !== -1;
+    if (isOnscreen) {
+      if (HAS_REANIMATED_3) {
+        if (this.mapperId !== null) {
+          Rea.stopMapper(this.mapperId);
+        }
+        const { nativeId, Skia, _recording } = this;
+        this.mapperId = Rea.startMapper(() => {
+          "worklet";
+          drawOnscreen(Skia, nativeId, _recording!);
+        }, Array.from(this.values));
+      } else {
+        this.redraw();
+      }
+    }
     this._root = root;
     const recorder = new Recorder();
     visit(recorder, root);
     this._recording = createRecording(recorder.commands);
-    if (isOnscreen && HAS_REANIMATED_3) {
-      if (this.mapperId !== null) {
-        Rea.stopMapper(this.mapperId);
-      }
-      const { nativeId, Skia, _recording } = this;
-      this.mapperId = Rea.startMapper(() => {
-        "worklet";
-        drawOnscreen(Skia, nativeId, _recording!);
-      }, Array.from(this.values));
-    }
   }
 
   clear() {
@@ -65,15 +70,13 @@ export class Container {
 
   redraw() {
     const isOnscreen = this.nativeId !== -1;
-    if (isOnscreen) {
+    if (isOnscreen && HAS_REANIMATED_3) {
       const { nativeId, Skia, _recording } = this;
-      if (HAS_REANIMATED_3) {
-        Rea.runOnUI(() => {
-          drawOnscreen(Skia, nativeId, _recording!);
-        })();
-      } else {
+      Rea.runOnUI(() => {
         drawOnscreen(Skia, nativeId, _recording!);
-      }
+      })();
+    } else if (isOnscreen) {
+      drawOnscreen(this.Skia, this.nativeId, this._recording!);
     }
   }
 
