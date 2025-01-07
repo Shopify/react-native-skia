@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import type { FrameInfo, SharedValue } from "react-native-reanimated";
 
 import { useAnimatedImage } from "../../skia/core/AnimatedImage";
