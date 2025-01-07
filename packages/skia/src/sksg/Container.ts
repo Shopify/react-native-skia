@@ -45,7 +45,6 @@ export class Container {
   }
 
   set root(root: Node[]) {
-    console.log({ HAS_REANIMATED_3 });
     const isOnscreen = this.nativeId !== -1;
     this._root = root;
     const recorder = new Recorder();
@@ -71,7 +70,6 @@ export class Container {
     const isOnscreen = this.nativeId !== -1;
     if (isOnscreen) {
       const { nativeId, Skia, _recording } = this;
-      console.log({ HAS_REANIMATED_3 });
       if (HAS_REANIMATED_3) {
         Rea.runOnUI(() => {
           drawOnscreen(Skia, nativeId, _recording!);
