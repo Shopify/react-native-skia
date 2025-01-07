@@ -203,7 +203,6 @@ export const sksgHostConfig: SkiaHostConfig = {
   },
 
   replaceContainerChildren(container: Container, newChildren: ChildSet) {
-    debug("replaceContainerChildren");
     container.root = newChildren;
   },
 

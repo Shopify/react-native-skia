@@ -11,28 +11,6 @@ import { visit } from "./Recorder/Visitor";
 import { replay } from "./Recorder/Player";
 import { createDrawingContext } from "./Recorder/DrawingContext";
 
-const drawOnscreen = (
-  Skia: Skia,
-  nativeId: number,
-  recording: SharedValue<Recording | null>
-) => {
-  "worklet";
-  if (!recording.value) {
-    return;
-  }
-  const rec = Skia.PictureRecorder();
-  const canvas = rec.beginRecording();
-  // const start = performance.now();
-
-  const ctx = createDrawingContext(Skia, recording.value.paintPool, canvas);
-  //console.log(recording.commands);
-  replay(ctx, recording.value.commands);
-  const picture = rec.finishRecordingAsPicture();
-  //const end = performance.now();
-  //console.log("Recording time: ", end - start);
-  SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
-};
-
 export interface Container {
   drawOnCanvas(canvas: SkCanvas): void;
   set root(root: Node[]);
@@ -73,6 +51,29 @@ class StaticContainer implements Container {
   }
 }
 
+const drawOnscreen = (
+  Skia: Skia,
+  nativeId: number,
+  recording: SharedValue<Recording | null>
+) => {
+  "worklet";
+  if (!recording.value) {
+    console.log("No recording to draw");
+    return;
+  }
+  const rec = Skia.PictureRecorder();
+  const canvas = rec.beginRecording();
+  // const start = performance.now();
+
+  const ctx = createDrawingContext(Skia, recording.value.paintPool, canvas);
+  //console.log(recording.commands);
+  replay(ctx, recording.value.commands);
+  const picture = rec.finishRecordingAsPicture();
+  //const end = performance.now();
+  //console.log("Recording time: ", end - start);
+  SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
+};
+
 class ReanimatedContainer implements Container {
   private recording: SharedValue<Recording | null>;
 
@@ -83,6 +84,9 @@ class ReanimatedContainer implements Container {
   }
 
   set root(root: Node[]) {
+    if (this.mapperId !== null) {
+      Rea.stopMapper(this.mapperId);
+    }
     const recorder = new Recorder();
     visit(recorder, root);
     const record = recorder.getRecording();
@@ -92,10 +96,8 @@ class ReanimatedContainer implements Container {
       paintPool: record.paintPool,
     };
 
-    if (this.mapperId !== null) {
-      Rea.stopMapper(this.mapperId);
-    }
-
+    console.log("new recording is set: " + root.length);
+    console.log("Animation values to register: ", animationValues.size);
     if (animationValues.size > 0) {
       const { nativeId, Skia, recording } = this;
       this.mapperId = Rea.startMapper(() => {

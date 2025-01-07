@@ -56,6 +56,7 @@ const useLoading = <T extends SkJSIInstance<string>>(
     });
     return () => {
       if (manage) {
+        console.log("dispose!");
         dataRef.current?.dispose();
       }
       mounted.current = false;
