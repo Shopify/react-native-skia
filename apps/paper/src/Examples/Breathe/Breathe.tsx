@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, useWindowDimensions, View } from "react-native";
 import {
   BlurMask,
@@ -65,12 +65,6 @@ export const Breathe = () => {
   const transform = useDerivedValue(() => [
     { rotate: mix(progress.value, -Math.PI, 0) },
   ]);
-
-  useEffect(() => {
-    return () => {
-      console.log("Breathe unmounting");
-    };
-  }, []);
 
   return (
     <View style={{ flex: 1 }}>

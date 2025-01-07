@@ -1,5 +1,3 @@
-import { type SharedValue } from "react-native-reanimated";
-
 import Rea from "../external/reanimated/ReanimatedProxy";
 import type { Skia, SkCanvas } from "../skia/types";
 import { HAS_REANIMATED_3 } from "../external/reanimated/renderHelpers";
@@ -51,23 +49,16 @@ class StaticContainer implements Container {
   }
 }
 
-const drawOnscreen = (
-  Skia: Skia,
-  nativeId: number,
-  recording: SharedValue<Recording | null>
-) => {
+const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   "worklet";
-  if (!recording.value) {
-    console.log("No recording to draw");
-    return;
-  }
+
   const rec = Skia.PictureRecorder();
   const canvas = rec.beginRecording();
   // const start = performance.now();
 
-  const ctx = createDrawingContext(Skia, recording.value.paintPool, canvas);
+  const ctx = createDrawingContext(Skia, recording.paintPool, canvas);
   //console.log(recording.commands);
-  replay(ctx, recording.value.commands);
+  replay(ctx, recording.commands);
   const picture = rec.finishRecordingAsPicture();
   //const end = performance.now();
   //console.log("Recording time: ", end - start);
@@ -75,13 +66,11 @@ const drawOnscreen = (
 };
 
 class ReanimatedContainer implements Container {
-  private recording: SharedValue<Recording | null>;
+  protected recording: Recording | null = null;
 
   private mapperId: number | null = null;
 
-  constructor(private Skia: Skia, private nativeId: number) {
-    this.recording = Rea.makeMutable<Recording | null>(null);
-  }
+  constructor(private Skia: Skia, private nativeId: number) {}
 
   set root(root: Node[]) {
     if (this.mapperId !== null) {
@@ -91,13 +80,10 @@ class ReanimatedContainer implements Container {
     visit(recorder, root);
     const record = recorder.getRecording();
     const { animationValues } = record;
-    this.recording.value = {
+    this.recording = {
       commands: record.commands,
       paintPool: record.paintPool,
     };
-
-    console.log("new recording is set: " + root.length);
-    console.log("Animation values to register: ", animationValues.size);
     if (animationValues.size > 0) {
       const { nativeId, Skia, recording } = this;
       this.mapperId = Rea.startMapper(() => {
@@ -110,7 +96,7 @@ class ReanimatedContainer implements Container {
   redraw() {
     const { nativeId, Skia, recording } = this;
     Rea.runOnUI(() => {
-      drawOnscreen(Skia, nativeId, recording);
+      drawOnscreen(Skia, nativeId, recording!);
     })();
   }
 
