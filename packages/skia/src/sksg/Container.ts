@@ -14,9 +14,6 @@ import { createDrawingContext } from "./Recorder/DrawingContext";
 const drawOnscreen = (
   Skia: Skia,
   nativeId: number,
-  //
-  // TODO: because the pool is not a shared value here, it is copied on every frame
-  // Also animation value set doesn't seen to be shared here
   recording: SharedValue<Recording | null>
 ) => {
   "worklet";
