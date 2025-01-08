@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import type { FrameInfo, SharedValue } from "react-native-reanimated";
 
 import { useAnimatedImage } from "../../skia/core/AnimatedImage";
@@ -49,11 +48,5 @@ export const useAnimatedImageValue = (
     // Update the last timestamp
     lastTimestamp.value = timestamp;
   });
-  useEffect(() => {
-    return () => {
-      animatedImage?.dispose();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
   return currentFrame;
 };

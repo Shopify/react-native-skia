@@ -80,7 +80,6 @@ export const useCollectionLoading = <T extends SkJSIInstance<string>>(
     });
 
     return () => {
-      dataRef.current?.forEach((instance) => instance?.dispose());
       mounted.current = false;
     };
 
