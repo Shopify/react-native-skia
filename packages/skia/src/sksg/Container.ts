@@ -23,6 +23,8 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   //const end = performance.now();
   //console.log("Recording time: ", end - start);
   SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
+  rec.dispose();
+  picture.dispose();
 };
 
 export abstract class Container {
