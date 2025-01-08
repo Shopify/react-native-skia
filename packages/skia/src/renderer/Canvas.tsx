@@ -90,6 +90,7 @@ export const Canvas = forwardRef(
 
     useEffect(() => {
       if (mode === "continuous") {
+        console.warn("The `mode` property in `Canvas` is deprecated.");
         requestRedraw();
       }
       return () => {
@@ -98,7 +99,6 @@ export const Canvas = forwardRef(
         }
       };
     }, [mode, requestRedraw]);
-
     // Component methods
     useImperativeHandle(ref, () => ({
       makeImageSnapshot: (rect?: SkRect) => {
