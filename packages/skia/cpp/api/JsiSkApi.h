@@ -52,6 +52,7 @@
 #include "JsiSkVertices.h"
 #include "JsiSkiaContext.h"
 #include "JsiVideo.h"
+#include "JsiPlayer.h"
 
 namespace RNSkia {
 
@@ -130,6 +131,8 @@ public:
 
     installReadonlyProperty("NativeBuffer",
                             std::make_shared<JsiNativeBufferFactory>(context));
+
+    installFunction("PlayRecording", JsiPlayer::createCtor(context));
   }
 };
 } // namespace RNSkia
