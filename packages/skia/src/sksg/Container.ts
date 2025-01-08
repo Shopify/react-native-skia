@@ -41,11 +41,14 @@ class StaticContainer implements Container {
   }
 
   redraw() {
-    const rec = this.Skia.PictureRecorder();
-    const canvas = rec.beginRecording();
-    this.drawOnCanvas(canvas);
-    const picture = rec.finishRecordingAsPicture();
-    SkiaViewApi.setJsiProperty(this.nativeId, "picture", picture);
+    const isOnScreen = this.nativeId !== -1;
+    if (isOnScreen) {
+      const rec = this.Skia.PictureRecorder();
+      const canvas = rec.beginRecording();
+      this.drawOnCanvas(canvas);
+      const picture = rec.finishRecordingAsPicture();
+      SkiaViewApi.setJsiProperty(this.nativeId, "picture", picture);
+    }
   }
 }
 

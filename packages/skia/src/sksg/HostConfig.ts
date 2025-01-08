@@ -198,8 +198,9 @@ export const sksgHostConfig: SkiaHostConfig = {
     childSet.push(child);
   },
 
-  finalizeContainerChildren(_container: Container, _newChildren: ChildSet) {
+  finalizeContainerChildren(container: Container, newChildren: ChildSet) {
     debug("finalizeContainerChildren");
+    container.root = newChildren;
   },
 
   replaceContainerChildren(container: Container, newChildren: ChildSet) {
