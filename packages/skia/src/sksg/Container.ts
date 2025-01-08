@@ -16,16 +16,10 @@ export interface Container {
 }
 
 class StaticContainer implements Container {
+  public root: Node[] = [];
   protected _recording: Recording | null = null;
 
   constructor(private Skia: Skia, private nativeId: number) {}
-
-  set root(root: Node[]) {
-    const recorder = new Recorder();
-    visit(recorder, root);
-    this._recording = recorder.getRecording();
-    this.redraw();
-  }
 
   drawOnCanvas(canvas: SkCanvas) {
     if (!this._recording) {
@@ -41,6 +35,9 @@ class StaticContainer implements Container {
   }
 
   redraw() {
+    const recorder = new Recorder();
+    visit(recorder, this.root);
+    this._recording = recorder.getRecording();
     const isOnScreen = this.nativeId !== -1;
     if (isOnScreen) {
       const rec = this.Skia.PictureRecorder();
@@ -70,17 +67,17 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
 
 class ReanimatedContainer implements Container {
   protected recording: Recording | null = null;
-
   private mapperId: number | null = null;
+  public root: Node[] = [];
 
   constructor(private Skia: Skia, private nativeId: number) {}
 
-  set root(root: Node[]) {
+  redraw() {
     if (this.mapperId !== null) {
       Rea.stopMapper(this.mapperId);
     }
     const recorder = new Recorder();
-    visit(recorder, root);
+    visit(recorder, this.root);
     const record = recorder.getRecording();
     const { animationValues } = record;
     this.recording = {
@@ -94,13 +91,6 @@ class ReanimatedContainer implements Container {
         drawOnscreen(Skia, nativeId, recording!);
       }, Array.from(animationValues));
     }
-  }
-
-  redraw() {
-    const { nativeId, Skia, recording } = this;
-    Rea.runOnUI(() => {
-      drawOnscreen(Skia, nativeId, recording!);
-    })();
   }
 
   drawOnCanvas(_canvas: SkCanvas) {
