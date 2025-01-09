@@ -85,14 +85,13 @@ export const sksgHostConfig: SkiaHostConfig = {
   createInstance(
     type,
     propsWithChildren,
-    container,
+    _container,
     _hostContext,
     _internalInstanceHandle
   ) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { children, ...props } = propsWithChildren as any;
     debug("createInstance", type);
-    container.registerValues(props);
     const instance = {
       type,
       props,
@@ -121,7 +120,7 @@ export const sksgHostConfig: SkiaHostConfig = {
     debug("commitMount");
   },
 
-  prepareForCommit(_containerInfo) {
+  prepareForCommit(_container: Container) {
     debug("prepareForCommit");
     return null;
   },
@@ -144,9 +143,8 @@ export const sksgHostConfig: SkiaHostConfig = {
     //  textInstance.instance = newText;
   },
 
-  clearContainer: (container) => {
+  clearContainer: (_container) => {
     debug("clearContainer");
-    container.clear();
   },
 
   prepareUpdate(
@@ -162,8 +160,6 @@ export const sksgHostConfig: SkiaHostConfig = {
     if (propsAreEqual) {
       return null;
     }
-    container.unregisterValues(oldProps);
-    container.registerValues(newProps);
     return container;
   },
 
@@ -208,7 +204,6 @@ export const sksgHostConfig: SkiaHostConfig = {
   },
 
   replaceContainerChildren(container: Container, newChildren: ChildSet) {
-    debug("replaceContainerChildren");
     container.root = newChildren;
   },
 
@@ -229,7 +224,7 @@ export const sksgHostConfig: SkiaHostConfig = {
   getCurrentEventPriority: () => DefaultEventPriority,
   beforeActiveInstanceBlur: () => {},
   afterActiveInstanceBlur: () => {},
-  detachDeletedInstance: () => {},
+  detachDeletedInstance: (_node: Instance) => {},
   getInstanceFromNode: function (_node): Fiber | null | undefined {
     throw new Error("Function not implemented.");
   },
