@@ -342,5 +342,5 @@ jobs:
         run: yarn ios --simulator 'iPhone 16 Pro'
 
       - name: Run e2e tests
-        working-directory: package
+        working-directory: packages/skia
         run: CI=true yarn e2e
