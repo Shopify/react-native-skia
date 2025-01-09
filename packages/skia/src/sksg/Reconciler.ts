@@ -6,7 +6,8 @@ import type { SkCanvas, Skia } from "../skia/types";
 import { NodeType } from "../dom/types";
 
 import { debug, sksgHostConfig } from "./HostConfig";
-import { Container } from "./Container";
+import type { Container } from "./Container";
+import { createContainer } from "./Container";
 
 const skiaReconciler = ReactReconciler(sksgHostConfig);
 
@@ -21,7 +22,7 @@ export class SkiaSGRoot {
   private container: Container;
 
   constructor(public Skia: Skia, nativeId = -1) {
-    this.container = new Container(Skia, nativeId);
+    this.container = createContainer(Skia, nativeId);
     this.root = skiaReconciler.createContainer(
       this.container,
       0,
@@ -58,7 +59,6 @@ export class SkiaSGRoot {
   }
 
   unmount() {
-    this.container.unmounted = true;
     skiaReconciler.updateContainer(null, this.root, null, () => {
       debug("unmountContainer");
     });
