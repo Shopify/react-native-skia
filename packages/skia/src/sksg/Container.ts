@@ -1,23 +1,21 @@
-import { type SharedValue } from "react-native-reanimated";
-
 import Rea from "../external/reanimated/ReanimatedProxy";
 import type { Skia, SkCanvas } from "../skia/types";
+import { HAS_REANIMATED_3 } from "../external/reanimated/renderHelpers";
 
 import type { Node } from "./Node";
-import { isSharedValue } from "./utils";
+import type { Recording } from "./Recorder/Recorder";
 import { Recorder } from "./Recorder/Recorder";
 import { visit } from "./Recorder/Visitor";
 import { replay } from "./Recorder/Player";
 import { createDrawingContext } from "./Recorder/DrawingContext";
-import { createRecording, type Recording } from "./Recorder/Recording";
 
 const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   "worklet";
+
   const rec = Skia.PictureRecorder();
   const canvas = rec.beginRecording();
   // const start = performance.now();
 
-  // TODO: because the pool is not a shared value here, it is copied on every frame
   const ctx = createDrawingContext(Skia, recording.paintPool, canvas);
   //console.log(recording.commands);
   replay(ctx, recording.commands);
@@ -25,84 +23,83 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   //const end = performance.now();
   //console.log("Recording time: ", end - start);
   SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
+  rec.dispose();
+  picture.dispose();
 };
 
-export class Container {
-  private _root: Node[] = [];
-  private _recording: Recording | null = null;
-  public unmounted = false;
+export abstract class Container {
+  public root: Node[] = [];
+  protected recording: Recording | null = null;
 
-  private values = new Set<SharedValue<unknown>>();
-  private mapperId: number | null = null;
-
-  constructor(public Skia: Skia, private nativeId: number) {}
-
-  get root() {
-    return this._root;
-  }
-
-  set root(root: Node[]) {
-    const isOnscreen = this.nativeId !== -1;
-    if (isOnscreen) {
-      if (this.mapperId !== null) {
-        Rea.stopMapper(this.mapperId);
-      }
-      const { nativeId, Skia, _recording } = this;
-      this.mapperId = Rea.startMapper(() => {
-        "worklet";
-        drawOnscreen(Skia, nativeId, _recording!);
-      }, Array.from(this.values));
-    }
-    this._root = root;
-    const recorder = new Recorder();
-    visit(recorder, root);
-    this._recording = createRecording(recorder.commands);
-  }
-
-  clear() {
-    console.log("clear container");
-  }
-
-  redraw() {
-    const isOnscreen = this.nativeId !== -1;
-    if (isOnscreen) {
-      const { nativeId, Skia, _recording } = this;
-      Rea.runOnUI(() => {
-        drawOnscreen(Skia, nativeId, _recording!);
-      })();
-    }
-  }
-
-  getNativeId() {
-    return this.nativeId;
-  }
-
-  unregisterValues(values: object) {
-    Object.values(values)
-      .filter(isSharedValue)
-      .forEach((value) => {
-        this.values.delete(value);
-      });
-  }
-
-  registerValues(values: object) {
-    Object.values(values)
-      .filter(isSharedValue)
-      .forEach((value) => {
-        this.values.add(value);
-      });
-  }
+  constructor(protected Skia: Skia, protected nativeId: number) {}
 
   drawOnCanvas(canvas: SkCanvas) {
-    if (!this._recording) {
+    if (!this.recording) {
       throw new Error("No recording to draw");
     }
     const ctx = createDrawingContext(
       this.Skia,
-      this._recording.paintPool,
+      this.recording.paintPool,
       canvas
     );
     //console.log(this._recording);
-    replay(ctx, this._recording.commands);
+    replay(ctx, this.recording.commands);
+  }
+
+  abstract redraw(): void;
+}
+
+class StaticContainer extends Container {
+  constructor(Skia: Skia, nativeId: number) {
+    super(Skia, nativeId);
+  }
+
+  redraw() {
+    const recorder = new Recorder();
+    visit(recorder, this.root);
+    this.recording = recorder.getRecording();
+    const isOnScreen = this.nativeId !== -1;
+    if (isOnScreen) {
+      const rec = this.Skia.PictureRecorder();
+      const canvas = rec.beginRecording();
+      this.drawOnCanvas(canvas);
+      const picture = rec.finishRecordingAsPicture();
+      SkiaViewApi.setJsiProperty(this.nativeId, "picture", picture);
+    }
   }
 }
+
+class ReanimatedContainer extends Container {
+  private mapperId: number | null = null;
+
+  constructor(Skia: Skia, nativeId: number) {
+    super(Skia, nativeId);
+  }
+
+  redraw() {
+    if (this.mapperId !== null) {
+      Rea.stopMapper(this.mapperId);
+    }
+    const recorder = new Recorder();
+    visit(recorder, this.root);
+    const record = recorder.getRecording();
+    const { animationValues } = record;
+    this.recording = {
+      commands: record.commands,
+      paintPool: record.paintPool,
+    };
+    if (animationValues.size > 0) {
+      const { nativeId, Skia, recording } = this;
+      this.mapperId = Rea.startMapper(() => {
+        "worklet";
+        drawOnscreen(Skia, nativeId, recording!);
+      }, Array.from(animationValues));
+    }
+  }
+}
+
+export const createContainer = (Skia: Skia, nativeId: number) => {
+  return HAS_REANIMATED_3 && nativeId !== -1
+    ? new ReanimatedContainer(Skia, nativeId)
+    : new StaticContainer(Skia, nativeId);
+};
