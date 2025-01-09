@@ -73,6 +73,17 @@ Find `CMake` and click _Show Package Details_ and download compatiable version *
 
 To use this library in the browser, see [these instructions](/docs/getting-started/web).
 
+## TV
+
+Starting from version [1.9.0](https://github.com/Shopify/react-native-skia/releases/tag/v1.9.0) React Native Skia supports running on TV devices using [React Native TVOS](https://github.com/react-native-tvos/react-native-tvos).
+Currently both Android TV and Apple TV are supported.
+
+:::info
+
+Not all features have been tested yet, so please [report](https://github.com/Shopify/react-native-skia/issues) any issues you encounter when using React Native Skia on TV devices.
+
+:::
+
 ## Playground
 
 We have an example project you can play with [here](https://github.com/Shopify/react-native-skia/tree/main/example).
