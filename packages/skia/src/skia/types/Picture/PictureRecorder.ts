@@ -4,7 +4,7 @@ import type { SkRect } from "../Rect";
 
 import type { SkPicture } from "./Picture";
 
-export interface SkPictureRecorder extends SkJSIInstance<"Recorder"> {
+export interface SkPictureRecorder extends SkJSIInstance<"PictureRecorder"> {
   /**
    * Returns a canvas on which to draw. When done drawing, call finishRecordingAsPicture()
    *

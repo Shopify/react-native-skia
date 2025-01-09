@@ -123,6 +123,12 @@ const buildXCFrameworks = () => {
   outputNames.forEach((name) => {
     console.log("Building XCFramework for " + name);
     const prefix = `${OutFolder}/${os}`;
+    $(`mkdir -p ${OutFolder}/${os}/tvsimulator`);
+    $(`rm -rf ${OutFolder}/${os}/tvsimulator/${name}`);
+    $(
+      // eslint-disable-next-line max-len
+      `lipo -create ${OutFolder}/${os}/x64-tvsimulator/${name} ${OutFolder}/${os}/arm64-tvsimulator/${name} -output ${OutFolder}/${os}/tvsimulator/${name}`
+    );
     $(`mkdir -p ${OutFolder}/${os}/iphonesimulator`);
     $(`rm -rf ${OutFolder}/${os}/iphonesimulator/${name}`);
     $(
@@ -141,6 +147,8 @@ const buildXCFrameworks = () => {
       "xcodebuild -create-xcframework " +
         `-library ${prefix}/arm64-iphoneos/${name} ` +
         `-library ${prefix}/iphonesimulator/${name} ` +
+        `-library ${prefix}/arm64-tvos/${name} ` +
+        `-library ${prefix}/tvsimulator/${name} ` +
         `-library ${prefix}/macosx/${name} ` +
         ` -output ${dstPath}`
     );

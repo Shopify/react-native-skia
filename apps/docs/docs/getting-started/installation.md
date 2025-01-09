@@ -14,6 +14,8 @@ In addition you should make sure you're on at least `iOS 13` and `Android API le
 To use React Native Skia with the new architecture, `react-native@>=0.72` is required. <br />
 To use React Native Skia with video support, `Android API level 26` or above is required.
 
+`tvOS >= 13` is also supported.
+
 Skia has a new experimental backend named Graphite which runs on Vulkan and Metal.
 We currently are working on a new version of React Native Skia that uses this new backend.
 For Graphite to run, you will need to use `Android API level 26` and `iOS 15.1` or above.
@@ -70,6 +72,17 @@ Find `CMake` and click _Show Package Details_ and download compatiable version *
 ## Web
 
 To use this library in the browser, see [these instructions](/docs/getting-started/web).
+
+## TV
+
+Starting from version [1.9.0](https://github.com/Shopify/react-native-skia/releases/tag/v1.9.0) React Native Skia supports running on TV devices using [React Native TVOS](https://github.com/react-native-tvos/react-native-tvos).
+Currently both Android TV and Apple TV are supported.
+
+:::info
+
+Not all features have been tested yet, so please [report](https://github.com/Shopify/react-native-skia/issues) any issues you encounter when using React Native Skia on TV devices.
+
+:::
 
 ## Playground
 
