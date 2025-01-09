@@ -14,6 +14,8 @@ In addition you should make sure you're on at least `iOS 13` and `Android API le
 To use React Native Skia with the new architecture, `react-native@>=0.72` is required. <br />
 To use React Native Skia with video support, `Android API level 26` or above is required.
 
+`tvOS >= 13` is also supported.
+
 Skia has a new experimental backend named Graphite which runs on Vulkan and Metal.
 We currently are working on a new version of React Native Skia that uses this new backend.
 For Graphite to run, you will need to use `Android API level 26` and `iOS 15.1` or above.
