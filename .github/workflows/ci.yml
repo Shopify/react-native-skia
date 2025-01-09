@@ -332,11 +332,15 @@ jobs:
       - name: Install CocoaPods
         working-directory: apps/paper/ios
         run: pod install
+
+      - name: Start Package Manager
+        working-directory: apps/paper
+        run: E2E=true yarn start &
   
       - name: Build example for iOS
         working-directory: apps/paper
-        run: CI=true yarn ios --simulator 'iPhone 14 Pro'
+        run: yarn ios --simulator 'iPhone 16 Pro'
 
       - name: Run e2e tests
         working-directory: package
-        run: yarn e2e
+        run: CI=true yarn e2e
