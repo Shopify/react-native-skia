@@ -7,9 +7,9 @@ slug: /getting-started/bundle-size
 
 Below is the app size increase to be expected when adding React Native Skia to your project.
 
-| iOS  | Android | Web      |
-| ---- | ------- | -------- |
-| 6 MB | 4 MB    | 2.9 MB\* |
+| iOS/tvOS | Android (TV) | Web      |
+|----------|--------------| -------- |
+| 6 MB     | 4 MB         | 2.9 MB\* |
 
 \*This figure is the size of the gzipped file served through a CDN ([learn more](web)).
 
