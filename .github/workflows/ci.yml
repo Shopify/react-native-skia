@@ -218,7 +218,7 @@ jobs:
 
   test-android:
     needs: build-android
-    runs-on: macos-latest-large
+    runs-on: macos-latest-xlarge
     env:
       TURBO_CACHE_DIR: .turbo/android
     strategy:
@@ -299,7 +299,7 @@ jobs:
           name: tests-docs-screenshots
 
   build-ios:
-    runs-on: macos-latest-large
+    runs-on: macos-latest-xlarge
     env:
       TURBO_CACHE_DIR: .turbo/ios
     steps:
@@ -329,6 +329,14 @@ jobs:
             echo "turbo_cache_hit=1" >> $GITHUB_ENV
           fi
 
+      - name: Install CocoaPods
+        working-directory: apps/paper/ios
+        run: pod install
+  
       - name: Build example for iOS
-        run: |
-          yarn turbo run build:ios --concurrency 1 --force
+        working-directory: apps/paper
+        run: CI=true yarn ios --simulator 'iPhone 14 Pro'
+
+      - name: Run e2e tests
+        working-directory: package
+        run: yarn e2e
