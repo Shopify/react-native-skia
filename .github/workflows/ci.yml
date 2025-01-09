@@ -145,7 +145,7 @@ jobs:
           yarn turbo run build:android --concurrency 1 --filter=paper --force
 
   build-android:
-    runs-on: macos-latest-large
+    runs-on: macos-latest-xlarge
     continue-on-error: true
     env:
       TURBO_CACHE_DIR: .turbo/android
@@ -204,7 +204,7 @@ jobs:
 
       - name: Build example for Android
         env:
-          JAVA_OPTS: "-XX:MaxHeapSize=6g"
+          JAVA_OPTS: "-XX:MaxHeapSize=10g"
         run: |
           yarn turbo run build:android --concurrency 1 --force
 
