@@ -249,7 +249,7 @@ jobs:
         run: $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n Pixel_API_30 --device 'Nexus 5X' --package "system-images;android-30;default;arm64-v8a" --sdcard 512M
 
       - name: Emulator - Boot
-        run: $ANDROID_HOME/emulator/emulator -avd Pixel_API_30 -memory 4096 -wipe-data -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim &
+        run: $ANDROID_HOME/emulator/emulator -avd Pixel_API_30 -memory 4096 -wipe-data -no-window -no-snapshot -noaudio -no-boot-anim &
 
       - name: ADB Wait For Device
         run: adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
