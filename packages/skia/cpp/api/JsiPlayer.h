@@ -40,7 +40,7 @@ public:
       DrawingCtx ctx(canvas);
       for (int i; i<=size; i++) {
         auto command = commands.getValueAtIndex(runtime, i).asObject(runtime);
-        play(&ctx, command);
+        play(&ctx, runtime, command);
       }
       return jsi::Value::undefined();
     };
