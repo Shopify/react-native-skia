@@ -7,8 +7,6 @@ import type {
   MipmapMode,
   FilterMode,
   ImageInfo,
-  CubicResampler,
-  FilterOptions,
   SamplingOptions,
 } from "./Image";
 import type { SkSVG } from "./SVG";
