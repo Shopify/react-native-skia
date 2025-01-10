@@ -97,9 +97,6 @@ public:
 
 class DrawTextCommand : public Command<CommandType::DrawText> {
 public:
-    DrawTextCommand(double x, double y, std::string& text, std::shared_ptr<SkFont>& font):
-      _x(x), _y(y), _text(text), _font(font) {}
-private:
   double _x;
   double _y;
   std::string _text;
@@ -108,8 +105,6 @@ private:
 
 class DrawCircleCommand : public Command<CommandType::DrawCircle> {
 public:
-    DrawCircleCommand(double x, double y, double radius): _x(x), _y(y), _radius(radius) {}
-private:
   double _x;
   double _y;
   double _radius;
@@ -195,7 +190,7 @@ private:
   std::unique_ptr<CommandBase>
   convert<CommandType::DrawCircle>(jsi::Runtime &runtime,
                                    const jsi::Object &object) {
-    auto command = std::make_unique<DrawCircleCommand>(0, 0, 0);
+    auto command = std::make_unique<DrawCircleCommand>();
     return command;
   }
 
@@ -203,9 +198,7 @@ private:
   std::unique_ptr<CommandBase>
   convert<CommandType::DrawText>(jsi::Runtime &runtime,
                                  const jsi::Object &object) {
-    std::shared_ptr<SkFont> font = nullptr;
-    std::string text = "foo";
-    auto command = std::make_unique<DrawTextCommand>(0, 0, text, font);
+    auto command = std::make_unique<DrawTextCommand>();
     
     return command;
   }
