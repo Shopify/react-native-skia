@@ -28,7 +28,7 @@ public:
   EXPORT_JSI_API_TYPENAME(JsiSkPaint, Paint)
 
   JSI_HOST_FUNCTION(assign) {
-    SkPaint* paint = JsiSkPaint::fromValue(runtime, arguments[0]).get();
+    SkPaint *paint = JsiSkPaint::fromValue(runtime, arguments[0]).get();
     *getObject() = *paint;
     return jsi::Value::undefined();
   }
