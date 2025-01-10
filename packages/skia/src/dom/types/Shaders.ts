@@ -1,7 +1,6 @@
 import type {
   Color,
-  FilterMode,
-  MipmapMode,
+  SamplingOptions,
   SkImage,
   SkRect,
   SkRuntimeEffect,
@@ -26,11 +25,10 @@ export interface ShaderProps extends TransformProps, ChildrenProps {
 export interface ImageShaderProps extends TransformProps, Partial<RectCtor> {
   tx: SkEnum<typeof TileMode>;
   ty: SkEnum<typeof TileMode>;
-  fm: SkEnum<typeof FilterMode>;
-  mm: SkEnum<typeof MipmapMode>;
   fit: Fit;
   rect?: SkRect;
   image: SkImage | null;
+  sampling?: SamplingOptions;
 }
 
 export interface ColorProps {

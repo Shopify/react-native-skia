@@ -546,8 +546,10 @@ public:
         colors.push_back(color);
       }
     }
-
-    SkSamplingOptions sampling(SkFilterMode::kLinear, SkMipmapMode::kNone);
+    SkSamplingOptions sampling(SkFilterMode::kLinear);
+    if (count > 6) {
+      sampling = SamplingOptionsFromValue(runtime, arguments[5]);
+    }
     _canvas->drawAtlas(atlas.get(), xforms.data(), skRects.data(),
                        colors.data(), skRects.size(), blendMode, sampling,
                        nullptr, paint.get());

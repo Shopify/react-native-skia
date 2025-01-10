@@ -17,6 +17,7 @@ import type {
   SkRect,
   SkRSXform,
   SkColor,
+  SamplingOptions,
 } from "../../skia/types";
 
 import type {
@@ -37,6 +38,7 @@ export type ImageProps = DrawingNodeProps &
   RectDef & {
     fit?: Fit;
     image: SkImage | null;
+    sampling?: SamplingOptions;
   };
 
 export type CircleProps = CircleDef & DrawingNodeProps;
@@ -65,6 +67,7 @@ export interface AtlasProps extends DrawingNodeProps {
   sprites: SkRect[];
   transforms: SkRSXform[];
   colors?: SkColor[];
+  sampling?: SamplingOptions;
 }
 
 export interface CubicBezierHandle {
