@@ -15,7 +15,8 @@
 RCT_EXPORT_MODULE(SkiaPictureView)
 
 - (SkiaManager *)skiaManager {
-  auto bridge = [RCTBridge currentBridge];
+  auto bridge = self.bridge;
+  RCTAssert(bridge, @"Bridge must not be nil.");
   auto skiaModule = (RNSkiaModule *)[bridge moduleForName:@"RNSkiaModule"];
   return [skiaModule manager];
 }

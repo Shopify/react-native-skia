@@ -38,7 +38,7 @@ export const Symbol = ({
   }, [timestamp]);
 
   const opacity = useDerivedValue(() => {
-    const idx = Math.round(timestamp.value / 100);
+    const idx = Math.round(timestamp.value / 75);
     return stream[(stream.length - j + idx) % stream.length];
   }, [timestamp]);
 

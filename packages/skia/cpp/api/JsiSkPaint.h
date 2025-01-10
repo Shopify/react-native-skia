@@ -27,6 +27,12 @@ class JsiSkPaint : public JsiSkWrappingSharedPtrHostObject<SkPaint> {
 public:
   EXPORT_JSI_API_TYPENAME(JsiSkPaint, Paint)
 
+  JSI_HOST_FUNCTION(assign) {
+    SkPaint *paint = JsiSkPaint::fromValue(runtime, arguments[0]).get();
+    *getObject() = *paint;
+    return jsi::Value::undefined();
+  }
+
   JSI_HOST_FUNCTION(copy) {
     const auto *paint = getObject().get();
     return jsi::Object::createFromHostObject(
@@ -163,7 +169,8 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPaint, copy),
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPaint, assign),
+                       JSI_EXPORT_FUNC(JsiSkPaint, copy),
                        JSI_EXPORT_FUNC(JsiSkPaint, reset),
                        JSI_EXPORT_FUNC(JsiSkPaint, getAlphaf),
                        JSI_EXPORT_FUNC(JsiSkPaint, getColor),

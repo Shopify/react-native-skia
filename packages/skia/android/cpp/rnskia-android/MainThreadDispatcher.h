@@ -1,13 +1,13 @@
 #pragma once
 
 #include <android/looper.h>
-#include <unistd.h>
 #include <queue>
+#include <unistd.h>
 
 class MainThreadDispatcher {
 private:
-  ALooper *mainLooper;
-  int messagePipe[2];
+  ALooper *mainLooper = nullptr;
+  int messagePipe[2] = {-1, -1};
   std::queue<std::function<void()>> taskQueue;
   std::mutex queueMutex;
 
@@ -28,9 +28,7 @@ public:
     return instance;
   }
 
-  bool isOnMainThread() {
-      return ALooper_forThread() == mainLooper;
-  }
+  bool isOnMainThread() { return ALooper_forThread() == mainLooper; }
 
   void post(std::function<void()> task) {
     // TODO: this is disabled for now but we can clean this up

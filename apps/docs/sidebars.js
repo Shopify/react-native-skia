@@ -140,7 +140,6 @@ const sidebars = {
         "animations/gestures",
         "animations/hooks",
         "animations/textures",
-        "animations/reanimated2",
       ],
     },
     {

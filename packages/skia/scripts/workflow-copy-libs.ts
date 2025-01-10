@@ -29,7 +29,7 @@ const androidFiles = [
   "libskunicode_core.a",
   "libskunicode_icu.a",
 ];
-const iosFiles = [
+const appleFiles = [
   "libskia.xcframework",
   "libskshaper.xcframework",
   "libsvg.xcframework",
@@ -73,7 +73,7 @@ destinations.forEach((d, i) => {
   copyFiles(sources[i], "./libs/android/" + d, androidFiles);
 });
 
-console.log("Copying ios files...");
-copyFiles("skia-ios-xcframeworks", "./libs/ios", iosFiles);
+console.log("Copying Apple files...");
+copyFiles("skia-apple-xcframeworks", "./libs/apple", appleFiles);
 
 console.log("Done copying artifacts.");

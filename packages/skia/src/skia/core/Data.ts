@@ -40,8 +40,7 @@ export const loadData = <T>(
 
 const useLoading = <T extends SkJSIInstance<string>>(
   source: DataSourceParam,
-  loader: () => Promise<T | null>,
-  manage = true
+  loader: () => Promise<T | null>
 ) => {
   const mounted = useRef(false);
   const [data, setData] = useState<T | null>(null);
@@ -55,9 +54,6 @@ const useLoading = <T extends SkJSIInstance<string>>(
       }
     });
     return () => {
-      if (manage) {
-        dataRef.current?.dispose();
-      }
       mounted.current = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -84,7 +80,6 @@ export const useCollectionLoading = <T extends SkJSIInstance<string>>(
     });
 
     return () => {
-      dataRef.current?.forEach((instance) => instance?.dispose());
       mounted.current = false;
     };
 
@@ -97,9 +92,8 @@ export const useCollectionLoading = <T extends SkJSIInstance<string>>(
 export const useRawData = <T extends SkJSIInstance<string>>(
   source: DataSourceParam,
   factory: (data: SkData) => T | null,
-  onError?: (err: Error) => void,
-  manage = true
-) => useLoading(source, () => loadData<T>(source, factory, onError), manage);
+  onError?: (err: Error) => void
+) => useLoading(source, () => loadData<T>(source, factory, onError));
 
 const identity = (data: SkData) => data;
 

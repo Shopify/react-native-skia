@@ -28,15 +28,21 @@ public:
 
   gl::Display *getDisplay() { return _glDisplay.get(); }
   gl::Context *getContext() { return _glContext.get(); }
+  gl::Surface *getSurface() { return _glSurface.get(); };
+  EGLConfig getConfig() { return _glConfig; }
 
 private:
   std::unique_ptr<gl::Display> _glDisplay;
   std::unique_ptr<gl::Context> _glContext;
+  std::unique_ptr<gl::Surface> _glSurface;
+  EGLConfig _glConfig;
 
   OpenGLSharedContext() {
     _glDisplay = std::make_unique<gl::Display>();
-    auto glConfig = _glDisplay->chooseConfig();
-    _glContext = _glDisplay->makeContext(glConfig, nullptr);
+    _glConfig = _glDisplay->chooseConfig();
+    _glContext = _glDisplay->makeContext(_glConfig, nullptr);
+    _glSurface = _glDisplay->makePixelBufferSurface(_glConfig, 1, 1);
+    _glContext->makeCurrent(_glSurface.get());
   }
 };
 
@@ -111,17 +117,23 @@ public:
     // GR_GL_TEXTURE_2D
     case AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM:
       format = GrBackendFormats::MakeGL(GR_GL_RGBA8, GR_GL_TEXTURE_EXTERNAL);
+      break;
     case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
       format = GrBackendFormats::MakeGL(GR_GL_RGBA16F, GR_GL_TEXTURE_EXTERNAL);
+      break;
     case AHARDWAREBUFFER_FORMAT_R5G6B5_UNORM:
-      format = GrBackendFormats::MakeGL(GR_GL_RGB565, GR_GL_TEXTURE_EXTERNAL);
+      GrBackendFormats::MakeGL(GR_GL_RGB565, GR_GL_TEXTURE_EXTERNAL);
+      break;
     case AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM:
       format = GrBackendFormats::MakeGL(GR_GL_RGB10_A2, GR_GL_TEXTURE_EXTERNAL);
+      break;
     case AHARDWAREBUFFER_FORMAT_R8G8B8_UNORM:
       format = GrBackendFormats::MakeGL(GR_GL_RGB8, GR_GL_TEXTURE_EXTERNAL);
+      break;
 #if __ANDROID_API__ >= 33
     case AHARDWAREBUFFER_FORMAT_R8_UNORM:
       format = GrBackendFormats::MakeGL(GR_GL_R8, GR_GL_TEXTURE_EXTERNAL);
+      break;
 #endif
     default:
       if (requireKnownFormat) {
@@ -130,11 +142,12 @@ public:
         format = GrBackendFormats::MakeGL(GR_GL_RGBA8, GR_GL_TEXTURE_EXTERNAL);
       }
     }
-
+    auto width = static_cast<int>(description.width);
+    auto height = static_cast<int>(description.height);
     auto backendTex = MakeGLBackendTexture(
         _directContext.get(), const_cast<AHardwareBuffer *>(hardwareBuffer),
-        description.width, description.height, &deleteImageProc,
-        &updateImageProc, &deleteImageCtx, false, format, false);
+        width, height, &deleteImageProc, &updateImageProc, &deleteImageCtx,
+        false, format, false);
     if (!backendTex.isValid()) {
       RNSkLogger::logToConsole(
           "Failed to convert HardwareBuffer to OpenGL Texture!");
@@ -153,14 +166,15 @@ public:
   }
 
   // TODO: remove width, height
-  std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window, int width,
-                                            int height) {
+  std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window) {
     auto display = OpenGLSharedContext::getInstance().getDisplay();
-    return std::make_unique<OpenGLWindowContext>(_directContext.get(), display,
-                                                 _glContext.get(), window);
+    return std::make_unique<OpenGLWindowContext>(
+        _directContext.get(), display, _glContext.get(), window,
+        OpenGLSharedContext::getInstance().getConfig());
   }
 
   GrDirectContext *getDirectContext() { return _directContext.get(); }
+  void makeCurrent() { _glContext->makeCurrent(_glSurface.get()); }
 
 private:
   std::unique_ptr<gl::Context> _glContext;
@@ -170,7 +184,7 @@ private:
   OpenGLContext() {
     auto display = OpenGLSharedContext::getInstance().getDisplay();
     auto sharedContext = OpenGLSharedContext::getInstance().getContext();
-    auto glConfig = display->chooseConfig();
+    auto glConfig = OpenGLSharedContext::getInstance().getConfig();
     _glContext = display->makeContext(glConfig, sharedContext);
     _glSurface = display->makePixelBufferSurface(glConfig, 1, 1);
     _glContext->makeCurrent(_glSurface.get());

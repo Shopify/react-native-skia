@@ -34,15 +34,15 @@ namespace RNSkia {
 class OpenGLWindowContext : public WindowContext {
 public:
   OpenGLWindowContext(GrDirectContext *directContext, gl::Display *display,
-                      gl::Context *glContext, ANativeWindow *window)
+                      gl::Context *glContext, ANativeWindow *window,
+                      EGLConfig config)
       : _directContext(directContext), _display(display), _glContext(glContext),
         _window(window) {
     ANativeWindow_acquire(_window);
-    auto config = display->chooseConfig();
     _glSurface = display->makeWindowSurface(config, _window);
   }
 
-  ~OpenGLWindowContext() {
+  ~OpenGLWindowContext() override {
     _skSurface = nullptr;
     _glSurface = nullptr;
     ANativeWindow_release(_window);
@@ -56,7 +56,14 @@ public:
 
   int getHeight() override { return ANativeWindow_getHeight(_window); };
 
-  void resize(int width, int height) override { _skSurface = nullptr; }
+  void resize(int width, int height) override {
+    if (_skSurface != nullptr) {
+      // Let's make sure there is no pending work
+      _glContext->makeCurrent(_glSurface.get());
+      _glSurface->present();
+      _skSurface = nullptr;
+    }
+  }
 
 private:
   GrDirectContext *_directContext;

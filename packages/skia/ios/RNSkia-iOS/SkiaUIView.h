@@ -29,7 +29,6 @@
            factory:(std::function<std::shared_ptr<RNSkBaseiOSView>(
                         std::shared_ptr<RNSkia::RNSkPlatformContext>)>)factory;
 - (std::shared_ptr<RNSkBaseiOSView>)impl;
-- (SkiaManager *)skiaManager;
 
 - (void)setDebugMode:(bool)debugMode;
 - (void)setOpaque:(bool)opaque;
