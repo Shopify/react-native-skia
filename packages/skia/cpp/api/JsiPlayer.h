@@ -5,8 +5,8 @@
 #include <utility>
 #include <vector>
 
-#include "JsiSkHostObjects.h"
 #include "JsiSkCanvas.h"
+#include "JsiSkHostObjects.h"
 
 #include "RNSkLog.h"
 #include "Recorder/DrawingCtx.h"
@@ -22,8 +22,6 @@ class Player {};
 
 class JsiPlayer : public JsiSkWrappingSharedPtrHostObject<Player> {
 public:
- 
-
   /**
    * Creates the function for construction a new instance of the SkFont
    * wrapper
@@ -34,11 +32,14 @@ public:
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
-      auto canvas = arguments[0].asObject(runtime).asHostObject<JsiSkCanvas>(runtime)->getCanvas();
+      auto canvas = arguments[0]
+                        .asObject(runtime)
+                        .asHostObject<JsiSkCanvas>(runtime)
+                        ->getCanvas();
       auto commands = arguments[1].asObject(runtime).asArray(runtime);
       auto size = commands.size(runtime);
       DrawingCtx ctx(canvas);
-      for (int i; i<=size; i++) {
+      for (int i; i <= size; i++) {
         auto command = commands.getValueAtIndex(runtime, i).asObject(runtime);
         play(&ctx, runtime, command);
       }

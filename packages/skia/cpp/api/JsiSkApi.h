@@ -7,6 +7,7 @@
 #include "JsiSkHostObjects.h"
 
 #include "JsiNativeBuffer.h"
+#include "JsiPlayer.h"
 #include "JsiSkAnimatedImage.h"
 #include "JsiSkAnimatedImageFactory.h"
 #include "JsiSkColor.h"
@@ -52,7 +53,6 @@
 #include "JsiSkVertices.h"
 #include "JsiSkiaContext.h"
 #include "JsiVideo.h"
-#include "JsiPlayer.h"
 
 namespace RNSkia {
 
