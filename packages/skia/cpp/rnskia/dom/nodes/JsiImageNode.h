@@ -1,6 +1,7 @@
 #pragma once
 
 #include "JsiDomDrawingNode.h"
+#include "SamplingProp.h"
 #include "SkImageProps.h"
 
 #include <memory>
@@ -20,19 +21,22 @@ protected:
     if (image == nullptr) {
       return;
     }
-
-    context->getCanvas()->drawImageRect(
-        image, rects->src, rects->dst, SkSamplingOptions(),
-        context->getPaint().get(), SkCanvas::kStrict_SrcRectConstraint);
+    auto sampling = _samplingProp->isSet() ? *_samplingProp->getDerivedValue()
+                                           : SkSamplingOptions(SkFilterMode::kLinear);
+    context->getCanvas()->drawImageRect(image, rects->src, rects->dst, sampling,
+                                        context->getPaint().get(),
+                                        SkCanvas::kStrict_SrcRectConstraint);
   }
 
   void defineProperties(NodePropsContainer *container) override {
     JsiDomDrawingNode::defineProperties(container);
     _imageProps = container->defineProperty<ImageProps>();
+    _samplingProp = container->defineProperty<SamplingProp>("sampling");
   }
 
 private:
   ImageProps *_imageProps;
+  SamplingProp *_samplingProp;
 };
 
 } // namespace RNSkia

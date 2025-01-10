@@ -2,7 +2,7 @@ name: Build SKIA
 on: workflow_dispatch
 jobs:
   build:
-    runs-on: macos-latest-large
+    runs-on: macos-latest-xlarge
     steps:
       - name: checkout
         uses: actions/checkout@v3
