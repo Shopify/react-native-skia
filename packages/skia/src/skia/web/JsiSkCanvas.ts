@@ -1,31 +1,37 @@
-import type { Canvas, CanvasKit } from "canvaskit-wasm";
-
 import type {
-  BlendMode,
-  ClipOp,
-  FilterMode,
-  MipmapMode,
-  PointMode,
-  SaveLayerFlag,
-  ImageInfo,
-  SkCanvas,
-  SkColor,
-  SkFont,
-  SkImage,
-  SkImageFilter,
-  SkMatrix,
-  SkPaint,
-  SkPath,
-  SkPicture,
-  SkPoint,
-  SkRect,
-  InputRRect,
-  SkSVG,
-  SkTextBlob,
-  SkVertices,
-  SkRSXform,
-  CubicResampler,
-  FilterOptions,
+  Canvas,
+  CanvasKit,
+  CubicResampler as CKCubicResampler,
+  FilterOptions as CKFilterOptions,
+} from "canvaskit-wasm";
+
+import {
+  type BlendMode,
+  type ClipOp,
+  type FilterMode,
+  type MipmapMode,
+  type PointMode,
+  type SaveLayerFlag,
+  type ImageInfo,
+  type SkCanvas,
+  type SkColor,
+  type SkFont,
+  type SkImage,
+  type SkImageFilter,
+  type SkMatrix,
+  type SkPaint,
+  type SkPath,
+  type SkPicture,
+  type SkPoint,
+  type SkRect,
+  type InputRRect,
+  type SkSVG,
+  type SkTextBlob,
+  type SkVertices,
+  type SkRSXform,
+  type CubicResampler,
+  type FilterOptions,
+  isCubicSampling,
 } from "../types";
 
 import { getEnum, HostObject } from "./Host";
@@ -398,7 +404,7 @@ export class JsiSkCanvas
     paint: SkPaint,
     blendMode?: BlendMode,
     colors?: SkColor[],
-    _sampling?: CubicResampler | FilterOptions
+    sampling?: CubicResampler | FilterOptions
   ) {
     const src = srcs.flatMap((s) =>
       Array.from(JsiSkRect.fromValue(this.CanvasKit, s))
@@ -412,6 +418,20 @@ export class JsiSkCanvas
         cls[i] = this.CanvasKit.ColorAsInt(r * 255, g * 255, b * 255, a * 255);
       }
     }
+    let ckSampling: CKCubicResampler | CKFilterOptions = {
+      filter: this.CanvasKit.FilterMode.Linear,
+      mipmap: this.CanvasKit.MipmapMode.None,
+    };
+    if (sampling && isCubicSampling(sampling)) {
+      ckSampling = sampling;
+    } else if (sampling) {
+      ckSampling = {
+        filter: getEnum(this.CanvasKit.FilterMode, sampling.filter),
+        mipmap: sampling.mipmap
+          ? getEnum(this.CanvasKit.MipmapMode, sampling.mipmap)
+          : this.CanvasKit.MipmapMode.None,
+      };
+    }
     this.ref.drawAtlas(
       JsiSkImage.fromValue(atlas),
       src,
@@ -420,7 +440,8 @@ export class JsiSkCanvas
       blendMode
         ? getEnum(this.CanvasKit.BlendMode, blendMode)
         : this.CanvasKit.BlendMode.DstOver,
-      cls
+      cls,
+      ckSampling
     );
   }
 

@@ -7,8 +7,7 @@ import type {
   MipmapMode,
   FilterMode,
   ImageInfo,
-  CubicResampler,
-  FilterOptions,
+  SamplingOptions,
 } from "./Image";
 import type { SkSVG } from "./SVG";
 import type { SkColor } from "./Color";
@@ -521,7 +520,7 @@ export interface SkCanvas {
     paint: SkPaint,
     blendMode?: BlendMode,
     colors?: SkColor[],
-    sampling?: CubicResampler | FilterOptions
+    sampling?: SamplingOptions
   ): void;
 
   /** Read Image pixels

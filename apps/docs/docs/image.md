@@ -85,6 +85,7 @@ Images can be drawn by specifying the output rectangle and how the image should 
 | width  | `number`  | The width of the destination image.                                                                                                                               |
 | height | `number`  | The height of the destination image.                                                                                                                              |
 | fit?   | `Fit`     | The method used to fit the image into the rectangle. Values can be `contain`, `fill`, `cover`, `fitHeight`, `fitWidth`, `scaleDown`, or `none` (the default is `contain`). |
+| sampling? | `Sampling` | The method used to sample the image. see ([sampling options](/docs/images#sampling-options)). |
 
 ### Example
 
@@ -96,6 +97,43 @@ const ImageDemo = () => {
   return (
     <Canvas style={{ flex: 1 }}>
       <Image image={image} fit="contain" x={0} y={0} width={256} height={256} />
+    </Canvas>
+  );
+};
+```
+
+### Sampling Options
+
+The `sampling` prop allows you to control how the image is sampled when it is drawn.
+Use cubic sampling for best quality: you can use the default `sampling={CubicSampling}` (defaults to `{ B: 0, C: 0 }`) or any value you would like: `sampling={{ B: 0, C: 0.5 }}`.
+
+You can also use filter modes (`nearest` or `linear`) and mimap modes (`none`, `nearest`, or `linear`). Default is `nearest`.
+
+```tsx twoslash
+import { Canvas, Image, useImage, CubicSampling, FilterMode, MipmapMode } from "@shopify/react-native-skia";
+
+const ImageDemo = () => {
+  const image = useImage(require("./assets/oslo.jpg"));
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Image
+        image={image}
+        fit="contain"
+        x={0}
+        y={0}
+        width={256}
+        height={256}
+        sampling={CubicSampling}
+      />
+      <Image
+        image={image}
+        fit="contain"
+        x={0}
+        y={0}
+        width={256}
+        height={256}
+        sampling={{ filter: FilterMode.Nearest, mipmap: MipmapMode.Nearest }}
+      />
     </Canvas>
   );
 };

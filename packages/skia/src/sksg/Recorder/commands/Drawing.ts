@@ -40,7 +40,10 @@ import {
   BlurStyle,
   ClipOp,
   FillType,
+  FilterMode,
+  isCubicSampling,
   isRRect,
+  MipmapMode,
   PointMode,
   VertexMode,
 } from "../../../skia/types";
@@ -117,7 +120,7 @@ export const drawBox = (
 
 export const drawImage = (ctx: DrawingContext, props: ImageProps) => {
   "worklet";
-  const { image } = props;
+  const { image, sampling } = props;
   if (image) {
     const fit = props.fit ?? "contain";
     const rect = processRect(ctx.Skia, props);
@@ -131,7 +134,25 @@ export const drawImage = (ctx: DrawingContext, props: ImageProps) => {
       },
       rect
     );
-    ctx.canvas.drawImageRect(image, src, dst, ctx.paint);
+    if (sampling && isCubicSampling(sampling)) {
+      ctx.canvas.drawImageRectCubic(
+        image,
+        src,
+        dst,
+        sampling.B,
+        sampling.C,
+        ctx.paint
+      );
+    } else {
+      ctx.canvas.drawImageRectOptions(
+        image,
+        src,
+        dst,
+        sampling?.filter ?? FilterMode.Linear,
+        sampling?.mipmap ?? MipmapMode.None,
+        ctx.paint
+      );
+    }
   }
 };
 
@@ -349,10 +370,18 @@ export const drawPicture = (ctx: DrawingContext, props: PictureProps) => {
 
 export const drawAtlas = (ctx: DrawingContext, props: AtlasProps) => {
   "worklet";
-  const { image, sprites, transforms, colors, blendMode } = props;
+  const { image, sprites, transforms, colors, blendMode, sampling } = props;
   const blend = blendMode ? BlendMode[enumKey(blendMode)] : undefined;
   if (image) {
-    ctx.canvas.drawAtlas(image, sprites, transforms, ctx.paint, blend, colors);
+    ctx.canvas.drawAtlas(
+      image,
+      sprites,
+      transforms,
+      ctx.paint,
+      blend,
+      colors,
+      sampling
+    );
   }
 };
 
