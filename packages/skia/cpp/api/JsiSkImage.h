@@ -41,10 +41,10 @@ inline SkSamplingOptions SamplingOptionsFromValue(jsi::Runtime &runtime,
   SkSamplingOptions samplingOptions;
   if (val.isObject()) {
     auto object = val.asObject(runtime);
-    if (object.hasProperty(runtime, "A") && object.hasProperty(runtime, "B")) {
-      auto A = static_cast<float>(object.getProperty(runtime, "A").asNumber());
+    if (object.hasProperty(runtime, "B") && object.hasProperty(runtime, "C")) {
       auto B = static_cast<float>(object.getProperty(runtime, "B").asNumber());
-      samplingOptions = SkSamplingOptions({A, B});
+      auto C = static_cast<float>(object.getProperty(runtime, "C").asNumber());
+      samplingOptions = SkSamplingOptions({B, C});
     } else if (object.hasProperty(runtime, "filter")) {
       auto filter = static_cast<SkFilterMode>(
           object.getProperty(runtime, "filter").asNumber());

@@ -3,6 +3,7 @@
 #include "JsiDomDrawingNode.h"
 #include "RSXformProp.h"
 #include "RectProp.h"
+#include "SamplingProp.h"
 #include "SkImageProps.h"
 
 #include <memory>
@@ -28,7 +29,8 @@ protected:
                                  ? *_blendModeProp->getDerivedValue()
                                  : SkBlendMode::kDstOver;
       auto paint = *context->getPaint();
-      SkSamplingOptions sampling(SkFilterMode::kLinear, SkMipmapMode::kNone);
+      auto sampling = _samplingProp->isSet() ? *_samplingProp->getDerivedValue()
+                                             : SkSamplingOptions();
       context->getCanvas()->drawAtlas(
           image.get(), transforms->data(), sprites->data(),
           colors == nullptr ? nullptr : colors->data(), sprites->size(),
@@ -43,6 +45,7 @@ protected:
     _imageProp = container->defineProperty<ImageProp>("image");
     _colorsProp = container->defineProperty<ColorsProp>("colors");
     _blendModeProp = container->defineProperty<BlendModeProp>("blendMode");
+    _samplingProp = container->defineProperty<SamplingProp>("sampling");
 
     _rectsProp->require();
     _rsxFormsProp->require();
@@ -54,6 +57,7 @@ private:
   RSXFormsProp *_rsxFormsProp;
   ColorsProp *_colorsProp;
   BlendModeProp *_blendModeProp;
+  SamplingProp *_samplingProp;
 };
 
 } // namespace RNSkia
