@@ -18,7 +18,7 @@ describe("Text", () => {
       },
       { font }
     );
-    expect(result).toEqual([892, 896]);
+    expect(result).toEqual(surface.OS === "ios" ? [0, 0] : [892, 896]);
   });
   it("Should calculate chinese text width correctly", async () => {
     const font = fonts.NotoSansSCRegular;

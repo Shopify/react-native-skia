@@ -204,7 +204,7 @@ jobs:
 
       - name: Build example for Android
         env:
-          JAVA_OPTS: "-XX:MaxHeapSize=6g"
+          JAVA_OPTS: "-XX:MaxHeapSize=16g"
         run: |
           yarn turbo run build:android --concurrency 1 --force
 
@@ -299,7 +299,7 @@ jobs:
           name: tests-docs-screenshots
 
   build-ios:
-    runs-on: macos-latest-large
+    runs-on: macos-latest-xlarge
     env:
       TURBO_CACHE_DIR: .turbo/ios
     steps:
@@ -329,6 +329,18 @@ jobs:
             echo "turbo_cache_hit=1" >> $GITHUB_ENV
           fi
 
+      - name: Install CocoaPods
+        working-directory: apps/paper/ios
+        run: pod install
+
+      - name: Start Package Manager
+        working-directory: apps/paper
+        run: E2E=true yarn start &
+  
       - name: Build example for iOS
-        run: |
-          yarn turbo run build:ios --concurrency 1 --force
+        working-directory: apps/paper
+        run: yarn ios --simulator 'iPhone 16 Pro'
+
+      - name: Run e2e tests
+        working-directory: packages/skia
+        run: CI=true yarn e2e
