@@ -32,6 +32,8 @@ export enum ImageFormat {
   WEBP = 6,
 }
 
+export type SamplingOptions = CubicResampler | FilterOptions;
+
 export interface SkImage extends SkJSIInstance<"Image"> {
   /**
    * Returns the possibly scaled height of the image.

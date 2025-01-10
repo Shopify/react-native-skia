@@ -412,6 +412,7 @@ export class JsiSkCanvas
         cls[i] = this.CanvasKit.ColorAsInt(r * 255, g * 255, b * 255, a * 255);
       }
     }
+    // TODO: wrong sampling
     this.ref.drawAtlas(
       JsiSkImage.fromValue(atlas),
       src,

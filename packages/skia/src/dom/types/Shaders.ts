@@ -2,6 +2,7 @@ import type {
   Color,
   FilterMode,
   MipmapMode,
+  SamplingOptions,
   SkImage,
   SkRect,
   SkRuntimeEffect,
@@ -31,6 +32,7 @@ export interface ImageShaderProps extends TransformProps, Partial<RectCtor> {
   fit: Fit;
   rect?: SkRect;
   image: SkImage | null;
+  sampling?: SamplingOptions;
 }
 
 export interface ColorProps {

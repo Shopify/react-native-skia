@@ -36,6 +36,30 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
+inline SkSamplingOptions SamplingOptionsFromValue(jsi::Runtime &runtime,
+                                                  const jsi::Value &val) {
+  SkSamplingOptions samplingOptions;
+  if (val.isObject()) {
+    auto object = val.asObject(runtime);
+    if (object.hasProperty(runtime, "A") && object.hasProperty(runtime, "B")) {
+      auto A = static_cast<float>(object.getProperty(runtime, "A").asNumber());
+      auto B = static_cast<float>(object.getProperty(runtime, "B").asNumber());
+      samplingOptions = SkSamplingOptions({A, B});
+    } else if (object.hasProperty(runtime, "filter")) {
+      auto filter = static_cast<SkFilterMode>(
+          object.getProperty(runtime, "filter").asNumber());
+      if (object.hasProperty(runtime, "mipmap")) {
+        auto mipmap = static_cast<SkMipmapMode>(
+            object.getProperty(runtime, "mipmap").asNumber());
+        samplingOptions = SkSamplingOptions(filter, mipmap);
+      } else {
+        samplingOptions = SkSamplingOptions(filter);
+      }
+    }
+  }
+  return samplingOptions;
+}
+
 class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
 public:
   // TODO-API: Properties?
