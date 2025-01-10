@@ -34,6 +34,11 @@ export enum ImageFormat {
 
 export type SamplingOptions = CubicResampler | FilterOptions;
 
+export const MitchellCubicSampling = { B: 1 / 3.0, C: 1 / 3.0 };
+export const CatmullRomCubicSampling = { B: 0, C: 1 / 2.0 };
+export const CubicSampling = { B: 0, C: 0 };
+export const MakeCubic = (B: number, C: number) => ({ B, C });
+
 export interface SkImage extends SkJSIInstance<"Image"> {
   /**
    * Returns the possibly scaled height of the image.
