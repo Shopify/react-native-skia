@@ -16,6 +16,7 @@ Its design particularly useful when using with [Reanimated](#animations).
 | transforms | `RSXform[]` | Rotation/scale transforms to be applied for each sprite. |
 | colors? | `SkColor[]` | Optional. Color to blend the sprites with. |
 | blendMode? | `BlendMode` | Optional. Blend mode used to combine sprites and colors together. |
+| sampling? | `Sampling` | The method used to sample the image. see ([sampling options](/docs/images#sampling-options)). |
 
 ## RSXform
 
