@@ -112,42 +112,37 @@ public:
 
 class CommandConverter {
 public:
-  static bool convert(jsi::Runtime &runtime, const jsi::Object &object,
-                      std::unique_ptr<CommandBase> &out) {
+  static std::unique_ptr<CommandBase> convert(jsi::Runtime &runtime,
+                                              const jsi::Object &object) {
     try {
       auto type = static_cast<CommandType>(
           object.getProperty(runtime, "type").asNumber());
-      return convert(runtime, object, type, out);
+      return convert(runtime, object, type);
     } catch (const std::exception &) {
-      return false;
+      return nullptr;
     }
   }
 
 private:
-  static bool convert(jsi::Runtime &runtime, const jsi::Object &object,
-                      CommandType type, std::unique_ptr<CommandBase> &out) {
+  static std::unique_ptr<CommandBase>
+  convert(jsi::Runtime &runtime, const jsi::Object &object, CommandType type) {
     try {
       switch (type) {
       case CommandType::Group:
-        out = convert<CommandType::Group>(runtime, object);
-        return true;
+        return convert<CommandType::Group>(runtime, object);
       case CommandType::SaveCTM:
-        out = convert<CommandType::SaveCTM>(runtime, object);
-        return true;
-      case CommandType::SavePaint:
-        out = convert<CommandType::SavePaint>(runtime, object);
-        return true;
+        return convert<CommandType::SaveCTM>(runtime, object);
+//      case CommandType::SavePaint:
+//        return convert<CommandType::SavePaint>(runtime, object);
       case CommandType::DrawCircle:
-        out = convert<CommandType::DrawCircle>(runtime, object);
-        return true;
+        return convert<CommandType::DrawCircle>(runtime, object);
       case CommandType::DrawText:
-        out = convert<CommandType::DrawText>(runtime, object);
-        return true;
+        return convert<CommandType::DrawText>(runtime, object);
       default:
-        return false;
+        return nullptr;
       }
     } catch (const std::exception &) {
-      return false;
+      return nullptr;
     }
   }
 
@@ -166,12 +161,11 @@ private:
                         .asArray(runtime);
 
     for (size_t i = 0; i < children.size(runtime); i++) {
-      std::unique_ptr<CommandBase> childCommand;
-      if (!convert(runtime,
-                   children.getValueAtIndex(runtime, i).asObject(runtime),
-                   childCommand)) {
-        throw std::runtime_error("Failed to convert child command");
-      }
+      std::unique_ptr<CommandBase> childCommand = CommandConverter::convert(
+          runtime, children.getValueAtIndex(runtime, i).asObject(runtime));
+    //  if (!childCommand) {
+    //    throw std::runtime_error("Failed to convert child command");
+    //  }
       command->children.push_back(std::move(childCommand));
     }
 
@@ -199,7 +193,7 @@ private:
   convert<CommandType::DrawText>(jsi::Runtime &runtime,
                                  const jsi::Object &object) {
     auto command = std::make_unique<DrawTextCommand>();
-    
+
     return command;
   }
 };

@@ -48,13 +48,12 @@ public:
         imageFilter = SkImageFilters::ColorFilter(cf, nullptr);
       }
     }
-    canvas->saveLayer(SkCanvas::SaveLayerRec(nullptr, nullptr, imageFilter.get(), 0));
+    canvas->saveLayer(
+        SkCanvas::SaveLayerRec(nullptr, nullptr, imageFilter.get(), 0));
     canvas->restore();
   }
 
-  void materializePaint() {
-
-  }
+  void materializePaint() {}
 };
 
 } // namespace RNSkia
