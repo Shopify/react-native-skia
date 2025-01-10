@@ -16,8 +16,11 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   const canvas = rec.beginRecording();
   // const start = performance.now();
 
-  const ctx = createDrawingContext(Skia, recording.paintPool, canvas);
-  replay(ctx, recording.commands);
+  //const ctx = createDrawingContext(Skia, recording.paintPool, canvas);
+  //replay(ctx, recording.commands);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  Skia.PlayRecording(canvas, recording.commands);
   const picture = rec.finishRecordingAsPicture();
   //const end = performance.now();
   //console.log("Recording time: ", end - start);

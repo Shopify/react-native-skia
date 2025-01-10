@@ -41,6 +41,7 @@ public:
       DrawingCtx ctx(canvas);
       for (int i; i <= size; i++) {
         auto command = commands.getValueAtIndex(runtime, i).asObject(runtime);
+        std::unique_ptr<CommandBase> &out = convert<CommandType::CommandBase>(runtime, command);
         play(&ctx, runtime, command);
       }
       return jsi::Value::undefined();
