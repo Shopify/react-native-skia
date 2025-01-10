@@ -546,7 +546,7 @@ public:
         colors.push_back(color);
       }
     }
-    SkSamplingOptions sampling(SkFilterMode::kLinear, SkMipmapMode::kNone);
+    SkSamplingOptions sampling(SkFilterMode::kLinear);
     if (count > 6) {
       sampling = SamplingOptionsFromValue(runtime, arguments[5]);
     }

@@ -1,4 +1,9 @@
-import type { Canvas, CanvasKit } from "canvaskit-wasm";
+import type {
+  Canvas,
+  CanvasKit,
+  CubicResampler as CKCubicResampler,
+  FilterOptions as CKFilterOptions,
+} from "canvaskit-wasm";
 
 import {
   type BlendMode,
@@ -413,7 +418,10 @@ export class JsiSkCanvas
         cls[i] = this.CanvasKit.ColorAsInt(r * 255, g * 255, b * 255, a * 255);
       }
     }
-    let ckSampling;
+    let ckSampling: CKCubicResampler | CKFilterOptions = {
+      filter: this.CanvasKit.FilterMode.Linear,
+      mipmap: this.CanvasKit.MipmapMode.None,
+    };
     if (sampling && isCubicSampling(sampling)) {
       ckSampling = sampling;
     } else if (sampling) {

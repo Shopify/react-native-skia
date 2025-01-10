@@ -18,7 +18,7 @@ public:
   }
 
   static SkSamplingOptions processSamplingOptions(const JsiValue &value) {
-    SkSamplingOptions samplingOptions;
+    SkSamplingOptions samplingOptions(SkFilterMode::kLinear);
     if (value.getType() == PropType::Object) {
       if (value.hasValue(PropNameCubicB) && value.hasValue(PropNameCubicC)) {
         auto B =

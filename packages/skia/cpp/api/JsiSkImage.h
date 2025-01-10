@@ -38,7 +38,7 @@ namespace jsi = facebook::jsi;
 
 inline SkSamplingOptions SamplingOptionsFromValue(jsi::Runtime &runtime,
                                                   const jsi::Value &val) {
-  SkSamplingOptions samplingOptions;
+  SkSamplingOptions samplingOptions(SkFilterMode::kLinear);
   if (val.isObject()) {
     auto object = val.asObject(runtime);
     if (object.hasProperty(runtime, "B") && object.hasProperty(runtime, "C")) {

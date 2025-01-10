@@ -123,7 +123,7 @@ public:
 
     auto samplingOptions = _samplingProp->isSet()
                                ? *_samplingProp->getDerivedValue()
-                               : SkSamplingOptions();
+                               : SkSamplingOptions(SkFilterMode::kLinear);
     context->getShaders()->push(image->makeShader(*_txProp->getDerivedValue(),
                                                   *_tyProp->getDerivedValue(),
                                                   samplingOptions, &_matrix));
