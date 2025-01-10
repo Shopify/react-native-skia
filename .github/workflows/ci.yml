@@ -298,7 +298,7 @@ jobs:
           path: apps/docs/static/
           name: tests-docs-screenshots
 
-  build-ios:
+  build-test-ios:
     runs-on: macos-latest-xlarge
     env:
       TURBO_CACHE_DIR: .turbo/ios
