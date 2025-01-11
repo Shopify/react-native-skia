@@ -17,7 +17,6 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   // const start = performance.now();
 
   const ctx = createDrawingContext(Skia, recording.paintPool, canvas);
-  //console.log(recording.commands);
   replay(ctx, recording.commands);
   const picture = rec.finishRecordingAsPicture();
   //const end = performance.now();
@@ -42,7 +41,7 @@ export abstract class Container {
       this.recording.paintPool,
       canvas
     );
-    //console.log(this._recording);
+    //console.log(this.recording.commands);
     replay(ctx, this.recording.commands);
   }
 
