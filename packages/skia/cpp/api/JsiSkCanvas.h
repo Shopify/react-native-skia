@@ -547,7 +547,7 @@ public:
       }
     }
     SkSamplingOptions sampling(SkFilterMode::kLinear);
-    if (count > 6 && arguments[6].isObject()) {
+    if (count > 6) {
       sampling = SamplingOptionsFromValue(runtime, arguments[6]);
     }
     _canvas->drawAtlas(atlas.get(), xforms.data(), skRects.data(),
