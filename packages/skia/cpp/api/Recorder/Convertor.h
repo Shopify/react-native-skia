@@ -58,7 +58,7 @@ private:
       case CommandType::DrawCircle:
         return DrawCircleCommand::fromJSIObject(runtime, object);
       case CommandType::DrawText:
-        return convert<CommandType::DrawText>(runtime, object);
+        return DrawTextCommand::fromJSIObject(runtime, object);
       default:
         return std::make_unique<Command<CommandType::Group>>(type);
       }
@@ -98,15 +98,6 @@ private:
   convert<CommandType::SavePaint>(jsi::Runtime &runtime,
                                   const jsi::Object &object) {
     auto command = std::make_unique<SavePaintCommand>();
-    return command;
-  }
-
-  template <>
-  std::unique_ptr<CommandBase>
-  convert<CommandType::DrawText>(jsi::Runtime &runtime,
-                                 const jsi::Object &object) {
-    auto command = std::make_unique<DrawTextCommand>();
-
     return command;
   }
 };

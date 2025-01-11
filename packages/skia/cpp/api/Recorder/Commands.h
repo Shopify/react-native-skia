@@ -168,9 +168,9 @@ public:
       if (props.hasProperty(runtime, "origin")) {
         auto origin =
             processPoint(runtime, props.getProperty(runtime, "origin"));
-          m3.preTranslate(origin.x(), origin.y());
-          m3.preConcat(m4.asM33());
-          m3.preTranslate(-origin.x(), -origin.y());
+        m3.preTranslate(origin.x(), origin.y());
+        m3.preConcat(m4.asM33());
+        m3.preTranslate(-origin.x(), -origin.y());
       } else {
         m3 = m3.preConcat(m4.asM33());
       }

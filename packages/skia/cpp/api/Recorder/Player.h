@@ -40,6 +40,9 @@ void play(DrawingCtx *ctx, jsi::Runtime &runtime, CommandBase *command) {
       drawCmd->draw(ctx->canvas, ctx->getPaint());
     } else if (command->getType() == CommandType::DrawPaint) {
       ctx->canvas->drawPaint(ctx->getPaint());
+    } else if (command->getType() == CommandType::DrawText) {
+      auto drawCmd = static_cast<DrawTextCommand *>(command);
+      drawCmd->draw(ctx->canvas, ctx->getPaint());
     }
   }
 }
