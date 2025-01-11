@@ -147,36 +147,53 @@ public:
         command->clipDef = rrect;
       }
     }
-    /*
-const computeClip = (
-  Skia: Skia,
-  clip: ClipDef | undefined
-):
-  | undefined
-  | { clipPath: SkPath }
-  | { clipRect: SkRect }
-  | { clipRRect: SkRRect } => {
-  "worklet";
-  if (clip) {
-    if (isPathDef(clip)) {
-      return { clipPath: processPath(Skia, clip) };
-    } else if (isRRect(clip)) {
-      return { clipRRect: clip };
-    } else {
-      return { clipRect: clip };
+    if (props.hasProperty(runtime, "matrix")) {
+      SkMatrix m3;
+      auto matrix =
+          processMatrix(runtime, props.getProperty(runtime, "matrix"));
+      if (props.hasProperty(runtime, "origin")) {
+        auto origin =
+            processPoint(runtime, props.getProperty(runtime, "origin"));
+        m3.Translate(origin);
+        m3.Concat(m3, matrix);
+        m3.Translate(-origin);
+      } else {
+        m3.Concat(m3, matrix);
+      }
+      command->matrix = m3;
+    } else if (props.hasProperty(runtime, "transform")) {
+
+      SkMatrix m3;
+      command->matrix = m3;
     }
+    /*
+export const processTransformProps2 = (Skia: Skia, props: TransformProps) => {
+  "worklet";
+
+  const { transform, origin, matrix } = props;
+  if (matrix) {
+    const m3 = Skia.Matrix();
+    if (origin) {
+      m3.translate(origin.x, origin.y);
+      m3.concat(matrix);
+      m3.translate(-origin.x, -origin.y);
+    } else {
+      m3.concat(matrix);
+    }
+    return m3;
+  } else if (transform) {
+    const m3 = Skia.Matrix();
+    if (origin) {
+      m3.translate(origin.x, origin.y);
+    }
+    processTransform(m3, transform);
+    if (origin) {
+      m3.translate(-origin.x, -origin.y);
+    }
+    return m3;
   }
-  return undefined;
+  return null;
 };
-
-
-
-
-     const hasTransform = matrix !== undefined || transform !== undefined;
-  const clip = computeClip(Skia, rawClip);
-  const hasClip = clip !== undefined;
-  const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
-  const m3 = processTransformProps2(Skia, { matrix, transform, origin });
 
     */
     return command;

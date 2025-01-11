@@ -2,11 +2,46 @@
 
 #include <jsi/jsi.h>
 
+#include "JsiSkMatrix.h"
 #include "JsiSkPath.h"
 #include "JsiSkRRect.h"
 #include "JsiSkRect.h"
 
 namespace RNSkia {
+
+static SkMatrix processMatrix(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isObject()) {
+    auto object = value.asObject(runtime);
+    if (object.isHostObject(runtime)) {
+      auto ptr =
+          std::dynamic_pointer_cast<JsiSkMatrix>(object.asHostObject(runtime));
+      if (ptr != nullptr) {
+        return SkMatrix(*ptr->getObject());
+      }
+    } else if (object.isArray(runtime)) {
+      SkMatrix m3;
+      auto array = object.asArray(runtime);
+      auto size = array.size(runtime);
+      if (size == 9) {
+        for (size_t i = 0; i < size; ++i) {
+          auto a = array.getValueAtIndex(runtime, i);
+          m3.set(i, a.asNumber());
+        }
+      } else {
+        SkM44 m4;
+        for (size_t i = 0; i < size; ++i) {
+          auto a = array.getValueAtIndex(runtime, i);
+          m4.setRC(i / 4, i % 4, a.asNumber());
+        }
+        auto m = m4.asM33();
+        m3.setAll(m.rc(0, 0), m.rc(0, 1), m.rc(0, 2), m.rc(1, 0), m.rc(1, 1),
+                  m.rc(1, 2), m.rc(2, 0), m.rc(2, 1), m.rc(2, 2));
+      }
+      return m3;
+    }
+  }
+  throw std::runtime_error("Couldn't read matrix value");
+}
 
 static std::shared_ptr<SkPath> processPath(jsi::Runtime &runtime,
                                            const jsi::Value &value) {
