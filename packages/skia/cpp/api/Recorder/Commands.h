@@ -163,8 +163,9 @@ public:
       command->matrix = m3;
     } else if (props.hasProperty(runtime, "transform")) {
       SkMatrix m3;
-      auto m4 = processTransform(runtime, props.getProperty(runtime, "transform"));
-       if (props.hasProperty(runtime, "origin")) {
+      auto m4 =
+          processTransform(runtime, props.getProperty(runtime, "transform"));
+      if (props.hasProperty(runtime, "origin")) {
         auto origin =
             processPoint(runtime, props.getProperty(runtime, "origin"));
         m3 = m3.Translate(origin);

@@ -20,26 +20,30 @@ static SkM44 processTransform(jsi::Runtime &runtime, const jsi::Value &value) {
         auto value = array.getValueAtIndex(runtime, i).asObject(runtime);
         auto propNames = value.getPropertyNames(runtime);
         if (propNames.size(runtime) == 0) {
-            throw std::runtime_error(
-                "Empty value in transform. Expected translateX, translateY, "
-                "scale, "
-                "scaleX, scaleY, skewX, skewY, rotate or rotateZ.");
+          throw std::runtime_error(
+              "Empty value in transform. Expected translateX, translateY, "
+              "scale, "
+              "scaleX, scaleY, skewX, skewY, rotate or rotateZ.");
         }
-        auto key = propNames.getValueAtIndex(runtime, 0).asString(runtime).utf8(runtime);
+        auto key = propNames.getValueAtIndex(runtime, 0)
+                       .asString(runtime)
+                       .utf8(runtime);
         if (key == "translateX") {
-           auto x = value.getProperty(runtime, key.c_str()).asNumber();
-           SkM44 trX(1, 0, 0, x, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-           m4.preConcat(trX);
+          auto x = value.getProperty(runtime, key.c_str()).asNumber();
+          SkM44 trX(1, 0, 0, x, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+          m4.preConcat(trX);
         } else if (key == "translateY") {
-           auto y = value.getProperty(runtime, key.c_str()).asNumber();
-           SkM44 trY(1, 0, 0, 0, 0, 1, 0, y, 0, 0, 1, 0, 0, 0, 0, 1);
-           m4.preConcat(trY);
+          auto y = value.getProperty(runtime, key.c_str()).asNumber();
+          SkM44 trY(1, 0, 0, 0, 0, 1, 0, y, 0, 0, 1, 0, 0, 0, 0, 1);
+          m4.preConcat(trY);
         } else if (key == "translateZ") {
           auto z = value.getProperty(runtime, key.c_str()).asNumber();
           SkM44 trZ(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, z, 0, 0, 0, 1);
           m4.preConcat(trZ);
         } else if (key == "translate") {
-          auto arr = value.getProperty(runtime, key.c_str()).asObject(runtime).asArray(runtime);
+          auto arr = value.getProperty(runtime, key.c_str())
+                         .asObject(runtime)
+                         .asArray(runtime);
           double x = 0, y = 0, z = 0;
           for (int i; i < arr.size(runtime); i++) {
             if (i == 0) {
@@ -96,7 +100,9 @@ static SkM44 processTransform(jsi::Runtime &runtime, const jsi::Value &value) {
                             1);
           m4.preConcat(perspective);
         } else if (key == "matrix") {
-          auto arr = value.getProperty(runtime, key.c_str()).asObject(runtime).asArray(runtime);
+          auto arr = value.getProperty(runtime, key.c_str())
+                         .asObject(runtime)
+                         .asArray(runtime);
           SkM44 m44;
           for (size_t i = 0; i < arr.size(runtime); ++i) {
             auto obj = arr.getValueAtIndex(runtime, i);
@@ -104,7 +110,7 @@ static SkM44 processTransform(jsi::Runtime &runtime, const jsi::Value &value) {
           }
           m4.preConcat(m44);
         } else {
-            throw std::runtime_error(
+          throw std::runtime_error(
               "Unknown key in transform. Expected translateX, translateY, "
               "scale, "
               "scaleX, scaleY, skewX, skewY, rotate or rotateZ - got " +
