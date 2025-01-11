@@ -23,7 +23,11 @@ void play(DrawingCtx *ctx, jsi::Runtime &runtime, CommandBase *command) {
     ctx->restorePaint();
   } else if (command->getType() == CommandType::Group) {
     auto group = static_cast<GroupCommand *>(command);
-    RNSkLogger::logToConsole("Group()");
+    for (auto &child : group->children) {
+      if (child) {
+        play(ctx, runtime, child.get());
+      }
+    }
   } else {
     if (command->getType() == CommandType::DrawCircle) {
       auto drawCmd = static_cast<DrawCircleCommand *>(command);
