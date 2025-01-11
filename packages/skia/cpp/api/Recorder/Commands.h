@@ -82,7 +82,9 @@ public:
 class SaveCTMCommand : public Command<CommandType::SaveCTM> {
 public:
   std::optional<SkMatrix> matrix;
-  std::optional<std::variant<SkRRect, SkRect, std::shared_ptr<SkPath>>> clipDef;
+  std::optional<std::variant<std::shared_ptr<SkRRect>, std::shared_ptr<SkRect>,
+                             std::shared_ptr<SkPath>>>
+      clipDef;
   std::optional<bool> invertClip;
   std::optional<std::variant<SkPaint, bool>> layer;
 
@@ -108,13 +110,15 @@ public:
     }
     if (clipDef.has_value()) {
       auto clipOp = invertClip ? SkClipOp::kDifference : SkClipOp::kIntersect;
-      if (std::holds_alternative<SkRRect>(clipDef.value())) {
-        auto rrect = std::get<SkRRect>(clipDef.value());
-        canvas->clipRRect(rrect, clipOp, true);
-      } else if (std::holds_alternative<SkRect>(clipDef.value())) {
-        auto rect = std::get<SkRect>(clipDef.value());
-        canvas->clipRect(rect, clipOp, true);
-      } else if (std::holds_alternative<std::shared_ptr<SkPath>>(clipDef.value())) {
+      if (std::holds_alternative<std::shared_ptr<SkRRect>>(clipDef.value())) {
+        auto rrect = std::get<std::shared_ptr<SkRRect>>(clipDef.value());
+        canvas->clipRRect(*rrect, clipOp, true);
+      } else if (std::holds_alternative<std::shared_ptr<SkRect>>(
+                     clipDef.value())) {
+        auto rect = std::get<std::shared_ptr<SkRect>>(clipDef.value());
+        canvas->clipRect(*rect, clipOp, true);
+      } else if (std::holds_alternative<std::shared_ptr<SkPath>>(
+                     clipDef.value())) {
         auto path = std::get<std::shared_ptr<SkPath>>(clipDef.value());
         canvas->clipPath(*path, clipOp, true);
       }
@@ -133,6 +137,14 @@ public:
       auto path = processPath(runtime, clip);
       if (path) {
         command->clipDef = path;
+      }
+      auto rect = processRect(runtime, clip);
+      if (rect) {
+        command->clipDef = rect;
+      }
+      auto rrect = processRRect(runtime, clip);
+      if (rrect) {
+        command->clipDef = rrect;
       }
     }
     /*
