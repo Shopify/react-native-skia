@@ -5,6 +5,7 @@
 #include <jsi/jsi.h>
 
 #include "Commands.h"
+#include "Drawings.h"
 
 namespace RNSkia {
 
