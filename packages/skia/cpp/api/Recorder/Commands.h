@@ -10,6 +10,10 @@
 #include "include/core/SkMatrix.h"
 #include "include/core/SkPaint.h"
 
+#include "Data.h"
+
+#include "JsiSkPath.h"
+
 namespace RNSkia {
 
 enum CommandType {
@@ -78,11 +82,12 @@ public:
 class SaveCTMCommand : public Command<CommandType::SaveCTM> {
 public:
   std::optional<SkMatrix> matrix;
-  std::optional<std::variant<SkRRect, SkRect, SkPath>> clipDef;
+  std::optional<std::variant<SkRRect, SkRect, std::shared_ptr<SkPath>>> clipDef;
   std::optional<bool> invertClip;
   std::optional<std::variant<SkPaint, bool>> layer;
 
   void setCTM(SkCanvas *canvas) {
+    // TODO: shouldSave is not necessary here
     auto shouldSave =
         matrix.has_value() || clipDef.has_value() || layer.has_value();
     if (shouldSave) {
@@ -109,9 +114,9 @@ public:
       } else if (std::holds_alternative<SkRect>(clipDef.value())) {
         auto rect = std::get<SkRect>(clipDef.value());
         canvas->clipRect(rect, clipOp, true);
-      } else if (std::holds_alternative<SkPath>(clipDef.value())) {
-        auto path = std::get<SkPath>(clipDef.value());
-        canvas->clipPath(path, clipOp, true);
+      } else if (std::holds_alternative<std::shared_ptr<SkPath>>(clipDef.value())) {
+        auto path = std::get<std::shared_ptr<SkPath>>(clipDef.value());
+        canvas->clipPath(*path, clipOp, true);
       }
     }
   }
@@ -119,6 +124,49 @@ public:
   static std::unique_ptr<SaveCTMCommand>
   fromJSIObject(jsi::Runtime &runtime, const jsi::Object &object) {
     auto command = std::make_unique<SaveCTMCommand>();
+    auto props = object.getProperty(runtime, "props").asObject(runtime);
+    if (props.hasProperty(runtime, "invertClip")) {
+      command->invertClip = props.getProperty(runtime, "invertClip").asBool();
+    }
+    if (props.hasProperty(runtime, "clip")) {
+      auto clip = props.getProperty(runtime, "clip");
+      auto path = processPath(runtime, clip);
+      if (path) {
+        command->clipDef = path;
+      }
+    }
+    /*
+const computeClip = (
+  Skia: Skia,
+  clip: ClipDef | undefined
+):
+  | undefined
+  | { clipPath: SkPath }
+  | { clipRect: SkRect }
+  | { clipRRect: SkRRect } => {
+  "worklet";
+  if (clip) {
+    if (isPathDef(clip)) {
+      return { clipPath: processPath(Skia, clip) };
+    } else if (isRRect(clip)) {
+      return { clipRRect: clip };
+    } else {
+      return { clipRect: clip };
+    }
+  }
+  return undefined;
+};
+
+
+
+
+     const hasTransform = matrix !== undefined || transform !== undefined;
+  const clip = computeClip(Skia, rawClip);
+  const hasClip = clip !== undefined;
+  const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
+  const m3 = processTransformProps2(Skia, { matrix, transform, origin });
+
+    */
     return command;
   }
 };
