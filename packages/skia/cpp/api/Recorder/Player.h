@@ -29,6 +29,8 @@ void play(DrawingCtx *ctx, jsi::Runtime &runtime, CommandBase *command) {
       }
     }
   } else if (command->getType() == CommandType::SaveCTM) {
+    auto ctmCmd = static_cast<SaveCTMCommand *>(command);
+    ctmCmd->setCTM(ctx->canvas);
   } else if (command->getType() == CommandType::RestoreCTM) {
     ctx->canvas->restore();
   } else {

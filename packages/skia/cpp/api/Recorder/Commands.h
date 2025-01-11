@@ -154,48 +154,27 @@ public:
       if (props.hasProperty(runtime, "origin")) {
         auto origin =
             processPoint(runtime, props.getProperty(runtime, "origin"));
-        m3.Translate(origin);
-        m3.Concat(m3, matrix);
-        m3.Translate(-origin);
+        m3 = m3.Translate(origin);
+        m3 = m3.Concat(m3, matrix);
+        m3 = m3.Translate(-origin);
       } else {
-        m3.Concat(m3, matrix);
+        m3 = m3.Concat(m3, matrix);
       }
       command->matrix = m3;
     } else if (props.hasProperty(runtime, "transform")) {
-
       SkMatrix m3;
+      auto m4 = processTransform(runtime, props.getProperty(runtime, "transform"));
+       if (props.hasProperty(runtime, "origin")) {
+        auto origin =
+            processPoint(runtime, props.getProperty(runtime, "origin"));
+        m3 = m3.Translate(origin);
+        m3 = m3.Concat(m3, m4.asM33());
+        m3 = m3.Translate(-origin);
+      } else {
+        m3 = m3.Concat(m3, m4.asM33());
+      }
       command->matrix = m3;
     }
-    /*
-export const processTransformProps2 = (Skia: Skia, props: TransformProps) => {
-  "worklet";
-
-  const { transform, origin, matrix } = props;
-  if (matrix) {
-    const m3 = Skia.Matrix();
-    if (origin) {
-      m3.translate(origin.x, origin.y);
-      m3.concat(matrix);
-      m3.translate(-origin.x, -origin.y);
-    } else {
-      m3.concat(matrix);
-    }
-    return m3;
-  } else if (transform) {
-    const m3 = Skia.Matrix();
-    if (origin) {
-      m3.translate(origin.x, origin.y);
-    }
-    processTransform(m3, transform);
-    if (origin) {
-      m3.translate(-origin.x, -origin.y);
-    }
-    return m3;
-  }
-  return null;
-};
-
-    */
     return command;
   }
 };
