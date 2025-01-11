@@ -154,11 +154,11 @@ public:
       if (props.hasProperty(runtime, "origin")) {
         auto origin =
             processPoint(runtime, props.getProperty(runtime, "origin"));
-        m3 = m3.Translate(origin);
-        m3 = m3.Concat(m3, matrix);
-        m3 = m3.Translate(SkPoint(-origin.x(), -origin.y()));
+        m3.preTranslate(origin.x(), origin.y());
+        m3.preConcat(matrix);
+        m3.preTranslate(-origin.x(), -origin.y());
       } else {
-        m3 = m3.Concat(m3, matrix);
+        m3.preConcat(matrix);
       }
       command->matrix = m3;
     } else if (props.hasProperty(runtime, "transform")) {
@@ -168,11 +168,11 @@ public:
       if (props.hasProperty(runtime, "origin")) {
         auto origin =
             processPoint(runtime, props.getProperty(runtime, "origin"));
-        m3 = SkMatrix::Translate(origin);
-        m3 = SkMatrix::Concat(m3, m4.asM33());
-        m3 = SkMatrix::Concat(m3, SkMatrix::Translate(SkPoint(-origin.x(), -origin.y())));
+          m3.preTranslate(origin.x(), origin.y());
+          m3.preConcat(m4.asM33());
+          m3.preTranslate(-origin.x(), -origin.y());
       } else {
-        m3 = m3.Concat(m3, m4.asM33());
+        m3 = m3.preConcat(m4.asM33());
       }
       command->matrix = m3;
     }
