@@ -75,12 +75,52 @@ public:
   std::vector<std::unique_ptr<CommandBase>> children;
 };
 
-class CTMCommand : public Command<CommandType::SaveCTM> {
+class SaveCTMCommand : public Command<CommandType::SaveCTM> {
 public:
   std::optional<SkMatrix> matrix;
   std::optional<std::variant<SkRRect, SkRect, SkPath>> clipDef;
   std::optional<bool> invertClip;
   std::optional<std::variant<SkPaint, bool>> layer;
+
+  void setCTM(SkCanvas *canvas) {
+    auto shouldSave =
+        matrix.has_value() || clipDef.has_value() || layer.has_value();
+    if (shouldSave) {
+      if (layer.has_value()) {
+        if (std::holds_alternative<bool>(layer.value())) {
+          canvas->saveLayer(
+              SkCanvas::SaveLayerRec(nullptr, nullptr, nullptr, 0));
+        } else {
+          canvas->saveLayer(SkCanvas::SaveLayerRec(
+              nullptr, &std::get<SkPaint>(layer.value()), nullptr, 0));
+        }
+      } else {
+        canvas->save();
+      }
+    }
+    if (matrix.has_value()) {
+      canvas->concat(matrix.value());
+    }
+    if (clipDef.has_value()) {
+      auto clipOp = invertClip ? SkClipOp::kDifference : SkClipOp::kIntersect;
+      if (std::holds_alternative<SkRRect>(clipDef.value())) {
+        auto rrect = std::get<SkRRect>(clipDef.value());
+        canvas->clipRRect(rrect, clipOp, true);
+      } else if (std::holds_alternative<SkRect>(clipDef.value())) {
+        auto rect = std::get<SkRect>(clipDef.value());
+        canvas->clipRect(rect, clipOp, true);
+      } else if (std::holds_alternative<SkPath>(clipDef.value())) {
+        auto path = std::get<SkPath>(clipDef.value());
+        canvas->clipPath(path, clipOp, true);
+      }
+    }
+  }
+
+  static std::unique_ptr<SaveCTMCommand>
+  fromJSIObject(jsi::Runtime &runtime, const jsi::Object &object) {
+    auto command = std::make_unique<SaveCTMCommand>();
+    return command;
+  }
 };
 
 class SavePaintCommand : public Command<CommandType::SavePaint> {

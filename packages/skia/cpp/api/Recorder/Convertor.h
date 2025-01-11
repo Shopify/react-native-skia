@@ -52,7 +52,7 @@ private:
       case CommandType::Group:
         return convert<CommandType::Group>(runtime, object);
       case CommandType::SaveCTM:
-        return convert<CommandType::SaveCTM>(runtime, object);
+        return SaveCTMCommand::fromJSIObject(runtime, object);
       case CommandType::SavePaint:
         return SavePaintCommand::fromJSIObject(runtime, object);
       case CommandType::DrawCircle:
@@ -98,14 +98,6 @@ private:
   convert<CommandType::SavePaint>(jsi::Runtime &runtime,
                                   const jsi::Object &object) {
     auto command = std::make_unique<SavePaintCommand>();
-    return command;
-  }
-
-  template <>
-  std::unique_ptr<CommandBase>
-  convert<CommandType::SaveCTM>(jsi::Runtime &runtime,
-                                const jsi::Object &object) {
-    auto command = std::make_unique<CTMCommand>();
     return command;
   }
 

@@ -28,6 +28,9 @@ void play(DrawingCtx *ctx, jsi::Runtime &runtime, CommandBase *command) {
         play(ctx, runtime, child.get());
       }
     }
+  } else if (command->getType() == CommandType::SaveCTM) {
+  } else if (command->getType() == CommandType::RestoreCTM) {
+    ctx->canvas->restore();
   } else {
     if (command->getType() == CommandType::DrawCircle) {
       auto drawCmd = static_cast<DrawCircleCommand *>(command);
