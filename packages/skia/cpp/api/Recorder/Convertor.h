@@ -54,7 +54,7 @@ private:
       case CommandType::SaveCTM:
         return convert<CommandType::SaveCTM>(runtime, object);
       case CommandType::SavePaint:
-        return convert<CommandType::SavePaint>(runtime, object);
+        return SavePaintCommand::fromJSIObject(runtime, object);
       case CommandType::DrawCircle:
         return DrawCircleCommand::fromJSIObject(runtime, object);
       case CommandType::DrawText:
