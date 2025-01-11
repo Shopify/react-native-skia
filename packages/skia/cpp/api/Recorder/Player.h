@@ -17,7 +17,7 @@ void play(DrawingCtx *ctx, jsi::Runtime &runtime, CommandBase *command) {
       // ctx->paints.push(paintCmd->paint.value());
     } else {
       ctx->savePaint();
-      // setPaintProperties(ctx->Skia, ctx->paint, paintCmd->props);
+      paintCmd->setProperties(ctx->getPaint());
     }
   } else if (command->getType() == CommandType::RestorePaint) {
     ctx->restorePaint();

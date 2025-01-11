@@ -96,6 +96,12 @@ public:
   std::optional<double> opacity;
   std::optional<bool> antiAlias;
   std::optional<bool> dither;
+
+  void setProperties(SkPaint &paint) {
+    if (color.has_value()) {
+      paint.setColor(color.value());
+    }
+  }
 };
 
 class DrawTextCommand : public Command<CommandType::DrawText> {
@@ -114,6 +120,25 @@ public:
 
   void draw(SkCanvas *canvas, SkPaint &paint) {
     canvas->drawCircle(cx, cy, r, paint);
+  }
+
+  static std::unique_ptr<DrawCircleCommand>
+  fromJSIObject(jsi::Runtime &runtime, const jsi::Object &object) {
+    auto command = std::make_unique<DrawCircleCommand>();
+    auto props = object.getProperty(runtime, "props").asObject(runtime);
+
+    if (props.hasProperty(runtime, "c")) {
+      auto c = props.getProperty(runtime, "c").asObject(runtime);
+      command->cx = c.getProperty(runtime, "x").asNumber();
+      command->cy = c.getProperty(runtime, "y").asNumber();
+    } else {
+      command->cx =
+          static_cast<float>(props.getProperty(runtime, "cx").asNumber());
+      command->cy =
+          static_cast<float>(props.getProperty(runtime, "cy").asNumber());
+    }
+    command->r = static_cast<float>(props.getProperty(runtime, "r").asNumber());
+    return command;
   }
 };
 
@@ -164,7 +189,7 @@ private:
       case CommandType::SavePaint:
         return convert<CommandType::SavePaint>(runtime, object);
       case CommandType::DrawCircle:
-        return convert<CommandType::DrawCircle>(runtime, object);
+        return DrawCircleCommand::fromJSIObject(runtime, object);
       case CommandType::DrawText:
         return convert<CommandType::DrawText>(runtime, object);
       default:
@@ -214,26 +239,6 @@ private:
   convert<CommandType::SaveCTM>(jsi::Runtime &runtime,
                                 const jsi::Object &object) {
     auto command = std::make_unique<CTMCommand>();
-    return command;
-  }
-
-  template <>
-  std::unique_ptr<CommandBase>
-  convert<CommandType::DrawCircle>(jsi::Runtime &runtime,
-                                   const jsi::Object &object) {
-    auto command = std::make_unique<DrawCircleCommand>();
-    auto props = object.getProperty(runtime, "props").asObject(runtime);
-    if (props.hasProperty(runtime, "c")) {
-      auto c = props.getProperty(runtime, "c").asObject(runtime);
-      command->cx = c.getProperty(runtime, "x").asNumber();
-      command->cy = c.getProperty(runtime, "y").asNumber();
-    } else {
-      command->cx =
-          static_cast<float>(props.getProperty(runtime, "cx").asNumber());
-      command->cy =
-          static_cast<float>(props.getProperty(runtime, "cy").asNumber());
-    }
-    command->r = static_cast<float>(props.getProperty(runtime, "r").asNumber());
     return command;
   }
 
