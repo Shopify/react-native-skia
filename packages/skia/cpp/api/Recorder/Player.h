@@ -33,6 +33,8 @@ void play(DrawingCtx *ctx, jsi::Runtime &runtime, CommandBase *command) {
       auto drawCmd = static_cast<DrawCircleCommand *>(command);
       auto paint = ctx->getPaint();
       drawCmd->draw(ctx->canvas, ctx->getPaint());
+    } else if (command->getType() == CommandType::DrawPaint) {
+      ctx->canvas->drawPaint(ctx->getPaint());
     }
   }
 }
