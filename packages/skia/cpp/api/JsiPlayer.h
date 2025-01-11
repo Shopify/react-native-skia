@@ -9,6 +9,7 @@
 #include "JsiSkHostObjects.h"
 
 #include "RNSkLog.h"
+#include "Recorder/Convertor.h"
 #include "Recorder/DrawingCtx.h"
 #include "Recorder/Player.h"
 
@@ -41,8 +42,7 @@ public:
       DrawingCtx ctx(canvas);
       for (int i = 0; i < size; i++) {
         auto command = commands.getValueAtIndex(runtime, i).asObject(runtime);
-        std::unique_ptr<CommandBase> cmd =
-            CommandConverter::convert(runtime, command);
+        std::unique_ptr<CommandBase> cmd = Convertor::convert(runtime, command);
         play(&ctx, runtime, cmd.get());
       }
       return jsi::Value::undefined();
