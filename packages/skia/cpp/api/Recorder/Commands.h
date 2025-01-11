@@ -63,8 +63,11 @@ public:
 
 template <CommandType T> class Command : public CommandBase {
 public:
-  static constexpr CommandType type = T;
-  CommandType getType() const override { return type; }
+  explicit Command(CommandType runtimeType = T) : _type(runtimeType) {}
+  CommandType getType() const override { return _type; }
+
+private:
+  CommandType _type;
 };
 
 class GroupCommand : public Command<CommandType::Group> {
@@ -105,9 +108,13 @@ public:
 
 class DrawCircleCommand : public Command<CommandType::DrawCircle> {
 public:
-  double _x;
-  double _y;
-  double _radius;
+  float cx;
+  float cy;
+  float r;
+
+  void draw(SkCanvas *canvas, SkPaint &paint) {
+    canvas->drawCircle(cx, cy, r, paint);
+  }
 };
 
 class CommandConverter {
@@ -117,6 +124,7 @@ public:
     try {
       auto type = static_cast<CommandType>(
           object.getProperty(runtime, "type").asNumber());
+      materializedProps(runtime, object);
       return convert(runtime, object, type);
     } catch (const std::exception &) {
       return nullptr;
@@ -124,6 +132,27 @@ public:
   }
 
 private:
+  static void materializedProps(jsi::Runtime &runtime,
+                                const jsi::Object &object) {
+    if (object.hasProperty(runtime, "animatedProps")) {
+      auto animatedProps =
+          object.getProperty(runtime, "animatedProps").asObject(runtime);
+      auto props = object.getProperty(runtime, "props").asObject(runtime);
+      auto propNames = animatedProps.getPropertyNames(runtime);
+      auto length = propNames.length(runtime);
+
+      for (size_t i = 0; i < length; i++) {
+        auto propName = propNames.getValueAtIndex(runtime, i)
+                            .asString(runtime)
+                            .utf8(runtime);
+        auto propValue = animatedProps.getProperty(runtime, propName.c_str())
+                             .asObject(runtime)
+                             .getProperty(runtime, "value");
+        props.setProperty(runtime, propName.c_str(), propValue);
+      }
+    }
+  }
+
   static std::unique_ptr<CommandBase>
   convert(jsi::Runtime &runtime, const jsi::Object &object, CommandType type) {
     try {
@@ -132,14 +161,14 @@ private:
         return convert<CommandType::Group>(runtime, object);
       case CommandType::SaveCTM:
         return convert<CommandType::SaveCTM>(runtime, object);
-//      case CommandType::SavePaint:
-//        return convert<CommandType::SavePaint>(runtime, object);
+      case CommandType::SavePaint:
+        return convert<CommandType::SavePaint>(runtime, object);
       case CommandType::DrawCircle:
         return convert<CommandType::DrawCircle>(runtime, object);
       case CommandType::DrawText:
         return convert<CommandType::DrawText>(runtime, object);
       default:
-        return nullptr;
+        return std::make_unique<Command<CommandType::Group>>(type);
       }
     } catch (const std::exception &) {
       return nullptr;
@@ -163,12 +192,20 @@ private:
     for (size_t i = 0; i < children.size(runtime); i++) {
       std::unique_ptr<CommandBase> childCommand = CommandConverter::convert(
           runtime, children.getValueAtIndex(runtime, i).asObject(runtime));
-    //  if (!childCommand) {
-    //    throw std::runtime_error("Failed to convert child command");
-    //  }
+      //          if (!childCommand) {
+      //              throw std::runtime_error("Failed to convert child command
+      //              of type");
+      //          }
       command->children.push_back(std::move(childCommand));
     }
+    return command;
+  }
 
+  template <>
+  std::unique_ptr<CommandBase>
+  convert<CommandType::SavePaint>(jsi::Runtime &runtime,
+                                  const jsi::Object &object) {
+    auto command = std::make_unique<SavePaintCommand>();
     return command;
   }
 
@@ -185,6 +222,18 @@ private:
   convert<CommandType::DrawCircle>(jsi::Runtime &runtime,
                                    const jsi::Object &object) {
     auto command = std::make_unique<DrawCircleCommand>();
+    auto props = object.getProperty(runtime, "props").asObject(runtime);
+    if (props.hasProperty(runtime, "c")) {
+      auto c = props.getProperty(runtime, "c").asObject(runtime);
+      command->cx = c.getProperty(runtime, "x").asNumber();
+      command->cy = c.getProperty(runtime, "y").asNumber();
+    } else {
+      command->cx =
+          static_cast<float>(props.getProperty(runtime, "cx").asNumber());
+      command->cy =
+          static_cast<float>(props.getProperty(runtime, "cy").asNumber());
+    }
+    command->r = static_cast<float>(props.getProperty(runtime, "r").asNumber());
     return command;
   }
 

@@ -13,23 +13,29 @@ namespace RNSkia {
 
 class DrawingCtx {
 private:
-  std::stack<std::shared_ptr<SkPaint>> paints;
+  std::stack<SkPaint> paints;
   std::stack<sk_sp<SkColorFilter>> colorFilters;
   std::stack<sk_sp<SkShader>> shaders;
   std::stack<sk_sp<SkImageFilter>> imageFilters;
   std::stack<sk_sp<SkPathEffect>> pathEffects;
-  std::stack<std::shared_ptr<SkPaint>> paintDeclarations;
+  std::stack<SkPaint> paintDeclarations;
 
 public:
-  DrawingCtx(SkCanvas *canvas) : canvas(canvas) {}
+  DrawingCtx(SkCanvas *canvas) : canvas(canvas) {
+    SkPaint paint;
+    paints.push(paint);
+  }
 
   SkCanvas *canvas;
 
-  std::shared_ptr<SkPaint> getPaint() { return paints.top(); }
+  SkPaint &getPaint() { return paints.top(); }
 
-  void savePaint() { paints.push(std::make_shared<SkPaint>(*getPaint())); }
+  void savePaint() {
+    SkPaint copy(getPaint());
+    paints.push(copy);
+  }
 
-  std::shared_ptr<SkPaint> restorePaint() {
+  SkPaint restorePaint() {
     auto top = paints.top();
     paints.pop();
     return top;

@@ -39,11 +39,11 @@ public:
       auto commands = arguments[1].asObject(runtime).asArray(runtime);
       auto size = commands.size(runtime);
       DrawingCtx ctx(canvas);
-      for (int i=0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         auto command = commands.getValueAtIndex(runtime, i).asObject(runtime);
-        std::unique_ptr<CommandBase> out =
+        std::unique_ptr<CommandBase> cmd =
             CommandConverter::convert(runtime, command);
-        play(&ctx, runtime, command);
+        play(&ctx, runtime, cmd.get());
       }
       return jsi::Value::undefined();
     };
