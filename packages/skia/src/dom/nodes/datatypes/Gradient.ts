@@ -16,6 +16,22 @@ export const transformOrigin = (origin: Vector, transform: Transforms3d) => {
   ];
 };
 
+export const processColor = (
+  Skia: Skia,
+  color: number | string | Float32Array | number[]
+) => {
+  "worklet";
+  if (typeof color === "string" || typeof color === "number") {
+    return Skia.Color(color);
+  } else if (Array.isArray(color) || color instanceof Float32Array) {
+    return color instanceof Float32Array ? color : new Float32Array(color);
+  } else {
+    throw new Error(
+      `Invalid color type: ${typeof color}. Expected number, string, or array.`
+    );
+  }
+};
+
 export const processGradientProps = (
   Skia: Skia,
   { colors, positions, mode, flags, ...transform }: GradientProps
@@ -24,7 +40,7 @@ export const processGradientProps = (
   const localMatrix = Skia.Matrix();
   processTransformProps(localMatrix, transform);
   return {
-    colors: colors.map((color) => Skia.Color(color)),
+    colors: colors.map((color) => processColor(Skia, color)),
     positions: positions ?? null,
     mode: TileMode[enumKey(mode ?? "clamp")],
     flags,
