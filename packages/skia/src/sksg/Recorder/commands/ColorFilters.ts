@@ -1,4 +1,4 @@
-import { enumKey } from "../../../dom/nodes";
+import { enumKey, processColor } from "../../../dom/nodes";
 import type {
   BlendColorFilterProps,
   LerpColorFilterProps,
@@ -59,7 +59,7 @@ export const pushColorFilter = (
   if (isColorFilter(command, NodeType.BlendColorFilter)) {
     const { props } = command;
     const { mode } = props;
-    const color = ctx.Skia.Color(props.color);
+    const color = processColor(ctx.Skia, props.color);
     cf = ctx.Skia.ColorFilter.MakeBlend(color, BlendMode[enumKey(mode)]);
   } else if (isColorFilter(command, NodeType.MatrixColorFilter)) {
     const { matrix } = command.props;
