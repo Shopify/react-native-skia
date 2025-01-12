@@ -90,6 +90,7 @@ export const Canvas = forwardRef(
 
     useEffect(() => {
       if (mode === "continuous") {
+        console.warn("The `mode` property in `Canvas` is deprecated.");
         requestRedraw();
       }
       return () => {
