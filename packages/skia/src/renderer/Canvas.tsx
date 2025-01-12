@@ -99,6 +99,7 @@ export const Canvas = forwardRef(
         }
       };
     }, [mode, requestRedraw]);
+
     // Component methods
     useImperativeHandle(ref, () => ({
       makeImageSnapshot: (rect?: SkRect) => {

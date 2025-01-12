@@ -40,6 +40,7 @@ export const saveCTM = (ctx: DrawingContext, props: CTMProps) => {
     origin,
     layer,
   } = props as CTMProps;
+  // TODO: shouldSave is not necessary here
   const hasTransform = matrix !== undefined || transform !== undefined;
   const clip = computeClip(Skia, rawClip);
   const hasClip = clip !== undefined;

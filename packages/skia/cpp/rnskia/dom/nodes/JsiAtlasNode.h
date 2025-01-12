@@ -29,8 +29,9 @@ protected:
                                  ? *_blendModeProp->getDerivedValue()
                                  : SkBlendMode::kDstOver;
       auto paint = *context->getPaint();
-      auto sampling = _samplingProp->isSet() ? *_samplingProp->getDerivedValue()
-                                             : SkSamplingOptions(SkFilterMode::kLinear);
+      auto sampling = _samplingProp->isSet()
+                          ? *_samplingProp->getDerivedValue()
+                          : SkSamplingOptions(SkFilterMode::kLinear);
       context->getCanvas()->drawAtlas(
           image.get(), transforms->data(), sprites->data(),
           colors == nullptr ? nullptr : colors->data(), sprites->size(),
