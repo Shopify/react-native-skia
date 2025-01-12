@@ -1,5 +1,5 @@
-import React, { useMemo } from "react";
-import { StyleSheet, useWindowDimensions, View } from "react-native";
+import React, { useCallback, useMemo, useState } from "react";
+import { Button, StyleSheet, useWindowDimensions, View } from "react-native";
 import {
   BlurMask,
   vec,
@@ -32,8 +32,8 @@ const Ring = ({ index, progress, total }: RingProps) => {
     [height, width]
   );
 
+  const theta = (index * (2 * Math.PI)) / total;
   const transform = useDerivedValue(() => {
-    const theta = (index * (2 * Math.PI)) / total;
     const { x, y } = polar2Canvas(
       { theta, radius: progress.value * R },
       { x: 0, y: 0 }
@@ -54,6 +54,7 @@ const Ring = ({ index, progress, total }: RingProps) => {
 };
 
 export const Breathe = () => {
+  const [rings, setRings] = useState(12);
   const { width, height } = useWindowDimensions();
   const center = useMemo(
     () => vec(width / 2, height / 2 - 64),
@@ -66,15 +67,30 @@ export const Breathe = () => {
     { rotate: mix(progress.value, -Math.PI, 0) },
   ]);
 
+  const add = useCallback(() => {
+    setRings((r) => r + 1);
+  }, []);
+  const remove = useCallback(() => {
+    setRings((r) => Math.max(1, r - 1));
+  }, []);
   return (
     <View style={{ flex: 1 }}>
+      <View>
+        <Button onPress={add} title="add" />
+        <Button onPress={remove} title="remove" />
+      </View>
       <Canvas style={styles.container} opaque>
         <Fill color="rgb(36,43,56)" />
         <Group origin={center} transform={transform} blendMode="screen">
           <BlurMask style="solid" blur={40} />
-          {new Array(6).fill(0).map((_, index) => {
+          {new Array(rings).fill(0).map((_, index) => {
             return (
-              <Ring key={index} index={index} progress={progress} total={6} />
+              <Ring
+                key={index}
+                index={index}
+                progress={progress}
+                total={rings}
+              />
             );
           })}
         </Group>
