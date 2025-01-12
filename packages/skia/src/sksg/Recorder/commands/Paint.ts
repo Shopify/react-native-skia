@@ -1,4 +1,4 @@
-import { enumKey } from "../../../dom/nodes";
+import { enumKey, processColor } from "../../../dom/nodes";
 import type { PaintProps } from "../../../dom/types";
 import {
   BlendMode,
@@ -7,22 +7,6 @@ import {
   StrokeJoin,
 } from "../../../skia/types";
 import type { SkPaint, Skia } from "../../../skia/types";
-
-export const processColor = (
-  Skia: Skia,
-  color: number | string | Float32Array | number[]
-) => {
-  "worklet";
-  if (typeof color === "string" || typeof color === "number") {
-    return Skia.Color(color);
-  } else if (Array.isArray(color) || color instanceof Float32Array) {
-    return color instanceof Float32Array ? color : new Float32Array(color);
-  } else {
-    throw new Error(
-      `Invalid color type: ${typeof color}. Expected number, string, or array.`
-    );
-  }
-};
 
 export const setPaintProperties = (
   Skia: Skia,

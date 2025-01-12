@@ -2,6 +2,7 @@ import {
   enumKey,
   fitRects,
   getRect,
+  processColor,
   processGradientProps,
   processTransformProps,
   rect2rect,
@@ -49,7 +50,7 @@ const declareShader = (ctx: DrawingContext, props: ShaderProps) => {
 const declareColorShader = (ctx: DrawingContext, props: ColorProps) => {
   "worklet";
   const { color } = props;
-  const shader = ctx.Skia.Shader.MakeColor(ctx.Skia.Color(color));
+  const shader = ctx.Skia.Shader.MakeColor(processColor(ctx.Skia, color));
   ctx.shaders.push(shader);
 };
 
