@@ -69,7 +69,6 @@ export class Recorder {
       const prop = props[key];
       if (isSharedValue(prop)) {
         this.animationValues.add(prop);
-        props[key] = prop.value;
         animatedProps[key] = prop;
         hasAnimatedProps = true;
       }

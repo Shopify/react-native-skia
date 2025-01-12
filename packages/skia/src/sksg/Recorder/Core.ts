@@ -27,6 +27,7 @@ import type {
 
 // export enum CommandType {
 //   // Context
+//   Group = "Group",
 //   SavePaint = "SavePaint",
 //   RestorePaint = "RestorePaint",
 //   SaveCTM = "SaveCTM",
