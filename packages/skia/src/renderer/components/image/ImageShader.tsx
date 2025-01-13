@@ -6,24 +6,11 @@ import type { SkiaDefaultProps } from "../../processors";
 export const ImageShader = ({
   tx = "decal",
   ty = "decal",
-  fm = "nearest",
-  mm = "none",
   fit = "none",
   transform = [],
   ...props
-}: SkiaDefaultProps<
-  ImageShaderProps,
-  "tx" | "ty" | "fm" | "mm" | "fit" | "transform"
->) => {
+}: SkiaDefaultProps<ImageShaderProps, "tx" | "ty" | "fit" | "transform">) => {
   return (
-    <skImageShader
-      tx={tx}
-      ty={ty}
-      fm={fm}
-      mm={mm}
-      fit={fit}
-      transform={transform}
-      {...props}
-    />
+    <skImageShader tx={tx} ty={ty} fit={fit} transform={transform} {...props} />
   );
 };

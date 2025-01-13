@@ -6,6 +6,7 @@
 #include "ColorProp.h"
 #include "NodeProp.h"
 #include "NumbersProp.h"
+#include "SamplingProp.h"
 #include "TileModeProp.h"
 #include "TransformsProps.h"
 #include "UniformsProp.h"
@@ -120,12 +121,12 @@ public:
       }
     }
 
-    context->getShaders()->push(image->makeShader(
-        *_txProp->getDerivedValue(), *_tyProp->getDerivedValue(),
-        SkSamplingOptions(
-            getFilterModeFromString(_filterModeProp->value().getAsString()),
-            getMipmapModeFromString(_mipmapModeProp->value().getAsString())),
-        &_matrix));
+    auto samplingOptions = _samplingProp->isSet()
+                               ? *_samplingProp->getDerivedValue()
+                               : SkSamplingOptions(SkFilterMode::kLinear);
+    context->getShaders()->push(image->makeShader(*_txProp->getDerivedValue(),
+                                                  *_tyProp->getDerivedValue(),
+                                                  samplingOptions, &_matrix));
   }
 
 protected:
@@ -133,17 +134,14 @@ protected:
     JsiDomDeclarationNode::defineProperties(container);
     _txProp = container->defineProperty<TileModeProp>("tx");
     _tyProp = container->defineProperty<TileModeProp>("ty");
-    _filterModeProp = container->defineProperty<NodeProp>("fm");
-    _mipmapModeProp = container->defineProperty<NodeProp>("mm");
 
+    _samplingProp = container->defineProperty<SamplingProp>("sampling");
     _imageProps = container->defineProperty<ImageProps>();
     _transformProp = container->defineProperty<TransformProp>("transform");
     _originProp = container->defineProperty<PointProp>("origin");
 
     _txProp->require();
     _tyProp->require();
-    _filterModeProp->require();
-    _mipmapModeProp->require();
 
     _transformProp->require();
 
@@ -152,41 +150,14 @@ protected:
   }
 
 private:
-  SkFilterMode getFilterModeFromString(const std::string &value) {
-    if (value == "last") {
-      return SkFilterMode::kLast;
-    } else if (value == "linear") {
-      return SkFilterMode::kLinear;
-    } else if (value == "nearest") {
-      return SkFilterMode::kNearest;
-    }
-    throw std::runtime_error("The value \"" + value +
-                             "\" is not a valid Filter Mode.");
-  }
-
-  SkMipmapMode getMipmapModeFromString(const std::string &value) {
-    if (value == "last") {
-      return SkMipmapMode::kLast;
-    } else if (value == "last") {
-      return SkMipmapMode::kLast;
-    } else if (value == "last") {
-      return SkMipmapMode::kLast;
-    } else if (value == "none") {
-      return SkMipmapMode::kNone;
-    }
-    throw std::runtime_error("The value \"" + value +
-                             "\" is not a valid Mipmap Mode.");
-  }
-
   SkMatrix _matrix;
 
   TileModeProp *_txProp;
   TileModeProp *_tyProp;
-  NodeProp *_filterModeProp;
-  NodeProp *_mipmapModeProp;
   ImageProps *_imageProps;
   TransformProp *_transformProp;
   PointProp *_originProp;
+  SamplingProp *_samplingProp;
 };
 
 class JsiColorShaderNode : public JsiDomDeclarationNode,

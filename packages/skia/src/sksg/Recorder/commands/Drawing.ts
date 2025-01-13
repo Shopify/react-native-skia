@@ -5,6 +5,7 @@ import {
   inflate,
   NodeType,
   processCircle,
+  processColor,
   processPath,
   processRect,
   processRRect,
@@ -40,7 +41,10 @@ import {
   BlurStyle,
   ClipOp,
   FillType,
+  FilterMode,
+  isCubicSampling,
   isRRect,
+  MipmapMode,
   PointMode,
   VertexMode,
 } from "../../../skia/types";
@@ -84,7 +88,7 @@ export const drawBox = (
     .map((shadow) => {
       const { color = "black", blur, spread = 0, dx = 0, dy = 0 } = shadow;
       const lPaint = Skia.Paint();
-      lPaint.setColor(Skia.Color(color));
+      lPaint.setColor(processColor(Skia, color));
       lPaint.setAlphaf(paint.getAlphaf() * opacity);
       lPaint.setMaskFilter(
         Skia.MaskFilter.MakeBlur(BlurStyle.Normal, blur, true)
@@ -102,7 +106,7 @@ export const drawBox = (
       canvas.save();
       canvas.clipRRect(box, ClipOp.Intersect, false);
       const lPaint = Skia.Paint();
-      lPaint.setColor(Skia.Color(color));
+      lPaint.setColor(processColor(Skia, color));
       lPaint.setAlphaf(paint.getAlphaf() * opacity);
 
       lPaint.setMaskFilter(
@@ -117,7 +121,7 @@ export const drawBox = (
 
 export const drawImage = (ctx: DrawingContext, props: ImageProps) => {
   "worklet";
-  const { image } = props;
+  const { image, sampling } = props;
   if (image) {
     const fit = props.fit ?? "contain";
     const rect = processRect(ctx.Skia, props);
@@ -131,7 +135,25 @@ export const drawImage = (ctx: DrawingContext, props: ImageProps) => {
       },
       rect
     );
-    ctx.canvas.drawImageRect(image, src, dst, ctx.paint);
+    if (sampling && isCubicSampling(sampling)) {
+      ctx.canvas.drawImageRectCubic(
+        image,
+        src,
+        dst,
+        sampling.B,
+        sampling.C,
+        ctx.paint
+      );
+    } else {
+      ctx.canvas.drawImageRectOptions(
+        image,
+        src,
+        dst,
+        sampling?.filter ?? FilterMode.Linear,
+        sampling?.mipmap ?? MipmapMode.None,
+        ctx.paint
+      );
+    }
   }
 };
 
@@ -149,7 +171,7 @@ export const drawVertices = (ctx: DrawingContext, props: VerticesProps) => {
     vertexMode,
     props.vertices,
     textures,
-    colors ? colors.map((c) => ctx.Skia.Color(c)) : undefined,
+    colors ? colors.map((c) => processColor(ctx.Skia, c)) : undefined,
     indices
   );
   const defaultBlendMode = colors ? BlendMode.DstOver : BlendMode.SrcOver;
@@ -237,7 +259,7 @@ export const drawPatch = (ctx: DrawingContext, props: PatchProps) => {
     patch[0].c1,
   ];
   const colors = props.colors
-    ? props.colors.map((c) => ctx.Skia.Color(c))
+    ? props.colors.map((c) => processColor(ctx.Skia, c))
     : undefined;
   ctx.canvas.drawPatch(points, colors, texture, mode, ctx.paint);
 };
@@ -349,10 +371,18 @@ export const drawPicture = (ctx: DrawingContext, props: PictureProps) => {
 
 export const drawAtlas = (ctx: DrawingContext, props: AtlasProps) => {
   "worklet";
-  const { image, sprites, transforms, colors, blendMode } = props;
+  const { image, sprites, transforms, colors, blendMode, sampling } = props;
   const blend = blendMode ? BlendMode[enumKey(blendMode)] : undefined;
   if (image) {
-    ctx.canvas.drawAtlas(image, sprites, transforms, ctx.paint, blend, colors);
+    ctx.canvas.drawAtlas(
+      image,
+      sprites,
+      transforms,
+      ctx.paint,
+      blend,
+      colors,
+      sampling
+    );
   }
 };
 

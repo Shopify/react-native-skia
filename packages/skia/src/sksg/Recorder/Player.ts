@@ -43,14 +43,18 @@ import {
   CommandType,
   isCommand,
   isDrawCommand,
+  isGroup,
   materializeProps,
   type Command,
 } from "./Core";
 import type { DrawingContext } from "./DrawingContext";
 
-const play = (ctx: DrawingContext, command: Command) => {
+function play(ctx: DrawingContext, command: Command) {
   "worklet";
-
+  if (isGroup(command)) {
+    command.children.forEach((child) => play(ctx, child));
+    return;
+  }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   materializeProps(command as any);
   if (isCommand(command, CommandType.SaveBackdropFilter)) {
@@ -150,7 +154,7 @@ const play = (ctx: DrawingContext, command: Command) => {
       ctx.paints.pop();
     });
   }
-};
+}
 
 export const replay = (ctx: DrawingContext, commands: Command[]) => {
   "worklet";

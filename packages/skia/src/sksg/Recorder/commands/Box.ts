@@ -1,4 +1,4 @@
-import { deflate, inflate } from "../../../dom/nodes";
+import { deflate, inflate, processColor } from "../../../dom/nodes";
 import type { BoxProps, BoxShadowProps } from "../../../dom/types";
 import { BlurStyle, ClipOp, isRRect } from "../../../skia/types";
 import type { Command } from "../Core";
@@ -31,7 +31,7 @@ export const drawBox = (ctx: DrawingContext, command: BoxCommand) => {
     .map((shadow) => {
       const { color = "black", blur, spread = 0, dx = 0, dy = 0 } = shadow;
       const lPaint = Skia.Paint();
-      lPaint.setColor(Skia.Color(color));
+      lPaint.setColor(processColor(Skia, color));
       lPaint.setAlphaf(paint.getAlphaf() * opacity);
       lPaint.setMaskFilter(
         Skia.MaskFilter.MakeBlur(BlurStyle.Normal, blur, true)

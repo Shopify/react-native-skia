@@ -46,7 +46,12 @@ interface AnimationValues {
 
 export class Recorder {
   commands: Command[] = [];
+  cursors: Command[][] = [];
   animationValues: Set<SharedValue<unknown>> = new Set();
+
+  constructor() {
+    this.cursors.push(this.commands);
+  }
 
   getRecording(): Recording & AnimationValues {
     return {
@@ -64,7 +69,6 @@ export class Recorder {
       const prop = props[key];
       if (isSharedValue(prop)) {
         this.animationValues.add(prop);
-        props[key] = prop.value;
         animatedProps[key] = prop;
         hasAnimatedProps = true;
       }
@@ -85,7 +89,17 @@ export class Recorder {
         command.animatedProps = animatedProps;
       }
     }
-    this.commands.push(command);
+    this.cursors[this.cursors.length - 1].push(command);
+  }
+
+  saveGroup() {
+    const children: Command[] = [];
+    this.add({ type: CommandType.Group, children });
+    this.cursors.push(children);
+  }
+
+  restoreGroup() {
+    this.cursors.pop();
   }
 
   savePaint(props: AnimatedProps<PaintProps>) {

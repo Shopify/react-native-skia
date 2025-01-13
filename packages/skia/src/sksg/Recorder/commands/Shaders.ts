@@ -2,6 +2,7 @@ import {
   enumKey,
   fitRects,
   getRect,
+  processColor,
   processGradientProps,
   processTransformProps,
   rect2rect,
@@ -19,9 +20,11 @@ import type {
   TurbulenceProps,
   TwoPointConicalGradientProps,
 } from "../../../dom/types";
+import type { SkShader } from "../../../skia/types";
 import {
   BlendMode,
   FilterMode,
+  isCubicSampling,
   MipmapMode,
   processUniforms,
   TileMode,
@@ -47,7 +50,7 @@ const declareShader = (ctx: DrawingContext, props: ShaderProps) => {
 const declareColorShader = (ctx: DrawingContext, props: ColorProps) => {
   "worklet";
   const { color } = props;
-  const shader = ctx.Skia.Shader.MakeColor(ctx.Skia.Color(color));
+  const shader = ctx.Skia.Shader.MakeColor(processColor(ctx.Skia, color));
   ctx.shaders.push(shader);
 };
 
@@ -179,7 +182,7 @@ const declareTurbulenceShader = (
 
 const declareImageShader = (ctx: DrawingContext, props: ImageShaderProps) => {
   "worklet";
-  const { fit, image, tx, ty, fm, mm, ...imageShaderProps } = props;
+  const { fit, image, tx, ty, sampling, ...imageShaderProps } = props;
   if (!image) {
     return;
   }
@@ -199,13 +202,24 @@ const declareImageShader = (ctx: DrawingContext, props: ImageShaderProps) => {
   const lm = ctx.Skia.Matrix();
   lm.concat(m3);
   processTransformProps(lm, imageShaderProps);
-  const shader = image.makeShaderOptions(
-    TileMode[enumKey(tx)],
-    TileMode[enumKey(ty)],
-    FilterMode[enumKey(fm)],
-    MipmapMode[enumKey(mm)],
-    lm
-  );
+  let shader: SkShader;
+  if (sampling && isCubicSampling(sampling)) {
+    shader = image.makeShaderCubic(
+      TileMode[enumKey(tx)],
+      TileMode[enumKey(ty)],
+      sampling.B,
+      sampling.C,
+      lm
+    );
+  } else {
+    shader = image.makeShaderCubic(
+      TileMode[enumKey(tx)],
+      TileMode[enumKey(ty)],
+      sampling?.filter ?? FilterMode.Linear,
+      sampling?.mipmap ?? MipmapMode.None,
+      lm
+    );
+  }
   ctx.shaders.push(shader);
 };
 

@@ -46,6 +46,6 @@ import { Fill, makeOffscreenSurface, drawOffscreen, getSkiaExports } from "@shop
 
 ## GPU Acceleration
 
-React Native Skia relies on the [OffscreenCanvas API](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas) to support GPU-Accelerated offscreen surfacs.
+React Native Skia relies on the [OffscreenCanvas API](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas) to support GPU-Accelerated offscreen surfaces.
 This means, that to benefit from the GPU acceleration, you will need to provide a polyfill of the [OffscreenCanvas API](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas) on Node.
 For example, [here](https://gist.github.com/wcandillon/a46e922910a814139758d6eda9d99ff8) is an OffScreenCanvas polyfill implementation that relies on WebGL using [headless-gl](https://github.com/stackgl/headless-gl).

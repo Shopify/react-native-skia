@@ -14,10 +14,9 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
 
   const rec = Skia.PictureRecorder();
   const canvas = rec.beginRecording();
-  // const start = performance.now();
+  //const start = performance.now();
 
   const ctx = createDrawingContext(Skia, recording.paintPool, canvas);
-  //console.log(recording.commands);
   replay(ctx, recording.commands);
   const picture = rec.finishRecordingAsPicture();
   //const end = performance.now();
@@ -42,7 +41,7 @@ export abstract class Container {
       this.recording.paintPool,
       canvas
     );
-    //console.log(this._recording);
+    //console.log(this.recording.commands);
     replay(ctx, this.recording.commands);
   }
 
@@ -88,13 +87,17 @@ class ReanimatedContainer extends Container {
       commands: record.commands,
       paintPool: record.paintPool,
     };
+    const { nativeId, Skia, recording } = this;
     if (animationValues.size > 0) {
-      const { nativeId, Skia, recording } = this;
       this.mapperId = Rea.startMapper(() => {
         "worklet";
         drawOnscreen(Skia, nativeId, recording!);
       }, Array.from(animationValues));
     }
+    Rea.runOnUI(() => {
+      "worklet";
+      drawOnscreen(Skia, nativeId, recording!);
+    })();
   }
 }
 

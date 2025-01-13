@@ -27,6 +27,7 @@ import type {
 
 // export enum CommandType {
 //   // Context
+//   Group = "Group",
 //   SavePaint = "SavePaint",
 //   RestorePaint = "RestorePaint",
 //   SaveCTM = "SaveCTM",
@@ -68,6 +69,7 @@ import type {
 // }
 export enum CommandType {
   // Context
+  Group,
   SavePaint,
   RestorePaint,
   SaveCTM,
@@ -131,6 +133,15 @@ export const isCommand = <T extends CommandType>(
 ): command is Command<T> => {
   "worklet";
   return command.type === type;
+};
+
+interface GroupCommand extends Command<CommandType.Group> {
+  children: Command[];
+}
+
+export const isGroup = (command: Command): command is GroupCommand => {
+  "worklet";
+  return command.type === CommandType.Group;
 };
 
 interface Props {
