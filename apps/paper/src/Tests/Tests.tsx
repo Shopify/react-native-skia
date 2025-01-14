@@ -94,7 +94,7 @@ export const Tests = ({ assets }: TestsProps) => {
       };
     }
     return;
-  }, [client, drawing]);
+  }, [client, drawing, ref]);
   useEffect(() => {
     if (screen) {
       const it = setTimeout(async () => {
