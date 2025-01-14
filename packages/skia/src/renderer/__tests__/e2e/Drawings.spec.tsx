@@ -10,6 +10,7 @@ import {
   Path,
   Rect,
   Image,
+  BlurMask,
 } from "../../components";
 import { images, importSkia, surface } from "../setup";
 
@@ -205,5 +206,40 @@ describe("Drawings", () => {
       </Group>
     );
     checkImage(image, "snapshots/drawings/image-default-props.png");
+  });
+
+  it("Should use the zIndex (1)", async () => {
+    const { width, height } = surface;
+    const r = width * 0.33;
+    const image = await surface.draw(
+      <Group>
+        <BlurMask style="solid" blur={10} />
+        <Circle cx={r} cy={r} r={r} color="cyan" zIndex={2} />
+        <Circle cx={width - r} cy={r} r={r} color="magenta" zIndex={1} />
+        <Circle
+          cx={width / 2}
+          cy={height - r}
+          r={r}
+          color="yellow"
+          zIndex={0}
+        />
+      </Group>
+    );
+    checkImage(image, "snapshots/drawings/zIndex.png");
+  });
+  it("Should use the zIndex (2)", async () => {
+    const { width, height } = surface;
+    const r = width * 0.33;
+    const image = await surface.draw(
+      <Group>
+        <BlurMask style="solid" blur={10} />
+        <Circle cx={r} cy={r} r={r} color="cyan" zIndex={2} />
+        <Circle cx={width - r} cy={r} r={r} color="magenta" zIndex={1}>
+          <BlurMask style="solid" blur={0} />
+        </Circle>
+        <Circle cx={width / 2} cy={height - r} r={r} color="yellow" />
+      </Group>
+    );
+    checkImage(image, "snapshots/drawings/zIndex2.png");
   });
 });
