@@ -16,6 +16,8 @@ import { SkiaSGRoot } from "../sksg/Reconciler";
 import { Skia } from "../skia";
 import type { SkiaBaseViewProps } from "../views";
 
+export const useCanvasRef = () => useRef<typeof Canvas>(null);
+
 const NativeSkiaPictureView = SkiaPictureViewNativeComponent;
 
 // TODO: no need to go through the JS thread for this
