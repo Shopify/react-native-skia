@@ -5,6 +5,7 @@ import {
   inflate,
   NodeType,
   processCircle,
+  processColor,
   processPath,
   processRect,
   processRRect,
@@ -87,7 +88,7 @@ export const drawBox = (
     .map((shadow) => {
       const { color = "black", blur, spread = 0, dx = 0, dy = 0 } = shadow;
       const lPaint = Skia.Paint();
-      lPaint.setColor(Skia.Color(color));
+      lPaint.setColor(processColor(Skia, color));
       lPaint.setAlphaf(paint.getAlphaf() * opacity);
       lPaint.setMaskFilter(
         Skia.MaskFilter.MakeBlur(BlurStyle.Normal, blur, true)
@@ -105,7 +106,7 @@ export const drawBox = (
       canvas.save();
       canvas.clipRRect(box, ClipOp.Intersect, false);
       const lPaint = Skia.Paint();
-      lPaint.setColor(Skia.Color(color));
+      lPaint.setColor(processColor(Skia, color));
       lPaint.setAlphaf(paint.getAlphaf() * opacity);
 
       lPaint.setMaskFilter(
@@ -170,7 +171,7 @@ export const drawVertices = (ctx: DrawingContext, props: VerticesProps) => {
     vertexMode,
     props.vertices,
     textures,
-    colors ? colors.map((c) => ctx.Skia.Color(c)) : undefined,
+    colors ? colors.map((c) => processColor(ctx.Skia, c)) : undefined,
     indices
   );
   const defaultBlendMode = colors ? BlendMode.DstOver : BlendMode.SrcOver;
@@ -258,7 +259,7 @@ export const drawPatch = (ctx: DrawingContext, props: PatchProps) => {
     patch[0].c1,
   ];
   const colors = props.colors
-    ? props.colors.map((c) => ctx.Skia.Color(c))
+    ? props.colors.map((c) => processColor(ctx.Skia, c))
     : undefined;
   ctx.canvas.drawPatch(points, colors, texture, mode, ctx.paint);
 };

@@ -1,4 +1,4 @@
-import { enumKey, processRadius } from "../../../dom/nodes";
+import { enumKey, processColor, processRadius } from "../../../dom/nodes";
 import type {
   BlendImageFilterProps,
   BlurImageFilterProps,
@@ -113,7 +113,7 @@ const declareDropShadowImageFilter = (
 ) => {
   "worklet";
   const { dx, dy, blur, shadowOnly, color: cl, inner } = props;
-  const color = ctx.Skia.Color(cl);
+  const color = processColor(ctx.Skia, cl);
   let factory;
   if (inner) {
     factory = MakeInnerShadow.bind(null, ctx.Skia, shadowOnly);
