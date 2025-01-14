@@ -1,3 +1,4 @@
+import type { FC } from "react";
 import {
   forwardRef,
   useCallback,
@@ -11,12 +12,19 @@ import type { SharedValue } from "react-native-reanimated";
 
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
 import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeComponent";
-import type { SkRect, SkSize } from "../skia/types";
+import type { SkImage, SkRect, SkSize } from "../skia/types";
 import { SkiaSGRoot } from "../sksg/Reconciler";
 import { Skia } from "../skia";
 import type { SkiaBaseViewProps } from "../views";
 
-export const useCanvasRef = () => useRef<typeof Canvas>(null);
+interface CanvasRef extends FC<CanvasProps> {
+  makeImageSnapshot(rect?: SkRect): SkImage;
+  makeImageSnapshotAsync(rect?: SkRect): Promise<SkImage>;
+  redraw(): void;
+  getNativeId(): number;
+}
+
+export const useCanvasRef = () => useRef<CanvasRef>(null);
 
 const NativeSkiaPictureView = SkiaPictureViewNativeComponent;
 
