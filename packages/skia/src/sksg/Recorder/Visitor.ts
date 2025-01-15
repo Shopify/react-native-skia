@@ -196,10 +196,6 @@ const pushPaints = (recorder: Recorder, paints: Node<any>[]) => {
 };
 
 const visitNode = (recorder: Recorder, node: Node<any>) => {
-  if (node.type === NodeType.Group) {
-    recorder.saveGroup();
-  }
-  const { props } = node;
   const {
     colorFilters,
     maskFilters,
@@ -209,6 +205,13 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
     pathEffects,
     paints,
   } = sortNodeChildren(node);
+  const hasZIndex = drawings.some(
+    (drawing: Node<any>) => drawing.props.zIndex !== undefined
+  );
+  if (hasZIndex && node.type === NodeType.Group) {
+    recorder.saveGroup(hasZIndex);
+  }
+  const { props } = node;
   const paint = processPaint(props);
   const shouldPushPaint =
     paint ||
@@ -309,8 +312,14 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
       recorder.drawAtlas(props);
       break;
   }
-  drawings.forEach((drawing) => {
+  drawings.forEach((drawing: Node<any>) => {
+    if (hasZIndex) {
+      recorder.saveGroup(false, drawing.props.zIndex ?? 0);
+    }
     visitNode(recorder, drawing);
+    if (hasZIndex) {
+      recorder.restoreGroup();
+    }
   });
   if (shouldPushPaint) {
     recorder.restorePaint();
@@ -318,7 +327,7 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
   if (shouldRestore) {
     recorder.restoreCTM();
   }
-  if (node.type === NodeType.Group) {
+  if (hasZIndex && node.type === NodeType.Group) {
     recorder.restoreGroup();
   }
 };

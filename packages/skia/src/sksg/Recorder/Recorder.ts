@@ -92,9 +92,14 @@ export class Recorder {
     this.cursors[this.cursors.length - 1].push(command);
   }
 
-  saveGroup() {
+  saveGroup(hasZIndex: boolean, zIndex?: number | SharedValue<number>) {
     const children: Command[] = [];
-    this.add({ type: CommandType.Group, children });
+    this.add({
+      type: CommandType.Group,
+      children,
+      hasZIndex,
+      zIndex,
+    });
     this.cursors.push(children);
   }
 

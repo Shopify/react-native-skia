@@ -1,3 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { SharedValue } from "react-native-reanimated";
+
+import { isSharedValue } from "../utils";
+
 import {
   drawCircle,
   drawImage,
@@ -49,13 +54,56 @@ import {
 } from "./Core";
 import type { DrawingContext } from "./DrawingContext";
 
+type ZIndex = number | SharedValue<number> | undefined;
+const materialize = (value: ZIndex) => {
+  "worklet";
+  if (value === undefined) {
+    return 0;
+  }
+  return isSharedValue<number>(value) ? value.value : value;
+};
+
+function sortGroupCommands(commands: Command[]) {
+  "worklet";
+  // Find the leading state setup commands
+  const prefix: Command[] = [];
+  let i = 0;
+  while (i < commands.length && commands[i].zIndex === undefined) {
+    prefix.push(commands[i]);
+    i++;
+  }
+
+  // Find the trailing cleanup commands
+  const suffix: Command[] = [];
+  let j = commands.length - 1;
+  while (j >= 0 && commands[j].zIndex === undefined) {
+    suffix.unshift(commands[j]);
+    j--;
+  }
+
+  // Extract the drawable groups
+  const drawableGroups = commands.slice(i, j + 1);
+  // Sort the drawable groups by zIndex
+  const sortedGroups = drawableGroups.sort((a: any, b: any) => {
+    const zIndexA = materialize(a.zIndex);
+    const zIndexB = materialize(b.zIndex);
+    return zIndexA - zIndexB;
+  });
+
+  // Reconstruct the final command list
+  return [...prefix, ...sortedGroups, ...suffix];
+}
+
 function play(ctx: DrawingContext, command: Command) {
   "worklet";
   if (isGroup(command)) {
-    command.children.forEach((child) => play(ctx, child));
+    let sortedChildren = command.children;
+    if (command.hasZIndex) {
+      sortedChildren = sortGroupCommands(command.children);
+    }
+    sortedChildren.forEach((child) => play(ctx, child));
     return;
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   materializeProps(command as any);
   if (isCommand(command, CommandType.SaveBackdropFilter)) {
     ctx.saveBackdropFilter();
