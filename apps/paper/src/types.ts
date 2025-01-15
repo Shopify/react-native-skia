@@ -27,4 +27,5 @@ export type StackParamList = {
   FrostedCard: undefined;
   SpeedTest: undefined;
   Video: undefined;
+  Chat: undefined;
 };

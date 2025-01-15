@@ -32,6 +32,7 @@ import {
   SpeedTest,
   Video,
   WebGPU,
+  Chat,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
@@ -65,6 +66,7 @@ const linking: LinkingOptions<StackParamList> = {
       FrostedCard: "frosted-card",
       SpeedTest: "speedtest",
       Video: "video",
+      Chat: "chat",
     },
   },
   prefixes: ["rnskia://"],
@@ -213,6 +215,13 @@ const App = () => {
               component={Video}
               options={{
                 header: () => null,
+              }}
+            />
+            <Stack.Screen
+              name="Chat"
+              component={Chat}
+              options={{
+                headerShown: false,
               }}
             />
             <Stack.Screen
