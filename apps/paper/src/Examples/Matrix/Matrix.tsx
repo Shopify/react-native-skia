@@ -39,7 +39,6 @@ export const Matrix = () => {
   if (font === null) {
     return null;
   }
-  const symbols = font.getGlyphIDs("abcdefghijklmnopqrstuvwxyz");
   return (
     <Canvas style={{ flex: 1 }} opaque>
       <Fill color="black" />
@@ -48,7 +47,7 @@ export const Matrix = () => {
         {cols.map((_i, i) =>
           rows.map((_j, j) => (
             <Symbol
-              symbols={symbols}
+              symbols={"abcdefghijklmnopqrstuvwxyz".split("")}
               font={font}
               timestamp={clock}
               key={`${i}-${j}`}

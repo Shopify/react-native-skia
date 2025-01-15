@@ -7,6 +7,7 @@
 #include "JsiSkHostObjects.h"
 
 #include "JsiNativeBuffer.h"
+#include "JsiPlayer.h"
 #include "JsiSkAnimatedImage.h"
 #include "JsiSkAnimatedImageFactory.h"
 #include "JsiSkColor.h"
@@ -130,6 +131,8 @@ public:
 
     installReadonlyProperty("NativeBuffer",
                             std::make_shared<JsiNativeBufferFactory>(context));
+
+    installFunction("PlayRecording", JsiPlayer::createCtor(context));
   }
 };
 } // namespace RNSkia
