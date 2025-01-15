@@ -1,10 +1,10 @@
-import type { CanvasProps, SkiaDomView } from "@shopify/react-native-skia";
-import { ImageFormat, Canvas } from "@shopify/react-native-skia";
-import React, { useCallback, useRef } from "react";
+import type { CanvasProps } from "@shopify/react-native-skia";
+import { ImageFormat, Canvas, useCanvasRef } from "@shopify/react-native-skia";
+import React, { useCallback } from "react";
 import { Alert, Pressable, Share } from "react-native";
 
 export const ExportableCanvas = ({ children, style }: CanvasProps) => {
-  const ref = useRef<SkiaDomView>(null);
+  const ref = useCanvasRef();
 
   const handleShare = useCallback(() => {
     const image = ref.current?.makeImageSnapshot();

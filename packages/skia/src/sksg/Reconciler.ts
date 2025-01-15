@@ -8,6 +8,7 @@ import { NodeType } from "../dom/types";
 import { debug, sksgHostConfig } from "./HostConfig";
 import type { Container } from "./Container";
 import { createContainer } from "./Container";
+import "./Elements";
 
 const skiaReconciler = ReactReconciler(sksgHostConfig);
 

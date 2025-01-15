@@ -1,11 +1,11 @@
 /* eslint-disable no-eval */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { SkiaDomView } from "@shopify/react-native-skia";
 import {
   Canvas,
   Group,
   makeImageFromView,
   Skia,
+  useCanvasRef,
 } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
 import { PixelRatio, Text, View } from "react-native";
@@ -27,7 +27,7 @@ interface TestsProps {
 
 export const Tests = ({ assets }: TestsProps) => {
   const viewRef = useRef<View>(null);
-  const ref = useRef<SkiaDomView>(null);
+  const ref = useCanvasRef();
   const [client, hostname] = useClient();
   const [drawing, setDrawing] = useState<any>(null);
   const [screen, setScreen] = useState<any>(null);
@@ -94,7 +94,7 @@ export const Tests = ({ assets }: TestsProps) => {
       };
     }
     return;
-  }, [client, drawing]);
+  }, [client, drawing, ref]);
   useEffect(() => {
     if (screen) {
       const it = setTimeout(async () => {
