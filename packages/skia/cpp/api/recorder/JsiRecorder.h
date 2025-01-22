@@ -19,16 +19,24 @@ namespace jsi = facebook::jsi;
 
 class JsiRecorder : public JsiSkWrappingSharedPtrHostObject<Recorder> {
 public:
-  JsiRecorder(std::shared_ptr<RNSkPlatformContext> context, const Recorder &recorder)
+  JsiRecorder(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkWrappingSharedPtrHostObject(std::move(context),
-                                         std::make_shared<Recorder>(recorder)) {}
-
+                                         std::make_shared<Recorder>()) {}
 
   JSI_HOST_FUNCTION(savePaint) {
+    getObject()->savePaint();
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(drawCircle) {
+      CircleProps props;
+      props.r = 100;
+    getObject()->drawCircle(props);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(restorePaint) {
+    getObject()->restorePaint();
     return jsi::Value::undefined();
   }
 
@@ -36,7 +44,8 @@ public:
 
   JSI_EXPORT_FUNCTIONS(
     JSI_EXPORT_FUNC(JsiRecorder, savePaint),
-    JSI_EXPORT_FUNC(JsiRecorder, restorePaint)
+    JSI_EXPORT_FUNC(JsiRecorder, restorePaint),
+    JSI_EXPORT_FUNC(JsiRecorder, drawCircle),
   )
 
   static const jsi::HostFunctionType
@@ -44,7 +53,7 @@ public:
     return JSI_HOST_FUNCTION_LAMBDA {
         // Return the newly constructed object
         return jsi::Object::createFromHostObject(
-            runtime, std::make_shared<JsiRecorder>(std::move(context), Recorder()));
+            runtime, std::make_shared<JsiRecorder>(std::move(context)));
     };
   }
 };

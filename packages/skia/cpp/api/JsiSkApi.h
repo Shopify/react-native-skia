@@ -52,7 +52,7 @@
 #include "JsiSkVertices.h"
 #include "JsiSkiaContext.h"
 #include "JsiVideo.h"
-#include "JsiRecorder.h"
+#include "recorder/JsiRecorder.h"
 
 namespace RNSkia {
 
