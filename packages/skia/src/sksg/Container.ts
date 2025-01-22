@@ -15,7 +15,6 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   const rec = Skia.PictureRecorder();
   const canvas = rec.beginRecording();
   //const start = performance.now();
-
   const ctx = createDrawingContext(Skia, recording.paintPool, canvas);
   replay(ctx, recording.commands);
   const picture = rec.finishRecordingAsPicture();
@@ -57,6 +56,7 @@ class StaticContainer extends Container {
     const recorder = new Recorder();
     visit(recorder, this.root);
     this.recording = recorder.getRecording();
+    //printRecording(this.recording.commands);
     const isOnScreen = this.nativeId !== -1;
     if (isOnScreen) {
       const rec = this.Skia.PictureRecorder();
