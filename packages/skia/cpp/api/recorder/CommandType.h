@@ -3,7 +3,7 @@
 namespace RNSkia {
 
 enum CommandType {
- // Context
+  // Context
   Group,
   SavePaint,
   RestorePaint,

@@ -21,8 +21,9 @@ protected:
     if (image == nullptr) {
       return;
     }
-    auto sampling = _samplingProp->isSet() ? *_samplingProp->getDerivedValue()
-                                           : SkSamplingOptions(SkFilterMode::kLinear);
+    auto sampling = _samplingProp->isSet()
+                        ? *_samplingProp->getDerivedValue()
+                        : SkSamplingOptions(SkFilterMode::kLinear);
     context->getCanvas()->drawImageRect(image, rects->src, rects->dst, sampling,
                                         context->getPaint().get(),
                                         SkCanvas::kStrict_SrcRectConstraint);

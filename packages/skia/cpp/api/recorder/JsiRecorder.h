@@ -8,8 +8,8 @@
 #include "JsiSkCanvas.h"
 #include "JsiSkHostObjects.h"
 
-#include "RNSkLog.h"
 #include "RNRecorder.h"
+#include "RNSkLog.h"
 
 #include <jsi/jsi.h>
 
@@ -25,7 +25,6 @@ public:
 
   JSI_HOST_FUNCTION(savePaint) {
     PaintCmdProps props;
-    props.opacity = 1;
     getObject()->savePaint(props);
     return jsi::Value::undefined();
   }
@@ -44,18 +43,16 @@ public:
 
   EXPORT_JSI_API_TYPENAME(JsiRecorder, Recorder)
 
-  JSI_EXPORT_FUNCTIONS(
-    JSI_EXPORT_FUNC(JsiRecorder, savePaint),
-    JSI_EXPORT_FUNC(JsiRecorder, restorePaint),
-    JSI_EXPORT_FUNC(JsiRecorder, drawCircle),
-  )
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiRecorder, savePaint),
+                       JSI_EXPORT_FUNC(JsiRecorder, restorePaint),
+                       JSI_EXPORT_FUNC(JsiRecorder, drawCircle), )
 
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
-        // Return the newly constructed object
-        return jsi::Object::createFromHostObject(
-            runtime, std::make_shared<JsiRecorder>(std::move(context)));
+      // Return the newly constructed object
+      return jsi::Object::createFromHostObject(
+          runtime, std::make_shared<JsiRecorder>(std::move(context)));
     };
   }
 };
