@@ -88,7 +88,7 @@ float getPropertyValue(jsi::Runtime& runtime, const jsi::Value& value) {
     if (value.isNumber()) {
         return static_cast<float>(value.asNumber());
     }
-    return 0.0f; // Or throw an exception if you prefer
+    throw std::runtime_error("Invalid prop value received");
 }
 
 template<>
@@ -129,10 +129,10 @@ struct CircleCmdProps {
 // Usage example
 void convert(jsi::Runtime& runtime, const jsi::Object& object,
             CircleCmdProps& props, Variables& variables) {
-    convertProperty<float>(runtime, object, "cx", props.cx, variables);            // Works with optional
-    convertProperty<float>(runtime, object, "cy", props.cy, variables);            // Works with optional
-    convertProperty<SkPoint>(runtime, object, "c", props.c, variables);            // Works with optional
-    convertProperty<float>(runtime, object, "r", props.r, variables);             // Works with non-optional
+    convertProperty<float>(runtime, object, "cx", props.cx, variables);
+    convertProperty<float>(runtime, object, "cy", props.cy, variables);
+    convertProperty<SkPoint>(runtime, object, "c", props.c, variables);
+    convertProperty<float>(runtime, object, "r", props.r, variables);
 }
 
 struct PaintCmdProps {

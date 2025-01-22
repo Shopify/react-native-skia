@@ -36,9 +36,10 @@ struct CircleCmd : Command {
 class Recorder {
 private:
   std::vector<std::unique_ptr<Command>> commands;
-  Variables variables;
 
 public:
+  Variables variables;
+    
   Recorder() = default;
   ~Recorder() = default;
 
