@@ -2,17 +2,13 @@
 
 #include <memory>
 #include <optional>
+#include <string>
 
 #include "CommandType.h"
+#include "Props.h"
 
 namespace RNSkia {
 
-struct CircleProps {
-  std::optional<float> cx;
-  std::optional<float> cy;
-  std::optional<SkPoint> c;
-  float r;
-};
 
 struct Command {
     CommandType type;
@@ -21,14 +17,16 @@ struct Command {
     virtual ~Command() = default;
 };
 
-struct SavePaintCommand : Command {
-    SavePaintCommand() : Command(CommandType::SavePaint) {}
+struct SavePaintCmd : Command {
+    PaintCmdProps props;
+
+    SavePaintCmd(const PaintCmdProps& p) : Command(CommandType::SavePaint), props(p) {}
 };
 
-struct CircleCommand : Command {
-    CircleProps props;
+struct CircleCmd : Command {
+    CircleCmdProps props;
 
-    CircleCommand(const CircleProps& p) : Command(CommandType::DrawCircle), props(p) {}
+    CircleCmd(const CircleCmdProps& p) : Command(CommandType::DrawCircle), props(p) {}
 };
 
 class Recorder {
@@ -39,16 +37,16 @@ public:
     
     Recorder() = default;
 
-    void savePaint() {
-        commands.push_back(std::make_unique<SavePaintCommand>());
+    void savePaint(PaintCmdProps& props) {
+        commands.push_back(std::make_unique<SavePaintCmd>(props));
     }
 
     void restorePaint() {
         commands.push_back(std::make_unique<Command>(CommandType::RestorePaint));
     }
 
-    void drawCircle(CircleProps& props) {
-        commands.push_back(std::make_unique<CircleCommand>(props));
+    void drawCircle(CircleCmdProps& props) {
+        commands.push_back(std::make_unique<CircleCmd>(props));
     }
 };
 

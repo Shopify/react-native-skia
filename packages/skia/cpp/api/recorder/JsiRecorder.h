@@ -24,13 +24,15 @@ public:
                                          std::make_shared<Recorder>()) {}
 
   JSI_HOST_FUNCTION(savePaint) {
-    getObject()->savePaint();
+    PaintCmdProps props;
+    props.opacity = 1;
+    getObject()->savePaint(props);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawCircle) {
-      CircleProps props;
-      props.r = 100;
+    CircleCmdProps props;
+    props.r = 100;
     getObject()->drawCircle(props);
     return jsi::Value::undefined();
   }
