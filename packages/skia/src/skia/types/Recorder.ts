@@ -87,4 +87,5 @@ export interface BaseRecorder {
 
 export interface JsiRecorder extends BaseRecorder {
   play(canvas: SkCanvas): void;
+  applyUpdates(): void;
 }

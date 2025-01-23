@@ -13,7 +13,7 @@
 
 namespace RNSkia {
 
-using ConversionFunction = std::function<void()>;
+using ConversionFunction = std::function<void(jsi::Runtime&)>;
 using Updates = std::vector<ConversionFunction>;
 
 bool isSharedValue(jsi::Runtime &runtime, const jsi::Value &value) {
@@ -55,12 +55,12 @@ void convertPropertyImpl(jsi::Runtime& runtime, const jsi::Object& object,
 
     if (isSharedValue(runtime, property)) {
         auto sharedValue = property.asObject(runtime);
-        auto conv = [&runtime, &sharedValue, &target, propertyName]() {
+        auto conv = [&sharedValue, &target](jsi::Runtime& runtime) {
             auto value = sharedValue.getProperty(runtime, "value");
             target = getPropertyValue<T>(runtime, value);
         };
         updates.push_back(conv);
-        conv();
+        conv(runtime);
     } else {
         target = getPropertyValue<T>(runtime, property);
     }

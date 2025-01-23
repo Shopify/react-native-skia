@@ -81,7 +81,6 @@ class StaticContainer extends Container {
     const recorder = new Recorder();
     visit(recorder, this.root);
     this.recording = recorder.getRecording();
-    console.log(this.recording);
     const isOnScreen = this.nativeId !== -1;
     if (isOnScreen) {
       const rec = this.Skia.PictureRecorder();
@@ -145,6 +144,7 @@ class NativeReanimatedContainer extends Container {
     if (sharedValues.length > 0) {
       this.mapperId = Rea.startMapper(() => {
         "worklet";
+        recorder.applyUpdates();
         nativeDrawOnscreen(Skia, nativeId, recorder);
       }, sharedValues);
     }

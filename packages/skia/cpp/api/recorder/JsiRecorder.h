@@ -54,13 +54,21 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(applyUpdates) {
+    for (auto &update : getObject()->updates) {
+      update(runtime);
+    }
+    return jsi::Value::undefined();
+  }
+
   EXPORT_JSI_API_TYPENAME(JsiRecorder, Recorder)
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiRecorder, savePaint),
                        JSI_EXPORT_FUNC(JsiRecorder, restorePaint),
                        JSI_EXPORT_FUNC(JsiRecorder, drawCircle),
                        JSI_EXPORT_FUNC(JsiRecorder, materializePaint),
-                       JSI_EXPORT_FUNC(JsiRecorder, play))
+                       JSI_EXPORT_FUNC(JsiRecorder, play),
+                       JSI_EXPORT_FUNC(JsiRecorder, applyUpdates))
 
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
