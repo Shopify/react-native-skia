@@ -57,9 +57,24 @@ public:
   }
 
   JSI_HOST_FUNCTION(applyUpdates) {
-    //    for (auto &update : getObject()->updates) {
-    //      update(runtime);
-    //    }
+    auto values = arguments[0].asObject(runtime).asArray(runtime);
+    auto size = values.size(runtime);
+    auto recorder = getObject();
+    for (int i = 0; i < size; i++) {
+      auto sharedValue = values.getValueAtIndex(runtime, i).asObject(runtime);
+      auto name = sharedValue.getProperty(runtime, "name")
+                      .asString(runtime)
+                      .utf8(runtime);
+      // Look up the conversion functions for this name
+      auto it = recorder->variables.find(name);
+      if (it != recorder->variables.end()) {
+        // Execute each conversion function in the vector
+        const auto &conversionFunctions = it->second;
+        for (const auto &conversionFunc : conversionFunctions) {
+          conversionFunc(runtime, sharedValue);
+        }
+      }
+    }
     return jsi::Value::undefined();
   }
 

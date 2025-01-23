@@ -25,10 +25,10 @@ void convert(jsi::Runtime &runtime, const jsi::Object &object,
 
 class CircleCmd : public Command {
 private:
-  CircleCmdProps props;
+  CircleCmdProps& props;
 
 public:
-  CircleCmd(const CircleCmdProps &p)
+  CircleCmd(CircleCmdProps &p)
       : Command(CommandType::DrawCircle), props(p) {}
 
   void draw(DrawingCtx *ctx) {

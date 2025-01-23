@@ -13,8 +13,9 @@
 
 namespace RNSkia {
 
-using ConversionFunction = std::function<void(void *val, jsi::Runtime &runtime)>;
-using Variables = std::map<void *, std::vector<ConversionFunction>>;
+using ConversionFunction =
+    std::function<void(jsi::Runtime &runtime, const jsi::Object &object)>;
+using Variables = std::map<std::string, std::vector<ConversionFunction>>;
 
 bool isSharedValue(jsi::Runtime &runtime, const jsi::Value &value) {
   return value.isObject() && value.asObject(runtime).hasProperty(
@@ -50,13 +51,16 @@ void convertPropertyImpl(jsi::Runtime &runtime, const jsi::Object &object,
   auto property = object.getProperty(runtime, propertyName.c_str());
 
   if (isSharedValue(runtime, property)) {
-    std::string name = property.asObject(runtime).getProperty(runtime, "name").asString(runtime).utf8(runtime);
+    std::string name = property.asObject(runtime)
+                           .getProperty(runtime, "name")
+                           .asString(runtime)
+                           .utf8(runtime);
     auto sharedValue = property.asObject(runtime);
-    auto conv = [&target](jsi::Runtime &runtime, const jsi::Object &val) {
-      auto value = val.getProperty(runtime, "value");
-      target = getPropertyValue<T>(runtime, value);
-    };
-    //variables[sharedValue].push_back(conv);
+  auto conv = [target = &target](jsi::Runtime &runtime, const jsi::Object &val) {
+    auto value = val.getProperty(runtime, "value");
+    *target = getPropertyValue<T>(runtime, value);
+  };
+    variables[name].push_back(conv);
     conv(runtime, sharedValue);
   } else {
     target = getPropertyValue<T>(runtime, property);
