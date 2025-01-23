@@ -49,8 +49,7 @@ public:
 
   JSI_HOST_FUNCTION(play) {
     auto jsiCanvas = arguments[0].asObject(runtime).asHostObject<JsiSkCanvas>(runtime);
-    auto canvas = jsiCanvas->getObject();
-    DrawingCtx ctx(canvas.get());
+    DrawingCtx ctx(jsiCanvas->getCanvas());
     getObject()->play(ctx);
     return jsi::Value::undefined();
   }

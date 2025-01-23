@@ -9,15 +9,16 @@ import { visit } from "./Recorder/Visitor";
 import { replay } from "./Recorder/Player";
 import { createDrawingContext } from "./Recorder/DrawingContext";
 
-const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
+const drawOnscreen = (Skia: Skia, nativeId: number, recorder: any) => {
   "worklet";
 
   const rec = Skia.PictureRecorder();
   const canvas = rec.beginRecording();
   //const start = performance.now();
 
-  const ctx = createDrawingContext(Skia, recording.paintPool, canvas);
-  replay(ctx, recording.commands);
+  recorder.play(canvas);
+  // const ctx = createDrawingContext(Skia, recording.paintPool, canvas);
+  // replay(ctx, recording.commands);
   const picture = rec.finishRecordingAsPicture();
   //const end = performance.now();
   //console.log("Recording time: ", end - start);
@@ -80,24 +81,25 @@ class ReanimatedContainer extends Container {
     if (this.mapperId !== null) {
       Rea.stopMapper(this.mapperId);
     }
-    const recorder = new Recorder();
+    const { nativeId, Skia } = this;
+    const recorder = Skia.Recorder();
     visit(recorder, this.root);
-    const record = recorder.getRecording();
-    const { animationValues } = record;
-    this.recording = {
-      commands: record.commands,
-      paintPool: record.paintPool,
-    };
-    const { nativeId, Skia, recording } = this;
-    if (animationValues.size > 0) {
-      this.mapperId = Rea.startMapper(() => {
-        "worklet";
-        drawOnscreen(Skia, nativeId, recording!);
-      }, Array.from(animationValues));
-    }
+    //const record = recorder.getRecording();
+    // const { animationValues } = record;
+    // this.recording = {
+    //   commands: record.commands,
+    //   paintPool: record.paintPool,
+    // };
+    // const { nativeId, Skia, recording } = this;
+    // if (animationValues.size > 0) {
+    //   this.mapperId = Rea.startMapper(() => {
+    //     "worklet";
+    //     drawOnscreen(Skia, nativeId, recording!);
+    //   }, Array.from(animationValues));
+    // }
     Rea.runOnUI(() => {
       "worklet";
-      drawOnscreen(Skia, nativeId, recording!);
+      drawOnscreen(Skia, nativeId, recorder);
     })();
   }
 }
