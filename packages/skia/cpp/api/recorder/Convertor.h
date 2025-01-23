@@ -18,7 +18,7 @@ using Variables = std::unordered_map<std::string, std::vector<ConversionFunction
 
 bool isSharedValue(jsi::Runtime &runtime, const jsi::Value &value) {
   return value.isObject() && value.asObject(runtime).hasProperty(
-                                        runtime, "._isReanimatedSharedValue");
+                                        runtime, "_isReanimatedSharedValue");
 }
 
 // Helper type traits
@@ -61,6 +61,7 @@ void convertPropertyImpl(jsi::Runtime& runtime, const jsi::Object& object,
         };
         auto& conversionFunctions = variables[propertyName];
         conversionFunctions.push_back(conv);
+        conv();
     } else {
         target = getPropertyValue<T>(runtime, property);
     }
