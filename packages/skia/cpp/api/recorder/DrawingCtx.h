@@ -10,6 +10,11 @@ public:
 
     DrawingCtx(SkCanvas* aCanvas): canvas(aCanvas) {};
     ~DrawingCtx() = default;
+
+    SkPaint& getPaint() {
+        SkPaint paint;
+        return paint;
+    }
 };
 
 } // namespace RNSkia

@@ -45,4 +45,13 @@ enum CommandType {
   DrawAtlas,
 };
 
+class Command {
+public:
+  CommandType type;
+
+  Command(CommandType t) : type(t) {}
+  virtual ~Command() = default;
+};
+
+
 } // namespace RNSkia

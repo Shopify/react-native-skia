@@ -120,8 +120,5 @@ std::optional<SkPoint> getPropertyValue(jsi::Runtime& runtime, const jsi::Value&
 }
 
 
-struct PaintCmdProps {
-    
-};
 
 } // namespace RNSkia

@@ -7,33 +7,24 @@
 
 #include <jsi/jsi.h>
 
-#include "CommandType.h"
+#include "Command.h"
 #include "Convertor.h"
 #include "DrawingCtx.h"
 #include "Drawings.h"
 
 namespace RNSkia {
 
-struct Command {
-  CommandType type;
-
-  Command(CommandType t) : type(t) {}
-  virtual ~Command() = default;
+struct PaintCmdProps {
+    
 };
 
-struct SavePaintCmd : Command {
+class SavePaintCmd : public Command {
+private:
   PaintCmdProps props;
 
+public:
   SavePaintCmd(const PaintCmdProps &p)
       : Command(CommandType::SavePaint), props(p) {}
-};
-
-struct CircleCmd : Command {
-  CircleCmdProps props;
-
-  CircleCmd(const CircleCmdProps &p)
-      : Command(CommandType::DrawCircle), props(p) {}
-    
 };
 
 class Recorder {
@@ -62,7 +53,7 @@ public:
     commands.push_back(std::make_unique<Command>(CommandType::MaterializePaint));
   }
 
-  void play(DrawingCtx ctx) {
+  void play(DrawingCtx* ctx) {
     for (const auto& cmd : commands) {
         switch (cmd->type) {
             case CommandType::SavePaint:
@@ -76,10 +67,7 @@ public:
             case CommandType::DrawCircle: {
                 // Safe downcast since we know the type
                 auto* circleCmd = static_cast<CircleCmd*>(cmd.get());
-                SkPaint paint;
-                auto center = SkPoint::Make(256, 256);
-                ctx.canvas->drawCircle(center, circleCmd->props.r, paint);
-                // Process circle command using circleCmd->props
+                circleCmd->draw(ctx);
                 break;
             }
         }
