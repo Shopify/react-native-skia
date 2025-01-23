@@ -6,15 +6,15 @@ namespace RNSkia {
 
 class DrawingCtx {
 public:
-    SkCanvas* canvas;
+  SkCanvas *canvas;
 
-    DrawingCtx(SkCanvas* aCanvas): canvas(aCanvas) {};
-    ~DrawingCtx() = default;
+  DrawingCtx(SkCanvas *aCanvas) : canvas(aCanvas) {};
+  ~DrawingCtx() = default;
 
-    SkPaint& getPaint() {
-        SkPaint paint;
-        return paint;
-    }
+  SkPaint &getPaint() {
+    SkPaint paint;
+    return paint;
+  }
 };
 
 } // namespace RNSkia

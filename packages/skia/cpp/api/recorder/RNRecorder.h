@@ -14,9 +14,7 @@
 
 namespace RNSkia {
 
-struct PaintCmdProps {
-    
-};
+struct PaintCmdProps {};
 
 class SavePaintCmd : public Command {
 private:
@@ -32,7 +30,7 @@ private:
   std::vector<std::unique_ptr<Command>> commands;
 
 public:
-  Updates updates;
+  Variables variables;
 
   ~Recorder() = default;
 
@@ -49,27 +47,28 @@ public:
   }
 
   void materializePaint() {
-    commands.push_back(std::make_unique<Command>(CommandType::MaterializePaint));
+    commands.push_back(
+        std::make_unique<Command>(CommandType::MaterializePaint));
   }
 
-  void play(DrawingCtx* ctx) {
-    for (const auto& cmd : commands) {
-        switch (cmd->type) {
-            case CommandType::SavePaint:
-                // Process save command
-                break;
-                
-            case CommandType::RestorePaint:
-                // Process restore command
-                break;
-                
-            case CommandType::DrawCircle: {
-                // Safe downcast since we know the type
-                auto* circleCmd = static_cast<CircleCmd*>(cmd.get());
-                circleCmd->draw(ctx);
-                break;
-            }
-        }
+  void play(DrawingCtx *ctx) {
+    for (const auto &cmd : commands) {
+      switch (cmd->type) {
+      case CommandType::SavePaint:
+        // Process save command
+        break;
+
+      case CommandType::RestorePaint:
+        // Process restore command
+        break;
+
+      case CommandType::DrawCircle: {
+        // Safe downcast since we know the type
+        auto *circleCmd = static_cast<CircleCmd *>(cmd.get());
+        circleCmd->draw(ctx);
+        break;
+      }
+      }
     }
   }
 };

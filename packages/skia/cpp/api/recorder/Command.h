@@ -53,5 +53,4 @@ public:
   virtual ~Command() = default;
 };
 
-
 } // namespace RNSkia

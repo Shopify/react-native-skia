@@ -8,8 +8,8 @@
 #include "JsiSkCanvas.h"
 #include "JsiSkHostObjects.h"
 
-#include "RNRecorder.h"
 #include "DrawingCtx.h"
+#include "RNRecorder.h"
 #include "RNSkLog.h"
 
 #include <jsi/jsi.h>
@@ -30,14 +30,15 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_HOST_FUNCTION(materializePaint){
+  JSI_HOST_FUNCTION(materializePaint) {
     getObject()->materializePaint();
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawCircle) {
     CircleCmdProps props;
-    convert(runtime, arguments[0].asObject(runtime), props, getObject()->updates);
+    convert(runtime, arguments[0].asObject(runtime), props,
+            getObject()->variables);
     getObject()->drawCircle(props);
     return jsi::Value::undefined();
   }
@@ -48,16 +49,17 @@ public:
   }
 
   JSI_HOST_FUNCTION(play) {
-    auto jsiCanvas = arguments[0].asObject(runtime).asHostObject<JsiSkCanvas>(runtime);
+    auto jsiCanvas =
+        arguments[0].asObject(runtime).asHostObject<JsiSkCanvas>(runtime);
     DrawingCtx ctx(jsiCanvas->getCanvas());
     getObject()->play(&ctx);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(applyUpdates) {
-    for (auto &update : getObject()->updates) {
-      update(runtime);
-    }
+    //    for (auto &update : getObject()->updates) {
+    //      update(runtime);
+    //    }
     return jsi::Value::undefined();
   }
 
