@@ -67,7 +67,7 @@ export const Breathe = () => {
   ]);
 
   const r = useDerivedValue(() => mix(progress.value, 64, 256));
-
+  r.name = "variable1";
   return (
     <View style={{ flex: 1 }}>
       <Canvas style={styles.container} opaque>

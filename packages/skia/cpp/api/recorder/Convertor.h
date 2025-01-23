@@ -50,16 +50,14 @@ void convertPropertyImpl(jsi::Runtime &runtime, const jsi::Object &object,
   auto property = object.getProperty(runtime, propertyName.c_str());
 
   if (isSharedValue(runtime, property)) {
-    void *sharedValue = property.asObject(runtime).asHostObject(runtime).get();
-    auto conv = [&sharedValue, &target](void *val, jsi::Runtime &runtime) {
-      jsi::Object jsObject = jsi::Object::createFromHostObject(
-          runtime, std::shared_ptr<jsi::HostObject>(
-                       static_cast<jsi::HostObject *>(val)));
-      auto value = jsObject.getProperty(runtime, "value");
+    std::string name = property.asObject(runtime).getProperty(runtime, "name").asString(runtime).utf8(runtime);
+    auto sharedValue = property.asObject(runtime);
+    auto conv = [&target](jsi::Runtime &runtime, const jsi::Object &val) {
+      auto value = val.getProperty(runtime, "value");
       target = getPropertyValue<T>(runtime, value);
     };
-    variables[sharedValue].push_back(conv);
-    conv(sharedValue, runtime);
+    //variables[sharedValue].push_back(conv);
+    conv(runtime, sharedValue);
   } else {
     target = getPropertyValue<T>(runtime, property);
   }
