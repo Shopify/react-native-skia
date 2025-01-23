@@ -61,7 +61,27 @@ public:
   }
 
   void play(DrawingCtx ctx) {
-    
+    for (const auto& cmd : commands) {
+        switch (cmd->type) {
+            case CommandType::SavePaint:
+                // Process save command
+                break;
+                
+            case CommandType::RestorePaint:
+                // Process restore command
+                break;
+                
+            case CommandType::DrawCircle: {
+                // Safe downcast since we know the type
+                auto* circleCmd = static_cast<CircleCmd*>(cmd.get());
+                SkPaint paint;
+                auto center = SkPoint::Make(256, 256);
+                ctx.canvas->drawCircle(center, circleCmd->props.r, paint);
+                // Process circle command using circleCmd->props
+                break;
+            }
+        }
+    }
   }
 };
 
