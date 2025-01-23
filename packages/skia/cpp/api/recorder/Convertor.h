@@ -2,7 +2,7 @@
 
 #include <functional>
 #include <optional>
-#include <unordered_map>
+#include <unordered_set>
 #include <variant>
 #include <vector>
 
@@ -14,7 +14,7 @@
 namespace RNSkia {
 
 using ConversionFunction = std::function<void()>;
-using Variables = std::unordered_map<std::string, std::vector<ConversionFunction>>;
+using Updates = std::vector<ConversionFunction>;
 
 bool isSharedValue(jsi::Runtime &runtime, const jsi::Value &value) {
   return value.isObject() && value.asObject(runtime).hasProperty(
@@ -46,7 +46,7 @@ T getPropertyValue(jsi::Runtime& runtime, const jsi::Value& value);
 template<typename T, typename Target>
 void convertPropertyImpl(jsi::Runtime& runtime, const jsi::Object& object,
                         const std::string& propertyName, Target& target,
-                        Variables& variables) {
+                        Updates& updates) {
     if (!object.hasProperty(runtime, propertyName.c_str())) {
         return;
     }
@@ -59,8 +59,7 @@ void convertPropertyImpl(jsi::Runtime& runtime, const jsi::Object& object,
             auto value = sharedValue.getProperty(runtime, "value");
             target = getPropertyValue<T>(runtime, value);
         };
-        auto& conversionFunctions = variables[propertyName];
-        conversionFunctions.push_back(conv);
+        updates.push_back(conv);
         conv();
     } else {
         target = getPropertyValue<T>(runtime, property);
@@ -71,16 +70,16 @@ void convertPropertyImpl(jsi::Runtime& runtime, const jsi::Object& object,
 template<typename T>
 void convertProperty(jsi::Runtime& runtime, const jsi::Object& object,
                     const std::string& propertyName, std::optional<T>& target,
-                    Variables& variables) {
-    convertPropertyImpl<T>(runtime, object, propertyName, target, variables);
+                     Updates& updates) {
+    convertPropertyImpl<T>(runtime, object, propertyName, target, updates);
 }
 
 // Specialization for non-optional types
 template<typename T>
 void convertProperty(jsi::Runtime& runtime, const jsi::Object& object,
                     const std::string& propertyName, T& target,
-                    Variables& variables) {
-    convertPropertyImpl<T>(runtime, object, propertyName, target, variables);
+                     Updates& updates) {
+    convertPropertyImpl<T>(runtime, object, propertyName, target, updates);
 }
 
 // Property value getter implementations

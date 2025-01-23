@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { SharedValue } from "react-native-reanimated";
+
 import type {
   CTMProps,
   DrawingNodeProps,
@@ -8,6 +10,7 @@ import { NodeType } from "../../dom/types";
 import type { BaseRecorder } from "../../skia/types/Recorder";
 import type { Node } from "../Node";
 import { isImageFilter, isShader, sortNodeChildren } from "../Node";
+import { isSharedValue } from "../utils";
 
 export const processPaint = ({
   opacity,
@@ -200,11 +203,20 @@ const pushPaints = (recorder: BaseRecorder, paints: Node<any>[]) => {
   });
 };
 
-const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
+const visitNode = (
+  recorder: BaseRecorder,
+  node: Node<any>,
+  sharedValues?: SharedValue<unknown>[]
+) => {
   if (node.type === NodeType.Group) {
     recorder.saveGroup();
   }
   const { props } = node;
+  if (sharedValues) {
+    sharedValues.push(
+      ...Object.values(props).filter((value) => isSharedValue(value))
+    );
+  }
   const {
     colorFilters,
     maskFilters,
@@ -328,8 +340,12 @@ const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
   }
 };
 
-export const visit = (recorder: BaseRecorder, root: Node[]) => {
+export const visit = (
+  recorder: BaseRecorder,
+  root: Node[],
+  sharedValues?: SharedValue<unknown>[]
+) => {
   root.forEach((node) => {
-    visitNode(recorder, node);
+    visitNode(recorder, node, sharedValues);
   });
 };

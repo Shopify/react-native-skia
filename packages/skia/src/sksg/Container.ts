@@ -1,3 +1,5 @@
+import type { SharedValue } from "react-native-reanimated";
+
 import Rea from "../external/reanimated/ReanimatedProxy";
 import type { Skia, SkCanvas } from "../skia/types";
 import { HAS_REANIMATED_3 } from "../external/reanimated/renderHelpers";
@@ -37,14 +39,12 @@ const nativeDrawOnscreen = (
 
   const rec = Skia.PictureRecorder();
   const canvas = rec.beginRecording();
-  //const start = performance.now();
+  const start = performance.now();
 
   recorder.play(canvas);
-  // const ctx = createDrawingContext(Skia, recording.paintPool, canvas);
-  // replay(ctx, recording.commands);
   const picture = rec.finishRecordingAsPicture();
-  //const end = performance.now();
-  //console.log("Recording time: ", end - start);
+  const end = performance.now();
+  console.log("Recording time: ", end - start);
   SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
   rec.dispose();
   picture.dispose();
@@ -139,20 +139,15 @@ class NativeReanimatedContainer extends Container {
     }
     const { nativeId, Skia } = this;
     const recorder = Skia.Recorder();
-    visit(recorder, this.root);
-    //const record = recorder.getRecording();
-    // const { animationValues } = record;
-    // this.recording = {
-    //   commands: record.commands,
-    //   paintPool: record.paintPool,
-    // };
-    // const { nativeId, Skia, recording } = this;
-    // if (animationValues.size > 0) {
-    //   this.mapperId = Rea.startMapper(() => {
-    //     "worklet";
-    //     drawOnscreen(Skia, nativeId, recording!);
-    //   }, Array.from(animationValues));
-    // }
+    const sharedValues: SharedValue<unknown>[] = [];
+    visit(recorder, this.root, sharedValues);
+    console.log({ sharedValues });
+    if (sharedValues.length > 0) {
+      this.mapperId = Rea.startMapper(() => {
+        "worklet";
+        nativeDrawOnscreen(Skia, nativeId, recorder);
+      }, sharedValues);
+    }
     Rea.runOnUI(() => {
       "worklet";
       nativeDrawOnscreen(Skia, nativeId, recorder);

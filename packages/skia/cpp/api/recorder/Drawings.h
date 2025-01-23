@@ -16,11 +16,11 @@ struct CircleCmdProps {
 };
 
 void convert(jsi::Runtime& runtime, const jsi::Object& object,
-            CircleCmdProps& props, Variables& variables) {
-    convertProperty<float>(runtime, object, "cx", props.cx, variables);
-    convertProperty<float>(runtime, object, "cy", props.cy, variables);
-    convertProperty<SkPoint>(runtime, object, "c", props.c, variables);
-    convertProperty<float>(runtime, object, "r", props.r, variables);
+            CircleCmdProps& props, Updates& updates) {
+    convertProperty<float>(runtime, object, "cx", props.cx, updates);
+    convertProperty<float>(runtime, object, "cy", props.cy, updates);
+    convertProperty<SkPoint>(runtime, object, "c", props.c, updates);
+    convertProperty<float>(runtime, object, "r", props.r, updates);
 }
 
 class CircleCmd : public Command {

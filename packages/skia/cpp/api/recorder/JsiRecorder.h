@@ -37,7 +37,7 @@ public:
 
   JSI_HOST_FUNCTION(drawCircle) {
     CircleCmdProps props;
-    convert(runtime, arguments[0].asObject(runtime), props, getObject()->variables);
+    convert(runtime, arguments[0].asObject(runtime), props, getObject()->updates);
     getObject()->drawCircle(props);
     return jsi::Value::undefined();
   }

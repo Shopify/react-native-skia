@@ -32,9 +32,8 @@ private:
   std::vector<std::unique_ptr<Command>> commands;
 
 public:
-  Variables variables;
-    
-  Recorder() = default;
+  Updates updates;
+
   ~Recorder() = default;
 
   void savePaint(PaintCmdProps &props) {
