@@ -10,6 +10,7 @@
 #include "CommandType.h"
 #include "Convertor.h"
 #include "DrawingCtx.h"
+#include "Drawings.h"
 
 namespace RNSkia {
 
@@ -32,6 +33,7 @@ struct CircleCmd : Command {
 
   CircleCmd(const CircleCmdProps &p)
       : Command(CommandType::DrawCircle), props(p) {}
+    
 };
 
 class Recorder {
