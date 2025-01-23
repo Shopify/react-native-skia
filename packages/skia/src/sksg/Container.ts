@@ -57,6 +57,7 @@ class StaticContainer extends Container {
     const recorder = new Recorder();
     visit(recorder, this.root);
     this.recording = recorder.getRecording();
+    console.log(this.recording);
     const isOnScreen = this.nativeId !== -1;
     if (isOnScreen) {
       const rec = this.Skia.PictureRecorder();

@@ -9,6 +9,7 @@
 #include "JsiSkHostObjects.h"
 
 #include "RNRecorder.h"
+#include "DrawingCtx.h"
 #include "RNSkLog.h"
 
 #include <jsi/jsi.h>
@@ -29,6 +30,11 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(materializePaint){
+    getObject()->materializePaint();
+    return jsi::Value::undefined();
+  }
+
   JSI_HOST_FUNCTION(drawCircle) {
     CircleCmdProps props;
     convert(runtime, arguments[0].asObject(runtime), props, getObject()->variables);
@@ -41,11 +47,21 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(play) {
+    auto jsiCanvas = arguments[0].asObject(runtime).asHostObject<JsiSkCanvas>(runtime);
+    auto canvas = jsiCanvas->getObject();
+    DrawingCtx ctx(canvas.get());
+    getObject()->play(ctx);
+    return jsi::Value::undefined();
+  }
+
   EXPORT_JSI_API_TYPENAME(JsiRecorder, Recorder)
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiRecorder, savePaint),
                        JSI_EXPORT_FUNC(JsiRecorder, restorePaint),
-                       JSI_EXPORT_FUNC(JsiRecorder, drawCircle), )
+                       JSI_EXPORT_FUNC(JsiRecorder, drawCircle),
+                       JSI_EXPORT_FUNC(JsiRecorder, materializePaint),
+                       JSI_EXPORT_FUNC(JsiRecorder, play))
 
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {

@@ -9,6 +9,7 @@
 
 #include "CommandType.h"
 #include "Convertor.h"
+#include "DrawingCtx.h"
 
 namespace RNSkia {
 
@@ -53,6 +54,14 @@ public:
 
   void drawCircle(CircleCmdProps &props) {
     commands.push_back(std::make_unique<CircleCmd>(props));
+  }
+
+  void materializePaint() {
+    commands.push_back(std::make_unique<Command>(CommandType::MaterializePaint));
+  }
+
+  void play(DrawingCtx ctx) {
+    
   }
 };
 
