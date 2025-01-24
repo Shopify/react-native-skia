@@ -70,11 +70,7 @@ export const Breathe = () => {
   return (
     <View style={{ flex: 1 }}>
       <Canvas style={styles.container} opaque>
-        {new Array(20).fill(0).map((_, index) => {
-          return <Circle key={index} cx={index * 10} cy={index * 10} r={r} />;
-        })}
-
-        {/* <Fill color="rgb(36,43,56)" />
+        <Fill color="rgb(36,43,56)" />
         <Group origin={center} transform={transform} blendMode="screen">
           <BlurMask style="solid" blur={40} />
           {new Array(6).fill(0).map((_, index) => {
@@ -82,7 +78,7 @@ export const Breathe = () => {
               <Ring key={index} index={index} progress={progress} total={6} />
             );
           })}
-        </Group> */}
+        </Group>
       </Canvas>
     </View>
   );

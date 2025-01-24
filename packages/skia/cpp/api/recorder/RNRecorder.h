@@ -39,6 +39,10 @@ public:
     commands.push_back(std::make_unique<CircleCmd>(runtime, props, variables));
   }
 
+  void drawPaint() {
+    commands.push_back(std::make_unique<Command>(CommandType::DrawPaint));
+  }
+
   void materializePaint() {
     commands.push_back(
         std::make_unique<Command>(CommandType::MaterializePaint));
