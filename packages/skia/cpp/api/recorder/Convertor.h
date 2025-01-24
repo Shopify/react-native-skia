@@ -104,6 +104,28 @@ SkPoint getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
+SkMatrix getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isObject()) {
+    auto object = value.asObject(runtime);
+    if (object.isArray(runtime)) {
+      auto array = object.asArray(runtime);
+      auto isTransform = array.getValueAtIndex(runtime, 0).isObject();
+      if (isTransform) {
+
+      } else {
+        if (object.isHostObject(runtime)) {
+          auto matrix = object.asHostObject<JsiSkMatrix>(runtime)->getObject().get();
+          return SkMatrix(*matrix);
+        } else {
+          return JsiSkMatrix::getMatrix(runtime, value);
+        }
+      }
+    }
+  }
+  throw std::runtime_error("Invalid prop value for SkMatrix received");
+}
+
+template <>
 SkBlendMode getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
   if (val.isString()) {
     auto value = val.asString(runtime).utf8(runtime);
@@ -240,8 +262,15 @@ std::optional<SkColor> getPropertyValue(jsi::Runtime &runtime,
 
 template <>
 std::optional<SkBlendMode> getPropertyValue(jsi::Runtime &runtime,
-                                        const jsi::Value &value) {
+                                            const jsi::Value &value) {
   return makeOptionalPropertyValue<SkBlendMode>(runtime, value);
 }
+
+template <>
+std::optional<SkMatrix> getPropertyValue(jsi::Runtime &runtime,
+                                            const jsi::Value &value) {
+  return makeOptionalPropertyValue<SkMatrix>(runtime, value);
+}
+
 
 } // namespace RNSkia

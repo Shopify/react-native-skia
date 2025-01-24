@@ -30,6 +30,15 @@ public:
         std::make_unique<SavePaintCmd>(runtime, props, variables));
   }
 
+  void saveCTM(jsi::Runtime &runtime, const jsi::Object &props,
+          Variables &variables) {
+    commands.push_back(std::make_unique<SaveCTMCmd>(runtime, props, variables));
+  }
+
+  void restoreCTM() {
+    commands.push_back(std::make_unique<Command>(CommandType::RestoreCTM));
+  }
+
   void restorePaint() {
     commands.push_back(std::make_unique<Command>(CommandType::RestorePaint));
   }
@@ -63,7 +72,18 @@ public:
       }
 
       case CommandType::RestorePaint: {
-        // Process restore command
+        ctx->restorePaint();
+        break;
+      }
+
+      case CommandType::SaveCTM: {
+        auto *saveCTMCmd = static_cast<SaveCTMCmd *>(cmd.get());
+        saveCTMCmd->saveCTM(ctx);
+        break;
+      }
+
+      case CommandType::RestoreCTM: {
+        ctx->canvas->restore();
         break;
       }
 

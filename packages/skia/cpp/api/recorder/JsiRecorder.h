@@ -144,8 +144,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(saveCTM) {
-    // getObject()->saveCTM(runtime, arguments[0].asObject(runtime),
-    //                      getObject()->variables);
+    getObject()->saveCTM(runtime, arguments[0].asObject(runtime),
+                         getObject()->variables);
     return jsi::Value::undefined();
   }
 
