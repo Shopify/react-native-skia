@@ -26,7 +26,7 @@ public:
           convertProperty<std::optional<float>>(runtime, object, "cx", props.cx, variables);
           convertProperty<std::optional<float>>(runtime, object, "cy", props.cy, variables);
           convertProperty<std::optional<SkPoint>>(runtime, object, "c", props.c, variables);
-          convertProperty<float>(runtime, object, "r", props.r, variables);
+          convertProperty(runtime, object, "r", props.r, variables);
       }
 
   void draw(DrawingCtx *ctx) {
