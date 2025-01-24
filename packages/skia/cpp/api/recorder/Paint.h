@@ -14,7 +14,7 @@ using ClipDef = std::variant<SkPath, SkRRect, SkRect>;
 using Layer = std::variant<SkPaint, bool>;
 
 struct CTMCmdProps {
-  std::optional<SkMatrix> transform;
+  std::optional<SkM44> transform;
   std::optional<SkPoint> origin;
   std::optional<SkMatrix> matrix;
   std::optional<ClipDef> clip;

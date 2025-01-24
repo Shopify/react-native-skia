@@ -144,7 +144,7 @@ class NativeReanimatedContainer extends Container {
     if (sharedValues.length > 0) {
       this.mapperId = Rea.startMapper(() => {
         "worklet";
-        recorder.applyUpdates(sharedValues);
+        //recorder.applyUpdates(sharedValues);
         nativeDrawOnscreen(Skia, nativeId, recorder);
       }, sharedValues);
     }

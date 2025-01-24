@@ -66,7 +66,6 @@ export const Breathe = () => {
     { rotate: mix(progress.value, -Math.PI, 0) },
   ]);
 
-  const r = useDerivedValue(() => mix(progress.value, 64, 256));
   return (
     <View style={{ flex: 1 }}>
       <Canvas style={styles.container} opaque>
