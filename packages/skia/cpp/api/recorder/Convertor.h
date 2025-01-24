@@ -114,7 +114,8 @@ SkMatrix getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 
       } else {
         if (object.isHostObject(runtime)) {
-          auto matrix = object.asHostObject<JsiSkMatrix>(runtime)->getObject().get();
+          auto matrix =
+              object.asHostObject<JsiSkMatrix>(runtime)->getObject().get();
           return SkMatrix(*matrix);
         } else {
           return JsiSkMatrix::getMatrix(runtime, value);
@@ -268,9 +269,8 @@ std::optional<SkBlendMode> getPropertyValue(jsi::Runtime &runtime,
 
 template <>
 std::optional<SkMatrix> getPropertyValue(jsi::Runtime &runtime,
-                                            const jsi::Value &value) {
+                                         const jsi::Value &value) {
   return makeOptionalPropertyValue<SkMatrix>(runtime, value);
 }
-
 
 } // namespace RNSkia

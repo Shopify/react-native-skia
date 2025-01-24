@@ -29,19 +29,22 @@ private:
 public:
   SaveCTMCmd(jsi::Runtime &runtime, const jsi::Object &object,
              Variables &variables)
-      : Command(CommandType::SavePaint) {
+      : Command(CommandType::SaveCTM) {
     convertProperty(runtime, object, "transform", props.transform, variables);
     convertProperty(runtime, object, "origin", props.origin, variables);
     convertProperty(runtime, object, "matrix", props.matrix, variables);
-   // convertProperty(runtime, object, "clip", props.clip, variables);
-   // convertProperty(runtime, object, "invertClip", props.invertClip, variables);
-   // convertProperty(runtime, object, "layer", props.layer, variables);
+    // convertProperty(runtime, object, "clip", props.clip, variables);
+    // convertProperty(runtime, object, "invertClip", props.invertClip,
+    // variables); convertProperty(runtime, object, "layer", props.layer,
+    // variables);
   }
 
   void saveCTM(DrawingCtx *ctx) {
     auto hasTransform = props.matrix.has_value() || props.transform.has_value();
     auto hasClip = props.clip.has_value();
-    auto op = props.invertClip.has_value() && props.invertClip.value() ? SkClipOp::kDifference : SkClipOp::kIntersect;
+    auto op = props.invertClip.has_value() && props.invertClip.value()
+                  ? SkClipOp::kDifference
+                  : SkClipOp::kIntersect;
     /*
     const hasTransform = matrix !== undefined || transform !== undefined;
   const clip = computeClip(Skia, rawClip);
@@ -106,6 +109,7 @@ public:
   }
 
   void savePaint(DrawingCtx *ctx) {
+    ctx->savePaint();
     auto &paint = ctx->getPaint();
     if (props.color.has_value()) {
       paint.setColor(props.color.value());

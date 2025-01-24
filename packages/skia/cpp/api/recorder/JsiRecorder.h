@@ -150,7 +150,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(restoreCTM) {
-    // getObject()->restoreCTM();
+    getObject()->restoreCTM();
     return jsi::Value::undefined();
   }
 
