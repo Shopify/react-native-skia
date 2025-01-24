@@ -42,8 +42,8 @@ public:
     commands.push_back(std::make_unique<Command>(CommandType::RestorePaint));
   }
 
-  void drawCircle(CircleCmdProps &props) {
-    commands.push_back(std::make_unique<CircleCmd>(props));
+  void drawCircle(jsi::Runtime &runtime, const jsi::Object &props, Variables &variables) {
+    commands.push_back(std::make_unique<CircleCmd>(runtime, props, variables));
   }
 
   void materializePaint() {

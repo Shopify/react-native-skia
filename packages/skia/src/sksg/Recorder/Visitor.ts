@@ -206,16 +206,18 @@ const pushPaints = (recorder: BaseRecorder, paints: Node<any>[]) => {
 const visitNode = (
   recorder: BaseRecorder,
   node: Node<any>,
-  sharedValues?: SharedValue<unknown>[]
+  sharedValues?: Set<SharedValue<unknown>>
 ) => {
   if (node.type === NodeType.Group) {
     recorder.saveGroup();
   }
   const { props } = node;
   if (sharedValues) {
-    sharedValues.push(
-      ...Object.values(props).filter((value) => isSharedValue(value))
-    );
+    Object.values(props).forEach((value) => {
+      if (isSharedValue(value)) {
+        sharedValues.add(value);
+      }
+    });
   }
   const {
     colorFilters,
@@ -343,7 +345,7 @@ const visitNode = (
 export const visit = (
   recorder: BaseRecorder,
   root: Node[],
-  sharedValues?: SharedValue<unknown>[]
+  sharedValues?: Set<SharedValue<unknown>>
 ) => {
   root.forEach((node) => {
     visitNode(recorder, node, sharedValues);

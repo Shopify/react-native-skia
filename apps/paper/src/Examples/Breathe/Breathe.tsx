@@ -71,7 +71,10 @@ export const Breathe = () => {
   return (
     <View style={{ flex: 1 }}>
       <Canvas style={styles.container} opaque>
-        <Circle cx={256} cy={256} r={r} />
+        {new Array(10).fill(0).map((_, index) => {
+          return <Circle key={index} cx={index * 10} cy={index * 10} r={r} />;
+        })}
+
         {/* <Fill color="rgb(36,43,56)" />
         <Group origin={center} transform={transform} blendMode="screen">
           <BlurMask style="solid" blur={40} />

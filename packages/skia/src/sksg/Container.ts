@@ -138,8 +138,9 @@ class NativeReanimatedContainer extends Container {
     }
     const { nativeId, Skia } = this;
     const recorder = Skia.Recorder();
-    const sharedValues: SharedValue<unknown>[] = [];
-    visit(recorder, this.root, sharedValues);
+    const sharedValuesSet = new Set<SharedValue<unknown>>();
+    visit(recorder, this.root, sharedValuesSet);
+    const sharedValues = Array.from(sharedValuesSet);
     if (sharedValues.length > 0) {
       this.mapperId = Rea.startMapper(() => {
         "worklet";
