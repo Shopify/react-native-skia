@@ -56,7 +56,8 @@ void convertPropertyImpl(jsi::Runtime &runtime, const jsi::Object &object,
                            .asString(runtime)
                            .utf8(runtime);
     auto sharedValue = property.asObject(runtime);
-    auto conv = [target = &target](jsi::Runtime &runtime, const jsi::Object &val) {
+    auto conv = [target = &target](jsi::Runtime &runtime,
+                                   const jsi::Object &val) {
       auto value = val.getProperty(runtime, "value");
       *target = getPropertyValue<T>(runtime, value);
     };
@@ -74,8 +75,8 @@ void convertProperty(jsi::Runtime &runtime, const jsi::Object &object,
                      Variables &variables) {
   if constexpr (is_optional<T>::value) {
     using ValueType = typename unwrap_optional<T>::type;
-    target = getPropertyValue<T>(runtime,
-      object.getProperty(runtime, propertyName.c_str()));
+    target = getPropertyValue<T>(
+        runtime, object.getProperty(runtime, propertyName.c_str()));
   } else {
     convertPropertyImpl<T>(runtime, object, propertyName, target, variables);
   }
@@ -101,25 +102,28 @@ SkPoint getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 //
-template<typename T>
-std::optional<T> makeOptionalPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+template <typename T>
+std::optional<T> makeOptionalPropertyValue(jsi::Runtime &runtime,
+                                           const jsi::Value &value) {
   if (value.isNull() || value.isUndefined()) {
     return std::nullopt;
   }
   try {
     return getPropertyValue<T>(runtime, value);
-  } catch (const std::runtime_error&) {
+  } catch (const std::runtime_error &) {
     return std::nullopt;
   }
 }
 
-template<>
-std::optional<float> getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+template <>
+std::optional<float> getPropertyValue(jsi::Runtime &runtime,
+                                      const jsi::Value &value) {
   return makeOptionalPropertyValue<float>(runtime, value);
 }
 
-template<>
-std::optional<SkPoint> getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+template <>
+std::optional<SkPoint> getPropertyValue(jsi::Runtime &runtime,
+                                        const jsi::Value &value) {
   return makeOptionalPropertyValue<SkPoint>(runtime, value);
 }
 

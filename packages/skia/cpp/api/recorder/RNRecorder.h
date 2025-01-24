@@ -11,19 +11,9 @@
 #include "Convertor.h"
 #include "DrawingCtx.h"
 #include "Drawings.h"
+#include "Paint.h"
 
 namespace RNSkia {
-
-struct PaintCmdProps {};
-
-class SavePaintCmd : public Command {
-private:
-  PaintCmdProps props;
-
-public:
-  SavePaintCmd(const PaintCmdProps &p)
-      : Command(CommandType::SavePaint), props(p) {}
-};
 
 class Recorder {
 private:
@@ -34,15 +24,18 @@ public:
 
   ~Recorder() = default;
 
-  void savePaint(PaintCmdProps &props) {
-    commands.push_back(std::make_unique<SavePaintCmd>(props));
+  void savePaint(jsi::Runtime &runtime, const jsi::Object &props,
+                 Variables &variables) {
+    commands.push_back(
+        std::make_unique<SavePaintCmd>(runtime, props, variables));
   }
 
   void restorePaint() {
     commands.push_back(std::make_unique<Command>(CommandType::RestorePaint));
   }
 
-  void drawCircle(jsi::Runtime &runtime, const jsi::Object &props, Variables &variables) {
+  void drawCircle(jsi::Runtime &runtime, const jsi::Object &props,
+                  Variables &variables) {
     commands.push_back(std::make_unique<CircleCmd>(runtime, props, variables));
   }
 
@@ -54,16 +47,18 @@ public:
   void play(DrawingCtx *ctx) {
     for (const auto &cmd : commands) {
       switch (cmd->type) {
-      case CommandType::SavePaint:
-        // Process save command
+      case CommandType::SavePaint: {
+        auto *savePaintCmd = static_cast<SavePaintCmd *>(cmd.get());
+        savePaintCmd->savePaint(ctx);
         break;
+      }
 
-      case CommandType::RestorePaint:
+      case CommandType::RestorePaint: {
         // Process restore command
         break;
+      }
 
       case CommandType::DrawCircle: {
-        // Safe downcast since we know the type
         auto *circleCmd = static_cast<CircleCmd *>(cmd.get());
         circleCmd->draw(ctx);
         break;
