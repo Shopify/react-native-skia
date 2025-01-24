@@ -53,6 +53,12 @@ void convertPropertyImpl(jsi::Runtime &runtime, const jsi::Object &object,
   auto property = object.getProperty(runtime, propertyName.c_str());
 
   if (isSharedValue(runtime, property)) {
+    auto hasNameProp = !property.asObject(runtime)
+                           .hasProperty(runtime, "name") && property.asObject(runtime)
+                           .getProperty(runtime, "name").isString();
+    if (!hasNameProp) {
+      throw std::runtime_error("Found a shared value without a name property");
+    }
     std::string name = property.asObject(runtime)
                            .getProperty(runtime, "name")
                            .asString(runtime)
@@ -75,13 +81,14 @@ template <typename T>
 void convertProperty(jsi::Runtime &runtime, const jsi::Object &object,
                      const std::string &propertyName, T &target,
                      Variables &variables) {
-  if constexpr (is_optional<T>::value) {
-    using ValueType = typename unwrap_optional<T>::type;
-    target = getPropertyValue<T>(
-        runtime, object.getProperty(runtime, propertyName.c_str()));
-  } else {
     convertPropertyImpl<T>(runtime, object, propertyName, target, variables);
-  }
+//  if constexpr (is_optional<T>::value) {
+//    using ValueType = typename unwrap_optional<T>::type;
+//    target = getPropertyValue<T>(
+//        runtime, object.getProperty(runtime, propertyName.c_str()));
+//  } else {
+//    convertPropertyImpl<T>(runtime, object, propertyName, target, variables);
+//  }
 }
 
 // Base property value getter implementations
@@ -107,6 +114,7 @@ template <>
 SkM44 getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isObject()) {
     auto object = value.asObject(runtime);
+    // Get array of property names
     auto array = object.asArray(runtime);
     auto size = array.size(runtime);
     SkM44 m4;

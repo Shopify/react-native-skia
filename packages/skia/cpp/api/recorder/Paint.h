@@ -31,8 +31,8 @@ public:
              Variables &variables)
       : Command(CommandType::SaveCTM) {
     convertProperty(runtime, object, "transform", props.transform, variables);
-    convertProperty(runtime, object, "origin", props.origin, variables);
-    convertProperty(runtime, object, "matrix", props.matrix, variables);
+    //convertProperty(runtime, object, "origin", props.origin, variables);
+    //convertProperty(runtime, object, "matrix", props.matrix, variables);
     // convertProperty(runtime, object, "clip", props.clip, variables);
     // convertProperty(runtime, object, "invertClip", props.invertClip,
     // variables); convertProperty(runtime, object, "layer", props.layer,
@@ -45,6 +45,8 @@ public:
     auto op = props.invertClip.has_value() && props.invertClip.value()
                   ? SkClipOp::kDifference
                   : SkClipOp::kIntersect;
+    ctx->canvas->save();
+    ctx->canvas->concat(props.transform.value().asM33());
     /*
     const hasTransform = matrix !== undefined || transform !== undefined;
   const clip = computeClip(Skia, rawClip);

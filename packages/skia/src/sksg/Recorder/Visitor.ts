@@ -217,7 +217,7 @@ const visitNode = (
       if (isSharedValue(value) && !sharedValues.has(value)) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
-        value.name = `variable${sharedValues.size}`;
+        sharedValues.name = `variable${sharedValues.size}`;
         sharedValues.add(value);
       }
     });
@@ -332,7 +332,7 @@ const visitNode = (
       break;
   }
   drawings.forEach((drawing) => {
-    visitNode(recorder, drawing);
+    visitNode(recorder, drawing, sharedValues);
   });
   if (shouldPushPaint) {
     recorder.restorePaint();

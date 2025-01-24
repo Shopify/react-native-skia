@@ -31,7 +31,7 @@ public:
   }
 
   void saveCTM(jsi::Runtime &runtime, const jsi::Object &props,
-               Variables &variables) {
+          Variables &variables) {
     commands.push_back(std::make_unique<SaveCTMCmd>(runtime, props, variables));
   }
 
