@@ -9,6 +9,8 @@
 #include <include/core/SkPaint.h>
 #include <include/core/SkPoint.h>
 
+#include "third_party/CSSColorParser.h"
+
 #include <jsi/jsi.h>
 
 namespace RNSkia {
@@ -98,7 +100,43 @@ SkPoint getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
     auto y = value.asObject(runtime).getProperty(runtime, "y").asNumber();
     return SkPoint::Make(x, y);
   }
-  return SkPoint::Make(0, 0); // Or throw an exception if you prefer
+  throw std::runtime_error("Invalid prop value for SkPoint received");
+}
+
+template <>
+SkColor getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isNumber()) {
+    return static_cast<SkColor>(value.asNumber());
+  } else if (value.isString()) {
+    auto text = value.asString(runtime).utf8(runtime);
+    auto color = CSSColorParser::parse(text);
+    if (color.a == -1.0f) {
+      return SK_ColorBLACK;
+    }
+    return SkColorSetARGB(color.a * 255, color.r, color.g, color.b);
+  } else if (value.isObject()) {
+    const auto &object = value.asObject(runtime);
+    if (object.isArray(runtime)) {
+      auto array = object.asArray(runtime);
+      auto r = array.getValueAtIndex(runtime, 0).asNumber();
+      auto g = array.getValueAtIndex(runtime, 1).asNumber();
+      auto b = array.getValueAtIndex(runtime, 2).asNumber();
+      auto a = array.getValueAtIndex(runtime, 3).asNumber();
+      return SkColorSetARGB(a * 255, r * 255, g * 255, b * 255);
+    }
+    jsi::ArrayBuffer buffer =
+        object
+            .getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
+            .asObject(runtime)
+            .getArrayBuffer(runtime);
+    auto bfrPtr = reinterpret_cast<float *>(buffer.data(runtime));
+    if (bfrPtr[0] > 1 || bfrPtr[1] > 1 || bfrPtr[2] > 1 || bfrPtr[3] > 1) {
+      return SK_ColorBLACK;
+    }
+    return SkColorSetARGB(bfrPtr[3] * 255, bfrPtr[0] * 255, bfrPtr[1] * 255,
+                          bfrPtr[2] * 255);
+  }
+  throw std::runtime_error("Invalid prop value for SkColor received");
 }
 
 //
@@ -125,6 +163,12 @@ template <>
 std::optional<SkPoint> getPropertyValue(jsi::Runtime &runtime,
                                         const jsi::Value &value) {
   return makeOptionalPropertyValue<SkPoint>(runtime, value);
+}
+
+template <>
+std::optional<SkColor> getPropertyValue(jsi::Runtime &runtime,
+                                        const jsi::Value &value) {
+  return makeOptionalPropertyValue<SkColor>(runtime, value);
 }
 
 } // namespace RNSkia
