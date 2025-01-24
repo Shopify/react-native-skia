@@ -56,10 +56,10 @@ void convertPropertyImpl(jsi::Runtime &runtime, const jsi::Object &object,
                            .asString(runtime)
                            .utf8(runtime);
     auto sharedValue = property.asObject(runtime);
-  auto conv = [target = &target](jsi::Runtime &runtime, const jsi::Object &val) {
-    auto value = val.getProperty(runtime, "value");
-    *target = getPropertyValue<T>(runtime, value);
-  };
+    auto conv = [target = &target](jsi::Runtime &runtime, const jsi::Object &val) {
+      auto value = val.getProperty(runtime, "value");
+      *target = getPropertyValue<T>(runtime, value);
+    };
     variables[name].push_back(conv);
     conv(runtime, sharedValue);
   } else {
@@ -67,38 +67,27 @@ void convertPropertyImpl(jsi::Runtime &runtime, const jsi::Object &object,
   }
 }
 
-// Specialization for std::optional
-template <typename T>
-void convertProperty(jsi::Runtime &runtime, const jsi::Object &object,
-                     const std::string &propertyName, std::optional<T> &target,
-                     Variables &variables) {
-  convertPropertyImpl<T>(runtime, object, propertyName, target, variables);
-}
-
-// Specialization for non-optional types
+// Main convertProperty template
 template <typename T>
 void convertProperty(jsi::Runtime &runtime, const jsi::Object &object,
                      const std::string &propertyName, T &target,
                      Variables &variables) {
-  convertPropertyImpl<T>(runtime, object, propertyName, target, variables);
+  if constexpr (is_optional<T>::value) {
+    using ValueType = typename unwrap_optional<T>::type;
+    target = getPropertyValue<T>(runtime,
+      object.getProperty(runtime, propertyName.c_str()));
+  } else {
+    convertPropertyImpl<T>(runtime, object, propertyName, target, variables);
+  }
 }
 
-// Property value getter implementations
+// Base property value getter implementations
 template <>
 float getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isNumber()) {
     return static_cast<float>(value.asNumber());
   }
   throw std::runtime_error("Invalid prop value received");
-}
-
-template <>
-std::optional<float> getPropertyValue(jsi::Runtime &runtime,
-                                      const jsi::Value &value) {
-  if (value.isNumber()) {
-    return static_cast<float>(value.asNumber());
-  }
-  return std::nullopt;
 }
 
 template <>
@@ -111,15 +100,27 @@ SkPoint getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   return SkPoint::Make(0, 0); // Or throw an exception if you prefer
 }
 
-template <>
-std::optional<SkPoint> getPropertyValue(jsi::Runtime &runtime,
-                                        const jsi::Value &value) {
-  if (value.isObject()) {
-    auto x = value.asObject(runtime).getProperty(runtime, "x").asNumber();
-    auto y = value.asObject(runtime).getProperty(runtime, "y").asNumber();
-    return SkPoint::Make(x, y);
+//
+template<typename T>
+std::optional<T> makeOptionalPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isNull() || value.isUndefined()) {
+    return std::nullopt;
   }
-  return std::nullopt;
+  try {
+    return getPropertyValue<T>(runtime, value);
+  } catch (const std::runtime_error&) {
+    return std::nullopt;
+  }
+}
+
+template<>
+std::optional<float> getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  return makeOptionalPropertyValue<float>(runtime, value);
+}
+
+template<>
+std::optional<SkPoint> getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  return makeOptionalPropertyValue<SkPoint>(runtime, value);
 }
 
 } // namespace RNSkia
