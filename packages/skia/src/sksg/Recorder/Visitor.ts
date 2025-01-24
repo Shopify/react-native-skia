@@ -214,7 +214,10 @@ const visitNode = (
   const { props } = node;
   if (sharedValues) {
     Object.values(props).forEach((value) => {
-      if (isSharedValue(value)) {
+      if (isSharedValue(value) && !sharedValues.has(value)) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        value.name = `variable${sharedValues.size}`;
         sharedValues.add(value);
       }
     });

@@ -67,11 +67,10 @@ export const Breathe = () => {
   ]);
 
   const r = useDerivedValue(() => mix(progress.value, 64, 256));
-  r.name = "variable1";
   return (
     <View style={{ flex: 1 }}>
       <Canvas style={styles.container} opaque>
-        {new Array(10).fill(0).map((_, index) => {
+        {new Array(20).fill(0).map((_, index) => {
           return <Circle key={index} cx={index * 10} cy={index * 10} r={r} />;
         })}
 

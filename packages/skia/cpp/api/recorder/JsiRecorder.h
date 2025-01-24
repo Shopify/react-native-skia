@@ -59,9 +59,7 @@ public:
     auto recorder = getObject();
     for (int i = 0; i < size; i++) {
       auto sharedValue = values.getValueAtIndex(runtime, i).asObject(runtime);
-      auto name = sharedValue.getProperty(runtime, "name")
-                      .asString(runtime)
-                      .utf8(runtime);
+      auto name = "variable" + std::to_string(i);
       // Look up the conversion functions for this name
       auto it = recorder->variables.find(name);
       if (it != recorder->variables.end()) {
