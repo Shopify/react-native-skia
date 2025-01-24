@@ -80,12 +80,12 @@ public:
   }
 
   JSI_HOST_FUNCTION(saveGroup) {
-    //getObject()->saveGroup();
+    // getObject()->saveGroup();
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(restoreGroup) {
-    //getObject()->restoreGroup();
+    // getObject()->restoreGroup();
     return jsi::Value::undefined();
   }
 
@@ -171,9 +171,10 @@ public:
 
     // size_t size = shadowsArray.size(runtime);
     // for (size_t i = 0; i < size; i++) {
-    //   auto shadow = shadowsArray.getValueAtIndex(runtime, i).asObject(runtime);
-    //   auto props = shadow.getProperty(runtime, "props").asObject(runtime);
-    //   auto animatedProps = shadow.getProperty(runtime, "animatedProps");
+    //   auto shadow = shadowsArray.getValueAtIndex(runtime,
+    //   i).asObject(runtime); auto props = shadow.getProperty(runtime,
+    //   "props").asObject(runtime); auto animatedProps =
+    //   shadow.getProperty(runtime, "animatedProps");
 
     //   shadows.push_back({props, animatedProps.isObject()
     //                                 ? animatedProps.asObject(runtime)

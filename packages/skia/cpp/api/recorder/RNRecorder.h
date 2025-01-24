@@ -57,6 +57,11 @@ public:
         break;
       }
 
+      case CommandType::DrawPaint: {
+        ctx->canvas->drawPaint(ctx->getPaint());
+        break;
+      }
+
       case CommandType::RestorePaint: {
         // Process restore command
         break;
