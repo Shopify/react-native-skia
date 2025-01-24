@@ -104,6 +104,73 @@ SkPoint getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
+SkBlendMode getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
+  if (val.isString()) {
+    auto value = val.asString(runtime).utf8(runtime);
+    if (value == "clear") {
+      return SkBlendMode::kClear;
+    } else if (value == "src") {
+      return SkBlendMode::kSrc;
+    } else if (value == "dst") {
+      return SkBlendMode::kDst;
+    } else if (value == "srcOver") {
+      return SkBlendMode::kSrcOver;
+    } else if (value == "dstOver") {
+      return SkBlendMode::kDstOver;
+    } else if (value == "srcIn") {
+      return SkBlendMode::kSrcIn;
+    } else if (value == "dstIn") {
+      return SkBlendMode::kDstIn;
+    } else if (value == "srcOut") {
+      return SkBlendMode::kSrcOut;
+    } else if (value == "dstOut") {
+      return SkBlendMode::kDstOut;
+    } else if (value == "srcATop") {
+      return SkBlendMode::kSrcATop;
+    } else if (value == "dstATop") {
+      return SkBlendMode::kDstATop;
+    } else if (value == "xor") {
+      return SkBlendMode::kXor;
+    } else if (value == "plus") {
+      return SkBlendMode::kPlus;
+    } else if (value == "modulate") {
+      return SkBlendMode::kModulate;
+    } else if (value == "screen") {
+      return SkBlendMode::kScreen;
+    } else if (value == "overlay") {
+      return SkBlendMode::kOverlay;
+    } else if (value == "darken") {
+      return SkBlendMode::kDarken;
+    } else if (value == "lighten") {
+      return SkBlendMode::kLighten;
+    } else if (value == "colorDodge") {
+      return SkBlendMode::kColorDodge;
+    } else if (value == "colorBurn") {
+      return SkBlendMode::kColorBurn;
+    } else if (value == "hardLight") {
+      return SkBlendMode::kHardLight;
+    } else if (value == "softLight") {
+      return SkBlendMode::kSoftLight;
+    } else if (value == "difference") {
+      return SkBlendMode::kDifference;
+    } else if (value == "exclusion") {
+      return SkBlendMode::kExclusion;
+    } else if (value == "multiply") {
+      return SkBlendMode::kMultiply;
+    } else if (value == "hue") {
+      return SkBlendMode::kHue;
+    } else if (value == "saturation") {
+      return SkBlendMode::kSaturation;
+    } else if (value == "color") {
+      return SkBlendMode::kColor;
+    } else if (value == "luminosity") {
+      return SkBlendMode::kLuminosity;
+    }
+  }
+  throw std::runtime_error("Invalid prop value for SkBlendMode received");
+}
+
+template <>
 SkColor getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isNumber()) {
     return static_cast<SkColor>(value.asNumber());
@@ -169,6 +236,12 @@ template <>
 std::optional<SkColor> getPropertyValue(jsi::Runtime &runtime,
                                         const jsi::Value &value) {
   return makeOptionalPropertyValue<SkColor>(runtime, value);
+}
+
+template <>
+std::optional<SkBlendMode> getPropertyValue(jsi::Runtime &runtime,
+                                        const jsi::Value &value) {
+  return makeOptionalPropertyValue<SkBlendMode>(runtime, value);
 }
 
 } // namespace RNSkia

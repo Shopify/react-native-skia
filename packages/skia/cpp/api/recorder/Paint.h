@@ -12,6 +12,7 @@ namespace RNSkia {
 
 struct PaintCmdProps {
   std::optional<SkColor> color;
+  std::optional<SkBlendMode> blendMode;
   /*
     color?: Color;
   strokeWidth?: number;
@@ -35,12 +36,16 @@ public:
                Variables &variables)
       : Command(CommandType::SavePaint) {
     convertProperty(runtime, object, "color", props.color, variables);
+    convertProperty(runtime, object, "blendMode", props.blendMode, variables);
   }
 
   void savePaint(DrawingCtx *ctx) {
     auto &paint = ctx->getPaint();
     if (props.color.has_value()) {
       paint.setColor(props.color.value());
+    }
+    if (props.blendMode.has_value()) {
+      paint.setBlendMode(props.blendMode.value());
     }
   }
 };
