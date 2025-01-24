@@ -23,9 +23,9 @@ private:
 public:
   CircleCmd(jsi::Runtime &runtime, const jsi::Object &object, Variables& variables)
       : Command(CommandType::DrawCircle) {
-          convertProperty<std::optional<float>>(runtime, object, "cx", props.cx, variables);
-          convertProperty<std::optional<float>>(runtime, object, "cy", props.cy, variables);
-          convertProperty<std::optional<SkPoint>>(runtime, object, "c", props.c, variables);
+          convertProperty(runtime, object, "cx", props.cx, variables);
+          convertProperty(runtime, object, "cy", props.cy, variables);
+          convertProperty(runtime, object, "c", props.c, variables);
           convertProperty(runtime, object, "r", props.r, variables);
       }
 
