@@ -20,8 +20,15 @@ using ConversionFunction =
 using Variables = std::map<std::string, std::vector<ConversionFunction>>;
 
 bool isSharedValue(jsi::Runtime &runtime, const jsi::Value &value) {
-  return value.isObject() && value.asObject(runtime).hasProperty(
-                                 runtime, "_isReanimatedSharedValue");
+  return value.isObject() &&
+         value.asObject(runtime).hasProperty(runtime,
+                                             "_isReanimatedSharedValue") &&
+         value.asObject(runtime)
+             .getProperty(runtime, "_isReanimatedSharedValue")
+             .isBool() &&
+         value.asObject(runtime)
+                 .getProperty(runtime, "_isReanimatedSharedValue")
+                 .asBool() == true;
 }
 
 // Helper type traits
@@ -53,17 +60,10 @@ void convertPropertyImpl(jsi::Runtime &runtime, const jsi::Object &object,
   auto property = object.getProperty(runtime, propertyName.c_str());
 
   if (isSharedValue(runtime, property)) {
-    auto hasNameProp = !property.asObject(runtime)
-                           .hasProperty(runtime, "name") && property.asObject(runtime)
-                           .getProperty(runtime, "name").isString();
-    if (!hasNameProp) {
-      throw std::runtime_error("Found a shared value without a name property");
-    }
-    std::string name = property.asObject(runtime)
-                           .getProperty(runtime, "name")
-                           .asString(runtime)
-                           .utf8(runtime);
     auto sharedValue = property.asObject(runtime);
+    auto name = sharedValue.getProperty(runtime, "name")
+                    .asString(runtime)
+                    .utf8(runtime);
     auto conv = [target = &target](jsi::Runtime &runtime,
                                    const jsi::Object &val) {
       auto value = val.getProperty(runtime, "value");
@@ -81,14 +81,15 @@ template <typename T>
 void convertProperty(jsi::Runtime &runtime, const jsi::Object &object,
                      const std::string &propertyName, T &target,
                      Variables &variables) {
-    convertPropertyImpl<T>(runtime, object, propertyName, target, variables);
-//  if constexpr (is_optional<T>::value) {
-//    using ValueType = typename unwrap_optional<T>::type;
-//    target = getPropertyValue<T>(
-//        runtime, object.getProperty(runtime, propertyName.c_str()));
-//  } else {
-//    convertPropertyImpl<T>(runtime, object, propertyName, target, variables);
-//  }
+  convertPropertyImpl<T>(runtime, object, propertyName, target, variables);
+  //  if constexpr (is_optional<T>::value) {
+  //    using ValueType = typename unwrap_optional<T>::type;
+  //    target = getPropertyValue<T>(
+  //        runtime, object.getProperty(runtime, propertyName.c_str()));
+  //  } else {
+  //    convertPropertyImpl<T>(runtime, object, propertyName, target,
+  //    variables);
+  //  }
 }
 
 // Base property value getter implementations

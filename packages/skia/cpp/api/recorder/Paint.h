@@ -31,12 +31,12 @@ public:
              Variables &variables)
       : Command(CommandType::SaveCTM) {
     convertProperty(runtime, object, "transform", props.transform, variables);
-    //convertProperty(runtime, object, "origin", props.origin, variables);
-    //convertProperty(runtime, object, "matrix", props.matrix, variables);
-    // convertProperty(runtime, object, "clip", props.clip, variables);
-    // convertProperty(runtime, object, "invertClip", props.invertClip,
-    // variables); convertProperty(runtime, object, "layer", props.layer,
-    // variables);
+    // convertProperty(runtime, object, "origin", props.origin, variables);
+    // convertProperty(runtime, object, "matrix", props.matrix, variables);
+    //  convertProperty(runtime, object, "clip", props.clip, variables);
+    //  convertProperty(runtime, object, "invertClip", props.invertClip,
+    //  variables); convertProperty(runtime, object, "layer", props.layer,
+    //  variables);
   }
 
   void saveCTM(DrawingCtx *ctx) {

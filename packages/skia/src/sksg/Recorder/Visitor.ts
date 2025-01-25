@@ -214,10 +214,10 @@ const visitNode = (
   const { props } = node;
   if (sharedValues) {
     Object.values(props).forEach((value) => {
-      if (isSharedValue(value) && !sharedValues.has(value)) {
+      if (isSharedValue(value)) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
-        sharedValues.name = `variable${sharedValues.size}`;
+        value.name = `variable${sharedValues.size}`;
         sharedValues.add(value);
       }
     });
@@ -274,10 +274,10 @@ const visitNode = (
       recorder.drawPaint();
       break;
     case NodeType.Image:
-      recorder.drawImage(node.props);
+      recorder.drawImage(props);
       break;
     case NodeType.Circle:
-      recorder.drawCircle(node.props);
+      recorder.drawCircle(props);
       break;
     case NodeType.Points:
       recorder.drawPoints(props);
