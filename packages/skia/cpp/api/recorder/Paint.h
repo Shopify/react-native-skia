@@ -45,21 +45,16 @@ public:
     auto shouldSave = hasTransform || hasClip || layer.has_value();
     SkMatrix m3;
     if (matrix.has_value()) {
+      m3 = matrix.value();
       if (origin.has_value()) {
-        m3.preTranslate(origin.value().x(), origin.value().y());
-        m3.preConcat(matrix.value());
+        m3.postTranslate(origin.value().x(), origin.value().y());
         m3.preTranslate(-origin.value().x(), -origin.value().y());
-      } else {
-        m3.preConcat(props.matrix.value());
       }
     } else if (transform.has_value()) {
-      SkM44 m4;
+      auto m4 = transform.value();
       if (origin.has_value()) {
-        m4.preTranslate(origin.value().x(), origin.value().y());
-        m4.preConcat(transform.value());
+        m4.postTranslate(origin.value().x(), origin.value().y());
         m4.preTranslate(-origin.value().x(), -origin.value().y());
-      } else {
-        m4.preConcat(tm4);
       }
       m3 = m4.asM33();
     }
