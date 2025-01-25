@@ -71,18 +71,27 @@ public:
       }
       ctx->canvas->concat(m3);
     }
-    /*
-
-  if (clip) {
-    if ("clipRect" in clip) {
-      canvas.clipRect(clip.clipRect, op, true);
-    } else if ("clipRRect" in clip) {
-      canvas.clipRRect(clip.clipRRect, op, true);
-    } else {
-      canvas.clipPath(clip.clipPath, op, true);
+    if (clip.has_value()) {
+      auto c = clip.value();
+      if (std::holds_alternative<SkPath>(c)) {
+        auto path = std::get<SkPath>(c);
+        ctx->canvas->clipPath(path);
+      } else if (std::holds_alternative<std::string>(c)) {
+        auto pathString = std::get<std::string>(c);
+        SkPath result;
+        if (SkParsePath::FromSVGString(pathString.c_str(), &result)) {
+          ctx->canvas->clipPath(result);
+        } else {
+          throw std::runtime_error("Could not parse path from string.");
+        }
+      } else if (std::holds_alternative<SkRect>(c)) {
+        auto rect = std::get<SkRect>(c);
+        ctx->canvas->clipRect(rect);
+      } else if (std::holds_alternative<SkRRect>(c)) {
+        auto rrect = std::get<SkRRect>(c);
+        ctx->canvas->clipRRect(rrect);
+      }
     }
-  }
-    */
   }
 };
 

@@ -82,14 +82,6 @@ void convertProperty(jsi::Runtime &runtime, const jsi::Object &object,
                      const std::string &propertyName, T &target,
                      Variables &variables) {
   convertPropertyImpl<T>(runtime, object, propertyName, target, variables);
-  //  if constexpr (is_optional<T>::value) {
-  //    using ValueType = typename unwrap_optional<T>::type;
-  //    target = getPropertyValue<T>(
-  //        runtime, object.getProperty(runtime, propertyName.c_str()));
-  //  } else {
-  //    convertPropertyImpl<T>(runtime, object, propertyName, target,
-  //    variables);
-  //  }
 }
 
 // Base property value getter implementations
@@ -342,27 +334,142 @@ SkColor getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   throw std::runtime_error("Invalid prop value for SkColor received");
 }
 
-using ClipDef = std::variant<SkPath, SkRRect, SkRect>;
+std::shared_ptr<SkPath> processPath(jsi::Runtime &runtime,
+                                    const jsi::Value &value) {
+  if (value.isString()) {
+    auto pathString = value.getString(runtime).utf8(runtime);
+    SkPath result;
+
+    if (SkParsePath::FromSVGString(pathString.c_str(), &result)) {
+      return std::make_shared<SkPath>(result);
+    } else {
+      throw std::runtime_error("Could not parse path from string.");
+    }
+  } else if (value.isObject()) {
+    auto ptr = std::dynamic_pointer_cast<JsiSkPath>(
+        value.asObject(runtime).asHostObject(runtime));
+    if (ptr != nullptr) {
+      return ptr->getObject();
+    }
+  }
+  return nullptr;
+}
+
+std::shared_ptr<SkRect> processRect(jsi::Runtime &runtime,
+                                    const jsi::Value &value) {
+  if (value.isObject()) {
+    auto object = value.asObject(runtime);
+    if (object.isHostObject(runtime)) {
+      auto ptr = std::dynamic_pointer_cast<JsiSkRect>(
+          value.asObject(runtime).asHostObject(runtime));
+      if (ptr != nullptr) {
+        return ptr->getObject();
+      }
+    } else if (object.hasProperty(runtime, "x") &&
+               object.hasProperty(runtime, "y") &&
+               object.hasProperty(runtime, "width") &&
+               object.hasProperty(runtime, "height")) {
+      auto x = object.getProperty(runtime, "x").getNumber();
+      auto y = object.getProperty(runtime, "y").getNumber();
+      auto width = object.getProperty(runtime, "width").getNumber();
+      auto height = object.getProperty(runtime, "height").getNumber();
+      return std::make_shared<SkRect>(SkRect::MakeXYWH(x, y, width, height));
+    }
+  }
+  return nullptr;
+}
+
+SkPoint processPoint(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isObject()) {
+    auto object = value.asObject(runtime);
+    if (object.hasProperty(runtime, "x") && object.hasProperty(runtime, "y")) {
+      auto x = static_cast<float>(object.getProperty(runtime, "x").getNumber());
+      auto y = static_cast<float>(object.getProperty(runtime, "y").getNumber());
+      return SkPoint::Make(x, y);
+    }
+  }
+  throw std::runtime_error("Couldn't read point value");
+};
+
+std::shared_ptr<SkRRect> processRRect(jsi::Runtime &runtime,
+                                      const jsi::Value &value) {
+  if (value.isObject()) {
+    auto object = value.asObject(runtime);
+    if (object.isHostObject(runtime)) {
+      auto ptr = std::dynamic_pointer_cast<JsiSkRRect>(
+          value.asObject(runtime).asHostObject(runtime));
+      if (ptr != nullptr) {
+        return ptr->getObject();
+      }
+    } else if (object.hasProperty(runtime, "rect") &&
+               object.hasProperty(runtime, "rx") &&
+               object.hasProperty(runtime, "ry")) {
+      auto rect = processRect(runtime, object.getProperty(runtime, "rect"));
+      auto rx = object.getProperty(runtime, "rx").getNumber();
+      auto ry = object.getProperty(runtime, "ry").getNumber();
+      return std::make_shared<SkRRect>(SkRRect::MakeRectXY(*rect, rx, ry));
+    } else if (object.hasProperty(runtime, "rect") &&
+               object.hasProperty(runtime, "topLeft") &&
+               object.hasProperty(runtime, "topRight") &&
+               object.hasProperty(runtime, "bottomRight") &&
+               object.hasProperty(runtime, "bottomLeft")) {
+      auto rect = processRect(runtime, object.getProperty(runtime, "rect"));
+      auto topLeft =
+          processPoint(runtime, object.getProperty(runtime, "topLeft"));
+      auto topRight =
+          processPoint(runtime, object.getProperty(runtime, "topRight"));
+      auto bottomRight =
+          processPoint(runtime, object.getProperty(runtime, "bottomRight"));
+      auto bottomLeft =
+          processPoint(runtime, object.getProperty(runtime, "bottomLeft"));
+      auto result = std::make_shared<SkRRect>(SkRRect::MakeRectXY(*rect, 0, 0));
+      const SkVector corners[4] = {topLeft, topRight, bottomRight, bottomLeft};
+      result->setRectRadii(*rect, corners);
+      return result;
+    }
+  }
+  return nullptr;
+}
+
+using ClipDef = std::variant<SkPath, SkRRect, SkRect, std::string>;
 using Layer = std::variant<SkPaint, bool>;
 
 template <>
 ClipDef getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
-  ClipDef clip;
-  return clip;
+  if (value.isObject()) {
+    auto path = processPath(runtime, value);
+    if (path) {
+      ClipDef def = SkPath(*path);
+      return def;
+    }
+    auto rect = processRect(runtime, value);
+    if (rect) {
+      ClipDef def = SkRect(*rect);
+      return def;
+    }
+    auto rrect = processRRect(runtime, value);
+    if (rrect) {
+      ClipDef def = SkRRect(*rrect);
+      return def;
+    }
+  } else if (value.isString()) {
+    auto pathString = value.asString(runtime).utf8(runtime);
+    ClipDef clip = pathString;
+    return clip;
+  }
+  throw std::runtime_error("Invalid prop value for ClipDef received");
 }
 
 template <>
 Layer getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isBool()) {
-    Layer layer;
-    layer = value.asBool();
+    Layer layer = value.asBool();
     return layer;
   } else if (value.isObject() &&
              value.asObject(runtime).isHostObject(runtime)) {
-    Layer layer;
     auto paint =
         value.asObject(runtime).asHostObject<JsiSkPaint>(runtime)->getObject();
-    layer = SkPaint(*paint);
+    Layer layer = SkPaint(*paint);
     return layer;
   }
   throw std::runtime_error("Invalid prop value for Layer received");
