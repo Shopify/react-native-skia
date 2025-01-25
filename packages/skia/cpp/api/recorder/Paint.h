@@ -54,10 +54,9 @@ public:
       }
     } else if (transform.has_value()) {
       SkM44 m4;
-      auto tm4 = transform.value();
       if (origin.has_value()) {
         m4.preTranslate(origin.value().x(), origin.value().y());
-        m4.preConcat(tm4);
+        m4.preConcat(transform.value());
         m4.preTranslate(-origin.value().x(), -origin.value().y());
       } else {
         m4.preConcat(tm4);
