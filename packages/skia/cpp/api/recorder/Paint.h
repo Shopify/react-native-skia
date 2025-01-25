@@ -10,9 +10,6 @@
 
 namespace RNSkia {
 
-using ClipDef = std::variant<SkPath, SkRRect, SkRect>;
-using Layer = std::variant<SkPaint, bool>;
-
 struct CTMCmdProps {
   std::optional<SkM44> transform;
   std::optional<SkPoint> origin;
@@ -31,43 +28,57 @@ public:
              Variables &variables)
       : Command(CommandType::SaveCTM) {
     convertProperty(runtime, object, "transform", props.transform, variables);
-    // convertProperty(runtime, object, "origin", props.origin, variables);
-    // convertProperty(runtime, object, "matrix", props.matrix, variables);
-    //  convertProperty(runtime, object, "clip", props.clip, variables);
-    //  convertProperty(runtime, object, "invertClip", props.invertClip,
-    //  variables); convertProperty(runtime, object, "layer", props.layer,
-    //  variables);
+    convertProperty(runtime, object, "origin", props.origin, variables);
+    convertProperty(runtime, object, "matrix", props.matrix, variables);
+    convertProperty(runtime, object, "clip", props.clip, variables);
+    convertProperty(runtime, object, "invertClip", props.invertClip, variables);
+    convertProperty(runtime, object, "layer", props.layer, variables);
   }
 
   void saveCTM(DrawingCtx *ctx) {
-    auto hasTransform = props.matrix.has_value() || props.transform.has_value();
-    auto hasClip = props.clip.has_value();
-    auto op = props.invertClip.has_value() && props.invertClip.value()
+    auto [transform, origin, matrix, clip, invertClip, layer] = props;
+    auto hasTransform = matrix.has_value() || transform.has_value();
+    auto hasClip = clip.has_value();
+    auto op = invertClip.has_value() && invertClip.value()
                   ? SkClipOp::kDifference
                   : SkClipOp::kIntersect;
-    ctx->canvas->save();
-    ctx->canvas->concat(props.transform.value().asM33());
-    /*
-    const hasTransform = matrix !== undefined || transform !== undefined;
-  const clip = computeClip(Skia, rawClip);
-  const hasClip = clip !== undefined;
-  const op = invertClip ? ClipOp.Difference : ClipOp.Intersect;
-  const m3 = processTransformProps2(Skia, { matrix, transform, origin });
-  const shouldSave = hasTransform || hasClip || !!layer;
-  if (shouldSave) {
-    if (layer) {
-      if (typeof layer === "boolean") {
-        canvas.saveLayer();
+    auto shouldSave = hasTransform || hasClip || layer.has_value();
+    SkMatrix m3;
+    if (matrix.has_value()) {
+      if (origin.has_value()) {
+        m3.preTranslate(origin.value().x(), origin.value().y());
+        m3.preConcat(matrix.value());
+        m3.preTranslate(-origin.value().x(), -origin.value().y());
       } else {
-        canvas.saveLayer(layer);
+        m3.preConcat(props.matrix.value());
       }
-    } else {
-      canvas.save();
+    } else if (transform.has_value()) {
+      SkM44 m4;
+      auto tm4 = transform.value();
+      if (origin.has_value()) {
+        m4.preTranslate(origin.value().x(), origin.value().y());
+        m4.preConcat(tm4);
+        m4.preTranslate(-origin.value().x(), -origin.value().y());
+      } else {
+        m4.preConcat(tm4);
+      }
+      m3 = m4.asM33();
     }
-  }
-  if (m3) {
-    canvas.concat(m3);
-  }
+    if (shouldSave) {
+      if (layer.has_value()) {
+        if (std::holds_alternative<bool>(layer.value())) {
+          ctx->canvas->saveLayer(nullptr, nullptr);
+        } else {
+          auto paint = std::get<SkPaint>(layer.value());
+          ctx->canvas->saveLayer(nullptr, &paint);
+        }
+      } else {
+        ctx->canvas->save();
+      }
+      ctx->canvas->concat(m3);
+    }
+    /*
+
   if (clip) {
     if ("clipRect" in clip) {
       canvas.clipRect(clip.clipRect, op, true);

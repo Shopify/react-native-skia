@@ -342,6 +342,40 @@ SkColor getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   throw std::runtime_error("Invalid prop value for SkColor received");
 }
 
+using ClipDef = std::variant<SkPath, SkRRect, SkRect>;
+using Layer = std::variant<SkPaint, bool>;
+
+template <>
+ClipDef getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  ClipDef clip;
+  return clip;
+}
+
+template <>
+Layer getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isBool()) {
+    Layer layer;
+    layer = value.asBool();
+    return layer;
+  } else if (value.isObject() &&
+             value.asObject(runtime).isHostObject(runtime)) {
+    Layer layer;
+    auto paint =
+        value.asObject(runtime).asHostObject<JsiSkPaint>(runtime)->getObject();
+    layer = SkPaint(*paint);
+    return layer;
+  }
+  throw std::runtime_error("Invalid prop value for Layer received");
+}
+
+template <>
+bool getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isBool()) {
+    return value.asBool();
+  }
+  throw std::runtime_error("Invalid prop value for bool received");
+}
+
 //
 template <typename T>
 std::optional<T> makeOptionalPropertyValue(jsi::Runtime &runtime,
@@ -390,6 +424,24 @@ template <>
 std::optional<SkM44> getPropertyValue(jsi::Runtime &runtime,
                                       const jsi::Value &value) {
   return makeOptionalPropertyValue<SkM44>(runtime, value);
+}
+
+template <>
+std::optional<bool> getPropertyValue(jsi::Runtime &runtime,
+                                     const jsi::Value &value) {
+  return makeOptionalPropertyValue<bool>(runtime, value);
+}
+
+template <>
+std::optional<ClipDef> getPropertyValue(jsi::Runtime &runtime,
+                                        const jsi::Value &value) {
+  return makeOptionalPropertyValue<ClipDef>(runtime, value);
+}
+
+template <>
+std::optional<Layer> getPropertyValue(jsi::Runtime &runtime,
+                                      const jsi::Value &value) {
+  return makeOptionalPropertyValue<Layer>(runtime, value);
 }
 
 } // namespace RNSkia
