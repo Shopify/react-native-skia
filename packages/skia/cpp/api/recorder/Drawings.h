@@ -42,4 +42,36 @@ public:
   }
 };
 
+struct TextCmdProps {
+  std::optional<SkFont> font;
+  std::string text;
+  float x;
+  float y;
+};
+
+class TextCmd : public Command {
+private:
+  TextCmdProps props;
+
+public:
+  TextCmd(jsi::Runtime &runtime, const jsi::Object &object,
+          Variables &variables)
+      : Command(CommandType::DrawText) {
+    convertProperty(runtime, object, "font", props.font, variables);
+    convertProperty(runtime, object, "text", props.text, variables);
+    convertProperty(runtime, object, "x", props.x, variables);
+    convertProperty(runtime, object, "y", props.y, variables);
+  }
+
+  void draw(DrawingCtx *ctx) {
+    auto [font, text, x, y] = props;
+    auto paint = ctx->getPaint();
+    if (font.has_value()) {
+      ctx->canvas->drawSimpleText(text.c_str(), text.length(),
+                                  SkTextEncoding::kUTF8, x, y, font.value(),
+                                  paint);
+    }
+  }
+};
+
 } // namespace RNSkia

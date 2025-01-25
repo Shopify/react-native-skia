@@ -94,6 +94,14 @@ float getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
+std::string getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isString()) {
+    return value.asString(runtime).utf8(runtime);
+  }
+  throw std::runtime_error("Invalid prop value received");
+}
+
+template <>
 SkPoint getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isObject()) {
     auto x = value.asObject(runtime).getProperty(runtime, "x").asNumber();
@@ -213,6 +221,16 @@ SkM44 getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
     return m4;
   }
   throw std::runtime_error("Invalid prop value for SkM44 received");
+}
+
+template <>
+SkFont getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isObject()) {
+    auto font =
+        value.asObject(runtime).asHostObject<JsiSkFont>(runtime)->getObject();
+    return SkFont(*font);
+  }
+  throw std::runtime_error("Invalid prop value for SkFont received");
 }
 
 template <>
@@ -549,6 +567,12 @@ template <>
 std::optional<Layer> getPropertyValue(jsi::Runtime &runtime,
                                       const jsi::Value &value) {
   return makeOptionalPropertyValue<Layer>(runtime, value);
+}
+
+template <>
+std::optional<SkFont> getPropertyValue(jsi::Runtime &runtime,
+                                       const jsi::Value &value) {
+  return makeOptionalPropertyValue<SkFont>(runtime, value);
 }
 
 } // namespace RNSkia

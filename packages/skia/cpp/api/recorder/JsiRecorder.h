@@ -246,8 +246,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawText) {
-    // getObject()->drawText(runtime, arguments[0].asObject(runtime),
-    //                       getObject()->variables);
+    getObject()->drawText(runtime, arguments[0].asObject(runtime),
+                          getObject()->variables);
     return jsi::Value::undefined();
   }
 

@@ -39,7 +39,7 @@ export const Matrix = () => {
   if (font === null) {
     return null;
   }
-  const symbols = font.getGlyphIDs("abcdefghijklmnopqrstuvwxyz");
+  const symbols = "abcdefghijklmnopqrstuvwxyz".split("");
   return (
     <Canvas style={{ flex: 1 }} opaque>
       <Fill color="black" />

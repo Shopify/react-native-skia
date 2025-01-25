@@ -48,6 +48,11 @@ public:
     commands.push_back(std::make_unique<CircleCmd>(runtime, props, variables));
   }
 
+  void drawText(jsi::Runtime &runtime, const jsi::Object &props,
+                Variables &variables) {
+    commands.push_back(std::make_unique<TextCmd>(runtime, props, variables));
+  }
+
   void drawPaint() {
     commands.push_back(std::make_unique<Command>(CommandType::DrawPaint));
   }
@@ -68,6 +73,12 @@ public:
 
       case CommandType::DrawPaint: {
         ctx->canvas->drawPaint(ctx->getPaint());
+        break;
+      }
+
+      case CommandType::DrawText: {
+        auto *textCmd = static_cast<TextCmd *>(cmd.get());
+        textCmd->draw(ctx);
         break;
       }
 
