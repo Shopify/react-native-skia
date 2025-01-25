@@ -250,6 +250,49 @@ SkMatrix getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
+SkPaint::Style getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
+  if (val.isString()) {
+    auto value = val.asString(runtime).utf8(runtime);
+    if (value == "fill") {
+      return SkPaint::kFill_Style;
+    } else if (value == "stroke") {
+      return SkPaint::kStroke_Style;
+    }
+  }
+  throw std::runtime_error("Invalid prop value for SkPaint::Style received");
+}
+
+template <>
+SkPaint::Join getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
+  if (val.isString()) {
+    auto value = val.asString(runtime).utf8(runtime);
+    if (value == "miter") {
+      return SkPaint::kMiter_Join;
+    } else if (value == "round") {
+      return SkPaint::kRound_Join;
+    } else if (value == "bevel") {
+      return SkPaint::kBevel_Join;
+    }
+  }
+  throw std::runtime_error("Invalid prop value for SkPaint::Join received");
+}
+
+template <>
+SkPaint::Cap getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
+  if (val.isString()) {
+    auto value = val.asString(runtime).utf8(runtime);
+    if (value == "butt") {
+      return SkPaint::kButt_Cap;
+    } else if (value == "round") {
+      return SkPaint::kRound_Cap;
+    } else if (value == "square") {
+      return SkPaint::kSquare_Cap;
+    }
+  }
+  throw std::runtime_error("Invalid prop value for SkPaint::Cap received");
+}
+
+template <>
 SkBlendMode getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
   if (val.isString()) {
     auto value = val.asString(runtime).utf8(runtime);
@@ -573,6 +616,24 @@ template <>
 std::optional<SkFont> getPropertyValue(jsi::Runtime &runtime,
                                        const jsi::Value &value) {
   return makeOptionalPropertyValue<SkFont>(runtime, value);
+}
+
+template <>
+std::optional<SkPaint::Style> getPropertyValue(jsi::Runtime &runtime,
+                                            const jsi::Value &value) {
+  return makeOptionalPropertyValue<SkPaint::Style>(runtime, value);
+}
+
+template <>
+std::optional<SkPaint::Join> getPropertyValue(jsi::Runtime &runtime,
+                                            const jsi::Value &value) {
+  return makeOptionalPropertyValue<SkPaint::Join>(runtime, value);
+}
+
+template <>
+std::optional<SkPaint::Cap> getPropertyValue(jsi::Runtime &runtime,
+                                            const jsi::Value &value) {
+  return makeOptionalPropertyValue<SkPaint::Cap>(runtime, value);
 }
 
 } // namespace RNSkia

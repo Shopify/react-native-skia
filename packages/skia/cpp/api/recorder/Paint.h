@@ -98,18 +98,14 @@ public:
 struct PaintCmdProps {
   std::optional<SkColor> color;
   std::optional<SkBlendMode> blendMode;
-  /*
-    color?: Color;
-  strokeWidth?: number;
-  blendMode?: SkEnum<typeof BlendMode>;
-  style?: SkEnum<typeof PaintStyle>;
-  strokeJoin?: SkEnum<typeof StrokeJoin>;
-  strokeCap?: SkEnum<typeof StrokeCap>;
-  strokeMiter?: number;
-  opacity?: number;
-  antiAlias?: boolean;
-  dither?: boolean;
-  */
+  std::optional<SkPaint::Style> style;
+  std::optional<SkPaint::Join> strokeJoin;
+  std::optional<SkPaint::Cap> strokeCap;
+  std::optional<float> strokeMiter;
+  std::optional<float> strokeWidth;
+  std::optional<float> opacity;
+  std::optional<bool> antiAlias;
+  std::optional<bool> dither;
 };
 
 class SavePaintCmd : public Command {
@@ -122,16 +118,51 @@ public:
       : Command(CommandType::SavePaint) {
     convertProperty(runtime, object, "color", props.color, variables);
     convertProperty(runtime, object, "blendMode", props.blendMode, variables);
+    convertProperty(runtime, object, "style", props.style, variables);
+    convertProperty(runtime, object, "strokeJoin", props.strokeJoin, variables);
+    convertProperty(runtime, object, "strokeCap", props.strokeCap, variables);
+    convertProperty(runtime, object, "strokeMiter", props.strokeMiter, variables);
+    convertProperty(runtime, object, "strokeWidth", props.strokeWidth, variables);
+    convertProperty(runtime, object, "opacity", props.opacity, variables);
+    convertProperty(runtime, object, "antiAlias", props.antiAlias, variables);
+    convertProperty(runtime, object, "dither", props.dither, variables);
   }
 
   void savePaint(DrawingCtx *ctx) {
     ctx->savePaint();
     auto &paint = ctx->getPaint();
+    if (props.opacity.has_value()) {
+      paint.setAlphaf(paint.getAlphaf() * props.opacity.value());
+    }
     if (props.color.has_value()) {
+      auto currentOpacity = paint.getAlphaf();
+      paint.setShader(nullptr);
       paint.setColor(props.color.value());
+      paint.setAlphaf(currentOpacity * paint.getAlphaf());
     }
     if (props.blendMode.has_value()) {
       paint.setBlendMode(props.blendMode.value());
+    }
+    if (props.style.has_value()) {
+      paint.setStyle(props.style.value());
+    }
+    if (props.strokeJoin.has_value()) {
+      paint.setStrokeJoin(props.strokeJoin.value());
+    }
+    if (props.strokeCap.has_value()) {
+      paint.setStrokeCap(props.strokeCap.value());
+    }
+    if (props.strokeMiter.has_value()) {
+      paint.setStrokeMiter(props.strokeMiter.value());
+    }
+    if (props.strokeWidth.has_value()) {
+      paint.setStrokeWidth(props.strokeWidth.value());
+    }
+    if (props.antiAlias.has_value()) {
+      paint.setAntiAlias(props.antiAlias.value());
+    }
+    if (props.dither.has_value()) {
+      paint.setDither(props.dither.value());
     }
   }
 };
