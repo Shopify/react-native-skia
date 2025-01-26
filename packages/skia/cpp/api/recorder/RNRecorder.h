@@ -37,6 +37,9 @@ public:
     if (nodeType == "skShader") {
       commands.push_back(
           std::make_unique<PushShaderCmd>(runtime, props, variables));
+    } else if (nodeType == "skImageShader") {
+      commands.push_back(
+          std::make_unique<PushImageShaderCmd>(runtime, props, variables));
     }
   }
 
