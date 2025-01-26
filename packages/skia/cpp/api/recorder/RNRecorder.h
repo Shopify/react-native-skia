@@ -74,10 +74,25 @@ public:
   void play(DrawingCtx *ctx) {
     for (const auto &cmd : commands) {
       switch (cmd->type) {
+
+          case CommandType::MaterializePaint: {
+        ctx->materializePaint();
+        break;
+      }
+
       case CommandType::SavePaint: {
         auto *savePaintCmd = static_cast<SavePaintCmd *>(cmd.get());
         savePaintCmd->savePaint(ctx);
         break;
+      }
+
+      case CommandType::PushShader: {
+        auto nodeType = cmd->nodeType;
+        if (nodeType == "skShader") {
+          auto *pushShaderCmd = static_cast<PushShaderCmd *>(cmd.get());
+          pushShaderCmd->pushShader(ctx);
+          break;
+        }
       }
 
       case CommandType::DrawPaint: {

@@ -8,6 +8,7 @@
 
 #include <include/core/SkPaint.h>
 #include <include/core/SkPoint.h>
+#include <include/effects/SkRuntimeEffect.h>
 
 #include "third_party/CSSColorParser.h"
 
@@ -528,13 +529,13 @@ std::vector<float> processArray(jsi::Runtime &runtime,
   return result;
 }
 
-bool isJSPoint(jsi::Runtime& runtime , const jsi::Value &value) {
+bool isJSPoint(jsi::Runtime &runtime, const jsi::Value &value) {
   return value.isObject() &&
          value.asObject(runtime).hasProperty(runtime, "x") &&
          value.asObject(runtime).hasProperty(runtime, "y");
 }
 
-bool isIndexable(jsi::Runtime& runtime, const jsi::Value &value) {
+bool isIndexable(jsi::Runtime &runtime, const jsi::Value &value) {
   return value.isObject() && value.asObject(runtime).hasProperty(runtime, "0");
 }
 

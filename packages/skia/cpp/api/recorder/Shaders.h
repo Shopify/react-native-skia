@@ -33,7 +33,7 @@ public:
     convertProperty(runtime, object, "uniforms", props.uniforms, variables);
   }
 
-  void pushShader(DrawingCtx* ctx) {
+  void pushShader(DrawingCtx *ctx) {
     auto [source, uniforms, transform, origin, matrix] = props;
     SkMatrix m3;
     if (matrix.has_value()) {
@@ -50,8 +50,24 @@ public:
       }
       m3 = m4.asM33();
     }
-    auto shader = source->makeShaderWithChildren(
-        uniforms.data(), uniforms.size(), ctx->popAllShaders().data(), ctx->shaders.size(), m3);
+
+    auto uniformSize = source->uniformSize();
+    auto uniformsData = SkData::MakeUninitialized(uniformSize);
+    float *uniformPtr = static_cast<float *>(uniformsData->writable_data());
+
+    for (const auto &[name, data] : uniforms) {
+      auto it =
+          std::find_if(source->uniforms().begin(), source->uniforms().end(),
+                       [&name](const auto &u) { return u.name == name; });
+      if (it != source->uniforms().end()) {
+        memcpy(uniformPtr + it->offset / sizeof(float), data.data(),
+               data.size() * sizeof(float));
+      }
+    }
+    std::vector<sk_sp<SkShader>> children = ctx->popAllShaders();
+    auto shader = source->makeShader(std::move(uniformsData), children.data(),
+                                     children.size(), &m3);
+
     ctx->shaders.push_back(shader);
   }
 };
