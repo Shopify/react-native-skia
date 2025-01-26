@@ -60,13 +60,18 @@ public:
   }
 
   void drawRect(jsi::Runtime &runtime, const jsi::Object &props,
-                  Variables &variables) {
+                Variables &variables) {
     commands.push_back(std::make_unique<RectCmd>(runtime, props, variables));
   }
 
   void drawCircle(jsi::Runtime &runtime, const jsi::Object &props,
                   Variables &variables) {
     commands.push_back(std::make_unique<CircleCmd>(runtime, props, variables));
+  }
+
+  void drawLine(jsi::Runtime &runtime, const jsi::Object &props,
+                Variables &variables) {
+    commands.push_back(std::make_unique<LineCmd>(runtime, props, variables));
   }
 
   void drawText(jsi::Runtime &runtime, const jsi::Object &props,
@@ -149,6 +154,12 @@ public:
       case CommandType::DrawRect: {
         auto *rectCmd = static_cast<RectCmd *>(cmd.get());
         rectCmd->draw(ctx);
+        break;
+      }
+
+      case CommandType::DrawLine: {
+        auto *lineCmd = static_cast<LineCmd *>(cmd.get());
+        lineCmd->draw(ctx);
         break;
       }
       }

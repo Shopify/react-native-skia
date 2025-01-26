@@ -222,8 +222,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawLine) {
-    // getObject()->drawLine(runtime, arguments[0].asObject(runtime),
-    //                       getObject()->variables);
+    getObject()->drawLine(runtime, arguments[0].asObject(runtime),
+                          getObject()->variables);
     return jsi::Value::undefined();
   }
 

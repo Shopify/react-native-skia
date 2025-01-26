@@ -758,7 +758,7 @@ std::optional<SkPaint::Cap> getPropertyValue(jsi::Runtime &runtime,
 
 template <>
 std::optional<SkRect> getPropertyValue(jsi::Runtime &runtime,
-                                             const jsi::Value &value) {
+                                       const jsi::Value &value) {
   return makeOptionalPropertyValue<SkRect>(runtime, value);
 }
 

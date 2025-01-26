@@ -70,8 +70,8 @@ private:
   RectCmdProps props;
 
 public:
-    RectCmd(jsi::Runtime &runtime, const jsi::Object &object,
-            Variables &variables)
+  RectCmd(jsi::Runtime &runtime, const jsi::Object &object,
+          Variables &variables)
       : Command(CommandType::DrawRect) {
     convertProperty(runtime, object, "x", props.x, variables);
     convertProperty(runtime, object, "y", props.y, variables);
@@ -86,9 +86,31 @@ public:
       ctx->canvas->drawRect(rect.value(), ctx->getPaint());
     } else {
       auto rct = SkRect::MakeXYWH(x, y, x + width.value(), y + height.value());
-      ctx->canvas->drawRect(rct,
-                            ctx->getPaint());
+      ctx->canvas->drawRect(rct, ctx->getPaint());
     }
+  }
+};
+
+struct LineCmdProps {
+  SkPoint p1;
+  SkPoint p2;
+};
+
+class LineCmd : public Command {
+private:
+  LineCmdProps props;
+
+public:
+  LineCmd(jsi::Runtime &runtime, const jsi::Object &object,
+          Variables &variables)
+      : Command(CommandType::DrawLine) {
+    convertProperty(runtime, object, "p1", props.p1, variables);
+    convertProperty(runtime, object, "p2", props.p2, variables);
+  }
+
+  void draw(DrawingCtx *ctx) {
+    ctx->canvas->drawLine(props.p1.x(), props.p1.y(), props.p2.x(),
+                          props.p2.y(), ctx->getPaint());
   }
 };
 
