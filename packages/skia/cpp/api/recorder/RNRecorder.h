@@ -74,6 +74,12 @@ public:
     commands.push_back(std::make_unique<LineCmd>(runtime, props, variables));
   }
 
+  void drawTextPath(jsi::Runtime &runtime, const jsi::Object &props,
+                    Variables &variables) {
+    commands.push_back(
+        std::make_unique<TextPathCmd>(runtime, props, variables));
+  }
+
   void drawText(jsi::Runtime &runtime, const jsi::Object &props,
                 Variables &variables) {
     commands.push_back(std::make_unique<TextCmd>(runtime, props, variables));
@@ -160,6 +166,12 @@ public:
       case CommandType::DrawLine: {
         auto *lineCmd = static_cast<LineCmd *>(cmd.get());
         lineCmd->draw(ctx);
+        break;
+      }
+
+      case CommandType::DrawTextPath: {
+        auto *textPathCmd = static_cast<TextPathCmd *>(cmd.get());
+        textPathCmd->draw(ctx);
         break;
       }
       }

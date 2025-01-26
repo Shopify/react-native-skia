@@ -409,6 +409,7 @@ SkColor getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   throw std::runtime_error("Invalid prop value for SkColor received");
 }
 
+// Return SkPath instead of shared_ptr<SkPath>
 std::shared_ptr<SkPath> processPath(jsi::Runtime &runtime,
                                     const jsi::Value &value) {
   if (value.isString()) {
@@ -430,6 +431,7 @@ std::shared_ptr<SkPath> processPath(jsi::Runtime &runtime,
   return nullptr;
 }
 
+// TODO: return the SkRect directly
 std::shared_ptr<SkRect> processRect(jsi::Runtime &runtime,
                                     const jsi::Value &value) {
   if (value.isObject()) {
@@ -466,6 +468,7 @@ SkPoint processPoint(jsi::Runtime &runtime, const jsi::Value &value) {
   throw std::runtime_error("Couldn't read point value");
 };
 
+// TODO: return the SkRRect directly
 std::shared_ptr<SkRRect> processRRect(jsi::Runtime &runtime,
                                       const jsi::Value &value) {
   if (value.isObject()) {
@@ -613,6 +616,18 @@ SkRect getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
     return SkRect(*rect);
   }
   throw std::runtime_error("Invalid prop value for SkRect received");
+}
+
+template <>
+SkPath getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isObject()) {
+    auto path = processPath(runtime, value);
+    if (!path) {
+      throw std::runtime_error("Invalid prop value for SkPath received");
+    }
+    return SkPath(*path);
+  }
+  throw std::runtime_error("Invalid prop value for SkPath received");
 }
 
 template <>

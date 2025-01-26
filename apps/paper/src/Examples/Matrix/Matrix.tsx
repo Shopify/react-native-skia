@@ -7,7 +7,7 @@ import {
   useFont,
 } from "@shopify/react-native-skia";
 import React from "react";
-import { useWindowDimensions } from "react-native";
+import { useWindowDimensions, View } from "react-native";
 
 import { COLS, ROWS, Symbol } from "./Symbol";
 
@@ -41,25 +41,27 @@ export const Matrix = () => {
   }
   const symbols = "abcdefghijklmnopqrstuvwxyz".split("");
   return (
-    <Canvas style={{ flex: 1 }} opaque>
-      <Fill color="black" />
-      <Group>
-        <BlurMask blur={4} style="solid" />
-        {cols.map((_i, i) =>
-          rows.map((_j, j) => (
-            <Symbol
-              symbols={symbols}
-              font={font}
-              timestamp={clock}
-              key={`${i}-${j}`}
-              i={i}
-              j={j}
-              stream={streams[i]}
-              symbol={symbol}
-            />
-          ))
-        )}
-      </Group>
-    </Canvas>
+    <View style={{ flex: 1, backgroundColor: "black" }}>
+      <Canvas style={{ flex: 1 }} opaque>
+        <Fill color="black" />
+        <Group>
+          <BlurMask blur={4} style="solid" />
+          {cols.map((_i, i) =>
+            rows.map((_j, j) => (
+              <Symbol
+                symbols={symbols}
+                font={font}
+                timestamp={clock}
+                key={`${i}-${j}`}
+                i={i}
+                j={j}
+                stream={streams[i]}
+                symbol={symbol}
+              />
+            ))
+          )}
+        </Group>
+      </Canvas>
+    </View>
   );
 };

@@ -4,8 +4,8 @@ import { interpolateColors, Text } from "@shopify/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
 import { useDerivedValue } from "react-native-reanimated";
 
-export const COLS = 32;
-export const ROWS = 64;
+export const COLS = 16;
+export const ROWS = 32;
 
 interface SymbolProps {
   i: number;
