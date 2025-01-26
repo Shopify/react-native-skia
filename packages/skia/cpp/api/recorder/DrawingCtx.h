@@ -41,6 +41,12 @@ public:
     return std::move(paint);
   }
 
+  std::vector<sk_sp<SkShader>> popAllShaders() {
+    auto result = std::move(shaders);
+    shaders.clear();
+    return result;
+  }
+
   //  void materializePaint() {
   //    if (!colorFilters.empty()) {
   //      SkColorFilter *result = nullptr;

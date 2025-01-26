@@ -34,24 +34,26 @@ public:
   }
 
   void pushShader(DrawingCtx* ctx) {
-    
+    auto [source, uniforms, transform, origin, matrix] = props;
+    SkMatrix m3;
+    if (matrix.has_value()) {
+      m3 = matrix.value();
+      if (origin.has_value()) {
+        m3.postTranslate(origin.value().x(), origin.value().y());
+        m3.preTranslate(-origin.value().x(), -origin.value().y());
+      }
+    } else if (transform.has_value()) {
+      auto m4 = transform.value();
+      if (origin.has_value()) {
+        m4.postTranslate(origin.value().x(), origin.value().y());
+        m4.preTranslate(-origin.value().x(), -origin.value().y());
+      }
+      m3 = m4.asM33();
+    }
+    auto shader = source->makeShaderWithChildren(
+        uniforms.data(), uniforms.size(), ctx->popAllShaders().data(), ctx->shaders.size(), m3);
+    ctx->shaders.push_back(shader);
   }
 };
-
-/*
-
-const declareShader = (ctx: DrawingContext, props: ShaderProps) => {
-  "worklet";
-  const { source, uniforms, ...transform } = props;
-  const m3 = ctx.Skia.Matrix();
-  processTransformProps(m3, transform);
-  const shader = source.makeShaderWithChildren(
-    processUniforms(source, uniforms),
-    ctx.shaders.splice(0, ctx.shaders.length),
-    m3
-  );
-  ctx.shaders.push(shader);
-};
-*/
 
 } // namespace RNSkia
