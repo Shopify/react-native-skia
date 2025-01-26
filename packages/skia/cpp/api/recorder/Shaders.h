@@ -105,6 +105,17 @@ public:
     convertProperty(runtime, object, "rect", props.rect, variables);
     convertProperty(runtime, object, "image", props.image, variables);
     convertProperty(runtime, object, "sampling", props.sampling, variables);
+          
+    convertProperty(runtime, object, "transform", props.transform, variables);
+    convertProperty(runtime, object, "origin", props.origin, variables);
+    convertProperty(runtime, object, "matrix", props.matrix, variables);
+          
+    convertProperty(runtime, object, "fit", props.fit, variables);
+    convertProperty(runtime, object, "x", props.x, variables);
+    convertProperty(runtime, object, "y", props.y, variables);
+    convertProperty(runtime, object, "width", props.width, variables);
+    convertProperty(runtime, object, "height", props.height, variables);
+    convertProperty(runtime, object, "rect", props.rect, variables);
   }
 
   void pushShader(DrawingCtx *ctx) {
@@ -142,7 +153,7 @@ public:
         m3 = m4.asM33();
       }
       lm.preConcat(m3);
-      auto shader = img->makeShader(tx, ty, sampling, &m3);
+      auto shader = img->makeShader(tx, ty, sampling, &lm);
       ctx->shaders.push_back(shader);
     }
   }
