@@ -141,6 +141,7 @@ class NativeReanimatedContainer extends Container {
     const sharedValuesSet = new Set<SharedValue<unknown>>();
     visit(recorder, this.root, sharedValuesSet);
     const sharedValues = Array.from(sharedValuesSet);
+    console.log({ sharedValues });
     if (sharedValues.length > 0) {
       this.mapperId = Rea.startMapper(() => {
         "worklet";
