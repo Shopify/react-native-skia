@@ -12,6 +12,7 @@
 #include "DrawingCtx.h"
 #include "Drawings.h"
 #include "Paint.h"
+#include "Shaders.h"
 
 namespace RNSkia {
 
@@ -28,6 +29,14 @@ public:
                  Variables &variables) {
     commands.push_back(
         std::make_unique<SavePaintCmd>(runtime, props, variables));
+  }
+
+  void pushShader(jsi::Runtime &runtime, const std::string &nodeType,
+                  const jsi::Object &props, Variables &variables) {
+    if (nodeType == "skShader") {
+      commands.push_back(
+          std::make_unique<PushShaderCmd>(runtime, props, variables));
+    }
   }
 
   void saveCTM(jsi::Runtime &runtime, const jsi::Object &props,

@@ -121,8 +121,10 @@ public:
     convertProperty(runtime, object, "style", props.style, variables);
     convertProperty(runtime, object, "strokeJoin", props.strokeJoin, variables);
     convertProperty(runtime, object, "strokeCap", props.strokeCap, variables);
-    convertProperty(runtime, object, "strokeMiter", props.strokeMiter, variables);
-    convertProperty(runtime, object, "strokeWidth", props.strokeWidth, variables);
+    convertProperty(runtime, object, "strokeMiter", props.strokeMiter,
+                    variables);
+    convertProperty(runtime, object, "strokeWidth", props.strokeWidth,
+                    variables);
     convertProperty(runtime, object, "opacity", props.opacity, variables);
     convertProperty(runtime, object, "antiAlias", props.antiAlias, variables);
     convertProperty(runtime, object, "dither", props.dither, variables);

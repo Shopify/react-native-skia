@@ -234,6 +234,16 @@ SkFont getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
+sk_sp<SkRuntimeEffect> getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isObject()) {
+    auto effect =
+        value.asObject(runtime).asHostObject<JsiSkRuntimeEffect>(runtime)->getObject();
+    return effect;
+  }
+  throw std::runtime_error("Invalid prop value for SkRuntimeEffect received");
+}
+
+template <>
 SkMatrix getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isObject()) {
     auto object = value.asObject(runtime);
@@ -620,19 +630,19 @@ std::optional<SkFont> getPropertyValue(jsi::Runtime &runtime,
 
 template <>
 std::optional<SkPaint::Style> getPropertyValue(jsi::Runtime &runtime,
-                                            const jsi::Value &value) {
+                                               const jsi::Value &value) {
   return makeOptionalPropertyValue<SkPaint::Style>(runtime, value);
 }
 
 template <>
 std::optional<SkPaint::Join> getPropertyValue(jsi::Runtime &runtime,
-                                            const jsi::Value &value) {
+                                              const jsi::Value &value) {
   return makeOptionalPropertyValue<SkPaint::Join>(runtime, value);
 }
 
 template <>
 std::optional<SkPaint::Cap> getPropertyValue(jsi::Runtime &runtime,
-                                            const jsi::Value &value) {
+                                             const jsi::Value &value) {
   return makeOptionalPropertyValue<SkPaint::Cap>(runtime, value);
 }
 
