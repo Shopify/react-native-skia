@@ -115,6 +115,10 @@ public:
           auto *pushShaderCmd = static_cast<PushShaderCmd *>(cmd.get());
           pushShaderCmd->pushShader(ctx);
           break;
+        } else if (nodeType == "skImageShader") {
+          auto *pushImageShaderCmd =
+              static_cast<PushImageShaderCmd *>(cmd.get());
+          pushImageShaderCmd->pushShader(ctx);
         }
       }
 

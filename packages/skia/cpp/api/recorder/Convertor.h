@@ -226,6 +226,33 @@ SkM44 getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
+SkSamplingOptions getPropertyValue(jsi::Runtime &runtime,
+                                   const jsi::Value &value) {
+  if (value.isObject()) {
+    SkSamplingOptions samplingOptions(SkFilterMode::kLinear);
+    auto object = value.asObject(runtime);
+    if (object.hasProperty(runtime, "B") && object.hasProperty(runtime, "C")) {
+      auto B = static_cast<float>(object.getProperty(runtime, "B").asNumber());
+      auto C = static_cast<float>(object.getProperty(runtime, "C").asNumber());
+      samplingOptions = SkSamplingOptions({B, C});
+    } else if (object.hasProperty(runtime, "filter")) {
+      auto filter = static_cast<SkFilterMode>(
+          object.getProperty(runtime, "filter").asNumber());
+      if (object.hasProperty(runtime, "mipmap")) {
+        auto mipmap = static_cast<SkMipmapMode>(
+            object.getProperty(runtime, "mipmap").asNumber());
+        samplingOptions = SkSamplingOptions(filter, mipmap);
+      } else {
+        samplingOptions = SkSamplingOptions(filter);
+      }
+    }
+    return samplingOptions;
+  }
+
+  throw std::runtime_error("Invalid prop value for SkM44 received");
+}
+
+template <>
 SkFont getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isObject()) {
     auto font =
@@ -245,6 +272,18 @@ sk_sp<SkRuntimeEffect> getPropertyValue(jsi::Runtime &runtime,
     return effect;
   }
   throw std::runtime_error("Invalid prop value for SkRuntimeEffect received");
+}
+
+template <>
+sk_sp<SkImage> getPropertyValue(jsi::Runtime &runtime,
+                                const jsi::Value &value) {
+
+  if (value.isObject()) {
+    auto effect =
+        value.asObject(runtime).asHostObject<JsiSkImage>(runtime)->getObject();
+    return effect;
+  }
+  throw std::runtime_error("Invalid prop value for SkImage received");
 }
 
 template <>
@@ -304,6 +343,24 @@ SkPaint::Cap getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
     }
   }
   throw std::runtime_error("Invalid prop value for SkPaint::Cap received");
+}
+
+template <>
+SkTileMode getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
+  if (val.isString()) {
+    auto value = val.asString(runtime).utf8(runtime);
+    if (value == "clamp") {
+      return SkTileMode::kClamp;
+    } else if (value == "repeat") {
+      return SkTileMode::kRepeat;
+    } else if (value == "mirror") {
+      return SkTileMode::kMirror;
+    } else if (value == "decal") {
+      return SkTileMode::kDecal;
+    }
+  }
+
+  throw std::runtime_error("Invalid prop value for SkBlendMode received");
 }
 
 template <>
@@ -775,6 +832,18 @@ template <>
 std::optional<SkRect> getPropertyValue(jsi::Runtime &runtime,
                                        const jsi::Value &value) {
   return makeOptionalPropertyValue<SkRect>(runtime, value);
+}
+
+template <>
+std::optional<sk_sp<SkImage>> getPropertyValue(jsi::Runtime &runtime,
+                                               const jsi::Value &value) {
+  return makeOptionalPropertyValue<sk_sp<SkImage>>(runtime, value);
+}
+
+template <>
+std::optional<SkSamplingOptions> getPropertyValue(jsi::Runtime &runtime,
+                                                  const jsi::Value &value) {
+  return makeOptionalPropertyValue<SkSamplingOptions>(runtime, value);
 }
 
 } // namespace RNSkia

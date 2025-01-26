@@ -42,21 +42,6 @@ public:
   }
 };
 
-/*
-export interface RectCtor {
-  x?: number;
-  y?: number;
-  width: number;
-  height: number;
-}
-
-export interface RRectCtor extends RectCtor {
-  r?: Radius;
-}
-
-export type RectDef = RectCtor | { rect: SkRect };
-*/
-
 struct RectCmdProps {
   float x = 0;
   float y = 0;
