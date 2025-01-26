@@ -604,6 +604,18 @@ SkBlurStyle getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
+SkRect getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isObject()) {
+    auto rect = processRect(runtime, value);
+    if (!rect) {
+      throw std::runtime_error("Invalid prop value for SkRect received");
+    }
+    return SkRect(*rect);
+  }
+  throw std::runtime_error("Invalid prop value for SkRect received");
+}
+
+template <>
 ClipDef getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isObject()) {
     auto path = processPath(runtime, value);
@@ -742,6 +754,12 @@ template <>
 std::optional<SkPaint::Cap> getPropertyValue(jsi::Runtime &runtime,
                                              const jsi::Value &value) {
   return makeOptionalPropertyValue<SkPaint::Cap>(runtime, value);
+}
+
+template <>
+std::optional<SkRect> getPropertyValue(jsi::Runtime &runtime,
+                                             const jsi::Value &value) {
+  return makeOptionalPropertyValue<SkRect>(runtime, value);
 }
 
 } // namespace RNSkia

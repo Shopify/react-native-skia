@@ -42,8 +42,27 @@ public:
   }
 };
 
-struct RectCmdProps {
+/*
+export interface RectCtor {
+  x?: number;
+  y?: number;
+  width: number;
+  height: number;
+}
 
+export interface RRectCtor extends RectCtor {
+  r?: Radius;
+}
+
+export type RectDef = RectCtor | { rect: SkRect };
+*/
+
+struct RectCmdProps {
+  float x = 0;
+  float y = 0;
+  std::optional<float> width;
+  std::optional<float> height;
+  std::optional<SkRect> rect;
 };
 
 class RectCmd : public Command {
@@ -54,19 +73,22 @@ public:
     RectCmd(jsi::Runtime &runtime, const jsi::Object &object,
             Variables &variables)
       : Command(CommandType::DrawRect) {
-
+    convertProperty(runtime, object, "x", props.x, variables);
+    convertProperty(runtime, object, "y", props.y, variables);
+    convertProperty(runtime, object, "width", props.width, variables);
+    convertProperty(runtime, object, "height", props.height, variables);
+    convertProperty(runtime, object, "rect", props.rect, variables);
   }
 
   void draw(DrawingCtx *ctx) {
-    // auto paint = ctx->getPaint();
-    // if (props.cx.has_value() && props.cy.has_value()) {
-    //   auto cx = props.cx.value();
-    //   auto cy = props.cy.value();
-    //   auto r = props.r;
-    //   ctx->canvas->drawCircle(cx, cy, r, paint);
-    // } else if (props.c.has_value()) {
-    //   ctx->canvas->drawCircle(props.c.value(), props.r, paint);
-    // }
+    auto [x, y, width, height, rect] = props;
+    if (rect.has_value()) {
+      ctx->canvas->drawRect(rect.value(), ctx->getPaint());
+    } else {
+      auto rct = SkRect::MakeXYWH(x, y, x + width.value(), y + height.value());
+      ctx->canvas->drawRect(rct,
+                            ctx->getPaint());
+    }
   }
 };
 
