@@ -234,10 +234,12 @@ SkFont getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
-sk_sp<SkRuntimeEffect> getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+sk_sp<SkRuntimeEffect> getPropertyValue(jsi::Runtime &runtime,
+                                        const jsi::Value &value) {
   if (value.isObject()) {
-    auto effect =
-        value.asObject(runtime).asHostObject<JsiSkRuntimeEffect>(runtime)->getObject();
+    auto effect = value.asObject(runtime)
+                      .asHostObject<JsiSkRuntimeEffect>(runtime)
+                      ->getObject();
     return effect;
   }
   throw std::runtime_error("Invalid prop value for SkRuntimeEffect received");
@@ -504,6 +506,83 @@ std::shared_ptr<SkRRect> processRRect(jsi::Runtime &runtime,
 
 using ClipDef = std::variant<SkPath, SkRRect, SkRect, std::string>;
 using Layer = std::variant<SkPaint, bool>;
+using Uniforms = std::map<std::string, std::vector<float>>;
+
+std::vector<float> processArray(jsi::Runtime &runtime,
+                                const jsi::Array &array) {
+  std::vector<float> result;
+  size_t length = array.length(runtime);
+  result.reserve(length);
+
+  for (size_t i = 0; i < length; i++) {
+    jsi::Value element = array.getValueAtIndex(runtime, i);
+    if (element.isNumber()) {
+      result.push_back(static_cast<float>(element.asNumber()));
+    } else if (element.isObject() &&
+               element.asObject(runtime).isArray(runtime)) {
+      auto subArray =
+          processArray(runtime, element.asObject(runtime).asArray(runtime));
+      result.insert(result.end(), subArray.begin(), subArray.end());
+    }
+  }
+  return result;
+}
+
+bool isJSPoint(jsi::Runtime& runtime , const jsi::Value &value) {
+  return value.isObject() &&
+         value.asObject(runtime).hasProperty(runtime, "x") &&
+         value.asObject(runtime).hasProperty(runtime, "y");
+}
+
+bool isIndexable(jsi::Runtime& runtime, const jsi::Value &value) {
+  return value.isObject() && value.asObject(runtime).hasProperty(runtime, "0");
+}
+
+template <>
+Uniforms getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isObject()) {
+    Uniforms result;
+    auto obj = value.asObject(runtime);
+    auto names = obj.getPropertyNames(runtime);
+
+    for (size_t i = 0; i < names.length(runtime); i++) {
+      std::string propName =
+          names.getValueAtIndex(runtime, i).toString(runtime).utf8(runtime);
+      jsi::Value propValue = obj.getProperty(runtime, propName.c_str());
+
+      if (propValue.isNumber()) {
+        result[propName] =
+            std::vector<float>{static_cast<float>(propValue.asNumber())};
+      } else if (propValue.isObject() &&
+                 propValue.asObject(runtime).isArray(runtime)) {
+        result[propName] =
+            processArray(runtime, propValue.asObject(runtime).asArray(runtime));
+      } else if (propValue.isObject() && isJSPoint(runtime, propValue)) {
+        result[propName] = {static_cast<float>(propValue.asObject(runtime)
+                                                   .getProperty(runtime, "x")
+                                                   .asNumber()),
+                            static_cast<float>(propValue.asObject(runtime)
+                                                   .getProperty(runtime, "y")
+                                                   .asNumber())};
+      } else if (propValue.isObject() && isIndexable(runtime, propValue)) {
+        auto indexableObj = propValue.asObject(runtime);
+        std::vector<float> values;
+        values.reserve(4);
+        for (int i = 0; i < 4; i++) {
+          if (indexableObj.hasProperty(runtime, std::to_string(i).c_str())) {
+            values.push_back(static_cast<float>(
+                indexableObj.getProperty(runtime, std::to_string(i).c_str())
+                    .asNumber()));
+          }
+        }
+        result[propName] = values;
+      }
+    }
+    return result;
+  }
+
+  throw std::runtime_error("Invalid prop value for Uniforms received");
+}
 
 template <>
 ClipDef getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {

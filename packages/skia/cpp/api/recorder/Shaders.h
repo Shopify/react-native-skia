@@ -12,7 +12,7 @@ namespace RNSkia {
 
 struct PushShaderProps {
   sk_sp<SkRuntimeEffect> source;
-  sk_sp<SkData> uniforms;
+  Uniforms uniforms;
   std::optional<SkM44> transform;
   std::optional<SkPoint> origin;
   std::optional<SkMatrix> matrix;
@@ -30,7 +30,11 @@ public:
     convertProperty(runtime, object, "origin", props.origin, variables);
     convertProperty(runtime, object, "matrix", props.matrix, variables);
     convertProperty(runtime, object, "source", props.source, variables);
-    //convertProperty(runtime, object, "uniforms", props.uniforms, variables);
+    convertProperty(runtime, object, "uniforms", props.uniforms, variables);
+  }
+
+  void pushShader(DrawingCtx* ctx) {
+    
   }
 };
 
