@@ -6,6 +6,7 @@
 #include <variant>
 #include <vector>
 
+#include <include/core/SkBlurTypes.h>
 #include <include/core/SkPaint.h>
 #include <include/core/SkPoint.h>
 #include <include/effects/SkRuntimeEffect.h>
@@ -583,6 +584,23 @@ Uniforms getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   }
 
   throw std::runtime_error("Invalid prop value for Uniforms received");
+}
+
+template <>
+SkBlurStyle getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isString()) {
+    auto valueStr = value.asString(runtime).utf8(runtime);
+    if (valueStr == "normal") {
+      return SkBlurStyle::kNormal_SkBlurStyle;
+    } else if (valueStr == "solid") {
+      return SkBlurStyle::kSolid_SkBlurStyle;
+    } else if (valueStr == "outer") {
+      return SkBlurStyle::kOuter_SkBlurStyle;
+    } else if (valueStr == "inner") {
+      return SkBlurStyle::kInner_SkBlurStyle;
+    }
+  }
+  throw std::runtime_error("Invalid prop value for SkBlurStyle received");
 }
 
 template <>

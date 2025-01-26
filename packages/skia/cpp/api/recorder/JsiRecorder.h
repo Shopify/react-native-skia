@@ -123,8 +123,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(pushBlurMaskFilter) {
-    // getObject()->pushBlurMaskFilter(runtime, arguments[0].asObject(runtime),
-    //                                 getObject()->variables);
+    getObject()->pushBlurMaskFilter(runtime, arguments[0].asObject(runtime),
+                                    getObject()->variables);
     return jsi::Value::undefined();
   }
 
@@ -204,8 +204,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawRect) {
-    // getObject()->drawRect(runtime, arguments[0].asObject(runtime),
-    //                       getObject()->variables);
+    getObject()->drawRect(runtime, arguments[0].asObject(runtime),
+                          getObject()->variables);
     return jsi::Value::undefined();
   }
 

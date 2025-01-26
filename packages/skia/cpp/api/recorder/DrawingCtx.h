@@ -47,54 +47,61 @@ public:
     return result;
   }
 
-    void materializePaint() {
-//      if (!colorFilters.empty()) {
-//        SkColorFilter *result = nullptr;
-//        for (auto it = colorFilters.rbegin(); it != colorFilters.rend(); ++it)
-//        {
-//          if (!result)
-//            result = *it;
-//          else
-//            result = skia->ColorFilter_MakeCompose(*it, result);
-//        }
-//        getPaint()->setColorFilter(result);
-//      }
-  
-      if (!shaders.empty()) {
-        getPaint().setShader(shaders.back());
-      }
-  
-//      if (!imageFilters.empty()) {
-//        SkImageFilter *result = nullptr;
-//        for (auto it = imageFilters.rbegin(); it != imageFilters.rend(); ++it)
-//        {
-//          if (!result)
-//            result = *it;
-//          else
-//            result = skia->ImageFilter_MakeCompose(*it, result);
-//        }
-//        getPaint()->setImageFilter(result);
-//      }
-  
-//      if (!pathEffects.empty()) {
-//        SkPathEffect *result = nullptr;
-//        for (auto it = pathEffects.rbegin(); it != pathEffects.rend(); ++it) {
-//          if (!result)
-//            result = *it;
-//          else
-//            result = skia->PathEffect_MakeCompose(*it, result);
-//        }
-//        getPaint()->setPathEffect(result);
-//      }
-  
-      colorFilters.clear();
-      shaders.clear();
-      imageFilters.clear();
-      pathEffects.clear();
+  void materializePaint() {
+    //      if (!colorFilters.empty()) {
+    //        SkColorFilter *result = nullptr;
+    //        for (auto it = colorFilters.rbegin(); it != colorFilters.rend();
+    //        ++it)
+    //        {
+    //          if (!result)
+    //            result = *it;
+    //          else
+    //            result = skia->ColorFilter_MakeCompose(*it, result);
+    //        }
+    //        getPaint()->setColorFilter(result);
+    //      }
+
+    if (!shaders.empty()) {
+      getPaint().setShader(shaders.back());
     }
+    if (!maskFilters.empty()) {
+      getPaint().setMaskFilter(maskFilters.back());
+    }
+
+    //      if (!imageFilters.empty()) {
+    //        SkImageFilter *result = nullptr;
+    //        for (auto it = imageFilters.rbegin(); it != imageFilters.rend();
+    //        ++it)
+    //        {
+    //          if (!result)
+    //            result = *it;
+    //          else
+    //            result = skia->ImageFilter_MakeCompose(*it, result);
+    //        }
+    //        getPaint()->setImageFilter(result);
+    //      }
+
+    //      if (!pathEffects.empty()) {
+    //        SkPathEffect *result = nullptr;
+    //        for (auto it = pathEffects.rbegin(); it != pathEffects.rend();
+    //        ++it) {
+    //          if (!result)
+    //            result = *it;
+    //          else
+    //            result = skia->PathEffect_MakeCompose(*it, result);
+    //        }
+    //        getPaint()->setPathEffect(result);
+    //      }
+
+    colorFilters.clear();
+    shaders.clear();
+    imageFilters.clear();
+    pathEffects.clear();
+  }
 
   SkCanvas *canvas;
   std::vector<SkPaint> paints;
+  std::vector<sk_sp<SkMaskFilter>> maskFilters;
   std::vector<sk_sp<SkColorFilter>> colorFilters;
   std::vector<sk_sp<SkShader>> shaders;
   std::vector<sk_sp<SkImageFilter>> imageFilters;

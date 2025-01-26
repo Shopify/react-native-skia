@@ -11,6 +11,7 @@
 #include "Convertor.h"
 #include "DrawingCtx.h"
 #include "Drawings.h"
+#include "ImageFilters.h"
 #include "Paint.h"
 #include "Shaders.h"
 
@@ -39,6 +40,12 @@ public:
     }
   }
 
+  void pushBlurMaskFilter(jsi::Runtime &runtime, const jsi::Object &props,
+                          Variables &variables) {
+    commands.push_back(
+        std::make_unique<BlurMaskFilterCmd>(runtime, props, variables));
+  }
+
   void saveCTM(jsi::Runtime &runtime, const jsi::Object &props,
                Variables &variables) {
     commands.push_back(std::make_unique<SaveCTMCmd>(runtime, props, variables));
@@ -50,6 +57,11 @@ public:
 
   void restorePaint() {
     commands.push_back(std::make_unique<Command>(CommandType::RestorePaint));
+  }
+
+  void drawRect(jsi::Runtime &runtime, const jsi::Object &props,
+                  Variables &variables) {
+    commands.push_back(std::make_unique<RectCmd>(runtime, props, variables));
   }
 
   void drawCircle(jsi::Runtime &runtime, const jsi::Object &props,
@@ -75,7 +87,7 @@ public:
     for (const auto &cmd : commands) {
       switch (cmd->type) {
 
-          case CommandType::MaterializePaint: {
+      case CommandType::MaterializePaint: {
         ctx->materializePaint();
         break;
       }
@@ -93,6 +105,12 @@ public:
           pushShaderCmd->pushShader(ctx);
           break;
         }
+      }
+
+      case CommandType::PushBlurMaskFilter: {
+        auto *blurMaskFilterCmd = static_cast<BlurMaskFilterCmd *>(cmd.get());
+        blurMaskFilterCmd->pushMaskFilter(ctx);
+        break;
       }
 
       case CommandType::DrawPaint: {
@@ -125,6 +143,12 @@ public:
       case CommandType::DrawCircle: {
         auto *circleCmd = static_cast<CircleCmd *>(cmd.get());
         circleCmd->draw(ctx);
+        break;
+      }
+
+      case CommandType::DrawRect: {
+        auto *rectCmd = static_cast<RectCmd *>(cmd.get());
+        rectCmd->draw(ctx);
         break;
       }
       }
