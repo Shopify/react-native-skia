@@ -6,6 +6,7 @@ class DrawingCtx {
 public:
   DrawingCtx(SkCanvas *canvas) : canvas(canvas) {
     SkPaint paint;
+    paint.setAntiAlias(true);
     paints.push_back(paint);
     nextPaintIndex++;
   }

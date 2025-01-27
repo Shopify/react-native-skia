@@ -137,21 +137,19 @@ SkM44 getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
       if (key == "translateX") {
         auto x = value.getProperty(runtime, key.c_str()).asNumber();
         SkM44 trX(1, 0, 0, x, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-        m4.preConcat(trX);
+        m4.preTranslate(x, 0, 0);
       } else if (key == "translateY") {
         auto y = value.getProperty(runtime, key.c_str()).asNumber();
-        SkM44 trY(1, 0, 0, 0, 0, 1, 0, y, 0, 0, 1, 0, 0, 0, 0, 1);
-        m4.preConcat(trY);
+        m4.preTranslate(0, y, 0);
       } else if (key == "translateZ") {
         auto z = value.getProperty(runtime, key.c_str()).asNumber();
-        SkM44 trZ(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, z, 0, 0, 0, 1);
-        m4.preConcat(trZ);
+        m4.preTranslate(0, 0, z);
       } else if (key == "translate") {
         auto arr = value.getProperty(runtime, key.c_str())
                        .asObject(runtime)
                        .asArray(runtime);
         double x = 0, y = 0, z = 0;
-        for (int i; i < arr.size(runtime); i++) {
+        for (int i = 0; i < arr.size(runtime); i++) {
           if (i == 0) {
             x = arr.getValueAtIndex(runtime, i).asNumber();
           } else if (i == 1) {
@@ -160,8 +158,7 @@ SkM44 getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
             z = arr.getValueAtIndex(runtime, i).asNumber();
           }
         }
-        SkM44 tr(1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z, 0, 0, 0, 1);
-        m4.preConcat(tr);
+        m4.preTranslate(x, y, z);
       } else if (key == "scale") {
         auto s = value.getProperty(runtime, key.c_str()).asNumber();
         SkM44 scale(s, 0, 0, 0, 0, s, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);

@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { SharedValue } from "react-native-reanimated";
-
 import type {
   CTMProps,
   DrawingNodeProps,
@@ -10,7 +8,6 @@ import { NodeType } from "../../dom/types";
 import type { BaseRecorder } from "../../skia/types/Recorder";
 import type { Node } from "../Node";
 import { isImageFilter, isShader, sortNodeChildren } from "../Node";
-import { isSharedValue } from "../utils";
 
 export const processPaint = ({
   opacity,
