@@ -182,13 +182,12 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawImage) {
-    // getObject()->drawImage(runtime, arguments[0].asObject(runtime));
+    getObject()->drawImage(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawPoints) {
-    // getObject()->drawPoints(runtime, arguments[0].asObject(runtime),
-    //                         getObject()->variables);
+    getObject()->drawPoints(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
@@ -203,13 +202,12 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawRRect) {
-    // getObject()->drawRRect(runtime, arguments[0].asObject(runtime));
+    getObject()->drawRRect(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawOval) {
-    // getObject()->drawOval(runtime, arguments[0].asObject(runtime),
-    //                       getObject()->variables);
+    getObject()->drawOval(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
@@ -219,18 +217,17 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawPatch) {
-    // getObject()->drawPatch(runtime, arguments[0].asObject(runtime));
+    getObject()->drawPatch(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawVertices) {
-    // getObject()->drawVertices(runtime, arguments[0].asObject(runtime));
+    getObject()->drawVertices(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawDiffRect) {
-    // getObject()->drawDiffRect(runtime, arguments[0].asObject(runtime),
-    //                           getObject()->variables);
+    getObject()->drawDiffRect(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
@@ -245,32 +242,32 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawTextBlob) {
-    // getObject()->drawTextBlob(runtime, arguments[0].asObject(runtime));
+    getObject()->drawTextBlob(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawGlyphs) {
-    // getObject()->drawGlyphs(runtime, arguments[0].asObject(runtime));
+    getObject()->drawGlyphs(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawPicture) {
-    // getObject()->drawPicture(runtime, arguments[0].asObject(runtime));
+    getObject()->drawPicture(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawImageSVG) {
-    // getObject()->drawImageSVG(runtime, arguments[0].asObject(runtime));
+    getObject()->drawImageSVG(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawParagraph) {
-    // getObject()->drawParagraph(runtime, arguments[0].asObject(runtime));
+    getObject()->drawParagraph(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawAtlas) {
-    // getObject()->drawAtlas(runtime, arguments[0].asObject(runtime));
+    getObject()->drawAtlas(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 

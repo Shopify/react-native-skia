@@ -333,4 +333,201 @@ public:
   }
 };
 
+// Add to Drawings.h, after existing commands
+
+struct BoxCmdProps {};
+
+class BoxCmd : public Command {
+private:
+  BoxCmdProps props;
+
+public:
+  BoxCmd(jsi::Runtime &runtime, const jsi::Object &object, Variables &variables)
+      : Command(CommandType::DrawBox) {}
+
+  void draw(DrawingCtx *ctx) {}
+};
+
+struct ImageCmdProps {};
+
+class ImageCmd : public Command {
+private:
+  ImageCmdProps props;
+
+public:
+  ImageCmd(jsi::Runtime &runtime, const jsi::Object &object,
+           Variables &variables)
+      : Command(CommandType::DrawImage) {}
+
+  void draw(DrawingCtx *ctx) {}
+};
+
+struct PointsCmdProps {};
+
+class PointsCmd : public Command {
+private:
+  PointsCmdProps props;
+
+public:
+  PointsCmd(jsi::Runtime &runtime, const jsi::Object &object,
+            Variables &variables)
+      : Command(CommandType::DrawPoints) {}
+
+  void draw(DrawingCtx *ctx) {}
+};
+
+struct RRectCmdProps {};
+
+class RRectCmd : public Command {
+private:
+  RRectCmdProps props;
+
+public:
+  RRectCmd(jsi::Runtime &runtime, const jsi::Object &object,
+           Variables &variables)
+      : Command(CommandType::DrawRRect) {}
+
+  void draw(DrawingCtx *ctx) {}
+};
+
+struct OvalCmdProps {};
+
+class OvalCmd : public Command {
+private:
+  OvalCmdProps props;
+
+public:
+  OvalCmd(jsi::Runtime &runtime, const jsi::Object &object,
+          Variables &variables)
+      : Command(CommandType::DrawOval) {}
+
+  void draw(DrawingCtx *ctx) {}
+};
+
+struct PatchCmdProps {};
+
+class PatchCmd : public Command {
+private:
+  PatchCmdProps props;
+
+public:
+  PatchCmd(jsi::Runtime &runtime, const jsi::Object &object,
+           Variables &variables)
+      : Command(CommandType::DrawPatch) {}
+
+  void draw(DrawingCtx *ctx) {}
+};
+
+struct VerticesCmdProps {};
+
+class VerticesCmd : public Command {
+private:
+  VerticesCmdProps props;
+
+public:
+  VerticesCmd(jsi::Runtime &runtime, const jsi::Object &object,
+              Variables &variables)
+      : Command(CommandType::DrawVertices) {}
+
+  void draw(DrawingCtx *ctx) {}
+};
+
+struct DiffRectCmdProps {};
+
+class DiffRectCmd : public Command {
+private:
+  DiffRectCmdProps props;
+
+public:
+  DiffRectCmd(jsi::Runtime &runtime, const jsi::Object &object,
+              Variables &variables)
+      : Command(CommandType::DrawDiffRect) {}
+
+  void draw(DrawingCtx *ctx) {}
+};
+
+struct TextBlobCmdProps {};
+
+class TextBlobCmd : public Command {
+private:
+  TextBlobCmdProps props;
+
+public:
+  TextBlobCmd(jsi::Runtime &runtime, const jsi::Object &object,
+              Variables &variables)
+      : Command(CommandType::DrawTextBlob) {}
+
+  void draw(DrawingCtx *ctx) {}
+};
+
+struct GlyphsCmdProps {};
+
+class GlyphsCmd : public Command {
+private:
+  GlyphsCmdProps props;
+
+public:
+  GlyphsCmd(jsi::Runtime &runtime, const jsi::Object &object,
+            Variables &variables)
+      : Command(CommandType::DrawGlyphs) {}
+
+  void draw(DrawingCtx *ctx) {}
+};
+
+struct PictureCmdProps {};
+
+class PictureCmd : public Command {
+private:
+  PictureCmdProps props;
+
+public:
+  PictureCmd(jsi::Runtime &runtime, const jsi::Object &object,
+             Variables &variables)
+      : Command(CommandType::DrawPicture) {}
+
+  void draw(DrawingCtx *ctx) {}
+};
+
+struct ImageSVGCmdProps {};
+
+class ImageSVGCmd : public Command {
+private:
+  ImageSVGCmdProps props;
+
+public:
+  ImageSVGCmd(jsi::Runtime &runtime, const jsi::Object &object,
+              Variables &variables)
+      : Command(CommandType::DrawImageSVG) {}
+
+  void draw(DrawingCtx *ctx) {}
+};
+
+struct ParagraphCmdProps {};
+
+class ParagraphCmd : public Command {
+private:
+  ParagraphCmdProps props;
+
+public:
+  ParagraphCmd(jsi::Runtime &runtime, const jsi::Object &object,
+               Variables &variables)
+      : Command(CommandType::DrawParagraph) {}
+
+  void draw(DrawingCtx *ctx) {}
+};
+
+struct AtlasCmdProps {};
+
+class AtlasCmd : public Command {
+private:
+  AtlasCmdProps props;
+
+public:
+  AtlasCmd(jsi::Runtime &runtime, const jsi::Object &object,
+           Variables &variables)
+      : Command(CommandType::DrawAtlas) {}
+
+  void draw(DrawingCtx *ctx) {}
+};
+
 } // namespace RNSkia
