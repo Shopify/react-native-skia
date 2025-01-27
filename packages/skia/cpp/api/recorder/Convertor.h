@@ -136,7 +136,6 @@ SkM44 getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
           propNames.getValueAtIndex(runtime, 0).asString(runtime).utf8(runtime);
       if (key == "translateX") {
         auto x = value.getProperty(runtime, key.c_str()).asNumber();
-        SkM44 trX(1, 0, 0, x, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
         m4.preTranslate(x, 0, 0);
       } else if (key == "translateY") {
         auto y = value.getProperty(runtime, key.c_str()).asNumber();
@@ -161,16 +160,13 @@ SkM44 getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
         m4.preTranslate(x, y, z);
       } else if (key == "scale") {
         auto s = value.getProperty(runtime, key.c_str()).asNumber();
-        SkM44 scale(s, 0, 0, 0, 0, s, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-        m4.preConcat(scale);
+        m4.preScale(scale, scale);
       } else if (key == "scaleX") {
         auto s = value.getProperty(runtime, key.c_str()).asNumber();
-        SkM44 scale(s, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-        m4.preConcat(scale);
+        m4.preScale(scale, 1);
       } else if (key == "scaleY") {
         auto s = value.getProperty(runtime, key.c_str()).asNumber();
-        SkM44 scale(1, 0, 0, 0, 0, s, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-        m4.preConcat(scale);
+        m4.preScale(scale, scale);
       } else if (key == "skewX") {
         auto angle = value.getProperty(runtime, key.c_str()).asNumber();
         SkM44 skewX(1, 0, 0, 0, std::tan(angle), 1, 0, 0, 0, 0, 1, 0, 0, 0, 0,
