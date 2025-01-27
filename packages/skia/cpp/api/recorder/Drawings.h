@@ -70,7 +70,7 @@ public:
     if (rect.has_value()) {
       ctx->canvas->drawRect(rect.value(), ctx->getPaint());
     } else {
-      auto rct = SkRect::MakeXYWH(x, y, x + width.value(), y + height.value());
+      auto rct = SkRect::MakeXYWH(x, y, width.value(), height.value());
       ctx->canvas->drawRect(rct, ctx->getPaint());
     }
   }
