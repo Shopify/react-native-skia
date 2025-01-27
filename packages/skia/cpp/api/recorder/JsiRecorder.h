@@ -93,9 +93,9 @@ public:
   }
 
   JSI_HOST_FUNCTION(pushPathEffect) {
-    // getObject()->pushPathEffect(
-    //     runtime, arguments[0].asString(runtime).utf8(runtime),
-    //     arguments[1].asObject(runtime));
+    getObject()->pushPathEffect(runtime,
+                                arguments[0].asString(runtime).utf8(runtime),
+                                arguments[1].asObject(runtime));
     return jsi::Value::undefined();
   }
 

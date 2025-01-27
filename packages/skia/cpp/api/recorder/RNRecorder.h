@@ -13,6 +13,7 @@
 #include "Drawings.h"
 #include "ImageFilters.h"
 #include "Paint.h"
+#include "PathEffects.h"
 #include "Shaders.h"
 
 namespace RNSkia {
@@ -39,6 +40,32 @@ public:
     } else if (nodeType == "skImageShader") {
       commands.push_back(
           std::make_unique<PushImageShaderCmd>(runtime, props, variables));
+    }
+  }
+
+  void pushPathEffect(jsi::Runtime &runtime, const std::string &nodeType,
+                      const jsi::Object &props) {
+    if (nodeType == "skDiscretePathEffect") {
+      commands.push_back(
+          std::make_unique<DiscretePathEffectCmd>(runtime, props, variables));
+    } else if (nodeType == "skDashPathEffect") {
+      commands.push_back(
+          std::make_unique<DashPathEffectCmd>(runtime, props, variables));
+    } else if (nodeType == "skPath1DPathEffect") {
+      commands.push_back(
+          std::make_unique<Path1DPathEffectCmd>(runtime, props, variables));
+    } else if (nodeType == "skPath2DPathEffect") {
+      commands.push_back(
+          std::make_unique<Path2DPathEffectCmd>(runtime, props, variables));
+    } else if (nodeType == "skCornerPathEffect") {
+      commands.push_back(
+          std::make_unique<CornerPathEffectCmd>(runtime, props, variables));
+    } else if (nodeType == "skSumPathEffect") {
+      commands.push_back(
+          std::make_unique<SumPathEffectCmd>(runtime, props, variables));
+    } else if (nodeType == "skLine2DPathEffect") {
+      commands.push_back(
+          std::make_unique<Line2DPathEffectCmd>(runtime, props, variables));
     }
   }
 
@@ -180,6 +207,33 @@ public:
               static_cast<PushImageShaderCmd *>(cmd.get());
           pushImageShaderCmd->pushShader(ctx);
         }
+      }
+
+      case CommandType::PushPathEffect: {
+        auto nodeType = cmd->nodeType;
+        if (nodeType == "skDiscretePathEffect") {
+          auto *discreteCmd = static_cast<DiscretePathEffectCmd *>(cmd.get());
+          discreteCmd->pushPathEffect(ctx);
+        } else if (nodeType == "skDashPathEffect") {
+          auto *dashCmd = static_cast<DashPathEffectCmd *>(cmd.get());
+          dashCmd->pushPathEffect(ctx);
+        } else if (nodeType == "skPath1DPathEffect") {
+          auto *path1DCmd = static_cast<Path1DPathEffectCmd *>(cmd.get());
+          path1DCmd->pushPathEffect(ctx);
+        } else if (nodeType == "skPath2DPathEffect") {
+          auto *path2DCmd = static_cast<Path2DPathEffectCmd *>(cmd.get());
+          path2DCmd->pushPathEffect(ctx);
+        } else if (nodeType == "skCornerPathEffect") {
+          auto *cornerCmd = static_cast<CornerPathEffectCmd *>(cmd.get());
+          cornerCmd->pushPathEffect(ctx);
+        } else if (nodeType == "skSumPathEffect") {
+          auto *sumCmd = static_cast<SumPathEffectCmd *>(cmd.get());
+          sumCmd->pushPathEffect(ctx);
+        } else if (nodeType == "skLine2DPathEffect") {
+          auto *line2DCmd = static_cast<Line2DPathEffectCmd *>(cmd.get());
+          line2DCmd->pushPathEffect(ctx);
+        }
+        break;
       }
 
       case CommandType::PushBlurMaskFilter: {
