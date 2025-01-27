@@ -194,8 +194,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawPath) {
-    // getObject()->drawPath(runtime, arguments[0].asObject(runtime),
-    //                       getObject()->variables);
+    getObject()->drawPath(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 

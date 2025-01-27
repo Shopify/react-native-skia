@@ -664,6 +664,59 @@ SkBlurStyle getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
+SkPathFillType getPropertyValue(jsi::Runtime &runtime,
+                                const jsi::Value &value) {
+  if (value.isString()) {
+    auto valueStr = value.asString(runtime).utf8(runtime);
+    if (valueStr == "winding") {
+      return SkPathFillType::kWinding;
+    } else if (valueStr == "evenOdd") {
+      return SkPathFillType::kEvenOdd;
+    } else if (valueStr == "inverseWinding") {
+      return SkPathFillType::kInverseWinding;
+    } else if (valueStr == "inverseEvenOdd") {
+      return SkPathFillType::kInverseEvenOdd;
+    }
+  }
+  throw std::runtime_error("Invalid prop value for SkPathFillType received");
+}
+
+struct StrokeOpts {
+  std::optional<float> width;
+  std::optional<float> miter_limit;
+  std::optional<float> precision;
+  std::optional<SkPaint::Join> join;
+  std::optional<SkPaint::Cap> cap;
+};
+
+template <>
+StrokeOpts getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isObject()) {
+    StrokeOpts opts;
+    auto object = value.asObject(runtime);
+    if (object.hasProperty(runtime, "width")) {
+      opts.width = object.getProperty(runtime, "width").asNumber();
+    }
+    if (object.hasProperty(runtime, "miterLimit")) {
+      opts.miter_limit = object.getProperty(runtime, "miterLimit").asNumber();
+    }
+    if (object.hasProperty(runtime, "precision")) {
+      opts.precision = object.getProperty(runtime, "precision").asNumber();
+    }
+    if (object.hasProperty(runtime, "join")) {
+      opts.join = getPropertyValue<SkPaint::Join>(
+          runtime, object.getProperty(runtime, "join"));
+    }
+    if (object.hasProperty(runtime, "cap")) {
+      opts.cap = getPropertyValue<SkPaint::Cap>(
+          runtime, object.getProperty(runtime, "cap"));
+    }
+    return opts;
+  }
+  throw std::runtime_error("Invalid prop value for StrokeOpts received");
+}
+
+template <>
 SkRect getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isObject()) {
     auto rect = processRect(runtime, value);
@@ -844,6 +897,12 @@ template <>
 std::optional<SkSamplingOptions> getPropertyValue(jsi::Runtime &runtime,
                                                   const jsi::Value &value) {
   return makeOptionalPropertyValue<SkSamplingOptions>(runtime, value);
+}
+
+template <>
+std::optional<StrokeOpts> getPropertyValue(jsi::Runtime &runtime,
+                                           const jsi::Value &value) {
+  return makeOptionalPropertyValue<StrokeOpts>(runtime, value);
 }
 
 } // namespace RNSkia

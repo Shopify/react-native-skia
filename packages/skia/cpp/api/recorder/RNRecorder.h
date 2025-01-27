@@ -80,6 +80,10 @@ public:
     commands.push_back(std::make_unique<TextCmd>(runtime, props, variables));
   }
 
+  void drawPath(jsi::Runtime &runtime, const jsi::Object &props) {
+    commands.push_back(std::make_unique<PathCmd>(runtime, props, variables));
+  }
+
   void drawPaint() {
     commands.push_back(std::make_unique<Command>(CommandType::DrawPaint));
   }

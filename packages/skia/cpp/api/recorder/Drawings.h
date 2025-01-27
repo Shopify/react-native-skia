@@ -76,6 +76,118 @@ public:
   }
 };
 
+struct PathCmdProps {
+  SkPath path;
+  float start;
+  float end;
+  std::optional<StrokeOpts> stroke;
+  SkPathFillType fillType;
+};
+
+class PathCmd : public Command {
+private:
+  PathCmdProps props;
+
+public:
+  PathCmd(jsi::Runtime &runtime, const jsi::Object &object,
+          Variables &variables)
+      : Command(CommandType::DrawPath) {
+    convertProperty(runtime, object, "path", props.path, variables);
+    convertProperty(runtime, object, "start", props.start, variables);
+    convertProperty(runtime, object, "end", props.end, variables);
+    convertProperty(runtime, object, "stroke", props.stroke, variables);
+    convertProperty(runtime, object, "fillType", props.fillType, variables);
+  }
+
+  void draw(DrawingCtx *ctx) {
+    // Saturate start and end values (clamp between 0 and 1)
+    float start = std::clamp(props.start, 0.0f, 1.0f);
+    float end = std::clamp(props.end, 0.0f, 1.0f);
+
+    // Check conditions that require path mutation
+    bool hasStartOffset = start != 0.0f;
+    bool hasEndOffset = end != 1.0f;
+    bool hasStrokeOptions = props.stroke.has_value();
+    bool hasFillType = true; // Since fillType is not optional in the struct
+    bool willMutatePath =
+        hasStartOffset || hasEndOffset || hasStrokeOptions || hasFillType;
+
+    std::shared_ptr<const SkPath> pathToUse;
+
+    if (willMutatePath) {
+      // Create a filtered path for modifications
+      SkPath filteredPath(props.path);
+
+      // Handle path trimming
+      if (hasStartOffset || hasEndOffset) {
+        auto pe =
+            SkTrimPathEffect::Make(start, end, SkTrimPathEffect::Mode::kNormal);
+        if (pe != nullptr) {
+          SkStrokeRec rec(SkStrokeRec::InitStyle::kHairline_InitStyle);
+          if (!pe->filterPath(&filteredPath, filteredPath, &rec, nullptr)) {
+            throw std::runtime_error(
+                "Failed trimming path with parameters start: " +
+                std::to_string(start) + ", end: " + std::to_string(end));
+          }
+          filteredPath.swap(filteredPath);
+        } else {
+          throw std::runtime_error(
+              "Failed trimming path with parameters start: " +
+              std::to_string(start) + ", end: " + std::to_string(end));
+        }
+      }
+
+      // Set fill type
+      auto p = std::make_shared<SkPath>(filteredPath);
+      p->setFillType(props.fillType);
+
+      // Handle stroke options
+      if (hasStrokeOptions) {
+        const auto &stroke = props.stroke.value();
+        SkPaint strokePaint;
+
+        if (stroke.cap.has_value()) {
+          strokePaint.setStrokeCap(stroke.cap.value());
+        }
+
+        if (stroke.join.has_value()) {
+          strokePaint.setStrokeJoin(stroke.join.value());
+        }
+
+        if (stroke.width.has_value()) {
+          strokePaint.setStrokeWidth(stroke.width.value());
+        }
+
+        if (stroke.miter_limit.has_value()) {
+          strokePaint.setStrokeMiter(stroke.miter_limit.value());
+        }
+
+        float precision = stroke.precision.value_or(1.0f);
+
+        auto strokedPath = std::make_shared<SkPath>();
+        if (!skpathutils::FillPathWithPaint(*p, strokePaint, strokedPath.get(),
+                                            nullptr, precision)) {
+          throw std::runtime_error("Failed to apply stroke to path");
+        }
+        pathToUse = std::const_pointer_cast<const SkPath>(strokedPath);
+      } else {
+        pathToUse = std::const_pointer_cast<const SkPath>(p);
+      }
+    } else {
+      // Use the original path directly
+      pathToUse = std::make_shared<const SkPath>(props.path);
+    }
+
+    if (!pathToUse) {
+      throw std::runtime_error(
+          "Path node could not resolve path props correctly.");
+    }
+
+    // Draw the final path
+    ctx->canvas->drawPath(*pathToUse, ctx->getPaint());
+  }
+};
+
 struct LineCmdProps {
   SkPoint p1;
   SkPoint p2;
