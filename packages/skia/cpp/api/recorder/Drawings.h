@@ -355,7 +355,7 @@ struct ImageCmdProps {
   std::optional<float> width;
   std::optional<float> height;
   std::optional<SkRect> rect;
-  std::string fit = "contain";
+  std::string fit;
   std::optional<sk_sp<SkImage>> image;
   SkSamplingOptions sampling = SkSamplingOptions(SkFilterMode::kLinear);
 };
