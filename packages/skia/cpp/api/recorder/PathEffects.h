@@ -10,7 +10,11 @@
 
 namespace RNSkia {
 
-struct DiscretePathEffectProps {};
+struct DiscretePathEffectProps {
+  float length;
+  float deviation;
+  uint32_t seed;
+};
 
 class DiscretePathEffectCmd : public Command {
 private:
@@ -19,9 +23,17 @@ private:
 public:
   DiscretePathEffectCmd(jsi::Runtime &runtime, const jsi::Object &object,
                         Variables &variables)
-      : Command(CommandType::PushPathEffect, "skDiscretePathEffect") {}
+      : Command(CommandType::PushPathEffect, "skDiscretePathEffect") {
+    convertProperty(runtime, object, "length", props.length, variables);
+    convertProperty(runtime, object, "deviation", props.deviation, variables);
+    convertProperty(runtime, object, "seed", props.seed, variables);
+  }
 
-  void pushPathEffect(DrawingCtx *ctx) {}
+  void pushPathEffect(DrawingCtx *ctx) {
+    auto pe =
+        SkDiscretePathEffect::Make(props.length, props.deviation, props.seed);
+    ctx->pathEffects.push_back(pe);
+  }
 };
 
 struct DashPathEffectProps {};

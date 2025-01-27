@@ -82,17 +82,17 @@ public:
     //        getPaint()->setImageFilter(result);
     //      }
 
-    //      if (!pathEffects.empty()) {
-    //        SkPathEffect *result = nullptr;
-    //        for (auto it = pathEffects.rbegin(); it != pathEffects.rend();
-    //        ++it) {
-    //          if (!result)
-    //            result = *it;
-    //          else
-    //            result = skia->PathEffect_MakeCompose(*it, result);
-    //        }
-    //        getPaint()->setPathEffect(result);
-    //      }
+    if (!pathEffects.empty()) {
+      sk_sp<SkPathEffect> result = nullptr;
+      for (auto it = pathEffects.rbegin(); it != pathEffects.rend(); ++it) {
+        if (!result) {
+          result = *it;
+        } else {
+          result = SkPathEffect::MakeCompose(*it, result);
+        }
+      }
+      getPaint().setPathEffect(result);
+    }
 
     colorFilters.clear();
     shaders.clear();
