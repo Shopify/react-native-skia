@@ -602,14 +602,11 @@ SkRect getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 
 template <>
 SkPath getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
-  if (value.isObject()) {
     auto path = processPath(runtime, value);
     if (!path) {
       throw std::runtime_error("Invalid prop value for SkPath received");
     }
     return SkPath(*path);
-  }
-  throw std::runtime_error("Invalid prop value for SkPath received");
 }
 
 template <>
