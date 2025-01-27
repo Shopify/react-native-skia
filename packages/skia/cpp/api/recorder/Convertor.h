@@ -160,13 +160,13 @@ SkM44 getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
         m4.preTranslate(x, y, z);
       } else if (key == "scale") {
         auto s = value.getProperty(runtime, key.c_str()).asNumber();
-        m4.preScale(scale, scale);
+        m4.preScale(s, s);
       } else if (key == "scaleX") {
         auto s = value.getProperty(runtime, key.c_str()).asNumber();
-        m4.preScale(scale, 1);
+        m4.preScale(s, 1);
       } else if (key == "scaleY") {
         auto s = value.getProperty(runtime, key.c_str()).asNumber();
-        m4.preScale(scale, scale);
+        m4.preScale(1, s);
       } else if (key == "skewX") {
         auto angle = value.getProperty(runtime, key.c_str()).asNumber();
         SkM44 skewX(1, 0, 0, 0, std::tan(angle), 1, 0, 0, 0, 0, 1, 0, 0, 0, 0,
