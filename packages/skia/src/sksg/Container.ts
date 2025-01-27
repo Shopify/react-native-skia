@@ -145,7 +145,7 @@ class NativeReanimatedContainer extends Container {
         "worklet";
         sharedRecorder.applyUpdates(sharedValues);
         nativeDrawOnscreen(Skia, nativeId, sharedRecorder);
-      }, Array.from(sharedValues));
+      }, sharedValues);
     }
     Rea.runOnUI(() => {
       "worklet";

@@ -95,21 +95,21 @@ public:
   JSI_HOST_FUNCTION(pushPathEffect) {
     // getObject()->pushPathEffect(
     //     runtime, arguments[0].asString(runtime).utf8(runtime),
-    //     arguments[1].asObject(runtime), getObject()->variables);
+    //     arguments[1].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(pushImageFilter) {
     // getObject()->pushImageFilter(
     //     runtime, arguments[0].asString(runtime).utf8(runtime),
-    //     arguments[1].asObject(runtime), getObject()->variables);
+    //     arguments[1].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(pushColorFilter) {
     // getObject()->pushColorFilter(
     //     runtime, arguments[0].asString(runtime).utf8(runtime),
-    //     arguments[1].asObject(runtime), getObject()->variables);
+    //     arguments[1].asObject(runtime));
     return jsi::Value::undefined();
   }
 
@@ -177,13 +177,12 @@ public:
     //                                 : jsi::Object(runtime)});
     // }
 
-    // getObject()->drawBox(runtime, boxProps, shadows, getObject()->variables);
+    // getObject()->drawBox(runtime, boxProps, shadows);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawImage) {
-    // getObject()->drawImage(runtime, arguments[0].asObject(runtime),
-    //                        getObject()->variables);
+    // getObject()->drawImage(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
@@ -204,8 +203,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawRRect) {
-    // getObject()->drawRRect(runtime, arguments[0].asObject(runtime),
-    //                        getObject()->variables);
+    // getObject()->drawRRect(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
@@ -221,14 +219,12 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawPatch) {
-    // getObject()->drawPatch(runtime, arguments[0].asObject(runtime),
-    //                        getObject()->variables);
+    // getObject()->drawPatch(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawVertices) {
-    // getObject()->drawVertices(runtime, arguments[0].asObject(runtime),
-    //                           getObject()->variables);
+    // getObject()->drawVertices(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
@@ -249,38 +245,32 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawTextBlob) {
-    // getObject()->drawTextBlob(runtime, arguments[0].asObject(runtime),
-    //                           getObject()->variables);
+    // getObject()->drawTextBlob(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawGlyphs) {
-    // getObject()->drawGlyphs(runtime, arguments[0].asObject(runtime),
-    //                         getObject()->variables);
+    // getObject()->drawGlyphs(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawPicture) {
-    // getObject()->drawPicture(runtime, arguments[0].asObject(runtime),
-    //                          getObject()->variables);
+    // getObject()->drawPicture(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawImageSVG) {
-    // getObject()->drawImageSVG(runtime, arguments[0].asObject(runtime),
-    //                           getObject()->variables);
+    // getObject()->drawImageSVG(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawParagraph) {
-    // getObject()->drawParagraph(runtime, arguments[0].asObject(runtime),
-    //                            getObject()->variables);
+    // getObject()->drawParagraph(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawAtlas) {
-    // getObject()->drawAtlas(runtime, arguments[0].asObject(runtime),
-    //                        getObject()->variables);
+    // getObject()->drawAtlas(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
