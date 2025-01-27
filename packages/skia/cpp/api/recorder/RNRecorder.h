@@ -14,6 +14,7 @@
 #include "ImageFilters.h"
 #include "Paint.h"
 #include "PathEffects.h"
+#include "ColorFilters.h"
 #include "Shaders.h"
 
 namespace RNSkia {
@@ -66,6 +67,29 @@ public:
     } else if (nodeType == "skLine2DPathEffect") {
       commands.push_back(
           std::make_unique<Line2DPathEffectCmd>(runtime, props, variables));
+    }
+  }
+
+  void pushColorFilter(jsi::Runtime &runtime, const std::string &nodeType,
+                    const jsi::Object &props) {
+    if (nodeType == "skMatrixColorFilter") {
+      commands.push_back(
+          std::make_unique<MatrixColorFilterCmd>(runtime, props, variables));
+    } else if (nodeType == "skBlendColorFilter") {
+      commands.push_back(
+          std::make_unique<BlendColorFilterCmd>(runtime, props, variables));
+    } else if (nodeType == "skLinearToSRGBGammaColorFilter") {
+      commands.push_back(
+          std::make_unique<LinearToSRGBGammaColorFilterCmd>(runtime, props, variables));
+    } else if (nodeType == "skSRGBToLinearGammaColorFilter") {
+      commands.push_back(
+          std::make_unique<SRGBToLinearGammaColorFilterCmd>(runtime, props, variables));
+    } else if (nodeType == "skLumaColorFilter") {
+      commands.push_back(
+          std::make_unique<LumaColorFilterCmd>(runtime, props, variables));
+    } else if (nodeType == "skLerpColorFilter") {
+      commands.push_back(
+          std::make_unique<LerpColorFilterCmd>(runtime, props, variables));
     }
   }
 
@@ -209,6 +233,37 @@ public:
         }
       }
 
+      case CommandType::PushImageFilter: {
+        auto nodeType = cmd->nodeType;
+        if (nodeType == "skOffsetImageFilter") {
+          auto *offsetCmd = static_cast<OffsetImageFilterCmd *>(cmd.get());
+          offsetCmd->pushImageFilter(ctx);
+        } else if (nodeType == "skDisplacementMapImageFilter") {
+          auto *displacementCmd =
+              static_cast<DisplacementMapImageFilterCmd *>(cmd.get());
+          displacementCmd->pushImageFilter(ctx);
+        } else if (nodeType == "skBlurImageFilter") {
+          auto *blurCmd = static_cast<BlurImageFilterCmd *>(cmd.get());
+          blurCmd->pushImageFilter(ctx);
+        } else if (nodeType == "skDropShadowImageFilter") {
+          auto *dropShadowCmd =
+              static_cast<DropShadowImageFilterCmd *>(cmd.get());
+          dropShadowCmd->pushImageFilter(ctx);
+        } else if (nodeType == "skMorphologyImageFilter") {
+          auto *morphologyCmd =
+              static_cast<MorphologyImageFilterCmd *>(cmd.get());
+          morphologyCmd->pushImageFilter(ctx);
+        } else if (nodeType == "skBlendImageFilter") {
+          auto *blendCmd = static_cast<BlendImageFilterCmd *>(cmd.get());
+          blendCmd->pushImageFilter(ctx);
+        } else if (nodeType == "skRuntimeShaderImageFilter") {
+          auto *runtimeShaderCmd =
+              static_cast<RuntimeShaderImageFilterCmd *>(cmd.get());
+          runtimeShaderCmd->pushImageFilter(ctx);
+        }
+        break;
+      }
+
       case CommandType::PushPathEffect: {
         auto nodeType = cmd->nodeType;
         if (nodeType == "skDiscretePathEffect") {
@@ -232,6 +287,30 @@ public:
         } else if (nodeType == "skLine2DPathEffect") {
           auto *line2DCmd = static_cast<Line2DPathEffectCmd *>(cmd.get());
           line2DCmd->pushPathEffect(ctx);
+        }
+        break;
+      }
+
+      case CommandType::PushColorFilter: {
+        auto nodeType = cmd->nodeType;
+        if (nodeType == "skMatrixColorFilter") {
+          auto *matrixCmd = static_cast<MatrixColorFilterCmd *>(cmd.get());
+          matrixCmd->pushColorFilter(ctx);
+        } else if (nodeType == "skBlendColorFilter") {
+          auto *blendCmd = static_cast<BlendColorFilterCmd *>(cmd.get());
+          blendCmd->pushColorFilter(ctx);
+        } else if (nodeType == "skLinearToSRGBGammaColorFilter") {
+          auto *linearToSRGBCmd = static_cast<LinearToSRGBGammaColorFilterCmd *>(cmd.get());
+          linearToSRGBCmd->pushColorFilter(ctx);
+        } else if (nodeType == "skSRGBToLinearGammaColorFilter") {
+          auto *srgbToLinearCmd = static_cast<SRGBToLinearGammaColorFilterCmd *>(cmd.get());
+          srgbToLinearCmd->pushColorFilter(ctx);
+        } else if (nodeType == "skLumaColorFilter") {
+          auto *lumaCmd = static_cast<LumaColorFilterCmd *>(cmd.get());
+          lumaCmd->pushColorFilter(ctx);
+        } else if (nodeType == "skLerpColorFilter") {
+          auto *lerpCmd = static_cast<LerpColorFilterCmd *>(cmd.get());
+          lerpCmd->pushColorFilter(ctx);
         }
         break;
       }
