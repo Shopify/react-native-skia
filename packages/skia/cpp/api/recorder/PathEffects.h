@@ -36,7 +36,10 @@ public:
   }
 };
 
-struct DashPathEffectProps {};
+struct DashPathEffectProps {
+  std::vector<float> intervals;
+  float phase = 0;
+};
 
 class DashPathEffectCmd : public Command {
 private:
@@ -45,12 +48,24 @@ private:
 public:
   DashPathEffectCmd(jsi::Runtime &runtime, const jsi::Object &object,
                     Variables &variables)
-      : Command(CommandType::PushPathEffect, "skDashPathEffect") {}
+      : Command(CommandType::PushPathEffect, "skDashPathEffect") {
+    convertProperty(runtime, object, "intervals", props.intervals, variables);
+    convertProperty(runtime, object, "phase", props.phase, variables);
+}
 
-  void pushPathEffect(DrawingCtx *ctx) {}
+  void pushPathEffect(DrawingCtx *ctx) {
+    auto pe = SkDashPathEffect::Make(props.intervals.data(), props.intervals.size(), props.phase);
+    ctx->pathEffects.push_back(pe);
+  }
 };
 
-struct Path1DPathEffectProps {};
+struct Path1DPathEffectProps {
+
+  SkPath path;
+  float advance;
+  float phase;
+  unsigned int style;
+};
 
 class Path1DPathEffectCmd : public Command {
 private:
@@ -59,9 +74,19 @@ private:
 public:
   Path1DPathEffectCmd(jsi::Runtime &runtime, const jsi::Object &object,
                       Variables &variables)
-      : Command(CommandType::PushPathEffect, "skPath1DPathEffect") {}
+      : Command(CommandType::PushPathEffect, "skPath1DPathEffect") {
+    convertProperty(runtime, object, "path", props.path, variables);
+    convertProperty(runtime, object, "advance", props.advance, variables);
+    convertProperty(runtime, object, "phase", props.phase, variables);
+    convertProperty(runtime, object, "style", props.style, variables);
+    }
 
-  void pushPathEffect(DrawingCtx *ctx) {}
+  void pushPathEffect(DrawingCtx *ctx) {
+    auto pe = SkPath1DPathEffect::Make(props.path, props.advance, props.phase, static_cast<SkPath1DPathEffect::Style>(props.style));
+    if (pe) {
+      ctx->pathEffects.push_back(pe);
+    }
+  }
 };
 
 struct Path2DPathEffectProps {};

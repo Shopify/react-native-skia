@@ -643,6 +643,40 @@ Layer getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   throw std::runtime_error("Invalid prop value for Layer received");
 }
 
+
+template <>
+std::vector<float> getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  std::vector<float> result;
+  
+  if (value.isNumber()) {
+    // If single number, create a vector with one element
+    result.push_back(static_cast<float>(value.asNumber()));
+  } else if (value.isObject()) {
+    auto obj = value.asObject(runtime);
+    if (obj.isArray(runtime)) {
+      auto array = obj.asArray(runtime);
+      size_t size = array.size(runtime);
+      result.reserve(size);
+      
+      for (size_t i = 0; i < size; i++) {
+        jsi::Value element = array.getValueAtIndex(runtime, i);
+        if (element.isNumber()) {
+          result.push_back(static_cast<float>(element.asNumber()));
+        } else {
+          throw std::runtime_error("Array elements must be numbers");
+        }
+      }
+    } else {
+      throw std::runtime_error("Expected array or number for vector<float>");
+    }
+  } else {
+    throw std::runtime_error("Invalid value type for vector<float>");
+  }
+  
+  return result;
+}
+
+
 template <>
 bool getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isBool()) {
