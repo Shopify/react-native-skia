@@ -25,8 +25,7 @@ public:
                                          std::make_shared<Recorder>()) {}
 
   JSI_HOST_FUNCTION(savePaint) {
-    getObject()->savePaint(runtime, arguments[0].asObject(runtime),
-                           getObject()->variables);
+    getObject()->savePaint(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
@@ -36,8 +35,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawCircle) {
-    getObject()->drawCircle(runtime, arguments[0].asObject(runtime),
-                            getObject()->variables);
+    getObject()->drawCircle(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
@@ -116,15 +114,14 @@ public:
   }
 
   JSI_HOST_FUNCTION(pushShader) {
-    getObject()->pushShader(
-        runtime, arguments[0].asString(runtime).utf8(runtime),
-        arguments[1].asObject(runtime), getObject()->variables);
+    getObject()->pushShader(runtime,
+                            arguments[0].asString(runtime).utf8(runtime),
+                            arguments[1].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(pushBlurMaskFilter) {
-    getObject()->pushBlurMaskFilter(runtime, arguments[0].asObject(runtime),
-                                    getObject()->variables);
+    getObject()->pushBlurMaskFilter(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
@@ -144,8 +141,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(saveCTM) {
-    getObject()->saveCTM(runtime, arguments[0].asObject(runtime),
-                         getObject()->variables);
+    getObject()->saveCTM(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
@@ -204,8 +200,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawRect) {
-    getObject()->drawRect(runtime, arguments[0].asObject(runtime),
-                          getObject()->variables);
+    getObject()->drawRect(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
@@ -222,8 +217,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawLine) {
-    getObject()->drawLine(runtime, arguments[0].asObject(runtime),
-                          getObject()->variables);
+    getObject()->drawLine(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
@@ -246,14 +240,12 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawText) {
-    getObject()->drawText(runtime, arguments[0].asObject(runtime),
-                          getObject()->variables);
+    getObject()->drawText(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawTextPath) {
-    getObject()->drawTextPath(runtime, arguments[0].asObject(runtime),
-                              getObject()->variables);
+    getObject()->drawTextPath(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 

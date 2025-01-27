@@ -92,7 +92,7 @@ float getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isNumber()) {
     return static_cast<float>(value.asNumber());
   }
-  throw std::runtime_error("Invalid prop value received");
+  throw std::runtime_error("Invalid float prop value received");
 }
 
 template <>
@@ -100,7 +100,7 @@ std::string getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isString()) {
     return value.asString(runtime).utf8(runtime);
   }
-  throw std::runtime_error("Invalid prop value received");
+  throw std::runtime_error("Invalid string prop value received");
 }
 
 template <>

@@ -203,25 +203,11 @@ const pushPaints = (recorder: BaseRecorder, paints: Node<any>[]) => {
   });
 };
 
-const visitNode = (
-  recorder: BaseRecorder,
-  node: Node<any>,
-  sharedValues?: Set<SharedValue<unknown>>
-) => {
+const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
   if (node.type === NodeType.Group) {
     recorder.saveGroup();
   }
   const { props } = node;
-  if (sharedValues) {
-    Object.values(props).forEach((value) => {
-      if (isSharedValue(value) && !sharedValues.has(value)) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        value.name = `variable${sharedValues.size}`;
-        sharedValues.add(value);
-      }
-    });
-  }
   const {
     colorFilters,
     maskFilters,
@@ -332,7 +318,7 @@ const visitNode = (
       break;
   }
   drawings.forEach((drawing) => {
-    visitNode(recorder, drawing, sharedValues);
+    visitNode(recorder, drawing);
   });
   if (shouldPushPaint) {
     recorder.restorePaint();
@@ -345,12 +331,8 @@ const visitNode = (
   }
 };
 
-export const visit = (
-  recorder: BaseRecorder,
-  root: Node[],
-  sharedValues?: Set<SharedValue<unknown>>
-) => {
+export const visit = (recorder: BaseRecorder, root: Node[]) => {
   root.forEach((node) => {
-    visitNode(recorder, node, sharedValues);
+    visitNode(recorder, node);
   });
 };

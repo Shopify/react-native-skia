@@ -105,11 +105,11 @@ public:
     convertProperty(runtime, object, "rect", props.rect, variables);
     convertProperty(runtime, object, "image", props.image, variables);
     convertProperty(runtime, object, "sampling", props.sampling, variables);
-          
+
     convertProperty(runtime, object, "transform", props.transform, variables);
     convertProperty(runtime, object, "origin", props.origin, variables);
     convertProperty(runtime, object, "matrix", props.matrix, variables);
-          
+
     convertProperty(runtime, object, "fit", props.fit, variables);
     convertProperty(runtime, object, "x", props.x, variables);
     convertProperty(runtime, object, "y", props.y, variables);
