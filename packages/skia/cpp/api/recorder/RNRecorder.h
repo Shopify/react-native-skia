@@ -160,6 +160,12 @@ public:
         break;
       }
 
+      case CommandType::DrawPath: {
+        auto *pathCmd = static_cast<PathCmd *>(cmd.get());
+        pathCmd->draw(ctx);
+        break;
+      }
+
       case CommandType::DrawRect: {
         auto *rectCmd = static_cast<RectCmd *>(cmd.get());
         rectCmd->draw(ctx);
