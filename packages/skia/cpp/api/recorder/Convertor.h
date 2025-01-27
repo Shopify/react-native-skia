@@ -8,6 +8,7 @@
 
 #include <include/core/SkBlurTypes.h>
 #include <include/core/SkPaint.h>
+#include <include/core/SkPathEffect.h>
 #include <include/core/SkPoint.h>
 #include <include/effects/SkRuntimeEffect.h>
 
@@ -356,6 +357,22 @@ SkTileMode getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
   }
 
   throw std::runtime_error("Invalid prop value for SkBlendMode received");
+}
+
+template <>
+SkPath1DPathEffect::Style getPropertyValue(jsi::Runtime &runtime,
+                                           const jsi::Value &val) {
+  if (val.isString()) {
+    auto value = val.asString(runtime).utf8(runtime);
+    if (value == "translate") {
+      return SkPath1DPathEffect::Style::kTranslate_Style;
+    } else if (value == "rotate") {
+      return SkPath1DPathEffect::Style::kRotate_Style;
+    } else if (value == "morph") {
+      return SkPath1DPathEffect::Style::kMorph_Style;
+    }
+  }
+  throw std::runtime_error("Invalid prop value for Path1DEffectStyle received");
 }
 
 template <>

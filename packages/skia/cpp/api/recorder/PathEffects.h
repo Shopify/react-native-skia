@@ -61,11 +61,10 @@ public:
 };
 
 struct Path1DPathEffectProps {
-
   SkPath path;
   float advance;
   float phase;
-  unsigned int style;
+  SkPath1DPathEffect::Style style;
 };
 
 class Path1DPathEffectCmd : public Command {
@@ -83,9 +82,8 @@ public:
   }
 
   void pushPathEffect(DrawingCtx *ctx) {
-    auto pe = SkPath1DPathEffect::Make(
-        props.path, props.advance, props.phase,
-        static_cast<SkPath1DPathEffect::Style>(props.style));
+    auto pe = SkPath1DPathEffect::Make(props.path, props.advance, props.phase,
+                                       props.style);
     if (pe) {
       ctx->pathEffects.push_back(pe);
     }
@@ -147,13 +145,23 @@ public:
       : Command(CommandType::PushPathEffect, "skSumPathEffect") {}
 
   void pushPathEffect(DrawingCtx *ctx) {
-    if (ctx->pathEffects.size() >= 2) {
-      auto effect1 = ctx->pathEffects[ctx->pathEffects.size() - 2];
-      auto effect2 = ctx->pathEffects[ctx->pathEffects.size() - 1];
-      ctx->pathEffects.pop_back();
-      ctx->pathEffects.pop_back();
-      auto pe = SkPathEffect::MakeSum(effect1, effect2);
-      ctx->pathEffects.push_back(pe);
+    // Get all path effects
+    auto effects = std::move(ctx->pathEffects);
+    ctx->pathEffects.clear(); // Clear the vector since we moved from it
+
+    // Create composer function for path effects
+    Composer<SkPathEffect> pathEffectComposer = [](sk_sp<SkPathEffect> outer,
+                                                   sk_sp<SkPathEffect> inner) {
+      return SkPathEffect::MakeSum(outer, inner);
+    };
+
+    // Compose all effects
+    auto composedEffect =
+        composeEffects<SkPathEffect>(effects, pathEffectComposer);
+
+    // If we got a valid composed effect, push it back
+    if (composedEffect) {
+      ctx->pathEffects.push_back(std::move(composedEffect));
     }
   }
 };
