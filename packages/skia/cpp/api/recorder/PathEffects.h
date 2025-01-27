@@ -51,10 +51,11 @@ public:
       : Command(CommandType::PushPathEffect, "skDashPathEffect") {
     convertProperty(runtime, object, "intervals", props.intervals, variables);
     convertProperty(runtime, object, "phase", props.phase, variables);
-}
+  }
 
   void pushPathEffect(DrawingCtx *ctx) {
-    auto pe = SkDashPathEffect::Make(props.intervals.data(), props.intervals.size(), props.phase);
+    auto pe = SkDashPathEffect::Make(props.intervals.data(),
+                                     props.intervals.size(), props.phase);
     ctx->pathEffects.push_back(pe);
   }
 };
@@ -79,17 +80,22 @@ public:
     convertProperty(runtime, object, "advance", props.advance, variables);
     convertProperty(runtime, object, "phase", props.phase, variables);
     convertProperty(runtime, object, "style", props.style, variables);
-    }
+  }
 
   void pushPathEffect(DrawingCtx *ctx) {
-    auto pe = SkPath1DPathEffect::Make(props.path, props.advance, props.phase, static_cast<SkPath1DPathEffect::Style>(props.style));
+    auto pe = SkPath1DPathEffect::Make(
+        props.path, props.advance, props.phase,
+        static_cast<SkPath1DPathEffect::Style>(props.style));
     if (pe) {
       ctx->pathEffects.push_back(pe);
     }
   }
 };
 
-struct Path2DPathEffectProps {};
+struct Path2DPathEffectProps {
+  SkMatrix matrix;
+  SkPath path;
+};
 
 class Path2DPathEffectCmd : public Command {
 private:
@@ -98,12 +104,22 @@ private:
 public:
   Path2DPathEffectCmd(jsi::Runtime &runtime, const jsi::Object &object,
                       Variables &variables)
-      : Command(CommandType::PushPathEffect, "skPath2DPathEffect") {}
+      : Command(CommandType::PushPathEffect, "skPath2DPathEffect") {
+    convertProperty(runtime, object, "matrix", props.matrix, variables);
+    convertProperty(runtime, object, "path", props.path, variables);
+  }
 
-  void pushPathEffect(DrawingCtx *ctx) {}
+  void pushPathEffect(DrawingCtx *ctx) {
+    auto pe = SkPath2DPathEffect::Make(props.matrix, props.path);
+    if (pe) {
+      ctx->pathEffects.push_back(pe);
+    }
+  }
 };
 
-struct CornerPathEffectProps {};
+struct CornerPathEffectProps {
+  float r;
+};
 
 class CornerPathEffectCmd : public Command {
 private:
@@ -112,26 +128,40 @@ private:
 public:
   CornerPathEffectCmd(jsi::Runtime &runtime, const jsi::Object &object,
                       Variables &variables)
-      : Command(CommandType::PushPathEffect, "skCornerPathEffect") {}
+      : Command(CommandType::PushPathEffect, "skCornerPathEffect") {
+    convertProperty(runtime, object, "r", props.r, variables);
+  }
 
-  void pushPathEffect(DrawingCtx *ctx) {}
+  void pushPathEffect(DrawingCtx *ctx) {
+    auto pe = SkCornerPathEffect::Make(props.r);
+    if (pe) {
+      ctx->pathEffects.push_back(pe);
+    }
+  }
 };
 
-struct SumPathEffectProps {};
-
 class SumPathEffectCmd : public Command {
-private:
-  SumPathEffectProps props;
-
 public:
   SumPathEffectCmd(jsi::Runtime &runtime, const jsi::Object &object,
                    Variables &variables)
       : Command(CommandType::PushPathEffect, "skSumPathEffect") {}
 
-  void pushPathEffect(DrawingCtx *ctx) {}
+  void pushPathEffect(DrawingCtx *ctx) {
+    if (ctx->pathEffects.size() >= 2) {
+      auto effect1 = ctx->pathEffects[ctx->pathEffects.size() - 2];
+      auto effect2 = ctx->pathEffects[ctx->pathEffects.size() - 1];
+      ctx->pathEffects.pop_back();
+      ctx->pathEffects.pop_back();
+      auto pe = SkPathEffect::MakeSum(effect1, effect2);
+      ctx->pathEffects.push_back(pe);
+    }
+  }
 };
 
-struct Line2DPathEffectProps {};
+struct Line2DPathEffectProps {
+  float width;
+  SkMatrix matrix;
+};
 
 class Line2DPathEffectCmd : public Command {
 private:
@@ -140,9 +170,17 @@ private:
 public:
   Line2DPathEffectCmd(jsi::Runtime &runtime, const jsi::Object &object,
                       Variables &variables)
-      : Command(CommandType::PushPathEffect, "skLine2DPathEffect") {}
+      : Command(CommandType::PushPathEffect, "skLine2DPathEffect") {
+    convertProperty(runtime, object, "width", props.width, variables);
+    convertProperty(runtime, object, "matrix", props.matrix, variables);
+  }
 
-  void pushPathEffect(DrawingCtx *ctx) {}
+  void pushPathEffect(DrawingCtx *ctx) {
+    auto pe = SkLine2DPathEffect::Make(props.width, props.matrix);
+    if (pe) {
+      ctx->pathEffects.push_back(pe);
+    }
+  }
 };
 
 } // namespace RNSkia
