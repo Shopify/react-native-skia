@@ -26,14 +26,13 @@ public:
 
   ~Recorder() = default;
 
-  void savePaint(jsi::Runtime &runtime, const jsi::Object &props,
-                 Variables &variables) {
+  void savePaint(jsi::Runtime &runtime, const jsi::Object &props) {
     commands.push_back(
         std::make_unique<SavePaintCmd>(runtime, props, variables));
   }
 
   void pushShader(jsi::Runtime &runtime, const std::string &nodeType,
-                  const jsi::Object &props, Variables &variables) {
+                  const jsi::Object &props) {
     if (nodeType == "skShader") {
       commands.push_back(
           std::make_unique<PushShaderCmd>(runtime, props, variables));
@@ -43,14 +42,12 @@ public:
     }
   }
 
-  void pushBlurMaskFilter(jsi::Runtime &runtime, const jsi::Object &props,
-                          Variables &variables) {
+  void pushBlurMaskFilter(jsi::Runtime &runtime, const jsi::Object &props) {
     commands.push_back(
         std::make_unique<BlurMaskFilterCmd>(runtime, props, variables));
   }
 
-  void saveCTM(jsi::Runtime &runtime, const jsi::Object &props,
-               Variables &variables) {
+  void saveCTM(jsi::Runtime &runtime, const jsi::Object &props) {
     commands.push_back(std::make_unique<SaveCTMCmd>(runtime, props, variables));
   }
 
@@ -62,29 +59,24 @@ public:
     commands.push_back(std::make_unique<Command>(CommandType::RestorePaint));
   }
 
-  void drawRect(jsi::Runtime &runtime, const jsi::Object &props,
-                Variables &variables) {
+  void drawRect(jsi::Runtime &runtime, const jsi::Object &props) {
     commands.push_back(std::make_unique<RectCmd>(runtime, props, variables));
   }
 
-  void drawCircle(jsi::Runtime &runtime, const jsi::Object &props,
-                  Variables &variables) {
+  void drawCircle(jsi::Runtime &runtime, const jsi::Object &props) {
     commands.push_back(std::make_unique<CircleCmd>(runtime, props, variables));
   }
 
-  void drawLine(jsi::Runtime &runtime, const jsi::Object &props,
-                Variables &variables) {
+  void drawLine(jsi::Runtime &runtime, const jsi::Object &props) {
     commands.push_back(std::make_unique<LineCmd>(runtime, props, variables));
   }
 
-  void drawTextPath(jsi::Runtime &runtime, const jsi::Object &props,
-                    Variables &variables) {
+  void drawTextPath(jsi::Runtime &runtime, const jsi::Object &props) {
     commands.push_back(
         std::make_unique<TextPathCmd>(runtime, props, variables));
   }
 
-  void drawText(jsi::Runtime &runtime, const jsi::Object &props,
-                Variables &variables) {
+  void drawText(jsi::Runtime &runtime, const jsi::Object &props) {
     commands.push_back(std::make_unique<TextCmd>(runtime, props, variables));
   }
 

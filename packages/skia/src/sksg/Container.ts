@@ -1,5 +1,3 @@
-import type { SharedValue } from "react-native-reanimated";
-
 import Rea from "../external/reanimated/ReanimatedProxy";
 import type { Skia, SkCanvas } from "../skia/types";
 import { HAS_REANIMATED_3 } from "../external/reanimated/renderHelpers";
@@ -12,6 +10,7 @@ import { Recorder } from "./Recorder/Recorder";
 import { visit } from "./Recorder/Visitor";
 import { replay } from "./Recorder/Player";
 import { createDrawingContext } from "./Recorder/DrawingContext";
+import { ReanimatedRecorder } from "./Recorder/ReanimatedRecorder";
 
 const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   "worklet";
@@ -137,20 +136,20 @@ class NativeReanimatedContainer extends Container {
       Rea.stopMapper(this.mapperId);
     }
     const { nativeId, Skia } = this;
-    const recorder = Skia.Recorder();
-    const values = new Set<SharedValue<unknown>>();
+    const recorder = new ReanimatedRecorder(Skia);
     visit(recorder, this.root);
-    const sharedValues = Array.from(values);
+    const sharedValues = recorder.getSharedValues();
+    const sharedRecorder = recorder.getRecorder();
     if (sharedValues.length > 0) {
       this.mapperId = Rea.startMapper(() => {
         "worklet";
-        recorder.applyUpdates(sharedValues);
-        nativeDrawOnscreen(Skia, nativeId, recorder);
+        sharedRecorder.applyUpdates(sharedValues);
+        nativeDrawOnscreen(Skia, nativeId, sharedRecorder);
       }, Array.from(sharedValues));
     }
     Rea.runOnUI(() => {
       "worklet";
-      nativeDrawOnscreen(Skia, nativeId, recorder);
+      nativeDrawOnscreen(Skia, nativeId, sharedRecorder);
     })();
   }
 }
