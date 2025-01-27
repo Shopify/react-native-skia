@@ -5,6 +5,7 @@
 #include "Command.h"
 #include "Convertor.h"
 #include "DrawingCtx.h"
+#include "Image.h"
 
 namespace RNSkia {
 
@@ -348,7 +349,16 @@ public:
   void draw(DrawingCtx *ctx) {}
 };
 
-struct ImageCmdProps {};
+struct ImageCmdProps {
+  float x = 0;
+  float y = 0;
+  std::optional<float> width;
+  std::optional<float> height;
+  std::optional<SkRect> rect;
+  std::string fit = "contain";
+  std::optional<sk_sp<SkImage>> image;
+  SkSamplingOptions sampling = SkSamplingOptions(SkFilterMode::kLinear);
+};
 
 class ImageCmd : public Command {
 private:
@@ -357,9 +367,39 @@ private:
 public:
   ImageCmd(jsi::Runtime &runtime, const jsi::Object &object,
            Variables &variables)
-      : Command(CommandType::DrawImage) {}
+      : Command(CommandType::DrawImage) {
+    convertProperty(runtime, object, "rect", props.rect, variables);
+    convertProperty(runtime, object, "image", props.image, variables);
+    convertProperty(runtime, object, "sampling", props.sampling, variables);
 
-  void draw(DrawingCtx *ctx) {}
+    convertProperty(runtime, object, "fit", props.fit, variables);
+    convertProperty(runtime, object, "x", props.x, variables);
+    convertProperty(runtime, object, "y", props.y, variables);
+    convertProperty(runtime, object, "width", props.width, variables);
+    convertProperty(runtime, object, "height", props.height, variables);
+    convertProperty(runtime, object, "rect", props.rect, variables);
+  }
+
+  void draw(DrawingCtx *ctx) {
+    auto [x, y, width, height, rect, fit, image, sampling] = props;
+    if (image.has_value()) {
+      auto img = image.value();
+      auto hasRect =
+          rect.has_value() || (width.has_value() && height.has_value());
+      if (hasRect) {
+        auto src = SkRect::MakeXYWH(0, 0, img->width(), img->height());
+        auto dst = rect.has_value()
+                       ? rect.value()
+                       : SkRect::MakeXYWH(x, y, width.value(), height.value());
+        auto rects = RNSkiaImage::fitRects(fit, src, dst);
+        ctx->canvas->drawImageRect(img, rects.src, rects.dst, sampling,
+                                   &(ctx->getPaint()),
+                                            SkCanvas::kStrict_SrcRectConstraint);
+      } else {
+          throw std::runtime_error("Image node could not resolve image dimension props.");
+      }
+    }
+  }
 };
 
 struct PointsCmdProps {};
