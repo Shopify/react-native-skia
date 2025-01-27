@@ -138,14 +138,15 @@ class NativeReanimatedContainer extends Container {
     }
     const { nativeId, Skia } = this;
     const recorder = Skia.Recorder();
+    const values = new Set<SharedValue<unknown>>();
     visit(recorder, this.root);
-    const sharedValues: SharedValue<unknown>[] = [];
+    const sharedValues = Array.from(values);
     if (sharedValues.length > 0) {
       this.mapperId = Rea.startMapper(() => {
         "worklet";
         recorder.applyUpdates(sharedValues);
         nativeDrawOnscreen(Skia, nativeId, recorder);
-      }, sharedValues);
+      }, Array.from(sharedValues));
     }
     Rea.runOnUI(() => {
       "worklet";
