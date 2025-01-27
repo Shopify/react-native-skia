@@ -7,6 +7,7 @@
 
 #include <jsi/jsi.h>
 
+#include "ColorFilters.h"
 #include "Command.h"
 #include "Convertor.h"
 #include "DrawingCtx.h"
@@ -14,7 +15,6 @@
 #include "ImageFilters.h"
 #include "Paint.h"
 #include "PathEffects.h"
-#include "ColorFilters.h"
 #include "Shaders.h"
 
 namespace RNSkia {
@@ -41,6 +41,27 @@ public:
     } else if (nodeType == "skImageShader") {
       commands.push_back(
           std::make_unique<PushImageShaderCmd>(runtime, props, variables));
+    } else if (nodeType == "skColorShader") {
+      commands.push_back(
+          std::make_unique<ColorShaderCmd>(runtime, props, variables));
+    } else if (nodeType == "skTurbulence") {
+      commands.push_back(
+          std::make_unique<TurbulenceCmd>(runtime, props, variables));
+    } else if (nodeType == "skFractalNoise") {
+      commands.push_back(
+          std::make_unique<FractalNoiseCmd>(runtime, props, variables));
+    } else if (nodeType == "skLinearGradient") {
+      commands.push_back(
+          std::make_unique<LinearGradientCmd>(runtime, props, variables));
+    } else if (nodeType == "skRadialGradient") {
+      commands.push_back(
+          std::make_unique<RadialGradientCmd>(runtime, props, variables));
+    } else if (nodeType == "skSweepGradient") {
+      commands.push_back(
+          std::make_unique<SweepGradientCmd>(runtime, props, variables));
+    } else if (nodeType == "skTwoPointConicalGradient") {
+      commands.push_back(std::make_unique<TwoPointConicalGradientCmd>(
+          runtime, props, variables));
     }
   }
 
@@ -71,7 +92,7 @@ public:
   }
 
   void pushColorFilter(jsi::Runtime &runtime, const std::string &nodeType,
-                    const jsi::Object &props) {
+                       const jsi::Object &props) {
     if (nodeType == "skMatrixColorFilter") {
       commands.push_back(
           std::make_unique<MatrixColorFilterCmd>(runtime, props, variables));
@@ -79,11 +100,11 @@ public:
       commands.push_back(
           std::make_unique<BlendColorFilterCmd>(runtime, props, variables));
     } else if (nodeType == "skLinearToSRGBGammaColorFilter") {
-      commands.push_back(
-          std::make_unique<LinearToSRGBGammaColorFilterCmd>(runtime, props, variables));
+      commands.push_back(std::make_unique<LinearToSRGBGammaColorFilterCmd>(
+          runtime, props, variables));
     } else if (nodeType == "skSRGBToLinearGammaColorFilter") {
-      commands.push_back(
-          std::make_unique<SRGBToLinearGammaColorFilterCmd>(runtime, props, variables));
+      commands.push_back(std::make_unique<SRGBToLinearGammaColorFilterCmd>(
+          runtime, props, variables));
     } else if (nodeType == "skLumaColorFilter") {
       commands.push_back(
           std::make_unique<LumaColorFilterCmd>(runtime, props, variables));
@@ -225,12 +246,34 @@ public:
         if (nodeType == "skShader") {
           auto *pushShaderCmd = static_cast<PushShaderCmd *>(cmd.get());
           pushShaderCmd->pushShader(ctx);
-          break;
         } else if (nodeType == "skImageShader") {
           auto *pushImageShaderCmd =
               static_cast<PushImageShaderCmd *>(cmd.get());
           pushImageShaderCmd->pushShader(ctx);
+        } else if (nodeType == "skColorShader") {
+          auto *colorShaderCmd = static_cast<ColorShaderCmd *>(cmd.get());
+          colorShaderCmd->pushShader(ctx);
+        } else if (nodeType == "skTurbulence") {
+          auto *turbulenceCmd = static_cast<TurbulenceCmd *>(cmd.get());
+          turbulenceCmd->pushShader(ctx);
+        } else if (nodeType == "skFractalNoise") {
+          auto *fractalNoiseCmd = static_cast<FractalNoiseCmd *>(cmd.get());
+          fractalNoiseCmd->pushShader(ctx);
+        } else if (nodeType == "skLinearGradient") {
+          auto *linearGradientCmd = static_cast<LinearGradientCmd *>(cmd.get());
+          linearGradientCmd->pushShader(ctx);
+        } else if (nodeType == "skRadialGradient") {
+          auto *radialGradientCmd = static_cast<RadialGradientCmd *>(cmd.get());
+          radialGradientCmd->pushShader(ctx);
+        } else if (nodeType == "skSweepGradient") {
+          auto *sweepGradientCmd = static_cast<SweepGradientCmd *>(cmd.get());
+          sweepGradientCmd->pushShader(ctx);
+        } else if (nodeType == "skTwoPointConicalGradient") {
+          auto *twoPointConicalGradientCmd =
+              static_cast<TwoPointConicalGradientCmd *>(cmd.get());
+          twoPointConicalGradientCmd->pushShader(ctx);
         }
+        break;
       }
 
       case CommandType::PushImageFilter: {
@@ -300,10 +343,12 @@ public:
           auto *blendCmd = static_cast<BlendColorFilterCmd *>(cmd.get());
           blendCmd->pushColorFilter(ctx);
         } else if (nodeType == "skLinearToSRGBGammaColorFilter") {
-          auto *linearToSRGBCmd = static_cast<LinearToSRGBGammaColorFilterCmd *>(cmd.get());
+          auto *linearToSRGBCmd =
+              static_cast<LinearToSRGBGammaColorFilterCmd *>(cmd.get());
           linearToSRGBCmd->pushColorFilter(ctx);
         } else if (nodeType == "skSRGBToLinearGammaColorFilter") {
-          auto *srgbToLinearCmd = static_cast<SRGBToLinearGammaColorFilterCmd *>(cmd.get());
+          auto *srgbToLinearCmd =
+              static_cast<SRGBToLinearGammaColorFilterCmd *>(cmd.get());
           srgbToLinearCmd->pushColorFilter(ctx);
         } else if (nodeType == "skLumaColorFilter") {
           auto *lumaCmd = static_cast<LumaColorFilterCmd *>(cmd.get());

@@ -18,7 +18,7 @@ private:
 
 public:
   MatrixColorFilterCmd(jsi::Runtime &runtime, const jsi::Object &object,
-                      Variables &variables)
+                       Variables &variables)
       : Command(CommandType::PushColorFilter, "skMatrixColorFilter") {}
 
   void pushColorFilter(DrawingCtx *ctx) {}
@@ -32,7 +32,7 @@ private:
 
 public:
   BlendColorFilterCmd(jsi::Runtime &runtime, const jsi::Object &object,
-                     Variables &variables)
+                      Variables &variables)
       : Command(CommandType::PushColorFilter, "skBlendColorFilter") {}
 
   void pushColorFilter(DrawingCtx *ctx) {}
@@ -45,9 +45,11 @@ private:
   LinearToSRGBGammaColorFilterProps props;
 
 public:
-  LinearToSRGBGammaColorFilterCmd(jsi::Runtime &runtime, const jsi::Object &object,
-                                 Variables &variables)
-      : Command(CommandType::PushColorFilter, "skLinearToSRGBGammaColorFilter") {}
+  LinearToSRGBGammaColorFilterCmd(jsi::Runtime &runtime,
+                                  const jsi::Object &object,
+                                  Variables &variables)
+      : Command(CommandType::PushColorFilter,
+                "skLinearToSRGBGammaColorFilter") {}
 
   void pushColorFilter(DrawingCtx *ctx) {}
 };
@@ -59,9 +61,11 @@ private:
   SRGBToLinearGammaColorFilterProps props;
 
 public:
-  SRGBToLinearGammaColorFilterCmd(jsi::Runtime &runtime, const jsi::Object &object,
-                                 Variables &variables)
-      : Command(CommandType::PushColorFilter, "skSRGBToLinearGammaColorFilter") {}
+  SRGBToLinearGammaColorFilterCmd(jsi::Runtime &runtime,
+                                  const jsi::Object &object,
+                                  Variables &variables)
+      : Command(CommandType::PushColorFilter,
+                "skSRGBToLinearGammaColorFilter") {}
 
   void pushColorFilter(DrawingCtx *ctx) {}
 };
@@ -74,7 +78,7 @@ private:
 
 public:
   LumaColorFilterCmd(jsi::Runtime &runtime, const jsi::Object &object,
-                    Variables &variables)
+                     Variables &variables)
       : Command(CommandType::PushColorFilter, "skLumaColorFilter") {}
 
   void pushColorFilter(DrawingCtx *ctx) {}
@@ -88,7 +92,7 @@ private:
 
 public:
   LerpColorFilterCmd(jsi::Runtime &runtime, const jsi::Object &object,
-                    Variables &variables)
+                     Variables &variables)
       : Command(CommandType::PushColorFilter, "skLerpColorFilter") {}
 
   void pushColorFilter(DrawingCtx *ctx) {}

@@ -159,4 +159,104 @@ public:
   }
 };
 
+// Add to Shaders.h
+
+struct ColorShaderProps {};
+
+class ColorShaderCmd : public Command {
+private:
+  ColorShaderProps props;
+
+public:
+  ColorShaderCmd(jsi::Runtime &runtime, const jsi::Object &object,
+                 Variables &variables)
+      : Command(CommandType::PushShader, "skColorShader") {}
+
+  void pushShader(DrawingCtx *ctx) {}
+};
+
+struct TurbulenceProps {};
+
+class TurbulenceCmd : public Command {
+private:
+  TurbulenceProps props;
+
+public:
+  TurbulenceCmd(jsi::Runtime &runtime, const jsi::Object &object,
+                Variables &variables)
+      : Command(CommandType::PushShader, "skTurbulence") {}
+
+  void pushShader(DrawingCtx *ctx) {}
+};
+
+struct FractalNoiseProps {};
+
+class FractalNoiseCmd : public Command {
+private:
+  FractalNoiseProps props;
+
+public:
+  FractalNoiseCmd(jsi::Runtime &runtime, const jsi::Object &object,
+                  Variables &variables)
+      : Command(CommandType::PushShader, "skFractalNoise") {}
+
+  void pushShader(DrawingCtx *ctx) {}
+};
+
+struct LinearGradientProps {};
+
+class LinearGradientCmd : public Command {
+private:
+  LinearGradientProps props;
+
+public:
+  LinearGradientCmd(jsi::Runtime &runtime, const jsi::Object &object,
+                    Variables &variables)
+      : Command(CommandType::PushShader, "skLinearGradient") {}
+
+  void pushShader(DrawingCtx *ctx) {}
+};
+
+struct RadialGradientProps {};
+
+class RadialGradientCmd : public Command {
+private:
+  RadialGradientProps props;
+
+public:
+  RadialGradientCmd(jsi::Runtime &runtime, const jsi::Object &object,
+                    Variables &variables)
+      : Command(CommandType::PushShader, "skRadialGradient") {}
+
+  void pushShader(DrawingCtx *ctx) {}
+};
+
+struct SweepGradientProps {};
+
+class SweepGradientCmd : public Command {
+private:
+  SweepGradientProps props;
+
+public:
+  SweepGradientCmd(jsi::Runtime &runtime, const jsi::Object &object,
+                   Variables &variables)
+      : Command(CommandType::PushShader, "skSweepGradient") {}
+
+  void pushShader(DrawingCtx *ctx) {}
+};
+
+struct TwoPointConicalGradientProps {};
+
+class TwoPointConicalGradientCmd : public Command {
+private:
+  TwoPointConicalGradientProps props;
+
+public:
+  TwoPointConicalGradientCmd(jsi::Runtime &runtime, const jsi::Object &object,
+                             Variables &variables)
+      : Command(CommandType::PushShader, "skTwoPointConicalGradient") {}
+
+  void pushShader(DrawingCtx *ctx) {}
+};
+
 } // namespace RNSkia
