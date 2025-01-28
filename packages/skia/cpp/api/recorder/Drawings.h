@@ -32,13 +32,13 @@ public:
 
   void draw(DrawingCtx *ctx) {
     auto paint = ctx->getPaint();
-    if (props.cx.has_value() && props.cy.has_value()) {
-      auto cx = props.cx.value();
-      auto cy = props.cy.value();
+    if (props.c.has_value()) {
+      ctx->canvas->drawCircle(props.c.value(), props.r, paint);
+    } else {
+      auto cx = props.cx.value_or(0);
+      auto cy = props.cy.value_or(0);
       auto r = props.r;
       ctx->canvas->drawCircle(cx, cy, r, paint);
-    } else if (props.c.has_value()) {
-      ctx->canvas->drawCircle(props.c.value(), props.r, paint);
     }
   }
 };
@@ -275,8 +275,8 @@ public:
           }
           dist = width / 2;
         }
-        // Gives us the (x, y) coordinates as well as the cos/sin of the tangent
-        // line at that position.
+        // Gives us the (x, y) coordinates as well as the cos/sin of the
+        // tangent line at that position.
         SkPoint pos;
         SkVector tan;
         if (!cont->getPosTan(dist, &pos, &tan)) {

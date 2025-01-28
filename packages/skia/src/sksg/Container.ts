@@ -64,7 +64,6 @@ export abstract class Container {
       this.recording.paintPool,
       canvas
     );
-    //console.log(this.recording.commands);
     replay(ctx, this.recording.commands);
   }
 

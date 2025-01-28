@@ -161,36 +161,37 @@ SkColor getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
-std::vector<SkColor> getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
-    std::vector<SkColor> result;
-    if (value.isObject() && value.asObject(runtime).isArray(runtime)) {
-        auto array = value.asObject(runtime).asArray(runtime);
-        size_t size = array.size(runtime);
-        result.reserve(size);
-        
-        for (size_t i = 0; i < size; i++) {
-            result.push_back(getPropertyValue<SkColor>(runtime,
-                array.getValueAtIndex(runtime, i)));
-        }
+std::vector<SkColor> getPropertyValue(jsi::Runtime &runtime,
+                                      const jsi::Value &value) {
+  std::vector<SkColor> result;
+  if (value.isObject() && value.asObject(runtime).isArray(runtime)) {
+    auto array = value.asObject(runtime).asArray(runtime);
+    size_t size = array.size(runtime);
+    result.reserve(size);
+
+    for (size_t i = 0; i < size; i++) {
+      result.push_back(getPropertyValue<SkColor>(
+          runtime, array.getValueAtIndex(runtime, i)));
     }
-    return result;
+  }
+  return result;
 }
 
 template <>
 SkTileMode getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
-    if (val.isString()) {
-        auto value = val.asString(runtime).utf8(runtime);
-        if (value == "clamp") {
-            return SkTileMode::kClamp;
-        } else if (value == "repeat") {
-            return SkTileMode::kRepeat;
-        } else if (value == "mirror") {
-            return SkTileMode::kMirror;
-        } else if (value == "decal") {
-            return SkTileMode::kDecal;
-        }
+  if (val.isString()) {
+    auto value = val.asString(runtime).utf8(runtime);
+    if (value == "clamp") {
+      return SkTileMode::kClamp;
+    } else if (value == "repeat") {
+      return SkTileMode::kRepeat;
+    } else if (value == "mirror") {
+      return SkTileMode::kMirror;
+    } else if (value == "decal") {
+      return SkTileMode::kDecal;
     }
-    throw std::runtime_error("Invalid value for SkTileMode received");
+  }
+  throw std::runtime_error("Invalid value for SkTileMode received");
 }
 
 template <>
@@ -842,20 +843,20 @@ std::optional<StrokeOpts> getPropertyValue(jsi::Runtime &runtime,
 
 template <>
 std::optional<std::vector<SkColor>> getPropertyValue(jsi::Runtime &runtime,
-                                                    const jsi::Value &value) {
-    return makeOptionalPropertyValue<std::vector<SkColor>>(runtime, value);
+                                                     const jsi::Value &value) {
+  return makeOptionalPropertyValue<std::vector<SkColor>>(runtime, value);
 }
 
 template <>
 std::optional<std::vector<float>> getPropertyValue(jsi::Runtime &runtime,
-                                          const jsi::Value &value) {
-    return makeOptionalPropertyValue<std::vector<float>>(runtime, value);
+                                                   const jsi::Value &value) {
+  return makeOptionalPropertyValue<std::vector<float>>(runtime, value);
 }
 
 template <>
 std::optional<SkTileMode> getPropertyValue(jsi::Runtime &runtime,
-                                          const jsi::Value &value) {
-    return makeOptionalPropertyValue<SkTileMode>(runtime, value);
+                                           const jsi::Value &value) {
+  return makeOptionalPropertyValue<SkTileMode>(runtime, value);
 }
 
 } // namespace RNSkia
