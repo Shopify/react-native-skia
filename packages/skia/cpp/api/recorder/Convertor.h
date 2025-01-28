@@ -402,12 +402,10 @@ sk_sp<SkPicture> getPropertyValue(jsi::Runtime &runtime,
 }
 
 template <>
-SkPaint getPropertyValue(jsi::Runtime &runtime,
-                                  const jsi::Value &value) {
+SkPaint getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isObject()) {
-    auto paint = value.asObject(runtime)
-                       .asHostObject<JsiSkPaint>(runtime)
-                       ->getObject();
+    auto paint =
+        value.asObject(runtime).asHostObject<JsiSkPaint>(runtime)->getObject();
     return SkPaint(*paint);
   }
   throw std::runtime_error("Invalid prop value for SkPaint received");

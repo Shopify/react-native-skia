@@ -72,8 +72,8 @@ public:
       // Calculate the size of this uniform (rows * columns)
       size_t uniformValueSize = uniform.sizeInBytes() / sizeof(float);
       auto size = it->second.size();
-      auto uniformCount = uniform.count;
-      auto sizeInBytes = uniform.sizeInBytes();
+      //      auto uniformCount = uniform.count;
+      //      auto sizeInBytes = uniform.sizeInBytes();
       if (size != uniformValueSize) {
         throw std::runtime_error("Incorrect uniform size for: " +
                                  std::string(uniform.name));
@@ -183,7 +183,10 @@ struct GradientProps {
   std::optional<std::vector<float>> positions;
   std::optional<SkTileMode> mode;
   std::optional<uint32_t> flags;
-  std::optional<SkMatrix> localMatrix;
+
+  std::optional<SkM44> transform;
+  std::optional<SkPoint> origin;
+  std::optional<SkMatrix> matrix;
 };
 
 struct ColorShaderProps {
@@ -292,18 +295,20 @@ public:
     convertProperty(runtime, object, "positions", props.positions, variables);
     convertProperty(runtime, object, "mode", props.mode, variables);
     convertProperty(runtime, object, "flags", props.flags, variables);
-    convertProperty(runtime, object, "localMatrix", props.localMatrix,
-                    variables);
+
+    convertProperty(runtime, object, "transform", props.transform, variables);
+    convertProperty(runtime, object, "origin", props.origin, variables);
+    convertProperty(runtime, object, "matrix", props.matrix, variables);
   }
 
   void pushShader(DrawingCtx *ctx) {
+    SkMatrix m3 = processTransform(props.matrix, props.transform, props.origin);
     const SkPoint pts[2] = {props.start, props.end};
     auto shader = SkGradientShader::MakeLinear(
         pts, props.colors.data(),
         props.positions ? props.positions->data() : nullptr,
         props.colors.size(), props.mode.value_or(SkTileMode::kClamp),
-        props.flags.value_or(0),
-        props.localMatrix ? &props.localMatrix.value() : nullptr);
+        props.flags.value_or(0), &m3);
     ctx->shaders.push_back(shader);
   }
 };
@@ -327,17 +332,19 @@ public:
     convertProperty(runtime, object, "positions", props.positions, variables);
     convertProperty(runtime, object, "mode", props.mode, variables);
     convertProperty(runtime, object, "flags", props.flags, variables);
-    convertProperty(runtime, object, "localMatrix", props.localMatrix,
-                    variables);
+
+    convertProperty(runtime, object, "transform", props.transform, variables);
+    convertProperty(runtime, object, "origin", props.origin, variables);
+    convertProperty(runtime, object, "matrix", props.matrix, variables);
   }
 
   void pushShader(DrawingCtx *ctx) {
+    SkMatrix m3 = processTransform(props.matrix, props.transform, props.origin);
     auto shader = SkGradientShader::MakeRadial(
         props.center, props.radius, props.colors.data(),
         props.positions ? props.positions->data() : nullptr,
         props.colors.size(), props.mode.value_or(SkTileMode::kClamp),
-        props.flags.value_or(0),
-        props.localMatrix ? &props.localMatrix.value() : nullptr);
+        props.flags.value_or(0), &m3);
     ctx->shaders.push_back(shader);
   }
 };
@@ -363,18 +370,20 @@ public:
     convertProperty(runtime, object, "positions", props.positions, variables);
     convertProperty(runtime, object, "mode", props.mode, variables);
     convertProperty(runtime, object, "flags", props.flags, variables);
-    convertProperty(runtime, object, "localMatrix", props.localMatrix,
-                    variables);
+
+    convertProperty(runtime, object, "transform", props.transform, variables);
+    convertProperty(runtime, object, "origin", props.origin, variables);
+    convertProperty(runtime, object, "matrix", props.matrix, variables);
   }
 
   void pushShader(DrawingCtx *ctx) {
+    SkMatrix m3 = processTransform(props.matrix, props.transform, props.origin);
     auto shader = SkGradientShader::MakeSweep(
         props.center.x(), props.center.y(), props.colors.data(),
         props.positions ? props.positions->data() : nullptr,
         props.colors.size(), props.mode.value_or(SkTileMode::kClamp),
         props.start.value_or(0), props.end.value_or(360),
-        props.flags.value_or(0),
-        props.localMatrix ? &props.localMatrix.value() : nullptr);
+        props.flags.value_or(0), &m3);
     ctx->shaders.push_back(shader);
   }
 };
@@ -402,18 +411,20 @@ public:
     convertProperty(runtime, object, "positions", props.positions, variables);
     convertProperty(runtime, object, "mode", props.mode, variables);
     convertProperty(runtime, object, "flags", props.flags, variables);
-    convertProperty(runtime, object, "localMatrix", props.localMatrix,
-                    variables);
+
+    convertProperty(runtime, object, "transform", props.transform, variables);
+    convertProperty(runtime, object, "origin", props.origin, variables);
+    convertProperty(runtime, object, "matrix", props.matrix, variables);
   }
 
   void pushShader(DrawingCtx *ctx) {
+    SkMatrix m3 = processTransform(props.matrix, props.transform, props.origin);
     auto shader = SkGradientShader::MakeTwoPointConical(
         props.start, props.startRadius, props.end, props.endRadius,
         props.colors.data(),
         props.positions ? props.positions->data() : nullptr,
         props.colors.size(), props.mode.value_or(SkTileMode::kClamp),
-        props.flags.value_or(0),
-        props.localMatrix ? &props.localMatrix.value() : nullptr);
+        props.flags.value_or(0), &m3);
     ctx->shaders.push_back(shader);
   }
 };

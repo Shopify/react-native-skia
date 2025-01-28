@@ -10,6 +10,28 @@
 
 namespace RNSkia {
 
+// TODO: can we avoid a copy here?
+SkMatrix processTransform(std::optional<SkMatrix> &matrix,
+                          std::optional<SkM44> &transform,
+                          std::optional<SkPoint> &origin) {
+  SkMatrix m3;
+  if (matrix.has_value()) {
+    m3 = matrix.value();
+    if (origin.has_value()) {
+      m3.postTranslate(origin.value().x(), origin.value().y());
+      m3.preTranslate(-origin.value().x(), -origin.value().y());
+    }
+  } else if (transform.has_value()) {
+    auto m4 = transform.value();
+    if (origin.has_value()) {
+      m4.postTranslate(origin.value().x(), origin.value().y());
+      m4.preTranslate(-origin.value().x(), -origin.value().y());
+    }
+    m3 = m4.asM33();
+  }
+  return m3;
+}
+
 struct CTMCmdProps {
   std::optional<SkM44> transform;
   std::optional<SkPoint> origin;
@@ -43,21 +65,7 @@ public:
                   ? SkClipOp::kDifference
                   : SkClipOp::kIntersect;
     auto shouldSave = hasTransform || hasClip || layer.has_value();
-    SkMatrix m3;
-    if (matrix.has_value()) {
-      m3 = matrix.value();
-      if (origin.has_value()) {
-        m3.postTranslate(origin.value().x(), origin.value().y());
-        m3.preTranslate(-origin.value().x(), -origin.value().y());
-      }
-    } else if (transform.has_value()) {
-      auto m4 = transform.value();
-      if (origin.has_value()) {
-        m4.postTranslate(origin.value().x(), origin.value().y());
-        m4.preTranslate(-origin.value().x(), -origin.value().y());
-      }
-      m3 = m4.asM33();
-    }
+    SkMatrix m3 = processTransform(matrix, transform, origin);
     if (shouldSave) {
       if (layer.has_value()) {
         if (std::holds_alternative<bool>(layer.value())) {
