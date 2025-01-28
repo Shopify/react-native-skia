@@ -890,7 +890,7 @@ std::optional<SkColorChannel> getPropertyValue(jsi::Runtime &runtime,
 
 template <>
 std::optional<Uniforms> getPropertyValue(jsi::Runtime &runtime,
-                                               const jsi::Value &value) {
+                                         const jsi::Value &value) {
   return makeOptionalPropertyValue<Uniforms>(runtime, value);
 }
 

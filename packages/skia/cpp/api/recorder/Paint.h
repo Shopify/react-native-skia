@@ -10,32 +10,6 @@
 
 namespace RNSkia {
 
-// Generic composer type using std::function
-template <typename T>
-using Composer = std::function<sk_sp<T>(sk_sp<T>, sk_sp<T>)>;
-
-// Generic composition function
-template <typename T>
-sk_sp<T> composeEffects(const std::vector<sk_sp<T>> &effects,
-                        const Composer<T> &composer) {
-  if (effects.empty()) {
-    return nullptr;
-  }
-  if (effects.size() == 1) {
-    return effects[0];
-  }
-
-  // Use std::accumulate with reverse iterators to mimic JavaScript's
-  // reduceRight
-  return std::accumulate(
-      std::next(effects.rbegin()), // Start from second-to-last
-      effects.rend(),              // End at first
-      effects.back(),              // Initial value is last element
-      [&composer](const sk_sp<T> &inner, const sk_sp<T> &outer) {
-        return inner ? composer(outer, inner) : outer;
-      });
-}
-
 struct CTMCmdProps {
   std::optional<SkM44> transform;
   std::optional<SkPoint> origin;

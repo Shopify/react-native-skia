@@ -87,6 +87,7 @@ export const createDrawingContext = (
         )
       );
     }
+
     // Path Effects
     if (pathEffects.length > 0) {
       getCurrentPaint().setPathEffect(

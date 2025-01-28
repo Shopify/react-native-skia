@@ -1,6 +1,52 @@
 #pragma once
+
 #include <memory>
 #include <vector>
+
+namespace RNSkia {
+
+// Generic composer type using std::function
+template <typename T>
+using Composer = std::function<sk_sp<T>(sk_sp<T>, sk_sp<T>)>;
+
+// Generic composition function
+template <typename T>
+
+const Composer<T> &composer) {
+  if (effects.empty()) {
+    return nullptr;
+  }
+  if (effects.size() == 1) {
+    return effects[0];
+  }
+
+  // Use std::accumulate with reverse iterators to mimic JavaScript's
+  // reduceRight
+  return std::accumulate(
+      std::next(effects.rbegin()), // Start from second-to-last
+      effects.rend(),              // End at first
+      effects.back(),              // Initial value is last element
+      [&composer](const sk_sp<T> &inner, const sk_sp<T> &outer) {
+        return inner ? composer(outer, inner) : outer;
+      });
+}
+
+struct Composers {
+  static sk_sp<SkColorFilter> colorFilter(const sk_sp<SkColorFilter> &outer,
+                                          const sk_sp<SkColorFilter> &inner) {
+    return SkColorFilters::Compose(outer, inner);
+  }
+
+  static sk_sp<SkImageFilter> imageFilter(const sk_sp<SkImageFilter> &outer,
+                                          const sk_sp<SkImageFilter> &inner) {
+    return SkImageFilters::Compose(outer, inner);
+  }
+
+  static sk_sp<SkPathEffect> pathEffect(const sk_sp<SkPathEffect> &outer,
+                                        const sk_sp<SkPathEffect> &inner) {
+    return SkPathEffect::MakeCompose(outer, inner);
+  }
+};
 
 class DrawingCtx {
 public:
@@ -50,51 +96,35 @@ public:
 
   void materializePaint() {
     if (!colorFilters.empty()) {
-      sk_sp<SkColorFilter> result = nullptr;
-      for (auto it = colorFilters.rbegin(); it != colorFilters.rend(); ++it) {
-        if (!result)
-          result = *it;
-        else
-          result = SkColorFilters::Compose(*it, result);
-      }
-      getPaint().setColorFilter(result);
+      getPaint().setColorFilter(
+          composeEffects<SkColorFilter>(colorFilters, Composers::colorFilter));
     }
 
     if (!shaders.empty()) {
       getPaint().setShader(shaders.back());
     }
+
     if (!maskFilters.empty()) {
       getPaint().setMaskFilter(maskFilters.back());
     }
 
     if (!imageFilters.empty()) {
-      sk_sp<SkImageFilter> result = nullptr;
-      for (auto it = imageFilters.rbegin(); it != imageFilters.rend(); ++it) {
-        if (!result) {
-          result = *it;
-        } else {
-          result = SkImageFilters::Compose(*it, result);
-        }
-      }
-      getPaint().setImageFilter(result);
+      getPaint().setImageFilter(
+          composeEffects<SkImageFilter>(imageFilters, Composers::imageFilter));
     }
 
+    // Handle path effects
     if (!pathEffects.empty()) {
-      sk_sp<SkPathEffect> result = nullptr;
-      for (auto it = pathEffects.rbegin(); it != pathEffects.rend(); ++it) {
-        if (!result) {
-          result = *it;
-        } else {
-          result = SkPathEffect::MakeCompose(*it, result);
-        }
-      }
-      getPaint().setPathEffect(result);
+      getPaint().setPathEffect(
+          composeEffects<SkPathEffect>(pathEffects, Composers::pathEffect));
     }
 
+    // Clear all vectors
     colorFilters.clear();
     shaders.clear();
     imageFilters.clear();
     pathEffects.clear();
+    maskFilters.clear();
   }
 
   SkCanvas *canvas;
@@ -109,3 +139,5 @@ public:
 private:
   size_t nextPaintIndex = 0;
 };
+
+} // namespace RNSkia
