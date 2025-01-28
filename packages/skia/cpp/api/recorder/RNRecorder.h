@@ -310,7 +310,9 @@ public:
       }
 
       case CommandType::RestorePaintDeclaration: {
-        ctx->restorePaintDeclaration();
+        ctx->materializePaint();
+        auto paint = ctx->restorePaint();
+        ctx->paintDeclarations.push_back(paint);
         break;
       }
 
@@ -320,7 +322,11 @@ public:
       }
 
       case CommandType::SaveLayer: {
-        ctx->saveLayer();
+        ctx->materializePaint();
+        auto paint = ctx->paintDeclarations.back();
+        ctx->paintDeclarations.pop_back();
+        ctx->canvas->saveLayer(
+            SkCanvas::SaveLayerRec(nullptr, &paint, nullptr, 0));
         break;
       }
 

@@ -64,30 +64,40 @@ public:
     nextPaintIndex++;
   }
 
-  //  void saveBackdropFilter() {
-  //    SkImageFilter *imageFilter = nullptr;
-  //    if (!imageFilters.empty()) {
-  //      imageFilter = imageFilters.back();
-  //      imageFilters.pop_back();
-  //    } else if (!colorFilters.empty()) {
-  //      auto cf = colorFilters.back();
-  //      colorFilters.pop_back();
-  //      imageFilter = skia->ImageFilter_MakeColorFilter(cf, nullptr);
-  //    }
-  //    canvas->saveLayer(nullptr, nullptr, imageFilter);
-  //    canvas->restore();
-  //  }
+  void saveBackdropFilter() {
+    // Initialize image filter as nullptr
+    sk_sp<SkImageFilter> imageFilter = nullptr;
+
+    // Try to get image filter first
+    if (!imageFilters.empty()) {
+      imageFilter = imageFilters.back();
+      imageFilters.pop_back();
+    } else if (!colorFilters.empty()) {
+      // If no image filter, try to create one from color filter
+      auto colorFilter = colorFilters.back();
+      colorFilters.pop_back();
+      imageFilter = SkImageFilters::ColorFilter(colorFilter, nullptr);
+    }
+
+    // Save layer with the image filter
+    SkPaint layerPaint;
+    if (imageFilter) {
+      layerPaint.setImageFilter(imageFilter);
+    }
+    canvas->saveLayer(nullptr, &layerPaint);
+    canvas->restore();
+  }
 
   SkPaint &getPaint() { return paints.back(); }
   const SkPaint &getPaint() const { return paints.back(); }
 
-  SkPaint &&restorePaint() {
+  SkPaint restorePaint() {
     if (paints.empty()) {
       throw std::runtime_error("No paint available");
     }
-    auto &&paint = std::move(paints.back());
+    auto paint = paints.back();
     paints.pop_back();
-    return std::move(paint);
+    return paint;
   }
 
   std::vector<sk_sp<SkShader>> popAllShaders() {
@@ -178,7 +188,7 @@ public:
   std::vector<sk_sp<SkShader>> shaders;
   std::vector<sk_sp<SkImageFilter>> imageFilters;
   std::vector<sk_sp<SkPathEffect>> pathEffects;
-  // std::vector<SkPaint *> paintDeclarations;
+  std::vector<SkPaint> paintDeclarations;
 
 private:
   size_t nextPaintIndex = 0;
