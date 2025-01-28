@@ -56,18 +56,14 @@ public:
     SkPaint paint;
     paint.setAntiAlias(true);
     paints.push_back(paint);
-    nextPaintIndex++;
   }
 
   void pushPaint(SkPaint &paint) {
-
     paints.push_back(paint);
-    nextPaintIndex++;
   }
 
   void savePaint() {
     paints.push_back(SkPaint(getPaint()));
-    nextPaintIndex++;
   }
 
   void saveBackdropFilter() {
@@ -196,9 +192,6 @@ public:
   std::vector<sk_sp<SkImageFilter>> imageFilters;
   std::vector<sk_sp<SkPathEffect>> pathEffects;
   std::vector<SkPaint> paintDeclarations;
-
-private:
-  size_t nextPaintIndex = 0;
 };
 
 } // namespace RNSkia

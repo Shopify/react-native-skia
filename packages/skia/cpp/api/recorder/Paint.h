@@ -106,6 +106,7 @@ struct PaintCmdProps {
   std::optional<float> opacity;
   std::optional<bool> antiAlias;
   std::optional<bool> dither;
+  std::optional<SkPaint> paint;
 };
 
 class SavePaintCmd : public Command {
@@ -128,9 +129,14 @@ public:
     convertProperty(runtime, object, "opacity", props.opacity, variables);
     convertProperty(runtime, object, "antiAlias", props.antiAlias, variables);
     convertProperty(runtime, object, "dither", props.dither, variables);
+    convertProperty(runtime, object, "paint", props.paint, variables);
   }
 
   void savePaint(DrawingCtx *ctx) {
+    if (props.paint.has_value()) {
+      ctx->pushPaint(props.paint.value());
+      return;
+    }
     ctx->savePaint();
     auto &paint = ctx->getPaint();
     if (props.opacity.has_value()) {

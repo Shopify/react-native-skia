@@ -402,6 +402,18 @@ sk_sp<SkPicture> getPropertyValue(jsi::Runtime &runtime,
 }
 
 template <>
+SkPaint getPropertyValue(jsi::Runtime &runtime,
+                                  const jsi::Value &value) {
+  if (value.isObject()) {
+    auto paint = value.asObject(runtime)
+                       .asHostObject<JsiSkPaint>(runtime)
+                       ->getObject();
+    return SkPaint(*paint);
+  }
+  throw std::runtime_error("Invalid prop value for SkPaint received");
+}
+
+template <>
 para::Paragraph *getPropertyValue(jsi::Runtime &runtime,
                                   const jsi::Value &value) {
   if (value.isObject()) {
@@ -1165,6 +1177,12 @@ template <>
 std::optional<SkRRect> getPropertyValue(jsi::Runtime &runtime,
                                         const jsi::Value &value) {
   return makeOptionalPropertyValue<SkRRect>(runtime, value);
+}
+
+template <>
+std::optional<SkPaint> getPropertyValue(jsi::Runtime &runtime,
+                                        const jsi::Value &value) {
+  return makeOptionalPropertyValue<SkPaint>(runtime, value);
 }
 
 template <>
