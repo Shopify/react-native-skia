@@ -7,6 +7,7 @@
 #include "Command.h"
 #include "Convertor.h"
 #include "DrawingCtx.h"
+#include "Paint.h"
 
 namespace RNSkia {
 
@@ -36,35 +37,10 @@ public:
   }
 };
 
-struct OffsetImageFilterProps {};
-
-class OffsetImageFilterCmd : public Command {
-private:
-  OffsetImageFilterProps props;
-
-public:
-  OffsetImageFilterCmd(jsi::Runtime &runtime, const jsi::Object &object,
-                       Variables &variables)
-      : Command(CommandType::PushImageFilter, "skOffsetImageFilter") {}
-
-  void pushImageFilter(DrawingCtx *ctx) {}
+struct BlurImageFilterProps {
+  SkPoint blur;
+  SkTileMode mode;
 };
-
-struct DisplacementMapImageFilterProps {};
-
-class DisplacementMapImageFilterCmd : public Command {
-private:
-  DisplacementMapImageFilterProps props;
-
-public:
-  DisplacementMapImageFilterCmd(jsi::Runtime &runtime,
-                                const jsi::Object &object, Variables &variables)
-      : Command(CommandType::PushImageFilter, "skDisplacementMapImageFilter") {}
-
-  void pushImageFilter(DrawingCtx *ctx) {}
-};
-
-struct BlurImageFilterProps {};
 
 class BlurImageFilterCmd : public Command {
 private:
@@ -73,26 +49,145 @@ private:
 public:
   BlurImageFilterCmd(jsi::Runtime &runtime, const jsi::Object &object,
                      Variables &variables)
-      : Command(CommandType::PushImageFilter, "skBlurImageFilter") {}
+      : Command(CommandType::PushImageFilter, "skBlurImageFilter") {
+    convertProperty(runtime, object, "blur", props.blur, variables);
+    convertProperty(runtime, object, "mode", props.mode, variables);
+  }
 
-  void pushImageFilter(DrawingCtx *ctx) {}
+  void pushImageFilter(DrawingCtx *ctx) {
+    auto imgf = SkImageFilters::Blur(props.blur.x(), props.blur.y(), props.mode,
+                                     nullptr);
+    ctx->imageFilters.push_back(imgf);
+  }
 };
 
-struct DropShadowImageFilterProps {};
+struct OffsetImageFilterProps {
+  float x;
+  float y;
+};
+
+class OffsetImageFilterCmd : public Command {
+private:
+  OffsetImageFilterProps props;
+
+public:
+  OffsetImageFilterCmd(jsi::Runtime &runtime, const jsi::Object &object,
+                       Variables &variables)
+      : Command(CommandType::PushImageFilter, "skOffsetImageFilter") {
+    convertProperty(runtime, object, "x", props.x, variables);
+    convertProperty(runtime, object, "y", props.y, variables);
+  }
+
+  void pushImageFilter(DrawingCtx *ctx) {
+    auto imgf = SkImageFilters::Offset(props.x, props.y, nullptr);
+    ctx->imageFilters.push_back(imgf);
+  }
+};
+
+struct DisplacementMapImageFilterProps {
+  SkColorChannel channelX;
+  SkColorChannel channelY;
+  float scale;
+};
+
+class DisplacementMapImageFilterCmd : public Command {
+private:
+  DisplacementMapImageFilterProps props;
+
+public:
+  DisplacementMapImageFilterCmd(jsi::Runtime &runtime,
+                                const jsi::Object &object, Variables &variables)
+      : Command(CommandType::PushImageFilter, "skDisplacementMapImageFilter") {
+    convertProperty(runtime, object, "channelX", props.channelX, variables);
+    convertProperty(runtime, object, "channelY", props.channelY, variables);
+    convertProperty(runtime, object, "scale", props.scale, variables);
+  }
+
+  void pushImageFilter(DrawingCtx *ctx) {
+    auto shader = ctx->shaders.back();
+    ctx->shaders.pop_back();
+    auto map = SkImageFilters::Shader(shader, nullptr);
+    auto imgf = SkImageFilters::DisplacementMap(props.channelX, props.channelY,
+                                                props.scale, map, nullptr);
+    ctx->imageFilters.push_back(imgf);
+  }
+};
+
+struct DropShadowImageFilterProps {
+  float dx;
+  float dy;
+  float blur;
+  SkColor color;
+  std::optional<bool> inner;
+  std::optional<bool> shadowOnly;
+};
 
 class DropShadowImageFilterCmd : public Command {
 private:
   DropShadowImageFilterProps props;
 
+  sk_sp<SkImageFilter> MakeInnerShadow(bool shadowOnly, float dx, float dy,
+                                       float sigmaX, float sigmaY,
+                                       SkColor color,
+                                       sk_sp<SkImageFilter> input) {
+    auto sourceGraphic = SkImageFilters::ColorFilter(
+        SkColorFilters::Blend(SK_ColorBLACK, SkBlendMode::kDst), nullptr);
+
+    auto sourceAlpha = SkImageFilters::ColorFilter(
+        SkColorFilters::Blend(SK_ColorBLACK, SkBlendMode::kSrcIn), nullptr);
+
+    auto f1 = SkImageFilters::ColorFilter(
+        SkColorFilters::Blend(color, SkBlendMode::kSrcOut), nullptr);
+
+    auto f2 = SkImageFilters::Offset(dx, dy, f1);
+    auto f3 = SkImageFilters::Blur(sigmaX, sigmaY, SkTileMode::kDecal, f2);
+    auto f4 = SkImageFilters::Blend(SkBlendMode::kSrcIn, sourceAlpha, f3);
+
+    if (shadowOnly) {
+      return f4;
+    }
+
+    return SkImageFilters::Compose(
+        input, SkImageFilters::Blend(SkBlendMode::kSrcOver, sourceGraphic, f4));
+  }
+
 public:
   DropShadowImageFilterCmd(jsi::Runtime &runtime, const jsi::Object &object,
                            Variables &variables)
-      : Command(CommandType::PushImageFilter, "skDropShadowImageFilter") {}
+      : Command(CommandType::PushImageFilter, "skDropShadowImageFilter") {
+    convertProperty(runtime, object, "dx", props.dx, variables);
+    convertProperty(runtime, object, "dy", props.dy, variables);
+    convertProperty(runtime, object, "blur", props.blur, variables);
+    convertProperty(runtime, object, "color", props.color, variables);
+    convertProperty(runtime, object, "inner", props.inner, variables);
+    convertProperty(runtime, object, "shadowOnly", props.shadowOnly, variables);
+  }
 
-  void pushImageFilter(DrawingCtx *ctx) {}
+  void pushImageFilter(DrawingCtx *ctx) {
+    auto shadowOnly = props.shadowOnly.value_or(false);
+    auto inner = props.inner.value_or(false);
+
+    sk_sp<SkImageFilter> imgf;
+    if (inner) {
+      imgf = MakeInnerShadow(shadowOnly, props.dx, props.dy, props.blur,
+                             props.blur, props.color, nullptr);
+    } else {
+      if (shadowOnly) {
+        imgf = SkImageFilters::DropShadowOnly(props.dx, props.dy, props.blur,
+                                              props.blur, props.color, nullptr);
+      } else {
+        imgf = SkImageFilters::DropShadow(props.dx, props.dy, props.blur,
+                                          props.blur, props.color, nullptr);
+      }
+    }
+    ctx->imageFilters.push_back(imgf);
+  }
 };
 
-struct MorphologyImageFilterProps {};
+struct MorphologyImageFilterProps {
+  std::string op; // "erode" or "dilate"
+  SkPoint radius;
+};
 
 class MorphologyImageFilterCmd : public Command {
 private:
@@ -101,12 +196,27 @@ private:
 public:
   MorphologyImageFilterCmd(jsi::Runtime &runtime, const jsi::Object &object,
                            Variables &variables)
-      : Command(CommandType::PushImageFilter, "skMorphologyImageFilter") {}
+      : Command(CommandType::PushImageFilter, "skMorphologyImageFilter") {
+    convertProperty(runtime, object, "operator", props.op, variables);
+    convertProperty(runtime, object, "radius", props.radius, variables);
+  }
 
-  void pushImageFilter(DrawingCtx *ctx) {}
+  void pushImageFilter(DrawingCtx *ctx) {
+    if (props.op == "erode") {
+      auto imgf =
+          SkImageFilters::Erode(props.radius.x(), props.radius.y(), nullptr);
+      ctx->imageFilters.push_back(imgf);
+    } else {
+      auto imgf =
+          SkImageFilters::Dilate(props.radius.x(), props.radius.y(), nullptr);
+      ctx->imageFilters.push_back(imgf);
+    }
+  }
 };
 
-struct BlendImageFilterProps {};
+struct BlendImageFilterProps {
+  SkBlendMode mode;
+};
 
 class BlendImageFilterCmd : public Command {
 private:
@@ -115,12 +225,34 @@ private:
 public:
   BlendImageFilterCmd(jsi::Runtime &runtime, const jsi::Object &object,
                       Variables &variables)
-      : Command(CommandType::PushImageFilter, "skBlendImageFilter") {}
+      : Command(CommandType::PushImageFilter, "skBlendImageFilter") {
+    convertProperty(runtime, object, "mode", props.mode, variables);
+  }
 
-  void pushImageFilter(DrawingCtx *ctx) {}
+  void pushImageFilter(DrawingCtx *ctx) {
+    // Get all filters
+    auto filters = std::move(ctx->imageFilters);
+    ctx->imageFilters.clear();
+
+    // Create composer function
+    auto composer = [this](sk_sp<SkImageFilter> outer,
+                           sk_sp<SkImageFilter> inner) {
+      return SkImageFilters::Blend(props.mode, outer, inner);
+    };
+
+    // Compose filters
+    auto composedFilter = composeEffects<SkImageFilter>(filters, composer);
+
+    if (composedFilter) {
+      ctx->imageFilters.push_back(composedFilter);
+    }
+  }
 };
 
-struct RuntimeShaderImageFilterProps {};
+struct RuntimeShaderImageFilterProps {
+  sk_sp<SkRuntimeEffect> source;
+  std::optional<Uniforms> uniforms;
+};
 
 class RuntimeShaderImageFilterCmd : public Command {
 private:
@@ -129,9 +261,25 @@ private:
 public:
   RuntimeShaderImageFilterCmd(jsi::Runtime &runtime, const jsi::Object &object,
                               Variables &variables)
-      : Command(CommandType::PushImageFilter, "skRuntimeShaderImageFilter") {}
+      : Command(CommandType::PushImageFilter, "skRuntimeShaderImageFilter") {
+    convertProperty(runtime, object, "source", props.source, variables);
+    convertProperty(runtime, object, "uniforms", props.uniforms, variables);
+  }
 
-  void pushImageFilter(DrawingCtx *ctx) {}
+  void pushImageFilter(DrawingCtx *ctx) {
+    //    auto builder = std::make_unique<SkRuntimeShaderBuilder>(props.source);
+    //
+    //    if (props.uniforms.has_value()) {
+    //      // Process uniforms similar to shader implementation
+    //      for (const auto& [name, data] : props.uniforms.value()) {
+    //        auto uniformData = SkData::MakeWithCopy(data.data(), data.size() *
+    //        sizeof(float)); builder->uniform(name.c_str()).set(uniformData);
+    //      }
+    //    }
+    //
+    //    auto imgf = SkImageFilters::RuntimeShader(std::move(builder), nullptr,
+    //    nullptr); ctx->imageFilters.push_back(imgf);
+  }
 };
 
 } // namespace RNSkia

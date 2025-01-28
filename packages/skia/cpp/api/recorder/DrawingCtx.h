@@ -69,18 +69,17 @@ public:
       getPaint().setMaskFilter(maskFilters.back());
     }
 
-    //      if (!imageFilters.empty()) {
-    //        SkImageFilter *result = nullptr;
-    //        for (auto it = imageFilters.rbegin(); it != imageFilters.rend();
-    //        ++it)
-    //        {
-    //          if (!result)
-    //            result = *it;
-    //          else
-    //            result = skia->ImageFilter_MakeCompose(*it, result);
-    //        }
-    //        getPaint()->setImageFilter(result);
-    //      }
+    if (!imageFilters.empty()) {
+      sk_sp<SkImageFilter> result = nullptr;
+      for (auto it = imageFilters.rbegin(); it != imageFilters.rend(); ++it) {
+        if (!result) {
+          result = *it;
+        } else {
+          result = SkImageFilters::Compose(*it, result);
+        }
+      }
+      getPaint().setImageFilter(result);
+    }
 
     if (!pathEffects.empty()) {
       sk_sp<SkPathEffect> result = nullptr;
