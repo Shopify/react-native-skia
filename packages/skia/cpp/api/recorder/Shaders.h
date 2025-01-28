@@ -366,4 +366,40 @@ public:
   }
 };
 
+struct BlendShaderProps {
+  SkBlendMode mode;
+};
+
+class BlendShaderCmd : public Command {
+private:
+  BlendShaderProps props;
+
+public:
+  BlendShaderCmd(jsi::Runtime &runtime, const jsi::Object &object,
+                 Variables &variables)
+      : Command(CommandType::PushShader, "skBlendShader") {
+    convertProperty(runtime, object, "mode", props.mode, variables);
+  }
+
+  void pushShader(DrawingCtx *ctx) {
+    // Get all existing shaders from the context
+    std::vector<sk_sp<SkShader>> shaders = ctx->popAllShaders();
+    
+    // We need at least 2 shaders to blend
+    if (shaders.size() >= 2) {
+      sk_sp<SkShader> blendedShader = shaders[0];
+      
+      // Iteratively blend shaders together
+      for (size_t i = 1; i < shaders.size(); i++) {
+        blendedShader = SkShaders::Blend(props.mode, blendedShader, shaders[i]);
+      }
+      
+      ctx->shaders.push_back(blendedShader);
+    } else if (shaders.size() == 1) {
+      // If only one shader, just push it back
+      ctx->shaders.push_back(shaders[0]);
+    }
+  }
+};
+
 } // namespace RNSkia

@@ -62,6 +62,9 @@ public:
     } else if (nodeType == "skTwoPointConicalGradient") {
       commands.push_back(std::make_unique<TwoPointConicalGradientCmd>(
           runtime, props, variables));
+        // TODO: should receive skBlendShader here
+    } else if (nodeType == "skBlend") {
+      commands.push_back(std::make_unique<BlendShaderCmd>(runtime, props, variables));
     }
   }
 
@@ -372,6 +375,12 @@ public:
           auto *twoPointConicalGradientCmd =
               static_cast<TwoPointConicalGradientCmd *>(cmd.get());
           twoPointConicalGradientCmd->pushShader(ctx);
+        } else if (nodeType == "skBlendShader") {
+          auto *blendShaderCmd =
+              static_cast<BlendShaderCmd *>(cmd.get());
+          blendShaderCmd->pushShader(ctx);
+        } else {
+            throw std::runtime_error("Invalid shader type: " + nodeType);
         }
         break;
       }
@@ -403,6 +412,8 @@ public:
           auto *runtimeShaderCmd =
               static_cast<RuntimeShaderImageFilterCmd *>(cmd.get());
           runtimeShaderCmd->pushImageFilter(ctx);
+        } else {
+          throw std::runtime_error("Invalid image filter type: " + nodeType);
         }
         break;
       }
@@ -430,7 +441,9 @@ public:
         } else if (nodeType == "skLine2DPathEffect") {
           auto *line2DCmd = static_cast<Line2DPathEffectCmd *>(cmd.get());
           line2DCmd->pushPathEffect(ctx);
-        }
+        } else {
+            throw std::runtime_error("Invalid path effect type: " + nodeType);
+          }
         break;
       }
 
@@ -456,6 +469,8 @@ public:
         } else if (nodeType == "skLerpColorFilter") {
           auto *lerpCmd = static_cast<LerpColorFilterCmd *>(cmd.get());
           lerpCmd->pushColorFilter(ctx);
+        } else {
+            throw std::runtime_error("Invalid color filter type: " + nodeType);
         }
         break;
       }
