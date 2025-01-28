@@ -217,6 +217,22 @@ SkColorChannel getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
 }
 
 template <>
+SkVertices::VertexMode getPropertyValue(jsi::Runtime &runtime,
+                                        const jsi::Value &val) {
+  if (val.isString()) {
+    auto value = val.asString(runtime).utf8(runtime);
+    if (value == "triangles") {
+      return SkVertices::VertexMode::kTriangles_VertexMode;
+    } else if (value == "triangleStrip") {
+      return SkVertices::VertexMode::kTriangleStrip_VertexMode;
+    } else if (value == "triangleFan") {
+      return SkVertices::VertexMode::kTriangleFan_VertexMode;
+    }
+  }
+  throw std::runtime_error("Invalid value for VertexMode received");
+}
+
+template <>
 SkM44 getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isObject()) {
     auto object = value.asObject(runtime);
@@ -358,14 +374,13 @@ SkFont getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   throw std::runtime_error("Invalid prop value for SkFont received");
 }
 
-
 template <>
 sk_sp<SkPicture> getPropertyValue(jsi::Runtime &runtime,
-                                        const jsi::Value &value) {
+                                  const jsi::Value &value) {
   if (value.isObject()) {
     auto picture = value.asObject(runtime)
-                      .asHostObject<JsiSkPicture>(runtime)
-                      ->getObject();
+                       .asHostObject<JsiSkPicture>(runtime)
+                       ->getObject();
     return picture;
   }
   throw std::runtime_error("Invalid prop value for SkTextBlob received");
@@ -373,11 +388,11 @@ sk_sp<SkPicture> getPropertyValue(jsi::Runtime &runtime,
 
 template <>
 sk_sp<SkTextBlob> getPropertyValue(jsi::Runtime &runtime,
-                                        const jsi::Value &value) {
+                                   const jsi::Value &value) {
   if (value.isObject()) {
     auto blob = value.asObject(runtime)
-                      .asHostObject<JsiSkTextBlob>(runtime)
-                      ->getObject();
+                    .asHostObject<JsiSkTextBlob>(runtime)
+                    ->getObject();
     return blob;
   }
   throw std::runtime_error("Invalid prop value for SkTextBlob received");
