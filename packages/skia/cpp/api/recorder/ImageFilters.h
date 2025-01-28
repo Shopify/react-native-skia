@@ -7,7 +7,6 @@
 #include "Command.h"
 #include "Convertor.h"
 #include "DrawingCtx.h"
-#include "Paint.h"
 
 namespace RNSkia {
 

@@ -140,6 +140,21 @@ public:
     }
   }
 
+  void composePathEffect() {
+    commands.push_back(
+        std::make_unique<Command>(CommandType::ComposePathEffect));
+  }
+
+  void composeImageFilter() {
+    commands.push_back(
+        std::make_unique<Command>(CommandType::ComposeImageFilter));
+  }
+
+  void composeColorFilter() {
+    commands.push_back(
+        std::make_unique<Command>(CommandType::ComposeColorFilter));
+  }
+
   void pushBlurMaskFilter(jsi::Runtime &runtime, const jsi::Object &props) {
     commands.push_back(
         std::make_unique<BlurMaskFilterCmd>(runtime, props, variables));
@@ -255,6 +270,20 @@ public:
   void play(DrawingCtx *ctx) {
     for (const auto &cmd : commands) {
       switch (cmd->type) {
+      case CommandType::ComposeColorFilter: {
+        ctx->composeColorFilter();
+        break;
+      }
+
+      case CommandType::ComposeImageFilter: {
+        ctx->composeImageFilter();
+        break;
+      }
+
+      case CommandType::ComposePathEffect: {
+        ctx->composePathEffect();
+        break;
+      }
 
       case CommandType::MaterializePaint: {
         ctx->materializePaint();

@@ -11,15 +11,17 @@ using Composer = std::function<sk_sp<T>(sk_sp<T>, sk_sp<T>)>;
 
 // Generic composition function
 template <typename T>
-
-const Composer<T> &composer) {
+using Composer = std::function<sk_sp<T>(sk_sp<T>, sk_sp<T>)>;
+// Generic composition function
+template <typename T>
+sk_sp<T> composeEffects(const std::vector<sk_sp<T>> &effects,
+                        const Composer<T> &composer) {
   if (effects.empty()) {
     return nullptr;
   }
   if (effects.size() == 1) {
     return effects[0];
   }
-
   // Use std::accumulate with reverse iterators to mimic JavaScript's
   // reduceRight
   return std::accumulate(
@@ -92,6 +94,48 @@ public:
     auto result = std::move(shaders);
     shaders.clear();
     return result;
+  }
+
+  void composeImageFilter() {
+    if (imageFilters.size() >= 2) {
+      auto second = imageFilters.back();
+      imageFilters.pop_back();
+      auto first = imageFilters.back();
+      imageFilters.pop_back();
+
+      auto imgf = SkImageFilters::Compose(first, second);
+      imageFilters.push_back(imgf);
+    } else {
+      throw std::runtime_error("Not enough image filters to compose");
+    }
+  }
+
+  void composePathEffect() {
+    if (pathEffects.size() >= 2) {
+      auto second = pathEffects.back();
+      pathEffects.pop_back();
+      auto first = pathEffects.back();
+      pathEffects.pop_back();
+
+      auto pe = SkPathEffect::MakeCompose(first, second);
+      pathEffects.push_back(pe);
+    } else {
+      throw std::runtime_error("Not enough path effects to compose");
+    }
+  }
+
+  void composeColorFilter() {
+    if (colorFilters.size() >= 2) {
+      auto second = colorFilters.back();
+      colorFilters.pop_back();
+      auto first = colorFilters.back();
+      colorFilters.pop_back();
+
+      auto cf = SkColorFilters::Compose(first, second);
+      colorFilters.push_back(cf);
+    } else {
+      throw std::runtime_error("Not enough color filters to compose");
+    }
   }
 
   void materializePaint() {

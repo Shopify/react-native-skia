@@ -126,17 +126,17 @@ public:
   }
 
   JSI_HOST_FUNCTION(composePathEffect) {
-    // getObject()->composePathEffect();
+    getObject()->composePathEffect();
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(composeColorFilter) {
-    // getObject()->composeColorFilter();
+    getObject()->composeColorFilter();
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(composeImageFilter) {
-    // getObject()->composeImageFilter();
+    getObject()->composeImageFilter();
     return jsi::Value::undefined();
   }
 
