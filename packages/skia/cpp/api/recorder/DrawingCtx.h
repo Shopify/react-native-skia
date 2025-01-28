@@ -98,12 +98,12 @@ public:
 
   void composeImageFilter() {
     if (imageFilters.size() >= 2) {
-      auto second = imageFilters.back();
+      auto outer = imageFilters.back();
       imageFilters.pop_back();
-      auto first = imageFilters.back();
+      auto inner = imageFilters.back();
       imageFilters.pop_back();
 
-      auto imgf = SkImageFilters::Compose(first, second);
+      auto imgf = SkImageFilters::Compose(outer, inner);
       imageFilters.push_back(imgf);
     } else {
       throw std::runtime_error("Not enough image filters to compose");
@@ -112,12 +112,12 @@ public:
 
   void composePathEffect() {
     if (pathEffects.size() >= 2) {
-      auto second = pathEffects.back();
+      auto outer = pathEffects.back();
       pathEffects.pop_back();
-      auto first = pathEffects.back();
+      auto inner = pathEffects.back();
       pathEffects.pop_back();
 
-      auto pe = SkPathEffect::MakeCompose(first, second);
+      auto pe = SkPathEffect::MakeCompose(outer, inner);
       pathEffects.push_back(pe);
     } else {
       throw std::runtime_error("Not enough path effects to compose");
@@ -126,12 +126,12 @@ public:
 
   void composeColorFilter() {
     if (colorFilters.size() >= 2) {
-      auto second = colorFilters.back();
+      auto outer = colorFilters.back();
       colorFilters.pop_back();
-      auto first = colorFilters.back();
+      auto inner = colorFilters.back();
       colorFilters.pop_back();
 
-      auto cf = SkColorFilters::Compose(first, second);
+      auto cf = SkColorFilters::Compose(outer, inner);
       colorFilters.push_back(cf);
     } else {
       throw std::runtime_error("Not enough color filters to compose");
