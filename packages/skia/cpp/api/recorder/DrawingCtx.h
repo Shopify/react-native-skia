@@ -114,8 +114,6 @@ public:
 
       auto imgf = SkImageFilters::Compose(outer, inner);
       imageFilters.push_back(imgf);
-    } else {
-      throw std::runtime_error("Not enough image filters to compose");
     }
   }
 
@@ -128,8 +126,6 @@ public:
 
       auto pe = SkPathEffect::MakeCompose(outer, inner);
       pathEffects.push_back(pe);
-    } else {
-      throw std::runtime_error("Not enough path effects to compose");
     }
   }
 
@@ -142,8 +138,6 @@ public:
 
       auto cf = SkColorFilters::Compose(outer, inner);
       colorFilters.push_back(cf);
-    } else {
-      throw std::runtime_error("Not enough color filters to compose");
     }
   }
 
