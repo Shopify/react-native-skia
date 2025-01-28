@@ -38,41 +38,51 @@ public:
     auto uniforms = props.uniforms;
     auto m3 = processTransform(props.matrix, props.transform, props.origin);
 
-    sk_sp<SkData> uniformsData;
     // Calculate total size needed for uniforms
     size_t uniformSize = source->uniformSize();
-    auto uniformsPtr = SkData::MakeUninitialized(uniformSize);
+    auto uniformsData = SkData::MakeUninitialized(uniformSize);
+    auto uniformDataPtr = static_cast<float*>(uniformsData->writable_data());
 
-    // Iterate through uniforms in the effect
-    const auto &sourceUniforms = source->uniforms();
-    for (const auto &uniform : sourceUniforms) {
+    // Loop through all uniforms in the effect
+    const auto &u = source->uniforms();
+    for (std::size_t i = 0; i < u.size(); i++) {
+      auto it = source->uniforms().begin() + i;
+      RuntimeEffectUniform reu = JsiSkRuntimeEffect::fromUniform(*it);
+      
       // Find the corresponding uniform value in our props
-      auto it = uniforms.find(std::string(uniform.name));
-      if (it == uniforms.end()) {
-        throw std::runtime_error("Missing uniform value for: " +
-                                 std::string(uniform.name));
+      auto uniformIt = uniforms.find(std::string(it->name));
+      if (uniformIt == uniforms.end()) {
+        throw std::runtime_error("Missing uniform value for: " + 
+                               std::string(it->name));
       }
 
-      // Calculate the size of this uniform (rows * columns)
-      size_t uniformValueSize = uniform.sizeInBytes() / sizeof(float);
-      auto size = it->second.size();
-      //      auto uniformCount = uniform.count;
-      //      auto sizeInBytes = uniform.sizeInBytes();
-      if (size != uniformValueSize) {
-        throw std::runtime_error("Incorrect uniform size for: " +
-                                 std::string(uniform.name));
+      const auto& uniformValues = uniformIt->second;
+      size_t expectedSize = reu.columns * reu.rows;
+      if (uniformValues.size() != expectedSize) {
+        throw std::runtime_error("Incorrect uniform size for: " + 
+                               std::string(it->name) + ". Expected " + 
+                               std::to_string(expectedSize) + " got " + 
+                               std::to_string(uniformValues.size()));
       }
 
-      // Copy the uniform data to the correct offset
-      memcpy(static_cast<float *>(uniformsPtr->writable_data()) +
-                 uniform.offset / sizeof(float),
-             it->second.data(), uniform.sizeInBytes());
+      // Process each element in the uniform (handling matrices and vectors)
+      for (std::size_t j = 0; j < expectedSize; ++j) {
+        const std::size_t offset = reu.slot + j;
+        float fValue = uniformValues[j];
+        
+        // Handle integer uniforms by converting to float bits
+        if (reu.isInteger) {
+          int iValue = static_cast<int>(fValue);
+          uniformDataPtr[offset] = SkBits2Float(iValue);
+        } else {
+          uniformDataPtr[offset] = fValue;
+        }
+      }
     }
-    uniformsData = std::move(uniformsPtr);
 
     std::vector<sk_sp<SkShader>> children = ctx->popAllShaders();
     auto shader = source->makeShader(std::move(uniformsData), children.data(),
-                                     children.size(), &m3);
+                                   children.size(), &m3);
 
     ctx->shaders.push_back(shader);
   }
