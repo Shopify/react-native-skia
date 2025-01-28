@@ -1160,6 +1160,18 @@ std::optional<Uniforms> getPropertyValue(jsi::Runtime &runtime,
 }
 
 template <>
+std::optional<Radius> getPropertyValue(jsi::Runtime &runtime,
+                                         const jsi::Value &value) {
+  return makeOptionalPropertyValue<Radius>(runtime, value);
+}
+
+template <>
+std::optional<SkRRect> getPropertyValue(jsi::Runtime &runtime,
+                                         const jsi::Value &value) {
+  return makeOptionalPropertyValue<SkRRect>(runtime, value);
+}
+
+template <>
 std::optional<std::vector<SkPoint>> getPropertyValue(jsi::Runtime &runtime,
                                                      const jsi::Value &value) {
   return makeOptionalPropertyValue<std::vector<SkPoint>>(runtime, value);

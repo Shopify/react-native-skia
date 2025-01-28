@@ -428,7 +428,7 @@ public:
 };
 
 struct RRectCmdProps {
-  SkRRect rect;
+  std::optional<SkRRect> rect;
   float x = 0;
   float y = 0;
   std::optional<float> width;
@@ -453,15 +453,15 @@ public:
   }
 
   void draw(DrawingCtx *ctx) {
-    auto [x, y, width, height, rect, r] = props;
+    auto [rect, x, y, width, height, r] = props;
     if (rect.has_value()) {
       ctx->canvas->drawRRect(rect.value(), ctx->getPaint());
     } else {
       if (!width.has_value() || !height.has_value() || !r.has_value()) {
-        throw std::runtime_error("Invalid properties for rounded rect")
+          throw std::runtime_error("Invalid properties for rounded rect");
       }
       auto rct =
-          SkRRect::Make(SkRect::MakeXYWH(x, y, width.value(), height.value()),
+          SkRRect::MakeRectXY(SkRect::MakeXYWH(x, y, width.value(), height.value()),
                         r.value().rX, r.value().rY);
       ctx->canvas->drawRRect(rct, ctx->getPaint());
     }
@@ -469,7 +469,7 @@ public:
 };
 
 struct OvalCmdProps {
-  SkRect rect;
+  std::optional<SkRect> rect;
   float x = 0;
   float y = 0;
   std::optional<float> width;
@@ -492,10 +492,13 @@ public:
   }
 
   void draw(DrawingCtx *ctx) {
-    auto [x, y, width, height, rect] = props;
+    auto [rect, x, y, width, height] = props;
     if (rect.has_value()) {
       ctx->canvas->drawOval(rect.value(), ctx->getPaint());
     } else {
+        if (!width.has_value() || !height.has_value()) {
+            throw std::runtime_error("Invalid properties received for Oval");
+        }
       auto rct = SkRect::MakeXYWH(x, y, width.value(), height.value());
       ctx->canvas->drawOval(rct, ctx->getPaint());
     }
