@@ -492,117 +492,124 @@ public:
         ctx->canvas->restore();
         break;
       }
+      default: {
+        // Handle all drawing commands
+        auto currentPaints = ctx->paintDeclarations;
+        currentPaints.push_back(ctx->getPaint()); // Add current paint
+        ctx->paintDeclarations.clear();
 
-      case CommandType::DrawCircle: {
-        auto *circleCmd = static_cast<CircleCmd *>(cmd.get());
-        circleCmd->draw(ctx);
-        break;
-      }
+        for (auto &paint : currentPaints) {
+          ctx->pushPaint(paint);
 
-      case CommandType::DrawPath: {
-        auto *pathCmd = static_cast<PathCmd *>(cmd.get());
-        pathCmd->draw(ctx);
-        break;
-      }
+          switch (cmd->type) {
+          case CommandType::DrawPaint: {
+            ctx->canvas->drawPaint(paint);
+            break;
+          }
+          case CommandType::DrawCircle: {
+            auto *circleCmd = static_cast<CircleCmd *>(cmd.get());
+            circleCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawPath: {
+            auto *pathCmd = static_cast<PathCmd *>(cmd.get());
+            pathCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawRect: {
+            auto *rectCmd = static_cast<RectCmd *>(cmd.get());
+            rectCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawLine: {
+            auto *lineCmd = static_cast<LineCmd *>(cmd.get());
+            lineCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawTextPath: {
+            auto *textPathCmd = static_cast<TextPathCmd *>(cmd.get());
+            textPathCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawText: {
+            auto *textCmd = static_cast<TextCmd *>(cmd.get());
+            textCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawBox: {
+            auto *boxCmd = static_cast<BoxCmd *>(cmd.get());
+            boxCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawImage: {
+            auto *imageCmd = static_cast<ImageCmd *>(cmd.get());
+            imageCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawPoints: {
+            auto *pointsCmd = static_cast<PointsCmd *>(cmd.get());
+            pointsCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawRRect: {
+            auto *rRectCmd = static_cast<RRectCmd *>(cmd.get());
+            rRectCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawOval: {
+            auto *ovalCmd = static_cast<OvalCmd *>(cmd.get());
+            ovalCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawPatch: {
+            auto *patchCmd = static_cast<PatchCmd *>(cmd.get());
+            patchCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawVertices: {
+            auto *verticesCmd = static_cast<VerticesCmd *>(cmd.get());
+            verticesCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawDiffRect: {
+            auto *diffRectCmd = static_cast<DiffRectCmd *>(cmd.get());
+            diffRectCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawTextBlob: {
+            auto *textBlobCmd = static_cast<TextBlobCmd *>(cmd.get());
+            textBlobCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawGlyphs: {
+            auto *glyphsCmd = static_cast<GlyphsCmd *>(cmd.get());
+            glyphsCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawPicture: {
+            auto *pictureCmd = static_cast<PictureCmd *>(cmd.get());
+            pictureCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawImageSVG: {
+            auto *imageSVGCmd = static_cast<ImageSVGCmd *>(cmd.get());
+            imageSVGCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawParagraph: {
+            auto *paragraphCmd = static_cast<ParagraphCmd *>(cmd.get());
+            paragraphCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawAtlas: {
+            auto *atlasCmd = static_cast<AtlasCmd *>(cmd.get());
+            atlasCmd->draw(ctx);
+            break;
+          }
+          }
 
-      case CommandType::DrawRect: {
-        auto *rectCmd = static_cast<RectCmd *>(cmd.get());
-        rectCmd->draw(ctx);
-        break;
-      }
-
-      case CommandType::DrawLine: {
-        auto *lineCmd = static_cast<LineCmd *>(cmd.get());
-        lineCmd->draw(ctx);
-        break;
-      }
-
-      case CommandType::DrawTextPath: {
-        auto *textPathCmd = static_cast<TextPathCmd *>(cmd.get());
-        textPathCmd->draw(ctx);
-        break;
-      }
-      case CommandType::DrawBox: {
-        auto *boxCmd = static_cast<BoxCmd *>(cmd.get());
-        boxCmd->draw(ctx);
-        break;
-      }
-
-      case CommandType::DrawImage: {
-        auto *imageCmd = static_cast<ImageCmd *>(cmd.get());
-        imageCmd->draw(ctx);
-        break;
-      }
-
-      case CommandType::DrawPoints: {
-        auto *pointsCmd = static_cast<PointsCmd *>(cmd.get());
-        pointsCmd->draw(ctx);
-        break;
-      }
-
-      case CommandType::DrawRRect: {
-        auto *rRectCmd = static_cast<RRectCmd *>(cmd.get());
-        rRectCmd->draw(ctx);
-        break;
-      }
-
-      case CommandType::DrawOval: {
-        auto *ovalCmd = static_cast<OvalCmd *>(cmd.get());
-        ovalCmd->draw(ctx);
-        break;
-      }
-
-      case CommandType::DrawPatch: {
-        auto *patchCmd = static_cast<PatchCmd *>(cmd.get());
-        patchCmd->draw(ctx);
-        break;
-      }
-
-      case CommandType::DrawVertices: {
-        auto *verticesCmd = static_cast<VerticesCmd *>(cmd.get());
-        verticesCmd->draw(ctx);
-        break;
-      }
-
-      case CommandType::DrawDiffRect: {
-        auto *diffRectCmd = static_cast<DiffRectCmd *>(cmd.get());
-        diffRectCmd->draw(ctx);
-        break;
-      }
-
-      case CommandType::DrawTextBlob: {
-        auto *textBlobCmd = static_cast<TextBlobCmd *>(cmd.get());
-        textBlobCmd->draw(ctx);
-        break;
-      }
-
-      case CommandType::DrawGlyphs: {
-        auto *glyphsCmd = static_cast<GlyphsCmd *>(cmd.get());
-        glyphsCmd->draw(ctx);
-        break;
-      }
-
-      case CommandType::DrawPicture: {
-        auto *pictureCmd = static_cast<PictureCmd *>(cmd.get());
-        pictureCmd->draw(ctx);
-        break;
-      }
-
-      case CommandType::DrawImageSVG: {
-        auto *imageSVGCmd = static_cast<ImageSVGCmd *>(cmd.get());
-        imageSVGCmd->draw(ctx);
-        break;
-      }
-
-      case CommandType::DrawParagraph: {
-        auto *paragraphCmd = static_cast<ParagraphCmd *>(cmd.get());
-        paragraphCmd->draw(ctx);
-        break;
-      }
-
-      case CommandType::DrawAtlas: {
-        auto *atlasCmd = static_cast<AtlasCmd *>(cmd.get());
-        atlasCmd->draw(ctx);
+          ctx->restorePaint();
+        }
         break;
       }
       }

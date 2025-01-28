@@ -59,6 +59,12 @@ public:
     nextPaintIndex++;
   }
 
+  void pushPaint(SkPaint &paint) {
+
+    paints.push_back(paint);
+    nextPaintIndex++;
+  }
+
   void savePaint() {
     paints.push_back(SkPaint(getPaint()));
     nextPaintIndex++;
@@ -84,7 +90,8 @@ public:
     if (imageFilter) {
       layerPaint.setImageFilter(imageFilter);
     }
-    canvas->saveLayer(SkCanvas::SaveLayerRec(nullptr, nullptr, imageFilter.get(), 0));
+    canvas->saveLayer(
+        SkCanvas::SaveLayerRec(nullptr, nullptr, imageFilter.get(), 0));
     canvas->restore();
   }
 
