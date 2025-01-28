@@ -1,6 +1,8 @@
 import Rea from "../external/reanimated/ReanimatedProxy";
 import type { Skia, SkCanvas } from "../skia/types";
 import { HAS_REANIMATED_3 } from "../external/reanimated/renderHelpers";
+import type { JsiRecorder } from "../skia/types/Recorder";
+import { Platform } from "../Platform";
 
 import type { Node } from "./Node";
 import type { Recording } from "./Recorder/Recorder";
@@ -8,6 +10,7 @@ import { Recorder } from "./Recorder/Recorder";
 import { visit } from "./Recorder/Visitor";
 import { replay } from "./Recorder/Player";
 import { createDrawingContext } from "./Recorder/DrawingContext";
+import { ReanimatedRecorder } from "./Recorder/ReanimatedRecorder";
 
 const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   "worklet";
@@ -21,6 +24,26 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   const picture = rec.finishRecordingAsPicture();
   //const end = performance.now();
   //console.log("Recording time: ", end - start);
+  SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
+  rec.dispose();
+  picture.dispose();
+};
+
+const nativeDrawOnscreen = (
+  Skia: Skia,
+  nativeId: number,
+  recorder: JsiRecorder
+) => {
+  "worklet";
+
+  const rec = Skia.PictureRecorder();
+  const canvas = rec.beginRecording();
+  const start = performance.now();
+
+  recorder.play(canvas);
+  const picture = rec.finishRecordingAsPicture();
+  const end = performance.now();
+  console.log("Recording time: ", end - start);
   SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
   rec.dispose();
   picture.dispose();
@@ -41,7 +64,6 @@ export abstract class Container {
       this.recording.paintPool,
       canvas
     );
-    //console.log(this.recording.commands);
     replay(ctx, this.recording.commands);
   }
 
@@ -101,8 +123,45 @@ class ReanimatedContainer extends Container {
   }
 }
 
+class NativeReanimatedContainer extends Container {
+  private mapperId: number | null = null;
+
+  constructor(Skia: Skia, nativeId: number) {
+    super(Skia, nativeId);
+  }
+
+  redraw() {
+    if (this.mapperId !== null) {
+      Rea.stopMapper(this.mapperId);
+    }
+    const { nativeId, Skia } = this;
+    const recorder = new ReanimatedRecorder(Skia);
+    visit(recorder, this.root);
+    const sharedValues = recorder.getSharedValues();
+    const sharedRecorder = recorder.getRecorder();
+    if (sharedValues.length > 0) {
+      this.mapperId = Rea.startMapper(() => {
+        "worklet";
+        sharedRecorder.applyUpdates(sharedValues);
+        nativeDrawOnscreen(Skia, nativeId, sharedRecorder);
+      }, sharedValues);
+    }
+    Rea.runOnUI(() => {
+      "worklet";
+      nativeDrawOnscreen(Skia, nativeId, sharedRecorder);
+    })();
+  }
+}
+
 export const createContainer = (Skia: Skia, nativeId: number) => {
-  return HAS_REANIMATED_3 && nativeId !== -1
-    ? new ReanimatedContainer(Skia, nativeId)
-    : new StaticContainer(Skia, nativeId);
+  const native = Platform.OS !== "web";
+  if (HAS_REANIMATED_3 && nativeId !== -1) {
+    if (native) {
+      return new NativeReanimatedContainer(Skia, nativeId);
+    } else {
+      return new ReanimatedContainer(Skia, nativeId);
+    }
+  } else {
+    return new StaticContainer(Skia, nativeId);
+  }
 };

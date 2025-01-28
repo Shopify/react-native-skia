@@ -5,10 +5,9 @@ import type {
   BoxShadowProps,
 } from "../../dom/types";
 import { NodeType } from "../../dom/types";
+import type { BaseRecorder } from "../../skia/types/Recorder";
 import type { Node } from "../Node";
 import { isImageFilter, isShader, sortNodeChildren } from "../Node";
-
-import type { Recorder } from "./Recorder";
 
 export const processPaint = ({
   opacity,
@@ -117,7 +116,10 @@ const processCTM = ({
   return null;
 };
 
-const pushColorFilters = (recorder: Recorder, colorFilters: Node<any>[]) => {
+const pushColorFilters = (
+  recorder: BaseRecorder,
+  colorFilters: Node<any>[]
+) => {
   colorFilters.forEach((colorFilter) => {
     if (colorFilter.children.length > 0) {
       pushColorFilters(recorder, colorFilter.children);
@@ -132,7 +134,7 @@ const pushColorFilters = (recorder: Recorder, colorFilters: Node<any>[]) => {
   });
 };
 
-const pushPathEffects = (recorder: Recorder, pathEffects: Node<any>[]) => {
+const pushPathEffects = (recorder: BaseRecorder, pathEffects: Node<any>[]) => {
   pathEffects.forEach((pathEffect) => {
     if (pathEffect.children.length > 0) {
       pushPathEffects(recorder, pathEffect.children);
@@ -147,7 +149,10 @@ const pushPathEffects = (recorder: Recorder, pathEffects: Node<any>[]) => {
   });
 };
 
-const pushImageFilters = (recorder: Recorder, imageFilters: Node<any>[]) => {
+const pushImageFilters = (
+  recorder: BaseRecorder,
+  imageFilters: Node<any>[]
+) => {
   imageFilters.forEach((imageFilter) => {
     if (imageFilter.children.length > 0) {
       pushImageFilters(recorder, imageFilter.children);
@@ -166,7 +171,7 @@ const pushImageFilters = (recorder: Recorder, imageFilters: Node<any>[]) => {
   });
 };
 
-const pushShaders = (recorder: Recorder, shaders: Node<any>[]) => {
+const pushShaders = (recorder: BaseRecorder, shaders: Node<any>[]) => {
   shaders.forEach((shader) => {
     if (shader.children.length > 0) {
       pushShaders(recorder, shader.children);
@@ -175,13 +180,13 @@ const pushShaders = (recorder: Recorder, shaders: Node<any>[]) => {
   });
 };
 
-const pushMaskFilters = (recorder: Recorder, maskFilters: Node<any>[]) => {
+const pushMaskFilters = (recorder: BaseRecorder, maskFilters: Node<any>[]) => {
   if (maskFilters.length > 0) {
     recorder.pushBlurMaskFilter(maskFilters[maskFilters.length - 1].props);
   }
 };
 
-const pushPaints = (recorder: Recorder, paints: Node<any>[]) => {
+const pushPaints = (recorder: BaseRecorder, paints: Node<any>[]) => {
   paints.forEach((paint) => {
     recorder.savePaint(paint.props);
     const { colorFilters, maskFilters, shaders, imageFilters, pathEffects } =
@@ -195,7 +200,7 @@ const pushPaints = (recorder: Recorder, paints: Node<any>[]) => {
   });
 };
 
-const visitNode = (recorder: Recorder, node: Node<any>) => {
+const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
   if (node.type === NodeType.Group) {
     recorder.saveGroup();
   }
@@ -252,10 +257,10 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
       recorder.drawPaint();
       break;
     case NodeType.Image:
-      recorder.drawImage(node.props);
+      recorder.drawImage(props);
       break;
     case NodeType.Circle:
-      recorder.drawCircle(node.props);
+      recorder.drawCircle(props);
       break;
     case NodeType.Points:
       recorder.drawPoints(props);
@@ -323,7 +328,7 @@ const visitNode = (recorder: Recorder, node: Node<any>) => {
   }
 };
 
-export const visit = (recorder: Recorder, root: Node[]) => {
+export const visit = (recorder: BaseRecorder, root: Node[]) => {
   root.forEach((node) => {
     visitNode(recorder, node);
   });

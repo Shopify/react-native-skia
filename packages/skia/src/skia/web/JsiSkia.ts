@@ -132,4 +132,7 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   Context: (_surface: bigint, _width: number, _height: number) => {
     throw new Error("Not implemented on React Native Web");
   },
+  Recorder: () => {
+    throw new Error("Not implemented on React Native Web");
+  },
 });

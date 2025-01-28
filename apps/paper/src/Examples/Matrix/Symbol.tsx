@@ -1,12 +1,11 @@
 import React, { useRef } from "react";
 import type { SkFont } from "@shopify/react-native-skia";
-import { interpolateColors, vec, Glyphs } from "@shopify/react-native-skia";
+import { interpolateColors, Text } from "@shopify/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
 import { useDerivedValue } from "react-native-reanimated";
 
-export const COLS = 8;
-export const ROWS = 15;
-const pos = vec(0, 0);
+export const COLS = 16;
+export const ROWS = 32;
 
 interface SymbolProps {
   i: number;
@@ -14,7 +13,7 @@ interface SymbolProps {
   timestamp: SharedValue<number>;
   stream: number[];
   font: SkFont;
-  symbols: number[];
+  symbols: string[];
   symbol: { width: number; height: number };
 }
 
@@ -32,9 +31,9 @@ export const Symbol = ({
   const x = i * symbol.width;
   const y = j * symbol.height;
 
-  const glyphs = useDerivedValue(() => {
+  const text = useDerivedValue(() => {
     const idx = offset.current + Math.floor(timestamp.value / range.current);
-    return [{ id: symbols[idx % symbols.length], pos }];
+    return symbols[idx % symbols.length];
   }, [timestamp]);
 
   const opacity = useDerivedValue(() => {
@@ -53,13 +52,6 @@ export const Symbol = ({
   );
 
   return (
-    <Glyphs
-      x={x + symbol.width / 4}
-      y={y + symbol.height}
-      font={font}
-      glyphs={glyphs}
-      opacity={opacity}
-      color={color}
-    />
+    <Text x={x} y={y} font={font} text={text} opacity={opacity} color={color} />
   );
 };
