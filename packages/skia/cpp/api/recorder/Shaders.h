@@ -387,11 +387,12 @@ public:
     
     // We need at least 2 shaders to blend
     if (shaders.size() >= 2) {
-      sk_sp<SkShader> blendedShader = shaders[0];
+      // Start from the last shader and blend backwards
+      sk_sp<SkShader> blendedShader = shaders.back();
       
-      // Iteratively blend shaders together
-      for (size_t i = 1; i < shaders.size(); i++) {
-        blendedShader = SkShaders::Blend(props.mode, blendedShader, shaders[i]);
+      // Iterate from second-to-last to first shader
+      for (int i = shaders.size() - 2; i >= 0; i--) {
+        blendedShader = SkShaders::Blend(props.mode, shaders[i], blendedShader);
       }
       
       ctx->shaders.push_back(blendedShader);
