@@ -394,9 +394,10 @@ public:
         auto rects = RNSkiaImage::fitRects(fit, src, dst);
         ctx->canvas->drawImageRect(img, rects.src, rects.dst, sampling,
                                    &(ctx->getPaint()),
-                                            SkCanvas::kStrict_SrcRectConstraint);
+                                   SkCanvas::kStrict_SrcRectConstraint);
       } else {
-          throw std::runtime_error("Image node could not resolve image dimension props.");
+        throw std::runtime_error(
+            "Image node could not resolve image dimension props.");
       }
     }
   }

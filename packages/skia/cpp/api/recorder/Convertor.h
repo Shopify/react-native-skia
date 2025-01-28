@@ -99,6 +99,14 @@ float getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
+int getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isNumber()) {
+    return static_cast<int>(value.asNumber());
+  }
+  throw std::runtime_error("Invalid int prop value received");
+}
+
+template <>
 std::string getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isString()) {
     return value.asString(runtime).utf8(runtime);
@@ -114,6 +122,75 @@ SkPoint getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
     return SkPoint::Make(x, y);
   }
   throw std::runtime_error("Invalid prop value for SkPoint received");
+}
+
+template <>
+SkColor getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isNumber()) {
+    return static_cast<SkColor>(value.asNumber());
+  } else if (value.isString()) {
+    auto text = value.asString(runtime).utf8(runtime);
+    auto color = CSSColorParser::parse(text);
+    if (color.a == -1.0f) {
+      return SK_ColorBLACK;
+    }
+    return SkColorSetARGB(color.a * 255, color.r, color.g, color.b);
+  } else if (value.isObject()) {
+    const auto &object = value.asObject(runtime);
+    if (object.isArray(runtime)) {
+      auto array = object.asArray(runtime);
+      auto r = array.getValueAtIndex(runtime, 0).asNumber();
+      auto g = array.getValueAtIndex(runtime, 1).asNumber();
+      auto b = array.getValueAtIndex(runtime, 2).asNumber();
+      auto a = array.getValueAtIndex(runtime, 3).asNumber();
+      return SkColorSetARGB(a * 255, r * 255, g * 255, b * 255);
+    }
+    jsi::ArrayBuffer buffer =
+        object
+            .getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
+            .asObject(runtime)
+            .getArrayBuffer(runtime);
+    auto bfrPtr = reinterpret_cast<float *>(buffer.data(runtime));
+    if (bfrPtr[0] > 1 || bfrPtr[1] > 1 || bfrPtr[2] > 1 || bfrPtr[3] > 1) {
+      return SK_ColorBLACK;
+    }
+    return SkColorSetARGB(bfrPtr[3] * 255, bfrPtr[0] * 255, bfrPtr[1] * 255,
+                          bfrPtr[2] * 255);
+  }
+  throw std::runtime_error("Invalid prop value for SkColor received");
+}
+
+template <>
+std::vector<SkColor> getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+    std::vector<SkColor> result;
+    if (value.isObject() && value.asObject(runtime).isArray(runtime)) {
+        auto array = value.asObject(runtime).asArray(runtime);
+        size_t size = array.size(runtime);
+        result.reserve(size);
+        
+        for (size_t i = 0; i < size; i++) {
+            result.push_back(getPropertyValue<SkColor>(runtime,
+                array.getValueAtIndex(runtime, i)));
+        }
+    }
+    return result;
+}
+
+template <>
+SkTileMode getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
+    if (val.isString()) {
+        auto value = val.asString(runtime).utf8(runtime);
+        if (value == "clamp") {
+            return SkTileMode::kClamp;
+        } else if (value == "repeat") {
+            return SkTileMode::kRepeat;
+        } else if (value == "mirror") {
+            return SkTileMode::kMirror;
+        } else if (value == "decal") {
+            return SkTileMode::kDecal;
+        }
+    }
+    throw std::runtime_error("Invalid value for SkTileMode received");
 }
 
 template <>
@@ -342,24 +419,6 @@ SkPaint::Cap getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
 }
 
 template <>
-SkTileMode getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
-  if (val.isString()) {
-    auto value = val.asString(runtime).utf8(runtime);
-    if (value == "clamp") {
-      return SkTileMode::kClamp;
-    } else if (value == "repeat") {
-      return SkTileMode::kRepeat;
-    } else if (value == "mirror") {
-      return SkTileMode::kMirror;
-    } else if (value == "decal") {
-      return SkTileMode::kDecal;
-    }
-  }
-
-  throw std::runtime_error("Invalid prop value for SkBlendMode received");
-}
-
-template <>
 SkPath1DPathEffect::Style getPropertyValue(jsi::Runtime &runtime,
                                            const jsi::Value &val) {
   if (val.isString()) {
@@ -440,42 +499,6 @@ SkBlendMode getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
     }
   }
   throw std::runtime_error("Invalid prop value for SkBlendMode received");
-}
-
-template <>
-SkColor getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
-  if (value.isNumber()) {
-    return static_cast<SkColor>(value.asNumber());
-  } else if (value.isString()) {
-    auto text = value.asString(runtime).utf8(runtime);
-    auto color = CSSColorParser::parse(text);
-    if (color.a == -1.0f) {
-      return SK_ColorBLACK;
-    }
-    return SkColorSetARGB(color.a * 255, color.r, color.g, color.b);
-  } else if (value.isObject()) {
-    const auto &object = value.asObject(runtime);
-    if (object.isArray(runtime)) {
-      auto array = object.asArray(runtime);
-      auto r = array.getValueAtIndex(runtime, 0).asNumber();
-      auto g = array.getValueAtIndex(runtime, 1).asNumber();
-      auto b = array.getValueAtIndex(runtime, 2).asNumber();
-      auto a = array.getValueAtIndex(runtime, 3).asNumber();
-      return SkColorSetARGB(a * 255, r * 255, g * 255, b * 255);
-    }
-    jsi::ArrayBuffer buffer =
-        object
-            .getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
-            .asObject(runtime)
-            .getArrayBuffer(runtime);
-    auto bfrPtr = reinterpret_cast<float *>(buffer.data(runtime));
-    if (bfrPtr[0] > 1 || bfrPtr[1] > 1 || bfrPtr[2] > 1 || bfrPtr[3] > 1) {
-      return SK_ColorBLACK;
-    }
-    return SkColorSetARGB(bfrPtr[3] * 255, bfrPtr[0] * 255, bfrPtr[1] * 255,
-                          bfrPtr[2] * 255);
-  }
-  throw std::runtime_error("Invalid prop value for SkColor received");
 }
 
 using ClipDef = std::variant<SkPath, SkRRect, SkRect, std::string>;
@@ -815,6 +838,24 @@ template <>
 std::optional<StrokeOpts> getPropertyValue(jsi::Runtime &runtime,
                                            const jsi::Value &value) {
   return makeOptionalPropertyValue<StrokeOpts>(runtime, value);
+}
+
+template <>
+std::optional<std::vector<SkColor>> getPropertyValue(jsi::Runtime &runtime,
+                                                    const jsi::Value &value) {
+    return makeOptionalPropertyValue<std::vector<SkColor>>(runtime, value);
+}
+
+template <>
+std::optional<std::vector<float>> getPropertyValue(jsi::Runtime &runtime,
+                                          const jsi::Value &value) {
+    return makeOptionalPropertyValue<std::vector<float>>(runtime, value);
+}
+
+template <>
+std::optional<SkTileMode> getPropertyValue(jsi::Runtime &runtime,
+                                          const jsi::Value &value) {
+    return makeOptionalPropertyValue<SkTileMode>(runtime, value);
 }
 
 } // namespace RNSkia

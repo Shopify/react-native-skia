@@ -159,9 +159,17 @@ public:
   }
 };
 
-// Add to Shaders.h
+struct GradientProps {
+  std::vector<SkColor> colors;
+  std::optional<std::vector<float>> positions;
+  std::optional<SkTileMode> mode;
+  std::optional<uint32_t> flags;
+  std::optional<SkMatrix> localMatrix;
+};
 
-struct ColorShaderProps {};
+struct ColorShaderProps {
+  SkColor color;
+};
 
 class ColorShaderCmd : public Command {
 private:
@@ -170,12 +178,24 @@ private:
 public:
   ColorShaderCmd(jsi::Runtime &runtime, const jsi::Object &object,
                  Variables &variables)
-      : Command(CommandType::PushShader, "skColorShader") {}
+      : Command(CommandType::PushShader, "skColorShader") {
+    convertProperty(runtime, object, "color", props.color, variables);
+  }
 
-  void pushShader(DrawingCtx *ctx) {}
+  void pushShader(DrawingCtx *ctx) {
+    auto shader = SkShaders::Color(props.color);
+    ctx->shaders.push_back(shader);
+  }
 };
 
-struct TurbulenceProps {};
+struct TurbulenceProps {
+  float freqX;
+  float freqY;
+  int octaves;
+  float seed;
+  float tileWidth;
+  float tileHeight;
+};
 
 class TurbulenceCmd : public Command {
 private:
@@ -184,12 +204,31 @@ private:
 public:
   TurbulenceCmd(jsi::Runtime &runtime, const jsi::Object &object,
                 Variables &variables)
-      : Command(CommandType::PushShader, "skTurbulence") {}
+      : Command(CommandType::PushShader, "skTurbulence") {
+    convertProperty(runtime, object, "freqX", props.freqX, variables);
+    convertProperty(runtime, object, "freqY", props.freqY, variables);
+    convertProperty(runtime, object, "octaves", props.octaves, variables);
+    convertProperty(runtime, object, "seed", props.seed, variables);
+    convertProperty(runtime, object, "tileWidth", props.tileWidth, variables);
+    convertProperty(runtime, object, "tileHeight", props.tileHeight, variables);
+  }
 
-  void pushShader(DrawingCtx *ctx) {}
+  void pushShader(DrawingCtx *ctx) {
+    auto size = SkISize::Make(props.tileWidth, props.tileHeight);
+    auto shader = SkShaders::MakeTurbulence(props.freqX, props.freqY,
+                                            props.octaves, props.seed, &size);
+    ctx->shaders.push_back(shader);
+  }
 };
 
-struct FractalNoiseProps {};
+struct FractalNoiseProps {
+  float freqX;
+  float freqY;
+  int octaves;
+  float seed;
+  float tileWidth;
+  float tileHeight;
+};
 
 class FractalNoiseCmd : public Command {
 private:
@@ -198,12 +237,27 @@ private:
 public:
   FractalNoiseCmd(jsi::Runtime &runtime, const jsi::Object &object,
                   Variables &variables)
-      : Command(CommandType::PushShader, "skFractalNoise") {}
+      : Command(CommandType::PushShader, "skFractalNoise") {
+    convertProperty(runtime, object, "freqX", props.freqX, variables);
+    convertProperty(runtime, object, "freqY", props.freqY, variables);
+    convertProperty(runtime, object, "octaves", props.octaves, variables);
+    convertProperty(runtime, object, "seed", props.seed, variables);
+    convertProperty(runtime, object, "tileWidth", props.tileWidth, variables);
+    convertProperty(runtime, object, "tileHeight", props.tileHeight, variables);
+  }
 
-  void pushShader(DrawingCtx *ctx) {}
+  void pushShader(DrawingCtx *ctx) {
+    auto size = SkISize::Make(props.tileWidth, props.tileHeight);
+    auto shader = SkShaders::MakeFractalNoise(props.freqX, props.freqY,
+                                              props.octaves, props.seed, &size);
+    ctx->shaders.push_back(shader);
+  }
 };
 
-struct LinearGradientProps {};
+struct LinearGradientProps : GradientProps {
+  SkPoint start;
+  SkPoint end;
+};
 
 class LinearGradientCmd : public Command {
 private:
@@ -212,12 +266,33 @@ private:
 public:
   LinearGradientCmd(jsi::Runtime &runtime, const jsi::Object &object,
                     Variables &variables)
-      : Command(CommandType::PushShader, "skLinearGradient") {}
+      : Command(CommandType::PushShader, "skLinearGradient") {
+    convertProperty(runtime, object, "start", props.start, variables);
+    convertProperty(runtime, object, "end", props.end, variables);
+    convertProperty(runtime, object, "colors", props.colors, variables);
+    convertProperty(runtime, object, "positions", props.positions, variables);
+    convertProperty(runtime, object, "mode", props.mode, variables);
+    convertProperty(runtime, object, "flags", props.flags, variables);
+    convertProperty(runtime, object, "localMatrix", props.localMatrix,
+                    variables);
+  }
 
-  void pushShader(DrawingCtx *ctx) {}
+  void pushShader(DrawingCtx *ctx) {
+    const SkPoint pts[2] = {props.start, props.end};
+    auto shader = SkGradientShader::MakeLinear(
+        pts, props.colors.data(),
+        props.positions ? props.positions->data() : nullptr,
+        props.colors.size(), props.mode.value_or(SkTileMode::kClamp),
+        props.flags.value_or(0),
+        props.localMatrix ? &props.localMatrix.value() : nullptr);
+    ctx->shaders.push_back(shader);
+  }
 };
 
-struct RadialGradientProps {};
+struct RadialGradientProps : GradientProps {
+  SkPoint center;
+  float radius;
+};
 
 class RadialGradientCmd : public Command {
 private:
@@ -226,12 +301,33 @@ private:
 public:
   RadialGradientCmd(jsi::Runtime &runtime, const jsi::Object &object,
                     Variables &variables)
-      : Command(CommandType::PushShader, "skRadialGradient") {}
+      : Command(CommandType::PushShader, "skRadialGradient") {
+    convertProperty(runtime, object, "c", props.center, variables);
+    convertProperty(runtime, object, "r", props.radius, variables);
+    convertProperty(runtime, object, "colors", props.colors, variables);
+    convertProperty(runtime, object, "positions", props.positions, variables);
+    convertProperty(runtime, object, "mode", props.mode, variables);
+    convertProperty(runtime, object, "flags", props.flags, variables);
+    convertProperty(runtime, object, "localMatrix", props.localMatrix,
+                    variables);
+  }
 
-  void pushShader(DrawingCtx *ctx) {}
+  void pushShader(DrawingCtx *ctx) {
+    auto shader = SkGradientShader::MakeRadial(
+        props.center, props.radius, props.colors.data(),
+        props.positions ? props.positions->data() : nullptr,
+        props.colors.size(), props.mode.value_or(SkTileMode::kClamp),
+        props.flags.value_or(0),
+        props.localMatrix ? &props.localMatrix.value() : nullptr);
+    ctx->shaders.push_back(shader);
+  }
 };
 
-struct SweepGradientProps {};
+struct SweepGradientProps : GradientProps {
+  SkPoint center;
+  std::optional<float> start;
+  std::optional<float> end;
+};
 
 class SweepGradientCmd : public Command {
 private:
@@ -240,12 +336,36 @@ private:
 public:
   SweepGradientCmd(jsi::Runtime &runtime, const jsi::Object &object,
                    Variables &variables)
-      : Command(CommandType::PushShader, "skSweepGradient") {}
+      : Command(CommandType::PushShader, "skSweepGradient") {
+    convertProperty(runtime, object, "c", props.center, variables);
+    convertProperty(runtime, object, "start", props.start, variables);
+    convertProperty(runtime, object, "end", props.end, variables);
+    convertProperty(runtime, object, "colors", props.colors, variables);
+    convertProperty(runtime, object, "positions", props.positions, variables);
+    convertProperty(runtime, object, "mode", props.mode, variables);
+    convertProperty(runtime, object, "flags", props.flags, variables);
+    convertProperty(runtime, object, "localMatrix", props.localMatrix,
+                    variables);
+  }
 
-  void pushShader(DrawingCtx *ctx) {}
+  void pushShader(DrawingCtx *ctx) {
+    auto shader = SkGradientShader::MakeSweep(
+        props.center.x(), props.center.y(), props.colors.data(),
+        props.positions ? props.positions->data() : nullptr,
+        props.colors.size(), props.mode.value_or(SkTileMode::kClamp),
+        props.start.value_or(0), props.end.value_or(360),
+        props.flags.value_or(0),
+        props.localMatrix ? &props.localMatrix.value() : nullptr);
+    ctx->shaders.push_back(shader);
+  }
 };
 
-struct TwoPointConicalGradientProps {};
+struct TwoPointConicalGradientProps : GradientProps {
+  SkPoint start;
+  float startRadius;
+  SkPoint end;
+  float endRadius;
+};
 
 class TwoPointConicalGradientCmd : public Command {
 private:
@@ -254,9 +374,29 @@ private:
 public:
   TwoPointConicalGradientCmd(jsi::Runtime &runtime, const jsi::Object &object,
                              Variables &variables)
-      : Command(CommandType::PushShader, "skTwoPointConicalGradient") {}
+      : Command(CommandType::PushShader, "skTwoPointConicalGradient") {
+    convertProperty(runtime, object, "start", props.start, variables);
+    convertProperty(runtime, object, "startR", props.startRadius, variables);
+    convertProperty(runtime, object, "end", props.end, variables);
+    convertProperty(runtime, object, "endR", props.endRadius, variables);
+    convertProperty(runtime, object, "colors", props.colors, variables);
+    convertProperty(runtime, object, "positions", props.positions, variables);
+    convertProperty(runtime, object, "mode", props.mode, variables);
+    convertProperty(runtime, object, "flags", props.flags, variables);
+    convertProperty(runtime, object, "localMatrix", props.localMatrix,
+                    variables);
+  }
 
-  void pushShader(DrawingCtx *ctx) {}
+  void pushShader(DrawingCtx *ctx) {
+    auto shader = SkGradientShader::MakeTwoPointConical(
+        props.start, props.startRadius, props.end, props.endRadius,
+        props.colors.data(),
+        props.positions ? props.positions->data() : nullptr,
+        props.colors.size(), props.mode.value_or(SkTileMode::kClamp),
+        props.flags.value_or(0),
+        props.localMatrix ? &props.localMatrix.value() : nullptr);
+    ctx->shaders.push_back(shader);
+  }
 };
 
 } // namespace RNSkia
