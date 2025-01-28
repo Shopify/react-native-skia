@@ -266,18 +266,30 @@ public:
   }
 
   void pushImageFilter(DrawingCtx *ctx) {
-    //    auto builder = std::make_unique<SkRuntimeShaderBuilder>(props.source);
-    //
-    //    if (props.uniforms.has_value()) {
-    //      // Process uniforms similar to shader implementation
-    //      for (const auto& [name, data] : props.uniforms.value()) {
-    //        auto uniformData = SkData::MakeWithCopy(data.data(), data.size() *
-    //        sizeof(float)); builder->uniform(name.c_str()).set(uniformData);
-    //      }
-    //    }
-    //
-    //    auto imgf = SkImageFilters::RuntimeShader(std::move(builder), nullptr,
-    //    nullptr); ctx->imageFilters.push_back(imgf);
+    if (props.source) {
+      // Create the runtime shader builder
+      SkRuntimeShaderBuilder builder(props.source);
+
+      // Process uniforms if present
+      if (props.uniforms.has_value()) {
+        const auto &uniforms = props.uniforms.value();
+        for (const auto &[name, data] : uniforms) {
+          auto uniform = builder.uniform(name.c_str());
+          uniform.set(data.data(), data.size());
+        }
+      }
+
+      // Get the input filter (if any)
+      sk_sp<SkImageFilter> input = nullptr;
+      if (!ctx->imageFilters.empty()) {
+        input = ctx->imageFilters.back();
+        ctx->imageFilters.pop_back();
+      }
+
+      // Create and push the runtime shader image filter
+      auto imgf = SkImageFilters::RuntimeShader(builder, "", input);
+      ctx->imageFilters.push_back(imgf);
+    }
   }
 };
 
