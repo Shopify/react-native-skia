@@ -75,21 +75,21 @@ public:
       auto c = clip.value();
       if (std::holds_alternative<SkPath>(c)) {
         auto path = std::get<SkPath>(c);
-        ctx->canvas->clipPath(path);
+        ctx->canvas->clipPath(path, op);
       } else if (std::holds_alternative<std::string>(c)) {
         auto pathString = std::get<std::string>(c);
         SkPath result;
         if (SkParsePath::FromSVGString(pathString.c_str(), &result)) {
-          ctx->canvas->clipPath(result);
+          ctx->canvas->clipPath(result, op);
         } else {
           throw std::runtime_error("Could not parse path from string.");
         }
       } else if (std::holds_alternative<SkRect>(c)) {
         auto rect = std::get<SkRect>(c);
-        ctx->canvas->clipRect(rect);
+        ctx->canvas->clipRect(rect, op);
       } else if (std::holds_alternative<SkRRect>(c)) {
         auto rrect = std::get<SkRRect>(c);
-        ctx->canvas->clipRRect(rrect);
+        ctx->canvas->clipRRect(rrect, op);
       }
     }
   }
