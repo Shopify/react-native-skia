@@ -358,7 +358,7 @@ struct ImageCmdProps {
   std::optional<SkRect> rect;
   std::string fit;
   std::optional<sk_sp<SkImage>> image;
-  SkSamplingOptions sampling = SkSamplingOptions(SkFilterMode::kLinear);
+  std::optional<SkSamplingOptions> sampling;
 };
 
 class ImageCmd : public Command {
@@ -393,7 +393,7 @@ public:
                        ? rect.value()
                        : SkRect::MakeXYWH(x, y, width.value(), height.value());
         auto rects = RNSkiaImage::fitRects(fit, src, dst);
-        ctx->canvas->drawImageRect(img, rects.src, rects.dst, sampling,
+        ctx->canvas->drawImageRect(img, rects.src, rects.dst, sampling.value_or(SkSamplingOptions(SkFilterMode::kLinear)),
                                    &(ctx->getPaint()),
                                    SkCanvas::kStrict_SrcRectConstraint);
       } else {
@@ -825,8 +825,8 @@ public:
     if (props.image) {
       auto colors =
           props.colors.has_value() ? props.colors.value().data() : nullptr;
-      auto blendMode = props.blendMode.value_or(SkBlendMode::kSrcOver);
-      auto sampling = props.sampling.value_or(SkSamplingOptions());
+      auto blendMode = props.blendMode.value_or(SkBlendMode::kDstOver);
+      auto sampling = props.sampling.value_or(SkSamplingOptions(SkFilterMode::kLinear));
 
       ctx->canvas->drawAtlas(props.image.get(), props.transforms.data(),
                              props.sprites.data(), colors,

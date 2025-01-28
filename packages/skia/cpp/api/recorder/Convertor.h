@@ -365,7 +365,7 @@ SkSamplingOptions getPropertyValue(jsi::Runtime &runtime,
     return samplingOptions;
   }
 
-  throw std::runtime_error("Invalid prop value for SkM44 received");
+  throw std::runtime_error("Invalid prop value for SkSamplingOptions received");
 }
 
 template <>
