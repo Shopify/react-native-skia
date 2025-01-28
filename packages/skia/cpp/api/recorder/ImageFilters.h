@@ -37,7 +37,7 @@ public:
 };
 
 struct BlurImageFilterProps {
-  SkPoint blur;
+  Radius blur;
   SkTileMode mode;
 };
 
@@ -54,7 +54,7 @@ public:
   }
 
   void pushImageFilter(DrawingCtx *ctx) {
-    auto imgf = SkImageFilters::Blur(props.blur.x(), props.blur.y(), props.mode,
+    auto imgf = SkImageFilters::Blur(props.blur.rX, props.blur.rY, props.mode,
                                      nullptr);
     ctx->imageFilters.push_back(imgf);
   }
@@ -185,7 +185,7 @@ public:
 
 struct MorphologyImageFilterProps {
   std::string op; // "erode" or "dilate"
-  SkPoint radius;
+  Radius radius;
 };
 
 class MorphologyImageFilterCmd : public Command {
@@ -203,11 +203,11 @@ public:
   void pushImageFilter(DrawingCtx *ctx) {
     if (props.op == "erode") {
       auto imgf =
-          SkImageFilters::Erode(props.radius.x(), props.radius.y(), nullptr);
+          SkImageFilters::Erode(props.radius.rX, props.radius.rY, nullptr);
       ctx->imageFilters.push_back(imgf);
     } else {
       auto imgf =
-          SkImageFilters::Dilate(props.radius.x(), props.radius.y(), nullptr);
+          SkImageFilters::Dilate(props.radius.rX, props.radius.rY, nullptr);
       ctx->imageFilters.push_back(imgf);
     }
   }

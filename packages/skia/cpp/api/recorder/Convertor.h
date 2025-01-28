@@ -20,6 +20,11 @@
 
 namespace RNSkia {
 
+struct Radius {
+  float rX;
+  float rY;
+};
+
 using ConversionFunction =
     std::function<void(jsi::Runtime &runtime, const jsi::Object &object)>;
 using Variables = std::map<std::string, std::vector<ConversionFunction>>;
@@ -391,6 +396,20 @@ SkMatrix getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
     }
   }
   throw std::runtime_error("Invalid prop value for SkMatrix received");
+}
+
+template <>
+Radius getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isObject()) {
+    auto object = value.asObject(runtime);
+    auto rX = static_cast<float>(object.getProperty(runtime, "x").asNumber());
+    auto rY = static_cast<float>(object.getProperty(runtime, "y").asNumber());
+    return {rX, rY};
+  } else if (value.isNumber()) {
+    auto r = static_cast<float>(value.asNumber());
+    return {r, r};
+  }
+  throw std::runtime_error("Invalid prop value for Radius received");
 }
 
 template <>
