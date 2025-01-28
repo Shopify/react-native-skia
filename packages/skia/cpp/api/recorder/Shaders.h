@@ -37,48 +37,7 @@ public:
     auto source = props.source;
     auto uniforms = props.uniforms;
     auto m3 = processTransform(props.matrix, props.transform, props.origin);
-
-    // Calculate total size needed for uniforms
-    size_t uniformSize = source->uniformSize();
-    auto uniformsData = SkData::MakeUninitialized(uniformSize);
-    auto uniformDataPtr = static_cast<float*>(uniformsData->writable_data());
-
-    // Loop through all uniforms in the effect
-    const auto &u = source->uniforms();
-    for (std::size_t i = 0; i < u.size(); i++) {
-      auto it = source->uniforms().begin() + i;
-      RuntimeEffectUniform reu = JsiSkRuntimeEffect::fromUniform(*it);
-      
-      // Find the corresponding uniform value in our props
-      auto uniformIt = uniforms.find(std::string(it->name));
-      if (uniformIt == uniforms.end()) {
-        throw std::runtime_error("Missing uniform value for: " + 
-                               std::string(it->name));
-      }
-
-      const auto& uniformValues = uniformIt->second;
-      size_t expectedSize = reu.columns * reu.rows;
-      if (uniformValues.size() != expectedSize) {
-        throw std::runtime_error("Incorrect uniform size for: " + 
-                               std::string(it->name) + ". Expected " + 
-                               std::to_string(expectedSize) + " got " + 
-                               std::to_string(uniformValues.size()));
-      }
-
-      // Process each element in the uniform (handling matrices and vectors)
-      for (std::size_t j = 0; j < expectedSize; ++j) {
-        const std::size_t offset = reu.slot + j;
-        float fValue = uniformValues[j];
-        
-        // Handle integer uniforms by converting to float bits
-        if (reu.isInteger) {
-          int iValue = static_cast<int>(fValue);
-          uniformDataPtr[offset] = SkBits2Float(iValue);
-        } else {
-          uniformDataPtr[offset] = fValue;
-        }
-      }
-    }
+    auto uniformsData = processUniforms(source, props.uniforms);
 
     std::vector<sk_sp<SkShader>> children = ctx->popAllShaders();
     auto shader = source->makeShader(std::move(uniformsData), children.data(),

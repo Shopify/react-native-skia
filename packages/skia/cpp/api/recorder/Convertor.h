@@ -639,7 +639,6 @@ SkBlendMode getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
 
 using ClipDef = std::variant<SkPath, SkRRect, SkRect, std::string>;
 using Layer = std::variant<SkPaint, bool>;
-using Uniforms = std::map<std::string, std::vector<float>>;
 
 template <>
 Uniforms getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {

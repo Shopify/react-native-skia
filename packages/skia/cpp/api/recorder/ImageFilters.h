@@ -272,11 +272,7 @@ public:
 
       // Process uniforms if present
       if (props.uniforms.has_value()) {
-        const auto &uniforms = props.uniforms.value();
-        for (const auto &[name, data] : uniforms) {
-          auto uniform = builder.uniform(name.c_str());
-          uniform.set(data.data(), data.size());
-        }
+        processUniforms(builder, props.source, props.uniforms.value());
       }
 
       // Get the input filter (if any)
