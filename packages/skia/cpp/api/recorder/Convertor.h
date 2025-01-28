@@ -410,6 +410,9 @@ para::Paragraph *getPropertyValue(jsi::Runtime &runtime,
                     ->getParagraph();
     return para;
   }
+  if (value.isNull()) {
+    return nullptr;
+  }
   throw std::runtime_error("Invalid prop value for Paragraph received");
 }
 

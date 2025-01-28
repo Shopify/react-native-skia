@@ -428,7 +428,12 @@ public:
 };
 
 struct RRectCmdProps {
-  SkRRect rrect;
+  SkRRect rect;
+  float x = 0;
+  float y = 0;
+  std::optional<float> width;
+  std::optional<float> height;
+  std::optional<Radius> r;
 };
 
 class RRectCmd : public Command {
@@ -439,16 +444,36 @@ public:
   RRectCmd(jsi::Runtime &runtime, const jsi::Object &object,
            Variables &variables)
       : Command(CommandType::DrawRRect) {
-    convertProperty(runtime, object, "rrect", props.rrect, variables);
+    convertProperty(runtime, object, "rect", props.rect, variables);
+    convertProperty(runtime, object, "x", props.x, variables);
+    convertProperty(runtime, object, "y", props.y, variables);
+    convertProperty(runtime, object, "width", props.width, variables);
+    convertProperty(runtime, object, "height", props.height, variables);
+    convertProperty(runtime, object, "r", props.r, variables);
   }
 
   void draw(DrawingCtx *ctx) {
-    ctx->canvas->drawRRect(props.rrect, ctx->getPaint());
+    auto [x, y, width, height, rect, r] = props;
+    if (rect.has_value()) {
+      ctx->canvas->drawRRect(rect.value(), ctx->getPaint());
+    } else {
+      if (!width.has_value() || !height.has_value() || !r.has_value()) {
+        throw std::runtime_error("Invalid properties for rounded rect")
+      }
+      auto rct =
+          SkRRect::Make(SkRect::MakeXYWH(x, y, width.value(), height.value()),
+                        r.value().rX, r.value().rY);
+      ctx->canvas->drawRRect(rct, ctx->getPaint());
+    }
   }
 };
 
 struct OvalCmdProps {
   SkRect rect;
+  float x = 0;
+  float y = 0;
+  std::optional<float> width;
+  std::optional<float> height;
 };
 
 class OvalCmd : public Command {
@@ -459,11 +484,21 @@ public:
   OvalCmd(jsi::Runtime &runtime, const jsi::Object &object,
           Variables &variables)
       : Command(CommandType::DrawOval) {
+    convertProperty(runtime, object, "x", props.x, variables);
+    convertProperty(runtime, object, "y", props.y, variables);
+    convertProperty(runtime, object, "width", props.width, variables);
+    convertProperty(runtime, object, "height", props.height, variables);
     convertProperty(runtime, object, "rect", props.rect, variables);
   }
 
   void draw(DrawingCtx *ctx) {
-    ctx->canvas->drawOval(props.rect, ctx->getPaint());
+    auto [x, y, width, height, rect] = props;
+    if (rect.has_value()) {
+      ctx->canvas->drawOval(rect.value(), ctx->getPaint());
+    } else {
+      auto rct = SkRect::MakeXYWH(x, y, width.value(), height.value());
+      ctx->canvas->drawOval(rct, ctx->getPaint());
+    }
   }
 };
 
