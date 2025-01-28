@@ -157,16 +157,21 @@ export class ReanimatedRecorder implements BaseRecorder {
     boxProps: AnimatedProps<BoxProps>,
     shadows: {
       props: BoxShadowProps;
-      animatedProps?: Record<string, SharedValue<unknown>>;
     }[]
   ): void {
     this.processAnimationValues(boxProps);
     shadows.forEach((shadow) => {
-      if (shadow.animatedProps) {
-        this.processAnimationValues(shadow.animatedProps);
-      }
+      this.processAnimationValues(
+        shadow.props as AnimatedProps<BoxShadowProps>
+      );
     });
-    this.recorder.drawBox(boxProps, shadows);
+    this.recorder.drawBox(
+      boxProps,
+      // TODO: Fix this type BaseRecorder.drawBox()
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      shadows.map((s) => s.props)
+    );
   }
 
   drawImage(props: AnimatedProps<ImageProps>): void {

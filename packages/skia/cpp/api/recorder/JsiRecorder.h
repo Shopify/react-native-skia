@@ -161,23 +161,9 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawBox) {
-    // auto boxProps = arguments[0].asObject(runtime);
-    // auto shadowsArray = arguments[1].asObject(runtime).asArray(runtime);
-    // std::vector<BoxShadow> shadows;
-
-    // size_t size = shadowsArray.size(runtime);
-    // for (size_t i = 0; i < size; i++) {
-    //   auto shadow = shadowsArray.getValueAtIndex(runtime,
-    //   i).asObject(runtime); auto props = shadow.getProperty(runtime,
-    //   "props").asObject(runtime); auto animatedProps =
-    //   shadow.getProperty(runtime, "animatedProps");
-
-    //   shadows.push_back({props, animatedProps.isObject()
-    //                                 ? animatedProps.asObject(runtime)
-    //                                 : jsi::Object(runtime)});
-    // }
-
-    // getObject()->drawBox(runtime, boxProps, shadows);
+    auto boxProps = arguments[0].asObject(runtime);
+    auto shadowsArray = arguments[1].asObject(runtime).asArray(runtime);
+    getObject()->drawBox(runtime, boxProps, shadowsArray);
     return jsi::Value::undefined();
   }
 

@@ -335,19 +335,127 @@ public:
   }
 };
 
-// Add to Drawings.h, after existing commands
+// Add to Drawings.h after existing command structures
+struct BoxShadowCmdProps {
+  float dx = 0;
+  float dy = 0;
+  float spread = 0;
+  float blur = 0;
+  std::optional<SkColor> color;
+  std::optional<bool> inner;
+};
 
-struct BoxCmdProps {};
+struct BoxCmdProps {
+  std::variant<SkRect, SkRRect> box;
+};
 
 class BoxCmd : public Command {
 private:
   BoxCmdProps props;
+  std::vector<BoxShadowCmdProps> shadows;
+
+  // Helper function to inflate RRect (deflate is just negative inflation)
+  SkRRect inflate(const SkRRect& box, float dx, float dy, float tx = 0, float ty = 0) {
+    const auto& rect = box.rect();
+    SkRect newRect = SkRect::MakeXYWH(
+      rect.x() - dx + tx,
+      rect.y() - dy + ty,
+      rect.width() + 2 * dx,
+      rect.height() + 2 * dy
+    );
+    
+    SkRRect result;
+    result.setRectXY(newRect, box.radii()[0].fX + dx, box.radii()[0].fY + dy);
+    return result;
+  }
+
+  SkRRect deflate(const SkRRect& box, float dx, float dy, float tx = 0, float ty = 0) {
+    return inflate(box, -dx, -dy, tx, ty);
+  }
 
 public:
-  BoxCmd(jsi::Runtime &runtime, const jsi::Object &object, Variables &variables)
-      : Command(CommandType::DrawBox) {}
+  BoxCmd(jsi::Runtime &runtime, const jsi::Object &object, const jsi::Array &shadowsArray,
+         Variables &variables)
+      : Command(CommandType::DrawBox) {
+    
+    convertProperty(runtime, object, "box", props.box, variables);
+    size_t shadowCount = shadowsArray.size(runtime);
+    shadows.reserve(shadowCount);
+    
+    for (size_t i = 0; i < shadowCount; i++) {
+      auto shadowObj = shadowsArray.getValueAtIndex(runtime, i).asObject(runtime);
+      BoxShadowCmdProps shadow;
 
-  void draw(DrawingCtx *ctx) {}
+      convertProperty(runtime, shadowObj, "dx", shadow.dx, variables);
+      convertProperty(runtime, shadowObj, "dy", shadow.dy, variables);
+      convertProperty(runtime, shadowObj, "spread", shadow.spread, variables);
+      convertProperty(runtime, shadowObj, "blur", shadow.blur, variables);
+      convertProperty(runtime, shadowObj, "color", shadow.color, variables);
+      convertProperty(runtime, shadowObj, "inner", shadow.inner, variables);
+
+      shadows.push_back(shadow);
+    }
+  }
+
+  void draw(DrawingCtx *ctx) {
+
+
+    // Get current paint properties
+    auto paint = ctx->getPaint();
+    float opacity = paint.getAlphaf();
+
+    // Convert box to RRect if needed
+    SkRRect box;
+    if (std::holds_alternative<SkRect>(props.box)) {
+      auto rect = std::get<SkRect>(props.box);
+      box.setRectXY(rect, 0, 0);
+    } else {
+      box = std::get<SkRRect>(props.box);
+    }
+
+    // Draw outer shadows first
+    for (const auto& shadow : shadows) {
+      if (!shadow.inner.value_or(false)) {
+        SkPaint shadowPaint;
+        shadowPaint.setAntiAlias(true);
+        shadowPaint.setColor(shadow.color.value_or(SK_ColorBLACK));
+        shadowPaint.setAlphaf(opacity);
+        shadowPaint.setMaskFilter(SkMaskFilter::MakeBlur(
+          SkBlurStyle::kNormal_SkBlurStyle, shadow.blur, true));
+
+        auto shadowBox = inflate(box, shadow.spread, shadow.spread, shadow.dx, shadow.dy);
+        ctx->canvas->drawRRect(shadowBox, shadowPaint);
+      }
+    }
+
+    // Draw main box
+    ctx->canvas->drawRRect(box, paint);
+
+    // Draw inner shadows
+    for (const auto& shadow : shadows) {
+      if (shadow.inner.value_or(false)) {
+        ctx->canvas->save();
+        
+        // Clip to box bounds
+        ctx->canvas->clipRRect(box, SkClipOp::kIntersect, true);
+
+        SkPaint shadowPaint;
+        shadowPaint.setAntiAlias(true);
+        shadowPaint.setColor(shadow.color.value_or(SK_ColorBLACK));
+        shadowPaint.setAlphaf(opacity);
+        shadowPaint.setMaskFilter(SkMaskFilter::MakeBlur(
+          SkBlurStyle::kNormal_SkBlurStyle, shadow.blur, true));
+
+        // Calculate shadow bounds
+        float delta = 10 + std::max(std::abs(shadow.dx), std::abs(shadow.dy));
+        auto inner = deflate(box, shadow.spread, shadow.spread, shadow.dx, shadow.dy);
+        auto outer = inflate(box, delta, delta);
+
+        ctx->canvas->drawDRRect(outer, inner, shadowPaint);
+        ctx->canvas->restore();
+      }
+    }
+  }
 };
 
 struct ImageCmdProps {

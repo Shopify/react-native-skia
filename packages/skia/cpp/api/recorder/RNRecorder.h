@@ -204,8 +204,8 @@ public:
     commands.push_back(std::make_unique<Command>(CommandType::DrawPaint));
   }
 
-  void drawBox(jsi::Runtime &runtime, const jsi::Object &props) {
-    commands.push_back(std::make_unique<BoxCmd>(runtime, props, variables));
+  void drawBox(jsi::Runtime &runtime, const jsi::Object &props, const jsi::Array &shadows) {
+    commands.push_back(std::make_unique<BoxCmd>(runtime, props, shadows, variables));
   }
 
   void drawImage(jsi::Runtime &runtime, const jsi::Object &props) {

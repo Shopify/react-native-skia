@@ -781,6 +781,21 @@ SkRect getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
+std::variant<SkRect, SkRRect> getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isObject()) {
+    auto rect = processRect(runtime, value);
+    if (rect) {
+      return SkRect(*rect);
+    }
+    auto rrect = processRRect(runtime, value);
+    if (rrect) {
+      return SkRRect(*rrect);
+    }
+  }
+  throw std::runtime_error("Invalid prop value for SkRect received");
+}
+
+template <>
 SkPath getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   auto path = processPath(runtime, value);
   if (!path) {
