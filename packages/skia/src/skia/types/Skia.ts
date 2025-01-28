@@ -32,6 +32,7 @@ import type { AnimatedImageFactory } from "./AnimatedImage";
 import type { ParagraphBuilderFactory } from "./Paragraph/ParagraphBuilder";
 import type { Video } from "./Video";
 import type { NativeBufferFactory } from "./NativeBuffer";
+import type { JsiRecorder } from "./Recorder";
 
 export interface SkiaContext {
   getSurface(): SkSurface;
@@ -104,4 +105,5 @@ export interface Skia {
   Video: (url: string) => Promise<Video> | Video;
   Context(surface: bigint, width: number, height: number): SkiaContext;
   NativeBuffer: NativeBufferFactory;
+  Recorder(): JsiRecorder;
 }

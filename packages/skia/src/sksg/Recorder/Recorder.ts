@@ -30,7 +30,7 @@ import type {
 import type { AnimatedProps } from "../../renderer";
 import { isSharedValue } from "../utils";
 import { isColorFilter, isImageFilter, isPathEffect, isShader } from "../Node";
-import type { SkPaint } from "../../skia/types";
+import type { SkPaint, BaseRecorder } from "../../skia/types";
 
 import { CommandType } from "./Core";
 import type { Command } from "./Core";
@@ -44,7 +44,7 @@ interface AnimationValues {
   animationValues: Set<SharedValue<unknown>>;
 }
 
-export class Recorder {
+export class Recorder implements BaseRecorder {
   commands: Command[] = [];
   cursors: Command[][] = [];
   animationValues: Set<SharedValue<unknown>> = new Set();
