@@ -100,16 +100,16 @@ public:
   }
 
   JSI_HOST_FUNCTION(pushImageFilter) {
-    // getObject()->pushImageFilter(
-    //     runtime, arguments[0].asString(runtime).utf8(runtime),
-    //     arguments[1].asObject(runtime));
+    getObject()->pushImageFilter(runtime,
+                                 arguments[0].asString(runtime).utf8(runtime),
+                                 arguments[1].asObject(runtime));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(pushColorFilter) {
-    // getObject()->pushColorFilter(
-    //     runtime, arguments[0].asString(runtime).utf8(runtime),
-    //     arguments[1].asObject(runtime));
+    getObject()->pushColorFilter(runtime,
+                                 arguments[0].asString(runtime).utf8(runtime),
+                                 arguments[1].asObject(runtime));
     return jsi::Value::undefined();
   }
 

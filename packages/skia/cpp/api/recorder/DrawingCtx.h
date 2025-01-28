@@ -49,18 +49,16 @@ public:
   }
 
   void materializePaint() {
-    //      if (!colorFilters.empty()) {
-    //        SkColorFilter *result = nullptr;
-    //        for (auto it = colorFilters.rbegin(); it != colorFilters.rend();
-    //        ++it)
-    //        {
-    //          if (!result)
-    //            result = *it;
-    //          else
-    //            result = skia->ColorFilter_MakeCompose(*it, result);
-    //        }
-    //        getPaint()->setColorFilter(result);
-    //      }
+    if (!colorFilters.empty()) {
+      sk_sp<SkColorFilter> result = nullptr;
+      for (auto it = colorFilters.rbegin(); it != colorFilters.rend(); ++it) {
+        if (!result)
+          result = *it;
+        else
+          result = SkColorFilters::Compose(*it, result);
+      }
+      getPaint().setColorFilter(result);
+    }
 
     if (!shaders.empty()) {
       getPaint().setShader(shaders.back());

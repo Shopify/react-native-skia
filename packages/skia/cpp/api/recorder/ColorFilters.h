@@ -3,6 +3,9 @@
 #include <optional>
 #include <string>
 #include <variant>
+#include <vector>
+
+#include <include/core/SkColorFilter.h>
 
 #include "Command.h"
 #include "Convertor.h"
@@ -10,7 +13,9 @@
 
 namespace RNSkia {
 
-struct MatrixColorFilterProps {};
+struct MatrixColorFilterProps {
+  std::vector<float> matrix;
+};
 
 class MatrixColorFilterCmd : public Command {
 private:
@@ -19,12 +24,22 @@ private:
 public:
   MatrixColorFilterCmd(jsi::Runtime &runtime, const jsi::Object &object,
                        Variables &variables)
-      : Command(CommandType::PushColorFilter, "skMatrixColorFilter") {}
+      : Command(CommandType::PushColorFilter, "skMatrixColorFilter") {
+    convertProperty(runtime, object, "matrix", props.matrix, variables);
+  }
 
-  void pushColorFilter(DrawingCtx *ctx) {}
+  void pushColorFilter(DrawingCtx *ctx) {
+    if (props.matrix.size() == 20) {
+      auto cf = SkColorFilters::Matrix(props.matrix.data());
+      ctx->colorFilters.push_back(cf);
+    }
+  }
 };
 
-struct BlendColorFilterProps {};
+struct BlendColorFilterProps {
+  SkBlendMode mode;
+  SkColor color;
+};
 
 class BlendColorFilterCmd : public Command {
 private:
@@ -33,17 +48,18 @@ private:
 public:
   BlendColorFilterCmd(jsi::Runtime &runtime, const jsi::Object &object,
                       Variables &variables)
-      : Command(CommandType::PushColorFilter, "skBlendColorFilter") {}
+      : Command(CommandType::PushColorFilter, "skBlendColorFilter") {
+    convertProperty(runtime, object, "mode", props.mode, variables);
+    convertProperty(runtime, object, "color", props.color, variables);
+  }
 
-  void pushColorFilter(DrawingCtx *ctx) {}
+  void pushColorFilter(DrawingCtx *ctx) {
+    auto cf = SkColorFilters::Blend(props.color, props.mode);
+    ctx->colorFilters.push_back(cf);
+  }
 };
 
-struct LinearToSRGBGammaColorFilterProps {};
-
 class LinearToSRGBGammaColorFilterCmd : public Command {
-private:
-  LinearToSRGBGammaColorFilterProps props;
-
 public:
   LinearToSRGBGammaColorFilterCmd(jsi::Runtime &runtime,
                                   const jsi::Object &object,
@@ -51,15 +67,13 @@ public:
       : Command(CommandType::PushColorFilter,
                 "skLinearToSRGBGammaColorFilter") {}
 
-  void pushColorFilter(DrawingCtx *ctx) {}
+  void pushColorFilter(DrawingCtx *ctx) {
+    auto cf = SkColorFilters::LinearToSRGBGamma();
+    ctx->colorFilters.push_back(cf);
+  }
 };
 
-struct SRGBToLinearGammaColorFilterProps {};
-
 class SRGBToLinearGammaColorFilterCmd : public Command {
-private:
-  SRGBToLinearGammaColorFilterProps props;
-
 public:
   SRGBToLinearGammaColorFilterCmd(jsi::Runtime &runtime,
                                   const jsi::Object &object,
@@ -67,24 +81,27 @@ public:
       : Command(CommandType::PushColorFilter,
                 "skSRGBToLinearGammaColorFilter") {}
 
-  void pushColorFilter(DrawingCtx *ctx) {}
+  void pushColorFilter(DrawingCtx *ctx) {
+    auto cf = SkColorFilters::SRGBToLinearGamma();
+    ctx->colorFilters.push_back(cf);
+  }
 };
 
-struct LumaColorFilterProps {};
-
 class LumaColorFilterCmd : public Command {
-private:
-  LumaColorFilterProps props;
-
 public:
   LumaColorFilterCmd(jsi::Runtime &runtime, const jsi::Object &object,
                      Variables &variables)
       : Command(CommandType::PushColorFilter, "skLumaColorFilter") {}
 
-  void pushColorFilter(DrawingCtx *ctx) {}
+  void pushColorFilter(DrawingCtx *ctx) {
+    auto cf = SkLumaColorFilter::Make();
+    ctx->colorFilters.push_back(cf);
+  }
 };
 
-struct LerpColorFilterProps {};
+struct LerpColorFilterProps {
+  float t;
+};
 
 class LerpColorFilterCmd : public Command {
 private:
@@ -93,9 +110,24 @@ private:
 public:
   LerpColorFilterCmd(jsi::Runtime &runtime, const jsi::Object &object,
                      Variables &variables)
-      : Command(CommandType::PushColorFilter, "skLerpColorFilter") {}
+      : Command(CommandType::PushColorFilter, "skLerpColorFilter") {
+    convertProperty(runtime, object, "t", props.t, variables);
+  }
 
-  void pushColorFilter(DrawingCtx *ctx) {}
+  void pushColorFilter(DrawingCtx *ctx) {
+    if (ctx->colorFilters.size() >= 2) {
+      auto second = ctx->colorFilters.back();
+      ctx->colorFilters.pop_back();
+      auto first = ctx->colorFilters.back();
+      ctx->colorFilters.pop_back();
+
+      auto cf = SkColorFilters::Lerp(props.t, first, second);
+      ctx->colorFilters.push_back(cf);
+    } else {
+      // Handle error - not enough filters
+      // Could throw an exception or handle gracefully
+    }
+  }
 };
 
 } // namespace RNSkia

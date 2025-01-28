@@ -114,6 +114,32 @@ public:
     }
   }
 
+  void pushImageFilter(jsi::Runtime &runtime, const std::string &nodeType,
+                       const jsi::Object &props) {
+    if (nodeType == "skOffsetImageFilter") {
+      commands.push_back(
+          std::make_unique<OffsetImageFilterCmd>(runtime, props, variables));
+    } else if (nodeType == "skDisplacementMapImageFilter") {
+      commands.push_back(std::make_unique<DisplacementMapImageFilterCmd>(
+          runtime, props, variables));
+    } else if (nodeType == "skBlurImageFilter") {
+      commands.push_back(
+          std::make_unique<BlurImageFilterCmd>(runtime, props, variables));
+    } else if (nodeType == "skDropShadowImageFilter") {
+      commands.push_back(std::make_unique<DropShadowImageFilterCmd>(
+          runtime, props, variables));
+    } else if (nodeType == "skMorphologyImageFilter") {
+      commands.push_back(std::make_unique<MorphologyImageFilterCmd>(
+          runtime, props, variables));
+    } else if (nodeType == "skBlendImageFilter") {
+      commands.push_back(
+          std::make_unique<BlendImageFilterCmd>(runtime, props, variables));
+    } else if (nodeType == "skRuntimeShaderImageFilter") {
+      commands.push_back(std::make_unique<RuntimeShaderImageFilterCmd>(
+          runtime, props, variables));
+    }
+  }
+
   void pushBlurMaskFilter(jsi::Runtime &runtime, const jsi::Object &props) {
     commands.push_back(
         std::make_unique<BlurMaskFilterCmd>(runtime, props, variables));

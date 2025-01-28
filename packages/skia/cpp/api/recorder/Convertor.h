@@ -195,6 +195,23 @@ SkTileMode getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
 }
 
 template <>
+SkColorChannel getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
+  if (val.isString()) {
+    auto value = val.asString(runtime).utf8(runtime);
+    if (value == "r") {
+      return SkColorChannel::kR;
+    } else if (value == "b") {
+      return SkColorChannel::kB;
+    } else if (value == "g") {
+      return SkColorChannel::kG;
+    } else if (value == "a") {
+      return SkColorChannel::kA;
+    }
+  }
+  throw std::runtime_error("Invalid value for SkTileMode received");
+}
+
+template <>
 SkM44 getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isObject()) {
     auto object = value.asObject(runtime);
@@ -861,8 +878,20 @@ std::optional<SkTileMode> getPropertyValue(jsi::Runtime &runtime,
 
 template <>
 std::optional<SkPathFillType> getPropertyValue(jsi::Runtime &runtime,
-                                              const jsi::Value &value) {
+                                               const jsi::Value &value) {
   return makeOptionalPropertyValue<SkPathFillType>(runtime, value);
+}
+
+template <>
+std::optional<SkColorChannel> getPropertyValue(jsi::Runtime &runtime,
+                                               const jsi::Value &value) {
+  return makeOptionalPropertyValue<SkColorChannel>(runtime, value);
+}
+
+template <>
+std::optional<Uniforms> getPropertyValue(jsi::Runtime &runtime,
+                                               const jsi::Value &value) {
+  return makeOptionalPropertyValue<Uniforms>(runtime, value);
 }
 
 } // namespace RNSkia
