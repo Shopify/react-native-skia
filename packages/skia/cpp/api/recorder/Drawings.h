@@ -458,11 +458,11 @@ public:
       ctx->canvas->drawRRect(rect.value(), ctx->getPaint());
     } else {
       if (!width.has_value() || !height.has_value() || !r.has_value()) {
-          throw std::runtime_error("Invalid properties for rounded rect");
+        throw std::runtime_error("Invalid properties for rounded rect");
       }
-      auto rct =
-          SkRRect::MakeRectXY(SkRect::MakeXYWH(x, y, width.value(), height.value()),
-                        r.value().rX, r.value().rY);
+      auto rct = SkRRect::MakeRectXY(
+          SkRect::MakeXYWH(x, y, width.value(), height.value()), r.value().rX,
+          r.value().rY);
       ctx->canvas->drawRRect(rct, ctx->getPaint());
     }
   }
@@ -496,9 +496,9 @@ public:
     if (rect.has_value()) {
       ctx->canvas->drawOval(rect.value(), ctx->getPaint());
     } else {
-        if (!width.has_value() || !height.has_value()) {
-            throw std::runtime_error("Invalid properties received for Oval");
-        }
+      if (!width.has_value() || !height.has_value()) {
+        throw std::runtime_error("Invalid properties received for Oval");
+      }
       auto rct = SkRect::MakeXYWH(x, y, width.value(), height.value());
       ctx->canvas->drawOval(rct, ctx->getPaint());
     }

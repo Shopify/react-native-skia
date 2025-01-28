@@ -448,6 +448,8 @@ sk_sp<SkImage> getPropertyValue(jsi::Runtime &runtime,
     auto effect =
         value.asObject(runtime).asHostObject<JsiSkImage>(runtime)->getObject();
     return effect;
+  } else if (value.isNull()) {
+    return nullptr;
   }
   throw std::runtime_error("Invalid prop value for SkImage received");
 }
@@ -780,26 +782,20 @@ SkPath getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 
 template <>
 ClipDef getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
-  if (value.isObject()) {
-    auto path = processPath(runtime, value);
-    if (path) {
-      ClipDef def = SkPath(*path);
-      return def;
-    }
-    auto rect = processRect(runtime, value);
-    if (rect) {
-      ClipDef def = SkRect(*rect);
-      return def;
-    }
-    auto rrect = processRRect(runtime, value);
-    if (rrect) {
-      ClipDef def = SkRRect(*rrect);
-      return def;
-    }
-  } else if (value.isString()) {
-    auto pathString = value.asString(runtime).utf8(runtime);
-    ClipDef clip = pathString;
-    return clip;
+  auto path = processPath(runtime, value);
+  if (path) {
+    ClipDef def = SkPath(*path);
+    return def;
+  }
+  auto rect = processRect(runtime, value);
+  if (rect) {
+    ClipDef def = SkRect(*rect);
+    return def;
+  }
+  auto rrect = processRRect(runtime, value);
+  if (rrect) {
+    ClipDef def = SkRRect(*rrect);
+    return def;
   }
   throw std::runtime_error("Invalid prop value for ClipDef received");
 }
@@ -1161,13 +1157,13 @@ std::optional<Uniforms> getPropertyValue(jsi::Runtime &runtime,
 
 template <>
 std::optional<Radius> getPropertyValue(jsi::Runtime &runtime,
-                                         const jsi::Value &value) {
+                                       const jsi::Value &value) {
   return makeOptionalPropertyValue<Radius>(runtime, value);
 }
 
 template <>
 std::optional<SkRRect> getPropertyValue(jsi::Runtime &runtime,
-                                         const jsi::Value &value) {
+                                        const jsi::Value &value) {
   return makeOptionalPropertyValue<SkRRect>(runtime, value);
 }
 

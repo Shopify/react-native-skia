@@ -123,7 +123,8 @@ std::shared_ptr<SkPath> processPath(jsi::Runtime &runtime,
     } else {
       throw std::runtime_error("Could not parse path from string.");
     }
-  } else if (value.isObject()) {
+  } else if (value.isObject() &&
+             value.asObject(runtime).isHostObject(runtime)) {
     auto ptr = std::dynamic_pointer_cast<JsiSkPath>(
         value.asObject(runtime).asHostObject(runtime));
     if (ptr != nullptr) {
