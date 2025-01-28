@@ -859,4 +859,10 @@ std::optional<SkTileMode> getPropertyValue(jsi::Runtime &runtime,
   return makeOptionalPropertyValue<SkTileMode>(runtime, value);
 }
 
+template <>
+std::optional<SkPathFillType> getPropertyValue(jsi::Runtime &runtime,
+                                              const jsi::Value &value) {
+  return makeOptionalPropertyValue<SkPathFillType>(runtime, value);
+}
+
 } // namespace RNSkia

@@ -82,7 +82,7 @@ struct PathCmdProps {
   float start;
   float end;
   std::optional<StrokeOpts> stroke;
-  SkPathFillType fillType;
+  std::optional<SkPathFillType> fillType;
 };
 
 class PathCmd : public Command {
@@ -109,7 +109,7 @@ public:
     bool hasStartOffset = start != 0.0f;
     bool hasEndOffset = end != 1.0f;
     bool hasStrokeOptions = props.stroke.has_value();
-    bool hasFillType = true; // Since fillType is not optional in the struct
+    bool hasFillType = props.fillType.has_value();
     bool willMutatePath =
         hasStartOffset || hasEndOffset || hasStrokeOptions || hasFillType;
 
@@ -140,8 +140,9 @@ public:
 
       // Set fill type
       auto p = std::make_shared<SkPath>(filteredPath);
-      p->setFillType(props.fillType);
-
+      if (props.fillType.has_value()) {
+        p->setFillType(props.fillType.value());
+      }
       // Handle stroke options
       if (hasStrokeOptions) {
         const auto &stroke = props.stroke.value();
