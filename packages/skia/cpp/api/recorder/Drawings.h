@@ -468,9 +468,9 @@ public:
 };
 
 struct PatchCmdProps {
-  std::array<SkPoint, 12> cubics;
+  std::vector<SkPoint> cubics;
   std::optional<std::vector<SkColor>> colors;
-  std::optional<std::array<SkPoint, 4>> texCoords;
+  std::optional<std::vector<SkPoint>> texCoords;
   std::optional<SkBlendMode> blendMode;
 };
 

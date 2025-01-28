@@ -11,6 +11,9 @@
 #include <include/core/SkPathEffect.h>
 #include <include/core/SkPoint.h>
 #include <include/effects/SkRuntimeEffect.h>
+#include <modules/skparagraph/include/Paragraph.h>
+#include <modules/skparagraph/include/ParagraphBuilder.h>
+#include <modules/skparagraph/include/ParagraphStyle.h>
 
 #include "third_party/CSSColorParser.h"
 
@@ -375,6 +378,18 @@ SkFont getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
+SkRSXform getPropertyValue(jsi::Runtime &runtime,
+                                  const jsi::Value &value) {
+  if (value.isObject()) {
+    auto form = value.asObject(runtime)
+                       .asHostObject<JsiSkRSXform>(runtime)
+                       ->getObject();
+      return SkRSXform::Make(form->fSCos, form->fSSin, form->fTx, form->fTy);
+  }
+  throw std::runtime_error("Invalid prop value for SkRSXform received");
+}
+
+template <>
 sk_sp<SkPicture> getPropertyValue(jsi::Runtime &runtime,
                                   const jsi::Value &value) {
   if (value.isObject()) {
@@ -384,6 +399,18 @@ sk_sp<SkPicture> getPropertyValue(jsi::Runtime &runtime,
     return picture;
   }
   throw std::runtime_error("Invalid prop value for SkTextBlob received");
+}
+
+template <>
+para::Paragraph* getPropertyValue(jsi::Runtime &runtime,
+                                  const jsi::Value &value) {
+  if (value.isObject()) {
+    auto para = value.asObject(runtime)
+                       .asHostObject<JsiSkParagraph>(runtime)
+                       ->getParagraph();
+    return para;
+  }
+  throw std::runtime_error("Invalid prop value for Paragraph received");
 }
 
 template <>
@@ -789,6 +816,63 @@ Layer getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   throw std::runtime_error("Invalid prop value for Layer received");
 }
 
+
+template <>
+std::vector<SkRSXform> getPropertyValue(jsi::Runtime &runtime,
+                                       const jsi::Value &value) {
+  std::vector<SkRSXform> result;
+  if (value.isObject() && value.asObject(runtime).isArray(runtime)) {
+    auto array = value.asObject(runtime).asArray(runtime);
+    size_t size = array.size(runtime);
+    result.reserve(size);
+
+    for (size_t i = 0; i < size; i++) {
+      result.push_back(getPropertyValue<SkRSXform>(
+          runtime, array.getValueAtIndex(runtime, i)));
+    }
+  }
+  return result;
+}
+
+template <>
+std::vector<SkPoint> getPropertyValue(jsi::Runtime &runtime,
+                                     const jsi::Value &value) {
+  std::vector<SkPoint> result;
+  if (value.isObject() && value.asObject(runtime).isArray(runtime)) {
+    auto array = value.asObject(runtime).asArray(runtime);
+    size_t size = array.size(runtime);
+    result.reserve(size);
+
+    for (size_t i = 0; i < size; i++) {
+      auto point = processPoint(runtime, array.getValueAtIndex(runtime, i));
+      result.push_back(point);
+    }
+  }
+  return result;
+}
+
+template <>
+std::vector<SkRect> getPropertyValue(jsi::Runtime &runtime,
+                                    const jsi::Value &value) {
+  std::vector<SkRect> result;
+  if (value.isObject() && value.asObject(runtime).isArray(runtime)) {
+    auto array = value.asObject(runtime).asArray(runtime);
+    size_t size = array.size(runtime);
+    result.reserve(size);
+
+    for (size_t i = 0; i < size; i++) {
+      auto rect = processRect(runtime, array.getValueAtIndex(runtime, i));
+      if (rect) {
+        result.push_back(*rect);
+      } else {
+        throw std::runtime_error("Invalid rect in array at index " + 
+                               std::to_string(i));
+      }
+    }
+  }
+  return result;
+}
+
 template <>
 std::vector<float> getPropertyValue(jsi::Runtime &runtime,
                                     const jsi::Value &value) {
@@ -817,6 +901,39 @@ std::vector<float> getPropertyValue(jsi::Runtime &runtime,
     }
   } else {
     throw std::runtime_error("Invalid value type for vector<float>");
+  }
+
+  return result;
+}
+
+template <>
+std::vector<uint16_t> getPropertyValue(jsi::Runtime &runtime,
+                                    const jsi::Value &value) {
+  std::vector<uint16_t> result;
+
+  if (value.isNumber()) {
+    // If single number, create a vector with one element
+    result.push_back(static_cast<float>(value.asNumber()));
+  } else if (value.isObject()) {
+    auto obj = value.asObject(runtime);
+    if (obj.isArray(runtime)) {
+      auto array = obj.asArray(runtime);
+      size_t size = array.size(runtime);
+      result.reserve(size);
+
+      for (size_t i = 0; i < size; i++) {
+        jsi::Value element = array.getValueAtIndex(runtime, i);
+        if (element.isNumber()) {
+          result.push_back(static_cast<uint16_t>(element.asNumber()));
+        } else {
+          throw std::runtime_error("Array elements must be numbers");
+        }
+      }
+    } else {
+      throw std::runtime_error("Expected array or number for vector<uint16_t>");
+    }
+  } else {
+    throw std::runtime_error("Invalid value type for vector<uint16_t>");
   }
 
   return result;
@@ -980,6 +1097,18 @@ template <>
 std::optional<Uniforms> getPropertyValue(jsi::Runtime &runtime,
                                          const jsi::Value &value) {
   return makeOptionalPropertyValue<Uniforms>(runtime, value);
+}
+
+template <>
+std::optional<std::vector<SkPoint>> getPropertyValue(jsi::Runtime &runtime,
+                                         const jsi::Value &value) {
+  return makeOptionalPropertyValue<std::vector<SkPoint>>(runtime, value);
+}
+
+template <>
+std::optional<std::vector<uint16_t>> getPropertyValue(jsi::Runtime &runtime,
+                                         const jsi::Value &value) {
+  return makeOptionalPropertyValue<std::vector<uint16_t>>(runtime, value);
 }
 
 } // namespace RNSkia
