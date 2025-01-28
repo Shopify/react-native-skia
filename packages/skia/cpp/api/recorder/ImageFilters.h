@@ -54,8 +54,8 @@ public:
   }
 
   void pushImageFilter(DrawingCtx *ctx) {
-    auto imgf = SkImageFilters::Blur(props.blur.rX, props.blur.rY, props.mode,
-                                     nullptr);
+    auto imgf =
+        SkImageFilters::Blur(props.blur.rX, props.blur.rY, props.mode, nullptr);
     ctx->imageFilters.push_back(imgf);
   }
 };

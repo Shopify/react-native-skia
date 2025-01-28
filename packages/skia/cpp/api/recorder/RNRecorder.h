@@ -267,9 +267,33 @@ public:
         std::make_unique<Command>(CommandType::MaterializePaint));
   }
 
+  void restorePaintDeclaration() {
+    commands.push_back(
+        std::make_unique<Command>(CommandType::RestorePaintDeclaration));
+  }
+
+  void saveLayer() {
+    commands.push_back(std::make_unique<Command>(CommandType::SaveLayer));
+  }
+
+  void saveBackdropFilter() {
+    commands.push_back(
+        std::make_unique<Command>(CommandType::SaveBackdropFilter));
+  }
+
+  void saveGroup() {}
+
+  void restoreGroup() {}
+
   void play(DrawingCtx *ctx) {
     for (const auto &cmd : commands) {
       switch (cmd->type) {
+
+      case Group: {
+        // Do nothing here for now
+        break;
+      }
+
       case CommandType::ComposeColorFilter: {
         ctx->composeColorFilter();
         break;
@@ -282,6 +306,21 @@ public:
 
       case CommandType::ComposePathEffect: {
         ctx->composePathEffect();
+        break;
+      }
+
+      case CommandType::RestorePaintDeclaration: {
+        ctx->restorePaintDeclaration();
+        break;
+      }
+
+      case CommandType::SaveBackdropFilter: {
+        ctx->saveBackdropFilter();
+        break;
+      }
+
+      case CommandType::SaveLayer: {
+        ctx->saveLayer();
         break;
       }
 

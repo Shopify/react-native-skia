@@ -78,17 +78,17 @@ public:
   }
 
   JSI_HOST_FUNCTION(saveGroup) {
-    // getObject()->saveGroup();
+    getObject()->saveGroup();
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(restoreGroup) {
-    // getObject()->restoreGroup();
+    getObject()->restoreGroup();
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(restorePaintDeclaration) {
-    // getObject()->restorePaintDeclaration();
+    getObject()->restorePaintDeclaration();
     return jsi::Value::undefined();
   }
 
@@ -151,12 +151,12 @@ public:
   }
 
   JSI_HOST_FUNCTION(saveLayer) {
-    // getObject()->saveLayer();
+    getObject()->saveLayer();
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(saveBackdropFilter) {
-    // getObject()->saveBackdropFilter();
+    getObject()->saveBackdropFilter();
     return jsi::Value::undefined();
   }
 
