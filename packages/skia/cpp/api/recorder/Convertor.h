@@ -31,6 +31,7 @@ struct Radius {
 using ConversionFunction =
     std::function<void(jsi::Runtime &runtime, const jsi::Object &object)>;
 using Variables = std::map<std::string, std::vector<ConversionFunction>>;
+using Patch = std::array<SkPoint, 12>;
 
 bool isSharedValue(jsi::Runtime &runtime, const jsi::Value &value) {
   return value.isObject() &&
@@ -378,13 +379,12 @@ SkFont getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
-SkRSXform getPropertyValue(jsi::Runtime &runtime,
-                                  const jsi::Value &value) {
+SkRSXform getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isObject()) {
     auto form = value.asObject(runtime)
-                       .asHostObject<JsiSkRSXform>(runtime)
-                       ->getObject();
-      return SkRSXform::Make(form->fSCos, form->fSSin, form->fTx, form->fTy);
+                    .asHostObject<JsiSkRSXform>(runtime)
+                    ->getObject();
+    return SkRSXform::Make(form->fSCos, form->fSSin, form->fTx, form->fTy);
   }
   throw std::runtime_error("Invalid prop value for SkRSXform received");
 }
@@ -402,12 +402,12 @@ sk_sp<SkPicture> getPropertyValue(jsi::Runtime &runtime,
 }
 
 template <>
-para::Paragraph* getPropertyValue(jsi::Runtime &runtime,
+para::Paragraph *getPropertyValue(jsi::Runtime &runtime,
                                   const jsi::Value &value) {
   if (value.isObject()) {
     auto para = value.asObject(runtime)
-                       .asHostObject<JsiSkParagraph>(runtime)
-                       ->getParagraph();
+                    .asHostObject<JsiSkParagraph>(runtime)
+                    ->getParagraph();
     return para;
   }
   throw std::runtime_error("Invalid prop value for Paragraph received");
@@ -816,10 +816,67 @@ Layer getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   throw std::runtime_error("Invalid prop value for Layer received");
 }
 
+template <>
+Patch getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isObject() && value.asObject(runtime).isArray(runtime)) {
+    auto array = value.asObject(runtime).asArray(runtime);
+    if (array.size(runtime) != 4) {
+      throw std::runtime_error("Patch must contain exactly 4 bezier handles");
+    }
+
+    // Patch requires points in the following order:
+    // M tl
+    // C c1 c2 br
+    // C c1 c2 bl
+    // C c1 c2 tl (the redundant point in the last command is removed)
+
+    Patch result;
+
+    result[0] = processPoint(runtime, array.getValueAtIndex(runtime, 0)
+                                          .asObject(runtime)
+                                          .getProperty(runtime, "pos"));
+    result[1] = processPoint(runtime, array.getValueAtIndex(runtime, 0)
+                                          .asObject(runtime)
+                                          .getProperty(runtime, "c2"));
+    result[2] = processPoint(runtime, array.getValueAtIndex(runtime, 1)
+                                          .asObject(runtime)
+                                          .getProperty(runtime, "c1"));
+    result[3] = processPoint(runtime, array.getValueAtIndex(runtime, 1)
+                                          .asObject(runtime)
+                                          .getProperty(runtime, "pos"));
+    result[4] = processPoint(runtime, array.getValueAtIndex(runtime, 1)
+                                          .asObject(runtime)
+                                          .getProperty(runtime, "c2"));
+    result[5] = processPoint(runtime, array.getValueAtIndex(runtime, 2)
+                                          .asObject(runtime)
+                                          .getProperty(runtime, "c1"));
+    result[6] = processPoint(runtime, array.getValueAtIndex(runtime, 2)
+                                          .asObject(runtime)
+                                          .getProperty(runtime, "pos"));
+    result[7] = processPoint(runtime, array.getValueAtIndex(runtime, 2)
+                                          .asObject(runtime)
+                                          .getProperty(runtime, "c2"));
+    result[8] = processPoint(runtime, array.getValueAtIndex(runtime, 3)
+                                          .asObject(runtime)
+                                          .getProperty(runtime, "c1"));
+    result[9] = processPoint(runtime, array.getValueAtIndex(runtime, 3)
+                                          .asObject(runtime)
+                                          .getProperty(runtime, "pos"));
+    result[10] = processPoint(runtime, array.getValueAtIndex(runtime, 3)
+                                           .asObject(runtime)
+                                           .getProperty(runtime, "c2"));
+    result[11] = processPoint(runtime, array.getValueAtIndex(runtime, 0)
+                                           .asObject(runtime)
+                                           .getProperty(runtime, "c1"));
+
+    return result;
+  }
+  throw std::runtime_error("Invalid prop value for Patch received");
+}
 
 template <>
 std::vector<SkRSXform> getPropertyValue(jsi::Runtime &runtime,
-                                       const jsi::Value &value) {
+                                        const jsi::Value &value) {
   std::vector<SkRSXform> result;
   if (value.isObject() && value.asObject(runtime).isArray(runtime)) {
     auto array = value.asObject(runtime).asArray(runtime);
@@ -836,7 +893,7 @@ std::vector<SkRSXform> getPropertyValue(jsi::Runtime &runtime,
 
 template <>
 std::vector<SkPoint> getPropertyValue(jsi::Runtime &runtime,
-                                     const jsi::Value &value) {
+                                      const jsi::Value &value) {
   std::vector<SkPoint> result;
   if (value.isObject() && value.asObject(runtime).isArray(runtime)) {
     auto array = value.asObject(runtime).asArray(runtime);
@@ -853,7 +910,7 @@ std::vector<SkPoint> getPropertyValue(jsi::Runtime &runtime,
 
 template <>
 std::vector<SkRect> getPropertyValue(jsi::Runtime &runtime,
-                                    const jsi::Value &value) {
+                                     const jsi::Value &value) {
   std::vector<SkRect> result;
   if (value.isObject() && value.asObject(runtime).isArray(runtime)) {
     auto array = value.asObject(runtime).asArray(runtime);
@@ -865,8 +922,8 @@ std::vector<SkRect> getPropertyValue(jsi::Runtime &runtime,
       if (rect) {
         result.push_back(*rect);
       } else {
-        throw std::runtime_error("Invalid rect in array at index " + 
-                               std::to_string(i));
+        throw std::runtime_error("Invalid rect in array at index " +
+                                 std::to_string(i));
       }
     }
   }
@@ -908,7 +965,7 @@ std::vector<float> getPropertyValue(jsi::Runtime &runtime,
 
 template <>
 std::vector<uint16_t> getPropertyValue(jsi::Runtime &runtime,
-                                    const jsi::Value &value) {
+                                       const jsi::Value &value) {
   std::vector<uint16_t> result;
 
   if (value.isNumber()) {
@@ -1101,13 +1158,13 @@ std::optional<Uniforms> getPropertyValue(jsi::Runtime &runtime,
 
 template <>
 std::optional<std::vector<SkPoint>> getPropertyValue(jsi::Runtime &runtime,
-                                         const jsi::Value &value) {
+                                                     const jsi::Value &value) {
   return makeOptionalPropertyValue<std::vector<SkPoint>>(runtime, value);
 }
 
 template <>
 std::optional<std::vector<uint16_t>> getPropertyValue(jsi::Runtime &runtime,
-                                         const jsi::Value &value) {
+                                                      const jsi::Value &value) {
   return makeOptionalPropertyValue<std::vector<uint16_t>>(runtime, value);
 }
 
