@@ -404,7 +404,10 @@ public:
   }
 };
 
-struct PointsCmdProps {};
+struct PointsCmdProps {
+  std::vector<SkPoint> points;
+  SkCanvas::PointMode mode;
+};
 
 class PointsCmd : public Command {
 private:
@@ -413,12 +416,20 @@ private:
 public:
   PointsCmd(jsi::Runtime &runtime, const jsi::Object &object,
             Variables &variables)
-      : Command(CommandType::DrawPoints) {}
+      : Command(CommandType::DrawPoints) {
+    convertProperty(runtime, object, "points", props.points, variables);
+    convertProperty(runtime, object, "mode", props.mode, variables);
+  }
 
-  void draw(DrawingCtx *ctx) {}
+  void draw(DrawingCtx *ctx) {
+    ctx->canvas->drawPoints(props.mode, props.points.size(),
+                            props.points.data(), ctx->getPaint());
+  }
 };
 
-struct RRectCmdProps {};
+struct RRectCmdProps {
+  SkRRect rrect;
+};
 
 class RRectCmd : public Command {
 private:
@@ -427,12 +438,18 @@ private:
 public:
   RRectCmd(jsi::Runtime &runtime, const jsi::Object &object,
            Variables &variables)
-      : Command(CommandType::DrawRRect) {}
+      : Command(CommandType::DrawRRect) {
+    convertProperty(runtime, object, "rrect", props.rrect, variables);
+  }
 
-  void draw(DrawingCtx *ctx) {}
+  void draw(DrawingCtx *ctx) {
+    ctx->canvas->drawRRect(props.rrect, ctx->getPaint());
+  }
 };
 
-struct OvalCmdProps {};
+struct OvalCmdProps {
+  SkRect rect;
+};
 
 class OvalCmd : public Command {
 private:
@@ -441,12 +458,21 @@ private:
 public:
   OvalCmd(jsi::Runtime &runtime, const jsi::Object &object,
           Variables &variables)
-      : Command(CommandType::DrawOval) {}
+      : Command(CommandType::DrawOval) {
+    convertProperty(runtime, object, "rect", props.rect, variables);
+  }
 
-  void draw(DrawingCtx *ctx) {}
+  void draw(DrawingCtx *ctx) {
+    ctx->canvas->drawOval(props.rect, ctx->getPaint());
+  }
 };
 
-struct PatchCmdProps {};
+struct PatchCmdProps {
+  std::array<SkPoint, 12> cubics;
+  std::optional<std::vector<SkColor>> colors;
+  std::optional<std::array<SkPoint, 4>> texCoords;
+  std::optional<SkBlendMode> blendMode;
+};
 
 class PatchCmd : public Command {
 private:
@@ -455,12 +481,32 @@ private:
 public:
   PatchCmd(jsi::Runtime &runtime, const jsi::Object &object,
            Variables &variables)
-      : Command(CommandType::DrawPatch) {}
+      : Command(CommandType::DrawPatch) {
+    convertProperty(runtime, object, "cubics", props.cubics, variables);
+    convertProperty(runtime, object, "colors", props.colors, variables);
+    convertProperty(runtime, object, "texCoords", props.texCoords, variables);
+    convertProperty(runtime, object, "blendMode", props.blendMode, variables);
+  }
 
-  void draw(DrawingCtx *ctx) {}
+  void draw(DrawingCtx *ctx) {
+    auto colors =
+        props.colors.has_value() ? props.colors.value().data() : nullptr;
+    auto texCoords =
+        props.texCoords.has_value() ? props.texCoords.value().data() : nullptr;
+    auto blendMode = props.blendMode.value_or(SkBlendMode::kSrcOver);
+    ctx->canvas->drawPatch(props.cubics.data(), colors, texCoords, blendMode,
+                           ctx->getPaint());
+  }
 };
 
-struct VerticesCmdProps {};
+struct VerticesCmdProps {
+  std::vector<SkPoint> vertices;
+  std::optional<std::vector<SkColor>> colors;
+  std::optional<std::vector<SkPoint>> textures;
+  SkVertices::VertexMode mode;
+  std::optional<SkBlendMode> blendMode;
+  std::optional<std::vector<uint16_t>> indices;
+};
 
 class VerticesCmd : public Command {
 private:
@@ -469,12 +515,43 @@ private:
 public:
   VerticesCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
-      : Command(CommandType::DrawVertices) {}
+      : Command(CommandType::DrawVertices) {
+    convertProperty(runtime, object, "vertices", props.vertices, variables);
+    convertProperty(runtime, object, "colors", props.colors, variables);
+    convertProperty(runtime, object, "textures", props.textures, variables);
+    convertProperty(runtime, object, "mode", props.mode, variables);
+    convertProperty(runtime, object, "blendMode", props.blendMode, variables);
+    convertProperty(runtime, object, "indices", props.indices, variables);
+  }
 
-  void draw(DrawingCtx *ctx) {}
+  void draw(DrawingCtx *ctx) {
+    // Create vertices using MakeCopy
+    auto vertices = SkVertices::MakeCopy(
+        props.mode, static_cast<int>(props.vertices.size()),
+        props.vertices.data(),
+        props.textures.has_value() ? props.textures.value().data() : nullptr,
+        props.colors.has_value() ? props.colors.value().data() : nullptr,
+        props.indices.has_value()
+            ? static_cast<int>(props.indices.value().size())
+            : 0,
+        props.indices.has_value() ? props.indices.value().data() : nullptr);
+
+    // Determine blend mode - use DstOver if colors are provided, SrcOver
+    // otherwise
+    const auto defaultBlendMode = props.colors.has_value()
+                                      ? SkBlendMode::kDstOver
+                                      : SkBlendMode::kSrcOver;
+
+    // Draw the vertices with the determined blend mode
+    ctx->canvas->drawVertices(
+        vertices, props.blendMode.value_or(defaultBlendMode), ctx->getPaint());
+  }
 };
 
-struct DiffRectCmdProps {};
+struct DiffRectCmdProps {
+  SkRRect outer;
+  SkRRect inner;
+};
 
 class DiffRectCmd : public Command {
 private:
@@ -483,12 +560,21 @@ private:
 public:
   DiffRectCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
-      : Command(CommandType::DrawDiffRect) {}
+      : Command(CommandType::DrawDiffRect) {
+    convertProperty(runtime, object, "outer", props.outer, variables);
+    convertProperty(runtime, object, "inner", props.inner, variables);
+  }
 
-  void draw(DrawingCtx *ctx) {}
+  void draw(DrawingCtx *ctx) {
+    ctx->canvas->drawDRRect(props.outer, props.inner, ctx->getPaint());
+  }
 };
 
-struct TextBlobCmdProps {};
+struct TextBlobCmdProps {
+  sk_sp<SkTextBlob> blob;
+  float x;
+  float y;
+};
 
 class TextBlobCmd : public Command {
 private:
@@ -497,12 +583,28 @@ private:
 public:
   TextBlobCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
-      : Command(CommandType::DrawTextBlob) {}
+      : Command(CommandType::DrawTextBlob) {
+    convertProperty(runtime, object, "blob", props.blob, variables);
+    convertProperty(runtime, object, "x", props.x, variables);
+    convertProperty(runtime, object, "y", props.y, variables);
+  }
 
-  void draw(DrawingCtx *ctx) {}
+  void draw(DrawingCtx *ctx) {
+    ctx->canvas->drawTextBlob(props.blob, props.x, props.y, ctx->getPaint());
+  }
 };
 
-struct GlyphsCmdProps {};
+struct GlyphData {
+  std::vector<SkGlyphID> glyphIds;
+  std::vector<SkPoint> positions;
+};
+
+struct GlyphsCmdProps {
+  std::optional<SkFont> font;
+  float x;
+  float y;
+  GlyphData glyphs;
+};
 
 class GlyphsCmd : public Command {
 private:
@@ -511,12 +613,32 @@ private:
 public:
   GlyphsCmd(jsi::Runtime &runtime, const jsi::Object &object,
             Variables &variables)
-      : Command(CommandType::DrawGlyphs) {}
+      : Command(CommandType::DrawGlyphs) {
+    convertProperty(runtime, object, "font", props.font, variables);
+    convertProperty(runtime, object, "x", props.x, variables);
+    convertProperty(runtime, object, "y", props.y, variables);
+    convertProperty(runtime, object, "glyphs", props.glyphs, variables);
+  }
 
-  void draw(DrawingCtx *ctx) {}
+  void draw(DrawingCtx *ctx) {
+    if (props.font.has_value()) {
+      std::vector<uint16_t> glyphIds;
+      std::vector<SkPoint> positions;
+      //      for (const auto &[id, pos] : props.glyphs) {
+      //        glyphIds.push_back(id);
+      //        positions.push_back(pos);
+      //      }
+      ctx->canvas->drawGlyphs(
+          static_cast<int>(props.glyphs.glyphIds.size()),
+          props.glyphs.glyphIds.data(), props.glyphs.positions.data(),
+          SkPoint::Make(props.x, props.y), props.font.value(), ctx->getPaint());
+    }
+  }
 };
 
-struct PictureCmdProps {};
+struct PictureCmdProps {
+  sk_sp<SkPicture> picture;
+};
 
 class PictureCmd : public Command {
 private:
@@ -525,12 +647,21 @@ private:
 public:
   PictureCmd(jsi::Runtime &runtime, const jsi::Object &object,
              Variables &variables)
-      : Command(CommandType::DrawPicture) {}
+      : Command(CommandType::DrawPicture) {
+    convertProperty(runtime, object, "picture", props.picture, variables);
+  }
 
-  void draw(DrawingCtx *ctx) {}
+  void draw(DrawingCtx *ctx) { ctx->canvas->drawPicture(props.picture); }
 };
 
-struct ImageSVGCmdProps {};
+struct ImageSVGCmdProps {
+  sk_sp<SkSVGDOM> svg;
+  std::optional<float> x;
+  std::optional<float> y;
+  std::optional<float> width;
+  std::optional<float> height;
+  std::optional<SkRect> rect;
+};
 
 class ImageSVGCmd : public Command {
 private:
@@ -539,12 +670,67 @@ private:
 public:
   ImageSVGCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
-      : Command(CommandType::DrawImageSVG) {}
+      : Command(CommandType::DrawImageSVG) {
+    // Convert SVG property - expect a host object of JsiSkSVG type
+    auto svgValue = object.getProperty(runtime, "svg");
+    if (svgValue.isObject() &&
+        svgValue.asObject(runtime).isHostObject(runtime)) {
+      auto ptr = std::dynamic_pointer_cast<JsiSkSVG>(
+          svgValue.asObject(runtime).asHostObject(runtime));
+      if (ptr != nullptr) {
+        props.svg = ptr->getObject();
+      } else {
+        throw std::runtime_error(
+            "Expected SkSvgDom object for the svg property.");
+      }
+    }
 
-  void draw(DrawingCtx *ctx) {}
+    // Convert other properties
+    convertProperty(runtime, object, "x", props.x, variables);
+    convertProperty(runtime, object, "y", props.y, variables);
+    convertProperty(runtime, object, "width", props.width, variables);
+    convertProperty(runtime, object, "height", props.height, variables);
+    convertProperty(runtime, object, "rect", props.rect, variables);
+  }
+
+  void draw(DrawingCtx *ctx) {
+    if (props.svg != nullptr) {
+      ctx->canvas->save();
+
+      if (props.rect.has_value()) {
+        // If rect is provided, use it for translation and container size
+        auto rect = props.rect.value();
+        ctx->canvas->translate(rect.x(), rect.y());
+        props.svg->setContainerSize(SkSize::Make(rect.width(), rect.height()));
+      } else {
+        // Otherwise use individual x, y, width, height properties
+        float x = props.x.value_or(-1);
+        float y = props.y.value_or(-1);
+        float width = props.width.value_or(-1);
+        float height = props.height.value_or(-1);
+
+        if (x != -1 && y != -1) {
+          ctx->canvas->translate(x, y);
+        }
+
+        if (width != -1 && height != -1) {
+          props.svg->setContainerSize(SkSize::Make(width, height));
+        }
+      }
+
+      // Render the SVG
+      props.svg->render(ctx->canvas);
+      ctx->canvas->restore();
+    }
+  }
 };
 
-struct ParagraphCmdProps {};
+struct ParagraphCmdProps {
+  para::Paragraph* paragraph;
+  float x;
+  float y;
+  float width;
+};
 
 class ParagraphCmd : public Command {
 private:
@@ -553,12 +739,29 @@ private:
 public:
   ParagraphCmd(jsi::Runtime &runtime, const jsi::Object &object,
                Variables &variables)
-      : Command(CommandType::DrawParagraph) {}
+      : Command(CommandType::DrawParagraph) {
+    convertProperty(runtime, object, "paragraph", props.paragraph, variables);
+    convertProperty(runtime, object, "x", props.x, variables);
+    convertProperty(runtime, object, "y", props.y, variables);
+    convertProperty(runtime, object, "width", props.width, variables);
+  }
 
-  void draw(DrawingCtx *ctx) {}
+  void draw(DrawingCtx *ctx) {
+    if (props.paragraph) {
+      props.paragraph->layout(props.width);
+      props.paragraph->paint(ctx->canvas, props.x, props.y);
+    }
+  }
 };
 
-struct AtlasCmdProps {};
+struct AtlasCmdProps {
+  sk_sp<SkImage> image;
+  std::vector<SkRect> sprites;
+  std::vector<SkRSXform> transforms;
+  std::optional<std::vector<SkColor>> colors;
+  std::optional<SkBlendMode> blendMode;
+  std::optional<SkSamplingOptions> sampling;
+};
 
 class AtlasCmd : public Command {
 private:
@@ -567,9 +770,28 @@ private:
 public:
   AtlasCmd(jsi::Runtime &runtime, const jsi::Object &object,
            Variables &variables)
-      : Command(CommandType::DrawAtlas) {}
+      : Command(CommandType::DrawAtlas) {
+    convertProperty(runtime, object, "image", props.image, variables);
+    convertProperty(runtime, object, "sprites", props.sprites, variables);
+    convertProperty(runtime, object, "transforms", props.transforms, variables);
+    convertProperty(runtime, object, "colors", props.colors, variables);
+    convertProperty(runtime, object, "blendMode", props.blendMode, variables);
+    convertProperty(runtime, object, "sampling", props.sampling, variables);
+  }
 
-  void draw(DrawingCtx *ctx) {}
+  void draw(DrawingCtx *ctx) {
+    if (props.image) {
+      auto colors =
+          props.colors.has_value() ? props.colors.value().data() : nullptr;
+      auto blendMode = props.blendMode.value_or(SkBlendMode::kSrcOver);
+      auto sampling = props.sampling.value_or(SkSamplingOptions());
+
+      ctx->canvas->drawAtlas(props.image.get(), props.transforms.data(),
+                             props.sprites.data(), colors,
+                             props.transforms.size(), blendMode, sampling,
+                             nullptr, &(ctx->getPaint()));
+    }
+  }
 };
 
 } // namespace RNSkia

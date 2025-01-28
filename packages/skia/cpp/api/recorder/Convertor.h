@@ -358,6 +358,31 @@ SkFont getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   throw std::runtime_error("Invalid prop value for SkFont received");
 }
 
+
+template <>
+sk_sp<SkPicture> getPropertyValue(jsi::Runtime &runtime,
+                                        const jsi::Value &value) {
+  if (value.isObject()) {
+    auto picture = value.asObject(runtime)
+                      .asHostObject<JsiSkPicture>(runtime)
+                      ->getObject();
+    return picture;
+  }
+  throw std::runtime_error("Invalid prop value for SkTextBlob received");
+}
+
+template <>
+sk_sp<SkTextBlob> getPropertyValue(jsi::Runtime &runtime,
+                                        const jsi::Value &value) {
+  if (value.isObject()) {
+    auto blob = value.asObject(runtime)
+                      .asHostObject<JsiSkTextBlob>(runtime)
+                      ->getObject();
+    return blob;
+  }
+  throw std::runtime_error("Invalid prop value for SkTextBlob received");
+}
+
 template <>
 sk_sp<SkRuntimeEffect> getPropertyValue(jsi::Runtime &runtime,
                                         const jsi::Value &value) {
@@ -410,6 +435,23 @@ Radius getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
     return {r, r};
   }
   throw std::runtime_error("Invalid prop value for Radius received");
+}
+
+template <>
+SkCanvas::PointMode getPropertyValue(jsi::Runtime &runtime,
+                                     const jsi::Value &val) {
+  if (val.isString()) {
+    auto value = val.asString(runtime).utf8(runtime);
+    if (value == "points") {
+      return SkCanvas::PointMode::kPoints_PointMode;
+    } else if (value == "lines") {
+      return SkCanvas::PointMode::kLines_PointMode;
+    } else if (value == "polygon") {
+      return SkCanvas::PointMode::kPolygon_PointMode;
+    }
+  }
+  throw std::runtime_error(
+      "Invalid prop value for SkCanvas::PointMode received");
 }
 
 template <>
@@ -656,6 +698,18 @@ StrokeOpts getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
     return opts;
   }
   throw std::runtime_error("Invalid prop value for StrokeOpts received");
+}
+
+template <>
+SkRRect getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isObject()) {
+    auto rect = processRRect(runtime, value);
+    if (!rect) {
+      throw std::runtime_error("Invalid prop value for SkRRect received");
+    }
+    return SkRRect(*rect);
+  }
+  throw std::runtime_error("Invalid prop value for SkRRect received");
 }
 
 template <>
