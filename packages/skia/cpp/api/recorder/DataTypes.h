@@ -19,6 +19,17 @@ std::vector<float> processArray(jsi::Runtime &runtime,
       auto subArray =
           processArray(runtime, element.asObject(runtime).asArray(runtime));
       result.insert(result.end(), subArray.begin(), subArray.end());
+    } else if (element.isObject()) {
+       auto indexableObj = element.asObject(runtime);
+        std::vector<float> values;
+        values.reserve(4);
+        for (int i = 0; i < 4; i++) {
+          if (indexableObj.hasProperty(runtime, std::to_string(i).c_str())) {
+            result.push_back(static_cast<float>(
+                indexableObj.getProperty(runtime, std::to_string(i).c_str())
+                    .asNumber()));
+          }
+        }
     }
   }
   return result;

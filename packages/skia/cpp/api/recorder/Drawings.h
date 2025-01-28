@@ -393,9 +393,10 @@ public:
                        ? rect.value()
                        : SkRect::MakeXYWH(x, y, width.value(), height.value());
         auto rects = RNSkiaImage::fitRects(fit, src, dst);
-        ctx->canvas->drawImageRect(img, rects.src, rects.dst, sampling.value_or(SkSamplingOptions(SkFilterMode::kLinear)),
-                                   &(ctx->getPaint()),
-                                   SkCanvas::kStrict_SrcRectConstraint);
+        ctx->canvas->drawImageRect(
+            img, rects.src, rects.dst,
+            sampling.value_or(SkSamplingOptions(SkFilterMode::kLinear)),
+            &(ctx->getPaint()), SkCanvas::kStrict_SrcRectConstraint);
       } else {
         throw std::runtime_error(
             "Image node could not resolve image dimension props.");
@@ -826,7 +827,8 @@ public:
       auto colors =
           props.colors.has_value() ? props.colors.value().data() : nullptr;
       auto blendMode = props.blendMode.value_or(SkBlendMode::kDstOver);
-      auto sampling = props.sampling.value_or(SkSamplingOptions(SkFilterMode::kLinear));
+      auto sampling =
+          props.sampling.value_or(SkSamplingOptions(SkFilterMode::kLinear));
 
       ctx->canvas->drawAtlas(props.image.get(), props.transforms.data(),
                              props.sprites.data(), colors,

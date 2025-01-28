@@ -58,13 +58,9 @@ public:
     paints.push_back(paint);
   }
 
-  void pushPaint(SkPaint &paint) {
-    paints.push_back(paint);
-  }
+  void pushPaint(SkPaint &paint) { paints.push_back(paint); }
 
-  void savePaint() {
-    paints.push_back(SkPaint(getPaint()));
-  }
+  void savePaint() { paints.push_back(SkPaint(getPaint())); }
 
   void saveBackdropFilter() {
     // Initialize image filter as nullptr

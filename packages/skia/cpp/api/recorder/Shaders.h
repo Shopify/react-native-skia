@@ -54,19 +54,38 @@ public:
       m3 = m4.asM33();
     }
 
-    auto uniformSize = source->uniformSize();
-    auto uniformsData = SkData::MakeUninitialized(uniformSize);
-    float *uniformPtr = static_cast<float *>(uniformsData->writable_data());
+    sk_sp<SkData> uniformsData;
+    // Calculate total size needed for uniforms
+    size_t uniformSize = source->uniformSize();
+    auto uniformsPtr = SkData::MakeUninitialized(uniformSize);
 
-    for (const auto &[name, data] : uniforms) {
-      auto it =
-          std::find_if(source->uniforms().begin(), source->uniforms().end(),
-                       [&name](const auto &u) { return u.name == name; });
-      if (it != source->uniforms().end()) {
-        memcpy(uniformPtr + it->offset / sizeof(float), data.data(),
-               data.size() * sizeof(float));
+    // Iterate through uniforms in the effect
+    const auto &sourceUniforms = source->uniforms();
+    for (const auto &uniform : sourceUniforms) {
+      // Find the corresponding uniform value in our props
+      auto it = uniforms.find(std::string(uniform.name));
+      if (it == uniforms.end()) {
+        throw std::runtime_error("Missing uniform value for: " +
+                                 std::string(uniform.name));
       }
+
+      // Calculate the size of this uniform (rows * columns)
+      size_t uniformValueSize = uniform.sizeInBytes() / sizeof(float);
+      auto size = it->second.size();
+      auto uniformCount = uniform.count;
+      auto sizeInBytes = uniform.sizeInBytes();
+      if (size != uniformValueSize) {
+        throw std::runtime_error("Incorrect uniform size for: " +
+                                 std::string(uniform.name));
+      }
+
+      // Copy the uniform data to the correct offset
+      memcpy(static_cast<float *>(uniformsPtr->writable_data()) +
+                 uniform.offset / sizeof(float),
+             it->second.data(), uniform.sizeInBytes());
     }
+    uniformsData = std::move(uniformsPtr);
+
     std::vector<sk_sp<SkShader>> children = ctx->popAllShaders();
     auto shader = source->makeShader(std::move(uniformsData), children.data(),
                                      children.size(), &m3);
