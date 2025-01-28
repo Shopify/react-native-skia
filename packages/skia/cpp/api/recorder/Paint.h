@@ -10,6 +10,12 @@
 
 namespace RNSkia {
 
+struct TransformProps {
+  std::optional<SkM44> transform;
+  std::optional<SkPoint> origin;
+  std::optional<SkMatrix> matrix;
+};
+
 // TODO: can we avoid a copy here?
 SkMatrix processTransform(std::optional<SkMatrix> &matrix,
                           std::optional<SkM44> &transform,
@@ -32,10 +38,7 @@ SkMatrix processTransform(std::optional<SkMatrix> &matrix,
   return m3;
 }
 
-struct CTMCmdProps {
-  std::optional<SkM44> transform;
-  std::optional<SkPoint> origin;
-  std::optional<SkMatrix> matrix;
+struct CTMCmdProps : TransformProps {
   std::optional<ClipDef> clip;
   std::optional<bool> invertClip;
   std::optional<Layer> layer;
@@ -58,14 +61,16 @@ public:
   }
 
   void saveCTM(DrawingCtx *ctx) {
-    auto [transform, origin, matrix, clip, invertClip, layer] = props;
-    auto hasTransform = matrix.has_value() || transform.has_value();
+    auto clip = props.clip;
+    auto invertClip = props.invertClip;
+    auto layer = props.layer;
+    auto hasTransform = props.matrix.has_value() || props.transform.has_value();
     auto hasClip = clip.has_value();
     auto op = invertClip.has_value() && invertClip.value()
                   ? SkClipOp::kDifference
                   : SkClipOp::kIntersect;
     auto shouldSave = hasTransform || hasClip || layer.has_value();
-    SkMatrix m3 = processTransform(matrix, transform, origin);
+    SkMatrix m3 = processTransform(props.matrix, props.transform, props.origin);
     if (shouldSave) {
       if (layer.has_value()) {
         if (std::holds_alternative<bool>(layer.value())) {

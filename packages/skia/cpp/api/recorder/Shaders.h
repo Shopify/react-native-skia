@@ -13,12 +13,9 @@
 
 namespace RNSkia {
 
-struct PushShaderProps {
+struct PushShaderProps : TransformProps {
   sk_sp<SkRuntimeEffect> source;
   Uniforms uniforms;
-  std::optional<SkM44> transform;
-  std::optional<SkPoint> origin;
-  std::optional<SkMatrix> matrix;
 };
 
 class PushShaderCmd : public Command {
@@ -37,22 +34,9 @@ public:
   }
 
   void pushShader(DrawingCtx *ctx) {
-    auto [source, uniforms, transform, origin, matrix] = props;
-    SkMatrix m3;
-    if (matrix.has_value()) {
-      m3 = matrix.value();
-      if (origin.has_value()) {
-        m3.postTranslate(origin.value().x(), origin.value().y());
-        m3.preTranslate(-origin.value().x(), -origin.value().y());
-      }
-    } else if (transform.has_value()) {
-      auto m4 = transform.value();
-      if (origin.has_value()) {
-        m4.postTranslate(origin.value().x(), origin.value().y());
-        m4.preTranslate(-origin.value().x(), -origin.value().y());
-      }
-      m3 = m4.asM33();
-    }
+    auto source = props.source;
+    auto uniforms = props.uniforms;
+    auto m3 = processTransform(props.matrix, props.transform, props.origin);
 
     sk_sp<SkData> uniformsData;
     // Calculate total size needed for uniforms
@@ -94,7 +78,7 @@ public:
   }
 };
 
-struct PushImageShaderProps {
+struct PushImageShaderProps : TransformProps {
   SkTileMode tx;
   SkTileMode ty;
   float x = 0;
@@ -104,11 +88,7 @@ struct PushImageShaderProps {
   std::optional<SkRect> rect;
   std::string fit;
   std::optional<sk_sp<SkImage>> image;
-  SkSamplingOptions sampling = SkSamplingOptions(SkFilterMode::kLinear);
-
-  std::optional<SkM44> transform;
-  std::optional<SkPoint> origin;
-  std::optional<SkMatrix> matrix;
+  std::optional<SkSamplingOptions> sampling;
 };
 
 class PushImageShaderCmd : public Command {
@@ -138,10 +118,13 @@ public:
   }
 
   void pushShader(DrawingCtx *ctx) {
-    auto [tx, ty, x, y, width, height, rect, fit, image, sampling, transform,
-          origin, matrix] = props;
-    if (image.has_value()) {
-      auto img = image.value();
+    auto x = props.x;
+    auto y = props.y;
+    auto width = props.width;
+    auto height = props.height;
+    auto rect = props.rect;
+    if (props.image.has_value()) {
+      auto img = props.image.value();
       SkMatrix m33;
       auto hasRect =
           rect.has_value() || (width.has_value() && height.has_value());
@@ -150,43 +133,28 @@ public:
         auto dst = rect.has_value()
                        ? rect.value()
                        : SkRect::MakeXYWH(x, y, width.value(), height.value());
-        auto rects = RNSkiaImage::fitRects(fit, src, dst);
+        auto rects = RNSkiaImage::fitRects(props.fit, src, dst);
         auto m = RNSkiaImage::rect2rect(rects.src, rects.dst);
         m33.preConcat(m);
       }
       SkMatrix lm;
       lm.preConcat(m33);
-      SkMatrix m3;
-      if (matrix.has_value()) {
-        m3 = matrix.value();
-        if (origin.has_value()) {
-          m3.postTranslate(origin.value().x(), origin.value().y());
-          m3.preTranslate(-origin.value().x(), -origin.value().y());
-        }
-      } else if (transform.has_value()) {
-        auto m4 = transform.value();
-        if (origin.has_value()) {
-          m4.postTranslate(origin.value().x(), origin.value().y());
-          m4.preTranslate(-origin.value().x(), -origin.value().y());
-        }
-        m3 = m4.asM33();
-      }
+      auto m3 = processTransform(props.matrix, props.transform, props.origin);
       lm.preConcat(m3);
-      auto shader = img->makeShader(tx, ty, sampling, &lm);
+      auto shader = img->makeShader(
+          props.tx, props.ty,
+          props.sampling.value_or(SkSamplingOptions(SkFilterMode::kLinear)),
+          &lm);
       ctx->shaders.push_back(shader);
     }
   }
 };
 
-struct GradientProps {
+struct GradientProps : TransformProps {
   std::vector<SkColor> colors;
   std::optional<std::vector<float>> positions;
   std::optional<SkTileMode> mode;
   std::optional<uint32_t> flags;
-
-  std::optional<SkM44> transform;
-  std::optional<SkPoint> origin;
-  std::optional<SkMatrix> matrix;
 };
 
 struct ColorShaderProps {
