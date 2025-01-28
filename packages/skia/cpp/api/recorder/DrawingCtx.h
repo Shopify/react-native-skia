@@ -84,7 +84,7 @@ public:
     if (imageFilter) {
       layerPaint.setImageFilter(imageFilter);
     }
-    canvas->saveLayer(nullptr, &layerPaint);
+    canvas->saveLayer(SkCanvas::SaveLayerRec(nullptr, nullptr, imageFilter.get(), 0));
     canvas->restore();
   }
 
