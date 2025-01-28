@@ -476,30 +476,31 @@ struct PatchCmdProps {
 
 class PatchCmd : public Command {
 private:
-  PatchCmdProps props;
-
+    PatchCmdProps props;
+    
 public:
-  PatchCmd(jsi::Runtime &runtime, const jsi::Object &object,
-           Variables &variables)
-      : Command(CommandType::DrawPatch) {
-    convertProperty(runtime, object, "patch", props.patch, variables);
-    convertProperty(runtime, object, "colors", props.colors, variables);
-    convertProperty(runtime, object, "texture", props.texture, variables);
-    convertProperty(runtime, object, "blendMode", props.blendMode, variables);
-  }
-
-  void draw(DrawingCtx *ctx) {
-    // Determine default blend mode based on presence of colors
-    SkBlendMode defaultBlendMode = props.colors.has_value()
-                                       ? SkBlendMode::kDstOver
-                                       : SkBlendMode::kSrcOver;
-
-    ctx->canvas->drawPatch(
-        props.patch.data(),
-        props.colors.has_value() ? props.colors.value().data() : nullptr,
-        props.texture.has_value() ? props.texture.value().data() : nullptr,
-        props.blendMode.value_or(defaultBlendMode), ctx->getPaint());
-  }
+    PatchCmd(jsi::Runtime &runtime, const jsi::Object &object,
+             Variables &variables)
+    : Command(CommandType::DrawPatch) {
+        convertProperty(runtime, object, "patch", props.patch, variables);
+        convertProperty(runtime, object, "colors", props.colors, variables);
+        convertProperty(runtime, object, "texture", props.texture, variables);
+        convertProperty(runtime, object, "blendMode", props.blendMode, variables);
+    }
+    
+    void draw(DrawingCtx *ctx) {
+        // Determine default blend mode based on presence of colors
+        SkBlendMode defaultBlendMode = props.colors.has_value()
+        ? SkBlendMode::kDstOver
+        : SkBlendMode::kSrcOver;
+        
+        ctx->canvas->drawPatch(
+                               props.patch.data(),
+                               props.colors.has_value() ? props.colors.value().data() : nullptr,
+                               props.texture.has_value() ? props.texture.value().data() : nullptr,
+                               props.blendMode.value_or(defaultBlendMode), ctx->getPaint());
+    }
+};
 
   struct VerticesCmdProps {
     std::vector<SkPoint> vertices;
