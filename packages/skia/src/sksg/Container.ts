@@ -52,8 +52,13 @@ const nativeDrawOnscreen = (
 export abstract class Container {
   public root: Node[] = [];
   protected recording: Recording | null = null;
+  protected unmounted = false;
 
   constructor(protected Skia: Skia, protected nativeId: number) {}
+
+  unmount() {
+    this.unmounted = true;
+  }
 
   drawOnCanvas(canvas: SkCanvas) {
     if (!this.recording) {
@@ -101,6 +106,9 @@ class ReanimatedContainer extends Container {
     if (this.mapperId !== null) {
       Rea.stopMapper(this.mapperId);
     }
+    if (this.unmounted) {
+      return;
+    }
     const recorder = new Recorder();
     visit(recorder, this.root);
     const record = recorder.getRecording();
@@ -133,6 +141,9 @@ class NativeReanimatedContainer extends Container {
   redraw() {
     if (this.mapperId !== null) {
       Rea.stopMapper(this.mapperId);
+    }
+    if (this.unmounted) {
+      return;
     }
     const { nativeId, Skia } = this;
     const recorder = new ReanimatedRecorder(Skia);
