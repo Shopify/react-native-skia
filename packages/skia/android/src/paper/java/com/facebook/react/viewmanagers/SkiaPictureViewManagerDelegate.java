@@ -24,6 +24,7 @@ public class SkiaPictureViewManagerDelegate<T extends View, U extends BaseViewMa
     switch (propName) {
       case "opaque":
         mViewManager.setOpaque(view, value != null && (boolean) value);
+        break;
       case "debug":
         mViewManager.setDebug(view, value != null && (boolean) value);
         break;
