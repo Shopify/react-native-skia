@@ -781,7 +781,8 @@ SkRect getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
-std::variant<SkRect, SkRRect> getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+std::variant<SkRect, SkRRect> getPropertyValue(jsi::Runtime &runtime,
+                                               const jsi::Value &value) {
   if (value.isObject()) {
     auto rect = processRect(runtime, value);
     if (rect) {

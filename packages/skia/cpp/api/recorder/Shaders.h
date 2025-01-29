@@ -9,7 +9,7 @@
 #include "Command.h"
 #include "Convertor.h"
 #include "DrawingCtx.h"
-#include "Image.h"
+#include "ImageFit.h"
 
 namespace RNSkia {
 
@@ -41,7 +41,7 @@ public:
 
     std::vector<sk_sp<SkShader>> children = ctx->popAllShaders();
     auto shader = source->makeShader(std::move(uniformsData), children.data(),
-                                   children.size(), &m3);
+                                     children.size(), &m3);
 
     ctx->shaders.push_back(shader);
   }
@@ -384,17 +384,17 @@ public:
   void pushShader(DrawingCtx *ctx) {
     // Get all existing shaders from the context
     std::vector<sk_sp<SkShader>> shaders = ctx->popAllShaders();
-    
+
     // We need at least 2 shaders to blend
     if (shaders.size() >= 2) {
       // Start from the last shader and blend backwards
       sk_sp<SkShader> blendedShader = shaders.back();
-      
+
       // Iterate from second-to-last to first shader
       for (int i = shaders.size() - 2; i >= 0; i--) {
         blendedShader = SkShaders::Blend(props.mode, shaders[i], blendedShader);
       }
-      
+
       ctx->shaders.push_back(blendedShader);
     } else if (shaders.size() == 1) {
       // If only one shader, just push it back
