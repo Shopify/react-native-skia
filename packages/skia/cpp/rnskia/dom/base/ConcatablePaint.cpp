@@ -73,7 +73,7 @@ void ConcatablePaint::concatTo(std::shared_ptr<SkPaint> paint) {
       paint->setStyle(SkPaint::Style::kFill_Style);
     } else {
       throw std::runtime_error(styleValue +
-                               " is not a valud value for the style property.");
+                               " is not a valid value for the style property.");
     }
   }
 

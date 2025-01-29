@@ -46,7 +46,7 @@ public:
         paint->setStyle(SkPaint::Style::kFill_Style);
       } else {
         throw std::runtime_error(
-            styleValue + " is not a valud value for the style property.");
+            styleValue + " is not a valid value for the style property.");
       }
     }
 
