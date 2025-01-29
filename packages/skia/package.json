@@ -1,7 +1,8 @@
 {
   "name": "@shopify/react-native-skia",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "bin": {
     "setup-skia-web": "./scripts/setup-canvaskit.js"
