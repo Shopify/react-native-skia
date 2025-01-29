@@ -9,7 +9,6 @@
 #include "RNSkJsiViewApi.h"
 #include "RNSkView.h"
 
-#include "JsiDomApi.h"
 #include "RuntimeAwareCache.h"
 
 namespace RNSkia {
@@ -24,7 +23,7 @@ RNSkManager::RNSkManager(
       _viewApi(std::make_shared<RNSkJsiViewApi>(platformContext)) {
 
   // Register main runtime
-  BaseRuntimeAwareCache::setMainJsRuntime(_jsRuntime);
+  RNJsi::BaseRuntimeAwareCache::setMainJsRuntime(_jsRuntime);
 
   // Install bindings
   installBindings();
@@ -77,10 +76,5 @@ void RNSkManager::installBindings() {
   _jsRuntime->global().setProperty(
       *_jsRuntime, "SkiaViewApi",
       jsi::Object::createFromHostObject(*_jsRuntime, _viewApi));
-
-  auto skiaDomApi = std::make_shared<JsiDomApi>(_platformContext);
-  _jsRuntime->global().setProperty(
-      *_jsRuntime, "SkiaDomApi",
-      jsi::Object::createFromHostObject(*_jsRuntime, std::move(skiaDomApi)));
 }
 } // namespace RNSkia
