@@ -148,87 +148,85 @@ std::shared_ptr<SkPath> processPath(jsi::Runtime &runtime,
 }
 
 // Function to process uniforms and return SkData for PushShaderCmd
-inline sk_sp<SkData> processUniforms(
-    const sk_sp<SkRuntimeEffect>& effect,
-    const Uniforms& uniforms) {
-    
-    size_t uniformSize = effect->uniformSize();
-    auto uniformsData = SkData::MakeUninitialized(uniformSize);
-    auto uniformDataPtr = static_cast<float*>(uniformsData->writable_data());
+inline sk_sp<SkData> processUniforms(const sk_sp<SkRuntimeEffect> &effect,
+                                     const Uniforms &uniforms) {
 
-    const auto& sourceUniforms = effect->uniforms();
-    for (const auto& uniform : sourceUniforms) {
-        auto it = uniforms.find(std::string(uniform.name));
-        if (it == uniforms.end()) {
-            throw std::runtime_error("Missing uniform value for: " + 
-                                   std::string(uniform.name));
-        }
+  size_t uniformSize = effect->uniformSize();
+  auto uniformsData = SkData::MakeUninitialized(uniformSize);
+  auto uniformDataPtr = static_cast<float *>(uniformsData->writable_data());
 
-        const auto& uniformValues = it->second;
-        RuntimeEffectUniform reu = JsiSkRuntimeEffect::fromUniform(uniform);
-        size_t expectedSize = reu.columns * reu.rows;
-        
-        if (uniformValues.size() != expectedSize) {
-            throw std::runtime_error("Incorrect uniform size for: " + 
-                                   std::string(uniform.name) + ". Expected " + 
-                                   std::to_string(expectedSize) + " got " + 
-                                   std::to_string(uniformValues.size()));
-        }
-
-        // Process each element in the uniform
-        for (std::size_t j = 0; j < expectedSize; ++j) {
-            const std::size_t offset = reu.slot + j;
-            float fValue = uniformValues[j];
-            
-            if (reu.isInteger) {
-                int iValue = static_cast<int>(fValue);
-                uniformDataPtr[offset] = SkBits2Float(iValue);
-            } else {
-                uniformDataPtr[offset] = fValue;
-            }
-        }
+  const auto &sourceUniforms = effect->uniforms();
+  for (const auto &uniform : sourceUniforms) {
+    auto it = uniforms.find(std::string(uniform.name));
+    if (it == uniforms.end()) {
+      throw std::runtime_error("Missing uniform value for: " +
+                               std::string(uniform.name));
     }
 
-    return uniformsData;
+    const auto &uniformValues = it->second;
+    RuntimeEffectUniform reu = JsiSkRuntimeEffect::fromUniform(uniform);
+    size_t expectedSize = reu.columns * reu.rows;
+
+    if (uniformValues.size() != expectedSize) {
+      throw std::runtime_error(
+          "Incorrect uniform size for: " + std::string(uniform.name) +
+          ". Expected " + std::to_string(expectedSize) + " got " +
+          std::to_string(uniformValues.size()));
+    }
+
+    // Process each element in the uniform
+    for (std::size_t j = 0; j < expectedSize; ++j) {
+      const std::size_t offset = reu.slot + j;
+      float fValue = uniformValues[j];
+
+      if (reu.isInteger) {
+        int iValue = static_cast<int>(fValue);
+        uniformDataPtr[offset] = SkBits2Float(iValue);
+      } else {
+        uniformDataPtr[offset] = fValue;
+      }
+    }
+  }
+
+  return uniformsData;
 }
 
-inline void processUniforms(
-    SkRuntimeShaderBuilder& builder,
-    const sk_sp<SkRuntimeEffect>& effect,
-    const Uniforms& uniforms) {
-    
-    const auto& sourceUniforms = effect->uniforms();
-    for (const auto& uniform : sourceUniforms) {
-        auto it = uniforms.find(std::string(uniform.name));
-        if (it == uniforms.end()) {
-            throw std::runtime_error("Missing uniform value for: " + 
-                                   std::string(uniform.name));
-        }
+inline void processUniforms(SkRuntimeShaderBuilder &builder,
+                            const sk_sp<SkRuntimeEffect> &effect,
+                            const Uniforms &uniforms) {
 
-        const auto& uniformValues = it->second;
-        RuntimeEffectUniform reu = JsiSkRuntimeEffect::fromUniform(uniform);
-        size_t expectedSize = reu.columns * reu.rows;
-        
-        if (uniformValues.size() != expectedSize) {
-            throw std::runtime_error("Incorrect uniform size for: " + 
-                                   std::string(uniform.name) + ". Expected " + 
-                                   std::to_string(expectedSize) + " got " + 
-                                   std::to_string(uniformValues.size()));
-        }
-
-        auto builderUniform = builder.uniform(uniform.name);
-        
-        if (reu.isInteger) {
-            std::vector<float> convertedValues(uniformValues.size());
-            for (size_t i = 0; i < uniformValues.size(); ++i) {
-                int iValue = static_cast<int>(uniformValues[i]);
-                convertedValues[i] = SkBits2Float(iValue);
-            }
-            builderUniform.set(convertedValues.data(), convertedValues.size());
-        } else {
-            builderUniform.set(uniformValues.data(), uniformValues.size());
-        }
+  const auto &sourceUniforms = effect->uniforms();
+  for (const auto &uniform : sourceUniforms) {
+    auto it = uniforms.find(std::string(uniform.name));
+    if (it == uniforms.end()) {
+      throw std::runtime_error("Missing uniform value for: " +
+                               std::string(uniform.name));
     }
+
+    const auto &uniformValues = it->second;
+    RuntimeEffectUniform reu = JsiSkRuntimeEffect::fromUniform(uniform);
+    size_t expectedSize = reu.columns * reu.rows;
+
+    if (uniformValues.size() != expectedSize) {
+      throw std::runtime_error(
+          "Incorrect uniform size for: " + std::string(uniform.name) +
+          ". Expected " + std::to_string(expectedSize) + " got " +
+          std::to_string(uniformValues.size()));
+    }
+
+    auto builderUniform = builder.uniform(uniform.name);
+
+    if (reu.isInteger) {
+      std::vector<float> convertedValues(uniformValues.size());
+      for (size_t i = 0; i < uniformValues.size(); ++i) {
+        int iValue = static_cast<int>(uniformValues[i]);
+        convertedValues[i] = SkBits2Float(iValue);
+      }
+      builderUniform.set(convertedValues.data(), convertedValues.size());
+    } else {
+      builderUniform.set(uniformValues.data(), uniformValues.size());
+    }
+  }
 }
 
 } // namespace RNSkia
