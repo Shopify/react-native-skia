@@ -62,9 +62,10 @@ public:
     } else if (nodeType == "skTwoPointConicalGradient") {
       commands.push_back(std::make_unique<TwoPointConicalGradientCmd>(
           runtime, props, variables));
-        // TODO: should receive skBlendShader here
+      // TODO: should receive skBlendShader here
     } else if (nodeType == "skBlend") {
-      commands.push_back(std::make_unique<BlendShaderCmd>(runtime, props, variables));
+      commands.push_back(
+          std::make_unique<BlendShaderCmd>(runtime, props, variables));
     }
   }
 
@@ -204,8 +205,10 @@ public:
     commands.push_back(std::make_unique<Command>(CommandType::DrawPaint));
   }
 
-  void drawBox(jsi::Runtime &runtime, const jsi::Object &props, const jsi::Array &shadows) {
-    commands.push_back(std::make_unique<BoxCmd>(runtime, props, shadows, variables));
+  void drawBox(jsi::Runtime &runtime, const jsi::Object &props,
+               const jsi::Array &shadows) {
+    commands.push_back(
+        std::make_unique<BoxCmd>(runtime, props, shadows, variables));
   }
 
   void drawImage(jsi::Runtime &runtime, const jsi::Object &props) {
@@ -376,11 +379,10 @@ public:
               static_cast<TwoPointConicalGradientCmd *>(cmd.get());
           twoPointConicalGradientCmd->pushShader(ctx);
         } else if (nodeType == "skBlendShader") {
-          auto *blendShaderCmd =
-              static_cast<BlendShaderCmd *>(cmd.get());
+          auto *blendShaderCmd = static_cast<BlendShaderCmd *>(cmd.get());
           blendShaderCmd->pushShader(ctx);
         } else {
-            throw std::runtime_error("Invalid shader type: " + nodeType);
+          throw std::runtime_error("Invalid shader type: " + nodeType);
         }
         break;
       }
@@ -442,8 +444,8 @@ public:
           auto *line2DCmd = static_cast<Line2DPathEffectCmd *>(cmd.get());
           line2DCmd->pushPathEffect(ctx);
         } else {
-            throw std::runtime_error("Invalid path effect type: " + nodeType);
-          }
+          throw std::runtime_error("Invalid path effect type: " + nodeType);
+        }
         break;
       }
 
@@ -470,7 +472,7 @@ public:
           auto *lerpCmd = static_cast<LerpColorFilterCmd *>(cmd.get());
           lerpCmd->pushColorFilter(ctx);
         } else {
-            throw std::runtime_error("Invalid color filter type: " + nodeType);
+          throw std::runtime_error("Invalid color filter type: " + nodeType);
         }
         break;
       }
