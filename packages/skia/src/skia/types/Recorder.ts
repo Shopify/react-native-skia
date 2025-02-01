@@ -29,7 +29,7 @@ import type {
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer/processors/Animations/Animations";
 
-import type { SkCanvas } from "./Canvas";
+import type { SkPicture } from "./Picture";
 
 export interface BaseRecorder {
   saveGroup(): void;
@@ -86,6 +86,6 @@ export interface BaseRecorder {
 }
 
 export interface JsiRecorder extends BaseRecorder {
-  play(canvas: SkCanvas): void;
+  play(): SkPicture;
   applyUpdates(variables: SharedValue<unknown>[]): void;
 }

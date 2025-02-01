@@ -29,24 +29,15 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   picture.dispose();
 };
 
-const nativeDrawOnscreen = (
-  Skia: Skia,
-  nativeId: number,
-  recorder: JsiRecorder
-) => {
+const nativeDrawOnscreen = (nativeId: number, recorder: JsiRecorder) => {
   "worklet";
 
-  const rec = Skia.PictureRecorder();
-  const canvas = rec.beginRecording();
   //const start = performance.now();
 
-  recorder.play(canvas);
-  const picture = rec.finishRecordingAsPicture();
+  const picture = recorder.play();
   //const end = performance.now();
   //console.log("Recording time: ", end - start);
   SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
-  rec.dispose();
-  picture.dispose();
 };
 
 export abstract class Container {
@@ -154,12 +145,12 @@ class NativeReanimatedContainer extends Container {
       this.mapperId = Rea.startMapper(() => {
         "worklet";
         sharedRecorder.applyUpdates(sharedValues);
-        nativeDrawOnscreen(Skia, nativeId, sharedRecorder);
+        nativeDrawOnscreen(nativeId, sharedRecorder);
       }, sharedValues);
     }
     Rea.runOnUI(() => {
       "worklet";
-      nativeDrawOnscreen(Skia, nativeId, sharedRecorder);
+      nativeDrawOnscreen(nativeId, sharedRecorder);
     })();
   }
 }
