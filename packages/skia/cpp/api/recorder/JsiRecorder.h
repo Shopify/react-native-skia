@@ -50,11 +50,15 @@ public:
   }
 
   JSI_HOST_FUNCTION(play) {
-    auto jsiCanvas =
-        arguments[0].asObject(runtime).asHostObject<JsiSkCanvas>(runtime);
-    DrawingCtx ctx(jsiCanvas->getCanvas());
+    SkPictureRecorder pictureRecorder;
+    SkISize size = SkISize::Make(2'000'000, 2'000'000);
+    SkRect rect = SkRect::Make(size);
+    auto canvas = pictureRecorder.beginRecording(rect, nullptr);
+    DrawingCtx ctx(canvas);
     getObject()->play(&ctx);
-    return jsi::Value::undefined();
+    auto picture = pictureRecorder.finishRecordingAsPicture();
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkPicture>(getContext(), picture));
   }
 
   JSI_HOST_FUNCTION(applyUpdates) {

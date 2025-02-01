@@ -36,17 +36,12 @@ const nativeDrawOnscreen = (
 ) => {
   "worklet";
 
-  const rec = Skia.PictureRecorder();
-  const canvas = rec.beginRecording();
   //const start = performance.now();
 
-  recorder.play(canvas);
-  const picture = rec.finishRecordingAsPicture();
+  const picture = recorder.play();
   //const end = performance.now();
   //console.log("Recording time: ", end - start);
   SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
-  rec.dispose();
-  picture.dispose();
 };
 
 export abstract class Container {
