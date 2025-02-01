@@ -29,7 +29,6 @@ import type {
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer/processors/Animations/Animations";
 
-import type { SkCanvas } from "./Canvas";
 import type { SkPicture } from "./Picture";
 
 export interface BaseRecorder {
