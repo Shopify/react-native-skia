@@ -1,8 +1,16 @@
 {
 	"name": "headless-skia",
 	"version": "1.0.0",
+	"scripts": {
+		"test": "ts-node ./src/helloWorld.tsx"
+	},
 	"dependencies": {
 		"@shopify/react-native-skia": "workspace:*",
 		"react": "^18.0.0"
+	},
+	"devDependencies": {
+		"eslint": "^9.19.0",
+		"eslint-config-react-native-wcandillon": "^3.10.2",
+		"ts-node": "^10.9.2"
 	}
 }
