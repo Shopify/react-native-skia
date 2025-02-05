@@ -15,11 +15,12 @@ You will notice in the example below that the import URL looks different than th
 
 ```tsx
 import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/commonjs/web/LoadSkiaWeb";
-import { Fill, makeOffscreenSurface, drawOffscreen, getSkiaExports } from "@shopify/react-native-skia/lib/commonjs/headless";
+import { Circle, drawOffscreen, getSkiaExports, Group, makeOffscreenSurface } from "@shopify/react-native-skia/lib/commonjs/headless";
 
 (async () => {
   const width = 256;
   const height = 256;
+  const size = 60;
   const r = size * 0.33;
   await LoadSkiaWeb();
   // Once that CanvasKit is loaded, you can access Skia via getSkiaExports()

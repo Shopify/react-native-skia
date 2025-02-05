@@ -12,7 +12,7 @@ import React from "react";
 (async () => {
 	const width = 256;
 	const height = 256;
-	const size = 50;
+	const size = 60;
 	const r = size * 0.33;
 	await LoadSkiaWeb();
 	// Once that CanvasKit is loaded, you can access Skia via getSkiaExports()
