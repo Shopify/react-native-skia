@@ -745,16 +745,11 @@ public:
   }
 };
 
-struct GlyphData {
-  std::vector<SkGlyphID> glyphIds;
-  std::vector<SkPoint> positions;
-};
-
 struct GlyphsCmdProps {
   std::optional<SkFont> font;
   float x;
   float y;
-  //  GlyphData glyphs;
+  GlyphData glyphs;
 };
 
 class GlyphsCmd : public Command {
@@ -768,22 +763,18 @@ public:
     convertProperty(runtime, object, "font", props.font, variables);
     convertProperty(runtime, object, "x", props.x, variables);
     convertProperty(runtime, object, "y", props.y, variables);
-    //  convertProperty(runtime, object, "glyphs", props.glyphs, variables);
+    convertProperty(runtime, object, "glyphs", props.glyphs, variables);
   }
 
-  void draw(DrawingCtx *ctx) {
+ void draw(DrawingCtx *ctx) {
     if (props.font.has_value()) {
-      //      std::vector<uint16_t> glyphIds;
-      //      std::vector<SkPoint> positions;
-      //            for (const auto &[id, pos] : props.glyphs) {
-      //              glyphIds.push_back(id);
-      //              positions.push_back(pos);
-      //            }
-      //      ctx->canvas->drawGlyphs(
-      //          static_cast<int>(props.glyphs.glyphIds.size()),
-      //          props.glyphs.glyphIds.data(), props.glyphs.positions.data(),
-      //          SkPoint::Make(props.x, props.y), props.font.value(),
-      //          ctx->getPaint());
+      ctx->canvas->drawGlyphs(
+          static_cast<int>(props.glyphs.glyphIds.size()),
+          props.glyphs.glyphIds.data(),
+          props.glyphs.positions.data(),
+          SkPoint::Make(props.x, props.y),
+          props.font.value(),
+          ctx->getPaint());
     }
   }
 };
