@@ -84,17 +84,6 @@ Not all features have been tested yet, so please [report](https://github.com/Sho
 
 :::
 
-## Playground
-
-We have an example project you can play with [here](https://github.com/Shopify/react-native-skia/tree/main/example).
-
-```sh
-yarn bootstrap
-cd example && yarn start
-```
-
-To run the example project on iOS, you will need to run `pod install`, and on Android, you will also need Android NDK to be installed ([see here](#android)).
-
 ## Debugging
 
 We recommend using React Native DevTools to debug your JS code — see the [React Native docs](https://reactnative.dev/docs/debugging). Alternatively, you can debug both JS and platform code in VS Code and via native IDEs. If using VS Code, we recommend [Expo Tools](https://github.com/expo/vscode-expo), [Radon IDE](https://ide.swmansion.com/), or Microsoft's [React Native Tools](https://marketplace.visualstudio.com/items?itemName=msjsdiag.vscode-react-native#debugging-react-native-applications).
@@ -158,3 +147,8 @@ afterEach(cleanup);
 ```
 
 With this configuration, you will have properly set up Jest to work with React Native Skia mocks using either ECMAScript Modules or CommonJS.
+
+## Playground
+
+We have example projects you can play with [here](https://github.com/Shopify/react-native-skia/tree/main/apps).
+It would require you first to [build Skia locally](https://github.com/shopify/react-native-skia?tab=readme-ov-file#library-development) first.
