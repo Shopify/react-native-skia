@@ -12979,6 +12979,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"headless-skia@workspace:apps/headless":
+  version: 0.0.0-use.local
+  resolution: "headless-skia@workspace:apps/headless"
+  dependencies:
+    "@shopify/react-native-skia": "workspace:*"
+    react: ^18.0.0
+    ts-node: ^10.0.0
+  languageName: unknown
+  linkType: soft
+
 "hermes-estree@npm:0.22.0":
   version: 0.22.0
   resolution: "hermes-estree@npm:0.22.0"
@@ -22135,7 +22145,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-node@npm:^10.9.2":
+"ts-node@npm:^10.0.0, ts-node@npm:^10.9.2":
   version: 10.9.2
   resolution: "ts-node@npm:10.9.2"
   dependencies:
