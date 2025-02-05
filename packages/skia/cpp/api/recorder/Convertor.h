@@ -31,7 +31,14 @@ struct Radius {
 using ConversionFunction =
     std::function<void(jsi::Runtime &runtime, const jsi::Object &object)>;
 using Variables = std::map<std::string, std::vector<ConversionFunction>>;
+
 using Patch = std::array<SkPoint, 12>;
+
+struct GlyphData {
+  std::vector<SkGlyphID> glyphIds;
+  std::vector<SkPoint> positions;
+};
+
 
 bool isSharedValue(jsi::Runtime &runtime, const jsi::Value &value) {
   return value.isObject() &&
@@ -376,6 +383,31 @@ SkFont getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
     return SkFont(*font);
   }
   throw std::runtime_error("Invalid prop value for SkFont received");
+}
+
+template <>
+GlyphData getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  GlyphData result;
+  if (value.isObject() && value.asObject(runtime).isArray(runtime)) {
+    auto array = value.asObject(runtime).asArray(runtime);
+    size_t size = array.size(runtime);
+    result.glyphIds.reserve(size);
+    result.positions.reserve(size);
+    
+    for (size_t i = 0; i < size; i++) {
+      auto glyph = array.getValueAtIndex(runtime, i).asObject(runtime);
+      // Get the glyph id
+      result.glyphIds.push_back(
+        static_cast<SkGlyphID>(glyph.getProperty(runtime, "id").asNumber())
+      );
+      // Get the position
+      result.positions.push_back(
+        processPoint(runtime, glyph.getProperty(runtime, "pos"))
+      );
+    }
+    return result;
+  }
+  throw std::runtime_error("Invalid prop value for GlyphData received");
 }
 
 template <>
