@@ -422,6 +422,20 @@ SkRSXform getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
+sk_sp<SkSVGDOM> getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (value.isObject() && value.asObject(runtime).isHostObject(runtime)) {
+    auto ptr = std::dynamic_pointer_cast<JsiSkSVG>(
+        value.asObject(runtime).asHostObject(runtime));
+    if (ptr != nullptr) {
+      return ptr->getObject();
+    }
+  } else if (value.isNull()) {
+    return nullptr;
+  }
+  throw std::runtime_error("Expected SkSvgDom object or null for the svg property.");
+}
+
+template <>
 sk_sp<SkPicture> getPropertyValue(jsi::Runtime &runtime,
                                   const jsi::Value &value) {
   if (value.isObject()) {

@@ -814,21 +814,8 @@ public:
   ImageSVGCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
       : Command(CommandType::DrawImageSVG) {
-    // Convert SVG property - expect a host object of JsiSkSVG type
-    auto svgValue = object.getProperty(runtime, "svg");
-    if (svgValue.isObject() &&
-        svgValue.asObject(runtime).isHostObject(runtime)) {
-      auto ptr = std::dynamic_pointer_cast<JsiSkSVG>(
-          svgValue.asObject(runtime).asHostObject(runtime));
-      if (ptr != nullptr) {
-        props.svg = ptr->getObject();
-      } else {
-        throw std::runtime_error(
-            "Expected SkSvgDom object for the svg property.");
-      }
-    }
-
     // Convert other properties
+    convertProperty(runtime, object, "svg", props.svg, variables);
     convertProperty(runtime, object, "x", props.x, variables);
     convertProperty(runtime, object, "y", props.y, variables);
     convertProperty(runtime, object, "width", props.width, variables);
