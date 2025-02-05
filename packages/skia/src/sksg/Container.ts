@@ -2,7 +2,6 @@ import Rea from "../external/reanimated/ReanimatedProxy";
 import type { Skia, SkCanvas } from "../skia/types";
 import { HAS_REANIMATED_3 } from "../external/reanimated/renderHelpers";
 import type { JsiRecorder } from "../skia/types/Recorder";
-import { Platform } from "../Platform";
 
 import type { Node } from "./Node";
 import type { Recording } from "./Recorder/Recorder";
@@ -156,7 +155,7 @@ class NativeReanimatedContainer extends Container {
 }
 
 export const createContainer = (Skia: Skia, nativeId: number) => {
-  const native = Platform.OS !== "web";
+  const native = global.SkiaViewApi !== undefined;
   if (HAS_REANIMATED_3 && nativeId !== -1) {
     if (native) {
       return new NativeReanimatedContainer(Skia, nativeId);
