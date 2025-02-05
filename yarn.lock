@@ -13190,6 +13190,7 @@ __metadata:
     eslint-config-react-native-wcandillon: ^3.10.2
     react: ^18.0.0
     ts-node: ^10.9.2
+    typescript: ^5.2.2
   languageName: unknown
   linkType: soft
 
