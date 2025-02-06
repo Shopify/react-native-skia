@@ -25,3 +25,4 @@ export * from "./FrostedCard";
 export * from "./SpeedTest";
 export * from "./Video";
 export * from "./WebGPU";
+export * from "./Chat";
