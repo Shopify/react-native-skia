@@ -12,10 +12,6 @@ export default function NotFoundScreen() {
 }
 
 const styles = StyleSheet.create({
-	title: {
-		fontSize: 20,
-		fontWeight: "bold",
-	},
 	linkText: {
 		fontSize: 14,
 		color: "#2e78b7",
