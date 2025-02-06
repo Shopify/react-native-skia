@@ -1,6 +1,12 @@
-import type { SkiaDomView, SkPath } from "@shopify/react-native-skia";
-import { Canvas, Circle, Path, Skia } from "@shopify/react-native-skia";
-import React, { useMemo, useRef, useState } from "react";
+import type { SkPath } from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Circle,
+  Path,
+  Skia,
+  useCanvasRef,
+} from "@shopify/react-native-skia";
+import React, { useMemo, useState } from "react";
 import { StyleSheet, TouchableOpacity, View, Text, Image } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -18,7 +24,7 @@ type DrawingOverlayProps = {
 export function DrawingOverlay({ onSend, onCancel }: DrawingOverlayProps) {
   const insets = useSafeAreaInsets();
 
-  const canvasRef = useRef<SkiaDomView>(null);
+  const canvasRef = useCanvasRef();
   const [paths, setPaths] = useState<string[]>([]);
 
   const savePath = (path: string) => {
@@ -71,7 +77,7 @@ export function DrawingOverlay({ onSend, onCancel }: DrawingOverlayProps) {
 
           runOnJS(savePath)(path);
         }),
-    []
+    [currentPath, updatePoint]
   );
 
   return (
