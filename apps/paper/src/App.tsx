@@ -31,7 +31,6 @@ import {
   FrostedCard,
   SpeedTest,
   Video,
-  WebGPU,
   Chat,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
@@ -112,14 +111,6 @@ const App = () => {
               component={HomeScreen}
               options={{
                 title: "🎨 Skia",
-              }}
-            />
-            <Stack.Screen
-              name="WebGPU"
-              key="WebGPU"
-              component={WebGPU}
-              options={{
-                title: "🏔️ WebGPU",
               }}
             />
             <Stack.Screen
