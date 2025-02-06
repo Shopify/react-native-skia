@@ -1,6 +1,5 @@
 import type { SkCanvas, SkImage } from "@shopify/react-native-skia";
 import { Skia } from "@shopify/react-native-skia";
-import { type SharedValue } from "react-native-reanimated";
 
 import type { ChatType, MessageType } from "../data/types";
 import { WINDOW_HEIGHT } from "../constants";
