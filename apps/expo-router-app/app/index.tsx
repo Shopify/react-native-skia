@@ -1,6 +1,6 @@
-import { Text } from "react-native";
+import AnimatedSquareCanvas from "@/components/AnimatedSquareCanvas";
 
 const Home = () => {
-	return <Text>Hello world!</Text>;
+	return <AnimatedSquareCanvas />;
 };
 export default Home;

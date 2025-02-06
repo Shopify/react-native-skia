@@ -12221,6 +12221,7 @@ __metadata:
     "@babel/core": ^7.25.2
     "@expo/vector-icons": ^14.0.2
     "@react-navigation/native": ^7.0.14
+    "@shopify/react-native-skia": "workspace:*"
     "@types/react": ~18.3.12
     expo: ~52.0.30
     expo-font: ~13.0.3
