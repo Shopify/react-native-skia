@@ -2,7 +2,7 @@
 
 High-performance 2d Graphics for React Native using Skia
 
-[![Tests](https://github.com/Shopify/react-native-skia/actions/workflows/tests.yml/badge.svg)](https://github.com/Shopify/react-native-skia/actions/workflows/tests.yml)
+[![CI](https://github.com/Shopify/react-native-skia/actions/workflows/ci.yml/badge.svg)](https://github.com/Shopify/react-native-skia/actions/workflows/tests.yml)
 [![npm version](https://img.shields.io/npm/v/@shopify/react-native-skia.svg?style=flat)](https://www.npmjs.com/package/@shopify/react-native-skia)
 [![issues](https://img.shields.io/github/issues/shopify/react-native-skia.svg?style=flat)](https://github.com/shopify/react-native-skia/issues)
 

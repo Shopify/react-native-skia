@@ -18,5 +18,13 @@ jest.mock("@shopify/react-native-skia", () => {
       View: Noop,
     };
   });
+  jest.mock("@shopify/react-native-skia/lib/commonjs/skia/core/Font", () => {
+    return {
+      useFont: () => null,
+      matchFont: () => null,
+      listFontFamilies: () => [],
+      useFonts: () => null,
+    }
+  });
   return Mock(global.CanvasKit);
 });

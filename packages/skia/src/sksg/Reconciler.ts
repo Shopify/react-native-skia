@@ -8,6 +8,7 @@ import { NodeType } from "../dom/types";
 import { debug, sksgHostConfig } from "./HostConfig";
 import type { Container } from "./Container";
 import { createContainer } from "./Container";
+import "./Elements";
 
 const skiaReconciler = ReactReconciler(sksgHostConfig);
 
@@ -59,6 +60,7 @@ export class SkiaSGRoot {
   }
 
   unmount() {
+    this.container.unmount();
     skiaReconciler.updateContainer(null, this.root, null, () => {
       debug("unmountContainer");
     });

@@ -52,7 +52,7 @@ Pod::Spec.new do |s|
     "HEADER_SEARCH_PATHS" => '"$(PODS_TARGET_SRCROOT)/cpp/"/**'
   }
 
-  s.frameworks = 'MetalKit'
+  s.frameworks = ['MetalKit', 'AVFoundation', 'AVKit', 'CoreMedia']
 
   s.vendored_frameworks = use_graphite ?
   base_frameworks + graphite_frameworks :
