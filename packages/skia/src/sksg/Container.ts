@@ -2,7 +2,6 @@ import Rea from "../external/reanimated/ReanimatedProxy";
 import type { Skia, SkCanvas } from "../skia/types";
 import { HAS_REANIMATED_3 } from "../external/reanimated/renderHelpers";
 import type { JsiRecorder } from "../skia/types/Recorder";
-import type { ISkiaViewApi } from "../views/types";
 
 import type { Node } from "./Node";
 import type { Recording } from "./Recorder/Recorder";
@@ -11,10 +10,6 @@ import { visit } from "./Recorder/Visitor";
 import { replay } from "./Recorder/Player";
 import { createDrawingContext } from "./Recorder/DrawingContext";
 import { ReanimatedRecorder } from "./Recorder/ReanimatedRecorder";
-
-declare global {
-  var SkiaViewApi: ISkiaViewApi;
-}
 
 const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   "worklet";
@@ -145,6 +140,10 @@ class NativeReanimatedContainer extends Container {
     visit(recorder, this.root);
     const sharedValues = recorder.getSharedValues();
     const sharedRecorder = recorder.getRecorder();
+    Rea.runOnUI(() => {
+      "worklet";
+      nativeDrawOnscreen(nativeId, sharedRecorder);
+    })();
     if (sharedValues.length > 0) {
       this.mapperId = Rea.startMapper(() => {
         "worklet";
@@ -152,10 +151,6 @@ class NativeReanimatedContainer extends Container {
         nativeDrawOnscreen(nativeId, sharedRecorder);
       }, sharedValues);
     }
-    Rea.runOnUI(() => {
-      "worklet";
-      nativeDrawOnscreen(nativeId, sharedRecorder);
-    })();
   }
 }
 
