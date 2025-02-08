@@ -39,7 +39,6 @@ struct GlyphData {
   std::vector<SkPoint> positions;
 };
 
-
 bool isSharedValue(jsi::Runtime &runtime, const jsi::Value &value) {
   return value.isObject() &&
          value.asObject(runtime).hasProperty(runtime,
@@ -393,17 +392,15 @@ GlyphData getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
     size_t size = array.size(runtime);
     result.glyphIds.reserve(size);
     result.positions.reserve(size);
-    
+
     for (size_t i = 0; i < size; i++) {
       auto glyph = array.getValueAtIndex(runtime, i).asObject(runtime);
       // Get the glyph id
       result.glyphIds.push_back(
-        static_cast<SkGlyphID>(glyph.getProperty(runtime, "id").asNumber())
-      );
+          static_cast<SkGlyphID>(glyph.getProperty(runtime, "id").asNumber()));
       // Get the position
       result.positions.push_back(
-        processPoint(runtime, glyph.getProperty(runtime, "pos"))
-      );
+          processPoint(runtime, glyph.getProperty(runtime, "pos")));
     }
     return result;
   }
@@ -422,7 +419,8 @@ SkRSXform getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
-sk_sp<SkSVGDOM> getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
+sk_sp<SkSVGDOM> getPropertyValue(jsi::Runtime &runtime,
+                                 const jsi::Value &value) {
   if (value.isObject() && value.asObject(runtime).isHostObject(runtime)) {
     auto ptr = std::dynamic_pointer_cast<JsiSkSVG>(
         value.asObject(runtime).asHostObject(runtime));
@@ -432,7 +430,8 @@ sk_sp<SkSVGDOM> getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value)
   } else if (value.isNull()) {
     return nullptr;
   }
-  throw std::runtime_error("Expected SkSvgDom object or null for the svg property.");
+  throw std::runtime_error(
+      "Expected SkSvgDom object or null for the svg property.");
 }
 
 template <>
@@ -470,7 +469,7 @@ std::shared_ptr<JsiSkParagraph> getPropertyValue(jsi::Runtime &runtime,
       return nullptr;
     }
     // Return a shared_ptr instead of raw pointer
-	return para;
+    return para;
   }
   return nullptr;
 }

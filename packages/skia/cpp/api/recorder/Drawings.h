@@ -766,15 +766,12 @@ public:
     convertProperty(runtime, object, "glyphs", props.glyphs, variables);
   }
 
- void draw(DrawingCtx *ctx) {
+  void draw(DrawingCtx *ctx) {
     if (props.font.has_value()) {
       ctx->canvas->drawGlyphs(
           static_cast<int>(props.glyphs.glyphIds.size()),
-          props.glyphs.glyphIds.data(),
-          props.glyphs.positions.data(),
-          SkPoint::Make(props.x, props.y),
-          props.font.value(),
-          ctx->getPaint());
+          props.glyphs.glyphIds.data(), props.glyphs.positions.data(),
+          SkPoint::Make(props.x, props.y), props.font.value(), ctx->getPaint());
     }
   }
 };
@@ -877,9 +874,9 @@ public:
   }
 
   void draw(DrawingCtx *ctx) {
-	  if (props.paragraph && props.paragraph->_paragraph) {
-		  props.paragraph->_paragraph->layout(props.width);
-		  props.paragraph->_paragraph->paint(ctx->canvas, props.x, props.y);
+    if (props.paragraph && props.paragraph->_paragraph) {
+      props.paragraph->_paragraph->layout(props.width);
+      props.paragraph->_paragraph->paint(ctx->canvas, props.x, props.y);
     }
   }
 };
