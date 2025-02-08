@@ -1,5 +1,5 @@
 import type { ViewProps } from "react-native";
-import { useEffect, useRef } from "react";
+import { createElement, useEffect, useRef } from "react";
 
 import { SkiaPictureView } from "../views/SkiaPictureView.web";
 
@@ -27,15 +27,13 @@ const SkiaPictureViewNativeComponent = ({
       );
     }
   }, [nativeID]);
-  return (
-    <SkiaPictureView
-      ref={ref}
-      debug={debug}
-      opaque={opaque}
-      onLayout={onLayout}
-      {...viewProps}
-    />
-  );
+  return createElement(SkiaPictureView, {
+    ref,
+    debug,
+    opaque,
+    onLayout,
+    ...viewProps,
+  });
 };
 // eslint-disable-next-line import/no-default-export
 export default SkiaPictureViewNativeComponent;
