@@ -2,17 +2,27 @@
     "$schema": "https://turbo.build/schema.json",
     "tasks": {
       "build:android": {
+        "cache": false,
         "env": ["JAVA_HOME", "ANDROID_NDK", "ANDROID_SDK", "ANDROID_HOME"]
       },
       "build:ios": {
+        "cache": false,
         "dependsOn": ["pod:install"]
       },
       "pod:install": {
         "cache": false
       },
-      "lint": {},
-      "tsc": {},
-      "test": {},
-      "build": {}
+      "lint": {
+        "cache": false
+      },
+      "tsc": {
+        "cache": false
+      },
+      "test": {
+        "cache": false
+      },
+      "build": {
+        "cache": false
+      }
     }
   }

@@ -11,6 +11,8 @@ import { replay } from "./Recorder/Player";
 import { createDrawingContext } from "./Recorder/DrawingContext";
 import { ReanimatedRecorder } from "./Recorder/ReanimatedRecorder";
 
+import "../views/api";
+
 const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   "worklet";
 
