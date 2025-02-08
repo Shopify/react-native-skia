@@ -23,4 +23,5 @@ export type Routes = {
   Snapshot: undefined;
   IconsExample: undefined;
   Paragraphs: undefined;
+  Paragraphs2: undefined;
 };
