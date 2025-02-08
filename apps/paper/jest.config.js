@@ -15,7 +15,7 @@ module.exports = {
     "setup.(ts|tsx)$"
   ],
   "setupFilesAfterEnv": [
-    "<rootDir>/node_modules/react-native-gesture-handler/jestSetup.js",
+    "<rootDir>/../../node_modules/react-native-gesture-handler/jestSetup.js",
     "<rootDir>/jestSetup.mjs"
   ],
   "preset": "react-native",
