@@ -51,7 +51,8 @@ public:
 
   JSI_HOST_FUNCTION(play) {
     SkPictureRecorder pictureRecorder;
-	  SkRect rect = SkRect::MakeWH(200, 200);
+    SkISize size = SkISize::Make(2'000'000, 2'000'000);
+    SkRect rect = SkRect::Make(size);
     auto canvas = pictureRecorder.beginRecording(rect, nullptr);
     DrawingCtx ctx(canvas);
     getObject()->play(&ctx);

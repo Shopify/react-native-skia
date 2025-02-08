@@ -33,7 +33,8 @@ public:
       SkRTreeFactory factory;
       canvas = getObject()->beginRecording(*rect, &factory);
     } else {
-      SkRect rect = SkRect::MakeEmpty();
+      SkISize size = SkISize::Make(2'000'000, 2'000'000);
+      SkRect rect = SkRect::Make(size);
       canvas = getObject()->beginRecording(rect, nullptr);
     }
     return jsi::Object::createFromHostObject(
