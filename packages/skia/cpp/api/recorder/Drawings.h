@@ -856,7 +856,7 @@ public:
 };
 
 struct ParagraphCmdProps {
-  std::shared_ptr<para::Paragraph> paragraph;
+  std::shared_ptr<JsiSkParagraph> paragraph;
   float x;
   float y;
   float width;
@@ -877,9 +877,9 @@ public:
   }
 
   void draw(DrawingCtx *ctx) {
-    if (props.paragraph) {
-      props.paragraph->layout(props.width);
-      props.paragraph->paint(ctx->canvas, props.x, props.y);
+	  if (props.paragraph && props.paragraph->_paragraph) {
+		  props.paragraph->_paragraph->layout(props.width);
+		  props.paragraph->_paragraph->paint(ctx->canvas, props.x, props.y);
     }
   }
 };

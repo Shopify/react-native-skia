@@ -458,7 +458,7 @@ SkPaint getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
-std::shared_ptr<para::Paragraph> getPropertyValue(jsi::Runtime &runtime, 
+std::shared_ptr<JsiSkParagraph> getPropertyValue(jsi::Runtime &runtime,
                                                  const jsi::Value &value) {
   if (value.isObject()) {
     auto hostObject = value.asObject(runtime).asHostObject(runtime);
@@ -470,7 +470,7 @@ std::shared_ptr<para::Paragraph> getPropertyValue(jsi::Runtime &runtime,
       return nullptr;
     }
     // Return a shared_ptr instead of raw pointer
-    return std::shared_ptr<para::Paragraph>(para->getParagraph());
+	return para;
   }
   return nullptr;
 }

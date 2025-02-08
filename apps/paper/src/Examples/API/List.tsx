@@ -23,6 +23,10 @@ export const examples = [
     title: "📚 Text & Paragraphs",
   },
   {
+    screen: "Paragraphs2",
+    title: "📚 Text & Paragraphs 2",
+  },
+  {
     screen: "Clipping",
     title: "✂️ & 🎭 Clipping & Masking",
   },
