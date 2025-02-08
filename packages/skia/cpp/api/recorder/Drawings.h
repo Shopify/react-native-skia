@@ -856,7 +856,7 @@ public:
 };
 
 struct ParagraphCmdProps {
-  para::Paragraph *paragraph;
+  std::shared_ptr<para::Paragraph> paragraph;
   float x;
   float y;
   float width;

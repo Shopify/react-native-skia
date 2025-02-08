@@ -458,18 +458,21 @@ SkPaint getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
-para::Paragraph *getPropertyValue(jsi::Runtime &runtime,
-                                  const jsi::Value &value) {
+std::shared_ptr<para::Paragraph> getPropertyValue(jsi::Runtime &runtime, 
+                                                 const jsi::Value &value) {
   if (value.isObject()) {
-    auto para = value.asObject(runtime)
-                    .asHostObject<JsiSkParagraph>(runtime)
-                    ->getParagraph();
-    return para;
+    auto hostObject = value.asObject(runtime).asHostObject(runtime);
+    if (!hostObject) {
+      return nullptr;
+    }
+    auto para = std::dynamic_pointer_cast<JsiSkParagraph>(hostObject);
+    if (!para) {
+      return nullptr;
+    }
+    // Return a shared_ptr instead of raw pointer
+    return std::shared_ptr<para::Paragraph>(para->getParagraph());
   }
-  if (value.isNull()) {
-    return nullptr;
-  }
-  throw std::runtime_error("Invalid prop value for Paragraph received");
+  return nullptr;
 }
 
 template <>
