@@ -24,8 +24,6 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   //const end = performance.now();
   //console.log("Recording time: ", end - start);
   SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
-  rec.dispose();
-  picture.dispose();
 };
 
 const nativeDrawOnscreen = (nativeId: number, recorder: JsiRecorder) => {
@@ -155,9 +153,9 @@ class NativeReanimatedContainer extends Container {
 }
 
 export const createContainer = (Skia: Skia, nativeId: number) => {
-  const native = global.SkiaViewApi !== undefined;
+  const { web } = global.SkiaViewApi;
   if (HAS_REANIMATED_3 && nativeId !== -1) {
-    if (native) {
+    if (!web) {
       return new NativeReanimatedContainer(Skia, nativeId);
     } else {
       return new ReanimatedContainer(Skia, nativeId);

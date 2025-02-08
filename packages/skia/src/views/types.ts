@@ -10,6 +10,7 @@ export type NativeSkiaViewProps = ViewProps & {
 };
 
 export interface ISkiaViewApi {
+  web?: boolean;
   setJsiProperty: <T>(nativeId: number, name: string, value: T) => void;
   requestRedraw: (nativeId: number) => void;
   makeImageSnapshot: (nativeId: number, rect?: SkRect) => SkImage;
