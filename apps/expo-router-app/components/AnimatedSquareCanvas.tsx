@@ -1,4 +1,4 @@
-import { Rect } from "@shopify/react-native-skia/src";
+import { Rect, Canvas } from "@shopify/react-native-skia/src";
 import { useEffect } from "react";
 import {
 	useSharedValue,
