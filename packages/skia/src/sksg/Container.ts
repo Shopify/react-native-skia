@@ -155,7 +155,7 @@ class NativeReanimatedContainer extends Container {
 }
 
 export const createContainer = (Skia: Skia, nativeId: number) => {
-  const { web } = global.SkiaViewApi;
+  const web = global.SkiaViewApi && global.SkiaViewApi.web;
   if (HAS_REANIMATED_3 && nativeId !== -1) {
     if (!web) {
       return new NativeReanimatedContainer(Skia, nativeId);
