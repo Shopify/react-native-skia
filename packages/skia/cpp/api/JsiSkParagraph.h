@@ -150,9 +150,7 @@ public:
     _paragraph = paragraphBuilder->Build();
   }
 
-  para::Paragraph *getParagraph() { return _paragraph.get(); }
-
-private:
+public:
   std::unique_ptr<para::Paragraph> _paragraph;
 };
 

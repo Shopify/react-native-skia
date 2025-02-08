@@ -2,7 +2,6 @@ import Rea from "../external/reanimated/ReanimatedProxy";
 import type { Skia, SkCanvas } from "../skia/types";
 import { HAS_REANIMATED_3 } from "../external/reanimated/renderHelpers";
 import type { JsiRecorder } from "../skia/types/Recorder";
-import type { ISkiaViewApi } from "../views/types";
 
 import type { Node } from "./Node";
 import type { Recording } from "./Recorder/Recorder";
@@ -12,9 +11,7 @@ import { replay } from "./Recorder/Player";
 import { createDrawingContext } from "./Recorder/DrawingContext";
 import { ReanimatedRecorder } from "./Recorder/ReanimatedRecorder";
 
-declare global {
-  var SkiaViewApi: ISkiaViewApi;
-}
+import "../views/api";
 
 const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   "worklet";
@@ -29,8 +26,6 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   //const end = performance.now();
   //console.log("Recording time: ", end - start);
   SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
-  rec.dispose();
-  picture.dispose();
 };
 
 const nativeDrawOnscreen = (nativeId: number, recorder: JsiRecorder) => {
@@ -145,6 +140,10 @@ class NativeReanimatedContainer extends Container {
     visit(recorder, this.root);
     const sharedValues = recorder.getSharedValues();
     const sharedRecorder = recorder.getRecorder();
+    Rea.runOnUI(() => {
+      "worklet";
+      nativeDrawOnscreen(nativeId, sharedRecorder);
+    })();
     if (sharedValues.length > 0) {
       this.mapperId = Rea.startMapper(() => {
         "worklet";
@@ -152,17 +151,13 @@ class NativeReanimatedContainer extends Container {
         nativeDrawOnscreen(nativeId, sharedRecorder);
       }, sharedValues);
     }
-    Rea.runOnUI(() => {
-      "worklet";
-      nativeDrawOnscreen(nativeId, sharedRecorder);
-    })();
   }
 }
 
 export const createContainer = (Skia: Skia, nativeId: number) => {
-  const native = global.SkiaViewApi !== undefined;
+  const web = global.SkiaViewApi && global.SkiaViewApi.web;
   if (HAS_REANIMATED_3 && nativeId !== -1) {
-    if (native) {
+    if (!web) {
       return new NativeReanimatedContainer(Skia, nativeId);
     } else {
       return new ReanimatedContainer(Skia, nativeId);

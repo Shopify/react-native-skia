@@ -28,11 +28,9 @@ public:
 
   bool isNull() { return std::holds_alternative<nullptr_t>(_value); }
 
-
   sk_sp<SkPicture> getPicture() { return std::get<sk_sp<SkPicture>>(_value); }
 
 private:
-  std::variant<nullptr_t, sk_sp<SkPicture>>
-      _value = nullptr;
+  std::variant<nullptr_t, sk_sp<SkPicture>> _value = nullptr;
 };
 } // namespace RNJsi
