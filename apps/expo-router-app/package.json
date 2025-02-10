@@ -1,6 +1,6 @@
 {
   "name": "expo-router-app",
-  "main": "expo-router/entry",
+  "main": "index",
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
@@ -16,6 +16,7 @@
     "@expo/vector-icons": "^14.0.2",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
+    "@shopify/react-native-skia": "workspace:*",
     "expo": "~52.0.31",
     "expo-blur": "~14.0.3",
     "expo-constants": "~17.0.5",
