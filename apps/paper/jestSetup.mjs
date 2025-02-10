@@ -14,6 +14,8 @@ jest.mock("expo-asset", () => ({
   useAssets: () => [[], undefined],
 }));
 
+jest.mock("@react-native-community/slider", () => jest.fn());
+
 jest.mock("react-native-reanimated", () => {
   // The mock for `call` immediately calls the callback which is incorrect
   // So we override it with a no-op
