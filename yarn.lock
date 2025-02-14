@@ -3755,12 +3755,12 @@ __metadata:
   linkType: hard
 
 "@octokit/endpoint@npm:^10.0.0":
-  version: 10.1.2
-  resolution: "@octokit/endpoint@npm:10.1.2"
+  version: 10.1.3
+  resolution: "@octokit/endpoint@npm:10.1.3"
   dependencies:
     "@octokit/types": ^13.6.2
     universal-user-agent: ^7.0.2
-  checksum: 425f4b0f12e2565d7270522e2e42d0595bd16c2c16fe262b540d50fc94d279e93b37b670370ae23dfe6117a2b74c69ffd7d3644e4dea5e6fc576a562ed75fba4
+  checksum: 47253e341ea1ef2d22fd33566753574f97fa28ebc8a9869821dd4f3f0eca2541562f31317118d203b91194804f1bac5f3373a261abb0b7b7a47ef84d6a88c124
   languageName: node
   linkType: hard
 
