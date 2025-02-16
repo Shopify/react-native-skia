@@ -1,3 +1,4 @@
+/* eslint-disable import/no-anonymous-default-export */
 import type { SkRect } from "../skia/types";
 import type { ISkiaViewApi } from "../views/types";
 import type { SkiaPictureView } from "../views/SkiaPictureView.web";
@@ -36,3 +37,6 @@ global.SkiaViewApi = {
     });
   },
 } as ISkiaViewApiWeb;
+
+// eslint-disable-next-line import/no-default-export
+export default {};
