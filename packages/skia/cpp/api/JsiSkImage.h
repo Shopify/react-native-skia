@@ -122,7 +122,7 @@ public:
       if (!image) {
         throw std::runtime_error("Failed to create raster image from texture in encodeImageData");
       }
-    } else if (image->isTextureBacked() && rasterIfNeeded) {
+    } else if (image->isTextureBacked() && !rasterIfNeeded) {
       throw std::runtime_error("Cannot encode texture-backed image directly");
     }
 #endif
@@ -178,7 +178,7 @@ public:
 
   JSI_HOST_FUNCTION(encodeToBase64) {
     bool rasterIfNeeded = count > 0 && arguments[0].isBool() ? arguments[0].asBool() : true;
-    auto data = encodeImageData(arguments, count);
+    auto data = encodeImageData(arguments, count, rasterIfNeeded);
     if (!data) {
       return jsi::Value::null();
     }
