@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ReactElement } from "react";
 import type { SharedValue } from "react-native-reanimated";
 
@@ -26,14 +26,18 @@ const createTexture = (
 };
 
 export const useTexture = (element: ReactElement, size: SkSize) => {
+  const [picture, setPicture] = useState<SkPicture | null>(null);
   const { width, height } = size;
-  const picture = useMemo(() => {
-    return drawAsPicture(element, {
-      x: 0,
-      y: 0,
-      width,
-      height,
-    });
+  useEffect(() => {
+    (async () => {
+      const pic = await drawAsPicture(element, {
+        x: 0,
+        y: 0,
+        width,
+        height,
+      });
+      setPicture(pic);
+    })();
   }, [element, width, height]);
   return usePictureAsTexture(picture, size);
 };

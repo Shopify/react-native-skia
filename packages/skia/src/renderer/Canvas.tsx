@@ -51,13 +51,11 @@ export interface CanvasProps extends ViewProps {
   debug?: boolean;
   opaque?: boolean;
   onSize?: SharedValue<SkSize>;
-  mode?: "continuous" | "default";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ref?: Ref<any>;
 }
 
 export const Canvas = ({
-  mode,
   debug,
   opaque,
   children,
@@ -66,7 +64,6 @@ export const Canvas = ({
   onLayout: _onLayout,
   ...viewProps
 }: CanvasProps) => {
-  const rafId = useRef<number>(null);
   const onLayout = useOnSizeEvent(onSize, _onLayout);
   // Native ID
   const nativeId = useMemo(() => {
@@ -78,7 +75,9 @@ export const Canvas = ({
 
   // Render effects
   useEffect(() => {
-    root.render(children);
+    (async () => {
+      await root.render(children);
+    })();
   }, [children, root]);
 
   useEffect(() => {
@@ -87,26 +86,6 @@ export const Canvas = ({
     };
   }, [root]);
 
-  const requestRedraw = useCallback(() => {
-    rafId.current = requestAnimationFrame(() => {
-      root.render(children);
-      if (mode === "continuous") {
-        requestRedraw();
-      }
-    });
-  }, [children, mode, root]);
-
-  useEffect(() => {
-    if (mode === "continuous") {
-      console.warn("The `mode` property in `Canvas` is deprecated.");
-      requestRedraw();
-    }
-    return () => {
-      if (rafId.current !== null) {
-        cancelAnimationFrame(rafId.current);
-      }
-    };
-  }, [mode, requestRedraw]);
   // Component methods
   useImperativeHandle(ref, () => ({
     makeImageSnapshot: (rect?: SkRect) => {
