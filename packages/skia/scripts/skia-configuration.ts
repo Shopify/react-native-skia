@@ -1,7 +1,13 @@
 /* eslint-disable max-len */
 import path from "path";
 
+import semver from "semver";
+
+import pck from "../package.json";
+
 import { $ } from "./utils";
+
+const react19 = semver.minVersion(pck.peerDependencies.react)!.major >= 20;
 
 const DEBUG = false;
 export const GRAPHITE = !!process.env.SK_GRAPHITE;
@@ -128,7 +134,7 @@ export const configurations = {
       },
     },
     args: [
-      ["ndk_api", 26],
+      ...(GRAPHITE || react19 ? [["ndk_api", 26]] : []),
       ["ndk", `"${NdkDir}"`],
       ["skia_use_system_freetype2", false],
       ["skia_use_gl", !GRAPHITE],

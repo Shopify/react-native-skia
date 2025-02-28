@@ -115,6 +115,7 @@
     "rimraf": "3.0.2",
     "semantic-release": "^24.1.0",
     "semantic-release-yarn": "^3.0.2",
+    "semver": "^7.7.1",
     "ts-jest": "29.1.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.2.2",
