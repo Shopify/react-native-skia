@@ -63,8 +63,11 @@ export class SkiaSGRoot {
 
   unmount() {
     this.container.unmount();
-    skiaReconciler.updateContainer(null, this.root, null, () => {
-      debug("unmountContainer");
+    return new Promise((resolve) => {
+      skiaReconciler.updateContainer(null, this.root, null, () => {
+        debug("unmountContainer");
+        resolve(true);
+      });
     });
   }
 }
