@@ -1,4 +1,4 @@
-import type { FC } from "react";
+import type { FC, Ref } from "react";
 import React, {
   useCallback,
   useEffect,
@@ -25,12 +25,8 @@ interface CanvasRef extends FC<CanvasProps> {
 
 export const useCanvasRef = () => useRef<CanvasRef>(null);
 
-console.log(SkiaPictureViewNativeComponent);
 const NativeSkiaPictureView = SkiaPictureViewNativeComponent;
 
-console.log({
-  NativeSkiaPictureView,
-});
 // TODO: no need to go through the JS thread for this
 const useOnSizeEvent = (
   resultValue: SkiaBaseViewProps["onSize"],
@@ -56,6 +52,8 @@ export interface CanvasProps extends ViewProps {
   opaque?: boolean;
   onSize?: SharedValue<SkSize>;
   mode?: "continuous" | "default";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ref?: Ref<any>;
 }
 
 export const Canvas = ({
