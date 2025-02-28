@@ -5313,7 +5313,7 @@ __metadata:
     pngjs: 6.0.0
     prettier: 2.8.7
     react: 19.0.0
-    react-native: 0.75.2
+    react-native: 0.78.0
     react-native-builder-bob: 0.18.2
     react-native-reanimated: ^3.16.5
     react-reconciler: 0.31.0
@@ -5327,7 +5327,7 @@ __metadata:
     ws: 8.18.0
   peerDependencies:
     react: ">=19.0"
-    react-native: ">=0.64"
+    react-native: ">=0.78"
     react-native-reanimated: ">=2.0.0"
   peerDependenciesMeta:
     react-native:
