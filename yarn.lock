@@ -5382,7 +5382,7 @@ __metadata:
     react: 19.0.0
     react-native: 0.78.0
     react-native-builder-bob: 0.18.2
-    react-native-reanimated: ^3.16.5
+    react-native-reanimated: 3.17.0
     react-reconciler: 0.31.0
     rimraf: 3.0.2
     semantic-release: ^24.1.0
@@ -5395,7 +5395,7 @@ __metadata:
   peerDependencies:
     react: ">=19.0"
     react-native: ">=0.78"
-    react-native-reanimated: ">=2.0.0"
+    react-native-reanimated: ">=3.0.0"
   peerDependenciesMeta:
     react-native:
       optional: true
@@ -10272,8 +10272,8 @@ __metadata:
     react: 19.0.0
     react-dom: 19.0.0
     react-native: 0.78.0
-    react-native-gesture-handler: ^2.18.1
-    react-native-reanimated: ^3.15.1
+    react-native-gesture-handler: 2.24.0
+    react-native-reanimated: 3.17.0
     twoslash-cli: 1.3.24
     typescript: 5.1.6
     url-loader: ^4.1.1
@@ -20348,21 +20348,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-gesture-handler@npm:^2.18.1":
-  version: 2.23.1
-  resolution: "react-native-gesture-handler@npm:2.23.1"
-  dependencies:
-    "@egjs/hammerjs": ^2.0.17
-    hoist-non-react-statics: ^3.3.0
-    invariant: ^2.2.4
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: f7afb2fdd370fdac52ef1ba37495ef598569df666a25f9a5f5825436861c90933face6b7ba8cb551fd90ba5438a1754495cf5690d9b663d4ab7a24c75d5abfc1
-  languageName: node
-  linkType: hard
-
-"react-native-gesture-handler@npm:^2.24.0":
+"react-native-gesture-handler@npm:2.24.0, react-native-gesture-handler@npm:^2.24.0":
   version: 2.24.0
   resolution: "react-native-gesture-handler@npm:2.24.0"
   dependencies:
@@ -20386,30 +20372,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:^3.15.1, react-native-reanimated@npm:^3.16.5":
-  version: 3.16.7
-  resolution: "react-native-reanimated@npm:3.16.7"
-  dependencies:
-    "@babel/plugin-transform-arrow-functions": ^7.0.0-0
-    "@babel/plugin-transform-class-properties": ^7.0.0-0
-    "@babel/plugin-transform-classes": ^7.0.0-0
-    "@babel/plugin-transform-nullish-coalescing-operator": ^7.0.0-0
-    "@babel/plugin-transform-optional-chaining": ^7.0.0-0
-    "@babel/plugin-transform-shorthand-properties": ^7.0.0-0
-    "@babel/plugin-transform-template-literals": ^7.0.0-0
-    "@babel/plugin-transform-unicode-regex": ^7.0.0-0
-    "@babel/preset-typescript": ^7.16.7
-    convert-source-map: ^2.0.0
-    invariant: ^2.2.4
-  peerDependencies:
-    "@babel/core": ^7.0.0-0
-    react: "*"
-    react-native: "*"
-  checksum: 108095709cd7a3effc5b5d276d94e161b399bd2d06e32140834168a0051545401bb09228071447e5925571da3f86f335d2a82c76751cdae07f66faf50b25c97f
-  languageName: node
-  linkType: hard
-
-"react-native-reanimated@npm:^3.17.0":
+"react-native-reanimated@npm:3.17.0, react-native-reanimated@npm:^3.17.0":
   version: 3.17.0
   resolution: "react-native-reanimated@npm:3.17.0"
   dependencies:

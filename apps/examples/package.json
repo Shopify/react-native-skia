@@ -13,8 +13,8 @@
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
     "react": "19.0.0",
     "react-native": "0.78.0",
-    "react-native-gesture-handler": "^2.24.0",
-    "react-native-reanimated": "^3.17.0"
+    "react-native-gesture-handler": "2.24.0",
+    "react-native-reanimated": "3.17.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

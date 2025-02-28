@@ -78,7 +78,7 @@
   "peerDependencies": {
     "react": ">=19.0",
     "react-native": ">=0.78",
-    "react-native-reanimated": ">=2.0.0"
+    "react-native-reanimated": ">=3.0.0"
   },
   "peerDependenciesMeta": {
     "react-native": {
@@ -111,7 +111,7 @@
     "react": "19.0.0",
     "react-native": "0.78.0",
     "react-native-builder-bob": "0.18.2",
-    "react-native-reanimated": "^3.16.5",
+    "react-native-reanimated": "3.17.0",
     "rimraf": "3.0.2",
     "semantic-release": "^24.1.0",
     "semantic-release-yarn": "^3.0.2",
@@ -135,6 +135,11 @@
     "jsSrcsDir": "src/specs",
     "android": {
       "javaPackageName": "com.shopify.reactnative.skia"
+    },
+    "ios": {
+      "componentProvider": {
+        "SkiaPictureView": "SkiaPictureView"
+      }
     }
   },
   "react-native-builder-bob": {
