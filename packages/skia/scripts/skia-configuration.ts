@@ -128,7 +128,7 @@ export const configurations = {
       },
     },
     args: [
-      ...(GRAPHITE ? [["ndk_api", 26]] : []),
+      ["ndk_api", 26],
       ["ndk", `"${NdkDir}"`],
       ["skia_use_system_freetype2", false],
       ["skia_use_gl", !GRAPHITE],
