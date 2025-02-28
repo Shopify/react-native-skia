@@ -42,9 +42,12 @@ export class SkiaSGRoot {
   }
 
   render(element: ReactNode) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    skiaReconciler.updateContainer(element as any, this.root, null, () => {
-      debug("updateContainer");
+    return new Promise((resolve) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      skiaReconciler.updateContainer(element as any, this.root, null, () => {
+        debug("updateContainer");
+        resolve(true);
+      });
     });
   }
 
@@ -61,8 +64,11 @@ export class SkiaSGRoot {
 
   unmount() {
     this.container.unmount();
-    skiaReconciler.updateContainer(null, this.root, null, () => {
-      debug("unmountContainer");
+    return new Promise((resolve) => {
+      skiaReconciler.updateContainer(null, this.root, null, () => {
+        debug("unmountContainer");
+        resolve(true);
+      });
     });
   }
 }

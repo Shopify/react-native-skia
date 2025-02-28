@@ -108,7 +108,7 @@ describe("Simple", () => {
     checkImage(image, "snapshots/sksg/breathe.png");
   });
 
-  it("simple demo (2)", () => {
+  it("simple demo (2)", async () => {
     const { Skia } = importSkia();
     const root = new SkiaSGRoot(Skia);
     const width = 768;
@@ -116,7 +116,7 @@ describe("Simple", () => {
     const center = { x: width / 2, y: height / 2 };
     const progress = 0;
     const transform = (() => [{ rotate: mix(progress, -Math.PI, 0) }])();
-    root.render(
+    await root.render(
       <>
         <skFill color="rgb(36,43,56)" />
         <skGroup blendMode="screen" origin={center} transform={transform}>

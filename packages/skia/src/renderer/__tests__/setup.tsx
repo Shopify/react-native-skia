@@ -176,14 +176,14 @@ export const width = 256 * PIXEL_RATIO;
 export const height = 256 * PIXEL_RATIO;
 export const center = { x: width / 2, y: height / 2 };
 
-export const drawOnNode = (element: ReactNode) => {
-  const { surface: ckSurface, draw, root } = mountCanvas(element);
+export const drawOnNode = async (element: ReactNode) => {
+  const { surface: ckSurface, draw, root } = await mountCanvas(element);
   draw();
   root.unmount();
   return ckSurface;
 };
 
-export const mountCanvas = (element: ReactNode) => {
+export const mountCanvas = async (element: ReactNode) => {
   const Skia = global.SkiaApi;
   expect(Skia).toBeDefined();
   const ckSurface = Skia.Surface.MakeOffscreen(width, height)!;
@@ -191,7 +191,7 @@ export const mountCanvas = (element: ReactNode) => {
   const canvas = ckSurface.getCanvas();
 
   const root = new SkiaSGRoot(Skia);
-  root.render(element);
+  await root.render(element);
   return {
     surface: ckSurface,
     root,
@@ -201,8 +201,8 @@ export const mountCanvas = (element: ReactNode) => {
   };
 };
 
-export const serialize = (element: ReactNode) => {
-  const { root } = mountCanvas(element);
+export const serialize = async (element: ReactNode) => {
+  const { root } = await mountCanvas(element);
   const serialized = serializeNode(root.sg);
   return JSON.stringify(serialized);
 };
@@ -379,8 +379,8 @@ class LocalSurface implements TestingSurface {
     return Promise.resolve(ckSurface.makeImageSnapshot());
   }
 
-  draw(node: ReactNode): Promise<SkImage> {
-    const { surface: ckSurface, draw } = mountCanvas(
+  async draw(node: ReactNode): Promise<SkImage> {
+    const { surface: ckSurface, draw } = await mountCanvas(
       <Group transform={[{ scale: PIXEL_RATIO }]}>{node}</Group>
     );
     draw();
@@ -440,8 +440,8 @@ return surface.makeImageSnapshot().encodeToBase64();
     return image;
   }
 
-  draw(node: ReactNode) {
-    return this.handleImageResponse(serialize(node));
+  async draw(node: ReactNode) {
+    return this.handleImageResponse(await serialize(node));
   }
 
   screen(screen: string) {
