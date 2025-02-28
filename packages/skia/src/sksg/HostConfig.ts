@@ -236,15 +236,9 @@ export const sksgHostConfig: SkiaHostConfig = {
   },
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
-  setCurrentUpdatePriority(newPriority: number) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    this.currentUpdatePriority = newPriority;
-  },
+  setCurrentUpdatePriority(newPriority: number) {},
   getCurrentUpdatePriority() {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    return this.currentUpdatePriority;
+    return DefaultEventPriority;
   },
   resolveUpdatePriority() {
     return DefaultEventPriority;

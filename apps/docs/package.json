@@ -16,8 +16,8 @@
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0"
   },
   "dependencies": {
-    "@docusaurus/core": "2.4.3",
-    "@docusaurus/preset-classic": "2.4.3",
+    "@docusaurus/core": "latest",
+    "@docusaurus/preset-classic": "latest",
     "@mdx-js/react": "^1.6.21",
     "@shopify/react-native-skia": "workspace:*",
     "@svgr/webpack": "^5.5.0",
@@ -35,7 +35,7 @@
     "url-loader": "^4.1.1"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "2.4.3",
+    "@docusaurus/module-type-aliases": "latest",
     "@tsconfig/docusaurus": "^1.0.4",
     "eslint": "8.21.0",
     "eslint-config-react-native-wcandillon": "3.10.2",
