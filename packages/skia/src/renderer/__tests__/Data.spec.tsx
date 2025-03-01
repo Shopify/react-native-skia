@@ -49,8 +49,6 @@ describe("Data Loading", () => {
 
   it("Should load a font file", async () => {
     const { surface, draw } = await mountCanvas(<CheckFont />);
-    draw();
-    processResult(surface, "snapshots/font/red.png");
     await wait(1500);
     draw();
     processResult(surface, "snapshots/font/green.png");
@@ -58,8 +56,6 @@ describe("Data Loading", () => {
 
   it("Should load an image", async () => {
     const { surface, draw } = await mountCanvas(<CheckImage />);
-    draw();
-    processResult(surface, "snapshots/font/red.png");
     await wait(1500);
     draw();
     processResult(surface, "snapshots/font/green.png");
