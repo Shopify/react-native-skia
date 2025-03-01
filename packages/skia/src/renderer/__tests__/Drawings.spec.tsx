@@ -87,10 +87,10 @@ describe("Test introductionary examples from our documentation", () => {
 
   it("should clear the canvas even if it's empty", async () => {
     const { surface, draw } = await mountCanvas(<CheckEmptyCanvas />);
-    draw();
+    await draw();
     processResult(surface, "snapshots/green.png");
     await wait(1000);
-    draw();
+    await draw();
     processResult(surface, "snapshots/transparent.png");
   });
 });

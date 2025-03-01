@@ -4,7 +4,7 @@ import { processResult } from "../../__tests__/setup";
 import { Fill, Picture, Group } from "../components";
 
 import type { EmptyProps } from "./setup";
-import { wait, importSkia, mountCanvas, width } from "./setup";
+import { importSkia, mountCanvas, wait, width } from "./setup";
 
 const CheckPicture = ({}: EmptyProps) => {
   const { createPicture, Skia } = importSkia();
@@ -62,19 +62,19 @@ const CheckPicture2 = ({}: EmptyProps) => {
 describe("Picture", () => {
   it("should respect dependency array", async () => {
     const { surface, draw } = await mountCanvas(<CheckPicture />);
-    draw();
+    await draw();
     processResult(surface, "snapshots/pictures/green.png");
-    await wait(32);
-    draw();
+    await wait(1000);
+    await draw();
     processResult(surface, "snapshots/pictures/red.png");
   });
 
   it("should not redraw if there are no dependency", async () => {
     const { surface, draw } = await mountCanvas(<CheckPicture2 />);
-    draw();
+    await draw();
     processResult(surface, "snapshots/pictures/green.png");
-    await wait(32);
-    draw();
+    await wait(1000);
+    await draw();
     processResult(surface, "snapshots/pictures/green.png");
   });
 });
