@@ -8,6 +8,9 @@ import { shallowEq } from "../renderer/typeddash";
 import type { Node } from "./Node";
 import type { Container } from "./Container";
 
+type EventPriority = number;
+const NoEventPriority = 0;
+
 const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
   if (DEBUG) {
@@ -22,7 +25,7 @@ type TextInstance = Node;
 type SuspenseInstance = Instance;
 type HydratableInstance = Instance;
 type PublicInstance = Instance;
-type HostContext = {};
+type HostContext = object;
 type UpdatePayload = Container;
 type ChildSet = Node[];
 type TimeoutHandle = NodeJS.Timeout;
@@ -43,6 +46,7 @@ type SkiaHostConfig = HostConfig<
   TimeoutHandle,
   NoTimeout
 >;
+let currentUpdatePriority: EventPriority = NoEventPriority;
 
 export const sksgHostConfig: SkiaHostConfig = {
   /**
@@ -236,15 +240,29 @@ export const sksgHostConfig: SkiaHostConfig = {
   },
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
-  setCurrentUpdatePriority(newPriority: number) {},
+  shouldAttemptEagerTransition: () => false,
+  trackSchedulerEvent: () => {},
+  resolveEventType: () => null,
+  resolveEventTimeStamp: () => -1.1,
+  requestPostPaintCallback() {},
+  maySuspendCommit: () => false,
+  preloadInstance: () => true, // true indicates already loaded
+  startSuspendingCommit() {},
+  suspendInstance() {},
+  waitForCommitToBeReady: () => null,
+  NotPendingTransition: null,
+  HostTransitionContext: null,
+  setCurrentUpdatePriority(newPriority: number) {
+    currentUpdatePriority = newPriority;
+  },
   getCurrentUpdatePriority() {
-    return DefaultEventPriority;
+    return currentUpdatePriority;
   },
   resolveUpdatePriority() {
+    if (currentUpdatePriority !== NoEventPriority) {
+      return currentUpdatePriority;
+    }
     return DefaultEventPriority;
   },
   resetFormInstance() {},
-  maySuspendCommit() {
-    return false;
-  },
 };
