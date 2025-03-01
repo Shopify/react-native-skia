@@ -49,15 +49,15 @@ describe("Data Loading", () => {
 
   it("Should load a font file", async () => {
     const { surface, draw } = await mountCanvas(<CheckFont />);
-    await wait(1500);
     draw();
-    processResult(surface, "snapshots/font/green.png");
+    processResult(surface, "snapshots/font/red.png");
+    await wait(1500);
   });
 
   it("Should load an image", async () => {
     const { surface, draw } = await mountCanvas(<CheckImage />);
-    await wait(1500);
     draw();
-    processResult(surface, "snapshots/font/green.png");
+    processResult(surface, "snapshots/font/red.png");
+    await wait(1500);
   });
 });

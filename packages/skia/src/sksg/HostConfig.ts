@@ -1,4 +1,5 @@
 /*global NodeJS*/
+import { createContext } from "react";
 import type { Fiber, HostConfig } from "react-reconciler";
 import { DefaultEventPriority } from "react-reconciler/constants";
 
@@ -129,9 +130,8 @@ export const sksgHostConfig: SkiaHostConfig = {
     return null;
   },
 
-  resetAfterCommit(container) {
+  resetAfterCommit(_container) {
     debug("resetAfterCommit");
-    container.redraw();
   },
 
   getPublicInstance(node: Instance) {
@@ -173,16 +173,16 @@ export const sksgHostConfig: SkiaHostConfig = {
 
   cloneInstance(
     instance,
-    _updatePayload,
-    _type,
-    _oldProps,
+    type,
+    oldProps,
     newProps,
+    updatePayload,
     _internalInstanceHandle,
     keepChildren: boolean,
     _recyclableInstance: null | Instance
   ) {
     debug("cloneInstance");
-
+    console.log({ instance, updatePayload, type, oldProps, newProps });
     return {
       type: instance.type,
       props: newProps,
@@ -251,7 +251,7 @@ export const sksgHostConfig: SkiaHostConfig = {
   suspendInstance() {},
   waitForCommitToBeReady: () => null,
   NotPendingTransition: null,
-  HostTransitionContext: null,
+  HostTransitionContext: createContext(null),
   setCurrentUpdatePriority(newPriority: number) {
     currentUpdatePriority = newPriority;
   },

@@ -41,7 +41,7 @@ export class SkiaSGRoot {
     return { type: NodeType.Group, props: {}, children, isDeclaration: false };
   }
 
-  render(element: ReactNode) {
+  private updateContainer(element: ReactNode) {
     return new Promise((resolve) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       skiaReconciler.updateContainer(element as any, this.root, null, () => {
@@ -49,6 +49,11 @@ export class SkiaSGRoot {
         resolve(true);
       });
     });
+  }
+
+  async render(element: ReactNode) {
+    await this.updateContainer(element);
+    this.container.redraw();
   }
 
   drawOnCanvas(canvas: SkCanvas) {

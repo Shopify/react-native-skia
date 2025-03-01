@@ -1,6 +1,5 @@
 import type { FC } from "react";
 import React, {
-  forwardRef,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -52,9 +51,10 @@ export interface CanvasProps extends ViewProps {
   debug?: boolean;
   opaque?: boolean;
   onSize?: SharedValue<SkSize>;
+  ref?: React.Ref<CanvasRef>;
 }
 
-export const Canvas = forwardRef(
+export const Canvas = (
   (
     {
       debug,
@@ -62,9 +62,9 @@ export const Canvas = forwardRef(
       children,
       onSize,
       onLayout: _onLayout,
+      ref,
       ...viewProps
     }: CanvasProps,
-    ref
   ) => {
     const onLayout = useOnSizeEvent(onSize, _onLayout);
     // Native ID
@@ -100,7 +100,7 @@ export const Canvas = forwardRef(
       getNativeId: () => {
         return nativeId;
       },
-    }));
+    } as CanvasRef));
     return (
       <NativeSkiaPictureView
         collapsable={false}
