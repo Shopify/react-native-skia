@@ -40,24 +40,27 @@ describe("Data Loading", () => {
   });
   it("Should accept null as an argument", async () => {
     const { surface, draw } = await mountCanvas(<CheckData />);
-    draw();
+    await draw();
     processResult(surface, "snapshots/font/green.png");
-    await wait(42);
-    draw();
+    await draw();
     processResult(surface, "snapshots/font/green.png");
   });
 
   it("Should load a font file", async () => {
     const { surface, draw } = await mountCanvas(<CheckFont />);
-    draw();
+    await draw();
     processResult(surface, "snapshots/font/red.png");
     await wait(1500);
+    await draw();
+    processResult(surface, "snapshots/font/green.png");
   });
 
   it("Should load an image", async () => {
     const { surface, draw } = await mountCanvas(<CheckImage />);
-    draw();
+    await draw();
     processResult(surface, "snapshots/font/red.png");
     await wait(1500);
+    await draw();
+    processResult(surface, "snapshots/font/green.png");
   });
 });

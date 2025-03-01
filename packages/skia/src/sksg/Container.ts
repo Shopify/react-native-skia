@@ -51,7 +51,6 @@ export abstract class Container {
   }
 
   set root(value: Node[]) {
-    console.log(value);
     this._root = value;
   }
 

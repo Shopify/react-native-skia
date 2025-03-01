@@ -178,7 +178,7 @@ export const center = { x: width / 2, y: height / 2 };
 
 export const drawOnNode = async (element: ReactNode) => {
   const { surface: ckSurface, draw, root } = await mountCanvas(element);
-  draw();
+  await draw();
   root.unmount();
   return ckSurface;
 };
@@ -191,11 +191,11 @@ export const mountCanvas = async (element: ReactNode) => {
   const canvas = ckSurface.getCanvas();
 
   const root = new SkiaSGRoot(Skia);
-  await root.render(element);
   return {
     surface: ckSurface,
     root,
-    draw: () => {
+    draw: async () => {
+      await root.render(element);
       root.drawOnCanvas(canvas);
     },
   };
@@ -383,7 +383,7 @@ class LocalSurface implements TestingSurface {
     const { surface: ckSurface, draw } = await mountCanvas(
       <Group transform={[{ scale: PIXEL_RATIO }]}>{node}</Group>
     );
-    draw();
+    await draw();
     return Promise.resolve(ckSurface.makeImageSnapshot());
   }
 
