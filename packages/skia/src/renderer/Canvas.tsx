@@ -52,13 +52,11 @@ export interface CanvasProps extends ViewProps {
   debug?: boolean;
   opaque?: boolean;
   onSize?: SharedValue<SkSize>;
-  mode?: "continuous" | "default";
 }
 
 export const Canvas = forwardRef(
   (
     {
-      mode,
       debug,
       opaque,
       children,
@@ -68,7 +66,6 @@ export const Canvas = forwardRef(
     }: CanvasProps,
     ref
   ) => {
-    const rafId = useRef<number | null>(null);
     const onLayout = useOnSizeEvent(onSize, _onLayout);
     // Native ID
     const nativeId = useMemo(() => {
@@ -89,26 +86,6 @@ export const Canvas = forwardRef(
       };
     }, [root]);
 
-    const requestRedraw = useCallback(() => {
-      rafId.current = requestAnimationFrame(() => {
-        root.render(children);
-        if (mode === "continuous") {
-          requestRedraw();
-        }
-      });
-    }, [children, mode, root]);
-
-    useEffect(() => {
-      if (mode === "continuous") {
-        console.warn("The `mode` property in `Canvas` is deprecated.");
-        requestRedraw();
-      }
-      return () => {
-        if (rafId.current !== null) {
-          cancelAnimationFrame(rafId.current);
-        }
-      };
-    }, [mode, requestRedraw]);
     // Component methods
     useImperativeHandle(ref, () => ({
       makeImageSnapshot: (rect?: SkRect) => {

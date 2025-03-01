@@ -22,9 +22,7 @@ const CheckPicture = ({}: EmptyProps) => {
         paint.setColor(Skia.Color(color));
         canvas.drawCircle(r, r, r, paint);
       }),
-    // In a non-test environment, createPicture and Skia will be top-level, not part of the array
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [color]
+    [Skia, color, createPicture, r]
   );
   return (
     <Group>
