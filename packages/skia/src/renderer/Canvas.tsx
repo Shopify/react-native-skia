@@ -54,62 +54,62 @@ export interface CanvasProps extends ViewProps {
   ref?: React.Ref<CanvasRef>;
 }
 
-export const Canvas = (
-  (
-    {
-      debug,
-      opaque,
-      children,
-      onSize,
-      onLayout: _onLayout,
-      ref,
-      ...viewProps
-    }: CanvasProps,
-  ) => {
-    const onLayout = useOnSizeEvent(onSize, _onLayout);
-    // Native ID
-    const nativeId = useMemo(() => {
-      return SkiaViewNativeId.current++;
-    }, []);
+export const Canvas = ({
+  debug,
+  opaque,
+  children,
+  onSize,
+  onLayout: _onLayout,
+  ref,
+  ...viewProps
+}: CanvasProps) => {
+  const onLayout = useOnSizeEvent(onSize, _onLayout);
+  // Native ID
+  const nativeId = useMemo(() => {
+    return SkiaViewNativeId.current++;
+  }, []);
 
-    // Root
-    const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
+  // Root
+  const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
 
-    // Render effects
-    useEffect(() => {
-      root.render(children);
-    }, [children, root]);
+  // Render effects
+  useEffect(() => {
+    root.render(children);
+  }, [children, root]);
 
-    useEffect(() => {
-      return () => {
-        root.unmount();
-      };
-    }, [root]);
+  useEffect(() => {
+    return () => {
+      root.unmount();
+    };
+  }, [root]);
 
-    // Component methods
-    useImperativeHandle(ref, () => ({
-      makeImageSnapshot: (rect?: SkRect) => {
-        return SkiaViewApi.makeImageSnapshot(nativeId, rect);
-      },
-      makeImageSnapshotAsync: (rect?: SkRect) => {
-        return SkiaViewApi.makeImageSnapshotAsync(nativeId, rect);
-      },
-      redraw: () => {
-        SkiaViewApi.requestRedraw(nativeId);
-      },
-      getNativeId: () => {
-        return nativeId;
-      },
-    } as CanvasRef));
-    return (
-      <NativeSkiaPictureView
-        collapsable={false}
-        nativeID={`${nativeId}`}
-        debug={debug}
-        opaque={opaque}
-        onLayout={onLayout}
-        {...viewProps}
-      />
-    );
-  }
-);
+  // Component methods
+  useImperativeHandle(
+    ref,
+    () =>
+      ({
+        makeImageSnapshot: (rect?: SkRect) => {
+          return SkiaViewApi.makeImageSnapshot(nativeId, rect);
+        },
+        makeImageSnapshotAsync: (rect?: SkRect) => {
+          return SkiaViewApi.makeImageSnapshotAsync(nativeId, rect);
+        },
+        redraw: () => {
+          SkiaViewApi.requestRedraw(nativeId);
+        },
+        getNativeId: () => {
+          return nativeId;
+        },
+      } as CanvasRef)
+  );
+  return (
+    <NativeSkiaPictureView
+      collapsable={false}
+      nativeID={`${nativeId}`}
+      debug={debug}
+      opaque={opaque}
+      onLayout={onLayout}
+      {...viewProps}
+    />
+  );
+};
