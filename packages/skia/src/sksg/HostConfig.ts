@@ -22,7 +22,7 @@ type TextInstance = Node;
 type SuspenseInstance = Instance;
 type HydratableInstance = Instance;
 type PublicInstance = Instance;
-type HostContext = null;
+type HostContext = {};
 type UpdatePayload = Container;
 type ChildSet = Node[];
 type TimeoutHandle = NodeJS.Timeout;
@@ -59,12 +59,12 @@ export const sksgHostConfig: SkiaHostConfig = {
 
   getRootHostContext: (_rootContainerInstance: Container) => {
     debug("getRootHostContext");
-    return null;
+    return {};
   },
 
   getChildHostContext(_parentHostContext, _type, _rootContainerInstance) {
     debug("getChildHostContext");
-    return null;
+    return {};
   },
 
   shouldSetTextContent(_type, _props) {
@@ -233,5 +233,18 @@ export const sksgHostConfig: SkiaHostConfig = {
   },
   getInstanceFromScope: function (_scopeInstance): Instance | null {
     throw new Error("Function not implemented.");
+  },
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  setCurrentUpdatePriority(newPriority: number) {},
+  getCurrentUpdatePriority() {
+    return DefaultEventPriority;
+  },
+  resolveUpdatePriority() {
+    return DefaultEventPriority;
+  },
+  resetFormInstance() {},
+  maySuspendCommit() {
+    return false;
   },
 };
