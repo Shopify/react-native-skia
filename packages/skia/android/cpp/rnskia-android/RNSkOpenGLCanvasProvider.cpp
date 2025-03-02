@@ -46,7 +46,7 @@ int RNSkOpenGLCanvasProvider::getScaledHeight() {
 }
 
 bool RNSkOpenGLCanvasProvider::renderToCanvas(
-    const std::function<void(SkCanvas *)> &cb) {
+    const std::function<void(SkCanvas *)> &cb, bool flush) {
   if (_surfaceHolder != nullptr && cb != nullptr) {
     // Get the surface
     auto surface = _surfaceHolder->getSurface();
@@ -66,7 +66,7 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
       // Draw into canvas using callback
       cb(surface->getCanvas());
       // Swap buffers and show on screen
-      _surfaceHolder->present();
+      _surfaceHolder->present(flush);
       return true;
     } else {
       // the render context did not provide a surface

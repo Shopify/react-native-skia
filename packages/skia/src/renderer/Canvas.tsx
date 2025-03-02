@@ -76,7 +76,12 @@ export const Canvas = forwardRef(
     }, []);
 
     // Root
-    const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
+    const root = useMemo(() => {
+      const result = new SkiaSGRoot(Skia, nativeId);
+      result.render(children);
+
+      return result;
+    }, [nativeId]);
 
     // Render effects
     useEffect(() => {

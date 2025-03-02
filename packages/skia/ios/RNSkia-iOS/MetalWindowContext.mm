@@ -48,7 +48,7 @@ sk_sp<SkSurface> MetalWindowContext::getSurface() {
   return _skSurface;
 }
 
-void MetalWindowContext::present() {
+void MetalWindowContext::present(bool flush) {
   if (auto dContext = GrAsDirectContext(_skSurface->recordingContext())) {
     dContext->flushAndSubmit();
   }
@@ -56,5 +56,10 @@ void MetalWindowContext::present() {
   id<MTLCommandBuffer> commandBuffer([_commandQueue commandBuffer]);
   [commandBuffer presentDrawable:_currentDrawable];
   [commandBuffer commit];
+    
+  if (flush) {
+    [commandBuffer waitUntilCompleted];
+  }
+
   _skSurface = nullptr;
 }

@@ -44,8 +44,8 @@ public:
         _platformContext(std::move(context)) {}
 
   void
-  renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvasProvider) override {
-    performDraw(canvasProvider);
+  renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvasProvider, bool flush) override {
+    performDraw(canvasProvider, flush);
   }
 
   void setPicture(sk_sp<SkPicture> picture) {
@@ -54,7 +54,7 @@ public:
   }
 
 private:
-  bool performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
+  bool performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider, bool flush) {
     return canvasProvider->renderToCanvas([=](SkCanvas *canvas) {
       // Make sure to scale correctly
       auto pd = _platformContext->getPixelDensity();
@@ -65,7 +65,7 @@ private:
         canvas->drawPicture(_picture);
       }
       canvas->restore();
-    });
+    }, flush);
   }
 
   std::shared_ptr<RNSkPlatformContext> _platformContext;

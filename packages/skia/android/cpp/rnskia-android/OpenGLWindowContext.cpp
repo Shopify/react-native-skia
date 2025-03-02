@@ -51,9 +51,9 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
   return _skSurface;
 }
 
-void OpenGLWindowContext::present() {
+void OpenGLWindowContext::present(bool flush) {
   _glContext->makeCurrent(_glSurface.get());
-  _directContext->flushAndSubmit();
+  _directContext->flushAndSubmit(flush ? GrSyncCpu::kNo : GrSyncCpu::kYes);
   _glSurface->present();
 }
 

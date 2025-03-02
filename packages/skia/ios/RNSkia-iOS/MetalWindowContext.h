@@ -15,7 +15,7 @@ public:
 
   sk_sp<SkSurface> getSurface() override;
 
-  void present() override;
+  void present(bool flush) override;
 
   int getWidth() override {
     return _layer.frame.size.width * _layer.contentsScale;
