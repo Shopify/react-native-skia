@@ -4,7 +4,7 @@ module.exports = makeMetroConfig({
     getTransformOptions: async () => ({
       transform: {
         experimentalImportSupport: false,
-        inlineRequires: false,
+        inlineRequires: true,
       },
     }),
   },
