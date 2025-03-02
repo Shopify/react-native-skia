@@ -10,8 +10,9 @@ Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flu
 
 **Version compatibility:**
 `react-native@>=0.71` and `react@>=18` are required. <br />
-In addition you should make sure you're on at least `iOS 13` and `Android API level 26` or above. <br />
-To use React Native Skia with the new architecture, `react-native@>=0.72` is required.
+In addition you should make sure you're on at least `iOS 13` and `Android API level 21` or above. <br />
+To use React Native Skia with the new architecture, `react-native@>=0.72` is required. <br />
+To use React Native Skia with video support, `Android API level 26` or above is required.
 
 `tvOS >= 13` is also supported.
 

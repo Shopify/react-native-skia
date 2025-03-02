@@ -41,19 +41,11 @@ export class SkiaSGRoot {
     return { type: NodeType.Group, props: {}, children, isDeclaration: false };
   }
 
-  private updateContainer(element: ReactNode) {
-    return new Promise((resolve) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      skiaReconciler.updateContainer(element as any, this.root, null, () => {
-        debug("updateContainer");
-        resolve(true);
-      });
+  render(element: ReactNode) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    skiaReconciler.updateContainer(element as any, this.root, null, () => {
+      debug("updateContainer");
     });
-  }
-
-  async render(element: ReactNode) {
-    await this.updateContainer(element);
-    this.container.redraw();
   }
 
   drawOnCanvas(canvas: SkCanvas) {
@@ -69,11 +61,8 @@ export class SkiaSGRoot {
 
   unmount() {
     this.container.unmount();
-    return new Promise((resolve) => {
-      skiaReconciler.updateContainer(null, this.root, null, () => {
-        debug("unmountContainer");
-        resolve(true);
-      });
+    skiaReconciler.updateContainer(null, this.root, null, () => {
+      debug("unmountContainer");
     });
   }
 }

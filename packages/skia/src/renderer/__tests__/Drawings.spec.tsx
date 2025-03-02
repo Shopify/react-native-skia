@@ -30,9 +30,9 @@ const CheckEmptyCanvas = () => {
 };
 
 describe("Test introductionary examples from our documentation", () => {
-  it("Should blend colors using multiplication", async () => {
+  it("Should blend colors using multiplication", () => {
     const r = width * 0.33;
-    const surface = await drawOnNode(
+    const surface = drawOnNode(
       <Group blendMode="multiply">
         <Circle cx={r} cy={r} r={r} color="cyan" />
         <Circle cx={width - r} cy={r} r={r} color="magenta" />
@@ -42,9 +42,9 @@ describe("Test introductionary examples from our documentation", () => {
     processResult(surface, "snapshots/drawings/blend-mode-multiply.png");
   });
 
-  it("Should use a blur image filter", async () => {
+  it("Should use a blur image filter", () => {
     const r = width * 0.33;
-    const surface = await drawOnNode(
+    const surface = drawOnNode(
       <Group blendMode="multiply">
         <Blur blur={30} />
         <Circle cx={r} cy={r} r={r} color="cyan" />
@@ -55,10 +55,10 @@ describe("Test introductionary examples from our documentation", () => {
     processResult(surface, "snapshots/drawings/blur-node.png");
   });
 
-  it("Should use multiple paint definitions for one drawing command", async () => {
+  it("Should use multiple paint definitions for one drawing command", () => {
     const r = width / 4;
     const strokeWidth = 50;
-    const surface = await drawOnNode(
+    const surface = drawOnNode(
       <>
         <Circle cx={width / 2} cy={width / 2} r={r} color="red">
           <Paint color="lightblue" />
@@ -70,7 +70,7 @@ describe("Test introductionary examples from our documentation", () => {
     processResult(surface, "snapshots/drawings/multiple-paints.png");
   });
 
-  it("Should draw DRect", async () => {
+  it("Should draw DRect", () => {
     const { rrect, rect } = importSkia();
     const padding = 25 * PIXEL_RATIO;
     const outer = rrect(rect(0, 0, width, width), padding, padding);
@@ -79,18 +79,18 @@ describe("Test introductionary examples from our documentation", () => {
       padding * 2,
       padding * 2
     );
-    const surface = await drawOnNode(
+    const surface = drawOnNode(
       <DiffRect inner={inner} outer={outer} color="lightblue" />
     );
     processResult(surface, docPath("shapes/drect.png"));
   });
 
   it("should clear the canvas even if it's empty", async () => {
-    const { surface, draw } = await mountCanvas(<CheckEmptyCanvas />);
-    await draw();
+    const { surface, draw } = mountCanvas(<CheckEmptyCanvas />);
+    draw();
     processResult(surface, "snapshots/green.png");
     await wait(1000);
-    await draw();
+    draw();
     processResult(surface, "snapshots/transparent.png");
   });
 });

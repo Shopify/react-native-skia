@@ -51,11 +51,11 @@ describe("Surface", () => {
       surface.dispose();
     }
   });
-  it("A raster surface shouldn't leak (3)", async () => {
+  it("A raster surface shouldn't leak (3)", () => {
     for (let i = 0; i < 10; i++) {
       //const t = performance.now();
       const r = 128;
-      const surface = await drawOnNode(
+      const surface = drawOnNode(
         <>
           <Group blendMode="multiply">
             <Circle cx={r} cy={r} r={r} color="cyan" />

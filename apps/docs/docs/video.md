@@ -12,6 +12,7 @@ Videos are also supported on Web.
 ### Requirements
 
 - **Reanimated** version 3 or higher.
+- **Android:** API level 26 or higher.
 
 ## Example
 

@@ -1,5 +1,4 @@
 /*global NodeJS*/
-import { createContext } from "react";
 import type { Fiber, HostConfig } from "react-reconciler";
 import { DefaultEventPriority } from "react-reconciler/constants";
 
@@ -8,9 +7,6 @@ import { shallowEq } from "../renderer/typeddash";
 
 import type { Node } from "./Node";
 import type { Container } from "./Container";
-
-type EventPriority = number;
-const NoEventPriority = 0;
 
 const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
@@ -26,7 +22,7 @@ type TextInstance = Node;
 type SuspenseInstance = Instance;
 type HydratableInstance = Instance;
 type PublicInstance = Instance;
-type HostContext = object;
+type HostContext = null;
 type UpdatePayload = Container;
 type ChildSet = Node[];
 type TimeoutHandle = NodeJS.Timeout;
@@ -47,7 +43,6 @@ type SkiaHostConfig = HostConfig<
   TimeoutHandle,
   NoTimeout
 >;
-let currentUpdatePriority: EventPriority = NoEventPriority;
 
 export const sksgHostConfig: SkiaHostConfig = {
   /**
@@ -64,12 +59,12 @@ export const sksgHostConfig: SkiaHostConfig = {
 
   getRootHostContext: (_rootContainerInstance: Container) => {
     debug("getRootHostContext");
-    return {};
+    return null;
   },
 
   getChildHostContext(_parentHostContext, _type, _rootContainerInstance) {
     debug("getChildHostContext");
-    return {};
+    return null;
   },
 
   shouldSetTextContent(_type, _props) {
@@ -130,8 +125,9 @@ export const sksgHostConfig: SkiaHostConfig = {
     return null;
   },
 
-  resetAfterCommit(_container) {
+  resetAfterCommit(container) {
     debug("resetAfterCommit");
+    container.redraw();
   },
 
   getPublicInstance(node: Instance) {
@@ -173,15 +169,16 @@ export const sksgHostConfig: SkiaHostConfig = {
 
   cloneInstance(
     instance,
+    _updatePayload,
     _type,
     _oldProps,
     newProps,
-    _updatePayload,
     _internalInstanceHandle,
     keepChildren: boolean,
     _recyclableInstance: null | Instance
   ) {
     debug("cloneInstance");
+
     return {
       type: instance.type,
       props: newProps,
@@ -237,31 +234,4 @@ export const sksgHostConfig: SkiaHostConfig = {
   getInstanceFromScope: function (_scopeInstance): Instance | null {
     throw new Error("Function not implemented.");
   },
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  shouldAttemptEagerTransition: () => false,
-  trackSchedulerEvent: () => {},
-  resolveEventType: () => null,
-  resolveEventTimeStamp: () => -1.1,
-  requestPostPaintCallback() {},
-  maySuspendCommit: () => false,
-  preloadInstance: () => true, // true indicates already loaded
-  startSuspendingCommit() {},
-  suspendInstance() {},
-  waitForCommitToBeReady: () => null,
-  NotPendingTransition: null,
-  HostTransitionContext: createContext(null),
-  setCurrentUpdatePriority(newPriority: number) {
-    currentUpdatePriority = newPriority;
-  },
-  getCurrentUpdatePriority() {
-    return currentUpdatePriority;
-  },
-  resolveUpdatePriority() {
-    if (currentUpdatePriority !== NoEventPriority) {
-      return currentUpdatePriority;
-    }
-    return DefaultEventPriority;
-  },
-  resetFormInstance() {},
 };
