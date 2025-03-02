@@ -10,18 +10,18 @@ describe("Renderer", () => {
   it("Loads renderer without Skia", () => {
     expect(SkiaRenderer).toBeDefined();
   });
-  it("Scale with origin", async () => {
+  it("Scale with origin", () => {
     const { Skia } = importSkia();
     const size = width;
     const origin = Skia.Point(size / 2, size / 2);
-    const surface = await drawOnNode(
+    const surface = drawOnNode(
       <Group transform={[{ scale: 0.5 }]} origin={origin}>
         <Rect x={0} y={0} width={size} height={size} color="lightblue" />
       </Group>
     );
     processResult(surface, "snapshots/transform/scale-origin.png");
   });
-  it("Scale with origin using a matrix", async () => {
+  it("Scale with origin using a matrix", () => {
     const { Skia } = importSkia();
     const size = width;
     const matrix = Skia.Matrix();
@@ -31,32 +31,32 @@ describe("Renderer", () => {
       .scale(0.5)
       .translate(-origin.x, -origin.y);
     expect(matrix.get()).toStrictEqual([0.5, 0, 192, 0, 0.5, 192, 0, 0, 1]);
-    const surface = await drawOnNode(
+    const surface = drawOnNode(
       <Group matrix={matrix}>
         <Rect x={0} y={0} width={size} height={size} color="lightblue" />
       </Group>
     );
     processResult(surface, "snapshots/transform/scale-origin.png");
   });
-  it("Scale with matrix and origin", async () => {
+  it("Scale with matrix and origin", () => {
     const { Skia } = importSkia();
     const size = width;
     const matrix = Skia.Matrix();
     const origin = Skia.Point(size / 2, size / 2);
     matrix.scale(0.5);
-    const surface = await drawOnNode(
+    const surface = drawOnNode(
       <Group matrix={matrix} origin={origin}>
         <Rect x={0} y={0} width={size} height={size} color="lightblue" />
       </Group>
     );
     processResult(surface, "snapshots/transform/scale-origin.png");
   });
-  it("Should rotate a rectangle to 180deg", async () => {
+  it("Should rotate a rectangle to 180deg", () => {
     const { Skia } = importSkia();
     const size = width;
     const origin = Skia.Point(size / 2, size / 2);
     const w = size / 4;
-    const surface = await drawOnNode(
+    const surface = drawOnNode(
       <Group transform={[{ rotate: Math.PI }]} origin={origin}>
         <Rect
           x={origin.x - w / 2}

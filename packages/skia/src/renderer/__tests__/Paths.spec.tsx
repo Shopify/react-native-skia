@@ -8,7 +8,7 @@ import { drawOnNode, width, importSkia } from "./setup";
 const size = width;
 
 describe("Path Examples", () => {
-  it("Should draw an arc", async () => {
+  it("Should draw an arc", () => {
     const { Skia } = importSkia();
     const path = Skia.Path.Make();
     const arcRect = {
@@ -18,11 +18,11 @@ describe("Path Examples", () => {
       height: size,
     };
     path.addArc(arcRect, 45, 270);
-    const surface = await drawOnNode(<Path path={path} color="lightblue" />);
+    const surface = drawOnNode(<Path path={path} color="lightblue" />);
     processResult(surface, "snapshots/paths/arc.png");
   });
 
-  it("Should draw an oval", async () => {
+  it("Should draw an oval", () => {
     const { Skia } = importSkia();
     const path = Skia.Path.Make();
     const rct = {
@@ -32,11 +32,11 @@ describe("Path Examples", () => {
       height: size,
     };
     path.addOval(rct);
-    const surface = await drawOnNode(<Path path={path} color="lightblue" />);
+    const surface = drawOnNode(<Path path={path} color="lightblue" />);
     processResult(surface, "snapshots/paths/oval.png");
   });
 
-  it("Should draw an rounded rectangle", async () => {
+  it("Should draw an rounded rectangle", () => {
     const { Skia } = importSkia();
     const path = Skia.Path.Make();
     path.addRRect({
@@ -49,11 +49,11 @@ describe("Path Examples", () => {
       rx: size / 4,
       ry: size / 4,
     });
-    const surface = await drawOnNode(<Path path={path} color="lightblue" />);
+    const surface = drawOnNode(<Path path={path} color="lightblue" />);
     processResult(surface, "snapshots/paths/rrect.png");
   });
 
-  it("Should draw a polygon", async () => {
+  it("Should draw a polygon", () => {
     const { Skia, vec } = importSkia();
     const path = Skia.Path.Make();
     const r = size / 4;
@@ -67,7 +67,7 @@ describe("Path Examples", () => {
       true
     );
 
-    const surface = await drawOnNode(
+    const surface = drawOnNode(
       <Path path={path} strokeWidth={4} style="stroke" color="lightblue" />
     );
     processResult(surface, "snapshots/paths/poly.png");

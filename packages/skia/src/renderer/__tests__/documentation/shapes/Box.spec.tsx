@@ -5,11 +5,11 @@ import { docPath, processResult } from "../../../../__tests__/setup";
 import { Box, BoxShadow, Fill } from "../../../components";
 
 describe("Box", () => {
-  it("should draw a box with inner and outer shadow", async () => {
+  it("should draw a box with inner and outer shadow", () => {
     const { rect, rrect } = importSkia();
     const size = width / 2;
     const d = 10 * PIXEL_RATIO;
-    const surface = await drawOnNode(
+    const surface = drawOnNode(
       <>
         <Fill color="#add8e6" />
         <Box
@@ -29,9 +29,9 @@ describe("Box", () => {
     );
     processResult(surface, docPath("box/shadows.png"));
   });
-  it("should draw a box with red stroke", async () => {
+  it("should draw a box with red stroke", () => {
     const size = width / 2;
-    const surface = await drawOnNode(
+    const surface = drawOnNode(
       <>
         <Box
           box={{ width: size, height: size, x: 1, y: 1 }}

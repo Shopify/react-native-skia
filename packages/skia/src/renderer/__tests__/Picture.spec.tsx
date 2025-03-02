@@ -4,7 +4,7 @@ import { processResult } from "../../__tests__/setup";
 import { Fill, Picture, Group } from "../components";
 
 import type { EmptyProps } from "./setup";
-import { importSkia, mountCanvas, wait, width } from "./setup";
+import { wait, importSkia, mountCanvas, width } from "./setup";
 
 const CheckPicture = ({}: EmptyProps) => {
   const { createPicture, Skia } = importSkia();
@@ -22,7 +22,9 @@ const CheckPicture = ({}: EmptyProps) => {
         paint.setColor(Skia.Color(color));
         canvas.drawCircle(r, r, r, paint);
       }),
-    [Skia, color, createPicture, r]
+    // In a non-test environment, createPicture and Skia will be top-level, not part of the array
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [color]
   );
   return (
     <Group>
@@ -61,20 +63,20 @@ const CheckPicture2 = ({}: EmptyProps) => {
 
 describe("Picture", () => {
   it("should respect dependency array", async () => {
-    const { surface, draw } = await mountCanvas(<CheckPicture />);
-    await draw();
+    const { surface, draw } = mountCanvas(<CheckPicture />);
+    draw();
     processResult(surface, "snapshots/pictures/green.png");
-    await wait(1000);
-    await draw();
+    await wait(32);
+    draw();
     processResult(surface, "snapshots/pictures/red.png");
   });
 
   it("should not redraw if there are no dependency", async () => {
-    const { surface, draw } = await mountCanvas(<CheckPicture2 />);
-    await draw();
+    const { surface, draw } = mountCanvas(<CheckPicture2 />);
+    draw();
     processResult(surface, "snapshots/pictures/green.png");
-    await wait(1000);
-    await draw();
+    await wait(32);
+    draw();
     processResult(surface, "snapshots/pictures/green.png");
   });
 });
