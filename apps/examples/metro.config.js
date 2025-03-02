@@ -1,48 +1,30 @@
-const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
 const path = require('path');
-const exclusionList = require('metro-config/src/defaults/exclusionList');
-
-const root = path.resolve(__dirname, '../..');
-
-const defaultConfig = getDefaultConfig(__dirname);
-defaultConfig.resolver.assetExts.push('glb', 'gltf', 'jpg', 'bin', 'hdr', 'ttf', 'otf', 'png');
 
 /**
- * Metro configuration
+ * Metro configuration for a monorepo
  * https://reactnative.dev/docs/metro
  *
- * @type {import('metro-config').MetroConfig}
+ * @type {import('@react-native/metro-config').MetroConfig}
  */
 const config = {
-  watchFolders: [root],
-
-  resolver: {
-    extraNodeModules: {
-    },
-    resolveRequest: (context, moduleName, platform) => {
-      // Let Metro handle other modules
-      return context.resolveRequest(context, moduleName, platform);
-    },
-  },
-
-  transformer: {
-    getTransformOptions: async () => ({
-      transform: {
-        experimentalImportSupport: false,
-        inlineRequires: true,
-      },
-    }),
-  },
-
+  // 1. Watch all files in the monorepo
   watchFolders: [
-    root,
+    path.resolve(__dirname, '../../'), // Monorepo root, assuming this is in apps/examples
   ],
-
+  
+  // 2. Set up proper module resolution for workspace packages
   resolver: {
-    blockList: exclusionList([
-      new RegExp(`${path.resolve(root, 'externals')}.*`),
-    ]),
+    nodeModulesPaths: [
+      path.resolve(__dirname, 'node_modules'),
+      path.resolve(__dirname, '../../node_modules'), // Monorepo root node_modules
+    ],
+    
+    // Allow importing from workspace packages
+    extraNodeModules: {
+      // Add mappings for workspace packages here as needed
+    },
   },
 };
 
-module.exports = mergeConfig(defaultConfig, config);
+module.exports = mergeConfig(getDefaultConfig(__dirname), config);

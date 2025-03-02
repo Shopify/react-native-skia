@@ -25,7 +25,7 @@ interface CanvasRef extends FC<CanvasProps> {
 
 export const useCanvasRef = () => useRef<CanvasRef>(null);
 
-const NativeSkiaPictureView = SkiaPictureViewNativeComponent;
+//const NativeSkiaPictureView = SkiaPictureViewNativeComponent;
 
 // TODO: no need to go through the JS thread for this
 const useOnSizeEvent = (
@@ -103,7 +103,7 @@ export const Canvas = ({
       } as CanvasRef)
   );
   return (
-    <NativeSkiaPictureView
+    <SkiaPictureViewNativeComponent
       collapsable={false}
       nativeID={`${nativeId}`}
       debug={debug}
