@@ -12,14 +12,14 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import { Skia, SkiaPictureView} from '@shopify/react-native-skia';
+import { Skia} from '@shopify/react-native-skia';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 
 const recorder = Skia.PictureRecorder();
 const canvas = recorder.beginRecording(Skia.XYWHRect(0, 0, 100, 100));
 canvas.clear(Skia.Color('green'));
-const picture = recorder.finishRecordingAsPicture();
+//const picture = recorder.finishRecordingAsPicture();
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -36,7 +36,6 @@ function App(): React.JSX.Element {
         backgroundColor={backgroundStyle.backgroundColor}
       />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <SkiaPictureView picture={picture} style={styles.canvas} />
         <View style={styles.header}>
           <Text style={styles.title}>React Native Skia Examples</Text>
         </View>
