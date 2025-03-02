@@ -1,62 +1,30 @@
-const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 const path = require('path');
-const fs = require('fs');
+const exclusionList = require('metro-config/src/defaults/exclusionList');
 
-// Find all node_modules directories
-const findNodeModules = (base) => {
-  const nodeModulesPath = path.join(base, 'node_modules');
-  const result = [nodeModulesPath];
-  
-  if (fs.existsSync(nodeModulesPath)) {
-    const reactNativeDir = path.join(nodeModulesPath, 'react-native');
-    if (fs.existsSync(reactNativeDir)) {
-      result.push(path.join(reactNativeDir, 'node_modules'));
-    }
-  }
-  
-  return result;
-};
+const root = path.resolve(__dirname, '../..');
 
-// Define paths
-const monorepoRoot = path.resolve(__dirname, '../..');
-const projectRoot = __dirname;
-
-// Get all node_modules paths
-const nodeModulesPaths = [
-  ...findNodeModules(projectRoot),
-  ...findNodeModules(monorepoRoot),
-];
+const defaultConfig = getDefaultConfig(__dirname);
+defaultConfig.resolver.assetExts.push('glb', 'gltf', 'jpg', 'bin', 'hdr', 'ttf', 'otf', 'png');
 
 /**
  * Metro configuration
  * https://reactnative.dev/docs/metro
  *
- * @type {import('@react-native/metro-config').MetroConfig}
+ * @type {import('metro-config').MetroConfig}
  */
 const config = {
-  watchFolders: [
-    // Watchfolders for monorepo
-    path.resolve(monorepoRoot, 'node_modules'),
-    path.resolve(monorepoRoot, 'packages'),
-  ],
+  watchFolders: [root],
+
   resolver: {
-    nodeModulesPaths,
     extraNodeModules: {
-      // Instead of directly referencing the path, let Metro use the workspace reference
-      // to avoid duplicate module issues
-      '@shopify/react-native-skia': path.resolve(monorepoRoot, 'packages/skia/src'),
-      // Ensure codegen is properly resolved
-      '@react-native/codegen': path.resolve(monorepoRoot, 'node_modules/@react-native/codegen'),
-      // Make sure react-native is correctly resolved from the root
-      'react-native': path.resolve(monorepoRoot, 'node_modules/react-native'),
-      'react': path.resolve(monorepoRoot, 'node_modules/react'),
-      'react-native-reanimated': path.resolve(monorepoRoot, 'node_modules/react-native-reanimated'),
     },
-    // Prevent errors with native modules
-    disableHierarchicalLookup: false,
-    // Enable resolving symlinks properly
-    enableResolverCache: false,
+    resolveRequest: (context, moduleName, platform) => {
+      // Let Metro handle other modules
+      return context.resolveRequest(context, moduleName, platform);
+    },
   },
+
   transformer: {
     getTransformOptions: async () => ({
       transform: {
@@ -65,6 +33,16 @@ const config = {
       },
     }),
   },
+
+  watchFolders: [
+    root,
+  ],
+
+  resolver: {
+    blockList: exclusionList([
+      new RegExp(`${path.resolve(root, 'externals')}.*`),
+    ]),
+  },
 };
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+module.exports = mergeConfig(defaultConfig, config);

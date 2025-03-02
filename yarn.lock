@@ -5353,7 +5353,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@shopify/react-native-skia@*, @shopify/react-native-skia@workspace:*, @shopify/react-native-skia@workspace:packages/skia":
+"@shopify/react-native-skia@workspace:*, @shopify/react-native-skia@workspace:packages/skia":
   version: 0.0.0-use.local
   resolution: "@shopify/react-native-skia@workspace:packages/skia"
   dependencies:
@@ -11361,7 +11361,7 @@ __metadata:
     "@react-native/eslint-config": 0.78.0
     "@react-native/metro-config": 0.78.0
     "@react-native/typescript-config": 0.78.0
-    "@shopify/react-native-skia": "*"
+    "@shopify/react-native-skia": "workspace:*"
     "@types/jest": ^29.5.13
     "@types/react": ^19.0.0
     "@types/react-test-renderer": ^19.0.0
