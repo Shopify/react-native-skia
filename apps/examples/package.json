@@ -12,7 +12,7 @@
     "pod:install": "cd ios && pod install"
   },
   "dependencies": {
-    "@shopify/react-native-skia": "*",
+    "@shopify/react-native-skia": "workspace:*",
     "react": "19.0.0",
     "react-native": "0.78.0",
     "react-native-reanimated": "^3.17.1"
