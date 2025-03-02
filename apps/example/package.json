@@ -15,8 +15,26 @@
     "tsc": "tsc --noEmit"
   },
   "dependencies": {
+    "@callstack/react-native-visionos": "^0.75.0",
+    "@react-native-community/slider": "^4.5.6",
+    "@react-navigation/bottom-tabs": "^7.2.1",
+    "@react-navigation/elements": "^2.2.6",
+    "@react-navigation/native": "^7.0.15",
+    "@react-navigation/native-stack": "^7.2.1",
+    "@shopify/react-native-skia": "workspace:*",
+    "@testing-library/react-native": "^13.1.0",
+    "babel-plugin-transform-inline-environment-variables": "^0.4.4",
+    "cdt2d": "^1.0.0",
+    "its-fine": "^2.0.0",
     "react": "19.0.0",
-    "react-native": "0.78.0"
+    "react-native": "0.78.0",
+    "react-native-gesture-handler": "^2.24.0",
+    "react-native-macos": "^0.75.0",
+    "react-native-reanimated": "^3.17.1",
+    "react-native-safe-area-context": "^5.2.0",
+    "react-native-screens": "^4.9.1",
+    "react-native-svg": "^15.11.2",
+    "react-native-windows": "^0.75.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -34,11 +52,14 @@
     "@types/react": "^19.0.0",
     "@types/react-test-renderer": "^19.0.0",
     "eslint": "^8.19.0",
+    "eslint-config-react-native-wcandillon": "^3.10.2",
+    "eslint-plugin-import": "^2.31.0",
     "jest": "^29.6.3",
+    "jest-transform-stub": "^2.0.0",
     "prettier": "2.8.8",
     "react-native-test-app": "^4.2.0",
     "react-test-renderer": "19.0.0",
-    "typescript": "5.0.4"
+    "typescript": "^5.8.2"
   },
   "engines": {
     "node": ">=18"
