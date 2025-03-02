@@ -12,9 +12,16 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import {Canvas, Circle, Group, Paint} from '@shopify/react-native-skia';
+import {Canvas, Fill, Skia} from '@shopify/react-native-skia';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
+
+const surface = Skia.Surface.MakeOffscreen(100, 100)!;
+const canvas = surface.getCanvas();
+canvas.clear(Skia.Color('green'));
+surface.flush();
+const image = surface.makeImageSnapshot()!;
+console.log(image.encodeToBase64());
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -31,17 +38,13 @@ function App(): React.JSX.Element {
         backgroundColor={backgroundStyle.backgroundColor}
       />
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Canvas style={{ width: 100, height: 100}}>
+          <Fill color="cyan" />
+        </Canvas>
         <View style={styles.header}>
           <Text style={styles.title}>React Native Skia Examples</Text>
         </View>
-        <View style={styles.canvasContainer}>
-          <Canvas style={styles.canvas}>
-            <Group>
-              <Paint color="#61DAFB" />
-              <Circle cx={150} cy={150} r={100} />
-            </Group>
-          </Canvas>
-        </View>
+        <View style={styles.canvasContainer} />
       </ScrollView>
     </SafeAreaView>
   );
