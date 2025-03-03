@@ -23,7 +23,6 @@
     "@types/jest": "^29.2.2",
     "@types/opentype.js": "^1.3.4",
     "@types/prismjs": "^1.26.0",
-    "@types/react-native": "^0.78.0",
     "abs-svg-path": "^0.1.1",
     "adaptive-bezier-curve": "^1.0.3",
     "babel-jest": "^29.3.1",
