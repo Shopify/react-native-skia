@@ -1,6 +1,7 @@
 import AnimatedSquareCanvas from "@/components/AnimatedSquareCanvas";
+import StraightLine from "@/components/StraightLine";
 
 const Home = () => {
-	return <AnimatedSquareCanvas />;
+	return <><StraightLine/><AnimatedSquareCanvas /></>;
 };
 export default Home;
