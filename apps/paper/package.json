@@ -28,7 +28,7 @@
     "react": "19.0.0",
     "react-native": "0.78.0",
     "react-native-gesture-handler": "^2.24.0",
-    "react-native-reanimated": "^3.17.1",
+    "react-native-reanimated": "3.17.1",
     "react-native-safe-area-context": "^5.2.0",
     "react-native-screens": "4.9.1",
     "react-native-svg": "^15.11.2",
