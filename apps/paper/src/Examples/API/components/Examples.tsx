@@ -7,6 +7,7 @@ import { ExportableCanvas } from "../../../components/ExportableCanvas";
 export const SIZE = 256;
 
 interface ExamplesProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   children: any | any[];
   exportable?: boolean;
 }
