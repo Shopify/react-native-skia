@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
 } from "react";
@@ -79,7 +80,7 @@ export const Canvas = forwardRef(
     const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
 
     // Render effects
-    useEffect(() => {
+    useLayoutEffect(() => {
       root.render(children);
     }, [children, root]);
 
