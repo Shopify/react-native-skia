@@ -56,7 +56,6 @@
     "@babel/preset-flow": "^7.25.9",
     "@types/color": "^3.0.6",
     "@types/lodash": "^4.14.182",
-    "@types/react": "^18.0.15",
     "@types/web": "^0.0.61",
     "babel-loader": "^9.2.1",
     "copy-webpack-plugin": "11"
