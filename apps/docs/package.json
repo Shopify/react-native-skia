@@ -30,7 +30,7 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.78.0",
-    "react-native-gesture-handler": "^2.18.1",
+    "react-native-gesture-handler": "^2.24.0",
     "react-native-reanimated": "^3.17.1",
     "url-loader": "^4.1.1"
   },
