@@ -64,7 +64,7 @@ export const PerformanceDrawingTest: React.FC = () => {
       </View>
       <View style={{ flex: 1 }}>
         <GestureDetector gesture={gesture}>
-          <Canvas style={styles.container} mode="default">
+          <Canvas style={styles.container}>
             {rects.map((_, i) => (
               <Rct pos={pos} key={i} rct={rects[i]} />
             ))}

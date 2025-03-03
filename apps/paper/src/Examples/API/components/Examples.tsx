@@ -1,4 +1,3 @@
-import type { ReactChild, ReactFragment, ReactPortal } from "react";
 import React, { Children } from "react";
 import { ScrollView } from "react-native";
 import { Canvas } from "@shopify/react-native-skia";
@@ -7,10 +6,8 @@ import { ExportableCanvas } from "../../../components/ExportableCanvas";
 
 export const SIZE = 256;
 
-type Child = ReactChild | ReactFragment | ReactPortal;
-
 interface ExamplesProps {
-  children: Child | Child[];
+  children: any | any[];
   exportable?: boolean;
 }
 

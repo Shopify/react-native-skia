@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		048FC5117D6DE8F99D47799B /* libPods-paper.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DF498488F8276BC7EF0508E /* libPods-paper.a */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		9CD0F1E2B9542C49682DA322 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
-		DCC9664F4F26CA91E79E811E /* libPods-paper.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6B5383A21B5A49EA48424FCA /* libPods-paper.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,11 +19,11 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = paper/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = paper/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = paper/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		6B5383A21B5A49EA48424FCA /* libPods-paper.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-paper.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = paper/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = paper/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		9BA42375716BD025C4259D46 /* Pods-paper.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-paper.release.xcconfig"; path = "Target Support Files/Pods-paper/Pods-paper.release.xcconfig"; sourceTree = "<group>"; };
-		CCF9D99183F930A8E10547E0 /* Pods-paper.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-paper.debug.xcconfig"; path = "Target Support Files/Pods-paper/Pods-paper.debug.xcconfig"; sourceTree = "<group>"; };
+		8DF498488F8276BC7EF0508E /* libPods-paper.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-paper.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A25D798ED831A83813BB337B /* Pods-paper.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-paper.debug.xcconfig"; path = "Target Support Files/Pods-paper/Pods-paper.debug.xcconfig"; sourceTree = "<group>"; };
+		BBCB37FA5207837E863D3699 /* Pods-paper.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-paper.release.xcconfig"; path = "Target Support Files/Pods-paper/Pods-paper.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -32,7 +32,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DCC9664F4F26CA91E79E811E /* libPods-paper.a in Frameworks */,
+				048FC5117D6DE8F99D47799B /* libPods-paper.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -55,7 +55,7 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				6B5383A21B5A49EA48424FCA /* libPods-paper.a */,
+				8DF498488F8276BC7EF0508E /* libPods-paper.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -92,8 +92,8 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				CCF9D99183F930A8E10547E0 /* Pods-paper.debug.xcconfig */,
-				9BA42375716BD025C4259D46 /* Pods-paper.release.xcconfig */,
+				A25D798ED831A83813BB337B /* Pods-paper.debug.xcconfig */,
+				BBCB37FA5207837E863D3699 /* Pods-paper.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -105,13 +105,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "paper" */;
 			buildPhases = (
-				E23D767C032DD71F261A4B55 /* [CP] Check Pods Manifest.lock */,
+				C4780F9D7F9B7FE83CCA853B /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				7804A79FDB44C7044A0303CC /* [CP] Embed Pods Frameworks */,
-				84974B33F89049A3147509D9 /* [CP] Copy Pods Resources */,
+				270D720CB24A7C19272AB497 /* [CP] Embed Pods Frameworks */,
+				10C9430CD7CB402FE48DDCC9 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -183,24 +183,7 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
 		};
-		7804A79FDB44C7044A0303CC /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-paper/Pods-paper-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-paper/Pods-paper-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-paper/Pods-paper-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		84974B33F89049A3147509D9 /* [CP] Copy Pods Resources */ = {
+		10C9430CD7CB402FE48DDCC9 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -217,7 +200,24 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-paper/Pods-paper-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		E23D767C032DD71F261A4B55 /* [CP] Check Pods Manifest.lock */ = {
+		270D720CB24A7C19272AB497 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-paper/Pods-paper-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-paper/Pods-paper-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-paper/Pods-paper-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C4780F9D7F9B7FE83CCA853B /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -255,7 +255,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CCF9D99183F930A8E10547E0 /* Pods-paper.debug.xcconfig */;
+			baseConfigurationReference = A25D798ED831A83813BB337B /* Pods-paper.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -283,7 +283,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9BA42375716BD025C4259D46 /* Pods-paper.release.xcconfig */;
+			baseConfigurationReference = BBCB37FA5207837E863D3699 /* Pods-paper.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
