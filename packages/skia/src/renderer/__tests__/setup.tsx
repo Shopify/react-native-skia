@@ -194,6 +194,9 @@ export const mountCanvas = async (element: ReactNode) => {
   return {
     surface: ckSurface,
     root,
+    render: async () => {
+      await root.render(element);
+    },
     draw: async () => {
       await root.render(element);
       root.drawOnCanvas(canvas);
@@ -202,8 +205,8 @@ export const mountCanvas = async (element: ReactNode) => {
 };
 
 export const serialize = async (element: ReactNode) => {
-  const { root, draw } = await mountCanvas(element);
-  await draw();
+  const { root, render } = await mountCanvas(element);
+  await render();
   const serialized = serializeNode(root.sg);
   return JSON.stringify(serialized);
 };
