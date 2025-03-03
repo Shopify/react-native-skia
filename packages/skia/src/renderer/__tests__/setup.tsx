@@ -202,7 +202,8 @@ export const mountCanvas = async (element: ReactNode) => {
 };
 
 export const serialize = async (element: ReactNode) => {
-  const { root } = await mountCanvas(element);
+  const { root, draw } = await mountCanvas(element);
+  await draw();
   const serialized = serializeNode(root.sg);
   return JSON.stringify(serialized);
 };
