@@ -43,7 +43,7 @@ public:
   /**
    Render to a canvas
    */
-  virtual bool renderToCanvas(const std::function<void(SkCanvas *)> &) = 0;
+  virtual bool renderToCanvas(const std::function<void(SkCanvas *)> &, bool flush) = 0;
 
 protected:
   std::function<void()> _requestRedraw;
@@ -55,7 +55,7 @@ public:
       : _requestRedraw(std::move(requestRedraw)), _showDebugOverlays(false) {}
 
   virtual void
-  renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvasProvider) = 0;
+  renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvasProvider, bool flush) = 0;
 
   void setShowDebugOverlays(bool showDebugOverlays) {
     _showDebugOverlays = showDebugOverlays;
@@ -114,7 +114,7 @@ public:
   /**
    Render to a canvas
    */
-  bool renderToCanvas(const std::function<void(SkCanvas *)> &cb) override {
+  bool renderToCanvas(const std::function<void(SkCanvas *)> &cb, bool flush) override {
     cb(_surface->getCanvas());
     return true;
   };
@@ -157,7 +157,7 @@ public:
         if (auto strongThis = weakThis.lock()) {
           // Only proceed if the object still exists
           if (strongThis->_renderer && strongThis->_redrawRequested) {
-            strongThis->_renderer->renderImmediate(strongThis->_canvasProvider);
+            strongThis->_renderer->renderImmediate(strongThis->_canvasProvider, false);
             strongThis->_redrawRequested = false;
           }
         }
@@ -165,8 +165,8 @@ public:
     }
   }
 
-  void redraw() {
-    _renderer->renderImmediate(_canvasProvider);
+  void redraw(bool flush) {
+    _renderer->renderImmediate(_canvasProvider, flush);
     _redrawRequested = false;
   }
 
@@ -197,7 +197,7 @@ public:
         getPlatformContext(), std::bind(&RNSkView::requestRedraw, this),
         _canvasProvider->getScaledWidth(), _canvasProvider->getScaledHeight());
 
-    _renderer->renderImmediate(provider);
+    _renderer->renderImmediate(provider, false);
     return provider->makeSnapshot(bounds);
   }
 

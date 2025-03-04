@@ -23,7 +23,7 @@ public:
   int getScaledWidth() override;
   int getScaledHeight() override;
 
-  bool renderToCanvas(const std::function<void(SkCanvas *)> &cb) override;
+  bool renderToCanvas(const std::function<void(SkCanvas *)> &cb, bool flush) override;
 
   void setSize(int width, int height);
   CALayer *getLayer();

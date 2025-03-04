@@ -55,7 +55,7 @@ public:
     return surface;
   }
 
-  void present() override;
+  void present(bool flush) override;
 
   void resize(int width, int height) override {
     throw std::runtime_error("resize not implemented yet");
