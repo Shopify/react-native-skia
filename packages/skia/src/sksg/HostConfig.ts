@@ -181,7 +181,7 @@ export const sksgHostConfig: SkiaHostConfig = {
 
     return {
       type: instance.type,
-      props: newProps,
+      props: { ...newProps },
       children: keepChildren ? [...instance.children] : [],
     };
   },
