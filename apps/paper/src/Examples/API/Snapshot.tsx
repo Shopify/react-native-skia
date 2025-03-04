@@ -1,3 +1,4 @@
+import type { RefObject } from "react";
 import React, { useCallback, useRef, useState } from "react";
 import {
   View,
@@ -46,10 +47,9 @@ export const Snapshot = () => {
 
   const image = useSharedValue<SkImage | null>(null);
   const takeSnapshot = useCallback(async () => {
-    if (viewRef.current == null) {
-      return;
+    if (viewRef.current != null) {
+      image.value = await makeImageFromView(viewRef as RefObject<View>);
     }
-    image.value = await makeImageFromView(viewRef);
   }, [image]);
 
   return (

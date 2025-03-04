@@ -47,7 +47,7 @@ rsxForm = Skia.RSXformFromRadians(1, r, 100, 0, 125, 25);
 In the example below, we draw in simple rectangle as an image.
 Then we display that rectangle 150 times with a simple transformation applied to each rectangle.
 
-```tsx twoslash
+```tsx
 import {Skia, drawAsImage, Group, Rect, Canvas, Atlas, rect} from "@shopify/react-native-skia";
 
 const size = { width: 25, height: 11.25 };
@@ -56,7 +56,7 @@ const imageSize = {
     width: size.width + strokeWidth,
     height: size.height + strokeWidth,
 };
-const image = drawAsImage(
+const image = await drawAsImage(
     <Group>
     <Rect
         rect={rect(strokeWidth / 2, strokeWidth / 2, size.width, size.height)}

@@ -26,8 +26,6 @@ jest.mock("react-native-reanimated", () => {
   Reanimated.useFrameCallback = () => {};
   return Reanimated;
 });
-// Silence the warning: Animated: `useNativeDriver` is not supported because the native animated module is missing
-jest.mock("react-native/Libraries/Animated/NativeAnimatedHelper");
 
 jest.mock("@shopify/react-native-skia", () => {
   jest.mock("../../packages/skia/src/Platform", () => {

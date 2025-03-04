@@ -7,6 +7,7 @@ import {
   Skia,
   useCanvasRef,
 } from "@shopify/react-native-skia";
+import type { RefObject } from "react";
 import React, { useEffect, useRef, useState } from "react";
 import { PixelRatio, Text, View } from "react-native";
 
@@ -98,7 +99,7 @@ export const Tests = ({ assets }: TestsProps) => {
   useEffect(() => {
     if (screen) {
       const it = setTimeout(async () => {
-        const image = await makeImageFromView(viewRef);
+        const image = await makeImageFromView(viewRef as RefObject<View>);
         if (image && client) {
           const data = image.encodeToBytes();
           client.send(data);
