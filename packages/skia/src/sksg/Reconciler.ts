@@ -43,8 +43,7 @@ export class SkiaSGRoot {
 
   private updateContainer(element: ReactNode) {
     return new Promise((resolve) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      skiaReconciler.updateContainer(element as any, this.root, null, () => {
+      skiaReconciler.updateContainer(element, this.root, null, () => {
         debug("updateContainer");
         resolve(true);
       });
