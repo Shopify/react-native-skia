@@ -8,7 +8,7 @@ const AnimatedSquareCanvas = () => {
     const [, setFirstRenderFinished] = useState(false);
 
     const setIsActive = useCallback(() => {
-        runOnJS(setFirstRenderFinished)(true);
+        setFirstRenderFinished(true);
     }, []);
 
     useAnimatedReaction(
