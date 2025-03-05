@@ -1,4 +1,4 @@
-import { Canvas, RoundedRect } from "@shopify/react-native-skia/src";
+import { Canvas, Rect } from "@shopify/react-native-skia/src";
 import { useCallback, useEffect, useState } from "react";
 import { runOnJS, useAnimatedReaction, useSharedValue, withRepeat, withSequence, withTiming } from "react-native-reanimated";
 
@@ -26,7 +26,7 @@ const AnimatedSquareCanvas = () => {
 
     return (
         <Canvas style={{ width: "100%", height: "100%" }}>
-            <RoundedRect x={x} y={0} width={100} height={100} color="blue" r={8} />
+            <Rect x={x} y={0} width={100} height={100} color="blue" />
         </Canvas>
     );
 };
