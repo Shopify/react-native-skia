@@ -73,9 +73,10 @@ export const Canvas = ({
   // Root
   const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
 
-  useLayoutEffect(() => {
-    root.render(children);
-  }, [root, children]);
+    // Render effects
+    useLayoutEffect(() => {
+      root.render(children);
+    }, [children, root]);
 
   useEffect(() => {
     return () => {
