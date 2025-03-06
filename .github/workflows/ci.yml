@@ -6,6 +6,7 @@ on:
   pull_request:
     branches:
       - main
+      - next
   merge_group:
     types:
       - checks_requested
@@ -190,7 +191,6 @@ jobs:
       - name: Install Android SDK
         run: |
           echo "sdk.dir=$ANDROID_HOME" > $GITHUB_WORKSPACE/apps/paper/android/local.properties
-          echo "sdk.dir=$ANDROID_HOME" > $GITHUB_WORKSPACE/apps/fabric/android/local.properties
 
       - name: Cache Gradle
         uses: actions/cache@v3
@@ -198,7 +198,7 @@ jobs:
           path: |
             ~/.gradle/wrapper
             ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('./apps/paper/android/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('./apps/fabric/android/gradle/wrapper/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('./apps/paper/android/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
@@ -272,7 +272,7 @@ jobs:
       #   run: echo "PACKAGE_NAME=${{ env.PACKAGE_NAME }}" >> $GITHUB_ENV
       - name: Launch APK
         env:
-          PACKAGE_NAME: ${{ matrix.working-directory == 'fabricexample' && 'com.fabricexample' || 'com.paper' }}  
+          PACKAGE_NAME: 'com.paper'
         run: adb shell monkey -p ${{ env.PACKAGE_NAME }} 1  
 
       # On fabric, the system fonts are slightly different

@@ -45,7 +45,7 @@ export const Neumorphism = () => {
   const font = useFont(require("./components/SF-Pro-Display-Bold.otf"), 17);
 
   return (
-    <Canvas style={{ flex: 1 }} mode="continuous">
+    <Canvas style={{ flex: 1 }}>
       <Group transform={transform}>
         <Group>
           <LinearGradient
