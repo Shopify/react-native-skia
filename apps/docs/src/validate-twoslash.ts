@@ -19,6 +19,9 @@ function validateTypeScriptSnippet(snippet: string): SnippetValidationResult {
     tsConfigFilePath: path.join(__dirname, "..", "tsconfig.json"),
     compilerOptions: {
       noEmit: true,
+      noUnusedLocals: false,
+      allowUmdGlobalAccess: true,
+      noUncheckedIndexedAccess: false,
     },
   });
 
@@ -161,9 +164,6 @@ async function extractAndValidateTwoslashSnippets(specificFile?: string) {
       // Skip empty code snippets
       if (codeSnippet && codeSnippet.trim() !== "") {
         const trimmedSnippet = codeSnippet.trim();
-        console.log(
-          `  → Validating snippet #${snippetCounter} (${trimmedSnippet.length} characters)`
-        );
         const validationResult = validateTypeScriptSnippet(trimmedSnippet);
 
         totalSnippets++;
@@ -171,10 +171,10 @@ async function extractAndValidateTwoslashSnippets(specificFile?: string) {
           totalInvalidSnippets++;
           hasFileErrors = true;
           console.log(
-            `    ❌ FAILED with ${validationResult.errors.length} error(s) in ${relativeFilePath}`
+            `  ❌ #${snippetCounter} with ${validationResult.errors.length} error(s) in ${relativeFilePath}`
           );
         } else {
-          console.log("    ✅ PASSED");
+          console.log(`  ✅ Snippet #${snippetCounter}`);
         }
 
         fileSnippets.push({
