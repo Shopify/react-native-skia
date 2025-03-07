@@ -31,11 +31,20 @@ jobs:
           GIT_SYNC_DEPS_SKIP_EMSDK: 'true'
         run: yarn build-skia
 
+      - name: Set artifact prefix
+        id: artifact-prefix
+        run: |
+          if [[ ${{ github.ref }} == 'refs/heads/next' ]]; then
+            echo "prefix=next-" >> $GITHUB_OUTPUT
+          else
+            echo "prefix=" >> $GITHUB_OUTPUT
+          fi
+
       - name: Upload artifacts - Android arm
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/next'
         uses: actions/upload-artifact@v4
         with:
-          name: skia-android-arm
+          name: ${{ steps.artifact-prefix.outputs.prefix }}skia-android-arm
           path: |
             ./externals/skia/out/android/arm/libskia.a
             ./externals/skia/out/android/arm/libskshaper.a
@@ -47,10 +56,10 @@ jobs:
             ./externals/skia/out/android/arm/libskunicode_icu.a
 
       - name: Upload artifacts - Android arm64
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/next'
         uses: actions/upload-artifact@v4
         with:
-          name: skia-android-arm-64
+          name: ${{ steps.artifact-prefix.outputs.prefix }}skia-android-arm-64
           path: |
             ./externals/skia/out/android/arm64/libskia.a
             ./externals/skia/out/android/arm64/libskshaper.a
@@ -62,10 +71,10 @@ jobs:
             ./externals/skia/out/android/arm64/libskunicode_icu.a
 
       - name: Upload artifacts - Android x86
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/next'
         uses: actions/upload-artifact@v4
         with:
-          name: skia-android-arm-x86
+          name: ${{ steps.artifact-prefix.outputs.prefix }}skia-android-arm-x86
           path: |
             ./externals/skia/out/android/x86/libskia.a
             ./externals/skia/out/android/x86/libskshaper.a
@@ -77,10 +86,10 @@ jobs:
             ./externals/skia/out/android/x86/libskunicode_icu.a
 
       - name: Upload artifacts - Android x64
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/next'
         uses: actions/upload-artifact@v4
         with:
-          name: skia-android-arm-x64
+          name: ${{ steps.artifact-prefix.outputs.prefix }}skia-android-arm-x64
           path: |
             ./externals/skia/out/android/x64/libskia.a
             ./externals/skia/out/android/x64/libskshaper.a
@@ -92,9 +101,9 @@ jobs:
             ./externals/skia/out/android/x64/libskunicode_icu.a
 
       - name: Upload artifacts - Apple xcframeworks
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/next'
         uses: actions/upload-artifact@v4
         with:
-          name: skia-apple-xcframeworks
+          name: ${{ steps.artifact-prefix.outputs.prefix }}skia-apple-xcframeworks
           path: |
             ./packages/skia/libs/apple/*.xcframework

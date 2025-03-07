@@ -35,6 +35,15 @@ runs:
       run: yarn install --immutable
       shell: bash
 
+    - name: Set artifact prefix
+      id: artifact-prefix
+      run: |
+        if [[ ${{ github.ref }} == 'refs/heads/next' || ${{ github.ref }} == refs/heads/next/* ]]; then
+          echo "prefix=next-" >> $GITHUB_OUTPUT
+        else
+          echo "prefix=" >> $GITHUB_OUTPUT
+        fi
+
     - name: Download Skia Binary Artifacts
       if: ${{ inputs.download_skia == 'true' }}
       uses: dawidd6/action-download-artifact@v2
@@ -42,7 +51,8 @@ runs:
         workflow: "build-skia.yml"
         repo: shopify/react-native-skia
         path: packages/skia/artifacts
-        branch: main
+        branch: ${{ github.ref_name }}
+        name: ${{ steps.artifact-prefix.outputs.prefix }}skia-*
 
     - name: Copy Artifacts to libs folder
       if: ${{ inputs.download_skia == 'true' }}
