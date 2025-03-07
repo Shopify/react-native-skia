@@ -76,8 +76,8 @@
   "licenseFilename": "LICENSE.md",
   "readmeFilename": "README.md",
   "peerDependencies": {
-    "react": ">=18.0",
-    "react-native": ">=0.64",
+    "react": ">=18.0 <19.0.0",
+    "react-native": ">=0.64 <0.78.0",
     "react-native-reanimated": ">=2.0.0"
   },
   "peerDependenciesMeta": {
