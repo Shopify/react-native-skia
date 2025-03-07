@@ -16,17 +16,16 @@
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0"
   },
   "dependencies": {
-    "@docusaurus/core": "2.4.3",
-    "@docusaurus/preset-classic": "2.4.3",
-    "@mdx-js/react": "^1.6.21",
+    "@docusaurus/core": "latest",
+    "@docusaurus/preset-classic": "latest",
+    "@mdx-js/react": "^3.1.0",
     "@shopify/react-native-skia": "workspace:*",
     "@svgr/webpack": "^5.5.0",
     "clsx": "^1.1.1",
-    "docusaurus-preset-shiki-twoslash": "1.1.41",
     "expo-asset": "^10.0.6",
     "file-loader": "^6.2.0",
     "its-fine": "^1.0.8",
-    "prism-react-renderer": "^1.2.1",
+    "prism-react-renderer": "^2.4.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-native": "0.75.2",
@@ -35,7 +34,7 @@
     "url-loader": "^4.1.1"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "2.4.3",
+    "@docusaurus/module-type-aliases": "latest",
     "@tsconfig/docusaurus": "^1.0.4",
     "eslint": "8.21.0",
     "eslint-config-react-native-wcandillon": "3.10.2",
