@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { Project, DiagnosticCategory } from "ts-morph";
+import minimist from "minimist";
 
 // Regex to extract code blocks with ```tsx twoslash
 const twoslashRegex = /```tsx twoslash\n([\s\S]*?)```/g;
@@ -52,12 +53,19 @@ function validateTypeScriptSnippet(snippet: string): SnippetValidationResult {
 }
 
 // Function to extract all twoslash snippets from markdown files and validate them
-async function extractAndValidateTwoslashSnippets() {
+async function extractAndValidateTwoslashSnippets(specificFile?: string) {
   console.log("Starting twoslash snippet extraction and validation...");
 
   // Find all .md and .mdx files in docs directory
   const docsPath = path.join(__dirname, "..");
-  console.log(`Looking for markdown files in: ${path.join(docsPath, "docs")}`);
+
+  if (specificFile) {
+    console.log(`Validating specific file: ${specificFile}`);
+  } else {
+    console.log(
+      `Looking for markdown files in: ${path.join(docsPath, "docs")}`
+    );
+  }
 
   // Use a recursive function instead of recursive option since it's causing type issues
   function findMarkdownFiles(dir: string): string[] {
@@ -79,11 +87,36 @@ async function extractAndValidateTwoslashSnippets() {
     return files;
   }
 
-  const docsDir = path.join(docsPath, "docs");
-  const allFiles = findMarkdownFiles(docsDir);
-  console.log(`Found ${allFiles.length} markdown files to scan`);
+  let files: string[] = [];
 
-  const files = allFiles.map((file) => file.substring(docsPath.length + 1));
+  if (specificFile) {
+    // Handle the specific file case
+    const fullPath = path.isAbsolute(specificFile)
+      ? specificFile
+      : path.join(docsPath, specificFile);
+
+    if (!fs.existsSync(fullPath)) {
+      throw new Error(`File not found: ${fullPath}`);
+    }
+
+    if (!fullPath.endsWith(".md") && !fullPath.endsWith(".mdx")) {
+      throw new Error(`File is not a markdown file: ${fullPath}`);
+    }
+
+    const relativeFilePath = path.isAbsolute(specificFile)
+      ? path.relative(docsPath, specificFile)
+      : specificFile;
+
+    files = [relativeFilePath];
+    console.log("Found 1 file to validate");
+  } else {
+    // Handle the all files case
+    const docsDir = path.join(docsPath, "docs");
+    const allFiles = findMarkdownFiles(docsDir);
+    console.log(`Found ${allFiles.length} markdown files to scan`);
+
+    files = allFiles.map((file) => file.substring(docsPath.length + 1));
+  }
 
   const results: {
     file: string;
@@ -178,13 +211,41 @@ async function extractAndValidateTwoslashSnippets() {
   };
 }
 
+// Parse command line arguments
+const argv = minimist(process.argv.slice(2), {
+  string: ["file"],
+  alias: {
+    f: "file",
+    h: "help",
+  },
+});
+
+// Display help information if requested
+if (argv.help) {
+  console.log(`
+TypeScript Twoslash Snippet Validator
+
+Usage:
+  node validate-snippets.js [options]
+
+Options:
+  --file, -f    Validate a specific markdown file (relative to project root or absolute path)
+  --help, -h    Show this help message
+
+Examples:
+  node validate-snippets.js                # Validate all markdown files in docs/
+  node validate-snippets.js --file=docs/components/button.md  # Validate a specific file
+`);
+  process.exit(0);
+}
+
 // Run the extraction and validation
 console.log(
   "Loading TypeScript configuration from:",
   path.join(__dirname, "..", "tsconfig.json")
 );
 
-extractAndValidateTwoslashSnippets()
+extractAndValidateTwoslashSnippets(argv.file)
   .then((result) => {
     console.log("\n=== VALIDATION COMPLETE ===\n");
     const { results, summary } = result;

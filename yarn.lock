@@ -6443,6 +6443,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/minimist@npm:^1.2.5":
+  version: 1.2.5
+  resolution: "@types/minimist@npm:1.2.5"
+  checksum: 477047b606005058ab0263c4f58097136268007f320003c348794f74adedc3166ffc47c80ec3e94687787f2ab7f4e72c468223946e79892cf0fd9e25e9970a90
+  languageName: node
+  linkType: hard
+
 "@types/ms@npm:*":
   version: 2.1.0
   resolution: "@types/ms@npm:2.1.0"
@@ -10336,6 +10343,7 @@ __metadata:
     "@shopify/react-native-skia": "workspace:*"
     "@svgr/webpack": ^5.5.0
     "@tsconfig/docusaurus": ^1.0.4
+    "@types/minimist": ^1.2.5
     "@types/node": ^22.13.9
     clsx: ^1.1.1
     eslint: 8.21.0
@@ -10343,6 +10351,7 @@ __metadata:
     expo-asset: ^10.0.6
     file-loader: ^6.2.0
     its-fine: ^1.0.8
+    minimist: ^1.2.8
     prism-react-renderer: ^2.4.1
     react: 18.3.1
     react-dom: 18.3.1
@@ -17471,7 +17480,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimist@npm:^1.2.0, minimist@npm:^1.2.5, minimist@npm:^1.2.6":
+"minimist@npm:^1.2.0, minimist@npm:^1.2.5, minimist@npm:^1.2.6, minimist@npm:^1.2.8":
   version: 1.2.8
   resolution: "minimist@npm:1.2.8"
   checksum: 75a6d645fb122dad29c06a7597bddea977258957ed88d7a6df59b5cd3fe4a527e253e9bbf2e783e4b73657f9098b96a5fe96ab8a113655d4109108577ecf85b0
