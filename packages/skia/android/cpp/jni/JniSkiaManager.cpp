@@ -9,11 +9,7 @@
 
 namespace {
 
-#if REACT_NATIVE_VERSION >= 75
 using CallFuncType = facebook::react::CallFunc;
-#else
-using CallFuncType = std::function<void()>;
-#endif
 
 // For bridgeless mode, currently we don't have a way to get the JSCallInvoker
 // from Java. Workaround to use RuntimeExecutor to simulate the behavior of
@@ -28,11 +24,7 @@ public:
 
   void invokeAsync(CallFuncType &&func) noexcept override {
     runtimeExecutor_([func = std::move(func)](facebook::jsi::Runtime &runtime) {
-#if REACT_NATIVE_VERSION >= 75
       func(runtime);
-#else
-      func();
-#endif
     });
   }
 
