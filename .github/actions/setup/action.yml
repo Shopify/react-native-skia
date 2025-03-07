@@ -43,6 +43,7 @@ runs:
         else
           echo "prefix=" >> $GITHUB_OUTPUT
         fi
+      shell: bash
 
     - name: Download Skia Binary Artifacts
       if: ${{ inputs.download_skia == 'true' }}
