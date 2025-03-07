@@ -53,7 +53,8 @@ runs:
         repo: shopify/react-native-skia
         path: packages/skia/artifacts
         branch: ${{ github.ref_name }}
-        name: ${{ steps.artifact-prefix.outputs.prefix }}skia-*
+        name: ${{ steps.artifact-prefix.outputs.prefix }}skia-.*
+        name_is_regexp: true
 
     - name: Copy Artifacts to libs folder
       if: ${{ inputs.download_skia == 'true' }}
