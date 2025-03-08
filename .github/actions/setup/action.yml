@@ -55,3 +55,9 @@ runs:
       working-directory: packages/skia
       run: yarn copy-skia-headers
       shell: bash
+
+    - name: Download Skia Build for next branch
+      if: ${{ github.ref == 'refs/heads/next' || startsWith(github.ref, 'refs/heads/next') }}
+      working-directory: packages/skia
+      run: yarn download-skia-build
+      shell: bash
