@@ -12,11 +12,23 @@
     [
       "semantic-release-yarn",
       {
-        "npmPublish": true
+        "npmPublish": false,
+        "tarballDir": "dist"
       }
     ],
     [
-      "@semantic-release/github"
+      "@semantic-release/github",
+      {
+        "assets": [
+          {"path": "dist/*.tgz", "label": "Package tarball"}
+        ]
+      }
+    ],
+    [
+      "@semantic-release/exec",
+      {
+        "publishCmd": "npm publish dist/*.tgz --provenance --access public --tag ${nextRelease.channel || 'latest'}"
+      }
     ]
   ]
 }
