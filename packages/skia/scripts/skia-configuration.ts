@@ -305,6 +305,8 @@ export const copyHeaders = () => {
     "cp -a ../../externals/skia/src/core/SkChecksum.h ./cpp/skia/src/core/.",
     "cp -a ../../externals/skia/src/core/SkTHash.h ./cpp/skia/src/core/.",
 
+    "cp -a ../../externals/skia/include/android/SkImageAndroid.h ./cpp/skia/include/android/.",
+
     // TODO: Remove this once migrated to Graphite
     "mkdir -p ./cpp/skia/src/gpu/ganesh/gl",
     "cp -a ../../externals/skia/src/gpu/ganesh/gl/GrGLDefines.h ./cpp/skia/src/gpu/ganesh/gl/.",

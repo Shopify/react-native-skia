@@ -12,7 +12,7 @@ function parseArgs(): { url: string } {
 //   }
   
 //   const url = urlArg.split('=')[1];
-  return { url: "https://firebasestorage.googleapis.com/v0/b/start-react-native.appspot.com/o/tmp%2Fskia-build-next.zip?alt=media&token=35b73859-97cf-4683-8f01-16274bb117be" };
+  return { url: "https://firebasestorage.googleapis.com/v0/b/start-react-native.appspot.com/o/tmp%2Fskia-build-next.zip?alt=media&token=f19d4ff1-7447-47da-ba5e-363e7a6408a3" };
 }
 
 // Main function
