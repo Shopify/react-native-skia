@@ -42,7 +42,7 @@
     "e2e": "E2E=true yarn test -i e2e",
     "release": "semantic-release",
     "build": "bob build && merge-dirs lib/typescript/src lib/commonjs && merge-dirs lib/typescript/src lib/module",
-    "clean-skia": "yarn rimraf ./libs && yarn rimraf ../../externals/skia/out",
+    "clean-skia": "rm -rf ./libs && rm -rf ../../externals/skia/out",
     "build-skia": "ts-node ./scripts/build-skia.ts",
     "archive-skia-build": "ts-node ./scripts/archive-skia-build.ts",
     "download-skia-build": "ts-node ./scripts/download-skia-build.ts",
