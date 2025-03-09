@@ -69,6 +69,7 @@
         _manager->setSkiaView(_nativeId, _impl->getDrawView());
       }
       _impl->getDrawView()->setShowDebugOverlays(_debugMode);
+      [self setNeedsDisplay];
     }
   }
 }
@@ -125,7 +126,7 @@
   // We override drawRect to ensure we to direct rendering when the
   // underlying OS view needs to render:
   if (_impl != nullptr) {
-    _impl->getDrawView()->redraw();
+    _impl->getDrawView()->redraw(true);
   }
 }
 
