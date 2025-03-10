@@ -7294,8 +7294,8 @@ __metadata:
     react: 19.0.0
     react-native: 0.78.0
     react-native-builder-bob: 0.18.2
-    react-native-reanimated: 3.17.1
-    react-reconciler: 0.31.0
+    react-native-reanimated: ^3.0
+    react-reconciler: 0.27.0
     rimraf: 3.0.2
     semantic-release: ^24.1.0
     semantic-release-yarn: ^3.0.2
@@ -12429,11 +12429,11 @@ __metadata:
     its-fine: ^1.0.8
     minimist: ^1.2.8
     prism-react-renderer: ^2.4.1
-    react: 19.0.0
-    react-dom: 19.0.0
-    react-native: 0.78.0
-    react-native-gesture-handler: ^2.24.0
-    react-native-reanimated: 3.17.1
+    react: 18.3.1
+    react-dom: 18.3.1
+    react-native: 0.75.2
+    react-native-gesture-handler: ^2.18.1
+    react-native-reanimated: ^3.0
     ts-morph: ^25.0.1
     ts-node: ^10.9.2
     twoslash-cli: 1.3.24
@@ -13852,7 +13852,7 @@ __metadata:
     react-native: 0.78.0
     react-native-gesture-handler: ^2.24.0
     react-native-macos: ^0.75.0
-    react-native-reanimated: ^3.17.1
+    react-native-reanimated: ^3.0
     react-native-safe-area-context: ^5.2.0
     react-native-screens: ^4.9.1
     react-native-svg: ^15.11.2
@@ -23382,6 +23382,30 @@ __metadata:
   linkType: hard
 
 "react-native-reanimated@npm:3.17.1":
+  version: 3.17.1
+  resolution: "react-native-reanimated@npm:3.17.1"
+  dependencies:
+    "@babel/plugin-transform-arrow-functions": ^7.0.0-0
+    "@babel/plugin-transform-class-properties": ^7.0.0-0
+    "@babel/plugin-transform-classes": ^7.0.0-0
+    "@babel/plugin-transform-nullish-coalescing-operator": ^7.0.0-0
+    "@babel/plugin-transform-optional-chaining": ^7.0.0-0
+    "@babel/plugin-transform-shorthand-properties": ^7.0.0-0
+    "@babel/plugin-transform-template-literals": ^7.0.0-0
+    "@babel/plugin-transform-unicode-regex": ^7.0.0-0
+    "@babel/preset-typescript": ^7.16.7
+    convert-source-map: ^2.0.0
+    invariant: ^2.2.4
+    react-native-is-edge-to-edge: 1.1.6
+  peerDependencies:
+    "@babel/core": ^7.0.0-0
+    react: "*"
+    react-native: "*"
+  checksum: fd05040a3fc6a8f4efb387657c0cd6c314e5e6b50f859e127d6891d8f81c65b020ddcf78615aa0074b4e134e450d38c40db916c544e1e2efa26c50c82815607d
+  languageName: node
+  linkType: hard
+
+"react-native-reanimated@npm:^3.0":
   version: 3.17.1
   resolution: "react-native-reanimated@npm:3.17.1"
   dependencies:
