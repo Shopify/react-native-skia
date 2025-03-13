@@ -5,7 +5,7 @@
     "provenance": true
   },
   "bin": {
-    "setup-skia-web": "./scripts/setup-canvaskit.js"
+    "setup-skia-web": "scripts/setup-canvaskit.js"
   },
   "title": "React Native Skia",
   "version": "0.0.0",

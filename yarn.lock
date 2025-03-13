@@ -2150,12 +2150,12 @@ __metadata:
   linkType: hard
 
 "@babel/runtime-corejs3@npm:^7.25.9":
-  version: 7.26.9
-  resolution: "@babel/runtime-corejs3@npm:7.26.9"
+  version: 7.26.10
+  resolution: "@babel/runtime-corejs3@npm:7.26.10"
   dependencies:
     core-js-pure: ^3.30.2
     regenerator-runtime: ^0.14.0
-  checksum: f4daeafe995659ebafeb57a5ed8399d8f4e0256cdc9107c9e2f1107b0aed50e93c3dbafb02265b1a707b9b6bbed515b25bf31e8df9a26c8790bc9c48208513a6
+  checksum: 771d986d824fb84503c348d24f71e50c4ff078a2b213412761f0ffc5c83257a2d149caa73db86a70d642fa0e7e57968bbbccc1dd8d0cb21dcca0389d0d39c8bd
   languageName: node
   linkType: hard
 
@@ -6896,7 +6896,7 @@ __metadata:
     react-native-reanimated:
       optional: true
   bin:
-    setup-skia-web: ./scripts/setup-canvaskit.js
+    setup-skia-web: scripts/setup-canvaskit.js
   languageName: unknown
   linkType: soft
 
@@ -22344,9 +22344,9 @@ __metadata:
   linkType: hard
 
 "prismjs@npm:^1.29.0":
-  version: 1.29.0
-  resolution: "prismjs@npm:1.29.0"
-  checksum: 007a8869d4456ff8049dc59404e32d5666a07d99c3b0e30a18bd3b7676dfa07d1daae9d0f407f20983865fd8da56de91d09cb08e6aa61f5bc420a27c0beeaf93
+  version: 1.30.0
+  resolution: "prismjs@npm:1.30.0"
+  checksum: a68eddd4c5f1c506badb5434b0b28a7cc2479ed1df91bc4218e6833c7971ef40c50ec481ea49749ac964256acb78d8b66a6bd11554938e8998e46c18b5f9a580
   languageName: node
   linkType: hard
 
