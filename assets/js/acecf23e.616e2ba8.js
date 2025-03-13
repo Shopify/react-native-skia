@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[1903],{1912:s=>{s.exports=JSON.parse('{"blogBasePath":"/react-native-skia/blog","blogTitle":"Blog","authorsListPath":"/react-native-skia/blog/authors"}')}}]);
