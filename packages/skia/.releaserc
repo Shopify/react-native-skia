@@ -19,7 +19,7 @@
     [
       "@semantic-release/exec",
       {
-        "publishCmd": "mkdir -p /tmp/npm-publish && cp dist/*.tgz /tmp/npm-publish/ && cd /tmp/npm-publish && npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN && npm publish *.tgz --provenance --access public --tag latest"
+        "publishCmd": "mkdir -p /tmp/npm-publish && cp dist/*.tgz /tmp/npm-publish/ && cd /tmp/npm-publish && npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN && npm publish *.tgz --provenance --access public --tag ${nextRelease.channel || 'latest'}"
       }
     ],
     [
