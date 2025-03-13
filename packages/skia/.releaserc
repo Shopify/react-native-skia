@@ -19,7 +19,7 @@
     [
       "@semantic-release/exec",
       {
-        "publishCmd": "npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN && npm publish dist/*.tgz --provenance --access public --tag ${nextRelease.channel || 'latest'}"
+        "publishCmd": "npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN && npm publish dist/*.tgz --provenance --access public --tag ${nextRelease.channel || 'latest'} --no-workspaces"
       }
     ],
     [
