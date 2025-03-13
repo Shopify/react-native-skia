@@ -5529,7 +5529,7 @@ __metadata:
     react-native-reanimated:
       optional: true
   bin:
-    setup-skia-web: ./scripts/setup-canvaskit.js
+    setup-skia-web: scripts/setup-canvaskit.js
   languageName: unknown
   linkType: soft
 
