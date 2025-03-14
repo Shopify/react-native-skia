@@ -51,7 +51,7 @@ int RNSkMetalCanvasProvider::getScaledHeight() {
  Render to a canvas
  */
 bool RNSkMetalCanvasProvider::renderToCanvas(
-    const std::function<void(SkCanvas *)> &cb) {
+    const std::function<void(SkCanvas *)> &cb, bool flush) {
   if (!_ctx) {
     return false;
   }
@@ -82,7 +82,7 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
     }
     auto canvas = surface->getCanvas();
     cb(canvas);
-    _ctx->present();
+    _ctx->present(flush);
   }
   return true;
 };

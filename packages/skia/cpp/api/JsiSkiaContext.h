@@ -43,7 +43,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(present) {
-    getObject()->present();
+    getObject()->present(true);
     return jsi::Value::undefined();
   }
 

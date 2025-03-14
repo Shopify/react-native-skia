@@ -38,7 +38,7 @@ public:
                         bool opaque) override {
     std::static_pointer_cast<RNSkOpenGLCanvasProvider>(T::getCanvasProvider())
         ->surfaceAvailable(surface, width, height, opaque);
-    RNSkView::redraw();
+    RNSkView::redraw(true);
   }
 
   void surfaceDestroyed() override {
@@ -52,7 +52,7 @@ public:
         ->surfaceSizeChanged(surface, width, height, opaque);
     // This is only need for the first time to frame, this renderImmediate call
     // will invoke updateTexImage for the previous frame
-    RNSkView::redraw();
+    RNSkView::redraw(true);
   }
 
   float getPixelDensity() override {
