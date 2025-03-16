@@ -2,7 +2,7 @@
 
 #import "RNSkMetalCanvasProvider.h"
 #import "RNSkView.h"
-#import "RNSkiOSPlatformContext.h"
+#import "RNSkApplePlatformContext.h"
 
 class RNSkBaseiOSView {
 public:
