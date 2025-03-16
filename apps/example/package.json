@@ -9,6 +9,7 @@
     "ios": "react-native run-ios",
     "lint-skip": "eslint .",
     "mkdist": "node -e \"require('node:fs').mkdirSync('dist', { recursive: true, mode: 0o755 })\"",
+    "pod:install": "cd ios && pod install",
     "start": "react-native start",
     "test-skip": "node --experimental-vm-modules ../../node_modules/.bin/jest",
     "tsc": "tsc --noEmit"
