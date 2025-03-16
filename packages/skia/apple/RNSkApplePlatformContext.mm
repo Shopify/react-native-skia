@@ -11,7 +11,7 @@
 #else
 #include "MetalContext.h"
 #endif
-#include "RNSkiOSVideo.h"
+#include "RNSkAppleVideo.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -190,7 +190,7 @@ const TextureInfo RNSkApplePlatformContext::getTexture(sk_sp<SkSurface> surface)
 
 std::shared_ptr<RNSkVideo>
 RNSkApplePlatformContext::createVideo(const std::string &url) {
-  return std::make_shared<RNSkiOSVideo>(url, this);
+  return std::make_shared<RNSkAppleVideo>(url, this);
 }
 
 std::shared_ptr<WindowContext>
