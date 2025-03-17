@@ -63,3 +63,5 @@ jest.mock("react-native-gesture-handler", () => {
     GestureDetector: jest.fn(),
   };
 });
+
+jest.mock("@react-native-community/slider", () => "Slider");

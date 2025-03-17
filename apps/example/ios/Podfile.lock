@@ -1238,7 +1238,7 @@ PODS:
     - React-jsiexecutor
     - React-RCTFBReactNativeSpec
     - ReactCommon/turbomodule/core
-  - react-native-safe-area-context (5.2.0):
+  - react-native-safe-area-context (5.3.0):
     - React-Core
   - react-native-skia (0.0.0):
     - DoubleConversion
@@ -1571,7 +1571,7 @@ PODS:
     - React-logger (= 0.78.0)
     - React-perflogger (= 0.78.0)
     - React-utils (= 0.78.0)
-  - ReactNativeHost (0.5.3):
+  - ReactNativeHost (0.5.5):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1593,7 +1593,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - ReactTestApp-DevSupport (4.2.0):
+  - ReactTestApp-DevSupport (4.2.2):
     - React-Core
     - React-jsi
   - ReactTestApp-Resources (1.0.0-dev)
@@ -1737,7 +1737,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (4.9.1):
+  - RNScreens (4.9.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2041,8 +2041,8 @@ SPEC CHECKSUMS:
   React-logger: 018826bfd51b9f18e87f67db1590bc510ad20664
   React-Mapbuffer: 3c11cee7737609275c7b66bd0b1de475f094cedf
   React-microtasksnativemodule: 843f352b32aacbe13a9c750190d34df44c3e6c2c
-  react-native-safe-area-context: 3e33e7c43c8b74dba436a5a32651cb8d7064c740
-  react-native-skia: e92968bc8321d0454845f8f27aa43cee2b373536
+  react-native-safe-area-context: fdb0a66feac038cb6eb1edafcf2ccee2b5cf0284
+  react-native-skia: d3b3efc8ecfc5c4c2b07599ada020d87e9ba6761
   react-native-slider: 1205801a8d29b28cacc14eef08cb120015cdafcb
   React-NativeModulesApple: 88433b6946778bea9c153e27b671de15411bf225
   React-perflogger: 9e8d3c0dc0194eb932162812a168aa5dc662f418
@@ -2072,12 +2072,12 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: a1fb08dfdc7ebc387b2e54cfc9decd283ed821d8
   ReactCodegen: 008c319179d681a6a00966edfc67fda68f9fbb2e
   ReactCommon: 0c097b53f03d6bf166edbcd0915da32f3015dd90
-  ReactNativeHost: b6daec6aff5d4b10b47b711137b335bf0f35b9bb
-  ReactTestApp-DevSupport: f23bacc6d21da29a7d8d248bb6ee8cc9ad241a48
+  ReactNativeHost: d6b0193d50e5f33dfb26528a34df846d69b1fb66
+  ReactTestApp-DevSupport: 3d6e08be21ce62ef882734884950d44b4642c4d7
   ReactTestApp-Resources: 1bd9ff10e4c24f2ad87101a32023721ae923bccf
   RNGestureHandler: 9f3109e11ed88fe5bed280bf7762b25e4c52f396
   RNReanimated: cdbe5dfe73c9143df3f750ff547a758eb16d2ab8
-  RNScreens: c11a9eb1e6df43890cd572ba68805b123defe8d1
+  RNScreens: 90e2348b58c6160a8c057436f9ece62d5b21e37b
   RNSVG: 4c63b12b7b5761063bca4f20dd228f6a8370f614
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: afd04ff05ebe0121a00c468a8a3c8080221cb14c
