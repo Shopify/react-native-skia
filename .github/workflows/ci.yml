@@ -3,9 +3,11 @@ on:
   push:
     branches:
       - main
+      - next
   pull_request:
     branches:
       - main
+      - next
   merge_group:
     types:
       - checks_requested
