@@ -1,17 +1,25 @@
 import React from "react";
 import { Canvas, Fill, Shader } from "@shopify/react-native-skia";
-import { Dimensions } from "react-native";
+import { Dimensions, View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import {
+  useDerivedValue,
+  useSharedValue,
+  withDecay,
+} from "react-native-reanimated";
 
 import { frag } from "../../components/ShaderLib";
 
 const { width, height } = Dimensions.get("window");
 
+const sf = 300;
+
 const rt = frag`
+uniform vec3 cameraPosition;
 
-
-const vec2 size = vec2(${width}, ${height});
+const vec2 size = vec2(${width}, ${height}-250.0);
 const vec3 backgroundColor = vec3(0.3, 0.6, 1.0);
-const vec3 cameraPosition = vec3(8.0, 8.0, 8.0);
+
 const vec3 cameraLookAt = vec3(0.0, 0.0, 0.0);
 const float cameraRoll = 0.0;
 const float light2Intensity = 1.0;
@@ -552,7 +560,7 @@ vec4 main(float2 fragCoord) {
                 vec2(0.0);
             
             // Get UV coordinates with the offset
-            float2 uv = ((fragCoord + offset) - 0.5 * size.xy) / size.y;
+            float2 uv = ((fragCoord + offset) - 0.5 * size.xy) / size.x;
             uv.y = -uv.y;  // Flip Y coordinate to match Skia's coordinate system
             
             // Camera setup
@@ -583,11 +591,38 @@ vec4 main(float2 fragCoord) {
 `;
 
 export const Chess = () => {
+  const rotateX = useSharedValue(Math.PI / 4);
+  const rotateY = useSharedValue(Math.PI / 4);
+
+  const gesture = Gesture.Pan()
+    .onChange((event) => {
+      rotateY.value += event.changeX / sf;
+      rotateX.value -= event.changeY / sf;
+    })
+    .onEnd(({ velocityX, velocityY }) => {
+      rotateX.value = withDecay({ velocity: velocityY / sf });
+      rotateY.value = withDecay({ velocity: velocityX / sf });
+    });
+  const uniforms = useDerivedValue(() => {
+    const dist = 7;
+    const cameraPosition = [
+      dist * Math.cos(rotateX.value) * Math.cos(rotateY.value),
+      dist * Math.sin(rotateX.value),
+      dist * Math.cos(rotateX.value) * Math.sin(rotateY.value),
+    ];
+    return {
+      cameraPosition,
+    };
+  });
   return (
-    <Canvas style={{ flex: 1 }}>
-      <Fill>
-        <Shader source={rt} uniforms={{}} />
-      </Fill>
-    </Canvas>
+    <View style={{ flex: 1 }}>
+      <GestureDetector gesture={gesture}>
+        <Canvas style={{ flex: 1 }}>
+          <Fill>
+            <Shader source={rt} uniforms={uniforms} />
+          </Fill>
+        </Canvas>
+      </GestureDetector>
+    </View>
   );
 };
