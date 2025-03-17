@@ -1208,7 +1208,7 @@ PODS:
     - React-jsiexecutor
     - React-RCTFBReactNativeSpec
     - ReactCommon/turbomodule/core
-  - react-native-safe-area-context (5.2.0):
+  - react-native-safe-area-context (5.3.0):
     - React-Core
   - react-native-skia (0.0.0):
     - DoubleConversion
@@ -1525,7 +1525,7 @@ PODS:
     - React-logger (= 0.78.0)
     - React-perflogger (= 0.78.0)
     - React-utils (= 0.78.0)
-  - ReactNativeHost (0.5.3):
+  - ReactNativeHost (0.5.5):
     - DoubleConversion
     - glog
     - RCT-Folly (= 2024.11.18.00)
@@ -1547,7 +1547,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - ReactTestApp-DevSupport (4.2.0):
+  - ReactTestApp-DevSupport (4.2.2):
     - React-Core
     - React-jsi
   - ReactTestApp-Resources (1.0.0-dev)
@@ -1681,7 +1681,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (4.9.1):
+  - RNScreens (4.9.2):
     - DoubleConversion
     - glog
     - RCT-Folly (= 2024.11.18.00)
