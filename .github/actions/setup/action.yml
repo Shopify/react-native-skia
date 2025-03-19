@@ -40,7 +40,7 @@ runs:
       uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
       with:
         workflow: "build-skia.yml"
-        repo: shopify/react-native-skia
+        repo: ExodusMovement/react-native-skia
         path: packages/skia/artifacts
         branch: main
 

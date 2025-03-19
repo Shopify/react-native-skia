@@ -4,7 +4,7 @@ import path from "path";
 
 import { $ } from "./utils";
 
-const repo = "shopify/react-native-skia";
+const repo = "ExodusMovement/react-native-skia";
 const workflow = "build-skia.yml";
 const names = [
   "skia-android-arm",
