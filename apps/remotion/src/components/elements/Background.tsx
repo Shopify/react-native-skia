@@ -1,9 +1,4 @@
-import {
-  Circle,
-  Fill,
-  Group,
-  RadialGradient,
-} from "@exodus/react-native-skia";
+import { Circle, Fill, Group, RadialGradient } from "@exodus/react-native-skia";
 import { interpolate, random, useCurrentFrame } from "remotion";
 import { createNoise3D } from "simplex-noise";
 
