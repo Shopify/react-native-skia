@@ -85,6 +85,9 @@ public:
 
     std::vector<SkColor> colors = getColors(runtime, arguments[2]);
     std::vector<SkScalar> positions = getPositions(runtime, arguments[3]);
+    if (!positions.empty() && positions.size() != colors.size()) {
+      throw std::invalid_argument("positions must be empty or have the same size as colors");
+    }
     auto tileMode = getTileMode(arguments, 4, count);
     auto flag = getFlag(arguments, 6, count);
     auto localMatrix = getLocalMatrix(runtime, arguments, 5, count);
@@ -104,6 +107,9 @@ public:
 
     std::vector<SkColor> colors = getColors(runtime, arguments[2]);
     std::vector<SkScalar> positions = getPositions(runtime, arguments[3]);
+    if (!positions.empty() && positions.size() != colors.size()) {
+      throw std::invalid_argument("positions must be empty or the same size as colors");
+    }
     auto tileMode = getTileMode(arguments, 4, count);
     auto flag = getFlag(arguments, 6, count);
     auto localMatrix = getLocalMatrix(runtime, arguments, 5, count);
@@ -121,6 +127,9 @@ public:
     auto y = arguments[1].asNumber();
     std::vector<SkColor> colors = getColors(runtime, arguments[2]);
     std::vector<SkScalar> positions = getPositions(runtime, arguments[3]);
+    if (!positions.empty() && positions.size() != colors.size()) {
+      throw std::invalid_argument("positions must be empty or the same size as colors");
+    }
     auto tileMode = getTileMode(arguments, 4, count);
     auto localMatrix = getLocalMatrix(runtime, arguments, 5, count);
     auto flag = getFlag(arguments, 6, count);
@@ -148,6 +157,9 @@ public:
 
     std::vector<SkColor> colors = getColors(runtime, arguments[4]);
     std::vector<SkScalar> positions = getPositions(runtime, arguments[5]);
+    if (!positions.empty() && positions.size() != colors.size()) {
+      throw std::invalid_argument("positions must be empty or the same size as colors");
+    }
     auto tileMode = getTileMode(arguments, 6, count);
     auto localMatrix = getLocalMatrix(runtime, arguments, 7, count);
     auto flag = getFlag(arguments, 8, count);
