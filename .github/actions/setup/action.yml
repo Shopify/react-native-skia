@@ -14,7 +14,7 @@ runs:
   using: composite
   steps:
     - name: Setup Node.js
-      uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
+      uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7 #v4.3.0
       with:
         node-version-file: .nvmrc
 
@@ -37,12 +37,13 @@ runs:
 
     - name: Download Skia Binary Artifacts
       if: ${{ inputs.download_skia == 'true' }}
-      uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
+      uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e #v9
       with:
-        workflow: "build-skia.yml"
+        workflow: 'build-skia.yml'
         repo: ExodusMovement/react-native-skia
         path: packages/skia/artifacts
         branch: exodus-fork
+        allow_forks: false
 
     - name: Copy Artifacts to libs folder
       if: ${{ inputs.download_skia == 'true' }}

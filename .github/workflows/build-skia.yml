@@ -16,7 +16,7 @@ jobs:
           ndk-version: r22b
 
       - name: Setup Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
+        uses: seanmiddleditch/gha-setup-ninja@3b1f8f94a2f8254bd26914c4ab9474d4f0015f67 #v6
 
       - name: Setup
         uses: ./.github/actions/setup
