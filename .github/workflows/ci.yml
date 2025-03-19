@@ -2,12 +2,10 @@ name: CI
 on:
   push:
     branches:
-      - main
-      - next
+      - exodus-2.0.1
   pull_request:
     branches:
-      - main
-      - next
+      - exodus-2.0.1
   merge_group:
     types:
       - checks_requested
@@ -119,7 +117,7 @@ jobs:
         id: setup-ndk
         with:
           ndk-version: r26d
-  
+
       - name: Set ANDROID_NDK
         run: echo "ANDROID_NDK=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
 
@@ -137,12 +135,13 @@ jobs:
           path: |
             ~/.gradle/wrapper
             ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('./apps/example/android/gradle/wrapper/gradle-wrapper.properties') }}
+          key:
+            ${{ runner.os }}-gradle-${{ hashFiles('./apps/example/android/gradle/wrapper/gradle-wrapper.properties') }}
             ${{ runner.os }}-gradle-
 
       - name: Build example for Android
         env:
-          JAVA_OPTS: "-XX:MaxHeapSize=6g"
+          JAVA_OPTS: '-XX:MaxHeapSize=6g'
         run: |
           yarn turbo run build:android --concurrency 1 --filter=example --force
 
@@ -181,7 +180,7 @@ jobs:
         id: setup-ndk
         with:
           ndk-version: r26d
-  
+
       - name: Set ANDROID_NDK
         run: echo "ANDROID_NDK=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
 
@@ -205,7 +204,7 @@ jobs:
 
       - name: Build example for Android
         env:
-          JAVA_OPTS: "-XX:MaxHeapSize=16g"
+          JAVA_OPTS: '-XX:MaxHeapSize=16g'
         run: |
           yarn turbo run build:android --concurrency 1 --force
 
@@ -239,7 +238,7 @@ jobs:
         with:
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
-      
+
       - name: SKDs - download required images
         run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
 
@@ -271,7 +270,7 @@ jobs:
       - name: Launch APK
         env:
           PACKAGE_NAME: 'com.microsoft.reacttestapp'
-        run: adb shell monkey -p ${{ env.PACKAGE_NAME }} 1  
+        run: adb shell monkey -p ${{ env.PACKAGE_NAME }} 1
 
       # On fabric, the system fonts are slightly different
       # so wont run the paragraph tests there for now
@@ -330,7 +329,7 @@ jobs:
       - name: Start Package Manager
         working-directory: apps/example
         run: E2E=true yarn start &
-  
+
       - name: Build example for iOS
         working-directory: apps/example
         run: yarn ios --simulator 'iPhone 16 Pro'

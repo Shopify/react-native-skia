@@ -42,7 +42,7 @@ runs:
         workflow: "build-skia.yml"
         repo: ExodusMovement/react-native-skia
         path: packages/skia/artifacts
-        branch: main
+        branch: exodus-fork
 
     - name: Copy Artifacts to libs folder
       if: ${{ inputs.download_skia == 'true' }}
