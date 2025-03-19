@@ -2,7 +2,7 @@ import {
   useImage,
   useImageAsTexture,
   useTypeface,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import { useCallback, useState } from "react";
 import { Platform } from "react-native";
 

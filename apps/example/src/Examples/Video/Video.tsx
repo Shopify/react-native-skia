@@ -7,7 +7,7 @@ import {
   Text,
   useFont,
   useVideo,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import { Platform, Pressable, View, useWindowDimensions } from "react-native";
 import { useDerivedValue, useSharedValue } from "react-native-reanimated";
 import Slider from "@react-native-community/slider";

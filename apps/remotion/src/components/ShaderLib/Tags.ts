@@ -1,4 +1,4 @@
-import { Skia } from "@shopify/react-native-skia";
+import { Skia } from "@exodus/react-native-skia";
 
 type Value = string | number;
 type Values = Value[];

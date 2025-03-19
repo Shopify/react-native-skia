@@ -1,6 +1,6 @@
 import React from "react";
 import { useWindowDimensions } from "react-native";
-import { Canvas, ImageSVG, useSVG } from "@shopify/react-native-skia";
+import { Canvas, ImageSVG, useSVG } from "@exodus/react-native-skia";
 
 export const SVG = () => {
   const { width, height } = useWindowDimensions();

@@ -5,7 +5,7 @@ import {
   Group,
   Paint,
   RoundedRect,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import React from "react";
 
 const PADDING = 32;

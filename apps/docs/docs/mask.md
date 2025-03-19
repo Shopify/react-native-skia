@@ -26,7 +26,7 @@ By default, the mask is not clipped if you want to clip the mask with the bounds
 Opaque pixels will be visible and transparent pixels invisible.
 
 ```tsx twoslash
-import {Canvas, Mask, Group, Circle, Rect} from "@shopify/react-native-skia";
+import {Canvas, Mask, Group, Circle, Rect} from "@exodus/react-native-skia";
 
 const Demo = () => (
   <Canvas style={{ width: 256, height: 256 }}>
@@ -53,7 +53,7 @@ const Demo = () => (
 White pixels will be visible and black pixels invisible.
 
 ```tsx twoslash
-import {Canvas, Mask, Group, Circle, Rect} from "@shopify/react-native-skia";
+import {Canvas, Mask, Group, Circle, Rect} from "@exodus/react-native-skia";
 
 const Demo = () => (
   <Canvas style={{ width: 256, height: 256 }}>

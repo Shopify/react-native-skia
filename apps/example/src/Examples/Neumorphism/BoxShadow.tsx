@@ -11,7 +11,7 @@ import {
   rect,
   Shadow,
   BoxShadow,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import { useWindowDimensions } from "react-native";
 
 export const Neumorphism = () => {

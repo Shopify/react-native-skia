@@ -1,5 +1,5 @@
-import type { SkSize, SkSurface } from "@shopify/react-native-skia";
-import { Skia } from "@shopify/react-native-skia";
+import type { SkSize, SkSurface } from "@exodus/react-native-skia";
+import { Skia } from "@exodus/react-native-skia";
 import { useMemo } from "react";
 import { useCurrentFrame } from "remotion";
 

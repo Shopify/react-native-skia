@@ -29,13 +29,13 @@ Use the `setup-skia-web` script to ensure that the `canvaskit.wasm` file is acce
 If you're [loading CanvasKit from a CDN](#using-a-cdn), running the `setup-skia-web` script is unnecessary.
 
 ```bash
-$ npx expo install @shopify/react-native-skia
+$ npx expo install @exodus/react-native-skia
 $ yarn setup-skia-web
 ```
 
 :::info
 
-Run `yarn setup-skia-web` each time you upgrade the `@shopify/react-native-skia` package.
+Run `yarn setup-skia-web` each time you upgrade the `@exodus/react-native-skia` package.
 Consider incorporating it into your `postinstall` script for convenience.
 
 :::
@@ -57,7 +57,7 @@ import '@expo/metro-runtime';
 import { App } from 'expo-router/build/qualified-entry';
 import { renderRootComponent } from 'expo-router/build/renderRootComponent';
 
-import { LoadSkiaWeb } from '@shopify/react-native-skia/lib/module/web';
+import { LoadSkiaWeb } from '@exodus/react-native-skia/lib/module/web';
 
 LoadSkiaWeb().then(async () => {
   renderRootComponent(App);
@@ -91,7 +91,7 @@ The following example demonstrates preloading Skia before rendering the `MySkiaC
 ```tsx
 import React from 'react';
 import { Text } from "react-native";
-import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
+import { WithSkiaWeb } from "@exodus/react-native-skia/lib/module/web";
 
 export default function App() {
   return (
@@ -116,7 +116,7 @@ The `LoadSkiaWeb()` function facilitates Skia's loading prior to the React app's
 Below is an `index.web.js` example:
 
 ```tsx
-import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
+import { LoadSkiaWeb } from "@exodus/react-native-skia/lib/module/web";
 
 LoadSkiaWeb().then(async () => {
   const App = (await import("./src/App")).default;
@@ -130,7 +130,7 @@ Below, CanvasKit loads via code-splitting from a CDN.
 It is critical that the CDN-hosted CanvasKit version aligns with React Native Skia's requirements.
 
 ```tsx
-import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
+import { WithSkiaWeb } from "@exodus/react-native-skia/lib/module/web";
 import { version } from 'canvaskit-wasm/package.json';
 
 export default function App() {
@@ -145,7 +145,7 @@ export default function App() {
 Alternatively, use deferred component registration:
 
 ```tsx
-import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
+import { LoadSkiaWeb } from "@exodus/react-native-skia/lib/module/web";
 import { version } from 'canvaskit-wasm/package.json';
 
 LoadSkiaWeb({

@@ -18,7 +18,7 @@ Please note that the y origin of the Text is the bottom of the text, not the top
 ### Simple Text
 
 ```tsx twoslash
-import {Canvas, Text, useFont, Fill} from "@shopify/react-native-skia";
+import {Canvas, Text, useFont, Fill} from "@exodus/react-native-skia";
 
 export const HelloWorld = () => {
   const fontSize = 32;
@@ -51,7 +51,7 @@ The APIs belows were made available before the Paragraph API was released.
 :::
 
 ```tsx twoslash
-import {useFonts, Text, matchFont} from "@shopify/react-native-skia";
+import {useFonts, Text, matchFont} from "@exodus/react-native-skia";
 
 const Demo = () => {
   const fontMgr = useFonts({
@@ -83,7 +83,7 @@ You can list system fonts via  `listFontFamilies` function returns the list of a
 By default the function will list system fonts but you can pass an optional `fontMgr` object as parameter.
 
 ```jsx twoslash
-import {listFontFamilies} from "@shopify/react-native-skia";
+import {listFontFamilies} from "@exodus/react-native-skia";
 
 console.log(listFontFamilies());
 ```
@@ -102,7 +102,7 @@ By default matchFont, will match fonts from the system font manager:
 
 ```jsx twoslash
 import {Platform} from "react-native";
-import {Canvas, Text, matchFont, Fill, Skia} from "@shopify/react-native-skia";
+import {Canvas, Text, matchFont, Fill, Skia} from "@exodus/react-native-skia";
  
 const fontFamily = Platform.select({ ios: "Helvetica", default: "serif" });
 const fontStyle = {
@@ -138,7 +138,7 @@ The `fontStyle` object can have the following list of optional attributes:
 By default, `matchFont` uses the system font manager to match the font style. However, if you want to use your custom font manager, you can pass it as the second parameter to the `matchFont` function:
 
 ```jsx twoslash
-import {matchFont, useFonts} from "@shopify/react-native-skia";
+import {matchFont, useFonts} from "@exodus/react-native-skia";
 
 const fontMgr = useFonts({
   Roboto: [
@@ -157,7 +157,7 @@ These are the APIs used behind the scene by the `matchFont` function.
 
 ```tsx twoslash
 import {Platform} from "react-native";
-import {Skia, FontStyle} from "@shopify/react-native-skia";
+import {Skia, FontStyle} from "@exodus/react-native-skia";
  
 const familyName = Platform.select({ ios: "Helvetica", default: "serif" });
 const fontSize = 32;

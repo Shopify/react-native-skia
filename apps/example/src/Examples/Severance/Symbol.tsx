@@ -1,11 +1,11 @@
-import type { SkFont, Vector } from "@shopify/react-native-skia";
+import type { SkFont, Vector } from "@exodus/react-native-skia";
 import {
   interpolate,
   dist,
   vec,
   Group,
   Text,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import React from "react";
 import { useWindowDimensions } from "react-native";
 import type { SharedValue } from "react-native-reanimated";

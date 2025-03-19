@@ -4,7 +4,7 @@ import {
   createPicture,
   Skia,
   SkiaPictureView,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 export const PictureViewExample = () => {
   // Create picture

@@ -1,5 +1,5 @@
-import type { PaintProps, SkRect, Vector } from "@shopify/react-native-skia";
-import { Skia, Path } from "@shopify/react-native-skia";
+import type { PaintProps, SkRect, Vector } from "@exodus/react-native-skia";
+import { Skia, Path } from "@exodus/react-native-skia";
 
 interface ProgressProps {
   start?: number;

@@ -1,5 +1,5 @@
 import "@expo/metro-runtime";
-import { LoadSkiaWeb } from "@shopify/react-native-skia/src/web";
+import { LoadSkiaWeb } from "@exodus/react-native-skia/src/web";
 import { version } from "canvaskit-wasm/package.json";
 import { App } from "expo-router/build/qualified-entry";
 import { renderRootComponent } from "expo-router/build/renderRootComponent";

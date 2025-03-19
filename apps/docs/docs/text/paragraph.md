@@ -15,7 +15,7 @@ Other system fonts will are available as well.
 
 ```tsx twoslash
 import { useMemo } from "react";
-import { Paragraph, Skia, useFonts, TextAlign, Canvas } from "@shopify/react-native-skia";
+import { Paragraph, Skia, useFonts, TextAlign, Canvas } from "@exodus/react-native-skia";
 
 const MyParagraph = () => {
   const customFontMgr = useFonts({
@@ -63,7 +63,7 @@ Below is the result on Android (left) and iOS (right).
 On Web, you will need to provide you own emoji font ([NotoColorEmoji](https://fonts.google.com/noto/specimen/Noto+Color+Emoji) for instance) and add it to the list of font families.
 
 ```tsx twoslash
-import { useFonts, Skia } from "@shopify/react-native-skia";
+import { useFonts, Skia } from "@exodus/react-native-skia";
 
 const customFontMgr = useFonts({
   Roboto: [
@@ -94,7 +94,7 @@ Below we use a foreground and a background paint on a text style:
 
 ```tsx twoslash
 import { useMemo } from "react";
-import { Paragraph, Skia, useFonts, Canvas, Rect, TileMode } from "@shopify/react-native-skia";
+import { Paragraph, Skia, useFonts, Canvas, Rect, TileMode } from "@exodus/react-native-skia";
 
 // Our background shader
 const source = Skia.RuntimeEffect.Make(`
@@ -173,7 +173,7 @@ For instance, in the example below, fopr  we apply a blur image filter.
 
 ```tsx twoslash
 import React from "react";
-import { Canvas, Skia, Group, Paint, Blur, Paragraph } from "@shopify/react-native-skia";
+import { Canvas, Skia, Group, Paint, Blur, Paragraph } from "@exodus/react-native-skia";
 
 const width = 256;
 const height = 256;
@@ -207,7 +207,7 @@ Before getting the paragraph height and width, you need to compute its layout us
 
 ```tsx twoslash
 import { useMemo } from "react";
-import { Paragraph, Skia, useFonts, Canvas, Rect } from "@shopify/react-native-skia";
+import { Paragraph, Skia, useFonts, Canvas, Rect } from "@exodus/react-native-skia";
 
 const MyParagraph = () => {
   const paragraph = useMemo(() => {
@@ -247,7 +247,7 @@ The font files should be organized by family names.
 For example:
 
 ```tsx twoslash
-import {useFonts} from "@shopify/react-native-skia";
+import {useFonts} from "@exodus/react-native-skia";
 
 const fontMgr = useFonts({
   Roboto: [
@@ -286,7 +286,7 @@ Below is an example to center text with `textAlign` property:
 
 ```tsx twoslash
 import { useMemo } from "react";
-import { Paragraph, Skia, TextAlign, Canvas, Rect } from "@shopify/react-native-skia";
+import { Paragraph, Skia, TextAlign, Canvas, Rect } from "@exodus/react-native-skia";
 
 const MyParagraph = () => {
   const paragraph = useMemo(() => {
@@ -338,7 +338,7 @@ Below is an example using different font styling:
 
 ```tsx twoslash
 import { useMemo } from "react";
-import { Paragraph, Skia, useFonts, FontStyle } from "@shopify/react-native-skia";
+import { Paragraph, Skia, useFonts, FontStyle } from "@exodus/react-native-skia";
 
 const MyParagraph = () => {
   const customFontMgr = useFonts({

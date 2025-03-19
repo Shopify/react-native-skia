@@ -1,4 +1,4 @@
-import type { Vector } from "@shopify/react-native-skia";
+import type { Vector } from "@exodus/react-native-skia";
 import {
   Circle,
   Group,
@@ -6,7 +6,7 @@ import {
   Blur,
   Fill,
   Skia,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 const r = 100;
 

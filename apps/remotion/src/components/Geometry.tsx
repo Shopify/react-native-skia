@@ -4,7 +4,7 @@ import type {
   SkRRect,
   SkRect,
   Vector,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import {
   fitbox,
   multiply4,
@@ -13,7 +13,7 @@ import {
   rrect,
   rect,
   Skia,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 import { CANVAS } from "./Theme";
 

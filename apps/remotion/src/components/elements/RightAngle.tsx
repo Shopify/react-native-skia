@@ -1,5 +1,5 @@
-import type { SkPoint } from "@shopify/react-native-skia";
-import { rotate } from "@shopify/react-native-skia";
+import type { SkPoint } from "@exodus/react-native-skia";
+import { rotate } from "@exodus/react-native-skia";
 
 import { getPointAtLength } from "../math";
 import type { Gradients } from "../Theme";

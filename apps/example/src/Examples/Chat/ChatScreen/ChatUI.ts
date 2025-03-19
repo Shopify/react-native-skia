@@ -1,5 +1,5 @@
-import type { SkCanvas, SkImage } from "@shopify/react-native-skia";
-import { Skia } from "@shopify/react-native-skia";
+import type { SkCanvas, SkImage } from "@exodus/react-native-skia";
+import { Skia } from "@exodus/react-native-skia";
 
 import type { ChatType, MessageType } from "../data/types";
 import { WINDOW_HEIGHT } from "../constants";

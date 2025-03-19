@@ -1,4 +1,4 @@
-import type { Vector } from "@shopify/react-native-skia";
+import type { Vector } from "@exodus/react-native-skia";
 import {
   vec,
   bottomLeft,
@@ -10,7 +10,7 @@ import {
   RadialGradient,
   rect,
   Fill,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import { interpolate, useCurrentFrame } from "remotion";
 
 import { CLAMP } from "../animations";

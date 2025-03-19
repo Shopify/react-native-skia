@@ -7,7 +7,7 @@ import {
   Skia,
   fitbox,
   rect,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import type { ReactNode } from "react";
 interface PhoneProps {
   x: number;

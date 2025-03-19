@@ -5,7 +5,7 @@ import {
   Group,
   Path,
   Rect,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 import { translate } from "../../../../components/Animations";
 

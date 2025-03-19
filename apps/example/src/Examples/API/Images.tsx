@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { ScrollView, useWindowDimensions } from "react-native";
-import { useImage, Canvas, Image, Rect } from "@shopify/react-native-skia";
+import { useImage, Canvas, Image, Rect } from "@exodus/react-native-skia";
 
 import { Title } from "./components/Title";
 

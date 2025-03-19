@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
 import { interpolate } from "remotion";
-import type { Vector } from "@shopify/react-native-skia";
+import type { Vector } from "@exodus/react-native-skia";
 import {
   Group,
   interpolateVector,
   transformOrigin,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 import { CLAMP } from "../animations";
 

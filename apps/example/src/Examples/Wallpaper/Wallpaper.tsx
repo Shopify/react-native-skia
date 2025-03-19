@@ -9,7 +9,7 @@ import {
   Mask,
   Shadow,
   Turbulence,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import React from "react";
 import { useWindowDimensions } from "react-native";
 

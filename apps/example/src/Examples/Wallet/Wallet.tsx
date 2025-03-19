@@ -6,7 +6,7 @@ import {
   Group,
   LinearGradient,
   vec,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import Animated, {
   useAnimatedStyle,
   useDerivedValue,

@@ -4,7 +4,7 @@ import {
   Canvas,
   Image,
   useAnimatedImageValue,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import { useSharedValue } from "react-native-reanimated";
 
 export const AnimatedImages = () => {

@@ -23,7 +23,7 @@ The build step will call some sub scripts which are basically calling the `build
 
 The script `build-skia.ios-fatlibs` archives all the archs for iOS into single files.
 
-After a successfull run the workflow uploads all of the libs used by @shopify/react-native-skia as artifacts that will be used in subsequent builds of the library itself.
+After a successfull run the workflow uploads all of the libs used by @exodus/react-native-skia as artifacts that will be used in subsequent builds of the library itself.
 
 ## build-npm.yml
 

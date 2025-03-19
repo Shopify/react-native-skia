@@ -1,5 +1,5 @@
-import type { Vector } from "@shopify/react-native-skia";
-import { Path } from "@shopify/react-native-skia";
+import type { Vector } from "@exodus/react-native-skia";
+import { Path } from "@exodus/react-native-skia";
 import React from "react";
 import type { SharedValue } from "react-native-reanimated";
 import { useDerivedValue } from "react-native-reanimated";

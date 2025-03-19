@@ -6,7 +6,7 @@ import {
   useImage,
   createPicture,
   SkiaPictureView,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 import { Title } from "./components/Title";
 

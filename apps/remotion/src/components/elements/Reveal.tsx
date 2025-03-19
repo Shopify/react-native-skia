@@ -1,4 +1,4 @@
-import { Group, mix, Skia } from "@shopify/react-native-skia";
+import { Group, mix, Skia } from "@exodus/react-native-skia";
 import type { ReactNode } from "react";
 
 import { CANVAS, center } from "../Theme";

@@ -5,8 +5,8 @@ import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
 } from "react-native-reanimated";
-import type { SkCanvas } from "@shopify/react-native-skia";
-import { Canvas, Image, Skia } from "@shopify/react-native-skia";
+import type { SkCanvas } from "@exodus/react-native-skia";
+import { Canvas, Image, Skia } from "@exodus/react-native-skia";
 import type { RouteProp } from "@react-navigation/native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useHeaderHeight } from "@react-navigation/elements";

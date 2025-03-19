@@ -2,13 +2,13 @@ import type {
   AnimatedProps,
   PathProps,
   SkPath,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import {
   interpolatePaths,
   Canvas,
   Fill,
   Path,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import {

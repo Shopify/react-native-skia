@@ -1,5 +1,5 @@
-import { Canvas, Rect, Skia, Group } from "@shopify/react-native-skia";
-import type { SkRect } from "@shopify/react-native-skia";
+import { Canvas, Rect, Skia, Group } from "@exodus/react-native-skia";
+import type { SkRect } from "@exodus/react-native-skia";
 import React, { useMemo, useState } from "react";
 import {
   StyleSheet,

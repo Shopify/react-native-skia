@@ -7,7 +7,7 @@ import {
   RoundedRect,
   mix,
   vec,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
 import { useDerivedValue, withTiming } from "react-native-reanimated";
 

@@ -1,4 +1,4 @@
-import { Skia, Shader, vec } from "@shopify/react-native-skia";
+import { Skia, Shader, vec } from "@exodus/react-native-skia";
 
 import { glsl } from "../ShaderLib";
 import { DEV } from "../Theme";

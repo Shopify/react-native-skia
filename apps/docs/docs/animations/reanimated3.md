@@ -11,7 +11,7 @@ React Native Skia supports the direct usage of Reanimated's shared and derived v
 
 ```tsx twoslash
 import {useEffect} from "react";
-import {Canvas, Circle, Group} from "@shopify/react-native-skia";
+import {Canvas, Circle, Group} from "@exodus/react-native-skia";
 import {
   useDerivedValue,
   useSharedValue,
@@ -59,7 +59,7 @@ import {
   // Use this function instead of interpolateColor from Reanimated
   interpolateColors,
   vec,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import { useEffect } from "react";
 import { useWindowDimensions } from "react-native";
 import {

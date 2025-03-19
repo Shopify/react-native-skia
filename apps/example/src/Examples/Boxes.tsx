@@ -6,7 +6,7 @@ import {
   Fill,
   rect,
   rrect,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import { useDerivedValue, useSharedValue } from "react-native-reanimated";
 
 export const Boxes = () => {

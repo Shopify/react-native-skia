@@ -1,4 +1,4 @@
-import { Skia } from "@shopify/react-native-skia";
+import { Skia } from "@exodus/react-native-skia";
 
 export const createGraphPath = (
   width: number,

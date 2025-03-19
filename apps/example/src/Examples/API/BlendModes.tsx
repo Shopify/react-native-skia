@@ -9,7 +9,7 @@ import {
   Text,
   useFont,
   enumKey,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 const r = 50;
 

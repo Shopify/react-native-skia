@@ -2547,9 +2547,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@shopify/react-native-skia@file:../../packages/skia::locator=expo-router-app%40workspace%3A.":
+"@exodus/react-native-skia@file:../../packages/skia::locator=expo-router-app%40workspace%3A.":
   version: 0.0.0
-  resolution: "@shopify/react-native-skia@file:../../packages/skia#../../packages/skia::hash=cb73b4&locator=expo-router-app%40workspace%3A."
+  resolution: "@exodus/react-native-skia@file:../../packages/skia#../../packages/skia::hash=8cec25&locator=expo-router-app%40workspace%3A."
   dependencies:
     canvaskit-wasm: 0.40.0
     react-reconciler: 0.31.0
@@ -4737,7 +4737,7 @@ __metadata:
     "@babel/core": ^7.25.2
     "@expo/vector-icons": ^14.0.2
     "@react-navigation/native": ^7.0.14
-    "@shopify/react-native-skia": ../../packages/skia
+    "@exodus/react-native-skia": ../../packages/skia
     "@types/react": ~18.3.12
     expo: ~52.0.30
     expo-font: ~13.0.3

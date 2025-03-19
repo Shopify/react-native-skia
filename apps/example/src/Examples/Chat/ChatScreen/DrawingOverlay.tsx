@@ -1,11 +1,11 @@
-import type { SkPath } from "@shopify/react-native-skia";
+import type { SkPath } from "@exodus/react-native-skia";
 import {
   Canvas,
   Circle,
   Path,
   Skia,
   useCanvasRef,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import React, { useMemo, useState } from "react";
 import { StyleSheet, TouchableOpacity, View, Text, Image } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";

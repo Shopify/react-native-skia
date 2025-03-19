@@ -17,7 +17,7 @@ import {
   useFont,
   FitBox,
   usePathInterpolation,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 import { useLoop } from "../../components/Animations";
 

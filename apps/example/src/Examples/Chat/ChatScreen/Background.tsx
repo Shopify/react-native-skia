@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
-import type { SkCanvas, SkImage, SkPaint } from "@shopify/react-native-skia";
-import { Canvas, Image, Skia } from "@shopify/react-native-skia";
+import type { SkCanvas, SkImage, SkPaint } from "@exodus/react-native-skia";
+import { Canvas, Image, Skia } from "@exodus/react-native-skia";
 import { makeMutable, runOnUI } from "react-native-reanimated";
 import { StyleSheet } from "react-native";
 

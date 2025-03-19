@@ -6,7 +6,7 @@ import {
   Picture,
   Skia,
   Group,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 // Create picture
 const picture = createPicture(

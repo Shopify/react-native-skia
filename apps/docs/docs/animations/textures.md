@@ -14,8 +14,8 @@ It takes a React element and the dimensions of the texture as arguments and retu
 
 ```tsx twoslash
 import { useWindowDimensions } from "react-native";
-import { useTexture } from "@shopify/react-native-skia";
-import { Image, Rect, rect, Canvas, Fill } from "@shopify/react-native-skia";
+import { useTexture } from "@exodus/react-native-skia";
+import { Image, Rect, rect, Canvas, Fill } from "@exodus/react-native-skia";
 import React from "react";
 
 const Demo = () => {
@@ -40,8 +40,8 @@ It will first load the image from its source and then upload it to the GPU.
 
 ```tsx twoslash
 import { useWindowDimensions } from "react-native";
-import { useImageAsTexture } from "@shopify/react-native-skia";
-import { Image, Rect, rect, Canvas, Fill } from "@shopify/react-native-skia";
+import { useImageAsTexture } from "@exodus/react-native-skia";
+import { Image, Rect, rect, Canvas, Fill } from "@exodus/react-native-skia";
 import React from "react";
 
 const Demo = () => {
@@ -64,8 +64,8 @@ This is useful to either generate the drawing commands outside the React lifecyc
 
 ```tsx twoslash
 import {useWindowDimensions} from "react-native";
-import { usePictureAsTexture } from "@shopify/react-native-skia";
-import { Image, Rect, rect, Canvas, Fill, Skia } from "@shopify/react-native-skia";
+import { usePictureAsTexture } from "@exodus/react-native-skia";
+import { Image, Rect, rect, Canvas, Fill, Skia } from "@exodus/react-native-skia";
 import React from "react";
 
 const rec = Skia.PictureRecorder();
@@ -95,8 +95,8 @@ Reanimated 2 provides a [`runOnUI`](https://docs.swmansion.com/react-native-rean
 import { useEffect } from "react";
 import { runOnUI, useSharedValue } from "react-native-reanimated";
 import type { SharedValue } from "react-native-reanimated";
-import { Skia, Canvas, Image } from "@shopify/react-native-skia";
-import type { SkImage } from "@shopify/react-native-skia";
+import { Skia, Canvas, Image } from "@exodus/react-native-skia";
+import type { SkImage } from "@exodus/react-native-skia";
 
 const createTexture = (image: SharedValue<SkImage | null>) => {
   "worklet";
@@ -121,6 +121,6 @@ const Demo = () => {
 };
 ```
 
-This example demonstrates how to create a texture, draw a cyan color onto it, and then display it using the `Image` component from `@shopify/react-native-skia`. The `runOnUI` function ensures that the texture creation and drawing operations are performed on the UI thread for optimal performance.
+This example demonstrates how to create a texture, draw a cyan color onto it, and then display it using the `Image` component from `@exodus/react-native-skia`. The `runOnUI` function ensures that the texture creation and drawing operations are performed on the UI thread for optimal performance.
 
-Make sure that you have installed the necessary packages and configured your project to use Reanimated 2 and `@shopify/react-native-skia` before running this code.
+Make sure that you have installed the necessary packages and configured your project to use Reanimated 2 and `@exodus/react-native-skia` before running this code.

@@ -3,7 +3,7 @@ import {
   Fill,
   Group,
   RadialGradient,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import { interpolate, random, useCurrentFrame } from "remotion";
 import { createNoise3D } from "simplex-noise";
 

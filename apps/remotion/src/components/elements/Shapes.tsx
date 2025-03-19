@@ -2,7 +2,7 @@ import type {
   SkRect,
   Vector,
   SkPath as RNSkPath,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import {
   DashPathEffect,
   topLeft,
@@ -10,7 +10,7 @@ import {
   Skia,
   Path,
   LinearGradient,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import type { Path as SkPath } from "canvaskit-wasm";
 
 import { useOpenTypeFonts } from "../Canvas";

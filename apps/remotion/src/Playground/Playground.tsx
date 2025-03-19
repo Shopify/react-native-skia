@@ -1,5 +1,5 @@
 import React from "react";
-import { Fill } from "@shopify/react-native-skia";
+import { Fill } from "@exodus/react-native-skia";
 
 import { Background, Canvas } from "../components";
 import {

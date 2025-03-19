@@ -7,7 +7,7 @@ import {
   Group,
   polar2Canvas,
   mix,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import { useCurrentFrame } from "remotion";
 
 import { CANVAS } from "../components";

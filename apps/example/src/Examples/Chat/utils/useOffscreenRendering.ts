@@ -4,7 +4,7 @@ import {
   type SkSurface,
   Skia,
   rect,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import { useCallback, useEffect, useMemo } from "react";
 import { PixelRatio } from "react-native";
 import {

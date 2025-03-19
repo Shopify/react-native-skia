@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import type { LayoutRectangle } from "react-native";
 import { Text } from "react-native";
-import { Canvas, Fill } from "@shopify/react-native-skia";
+import { Canvas, Fill } from "@exodus/react-native-skia";
 
 export const OnLayoutDemo = () => {
   const [layout, setLayout] = useState<LayoutRectangle>();

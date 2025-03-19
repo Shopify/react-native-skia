@@ -1,4 +1,4 @@
-import type { Matrix4, Transforms3d } from "@shopify/react-native-skia";
+import type { Matrix4, Transforms3d } from "@exodus/react-native-skia";
 
 export const persp = (perspective: number) => {
   if (perspective === 0) {

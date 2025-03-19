@@ -1,4 +1,4 @@
-import type { Vector } from "@shopify/react-native-skia";
+import type { Vector } from "@exodus/react-native-skia";
 import {
   vec,
   LinearGradient,
@@ -9,7 +9,7 @@ import {
   DashPathEffect,
   Line,
   mixVector,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import { interpolate } from "remotion";
 
 import { Gradients } from "../Theme";

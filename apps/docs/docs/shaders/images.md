@@ -29,7 +29,7 @@ import {
   Skia,
   Shader,
   useImage
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 const ImageShaderDemo = () => {
   const image = useImage(require("../../assets/oslo.jpg"));

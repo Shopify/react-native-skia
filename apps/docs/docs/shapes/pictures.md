@@ -23,7 +23,7 @@ import {
   Skia,
   Group,
   BlendMode
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 export const HelloWorld = () => {
   // Create a picture
@@ -62,7 +62,7 @@ For instance, in the example below, fopr  we apply a blur image filter.
 
 ```tsx twoslash
 import React from "react";
-import { Canvas, Skia, Group, Paint, Blur, createPicture, BlendMode, Picture } from "@shopify/react-native-skia";
+import { Canvas, Skia, Group, Paint, Blur, createPicture, BlendMode, Picture } from "@exodus/react-native-skia";
 
 const width = 256;
 const height = 256;
@@ -112,7 +112,7 @@ import {
   Picture,
   Skia,
   Group,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 export const PictureExample = () => {
   // Create picture

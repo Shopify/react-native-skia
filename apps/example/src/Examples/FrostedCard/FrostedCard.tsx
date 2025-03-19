@@ -7,7 +7,7 @@ import {
   BackdropFilter,
   Fill,
   usePathValue,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import React from "react";
 import { Dimensions, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";

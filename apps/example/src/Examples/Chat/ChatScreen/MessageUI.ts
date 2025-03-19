@@ -1,5 +1,5 @@
-import type { SkCanvas, SkImage } from "@shopify/react-native-skia";
-import { rect, rrect, Skia } from "@shopify/react-native-skia";
+import type { SkCanvas, SkImage } from "@exodus/react-native-skia";
+import { rect, rrect, Skia } from "@exodus/react-native-skia";
 
 import type { MessageType } from "../data/types";
 import { WINDOW_WIDTH } from "../constants";

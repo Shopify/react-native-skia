@@ -1,11 +1,11 @@
-import type { SkPoint } from "@shopify/react-native-skia";
+import type { SkPoint } from "@exodus/react-native-skia";
 import {
   vec,
   Skia,
   Group,
   Text,
   LinearGradient,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import { useMemo } from "react";
 
 import { Gradients } from "../Theme";

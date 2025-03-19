@@ -23,7 +23,7 @@ Its design particularly useful when using with [Reanimated](#animations).
 The RSXform object used by the altas API is the compression of the following matrix: `[fSCos -fSSin fTx, fSSin fSCos fTy, 0, 0, 1]`. Below are few transformations that you will find useful:
 
 ```tsx twoslash
-import {Skia} from "@shopify/react-native-skia";
+import {Skia} from "@exodus/react-native-skia";
 
 // 1. Identity (doesn't do anything)
 let rsxForm = Skia.RSXform(1, 0, 0, 0);
@@ -47,8 +47,8 @@ rsxForm = Skia.RSXformFromRadians(1, r, 100, 0, 125, 25);
 In the example below, we draw in simple rectangle as an image.
 Then we display that rectangle 150 times with a simple transformation applied to each rectangle.
 
-```tsx
-import {Skia, drawAsImage, Group, Rect, Canvas, Atlas, rect} from "@shopify/react-native-skia";
+```tsx twoslash
+import {Skia, drawAsImage, Group, Rect, Canvas, Atlas, rect} from "@exodus/react-native-skia";
 
 const size = { width: 25, height: 11.25 };
 const strokeWidth = 2;
@@ -107,7 +107,7 @@ The example below is identical to the one above but the position is an animation
 
 
 ```tsx twoslash
-import {Skia, drawAsImage, Group, Rect, Canvas, Atlas, rect, useTexture, useRSXformBuffer} from "@shopify/react-native-skia";
+import {Skia, drawAsImage, Group, Rect, Canvas, Atlas, rect, useTexture, useRSXformBuffer} from "@exodus/react-native-skia";
 import {useSharedValue, useDerivedValue} from "react-native-reanimated";
 import {GestureDetector, Gesture} from "react-native-gesture-handler";
 

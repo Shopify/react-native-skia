@@ -1,11 +1,11 @@
-import type { Vector, PathCommand } from "@shopify/react-native-skia";
+import type { Vector, PathCommand } from "@exodus/react-native-skia";
 import {
   cartesian2Polar,
   PathVerb,
   vec,
   Skia,
-} from "@shopify/react-native-skia";
-import { exhaustiveCheck } from "@shopify/react-native-skia/src/renderer/typeddash";
+} from "@exodus/react-native-skia";
+import { exhaustiveCheck } from "@exodus/react-native-skia/src/renderer/typeddash";
 
 const round = (value: number, precision = 0) => {
   "worklet";

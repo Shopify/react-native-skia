@@ -1,6 +1,6 @@
 /* globals jest */
-jest.mock("@shopify/react-native-skia", () => {
-  jest.mock("@shopify/react-native-skia/lib/commonjs/Platform", () => {
+jest.mock("@exodus/react-native-skia", () => {
+  jest.mock("@exodus/react-native-skia/lib/commonjs/Platform", () => {
     const Noop = () => undefined;
     return {
       OS: "web",
@@ -12,7 +12,7 @@ jest.mock("@shopify/react-native-skia", () => {
       View: Noop,
     };
   });
-  jest.mock("@shopify/react-native-skia/lib/commonjs/skia/core/Font", () => {
+  jest.mock("@exodus/react-native-skia/lib/commonjs/skia/core/Font", () => {
     return {
       useFont: () => null,
       matchFont: () => null,
@@ -20,7 +20,7 @@ jest.mock("@shopify/react-native-skia", () => {
       useFonts: () => null,
     }
   });
-  return require("@shopify/react-native-skia/lib/commonjs/mock").Mock(
+  return require("@exodus/react-native-skia/lib/commonjs/mock").Mock(
     global.CanvasKit
   );
 });

@@ -28,7 +28,7 @@ jest.mock("react-native-reanimated", () => {
   return Reanimated;
 });
 
-jest.mock("@shopify/react-native-skia", () => {
+jest.mock("@exodus/react-native-skia", () => {
   jest.mock("../../packages/skia/src/Platform", () => {
     const Noop = () => undefined;
     return {

@@ -16,7 +16,7 @@ import {
   SRGBToLinearGamma,
   SkiaPictureView,
   createPicture,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 import { Title } from "./components/Title";
 

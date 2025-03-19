@@ -1,4 +1,4 @@
-import { Skia, type SkCanvas } from "@shopify/react-native-skia";
+import { Skia, type SkCanvas } from "@exodus/react-native-skia";
 import { PixelRatio } from "react-native";
 
 import { SCALE_RATIO } from "../constants";

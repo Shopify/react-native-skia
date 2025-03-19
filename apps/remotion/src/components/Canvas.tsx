@@ -3,8 +3,8 @@ import type {
   SkImage,
   SkTypeface,
   SkTypefaceFontProvider,
-} from "@shopify/react-native-skia";
-import { Canvas as SkCanvas, Skia } from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
+import { Canvas as SkCanvas, Skia } from "@exodus/react-native-skia";
 import type { ReactNode } from "react";
 import { useContext, createContext, useState, useEffect } from "react";
 import { Internals } from "remotion";

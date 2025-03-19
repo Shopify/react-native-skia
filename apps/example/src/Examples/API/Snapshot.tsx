@@ -8,7 +8,7 @@ import {
   useWindowDimensions,
   ScrollView,
 } from "react-native";
-import type { SkImage } from "@shopify/react-native-skia";
+import type { SkImage } from "@exodus/react-native-skia";
 import {
   Canvas,
   Fill,
@@ -20,7 +20,7 @@ import {
   ImageShader,
   useImage,
   Image,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import { Switch } from "react-native-gesture-handler";
 import { useDerivedValue, useSharedValue } from "react-native-reanimated";
 

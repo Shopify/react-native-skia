@@ -8,7 +8,7 @@ import {
   Shader,
   mix,
   Fill,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import { useDerivedValue } from "react-native-reanimated";
 
 import { useLoop } from "../../components/Animations";

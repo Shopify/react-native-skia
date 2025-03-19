@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { Font } from "opentype.js";
-import { Path, Group, Skia, Blur, mix } from "@shopify/react-native-skia";
+import { Path, Group, Skia, Blur, mix } from "@exodus/react-native-skia";
 import { interpolate, random } from "remotion";
 
 import { EASE_CLAMP } from "../animations";

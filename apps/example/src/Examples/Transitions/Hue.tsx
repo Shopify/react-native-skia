@@ -6,7 +6,7 @@ import {
   ImageShader,
   rect,
   useImage,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 import { HueRotation } from "./HueRotation";
 

@@ -1,4 +1,4 @@
-import type { SkRect } from "@shopify/react-native-skia";
+import type { SkRect } from "@exodus/react-native-skia";
 
 const f = 1;
 const width = 3840 * f;

@@ -1,5 +1,5 @@
-import type { SkPath } from "@shopify/react-native-skia";
-import { interpolate, Circle } from "@shopify/react-native-skia";
+import type { SkPath } from "@exodus/react-native-skia";
+import { interpolate, Circle } from "@exodus/react-native-skia";
 import { useMemo } from "react";
 import { interpolateColors } from "remotion";
 

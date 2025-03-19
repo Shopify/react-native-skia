@@ -31,7 +31,7 @@ import {
   Canvas,
   ImageSVG,
   useSVG
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 const ImageSVGDemo = () => {
   // Alternatively, you can pass an SVG URL directly
@@ -55,7 +55,7 @@ You can also use an inlined string as SVG (using `Skia.SVG.MakeFromString`):
 
 ```tsx twoslash
 import React from "react";
-import { Canvas, ImageSVG, Skia } from "@shopify/react-native-skia";
+import { Canvas, ImageSVG, Skia } from "@exodus/react-native-skia";
 
 const svg = Skia.SVG.MakeFromString(
   `<svg viewBox='0 0 290 500' xmlns='http://www.w3.org/2000/svg'>
@@ -88,7 +88,7 @@ In the example below we scale the SVG to the canvas width and height.
 
 ```tsx twoslash
 import React from "react";
-import { Canvas, ImageSVG, Skia, rect, fitbox, Group } from "@shopify/react-native-skia";
+import { Canvas, ImageSVG, Skia, rect, fitbox, Group } from "@exodus/react-native-skia";
 
 const svg = Skia.SVG.MakeFromString(
   `<svg viewBox='0 0 20 20' width="20" height="20" xmlns='http://www.w3.org/2000/svg'>
@@ -126,7 +126,7 @@ In the example below we apply an opacity effect via the `ColorMatrix` component.
 
 ```tsx twoslash
 import React from "react";
-import { Canvas, ImageSVG, Skia, rect, fitbox, useSVG, Group, Paint, OpacityMatrix, ColorMatrix } from "@shopify/react-native-skia";
+import { Canvas, ImageSVG, Skia, rect, fitbox, useSVG, Group, Paint, OpacityMatrix, ColorMatrix } from "@exodus/react-native-skia";
 
 const width = 256;
 const height = 256;
@@ -159,7 +159,7 @@ In the example below we apply a blur image filter to the SVG.
 
 ```tsx twoslash
 import React from "react";
-import { Canvas, ImageSVG, Skia, rect, fitbox, useSVG, Group, Paint, Blur } from "@shopify/react-native-skia";
+import { Canvas, ImageSVG, Skia, rect, fitbox, useSVG, Group, Paint, Blur } from "@exodus/react-native-skia";
 
 const width = 256;
 const height = 256;

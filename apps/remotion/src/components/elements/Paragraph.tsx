@@ -1,7 +1,7 @@
 import type {
   SkParagraph,
   SkParagraphBuilder,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 export const buildParagraph = (
   maxWidth: number,

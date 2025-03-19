@@ -1,4 +1,4 @@
-import type { SkPath } from "@shopify/react-native-skia";
+import type { SkPath } from "@exodus/react-native-skia";
 import {
   processTransform2d,
   DashPathEffect,
@@ -15,7 +15,7 @@ import {
   Text,
   vec,
   Group,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 import {
   CANVAS,

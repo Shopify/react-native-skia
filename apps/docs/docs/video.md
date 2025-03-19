@@ -28,7 +28,7 @@ import {
   Fill,
   ImageShader,
   useVideo
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import { Pressable, useWindowDimensions } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 
@@ -93,7 +93,7 @@ import {
   Fill,
   Image,
   useVideo
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import { Pressable, useWindowDimensions } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 
@@ -142,7 +142,7 @@ import {
   useVideo,
   fitbox,
   rect
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import { Pressable, useWindowDimensions } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 
@@ -174,7 +174,7 @@ export const VideoExample = () => {
 Below is an example where we use [expo-asset](https://docs.expo.dev/versions/latest/sdk/asset/) to load a video file from the bundle.
 
 ```tsx twoslash
-import { useVideo } from "@shopify/react-native-skia";
+import { useVideo } from "@exodus/react-native-skia";
 import { useAssets } from "expo-asset";
 
 // Example usage:

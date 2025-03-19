@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unstable-nested-components */
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import React, { useMemo } from "react";
-import type { SkTextStyle } from "@shopify/react-native-skia";
+import type { SkTextStyle } from "@exodus/react-native-skia";
 import {
   Canvas,
   Skia,
@@ -17,7 +17,7 @@ import {
   TextAlign,
   interpolate,
   usePathValue,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import { useDerivedValue, useSharedValue } from "react-native-reanimated";
 
 import { Header } from "./Header";

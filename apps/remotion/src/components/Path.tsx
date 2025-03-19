@@ -1,10 +1,10 @@
-import type { SkPath, SkRect, Vector } from "@shopify/react-native-skia";
+import type { SkPath, SkRect, Vector } from "@exodus/react-native-skia";
 import {
   processTransform2d,
   fitbox,
   center,
   Skia,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 import { CANVAS } from "./Theme";
 

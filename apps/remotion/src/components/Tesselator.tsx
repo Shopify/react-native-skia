@@ -4,7 +4,7 @@ import type {
   SkPaint,
   SkPath,
   Vector,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import {
   TileMode,
   interpolateColors,
@@ -14,7 +14,7 @@ import {
   StrokeCap,
   StrokeJoin,
   Skia,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 import { getPointAtLength } from "./math";
 

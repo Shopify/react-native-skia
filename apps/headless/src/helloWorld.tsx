@@ -4,8 +4,8 @@ import {
 	getSkiaExports,
 	Group,
 	makeOffscreenSurface,
-} from "@shopify/react-native-skia/src/headless";
-import { LoadSkiaWeb } from "@shopify/react-native-skia/src/web/LoadSkiaWeb";
+} from "@exodus/react-native-skia/src/headless";
+import { LoadSkiaWeb } from "@exodus/react-native-skia/src/web/LoadSkiaWeb";
 import React from "react";
 
 // https://shopify.github.io/react-native-skia/docs/getting-started/headless/
@@ -16,7 +16,7 @@ import React from "react";
 	const r = size * 0.33;
 	await LoadSkiaWeb();
 	// Once that CanvasKit is loaded, you can access Skia via getSkiaExports()
-	// Alternatively you can do const {Skia} = require("@shopify/react-native-skia")
+	// Alternatively you can do const {Skia} = require("@exodus/react-native-skia")
 	const { Skia: _ } = getSkiaExports();
 	const surface = makeOffscreenSurface(width, height);
 	const image = await drawOffscreen(

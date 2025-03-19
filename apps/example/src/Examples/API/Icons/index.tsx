@@ -1,14 +1,14 @@
 import React, { createContext, useContext, useMemo } from "react";
 import { Text, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import type { SkPicture } from "@shopify/react-native-skia";
+import type { SkPicture } from "@exodus/react-native-skia";
 import {
   Canvas,
   Rect,
   SkiaPictureView,
   Skia,
   useSVG,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 import { Octocat } from "./SvgIcons/OctocatIcon";
 import { StackExchange } from "./SvgIcons/StackExchangeIcon";

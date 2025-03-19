@@ -1,4 +1,4 @@
-import { useImage } from "@shopify/react-native-skia";
+import { useImage } from "@exodus/react-native-skia";
 
 export const useAssets = () => {
   const image1 = useImage(require("./assets/1.jpg"));

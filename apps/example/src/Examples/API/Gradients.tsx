@@ -16,7 +16,7 @@ import {
   Turbulence,
   ColorShader,
   Blend,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 import { BilinearGradient } from "../Aurora/components/BilinearGradient";
 

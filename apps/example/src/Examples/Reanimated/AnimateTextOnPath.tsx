@@ -6,7 +6,7 @@ import {
   TextPath,
   useFont,
   Skia,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import {
   useSharedValue,
   Easing,

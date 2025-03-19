@@ -6,7 +6,7 @@
 		"tsc": "tsc"
 	},
 	"dependencies": {
-		"@shopify/react-native-skia": "workspace:*",
+		"@exodus/react-native-skia": "workspace:*",
 		"react": "^19.0.0",
 		"typescript": "^5.2.2"
 	},

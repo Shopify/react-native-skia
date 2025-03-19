@@ -1,5 +1,5 @@
-import type { SkRect, Vector } from "@shopify/react-native-skia";
-import { rect, vec } from "@shopify/react-native-skia";
+import type { SkRect, Vector } from "@exodus/react-native-skia";
+import { rect, vec } from "@exodus/react-native-skia";
 import { interpolateColors } from "remotion";
 
 export const { PI } = Math;

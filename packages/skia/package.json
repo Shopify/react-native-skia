@@ -1,5 +1,5 @@
 {
-  "name": "@shopify/react-native-skia",
+  "name": "@exodus/react-native-skia",
   "publishConfig": {
     "access": "public",
     "provenance": true

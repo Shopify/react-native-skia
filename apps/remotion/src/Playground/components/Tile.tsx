@@ -1,5 +1,5 @@
-import type { SkImage, Vector } from "@shopify/react-native-skia";
-import { center, rect, Group, Rect, Image } from "@shopify/react-native-skia";
+import type { SkImage, Vector } from "@exodus/react-native-skia";
+import { center, rect, Group, Rect, Image } from "@exodus/react-native-skia";
 import { Easing } from "remotion";
 
 interface TileProps {

@@ -1,4 +1,4 @@
-import type { SkRect } from "@shopify/react-native-skia";
+import type { SkRect } from "@exodus/react-native-skia";
 import {
   Matrix4,
   multiply4,
@@ -7,7 +7,7 @@ import {
   translate,
   convertToColumnMajor,
   convertToAffineMatrix,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 import React from "react";
 import { Platform } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";

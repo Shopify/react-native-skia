@@ -19,7 +19,7 @@ React Native Skia also provides [Path Effects](/docs/path-effects) and [Path hoo
 ### Using SVG Notation
 
 ```tsx twoslash
-import {Canvas, Path} from "@shopify/react-native-skia";
+import {Canvas, Path} from "@exodus/react-native-skia";
 
 const SVGNotation = () => {
   return (
@@ -38,7 +38,7 @@ const SVGNotation = () => {
 ### Using Path Object
 
 ```tsx twoslash
-import {Canvas, Path, Skia} from "@shopify/react-native-skia";
+import {Canvas, Path, Skia} from "@exodus/react-native-skia";
 
 const path = Skia.Path.Make();
 path.moveTo(128, 0);
@@ -71,7 +71,7 @@ const PathDemo = () => {
 ### Trim
 
 ```tsx twoslash
-import {Canvas, Path} from "@shopify/react-native-skia";
+import {Canvas, Path} from "@exodus/react-native-skia";
 
 const SVGNotation = () => {
   return (
@@ -100,7 +100,7 @@ The `fillType` property defines the algorithm to use to determine the inside par
 Possible values are: `winding`, `evenOdd`, `inverseWinding`, `inverseEvenOdd`. Default value is `winding`.
 
 ```tsx twoslash
-import {Canvas, Skia, Fill, Path} from "@shopify/react-native-skia";
+import {Canvas, Skia, Fill, Path} from "@exodus/react-native-skia";
 
 const star = () => {
   const R = 115.2;

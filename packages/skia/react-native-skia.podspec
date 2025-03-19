@@ -1,4 +1,4 @@
-# @shopify/react-native-skia.podspec
+# @exodus/react-native-skia.podspec
 
 require "json"
 
@@ -32,7 +32,7 @@ Pod::Spec.new do |s|
   s.version      = package["version"]
   s.summary      = package["description"]
   s.description  = <<-DESC
-                  @shopify/react-native-skia
+                  @exodus/react-native-skia
                    DESC
   s.homepage     = "https://github.com/shopify/react-native-skia"
   s.license      = "MIT"

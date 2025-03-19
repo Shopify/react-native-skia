@@ -5,8 +5,8 @@ import {
   Text,
   Circle,
   LinearGradient,
-} from "@shopify/react-native-skia";
-import type { SkFont } from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
+import type { SkFont } from "@exodus/react-native-skia";
 import type { ReactNode } from "react";
 import React from "react";
 import type { SharedValue } from "react-native-reanimated";

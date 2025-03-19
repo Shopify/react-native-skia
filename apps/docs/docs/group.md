@@ -33,7 +33,7 @@ In each component reference, we also document how to apply paint effects on them
 Its children will inherit all paint attributes applied to a group. These attributes can be properties like `color` or `style` or children like `<Shader />`, or `<ImageFilter />` for instance ([see painting](/docs/paint/overview)).
 
 ```tsx twoslash
-import { Canvas, Circle, Group } from "@shopify/react-native-skia";
+import { Canvas, Circle, Group } from "@exodus/react-native-skia";
 
 export const PaintDemo = () => {
   const r = 128;
@@ -62,7 +62,7 @@ All rotations are in radians.
 ### Simple Transformation
 
 ```tsx twoslash
-import { Canvas, Fill, Group, RoundedRect } from "@shopify/react-native-skia";
+import { Canvas, Fill, Group, RoundedRect } from "@exodus/react-native-skia";
 
 const SimpleTransform = () => {
   return (
@@ -81,7 +81,7 @@ const SimpleTransform = () => {
 ### Transformation of Origin
 
 ```tsx twoslash
-import { Canvas, Fill, Group, RoundedRect } from "@shopify/react-native-skia";
+import { Canvas, Fill, Group, RoundedRect } from "@exodus/react-native-skia";
 
 const SimpleTransform = () => {
   return (
@@ -117,7 +117,7 @@ import {
   useImage,
   rect,
   Fill,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 const size = 256;
 const padding = 32;
@@ -156,7 +156,7 @@ import {
   useImage,
   rrect,
   rect,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 const size = 256;
 const padding = 32;
@@ -198,7 +198,7 @@ import {
   Image,
   useImage,
   Skia,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 const Clip = () => {
   const image = useImage(require("./assets/oslo.jpg"));
@@ -227,7 +227,7 @@ import {
   Image,
   useImage,
   Skia,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 const Clip = () => {
   const image = useImage(require("./assets/oslo.jpg"));
@@ -261,7 +261,7 @@ import {
   Blur,
   Paint,
   ColorMatrix,
-} from "@shopify/react-native-skia";
+} from "@exodus/react-native-skia";
 
 const Clip = () => {
   return (
@@ -313,7 +313,7 @@ Its bounding source rectangle is `0, 0, 664, 308`:
 We would like to automatically scale that path to our canvas of size `256 x 256`:
 
 ```tsx twoslash
-import { Canvas, FitBox, Path, rect } from "@shopify/react-native-skia";
+import { Canvas, FitBox, Path, rect } from "@exodus/react-native-skia";
 
 const Hello = () => {
   return (
