@@ -6,4 +6,4 @@ High-performance 2d Graphics for React Native using Skia
 
 Checkout the full documentation [here](https://shopify.github.io/react-native-skia).
 
-Documentation on the library development is available [here](https://github.com/Shopify/react-native-skia#library-development).
+Documentation on the library development is available [here](https://github.com/ExodusMovement/react-native-skia#library-development).

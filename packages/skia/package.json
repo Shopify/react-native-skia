@@ -55,8 +55,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Shopify/react-native-skia.git",
-    "baseUrl": "https://github.com/Shopify/react-native-skia"
+    "url": "git+https://github.com/ExodusMovement/react-native-skia.git",
+    "baseUrl": "https://github.com/ExodusMovement/react-native-skia"
   },
   "keywords": [
     "react-native"
