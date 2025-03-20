@@ -1,5 +1,6 @@
 {
   "branches": [
+    "main",
     {
       "name": "exodus-2.0.1",
       "prerelease": "rc"
