@@ -1,5 +1,8 @@
 name: Build SKIA
 on: workflow_dispatch
+permissions:
+  contents: read    # Read repository contents
+  actions: write    # Publish artifacts
 jobs:
   build:
     runs-on: macos-latest-xlarge
