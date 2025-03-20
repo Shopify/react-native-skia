@@ -1,9 +1,8 @@
 {
   "branches": [
-    "main",
     {
-      "name": "next",
-      "prerelease": "next"
+      "name": "exodus-2.0.1",
+      "prerelease": "rc"
     }
   ],
   "plugins": [
