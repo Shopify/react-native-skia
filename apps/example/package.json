@@ -15,7 +15,6 @@
     "tsc": "tsc --noEmit"
   },
   "dependencies": {
-    "@callstack/react-native-visionos": "^0.75.0",
     "@react-native-community/slider": "^4.5.6",
     "@react-navigation/bottom-tabs": "^7.2.1",
     "@react-navigation/elements": "^2.2.6",
@@ -29,12 +28,10 @@
     "react": "19.0.0",
     "react-native": "0.78.0",
     "react-native-gesture-handler": "^2.24.0",
-    "react-native-macos": "^0.75.0",
     "react-native-reanimated": "^3.0",
     "react-native-safe-area-context": "^5.2.0",
     "react-native-screens": "^4.9.1",
-    "react-native-svg": "^15.11.2",
-    "react-native-windows": "^0.75.0"
+    "react-native-svg": "^15.11.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
