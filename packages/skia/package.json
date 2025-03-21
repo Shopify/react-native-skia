@@ -1,8 +1,8 @@
 {
   "name": "@exodus/react-native-skia",
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "restricted",
+    "provenance": false
   },
   "bin": {
     "setup-skia-web": "scripts/setup-canvaskit.js"
