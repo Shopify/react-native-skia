@@ -80,7 +80,7 @@ jobs:
       - name: Build dry run release
         working-directory: packages/skia
         run: |
-          npx semantic-release --dry-run
+          npx semantic-release --dry-run --no-ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
