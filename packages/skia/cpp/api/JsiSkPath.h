@@ -436,7 +436,11 @@ public:
     auto x = arguments[0].asNumber();
     auto y = arguments[1].asNumber();
     auto r = arguments[2].asNumber();
-    getObject()->addCircle(x, y, r);
+    auto direction = SkPathDirection::kCW;
+    if (count >= 4 && arguments[3].getBool()) {
+      direction = SkPathDirection::kCCW;
+    }
+    getObject()->addCircle(x, y, r, direction);
     return thisValue.getObject(runtime);
   }
 
