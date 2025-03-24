@@ -1,7 +1,7 @@
 {
   "extends": "react-native-wcandillon",
   "parserOptions": {
-    "project": "./tsconfig.json"
+    "project": "./tsconfig.lint.json"
   },
   "rules": {
     "prefer-destructuring": [

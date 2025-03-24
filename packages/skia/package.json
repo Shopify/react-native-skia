@@ -10,10 +10,10 @@
   "title": "React Native Skia",
   "version": "0.0.0",
   "description": "High-performance React Native Graphics using Skia",
-  "main": "lib/module/index.js",
+  "main": "lib/index.js",
   "react-native": "src/index.ts",
-  "module": "lib/module/index.js",
-  "types": "lib/typescript/index.d.ts",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
   "files": [
     "src/**",
     "lib/**",
@@ -37,11 +37,11 @@
   ],
   "scripts": {
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --cache --fix",
-    "tsc": "tsc --noEmit",
+    "tsc": "tsc",
     "test": "jest",
     "e2e": "E2E=true yarn test -i e2e",
     "release": "semantic-release",
-    "build": "bob build && merge-dirs lib/typescript/src lib/commonjs && merge-dirs lib/typescript/src lib/module",
+    "build": "yarn tsc",
     "clean-skia": "yarn rimraf ./libs && yarn rimraf ../../externals/skia/out",
     "build-skia": "ts-node ./scripts/build-skia.ts",
     "copy-skia-headers": "ts-node ./scripts/copy-skia-headers.ts",
@@ -136,24 +136,5 @@
     "android": {
       "javaPackageName": "com.shopify.reactnative.skia"
     }
-  },
-  "react-native-builder-bob": {
-    "source": "src",
-    "output": "lib",
-    "targets": [
-      "commonjs",
-      [
-        "module",
-        {
-          "configFile": "./.babelrc"
-        }
-      ],
-      [
-        "typescript",
-        {
-          "project": "tsconfig.build.json"
-        }
-      ]
-    ]
   }
 }

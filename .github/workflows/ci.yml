@@ -58,6 +58,9 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build
+        run: yarn build
+
       - name: Test
         run: yarn test
 

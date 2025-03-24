@@ -1,12 +1,12 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { jest } from "@jest/globals";
 import CanvasKitInit from "canvaskit-wasm/bin/full/canvaskit";
-import { Mock } from "@exodus/react-native-skia/lib/module/mock";
+import { Mock } from "@exodus/react-native-skia/lib/mock";
 
 global.CanvasKit = await CanvasKitInit({});
 
 jest.mock("@exodus/react-native-skia", () => {
-  jest.mock("@exodus/react-native-skia/lib/commonjs/Platform", () => {
+  jest.mock("@exodus/react-native-skia/lib/Platform", () => {
     const Noop = () => undefined;
     return {
       OS: "web",
@@ -18,7 +18,7 @@ jest.mock("@exodus/react-native-skia", () => {
       View: Noop,
     };
   });
-  jest.mock("@exodus/react-native-skia/lib/commonjs/skia/core/Font", () => {
+  jest.mock("@exodus/react-native-skia/lib/skia/core/Font", () => {
     return {
       useFont: () => null,
       matchFont: () => null,
