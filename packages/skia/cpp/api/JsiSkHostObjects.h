@@ -55,7 +55,7 @@ public:
   /**
    * Returns the underlying object exposed by this host object. This object
    * should be wrapped in a shared pointer of some kind.
-   * Throws if the object is nullptr.
+   * Throws if the object has been disposed.
    * @return Underlying object
    */
   T getObject() { return validateObject(); }
@@ -84,11 +84,10 @@ protected:
 
 private:
   /**
-   * Validates that _object is not nullptr and returns it.
-   * bool operator of T is used to check if the object is null.
+   * Validates that _object was not disposed and returns it.
    */
   T validateObject() const {
-    if (!_object) {
+    if (_isDisposed) {
       throw std::runtime_error("Attempted to access a disposed object.");
     }
     return _object;
