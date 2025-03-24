@@ -87,7 +87,7 @@ private:
    * Validates that _object was not disposed and returns it.
    */
   T validateObject() const {
-    if (_isDisposed || !_object) {
+    if (_isDisposed) {
       throw std::runtime_error("Attempted to access a disposed object.");
     }
     return _object;
