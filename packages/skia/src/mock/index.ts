@@ -1,5 +1,4 @@
 import type { CanvasKit } from "canvaskit-wasm";
-import { View } from "react-native";
 
 import { JsiSkApi } from "../skia/web";
 
@@ -22,7 +21,7 @@ export const Mock = (CanvasKit: CanvasKit) => {
     ...require("../animation"),
     ...require("../dom/types"),
     ...require("../dom/nodes"),
-    Canvas: View,
+    Canvas: require("react-native").View,
     // Skia Animations
     useValue: NoopValue,
     useComputedValue: NoopValue,
