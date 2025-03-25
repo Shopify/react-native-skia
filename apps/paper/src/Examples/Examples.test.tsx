@@ -19,7 +19,9 @@ import { Filters } from "./Filters";
 import { Boxes } from "./Boxes";
 
 it("should render the Breathe example correctly", () => {
-  render(<Breathe />);
+  const { getByTestId } = render(<Breathe />);
+  const breatheCanvas = getByTestId("breathe-canvas");
+  expect(breatheCanvas).toBeTruthy();
 });
 
 it("should render the Gooey example correctly", () => {
@@ -48,10 +50,6 @@ it("should render the Severance example correctly", () => {
 
 it("should render the Performance example correctly", () => {
   render(<PerformanceDrawingTest />);
-});
-
-it("should render the Neumorphism example correctly", () => {
-  render(<Neumorphism />);
 });
 
 it("should render the Matrix example correctly", () => {

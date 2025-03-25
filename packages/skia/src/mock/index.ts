@@ -1,4 +1,5 @@
 import type { CanvasKit } from "canvaskit-wasm";
+import { View } from "react-native";
 
 import { JsiSkApi } from "../skia/web";
 
@@ -22,7 +23,7 @@ export const Mock = (CanvasKit: CanvasKit) => {
     ...require("../dom/types"),
     ...require("../dom/nodes"),
     // We could use the real Canvas if we mock the SkiaView component for node
-    Canvas: Noop,
+    Canvas: View,
     // Skia Animations
     useValue: NoopValue,
     useComputedValue: NoopValue,
