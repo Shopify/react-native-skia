@@ -52,6 +52,10 @@ it("should render the Performance example correctly", () => {
   render(<PerformanceDrawingTest />);
 });
 
+it("should render the Neumorphism example correctly", () => {
+  render(<Neumorphism />);
+});
+
 it("should render the Matrix example correctly", () => {
   render(<Matrix />);
 });
