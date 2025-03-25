@@ -22,7 +22,6 @@ export const Mock = (CanvasKit: CanvasKit) => {
     ...require("../animation"),
     ...require("../dom/types"),
     ...require("../dom/nodes"),
-    // We could use the real Canvas if we mock the SkiaView component for node
     Canvas: View,
     // Skia Animations
     useValue: NoopValue,
