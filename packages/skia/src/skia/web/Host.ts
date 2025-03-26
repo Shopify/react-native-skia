@@ -48,8 +48,8 @@ export const getEnum = (
   v: number
 ): EmbindEnumEntity => {
   const e = CanvasKit[name];
-  if (typeof e !== "object") {
-    throw new Error(`${name} is not an enumber`);
+  if (typeof e !== "function") {
+    throw new Error(`${name} is not an number`);
   }
   const result = Object.values(e).find(({ value }) => value === v);
   if (!result) {
