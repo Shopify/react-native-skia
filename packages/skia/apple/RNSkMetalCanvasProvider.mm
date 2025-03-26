@@ -63,13 +63,8 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
   // NOTE: UIApplication.sharedApplication.applicationState can only be
   // accessed from the main thread so we need to check here.
   if ([[NSThread currentThread] isMainThread]) {
-#if !TARGET_OS_OSX
     auto state = UIApplication.sharedApplication.applicationState;
-    bool appIsBackgrounded = (state == UIApplicationStateBackground);
-#else
-    bool appIsBackgrounded = !NSApplication.sharedApplication.isActive;
-#endif // !TARGET_OS_OSX
-    if (appIsBackgrounded) {
+    if (state == UIApplicationStateBackground) {
       // Request a redraw in the next run loop callback
       _requestRedraw();
       // and don't draw now since it might cause errors in the metal renderer if
