@@ -111,4 +111,38 @@ describe("Enums", () => {
     );
     checkEnum(ClipOp, CanvasKit.ClipOp);
   });
+  it("Should match color types with CanvasKit", () => {
+    const { CanvasKit } = setupSkia();
+    //expect(CanvasKit.ColorType.Unknown.value).toBe(ColorType.Unknown);
+    expect(CanvasKit.ColorType.Alpha_8.value).toBe(ColorTypeCanvasKit.Alpha_8);
+    expect(CanvasKit.ColorType.RGB_565.value).toBe(ColorTypeCanvasKit.RGB_565);
+    //expect(CanvasKit.ColorType.ARGB_4444.value).toBe(ColorType.ARGB_4444);
+    expect(CanvasKit.ColorType.RGBA_8888.value).toBe(
+      ColorTypeCanvasKit.RGBA_8888
+    );
+    //expect(CanvasKit.ColorType.RGB_888x.value).toBe(ColorType.RGB_888x);
+    expect(CanvasKit.ColorType.BGRA_8888.value).toBe(
+      ColorTypeCanvasKit.BGRA_8888
+    );
+    expect(CanvasKit.ColorType.RGBA_1010102.value).toBe(
+      ColorTypeCanvasKit.RGBA_1010102
+    );
+    //expect(CanvasKit.ColorType.BGRA_1010102.value).toBe(ColorType.BGRA_1010102);
+    expect(CanvasKit.ColorType.RGB_101010x.value).toBe(
+      ColorTypeCanvasKit.RGB_101010x
+    );
+    //expect(CanvasKit.ColorType.BGR_101010x.value).toBe(ColorType.BGR_101010x);
+    //expect(CanvasKit.ColorType.BGR_101010x_XR.value).toBe(ColorType.BGR_101010x_XR);
+    //expect(CanvasKit.ColorType.BGRA_10101010_XR.value).toBe(ColorType.BGRA_10101010_XR);
+    //expect(CanvasKit.ColorType.RGBA_10x6.value).toBe(ColorType.RGBA_10x6);
+    expect(CanvasKit.ColorType.Gray_8.value).toBe(ColorTypeCanvasKit.Gray_8);
+    //expect(CanvasKit.ColorType.RGBA_F16Norm.value).toBe(ColorType.RGBA_F16Norm);
+    expect(CanvasKit.ColorType.RGBA_F16.value).toBe(
+      ColorTypeCanvasKit.RGBA_F16
+    );
+    //expect(CanvasKit.ColorType.RGB_F16F16F16x.value).toBe(ColorType.RGB_F16F16F16x);
+    expect(CanvasKit.ColorType.RGBA_F32.value).toBe(
+      ColorTypeCanvasKit.RGBA_F32
+    );
+  });
 });
