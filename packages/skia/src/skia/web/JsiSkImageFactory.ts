@@ -77,11 +77,20 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
 
   MakeImage(info: ImageInfo, data: SkData, bytesPerRow: number) {
     // see toSkImageInfo() from canvaskit
+    const alphaType = getEnum(this.CanvasKit.AlphaType, info.alphaType);
+    if (alphaType === undefined) {
+      throw new Error(`AlphaType not found in CanvasKit: ${info.alphaType}`);
+    }
+    const colorType = getEnum(this.CanvasKit.ColorType, info.colorType);
+    if (colorType === undefined) {
+      throw new Error(`ColorType not found in CanvasKit: ${info.colorType}`);
+    }
+
     const image = this.CanvasKit.MakeImage(
       {
-        alphaType: getEnum(this.CanvasKit.AlphaType, info.alphaType),
+        alphaType,
         colorSpace: this.CanvasKit.ColorSpace.SRGB,
-        colorType: getEnum(this.CanvasKit.ColorType, info.colorType),
+        colorType,
         height: info.height,
         width: info.width,
       },
