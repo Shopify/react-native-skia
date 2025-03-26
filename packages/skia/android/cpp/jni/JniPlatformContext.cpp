@@ -90,12 +90,8 @@ JniPlatformContext::createVideo(const std::string &url) {
   auto videoObject = method(javaPart_.get(), jUrl);
   env->DeleteLocalRef(jUrl);
 
-  // Create a global reference from the local reference
+  // Clean up the jstring local reference
   auto result = jni::make_global(videoObject);
-
-  // Clean up the local reference now that we have a global one
-  env->DeleteLocalRef(videoObject);
-
   return result;
 }
 
@@ -107,7 +103,7 @@ sk_sp<SkImage> JniPlatformContext::takeScreenshotFromViewTag(size_t tag) {
 
   auto bitmap = method(javaPart_.get(), tag).release();
 
-  // Get bitmap info
+  // Let's convert to a native bitmap and get some info about the bitmap
   AndroidBitmapInfo bmi;
   AndroidBitmap_getInfo(env, bitmap, &bmi);
 
@@ -130,9 +126,6 @@ sk_sp<SkImage> JniPlatformContext::takeScreenshotFromViewTag(size_t tag) {
   // Unlock pixels
   AndroidBitmap_unlockPixels(env, bitmap);
 
-  // Clean up the local reference before returning
-  env->DeleteLocalRef(bitmap);
-
   // Return our newly created SkImage!
   return skImage;
 }
@@ -143,25 +136,13 @@ void JniPlatformContext::performStreamOperation(
   static auto method = javaPart_->getClass()->getMethod<jbyteArray(jstring)>(
       "getJniStreamFromSource");
 
-  // Create a copy of the java part to ensure it's not deleted before the thread completes
-  auto javaPartCopy = javaPart_;
-
-  auto loader = [javaPartCopy, sourceUri, op]() -> void {
-    // Check if Java part is still valid
-    if (!javaPartCopy) {
-      printf("Java part no longer valid\n");
-      return;
-    }
-    
+  auto loader = [=]() -> void {
     jni::ThreadScope ts;
     jstring jstr =
         (*jni::Environment::current()).NewStringUTF(sourceUri.c_str());
 
-    // Use the copy of Java part
-    auto array = method(javaPartCopy.get(), jstr);
-    
-    // Delete jstr since we're done with it
-    jni::Environment::current()->DeleteLocalRef(jstr);
+    // Get the array with data from input stream from Java
+    auto array = method(javaPart_.get(), jstr);
 
     if (array == nullptr) {
       printf("Calling getJniStreamFromSource failed\n");
@@ -181,7 +162,7 @@ void JniPlatformContext::performStreamOperation(
         jni::Environment::current()->GetByteArrayElements(array.get(), nullptr);
     if (!elements) {
       printf("Element Fail\n");
-      free(buffer);  // Clean up buffer if elements allocation fails
+      free(buffer);
       return;
     }
 
