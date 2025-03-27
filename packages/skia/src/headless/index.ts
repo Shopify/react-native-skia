@@ -8,8 +8,15 @@ import type { SkSurface } from "../skia";
 import { SkiaSGRoot } from "../sksg/Reconciler";
 
 export * from "../renderer/components";
+export * from "../skia/types";
+// TODO: there is current an issue where the ColorType enum is not matching the Skia and CanvasKit version.
+// For node and web we need to export our own enum.
+// We will consolidate this.
+import {ColorType as CanvasKitColorType} from "../skia/types/Image/ColorType.web";
+export const ColorType = CanvasKitColorType;
 
 let Skia: ReturnType<typeof JsiSkApi>;
+
 
 export const makeOffscreenSurface = (width: number, height: number) => {
   if (!Skia) {
