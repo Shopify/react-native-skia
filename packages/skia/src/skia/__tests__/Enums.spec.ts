@@ -26,7 +26,7 @@ import {
 import { Path1DEffectStyle } from "../types/PathEffect";
 import { BlendMode } from "../types/Paint/BlendMode";
 import { mapKeys } from "../../renderer/typeddash";
-import { ColorTypeCanvasKit } from "../types/Image/ColorType.web";
+import { ColorType as ColorTypeCanvasKit } from "../types/Image/ColorType.web";
 
 import { setupSkia } from "./setup";
 

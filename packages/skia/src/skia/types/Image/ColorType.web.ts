@@ -1,4 +1,4 @@
-export enum ColorTypeCanvasKit {
+export enum ColorType {
   Unknown, // uninitialized
   Alpha_8, // pixel with alpha in 8-bit byte
   RGB_565, // pixel with 5 bits red, 6 bits green, 5 bits blue, in 16-bit word
