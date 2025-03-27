@@ -10,9 +10,10 @@ import {
 
 import { frag } from "../../components/ShaderLib";
 
+import { lib } from "./Shader";
+
 const { width, height } = Dimensions.get("window");
 const sf = 100;
-
 
 const rt = frag`
 // SkSL version of the ShaderToy shader
