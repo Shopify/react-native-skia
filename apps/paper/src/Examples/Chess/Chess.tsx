@@ -44,7 +44,6 @@ struct Light {
     vec3 position;
     vec3 color;
     vec3 intensity;
-    float isSun; // directional if true, point light if false
 };
 
 
@@ -56,27 +55,14 @@ Hit minWithMaterial(Hit a, Hit b) {
    }
 }
 
-const int NUM_LIGHTS = 3;
+const int NUM_LIGHTS = 1;
 Light lights[NUM_LIGHTS];
 
 void setupLights() {
     // Main directional light (sun)
     lights[0].position = normalize(vec3(1.0, 2.0, 1.0));
     lights[0].color = vec3(1.0, 1.0, 1.0);
-    lights[0].intensity = vec3(1.0);
-    lights[0].isSun = 1;
-    
-    // Fill light (point light)
-    lights[1].position = vec3(3.0, 3.0, 3.0);
-    lights[1].color = vec3(1.0, 1.0, 1.0);
-    lights[1].intensity = vec3(1.0);
-    lights[1].isSun = 0;
-    
-    // NEW: Third light (opposite of first light)
-    lights[2].position = normalize(vec3(-1.0, 1.0, -1.0));  // Opposite direction of main light
-    lights[2].color = vec3(0.6, 0.6, 0.8);  // Slightly cooler color for fill light
-    lights[2].intensity = vec3(0.5);  // Lower intensity for a subtle fill effect
-    lights[2].isSun = 1;  // Also make it a directional light
+    lights[0].intensity = vec3(1.0);    
 }
 
 float sdRoundCone(vec3 a, vec3 b, float r1, float r2, vec3 p)
@@ -266,10 +252,10 @@ vec3 checkboard(vec3 p, vec3 color) {
   return stripes;
 }
 
-      
 
-float queen1SDF( vec3 p )
-{
+// Queen SDF is based on https://www.shadertoy.com/view/3sVfW3
+float queenSDF( vec3 p ) {
+  p += vec3(0., -1.4, 0.);
   // body
   vec3 p0 = p - vec3(0., 0.5, 0.);
   float r = 0.28 + pow(0.4 - p0.y, 2.) / 6.;
@@ -285,20 +271,13 @@ float queen1SDF( vec3 p )
   float d2 = sdCappedCylinder(0.6, 0.12, p2);
   d0 = smax(d0, -d2, 0.07);
 
-    vec3 p3 = p - vec3(0., 2.15, 0.);
-    float d3 = sdfCone(p3, vec2(0.001), 0.31);
-    d0 = smin(d0, d3, 0.045);
+  vec3 p3 = p - vec3(0., 2.15, 0.);
+  float d3 = sdfCone(p3, vec2(0.001), 0.31);
+  d0 = smin(d0, d3, 0.045);
 
-    vec3 offsetToRemove = vec3(0., -0.05, 0.);
-    float d4 = sdSphere(vec3(0., 2.18, 0.), 0.09, p - offsetToRemove);
-    d0 = smin(d0, d4, 0.03);
-
-    return d0;
- 
-}
-
-float queen2SDF( vec3 p ) {
-  float d0 = queen1SDF(p);
+  vec3 offsetToRemove = vec3(0., -0.05, 0.);
+  float d4 = sdSphere(vec3(0., 2.18, 0.), 0.09, p - offsetToRemove);
+  d0 = smin(d0, d4, 0.03);
   vec3 p5 = p - vec3(0., 1.4, 0.);
   vec3 radii = vec3(0.5, 0.07, 0.5);
   float d5 = sdEllipsoid(radii, p5);
@@ -311,21 +290,13 @@ float queen2SDF( vec3 p ) {
 
   vec3 p7 = p - vec3(0., -1., 0.);
   float d7 = sdTorus(vec2(0.43, 0.5), p7);
-  //d7 = max(d7, -sdHPlane(0., p7));
   d0 = smin(d0, d7, 0.03);
-  return d0;
-}
-
-float queen3SDF( vec3 p ) {
-  p += vec3(0., -1.4, 0.);
-  float d0 = queen2SDF(p);
-  vec3 tr = vec3(0., 0., 0.);
+  tr = vec3(0., 0., 0.);
   float d9 = sdTorus(vec2(0.586, 0.01), p - vec3(0., -0.425, 0.) + tr);
   float d0a = min(d0, d9);
   float d0b = smax(d0, -d9, 0.05);
   d0 = mix(d0a, d0b, 1.0);
 
-  //d0 = smax(d0, -d9, 0.05);
   float d10 = sdTorus(vec2(0.553, 0.01), p - vec3(0., -0.345, 0.) + tr);
   d0a = min(d0, d10);
   d0b = smax(d0, -d10, 0.05);
@@ -334,10 +305,6 @@ float queen3SDF( vec3 p ) {
 
   return d0;
 }
-
-
-
-
 
 Material createMaterial(vec3 color, float roughness, float metalness, float reflectivity) {
     Material mat;
@@ -348,7 +315,6 @@ Material createMaterial(vec3 color, float roughness, float metalness, float refl
     return mat;
 }
 
-
 Hit sceneSDF(float3 p) {
     // Define your scene here
     Hit obj0;
@@ -357,7 +323,7 @@ Hit sceneSDF(float3 p) {
           obj0.material = createMaterial(checkboard(pobj0, vec3(0.7568627595901489,0.6039215922355652,0.41960784792900085)), float(0.8), float(0.5), float(0.5));
 Hit obj1;
            vec3 pobj1 = p;
-           obj1.dist = queen3SDF(pobj1 );
+           obj1.dist = queenSDF(pobj1 );
           obj1.material = createMaterial(vec3(0.9,0.9,0.9), float(1), float(0.5), float(0.5));
 
     Hit result = minWithMaterial(obj1, obj0);
@@ -506,27 +472,14 @@ vec3 pbr(vec3 p, vec3 n, vec3 v, Material mat) {
         vec3 L;
         float attenuation = 1.0;
         
-        if(lights[i].isSun == 1) {
-            // Directional light
-            // Directional light
-            L = normalize(lights[i].position);
-            
-            // Simple shadow calculation for directional light
-            float shadow = calcShadow(p, L, 0.1, 20.0, 16.0);
-            attenuation *= shadow;
-        } else {
-            // Point light
-            vec3 lightVec = lights[i].position - p;
-            float distance = length(lightVec);
-            L = normalize(lightVec);
-            
-            // Attenuation based on distance
-            attenuation = 1.0 / (1.0 + 0.1 * distance + 0.01 * distance * distance);
-            
-            // Point light shadows
-            float shadow = calcShadow(p, L, 0.1, distance, 16.0);
-            attenuation *= shadow;
-        }
+        // Directional light
+        // Directional light
+        L = normalize(lights[i].position);
+        
+        // Simple shadow calculation for directional light
+        float shadow = calcShadow(p, L, 0.1, 20.0, 16.0);
+        attenuation *= shadow;
+
         
         // Half vector between view and light directions
         vec3 H = normalize(v + L);
@@ -570,13 +523,8 @@ vec3 pbr(vec3 p, vec3 n, vec3 v, Material mat) {
     
     // Ambient lighting (simplified IBL)
     vec3 ambient = vec3(0.03) * albedo * ao;
-    
     // Final color
     vec3 color = ambient + Lo;
-    
-    // HDR tonemapping and gamma correction
-    //color = color / (color + vec3(1.0));
-    //color = color / (color + vec3(0.7));  // Adjusted exposure for brighter look
     color = stylizedTonemap(color);
 
     return color;
