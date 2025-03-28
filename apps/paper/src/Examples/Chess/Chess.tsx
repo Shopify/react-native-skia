@@ -47,20 +47,20 @@ struct Light {
 
 
 Hit minWithMaterial(Hit a, Hit b) {
-   if (a.dist < b.dist) {
-     return a;
-   } else {
-     return b;
-   }
+  if (a.dist < b.dist) {
+    return a;
+  } else {
+    return b;
+  }
 }
 
 Light light;
 
 void setupLights() {
-    // Main directional light (sun)
-    light.position = normalize(vec3(1.0, 2.0, 1.0));
-    light.color = vec3(1.0, 1.0, 1.0);
-    light.intensity = vec3(1.0);    
+  // Main directional light (sun)
+  light.position = normalize(vec3(1.0, 2.0, 1.0));
+  light.color = vec3(1.0, 1.0, 1.0);
+  light.intensity = vec3(1.0);    
 }
 
 ${lib}
@@ -129,20 +129,20 @@ Hit raymarch(float3 ro, float3 rd) {
 
 // Calculate shadows using ray marching
 float calcShadow(vec3 ro, vec3 rd, float mint, float maxt, float k) {
-    float res = 1.0;
-    float t = mint;
+  float res = 1.0;
+  float t = mint;
+  
+  for(int i = 0; i < 32; i++) {
+    float h = sceneSDF(ro + rd * t).dist;
+    if(h < 0.001) return 0.0;
     
-    for(int i = 0; i < 32; i++) {
-        float h = sceneSDF(ro + rd * t).dist;
-        if(h < 0.001) return 0.0;
-        
-        res = min(res, k * h / t);
-        t += clamp(h, 0.01, 0.2);
-        
-        if(t > maxt) break;
-    }
+    res = min(res, k * h / t);
+    t += clamp(h, 0.01, 0.2);
     
-    return clamp(res, 0.0, 1.0);
+    if(t > maxt) break;
+  }
+  
+  return clamp(res, 0.0, 1.0);
 }
 
 float calcAO(vec3 pos, vec3 nor) {
@@ -159,32 +159,32 @@ float calcAO(vec3 pos, vec3 nor) {
 
 // Lighting function to calculate illumination for a point
 vec3 calculateLighting(vec3 point, vec3 normal, vec3 baseColor, int materialType) {
-    // Light settings
-    vec3 ambientColor = vec3(0.1, 0.1, 0.1);
-    vec3 diffuseColor = vec3(0.7, 0.7, 0.7);
-    vec3 lightPosition = cameraPosition; // Position of the point light
-    float lightIntensity = 1;
-    
-    // Ambient component
-    vec3 ambient = ambientColor * baseColor;
-    
-    // Diffuse lighting (directional light from above)
-    vec3 lightDir = normalize(vec3(0.0, 5.0, 0.0));
-    float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = diff * diffuseColor * baseColor;
-    
-    // Point light calculation
-    vec3 pointLightDir = normalize(lightPosition - point);
-    float pointDiff = max(dot(normal, pointLightDir), 0.0);
-    
-    // Attenuation (light gets weaker with distance)
-    float distance = length(lightPosition - point);
-    float attenuation = 1.0 / (1.0 + 0.1 * distance + 0.01 * distance * distance);
-    
-    vec3 pointLight = pointDiff * lightIntensity * attenuation * baseColor;
-    
-    // Combine all lighting components
-    return ambient + diffuse + pointLight;
+  // Light settings
+  vec3 ambientColor = vec3(0.1, 0.1, 0.1);
+  vec3 diffuseColor = vec3(0.7, 0.7, 0.7);
+  vec3 lightPosition = cameraPosition; // Position of the point light
+  float lightIntensity = 1;
+  
+  // Ambient component
+  vec3 ambient = ambientColor * baseColor;
+  
+  // Diffuse lighting (directional light from above)
+  vec3 lightDir = normalize(vec3(0.0, 5.0, 0.0));
+  float diff = max(dot(normal, lightDir), 0.0);
+  vec3 diffuse = diff * diffuseColor * baseColor;
+  
+  // Point light calculation
+  vec3 pointLightDir = normalize(lightPosition - point);
+  float pointDiff = max(dot(normal, pointLightDir), 0.0);
+  
+  // Attenuation (light gets weaker with distance)
+  float distance = length(lightPosition - point);
+  float attenuation = 1.0 / (1.0 + 0.1 * distance + 0.01 * distance * distance);
+  
+  vec3 pointLight = pointDiff * lightIntensity * attenuation * baseColor;
+  
+  // Combine all lighting components
+  return ambient + diffuse + pointLight;
 }
 
 vec3 stylizedTonemap(vec3 color) {
@@ -326,8 +326,8 @@ vec4 main(float2 fragCoord) {
     for(int n = 0; n < samples; n++) {
       // Calculate offset for this sample (only if using AA)
       vec2 offset = (samples > 1) ? 
-          (vec2(float(m), float(n)) / float(samples) - 0.5/float(samples)) : 
-          vec2(0.0);
+        (vec2(float(m), float(n)) / float(samples) - 0.5/float(samples)) : 
+        vec2(0.0);
       
       // Get UV coordinates with the offset
       float2 uv = ((fragCoord + offset) - 0.5 * size.xy) / size.y;
