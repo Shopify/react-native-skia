@@ -79,59 +79,6 @@ vec3 checkboard(vec3 p, vec3 color) {
   return stripes;
 }
 
-// Queen SDF is based on https://www.shadertoy.com/view/3sVfW3
-float sdQueen( vec3 p ) {
-  p += vec3(0., -1.4, 0.);
-  // body
-  vec3 p0 = p - vec3(0., 0.5, 0.);
-  float r = 0.28 + pow(0.4 - p0.y, 2.) / 6.;
-  float d0 = sdCappedCylinder(1.5, r, p0) - 0.02;
-  // head
-  vec3 p1 = p - vec3(0., 1.9, 0.);
-  float d1 = sdCappedCylinder(0.2, r - 0.1, p1);
-  d0 = smax(d0, -d1, 0.03);
-  vec3 p2 = p  - vec3(0., 2.05, 0.);
-  float a = mod(atan(p2.z, p2.x) + PI / 8., PI / 4.) - PI / 8.;
-  float l = length(vec2(p2.x, p2.z));
-  p2 = vec3(p2.y, l * cos(a), l * sin(a));
-  float d2 = sdCappedCylinder(0.6, 0.12, p2);
-  d0 = smax(d0, -d2, 0.07);
-
-  vec3 p3 = p - vec3(0., 2.15, 0.);
-  float d3 = sdfCone(p3, vec2(0.001), 0.31);
-  d0 = smin(d0, d3, 0.045);
-
-  vec3 offsetToRemove = vec3(0., -0.05, 0.);
-  float d4 = sdSphere(vec3(0., 2.18, 0.), 0.09, p - offsetToRemove);
-  d0 = smin(d0, d4, 0.03);
-  vec3 p5 = p - vec3(0., 1.4, 0.);
-  vec3 radii = vec3(0.5, 0.07, 0.5);
-  float d5 = sdEllipsoid(radii, p5);
-  d0 = smin(d0, d5, 0.03);
-
-  vec3 tr = mix(vec3(0., 1.5, 0.), vec3(0.), 1.);
-  vec3 p6 = p - vec3(0., 1.51, 0.) + tr;
-  float d6 = sdEllipsoid(vec3(0.42, 0.07, 0.42), p6);
-  d0 = smin(d0, d6, 0.03);
-
-  vec3 p7 = p - vec3(0., -1., 0.);
-  float d7 = sdTorus(vec2(0.43, 0.5), p7);
-  d0 = smin(d0, d7, 0.03);
-  tr = vec3(0., 0., 0.);
-  float d9 = sdTorus(vec2(0.586, 0.01), p - vec3(0., -0.425, 0.) + tr);
-  float d0a = min(d0, d9);
-  float d0b = smax(d0, -d9, 0.05);
-  d0 = mix(d0a, d0b, 1.0);
-
-  float d10 = sdTorus(vec2(0.553, 0.01), p - vec3(0., -0.345, 0.) + tr);
-  d0a = min(d0, d10);
-  d0b = smax(d0, -d10, 0.05);
-
-  d0 = mix(d0a, d0b, 1.0);
-
-  return d0;
-}
-
 Material createMaterial(vec3 color, float roughness, float metalness, float reflectivity) {
   Material mat;
   mat.color = color;
@@ -199,17 +146,15 @@ float calcShadow(vec3 ro, vec3 rd, float mint, float maxt, float k) {
 }
 
 float calcAO(vec3 pos, vec3 nor) {
-    float occ = 0.0;
-    float sca = 1.0;
-    
-    for(int i = 0; i < 5; i++) {
-        float h = 0.01 + 0.12 * float(i) / 4.0;
-        float d = sceneSDF(pos + h * nor).dist;
-        occ += (h - d) * sca;
-        sca *= 0.95;
-    }
-    
-    return clamp(1.0 - 3.0 * occ, 0.0, 1.0);
+  float occ = 0.0;
+  float sca = 1.0;
+  for(int i = 0; i < 5; i++) {
+    float h = 0.01 + 0.12 * float(i) / 4.0;
+    float d = sceneSDF(pos + h * nor).dist;
+    occ += (h - d) * sca;
+    sca *= 0.95;
+  }
+  return clamp(1.0 - 3.0 * occ, 0.0, 1.0);
 }
 
 // Lighting function to calculate illumination for a point
@@ -291,131 +236,126 @@ vec3 pbr(vec3 p, vec3 n, vec3 v, Material mat) {
     vec3 Lo = vec3(0.0);
     
     // Calculate lighting contribution from each light
-        vec3 L;
-        float attenuation = 1.0;
-        
-        // Directional light
-        // Directional light
-        L = normalize(light.position);
-        
-        // Simple shadow calculation for directional light
-        float shadow = calcShadow(p, L, 0.1, 20.0, 16.0);
-        attenuation *= shadow;
-
-        
-        // Half vector between view and light directions
-        vec3 H = normalize(v + L);
-        
-        // Calculate dot products for lighting equation
-        float NdotL = max(dot(n, L), 0.0);
-        float NdotV = max(dot(n, v), 0.0);
-        float NdotH = max(dot(n, H), 0.0);
-        float HdotV = max(dot(H, v), 0.0);
-        
-        if(NdotL > 0.0) {
-            // Diffuse term (Lambert)
-            vec3 diffuse = albedo / PI;
-            
-            // Specular term (simplified GGX)
-            float alpha = roughness * roughness;
-            float alpha2 = alpha * alpha;
-            
-            // Normal Distribution Function (D)
-            float denom = NdotH * NdotH * (alpha2 - 1.0) + 1.0;
-            float D = alpha2 / (PI * denom * denom);
-            
-            // Fresnel term (F) - Schlick approximation
-            vec3 F = F0 + (1.0 - F0) * pow(1.0 - HdotV, 5.0);
-            
-            // Geometry term (G) - simplified
-            float k = (roughness + 1.0) * (roughness + 1.0) / 8.0;
-            float G = NdotL * NdotV / ((NdotL * (1.0 - k) + k) * (NdotV * (1.0 - k) + k));
-            
-            // Combine terms for specular
-            vec3 specular = D * F * G / (4.0 * NdotV * NdotL + 0.001);
-            //specular *= 0.6; // Reduce specular intensity to 60%
-            
-            // Energy conservation: metallic surfaces don't have diffuse
-            vec3 kD = (1.0 - F) * (1.0 - metalness);
-            
-            // Combine diffuse and specular
-            Lo += (kD * diffuse + specular) * light.color * light.intensity * NdotL * attenuation;
-        }
-  
+    vec3 L;
+    float attenuation = 1.0;
     
-    // Ambient lighting (simplified IBL)
-    vec3 ambient = vec3(0.03) * albedo * ao;
-    // Final color
-    vec3 color = ambient + Lo;
-    color = stylizedTonemap(color);
+    // Directional light
+    // Directional light
+    L = normalize(light.position);
+    
+    // Simple shadow calculation for directional light
+    float shadow = calcShadow(p, L, 0.1, 20.0, 16.0);
+    attenuation *= shadow;
 
-    return color;
+    // Half vector between view and light directions
+    vec3 H = normalize(v + L);
+    
+    // Calculate dot products for lighting equation
+    float NdotL = max(dot(n, L), 0.0);
+    float NdotV = max(dot(n, v), 0.0);
+    float NdotH = max(dot(n, H), 0.0);
+    float HdotV = max(dot(H, v), 0.0);
+  
+    if(NdotL > 0.0) {
+        // Diffuse term (Lambert)
+        vec3 diffuse = albedo / PI;
+        
+        // Specular term (simplified GGX)
+        float alpha = roughness * roughness;
+        float alpha2 = alpha * alpha;
+        
+        // Normal Distribution Function (D)
+        float denom = NdotH * NdotH * (alpha2 - 1.0) + 1.0;
+        float D = alpha2 / (PI * denom * denom);
+        
+        // Fresnel term (F) - Schlick approximation
+        vec3 F = F0 + (1.0 - F0) * pow(1.0 - HdotV, 5.0);
+        
+        // Geometry term (G) - simplified
+        float k = (roughness + 1.0) * (roughness + 1.0) / 8.0;
+        float G = NdotL * NdotV / ((NdotL * (1.0 - k) + k) * (NdotV * (1.0 - k) + k));
+        
+        // Combine terms for specular
+        vec3 specular = D * F * G / (4.0 * NdotV * NdotL + 0.001);
+        //specular *= 0.6; // Reduce specular intensity to 60%
+        
+        // Energy conservation: metallic surfaces don't have diffuse
+        vec3 kD = (1.0 - F) * (1.0 - metalness);
+        // Combine diffuse and specular
+        Lo += (kD * diffuse + specular) * light.color * light.intensity * NdotL * attenuation;
+    }
+
+
+// Ambient lighting (simplified IBL)
+vec3 ambient = vec3(0.03) * albedo * ao;
+// Final color
+vec3 color = ambient + Lo;
+color = stylizedTonemap(color);
+
+return color;
 }
 
 
 float3 render(float3 ro, float3 rd) {
-    float3 col = backgroundColor;
-    Hit hit = raymarch(ro, rd);
+  float3 col = backgroundColor;
+  Hit hit = raymarch(ro, rd);
+  // If we hit something
+  if(hit.dist < 100.0) {
+    vec3 p = ro + rd * hit.dist;
+    vec3 n = getNormal(p);
     
-    // If we hit something
-    if(hit.dist < 100.0) {
-        vec3 p = ro + rd * hit.dist;
-        vec3 n = getNormal(p);
-        
-        // View direction (from point to camera)
-        vec3 v = normalize(ro - p);
-        
-        // Apply PBR lighting
-        col = pbr(p, n, v, hit.material);
-    }
+    // View direction (from point to camera)
+    vec3 v = normalize(ro - p);
     
-    return col;
+    // Apply PBR lighting
+    col = pbr(p, n, v, hit.material);
+  }
+
+  return col;
 }
 
 
 vec4 main(float2 fragCoord) {
-    // Anti-aliasing settings
-    const int samples = 1; // Used when aaSamples uniform isn't provided
- 
-    float sampleStrength = 1.0/float(samples*samples);
-    float3 finalColor = float3(0.0);
-    
-    // Perform supersampling
-    for(int m = 0; m < samples; m++) {
-        for(int n = 0; n < samples; n++) {
-            // Calculate offset for this sample (only if using AA)
-            vec2 offset = (samples > 1) ? 
-                (vec2(float(m), float(n)) / float(samples) - 0.5/float(samples)) : 
-                vec2(0.0);
-            
-            // Get UV coordinates with the offset
-            float2 uv = ((fragCoord + offset) - 0.5 * size.xy) / size.y;
-            uv.y = -uv.y;  // Flip Y coordinate to match Skia's coordinate system
-            
-            // Camera setup
-            float3 ro = cameraPosition;
-            float3 ta = cameraLookAt;
-            float cr = cameraRoll;
+  const int samples = 1; // Use 2 for AA
 
-            // Camera matrix
-            float3 ww = normalize(ta - ro);
-            float3 cp = float3(sin(cameraRoll), cos(cameraRoll), 0.0);
-            float3 uu = normalize(cross(ww, cp));
-            float3 vv = normalize(cross(uu, ww));
-            
-            float3 rd = normalize(uv.x * uu + uv.y * vv + 1.5 * ww);
-            
-            // Render this sample
-            float3 col = render(ro, rd);
-            
-            // Accumulate color
-            finalColor += col * sampleStrength;
-        }
+  float sampleStrength = 1.0/float(samples*samples);
+  float3 finalColor = float3(0.0);
+  
+  // Perform supersampling
+  for(int m = 0; m < samples; m++) {
+    for(int n = 0; n < samples; n++) {
+      // Calculate offset for this sample (only if using AA)
+      vec2 offset = (samples > 1) ? 
+          (vec2(float(m), float(n)) / float(samples) - 0.5/float(samples)) : 
+          vec2(0.0);
+      
+      // Get UV coordinates with the offset
+      float2 uv = ((fragCoord + offset) - 0.5 * size.xy) / size.y;
+      uv.y = -uv.y;  // Flip Y coordinate to match Skia's coordinate system
+      
+      // Camera setup
+      float3 ro = cameraPosition;
+      float3 ta = cameraLookAt;
+      float cr = cameraRoll;
+
+      // Camera matrix
+      float3 ww = normalize(ta - ro);
+      float3 cp = float3(sin(cameraRoll), cos(cameraRoll), 0.0);
+      float3 uu = normalize(cross(ww, cp));
+      float3 vv = normalize(cross(uu, ww));
+      
+      float3 rd = normalize(uv.x * uu + uv.y * vv + 1.5 * ww);
+      
+      // Render this sample
+      float3 col = render(ro, rd);
+      
+      // Accumulate color
+      finalColor += col * sampleStrength;
     }
-    
-    // Final gamma correction
-    finalColor = pow(finalColor, vec3(0.4545));
-    return vec4(finalColor, 1.0);
+  }
+  // Final gamma correction
+  finalColor = pow(finalColor, vec3(0.4545));
+  return vec4(finalColor, 1.0);
 }
 `;
 

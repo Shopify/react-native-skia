@@ -101,4 +101,59 @@ float smax(float a, float b, float k)
   float h = max(k-abs(a-b),0.0);
   return max(a, b) + h*h*h/(6.0*k*k);
 }
+
+
+// Queen SDF is based on https://www.shadertoy.com/view/3sVfW3
+float sdQueen( vec3 p ) {
+    p += vec3(0., -1.4, 0.);
+    // body
+    vec3 p0 = p - vec3(0., 0.5, 0.);
+    float r = 0.28 + pow(0.4 - p0.y, 2.) / 6.;
+    float d0 = sdCappedCylinder(1.5, r, p0) - 0.02;
+    // head
+    vec3 p1 = p - vec3(0., 1.9, 0.);
+    float d1 = sdCappedCylinder(0.2, r - 0.1, p1);
+    d0 = smax(d0, -d1, 0.03);
+    vec3 p2 = p  - vec3(0., 2.05, 0.);
+    float a = mod(atan(p2.z, p2.x) + PI / 8., PI / 4.) - PI / 8.;
+    float l = length(vec2(p2.x, p2.z));
+    p2 = vec3(p2.y, l * cos(a), l * sin(a));
+    float d2 = sdCappedCylinder(0.6, 0.12, p2);
+    d0 = smax(d0, -d2, 0.07);
+
+    vec3 p3 = p - vec3(0., 2.15, 0.);
+    float d3 = sdfCone(p3, vec2(0.001), 0.31);
+    d0 = smin(d0, d3, 0.045);
+
+    vec3 offsetToRemove = vec3(0., -0.05, 0.);
+    float d4 = sdSphere(vec3(0., 2.18, 0.), 0.09, p - offsetToRemove);
+    d0 = smin(d0, d4, 0.03);
+    vec3 p5 = p - vec3(0., 1.4, 0.);
+    vec3 radii = vec3(0.5, 0.07, 0.5);
+    float d5 = sdEllipsoid(radii, p5);
+    d0 = smin(d0, d5, 0.03);
+
+    vec3 tr = mix(vec3(0., 1.5, 0.), vec3(0.), 1.);
+    vec3 p6 = p - vec3(0., 1.51, 0.) + tr;
+    float d6 = sdEllipsoid(vec3(0.42, 0.07, 0.42), p6);
+    d0 = smin(d0, d6, 0.03);
+
+    vec3 p7 = p - vec3(0., -1., 0.);
+    float d7 = sdTorus(vec2(0.43, 0.5), p7);
+    d0 = smin(d0, d7, 0.03);
+    tr = vec3(0., 0., 0.);
+    float d9 = sdTorus(vec2(0.586, 0.01), p - vec3(0., -0.425, 0.) + tr);
+    float d0a = min(d0, d9);
+    float d0b = smax(d0, -d9, 0.05);
+    d0 = mix(d0a, d0b, 1.0);
+
+    float d10 = sdTorus(vec2(0.553, 0.01), p - vec3(0., -0.345, 0.) + tr);
+    d0a = min(d0, d10);
+    d0b = smax(d0, -d10, 0.05);
+
+    d0 = mix(d0a, d0b, 1.0);
+
+    return d0;
+    }
+  
 `;
