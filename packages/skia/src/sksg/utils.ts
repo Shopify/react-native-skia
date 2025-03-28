@@ -12,7 +12,7 @@ export const isSharedValue = <T = unknown>(
 
 export const materialize = <T extends object>(props: T) => {
   "worklet";
-  const result: T = Object.assign({}, props);
+  const result: T = Object.assign(Object.create(null), props);
   mapKeys(result).forEach((key) => {
     const value = result[key];
     if (isSharedValue(value)) {

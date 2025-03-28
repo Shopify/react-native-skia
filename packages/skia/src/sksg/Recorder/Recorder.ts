@@ -62,7 +62,7 @@ export class Recorder implements BaseRecorder {
   }
 
   private processProps(props: Record<string, unknown>) {
-    const animatedProps: Record<string, SharedValue<unknown>> = {};
+    const animatedProps: Record<string, SharedValue<unknown>> = Object.create(null);
     let hasAnimatedProps = false;
 
     for (const key in props) {
