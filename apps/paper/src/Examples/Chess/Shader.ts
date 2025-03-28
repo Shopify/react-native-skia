@@ -8,7 +8,7 @@ float sdRoundCone(vec3 a, vec3 b, float r1, float r2, vec3 p)
     float rr = r1 - r2;
     float a2 = l2 - rr*rr;
     float il2 = 1.0/l2;
-    
+
     vec3 pa = p - a;
     float y = dot(pa,ba);
     float z = y - l2;
@@ -44,7 +44,6 @@ float sdfCone( vec3 p, vec2 c, float h )
   float s = max( k*(w.x*q.y-w.y*q.x),k*(w.y-q.y)  );
   return sqrt(d)*sign(s);
 }
-
 
 float sdEllipsoid(vec3 r, vec3 p)
 {
