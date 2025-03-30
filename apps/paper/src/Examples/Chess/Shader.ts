@@ -107,43 +107,54 @@ float sdQueen( vec3 p ) {
   p += vec3(0., -1.4, 0.);
   // cylinder body
   vec3 p0 = p - vec3(0., 0.5, 0.);
-  float r = 0.28 + pow(0.4 - p0.y, 2.) / 6.;
+  float r = (1./6.)*pow(p0.y, 2.) - (4./30.)*p0.y + 0.3067;
   float d0 = sdCappedCylinder(1.5, r, p0) - 0.02;
   // hole in the top of the cylinder
   vec3 p1 = p - vec3(0., 1.9, 0.);
   float d1 = sdCappedCylinder(0.2, r - 0.1, p1);
   d0 = smax(d0, -d1, 0.03);
   // crown
-  vec3 p2 = p  - vec3(0., 2.05, 0.);
-  float a = mod(atan(p2.z, p2.x) + PI / 8., PI / 4.) - PI / 8.;
-  float l = length(vec2(p2.x, p2.z));
-  p2 = vec3(p2.y, l * cos(a), l * sin(a));
-  float d2 = sdCappedCylinder(0.6, 0.12, p2);
-  d0 = smax(d0, -d2, 0.07);
-  // cone
+  {
+    // Transform point for crown spikes with 8-fold radial symmetry
+    vec3 p2 = p - vec3(0., 2.05, 0.);  // Move reference point to crown height
+    // Convert x,z coordinates to polar angle (theta)
+    float theta = atan(p2.z, p2.x);
+    // Add PI/8 offset, wrap to PI/4 segments (8 segments total), then remove offset
+    // This creates 8 identical segments around the circle
+    float repeatedAngle = mod(theta + PI/8., PI/4.) - PI/8.;
+    // Get radius in xz-plane
+    float radius = length(vec2(p2.x, p2.z));
+    // Convert back to cartesian coordinates, but using the repeated angle
+    // y remains unchanged, but x,z are replaced with the new angle-adjusted coordinates
+    p2 = vec3(p2.y, radius * cos(repeatedAngle), radius * sin(repeatedAngle)); 
+    // Create cylinder for each spike
+    float d2 = sdCappedCylinder(0.6, 0.12, p2);
+    d0 = smax(d0, -d2, 0.07);
+  }
+  // head cone
   vec3 p3 = p - vec3(0., 2.15, 0.);
   float d3 = sdfCone(p3, vec2(0.001), 0.31);
   d0 = smin(d0, d3, 0.045);
-  // sphere
+  // head sphere
   float d4 = sdSphere(vec3(0., 2.18, 0.), 0.09, p);
   d0 = smin(d0, d4, 0.03);
-  // ellipsoid
+  // ring 1
   vec3 p5 = p - vec3(0., 1.4, 0.);
   vec3 radii = vec3(0.5, 0.07, 0.5);
   float d5 = sdEllipsoid(radii, p5);
   d0 = smin(d0, d5, 0.03);
-  // ellipsoid
+  // ring 2
   vec3 p6 = p - vec3(0., 1.51, 0.);
   float d6 = sdEllipsoid(vec3(0.42, 0.07, 0.42), p6);
   d0 = smin(d0, d6, 0.03);
-  // torus
+  // base torus
   vec3 p7 = p - vec3(0., -1., 0.);
   float d7 = sdTorus(vec2(0.43, 0.5), p7);
   d0 = smin(d0, d7, 0.03);
-  // torus
+  // inner base ring 1
   float d9 = sdTorus(vec2(0.586, 0.01), p - vec3(0., -0.425, 0.));
   d0 = smax(d0, -d9, 0.05);
-  // torus
+  // inner base ring 2
   float d10 = sdTorus(vec2(0.553, 0.01), p - vec3(0., -0.345, 0.));
   d0 = smax(d0, -d10, 0.05);
   return d0;
