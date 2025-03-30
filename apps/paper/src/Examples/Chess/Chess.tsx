@@ -89,42 +89,41 @@ Material createMaterial(vec3 color, float roughness, float metalness, float refl
 }
 
 Hit sceneSDF(float3 p) {
-  // Define your scene here
-  Hit obj0;
-  vec3 pobj0 = p;
-  obj0.dist = sdRoundCone(pobj0, vec3(8.2,0.35,8.2), float(0.2));
-  obj0.material = createMaterial(checkboard(pobj0, vec3(0.7568627595901489,0.6039215922355652,0.41960784792900085)), float(0.8), float(0.5), float(0.5));
-  Hit obj1;
-  vec3 pobj1 = p;
-  obj1.dist = sdQueen(pobj1);
-  obj1.material = createMaterial(vec3(0.9,0.9,0.9), float(1), float(0.5), float(0.5));
-  Hit result = minWithMaterial(obj1, obj0);  
+  Hit board;
+  board.dist = sdRoundCone(p, vec3(8.2, 0.35, 8.2), 0.2);
+  board.material = createMaterial(checkboard(p, vec3(0.756 ,0.603, 0.419)), 0.8, 0.5, 0.5);
+
+  Hit queen;
+  queen.dist = sdQueen(p);
+  queen.material = createMaterial(vec3(0.9, 0.9, 0.9), 1, 0.5, 0.5);
+
+  Hit result = minWithMaterial(queen, board);  
   return result;
 }
 
 float3 getNormal(float3 p) {
-    const float h = 0.0001;
-    const float2 k = float2(1.0, -1.0);
-    return normalize(k.xyy*sceneSDF(p + k.xyy*h).dist + 
-                    k.yyx*sceneSDF(p + k.yyx*h).dist + 
-                    k.yxy*sceneSDF(p + k.yxy*h).dist + 
-                    k.xxx*sceneSDF(p + k.xxx*h).dist);
+  const float h = 0.0001;
+  const float2 k = float2(1.0, -1.0);
+  return normalize(k.xyy*sceneSDF(p + k.xyy*h).dist + 
+                  k.yyx*sceneSDF(p + k.yyx*h).dist + 
+                  k.yxy*sceneSDF(p + k.yxy*h).dist + 
+                  k.xxx*sceneSDF(p + k.xxx*h).dist);
 }
 
 Hit raymarch(float3 ro, float3 rd) {
-    float t = 0.0;
-    Hit hit;
-    
-    for(int i = 0; i < 512; i++) {
-        float3 p = ro + rd * t;
-        hit = sceneSDF(p);
-        if(hit.dist < 0.0001 || t > 100.0) {
-          break;
-        }
-        t += hit.dist;
+  float t = 0.0;
+  Hit hit;
+  
+  for(int i = 0; i < 512; i++) {
+    float3 p = ro + rd * t;
+    hit = sceneSDF(p);
+    if(hit.dist < 0.0001 || t > 100.0) {
+      break;
     }
-    hit.dist = t;
-    return hit;
+    t += hit.dist;
+  }
+  hit.dist = t;
+  return hit;
 }
 
 // Calculate shadows using ray marching
@@ -188,111 +187,109 @@ vec3 calculateLighting(vec3 point, vec3 normal, vec3 baseColor, int materialType
 }
 
 vec3 stylizedTonemap(vec3 color) {
-    // Moderate exposure boost for balanced brightness
-    color *= 5.2;  // Slightly reduced exposure for better balance
-    
-    // Use a more extreme tone mapping curve
-    // Modified Reinhard with slightly reduced white point for controlled highlights
-    float whitePoint = 6.5;
-    color = (color * (1.0 + color/(whitePoint*whitePoint))) / (1.0 + color);
-    
-    // Apply color correction before saturation boost
-    // This helps prevent oversaturation of already bright areas
-    color = pow(color, vec3(0.85));  // Gamma adjustment for brighter midtones
-    
-    // Enhance saturation significantly
-    float luminance = dot(color, vec3(0.299, 0.587, 0.114));
-    color = mix(vec3(luminance), color, 1.9);  // More controlled saturation boost
-    
-    // Apply a more aggressive contrast S-curve for punchier look
-    color = color * color * (3.0 - 1.7 * color);  // Modified to prevent too much darkening
-    
-    // Remove color bias for neutral black and white rendering
-    // If you still want some vibrancy in colored objects but neutral blacks/whites,
-    // you could use a selective approach instead
-    
-    return clamp(color, 0.0, 1.0);
+  // Moderate exposure boost for balanced brightness
+  color *= 5.2;  // Slightly reduced exposure for better balance
+  
+  // Use a more extreme tone mapping curve
+  // Modified Reinhard with slightly reduced white point for controlled highlights
+  float whitePoint = 6.5;
+  color = (color * (1.0 + color/(whitePoint*whitePoint))) / (1.0 + color);
+  
+  // Apply color correction before saturation boost
+  // This helps prevent oversaturation of already bright areas
+  color = pow(color, vec3(0.85));  // Gamma adjustment for brighter midtones
+  
+  // Enhance saturation significantly
+  float luminance = dot(color, vec3(0.299, 0.587, 0.114));
+  color = mix(vec3(luminance), color, 1.9);  // More controlled saturation boost
+  
+  // Apply a more aggressive contrast S-curve for punchier look
+  color = color * color * (3.0 - 1.7 * color);  // Modified to prevent too much darkening
+  
+  // Remove color bias for neutral black and white rendering
+  // If you still want some vibrancy in colored objects but neutral blacks/whites,
+  // you could use a selective approach instead
+  
+  return clamp(color, 0.0, 1.0);
 }
 
 // PBR lighting calculation
 vec3 pbr(vec3 p, vec3 n, vec3 v, Material mat) {
-    setupLights();
+  setupLights();
     
-    // Material properties
-    vec3 albedo = mat.color;
-    float roughness = mat.roughness;
-    float metalness = mat.metalness;
-    
-    // Constants for PBR
-    const float PI = 3.14159265359;
-    
-    // Base reflectivity for dielectrics (non-metals)
-    vec3 F0 = mix(vec3(0.04), albedo, metalness);
-    
-    // Calculate ambient occlusion
-    float ao = calcAO(p, n);
-    
-    // Initialize the accumulator for direct lighting
-    vec3 Lo = vec3(0.0);
-    
-    // Calculate lighting contribution from each light
-    vec3 L;
-    float attenuation = 1.0;
-    
-    // Directional light
-    // Directional light
-    L = normalize(light.position);
-    
-    // Simple shadow calculation for directional light
-    float shadow = calcShadow(p, L, 0.1, 20.0, 16.0);
-    attenuation *= shadow;
-
-    // Half vector between view and light directions
-    vec3 H = normalize(v + L);
-    
-    // Calculate dot products for lighting equation
-    float NdotL = max(dot(n, L), 0.0);
-    float NdotV = max(dot(n, v), 0.0);
-    float NdotH = max(dot(n, H), 0.0);
-    float HdotV = max(dot(H, v), 0.0);
+  // Material properties
+  vec3 albedo = mat.color;
+  float roughness = mat.roughness;
+  float metalness = mat.metalness;
   
-    if(NdotL > 0.0) {
-        // Diffuse term (Lambert)
-        vec3 diffuse = albedo / PI;
-        
-        // Specular term (simplified GGX)
-        float alpha = roughness * roughness;
-        float alpha2 = alpha * alpha;
-        
-        // Normal Distribution Function (D)
-        float denom = NdotH * NdotH * (alpha2 - 1.0) + 1.0;
-        float D = alpha2 / (PI * denom * denom);
-        
-        // Fresnel term (F) - Schlick approximation
-        vec3 F = F0 + (1.0 - F0) * pow(1.0 - HdotV, 5.0);
-        
-        // Geometry term (G) - simplified
-        float k = (roughness + 1.0) * (roughness + 1.0) / 8.0;
-        float G = NdotL * NdotV / ((NdotL * (1.0 - k) + k) * (NdotV * (1.0 - k) + k));
-        
-        // Combine terms for specular
-        vec3 specular = D * F * G / (4.0 * NdotV * NdotL + 0.001);
-        //specular *= 0.6; // Reduce specular intensity to 60%
-        
-        // Energy conservation: metallic surfaces don't have diffuse
-        vec3 kD = (1.0 - F) * (1.0 - metalness);
-        // Combine diffuse and specular
-        Lo += (kD * diffuse + specular) * light.color * light.intensity * NdotL * attenuation;
-    }
+  // Constants for PBR
+  const float PI = 3.14159265359;
+  
+  // Base reflectivity for dielectrics (non-metals)
+  vec3 F0 = mix(vec3(0.04), albedo, metalness);
+  
+  // Calculate ambient occlusion
+  float ao = calcAO(p, n);
+  
+  // Initialize the accumulator for direct lighting
+  vec3 Lo = vec3(0.0);
+  
+  // Calculate lighting contribution from each light
+  vec3 L;
+  float attenuation = 1.0;
+  
+  // Directional light
+  // Directional light
+  L = normalize(light.position);
+    
+  // Simple shadow calculation for directional light
+  float shadow = calcShadow(p, L, 0.1, 20.0, 16.0);
+  attenuation *= shadow;
 
+  // Half vector between view and light directions
+  vec3 H = normalize(v + L);
+  
+  // Calculate dot products for lighting equation
+  float NdotL = max(dot(n, L), 0.0);
+  float NdotV = max(dot(n, v), 0.0);
+  float NdotH = max(dot(n, H), 0.0);
+  float HdotV = max(dot(H, v), 0.0);
+  
+  if(NdotL > 0.0) {
+    // Diffuse term (Lambert)
+    vec3 diffuse = albedo / PI;
+    
+    // Specular term (simplified GGX)
+    float alpha = roughness * roughness;
+    float alpha2 = alpha * alpha;
+    
+    // Normal Distribution Function (D)
+    float denom = NdotH * NdotH * (alpha2 - 1.0) + 1.0;
+    float D = alpha2 / (PI * denom * denom);
+    
+    // Fresnel term (F) - Schlick approximation
+    vec3 F = F0 + (1.0 - F0) * pow(1.0 - HdotV, 5.0);
+    
+    // Geometry term (G) - simplified
+    float k = (roughness + 1.0) * (roughness + 1.0) / 8.0;
+    float G = NdotL * NdotV / ((NdotL * (1.0 - k) + k) * (NdotV * (1.0 - k) + k));
+    
+    // Combine terms for specular
+    vec3 specular = D * F * G / (4.0 * NdotV * NdotL + 0.001);
+    //specular *= 0.6; // Reduce specular intensity to 60%
+    
+    // Energy conservation: metallic surfaces don't have diffuse
+    vec3 kD = (1.0 - F) * (1.0 - metalness);
+    // Combine diffuse and specular
+    Lo += (kD * diffuse + specular) * light.color * light.intensity * NdotL * attenuation;
+  }
+  // Ambient lighting (simplified IBL)
+  vec3 ambient = vec3(0.03) * albedo * ao;
+  // Final color
+  vec3 color = ambient + Lo;
+  color = stylizedTonemap(color);
 
-// Ambient lighting (simplified IBL)
-vec3 ambient = vec3(0.03) * albedo * ao;
-// Final color
-vec3 color = ambient + Lo;
-color = stylizedTonemap(color);
-
-return color;
+  return color;
 }
 
 
@@ -303,14 +300,11 @@ float3 render(float3 ro, float3 rd) {
   if(hit.dist < 100.0) {
     vec3 p = ro + rd * hit.dist;
     vec3 n = getNormal(p);
-    
     // View direction (from point to camera)
     vec3 v = normalize(ro - p);
-    
     // Apply PBR lighting
     col = pbr(p, n, v, hit.material);
   }
-
   return col;
 }
 
