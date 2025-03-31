@@ -110,7 +110,7 @@ describe("Paths", () => {
       path.trim(0.0001, 1.00001, false);
       return path.toSVGString();
     });
-    expect(result).toApproximatelyEqual("M20 20.0048L20 40L40 20");
+    expect(result).toBeApproximatelyEqual("M20 20.0048L20 40L40 20");
   });
   it("should accept [0, 1.2] as trim value", async () => {
     const result = await surface.eval((Skia) => {
@@ -144,7 +144,7 @@ describe("Paths", () => {
         path.interpolate(path2, 2)!.toSVGString(),
       ].join(" ");
     });
-    expect(result).toApproximatelyEqual(
+    expect(result).toBeApproximatelyEqual(
       [
         "M-20 -20L20 0L0 60",
         "M0 0L20 20L20 40",

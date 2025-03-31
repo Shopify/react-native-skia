@@ -14,106 +14,6 @@ export const itRunsE2eOnly = E2E ? it : it.skip;
 export const itRunsNodeOnly = E2E ? it.skip : it;
 export const itRunsCIAndNodeOnly = CI || !E2E ? it : it.skip;
 
-// Custom matcher for approximately equal SVG path strings
-expect.extend({
-  toApproximatelyEqual(received, expected) {
-    // For arrays, we check each element
-    if (Array.isArray(received) && Array.isArray(expected)) {
-      if (received.length !== expected.length) {
-        return {
-          message: () =>
-            `Expected array of length ${expected.length}, but received array of length ${received.length}`,
-          pass: false,
-        };
-      }
-
-      for (let i = 0; i < received.length; i++) {
-        const result = this.equals(received[i], expected[i]);
-        if (!result) {
-          return {
-            message: () =>
-              `Array elements at index ${i} are not approximately equal:\n` +
-              `Expected: ${expected[i]}\n` +
-              `Received: ${received[i]}`,
-            pass: false,
-          };
-        }
-      }
-      return {
-        message: () => "Arrays are approximately equal",
-        pass: true,
-      };
-    }
-
-    // For SVG path strings, we need to handle floating point values
-    if (typeof received === "string" && typeof expected === "string") {
-      // Extract all numbers from SVG path strings
-      const extractNumbers = (str: string) => {
-        const numbers: number[] = [];
-        const regex = /-?\d+(\.\d+)?/g;
-        let match;
-        while ((match = regex.exec(str)) !== null) {
-          numbers.push(parseFloat(match[0]));
-        }
-        return numbers;
-      };
-
-      const receivedNumbers = extractNumbers(received);
-      const expectedNumbers = extractNumbers(expected);
-
-      if (receivedNumbers.length !== expectedNumbers.length) {
-        return {
-          message: () =>
-            "SVG path strings have different number of values:\n" +
-            `Expected: ${expected}\n` +
-            `Received: ${received}`,
-          pass: false,
-        };
-      }
-
-      // Check if all numbers are approximately equal
-      const EPSILON = 0.001; // Tolerance threshold
-      for (let i = 0; i < receivedNumbers.length; i++) {
-        if (Math.abs(receivedNumbers[i] - expectedNumbers[i]) > EPSILON) {
-          return {
-            message: () =>
-              `SVG path strings differ at position ${i}:\n` +
-              `Expected: ${expectedNumbers[i]}\n` +
-              `Received: ${receivedNumbers[i]}\n` +
-              `Difference: ${Math.abs(
-                receivedNumbers[i] - expectedNumbers[i]
-              )}`,
-            pass: false,
-          };
-        }
-      }
-      return {
-        message: () => "SVG path strings are approximately equal",
-        pass: true,
-      };
-    }
-
-    // Default case: fall back to exact equality
-    const pass = this.equals(received, expected);
-    return {
-      message: () =>
-        pass
-          ? "Values are approximately equal"
-          : `Expected: ${expected}\nReceived: ${received}`,
-      pass,
-    };
-  },
-});
-
-// Make TypeScript aware of our custom matcher
-declare global {
-  namespace jest {
-    interface Matchers<R> {
-      toApproximatelyEqual: (expected: any) => R;
-    }
-  }
-}
-
 export const docPath = (relPath: string) =>
   path.resolve(process.cwd(), `../../apps/docs/static/img/${relPath}`);
 
@@ -196,9 +96,26 @@ export const checkImage = (
   }
   return 0;
 };
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace jest {
+    interface Matchers<R> {
+      /**
+       * Checks if values are approximately equal within the given tolerance.
+       * Works with single numbers, arrays, or Float32Arrays.
+       * @param expected - The expected value or array to compare against
+       * @param tolerance - The maximum allowed difference between elements (default: 0.01)
+       */
+      toBeApproximatelyEqual(
+        expected: number | number[] | Float32Array,
+        tolerance?: number
+      ): R;
+    }
+  }
+}
 
 expect.extend({
-  toBeApproximatelyEqual(_received, _argument, tolerance = 0.1) {
+  toBeApproximatelyEqual(_received, _argument, tolerance = 0.01) {
     const received =
       Array.isArray(_received) || _received instanceof Float32Array
         ? _received
