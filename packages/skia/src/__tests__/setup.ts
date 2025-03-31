@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import path from "path";
 import fs from "fs";
 
@@ -96,18 +97,24 @@ export const checkImage = (
   }
   return 0;
 };
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
     interface Matchers<R> {
       /**
        * Checks if values are approximately equal within the given tolerance.
-       * Works with single numbers, arrays, or Float32Arrays.
-       * @param expected - The expected value or array to compare against
+       * Works with:
+       * - Single numbers
+       * - Arrays of numbers
+       * - Float32Arrays
+       * - SVG path strings (compares numeric values with tolerance)
+       *
+       * @param expected - The expected value to compare against
        * @param tolerance - The maximum allowed difference between elements (default: 0.01)
        */
       toBeApproximatelyEqual(
-        expected: number | number[] | Float32Array,
+        expected: number | number[] | Float32Array | string,
         tolerance?: number
       ): R;
     }
@@ -116,6 +123,44 @@ declare global {
 
 expect.extend({
   toBeApproximatelyEqual(_received, _argument, tolerance = 0.01) {
+    // Handle SVG path strings
+    if (typeof _received === "string" && typeof _argument === "string") {
+      // Parse SVG path strings to extract numerical values
+      const parsePathString = (pathStr: string): number[] => {
+        // Extract all numeric values (including decimals) from the path string
+        const numbers = pathStr.match(/-?\d+(?:\.\d+)?/g) || [];
+        return numbers.map(Number);
+      };
+
+      const receivedPoints = parsePathString(_received);
+      const argumentPoints = parsePathString(_argument);
+
+      if (receivedPoints.length !== argumentPoints.length) {
+        return {
+          pass: false,
+          message: () =>
+            `SVG paths have different number of points: ${receivedPoints.length} vs ${argumentPoints.length}`,
+        };
+      }
+
+      for (let i = 0; i < receivedPoints.length; i++) {
+        if (
+          isNaN(receivedPoints[i]) ||
+          isNaN(argumentPoints[i]) ||
+          Math.abs(receivedPoints[i] - argumentPoints[i]) > tolerance
+        ) {
+          return {
+            pass: false,
+            message: () =>
+              `SVG path points differ more than ${tolerance} at position ${i}: ${receivedPoints[i]} vs ${argumentPoints[i]}`,
+          };
+        }
+      }
+
+      return { pass: true, message: () => "SVG paths are approximately equal" };
+    }
+
+    // Original logic for numbers and arrays
     const received =
       Array.isArray(_received) || _received instanceof Float32Array
         ? _received
@@ -127,6 +172,7 @@ expect.extend({
     if (received.length !== argument.length) {
       return { pass: false, message: () => "Arrays have different lengths" };
     }
+
     for (let i = 0; i < received.length; i++) {
       if (
         isNaN(argument[i]) ||
@@ -144,3 +190,6 @@ ${diffString}`,
     return { pass: true, message: () => "Arrays are approximately equal" };
   },
 });
+
+// Export empty object to make this a module
+export {};
