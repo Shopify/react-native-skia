@@ -122,7 +122,7 @@
     "ws": "8.18.0"
   },
   "dependencies": {
-    "canvaskit-wasm": "0.39.1",
+    "canvaskit-wasm": "0.40.0",
     "react-reconciler": "0.27.0"
   },
   "eslintIgnore": [
