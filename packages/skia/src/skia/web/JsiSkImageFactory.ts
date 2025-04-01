@@ -9,7 +9,7 @@ import type {
   ImageFactory,
 } from "../types";
 
-import { Host, getEnum } from "./Host";
+import { Host, getEnum, throwNotImplementedOnRNWeb } from "./Host";
 import { JsiSkImage } from "./JsiSkImage";
 import { JsiSkData } from "./JsiSkData";
 import type { JsiSkSurface } from "./JsiSkSurface";
@@ -75,17 +75,17 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
     return new JsiSkImage(this.CanvasKit, image);
   }
 
-  MakeImageFromNativeTextureUnstable(): SkImage {
-    throw new Error("MakeImageFromNativeTexture is not implemented on web");
+  MakeImageFromNativeTextureUnstable() {
+    return throwNotImplementedOnRNWeb<SkImage>();
   }
 
   MakeImage(info: ImageInfo, data: SkData, bytesPerRow: number) {
     // see toSkImageInfo() from canvaskit
     const image = this.CanvasKit.MakeImage(
       {
-        alphaType: getEnum(this.CanvasKit.AlphaType, info.alphaType),
+        alphaType: getEnum(this.CanvasKit, "AlphaType", info.alphaType),
         colorSpace: this.CanvasKit.ColorSpace.SRGB,
-        colorType: getEnum(this.CanvasKit.ColorType, info.colorType),
+        colorType: getEnum(this.CanvasKit, "ColorType", info.colorType),
         height: info.height,
         width: info.width,
       },

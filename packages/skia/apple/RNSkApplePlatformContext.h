@@ -18,19 +18,23 @@ class CallInvoker;
 
 namespace RNSkia {
 
-class RNSkiOSPlatformContext : public RNSkPlatformContext {
+class RNSkApplePlatformContext : public RNSkPlatformContext {
 public:
-  RNSkiOSPlatformContext(
+  RNSkApplePlatformContext(
       RCTBridge *bridge,
       std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker)
+#if !TARGET_OS_OSX
       : RNSkPlatformContext(jsCallInvoker, [[UIScreen mainScreen] scale]) {
+#else
+      : RNSkPlatformContext(jsCallInvoker, [[NSScreen mainScreen] backingScaleFactor]) {
+#endif // !TARGET_OS_OSX
 
     // Create screenshot manager
     _screenshotService =
         [[ViewScreenshotService alloc] initWithUiManager:bridge.uiManager];
   }
 
-  ~RNSkiOSPlatformContext() = default;
+  ~RNSkApplePlatformContext() = default;
 
   void runOnMainThread(std::function<void()>) override;
 

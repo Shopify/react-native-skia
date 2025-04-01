@@ -10,7 +10,7 @@ import type {
   SkTypeface,
 } from "../types";
 
-import { HostObject, NotImplementedOnRNWeb, getEnum } from "./Host";
+import { HostObject, getEnum, throwNotImplementedOnRNWeb } from "./Host";
 import { JsiSkPaint } from "./JsiSkPaint";
 import { JsiSkPoint } from "./JsiSkPoint";
 import { JsiSkRect } from "./JsiSkRect";
@@ -21,8 +21,8 @@ export class JsiSkFont extends HostObject<Font, "Font"> implements SkFont {
     super(CanvasKit, ref, "Font");
   }
 
-  measureText(_text: string, _paint?: SkPaint | undefined): SkRect {
-    throw new NotImplementedOnRNWeb();
+  measureText(_text: string, _paint?: SkPaint | undefined) {
+    return throwNotImplementedOnRNWeb<SkRect>();
   }
 
   dispose = () => {
@@ -100,7 +100,7 @@ export class JsiSkFont extends HostObject<Font, "Font"> implements SkFont {
   }
 
   setEdging(edging: FontEdging) {
-    this.ref.setEdging(getEnum(this.CanvasKit.FontEdging, edging));
+    this.ref.setEdging(getEnum(this.CanvasKit, "FontEdging", edging));
   }
 
   setEmbeddedBitmaps(embeddedBitmaps: boolean) {
@@ -108,7 +108,7 @@ export class JsiSkFont extends HostObject<Font, "Font"> implements SkFont {
   }
 
   setHinting(hinting: FontHinting) {
-    this.ref.setHinting(getEnum(this.CanvasKit.FontHinting, hinting));
+    this.ref.setHinting(getEnum(this.CanvasKit, "FontHinting", hinting));
   }
 
   setLinearMetrics(linearMetrics: boolean) {

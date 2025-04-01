@@ -1,12 +1,13 @@
-import type { CanvasKit, EmbindEnumEntity, EmbindEnum } from "canvaskit-wasm";
+import type { CanvasKit, EmbindEnumEntity } from "canvaskit-wasm";
 
 import type { SkJSIInstance } from "../types";
 
-export class NotImplementedOnRNWeb extends Error {
-  constructor(msg?: string) {
-    super(msg ?? "Not implemented on React Native Web");
+export const throwNotImplementedOnRNWeb = <T>(): T => {
+  if (typeof jest !== "undefined") {
+    return jest.fn() as unknown as T;
   }
-}
+  throw new Error("Not implemented on React Native Web");
+};
 
 export abstract class Host {
   readonly CanvasKit: CanvasKit;
@@ -41,11 +42,28 @@ export abstract class HostObject<T, N extends string> extends BaseHostObject<
   }
 }
 
-export const getEnum = (e: EmbindEnum, v: number): EmbindEnumEntity =>
-  Object.values(e).find(({ value }) => value === v);
+export const getEnum = (
+  CanvasKit: CanvasKit,
+  name: keyof CanvasKit,
+  v: number
+): EmbindEnumEntity => {
+  const e = CanvasKit[name];
+  if (typeof e !== "function") {
+    throw new Error(`${name} is not an number`);
+  }
+  const result = Object.values(e).find(({ value }) => value === v);
+  if (!result) {
+    throw new Error(
+      `Enum ${name} does not have value ${v} on React Native Web`
+    );
+  }
+  return result;
+};
 
 export const optEnum = (
-  e: EmbindEnum,
-  value: number | undefined
-): EmbindEnumEntity | undefined =>
-  value === undefined ? undefined : getEnum(e, value);
+  CanvasKit: CanvasKit,
+  name: keyof CanvasKit,
+  v: number | undefined
+): EmbindEnumEntity | undefined => {
+  return v === undefined ? undefined : getEnum(CanvasKit, name, v);
+};

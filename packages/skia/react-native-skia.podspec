@@ -41,7 +41,7 @@ Pod::Spec.new do |s|
     "Christian Falch" => "christian.falch@gmail.com",
     "William Candillon" => "wcandillon@gmail.com"
   }
-  s.platforms    = { :ios => "13.0", :tvos => "13.0" }
+  s.platforms    = { :ios => "13.0", :tvos => "13.0", :osx => "11" }
   s.source       = { :git => "https://github.com/shopify/react-native-skia/react-native-skia.git", :tag => "#{s.version}" }
 
   s.requires_arc = true
@@ -54,13 +54,13 @@ Pod::Spec.new do |s|
 
   s.frameworks = ['MetalKit', 'AVFoundation', 'AVKit', 'CoreMedia']
 
-  s.vendored_frameworks = use_graphite ?
+  s.vendored_frameworks = use_graphite ? 
   base_frameworks + graphite_frameworks :
   base_frameworks
 
   # All iOS cpp/h files
   s.source_files = [
-    "ios/**/*.{h,c,cc,cpp,m,mm,swift}",  
+    "apple/**/*.{h,c,cc,cpp,m,mm,swift}",  
     "cpp/**/*.{h,cpp}"
   ]
 

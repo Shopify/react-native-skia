@@ -5,7 +5,7 @@
     "provenance": true
   },
   "bin": {
-    "setup-skia-web": "./scripts/setup-canvaskit.js"
+    "setup-skia-web": "scripts/setup-canvaskit.js"
   },
   "title": "React Native Skia",
   "version": "0.0.0",
@@ -29,7 +29,7 @@
     "jestSetup.mjs",
     "jestEnv.mjs",
     "cpp/**/*.{h,cpp}",
-    "ios/**",
+    "apple/**",
     "libs/apple/*.xcframework/**",
     "react-native-skia.podspec",
     "scripts/setup-canvaskit.js",
@@ -46,7 +46,7 @@
     "build-skia": "ts-node ./scripts/build-skia.ts",
     "copy-skia-headers": "ts-node ./scripts/copy-skia-headers.ts",
     "clang-format": "yarn clang-format-ios && yarn clang-format-android && yarn clang-format-common",
-    "clang-format-ios": "find ios/ -iname '*.h' -o -iname '*.mm' -o -iname '*.cpp' | xargs clang-format -i",
+    "clang-format-ios": "find apple/ -iname '*.h' -o -iname '*.mm' -o -iname '*.cpp' | xargs clang-format -i",
     "clang-format-android": "find android/cpp/ -iname '*.h' -o -iname '*.m' -o -iname '*.cpp' | xargs clang-format -i",
     "clang-format-common": "find cpp/ \\( -path 'cpp//skia' -prune \\) -o \\( -iname '*.h' -o -iname '*.m' -o -iname '*.cpp' \\) -print | xargs clang-format -i",
     "workflow-copy-libs": "yarn ts-node ./scripts/workflow-copy-libs.ts",
@@ -76,8 +76,8 @@
   "licenseFilename": "LICENSE.md",
   "readmeFilename": "README.md",
   "peerDependencies": {
-    "react": ">=18.0",
-    "react-native": ">=0.64",
+    "react": ">=18.0 <19.0.0",
+    "react-native": ">=0.64 <0.78.0",
     "react-native-reanimated": ">=2.0.0"
   },
   "peerDependenciesMeta": {
@@ -91,6 +91,7 @@
   "devDependencies": {
     "@babel/plugin-proposal-nullish-coalescing-operator": "7.18.6",
     "@semantic-release/commit-analyzer": "^13.0.0",
+    "@semantic-release/exec": "^7.0.3",
     "@semantic-release/github": "^10.3.3",
     "@semantic-release/release-notes-generator": "^14.0.1",
     "@types/jest": "29.5.6",
@@ -121,7 +122,7 @@
     "ws": "8.18.0"
   },
   "dependencies": {
-    "canvaskit-wasm": "0.39.1",
+    "canvaskit-wasm": "0.40.0",
     "react-reconciler": "0.27.0"
   },
   "eslintIgnore": [
