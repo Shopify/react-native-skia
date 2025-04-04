@@ -199,7 +199,7 @@ jobs:
           path: |
             ~/.gradle/wrapper
             ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('./apps/example/android/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('./apps/fabric/android/gradle/wrapper/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('./apps/example/android/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
@@ -222,9 +222,6 @@ jobs:
     runs-on: macos-latest-large
     env:
       TURBO_CACHE_DIR: .turbo/android
-    strategy:
-      matrix:
-        working-directory: [apps/example]
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -240,7 +237,7 @@ jobs:
         id: cache-apk
         uses: actions/cache/restore@v3
         with:
-          path: ${{ matrix.working-directory }}/android/app/build/intermediates/apk/debug/app-debug.apk
+          path: apps/example/android/app/build/intermediates/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
       
       - name: SKDs - download required images
@@ -257,17 +254,17 @@ jobs:
         timeout-minutes: 10
 
       - name: Start Package Manager
-        working-directory: ${{ matrix.working-directory }}
+        working-directory: apps/example/
         run: E2E=true yarn start &
 
       - name: Check APK existence
         uses: andstor/file-existence-action@v2
         with:
-          files: ${{ matrix.working-directory }}/android/app/build/intermediates/apk/debug/app-debug.apk
+          files: apps/example/android/app/build/intermediates/apk/debug/app-debug.apk
           fail: true
 
       - name: Install APK
-        run: adb install -r ${{ matrix.working-directory }}/android/app/build/intermediates/apk/debug/app-debug.apk
+        run: adb install -r apps/example/android/app/build/intermediates/apk/debug/app-debug.apk
 
       # - name: Set up environment
       #   run: echo "PACKAGE_NAME=${{ env.PACKAGE_NAME }}" >> $GITHUB_ENV
@@ -281,11 +278,7 @@ jobs:
       - name: Run e2e Tests
         working-directory: packages/skia
         run: |
-          if [ "${{ matrix.working-directory }}" = "apps/example" ]; then
-            CI=true yarn e2e
-          elif [ "${{ matrix.working-directory }}" = "apps/none" ]; then
-            CI=true yarn e2e --testPathIgnorePatterns Paragraphs
-          fi
+          CI=true yarn e2e --testPathIgnorePatterns Paragraphs
 
       - uses: actions/upload-artifact@v4
         if: failure()
