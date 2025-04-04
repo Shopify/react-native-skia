@@ -34,7 +34,6 @@ export const Chat = () => {
           component={ChatScreen}
           options={{
             animation: "ios_from_right",
-            headerBackTitleVisible: false,
             headerTintColor: "black",
           }}
         />

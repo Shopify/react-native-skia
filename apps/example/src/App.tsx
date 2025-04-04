@@ -88,6 +88,8 @@ const HeaderLeft = (props: HeaderBackButtonProps) => {
 
 enableScreens(true);
 
+console.log("CI", CI);
+
 const App = () => {
   const Stack = createNativeStackNavigator<StackParamList>();
   const assets = useAssets();
