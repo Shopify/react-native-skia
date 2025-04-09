@@ -641,7 +641,7 @@ public:
     if (props.colors.has_value() && props.colors.value().size() != 4) {
       throw std::invalid_argument("Colors array for patch must have exactly 4 colors");
     }
-
+    
     // Validate texture array has exactly 4 points if provided
     if (props.texture.has_value() && props.texture.value().size() != 4) {
       throw std::invalid_argument("Texture coordinates array for patch must have exactly 4 points");
@@ -690,7 +690,7 @@ public:
     if (props.colors.has_value() && props.colors.value().size() != props.vertices.size()) {
       throw std::invalid_argument("Colors array must have the same size as vertices array");
     }
-
+    
     if (props.textures.has_value() && props.textures.value().size() != props.vertices.size()) {
       throw std::invalid_argument("Textures array must have the same size as vertices array");
     }
@@ -932,12 +932,12 @@ public:
       if (props.transforms.size() != props.sprites.size()) {
         throw std::invalid_argument("transforms and sprites arrays must have the same length");
       }
-
+      
       // Validate colors array matches if provided
       if (props.colors.has_value() && props.colors.value().size() != props.transforms.size()) {
         throw std::invalid_argument("colors array must have the same length as transforms/sprites");
       }
-
+      
       auto colors =
           props.colors.has_value() ? props.colors.value().data() : nullptr;
       auto blendMode = props.blendMode.value_or(SkBlendMode::kDstOver);
