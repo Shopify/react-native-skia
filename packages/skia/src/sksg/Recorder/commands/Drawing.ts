@@ -89,7 +89,7 @@ export const drawBox = (
       const { color = "black", blur, spread = 0, dx = 0, dy = 0 } = shadow;
       const lPaint = Skia.Paint();
       lPaint.setColor(processColor(Skia, color));
-      lPaint.setAlphaf(paint.getAlphaf() * opacity);
+      lPaint.setAlphaf(lPaint.getAlphaf() * opacity);
       lPaint.setMaskFilter(
         Skia.MaskFilter.MakeBlur(BlurStyle.Normal, blur, true)
       );
@@ -107,7 +107,7 @@ export const drawBox = (
       canvas.clipRRect(box, ClipOp.Intersect, false);
       const lPaint = Skia.Paint();
       lPaint.setColor(processColor(Skia, color));
-      lPaint.setAlphaf(paint.getAlphaf() * opacity);
+      lPaint.setAlphaf(lPaint.getAlphaf() * opacity);
 
       lPaint.setMaskFilter(
         Skia.MaskFilter.MakeBlur(BlurStyle.Normal, blur, true)
