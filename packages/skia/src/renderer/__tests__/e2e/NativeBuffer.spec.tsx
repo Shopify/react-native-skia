@@ -42,8 +42,7 @@ for (let j = 0; j < rgbaPixels.length; j += 4) {
 }
 
 describe("Native Buffers", () => {
-  // eslint-disable-next-line jest/no-disabled-tests
-  it.skip("On non supported platforms MakeImageFromNativeBuffer() should throw", async () => {
+  it("On non supported platforms MakeImageFromNativeBuffer() should throw", async () => {
     const { Skia: Sk } = setupSkia();
     if (!shouldNativeBufferTestRun()) {
       return;
@@ -73,8 +72,8 @@ describe("Native Buffers", () => {
     );
     expect(success).toBe(true);
   });
-  // eslint-disable-next-line jest/no-disabled-tests
-  it.skip("creates a native buffer from an image", async () => {
+
+  it("creates a native buffer from an image", async () => {
     if (!shouldNativeBufferTestRun()) {
       return;
     }
@@ -93,8 +92,7 @@ describe("Native Buffers", () => {
     });
     expect(BigInt(result)).not.toBe(BigInt(0));
   });
-  // eslint-disable-next-line jest/no-disabled-tests
-  it.skip("creates an image from a native buffer", async () => {
+  it("creates an image from a native buffer", async () => {
     const { Skia: Sk } = setupSkia();
     // Skip outside iOS and Android
     if (!shouldNativeBufferTestRun()) {
@@ -117,8 +115,8 @@ describe("Native Buffers", () => {
     expect(image).not.toBeNull();
     checkImage(image, "snapshots/cyan-buffer.png");
   });
-  // eslint-disable-next-line jest/no-disabled-tests
-  it.skip("creates an image from native color type", async () => {
+
+  it("creates an image from native color type", async () => {
     const { Skia: Sk } = setupSkia();
     // Skip outside iOS and Android
     if (!shouldNativeBufferTestRun()) {
