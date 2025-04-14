@@ -214,7 +214,7 @@ jobs:
         env:
           cache-name: cache-apk
         with:
-          path: apps/example/android/app/build/intermediates/apk/debug/app-debug.apk
+          path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
 
   test-android:
@@ -237,7 +237,7 @@ jobs:
         id: cache-apk
         uses: actions/cache/restore@v3
         with:
-          path: apps/example/android/app/build/intermediates/apk/debug/app-debug.apk
+          path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
       
       - name: SKDs - download required images
@@ -260,11 +260,11 @@ jobs:
       - name: Check APK existence
         uses: andstor/file-existence-action@v2
         with:
-          files: apps/example/android/app/build/intermediates/apk/debug/app-debug.apk
+          files: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           fail: true
 
       - name: Install APK
-        run: adb install -r apps/example/android/app/build/intermediates/apk/debug/app-debug.apk
+        run: adb install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk
 
       # - name: Set up environment
       #   run: echo "PACKAGE_NAME=${{ env.PACKAGE_NAME }}" >> $GITHUB_ENV

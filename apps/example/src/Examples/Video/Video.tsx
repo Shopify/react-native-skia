@@ -10,7 +10,9 @@ import {
 } from "@shopify/react-native-skia";
 import { Platform, Pressable, View, useWindowDimensions } from "react-native";
 import { useDerivedValue, useSharedValue } from "react-native-reanimated";
-import Slider from "@react-native-community/slider";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import Slider from "react-native-reanimated-slider";
 
 // on Web because of CORS we need to use a local video
 const videoURL =
@@ -69,7 +71,7 @@ export const Video = () => {
           maximumValue={1}
           minimumTrackTintColor="#FFFFFF"
           maximumTrackTintColor="#000000"
-          onSlidingComplete={(value) => {
+          onSlidingComplete={(value: number) => {
             seek.value = value * duration;
             paused.value = false;
           }}
