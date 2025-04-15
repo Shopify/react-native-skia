@@ -1933,7 +1933,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 4a9b9131acbd8326b1f0e768d0ad63d981a4a92f
   React-microtasksnativemodule: 8b2d1ac72763e0f7aa2d1dcbe26ea84124948ec8
   react-native-safe-area-context: 758e894ca5a9bd1868d2a9cfbca7326a2b6bf9dc
-  react-native-skia: 8e694547ef3175c6a211ac5bf0601ea2ffbf7903
+  react-native-skia: 25d95c25c24fd03d4fde4ac539bd22b0bbbe2d4b
   react-native-slider: fc7f35c082abec47e341dfe43657a1c26f38db2f
   React-nativeconfig: 57781b79e11d5af7573e6f77cbf1143b71802a6d
   React-NativeModulesApple: 77edd58a435c1ba641506ba853bd0d594e1f85de
