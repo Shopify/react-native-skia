@@ -89,7 +89,14 @@ describe("Box", () => {
       <>
         <Fill color="white" />
         <Box box={rect(size / 2, size / 2, size, size)} color="red">
-          <BoxShadow dx={0} dy={0} blur={5} spread={10} inner color={"rgba(0, 0, 255, 0.5)"} />
+          <BoxShadow
+            dx={0}
+            dy={0}
+            blur={5}
+            spread={10}
+            inner
+            color={"rgba(0, 0, 255, 0.5)"}
+          />
         </Box>
       </>
     );
