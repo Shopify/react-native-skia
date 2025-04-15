@@ -24,8 +24,8 @@ export const HomeScreen = () => {
         route="Reanimated"
       />
       <HomeScreenButton
-        title="👸🏼's Gambit"
-        description="Queen's Gambit"
+        title="👸🏼 Shader's Gambit"
+        description="3d SDF scene"
         route="Chess"
       />
       <HomeScreenButton
