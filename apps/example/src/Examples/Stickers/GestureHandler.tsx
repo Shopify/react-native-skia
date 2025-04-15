@@ -17,6 +17,11 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 
+const multiply = (...matrices: Matrix4[]) => {
+  "worklet";
+  return matrices.reduce((acc, matrix) => multiply4(acc, matrix), Matrix4());
+};
+
 interface GestureHandlerProps {
   matrix: SharedValue<Matrix4>;
   dimensions: SkRect;
@@ -60,7 +65,12 @@ export const GestureHandler = ({
     });
 
   const style = useAnimatedStyle(() => {
-    const m4 = convertToColumnMajor(matrix.value);
+    const m = multiply(
+      translate(-width / 2, -height / 2),
+      matrix.value,
+      translate(width / 2, height / 2)
+    );
+    const m4 = convertToColumnMajor(m);
     return {
       position: "absolute",
       left: x,
@@ -69,16 +79,12 @@ export const GestureHandler = ({
       height,
       backgroundColor: debug ? "rgba(100, 200, 300, 0.4)" : "transparent",
       transform: [
-        { translateX: -width / 2 },
-        { translateY: -height / 2 },
         {
           matrix:
             Platform.OS === "web"
               ? convertToAffineMatrix(m4)
               : (m4 as unknown as number[]),
         },
-        { translateX: width / 2 },
-        { translateY: height / 2 },
       ],
     };
   });

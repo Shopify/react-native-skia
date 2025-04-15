@@ -18,15 +18,14 @@ export const HomeScreen = () => {
         route="API"
         testId="API"
       />
-      <HomeScreenButton title="🏔️ WebGPU" description="WebGPU" route="WebGPU" />
       <HomeScreenButton
         title="🎥 Reanimated"
         description="Reanimated & Gesture Handler"
         route="Reanimated"
       />
       <HomeScreenButton
-        title="👸🏼's Gambit"
-        description="Queen's Gambit"
+        title="👸🏼 Shader's Gambit"
+        description="3d SDF scene"
         route="Chess"
       />
       <HomeScreenButton
