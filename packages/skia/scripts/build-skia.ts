@@ -135,6 +135,12 @@ const buildXCFrameworks = () => {
       // eslint-disable-next-line max-len
       `lipo -create ${OutFolder}/${os}/x64-iphonesimulator/${name} ${OutFolder}/${os}/arm64-iphonesimulator/${name} -output ${OutFolder}/${os}/iphonesimulator/${name}`
     );
+	$(`mkdir -p ${OutFolder}/${os}/maccatalyst`);
+	$(`rm -rf ${OutFolder}/${os}/maccatalyst/${name}`);
+	$(
+		// eslint-disable-next-line max-len
+		`lipo -create ${OutFolder}/${os}/x64-maccatalyst/${name} ${OutFolder}/${os}/arm64-maccatalyst/${name} -output ${OutFolder}/${os}/maccatalyst/${name}`
+	);
     $(`mkdir -p ${OutFolder}/${os}/macosx`);
     $(`rm -rf ${OutFolder}/${os}/macosx/${name}`);
     $(
@@ -150,6 +156,7 @@ const buildXCFrameworks = () => {
         `-library ${prefix}/arm64-tvos/${name} ` +
         `-library ${prefix}/tvsimulator/${name} ` +
         `-library ${prefix}/macosx/${name} ` +
+        `-library ${prefix}/maccatalyst/${name} ` +
         ` -output ${dstPath}`
     );
   });
