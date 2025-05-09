@@ -30,9 +30,9 @@ export const getSkiaExports = () => {
   return { Skia };
 };
 
-export const drawOffscreen = (surface: SkSurface, element: ReactNode) => {
+export const drawOffscreen = async (surface: SkSurface, element: ReactNode) => {
   const root = new SkiaSGRoot(Skia);
-  root.render(element);
+  await root.render(element);
   const canvas = surface.getCanvas();
   root.drawOnCanvas(canvas);
   root.unmount();

@@ -98,7 +98,8 @@ const useElementLayout = (ref: RefObject<Div>, onLayout: OnLayout) => {
 const View = (({ children, onLayout, style: rawStyle }: ViewProps) => {
   const style = useMemo(() => (rawStyle ?? {}) as CSSProperties, [rawStyle]);
   const ref = useRef<Div>(null);
-  useElementLayout(ref, onLayout);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  useElementLayout(ref as any, onLayout);
   const cssStyles = useMemo(() => {
     return {
       alignItems: "stretch" as const,
