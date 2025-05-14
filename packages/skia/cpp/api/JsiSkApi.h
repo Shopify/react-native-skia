@@ -48,6 +48,7 @@
 #include "JsiSkTextBlobFactory.h"
 #include "JsiSkTypeface.h"
 #include "JsiSkTypefaceFactory.h"
+#include "JsiSkottieFactory.h"
 #include "JsiSkTypefaceFontProviderFactory.h"
 #include "JsiSkVertices.h"
 #include "JsiSkiaContext.h"
@@ -121,6 +122,8 @@ public:
                             std::make_shared<JsiSkPictureFactory>(context));
     installReadonlyProperty("FontMgr",
                             std::make_shared<JsiSkFontMgrFactory>(context));
+    installReadonlyProperty("Skottie",
+                            std::make_shared<JsiSkottieFactory>(context));
     installReadonlyProperty(
         "TypefaceFontProvider",
         std::make_shared<JsiSkTypefaceFontProviderFactory>(context));
