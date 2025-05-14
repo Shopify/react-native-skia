@@ -17,18 +17,26 @@ describe("Skottie", () => {
           lego: {
             duration: Math.round(legoAnimation.duration() * 1000),
             fps: Math.round(legoAnimation.fps()),
+            version: legoAnimation.version(),
+            size: legoAnimation.size(),
           },
           drinks: {
             duration: Math.round(drinksAnimation.duration() * 1000),
             fps: Math.round(drinksAnimation.fps()),
+            version: drinksAnimation.version(),
+            size: drinksAnimation.size(),
           },
           confetti: {
             duration: Math.round(confettiAnimation.duration() * 1000),
             fps: Math.round(confettiAnimation.fps()),
+            version: confettiAnimation.version(),
+            size: confettiAnimation.size(),
           },
           onboarding: {
             duration: Math.round(onboardingAnimation.duration() * 1000),
             fps: Math.round(onboardingAnimation.fps()),
+            version: onboardingAnimation.version(),
+            size: onboardingAnimation.size(),
           },
         };
       },
@@ -39,13 +47,21 @@ describe("Skottie", () => {
         onboarding: JSON.stringify(onboardingJSON),
       }
     );
+    expect(lego.version).toEqual("4.7.0");
     expect(lego.duration).toEqual(5033);
     expect(lego.fps).toEqual(30);
+    expect(lego.size).toEqual({ width: 800, height: 600 });
     expect(drinks.duration).toEqual(9160);
     expect(drinks.fps).toEqual(25);
+    expect(drinks.version).toEqual("4.5.9");
+    expect(lego.size).toEqual({ width: 800, height: 600 });
     expect(confetti.duration).toEqual(1969);
     expect(confetti.fps).toEqual(30);
+    expect(confetti.version).toEqual("4.12.0");
+    expect(lego.size).toEqual({ width: 800, height: 600 });
     expect(onboarding.duration).toEqual(2636);
     expect(onboarding.fps).toEqual(30);
+    expect(onboarding.version).toEqual("5.0.3");
+    expect(lego.size).toEqual({ width: 800, height: 600 });
   });
 });

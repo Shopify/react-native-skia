@@ -3,7 +3,6 @@ import type { CanvasKit, SkottieAnimation } from "canvaskit-wasm";
 import type { SkSkottieAnimation } from "../types/Skottie";
 
 import { HostObject } from "./Host";
-import { JsiSkPoint } from "./JsiSkPoint";
 import { JsiSkCanvas } from "./JsiSkCanvas";
 import { JsiSkRect } from "./JsiSkRect";
 
@@ -23,17 +22,13 @@ export class JsiSkottieAnimation
   render(canvas: JsiSkCanvas, dstRect?: JsiSkRect): void {
     this.ref.render(JsiSkCanvas.fromValue(canvas), dstRect?.ref);
   }
-  seek(t: number, damageRect?: JsiSkRect): JsiSkRect {
-    const result = this.ref.seek(t, damageRect?.ref);
-    return new JsiSkRect(this.CanvasKit, result);
-  }
   seekFrame(frame: number, damageRect?: JsiSkRect): JsiSkRect {
     const result = this.ref.seekFrame(frame, damageRect?.ref);
     return new JsiSkRect(this.CanvasKit, result);
   }
   size() {
-    const size = this.ref.size();
-    return new JsiSkPoint(this.CanvasKit, size);
+    const [width, height] = this.ref.size();
+    return { width, height };
   }
   version(): string {
     return this.ref.version();

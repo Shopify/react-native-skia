@@ -5,6 +5,7 @@ import type { StrokeJoin } from "./Paint";
 import type { TextAlign, TextDirection } from "./Paragraph";
 import type { SkPoint } from "./Point";
 import type { SkRect } from "./Rect";
+import type { SkSize } from "./Size";
 import type { SkTypeface } from "./Typeface";
 
 export enum LineBreakType {
@@ -210,13 +211,6 @@ export interface SkSkottieAnimation extends SkJSIInstance<"SkottieAnimation"> {
   render(canvas: SkCanvas, dstRect?: SkRect): void;
 
   /**
-   * [deprecated] - use seekFrame
-   * @param t - value from [0.0, 1.0]; 0 is first frame, 1 is final frame.
-   * @param damageRect - will copy damage frame into this if provided.
-   */
-  seek(t: number, damageRect?: SkRect): SkRect;
-
-  /**
    * Update the animation state to match |t|, specified as a frame index
    * i.e. relative to duration() * fps().
    *
@@ -230,11 +224,8 @@ export interface SkSkottieAnimation extends SkJSIInstance<"SkottieAnimation"> {
    */
   seekFrame(frame: number, damageRect?: SkRect): SkRect;
 
-  /**
-   * Return the size of this animation.
-   * @param outputSize - If provided, the size will be copied into here as width, height.
-   */
-  size(outputSize?: SkPoint): SkPoint;
+  size(): SkSize;
+
   version(): string;
 }
 

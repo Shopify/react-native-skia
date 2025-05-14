@@ -31,9 +31,17 @@ public:
   // #endregion
 
   // #region Methods
-  JSI_HOST_FUNCTION(seek) {
+  JSI_HOST_FUNCTION(seekFrame) {
     getObject()->seek(arguments[0].asNumber());
     return jsi::Value::undefined();
+  }
+    
+  JSI_HOST_FUNCTION(size) {
+    auto size = getObject()->size();
+    jsi::Object jsiSize(runtime);
+    jsiSize.setProperty(runtime, "width", size.width());
+    jsiSize.setProperty(runtime, "height", size.height());
+    return jsiSize;
   }
 
   JSI_HOST_FUNCTION(render) {
@@ -50,10 +58,16 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(version) {
+    return jsi::String::createFromUtf8(runtime, getObject()->version().c_str());
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSkottie, duration),
                        JSI_EXPORT_FUNC(JsiSkSkottie, fps),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, seek),
+                       JSI_EXPORT_FUNC(JsiSkSkottie, seekFrame),
                        JSI_EXPORT_FUNC(JsiSkSkottie, render),
+                       JSI_EXPORT_FUNC(JsiSkSkottie, size),
+                       JSI_EXPORT_FUNC(JsiSkSkottie, version),
                        JSI_EXPORT_FUNC(JsiSkSkottie, dispose))
   // #endregion
 
