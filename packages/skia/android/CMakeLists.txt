@@ -12,6 +12,7 @@ set (SKIA_SKSHAPER_LIB "skshaper")
 set (SKIA_SKPARAGRAPH_LIB "skparagraph")
 set (SKIA_SKUNICODE_CORE_LIB "skunicode_core")
 set (SKIA_SKUNICODE_ICU_LIB "skunicode_icu")
+set (SKIA_SKOTTIE_LIB "skottie")
 
 
 # Clear some variables
@@ -130,6 +131,9 @@ set_property(TARGET svg PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libsvg.a")
 
 add_library(skshaper STATIC IMPORTED)
 set_property(TARGET skshaper PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskshaper.a")
+
+add_library(skottie STATIC IMPORTED)
+set_property(TARGET skottie PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskottie.a")
 
 add_library(skparagraph STATIC IMPORTED)
 set_property(TARGET skparagraph PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskparagraph.a")
@@ -267,7 +271,7 @@ if(${REACT_NATIVE_VERSION} GREATER_EQUAL 76)
         ${SKIA_SKPARAGRAPH_LIB}
         ${SKIA_SKUNICODE_CORE_LIB}
         ${SKIA_SKUNICODE_ICU_LIB}
-        ${SKIA_LIB}
+        ${SKIA_SKOTTIE_LIB}
         -ljnigraphics
         -lGLESv2
         -lEGL
@@ -287,7 +291,7 @@ else()
         ${SKIA_SKPARAGRAPH_LIB}
         ${SKIA_SKUNICODE_CORE_LIB}
         ${SKIA_SKUNICODE_ICU_LIB}
-        ${SKIA_LIB}
+        ${SKIA_SKOTTIE_LIB}
         -ljnigraphics
         -lGLESv2
         -lEGL

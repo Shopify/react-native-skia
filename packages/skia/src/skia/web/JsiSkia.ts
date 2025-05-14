@@ -46,6 +46,7 @@ import { JsiSkParagraphBuilderFactory } from "./JsiSkParagraphBuilderFactory";
 import { JsiSkNativeBufferFactory } from "./JsiSkNativeBufferFactory";
 import { createVideo } from "./JsiVideo";
 import { throwNotImplementedOnRNWeb } from "./Host";
+import { JsiSkottieFactory } from "./JsiSkottieFactory";
 
 export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   Point: (x: number, y: number) =>
@@ -131,6 +132,7 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   FontMgr: new JsiSkFontMgrFactory(CanvasKit),
   ParagraphBuilder: new JsiSkParagraphBuilderFactory(CanvasKit),
   NativeBuffer: new JsiSkNativeBufferFactory(CanvasKit),
+  Skottie: new JsiSkottieFactory(CanvasKit),
   Video: createVideo.bind(null, CanvasKit),
   Context: (_surface: bigint, _width: number, _height: number) => {
     return throwNotImplementedOnRNWeb<SkiaContext>();

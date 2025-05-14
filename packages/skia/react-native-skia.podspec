@@ -18,7 +18,8 @@ base_frameworks = ['libs/apple/libskia.xcframework',
 'libs/apple/libskshaper.xcframework',
 'libs/apple/libskparagraph.xcframework',
 'libs/apple/libskunicode_core.xcframework',
-'libs/apple/libskunicode_libgrapheme.xcframework',]
+'libs/apple/libskunicode_libgrapheme.xcframework',
+'libs/apple/libskottie.xcframework']
 
 # Add Graphite frameworks if enabled
 graphite_frameworks = [
