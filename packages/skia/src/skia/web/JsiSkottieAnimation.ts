@@ -4,7 +4,7 @@ import type { SkSkottieAnimation } from "../types/Skottie";
 
 import { HostObject } from "./Host";
 import { JsiSkCanvas } from "./JsiSkCanvas";
-import { JsiSkRect } from "./JsiSkRect";
+import type { JsiSkRect } from "./JsiSkRect";
 
 export class JsiSkottieAnimation
   extends HostObject<SkottieAnimation, "SkottieAnimation">
@@ -22,10 +22,14 @@ export class JsiSkottieAnimation
   render(canvas: JsiSkCanvas, dstRect?: JsiSkRect): void {
     this.ref.render(JsiSkCanvas.fromValue(canvas), dstRect?.ref);
   }
-  seekFrame(frame: number, damageRect?: JsiSkRect): JsiSkRect {
-    const damagedRect = damageRect?.ref ?? new Float32Array(4);
-    this.ref.seekFrame(frame, damagedRect);
-    return new JsiSkRect(this.CanvasKit, damagedRect);
+  seekFrame(frame: number, damageRect?: JsiSkRect) {
+    const result = this.ref.seekFrame(frame);
+    if (damageRect) {
+      damageRect.ref[0] = result[0];
+      damageRect.ref[1] = result[1];
+      damageRect.ref[2] = result[2];
+      damageRect.ref[3] = result[3];
+    }
   }
   size() {
     const [width, height] = this.ref.size();

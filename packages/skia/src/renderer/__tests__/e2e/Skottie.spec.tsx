@@ -74,7 +74,7 @@ describe("Skottie", () => {
           throw new Error("Failed to create surface");
         }
         const canvas = sur.getCanvas();
-        legoAnimation.seekFrame(0);
+        legoAnimation.seekFrame(10);
         legoAnimation.render(canvas);
         sur.flush();
         return sur.makeImageSnapshot().makeNonTextureImage().encodeToBase64();

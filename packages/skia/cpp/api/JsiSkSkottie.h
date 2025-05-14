@@ -32,10 +32,18 @@ public:
 
   // #region Methods
   JSI_HOST_FUNCTION(seekFrame) {
-    getObject()->seek(arguments[0].asNumber());
+    sksg::InvalidationController ic;
+    getObject()->seek(arguments[0].asNumber(), &ic);
+    auto bounds = ic.bounds();
+    if (count >= 2) {
+      auto rect = JsiSkRect::fromValue(runtime, arguments[1]);
+      if (rect != nullptr) {
+        bounds = rect.get();
+      }
+    }
     return jsi::Value::undefined();
   }
-    
+
   JSI_HOST_FUNCTION(size) {
     auto size = getObject()->size();
     jsi::Object jsiSize(runtime);

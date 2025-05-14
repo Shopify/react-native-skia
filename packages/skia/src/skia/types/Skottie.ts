@@ -222,7 +222,7 @@ export interface SkSkottieAnimation extends SkJSIInstance<"SkottieAnimation"> {
    *                0.5 -> halfway between first and second frame
    * @param damageRect - will copy damage frame into this if provided.
    */
-  seekFrame(frame: number, damageRect?: SkRect): SkRect;
+  seekFrame(frame: number, damageRect?: SkRect): void;
 
   size(): SkSize;
 
