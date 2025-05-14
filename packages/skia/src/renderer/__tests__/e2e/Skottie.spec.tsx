@@ -1,4 +1,5 @@
-import { surface } from "../setup";
+import { checkImage, docPath } from "../../../__tests__/setup";
+import { importSkia, surface } from "../setup";
 
 const legoLoaderJSON = require("./setup/skottie/lego_loader.json");
 const drinksJSON = require("./setup/skottie/drinks.json");
@@ -63,5 +64,29 @@ describe("Skottie", () => {
     expect(onboarding.fps).toEqual(30);
     expect(onboarding.version).toEqual("5.0.3");
     expect(lego.size).toEqual({ width: 800, height: 600 });
+  });
+  it("Get first frame", async () => {
+    const raw = await surface.eval(
+      (Skia, ctx) => {
+        const legoAnimation = Skia.Skottie.Make(ctx.legoLoader);
+        const sur = Skia.Surface.MakeOffscreen(800, 600);
+        if (!sur) {
+          throw new Error("Failed to create surface");
+        }
+        const canvas = sur.getCanvas();
+        legoAnimation.seekFrame(0);
+        legoAnimation.render(canvas);
+        sur.flush();
+        return sur.makeImageSnapshot().makeNonTextureImage().encodeToBase64();
+      },
+      {
+        legoLoader: JSON.stringify(legoLoaderJSON),
+      }
+    );
+    const { Skia } = importSkia();
+    const data = Skia.Data.fromBase64(raw);
+    const image = Skia.Image.MakeImageFromEncoded(data)!;
+    expect(data).toBeDefined();
+    checkImage(image, docPath("skottie/lego.png"));
   });
 });

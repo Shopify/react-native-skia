@@ -23,8 +23,9 @@ export class JsiSkottieAnimation
     this.ref.render(JsiSkCanvas.fromValue(canvas), dstRect?.ref);
   }
   seekFrame(frame: number, damageRect?: JsiSkRect): JsiSkRect {
-    const result = this.ref.seekFrame(frame, damageRect?.ref);
-    return new JsiSkRect(this.CanvasKit, result);
+    const damagedRect = damageRect?.ref ?? new Float32Array(4);
+    this.ref.seekFrame(frame, damagedRect);
+    return new JsiSkRect(this.CanvasKit, damagedRect);
   }
   size() {
     const [width, height] = this.ref.size();
