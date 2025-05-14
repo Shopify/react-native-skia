@@ -48,10 +48,10 @@
 #include "JsiSkTextBlobFactory.h"
 #include "JsiSkTypeface.h"
 #include "JsiSkTypefaceFactory.h"
-#include "JsiSkottieFactory.h"
 #include "JsiSkTypefaceFontProviderFactory.h"
 #include "JsiSkVertices.h"
 #include "JsiSkiaContext.h"
+#include "JsiSkottieFactory.h"
 #include "JsiVideo.h"
 #include "recorder/JsiRecorder.h"
 

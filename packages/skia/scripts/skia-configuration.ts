@@ -302,6 +302,9 @@ export const copyHeaders = () => {
     ...copyModule("skottie"),
     ...copyModule("sksg"),
 
+    "rm -rf ./cpp/skia/modules/jsonreader",
+    "cp -a ../../externals/skia/modules/jsonreader/. ./cpp/skia/modules/jsonreader",
+
     "rm -rf ./cpp/skia/modules/skottie/src",
     "mkdir -p ./cpp/skia/modules/skottie/src",
     "mkdir -p ./cpp/skia/modules/skottie/src/text",
@@ -330,6 +333,7 @@ export const copyHeaders = () => {
     "cp -a ../../externals/skia/src/base/SkMathPriv.h ./cpp/skia/src/base/.",
     "cp -a ../../externals/skia/src/base/SkTInternalLList.h ./cpp/skia/src/base/.",
     "cp -a ../../externals/skia/src/base/SkUTF.h ./cpp/skia/src/base/.",
+    "cp -a ../../externals/skia/src/base/SkArenaAlloc.h ./cpp/skia/src/base/.",
 
     "mkdir -p ./cpp/skia/modules/skunicode/include/",
     "cp -a ../../externals/skia/modules/skunicode/include/SkUnicode.h ./cpp/skia/modules/skunicode/include/.",
