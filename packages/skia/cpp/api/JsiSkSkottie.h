@@ -157,34 +157,96 @@ public:
   JSI_HOST_FUNCTION(getColorProps) {
       jsi::Array propsArray = jsi::Array(runtime, 0);
       return propsArray;
-//    auto colorProps = getObject()->_propMgr->getColorProps();
-//    jsi::Array propsArray = jsi::Array(runtime, colorProps.size());
-//    int i = 0;
-//    for (const auto &cp : colorProps) {
-//      auto prop = jsi::Object(runtime);
-//      prop.setProperty(runtime, "key", cp);
-//      auto color = getObject()->_propMgr->getColor(cp);
-//      prop.setProperty(runtime, "value", JsiSkColor::toValue(runtime, color));
-//      propsArray.setValueAtIndex(runtime, i, prop);
-//      i++;
-//    }
-//    return propsArray;
+//   auto colorProps = getObject()->_propertyObserver->getColorMap();
+//   jsi::Array propsArray = jsi::Array(runtime, colorProps.size());
+//   
+//   size_t i = 0;
+//   for (const auto& pair : colorProps) {
+//     jsi::Object propObj(runtime);
+//     propObj.setProperty(runtime, "key", jsi::String::createFromUtf8(runtime, pair.first));
+//     propObj.setProperty(runtime, "value", JsiSkColor::toValue(runtime, pair.second));
+//     propsArray.setValueAtIndex(runtime, i++, propObj);
+//   }
+//  
+//   return propsArray;
   }
 
-  JSI_HOST_FUNCTION(getOpacityProps) {
-    jsi::Array propsArray = jsi::Array(runtime, 0);
-    return propsArray;
-  }
+//   JSI_HOST_FUNCTION(getOpacityProps) {
+//     auto opacityProps = getObject()->_propertyObserver->getOpacityMap();
+//     jsi::Array propsArray = jsi::Array(runtime, opacityProps.size());
+    
+//     size_t i = 0;
+//     for (const auto& pair : opacityProps) {
+//       jsi::Object propObj(runtime);
+//       propObj.setProperty(runtime, "key", jsi::String::createFromUtf8(runtime, pair.first));
+//       propObj.setProperty(runtime, "value", jsi::Value(pair.second));
+//       propsArray.setValueAtIndex(runtime, i++, propObj);
+//     }
+    
+//     return propsArray;
+//   }
 
-  JSI_HOST_FUNCTION(getTextProps) {
-    jsi::Array propsArray = jsi::Array(runtime, 0);
-    return propsArray;
-  }
+//   JSI_HOST_FUNCTION(getTextProps) {
+//     auto textProps = getObject()->_propertyObserver->getTextMap();
+//     jsi::Array propsArray = jsi::Array(runtime, textProps.size());
+    
+//     size_t i = 0;
+//     for (const auto& pair : textProps) {
+//       jsi::Object propObj(runtime);
+//       propObj.setProperty(runtime, "key", jsi::String::createFromUtf8(runtime, pair.first));
+      
+//       // Create a text property value object
+//       jsi::Object textValue(runtime);
+//       textValue.setProperty(runtime, "text", jsi::String::createFromUtf8(runtime, pair.second.fText.c_str()));
+      
+//       // Add other text properties as needed
+//       if (!pair.second.fFontFamily.isEmpty()) {
+//         textValue.setProperty(runtime, "fontFamily", 
+//           jsi::String::createFromUtf8(runtime, pair.second.fFontFamily.c_str()));
+//       }
+      
+//       propObj.setProperty(runtime, "value", textValue);
+//       propsArray.setValueAtIndex(runtime, i++, propObj);
+//     }
+    
+//     return propsArray;
+//   }
 
-  JSI_HOST_FUNCTION(getTransformProps) {
-    jsi::Array propsArray = jsi::Array(runtime, 0);
-    return propsArray;
-  }
+//   JSI_HOST_FUNCTION(getTransformProps) {
+//     auto transformProps = getObject()->_propertyObserver->getTransformMap();
+//     jsi::Array propsArray = jsi::Array(runtime, transformProps.size());
+    
+//     size_t i = 0;
+//     for (const auto& pair : transformProps) {
+//       jsi::Object propObj(runtime);
+//       propObj.setProperty(runtime, "key", jsi::String::createFromUtf8(runtime, pair.first));
+      
+//       // Create a transform property value object
+//       jsi::Object transformValue(runtime);
+      
+// //      // Convert anchor point
+// //      auto anchor = JsiSkPoint::createFromPoint(runtime, pair.second.fAnchorPoint);
+// //      transformValue.setProperty(runtime, "anchorPoint", jsi::Object::createFromHostObject(runtime, anchor));
+// //      
+// //      // Convert position
+// //      auto position = JsiSkPoint::createFromPoint(runtime, pair.second.fPosition);
+// //      transformValue.setProperty(runtime, "position", jsi::Object::createFromHostObject(runtime, position));
+// //      
+// //      // Convert scale
+// //      auto scale = JsiSkPoint::createFromPoint(runtime, {pair.second.fScale.x(), pair.second.fScale.y()});
+// //      transformValue.setProperty(runtime, "scale", jsi::Object::createFromHostObject(runtime, scale));
+      
+//       // Convert rotation, skew, skewAxis
+//       transformValue.setProperty(runtime, "rotation", jsi::Value(pair.second.fRotation));
+//       transformValue.setProperty(runtime, "skew", jsi::Value(pair.second.fSkew));
+//       transformValue.setProperty(runtime, "skewAxis", jsi::Value(pair.second.fSkewAxis));
+      
+//       propObj.setProperty(runtime, "value", transformValue);
+//       propsArray.setValueAtIndex(runtime, i++, propObj);
+//     }
+    
+//     return propsArray;
+//   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSkottie, duration),
                        JSI_EXPORT_FUNC(JsiSkSkottie, fps),
@@ -193,14 +255,14 @@ public:
                        JSI_EXPORT_FUNC(JsiSkSkottie, size),
                        JSI_EXPORT_FUNC(JsiSkSkottie, version),
                        JSI_EXPORT_FUNC(JsiSkSkottie, setColor),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, setOpacity),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, setText),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, setTransform),
+                       //JSI_EXPORT_FUNC(JsiSkSkottie, setOpacity),
+                       //JSI_EXPORT_FUNC(JsiSkSkottie, setText),
+                       //JSI_EXPORT_FUNC(JsiSkSkottie, setTransform),
                        JSI_EXPORT_FUNC(JsiSkSkottie, getMarkers),
                        JSI_EXPORT_FUNC(JsiSkSkottie, getColorProps),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, getOpacityProps),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, getTextProps),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, getTransformProps),
+                       //JSI_EXPORT_FUNC(JsiSkSkottie, getOpacityProps),
+                       //JSI_EXPORT_FUNC(JsiSkSkottie, getTextProps),
+                       //JSI_EXPORT_FUNC(JsiSkSkottie, getTransformProps),
                        JSI_EXPORT_FUNC(JsiSkSkottie, dispose))
   // #endregion
 
