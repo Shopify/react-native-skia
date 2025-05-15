@@ -13,13 +13,13 @@ export class JsiSkottieAnimation
   constructor(CanvasKit: CanvasKit, ref: SkottieAnimation) {
     super(CanvasKit, ref, "SkottieAnimation");
   }
-  duration(): number {
+  duration() {
     return this.ref.duration();
   }
-  fps(): number {
+  fps() {
     return this.ref.fps();
   }
-  render(canvas: JsiSkCanvas, dstRect?: JsiSkRect): void {
+  render(canvas: JsiSkCanvas, dstRect?: JsiSkRect) {
     this.ref.render(canvas.ref, dstRect?.ref);
   }
   seekFrame(frame: number, damageRect?: JsiSkRect) {
@@ -35,7 +35,7 @@ export class JsiSkottieAnimation
     const [width, height] = this.ref.size();
     return { width, height };
   }
-  version(): string {
+  version() {
     return this.ref.version();
   }
   dispose() {
