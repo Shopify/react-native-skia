@@ -34,7 +34,7 @@ public:
   // #region Methods
   JSI_HOST_FUNCTION(seekFrame) {
     sksg::InvalidationController ic;
-    getObject()->seek(arguments[0].asNumber(), &ic);
+    getObject()->seekFrame(arguments[0].asNumber(), &ic);
     auto bounds = ic.bounds();
     if (count >= 2) {
       auto rect = JsiSkRect::fromValue(runtime, arguments[1]);
