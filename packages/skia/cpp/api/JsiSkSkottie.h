@@ -9,6 +9,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "modules/skottie/include/Skottie.h"
+#include "modules/sksg/include/SkSGInvalidationController.h"
 
 #pragma clang diagnostic pop
 
@@ -38,7 +39,7 @@ public:
     if (count >= 2) {
       auto rect = JsiSkRect::fromValue(runtime, arguments[1]);
       if (rect != nullptr) {
-        bounds = rect.get();
+        rect->setXYWH(bounds.x(), bounds.y(), bounds.width(), bounds.height());
       }
     }
     return jsi::Value::undefined();
@@ -57,10 +58,11 @@ public:
                       .asObject(runtime)
                       .asHostObject<JsiSkCanvas>(runtime)
                       ->getCanvas();
-
-    auto rect = JsiSkRect::fromValue(runtime, arguments[1]);
-    if (canvas != nullptr && rect != nullptr) {
+    if (count > 1) {
+      auto rect = JsiSkRect::fromValue(runtime, arguments[1]);
       getObject()->render(canvas, rect.get());
+    } else {
+        getObject()->render(canvas);
     }
 
     return jsi::Value::undefined();
