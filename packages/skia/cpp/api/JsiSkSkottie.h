@@ -25,13 +25,11 @@ using namespace facebook;
 class ManagedAnimation {
 public:
   ManagedAnimation(
-      sk_sp<skottie::Animation> animation,
-      std::unique_ptr<skottie_utils::CustomPropertyManager> propMgr)
-      : _animation(animation), _propMgr(std::move(propMgr)) {}
+      sk_sp<skottie::Animation> animation)
+      : _animation(animation) {}
 
 public:
   sk_sp<skottie::Animation> _animation;
-  std::unique_ptr<skottie_utils::CustomPropertyManager> _propMgr;
 };
 
 class JsiSkSkottie : public JsiSkWrappingSharedPtrHostObject<ManagedAnimation> {
@@ -100,7 +98,8 @@ public:
 
     auto key = arguments[0].asString(runtime).utf8(runtime);
     auto color = JsiSkColor::fromValue(runtime, arguments[1]);
-    return getObject()->_propMgr->setColor(key, color);
+    //return getObject()->_propMgr->setColor(key, color);
+      return false;
   }
 
   JSI_HOST_FUNCTION(setOpacity) {
@@ -110,7 +109,8 @@ public:
 
     auto key = arguments[0].asString(runtime).utf8(runtime);
     auto opacity = arguments[1].asNumber();
-    return getObject()->_propMgr->setOpacity(key, opacity);
+    //return getObject()->_propMgr->setOpacity(key, opacity);
+      return false;
   }
 
   JSI_HOST_FUNCTION(setText) {
@@ -144,7 +144,8 @@ public:
     transform.fRotation = rotation;
     transform.fSkew = skew;
     transform.fSkewAxis = skewAxis;
-    return getObject()->_propMgr->setTransform(key, transform);
+    //return getObject()->_propMgr->setTransform(key, transform);
+    return false;
   }
 
   JSI_HOST_FUNCTION(getMarkers) {
@@ -153,18 +154,20 @@ public:
   }
 
   JSI_HOST_FUNCTION(getColorProps) {
-    auto colorProps = getObject()->_propMgr->getColorProps();
-    jsi::Array propsArray = jsi::Array(runtime, colorProps.size());
-    int i = 0;
-    for (const auto &cp : colorProps) {
-      auto prop = jsi::Object(runtime);
-      prop.setProperty(runtime, "key", cp);
-      auto color = getObject()->_propMgr->getColor(cp);
-      prop.setProperty(runtime, "value", JsiSkColor::toValue(runtime, color));
-      propsArray.setValueAtIndex(runtime, i, prop);
-      i++;
-    }
-    return propsArray;
+      jsi::Array propsArray = jsi::Array(runtime, 0);
+      return propsArray;
+//    auto colorProps = getObject()->_propMgr->getColorProps();
+//    jsi::Array propsArray = jsi::Array(runtime, colorProps.size());
+//    int i = 0;
+//    for (const auto &cp : colorProps) {
+//      auto prop = jsi::Object(runtime);
+//      prop.setProperty(runtime, "key", cp);
+//      auto color = getObject()->_propMgr->getColor(cp);
+//      prop.setProperty(runtime, "value", JsiSkColor::toValue(runtime, color));
+//      propsArray.setValueAtIndex(runtime, i, prop);
+//      i++;
+//    }
+//    return propsArray;
   }
 
   JSI_HOST_FUNCTION(getOpacityProps) {
