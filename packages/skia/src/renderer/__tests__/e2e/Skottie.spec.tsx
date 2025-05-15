@@ -1,5 +1,6 @@
+/* eslint-disable camelcase */
 import { checkImage, docPath } from "../../../__tests__/setup";
-import { importSkia, surface } from "../setup";
+import { data, importSkia, surface } from "../setup";
 
 const legoLoaderJSON = require("./setup/skottie/lego_loader.json");
 const drinksJSON = require("./setup/skottie/drinks.json");
@@ -85,9 +86,9 @@ describe("Skottie", () => {
       }
     );
     const { Skia } = importSkia();
-    const data = Skia.Data.fromBase64(raw);
-    const image = Skia.Image.MakeImageFromEncoded(data)!;
-    expect(data).toBeDefined();
+    const rData = Skia.Data.fromBase64(raw);
+    const image = Skia.Image.MakeImageFromEncoded(rData)!;
+    expect(rData).toBeDefined();
     checkImage(image, docPath("skottie/lego.png"));
   });
   it("Color slot information", async () => {
@@ -147,12 +148,14 @@ describe("Skottie", () => {
       props.transformProps.every((prop) => typeof prop.value === "object")
     ).toBe(true);
   });
-  /*
-
-  it("Color slot information", async () => {
+  it("load skottie with assets", async () => {
     const raw = await surface.eval(
       (Skia, ctx) => {
-        const animation = Skia.Skottie.Make(ctx.basicSlotsJSON);
+        const assets = {
+          NotoSerif: ctx.NotoSerif,
+          "img_0.png": ctx.img_0,
+        };
+        const animation = Skia.Skottie.Make(ctx.basicSlotsJSON, assets);
         const size = animation.size();
         const sur = Skia.Surface.MakeOffscreen(size.width, size.height);
         if (!sur) {
@@ -166,13 +169,14 @@ describe("Skottie", () => {
       },
       {
         basicSlotsJSON: JSON.stringify(basicSlotsJSON),
+        NotoSerif: data.NotoSansSCRegular,
+        img_0: data.img_0,
       }
     );
     const { Skia } = importSkia();
-    const data = Skia.Data.fromBase64(raw);
-    const image = Skia.Image.MakeImageFromEncoded(data)!;
-    expect(data).toBeDefined();
+    const rData = Skia.Data.fromBase64(raw);
+    const image = Skia.Image.MakeImageFromEncoded(rData)!;
+    expect(rData).toBeDefined();
     checkImage(image, docPath("skottie/basic_slots.png"));
   });
-  */
 });
