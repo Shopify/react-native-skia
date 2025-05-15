@@ -5,6 +5,7 @@ const legoLoaderJSON = require("./setup/skottie/lego_loader.json");
 const drinksJSON = require("./setup/skottie/drinks.json");
 const confettiJSON = require("./setup/skottie/confetti.json");
 const onboardingJSON = require("./setup/skottie/onboarding.json");
+const basicSlotsJSON = require("./setup/skottie/basic_slots.json");
 
 describe("Skottie", () => {
   it("Get durations", async () => {
@@ -89,4 +90,89 @@ describe("Skottie", () => {
     expect(data).toBeDefined();
     checkImage(image, docPath("skottie/lego.png"));
   });
+  it("Color slot information", async () => {
+    const props = await surface.eval(
+      (Skia, ctx) => {
+        const assets = {
+          NotoSerif: Skia.Data.fromBytes(
+            new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+          ),
+          "img_0.png": Skia.Data.fromBytes(
+            new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+          ),
+        };
+        const animation = Skia.Skottie.Make(ctx.basicSlotsJSON, assets);
+        const colorProps = animation.getColorProps();
+        const opacityProps = animation.getOpacityProps();
+        const textProps = animation.getTextProps();
+        const transformProps = animation.getTransformProps();
+        return {
+          colorProps,
+          opacityProps,
+          textProps,
+          transformProps,
+        };
+      },
+      {
+        basicSlotsJSON: JSON.stringify(basicSlotsJSON),
+      }
+    );
+    expect(props.colorProps.length).toEqual(4);
+    expect(props.colorProps[0].key).toEqual("Black Solid 1");
+    expect(props.colorProps[1].key).toEqual("Turquoise Solid 1");
+    expect(props.colorProps[2].key).toEqual("Fill 1");
+    expect(props.colorProps[3].key).toEqual("Stroke 1");
+    expect(
+      props.colorProps.every((prop) => prop.value instanceof Float32Array)
+    ).toBe(true);
+
+    expect(props.opacityProps.length).toEqual(11);
+    expect(props.opacityProps[0].key).toEqual("Black Solid 1");
+    expect(props.opacityProps[0].value).toEqual(70);
+    expect(props.opacityProps[1].key).toEqual("Turquoise Solid 1");
+    expect(props.opacityProps[1].value).toEqual(100);
+    expect(
+      props.opacityProps.slice(2).every((prop) => prop.value === 100)
+    ).toBe(true);
+
+    expect(props.textProps.length).toEqual(1);
+    expect(props.textProps[0].key).toEqual("text slots");
+    expect(typeof props.textProps[0].value).toEqual("object");
+
+    expect(props.transformProps.length).toEqual(11);
+    expect(props.transformProps[0].key).toEqual("Transform");
+    expect(props.transformProps[1].key).toEqual("Shape Layer 2");
+    expect(props.transformProps[2].key).toEqual("Shape Layer 1");
+    expect(
+      props.transformProps.every((prop) => typeof prop.value === "object")
+    ).toBe(true);
+  });
+  /*
+
+  it("Color slot information", async () => {
+    const raw = await surface.eval(
+      (Skia, ctx) => {
+        const animation = Skia.Skottie.Make(ctx.basicSlotsJSON);
+        const size = animation.size();
+        const sur = Skia.Surface.MakeOffscreen(size.width, size.height);
+        if (!sur) {
+          throw new Error("Failed to create surface");
+        }
+        const canvas = sur.getCanvas();
+        animation.seekFrame(0);
+        animation.render(canvas);
+        sur.flush();
+        return sur.makeImageSnapshot().encodeToBase64();
+      },
+      {
+        basicSlotsJSON: JSON.stringify(basicSlotsJSON),
+      }
+    );
+    const { Skia } = importSkia();
+    const data = Skia.Data.fromBase64(raw);
+    const image = Skia.Image.MakeImageFromEncoded(data)!;
+    expect(data).toBeDefined();
+    checkImage(image, docPath("skottie/basic_slots.png"));
+  });
+  */
 });

@@ -1,5 +1,6 @@
 import type { SkCanvas } from "./Canvas";
 import type { SkColor } from "./Color";
+import type { SkData } from "./Data";
 import type { SkJSIInstance } from "./JsiInstance";
 import type { StrokeJoin } from "./Paint";
 import type { TextAlign, TextDirection } from "./Paragraph";
@@ -137,7 +138,7 @@ export interface TransformValue {
   /**
    * Direction of skew in degrees.
    */
-  skew_axis: number;
+  skewAxis: number;
 }
 
 /**
@@ -227,6 +228,23 @@ export interface SkSkottieAnimation extends SkJSIInstance<"SkottieAnimation"> {
   size(): SkSize;
 
   version(): string;
+  setColor(key: string, color: SkColor): boolean;
+  setOpacity(key: string, opacity: number): boolean;
+  setText(key: string, text: string, size: number): boolean;
+  setTransform(
+    key: string,
+    anchor: SkPoint,
+    position: SkPoint,
+    scale: SkPoint,
+    rotation: number,
+    skew: number,
+    skewAxis: number
+  ): boolean;
+  getMarkers(): AnimationMarker[];
+  getColorProps(): ColorProperty[];
+  getOpacityProps(): OpacityProperty[];
+  getTextProps(): TextProperty[];
+  getTransformProps(): TransformProperty[];
 }
 
 // export interface SkManagedSkottieAnimation extends SkSkottieAnimation {
@@ -295,5 +313,5 @@ export interface SkottieFactory {
 }
 
 export interface SkottieFactory {
-  Make(json: string): SkSkottieAnimation;
+  Make(json: string, assets?: Record<string, SkData>): SkSkottieAnimation;
 }
