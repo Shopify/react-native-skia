@@ -62,7 +62,7 @@ public:
       auto rect = JsiSkRect::fromValue(runtime, arguments[1]);
       getObject()->render(canvas, rect.get());
     } else {
-        getObject()->render(canvas);
+      getObject()->render(canvas);
     }
 
     return jsi::Value::undefined();
