@@ -25,11 +25,12 @@ using namespace facebook;
 class ManagedAnimation {
 public:
   ManagedAnimation(
-      sk_sp<skottie::Animation> animation)
-      : _animation(animation) {}
+      sk_sp<skottie::Animation> animation, sk_sp<CustomPropertyObserver> propertyObserver)
+      : _animation(animation), _propertyObserver(propertyObserver) {}
 
 public:
   sk_sp<skottie::Animation> _animation;
+  sk_sp<CustomPropertyObserver> _propertyObserver;
 };
 
 class JsiSkSkottie : public JsiSkWrappingSharedPtrHostObject<ManagedAnimation> {
