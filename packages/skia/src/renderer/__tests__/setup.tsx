@@ -10,7 +10,7 @@ import type { Server, WebSocket } from "ws";
 import type * as SkiaExports from "../../index";
 import { JsiSkApi } from "../../skia/web/JsiSkia";
 import { Group } from "../components";
-import type { SkImage, SkFont, Skia, SkCanvas, SkData } from "../../skia/types";
+import type { SkImage, SkFont, Skia, SkCanvas } from "../../skia/types";
 import { isPath } from "../../skia/types";
 import { E2E } from "../../__tests__/setup";
 import { LoadSkiaWeb } from "../../web/LoadSkiaWeb";
@@ -44,9 +44,9 @@ export let fonts: {
   DinMedium: SkFont;
 };
 
-export let data: {
-  NotoSansSCRegular: SkData;
-  img_0: SkData;
+export let dataAssets: {
+  NotoSansSCRegular: Uint8Array;
+  img_0: Uint8Array;
 };
 
 beforeAll(async () => {
@@ -76,9 +76,11 @@ beforeAll(async () => {
   const skiaLogoPng = loadImage("skia/__tests__/assets/skia_logo.png");
   const skiaLogoJpeg = loadImage("skia/__tests__/assets/skia_logo_jpeg.jpg");
   const mask = loadImage("skia/__tests__/assets/mask.png");
-  data = {
-    NotoSansSCRegular: loadData("skia/__tests__/assets/NotoSansSC-Regular.otf"),
-    img_0: loadData("skia/__tests__/assets/oslo.jpg"),
+  dataAssets = {
+    NotoSansSCRegular: resolveFile(
+      "skia/__tests__/assets/NotoSansSC-Regular.otf"
+    ),
+    img_0: resolveFile("skia/__tests__/assets/oslo.jpg"),
   };
   images = { oslo, skiaLogoPng, skiaLogoJpeg, mask };
   fonts = {
@@ -154,11 +156,6 @@ export const loadImage = (uri: string) => {
   );
   expect(image).toBeTruthy();
   return image!;
-};
-
-export const loadData = (uri: string) => {
-  const Skia = global.SkiaApi;
-  return Skia.Data.fromBytes(resolveFile(uri));
 };
 
 export const loadFont = (uri: string, ftSize?: number) => {
