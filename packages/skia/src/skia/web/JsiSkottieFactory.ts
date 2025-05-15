@@ -12,7 +12,7 @@ export class JsiSkottieFactory extends Host implements SkottieFactory {
   }
 
   Make(json: string): SkSkottieAnimation {
-    const animation = this.CanvasKit.MakeManagedAnimation(json);
+    const animation = this.CanvasKit.MakeAnimation(json);
     if (!animation) {
       throw new Error("Failed to create SkottieAnimation");
     }

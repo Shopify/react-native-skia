@@ -20,7 +20,11 @@ export class JsiSkottieAnimation
     return this.ref.fps();
   }
   render(canvas: JsiSkCanvas, dstRect?: JsiSkRect) {
-    this.ref.render(canvas.ref, dstRect?.ref);
+    const [width, height] = this.ref.size();
+    this.ref.render(
+      canvas.ref,
+      dstRect?.ref ?? Float32Array.of(0, 0, width, height)
+    );
   }
   seekFrame(frame: number, damageRect?: JsiSkRect) {
     const result = this.ref.seekFrame(frame);
