@@ -46,7 +46,8 @@ public:
       }
     }
 
-    auto managedAnimation = std::make_shared<ManagedAnimation>(json, std::move(assets), std::move(fontMgr));
+    auto managedAnimation = std::make_shared<ManagedAnimation>(
+        json, std::move(assets), std::move(fontMgr));
     if (!managedAnimation->_animation) {
       return jsi::Value::null();
     }

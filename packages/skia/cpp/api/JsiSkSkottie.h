@@ -11,6 +11,10 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#include "include/codec/SkJpegDecoder.h"
+#include "include/codec/SkPngDecoder.h"
+#include "include/codec/SkWebpDecoder.h"
+
 #include "modules/skottie/include/Skottie.h"
 #include "modules/skottie/include/SkottieProperty.h"
 #include "modules/skottie/include/SlotManager.h"
@@ -21,95 +25,103 @@
 namespace RNSkia {
 using namespace facebook;
 
+std::unique_ptr<SkCodec> DecodeImageData(sk_sp<SkData> data) {
+    if (data == nullptr) {
+        return nullptr;
+    }
+  
+    if (SkJpegDecoder::IsJpeg(data->data(), data->size())) {
+        return SkJpegDecoder::Decode(data, nullptr);
+    }
+
+    if (SkPngDecoder::IsPng(data->data(), data->size())) {
+        return SkPngDecoder::Decode(data, nullptr);
+    }
+
+    if (SkWebpDecoder::IsWebp(data->data(), data->size())) {
+        return SkWebpDecoder::Decode(data, nullptr);
+    }
+    return nullptr;
+}
 
 class SkottieAssetProvider : public skottie::ResourceProvider {
 public:
-    ~SkottieAssetProvider() override {
-        RNSkLogger::logToConsole("hello!");
-    }
-   
-    using AssetMap = std::unordered_map<std::string, sk_sp<SkData>>;
+  ~SkottieAssetProvider() override = default;
 
-    static sk_sp<SkottieAssetProvider> Make(AssetMap assets,
-                                            sk_sp<SkFontMgr> fontMgr) {
-        return sk_sp<SkottieAssetProvider>(
-                                           new SkottieAssetProvider(std::move(assets), std::move(fontMgr)));
+  using AssetMap = std::unordered_map<std::string, sk_sp<SkData>>;
+
+  static sk_sp<SkottieAssetProvider> Make(AssetMap assets,
+                                          sk_sp<SkFontMgr> fontMgr) {
+    return sk_sp<SkottieAssetProvider>(
+        new SkottieAssetProvider(std::move(assets), std::move(fontMgr)));
+  }
+
+  sk_sp<skottie::ImageAsset>
+  loadImageAsset(const char[] /* path */, const char name[],
+                 const char[] /* id */) const override {
+    // For CK/Skottie we ignore paths & IDs, and identify images based solely on
+    // name.
+    if (auto data = this->findAsset(name)) {
+      auto codec = DecodeImageData(data);
+      if (!codec) {
+        return nullptr;
+      }
+      return skresources::MultiFrameImageAsset::Make(std::move(codec));
     }
-   
-   sk_sp<skottie::ImageAsset>
-   loadImageAsset(const char[] /* path */, const char name[],
-                  const char[] /* id */) const override {
-       // For CK/Skottie we ignore paths & IDs, and identify images based solely on
-       // name.
-       //    if (auto data = this->findAsset(name)) {
-       //      auto codec = DecodeImageData(data);
-       //      if (!codec) {
-       //        return nullptr;
-       //      }
-       //      return skresources::MultiFrameImageAsset::Make(std::move(codec));
-       //    }
-       
-       return nullptr;
-   }
-   
-   sk_sp<skresources::ExternalTrackAsset>
-   loadAudioAsset(const char[] /* path */, const char[] /* name */,
-                  const char id[]) override {
-       
-       return nullptr;
-   }
-   
-   sk_sp<SkTypeface> loadTypeface(const char name[],
-                                  const char[] /* url */) const override {
-       sk_sp<SkData> faceData = this->findAsset(name);
-       if (!faceData) {
-           return nullptr;
-       }
-       return fFontMgr->makeFromData(std::move(faceData));
-   }
-   
-   sk_sp<SkData> load(const char[] /*path*/, const char name[]) const override {
-       // Ignore paths.
-       return this->findAsset(name);
-   }
-    
+
+    return nullptr;
+  }
+
+  sk_sp<skresources::ExternalTrackAsset>
+  loadAudioAsset(const char[] /* path */, const char[] /* name */,
+                 const char id[]) override {
+
+    return nullptr;
+  }
+
+  sk_sp<SkTypeface> loadTypeface(const char name[],
+                                 const char[] /* url */) const override {
+    sk_sp<SkData> faceData = this->findAsset(name);
+    if (!faceData) {
+      return nullptr;
+    }
+    return fFontMgr->makeFromData(std::move(faceData));
+  }
+
+  sk_sp<SkData> load(const char[] /*path*/, const char name[]) const override {
+    // Ignore paths.
+    return this->findAsset(name);
+  }
+
 private:
-    explicit SkottieAssetProvider(AssetMap assets, sk_sp<SkFontMgr> fontMgr)
-     : fAssets(std::move(assets)), fFontMgr(std::move(fontMgr)) {}
+  explicit SkottieAssetProvider(AssetMap assets, sk_sp<SkFontMgr> fontMgr)
+      : fAssets(std::move(assets)), fFontMgr(std::move(fontMgr)) {}
   const AssetMap fAssets;
   const sk_sp<SkFontMgr> fFontMgr;
 
- sk_sp<SkData> findAsset(const char name[]) const {
-   auto it = fAssets.find(name);
-   if (it != fAssets.end()) {
-     return it->second;
-   }
-   return nullptr;
- }
+  sk_sp<SkData> findAsset(const char name[]) const {
+    auto it = fAssets.find(name);
+    if (it != fAssets.end()) {
+      return it->second;
+    }
+    return nullptr;
+  }
 };
 
 class ManagedAnimation {
 public:
-  ManagedAnimation(std::string json,
-                   SkottieAssetProvider::AssetMap assets,
-                   sk_sp<SkFontMgr> fontMgr)  {
-    _rp = SkottieAssetProvider::Make(std::move(assets), std::move(fontMgr));
-    _rp->ref();
-    skottie::Animation::Builder builder;
-    builder.setResourceProvider(_rp);
-    _animation = builder.make(json.c_str(), json.size());
+  ManagedAnimation(std::string json, SkottieAssetProvider::AssetMap assets,
+                   sk_sp<SkFontMgr> fontMgr) {
+    auto rp = SkottieAssetProvider::Make(std::move(assets), std::move(fontMgr));
+    // TODO: this is leaking!
+    rp->ref();
+    auto builder = std::make_shared<skottie::Animation::Builder>();
+    builder->setResourceProvider(rp);
+    _animation = builder->make(json.c_str(), json.size());
   }
-    
-//    ~ManagedAnimation() {
-//       // _rp->unref();
-//        _animation = nullptr;
-//        //_rp->unref();
-//        //_rp = nullptr;
-//    }
 
 public:
   sk_sp<skottie::Animation> _animation = nullptr;
-  sk_sp<skottie::ResourceProvider> _rp = nullptr;
 };
 
 class JsiSkSkottie : public JsiSkWrappingSharedPtrHostObject<ManagedAnimation> {
