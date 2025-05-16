@@ -118,10 +118,12 @@ public:
     auto builder = std::make_shared<skottie::Animation::Builder>();
     builder->setResourceProvider(rp);
     _animation = builder->make(json.c_str(), json.size());
+    _slotManager = builder->getSlotManager();
   }
 
 public:
   sk_sp<skottie::Animation> _animation = nullptr;
+  sk_sp<skottie::SlotManager> _slotManager = nullptr;
 };
 
 class JsiSkSkottie : public JsiSkWrappingSharedPtrHostObject<ManagedAnimation> {
@@ -238,6 +240,42 @@ public:
     transform.fSkewAxis = skewAxis;
     // return getObject()->_propMgr->setTransform(key, transform);
     return false;
+  }
+
+  JSI_HOST_FUNCTION(getSlotInfo) {
+    jsi::Object slotInfoJS = jsi::Object(runtime);
+    auto slotInfo = getObject()->_slotManager->getSlotInfo();
+    
+    auto colorSlotIDs = jsi::Array(runtime, slotInfo.fColorSlotIDs.size());
+    for (size_t i = 0; i < slotInfo.fColorSlotIDs.size(); i++) {
+      colorSlotIDs.setValueAtIndex(runtime, i, jsi::String::createFromUtf8(runtime, slotInfo.fColorSlotIDs[i].c_str()));
+    }
+    slotInfoJS.setProperty(runtime, "colorSlotIDs", colorSlotIDs);
+    
+    auto scalarSlotIDs = jsi::Array(runtime, slotInfo.fScalarSlotIDs.size());
+    for (size_t i = 0; i < slotInfo.fScalarSlotIDs.size(); i++) {
+      scalarSlotIDs.setValueAtIndex(runtime, i, jsi::String::createFromUtf8(runtime, slotInfo.fScalarSlotIDs[i].c_str()));
+    }
+    slotInfoJS.setProperty(runtime, "scalarSlotIDs", scalarSlotIDs);
+    
+    auto vec2SlotIDs = jsi::Array(runtime, slotInfo.fVec2SlotIDs.size());
+    for (size_t i = 0; i < slotInfo.fVec2SlotIDs.size(); i++) {
+      vec2SlotIDs.setValueAtIndex(runtime, i, jsi::String::createFromUtf8(runtime, slotInfo.fVec2SlotIDs[i].c_str()));
+    }
+    slotInfoJS.setProperty(runtime, "vec2SlotIDs", vec2SlotIDs);
+    
+    auto imageSlotIDs = jsi::Array(runtime, slotInfo.fImageSlotIDs.size());
+    for (size_t i = 0; i < slotInfo.fImageSlotIDs.size(); i++) {
+      imageSlotIDs.setValueAtIndex(runtime, i, jsi::String::createFromUtf8(runtime, slotInfo.fImageSlotIDs[i].c_str()));
+    }
+    slotInfoJS.setProperty(runtime, "imageSlotIDs", imageSlotIDs);
+    
+    auto textSlotIDs = jsi::Array(runtime, slotInfo.fTextSlotIDs.size());
+    for (size_t i = 0; i < slotInfo.fTextSlotIDs.size(); i++) {
+      textSlotIDs.setValueAtIndex(runtime, i, jsi::String::createFromUtf8(runtime, slotInfo.fTextSlotIDs[i].c_str()));
+    }
+    slotInfoJS.setProperty(runtime, "textSlotIDs", textSlotIDs);
+    return slotInfoJS;
   }
 
   JSI_HOST_FUNCTION(getMarkers) {
@@ -369,6 +407,7 @@ public:
                        // JSI_EXPORT_FUNC(JsiSkSkottie, getOpacityProps),
                        // JSI_EXPORT_FUNC(JsiSkSkottie, getTextProps),
                        // JSI_EXPORT_FUNC(JsiSkSkottie, getTransformProps),
+                       JSI_EXPORT_FUNC(JsiSkSkottie, getSlotInfo),
                        JSI_EXPORT_FUNC(JsiSkSkottie, dispose))
   // #endregion
 
