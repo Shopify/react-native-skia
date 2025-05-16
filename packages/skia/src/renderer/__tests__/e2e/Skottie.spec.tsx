@@ -91,15 +91,15 @@ describe("Skottie", () => {
     expect(rData).toBeDefined();
     checkImage(image, docPath("skottie/lego.png"));
   });
-  it("Color slot information", async () => {
-    const props = await surface.eval(
+  it("Get slot information", async () => {
+    const slots = await surface.eval(
       (Skia, ctx) => {
         const assets = {
           NotoSerif: Skia.Data.fromBytes(new Uint8Array(ctx.NotoSerif)),
           "img_0.png": Skia.Data.fromBytes(new Uint8Array(ctx.img_0)),
         };
         const animation = Skia.Skottie.Make(ctx.basicSlotsJSON, assets);
-        return animation !== null;
+        return animation.getSlotInfo();
       },
       {
         basicSlotsJSON: JSON.stringify(basicSlotsJSON),
@@ -107,7 +107,13 @@ describe("Skottie", () => {
         img_0: Array.from(dataAssets.img_0),
       }
     );
-    expect(props).toBe(true);
+    expect(slots).toEqual({
+      colorSlotIDs: ["FillsGroup", "StrokeGroup"],
+      imageSlotIDs: ["ImageSource"],
+      scalarSlotIDs: ["Opacity"],
+      textSlotIDs: ["TextSource"],
+      vec2SlotIDs: ["ScaleGroup"],
+    });
   });
   it("load skottie with assets", async () => {
     const raw = await surface.eval(

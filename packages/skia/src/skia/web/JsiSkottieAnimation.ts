@@ -1,10 +1,16 @@
 import type { CanvasKit, ManagedSkottieAnimation } from "canvaskit-wasm";
 
-import type { SkSkottieAnimation } from "../types/Skottie";
+import type {
+  SkSkottieAnimation,
+  SlotInfo,
+  SlottableTextProperty,
+} from "../types/Skottie";
+import type { SkColor, SkPoint } from "../types";
 
 import { HostObject } from "./Host";
 import type { JsiSkCanvas } from "./JsiSkCanvas";
 import type { JsiSkRect } from "./JsiSkRect";
+import { JsiSkPoint } from "./JsiSkPoint";
 
 export class JsiSkottieAnimation
   extends HostObject<ManagedSkottieAnimation, "SkottieAnimation">
@@ -12,6 +18,42 @@ export class JsiSkottieAnimation
 {
   constructor(CanvasKit: CanvasKit, ref: ManagedSkottieAnimation) {
     super(CanvasKit, ref, "SkottieAnimation");
+  }
+  getSlotInfo(): SlotInfo {
+    return this.ref.getSlotInfo();
+  }
+  setColorSlot(key: string, color: SkColor) {
+    return this.ref.setColorSlot(key, color);
+  }
+  setScalarSlot(key: string, scalar: number) {
+    return this.ref.setScalarSlot(key, scalar);
+  }
+  setVec2Slot(key: string, vec2: JsiSkPoint) {
+    return this.ref.setVec2Slot(key, vec2.ref);
+  }
+  setTextSlot(_key: string, _text: SlottableTextProperty): boolean {
+    throw new Error("Method not implemented.");
+    // return this.ref.setTextSlot(key, text);
+  }
+  setImageSlot(key: string, assetName: string) {
+    return this.ref.setImageSlot(key, assetName);
+  }
+  getColorSlot(key: string): SkColor | null {
+    const color = this.ref.getColorSlot(key);
+    return color;
+  }
+  getScalarSlot(key: string) {
+    return this.ref.getScalarSlot(key);
+  }
+  getVec2Slot(key: string): SkPoint | null {
+    const vec2 = this.ref.getVec2Slot(key);
+    if (!vec2) {
+      return null;
+    }
+    return new JsiSkPoint(this.CanvasKit, vec2);
+  }
+  getTextSlot(_key: string): SlottableTextProperty | null {
+    throw new Error("Method not implemented.");
   }
 
   duration() {

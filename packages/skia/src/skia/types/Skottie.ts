@@ -228,10 +228,19 @@ export interface SkSkottieAnimation extends SkJSIInstance<"SkottieAnimation"> {
   size(): SkSize;
 
   version(): string;
-}
 
-export interface SkottieFactory {
-  Make(json: string): SkSkottieAnimation;
+  getSlotInfo(): SlotInfo;
+
+  setColorSlot(key: string, color: SkColor): boolean;
+  setScalarSlot(key: string, scalar: number): boolean;
+  setVec2Slot(key: string, vec2: SkPoint): boolean;
+  setTextSlot(key: string, text: SlottableTextProperty): boolean;
+  setImageSlot(key: string, assetName: string): boolean;
+
+  getColorSlot(key: string): SkColor | null;
+  getScalarSlot(key: string): number | null;
+  getVec2Slot(key: string): SkPoint | null;
+  getTextSlot(key: string): SlottableTextProperty | null;
 }
 
 export interface SkottieFactory {
