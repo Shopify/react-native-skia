@@ -24,7 +24,9 @@ using namespace facebook;
 
 class SkottieAssetProvider : public skottie::ResourceProvider {
 public:
-    ~SkottieAssetProvider() override = default;
+    ~SkottieAssetProvider() override {
+        RNSkLogger::logToConsole("hello!");
+    }
    
     using AssetMap = std::unordered_map<std::string, sk_sp<SkData>>;
 
@@ -91,18 +93,23 @@ public:
   ManagedAnimation(std::string json,
                    SkottieAssetProvider::AssetMap assets,
                    sk_sp<SkFontMgr> fontMgr)  {
-    auto rp = SkottieAssetProvider::Make(std::move(assets), std::move(fontMgr));
-    rp->ref();
-    _builder.setResourceProvider(rp);
-    _animation = _builder.make(json.c_str(), json.size());
+    _rp = SkottieAssetProvider::Make(std::move(assets), std::move(fontMgr));
+    _rp->ref();
+    skottie::Animation::Builder builder;
+    builder.setResourceProvider(_rp);
+    _animation = builder.make(json.c_str(), json.size());
   }
     
-
+//    ~ManagedAnimation() {
+//       // _rp->unref();
+//        _animation = nullptr;
+//        //_rp->unref();
+//        //_rp = nullptr;
+//    }
 
 public:
   sk_sp<skottie::Animation> _animation = nullptr;
-  sk_sp<SkottieAssetProvider> _assetProvider;
-  skottie::Animation::Builder _builder;
+  sk_sp<skottie::ResourceProvider> _rp = nullptr;
 };
 
 class JsiSkSkottie : public JsiSkWrappingSharedPtrHostObject<ManagedAnimation> {
