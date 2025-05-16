@@ -146,4 +146,37 @@ describe("Skottie", () => {
     expect(rData).toBeDefined();
     checkImage(image, docPath("skottie/basic_slots.png"));
   });
+  it("load skottie with assets and set color slots", async () => {
+    const raw = await surface.eval(
+      (Skia, ctx) => {
+        const assets = {
+          NotoSerif: Skia.Data.fromBytes(new Uint8Array(ctx.NotoSerif)),
+          "img_0.png": Skia.Data.fromBytes(new Uint8Array(ctx.img_0)),
+        };
+        const animation = Skia.Skottie.Make(ctx.basicSlotsJSON, assets);
+        const size = animation.size();
+        const sur = Skia.Surface.MakeOffscreen(size.width, size.height);
+        if (!sur) {
+          throw new Error("Failed to create surface");
+        }
+        const canvas = sur.getCanvas();
+        animation.setColorSlot("FillsGroup", Skia.Color("cyan"));
+        animation.setColorSlot("StrokeGroup", Skia.Color("magenta"));
+        animation.seekFrame(0);
+        animation.render(canvas);
+        sur.flush();
+        return sur.makeImageSnapshot().encodeToBase64();
+      },
+      {
+        basicSlotsJSON: JSON.stringify(basicSlotsJSON),
+        NotoSerif: Array.from(dataAssets.NotoSansSCRegular),
+        img_0: Array.from(dataAssets.img_0),
+      }
+    );
+    const { Skia } = importSkia();
+    const rData = Skia.Data.fromBase64(raw);
+    const image = Skia.Image.MakeImageFromEncoded(rData)!;
+    expect(rData).toBeDefined();
+    checkImage(image, docPath("skottie/basic_slots-with-colors.png"));
+  });
 });
