@@ -17,14 +17,12 @@ public:
     auto str = arguments[0].asString(runtime).utf8(runtime);
     auto builder = skottie::Animation::Builder();
     auto slotManager = builder.getSlotManager();
-    auto propertyObserver = sk_make_sp<CustomPropertyObserver>();
-    builder.setPropertyObserver(propertyObserver);
     auto animation = builder.make(str.c_str(), str.size());
     if (!animation) {
       return jsi::Value::null();
     }
     auto managedAnimation = std::make_shared<ManagedAnimation>(
-        std::move(animation), propertyObserver);
+        std::move(animation), std::move(slotManager));
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkSkottie>(getContext(), std::move(managedAnimation)));
   }

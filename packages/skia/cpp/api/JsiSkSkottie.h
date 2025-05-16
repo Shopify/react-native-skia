@@ -15,7 +15,6 @@
 #include "modules/skottie/include/SkottieProperty.h"
 #include "modules/skottie/include/SlotManager.h"
 #include "modules/sksg/include/SkSGInvalidationController.h"
-#include "third_party/SkottieUtils.h"
 
 #pragma clang diagnostic pop
 
@@ -25,12 +24,12 @@ using namespace facebook;
 class ManagedAnimation {
 public:
   ManagedAnimation(
-      sk_sp<skottie::Animation> animation, sk_sp<CustomPropertyObserver> propertyObserver)
-      : _animation(animation), _propertyObserver(propertyObserver) {}
+      sk_sp<skottie::Animation> animation, sk_sp<skottie::SlotManager> slotManager)
+      : _animation(std::move(animation)), _slotManager(std::move(slotManager)) {}
 
 public:
   sk_sp<skottie::Animation> _animation;
-  sk_sp<CustomPropertyObserver> _propertyObserver;
+  sk_sp<skottie::SlotManager> _slotManager;
 };
 
 class JsiSkSkottie : public JsiSkWrappingSharedPtrHostObject<ManagedAnimation> {
