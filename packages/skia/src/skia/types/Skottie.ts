@@ -246,6 +246,7 @@ export interface SkSkottieAnimation extends SkJSIInstance<"SkottieAnimation"> {
   getTextProps(): TextProperty[];
 
   setColor(key: string, color: SkColor): boolean;
+  setText(key: string, text: string, size: number): boolean;
 }
 
 export interface SkottieFactory {

@@ -264,7 +264,8 @@ describe("Skottie", () => {
           throw new Error("Failed to create surface");
         }
         const canvas = sur.getCanvas();
-
+        animation.setText("hello!", "World", 164);
+        animation.setText("hello! 2", "World", 164);
         animation.seekFrame(animation.duration() * 0.5);
         animation.render(canvas);
         sur.flush();

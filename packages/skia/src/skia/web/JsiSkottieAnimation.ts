@@ -38,6 +38,9 @@ export class JsiSkottieAnimation
   setColor(key: string, color: SkColor) {
     return this.ref.setColor(key, color);
   }
+  setText(key: string, text: string, size: number): boolean {
+    return this.ref.setText(key, text, size);
+  }
   getSlotInfo(): SlotInfo {
     return this.ref.getSlotInfo();
   }
