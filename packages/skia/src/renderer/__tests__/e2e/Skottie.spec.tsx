@@ -7,7 +7,7 @@ const drinksJSON = require("./setup/skottie/drinks.json");
 const confettiJSON = require("./setup/skottie/confetti.json");
 const onboardingJSON = require("./setup/skottie/onboarding.json");
 const basicSlotsJSON = require("./setup/skottie/basic_slots.json");
-
+const fingerprintJSON = require("./setup/skottie/fingerprint.json");
 describe("Skottie", () => {
   it("Get durations", async () => {
     const { lego, drinks, confetti, onboarding } = await surface.eval(
@@ -178,5 +178,32 @@ describe("Skottie", () => {
     const image = Skia.Image.MakeImageFromEncoded(rData)!;
     expect(rData).toBeDefined();
     checkImage(image, docPath("skottie/basic_slots-with-colors.png"));
+  });
+  it("fingerprint example (1)", async () => {
+    const raw = await surface.eval(
+      (Skia, ctx) => {
+        const animation = Skia.Skottie.Make(ctx.fingerprint);
+        const size = animation.size();
+        const sur = Skia.Surface.MakeOffscreen(size.width, size.height);
+        if (!sur) {
+          throw new Error("Failed to create surface");
+        }
+        const canvas = sur.getCanvas();
+        const colorProp = animation.getColorProps()[0];
+        animation.setColor(colorProp.key, Skia.Color("rgb(60, 120, 255)"));
+        animation.seekFrame(120);
+        animation.render(canvas);
+        sur.flush();
+        return sur.makeImageSnapshot().encodeToBase64();
+      },
+      {
+        fingerprint: JSON.stringify(fingerprintJSON),
+      }
+    );
+    const { Skia } = importSkia();
+    const rData = Skia.Data.fromBase64(raw);
+    const image = Skia.Image.MakeImageFromEncoded(rData)!;
+    expect(rData).toBeDefined();
+    checkImage(image, docPath("skottie/fingerprint-color1.png"));
   });
 });

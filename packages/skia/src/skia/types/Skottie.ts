@@ -241,6 +241,10 @@ export interface SkSkottieAnimation extends SkJSIInstance<"SkottieAnimation"> {
   getScalarSlot(key: string): number | null;
   getVec2Slot(key: string): SkPoint | null;
   getTextSlot(key: string): SlottableTextProperty | null;
+
+  getColorProps(): ColorProperty[];
+
+  setColor(key: string, color: SkColor): boolean;
 }
 
 export interface SkottieFactory {

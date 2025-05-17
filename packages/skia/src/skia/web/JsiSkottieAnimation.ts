@@ -5,6 +5,7 @@ import type {
 } from "canvaskit-wasm";
 
 import type {
+  ColorProperty,
   SkSkottieAnimation,
   SlotInfo,
   SlottableTextProperty,
@@ -24,6 +25,14 @@ export class JsiSkottieAnimation
 {
   constructor(CanvasKit: CanvasKit, ref: ManagedSkottieAnimation) {
     super(CanvasKit, ref, "SkottieAnimation");
+  }
+  getColorProps(): ColorProperty[] {
+    return this.ref
+      .getColorProps()
+      .map(({ key, value }) => ({ key, value: Color(value) }));
+  }
+  setColor(key: string, color: SkColor) {
+    return this.ref.setColor(key, color);
   }
   getSlotInfo(): SlotInfo {
     return this.ref.getSlotInfo();
