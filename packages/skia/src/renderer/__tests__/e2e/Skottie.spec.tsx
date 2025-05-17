@@ -227,9 +227,11 @@ describe("Skottie", () => {
   it("has text props", async () => {
     const colorProps = await surface.eval(
       (Skia, ctx) => {
-        const animation = Skia.Skottie.Make(ctx.textLayerJSON);
+        const assets = {
+          "Avenir-Heavy": Skia.Data.fromBytes(new Uint8Array(ctx.AvenirHeavy)),
+        };
+        const animation = Skia.Skottie.Make(ctx.textLayerJSON, assets);
         const props = animation.getTextProps();
-        console.log(props);
         return props.map(({ key, value }) => ({
           key,
           value,
@@ -237,6 +239,7 @@ describe("Skottie", () => {
       },
       {
         textLayerJSON: JSON.stringify(textLayerJSON),
+        AvenirHeavy: Array.from(dataAssets.AvenirHeavy),
       }
     );
     expect(colorProps[0]).toEqual({
@@ -252,7 +255,7 @@ describe("Skottie", () => {
     const raw = await surface.eval(
       (Skia, ctx) => {
         const assets = {
-          "Avenir-Heavy": Skia.Data.fromBytes(new Uint8Array(ctx.NotoSerif)),
+          "Avenir-Heavy": Skia.Data.fromBytes(new Uint8Array(ctx.AvenirHeavy)),
         };
         const animation = Skia.Skottie.Make(ctx.textLayer, assets);
         const size = animation.size();
@@ -269,7 +272,7 @@ describe("Skottie", () => {
       },
       {
         textLayer: JSON.stringify(textLayerJSON),
-        NotoSerif: Array.from(dataAssets.NotoSansSCRegular),
+        AvenirHeavy: Array.from(dataAssets.AvenirHeavy),
       }
     );
     const { Skia } = importSkia();

@@ -47,6 +47,7 @@ export let fonts: {
 export let dataAssets: {
   NotoSansSCRegular: Uint8Array;
   img_0: Uint8Array;
+  AvenirHeavy: Uint8Array;
 };
 
 beforeAll(async () => {
@@ -77,6 +78,7 @@ beforeAll(async () => {
   const skiaLogoJpeg = loadImage("skia/__tests__/assets/skia_logo_jpeg.jpg");
   const mask = loadImage("skia/__tests__/assets/mask.png");
   dataAssets = {
+    AvenirHeavy: resolveFile("skia/__tests__/assets/Avenir-Heavy.ttf"),
     NotoSansSCRegular: resolveFile(
       "skia/__tests__/assets/NotoSansSC-Regular.otf"
     ),
