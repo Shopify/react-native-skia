@@ -126,7 +126,9 @@ describe("Skottie", () => {
         };
         const animation = Skia.Skottie.Make(ctx.basicSlotsJSON, assets);
         return {
-          opacityProps: animation.getOpacityProps(),
+          opacityProps: animation
+            .getOpacityProps()
+            .sort((a, b) => a.key.localeCompare(b.key)),
           transformProps: [
             animation
               .getTransformProps()
@@ -134,8 +136,11 @@ describe("Skottie", () => {
           ],
           colorProps: animation
             .getColorProps()
+            .sort((a, b) => a.key.localeCompare(b.key))
             .map(({ key, value }) => ({ key, value: Array.from(value) })),
-          textProps: animation.getTextProps(),
+          textProps: animation
+            .getTextProps()
+            .sort((a, b) => a.key.localeCompare(b.key)),
         };
       },
       {
@@ -157,7 +162,7 @@ describe("Skottie", () => {
         { key: "Shape Layer 2", value: 100 },
         { key: "Shape Layer 1", value: 100 },
         { key: "Transform", value: 100 },
-      ],
+      ].sort((a, b) => a.key.localeCompare(b.key)),
       transformProps: [
         {
           key: "Transform",
@@ -176,7 +181,7 @@ describe("Skottie", () => {
         { key: "Turquoise Solid 1", value: [0, 1, 0.7450980544090271, 1] },
         { key: "Fill 1", value: [0, 0, 0, 1] },
         { key: "Stroke 1", value: [0, 0, 0, 1] },
-      ],
+      ].sort((a, b) => a.key.localeCompare(b.key)),
       textProps: [
         {
           key: "text slots",

@@ -491,6 +491,59 @@ public:
     return colorProps;
   }
 
+  JSI_HOST_FUNCTION(getOpacityProps) {
+    auto props = getObject()->_propManager->getOpacityProps();
+    auto opacityProps = jsi::Array(
+        runtime, getObject()->_propManager->getOpacityProps().size());
+    int i = 0;
+    for (const auto &op : getObject()->_propManager->getOpacityProps()) {
+      auto opacityProp = jsi::Object(runtime);
+      opacityProp.setProperty(runtime, "key", op);
+      opacityProp.setProperty(runtime, "value",
+                              getObject()->_propManager->getOpacity(op));
+      opacityProps.setValueAtIndex(runtime, i, opacityProp);
+      i++;
+    }
+    return opacityProps;
+  }
+
+  JSI_HOST_FUNCTION(getTransformProps) {
+    auto props = getObject()->_propManager->getTransformProps();
+    auto transformProps = jsi::Array(
+        runtime, getObject()->_propManager->getTransformProps().size());
+    int i = 0;
+    for (const auto &tp : getObject()->_propManager->getTransformProps()) {
+      const auto transform = getObject()->_propManager->getTransform(tp);
+
+      auto transformProp = jsi::Object(runtime);
+      transformProp.setProperty(runtime, "key", tp);
+      jsi::Object transformPropValue(runtime);
+      auto anchor = jsi::Object(runtime);
+
+      anchor.setProperty(runtime, "x", transform.fAnchorPoint.x());
+      anchor.setProperty(runtime, "y", transform.fAnchorPoint.y());
+      transformPropValue.setProperty(runtime, "anchor", anchor);
+
+      auto position = jsi::Object(runtime);
+      position.setProperty(runtime, "x", transform.fPosition.x());
+      position.setProperty(runtime, "y", transform.fPosition.y());
+      transformPropValue.setProperty(runtime, "position", position);
+
+      auto scale = jsi::Object(runtime);
+      scale.setProperty(runtime, "x", transform.fScale.x());
+      scale.setProperty(runtime, "y", transform.fScale.y());
+      transformPropValue.setProperty(runtime, "scale", scale);
+
+      transformPropValue.setProperty(runtime, "rotation", transform.fRotation);
+      transformPropValue.setProperty(runtime, "skew", transform.fSkew);
+      transformPropValue.setProperty(runtime, "skewAxis", transform.fSkewAxis);
+      transformProp.setProperty(runtime, "value", transformPropValue);
+      transformProps.setValueAtIndex(runtime, i, transformProp);
+      i++;
+    }
+    return transformProps;
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSkottie, duration),
                        JSI_EXPORT_FUNC(JsiSkSkottie, fps),
                        JSI_EXPORT_FUNC(JsiSkSkottie, seekFrame),
@@ -508,6 +561,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkSkottie, getVec2Slot),
                        JSI_EXPORT_FUNC(JsiSkSkottie, getTextSlot),
                        JSI_EXPORT_FUNC(JsiSkSkottie, getColorProps),
+                       JSI_EXPORT_FUNC(JsiSkSkottie, getOpacityProps),
+                       JSI_EXPORT_FUNC(JsiSkSkottie, getTransformProps),
                        JSI_EXPORT_FUNC(JsiSkSkottie, getTextProps),
                        JSI_EXPORT_FUNC(JsiSkSkottie, setColor),
                        JSI_EXPORT_FUNC(JsiSkSkottie, setText),
