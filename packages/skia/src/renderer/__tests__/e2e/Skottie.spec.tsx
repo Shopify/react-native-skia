@@ -179,6 +179,23 @@ describe("Skottie", () => {
     expect(rData).toBeDefined();
     checkImage(image, docPath("skottie/basic_slots-with-colors.png"));
   });
+  it("has color props", async () => {
+    const colorProps = await surface.eval(
+      (Skia, ctx) => {
+        const animation = Skia.Skottie.Make(ctx.fingerprint);
+        const props = animation.getColorProps();
+        console.log(props);
+        return props.map(({ key, value }) => ({
+          key,
+          value: Array.from(value),
+        }));
+      },
+      {
+        fingerprint: JSON.stringify(fingerprintJSON),
+      }
+    );
+    expect(colorProps.length).toBe(1);
+  });
   it("fingerprint example (1)", async () => {
     const raw = await surface.eval(
       (Skia, ctx) => {

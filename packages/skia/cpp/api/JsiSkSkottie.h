@@ -7,6 +7,7 @@
 #include "JsiSkHostObjects.h"
 #include "JsiSkPoint.h"
 #include "JsiSkRect.h"
+#include "third_party/SkottieUtils.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -112,12 +113,16 @@ class ManagedAnimation {
 public:
   ManagedAnimation(std::string json, SkottieAssetProvider::AssetMap assets,
                    sk_sp<SkFontMgr> fontMgr) {
+    // TODO: this is leaking!
+    _propManager = new skottie_utils::CustomPropertyManager(skottie_utils::CustomPropertyManager::Mode::kCollapseProperties, "");
     _resourceProvider =
         SkottieAssetProvider::Make(std::move(assets), std::move(fontMgr));
     // TODO: this is leaking!
     _resourceProvider->ref();
     auto builder = std::make_shared<skottie::Animation::Builder>();
     builder->setResourceProvider(_resourceProvider);
+    builder->setPropertyObserver(_propManager->getPropertyObserver());
+    // ExternalAnimationPrecompInterceptor
     _animation = builder->make(json.c_str(), json.size());
     _slotManager = builder->getSlotManager();
   }
@@ -126,6 +131,7 @@ public:
   sk_sp<skottie::Animation> _animation = nullptr;
   sk_sp<skottie::SlotManager> _slotManager = nullptr;
   sk_sp<SkottieAssetProvider> _resourceProvider = nullptr;
+  skottie_utils::CustomPropertyManager *_propManager = nullptr;
 };
 
 class JsiSkSkottie : public JsiSkWrappingSharedPtrHostObject<ManagedAnimation> {
@@ -191,11 +197,9 @@ public:
     if (count < 2) {
       return jsi::Value(false);
     }
-
     auto key = arguments[0].asString(runtime).utf8(runtime);
     auto color = JsiSkColor::fromValue(runtime, arguments[1]);
-    // return getObject()->_propMgr->setColor(key, color);
-    return false;
+    return getObject()->_propManager->setColor(key, color);
   }
 
   JSI_HOST_FUNCTION(setOpacity) {
@@ -448,13 +452,30 @@ public:
     return jsi::Value::null();
   }
 
+  JSI_HOST_FUNCTION(getColorProps) {
+    auto props = getObject()->_propManager->getColorProps();
+    auto colorProps =
+        jsi::Array(runtime, getObject()->_propManager->getColorProps().size());
+    int i = 0;
+    for (const auto &cp : getObject()->_propManager->getColorProps()) {
+      auto colorProp = jsi::Object(runtime);
+      colorProp.setProperty(runtime, "key", cp);
+      auto colorPropValue = getObject()->_propManager->getColor(cp);
+      colorProp.setProperty(runtime, "value",
+                            JsiSkColor::toValue(runtime, colorPropValue));
+      colorProps.setValueAtIndex(runtime, i, colorProp);
+      i++;
+    }
+
+    return colorProps;
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSkottie, duration),
                        JSI_EXPORT_FUNC(JsiSkSkottie, fps),
                        JSI_EXPORT_FUNC(JsiSkSkottie, seekFrame),
                        JSI_EXPORT_FUNC(JsiSkSkottie, render),
                        JSI_EXPORT_FUNC(JsiSkSkottie, size),
                        JSI_EXPORT_FUNC(JsiSkSkottie, version),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, setColor),
                        JSI_EXPORT_FUNC(JsiSkSkottie, getSlotInfo),
                        JSI_EXPORT_FUNC(JsiSkSkottie, setColorSlot),
                        JSI_EXPORT_FUNC(JsiSkSkottie, setScalarSlot),
@@ -465,6 +486,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkSkottie, getScalarSlot),
                        JSI_EXPORT_FUNC(JsiSkSkottie, getVec2Slot),
                        JSI_EXPORT_FUNC(JsiSkSkottie, getTextSlot),
+                       JSI_EXPORT_FUNC(JsiSkSkottie, getColorProps),
+                       JSI_EXPORT_FUNC(JsiSkSkottie, setColor),
                        JSI_EXPORT_FUNC(JsiSkSkottie, dispose))
   // #endregion
 
