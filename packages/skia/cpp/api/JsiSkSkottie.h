@@ -26,22 +26,22 @@ namespace RNSkia {
 using namespace facebook;
 
 std::unique_ptr<SkCodec> DecodeImageData(sk_sp<SkData> data) {
-    if (data == nullptr) {
-        return nullptr;
-    }
-  
-    if (SkJpegDecoder::IsJpeg(data->data(), data->size())) {
-        return SkJpegDecoder::Decode(data, nullptr);
-    }
-
-    if (SkPngDecoder::IsPng(data->data(), data->size())) {
-        return SkPngDecoder::Decode(data, nullptr);
-    }
-
-    if (SkWebpDecoder::IsWebp(data->data(), data->size())) {
-        return SkWebpDecoder::Decode(data, nullptr);
-    }
+  if (data == nullptr) {
     return nullptr;
+  }
+
+  if (SkJpegDecoder::IsJpeg(data->data(), data->size())) {
+    return SkJpegDecoder::Decode(data, nullptr);
+  }
+
+  if (SkPngDecoder::IsPng(data->data(), data->size())) {
+    return SkPngDecoder::Decode(data, nullptr);
+  }
+
+  if (SkWebpDecoder::IsWebp(data->data(), data->size())) {
+    return SkWebpDecoder::Decode(data, nullptr);
+  }
+  return nullptr;
 }
 
 class SkottieAssetProvider : public skottie::ResourceProvider {
@@ -112,11 +112,12 @@ class ManagedAnimation {
 public:
   ManagedAnimation(std::string json, SkottieAssetProvider::AssetMap assets,
                    sk_sp<SkFontMgr> fontMgr) {
-    auto rp = SkottieAssetProvider::Make(std::move(assets), std::move(fontMgr));
+    _resourceProvider =
+        SkottieAssetProvider::Make(std::move(assets), std::move(fontMgr));
     // TODO: this is leaking!
-    rp->ref();
+    _resourceProvider->ref();
     auto builder = std::make_shared<skottie::Animation::Builder>();
-    builder->setResourceProvider(rp);
+    builder->setResourceProvider(_resourceProvider);
     _animation = builder->make(json.c_str(), json.size());
     _slotManager = builder->getSlotManager();
   }
@@ -124,6 +125,7 @@ public:
 public:
   sk_sp<skottie::Animation> _animation = nullptr;
   sk_sp<skottie::SlotManager> _slotManager = nullptr;
+  sk_sp<SkottieAssetProvider> _resourceProvider = nullptr;
 };
 
 class JsiSkSkottie : public JsiSkWrappingSharedPtrHostObject<ManagedAnimation> {
@@ -245,152 +247,206 @@ public:
   JSI_HOST_FUNCTION(getSlotInfo) {
     jsi::Object slotInfoJS = jsi::Object(runtime);
     auto slotInfo = getObject()->_slotManager->getSlotInfo();
-    
+
     auto colorSlotIDs = jsi::Array(runtime, slotInfo.fColorSlotIDs.size());
     for (size_t i = 0; i < slotInfo.fColorSlotIDs.size(); i++) {
-      colorSlotIDs.setValueAtIndex(runtime, i, jsi::String::createFromUtf8(runtime, slotInfo.fColorSlotIDs[i].c_str()));
+      colorSlotIDs.setValueAtIndex(
+          runtime, i,
+          jsi::String::createFromUtf8(runtime,
+                                      slotInfo.fColorSlotIDs[i].c_str()));
     }
     slotInfoJS.setProperty(runtime, "colorSlotIDs", colorSlotIDs);
-    
+
     auto scalarSlotIDs = jsi::Array(runtime, slotInfo.fScalarSlotIDs.size());
     for (size_t i = 0; i < slotInfo.fScalarSlotIDs.size(); i++) {
-      scalarSlotIDs.setValueAtIndex(runtime, i, jsi::String::createFromUtf8(runtime, slotInfo.fScalarSlotIDs[i].c_str()));
+      scalarSlotIDs.setValueAtIndex(
+          runtime, i,
+          jsi::String::createFromUtf8(runtime,
+                                      slotInfo.fScalarSlotIDs[i].c_str()));
     }
     slotInfoJS.setProperty(runtime, "scalarSlotIDs", scalarSlotIDs);
-    
+
     auto vec2SlotIDs = jsi::Array(runtime, slotInfo.fVec2SlotIDs.size());
     for (size_t i = 0; i < slotInfo.fVec2SlotIDs.size(); i++) {
-      vec2SlotIDs.setValueAtIndex(runtime, i, jsi::String::createFromUtf8(runtime, slotInfo.fVec2SlotIDs[i].c_str()));
+      vec2SlotIDs.setValueAtIndex(
+          runtime, i,
+          jsi::String::createFromUtf8(runtime,
+                                      slotInfo.fVec2SlotIDs[i].c_str()));
     }
     slotInfoJS.setProperty(runtime, "vec2SlotIDs", vec2SlotIDs);
-    
+
     auto imageSlotIDs = jsi::Array(runtime, slotInfo.fImageSlotIDs.size());
     for (size_t i = 0; i < slotInfo.fImageSlotIDs.size(); i++) {
-      imageSlotIDs.setValueAtIndex(runtime, i, jsi::String::createFromUtf8(runtime, slotInfo.fImageSlotIDs[i].c_str()));
+      imageSlotIDs.setValueAtIndex(
+          runtime, i,
+          jsi::String::createFromUtf8(runtime,
+                                      slotInfo.fImageSlotIDs[i].c_str()));
     }
     slotInfoJS.setProperty(runtime, "imageSlotIDs", imageSlotIDs);
-    
+
     auto textSlotIDs = jsi::Array(runtime, slotInfo.fTextSlotIDs.size());
     for (size_t i = 0; i < slotInfo.fTextSlotIDs.size(); i++) {
-      textSlotIDs.setValueAtIndex(runtime, i, jsi::String::createFromUtf8(runtime, slotInfo.fTextSlotIDs[i].c_str()));
+      textSlotIDs.setValueAtIndex(
+          runtime, i,
+          jsi::String::createFromUtf8(runtime,
+                                      slotInfo.fTextSlotIDs[i].c_str()));
     }
     slotInfoJS.setProperty(runtime, "textSlotIDs", textSlotIDs);
     return slotInfoJS;
   }
 
-  JSI_HOST_FUNCTION(getMarkers) {
-    jsi::Array markersArray = jsi::Array(runtime, 0);
-    return markersArray;
+  JSI_HOST_FUNCTION(setColorSlot) {
+    if (count < 2) {
+      return jsi::Value(false);
+    }
+    auto slotID = arguments[0].asString(runtime).utf8(runtime);
+    auto color = JsiSkColor::fromValue(runtime, arguments[1]);
+    return getObject()->_slotManager->setColorSlot(SkString(slotID), color);
   }
 
-  JSI_HOST_FUNCTION(getColorProps) {
-    jsi::Array propsArray = jsi::Array(runtime, 0);
-    return propsArray;
-    //   auto colorProps = getObject()->_propertyObserver->getColorMap();
-    //   jsi::Array propsArray = jsi::Array(runtime, colorProps.size());
-    //
-    //   size_t i = 0;
-    //   for (const auto& pair : colorProps) {
-    //     jsi::Object propObj(runtime);
-    //     propObj.setProperty(runtime, "key",
-    //     jsi::String::createFromUtf8(runtime, pair.first));
-    //     propObj.setProperty(runtime, "value", JsiSkColor::toValue(runtime,
-    //     pair.second)); propsArray.setValueAtIndex(runtime, i++, propObj);
-    //   }
-    //
-    //   return propsArray;
+  JSI_HOST_FUNCTION(setScalarSlot) {
+    if (count < 2) {
+      return jsi::Value(false);
+    }
+    auto slotID = arguments[0].asString(runtime).utf8(runtime);
+    auto scalar = arguments[1].asNumber();
+    return getObject()->_slotManager->setScalarSlot(SkString(slotID), scalar);
   }
 
-  //   JSI_HOST_FUNCTION(getOpacityProps) {
-  //     auto opacityProps = getObject()->_propertyObserver->getOpacityMap();
-  //     jsi::Array propsArray = jsi::Array(runtime, opacityProps.size());
+  JSI_HOST_FUNCTION(setVec2Slot) {
+    if (count < 2) {
+      return jsi::Value(false);
+    }
+    auto slotID = arguments[0].asString(runtime).utf8(runtime);
+    auto point = JsiSkPoint::fromValue(runtime, arguments[1]);
+    SkV2 vec2{point->x(), point->y()};
+    return getObject()->_slotManager->setVec2Slot(SkString(slotID), vec2);
+  }
 
-  //     size_t i = 0;
-  //     for (const auto& pair : opacityProps) {
-  //       jsi::Object propObj(runtime);
-  //       propObj.setProperty(runtime, "key",
-  //       jsi::String::createFromUtf8(runtime, pair.first));
-  //       propObj.setProperty(runtime, "value", jsi::Value(pair.second));
-  //       propsArray.setValueAtIndex(runtime, i++, propObj);
-  //     }
+  JSI_HOST_FUNCTION(setTextSlot) {
+    if (count < 2) {
+      return jsi::Value(false);
+    }
+    auto key = arguments[0].asString(runtime).utf8(runtime);
+    // TODO: Implement proper text slot setting
+    return jsi::Value(false);
+  }
 
-  //     return propsArray;
-  //   }
+  JSI_HOST_FUNCTION(setImageSlot) {
+    if (count < 2) {
+      return jsi::Value(false);
+    }
+    auto slotID = arguments[0].asString(runtime).utf8(runtime);
+    auto assetName = arguments[1].asString(runtime).utf8(runtime);
+    return getObject()->_slotManager->setImageSlot(
+        SkString(slotID), getObject()->_resourceProvider->loadImageAsset(
+                              nullptr, assetName.data(), nullptr));
+  }
 
-  //   JSI_HOST_FUNCTION(getTextProps) {
-  //     auto textProps = getObject()->_propertyObserver->getTextMap();
-  //     jsi::Array propsArray = jsi::Array(runtime, textProps.size());
+  JSI_HOST_FUNCTION(getColorSlot) {
+    if (count < 1) {
+      return jsi::Value::null();
+    }
+    auto slotID = arguments[0].asString(runtime).utf8(runtime);
+    if (auto v = getObject()->_slotManager->getColorSlot(SkString(slotID))) {
+      return JsiSkColor::toValue(runtime, v.value());
+    }
+    return jsi::Value::null();
+  }
 
-  //     size_t i = 0;
-  //     for (const auto& pair : textProps) {
-  //       jsi::Object propObj(runtime);
-  //       propObj.setProperty(runtime, "key",
-  //       jsi::String::createFromUtf8(runtime, pair.first));
+  JSI_HOST_FUNCTION(getScalarSlot) {
+    if (count < 1) {
+      return jsi::Value::null();
+    }
+    auto slotID = arguments[0].asString(runtime).utf8(runtime);
+    if (auto v = getObject()->_slotManager->getScalarSlot(SkString(slotID))) {
+      return jsi::Value(v.value());
+    }
+    return jsi::Value::null();
+  }
 
-  //       // Create a text property value object
-  //       jsi::Object textValue(runtime);
-  //       textValue.setProperty(runtime, "text",
-  //       jsi::String::createFromUtf8(runtime, pair.second.fText.c_str()));
+  JSI_HOST_FUNCTION(getVec2Slot) {
+    if (count < 1) {
+      return jsi::Value::null();
+    }
+    auto slotID = arguments[0].asString(runtime).utf8(runtime);
+    if (auto v = getObject()->_slotManager->getVec2Slot(SkString(slotID))) {
+      auto point = jsi::Object(runtime);
+      point.setProperty(runtime, "x", static_cast<double>(v->x));
+      point.setProperty(runtime, "y", static_cast<double>(v->y));
+      return point;
+    }
+    return jsi::Value::null();
+  }
 
-  //       // Add other text properties as needed
-  //       if (!pair.second.fFontFamily.isEmpty()) {
-  //         textValue.setProperty(runtime, "fontFamily",
-  //           jsi::String::createFromUtf8(runtime,
-  //           pair.second.fFontFamily.c_str()));
-  //       }
+  JSI_HOST_FUNCTION(getTextSlot) {
+    if (count < 1) {
+      return jsi::Value::null();
+    }
+    auto slotID = arguments[0].asString(runtime).utf8(runtime);
+    if (auto textProp =
+            getObject()->_slotManager->getTextSlot(SkString(slotID))) {
+      jsi::Object textVal(runtime);
+      // text_val.set("typeface", textProp->fTypeface);
+      // text_val.set("text", emscripten::val(textProp->fText.c_str()));
+      // text_val.set("textSize", textProp->fTextSize);
+      // text_val.set("minTextSize", textProp->fMinTextSize);
+      // text_val.set("maxTextSize", textProp->fMaxTextSize);
+      // text_val.set("strokeWidth", textProp->fStrokeWidth);
+      // text_val.set("lineHeight", textProp->fLineHeight);
+      // text_val.set("lineShift", textProp->fLineShift);
+      // text_val.set("ascent", textProp->fAscent);
+      // text_val.set("maxLines", textProp->fMaxLines);
 
-  //       propObj.setProperty(runtime, "value", textValue);
-  //       propsArray.setValueAtIndex(runtime, i++, propObj);
-  //     }
+      // switch (textProp->fHAlign) {
+      // case SkTextUtils::Align::kLeft_Align:
+      //   text_val.set("horizAlign", para::TextAlign::kLeft);
+      //   break;
+      // case SkTextUtils::Align::kRight_Align:
+      //   text_val.set("horizAlign", para::TextAlign::kRight);
+      //   break;
+      // case SkTextUtils::Align::kCenter_Align:
+      //   text_val.set("horizAlign", para::TextAlign::kCenter);
+      //   break;
+      // default:
+      //   text_val.set("horizAlign", para::TextAlign::kLeft);
+      //   break;
+      // }
 
-  //     return propsArray;
-  //   }
+      // text_val.set("vertAlign", textProp->fVAlign);
+      // text_val.set("resize", textProp->fResize);
 
-  //   JSI_HOST_FUNCTION(getTransformProps) {
-  //     auto transformProps =
-  //     getObject()->_propertyObserver->getTransformMap(); jsi::Array
-  //     propsArray = jsi::Array(runtime, transformProps.size());
+      // if (textProp->fLineBreak ==
+      //     skottie::Shaper::LinebreakPolicy::kParagraph) {
+      //   text_val.set("linebreak", SkUnicode::LineBreakType::kSoftLineBreak);
+      // } else {
+      //   text_val.set("linebreak", SkUnicode::LineBreakType::kHardLineBreak);
+      // }
 
-  //     size_t i = 0;
-  //     for (const auto& pair : transformProps) {
-  //       jsi::Object propObj(runtime);
-  //       propObj.setProperty(runtime, "key",
-  //       jsi::String::createFromUtf8(runtime, pair.first));
+      // if (textProp->fDirection == skottie::Shaper::Direction::kLTR) {
+      //   text_val.set("direction", para::TextDirection::kLtr);
+      // } else {
+      //   text_val.set("direction", para::TextDirection::kRtl);
+      // }
+      // text_val.set("strokeJoin", textProp->fStrokeJoin);
 
-  //       // Create a transform property value object
-  //       jsi::Object transformValue(runtime);
+      // text_val.set(
+      //     "fillColor",
+      //     MakeTypedArray(4,
+      //     SkColor4f::FromColor(textProp->fFillColor).vec()));
 
-  // //      // Convert anchor point
-  // //      auto anchor = JsiSkPoint::createFromPoint(runtime,
-  // pair.second.fAnchorPoint);
-  // //      transformValue.setProperty(runtime, "anchorPoint",
-  // jsi::Object::createFromHostObject(runtime, anchor));
-  // //
-  // //      // Convert position
-  // //      auto position = JsiSkPoint::createFromPoint(runtime,
-  // pair.second.fPosition);
-  // //      transformValue.setProperty(runtime, "position",
-  // jsi::Object::createFromHostObject(runtime, position));
-  // //
-  // //      // Convert scale
-  // //      auto scale = JsiSkPoint::createFromPoint(runtime,
-  // {pair.second.fScale.x(), pair.second.fScale.y()});
-  // //      transformValue.setProperty(runtime, "scale",
-  // jsi::Object::createFromHostObject(runtime, scale));
+      // text_val.set("strokeColor",
+      //              MakeTypedArray(
+      //                  4,
+      //                  SkColor4f::FromColor(textProp->fStrokeColor).vec()));
 
-  //       // Convert rotation, skew, skewAxis
-  //       transformValue.setProperty(runtime, "rotation",
-  //       jsi::Value(pair.second.fRotation));
-  //       transformValue.setProperty(runtime, "skew",
-  //       jsi::Value(pair.second.fSkew)); transformValue.setProperty(runtime,
-  //       "skewAxis", jsi::Value(pair.second.fSkewAxis));
-
-  //       propObj.setProperty(runtime, "value", transformValue);
-  //       propsArray.setValueAtIndex(runtime, i++, propObj);
-  //     }
-
-  //     return propsArray;
-  //   }
+      // const float box[] = {textProp->fBox.fLeft, textProp->fBox.fTop,
+      //                      textProp->fBox.fRight, textProp->fBox.fBottom};
+      // text_val.set("boundingBox", MakeTypedArray(4, box));
+      return textVal;
+    }
+    return jsi::Value::null();
+  }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSkottie, duration),
                        JSI_EXPORT_FUNC(JsiSkSkottie, fps),
@@ -399,15 +455,16 @@ public:
                        JSI_EXPORT_FUNC(JsiSkSkottie, size),
                        JSI_EXPORT_FUNC(JsiSkSkottie, version),
                        JSI_EXPORT_FUNC(JsiSkSkottie, setColor),
-                       // JSI_EXPORT_FUNC(JsiSkSkottie, setOpacity),
-                       // JSI_EXPORT_FUNC(JsiSkSkottie, setText),
-                       // JSI_EXPORT_FUNC(JsiSkSkottie, setTransform),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, getMarkers),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, getColorProps),
-                       // JSI_EXPORT_FUNC(JsiSkSkottie, getOpacityProps),
-                       // JSI_EXPORT_FUNC(JsiSkSkottie, getTextProps),
-                       // JSI_EXPORT_FUNC(JsiSkSkottie, getTransformProps),
                        JSI_EXPORT_FUNC(JsiSkSkottie, getSlotInfo),
+                       JSI_EXPORT_FUNC(JsiSkSkottie, setColorSlot),
+                       JSI_EXPORT_FUNC(JsiSkSkottie, setScalarSlot),
+                       JSI_EXPORT_FUNC(JsiSkSkottie, setVec2Slot),
+                       JSI_EXPORT_FUNC(JsiSkSkottie, setTextSlot),
+                       JSI_EXPORT_FUNC(JsiSkSkottie, setImageSlot),
+                       JSI_EXPORT_FUNC(JsiSkSkottie, getColorSlot),
+                       JSI_EXPORT_FUNC(JsiSkSkottie, getScalarSlot),
+                       JSI_EXPORT_FUNC(JsiSkSkottie, getVec2Slot),
+                       JSI_EXPORT_FUNC(JsiSkSkottie, getTextSlot),
                        JSI_EXPORT_FUNC(JsiSkSkottie, dispose))
   // #endregion
 

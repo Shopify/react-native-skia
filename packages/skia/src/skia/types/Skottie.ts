@@ -172,8 +172,8 @@ export interface SlotInfo {
 export interface SlottableTextProperty {
   typeface?: SkTypeface;
   text?: string;
-
   textSize?: number;
+
   minTextSize?: number;
   maxTextSize?: number;
   strokeWidth?: number;

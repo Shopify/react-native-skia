@@ -1,4 +1,8 @@
-import type { CanvasKit, ManagedSkottieAnimation } from "canvaskit-wasm";
+import type {
+  CanvasKit,
+  ManagedSkottieAnimation,
+  SlottableTextProperty as CKSlottableTextProperty,
+} from "canvaskit-wasm";
 
 import type {
   SkSkottieAnimation,
@@ -9,8 +13,10 @@ import type { SkColor, SkPoint } from "../types";
 
 import { HostObject } from "./Host";
 import type { JsiSkCanvas } from "./JsiSkCanvas";
-import type { JsiSkRect } from "./JsiSkRect";
+import { JsiSkRect } from "./JsiSkRect";
 import { JsiSkPoint } from "./JsiSkPoint";
+import { JsiSkTypeface } from "./JsiSkTypeface";
+import { Color } from "./JsiSkColor";
 
 export class JsiSkottieAnimation
   extends HostObject<ManagedSkottieAnimation, "SkottieAnimation">
@@ -31,9 +37,54 @@ export class JsiSkottieAnimation
   setVec2Slot(key: string, vec2: JsiSkPoint) {
     return this.ref.setVec2Slot(key, vec2.ref);
   }
-  setTextSlot(_key: string, _text: SlottableTextProperty): boolean {
-    throw new Error("Method not implemented.");
-    // return this.ref.setTextSlot(key, text);
+  setTextSlot(key: string, text: SlottableTextProperty): boolean {
+    const txt: CKSlottableTextProperty = {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      typeface:
+        text.typeface && text.typeface instanceof JsiSkTypeface
+          ? text.typeface.ref
+          : null,
+      text: text.text ?? "",
+      textSize: text.textSize ?? 0,
+      minTextSize: text.minTextSize ?? 0,
+      maxTextSize: text.maxTextSize ?? Number.MAX_VALUE,
+      strokeWidth: text.strokeWidth ?? 0,
+      lineHeight: text.lineHeight ?? 0,
+      lineShift: text.lineShift ?? 0,
+      ascent: text.ascent,
+      maxLines: text.maxLines,
+      // TODO: implement
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-expect-error
+      horizAlign: this.CanvasKit.TextAlign.Left,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-expect-error
+      vertAlign: this.CanvasKit.VerticalTextAlign.Top,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-expect-error
+      strokeJoin: this.CanvasKit.StrokeJoin.Miter,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-expect-error
+      direction: this.CanvasKit.TextDirection.LTR,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      linebreak: this.CanvasKit.LineBreakType.HardLineBreak,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      resize: this.CanvasKit.ResizePolicy.None,
+      boundingBox:
+        text.boundingBox && text.boundingBox instanceof JsiSkRect
+          ? text.boundingBox.ref
+          : [0, 0, 0, 0],
+      fillColor: text.fillColor
+        ? Color(text.fillColor)
+        : this.CanvasKit.TRANSPARENT,
+      strokeColor: text.strokeColor
+        ? Color(text.strokeColor)
+        : this.CanvasKit.TRANSPARENT,
+    };
+    return this.ref.setTextSlot(key, txt);
   }
   setImageSlot(key: string, assetName: string) {
     return this.ref.setImageSlot(key, assetName);
@@ -52,8 +103,72 @@ export class JsiSkottieAnimation
     }
     return new JsiSkPoint(this.CanvasKit, vec2);
   }
-  getTextSlot(_key: string): SlottableTextProperty | null {
-    throw new Error("Method not implemented.");
+  getTextSlot(key: string): SlottableTextProperty | null {
+    const result = this.ref.getTextSlot(key);
+    const textSlot: SlottableTextProperty = {};
+    if (result) {
+      if (result.typeface) {
+        textSlot.typeface = new JsiSkTypeface(this.CanvasKit, result.typeface);
+      }
+      if (result.text) {
+        textSlot.text = result.text;
+      }
+      if (result.textSize) {
+        textSlot.textSize = result.textSize;
+      }
+      if (result.minTextSize) {
+        textSlot.minTextSize = result.minTextSize;
+      }
+      if (result.maxTextSize) {
+        textSlot.maxTextSize = result.maxTextSize;
+      }
+      if (result.strokeWidth) {
+        textSlot.strokeWidth = result.strokeWidth;
+      }
+      if (result.lineHeight) {
+        textSlot.lineHeight = result.lineHeight;
+      }
+      if (result.lineShift) {
+        textSlot.lineShift = result.lineShift;
+      }
+      if (result.ascent) {
+        textSlot.ascent = result.ascent;
+      }
+      if (result.maxLines) {
+        textSlot.maxLines = result.maxLines;
+      }
+      // if (result.horizAlign) {
+      //   textSlot.horizAlign = result.horizAlign;
+      // }
+      // if (result.vertAlign) {
+      //   textSlot.vertAlign = result.vertAlign;
+      // }
+      // if (result.strokeJoin) {
+      //   textSlot.strokeJoin = result.strokeJoin;
+      // }
+      // if (result.direction) {
+      //   textSlot.direction = result.direction;
+      // }
+      // if (result.linebreak) {
+      //   textSlot.linebreak = result.linebreak;
+      // }
+      // if (result.resize) {
+      //   textSlot.resize = result.resize;
+      // }
+      // if (result.boundingBox) {
+      //   textSlot.boundingBox = new JsiSkRect(
+      //     this.CanvasKit,
+      //     result.boundingBox
+      //   );
+      // }
+      // if (result.fillColor) {
+      //   textSlot.fillColor = Color(result.fillColor);
+      // }
+      // if (result.strokeColor) {
+      //   textSlot.strokeColor = Color(result.strokeColor);
+      // }
+    }
+    return textSlot;
   }
 
   duration() {
