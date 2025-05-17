@@ -115,7 +115,8 @@ public:
   ManagedAnimation(std::string json, SkottieAssetProvider::AssetMap assets,
                    sk_sp<SkFontMgr> fontMgr) {
     // TODO: this is leaking!
-    _propManager = new skottie_utils::CustomPropertyManager(skottie_utils::CustomPropertyManager::Mode::kCollapseProperties, "");
+    _propManager = new skottie_utils::CustomPropertyManager(
+        skottie_utils::CustomPropertyManager::Mode::kCollapseProperties, "");
     _resourceProvider =
         SkottieAssetProvider::Make(std::move(assets), std::move(fontMgr));
     // TODO: this is leaking!
@@ -210,19 +211,39 @@ public:
 
     auto key = arguments[0].asString(runtime).utf8(runtime);
     auto opacity = arguments[1].asNumber();
-    // return getObject()->_propMgr->setOpacity(key, opacity);
-    return false;
+    return getObject()->_propManager->setOpacity(key, opacity);
   }
 
   JSI_HOST_FUNCTION(setText) {
     if (count < 3) {
       return jsi::Value(false);
     }
-
-    SkString key(arguments[0].asString(runtime).utf8(runtime));
-    SkString text(arguments[1].asString(runtime).utf8(runtime));
+    auto key = arguments[0].asString(runtime).utf8(runtime);
+    auto text = arguments[1].asString(runtime).utf8(runtime);
     auto size = arguments[2].asNumber();
-    return false;
+    // preserve all other text fields
+    auto t = getObject()->_propManager->getText(key);
+    t.fText = SkString(text);
+    t.fTextSize = size;
+    return getObject()->_propManager->setText(key, t);
+  }
+
+  JSI_HOST_FUNCTION(getTextProps) {
+    auto textProps = getObject()->_propManager->getTextProps();
+    int i = 0;
+    auto props = jsi::Array(runtime, textProps.size());
+    for (const auto &prop : textProps) {
+      auto txt = getObject()->_propManager->getText(prop);
+      auto txtVal = jsi::Object(runtime);
+      txtVal.setProperty(runtime, "text", txt.fText.c_str());
+      txtVal.setProperty(runtime, "size", txt.fTextSize);
+      auto val = jsi::Object(runtime);
+      val.setProperty(runtime, "key", prop);
+      val.setProperty(runtime, "value", txtVal);
+      props.setValueAtIndex(runtime, i, val);
+      i++;
+    }
+    return props;
   }
 
   JSI_HOST_FUNCTION(setTransform) {
@@ -245,8 +266,7 @@ public:
     transform.fRotation = rotation;
     transform.fSkew = skew;
     transform.fSkewAxis = skewAxis;
-    // return getObject()->_propMgr->setTransform(key, transform);
-    return false;
+    return getObject()->_propManager->setTransform(key, transform);
   }
 
   JSI_HOST_FUNCTION(getSlotInfo) {
@@ -488,7 +508,9 @@ public:
                        JSI_EXPORT_FUNC(JsiSkSkottie, getVec2Slot),
                        JSI_EXPORT_FUNC(JsiSkSkottie, getTextSlot),
                        JSI_EXPORT_FUNC(JsiSkSkottie, getColorProps),
+                       JSI_EXPORT_FUNC(JsiSkSkottie, getTextProps),
                        JSI_EXPORT_FUNC(JsiSkSkottie, setColor),
+                       JSI_EXPORT_FUNC(JsiSkSkottie, setText),
                        JSI_EXPORT_FUNC(JsiSkSkottie, dispose))
   // #endregion
 
