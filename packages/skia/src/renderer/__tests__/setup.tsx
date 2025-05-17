@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import fs from "fs";
 import path from "path";
@@ -43,6 +44,11 @@ export let fonts: {
   DinMedium: SkFont;
 };
 
+export let dataAssets: {
+  NotoSansSCRegular: Uint8Array;
+  img_0: Uint8Array;
+};
+
 beforeAll(async () => {
   await LoadSkiaWeb();
   const Skia = JsiSkApi(global.CanvasKit);
@@ -70,6 +76,12 @@ beforeAll(async () => {
   const skiaLogoPng = loadImage("skia/__tests__/assets/skia_logo.png");
   const skiaLogoJpeg = loadImage("skia/__tests__/assets/skia_logo_jpeg.jpg");
   const mask = loadImage("skia/__tests__/assets/mask.png");
+  dataAssets = {
+    NotoSansSCRegular: resolveFile(
+      "skia/__tests__/assets/NotoSansSC-Regular.otf"
+    ),
+    img_0: resolveFile("skia/__tests__/assets/oslo.jpg"),
+  };
   images = { oslo, skiaLogoPng, skiaLogoJpeg, mask };
   fonts = {
     RobotoMedium,

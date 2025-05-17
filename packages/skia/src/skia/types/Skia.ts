@@ -33,6 +33,7 @@ import type { ParagraphBuilderFactory } from "./Paragraph/ParagraphBuilder";
 import type { Video } from "./Video";
 import type { NativeBufferFactory } from "./NativeBuffer";
 import type { JsiRecorder } from "./Recorder";
+import type { SkottieFactory } from "./Skottie";
 
 export interface SkiaContext {
   getSurface(): SkSurface;
@@ -102,6 +103,7 @@ export interface Skia {
   TextBlob: TextBlobFactory;
   Surface: SurfaceFactory;
   ParagraphBuilder: ParagraphBuilderFactory;
+  Skottie: SkottieFactory;
   Video: (url: string) => Promise<Video> | Video;
   Context(surface: bigint, width: number, height: number): SkiaContext;
   NativeBuffer: NativeBufferFactory;
