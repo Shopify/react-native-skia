@@ -244,9 +244,21 @@ export interface SkSkottieAnimation extends SkJSIInstance<"SkottieAnimation"> {
 
   getColorProps(): ColorProperty[];
   getTextProps(): TextProperty[];
+  getOpacityProps(): OpacityProperty[];
+  getTransformProps(): TransformProperty[];
 
   setColor(key: string, color: SkColor): boolean;
   setText(key: string, text: string, size: number): boolean;
+  setOpacity(key: string, opacity: number): boolean;
+  setTransform(
+    key: string,
+    anchor: SkPoint,
+    position: SkPoint,
+    scale: SkPoint,
+    rotation: number,
+    skew: number,
+    skewAxis: number
+  ): boolean;
 }
 
 export interface SkottieFactory {

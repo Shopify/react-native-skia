@@ -117,6 +117,77 @@ describe("Skottie", () => {
       vec2SlotIDs: ["ScaleGroup"],
     });
   });
+  it("Get props information", async () => {
+    const props = await surface.eval(
+      (Skia, ctx) => {
+        const assets = {
+          NotoSerif: Skia.Data.fromBytes(new Uint8Array(ctx.NotoSerif)),
+          "img_0.png": Skia.Data.fromBytes(new Uint8Array(ctx.img_0)),
+        };
+        const animation = Skia.Skottie.Make(ctx.basicSlotsJSON, assets);
+        return {
+          opacityProps: animation.getOpacityProps(),
+          transformProps: [
+            animation
+              .getTransformProps()
+              .find(({ key }) => key === "Transform"),
+          ],
+          colorProps: animation
+            .getColorProps()
+            .map(({ key, value }) => ({ key, value: Array.from(value) })),
+          textProps: animation.getTextProps(),
+        };
+      },
+      {
+        basicSlotsJSON: JSON.stringify(basicSlotsJSON),
+        NotoSerif: Array.from(dataAssets.NotoSansSCRegular),
+        img_0: Array.from(dataAssets.img_0),
+      }
+    );
+    expect(props).toEqual({
+      opacityProps: [
+        { key: "Black Solid 1", value: 70 },
+        { key: "Turquoise Solid 1", value: 100 },
+        { key: "text_comp", value: 100 },
+        { key: "image_comp", value: 100 },
+        { key: "shapes_comp", value: 100 },
+        { key: "comp", value: 100 },
+        { key: "img1.png", value: 100 },
+        { key: "text slots", value: 100 },
+        { key: "Shape Layer 2", value: 100 },
+        { key: "Shape Layer 1", value: 100 },
+        { key: "Transform", value: 100 },
+      ],
+      transformProps: [
+        {
+          key: "Transform",
+          value: {
+            anchor: { x: 0, y: 0 },
+            position: { x: 97, y: 0 },
+            scale: { x: 100, y: 100 },
+            rotation: 0,
+            skew: 0,
+            skewAxis: 0,
+          },
+        },
+      ],
+      colorProps: [
+        { key: "Black Solid 1", value: [0, 0, 0, 1] },
+        { key: "Turquoise Solid 1", value: [0, 1, 0.7450980544090271, 1] },
+        { key: "Fill 1", value: [0, 0, 0, 1] },
+        { key: "Stroke 1", value: [0, 0, 0, 1] },
+      ],
+      textProps: [
+        {
+          key: "text slots",
+          value: {
+            size: 39,
+            text: "text slots",
+          },
+        },
+      ],
+    });
+  });
   it("load skottie with assets", async () => {
     const raw = await surface.eval(
       (Skia, ctx) => {
