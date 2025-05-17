@@ -82,6 +82,7 @@ public:
 
   sk_sp<SkTypeface> loadTypeface(const char name[],
                                  const char[] /* url */) const override {
+    RNSkLogger::logToConsole("loadTypeface %s", name);
     sk_sp<SkData> faceData = this->findAsset(name);
     if (!faceData) {
       return nullptr;

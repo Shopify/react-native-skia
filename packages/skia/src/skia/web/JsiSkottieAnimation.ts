@@ -9,6 +9,7 @@ import type {
   SkSkottieAnimation,
   SlotInfo,
   SlottableTextProperty,
+  TextProperty,
 } from "../types/Skottie";
 import type { SkColor, SkPoint } from "../types";
 
@@ -25,6 +26,9 @@ export class JsiSkottieAnimation
 {
   constructor(CanvasKit: CanvasKit, ref: ManagedSkottieAnimation) {
     super(CanvasKit, ref, "SkottieAnimation");
+  }
+  getTextProps(): TextProperty[] {
+    return this.ref.getTextProps();
   }
   getColorProps(): ColorProperty[] {
     return this.ref

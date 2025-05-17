@@ -243,6 +243,7 @@ export interface SkSkottieAnimation extends SkJSIInstance<"SkottieAnimation"> {
   getTextSlot(key: string): SlottableTextProperty | null;
 
   getColorProps(): ColorProperty[];
+  getTextProps(): TextProperty[];
 
   setColor(key: string, color: SkColor): boolean;
 }

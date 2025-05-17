@@ -8,6 +8,8 @@ const confettiJSON = require("./setup/skottie/confetti.json");
 const onboardingJSON = require("./setup/skottie/onboarding.json");
 const basicSlotsJSON = require("./setup/skottie/basic_slots.json");
 const fingerprintJSON = require("./setup/skottie/fingerprint.json");
+const textLayerJSON = require("./setup/skottie/text-layer.json");
+
 describe("Skottie", () => {
   it("Get durations", async () => {
     const { lego, drinks, confetti, onboarding } = await surface.eval(
@@ -184,7 +186,6 @@ describe("Skottie", () => {
       (Skia, ctx) => {
         const animation = Skia.Skottie.Make(ctx.fingerprint);
         const props = animation.getColorProps();
-        console.log(props);
         return props.map(({ key, value }) => ({
           key,
           value: Array.from(value),
@@ -222,5 +223,59 @@ describe("Skottie", () => {
     const image = Skia.Image.MakeImageFromEncoded(rData)!;
     expect(rData).toBeDefined();
     checkImage(image, docPath("skottie/fingerprint-color1.png"));
+  });
+  it("has text props", async () => {
+    const colorProps = await surface.eval(
+      (Skia, ctx) => {
+        const animation = Skia.Skottie.Make(ctx.textLayerJSON);
+        const props = animation.getTextProps();
+        console.log(props);
+        return props.map(({ key, value }) => ({
+          key,
+          value,
+        }));
+      },
+      {
+        textLayerJSON: JSON.stringify(textLayerJSON),
+      }
+    );
+    expect(colorProps[0]).toEqual({
+      key: "hello!",
+      value: { text: "hello!", size: 164 },
+    });
+    expect(colorProps[1]).toEqual({
+      key: "hello! 2",
+      value: { text: "hello!", size: 164 },
+    });
+  });
+  it("text prop", async () => {
+    const raw = await surface.eval(
+      (Skia, ctx) => {
+        const assets = {
+          "Avenir-Heavy": Skia.Data.fromBytes(new Uint8Array(ctx.NotoSerif)),
+        };
+        const animation = Skia.Skottie.Make(ctx.textLayer, assets);
+        const size = animation.size();
+        const sur = Skia.Surface.MakeOffscreen(size.width, size.height);
+        if (!sur) {
+          throw new Error("Failed to create surface");
+        }
+        const canvas = sur.getCanvas();
+
+        animation.seekFrame(animation.duration() * 0.5);
+        animation.render(canvas);
+        sur.flush();
+        return sur.makeImageSnapshot().encodeToBase64();
+      },
+      {
+        textLayer: JSON.stringify(textLayerJSON),
+        NotoSerif: Array.from(dataAssets.NotoSansSCRegular),
+      }
+    );
+    const { Skia } = importSkia();
+    const rData = Skia.Data.fromBase64(raw);
+    const image = Skia.Image.MakeImageFromEncoded(rData)!;
+    expect(rData).toBeDefined();
+    checkImage(image, docPath("skottie/text-prop.png"));
   });
 });
