@@ -11,6 +11,12 @@ import type {
   SkRuntimeShaderBuilder,
   SkShader,
   TileMode,
+  FilterMode,
+  MipmapMode,
+  SkImage,
+  SkMatrix,
+  SkPicture,
+  SkPoint3,
 } from "../types";
 
 import { Host, throwNotImplementedOnRNWeb, getEnum } from "./Host";
@@ -23,6 +29,164 @@ export class JsiSkImageFilterFactory
 {
   constructor(CanvasKit: CanvasKit) {
     super(CanvasKit);
+  }
+  MakeRuntimeShaderWithChildren(
+    _builder: SkRuntimeShaderBuilder,
+    _sampleRadius: number,
+    _childShaderNames: string[],
+    _inputs: Array<SkImageFilter | null>
+  ): SkImageFilter {
+    throw throwNotImplementedOnRNWeb();
+  }
+  MakeArithmetic(
+    _k1: number,
+    _k2: number,
+    _k3: number,
+    _k4: number,
+    _enforcePMColor: boolean,
+    _background?: SkImageFilter | null,
+    _foreground?: SkImageFilter | null,
+    _cropRect?: SkRect | null
+  ): SkImageFilter {
+    throw throwNotImplementedOnRNWeb();
+  }
+  MakeCrop(
+    _rect: SkRect,
+    _tileMode?: TileMode | null,
+    _input?: SkImageFilter | null
+  ): SkImageFilter {
+    throw throwNotImplementedOnRNWeb();
+  }
+  MakeEmpty(): SkImageFilter {
+    throw throwNotImplementedOnRNWeb();
+  }
+  MakeImage(
+    _image: SkImage,
+    _srcRect?: SkRect | null,
+    _dstRect?: SkRect | null,
+    _filterMode?: FilterMode,
+    _mipmap?: MipmapMode
+  ): SkImageFilter {
+    throw throwNotImplementedOnRNWeb();
+  }
+  MakeMagnifier(
+    _lensBounds: SkRect,
+    _zoomAmount: number,
+    _inset: number,
+    _filterMode?: FilterMode,
+    _mipmap?: MipmapMode,
+    _input?: SkImageFilter | null,
+    _cropRect?: SkRect | null
+  ): SkImageFilter {
+    throw throwNotImplementedOnRNWeb();
+  }
+  MakeMatrixConvolution(
+    _kernelSizeX: number,
+    _kernelSizeY: number,
+    _kernel: number[],
+    _gain: number,
+    _bias: number,
+    _kernelOffsetX: number,
+    _kernelOffsetY: number,
+    _tileMode: TileMode,
+    _convolveAlpha: boolean,
+    _input?: SkImageFilter | null,
+    _cropRect?: SkRect | null
+  ): SkImageFilter {
+    throw throwNotImplementedOnRNWeb();
+  }
+  MakeMatrixTransform(
+    _matrix: SkMatrix,
+    _filterMode?: FilterMode,
+    _mipmap?: MipmapMode,
+    _input?: SkImageFilter | null
+  ): SkImageFilter {
+    throw throwNotImplementedOnRNWeb();
+  }
+  MakeMerge(
+    _filters: Array<SkImageFilter | null>,
+    _cropRect?: SkRect | null
+  ): SkImageFilter {
+    throw throwNotImplementedOnRNWeb();
+  }
+  MakePicture(_picture: SkPicture, _targetRect?: SkRect | null): SkImageFilter {
+    throw throwNotImplementedOnRNWeb();
+  }
+  MakeTile(
+    _src: SkRect,
+    _dst: SkRect,
+    _input?: SkImageFilter | null
+  ): SkImageFilter {
+    throw throwNotImplementedOnRNWeb();
+  }
+  MakeDistantLitDiffuse(
+    _direction: SkPoint3,
+    _lightColor: SkColor,
+    _surfaceScale: number,
+    _kd: number,
+    _input?: SkImageFilter | null,
+    _cropRect?: SkRect | null
+  ): SkImageFilter {
+    throw throwNotImplementedOnRNWeb();
+  }
+  MakePointLitDiffuse(
+    _location: SkPoint3,
+    _lightColor: SkColor,
+    _surfaceScale: number,
+    _kd: number,
+    _input?: SkImageFilter | null,
+    _cropRect?: SkRect | null
+  ): SkImageFilter {
+    throw throwNotImplementedOnRNWeb();
+  }
+  MakeSpotLitDiffuse(
+    _location: SkPoint3,
+    _target: SkPoint3,
+    _falloffExponent: number,
+    _cutoffAngle: number,
+    _lightColor: SkColor,
+    _surfaceScale: number,
+    _kd: number,
+    _input?: SkImageFilter | null,
+    _cropRect?: SkRect | null
+  ): SkImageFilter {
+    throw throwNotImplementedOnRNWeb();
+  }
+  MakeDistantLitSpecular(
+    _direction: SkPoint3,
+    _lightColor: SkColor,
+    _surfaceScale: number,
+    _ks: number,
+    _shininess: number,
+    _input?: SkImageFilter | null,
+    _cropRect?: SkRect | null
+  ): SkImageFilter {
+    throw throwNotImplementedOnRNWeb();
+  }
+  MakePointLitSpecular(
+    _location: SkPoint3,
+    _lightColor: SkColor,
+    _surfaceScale: number,
+    _ks: number,
+    _shininess: number,
+    _input?: SkImageFilter | null,
+    _cropRect?: SkRect | null
+  ): SkImageFilter {
+    throw throwNotImplementedOnRNWeb();
+  }
+  MakeSpotLitSpecular(
+    _location: SkPoint3,
+    _target: SkPoint3,
+    _falloffExponent: number,
+    _cutoffAngle: number,
+    _lightColor: SkColor,
+    _surfaceScale: number,
+    _ks: number,
+    _shininess: number,
+    _input?: SkImageFilter | null,
+    _cropRect?: SkRect | null
+  ): SkImageFilter {
+    throw throwNotImplementedOnRNWeb();
   }
 
   MakeOffset(
