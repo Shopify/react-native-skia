@@ -10,7 +10,7 @@ const checkResult = (base64: string, path: string) => {
 };
 
 describe("Advanced Image Filters", () => {
-  it("Arithmetic", async () => {
+  it("Arithmetic - Neon Glow", async () => {
     const { skiaLogoPng } = images;
     const base64 = await surface.eval(
       (Skia, ctx) => {
@@ -42,6 +42,6 @@ describe("Advanced Image Filters", () => {
       },
       { skiaLogoPng }
     );
-    checkResult(base64, "advanced-image-filters/arthimetic.png");
+    checkResult(base64, "advanced-image-filters/arithmetic-neon-glow.png");
   });
 });
