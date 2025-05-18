@@ -285,4 +285,208 @@ describe("Advanced Image Filters", () => {
     );
     checkResult(base64, "advanced-image-filters/makeimage-mosaic.png");
   });
+  it("MatrixConvolution - Embossed Metallic Effect", async () => {
+    const { skiaLogoPng } = images;
+    const base64 = await surface.eval(
+      (Skia, ctx) => {
+        const sur = Skia.Surface.Make(768, 768)!;
+        const canvas = sur.getCanvas();
+
+        // First, let's create a metallic gradient background
+        const bgPaint = Skia.Paint();
+        const shader = Skia.Shader.MakeLinearGradient(
+          { x: 0, y: 0 },
+          { x: 768, y: 768 },
+          [
+            Skia.Color("rgb(180, 180, 190)"), // Light silver
+            Skia.Color("rgb(100, 100, 110)"), // Medium gray
+            Skia.Color("rgb(140, 140, 160)"), // Silver again
+            Skia.Color("rgb(70, 70, 90)"), // Dark silver
+          ],
+          [0.0, 0.3, 0.7, 1.0],
+          ctx.TileMode.Clamp
+        );
+        bgPaint.setShader(shader);
+        canvas.drawRect(Skia.XYWHRect(0, 0, 768, 768), bgPaint);
+
+        // Create our emboss effect paint
+        const embossPaint = Skia.Paint();
+
+        // For an emboss effect, we use a 3x3 kernel that highlights
+        // edges in a directional way (typically top-left to bottom-right)
+        // This creates the illusion of depth
+        const kernelSizeX = 3;
+        const kernelSizeY = 3;
+
+        // Emboss kernel - this will create a 3D effect with light coming from top-left
+        const kernel = [
+          -2,
+          -1,
+          0, // Top row
+          -1,
+          1,
+          1, // Middle row
+          0,
+          1,
+          2, // Bottom row
+        ];
+
+        // Set kernel parameters
+        const gain = 1.0; // Standard scaling
+        const bias = 128.0; // Add a mid-gray to make the effect visible
+
+        // Center the kernel over each pixel
+        const kernelOffsetX = 1;
+        const kernelOffsetY = 1;
+
+        // Create the matrix convolution filter
+        const embossFilter = Skia.ImageFilter.MakeMatrixConvolution(
+          kernelSizeX,
+          kernelSizeY,
+          kernel,
+          gain,
+          bias,
+          kernelOffsetX,
+          kernelOffsetY,
+          ctx.TileMode.Clamp, // Use clamp for edge pixels
+          false, // Don't convolve alpha to maintain shape
+          null, // Use source bitmap as input
+          null // No crop rect
+        );
+
+        // Set the filter to our paint
+        embossPaint.setImageFilter(embossFilter);
+
+        // To enhance the metallic look, let's add some color desaturation
+        // Grayscale color matrix with a slight blue-silver tint
+        const colorMatrix = [
+          0.33,
+          0.33,
+          0.33,
+          0,
+          0, // Red channel
+          0.33,
+          0.33,
+          0.33,
+          0,
+          0, // Green channel
+          0.34,
+          0.34,
+          0.34,
+          0,
+          10, // Blue channel (slightly boosted)
+          0,
+          0,
+          0,
+          1,
+          0, // Alpha channel unchanged
+        ];
+
+        const colorFilter = Skia.ColorFilter.MakeMatrix(colorMatrix);
+        embossPaint.setColorFilter(colorFilter);
+
+        // Now let's draw our image with the emboss effect
+        // Scale down slightly to leave a border
+        const padding = 40;
+        const imageRect = Skia.XYWHRect(
+          padding,
+          padding,
+          768 - padding * 2,
+          768 - padding * 2
+        );
+
+        canvas.drawImageRect(
+          ctx.skiaLogoPng,
+          Skia.XYWHRect(
+            0,
+            0,
+            ctx.skiaLogoPng.width(),
+            ctx.skiaLogoPng.height()
+          ),
+          imageRect,
+          embossPaint
+        );
+
+        // Add a subtle bevel frame to enhance the metallic appearance
+        const framePaint = Skia.Paint();
+
+        // Outer edge - dark shadow
+        framePaint.setStyle(ctx.PaintStyle.Stroke);
+        framePaint.setStrokeWidth(8);
+        framePaint.setColor(Skia.Color("rgba(60, 60, 70, 0.8)"));
+        canvas.drawRect(
+          Skia.XYWHRect(
+            padding - 10,
+            padding - 10,
+            768 - padding * 2 + 20,
+            768 - padding * 2 + 20
+          ),
+          framePaint
+        );
+
+        // Inner edge - highlight
+        framePaint.setStrokeWidth(4);
+        framePaint.setColor(Skia.Color("rgba(220, 220, 230, 0.8)"));
+        canvas.drawRect(
+          Skia.XYWHRect(
+            padding - 4,
+            padding - 4,
+            768 - padding * 2 + 8,
+            768 - padding * 2 + 8
+          ),
+          framePaint
+        );
+
+        // Add some decorative rivets on the corners to enhance metallic look
+        const rivetPaint = Skia.Paint();
+        rivetPaint.setColor(Skia.Color("rgb(160, 160, 180)"));
+
+        // Draw rivets at the corners
+        const rivetRadius = 12;
+        const rivetOffset = 24;
+        const rivetPositions = [
+          { x: padding - rivetOffset, y: padding - rivetOffset },
+          { x: 768 - padding + rivetOffset, y: padding - rivetOffset },
+          { x: padding - rivetOffset, y: 768 - padding + rivetOffset },
+          { x: 768 - padding + rivetOffset, y: 768 - padding + rivetOffset },
+        ];
+
+        // Draw each rivet with a metallic gradient
+        rivetPositions.forEach((pos) => {
+          // Rivet base
+          rivetPaint.setShader(
+            Skia.Shader.MakeRadialGradient(
+              { x: pos.x, y: pos.y },
+              rivetRadius,
+              [
+                Skia.Color("rgb(200, 200, 210)"),
+                Skia.Color("rgb(130, 130, 140)"),
+              ],
+              [0.2, 1.0],
+              ctx.TileMode.Clamp
+            )
+          );
+          canvas.drawCircle(pos.x, pos.y, rivetRadius, rivetPaint);
+
+          // Rivet highlight
+          const highlightPaint = Skia.Paint();
+          highlightPaint.setColor(Skia.Color("rgba(240, 240, 250, 0.8)"));
+          canvas.drawCircle(
+            pos.x - 3,
+            pos.y - 3,
+            rivetRadius / 3,
+            highlightPaint
+          );
+        });
+
+        sur.flush();
+        return sur.makeImageSnapshot().encodeToBase64();
+      },
+      { skiaLogoPng, TileMode, PaintStyle }
+    );
+    checkResult(
+      base64,
+      "advanced-image-filters/matrix-convolution-embossed-metal.png"
+    );
+  });
 });
