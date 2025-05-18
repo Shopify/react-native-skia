@@ -20,46 +20,64 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
+inline bool hasOptionalArgument(const jsi::Value *arguments, size_t count,
+                               size_t index) {
+  return (index < count && !arguments[index].isNull() &&
+          !arguments[index].isUndefined());
+}
+
 class JsiSkImageFilterFactory : public JsiSkHostObject {
 public:
   JSI_HOST_FUNCTION(MakeBlur) {
     float sigmaX = arguments[0].asNumber();
     float sigmaY = arguments[1].asNumber();
     int tileMode = arguments[2].asNumber();
-    sk_sp<SkImageFilter> imageFilter;
-    if (!arguments[3].isNull()) {
+    sk_sp<SkImageFilter> imageFilter = nullptr;
+    if (hasOptionalArgument(arguments, count, 3)) {
       imageFilter = JsiSkImageFilter::fromValue(runtime, arguments[3]);
+    }
+    SkImageFilters::CropRect cropRect = {};
+    if (hasOptionalArgument(arguments, count, 4)) {
+      cropRect = *JsiSkRect::fromValue(runtime, arguments[4]);
     }
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImageFilter>(
                      getContext(),
                      SkImageFilters::Blur(sigmaX, sigmaY, (SkTileMode)tileMode,
-                                          imageFilter)));
+                                          imageFilter, cropRect)));
   }
 
   JSI_HOST_FUNCTION(MakeColorFilter) {
     auto cf = JsiSkColorFilter::fromValue(runtime, arguments[0]);
-    sk_sp<SkImageFilter> input;
-    if (!arguments[1].isNull()) {
+    sk_sp<SkImageFilter> input = nullptr;
+    if (hasOptionalArgument(arguments, count, 1)) {
       input = JsiSkImageFilter::fromValue(runtime, arguments[1]);
+    }
+    SkImageFilters::CropRect cropRect = {};
+    if (hasOptionalArgument(arguments, count, 2)) {
+      cropRect = *JsiSkRect::fromValue(runtime, arguments[2]);
     }
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImageFilter>(
                      getContext(), SkImageFilters::ColorFilter(
-                                       std::move(cf), std::move(input))));
+                                       std::move(cf), std::move(input), cropRect)));
   }
 
   JSI_HOST_FUNCTION(MakeOffset) {
     auto x = arguments[0].asNumber();
     auto y = arguments[1].asNumber();
-    sk_sp<SkImageFilter> input;
-    if (!arguments[2].isNull()) {
+    sk_sp<SkImageFilter> input = nullptr;
+    if (hasOptionalArgument(arguments, count, 2)) {
       input = JsiSkImageFilter::fromValue(runtime, arguments[2]);
+    }
+    SkImageFilters::CropRect cropRect = {};
+    if (hasOptionalArgument(arguments, count, 3)) {
+      cropRect = *JsiSkRect::fromValue(runtime, arguments[3]);
     }
     return jsi::Object::createFromHostObject(
         runtime,
         std::make_shared<JsiSkImageFilter>(
-            getContext(), SkImageFilters::Offset(x, y, std::move(input))));
+            getContext(), SkImageFilters::Offset(x, y, std::move(input), cropRect)));
   }
 
   JSI_HOST_FUNCTION(MakeDisplacementMap) {
@@ -69,32 +87,45 @@ public:
         static_cast<SkColorChannel>(arguments[1].asNumber());
     auto scale = arguments[2].asNumber();
     auto in2 = JsiSkImageFilter::fromValue(runtime, arguments[3]);
-    sk_sp<SkImageFilter> input;
-    if (!arguments[4].isNull()) {
+    sk_sp<SkImageFilter> input = nullptr;
+    if (hasOptionalArgument(arguments, count, 4)) {
       input = JsiSkImageFilter::fromValue(runtime, arguments[4]);
+    }
+    SkImageFilters::CropRect cropRect = {};
+    if (hasOptionalArgument(arguments, count, 5)) {
+      cropRect = *JsiSkRect::fromValue(runtime, arguments[5]);
     }
     return jsi::Object::createFromHostObject(
         runtime,
         std::make_shared<JsiSkImageFilter>(
             getContext(), SkImageFilters::DisplacementMap(
                               fXChannelSelector, fYChannelSelector, scale,
-                              std::move(in2), std::move(input))));
+                              std::move(in2), std::move(input), cropRect)));
   }
 
   JSI_HOST_FUNCTION(MakeShader) {
     auto shader = JsiSkShader::fromValue(runtime, arguments[0]);
+    SkImageFilters::Dither dither = SkImageFilters::Dither::kNo;
+    if (hasOptionalArgument(arguments, count, 1)) {
+      dither = arguments[1].asBool() ? SkImageFilters::Dither::kYes
+                                   : SkImageFilters::Dither::kNo;
+    }
+    SkImageFilters::CropRect cropRect = {};
+    if (hasOptionalArgument(arguments, count, 2)) {
+      cropRect = *JsiSkRect::fromValue(runtime, arguments[2]);
+    }
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImageFilter>(
-                     getContext(), SkImageFilters::Shader(std::move(shader))));
+                     getContext(), SkImageFilters::Shader(std::move(shader), dither, cropRect)));
   }
 
   JSI_HOST_FUNCTION(MakeCompose) {
-    sk_sp<SkImageFilter> outer;
-    if (!arguments[0].isNull() && !arguments[0].isUndefined()) {
+    sk_sp<SkImageFilter> outer = nullptr;
+    if (hasOptionalArgument(arguments, count, 0)) {
       outer = JsiSkImageFilter::fromValue(runtime, arguments[0]);
     }
-    sk_sp<SkImageFilter> inner;
-    if (!arguments[1].isNull() && !arguments[1].isUndefined()) {
+    sk_sp<SkImageFilter> inner = nullptr;
+    if (hasOptionalArgument(arguments, count, 1)) {
       inner = JsiSkImageFilter::fromValue(runtime, arguments[1]);
     }
     return jsi::Object::createFromHostObject(
@@ -109,12 +140,12 @@ public:
         JsiSkImageFilter::fromValue(runtime, arguments[1]);
     sk_sp<SkImageFilter> foreground = nullptr;
 
-    if (count > 2 && !arguments[2].isNull()) {
+    if (hasOptionalArgument(arguments, count, 2)) {
       foreground = JsiSkImageFilter::fromValue(runtime, arguments[2]);
     }
 
     SkImageFilters::CropRect cropRect = {};
-    if (count > 3 && !arguments[3].isUndefined()) {
+    if (hasOptionalArgument(arguments, count, 3)) {
       cropRect = *JsiSkRect::fromValue(runtime, arguments[3]);
     }
 
@@ -131,12 +162,12 @@ public:
     auto sigmaX = arguments[2].asNumber();
     auto sigmaY = arguments[3].asNumber();
     auto color = JsiSkColor::fromValue(runtime, arguments[4]);
-    sk_sp<SkImageFilter> input;
-    if (!arguments[5].isNull() && !arguments[5].isUndefined()) {
+    sk_sp<SkImageFilter> input = nullptr;
+    if (hasOptionalArgument(arguments, count, 5)) {
       input = JsiSkImageFilter::fromValue(runtime, arguments[5]);
     }
     SkImageFilters::CropRect cropRect = {};
-    if (count > 6 && !arguments[6].isUndefined()) {
+    if (hasOptionalArgument(arguments, count, 6)) {
       cropRect = *JsiSkRect::fromValue(runtime, arguments[6]);
     }
     return jsi::Object::createFromHostObject(
@@ -152,12 +183,12 @@ public:
     auto sigmaX = arguments[2].asNumber();
     auto sigmaY = arguments[3].asNumber();
     auto color = JsiSkColor::fromValue(runtime, arguments[4]);
-    sk_sp<SkImageFilter> input;
-    if (!arguments[5].isNull() && !arguments[5].isUndefined()) {
+    sk_sp<SkImageFilter> input = nullptr;
+    if (hasOptionalArgument(arguments, count, 5)) {
       input = JsiSkImageFilter::fromValue(runtime, arguments[5]);
     }
     SkImageFilters::CropRect cropRect = {};
-    if (count > 6 && !arguments[6].isUndefined()) {
+    if (hasOptionalArgument(arguments, count, 6)) {
       cropRect = *JsiSkRect::fromValue(runtime, arguments[6]);
     }
     return jsi::Object::createFromHostObject(
@@ -170,12 +201,12 @@ public:
   JSI_HOST_FUNCTION(MakeErode) {
     auto rx = arguments[0].asNumber();
     auto ry = arguments[1].asNumber();
-    sk_sp<SkImageFilter> input;
-    if (!arguments[2].isNull() && !arguments[2].isUndefined()) {
+    sk_sp<SkImageFilter> input = nullptr;
+    if (hasOptionalArgument(arguments, count, 2)) {
       input = JsiSkImageFilter::fromValue(runtime, arguments[2]);
     }
     SkImageFilters::CropRect cropRect = {};
-    if (count > 3 && !arguments[3].isUndefined()) {
+    if (hasOptionalArgument(arguments, count, 3)) {
       cropRect = *JsiSkRect::fromValue(runtime, arguments[3]);
     }
     return jsi::Object::createFromHostObject(
@@ -187,12 +218,12 @@ public:
   JSI_HOST_FUNCTION(MakeDilate) {
     auto rx = arguments[0].asNumber();
     auto ry = arguments[1].asNumber();
-    sk_sp<SkImageFilter> input;
-    if (!arguments[2].isNull() && !arguments[2].isUndefined()) {
+    sk_sp<SkImageFilter> input = nullptr;
+    if (hasOptionalArgument(arguments, count, 2)) {
       input = JsiSkImageFilter::fromValue(runtime, arguments[2]);
     }
     SkImageFilters::CropRect cropRect = {};
-    if (count > 3 && !arguments[3].isUndefined()) {
+    if (hasOptionalArgument(arguments, count, 3)) {
       cropRect = *JsiSkRect::fromValue(runtime, arguments[3]);
     }
     return jsi::Object::createFromHostObject(
@@ -205,12 +236,12 @@ public:
     auto rtb = JsiSkRuntimeShaderBuilder::fromValue(runtime, arguments[0]);
 
     const char *childName = "";
-    if (!arguments[1].isNull() && !arguments[1].isUndefined()) {
+    if (hasOptionalArgument(arguments, count, 1)) {
       childName = arguments[1].asString(runtime).utf8(runtime).c_str();
     }
 
-    sk_sp<SkImageFilter> input;
-    if (!arguments[2].isNull() && !arguments[2].isUndefined()) {
+    sk_sp<SkImageFilter> input = nullptr;
+    if (hasOptionalArgument(arguments, count, 2)) {
       input = JsiSkImageFilter::fromValue(runtime, arguments[2]);
     }
     return jsi::Object::createFromHostObject(

@@ -21,11 +21,13 @@ export interface ImageFilterFactory {
    * @param dx - Offset along the X axis
    * @param dy - Offset along the X axis
    * @param input - if null, it will use the dynamic source image
+   * @param cropRect - Optional rectangle that crops the input and output
    */
   MakeOffset(
     dx: number,
     dy: number,
-    input: SkImageFilter | null
+    input?: SkImageFilter | null,
+    cropRect?: SkRect | null
   ): SkImageFilter;
   /**
    * Spatially displace pixel values of the filtered image
@@ -35,45 +37,56 @@ export interface ImageFilterFactory {
    * @param scale - Scale factor to be used in the displacement
    * @param in1 - Source image filter to use for the displacement
    * @param input - if null, it will use the dynamic source image
+   * @param cropRect - Optional rectangle that crops the input and output
    */
   MakeDisplacementMap(
     channelX: ColorChannel,
     channelY: ColorChannel,
     scale: number,
     in1: SkImageFilter,
-    input: SkImageFilter | null
+    input?: SkImageFilter | null,
+    cropRect?: SkRect | null
   ): SkImageFilter;
   /**
    * Transforms a shader into an impage filter
    *
    * @param shader - The Shader to be transformed
-   * @param input - if null, it will use the dynamic source image
+   * @param dither - Whether to apply dithering to the shader
+   * @param cropRect - Optional rectangle that crops the input and output
    */
-  MakeShader(shader: SkShader, input: SkImageFilter | null): SkImageFilter;
+  MakeShader(
+    shader: SkShader,
+    dither?: boolean,
+    cropRect?: SkRect | null
+  ): SkImageFilter;
   /**
    * Create a filter that blurs its input by the separate X and Y sigmas. The provided tile mode
    * is used when the blur kernel goes outside the input image.
    *
    * @param sigmaX - The Gaussian sigma value for blurring along the X axis.
    * @param sigmaY - The Gaussian sigma value for blurring along the Y axis.
-   * @param mode
+   * @param mode - The tile mode to use when blur kernel goes outside the image
    * @param input - if null, it will use the dynamic source image (e.g. a saved layer)
+   * @param cropRect - Optional rectangle that crops the input and output
    */
   MakeBlur(
     sigmaX: number,
     sigmaY: number,
     mode: TileMode,
-    input: SkImageFilter | null
+    input?: SkImageFilter | null,
+    cropRect?: SkRect | null
   ): SkImageFilter;
 
   /**
    * Create a filter that applies the color filter to the input filter results.
-   * @param cf
+   * @param colorFilter - The color filter to apply
    * @param input - if null, it will use the dynamic source image (e.g. a saved layer)
+   * @param cropRect - Optional rectangle that crops the input and output
    */
   MakeColorFilter(
-    cf: SkColorFilter,
-    input: SkImageFilter | null
+    colorFilter: SkColorFilter,
+    input?: SkImageFilter | null,
+    cropRect?: SkRect | null
   ): SkImageFilter;
 
   /**
@@ -105,8 +118,8 @@ export interface ImageFilterFactory {
     sigmaX: number,
     sigmaY: number,
     color: SkColor,
-    input: SkImageFilter | null,
-    cropRect?: SkRect
+    input?: SkImageFilter | null,
+    cropRect?: SkRect | null
   ) => SkImageFilter;
   /**
    * Create a filter that renders a drop shadow, in exactly the same manner as ::DropShadow, except
@@ -126,8 +139,8 @@ export interface ImageFilterFactory {
     sigmaX: number,
     sigmaY: number,
     color: SkColor,
-    input: SkImageFilter | null,
-    cropRect?: SkRect
+    input?: SkImageFilter | null,
+    cropRect?: SkRect | null
   ) => SkImageFilter;
   /**
    *  Create a filter that erodes each input pixel's channel values to the minimum channel value
@@ -140,8 +153,8 @@ export interface ImageFilterFactory {
   MakeErode: (
     rx: number,
     ry: number,
-    input: SkImageFilter | null,
-    cropRect?: SkRect
+    input?: SkImageFilter | null,
+    cropRect?: SkRect | null
   ) => SkImageFilter;
   /**
    *  Create a filter that dilates each input pixel's channel values to the max value within the
@@ -154,21 +167,21 @@ export interface ImageFilterFactory {
   MakeDilate: (
     rx: number,
     ry: number,
-    input: SkImageFilter | null,
-    cropRect?: SkRect
+    input?: SkImageFilter | null,
+    cropRect?: SkRect | null
   ) => SkImageFilter;
   /**
    *  This filter takes an SkBlendMode and uses it to composite the two filters together.
    *  @param mode       The blend mode that defines the compositing operation
    *  @param background The Dst pixels used in blending, if null the source bitmap is used.
    *  @param foreground The Src pixels used in blending, if null the source bitmap is used.
-   *  @cropRect         Optional rectangle to crop input and output.
+   *  @param cropRect   Optional rectangle to crop input and output.
    */
   MakeBlend: (
     mode: BlendMode,
     background: SkImageFilter,
-    foreground: SkImageFilter | null,
-    cropRect?: SkRect
+    foreground?: SkImageFilter | null,
+    cropRect?: SkRect | null
   ) => SkImageFilter;
   /**
    *  Create a filter that fills the output with the per-pixel evaluation of the SkShader produced
@@ -187,6 +200,6 @@ export interface ImageFilterFactory {
   MakeRuntimeShader: (
     builder: SkRuntimeShaderBuilder,
     childShaderName: string | null,
-    input: SkImageFilter | null
+    input?: SkImageFilter | null
   ) => SkImageFilter;
 }

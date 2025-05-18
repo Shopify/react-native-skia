@@ -151,7 +151,7 @@ const declareDisplacementMapImageFilter = (
   if (!shader) {
     throw new Error("DisplacementMap expects a shader as child");
   }
-  const map = ctx.Skia.ImageFilter.MakeShader(shader, null);
+  const map = ctx.Skia.ImageFilter.MakeShader(shader);
   const imgf = ctx.Skia.ImageFilter.MakeDisplacementMap(
     ColorChannel[enumKey(channelX)],
     ColorChannel[enumKey(channelY)],
