@@ -1,7 +1,7 @@
 import { importSkia, surface, images } from "../setup";
 import type { SkColor } from "../../../skia/types";
 import { BlendMode, ClipOp, PaintStyle, TileMode } from "../../../skia/types";
-import { checkImage, docPath } from "../../../__tests__/setup";
+import { checkImage, docPath, itRunsE2eOnly } from "../../../__tests__/setup";
 
 const checkResult = (base64: string, path: string) => {
   const { Skia } = importSkia();
@@ -12,7 +12,7 @@ const checkResult = (base64: string, path: string) => {
 };
 
 describe("Lighting Image Filters", () => {
-  it("DistantLitDiffuse - Dramatic Relief", async () => {
+  itRunsE2eOnly("DistantLitDiffuse - Dramatic Relief", async () => {
     const { skiaLogoPng } = images;
     const base64 = await surface.eval(
       (Skia, ctx) => {
@@ -139,7 +139,7 @@ describe("Lighting Image Filters", () => {
     checkResult(base64, "lighting-image-filters/distant-lit-diffuse.png");
   });
 
-  it("PointLitDiffuse - Glowing Core", async () => {
+  itRunsE2eOnly("PointLitDiffuse - Glowing Core", async () => {
     const { skiaLogoPng } = images;
     const base64 = await surface.eval(
       (Skia, ctx) => {
@@ -232,7 +232,7 @@ describe("Lighting Image Filters", () => {
     checkResult(base64, "lighting-image-filters/point-lit-diffuse.png");
   });
 
-  it("SpotLitDiffuse - Theatrical Spotlight", async () => {
+  itRunsE2eOnly("SpotLitDiffuse - Theatrical Spotlight", async () => {
     const { skiaLogoPng } = images;
     const base64 = await surface.eval(
       (Skia, ctx) => {
@@ -362,7 +362,7 @@ describe("Lighting Image Filters", () => {
     checkResult(base64, "lighting-image-filters/spot-lit-diffuse.png");
   });
 
-  it("DistantLitSpecular - Metallic Gold", async () => {
+  itRunsE2eOnly("DistantLitSpecular - Metallic Gold", async () => {
     const { skiaLogoPng } = images;
     const base64 = await surface.eval(
       (Skia, ctx) => {
@@ -561,7 +561,7 @@ describe("Lighting Image Filters", () => {
     checkResult(base64, "lighting-image-filters/distant-lit-specular.png");
   });
 
-  it("PointLitSpecular - Wet Surface", async () => {
+  itRunsE2eOnly("PointLitSpecular - Wet Surface", async () => {
     const { skiaLogoPng } = images;
     const base64 = await surface.eval(
       (Skia, ctx) => {
@@ -729,7 +729,7 @@ describe("Lighting Image Filters", () => {
     );
     checkResult(base64, "lighting-image-filters/point-lit-specular.png");
   });
-  it("SpotLitSpecular - Crystal Prism", async () => {
+  itRunsE2eOnly("SpotLitSpecular - Crystal Prism", async () => {
     const { skiaLogoPng } = images;
     const base64 = await surface.eval(
       (Skia, ctx) => {
@@ -1034,7 +1034,7 @@ describe("Lighting Image Filters", () => {
     checkResult(base64, "lighting-image-filters/spot-lit-specular.png");
   });
 
-  it("Combined Lighting - Elemental Fire & Ice", async () => {
+  itRunsE2eOnly("Combined Lighting - Elemental Fire & Ice", async () => {
     const { skiaLogoPng } = images;
     const base64 = await surface.eval(
       (Skia, ctx) => {

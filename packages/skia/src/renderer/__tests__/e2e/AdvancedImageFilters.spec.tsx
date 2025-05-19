@@ -1,4 +1,4 @@
-import { docPath, checkImage } from "../../../__tests__/setup";
+import { docPath, checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
 import {
   BlendMode,
   FilterMode,
@@ -17,7 +17,7 @@ const checkResult = (base64: string, path: string) => {
 };
 
 describe("Advanced Image Filters", () => {
-  it("Arithmetic - Neon Glow", async () => {
+  itRunsE2eOnly("Arithmetic - Neon Glow", async () => {
     const { skiaLogoPng } = images;
     const base64 = await surface.eval(
       (Skia, ctx) => {
@@ -52,7 +52,7 @@ describe("Advanced Image Filters", () => {
     checkResult(base64, "advanced-image-filters/arithmetic-neon-glow.png");
   });
 
-  it("Crop - Viewport Portal", async () => {
+  itRunsE2eOnly("Crop - Viewport Portal", async () => {
     const { skiaLogoPng } = images;
     const base64 = await surface.eval(
       (Skia, ctx) => {
@@ -142,7 +142,7 @@ describe("Advanced Image Filters", () => {
     checkResult(base64, "advanced-image-filters/crop-viewport-portal.png");
   });
 
-  it("Empty - Silhouette Effect", async () => {
+  itRunsE2eOnly("Empty - Silhouette Effect", async () => {
     const { skiaLogoPng } = images;
     const base64 = await surface.eval(
       (Skia, ctx) => {
@@ -209,7 +209,7 @@ describe("Advanced Image Filters", () => {
     checkResult(base64, "advanced-image-filters/empty-silhouette.png");
   });
 
-  it("MakeImage - Dynamic Mosaic", async () => {
+  itRunsE2eOnly("MakeImage - Dynamic Mosaic", async () => {
     const { skiaLogoPng, mask } = images;
     const base64 = await surface.eval(
       (Skia, ctx) => {
@@ -285,7 +285,7 @@ describe("Advanced Image Filters", () => {
     );
     checkResult(base64, "advanced-image-filters/makeimage-mosaic.png");
   });
-  it("MatrixConvolution - Embossed Metallic Effect", async () => {
+  itRunsE2eOnly("MatrixConvolution - Embossed Metallic Effect", async () => {
     const { skiaLogoPng } = images;
     const base64 = await surface.eval(
       (Skia, ctx) => {
