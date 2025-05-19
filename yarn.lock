@@ -10705,13 +10705,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:2":
-  version: 2.6.12
-  resolution: "core-js@npm:2.6.12"
-  checksum: 44fa9934a85f8c78d61e0c8b7b22436330471ffe59ec5076fe7f324d6e8cf7f824b14b1c81ca73608b13bdb0fef035bd820989bf059767ad6fa13123bb8bd016
-  languageName: node
-  linkType: hard
-
 "core-js@npm:^3.31.1":
   version: 3.41.0
   resolution: "core-js@npm:3.41.0"
@@ -13041,7 +13034,6 @@ __metadata:
     react-native-gesture-handler: ^2.24.0
     react-native-macos: ^0.75.0
     react-native-reanimated: ^3.0
-    react-native-reanimated-slider: ^2.0.0
     react-native-safe-area-context: ^5.2.0
     react-native-screens: ^4.9.1
     react-native-svg: ^15.11.2
@@ -22567,18 +22559,6 @@ __metadata:
   bin:
     react-native: cli.js
   checksum: a06e700bd359df4e1eaa15cbaf6d3b6e2e22f95083520d5f7f02b0acec45d307133992623dd712bdbf7d2d93d596e28a0658405e89880a95997ae5b46d2280cc
-  languageName: node
-  linkType: hard
-
-"react-native-reanimated-slider@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "react-native-reanimated-slider@npm:2.0.0"
-  dependencies:
-    core-js: 2
-  peerDependencies:
-    react-native-gesture-handler: ^1.x.x
-    react-native-reanimated: ^2.x.x
-  checksum: b16931d48f5067547404c79fb5d387b198c51fb173041070b4d94933426b22e0380a29b3145f3ebeee3a2479dbd2da2abad9a7e42b7bd2095f36623facf15005
   languageName: node
   linkType: hard
 

@@ -31,7 +31,6 @@
     "react-native-gesture-handler": "^2.24.0",
     "react-native-macos": "^0.75.0",
     "react-native-reanimated": "^3.0",
-    "react-native-reanimated-slider": "^2.0.0",
     "react-native-safe-area-context": "^5.2.0",
     "react-native-screens": "^4.9.1",
     "react-native-svg": "^15.11.2",
