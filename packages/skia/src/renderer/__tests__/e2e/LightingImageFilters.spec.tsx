@@ -146,30 +146,24 @@ describe("Lighting Image Filters", () => {
         const sur = Skia.Surface.MakeOffscreen(768, 768)!;
         const canvas = sur.getCanvas();
 
-        // Create a black background for maximum contrast
+        // Create a dark background (not completely black) for better visibility
         const bgPaint = Skia.Paint();
-        bgPaint.setColor(Skia.Color("rgb(0, 0, 0)"));
+        bgPaint.setColor(Skia.Color("rgb(10, 10, 15)"));
         canvas.drawRect(Skia.XYWHRect(0, 0, 768, 768), bgPaint);
 
         // Create a glowing center effect
         const paint = Skia.Paint();
 
-        // Preprocess the image to enhance edge contrast
-        const preprocessFilter = Skia.ImageFilter.MakeBlur(
-          3,
-          3,
-          ctx.TileMode.Decal
-        );
-
         // Position light inside the image for a glowing core effect
-        const location = { x: 384, y: 384, z: -100 }; // Negative Z places light behind/inside image
+        // Moved light closer to surface (z is now positive)
+        const location = { x: 384, y: 384, z: 200 };
 
         // Light color (intense orange-yellow for a fiery glow)
         const lightColor = Skia.Color("rgb(255, 200, 50)");
 
         // Parameters for the filter
-        const surfaceScale = 3.0; // Exaggerated height effect
-        const kd = 3.0; // Very strong diffuse reflection
+        const surfaceScale = 2.0; // Height effect
+        const kd = 1.5; // Diffuse reflection strength
 
         // Create the point light diffuse filter
         const pointLitFilter = Skia.ImageFilter.MakePointLitDiffuse(
@@ -177,31 +171,31 @@ describe("Lighting Image Filters", () => {
           lightColor,
           surfaceScale,
           kd,
-          preprocessFilter, // Use blurred image input for smoother edges
+          null, // Use source bitmap as input
           null // No crop rect
         );
 
         // Set the filter to our paint
         paint.setImageFilter(pointLitFilter);
 
-        // Add a slight blue color to outer areas
+        // Add a color boost to make the effect more visible
         paint.setColorFilter(
           Skia.ColorFilter.MakeMatrix([
+            1.2,
+            0,
+            0,
+            0,
+            20, // Boosted red
+            0,
+            1.1,
+            0,
+            0,
+            10, // Boosted green
+            0,
+            0,
             1.0,
             0,
-            0,
-            0,
-            0, // Red unchanged
-            0,
-            0.9,
-            0.1,
-            0,
-            0, // Green slightly reduced
-            0,
-            0.2,
-            0.8,
-            0,
-            20, // Boost blue in darker areas
+            0, // Blue unchanged
             0,
             0,
             0,
@@ -213,32 +207,27 @@ describe("Lighting Image Filters", () => {
         // Draw the image with the glowing core effect
         canvas.drawImage(ctx.skiaLogoPng, 0, 0, paint);
 
-        // Add an outer glow effect
-        const glowPaint = Skia.Paint();
-
-        // Position second light further away for outer glow
-        const outerLocation = { x: 384, y: 384, z: 500 };
-        const outerLightColor = Skia.Color("rgb(80, 130, 255)"); // Blue outer glow
-
-        const outerFilter = Skia.ImageFilter.MakePointLitDiffuse(
-          outerLocation,
-          outerLightColor,
+        // Add a second layer of lighting for more intensity
+        const accentPaint = Skia.Paint();
+        const accentFilter = Skia.ImageFilter.MakePointLitDiffuse(
+          { x: 384, y: 384, z: 50 }, // Closer light source
+          Skia.Color("rgb(255, 255, 200)"), // Brighter light
           surfaceScale * 0.5,
-          kd * 0.3, // Weaker diffuse for subtler effect
-          preprocessFilter,
+          kd * 0.8,
+          null,
           null
         );
 
-        glowPaint.setImageFilter(outerFilter);
-        glowPaint.setBlendMode(ctx.BlendMode.Screen); // Screen blend for additive light effect
+        accentPaint.setImageFilter(accentFilter);
+        accentPaint.setBlendMode(ctx.BlendMode.Plus); // Additive lighting
 
-        // Draw a second pass with outer glow
-        canvas.drawImage(ctx.skiaLogoPng, 0, 0, glowPaint);
+        // Draw second layer
+        canvas.drawImage(ctx.skiaLogoPng, 0, 0, accentPaint);
 
         sur.flush();
         return sur.makeImageSnapshot().encodeToBase64();
       },
-      { skiaLogoPng, TileMode, BlendMode }
+      { skiaLogoPng, BlendMode }
     );
     checkResult(base64, "lighting-image-filters/point-lit-diffuse.png");
   });
@@ -350,13 +339,13 @@ describe("Lighting Image Filters", () => {
         // Draw 12 light rays from the main spotlight
         for (let i = 0; i < 12; i++) {
           const angle = (i / 12) * Math.PI * 0.5 + Math.PI * 0.75; // Angles for right-top quadrant
-          const length = 300 + Math.random() * 200;
+          const length = 300 + 0.5 * 200;
           const endX = lightX + Math.cos(angle) * length;
           const endY = lightY + Math.sin(angle) * length;
 
           const rayPaint = Skia.Paint();
           rayPaint.setColor(Skia.Color("rgba(255, 230, 180, 0.1)"));
-          rayPaint.setStrokeWidth(2 + Math.random() * 4);
+          rayPaint.setStrokeWidth(2 + 0.5 * 4);
           rayPaint.setStyle(ctx.PaintStyle.Stroke);
           rayPaint.setImageFilter(
             Skia.ImageFilter.MakeBlur(3, 3, ctx.TileMode.Decal)
