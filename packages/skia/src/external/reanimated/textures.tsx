@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { DependencyList, ReactElement } from "react";
-import { type SharedValue } from "react-native-reanimated";
+import type { SharedValue } from "react-native-reanimated";
 
 import type {
   DataSourceParam,
@@ -15,10 +15,9 @@ import {
 import { Skia, useImage } from "../../skia";
 
 import Rea from "./ReanimatedProxy";
-import { notifyChange } from "./interpolators";
 
 const createTexture = (
-  texture: SharedValue<SkImage>,
+  texture: SharedValue<SkImage | null>,
   picture: SkPicture,
   size: SkSize
 ) => {
@@ -51,17 +50,10 @@ export const usePictureAsTexture = (
   picture: SkPicture | null,
   size: SkSize
 ) => {
-  const texture = Rea.useSharedValue<SkImage>(Skia.Image.MakeNull());
+  const texture = Rea.useSharedValue<SkImage | null>(null);
   useEffect(() => {
     if (picture !== null) {
-      Rea.runOnUI(() => {
-        const surface = Skia.Surface.MakeOffscreen(size.width, size.height)!;
-        const canvas = surface.getCanvas();
-        canvas.drawPicture(picture);
-        const tex = surface.getNativeTextureUnstable();
-        texture.value = Skia.Image.MakeImageFromNativeTextureUnstable(tex, size.width, size.height, false, texture.value);
-        notifyChange(texture);
-      })();
+      Rea.runOnUI(createTexture)(texture, picture, size);
     }
   }, [picture, size, texture]);
   return texture;
