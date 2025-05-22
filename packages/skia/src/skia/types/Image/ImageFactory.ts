@@ -21,6 +21,7 @@ export interface ImageInfo {
 }
 
 export interface ImageFactory {
+  MakeNull: () => SkImage;
   /**
    * Return an Image backed by the encoded data, but attempt to defer decoding until the image
    * is actually used/drawn. This deferral allows the system to cache the result, either on the
@@ -70,7 +71,8 @@ export interface ImageFactory {
     texture: unknown,
     width: number,
     height: number,
-    mipmapped?: boolean
+    mipmapped?: boolean,
+    outputImage?: SkImage
   ) => SkImage;
 
   /**
