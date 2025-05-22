@@ -170,7 +170,7 @@ function OffscreenCanvas({ render }: CanvasProps) {
   const [texture] = useOffscreenCanvas(render);
 
   return (
-    <Canvas opaque={Platform.OS === "android"} style={StyleSheet.absoluteFill}>
+    <Canvas style={StyleSheet.absoluteFill}>
       <Image image={texture} width={WINDOW_WIDTH} height={WINDOW_HEIGHT} />
     </Canvas>
   );
