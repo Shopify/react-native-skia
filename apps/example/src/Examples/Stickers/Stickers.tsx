@@ -24,7 +24,7 @@ export const Stickers = () => {
   }
   return (
     <View>
-      <Canvas style={{ width, height }} opaque>
+      <Canvas style={{ width, height }}>
         <Picture matrix={pictureMatrix} image={image} />
         <HelloSticker matrix={helloMatrix} />
         <LocationSticker font={font} matrix={locationMatrix} />
