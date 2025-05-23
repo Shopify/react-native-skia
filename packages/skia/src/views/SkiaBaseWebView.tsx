@@ -42,6 +42,10 @@ export abstract class SkiaBaseWebView<
       canvas.width = this.width * pd;
       canvas.height = this.height * pd;
       const surface = CanvasKit.MakeWebGLCanvasSurface(canvas);
+      const ctx = canvas.getContext("webgl2");
+      if (ctx) {
+        ctx.drawingBufferColorSpace = "display-p3";
+      }
       if (!surface) {
         throw new Error("Could not create surface");
       }
