@@ -52,7 +52,9 @@ describe("Data Encoding", () => {
       const offscreen = Skia.Surface.MakeOffscreen(1, 1)!;
       const canvas = offscreen.getCanvas();
       canvas.drawImage(img, 0, 0);
-      return Array.from(offscreen.makeImageSnapshot().encodeToBytes());
+      const snapshotImage = Skia.Image.MakeNull();
+      offscreen.makeImageSnapshot(undefined, snapshotImage);
+      return Array.from(snapshotImage.encodeToBytes());
     });
     expect(result.length).toBeGreaterThan(0);
   });
@@ -68,7 +70,9 @@ describe("Data Encoding", () => {
       const offscreen = Skia.Surface.MakeOffscreen(1, 1)!;
       const canvas = offscreen.getCanvas();
       canvas.drawImage(img, 0, 0);
-      return offscreen.makeImageSnapshot().encodeToBase64();
+      const snapshotImage = Skia.Image.MakeNull();
+      offscreen.makeImageSnapshot(undefined, snapshotImage);
+      return snapshotImage.encodeToBase64();
     });
     expect(result.length).toBeGreaterThan(0);
   });
