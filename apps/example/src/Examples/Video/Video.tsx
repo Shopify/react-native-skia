@@ -37,7 +37,7 @@ export const Video = () => {
         style={{ flex: 1 }}
         onPress={() => (paused.value = !paused.value)}
       >
-        <Canvas style={{ flex: 1 }} opaque>
+        <Canvas style={{ flex: 1 }}>
           <Fill>
             <ImageShader
               image={currentFrame}
