@@ -64,7 +64,7 @@ public:
   JSI_HOST_FUNCTION(makeImageSnapshot) {
     auto surface = getObject();
     sk_sp<SkImage> image;
-    if (count > 1 && arguments[1].isObject()) {
+    if (count > 0 && arguments[0].isObject()) {
       auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
       image = surface->makeImageSnapshot(SkIRect::MakeXYWH(
           rect->x(), rect->y(), rect->width(), rect->height()));
@@ -75,10 +75,10 @@ public:
     auto recording = surface->recorder()->snap();
     DawnContext::getInstance().submitRecording(recording.get());
 #endif
-    if (count > 2 && arguments[2].isObject()) {
-      auto jsiImage = arguments[2].asObject(runtime).asHostObject<JsiSkImage>(runtime);
-      auto img = jsiImage->getObject();
-      img = image;
+    if (count > 1 && arguments[1].isObject()) {
+      auto jsiImage = arguments[1].asObject(runtime).asHostObject<JsiSkImage>(runtime);
+      jsiImage->setObject(image);
+      return jsi::Value(runtime, arguments[1]);
     }
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));

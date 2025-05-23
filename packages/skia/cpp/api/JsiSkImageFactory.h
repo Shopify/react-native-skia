@@ -95,8 +95,8 @@ public:
         arguments[4].asObject(runtime).isHostObject(runtime)) {
       auto jsiImage = arguments[4].asObject(runtime).asHostObject<JsiSkImage>(
           runtime);
-      auto img = jsiImage->getObject();
-      img = image;
+      jsiImage->setObject(image);
+      return jsi::Value(runtime, arguments[4]);
     }
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
