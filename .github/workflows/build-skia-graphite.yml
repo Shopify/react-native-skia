@@ -24,6 +24,20 @@ jobs:
           download_skia: 'false'
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Apply Dawn patch
+        run: |
+          DAWN_GNI_FILE="./externals/skia/build_overrides/dawn.gni"
+          if [ -f "$DAWN_GNI_FILE" ]; then
+            echo "Applying patch to dawn.gni..."
+            # Remove the specified lines from the end of the file
+            sed -i.bak '/# PartitionAlloc is an optional dependency:/,$d' "$DAWN_GNI_FILE"
+            echo "Patch applied successfully."
+            echo "Modified dawn.gni content:"
+            cat "$DAWN_GNI_FILE"
+          else
+            echo "Warning: dawn.gni file not found at $DAWN_GNI_FILE"
+          fi
+
       - name: Build Skia with Graphite
         working-directory: ./packages/skia
         env:
