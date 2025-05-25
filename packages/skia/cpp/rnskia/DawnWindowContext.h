@@ -27,16 +27,7 @@ public:
                     wgpu::Surface surface, int width, int height)
       : _recorder(recorder), _device(device), _surface(surface), _width(width),
         _height(height) {
-    wgpu::SurfaceConfiguration config;
-    config.device = _device;
-    config.format = DawnUtils::PreferredTextureFormat;
-    config.width = _width;
-    config.height = _height;
-    config.presentMode = wgpu::PresentMode::Fifo;
-#ifdef __APPLE__
-    config.alphaMode = wgpu::CompositeAlphaMode::Premultiplied;
-#endif
-    _surface.Configure(&config);
+    configureSurface();
   }
 
   sk_sp<SkSurface> getSurface() override {
@@ -59,7 +50,9 @@ public:
   void present() override;
 
   void resize(int width, int height) override {
-    throw std::runtime_error("resize not implemented yet");
+    _width = width;
+    _height = height;
+    configureSurface();
   }
 
   int getWidth() override { return _width; }
@@ -67,6 +60,19 @@ public:
   int getHeight() override { return _height; }
 
 private:
+  void configureSurface() {
+    wgpu::SurfaceConfiguration config;
+    config.device = _device;
+    config.format = DawnUtils::PreferredTextureFormat;
+    config.width = _width;
+    config.height = _height;
+    config.presentMode = wgpu::PresentMode::Fifo;
+#ifdef __APPLE__
+    config.alphaMode = wgpu::CompositeAlphaMode::Premultiplied;
+#endif
+    _surface.Configure(&config);
+  }
+
   skgpu::graphite::Recorder *_recorder;
   // TODO: keep device in DawnContext? Do we need it for resizing?
   wgpu::Device _device;
