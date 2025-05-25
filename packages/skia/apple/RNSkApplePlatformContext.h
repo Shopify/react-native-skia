@@ -43,15 +43,17 @@ public:
 
   sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override;
 
+#if !defined(SK_GRAPHITE)
   sk_sp<SkImage> makeImageFromNativeTexture(const TextureInfo &textureInfo,
                                             int width, int height,
                                             bool mipMapped) override;
 
-  uint64_t makeNativeBuffer(sk_sp<SkImage> image) override;
-
   const TextureInfo getTexture(sk_sp<SkSurface> image) override;
 
   const TextureInfo getTexture(sk_sp<SkImage> image) override;
+#endif
+
+  uint64_t makeNativeBuffer(sk_sp<SkImage> image) override;
 
   void releaseNativeBuffer(uint64_t pointer) override;
 

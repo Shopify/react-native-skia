@@ -31,7 +31,8 @@ createDawnBackendContext(dawn::native::Instance *instance) {
       "use_tint_ir",
   };
   wgpu::DawnTogglesDescriptor togglesDesc;
-  togglesDesc.enabledToggleCount = (sizeof(kToggles) / sizeof(kToggles[0])) - (useTintIR ? 0 : 1);
+  togglesDesc.enabledToggleCount =
+      (sizeof(kToggles) / sizeof(kToggles[0])) - (useTintIR ? 0 : 1);
   togglesDesc.enabledToggles = kToggles;
 
   wgpu::RequestAdapterOptions options;
