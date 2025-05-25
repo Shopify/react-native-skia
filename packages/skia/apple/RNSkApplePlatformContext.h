@@ -44,6 +44,8 @@ public:
   sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override;
 
 #if !defined(SK_GRAPHITE)
+  GrDirectContext *getDirectContext() override;
+
   sk_sp<SkImage> makeImageFromNativeTexture(const TextureInfo &textureInfo,
                                             int width, int height,
                                             bool mipMapped) override;
@@ -68,9 +70,7 @@ public:
 
   void raiseError(const std::exception &err) override;
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override;
-#if !defined(SK_GRAPHITE)
-  GrDirectContext *getDirectContext() override;
-#endif
+
   sk_sp<SkFontMgr> createFontMgr() override;
 
 private:

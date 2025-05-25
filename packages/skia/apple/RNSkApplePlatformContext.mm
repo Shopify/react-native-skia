@@ -157,6 +157,10 @@ uint64_t RNSkApplePlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
 }
 
 #if !defined(SK_GRAPHITE)
+GrDirectContext *RNSkApplePlatformContext::getDirectContext() {
+  return MetalContext::getInstance().getDirectContext();
+}
+
 const TextureInfo RNSkApplePlatformContext::getTexture(sk_sp<SkImage> image) {
   TextureInfo result;
   GrBackendTexture texture;
@@ -171,6 +175,7 @@ const TextureInfo RNSkApplePlatformContext::getTexture(sk_sp<SkImage> image) {
     throw std::runtime_error("Couldn't get Metal texture info");
   }
   result.mtlTexture = textureInfo.fTexture.get();
+  return result;
 }
 
 const TextureInfo
@@ -185,7 +190,8 @@ RNSkApplePlatformContext::getTexture(sk_sp<SkSurface> surface) {
   if (!GrBackendTextures::GetMtlTextureInfo(texture, &textureInfo)) {
     throw std::runtime_error("Couldn't get Metal texture info");
   }
-  result.mtlTexture = textureInfo.fTexture.get();
+  result.mtlTexture = textureInfo.fTexture.get(); 
+  return result;
 }
 
 sk_sp<SkImage> RNSkApplePlatformContext::makeImageFromNativeTexture(
@@ -280,12 +286,6 @@ SkColorType RNSkApplePlatformContext::mtlPixelFormatToSkColorType(
     return kUnknown_SkColorType;
   }
 }
-
-#if !defined(SK_GRAPHITE)
-GrDirectContext *RNSkApplePlatformContext::getDirectContext() {
-  return MetalContext::getInstance().getDirectContext();
-}
-#endif
 
 sk_sp<SkFontMgr> RNSkApplePlatformContext::createFontMgr() {
   return SkFontMgr_New_CoreText(nullptr);
