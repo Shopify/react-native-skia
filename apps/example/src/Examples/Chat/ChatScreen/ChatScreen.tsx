@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo } from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Animated, {
   runOnUI,
   useAnimatedScrollHandler,
@@ -170,7 +170,7 @@ function OffscreenCanvas({ render }: CanvasProps) {
   const [texture] = useOffscreenCanvas(render);
 
   return (
-    <Canvas opaque={Platform.OS === "android"} style={StyleSheet.absoluteFill}>
+    <Canvas style={StyleSheet.absoluteFill}>
       <Image image={texture} width={WINDOW_WIDTH} height={WINDOW_HEIGHT} />
     </Canvas>
   );
