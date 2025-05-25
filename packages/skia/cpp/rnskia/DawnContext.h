@@ -204,7 +204,7 @@ private:
     DawnProcTable backendProcs = dawn::native::GetProcs();
     dawnProcSetProcs(&backendProcs);
     WGPUInstanceDescriptor desc{};
-    //desc.features.timedWaitAnyEnable = true;
+    desc.capabilities.timedWaitAnyEnable = true;
     instance = std::make_unique<dawn::native::Instance>(&desc);
 
     backendContext = DawnUtils::createDawnBackendContext(instance.get());
