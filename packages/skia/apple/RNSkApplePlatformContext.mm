@@ -157,8 +157,9 @@ uint64_t RNSkApplePlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
 }
 
 const TextureInfo RNSkApplePlatformContext::getTexture(sk_sp<SkImage> image) {
-  GrBackendTexture texture;
   TextureInfo result;
+#if !defined(SK_GRAPHITE)
+  GrBackendTexture texture;
   if (!SkImages::GetBackendTextureFromImage(image, &texture, true)) {
     throw std::runtime_error("Couldn't get backend texture");
   }
@@ -170,14 +171,16 @@ const TextureInfo RNSkApplePlatformContext::getTexture(sk_sp<SkImage> image) {
     throw std::runtime_error("Couldn't get Metal texture info");
   }
   result.mtlTexture = textureInfo.fTexture.get();
-  return result;
+#endif
+   return result;
 }
 
 const TextureInfo
 RNSkApplePlatformContext::getTexture(sk_sp<SkSurface> surface) {
+  TextureInfo result;
+#if !defined(SK_GRAPHITE)
   GrBackendTexture texture = SkSurfaces::GetBackendTexture(
       surface.get(), SkSurfaces::BackendHandleAccess::kFlushRead);
-  TextureInfo result;
   if (!texture.isValid()) {
     throw std::runtime_error("Invalid backend texture");
   }
@@ -186,6 +189,7 @@ RNSkApplePlatformContext::getTexture(sk_sp<SkSurface> surface) {
     throw std::runtime_error("Couldn't get Metal texture info");
   }
   result.mtlTexture = textureInfo.fTexture.get();
+#endif
   return result;
 }
 
@@ -229,6 +233,7 @@ RNSkApplePlatformContext::makeImageFromNativeBuffer(void *buffer) {
 
 sk_sp<SkImage> RNSkApplePlatformContext::makeImageFromNativeTexture(
     const TextureInfo &texInfo, int width, int height, bool mipMapped) {
+#if !defined(SK_GRAPHITE)
   id<MTLTexture> mtlTexture = (__bridge id<MTLTexture>)(texInfo.mtlTexture);
 
   SkColorType colorType = mtlPixelFormatToSkColorType(mtlTexture.pixelFormat);
@@ -246,6 +251,8 @@ sk_sp<SkImage> RNSkApplePlatformContext::makeImageFromNativeTexture(
   return SkImages::BorrowTextureFrom(getDirectContext(), texture,
                                      kTopLeft_GrSurfaceOrigin, colorType,
                                      kPremul_SkAlphaType, nullptr);
+#endif
+    return nullptr;
 }
 
 SkColorType RNSkApplePlatformContext::mtlPixelFormatToSkColorType(

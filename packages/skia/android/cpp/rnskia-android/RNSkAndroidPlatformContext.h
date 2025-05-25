@@ -78,6 +78,7 @@ public:
   sk_sp<SkImage> makeImageFromNativeTexture(const TextureInfo &texInfo,
                                             int width, int height,
                                             bool mipMapped) override {
+#if !defined(SK_GRAPHITE)
     GrGLTextureInfo textureInfo;
     textureInfo.fTarget = (GrGLenum)texInfo.glTarget;
     textureInfo.fID = (GrGLuint)texInfo.glID;
@@ -98,6 +99,9 @@ public:
         OpenGLContext::getInstance().getDirectContext(), backendTexture,
         kTopLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType, kUnpremul_SkAlphaType,
         nullptr);
+#else
+    return nullptr;
+#endif
   }
 
   std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override {
@@ -172,20 +176,31 @@ public:
   }
 
   const TextureInfo getTexture(sk_sp<SkImage> image) override {
+#if !defined(SK_GRAPHITE)
     GrBackendTexture texture;
     if (!SkImages::GetBackendTextureFromImage(image, &texture, true)) {
       throw std::runtime_error("Couldn't get backend texture from image.");
     }
     return getTextureInfo(texture);
+#else
+      TextureInfo tex;
+      return tex;
+#endif
   }
 
   const TextureInfo getTexture(sk_sp<SkSurface> surface) override {
+#if !defined(SK_GRAPHITE)
     GrBackendTexture texture = SkSurfaces::GetBackendTexture(
         surface.get(), SkSurface::BackendHandleAccess::kFlushRead);
     return getTextureInfo(texture);
+#else
+    TextureInfo tex;
+    return tex;
+#endif
   }
 
   static TextureInfo getTextureInfo(const GrBackendTexture &texture) {
+#if !defined(SK_GRAPHITE)
     if (!texture.isValid()) {
       throw std::runtime_error("invalid backend texture");
     }
@@ -203,6 +218,10 @@ public:
     texInfo.glFormat = textureInfo.fFormat;
     texInfo.glTarget = textureInfo.fTarget;
     return texInfo;
+#else
+    TextureInfo texInfo;
+    return texInfo;
+#endif
   }
 
 #if !defined(SK_GRAPHITE)

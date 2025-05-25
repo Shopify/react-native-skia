@@ -123,12 +123,17 @@ const buildXCFrameworks = () => {
   outputNames.forEach((name) => {
     console.log("Building XCFramework for " + name);
     const prefix = `${OutFolder}/${os}`;
-    $(`mkdir -p ${OutFolder}/${os}/tvsimulator`);
-    $(`rm -rf ${OutFolder}/${os}/tvsimulator/${name}`);
-    $(
-      // eslint-disable-next-line max-len
-      `lipo -create ${OutFolder}/${os}/x64-tvsimulator/${name} ${OutFolder}/${os}/arm64-tvsimulator/${name} -output ${OutFolder}/${os}/tvsimulator/${name}`
-    );
+
+    // Only create tvOS frameworks if GRAPHITE is not enabled
+    if (!GRAPHITE) {
+      $(`mkdir -p ${OutFolder}/${os}/tvsimulator`);
+      $(`rm -rf ${OutFolder}/${os}/tvsimulator/${name}`);
+      $(
+        // eslint-disable-next-line max-len
+        `lipo -create ${OutFolder}/${os}/x64-tvsimulator/${name} ${OutFolder}/${os}/arm64-tvsimulator/${name} -output ${OutFolder}/${os}/tvsimulator/${name}`
+      );
+    }
+
     $(`mkdir -p ${OutFolder}/${os}/iphonesimulator`);
     $(`rm -rf ${OutFolder}/${os}/iphonesimulator/${name}`);
     $(
@@ -143,21 +148,32 @@ const buildXCFrameworks = () => {
     );
     const [lib] = name.split(".");
     const dstPath = `${PackageRoot}/libs/${os}/${lib}.xcframework`;
-    $(
-      "xcodebuild -create-xcframework " +
+
+    // Build the xcodebuild command conditionally based on GRAPHITE
+    const xcframeworkCmd = GRAPHITE
+      ? "xcodebuild -create-xcframework " +
+        `-library ${prefix}/arm64-iphoneos/${name} ` +
+        `-library ${prefix}/iphonesimulator/${name} ` +
+        `-library ${prefix}/macosx/${name} ` +
+        ` -output ${dstPath}`
+      : "xcodebuild -create-xcframework " +
         `-library ${prefix}/arm64-iphoneos/${name} ` +
         `-library ${prefix}/iphonesimulator/${name} ` +
         `-library ${prefix}/arm64-tvos/${name} ` +
         `-library ${prefix}/tvsimulator/${name} ` +
         `-library ${prefix}/macosx/${name} ` +
-        ` -output ${dstPath}`
-    );
+        ` -output ${dstPath}`;
+
+    $(xcframeworkCmd);
   });
 };
 
 (async () => {
   if (GRAPHITE) {
     console.log("🪨 Skia Graphite");
+    console.log(
+      "⚠️  Apple TV (tvOS) builds are skipped when GRAPHITE is enabled"
+    );
   } else {
     console.log("🐘 Skia Ganesh");
   }
@@ -189,7 +205,7 @@ const buildXCFrameworks = () => {
           key,
           target,
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
+          // @ts-ignore
           configuration.targets[target].output,
           configuration.outputNames
         );
