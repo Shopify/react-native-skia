@@ -10,9 +10,7 @@ import {
 } from "@shopify/react-native-skia";
 import { Platform, Pressable, View, useWindowDimensions } from "react-native";
 import { useDerivedValue, useSharedValue } from "react-native-reanimated";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import Slider from "react-native-reanimated-slider";
+import Slider from "@react-native-community/slider";
 
 // on Web because of CORS we need to use a local video
 const videoURL =
@@ -39,7 +37,7 @@ export const Video = () => {
         style={{ flex: 1 }}
         onPress={() => (paused.value = !paused.value)}
       >
-        <Canvas style={{ flex: 1 }} opaque>
+        <Canvas style={{ flex: 1 }}>
           <Fill>
             <ImageShader
               image={currentFrame}

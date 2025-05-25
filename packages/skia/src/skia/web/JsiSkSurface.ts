@@ -35,12 +35,15 @@ export class JsiSkSurface
     return new JsiSkCanvas(this.CanvasKit, this.ref.getCanvas());
   }
 
-  makeImageSnapshot(bounds?: SkRect): SkImage {
+  makeImageSnapshot(bounds?: SkRect, outputImage?: JsiSkImage): SkImage {
     const image = this.ref.makeImageSnapshot(
       bounds
         ? Array.from(JsiSkRect.fromValue(this.CanvasKit, bounds))
         : undefined
     );
+    if (outputImage) {
+      outputImage.ref = image;
+    }
     return new JsiSkImage(this.CanvasKit, image);
   }
 
