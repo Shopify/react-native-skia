@@ -32,6 +32,7 @@ public:
     config.format = DawnUtils::PreferredTextureFormat;
     config.width = _width;
     config.height = _height;
+    config.presentMode = wgpu::PresentMode::Fifo;
 #ifdef __APPLE__
     config.alphaMode = wgpu::CompositeAlphaMode::Premultiplied;
 #endif

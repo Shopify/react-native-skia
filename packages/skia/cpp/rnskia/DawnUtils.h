@@ -31,7 +31,7 @@ createDawnBackendContext(dawn::native::Instance *instance) {
       "use_tint_ir",
   };
   wgpu::DawnTogglesDescriptor togglesDesc;
-  togglesDesc.enabledToggleCount = std::size(kToggles) - (useTintIR ? 0 : 1);
+  togglesDesc.enabledToggleCount = (sizeof(kToggles) / sizeof(kToggles[0])) - (useTintIR ? 0 : 1);
   togglesDesc.enabledToggles = kToggles;
 
   wgpu::RequestAdapterOptions options;
@@ -100,18 +100,6 @@ createDawnBackendContext(dawn::native::Instance *instance) {
   desc.requiredFeatureCount = features.size();
   desc.requiredFeatures = features.data();
   desc.nextInChain = &togglesDesc;
- desc.SetDeviceLostCallback(
-     wgpu::CallbackMode::AllowSpontaneous,
-     [](const wgpu::Device &, wgpu::DeviceLostReason reason,
-        wgpu::StringView message) {
-       if (reason != wgpu::DeviceLostReason::Destroyed) {
-         SK_ABORT("Device lost: %s\n", message.data);
-       }
-     });
- desc.SetUncapturedErrorCallback(
-     [](const wgpu::Device &, wgpu::ErrorType, wgpu::StringView message) {
-       SkDebugf("Device error: %s\n", message.data);
-     });
 
   wgpu::Device device = adapter.CreateDevice(&desc);
   SkASSERT(device);
