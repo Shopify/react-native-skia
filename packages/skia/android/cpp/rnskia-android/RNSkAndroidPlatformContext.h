@@ -75,6 +75,7 @@ public:
 #endif
   }
 
+#if !defined(SK_GRAPHITE)
   sk_sp<SkImage> makeImageFromNativeTexture(const TextureInfo &texInfo,
                                             int width, int height,
                                             bool mipMapped) override {
@@ -99,6 +100,7 @@ public:
         kTopLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType, kUnpremul_SkAlphaType,
         nullptr);
   }
+#endif
 
   std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override {
     auto jniVideo = _jniPlatformContext->createVideo(url);
@@ -171,6 +173,11 @@ public:
 #endif
   }
 
+#if !defined(SK_GRAPHITE)
+  GrDirectContext *getDirectContext() override {
+    return OpenGLContext::getInstance().getDirectContext();
+  }
+
   const TextureInfo getTexture(sk_sp<SkImage> image) override {
     GrBackendTexture texture;
     if (!SkImages::GetBackendTextureFromImage(image, &texture, true)) {
@@ -186,6 +193,7 @@ public:
   }
 
   static TextureInfo getTextureInfo(const GrBackendTexture &texture) {
+
     if (!texture.isValid()) {
       throw std::runtime_error("invalid backend texture");
     }
@@ -203,11 +211,6 @@ public:
     texInfo.glFormat = textureInfo.fFormat;
     texInfo.glTarget = textureInfo.fTarget;
     return texInfo;
-  }
-
-#if !defined(SK_GRAPHITE)
-  GrDirectContext *getDirectContext() override {
-    return OpenGLContext::getInstance().getDirectContext();
   }
 #endif
 

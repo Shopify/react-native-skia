@@ -3,7 +3,19 @@ cmake_minimum_required(VERSION 3.4.1)
 
 set (CMAKE_VERBOSE_MAKEFILE ON)
 set (CMAKE_CXX_STANDARD 17)
-set(SK_GRAPHITE OFF)
+
+# Import prebuilt SKIA libraries path first to check for Dawn libraries
+set (SKIA_LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../libs/android/${ANDROID_ABI}")
+
+# Check if Dawn libraries exist, if so enable SK_GRAPHITE
+if(EXISTS "${SKIA_LIBS_PATH}/libdawn_native_static.a")
+    set(SK_GRAPHITE ON)
+    message("-- SK_GRAPHITE: ON (Dawn libraries found)")
+else()
+    set(SK_GRAPHITE OFF)
+    message("-- SK_GRAPHITE: OFF (Dawn libraries not found)")
+endif()
+
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSK_BUILD_FOR_ANDROID -DSK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_HAVE_MEMRCHR=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_MOBILE=1 -DON_ANDROID -DONANDROID")
 set (PACKAGE_NAME "rnskia")
 set (SKIA_LIB "skia")
@@ -30,9 +42,6 @@ message("-- BUILD   : " ${build_DIR})
 message("-- LIBRN   : " ${LIBRN_DIR})
 
 link_directories(../libs/android/${ANDROID_ABI}/)
-
-# Import prebuilt SKIA libraries
-set (SKIA_LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../libs/android/${ANDROID_ABI}")
 
 if(SK_GRAPHITE)
     add_definitions(-DSK_GRAPHITE)
