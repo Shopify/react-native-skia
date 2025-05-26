@@ -105,21 +105,38 @@ public:
    */
   virtual sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) = 0;
 
+#if !defined(SK_GRAPHITE)
   virtual sk_sp<SkImage>
   makeImageFromNativeTexture(const TextureInfo &textureInfo, int width,
                              int height, bool mipMapped) = 0;
 
-#if !defined(SK_GRAPHITE)
+  virtual const TextureInfo getTexture(sk_sp<SkSurface> image) = 0;
+
+  virtual const TextureInfo getTexture(sk_sp<SkImage> image) = 0;
+
   virtual GrDirectContext *getDirectContext() = 0;
+#else
+  sk_sp<SkImage> makeImageFromNativeTexture(const TextureInfo &textureInfo,
+                                            int width, int height,
+                                            bool mipMapped) {
+    throw std::runtime_error(
+        "makeImageFromNativeTexture not implemented yet on Graphite");
+  }
+
+  const TextureInfo getTexture(sk_sp<SkSurface> image) {
+    throw std::runtime_error(
+        "getTexture(surface) not implemented yet on Graphite");
+  }
+
+  const TextureInfo getTexture(sk_sp<SkImage> image) {
+    throw std::runtime_error(
+        "getTexture(image) not implemented yet on Graphite");
+  }
 #endif
 
   virtual void releaseNativeBuffer(uint64_t pointer) = 0;
 
   virtual uint64_t makeNativeBuffer(sk_sp<SkImage> image) = 0;
-
-  virtual const TextureInfo getTexture(sk_sp<SkSurface> image) = 0;
-
-  virtual const TextureInfo getTexture(sk_sp<SkImage> image) = 0;
 
   virtual std::shared_ptr<RNSkVideo> createVideo(const std::string &url) = 0;
 
