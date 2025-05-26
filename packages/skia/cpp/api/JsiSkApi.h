@@ -51,6 +51,7 @@
 #include "JsiSkTypefaceFontProviderFactory.h"
 #include "JsiSkVertices.h"
 #include "JsiSkiaContext.h"
+#include "JsiSkottieFactory.h"
 #include "JsiVideo.h"
 #include "recorder/JsiRecorder.h"
 
@@ -121,6 +122,8 @@ public:
                             std::make_shared<JsiSkPictureFactory>(context));
     installReadonlyProperty("FontMgr",
                             std::make_shared<JsiSkFontMgrFactory>(context));
+    installReadonlyProperty("Skottie",
+                            std::make_shared<JsiSkottieFactory>(context));
     installReadonlyProperty(
         "TypefaceFontProvider",
         std::make_shared<JsiSkTypefaceFontProviderFactory>(context));
