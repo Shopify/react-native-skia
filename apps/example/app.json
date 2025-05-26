@@ -30,5 +30,14 @@
       "dist/assets",
       "dist/main.windows.bundle"
     ]
+  },
+  "ios": {
+    "metalAPIValidation": false
+  },
+  "macos": {
+    "metalAPIValidation": false
+  },
+  "visionos": {
+    "metalAPIValidation": false
   }
 }

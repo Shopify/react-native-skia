@@ -156,9 +156,14 @@ uint64_t RNSkApplePlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
   return reinterpret_cast<uint64_t>(pixelBuffer);
 }
 
+#if !defined(SK_GRAPHITE)
+GrDirectContext *RNSkApplePlatformContext::getDirectContext() {
+  return MetalContext::getInstance().getDirectContext();
+}
+
 const TextureInfo RNSkApplePlatformContext::getTexture(sk_sp<SkImage> image) {
-  GrBackendTexture texture;
   TextureInfo result;
+  GrBackendTexture texture;
   if (!SkImages::GetBackendTextureFromImage(image, &texture, true)) {
     throw std::runtime_error("Couldn't get backend texture");
   }
@@ -175,9 +180,9 @@ const TextureInfo RNSkApplePlatformContext::getTexture(sk_sp<SkImage> image) {
 
 const TextureInfo
 RNSkApplePlatformContext::getTexture(sk_sp<SkSurface> surface) {
+  TextureInfo result;
   GrBackendTexture texture = SkSurfaces::GetBackendTexture(
       surface.get(), SkSurfaces::BackendHandleAccess::kFlushRead);
-  TextureInfo result;
   if (!texture.isValid()) {
     throw std::runtime_error("Invalid backend texture");
   }
@@ -185,9 +190,32 @@ RNSkApplePlatformContext::getTexture(sk_sp<SkSurface> surface) {
   if (!GrBackendTextures::GetMtlTextureInfo(texture, &textureInfo)) {
     throw std::runtime_error("Couldn't get Metal texture info");
   }
-  result.mtlTexture = textureInfo.fTexture.get();
+  result.mtlTexture = textureInfo.fTexture.get(); 
   return result;
 }
+
+sk_sp<SkImage> RNSkApplePlatformContext::makeImageFromNativeTexture(
+    const TextureInfo &texInfo, int width, int height, bool mipMapped) {
+  id<MTLTexture> mtlTexture = (__bridge id<MTLTexture>)(texInfo.mtlTexture);
+
+  SkColorType colorType = mtlPixelFormatToSkColorType(mtlTexture.pixelFormat);
+  if (colorType == SkColorType::kUnknown_SkColorType) {
+    throw std::runtime_error("Unsupported pixelFormat");
+  }
+
+  GrMtlTextureInfo textureInfo;
+  textureInfo.fTexture.retain((__bridge const void *)mtlTexture);
+
+  GrBackendTexture texture = GrBackendTextures::MakeMtl(
+      width, height, mipMapped ? skgpu::Mipmapped::kYes : skgpu::Mipmapped::kNo,
+      textureInfo);
+
+  return SkImages::BorrowTextureFrom(getDirectContext(), texture,
+                                     kTopLeft_GrSurfaceOrigin, colorType,
+                                     kPremul_SkAlphaType, nullptr);
+  return nullptr;
+}
+#endif
 
 std::shared_ptr<RNSkVideo>
 RNSkApplePlatformContext::createVideo(const std::string &url) {
@@ -227,27 +255,6 @@ RNSkApplePlatformContext::makeImageFromNativeBuffer(void *buffer) {
 #endif
 }
 
-sk_sp<SkImage> RNSkApplePlatformContext::makeImageFromNativeTexture(
-    const TextureInfo &texInfo, int width, int height, bool mipMapped) {
-  id<MTLTexture> mtlTexture = (__bridge id<MTLTexture>)(texInfo.mtlTexture);
-
-  SkColorType colorType = mtlPixelFormatToSkColorType(mtlTexture.pixelFormat);
-  if (colorType == SkColorType::kUnknown_SkColorType) {
-    throw std::runtime_error("Unsupported pixelFormat");
-  }
-
-  GrMtlTextureInfo textureInfo;
-  textureInfo.fTexture.retain((__bridge const void *)mtlTexture);
-
-  GrBackendTexture texture = GrBackendTextures::MakeMtl(
-      width, height, mipMapped ? skgpu::Mipmapped::kYes : skgpu::Mipmapped::kNo,
-      textureInfo);
-
-  return SkImages::BorrowTextureFrom(getDirectContext(), texture,
-                                     kTopLeft_GrSurfaceOrigin, colorType,
-                                     kPremul_SkAlphaType, nullptr);
-}
-
 SkColorType RNSkApplePlatformContext::mtlPixelFormatToSkColorType(
     MTLPixelFormat pixelFormat) {
   switch (pixelFormat) {
@@ -279,12 +286,6 @@ SkColorType RNSkApplePlatformContext::mtlPixelFormatToSkColorType(
     return kUnknown_SkColorType;
   }
 }
-
-#if !defined(SK_GRAPHITE)
-GrDirectContext *RNSkApplePlatformContext::getDirectContext() {
-  return MetalContext::getInstance().getDirectContext();
-}
-#endif
 
 sk_sp<SkFontMgr> RNSkApplePlatformContext::createFontMgr() {
   return SkFontMgr_New_CoreText(nullptr);

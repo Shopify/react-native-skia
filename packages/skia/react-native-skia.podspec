@@ -4,8 +4,15 @@ require "json"
 
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
-# Check for GRAPHITE env var
-use_graphite = ENV['SK_GRAPHITE'] == '1'
+# Check if Dawn libraries exist, if so enable GRAPHITE
+dawn_lib_path = File.join(__dir__, "libs/apple/libdawn_native_static.xcframework")
+use_graphite = File.exist?(dawn_lib_path)
+
+if use_graphite
+  puts "SK_GRAPHITE: ON (Dawn libraries found)"
+else
+  puts "SK_GRAPHITE: OFF (Dawn libraries not found)"
+end
 
 # Set preprocessor definitions based on GRAPHITE flag
 preprocessor_defs = use_graphite ? 
