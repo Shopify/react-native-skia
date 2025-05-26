@@ -13,7 +13,10 @@ jobs:
         id: setup-ndk
         uses: nttld/setup-ndk@afb4c9964b521afb97c864b7d40b11e6911bd410 # v1.5.0
         with:
-          ndk-version: r22b
+          ndk-version: r26d
+
+      - name: Set ANDROID_NDK
+        run: echo "ANDROID_NDK=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
 
       - name: Setup Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
@@ -23,6 +26,20 @@ jobs:
         with:
           download_skia: 'false'
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Apply Dawn patch
+        run: |
+          DAWN_GNI_FILE="./externals/skia/build_overrides/dawn.gni"
+          if [ -f "$DAWN_GNI_FILE" ]; then
+            echo "Applying patch to dawn.gni..."
+            # Remove the specified lines from the end of the file
+            sed -i.bak '/# PartitionAlloc is an optional dependency:/,$d' "$DAWN_GNI_FILE"
+            echo "Patch applied successfully."
+            echo "Modified dawn.gni content:"
+            cat "$DAWN_GNI_FILE"
+          else
+            echo "Warning: dawn.gni file not found at $DAWN_GNI_FILE"
+          fi
 
       - name: Build Skia with Graphite
         working-directory: ./packages/skia
