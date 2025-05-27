@@ -39,7 +39,17 @@ public:
     auto width = static_cast<int>(arguments[0].asNumber());
     auto height = static_cast<int>(arguments[1].asNumber());
     auto context = getContext();
-    auto surface = context->makeOffscreenSurface(width, height);
+    
+    sk_sp<SkSurface> surface;
+    if (count > 2 && !arguments[2].isUndefined()) {
+      auto colorTypeValue = static_cast<int>(arguments[2].asNumber());
+      auto colorType = static_cast<SkColorType>(colorTypeValue);
+      surface = context->makeOffscreenSurface(width, height, colorType);
+    } else {
+      // Use platform-specific default color type
+      surface = context->makeOffscreenSurface(width, height);
+    }
+    
     if (surface == nullptr) {
       return jsi::Value::null();
     }

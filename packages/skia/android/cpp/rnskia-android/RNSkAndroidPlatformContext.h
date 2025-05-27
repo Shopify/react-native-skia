@@ -49,12 +49,17 @@ public:
     _jniPlatformContext->raiseError(err);
   }
 
-  sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override {
+  sk_sp<SkSurface> makeOffscreenSurface(int width, int height, SkColorType colorType) override {
 #if defined(SK_GRAPHITE)
-    return DawnContext::getInstance().MakeOffscreen(width, height);
+    return DawnContext::getInstance().MakeOffscreen(width, height, colorType);
 #else
-    return OpenGLContext::getInstance().MakeOffscreen(width, height);
+    return OpenGLContext::getInstance().MakeOffscreen(width, height, colorType);
 #endif
+  }
+
+  sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override {
+    // Android/OpenGL default is RGBA_8888
+    return makeOffscreenSurface(width, height, kRGBA_8888_SkColorType);
   }
 
   std::shared_ptr<WindowContext>

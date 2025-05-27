@@ -43,16 +43,42 @@ struct OffscreenRenderContext {
   OffscreenRenderContext(id<MTLDevice> device,
                          sk_sp<GrDirectContext> skiaContext,
                          id<MTLCommandQueue> commandQueue, int width,
-                         int height) {
+                         int height, SkColorType colorType) {
+    // Convert SkColorType to Metal pixel format
+    MTLPixelFormat pixelFormat = skColorTypeToMTLPixelFormat(colorType);
+    
     // Create a Metal texture descriptor
     MTLTextureDescriptor *textureDescriptor = [MTLTextureDescriptor
-        texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
+        texture2DDescriptorWithPixelFormat:pixelFormat
                                      width:width
                                     height:height
                                  mipmapped:NO];
     textureDescriptor.usage =
         MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead;
     texture = [device newTextureWithDescriptor:textureDescriptor];
+  }
+
+private:
+  MTLPixelFormat skColorTypeToMTLPixelFormat(SkColorType colorType) {
+    switch (colorType) {
+      case kRGBA_8888_SkColorType:
+        return MTLPixelFormatRGBA8Unorm;
+      case kBGRA_8888_SkColorType:
+        return MTLPixelFormatBGRA8Unorm;
+      case kRGB_565_SkColorType:
+        return MTLPixelFormatB5G6R5Unorm;
+      case kARGB_4444_SkColorType:
+        return MTLPixelFormatABGR4Unorm;
+      case kRGBA_F16_SkColorType:
+      case kRGBA_F16Norm_SkColorType:
+        return MTLPixelFormatRGBA16Float;
+      case kGray_8_SkColorType:
+        return MTLPixelFormatR8Unorm;
+      case kRGBA_1010102_SkColorType:
+        return MTLPixelFormatRGB10A2Unorm;
+      default:
+        return MTLPixelFormatBGRA8Unorm; // fallback to default
+    }
   }
 };
 
@@ -67,10 +93,10 @@ public:
     return instance;
   }
 
-  sk_sp<SkSurface> MakeOffscreen(int width, int height) {
+  sk_sp<SkSurface> MakeOffscreen(int width, int height, SkColorType colorType) {
     auto device = MetalSharedContext::getInstance().getDevice();
     auto ctx = new OffscreenRenderContext(device, _directContext, _commandQueue,
-                                          width, height);
+                                          width, height, colorType);
 
     // Create a GrBackendTexture from the Metal texture
     GrMtlTextureInfo info;
@@ -81,7 +107,7 @@ public:
     // Create a SkSurface from the GrBackendTexture
     auto surface = SkSurfaces::WrapBackendTexture(
         _directContext.get(), backendTexture, kTopLeft_GrSurfaceOrigin, 0,
-        kBGRA_8888_SkColorType, nullptr, nullptr,
+        colorType, nullptr, nullptr,
         [](void *addr) { delete (OffscreenRenderContext *)addr; }, ctx);
 
     return surface;

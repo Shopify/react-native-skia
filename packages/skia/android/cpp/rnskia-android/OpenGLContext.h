@@ -58,9 +58,7 @@ public:
     return instance;
   }
 
-  sk_sp<SkSurface> MakeOffscreen(int width, int height) {
-    auto colorType = kRGBA_8888_SkColorType;
-
+  sk_sp<SkSurface> MakeOffscreen(int width, int height, SkColorType colorType) {
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
     auto result = _glContext->makeCurrent(_glSurface.get());
@@ -68,9 +66,9 @@ public:
       return nullptr;
     }
 
-    // Create texture
-    auto GL_RGBA8 = 0x8058;
-    auto format = GrBackendFormats::MakeGL(GL_RGBA8, GL_TEXTURE_2D);
+    // Create texture with appropriate format based on colorType
+    GrGLenum glInternalFormat = skColorTypeToGLFormat(colorType);
+    auto format = GrBackendFormats::MakeGL(glInternalFormat, GL_TEXTURE_2D);
     auto texture = _directContext->createBackendTexture(
         width, height, format, SkColors::kTransparent, skgpu::Mipmapped::kNo,
         GrRenderable::kYes);
@@ -180,6 +178,28 @@ private:
   std::unique_ptr<gl::Context> _glContext;
   std::unique_ptr<gl::Surface> _glSurface;
   sk_sp<GrDirectContext> _directContext;
+
+  GrGLenum skColorTypeToGLFormat(SkColorType colorType) {
+    switch (colorType) {
+      case kRGBA_8888_SkColorType:
+        return 0x8058; // GL_RGBA8
+      case kBGRA_8888_SkColorType:
+        return 0x8058; // GL_RGBA8 (will handle swizzling in shader)
+      case kRGB_565_SkColorType:
+        return 0x8D62; // GL_RGB565
+      case kARGB_4444_SkColorType:
+        return 0x8033; // GL_RGBA4
+      case kRGBA_F16_SkColorType:
+      case kRGBA_F16Norm_SkColorType:
+        return 0x881A; // GL_RGBA16F
+      case kGray_8_SkColorType:
+        return 0x8229; // GL_R8
+      case kRGBA_1010102_SkColorType:
+        return 0x8059; // GL_RGB10_A2
+      default:
+        return 0x8058; // GL_RGBA8 fallback
+    }
+  }
 
   OpenGLContext() {
     auto display = OpenGLSharedContext::getInstance().getDisplay();
