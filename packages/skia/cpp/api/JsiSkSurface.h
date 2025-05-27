@@ -76,7 +76,8 @@ public:
     DawnContext::getInstance().submitRecording(recording.get());
 #endif
     if (count > 1 && arguments[1].isObject()) {
-      auto jsiImage = arguments[1].asObject(runtime).asHostObject<JsiSkImage>(runtime);
+      auto jsiImage =
+          arguments[1].asObject(runtime).asHostObject<JsiSkImage>(runtime);
       jsiImage->setObject(image);
       return jsi::Value(runtime, arguments[1]);
     }

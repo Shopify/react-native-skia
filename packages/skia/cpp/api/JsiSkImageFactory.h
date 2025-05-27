@@ -93,8 +93,8 @@ public:
     }
     if (count > 4 && arguments[4].isObject() &&
         arguments[4].asObject(runtime).isHostObject(runtime)) {
-      auto jsiImage = arguments[4].asObject(runtime).asHostObject<JsiSkImage>(
-          runtime);
+      auto jsiImage =
+          arguments[4].asObject(runtime).asHostObject<JsiSkImage>(runtime);
       jsiImage->setObject(image);
       return jsi::Value(runtime, arguments[4]);
     }
