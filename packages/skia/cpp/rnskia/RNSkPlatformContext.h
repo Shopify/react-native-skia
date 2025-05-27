@@ -92,7 +92,8 @@ public:
    * @param colorType Color type for the surface
    * @return sk_sp<SkSurface>
    */
-  virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height, SkColorType colorType) = 0;
+  virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height,
+                                                SkColorType colorType) = 0;
 
   /**
    * Creates an offscreen surface with platform-specific default color type

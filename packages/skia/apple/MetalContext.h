@@ -46,13 +46,13 @@ struct OffscreenRenderContext {
                          int height, SkColorType colorType) {
     // Convert SkColorType to Metal pixel format
     MTLPixelFormat pixelFormat = skColorTypeToMTLPixelFormat(colorType);
-    
+
     // Create a Metal texture descriptor
-    MTLTextureDescriptor *textureDescriptor = [MTLTextureDescriptor
-        texture2DDescriptorWithPixelFormat:pixelFormat
-                                     width:width
-                                    height:height
-                                 mipmapped:NO];
+    MTLTextureDescriptor *textureDescriptor =
+        [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:pixelFormat
+                                                           width:width
+                                                          height:height
+                                                       mipmapped:NO];
     textureDescriptor.usage =
         MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead;
     texture = [device newTextureWithDescriptor:textureDescriptor];
@@ -61,23 +61,23 @@ struct OffscreenRenderContext {
 private:
   MTLPixelFormat skColorTypeToMTLPixelFormat(SkColorType colorType) {
     switch (colorType) {
-      case kRGBA_8888_SkColorType:
-        return MTLPixelFormatRGBA8Unorm;
-      case kBGRA_8888_SkColorType:
-        return MTLPixelFormatBGRA8Unorm;
-      case kRGB_565_SkColorType:
-        return MTLPixelFormatB5G6R5Unorm;
-      case kARGB_4444_SkColorType:
-        return MTLPixelFormatABGR4Unorm;
-      case kRGBA_F16_SkColorType:
-      case kRGBA_F16Norm_SkColorType:
-        return MTLPixelFormatRGBA16Float;
-      case kGray_8_SkColorType:
-        return MTLPixelFormatR8Unorm;
-      case kRGBA_1010102_SkColorType:
-        return MTLPixelFormatRGB10A2Unorm;
-      default:
-        return MTLPixelFormatBGRA8Unorm; // fallback to default
+    case kRGBA_8888_SkColorType:
+      return MTLPixelFormatRGBA8Unorm;
+    case kBGRA_8888_SkColorType:
+      return MTLPixelFormatBGRA8Unorm;
+    case kRGB_565_SkColorType:
+      return MTLPixelFormatB5G6R5Unorm;
+    case kARGB_4444_SkColorType:
+      return MTLPixelFormatABGR4Unorm;
+    case kRGBA_F16_SkColorType:
+    case kRGBA_F16Norm_SkColorType:
+      return MTLPixelFormatRGBA16Float;
+    case kGray_8_SkColorType:
+      return MTLPixelFormatR8Unorm;
+    case kRGBA_1010102_SkColorType:
+      return MTLPixelFormatRGB10A2Unorm;
+    default:
+      return MTLPixelFormatBGRA8Unorm; // fallback to default
     }
   }
 };

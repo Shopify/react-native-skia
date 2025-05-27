@@ -146,16 +146,22 @@ describe("Offscreen Drawings", () => {
         }
 
         // For 16-bit surfaces, we expect different behavior than 8-bit
-        // The pixel data length should match the format
+        // The pixel data should be a Float32Array for 16-bit formats
+        const isFloat32Array = pixelData instanceof Float32Array;
+        const isUint8Array = pixelData instanceof Uint8Array;
         const expectedLength = 2 * 2 * 4; // 2x2 pixels, 4 channels (RGBA)
 
         return {
           success: true,
           pixelDataLength: pixelData.length,
           expectedLength,
+          isFloat32Array,
+          isUint8Array,
+          arrayConstructorName: pixelData.constructor.name,
           // For verification, return first few pixel values
           firstPixels: Array.from(pixelData.slice(0, 16)),
-          colorType: ctx.colorType,
+          actualColorType: image.getImageInfo().colorType,
+          expectedColorType: ctx.colorType,
           surfaceWidth: image.width(),
           surfaceHeight: image.height(),
         };
@@ -168,7 +174,13 @@ describe("Offscreen Drawings", () => {
     expect(result.surfaceWidth).toBe(2);
     expect(result.surfaceHeight).toBe(2);
     expect(result.pixelDataLength).toBeGreaterThan(0);
-    expect(result.colorType).toBe(ColorType.RGBA_F16);
+    expect(result.actualColorType).toBe(ColorType.RGBA_F16);
+    expect(result.actualColorType).toBe(result.expectedColorType);
+
+    // Verify that 16-bit formats return Float32Array instead of Uint8Array
+    expect(result.isFloat32Array).toBe(true);
+    expect(result.isUint8Array).toBe(false);
+    expect(result.arrayConstructorName).toBe("Float32Array");
   });
 
   it("Should use platform-specific default color types", async () => {
@@ -206,12 +218,26 @@ describe("Offscreen Drawings", () => {
         const defaultImage = defaultSurface.makeImageSnapshot();
         const rgba8888Image = rgba8888Surface.makeImageSnapshot();
 
+        // Test pixel data types for 8-bit vs 16-bit formats
+        const rgba8888PixelData = rgba8888Image.readPixels();
+        const isRgba8888Uint8Array = rgba8888PixelData instanceof Uint8Array;
+        const isRgba8888Float32Array =
+          rgba8888PixelData instanceof Float32Array;
+
         return {
           success: true,
           defaultImageWidth: defaultImage.width(),
           defaultImageHeight: defaultImage.height(),
           rgba8888ImageWidth: rgba8888Image.width(),
           rgba8888ImageHeight: rgba8888Image.height(),
+          defaultImageColorType: defaultImage.getImageInfo().colorType,
+          rgba8888ImageColorType: rgba8888Image.getImageInfo().colorType,
+          // Verify 8-bit format returns Uint8Array
+          isRgba8888Uint8Array,
+          isRgba8888Float32Array,
+          rgba8888ArrayConstructorName: rgba8888PixelData
+            ? rgba8888PixelData.constructor.name
+            : null,
         };
       },
       { rgba8888ColorType: ColorType.RGBA_8888 }
@@ -222,5 +248,19 @@ describe("Offscreen Drawings", () => {
     expect(result.defaultImageHeight).toBe(2);
     expect(result.rgba8888ImageWidth).toBe(2);
     expect(result.rgba8888ImageHeight).toBe(2);
+
+    // Verify that the explicit RGBA_8888 surface has the correct color type
+    expect(result.defaultImageColorType).toBe(
+      surface.OS === "ios" ? ColorType.BGRA_8888 : ColorType.RGBA_8888
+    );
+
+    // Verify that the default surface has a valid color type (platform-specific)
+    expect(result.defaultImageColorType).toBeDefined();
+    expect(typeof result.defaultImageColorType).toBe("number");
+
+    // Verify that 8-bit formats return Uint8Array (not Float32Array)
+    expect(result.isRgba8888Uint8Array).toBe(true);
+    expect(result.isRgba8888Float32Array).toBe(false);
+    expect(result.rgba8888ArrayConstructorName).toBe("Uint8Array");
   });
 });

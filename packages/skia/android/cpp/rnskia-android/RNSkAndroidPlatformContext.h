@@ -49,7 +49,8 @@ public:
     _jniPlatformContext->raiseError(err);
   }
 
-  sk_sp<SkSurface> makeOffscreenSurface(int width, int height, SkColorType colorType) override {
+  sk_sp<SkSurface> makeOffscreenSurface(int width, int height,
+                                        SkColorType colorType) override {
 #if defined(SK_GRAPHITE)
     return DawnContext::getInstance().MakeOffscreen(width, height, colorType);
 #else

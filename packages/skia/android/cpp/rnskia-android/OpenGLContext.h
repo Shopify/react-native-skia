@@ -181,23 +181,23 @@ private:
 
   GrGLenum skColorTypeToGLFormat(SkColorType colorType) {
     switch (colorType) {
-      case kRGBA_8888_SkColorType:
-        return 0x8058; // GL_RGBA8
-      case kBGRA_8888_SkColorType:
-        return 0x8058; // GL_RGBA8 (will handle swizzling in shader)
-      case kRGB_565_SkColorType:
-        return 0x8D62; // GL_RGB565
-      case kARGB_4444_SkColorType:
-        return 0x8033; // GL_RGBA4
-      case kRGBA_F16_SkColorType:
-      case kRGBA_F16Norm_SkColorType:
-        return 0x881A; // GL_RGBA16F
-      case kGray_8_SkColorType:
-        return 0x8229; // GL_R8
-      case kRGBA_1010102_SkColorType:
-        return 0x8059; // GL_RGB10_A2
-      default:
-        return 0x8058; // GL_RGBA8 fallback
+    case kRGBA_8888_SkColorType:
+      return 0x8058; // GL_RGBA8
+    case kBGRA_8888_SkColorType:
+      return 0x8058; // GL_RGBA8 (will handle swizzling in shader)
+    case kRGB_565_SkColorType:
+      return 0x8D62; // GL_RGB565
+    case kARGB_4444_SkColorType:
+      return 0x8033; // GL_RGBA4
+    case kRGBA_F16_SkColorType:
+    case kRGBA_F16Norm_SkColorType:
+      return 0x881A; // GL_RGBA16F
+    case kGray_8_SkColorType:
+      return 0x8229; // GL_R8
+    case kRGBA_1010102_SkColorType:
+      return 0x8059; // GL_RGB10_A2
+    default:
+      return 0x8058; // GL_RGBA8 fallback
     }
   }
 

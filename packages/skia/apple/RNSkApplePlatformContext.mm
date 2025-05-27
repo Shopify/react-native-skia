@@ -190,7 +190,7 @@ RNSkApplePlatformContext::getTexture(sk_sp<SkSurface> surface) {
   if (!GrBackendTextures::GetMtlTextureInfo(texture, &textureInfo)) {
     throw std::runtime_error("Couldn't get Metal texture info");
   }
-  result.mtlTexture = textureInfo.fTexture.get(); 
+  result.mtlTexture = textureInfo.fTexture.get();
   return result;
 }
 
@@ -237,8 +237,9 @@ void RNSkApplePlatformContext::raiseError(const std::exception &err) {
   RCTFatal(RCTErrorWithMessage([NSString stringWithUTF8String:err.what()]));
 }
 
-sk_sp<SkSurface> RNSkApplePlatformContext::makeOffscreenSurface(int width,
-                                                                int height, SkColorType colorType) {
+sk_sp<SkSurface>
+RNSkApplePlatformContext::makeOffscreenSurface(int width, int height,
+                                               SkColorType colorType) {
 #if defined(SK_GRAPHITE)
   return DawnContext::getInstance().MakeOffscreen(width, height, colorType);
 #else

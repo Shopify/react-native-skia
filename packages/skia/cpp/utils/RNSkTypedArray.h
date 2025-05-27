@@ -21,16 +21,24 @@ public:
           return typedArray;
         }
       } else {
-        if (info.colorType() == kRGBA_F32_SkColorType) {
-          auto arrayCtor =
-              runtime.global().getPropertyAsFunction(runtime, "Float32Array");
-          return arrayCtor.callAsConstructor(runtime,
-                                             static_cast<double>(reqSize / 4));
-        } else {
+        if (info.colorType() == kAlpha_8_SkColorType ||
+            info.colorType() == kRGBA_8888_SkColorType ||
+            info.colorType() == kRGB_888x_SkColorType ||
+            info.colorType() == kBGRA_8888_SkColorType ||
+            info.colorType() == kGray_8_SkColorType ||
+            info.colorType() == kR8G8_unorm_SkColorType ||
+            info.colorType() == kSRGBA_8888_SkColorType ||
+            info.colorType() == kR8_unorm_SkColorType) {
+
           auto arrayCtor =
               runtime.global().getPropertyAsFunction(runtime, "Uint8Array");
           return arrayCtor.callAsConstructor(runtime,
                                              static_cast<double>(reqSize));
+        } else {
+          auto arrayCtor =
+              runtime.global().getPropertyAsFunction(runtime, "Float32Array");
+          return arrayCtor.callAsConstructor(runtime,
+                                             static_cast<double>(reqSize / 4));
         }
       }
     }

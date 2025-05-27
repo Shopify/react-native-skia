@@ -69,7 +69,8 @@ public:
       const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) override;
 
   void raiseError(const std::exception &err) override;
-  sk_sp<SkSurface> makeOffscreenSurface(int width, int height, SkColorType colorType) override;
+  sk_sp<SkSurface> makeOffscreenSurface(int width, int height,
+                                        SkColorType colorType) override;
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override;
 
   sk_sp<SkFontMgr> createFontMgr() override;
