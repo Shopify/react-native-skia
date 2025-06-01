@@ -15,10 +15,10 @@ set_property(TARGET skia PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskia.a
 set(SK_GRAPHITE_AVAILABLE OFF)
 
 if(EXISTS "${SKIA_LIBS_PATH}/libskia.a")
-    # Try nm first (if available), then objdump as fallback
+    # Look for specific Dawn function symbols that indicate Graphite support
     execute_process(
         COMMAND nm "${SKIA_LIBS_PATH}/libskia.a"
-        COMMAND grep -i "graphite"
+        COMMAND grep "dawn::\\|wgpu\\|_ZN4dawn\\|DawnDevice\\|dawn_native"
         OUTPUT_VARIABLE NM_OUTPUT
         ERROR_QUIET
         RESULT_VARIABLE NM_RESULT
@@ -30,7 +30,7 @@ if(EXISTS "${SKIA_LIBS_PATH}/libskia.a")
         # Fallback to objdump if nm doesn't work
         execute_process(
             COMMAND objdump -t "${SKIA_LIBS_PATH}/libskia.a"
-            COMMAND grep -i "graphite" 
+            COMMAND grep "dawn::\\|wgpu\\|_ZN4dawn\\|DawnDevice\\|dawn_native"
             OUTPUT_VARIABLE OBJDUMP_OUTPUT
             ERROR_QUIET
             RESULT_VARIABLE OBJDUMP_RESULT

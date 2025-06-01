@@ -19,17 +19,17 @@ if File.exist?(libskia_path)
   
   framework_paths.each do |framework_path|
     if File.exist?(framework_path)
-      # Try multiple symbol patterns for Graphite
-      symbol_patterns = [
-        'graphite',
-        'Graphite', 
-        'skgpu.*graphite',
-        'Context.*graphite',
-        '_ZN5skgpu8graphite',  # mangled namespace
+      # Look for specific Dawn function symbols that indicate Graphite support
+      dawn_symbols = [
+        'dawn::',
+        'wgpu',
+        '_ZN4dawn',
+        'DawnDevice',
+        'dawn_native'
       ]
       
-      symbol_patterns.each do |pattern|
-        nm_output = `nm "#{framework_path}" 2>/dev/null | grep -i "#{pattern}"`
+      dawn_symbols.each do |symbol|
+        nm_output = `nm "#{framework_path}" 2>/dev/null | grep "#{symbol}"`
         if $?.success? && !nm_output.empty?
           use_graphite = true
           break
