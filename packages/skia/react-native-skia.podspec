@@ -27,13 +27,6 @@ base_frameworks = ['libs/apple/libskia.xcframework',
 'libs/apple/libskunicode_core.xcframework',
 'libs/apple/libskunicode_libgrapheme.xcframework',]
 
-# Add Graphite frameworks if enabled
-graphite_frameworks = [
-  'libs/apple/libdawn_native_static.xcframework',
-  'libs/apple/libdawn_platform_static.xcframework', 
-  'libs/apple/libdawn_proc_static.xcframework'
-]
-
 Pod::Spec.new do |s|
   s.name         = "react-native-skia"
   s.version      = package["version"]
@@ -61,9 +54,7 @@ Pod::Spec.new do |s|
 
   s.frameworks = ['MetalKit', 'AVFoundation', 'AVKit', 'CoreMedia']
 
-  s.vendored_frameworks = use_graphite ? 
-  base_frameworks + graphite_frameworks :
-  base_frameworks
+  s.vendored_frameworks = base_frameworks
 
   # All iOS cpp/h files
   s.source_files = [

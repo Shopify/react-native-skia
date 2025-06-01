@@ -45,21 +45,10 @@ link_directories(../libs/android/${ANDROID_ABI}/)
 
 if(SK_GRAPHITE)
     add_definitions(-DSK_GRAPHITE)
-    set(DAWN_NATIVE_LIB "libdawn_native_static")
-    set(DAWN_PLATFORM_LIB "libdawn_platform_static")
-    set(DAWN_PROC_LIB "libdawn_proc_static")
     set(BACKEND_SOURCES
     #TODO: is this source needed to be added?
         "${PROJECT_SOURCE_DIR}/../cpp/rnskia/DawnWindowContext.cpp"
     )
-    add_library(libdawn_native_static STATIC IMPORTED)
-    set_property(TARGET libdawn_native_static PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_native_static.a")
-
-    add_library(libdawn_platform_static STATIC IMPORTED)
-    set_property(TARGET libdawn_platform_static PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_platform_static.a")
-
-    add_library(libdawn_proc_static STATIC IMPORTED)
-    set_property(TARGET libdawn_proc_static PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_proc_static.a")
 else()
     add_definitions(-DSK_GL -DSK_GANESH)
     set(BACKEND_SOURCES
@@ -307,9 +296,6 @@ endif()
 if(SK_GRAPHITE)
     target_link_libraries(${PACKAGE_NAME}
         ${COMMON_LIBS}
-        ${DAWN_NATIVE_LIB}
-        ${DAWN_PLATFORM_LIB}
-        ${DAWN_PROC_LIB}
     )
 else()
     target_link_libraries(${PACKAGE_NAME}
