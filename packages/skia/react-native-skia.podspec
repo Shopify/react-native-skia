@@ -4,14 +4,47 @@ require "json"
 
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
-# Check if Dawn libraries exist, if so enable GRAPHITE
-dawn_lib_path = File.join(__dir__, "libs/apple/libdawn_native_static.xcframework")
-use_graphite = File.exist?(dawn_lib_path)
+# Check if Graphite symbols are available in libskia
+libskia_path = File.join(__dir__, "libs/apple/libskia.xcframework")
+use_graphite = false
+
+if File.exist?(libskia_path)
+  # Look for any arm64 or x86_64 framework inside the xcframework
+  framework_paths = Dir.glob(File.join(libskia_path, "**/libskia.framework/libskia"))
+  
+  # Also try looking for static libraries if frameworks aren't found
+  if framework_paths.empty?
+    framework_paths = Dir.glob(File.join(libskia_path, "**/libskia.a"))
+  end
+  
+  framework_paths.each do |framework_path|
+    if File.exist?(framework_path)
+      # Try multiple symbol patterns for Graphite
+      symbol_patterns = [
+        'graphite',
+        'Graphite', 
+        'skgpu.*graphite',
+        'Context.*graphite',
+        '_ZN5skgpu8graphite',  # mangled namespace
+      ]
+      
+      symbol_patterns.each do |pattern|
+        nm_output = `nm "#{framework_path}" 2>/dev/null | grep -i "#{pattern}"`
+        if $?.success? && !nm_output.empty?
+          use_graphite = true
+          break
+        end
+      end
+      
+      break if use_graphite
+    end
+  end
+end
 
 if use_graphite
-  puts "SK_GRAPHITE: ON (Dawn libraries found)"
+  puts "SK_GRAPHITE: ON (Graphite symbols found in libskia)"
 else
-  puts "SK_GRAPHITE: OFF (Dawn libraries not found)"
+  puts "SK_GRAPHITE: OFF (Graphite symbols not found in libskia)"
 end
 
 # Set preprocessor definitions based on GRAPHITE flag

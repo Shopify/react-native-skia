@@ -4,16 +4,40 @@ cmake_minimum_required(VERSION 3.4.1)
 set (CMAKE_VERBOSE_MAKEFILE ON)
 set (CMAKE_CXX_STANDARD 17)
 
-# Import prebuilt SKIA libraries path first to check for Dawn libraries
+# Import prebuilt SKIA libraries path
 set (SKIA_LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../libs/android/${ANDROID_ABI}")
 
-# Check if Dawn libraries exist, if so enable SK_GRAPHITE
-if(EXISTS "${SKIA_LIBS_PATH}/libdawn_native_static.a")
+# Import libskia first so we can check for symbols
+add_library(skia STATIC IMPORTED)
+set_property(TARGET skia PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskia.a")
+
+# Check if Graphite is available in libskia by trying to compile a test program
+set(GRAPHITE_TEST_SOURCE "
+#include \"include/gpu/graphite/Context.h\"
+int main() {
+    // Just test if we can reference a Graphite symbol
+    return sizeof(skgpu::graphite::Context*);
+}
+")
+
+# Write the test source file
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/graphite_test.cpp "${GRAPHITE_TEST_SOURCE}")
+
+try_compile(SK_GRAPHITE_AVAILABLE
+    ${CMAKE_CURRENT_BINARY_DIR}/graphite_test
+    SOURCES ${CMAKE_CURRENT_BINARY_DIR}/graphite_test.cpp
+    LINK_LIBRARIES skia
+    CMAKE_FLAGS 
+        "-DINCLUDE_DIRECTORIES=${CMAKE_CURRENT_SOURCE_DIR}/../cpp/skia"
+        "-DCMAKE_CXX_STANDARD=17"
+)
+
+if(SK_GRAPHITE_AVAILABLE)
     set(SK_GRAPHITE ON)
-    message("-- SK_GRAPHITE: ON (Dawn libraries found)")
+    message("-- SK_GRAPHITE: ON (Graphite symbols found in libskia)")
 else()
     set(SK_GRAPHITE OFF)
-    message("-- SK_GRAPHITE: OFF (Dawn libraries not found)")
+    message("-- SK_GRAPHITE: OFF (Graphite symbols not found in libskia)")
 endif()
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSK_BUILD_FOR_ANDROID -DSK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_HAVE_MEMRCHR=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_MOBILE=1 -DON_ANDROID -DONANDROID")
@@ -119,9 +143,6 @@ target_include_directories(
 
         ${libfbjni_include_DIRS}
 )
-
-add_library(skia STATIC IMPORTED)
-set_property(TARGET skia PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskia.a")
 
 add_library(svg STATIC IMPORTED)
 set_property(TARGET svg PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libsvg.a")
