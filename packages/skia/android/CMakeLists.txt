@@ -11,26 +11,36 @@ set (SKIA_LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../libs/android/${ANDROID_ABI}"
 add_library(skia STATIC IMPORTED)
 set_property(TARGET skia PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskia.a")
 
-# Check if Graphite is available in libskia by trying to compile a test program
-set(GRAPHITE_TEST_SOURCE "
-#include \"include/gpu/graphite/Context.h\"
-int main() {
-    // Just test if we can reference a Graphite symbol
-    return sizeof(skgpu::graphite::Context*);
-}
-")
+# Check if Graphite symbols are available in libskia using nm/objdump
+set(SK_GRAPHITE_AVAILABLE OFF)
 
-# Write the test source file
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/graphite_test.cpp "${GRAPHITE_TEST_SOURCE}")
-
-try_compile(SK_GRAPHITE_AVAILABLE
-    ${CMAKE_CURRENT_BINARY_DIR}/graphite_test
-    SOURCES ${CMAKE_CURRENT_BINARY_DIR}/graphite_test.cpp
-    LINK_LIBRARIES skia
-    CMAKE_FLAGS 
-        "-DINCLUDE_DIRECTORIES=${CMAKE_CURRENT_SOURCE_DIR}/../cpp/skia"
-        "-DCMAKE_CXX_STANDARD=17"
-)
+if(EXISTS "${SKIA_LIBS_PATH}/libskia.a")
+    # Try nm first (if available), then objdump as fallback
+    execute_process(
+        COMMAND nm "${SKIA_LIBS_PATH}/libskia.a"
+        COMMAND grep -i "graphite"
+        OUTPUT_VARIABLE NM_OUTPUT
+        ERROR_QUIET
+        RESULT_VARIABLE NM_RESULT
+    )
+    
+    if(NM_RESULT EQUAL 0 AND NOT "${NM_OUTPUT}" STREQUAL "")
+        set(SK_GRAPHITE_AVAILABLE ON)
+    else()
+        # Fallback to objdump if nm doesn't work
+        execute_process(
+            COMMAND objdump -t "${SKIA_LIBS_PATH}/libskia.a"
+            COMMAND grep -i "graphite" 
+            OUTPUT_VARIABLE OBJDUMP_OUTPUT
+            ERROR_QUIET
+            RESULT_VARIABLE OBJDUMP_RESULT
+        )
+        
+        if(OBJDUMP_RESULT EQUAL 0 AND NOT "${OBJDUMP_OUTPUT}" STREQUAL "")
+            set(SK_GRAPHITE_AVAILABLE ON)
+        endif()
+    endif()
+endif()
 
 if(SK_GRAPHITE_AVAILABLE)
     set(SK_GRAPHITE ON)
