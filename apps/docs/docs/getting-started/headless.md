@@ -27,7 +27,7 @@ import { Circle, drawOffscreen, getSkiaExports, Group, makeOffscreenSurface } fr
   // Alternatively you can do const {Skia} = require("@shopify/react-native-skia")
   const {Skia} = getSkiaExports();
   const surface = makeOffscreenSurface(width, height);
-  const image = drawOffscreen(surface,
+  const image = await drawOffscreen(surface,
     <Group blendMode="multiply">
       <Circle cx={r} cy={r} r={r} color="cyan" />
       <Circle cx={size - r} cy={r} r={r} color="magenta" />

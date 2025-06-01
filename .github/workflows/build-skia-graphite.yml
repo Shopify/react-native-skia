@@ -1,0 +1,140 @@
+name: Build SKIA Graphite
+on: workflow_dispatch
+jobs:
+  build:
+    runs-on: macos-latest-xlarge
+    steps:
+      - name: checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: recursive
+
+      - name: Setup Android NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@afb4c9964b521afb97c864b7d40b11e6911bd410 # v1.5.0
+        with:
+          ndk-version: r26d
+
+      - name: Set ANDROID_NDK
+        run: echo "ANDROID_NDK=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
+
+      - name: Setup Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          download_skia: 'false'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Apply Dawn patch
+        run: |
+          DAWN_GNI_FILE="./externals/skia/build_overrides/dawn.gni"
+          if [ -f "$DAWN_GNI_FILE" ]; then
+            echo "Applying patch to dawn.gni..."
+            # Remove the specified lines from the end of the file
+            sed -i.bak '/# PartitionAlloc is an optional dependency:/,$d' "$DAWN_GNI_FILE"
+            echo "Patch applied successfully."
+            echo "Modified dawn.gni content:"
+            cat "$DAWN_GNI_FILE"
+          else
+            echo "Warning: dawn.gni file not found at $DAWN_GNI_FILE"
+          fi
+
+      - name: Build Skia with Graphite
+        working-directory: ./packages/skia
+        env:
+          ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
+          GIT_SYNC_DEPS_SKIP_EMSDK: 'true'
+          ZERO_AR_DATE: 1
+          SK_GRAPHITE: 1
+        run: yarn build-skia
+
+      - name: Upload artifacts - Android arm (Graphite)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: skia-graphite-android-arm
+          path: |
+            ./externals/skia/out/android/arm/libskia.a
+            ./externals/skia/out/android/arm/libskshaper.a
+            ./externals/skia/out/android/arm/libsvg.a
+            ./externals/skia/out/android/arm/libskottie.a
+            ./externals/skia/out/android/arm/libsksg.a
+            ./externals/skia/out/android/arm/libskparagraph.a
+            ./externals/skia/out/android/arm/libskunicode_core.a
+            ./externals/skia/out/android/arm/libskunicode_icu.a
+            ./externals/skia/out/android/arm/libdawn_native_static.a
+            ./externals/skia/out/android/arm/libdawn_platform_static.a
+            ./externals/skia/out/android/arm/libdawn_proc_static.a
+
+      - name: Upload artifacts - Android arm64 (Graphite)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: skia-graphite-android-arm-64
+          path: |
+            ./externals/skia/out/android/arm64/libskia.a
+            ./externals/skia/out/android/arm64/libskshaper.a
+            ./externals/skia/out/android/arm64/libsvg.a
+            ./externals/skia/out/android/arm64/libskottie.a
+            ./externals/skia/out/android/arm64/libsksg.a
+            ./externals/skia/out/android/arm64/libskparagraph.a
+            ./externals/skia/out/android/arm64/libskunicode_core.a
+            ./externals/skia/out/android/arm64/libskunicode_icu.a
+            ./externals/skia/out/android/arm64/libdawn_native_static.a
+            ./externals/skia/out/android/arm64/libdawn_platform_static.a
+            ./externals/skia/out/android/arm64/libdawn_proc_static.a
+
+      - name: Upload artifacts - Android x86 (Graphite)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: skia-graphite-android-arm-x86
+          path: |
+            ./externals/skia/out/android/x86/libskia.a
+            ./externals/skia/out/android/x86/libskshaper.a
+            ./externals/skia/out/android/x86/libsvg.a
+            ./externals/skia/out/android/x86/libskottie.a
+            ./externals/skia/out/android/x86/libsksg.a
+            ./externals/skia/out/android/x86/libskparagraph.a
+            ./externals/skia/out/android/x86/libskunicode_core.a
+            ./externals/skia/out/android/x86/libskunicode_icu.a
+            ./externals/skia/out/android/x86/libdawn_native_static.a
+            ./externals/skia/out/android/x86/libdawn_platform_static.a
+            ./externals/skia/out/android/x86/libdawn_proc_static.a
+
+      - name: Upload artifacts - Android x64 (Graphite)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: skia-graphite-android-arm-x64
+          path: |
+            ./externals/skia/out/android/x64/libskia.a
+            ./externals/skia/out/android/x64/libskshaper.a
+            ./externals/skia/out/android/x64/libsvg.a
+            ./externals/skia/out/android/x64/libskottie.a
+            ./externals/skia/out/android/x64/libsksg.a
+            ./externals/skia/out/android/x64/libskparagraph.a
+            ./externals/skia/out/android/x64/libskunicode_core.a
+            ./externals/skia/out/android/x64/libskunicode_icu.a
+            ./externals/skia/out/android/x64/libdawn_native_static.a
+            ./externals/skia/out/android/x64/libdawn_platform_static.a
+            ./externals/skia/out/android/x64/libdawn_proc_static.a
+
+      - name: Upload artifacts - Apple xcframeworks (Graphite)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: skia-graphite-apple-xcframeworks
+          path: |
+            ./packages/skia/libs/apple/*.xcframework
+
+      - name: Upload artifacts - Graphite Headers
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: skia-graphite-headers
+          path: |
+            ./packages/skia/cpp/dawn/include/
+            ./packages/skia/cpp/skia/src/gpu/graphite/

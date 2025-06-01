@@ -15,8 +15,7 @@ To use React Native Skia with video support, `Android API level 26` or above is 
 
 For `react-native@<=0.78` and `react@<=18`, you need to use `@shopify/react-native-skia` version `1.12.4` or below.
 
-`tvOS >= 13` is also supported.
-
+tvOS and macOS are also supported platforms.
 
 **Install the library using yarn:**
 
