@@ -64,9 +64,6 @@ jobs:
             ./externals/skia/out/android/arm/libskparagraph.a
             ./externals/skia/out/android/arm/libskunicode_core.a
             ./externals/skia/out/android/arm/libskunicode_icu.a
-            ./externals/skia/out/android/arm/libdawn_native_static.a
-            ./externals/skia/out/android/arm/libdawn_platform_static.a
-            ./externals/skia/out/android/arm/libdawn_proc_static.a
 
       - name: Upload artifacts - Android arm64 (Graphite)
         if: github.ref == 'refs/heads/main'
@@ -82,9 +79,6 @@ jobs:
             ./externals/skia/out/android/arm64/libskparagraph.a
             ./externals/skia/out/android/arm64/libskunicode_core.a
             ./externals/skia/out/android/arm64/libskunicode_icu.a
-            ./externals/skia/out/android/arm64/libdawn_native_static.a
-            ./externals/skia/out/android/arm64/libdawn_platform_static.a
-            ./externals/skia/out/android/arm64/libdawn_proc_static.a
 
       - name: Upload artifacts - Android x86 (Graphite)
         if: github.ref == 'refs/heads/main'
@@ -100,9 +94,6 @@ jobs:
             ./externals/skia/out/android/x86/libskparagraph.a
             ./externals/skia/out/android/x86/libskunicode_core.a
             ./externals/skia/out/android/x86/libskunicode_icu.a
-            ./externals/skia/out/android/x86/libdawn_native_static.a
-            ./externals/skia/out/android/x86/libdawn_platform_static.a
-            ./externals/skia/out/android/x86/libdawn_proc_static.a
 
       - name: Upload artifacts - Android x64 (Graphite)
         if: github.ref == 'refs/heads/main'
@@ -118,9 +109,6 @@ jobs:
             ./externals/skia/out/android/x64/libskparagraph.a
             ./externals/skia/out/android/x64/libskunicode_core.a
             ./externals/skia/out/android/x64/libskunicode_icu.a
-            ./externals/skia/out/android/x64/libdawn_native_static.a
-            ./externals/skia/out/android/x64/libdawn_platform_static.a
-            ./externals/skia/out/android/x64/libdawn_proc_static.a
 
       - name: Upload artifacts - Apple xcframeworks (Graphite)
         if: github.ref == 'refs/heads/main'

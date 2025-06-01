@@ -53,14 +53,6 @@ const ParagraphOutputsAndroid = BUILD_WITH_PARAGRAPH
   ? ["libskparagraph.a", "libskunicode_core.a", "libskunicode_icu.a"]
   : [];
 
-const DawnOutput = GRAPHITE
-  ? [
-      "libdawn_native_static.a",
-      "libdawn_platform_static.a",
-      "libdawn_proc_static.a",
-    ]
-  : [];
-
 export const commonArgs = [
   ["skia_use_piex", true],
   ["skia_use_sfntly", false],
@@ -210,7 +202,6 @@ export const configurations = {
       "libskottie.a",
       "libsksg.a",
       ...ParagraphOutputsAndroid,
-      ...DawnOutput,
     ],
   },
   apple: {
@@ -259,7 +250,6 @@ export const configurations = {
       "libskottie.a",
       "libsksg.a",
       ...ParagraphApple,
-      ...DawnOutput,
     ],
   },
 };
