@@ -67,7 +67,7 @@ function play(ctx: DrawingContext, _command: Command) {
       ctx.paints.push(command.props.paint);
     } else {
       ctx.savePaint();
-      setPaintProperties(ctx.Skia, ctx.paint, command.props);
+      setPaintProperties(ctx.Skia, ctx, command.props);
     }
   } else if (isCommand(command, CommandType.RestorePaint)) {
     ctx.restorePaint();
@@ -101,7 +101,11 @@ function play(ctx: DrawingContext, _command: Command) {
   } else if (isCommand(command, CommandType.RestoreCTM)) {
     ctx.canvas.restore();
   } else {
-    const paints = [ctx.paint, ...ctx.paintDeclarations];
+    // TODO: is a copy needed here?
+    // apply opacity to the current paint.
+    const paint = ctx.paint.copy();
+    paint.setAlphaf(paint.getAlphaf() * ctx.getOpacity());
+    const paints = [paint, ...ctx.paintDeclarations];
     ctx.paintDeclarations = [];
     paints.forEach((p) => {
       ctx.paints.push(p);
