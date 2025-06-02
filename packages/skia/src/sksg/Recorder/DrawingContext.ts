@@ -22,12 +22,14 @@ export const createDrawingContext = (
   const imageFilters: SkImageFilter[] = [];
   const pathEffects: SkPathEffect[] = [];
   const paintDeclarations: SkPaint[] = [];
+  const opacities: number[] = [];
 
   let nextPaintIndex = 1;
 
-  // Initialize first paint
+  // Initialize first paint and opacity
   paintPool[0] = Skia.Paint();
   paints.push(paintPool[0]);
+  opacities.push(1);
 
   // Methods (formerly class methods)
   const savePaint = () => {
@@ -39,7 +41,16 @@ export const createDrawingContext = (
     const nextPaint = paintPool[nextPaintIndex];
     nextPaint.assign(getCurrentPaint()); // Reuse allocation by copying properties
     paints.push(nextPaint);
+    opacities.push(opacities[opacities.length - 1]);
     nextPaintIndex++;
+  };
+
+  const getOpacity = () => {
+    return opacities[opacities.length - 1];
+  };
+
+  const setOpacity = (newOpacity: number) => {
+    opacities[opacities.length - 1] = Math.max(0, Math.min(1, newOpacity));
   };
 
   const saveBackdropFilter = () => {
@@ -63,6 +74,7 @@ export const createDrawingContext = (
   };
 
   const restorePaint = () => {
+    opacities.pop();
     return paints.pop();
   };
 
@@ -78,6 +90,7 @@ export const createDrawingContext = (
     // Shaders
     if (shaders.length > 0) {
       getCurrentPaint().setShader(shaders[shaders.length - 1]);
+      getCurrentPaint().setAlphaf(getCurrentPaint().getAlphaf() * getOpacity());
     }
     // Image Filters
     if (imageFilters.length > 0) {
@@ -125,6 +138,8 @@ export const createDrawingContext = (
     }, // the "getter" for the current paint
     restorePaint,
     materializePaint,
+    getOpacity,
+    setOpacity,
   };
 };
 

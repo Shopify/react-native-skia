@@ -163,6 +163,7 @@ public:
 
     if (!shaders.empty()) {
       getPaint().setShader(shaders.back());
+      getPaint().setAlphaf(getPaint().getAlphaf() * getOpacity());
     }
 
     if (!maskFilters.empty()) {

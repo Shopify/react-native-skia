@@ -67,7 +67,7 @@ function play(ctx: DrawingContext, _command: Command) {
       ctx.paints.push(command.props.paint);
     } else {
       ctx.savePaint();
-      setPaintProperties(ctx.Skia, ctx.paint, command.props);
+      setPaintProperties(ctx.Skia, ctx, command.props);
     }
   } else if (isCommand(command, CommandType.RestorePaint)) {
     ctx.restorePaint();
