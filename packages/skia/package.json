@@ -33,8 +33,7 @@
     "apple/**",
     "libs/apple/*.xcframework/**",
     "react-native-skia.podspec",
-    "dist/**",
-    "!**/__tests__/**"
+    "dist/**"
   ],
   "scripts": {
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --cache --fix",
