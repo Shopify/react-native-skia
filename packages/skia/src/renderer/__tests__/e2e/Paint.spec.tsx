@@ -184,4 +184,30 @@ describe("Paint", () => {
     );
     checkImage(result, docPath("paint/stroke.png"));
   });
+  it("colors don't influence opacity (1)", async () => {
+    const { vec } = importSkia();
+    const strokeWidth = 10;
+    const { width, height } = surface;
+    const c = vec(width / 2, height / 2);
+    const r = (width - strokeWidth) / 2;
+    const result = await surface.draw(
+      <Group color="rgba(0,0,0,0.5)">
+        <Circle c={c} r={r} color="lightblue" />
+      </Group>
+    );
+    checkImage(result, docPath("paint/opaque-circle.png"));
+  });
+  it("colors don't influence opacity (2)", async () => {
+    const { vec } = importSkia();
+    const strokeWidth = 10;
+    const { width, height } = surface;
+    const c = vec(width / 2, height / 2);
+    const r = (width - strokeWidth) / 2;
+    const result = await surface.draw(
+      <Group opacity={0.5}>
+        <Circle c={c} r={r} color="lightblue" />
+      </Group>
+    );
+    checkImage(result, docPath("paint/semi-transparent-circle.png"));
+  });
 });
