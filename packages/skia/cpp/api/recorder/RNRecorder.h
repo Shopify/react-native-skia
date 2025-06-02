@@ -294,7 +294,7 @@ public:
   void play(DrawingCtx *ctx) {
     for (const auto &cmd : commands) {
       switch (cmd->type) {
-
+			  
       case Group: {
         // Do nothing here for now
         break;
@@ -480,17 +480,6 @@ public:
       case CommandType::PushBlurMaskFilter: {
         auto *blurMaskFilterCmd = static_cast<BlurMaskFilterCmd *>(cmd.get());
         blurMaskFilterCmd->pushMaskFilter(ctx);
-        break;
-      }
-
-      case CommandType::DrawPaint: {
-        ctx->canvas->drawPaint(ctx->getPaint());
-        break;
-      }
-
-      case CommandType::DrawText: {
-        auto *textCmd = static_cast<TextCmd *>(cmd.get());
-        textCmd->draw(ctx);
         break;
       }
 
