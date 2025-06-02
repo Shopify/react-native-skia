@@ -34,7 +34,6 @@ export const setPaintProperties = (
   if (color !== undefined) {
     paint.setShader(null);
     paint.setColor(processColor(Skia, color));
-    paint.setAlphaf(paint.getAlphaf() * ctx.getOpacity());
   }
   if (blendMode !== undefined) {
     paint.setBlendMode(BlendMode[enumKey(blendMode)]);
