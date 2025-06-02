@@ -26,13 +26,11 @@ export const setPaintProperties = (
 ) => {
   "worklet";
   if (opacity !== undefined) {
-    paint.setAlphaf(paint.getAlphaf() * opacity);
+    paint.setOpacityPriv(paint.getOpacityPriv() * opacity);
   }
   if (color !== undefined) {
-    const currentOpacity = paint.getAlphaf();
     paint.setShader(null);
     paint.setColor(processColor(Skia, color));
-    paint.setAlphaf(currentOpacity * paint.getAlphaf());
   }
   if (blendMode !== undefined) {
     paint.setBlendMode(BlendMode[enumKey(blendMode)]);
