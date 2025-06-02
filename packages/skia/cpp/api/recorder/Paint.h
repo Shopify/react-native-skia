@@ -158,7 +158,6 @@ public:
     if (props.color.has_value()) {
       paint.setShader(nullptr);
       paint.setColor(props.color.value());
-      paint.setAlphaf(paint.getAlphaf() * ctx->getOpacity());
     }
     if (props.blendMode.has_value()) {
       paint.setBlendMode(props.blendMode.value());

@@ -90,7 +90,6 @@ export const createDrawingContext = (
     // Shaders
     if (shaders.length > 0) {
       getCurrentPaint().setShader(shaders[shaders.length - 1]);
-      getCurrentPaint().setAlphaf(getCurrentPaint().getAlphaf() * getOpacity());
     }
     // Image Filters
     if (imageFilters.length > 0) {

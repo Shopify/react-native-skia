@@ -512,7 +512,10 @@ public:
       default: {
         // Handle all drawing commands
         auto currentPaints = ctx->paintDeclarations;
-        currentPaints.push_back(ctx->getPaint()); // Add current paint
+        // apply alpha to the current paint.
+        SkPaint paint(ctx->getPaint());
+        paint.setAlphaf(paint.getAlphaf() * ctx->getOpacity());
+        currentPaints.push_back(paint);
         ctx->paintDeclarations.clear();
 
         for (auto &paint : currentPaints) {
