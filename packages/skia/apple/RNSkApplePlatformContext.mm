@@ -190,7 +190,7 @@ RNSkApplePlatformContext::getTexture(sk_sp<SkSurface> surface) {
   if (!GrBackendTextures::GetMtlTextureInfo(texture, &textureInfo)) {
     throw std::runtime_error("Couldn't get Metal texture info");
   }
-  result.mtlTexture = textureInfo.fTexture.get(); 
+  result.mtlTexture = textureInfo.fTexture.get();
   return result;
 }
 

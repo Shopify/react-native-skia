@@ -4,14 +4,47 @@ require "json"
 
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
-# Check if Dawn libraries exist, if so enable GRAPHITE
-dawn_lib_path = File.join(__dir__, "libs/apple/libdawn_native_static.xcframework")
-use_graphite = File.exist?(dawn_lib_path)
+# Check if Graphite symbols are available in libskia
+libskia_path = File.join(__dir__, "libs/apple/libskia.xcframework")
+use_graphite = false
+
+if File.exist?(libskia_path)
+  # Look for any arm64 or x86_64 framework inside the xcframework
+  framework_paths = Dir.glob(File.join(libskia_path, "**/libskia.framework/libskia"))
+  
+  # Also try looking for static libraries if frameworks aren't found
+  if framework_paths.empty?
+    framework_paths = Dir.glob(File.join(libskia_path, "**/libskia.a"))
+  end
+  
+  framework_paths.each do |framework_path|
+    if File.exist?(framework_path)
+      # Look for specific Dawn function symbols that indicate Graphite support
+      dawn_symbols = [
+        'dawn::',
+        'wgpu',
+        '_ZN4dawn',
+        'DawnDevice',
+        'dawn_native'
+      ]
+      
+      dawn_symbols.each do |symbol|
+        nm_output = `nm "#{framework_path}" 2>/dev/null | grep "#{symbol}"`
+        if $?.success? && !nm_output.empty?
+          use_graphite = true
+          break
+        end
+      end
+      
+      break if use_graphite
+    end
+  end
+end
 
 if use_graphite
-  puts "SK_GRAPHITE: ON (Dawn libraries found)"
+  puts "SK_GRAPHITE: ON (Graphite symbols found in libskia)"
 else
-  puts "SK_GRAPHITE: OFF (Dawn libraries not found)"
+  puts "SK_GRAPHITE: OFF (Graphite symbols not found in libskia)"
 end
 
 # Set preprocessor definitions based on GRAPHITE flag
@@ -26,13 +59,6 @@ base_frameworks = ['libs/apple/libskia.xcframework',
 'libs/apple/libskparagraph.xcframework',
 'libs/apple/libskunicode_core.xcframework',
 'libs/apple/libskunicode_libgrapheme.xcframework',]
-
-# Add Graphite frameworks if enabled
-graphite_frameworks = [
-  'libs/apple/libdawn_native_static.xcframework',
-  'libs/apple/libdawn_platform_static.xcframework', 
-  'libs/apple/libdawn_proc_static.xcframework'
-]
 
 Pod::Spec.new do |s|
   s.name         = "react-native-skia"
@@ -61,9 +87,7 @@ Pod::Spec.new do |s|
 
   s.frameworks = ['MetalKit', 'AVFoundation', 'AVKit', 'CoreMedia']
 
-  s.vendored_frameworks = use_graphite ? 
-  base_frameworks + graphite_frameworks :
-  base_frameworks
+  s.vendored_frameworks = base_frameworks
 
   # All iOS cpp/h files
   s.source_files = [

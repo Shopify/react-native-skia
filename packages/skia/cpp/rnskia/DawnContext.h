@@ -221,7 +221,16 @@ private:
     }
   }
 
-  void tick() { backendContext.fTick(backendContext.fInstance); }
+  ~DawnContext() {
+    backendContext.fDevice = nullptr;
+    tick();
+  }
+
+  void tick() {
+    if (backendContext.fTick) {
+      backendContext.fTick(backendContext.fInstance);
+    }
+  }
 
   skgpu::graphite::Recorder *getRecorder() {
     static thread_local skgpu::graphite::RecorderOptions recorderOptions;
