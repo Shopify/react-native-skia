@@ -65,6 +65,7 @@ jobs:
         run: yarn test
 
   build-library:
+    environment: release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
