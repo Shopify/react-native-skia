@@ -9,6 +9,10 @@ inputs:
     description: 'Download Skia Binary Artifacts'
     required: false
     default: 'true'
+  skia_workflow:
+    description: 'Skia workflow to download artifacts from'
+    required: false
+    default: 'build-skia.yml'
 
 runs:
   using: composite
@@ -39,7 +43,7 @@ runs:
       if: ${{ inputs.download_skia == 'true' }}
       uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
       with:
-        workflow: "build-skia.yml"
+        workflow: ${{ inputs.skia_workflow }}
         repo: shopify/react-native-skia
         path: packages/skia/artifacts
         branch: main

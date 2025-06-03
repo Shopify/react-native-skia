@@ -46,6 +46,9 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        skia_workflow: ['build-skia.yml', 'build-skia-graphite.yml']
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -56,6 +59,7 @@ jobs:
         uses: ./.github/actions/setup
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          skia_workflow: ${{ matrix.skia_workflow }}
 
       - name: Test
         run: yarn test
@@ -149,6 +153,9 @@ jobs:
   build-android:
     runs-on: macos-latest-large
     continue-on-error: true
+    strategy:
+      matrix:
+        skia_workflow: ['build-skia.yml', 'build-skia-graphite.yml']
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
@@ -161,6 +168,7 @@ jobs:
         uses: ./.github/actions/setup
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          skia_workflow: ${{ matrix.skia_workflow }}
 
       - name: Cache turborepo for Android
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
@@ -294,6 +302,9 @@ jobs:
 
   build-test-ios:
     runs-on: macos-latest-xlarge
+    strategy:
+      matrix:
+        skia_workflow: ['build-skia.yml', 'build-skia-graphite.yml']
     env:
       TURBO_CACHE_DIR: .turbo/ios
     steps:
@@ -306,6 +317,7 @@ jobs:
         uses: ./.github/actions/setup
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          skia_workflow: ${{ matrix.skia_workflow }}
 
       - name: Cache turborepo for iOS
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
