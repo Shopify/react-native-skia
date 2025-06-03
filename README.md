@@ -27,12 +27,14 @@ And then the _SDK Location_ section. It will show you the NDK path, or the optio
 
 ### Building
 
-- Checkout submodules `git submodule update --init --recursive`
-- Install dependencies `yarn`
-- Go to the package folder `cd packages/skia`
-- Build the Skia libraries with `yarn build-skia` (this can take a while)
-- Copy Skia headers `yarn copy-skia-headers`
-- run `yarn pod:install`
+1. Checkout submodules `git submodule update --init --recursive`
+2. Install dependencies `yarn`
+3. Go to the package folder `cd packages/skia`
+4. Build the Skia libraries, either:  
+   i. locally with `yarn build-skia` (this can take a while), or by running the Github Action  
+   ii. in CI, run [build-skia.yml](https://github.com/ExodusMovement/react-native-skia/actions/workflows/build-skia.yml) on the relevant branch, then run `yarn download-artifacts && yarn workflow-copy-libs`
+5. Copy Skia headers `yarn copy-skia-headers`
+6. run `yarn pod:install`
 
 ### Upgrading
 
