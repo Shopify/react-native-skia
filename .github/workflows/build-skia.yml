@@ -39,7 +39,10 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: skia-headers
-          path: ./externals/skia/include
+          path: |
+            ./externals/skia/include
+            ./externals/skia/modules
+            ./externals/skia/src
 
       - name: Upload artifacts - Android arm
         if: github.ref == 'refs/heads/exodus-2.0.1'
