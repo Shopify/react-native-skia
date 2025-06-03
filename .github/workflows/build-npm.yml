@@ -1,12 +1,5 @@
 name: Create a release
-on:
-  workflow_dispatch:
-    inputs:
-      dry_run:
-        description: 'Run in dry-run mode (no actual release)'
-        required: false
-        default: false
-        type: boolean
+on: workflow_dispatch
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -39,8 +32,7 @@ jobs:
       - name: Build NPM Package
         working-directory: packages/skia
         run: |
-          echo dry run: ${{inputs.dry_run}}
-          # yarn release -d=${}
+          yarn release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
