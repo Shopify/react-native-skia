@@ -42,7 +42,7 @@ runs:
         workflow: 'build-skia.yml'
         repo: ExodusMovement/react-native-skia
         path: packages/skia/artifacts
-        branch: exodus-fork
+        branch: exodus-2.0.1
         allow_forks: false
 
     - name: Copy Artifacts to libs folder
