@@ -177,10 +177,8 @@ export const sksgHostConfig: SkiaHostConfig = {
     _type,
     _oldProps,
     newProps,
-    _updatePayload,
-    _internalInstanceHandle,
-    keepChildren: boolean,
-    _recyclableInstance: null | Instance
+    keepChildren,
+    _newChildSet
   ) {
     debug("cloneInstance");
     return {
