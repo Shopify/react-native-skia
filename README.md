@@ -56,6 +56,10 @@ Publish the NPM package manually. The output is found in the `dist` folder.
 
 - Install Cocoapods in the example/ios folder `cd example/ios && pod install && cd ..`
 
+#### Dry-Run
+
+To figure out which version semantic-release will release, remove all plugins from [./packages/skia/.releaserc](./packages/skia/.releaserc) except for the `@semantic-release/commit-analyzer` plugin, then run `yarn semantic-release --dry-run`. Expect to wait a few minutes, the release command is super slow.
+
 ## Contributing
 
 When making contributions to the project, an important part is testing.
