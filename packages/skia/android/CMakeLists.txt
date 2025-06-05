@@ -335,3 +335,6 @@ else()
         -lEGL
     )
 endif()
+
+# Enable Android 16kb native library alignment
+target_link_options(${PACKAGE_NAME} PRIVATE "-Wl,-z,max-page-size=16384")
