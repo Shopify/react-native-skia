@@ -30,7 +30,6 @@ RNSkManager::RNSkManager(
 }
 
 RNSkManager::~RNSkManager() {
-  invalidate();
   // Free up any references
   _viewApi = nullptr;
   _jsRuntime = nullptr;
@@ -38,36 +37,22 @@ RNSkManager::~RNSkManager() {
   _jsCallInvoker = nullptr;
 }
 
-void RNSkManager::invalidate() {
-  if (_isInvalidated) {
-    return;
-  }
-  _isInvalidated = true;
-
-  // Invalidate members
-  _viewApi->unregisterAll();
-}
-
 void RNSkManager::registerSkiaView(size_t nativeId,
                                    std::shared_ptr<RNSkView> view) {
-  if (!_isInvalidated && _viewApi != nullptr)
-    _viewApi->registerSkiaView(nativeId, std::move(view));
+  _viewApi->registerSkiaView(nativeId, std::move(view));
 }
 
 void RNSkManager::unregisterSkiaView(size_t nativeId) {
-  if (!_isInvalidated && _viewApi != nullptr)
-    _viewApi->unregisterSkiaView(nativeId);
+  _viewApi->unregisterSkiaView(nativeId);
 }
 
 void RNSkManager::setSkiaView(size_t nativeId, std::shared_ptr<RNSkView> view) {
-  if (!_isInvalidated && _viewApi != nullptr)
-    _viewApi->setSkiaView(nativeId, std::move(view));
+  _viewApi->setSkiaView(nativeId, std::move(view));
 }
 
 void RNSkManager::installBindings() {
   // Create the API objects and install it on the global object in the
   // provided runtime.
-
   auto skiaApi = std::make_shared<JsiSkApi>(_platformContext);
   _jsRuntime->global().setProperty(
       *_jsRuntime, "SkiaApi",

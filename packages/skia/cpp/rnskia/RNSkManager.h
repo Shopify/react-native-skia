@@ -34,11 +34,6 @@ public:
   ~RNSkManager();
 
   /**
-   Invalidates the Skia Manager
-   */
-  void invalidate();
-
-  /**
    * Registers a RNSkView with the given native id
    * @param nativeId Native view id
    * @param view View to register
@@ -77,7 +72,6 @@ private:
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   std::shared_ptr<facebook::react::CallInvoker> _jsCallInvoker;
   std::shared_ptr<RNSkJsiViewApi> _viewApi;
-  std::atomic<bool> _isInvalidated = {false};
 };
 
 } // namespace RNSkia
