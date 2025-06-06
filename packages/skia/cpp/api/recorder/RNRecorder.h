@@ -294,7 +294,7 @@ public:
   void play(DrawingCtx *ctx) {
     for (const auto &cmd : commands) {
       switch (cmd->type) {
-
+			  
       case Group: {
         // Do nothing here for now
         break;
@@ -483,17 +483,6 @@ public:
         break;
       }
 
-      case CommandType::DrawPaint: {
-        ctx->canvas->drawPaint(ctx->getPaint());
-        break;
-      }
-
-      case CommandType::DrawText: {
-        auto *textCmd = static_cast<TextCmd *>(cmd.get());
-        textCmd->draw(ctx);
-        break;
-      }
-
       case CommandType::RestorePaint: {
         ctx->restorePaint();
         break;
@@ -512,7 +501,10 @@ public:
       default: {
         // Handle all drawing commands
         auto currentPaints = ctx->paintDeclarations;
-        currentPaints.push_back(ctx->getPaint()); // Add current paint
+        // apply alpha to the current paint.
+        SkPaint paint(ctx->getPaint());
+        paint.setAlphaf(paint.getAlphaf() * ctx->getOpacity());
+        currentPaints.push_back(paint);
         ctx->paintDeclarations.clear();
 
         for (auto &paint : currentPaints) {
