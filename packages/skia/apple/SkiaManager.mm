@@ -20,9 +20,6 @@ static __weak SkiaManager *sharedInstance = nil;
 }
 
 - (void)invalidate {
-  if (_skManager != nullptr) {
-    _skManager->invalidate();
-  }
   _skManager = nullptr;
 }
 
