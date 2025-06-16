@@ -2549,7 +2549,7 @@ __metadata:
 
 "@shopify/react-native-skia@file:../../packages/skia::locator=expo-router-app%40workspace%3A.":
   version: 0.0.0
-  resolution: "@shopify/react-native-skia@file:../../packages/skia#../../packages/skia::hash=cb73b4&locator=expo-router-app%40workspace%3A."
+  resolution: "@shopify/react-native-skia@file:../../packages/skia#../../packages/skia::hash=65bc37&locator=expo-router-app%40workspace%3A."
   dependencies:
     canvaskit-wasm: 0.40.0
     react-reconciler: 0.31.0
@@ -2564,7 +2564,7 @@ __metadata:
       optional: true
   bin:
     setup-skia-web: scripts/setup-canvaskit.js
-  checksum: 85b0685bb3af2b0b23b7288c0978d1b667a9aca10b51a514ec462584c1337ef8706b25d1d39d0661ee3ca979f61edcc2a75e2e25d2d4dc7b363be4f57b0da8c7
+  checksum: d18de7d060fbd268cf2cc256f926cd0db8a4797746165fb38a01e66dd87edaf7b636837ad7b71b491ba90d91208f7394e55f9634889e1417829c41dbb84e5e0e
   languageName: node
   linkType: hard
 
@@ -3379,12 +3379,12 @@ __metadata:
   linkType: hard
 
 "brace-expansion@npm:^1.1.7":
-  version: 1.1.11
-  resolution: "brace-expansion@npm:1.1.11"
+  version: 1.1.12
+  resolution: "brace-expansion@npm:1.1.12"
   dependencies:
     balanced-match: ^1.0.0
     concat-map: 0.0.1
-  checksum: faf34a7bb0c3fcf4b59c7808bc5d2a96a40988addf2e7e09dfbb67a2251800e0d14cd2bfc1aa79174f2f5095c54ff27f46fb1289fe2d77dac755b5eb3434cc07
+  checksum: 12cb6d6310629e3048cadb003e1aca4d8c9bb5c67c3c321bafdd7e7a50155de081f78ea3e0ed92ecc75a9015e784f301efc8132383132f4f7904ad1ac529c562
   languageName: node
   linkType: hard
 
