@@ -102,8 +102,8 @@ export class Recorder implements BaseRecorder {
     this.cursors.pop();
   }
 
-  savePaint(props: AnimatedProps<PaintProps>) {
-    this.add({ type: CommandType.SavePaint, props });
+  savePaint(props: AnimatedProps<PaintProps>, standalone: boolean) {
+    this.add({ type: CommandType.SavePaint, props, standalone });
   }
 
   restorePaint() {
