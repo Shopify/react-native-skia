@@ -67,7 +67,13 @@ function play(ctx: DrawingContext, _command: Command) {
       ctx.paints.push(command.props.paint);
     } else {
       ctx.savePaint();
-      setPaintProperties(ctx.Skia, ctx, command.props);
+      setPaintProperties(
+        ctx.Skia,
+        ctx,
+        command.props,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (command as any).standalone
+      );
     }
   } else if (isCommand(command, CommandType.RestorePaint)) {
     ctx.restorePaint();

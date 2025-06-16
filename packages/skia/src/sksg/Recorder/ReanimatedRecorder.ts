@@ -69,9 +69,9 @@ export class ReanimatedRecorder implements BaseRecorder {
     this.recorder.restoreGroup();
   }
 
-  savePaint(props: AnimatedProps<PaintProps>): void {
+  savePaint(props: AnimatedProps<PaintProps>, standalone: boolean): void {
     this.processAnimationValues(props);
-    this.recorder.savePaint(props);
+    this.recorder.savePaint(props, standalone);
   }
 
   restorePaint(): void {

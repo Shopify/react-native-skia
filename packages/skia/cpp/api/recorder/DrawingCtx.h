@@ -60,17 +60,17 @@ public:
   }
 
   float getOpacity() const { return opacities.back(); }
-  
+
   void setOpacity(float newOpacity) {
     opacities.back() = std::clamp(newOpacity, 0.0f, 1.0f);
   }
 
-  void pushPaint(SkPaint &paint) { 
+  void pushPaint(SkPaint &paint) {
     paints.push_back(paint);
     opacities.push_back(opacities.back());
   }
 
-  void savePaint() { 
+  void savePaint() {
     paints.push_back(SkPaint(getPaint()));
     opacities.push_back(opacities.back());
   }

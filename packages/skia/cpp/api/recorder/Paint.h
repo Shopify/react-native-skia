@@ -125,11 +125,12 @@ struct PaintCmdProps {
 class SavePaintCmd : public Command {
 private:
   PaintCmdProps props;
+  bool standalone;
 
 public:
   SavePaintCmd(jsi::Runtime &runtime, const jsi::Object &object,
-               Variables &variables)
-      : Command(CommandType::SavePaint) {
+               Variables &variables, bool lStandalone)
+      : Command(CommandType::SavePaint), standalone(lStandalone) {
     convertProperty(runtime, object, "color", props.color, variables);
     convertProperty(runtime, object, "blendMode", props.blendMode, variables);
     convertProperty(runtime, object, "style", props.style, variables);
@@ -153,7 +154,11 @@ public:
     ctx->savePaint();
     auto &paint = ctx->getPaint();
     if (props.opacity.has_value()) {
-      ctx->setOpacity(ctx->getOpacity() * props.opacity.value());
+      if (standalone) {
+        paint.setAlphaf(paint.getAlphaf() * props.opacity.value());
+      } else {
+        ctx->setOpacity(ctx->getOpacity() * props.opacity.value());
+      }
     }
     if (props.color.has_value()) {
       paint.setShader(nullptr);
