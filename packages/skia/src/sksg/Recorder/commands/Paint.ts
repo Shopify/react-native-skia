@@ -23,13 +23,18 @@ export const setPaintProperties = (
     strokeMiter,
     antiAlias,
     dither,
-  }: PaintProps
+  }: PaintProps,
+  standalone: boolean
 ) => {
   "worklet";
   const { paint } = ctx;
 
   if (opacity !== undefined) {
-    ctx.setOpacity(ctx.getOpacity() * opacity);
+    if (standalone) {
+      paint.setAlphaf(paint.getAlphaf() * opacity);
+    } else {
+      ctx.setOpacity(ctx.getOpacity() * opacity);
+    }
   }
   if (color !== undefined) {
     paint.setShader(null);

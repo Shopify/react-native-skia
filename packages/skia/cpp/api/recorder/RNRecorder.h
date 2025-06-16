@@ -28,9 +28,10 @@ public:
 
   ~Recorder() = default;
 
-  void savePaint(jsi::Runtime &runtime, const jsi::Object &props) {
+  void savePaint(jsi::Runtime &runtime, const jsi::Object &props,
+                 bool standalone) {
     commands.push_back(
-        std::make_unique<SavePaintCmd>(runtime, props, variables));
+        std::make_unique<SavePaintCmd>(runtime, props, variables, standalone));
   }
 
   void pushShader(jsi::Runtime &runtime, const std::string &nodeType,
@@ -294,7 +295,7 @@ public:
   void play(DrawingCtx *ctx) {
     for (const auto &cmd : commands) {
       switch (cmd->type) {
-			  
+
       case Group: {
         // Do nothing here for now
         break;
