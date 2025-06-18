@@ -1,0 +1,1 @@
+{"version":3,"names":[],"sources":["PictureFactory.ts"],"sourcesContent":["import type { SkPicture } from \"./Picture\";\n\nexport interface PictureFactory {\n  /**\n   * Returns an SkPicture which has been serialized previously to the given bytes.\n   * @param bytes\n   */\n  MakePicture(bytes: Uint8Array | ArrayBuffer): SkPicture | null;\n}\n"],"mappings":"","ignoreList":[]}

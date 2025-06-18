@@ -1,0 +1,1 @@
+{"version":3,"names":[],"sources":["Color.ts"],"sourcesContent":["// This is the JSI color\nexport type SkColor = Float32Array;\n// Input colors can be string, number, number[] or Float32Array\nexport type Color = string | Float32Array | number | number[];\n"],"mappings":"","ignoreList":[]}

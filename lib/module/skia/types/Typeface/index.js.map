@@ -1,0 +1,1 @@
+{"version":3,"names":[],"sources":["index.ts"],"sourcesContent":["export * from \"./Typeface\";\nexport * from \"./TypefaceFactory\";\n"],"mappings":"AAAA,cAAc,YAAY;AAC1B,cAAc,mBAAmB","ignoreList":[]}

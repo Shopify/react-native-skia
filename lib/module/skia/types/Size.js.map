@@ -1,0 +1,1 @@
+{"version":3,"names":[],"sources":["Size.ts"],"sourcesContent":["export interface SkSize {\n  width: number;\n  height: number;\n}\n"],"mappings":"","ignoreList":[]}

@@ -1,0 +1,1 @@
+{"version":3,"names":[],"sources":["MaskFilters.ts"],"sourcesContent":["import type { BlurStyle } from \"../../skia/types\";\n\nimport type { SkEnum } from \"./Common\";\n\nexport interface BlurMaskFilterProps {\n  style: SkEnum<typeof BlurStyle>;\n  blur: number;\n  respectCTM: boolean;\n}\n"],"mappings":"","ignoreList":[]}

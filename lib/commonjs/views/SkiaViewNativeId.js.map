@@ -1,0 +1,1 @@
+{"version":3,"names":["SkiaViewNativeId","exports","current"],"sources":["SkiaViewNativeId.ts"],"sourcesContent":["export const SkiaViewNativeId = { current: 1000 };\n"],"mappings":";;;;;;AAAO,MAAMA,gBAAgB,GAAAC,OAAA,CAAAD,gBAAA,GAAG;EAAEE,OAAO,EAAE;AAAK,CAAC","ignoreList":[]}

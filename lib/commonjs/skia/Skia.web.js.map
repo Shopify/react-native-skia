@@ -1,0 +1,1 @@
+{"version":3,"names":["_web","require","Skia","exports","JsiSkApi","global","CanvasKit"],"sources":["Skia.web.ts"],"sourcesContent":["import { JsiSkApi } from \"./web\";\n\nexport const Skia = JsiSkApi(global.CanvasKit);\n"],"mappings":";;;;;;AAAA,IAAAA,IAAA,GAAAC,OAAA;AAEO,MAAMC,IAAI,GAAAC,OAAA,CAAAD,IAAA,GAAG,IAAAE,aAAQ,EAACC,MAAM,CAACC,SAAS,CAAC","ignoreList":[]}

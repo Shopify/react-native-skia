@@ -1,0 +1,52 @@
+export const __esModule: boolean;
+export class Recorder {
+    getRecording(): {
+        commands: any;
+        paintPool: never[];
+        animationValues: any;
+    };
+    processProps(props: any): {
+        props: any;
+        animatedProps: {} | undefined;
+    };
+    add(command: any): void;
+    saveGroup(): void;
+    restoreGroup(): void;
+    savePaint(props: any): void;
+    restorePaint(): void;
+    restorePaintDeclaration(): void;
+    materializePaint(): void;
+    pushPathEffect(pathEffectType: any, props: any): void;
+    pushImageFilter(imageFilterType: any, props: any): void;
+    pushColorFilter(colorFilterType: any, props: any): void;
+    pushShader(shaderType: any, props: any): void;
+    pushBlurMaskFilter(props: any): void;
+    composePathEffect(): void;
+    composeColorFilter(): void;
+    composeImageFilter(): void;
+    saveCTM(props: any): void;
+    restoreCTM(): void;
+    drawPaint(): void;
+    saveLayer(): void;
+    saveBackdropFilter(): void;
+    drawBox(boxProps: any, shadows: any): void;
+    drawImage(props: any): void;
+    drawCircle(props: any): void;
+    drawPoints(props: any): void;
+    drawPath(props: any): void;
+    drawRect(props: any): void;
+    drawRRect(props: any): void;
+    drawOval(props: any): void;
+    drawLine(props: any): void;
+    drawPatch(props: any): void;
+    drawVertices(props: any): void;
+    drawDiffRect(props: any): void;
+    drawText(props: any): void;
+    drawTextPath(props: any): void;
+    drawTextBlob(props: any): void;
+    drawGlyphs(props: any): void;
+    drawPicture(props: any): void;
+    drawImageSVG(props: any): void;
+    drawParagraph(props: any): void;
+    drawAtlas(props: any): void;
+}

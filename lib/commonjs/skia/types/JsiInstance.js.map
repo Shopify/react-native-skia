@@ -1,0 +1,1 @@
+{"version":3,"names":[],"sources":["JsiInstance.ts"],"sourcesContent":["export interface SkJSIInstance<T extends string> {\n  __typename__: T;\n  dispose(): void;\n}\n"],"mappings":"","ignoreList":[]}

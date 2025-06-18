@@ -1,0 +1,1 @@
+{"version":3,"names":[],"sources":["TypefaceFactory.ts"],"sourcesContent":["import type { SkData } from \"../Data\";\n\nimport type { SkTypeface } from \"./Typeface\";\n\nexport interface TypefaceFactory {\n  MakeFreeTypeFaceFromData(data: SkData): SkTypeface | null;\n}\n"],"mappings":"","ignoreList":[]}

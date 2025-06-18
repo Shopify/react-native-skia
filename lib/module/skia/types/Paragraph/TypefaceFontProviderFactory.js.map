@@ -1,0 +1,1 @@
+{"version":3,"names":[],"sources":["TypefaceFontProviderFactory.ts"],"sourcesContent":["import type { SkTypefaceFontProvider } from \"./TypefaceFontProvider\";\n\nexport interface TypefaceFontProviderFactory {\n  Make(): SkTypefaceFontProvider;\n}\n"],"mappings":"","ignoreList":[]}

@@ -1,0 +1,1 @@
+{"version":3,"names":[],"sources":["Paragraph.ts"],"sourcesContent":["import type { SkParagraph } from \"../../skia/types/Paragraph\";\n\nimport type { GroupProps } from \"./Common\";\n\nexport interface ParagraphProps extends GroupProps {\n  paragraph: SkParagraph | null;\n  x: number;\n  y: number;\n  width: number;\n}\n"],"mappings":"","ignoreList":[]}

@@ -1,0 +1,44 @@
+export const __esModule: boolean;
+export namespace sksgHostConfig {
+    let supportsMutation: boolean;
+    let isPrimaryRenderer: boolean;
+    let supportsPersistence: boolean;
+    let supportsHydration: boolean;
+    let scheduleTimeout: typeof setTimeout;
+    let cancelTimeout: typeof clearTimeout;
+    let noTimeout: number;
+    function appendChildToContainer(container: any, child: any): void;
+    function appendChild(parent: any, child: any): void;
+    function getRootHostContext(_rootContainerInstance: any): null;
+    function getChildHostContext(_parentHostContext: any, _type: any, _rootContainerInstance: any): null;
+    function shouldSetTextContent(_type: any, _props: any): boolean;
+    function createTextInstance(_text: any, _rootContainerInstance: any, _hostContext: any, _internalInstanceHandle: any): never;
+    function createInstance(type: any, propsWithChildren: any, _container: any, _hostContext: any, _internalInstanceHandle: any): {
+        type: any;
+        props: any;
+        children: never[];
+    };
+    function appendInitialChild(parentInstance: any, child: any): void;
+    function finalizeInitialChildren(parentInstance: any, _type: any, _props: any, _rootContainerInstance: any, _hostContext: any): boolean;
+    function commitMount(): void;
+    function prepareForCommit(_containerInfo: any): null;
+    function resetAfterCommit(container: any): void;
+    function getPublicInstance(node: any): any;
+    function prepareUpdate(_instance: any, type: any, oldProps: any, newProps: any, rootContainerInstance: any, _hostContext: any): any;
+    function commitUpdate(instance: any, _updatePayload: any, type: any, prevProps: any, nextProps: any, _internalHandle: any): void;
+    function commitTextUpdate(_textInstance: any, _oldText: any, _newText: any): void;
+    function clearContainer(container: any): void;
+    function preparePortalMount(): void;
+    function removeChild(parent: any, child: any): void;
+    function removeChildFromContainer(container: any, child: any): void;
+    function insertInContainerBefore(container: any, child: any, before: any): void;
+    function insertBefore(parent: any, child: any, before: any): void;
+    function getCurrentEventPriority(): number;
+    function beforeActiveInstanceBlur(): void;
+    function afterActiveInstanceBlur(): void;
+    function detachDeletedInstance(): void;
+    function getInstanceFromNode(_node: any): null;
+    function prepareScopeUpdate(_scopeInstance: any, _instance: any): void;
+    function getInstanceFromScope(_scopeInstance: any): null;
+}
+export function debug(...args: any[]): void;

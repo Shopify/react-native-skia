@@ -1,0 +1,1 @@
+{"version":3,"names":[],"sources":["SVGFactory.ts"],"sourcesContent":["import type { SkData } from \"../Data\";\n\nimport type { SkSVG } from \"./SVG\";\n\nexport interface SVGFactory {\n  MakeFromData(data: SkData): SkSVG | null;\n  MakeFromString(str: string): SkSVG | null;\n}\n"],"mappings":"","ignoreList":[]}

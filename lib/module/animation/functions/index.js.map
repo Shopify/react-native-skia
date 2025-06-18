@@ -1,0 +1,1 @@
+{"version":3,"names":[],"sources":["index.ts"],"sourcesContent":["export * from \"./interpolate\";\nexport * from \"./interpolateColors\";\nexport * from \"./interpolateVector\";\nexport * from \"./interpolatePaths\";\n"],"mappings":"AAAA,cAAc,eAAe;AAC7B,cAAc,qBAAqB;AACnC,cAAc,qBAAqB;AACnC,cAAc,oBAAoB","ignoreList":[]}

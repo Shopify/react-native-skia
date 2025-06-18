@@ -1,0 +1,1 @@
+{"version":3,"names":[],"sources":["SVG.ts"],"sourcesContent":["import type { SkJSIInstance } from \"../JsiInstance\";\n\nexport interface SkSVG extends SkJSIInstance<\"SVG\"> {\n  width(): number;\n  height(): number;\n}\n"],"mappings":"","ignoreList":[]}
