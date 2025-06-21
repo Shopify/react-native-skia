@@ -138,4 +138,27 @@ describe("Backdrop Filters", () => {
     );
     checkImage(img, docPath("blur-backdrop-aurora.png"));
   });
+  it("Blur backdrop blur on text with white background", async () => {
+    const { width, height } = surface;
+    const { rect } = importSkia();
+    const img = await surface.draw(
+      <>
+        <Circle c={{ x: 0, y: 0 }} r={100} color="black" />
+        <BackdropBlur blur={10 / 3} clip={rect(0, 0, width, height)} />
+      </>
+    );
+    checkImage(img, docPath("backdrop-circle.png"));
+  });
+  it("Blur backdrop blur on text with opaque background", async () => {
+    const { width, height } = surface;
+    const { rect } = importSkia();
+    const img = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Circle c={{ x: 0, y: 0 }} r={100} color="black" />
+        <BackdropBlur blur={10 / 3} clip={rect(0, 0, width, height)} />
+      </>
+    );
+    checkImage(img, docPath("backdrop-circle-opaque.png"));
+  });
 });
