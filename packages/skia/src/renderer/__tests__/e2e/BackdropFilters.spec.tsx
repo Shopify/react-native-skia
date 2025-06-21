@@ -10,8 +10,9 @@ import {
   Fill,
   Image,
   LinearGradient,
+  Text,
 } from "../../components";
-import { importSkia, surface, images } from "../setup";
+import { importSkia, surface, images, fonts } from "../setup";
 import { Group } from "../../components/Group";
 
 // https://kazzkiq.github.io/svg-color-filter/
@@ -137,5 +138,17 @@ describe("Backdrop Filters", () => {
       </>
     );
     checkImage(img, docPath("blur-backdrop-aurora.png"));
+  });
+  it("Blur backdrop blur on text", async () => {
+    const { width, height } = surface;
+    const { rect } = importSkia();
+    const font = fonts.DinMedium;
+    const img = await surface.draw(
+      <>
+        <Text x={0} y={64} text="Lorem ipsum" font={font} />
+        <BackdropBlur blur={10 / 3} clip={rect(0, 0, width, height)} />
+      </>
+    );
+    checkImage(img, docPath("backdrop-text.png"));
   });
 });
