@@ -51,7 +51,7 @@ async_callback(void *c,
 class DawnContext {
 public:
   // TODO: remove
-  friend class RNSkiOSPlatformContext;
+  friend class RNSkApplePlatformContext;
 
   DawnContext(const DawnContext &) = delete;
   DawnContext &operator=(const DawnContext &) = delete;
@@ -204,7 +204,7 @@ private:
     DawnProcTable backendProcs = dawn::native::GetProcs();
     dawnProcSetProcs(&backendProcs);
     WGPUInstanceDescriptor desc{};
-    desc.features.timedWaitAnyEnable = true;
+    desc.capabilities.timedWaitAnyEnable = true;
     instance = std::make_unique<dawn::native::Instance>(&desc);
 
     backendContext = DawnUtils::createDawnBackendContext(instance.get());
@@ -221,7 +221,16 @@ private:
     }
   }
 
-  void tick() { backendContext.fTick(backendContext.fInstance); }
+  ~DawnContext() {
+    backendContext.fDevice = nullptr;
+    tick();
+  }
+
+  void tick() {
+    if (backendContext.fTick) {
+      backendContext.fTick(backendContext.fInstance);
+    }
+  }
 
   skgpu::graphite::Recorder *getRecorder() {
     static thread_local skgpu::graphite::RecorderOptions recorderOptions;

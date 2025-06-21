@@ -19,7 +19,7 @@ import java.nio.file.Paths
 // the minimum React Native version supported.
 def DEFAULT_COMPILE_SDK_VERSION = 28
 def DEFAULT_BUILD_TOOLS_VERSION = '28.0.3'
-def DEFAULT_MIN_SDK_VERSION = 16
+def DEFAULT_MIN_SDK_VERSION = 21
 def DEFAULT_TARGET_SDK_VERSION = 28
 
 def safeExtGet(prop, fallback) {
@@ -132,6 +132,16 @@ android {
 
     compileSdkVersion safeExtGet('compileSdkVersion', DEFAULT_COMPILE_SDK_VERSION)
     buildToolsVersion safeExtGet('buildToolsVersion', DEFAULT_BUILD_TOOLS_VERSION)
+
+    // Used to override the NDK path/version on internal CI or by allowing
+    // users to customize the NDK path/version from their root project.
+    if (rootProject.hasProperty("ndkPath")) {
+        ndkPath rootProject.ext.ndkPath
+    }
+    if (rootProject.hasProperty("ndkVersion")) {
+        ndkVersion rootProject.ext.ndkVersion
+    }
+
     defaultConfig {
         minSdkVersion safeExtGet('minSdkVersion', DEFAULT_MIN_SDK_VERSION)
         targetSdkVersion safeExtGet('targetSdkVersion', DEFAULT_TARGET_SDK_VERSION)
@@ -285,13 +295,17 @@ afterEvaluate { project ->
     }
 }
 
+def localBuildDir = buildDir
+def headersConfiguration = configurations.extractHeaders
+def jniConfiguration = configurations.extractJNI
+
 task extractAARHeaders {
     doLast {
-        configurations.extractHeaders.files.each {
-            def file = it.absoluteFile
-            copy {
-                from zipTree(file)
-                into "$buildDir/$file.name"
+        headersConfiguration.files.each { file ->
+            def absFile = file.absoluteFile
+            project.copy {
+                from project.zipTree(absFile)
+                into "${localBuildDir}/${absFile.name}"
                 include "**/*.h"
             }
         }
@@ -300,11 +314,11 @@ task extractAARHeaders {
 
 task extractJNIFiles {
     doLast {
-        configurations.extractJNI.files.each {
-            def file = it.absoluteFile
-            copy {
-                from zipTree(file)
-                into "$buildDir/$file.name"
+        jniConfiguration.files.each { file ->
+            def absFile = file.absoluteFile
+            project.copy {
+                from project.zipTree(absFile)
+                into "${localBuildDir}/${absFile.name}"
                 include "jni/**/*"
             }
         }

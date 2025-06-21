@@ -155,11 +155,8 @@ Again, since `eval`, `draw`, and `drawOffscreen` serialize the function's conten
 ## Graphite
 
 Skia has two backends: Ganesh and Graphite. Ganesh is the default backend.
-Currently, Graphite doesn't match Ganesh in terms of features, but we offer experimental support for it.  
-If you want to tinker with Graphite, you can enable it by building Skia using `SK_GRAPHITE=1 yarn build-skia`.  
-With this command, the Skia binary will work for both Ganesh and Graphite.  
-The reason we do not currently ship this build by default is that it requires Android API Level 26 or above.
+If you want to experiment with Graphite, you can enable it by building Skia with `SK_GRAPHITE=1 yarn build-skia`.  
+Skia Graphite requires Android API Level 26 or above.
 
-To enable Graphite in your app, follow these steps:  
-* **iOS**: Install pods using `SK_GRAPHITE=1 pod install`.  
-* **Android**: In [CMakeLists.txt](/packages/skia/android/CMakeLists.txt), use `set(SK_GRAPHITE ON)`.
+React Native Skia automatically detects if the Dawn WebGPU implementation library files are available. If they are present, it will automatically assume that Graphite is enabled.
+  

@@ -25,7 +25,8 @@ public:
                                          std::make_shared<Recorder>()) {}
 
   JSI_HOST_FUNCTION(savePaint) {
-    getObject()->savePaint(runtime, arguments[0].asObject(runtime));
+    getObject()->savePaint(runtime, arguments[0].asObject(runtime),
+                           arguments[1].asBool());
     return jsi::Value::undefined();
   }
 

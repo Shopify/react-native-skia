@@ -5,7 +5,7 @@
     "provenance": true
   },
   "bin": {
-    "setup-skia-web": "./scripts/setup-canvaskit.js"
+    "setup-skia-web": "scripts/setup-canvaskit.js"
   },
   "title": "React Native Skia",
   "version": "0.0.0",
@@ -29,7 +29,7 @@
     "jestSetup.mjs",
     "jestEnv.mjs",
     "cpp/**/*.{h,cpp}",
-    "ios/**",
+    "apple/**",
     "libs/apple/*.xcframework/**",
     "react-native-skia.podspec",
     "scripts/setup-canvaskit.js",
@@ -46,7 +46,7 @@
     "build-skia": "ts-node ./scripts/build-skia.ts",
     "copy-skia-headers": "ts-node ./scripts/copy-skia-headers.ts",
     "clang-format": "yarn clang-format-ios && yarn clang-format-android && yarn clang-format-common",
-    "clang-format-ios": "find ios/ -iname '*.h' -o -iname '*.mm' -o -iname '*.cpp' | xargs clang-format -i",
+    "clang-format-ios": "find apple/ -iname '*.h' -o -iname '*.mm' -o -iname '*.cpp' | xargs clang-format -i",
     "clang-format-android": "find android/cpp/ -iname '*.h' -o -iname '*.m' -o -iname '*.cpp' | xargs clang-format -i",
     "clang-format-common": "find cpp/ \\( -path 'cpp//skia' -prune \\) -o \\( -iname '*.h' -o -iname '*.m' -o -iname '*.cpp' \\) -print | xargs clang-format -i",
     "workflow-copy-libs": "yarn ts-node ./scripts/workflow-copy-libs.ts",
@@ -76,9 +76,9 @@
   "licenseFilename": "LICENSE.md",
   "readmeFilename": "README.md",
   "peerDependencies": {
-    "react": ">=18.0",
-    "react-native": ">=0.64",
-    "react-native-reanimated": ">=2.0.0"
+    "react": ">=19.0",
+    "react-native": ">=0.78",
+    "react-native-reanimated": "^3.0"
   },
   "peerDependenciesMeta": {
     "react-native": {
@@ -91,12 +91,13 @@
   "devDependencies": {
     "@babel/plugin-proposal-nullish-coalescing-operator": "7.18.6",
     "@semantic-release/commit-analyzer": "^13.0.0",
+    "@semantic-release/exec": "^7.0.3",
     "@semantic-release/github": "^10.3.3",
     "@semantic-release/release-notes-generator": "^14.0.1",
     "@types/jest": "29.5.6",
     "@types/pixelmatch": "5.2.4",
     "@types/pngjs": "6.0.1",
-    "@types/react": "^18.2.6",
+    "@types/react": "^19.0.0",
     "@types/react-reconciler": "0.28.9",
     "@types/ws": "8.5.3",
     "eslint": "8",
@@ -108,10 +109,10 @@
     "pixelmatch": "5.3.0",
     "pngjs": "6.0.0",
     "prettier": "2.8.7",
-    "react": "18.3.1",
-    "react-native": "0.75.2",
+    "react": "19.0.0",
+    "react-native": "0.78.0",
     "react-native-builder-bob": "0.18.2",
-    "react-native-reanimated": "^3.16.5",
+    "react-native-reanimated": "^3.0",
     "rimraf": "3.0.2",
     "semantic-release": "^24.1.0",
     "semantic-release-yarn": "^3.0.2",
@@ -121,8 +122,8 @@
     "ws": "8.18.0"
   },
   "dependencies": {
-    "canvaskit-wasm": "0.39.1",
-    "react-reconciler": "0.27.0"
+    "canvaskit-wasm": "0.40.0",
+    "react-reconciler": "0.31.0"
   },
   "eslintIgnore": [
     "node_modules/",

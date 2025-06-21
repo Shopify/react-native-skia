@@ -17,6 +17,11 @@ namespace jsi = facebook::jsi;
 
 class JsiSkImageFactory : public JsiSkHostObject {
 public:
+  JSI_HOST_FUNCTION(MakeNull) {
+    return jsi::Object::createFromHostObject(
+        runtime, std::make_shared<JsiSkImage>(getContext(), nullptr));
+  }
+
   JSI_HOST_FUNCTION(MakeImageFromEncoded) {
     auto data = JsiSkData::fromValue(runtime, arguments[0]);
     auto image = SkImages::DeferredFromEncodedData(data);
@@ -86,6 +91,13 @@ public:
     if (image == nullptr) {
       throw std::runtime_error("Failed to convert native texture to SkImage!");
     }
+    if (count > 4 && arguments[4].isObject() &&
+        arguments[4].asObject(runtime).isHostObject(runtime)) {
+      auto jsiImage =
+          arguments[4].asObject(runtime).asHostObject<JsiSkImage>(runtime);
+      jsiImage->setObject(image);
+      return jsi::Value(runtime, arguments[4]);
+    }
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
@@ -96,7 +108,8 @@ public:
                                        MakeImageFromNativeBuffer),
                        JSI_EXPORT_FUNC(JsiSkImageFactory,
                                        MakeImageFromNativeTextureUnstable),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage))
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage),
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeNull))
 
   explicit JsiSkImageFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

@@ -34,7 +34,7 @@ import type { SkPicture } from "./Picture";
 export interface BaseRecorder {
   saveGroup(): void;
   restoreGroup(): void;
-  savePaint(props: AnimatedProps<PaintProps>): void;
+  savePaint(props: AnimatedProps<PaintProps>, standalone: boolean): void;
   restorePaint(): void;
   restorePaintDeclaration(): void;
   materializePaint(): void;

@@ -3,9 +3,11 @@ on:
   push:
     branches:
       - main
+      - next
   pull_request:
     branches:
       - main
+      - next
   merge_group:
     types:
       - checks_requested
@@ -19,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           submodules: recursive
 
@@ -28,9 +30,9 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
       - run: pip install cpplint
-      - run: cpplint --linelength=230 --filter=-legal/copyright,-whitespace/indent,-whitespace/comments,-whitespace/ending_newline,-build/include_order,-runtime/references,-readability/todo,-whitespace/blank_line,-whitespace/todo,-runtime/int,-build/c++11,-whitespace/parens --exclude=package/cpp/skia --exclude=package/ios --exclude=package/android/build --exclude=package/node_modules --recursive package
+      - run: cpplint --linelength=230 --filter=-legal/copyright,-whitespace/indent,-whitespace/comments,-whitespace/ending_newline,-build/include_order,-runtime/references,-readability/todo,-whitespace/blank_line,-whitespace/todo,-runtime/int,-build/c++11,-whitespace/parens --exclude=package/cpp/skia --exclude=package/apple --exclude=package/android/build --exclude=package/node_modules --recursive package
 
       - name: Clang Format
         working-directory: packages/skia
@@ -46,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           submodules: recursive
 
@@ -62,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           submodules: recursive
 
@@ -89,7 +91,7 @@ jobs:
       TURBO_CACHE_DIR: .turbo/android
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           submodules: recursive
 
@@ -99,7 +101,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache turborepo for Android
-        uses: actions/cache@v3
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: ${{ env.TURBO_CACHE_DIR }}
           key: ${{ runner.os }}-turborepo-android-${{ hashFiles('yarn.lock') }}
@@ -107,13 +109,13 @@ jobs:
             ${{ runner.os }}-turborepo-android
 
       - name: Install JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
         with:
           distribution: 'zulu'
           java-version: '17'
 
       - name: Install NDK
-        uses: nttld/setup-ndk@v1
+        uses: nttld/setup-ndk@afb4c9964b521afb97c864b7d40b11e6911bd410 # v1.5.0
         id: setup-ndk
         with:
           ndk-version: r26d
@@ -127,22 +129,22 @@ jobs:
 
       - name: Install Android SDK
         run: |
-          echo "sdk.dir=$ANDROID_HOME" > $GITHUB_WORKSPACE/apps/paper/android/local.properties
+          echo "sdk.dir=$ANDROID_HOME" > $GITHUB_WORKSPACE/apps/example/android/local.properties
 
       - name: Cache Gradle
-        uses: actions/cache@v3
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: |
             ~/.gradle/wrapper
             ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('./apps/paper/android/gradle/wrapper/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('./apps/example/android/gradle/wrapper/gradle-wrapper.properties') }}
             ${{ runner.os }}-gradle-
 
       - name: Build example for Android
         env:
           JAVA_OPTS: "-XX:MaxHeapSize=6g"
         run: |
-          yarn turbo run build:android --concurrency 1 --filter=paper --force
+          yarn turbo run build:android --concurrency 1 --filter=example --force
 
   build-android:
     runs-on: macos-latest-large
@@ -151,7 +153,7 @@ jobs:
       TURBO_CACHE_DIR: .turbo/android
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           submodules: recursive
 
@@ -161,7 +163,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache turborepo for Android
-        uses: actions/cache@v3
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: ${{ env.TURBO_CACHE_DIR }}
           key: ${{ runner.os }}-turborepo-android-${{ hashFiles('yarn.lock') }}
@@ -169,13 +171,13 @@ jobs:
             ${{ runner.os }}-turborepo-android
 
       - name: Install JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
         with:
           distribution: 'zulu'
           java-version: '17'
 
       - name: Install NDK
-        uses: nttld/setup-ndk@v1
+        uses: nttld/setup-ndk@afb4c9964b521afb97c864b7d40b11e6911bd410 # v1.5.0
         id: setup-ndk
         with:
           ndk-version: r26d
@@ -189,16 +191,15 @@ jobs:
 
       - name: Install Android SDK
         run: |
-          echo "sdk.dir=$ANDROID_HOME" > $GITHUB_WORKSPACE/apps/paper/android/local.properties
-          echo "sdk.dir=$ANDROID_HOME" > $GITHUB_WORKSPACE/apps/fabric/android/local.properties
+          echo "sdk.dir=$ANDROID_HOME" > $GITHUB_WORKSPACE/apps/example/android/local.properties
 
       - name: Cache Gradle
-        uses: actions/cache@v3
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: |
             ~/.gradle/wrapper
             ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('./apps/paper/android/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('./apps/fabric/android/gradle/wrapper/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('./apps/example/android/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
@@ -209,11 +210,11 @@ jobs:
           yarn turbo run build:android --concurrency 1 --force
 
       - name: Cache apk
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         env:
           cache-name: cache-apk
         with:
-          path: apps/paper/android/app/build/outputs/apk/debug/app-debug.apk
+          path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
 
   test-android:
@@ -221,12 +222,9 @@ jobs:
     runs-on: macos-latest-large
     env:
       TURBO_CACHE_DIR: .turbo/android
-    strategy:
-      matrix:
-        working-directory: [apps/paper]
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           submodules: recursive
 
@@ -237,9 +235,9 @@ jobs:
 
       - name: Restore APK
         id: cache-apk
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
-          path: ${{ matrix.working-directory }}/android/app/build/outputs/apk/debug/app-debug.apk
+          path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
       
       - name: SKDs - download required images
@@ -256,23 +254,23 @@ jobs:
         timeout-minutes: 10
 
       - name: Start Package Manager
-        working-directory: ${{ matrix.working-directory }}
+        working-directory: apps/example/
         run: E2E=true yarn start &
 
       - name: Check APK existence
-        uses: andstor/file-existence-action@v2
+        uses: andstor/file-existence-action@076e0072799f4942c8bc574a82233e1e4d13e9d6 # v3.0.0
         with:
-          files: ${{ matrix.working-directory }}/android/app/build/outputs/apk/debug/app-debug.apk
+          files: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           fail: true
 
       - name: Install APK
-        run: adb install -r ${{ matrix.working-directory }}/android/app/build/outputs/apk/debug/app-debug.apk
+        run: adb install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk
 
       # - name: Set up environment
       #   run: echo "PACKAGE_NAME=${{ env.PACKAGE_NAME }}" >> $GITHUB_ENV
       - name: Launch APK
         env:
-          PACKAGE_NAME: ${{ matrix.working-directory == 'fabricexample' && 'com.fabricexample' || 'com.paper' }}  
+          PACKAGE_NAME: 'com.microsoft.reacttestapp'
         run: adb shell monkey -p ${{ env.PACKAGE_NAME }} 1  
 
       # On fabric, the system fonts are slightly different
@@ -280,19 +278,15 @@ jobs:
       - name: Run e2e Tests
         working-directory: packages/skia
         run: |
-          if [ "${{ matrix.working-directory }}" = "apps/paper" ]; then
-            CI=true yarn e2e
-          elif [ "${{ matrix.working-directory }}" = "apps/none" ]; then
-            CI=true yarn e2e --testPathIgnorePatterns Paragraphs
-          fi
+          CI=true yarn e2e --testPathIgnorePatterns Paragraphs
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: failure()
         with:
           path: packages/skia/src/__tests__/snapshots/
           name: tests-snapshots-screenshots
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: failure()
         with:
           path: apps/docs/static/
@@ -304,7 +298,7 @@ jobs:
       TURBO_CACHE_DIR: .turbo/ios
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           submodules: recursive
 
@@ -314,7 +308,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache turborepo for iOS
-        uses: actions/cache@v3
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: ${{ env.TURBO_CACHE_DIR }}
           key: ${{ runner.os }}-turborepo-ios-${{ hashFiles('yarn.lock') }}
@@ -330,15 +324,15 @@ jobs:
           fi
 
       - name: Install CocoaPods
-        working-directory: apps/paper/ios
+        working-directory: apps/example/ios
         run: pod install
 
       - name: Start Package Manager
-        working-directory: apps/paper
+        working-directory: apps/example
         run: E2E=true yarn start &
   
       - name: Build example for iOS
-        working-directory: apps/paper
+        working-directory: apps/example
         run: yarn ios --simulator 'iPhone 16 Pro'
 
       - name: Run e2e tests

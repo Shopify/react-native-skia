@@ -2,7 +2,7 @@ import { deflate, inflate, processColor } from "../../../dom/nodes";
 import type { BoxProps, BoxShadowProps } from "../../../dom/types";
 import { BlurStyle, ClipOp, isRRect } from "../../../skia/types";
 import type { Command } from "../Core";
-import { CommandType, materializeProps } from "../Core";
+import { CommandType, materializeCommand } from "../Core";
 import type { DrawingContext } from "../DrawingContext";
 
 interface BoxCommand extends Command<CommandType.DrawBox> {
@@ -17,11 +17,9 @@ export const isBoxCommand = (command: Command): command is BoxCommand => {
 
 export const drawBox = (ctx: DrawingContext, command: BoxCommand) => {
   "worklet";
-  command.shadows.forEach((shadow) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    materializeProps(shadow as any);
+  const shadows = command.shadows.map((shadow) => {
+    return materializeCommand(shadow).props;
   });
-  const shadows = command.shadows.map((shadow) => shadow.props);
   const { paint, Skia, canvas } = ctx;
   const { box: defaultBox } = command.props;
   const opacity = paint.getAlphaf();
@@ -32,7 +30,7 @@ export const drawBox = (ctx: DrawingContext, command: BoxCommand) => {
       const { color = "black", blur, spread = 0, dx = 0, dy = 0 } = shadow;
       const lPaint = Skia.Paint();
       lPaint.setColor(processColor(Skia, color));
-      lPaint.setAlphaf(paint.getAlphaf() * opacity);
+      lPaint.setAlphaf(lPaint.getAlphaf() * opacity);
       lPaint.setMaskFilter(
         Skia.MaskFilter.MakeBlur(BlurStyle.Normal, blur, true)
       );
@@ -50,7 +48,7 @@ export const drawBox = (ctx: DrawingContext, command: BoxCommand) => {
       canvas.clipRRect(box, ClipOp.Intersect, false);
       const lPaint = Skia.Paint();
       lPaint.setColor(Skia.Color(color));
-      lPaint.setAlphaf(paint.getAlphaf() * opacity);
+      lPaint.setAlphaf(lPaint.getAlphaf() * opacity);
 
       lPaint.setMaskFilter(
         Skia.MaskFilter.MakeBlur(BlurStyle.Normal, blur, true)
