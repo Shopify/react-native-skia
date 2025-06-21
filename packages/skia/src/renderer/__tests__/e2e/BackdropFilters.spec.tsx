@@ -10,9 +10,8 @@ import {
   Fill,
   Image,
   LinearGradient,
-  Text,
 } from "../../components";
-import { importSkia, surface, images, fonts } from "../setup";
+import { importSkia, surface, images } from "../setup";
 import { Group } from "../../components/Group";
 
 // https://kazzkiq.github.io/svg-color-filter/
@@ -142,25 +141,24 @@ describe("Backdrop Filters", () => {
   it("Blur backdrop blur on text with white background", async () => {
     const { width, height } = surface;
     const { rect } = importSkia();
-    const font = fonts.DinMedium;
     const img = await surface.draw(
       <>
-        <Text x={0} y={64} text="Lorem ipsum" font={font} />
+        <Circle c={{ x: 0, y: 0 }} r={100} color="black" />
         <BackdropBlur blur={10 / 3} clip={rect(0, 0, width, height)} />
       </>
     );
-    checkImage(img, docPath("backdrop-text.png"));
+    checkImage(img, docPath("backdrop-circle.png"));
   });
   it("Blur backdrop blur on text with opaque background", async () => {
     const { width, height } = surface;
     const { rect } = importSkia();
-    const font = fonts.DinMedium;
     const img = await surface.draw(
       <>
-        <Text x={0} y={64} text="Lorem ipsum" font={font} />
+        <Fill color="white" />
+        <Circle c={{ x: 0, y: 0 }} r={100} color="black" />
         <BackdropBlur blur={10 / 3} clip={rect(0, 0, width, height)} />
       </>
     );
-    checkImage(img, docPath("backdrop-text-opaque.png"));
+    checkImage(img, docPath("backdrop-circle-opaque.png"));
   });
 });
