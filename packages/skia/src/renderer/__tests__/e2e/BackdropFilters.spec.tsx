@@ -139,7 +139,7 @@ describe("Backdrop Filters", () => {
     );
     checkImage(img, docPath("blur-backdrop-aurora.png"));
   });
-  it("Blur backdrop blur on text", async () => {
+  it("Blur backdrop blur on text with white background", async () => {
     const { width, height } = surface;
     const { rect } = importSkia();
     const font = fonts.DinMedium;
@@ -150,5 +150,17 @@ describe("Backdrop Filters", () => {
       </>
     );
     checkImage(img, docPath("backdrop-text.png"));
+  });
+  it("Blur backdrop blur on text with opaque background", async () => {
+    const { width, height } = surface;
+    const { rect } = importSkia();
+    const font = fonts.DinMedium;
+    const img = await surface.draw(
+      <>
+        <Text x={0} y={64} text="Lorem ipsum" font={font} />
+        <BackdropBlur blur={10 / 3} clip={rect(0, 0, width, height)} />
+      </>
+    );
+    checkImage(img, docPath("backdrop-text-opaque.png"));
   });
 });
