@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { flowPlugin, esbuildFlowPlugin } from '@bunchtogether/vite-plugin-flow';
+import { flowPlugin, esbuildFlowPlugin } from "@bunchtogether/vite-plugin-flow";
+import fs from "node:fs/promises";
 
 const extensions = [
   ".web.mjs",
@@ -48,7 +49,26 @@ export default defineConfig({
   optimizeDeps: {
     esbuildOptions: {
       resolveExtensions: extensions,
-      plugins: [esbuildFlowPlugin()],
+      plugins: [
+        {
+          name: "js-in-jsx-loader",
+          setup(build) {
+            build.onLoad(
+              { filter: /\/react-native-reanimated\/.*\.(js)$/ },
+              async (args) => {
+                return {
+                  contents: await fs.readFile(
+                    args.path,
+                    "utf8"
+                  ),
+                  loader: "jsx",
+                };
+              }
+            );
+          },
+        },
+        esbuildFlowPlugin(),
+      ],
     },
   },
 });
