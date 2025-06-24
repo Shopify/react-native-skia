@@ -8,6 +8,9 @@ slug: /tutorials
 Below is a list of tutorials sorted by category.
 Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/docs/tutorials.md) if you would like to add entries to the list.
 
+## 3D SDFS
+* [The Shader's Gambit (youtu.be)](https://www.youtube.com/watch?v=wUsFNlas620)
+
 ## Animations
 * [The Matrix Reacts (youtu.be)](https://www.youtube.com/watch?v=49QR0wUDMG0)
 * [Animated 3D Card in React Native (youtu.be)](https://www.youtube.com/watch?v=pVesCl7TY8A)
