@@ -1,6 +1,6 @@
 import { exit } from "process";
 
-import type { Platform, PlatformName } from "./skia-configuration";
+import type { Platform, PlatformName, Target } from "./skia-configuration";
 import {
   commonArgs,
   configurations,
@@ -27,7 +27,9 @@ const parseArgs = () => {
       if (platformValue === "android" || platformValue === "apple") {
         platform = platformValue;
       } else {
-        console.error(`Invalid platform: ${platformValue}. Must be 'android' or 'apple'.`);
+        console.error(
+          `Invalid platform: ${platformValue}. Must be 'android' or 'apple'.`
+        );
         exit(1);
       }
       i++; // Skip the next argument as it's the value
@@ -159,33 +161,46 @@ export const buildXCFrameworks = () => {
   const { outputNames } = configurations.apple;
   process.chdir(SkiaSrc);
   outputNames.forEach((name) => {
-    console.log("Building XCFramework for " + name);
+    console.log("🏗️  Building XCFramework for " + name);
     const prefix = `${OutFolder}/${os}`;
 
     // Only create tvOS frameworks if GRAPHITE is not enabled
     if (!GRAPHITE) {
+      //console.log(`📁 Creating tvOS simulator directory for ${name}`);
       $(`mkdir -p ${OutFolder}/${os}/tvsimulator`);
+      //console.log(`🗑️  Removing existing tvOS simulator library for ${name}`);
       $(`rm -rf ${OutFolder}/${os}/tvsimulator/${name}`);
+      //console.log(`🔗 Creating universal tvOS simulator library for ${name}`);
       $(
         // eslint-disable-next-line max-len
         `lipo -create ${OutFolder}/${os}/x64-tvsimulator/${name} ${OutFolder}/${os}/arm64-tvsimulator/${name} -output ${OutFolder}/${os}/tvsimulator/${name}`
       );
     }
 
+    // console.log(`📁 Creating iPhone simulator directory for ${name}`);
     $(`mkdir -p ${OutFolder}/${os}/iphonesimulator`);
+    //console.log(`🗑️  Removing existing iPhone simulator library for ${name}`);
     $(`rm -rf ${OutFolder}/${os}/iphonesimulator/${name}`);
+    //console.log(`🔗 Creating universal iPhone simulator library for ${name}`);
     $(
       // eslint-disable-next-line max-len
       `lipo -create ${OutFolder}/${os}/x64-iphonesimulator/${name} ${OutFolder}/${os}/arm64-iphonesimulator/${name} -output ${OutFolder}/${os}/iphonesimulator/${name}`
     );
+    //console.log(`📁 Creating macOS directory for ${name}`);
     $(`mkdir -p ${OutFolder}/${os}/macosx`);
+    //console.log(`🗑️  Removing existing macOS library for ${name}`);
     $(`rm -rf ${OutFolder}/${os}/macosx/${name}`);
+    //console.log(`🔗 Creating universal macOS library for ${name}`);
     $(
       // eslint-disable-next-line max-len
       `lipo -create ${OutFolder}/${os}/x64-macosx/${name} ${OutFolder}/${os}/arm64-macosx/${name} -output ${OutFolder}/${os}/macosx/${name}`
     );
     const [lib] = name.split(".");
     const dstPath = `${PackageRoot}/libs/${os}/${lib}.xcframework`;
+
+    // Clean up existing XCFramework before creating a new one
+    //console.log(`🗑️  Removing existing XCFramework for ${name} at ${dstPath}`);
+    $(`rm -rf ${dstPath}`);
 
     // Build the xcodebuild command conditionally based on GRAPHITE
     const xcframeworkCmd = GRAPHITE
@@ -202,39 +217,45 @@ export const buildXCFrameworks = () => {
         `-library ${prefix}/macosx/${name} ` +
         ` -output ${dstPath}`;
 
+    console.log(`📦 Creating XCFramework for ${name} at ${dstPath}`);
     $(xcframeworkCmd);
   });
 };
 
-const buildSingleTarget = async (platformName: PlatformName, targetName: string) => {
+const buildSingleTarget = async (
+  platformName: PlatformName,
+  targetName: string
+) => {
   const configuration = configurations[platformName];
   if (!configuration) {
     console.error(`Platform "${platformName}" not found in configurations`);
     exit(1);
   }
 
-  const target = (configuration.targets as any)[targetName];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const target = (configuration.targets as any)[targetName] as
+    | Target
+    | undefined;
   if (!target) {
-    console.error(`Target "${targetName}" not found for platform "${platformName}"`);
-    console.error(`Available targets: ${Object.keys(configuration.targets).join(", ")}`);
+    console.error(
+      `Target "${targetName}" not found for platform "${platformName}"`
+    );
+    console.error(
+      `Available targets: ${Object.keys(configuration.targets).join(", ")}`
+    );
     exit(1);
   }
 
   console.log(`Building ${platformName} ${targetName}`);
-  
+
   await configurePlatform(platformName, configuration, targetName);
   await buildPlatform(platformName, targetName);
-  
+
   process.chdir(ProjectRoot);
-  if (platformName === "android") {
-    copyLib(
-      platformName,
-      targetName,
-      target.output!,
-      configuration.outputNames
-    );
+  if (platformName === "android" && target.output) {
+    copyLib(platformName, targetName, target.output, configuration.outputNames);
   }
-  
+
   copyHeaders();
 };
 
@@ -262,22 +283,43 @@ const buildAllPlatforms = async () => {
   copyHeaders();
 };
 
-(async () => {
-  if (GRAPHITE) {
-    console.log("🪨 Skia Graphite");
-    console.log(
-      "⚠️  Apple TV (tvOS) builds are skipped when GRAPHITE is enabled"
-    );
-  } else {
-    console.log("🐘 Skia Ganesh");
-  }
+// Only run the main logic if this script is executed directly
+if (require.main === module) {
+  (async () => {
+    if (GRAPHITE) {
+      console.log("🪨 Skia Graphite");
+      console.log(
+        "⚠️  Apple TV (tvOS) builds are skipped when GRAPHITE is enabled"
+      );
+    } else {
+      console.log("🐘 Skia Ganesh");
+    }
 
-  const { platform, arch, buildAll, skipGclientSync } = parseArgs();
+    const { platform, arch, buildAll, skipGclientSync } = parseArgs();
 
-  if (platform && arch) {
-    console.log(`Building single target: ${platform} ${arch}`);
-    // Only check Android environment variables if building Android
-    if (platform === "android") {
+    if (platform && arch) {
+      console.log(`Building single target: ${platform} ${arch}`);
+      // Only check Android environment variables if building Android
+      if (platform === "android") {
+        ["ANDROID_NDK", "ANDROID_HOME"].forEach((name) => {
+          if (!process.env[name]) {
+            console.log(`${name} not set.`);
+            exit(1);
+          } else {
+            console.log(`✅ ${name}`);
+          }
+        });
+      }
+
+      if (!skipGclientSync) {
+        runGclientSync();
+      }
+
+      await buildSingleTarget(platform, arch);
+    } else if (buildAll || (!platform && !arch)) {
+      // Build all platforms - either explicitly with --all or implicitly (default behavior)
+      console.log("Building all platforms");
+
       ["ANDROID_NDK", "ANDROID_HOME"].forEach((name) => {
         if (!process.env[name]) {
           console.log(`${name} not set.`);
@@ -286,44 +328,38 @@ const buildAllPlatforms = async () => {
           console.log(`✅ ${name}`);
         }
       });
-    }
 
-    if (!skipGclientSync) {
-      runGclientSync();
-    }
-
-    await buildSingleTarget(platform, arch);
-  } else if (buildAll || (!platform && !arch)) {
-    // Build all platforms - either explicitly with --all or implicitly (default behavior)
-    console.log("Building all platforms");
-    
-    ["ANDROID_NDK", "ANDROID_HOME"].forEach((name) => {
-      if (!process.env[name]) {
-        console.log(`${name} not set.`);
-        exit(1);
-      } else {
-        console.log(`✅ ${name}`);
+      if (!skipGclientSync) {
+        runGclientSync();
       }
-    });
 
-    if (!skipGclientSync) {
-      runGclientSync();
+      await buildAllPlatforms();
+    } else {
+      console.error(
+        "Both --platform and --arch must be specified together, or use --all for building all platforms"
+      );
+      console.error("Usage:");
+      console.error(
+        "  yarn build-skia                                    # Build all platforms (default)"
+      );
+      console.error(
+        "  yarn build-skia --all                              # Build all platforms (explicit)"
+      );
+      console.error(
+        "  yarn build-skia --platform <platform> --arch <arch> # Build single target"
+      );
+      console.error("");
+      console.error("Available architectures:");
+      console.error("  Android: arm, arm64, x86, x64");
+      console.error(
+        "  Apple: arm64-iphoneos, arm64-iphonesimulator, x64-iphonesimulator, arm64-macosx, x64-macosx"
+      );
+      if (!GRAPHITE) {
+        console.error(
+          "  Apple (tvOS): arm64-tvos, arm64-tvsimulator, x64-tvsimulator"
+        );
+      }
+      exit(1);
     }
-
-    await buildAllPlatforms();
-  } else {
-    console.error("Both --platform and --arch must be specified together, or use --all for building all platforms");
-    console.error("Usage:");
-    console.error("  yarn build-skia                                    # Build all platforms (default)");
-    console.error("  yarn build-skia --all                              # Build all platforms (explicit)");
-    console.error("  yarn build-skia --platform <platform> --arch <arch> # Build single target");
-    console.error("");
-    console.error("Available architectures:");
-    console.error("  Android: arm, arm64, x86, x64");
-    console.error("  Apple: arm64-iphoneos, arm64-iphonesimulator, x64-iphonesimulator, arm64-macosx, x64-macosx");
-    if (!GRAPHITE) {
-      console.error("  Apple (tvOS): arm64-tvos, arm64-tvsimulator, x64-tvsimulator");
-    }
-    exit(1);
-  }
-})();
+  })();
+}
