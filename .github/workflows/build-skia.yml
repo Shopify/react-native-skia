@@ -83,6 +83,10 @@ jobs:
           download_skia: 'false'
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Update depot_tools
+        working-directory: ./externals/depot_tools
+        run: ./update_depot_tools
+
       - name: Build Skia ${{ matrix.platform }} ${{ matrix.arch }}
         working-directory: ./packages/skia
         env:

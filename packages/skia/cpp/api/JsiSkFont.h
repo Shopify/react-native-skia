@@ -40,15 +40,13 @@ public:
     for (int i = 0; i < glyphsSize; i++) {
       glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
     }
+    auto widths = SkSpan(static_cast<SkScalar *>(widthPtrs.data()), glyphsSize);
+    auto g = SkSpan(glyphs.data(), glyphs.size());
     if (count > 1) {
       auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
-      getObject()->getWidthsBounds(glyphs.data(), glyphsSize,
-                                   static_cast<SkScalar *>(widthPtrs.data()),
-                                   nullptr, paint.get());
+      getObject()->getWidthsBounds(g, widths, {}, paint.get());
     } else {
-      getObject()->getWidthsBounds(glyphs.data(), glyphsSize,
-                                   static_cast<SkScalar *>(widthPtrs.data()),
-                                   nullptr, nullptr);
+      getObject()->getWidthsBounds(g, widths, {}, nullptr);
     }
     auto jsiWidths = jsi::Array(runtime, glyphsSize);
     for (int i = 0; i < glyphsSize; i++) {
@@ -68,20 +66,17 @@ public:
     std::vector<SkGlyphID> glyphs;
     glyphs.resize(numGlyphIDs);
     int glyphsSize = static_cast<int>(numGlyphIDs);
+    auto g = SkSpan(glyphs.data(), glyphs.size());
     getObject()->textToGlyphs(str.c_str(), str.length(), SkTextEncoding::kUTF8,
-                              static_cast<SkGlyphID *>(glyphs.data()),
-                              glyphsSize);
+                              g);
     std::vector<SkScalar> widthPtrs;
     widthPtrs.resize(numGlyphIDs);
+    auto widths = SkSpan(widthPtrs.data(), widthPtrs.size());
     if (count > 1) {
       auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
-      getObject()->getWidthsBounds(glyphs.data(), glyphsSize,
-                                   static_cast<SkScalar *>(widthPtrs.data()),
-                                   nullptr, paint.get());
+      getObject()->getWidthsBounds(g, widths, {}, paint.get());
     } else {
-      getObject()->getWidthsBounds(glyphs.data(), glyphsSize,
-                                   static_cast<SkScalar *>(widthPtrs.data()),
-                                   nullptr, nullptr);
+      getObject()->getWidthsBounds(g, widths, {}, nullptr);
     }
     return jsi::Value(std::accumulate(widthPtrs.begin(), widthPtrs.end(), 0));
   }
@@ -126,9 +121,9 @@ public:
                                      SkTextEncoding::kUTF8);
     std::vector<SkGlyphID> glyphIDs;
     glyphIDs.resize(numGlyphIDs);
+    auto g = SkSpan(static_cast<SkGlyphID *>(glyphIDs.data()), glyphIDs.size());
     getObject()->textToGlyphs(str.c_str(), str.length(), SkTextEncoding::kUTF8,
-                              static_cast<SkGlyphID *>(glyphIDs.data()),
-                              numGlyphIDs);
+                              g);
     auto jsiGlyphIDs = jsi::Array(runtime, numGlyphIDs);
     for (int i = 0; i < numGlyphIDs; i++) {
       jsiGlyphIDs.setValueAtIndex(runtime, i,
@@ -162,8 +157,9 @@ public:
       throw jsi::JSError(runtime, "Not enough x,y position pairs for glyphs");
       return jsi::Value::null();
     }
-    auto sects = getObject()->getIntercepts(
-        glyphs.data(), SkToInt(glyphs.size()), positions.data(), top, bottom);
+    auto g = SkSpan(glyphs.data(), glyphs.size());
+    auto p = SkSpan(positions.data(), positions.size());
+    auto sects = getObject()->getIntercepts(g, p, top, bottom);
     auto jsiSects = jsi::Array(runtime, sects.size());
     for (int i = 0; i < sects.size(); i++) {
       jsiSects.setValueAtIndex(runtime, i,

@@ -58,7 +58,8 @@ base_frameworks = ['libs/apple/libskia.xcframework',
 'libs/apple/libskshaper.xcframework',
 'libs/apple/libskparagraph.xcframework',
 'libs/apple/libskunicode_core.xcframework',
-'libs/apple/libskunicode_libgrapheme.xcframework',]
+'libs/apple/libskunicode_libgrapheme.xcframework',
+'libs/apple/libpathops.xcframework',]
 
 Pod::Spec.new do |s|
   s.name         = "react-native-skia"
