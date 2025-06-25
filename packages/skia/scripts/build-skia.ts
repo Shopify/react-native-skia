@@ -13,12 +13,17 @@ import {
 } from "./skia-configuration";
 import { $, mapKeys, runAsync } from "./utils";
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const getRandomSleepTime = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
 const parseArgs = () => {
   const args = process.argv.slice(2);
   let platform: PlatformName | undefined;
   let arch: string | undefined;
   let buildAll = false;
-  let skipGclientSync = false;
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -38,12 +43,10 @@ const parseArgs = () => {
       i++; // Skip the next argument as it's the value
     } else if (arg === "--all") {
       buildAll = true;
-    } else if (arg === "--skip-gclient-sync") {
-      skipGclientSync = true;
     }
   }
 
-  return { platform, arch, buildAll, skipGclientSync };
+  return { platform, arch, buildAll };
 };
 
 const getOutDir = (platform: PlatformName, targetName: string) => {
@@ -149,9 +152,19 @@ export const copyLib = (
     });
 };
 
-export const runGclientSync = () => {
+export const runGclientSync = async () => {
   console.log("Running gclient sync...");
   process.chdir(SkiaSrc);
+  
+  // Add a random sleep to avoid rate limiting when running in CI with large build matrix
+  // GitHub Actions sets CI=true, GITHUB_ACTIONS=true, and RUNNER_OS
+  const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+  if (isCI) {
+    const sleepTime = getRandomSleepTime(10000, 30000); // 10-30 seconds
+    console.log(`Sleeping for ${sleepTime}ms to avoid rate limiting...`);
+    await sleep(sleepTime);
+  }
+  
   $("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
   console.log("gclient sync done");
 };
@@ -295,7 +308,7 @@ if (require.main === module) {
       console.log("🐘 Skia Ganesh");
     }
 
-    const { platform, arch, buildAll, skipGclientSync } = parseArgs();
+    const { platform, arch, buildAll } = parseArgs();
 
     if (platform && arch) {
       console.log(`Building single target: ${platform} ${arch}`);
@@ -311,10 +324,7 @@ if (require.main === module) {
         });
       }
 
-      if (!skipGclientSync) {
-        runGclientSync();
-      }
-
+      await runGclientSync();
       await buildSingleTarget(platform, arch);
     } else if (buildAll || (!platform && !arch)) {
       // Build all platforms - either explicitly with --all or implicitly (default behavior)
@@ -329,10 +339,7 @@ if (require.main === module) {
         }
       });
 
-      if (!skipGclientSync) {
-        runGclientSync();
-      }
-
+      await runGclientSync();
       await buildAllPlatforms();
     } else {
       console.error(

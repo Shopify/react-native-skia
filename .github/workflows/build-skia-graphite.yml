@@ -84,16 +84,6 @@ jobs:
             echo "Warning: dawn.gni file not found at $DAWN_GNI_FILE"
           fi
 
-      - name: Run gclient sync
-        working-directory: ./packages/skia
-        env:
-          GIT_SYNC_DEPS_SKIP_EMSDK: 'true'
-        run: |
-          npx tsx -e "
-            import { runGclientSync } from './scripts/build-skia.ts';
-            runGclientSync();
-          "
-
       - name: Build Skia with Graphite ${{ matrix.platform }} ${{ matrix.arch }}
         working-directory: ./packages/skia
         env:
@@ -101,7 +91,7 @@ jobs:
           GIT_SYNC_DEPS_SKIP_EMSDK: 'true'
           ZERO_AR_DATE: 1
           SK_GRAPHITE: 1
-        run: yarn build-skia --platform ${{ matrix.platform }} --arch ${{ matrix.arch }} --skip-gclient-sync
+        run: yarn build-skia --platform ${{ matrix.platform }} --arch ${{ matrix.arch }}
 
       - name: Upload build artifacts
         if: github.ref == 'refs/heads/main'

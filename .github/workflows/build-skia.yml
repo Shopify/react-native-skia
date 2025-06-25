@@ -87,23 +87,13 @@ jobs:
         working-directory: ./externals/depot_tools
         run: ./update_depot_tools
 
-      - name: Run gclient sync
-        working-directory: ./packages/skia
-        env:
-          GIT_SYNC_DEPS_SKIP_EMSDK: 'true'
-        run: |
-          npx tsx -e "
-            import { runGclientSync } from './scripts/build-skia.ts';
-            runGclientSync();
-          "
-
       - name: Build Skia ${{ matrix.platform }} ${{ matrix.arch }}
         working-directory: ./packages/skia
         env:
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
           GIT_SYNC_DEPS_SKIP_EMSDK: 'true'
           ZERO_AR_DATE: 1
-        run: yarn build-skia --platform ${{ matrix.platform }} --arch ${{ matrix.arch }} --skip-gclient-sync
+        run: yarn build-skia --platform ${{ matrix.platform }} --arch ${{ matrix.arch }}
 
       - name: Upload build artifacts
         if: github.ref == 'refs/heads/main'
