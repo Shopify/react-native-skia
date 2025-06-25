@@ -1,53 +1,8 @@
 name: Build SKIA Graphite
 on: workflow_dispatch
-
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # Android builds
-          - platform: android
-            arch: arm
-            runner: macos-latest-xlarge
-            ndk_required: true
-          - platform: android
-            arch: arm64
-            runner: macos-latest-xlarge
-            ndk_required: true
-          - platform: android
-            arch: x86
-            runner: macos-latest-xlarge
-            ndk_required: true
-          - platform: android
-            arch: x64
-            runner: macos-latest-xlarge
-            ndk_required: true
-          # Apple builds (excluding tvOS for Graphite)
-          - platform: apple
-            arch: arm64-iphoneos
-            runner: macos-latest-xlarge
-            ndk_required: false
-          - platform: apple
-            arch: arm64-iphonesimulator
-            runner: macos-latest-xlarge
-            ndk_required: false
-          - platform: apple
-            arch: x64-iphonesimulator
-            runner: macos-latest-xlarge
-            ndk_required: false
-          - platform: apple
-            arch: arm64-macosx
-            runner: macos-latest-xlarge
-            ndk_required: false
-          - platform: apple
-            arch: x64-macosx
-            runner: macos-latest-xlarge
-            ndk_required: false
-
-    name: Build-Graphite-${{ matrix.platform }}-${{ matrix.arch }}
-    runs-on: ${{ matrix.runner }}
+    runs-on: macos-latest-xlarge
     steps:
       - name: checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -55,11 +10,13 @@ jobs:
           submodules: recursive
 
       - name: Setup Android NDK
-        if: matrix.ndk_required
         id: setup-ndk
         uses: nttld/setup-ndk@afb4c9964b521afb97c864b7d40b11e6911bd410 # v1.5.0
         with:
           ndk-version: r26d
+
+      - name: Set ANDROID_NDK
+        run: echo "ANDROID_NDK=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
 
       - name: Setup Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
@@ -69,10 +26,6 @@ jobs:
         with:
           download_skia: 'false'
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Update depot_tools
-        working-directory: ./externals/depot_tools
-        run: ./update_depot_tools
 
       - name: Apply Dawn patch
         run: |
@@ -88,146 +41,88 @@ jobs:
             echo "Warning: dawn.gni file not found at $DAWN_GNI_FILE"
           fi
 
-      - name: Build Skia with Graphite ${{ matrix.platform }} ${{ matrix.arch }}
+      - name: Build Skia with Graphite
         working-directory: ./packages/skia
         env:
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
           GIT_SYNC_DEPS_SKIP_EMSDK: 'true'
           ZERO_AR_DATE: 1
           SK_GRAPHITE: 1
-        run: yarn build-skia --platform ${{ matrix.platform }} --arch ${{ matrix.arch }}
+        run: yarn build-skia
 
-      - name: Upload build artifacts
+      - name: Upload artifacts - Android arm (Graphite)
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: skia-graphite-${{ matrix.platform }}-${{ matrix.arch }}
+          name: skia-graphite-android-arm
           path: |
-            ./externals/skia/out/${{ matrix.platform }}/${{ matrix.arch }}/lib*.a
-            ./packages/skia/libs/${{ matrix.platform }}/**/*
-            ./packages/skia/cpp/**/*
+            ./externals/skia/out/android/arm/libskia.a
+            ./externals/skia/out/android/arm/libskshaper.a
+            ./externals/skia/out/android/arm/libsvg.a
+            ./externals/skia/out/android/arm/libskottie.a
+            ./externals/skia/out/android/arm/libsksg.a
+            ./externals/skia/out/android/arm/libskparagraph.a
+            ./externals/skia/out/android/arm/libskunicode_core.a
+            ./externals/skia/out/android/arm/libskunicode_icu.a
 
-  # Job to create XCFrameworks after all Apple builds are complete
-  package-apple:
-    name: Package Apple XCFrameworks (Graphite)
-    runs-on: macos-latest-xlarge
-    needs: build
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Upload artifacts - Android arm64 (Graphite)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          submodules: recursive
+          name: skia-graphite-android-arm-64
+          path: |
+            ./externals/skia/out/android/arm64/libskia.a
+            ./externals/skia/out/android/arm64/libskshaper.a
+            ./externals/skia/out/android/arm64/libsvg.a
+            ./externals/skia/out/android/arm64/libskottie.a
+            ./externals/skia/out/android/arm64/libsksg.a
+            ./externals/skia/out/android/arm64/libskparagraph.a
+            ./externals/skia/out/android/arm64/libskunicode_core.a
+            ./externals/skia/out/android/arm64/libskunicode_icu.a
 
-      - name: Setup Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
-
-      - name: Setup
-        uses: ./.github/actions/setup
+      - name: Upload artifacts - Android x86 (Graphite)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          download_skia: 'false'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          name: skia-graphite-android-arm-x86
+          path: |
+            ./externals/skia/out/android/x86/libskia.a
+            ./externals/skia/out/android/x86/libskshaper.a
+            ./externals/skia/out/android/x86/libsvg.a
+            ./externals/skia/out/android/x86/libskottie.a
+            ./externals/skia/out/android/x86/libsksg.a
+            ./externals/skia/out/android/x86/libskparagraph.a
+            ./externals/skia/out/android/x86/libskunicode_core.a
+            ./externals/skia/out/android/x86/libskunicode_icu.a
 
-      - name: Download all Apple build artifacts
-        uses: actions/download-artifact@v4
+      - name: Upload artifacts - Android x64 (Graphite)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          pattern: skia-graphite-apple-*
-          path: artifacts
+          name: skia-graphite-android-arm-x64
+          path: |
+            ./externals/skia/out/android/x64/libskia.a
+            ./externals/skia/out/android/x64/libskshaper.a
+            ./externals/skia/out/android/x64/libsvg.a
+            ./externals/skia/out/android/x64/libskottie.a
+            ./externals/skia/out/android/x64/libsksg.a
+            ./externals/skia/out/android/x64/libskparagraph.a
+            ./externals/skia/out/android/x64/libskunicode_core.a
+            ./externals/skia/out/android/x64/libskunicode_icu.a
 
-      - name: Reconstruct build output structure
-        run: |
-          mkdir -p externals/skia/out/apple
-          # Move downloaded artifacts to expected locations
-          for artifact_dir in artifacts/skia-graphite-apple-*; do
-            if [ -d "$artifact_dir" ]; then
-              arch=$(basename "$artifact_dir" | sed 's/skia-graphite-apple-//')
-              echo "Processing $arch from $artifact_dir"
-              mkdir -p "externals/skia/out/apple/$arch"
-              if [ -d "$artifact_dir/externals/skia/out/apple/$arch" ]; then
-                cp -r "$artifact_dir/externals/skia/out/apple/$arch/"* "externals/skia/out/apple/$arch/"
-              fi
-            fi
-          done
-
-      - name: Build XCFrameworks (Graphite)
-        working-directory: ./packages/skia
-        env:
-          GIT_SYNC_DEPS_SKIP_EMSDK: 'true'
-          ZERO_AR_DATE: 1
-          SK_GRAPHITE: 1
-        run: |
-          # We need to build XCFrameworks from the individual platform builds
-          # This requires running the XCFramework creation logic from build-skia.ts
-          npx tsx -e "
-            import { buildXCFrameworks } from './scripts/build-skia.ts';
-            buildXCFrameworks();
-          "
-
-      - name: Upload Apple XCFrameworks (Graphite)
+      - name: Upload artifacts - Apple xcframeworks (Graphite)
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: skia-graphite-apple-xcframeworks
           path: |
             ./packages/skia/libs/apple/*.xcframework
 
-      - name: Upload Graphite Headers
+      - name: Upload artifacts - Graphite Headers
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: skia-graphite-headers
           path: |
             ./packages/skia/cpp/dawn/include/
             ./packages/skia/cpp/skia/src/gpu/graphite/
-
-  # Job to package Android build artifacts after all Android builds are complete
-  package-android:
-    name: Package Android Build Artifacts (Graphite)
-    runs-on: macos-latest-xlarge
-    needs: build
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          submodules: recursive
-
-      - name: Setup Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
-
-      - name: Setup
-        uses: ./.github/actions/setup
-        with:
-          download_skia: 'false'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Update depot_tools
-        working-directory: ./externals/depot_tools
-        run: ./update_depot_tools
-
-      - name: Download all Android build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: skia-graphite-android-*
-          path: artifacts
-
-      - name: Reconstruct Android build output structure
-        run: |
-          mkdir -p externals/skia/out/android
-          # Move downloaded artifacts to expected locations
-          for artifact_dir in artifacts/skia-graphite-android-*; do
-            if [ -d "$artifact_dir" ]; then
-              arch=$(basename "$artifact_dir" | sed 's/skia-graphite-android-//')
-              echo "Processing $arch from $artifact_dir"
-              mkdir -p "externals/skia/out/android/$arch"
-              if [ -d "$artifact_dir/externals/skia/out/android/$arch" ]; then
-                cp -r "$artifact_dir/externals/skia/out/android/$arch/"* "externals/skia/out/android/$arch/"
-              fi
-            fi
-          done
-
-      - name: Upload Android Build Artifacts (Graphite)
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: skia-graphite-android-builds
-          path: |
-            ./packages/skia/libs/android/**/*
-            ./packages/skia/cpp/**/*

@@ -1,6 +1,6 @@
 import { exit } from "process";
 
-import type { Platform, PlatformName, Target } from "./skia-configuration";
+import type { Platform, PlatformName } from "./skia-configuration";
 import {
   commonArgs,
   configurations,
@@ -12,42 +12,6 @@ import {
   SkiaSrc,
 } from "./skia-configuration";
 import { $, mapKeys, runAsync } from "./utils";
-
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-const getRandomSleepTime = (min: number, max: number) => {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-};
-
-const parseArgs = () => {
-  const args = process.argv.slice(2);
-  let platform: PlatformName | undefined;
-  let arch: string | undefined;
-  let buildAll = false;
-
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
-    if (arg === "--platform" && i + 1 < args.length) {
-      const platformValue = args[i + 1];
-      if (platformValue === "android" || platformValue === "apple") {
-        platform = platformValue;
-      } else {
-        console.error(
-          `Invalid platform: ${platformValue}. Must be 'android' or 'apple'.`
-        );
-        exit(1);
-      }
-      i++; // Skip the next argument as it's the value
-    } else if (arg === "--arch" && i + 1 < args.length) {
-      arch = args[i + 1];
-      i++; // Skip the next argument as it's the value
-    } else if (arg === "--all") {
-      buildAll = true;
-    }
-  }
-
-  return { platform, arch, buildAll };
-};
 
 const getOutDir = (platform: PlatformName, targetName: string) => {
   return `${OutFolder}/${platform}/${targetName}`;
@@ -152,68 +116,38 @@ export const copyLib = (
     });
 };
 
-export const runGclientSync = async () => {
-  console.log("Running gclient sync...");
-  process.chdir(SkiaSrc);
-  
-  // Add a random sleep to avoid rate limiting when running in CI with large build matrix
-  // GitHub Actions sets CI=true, GITHUB_ACTIONS=true, and RUNNER_OS
-  const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
-  if (isCI) {
-    const sleepTime = getRandomSleepTime(0, 90000);
-    console.log(`Sleeping for ${sleepTime}ms to avoid rate limiting...`);
-    await sleep(sleepTime);
-  }
-  
-  $("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
-  console.log("gclient sync done");
-};
-
-export const buildXCFrameworks = () => {
+const buildXCFrameworks = () => {
   const os: PlatformName = "apple";
   const { outputNames } = configurations.apple;
   process.chdir(SkiaSrc);
   outputNames.forEach((name) => {
-    console.log("🏗️  Building XCFramework for " + name);
+    console.log("Building XCFramework for " + name);
     const prefix = `${OutFolder}/${os}`;
 
     // Only create tvOS frameworks if GRAPHITE is not enabled
     if (!GRAPHITE) {
-      //console.log(`📁 Creating tvOS simulator directory for ${name}`);
       $(`mkdir -p ${OutFolder}/${os}/tvsimulator`);
-      //console.log(`🗑️  Removing existing tvOS simulator library for ${name}`);
       $(`rm -rf ${OutFolder}/${os}/tvsimulator/${name}`);
-      //console.log(`🔗 Creating universal tvOS simulator library for ${name}`);
       $(
         // eslint-disable-next-line max-len
         `lipo -create ${OutFolder}/${os}/x64-tvsimulator/${name} ${OutFolder}/${os}/arm64-tvsimulator/${name} -output ${OutFolder}/${os}/tvsimulator/${name}`
       );
     }
 
-    // console.log(`📁 Creating iPhone simulator directory for ${name}`);
     $(`mkdir -p ${OutFolder}/${os}/iphonesimulator`);
-    //console.log(`🗑️  Removing existing iPhone simulator library for ${name}`);
     $(`rm -rf ${OutFolder}/${os}/iphonesimulator/${name}`);
-    //console.log(`🔗 Creating universal iPhone simulator library for ${name}`);
     $(
       // eslint-disable-next-line max-len
       `lipo -create ${OutFolder}/${os}/x64-iphonesimulator/${name} ${OutFolder}/${os}/arm64-iphonesimulator/${name} -output ${OutFolder}/${os}/iphonesimulator/${name}`
     );
-    //console.log(`📁 Creating macOS directory for ${name}`);
     $(`mkdir -p ${OutFolder}/${os}/macosx`);
-    //console.log(`🗑️  Removing existing macOS library for ${name}`);
     $(`rm -rf ${OutFolder}/${os}/macosx/${name}`);
-    //console.log(`🔗 Creating universal macOS library for ${name}`);
     $(
       // eslint-disable-next-line max-len
       `lipo -create ${OutFolder}/${os}/x64-macosx/${name} ${OutFolder}/${os}/arm64-macosx/${name} -output ${OutFolder}/${os}/macosx/${name}`
     );
     const [lib] = name.split(".");
     const dstPath = `${PackageRoot}/libs/${os}/${lib}.xcframework`;
-
-    // Clean up existing XCFramework before creating a new one
-    //console.log(`🗑️  Removing existing XCFramework for ${name} at ${dstPath}`);
-    $(`rm -rf ${dstPath}`);
 
     // Build the xcodebuild command conditionally based on GRAPHITE
     const xcframeworkCmd = GRAPHITE
@@ -230,49 +164,35 @@ export const buildXCFrameworks = () => {
         `-library ${prefix}/macosx/${name} ` +
         ` -output ${dstPath}`;
 
-    console.log(`📦 Creating XCFramework for ${name} at ${dstPath}`);
     $(xcframeworkCmd);
   });
 };
 
-const buildSingleTarget = async (
-  platformName: PlatformName,
-  targetName: string
-) => {
-  const configuration = configurations[platformName];
-  if (!configuration) {
-    console.error(`Platform "${platformName}" not found in configurations`);
-    exit(1);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const target = (configuration.targets as any)[targetName] as
-    | Target
-    | undefined;
-  if (!target) {
-    console.error(
-      `Target "${targetName}" not found for platform "${platformName}"`
+(async () => {
+  if (GRAPHITE) {
+    console.log("🪨 Skia Graphite");
+    console.log(
+      "⚠️  Apple TV (tvOS) builds are skipped when GRAPHITE is enabled"
     );
-    console.error(
-      `Available targets: ${Object.keys(configuration.targets).join(", ")}`
-    );
-    exit(1);
+  } else {
+    console.log("🐘 Skia Ganesh");
   }
+  ["ANDROID_NDK", "ANDROID_HOME"].forEach((name) => {
+    // Test for existence of Android SDK
+    if (!process.env[name]) {
+      console.log(`${name} not set.`);
+      exit(1);
+    } else {
+      console.log(`✅ ${name}`);
+    }
+  });
 
-  console.log(`Building ${platformName} ${targetName}`);
-
-  await configurePlatform(platformName, configuration, targetName);
-  await buildPlatform(platformName, targetName);
-
-  process.chdir(ProjectRoot);
-  if (platformName === "android" && target.output) {
-    copyLib(platformName, targetName, target.output, configuration.outputNames);
-  }
-
-  copyHeaders();
-};
-
-const buildAllPlatforms = async () => {
+  // Run glient sync
+  console.log("Running gclient sync...");
+  // Start by running sync
+  process.chdir(SkiaSrc);
+  $("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
+  console.log("gclient sync done");
   $(`rm -rf ${PackageRoot}/libs`);
   for (const key of mapKeys(configurations)) {
     const configuration = configurations[key];
@@ -294,79 +214,4 @@ const buildAllPlatforms = async () => {
   }
   buildXCFrameworks();
   copyHeaders();
-};
-
-// Only run the main logic if this script is executed directly
-if (require.main === module) {
-  (async () => {
-    if (GRAPHITE) {
-      console.log("🪨 Skia Graphite");
-      console.log(
-        "⚠️  Apple TV (tvOS) builds are skipped when GRAPHITE is enabled"
-      );
-    } else {
-      console.log("🐘 Skia Ganesh");
-    }
-
-    const { platform, arch, buildAll } = parseArgs();
-
-    if (platform && arch) {
-      console.log(`Building single target: ${platform} ${arch}`);
-      // Only check Android environment variables if building Android
-      if (platform === "android") {
-        ["ANDROID_NDK", "ANDROID_HOME"].forEach((name) => {
-          if (!process.env[name]) {
-            console.log(`${name} not set.`);
-            exit(1);
-          } else {
-            console.log(`✅ ${name}`);
-          }
-        });
-      }
-
-      await runGclientSync();
-      await buildSingleTarget(platform, arch);
-    } else if (buildAll || (!platform && !arch)) {
-      // Build all platforms - either explicitly with --all or implicitly (default behavior)
-      console.log("Building all platforms");
-
-      ["ANDROID_NDK", "ANDROID_HOME"].forEach((name) => {
-        if (!process.env[name]) {
-          console.log(`${name} not set.`);
-          exit(1);
-        } else {
-          console.log(`✅ ${name}`);
-        }
-      });
-
-      await runGclientSync();
-      await buildAllPlatforms();
-    } else {
-      console.error(
-        "Both --platform and --arch must be specified together, or use --all for building all platforms"
-      );
-      console.error("Usage:");
-      console.error(
-        "  yarn build-skia                                    # Build all platforms (default)"
-      );
-      console.error(
-        "  yarn build-skia --all                              # Build all platforms (explicit)"
-      );
-      console.error(
-        "  yarn build-skia --platform <platform> --arch <arch> # Build single target"
-      );
-      console.error("");
-      console.error("Available architectures:");
-      console.error("  Android: arm, arm64, x86, x64");
-      console.error(
-        "  Apple: arm64-iphoneos, arm64-iphonesimulator, x64-iphonesimulator, arm64-macosx, x64-macosx"
-      );
-      if (!GRAPHITE) {
-        console.error(
-          "  Apple (tvOS): arm64-tvos, arm64-tvsimulator, x64-tvsimulator"
-        );
-      }
-      exit(1);
-    }
-  })();
-}
+})();
