@@ -126,6 +126,10 @@ jobs:
           download_skia: 'false'
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Update depot_tools
+        working-directory: ./externals/depot_tools
+        run: ./update_depot_tools
+
       - name: Download all Apple build artifacts
         uses: actions/download-artifact@v4
         with:
