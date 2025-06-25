@@ -24,6 +24,9 @@ const parseArgs = () => {
   let platform: PlatformName | undefined;
   let arch: string | undefined;
   let buildAll = false;
+  let stagger: number | undefined;
+  let skipGclient = false;
+  let gclientOnly = false;
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -43,10 +46,22 @@ const parseArgs = () => {
       i++; // Skip the next argument as it's the value
     } else if (arg === "--all") {
       buildAll = true;
+    } else if (arg === "--stagger" && i + 1 < args.length) {
+      const staggerValue = parseInt(args[i + 1], 10);
+      if (isNaN(staggerValue) || staggerValue < 0) {
+        console.error(`Invalid stagger value: ${args[i + 1]}. Must be a non-negative integer.`);
+        exit(1);
+      }
+      stagger = staggerValue;
+      i++; // Skip the next argument as it's the value
+    } else if (arg === "--skip-gclient") {
+      skipGclient = true;
+    } else if (arg === "--gclient") {
+      gclientOnly = true;
     }
   }
 
-  return { platform, arch, buildAll };
+  return { platform, arch, buildAll, stagger, skipGclient, gclientOnly };
 };
 
 const getOutDir = (platform: PlatformName, targetName: string) => {
@@ -155,15 +170,6 @@ export const copyLib = (
 export const runGclientSync = async () => {
   console.log("Running gclient sync...");
   process.chdir(SkiaSrc);
-  
-  // Add a random sleep to avoid rate limiting when running in CI with large build matrix
-  // GitHub Actions sets CI=true, GITHUB_ACTIONS=true, and RUNNER_OS
-  const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
-  if (isCI) {
-    const sleepTime = getRandomSleepTime(0, 90000);
-    console.log(`Sleeping for ${sleepTime}ms to avoid rate limiting...`);
-    await sleep(sleepTime);
-  }
   
   $("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
   console.log("gclient sync done");
@@ -308,7 +314,7 @@ if (require.main === module) {
       console.log("🐘 Skia Ganesh");
     }
 
-    const { platform, arch, buildAll } = parseArgs();
+    const { platform, arch, buildAll, stagger, skipGclient, gclientOnly } = parseArgs();
 
     if (platform && arch) {
       console.log(`Building single target: ${platform} ${arch}`);
@@ -324,7 +330,9 @@ if (require.main === module) {
         });
       }
 
-      await runGclientSync();
+      if (!skipGclient) {
+        await runGclientSync();
+      }
       await buildSingleTarget(platform, arch);
     } else if (buildAll || (!platform && !arch)) {
       // Build all platforms - either explicitly with --all or implicitly (default behavior)
@@ -339,8 +347,12 @@ if (require.main === module) {
         }
       });
 
-      await runGclientSync();
+      if (!skipGclient) {
+        await runGclientSync();
+      }
       await buildAllPlatforms();
+    } else if (gclientOnly) {
+      await runGclientSync();
     } else {
       console.error(
         "Both --platform and --arch must be specified together, or use --all for building all platforms"
