@@ -203,7 +203,7 @@ const buildSingleTarget = async (platformName: PlatformName, targetName: string)
     exit(1);
   }
 
-  const target = configuration.targets[targetName];
+  const target = (configuration.targets as any)[targetName];
   if (!target) {
     console.error(`Target "${targetName}" not found for platform "${platformName}"`);
     console.error(`Available targets: ${Object.keys(configuration.targets).join(", ")}`);
@@ -285,9 +285,9 @@ const buildAllPlatforms = async () => {
     console.log("gclient sync done");
 
     await buildSingleTarget(platform, arch);
-  } else if (buildAll || (!platform && !arch && !buildAll)) {
-    // Build all platforms - either explicitly with --all or implicitly (original behavior)
-    console.log(buildAll ? "Building all platforms (--all specified)" : "Building all platforms (default behavior)");
+  } else if (buildAll || (!platform && !arch)) {
+    // Build all platforms - either explicitly with --all or implicitly (default behavior)
+    console.log("Building all platforms");
     
     ["ANDROID_NDK", "ANDROID_HOME"].forEach((name) => {
       if (!process.env[name]) {
