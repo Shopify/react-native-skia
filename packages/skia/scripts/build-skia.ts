@@ -160,7 +160,7 @@ export const runGclientSync = async () => {
   // GitHub Actions sets CI=true, GITHUB_ACTIONS=true, and RUNNER_OS
   const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
   if (isCI) {
-    const sleepTime = getRandomSleepTime(10000, 30000); // 10-30 seconds
+    const sleepTime = getRandomSleepTime(0, 90000);
     console.log(`Sleeping for ${sleepTime}ms to avoid rate limiting...`);
     await sleep(sleepTime);
   }
