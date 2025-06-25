@@ -18,6 +18,7 @@ const parseArgs = () => {
   let platform: PlatformName | undefined;
   let arch: string | undefined;
   let buildAll = false;
+  let skipGclientSync = false;
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -35,10 +36,12 @@ const parseArgs = () => {
       i++; // Skip the next argument as it's the value
     } else if (arg === "--all") {
       buildAll = true;
+    } else if (arg === "--skip-gclient-sync") {
+      skipGclientSync = true;
     }
   }
 
-  return { platform, arch, buildAll };
+  return { platform, arch, buildAll, skipGclientSync };
 };
 
 const getOutDir = (platform: PlatformName, targetName: string) => {
@@ -142,6 +145,13 @@ export const copyLib = (
       console.log(`cp ${libPath} ${dstPath}`);
       $(`cp ${libPath} ${dstPath}`);
     });
+};
+
+export const runGclientSync = () => {
+  console.log("Running gclient sync...");
+  process.chdir(SkiaSrc);
+  $("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
+  console.log("gclient sync done");
 };
 
 export const buildXCFrameworks = () => {
@@ -262,7 +272,7 @@ const buildAllPlatforms = async () => {
     console.log("🐘 Skia Ganesh");
   }
 
-  const { platform, arch, buildAll } = parseArgs();
+  const { platform, arch, buildAll, skipGclientSync } = parseArgs();
 
   if (platform && arch) {
     console.log(`Building single target: ${platform} ${arch}`);
@@ -278,11 +288,9 @@ const buildAllPlatforms = async () => {
       });
     }
 
-    // Run gclient sync
-    console.log("Running gclient sync...");
-    process.chdir(SkiaSrc);
-    $("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
-    console.log("gclient sync done");
+    if (!skipGclientSync) {
+      runGclientSync();
+    }
 
     await buildSingleTarget(platform, arch);
   } else if (buildAll || (!platform && !arch)) {
@@ -298,10 +306,9 @@ const buildAllPlatforms = async () => {
       }
     });
 
-    console.log("Running gclient sync...");
-    process.chdir(SkiaSrc);
-    $("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
-    console.log("gclient sync done");
+    if (!skipGclientSync) {
+      runGclientSync();
+    }
 
     await buildAllPlatforms();
   } else {

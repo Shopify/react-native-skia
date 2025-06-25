@@ -48,7 +48,7 @@ public:
     } else {
       getObject()->getWidthsBounds(g, widths, {}, nullptr);
     }
-    auto jsiWidths = jsi::Array(runtime, glyphsSize);
+    auto jsiWidths = jsi::Array(runtime, glyphsSize);f
     for (int i = 0; i < glyphsSize; i++) {
       jsiWidths.setValueAtIndex(
           runtime, i,
