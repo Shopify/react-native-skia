@@ -171,6 +171,18 @@ export const runGclientSync = async () => {
   console.log("Running gclient sync...");
   process.chdir(SkiaSrc);
   
+<<<<<<< improve-skia-build
+=======
+  // Add a random sleep to avoid rate limiting when running in CI with large build matrix
+  // GitHub Actions sets CI=true, GITHUB_ACTIONS=true, and RUNNER_OS
+  const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+  if (isCI) {
+    const sleepTime = getRandomSleepTime(0, 90000);
+    console.log(`Sleeping for ${sleepTime}ms to avoid rate limiting...`);
+    await sleep(sleepTime);
+  }
+  
+>>>>>>> main
   $("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
   console.log("gclient sync done");
 };
