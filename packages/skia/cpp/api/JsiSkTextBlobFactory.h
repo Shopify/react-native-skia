@@ -63,8 +63,9 @@ public:
           runtime, jsiRsxforms.getValueAtIndex(runtime, i));
       rsxforms.push_back(*rsxform);
     }
-    auto textBlob = SkTextBlob::MakeFromRSXform(str.c_str(), str.length(),
-                                                rsxforms.data(), *font);
+    auto x = SkSpan(rsxforms.data(), rsxforms.size());
+    auto textBlob =
+        SkTextBlob::MakeFromRSXform(str.c_str(), str.length(), x, *font);
     return jsi::Object::createFromHostObject(
         runtime,
         std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob)));
@@ -89,8 +90,9 @@ public:
           runtime, jsiRsxforms.getValueAtIndex(runtime, i));
       rsxforms.push_back(*rsxform);
     }
+    auto x = SkSpan(rsxforms.data(), rsxforms.size());
     auto textBlob = SkTextBlob::MakeFromRSXform(
-        glyphs.data(), glyphs.size() * bytesPerGlyph, rsxforms.data(), *font,
+        glyphs.data(), glyphs.size() * bytesPerGlyph, x, *font,
         SkTextEncoding::kGlyphID);
     return jsi::Object::createFromHostObject(
         runtime,

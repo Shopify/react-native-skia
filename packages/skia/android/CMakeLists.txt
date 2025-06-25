@@ -58,6 +58,7 @@ set (SKIA_SKSHAPER_LIB "skshaper")
 set (SKIA_SKPARAGRAPH_LIB "skparagraph")
 set (SKIA_SKUNICODE_CORE_LIB "skunicode_core")
 set (SKIA_SKUNICODE_ICU_LIB "skunicode_icu")
+set (SKIA_PATHOPS_LIB "pathops")
 
 
 # Clear some variables
@@ -169,6 +170,8 @@ set_property(TARGET skunicode_core PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}
 add_library(skunicode_icu STATIC IMPORTED)
 set_property(TARGET skunicode_icu PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskunicode_icu.a")
 
+add_library(pathops STATIC IMPORTED)
+set_property(TARGET pathops PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libpathops.a")
 
 find_library(
         LOG_LIB
@@ -296,6 +299,7 @@ if(${REACT_NATIVE_VERSION} GREATER_EQUAL 76)
         ${SKIA_SKPARAGRAPH_LIB}
         ${SKIA_SKUNICODE_CORE_LIB}
         ${SKIA_SKUNICODE_ICU_LIB}
+        ${SKIA_PATHOPS_LIB}
         ${SKIA_LIB}
         -ljnigraphics
         -lGLESv2
@@ -316,6 +320,7 @@ else()
         ${SKIA_SKPARAGRAPH_LIB}
         ${SKIA_SKUNICODE_CORE_LIB}
         ${SKIA_SKUNICODE_ICU_LIB}
+        ${SKIA_PATHOPS_LIB}
         ${SKIA_LIB}
         -ljnigraphics
         -lGLESv2
