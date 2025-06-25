@@ -47,10 +47,10 @@ public:
         count >= 2 && !arguments[1].isUndefined() && !arguments[1].isNull()
             ? arguments[1].asNumber()
             : 0;
+    auto i = SkSpan(intervals.data(), intervals.size());
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkPathEffect>(
-                     getContext(),
-                     SkDashPathEffect::Make(intervals.data(), size, phase)));
+                     getContext(), SkDashPathEffect::Make(i, phase)));
   }
 
   JSI_HOST_FUNCTION(MakeDiscrete) {

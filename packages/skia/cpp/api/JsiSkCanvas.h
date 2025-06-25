@@ -258,9 +258,8 @@ public:
     }
 
     auto paint = JsiSkPaint::fromValue(runtime, arguments[2]);
-
-    _canvas->drawPoints((SkCanvas::PointMode)pointMode, pointsSize,
-                        points.data(), *paint);
+    auto p = SkSpan(points.data(), points.size());
+    _canvas->drawPoints((SkCanvas::PointMode)pointMode, p, *paint);
 
     return jsi::Value::undefined();
   }
@@ -403,8 +402,9 @@ public:
       glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
     }
 
-    _canvas->drawGlyphs(glyphsSize, glyphs.data(), positions.data(), origin,
-                        *font, *paint);
+    auto g = SkSpan(glyphs.data(), glyphs.size());
+    auto p = SkSpan(positions.data(), positions.size());
+    _canvas->drawGlyphs(g, p, origin, *font, *paint);
 
     return jsi::Value::undefined();
   }
@@ -597,9 +597,11 @@ public:
     if (count > 6) {
       sampling = SamplingOptionsFromValue(runtime, arguments[6]);
     }
-    _canvas->drawAtlas(atlas.get(), xforms.data(), skRects.data(),
-                       colors.empty() ? nullptr : colors.data(), skRects.size(),
-                       blendMode, sampling, nullptr, paint.get());
+    auto x = SkSpan(xforms.data(), xforms.size());
+    auto t = SkSpan(skRects.data(), skRects.size());
+    auto c = SkSpan(colors.data(), colors.size());
+    _canvas->drawAtlas(atlas.get(), x, t, c, blendMode, sampling, nullptr,
+                       paint.get());
 
     return jsi::Value::undefined();
   }
