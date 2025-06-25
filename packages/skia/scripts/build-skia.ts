@@ -13,6 +13,34 @@ import {
 } from "./skia-configuration";
 import { $, mapKeys, runAsync } from "./utils";
 
+const parseArgs = () => {
+  const args = process.argv.slice(2);
+  let platform: PlatformName | undefined;
+  let arch: string | undefined;
+  let buildAll = false;
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === "--platform" && i + 1 < args.length) {
+      const platformValue = args[i + 1];
+      if (platformValue === "android" || platformValue === "apple") {
+        platform = platformValue;
+      } else {
+        console.error(`Invalid platform: ${platformValue}. Must be 'android' or 'apple'.`);
+        exit(1);
+      }
+      i++; // Skip the next argument as it's the value
+    } else if (arg === "--arch" && i + 1 < args.length) {
+      arch = args[i + 1];
+      i++; // Skip the next argument as it's the value
+    } else if (arg === "--all") {
+      buildAll = true;
+    }
+  }
+
+  return { platform, arch, buildAll };
+};
+
 const getOutDir = (platform: PlatformName, targetName: string) => {
   return `${OutFolder}/${platform}/${targetName}`;
 };
@@ -116,7 +144,7 @@ export const copyLib = (
     });
 };
 
-const buildXCFrameworks = () => {
+export const buildXCFrameworks = () => {
   const os: PlatformName = "apple";
   const { outputNames } = configurations.apple;
   process.chdir(SkiaSrc);
@@ -168,31 +196,39 @@ const buildXCFrameworks = () => {
   });
 };
 
-(async () => {
-  if (GRAPHITE) {
-    console.log("🪨 Skia Graphite");
-    console.log(
-      "⚠️  Apple TV (tvOS) builds are skipped when GRAPHITE is enabled"
-    );
-  } else {
-    console.log("🐘 Skia Ganesh");
+const buildSingleTarget = async (platformName: PlatformName, targetName: string) => {
+  const configuration = configurations[platformName];
+  if (!configuration) {
+    console.error(`Platform "${platformName}" not found in configurations`);
+    exit(1);
   }
-  ["ANDROID_NDK", "ANDROID_HOME"].forEach((name) => {
-    // Test for existence of Android SDK
-    if (!process.env[name]) {
-      console.log(`${name} not set.`);
-      exit(1);
-    } else {
-      console.log(`✅ ${name}`);
-    }
-  });
 
-  // Run glient sync
-  console.log("Running gclient sync...");
-  // Start by running sync
-  process.chdir(SkiaSrc);
-  $("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
-  console.log("gclient sync done");
+  const target = configuration.targets[targetName];
+  if (!target) {
+    console.error(`Target "${targetName}" not found for platform "${platformName}"`);
+    console.error(`Available targets: ${Object.keys(configuration.targets).join(", ")}`);
+    exit(1);
+  }
+
+  console.log(`Building ${platformName} ${targetName}`);
+  
+  await configurePlatform(platformName, configuration, targetName);
+  await buildPlatform(platformName, targetName);
+  
+  process.chdir(ProjectRoot);
+  if (platformName === "android") {
+    copyLib(
+      platformName,
+      targetName,
+      target.output!,
+      configuration.outputNames
+    );
+  }
+  
+  copyHeaders();
+};
+
+const buildAllPlatforms = async () => {
   $(`rm -rf ${PackageRoot}/libs`);
   for (const key of mapKeys(configurations)) {
     const configuration = configurations[key];
@@ -214,4 +250,73 @@ const buildXCFrameworks = () => {
   }
   buildXCFrameworks();
   copyHeaders();
+};
+
+(async () => {
+  if (GRAPHITE) {
+    console.log("🪨 Skia Graphite");
+    console.log(
+      "⚠️  Apple TV (tvOS) builds are skipped when GRAPHITE is enabled"
+    );
+  } else {
+    console.log("🐘 Skia Ganesh");
+  }
+
+  const { platform, arch, buildAll } = parseArgs();
+
+  if (platform && arch) {
+    console.log(`Building single target: ${platform} ${arch}`);
+    // Only check Android environment variables if building Android
+    if (platform === "android") {
+      ["ANDROID_NDK", "ANDROID_HOME"].forEach((name) => {
+        if (!process.env[name]) {
+          console.log(`${name} not set.`);
+          exit(1);
+        } else {
+          console.log(`✅ ${name}`);
+        }
+      });
+    }
+
+    // Run gclient sync
+    console.log("Running gclient sync...");
+    process.chdir(SkiaSrc);
+    $("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
+    console.log("gclient sync done");
+
+    await buildSingleTarget(platform, arch);
+  } else if (buildAll || (!platform && !arch && !buildAll)) {
+    // Build all platforms - either explicitly with --all or implicitly (original behavior)
+    console.log(buildAll ? "Building all platforms (--all specified)" : "Building all platforms (default behavior)");
+    
+    ["ANDROID_NDK", "ANDROID_HOME"].forEach((name) => {
+      if (!process.env[name]) {
+        console.log(`${name} not set.`);
+        exit(1);
+      } else {
+        console.log(`✅ ${name}`);
+      }
+    });
+
+    console.log("Running gclient sync...");
+    process.chdir(SkiaSrc);
+    $("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
+    console.log("gclient sync done");
+
+    await buildAllPlatforms();
+  } else {
+    console.error("Both --platform and --arch must be specified together, or use --all for building all platforms");
+    console.error("Usage:");
+    console.error("  yarn build-skia                                    # Build all platforms (default)");
+    console.error("  yarn build-skia --all                              # Build all platforms (explicit)");
+    console.error("  yarn build-skia --platform <platform> --arch <arch> # Build single target");
+    console.error("");
+    console.error("Available architectures:");
+    console.error("  Android: arm, arm64, x86, x64");
+    console.error("  Apple: arm64-iphoneos, arm64-iphonesimulator, x64-iphonesimulator, arm64-macosx, x64-macosx");
+    if (!GRAPHITE) {
+      console.error("  Apple (tvOS): arm64-tvos, arm64-tvsimulator, x64-tvsimulator");
+    }
+    exit(1);
+  }
 })();
