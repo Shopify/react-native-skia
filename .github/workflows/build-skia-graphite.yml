@@ -103,7 +103,6 @@ jobs:
         with:
           name: skia-graphite-${{ matrix.platform }}-${{ matrix.arch }}
           path: |
-            ./externals/skia/out/${{ matrix.platform }}/${{ matrix.arch }}/lib*.a
             ./packages/skia/libs/${{ matrix.platform }}/**/*
             ./packages/skia/cpp/**/*
 

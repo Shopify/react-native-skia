@@ -101,7 +101,6 @@ jobs:
         with:
           name: skia-${{ matrix.platform }}-${{ matrix.arch }}
           path: |
-            ./externals/skia/out/${{ matrix.platform }}/${{ matrix.arch }}/lib*.a
             ./packages/skia/libs/${{ matrix.platform }}/**/*
             ./packages/skia/cpp/**/*
 
@@ -110,7 +109,6 @@ jobs:
     name: Package Apple XCFrameworks
     runs-on: macos-latest-xlarge
     needs: build
-    if: github.ref == 'refs/heads/main'
     steps:
       - name: checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -171,56 +169,39 @@ jobs:
           path: |
             ./packages/skia/libs/apple/*.xcframework
 
-  # Job to package Android build artifacts after all Android builds are complete
-  package-android:
-    name: Package Android Build Artifacts
+  # Job to deploy Apple XCFrameworks to packages/skia/libs
+  deploy-apple-xcframeworks:
+    name: Deploy Apple XCFrameworks
     runs-on: macos-latest-xlarge
-    needs: build
-    if: github.ref == 'refs/heads/main'
+    needs: package-apple
     steps:
       - name: checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           submodules: recursive
 
-      - name: Setup Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
-
-      - name: Setup
-        uses: ./.github/actions/setup
-        with:
-          download_skia: 'false'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Update depot_tools
-        working-directory: ./externals/depot_tools
-        run: ./update_depot_tools
-
-      - name: Download all Android build artifacts
+      - name: Download Apple XCFrameworks artifact
         uses: actions/download-artifact@v4
         with:
-          pattern: skia-android-*
+          name: skia-apple-xcframeworks
           path: artifacts
 
-      - name: Reconstruct Android build output structure
+      - name: Copy XCFrameworks to packages/skia/libs
         run: |
-          mkdir -p externals/skia/out/android
-          # Move downloaded artifacts to expected locations
-          for artifact_dir in artifacts/skia-android-*; do
-            if [ -d "$artifact_dir" ]; then
-              arch=$(basename "$artifact_dir" | sed 's/skia-android-//')
-              echo "Processing $arch from $artifact_dir"
-              mkdir -p "externals/skia/out/android/$arch"
-              if [ -d "$artifact_dir/externals/skia/out/android/$arch" ]; then
-                cp -r "$artifact_dir/externals/skia/out/android/$arch/"* "externals/skia/out/android/$arch/"
-              fi
-            fi
-          done
+          mkdir -p packages/skia/libs
+          # Copy all XCFrameworks from the artifact to packages/skia/libs
+          if [ -d "artifacts" ]; then
+            find artifacts -name "*.xcframework" -exec cp -r {} packages/skia/libs/ \;
+            echo "XCFrameworks copied to packages/skia/libs:"
+            ls -la packages/skia/libs/
+          else
+            echo "No artifacts directory found"
+            exit 1
+          fi
 
-      - name: Upload Android Build Artifacts
+      - name: Upload final Apple XCFrameworks
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: skia-android-builds
+          name: skia-apple-xcframeworks-final
           path: |
-            ./packages/skia/libs/android/**/*
-            ./packages/skia/cpp/**/*
+            ./packages/skia/libs/*.xcframework
