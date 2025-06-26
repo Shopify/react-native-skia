@@ -24,9 +24,10 @@
 #include "include/core/SkStrokeRec.h"
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkTrimPathEffect.h"
-#include "include/pathops/SkPathOps.h"
 #include "include/utils/SkParsePath.h"
 #include "include/utils/SkTextUtils.h"
+
+#include "modules/pathops/include/SkPathOps.h"
 
 #pragma clang diagnostic pop
 
