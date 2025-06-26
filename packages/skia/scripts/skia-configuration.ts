@@ -343,6 +343,7 @@ export const copyHeaders = () => {
     "rm -rf ./cpp/skia/include/gpu/GrBackendSurface.h",
     "rm -rf ./cpp/skia/include/gpu/d3d/GrD3DBackendContext.h",
     "rm -rf ./cpp/skia/include/gpu/d3d/GrD3DTypes.h",
+    "rm -rf ./cpp/skia/include/pathops/SkPathOps.h",
   ].map((cmd) => {
     console.log(cmd);
     $(cmd);
