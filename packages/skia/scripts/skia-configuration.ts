@@ -321,31 +321,54 @@ export const copyHeaders = () => {
     "cp -a ../../externals/skia/modules/skunicode/include/SkUnicode.h ./cpp/skia/modules/skunicode/include/.",
 
     // Remove migrated headers
-    //grep -R "Delete this after migrating clients" cpp
-    "rm -rf ./cpp/skia/include/gpu/GrContextThreadSafeProxy.h",
-    "rm -rf ./cpp/skia/include/gpu/GrDirectContext.h",
-    "rm -rf ./cpp/skia/include/gpu/GrBackendSemaphore.h",
-    "rm -rf ./cpp/skia/include/gpu/mock/GrMockTypes.h",
-    "rm -rf ./cpp/skia/include/gpu/GrDriverBugWorkaroundsAutogen.h",
-    "rm -rf ./cpp/skia/include/gpu/GrTypes.h",
-    "rm -rf ./cpp/skia/include/gpu/vk/GrVkTypes.h",
-    "rm -rf ./cpp/skia/include/gpu/GrDriverBugWorkarounds.h",
-    "rm -rf ./cpp/skia/include/gpu/GrContextOptions.h",
-    "rm -rf ./cpp/skia/include/gpu/gl/GrGLExtensions.h",
-    "rm -rf ./cpp/skia/include/gpu/gl/GrGLAssembleInterface.h",
-    "rm -rf ./cpp/skia/include/gpu/gl/GrGLTypes.h",
-    "rm -rf ./cpp/skia/include/gpu/gl/GrGLConfig.h",
-    "rm -rf ./cpp/skia/include/gpu/gl/GrGLFunctions.h",
-    "rm -rf ./cpp/skia/include/gpu/gl/GrGLAssembleHelpers.h",
-    "rm -rf ./cpp/skia/include/gpu/gl/GrGLInterface.h",
-    "rm -rf ./cpp/skia/include/gpu/GrYUVABackendTextures.h",
-    "rm -rf ./cpp/skia/include/gpu/GrRecordingContext.h",
-    "rm -rf ./cpp/skia/include/gpu/GrBackendSurface.h",
-    "rm -rf ./cpp/skia/include/gpu/d3d/GrD3DBackendContext.h",
-    "rm -rf ./cpp/skia/include/gpu/d3d/GrD3DTypes.h",
     "rm -rf ./cpp/skia/include/pathops/SkPathOps.h",
   ].map((cmd) => {
     console.log(cmd);
     $(cmd);
   });
+
+  // Check for duplicate header names and issue warnings
+  const duplicateHeaders = $(
+    "find ./cpp -name '*.h' -type f | sed 's/.*\\///' | sort | uniq -d"
+  ).toString();
+  if (duplicateHeaders.trim()) {
+    console.warn("⚠️  WARNING: Found duplicate header names:");
+    let hasNonGraphiteDuplicates = false;
+
+    duplicateHeaders
+      .split("\n")
+      .filter(Boolean)
+      .forEach((filename: string) => {
+        const fullPaths = $(
+          `find ./cpp -name "${filename}" -type f`
+        ).toString();
+        const paths = fullPaths.split("\n").filter(Boolean);
+
+        // Check if any of the paths contain 'graphite'
+        const hasGraphitePath = paths.some((filePath: string) =>
+          filePath.includes("graphite")
+        );
+
+        console.warn(`   ${filename}:`);
+        paths.forEach((filePath: string) => {
+          console.warn(`     ${filePath}`);
+        });
+
+        // If it's a Graphite-related duplicate and GRAPHITE is false, don't count it as an error
+        if (!hasGraphitePath || GRAPHITE) {
+          hasNonGraphiteDuplicates = true;
+        } else {
+          console.warn(
+            `     (Graphite-related duplicate - ignoring since GRAPHITE=${GRAPHITE})`
+          );
+        }
+      });
+
+    if (hasNonGraphiteDuplicates) {
+      console.error(
+        "❌ ERROR: Duplicate headers found that will cause iOS build conflicts!"
+      );
+      process.exit(1);
+    }
+  }
 };
