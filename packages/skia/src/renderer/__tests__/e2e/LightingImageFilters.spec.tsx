@@ -229,7 +229,10 @@ describe("Lighting Image Filters", () => {
       },
       { skiaLogoPng, BlendMode }
     );
-    checkResult(base64, "lighting-image-filters/point-lit-diffuse.png");
+    checkResult(
+      base64,
+      `lighting-image-filters/point-lit-diffuse-${surface.OS}.png`
+    );
   });
 
   itRunsE2eOnly("SpotLitDiffuse - Theatrical Spotlight", async () => {
@@ -359,7 +362,10 @@ describe("Lighting Image Filters", () => {
       },
       { skiaLogoPng, TileMode, BlendMode, PaintStyle }
     );
-    checkResult(base64, "lighting-image-filters/spot-lit-diffuse.png");
+    checkResult(
+      base64,
+      `lighting-image-filters/spot-lit-diffuse-${surface.OS}.png`
+    );
   });
 
   itRunsE2eOnly("DistantLitSpecular - Metallic Gold", async () => {
@@ -727,7 +733,10 @@ describe("Lighting Image Filters", () => {
       },
       { skiaLogoPng, BlendMode, TileMode, PaintStyle }
     );
-    checkResult(base64, "lighting-image-filters/point-lit-specular.png");
+    checkResult(
+      base64,
+      `lighting-image-filters/point-lit-specular-${surface.OS}.png`
+    );
   });
   itRunsE2eOnly("SpotLitSpecular - Crystal Prism", async () => {
     const { skiaLogoPng } = images;
@@ -1031,7 +1040,10 @@ describe("Lighting Image Filters", () => {
       },
       { skiaLogoPng, BlendMode, TileMode, PaintStyle }
     );
-    checkResult(base64, "lighting-image-filters/spot-lit-specular.png");
+    checkResult(
+      base64,
+      `lighting-image-filters/spot-lit-specular-${surface.OS}.png`
+    );
   });
 
   itRunsE2eOnly("Combined Lighting - Elemental Fire & Ice", async () => {
@@ -1460,7 +1472,7 @@ describe("Lighting Image Filters", () => {
     );
     checkResult(
       base64,
-      "lighting-image-filters/combined-lighting-fire-ice.png"
+      `lighting-image-filters/combined-lighting-fire-ice-${surface.OS}.png`
     );
   });
 });
