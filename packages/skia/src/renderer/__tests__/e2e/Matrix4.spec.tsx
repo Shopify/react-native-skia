@@ -15,6 +15,7 @@ import {
   invert4,
   scale,
   rotateZ,
+  setupCamera,
 } from "../../../skia/types";
 
 const ckPerspective = (d: number) => [
@@ -363,5 +364,43 @@ describe("Matrix4", () => {
     const backTransformed = mapPoint3d(inverse, transformed);
 
     almostEqual(backTransformed, point);
+  });
+
+  const expectArrayCloseTo = (
+    actual: Matrix4,
+    expected: number[],
+    precision: number
+  ) => {
+    expect(actual.length).toBe(expected.length);
+    actual.forEach((val, idx) => {
+      expect(val).toBeCloseTo(expected[idx], precision);
+    });
+  };
+
+  it("can create a camera setup matrix", () => {
+    const camAngle = Math.PI / 12; // 15 degrees field of view
+
+    // Camera configuration object
+    const cam = {
+      eye: [0, 0, 1 / Math.tan(camAngle / 2) - 1] as const, // Camera position in 3D space
+      coa: [0, 0, 0] as const, // "Center of attention" - what the camera is looking at
+      up: [0, 1, 0] as const, // Up vector defining camera orientation (Y-up)
+      near: 0.02, // Near clipping plane distance
+      far: 4, // Far clipping plane distance
+      angle: camAngle, // Field of view angle in radians
+    };
+
+    // setupCamera parameters:
+    // - area: [left, top, right, bottom] viewport rectangle (LTRB format)
+    // - zscale: Z-axis scaling factor for viewport transformation
+    // - cam: camera configuration object
+    const mat = setupCamera([0, 0, 200, 200], 200, cam);
+
+    // These values came from an invocation of setupCamera visually inspected.
+    const expected = [
+      7.595754, 0, -0.5, 0, 0, 7.595754, -0.5, 0, 0, 0, 1.01005, -1324.368418,
+      0, 0, -0.005, 7.595754,
+    ];
+    expectArrayCloseTo(mat, expected, 5);
   });
 });

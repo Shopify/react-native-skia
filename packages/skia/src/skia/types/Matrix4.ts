@@ -3,6 +3,12 @@ type Vec2 = readonly [number, number];
 type Vec3 = readonly [number, number, number];
 type Vec4 = readonly [number, number, number, number];
 
+export interface Camera {
+  cameraPosition: Vec3;
+  cameraLookAt: Vec3;
+  cameraRoll: Vec3;
+}
+
 export type Matrix3 = readonly [
   number,
   number,
@@ -470,4 +476,155 @@ export const invert4 = (m: Matrix4): Matrix4 => {
     b23 * invDet,
     b33 * invDet,
   ] as Matrix4;
+};
+
+const crossProduct = (a: Vec3, b: Vec3): Vec3 => {
+  "worklet";
+  return [
+    a[1] * b[2] - a[2] * b[1],
+    a[2] * b[0] - a[0] * b[2],
+    a[0] * b[1] - a[1] * b[0],
+  ];
+};
+
+const subtractVec3 = (a: Vec3, b: Vec3): Vec3 => {
+  "worklet";
+  return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+};
+
+/**
+ * @worklet
+ */
+export const lookat = (eye: Vec3, center: Vec3, up: Vec3): Matrix4 => {
+  "worklet";
+  // Follow CanvasKit implementation exactly
+  const f = normalizeVec(subtractVec3(center, eye)); // forward = center - eye
+  const u = normalizeVec(up); // normalize up vector
+  const s = normalizeVec(crossProduct(f, u)); // side = cross(forward, up)
+
+  // Build matrix with columns: side, cross(side, forward), -forward, eye
+  const sxf = crossProduct(s, f);
+  const m: Matrix4 = [
+    s[0],
+    sxf[0],
+    -f[0],
+    eye[0],
+    s[1],
+    sxf[1],
+    -f[1],
+    eye[1],
+    s[2],
+    sxf[2],
+    -f[2],
+    eye[2],
+    0,
+    0,
+    0,
+    1,
+  ];
+
+  // CanvasKit inverts this matrix
+  return invert4(m);
+};
+
+/**
+ * @worklet
+ */
+export const perspectiveCamera = (
+  near: number,
+  far: number,
+  angle: number
+): Matrix4 => {
+  "worklet";
+  const dInv = 1 / (far - near);
+  const halfAngle = angle / 2;
+  const cot = Math.cos(halfAngle) / Math.sin(halfAngle);
+
+  return [
+    cot,
+    0,
+    0,
+    0,
+    0,
+    cot,
+    0,
+    0,
+    0,
+    0,
+    (far + near) * dInv,
+    2 * far * near * dInv,
+    0,
+    0,
+    -1,
+    1,
+  ];
+};
+
+/**
+ * @worklet
+ */
+export const scaled = (scaleVec: Vec3): Matrix4 => {
+  "worklet";
+  return [
+    scaleVec[0],
+    0,
+    0,
+    0,
+    0,
+    scaleVec[1],
+    0,
+    0,
+    0,
+    0,
+    scaleVec[2],
+    0,
+    0,
+    0,
+    0,
+    1,
+  ];
+};
+
+/**
+ * @worklet
+ */
+export const setupCamera = (
+  area: Vec4,
+  zscale: number,
+  cam: {
+    eye: Vec3;
+    coa: Vec3;
+    up: Vec3;
+    near: number;
+    far: number;
+    angle: number;
+  }
+): Matrix4 => {
+  "worklet";
+  const camera = lookat(cam.eye, cam.coa, cam.up);
+  const perspectiveMatrix = perspectiveCamera(cam.near, cam.far, cam.angle);
+  const center: Vec3 = [(area[0] + area[2]) / 2, (area[1] + area[3]) / 2, 0];
+  const viewScale: Vec3 = [
+    (area[2] - area[0]) / 2,
+    (area[3] - area[1]) / 2,
+    zscale,
+  ];
+
+  const viewport = multiply4(
+    translate(center[0], center[1], center[2]),
+    scaled(viewScale)
+  );
+
+  return multiply4(
+    multiply4(multiply4(viewport, perspectiveMatrix), camera),
+    invert4(viewport)
+  );
+};
+
+/**
+ * @worklet
+ */
+export const createTransformationFromCamera = (camera: Camera): Matrix4 => {
+  "worklet";
+  return lookat(camera.cameraPosition, camera.cameraLookAt, camera.cameraRoll);
 };
