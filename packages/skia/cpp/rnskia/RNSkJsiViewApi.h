@@ -3,6 +3,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -21,6 +22,48 @@ using RNSkViewInfo = struct RNSkViewInfo {
   RNSkViewInfo() { view = nullptr; }
   std::shared_ptr<RNSkView> view;
   std::unordered_map<std::string, RNJsi::ViewProperty> props;
+};
+
+class ViewRegistry {
+public:
+  static ViewRegistry &getInstance() {
+    static ViewRegistry instance;
+    return instance;
+  }
+
+  ViewRegistry(const ViewRegistry &) = delete;
+  ViewRegistry &operator=(const ViewRegistry &) = delete;
+
+  void removeViewInfo(size_t id) {
+    std::unique_lock<std::shared_mutex> lock(_mutex);
+    _registry.erase(id);
+  }
+
+  // Execute a function while holding the registry lock
+  template <typename F>
+  auto withViewInfo(size_t id, F &&func)
+      -> decltype(func(std::shared_ptr<RNSkViewInfo>())) {
+    std::unique_lock<std::shared_mutex> lock(_mutex);
+    auto it = _registry.find(id);
+    std::shared_ptr<RNSkViewInfo> info;
+    if (it != _registry.end()) {
+      info = it->second;
+    } else {
+      info = std::make_shared<RNSkViewInfo>();
+      _registry[id] = info;
+    }
+    return func(info);
+  }
+
+  void clear() {
+    std::unique_lock<std::shared_mutex> lock(_mutex);
+    _registry.clear();
+  }
+
+private:
+  ViewRegistry() = default;
+  mutable std::shared_mutex _mutex;
+  std::unordered_map<size_t, std::shared_ptr<RNSkViewInfo>> _registry;
 };
 
 class RNSkJsiViewApi : public RNJsi::JsiHostObject,
@@ -53,19 +96,23 @@ public:
     }
 
     auto nativeId = arguments[0].asNumber();
-    std::lock_guard<std::mutex> lock(_mutex);
-    auto info = getEnsuredViewInfo(nativeId);
 
-    info->props.insert_or_assign(arguments[1].asString(runtime).utf8(runtime),
-                                 RNJsi::ViewProperty(runtime, arguments[2]));
+    // Safely execute operations while holding the registry lock
+    ViewRegistry::getInstance().withViewInfo(
+        nativeId, [&](std::shared_ptr<RNSkViewInfo> info) {
+          info->props.insert_or_assign(
+              arguments[1].asString(runtime).utf8(runtime),
+              RNJsi::ViewProperty(runtime, arguments[2]));
 
-    // Now let's see if we have a view that we can update
-    if (info->view != nullptr) {
-      // Update view!
-      info->view->setNativeId(nativeId);
-      info->view->setJsiProperties(info->props);
-      info->props.clear();
-    }
+          // Now let's see if we have a view that we can update
+          if (info->view != nullptr) {
+            // Update view!
+            info->view->setNativeId(nativeId);
+            info->view->setJsiProperties(info->props);
+            info->props.clear();
+          }
+          return nullptr; // Return type for template deduction
+        });
 
     return jsi::Value::undefined();
   }
@@ -88,11 +135,13 @@ public:
 
     // find Skia View
     int nativeId = arguments[0].asNumber();
-    std::lock_guard<std::mutex> lock(_mutex);
-    auto info = getEnsuredViewInfo(nativeId);
-    if (info->view != nullptr) {
-      info->view->requestRedraw();
-    }
+    ViewRegistry::getInstance().withViewInfo(
+        nativeId, [](std::shared_ptr<RNSkViewInfo> info) {
+          if (info->view != nullptr) {
+            info->view->requestRedraw();
+          }
+          return nullptr;
+        });
     return jsi::Value::undefined();
   }
 
@@ -113,12 +162,9 @@ public:
     // find Skia view
     int nativeId = arguments[0].asNumber();
     sk_sp<SkImage> image;
-    std::shared_ptr<RNSkView> view;
-    {
-      std::lock_guard<std::mutex> lock(_mutex);
-      auto info = getEnsuredViewInfo(nativeId);
-      view = info->view;
-    }
+    std::shared_ptr<RNSkView> view = ViewRegistry::getInstance().withViewInfo(
+        nativeId,
+        [](std::shared_ptr<RNSkViewInfo> info) { return info->view; });
     if (view != nullptr) {
       if (count > 1 && !arguments[1].isUndefined() && !arguments[1].isNull()) {
         auto rect = JsiSkRect::fromValue(runtime, arguments[1]);
@@ -154,12 +200,9 @@ public:
 
     // find Skia view
     int nativeId = arguments[0].asNumber();
-    std::shared_ptr<RNSkView> view;
-    {
-      std::lock_guard<std::mutex> lock(_mutex);
-      auto info = getEnsuredViewInfo(nativeId);
-      view = info->view;
-    }
+    std::shared_ptr<RNSkView> view = ViewRegistry::getInstance().withViewInfo(
+        nativeId,
+        [](std::shared_ptr<RNSkViewInfo> info) { return info->view; });
     auto context = _platformContext;
     auto bounds =
         count > 1 && !arguments[1].isUndefined() && !arguments[1].isNull()
@@ -204,10 +247,7 @@ public:
   /**
    Call to remove all draw view infos
    */
-  void unregisterAll() {
-    std::lock_guard<std::mutex> lock(_mutex);
-    _viewInfos.clear();
-  }
+  void unregisterAll() { ViewRegistry::getInstance().clear(); }
 
   /**
    * Registers a skia view
@@ -215,12 +255,14 @@ public:
    * @param view View to register
    */
   void registerSkiaView(size_t nativeId, std::shared_ptr<RNSkView> view) {
-    std::lock_guard<std::mutex> lock(_mutex);
-    auto info = getEnsuredViewInfo(nativeId);
-    info->view = view;
-    info->view->setNativeId(nativeId);
-    info->view->setJsiProperties(info->props);
-    info->props.clear();
+    ViewRegistry::getInstance().withViewInfo(
+        nativeId, [&](std::shared_ptr<RNSkViewInfo> info) {
+          info->view = view;
+          info->view->setNativeId(nativeId);
+          info->view->setJsiProperties(info->props);
+          info->props.clear();
+          return nullptr;
+        });
   }
 
   /**
@@ -228,14 +270,7 @@ public:
    * @param nativeId View id
    */
   void unregisterSkiaView(size_t nativeId) {
-    std::lock_guard<std::mutex> lock(_mutex);
-    if (_viewInfos.count(nativeId) == 0) {
-      return;
-    }
-    auto info = getEnsuredViewInfo(nativeId);
-
-    info->view = nullptr;
-    _viewInfos.erase(nativeId);
+    ViewRegistry::getInstance().removeViewInfo(nativeId);
   }
 
   /**
@@ -245,34 +280,21 @@ public:
    or a valid view, effectively toggling the view's availability.
    */
   void setSkiaView(size_t nativeId, std::shared_ptr<RNSkView> view) {
-    std::lock_guard<std::mutex> lock(_mutex);
-    auto info = getEnsuredViewInfo(nativeId);
-    if (view != nullptr) {
-      info->view = view;
-      info->view->setNativeId(nativeId);
-      info->view->setJsiProperties(info->props);
-      info->props.clear();
-    } else if (view == nullptr) {
-      info->view = view;
-    }
+    ViewRegistry::getInstance().withViewInfo(
+        nativeId, [&](std::shared_ptr<RNSkViewInfo> info) {
+          if (view != nullptr) {
+            info->view = view;
+            info->view->setNativeId(nativeId);
+            info->view->setJsiProperties(info->props);
+            info->props.clear();
+          } else {
+            info->view = view; // Set to nullptr
+          }
+          return nullptr;
+        });
   }
 
 private:
-  /**
-   * Creates or returns the callback info object for the given view
-   * @param nativeId View id
-   * @return The callback info object for the requested view
-   */
-  RNSkViewInfo *getEnsuredViewInfo(size_t nativeId) {
-    if (_viewInfos.count(nativeId) == 0) {
-      RNSkViewInfo info;
-      _viewInfos.emplace(nativeId, info);
-    }
-    return &_viewInfos.at(nativeId);
-  }
-
-  std::unordered_map<size_t, RNSkViewInfo> _viewInfos;
   std::shared_ptr<RNSkPlatformContext> _platformContext;
-  std::mutex _mutex;
 };
 } // namespace RNSkia

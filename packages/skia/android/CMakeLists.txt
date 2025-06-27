@@ -4,16 +4,50 @@ cmake_minimum_required(VERSION 3.4.1)
 set (CMAKE_VERBOSE_MAKEFILE ON)
 set (CMAKE_CXX_STANDARD 17)
 
-# Import prebuilt SKIA libraries path first to check for Dawn libraries
+# Import prebuilt SKIA libraries path
 set (SKIA_LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../libs/android/${ANDROID_ABI}")
 
-# Check if Dawn libraries exist, if so enable SK_GRAPHITE
-if(EXISTS "${SKIA_LIBS_PATH}/libdawn_native_static.a")
+# Import libskia first so we can check for symbols
+add_library(skia STATIC IMPORTED)
+set_property(TARGET skia PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskia.a")
+
+# Check if Graphite symbols are available in libskia using nm/objdump
+set(SK_GRAPHITE_AVAILABLE OFF)
+
+if(EXISTS "${SKIA_LIBS_PATH}/libskia.a")
+    # Look for specific Dawn function symbols that indicate Graphite support
+    execute_process(
+        COMMAND nm "${SKIA_LIBS_PATH}/libskia.a"
+        COMMAND grep "dawn::\\|wgpu\\|_ZN4dawn\\|DawnDevice\\|dawn_native"
+        OUTPUT_VARIABLE NM_OUTPUT
+        ERROR_QUIET
+        RESULT_VARIABLE NM_RESULT
+    )
+    
+    if(NM_RESULT EQUAL 0 AND NOT "${NM_OUTPUT}" STREQUAL "")
+        set(SK_GRAPHITE_AVAILABLE ON)
+    else()
+        # Fallback to objdump if nm doesn't work
+        execute_process(
+            COMMAND objdump -t "${SKIA_LIBS_PATH}/libskia.a"
+            COMMAND grep "dawn::\\|wgpu\\|_ZN4dawn\\|DawnDevice\\|dawn_native"
+            OUTPUT_VARIABLE OBJDUMP_OUTPUT
+            ERROR_QUIET
+            RESULT_VARIABLE OBJDUMP_RESULT
+        )
+        
+        if(OBJDUMP_RESULT EQUAL 0 AND NOT "${OBJDUMP_OUTPUT}" STREQUAL "")
+            set(SK_GRAPHITE_AVAILABLE ON)
+        endif()
+    endif()
+endif()
+
+if(SK_GRAPHITE_AVAILABLE)
     set(SK_GRAPHITE ON)
-    message("-- SK_GRAPHITE: ON (Dawn libraries found)")
+    message("-- SK_GRAPHITE: ON (Graphite symbols found in libskia)")
 else()
     set(SK_GRAPHITE OFF)
-    message("-- SK_GRAPHITE: OFF (Dawn libraries not found)")
+    message("-- SK_GRAPHITE: OFF (Graphite symbols not found in libskia)")
 endif()
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSK_BUILD_FOR_ANDROID -DSK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_HAVE_MEMRCHR=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_MOBILE=1 -DON_ANDROID -DONANDROID")
@@ -24,6 +58,7 @@ set (SKIA_SKSHAPER_LIB "skshaper")
 set (SKIA_SKPARAGRAPH_LIB "skparagraph")
 set (SKIA_SKUNICODE_CORE_LIB "skunicode_core")
 set (SKIA_SKUNICODE_ICU_LIB "skunicode_icu")
+set (SKIA_PATHOPS_LIB "pathops")
 
 
 # Clear some variables
@@ -45,21 +80,10 @@ link_directories(../libs/android/${ANDROID_ABI}/)
 
 if(SK_GRAPHITE)
     add_definitions(-DSK_GRAPHITE)
-    set(DAWN_NATIVE_LIB "libdawn_native_static")
-    set(DAWN_PLATFORM_LIB "libdawn_platform_static")
-    set(DAWN_PROC_LIB "libdawn_proc_static")
     set(BACKEND_SOURCES
     #TODO: is this source needed to be added?
         "${PROJECT_SOURCE_DIR}/../cpp/rnskia/DawnWindowContext.cpp"
     )
-    add_library(libdawn_native_static STATIC IMPORTED)
-    set_property(TARGET libdawn_native_static PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_native_static.a")
-
-    add_library(libdawn_platform_static STATIC IMPORTED)
-    set_property(TARGET libdawn_platform_static PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_platform_static.a")
-
-    add_library(libdawn_proc_static STATIC IMPORTED)
-    set_property(TARGET libdawn_proc_static PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_proc_static.a")
 else()
     add_definitions(-DSK_GL -DSK_GANESH)
     set(BACKEND_SOURCES
@@ -131,9 +155,6 @@ target_include_directories(
         ${libfbjni_include_DIRS}
 )
 
-add_library(skia STATIC IMPORTED)
-set_property(TARGET skia PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskia.a")
-
 add_library(svg STATIC IMPORTED)
 set_property(TARGET svg PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libsvg.a")
 
@@ -149,6 +170,8 @@ set_property(TARGET skunicode_core PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}
 add_library(skunicode_icu STATIC IMPORTED)
 set_property(TARGET skunicode_icu PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskunicode_icu.a")
 
+add_library(pathops STATIC IMPORTED)
+set_property(TARGET pathops PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libpathops.a")
 
 find_library(
         LOG_LIB
@@ -276,6 +299,7 @@ if(${REACT_NATIVE_VERSION} GREATER_EQUAL 76)
         ${SKIA_SKPARAGRAPH_LIB}
         ${SKIA_SKUNICODE_CORE_LIB}
         ${SKIA_SKUNICODE_ICU_LIB}
+        ${SKIA_PATHOPS_LIB}
         ${SKIA_LIB}
         -ljnigraphics
         -lGLESv2
@@ -296,6 +320,7 @@ else()
         ${SKIA_SKPARAGRAPH_LIB}
         ${SKIA_SKUNICODE_CORE_LIB}
         ${SKIA_SKUNICODE_ICU_LIB}
+        ${SKIA_PATHOPS_LIB}
         ${SKIA_LIB}
         -ljnigraphics
         -lGLESv2
@@ -307,9 +332,6 @@ endif()
 if(SK_GRAPHITE)
     target_link_libraries(${PACKAGE_NAME}
         ${COMMON_LIBS}
-        ${DAWN_NATIVE_LIB}
-        ${DAWN_PLATFORM_LIB}
-        ${DAWN_PROC_LIB}
     )
 else()
     target_link_libraries(${PACKAGE_NAME}
@@ -317,4 +339,9 @@ else()
         -lGLESv2
         -lEGL
     )
+endif()
+
+# Enable Android 16kb native library alignment
+if(CMAKE_ANDROID_NDK_VERSION VERSION_LESS "27")
+    target_link_options(${PACKAGE_NAME} PRIVATE "-Wl,-z,max-page-size=16384")
 endif()
