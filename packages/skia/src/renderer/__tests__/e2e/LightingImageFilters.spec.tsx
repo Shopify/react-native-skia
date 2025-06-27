@@ -587,16 +587,16 @@ describe("Lighting Image Filters", () => {
         // Random water droplets
         const numDroplets = 200;
         for (let i = 0; i < numDroplets; i++) {
-          const x = Math.random() * 768;
-          const y = Math.random() * 768;
-          const size = 1 + Math.random() * 5;
+          const x = 0.5 * 768;
+          const y = 0.5 * 768;
+          const size = 1 + 0.5 * 5;
 
           // Make some droplets blurry for depth
-          if (Math.random() > 0.7) {
+          if (0.5 > 0.7) {
             dropletPaint.setImageFilter(
               Skia.ImageFilter.MakeBlur(
-                1 + Math.random() * 2,
-                1 + Math.random() * 2,
+                1 + 0.5 * 2,
+                1 + 0.5 * 2,
                 ctx.TileMode.Decal
               )
             );
@@ -674,8 +674,8 @@ describe("Lighting Image Filters", () => {
 
         // Create several water streaks
         for (let i = 0; i < 8; i++) {
-          const startX = 50 + Math.random() * 700;
-          const startY = 20 + Math.random() * 100;
+          const startX = 50 + 0.5 * 700;
+          const startY = 20 + 0.5 * 100;
           let currentX = startX;
           let currentY = startY;
 
@@ -683,14 +683,14 @@ describe("Lighting Image Filters", () => {
           flowPath.moveTo(currentX, currentY);
 
           // Create a wavy downward path
-          const length = 100 + Math.random() * 600;
+          const length = 100 + 0.5 * 600;
           const segments = 10 + Math.floor(length / 30);
 
           for (let j = 0; j < segments; j++) {
             // Gravity pulls downward
             currentY += length / segments;
             // Random side-to-side waviness
-            currentX += (Math.random() - 0.5) * 30;
+            currentX += (0.5 - 0.5) * 30;
 
             flowPath.lineTo(currentX, currentY);
           }
@@ -699,7 +699,7 @@ describe("Lighting Image Filters", () => {
           const streakPaint = Skia.Paint();
           streakPaint.setStyle(ctx.PaintStyle.Stroke);
           streakPaint.setColor(Skia.Color("rgba(200, 240, 255, 0.2)"));
-          streakPaint.setStrokeWidth(1 + Math.random() * 3);
+          streakPaint.setStrokeWidth(1 + 0.5 * 3);
           streakPaint.setImageFilter(
             Skia.ImageFilter.MakeBlur(1, 1, ctx.TileMode.Decal)
           );
@@ -953,7 +953,7 @@ describe("Lighting Image Filters", () => {
           const angle = (i / facets) * Math.PI * 2;
 
           // Vary the radius for each facet
-          const radiusVariation = 30 + Math.random() * 40;
+          const radiusVariation = 30 + 0.5 * 40;
           const radius = padding - 20 + radiusVariation;
 
           borderPath.lineTo(
@@ -1164,9 +1164,9 @@ describe("Lighting Image Filters", () => {
 
         // Draw multiple flames
         for (let i = 0; i < 8; i++) {
-          const x = 50 + Math.random() * 300;
-          const baseHeight = 200 + Math.random() * 300;
-          drawFlame(x, 768 - baseHeight, 20 + Math.random() * 50, baseHeight);
+          const x = 50 + 0.5 * 300;
+          const baseHeight = 200 + 0.5 * 300;
+          drawFlame(x, 768 - baseHeight, 20 + 0.5 * 50, baseHeight);
         }
 
         // Create fire lighting with composite of diffuse and specular
@@ -1239,17 +1239,17 @@ describe("Lighting Image Filters", () => {
         const emberPaint = Skia.Paint();
 
         for (let i = 0; i < 60; i++) {
-          const x = Math.random() * 384;
-          const y = 300 + Math.random() * 468;
-          const size = 1 + Math.random() * 3;
+          const x = 0.5 * 384;
+          const y = 300 + 0.5 * 468;
+          const size = 1 + 0.5 * 3;
 
-          const brightness = 150 + Math.random() * 105;
+          const brightness = 150 + 0.5 * 105;
           emberPaint.setColor(
             Skia.Color(`rgba(${brightness}, ${brightness * 0.6}, 0, 0.8)`)
           );
 
           // Add glow to some embers
-          if (Math.random() > 0.6) {
+          if (0.5 > 0.6) {
             emberPaint.setImageFilter(
               Skia.ImageFilter.MakeBlur(size * 2, size * 2, ctx.TileMode.Decal)
             );
@@ -1336,10 +1336,10 @@ describe("Lighting Image Filters", () => {
 
         // Draw multiple crystals
         for (let i = 0; i < 15; i++) {
-          const x = 384 + Math.random() * 384;
-          const y = Math.random() * 768;
-          const size = 20 + Math.random() * 60;
-          const rotation = Math.random() * 360;
+          const x = 384 + 0.5 * 384;
+          const y = 0.5 * 768;
+          const size = 20 + 0.5 * 60;
+          const rotation = 0.5 * 360;
 
           drawCrystal(x, y, size, rotation);
         }
@@ -1415,12 +1415,12 @@ describe("Lighting Image Filters", () => {
         snowPaint.setColor(Skia.Color("rgba(255, 255, 255, 0.8)"));
 
         for (let i = 0; i < 60; i++) {
-          const x = 384 + Math.random() * 384;
-          const y = Math.random() * 768;
-          const size = 1 + Math.random() * 3;
+          const x = 384 + 0.5 * 384;
+          const y = 0.5 * 768;
+          const size = 1 + 0.5 * 3;
 
           // Add glow to some snowflakes
-          if (Math.random() > 0.7) {
+          if (0.5 > 0.7) {
             snowPaint.setImageFilter(
               Skia.ImageFilter.MakeBlur(size * 2, size * 2, ctx.TileMode.Decal)
             );
