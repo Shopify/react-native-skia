@@ -501,7 +501,7 @@ public:
 
   JSI_HOST_FUNCTION(MakeMatrixConvolution) {
     SkISize kernelSize =
-        SkISize(arguments[0].asNumber(), arguments[1].asNumber());
+            SkISize::Make(arguments[0].asNumber(), arguments[1].asNumber());
     std::vector<float> kernel;
     auto kernelArray = arguments[2].asObject(runtime).asArray(runtime);
     auto size = kernelArray.size(runtime);
@@ -511,8 +511,8 @@ public:
     auto gain = arguments[3].asNumber();
     auto bias = arguments[4].asNumber();
     SkIPoint kernelOffset =
-        SkIPoint(arguments[5].asNumber(), arguments[6].asNumber());
-    SkTileMode tileMode = (SkTileMode)arguments[7].asNumber();
+        SkIPoint::Make(arguments[5].asNumber(), arguments[6].asNumber());
+    auto tileMode = static_cast<SkTileMode>(arguments[7].asNumber());
     bool convolveAlpha = arguments[8].asBool();
     sk_sp<SkImageFilter> input = nullptr;
     if (hasOptionalArgument(arguments, count, 9)) {
