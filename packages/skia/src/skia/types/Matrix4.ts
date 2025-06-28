@@ -1,7 +1,7 @@
 type Point = { x: number; y: number };
 type Vec2 = readonly [number, number];
-type Vec3 = readonly [number, number, number];
-type Vec4 = readonly [number, number, number, number];
+export type Vec3 = readonly [number, number, number];
+export type Vec4 = readonly [number, number, number, number];
 
 export type Matrix3 = readonly [
   number,
