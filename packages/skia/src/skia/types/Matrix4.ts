@@ -472,33 +472,9 @@ export const invert4 = (m: Matrix4): Matrix4 => {
   ] as Matrix4;
 };
 
-const vecDot = (a: Vec3, b: Vec3): number => {
-  "worklet";
-  return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-};
-
-const vecLength = (v: Vec3): number => {
-  "worklet";
-  return Math.sqrt(vecDot(v, v));
-};
-
-const vecNormalize = (v: Vec3): Vec3 => {
-  "worklet";
-  const length = vecLength(v);
-  if (length === 0) {
-    return [0, 0, 0];
-  }
-  return [v[0] / length, v[1] / length, v[2] / length];
-};
-
 const vecSub = (a: Vec3, b: Vec3): Vec3 => {
   "worklet";
   return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
-};
-
-const vecMulScalar = (v: Vec3, s: number): Vec3 => {
-  "worklet";
-  return [v[0] * s, v[1] * s, v[2] * s];
 };
 
 const vecCross = (a: Vec3, b: Vec3): Vec3 => {
@@ -510,35 +486,22 @@ const vecCross = (a: Vec3, b: Vec3): Vec3 => {
   ];
 };
 
-const stride = (
-  v: Vec3,
-  m: Matrix4,
-  width: number,
-  offset: number,
-  colStride: number
-): Matrix4 => {
-  "worklet";
-  const result = [...m];
-  for (let i = 0; i < v.length; i++) {
-    result[i * width + ((i * colStride + offset + width) % width)] = v[i];
-  }
-  return result as unknown as Matrix4;
-};
-
 const lookat = (eyeVec: Vec3, centerVec: Vec3, upVec: Vec3): Matrix4 => {
   "worklet";
-  const f = vecNormalize(vecSub(centerVec, eyeVec));
-  const u = vecNormalize(upVec);
-  const s = vecNormalize(vecCross(f, u));
+  const f = normalizeVec(vecSub(centerVec, eyeVec));
+  const u = normalizeVec(upVec);
+  const s = normalizeVec(vecCross(f, u));
+  const uf = vecCross(s, f);
 
-  let m = Matrix4();
-  m = stride(s, m, 4, 0, 0);
-  m = stride(vecCross(s, f), m, 4, 1, 0);
-  m = stride(vecMulScalar(f, -1), m, 4, 2, 0);
-  m = stride(eyeVec, m, 4, 3, 0);
+  // Build the look-at matrix directly
+  const m: Matrix4 = [
+    s[0], uf[0], -f[0], eyeVec[0],
+    s[1], uf[1], -f[1], eyeVec[1], 
+    s[2], uf[2], -f[2], eyeVec[2],
+    0,    0,     0,     1
+  ];
 
-  const m2 = invert4(m);
-  return m2;
+  return invert4(m);
 };
 
 const perspectiveMatrix = (
@@ -570,15 +533,6 @@ const perspectiveMatrix = (
   ];
 };
 
-const scaled = (vec: Vec3): Matrix4 => {
-  "worklet";
-  return stride(vec, Matrix4(), 4, 0, 1);
-};
-
-const translated = (vec: Vec3): Matrix4 => {
-  "worklet";
-  return stride(vec, Matrix4(), 4, 3, 0);
-};
 
 export interface CameraConfig {
   eye: Vec3;
@@ -603,7 +557,10 @@ export const setupCamera = (
     (area[3] - area[1]) / 2,
     zscale,
   ];
-  const viewport = multiply4(translated(center), scaled(viewScale));
+  const viewport = multiply4(
+    translate(center[0], center[1], center[2]),
+    scale(viewScale[0], viewScale[1], viewScale[2])
+  );
   return multiply4(
     multiply4(viewport, p),
     multiply4(camera, invert4(viewport))
