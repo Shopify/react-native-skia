@@ -437,4 +437,58 @@ describe("Camera", () => {
     );
     checkImage(image, "snapshots/matrix4/test-perspective.png");
   });
+  it("test perspective (2)", async () => {
+    const { Skia } = importSkia();
+    const { width, height } = surface;
+    let pad = 0;
+    const rct = {
+      x: pad,
+      y: pad,
+      width: width - pad * 2,
+      height: height - pad * 2,
+    };
+    const path = Skia.Path.Make();
+    const path3 = new Path3();
+    path3.addHRect(rct, 0);
+
+    const path3a = new Path3();
+    pad = 20;
+    path3a.addHRect(
+      {
+        x: pad,
+        y: pad,
+        width: width - pad * 2,
+        height: height - pad * 2,
+      },
+      0.5
+    );
+
+    const camAngle = Math.PI / 4;
+
+    const cam = {
+      eye: [-1.5, 0, 0.5], // Camera centered
+      coa: [-1, 0, 0], // Look at top-left corner of rectangle
+      up: [0, 1, 0],
+      near: 0.02,
+      far: 10,
+      angle: camAngle,
+    };
+
+    const mat = CanvasKit.M44.setupCamera(
+      CanvasKit.LTRBRect(0, 0, width, height),
+      Math.min(width, height) / 2,
+      cam
+    );
+    path3.project(path, mat as unknown as Matrix4);
+    const path1 = Skia.Path.Make();
+
+    path3a.project(path1, mat as unknown as Matrix4);
+    const image = await surface.draw(
+      <Group>
+        <Path path={path} color="cyan" opacity={0.5} />
+        <Path path={path1} color="red" opacity={0.5} />
+      </Group>
+    );
+    checkImage(image, "snapshots/matrix4/test-perspective2.png");
+  });
 });
