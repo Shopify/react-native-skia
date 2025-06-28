@@ -1,8 +1,13 @@
 import React from "react";
 
 import { checkImage } from "../../../__tests__/setup";
-import type { SkPath, SkRect, Vec3 } from "../../../skia/types";
-import { mapPoint3d, processTransform3d, Matrix4 } from "../../../skia/types";
+import type { SkPath, SkRect, Vec3, Vec4 } from "../../../skia/types";
+import {
+  mapPoint3d,
+  processTransform3d,
+  Matrix4,
+  setupCamera,
+} from "../../../skia/types";
 import { Group, Path, Rect } from "../../components";
 import { importSkia, surface } from "../setup";
 
@@ -182,21 +187,18 @@ describe("Camera", () => {
     const camAngle = Math.PI / 4; // 45 degrees for dramatic perspective
 
     const cam = {
-      eye: [0, 0, 1],
-      coa: [0, 0, 0], // Look at origin (setupCamera handles viewport translation)
-      up: [0, 1, 0],
+      eye: [0, 0, 1] as const,
+      coa: [0, 0, 0] as const, // Look at origin (setupCamera handles viewport translation)
+      up: [0, 1, 0] as const,
       near: 0.02,
       far: 4,
       angle: camAngle,
     };
 
     // Setup camera with surface-based viewport
-    const mat = CanvasKit.M44.setupCamera(
-      CanvasKit.LTRBRect(0, 0, width, height),
-      Math.min(width, height) / 2,
-      cam
-    );
-    path3.project(path, mat as unknown as Matrix4);
+    const area: Vec4 = [0, 0, width, height];
+    const mat = setupCamera(area, Math.min(width, height) / 2, cam);
+    path3.project(path, mat);
     const image = await surface.draw(
       <Group>
         <Path path={path} color="cyan" opacity={0.5} />
@@ -222,21 +224,18 @@ describe("Camera", () => {
     const camAngle = Math.PI / 4; // 45 degrees for dramatic perspective
 
     const cam = {
-      eye: [0, 0, 4],
-      coa: [0, 0, 0], // Look at origin (setupCamera handles viewport translation)
-      up: [0, 1, 0],
+      eye: [0, 0, 4] as const,
+      coa: [0, 0, 0] as const, // Look at origin (setupCamera handles viewport translation)
+      up: [0, 1, 0] as const,
       near: 0.02,
       far: 4,
       angle: camAngle,
     };
 
     // Setup camera with surface-based viewport
-    const mat = CanvasKit.M44.setupCamera(
-      CanvasKit.LTRBRect(0, 0, width, height),
-      Math.min(width, height) / 2,
-      cam
-    );
-    path3.project(path, mat as unknown as Matrix4);
+    const area: Vec4 = [0, 0, width, height];
+    const mat = setupCamera(area, Math.min(width, height) / 2, cam);
+    path3.project(path, mat);
     const image = await surface.draw(
       <Group>
         <Path path={path} color="cyan" opacity={0.5} />
@@ -261,20 +260,17 @@ describe("Camera", () => {
     const camAngle = Math.PI / 4;
 
     const cam = {
-      eye: [0.5, 0.5, 1], // Offset right and up in 3D space
-      coa: [0, 0, 0], // Still look at center
-      up: [0, 1, 0],
+      eye: [0.5, 0.5, 1] as const, // Offset right and up in 3D space
+      coa: [0, 0, 0] as const, // Still look at center
+      up: [0, 1, 0] as const,
       near: 0.02,
       far: 4,
       angle: camAngle,
     };
 
-    const mat = CanvasKit.M44.setupCamera(
-      CanvasKit.LTRBRect(0, 0, width, height),
-      Math.min(width, height) / 2,
-      cam
-    );
-    path3.project(path, mat as unknown as Matrix4);
+    const area: Vec4 = [0, 0, width, height];
+    const mat = setupCamera(area, Math.min(width, height) / 2, cam);
+    path3.project(path, mat);
     const image = await surface.draw(
       <Group>
         <Path path={path} color="cyan" opacity={0.5} />
@@ -300,20 +296,17 @@ describe("Camera", () => {
     const camAngle = Math.PI / 4;
 
     const cam = {
-      eye: [0, 0, 2], // Move camera twice as far away
-      coa: [0, 0, 0], // Look at center
-      up: [0, 1, 0],
+      eye: [0, 0, 2] as const, // Move camera twice as far away
+      coa: [0, 0, 0] as const, // Look at center
+      up: [0, 1, 0] as const,
       near: 0.02,
       far: 8, // Increase far plane since camera is further
       angle: camAngle,
     };
 
-    const mat = CanvasKit.M44.setupCamera(
-      CanvasKit.LTRBRect(0, 0, width, height),
-      Math.min(width, height) / 2,
-      cam
-    );
-    path3.project(path, mat as unknown as Matrix4);
+    const area: Vec4 = [0, 0, width, height];
+    const mat = setupCamera(area, Math.min(width, height) / 2, cam);
+    path3.project(path, mat);
     const image = await surface.draw(
       <Group>
         <Path path={path} color="cyan" opacity={0.5} />
@@ -339,20 +332,17 @@ describe("Camera", () => {
     const camAngle = Math.PI / 4;
 
     const cam = {
-      eye: [-0.5, -0.5, 1], // Position at corner in normalized coords
-      coa: [-0.5, -0.5, 0], // Look at same corner
-      up: [0, 1, 0],
+      eye: [-0.5, -0.5, 1] as const, // Position at corner in normalized coords
+      coa: [-0.5, -0.5, 0] as const, // Look at same corner
+      up: [0, 1, 0] as const,
       near: 0.02,
       far: 4,
       angle: camAngle,
     };
 
-    const mat = CanvasKit.M44.setupCamera(
-      CanvasKit.LTRBRect(0, 0, width, height),
-      Math.min(width, height) / 2,
-      cam
-    );
-    path3.project(path, mat as unknown as Matrix4);
+    const area: Vec4 = [0, 0, width, height];
+    const mat = setupCamera(area, Math.min(width, height) / 2, cam);
+    path3.project(path, mat);
     const image = await surface.draw(
       <Group>
         <Path path={path} color="cyan" opacity={0.5} />
@@ -378,20 +368,17 @@ describe("Camera", () => {
     const camAngle = Math.PI / 4;
 
     const cam = {
-      eye: [-1, -1, 1], // Camera centered
-      coa: [-1, -1, 0], // Look at top-left corner of rectangle
-      up: [0, 1, 0],
+      eye: [-1, -1, 1] as const, // Camera centered
+      coa: [-1, -1, 0] as const, // Look at top-left corner of rectangle
+      up: [0, 1, 0] as const,
       near: 0.02,
       far: 4,
       angle: camAngle,
     };
 
-    const mat = CanvasKit.M44.setupCamera(
-      CanvasKit.LTRBRect(0, 0, width, height),
-      Math.min(width, height) / 2,
-      cam
-    );
-    path3.project(path, mat as unknown as Matrix4);
+    const area: Vec4 = [0, 0, width, height];
+    const mat = setupCamera(area, Math.min(width, height) / 2, cam);
+    path3.project(path, mat);
     const image = await surface.draw(
       <Group>
         <Path path={path} color="cyan" opacity={0.5} />
@@ -416,20 +403,17 @@ describe("Camera", () => {
     const camAngle = Math.PI / 4;
 
     const cam = {
-      eye: [-1.5, 0, 0.25], // Camera centered
-      coa: [-1, 0, 0], // Look at top-left corner of rectangle
-      up: [0, 1, 0],
+      eye: [-1.5, 0, 0.25] as const, // Camera centered
+      coa: [-1, 0, 0] as const, // Look at top-left corner of rectangle
+      up: [0, 1, 0] as const,
       near: 0.02,
       far: 10,
       angle: camAngle,
     };
 
-    const mat = CanvasKit.M44.setupCamera(
-      CanvasKit.LTRBRect(0, 0, width, height),
-      Math.min(width, height) / 2,
-      cam
-    );
-    path3.project(path, mat as unknown as Matrix4);
+    const area: Vec4 = [0, 0, width, height];
+    const mat = setupCamera(area, Math.min(width, height) / 2, cam);
+    path3.project(path, mat);
     const image = await surface.draw(
       <Group>
         <Path path={path} color="cyan" opacity={0.5} />
@@ -466,23 +450,20 @@ describe("Camera", () => {
     const camAngle = Math.PI / 4;
 
     const cam = {
-      eye: [-1.5, 0, 0.5], // Camera centered
-      coa: [-1, 0, 0], // Look at top-left corner of rectangle
-      up: [0, 1, 0],
+      eye: [-1.5, 0, 0.5] as const, // Camera centered
+      coa: [-1, 0, 0] as const, // Look at top-left corner of rectangle
+      up: [0, 1, 0] as const,
       near: 0.02,
       far: 10,
       angle: camAngle,
     };
 
-    const mat = CanvasKit.M44.setupCamera(
-      CanvasKit.LTRBRect(0, 0, width, height),
-      Math.min(width, height) / 2,
-      cam
-    );
-    path3.project(path, mat as unknown as Matrix4);
+    const area: Vec4 = [0, 0, width, height];
+    const mat = setupCamera(area, Math.min(width, height) / 2, cam);
+    path3.project(path, mat);
     const path1 = Skia.Path.Make();
 
-    path3a.project(path1, mat as unknown as Matrix4);
+    path3a.project(path1, mat);
     const image = await surface.draw(
       <Group>
         <Path path={path} color="cyan" opacity={0.5} />

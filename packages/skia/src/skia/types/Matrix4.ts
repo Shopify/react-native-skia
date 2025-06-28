@@ -471,3 +471,141 @@ export const invert4 = (m: Matrix4): Matrix4 => {
     b33 * invDet,
   ] as Matrix4;
 };
+
+const vecDot = (a: Vec3, b: Vec3): number => {
+  "worklet";
+  return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+};
+
+const vecLength = (v: Vec3): number => {
+  "worklet";
+  return Math.sqrt(vecDot(v, v));
+};
+
+const vecNormalize = (v: Vec3): Vec3 => {
+  "worklet";
+  const length = vecLength(v);
+  if (length === 0) {
+    return [0, 0, 0];
+  }
+  return [v[0] / length, v[1] / length, v[2] / length];
+};
+
+const vecSub = (a: Vec3, b: Vec3): Vec3 => {
+  "worklet";
+  return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+};
+
+const vecMulScalar = (v: Vec3, s: number): Vec3 => {
+  "worklet";
+  return [v[0] * s, v[1] * s, v[2] * s];
+};
+
+const vecCross = (a: Vec3, b: Vec3): Vec3 => {
+  "worklet";
+  return [
+    a[1] * b[2] - a[2] * b[1],
+    a[2] * b[0] - a[0] * b[2],
+    a[0] * b[1] - a[1] * b[0],
+  ];
+};
+
+const stride = (
+  v: Vec3,
+  m: Matrix4,
+  width: number,
+  offset: number,
+  colStride: number
+): Matrix4 => {
+  "worklet";
+  const result = [...m];
+  for (let i = 0; i < v.length; i++) {
+    result[i * width + ((i * colStride + offset + width) % width)] = v[i];
+  }
+  return result as unknown as Matrix4;
+};
+
+const lookat = (eyeVec: Vec3, centerVec: Vec3, upVec: Vec3): Matrix4 => {
+  "worklet";
+  const f = vecNormalize(vecSub(centerVec, eyeVec));
+  const u = vecNormalize(upVec);
+  const s = vecNormalize(vecCross(f, u));
+
+  let m = Matrix4();
+  m = stride(s, m, 4, 0, 0);
+  m = stride(vecCross(s, f), m, 4, 1, 0);
+  m = stride(vecMulScalar(f, -1), m, 4, 2, 0);
+  m = stride(eyeVec, m, 4, 3, 0);
+
+  const m2 = invert4(m);
+  return m2;
+};
+
+const perspectiveMatrix = (
+  near: number,
+  far: number,
+  angle: number
+): Matrix4 => {
+  "worklet";
+  const dInv = 1 / (far - near);
+  const halfAngle = angle / 2;
+  const cot = Math.cos(halfAngle) / Math.sin(halfAngle);
+  return [
+    cot,
+    0,
+    0,
+    0,
+    0,
+    cot,
+    0,
+    0,
+    0,
+    0,
+    (far + near) * dInv,
+    2 * far * near * dInv,
+    0,
+    0,
+    -1,
+    1,
+  ];
+};
+
+const scaled = (vec: Vec3): Matrix4 => {
+  "worklet";
+  return stride(vec, Matrix4(), 4, 0, 1);
+};
+
+const translated = (vec: Vec3): Matrix4 => {
+  "worklet";
+  return stride(vec, Matrix4(), 4, 3, 0);
+};
+
+export interface CameraConfig {
+  eye: Vec3;
+  coa: Vec3;
+  up: Vec3;
+  near: number;
+  far: number;
+  angle: number;
+}
+
+export const setupCamera = (
+  area: Vec4,
+  zscale: number,
+  cam: CameraConfig
+): Matrix4 => {
+  "worklet";
+  const camera = lookat(cam.eye, cam.coa, cam.up);
+  const p = perspectiveMatrix(cam.near, cam.far, cam.angle);
+  const center: Vec3 = [(area[0] + area[2]) / 2, (area[1] + area[3]) / 2, 0];
+  const viewScale: Vec3 = [
+    (area[2] - area[0]) / 2,
+    (area[3] - area[1]) / 2,
+    zscale,
+  ];
+  const viewport = multiply4(translated(center), scaled(viewScale));
+  return multiply4(
+    multiply4(viewport, p),
+    multiply4(camera, invert4(viewport))
+  );
+};
