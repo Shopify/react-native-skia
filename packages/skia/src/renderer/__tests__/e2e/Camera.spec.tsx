@@ -186,7 +186,7 @@ describe("Camera", () => {
     const optimalZ = 1 / Math.tan(camAngle / 2) - 1;
 
     const cam = {
-      eye: [0, 0, optimalZ + 1],
+      eye: [0, 0, optimalZ],
       coa: [0, 0, 0], // Look at origin (setupCamera handles viewport translation)
       up: [0, 1, 0],
       near: 0.02,
@@ -206,6 +206,46 @@ describe("Camera", () => {
         <Path path={path} color="cyan" opacity={0.5} />
       </Group>
     );
-    checkImage(image, "snapshots/matrix4/rect-camera.png");
+    checkImage(image, "snapshots/matrix4/full-rect.png");
+  });
+
+  it("Camera coordinate system visualization", async () => {
+    const { Skia } = importSkia();
+    const { width, height } = surface;
+    const pad = 0;
+    const rct = {
+      x: pad,
+      y: pad,
+      width: width - pad * 2,
+      height: height - pad * 2,
+    };
+    const path = Skia.Path.Make();
+    const path3 = new Path3();
+    path3.addHRect(rct, 0);
+
+    const camAngle = Math.PI / 4;
+    const optimalZ = 1 / Math.tan(camAngle / 2) - 1;
+
+    const cam = {
+      eye: [0.5, 0.5, optimalZ], // Offset right and up in 3D space
+      coa: [0, 0, 0], // Still look at center
+      up: [0, 1, 0],
+      near: 0.02,
+      far: 4,
+      angle: camAngle,
+    };
+
+    const mat = CanvasKit.M44.setupCamera(
+      CanvasKit.LTRBRect(0, 0, width, height),
+      Math.min(width, height) / 2,
+      cam
+    );
+    path3.project(path, mat as unknown as Matrix4);
+    const image = await surface.draw(
+      <Group>
+        <Path path={path} color="cyan" opacity={0.5} />
+      </Group>
+    );
+    checkImage(image, "snapshots/matrix4/camera-offset.png");
   });
 });
