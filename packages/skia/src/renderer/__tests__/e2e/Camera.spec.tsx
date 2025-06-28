@@ -181,10 +181,6 @@ describe("Camera", () => {
     // Sensible camera defaults based on surface dimensions
     const camAngle = Math.PI / 4; // 45 degrees for dramatic perspective
 
-    // Calculate Z distance using the same pattern as working code
-    // The setupCamera function works in a normalized coordinate system
-    //const optimalZ = 1 / Math.tan(camAngle / 2) - 1;
-
     const cam = {
       eye: [0, 0, 1],
       coa: [0, 0, 0], // Look at origin (setupCamera handles viewport translation)
@@ -225,10 +221,6 @@ describe("Camera", () => {
     // Sensible camera defaults based on surface dimensions
     const camAngle = Math.PI / 4; // 45 degrees for dramatic perspective
 
-    // Calculate Z distance using the same pattern as working code
-    // The setupCamera function works in a normalized coordinate system
-    //const optimalZ = 1 / Math.tan(camAngle / 2) - 1;
-
     const cam = {
       eye: [0, 0, 4],
       coa: [0, 0, 0], // Look at origin (setupCamera handles viewport translation)
@@ -267,10 +259,9 @@ describe("Camera", () => {
     path3.addHRect(rct, 0);
 
     const camAngle = Math.PI / 4;
-    const optimalZ = 1 / Math.tan(camAngle / 2) - 1;
 
     const cam = {
-      eye: [0.5, 0.5, optimalZ], // Offset right and up in 3D space
+      eye: [0.5, 0.5, 1], // Offset right and up in 3D space
       coa: [0, 0, 0], // Still look at center
       up: [0, 1, 0],
       near: 0.02,
@@ -307,10 +298,9 @@ describe("Camera", () => {
     path3.addHRect(rct, 0);
 
     const camAngle = Math.PI / 4;
-    const optimalZ = 1 / Math.tan(camAngle / 2) - 1;
 
     const cam = {
-      eye: [0, 0, optimalZ * 2], // Move camera twice as far away
+      eye: [0, 0, 2], // Move camera twice as far away
       coa: [0, 0, 0], // Look at center
       up: [0, 1, 0],
       near: 0.02,
@@ -347,10 +337,9 @@ describe("Camera", () => {
     path3.addHRect(rct, 0);
 
     const camAngle = Math.PI / 4;
-    const optimalZ = 1 / Math.tan(camAngle / 2) - 1;
 
     const cam = {
-      eye: [-0.5, -0.5, optimalZ], // Position at corner in normalized coords
+      eye: [-0.5, -0.5, 1], // Position at corner in normalized coords
       coa: [-0.5, -0.5, 0], // Look at same corner
       up: [0, 1, 0],
       near: 0.02,
@@ -387,10 +376,9 @@ describe("Camera", () => {
     path3.addHRect(rct, 0);
 
     const camAngle = Math.PI / 4;
-    const optimalZ = 1 / Math.tan(camAngle / 2) - 1;
 
     const cam = {
-      eye: [-1, -1, optimalZ], // Camera centered
+      eye: [-1, -1, 1], // Camera centered
       coa: [-1, -1, 0], // Look at top-left corner of rectangle
       up: [0, 1, 0],
       near: 0.02,
@@ -428,11 +416,11 @@ describe("Camera", () => {
     const camAngle = Math.PI / 4;
 
     const cam = {
-      eye: [-2, 0, 0.5], // Camera centered
+      eye: [-1.5, 0, 0.25], // Camera centered
       coa: [-1, 0, 0], // Look at top-left corner of rectangle
       up: [0, 1, 0],
       near: 0.02,
-      far: 4,
+      far: 10,
       angle: camAngle,
     };
 
