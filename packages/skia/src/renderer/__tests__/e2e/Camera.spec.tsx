@@ -248,4 +248,44 @@ describe("Camera", () => {
     );
     checkImage(image, "snapshots/matrix4/camera-offset.png");
   });
+
+  it("Camera zoom out - rectangle appears half size", async () => {
+    const { Skia } = importSkia();
+    const { width, height } = surface;
+    const pad = 0;
+    const rct = {
+      x: pad,
+      y: pad,
+      width: width - pad * 2,
+      height: height - pad * 2,
+    };
+    const path = Skia.Path.Make();
+    const path3 = new Path3();
+    path3.addHRect(rct, 0);
+
+    const camAngle = Math.PI / 4;
+    const optimalZ = 1 / Math.tan(camAngle / 2) - 1;
+
+    const cam = {
+      eye: [0, 0, optimalZ * 2], // Move camera twice as far away
+      coa: [0, 0, 0], // Look at center
+      up: [0, 1, 0],
+      near: 0.02,
+      far: 8, // Increase far plane since camera is further
+      angle: camAngle,
+    };
+
+    const mat = CanvasKit.M44.setupCamera(
+      CanvasKit.LTRBRect(0, 0, width, height),
+      Math.min(width, height) / 2,
+      cam
+    );
+    path3.project(path, mat as unknown as Matrix4);
+    const image = await surface.draw(
+      <Group>
+        <Path path={path} color="cyan" opacity={0.5} />
+      </Group>
+    );
+    checkImage(image, "snapshots/matrix4/camera-zoom-out.png");
+  });
 });
