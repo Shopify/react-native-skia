@@ -28,9 +28,10 @@ public:
 
   ~Recorder() = default;
 
-  void savePaint(jsi::Runtime &runtime, const jsi::Object &props) {
+  void savePaint(jsi::Runtime &runtime, const jsi::Object &props,
+                 bool standalone) {
     commands.push_back(
-        std::make_unique<SavePaintCmd>(runtime, props, variables));
+        std::make_unique<SavePaintCmd>(runtime, props, variables, standalone));
   }
 
   void pushShader(jsi::Runtime &runtime, const std::string &nodeType,
@@ -483,17 +484,6 @@ public:
         break;
       }
 
-      case CommandType::DrawPaint: {
-        ctx->canvas->drawPaint(ctx->getPaint());
-        break;
-      }
-
-      case CommandType::DrawText: {
-        auto *textCmd = static_cast<TextCmd *>(cmd.get());
-        textCmd->draw(ctx);
-        break;
-      }
-
       case CommandType::RestorePaint: {
         ctx->restorePaint();
         break;
@@ -512,7 +502,10 @@ public:
       default: {
         // Handle all drawing commands
         auto currentPaints = ctx->paintDeclarations;
-        currentPaints.push_back(ctx->getPaint()); // Add current paint
+        // apply alpha to the current paint.
+        SkPaint paint(ctx->getPaint());
+        paint.setAlphaf(paint.getAlphaf() * ctx->getOpacity());
+        currentPaints.push_back(paint);
         ctx->paintDeclarations.clear();
 
         for (auto &paint : currentPaints) {

@@ -51,6 +51,7 @@ export class SkiaSGRoot {
   }
 
   async render(element: ReactNode) {
+    this.container.mount();
     await this.updateContainer(element);
     this.container.redraw();
   }

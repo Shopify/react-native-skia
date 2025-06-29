@@ -38,12 +38,13 @@ public:
         count > 1 && !arguments[1].isNull() && !arguments[1].isUndefined()
             ? static_cast<int>(arguments[1].asNumber())
             : getObject()->textToGlyphs(str.c_str(), str.length(),
-                                        SkTextEncoding::kUTF8, nullptr, 0);
+                                        SkTextEncoding::kUTF8,
+                                        SkSpan<SkGlyphID>(nullptr, 0));
     std::vector<SkGlyphID> glyphIDs;
     glyphIDs.resize(numGlyphIDs);
-    getObject()->textToGlyphs(str.c_str(), str.length(), SkTextEncoding::kUTF8,
-                              static_cast<SkGlyphID *>(glyphIDs.data()),
-                              numGlyphIDs);
+    getObject()->textToGlyphs(
+        str.c_str(), str.length(), SkTextEncoding::kUTF8,
+        SkSpan(static_cast<SkGlyphID *>(glyphIDs.data()), numGlyphIDs));
     auto jsiGlyphIDs = jsi::Array(runtime, numGlyphIDs);
     for (int i = 0; i < numGlyphIDs; i++) {
       jsiGlyphIDs.setValueAtIndex(runtime, i,

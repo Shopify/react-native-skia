@@ -54,6 +54,10 @@ export abstract class Container {
     this._root = value;
   }
 
+  mount() {
+    this.unmounted = false;
+  }
+
   unmount() {
     this.unmounted = true;
   }
