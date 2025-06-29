@@ -1,0 +1,28 @@
+{
+  "name": "vite-web-skia",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "postinstall": "setup-skia-web public"
+  },
+  "dependencies": {
+    "@shopify/react-native-skia": "workspace:*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-native": "0.78.0",
+    "react-native-reanimated": "^3.0",
+    "react-native-web": "~0.19.13"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-export-namespace-from": "^7.18.9",
+    "@bunchtogether/vite-plugin-flow": "^1.0.2",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "globals": "^16.2.0",
+    "typescript": "^5.2.2",
+    "vite": "^6.1.0"
+  }
+}
