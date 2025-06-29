@@ -50,7 +50,7 @@ else()
     message("-- SK_GRAPHITE: OFF (Graphite symbols not found in libskia)")
 endif()
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSK_BUILD_FOR_ANDROID -DSK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_HAVE_MEMRCHR=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_MOBILE=1 -DON_ANDROID -DONANDROID")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSK_BUILD_FOR_ANDROID -DSK_DISABLE_LEGACY_SHAPER_FACTORY -DSK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_HAVE_MEMRCHR=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_MOBILE=1 -DON_ANDROID -DONANDROID")
 set (PACKAGE_NAME "rnskia")
 set (SKIA_LIB "skia")
 set (SKIA_SVG_LIB "svg")
@@ -58,6 +58,8 @@ set (SKIA_SKSHAPER_LIB "skshaper")
 set (SKIA_SKPARAGRAPH_LIB "skparagraph")
 set (SKIA_SKUNICODE_CORE_LIB "skunicode_core")
 set (SKIA_SKUNICODE_ICU_LIB "skunicode_icu")
+set (SKIA_SKOTTIE_LIB "skottie")
+set (SKIA_SKSG_LIB "sksg")
 set (SKIA_PATHOPS_LIB "pathops")
 
 
@@ -160,6 +162,12 @@ set_property(TARGET svg PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libsvg.a")
 
 add_library(skshaper STATIC IMPORTED)
 set_property(TARGET skshaper PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskshaper.a")
+
+add_library(skottie STATIC IMPORTED)
+set_property(TARGET skottie PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskottie.a")
+
+add_library(sksg STATIC IMPORTED)
+set_property(TARGET sksg PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libsksg.a")
 
 add_library(skparagraph STATIC IMPORTED)
 set_property(TARGET skparagraph PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskparagraph.a")
@@ -299,6 +307,8 @@ if(${REACT_NATIVE_VERSION} GREATER_EQUAL 76)
         ${SKIA_SKPARAGRAPH_LIB}
         ${SKIA_SKUNICODE_CORE_LIB}
         ${SKIA_SKUNICODE_ICU_LIB}
+        ${SKIA_SKOTTIE_LIB}
+        ${SKIA_SKSG_LIB}
         ${SKIA_PATHOPS_LIB}
         ${SKIA_LIB}
         -ljnigraphics
@@ -320,6 +330,8 @@ else()
         ${SKIA_SKPARAGRAPH_LIB}
         ${SKIA_SKUNICODE_CORE_LIB}
         ${SKIA_SKUNICODE_ICU_LIB}
+        ${SKIA_SKOTTIE_LIB}
+        ${SKIA_SKSG_LIB}
         ${SKIA_PATHOPS_LIB}
         ${SKIA_LIB}
         -ljnigraphics

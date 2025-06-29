@@ -298,7 +298,24 @@ export const copyHeaders = () => {
     ...copyModule("skresources"),
     ...copyModule("skparagraph"),
     ...copyModule("skshaper"),
+    ...copyModule("skottie"),
+    ...copyModule("sksg"),
     ...copyModule("pathops"),
+
+    "rm -rf ./cpp/skia/modules/jsonreader",
+    "cp -a ../../externals/skia/modules/jsonreader/. ./cpp/skia/modules/jsonreader",
+
+    "rm -rf ./cpp/skia/modules/skottie/src",
+    "mkdir -p ./cpp/skia/modules/skottie/src",
+    "mkdir -p ./cpp/skia/modules/skottie/src/text",
+    "mkdir -p ./cpp/skia/modules/skottie/src/animator",
+    "cp -a ../../externals/skia/modules/skottie/src/SkottieValue.h ./cpp/skia/modules/skottie/src/.",
+    "cp -a ../../externals/skia/modules/skottie/src/text/TextAdapter.h ./cpp/skia/modules/skottie/src/text/.",
+    "cp -a ../../externals/skia/modules/skottie/src/text/Font.h ./cpp/skia/modules/skottie/src/text/.",
+    "cp -a ../../externals/skia/modules/skottie/src/text/TextAnimator.h ./cpp/skia/modules/skottie/src/text/.",
+    "cp -a ../../externals/skia/modules/skottie/src/text/TextValue.h ./cpp/skia/modules/skottie/src/text/.",
+    "cp -a ../../externals/skia/modules/skottie/src/animator/Animator.h ./cpp/skia/modules/skottie/src/animator/.",
+
     "cp -a ../../externals/skia/modules/skcms/. ./cpp/skia/modules/skcms",
     "mkdir -p ./cpp/skia/src/",
     "mkdir -p ./cpp/skia/src/core/",
@@ -316,6 +333,7 @@ export const copyHeaders = () => {
     "cp -a ../../externals/skia/src/base/SkMathPriv.h ./cpp/skia/src/base/.",
     "cp -a ../../externals/skia/src/base/SkTInternalLList.h ./cpp/skia/src/base/.",
     "cp -a ../../externals/skia/src/base/SkUTF.h ./cpp/skia/src/base/.",
+    "cp -a ../../externals/skia/src/base/SkArenaAlloc.h ./cpp/skia/src/base/.",
 
     "mkdir -p ./cpp/skia/modules/skunicode/include/",
     "cp -a ../../externals/skia/modules/skunicode/include/SkUnicode.h ./cpp/skia/modules/skunicode/include/.",
