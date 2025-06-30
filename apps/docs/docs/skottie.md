@@ -144,6 +144,65 @@ const version = animation.version();
 const size = animation.size(); // { width: 800, height: 600 }
 ```
 
+## Dynamic Animation Properties
+
+Skottie allows you to customize Lottie animations at runtime by modifying their properties programmatically. This powerful feature enables you to change colors, text, opacity, and transforms without recreating the animation, making it perfect for creating dynamic, interactive experiences.
+
+Here's a complete example showing how to load and render a Skottie animation with Reanimated for smooth playback and dynamic properties:
+
+```tsx twoslash
+import React from "react";
+import { 
+  Canvas, 
+  Skia, 
+  useClock,
+  Group,
+  Skottie
+} from "@shopify/react-native-skia";
+import { useDerivedValue } from "react-native-reanimated";
+
+const animationJSON = require("./assets/fingerprint.json");
+
+// Create animation and set properties outside the component
+const animation = Skia.Skottie.Make(JSON.stringify(animationJSON));
+if (!animation) {
+  throw new Error("Failed to create animation");
+}
+
+// Get animation properties and modify them
+const colorProps = animation.getColorProps();
+if (colorProps.length > 0) {
+  // Change the first color property
+  animation.setColor(colorProps[0].key, Skia.Color("rgb(60, 120, 255)"));
+}
+
+// Set color slots if available
+const slotInfo = animation.getSlotInfo();
+if (slotInfo.colorSlotIDs.length > 0) {
+  animation.setColorSlot(slotInfo.colorSlotIDs[0], Skia.Color("magenta"));
+}
+
+const SkottiePlayer = () => {
+  const clock = useClock();
+
+  const frame = useDerivedValue(() => {
+    const fps = animation.fps();
+    const duration = animation.duration();
+    const currentFrame =
+      Math.floor((clock.value / 1000) * fps) % (duration * fps);
+    return currentFrame;
+  });
+
+  return (
+    <Canvas style={{ width: 400, height: 400 }}>
+      <Group transform={[{ scale: 0.5 }]}>
+        <Skottie animation={animation} frame={frame} />
+      </Group>
+    </Canvas>
+  );
+};
+```
+
 ## Slot Management
 
 Slots are placeholders built into the design of Lottie animations that allow for dynamic content replacement at runtime. This is incredibly convenient for customizing animations without recreating them - designers can create slots in After Effects, and developers can programmatically replace colors, text, images, and other properties.
@@ -236,73 +295,4 @@ const transformProps = animation.getTransformProps();
 //     skewAxis: number
 //   }
 // }
-```
-
-## Complete Example
-
-Here's a complete example showing how to load and render a Skottie animation with dynamic properties:
-
-```tsx twoslash
-import React, { useEffect, useState } from "react";
-import { View } from "react-native";
-import { 
-  Canvas, 
-  Skia, 
-  useCanvasRef,
-  Image,
-  SkSkottieAnimation,
-  SkImage
-} from "@shopify/react-native-skia";
-
-const animationJSON = require("./assets/fingerprint.json");
-
-const SkottiePlayer = () => {
-  const [animation, setAnimation] = useState<SkSkottieAnimation | null>(null);
-  const [image, setImage] = useState<SkImage | null>(null);
-  
-  useEffect(() => {
-    const skottieAnimation = Skia.Skottie.Make(JSON.stringify(animationJSON));
-    if (!skottieAnimation) {
-      throw new Error("Failed to create animation");
-    }
-    setAnimation(skottieAnimation);
-    
-    // Get animation properties
-    const colorProps = skottieAnimation.getColorProps();
-    if (colorProps.length > 0) {
-      // Change the first color property
-      skottieAnimation.setColor(colorProps[0].key, Skia.Color("rgb(60, 120, 255)"));
-    }
-    
-    // Render a frame
-    const size = skottieAnimation.size();
-    const surface = Skia.Surface.MakeOffscreen(size.width, size.height);
-    if (!surface) {
-      throw new Error("Failed to create surface");
-    }
-    const canvas = surface.getCanvas();
-    
-    skottieAnimation.seekFrame(120);
-    skottieAnimation.render(canvas);
-    surface.flush();
-    
-    const snapshot = surface.makeImageSnapshot();
-    setImage(snapshot);
-  }, []);
-
-  if (!image) return <View />;
-
-  return (
-    <Canvas style={{ width: 400, height: 400 }}>
-      <Image 
-        image={image} 
-        x={0} 
-        y={0} 
-        width={400} 
-        height={400}
-        fit="contain"
-      />
-    </Canvas>
-  );
-};
 ```
