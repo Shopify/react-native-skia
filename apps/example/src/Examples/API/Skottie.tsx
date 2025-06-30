@@ -4,7 +4,6 @@ import {
   Skia,
   Canvas,
   useClock,
-  Fill,
   Group,
 } from "@shopify/react-native-skia";
 import { useDerivedValue } from "react-native-reanimated";
@@ -18,12 +17,7 @@ export const Skottie = () => {
   const clock = useClock();
   const picture = useDerivedValue(() => {
     const rec = Skia.PictureRecorder();
-    const canvas = rec.beginRecording({
-      x: 0,
-      y: 0,
-      width: 2_000_000,
-      height: 2_000_000,
-    });
+    const canvas = rec.beginRecording();
     const fps = animation.fps();
     const duration = animation.duration();
     const currentFrame =
