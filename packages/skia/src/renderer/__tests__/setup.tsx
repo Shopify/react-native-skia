@@ -313,6 +313,15 @@ const serializeSkOjects = (obj: any): any => {
         tx: obj.tx,
         ty: obj.ty,
       };
+    } else if (obj.__typename__ === "SkottieAnimation") {
+      if (!obj.source) {
+        throw new Error("SkottieAnimation must have a source");
+      }
+      return {
+        __typename__: "SkottieAnimation",
+        source: obj.source,
+        assets: obj.assets,
+      };
     }
   } else if (obj && typeof obj === "object") {
     const result = Object.keys(obj).reduce((acc, key) => {

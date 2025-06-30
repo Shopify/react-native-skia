@@ -17,7 +17,7 @@ public:
     auto fontMgr = JsiSkFontMgrFactory::getFontMgr(getContext());
     auto json = arguments[0].asString(runtime).utf8(runtime);
     SkottieAssetProvider::AssetMap assets;
-    if (count > 1) {
+    if (count > 1 && arguments[1].isObject()) {
       auto jsAssetMap = arguments[1].asObject(runtime);
 
       // Convert JS object to C++ AssetMap

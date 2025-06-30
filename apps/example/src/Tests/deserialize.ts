@@ -88,6 +88,8 @@ const parseProp = (value: any, assets: Assets): any => {
       return Skia.Font(asset, value.size);
     } else if (value.__typename__ === "RSXform") {
       return Skia.RSXform(value.scos, value.ssin, value.tx, value.ty);
+    } else if (value.__typename__ === "SkottieAnimation") {
+      return Skia.Skottie.Make(value.source);
     } else if (value.__typename__ === "Function") {
       // eslint-disable-next-line no-eval
       return eval(
