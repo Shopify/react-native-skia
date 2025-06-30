@@ -5,8 +5,7 @@
  * found in the LICENSE file.
  */
 
-#ifndef SkottieUtils_DEFINED
-#define SkottieUtils_DEFINED
+#pragma once
 
 #include "include/core/SkRefCnt.h"
 #include "include/core/SkString.h"
@@ -171,4 +170,3 @@ private:
 
 } // namespace RNSkia
 
-#endif // SkottieUtils_DEFINED
