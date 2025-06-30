@@ -106,9 +106,23 @@ private:
 CustomPropertyManager::CustomPropertyManager(Mode mode, const char *prefix)
     : fMode(mode), fPrefix(prefix ? prefix : "$"),
       fPropertyInterceptor(sk_make_sp<PropertyInterceptor>(this)),
-      fMarkerInterceptor(sk_make_sp<MarkerInterceptor>(this)) {}
+      fMarkerInterceptor(sk_make_sp<MarkerInterceptor>(this)) {
+  // there is a bug in the ref counting here
+  fPropertyInterceptor->ref();
+  fMarkerInterceptor->ref();
+}
 
-CustomPropertyManager::~CustomPropertyManager() = default;
+CustomPropertyManager::~CustomPropertyManager() {
+  // there is a bug in the ref counting here
+  // ref count 0 but the raw pointer still exists
+  auto rawptr1 = fPropertyInterceptor.get();
+  fPropertyInterceptor = nullptr;
+  delete rawptr1;
+
+  auto rawptr2 = fMarkerInterceptor.get();
+  fMarkerInterceptor = nullptr;
+  delete rawptr2;
+}
 
 std::string CustomPropertyManager::acceptKey(const char *name,
                                              const char *suffix) const {
@@ -316,4 +330,4 @@ ExternalAnimationPrecompInterceptor::onLoadPrecomp(const char[],
               : nullptr;
 }
 
-} // namespace skottie_utils
+} // namespace RNSkia

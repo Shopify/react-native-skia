@@ -114,8 +114,8 @@ class ManagedAnimation {
 public:
   ManagedAnimation(std::string json, SkottieAssetProvider::AssetMap assets,
                    sk_sp<SkFontMgr> fontMgr) {
-    // TODO: this is leaking!
-    _propManager = new CustomPropertyManager(CustomPropertyManager::Mode::kCollapseProperties, "");
+    _propManager = std::make_unique<CustomPropertyManager>(
+        CustomPropertyManager::Mode::kCollapseProperties, "");
     _resourceProvider =
         SkottieAssetProvider::Make(std::move(assets), std::move(fontMgr));
     // There is a bug in the ref counting that we address here.
@@ -123,7 +123,6 @@ public:
     auto builder = std::make_shared<skottie::Animation::Builder>();
     builder->setResourceProvider(_resourceProvider);
     builder->setPropertyObserver(_propManager->getPropertyObserver());
-    // ExternalAnimationPrecompInterceptor
     _animation = builder->make(json.c_str(), json.size());
     _slotManager = builder->getSlotManager();
   }
@@ -131,9 +130,10 @@ public:
   ~ManagedAnimation() {
     _animation = nullptr;
     _slotManager = nullptr;
-    // Here the ref count is 0 but it's because of a bug, we need to still delete the resource provider
+    // Here the ref count is 0 but it's because of a bug, we need to still
+    // delete the resource provider
     if (_resourceProvider) {
-      auto* raw_ptr = _resourceProvider.get();
+      auto *raw_ptr = _resourceProvider.get();
       _resourceProvider = nullptr;
       delete raw_ptr; // Direct delete - bypasses ref counting entirely
     }
@@ -143,7 +143,7 @@ public:
   sk_sp<skottie::Animation> _animation = nullptr;
   sk_sp<skottie::SlotManager> _slotManager = nullptr;
   sk_sp<SkottieAssetProvider> _resourceProvider = nullptr;
-  CustomPropertyManager *_propManager = nullptr;
+  std::unique_ptr<CustomPropertyManager> _propManager = nullptr;
 };
 
 class JsiSkSkottie : public JsiSkWrappingSharedPtrHostObject<ManagedAnimation> {

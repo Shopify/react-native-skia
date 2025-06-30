@@ -23,7 +23,7 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 
 inline bool hasOptionalArgument(const jsi::Value *arguments, size_t count,
-                               size_t index) {
+                                size_t index) {
   return (index < count && !arguments[index].isNull() &&
           !arguments[index].isUndefined());
 }
@@ -60,9 +60,10 @@ public:
       cropRect = *JsiSkRect::fromValue(runtime, arguments[2]);
     }
     return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImageFilter>(
-                     getContext(), SkImageFilters::ColorFilter(
-                                       std::move(cf), std::move(input), cropRect)));
+        runtime,
+        std::make_shared<JsiSkImageFilter>(
+            getContext(), SkImageFilters::ColorFilter(
+                              std::move(cf), std::move(input), cropRect)));
   }
 
   JSI_HOST_FUNCTION(MakeOffset) {
@@ -77,9 +78,9 @@ public:
       cropRect = *JsiSkRect::fromValue(runtime, arguments[3]);
     }
     return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkImageFilter>(
-            getContext(), SkImageFilters::Offset(x, y, std::move(input), cropRect)));
+        runtime, std::make_shared<JsiSkImageFilter>(
+                     getContext(),
+                     SkImageFilters::Offset(x, y, std::move(input), cropRect)));
   }
 
   JSI_HOST_FUNCTION(MakeDisplacementMap) {
@@ -110,7 +111,7 @@ public:
     SkImageFilters::Dither dither = SkImageFilters::Dither::kNo;
     if (hasOptionalArgument(arguments, count, 1)) {
       dither = arguments[1].asBool() ? SkImageFilters::Dither::kYes
-                                   : SkImageFilters::Dither::kNo;
+                                     : SkImageFilters::Dither::kNo;
     }
     SkImageFilters::CropRect cropRect = {};
     if (hasOptionalArgument(arguments, count, 2)) {
@@ -118,7 +119,8 @@ public:
     }
     return jsi::Object::createFromHostObject(
         runtime, std::make_shared<JsiSkImageFilter>(
-                     getContext(), SkImageFilters::Shader(std::move(shader), dither, cropRect)));
+                     getContext(), SkImageFilters::Shader(std::move(shader),
+                                                          dither, cropRect)));
   }
 
   JSI_HOST_FUNCTION(MakeCompose) {
@@ -501,7 +503,7 @@ public:
 
   JSI_HOST_FUNCTION(MakeMatrixConvolution) {
     SkISize kernelSize =
-            SkISize::Make(arguments[0].asNumber(), arguments[1].asNumber());
+        SkISize::Make(arguments[0].asNumber(), arguments[1].asNumber());
     std::vector<float> kernel;
     auto kernelArray = arguments[2].asObject(runtime).asArray(runtime);
     auto size = kernelArray.size(runtime);

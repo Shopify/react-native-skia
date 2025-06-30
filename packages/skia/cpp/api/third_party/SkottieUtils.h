@@ -169,6 +169,6 @@ private:
   const SkString fPrefix;
 };
 
-} // namespace skottie_utils
+} // namespace RNSkia
 
 #endif // SkottieUtils_DEFINED
