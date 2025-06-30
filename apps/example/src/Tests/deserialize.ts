@@ -93,10 +93,10 @@ const parseProp = (value: any, assets: Assets): any => {
       const assets: any = {};
       if (value.assets) {
         Object.keys(value.assets).forEach((key) => {
-          assets[key] = new Float32Array(value.assets[key]);
+          assets[key] = Skia.Data.fromBytes(new Uint8Array(value.assets[key]));
         });
       }
-      return Skia.Skottie.Make(value.source, value);
+      return Skia.Skottie.Make(value.source, assets);
     } else if (value.__typename__ === "Function") {
       // eslint-disable-next-line no-eval
       return eval(

@@ -18,9 +18,11 @@ describe("Skottie", () => {
     const { Skia } = importSkia();
     const source = JSON.stringify(legoLoaderJSON);
     const legoAnimation = Skia.Skottie.Make(source);
+    // THIS IS FOR INTERNAL TESTING ONLY
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     legoAnimation.source = source;
+    // END OF INTERNAL TESTING ONLY
     const img = await surface.draw(
       <Group transform={[{ scale: 0.5 }]}>
         <Skottie animation={legoAnimation} frame={41} />
@@ -46,9 +48,11 @@ describe("Skottie", () => {
     const { Skia } = importSkia();
     const source = JSON.stringify(confettiJSON);
     const confettiAnimation = Skia.Skottie.Make(source);
+    // THIS IS FOR INTERNAL TESTING ONLY
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     confettiAnimation.source = source;
+    // END OF INTERNAL TESTING ONLY
     const img = await surface.draw(
       <Group transform={[{ scale: 0.8 }]}>
         <Skottie animation={confettiAnimation} frame={30} />
@@ -68,12 +72,17 @@ describe("Skottie", () => {
     };
     const source = JSON.stringify(basicSlotsJSON);
     const animation = Skia.Skottie.Make(source, assets);
+    // THIS IS FOR INTERNAL TESTING ONLY
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     animation.source = source;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    animation.assets = assets;
+    animation.assets = {
+      NotoSerif: Array.from(dataAssets.NotoSansSCRegular),
+      "img_0.png": Array.from(dataAssets.img_0),
+    };
+    // END OF INTERNAL TESTING ONLY
     const img = await surface.draw(
       <Group transform={[{ scale: 0.6 }]}>
         <Skottie animation={animation} frame={0} />
