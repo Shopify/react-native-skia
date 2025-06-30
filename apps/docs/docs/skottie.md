@@ -6,6 +6,7 @@ slug: /skottie
 ---
 
 Skottie is a Lottie animation renderer built on Skia. It allows you to load and render After Effects animations exported via Bodymovin/Lottie in React Native Skia.
+It provides a powerful way to integrate After Effects animations into your React Native Skia applications with full programmatic control over animation properties.
 
 ## Rendering Animations
 
@@ -76,6 +77,9 @@ import { Skia, Canvas } from "@shopify/react-native-skia";
 const animation = {} as any;
 // ---cut---
 const surface = Skia.Surface.MakeOffscreen(800, 600);
+if (!surface) {
+  throw new Error("Failed to create surface");
+}
 const canvas = surface.getCanvas();
 
 // Seek to a specific frame
@@ -105,15 +109,15 @@ const animation = Skia.Skottie.Make(JSON.stringify(legoAnimationJSON));
 Many Lottie animations include external assets like fonts and images. You can provide these when creating the animation:
 
 ```tsx twoslash
-import { Skia, Data } from "@shopify/react-native-skia";
+import { Skia } from "@shopify/react-native-skia";
 
 const basicSlotsJSON = require("./assets/basic_slots.json");
 const notoSerifFont = require("./assets/NotoSerif.ttf");
 const image = require("./assets/img_0.png");
 
-const assets = {
-  NotoSerif: Data.fromURI(notoSerifFont),
-  "img_0.png": Data.fromURI(image),
+const assets: Record<string, SkData> = {
+  NotoSerif: Skia.Data.fromURI(notoSerifFont),
+  "img_0.png": Skia.Data.fromURI(image),
 };
 
 const animation = Skia.Skottie.Make(JSON.stringify(basicSlotsJSON), assets);
@@ -181,6 +185,7 @@ Beyond slots, Skottie provides powerful introspection capabilities that allow yo
 ### Color Properties
 
 ```tsx twoslash
+import { Skia } from "@shopify/react-native-skia";
 const animation = {} as any;
 // ---cut---
 // Get all color properties
@@ -246,17 +251,22 @@ import {
   Canvas, 
   Skia, 
   useCanvasRef,
-  Image
+  Image,
+  SkSkottieAnimation,
+  SkImage
 } from "@shopify/react-native-skia";
 
 const animationJSON = require("./assets/fingerprint.json");
 
 const SkottiePlayer = () => {
-  const [animation, setAnimation] = useState(null);
-  const [image, setImage] = useState(null);
+  const [animation, setAnimation] = useState<SkSkottieAnimation | null>(null);
+  const [image, setImage] = useState<SkImage | null>(null);
   
   useEffect(() => {
     const skottieAnimation = Skia.Skottie.Make(JSON.stringify(animationJSON));
+    if (!skottieAnimation) {
+      throw new Error("Failed to create animation");
+    }
     setAnimation(skottieAnimation);
     
     // Get animation properties
@@ -269,6 +279,9 @@ const SkottiePlayer = () => {
     // Render a frame
     const size = skottieAnimation.size();
     const surface = Skia.Surface.MakeOffscreen(size.width, size.height);
+    if (!surface) {
+      throw new Error("Failed to create surface");
+    }
     const canvas = surface.getCanvas();
     
     skottieAnimation.seekFrame(120);
@@ -295,23 +308,3 @@ const SkottiePlayer = () => {
   );
 };
 ```
-
-## Best Practices
-
-1. **Asset Management**: Ensure all required fonts and images are properly bundled with your animation
-2. **Performance**: Cache animations when possible, as parsing JSON can be expensive
-3. **Frame Management**: Use `seekFrame()` to control animation playback programmatically
-4. **Property Updates**: Batch property changes before rendering for better performance
-5. **Memory Management**: Dispose of surfaces and animations when no longer needed
-
-## Supported Features
-
-- ✅ Basic animation playback
-- ✅ Color slot manipulation
-- ✅ Text property modification  
-- ✅ Asset loading (fonts, images)
-- ✅ Property introspection
-- ✅ Transform properties
-- ✅ Opacity controls
-
-Skottie provides a powerful way to integrate After Effects animations into your React Native Skia applications with full programmatic control over animation properties.
