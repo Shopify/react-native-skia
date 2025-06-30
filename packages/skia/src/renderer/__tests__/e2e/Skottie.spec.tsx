@@ -1,6 +1,9 @@
 /* eslint-disable camelcase */
+import React from "react";
+
 import { checkImage, docPath } from "../../../__tests__/setup";
 import { dataAssets, importSkia, surface } from "../setup";
+import { Group, Skottie } from "../../components";
 
 const legoLoaderJSON = require("./setup/skottie/lego_loader.json");
 const drinksJSON = require("./setup/skottie/drinks.json");
@@ -11,6 +14,54 @@ const fingerprintJSON = require("./setup/skottie/fingerprint.json");
 const textLayerJSON = require("./setup/skottie/text-layer.json");
 
 describe("Skottie", () => {
+  it("Should render Skottie component with lego animation", async () => {
+    const { Skia } = importSkia();
+    const legoAnimation = Skia.Skottie.Make(JSON.stringify(legoLoaderJSON));
+    const img = await surface.draw(
+      <Group transform={[{ scale: 0.5 }]}>
+        <Skottie animation={legoAnimation} frame={41} />
+      </Group>
+    );
+    checkImage(img, docPath("skottie/skottie-component-lego.png"));
+  });
+  it("Should render Skottie component with drinks animation", async () => {
+    const { Skia } = importSkia();
+    const drinksAnimation = Skia.Skottie.Make(JSON.stringify(drinksJSON));
+    const img = await surface.draw(
+      <Group transform={[{ scale: 0.3 }]}>
+        <Skottie animation={drinksAnimation} frame={200} />
+      </Group>
+    );
+    checkImage(img, docPath("skottie/skottie-component-drinks.png"));
+  });
+  it("Should render Skottie component with confetti animation", async () => {
+    const { Skia } = importSkia();
+    const confettiAnimation = Skia.Skottie.Make(JSON.stringify(confettiJSON));
+    const img = await surface.draw(
+      <Group transform={[{ scale: 0.8 }]}>
+        <Skottie animation={confettiAnimation} frame={30} />
+      </Group>
+    );
+    checkImage(img, docPath("skottie/skottie-component-confetti.png"));
+  });
+  it("Should render Skottie component with basic slots animation", async () => {
+    const { Skia } = importSkia();
+    const assets = {
+      NotoSerif: Skia.Data.fromBytes(
+        new Uint8Array(Array.from(dataAssets.NotoSansSCRegular))
+      ),
+      "img_0.png": Skia.Data.fromBytes(
+        new Uint8Array(Array.from(dataAssets.img_0))
+      ),
+    };
+    const animation = Skia.Skottie.Make(JSON.stringify(basicSlotsJSON), assets);
+    const img = await surface.draw(
+      <Group transform={[{ scale: 0.6 }]}>
+        <Skottie animation={animation} frame={0} />
+      </Group>
+    );
+    checkImage(img, docPath("skottie/skottie-component-basic-slots.png"));
+  });
   it("Get durations", async () => {
     const { lego, drinks, confetti, onboarding } = await surface.eval(
       (Skia, ctx) => {
