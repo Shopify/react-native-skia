@@ -47,8 +47,6 @@ std::unique_ptr<SkCodec> DecodeImageData(sk_sp<SkData> data) {
 
 class SkottieAssetProvider : public skottie::ResourceProvider {
 public:
-  ~SkottieAssetProvider() override = default;
-
   using AssetMap = std::unordered_map<std::string, sk_sp<SkData>>;
 
   static sk_sp<SkottieAssetProvider> Make(AssetMap assets,
@@ -56,6 +54,8 @@ public:
     return sk_sp<SkottieAssetProvider>(
         new SkottieAssetProvider(std::move(assets), std::move(fontMgr)));
   }
+
+  ~SkottieAssetProvider() override = default;
 
   sk_sp<skottie::ImageAsset>
   loadImageAsset(const char[] /* path */, const char name[],
@@ -119,7 +119,7 @@ public:
         skottie_utils::CustomPropertyManager::Mode::kCollapseProperties, "");
     _resourceProvider =
         SkottieAssetProvider::Make(std::move(assets), std::move(fontMgr));
-    // TODO: this is leaking!
+    // There is a bug in the ref counting that we address here.
     _resourceProvider->ref();
     auto builder = std::make_shared<skottie::Animation::Builder>();
     builder->setResourceProvider(_resourceProvider);
@@ -127,6 +127,17 @@ public:
     // ExternalAnimationPrecompInterceptor
     _animation = builder->make(json.c_str(), json.size());
     _slotManager = builder->getSlotManager();
+  }
+
+  ~ManagedAnimation() {
+    _animation = nullptr;
+    _slotManager = nullptr;
+    // Here the ref count is 0 but it's because of a bug, we need to still delete the resource provider
+    if (_resourceProvider) {
+      auto* raw_ptr = _resourceProvider.get();
+      _resourceProvider = nullptr;
+      delete raw_ptr; // Direct delete - bypasses ref counting entirely
+    }
   }
 
 public:
