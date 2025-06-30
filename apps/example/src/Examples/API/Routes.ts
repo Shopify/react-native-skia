@@ -24,4 +24,5 @@ export type Routes = {
   IconsExample: undefined;
   Paragraphs: undefined;
   Paragraphs2: undefined;
+  Skottie: undefined;
 };

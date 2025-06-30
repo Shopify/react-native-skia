@@ -27,6 +27,7 @@ import { FontMgr } from "./FontMgr";
 import { AnimatedImages } from "./AnimatedImages";
 import { Paragraphs } from "./Paragraphs";
 import { Paragraphs2 } from "./Paragraphs2";
+import { Skottie } from "./Skottie";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
@@ -52,6 +53,13 @@ export const API = () => {
         component={Images}
         options={{
           title: "🏞 Images",
+        }}
+      />
+      <Stack.Screen
+        name="Skottie"
+        component={Skottie}
+        options={{
+          title: "🍭 Skottie",
         }}
       />
       <Stack.Screen

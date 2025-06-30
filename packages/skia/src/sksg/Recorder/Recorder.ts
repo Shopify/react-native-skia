@@ -26,6 +26,7 @@ import type {
   AtlasProps,
   BoxProps,
   BoxShadowProps,
+  SkottieProps,
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer";
 import { isSharedValue } from "../utils";
@@ -289,5 +290,9 @@ export class Recorder implements BaseRecorder {
 
   drawAtlas(props: AnimatedProps<AtlasProps>) {
     this.add({ type: CommandType.DrawAtlas, props });
+  }
+
+  drawSkottie(props: AnimatedProps<SkottieProps>) {
+    this.add({ type: CommandType.DrawSkottie, props });
   }
 }

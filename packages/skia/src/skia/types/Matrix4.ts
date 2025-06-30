@@ -495,10 +495,22 @@ const lookat = (eyeVec: Vec3, centerVec: Vec3, upVec: Vec3): Matrix4 => {
 
   // Build the look-at matrix directly
   const m: Matrix4 = [
-    s[0], uf[0], -f[0], eyeVec[0],
-    s[1], uf[1], -f[1], eyeVec[1], 
-    s[2], uf[2], -f[2], eyeVec[2],
-    0,    0,     0,     1
+    s[0],
+    uf[0],
+    -f[0],
+    eyeVec[0],
+    s[1],
+    uf[1],
+    -f[1],
+    eyeVec[1],
+    s[2],
+    uf[2],
+    -f[2],
+    eyeVec[2],
+    0,
+    0,
+    0,
+    1,
   ];
 
   return invert4(m);
@@ -532,7 +544,6 @@ const perspectiveMatrix = (
     1,
   ];
 };
-
 
 export interface CameraConfig {
   eye: Vec3;

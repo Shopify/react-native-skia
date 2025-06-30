@@ -310,6 +310,9 @@ const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
     case NodeType.Paragraph:
       recorder.drawParagraph(props);
       break;
+    case NodeType.Skottie:
+      recorder.drawSkottie(props);
+      break;
     case NodeType.Atlas:
       recorder.drawAtlas(props);
       break;

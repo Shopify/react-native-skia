@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import fs from "fs";
 import path from "path";
@@ -43,6 +44,12 @@ export let fonts: {
   DinMedium: SkFont;
 };
 
+export let dataAssets: {
+  NotoSansSCRegular: Uint8Array;
+  img_0: Uint8Array;
+  AvenirHeavy: Uint8Array;
+};
+
 beforeAll(async () => {
   await LoadSkiaWeb();
   const Skia = JsiSkApi(global.CanvasKit);
@@ -70,6 +77,13 @@ beforeAll(async () => {
   const skiaLogoPng = loadImage("skia/__tests__/assets/skia_logo.png");
   const skiaLogoJpeg = loadImage("skia/__tests__/assets/skia_logo_jpeg.jpg");
   const mask = loadImage("skia/__tests__/assets/mask.png");
+  dataAssets = {
+    AvenirHeavy: resolveFile("skia/__tests__/assets/Avenir-Heavy.ttf"),
+    NotoSansSCRegular: resolveFile(
+      "skia/__tests__/assets/NotoSansSC-Regular.otf"
+    ),
+    img_0: resolveFile("skia/__tests__/assets/oslo.jpg"),
+  };
   images = { oslo, skiaLogoPng, skiaLogoJpeg, mask };
   fonts = {
     RobotoMedium,
@@ -298,6 +312,15 @@ const serializeSkOjects = (obj: any): any => {
         ssin: obj.ssin,
         tx: obj.tx,
         ty: obj.ty,
+      };
+    } else if (obj.__typename__ === "SkottieAnimation") {
+      if (!obj.source) {
+        throw new Error("SkottieAnimation must have a source");
+      }
+      return {
+        __typename__: "SkottieAnimation",
+        source: obj.source,
+        assets: obj.assets,
       };
     }
   } else if (obj && typeof obj === "object") {

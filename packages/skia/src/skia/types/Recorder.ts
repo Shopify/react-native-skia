@@ -26,6 +26,7 @@ import type {
   TextBlobProps,
   TextPathProps,
   VerticesProps,
+  SkottieProps,
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer/processors/Animations/Animations";
 
@@ -82,6 +83,7 @@ export interface BaseRecorder {
   drawPicture(props: AnimatedProps<PictureProps>): void;
   drawImageSVG(props: AnimatedProps<ImageSVGProps>): void;
   drawParagraph(props: AnimatedProps<ParagraphProps>): void;
+  drawSkottie(props: AnimatedProps<SkottieProps>): void;
   drawAtlas(props: AnimatedProps<AtlasProps>): void;
 }
 

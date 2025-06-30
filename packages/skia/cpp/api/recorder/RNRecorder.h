@@ -269,6 +269,10 @@ public:
     commands.push_back(std::make_unique<AtlasCmd>(runtime, props, variables));
   }
 
+  void drawSkottie(jsi::Runtime &runtime, const jsi::Object &props) {
+    commands.push_back(std::make_unique<SkottieCmd>(runtime, props, variables));
+  }
+
   void materializePaint() {
     commands.push_back(
         std::make_unique<Command>(CommandType::MaterializePaint));
@@ -614,6 +618,11 @@ public:
           case CommandType::DrawAtlas: {
             auto *atlasCmd = static_cast<AtlasCmd *>(cmd.get());
             atlasCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawSkottie: {
+            auto *skottieCmd = static_cast<SkottieCmd *>(cmd.get());
+            skottieCmd->draw(ctx);
             break;
           }
           }

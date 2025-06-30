@@ -262,6 +262,11 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(drawSkottie) {
+    getObject()->drawSkottie(runtime, arguments[0].asObject(runtime));
+    return jsi::Value::undefined();
+  }
+
   EXPORT_JSI_API_TYPENAME(JsiRecorder, Recorder)
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiRecorder, saveGroup),
@@ -303,6 +308,7 @@ public:
                        JSI_EXPORT_FUNC(JsiRecorder, drawImageSVG),
                        JSI_EXPORT_FUNC(JsiRecorder, drawParagraph),
                        JSI_EXPORT_FUNC(JsiRecorder, drawAtlas),
+                       JSI_EXPORT_FUNC(JsiRecorder, drawSkottie),
                        JSI_EXPORT_FUNC(JsiRecorder, play),
                        JSI_EXPORT_FUNC(JsiRecorder, applyUpdates))
 

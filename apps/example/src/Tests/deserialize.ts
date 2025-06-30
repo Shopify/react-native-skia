@@ -88,6 +88,15 @@ const parseProp = (value: any, assets: Assets): any => {
       return Skia.Font(asset, value.size);
     } else if (value.__typename__ === "RSXform") {
       return Skia.RSXform(value.scos, value.ssin, value.tx, value.ty);
+    } else if (value.__typename__ === "SkottieAnimation") {
+      // eslint-disable-next-line @typescript-eslint/no-shadow
+      const assets: any = {};
+      if (value.assets) {
+        Object.keys(value.assets).forEach((key) => {
+          assets[key] = Skia.Data.fromBytes(new Uint8Array(value.assets[key]));
+        });
+      }
+      return Skia.Skottie.Make(value.source, assets);
     } else if (value.__typename__ === "Function") {
       // eslint-disable-next-line no-eval
       return eval(
