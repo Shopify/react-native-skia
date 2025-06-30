@@ -202,6 +202,7 @@ export const configurations = {
       "libskottie.a",
       "libsksg.a",
       "libpathops.a",
+      "libjsonreader.a",
       ...ParagraphOutputsAndroid,
     ],
   },

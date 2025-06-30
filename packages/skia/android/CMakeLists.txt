@@ -61,6 +61,7 @@ set (SKIA_SKUNICODE_ICU_LIB "skunicode_icu")
 set (SKIA_SKOTTIE_LIB "skottie")
 set (SKIA_SKSG_LIB "sksg")
 set (SKIA_PATHOPS_LIB "pathops")
+set (SKIA_JSONREADER_LIB "jsonreader")
 
 
 # Clear some variables
@@ -181,6 +182,9 @@ set_property(TARGET skunicode_icu PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/
 
 add_library(pathops STATIC IMPORTED)
 set_property(TARGET pathops PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libpathops.a")
+
+add_library(jsonreader STATIC IMPORTED)
+set_property(TARGET jsonreader PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libjsonreader.a")
 
 find_library(
         LOG_LIB
@@ -311,6 +315,7 @@ if(${REACT_NATIVE_VERSION} GREATER_EQUAL 76)
         ${SKIA_SKOTTIE_LIB}
         ${SKIA_SKSG_LIB}
         ${SKIA_PATHOPS_LIB}
+        ${SKIA_JSONREADER_LIB}
         ${SKIA_LIB}
         -ljnigraphics
         -lGLESv2
@@ -334,6 +339,7 @@ else()
         ${SKIA_SKOTTIE_LIB}
         ${SKIA_SKSG_LIB}
         ${SKIA_PATHOPS_LIB}
+        ${SKIA_JSONREADER_LIB}
         ${SKIA_LIB}
         -ljnigraphics
         -lGLESv2
