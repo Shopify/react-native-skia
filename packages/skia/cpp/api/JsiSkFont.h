@@ -36,7 +36,7 @@ public:
     std::vector<SkScalar> widthPtrs;
     widthPtrs.resize(glyphsSize);
 
-    glyphs.reserve(glyphsSize);
+    glyphs.reserve(glyphsSize)	;
     for (int i = 0; i < glyphsSize; i++) {
       glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
     }
