@@ -11,7 +11,6 @@ import type {
   AtlasProps,
   CircleProps,
   DiffRectProps,
-  DrawingNodeProps,
   GlyphsProps,
   ImageProps,
   ImageSVGProps,
@@ -24,6 +23,7 @@ import type {
   PointsProps,
   RectProps,
   RoundedRectProps,
+  SkottieProps,
   TextBlobProps,
   TextPathProps,
   TextProps,
@@ -328,7 +328,11 @@ export const drawCircle = (ctx: DrawingContext, props: CircleProps) => {
   ctx.canvas.drawCircle(c.x, c.y, r, ctx.paint);
 };
 
-export const drawFill = (ctx: DrawingContext, _props: DrawingNodeProps) => {
+export const drawSkottie = (ctx: DrawingContext, props: SkottieProps) => {
   "worklet";
-  ctx.canvas.drawPaint(ctx.paint);
+  const { animation, frame } = props;
+  if (animation) {
+    props.animation.seekFrame(frame);
+    props.animation.render(ctx.canvas);
+  }
 };

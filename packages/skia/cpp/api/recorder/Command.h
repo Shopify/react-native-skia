@@ -43,6 +43,7 @@ enum CommandType {
   DrawImageSVG,
   DrawParagraph,
   DrawAtlas,
+  DrawSkottie
 };
 
 class Command {

@@ -899,6 +899,29 @@ public:
   }
 };
 
+struct SkottieCmdProps {
+  sk_sp<skottie::Animation> animation;
+  float frame;
+};
+
+class SkottieCmd : public Command {
+private:
+  SkottieCmdProps props;
+
+public:
+  SkottieCmd(jsi::Runtime &runtime, const jsi::Object &object,
+             Variables &variables)
+      : Command(CommandType::DrawSkottie) {
+    convertProperty(runtime, object, "animation", props.animation, variables);
+    convertProperty(runtime, object, "frame", props.frame, variables);
+  }
+
+  void draw(DrawingCtx *ctx) {
+    props.animation->seekFrame(props.frame);
+    props.animation->render(ctx->canvas);
+  }
+};
+
 struct AtlasCmdProps {
   sk_sp<SkImage> image;
   std::vector<SkRect> sprites;

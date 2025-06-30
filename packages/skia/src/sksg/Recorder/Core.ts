@@ -21,6 +21,7 @@ import type {
   ParagraphProps,
   AtlasProps,
   DrawingNodeProps,
+  SkottieProps,
 } from "../../dom/types";
 
 // export enum CommandType {
@@ -106,6 +107,7 @@ export enum CommandType {
   DrawImageSVG,
   DrawParagraph,
   DrawAtlas,
+  DrawSkottie,
 }
 
 export type Command<T extends CommandType = CommandType> = {
@@ -165,6 +167,7 @@ interface Props {
   [CommandType.DrawImageSVG]: ImageSVGProps;
   [CommandType.DrawParagraph]: ParagraphProps;
   [CommandType.DrawAtlas]: AtlasProps;
+  [CommandType.DrawSkottie]: SkottieProps;
 }
 
 interface DrawCommand<T extends CommandType> extends Command<T> {

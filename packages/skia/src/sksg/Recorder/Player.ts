@@ -18,6 +18,7 @@ import {
   drawDiffRect,
   drawVertices,
   drawPatch,
+  drawSkottie,
 } from "./commands/Drawing";
 import { drawBox, isBoxCommand } from "./commands/Box";
 import {
@@ -157,6 +158,8 @@ function play(ctx: DrawingContext, _command: Command) {
         drawParagraph(ctx, command.props);
       } else if (isDrawCommand(command, CommandType.DrawAtlas)) {
         drawAtlas(ctx, command.props);
+      } else if (isDrawCommand(command, CommandType.DrawSkottie)) {
+        drawSkottie(ctx, command.props);
       } else {
         console.warn(`Unknown command: ${command.type}`);
       }
