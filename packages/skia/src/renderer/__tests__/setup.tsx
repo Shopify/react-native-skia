@@ -317,10 +317,17 @@ const serializeSkOjects = (obj: any): any => {
       if (!obj.source) {
         throw new Error("SkottieAnimation must have a source");
       }
+      // eslint-disable-next-line @typescript-eslint/no-shadow
+      const assets: any = {};
+      if (obj.assets) {
+        Object.keys(obj.assets).forEach((key) => {
+          assets[key] = Array.from(obj.assets[key]);
+        });
+      }
       return {
         __typename__: "SkottieAnimation",
         source: obj.source,
-        assets: obj.assets,
+        assets,
       };
     }
   } else if (obj && typeof obj === "object") {

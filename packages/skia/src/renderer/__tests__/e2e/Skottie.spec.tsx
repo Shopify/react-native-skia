@@ -56,31 +56,31 @@ describe("Skottie", () => {
     );
     checkImage(img, docPath("skottie/skottie-component-confetti.png"));
   });
-  // it("Should render Skottie component with basic slots animation", async () => {
-  //   const { Skia } = importSkia();
-  //   const assets = {
-  //     NotoSerif: Skia.Data.fromBytes(
-  //       new Uint8Array(Array.from(dataAssets.NotoSansSCRegular))
-  //     ),
-  //     "img_0.png": Skia.Data.fromBytes(
-  //       new Uint8Array(Array.from(dataAssets.img_0))
-  //     ),
-  //   };
-  //   const source = JSON.stringify(basicSlotsJSON);
-  //   const animation = Skia.Skottie.Make(source, assets);
-  //   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //   // @ts-expect-error
-  //   animation.source = source;
-  //   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //   // @ts-expect-error
-  //   animation.assets = assets;
-  //   const img = await surface.draw(
-  //     <Group transform={[{ scale: 0.6 }]}>
-  //       <Skottie animation={animation} frame={0} />
-  //     </Group>
-  //   );
-  //   checkImage(img, docPath("skottie/skottie-component-basic-slots.png"));
-  // });
+  it("Should render Skottie component with basic slots animation", async () => {
+    const { Skia } = importSkia();
+    const assets = {
+      NotoSerif: Skia.Data.fromBytes(
+        new Uint8Array(Array.from(dataAssets.NotoSansSCRegular))
+      ),
+      "img_0.png": Skia.Data.fromBytes(
+        new Uint8Array(Array.from(dataAssets.img_0))
+      ),
+    };
+    const source = JSON.stringify(basicSlotsJSON);
+    const animation = Skia.Skottie.Make(source, assets);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    animation.source = source;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    animation.assets = assets;
+    const img = await surface.draw(
+      <Group transform={[{ scale: 0.6 }]}>
+        <Skottie animation={animation} frame={0} />
+      </Group>
+    );
+    checkImage(img, docPath("skottie/skottie-component-basic-slots.png"));
+  });
   it("Get durations", async () => {
     const { lego, drinks, confetti, onboarding } = await surface.eval(
       (Skia, ctx) => {
