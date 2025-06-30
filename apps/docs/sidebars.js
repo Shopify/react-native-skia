@@ -69,6 +69,11 @@ const sidebars = {
       id: "video",
     },
     {
+      type: "doc",
+      label: "Skottie",
+      id: "skottie",
+    },
+    {
       collapsed: true,
       type: "category",
       label: "Text",
