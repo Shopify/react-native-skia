@@ -434,9 +434,9 @@ sk_sp<SkSVGDOM> getPropertyValue(jsi::Runtime &runtime,
       "Expected SkSvgDom object or null for the svg property.");
 }
 
-template<>
+template <>
 sk_sp<skottie::Animation> getPropertyValue(jsi::Runtime &runtime,
-                                 const jsi::Value &value) {
+                                           const jsi::Value &value) {
   if (value.isObject() && value.asObject(runtime).isHostObject(runtime)) {
     auto ptr = std::dynamic_pointer_cast<JsiSkSkottie>(
         value.asObject(runtime).asHostObject(runtime));

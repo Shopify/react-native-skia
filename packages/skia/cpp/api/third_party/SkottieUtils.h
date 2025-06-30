@@ -5,8 +5,7 @@
  * found in the LICENSE file.
  */
 
-#ifndef SkottieUtils_DEFINED
-#define SkottieUtils_DEFINED
+#pragma once
 
 #include "include/core/SkRefCnt.h"
 #include "include/core/SkString.h"
@@ -22,20 +21,20 @@
 struct SkSize;
 
 namespace skottie {
-class MarkerObserver;
+    class MarkerObserver;
 
-void PropertyObserver::onColorProperty(
+inline void PropertyObserver::onColorProperty(
     const char node_name[], const LazyHandle<ColorPropertyHandle> &) {}
 
-void PropertyObserver::onOpacityProperty(
+inline void PropertyObserver::onOpacityProperty(
     const char node_name[], const LazyHandle<OpacityPropertyHandle> &) {}
-void PropertyObserver::onTextProperty(const char node_name[],
+inline void PropertyObserver::onTextProperty(const char node_name[],
                                       const LazyHandle<TextPropertyHandle> &) {}
-void PropertyObserver::onTransformProperty(
+inline void PropertyObserver::onTransformProperty(
     const char node_name[], const LazyHandle<TransformPropertyHandle> &) {}
-void PropertyObserver::onEnterNode(const char node_name[], NodeType node_type) {
+inline void PropertyObserver::onEnterNode(const char node_name[], NodeType node_type) {
 }
-void PropertyObserver::onLeavingNode(const char node_name[],
+inline void PropertyObserver::onLeavingNode(const char node_name[],
                                      NodeType node_type) {}
 
 } // namespace skottie
@@ -171,4 +170,3 @@ private:
 
 } // namespace RNSkia
 
-#endif // SkottieUtils_DEFINED

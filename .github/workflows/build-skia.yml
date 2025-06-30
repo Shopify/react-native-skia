@@ -51,6 +51,7 @@ jobs:
             ./externals/skia/out/android/arm/libskunicode_core.a
             ./externals/skia/out/android/arm/libskunicode_icu.a
             ./externals/skia/out/android/arm/libpathops.a
+            ./externals/skia/out/android/arm/libjsonreader.a
 
       - name: Upload artifacts - Android arm64
         if: github.ref == 'refs/heads/main'
@@ -67,6 +68,7 @@ jobs:
             ./externals/skia/out/android/arm64/libskunicode_core.a
             ./externals/skia/out/android/arm64/libskunicode_icu.a
             ./externals/skia/out/android/arm64/libpathops.a
+            ./externals/skia/out/android/arm64/libjsonreader.a
       - name: Upload artifacts - Android x86
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -82,6 +84,7 @@ jobs:
             ./externals/skia/out/android/x86/libskunicode_core.a
             ./externals/skia/out/android/x86/libskunicode_icu.a
             ./externals/skia/out/android/x86/libpathops.a
+            ./externals/skia/out/android/x86/libjsonreader.a
       - name: Upload artifacts - Android x64
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -97,6 +100,7 @@ jobs:
             ./externals/skia/out/android/x64/libskunicode_core.a
             ./externals/skia/out/android/x64/libskunicode_icu.a
             ./externals/skia/out/android/x64/libpathops.a
+            ./externals/skia/out/android/x64/libjsonreader.a
       - name: Upload artifacts - Apple xcframeworks
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

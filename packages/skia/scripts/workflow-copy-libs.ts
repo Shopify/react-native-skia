@@ -29,6 +29,7 @@ const androidFiles = [
   "libskunicode_core.a",
   "libskunicode_icu.a",
   "libpathops.a",
+  "libjsonreader.a",
 ];
 const appleFiles = [
   "libskia.xcframework",
