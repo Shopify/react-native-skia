@@ -19,7 +19,7 @@
 
 class SkCanvas;
 
-namespace skottie_utils {
+namespace RNSkia {
 
 class CustomPropertyManager::PropertyInterceptor final
     : public skottie::PropertyObserver {

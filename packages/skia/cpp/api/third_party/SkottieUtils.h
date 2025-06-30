@@ -44,7 +44,7 @@ namespace skresources {
 class ResourceProvider;
 }
 
-namespace skottie_utils {
+namespace RNSkia {
 
 /**
  * CustomPropertyManager implements a property management scheme where

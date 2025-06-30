@@ -115,8 +115,7 @@ public:
   ManagedAnimation(std::string json, SkottieAssetProvider::AssetMap assets,
                    sk_sp<SkFontMgr> fontMgr) {
     // TODO: this is leaking!
-    _propManager = new skottie_utils::CustomPropertyManager(
-        skottie_utils::CustomPropertyManager::Mode::kCollapseProperties, "");
+    _propManager = new CustomPropertyManager(CustomPropertyManager::Mode::kCollapseProperties, "");
     _resourceProvider =
         SkottieAssetProvider::Make(std::move(assets), std::move(fontMgr));
     // There is a bug in the ref counting that we address here.
@@ -144,7 +143,7 @@ public:
   sk_sp<skottie::Animation> _animation = nullptr;
   sk_sp<skottie::SlotManager> _slotManager = nullptr;
   sk_sp<SkottieAssetProvider> _resourceProvider = nullptr;
-  skottie_utils::CustomPropertyManager *_propManager = nullptr;
+  CustomPropertyManager *_propManager = nullptr;
 };
 
 class JsiSkSkottie : public JsiSkWrappingSharedPtrHostObject<ManagedAnimation> {
