@@ -28,9 +28,10 @@ public:
 
   ~Recorder() = default;
 
-  void savePaint(jsi::Runtime &runtime, const jsi::Object &props) {
+  void savePaint(jsi::Runtime &runtime, const jsi::Object &props,
+                 bool standalone) {
     commands.push_back(
-        std::make_unique<SavePaintCmd>(runtime, props, variables));
+        std::make_unique<SavePaintCmd>(runtime, props, variables, standalone));
   }
 
   void pushShader(jsi::Runtime &runtime, const std::string &nodeType,
@@ -268,6 +269,10 @@ public:
     commands.push_back(std::make_unique<AtlasCmd>(runtime, props, variables));
   }
 
+  void drawSkottie(jsi::Runtime &runtime, const jsi::Object &props) {
+    commands.push_back(std::make_unique<SkottieCmd>(runtime, props, variables));
+  }
+
   void materializePaint() {
     commands.push_back(
         std::make_unique<Command>(CommandType::MaterializePaint));
@@ -294,7 +299,7 @@ public:
   void play(DrawingCtx *ctx) {
     for (const auto &cmd : commands) {
       switch (cmd->type) {
-			  
+
       case Group: {
         // Do nothing here for now
         break;
@@ -613,6 +618,11 @@ public:
           case CommandType::DrawAtlas: {
             auto *atlasCmd = static_cast<AtlasCmd *>(cmd.get());
             atlasCmd->draw(ctx);
+            break;
+          }
+          case CommandType::DrawSkottie: {
+            auto *skottieCmd = static_cast<SkottieCmd *>(cmd.get());
+            skottieCmd->draw(ctx);
             break;
           }
           }

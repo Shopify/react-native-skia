@@ -49,8 +49,8 @@ end
 
 # Set preprocessor definitions based on GRAPHITE flag
 preprocessor_defs = use_graphite ? 
-  '$(inherited) SK_GRAPHITE=1 SK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API=1' : 
-  '$(inherited) SK_METAL=1 SK_GANESH=1 SK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API=1'
+  '$(inherited) SK_GRAPHITE=1 SK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API=1 SK_DISABLE_LEGACY_SHAPER_FACTORY=1' : 
+  '$(inherited) SK_METAL=1 SK_GANESH=1 SK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API=1 SK_DISABLE_LEGACY_SHAPER_FACTORY=1'
 
 # Define base frameworks
 base_frameworks = ['libs/apple/libskia.xcframework', 
@@ -58,7 +58,10 @@ base_frameworks = ['libs/apple/libskia.xcframework',
 'libs/apple/libskshaper.xcframework',
 'libs/apple/libskparagraph.xcframework',
 'libs/apple/libskunicode_core.xcframework',
-'libs/apple/libskunicode_libgrapheme.xcframework',]
+'libs/apple/libskunicode_libgrapheme.xcframework',
+'libs/apple/libskottie.xcframework',
+'libs/apple/libsksg.xcframework',
+'libs/apple/libpathops.xcframework',]
 
 Pod::Spec.new do |s|
   s.name         = "react-native-skia"

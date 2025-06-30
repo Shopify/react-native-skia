@@ -26,6 +26,7 @@ import type {
   TextBlobProps,
   TextPathProps,
   VerticesProps,
+  SkottieProps,
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer/processors/Animations/Animations";
 
@@ -34,7 +35,7 @@ import type { SkPicture } from "./Picture";
 export interface BaseRecorder {
   saveGroup(): void;
   restoreGroup(): void;
-  savePaint(props: AnimatedProps<PaintProps>): void;
+  savePaint(props: AnimatedProps<PaintProps>, standalone: boolean): void;
   restorePaint(): void;
   restorePaintDeclaration(): void;
   materializePaint(): void;
@@ -82,6 +83,7 @@ export interface BaseRecorder {
   drawPicture(props: AnimatedProps<PictureProps>): void;
   drawImageSVG(props: AnimatedProps<ImageSVGProps>): void;
   drawParagraph(props: AnimatedProps<ParagraphProps>): void;
+  drawSkottie(props: AnimatedProps<SkottieProps>): void;
   drawAtlas(props: AnimatedProps<AtlasProps>): void;
 }
 

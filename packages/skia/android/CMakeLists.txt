@@ -50,7 +50,7 @@ else()
     message("-- SK_GRAPHITE: OFF (Graphite symbols not found in libskia)")
 endif()
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSK_BUILD_FOR_ANDROID -DSK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_HAVE_MEMRCHR=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_MOBILE=1 -DON_ANDROID -DONANDROID")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSK_BUILD_FOR_ANDROID -DSK_DISABLE_LEGACY_SHAPER_FACTORY -DSK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_HAVE_MEMRCHR=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_MOBILE=1 -DON_ANDROID -DONANDROID")
 set (PACKAGE_NAME "rnskia")
 set (SKIA_LIB "skia")
 set (SKIA_SVG_LIB "svg")
@@ -58,6 +58,10 @@ set (SKIA_SKSHAPER_LIB "skshaper")
 set (SKIA_SKPARAGRAPH_LIB "skparagraph")
 set (SKIA_SKUNICODE_CORE_LIB "skunicode_core")
 set (SKIA_SKUNICODE_ICU_LIB "skunicode_icu")
+set (SKIA_SKOTTIE_LIB "skottie")
+set (SKIA_SKSG_LIB "sksg")
+set (SKIA_PATHOPS_LIB "pathops")
+set (SKIA_JSONREADER_LIB "jsonreader")
 
 
 # Clear some variables
@@ -120,6 +124,7 @@ add_library(
 
         "${PROJECT_SOURCE_DIR}/../cpp/api/third_party/CSSColorParser.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/api/third_party/base64.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/api/third_party/SkottieUtils.cpp"
         ${BACKEND_SOURCES}
 )
 
@@ -160,6 +165,12 @@ set_property(TARGET svg PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libsvg.a")
 add_library(skshaper STATIC IMPORTED)
 set_property(TARGET skshaper PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskshaper.a")
 
+add_library(skottie STATIC IMPORTED)
+set_property(TARGET skottie PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskottie.a")
+
+add_library(sksg STATIC IMPORTED)
+set_property(TARGET sksg PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libsksg.a")
+
 add_library(skparagraph STATIC IMPORTED)
 set_property(TARGET skparagraph PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskparagraph.a")
 
@@ -169,6 +180,11 @@ set_property(TARGET skunicode_core PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}
 add_library(skunicode_icu STATIC IMPORTED)
 set_property(TARGET skunicode_icu PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskunicode_icu.a")
 
+add_library(pathops STATIC IMPORTED)
+set_property(TARGET pathops PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libpathops.a")
+
+add_library(jsonreader STATIC IMPORTED)
+set_property(TARGET jsonreader PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libjsonreader.a")
 
 find_library(
         LOG_LIB
@@ -296,6 +312,10 @@ if(${REACT_NATIVE_VERSION} GREATER_EQUAL 76)
         ${SKIA_SKPARAGRAPH_LIB}
         ${SKIA_SKUNICODE_CORE_LIB}
         ${SKIA_SKUNICODE_ICU_LIB}
+        ${SKIA_SKOTTIE_LIB}
+        ${SKIA_SKSG_LIB}
+        ${SKIA_PATHOPS_LIB}
+        ${SKIA_JSONREADER_LIB}
         ${SKIA_LIB}
         -ljnigraphics
         -lGLESv2
@@ -316,6 +336,10 @@ else()
         ${SKIA_SKPARAGRAPH_LIB}
         ${SKIA_SKUNICODE_CORE_LIB}
         ${SKIA_SKUNICODE_ICU_LIB}
+        ${SKIA_SKOTTIE_LIB}
+        ${SKIA_SKSG_LIB}
+        ${SKIA_PATHOPS_LIB}
+        ${SKIA_JSONREADER_LIB}
         ${SKIA_LIB}
         -ljnigraphics
         -lGLESv2
@@ -334,4 +358,9 @@ else()
         -lGLESv2
         -lEGL
     )
+endif()
+
+# Enable Android 16kb native library alignment
+if(CMAKE_ANDROID_NDK_VERSION VERSION_LESS "27")
+    target_link_options(${PACKAGE_NAME} PRIVATE "-Wl,-z,max-page-size=16384")
 endif()

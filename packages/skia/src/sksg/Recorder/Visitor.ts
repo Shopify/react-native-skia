@@ -188,7 +188,7 @@ const pushMaskFilters = (recorder: BaseRecorder, maskFilters: Node<any>[]) => {
 
 const pushPaints = (recorder: BaseRecorder, paints: Node<any>[]) => {
   paints.forEach((paint) => {
-    recorder.savePaint(paint.props);
+    recorder.savePaint(paint.props, true);
     const { colorFilters, maskFilters, shaders, imageFilters, pathEffects } =
       sortNodeChildren(paint);
     pushColorFilters(recorder, colorFilters);
@@ -223,7 +223,7 @@ const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
     pathEffects.length > 0 ||
     shaders.length > 0;
   if (shouldPushPaint) {
-    recorder.savePaint(paint ?? {});
+    recorder.savePaint(paint ?? {}, false);
     pushColorFilters(recorder, colorFilters);
     pushImageFilters(recorder, imageFilters);
     pushMaskFilters(recorder, maskFilters);
@@ -309,6 +309,9 @@ const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
       break;
     case NodeType.Paragraph:
       recorder.drawParagraph(props);
+      break;
+    case NodeType.Skottie:
+      recorder.drawSkottie(props);
       break;
     case NodeType.Atlas:
       recorder.drawAtlas(props);

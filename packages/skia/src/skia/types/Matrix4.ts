@@ -1,7 +1,7 @@
 type Point = { x: number; y: number };
 type Vec2 = readonly [number, number];
-type Vec3 = readonly [number, number, number];
-type Vec4 = readonly [number, number, number, number];
+export type Vec3 = readonly [number, number, number];
+export type Vec4 = readonly [number, number, number, number];
 
 export type Matrix3 = readonly [
   number,
@@ -470,4 +470,110 @@ export const invert4 = (m: Matrix4): Matrix4 => {
     b23 * invDet,
     b33 * invDet,
   ] as Matrix4;
+};
+
+const vecSub = (a: Vec3, b: Vec3): Vec3 => {
+  "worklet";
+  return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+};
+
+const vecCross = (a: Vec3, b: Vec3): Vec3 => {
+  "worklet";
+  return [
+    a[1] * b[2] - a[2] * b[1],
+    a[2] * b[0] - a[0] * b[2],
+    a[0] * b[1] - a[1] * b[0],
+  ];
+};
+
+const lookat = (eyeVec: Vec3, centerVec: Vec3, upVec: Vec3): Matrix4 => {
+  "worklet";
+  const f = normalizeVec(vecSub(centerVec, eyeVec));
+  const u = normalizeVec(upVec);
+  const s = normalizeVec(vecCross(f, u));
+  const uf = vecCross(s, f);
+
+  // Build the look-at matrix directly
+  const m: Matrix4 = [
+    s[0],
+    uf[0],
+    -f[0],
+    eyeVec[0],
+    s[1],
+    uf[1],
+    -f[1],
+    eyeVec[1],
+    s[2],
+    uf[2],
+    -f[2],
+    eyeVec[2],
+    0,
+    0,
+    0,
+    1,
+  ];
+
+  return invert4(m);
+};
+
+const perspectiveMatrix = (
+  near: number,
+  far: number,
+  angle: number
+): Matrix4 => {
+  "worklet";
+  const dInv = 1 / (far - near);
+  const halfAngle = angle / 2;
+  const cot = Math.cos(halfAngle) / Math.sin(halfAngle);
+  return [
+    cot,
+    0,
+    0,
+    0,
+    0,
+    cot,
+    0,
+    0,
+    0,
+    0,
+    (far + near) * dInv,
+    2 * far * near * dInv,
+    0,
+    0,
+    -1,
+    1,
+  ];
+};
+
+export interface CameraConfig {
+  eye: Vec3;
+  coa: Vec3;
+  up: Vec3;
+  near: number;
+  far: number;
+  angle: number;
+}
+
+export const setupCamera = (
+  area: Vec4,
+  zscale: number,
+  cam: CameraConfig
+): Matrix4 => {
+  "worklet";
+  const camera = lookat(cam.eye, cam.coa, cam.up);
+  const p = perspectiveMatrix(cam.near, cam.far, cam.angle);
+  const center: Vec3 = [(area[0] + area[2]) / 2, (area[1] + area[3]) / 2, 0];
+  const viewScale: Vec3 = [
+    (area[2] - area[0]) / 2,
+    (area[3] - area[1]) / 2,
+    zscale,
+  ];
+  const viewport = multiply4(
+    translate(center[0], center[1], center[2]),
+    scale(viewScale[0], viewScale[1], viewScale[2])
+  );
+  return multiply4(
+    multiply4(viewport, p),
+    multiply4(camera, invert4(viewport))
+  );
 };

@@ -51,6 +51,7 @@ import type {
   ChildrenProps,
   MorphologyImageFilterProps,
   BlendProps,
+  SkottieProps,
 } from "../dom/types";
 import type { SkiaProps } from "../renderer";
 
@@ -80,6 +81,7 @@ declare module "react" {
       skTextBlob: SkiaProps<TextBlobProps>;
       skGlyphs: SkiaProps<GlyphsProps>;
       skDiffRect: SkiaProps<DiffRectProps>;
+      skSkottie: SkiaProps<SkottieProps>;
       skPicture: SkiaProps<PictureProps>;
       skImageSVG: SkiaProps<ImageSVGProps>;
 

@@ -27,6 +27,7 @@ import type {
   ImageSVGProps,
   ParagraphProps,
   AtlasProps,
+  SkottieProps,
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer";
 import { isSharedValue } from "../utils";
@@ -69,9 +70,9 @@ export class ReanimatedRecorder implements BaseRecorder {
     this.recorder.restoreGroup();
   }
 
-  savePaint(props: AnimatedProps<PaintProps>): void {
+  savePaint(props: AnimatedProps<PaintProps>, standalone: boolean): void {
     this.processAnimationValues(props);
-    this.recorder.savePaint(props);
+    this.recorder.savePaint(props, standalone);
   }
 
   restorePaint(): void {
@@ -267,5 +268,10 @@ export class ReanimatedRecorder implements BaseRecorder {
   drawAtlas(props: AnimatedProps<AtlasProps>): void {
     this.processAnimationValues(props);
     this.recorder.drawAtlas(props);
+  }
+
+  drawSkottie(props: AnimatedProps<SkottieProps>): void {
+    this.processAnimationValues(props);
+    this.recorder.drawSkottie(props);
   }
 }

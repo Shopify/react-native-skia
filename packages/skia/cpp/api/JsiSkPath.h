@@ -24,9 +24,10 @@
 #include "include/core/SkStrokeRec.h"
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkTrimPathEffect.h"
-#include "include/pathops/SkPathOps.h"
 #include "include/utils/SkParsePath.h"
 #include "include/utils/SkTextUtils.h"
+
+#include "modules/pathops/include/SkPathOps.h"
 
 #pragma clang diagnostic pop
 
@@ -96,7 +97,8 @@ public:
           runtime, jsiPoints.getValueAtIndex(runtime, i).asObject(runtime));
       points.push_back(*point.get());
     }
-    getObject()->addPoly(points.data(), static_cast<int>(points.size()), close);
+    auto p = SkSpan(points.data(), points.size());
+    getObject()->addPoly(p, close);
     return thisValue.getObject(runtime);
   }
 
@@ -213,7 +215,8 @@ public:
     SkScalar off = arguments[1].asNumber();
     auto phase = arguments[2].asNumber();
     SkScalar intervals[] = {on, off};
-    auto pe = SkDashPathEffect::Make(intervals, 2, phase);
+    auto i = SkSpan(intervals, 2);
+    auto pe = SkDashPathEffect::Make(i, phase);
     if (!pe) {
       // TODO: SkDebugf("Invalid args to dash()\n");
       return jsi::Value(false);

@@ -18,6 +18,7 @@ import {
   drawDiffRect,
   drawVertices,
   drawPatch,
+  drawSkottie,
 } from "./commands/Drawing";
 import { drawBox, isBoxCommand } from "./commands/Box";
 import {
@@ -67,7 +68,13 @@ function play(ctx: DrawingContext, _command: Command) {
       ctx.paints.push(command.props.paint);
     } else {
       ctx.savePaint();
-      setPaintProperties(ctx.Skia, ctx, command.props);
+      setPaintProperties(
+        ctx.Skia,
+        ctx,
+        command.props,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (command as any).standalone
+      );
     }
   } else if (isCommand(command, CommandType.RestorePaint)) {
     ctx.restorePaint();
@@ -151,6 +158,8 @@ function play(ctx: DrawingContext, _command: Command) {
         drawParagraph(ctx, command.props);
       } else if (isDrawCommand(command, CommandType.DrawAtlas)) {
         drawAtlas(ctx, command.props);
+      } else if (isDrawCommand(command, CommandType.DrawSkottie)) {
+        drawSkottie(ctx, command.props);
       } else {
         console.warn(`Unknown command: ${command.type}`);
       }

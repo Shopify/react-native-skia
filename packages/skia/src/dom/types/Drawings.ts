@@ -18,6 +18,7 @@ import type {
   SkRSXform,
   SkColor,
   SamplingOptions,
+  SkSkottieAnimation,
 } from "../../skia/types";
 
 import type {
@@ -104,6 +105,11 @@ export interface ImageSVGProps extends DrawingNodeProps {
   width?: number;
   height?: number;
   rect?: SkRect;
+}
+
+export interface SkottieProps extends DrawingNodeProps {
+  animation: SkSkottieAnimation;
+  frame: number;
 }
 
 export interface PictureProps extends DrawingNodeProps {

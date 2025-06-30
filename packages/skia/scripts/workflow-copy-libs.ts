@@ -28,6 +28,8 @@ const androidFiles = [
   "libskparagraph.a",
   "libskunicode_core.a",
   "libskunicode_icu.a",
+  "libpathops.a",
+  "libjsonreader.a",
 ];
 const appleFiles = [
   "libskia.xcframework",
@@ -38,6 +40,7 @@ const appleFiles = [
   "libskparagraph.xcframework",
   "libskunicode_core.xcframework",
   "libskunicode_libgrapheme.xcframework",
+  "libpathops.xcframework",
 ];
 
 const copyFiles = (from: string, to: string, files: string[]) => {

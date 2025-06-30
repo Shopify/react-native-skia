@@ -246,15 +246,17 @@ public:
       glyphIds.reserve(numGlyphIds);
       auto ids = font->textToGlyphs(
           text.c_str(), text.length(), SkTextEncoding::kUTF8,
-          static_cast<SkGlyphID *>(glyphIds.data()), numGlyphIds);
+          SkSpan(static_cast<SkGlyphID *>(glyphIds.data()), numGlyphIds));
 
       // Get glyph widths
       int glyphsSize = static_cast<int>(ids);
       std::vector<SkScalar> widthPtrs;
       widthPtrs.resize(glyphsSize);
-      font->getWidthsBounds(glyphIds.data(), numGlyphIds,
-                            static_cast<SkScalar *>(widthPtrs.data()), nullptr,
-                            nullptr); // TODO: Should we use paint somehow here?
+      font->getWidthsBounds(
+          SkSpan(glyphIds.data(), numGlyphIds),
+          SkSpan(static_cast<SkScalar *>(widthPtrs.data()), widthPtrs.size()),
+          {},
+          nullptr); // TODO: Should we use paint somehow here?
 
       std::vector<SkRSXform> rsx;
       SkContourMeasureIter meas(path, false, 1);
@@ -295,9 +297,9 @@ public:
         rsx.push_back(SkRSXform::Make(tx, ty, adjustedX, adjustedY));
         dist += width / 2;
       }
-
-      auto blob = SkTextBlob::MakeFromRSXform(text.c_str(), text.length(),
-                                              rsx.data(), *font);
+      auto x = SkSpan(rsx.data(), rsx.size());
+      auto blob =
+          SkTextBlob::MakeFromRSXform(text.c_str(), text.length(), x, *font);
       ctx->canvas->drawTextBlob(blob, 0, 0, ctx->getPaint());
     }
   }
@@ -532,8 +534,8 @@ public:
   }
 
   void draw(DrawingCtx *ctx) {
-    ctx->canvas->drawPoints(props.mode, props.points.size(),
-                            props.points.data(), ctx->getPaint());
+    auto points = SkSpan(props.points.data(), props.points.size());
+    ctx->canvas->drawPoints(props.mode, points, ctx->getPaint());
   }
 };
 
@@ -780,10 +782,13 @@ public:
 
   void draw(DrawingCtx *ctx) {
     if (props.font.has_value()) {
-      ctx->canvas->drawGlyphs(
-          static_cast<int>(props.glyphs.glyphIds.size()),
-          props.glyphs.glyphIds.data(), props.glyphs.positions.data(),
-          SkPoint::Make(props.x, props.y), props.font.value(), ctx->getPaint());
+      auto glyphs =
+          SkSpan(props.glyphs.glyphIds.data(), props.glyphs.glyphIds.size());
+      auto positions =
+          SkSpan(props.glyphs.positions.data(), props.glyphs.positions.size());
+      ctx->canvas->drawGlyphs(glyphs, positions,
+                              SkPoint::Make(props.x, props.y),
+                              props.font.value(), ctx->getPaint());
     }
   }
 };
@@ -894,6 +899,29 @@ public:
   }
 };
 
+struct SkottieCmdProps {
+  sk_sp<skottie::Animation> animation;
+  float frame;
+};
+
+class SkottieCmd : public Command {
+private:
+  SkottieCmdProps props;
+
+public:
+  SkottieCmd(jsi::Runtime &runtime, const jsi::Object &object,
+             Variables &variables)
+      : Command(CommandType::DrawSkottie) {
+    convertProperty(runtime, object, "animation", props.animation, variables);
+    convertProperty(runtime, object, "frame", props.frame, variables);
+  }
+
+  void draw(DrawingCtx *ctx) {
+    props.animation->seekFrame(props.frame);
+    props.animation->render(ctx->canvas);
+  }
+};
+
 struct AtlasCmdProps {
   sk_sp<SkImage> image;
   std::vector<SkRect> sprites;
@@ -934,16 +962,17 @@ public:
             "colors array must have the same length as transforms/sprites");
       }
 
-      auto colors =
-          props.colors.has_value() ? props.colors.value().data() : nullptr;
+      auto colors = SkSpan(
+          props.colors.has_value() ? props.colors.value().data() : nullptr,
+          props.colors.has_value() ? props.colors.value().size() : 0);
       auto blendMode = props.blendMode.value_or(SkBlendMode::kDstOver);
       auto sampling =
           props.sampling.value_or(SkSamplingOptions(SkFilterMode::kLinear));
-
-      ctx->canvas->drawAtlas(props.image.get(), props.transforms.data(),
-                             props.sprites.data(), colors,
-                             props.transforms.size(), blendMode, sampling,
-                             nullptr, &(ctx->getPaint()));
+      auto transforms =
+          SkSpan(props.transforms.data(), props.transforms.size());
+      auto sprites = SkSpan(props.sprites.data(), props.sprites.size());
+      ctx->canvas->drawAtlas(props.image.get(), transforms, sprites, colors,
+                             blendMode, sampling, nullptr, &(ctx->getPaint()));
     }
   }
 };
