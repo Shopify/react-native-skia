@@ -110,15 +110,12 @@ Many Lottie animations include external assets like fonts and images. You can pr
 
 ```tsx twoslash
 import { Skia } from "@shopify/react-native-skia";
-import type { SkData } from "@shopify/react-native-skia";
 
 const basicSlotsJSON = require("./assets/basic_slots.json");
-const notoSerifFont = require("./assets/NotoSerif.ttf");
-const image = require("./assets/img_0.png");
 
-const assets: Record<string, SkData> = {
-  NotoSerif: Skia.Data.fromURI(notoSerifFont),
-  "img_0.png": Skia.Data.fromURI(image),
+const assets = {
+  NotoSerif: Skia.Data.fromBytes(new Uint8Array([])),
+  "img_0.png": Skia.Data.fromBytes(new Uint8Array([])),
 };
 
 const animation = Skia.Skottie.Make(JSON.stringify(basicSlotsJSON), assets);
