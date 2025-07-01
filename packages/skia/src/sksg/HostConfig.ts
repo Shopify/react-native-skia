@@ -181,10 +181,20 @@ export const sksgHostConfig: SkiaHostConfig = {
     _newChildSet
   ) {
     debug("cloneInstance");
+
+    // TODO: on RN Web we need to do clone newProps
+    // see https://github.com/Shopify/react-native-skia/pull/2998
+    if (
+      keepChildren &&
+      shallowEq(instance.props as object, newProps as object)
+    ) {
+      return instance;
+    }
+
     return {
       type: instance.type,
-      props: { ...newProps },
-      children: keepChildren ? [...instance.children] : [],
+      props: newProps,
+      children: keepChildren ? instance.children : [],
     };
   },
 
