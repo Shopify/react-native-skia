@@ -303,8 +303,8 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     return this.ref.isVolatile();
   }
 
-  addCircle(x: number, y: number, r: number) {
-    this.ref.addCircle(x, y, r);
+  addCircle(x: number, y: number, r: number, isCCW?: boolean) {
+    this.ref.addCircle(x, y, r, isCCW);
     return this;
   }
 
