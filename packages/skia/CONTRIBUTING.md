@@ -1,8 +1,10 @@
-# Contributing to React Native Skia Scene Graph
+# Contributing
+
+## Adding a component to the scene Graph
 
 This guide explains how to add new components to the React Native Skia scene graph system.
 
-## 🎯 Two Types of Components
+### 🎯 Two Types of Components
 
 **1. Drawing Commands** (like `Skottie`)
 - Draw content directly to the canvas
@@ -12,9 +14,9 @@ This guide explains how to add new components to the React Native Skia scene gra
 - Modify the rendering context for child components
 - Examples: ImageFilter, ColorFilter, MaskFilter, Shader
 
-## 📝 Step-by-Step Implementation
+### 📝 Step-by-Step Implementation
 
-### 1. **Define Component Props Interface**
+#### 1. **Define Component Props Interface**
 📁 `src/dom/types/Drawings.ts`
 
 ```typescript
@@ -27,7 +29,7 @@ export interface ImageFilterProps extends GroupProps {
 }
 ```
 
-### 2. **Add Node Type**
+#### 2. **Add Node Type**
 📁 `src/dom/types/NodeType.ts`
 
 ```typescript
@@ -37,7 +39,7 @@ export const enum NodeType {
 }
 ```
 
-### 3. **Create React Component**
+#### 3. **Create React Component**
 📁 `src/renderer/components/ImageFilter.tsx`
 
 ```typescript
@@ -50,14 +52,14 @@ export const ImageFilter = (props: SkiaProps<ImageFilterProps>) => {
 };
 ```
 
-### 4. **Export Component**
+#### 4. **Export Component**
 📁 `src/renderer/components/index.ts`
 
 ```typescript
 export * from "./ImageFilter";
 ```
 
-### 5. **Add Property Converter (if needed)**
+#### 5. **Add Property Converter (if needed)**
 📁 `cpp/api/recorder/Convertor.h`
 
 For components that use complex Skia types (like `SkImageFilter`, `skottie::Animation`, etc.), add a template specialization to convert JSI values to native types:
@@ -80,10 +82,10 @@ sk_sp<SkImageFilter> getPropertyValue(jsi::Runtime &runtime,
 }
 ```
 
-### 6. **Implement C++ Command**
+#### 6. **Implement C++ Command**
 📁 `cpp/api/recorder/ImageFilters.h`
 
-#### For Context Declarations (like ImageFilter)
+##### For Context Declarations (like ImageFilter)
 
 ```cpp
 struct ImageFilterCmdProps {
@@ -107,7 +109,7 @@ public:
 };
 ```
 
-#### For Drawing Commands (like Skottie)
+##### For Drawing Commands (like Skottie)
 
 ```cpp
 struct SkottieCmdProps {
@@ -134,7 +136,7 @@ public:
 };
 ```
 
-### 7. **Register in Recorder**
+#### 7. **Register in Recorder**
 📁 `cpp/api/recorder/RNRecorder.h`
 
 ```cpp
@@ -149,7 +151,7 @@ void pushImageFilter(jsi::Runtime &runtime, const std::string &nodeType,
 }
 ```
 
-### 8. **Add Execution Logic**
+#### 8. **Add Execution Logic**
 📁 `cpp/api/recorder/RNRecorder.h`
 
 ```cpp
@@ -165,7 +167,7 @@ case CommandType::PushImageFilter: {
 }
 ```
 
-### 9. **Update Node Classification (if needed)**
+#### 9. **Update Node Classification (if needed)**
 📁 `src/sksg/Node.ts`
 
 For new general component types (like `ImageFilter`, `ColorFilter`, etc.), add them to the appropriate classification function:
@@ -182,7 +184,7 @@ export const isImageFilter = (type: NodeType) => {
 };
 ```
 
-### 10. **Create Tests**
+#### 10. **Create Tests**
 📁 `src/renderer/__tests__/e2e/ImageFilter.spec.tsx`
 
 ```typescript
@@ -210,7 +212,7 @@ describe("ImageFilter", () => {
 });
 ```
 
-### 11. **Verify Implementation**
+#### 11. **Verify Implementation**
 
 ```bash
 # Check TypeScript compilation
@@ -223,21 +225,21 @@ mkdir -p apps/docs/static/img/your-component/
 yarn test src/renderer/__tests__/e2e/YourComponent.spec.tsx
 ```
 
-## 🔑 Key Differences
+### 🔑 Key Differences
 
-### Drawing Commands (Skottie-style)
+#### Drawing Commands (Skottie-style)
 - Use `CommandType::DrawSkottie` or similar
 - Implement `draw(DrawingCtx *ctx)` method
 - Render directly to `ctx->canvas`
 - Examples: Skottie, Circle, Rect, Text
 
-### Context Declarations (ImageFilter-style)
+#### Context Declarations (ImageFilter-style)
 - Use `CommandType::PushImageFilter` or similar
 - Implement `pushImageFilter(DrawingCtx *ctx)` method
 - Modify context state (e.g., `ctx->imageFilters.push_back()`)
 - Examples: ImageFilter, ColorFilter, MaskFilter, Shader
 
-## 📋 Checklist
+### 📋 Checklist
 
 When adding a new component, ensure you:
 
@@ -254,10 +256,10 @@ When adding a new component, ensure you:
 - [ ] Verify TypeScript compilation
 - [ ] Run and verify tests pass
 
-## 📚 Reference Implementation
+### 📚 Reference Implementation
 
 The ImageFilter component serves as a complete reference implementation for context declarations, while Skottie serves as a reference for drawing commands. Both follow the established patterns and can be used as templates for new components.
 
-## 🔄 Pattern Summary
+### 🔄 Pattern Summary
 
 This pattern allows you to add both types of components consistently to the React Native Skia scene graph system, maintaining clean separation between React component layer, type definitions, and native C++ implementation.
