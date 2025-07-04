@@ -322,6 +322,14 @@ const serializeSkOjects = (obj: any): any => {
         source: obj.source,
         assets: obj.assets,
       };
+    } else if (obj.__typename__ === "ImageFilter") {
+      if (!obj.source) {
+        throw new Error("ImageFilter must have a source");
+      }
+      return {
+        __typename__: "Function",
+        source: obj.source,
+      };
     }
   } else if (obj && typeof obj === "object") {
     const result = Object.keys(obj).reduce((acc, key) => {

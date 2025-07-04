@@ -142,6 +142,9 @@ public:
     } else if (nodeType == "skRuntimeShaderImageFilter") {
       commands.push_back(std::make_unique<RuntimeShaderImageFilterCmd>(
           runtime, props, variables));
+    } else if (nodeType == "skImageFilter") {
+      commands.push_back(
+          std::make_unique<ImageFilterCmd>(runtime, props, variables));
     }
   }
 
@@ -419,6 +422,9 @@ public:
           auto *runtimeShaderCmd =
               static_cast<RuntimeShaderImageFilterCmd *>(cmd.get());
           runtimeShaderCmd->pushImageFilter(ctx);
+        } else if (nodeType == "skImageFilter") {
+          auto *imageFilterCmd = static_cast<ImageFilterCmd *>(cmd.get());
+          imageFilterCmd->pushImageFilter(ctx);
         } else {
           throw std::runtime_error("Invalid image filter type: " + nodeType);
         }

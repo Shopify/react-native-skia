@@ -5,6 +5,7 @@ import type {
   BlurMaskFilterProps,
   DisplacementMapImageFilterProps,
   DropShadowImageFilterProps,
+  ImageFilterProps,
   MorphologyImageFilterProps,
   OffsetImageFilterProps,
   RuntimeShaderImageFilterProps,
@@ -176,6 +177,15 @@ const declareRuntimeShaderImageFilter = (
   ctx.imageFilters.push(imgf);
 };
 
+const declareImageFilter = (
+  ctx: DrawingContext,
+  props: ImageFilterProps
+) => {
+  "worklet";
+  const { imageFilter } = props;
+  ctx.imageFilters.push(imageFilter);
+};
+
 export const composeImageFilters = (ctx: DrawingContext) => {
   "worklet";
   if (ctx.imageFilters.length > 1) {
@@ -207,6 +217,7 @@ export const isPushImageFilter = (
 };
 
 type Props = {
+  [NodeType.ImageFilter]: ImageFilterProps;
   [NodeType.OffsetImageFilter]: OffsetImageFilterProps;
   [NodeType.DisplacementMapImageFilter]: DisplacementMapImageFilterProps;
   [NodeType.BlurImageFilter]: BlurImageFilterProps;
@@ -235,7 +246,9 @@ export const pushImageFilter = (
   command: Command<CommandType.PushImageFilter>
 ) => {
   "worklet";
-  if (isImageFilter(command, NodeType.BlurImageFilter)) {
+  if (isImageFilter(command, NodeType.ImageFilter)) {
+    declareImageFilter(ctx, command.props);
+  } else if (isImageFilter(command, NodeType.BlurImageFilter)) {
     declareBlurImageFilter(ctx, command.props);
   } else if (isImageFilter(command, NodeType.MorphologyImageFilter)) {
     declareMorphologyImageFilter(ctx, command.props);
