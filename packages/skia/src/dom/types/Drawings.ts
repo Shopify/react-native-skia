@@ -19,6 +19,7 @@ import type {
   SkColor,
   SamplingOptions,
   SkSkottieAnimation,
+  SkImageFilter,
 } from "../../skia/types";
 
 import type {
@@ -169,4 +170,8 @@ export interface BoxShadowProps {
   blur: number;
   color?: Color;
   inner?: boolean;
+}
+
+export interface ImageFilterProps extends GroupProps {
+  imageFilter: SkImageFilter;
 }

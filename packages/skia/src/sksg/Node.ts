@@ -34,6 +34,7 @@ export const isPathEffect = (type: NodeType) => {
 export const isImageFilter = (type: NodeType) => {
   "worklet";
   return (
+    type === NodeType.ImageFilter ||
     type === NodeType.OffsetImageFilter ||
     type === NodeType.DisplacementMapImageFilter ||
     type === NodeType.BlurImageFilter ||

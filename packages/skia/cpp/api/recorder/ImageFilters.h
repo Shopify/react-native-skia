@@ -289,4 +289,24 @@ public:
   }
 };
 
+struct ImageFilterCmdProps {
+  sk_sp<SkImageFilter> imageFilter;
+};
+
+class ImageFilterCmd : public Command {
+private:
+  ImageFilterCmdProps props;
+
+public:
+  ImageFilterCmd(jsi::Runtime &runtime, const jsi::Object &object,
+                 Variables &variables)
+      : Command(CommandType::PushImageFilter, "skImageFilter") {
+    convertProperty(runtime, object, "imageFilter", props.imageFilter, variables);
+  }
+
+  void pushImageFilter(DrawingCtx *ctx) {
+    ctx->imageFilters.push_back(props.imageFilter);
+  }
+};
+
 } // namespace RNSkia
