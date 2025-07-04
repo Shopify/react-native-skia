@@ -4,9 +4,11 @@ import {
   DisplacementMap,
   Fill,
   Group,
+  Image,
   rect,
   Shader,
   Skia,
+  useImage,
 } from "@shopify/react-native-skia";
 import React, { useState } from "react";
 import { useDerivedValue, withSpring } from "react-native-reanimated";
@@ -68,9 +70,9 @@ half4 main(float2 p) {
   float centerFactor = clamp(-d / r, 0.0, 1.0); // 0 at edge, 1 at center
   float edgePattern = sin(t * 2.0 * 3.14159265 * patternFreq) * 0.5 + 0.5; // Alternating pattern
   
-  vec3 yellow = vec3(1.0, 1.0, 0.0);
-  vec3 red = vec3(1.0, 0.0, 0.0);
-  vec3 green = vec3(0.0, 1.0, 0.0);
+  vec3 yellow = vec3(0.5, 0.5, 0.0);
+  vec3 red = vec3(0.5, 0.0, 0.0);
+  vec3 green = vec3(0.0, 0.5, 0.0);
   vec3 edgeColor = mix(red, green, edgePattern);
   
   vec3 color = mix(edgeColor, yellow, centerFactor);
@@ -81,6 +83,7 @@ half4 main(float2 p) {
 const r = 50;
 
 export const LiquidShape = () => {
+  const oslo = useImage(require("../../assets/oslo.jpg"));
   const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
   const { progress, c1, box, bounds } = useButtonGroup({ width, height }, r);
   const uniforms = useDerivedValue(() => {
@@ -107,21 +110,32 @@ export const LiquidShape = () => {
             });
           }}
         >
+          <Fill color="white" />
           <Group clip={rect(0, height / 2, width, height / 2)}>
             <Fill color="black" />
           </Group>
+          <Image image={oslo} rect={rect(0, 0, width, height)} fit="cover" />
           <BackdropFilter
             filter={
-              <DisplacementMap channelX="a" channelY="r" scale={40}>
-                <Shader source={source} uniforms={uniforms} />
+              <DisplacementMap channelX="r" channelY="g" scale={20}>
+                <Shader
+                  source={source}
+                  uniforms={uniforms}
+                  transform={[
+                    { translateX: bounds.x },
+                    { translateY: bounds.y },
+                  ]}
+                />
               </DisplacementMap>
             }
           />
-          <Group
-            transform={[{ translateX: bounds.x }, { translateY: bounds.y }]}
-          >
+          <Group>
             <Fill>
-              <Shader source={source} uniforms={uniforms} />
+              <Shader
+                source={source}
+                uniforms={uniforms}
+                transform={[{ translateX: bounds.x }, { translateY: bounds.y }]}
+              />
             </Fill>
           </Group>
         </Canvas>
