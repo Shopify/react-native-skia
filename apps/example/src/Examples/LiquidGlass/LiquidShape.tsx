@@ -9,7 +9,9 @@ import {
   Skia,
 } from "@shopify/react-native-skia";
 import React, { useState } from "react";
-import { useDerivedValue } from "react-native-reanimated";
+import { useDerivedValue, withSpring } from "react-native-reanimated";
+import { View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 import { frag } from "../../components/ShaderLib";
 
@@ -80,7 +82,7 @@ const r = 50;
 
 export const LiquidShape = () => {
   const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
-  const { progress, c1, box } = useButtonGroup({ width, height }, r);
+  const { progress, c1, box, bounds } = useButtonGroup({ width, height }, r);
   const uniforms = useDerivedValue(() => {
     return {
       progress: progress.value,
@@ -90,29 +92,40 @@ export const LiquidShape = () => {
       r,
     };
   });
+  const gesture = Gesture.Tap().onEnd(() => {
+    progress.value = withSpring(progress.value === 0 ? 1 : 0);
+  });
   return (
-    <Canvas
-      style={{ flex: 1 }}
-      onLayout={({ nativeEvent: { layout } }) => {
-        setSize({
-          width: layout.width,
-          height: layout.height,
-        });
-      }}
-    >
-      <Group clip={rect(0, height / 2, width, height / 2)}>
-        <Fill color="black" />
-      </Group>
-      <BackdropFilter
-        filter={
-          <DisplacementMap channelX="a" channelY="r" scale={40}>
-            <Shader source={source} uniforms={uniforms} />
-          </DisplacementMap>
-        }
-      />
-      <Fill>
-        <Shader source={source} uniforms={uniforms} />
-      </Fill>
-    </Canvas>
+    <View style={{ flex: 1 }}>
+      <GestureDetector gesture={gesture}>
+        <Canvas
+          style={{ flex: 1 }}
+          onLayout={({ nativeEvent: { layout } }) => {
+            setSize({
+              width: layout.width,
+              height: layout.height,
+            });
+          }}
+        >
+          <Group clip={rect(0, height / 2, width, height / 2)}>
+            <Fill color="black" />
+          </Group>
+          <BackdropFilter
+            filter={
+              <DisplacementMap channelX="a" channelY="r" scale={40}>
+                <Shader source={source} uniforms={uniforms} />
+              </DisplacementMap>
+            }
+          />
+          <Group
+            transform={[{ translateX: bounds.x }, { translateY: bounds.y }]}
+          >
+            <Fill>
+              <Shader source={source} uniforms={uniforms} />
+            </Fill>
+          </Group>
+        </Canvas>
+      </GestureDetector>
+    </View>
   );
 };
