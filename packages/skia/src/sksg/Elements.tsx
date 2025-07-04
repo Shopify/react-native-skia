@@ -52,6 +52,7 @@ import type {
   MorphologyImageFilterProps,
   BlendProps,
   SkottieProps,
+  ImageFilterProps,
 } from "../dom/types";
 import type { SkiaProps } from "../renderer";
 
@@ -89,6 +90,7 @@ declare module "react" {
       skBlurMaskFilter: SkiaProps<BlurMaskFilterProps>;
 
       // ImageFilters
+      skImageFilter: SkiaProps<ImageFilterProps>;
       skBlendImageFilter: SkiaProps<BlendImageFilterProps>;
       skBlurImageFilter: SkiaProps<BlurImageFilterProps>;
       skOffsetImageFilter: SkiaProps<OffsetImageFilterProps>;
