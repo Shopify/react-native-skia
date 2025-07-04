@@ -57,7 +57,30 @@ export const ImageFilter = (props: SkiaProps<ImageFilterProps>) => {
 export * from "./ImageFilter";
 ```
 
-### 5. **Implement C++ Command**
+### 5. **Add Property Converter (if needed)**
+📁 `cpp/api/recorder/Convertor.h`
+
+For components that use complex Skia types (like `SkImageFilter`, `skottie::Animation`, etc.), add a template specialization to convert JSI values to native types:
+
+```cpp
+template <>
+sk_sp<SkImageFilter> getPropertyValue(jsi::Runtime &runtime,
+                                      const jsi::Value &value) {
+  if (value.isObject() && value.asObject(runtime).isHostObject(runtime)) {
+    auto ptr = std::dynamic_pointer_cast<JsiSkImageFilter>(
+        value.asObject(runtime).asHostObject(runtime));
+    if (ptr != nullptr) {
+      return ptr->getObject();
+    }
+  } else if (value.isNull()) {
+    return nullptr;
+  }
+  throw std::runtime_error(
+      "Expected JsiSkImageFilter object or null for the imageFilter property.");
+}
+```
+
+### 6. **Implement C++ Command**
 📁 `cpp/api/recorder/ImageFilters.h`
 
 #### For Context Declarations (like ImageFilter)
@@ -111,7 +134,7 @@ public:
 };
 ```
 
-### 6. **Register in Recorder**
+### 7. **Register in Recorder**
 📁 `cpp/api/recorder/RNRecorder.h`
 
 ```cpp
@@ -126,7 +149,7 @@ void pushImageFilter(jsi::Runtime &runtime, const std::string &nodeType,
 }
 ```
 
-### 7. **Add Execution Logic**
+### 8. **Add Execution Logic**
 📁 `cpp/api/recorder/RNRecorder.h`
 
 ```cpp
@@ -142,7 +165,24 @@ case CommandType::PushImageFilter: {
 }
 ```
 
-### 8. **Create Tests**
+### 9. **Update Node Classification (if needed)**
+📁 `src/sksg/Node.ts`
+
+For new general component types (like `ImageFilter`, `ColorFilter`, etc.), add them to the appropriate classification function:
+
+```typescript
+// For context declarations like ImageFilter
+export const isImageFilter = (type: NodeType) => {
+  "worklet";
+  return (
+    type === NodeType.ImageFilter ||        // Add your new general type here
+    type === NodeType.OffsetImageFilter ||
+    // ... other specific types
+  );
+};
+```
+
+### 10. **Create Tests**
 📁 `src/renderer/__tests__/e2e/ImageFilter.spec.tsx`
 
 ```typescript
@@ -170,7 +210,7 @@ describe("ImageFilter", () => {
 });
 ```
 
-### 9. **Verify Implementation**
+### 11. **Verify Implementation**
 
 ```bash
 # Check TypeScript compilation
@@ -205,9 +245,11 @@ When adding a new component, ensure you:
 - [ ] Add node type in `NodeType.ts`
 - [ ] Create React component
 - [ ] Export component in `index.ts`
+- [ ] Add property converter (if needed) in `Convertor.h`
 - [ ] Implement C++ command class
 - [ ] Register command in `RNRecorder.h`
 - [ ] Add execution logic in `RNRecorder.h`
+- [ ] Update Node classification (if needed) in `Node.ts`
 - [ ] Create comprehensive tests
 - [ ] Verify TypeScript compilation
 - [ ] Run and verify tests pass
