@@ -25,7 +25,7 @@ uniform vec4 box;
 uniform float r;
 
 vec2 sdCircle(vec2 p, vec2 center, float radius) {
-  vec2 offset = p - center + vec2(0, -radius);
+  vec2 offset = p - center;
   float d = length(offset) - radius;
   float t = atan(offset.y, offset.x) / (2.0 * 3.14159265) + 0.5;
   return vec2(d, t);
@@ -51,9 +51,10 @@ float smin(float a, float b, float k) {
 }
 
 half4 main(float2 p) {
-  vec2 sdf1 = sdCircle(p, c1, r);
+  float circleRadius = r * (1.0 - smoothstep(0.8, 1.0, progress));
+  vec2 sdf1 = sdCircle(p + vec2(0, -r), c1, circleRadius);
   vec2 sdf2 = sdRoundedBox(p - box.xy - box.zw * 0.5, box.zw * 0.5, vec4(r));
-  float k = 1;
+  float k = 20 + 20 * (1.0 - abs(2.0 * progress - 1.0));
   float d = smin(sdf1.x, sdf2.x, k);
   
   // Calculate the blend factor used in smin to interpolate t
