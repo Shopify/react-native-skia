@@ -7,7 +7,6 @@ import {
   Image,
   rect,
   Shader,
-  Skia,
   useImage,
 } from "@shopify/react-native-skia";
 import React, { useState } from "react";
@@ -26,7 +25,7 @@ uniform vec4 box;
 uniform float r;
 
 vec2 sdCircle(vec2 p, vec2 center, float radius) {
-  vec2 offset = p - center;
+  vec2 offset = p - center + vec2(0, -radius);
   float d = length(offset) - radius;
   float t = atan(offset.y, offset.x) / (2.0 * 3.14159265) + 0.5;
   return vec2(d, t);
