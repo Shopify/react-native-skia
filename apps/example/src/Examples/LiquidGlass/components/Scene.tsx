@@ -67,20 +67,18 @@ half4 main(float2 p) {
      return vec4(0.0);
   }
 
-  return vec4(0.0, 0.0, 0.0, 1.0);
-
-  // // Create gradient from yellow center to alternating red/green edge
-  // float patternFreq = 1.0; // Frequency of the alternating pattern
-  // float centerFactor = clamp(-d / r, 0.0, 1.0); // 0 at edge, 1 at center
-  // float edgePattern = sin(t * 2.0 * 3.14159265 * patternFreq) * 0.5 + 0.5; // Alternating pattern
+  // Create gradient from yellow center to alternating red/green edge
+  float patternFreq = 1.0; // Frequency of the alternating pattern
+  float centerFactor = clamp(-d / r, 0.0, 1.0); // 0 at edge, 1 at center
+  float edgePattern = sin(t * 2.0 * 3.14159265 * patternFreq) * 0.5 + 0.5; // Alternating pattern
   
-  // vec3 yellow = vec3(0.5, 0.5, 0.0);
-  // vec3 red = vec3(0.5, 0.0, 0.0);
-  // vec3 green = vec3(0.0, 0.5, 0.0);
-  // vec3 edgeColor = mix(red, green, edgePattern);
+  vec3 yellow = vec3(0.5, 0.5, 0.0);
+  vec3 red = vec3(0.5, 0.0, 0.0);
+  vec3 green = vec3(0.0, 0.5, 0.0);
+  vec3 edgeColor = mix(red, green, edgePattern);
   
-  // vec3 color = mix(edgeColor, yellow, centerFactor);
-  // return vec4(color, 1.0);
+  vec3 color = mix(edgeColor, yellow, centerFactor);
+  return vec4(color, 1.0);
 }
 `;
 
