@@ -177,13 +177,10 @@ const declareRuntimeShaderImageFilter = (
   ctx.imageFilters.push(imgf);
 };
 
-const declareImageFilter = (
-  ctx: DrawingContext,
-  props: ImageFilterProps
-) => {
+const declareImageFilter = (ctx: DrawingContext, props: ImageFilterProps) => {
   "worklet";
-  const { imageFilter } = props;
-  ctx.imageFilters.push(imageFilter);
+  const { filter } = props;
+  ctx.imageFilters.push(filter);
 };
 
 export const composeImageFilters = (ctx: DrawingContext) => {
