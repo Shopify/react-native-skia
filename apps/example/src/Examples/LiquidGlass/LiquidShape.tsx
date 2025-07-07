@@ -15,19 +15,10 @@ import React from "react";
 import { Scene } from "./components/Scene";
 
 export const LiquidShape = () => {
-  const filter = (
-    bounds: SkRect,
-    source: SkRuntimeEffect,
-    uniforms: number[]
-  ) => {
+  const filter = (baseShader: SkShader) => {
     "worklet";
-    const localMatrix = processTransform2d([
-      { translateX: bounds.x },
-      { translateY: bounds.y },
-    ]);
-    const shader = Skia.ImageFilter.MakeShader(
-      source.makeShader(uniforms, localMatrix)
-    );
+
+    const shader = Skia.ImageFilter.MakeShader(baseShader);
     const sigma = 12;
     const blur = Skia.ImageFilter.MakeBlur(sigma, sigma, TileMode.Clamp);
     const blendFilter = Skia.ImageFilter.MakeBlend(BlendMode.SrcIn, shader);

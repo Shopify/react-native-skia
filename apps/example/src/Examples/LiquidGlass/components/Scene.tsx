@@ -1,12 +1,9 @@
-import type {
-  SkImageFilter,
-  SkRect,
-  SkRuntimeEffect,
-} from "@shopify/react-native-skia";
+import type { SkImageFilter, SkShader } from "@shopify/react-native-skia";
 import {
   BackdropFilter,
   Canvas,
   ImageFilter,
+  processTransform2d,
   processUniforms,
 } from "@shopify/react-native-skia";
 import React, { useState } from "react";
@@ -90,11 +87,7 @@ half4 main(float2 p) {
 const r = 55;
 
 interface SceneProps {
-  filter: (
-    bounds: SkRect,
-    shader: SkRuntimeEffect,
-    uniforms: number[]
-  ) => SkImageFilter;
+  filter: (shader: SkShader) => SkImageFilter;
 }
 
 export const Scene = ({ filter: filterCB }: SceneProps) => {
@@ -111,7 +104,15 @@ export const Scene = ({ filter: filterCB }: SceneProps) => {
     };
   });
   const filter = useDerivedValue(() => {
-    return filterCB(bounds, source, processUniforms(source, uniforms.value));
+    const localMatrix = processTransform2d([
+      { translateX: bounds.x },
+      { translateY: bounds.y },
+    ]);
+    const shader = source.makeShader(
+      processUniforms(source, uniforms.value),
+      localMatrix
+    );
+    return filterCB(shader);
   });
   const gesture = Gesture.Tap().onEnd(() => {
     progress.value = withSpring(progress.value === 0 ? 1 : 0, {
