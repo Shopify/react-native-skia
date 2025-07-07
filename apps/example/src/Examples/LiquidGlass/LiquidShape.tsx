@@ -9,6 +9,7 @@ import {
   Group,
   Image,
   ImageFilter,
+  ImageShader,
   processTransform,
   processTransform2d,
   processUniforms,
@@ -30,6 +31,7 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { frag } from "../../components/ShaderLib";
 
 import { useButtonGroup } from "./ButtonGroup";
+import { Pattern } from "./Pattern";
 
 const source = frag`
 uniform float progress;
@@ -98,7 +100,6 @@ half4 main(float2 p) {
 const r = 50;
 
 export const LiquidShape = () => {
-  const oslo = useImage(require("../../assets/oslo.jpg"));
   const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
   const { progress, c1, box, bounds } = useButtonGroup({ width, height }, r);
   const uniforms = useDerivedValue(() => {
@@ -137,10 +138,10 @@ export const LiquidShape = () => {
   });
   const gesture = Gesture.Tap().onEnd(() => {
     progress.value = withSpring(progress.value === 0 ? 1 : 0, {
-      // duration: 1000,
-      // dampingRatio: 0.5,
-      mass: 1,
-      damping: 10,
+      duration: 1000,
+      dampingRatio: 0.5,
+      // mass: 1,
+      // damping: 10,
       stiffness: 100,
       overshootClamping: false,
       restDisplacementThreshold: 0.01,
@@ -160,9 +161,7 @@ export const LiquidShape = () => {
             });
           }}
         >
-          <Group>
-            <Image image={oslo} rect={rect(0, 0, width, height)} fit="cover" />
-          </Group>
+          <Pattern />
           <BackdropFilter filter={<ImageFilter imageFilter={filter} />} />
         </Canvas>
       </GestureDetector>
