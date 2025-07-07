@@ -1,6 +1,7 @@
 import type {
   SkRect,
   SkRuntimeEffect,
+  SkShader,
   Uniforms,
 } from "@shopify/react-native-skia";
 import {
