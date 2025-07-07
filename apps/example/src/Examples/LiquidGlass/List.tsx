@@ -11,8 +11,12 @@ export const examples = [
     title: "🔘 Liquid Shape",
   },
   {
-    screen: "DisplacementMap",
-    title: "🗺️  Displacement Map ",
+    screen: "DisplacementMap1",
+    title: "🗺️  Displacement Map  1",
+  },
+  {
+    screen: "DisplacementMap2",
+    title: "🗺️  Displacement Map  2",
   },
 ] as const;
 

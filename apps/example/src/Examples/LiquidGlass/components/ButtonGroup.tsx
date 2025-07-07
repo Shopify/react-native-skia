@@ -34,7 +34,10 @@ export const ButtonGroup = ({
   bounds,
 }: ReturnType<typeof useButtonGroup>) => {
   return (
-    <Group transform={[{ translateX: bounds.x }, { translateY: bounds.y + r }]}>
+    <Group
+      transform={[{ translateX: bounds.x }, { translateY: bounds.y + r }]}
+      opacity={0.8}
+    >
       <IconButton c={c1} r={r} progress={progress} icon1="plus" />
       <IconButton
         c={c2}

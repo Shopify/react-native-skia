@@ -1,5 +1,6 @@
 export type Routes = {
   List: undefined;
   LiquidShape: undefined;
-  DisplacementMap: undefined;
+  DisplacementMap1: undefined;
+  DisplacementMap2: undefined;
 };

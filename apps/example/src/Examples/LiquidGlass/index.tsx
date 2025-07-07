@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import type { Routes } from "./Routes";
 import { List } from "./List";
 import { LiquidShape } from "./LiquidShape";
-import { DisplacementMapExample } from "./DisplacementMap";
+import { DisplacementMap1 } from "./DisplacementMap1";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const LiquidGlass = () => {
@@ -26,8 +26,8 @@ export const LiquidGlass = () => {
         }}
       />
       <Stack.Screen
-        name="DisplacementMap"
-        component={DisplacementMapExample}
+        name="DisplacementMap1"
+        component={DisplacementMap1}
         options={{
           title: "🗺️  Displacement Map",
         }}

@@ -82,7 +82,7 @@ half4 main(float2 p) {
 
 const r = 50;
 
-export const DisplacementMapExample = () => {
+export const DisplacementMap1 = () => {
   const oslo = useImage(require("../../assets/oslo.jpg"));
   const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
   const { progress, c1, box, bounds } = useButtonGroup({ width, height }, r);
