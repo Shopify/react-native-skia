@@ -1,12 +1,21 @@
 import {
   BackdropFilter,
+  Blend,
+  BlendMode,
+  Blur,
   Canvas,
   DisplacementMap,
   Fill,
   Group,
   Image,
+  ImageFilter,
+  processTransform,
+  processTransform2d,
+  processUniforms,
   rect,
   Shader,
+  Skia,
+  TileMode,
   useImage,
 } from "@shopify/react-native-skia";
 import React, { useState } from "react";
@@ -101,6 +110,20 @@ export const LiquidShape = () => {
       r,
     };
   });
+  const filter = useDerivedValue(() => {
+    const localMatrix = processTransform2d([
+      { translateX: bounds.x },
+      { translateY: bounds.y },
+    ]);
+    const shader = Skia.ImageFilter.MakeShader(
+      source.makeShader(processUniforms(source, uniforms.value), localMatrix)
+    );
+    const sigma = 8;
+    const blur = Skia.ImageFilter.MakeBlur(sigma, sigma, TileMode.Clamp);
+    const blendFilter = Skia.ImageFilter.MakeBlend(BlendMode.SrcIn, shader);
+
+    return Skia.ImageFilter.MakeCompose(blendFilter, blur);
+  });
   const gesture = Gesture.Tap().onEnd(() => {
     progress.value = withSpring(progress.value === 0 ? 1 : 0, {
       // duration: 1000,
@@ -126,34 +149,10 @@ export const LiquidShape = () => {
             });
           }}
         >
-          <Fill color="white" />
-          <Group clip={rect(0, height / 2, width, height / 2)}>
-            <Fill color="black" />
-          </Group>
-          <Image image={oslo} rect={rect(0, 0, width, height)} fit="cover" />
-          <BackdropFilter
-            filter={
-              <DisplacementMap channelX="r" channelY="g" scale={20}>
-                <Shader
-                  source={source}
-                  uniforms={uniforms}
-                  transform={[
-                    { translateX: bounds.x },
-                    { translateY: bounds.y },
-                  ]}
-                />
-              </DisplacementMap>
-            }
-          />
           <Group>
-            <Fill>
-              <Shader
-                source={source}
-                uniforms={uniforms}
-                transform={[{ translateX: bounds.x }, { translateY: bounds.y }]}
-              />
-            </Fill>
+            <Image image={oslo} rect={rect(0, 0, width, height)} fit="cover" />
           </Group>
+          <BackdropFilter filter={<ImageFilter imageFilter={filter} />} />
         </Canvas>
       </GestureDetector>
     </View>
