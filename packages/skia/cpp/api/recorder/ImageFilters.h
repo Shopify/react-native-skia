@@ -290,7 +290,7 @@ public:
 };
 
 struct ImageFilterCmdProps {
-  sk_sp<SkImageFilter> imageFilter;
+  sk_sp<SkImageFilter> filter;
 };
 
 class ImageFilterCmd : public Command {
@@ -301,11 +301,11 @@ public:
   ImageFilterCmd(jsi::Runtime &runtime, const jsi::Object &object,
                  Variables &variables)
       : Command(CommandType::PushImageFilter, "skImageFilter") {
-    convertProperty(runtime, object, "imageFilter", props.imageFilter, variables);
+    convertProperty(runtime, object, "filter", props.filter, variables);
   }
 
   void pushImageFilter(DrawingCtx *ctx) {
-    ctx->imageFilters.push_back(props.imageFilter);
+    ctx->imageFilters.push_back(props.filter);
   }
 };
 
