@@ -16,7 +16,7 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 import { frag } from "../../components/ShaderLib";
 
-import { useButtonGroup } from "./ButtonGroup";
+import { useButtonGroup } from "./components/ButtonGroup";
 
 const source = frag`
 uniform float progress;

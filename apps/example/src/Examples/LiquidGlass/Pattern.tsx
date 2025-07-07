@@ -11,7 +11,7 @@ export const Pattern = () => {
   const clock = useClock();
   const flower = useImage(require("./assets/flowers.jpg"));
   const rect = useDerivedValue(() => {
-    return { x: 0, y: (clock.value * 0.075) % 512, width: 512, height: 512 };
+    return { x: 0, y: (clock.value * 0.055) % 512, width: 512, height: 512 };
   });
   return (
     <Fill>

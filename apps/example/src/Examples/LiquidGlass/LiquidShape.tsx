@@ -1,23 +1,12 @@
 import {
   BackdropFilter,
-  Blend,
   BlendMode,
-  Blur,
   Canvas,
-  DisplacementMap,
-  Fill,
-  Group,
-  Image,
   ImageFilter,
-  ImageShader,
-  processTransform,
   processTransform2d,
   processUniforms,
-  rect,
-  Shader,
   Skia,
   TileMode,
-  useImage,
 } from "@shopify/react-native-skia";
 import React, { useState } from "react";
 import {
@@ -30,7 +19,7 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 import { frag } from "../../components/ShaderLib";
 
-import { useButtonGroup } from "./ButtonGroup";
+import { ButtonGroup, useButtonGroup } from "./components/ButtonGroup";
 import { Pattern } from "./Pattern";
 
 const source = frag`
@@ -97,11 +86,12 @@ half4 main(float2 p) {
 }
 `;
 
-const r = 50;
+const r = 55;
 
 export const LiquidShape = () => {
   const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
-  const { progress, c1, box, bounds } = useButtonGroup({ width, height }, r);
+  const props = useButtonGroup({ width, height }, r);
+  const { progress, c1, box, bounds } = props;
   const uniforms = useDerivedValue(() => {
     return {
       progress: progress.value,
@@ -163,6 +153,7 @@ export const LiquidShape = () => {
         >
           <Pattern />
           <BackdropFilter filter={<ImageFilter imageFilter={filter} />} />
+          <ButtonGroup {...props} />
         </Canvas>
       </GestureDetector>
     </View>
