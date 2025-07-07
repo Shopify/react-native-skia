@@ -9,7 +9,7 @@ import { DisplacementMap1 } from "./DisplacementMap1";
 const Stack = createNativeStackNavigator<Routes>();
 export const LiquidGlass = () => {
   return (
-    <Stack.Navigator initialRouteName="LiquidShape">
+    <Stack.Navigator initialRouteName="DisplacementMap1">
       <Stack.Screen
         name="List"
         component={List}
