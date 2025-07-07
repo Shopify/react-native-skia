@@ -138,7 +138,7 @@ export const Scene = ({ filter: filterCB }: SceneProps) => {
           }}
         >
           <Pattern />
-          <BackdropFilter filter={<ImageFilter imageFilter={filter} />} />
+          <BackdropFilter filter={<ImageFilter filter={filter} />} />
           <ButtonGroup {...props} />
         </Canvas>
       </GestureDetector>
