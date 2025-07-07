@@ -7,7 +7,7 @@
     "build:android": "npm run mkdist && react-native bundle --entry-file index.js --platform android --dev true --bundle-output dist/main.android.jsbundle --assets-dest dist/res && cd android && ./gradlew assembleDebug --warning-mode all",
     "build:ios": "npm run mkdist && react-native bundle --entry-file index.js --platform ios --dev true --bundle-output dist/main.ios.jsbundle --assets-dest dist",
     "ios": "react-native run-ios",
-    "lint-skip": "eslint .",
+    "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --cache --fix",
     "mkdist": "node -e \"require('node:fs').mkdirSync('dist', { recursive: true, mode: 0o755 })\"",
     "pod:install": "cd ios && pod install",
     "start": "react-native start",

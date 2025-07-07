@@ -20,6 +20,7 @@
     "@typescript-eslint/no-empty-function": "off",
     "react/jsx-uses-react": "error",
     "react/react-in-jsx-scope": "error",
-    "reanimated/js-function-in-worklet": 0
+    "reanimated/js-function-in-worklet": 0,
+    "import/no-cycle": [2, { "ignoreExternal": true, "disableScc": true }]
   }
 }
