@@ -17,7 +17,7 @@ describe("ImageFilter", () => {
     // END OF INTERNAL TESTING ONLY
     const img = await surface.draw(
       <Group>
-        <ImageFilter imageFilter={blurFilter} />
+        <ImageFilter filter={blurFilter} />
         <Circle cx={50} cy={50} r={30} color="red" />
       </Group>
     );
@@ -36,7 +36,7 @@ describe("ImageFilter", () => {
 
     const img = await surface.draw(
       <Group>
-        <ImageFilter imageFilter={offsetFilter} />
+        <ImageFilter filter={offsetFilter} />
         <Circle cx={50} cy={50} r={30} color="blue" />
       </Group>
     );
@@ -63,7 +63,7 @@ describe("ImageFilter", () => {
 
     const img = await surface.draw(
       <Group>
-        <ImageFilter imageFilter={dropShadowFilter} />
+        <ImageFilter filter={dropShadowFilter} />
         <Circle cx={50} cy={50} r={30} color="green" />
       </Group>
     );
@@ -89,7 +89,7 @@ describe("ImageFilter", () => {
 
     const img = await surface.draw(
       <Group>
-        <ImageFilter imageFilter={offsetFilter} />
+        <ImageFilter filter={offsetFilter} />
         <Circle cx={50} cy={50} r={30} color="purple" />
       </Group>
     );

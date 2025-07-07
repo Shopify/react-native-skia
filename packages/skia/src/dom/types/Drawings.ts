@@ -173,5 +173,5 @@ export interface BoxShadowProps {
 }
 
 export interface ImageFilterProps extends GroupProps {
-  imageFilter: SkImageFilter;
+  filter: SkImageFilter;
 }
