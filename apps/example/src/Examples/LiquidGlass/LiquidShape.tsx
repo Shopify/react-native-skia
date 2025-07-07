@@ -122,7 +122,18 @@ export const LiquidShape = () => {
     const blur = Skia.ImageFilter.MakeBlur(sigma, sigma, TileMode.Clamp);
     const blendFilter = Skia.ImageFilter.MakeBlend(BlendMode.SrcIn, shader);
 
-    return Skia.ImageFilter.MakeCompose(blendFilter, blur);
+    const whiteTint = Skia.Shader.MakeColor(
+      Skia.Color("rgba(255, 255, 255, 0.25)")
+    );
+
+    return Skia.ImageFilter.MakeCompose(
+      blendFilter,
+      Skia.ImageFilter.MakeBlend(
+        BlendMode.SrcOver,
+        blur,
+        Skia.ImageFilter.MakeShader(whiteTint)
+      )
+    );
   });
   const gesture = Gesture.Tap().onEnd(() => {
     progress.value = withSpring(progress.value === 0 ? 1 : 0, {
