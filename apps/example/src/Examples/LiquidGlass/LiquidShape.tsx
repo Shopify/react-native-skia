@@ -119,12 +119,12 @@ export const LiquidShape = () => {
     const shader = Skia.ImageFilter.MakeShader(
       source.makeShader(processUniforms(source, uniforms.value), localMatrix)
     );
-    const sigma = 8;
+    const sigma = 12;
     const blur = Skia.ImageFilter.MakeBlur(sigma, sigma, TileMode.Clamp);
     const blendFilter = Skia.ImageFilter.MakeBlend(BlendMode.SrcIn, shader);
 
     const whiteTint = Skia.Shader.MakeColor(
-      Skia.Color("rgba(255, 255, 255, 0.25)")
+      Skia.Color("rgba(255, 255, 255, 0.4)")
     );
 
     return Skia.ImageFilter.MakeCompose(
