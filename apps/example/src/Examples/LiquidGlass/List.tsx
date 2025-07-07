@@ -18,6 +18,14 @@ export const examples = [
     screen: "DisplacementMap2",
     title: "🗺️  Displacement Map  2",
   },
+  {
+    screen: "Shader1",
+    title: "🎨 Shader 1",
+  },
+  {
+    screen: "Shader2",
+    title: "🎨 Shader 2",
+  },
 ] as const;
 
 const styles = StyleSheet.create({
