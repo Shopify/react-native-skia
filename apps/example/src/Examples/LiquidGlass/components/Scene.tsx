@@ -1,10 +1,17 @@
-import type { SkImageFilter, SkShader } from "@shopify/react-native-skia";
+import type {
+  SkImageFilter,
+  SkRuntimeEffect,
+  SkShader,
+} from "@shopify/react-native-skia";
 import {
   BackdropFilter,
   Canvas,
+  convertToColumnMajor,
+  convertToColumnMajor3,
   ImageFilter,
   processTransform2d,
   processUniforms,
+  Skia,
 } from "@shopify/react-native-skia";
 import React, { useState } from "react";
 import {
@@ -15,16 +22,20 @@ import {
 import { View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
-import { frag } from "../../../components/ShaderLib";
+import { frag, glsl } from "../../../components/ShaderLib";
 
 import { ButtonGroup, useButtonGroup } from "./ButtonGroup";
 import { Pattern } from "./Pattern";
 
-const source = frag`
+export const baseUniforms = glsl`
 uniform float progress;
 uniform vec2 c1;
 uniform vec4 box;
 uniform float r;
+`;
+
+const source = frag`
+${baseUniforms}
 
 vec2 sdCircle(vec2 p, vec2 center, float radius) {
   vec2 offset = p - center;
@@ -85,10 +96,14 @@ half4 main(float2 p) {
 const r = 55;
 
 interface SceneProps {
-  filter: (shader: SkShader) => SkImageFilter;
+  filter?: (shader: SkShader) => SkImageFilter;
+  shader?: SkRuntimeEffect;
 }
 
-export const Scene = ({ filter: filterCB }: SceneProps) => {
+export const Scene = ({
+  filter: filterCB,
+  shader: shaderFilter,
+}: SceneProps) => {
   const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
   const props = useButtonGroup({ width, height }, r);
   const { progress, c1, box, bounds } = props;
@@ -106,11 +121,27 @@ export const Scene = ({ filter: filterCB }: SceneProps) => {
       { translateX: bounds.x },
       { translateY: bounds.y },
     ]);
-    const shader = source.makeShader(
-      processUniforms(source, uniforms.value),
-      localMatrix
-    );
-    return filterCB(shader);
+    if (filterCB) {
+      const shader = source.makeShader(
+        processUniforms(source, uniforms.value),
+        localMatrix
+      );
+      return filterCB(shader);
+    } else if (shaderFilter) {
+      const builder = Skia.RuntimeShaderBuilder(shaderFilter);
+      const transform = convertToColumnMajor3(localMatrix.get());
+      processUniforms(
+        shaderFilter,
+        {
+          ...uniforms.value,
+          transform,
+        },
+        builder
+      );
+      return Skia.ImageFilter.MakeRuntimeShader(builder, null);
+    } else {
+      throw new Error("No filter or shader provided");
+    }
   });
   const gesture = Gesture.Tap().onEnd(() => {
     progress.value = withSpring(progress.value === 0 ? 1 : 0, {

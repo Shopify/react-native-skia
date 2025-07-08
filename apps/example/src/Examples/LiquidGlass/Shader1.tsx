@@ -1,46 +1,57 @@
-import type { SkShader } from "@shopify/react-native-skia";
-import {
-  BlendMode,
-  ColorChannel,
-  Skia,
-  TileMode,
-} from "@shopify/react-native-skia";
 import React from "react";
 
-import { Scene } from "./components/Scene";
+import { frag } from "../../components/ShaderLib";
+
+import { Scene, baseUniforms } from "./components/Scene";
+
+const shader = frag`
+${baseUniforms}
+uniform mat3 transform;
+uniform shader image;
+
+
+float sdCircle(vec2 p, vec2 center, float radius) {
+  vec2 offset = p - center;
+  float d = length(offset) - radius;
+  return d;
+}
+
+float sdRoundedBox( in vec2 p, in vec2 b, in vec4 r ) {
+  r.xy = (p.x>0.0) ? r.xy : r.zw;
+  r.x  = (p.y>0.0) ? r.x  : r.y;
+  vec2 q = abs(p)-b+r.x;
+  float d = min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r.x;
+  return d;
+}
+
+float smin(float a, float b, float k) {
+  float h = clamp(0.5 + 0.5*(a-b)/k, 0.0, 1.0);
+  return mix(a, b, h) - k*h*(1.0-h);
+}
+
+vec2 project(vec2 p, mat3 m) {
+  vec3 result =  inverse(m) * vec3(p, 1.0);
+  return result.xy;
+}
+
+vec4 main(float2 xy) {
+  vec2 p = project(xy, transform);
+  float circleRadius = r * (1.0 - smoothstep(0.8, 1.0, progress));
+  float sdf1 = sdCircle(p + vec2(0, -r), c1, circleRadius);
+  float sdf2 = sdRoundedBox(p - box.xy - box.zw * 0.5, box.zw * 0.5, vec4(r));
+  float k = 20 + 20 * (1.0 - abs(2.0 * progress - 1.0));
+  float d = smin(sdf1, sdf2, k);
+  
+  // Calculate the blend factor used in smin to interpolate t
+  float h = clamp(0.5 + 0.5*(sdf1 - sdf2)/k, 0.0, 1.0);
+
+  if (d > 0.0) {
+     return image.eval(xy);
+  }
+
+  return vec4(0.0, 0.0, 0.0, 1.0);
+}`;
 
 export const Shader1 = () => {
-  const filter = (baseShader: SkShader) => {
-    "worklet";
-
-    const shader = Skia.ImageFilter.MakeShader(baseShader);
-    const sigma = 2;
-    const blendFilter = Skia.ImageFilter.MakeBlend(BlendMode.SrcIn, shader);
-
-    const whiteTint = Skia.ImageFilter.MakeShader(
-      Skia.Shader.MakeColor(Skia.Color("rgba(255, 255, 255, 0.4)"))
-    );
-
-    const displacementMap = Skia.ImageFilter.MakeDisplacementMap(
-      ColorChannel.R,
-      ColorChannel.G,
-      40,
-      shader
-    );
-
-    return Skia.ImageFilter.MakeCompose(
-      blendFilter,
-      Skia.ImageFilter.MakeBlur(
-        sigma,
-        sigma,
-        TileMode.Clamp,
-        Skia.ImageFilter.MakeBlend(
-          BlendMode.SrcOver,
-          displacementMap,
-          whiteTint
-        )
-      )
-    );
-  };
-  return <Scene filter={filter} />;
+  return <Scene shader={shader} />;
 };
