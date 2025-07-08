@@ -34,7 +34,7 @@ vec2 project(vec2 p, mat3 m) {
   return result.xy;
 }
 
-vec4 main(float2 xy) {
+vec4 render(float2 xy) {
   vec2 p = project(xy, transform);
   float circleRadius = r * (1.0 - smoothstep(0.8, 1.0, progress));
   float sdf1 = sdCircle(p + vec2(0, -r), c1, circleRadius);
@@ -49,7 +49,34 @@ vec4 main(float2 xy) {
      return image.eval(xy);
   }
 
-  return vec4(0.0, 0.0, 0.0, 1.0);
+  return vec4(0.3, 0.6, 1.0, 1.0);
+}
+
+vec4 main(vec2 fragCoord) {
+  // Anti-aliasing settings
+  const int samples = 4;
+  float sampleStrength = 1.0/float(samples*samples);
+  vec4 finalColor = vec4(0.0);
+  
+  // Perform supersampling
+  for(int m = 0; m < samples; m++) {
+    for(int n = 0; n < samples; n++) {
+      // Calculate offset for this sample (only if using AA)
+      vec2 offset = (samples > 1) ? 
+          (vec2(float(m), float(n)) / float(samples) - 0.5/float(samples)) : 
+          vec2(0.0);
+      
+      // Get pixel position with the offset
+      vec2 p = fragCoord + offset;
+      
+      // Render this sample
+      vec4 color = render(p);
+      // Accumulate color
+      finalColor += color * sampleStrength;
+    }
+  }
+  
+  return finalColor;
 }`;
 
 export const Shader1 = () => {
