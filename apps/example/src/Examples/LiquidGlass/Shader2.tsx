@@ -85,34 +85,44 @@ float height(float sd, float thickness)
 // Isolated liquid glass effect calculation
 vec4 calculateLiquidGlass(float sd, vec2 g, vec2 fragCoord)
 {
-    float thickness = 14.0;
-    float index = 1.5;
-    float base_height = thickness * 8.0;
-    float color_mix = 0.3;
-    vec4 color_base = vec4(1.0, 1.0, 1.0, 0.0);
+   float thickness = 14.0;
+    float transmission = 0.9;          // Transmission strength
+    float roughness = 0.1;             // Surface roughness
+    float ior = 1.5;                   // Index of refraction
+    float chromaticAberration = 0.03;  // Chromatic aberration strength
+    float distortionScale = 1.0;       // Distortion multiplier
     
-    vec3 normal = getNormal(sd, g, thickness);
+    vec3 normal = getNormal(sd, g * distortionScale, thickness);
+    vec3 incident = vec3(0.0, 0.0, -1.0);
     
-    // A ray going -z hits the top of the pad, where would it hit on
-    // the z = -base_height plane?
-    vec3 incident = vec3(0.0, 0.0, -1.0); // Should be normalized.
-    vec3 refract_vec = refract(incident, normal, 1.0/index);
+    // Fresnel effect - more reflection at grazing angles
+    float fresnel = pow(1.0 - abs(dot(incident, normal)), 3.0);
+    
+    // Base refraction
+    vec3 refract_vec = refract(incident, normal, 1.0/ior);
     float h = height(sd, thickness);
-    float refract_length = (h + base_height) /
-        dot(vec3(0.0, 0.0, -1.0), refract_vec);
-    // This is the screen coord of the ray hitting the z = -base_height
-    // plane.
-    vec2 coord1 = fragCoord + refract_vec.xy * refract_length;
-    vec4 refract_color = blurredImage.eval(coord1);
+    float base_height = thickness * 8.0;
+    float refract_length = (h + base_height) / dot(vec3(0.0, 0.0, -1.0), refract_vec);
     
-    // Reflection
+    // Chromatic aberration - sample RGB channels separately
+    vec2 base_coord = fragCoord + refract_vec.xy * refract_length;
+    vec2 uv_base = base_coord / resolution.xy;
+    
+    // Offset each color channel slightly for dispersion
+    vec2 offset = refract_vec.xy * chromaticAberration;
+    float r = blurredImage.eval((uv_base - offset) * resolution).r;
+    float g_channel = blurredImage.eval(uv_base * resolution).g;
+    float b = blurredImage.eval((uv_base + offset) * resolution).b;
+    vec4 refract_color = vec4(r, g_channel, b, 1.0);
+    
+    // Roughness-based reflection blur (simplified)
     vec3 reflect_vec = reflect(incident, normal);
     vec4 reflect_color = vec4(0.0);
-    float c = clamp(abs(reflect_vec.x - reflect_vec.y), 0.0, 1.0);
-    reflect_color = vec4(c,c,c, 0.0);
     
-    return mix(mix(refract_color, reflect_color, (1.0 - normal.z) * 2.0),
-               color_base, color_mix);
+    // Mix reflection and refraction based on fresnel and transmission
+    vec4 glass_color = mix(refract_color, reflect_color, fresnel * (1.0 - transmission));
+    
+    return glass_color;
 }
 
 vec4 render(vec2 xy) {
