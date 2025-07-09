@@ -35,18 +35,18 @@ vec2 project(vec2 p, mat3 m) {
   return result.xy;
 }
 
-vec4 render(float2 xy) {
+float sdf(vec2 xy) {
   vec2 p = project(xy, transform);
-  float2 uv = p / resolution.xy;
   float circleRadius = r * (1.0 - smoothstep(0.8, 1.0, progress));
   float sdf1 = sdCircle(p + vec2(0, -r), c1, circleRadius);
   float sdf2 = sdRoundedBox(p - box.xy - box.zw * 0.5, box.zw * 0.5, vec4(r));
   float k = 20 + 20 * (1.0 - abs(2.0 * progress - 1.0));
   float d = smin(sdf1, sdf2, k);
-  
-  // Calculate the blend factor used in smin to interpolate t
-  float h = clamp(0.5 + 0.5*(sdf1 - sdf2)/k, 0.0, 1.0);
+  return d;
+}
 
+vec4 render(vec2 xy) {
+  float d = sdf(xy);
   if (d > 0.0) {
     return image.eval(xy);
   } else {
