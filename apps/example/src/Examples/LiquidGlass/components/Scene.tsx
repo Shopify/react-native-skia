@@ -6,7 +6,6 @@ import type {
 import {
   BackdropFilter,
   Canvas,
-  convertToColumnMajor,
   convertToColumnMajor3,
   ImageFilter,
   processTransform2d,
