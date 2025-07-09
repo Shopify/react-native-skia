@@ -12,6 +12,7 @@ import {
   processTransform2d,
   processUniforms,
   Skia,
+  TileMode,
 } from "@shopify/react-native-skia";
 import React, { useState } from "react";
 import {
@@ -135,10 +136,16 @@ export const Scene = ({
         {
           ...uniforms.value,
           transform,
+          resolution: [width, height],
         },
         builder
       );
-      return Skia.ImageFilter.MakeRuntimeShader(builder, null);
+      return Skia.ImageFilter.MakeRuntimeShaderWithChildren(
+        builder,
+        0,
+        ["blurredImage"],
+        [Skia.ImageFilter.MakeBlur(4, 4, TileMode.Clamp)]
+      );
     } else {
       throw new Error("No filter or shader provided");
     }

@@ -7,8 +7,9 @@ import { Scene, baseUniforms } from "./components/Scene";
 const shader = frag`
 ${baseUniforms}
 uniform mat3 transform;
+uniform vec2 resolution;
 uniform shader image;
-
+uniform shader blurredImage;
 
 float sdCircle(vec2 p, vec2 center, float radius) {
   vec2 offset = p - center;
@@ -36,6 +37,7 @@ vec2 project(vec2 p, mat3 m) {
 
 vec4 render(float2 xy) {
   vec2 p = project(xy, transform);
+  float2 uv = p / resolution.xy;
   float circleRadius = r * (1.0 - smoothstep(0.8, 1.0, progress));
   float sdf1 = sdCircle(p + vec2(0, -r), c1, circleRadius);
   float sdf2 = sdRoundedBox(p - box.xy - box.zw * 0.5, box.zw * 0.5, vec4(r));
@@ -46,10 +48,10 @@ vec4 render(float2 xy) {
   float h = clamp(0.5 + 0.5*(sdf1 - sdf2)/k, 0.0, 1.0);
 
   if (d > 0.0) {
-     return image.eval(xy);
+    return image.eval(xy);
+  } else {
+    return blurredImage.eval(xy);
   }
-
-  return vec4(0.3, 0.6, 1.0, 1.0);
 }
 
 vec4 main(vec2 fragCoord) {
