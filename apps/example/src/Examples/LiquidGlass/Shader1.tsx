@@ -50,7 +50,7 @@ vec4 render(float2 xy) {
   if (d > 0.0) {
     return image.eval(xy);
   } else {
-    return blurredImage.eval(xy);
+    return blurredImage.eval(xy) + vec4(vec3(0.25), 1.0);
   }
 }
 
