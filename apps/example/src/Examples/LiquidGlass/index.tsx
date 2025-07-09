@@ -12,7 +12,7 @@ import { Shader2 } from "./Shader2";
 const Stack = createNativeStackNavigator<Routes>();
 export const LiquidGlass = () => {
   return (
-    <Stack.Navigator initialRouteName="Shader1">
+    <Stack.Navigator>
       <Stack.Screen
         name="List"
         component={List}

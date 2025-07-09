@@ -54,13 +54,75 @@ vec2 calculateGradient(vec2 p) {
     return vec2(dx, dy) / (2.0 * epsilon);
 }
 
+
+// Thickness is the t in the doc.
+vec3 getNormal(float sd, vec2 gradient, float thickness)
+{
+    float dx = gradient.x;
+    float dy = gradient.y;
+    // The cosine and sine between normal and the xy plane.
+    float n_cos = max(thickness + sd, 0.0) / thickness;
+    float n_sin = sqrt(1.0 - n_cos * n_cos);
+    return normalize(vec3(dx * n_cos, dy * n_cos, n_sin));
+}
+
+// The height (z component) of the pad surface at sd.
+float height(float sd, float thickness)
+{
+    if(sd >= 0.0)
+    {
+        return 0.0;
+    }
+    if(sd < -thickness)
+    {
+        return thickness;
+    }
+    float x = thickness + sd;
+    return sqrt(thickness * thickness - x * x);
+}
+
+
+// Isolated liquid glass effect calculation
+vec4 calculateLiquidGlass(float sd, vec2 g, vec2 fragCoord)
+{
+    float thickness = 10.0;
+    float index = 1.5;
+    float base_height = thickness * 8.0;
+    float color_mix = 0.3;
+    vec4 color_base = vec4(1.0, 1.0, 1.0, 0.0);
+    
+    vec3 normal = getNormal(sd, g, thickness);
+    
+    // A ray going -z hits the top of the pad, where would it hit on
+    // the z = -base_height plane?
+    vec3 incident = vec3(0.0, 0.0, -1.0); // Should be normalized.
+    vec3 refract_vec = refract(incident, normal, 1.0/index);
+    float h = height(sd, thickness);
+    float refract_length = (h + base_height) /
+        dot(vec3(0.0, 0.0, -1.0), refract_vec);
+    // This is the screen coord of the ray hitting the z = -base_height
+    // plane.
+    vec2 coord1 = fragCoord + refract_vec.xy * refract_length;
+    vec4 refract_color = blurredImage.eval(coord1);
+    
+    // Reflection
+    vec3 reflect_vec = reflect(incident, normal);
+    vec4 reflect_color = vec4(0.0);
+    float c = clamp(abs(reflect_vec.x - reflect_vec.y), 0.0, 1.0);
+    reflect_color = vec4(c,c,c, 0.0);
+    
+    return mix(mix(refract_color, reflect_color, (1.0 - normal.z) * 2.0),
+               color_base, color_mix);
+}
+
 vec4 render(vec2 xy) {
+  vec2 p = project(xy, transform);
   float d = sdf(xy);
-  float2 g = calculateGradient(xy);
+  float2 g = calculateGradient(p);
   if (d > 0.0) {
     return image.eval(xy);
   } else {
-    return blurredImage.eval(xy) + vec4(vec3(0.25), 1.0);
+    return calculateLiquidGlass(d, g, xy);
   }
 }
 

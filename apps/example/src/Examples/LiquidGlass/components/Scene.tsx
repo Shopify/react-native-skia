@@ -144,7 +144,7 @@ export const Scene = ({
         builder,
         0,
         ["blurredImage"],
-        [Skia.ImageFilter.MakeBlur(4, 4, TileMode.Clamp)]
+        [Skia.ImageFilter.MakeBlur(8, 8, TileMode.Clamp)]
       );
     } else {
       throw new Error("No filter or shader provided");
