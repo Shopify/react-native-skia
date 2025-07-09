@@ -45,8 +45,18 @@ float sdf(vec2 xy) {
   return d;
 }
 
+
+// Gradient calculation using finite differences
+vec2 calculateGradient(vec2 p) {
+    const float epsilon = 0.001;
+    float dx = sdf(p + vec2(epsilon, 0.0)) - sdf(p - vec2(epsilon, 0.0));
+    float dy = sdf(p + vec2(0.0, epsilon)) - sdf(p - vec2(0.0, epsilon));
+    return vec2(dx, dy) / (2.0 * epsilon);
+}
+
 vec4 render(vec2 xy) {
   float d = sdf(xy);
+  float2 g = calculateGradient(xy);
   if (d > 0.0) {
     return image.eval(xy);
   } else {
