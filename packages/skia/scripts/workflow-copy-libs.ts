@@ -1,6 +1,7 @@
 import { existsSync } from "fs";
 
 import { ensureFolderExists, copyRecursiveSync } from "./utils";
+import { GRAPHITE } from "./skia-configuration";
 /**
  * This build script prepares the npm build command by copying
  * the Skia Binaries from the artifact folder into the libs folder
@@ -10,11 +11,12 @@ import { ensureFolderExists, copyRecursiveSync } from "./utils";
 
 console.log("Copying Skia Binaries from artifacts to libs folder");
 
+const suffix = GRAPHITE ? "-graphite" : "";
 const sources = [
-  "./skia-android-arm",
-  "./skia-android-arm-64",
-  "./skia-android-arm-x86",
-  "./skia-android-arm-x64",
+  `./skia${suffix}-android-arm`,
+  `./skia${suffix}-android-arm-64`,
+  `./skia${suffix}-android-arm-x86`,
+  `./skia${suffix}-android-arm-x64`,
 ];
 
 const destinations = ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"];
@@ -77,6 +79,20 @@ destinations.forEach((d, i) => {
 });
 
 console.log("Copying Apple files...");
-copyFiles("skia-apple-xcframeworks", "./libs/apple", appleFiles);
+copyFiles(`skia${suffix}-apple-xcframeworks`, "./libs/apple", appleFiles);
+
+// Copy skia-headers and skia-graphite-headers artifacts to ./cpp/
+if (GRAPHITE) {
+  [`skia${suffix}-headers`].forEach((headerArtifact) => {
+    const source = `./artifacts/${headerArtifact}`;
+    const target = "./cpp";
+    if (existsSync(source)) {
+      copyRecursiveSync(source, target);
+      console.log(`Copied headers from ${source} to ${target}`);
+    } else {
+      console.log(`Header artifact ${source} not found, skipping.`);
+    }
+  });
+}
 
 console.log("Done copying artifacts.");
