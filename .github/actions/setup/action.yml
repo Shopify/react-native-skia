@@ -38,6 +38,8 @@ runs:
       if: steps.yarn-cache.outputs.cache-hit != 'true'
       run: yarn install --immutable
       shell: bash
+      env:
+        SK_GRAPHITE: ${{ inputs.graphite == 'true' && '1' || '' }}
 
     - name: Download Skia Binary Artifacts
       if: ${{ inputs.download_skia == 'true' }}
@@ -53,9 +55,13 @@ runs:
       working-directory: packages/skia
       run: yarn workflow-copy-libs
       shell: bash
+      env:
+        SK_GRAPHITE: ${{ inputs.graphite == 'true' && '1' || '' }}
 
     - name: Copy Skia Headers
       if: ${{ inputs.download_skia == 'true' }}
       working-directory: packages/skia
       run: yarn copy-skia-headers
       shell: bash
+      env:
+        SK_GRAPHITE: ${{ inputs.graphite == 'true' && '1' || '' }}
