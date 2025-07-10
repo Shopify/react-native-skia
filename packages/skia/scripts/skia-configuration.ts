@@ -263,6 +263,23 @@ const copyModule = (module: string) => [
   `cp -a ../../externals/skia/modules/${module}/include/. ./cpp/skia/modules/${module}/include`,
 ];
 
+const getFirstAvailableTarget = () => {
+  // Use the same logic as build-skia.ts to get the first available target
+  const platforms = Object.keys(configurations) as PlatformName[];
+  
+  for (const platformName of platforms) {
+    const configuration = configurations[platformName];
+    const targetNames = Object.keys(configuration.targets);
+    
+    if (targetNames.length > 0) {
+      return `${platformName}/${targetNames[0]}`;
+    }
+  }
+  
+  // Fallback to a sensible default
+  return 'android/arm64';
+};
+
 export const copyHeaders = () => {
   process.chdir(PackageRoot);
   [
@@ -281,7 +298,7 @@ export const copyHeaders = () => {
           "cp -a ../../externals/skia/src/gpu/graphite/ResourceTypes.h ./cpp/skia/src/gpu/graphite/.",
           "cp -a ../../externals/skia/src/gpu/graphite/TextureProxyView.h ./cpp/skia/src/gpu/graphite/.",
 
-          "cp -a ../../externals/skia/out/android/arm/gen/third_party/externals/dawn/include/. ./cpp/dawn/include",
+          `cp -a ../../externals/skia/out/${getFirstAvailableTarget()}/gen/third_party/externals/dawn/include/. ./cpp/dawn/include`,
           "cp -a ../../externals/skia/third_party/externals/dawn/include/. ./cpp/dawn/include",
           "cp -a ../../externals/skia/third_party/externals/dawn/include/. ./cpp/dawn/include",
 
