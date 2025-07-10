@@ -13,7 +13,7 @@
 #include <thread>
 #include <unordered_map>
 
-#include "WindowContext.h"
+#include "RNWindowContext.h"
 #include "gl/Display.h"
 
 #pragma clang diagnostic push
