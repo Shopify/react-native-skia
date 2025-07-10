@@ -81,4 +81,18 @@ destinations.forEach((d, i) => {
 console.log("Copying Apple files...");
 copyFiles(`skia${suffix}-apple-xcframeworks`, "./libs/apple", appleFiles);
 
+// Copy skia-headers and skia-graphite-headers artifacts to ./cpp/
+[`skia${suffix}-headers`].forEach((headerArtifact) => {
+  const source = `./artifacts/${headerArtifact}`;
+  const target = "./cpp";
+  if (existsSync(source)) {
+    copyRecursiveSync(source, target);
+    console.log(`Copied headers from ${source} to ${target}`);
+  } else {
+    console.log(`Header artifact ${source} not found, skipping.`);
+  }
+});
+
 console.log("Done copying artifacts.");
+
+
