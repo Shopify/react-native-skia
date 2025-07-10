@@ -85,7 +85,7 @@ if(SK_GRAPHITE)
     add_definitions(-DSK_GRAPHITE)
     set(BACKEND_SOURCES
     #TODO: is this source needed to be added?
-        "${PROJECT_SOURCE_DIR}/../cpp/rnskia/DawnWindowContext.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnskia/RNDawnWindowContext.cpp"
     )
 else()
     add_definitions(-DSK_GL -DSK_GANESH)

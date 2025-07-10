@@ -2,7 +2,7 @@
 
 #import <MetalKit/MetalKit.h>
 
-#include "WindowContext.h"
+#include "RNWindowContext.h"
 
 class SkiaMetalContext;
 

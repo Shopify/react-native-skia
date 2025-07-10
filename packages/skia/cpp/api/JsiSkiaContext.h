@@ -14,7 +14,7 @@
 #include "JsiSkRect.h"
 #include "JsiSkTypeface.h"
 
-#include "WindowContext.h"
+#include "RNWindowContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

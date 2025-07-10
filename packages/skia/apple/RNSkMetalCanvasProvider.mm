@@ -3,7 +3,7 @@
 #import "RNSkLog.h"
 
 #if defined(SK_GRAPHITE)
-#import "DawnContext.h"
+#import "RNDawnContext.h"
 #else
 #import "MetalContext.h"
 #endif

@@ -12,7 +12,7 @@
 #include "JsiSkImage.h"
 
 #if defined(SK_GRAPHITE)
-#include "DawnContext.h"
+#include "RNDawnContext.h"
 #endif
 
 #pragma clang diagnostic push

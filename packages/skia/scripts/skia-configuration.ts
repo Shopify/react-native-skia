@@ -71,6 +71,7 @@ export const commonArgs = [
   //["skia_enable_ganesh", !GRAPHITE],
   ["skia_enable_graphite", GRAPHITE],
   ["skia_use_dawn", GRAPHITE],
+  ["skia_use_cpp20", GRAPHITE],
 ];
 
 export type PlatformName = "apple" | "android";
@@ -291,6 +292,7 @@ export const copyHeaders = () => {
           "rm -rf ./cpp/dawn/include/dawn/webgpu.h",
           "rm -rf ./cpp/dawn/include/dawn/webgpu_cpp.h",
           "rm -rf ./cpp/dawn/include/dawn/wire",
+          "rm -rf ./cpp/dawn/include/webgpu/webgpu_cpp_print.h",
         ]
       : []),
 
