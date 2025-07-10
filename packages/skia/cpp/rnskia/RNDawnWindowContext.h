@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RNDawnUtils.h"
-#include "WindowContext.h"
+#include "RNWindowContext.h"
 
 #include "dawn/native/MetalBackend.h"
 #include "webgpu/webgpu_cpp.h"

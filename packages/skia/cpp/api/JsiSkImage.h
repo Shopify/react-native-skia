@@ -14,7 +14,7 @@
 #include "RNSkTypedArray.h"
 
 #if defined(SK_GRAPHITE)
-#include "DawnContext.h"
+#include "RNDawnContext.h"
 #include "include/gpu/graphite/Context.h"
 #endif
 

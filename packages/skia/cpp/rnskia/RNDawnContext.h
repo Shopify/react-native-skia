@@ -3,7 +3,7 @@
 #include <memory>
 #include <mutex>
 
-#include "DawnWindowContext.h"
+#include "RNDawnWindowContext.h"
 #include "RNImageProvider.h"
 #include "RNDawnUtils.h"
 

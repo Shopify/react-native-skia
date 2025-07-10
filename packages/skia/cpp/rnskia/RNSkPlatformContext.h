@@ -10,7 +10,7 @@
 #include <utility>
 
 #include "RNSkVideo.h"
-#include "WindowContext.h"
+#include "RNWindowContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
