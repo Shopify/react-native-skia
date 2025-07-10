@@ -292,6 +292,7 @@ export const copyHeaders = () => {
           "rm -rf ./cpp/dawn/include/dawn/webgpu.h",
           "rm -rf ./cpp/dawn/include/dawn/webgpu_cpp.h",
           "rm -rf ./cpp/dawn/include/dawn/wire",
+          "rm -rf ./cpp/dawn/include/webgpu/webgpu_cpp_print.h",
         ]
       : []),
 

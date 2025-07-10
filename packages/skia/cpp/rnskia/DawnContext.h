@@ -3,9 +3,9 @@
 #include <memory>
 #include <mutex>
 
-#include "DawnUtils.h"
 #include "DawnWindowContext.h"
-#include "ImageProvider.h"
+#include "RNImageProvider.h"
+#include "RNDawnUtils.h"
 
 #include "include/core/SkData.h"
 #include "include/gpu/graphite/BackendTexture.h"

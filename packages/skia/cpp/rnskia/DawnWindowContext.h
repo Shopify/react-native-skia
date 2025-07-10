@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DawnUtils.h"
+#include "RNDawnUtils.h"
 #include "WindowContext.h"
 
 #include "dawn/native/MetalBackend.h"
