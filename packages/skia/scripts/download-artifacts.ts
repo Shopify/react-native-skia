@@ -3,16 +3,21 @@ import fs from "fs";
 import path from "path";
 
 import { $ } from "./utils";
+import { GRAPHITE } from "./skia-configuration";
 
 const repo = "shopify/react-native-skia";
-const workflow = "build-skia.yml";
+const workflow = `build-skia${GRAPHITE ? "-graphite" : ""}.yml`;
+const prefix = GRAPHITE ? "skia-graphite" : "skia";
 const names = [
-  "skia-android-arm",
-  "skia-android-arm-64",
-  "skia-android-arm-x64",
-  "skia-android-arm-x86",
-  "skia-apple-xcframeworks",
+  `${prefix}-android-arm`,
+  `${prefix}-android-arm-64`,
+  `${prefix}-android-arm-x64`,
+  `${prefix}-android-arm-x86`,
+  `${prefix}-apple-xcframeworks`,
 ];
+if (GRAPHITE) {
+  names.push("skia-graphite-headers");
+}
 //const branch = "main";
 
 const artifactsDir = path.resolve(
