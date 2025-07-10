@@ -1,13 +1,14 @@
 import { existsSync } from "fs";
 
 import { ensureFolderExists, copyRecursiveSync } from "./utils";
+import { GRAPHITE } from "./skia-configuration";
 /**
  * This build script prepares the npm build command by copying
  * the Skia Binaries from the artifact folder into the libs folder
  * in the checkout directory. This build script is run by the
  * build-npm.yml workflow and does not require anything.
  */
-
+const suffix = GRAPHITE ? "-graphite" : "";
 console.log("Copying Skia Binaries from artifacts to libs folder");
 
 const sources = [
@@ -78,5 +79,17 @@ destinations.forEach((d, i) => {
 
 console.log("Copying Apple files...");
 copyFiles("skia-apple-xcframeworks", "./libs/apple", appleFiles);
+
+// Copy skia-headers and skia-graphite-headers artifacts to ./cpp/
+[`skia${suffix}-headers`].forEach((headerArtifact) => {
+  const source = `./artifacts/${headerArtifact}`;
+  const target = "./cpp";
+  if (existsSync(source)) {
+    copyRecursiveSync(source, target);
+    console.log(`Copied headers from ${source} to ${target}`);
+  } else {
+    console.log(`Header artifact ${source} not found, skipping.`);
+  }
+});
 
 console.log("Done copying artifacts.");

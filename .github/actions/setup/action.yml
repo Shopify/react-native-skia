@@ -50,8 +50,8 @@ runs:
       run: yarn workflow-copy-libs
       shell: bash
 
-    - name: Copy Skia Headers
-      if: ${{ inputs.download_skia == 'true' }}
-      working-directory: packages/skia
-      run: yarn copy-skia-headers
-      shell: bash
+    # - name: Copy Skia Headers
+    #   if: ${{ inputs.download_skia == 'true' }}
+    #   working-directory: packages/skia
+    #   run: yarn copy-skia-headers
+    #   shell: bash
