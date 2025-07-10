@@ -169,6 +169,55 @@ const buildXCFrameworks = () => {
 };
 
 (async () => {
+  // Parse command line arguments
+  const args = process.argv.slice(2);
+  const defaultTargets = Object.keys(configurations);
+  const targetSpecs = args.length > 0 ? args : defaultTargets;
+  
+  // Parse target specifications (platform or platform-target format)
+  const buildTargets: { platform: PlatformName; targets?: string[] }[] = [];
+  const validPlatforms = Object.keys(configurations);
+  
+  for (const spec of targetSpecs) {
+    if (spec.includes('-')) {
+      // Handle platform-target format (e.g., android-arm, android-arm64)
+      const [platform, target] = spec.split('-', 2);
+      if (!validPlatforms.includes(platform)) {
+        console.error(`❌ Invalid platform: ${platform}`);
+        console.error(`Valid platforms are: ${validPlatforms.join(', ')}`);
+        exit(1);
+      }
+      
+      const platformConfig = configurations[platform as PlatformName];
+      if (!(target in platformConfig.targets)) {
+        console.error(`❌ Invalid target '${target}' for platform '${platform}'`);
+        console.error(`Valid targets for ${platform}: ${Object.keys(platformConfig.targets).join(', ')}`);
+        exit(1);
+      }
+      
+      // Find existing platform entry or create new one
+      let existingPlatform = buildTargets.find(bt => bt.platform === platform);
+      if (!existingPlatform) {
+        existingPlatform = { platform: platform as PlatformName, targets: [] };
+        buildTargets.push(existingPlatform);
+      }
+      if (!existingPlatform.targets) {
+        existingPlatform.targets = [];
+      }
+      existingPlatform.targets.push(target);
+    } else {
+      // Handle platform-only format (e.g., android, apple)
+      if (!validPlatforms.includes(spec)) {
+        console.error(`❌ Invalid platform: ${spec}`);
+        console.error(`Valid platforms are: ${validPlatforms.join(', ')}`);
+        exit(1);
+      }
+      buildTargets.push({ platform: spec as PlatformName });
+    }
+  }
+
+  console.log(`🎯 Building targets: ${targetSpecs.join(', ')}`);
+  
   if (GRAPHITE) {
     console.log("🪨 Skia Graphite");
     console.log(
@@ -177,15 +226,20 @@ const buildXCFrameworks = () => {
   } else {
     console.log("🐘 Skia Ganesh");
   }
-  ["ANDROID_NDK", "ANDROID_HOME"].forEach((name) => {
-    // Test for existence of Android SDK
-    if (!process.env[name]) {
-      console.log(`${name} not set.`);
-      exit(1);
-    } else {
-      console.log(`✅ ${name}`);
-    }
-  });
+  
+  // Check Android environment variables if android is in target platforms
+  const hasAndroid = buildTargets.some(bt => bt.platform === "android");
+  if (hasAndroid) {
+    ["ANDROID_NDK", "ANDROID_HOME"].forEach((name) => {
+      // Test for existence of Android SDK
+      if (!process.env[name]) {
+        console.log(`${name} not set.`);
+        exit(1);
+      } else {
+        console.log(`✅ ${name}`);
+      }
+    });
+  }
 
   // Run glient sync
   console.log("Running gclient sync...");
@@ -194,15 +248,22 @@ const buildXCFrameworks = () => {
   $("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
   console.log("gclient sync done");
   $(`rm -rf ${PackageRoot}/libs`);
-  for (const key of mapKeys(configurations)) {
-    const configuration = configurations[key];
-    for (const target of mapKeys(configuration.targets)) {
-      await configurePlatform(key as PlatformName, configuration, target);
-      await buildPlatform(key as PlatformName, target);
+  
+  // Build specified platforms and targets
+  for (const buildTarget of buildTargets) {
+    const { platform, targets } = buildTarget;
+    const configuration = configurations[platform];
+    console.log(`\n🔨 Building platform: ${platform}`);
+    
+    const targetsToProcess = targets || mapKeys(configuration.targets);
+    
+    for (const target of targetsToProcess) {
+      await configurePlatform(platform, configuration, target);
+      await buildPlatform(platform, target);
       process.chdir(ProjectRoot);
-      if (key === "android") {
+      if (platform === "android") {
         copyLib(
-          key,
+          platform,
           target,
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
@@ -212,6 +273,12 @@ const buildXCFrameworks = () => {
       }
     }
   }
-  buildXCFrameworks();
+  
+  // Only build XCFrameworks if apple platform is included
+  const hasApple = buildTargets.some(bt => bt.platform === "apple");
+  if (hasApple) {
+    buildXCFrameworks();
+  }
+  
   copyHeaders();
 })();
