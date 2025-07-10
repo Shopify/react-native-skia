@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-android-ubuntu:
+  build-android-ubuntu-graphite:
     runs-on: ubuntu-latest
     continue-on-error: true
     env:
@@ -81,7 +81,7 @@ jobs:
         run: |
           yarn turbo run build:android --concurrency 1 --filter=example --force
 
-  build-android:
+  build-android-graphite:
     runs-on: macos-latest-large
     continue-on-error: true
     env:
@@ -153,8 +153,8 @@ jobs:
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
 
-  test-android:
-    needs: build-android
+  test-android-graphite:
+    needs: build-android-graphite
     runs-on: macos-latest-large
     env:
       TURBO_CACHE_DIR: .turbo/android
@@ -229,7 +229,7 @@ jobs:
           path: apps/docs/static/
           name: tests-docs-screenshots
 
-  build-test-ios:
+  build-test-ios-graphite:
     runs-on: macos-latest-xlarge
     env:
       TURBO_CACHE_DIR: .turbo/ios
