@@ -180,8 +180,10 @@ const buildXCFrameworks = () => {
   
   for (const spec of targetSpecs) {
     if (spec.includes('-')) {
-      // Handle platform-target format (e.g., android-arm, android-arm64)
-      const [platform, target] = spec.split('-', 2);
+      // Handle platform-target format (e.g., android-arm, android-arm64, apple-arm64-iphoneos)
+      const parts = spec.split('-');
+      const platform = parts[0];
+      
       if (!validPlatforms.includes(platform)) {
         console.error(`❌ Invalid platform: ${platform}`);
         console.error(`Valid platforms are: ${validPlatforms.join(', ')}`);
@@ -189,6 +191,16 @@ const buildXCFrameworks = () => {
       }
       
       const platformConfig = configurations[platform as PlatformName];
+      let target: string;
+      
+      if (platform === 'apple' && parts.length > 2) {
+        // Handle apple-arm64-iphoneos format
+        target = parts.slice(1).join('-');
+      } else {
+        // Handle android-arm format
+        target = parts[1];
+      }
+      
       if (!(target in platformConfig.targets)) {
         console.error(`❌ Invalid target '${target}' for platform '${platform}'`);
         console.error(`Valid targets for ${platform}: ${Object.keys(platformConfig.targets).join(', ')}`);
@@ -274,10 +286,16 @@ const buildXCFrameworks = () => {
     }
   }
   
-  // Only build XCFrameworks if apple platform is included
+  // Only build XCFrameworks if building all Apple targets (not individual ones)
   const hasApple = buildTargets.some(bt => bt.platform === "apple");
-  if (hasApple) {
+  const hasIndividualAppleTargets = buildTargets.some(bt => bt.platform === "apple" && bt.targets);
+  
+  if (hasApple && !hasIndividualAppleTargets) {
+    console.log("\n🏗️ Building XCFrameworks...");
     buildXCFrameworks();
+  } else if (hasIndividualAppleTargets) {
+    console.log("\n⚠️ Skipping XCFramework build - individual Apple targets specified");
+    console.log("💡 Use 'yarn build-xcframeworks' after all Apple targets are built");
   }
   
   copyHeaders();

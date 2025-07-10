@@ -6,9 +6,32 @@ jobs:
     strategy:
       matrix:
         include:
-          - target: "apple"
-            artifact_name: "skia-apple-xcframeworks"
-            artifact_path: "./packages/skia/libs/apple/*.xcframework"
+          # Apple individual targets
+          - target: "apple-arm64-iphoneos"
+            artifact_name: "skia-apple-arm64-iphoneos"
+            artifact_path: "./externals/skia/out/apple/arm64-iphoneos/*.a"
+          - target: "apple-arm64-iphonesimulator"
+            artifact_name: "skia-apple-arm64-iphonesimulator"
+            artifact_path: "./externals/skia/out/apple/arm64-iphonesimulator/*.a"
+          - target: "apple-x64-iphonesimulator"
+            artifact_name: "skia-apple-x64-iphonesimulator"
+            artifact_path: "./externals/skia/out/apple/x64-iphonesimulator/*.a"
+          - target: "apple-arm64-macosx"
+            artifact_name: "skia-apple-arm64-macosx"
+            artifact_path: "./externals/skia/out/apple/arm64-macosx/*.a"
+          - target: "apple-x64-macosx"
+            artifact_name: "skia-apple-x64-macosx"
+            artifact_path: "./externals/skia/out/apple/x64-macosx/*.a"
+          - target: "apple-arm64-tvos"
+            artifact_name: "skia-apple-arm64-tvos"
+            artifact_path: "./externals/skia/out/apple/arm64-tvos/*.a"
+          - target: "apple-arm64-tvsimulator"
+            artifact_name: "skia-apple-arm64-tvsimulator"
+            artifact_path: "./externals/skia/out/apple/arm64-tvsimulator/*.a"
+          - target: "apple-x64-tvsimulator"
+            artifact_name: "skia-apple-x64-tvsimulator"
+            artifact_path: "./externals/skia/out/apple/x64-tvsimulator/*.a"
+          # Android targets
           - target: "android-arm"
             artifact_name: "skia-android-arm"
             artifact_path: |
@@ -102,3 +125,65 @@ jobs:
         with:
           name: ${{ matrix.artifact_name }}
           path: ${{ matrix.artifact_path }}
+
+  package-apple:
+    name: Package Apple XCFrameworks
+    runs-on: macos-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    env:
+      GRAPHITE: ${{ contains(github.workflow, 'Graphite') }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: recursive
+
+      - name: Download all Apple build artifacts
+        uses: actions/download-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          pattern: skia-apple-*
+          path: artifacts
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          download_skia: 'false'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Copy artifacts to expected locations
+        working-directory: ./externals/skia
+        run: |
+          # Copy individual architecture files to expected locations
+          mkdir -p out/apple/arm64-iphoneos out/apple/arm64-iphonesimulator out/apple/x64-iphonesimulator 
+          mkdir -p out/apple/arm64-macosx out/apple/x64-macosx
+          mkdir -p out/apple/arm64-tvos out/apple/arm64-tvsimulator out/apple/x64-tvsimulator
+          
+          cp artifacts/skia-apple-arm64-iphoneos/*.a out/apple/arm64-iphoneos/
+          cp artifacts/skia-apple-arm64-iphonesimulator/*.a out/apple/arm64-iphonesimulator/
+          cp artifacts/skia-apple-x64-iphonesimulator/*.a out/apple/x64-iphonesimulator/
+          cp artifacts/skia-apple-arm64-macosx/*.a out/apple/arm64-macosx/
+          cp artifacts/skia-apple-x64-macosx/*.a out/apple/x64-macosx/
+          
+          # Copy tvOS artifacts if they exist (not present in Graphite builds)
+          if [ -d "artifacts/skia-apple-arm64-tvos" ]; then
+            cp artifacts/skia-apple-arm64-tvos/*.a out/apple/arm64-tvos/
+            cp artifacts/skia-apple-arm64-tvsimulator/*.a out/apple/arm64-tvsimulator/
+            cp artifacts/skia-apple-x64-tvsimulator/*.a out/apple/x64-tvsimulator/
+          fi
+
+      - name: Build XCFrameworks
+        working-directory: ./packages/skia
+        env:
+          SK_GRAPHITE: ${{ contains(github.workflow, 'Graphite') && '1' || '' }}
+        run: yarn build-xcframeworks
+
+      - name: Copy headers
+        working-directory: ./packages/skia
+        run: yarn copy-skia-headers
+
+      - name: Upload Apple XCFrameworks
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: skia-apple-xcframeworks
+          path: ./packages/skia/libs/apple/*.xcframework

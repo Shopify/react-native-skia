@@ -44,6 +44,7 @@
     "build": "bob build && merge-dirs lib/typescript/src lib/commonjs && merge-dirs lib/typescript/src lib/module",
     "clean-skia": "yarn rimraf ./libs && yarn rimraf ../../externals/skia/out",
     "build-skia": "ts-node ./scripts/build-skia.ts",
+    "build-xcframeworks": "ts-node ./scripts/build-xcframeworks.ts",
     "copy-skia-headers": "ts-node ./scripts/copy-skia-headers.ts",
     "clang-format": "yarn clang-format-ios && yarn clang-format-android && yarn clang-format-common",
     "clang-format-ios": "find apple/ -iname '*.h' -o -iname '*.mm' -o -iname '*.cpp' | xargs clang-format -i",
