@@ -271,13 +271,22 @@ const getFirstAvailableTarget = () => {
     const configuration = configurations[platformName];
     const targetNames = Object.keys(configuration.targets);
     
-    if (targetNames.length > 0) {
-      return `${platformName}/${targetNames[0]}`;
+    for (const targetName of targetNames) {
+      const targetPath = `${platformName}/${targetName}`;
+      const dawnPath = `../../externals/skia/out/${targetPath}/gen/third_party/externals/dawn`;
+      
+      try {
+        require('fs').statSync(dawnPath);
+        return targetPath;
+      } catch (e) {
+        // Dawn folder doesn't exist for this target, try next
+        continue;
+      }
     }
   }
   
-  // Fallback to a sensible default
-  return 'android/arm64';
+  // No target found with dawn folder
+  throw new Error('No target found with dawn folder at ../../externals/skia/out/{target}/gen/third_party/externals/dawn');
 };
 
 export const copyHeaders = () => {
