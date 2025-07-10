@@ -263,6 +263,32 @@ const copyModule = (module: string) => [
   `cp -a ../../externals/skia/modules/${module}/include/. ./cpp/skia/modules/${module}/include`,
 ];
 
+const findDawnIncludePath = () => {
+  const fs = require('fs');
+  const path = require('path');
+  
+  const outDir = path.join(SkiaSrc, 'out');
+  const dawnIncludePath = 'gen/third_party/externals/dawn/include';
+  
+  // Search in both android and apple platforms
+  const platforms = ['android', 'apple'];
+  
+  for (const platform of platforms) {
+    const platformDir = path.join(outDir, platform);
+    if (!fs.existsSync(platformDir)) continue;
+    
+    const targets = fs.readdirSync(platformDir);
+    for (const target of targets) {
+      const targetPath = path.join(platformDir, target, dawnIncludePath);
+      if (fs.existsSync(targetPath)) {
+        return path.join(platform, target);
+      }
+    }
+  }
+  
+  throw new Error('Dawn include directory not found in any build target. Make sure Skia is built with Graphite/Dawn support.');
+};
+
 export const copyHeaders = () => {
   process.chdir(PackageRoot);
   [
@@ -281,7 +307,7 @@ export const copyHeaders = () => {
           "cp -a ../../externals/skia/src/gpu/graphite/ResourceTypes.h ./cpp/skia/src/gpu/graphite/.",
           "cp -a ../../externals/skia/src/gpu/graphite/TextureProxyView.h ./cpp/skia/src/gpu/graphite/.",
 
-          "cp -a ../../externals/skia/out/android/arm/gen/third_party/externals/dawn/include/. ./cpp/dawn/include",
+          `cp -a ../../externals/skia/out/${findDawnIncludePath()}/gen/third_party/externals/dawn/include/. ./cpp/dawn/include`,
           "cp -a ../../externals/skia/third_party/externals/dawn/include/. ./cpp/dawn/include",
           "cp -a ../../externals/skia/third_party/externals/dawn/include/. ./cpp/dawn/include",
 
