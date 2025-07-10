@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "RNSkView.h"
-#include "WindowContext.h"
+#include "RNWindowContext.h"
 
 #include <android/native_window.h>
 
