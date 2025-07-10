@@ -50,6 +50,12 @@ runs:
         path: packages/skia/artifacts
         branch: main
 
+    - name: Copy Skia Headers
+      if: ${{ inputs.download_skia == 'true' }}
+      working-directory: packages/skia
+      run: yarn copy-skia-headers
+      shell: bash
+
     - name: Copy Artifacts to libs folder
       if: ${{ inputs.download_skia == 'true' }}
       working-directory: packages/skia
@@ -57,9 +63,3 @@ runs:
       shell: bash
       env:
         SK_GRAPHITE: ${{ inputs.graphite == 'true' && '1' || '' }}
-
-    - name: Copy Skia Headers
-      if: ${{ inputs.download_skia == 'true' }}
-      working-directory: packages/skia
-      run: yarn copy-skia-headers
-      shell: bash
