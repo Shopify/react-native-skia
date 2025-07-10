@@ -1,5 +1,6 @@
 export * from "./Reanimated";
 export * from "./API";
+export * from "./LiquidGlass";
 export * from "./Breathe";
 export * from "./Filters";
 export * from "./Gooey";
