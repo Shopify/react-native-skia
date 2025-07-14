@@ -174,6 +174,7 @@ export const importSkia = (): typeof SkiaExports => {
   const skia = require("../../skia");
   const renderer = require("../../renderer");
   const offscreen = require("../Offscreen");
+  const nodes = require("../../dom/nodes");
   // TODO: to remove
   const animation = require("../../animation");
   return {
@@ -181,6 +182,7 @@ export const importSkia = (): typeof SkiaExports => {
     ...renderer,
     ...animation,
     ...offscreen,
+    ...nodes,
   };
 };
 

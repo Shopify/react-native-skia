@@ -5,7 +5,6 @@ import React from "react";
 
 import { processResult } from "../../__tests__/setup";
 import { Circle, FitBox, Rect, Image, Group, fitbox } from "../components";
-import { rect2rect, fitRects } from "../../dom/nodes";
 
 import { drawOnNode, width, height, importSkia } from "./setup";
 
@@ -228,7 +227,7 @@ describe("FitBox", () => {
 
   describe("rect2rect", () => {
     test("basic scaling from unit square to double size", () => {
-      const { Skia } = importSkia();
+      const { Skia, rect2rect } = importSkia();
       const src = Skia.XYWHRect(0, 0, 1, 1);
       const dst = Skia.XYWHRect(0, 0, 2, 2);
       const result = rect2rect(src, dst);
@@ -242,7 +241,7 @@ describe("FitBox", () => {
     });
 
     test("scaling with translation", () => {
-      const { Skia } = importSkia();
+      const { Skia, rect2rect } = importSkia();
       const src = Skia.XYWHRect(0, 0, 10, 10);
       const dst = Skia.XYWHRect(5, 5, 20, 20);
       const result = rect2rect(src, dst);
@@ -256,7 +255,7 @@ describe("FitBox", () => {
     });
 
     test("scaling with non-zero source origin", () => {
-      const { Skia } = importSkia();
+      const { Skia, rect2rect } = importSkia();
       const src = Skia.XYWHRect(10, 10, 20, 20);
       const dst = Skia.XYWHRect(0, 0, 40, 40);
       const result = rect2rect(src, dst);
@@ -270,7 +269,7 @@ describe("FitBox", () => {
     });
 
     test("shrinking transformation", () => {
-      const { Skia } = importSkia();
+      const { Skia, rect2rect } = importSkia();
       const src = Skia.XYWHRect(0, 0, 100, 100);
       const dst = Skia.XYWHRect(0, 0, 50, 50);
       const result = rect2rect(src, dst);
@@ -284,7 +283,7 @@ describe("FitBox", () => {
     });
 
     test("non-uniform scaling", () => {
-      const { Skia } = importSkia();
+      const { Skia, rect2rect } = importSkia();
       const src = Skia.XYWHRect(0, 0, 10, 20);
       const dst = Skia.XYWHRect(0, 0, 30, 40);
       const result = rect2rect(src, dst);
@@ -298,7 +297,7 @@ describe("FitBox", () => {
     });
 
     test("transformation with offset source and destination", () => {
-      const { Skia } = importSkia();
+      const { Skia, rect2rect } = importSkia();
       const src = Skia.XYWHRect(5, 10, 15, 20);
       const dst = Skia.XYWHRect(50, 100, 30, 40);
       const result = rect2rect(src, dst);
@@ -312,7 +311,7 @@ describe("FitBox", () => {
     });
 
     test("identity transformation", () => {
-      const { Skia } = importSkia();
+      const { Skia, rect2rect } = importSkia();
       const src = Skia.XYWHRect(10, 20, 30, 40);
       const dst = Skia.XYWHRect(10, 20, 30, 40);
       const result = rect2rect(src, dst);
@@ -326,7 +325,7 @@ describe("FitBox", () => {
     });
 
     test("fractional scaling", () => {
-      const { Skia } = importSkia();
+      const { Skia, rect2rect } = importSkia();
       const src = Skia.XYWHRect(0, 0, 3, 4);
       const dst = Skia.XYWHRect(0, 0, 1.5, 2);
       const result = rect2rect(src, dst);
@@ -340,7 +339,7 @@ describe("FitBox", () => {
     });
 
     test("complex transformation with negative coordinates", () => {
-      const { Skia } = importSkia();
+      const { Skia, rect2rect } = importSkia();
       const src = Skia.XYWHRect(-10, -20, 20, 30);
       const dst = Skia.XYWHRect(10, 5, 40, 60);
       const result = rect2rect(src, dst);
@@ -354,7 +353,7 @@ describe("FitBox", () => {
     });
 
     test("very small dimensions", () => {
-      const { Skia } = importSkia();
+      const { Skia, rect2rect } = importSkia();
       const src = Skia.XYWHRect(0, 0, 0.1, 0.1);
       const dst = Skia.XYWHRect(0, 0, 1, 1);
       const result = rect2rect(src, dst);
@@ -368,7 +367,7 @@ describe("FitBox", () => {
 
   describe("fitRects", () => {
     test("fill mode - source fills destination completely", () => {
-      const { Skia } = importSkia();
+      const { Skia, fitRects } = importSkia();
       const srcRect = Skia.XYWHRect(0, 0, 100, 50);
       const dstRect = Skia.XYWHRect(10, 20, 200, 100);
       const result = fitRects("fill", srcRect, dstRect);
@@ -388,7 +387,7 @@ describe("FitBox", () => {
     });
 
     test("contain mode - source fits inside destination maintaining aspect ratio", () => {
-      const { Skia } = importSkia();
+      const { Skia, fitRects } = importSkia();
       const srcRect = Skia.XYWHRect(0, 0, 100, 50);
       const dstRect = Skia.XYWHRect(0, 0, 200, 200);
       const result = fitRects("contain", srcRect, dstRect);
@@ -407,7 +406,7 @@ describe("FitBox", () => {
     });
 
     test("cover mode - source covers destination completely", () => {
-      const { Skia } = importSkia();
+      const { Skia, fitRects } = importSkia();
       const srcRect = Skia.XYWHRect(0, 0, 100, 50);
       const dstRect = Skia.XYWHRect(0, 0, 100, 100);
       const result = fitRects("cover", srcRect, dstRect);
@@ -427,7 +426,7 @@ describe("FitBox", () => {
     });
 
     test("fitWidth mode - fits to width, adjusts height", () => {
-      const { Skia } = importSkia();
+      const { Skia, fitRects } = importSkia();
       const srcRect = Skia.XYWHRect(0, 0, 100, 50);
       const dstRect = Skia.XYWHRect(0, 0, 200, 200);
       const result = fitRects("fitWidth", srcRect, dstRect);
@@ -446,7 +445,7 @@ describe("FitBox", () => {
     });
 
     test("fitHeight mode - fits to height, adjusts width", () => {
-      const { Skia } = importSkia();
+      const { Skia, fitRects } = importSkia();
       const srcRect = Skia.XYWHRect(0, 0, 100, 50);
       const dstRect = Skia.XYWHRect(0, 0, 200, 200);
       const result = fitRects("fitHeight", srcRect, dstRect);
@@ -465,7 +464,7 @@ describe("FitBox", () => {
     });
 
     test("none mode - uses minimum dimensions", () => {
-      const { Skia } = importSkia();
+      const { Skia, fitRects } = importSkia();
       const srcRect = Skia.XYWHRect(0, 0, 100, 50);
       const dstRect = Skia.XYWHRect(0, 0, 80, 120);
       const result = fitRects("none", srcRect, dstRect);
@@ -483,7 +482,7 @@ describe("FitBox", () => {
     });
 
     test("scaleDown mode - scales down if needed", () => {
-      const { Skia } = importSkia();
+      const { Skia, fitRects } = importSkia();
       const srcRect = Skia.XYWHRect(0, 0, 200, 100);
       const dstRect = Skia.XYWHRect(0, 0, 100, 80);
       const result = fitRects("scaleDown", srcRect, dstRect);
@@ -503,7 +502,7 @@ describe("FitBox", () => {
     });
 
     test("scaleDown mode - no scaling if source is smaller", () => {
-      const { Skia } = importSkia();
+      const { Skia, fitRects } = importSkia();
       const srcRect = Skia.XYWHRect(0, 0, 50, 25);
       const dstRect = Skia.XYWHRect(0, 0, 100, 100);
       const result = fitRects("scaleDown", srcRect, dstRect);
@@ -523,7 +522,7 @@ describe("FitBox", () => {
     });
 
     test("with offset source rectangle", () => {
-      const { Skia } = importSkia();
+      const { Skia, fitRects } = importSkia();
       const srcRect = Skia.XYWHRect(50, 100, 100, 50);
       const dstRect = Skia.XYWHRect(10, 20, 200, 100);
       const result = fitRects("fill", srcRect, dstRect);
@@ -543,7 +542,7 @@ describe("FitBox", () => {
     });
 
     test("with very small source rectangle", () => {
-      const { Skia } = importSkia();
+      const { Skia, fitRects } = importSkia();
       const srcRect = Skia.XYWHRect(0, 0, 1, 1);
       const dstRect = Skia.XYWHRect(0, 0, 100, 100);
       const result = fitRects("contain", srcRect, dstRect);
@@ -563,7 +562,7 @@ describe("FitBox", () => {
     });
 
     test("with zero dimensions - should return empty sizes", () => {
-      const { Skia } = importSkia();
+      const { Skia, fitRects } = importSkia();
       const srcRect = Skia.XYWHRect(0, 0, 0, 100);
       const dstRect = Skia.XYWHRect(0, 0, 100, 100);
       const result = fitRects("fill", srcRect, dstRect);
@@ -583,7 +582,7 @@ describe("FitBox", () => {
     });
 
     test("cover mode with wide source rectangle", () => {
-      const { Skia } = importSkia();
+      const { Skia, fitRects } = importSkia();
       const srcRect = Skia.XYWHRect(0, 0, 200, 50);
       const dstRect = Skia.XYWHRect(0, 0, 100, 100);
       const result = fitRects("cover", srcRect, dstRect);
@@ -603,7 +602,7 @@ describe("FitBox", () => {
     });
 
     test("cover mode with tall destination rectangle", () => {
-      const { Skia } = importSkia();
+      const { Skia, fitRects } = importSkia();
       const srcRect = Skia.XYWHRect(0, 0, 100, 100);
       const dstRect = Skia.XYWHRect(0, 0, 50, 200);
       const result = fitRects("cover", srcRect, dstRect);
