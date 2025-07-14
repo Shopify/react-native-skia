@@ -621,4 +621,58 @@ describe("FitBox", () => {
       });
     });
   });
+  describe("Path bounds", () => {
+    test("computes bounds for cubic with extreme control points", () => {
+      const { Skia } = importSkia();
+      const path = Skia.Path.Make();
+      path.moveTo(0, 0);
+      path.cubicTo(-50, 100, 150, -50, 100, 100);
+      const bounds = path.computeTightBounds();
+      // bounds is -8.09475040435791 0 116.1894998550415 100
+      expect(bounds.x).toBeCloseTo(-8.09475, 2);
+      expect(bounds.y).toBeCloseTo(0, 2);
+      expect(bounds.width).toBeCloseTo(116.1895, 2);
+      expect(bounds.height).toBeCloseTo(100, 2);
+    });
+    test("computes bounds for cubic forming loop", () => {
+      const { Skia } = importSkia();
+      const path = Skia.Path.Make();
+      path.moveTo(0, 0);
+      path.cubicTo(100, 0, 100, 100, 0, 50);
+      const bounds = path.computeTightBounds();
+      expect(bounds.x).toBeCloseTo(0, 2);
+      expect(bounds.y).toBeCloseTo(0, 2);
+      expect(bounds.width).toBeCloseTo(75, 2);
+      expect(bounds.height).toBeCloseTo(64, 2);
+    });
+    test("computes bounds for multiple cubics forming complex path", () => {
+      const { Skia } = importSkia();
+      const path = Skia.Path.Make();
+      path.moveTo(0, 50);
+      path.cubicTo(25, 0, 75, 100, 100, 50);
+      path.moveTo(100, 50);
+      path.cubicTo(125, 0, 175, 100, 200, 50);
+      path.moveTo(200, 50);
+      path.cubicTo(225, 100, 275, 0, 300, 50);
+
+      const bounds = path.computeTightBounds();
+      expect(bounds.x).toBeCloseTo(0, 2);
+      expect(bounds.y).toBeCloseTo(35.56624221801758, 2);
+      expect(bounds.width).toBeCloseTo(300, 2);
+      expect(bounds.height).toBeCloseTo(28.867511749267578, 2);
+    });
+    test("draw Skia logo", () => {
+      const skiaLogo =
+        // eslint-disable-next-line max-len
+        "M465.63 273.956C409.11 212.516 348.87 258.846 362.34 310.646C367.09 328.936 381.05 347.906 407.6 363.056C444.3 383.986 460.05 408.286 461.42 430.426C464.57 481.036 392.6 520.356 324 482.376M490 430.426C589.17 299.226 590.11 228.576 568.77 222.366C554.04 218.586 529.13 244.036 518 301.366C505.52 367.526 500.67 405.066 490 494.956C505.58 451.676 514.49 414.746 545.45 389.956C554.589 382.551 565.818 378.197 577.56 377.506C628.71 374.806 621.17 446.096 541.95 430.406M541.95 430.426C575.55 436.726 571.27 458.036 580.75 482.326C582.111 485.913 584.445 489.051 587.49 491.386C607.49 506.386 643.49 476.616 654.36 457.216C671.21 432.636 684.24 404.916 697.36 378.486M697.38 378.486C684.12 411.766 675.597 437.196 671.81 454.776C668.54 481.546 675.24 493.636 686.32 496.256C710.7 502.016 756.23 461.896 763.13 431.256C776.37 372.396 862.18 350.556 881.97 419.656M881.97 419.636C862.18 350.536 776.21 372.376 763.13 431.236C759.37 455.676 766.85 473.336 779.67 483.966C786.621 489.63 794.908 493.417 803.74 494.966C818.132 497.496 832.957 495.178 845.89 488.376C846.69 487.956 847.49 487.516 848.29 487.056C856.441 482.27 863.382 475.672 868.574 467.773C873.765 459.875 877.069 450.887 878.23 441.506C881.09 419.196 888.04 394.656 892.59 378.086M892.59 378.076C885.36 404.426 872.1 449.746 878.77 476.156C880.283 482.292 884.122 487.599 889.475 490.958C894.828 494.316 901.277 495.463 907.46 494.156C925.39 490.256 943.78 472.156 955.09 454.336M714.5 338C714.5 339.933 712.933 341.5 711 341.5C709.067 341.5 707.5 339.933 707.5 338C707.5 336.067 709.067 334.5 711 334.5C712.933 334.5 714.5 336.067 714.5 338Z";
+      const { Skia } = importSkia();
+      const path = Skia.Path.MakeFromSVGString(skiaLogo)!;
+      const bounds = path.computeTightBounds();
+      console.log(bounds.x, bounds.y, bounds.width, bounds.height);
+      expect(bounds.x).toBeCloseTo(324, 2);
+      expect(bounds.y).toBeCloseTo(222, 2);
+      expect(bounds.width).toBeCloseTo(631.09, 2);
+      expect(bounds.height).toBeCloseTo(275.55, 2);
+    });
+  });
 });
