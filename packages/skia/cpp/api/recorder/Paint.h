@@ -152,6 +152,10 @@ public:
       return;
     }
     ctx->savePaint();
+    if (standalone) {
+      SkPaint freshPaint;
+      ctx->pushPaint(freshPaint);
+    }
     auto &paint = ctx->getPaint();
     if (props.opacity.has_value()) {
       if (standalone) {
