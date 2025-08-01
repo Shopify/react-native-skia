@@ -140,7 +140,7 @@ export const SVG = () => {
   return (
     <Canvas style={{ flex: 1 }}>
       <Group layer={<Paint><Blur blur={10} /></Paint>}>
-        <Skottie animation={legoAnimation} frame={41} />
+        <Skottie animation={animation} frame={41} />
       </Group>
     </Canvas>
   );
