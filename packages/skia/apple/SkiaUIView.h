@@ -41,5 +41,6 @@
 - (void)setDebugMode:(bool)debugMode;
 - (void)setOpaque:(bool)opaque;
 - (void)setNativeId:(size_t)nativeId;
+- (void)setUseP3ColorSpace:(bool)useP3ColorSpace;
 
 @end
