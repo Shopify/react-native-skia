@@ -9,6 +9,7 @@ import {
   LinearGradient,
   Paint,
   Path,
+  SweepGradient,
 } from "../../components";
 import { checkImage, docPath } from "../../../__tests__/setup";
 import { fitbox } from "../../components/shapes/FitBox";
@@ -209,5 +210,22 @@ describe("Paint", () => {
       </Group>
     );
     checkImage(result, docPath("paint/semi-transparent-circle.png"));
+  });
+  it("test paint", async () => {
+    const { vec, Skia } = importSkia();
+    const strokeWidth = 10;
+    const { width, height } = surface;
+    const c = vec(width / 2, height / 2);
+    const r = (width - strokeWidth) / 2;
+    const path = Skia.Path.Make();
+    path.addCircle(c.x, c.y, r);
+    const result = await surface.draw(
+      <Path path={path} color="transparent">
+        <Paint style="stroke" strokeWidth={20} strokeCap="round">
+          <SweepGradient c={c} colors={["#64BC65", "#4488ff"]} />
+        </Paint>
+      </Path>
+    );
+    checkImage(result, docPath("paint/test-paint.png"));
   });
 });
