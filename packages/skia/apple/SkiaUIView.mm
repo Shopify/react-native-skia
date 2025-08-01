@@ -16,6 +16,7 @@
       _factory;
   bool _debugMode;
   bool _opaque;
+  bool _useP3ColorSpace;
   size_t _nativeId;
 }
 
@@ -73,6 +74,7 @@
         _manager->setSkiaView(_nativeId, _impl->getDrawView());
       }
       _impl->getDrawView()->setShowDebugOverlays(_debugMode);
+      _impl->setUseP3ColorSpace(_useP3ColorSpace);
     }
   }
 }
@@ -160,6 +162,13 @@
 
   if (_impl != nullptr) {
     _manager->registerSkiaView(nativeId, _impl->getDrawView());
+  }
+}
+
+- (void)setUseP3ColorSpace:(bool)useP3ColorSpace {
+  _useP3ColorSpace = useP3ColorSpace;
+  if (_impl != nullptr) {
+    _impl->setUseP3ColorSpace(_useP3ColorSpace);
   }
 }
 

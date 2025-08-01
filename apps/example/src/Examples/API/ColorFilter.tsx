@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { ScrollView, useWindowDimensions } from "react-native";
+import { ScrollView, useWindowDimensions, View } from "react-native";
 import {
   Skia,
   PaintStyle,
@@ -16,6 +16,7 @@ import {
   SRGBToLinearGamma,
   SkiaPictureView,
   createPicture,
+  Fill,
 } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
@@ -113,7 +114,7 @@ export const ColorFilter = () => {
 
   return (
     <ScrollView>
-      <Title>Color Matrix Filter</Title>
+      <Title>Color Matrix Filter 2</Title>
       <SkiaPictureView style={style} picture={matrixDraw} />
       <Title>Image Filter</Title>
       <SkiaPictureView style={style} picture={imageFilterDraw} />
@@ -137,6 +138,10 @@ export const ColorFilter = () => {
           </LinearToSRGBGamma>
         </Image>
       </Canvas>
+      <Canvas style={{ width: 256, height: 256 }} colorSpace="srgb">
+        <Fill color="green" />
+      </Canvas>
+      <View style={{ width: 256, height: 256, backgroundColor: "green" }} />
     </ScrollView>
   );
 };

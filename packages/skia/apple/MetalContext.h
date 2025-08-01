@@ -113,10 +113,10 @@ public:
   }
 
   std::unique_ptr<RNSkia::WindowContext> MakeWindow(CALayer *window, int width,
-                                                    int height) {
+                                                    int height, bool useP3ColorSpace = true) {
     auto device = MetalSharedContext::getInstance().getDevice();
     return std::make_unique<MetalWindowContext>(
-        _directContext.get(), device, _commandQueue, window, width, height);
+        _directContext.get(), device, _commandQueue, window, width, height, useP3ColorSpace);
   }
 
   GrDirectContext *getDirectContext() { return _directContext.get(); }
