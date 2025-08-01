@@ -121,6 +121,32 @@ const assets = {
 const animation = Skia.Skottie.Make(JSON.stringify(basicSlotsJSON), assets);
 ```
 
+## Applying Effects
+
+The `Skottie` component doesn't follow the same painting rules as other components.
+This is because behind the scene, we use the Skottie module from Skia.
+However you can apply effets using the `layer` property.
+These are the rules as for the [ImageSVG](/docs/images-svg/#applying-effects), the [Paragraph](/docs/text/paragraph/#applying-effects), and the [Picture](/docs/shapes/pictures/#applying-effects) component.
+In the example below, for instance we apply a blur filter to a Skottie animation.
+
+```tsx twoslash
+import React from "react";
+import { Canvas, Skottie, Skia, Group, Paint, Blur } from "@shopify/react-native-skia";
+
+const legoAnimationJSON = require("./assets/lego_loader.json");
+const animation = Skia.Skottie.Make(JSON.stringify(legoAnimationJSON));
+
+export const SVG = () => {
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Group layer={<Paint><Blur blur={10} /></Paint>}>
+        <Skottie animation={legoAnimation} frame={41} />
+      </Group>
+    </Canvas>
+  );
+};
+```
+
 ## Animation Properties
 
 ### Basic Information
