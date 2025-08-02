@@ -196,8 +196,9 @@ public:
     SkImageInfo info =
         (count > 2 && !arguments[2].isUndefined())
             ? *JsiSkImageInfo::fromValue(runtime, arguments[2])
-            : SkImageInfo::MakeN32(getObject()->width(), getObject()->height(),
-                                   getObject()->imageInfo().alphaType());
+            : SkImageInfo::Make(getObject()->width(), getObject()->height(),
+                                getObject()->imageInfo().colorType(),
+                                getObject()->imageInfo().alphaType());
     size_t bytesPerRow = 0;
     if (count > 4 && !arguments[4].isUndefined()) {
       bytesPerRow = static_cast<size_t>(arguments[4].asNumber());
