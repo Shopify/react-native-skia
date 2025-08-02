@@ -114,7 +114,7 @@ export const ColorFilter = () => {
 
   return (
     <ScrollView>
-      <Title>Color Matrix Filter 2</Title>
+      <Title>Color Matrix Filter</Title>
       <SkiaPictureView style={style} picture={matrixDraw} />
       <Title>Image Filter</Title>
       <SkiaPictureView style={style} picture={imageFilterDraw} />
