@@ -67,14 +67,14 @@ function play(ctx: DrawingContext, _command: Command) {
     if (command.props.paint) {
       ctx.paints.push(command.props.paint);
     } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { standalone } = command as any;
       ctx.savePaint();
-      setPaintProperties(
-        ctx.Skia,
-        ctx,
-        command.props,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (command as any).standalone
-      );
+      if (standalone) {
+        const freshPaint = ctx.Skia.Paint();
+        ctx.paint.assign(freshPaint);
+      }
+      setPaintProperties(ctx.Skia, ctx, command.props, standalone);
     }
   } else if (isCommand(command, CommandType.RestorePaint)) {
     ctx.restorePaint();
