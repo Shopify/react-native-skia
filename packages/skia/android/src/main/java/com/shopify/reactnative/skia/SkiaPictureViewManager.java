@@ -5,6 +5,7 @@ import com.facebook.react.viewmanagers.SkiaPictureViewManagerDelegate;
 import com.facebook.react.viewmanagers.SkiaPictureViewManagerInterface;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public class SkiaPictureViewManager extends SkiaBaseViewManager<SkiaPictureView> implements SkiaPictureViewManagerInterface<SkiaPictureView> {
 
@@ -29,5 +30,10 @@ public class SkiaPictureViewManager extends SkiaBaseViewManager<SkiaPictureView>
     @Override
     public SkiaPictureView createViewInstance(@NonNull ThemedReactContext reactContext) {
         return new SkiaPictureView(reactContext);
+    }
+
+    @Override
+    public void setColorSpace(SkiaPictureView view, @Nullable String value) {
+        // nothing to do here at the moment
     }
 }
