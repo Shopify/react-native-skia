@@ -7,46 +7,25 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import type { LayoutChangeEvent, ViewProps } from "react-native";
-import type { SharedValue } from "react-native-reanimated";
+import type { View, ViewProps } from "react-native";
+import { type SharedValue } from "react-native-reanimated";
 
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
 import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeComponent";
 import type { SkImage, SkRect, SkSize } from "../skia/types";
 import { SkiaSGRoot } from "../sksg/Reconciler";
 import { Skia } from "../skia";
-import type { SkiaBaseViewProps } from "../views";
 
 export interface CanvasRef extends FC<CanvasProps> {
   makeImageSnapshot(rect?: SkRect): SkImage;
   makeImageSnapshotAsync(rect?: SkRect): Promise<SkImage>;
   redraw(): void;
   getNativeId(): number;
+  measure(callback: Parameters<View["measure"]>[0]): void;
+  measureInWindow(callback: Parameters<View["measureInWindow"]>[0]): void;
 }
 
 export const useCanvasRef = () => useRef<CanvasRef>(null);
-
-//const NativeSkiaPictureView = SkiaPictureViewNativeComponent;
-
-// TODO: no need to go through the JS thread for this
-const useOnSizeEvent = (
-  resultValue: SkiaBaseViewProps["onSize"],
-  onLayout?: (event: LayoutChangeEvent) => void
-) => {
-  return useCallback(
-    (event: LayoutChangeEvent) => {
-      if (onLayout) {
-        onLayout(event);
-      }
-      const { width, height } = event.nativeEvent.layout;
-
-      if (resultValue) {
-        resultValue.value = { width, height };
-      }
-    },
-    [onLayout, resultValue]
-  );
-};
 
 export interface CanvasProps extends ViewProps {
   debug?: boolean;
@@ -61,12 +40,11 @@ export const Canvas = ({
   opaque,
   children,
   onSize,
-  onLayout: _onLayout,
   colorSpace = "p3",
   ref,
   ...viewProps
 }: CanvasProps) => {
-  const onLayout = useOnSizeEvent(onSize, _onLayout);
+  const viewRef = useRef<View>(null);
   // Native ID
   const nativeId = useMemo(() => {
     return SkiaViewNativeId.current++;
@@ -103,16 +81,23 @@ export const Canvas = ({
         getNativeId: () => {
           return nativeId;
         },
+        measure: (callback) => {
+          viewRef.current?.measure(callback);
+        },
+        measureInWindow: (callback) => {
+          viewRef.current?.measureInWindow(callback);
+        },
       } as CanvasRef)
   );
+
   return (
     <SkiaPictureViewNativeComponent
+      ref={viewRef}
       collapsable={false}
       nativeID={`${nativeId}`}
       debug={debug}
       opaque={opaque}
       colorSpace={colorSpace}
-      onLayout={onLayout}
       {...viewProps}
     />
   );

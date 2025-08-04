@@ -14,13 +14,12 @@ Behind the scenes, it is using its own React renderer.
 | style?   | `ViewStyle` | View style |
 | ref?   | `Ref<SkiaView>` | Reference to the `SkiaView` object |
 | onSize? | `SharedValue<Size>` | Reanimated value to which the canvas size will be assigned  (see [canvas size](/docs/animations/hooks#canvas-size)) |
-| onLayout? | `NativeEvent<LayoutEvent>` | Invoked on mount and on layout changes (see [onLayout](https://reactnative.dev/docs/view#onlayout)) |
 
 ## Getting the Canvas size
 
 If the size of the Canvas is unknown, there are two ways to access it:
-  * **On the JS thread**, using the [`onLayout`](https://reactnative.dev/docs/view#onlayout) prop, like you would on any regular React Native View. 
   * **On the UI thread**, using the [`onSize`](/docs/animations/hooks#canvas-size) prop with [Reanimated](/docs/animations/animations).
+  * **On the JS thread**, using [`measure`](https://reactnative.dev/docs/the-new-architecture/layout-measurements#measurecallback) or using [`onLayout`](https://reactnative.dev/docs/the-new-architecture/layout-measurements) (old architecture only).
 
 ## Getting a Canvas Snapshot
 
