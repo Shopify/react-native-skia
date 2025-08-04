@@ -26,7 +26,10 @@ export interface CanvasRef extends FC<CanvasProps> {
 
 export const useCanvasRef = () => useRef<CanvasRef>(null);
 
-export interface CanvasProps extends ViewProps {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const isFabric = Boolean((global as any)?.nativeFabricUIManager);
+
+export interface CanvasProps extends Omit<ViewProps, "onLayout"> {
   debug?: boolean;
   opaque?: boolean;
   onSize?: SharedValue<SkSize>;
@@ -41,8 +44,18 @@ export const Canvas = ({
   onSize,
   colorSpace = "p3",
   ref,
+  // Here know this is a type error but this is done on purpose to check it at runtime
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  onLayout,
   ...viewProps
 }: CanvasProps) => {
+  if (!onLayout && isFabric) {
+    console.error(
+      // eslint-disable-next-line max-len
+      "<Canvas onLayout={onLayout} /> is not supported on the new architecture, to fix the issue, see: https://shopify.github.io/react-native-skia/docs/canvas/overview/#getting-the-canvas-size"
+    );
+  }
   const viewRef = useRef<View>(null);
   // Native ID
   const nativeId = useMemo(() => {

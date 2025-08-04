@@ -17,17 +17,11 @@ Behind the scenes, it is using its own React renderer.
 
 ## Getting the Canvas size
 
-If the size of the Canvas is unknown, there are several ways to access it depending on your architecture and needs:
-
-  * **On the UI thread**, using the [`onSize`](/docs/animations/hooks#canvas-size) prop with [Reanimated](/docs/animations/animations). Pass a shared value to the `onSize` property and it will be automatically updated whenever the canvas size changes.
-  * **On the JS thread**:
-    * **Fabric architecture**: Use [`measureInWindow`](https://reactnative.dev/docs/the-new-architecture/layout-measurements#measureinwindowcallback) to get the canvas dimensions
-    * **Paper architecture**: Use [`onLayout`](https://reactnative.dev/docs/the-new-architecture/layout-measurements) to receive layout updates when the canvas size changes
-
-In the example below, we set the size of the rectangle to the size of the canvas at all times.
+The example below The `onSize` property receives a shared value, which will be updated whenever the canvas size changes.
+If you need the value to be available on the JS 
 
 ```tsx twoslash
-import {useSharedValue} from "react-native-reanimated";
+import {useSharedValue, useDerivedValue} from "react-native-reanimated";
 import {Fill, Canvas, Rect} from "@shopify/react-native-skia";
 
 const Demo = () => {

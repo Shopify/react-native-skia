@@ -114,14 +114,18 @@ The Canvas element has an `onSize` property that can receive a shared value, whi
 
 ```tsx twoslash
 import {useSharedValue} from "react-native-reanimated";
-import {Fill, Canvas} from "@shopify/react-native-skia";
+import {Fill, Canvas, Rect} from "@shopify/react-native-skia";
 
 const Demo = () => {
   // size will be updated as the canvas size changes
   const size = useSharedValue({ width: 0, height: 0 });
+  const rect = useDerivedValue(() => {
+    const {width, height} = size.value;
+    return { x: 0, y: 0, width, height };
+  });
   return (
     <Canvas style={{ flex: 1 }} onSize={size}>
-      <Fill color="white" />
+      <Rect color="cyan" rect={rect} />
     </Canvas>
   );
 };

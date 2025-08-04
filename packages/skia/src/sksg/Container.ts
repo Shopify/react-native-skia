@@ -205,10 +205,11 @@ class NativeReanimatedContainer extends Container {
       nativeDrawOnscreen(nativeId, sharedRecorder, onSize);
     })(this.onSize);
     if (sharedValues.length > 0) {
+      const { onSize } = this;
       this.mapperId = Rea.startMapper(() => {
         "worklet";
         sharedRecorder.applyUpdates(sharedValues);
-        nativeDrawOnscreen(nativeId, sharedRecorder);
+        nativeDrawOnscreen(nativeId, sharedRecorder, onSize);
       }, sharedValues);
     }
   }
