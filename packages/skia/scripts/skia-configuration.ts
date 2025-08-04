@@ -266,17 +266,17 @@ const copyModule = (module: string) => [
 const getFirstAvailableTarget = () => {
   // Use the same logic as build-skia.ts to get the first available target
   const platforms = Object.keys(configurations) as PlatformName[];
-  
+
   for (const platformName of platforms) {
     const configuration = configurations[platformName];
     const targetNames = Object.keys(configuration.targets);
-    
+
     for (const targetName of targetNames) {
       const targetPath = `${platformName}/${targetName}`;
       const dawnPath = `../../externals/skia/out/${targetPath}/gen/third_party/externals/dawn`;
-      
+
       try {
-        require('fs').statSync(dawnPath);
+        require("fs").statSync(dawnPath);
         return targetPath;
       } catch (e) {
         // Dawn folder doesn't exist for this target, try next
@@ -284,9 +284,11 @@ const getFirstAvailableTarget = () => {
       }
     }
   }
-  
+
   // No target found with dawn folder
-  throw new Error('No target found with dawn folder at ../../externals/skia/out/{target}/gen/third_party/externals/dawn');
+  throw new Error(
+    "No target found with dawn folder at ../../externals/skia/out/{target}/gen/third_party/externals/dawn"
+  );
 };
 
 export const copyHeaders = () => {

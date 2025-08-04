@@ -15,6 +15,7 @@ export interface ISkiaViewApi {
   requestRedraw: (nativeId: number) => void;
   makeImageSnapshot: (nativeId: number, rect?: SkRect) => SkImage;
   makeImageSnapshotAsync: (nativeId: number, rect?: SkRect) => Promise<SkImage>;
+  size: (nativeId: number) => SkSize;
 }
 
 export interface SkiaBaseViewProps extends ViewProps {

@@ -1,6 +1,5 @@
 import type { FC } from "react";
 import React, {
-  useCallback,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
@@ -51,12 +50,15 @@ export const Canvas = ({
   }, []);
 
   // Root
-  const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
+  const root = useMemo(
+    () => new SkiaSGRoot(Skia, nativeId, onSize),
+    [nativeId, onSize]
+  );
 
   // Render effects
   useLayoutEffect(() => {
     root.render(children);
-  }, [children, root]);
+  }, [children, root, nativeId]);
 
   useEffect(() => {
     return () => {

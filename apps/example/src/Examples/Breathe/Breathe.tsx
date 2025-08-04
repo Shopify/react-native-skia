@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, useWindowDimensions, View } from "react-native";
 import {
   BlurMask,
@@ -9,10 +9,9 @@ import {
   Group,
   polar2Canvas,
   mix,
-  useCanvasRef,
 } from "@shopify/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
-import { useAnimatedRef, useDerivedValue } from "react-native-reanimated";
+import { useDerivedValue } from "react-native-reanimated";
 
 import { useLoop } from "../../components/Animations";
 
@@ -55,29 +54,11 @@ const Ring = ({ index, progress, total }: RingProps) => {
 };
 
 export const Breathe = () => {
-  const ref = useCanvasRef();
-  const aRef = useAnimatedRef();
   const { width, height } = useWindowDimensions();
   const center = useMemo(
     () => vec(width / 2, height / 2 - 64),
     [height, width]
   );
-
-  useDerivedValue(() => {
-    if (aRef.current) {
-      console.log(aRef.current.measure());
-    } else {
-      console.log(aRef);
-    }
-  });
-
-  useEffect(() => {
-    if (ref.current) {
-      ref.current.measureInWindow((x, y, w, h) => {
-        console.log("Canvas dimensions:", { x, y, w, h });
-      });
-    }
-  }, [ref]);
 
   const progress = useLoop({ duration: 3000 });
 
@@ -87,12 +68,7 @@ export const Breathe = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <Canvas
-        style={styles.container}
-        testID="breathe-canvas"
-        animatedRef={aRef}
-        ref={ref}
-      >
+      <Canvas style={styles.container} testID="breathe-canvas">
         <Fill color="rgb(36,43,56)" />
         <Group origin={center} transform={transform} blendMode="screen">
           <BlurMask style="solid" blur={40} />
