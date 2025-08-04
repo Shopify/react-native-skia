@@ -15,10 +15,14 @@ Behind the scenes, it is using its own React renderer.
 | ref?   | `Ref<SkiaView>` | Reference to the `SkiaView` object |
 | onSize? | `SharedValue<Size>` | Reanimated value to which the canvas size will be assigned  (see [canvas size](/docs/animations/hooks#canvas-size)) |
 
-## Getting the Canvas size
+## Canvas size
 
-The example below The `onSize` property receives a shared value, which will be updated whenever the canvas size changes.
-If you need the value to be available on the JS 
+The size of the canvas is available on both the UI and JS thread.
+
+### UI thread
+
+The `onSize` property receives a shared value, which will be updated whenever the canvas size changes.
+You can see it in action in the example below.
 
 ```tsx twoslash
 import {useSharedValue, useDerivedValue} from "react-native-reanimated";
@@ -37,6 +41,31 @@ const Demo = () => {
     </Canvas>
   );
 };
+```
+
+### JS thread
+
+To get the canvas size on the JS thread, you can use `useLayoutEffect` and `measureInWindow()`.
+
+```tsx twoslash
+import {useLayoutEffect} from "react";
+import {Fill, Canvas, Rect, useCanvasRef} from "@shopify/react-native-skia";
+
+const Demo = () => {
+  const ref = useCanvasRef();
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  useLayoutEffect(() => {
+    ref.current?.measureInWindow(({ width, height }) => {
+      setSize({ width, height });
+    });
+  }, []);
+  return (
+    <Canvas style={{ flex: 1 }} ref={ref}>
+      <Rect color="cyan" rect={rect} />
+    </Canvas>
+  );
+};
+```
 ```
 
 ## Getting a Canvas Snapshot
