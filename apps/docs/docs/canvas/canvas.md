@@ -52,7 +52,9 @@ Since this is a very common pattern, we offer a `useCanvasSize` hook you can use
 import {Fill, Canvas, Rect, useCanvasSize} from "@shopify/react-native-skia";
 
 const Demo = () => {
-  const {ref, size: {width, height}} = useCanvasSize();
+  // useCanvasSize accepts and optional canvas ref as parameter
+  // if you want to provide your own
+  const {ref, size: {width, height}} = useCanvasSize(); 
   return (
     <Canvas style={{ flex: 1 }} ref={ref}>
       <Rect color="cyan" rect={{ x: 0, y: 0, width, height }} />
@@ -61,7 +63,9 @@ const Demo = () => {
 };
 ```
 
-This example is equivalent to the code below:
+Alternatively, 
+
+Using `useCanvasSize` is equivalent to the code below:
 
 ```tsx twoslash
 import {useLayoutEffect, useState} from "react";
