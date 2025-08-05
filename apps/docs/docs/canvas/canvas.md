@@ -46,6 +46,22 @@ const Demo = () => {
 ### JS thread
 
 To get the canvas size on the JS thread, you can use `useLayoutEffect` and `measure()`.
+Since this is a very common pattern, we offer a `useCanvasSize` hook you can use for convenience.
+
+```tsx twoslash
+import {Fill, Canvas, Rect, useCanvasSize} from "@shopify/react-native-skia";
+
+const Demo = () => {
+  const {ref, size} = useCanvasSize();
+  return (
+    <Canvas style={{ flex: 1 }} ref={ref}>
+      <Rect color="cyan" rect={{ x: 0, y: 0, width, height }} />
+    </Canvas>
+  );
+};
+```
+
+This example is equivalent to the code below:
 
 ```tsx twoslash
 import {useLayoutEffect, useState} from "react";
@@ -67,20 +83,6 @@ const Demo = () => {
 };
 ```
 
-Since this is a very common pattern, we offer a `useCanvasSize` hook you can use for convenience.
-
-```tsx twoslash
-import {Fill, Canvas, Rect, useCanvasSize} from "@shopify/react-native-skia";
-
-const Demo = () => {
-  const {ref, size} = useCanvasSize();
-  return (
-    <Canvas style={{ flex: 1 }} ref={ref}>
-      <Rect color="cyan" rect={{ x: 0, y: 0, width, height }} />
-    </Canvas>
-  );
-};
-```
 
 ## Getting a Canvas Snapshot
 
