@@ -108,25 +108,6 @@ export default function App() {
 }
 ```
 
-## Canvas Size
-
-The Canvas element has an `onSize` property that can receive a shared value, which will be updated whenever the canvas size changes.
-
-```tsx twoslash
-import {useSharedValue} from "react-native-reanimated";
-import {Fill, Canvas} from "@shopify/react-native-skia";
-
-const Demo = () => {
-  // size will be updated as the canvas size changes
-  const size = useSharedValue({ width: 0, height: 0 });
-  return (
-    <Canvas style={{ flex: 1 }} onSize={size}>
-      <Fill color="white" />
-    </Canvas>
-  );
-};
-```
-
 ## useRectBuffer
 
 Creates an array for rectangle to be animated.
