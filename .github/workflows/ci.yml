@@ -202,10 +202,13 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('./apps/example/android/gradle/wrapper/gradle-wrapper.properties') }}
             ${{ runner.os }}-gradle-
 
+      - name: Disable newArch in gradle.properties
+        run: |
+          sed -i 's/newArchEnabled=true/newArchEnabled=false/g' apps/example/android/gradle.properties
+
       - name: Build example for Android (newArch disabled)
         env:
           JAVA_OPTS: "-XX:MaxHeapSize=6g"
-          ORG_GRADLE_PROJECT_newArchEnabled: "false"
         run: |
           yarn turbo run build:android --concurrency 1 --filter=example --force
 
