@@ -173,30 +173,38 @@ const buildXCFrameworks = () => {
   const args = process.argv.slice(2);
   const defaultTargets = Object.keys(configurations);
   const targetSpecs = args.length > 0 ? args : defaultTargets;
-  
+
   // Parse target specifications (platform or platform-target format)
   const buildTargets: { platform: PlatformName; targets?: string[] }[] = [];
   const validPlatforms = Object.keys(configurations);
-  
+
   for (const spec of targetSpecs) {
-    if (spec.includes('-')) {
+    if (spec.includes("-")) {
       // Handle platform-target format (e.g., android-arm, android-arm64)
-      const [platform, target] = spec.split('-', 2);
+      const [platform, target] = spec.split("-", 2);
       if (!validPlatforms.includes(platform)) {
         console.error(`❌ Invalid platform: ${platform}`);
-        console.error(`Valid platforms are: ${validPlatforms.join(', ')}`);
+        console.error(`Valid platforms are: ${validPlatforms.join(", ")}`);
         exit(1);
       }
-      
+
       const platformConfig = configurations[platform as PlatformName];
       if (!(target in platformConfig.targets)) {
-        console.error(`❌ Invalid target '${target}' for platform '${platform}'`);
-        console.error(`Valid targets for ${platform}: ${Object.keys(platformConfig.targets).join(', ')}`);
+        console.error(
+          `❌ Invalid target '${target}' for platform '${platform}'`
+        );
+        console.error(
+          `Valid targets for ${platform}: ${Object.keys(
+            platformConfig.targets
+          ).join(", ")}`
+        );
         exit(1);
       }
-      
+
       // Find existing platform entry or create new one
-      let existingPlatform = buildTargets.find(bt => bt.platform === platform);
+      let existingPlatform = buildTargets.find(
+        (bt) => bt.platform === platform
+      );
       if (!existingPlatform) {
         existingPlatform = { platform: platform as PlatformName, targets: [] };
         buildTargets.push(existingPlatform);
@@ -209,15 +217,15 @@ const buildXCFrameworks = () => {
       // Handle platform-only format (e.g., android, apple)
       if (!validPlatforms.includes(spec)) {
         console.error(`❌ Invalid platform: ${spec}`);
-        console.error(`Valid platforms are: ${validPlatforms.join(', ')}`);
+        console.error(`Valid platforms are: ${validPlatforms.join(", ")}`);
         exit(1);
       }
       buildTargets.push({ platform: spec as PlatformName });
     }
   }
 
-  console.log(`🎯 Building targets: ${targetSpecs.join(', ')}`);
-  
+  console.log(`🎯 Building targets: ${targetSpecs.join(", ")}`);
+
   if (GRAPHITE) {
     console.log("🪨 Skia Graphite");
     console.log(
@@ -226,9 +234,9 @@ const buildXCFrameworks = () => {
   } else {
     console.log("🐘 Skia Ganesh");
   }
-  
+
   // Check Android environment variables if android is in target platforms
-  const hasAndroid = buildTargets.some(bt => bt.platform === "android");
+  const hasAndroid = buildTargets.some((bt) => bt.platform === "android");
   if (hasAndroid) {
     ["ANDROID_NDK", "ANDROID_HOME"].forEach((name) => {
       // Test for existence of Android SDK
@@ -248,15 +256,15 @@ const buildXCFrameworks = () => {
   $("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
   console.log("gclient sync done");
   $(`rm -rf ${PackageRoot}/libs`);
-  
+
   // Build specified platforms and targets
   for (const buildTarget of buildTargets) {
     const { platform, targets } = buildTarget;
     const configuration = configurations[platform];
     console.log(`\n🔨 Building platform: ${platform}`);
-    
+
     const targetsToProcess = targets || mapKeys(configuration.targets);
-    
+
     for (const target of targetsToProcess) {
       await configurePlatform(platform, configuration, target);
       await buildPlatform(platform, target);
@@ -273,12 +281,12 @@ const buildXCFrameworks = () => {
       }
     }
   }
-  
+
   // Only build XCFrameworks if apple platform is included
-  const hasApple = buildTargets.some(bt => bt.platform === "apple");
+  const hasApple = buildTargets.some((bt) => bt.platform === "apple");
   if (hasApple) {
     buildXCFrameworks();
   }
-  
+
   copyHeaders();
 })();

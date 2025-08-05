@@ -203,6 +203,16 @@ public:
 
   std::shared_ptr<RNSkRenderer> getRenderer() { return _renderer; }
 
+  /**
+   Returns the scaled width of the view
+   */
+  int getScaledWidth() { return _canvasProvider->getScaledWidth(); }
+
+  /**
+   Returns the scaled height of the view
+   */
+  int getScaledHeight() { return _canvasProvider->getScaledHeight(); }
+
 protected:
   std::shared_ptr<RNSkPlatformContext> getPlatformContext() {
     return _platformContext;
