@@ -1,4 +1,4 @@
-import type { FC } from "react";
+import type { FC, RefObject } from "react";
 import React, {
   useEffect,
   useImperativeHandle,
@@ -32,8 +32,9 @@ export interface CanvasRef extends FC<CanvasProps> {
 
 export const useCanvasRef = () => useRef<CanvasRef>(null);
 
-export const useCanvasSize = () => {
-  const ref = useCanvasRef();
+export const useCanvasSize = (userRef?: RefObject<CanvasRef | null>) => {
+  const ourRef = useCanvasRef();
+  const ref = userRef ?? ourRef;
   const [size, setSize] = useState<SkSize>({ width: 0, height: 0 });
   useLayoutEffect(() => {
     if (ref.current) {
