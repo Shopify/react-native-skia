@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import type { View, ViewProps } from "react-native";
+import type { MeasureInWindowOnSuccessCallback, MeasureOnSuccessCallback, View, ViewProps } from "react-native";
 import { type SharedValue } from "react-native-reanimated";
 
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
@@ -20,8 +20,8 @@ export interface CanvasRef extends FC<CanvasProps> {
   makeImageSnapshotAsync(rect?: SkRect): Promise<SkImage>;
   redraw(): void;
   getNativeId(): number;
-  measure(callback: Parameters<View["measure"]>[0]): void;
-  measureInWindow(callback: Parameters<View["measureInWindow"]>[0]): void;
+  measure(callback: MeasureOnSuccessCallback): void;
+  measureInWindow(callback: MeasureInWindowOnSuccessCallback): void;
 }
 
 export const useCanvasRef = () => useRef<CanvasRef>(null);

@@ -45,18 +45,18 @@ const Demo = () => {
 
 ### JS thread
 
-To get the canvas size on the JS thread, you can use `useLayoutEffect` and `measureInWindow()`.
+To get the canvas size on the JS thread, you can use `useLayoutEffect` and `measure()`.
 
 ```tsx twoslash
-import {useLayoutEffect} from "react";
+import {useLayoutEffect, useState} from "react";
 import {Fill, Canvas, Rect, useCanvasRef} from "@shopify/react-native-skia";
 
 const Demo = () => {
   const ref = useCanvasRef();
-  const [size, setSize] = useState({ width: 0, height: 0 });
+  const [rect, setRect] = useState({ x: 0, y: 0, width: 0, height: 0 });
   useLayoutEffect(() => {
-    ref.current?.measureInWindow(({ width, height }) => {
-      setSize({ width, height });
+    ref.current?.measure((_x, _y, width, height) => {
+      setRect({ x: 0, y: 0, width, height });
     });
   }, []);
   return (
@@ -65,7 +65,6 @@ const Demo = () => {
     </Canvas>
   );
 };
-```
 ```
 
 ## Getting a Canvas Snapshot
@@ -104,7 +103,7 @@ export const Demo = () => {
 };
 ```
 
-## Accessibilty
+## Accessibility
 
 The Canvas component supports the same properties as a View component including its [accessibility properties](https://reactnative.dev/docs/accessibility#accessible).
 You can make elements inside the canvas accessible as well by overlayings views on top of your canvas.
