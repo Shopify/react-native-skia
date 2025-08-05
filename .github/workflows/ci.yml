@@ -206,6 +206,17 @@ jobs:
         run: |
           sed -i 's/newArchEnabled=true/newArchEnabled=false/g' apps/example/android/gradle.properties
 
+      - name: Verify newArch is disabled
+        run: |
+          echo "Checking newArchEnabled setting:"
+          grep newArchEnabled apps/example/android/gradle.properties
+          if grep -q "newArchEnabled=false" apps/example/android/gradle.properties; then
+            echo "✅ newArchEnabled is correctly set to false"
+          else
+            echo "❌ newArchEnabled is not set to false"
+            exit 1
+          fi
+
       - name: Build example for Android (newArch disabled)
         env:
           JAVA_OPTS: "-XX:MaxHeapSize=6g"
