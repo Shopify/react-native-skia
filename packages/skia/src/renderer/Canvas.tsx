@@ -5,8 +5,14 @@ import React, {
   useLayoutEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
-import type { MeasureInWindowOnSuccessCallback, MeasureOnSuccessCallback, View, ViewProps } from "react-native";
+import type {
+  MeasureInWindowOnSuccessCallback,
+  MeasureOnSuccessCallback,
+  View,
+  ViewProps,
+} from "react-native";
 import { type SharedValue } from "react-native-reanimated";
 
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
@@ -25,6 +31,20 @@ export interface CanvasRef extends FC<CanvasProps> {
 }
 
 export const useCanvasRef = () => useRef<CanvasRef>(null);
+
+export const useCanvasSize = () => {
+  const ref = useCanvasRef();
+  const [size, setSize] = useState<SkSize>({ width: 0, height: 0 });
+  useLayoutEffect(() => {
+    if (ref.current) {
+      ref.current.measure((_x, _y, width, height) => {
+        setSize({ width, height });
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return { ref, size };
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const isFabric = Boolean((global as any)?.nativeFabricUIManager);
@@ -50,7 +70,7 @@ export const Canvas = ({
   onLayout,
   ...viewProps
 }: CanvasProps) => {
-  if (!onLayout && isFabric) {
+  if (onLayout && isFabric) {
     console.error(
       // eslint-disable-next-line max-len
       "<Canvas onLayout={onLayout} /> is not supported on the new architecture, to fix the issue, see: https://shopify.github.io/react-native-skia/docs/canvas/overview/#getting-the-canvas-size"

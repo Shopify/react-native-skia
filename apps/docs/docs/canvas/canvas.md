@@ -67,6 +67,21 @@ const Demo = () => {
 };
 ```
 
+Since this is a very common pattern, we offer a `useCanvasSize` hook you can use for convenience.
+
+```tsx twoslash
+import {Fill, Canvas, Rect, useCanvasSize} from "@shopify/react-native-skia";
+
+const Demo = () => {
+  const {ref, size} = useCanvasSize();
+  return (
+    <Canvas style={{ flex: 1 }} ref={ref}>
+      <Rect color="cyan" rect={{ x: 0, y: 0, width, height }} />
+    </Canvas>
+  );
+};
+```
+
 ## Getting a Canvas Snapshot
 
 You can save your drawings as an image by using the `makeImageSnapshotAsync` method. This method returns a promise that resolves to an [Image](/docs/images).

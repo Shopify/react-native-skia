@@ -12,8 +12,9 @@ import {
   processUniforms,
   Skia,
   TileMode,
+  useCanvasSize,
 } from "@shopify/react-native-skia";
-import React, { useState } from "react";
+import React from "react";
 import {
   ReduceMotion,
   useDerivedValue,
@@ -104,7 +105,8 @@ export const Scene = ({
   filter: filterCB,
   shader: shaderFilter,
 }: SceneProps) => {
-  const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
+  const { ref, size } = useCanvasSize();
+  const { width, height } = size;
   const props = useButtonGroup({ width, height }, r);
   const { progress, c1, box, bounds } = props;
   const uniforms = useDerivedValue(() => {
@@ -165,15 +167,7 @@ export const Scene = ({
   return (
     <View style={{ flex: 1 }}>
       <GestureDetector gesture={gesture}>
-        <Canvas
-          style={{ flex: 1 }}
-          onLayout={({ nativeEvent: { layout } }) => {
-            setSize({
-              width: layout.width,
-              height: layout.height,
-            });
-          }}
-        >
+        <Canvas style={{ flex: 1 }} ref={ref}>
           <Pattern />
           <BackdropFilter filter={<ImageFilter filter={filter} />} />
           <ButtonGroup {...props} />
