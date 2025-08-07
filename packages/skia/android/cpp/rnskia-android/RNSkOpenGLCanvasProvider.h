@@ -21,9 +21,9 @@ public:
 
   ~RNSkOpenGLCanvasProvider();
 
-  int getScaledWidth() override;
+  int getWidth() override;
 
-  int getScaledHeight() override;
+  int getHeight() override;
 
   bool renderToCanvas(const std::function<void(SkCanvas *)> &cb) override;
 

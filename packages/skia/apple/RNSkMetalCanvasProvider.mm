@@ -37,14 +37,14 @@ RNSkMetalCanvasProvider::~RNSkMetalCanvasProvider() {}
 /**
  Returns the scaled width of the view
  */
-int RNSkMetalCanvasProvider::getScaledWidth() {
+int RNSkMetalCanvasProvider::getWidth() {
   return _ctx ? _ctx->getWidth() : -1;
 };
 
 /**
  Returns the scaled height of the view
  */
-int RNSkMetalCanvasProvider::getScaledHeight() {
+int RNSkMetalCanvasProvider::getHeight() {
   return _ctx ? _ctx->getHeight() : -1;
 };
 
