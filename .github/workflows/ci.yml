@@ -147,7 +147,7 @@ jobs:
           yarn turbo run build:android --concurrency 1 --filter=example --force
 
   build-test-android:
-    runs-on: macos-latest-xlarge
+    runs-on: macos-latest-large
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
