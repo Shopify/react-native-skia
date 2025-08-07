@@ -153,9 +153,24 @@ jobs:
       - name: Emulator - Boot
         run: $ANDROID_HOME/emulator/emulator -memory 4096 -avd Pixel_API_30 -wipe-data -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim &
 
-      - name: ADB Wait For Device
-        run: adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
-        timeout-minutes: 10
+      - name: Wait for Emulator to Start
+        run: |
+          echo "Waiting for emulator to start..."
+          adb wait-for-device
+          echo "Device connected, waiting for boot to complete..."
+          
+      - name: Wait for Boot Complete
+        run: |
+          timeout 600 bash -c 'until [[ $(adb shell getprop sys.boot_completed) == "1" ]]; do 
+            echo "Still booting..."
+            sleep 5
+          done'
+          echo "Emulator fully booted!"
+          
+      - name: Verify Emulator Ready
+        run: |
+          adb devices -l
+          adb shell getprop ro.build.version.release
 
       - name: Start Package Manager
         working-directory: apps/example/
