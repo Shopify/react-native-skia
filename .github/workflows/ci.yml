@@ -146,9 +146,8 @@ jobs:
         run: |
           yarn turbo run build:android --concurrency 1 --filter=example --force
 
-  build-android:
+  build-test-android:
     runs-on: macos-latest-large
-    continue-on-error: true
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
@@ -209,37 +208,6 @@ jobs:
         run: |
           yarn turbo run build:android --concurrency 1 --force
 
-      - name: Cache apk
-        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-        env:
-          cache-name: cache-apk
-        with:
-          path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
-          key: apk-${{ github.sha }}
-
-  test-android:
-    needs: build-android
-    runs-on: macos-latest-large
-    env:
-      TURBO_CACHE_DIR: .turbo/android
-    steps:
-      - name: checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          submodules: recursive
-
-      - name: Setup
-        uses: ./.github/actions/setup
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Restore APK
-        id: cache-apk
-        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-        with:
-          path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
-          key: apk-${{ github.sha }}
-      
       - name: SKDs - download required images
         run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
 
@@ -266,8 +234,6 @@ jobs:
       - name: Install APK
         run: adb install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk
 
-      # - name: Set up environment
-      #   run: echo "PACKAGE_NAME=${{ env.PACKAGE_NAME }}" >> $GITHUB_ENV
       - name: Launch APK
         env:
           PACKAGE_NAME: 'com.microsoft.reacttestapp'
