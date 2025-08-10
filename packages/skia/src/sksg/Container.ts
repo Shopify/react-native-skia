@@ -170,10 +170,10 @@ class ReanimatedContainer extends Container {
         drawOnscreen(Skia, nativeId, recording!);
       }, Array.from(animationValues));
     }
-    Rea.runOnUI(() => {
+    Rea.runOnUI((onSize?: SharedValue<SkSize>) => {
       "worklet";
-      drawOnscreen(Skia, nativeId, recording!, this.onSize);
-    })();
+      drawOnscreen(Skia, nativeId, recording!, onSize);
+    })(this.onSize);
   }
 }
 
