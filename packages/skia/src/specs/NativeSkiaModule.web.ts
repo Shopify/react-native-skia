@@ -30,6 +30,13 @@ global.SkiaViewApi = {
       }
     }
   },
+  size(nativeId: number) {
+    if (this.views[`${nativeId}`]) {
+      return this.views[`${nativeId}`].getSize();
+    } else {
+      return { width: 0, height: 0 };
+    }
+  },
   requestRedraw(nativeId: number) {
     this.views[`${nativeId}`].redraw();
   },
