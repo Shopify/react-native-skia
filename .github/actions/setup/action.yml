@@ -33,7 +33,7 @@ runs:
     - name: Upload refreshed yarn.lock
       uses: actions/upload-artifact@v4
       with:
-        name: yarn-lock
+        name: yarn-lock-${{ github.sha }}
         path: yarn.lock
 
     - name: Download Skia Binary Artifacts
