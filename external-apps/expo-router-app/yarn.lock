@@ -2132,9 +2132,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@shopify/react-native-skia@npm:v2.0.0-next.4":
-  version: 2.0.0-next.4
-  resolution: "@shopify/react-native-skia@npm:2.0.0-next.4"
+"@shopify/react-native-skia@file:../../packages/skia::locator=expo-router-app%40workspace%3A.":
+  version: 0.0.0
+  resolution: "@shopify/react-native-skia@file:../../packages/skia#../../packages/skia::hash=e18c3e&locator=expo-router-app%40workspace%3A."
   dependencies:
     canvaskit-wasm: 0.40.0
     react-reconciler: 0.31.0
@@ -2149,7 +2149,7 @@ __metadata:
       optional: true
   bin:
     setup-skia-web: scripts/setup-canvaskit.js
-  checksum: b7bfc4c078d2d675f6c7fbd2ba681a608054b80d219b19564d845997cdd721f8a5109f5fe4fb87a1c084c0a61d26449674ad140a207adcb7d4aaa2ca98ace2b0
+  checksum: 60d87a7bf3297190cf1debb3377e2d8aaf5300a1ca5c8d2f1fddcd14f49c6b69fe32bba5f4a6a32996ada64a5409f337be6d264c81aea505818b2cffa2461ef9
   languageName: node
   linkType: hard
 
@@ -3989,7 +3989,7 @@ __metadata:
     "@babel/core": ^7.25.2
     "@expo/vector-icons": ^14.0.2
     "@react-navigation/native": ^7.0.14
-    "@shopify/react-native-skia": v2.0.0-next.4
+    "@shopify/react-native-skia": ../../packages/skia
     "@types/react": ~19.0.10
     expo: ^53.0.0
     expo-font: ~13.3.1
@@ -4290,15 +4290,15 @@ __metadata:
   linkType: hard
 
 "form-data@npm:^4.0.0":
-  version: 4.0.3
-  resolution: "form-data@npm:4.0.3"
+  version: 4.0.4
+  resolution: "form-data@npm:4.0.4"
   dependencies:
     asynckit: ^0.4.0
     combined-stream: ^1.0.8
     es-set-tostringtag: ^2.1.0
     hasown: ^2.0.2
     mime-types: ^2.1.12
-  checksum: b8e2568c0853ce167b2b9c9c4b81fe563f9ade647178baf6b6381cf8a11e3c01dd2b78a63ba367e6f5eab59afab8284a9438bb5ae768133f9d9fce6567fbc26a
+  checksum: 9b7788836df9fa5a6999e0c02515b001946b2a868cfe53f026c69e2c537a2ff9fbfb8e9d2b678744628f3dc7a2d6e14e4e45dfaf68aa6239727f0bdb8ce0abf2
   languageName: node
   linkType: hard
 
