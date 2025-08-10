@@ -352,12 +352,21 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build and pack Skia package
+        working-directory: packages/skia
+        run: yarn build && yarn pack
+
+      - name: Update package.json to use local Skia package
+        working-directory: externals/skia-web-app
+        run: |
+          sed -i 's/"@shopify\/react-native-skia": "[^"]*"/"@shopify\/react-native-skia": "file:..\/..\/packages\/skia\/package.tgz"/' package.json
+
       - name: Install dependencies for skia-web-app
-        working-directory: skia-web-app
+        working-directory: externals/skia-web-app
         run: yarn install
 
       - name: Start web server
-        working-directory: skia-web-app
+        working-directory: externals/skia-web-app
         run: |
           timeout 30s yarn web --port 3000 || true &
           sleep 25
