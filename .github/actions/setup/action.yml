@@ -25,7 +25,7 @@ runs:
         cache-dependency-path: yarn.lock
 
     - name: Install dependencies
-      run: yarn install --no-immutable
+      run: yarn install --immutable
       shell: bash
       env:
         SK_GRAPHITE: ${{ inputs.graphite == 'true' && '1' || '' }}
