@@ -8,7 +8,7 @@ Config.setCodec("prores");
 Config.setProResProfile("4444");
 
 //Config.setProResProfile("4444");
-//Config.setFrameRange([140, 244]);
+Config.setFrameRange([1, 1]);
 
 Config.overrideWebpackConfig((currentConfiguration) => {
   if (!currentConfiguration.module) {
