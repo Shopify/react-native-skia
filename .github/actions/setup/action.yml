@@ -22,9 +22,10 @@ runs:
       with:
         node-version-file: .nvmrc
         cache: yarn
+        cache-dependency-path: yarn.lock
 
     - name: Install dependencies
-      run: yarn install --immutable
+      run: yarn install --frozen-lockfile
       shell: bash
       env:
         SK_GRAPHITE: ${{ inputs.graphite == 'true' && '1' || '' }}
