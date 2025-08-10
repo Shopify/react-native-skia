@@ -31,7 +31,7 @@ runs:
         SK_GRAPHITE: ${{ inputs.graphite == 'true' && '1' || '' }}
 
     - name: Upload refreshed yarn.lock
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: yarn-lock
         path: yarn.lock
