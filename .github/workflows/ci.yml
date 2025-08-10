@@ -359,7 +359,7 @@ jobs:
       - name: Update package.json to use local Skia package
         working-directory: externals/skia-web-app
         run: |
-          sed -i 's/"@shopify\/react-native-skia": "[^"]*"/"@shopify\/react-native-skia": "file:..\/..\/packages\/skia\/package.tgz"/' package.json
+          sed -i '' 's/"@shopify\/react-native-skia": "[^"]*"/"@shopify\/react-native-skia": "file:..\/..\/packages\/skia\/package.tgz"/' package.json
 
       - name: Install dependencies for skia-web-app
         working-directory: externals/skia-web-app
