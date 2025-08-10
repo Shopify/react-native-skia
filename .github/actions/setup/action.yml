@@ -21,21 +21,10 @@ runs:
       uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
       with:
         node-version-file: .nvmrc
-
-    - name: Cache dependencies
-      id: yarn-cache
-      uses: actions/cache@2f8e54208210a422b2efd51efaa6bd6d7ca8920f # v3.4.3
-      with:
-        path: |
-          **/node_modules
-          .yarn/install-state.gz
-        key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}-${{ hashFiles('**/package.json', '!node_modules/**') }}
-        restore-keys: |
-          ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
-          ${{ runner.os }}-yarn-
+        cache: yarn
+        cache-dependency-path: yarn.lock
 
     - name: Install dependencies
-      if: steps.yarn-cache.outputs.cache-hit != 'true'
       run: yarn install --immutable
       shell: bash
       env:
