@@ -35,7 +35,7 @@ describe("Export Tests", () => {
         let hasTransparency = false;
         // Check every 4th byte (alpha channel) for transparency
         for (let i = 3; i < data.length; i += 4) {
-          if (data[i] < 255) {
+          if (data[i] === 0) {
             hasTransparency = true;
             break;
           }
