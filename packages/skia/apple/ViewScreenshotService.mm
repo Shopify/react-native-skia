@@ -44,8 +44,11 @@
   // up in the profiler!
   UIImage *image = [renderer
       imageWithActions:^(UIGraphicsImageRendererContext *_Nonnull context) {
+        //CFTimeInterval startTime = CACurrentMediaTime();
         [view drawViewHierarchyInRect:(CGRect){CGPointZero, size}
-                   afterScreenUpdates:YES];
+                   afterScreenUpdates:NO];
+        //CFTimeInterval endTime = CACurrentMediaTime();
+        //NSLog(@"drawViewHierarchyInRect took %.2f ms", (endTime - startTime) * 1000.0);
       }];
 
   // Convert from UIImage -> CGImage -> SkImage
