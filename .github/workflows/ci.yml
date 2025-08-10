@@ -363,8 +363,7 @@ jobs:
 
       - name: Install dependencies for skia-web-app
         working-directory: externals/skia-web-app
-        run: |
-          yarn install --refresh-lockfile
+        run: yarn install --no-immutable
 
       - name: Start web server
         working-directory: externals/skia-web-app
