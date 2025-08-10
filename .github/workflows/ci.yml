@@ -338,3 +338,49 @@ jobs:
       - name: Run e2e tests
         working-directory: packages/skia
         run: CI=true yarn e2e
+
+  test-web:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update skia-web-app submodule to latest main
+        run: |
+          cd externals/skia-web-app
+          git checkout main
+          git pull origin main
+
+      - name: Build and pack Skia package
+        working-directory: packages/skia
+        run: yarn build && yarn pack
+
+      - name: Update package.json to use local Skia package
+        working-directory: externals/skia-web-app
+        run: |
+          sed -i '' 's/"@shopify\/react-native-skia": "[^"]*"/"@shopify\/react-native-skia": "file:..\/..\/packages\/skia\/package.tgz"/' package.json
+
+      - name: Install dependencies for skia-web-app
+        working-directory: externals/skia-web-app
+        run: yarn install --no-immutable
+
+      - name: Start web server
+        working-directory: externals/skia-web-app
+        run: |
+          yarn web &
+          sleep 30
+
+      - name: Run tests
+        working-directory: externals/skia-web-app
+        run: yarn test
+
+      - name: Stop web server
+        working-directory: externals/skia-web-app
+        run: pkill -f "yarn web" || true
