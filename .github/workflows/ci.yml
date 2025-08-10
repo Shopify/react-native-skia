@@ -45,7 +45,8 @@ jobs:
         run: yarn tsc
 
   test:
-    runs-on: ubuntu-latest
+    # We need macos here for the web e2e tests
+    runs-on: macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
