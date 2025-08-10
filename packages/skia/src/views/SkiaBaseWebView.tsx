@@ -59,7 +59,7 @@ export abstract class SkiaBaseWebView<
     }
   }
 
-  protected getSize() {
+  getSize() {
     return { width: this.width, height: this.height };
   }
 
