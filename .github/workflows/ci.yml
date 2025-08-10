@@ -370,4 +370,11 @@ jobs:
         run: |
           yarn web &
           sleep 30
-          yarn test
+
+      - name: Run tests
+        working-directory: externals/skia-web-app
+        run: yarn test
+
+      - name: Stop web server
+        working-directory: externals/skia-web-app
+        run: pkill -f "yarn web" || true
