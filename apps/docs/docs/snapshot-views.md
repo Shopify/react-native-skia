@@ -16,9 +16,9 @@ If the view is optimized away, `makeImageFromView` will crash or return the wron
 
 ::::info
 
+### Example
 
-
-```tsx
+```tsx twoslash
 import { useState, useRef } from "react";
 import { View, Text, PixelRatio, StyleSheet, Pressable } from "react-native";
 import type { SkImage } from "@shopify/react-native-skia";
