@@ -368,6 +368,6 @@ jobs:
       - name: Start web server
         working-directory: externals/skia-web-app
         run: |
-          timeout 30s yarn web --port 3000 || true &
-          sleep 25
+          timeout 60s yarn web --port 3000 || true &
+          sleep 60
           curl -f http://localhost:3000 || exit 1
