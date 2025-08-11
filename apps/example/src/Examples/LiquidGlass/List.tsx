@@ -26,6 +26,10 @@ export const examples = [
     screen: "Shader2",
     title: "🎨 Shader 2",
   },
+  {
+    screen: "NativeView",
+    title: "📱 Native View",
+  },
 ] as const;
 
 const styles = StyleSheet.create({

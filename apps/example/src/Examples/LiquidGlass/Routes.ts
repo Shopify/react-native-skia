@@ -5,4 +5,5 @@ export type Routes = {
   DisplacementMap2: undefined;
   Shader1: undefined;
   Shader2: undefined;
+  NativeView: undefined;
 };
