@@ -161,6 +161,16 @@ public:
   }
 
   /**
+   * Creates an skImage containing the screenshot of a native view and its
+   * children. This method assumes it's already running on the main thread.
+   * @param viewTag React viewtag
+   * @return sk_sp<SkImage> The screenshot image or nullptr if failed
+   */
+  virtual sk_sp<SkImage> makeViewScreenshotSync(int viewTag) {
+    return takeScreenshotFromViewTag(viewTag);
+  }
+
+  /**
    * Raises an exception on the platform. This function does not necessarily
    * throw an exception and stop execution, so it is important to stop execution
    * by returning after calling the function

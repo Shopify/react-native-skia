@@ -86,11 +86,20 @@ public:
   JSI_HOST_FUNCTION(MakeImageFromViewTagSync) {
     // TODO: add safety checks on args[0] and args[1]
     auto viewTag = arguments[0].asNumber();
-    auto image = JsiSkImage::fromValue(runtime, arguments[1]);
+    auto jsiImage = arguments[1].asObject(runtime).asHostObject<JsiSkImage>(runtime);
     auto context = getContext();
     // TODO: check we are on the main thread
     if (viewTag != -1) {
-
+      auto result = context->makeViewScreenshotSync(viewTag);
+      SkDebugf("MakeImageFromViewTagSync: viewTag=%d, result=%s\n", 
+               static_cast<int>(viewTag), 
+               result != nullptr ? "not null" : "null");
+      jsiImage->setObject(result);
+      return jsi::Object::createFromHostObject(
+            runtime, std::make_shared<JsiSkImage>(getContext(), std::move(result)));
+    } else {
+            SkDebugf("MakeImageFromViewTagSync failed: viewTag=%d\n", 
+               static_cast<int>(viewTag));
     }
     return jsi::Value::undefined();
   }

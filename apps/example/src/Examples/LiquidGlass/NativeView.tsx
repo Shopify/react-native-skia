@@ -3,9 +3,17 @@ import {
   Skia,
   useClock,
   Image as SkImage,
+  Fill,
+  ColorMatrix,
 } from "@shopify/react-native-skia";
 import React, { useLayoutEffect, useRef } from "react";
-import { View, PixelRatio, StyleSheet, findNodeHandle } from "react-native";
+import {
+  View,
+  PixelRatio,
+  StyleSheet,
+  findNodeHandle,
+  Platform,
+} from "react-native";
 import Animated, {
   useAnimatedReaction,
   useAnimatedStyle,
@@ -38,12 +46,20 @@ export const NativeView = () => {
     };
   });
 
-  useAnimatedReaction(
-    () => clock.value,
-    () => {
-      Skia.Image.MakeImageFromViewTagSync(viewTag.current, image.value);
-    }
-  );
+  // useAnimatedReaction(
+  //   () => clock.value,
+  //   () => {
+  //     console.log("take snapshot on " + Platform.OS + " at " + new Date());
+  //     Skia.Image.MakeImageFromViewTagSync(viewTag.current, image.value);
+  //   }
+  // );
+  const result = useDerivedValue(() => {
+    console.log(clock.value);
+    return Skia.Image.MakeImageFromViewTagSync(
+      viewTag.current,
+      image.value
+    ) as SkImage;
+  });
 
   const rect = useDerivedValue(() => ({
     x: 0,
@@ -79,7 +95,14 @@ export const NativeView = () => {
         />
       </View>
       <Canvas style={StyleSheet.absoluteFillObject} onSize={canvasSize}>
-        <SkImage image={image} rect={rect} />
+        <SkImage image={result} rect={rect}>
+          <ColorMatrix
+            matrix={[
+              -0.578, 0.99, 0.588, 0, 0, 0.469, 0.535, -0.003, 0, 0, 0.015,
+              1.69, -0.703, 0, 0, 0, 0, 0, 1, 0,
+            ]}
+          />
+        </SkImage>
       </Canvas>
     </View>
   );
