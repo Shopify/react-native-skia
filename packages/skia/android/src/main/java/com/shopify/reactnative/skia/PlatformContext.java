@@ -1,11 +1,18 @@
 package com.shopify.reactnative.skia;
 
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.graphics.RenderEffect;
+import android.graphics.Shader;
+import android.view.View;
 
 import com.facebook.jni.HybridData;
 import com.facebook.proguard.annotations.DoNotStrip;
 import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.UIManager;
+import com.facebook.react.uimanager.UIManagerHelper;
+import com.facebook.react.uimanager.UIManagerModule;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -113,6 +120,26 @@ public class PlatformContext {
                 mContext.handleException(new Exception(message));
             }
         });
+    }
+
+    @DoNotStrip
+    public void setRenderEffectAndroid(final int tag, final String shaderString) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            UIManager uiManager = UIManagerHelper.getUIManagerForReactTag(mContext, tag);
+            View view = null;
+            try {
+                view = uiManager.resolveView(tag);
+            } catch (RuntimeException e) {
+                mContext.handleException(e);
+            }
+            if (view != null) {
+                    // For now, ignore shaderString and use a fixed blur effect
+                    RenderEffect blurEffect = null;
+                    blurEffect = RenderEffect.createBlurEffect(
+                            10, 10, null, Shader.TileMode.CLAMP);
+                    view.setRenderEffect(blurEffect);
+            }
+        }
     }
 
     // Private c++ native methods

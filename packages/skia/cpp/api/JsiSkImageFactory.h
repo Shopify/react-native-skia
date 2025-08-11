@@ -91,16 +91,18 @@ public:
     // TODO: check we are on the main thread
     if (viewTag != -1) {
       auto result = context->makeViewScreenshotSync(viewTag);
-      SkDebugf("MakeImageFromViewTagSync: viewTag=%d, result=%s\n", 
-               static_cast<int>(viewTag), 
-               result != nullptr ? "not null" : "null");
       jsiImage->setObject(result);
       return jsi::Object::createFromHostObject(
             runtime, std::make_shared<JsiSkImage>(getContext(), std::move(result)));
-    } else {
-            SkDebugf("MakeImageFromViewTagSync failed: viewTag=%d\n", 
-               static_cast<int>(viewTag));
     }
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setRenderEffectAndroid) {
+    auto viewTag = static_cast<int>(arguments[0].asNumber());
+    auto shaderString = arguments[1].asString(runtime).utf8(runtime);
+    auto context = getContext();
+    context->setRenderEffectAndroid(viewTag, shaderString);
     return jsi::Value::undefined();
   }
 
@@ -126,6 +128,7 @@ public:
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromEncoded),
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTag),
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTagSync),
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, setRenderEffectAndroid),
                        JSI_EXPORT_FUNC(JsiSkImageFactory,
                                        MakeImageFromNativeBuffer),
                        JSI_EXPORT_FUNC(JsiSkImageFactory,

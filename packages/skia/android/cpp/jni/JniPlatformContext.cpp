@@ -130,6 +130,17 @@ sk_sp<SkImage> JniPlatformContext::takeScreenshotFromViewTag(size_t tag) {
   return skImage;
 }
 
+void JniPlatformContext::setRenderEffectAndroid(int viewTag, const std::string &shaderString) {
+  auto env = jni::Environment::current();
+  static auto method = javaPart_->getClass()->getMethod<void(int, jstring)>("setRenderEffectAndroid");
+  
+  jstring jShaderString = env->NewStringUTF(shaderString.c_str());
+  
+  method(javaPart_.get(), viewTag, jShaderString);
+  
+  env->DeleteLocalRef(jShaderString);
+}
+
 void JniPlatformContext::performStreamOperation(
     const std::string &sourceUri,
     const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) {

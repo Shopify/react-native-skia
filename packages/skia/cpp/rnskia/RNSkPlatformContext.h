@@ -171,6 +171,15 @@ public:
   }
 
   /**
+   * Sets a render effect on an Android view. No-op on other platforms.
+   * @param viewTag React viewtag
+   * @param shaderString Shader string (not used in initial implementation)
+   */
+  virtual void setRenderEffectAndroid(int viewTag, const std::string &shaderString) {
+    // No-op by default (iOS and other platforms)
+  }
+
+  /**
    * Raises an exception on the platform. This function does not necessarily
    * throw an exception and stop execution, so it is important to stop execution
    * by returning after calling the function

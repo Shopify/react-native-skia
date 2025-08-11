@@ -42,6 +42,8 @@ public:
 
   sk_sp<SkImage> takeScreenshotFromViewTag(size_t tag);
 
+  void setRenderEffectAndroid(int viewTag, const std::string &shaderString);
+
   jni::global_ref<jobject> createVideo(const std::string &url);
 
 private:

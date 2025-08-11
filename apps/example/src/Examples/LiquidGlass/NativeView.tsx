@@ -5,6 +5,7 @@ import {
   Image as SkImage,
   Fill,
   ColorMatrix,
+  notifyChange,
 } from "@shopify/react-native-skia";
 import React, { useLayoutEffect, useRef } from "react";
 import {
@@ -38,6 +39,10 @@ export const NativeView = () => {
 
   useLayoutEffect(() => {
     viewTag.current = findNodeHandle(ref.current)!;
+    if (Platform.OS === "android") {
+      console.log("SetRenderEffect!");
+      Skia.Image.setRenderEffectAndroid(viewTag.current, "");
+    }
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -46,20 +51,15 @@ export const NativeView = () => {
     };
   });
 
-  // useAnimatedReaction(
-  //   () => clock.value,
-  //   () => {
-  //     console.log("take snapshot on " + Platform.OS + " at " + new Date());
-  //     Skia.Image.MakeImageFromViewTagSync(viewTag.current, image.value);
-  //   }
-  // );
-  const result = useDerivedValue(() => {
-    console.log(clock.value);
-    return Skia.Image.MakeImageFromViewTagSync(
-      viewTag.current,
-      image.value
-    ) as SkImage;
-  });
+  useAnimatedReaction(
+    () => clock.value,
+    () => {
+      if (Platform.OS === "ios") {
+        Skia.Image.MakeImageFromViewTagSync(viewTag.current, image.value);
+        notifyChange(image);
+      }
+    }
+  );
 
   const rect = useDerivedValue(() => ({
     x: 0,
@@ -95,7 +95,7 @@ export const NativeView = () => {
         />
       </View>
       <Canvas style={StyleSheet.absoluteFillObject} onSize={canvasSize}>
-        <SkImage image={result} rect={rect}>
+        <SkImage image={image} rect={rect}>
           <ColorMatrix
             matrix={[
               -0.578, 0.99, 0.588, 0, 0, 0.469, 0.535, -0.003, 0, 0, 0.015,
