@@ -83,6 +83,18 @@ public:
         });
   }
 
+  JSI_HOST_FUNCTION(MakeImageFromViewTagSync) {
+    // TODO: add safety checks on args[0] and args[1]
+    auto viewTag = arguments[0].asNumber();
+    auto image = JsiSkImage::fromValue(runtime, arguments[1]);
+    auto context = getContext();
+    // TODO: check we are on the main thread
+    if (viewTag != -1) {
+
+    }
+    return jsi::Value::undefined();
+  }
+
   JSI_HOST_FUNCTION(MakeImageFromNativeTextureUnstable) {
     auto texInfo = JsiTextureInfo::fromValue(runtime, arguments[0]);
     auto image = getContext()->makeImageFromNativeTexture(
@@ -104,6 +116,7 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromEncoded),
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTag),
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTagSync),
                        JSI_EXPORT_FUNC(JsiSkImageFactory,
                                        MakeImageFromNativeBuffer),
                        JSI_EXPORT_FUNC(JsiSkImageFactory,
