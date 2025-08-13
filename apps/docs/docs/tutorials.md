@@ -69,3 +69,4 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 
 ## Games
 * [Introduction to Game Development with Expo, Skia and Reanimated](https://youtu.be/Af2-OT9mE14?si=yMoznK-EpDPIYvXE)
+* [2D Game Physics with Matter.js, React Native Skia and Expo](https://www.youtube.com/watch?v=fxxaOu6pLnU)
