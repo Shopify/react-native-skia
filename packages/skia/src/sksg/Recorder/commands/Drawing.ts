@@ -208,8 +208,8 @@ export const drawPath = (ctx: DrawingContext, props: PathProps) => {
     stroke,
     ...pathProps
   } = props;
-  const start = saturate(trimStart);
-  const end = saturate(trimEnd);
+  const start = Math.fround(saturate(trimStart));
+  const end = Math.fround(saturate(trimEnd));
   const hasStartOffset = start !== 0;
   const hasEndOffset = end !== 1;
   const hasStrokeOptions = stroke !== undefined;
