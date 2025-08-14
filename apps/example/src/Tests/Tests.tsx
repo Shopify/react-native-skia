@@ -41,11 +41,11 @@ export const Tests = ({ assets }: TestsProps) => {
           let tree: any;
 
           // Handle ping/pong for heartbeat
-          if (message.type === 'pong') {
+          if (message.type === "pong") {
             // Heartbeat response received, connection is alive
             return;
           }
-          
+
           // Check if this is a correlated message
           if (message.id && message.body) {
             requestId = message.id;
@@ -60,7 +60,7 @@ export const Tests = ({ assets }: TestsProps) => {
               // Send correlated response
               const response = JSON.stringify({
                 id: requestId,
-                body: data
+                body: data,
               });
               client.send(response);
             } else {
@@ -94,7 +94,7 @@ export const Tests = ({ assets }: TestsProps) => {
         } catch (error) {
           console.error("Failed to process message:", error);
           // Send error response if we have a request ID
-          const errorResponse = { error: error.message };
+          const errorResponse = { error: (error as any).message };
           client.send(JSON.stringify(errorResponse));
         }
       };
@@ -122,7 +122,7 @@ export const Tests = ({ assets }: TestsProps) => {
                   // Send correlated response
                   const response = JSON.stringify({
                     id: drawing.requestId,
-                    body: Array.from(data)
+                    body: Array.from(data),
                   });
                   client.send(response);
                 } else {
@@ -136,7 +136,7 @@ export const Tests = ({ assets }: TestsProps) => {
               if (drawing.requestId && client) {
                 const errorResponse = JSON.stringify({
                   id: drawing.requestId,
-                  error: e.message
+                  error: e.message,
                 });
                 client.send(errorResponse);
               }
@@ -160,7 +160,7 @@ export const Tests = ({ assets }: TestsProps) => {
               // Send correlated response
               const response = JSON.stringify({
                 id: screen.requestId,
-                body: Array.from(data)
+                body: Array.from(data),
               });
               client.send(response);
             } else {
@@ -173,7 +173,7 @@ export const Tests = ({ assets }: TestsProps) => {
           if (screen.requestId && client) {
             const errorResponse = JSON.stringify({
               id: screen.requestId,
-              error: e.message
+              error: (e as any).message,
             });
             client.send(errorResponse);
           }
@@ -190,13 +190,13 @@ export const Tests = ({ assets }: TestsProps) => {
       <Text style={{ color: "black" }}>
         {(() => {
           switch (connectionState) {
-            case 'connecting':
+            case "connecting":
               return `⚪️ Connecting to ${hostname}. Use yarn e2e to run tests.`;
-            case 'connected':
+            case "connected":
               return "🟢 Connected - Waiting for the server to send tests";
-            case 'disconnected':
+            case "disconnected":
               return `🟡 Disconnected from ${hostname} - Reconnecting...`;
-            case 'error':
+            case "error":
               return `🔴 Connection failed to ${hostname}`;
             default:
               return `⚪️ Connecting to ${hostname}. Use yarn e2e to run tests.`;

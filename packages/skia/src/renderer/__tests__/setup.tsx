@@ -515,12 +515,12 @@ return surface.makeImageSnapshot().encodeToBase64();
 
       const messageHandler = (raw: Buffer) => {
         clearTimeout(timeout);
-        this.client.removeListener('message', messageHandler);
-        
+        this.client.removeListener("message", messageHandler);
+
         try {
           const responseStr = raw.toString();
           let response;
-          
+
           try {
             response = JSON.parse(responseStr);
           } catch {
@@ -528,39 +528,39 @@ return surface.makeImageSnapshot().encodeToBase64();
             resolve(json ? JSON.parse(responseStr) : this.decodeImage(raw));
             return;
           }
-          
+
           // Check if this is a correlated response
           if (response.id === requestId) {
             if (response.error) {
               reject(new Error(`Remote error: ${response.error}`));
               return;
             }
-            
+
             if (json) {
               resolve(response.body);
             } else {
               // Convert array back to Uint8Array for image processing
               if (Array.isArray(response.body)) {
                 const imageData = new Uint8Array(response.body);
-                resolve(this.decodeImage(Buffer.from(imageData)));
+                resolve(this.decodeImage(Buffer.from(imageData)) as any as R);
               } else {
-                resolve(this.decodeImage(raw));
+                resolve(this.decodeImage(raw) as any as R);
               }
             }
           } else {
             // Not our response, put the listener back
-            this.client.once('message', messageHandler);
+            this.client.once("message", messageHandler);
           }
         } catch (error) {
           reject(new Error(`Failed to process response: ${error}`));
         }
       };
-      
-      this.client.on('message', messageHandler);
+
+      this.client.on("message", messageHandler);
 
       const message = JSON.stringify({
         id: requestId,
-        body: json ? JSON.parse(body) : body
+        body: json ? JSON.parse(body) : body,
       });
       this.client.send(message);
     });

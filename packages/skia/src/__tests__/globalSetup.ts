@@ -28,7 +28,7 @@ const globalSetup = () => {
       );
       global.testServer.on("connection", (client) => {
         global.testClient = client;
-        
+
         // Handle initial handshake
         client.once("message", (msg) => {
           const obj = JSON.parse(msg.toString("utf8"));
@@ -49,13 +49,13 @@ const globalSetup = () => {
         client.on("message", (msg) => {
           try {
             const message = JSON.parse(msg.toString("utf8"));
-            
+
             // Handle ping/pong for heartbeat
-            if (message.type === 'ping') {
-              client.send(JSON.stringify({ type: 'pong' }));
+            if (message.type === "ping") {
+              client.send(JSON.stringify({ type: "pong" }));
               return;
             }
-            
+
             if (message.id && message.body) {
               // This is a correlated request, emit on specific channel
               client.emit(`request_${message.id}`, message.body);
