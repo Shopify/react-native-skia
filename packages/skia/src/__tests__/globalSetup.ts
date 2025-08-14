@@ -28,6 +28,8 @@ const globalSetup = () => {
       );
       global.testServer.on("connection", (client) => {
         global.testClient = client;
+        
+        // Handle initial handshake
         client.once("message", (msg) => {
           const obj = JSON.parse(msg.toString("utf8"));
           const { OS, arch } = obj;
@@ -41,6 +43,26 @@ const globalSetup = () => {
           global.testArch = arch;
           console.log(`${OS} device connected (${arch})`);
           resolve();
+        });
+
+        // Handle subsequent messages with correlation
+        client.on("message", (msg) => {
+          try {
+            const message = JSON.parse(msg.toString("utf8"));
+            
+            // Handle ping/pong for heartbeat
+            if (message.type === 'ping') {
+              client.send(JSON.stringify({ type: 'pong' }));
+              return;
+            }
+            
+            if (message.id && message.body) {
+              // This is a correlated request, emit on specific channel
+              client.emit(`request_${message.id}`, message.body);
+            }
+          } catch (error) {
+            console.error("Failed to parse correlated message:", error);
+          }
         });
       });
     }

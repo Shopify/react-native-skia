@@ -29,37 +29,73 @@ interface TestsProps {
 export const Tests = ({ assets }: TestsProps) => {
   const viewRef = useRef<View>(null);
   const ref = useCanvasRef();
-  const [client, hostname] = useClient();
+  const [client, hostname, connectionState] = useClient();
   const [drawing, setDrawing] = useState<any>(null);
   const [screen, setScreen] = useState<any>(null);
   useEffect(() => {
     if (client !== null) {
       client.onmessage = (e) => {
-        const tree: any = JSON.parse(e.data);
-        if (tree.code) {
-          client.send(
-            JSON.stringify(
-              eval(
-                `(function Main() {
-                  return (${tree.code})(this.Skia, this.ctx, this.size, this.scale);
-                })`
-              ).call({
-                Skia,
-                ctx: parseProps(tree.ctx, assets),
-                size: size * PixelRatio.get(),
-                scale: s,
-              })
-            )
-          );
-        } else if (typeof tree.screen === "string") {
-          const Screen = Screens[tree.screen];
-          if (!Screen) {
-            throw new Error(`Unknown screen: ${tree.screen}`);
+        try {
+          const message = JSON.parse(e.data);
+          let requestId: string | undefined;
+          let tree: any;
+
+          // Handle ping/pong for heartbeat
+          if (message.type === 'pong') {
+            // Heartbeat response received, connection is alive
+            return;
           }
-          setScreen(React.createElement(Screen));
-        } else {
-          const node = parseNode(tree, assets);
-          setDrawing(node as SerializedNode);
+          
+          // Check if this is a correlated message
+          if (message.id && message.body) {
+            requestId = message.id;
+            tree = message.body;
+          } else {
+            // Legacy message format
+            tree = message;
+          }
+
+          const sendResponse = (data: any) => {
+            if (requestId) {
+              // Send correlated response
+              const response = JSON.stringify({
+                id: requestId,
+                body: data
+              });
+              client.send(response);
+            } else {
+              // Legacy response
+              client.send(data);
+            }
+          };
+
+          if (tree.code) {
+            const result = eval(
+              `(function Main() {
+                return (${tree.code})(this.Skia, this.ctx, this.size, this.scale);
+              })`
+            ).call({
+              Skia,
+              ctx: parseProps(tree.ctx, assets),
+              size: size * PixelRatio.get(),
+              scale: s,
+            });
+            sendResponse(JSON.stringify(result));
+          } else if (typeof tree.screen === "string") {
+            const Screen = Screens[tree.screen];
+            if (!Screen) {
+              throw new Error(`Unknown screen: ${tree.screen}`);
+            }
+            setScreen({ component: React.createElement(Screen), requestId });
+          } else {
+            const node = parseNode(tree, assets);
+            setDrawing({ node: node as SerializedNode, requestId });
+          }
+        } catch (error) {
+          console.error("Failed to process message:", error);
+          // Send error response if we have a request ID
+          const errorResponse = { error: error.message };
+          client.send(JSON.stringify(errorResponse));
         }
       };
       return () => {
@@ -82,11 +118,28 @@ export const Tests = ({ assets }: TestsProps) => {
             .then((image) => {
               if (image && client) {
                 const data = image.encodeToBytes();
-                client.send(data);
+                if (drawing.requestId) {
+                  // Send correlated response
+                  const response = JSON.stringify({
+                    id: drawing.requestId,
+                    body: Array.from(data)
+                  });
+                  client.send(response);
+                } else {
+                  // Legacy response
+                  client.send(data);
+                }
               }
             })
             .catch((e) => {
               console.error(e);
+              if (drawing.requestId && client) {
+                const errorResponse = JSON.stringify({
+                  id: drawing.requestId,
+                  error: e.message
+                });
+                client.send(errorResponse);
+              }
             });
         }
       }, timeToDraw);
@@ -99,10 +152,31 @@ export const Tests = ({ assets }: TestsProps) => {
   useEffect(() => {
     if (screen) {
       const it = setTimeout(async () => {
-        const image = await makeImageFromView(viewRef as RefObject<View>);
-        if (image && client) {
-          const data = image.encodeToBytes();
-          client.send(data);
+        try {
+          const image = await makeImageFromView(viewRef as RefObject<View>);
+          if (image && client) {
+            const data = image.encodeToBytes();
+            if (screen.requestId) {
+              // Send correlated response
+              const response = JSON.stringify({
+                id: screen.requestId,
+                body: Array.from(data)
+              });
+              client.send(response);
+            } else {
+              // Legacy response
+              client.send(data);
+            }
+          }
+        } catch (e) {
+          console.error(e);
+          if (screen.requestId && client) {
+            const errorResponse = JSON.stringify({
+              id: screen.requestId,
+              error: e.message
+            });
+            client.send(errorResponse);
+          }
         }
       }, timeToDraw);
       return () => {
@@ -114,19 +188,30 @@ export const Tests = ({ assets }: TestsProps) => {
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <Text style={{ color: "black" }}>
-        {client === null
-          ? `⚪️ Connecting to ${hostname}. Use yarn e2e to run tests.`
-          : "🟢 Waiting for the server to send tests"}
+        {(() => {
+          switch (connectionState) {
+            case 'connecting':
+              return `⚪️ Connecting to ${hostname}. Use yarn e2e to run tests.`;
+            case 'connected':
+              return "🟢 Connected - Waiting for the server to send tests";
+            case 'disconnected':
+              return `🟡 Disconnected from ${hostname} - Reconnecting...`;
+            case 'error':
+              return `🔴 Connection failed to ${hostname}`;
+            default:
+              return `⚪️ Connecting to ${hostname}. Use yarn e2e to run tests.`;
+          }
+        })()}
       </Text>
       <Canvas style={{ width: size, height: size }} ref={ref}>
-        <Group transform={[{ scale }]}>{drawing}</Group>
+        <Group transform={[{ scale }]}>{drawing?.node || drawing}</Group>
       </Canvas>
       <View
         style={{ width: size, height: size }}
         ref={viewRef}
         collapsable={false}
       >
-        {screen}
+        {screen?.component || screen}
       </View>
     </View>
   );

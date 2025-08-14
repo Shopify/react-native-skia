@@ -506,11 +506,63 @@ return surface.makeImageSnapshot().encodeToBase64();
     body: string,
     json?: boolean
   ): Promise<R> {
-    return new Promise((resolve) => {
-      this.client.once("message", (raw: Buffer) => {
-        resolve(json ? JSON.parse(raw.toString()) : this.decodeImage(raw));
+    return new Promise((resolve, reject) => {
+      const requestId = Math.random().toString(36).substring(7);
+      const timeout = setTimeout(() => {
+        this.client.removeAllListeners(`response_${requestId}`);
+        reject(new Error(`Request ${requestId} timed out after 30 seconds`));
+      }, 30000);
+
+      const messageHandler = (raw: Buffer) => {
+        clearTimeout(timeout);
+        this.client.removeListener('message', messageHandler);
+        
+        try {
+          const responseStr = raw.toString();
+          let response;
+          
+          try {
+            response = JSON.parse(responseStr);
+          } catch {
+            // Legacy binary response
+            resolve(json ? JSON.parse(responseStr) : this.decodeImage(raw));
+            return;
+          }
+          
+          // Check if this is a correlated response
+          if (response.id === requestId) {
+            if (response.error) {
+              reject(new Error(`Remote error: ${response.error}`));
+              return;
+            }
+            
+            if (json) {
+              resolve(response.body);
+            } else {
+              // Convert array back to Uint8Array for image processing
+              if (Array.isArray(response.body)) {
+                const imageData = new Uint8Array(response.body);
+                resolve(this.decodeImage(Buffer.from(imageData)));
+              } else {
+                resolve(this.decodeImage(raw));
+              }
+            }
+          } else {
+            // Not our response, put the listener back
+            this.client.once('message', messageHandler);
+          }
+        } catch (error) {
+          reject(new Error(`Failed to process response: ${error}`));
+        }
+      };
+      
+      this.client.on('message', messageHandler);
+
+      const message = JSON.stringify({
+        id: requestId,
+        body: json ? JSON.parse(body) : body
       });
-      this.client.send(body);
+      this.client.send(message);
     });
   }
 
