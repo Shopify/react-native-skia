@@ -1,9 +1,9 @@
-import type { Server, WebSocket } from "ws";
-import { WebSocketServer } from "ws";
+import { Server } from "socket.io";
+import type { Socket } from "socket.io";
 
 declare global {
   var testServer: Server;
-  var testClient: WebSocket;
+  var testClient: Socket;
   var testOS: "ios" | "android" | "web" | "node";
   var testArch: "paper" | "fabric";
 }
@@ -22,17 +22,25 @@ const globalSetup = () => {
       resolve();
     } else {
       const port = 4242;
-      global.testServer = new WebSocketServer({ port });
+      global.testServer = new Server(port, {
+        cors: {
+          origin: "*",
+          methods: ["GET", "POST"]
+        },
+        transports: ['websocket', 'polling']
+      });
+      
       console.log(
         `\n\nTest server listening on port ${port} (waiting for the example app to open on E2E tests screen)`
       );
-      global.testServer.on("connection", (client) => {
-        global.testClient = client;
+      
+      global.testServer.on("connection", (socket) => {
+        console.log("Socket.IO client connected");
+        global.testClient = socket;
         
         // Handle initial handshake
-        client.once("message", (msg) => {
-          const obj = JSON.parse(msg.toString("utf8"));
-          const { OS, arch } = obj;
+        socket.once("handshake", (data) => {
+          const { OS, arch } = data;
           if (!isOS(OS)) {
             throw new Error("Unknown testing platform: " + OS);
           }
@@ -42,27 +50,16 @@ const globalSetup = () => {
           global.testOS = OS;
           global.testArch = arch;
           console.log(`${OS} device connected (${arch})`);
+          socket.emit("handshake-ack", { success: true });
           resolve();
         });
 
-        // Handle subsequent messages with correlation
-        client.on("message", (msg) => {
-          try {
-            const message = JSON.parse(msg.toString("utf8"));
-            
-            // Handle ping/pong for heartbeat
-            if (message.type === 'ping') {
-              client.send(JSON.stringify({ type: 'pong' }));
-              return;
-            }
-            
-            if (message.id && message.body) {
-              // This is a correlated request, emit on specific channel
-              client.emit(`request_${message.id}`, message.body);
-            }
-          } catch (error) {
-            console.error("Failed to parse correlated message:", error);
-          }
+        socket.on("disconnect", (reason) => {
+          console.log("Socket.IO client disconnected:", reason);
+        });
+
+        socket.on("error", (error) => {
+          console.error("Socket.IO error:", error);
         });
       });
     }

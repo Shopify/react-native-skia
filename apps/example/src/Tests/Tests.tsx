@@ -33,73 +33,57 @@ export const Tests = ({ assets }: TestsProps) => {
   const [drawing, setDrawing] = useState<any>(null);
   const [screen, setScreen] = useState<any>(null);
   useEffect(() => {
-    if (client !== null) {
-      client.onmessage = (e) => {
+    if (client !== null && client.connected) {
+      
+      // Handle eval requests (code execution)
+      client.on('eval-request', (data, callback) => {
         try {
-          const message = JSON.parse(e.data);
-          let requestId: string | undefined;
-          let tree: any;
-
-          // Handle ping/pong for heartbeat
-          if (message.type === 'pong') {
-            // Heartbeat response received, connection is alive
-            return;
-          }
-          
-          // Check if this is a correlated message
-          if (message.id && message.body) {
-            requestId = message.id;
-            tree = message.body;
-          } else {
-            // Legacy message format
-            tree = message;
-          }
-
-          const sendResponse = (data: any) => {
-            if (requestId) {
-              // Send correlated response
-              const response = JSON.stringify({
-                id: requestId,
-                body: data
-              });
-              client.send(response);
-            } else {
-              // Legacy response
-              client.send(data);
-            }
-          };
-
-          if (tree.code) {
-            const result = eval(
-              `(function Main() {
-                return (${tree.code})(this.Skia, this.ctx, this.size, this.scale);
-              })`
-            ).call({
-              Skia,
-              ctx: parseProps(tree.ctx, assets),
-              size: size * PixelRatio.get(),
-              scale: s,
-            });
-            sendResponse(JSON.stringify(result));
-          } else if (typeof tree.screen === "string") {
-            const Screen = Screens[tree.screen];
-            if (!Screen) {
-              throw new Error(`Unknown screen: ${tree.screen}`);
-            }
-            setScreen({ component: React.createElement(Screen), requestId });
-          } else {
-            const node = parseNode(tree, assets);
-            setDrawing({ node: node as SerializedNode, requestId });
-          }
-        } catch (error) {
-          console.error("Failed to process message:", error);
-          // Send error response if we have a request ID
-          const errorResponse = { error: error.message };
-          client.send(JSON.stringify(errorResponse));
+          const result = eval(
+            `(function Main() {
+              return (${data.code})(this.Skia, this.ctx, this.size, this.scale);
+            })`
+          ).call({
+            Skia,
+            ctx: parseProps(data.ctx, assets),
+            size: size * PixelRatio.get(),
+            scale: s,
+          });
+          callback(result);
+        } catch (error: any) {
+          console.error("Failed to process eval request:", error);
+          callback({ error: error.message });
         }
-      };
+      });
+
+      // Handle draw requests (rendering nodes)
+      client.on('draw-request', (tree, callback) => {
+        try {
+          const node = parseNode(tree, assets);
+          setDrawing({ node: node as SerializedNode, callback });
+        } catch (error: any) {
+          console.error("Failed to process draw request:", error);
+          callback({ error: error.message });
+        }
+      });
+
+      // Handle screen requests (taking screenshots)
+      client.on('screen-request', (data, callback) => {
+        try {
+          const Screen = Screens[data.screen];
+          if (!Screen) {
+            throw new Error(`Unknown screen: ${data.screen}`);
+          }
+          setScreen({ component: React.createElement(Screen), callback });
+        } catch (error: any) {
+          console.error("Failed to process screen request:", error);
+          callback({ error: error.message });
+        }
+      });
+
       return () => {
-        client.close();
+        client.off('eval-request');
+        client.off('draw-request'); 
+        client.off('screen-request');
       };
     }
     return;
@@ -116,29 +100,18 @@ export const Tests = ({ assets }: TestsProps) => {
               height: size,
             })
             .then((image) => {
-              if (image && client) {
+              if (image) {
                 const data = image.encodeToBytes();
-                if (drawing.requestId) {
-                  // Send correlated response
-                  const response = JSON.stringify({
-                    id: drawing.requestId,
-                    body: Array.from(data)
-                  });
-                  client.send(response);
-                } else {
-                  // Legacy response
-                  client.send(data);
+                if (drawing.callback) {
+                  // Socket.IO callback response
+                  drawing.callback(Array.from(data));
                 }
               }
             })
             .catch((e) => {
               console.error(e);
-              if (drawing.requestId && client) {
-                const errorResponse = JSON.stringify({
-                  id: drawing.requestId,
-                  error: e.message
-                });
-                client.send(errorResponse);
+              if (drawing.callback) {
+                drawing.callback({ error: e.message });
               }
             });
         }
@@ -154,28 +127,17 @@ export const Tests = ({ assets }: TestsProps) => {
       const it = setTimeout(async () => {
         try {
           const image = await makeImageFromView(viewRef as RefObject<View>);
-          if (image && client) {
+          if (image) {
             const data = image.encodeToBytes();
-            if (screen.requestId) {
-              // Send correlated response
-              const response = JSON.stringify({
-                id: screen.requestId,
-                body: Array.from(data)
-              });
-              client.send(response);
-            } else {
-              // Legacy response
-              client.send(data);
+            if (screen.callback) {
+              // Socket.IO callback response
+              screen.callback(Array.from(data));
             }
           }
-        } catch (e) {
+        } catch (e: any) {
           console.error(e);
-          if (screen.requestId && client) {
-            const errorResponse = JSON.stringify({
-              id: screen.requestId,
-              error: e.message
-            });
-            client.send(errorResponse);
+          if (screen.callback) {
+            screen.callback({ error: e.message });
           }
         }
       }, timeToDraw);

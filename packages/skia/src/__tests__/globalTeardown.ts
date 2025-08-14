@@ -1,6 +1,6 @@
 const globalTeardown = () => {
   if (global.testClient) {
-    global.testClient.close();
+    global.testClient.disconnect();
   }
   if (global.testServer) {
     global.testServer.close();

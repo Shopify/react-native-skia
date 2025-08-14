@@ -5,7 +5,8 @@ import path from "path";
 
 import React from "react";
 import type { ReactNode } from "react";
-import type { Server, WebSocket } from "ws";
+import type { Server } from "socket.io";
+import type { Socket } from "socket.io";
 
 import type * as SkiaExports from "../../index";
 import { JsiSkApi } from "../../skia/web/JsiSkia";
@@ -25,7 +26,7 @@ type TestOS = "ios" | "android" | "web" | "node";
 
 declare global {
   var testServer: Server;
-  var testClient: WebSocket;
+  var testClient: Socket;
   var testOS: TestOS;
 }
 export let surface: TestingSurface;
@@ -481,15 +482,42 @@ return surface.makeImageSnapshot().encodeToBase64();
     return this.handleImageResponse(await serialize(node));
   }
 
-  screen(screen: string) {
-    return this.handleImageResponse(JSON.stringify({ screen }));
+  async screen(screen: string): Promise<SkImage> {
+    try {
+      const response = await this.client.timeout(30000).emitWithAck('screen-request', { screen });
+      
+      if (response.error) {
+        throw new Error(`Remote error: ${response.error}`);
+      }
+      
+      if (Array.isArray(response)) {
+        const imageData = new Uint8Array(response);
+        return this.decodeImage(Buffer.from(imageData));
+      } else if (typeof response === 'string') {
+        const Skia = global.SkiaApi;
+        const data = Skia.Data.fromBase64(response);
+        const image = Skia.Image.MakeImageFromEncoded(data);
+        if (image === null) {
+          throw new Error("Unable to decode screen image");
+        }
+        return image;
+      } else {
+        return this.decodeImage(Buffer.from(response));
+      }
+    } catch (error: any) {
+      if (error.type === 'timeout') {
+        throw new Error('Screen capture request timed out after 30 seconds');
+      } else {
+        throw new Error(`Failed to capture screen: ${error.message}`);
+      }
+    }
   }
 
   private get client() {
-    if (global.testClient === null) {
-      throw new Error("Client is not connected. Did you call init?");
+    if (!global.testClient || !global.testClient.connected) {
+      throw new Error("Socket.IO client is not connected. Did you call init?");
     }
-    return global.testClient!;
+    return global.testClient;
   }
 
   private prepareContext<Ctx extends EvalContext>(context?: Ctx): EvalContext {
@@ -506,63 +534,46 @@ return surface.makeImageSnapshot().encodeToBase64();
     body: string,
     json?: boolean
   ): Promise<R> {
-    return new Promise((resolve, reject) => {
-      const requestId = Math.random().toString(36).substring(7);
-      const timeout = setTimeout(() => {
-        this.client.removeAllListeners(`response_${requestId}`);
-        reject(new Error(`Request ${requestId} timed out after 30 seconds`));
-      }, 30000);
-
-      const messageHandler = (raw: Buffer) => {
-        clearTimeout(timeout);
-        this.client.removeListener('message', messageHandler);
+    return new Promise(async (resolve, reject) => {
+      try {
+        const payload = json ? JSON.parse(body) : body;
+        const eventName = json ? 'eval-request' : 'draw-request';
         
-        try {
-          const responseStr = raw.toString();
-          let response;
-          
-          try {
-            response = JSON.parse(responseStr);
-          } catch {
-            // Legacy binary response
-            resolve(json ? JSON.parse(responseStr) : this.decodeImage(raw));
-            return;
-          }
-          
-          // Check if this is a correlated response
-          if (response.id === requestId) {
-            if (response.error) {
-              reject(new Error(`Remote error: ${response.error}`));
-              return;
-            }
-            
-            if (json) {
-              resolve(response.body);
-            } else {
-              // Convert array back to Uint8Array for image processing
-              if (Array.isArray(response.body)) {
-                const imageData = new Uint8Array(response.body);
-                resolve(this.decodeImage(Buffer.from(imageData)));
-              } else {
-                resolve(this.decodeImage(raw));
-              }
-            }
-          } else {
-            // Not our response, put the listener back
-            this.client.once('message', messageHandler);
-          }
-        } catch (error) {
-          reject(new Error(`Failed to process response: ${error}`));
+        // Use Socket.IO timeout and acknowledgment
+        const response = await this.client.timeout(30000).emitWithAck(eventName, payload);
+        
+        if (response.error) {
+          reject(new Error(`Remote error: ${response.error}`));
+          return;
         }
-      };
-      
-      this.client.on('message', messageHandler);
-
-      const message = JSON.stringify({
-        id: requestId,
-        body: json ? JSON.parse(body) : body
-      });
-      this.client.send(message);
+        
+        if (json) {
+          resolve(response);
+        } else {
+          // Handle binary image response
+          if (Array.isArray(response)) {
+            const imageData = new Uint8Array(response);
+            resolve(this.decodeImage(Buffer.from(imageData)) as any as R);
+          } else if (typeof response === 'string') {
+            // Base64 encoded image
+            const Skia = global.SkiaApi;
+            const data = Skia.Data.fromBase64(response);
+            const image = Skia.Image.MakeImageFromEncoded(data);
+            if (image === null) {
+              throw new Error("Unable to decode image from base64");
+            }
+            resolve(image as any as R);
+          } else {
+            resolve(this.decodeImage(Buffer.from(response)) as any as R);
+          }
+        }
+      } catch (error: any) {
+        if (error.type === 'timeout') {
+          reject(new Error(`Request timed out after 30 seconds`));
+        } else {
+          reject(new Error(`Failed to process request: ${error.message}`));
+        }
+      }
     });
   }
 

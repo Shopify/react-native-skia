@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
+import { io, Socket } from "socket.io-client";
 
 const { OS } = Platform;
 const ANDROID_WS_HOST = "10.0.2.2";
@@ -10,92 +11,81 @@ const PORT = 4242;
 const arch = (global as any)?.nativeFabricUIManager ? "fabric" : "paper";
 
 type ConnectionState = 'connecting' | 'connected' | 'disconnected' | 'error';
-type UseClient = [client: WebSocket | null, hostname: string, state: ConnectionState];
+type UseClient = [client: Socket | null, hostname: string, state: ConnectionState];
 
 export const useClient = (): UseClient => {
-  const [client, setClient] = useState<WebSocket | null>(null);
+  const [client, setClient] = useState<Socket | null>(null);
   const [state, setState] = useState<ConnectionState>('connecting');
-  const [retry, setRetry] = useState<number>(0);
-  const [messageQueue, setMessageQueue] = useState<string[]>([]);
 
   useEffect(() => {
-    const url = `ws://${HOST}:${PORT}`;
-    let reconnectTimeout: ReturnType<typeof setTimeout>;
-    let heartbeatInterval: ReturnType<typeof setInterval>;
+    const url = `http://${HOST}:${PORT}`;
     
+    console.log('Connecting to Socket.IO server at:', url);
     setState('connecting');
-    const ws = new WebSocket(url);
     
-    ws.onopen = () => {
-      console.log('WebSocket connected');
+    const socket = io(url, {
+      transports: ['websocket', 'polling'],
+      timeout: 20000,
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 10000,
+      reconnectionAttempts: 10,
+      autoConnect: true,
+      forceNew: true
+    });
+
+    socket.on('connect', () => {
+      console.log('Socket.IO connected');
       setState('connected');
-      setClient(ws);
+      setClient(socket);
       
       // Send initial handshake
-      ws.send(
-        JSON.stringify({
-          OS,
-          arch,
-        })
-      );
-      
-      // Send any queued messages
-      messageQueue.forEach(message => {
-        ws.send(message);
+      socket.emit('handshake', {
+        OS,
+        arch,
       });
-      setMessageQueue([]);
-      
-      // Start heartbeat
-      heartbeatInterval = setInterval(() => {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ type: 'ping' }));
-        }
-      }, 30000);
-    };
-    
-    ws.onclose = (event) => {
-      console.log('WebSocket closed:', event.code, event.reason);
+    });
+
+    socket.on('handshake-ack', (data) => {
+      console.log('Handshake acknowledged:', data);
+    });
+
+    socket.on('disconnect', (reason) => {
+      console.log('Socket.IO disconnected:', reason);
       setState('disconnected');
       setClient(null);
-      clearInterval(heartbeatInterval);
-      
-      // Attempt to reconnect after delay
-      if (retry < 10) { // Max 10 retries
-        const delay = Math.min(1000 * Math.pow(2, retry), 10000); // Exponential backoff, max 10s
-        console.log(`Reconnecting in ${delay}ms...`);
-        reconnectTimeout = setTimeout(() => {
-          setRetry((r) => r + 1);
-        }, delay);
-      } else {
-        setState('error');
-        console.error('Max reconnection attempts reached');
-      }
-    };
-    
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+    });
+
+    socket.on('connect_error', (error) => {
+      console.error('Socket.IO connection error:', error);
       setState('error');
-    };
-    
-    // Override the send method to queue messages when not connected
-    const originalSend = ws.send.bind(ws);
-    ws.send = (data: string | ArrayBufferLike | Blob | ArrayBufferView) => {
-      if (ws.readyState === WebSocket.OPEN) {
-        originalSend(data);
-      } else {
-        // Queue message for later
-        if (typeof data === 'string') {
-          setMessageQueue(queue => [...queue, data]);
-        }
-      }
-    };
-    
+    });
+
+    socket.on('reconnect', (attemptNumber) => {
+      console.log('Socket.IO reconnected after', attemptNumber, 'attempts');
+      setState('connected');
+      setClient(socket);
+    });
+
+    socket.on('reconnect_attempt', (attemptNumber) => {
+      console.log('Socket.IO reconnection attempt', attemptNumber);
+      setState('connecting');
+    });
+
+    socket.on('reconnect_error', (error) => {
+      console.error('Socket.IO reconnection error:', error);
+    });
+
+    socket.on('reconnect_failed', () => {
+      console.error('Socket.IO reconnection failed');
+      setState('error');
+    });
+
     return () => {
-      clearTimeout(reconnectTimeout);
-      clearInterval(heartbeatInterval);
-      ws.close(1000, 'Component unmounting');
+      console.log('Disconnecting Socket.IO client');
+      socket.disconnect();
     };
-  }, [retry, messageQueue]);
+  }, []);
   
   return [client, HOST, state];
 };
