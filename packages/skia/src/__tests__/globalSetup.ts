@@ -6,6 +6,7 @@ declare global {
   var testClient: WebSocket;
   var testOS: "ios" | "android" | "web" | "node";
   var testArch: "paper" | "fabric";
+  var testClientHealthy: boolean;
 }
 
 const isOS = (os: string): os is "android" | "ios" | "web" => {
@@ -28,6 +29,40 @@ const globalSetup = () => {
       );
       global.testServer.on("connection", (client) => {
         global.testClient = client;
+        global.testClientHealthy = true;
+        
+        let missedPongs = 0;
+        const maxMissedPongs = 2;
+        
+        // Set up heartbeat
+        const heartbeat = setInterval(() => {
+          if (client.readyState === client.OPEN) {
+            if (missedPongs >= maxMissedPongs) {
+              console.log('Client appears unhealthy, terminating connection');
+              global.testClientHealthy = false;
+              client.terminate();
+              clearInterval(heartbeat);
+              return;
+            }
+            missedPongs++;
+            client.ping();
+          } else {
+            clearInterval(heartbeat);
+          }
+        }, 30000);
+        
+        client.on('pong', () => {
+          console.log('Heartbeat received from client');
+          missedPongs = 0;
+          global.testClientHealthy = true;
+        });
+        
+        client.on('close', () => {
+          clearInterval(heartbeat);
+          global.testClientHealthy = false;
+          console.log('Client disconnected');
+        });
+        
         client.once("message", (msg) => {
           const obj = JSON.parse(msg.toString("utf8"));
           const { OS, arch } = obj;

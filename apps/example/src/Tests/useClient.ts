@@ -20,25 +20,34 @@ export const useClient = (): UseClient => {
     const ws = new WebSocket(url);
     ws.onopen = () => {
       setClient(ws);
-      ws.send(
-        JSON.stringify({
-          OS,
-          arch,
-        })
-      );
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(
+          JSON.stringify({
+            OS,
+            arch,
+          })
+        );
+      }
     };
     ws.onclose = () => {
       setClient(null);
     };
+    ws.addEventListener('ping', () => {
+      console.log('Ping received from server');
+    });
     ws.onerror = () => {
       it = setTimeout(() => {
-        ws.close();
+        if (ws.readyState !== WebSocket.CLOSED) {
+          ws.close();
+        }
         // incrementing retry to rerun the effect
         setRetry((r) => r + 1);
       }, 500);
     };
     return () => {
-      ws.close();
+      if (ws.readyState !== WebSocket.CLOSED) {
+        ws.close();
+      }
       clearTimeout(it);
     };
   }, [retry]);
