@@ -2,6 +2,7 @@
 import path from "path";
 
 import { $ } from "./utils";
+import { spawnSync } from "child_process";
 
 const DEBUG = false;
 export const GRAPHITE = !!process.env.SK_GRAPHITE;
@@ -95,6 +96,8 @@ export type Platform = {
 
 const appleMinTarget = GRAPHITE ? "15.1" : "13.0";
 const appleSimulatorMinTarget = "16.0";
+
+const appleSdkRoot = spawnSync(`xcrun --sdk macosx --show-sdk-path`, {shell:true}).stdout.toString().trim();
 
 // Define tvOS targets separately so they can be conditionally included
 const tvosTargets: { [key: string]: Target } = GRAPHITE
@@ -228,6 +231,54 @@ export const configurations = {
         args: [["ios_min_target", `"${appleSimulatorMinTarget}"`]],
       },
       ...tvosTargets,
+      "arm64-maccatalyst": {
+        cpu: "arm64",
+        platform: "mac",
+        args: [
+          ["skia_enable_gpu", true],
+          ["target_os", `"mac"`],
+          ["target_cpu", `"arm64"`],
+          ["mac_deployment_target", `"14.0"`],
+          [
+            "extra_cflags",
+            `["-target","arm64-apple-ios14.0-macabi",` +
+              `"-isysroot","${appleSdkRoot}",` +
+              `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
+              `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
+          ],
+          [
+            "extra_ldflags",
+            `["-isysroot","${appleSdkRoot}",` +
+              `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
+          ],
+          ["cc", "\"clang\""],
+          ["cxx", "\"clang++\""],
+        ],
+      },
+      "x64-maccatalyst": {
+        cpu: "x64",
+        platform: "mac",
+        args: [
+          ["skia_enable_gpu", true],
+          ["target_os", `"mac"`],
+          ["target_cpu", `"x64"`],
+          ["mac_deployment_target", `"14.0"`],
+          [
+            "extra_cflags",
+            `["-target","x86_64-apple-ios14.0-macabi",` +
+              `"-isysroot","${appleSdkRoot}",` +
+              `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
+              `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
+          ],
+          [
+            "extra_ldflags",
+            `["-isysroot","${appleSdkRoot}",` +
+              `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
+          ],
+          ["cc", "\"clang\""],
+          ["cxx", "\"clang++\""],
+        ],
+      },
       "arm64-macosx": {
         platformGroup: "macosx",
         cpu: "arm64",
