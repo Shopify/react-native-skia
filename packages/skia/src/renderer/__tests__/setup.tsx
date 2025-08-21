@@ -103,6 +103,12 @@ beforeAll(async () => {
   assets.set(skiaLogoJpeg, "skiaLogoJpeg");
 });
 
+afterAll(() => {
+  if (surface && E2E && 'destroy' in surface) {
+    (surface as RemoteSurface).destroy();
+  }
+});
+
 export const wait = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -429,12 +435,27 @@ class LocalSurface implements TestingSurface {
   }
 }
 
+interface TestRequest {
+  id: string;
+  body: string;
+}
+
+interface TestResponse {
+  id: string;
+  data: string | Buffer;
+  error?: string;
+}
+
 class RemoteSurface implements TestingSurface {
   readonly width = 256;
   readonly height = 256;
   readonly fontSize = 32;
   readonly OS = global.testOS;
   readonly arch = global.testArch;
+  
+  private pendingRequests = new Map<string, { resolve: (value: any) => void; reject: (error: Error) => void; isJson: boolean; timeout: NodeJS.Timeout }>();
+  private messageListenerAttached = false;
+  private isDestroyed = false;
 
   eval<Ctx extends EvalContext, R>(
     fn: (Skia: Skia, ctx: Ctx) => any,
@@ -442,7 +463,7 @@ class RemoteSurface implements TestingSurface {
   ): Promise<R> {
     const ctx = this.prepareContext(context);
     const body = { code: fn.toString(), ctx };
-    return this.handleImageResponse<R>(JSON.stringify(body), true);
+    return this.sendRequest<R>(JSON.stringify(body), true);
   }
 
   async drawOffscreen<Ctx extends EvalContext>(
@@ -464,7 +485,7 @@ surface.flush();
 return surface.makeImageSnapshot().encodeToBase64();
 }`;
     const body = { code, ctx };
-    const base64 = await this.handleImageResponse<string>(
+    const base64 = await this.sendRequest<string>(
       JSON.stringify(body),
       true
     );
@@ -478,11 +499,11 @@ return surface.makeImageSnapshot().encodeToBase64();
   }
 
   async draw(node: ReactNode) {
-    return this.handleImageResponse(await serialize(node));
+    return this.sendRequest(await serialize(node));
   }
 
   screen(screen: string) {
-    return this.handleImageResponse(JSON.stringify({ screen }));
+    return this.sendRequest(JSON.stringify({ screen }));
   }
 
   private get client() {
@@ -502,16 +523,78 @@ return surface.makeImageSnapshot().encodeToBase64();
     return ctx;
   }
 
-  private handleImageResponse<R = SkImage>(
+  private sendRequest<R = SkImage>(
     body: string,
     json?: boolean
   ): Promise<R> {
-    return new Promise((resolve) => {
-      this.client.once("message", (raw: Buffer) => {
-        resolve(json ? JSON.parse(raw.toString()) : this.decodeImage(raw));
+    const requestId = this.generateRequestId();
+    this.ensureMessageListener();
+    
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        this.pendingRequests.delete(requestId);
+        reject(new Error(`Request ${requestId} timed out after 180 seconds`));
+      }, 180000);
+      
+      this.pendingRequests.set(requestId, { 
+        resolve, 
+        reject, 
+        isJson: json || false,
+        timeout 
       });
-      this.client.send(body);
+      
+      const request: TestRequest = { id: requestId, body };
+      this.client.send(JSON.stringify(request));
     });
+  }
+
+  private ensureMessageListener() {
+    if (!this.messageListenerAttached && this.client) {
+      this.client.on("message", (raw: Buffer) => {
+        if (this.isDestroyed) {
+          return;
+        }
+        
+        try {
+          const response: TestResponse = JSON.parse(raw.toString());
+          const pending = this.pendingRequests.get(response.id);
+          
+          if (!pending) {
+            // Silently ignore responses for requests that have already timed out or completed
+            return;
+          }
+          
+          clearTimeout(pending.timeout);
+          this.pendingRequests.delete(response.id);
+          
+          if (response.error) {
+            pending.reject(new Error(response.error));
+          } else {
+            const result = pending.isJson ? JSON.parse(response.data as string) : this.decodeImage(Buffer.from(response.data as string, 'base64'));
+            pending.resolve(result);
+          }
+        } catch (error) {
+          if (!this.isDestroyed) {
+            console.error("Error processing response:", error);
+          }
+        }
+      });
+      this.messageListenerAttached = true;
+    }
+  }
+
+  destroy() {
+    this.isDestroyed = true;
+    // Clean up any pending requests
+    this.pendingRequests.forEach(({ timeout, reject }) => {
+      clearTimeout(timeout);
+      reject(new Error("RemoteSurface destroyed"));
+    });
+    this.pendingRequests.clear();
+  }
+
+  private generateRequestId(): string {
+    return `req_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   private decodeImage(raw: Buffer) {
