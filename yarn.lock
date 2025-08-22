@@ -7180,7 +7180,7 @@ __metadata:
   peerDependencies:
     react: ">=19.0"
     react-native: ">=0.78"
-    react-native-reanimated: ">=4.0"
+    react-native-reanimated: ">=3.0"
     react-native-worklets: ">=0.4.0"
   peerDependenciesMeta:
     react-native:
