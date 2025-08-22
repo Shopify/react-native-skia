@@ -6942,6 +6942,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@rnx-kit/react-native-host@npm:^0.5.11":
+  version: 0.5.11
+  resolution: "@rnx-kit/react-native-host@npm:0.5.11"
+  peerDependencies:
+    react-native: ">=0.66"
+  checksum: 6895f82aa9f69279171f9952888b0c65a0a9fec58ccee212214518e196ca3d73f67c0e45d40ad275f9bd04ba73768de4c32ff847c5e35dc0b89120609cf8b411
+  languageName: node
+  linkType: hard
+
 "@rnx-kit/react-native-host@npm:^0.5.5":
   version: 0.5.5
   resolution: "@rnx-kit/react-native-host@npm:0.5.5"
@@ -13685,7 +13694,7 @@ __metadata:
     react-native-safe-area-context: ^5.2.0
     react-native-screens: ^4.9.1
     react-native-svg: ^15.12.1
-    react-native-test-app: ^4.2.0
+    react-native-test-app: ^4.4.6
     react-native-windows: ^0.75.0
     react-native-worklets: ^0.4.0
     react-test-renderer: 19.0.0
@@ -23325,6 +23334,43 @@ __metadata:
     init-test-app: scripts/init.mjs
     install-windows-test-app: windows/test-app.mjs
   checksum: 8a29dd1c2284281524b6974b3e3fc7d706f695327118b9780c4b37c3b371e1ed646c998e351453b4d59b982f0ef9dd2f8903c081510e63accabf8fff3346d441
+  languageName: node
+  linkType: hard
+
+"react-native-test-app@npm:^4.4.6":
+  version: 4.4.6
+  resolution: "react-native-test-app@npm:4.4.6"
+  dependencies:
+    "@rnx-kit/react-native-host": ^0.5.11
+    "@rnx-kit/tools-react-native": ^2.1.0
+    ajv: ^8.0.0
+    cliui: ^8.0.0
+    fast-xml-parser: ^4.0.0
+    prompts: ^2.4.0
+    semver: ^7.3.5
+    uuid: ^11.0.0
+  peerDependencies:
+    "@callstack/react-native-visionos": 0.73 - 0.78
+    "@expo/config-plugins": ">=5.0"
+    react: 18.1 - 19.1
+    react-native: 0.70 - 0.81 || >=0.82.0-0 <0.82.0
+    react-native-macos: ^0.0.0-0 || 0.71 - 0.78
+    react-native-windows: ^0.0.0-0 || 0.70 - 0.79
+  peerDependenciesMeta:
+    "@callstack/react-native-visionos":
+      optional: true
+    "@expo/config-plugins":
+      optional: true
+    react-native-macos:
+      optional: true
+    react-native-windows:
+      optional: true
+  bin:
+    configure-test-app: scripts/configure.mjs
+    init: scripts/init.mjs
+    init-test-app: scripts/init.mjs
+    install-windows-test-app: windows/app.mjs
+  checksum: 170e7948454f88fb435f5ad1232c0b6ebb50bafd0fb531a987ba0c5955fa4811c6fef4a2e67116f8a570bab319eaee1c200cea7ec8d3f39b24ae8f105af31b7f
   languageName: node
   linkType: hard
 

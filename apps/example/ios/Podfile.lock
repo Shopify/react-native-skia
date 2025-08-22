@@ -1657,7 +1657,7 @@ PODS:
     - React-logger (= 0.78.0)
     - React-perflogger (= 0.78.0)
     - React-utils (= 0.78.0)
-  - ReactNativeHost (0.5.5):
+  - ReactNativeHost (0.5.11):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1680,7 +1680,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - ReactTestApp-DevSupport (4.3.1):
+  - ReactTestApp-DevSupport (4.4.6):
     - React-Core
     - React-jsi
   - ReactTestApp-Resources (1.0.0-dev)
@@ -2006,8 +2006,8 @@ DEPENDENCIES:
   - ReactAppDependencyProvider (from `build/generated/ios`)
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../../../node_modules/react-native/ReactCommon`)
-  - "ReactNativeHost (from `../../../node_modules/@rnx-kit/react-native-host`)"
-  - ReactTestApp-DevSupport (from `../../../node_modules/react-native-test-app`)
+  - "ReactNativeHost (from `../node_modules/@rnx-kit/react-native-host`)"
+  - ReactTestApp-DevSupport (from `../node_modules/react-native-test-app`)
   - ReactTestApp-Resources (from `..`)
   - RNGestureHandler (from `../../../node_modules/react-native-gesture-handler`)
   - RNReanimated (from `../../../node_modules/react-native-reanimated`)
@@ -2159,9 +2159,9 @@ EXTERNAL SOURCES:
   ReactCommon:
     :path: "../../../node_modules/react-native/ReactCommon"
   ReactNativeHost:
-    :path: "../../../node_modules/@rnx-kit/react-native-host"
+    :path: "../node_modules/@rnx-kit/react-native-host"
   ReactTestApp-DevSupport:
-    :path: "../../../node_modules/react-native-test-app"
+    :path: "../node_modules/react-native-test-app"
   ReactTestApp-Resources:
     :path: ".."
   RNGestureHandler:
@@ -2246,8 +2246,8 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: f2e81d80afd71a8058589e19d8a134243fa53f17
   ReactCodegen: 50b6e45bbbef9b39d9798820cdbe87bfc7922e22
   ReactCommon: 3d39389f8e2a2157d5c999f8fba57bd1c8f226f0
-  ReactNativeHost: f2ecc49200441384efb6c6e8bffe62ba29ee16ae
-  ReactTestApp-DevSupport: 15d2ef4884e8f5fd30ded3dec59b010f76384f37
+  ReactNativeHost: bb6bae8a13691653d04a3653e4e78f39998712ed
+  ReactTestApp-DevSupport: 7f041d0226e551d19b818344272ffe901e1ac799
   ReactTestApp-Resources: 1bd9ff10e4c24f2ad87101a32023721ae923bccf
   RNGestureHandler: 66e593addd8952725107cfaa4f5e3378e946b541
   RNReanimated: a21f8bd71df12f6c81c12c8fd9fc80b295106981
