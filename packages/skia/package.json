@@ -102,7 +102,7 @@
     "@types/pixelmatch": "5.2.4",
     "@types/pngjs": "6.0.1",
     "@types/react": "^19.1.0",
-    "@types/react-reconciler": "0.28.9",
+    "@types/react-reconciler": "0.32.0",
     "@types/ws": "8.5.3",
     "eslint": "8",
     "eslint-config-react-native-wcandillon": "^3.10.2",
@@ -128,7 +128,7 @@
   },
   "dependencies": {
     "canvaskit-wasm": "0.40.0",
-    "react-reconciler": "0.31.0"
+    "react-reconciler": "0.32.0"
   },
   "eslintIgnore": [
     "node_modules/",
