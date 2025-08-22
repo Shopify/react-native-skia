@@ -7151,7 +7151,7 @@ __metadata:
     "@types/jest": 29.5.6
     "@types/pixelmatch": 5.2.4
     "@types/pngjs": 6.0.1
-    "@types/react": ^19.0.0
+    "@types/react": ^19.1.0
     "@types/react-reconciler": 0.28.9
     "@types/ws": 8.5.3
     canvaskit-wasm: 0.40.0
@@ -7164,7 +7164,7 @@ __metadata:
     pixelmatch: 5.3.0
     pngjs: 6.0.0
     prettier: 2.8.7
-    react: 19.0.0
+    react: 19.1.0
     react-native: 0.78.0
     react-native-builder-bob: 0.18.2
     react-native-reanimated: ^4.0
@@ -8251,7 +8251,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-test-renderer@npm:^19.0.0":
+"@types/react-test-renderer@npm:^19.1.0":
   version: 19.1.0
   resolution: "@types/react-test-renderer@npm:19.1.0"
   dependencies:
@@ -8260,12 +8260,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^19.0.0":
+"@types/react@npm:*":
   version: 19.1.0
   resolution: "@types/react@npm:19.1.0"
   dependencies:
     csstype: ^3.0.2
   checksum: 7dd7e021897509a68672ab38c268d2f1f519306ade66cc12ffce4dd46e9d2b4224ab49e0b1191b17ac5eceafc65d76e987d6c5b0679224ddbb46f8debce5decc
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^19.1.0":
+  version: 19.1.10
+  resolution: "@types/react@npm:19.1.10"
+  dependencies:
+    csstype: ^3.0.2
+  checksum: 1d9c5edb5957e797ad59dc71f92f6faa1f8033007c037f9aeb01161366c92fa257a6ddb267ff33f7787c072c5d568b5f8593868d58f2858f7face6978cd18e00
   languageName: node
   linkType: hard
 
@@ -12266,8 +12275,8 @@ __metadata:
     its-fine: ^1.0.8
     minimist: ^1.2.8
     prism-react-renderer: ^2.4.1
-    react: 19.0.0
-    react-dom: 19.0.0
+    react: 19.1.0
+    react-dom: 19.1.0
     react-native: 0.78.0
     react-native-gesture-handler: ^2.24.0
     react-native-reanimated: ^4.0
@@ -13675,8 +13684,8 @@ __metadata:
     "@shopify/react-native-skia": "workspace:*"
     "@testing-library/react-native": ^13.1.0
     "@types/jest": ^29.5.13
-    "@types/react": ^19.0.0
-    "@types/react-test-renderer": ^19.0.0
+    "@types/react": ^19.1.0
+    "@types/react-test-renderer": ^19.1.0
     babel-plugin-transform-inline-environment-variables: ^0.4.4
     cdt2d: ^1.0.0
     eslint: ^8.19.0
@@ -15342,7 +15351,7 @@ __metadata:
     eslint: ^9.19.0
     eslint-config-react-native-wcandillon: ^3.10.2
     jest: ^29.7.0
-    react: ^19.0.0
+    react: ^19.1.0
     ts-jest: ^29.1.1
     ts-node: ^10.9.2
     typescript: ^5.2.2
@@ -23005,18 +23014,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:19.0.0":
-  version: 19.0.0
-  resolution: "react-dom@npm:19.0.0"
-  dependencies:
-    scheduler: ^0.25.0
-  peerDependencies:
-    react: ^19.0.0
-  checksum: 009cc6e575263a0d1906f9dd4aa6532d2d3d0d71e4c2b7777c8fe4de585fa06b5b77cdc2e0fbaa2f3a4a5e5d3305c189ba152153f358ee7da4d9d9ba5d3a8975
-  languageName: node
-  linkType: hard
-
-"react-dom@npm:^19.0.0":
+"react-dom@npm:19.1.0":
   version: 19.1.0
   resolution: "react-dom@npm:19.1.0"
   dependencies:
@@ -23024,6 +23022,17 @@ __metadata:
   peerDependencies:
     react: ^19.1.0
   checksum: 1d154b6543467095ac269e61ca59db546f34ef76bcdeb90f2dad41d682cd210aae492e70c85010ed5d0a2caea225e9a55139ebc1a615ee85bf197d7f99678cdf
+  languageName: node
+  linkType: hard
+
+"react-dom@npm:^19.1.0":
+  version: 19.1.1
+  resolution: "react-dom@npm:19.1.1"
+  dependencies:
+    scheduler: ^0.26.0
+  peerDependencies:
+    react: ^19.1.1
+  checksum: 71d63df955e99bb58470c6ae12ebb82fa80e2a73147c387b73a31c17bcff803ce8aded52ae0c4391c9b413be0aa449249d8be7d063136826d1f0caba9720a907
   languageName: node
   linkType: hard
 
@@ -23088,9 +23097,9 @@ __metadata:
   linkType: hard
 
 "react-is@npm:^19.0.0":
-  version: 19.1.0
-  resolution: "react-is@npm:19.1.0"
-  checksum: 3eb4eac7f09bf178bdc6fa98d384f5f243b85de7c99679a88b0154ead4d818ad94386ccb00ea31ec52409ffd13299057f5ec6ca2eaec06f9f7eddc1ad4832332
+  version: 19.1.1
+  resolution: "react-is@npm:19.1.1"
+  checksum: e60ed01c27fe4d22b08f8a31f18831d144a801d08a909ca31fb1d02721b4f4cde0759148d6341f660a4d6ce54a78e22b8b39520b67e2e76254e583885868ab43
   languageName: node
   linkType: hard
 
@@ -23627,10 +23636,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^19.0.0":
+"react@npm:19.1.0":
   version: 19.1.0
   resolution: "react@npm:19.1.0"
   checksum: c0905f8cfb878b0543a5522727e5ed79c67c8111dc16ceee135b7fe19dce77b2c1c19293513061a8934e721292bfc1517e0487e262d1906f306bdf95fa54d02f
+  languageName: node
+  linkType: hard
+
+"react@npm:^19.1.0":
+  version: 19.1.1
+  resolution: "react@npm:19.1.1"
+  checksum: f2f18fea5deac87b1167365bd5160bcba64d383c26a37afa905b714ca424f423ef97d8daf53f041ab9ac25a06357fafcf0b5d3b6b84c9d1eace0e621bfeae629
   languageName: node
   linkType: hard
 
@@ -24218,8 +24234,8 @@ __metadata:
     parse-svg-path: ^0.1.2
     pixelmatch: ^7.1.0
     raw-loader: ^4.0.2
-    react: ^19.0.0
-    react-dom: ^19.0.0
+    react: ^19.1.0
+    react-dom: ^19.1.0
     react-native-web: ^0.19.7
     remotion: 4.0.244
     serialize-svg-path: ^0.1.0
