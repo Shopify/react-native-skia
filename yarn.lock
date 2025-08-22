@@ -6615,7 +6615,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/bottom-tabs@npm:latest":
+"@react-navigation/bottom-tabs@npm:^7.4.6":
   version: 7.4.6
   resolution: "@react-navigation/bottom-tabs@npm:7.4.6"
   dependencies:
@@ -6648,7 +6648,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/elements@npm:^2.6.3, @react-navigation/elements@npm:latest":
+"@react-navigation/elements@npm:^2.6.3":
   version: 2.6.3
   resolution: "@react-navigation/elements@npm:2.6.3"
   dependencies:
@@ -6668,7 +6668,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/native-stack@npm:latest":
+"@react-navigation/native-stack@npm:^7.3.25":
   version: 7.3.25
   resolution: "@react-navigation/native-stack@npm:7.3.25"
   dependencies:
@@ -6684,7 +6684,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/native@npm:latest":
+"@react-navigation/native@npm:^7.1.17":
   version: 7.1.17
   resolution: "@react-navigation/native@npm:7.1.17"
   dependencies:
@@ -13678,10 +13678,10 @@ __metadata:
     "@react-native/eslint-config": 0.78.0
     "@react-native/metro-config": 0.78.0
     "@react-native/typescript-config": 0.78.0
-    "@react-navigation/bottom-tabs": latest
-    "@react-navigation/elements": latest
-    "@react-navigation/native": latest
-    "@react-navigation/native-stack": latest
+    "@react-navigation/bottom-tabs": ^7.4.6
+    "@react-navigation/elements": ^2.6.3
+    "@react-navigation/native": ^7.1.17
+    "@react-navigation/native-stack": ^7.3.25
     "@rnx-kit/metro-config": ^2.0.0
     "@shopify/react-native-skia": "workspace:*"
     "@testing-library/react-native": ^13.1.0
