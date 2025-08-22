@@ -8,10 +8,12 @@ import { SkiaSGRoot } from "../sksg/Reconciler";
 // We call it main thread because on web main is JS thread
 export const isOnMainThread = () => {
   "worklet";
-  return (
-    (typeof _WORKLET !== "undefined" && _WORKLET === true) ||
-    Platform.OS === "web"
-  );
+  // Check if we're on the UI thread (worklet context)
+  // In Reanimated 4, worklets can be detected via global object
+  const isWorklet =
+    typeof global !== "undefined" &&
+    (global as { _WORKLET?: boolean })._WORKLET === true;
+  return !isWorklet || Platform.OS === "web";
 };
 
 export const drawAsPicture = async (element: ReactElement, bounds?: SkRect) => {

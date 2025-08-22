@@ -78,13 +78,17 @@
   "peerDependencies": {
     "react": ">=19.0",
     "react-native": ">=0.78",
-    "react-native-reanimated": ">=3.0"
+    "react-native-reanimated": ">=4.0",
+    "react-native-worklets": ">=0.4.0"
   },
   "peerDependenciesMeta": {
     "react-native": {
       "optional": true
     },
     "react-native-reanimated": {
+      "optional": true
+    },
+    "react-native-worklets": {
       "optional": true
     }
   },
@@ -112,7 +116,8 @@
     "react": "19.0.0",
     "react-native": "0.78.0",
     "react-native-builder-bob": "0.18.2",
-    "react-native-reanimated": "^3.0",
+    "react-native-reanimated": "^4.0",
+    "react-native-worklets": "^0.4.0",
     "rimraf": "3.0.2",
     "semantic-release": "^24.1.0",
     "semantic-release-yarn": "^3.0.2",
