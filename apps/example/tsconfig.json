@@ -1,9 +1,9 @@
 {
   "extends": "eslint-config-react-native-wcandillon/tsconfig.base",
   "compilerOptions": {
-    "target": "es2018",
+    "target": "es2022",
     "module": "commonjs",
-    "lib": ["es2018", "dom"],
+    "lib": ["es2022", "dom"],
     "jsx": "react",
     "strict": true,
     "esModuleInterop": true,
