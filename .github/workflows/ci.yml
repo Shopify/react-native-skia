@@ -43,6 +43,9 @@ jobs:
           yarn clang-format
           if [[ `git status --porcelain` ]]; then
             echo "ERROR: clang-format would modify files. Please run 'yarn clang-format' and commit the changes."
+            echo "Files that would be modified:"
+            git status --porcelain
+            echo "Diff of changes:"
             git diff
             exit 1
           fi
