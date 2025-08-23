@@ -159,8 +159,6 @@ export const Scene = ({
       // damping: 10,
       stiffness: 100,
       overshootClamping: false,
-      restDisplacementThreshold: 0.01,
-      restSpeedThreshold: 2,
       reduceMotion: ReduceMotion.System,
     });
   });

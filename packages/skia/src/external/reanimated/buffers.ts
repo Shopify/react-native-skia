@@ -1,5 +1,10 @@
 import { useEffect, useMemo } from "react";
-import type { WorkletFunction } from "react-native-reanimated/lib/typescript/commonTypes";
+// WorkletFunction type is no longer exported in Reanimated 4
+// Using a local type definition instead
+type WorkletFunction = {
+  (...args: unknown[]): unknown;
+  __closure?: Record<string, unknown>;
+};
 
 import type { SkColor, SkHostRect, SkPoint, SkRSXform } from "../../skia/types";
 import { Skia } from "../../skia";
