@@ -34,16 +34,6 @@ jobs:
       - run: pip install cpplint
       - run: cpplint --linelength=230 --filter=-legal/copyright,-whitespace/indent,-whitespace/comments,-whitespace/ending_newline,-build/include_order,-runtime/references,-readability/todo,-whitespace/blank_line,-whitespace/todo,-runtime/int,-build/c++11,-whitespace/parens --exclude=package/cpp/skia --exclude=package/apple --exclude=package/android/build --exclude=package/node_modules --recursive package
 
-      - name: Clang Format
-        working-directory: packages/skia
-        run: |
-          yarn clang-format
-          if [[ `git status --porcelain` ]]; then
-            echo "ERROR: clang-format would modify files. Please run 'yarn clang-format' and commit the changes."
-            git diff
-            exit 1
-          fi
-
       - name: Lint files
         run: yarn lint
 
@@ -62,6 +52,16 @@ jobs:
         uses: ./.github/actions/setup
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clang Format Check
+        working-directory: packages/skia
+        run: |
+          yarn clang-format
+          if [[ `git status --porcelain` ]]; then
+            echo "ERROR: clang-format would modify files. Please run 'yarn clang-format' and commit the changes."
+            git diff
+            exit 1
+          fi
 
       - name: Test
         run: yarn test
