@@ -234,15 +234,13 @@ public:
 
   JSI_HOST_FUNCTION(size) {
     if (count != 1) {
-      _platformContext->raiseError(
-          std::string("size: Expected 1 argument, got " +
-                      std::to_string(count) + "."));
+      _platformContext->raiseError(std::string(
+          "size: Expected 1 argument, got " + std::to_string(count) + "."));
       return jsi::Value::undefined();
     }
 
     if (!arguments[0].isNumber()) {
-      _platformContext->raiseError(
-          "size: First argument must be a number");
+      _platformContext->raiseError("size: First argument must be a number");
       return jsi::Value::undefined();
     }
 
@@ -254,11 +252,13 @@ public:
     if (view != nullptr) {
       auto pixelDensity = _platformContext->getPixelDensity();
       auto sizeObj = jsi::Object(runtime);
-      sizeObj.setProperty(runtime, "width", view->getScaledWidth() / pixelDensity);
-      sizeObj.setProperty(runtime, "height", view->getScaledHeight() / pixelDensity);
+      sizeObj.setProperty(runtime, "width",
+                          view->getScaledWidth() / pixelDensity);
+      sizeObj.setProperty(runtime, "height",
+                          view->getScaledHeight() / pixelDensity);
       return sizeObj;
     }
-    
+
     // Return default size if view not found
     auto sizeObj = jsi::Object(runtime);
     sizeObj.setProperty(runtime, "width", 0);

@@ -34,9 +34,21 @@ jobs:
       - run: pip install cpplint
       - run: cpplint --linelength=230 --filter=-legal/copyright,-whitespace/indent,-whitespace/comments,-whitespace/ending_newline,-build/include_order,-runtime/references,-readability/todo,-whitespace/blank_line,-whitespace/todo,-runtime/int,-build/c++11,-whitespace/parens --exclude=package/cpp/skia --exclude=package/apple --exclude=package/android/build --exclude=package/node_modules --recursive package
 
-      - name: Clang Format
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format-18
+
+      - name: Clang Format Check
         working-directory: packages/skia
-        run: yarn clang-format
+        run: |
+          yarn clang-format
+          if [[ `git status --porcelain` ]]; then
+            echo "ERROR: clang-format would modify files. Please run 'yarn clang-format' and commit the changes."
+            echo "Files that would be modified:"
+            git status --porcelain
+            echo "Diff of changes:"
+            git diff
+            exit 1
+          fi
 
       - name: Lint files
         run: yarn lint
