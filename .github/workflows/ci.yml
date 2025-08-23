@@ -36,7 +36,13 @@ jobs:
 
       - name: Clang Format
         working-directory: packages/skia
-        run: yarn clang-format
+        run: |
+          yarn clang-format
+          if [[ `git status --porcelain` ]]; then
+            echo "ERROR: clang-format would modify files. Please run 'yarn clang-format' and commit the changes."
+            git diff
+            exit 1
+          fi
 
       - name: Lint files
         run: yarn lint

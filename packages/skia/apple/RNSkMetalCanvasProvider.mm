@@ -23,9 +23,9 @@
 
 RNSkMetalCanvasProvider::RNSkMetalCanvasProvider(
     std::function<void()> requestRedraw,
-    std::shared_ptr<RNSkia::RNSkPlatformContext> context,
-    bool useP3ColorSpace)
-    : RNSkCanvasProvider(requestRedraw), _context(context), _useP3ColorSpace(useP3ColorSpace) {
+    std::shared_ptr<RNSkia::RNSkPlatformContext> context, bool useP3ColorSpace)
+    : RNSkCanvasProvider(requestRedraw), _context(context),
+      _useP3ColorSpace(useP3ColorSpace) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   _layer = [CAMetalLayer layer];
