@@ -54,7 +54,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install clang-format
-        run: brew install clang-format
+        run: brew install clang-format@18
 
       - name: Clang Format Check
         working-directory: packages/skia
