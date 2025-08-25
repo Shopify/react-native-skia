@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@callstack/react-native-visionos": "^0.75.0",
-    "@react-native-community/slider": "^4.5.7",
+    "@react-native-community/slider": "^5.0.1",
     "@react-navigation/bottom-tabs": "^7.4.6",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.17",

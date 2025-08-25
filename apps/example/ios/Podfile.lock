@@ -1836,7 +1836,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-slider (4.5.7):
+  - react-native-slider (5.0.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -1854,7 +1854,7 @@ PODS:
     - React-graphics
     - React-ImageManager
     - React-jsi
-    - react-native-slider/common (= 4.5.7)
+    - react-native-slider/common (= 5.0.1)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-renderercss
@@ -1865,7 +1865,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-slider/common (4.5.7):
+  - react-native-slider/common (5.0.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -3024,7 +3024,7 @@ SPEC CHECKSUMS:
   React-microtasksnativemodule: 10892b00e612d79436022a11e5bc8bdf468a284f
   react-native-safe-area-context: 6d8a7b750e496e37bda47c938320bf2c734d441f
   react-native-skia: a8255817eb7a635975de6eb09ad8602a5c598000
-  react-native-slider: fe0add239ded49237c81fe25f3ad84adb3ce49c7
+  react-native-slider: 30cea7008de785564de2f4fd064f2deb38614a4a
   React-NativeModulesApple: 3f9e97a4a90eeec1ceade511f973b277632650bb
   React-oscompat: 34f3d3c06cadcbc470bc4509c717fb9b919eaa8b
   React-perflogger: 95dff8cc9901777360716cbdcb2998849f133a4f

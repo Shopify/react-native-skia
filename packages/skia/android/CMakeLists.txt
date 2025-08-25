@@ -302,6 +302,7 @@ add_definitions(-DREACT_NATIVE_VERSION=${REACT_NATIVE_VERSION})
 
 # Set RN_SERIALIZABLE_STATE and C++ flags for React Native 0.81+
 if(${REACT_NATIVE_VERSION} GREATER_EQUAL 81)
+    include("${REACT_NATIVE_DIR}/ReactCommon/cmake-utils/react-native-flags.cmake")
     target_compile_reactnative_options(${PACKAGE_NAME} PRIVATE)
 endif()
 
