@@ -11,9 +11,7 @@ To use the Skia prebuilt binaries from GitHub, use the following commands:
 - Install dependencies: `yarn`
 - Go to the package folder: `cd packages/skia`
 - Install the Skia libraries: `yarn install-skia`
-- Copy Skia headers: `yarn copy-skia-headers`
-- Run: `yarn pod:install`
-
+- 
 ### Building
 
 If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
@@ -27,7 +25,6 @@ And then the _SDK Location_ section. It will show you the NDK path, or the optio
 - Go to the package folder: `cd packages/skia`
 - Build the Skia libraries: `yarn build-skia` (this can take a while)
 - Copy Skia headers: `yarn copy-skia-headers`
-- Run: `yarn pod:install`
 
 ### Upgrading
 
