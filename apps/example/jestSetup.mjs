@@ -46,10 +46,24 @@ jest.mock("@shopify/react-native-skia", () => {
 
 const mockedNavigate = jest.fn();
 
-jest.mock("@react-navigation/native", () => {
-  const actualNav = jest.requireActual("@react-navigation/native");
+jest.mock("@react-navigation/bottom-tabs", () => {
   return {
-    ...actualNav,
+    createBottomTabNavigator: jest.fn(),
+  };
+});
+
+jest.mock("@react-navigation/elements", () => {
+  return {};
+});
+
+jest.mock("@react-navigation/native-stack", () => {
+  return {
+    createNativeStackNavigator: jest.fn(),
+  };
+});
+
+jest.mock("@react-navigation/native", () => {
+  return {
     useNavigation: () => ({
       navigate: mockedNavigate,
     }),
