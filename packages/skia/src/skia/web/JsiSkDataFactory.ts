@@ -21,6 +21,8 @@ export class JsiSkDataFactory extends Host implements DataFactory {
    * @param bytes An array of bytes representing the data
    */
   fromBytes(bytes: Uint8Array) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     return new JsiSkData(this.CanvasKit, bytes);
   }
   /**
