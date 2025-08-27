@@ -27,8 +27,8 @@ MetalWindowContext::MetalWindowContext(GrDirectContext *directContext,
   BOOL supportsWideColor = NO;
   if (useP3ColorSpace) {
     if (@available(iOS 10.0, *)) {
-      supportsWideColor =
-          [UIScreen mainScreen].traitCollection.displayGamut == UIDisplayGamutP3;
+      supportsWideColor = [UIScreen mainScreen].traitCollection.displayGamut ==
+                          UIDisplayGamutP3;
     }
   }
   if (supportsWideColor) {
