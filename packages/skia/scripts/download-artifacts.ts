@@ -25,10 +25,7 @@ const artifactsDir = path.resolve(
   "../../../packages/skia/artifacts"
 );
 
-const libsDir = path.resolve(
-  __dirname,
-  "../libs"
-);
+const libsDir = path.resolve(__dirname, "../libs");
 
 // Function to clear directory contents
 const clearDirectory = (directory: string) => {
@@ -77,7 +74,7 @@ const androidArchs = [
   { src: "skia-android-arm", dest: "armeabi-v7a" },
   { src: "skia-android-arm-64", dest: "arm64-v8a" },
   { src: "skia-android-arm-x86", dest: "x86" },
-  { src: "skia-android-arm-x64", dest: "x86_64" }
+  { src: "skia-android-arm-x64", dest: "x86_64" },
 ];
 
 androidArchs.forEach(({ src, dest }) => {
@@ -96,12 +93,12 @@ const appleDir = path.join(libsDir, "apple");
 const appleSrcDir = path.join(artifactsDir, "skia-apple-xcframeworks");
 if (fs.existsSync(appleSrcDir)) {
   fs.mkdirSync(appleDir, { recursive: true });
-  
+
   // Copy all xcframeworks
   fs.readdirSync(appleSrcDir).forEach((item) => {
     const srcPath = path.join(appleSrcDir, item);
     const destPath = path.join(appleDir, item);
-    
+
     if (fs.lstatSync(srcPath).isDirectory()) {
       // Copy directory recursively
       const copyDir = (src: string, dest: string) => {

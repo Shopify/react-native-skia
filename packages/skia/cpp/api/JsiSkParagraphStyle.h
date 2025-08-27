@@ -117,8 +117,11 @@ private:
   static void fromUTF8(
       const std::string &source,
       std::basic_string<T, std::char_traits<T>, std::allocator<T>> &result) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     std::wstring_convert<std::codecvt_utf8_utf16<T>, T> convertor;
     result = convertor.from_bytes(source);
+#pragma clang diagnostic pop
   }
 };
 
