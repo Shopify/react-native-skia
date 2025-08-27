@@ -77,7 +77,7 @@ Pod::Spec.new do |s|
     "Christian Falch" => "christian.falch@gmail.com",
     "William Candillon" => "wcandillon@gmail.com"
   }
-  s.platforms    = { :ios => "13.0", :tvos => "13.0", :osx => "11" }
+  s.platforms    = { :ios => "14.0", :tvos => "13.0", :osx => "11" }
   s.source       = { :git => "https://github.com/shopify/react-native-skia/react-native-skia.git", :tag => "#{s.version}" }
 
   s.requires_arc = true
