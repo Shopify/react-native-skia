@@ -127,7 +127,7 @@ public:
     return thisValue.asObject(runtime);
   }
 
-  JSI_HOST_FUNCTION(get) {
+  JSI_HOST_FUNCTION(getValues) {
     auto values = jsi::Array(runtime, 9);
     for (auto i = 0; i < 9; i++) {
       values.setValueAtIndex(runtime, i, getObject()->get(i));
@@ -147,7 +147,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkMatrix, rotate),
                        JSI_EXPORT_FUNC(JsiSkMatrix, postRotate),
                        JSI_EXPORT_FUNC(JsiSkMatrix, identity),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, get),
+                       JSI_EXPORT_FUNC(JsiSkMatrix, getValues),
                        JSI_EXPORT_FUNC(JsiSkMatrix, dispose))
 
   /**

@@ -36,7 +36,7 @@ public:
   OpenGLWindowContext(GrDirectContext *directContext, gl::Display *display,
                       gl::Context *glContext, ANativeWindow *window,
                       EGLConfig config)
-      : _directContext(directContext), _display(display), _glContext(glContext),
+      : _directContext(directContext), _glContext(glContext),
         _window(window) {
     ANativeWindow_acquire(_window);
     _glSurface = display->makeWindowSurface(config, _window);
@@ -67,7 +67,6 @@ public:
 
 private:
   GrDirectContext *_directContext;
-  gl::Display *_display;
   gl::Context *_glContext = nullptr;
   ANativeWindow *_window;
   sk_sp<SkSurface> _skSurface = nullptr;
