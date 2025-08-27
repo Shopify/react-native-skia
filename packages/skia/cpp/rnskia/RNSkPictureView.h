@@ -27,7 +27,7 @@
 #pragma clang diagnostic pop
 
 class SkPicture;
-class SkRect;
+struct SkRect;
 class SkImage;
 
 namespace RNSkia {
@@ -42,6 +42,8 @@ public:
                       std::shared_ptr<RNSkPlatformContext> context)
       : RNSkRenderer(std::move(requestRedraw)),
         _platformContext(std::move(context)) {}
+
+  virtual ~RNSkPictureRenderer() = default;
 
   void
   renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvasProvider) override {

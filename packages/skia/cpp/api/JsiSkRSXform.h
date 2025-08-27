@@ -40,7 +40,7 @@ public:
     return jsi::Value(SkScalarToDouble(getObject()->fTy));
   }
 
-  JSI_HOST_FUNCTION(set) {
+  JSI_HOST_FUNCTION(setValues) {
     auto scos = arguments[0].asNumber();
     auto ssin = arguments[1].asNumber();
     auto tx = arguments[2].asNumber();
@@ -55,7 +55,7 @@ public:
                               JSI_EXPORT_PROP_GET(JsiSkRSXform, tx),
                               JSI_EXPORT_PROP_GET(JsiSkRSXform, ty))
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkRSXform, set),
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkRSXform, setValues),
                        JSI_EXPORT_FUNC(JsiSkRSXform, dispose))
 
   /**

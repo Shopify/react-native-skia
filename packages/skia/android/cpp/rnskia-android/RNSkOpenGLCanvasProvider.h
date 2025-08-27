@@ -19,7 +19,7 @@ public:
       std::function<void()> requestRedraw,
       std::shared_ptr<RNSkia::RNSkPlatformContext> platformContext);
 
-  ~RNSkOpenGLCanvasProvider();
+  virtual ~RNSkOpenGLCanvasProvider();
 
   int getWidth() override;
 
