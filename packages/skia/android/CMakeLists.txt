@@ -305,22 +305,6 @@ add_definitions(-DREACT_NATIVE_VERSION=${REACT_NATIVE_VERSION})
 if(${REACT_NATIVE_VERSION} GREATER_EQUAL 80)
     include("${REACT_NATIVE_DIR}/ReactCommon/cmake-utils/react-native-flags.cmake")
     target_compile_reactnative_options(${PACKAGE_NAME} PRIVATE)
-    
-    # Add strict warning flags to match Android build errors
-    target_compile_options(${PACKAGE_NAME} PRIVATE
-        -Wall
-        -Werror
-        -Wunused-function
-        -Wunused-private-field
-        -Woverloaded-virtual
-        -Wreorder-ctor
-        -Wdelete-non-abstract-non-virtual-dtor
-        -Wmismatched-tags
-        -Wunused-variable
-        -Wpessimizing-move
-        -Wswitch
-        -Wdeprecated-declarations
-    )
 else()
   string(APPEND CMAKE_CXX_FLAGS
          "  -fexceptions -frtti -std=c++${CMAKE_CXX_STANDARD} -Wall -Werror -Wunused-function -Wunused-private-field -Woverloaded-virtual -Wreorder-ctor -Wdelete-non-abstract-non-virtual-dtor -Wmismatched-tags -Wunused-variable -Wpessimizing-move -Wswitch -Wdeprecated-declarations")

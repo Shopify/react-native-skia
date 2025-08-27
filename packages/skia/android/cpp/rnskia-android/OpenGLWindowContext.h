@@ -36,8 +36,7 @@ public:
   OpenGLWindowContext(GrDirectContext *directContext, gl::Display *display,
                       gl::Context *glContext, ANativeWindow *window,
                       EGLConfig config)
-      : _directContext(directContext), _glContext(glContext),
-        _window(window) {
+      : _directContext(directContext), _glContext(glContext), _window(window) {
     ANativeWindow_acquire(_window);
     _glSurface = display->makeWindowSurface(config, _window);
   }

@@ -632,7 +632,8 @@ public:
             break;
           }
           default:
-            // Context commands (Group, SavePaint, RestorePaint, etc.) are not handled here
+            // Context commands (Group, SavePaint, RestorePaint, etc.) are not
+            // handled here
             break;
           }
 

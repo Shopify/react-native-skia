@@ -69,11 +69,11 @@ protected:
 
 class RNSkOffscreenCanvasProvider : public RNSkCanvasProvider {
 public:
-  RNSkOffscreenCanvasProvider(const std::shared_ptr<RNSkPlatformContext>& context,
-                              std::function<void()> requestRedraw, float width,
-                              float height)
-      : RNSkCanvasProvider(std::move(requestRedraw)), _width(width), _height(height),
-        _context(context) {
+  RNSkOffscreenCanvasProvider(
+      const std::shared_ptr<RNSkPlatformContext> &context,
+      std::function<void()> requestRedraw, float width, float height)
+      : RNSkCanvasProvider(std::move(requestRedraw)), _width(width),
+        _height(height), _context(context) {
     _surface = context->makeOffscreenSurface(_width, _height);
     _pd = context->getPixelDensity();
   }
