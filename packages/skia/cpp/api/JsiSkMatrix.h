@@ -127,13 +127,16 @@ public:
     return thisValue.asObject(runtime);
   }
 
-  JSI_HOST_FUNCTION(getValues) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+  JSI_HOST_FUNCTION(get) {
     auto values = jsi::Array(runtime, 9);
     for (auto i = 0; i < 9; i++) {
       values.setValueAtIndex(runtime, i, getObject()->get(i));
     }
     return values;
   }
+#pragma clang diagnostic pop
 
   EXPORT_JSI_API_TYPENAME(JsiSkMatrix, Matrix)
 
@@ -147,7 +150,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkMatrix, rotate),
                        JSI_EXPORT_FUNC(JsiSkMatrix, postRotate),
                        JSI_EXPORT_FUNC(JsiSkMatrix, identity),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, getValues),
+                       JSI_EXPORT_FUNC(JsiSkMatrix, get),
                        JSI_EXPORT_FUNC(JsiSkMatrix, dispose))
 
   /**

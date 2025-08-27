@@ -40,7 +40,9 @@ public:
     return jsi::Value(SkScalarToDouble(getObject()->fTy));
   }
 
-  JSI_HOST_FUNCTION(setValues) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+  JSI_HOST_FUNCTION(set) {
     auto scos = arguments[0].asNumber();
     auto ssin = arguments[1].asNumber();
     auto tx = arguments[2].asNumber();
@@ -48,6 +50,7 @@ public:
     getObject()->set(scos, ssin, tx, ty);
     return jsi::Value::undefined();
   }
+#pragma clang diagnostic pop
 
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkRSXform, __typename__),
                               JSI_EXPORT_PROP_GET(JsiSkRSXform, scos),
@@ -55,7 +58,7 @@ public:
                               JSI_EXPORT_PROP_GET(JsiSkRSXform, tx),
                               JSI_EXPORT_PROP_GET(JsiSkRSXform, ty))
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkRSXform, setValues),
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkRSXform, set),
                        JSI_EXPORT_FUNC(JsiSkRSXform, dispose))
 
   /**
