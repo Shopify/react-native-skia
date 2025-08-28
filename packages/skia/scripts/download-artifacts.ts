@@ -5,6 +5,8 @@ import path from "path";
 import { $ } from "./utils";
 import { GRAPHITE } from "./skia-configuration";
 
+console.log(GRAPHITE ? "🗿 Skia Graphite" : "🐘 Skia Ganesh");
+
 const repo = "shopify/react-native-skia";
 const workflow = `build-skia${GRAPHITE ? "-graphite" : ""}.yml`;
 const prefix = GRAPHITE ? "skia-graphite" : "skia";
@@ -55,6 +57,7 @@ console.log("🧹 Clearing existing artifacts...");
 clearDirectory(artifactsDir);
 
 console.log(`⬇️  Downloading artifacts to ${artifactsDir}`);
+console.log("📋 Artifacts to download:", names);
 names.forEach((artifactName) => {
   $(
     `gh run download "${id}" --repo "${repo}" --name "${artifactName}" --dir ${artifactsDir}/${artifactName}`
