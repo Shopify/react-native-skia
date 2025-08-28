@@ -185,25 +185,28 @@ public:
   }
 
   JSI_HOST_FUNCTION(readPixels) {
-//    int srcX = 0;
-//    int srcY = 0;
-//    if (count > 0 && !arguments[0].isUndefined()) {
-//      srcX = static_cast<int>(arguments[0].asNumber());
-//    }
-//    if (count > 1 && !arguments[1].isUndefined()) {
-//      srcY = static_cast<int>(arguments[1].asNumber());
-//    }
+#if defined(SK_GRAPHITE)
+    throw std::runtime_error("Not implemented yet");
+#else
+    int srcX = 0;
+    int srcY = 0;
+    if (count > 0 && !arguments[0].isUndefined()) {
+      srcX = static_cast<int>(arguments[0].asNumber());
+    }
+    if (count > 1 && !arguments[1].isUndefined()) {
+      srcY = static_cast<int>(arguments[1].asNumber());
+    }
     SkImageInfo info =
         (count > 2 && !arguments[2].isUndefined())
             ? *JsiSkImageInfo::fromValue(runtime, arguments[2])
             : SkImageInfo::MakeN32(getObject()->width(), getObject()->height(),
                                    getObject()->imageInfo().alphaType());
-//    size_t bytesPerRow = 0;
-//    if (count > 4 && !arguments[4].isUndefined()) {
-//      bytesPerRow = static_cast<size_t>(arguments[4].asNumber());
-//    } else {
-//      bytesPerRow = info.minRowBytes();
-//    }
+    size_t bytesPerRow = 0;
+    if (count > 4 && !arguments[4].isUndefined()) {
+      bytesPerRow = static_cast<size_t>(arguments[4].asNumber());
+    } else {
+      bytesPerRow = info.minRowBytes();
+    }
     auto dest =
         count > 3
             ? RNSkTypedArray::getTypedArray(runtime, arguments[3], info)
@@ -216,17 +219,15 @@ public:
             .getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
             .asObject(runtime)
             .getArrayBuffer(runtime);
-    //auto bfrPtr = reinterpret_cast<void *>(buffer.data(runtime));
-#if defined(SK_GRAPHITE)
-    throw std::runtime_error("Not implemented yet");
-#else
+    auto bfrPtr = reinterpret_cast<void *>(buffer.data(runtime));
+
     auto grContext = getContext()->getDirectContext();
     if (!getObject()->readPixels(grContext, info, bfrPtr, bytesPerRow, srcX,
                                  srcY)) {
       return jsi::Value::null();
     }
-#endif
     return dest;
+#endif
   }
 
   JSI_HOST_FUNCTION(makeNonTextureImage) {
