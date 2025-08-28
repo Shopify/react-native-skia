@@ -94,7 +94,7 @@ export type Platform = {
   options?: Arg[];
 };
 
-const appleMinTarget = GRAPHITE ? "15.1" : "13.0";
+const appleMinTarget = GRAPHITE ? "15.1" : "14.0";
 const appleSimulatorMinTarget = "16.0";
 
 // Define tvOS targets separately so they can be conditionally included

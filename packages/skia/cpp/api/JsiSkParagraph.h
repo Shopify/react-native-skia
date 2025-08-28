@@ -141,7 +141,7 @@ public:
   explicit JsiSkParagraph(std::shared_ptr<RNSkPlatformContext> context,
                           para::ParagraphBuilder *paragraphBuilder)
       : JsiSkWrappingSharedPtrHostObject<para::Paragraph>(
-            std::move(context), std::move(paragraphBuilder->Build())) {}
+            std::move(context), paragraphBuilder->Build()) {}
 };
 
 } // namespace RNSkia

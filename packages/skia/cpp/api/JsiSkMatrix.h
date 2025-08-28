@@ -127,6 +127,8 @@ public:
     return thisValue.asObject(runtime);
   }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
   JSI_HOST_FUNCTION(get) {
     auto values = jsi::Array(runtime, 9);
     for (auto i = 0; i < 9; i++) {
@@ -134,6 +136,7 @@ public:
     }
     return values;
   }
+#pragma clang diagnostic pop
 
   EXPORT_JSI_API_TYPENAME(JsiSkMatrix, Matrix)
 

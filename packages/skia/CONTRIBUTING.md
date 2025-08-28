@@ -2,21 +2,29 @@
 
 ## Library Development
 
-To develop react-native-skia, you need to build the skia libraries on your computer.
+To develop react-native-skia, you can build the skia libraries on your computer. Alternatively, you can use the pre-built binaries.
+
+### Using pre-built binaries
+
+To use the Skia prebuilt binaries from GitHub, use the following commands:
+- Checkout submodules: `git submodule update --init --recursive`
+- Install dependencies: `yarn`
+- Go to the package folder: `cd packages/skia`
+- Install the Skia libraries: `yarn install-skia`
+- 
+### Building
 
 If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
 `ANDROID_NDK=/Users/username/Library/Android/sdk/ndk/<version>` for instance.
 If the NDK is not installed, you can install it via Android Studio by going to the menu _File > Project Structure_.
 And then the _SDK Location_ section. It will show you the NDK path, or the option to Download it if you don't have it installed.
 
-### Building
 
-- Checkout submodules `git submodule update --init --recursive`
-- Install dependencies `yarn`
-- Go to the package folder `cd packages/skia`
-- Build the Skia libraries with `yarn build-skia` (this can take a while)
-- Copy Skia headers `yarn copy-skia-headers`
-- run `yarn pod:install`
+- Checkout submodules: `git submodule update --init --recursive`
+- Install dependencies: `yarn`
+- Go to the package folder: `cd packages/skia`
+- Build the Skia libraries: `yarn build-skia` (this can take a while)
+- Copy Skia headers: `yarn copy-skia-headers`
 
 ### Upgrading
 
@@ -136,7 +144,7 @@ Finally, you can use `drawOffscreen` to receive a canvas object as parameter. Yo
 
 Again, since `eval`, `draw`, and `drawOffscreen` serialize the function's content, avoid any external dependencies that can't be serialized.
 
-## Adding a component to the scene Graph
+## Adding a Component to the Scene Graph
 
 This guide explains how to add new components to the React Native Skia scene graph system.
 

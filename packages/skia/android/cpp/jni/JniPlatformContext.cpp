@@ -136,7 +136,7 @@ void JniPlatformContext::performStreamOperation(
   static auto method = javaPart_->getClass()->getMethod<jbyteArray(jstring)>(
       "getJniStreamFromSource");
 
-  auto loader = [=]() -> void {
+  auto loader = [=, this]() -> void {
     jni::ThreadScope ts;
     jstring jstr =
         (*jni::Environment::current()).NewStringUTF(sourceUri.c_str());

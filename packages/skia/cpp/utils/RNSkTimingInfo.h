@@ -90,7 +90,6 @@ private:
     _frameCount++;
   }
 
-  double _lastTimeStamp;
   long _lastDurations[NUMBER_OF_DURATION_SAMPLES];
   int _lastDurationIndex;
   int _lastDurationsCount;
