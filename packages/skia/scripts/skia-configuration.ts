@@ -97,8 +97,6 @@ export type Platform = {
 const appleMinTarget = GRAPHITE ? "15.1" : "13.0";
 const appleSimulatorMinTarget = "16.0";
 
-const appleSdkRoot = spawnSync(`xcrun --sdk macosx --show-sdk-path`, {shell:true}).stdout.toString().trim();
-
 // Define tvOS targets separately so they can be conditionally included
 const tvosTargets: { [key: string]: Target } = GRAPHITE
   ? {}
