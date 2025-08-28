@@ -27,7 +27,7 @@
 #pragma clang diagnostic pop
 
 class SkPicture;
-class SkRect;
+struct SkRect;
 class SkImage;
 
 namespace RNSkia {
@@ -43,6 +43,8 @@ public:
       : RNSkRenderer(std::move(requestRedraw)),
         _platformContext(std::move(context)) {}
 
+  virtual ~RNSkPictureRenderer() = default;
+
   void
   renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvasProvider) override {
     performDraw(canvasProvider);
@@ -55,7 +57,7 @@ public:
 
 private:
   bool performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
-    return canvasProvider->renderToCanvas([=](SkCanvas *canvas) {
+    return canvasProvider->renderToCanvas([=, this](SkCanvas *canvas) {
       // Make sure to scale correctly
       auto pd = _platformContext->getPixelDensity();
       canvas->clear(SK_ColorTRANSPARENT);

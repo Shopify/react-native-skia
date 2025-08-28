@@ -65,7 +65,6 @@ public:
                                               SkTextEncoding::kUTF8);
     std::vector<SkGlyphID> glyphs;
     glyphs.resize(numGlyphIDs);
-    int glyphsSize = static_cast<int>(numGlyphIDs);
     auto g = SkSpan(glyphs.data(), glyphs.size());
     getObject()->textToGlyphs(str.c_str(), str.length(), SkTextEncoding::kUTF8,
                               g);

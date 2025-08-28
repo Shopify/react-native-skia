@@ -631,6 +631,10 @@ public:
             skottieCmd->draw(ctx);
             break;
           }
+          default:
+            // Context commands (Group, SavePaint, RestorePaint, etc.) are not
+            // handled here
+            break;
           }
 
           ctx->restorePaint();
