@@ -7,7 +7,7 @@ import type { NodeType } from "../dom/types";
 import { shallowEq } from "../renderer/typeddash";
 
 import type { Node } from "./Node";
-import type { Container } from "./Container";
+import type { Container } from "./StaticContainer";
 
 type EventPriority = number;
 const NoEventPriority = 0;
