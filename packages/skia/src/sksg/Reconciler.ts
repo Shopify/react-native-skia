@@ -7,7 +7,7 @@ import type { SkCanvas, Skia, SkSize } from "../skia/types";
 import { NodeType } from "../dom/types";
 
 import { debug, sksgHostConfig } from "./HostConfig";
-import type { Container } from "./Container";
+import type { Container } from "./StaticContainer";
 import { createContainer } from "./Container";
 
 import "./Elements";
