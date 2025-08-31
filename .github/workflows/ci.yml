@@ -343,19 +343,15 @@ jobs:
         working-directory: apps/example
         run: E2E=true yarn start &
 
-      - name: List Available Simulators
+      - name: Get iPhone 16 Pro UUID
+        id: get_simulator
         run: |
-          echo "=== All available iPhone simulators ==="
-          xcrun simctl list devices available | grep iPhone
-        shell: bash
+          UUID=$(xcrun simctl list devices | grep "iPhone 16 Pro" | head -1 | grep -oE '[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}')
+          echo "uuid=$UUID" >> $GITHUB_OUTPUT
       
       - name: Build example for iOS
         working-directory: apps/example
-        run: yarn ios --simulator 'iPhone 16 Pro'  # We'll update this after seeing what's available
-
-      - name: Build example for iOS
-        working-directory: apps/example
-        run: yarn ios --simulator 'iPhone 15 Pro'
+        run: yarn ios --udid '${{ steps.get_simulator.outputs.uuid }}'
 
       - name: Run e2e tests
         working-directory: packages/skia
