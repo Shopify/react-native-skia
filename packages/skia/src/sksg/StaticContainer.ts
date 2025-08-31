@@ -9,6 +9,8 @@ import { visit } from "./Recorder/Visitor";
 import { replay } from "./Recorder/Player";
 import { createDrawingContext } from "./Recorder/DrawingContext";
 
+import "../views/api";
+
 export abstract class Container {
   private _root: Node[] = [];
   protected recording: Recording | null = null;
