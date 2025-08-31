@@ -35,10 +35,10 @@ public:
   }
 
   void pushShader(jsi::Runtime &runtime, const std::string &nodeType,
-                  const jsi::Object &props) {
+                  const jsi::Object &props, int children) {
     if (nodeType == "skShader") {
       commands.push_back(
-          std::make_unique<PushShaderCmd>(runtime, props, variables));
+          std::make_unique<PushShaderCmd>(runtime, props, variables, children));
     } else if (nodeType == "skImageShader") {
       commands.push_back(
           std::make_unique<PushImageShaderCmd>(runtime, props, variables));
