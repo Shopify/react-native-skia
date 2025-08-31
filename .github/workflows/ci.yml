@@ -342,7 +342,17 @@ jobs:
       - name: Start Package Manager
         working-directory: apps/example
         run: E2E=true yarn start &
-  
+
+      - name: List Available Simulators
+        run: |
+          echo "=== All available iPhone simulators ==="
+          xcrun simctl list devices available | grep iPhone
+        shell: bash
+      
+      - name: Build example for iOS
+        working-directory: apps/example
+        run: yarn ios --simulator 'iPhone 16 Pro'  # We'll update this after seeing what's available
+
       - name: Build example for iOS
         working-directory: apps/example
         run: yarn ios --simulator 'iPhone 15 Pro'
