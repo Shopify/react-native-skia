@@ -9,8 +9,6 @@ import { Recorder } from "./Recorder/Recorder";
 import { visit } from "./Recorder/Visitor";
 import { replay } from "./Recorder/Player";
 import { createDrawingContext } from "./Recorder/DrawingContext";
-
-import "../views/api";
 import { Container, StaticContainer } from "./StaticContainer";
 
 const drawOnscreen = (
