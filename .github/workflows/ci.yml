@@ -345,7 +345,7 @@ jobs:
   
       - name: Build example for iOS
         working-directory: apps/example
-        run: yarn ios --simulator 'iPhone 16 Pro'
+        run: yarn ios --simulator 'iPhone 15 Pro'
 
       - name: Run e2e tests
         working-directory: packages/skia
