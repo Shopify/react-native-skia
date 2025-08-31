@@ -13,6 +13,7 @@ import { replay } from "./Recorder/Player";
 import { createDrawingContext } from "./Recorder/DrawingContext";
 import { ReanimatedRecorder } from "./Recorder/ReanimatedRecorder";
 
+import "../skia/NativeSetup";
 import "../views/api";
 
 const drawOnscreen = (
