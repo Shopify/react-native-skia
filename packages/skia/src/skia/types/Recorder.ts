@@ -48,7 +48,11 @@ export interface BaseRecorder {
     colorFilterType: NodeType,
     props: AnimatedProps<unknown>
   ): void;
-  pushShader(shaderType: NodeType, props: AnimatedProps<unknown>): void;
+  pushShader(
+    shaderType: NodeType,
+    props: AnimatedProps<unknown>,
+    children: number
+  ): void;
   pushBlurMaskFilter(props: AnimatedProps<BlurMaskFilterProps>): void;
   composePathEffect(): void;
   composeColorFilter(): void;
