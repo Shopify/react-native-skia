@@ -339,36 +339,117 @@ jobs:
         working-directory: apps/example/ios
         run: pod install
 
+      - name: Disable Xcode 15 simultaneous device builds
+        run: |
+          # This fixes the React Native issue with Xcode 15 and iOS 17+ simulators
+          # See: https://github.com/facebook/react-native/issues/36857
+          defaults write com.apple.dt.XCBuild EnableSwiftBuildSystemIntegration 0
+          
+          # Alternative: Set via environment variable
+          echo "XCODE_BUILD_SYSTEM_INTEGRATION_ENABLED=0" >> $GITHUB_ENV
+
       - name: Start Package Manager
         working-directory: apps/example
         run: E2E=true yarn start &
+        
+      - name: Wait for packager
+        run: |
+          echo "Waiting for packager to start..."
+          timeout 30 bash -c 'until curl -s http://localhost:8081/status | grep -q "packager-status:running"; do sleep 2; done' || true
   
       - name: List available simulators
         run: |
-          echo "Available simulators:"
-          xcrun xctrace list devices
+          echo "Available iPhone simulators:"
+          xcrun simctl list devices available | grep iPhone
           
       - name: Get iPhone simulator UDID
         run: |
-          # Try to find iPhone 16 Pro first, then fall back to other options
-          SIMULATOR_UDID=$(xcrun xctrace list devices 2>&1 | grep -E "iPhone 16 Pro|iPhone 15 Pro|iPhone 14 Pro" | head -n1 | sed -E 's/.*\(([A-F0-9-]+)\).*/\1/')
+          # Try to find iPhone 16 Pro with iOS 18.4 first
+          SIMULATOR_UDID="C0822A03-7FB2-498B-9DE5-B4C7C066C9BB"
           
-          # If no Pro model found, get any iPhone simulator
-          if [ -z "$SIMULATOR_UDID" ]; then
-            SIMULATOR_UDID=$(xcrun xctrace list devices 2>&1 | grep "iPhone" | head -n1 | sed -E 's/.*\(([A-F0-9-]+)\).*/\1/')
+          # Verify the simulator exists
+          if ! xcrun simctl list devices | grep -q "$SIMULATOR_UDID"; then
+            echo "Specific simulator not found, finding any iPhone 16 Pro"
+            SIMULATOR_UDID=$(xcrun simctl list devices available | grep "iPhone 16 Pro" | grep "18.4" | head -n1 | sed -E 's/.*\(([A-F0-9-]+)\).*/\1/')
           fi
           
+          # Fallback to any iPhone 16 Pro
           if [ -z "$SIMULATOR_UDID" ]; then
-            echo "No iPhone simulator found!"
-            exit 1
+            SIMULATOR_UDID=$(xcrun simctl list devices available | grep "iPhone 16 Pro" | head -n1 | sed -E 's/.*\(([A-F0-9-]+)\).*/\1/')
+          fi
+          
+          # Final fallback to any iPhone
+          if [ -z "$SIMULATOR_UDID" ]; then
+            SIMULATOR_UDID=$(xcrun simctl list devices available | grep "iPhone" | head -n1 | sed -E 's/.*\(([A-F0-9-]+)\).*/\1/')
           fi
           
           echo "Selected simulator UDID: $SIMULATOR_UDID"
           echo "SIMULATOR_UDID=$SIMULATOR_UDID" >> $GITHUB_ENV
           
-      - name: Build example for iOS
+      - name: Boot simulator
+        run: |
+          echo "Shutting down any running simulators..."
+          xcrun simctl shutdown all || true
+          
+          echo "Booting simulator ${{ env.SIMULATOR_UDID }}"
+          xcrun simctl boot ${{ env.SIMULATOR_UDID }} || true
+          
+          # Wait for simulator to be ready
+          echo "Waiting for simulator to be ready..."
+          xcrun simctl bootstatus ${{ env.SIMULATOR_UDID }} -b
+          
+      - name: Build example for iOS (Method 1 - React Native CLI)
         working-directory: apps/example
-        run: yarn ios --udid ${{ env.SIMULATOR_UDID }}
+        run: |
+          # First attempt with React Native CLI
+          yarn ios --udid ${{ env.SIMULATOR_UDID }} || BUILD_FAILED=true
+          
+          if [ "$BUILD_FAILED" = "true" ]; then
+            echo "Method 1 failed, trying alternative build method..."
+            exit 1
+          fi
+        continue-on-error: true
+        id: build_method_1
+
+      - name: Build example for iOS (Method 2 - Direct xcodebuild)
+        if: steps.build_method_1.outcome == 'failure'
+        working-directory: apps/example/ios
+        run: |
+          # Clean build folder
+          rm -rf ~/Library/Developer/Xcode/DerivedData/*
+          
+          # Direct xcodebuild with explicit settings
+          set -o pipefail && xcodebuild \
+            -workspace example.xcworkspace \
+            -scheme example \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,id=${{ env.SIMULATOR_UDID }}" \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            | xcbeautify
+            
+          # Install the app on the simulator
+          APP_PATH=$(find build/Build/Products -name "*.app" -type d | head -n1)
+          if [ -n "$APP_PATH" ]; then
+            echo "Installing app: $APP_PATH"
+            xcrun simctl install ${{ env.SIMULATOR_UDID }} "$APP_PATH"
+            
+            # Launch the app
+            BUNDLE_ID=$(defaults read "$APP_PATH/Info.plist" CFBundleIdentifier)
+            echo "Launching app with bundle ID: $BUNDLE_ID"
+            xcrun simctl launch ${{ env.SIMULATOR_UDID }} "$BUNDLE_ID"
+          else
+            echo "ERROR: Could not find built app"
+            exit 1
+          fi
+
+      - name: Build example for iOS (Method 3 - React Native CLI with build mode)
+        if: steps.build_method_1.outcome == 'failure' && failure()
+        working-directory: apps/example
+        run: |
+          # Alternative approach using build mode configuration
+          yarn ios --udid ${{ env.SIMULATOR_UDID }} --mode Debug --no-packager
 
       - name: Run e2e tests
         working-directory: packages/skia
