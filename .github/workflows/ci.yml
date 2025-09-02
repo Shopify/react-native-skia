@@ -343,9 +343,32 @@ jobs:
         working-directory: apps/example
         run: E2E=true yarn start &
   
+      - name: List available simulators
+        run: |
+          echo "Available simulators:"
+          xcrun xctrace list devices
+          
+      - name: Get iPhone simulator UDID
+        run: |
+          # Try to find iPhone 16 Pro first, then fall back to other options
+          SIMULATOR_UDID=$(xcrun xctrace list devices 2>&1 | grep -E "iPhone 16 Pro|iPhone 15 Pro|iPhone 14 Pro" | head -n1 | sed -E 's/.*\(([A-F0-9-]+)\).*/\1/')
+          
+          # If no Pro model found, get any iPhone simulator
+          if [ -z "$SIMULATOR_UDID" ]; then
+            SIMULATOR_UDID=$(xcrun xctrace list devices 2>&1 | grep "iPhone" | head -n1 | sed -E 's/.*\(([A-F0-9-]+)\).*/\1/')
+          fi
+          
+          if [ -z "$SIMULATOR_UDID" ]; then
+            echo "No iPhone simulator found!"
+            exit 1
+          fi
+          
+          echo "Selected simulator UDID: $SIMULATOR_UDID"
+          echo "SIMULATOR_UDID=$SIMULATOR_UDID" >> $GITHUB_ENV
+          
       - name: Build example for iOS
         working-directory: apps/example
-        run: yarn ios --simulator 'iPhone 16 Pro'
+        run: yarn ios --udid ${{ env.SIMULATOR_UDID }}
 
       - name: Run e2e tests
         working-directory: packages/skia
