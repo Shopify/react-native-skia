@@ -345,7 +345,7 @@ jobs:
   
       - name: Build example for iOS
         working-directory: apps/example/ios
-        run: xcodebuild -workspace example.xcworkspace -configuration Debug -scheme example -destination id=C0822A03-7FB2-498B-9DE5-B4C7C066C9BB
+        run: xcodebuild -workspace example.xcworkspace -configuration Debug -scheme example -destination id=C0822A03-7FB2-498B-9DE5-B4C7C066C9BB -quiet
 
       - name: Run e2e tests
         working-directory: packages/skia
