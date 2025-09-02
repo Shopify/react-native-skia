@@ -352,8 +352,25 @@ jobs:
             -scheme example \
             -destination 'platform=iOS Simulator,id=C0822A03-7FB2-498B-9DE5-B4C7C066C9BB' \
             -derivedDataPath build \
-            test-without-building \
             -quiet
+      
+      - name: Install app on Simulator
+        run: |
+          # Find the app bundle that was just built
+          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "com.microsoft.ReactTestApp" -type d | head -n 1)
+          
+          # Install the app
+          xcrun simctl install C0822A03-7FB2-498B-9DE5-B4C7C066C9BB "$APP_PATH"
+      
+      - name: Launch app on Simulator
+        run: |
+          # Launch the app using its bundle identifier
+          # You'll need to replace com.example.app with your actual bundle ID
+          xcrun simctl launch C0822A03-7FB2-498B-9DE5-B4C7C066C9BB com.microsoft.ReactTestApp
+          
+          # Give the app some time to start
+          sleep 10
+
       - name: Run e2e tests
         working-directory: packages/skia
         run: CI=true yarn e2e
