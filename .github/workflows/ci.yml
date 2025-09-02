@@ -344,7 +344,7 @@ jobs:
         run: E2E=true yarn start &
   
       - name: Build example for iOS
-        working-directory: apps/example
+        working-directory: apps/example/ios
         run: xcodebuild -workspace example.xcworkspace -configuration Debug -scheme example -destination id=C0822A03-7FB2-498B-9DE5-B4C7C066C9BB
 
       - name: Run e2e tests
