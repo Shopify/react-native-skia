@@ -306,8 +306,7 @@ jobs:
 
   build-test-ios:
     runs-on: macos-latest-xlarge
-    env:
-      TURBO_CACHE_DIR: .turbo/ios
+    # Removed TURBO_CACHE_DIR environment variable
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -319,21 +318,15 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Cache turborepo for iOS
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: ${{ env.TURBO_CACHE_DIR }}
-          key: ${{ runner.os }}-turborepo-ios-${{ hashFiles('yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-turborepo-ios-
+      # Removed turborepo cache steps completely
 
-      - name: Check turborepo cache for iOS
+      - name: Clean iOS build artifacts
         run: |
-          TURBO_CACHE_STATUS=$(node -p "($(yarn turbo run build:ios --cache-dir="${{ env.TURBO_CACHE_DIR }}" --dry=json)).tasks.find(t => t.task === 'build:ios').cache.status")
-
-          if [[ $TURBO_CACHE_STATUS == "HIT" ]]; then
-            echo "turbo_cache_hit=1" >> $GITHUB_ENV
-          fi
+          cd apps/example/ios
+          rm -rf build/
+          rm -rf ~/Library/Caches/CocoaPods
+          rm -rf ~/Library/Developer/Xcode/DerivedData
+          pod cache clean --all
 
       - name: Install CocoaPods
         working-directory: apps/example/ios
@@ -343,7 +336,13 @@ jobs:
         working-directory: apps/example
         run: E2E=true yarn start &
   
-      - name: Build example for iOS
+      - name: Build example for iOS (no cache)
+        working-directory: apps/example
+        run: |
+          # Force rebuild without any turborepo cache
+          yarn turbo run build:ios --force --no-cache --no-daemon
+
+      - name: Run iOS app
         working-directory: apps/example
         run: yarn ios --simulator 'iPhone 16 Pro'
 
