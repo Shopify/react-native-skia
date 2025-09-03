@@ -286,17 +286,6 @@ dependencies {
     }
 }
 
-afterEvaluate { project ->
-    android.libraryVariants.all { variant ->
-        def name = variant.name.capitalize()
-        def javaCompileTask = variant.javaCompileProvider.get()
-
-        task "jar${name}"(type: Jar, dependsOn: javaCompileTask) {
-            from javaCompileTask.destinationDir
-        }
-    }
-}
-
 def localBuildDir = buildDir
 def headersConfiguration = configurations.extractHeaders
 def jniConfiguration = configurations.extractJNI
