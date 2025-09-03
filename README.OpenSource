@@ -1,0 +1,11 @@
+[
+    {
+        "Name": "react-native-skia",
+        "License": "MIT License",
+        "License File": "https://github.com/Shopify/react-native-skia/blob/main/LICENSE.md",
+        "Version Number": "1.3.7",
+        "Owner" : "xiafeng@huawei.com",
+        "Upstream URL": "https://github.com/software-mansion/react-native-skia",
+        "Description": "High-performance React Native Graphics using Skia"
+    }
+]

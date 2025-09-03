@@ -1,0 +1,14 @@
+{
+  "extends": "@react-native/typescript-config/tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-native",
+    "paths": {
+      "react-native": [
+        "./node_modules/react-native-harmony"
+      ],
+    },
+  },
+  "exclude": [
+    "harmony"
+  ]
+}

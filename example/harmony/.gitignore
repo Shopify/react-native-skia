@@ -1,0 +1,24 @@
+# it may cause some issues when building the project when switching branches
+package-lock.json
+# we add this because we want to keep the signing configs out of git
+/build-profile.json5
+
+rnoh_modules
+
+**/oh-package-lock.json5
+# ---
+
+/node_modules
+/local.properties
+/.idea
+**/build
+/.hvigor
+.cxx
+/.clangd
+/.clang-format
+/.clang-tidy
+/oh_modules
+hvigorw
+hvigorw.bat
+hvigor/hvigor-wrapper.js
+

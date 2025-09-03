@@ -1,0 +1,9 @@
+{
+  "module": {
+    "name": "skia",
+    "type": "har",
+    "deviceTypes": [
+      "default"
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "@react-native-ohos/react-native-skia",
+  "version": "1.3.8-rc.1",
+  "description": "Please describe the basic information.",
+  "main": "index.ets",
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@rnoh/react-native-openharmony": '../react_native_openharmony'
+  }
+}

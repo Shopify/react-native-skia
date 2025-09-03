@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <oatconfig>
+	<licensefile>LICENSE</licensefile>
+    <policylist>
+        <policy name="projectPolicy" desc="">
+            <policyitem type="license" name="MIT" path=".*" desc="license under the MIT"/>
+        </policy>
+        <policy name="projectPolicy" desc="">
+            <policyitem type="compatibility" name="GPL-2.0+" path=".*" desc="Process that runs independently, invoked by the X process."/>
+            <policyitem type="compatibility" name="Apache-2.0" path=".*" desc="不影响兼容性"/>
+            <policyitem type="compatibility" name="BSDStyleLicense" path=".*" desc="不影响兼容性" />
+            <policyitem type="compatibility" name="MIT" path=".*" desc="不影响兼容性" />
+            <policyitem type="compatibility" name="GPLStyleLicense" path=".*" desc="不影响兼容性" />
+        </policy>
+    </policylist>
+        <filefilterlist>
+            <filefilter name="copyrightPolicyFilter" desc="Filters for compatibility，license header policies">
+         	    <filteritem type="filename" name="LICENSE" desc="版权文件，不添加版权头"/>
+				
+				<filteritem type="filepath" name="src/.*" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+                <filteritem type="filepath" name="lib/.*" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="scripts/.*" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="LICENSE" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="index.ts" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				
+				<filteritem type="filepath" name="jest.config.js" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="jestEnv.mjs" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="jestSetup.js" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="jestSetup.mjs" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="react-native-skia.podspec" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="yarn.lock" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name=".eslintrc" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name=".releaserc" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				
+				
+				<filteritem type="filepath" name="harmony/.clang-tidy" desc="示例工程，非业务代码，不添加许可证头"/>
+                <filteritem type="filepath" name="harmony/entry/.*" desc="示例工程，非业务代码，不添加许可证头"/>
+                <filteritem type="filepath" name="harmony/skia/src/main/cpp/.*" desc="第三方开源软件源码，不修改版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="harmony/skia/src/main/cpp/skia/.*" desc="第三方开源软件源码，不修改版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="harmony/skia/src/main/cpp/freetype/.*" desc="第三方开源软件源码，不修改版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="harmony/skia/src/main/cpp/json/.*" desc="第三方开源软件源码，不修改版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="harmony/skia/src/main/cpp/napi/.*" desc="第三方开源软件源码，不修改版权头，以防有修改版权风险"/>
+                <filteritem type="filepath" name="harmony/skia/hvigorfile.ts" desc="工程模板，不修改版权头，以防有修改版权风险"/>
+                <filteritem type="filepath" name="harmony/skia/build-profile.json5" desc="工程模板，不修改版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="harmony/skia/BuildProfile.ets" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				<filteritem type="filepath" name="harmony/skia/resources/.*" desc="项目资源文件，不添加版权头"/>
+				<filteritem type="filepath" name="harmony/skia/module.json5" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				<filteritem type="filepath" name="harmony/skia/mock/.*" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				<filteritem type="filepath" name="harmony/skia/src/ohosTest/.*" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				<filteritem type="filepath" name="harmony/skia/src/ohosTest/ets/testability/pages/Index.ets" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				<filteritem type="filepath" name="harmony/skia/src/ohosTest/ets/testrunner/.*" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				<filteritem type="filepath" name="harmony/skia/src/ohosTest/ets/test/.*" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				<filteritem type="filepath" name="harmony/skia/src/ohosTest/ets/test/.*" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				<filteritem type="filepath" name="harmony/skia/src/test/.*" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				
+				
+				<filteritem type="filename" name="harmony/skia/src/test/.gitignore" desc="项目配置文件，不添加版权头"/>
+				<filteritem type="filename" name="harmony/skia/src/test/BuildProfile.ets" desc="项目配置文件，不添加版权头"/>
+				<filteritem type="filename" name="harmony/skia/src/test/consumer-rules.txt" desc="项目配置文件，不添加版权头"/>
+				<filteritem type="filename" name="harmony/skia/src/test/hvigorfile.ts" desc="项目配置文件，不添加版权头"/>
+				<filteritem type="filename" name="harmony/skia/src/test/index.ets" desc="项目配置文件，不添加版权头"/>
+				<filteritem type="filename" name="harmony/skia/src/test/obfuscation-rules.txt" desc="项目配置文件，不添加版权头"/>
+				<filteritem type="filename" name="harmony/skia/src/test/oh-package.json5" desc="项目配置文件，不添加版权头"/>
+				<filteritem type="filename" name="harmony/skia/src/test/ts.ts" desc="项目配置文件，不添加版权头"/>
+				<filteritem type="filepath" name="harmony/hvigorfile.ts" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				<filteritem type="filepath" name="tester/harmony/build-profile.template.json5" desc="示例工程配置文件，非业务代码，不添加许可证头"/>
+				<filteritem type="filename" name="*.json5" desc="示例工程配置文件，非业务代码，不添加许可证头"/>
+            </filefilter>
+            <filefilter name="defaultPolicyFilter" desc="Filters for compatibility，license header policies">
+                <filteritem type="filename" name="LICENSE" desc="版权文件，不添加版权头"/>
+				
+				<filteritem type="filepath" name="src/.*" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+                <filteritem type="filepath" name="lib/.*" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="scripts/.*" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="LICENSE" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="index.ts" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				
+				<filteritem type="filepath" name="jest.config.js" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="jestEnv.mjs" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="jestSetup.js" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="jestSetup.mjs" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="react-native-skia.podspec" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="yarn.lock" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name=".eslintrc" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name=".releaserc" desc="第三方开源软件源码，原本无版权头，以防有修改版权风险"/>
+				
+				
+				<filteritem type="filepath" name="harmony/.clang-tidy" desc="示例工程，非业务代码，不添加许可证头"/>
+                <filteritem type="filepath" name="harmony/entry/.*" desc="示例工程，非业务代码，不添加许可证头"/>
+                <filteritem type="filepath" name="harmony/skia/src/main/cpp/.*" desc="第三方开源软件源码，不修改版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="harmony/skia/src/main/cpp/skia/.*" desc="第三方开源软件源码，不修改版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="harmony/skia/src/main/cpp/freetype/.*" desc="第三方开源软件源码，不修改版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="harmony/skia/src/main/cpp/json/.*" desc="第三方开源软件源码，不修改版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="harmony/skia/src/main/cpp/napi/.*" desc="第三方开源软件源码，不修改版权头，以防有修改版权风险"/>
+                <filteritem type="filepath" name="harmony/skia/hvigorfile.ts" desc="工程模板，不修改版权头，以防有修改版权风险"/>
+                <filteritem type="filepath" name="harmony/skia/build-profile.json5" desc="工程模板，不修改版权头，以防有修改版权风险"/>
+				<filteritem type="filepath" name="harmony/skia/BuildProfile.ets" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				<filteritem type="filepath" name="harmony/skia/resources/.*" desc="项目资源文件，不添加版权头"/>
+				<filteritem type="filepath" name="harmony/skia/module.json5" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				<filteritem type="filepath" name="harmony/skia/mock/.*" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				<filteritem type="filepath" name="harmony/skia/src/ohosTest/.*" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				<filteritem type="filepath" name="harmony/skia/src/ohosTest/ets/testability/pages/Index.ets" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				<filteritem type="filepath" name="harmony/skia/src/ohosTest/ets/testrunner/.*" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				<filteritem type="filepath" name="harmony/skia/src/ohosTest/ets/test/.*" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				<filteritem type="filepath" name="harmony/skia/src/ohosTest/ets/test/.*" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				<filteritem type="filepath" name="harmony/skia/src/test/.*" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				
+				
+				<filteritem type="filename" name="harmony/skia/src/test/.gitignore" desc="项目配置文件，不添加版权头"/>
+				<filteritem type="filename" name="harmony/skia/src/test/BuildProfile.ets" desc="项目配置文件，不添加版权头"/>
+				<filteritem type="filename" name="harmony/skia/src/test/consumer-rules.txt" desc="项目配置文件，不添加版权头"/>
+				<filteritem type="filename" name="harmony/skia/src/test/hvigorfile.ts" desc="项目配置文件，不添加版权头"/>
+				<filteritem type="filename" name="harmony/skia/src/test/index.ets" desc="项目配置文件，不添加版权头"/>
+				<filteritem type="filename" name="harmony/skia/src/test/obfuscation-rules.txt" desc="项目配置文件，不添加版权头"/>
+				<filteritem type="filename" name="harmony/skia/src/test/oh-package.json5" desc="项目配置文件，不添加版权头"/>
+				<filteritem type="filename" name="harmony/skia/src/test/ts.ts" desc="项目配置文件，不添加版权头"/>
+				<filteritem type="filepath" name="harmony/hvigorfile.ts" desc="配置文件，DevEco Studio自动生成，不手动修改"/>
+				<filteritem type="filepath" name="tester/harmony/build-profile.template.json5" desc="示例工程配置文件，非业务代码，不添加许可证头"/>
+				<filteritem type="filename" name="*.json5" desc="示例工程配置文件，非业务代码，不添加许可证头"/>
+            </filefilter>
+            <filefilter name="binaryFileTypePolicyFilter" desc="Filters for copyright header policies">
+                <filteritem type="filepath" name="harmony/skia.har" desc="项目打包文件" />
+            </filefilter>
+        </filefilterlist>
+    </oatconfig>
+</configuration>

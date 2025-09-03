@@ -1,12 +1,3 @@
-.turbo
-
-# Yarn
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
 
 # OSX
 #
@@ -17,7 +8,7 @@
 node_modules/
 npm-debug.log
 yarn-error.log
-.eslintcache
+  
 
 # Xcode
 #
@@ -38,24 +29,23 @@ DerivedData
 *.ipa
 *.xcuserstate
 project.xcworkspace
+      
 
 # Android/IntelliJ
+#
 build/
 .idea
 .gradle
 local.properties
 *.iml
-.cxx
-# Legacy Eclipse Settings
-.settings/
-
-# Externals
-packages/skia/lib
-packages/skia/libs
-packages/skia/cpp/skia
-packages/skia/cpp/dawn
 
 # BUCK
 buck-out/
 \.buckd/
 *.keystore
+
+# Editor config
+.vscode
+
+# eslintcache
+.eslintcache

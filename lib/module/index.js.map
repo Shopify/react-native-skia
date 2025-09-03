@@ -1,0 +1,1 @@
+{"version":3,"names":["JsiSkImage"],"sources":["index.ts"],"sourcesContent":["import \"@shopify/react-native-skia/src/skia/NativeSetup\";\nexport { JsiSkImage } from \"@shopify/react-native-skia\";\nexport * from \"@shopify/react-native-skia\";\n"],"mappings":"AAAA,OAAO,iDAAiD;AACxD,SAASA,UAAU,QAAQ,4BAA4B;AACvD,cAAc,4BAA4B","ignoreList":[]}

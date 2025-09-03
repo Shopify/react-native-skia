@@ -1,0 +1,12 @@
+{
+  "modelVersion": "5.0.0",
+  "license": "ISC",
+  "name": "rnoh",
+  "description": "example description",
+  "repository": {},
+  "version": "1.0.0",
+  "overrides": {
+    "@rnoh/react-native-openharmony": "file:./../node_modules/react-native-harmony/harmony/react_native_openharmony.har"
+  },
+  "dynamicDependencies": {}
+}
