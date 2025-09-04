@@ -391,7 +391,7 @@ jobs:
 
       - name: Run tests
         working-directory: externals/skia-web-app
-        run: yarn test
+        run: yarn test --detectOpenHandles
 
       - name: Stop web server
         working-directory: externals/skia-web-app
