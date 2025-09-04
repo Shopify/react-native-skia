@@ -32,9 +32,11 @@ export const Tests = ({ assets }: TestsProps) => {
   const [client, hostname] = useClient();
   const [drawing, setDrawing] = useState<any>(null);
   const [screen, setScreen] = useState<any>(null);
+  
   useEffect(() => {
     if (client !== null) {
-      client.onmessage = (e) => {
+      // Define the message handler as a separate function
+      const handleMessage = (e: MessageEvent) => {
         const tree: any = JSON.parse(e.data);
         if (tree.code) {
           client.send(
@@ -62,14 +64,20 @@ export const Tests = ({ assets }: TestsProps) => {
           setDrawing(node as SerializedNode);
         }
       };
+
+      // Use addEventListener instead of onmessage
+      client.addEventListener('message', handleMessage);
+
+      // Clean up: remove the specific event listener
       return () => {
-        client.close();
+        client.removeEventListener('message', handleMessage);
       };
     }
     return;
   }, [assets, client]);
+  
   useEffect(() => {
-    if (drawing) {
+    if (drawing && client) {
       const it = setTimeout(() => {
         if (ref.current) {
           ref.current
@@ -96,8 +104,9 @@ export const Tests = ({ assets }: TestsProps) => {
     }
     return;
   }, [client, drawing, ref]);
+  
   useEffect(() => {
-    if (screen) {
+    if (screen && client) {
       const it = setTimeout(async () => {
         const image = await makeImageFromView(viewRef as RefObject<View>);
         if (image && client) {
@@ -111,6 +120,7 @@ export const Tests = ({ assets }: TestsProps) => {
     }
     return;
   }, [client, screen]);
+  
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <Text style={{ color: "black" }}>
