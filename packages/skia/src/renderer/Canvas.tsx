@@ -56,6 +56,28 @@ export interface CanvasProps extends Omit<ViewProps, "onLayout"> {
   onSize?: SharedValue<SkSize>;
   colorSpace?: "p3" | "srgb";
   ref?: React.Ref<CanvasRef>;
+  /**
+   * WebGL context attributes for web platform.
+   * Allows configuration of the WebGL rendering context.
+   * Only applicable when running on web platform.
+   * 
+   * Note: Boolean values will be automatically converted to 0/1 for CanvasKit compatibility.
+   */
+  webglContextAttributes?: {
+    alpha?: boolean;
+    depth?: boolean;
+    stencil?: boolean;
+    antialias?: boolean;
+    premultipliedAlpha?: boolean;
+    preserveDrawingBuffer?: boolean;
+    preferLowPowerToHighPerformance?: boolean;
+    failIfMajorPerformanceCaveat?: boolean;
+    enableExtensionsByDefault?: boolean;
+    explicitSwapControl?: boolean;
+    renderViaOffscreenBackBuffer?: boolean;
+    majorVersion?: number;
+    minorVersion?: number;
+  };
 }
 
 export const Canvas = ({

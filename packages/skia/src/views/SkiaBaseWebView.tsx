@@ -41,7 +41,36 @@ export abstract class SkiaBaseWebView<
       this.height = canvas.clientHeight;
       canvas.width = this.width * pd;
       canvas.height = this.height * pd;
-      const surface = CanvasKit.MakeWebGLCanvasSurface(canvas);
+      
+      // Convert boolean webglContextAttributes to numbers for CanvasKit
+      let contextAttributes: any = undefined;
+      if (this.props.webglContextAttributes) {
+        contextAttributes = {};
+        const attrs = this.props.webglContextAttributes;
+        
+        // Convert boolean values to 0/1 for CanvasKit compatibility
+        if (attrs.alpha !== undefined) contextAttributes.alpha = attrs.alpha ? 1 : 0;
+        if (attrs.depth !== undefined) contextAttributes.depth = attrs.depth ? 1 : 0;
+        if (attrs.stencil !== undefined) contextAttributes.stencil = attrs.stencil ? 1 : 0;
+        if (attrs.antialias !== undefined) contextAttributes.antialias = attrs.antialias ? 1 : 0;
+        if (attrs.premultipliedAlpha !== undefined) contextAttributes.premultipliedAlpha = attrs.premultipliedAlpha ? 1 : 0;
+        if (attrs.preserveDrawingBuffer !== undefined) contextAttributes.preserveDrawingBuffer = attrs.preserveDrawingBuffer ? 1 : 0;
+        if (attrs.preferLowPowerToHighPerformance !== undefined) contextAttributes.preferLowPowerToHighPerformance = attrs.preferLowPowerToHighPerformance ? 1 : 0;
+        if (attrs.failIfMajorPerformanceCaveat !== undefined) contextAttributes.failIfMajorPerformanceCaveat = attrs.failIfMajorPerformanceCaveat ? 1 : 0;
+        if (attrs.enableExtensionsByDefault !== undefined) contextAttributes.enableExtensionsByDefault = attrs.enableExtensionsByDefault ? 1 : 0;
+        if (attrs.explicitSwapControl !== undefined) contextAttributes.explicitSwapControl = attrs.explicitSwapControl ? 1 : 0;
+        if (attrs.renderViaOffscreenBackBuffer !== undefined) contextAttributes.renderViaOffscreenBackBuffer = attrs.renderViaOffscreenBackBuffer ? 1 : 0;
+        
+        // Pass through numeric values as-is
+        if (attrs.majorVersion !== undefined) contextAttributes.majorVersion = attrs.majorVersion;
+        if (attrs.minorVersion !== undefined) contextAttributes.minorVersion = attrs.minorVersion;
+      }
+      
+      const surface = CanvasKit.MakeWebGLCanvasSurface(
+        canvas,
+        undefined, // colorSpace - using undefined to maintain default
+        contextAttributes
+      );
       const ctx = canvas.getContext("webgl2");
       if (ctx) {
         ctx.drawingBufferColorSpace = "display-p3";

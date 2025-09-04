@@ -7,6 +7,21 @@ export interface NativeProps extends ViewProps {
   debug?: boolean;
   opaque?: boolean;
   nativeID: string;
+  webglContextAttributes?: {
+    alpha?: boolean;
+    depth?: boolean;
+    stencil?: boolean;
+    antialias?: boolean;
+    premultipliedAlpha?: boolean;
+    preserveDrawingBuffer?: boolean;
+    preferLowPowerToHighPerformance?: boolean;
+    failIfMajorPerformanceCaveat?: boolean;
+    enableExtensionsByDefault?: boolean;
+    explicitSwapControl?: boolean;
+    renderViaOffscreenBackBuffer?: boolean;
+    majorVersion?: number;
+    minorVersion?: number;
+  };
 }
 
 const SkiaPictureViewNativeComponent = ({
@@ -14,6 +29,7 @@ const SkiaPictureViewNativeComponent = ({
   debug,
   opaque,
   onLayout,
+  webglContextAttributes,
   ...viewProps
 }: NativeProps) => {
   return createElement(SkiaPictureView, {
@@ -21,6 +37,7 @@ const SkiaPictureViewNativeComponent = ({
     debug,
     opaque,
     onLayout,
+    webglContextAttributes,
     ...viewProps,
   });
 };
