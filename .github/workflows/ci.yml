@@ -232,6 +232,7 @@ jobs:
   test-android:
     needs: build-android
     runs-on: macos-latest-large
+    timeout-minutes: 60
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
