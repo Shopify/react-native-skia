@@ -41,31 +41,26 @@ export abstract class SkiaBaseWebView<
       this.height = canvas.clientHeight;
       canvas.width = this.width * pd;
       canvas.height = this.height * pd;
-      
-      // Convert boolean webglContextAttributes to numbers for CanvasKit
-      let contextAttributes: any = undefined;
+
+      // Convert WebGL context attributes from boolean to numeric for CanvasKit
+      let contextAttributes: Record<string, number> | undefined;
       if (this.props.webglContextAttributes) {
         contextAttributes = {};
         const attrs = this.props.webglContextAttributes;
-        
-        // Convert boolean values to 0/1 for CanvasKit compatibility
-        if (attrs.alpha !== undefined) contextAttributes.alpha = attrs.alpha ? 1 : 0;
-        if (attrs.depth !== undefined) contextAttributes.depth = attrs.depth ? 1 : 0;
-        if (attrs.stencil !== undefined) contextAttributes.stencil = attrs.stencil ? 1 : 0;
-        if (attrs.antialias !== undefined) contextAttributes.antialias = attrs.antialias ? 1 : 0;
-        if (attrs.premultipliedAlpha !== undefined) contextAttributes.premultipliedAlpha = attrs.premultipliedAlpha ? 1 : 0;
-        if (attrs.preserveDrawingBuffer !== undefined) contextAttributes.preserveDrawingBuffer = attrs.preserveDrawingBuffer ? 1 : 0;
-        if (attrs.preferLowPowerToHighPerformance !== undefined) contextAttributes.preferLowPowerToHighPerformance = attrs.preferLowPowerToHighPerformance ? 1 : 0;
-        if (attrs.failIfMajorPerformanceCaveat !== undefined) contextAttributes.failIfMajorPerformanceCaveat = attrs.failIfMajorPerformanceCaveat ? 1 : 0;
-        if (attrs.enableExtensionsByDefault !== undefined) contextAttributes.enableExtensionsByDefault = attrs.enableExtensionsByDefault ? 1 : 0;
-        if (attrs.explicitSwapControl !== undefined) contextAttributes.explicitSwapControl = attrs.explicitSwapControl ? 1 : 0;
-        if (attrs.renderViaOffscreenBackBuffer !== undefined) contextAttributes.renderViaOffscreenBackBuffer = attrs.renderViaOffscreenBackBuffer ? 1 : 0;
-        
-        // Pass through numeric values as-is
-        if (attrs.majorVersion !== undefined) contextAttributes.majorVersion = attrs.majorVersion;
-        if (attrs.minorVersion !== undefined) contextAttributes.minorVersion = attrs.minorVersion;
+
+        // Iterate through all attributes and convert booleans to 0/1
+        for (const [key, value] of Object.entries(attrs)) {
+          if (value !== undefined) {
+            // Convert boolean to number (0/1), pass through numbers as-is
+            if (typeof value === "boolean") {
+              contextAttributes[key] = value ? 1 : 0;
+            } else {
+              contextAttributes[key] = value;
+            }
+          }
+        }
       }
-      
+
       const surface = CanvasKit.MakeWebGLCanvasSurface(
         canvas,
         undefined, // colorSpace - using undefined to maintain default
