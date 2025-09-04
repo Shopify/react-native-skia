@@ -33,9 +33,9 @@ export const Tests = ({ assets }: TestsProps) => {
   const [drawing, setDrawing] = useState<any>(null);
   const [screen, setScreen] = useState<any>(null);
   useEffect(() => {
-    if (client !== null) {
-      client.onmessage = (e) => {
-        const tree: any = JSON.parse(e.data);
+    if (client) {
+      const handleMessage = (event: MessageEvent) => {
+        const tree: any = JSON.parse(event.data);
         if (tree.code) {
           client.send(
             JSON.stringify(
@@ -62,11 +62,13 @@ export const Tests = ({ assets }: TestsProps) => {
           setDrawing(node as SerializedNode);
         }
       };
+  
+      client.addEventListener('message', handleMessage);
+  
       return () => {
-        client.close();
+        client.removeEventListener('message', handleMessage);
       };
     }
-    return;
   }, [assets, client]);
   useEffect(() => {
     if (drawing) {
