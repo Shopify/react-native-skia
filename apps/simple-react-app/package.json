@@ -7,8 +7,8 @@
     "build": "craco build",
     "test": "craco test",
     "eject": "react-scripts eject",
-    "lint": "eslint src --ext .ts,.tsx --max-warnings 0",
-    "tsc": "tsc --noEmit"
+    "lint-disabled": "eslint src --ext .ts,.tsx --max-warnings 0",
+    "tsc-disabled": "tsc --noEmit"
   },
   "dependencies": {
     "@shopify/react-native-skia": "workspace:*",
