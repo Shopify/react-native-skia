@@ -56,6 +56,7 @@ export interface CanvasProps extends Omit<ViewProps, "onLayout"> {
   onSize?: SharedValue<SkSize>;
   colorSpace?: "p3" | "srgb";
   ref?: React.Ref<CanvasRef>;
+  __destroyWebGLContextAfterRender?: boolean;
 }
 
 export const Canvas = ({

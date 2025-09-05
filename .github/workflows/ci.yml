@@ -375,10 +375,25 @@ jobs:
         working-directory: packages/skia
         run: yarn build && yarn pack
 
+      - name: Log package.json before change
+        working-directory: externals/skia-web-app
+        run: |
+          echo "=== package.json BEFORE change ==="
+          grep -n "@shopify/react-native-skia" package.json || echo "Pattern not found"
+          echo "=================================="
+
       - name: Update package.json to use local Skia package
         working-directory: externals/skia-web-app
         run: |
-          sed -i '' 's/"@shopify\/react-native-skia": "[^"]*"/"@shopify\/react-native-skia": "file:..\/..\/packages\/skia\/package.tgz"/' package.json
+          # More robust regex that handles different whitespace
+          sed -i '' 's/"@shopify\/react-native-skia"[[:space:]]*:[[:space:]]*"[^"]*"/"@shopify\/react-native-skia": "file:..\/..\/packages\/skia\/package.tgz"/' package.json
+
+      - name: Log package.json after change
+        working-directory: externals/skia-web-app
+        run: |
+          echo "=== package.json AFTER change ==="
+          grep -n "@shopify/react-native-skia" package.json || echo "Pattern not found"
+          echo "================================="
 
       - name: Install dependencies for skia-web-app
         working-directory: externals/skia-web-app
