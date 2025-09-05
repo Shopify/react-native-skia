@@ -1,10 +1,9 @@
-import { Canvas, Fill, } from '@shopify/react-native-skia';
+import React from 'react';
+import { Canvas } from '@shopify/react-native-skia';
 import { Breathe } from './Breathe';
 function App() {
-  console.log({ CanvasKit});
-  
   const canvases = [];
-  for (let i = 0; i < 17; i++) {
+  for (let i = 0; i < 10; i++) {
     canvases.push(
       <div key={i} style={{ margin: '10px', display: 'inline-block' }}>
         <h4>Canvas {i + 1}</h4>

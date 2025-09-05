@@ -2,6 +2,15 @@ const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
 const path = require("path");
 
 module.exports = {
+  babel: {
+    presets: [
+      "@babel/preset-react"
+    ],
+    plugins: [
+      "@babel/plugin-proposal-export-namespace-from",
+      "react-native-reanimated/plugin"
+    ]
+  },
   webpack: {
     plugins: {
       add: [new NodePolyfillPlugin()]
@@ -35,7 +44,6 @@ module.exports = {
       webpackConfig.resolve.alias = {
         ...webpackConfig.resolve.alias,
         "react-native$": "react-native-web",
-        "react-native-reanimated": "react-native-reanimated/lib/module/web",
         "react-native/Libraries/Image/AssetRegistry": "react-native-web/dist/modules/AssetRegistry",
         "@shopify/react-native-skia$": path.resolve(__dirname, "../../packages/skia/src/index.ts"),
         "@shopify/react-native-skia/src/web": path.resolve(__dirname, "../../packages/skia/src/web/index.ts")
