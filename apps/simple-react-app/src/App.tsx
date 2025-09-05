@@ -3,7 +3,7 @@ function App() {
   console.log({ CanvasKit});
   
   const canvases = [];
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 17; i++) {
     canvases.push(
       <div key={i} style={{ margin: '10px', display: 'inline-block' }}>
         <h4>Canvas {i + 1}</h4>
