@@ -87,9 +87,11 @@ export const createContainer = (
   nativeId: number,
   onSize?: SharedValue<SkSize>
 ) => {
-  if (HAS_REANIMATED_3 && nativeId !== -1) {
-    return new ReanimatedContainer(Skia, nativeId, onSize);
-  } else {
-    return new StaticContainer(Skia, nativeId);
-  }
+  return new StaticContainer(Skia, nativeId);
+
+  // if (HAS_REANIMATED_3 && nativeId !== -1) {
+  //   return new ReanimatedContainer(Skia, nativeId, onSize);
+  // } else {
+  //   return new StaticContainer(Skia, nativeId);
+  // }
 };

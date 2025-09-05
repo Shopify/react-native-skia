@@ -1,14 +1,13 @@
-import React from 'react';
-import { Canvas } from '@shopify/react-native-skia';
-import { Breathe } from './Breathe';
+import { Canvas, Fill } from '@shopify/react-native-skia';
 function App() {
   const canvases = [];
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 17; i++) {
+    const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
     canvases.push(
       <div key={i} style={{ margin: '10px', display: 'inline-block' }}>
         <h4>Canvas {i + 1}</h4>
         <Canvas style={{ width: 200, height: 200,  }}>
-          <Breathe width={200} height={200} />
+          <Fill color={randomColor} />
         </Canvas>
       </div>
     );
