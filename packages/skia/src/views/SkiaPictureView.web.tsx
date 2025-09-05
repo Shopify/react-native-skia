@@ -78,10 +78,13 @@ export const SkiaPictureView = forwardRef<
 
   const makeImageSnapshot = useCallback(
     (rect?: SkRect) => {
-      canvasRef.current!.clear(CanvasKit.TRANSPARENT);
-      renderInCanvas(canvasRef.current!);
-      surfaceRef.current?.ref.flush();
-      return surfaceRef.current?.makeImageSnapshot(rect);
+      if (!canvasRef.current || !surfaceRef.current) {
+        return null;
+      }
+      canvasRef.current.clear(CanvasKit.TRANSPARENT);
+      renderInCanvas(canvasRef.current);
+      surfaceRef.current.ref.flush();
+      return surfaceRef.current.makeImageSnapshot(rect);
     },
     [renderInCanvas]
   );
