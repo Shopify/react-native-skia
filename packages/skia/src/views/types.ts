@@ -31,6 +31,10 @@ export interface SkiaBaseViewProps extends ViewProps {
   onSize?: SharedValue<SkSize>;
 
   opaque?: boolean;
+
+  // On web, only 16 WebGL contextes are allowed. If the drawing is non-animated, set
+  // __webAnimations to false to release the context after each draw.
+  __webAnimations?: boolean;
 }
 
 export interface SkiaPictureViewNativeProps extends SkiaBaseViewProps {
