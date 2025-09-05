@@ -150,7 +150,24 @@ class StaticWebGLRenderer implements Renderer {
     if (!ctx2d) {
       throw new Error("Could not get 2D context");
     }
-    ctx2d.drawImage(tempCanvas, 0, 0);
+
+    // Set canvas dimensions to match pixel density
+    this.canvas.width = this.canvas.clientWidth * this.pd;
+    this.canvas.height = this.canvas.clientHeight * this.pd;
+
+    // Draw the tempCanvas scaled down to the display size
+    ctx2d.drawImage(
+      tempCanvas,
+      0,
+      0,
+      tempCanvas.width,
+      tempCanvas.height,
+      0,
+      0,
+      this.canvas.clientWidth * this.pd,
+      this.canvas.clientHeight * this.pd
+    );
+
     this.cleanupWebGLContext(tempCanvas);
   }
 
@@ -243,9 +260,10 @@ export const SkiaPictureView = forwardRef<
     (evt: LayoutChangeEvent) => {
       const canvas = canvasRef.current;
       if (canvas) {
-        renderer.current = props.__webAnimations
-          ? new WebGLRenderer(canvas, pd)
-          : new StaticWebGLRenderer(canvas, pd);
+        renderer.current =
+          props.__webAnimations === false
+            ? new StaticWebGLRenderer(canvas, pd)
+            : new WebGLRenderer(canvas, pd);
         if (pictureRef.current) {
           renderer.current.draw(pictureRef.current);
         }
