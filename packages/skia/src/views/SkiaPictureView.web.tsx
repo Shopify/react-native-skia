@@ -261,7 +261,7 @@ export const SkiaPictureView = forwardRef<
       const canvas = canvasRef.current;
       if (canvas) {
         renderer.current =
-          props.__destroyGLContextAfterRender === true
+          props.__destroyWebGLContextAfterRender === true
             ? new StaticWebGLRenderer(canvas, pd)
             : new WebGLRenderer(canvas, pd);
         if (pictureRef.current) {
@@ -272,7 +272,7 @@ export const SkiaPictureView = forwardRef<
         onLayout(evt);
       }
     },
-    [onLayout, props.__destroyGLContextAfterRender]
+    [onLayout, props.__destroyWebGLContextAfterRender]
   );
 
   useImperativeHandle(
