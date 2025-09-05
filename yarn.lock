@@ -30332,6 +30332,7 @@ __metadata:
     path-browserify: ^1.0.1
     react: 19.0.0
     react-dom: 19.0.0
+    react-native-reanimated: 3.19.1
     react-native-web: ^0.21.1
     react-scripts: 5.0.1
     typescript: ^5.2.2
