@@ -1,5 +1,6 @@
 import type { ViewProps } from "react-native";
 import type { SharedValue } from "react-native-reanimated";
+import type { WebGLOptions } from "canvaskit-wasm";
 
 import type { Node } from "../dom/types";
 import type { SkImage, SkPicture, SkRect, SkSize } from "../skia/types";
@@ -31,6 +32,14 @@ export interface SkiaBaseViewProps extends ViewProps {
   onSize?: SharedValue<SkSize>;
 
   opaque?: boolean;
+
+  /**
+   * WebGL context attributes for web platform.
+   * Allows configuration of the WebGL rendering context.
+   * Only applicable when running on web platform.
+   * Uses CanvasKit's WebGLOptions type directly - all values must be numeric (0 or 1 for boolean flags).
+   */
+  webglContextAttributes?: WebGLOptions;
 }
 
 export interface SkiaPictureViewNativeProps extends SkiaBaseViewProps {
