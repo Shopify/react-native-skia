@@ -156,6 +156,7 @@ jobs:
   test-android-graphite:
     needs: build-android-graphite
     runs-on: macos-latest-large
+    timeout-minutes: 60
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
