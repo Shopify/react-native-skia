@@ -164,7 +164,7 @@ Usually developers will see this error when they exceed this limit:
 ```
 WARNING: Too many active WebGL contexts. Oldest context will be lost.
 ```
-If you canvas is static and doesn't contain animation values, you can use the `__webAnimation={false}` prop on your Canvas components to destroy the WebGL context after rendering.
+If you canvas is static and doesn't contain animation values, you can use the `__destroyGLContextAfterRender={true}` prop on your Canvas components to destroy the WebGL context after rendering.
 This even works with animated canvases but it will come with a performance cost as the context will be recreated on each render.
 
 ```tsx twoslash
@@ -175,9 +175,9 @@ export default function App() {
   return (
     <View style={{ flex: 1 }}>
       {
-        // 20 Skia Canvases with __webAnimation={false}
+        // 20 Skia Canvases with __destroyGLContextAfterRender={true}
         new Array(20).fill(0).map((_, i) => (
-          <Canvas key={i} style={{ width: 100, height: 100 }} __webAnimation={false}>
+          <Canvas key={i} style={{ width: 100, height: 100 }} __destroyGLContextAfterRender={true}>
             <Fill color="lightblue" />
           </Canvas>
         ))
