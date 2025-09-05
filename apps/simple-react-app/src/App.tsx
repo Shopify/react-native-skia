@@ -1,4 +1,5 @@
 import { Canvas, Fill, } from '@shopify/react-native-skia';
+import { Breathe } from './Breathe';
 function App() {
   console.log({ CanvasKit});
   
@@ -8,7 +9,7 @@ function App() {
       <div key={i} style={{ margin: '10px', display: 'inline-block' }}>
         <h4>Canvas {i + 1}</h4>
         <Canvas style={{ width: 200, height: 200,  }}>
-          <Fill color={`hsl(${(i * 18) % 360}, 70%, 50%)`} />
+          <Breathe width={200} height={200} />
         </Canvas>
       </div>
     );
