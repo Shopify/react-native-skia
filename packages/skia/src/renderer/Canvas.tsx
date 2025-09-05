@@ -14,6 +14,7 @@ import type {
   ViewProps,
 } from "react-native";
 import { type SharedValue } from "react-native-reanimated";
+import type { WebGLOptions } from "canvaskit-wasm";
 
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
 import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeComponent";
@@ -60,24 +61,9 @@ export interface CanvasProps extends Omit<ViewProps, "onLayout"> {
    * WebGL context attributes for web platform.
    * Allows configuration of the WebGL rendering context.
    * Only applicable when running on web platform.
-   * 
-   * Note: Boolean values will be automatically converted to 0/1 for CanvasKit compatibility.
+   * Uses CanvasKit's WebGLOptions type directly - all values must be numeric (0 or 1 for boolean flags).
    */
-  webglContextAttributes?: {
-    alpha?: boolean;
-    depth?: boolean;
-    stencil?: boolean;
-    antialias?: boolean;
-    premultipliedAlpha?: boolean;
-    preserveDrawingBuffer?: boolean;
-    preferLowPowerToHighPerformance?: boolean;
-    failIfMajorPerformanceCaveat?: boolean;
-    enableExtensionsByDefault?: boolean;
-    explicitSwapControl?: boolean;
-    renderViaOffscreenBackBuffer?: boolean;
-    majorVersion?: number;
-    minorVersion?: number;
-  };
+  webglContextAttributes?: WebGLOptions;
 }
 
 export const Canvas = ({

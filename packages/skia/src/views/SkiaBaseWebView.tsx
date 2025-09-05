@@ -42,29 +42,10 @@ export abstract class SkiaBaseWebView<
       canvas.width = this.width * pd;
       canvas.height = this.height * pd;
 
-      // Convert WebGL context attributes from boolean to numeric for CanvasKit
-      let contextAttributes: Record<string, number> | undefined;
-      if (this.props.webglContextAttributes) {
-        contextAttributes = {};
-        const attrs = this.props.webglContextAttributes;
-
-        // Iterate through all attributes and convert booleans to 0/1
-        for (const [key, value] of Object.entries(attrs)) {
-          if (value !== undefined) {
-            // Convert boolean to number (0/1), pass through numbers as-is
-            if (typeof value === "boolean") {
-              contextAttributes[key] = value ? 1 : 0;
-            } else {
-              contextAttributes[key] = value;
-            }
-          }
-        }
-      }
-
       const surface = CanvasKit.MakeWebGLCanvasSurface(
         canvas,
         undefined, // colorSpace - using undefined to maintain default
-        contextAttributes
+        this.props.webglContextAttributes // undefined if not explicitly provided
       );
       const ctx = canvas.getContext("webgl2");
       if (ctx) {

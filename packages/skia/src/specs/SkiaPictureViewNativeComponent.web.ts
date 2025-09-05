@@ -1,5 +1,6 @@
 import type { ViewProps } from "react-native";
 import { createElement } from "react";
+import type { WebGLOptions } from "canvaskit-wasm";
 
 import { SkiaPictureView } from "../views/SkiaPictureView.web";
 
@@ -7,21 +8,7 @@ export interface NativeProps extends ViewProps {
   debug?: boolean;
   opaque?: boolean;
   nativeID: string;
-  webglContextAttributes?: {
-    alpha?: boolean;
-    depth?: boolean;
-    stencil?: boolean;
-    antialias?: boolean;
-    premultipliedAlpha?: boolean;
-    preserveDrawingBuffer?: boolean;
-    preferLowPowerToHighPerformance?: boolean;
-    failIfMajorPerformanceCaveat?: boolean;
-    enableExtensionsByDefault?: boolean;
-    explicitSwapControl?: boolean;
-    renderViaOffscreenBackBuffer?: boolean;
-    majorVersion?: number;
-    minorVersion?: number;
-  };
+  webglContextAttributes?: WebGLOptions;
 }
 
 const SkiaPictureViewNativeComponent = ({
