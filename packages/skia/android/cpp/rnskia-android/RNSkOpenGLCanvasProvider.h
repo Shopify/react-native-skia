@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "RNSkView.h"
-#include "WindowContext.h"
+#include "RNWindowContext.h"
 
 #include <android/native_window.h>
 
@@ -19,11 +19,11 @@ public:
       std::function<void()> requestRedraw,
       std::shared_ptr<RNSkia::RNSkPlatformContext> platformContext);
 
-  ~RNSkOpenGLCanvasProvider();
+  virtual ~RNSkOpenGLCanvasProvider();
 
-  int getScaledWidth() override;
+  int getWidth() override;
 
-  int getScaledHeight() override;
+  int getHeight() override;
 
   bool renderToCanvas(const std::function<void(SkCanvas *)> &cb) override;
 

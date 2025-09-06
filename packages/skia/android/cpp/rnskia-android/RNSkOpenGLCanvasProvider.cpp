@@ -8,7 +8,7 @@
 #include "RNSkLog.h"
 
 #if defined(SK_GRAPHITE)
-#include "DawnContext.h"
+#include "RNDawnContext.h"
 #else
 #include "OpenGLContext.h"
 #endif
@@ -31,14 +31,14 @@ RNSkOpenGLCanvasProvider::RNSkOpenGLCanvasProvider(
 
 RNSkOpenGLCanvasProvider::~RNSkOpenGLCanvasProvider() = default;
 
-int RNSkOpenGLCanvasProvider::getScaledWidth() {
+int RNSkOpenGLCanvasProvider::getWidth() {
   if (_surfaceHolder) {
     return _surfaceHolder->getWidth();
   }
   return 0;
 }
 
-int RNSkOpenGLCanvasProvider::getScaledHeight() {
+int RNSkOpenGLCanvasProvider::getHeight() {
   if (_surfaceHolder) {
     return _surfaceHolder->getHeight();
   }

@@ -71,6 +71,7 @@ export const commonArgs = [
   //["skia_enable_ganesh", !GRAPHITE],
   ["skia_enable_graphite", GRAPHITE],
   ["skia_use_dawn", GRAPHITE],
+  ["skia_use_cpp20", GRAPHITE],
 ];
 
 export type PlatformName = "apple" | "android";
@@ -92,7 +93,7 @@ export type Platform = {
   options?: Arg[];
 };
 
-const appleMinTarget = GRAPHITE ? "15.1" : "13.0";
+const appleMinTarget = GRAPHITE ? "15.1" : "14.0";
 const appleSimulatorMinTarget = "16.0";
 
 // Define tvOS targets separately so they can be conditionally included
@@ -262,6 +263,34 @@ const copyModule = (module: string) => [
   `cp -a ../../externals/skia/modules/${module}/include/. ./cpp/skia/modules/${module}/include`,
 ];
 
+const getFirstAvailableTarget = () => {
+  // Use the same logic as build-skia.ts to get the first available target
+  const platforms = Object.keys(configurations) as PlatformName[];
+
+  for (const platformName of platforms) {
+    const configuration = configurations[platformName];
+    const targetNames = Object.keys(configuration.targets);
+
+    for (const targetName of targetNames) {
+      const targetPath = `${platformName}/${targetName}`;
+      const dawnPath = `../../externals/skia/out/${targetPath}/gen/third_party/externals/dawn`;
+
+      try {
+        require("fs").statSync(dawnPath);
+        return targetPath;
+      } catch (e) {
+        // Dawn folder doesn't exist for this target, try next
+        continue;
+      }
+    }
+  }
+
+  // No target found with dawn folder
+  throw new Error(
+    "No target found with dawn folder at ../../externals/skia/out/{target}/gen/third_party/externals/dawn"
+  );
+};
+
 export const copyHeaders = () => {
   process.chdir(PackageRoot);
   [
@@ -280,7 +309,7 @@ export const copyHeaders = () => {
           "cp -a ../../externals/skia/src/gpu/graphite/ResourceTypes.h ./cpp/skia/src/gpu/graphite/.",
           "cp -a ../../externals/skia/src/gpu/graphite/TextureProxyView.h ./cpp/skia/src/gpu/graphite/.",
 
-          "cp -a ../../externals/skia/out/android/arm/gen/third_party/externals/dawn/include/. ./cpp/dawn/include",
+          `cp -a ../../externals/skia/out/${getFirstAvailableTarget()}/gen/third_party/externals/dawn/include/. ./cpp/dawn/include`,
           "cp -a ../../externals/skia/third_party/externals/dawn/include/. ./cpp/dawn/include",
           "cp -a ../../externals/skia/third_party/externals/dawn/include/. ./cpp/dawn/include",
 
@@ -291,6 +320,7 @@ export const copyHeaders = () => {
           "rm -rf ./cpp/dawn/include/dawn/webgpu.h",
           "rm -rf ./cpp/dawn/include/dawn/webgpu_cpp.h",
           "rm -rf ./cpp/dawn/include/dawn/wire",
+          "rm -rf ./cpp/dawn/include/webgpu/webgpu_cpp_print.h",
         ]
       : []),
 

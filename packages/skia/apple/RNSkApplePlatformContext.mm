@@ -7,7 +7,7 @@
 #include <utility>
 
 #if defined(SK_GRAPHITE)
-#include "DawnContext.h"
+#include "RNDawnContext.h"
 #else
 #include "MetalContext.h"
 #endif

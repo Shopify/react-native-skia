@@ -14,7 +14,7 @@
 #include "RNSkTypedArray.h"
 
 #if defined(SK_GRAPHITE)
-#include "DawnContext.h"
+#include "RNDawnContext.h"
 #include "include/gpu/graphite/Context.h"
 #endif
 
@@ -185,6 +185,9 @@ public:
   }
 
   JSI_HOST_FUNCTION(readPixels) {
+#if defined(SK_GRAPHITE)
+    throw std::runtime_error("Not implemented yet");
+#else
     int srcX = 0;
     int srcY = 0;
     if (count > 0 && !arguments[0].isUndefined()) {
@@ -218,16 +221,14 @@ public:
             .asObject(runtime)
             .getArrayBuffer(runtime);
     auto bfrPtr = reinterpret_cast<void *>(buffer.data(runtime));
-#if defined(SK_GRAPHITE)
-    throw std::runtime_error("Not implemented yet");
-#else
+
     auto grContext = getContext()->getDirectContext();
     if (!getObject()->readPixels(grContext, info, bfrPtr, bytesPerRow, srcX,
                                  srcY)) {
       return jsi::Value::null();
     }
-#endif
     return dest;
+#endif
   }
 
   JSI_HOST_FUNCTION(makeNonTextureImage) {

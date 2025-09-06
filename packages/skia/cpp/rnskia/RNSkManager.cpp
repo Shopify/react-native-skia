@@ -18,8 +18,8 @@ RNSkManager::RNSkManager(
     jsi::Runtime *jsRuntime,
     std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker,
     std::shared_ptr<RNSkPlatformContext> platformContext)
-    : _jsRuntime(jsRuntime), _jsCallInvoker(jsCallInvoker),
-      _platformContext(platformContext),
+    : _jsRuntime(jsRuntime), _platformContext(platformContext),
+      _jsCallInvoker(jsCallInvoker),
       _viewApi(std::make_shared<RNSkJsiViewApi>(platformContext)) {
 
   // Register main runtime

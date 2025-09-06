@@ -3,7 +3,7 @@ import React from "react";
 
 import { checkImage, docPath } from "../../../__tests__/setup";
 import { dataAssets, importSkia, surface } from "../setup";
-import { Group, Skottie } from "../../components";
+import { Blur, Group, Paint, Skottie } from "../../components";
 
 const legoLoaderJSON = require("./setup/skottie/lego_loader.json");
 const drinksJSON = require("./setup/skottie/drinks.json");
@@ -29,6 +29,29 @@ describe("Skottie", () => {
       </Group>
     );
     checkImage(img, docPath("skottie/skottie-component-lego.png"));
+  });
+  it("Should render Skottie component with raster effect", async () => {
+    const { Skia } = importSkia();
+    const source = JSON.stringify(legoLoaderJSON);
+    const legoAnimation = Skia.Skottie.Make(source);
+    // THIS IS FOR INTERNAL TESTING ONLY
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    legoAnimation.source = source;
+    // END OF INTERNAL TESTING ONLY
+    const img = await surface.draw(
+      <Group
+        transform={[{ scale: 0.5 }]}
+        layer={
+          <Paint>
+            <Blur blur={10} />
+          </Paint>
+        }
+      >
+        <Skottie animation={legoAnimation} frame={41} />
+      </Group>
+    );
+    checkImage(img, docPath("skottie/skottie-component-lego-blur.png"));
   });
   it("Should render Skottie component with drinks animation", async () => {
     const { Skia } = importSkia();

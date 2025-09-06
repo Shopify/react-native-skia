@@ -15,5 +15,6 @@ export * from "./Mask";
 export * from "./Paint";
 export * from "./Blend";
 export * from "./Skottie";
+export * from "./ImageFilter";
 
 export * from "./paragraph";

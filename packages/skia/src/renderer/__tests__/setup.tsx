@@ -174,6 +174,7 @@ export const importSkia = (): typeof SkiaExports => {
   const skia = require("../../skia");
   const renderer = require("../../renderer");
   const offscreen = require("../Offscreen");
+  const nodes = require("../../dom/nodes");
   // TODO: to remove
   const animation = require("../../animation");
   return {
@@ -181,6 +182,7 @@ export const importSkia = (): typeof SkiaExports => {
     ...renderer,
     ...animation,
     ...offscreen,
+    ...nodes,
   };
 };
 
@@ -321,6 +323,14 @@ const serializeSkOjects = (obj: any): any => {
         __typename__: "SkottieAnimation",
         source: obj.source,
         assets: obj.assets,
+      };
+    } else if (obj.__typename__ === "ImageFilter") {
+      if (!obj.source) {
+        throw new Error("ImageFilter must have a source");
+      }
+      return {
+        __typename__: "Function",
+        source: obj.source,
       };
     }
   } else if (obj && typeof obj === "object") {

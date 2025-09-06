@@ -77,7 +77,7 @@ Pod::Spec.new do |s|
     "Christian Falch" => "christian.falch@gmail.com",
     "William Candillon" => "wcandillon@gmail.com"
   }
-  s.platforms    = { :ios => "13.0", :tvos => "13.0", :osx => "11" }
+  s.platforms    = { :ios => "14.0", :tvos => "13.0", :osx => "11" }
   s.source       = { :git => "https://github.com/shopify/react-native-skia/react-native-skia.git", :tag => "#{s.version}" }
 
   s.requires_arc = true
@@ -99,11 +99,11 @@ Pod::Spec.new do |s|
   ]
 
   graphite_exclusions = [
-    'cpp/rnskia/DawnContext.h',
-    'cpp/rnskia/DawnUtils.h',
-    'cpp/rnskia/DawnWindowContext.h', 
-    'cpp/rnskia/DawnWindowContext.cpp',
-    'cpp/rnskia/ImageProvider.h'
+    'cpp/rnskia/RNDawnContext.h',
+    'cpp/rnskia/RNDawnUtils.h',
+    'cpp/rnskia/RNDawnWindowContext.h', 
+    'cpp/rnskia/RNDawnWindowContext.cpp',
+    'cpp/rnskia/RNImageProvider.h'
   ]
   s.exclude_files = graphite_exclusions unless use_graphite 
 

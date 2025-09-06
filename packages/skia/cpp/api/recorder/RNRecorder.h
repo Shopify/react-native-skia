@@ -35,10 +35,10 @@ public:
   }
 
   void pushShader(jsi::Runtime &runtime, const std::string &nodeType,
-                  const jsi::Object &props) {
+                  const jsi::Object &props, int children) {
     if (nodeType == "skShader") {
       commands.push_back(
-          std::make_unique<PushShaderCmd>(runtime, props, variables));
+          std::make_unique<PushShaderCmd>(runtime, props, variables, children));
     } else if (nodeType == "skImageShader") {
       commands.push_back(
           std::make_unique<PushImageShaderCmd>(runtime, props, variables));
@@ -142,6 +142,9 @@ public:
     } else if (nodeType == "skRuntimeShaderImageFilter") {
       commands.push_back(std::make_unique<RuntimeShaderImageFilterCmd>(
           runtime, props, variables));
+    } else if (nodeType == "skImageFilter") {
+      commands.push_back(
+          std::make_unique<ImageFilterCmd>(runtime, props, variables));
     }
   }
 
@@ -419,6 +422,9 @@ public:
           auto *runtimeShaderCmd =
               static_cast<RuntimeShaderImageFilterCmd *>(cmd.get());
           runtimeShaderCmd->pushImageFilter(ctx);
+        } else if (nodeType == "skImageFilter") {
+          auto *imageFilterCmd = static_cast<ImageFilterCmd *>(cmd.get());
+          imageFilterCmd->pushImageFilter(ctx);
         } else {
           throw std::runtime_error("Invalid image filter type: " + nodeType);
         }
@@ -625,6 +631,10 @@ public:
             skottieCmd->draw(ctx);
             break;
           }
+          default:
+            // Context commands (Group, SavePaint, RestorePaint, etc.) are not
+            // handled here
+            break;
           }
 
           ctx->restorePaint();

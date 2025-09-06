@@ -33,12 +33,12 @@ public:
   /**
    Returns the scaled width of the view
    */
-  virtual int getScaledWidth() = 0;
+  virtual int getWidth() = 0;
 
   /**
    Returns the scaled height of the view
    */
-  virtual int getScaledHeight() = 0;
+  virtual int getHeight() = 0;
 
   /**
    Render to a canvas
@@ -69,14 +69,16 @@ protected:
 
 class RNSkOffscreenCanvasProvider : public RNSkCanvasProvider {
 public:
-  RNSkOffscreenCanvasProvider(std::shared_ptr<RNSkPlatformContext> context,
-                              std::function<void()> requestRedraw, float width,
-                              float height)
-      : RNSkCanvasProvider(requestRedraw), _context(context), _width(width),
-        _height(height) {
+  RNSkOffscreenCanvasProvider(
+      const std::shared_ptr<RNSkPlatformContext> &context,
+      std::function<void()> requestRedraw, float width, float height)
+      : RNSkCanvasProvider(std::move(requestRedraw)), _width(width),
+        _height(height), _context(context) {
     _surface = context->makeOffscreenSurface(_width, _height);
     _pd = context->getPixelDensity();
   }
+
+  virtual ~RNSkOffscreenCanvasProvider() = default;
 
   /**
    Returns a snapshot of the current surface/canvas
@@ -104,12 +106,12 @@ public:
   /**
    Returns the scaled width of the view
    */
-  int getScaledWidth() override { return _width; };
+  int getWidth() override { return _width; };
 
   /**
    Returns the scaled height of the view
    */
-  int getScaledHeight() override { return _height; };
+  int getHeight() override { return _height; };
 
   /**
    Render to a canvas
@@ -195,13 +197,23 @@ public:
 
     auto provider = std::make_shared<RNSkOffscreenCanvasProvider>(
         getPlatformContext(), std::bind(&RNSkView::requestRedraw, this),
-        _canvasProvider->getScaledWidth(), _canvasProvider->getScaledHeight());
+        _canvasProvider->getWidth(), _canvasProvider->getHeight());
 
     _renderer->renderImmediate(provider);
     return provider->makeSnapshot(bounds);
   }
 
   std::shared_ptr<RNSkRenderer> getRenderer() { return _renderer; }
+
+  /**
+   Returns the scaled width of the view
+   */
+  int getScaledWidth() { return _canvasProvider->getWidth(); }
+
+  /**
+   Returns the scaled height of the view
+   */
+  int getScaledHeight() { return _canvasProvider->getHeight(); }
 
 protected:
   std::shared_ptr<RNSkPlatformContext> getPlatformContext() {

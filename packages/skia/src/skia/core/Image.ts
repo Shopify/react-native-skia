@@ -29,6 +29,7 @@ export const makeImageFromView = <
     | number
     | React.Component<unknown, unknown>
     | React.ComponentClass<unknown>
+    | null
 >(
   viewRef: React.RefObject<T>,
   callback:

@@ -6,7 +6,8 @@
 MetalWindowContext::MetalWindowContext(GrDirectContext *directContext,
                                        id<MTLDevice> device,
                                        id<MTLCommandQueue> commandQueue,
-                                       CALayer *layer, int width, int height)
+                                       CALayer *layer, int width, int height,
+                                       bool useP3ColorSpace)
     : _directContext(directContext), _commandQueue(commandQueue) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
@@ -24,9 +25,11 @@ MetalWindowContext::MetalWindowContext(GrDirectContext *directContext,
   _layer.contentsGravity = kCAGravityBottomLeft;
   _layer.drawableSize = CGSizeMake(width, height);
   BOOL supportsWideColor = NO;
-  if (@available(iOS 10.0, *)) {
-    supportsWideColor =
-        [UIScreen mainScreen].traitCollection.displayGamut == UIDisplayGamutP3;
+  if (useP3ColorSpace) {
+    if (@available(iOS 10.0, *)) {
+      supportsWideColor = [UIScreen mainScreen].traitCollection.displayGamut ==
+                          UIDisplayGamutP3;
+    }
   }
   if (supportsWideColor) {
     CGColorSpaceRef colorSpace =

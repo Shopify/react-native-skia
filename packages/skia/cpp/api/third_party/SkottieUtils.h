@@ -21,21 +21,23 @@
 struct SkSize;
 
 namespace skottie {
-    class MarkerObserver;
+class MarkerObserver;
 
-inline void PropertyObserver::onColorProperty(
-    const char node_name[], const LazyHandle<ColorPropertyHandle> &) {}
+inline void
+PropertyObserver::onColorProperty(const char node_name[],
+                                  const LazyHandle<ColorPropertyHandle> &) {}
 
 inline void PropertyObserver::onOpacityProperty(
     const char node_name[], const LazyHandle<OpacityPropertyHandle> &) {}
-inline void PropertyObserver::onTextProperty(const char node_name[],
-                                      const LazyHandle<TextPropertyHandle> &) {}
+inline void
+PropertyObserver::onTextProperty(const char node_name[],
+                                 const LazyHandle<TextPropertyHandle> &) {}
 inline void PropertyObserver::onTransformProperty(
     const char node_name[], const LazyHandle<TransformPropertyHandle> &) {}
-inline void PropertyObserver::onEnterNode(const char node_name[], NodeType node_type) {
-}
+inline void PropertyObserver::onEnterNode(const char node_name[],
+                                          NodeType node_type) {}
 inline void PropertyObserver::onLeavingNode(const char node_name[],
-                                     NodeType node_type) {}
+                                            NodeType node_type) {}
 
 } // namespace skottie
 
@@ -169,4 +171,3 @@ private:
 };
 
 } // namespace RNSkia
-

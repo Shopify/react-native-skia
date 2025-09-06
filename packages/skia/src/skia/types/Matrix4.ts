@@ -357,6 +357,22 @@ export const convertToColumnMajor = (rowMajorMatrix: Matrix4) => {
 /**
  * @worklet
  */
+export const convertToColumnMajor3 = (rowMajorMatrix: Matrix3 | number[]) => {
+  "worklet";
+
+  const colMajorMatrix = new Array<number>(9);
+  const size = 3;
+  for (let row = 0; row < size; row++) {
+    for (let col = 0; col < size; col++) {
+      colMajorMatrix[col * size + row] = rowMajorMatrix[row * size + col];
+    }
+  }
+  return colMajorMatrix as unknown as Matrix3;
+};
+
+/**
+ * @worklet
+ */
 export const convertToAffineMatrix = (m4: Matrix4) => {
   "worklet";
   // Extracting the relevant components from the 4x4 matrix

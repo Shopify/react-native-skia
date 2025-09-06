@@ -12,7 +12,10 @@ package com.facebook.react.viewmanagers;
 import android.view.View;
 import androidx.annotation.Nullable;
 
+import com.shopify.reactnative.skia.SkiaPictureView;
+
 public interface SkiaPictureViewManagerInterface<T extends View> {
   void setDebug(T view, boolean value);
   void setOpaque(T view, boolean value);
+  void setColorSpace(SkiaPictureView view, @Nullable String value);
 }

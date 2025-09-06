@@ -32,6 +32,7 @@ import {
   SpeedTest,
   Video,
   Chat,
+  LiquidGlass,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
@@ -45,6 +46,7 @@ const linking: LinkingOptions<StackParamList> = {
       Home: "",
       Vertices: "vertices",
       API: "api",
+      LiquidGlass: "liquid-glass",
       Breathe: "breathe",
       Filters: "filters",
       Gooey: "gooey",
@@ -132,6 +134,7 @@ const App = () => {
               }}
             />
             <Stack.Screen name="API" component={API} />
+            <Stack.Screen name="LiquidGlass" component={LiquidGlass} />
             <Stack.Screen name="Breathe" component={Breathe} />
             <Stack.Screen
               name="Chess"

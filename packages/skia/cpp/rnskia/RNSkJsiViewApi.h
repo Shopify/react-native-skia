@@ -232,10 +232,45 @@ public:
         });
   }
 
+  JSI_HOST_FUNCTION(size) {
+    if (count != 1) {
+      _platformContext->raiseError(std::string(
+          "size: Expected 1 argument, got " + std::to_string(count) + "."));
+      return jsi::Value::undefined();
+    }
+
+    if (!arguments[0].isNumber()) {
+      _platformContext->raiseError("size: First argument must be a number");
+      return jsi::Value::undefined();
+    }
+
+    // find Skia View
+    int nativeId = arguments[0].asNumber();
+    std::shared_ptr<RNSkView> view = ViewRegistry::getInstance().withViewInfo(
+        nativeId,
+        [](std::shared_ptr<RNSkViewInfo> info) { return info->view; });
+    if (view != nullptr) {
+      auto pixelDensity = _platformContext->getPixelDensity();
+      auto sizeObj = jsi::Object(runtime);
+      sizeObj.setProperty(runtime, "width",
+                          view->getScaledWidth() / pixelDensity);
+      sizeObj.setProperty(runtime, "height",
+                          view->getScaledHeight() / pixelDensity);
+      return sizeObj;
+    }
+
+    // Return default size if view not found
+    auto sizeObj = jsi::Object(runtime);
+    sizeObj.setProperty(runtime, "width", 0);
+    sizeObj.setProperty(runtime, "height", 0);
+    return sizeObj;
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setJsiProperty),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, requestRedraw),
                        JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshotAsync),
-                       JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshot))
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshot),
+                       JSI_EXPORT_FUNC(RNSkJsiViewApi, size))
 
   /**
    * Constructor

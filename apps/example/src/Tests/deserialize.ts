@@ -1,4 +1,4 @@
-import { Skia } from "@shopify/react-native-skia";
+import { Skia, TileMode } from "@shopify/react-native-skia";
 import React from "react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -100,9 +100,10 @@ const parseProp = (value: any, assets: Assets): any => {
     } else if (value.__typename__ === "Function") {
       // eslint-disable-next-line no-eval
       return eval(
-        `(function Main(){ const {Skia} = this; return (${value.source}); })`
+        `(function Main(){ const {Skia, TileMode} = this; return (${value.source}); })`
       ).call({
         Skia,
+        TileMode,
       });
     }
   } else if (Array.isArray(value)) {
