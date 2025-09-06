@@ -42,6 +42,17 @@ private:
   JSI_API_TYPENAME(TYPENAME)                                                   \
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(CLASS, __typename__))
 
+/**
+ * Helper macro to create a JSI object from a host object and initialize memory pressure.
+ * Usage: CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, hostObject)
+ */
+#define CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, hostObject)           \
+  ([&]() {                                                                     \
+    auto jsObj = jsi::Object::createFromHostObject(runtime, hostObject);       \
+    hostObject->initializeMemoryPressure(runtime, jsObj);                      \
+    return jsObj;                                                              \
+  }())
+
 template <typename T> class JsiSkWrappingHostObject : public JsiSkHostObject {
 public:
   /**
@@ -63,8 +74,36 @@ public:
 
   /**
    * Updates the inner object with a new version of the object.
+   * Also updates memory pressure if applicable.
    */
-  void setObject(T object) { _object = object; }
+  void setObject(T object) { 
+    _object = object;
+    updateMemoryPressure();
+  }
+  
+  /**
+   * Called to update the external memory pressure for this object.
+   * Should be called after object creation and after any significant
+   * modifications to the wrapped object.
+   * Note: This requires being called from a context where we have access
+   * to the runtime and JSI object.
+   */
+  void updateMemoryPressure() {
+    // This will be called from methods that have access to runtime
+    // The actual implementation needs to happen in the concrete classes
+  }
+  
+  /**
+   * Initialize memory pressure for this object.
+   * Should be called right after the host object is wrapped in a JSI object.
+   */
+  void initializeMemoryPressure(jsi::Runtime& runtime, const jsi::Object& jsObject) {
+    if (!_isDisposed) {
+      size_t pressure = getExternalMemorySize();
+      jsObject.setExternalMemoryPressure(runtime, pressure);
+      _lastMemoryPressure = pressure;
+    }
+  }
 
   /**
    * Dispose function that can be exposed to JS by using the JSI_API_TYPENAME
@@ -81,6 +120,18 @@ protected:
    * This method will only be called once for each instance of this class.
    */
   virtual void releaseResources() = 0;
+  
+  /**
+   * Override to provide the external memory size of the wrapped object.
+   * This is used to inform the JS engine about memory pressure.
+   * Return 0 if the object doesn't use significant external memory.
+   */
+  virtual size_t getExternalMemorySize() const { return 0; }
+  
+  /**
+   * Track last memory pressure to avoid redundant updates.
+   */
+  mutable size_t _lastMemoryPressure = 0;
 
 private:
   /**

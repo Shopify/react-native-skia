@@ -35,6 +35,9 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
+// Macro to automatically update memory pressure after path modification
+#define UPDATE_PATH_MEMORY_PRESSURE() updatePathMemoryPressure(runtime, thisValue)
+
 class JsiSkPath : public JsiSkWrappingSharedPtrHostObject<SkPath> {
 private:
   static const int MOVE = 0;
@@ -64,6 +67,7 @@ public:
     } else {
       getObject()->addPath(*src, *matrix, mode);
     }
+    UPDATE_PATH_MEMORY_PRESSURE();
     return thisValue.getObject(runtime);
   }
 
@@ -72,6 +76,7 @@ public:
     auto start = arguments[1].asNumber();
     auto sweep = arguments[2].asNumber();
     getObject()->addArc(*rect, start, sweep);
+    UPDATE_PATH_MEMORY_PRESSURE();
     return thisValue.getObject(runtime);
   }
 
@@ -83,6 +88,7 @@ public:
     }
     unsigned startIndex = count < 3 ? 0 : arguments[2].asNumber();
     auto result = getObject()->addOval(*rect, direction, startIndex);
+    UPDATE_PATH_MEMORY_PRESSURE();
     return thisValue.getObject(runtime);
   }
 
@@ -99,6 +105,7 @@ public:
     }
     auto p = SkSpan(points.data(), points.size());
     getObject()->addPoly(p, close);
+    UPDATE_PATH_MEMORY_PRESSURE();
     return thisValue.getObject(runtime);
   }
 
@@ -362,6 +369,7 @@ public:
     SkScalar x = arguments[0].asNumber();
     SkScalar y = arguments[1].asNumber();
     getObject()->moveTo(x, y);
+    UPDATE_PATH_MEMORY_PRESSURE();
     return thisValue.getObject(runtime);
   }
 
@@ -375,6 +383,7 @@ public:
     SkScalar x = arguments[0].asNumber();
     SkScalar y = arguments[1].asNumber();
     getObject()->lineTo(x, y);
+    UPDATE_PATH_MEMORY_PRESSURE();
     return thisValue.getObject(runtime);
   }
 
@@ -393,6 +402,7 @@ public:
     auto x3 = arguments[4].asNumber();
     auto y3 = arguments[5].asNumber();
     getObject()->cubicTo(x1, y1, x2, y2, x3, y3);
+    UPDATE_PATH_MEMORY_PRESSURE();
     return thisValue.getObject(runtime);
   }
 
@@ -409,6 +419,7 @@ public:
 
   JSI_HOST_FUNCTION(reset) {
     getObject()->reset();
+    UPDATE_PATH_MEMORY_PRESSURE();
     return thisValue.getObject(runtime);
   }
 
@@ -473,8 +484,8 @@ public:
 
   JSI_HOST_FUNCTION(copy) {
     const auto *path = getObject().get();
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPath>(getContext(), SkPath(*path)));
+    auto hostObject = std::make_shared<JsiSkPath>(getContext(), SkPath(*path));
+    return CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, hostObject);
   }
 
   JSI_HOST_FUNCTION(op) {
@@ -509,8 +520,8 @@ public:
     if (!succeed) {
       return nullptr;
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPath>(getContext(), std::move(result)));
+    auto hostObject = std::make_shared<JsiSkPath>(getContext(), std::move(result));
+    return CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, hostObject);
   }
   JSI_HOST_FUNCTION(toCmds) {
     auto path = *getObject();
@@ -636,16 +647,48 @@ public:
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             const SkPath &path) {
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPath>(std::move(context), path));
+    auto hostObject = std::make_shared<JsiSkPath>(std::move(context), path);
+    return CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, hostObject);
   }
 
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             SkPath &&path) {
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkPath>(std::move(context), std::move(path)));
+    auto hostObject = std::make_shared<JsiSkPath>(std::move(context), std::move(path));
+    return CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, hostObject);
+  }
+  
+  /**
+   * Update memory pressure for this path object.
+   * Called after any operation that modifies the path.
+   */
+  void updatePathMemoryPressure(jsi::Runtime &runtime, const jsi::Value &thisValue) {
+    if (thisValue.isObject()) {
+      size_t newPressure = getExternalMemorySize();
+      if (newPressure != _lastMemoryPressure) {
+        thisValue.asObject(runtime).setExternalMemoryPressure(runtime, newPressure);
+        _lastMemoryPressure = newPressure;
+      }
+    }
+  }
+  
+protected:
+  /**
+   * Calculate the approximate memory size of the SkPath.
+   * This is a heuristic based on the number of points and verbs.
+   */
+  size_t getExternalMemorySize() const override {
+    if (!getObject()) return 0;
+    
+    // SkPath contains verbs and points
+    // Each verb is approximately 1 byte, each point is 2 floats (8 bytes)
+    // Plus some overhead for the path structure itself
+    size_t baseSize = sizeof(SkPath);
+    size_t pointCount = getObject()->countPoints();
+    size_t verbCount = getObject()->countVerbs();
+    
+    // Approximate: base + points * 8 + verbs * 1 + some overhead
+    return baseSize + (pointCount * 8) + verbCount + 64;
   }
 };
 
