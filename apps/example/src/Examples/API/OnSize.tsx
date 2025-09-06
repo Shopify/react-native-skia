@@ -21,10 +21,6 @@ export const OnSize = () => {
       <Canvas onSize={size} style={StyleSheet.absoluteFill}>
         <Rect rect={redRect} color="red" />
       </Canvas>
-      <Text>
-        Skia version:{" "}
-        {require("@shopify/react-native-skia/package.json").version}
-      </Text>
       <TextInput
         placeholder={`
 Hello

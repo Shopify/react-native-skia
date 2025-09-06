@@ -16,6 +16,7 @@
 #include <jsi/jsi.h>
 
 namespace RNSkia {
+
 namespace jsi = facebook::jsi;
 
 using RNSkViewInfo = struct RNSkViewInfo {
@@ -100,16 +101,24 @@ public:
     // Safely execute operations while holding the registry lock
     ViewRegistry::getInstance().withViewInfo(
         nativeId, [&](std::shared_ptr<RNSkViewInfo> info) {
-          info->props.insert_or_assign(
-              arguments[1].asString(runtime).utf8(runtime),
-              RNJsi::ViewProperty(runtime, arguments[2]));
+          auto name = arguments[1].asString(runtime).utf8(runtime);
+          if (name == "onSize" && isSharedValue(runtime, arguments[2])) {
+            jsi::Object size(runtime);
+            size.setProperty(runtime, "width", info->view->getScaledWidth());
+            size.setProperty(runtime, "height", info->view->getScaledHeight());
+			arguments[2].asObject(runtime).setProperty(runtime, "value", size);
+          } else {
+            info->props.insert_or_assign(
+                arguments[1].asString(runtime).utf8(runtime),
+                RNJsi::ViewProperty(runtime, arguments[2]));
 
-          // Now let's see if we have a view that we can update
-          if (info->view != nullptr) {
-            // Update view!
-            info->view->setNativeId(nativeId);
-            info->view->setJsiProperties(info->props);
-            info->props.clear();
+            // Now let's see if we have a view that we can update
+            if (info->view != nullptr) {
+              // Update view!
+              info->view->setNativeId(nativeId);
+              info->view->setJsiProperties(info->props);
+              info->props.clear();
+            }
           }
           return nullptr; // Return type for template deduction
         });
