@@ -22,13 +22,7 @@ const drawOnscreen = (
 ) => {
   "worklet";
   if (onSize) {
-    const size = SkiaViewApi.size(nativeId);
-    if (
-      size.width !== onSize.value.width ||
-      size.height !== onSize.value.height
-    ) {
-      onSize.value = size;
-    }
+    SkiaViewApi.setJsiProperty(nativeId, "onSize", onSize);
   }
   const rec = Skia.PictureRecorder();
   const canvas = rec.beginRecording();

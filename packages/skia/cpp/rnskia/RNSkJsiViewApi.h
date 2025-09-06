@@ -106,7 +106,7 @@ public:
             jsi::Object size(runtime);
             size.setProperty(runtime, "width", info->view->getScaledWidth());
             size.setProperty(runtime, "height", info->view->getScaledHeight());
-			arguments[2].asObject(runtime).setProperty(runtime, "value", size);
+            arguments[2].asObject(runtime).setProperty(runtime, "value", size);
           } else {
             info->props.insert_or_assign(
                 arguments[1].asString(runtime).utf8(runtime),

@@ -7,8 +7,9 @@ import React, {
   forwardRef,
 } from "react";
 import type { LayoutChangeEvent } from "react-native";
+import type { SharedValue } from "react-native-reanimated";
 
-import type { SkRect, SkPicture, SkImage } from "../skia/types";
+import type { SkRect, SkPicture, SkImage, SkSize } from "../skia/types";
 import { JsiSkSurface } from "../skia/web/JsiSkSurface";
 import { Platform } from "../Platform";
 import type { ISkiaViewApiWeb } from "../specs/NativeSkiaModule.web";
@@ -203,6 +204,7 @@ const pd = Platform.PixelRatio;
 
 export interface SkiaPictureViewHandle {
   setPicture(picture: SkPicture): void;
+  setOnSize(sharedValue: SharedValue<SkSize>): void;
   getSize(): { width: number; height: number };
   redraw(): void;
   makeImageSnapshot(rect?: SkRect): SkImage | null;
@@ -212,6 +214,7 @@ export const SkiaPictureView = forwardRef<
   SkiaPictureViewHandle,
   SkiaPictureViewNativeProps
 >((props, ref) => {
+  const onSizeRef = useRef<SharedValue<SkSize> | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const renderer = useRef<Renderer | null>(null);
   const redrawRequestsRef = useRef(0);
@@ -239,6 +242,12 @@ export const SkiaPictureView = forwardRef<
     [redraw]
   );
 
+  const setOnSize = useCallback((sharedValue: SharedValue<SkSize>) => {
+    if (renderer.current) {
+      onSizeRef.current = sharedValue;
+    }
+  }, []);
+
   const makeImageSnapshot = useCallback((rect?: SkRect) => {
     if (renderer.current && pictureRef.current) {
       return renderer.current.makeImageSnapshot(pictureRef.current, rect);
@@ -264,6 +273,9 @@ export const SkiaPictureView = forwardRef<
           props.__destroyWebGLContextAfterRender === true
             ? new StaticWebGLRenderer(canvas, pd)
             : new WebGLRenderer(canvas, pd);
+        if (onSizeRef.current) {
+          onSizeRef.current.value = getSize();
+        }
         if (pictureRef.current) {
           renderer.current.draw(pictureRef.current);
         }
@@ -272,18 +284,19 @@ export const SkiaPictureView = forwardRef<
         onLayout(evt);
       }
     },
-    [onLayout, props.__destroyWebGLContextAfterRender]
+    [getSize, onLayout, props.__destroyWebGLContextAfterRender]
   );
 
   useImperativeHandle(
     ref,
     () => ({
       setPicture,
+      setOnSize,
       getSize,
       redraw,
       makeImageSnapshot,
     }),
-    [setPicture, getSize, redraw, makeImageSnapshot]
+    [setPicture, setOnSize, getSize, redraw, makeImageSnapshot]
   );
 
   useEffect(() => {

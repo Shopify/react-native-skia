@@ -7,7 +7,7 @@ import { StaticContainer } from "./StaticContainer";
 export const createContainer = (
   Skia: Skia,
   nativeId: number,
-  onSize?: SharedValue<SkSize>
+  _onSize?: SharedValue<SkSize>
 ) => {
-  return new StaticContainer(Skia, nativeId, onSize);
+  return new StaticContainer(Skia, nativeId);
 };
