@@ -95,46 +95,47 @@ public:
     std::vector<para::LineMetrics> metrics;
     getObject()->getLineMetrics(metrics);
     auto returnValue = jsi::Array(runtime, metrics.size());
-    
+
     for (size_t i = 0; i < metrics.size(); ++i) {
       auto lineMetrics = jsi::Object(runtime);
-      
+
       // Text indices
-      lineMetrics.setProperty(runtime, "startIndex", 
+      lineMetrics.setProperty(runtime, "startIndex",
                               static_cast<double>(metrics[i].fStartIndex));
-      lineMetrics.setProperty(runtime, "endIndex", 
+      lineMetrics.setProperty(runtime, "endIndex",
                               static_cast<double>(metrics[i].fEndIndex));
-      lineMetrics.setProperty(runtime, "endExcludingWhitespaces", 
-                              static_cast<double>(metrics[i].fEndExcludingWhitespaces));
-      lineMetrics.setProperty(runtime, "endIncludingNewline", 
-                              static_cast<double>(metrics[i].fEndIncludingNewline));
-      
+      lineMetrics.setProperty(
+          runtime, "endExcludingWhitespaces",
+          static_cast<double>(metrics[i].fEndExcludingWhitespaces));
+      lineMetrics.setProperty(
+          runtime, "endIncludingNewline",
+          static_cast<double>(metrics[i].fEndIncludingNewline));
+
       // Line break info
-      lineMetrics.setProperty(runtime, "isHardBreak", 
-                              metrics[i].fHardBreak);
-      
+      lineMetrics.setProperty(runtime, "isHardBreak", metrics[i].fHardBreak);
+
       // Vertical metrics
-      lineMetrics.setProperty(runtime, "ascent", 
+      lineMetrics.setProperty(runtime, "ascent",
                               static_cast<double>(metrics[i].fAscent));
-      lineMetrics.setProperty(runtime, "descent", 
+      lineMetrics.setProperty(runtime, "descent",
                               static_cast<double>(metrics[i].fDescent));
-      lineMetrics.setProperty(runtime, "height", 
+      lineMetrics.setProperty(runtime, "height",
                               static_cast<double>(metrics[i].fHeight));
-      
+
       // Horizontal metrics
-      lineMetrics.setProperty(runtime, "width", 
+      lineMetrics.setProperty(runtime, "width",
                               static_cast<double>(metrics[i].fWidth));
-      lineMetrics.setProperty(runtime, "left", 
+      lineMetrics.setProperty(runtime, "left",
                               static_cast<double>(metrics[i].fLeft));
-      
+
       // Position
-      lineMetrics.setProperty(runtime, "baseline", 
+      lineMetrics.setProperty(runtime, "baseline",
                               static_cast<double>(metrics[i].fBaseline));
-      
+
       // Line number
-      lineMetrics.setProperty(runtime, "lineNumber", 
+      lineMetrics.setProperty(runtime, "lineNumber",
                               static_cast<double>(metrics[i].fLineNumber));
-      
+
       returnValue.setValueAtIndex(runtime, i, lineMetrics);
     }
     return returnValue;

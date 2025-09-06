@@ -41,8 +41,9 @@ public:
     auto uniformsData = processUniforms(source, props.uniforms);
 
     std::vector<sk_sp<SkShader>> childrenShaders = ctx->popShaders(children);
-    auto shader = source->makeShader(std::move(uniformsData), childrenShaders.data(),
-                                     childrenShaders.size(), &m3);
+    auto shader =
+        source->makeShader(std::move(uniformsData), childrenShaders.data(),
+                           childrenShaders.size(), &m3);
 
     ctx->shaders.push_back(shader);
   }

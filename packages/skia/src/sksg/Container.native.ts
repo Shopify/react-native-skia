@@ -18,17 +18,10 @@ const nativeDrawOnscreen = (
   onSize?: SharedValue<SkSize>
 ) => {
   "worklet";
-
-  //const start = performance.now();
   if (onSize) {
-    const size = SkiaViewApi.size(nativeId);
-    if (
-      size.width !== onSize.value.width ||
-      size.height !== onSize.value.height
-    ) {
-      onSize.value = size;
-    }
+    SkiaViewApi.setJsiProperty(nativeId, "onSize", onSize);
   }
+  //const start = performance.now();
   const picture = recorder.play();
   //const end = performance.now();
   //console.log("Recording time: ", end - start);

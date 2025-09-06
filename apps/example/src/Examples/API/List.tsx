@@ -106,6 +106,10 @@ export const examples = [
     screen: "OnLayout",
     title: "🎛️ OnLayout",
   },
+  {
+    screen: "OnSize",
+    title: "📏 OnSize",
+  },
 ] as const;
 
 const styles = StyleSheet.create({

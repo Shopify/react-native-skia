@@ -122,7 +122,7 @@ public:
   std::vector<sk_sp<SkShader>> popShaders(int count) {
     std::vector<sk_sp<SkShader>> result;
     int actualCount = std::min(count, static_cast<int>(shaders.size()));
-    
+
     if (actualCount > 0) {
       // Get the last 'actualCount' shaders
       auto start = shaders.end() - actualCount;
@@ -130,7 +130,7 @@ public:
       // Remove them from the original vector
       shaders.erase(start, shaders.end());
     }
-    
+
     return result;
   }
 
