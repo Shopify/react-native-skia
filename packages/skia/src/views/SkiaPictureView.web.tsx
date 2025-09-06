@@ -7,9 +7,8 @@ import React, {
   forwardRef,
 } from "react";
 import type { LayoutChangeEvent } from "react-native";
-import type { SharedValue } from "react-native-reanimated";
 
-import type { SkRect, SkPicture, SkImage, SkSize } from "../skia/types";
+import type { SkRect, SkPicture, SkImage } from "../skia/types";
 import { JsiSkSurface } from "../skia/web/JsiSkSurface";
 import { Platform } from "../Platform";
 import type { ISkiaViewApiWeb } from "../specs/NativeSkiaModule.web";
@@ -213,7 +212,6 @@ export const SkiaPictureView = forwardRef<
   SkiaPictureViewHandle,
   SkiaPictureViewNativeProps
 >((props, ref) => {
-  const onSizeRef = useRef<SharedValue<SkSize> | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const renderer = useRef<Renderer | null>(null);
   const redrawRequestsRef = useRef(0);
@@ -266,9 +264,6 @@ export const SkiaPictureView = forwardRef<
           props.__destroyWebGLContextAfterRender === true
             ? new StaticWebGLRenderer(canvas, pd)
             : new WebGLRenderer(canvas, pd);
-        if (onSizeRef.current) {
-          onSizeRef.current.value = getSize();
-        }
         if (pictureRef.current) {
           renderer.current.draw(pictureRef.current);
         }
@@ -277,7 +272,7 @@ export const SkiaPictureView = forwardRef<
         onLayout(evt);
       }
     },
-    [getSize, onLayout, props.__destroyWebGLContextAfterRender]
+    [onLayout, props.__destroyWebGLContextAfterRender]
   );
 
   useImperativeHandle(

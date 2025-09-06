@@ -1,6 +1,6 @@
 import { Canvas, Rect, rect } from "@shopify/react-native-skia";
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { useDerivedValue, useSharedValue } from "react-native-reanimated";
 
