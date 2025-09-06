@@ -204,7 +204,6 @@ const pd = Platform.PixelRatio;
 
 export interface SkiaPictureViewHandle {
   setPicture(picture: SkPicture): void;
-  setOnSize(sharedValue: SharedValue<SkSize>): void;
   getSize(): { width: number; height: number };
   redraw(): void;
   makeImageSnapshot(rect?: SkRect): SkImage | null;
@@ -241,12 +240,6 @@ export const SkiaPictureView = forwardRef<
     },
     [redraw]
   );
-
-  const setOnSize = useCallback((sharedValue: SharedValue<SkSize>) => {
-    if (renderer.current) {
-      onSizeRef.current = sharedValue;
-    }
-  }, []);
 
   const makeImageSnapshot = useCallback((rect?: SkRect) => {
     if (renderer.current && pictureRef.current) {
@@ -291,12 +284,11 @@ export const SkiaPictureView = forwardRef<
     ref,
     () => ({
       setPicture,
-      setOnSize,
       getSize,
       redraw,
       makeImageSnapshot,
     }),
-    [setPicture, setOnSize, getSize, redraw, makeImageSnapshot]
+    [setPicture, getSize, redraw, makeImageSnapshot]
   );
 
   useEffect(() => {

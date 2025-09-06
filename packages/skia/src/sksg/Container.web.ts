@@ -14,16 +14,8 @@ import { Container, StaticContainer } from "./StaticContainer";
 import "../skia/NativeSetup";
 import "../views/api";
 
-const drawOnscreen = (
-  Skia: Skia,
-  nativeId: number,
-  recording: Recording,
-  onSize?: SharedValue<SkSize>
-) => {
+const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   "worklet";
-  if (onSize) {
-    SkiaViewApi.setJsiProperty(nativeId, "onSize", onSize);
-  }
   const rec = Skia.PictureRecorder();
   const canvas = rec.beginRecording();
   //const start = performance.now();
@@ -39,11 +31,7 @@ const drawOnscreen = (
 class ReanimatedContainer extends Container {
   private mapperId: number | null = null;
 
-  constructor(
-    Skia: Skia,
-    private nativeId: number,
-    private onSize?: SharedValue<SkSize>
-  ) {
+  constructor(Skia: Skia, private nativeId: number) {
     super(Skia);
   }
 
@@ -69,20 +57,20 @@ class ReanimatedContainer extends Container {
         drawOnscreen(Skia, nativeId, recording!);
       }, Array.from(animationValues));
     }
-    Rea.runOnUI((onSize?: SharedValue<SkSize>) => {
+    Rea.runOnUI(() => {
       "worklet";
-      drawOnscreen(Skia, nativeId, recording!, onSize);
-    })(this.onSize);
+      drawOnscreen(Skia, nativeId, recording!);
+    })();
   }
 }
 
 export const createContainer = (
   Skia: Skia,
   nativeId: number,
-  onSize?: SharedValue<SkSize>
+  _onSize?: SharedValue<SkSize>
 ) => {
   if (HAS_REANIMATED_3 && nativeId !== -1) {
-    return new ReanimatedContainer(Skia, nativeId, onSize);
+    return new ReanimatedContainer(Skia, nativeId);
   } else {
     return new StaticContainer(Skia, nativeId);
   }
