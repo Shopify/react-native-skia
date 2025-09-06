@@ -1,5 +1,6 @@
 import type { FC, RefObject } from "react";
 import React, {
+  useCallback,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
@@ -8,6 +9,7 @@ import React, {
   useState,
 } from "react";
 import type {
+  LayoutChangeEvent,
   MeasureInWindowOnSuccessCallback,
   MeasureOnSuccessCallback,
   View,
@@ -20,6 +22,7 @@ import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeCompon
 import type { SkImage, SkRect, SkSize } from "../skia/types";
 import { SkiaSGRoot } from "../sksg/Reconciler";
 import { Skia } from "../skia";
+import { Platform } from "../Platform";
 
 export interface CanvasRef extends FC<CanvasProps> {
   makeImageSnapshot(rect?: SkRect): SkImage;
@@ -127,6 +130,19 @@ export const Canvas = ({
       } as CanvasRef)
   );
 
+  const onLayoutWeb = useCallback(
+    (e: LayoutChangeEvent) => {
+      if (onLayout) {
+        onLayout(e);
+      }
+      if (Platform.OS === "web" && onSize) {
+        const { width, height } = e.nativeEvent.layout;
+        onSize.value = { width, height };
+      }
+    },
+    [onLayout, onSize]
+  );
+
   return (
     <SkiaPictureViewNativeComponent
       ref={viewRef}
@@ -135,6 +151,7 @@ export const Canvas = ({
       debug={debug}
       opaque={opaque}
       colorSpace={colorSpace}
+      onLayout={onLayoutWeb}
       {...viewProps}
     />
   );

@@ -21,6 +21,7 @@ import { FreezeExample } from "./Freeze";
 import { Touch } from "./Touch";
 import { PictureViewExample } from "./PictureView";
 import { OnLayoutDemo } from "./OnLayout";
+import { OnSize } from "./OnSize";
 import { Snapshot } from "./Snapshot";
 import { IconsExample } from "./Icons";
 import { FontMgr } from "./FontMgr";
@@ -214,6 +215,13 @@ export const API = () => {
         component={OnLayoutDemo}
         options={{
           title: "🎛️ OnLayout",
+        }}
+      />
+      <Stack.Screen
+        name="OnSize"
+        component={OnSize}
+        options={{
+          title: "📏 OnSize",
         }}
       />
     </Stack.Navigator>
