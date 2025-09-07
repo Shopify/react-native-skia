@@ -43,8 +43,8 @@ public:
 
   JSI_HOST_FUNCTION(finishRecordingAsPicture) {
     auto picture = getObject()->finishRecordingAsPicture();
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPicture>(getContext(), picture));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkPicture,
+                                                       getContext(), picture);
   }
 
   EXPORT_JSI_API_TYPENAME(JsiSkPictureRecorder, PictureRecorder)

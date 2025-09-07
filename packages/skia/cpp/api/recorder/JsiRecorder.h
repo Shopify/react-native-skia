@@ -58,8 +58,8 @@ public:
     DrawingCtx ctx(canvas);
     getObject()->play(&ctx);
     auto picture = pictureRecorder.finishRecordingAsPicture();
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPicture>(getContext(), picture));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkPicture,
+                                                       getContext(), picture);
   }
 
   JSI_HOST_FUNCTION(applyUpdates) {

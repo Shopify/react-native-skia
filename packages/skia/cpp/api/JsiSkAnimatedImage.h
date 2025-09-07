@@ -31,7 +31,8 @@ public:
   // TODO-API: Properties?
   JSI_HOST_FUNCTION(getCurrentFrame) {
     auto image = getObject()->getCurrentFrame();
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkImage, getContext(), std::move(image));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, JsiSkImage, getContext(), std::move(image));
   }
 
   JSI_HOST_FUNCTION(getFrameCount) {

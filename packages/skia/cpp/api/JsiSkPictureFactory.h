@@ -35,8 +35,8 @@ public:
         SkData::MakeWithCopy(buffer.data(runtime), buffer.size(runtime));
     auto picture = SkPicture::MakeFromData(data.get());
     if (picture != nullptr) {
-      return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkPicture>(getContext(), picture));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkPicture,
+                                                         getContext(), picture);
     } else {
       return jsi::Value::undefined();
     }

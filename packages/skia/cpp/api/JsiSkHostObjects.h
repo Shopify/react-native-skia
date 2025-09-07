@@ -42,15 +42,17 @@ private:
   JSI_API_TYPENAME(TYPENAME)                                                   \
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(CLASS, __typename__))
 
-#define JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, hostObjectClass, context, object) \
-  [&]() { \
-    auto hostObject = std::make_shared<hostObjectClass>(context, std::move(object)); \
-    auto result = jsi::Object::createFromHostObject(runtime, hostObject); \
-    auto memoryPressure = hostObject->getMemoryPressure(); \
-    if (memoryPressure > 0) { \
-      result.setExternalMemoryPressure(runtime, memoryPressure); \
-    } \
-    return result; \
+#define JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, hostObjectClass,  \
+                                                    context, object)           \
+  [&]() {                                                                      \
+    auto hostObject =                                                          \
+        std::make_shared<hostObjectClass>(context, std::move(object));         \
+    auto result = jsi::Object::createFromHostObject(runtime, hostObject);      \
+    auto memoryPressure = hostObject->getMemoryPressure();                     \
+    if (memoryPressure > 0) {                                                  \
+      result.setExternalMemoryPressure(runtime, memoryPressure);               \
+    }                                                                          \
+    return result;                                                             \
   }()
 
 template <typename T> class JsiSkWrappingHostObject : public JsiSkHostObject {
@@ -69,8 +71,8 @@ public:
    * Throws if the object has been disposed.
    * @return Underlying object
    */
-  T getObject() { return validateObject(); }
-  const T getObject() const { return validateObject(); }
+  T getObject() { return _object; }
+  const T getObject() const { return _object; }
 
   /**
    * Updates the inner object with a new version of the object.
@@ -94,24 +96,9 @@ public:
 
 private:
   /**
-   * Validates that _object was not disposed and returns it.
-   */
-  T validateObject() const {
-    if (_isDisposed) {
-      throw std::runtime_error("Attempted to access a disposed object.");
-    }
-    return _object;
-  }
-
-  /**
    * Wrapped object.
    */
   T _object;
-
-  /**
-   * Resource disposed flag.
-   */
-  std::atomic<bool> _isDisposed = {false};
 };
 
 template <typename T>

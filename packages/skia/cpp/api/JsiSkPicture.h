@@ -67,5 +67,15 @@ public:
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPicture, makeShader),
                        JSI_EXPORT_FUNC(JsiSkPicture, serialize),
                        JSI_EXPORT_FUNC(JsiSkPicture, dispose))
+
+  size_t getMemoryPressure() const override {
+    auto picture = getObject();
+    if (!picture) {
+      return 0;
+    }
+    // SkPicture provides approximateBytesUsed() method to estimate memory usage
+    auto bytesUsed = picture->approximateBytesUsed();
+    return bytesUsed;
+  }
 };
 } // namespace RNSkia
