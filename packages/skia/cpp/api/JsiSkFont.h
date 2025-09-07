@@ -278,6 +278,11 @@ public:
       : JsiSkWrappingSharedPtrHostObject(std::move(context),
                                          std::make_shared<SkFont>(font)) {}
 
+  size_t getMemoryPressure() const override {
+    // SkFont is small but holds a reference to SkTypeface which can be large
+    return sizeof(SkFont);
+  }
+
   /**
    * Creates the function for construction a new instance of the SkFont
    * wrapper
@@ -292,18 +297,13 @@ public:
       if (count == 2) {
         auto typeface = JsiSkTypeface::fromValue(runtime, arguments[0]);
         auto size = arguments[1].asNumber();
-        return jsi::Object::createFromHostObject(
-            runtime, std::make_shared<JsiSkFont>(std::move(context),
-                                                 SkFont(typeface, size)));
+        return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkFont, std::move(context), SkFont(typeface, size));
       } else if (count == 1) {
         auto typeface = JsiSkTypeface::fromValue(runtime, arguments[0]);
-        return jsi::Object::createFromHostObject(
-            runtime,
-            std::make_shared<JsiSkFont>(std::move(context), SkFont(typeface)));
+        return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkFont, std::move(context), SkFont(typeface));
       } else {
         // Return the newly constructed object
-        return jsi::Object::createFromHostObject(
-            runtime, std::make_shared<JsiSkFont>(std::move(context), SkFont()));
+        return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkFont, std::move(context), SkFont());
       }
     };
   }

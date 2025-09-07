@@ -59,8 +59,7 @@ public:
     if (!typeface) {
       throw std::runtime_error("Could not find font style for " + name);
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkTypeface>(getContext(), typeface));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkTypeface, getContext(), typeface);
   }
 
   JSI_HOST_FUNCTION(countFamilies) { return getObject()->countFamilies(); }

@@ -53,15 +53,24 @@ public:
     return jsiGlyphIDs;
   }
 
+  size_t getMemoryPressure() const override {
+    auto typeface = getObject();
+    if (!typeface) {
+      return 0;
+    }
+    
+    // Typefaces can be quite large as they contain font data
+    // Use approximateBytesUsed if available, otherwise estimate based on glyph count
+    return typeface->approximateBytesUsed();
+  }
+
   /**
    Returns the jsi object from a host object of this type
   */
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             sk_sp<SkTypeface> tf) {
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkTypeface>(std::move(context), std::move(tf)));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkTypeface, std::move(context), std::move(tf));
   }
 };
 
