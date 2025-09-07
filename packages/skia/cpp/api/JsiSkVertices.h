@@ -37,6 +37,14 @@ public:
     return static_cast<double>(getObject()->uniqueID());
   }
 
+  size_t getMemoryPressure() const override {
+    auto vertices = getObject();
+    if (!vertices) return 0;
+    
+    // SkVertices provides approximateBytesUsed() to estimate memory usage
+    return vertices->approximateSize();
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkVertices, bounds),
                        JSI_EXPORT_FUNC(JsiSkVertices, uniqueID),
                        JSI_EXPORT_FUNC(JsiSkVertices, dispose))
@@ -146,9 +154,7 @@ public:
                                texs.size() > 0 ? texs.data() : nullptr,
                                colors.size() > 0 ? colors.data() : nullptr,
                                indicesSize, indices.data());
-      return jsi::Object::createFromHostObject(
-          runtime,
-          std::make_shared<JsiSkVertices>(context, std::move(vertices)));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkVertices, context, std::move(vertices));
     };
   }
 };

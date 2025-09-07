@@ -32,8 +32,7 @@ class JsiSkPathFactory : public JsiSkHostObject {
 
 public:
   JSI_HOST_FUNCTION(Make) {
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPath>(getContext(), SkPath()));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkPath, getContext(), SkPath());
   }
 
   JSI_HOST_FUNCTION(MakeFromSVGString) {
@@ -45,8 +44,7 @@ public:
       return jsi::Value(nullptr);
     }
 
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPath>(getContext(), std::move(result)));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkPath, getContext(), std::move(result));
   }
 
   JSI_HOST_FUNCTION(MakeFromOp) {
@@ -58,8 +56,7 @@ public:
     if (!success) {
       return jsi::Value(nullptr);
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPath>(getContext(), std::move(result)));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkPath, getContext(), std::move(result));
   }
 
   JSI_HOST_FUNCTION(MakeFromCmds) {
@@ -144,8 +141,7 @@ public:
       }
       }
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPath>(getContext(), std::move(path)));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkPath, getContext(), std::move(path));
   }
 
   JSI_HOST_FUNCTION(MakeFromText) {
@@ -156,8 +152,7 @@ public:
     SkPath path;
     SkTextUtils::GetPath(text.c_str(), strlen(text.c_str()),
                          SkTextEncoding::kUTF8, x, y, *font, &path);
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPath>(getContext(), std::move(path)));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkPath, getContext(), std::move(path));
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPathFactory, Make),

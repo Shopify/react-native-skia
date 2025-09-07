@@ -90,6 +90,17 @@ public:
     return JsiTextureInfo::toValue(runtime, texInfo);
   }
 
+  size_t getMemoryPressure() const override {
+    auto surface = getObject();
+    if (!surface) return 0;
+    
+    // Surface memory is primarily the pixel buffer: width × height × bytes per pixel
+    int width = surface->width();
+    int height = surface->height();
+    // Assume 4 bytes per pixel (RGBA) for most surfaces
+    return width * height * 4;
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurface, width),
                        JSI_EXPORT_FUNC(JsiSkSurface, height),
                        JSI_EXPORT_FUNC(JsiSkSurface, getCanvas),

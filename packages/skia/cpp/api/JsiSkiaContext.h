@@ -37,9 +37,7 @@ public:
     if (surface == nullptr) {
       return jsi::Value::null();
     }
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkSurface>(getContext(), std::move(surface)));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkSurface, getContext(), std::move(surface));
   }
 
   JSI_HOST_FUNCTION(present) {
