@@ -278,10 +278,6 @@ public:
       : JsiSkWrappingSharedPtrHostObject(std::move(context),
                                          std::make_shared<SkFont>(font)) {}
 
-  size_t getMemoryPressure() const override {
-    // SkFont is small but holds a reference to SkTypeface which can be large
-    return sizeof(SkFont);
-  }
 
   /**
    * Creates the function for construction a new instance of the SkFont

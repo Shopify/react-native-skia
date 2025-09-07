@@ -206,11 +206,6 @@ public:
     setObject(std::make_shared<SkPaint>(std::move(paint)));
   }
 
-  size_t getMemoryPressure() const override {
-    // SkPaint is relatively small, but use a reasonable estimate
-    // for the base paint object plus potential attached effects/filters
-    return sizeof(SkPaint);
-  }
 
   /**
    * Creates the function for construction a new instance of the SkPaint

@@ -153,7 +153,6 @@ public:
                        JSI_EXPORT_FUNC(JsiSkMatrix, get),
                        JSI_EXPORT_FUNC(JsiSkMatrix, dispose))
 
-  size_t getMemoryPressure() const override { return sizeof(SkMatrix); }
 
   /**
    * Returns the underlying object from a host object of this type

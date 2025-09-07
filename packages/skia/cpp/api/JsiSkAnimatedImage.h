@@ -61,7 +61,6 @@ public:
       : JsiSkWrappingSkPtrHostObject<SkAnimatedImage>(std::move(context),
                                                       std::move(image)) {}
 
-  size_t getMemoryPressure() const override { return sizeof(SkAnimatedImage); }
 };
 
 } // namespace RNSkia
