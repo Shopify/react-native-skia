@@ -18,8 +18,7 @@ namespace jsi = facebook::jsi;
 class JsiSkImageFactory : public JsiSkHostObject {
 public:
   JSI_HOST_FUNCTION(MakeNull) {
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), nullptr));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkImage, getContext(), nullptr);
   }
 
   JSI_HOST_FUNCTION(MakeImageFromEncoded) {
@@ -28,8 +27,7 @@ public:
     if (image == nullptr) {
       return jsi::Value::null();
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkImage, getContext(), std::move(image));
   }
 
   JSI_HOST_FUNCTION(MakeImageFromNativeBuffer) {
@@ -40,8 +38,7 @@ public:
     if (image == nullptr) {
       throw std::runtime_error("Failed to convert NativeBuffer to SkImage!");
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkImage, getContext(), std::move(image));
   }
 
   JSI_HOST_FUNCTION(MakeImage) {
@@ -52,8 +49,7 @@ public:
     if (image == nullptr) {
       return jsi::Value::null();
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkImage, getContext(), std::move(image));
   }
 
   JSI_HOST_FUNCTION(MakeImageFromViewTag) {
@@ -75,9 +71,7 @@ public:
                     promise->reject("Failed to create image from view tag");
                     return;
                   }
-                  promise->resolve(jsi::Object::createFromHostObject(
-                      runtime, std::make_shared<JsiSkImage>(
-                                   std::move(context), std::move(result))));
+                  promise->resolve(JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkImage, std::move(context), std::move(result)));
                 });
               });
         });
@@ -98,8 +92,7 @@ public:
       jsiImage->setObject(image);
       return jsi::Value(runtime, arguments[4]);
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkImage, getContext(), std::move(image));
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromEncoded),

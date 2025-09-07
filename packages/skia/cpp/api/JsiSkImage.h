@@ -237,8 +237,7 @@ public:
     auto grContext = getContext()->getDirectContext();
     auto rasterImage = getObject()->makeRasterImage(grContext);
 #endif
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), rasterImage));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkImage, getContext(), rasterImage);
   }
 
   JSI_HOST_FUNCTION(getNativeTextureUnstable) {
@@ -268,6 +267,11 @@ public:
              const sk_sp<SkImage> image)
       : JsiSkWrappingSkPtrHostObject<SkImage>(std::move(context),
                                               std::move(image)) {}
+
+  size_t getMemoryPressure() const override {
+    auto image = getObject();
+    return image ? image->imageInfo().computeMinByteSize() : 0;
+  }
 };
 
 } // namespace RNSkia

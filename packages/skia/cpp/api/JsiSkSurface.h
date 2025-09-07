@@ -81,8 +81,7 @@ public:
       jsiImage->setObject(image);
       return jsi::Value(runtime, arguments[1]);
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkImage, getContext(), std::move(image));
   }
 
   JSI_HOST_FUNCTION(getNativeTextureUnstable) {

@@ -42,6 +42,17 @@ private:
   JSI_API_TYPENAME(TYPENAME)                                                   \
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(CLASS, __typename__))
 
+#define JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, hostObjectClass, context, object) \
+  [&]() { \
+    auto hostObject = std::make_shared<hostObjectClass>(context, std::move(object)); \
+    auto result = jsi::Object::createFromHostObject(runtime, hostObject); \
+    auto memoryPressure = hostObject->getMemoryPressure(); \
+    if (memoryPressure > 0) { \
+      result.setExternalMemoryPressure(runtime, memoryPressure); \
+    } \
+    return result; \
+  }()
+
 template <typename T> class JsiSkWrappingHostObject : public JsiSkHostObject {
 public:
   /**
@@ -74,6 +85,12 @@ public:
     // This is a no-op on native
     return jsi::Value::undefined();
   }
+
+  /**
+   * Override this method to return the memory pressure for the wrapped object.
+   * @return The memory pressure in bytes, defaults to 1KB for generic objects
+   */
+  virtual size_t getMemoryPressure() const { return 1024; }
 
 private:
   /**
