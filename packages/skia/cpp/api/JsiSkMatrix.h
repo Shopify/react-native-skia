@@ -153,9 +153,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkMatrix, get),
                        JSI_EXPORT_FUNC(JsiSkMatrix, dispose))
 
-  size_t getMemoryPressure() const override {
-    return sizeof(SkMatrix);
-  }
+  size_t getMemoryPressure() const override { return sizeof(SkMatrix); }
 
   /**
    * Returns the underlying object from a host object of this type
@@ -179,7 +177,8 @@ public:
       } else {
         matrix = SkMatrix::I();
       }
-      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkMatrix, std::move(context), matrix);
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+          runtime, JsiSkMatrix, std::move(context), matrix);
     };
   }
 };

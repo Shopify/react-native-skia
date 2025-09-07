@@ -297,13 +297,16 @@ public:
       if (count == 2) {
         auto typeface = JsiSkTypeface::fromValue(runtime, arguments[0]);
         auto size = arguments[1].asNumber();
-        return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkFont, std::move(context), SkFont(typeface, size));
+        return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+            runtime, JsiSkFont, std::move(context), SkFont(typeface, size));
       } else if (count == 1) {
         auto typeface = JsiSkTypeface::fromValue(runtime, arguments[0]);
-        return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkFont, std::move(context), SkFont(typeface));
+        return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+            runtime, JsiSkFont, std::move(context), SkFont(typeface));
       } else {
         // Return the newly constructed object
-        return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkFont, std::move(context), SkFont());
+        return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+            runtime, JsiSkFont, std::move(context), SkFont());
       }
     };
   }

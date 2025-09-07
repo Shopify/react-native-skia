@@ -58,10 +58,14 @@ public:
     if (!typeface) {
       return 0;
     }
-    
+
     // Typefaces can be quite large as they contain font data
-    // Use approximateBytesUsed if available, otherwise estimate based on glyph count
-    return typeface->approximateBytesUsed();
+    // Since SkTypeface doesn't provide a direct memory usage method,
+    // estimate based on glyph count (typically ranges from 64KB to several MB)
+    int glyphCount = typeface->countGlyphs();
+    return glyphCount > 0
+               ? glyphCount * 64
+               : 65536; // 64 bytes per glyph estimate, or 64KB minimum
   }
 
   /**
@@ -70,7 +74,8 @@ public:
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             sk_sp<SkTypeface> tf) {
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkTypeface, std::move(context), std::move(tf));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, JsiSkTypeface, std::move(context), std::move(tf));
   }
 };
 
