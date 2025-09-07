@@ -1,9 +1,15 @@
 import type { CanvasKit, Paragraph } from "canvaskit-wasm";
 
-import type { SkRect, SkRectWithDirection, SkParagraph } from "../types";
+import type {
+  SkRect,
+  SkRectWithDirection,
+  SkParagraph,
+  LineMetrics,
+} from "../types";
 
 import { HostObject } from "./Host";
 import type { JsiSkCanvas } from "./JsiSkCanvas";
+import { JsiSkRect } from "./JsiSkRect";
 
 export class JsiSkParagraph
   extends HostObject<Paragraph, "Paragraph">
@@ -12,41 +18,36 @@ export class JsiSkParagraph
   constructor(CanvasKit: CanvasKit, ref: Paragraph) {
     super(CanvasKit, ref, "Paragraph");
   }
-  getMinIntrinsicWidth(): number {
+  getMinIntrinsicWidth() {
     return this.ref.getMinIntrinsicWidth();
   }
 
-  getMaxIntrinsicWidth(): number {
+  getMaxIntrinsicWidth() {
     return this.ref.getMaxIntrinsicWidth();
   }
 
-  getLongestLine(): number {
+  getLongestLine() {
     return this.ref.getLongestLine();
   }
 
-  layout(width: number): void {
+  layout(width: number) {
     this.ref.layout(width);
   }
-  paint(canvas: JsiSkCanvas, x: number, y: number): void {
+  paint(canvas: JsiSkCanvas, x: number, y: number) {
     canvas.ref.drawParagraph(this.ref, x, y);
   }
-  getHeight(): number {
+  getHeight() {
     return this.ref.getHeight();
   }
-  getMaxWidth(): number {
+  getMaxWidth() {
     return this.ref.getMaxWidth();
   }
-  getGlyphPositionAtCoordinate(x: number, y: number): number {
+  getGlyphPositionAtCoordinate(x: number, y: number) {
     return this.ref.getGlyphPositionAtCoordinate(x, y).pos;
   }
   getRectsForPlaceholders(): SkRectWithDirection[] {
     return this.ref.getRectsForPlaceholders().map(({ rect, dir }) => ({
-      rect: {
-        x: rect.at(0)!,
-        y: rect.at(1)!,
-        width: rect.at(2)!,
-        height: rect.at(3)!,
-      },
+      rect: new JsiSkRect(this.CanvasKit, rect),
       direction: dir.value,
     }));
   }
@@ -58,20 +59,10 @@ export class JsiSkParagraph
         { value: 0 } /** kTight */,
         { value: 0 } /** kTight */
       )
-      .map(({ rect }) => ({
-        x: rect[0],
-        y: rect[1],
-        width: rect[2],
-        height: rect[3],
-      }));
+      .map(({ rect }) => new JsiSkRect(this.CanvasKit, rect));
   }
-  getLineMetrics(): SkRect[] {
-    return this.ref.getLineMetrics().map((r, index) => ({
-      x: r.left,
-      y: index * r.height,
-      width: r.width,
-      height: r.height,
-    }));
+  getLineMetrics(): LineMetrics[] {
+    return this.ref.getLineMetrics();
   }
 
   dispose() {

@@ -119,9 +119,9 @@ public:
   }
 
   JSI_HOST_FUNCTION(pushShader) {
-    getObject()->pushShader(runtime,
-                            arguments[0].asString(runtime).utf8(runtime),
-                            arguments[1].asObject(runtime));
+    getObject()->pushShader(
+        runtime, arguments[0].asString(runtime).utf8(runtime),
+        arguments[1].asObject(runtime), arguments[2].asNumber());
     return jsi::Value::undefined();
   }
 

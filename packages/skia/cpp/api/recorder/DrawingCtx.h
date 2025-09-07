@@ -119,6 +119,21 @@ public:
     return result;
   }
 
+  std::vector<sk_sp<SkShader>> popShaders(int count) {
+    std::vector<sk_sp<SkShader>> result;
+    int actualCount = std::min(count, static_cast<int>(shaders.size()));
+
+    if (actualCount > 0) {
+      // Get the last 'actualCount' shaders
+      auto start = shaders.end() - actualCount;
+      result.assign(start, shaders.end());
+      // Remove them from the original vector
+      shaders.erase(start, shaders.end());
+    }
+
+    return result;
+  }
+
   void composeImageFilter() {
     if (imageFilters.size() >= 2) {
       auto outer = imageFilters.back();

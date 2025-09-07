@@ -257,4 +257,97 @@ vec4 main(vec2 pos) {
     );
     checkImage(img, docPath("shaders/color.png"));
   });
+  it("should display a mix of red and lightblue color", async () => {
+    const { Skia } = importSkia();
+    const colorSelection = Skia.RuntimeEffect.Make(`uniform shader child1;
+uniform shader child2;
+
+vec4 main(vec2 pos) {
+  vec4 c1 = child1.eval(pos);
+  vec4 c2 = child2.eval(pos);
+  return mix(c1, c2, 0.5);
+}`)!;
+    const img = await surface.draw(
+      <Fill>
+        <Shader source={colorSelection}>
+          <ColorShader color="lightblue" />
+          <ColorShader color="red" />
+        </Shader>
+      </Fill>
+    );
+    checkImage(img, docPath("shaders/mixed-colors.png"));
+  });
+  it("should display a mix of red and lightblue from custom shaders", async () => {
+    const { Skia } = importSkia();
+    const colorSelection = Skia.RuntimeEffect.Make(`uniform shader child1;
+uniform shader child2;
+
+vec4 main(vec2 pos) {
+  vec4 c1 = child1.eval(pos);
+  vec4 c2 = child2.eval(pos);
+  return mix(c1, c2, 0.5);
+}`)!;
+    expect(colorSelection).toBeDefined();
+    const colorShader = Skia.RuntimeEffect.Make(`
+uniform vec4 color;
+
+vec4 main(vec2 pos) {
+  return color;
+}
+`)!;
+    expect(colorShader).toBeDefined();
+    const img = await surface.draw(
+      <Fill>
+        <Shader source={colorSelection}>
+          <Shader
+            source={colorShader}
+            uniforms={{ color: Skia.Color("lightblue") }}
+          />
+          <Shader
+            source={colorShader}
+            uniforms={{ color: Skia.Color("red") }}
+          />
+        </Shader>
+      </Fill>
+    );
+    checkImage(img, docPath("shaders/mixed-colors.png"));
+  });
+
+  it("should display different results based on children order", async () => {
+    const { Skia } = importSkia();
+    const orderSensitiveShader = Skia.RuntimeEffect.Make(`uniform shader child1;
+uniform shader child2;
+
+vec4 main(vec2 pos) {
+  vec4 c1 = child1.eval(pos);
+  vec4 c2 = child2.eval(pos);
+  // Order-dependent: blend child2 over child1 with position-based alpha
+  float alpha = pos.x / 256.0;
+  return mix(c1, c2, alpha);
+}`)!;
+    expect(orderSensitiveShader).toBeDefined();
+    const colorShader = Skia.RuntimeEffect.Make(`
+uniform vec4 color;
+
+vec4 main(vec2 pos) {
+  return color;
+}
+`)!;
+    expect(colorShader).toBeDefined();
+    const img = await surface.draw(
+      <Fill>
+        <Shader source={orderSensitiveShader}>
+          <Shader
+            source={colorShader}
+            uniforms={{ color: Skia.Color("blue") }}
+          />
+          <Shader
+            source={colorShader}
+            uniforms={{ color: Skia.Color("yellow") }}
+          />
+        </Shader>
+      </Fill>
+    );
+    checkImage(img, docPath("shaders/order-dependent.png"));
+  });
 });

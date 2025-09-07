@@ -17,11 +17,11 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Setup Xcode 16
-      if: runner.os == 'macOS'
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: '16.2.0'
+    # - name: Setup Xcode 16
+    #   if: runner.os == 'macOS'
+    #   uses: maxim-lobanov/setup-xcode@v1
+    #   with:
+    #     xcode-version: '16.2.0'
 
     - name: Setup Node.js
       uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1

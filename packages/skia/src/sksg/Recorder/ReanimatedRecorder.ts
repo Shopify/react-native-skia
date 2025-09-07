@@ -111,9 +111,13 @@ export class ReanimatedRecorder implements BaseRecorder {
     this.recorder.pushColorFilter(colorFilterType, props);
   }
 
-  pushShader(shaderType: NodeType, props: AnimatedProps<unknown>): void {
+  pushShader(
+    shaderType: NodeType,
+    props: AnimatedProps<unknown>,
+    children: number
+  ): void {
     this.processAnimationValues(props);
-    this.recorder.pushShader(shaderType, props);
+    this.recorder.pushShader(shaderType, props, children);
   }
 
   pushBlurMaskFilter(props: AnimatedProps<BlurMaskFilterProps>): void {
