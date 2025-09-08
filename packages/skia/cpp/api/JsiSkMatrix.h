@@ -153,7 +153,6 @@ public:
                        JSI_EXPORT_FUNC(JsiSkMatrix, get),
                        JSI_EXPORT_FUNC(JsiSkMatrix, dispose))
 
-
   /**
    * Returns the underlying object from a host object of this type
    */

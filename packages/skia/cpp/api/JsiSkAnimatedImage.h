@@ -60,7 +60,6 @@ public:
                      const sk_sp<SkAnimatedImage> image)
       : JsiSkWrappingSkPtrHostObject<SkAnimatedImage>(std::move(context),
                                                       std::move(image)) {}
-
 };
 
 } // namespace RNSkia

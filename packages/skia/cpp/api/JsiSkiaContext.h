@@ -37,7 +37,8 @@ public:
     if (surface == nullptr) {
       return jsi::Value::null();
     }
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkSurface, getContext(), std::move(surface));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, JsiSkSurface, getContext(), std::move(surface));
   }
 
   JSI_HOST_FUNCTION(present) {
@@ -73,7 +74,8 @@ public:
       auto result =
           context->makeContextFromNativeSurface(surface, width, height);
       // Return the newly constructed object
-      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkiaContext, context, std::move(result));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+          runtime, JsiSkiaContext, context, std::move(result));
     };
   }
 };

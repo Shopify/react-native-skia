@@ -43,7 +43,9 @@ public:
   }
 
   JSI_HOST_FUNCTION(getCanvas) {
-    return jsi::Object::createFromHostObject(runtime, std::make_shared<JsiSkCanvas>(getContext(), getObject()->getCanvas()));
+    return jsi::Object::createFromHostObject(
+        runtime,
+        std::make_shared<JsiSkCanvas>(getContext(), getObject()->getCanvas()));
   }
 
   JSI_HOST_FUNCTION(flush) {
@@ -90,9 +92,11 @@ public:
 
   size_t getMemoryPressure() const override {
     auto surface = getObject();
-    if (!surface) return 0;
-    
-    // Surface memory is primarily the pixel buffer: width × height × bytes per pixel
+    if (!surface)
+      return 0;
+
+    // Surface memory is primarily the pixel buffer: width × height × bytes per
+    // pixel
     int width = surface->width();
     int height = surface->height();
     // Assume 4 bytes per pixel (RGBA) for most surfaces

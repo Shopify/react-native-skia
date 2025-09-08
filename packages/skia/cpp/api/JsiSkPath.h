@@ -173,13 +173,15 @@ public:
 
   JSI_HOST_FUNCTION(computeTightBounds) {
     auto result = getObject()->computeTightBounds();
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkRect, getContext(), std::move(result));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, JsiSkRect, getContext(), std::move(result));
   }
 
   // TODO-API: Should this be a property?
   JSI_HOST_FUNCTION(getBounds) {
     auto result = getObject()->getBounds();
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkRect, getContext(), std::move(result));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, JsiSkRect, getContext(), std::move(result));
   }
 
   JSI_HOST_FUNCTION(conicTo) {
@@ -328,7 +330,8 @@ public:
   JSI_HOST_FUNCTION(getPoint) {
     auto index = arguments[0].asNumber();
     auto point = getObject()->getPoint(index);
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkPoint, getContext(), point);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkPoint,
+                                                       getContext(), point);
   }
 
   JSI_HOST_FUNCTION(toSVGString) {
@@ -470,7 +473,8 @@ public:
 
   JSI_HOST_FUNCTION(copy) {
     const auto *path = getObject().get();
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkPath, getContext(), SkPath(*path));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, JsiSkPath, getContext(), SkPath(*path));
   }
 
   JSI_HOST_FUNCTION(op) {
@@ -505,7 +509,8 @@ public:
     if (!succeed) {
       return nullptr;
     }
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkPath, getContext(), std::move(result));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, JsiSkPath, getContext(), std::move(result));
   }
   JSI_HOST_FUNCTION(toCmds) {
     auto path = *getObject();
@@ -630,8 +635,9 @@ public:
 
   size_t getMemoryPressure() const override {
     auto path = getObject();
-    if (!path) return 0;
-    
+    if (!path)
+      return 0;
+
     // SkPath provides approximateBytesUsed() to estimate memory usage
     return path->approximateBytesUsed();
   }
@@ -639,13 +645,15 @@ public:
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             const SkPath &path) {
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkPath, std::move(context), path);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, JsiSkPath, std::move(context), path);
   }
 
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             SkPath &&path) {
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkPath, std::move(context), std::move(path));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, JsiSkPath, std::move(context), std::move(path));
   }
 };
 

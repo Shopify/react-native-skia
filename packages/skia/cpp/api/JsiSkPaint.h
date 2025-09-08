@@ -206,7 +206,6 @@ public:
     setObject(std::make_shared<SkPaint>(std::move(paint)));
   }
 
-
   /**
    * Creates the function for construction a new instance of the SkPaint
    * wrapper

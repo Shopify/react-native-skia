@@ -278,7 +278,6 @@ public:
       : JsiSkWrappingSharedPtrHostObject(std::move(context),
                                          std::make_shared<SkFont>(font)) {}
 
-
   /**
    * Creates the function for construction a new instance of the SkFont
    * wrapper

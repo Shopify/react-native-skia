@@ -29,7 +29,8 @@ public:
 
   JSI_HOST_FUNCTION(bounds) {
     const auto &result = getObject()->bounds();
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkRect, getContext(), result);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkRect,
+                                                       getContext(), result);
   }
 
   JSI_HOST_FUNCTION(uniqueID) {
@@ -38,8 +39,9 @@ public:
 
   size_t getMemoryPressure() const override {
     auto vertices = getObject();
-    if (!vertices) return 0;
-    
+    if (!vertices)
+      return 0;
+
     // SkVertices provides approximateBytesUsed() to estimate memory usage
     return vertices->approximateSize();
   }
@@ -153,7 +155,8 @@ public:
                                texs.size() > 0 ? texs.data() : nullptr,
                                colors.size() > 0 ? colors.data() : nullptr,
                                indicesSize, indices.data());
-      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkVertices, context, std::move(vertices));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+          runtime, JsiSkVertices, context, std::move(vertices));
     };
   }
 };
