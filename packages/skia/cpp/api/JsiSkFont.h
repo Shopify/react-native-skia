@@ -91,8 +91,9 @@ public:
       getObject()->measureText(str.c_str(), str.length(), SkTextEncoding::kUTF8,
                                &bounds);
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkRect>(getContext(), std::move(bounds)));
+    auto rect = std::make_shared<JsiSkRect>(getContext(), std::move(bounds));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, rect,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(getMetrics) {

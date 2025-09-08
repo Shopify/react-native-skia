@@ -58,7 +58,8 @@ public:
                             std::shared_ptr<RNSkPlatformContext> context,
                             const SkPoint &point) {
     auto pointObj = std::make_shared<JsiSkPoint>(std::move(context), point);
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pointObj, context);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pointObj,
+                                                       context);
   }
 
   /**
@@ -75,8 +76,10 @@ public:
           SkPoint::Make(arguments[0].asNumber(), arguments[1].asNumber());
 
       // Return the newly constructed object
-      auto pointObj = std::make_shared<JsiSkPoint>(std::move(context), std::move(point));
-      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pointObj, context);
+      auto pointObj =
+          std::make_shared<JsiSkPoint>(std::move(context), std::move(point));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pointObj,
+                                                         context);
     };
   }
 };

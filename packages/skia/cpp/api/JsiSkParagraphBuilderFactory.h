@@ -39,9 +39,10 @@ public:
                   : nullptr;
 
     // Create the paragraph builder
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkParagraphBuilder>(
-                     getContext(), paragraphStyle, fontMgr));
+    auto builder = std::make_shared<JsiSkParagraphBuilder>(
+        getContext(), paragraphStyle, fontMgr);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, builder,
+                                                       getContext());
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraphBuilderFactory, Make))

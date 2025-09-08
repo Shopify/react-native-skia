@@ -83,9 +83,10 @@ public:
                  : nullptr;
     auto shader =
         getObject()->makeShader(tmx, tmy, SkSamplingOptions(fm, mm), m);
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkShader>(getContext(), std::move(shader)));
+    auto shaderObj =
+        std::make_shared<JsiSkShader>(getContext(), std::move(shader));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shaderObj,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(makeShaderCubic) {
@@ -98,9 +99,10 @@ public:
                  : nullptr;
     auto shader =
         getObject()->makeShader(tmx, tmy, SkSamplingOptions({B, C}), m);
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkShader>(getContext(), std::move(shader)));
+    auto shaderObj =
+        std::make_shared<JsiSkShader>(getContext(), std::move(shader));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shaderObj,
+                                                       getContext());
   }
 
   sk_sp<SkData> encodeImageData(const jsi::Value *arguments, size_t count) {

@@ -51,9 +51,10 @@ public:
     auto shader =
         getObject()->makeShader(std::move(uniforms), nullptr, 0, matrix);
 
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkShader>(getContext(), std::move(shader)));
+    auto shaderObj =
+        std::make_shared<JsiSkShader>(getContext(), std::move(shader));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shaderObj,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(makeShaderWithChildren) {
@@ -81,9 +82,10 @@ public:
     auto shader = getObject()->makeShader(std::move(uniforms), children.data(),
                                           children.size(), matrix);
 
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkShader>(getContext(), std::move(shader)));
+    auto shaderObj =
+        std::make_shared<JsiSkShader>(getContext(), std::move(shader));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shaderObj,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(getUniformCount) {

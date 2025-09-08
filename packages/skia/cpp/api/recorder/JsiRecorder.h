@@ -318,8 +318,9 @@ public:
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
       // Return the newly constructed object
-      return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiRecorder>(std::move(context)));
+      auto recorder = std::make_shared<JsiRecorder>(std::move(context));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, recorder,
+                                                         context);
     };
   }
 };

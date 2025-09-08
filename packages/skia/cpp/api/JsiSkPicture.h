@@ -39,8 +39,9 @@ public:
 
     // Create shader
     auto shader = getObject()->makeShader(tmx, tmy, fm, m, tr);
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkShader>(getContext(), shader));
+    auto shaderObj = std::make_shared<JsiSkShader>(getContext(), shader);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shaderObj,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(serialize) {

@@ -85,9 +85,10 @@ public:
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             sk_sp<para::TypefaceFontProvider> tfProvider) {
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkTypefaceFontProvider>(
-                     std::move(context), std::move(tfProvider)));
+    auto provider = std::make_shared<JsiSkTypefaceFontProvider>(
+        std::move(context), std::move(tfProvider));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, provider,
+                                                       context);
   }
 };
 

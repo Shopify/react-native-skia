@@ -32,8 +32,9 @@ public:
 
   JSI_HOST_FUNCTION(System) {
     auto fontMgr = JsiSkFontMgrFactory::getFontMgr(getContext());
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkFontMgr>(getContext(), fontMgr));
+    auto fontMgrObj = std::make_shared<JsiSkFontMgr>(getContext(), fontMgr);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, fontMgrObj,
+                                                       getContext());
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkFontMgrFactory, System))

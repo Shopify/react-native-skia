@@ -26,9 +26,10 @@ public:
                                       .c_str());
       return jsi::Value::null();
     }
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkRuntimeEffect>(getContext(), std::move(effect)));
+    auto runtimeEffect =
+        std::make_shared<JsiSkRuntimeEffect>(getContext(), std::move(effect));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, runtimeEffect,
+                                                       getContext());
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkRuntimeEffectFactory, Make))

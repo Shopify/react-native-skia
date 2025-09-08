@@ -31,7 +31,8 @@ public:
     int radius = arguments[0].asNumber();
     auto pathEffect = std::make_shared<JsiSkPathEffect>(
         getContext(), SkCornerPathEffect::Make(radius));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect, getContext());
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakeDash) {
@@ -50,7 +51,8 @@ public:
     auto i = SkSpan(intervals.data(), intervals.size());
     auto pathEffect = std::make_shared<JsiSkPathEffect>(
         getContext(), SkDashPathEffect::Make(i, phase));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect, getContext());
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakeDiscrete) {
@@ -59,23 +61,28 @@ public:
     int seedAssist = arguments[2].asNumber();
     auto pathEffect = std::make_shared<JsiSkPathEffect>(
         getContext(), SkDiscretePathEffect::Make(segLength, dec, seedAssist));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect, getContext());
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakeCompose) {
     auto outer = JsiSkPathEffect::fromValue(runtime, arguments[0]);
     auto inner = JsiSkPathEffect::fromValue(runtime, arguments[1]);
     auto pathEffect = std::make_shared<JsiSkPathEffect>(
-        getContext(), SkPathEffect::MakeCompose(std::move(outer), std::move(inner)));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect, getContext());
+        getContext(),
+        SkPathEffect::MakeCompose(std::move(outer), std::move(inner)));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakeSum) {
     auto outer = JsiSkPathEffect::fromValue(runtime, arguments[0]);
     auto inner = JsiSkPathEffect::fromValue(runtime, arguments[1]);
     auto pathEffect = std::make_shared<JsiSkPathEffect>(
-        getContext(), SkPathEffect::MakeSum(std::move(outer), std::move(inner)));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect, getContext());
+        getContext(),
+        SkPathEffect::MakeSum(std::move(outer), std::move(inner)));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakePath1D) {
@@ -86,7 +93,8 @@ public:
         static_cast<SkPath1DPathEffect::Style>(arguments[3].asNumber());
     auto pathEffect = std::make_shared<JsiSkPathEffect>(
         getContext(), SkPath1DPathEffect::Make(*path, advance, phase, style));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect, getContext());
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakePath2D) {
@@ -94,7 +102,8 @@ public:
     auto path = JsiSkPath::fromValue(runtime, arguments[1]);
     auto pathEffect = std::make_shared<JsiSkPathEffect>(
         getContext(), SkPath2DPathEffect::Make(*matrix, *path));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect, getContext());
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakeLine2D) {
@@ -102,7 +111,8 @@ public:
     auto matrix = JsiSkMatrix::fromValue(runtime, arguments[1]);
     auto pathEffect = std::make_shared<JsiSkPathEffect>(
         getContext(), SkLine2DPathEffect::Make(width, *matrix));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect, getContext());
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect,
+                                                       getContext());
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPathEffectFactory, MakeCorner),

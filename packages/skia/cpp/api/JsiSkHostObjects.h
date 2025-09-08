@@ -23,6 +23,12 @@ public:
   explicit JsiSkHostObject(std::shared_ptr<RNSkPlatformContext> context)
       : _context(context) {}
 
+  /**
+   * Override this method to return the memory pressure for the wrapped object.
+   * @return The memory pressure in bytes, defaults to 1KB for generic objects
+   */
+  virtual size_t getMemoryPressure() const { return 1024; }
+
 protected:
   /**
    * @return A pointer to the platform context
@@ -86,12 +92,6 @@ public:
     // This is a no-op on native
     return jsi::Value::undefined();
   }
-
-  /**
-   * Override this method to return the memory pressure for the wrapped object.
-   * @return The memory pressure in bytes, defaults to 1KB for generic objects
-   */
-  virtual size_t getMemoryPressure() const { return 1024; }
 
 private:
   /**

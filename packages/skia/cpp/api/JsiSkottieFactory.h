@@ -51,9 +51,10 @@ public:
     if (!managedAnimation->_animation) {
       return jsi::Value::null();
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkSkottie>(getContext(),
-                                                std::move(managedAnimation)));
+    auto skottie = std::make_shared<JsiSkSkottie>(getContext(),
+                                                  std::move(managedAnimation));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, skottie,
+                                                       getContext());
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkottieFactory, Make))

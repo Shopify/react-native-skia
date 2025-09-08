@@ -37,7 +37,8 @@ public:
     auto nextObject =
         std::make_shared<JsiSkContourMeasure>(getContext(), std::move(next));
 
-    return jsi::Object::createFromHostObject(runtime, std::move(nextObject));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, nextObject,
+                                                       getContext());
   }
 
   EXPORT_JSI_API_TYPENAME(JsiSkContourMeasureIter, ContourMeasureIter)
@@ -59,9 +60,10 @@ public:
       auto forceClosed = arguments[1].getBool();
       auto resScale = arguments[2].asNumber();
       // Return the newly constructed object
-      return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkContourMeasureIter>(
-                       std::move(context), *path, forceClosed, resScale));
+      auto iter = std::make_shared<JsiSkContourMeasureIter>(
+          std::move(context), *path, forceClosed, resScale);
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, iter,
+                                                         context);
     };
   }
 };

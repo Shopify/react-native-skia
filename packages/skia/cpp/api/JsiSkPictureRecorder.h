@@ -37,8 +37,9 @@ public:
       SkRect rect = SkRect::Make(size);
       canvas = getObject()->beginRecording(rect, nullptr);
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkCanvas>(getContext(), canvas));
+    auto canvasObj = std::make_shared<JsiSkCanvas>(getContext(), canvas);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, canvasObj,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(finishRecordingAsPicture) {
@@ -59,8 +60,9 @@ public:
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
-      return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkPictureRecorder>(context));
+      auto recorder = std::make_shared<JsiSkPictureRecorder>(context);
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, recorder,
+                                                         context);
     };
   }
 };

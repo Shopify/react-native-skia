@@ -111,8 +111,10 @@ public:
       auto url = arguments[0].asString(runtime).utf8(runtime);
       auto video = context->createVideo(url);
       // Return the newly constructed object
-      auto videoObj = std::make_shared<JsiVideo>(std::move(context), std::move(video));
-      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, videoObj, context);
+      auto videoObj =
+          std::make_shared<JsiVideo>(std::move(context), std::move(video));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, videoObj,
+                                                         context);
     };
   }
 };

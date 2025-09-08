@@ -37,10 +37,12 @@ public:
       throw jsi::JSError(runtime, "getPosTan() failed");
     }
     auto posTan = jsi::Array(runtime, 2);
-    auto pos = jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPoint>(getContext(), position));
-    auto tan = jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPoint>(getContext(), tangent));
+    auto posPoint = std::make_shared<JsiSkPoint>(getContext(), position);
+    auto pos = JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, posPoint,
+                                                           getContext());
+    auto tanPoint = std::make_shared<JsiSkPoint>(getContext(), tangent);
+    auto tan = JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, tanPoint,
+                                                           getContext());
     posTan.setValueAtIndex(runtime, 0, pos);
     posTan.setValueAtIndex(runtime, 1, tan);
     return posTan;
