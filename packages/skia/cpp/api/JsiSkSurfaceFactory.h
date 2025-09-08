@@ -53,6 +53,8 @@ public:
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurfaceFactory, Make),
                        JSI_EXPORT_FUNC(JsiSkSurfaceFactory, MakeOffscreen))
 
+  size_t getMemoryPressure() const override { return 2048; }
+
   explicit JsiSkSurfaceFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };

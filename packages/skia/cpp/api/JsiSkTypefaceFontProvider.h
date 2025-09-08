@@ -79,6 +79,8 @@ public:
       : JsiSkWrappingSkPtrHostObject(std::move(context),
                                      std::move(tfProvider)) {}
 
+  size_t getMemoryPressure() const override { return 4096; }
+
   /**
    Returns the jsi object from a host object of this type
   */

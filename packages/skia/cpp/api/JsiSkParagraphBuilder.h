@@ -110,6 +110,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkParagraphBuilder, pushStyle),
                        JSI_EXPORT_FUNC(JsiSkParagraphBuilder, pop))
 
+  size_t getMemoryPressure() const override { return 4096; }
+
   explicit JsiSkParagraphBuilder(std::shared_ptr<RNSkPlatformContext> context,
                                  para::ParagraphStyle paragraphStyle,
                                  sk_sp<SkFontMgr> fontManager)

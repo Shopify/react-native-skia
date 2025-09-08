@@ -113,6 +113,8 @@ public:
         runtime, hostObjectInstance, getContext());
   }
 
+  size_t getMemoryPressure() const override { return 1024; }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromEncoded),
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTag),
                        JSI_EXPORT_FUNC(JsiSkImageFactory,

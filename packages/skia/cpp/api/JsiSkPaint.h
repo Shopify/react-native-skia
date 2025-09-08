@@ -208,6 +208,8 @@ public:
     setObject(std::make_shared<SkPaint>(std::move(paint)));
   }
 
+  size_t getMemoryPressure() const override { return sizeof(SkPaint); }
+
   /**
    * Creates the function for construction a new instance of the SkPaint
    * wrapper

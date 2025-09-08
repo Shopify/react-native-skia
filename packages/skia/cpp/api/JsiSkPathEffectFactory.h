@@ -122,7 +122,9 @@ public:
                        JSI_EXPORT_FUNC(JsiSkPathEffectFactory, MakeSum),
                        JSI_EXPORT_FUNC(JsiSkPathEffectFactory, MakeLine2D),
                        JSI_EXPORT_FUNC(JsiSkPathEffectFactory, MakePath1D),
-                       JSI_EXPORT_FUNC(JsiSkPathEffectFactory, MakePath2D), )
+                       JSI_EXPORT_FUNC(JsiSkPathEffectFactory, MakePath2D))
+
+  size_t getMemoryPressure() const override { return 1024; }
 
   explicit JsiSkPathEffectFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

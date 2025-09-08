@@ -100,6 +100,8 @@ public:
                                                        context);
   }
 
+  size_t getMemoryPressure() const override { return sizeof(SkRect); }
+
   /**
    * Creates the function for construction a new instance of the SkRect
    * wrapper

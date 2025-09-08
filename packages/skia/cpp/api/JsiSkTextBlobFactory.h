@@ -109,6 +109,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkTextBlobFactory,
                                        MakeFromRSXformGlyphs), )
 
+  size_t getMemoryPressure() const override { return 2048; }
+
   explicit JsiSkTextBlobFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };

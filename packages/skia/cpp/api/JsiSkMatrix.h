@@ -166,6 +166,8 @@ public:
     }
   }
 
+  size_t getMemoryPressure() const override { return sizeof(SkMatrix); }
+
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {

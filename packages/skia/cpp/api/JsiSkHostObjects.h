@@ -25,9 +25,9 @@ public:
 
   /**
    * Override this method to return the memory pressure for the wrapped object.
-   * @return The memory pressure in bytes, defaults to 1KB for generic objects
+   * @return The memory pressure in bytes
    */
-  virtual size_t getMemoryPressure() const { return 1024; }
+  virtual size_t getMemoryPressure() const = 0;
 
 protected:
   /**

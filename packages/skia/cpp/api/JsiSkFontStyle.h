@@ -56,6 +56,8 @@ public:
     }
   }
 
+  size_t getMemoryPressure() const override { return sizeof(SkFontStyle); }
+
   /**
   Returns the jsi object from a host object of this type
  */

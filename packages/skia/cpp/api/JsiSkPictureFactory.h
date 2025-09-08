@@ -46,6 +46,8 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPictureFactory, MakePicture))
 
+  size_t getMemoryPressure() const override { return 1024; }
+
   explicit JsiSkPictureFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };

@@ -66,6 +66,8 @@ public:
     return JsiSkPath::toValue(runtime, getContext(), std::move(path));
   }
 
+  size_t getMemoryPressure() const override { return 1024; }
+
   EXPORT_JSI_API_TYPENAME(JsiSkContourMeasure, ContourMeasure)
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkContourMeasure, getPosTan),

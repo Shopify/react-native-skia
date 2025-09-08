@@ -687,6 +687,8 @@ public:
       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakePointLitSpecular),
       JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeSpotLitSpecular))
 
+  size_t getMemoryPressure() const override { return 2048; }
+
   explicit JsiSkImageFilterFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };

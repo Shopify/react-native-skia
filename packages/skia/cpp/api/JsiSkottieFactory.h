@@ -59,6 +59,8 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkottieFactory, Make))
 
+  size_t getMemoryPressure() const override { return 4096; }
+
   explicit JsiSkottieFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };

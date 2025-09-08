@@ -279,6 +279,8 @@ public:
       : JsiSkWrappingSharedPtrHostObject(std::move(context),
                                          std::make_shared<SkFont>(font)) {}
 
+  size_t getMemoryPressure() const override { return sizeof(SkFont); }
+
   /**
    * Creates the function for construction a new instance of the SkFont
    * wrapper

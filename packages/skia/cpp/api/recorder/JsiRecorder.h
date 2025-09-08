@@ -314,6 +314,8 @@ public:
                        JSI_EXPORT_FUNC(JsiRecorder, play),
                        JSI_EXPORT_FUNC(JsiRecorder, applyUpdates))
 
+  size_t getMemoryPressure() const override { return 16384; }
+
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {

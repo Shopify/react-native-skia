@@ -98,6 +98,8 @@ public:
       : JsiSkWrappingSharedPtrHostObject(std::move(context), std::move(video)) {
   }
 
+  size_t getMemoryPressure() const override { return 32768; }
+
   /**
    * Creates the function for construction a new instance of the SkFont
    * wrapper

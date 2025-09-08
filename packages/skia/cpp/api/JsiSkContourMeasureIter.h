@@ -46,6 +46,10 @@ public:
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkContourMeasureIter, next),
                        JSI_EXPORT_FUNC(JsiSkContourMeasureIter, dispose))
 
+  size_t getMemoryPressure() const override {
+    return sizeof(SkContourMeasureIter);
+  }
+
   /**
    * Creates the function for construction a new instance of the
    * SkContourMeasureIter wrapper

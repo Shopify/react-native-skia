@@ -48,6 +48,8 @@ public:
         runtime, hostObjectInstance, getContext());
   }
 
+  size_t getMemoryPressure() const override { return 2048; }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkFontMgr, countFamilies),
                        JSI_EXPORT_FUNC(JsiSkFontMgr, getFamilyName),
                        JSI_EXPORT_FUNC(JsiSkFontMgr, matchFamilyStyle))

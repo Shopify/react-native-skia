@@ -252,6 +252,8 @@ public:
                                                        getContext());
   }
 
+  size_t getMemoryPressure() const override { return 1024; }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkShaderFactory, MakeLinearGradient),
                        JSI_EXPORT_FUNC(JsiSkShaderFactory, MakeRadialGradient),
                        JSI_EXPORT_FUNC(JsiSkShaderFactory, MakeSweepGradient),

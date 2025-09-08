@@ -142,6 +142,8 @@ public:
       : JsiSkWrappingSkPtrHostObject<SkRuntimeEffect>(std::move(context),
                                                       std::move(rt)) {}
 
+  size_t getMemoryPressure() const override { return 4096; }
+
   static RuntimeEffectUniform fromUniform(const SkRuntimeEffect::Uniform &u) {
     RuntimeEffectUniform su;
     su.rows = u.count; // arrayLength

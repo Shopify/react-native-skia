@@ -55,6 +55,8 @@ public:
                  std::shared_ptr<WindowContext> ctx)
       : JsiSkWrappingSharedPtrHostObject(std::move(context), std::move(ctx)) {}
 
+  size_t getMemoryPressure() const override { return 8192; }
+
   /**
    * Creates the function for construction a new instance of the SkFont
    * wrapper

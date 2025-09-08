@@ -111,6 +111,8 @@ public:
                                                          context);
     };
   }
+  size_t getMemoryPressure() const override { return sizeof(SkRSXform); }
+
   /**
    * Creates the function for construction a new instance of the SkRSXform
    * wrapper

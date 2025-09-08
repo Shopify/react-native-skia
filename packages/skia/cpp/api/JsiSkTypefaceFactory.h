@@ -28,6 +28,8 @@ public:
         runtime, hostObjectInstance, getContext());
   }
 
+  size_t getMemoryPressure() const override { return 1024; }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTypefaceFactory,
                                        MakeFreeTypeFaceFromData))
 

@@ -25,6 +25,8 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTypefaceFontProviderFactory, Make))
 
+  size_t getMemoryPressure() const override { return 2048; }
+
   explicit JsiSkTypefaceFontProviderFactory(
       std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
