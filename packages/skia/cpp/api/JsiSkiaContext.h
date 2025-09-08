@@ -73,9 +73,7 @@ public:
       auto result =
           context->makeContextFromNativeSurface(surface, width, height);
       // Return the newly constructed object
-      return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkiaContext>(std::move(context),
-                                                    std::move(result)));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkiaContext, context, std::move(result));
     };
   }
 };

@@ -43,9 +43,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(getCanvas) {
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkCanvas>(getContext(), getObject()->getCanvas()));
+    return jsi::Object::createFromHostObject(runtime, std::make_shared<JsiSkCanvas>(getContext(), getObject()->getCanvas()));
   }
 
   JSI_HOST_FUNCTION(flush) {

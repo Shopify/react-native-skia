@@ -29,8 +29,7 @@ public:
 
   JSI_HOST_FUNCTION(bounds) {
     const auto &result = getObject()->bounds();
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkRect>(getContext(), result));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkRect, getContext(), result);
   }
 
   JSI_HOST_FUNCTION(uniqueID) {

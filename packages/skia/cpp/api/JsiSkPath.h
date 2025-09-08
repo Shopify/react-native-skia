@@ -173,15 +173,13 @@ public:
 
   JSI_HOST_FUNCTION(computeTightBounds) {
     auto result = getObject()->computeTightBounds();
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkRect>(getContext(), std::move(result)));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkRect, getContext(), std::move(result));
   }
 
   // TODO-API: Should this be a property?
   JSI_HOST_FUNCTION(getBounds) {
     auto result = getObject()->getBounds();
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkRect>(getContext(), std::move(result)));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkRect, getContext(), std::move(result));
   }
 
   JSI_HOST_FUNCTION(conicTo) {
@@ -330,8 +328,7 @@ public:
   JSI_HOST_FUNCTION(getPoint) {
     auto index = arguments[0].asNumber();
     auto point = getObject()->getPoint(index);
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPoint>(getContext(), point));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkPoint, getContext(), point);
   }
 
   JSI_HOST_FUNCTION(toSVGString) {
