@@ -42,13 +42,14 @@ private:
   JSI_API_TYPENAME(TYPENAME)                                                   \
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(CLASS, __typename__))
 
-#define JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, hostObjectClass,  \
+#define JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, hostObject,       \
                                                     context, object)           \
   [&]() {                                                                      \
-    auto hostObject =                                                          \
-        std::make_shared<hostObjectClass>(context, std::move(object));         \
-    auto result = jsi::Object::createFromHostObject(runtime, hostObject);      \
-    auto memoryPressure = hostObject->getMemoryPressure();                     \
+    auto hostObjectInstance =                                                  \
+        std::make_shared<hostObject>(context, std::move(object));              \
+    auto result =                                                              \
+        jsi::Object::createFromHostObject(runtime, hostObjectInstance);        \
+    auto memoryPressure = hostObjectInstance->getMemoryPressure();             \
     if (memoryPressure > 0) {                                                  \
       result.setExternalMemoryPressure(runtime, memoryPressure);               \
     }                                                                          \
