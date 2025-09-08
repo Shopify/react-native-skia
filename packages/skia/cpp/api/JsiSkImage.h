@@ -237,8 +237,10 @@ public:
     auto grContext = getContext()->getDirectContext();
     auto rasterImage = getObject()->makeRasterImage(grContext);
 #endif
+    auto hostObjectInstance =
+        std::make_shared<JsiSkImage>(getContext(), std::move(rasterImage));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, JsiSkImage, getContext(), rasterImage);
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(getNativeTextureUnstable) {

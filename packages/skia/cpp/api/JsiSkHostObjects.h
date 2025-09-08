@@ -42,11 +42,9 @@ private:
   JSI_API_TYPENAME(TYPENAME)                                                   \
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(CLASS, __typename__))
 
-#define JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, hostObject,       \
-                                                    context, object)           \
+#define JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(                           \
+    runtime, hostObjectInstance, context)                                      \
   [&]() {                                                                      \
-    auto hostObjectInstance =                                                  \
-        std::make_shared<hostObject>(context, std::move(object));              \
     auto result =                                                              \
         jsi::Object::createFromHostObject(runtime, hostObjectInstance);        \
     auto memoryPressure = hostObjectInstance->getMemoryPressure();             \

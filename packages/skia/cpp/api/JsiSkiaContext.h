@@ -37,8 +37,10 @@ public:
     if (surface == nullptr) {
       return jsi::Value::null();
     }
+    auto hostObjectInstance =
+        std::make_shared<JsiSkSurface>(getContext(), std::move(surface));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, JsiSkSurface, getContext(), std::move(surface));
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(present) {
@@ -74,8 +76,10 @@ public:
       auto result =
           context->makeContextFromNativeSurface(surface, width, height);
       // Return the newly constructed object
+      auto hostObjectInstance =
+          std::make_shared<JsiSkiaContext>(context, std::move(result));
       return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-          runtime, JsiSkiaContext, context, std::move(result));
+          runtime, hostObjectInstance, context);
     };
   }
 };

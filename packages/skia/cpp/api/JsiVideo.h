@@ -39,8 +39,10 @@ public:
     if (!image) {
       return jsi::Value::null();
     }
+    auto hostObjectInstance =
+        std::make_shared<JsiSkImage>(getContext(), std::move(image));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, JsiSkImage, getContext(), std::move(image));
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(duration) { return getObject()->duration(); }

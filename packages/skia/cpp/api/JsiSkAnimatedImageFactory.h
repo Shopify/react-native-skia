@@ -23,8 +23,10 @@ public:
     if (image == nullptr) {
       return jsi::Value::null();
     }
+    auto hostObjectInstance =
+        std::make_shared<JsiSkAnimatedImage>(getContext(), std::move(image));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, JsiSkAnimatedImage, getContext(), std::move(image));
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkAnimatedImageFactory,

@@ -42,8 +42,10 @@ public:
     auto name = arguments[0].asString(runtime).utf8(runtime);
     auto fontStyle = JsiSkFontStyle::fromValue(runtime, arguments[1]);
     auto typeface = getObject()->matchFamilyStyle(name.c_str(), *fontStyle);
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkTypeface,
-                                                       getContext(), typeface);
+    auto hostObjectInstance =
+        std::make_shared<JsiSkTypeface>(getContext(), std::move(typeface));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkFontMgr, countFamilies),

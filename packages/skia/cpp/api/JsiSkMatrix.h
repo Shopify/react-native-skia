@@ -175,8 +175,10 @@ public:
       } else {
         matrix = SkMatrix::I();
       }
+      auto hostObjectInstance =
+          std::make_shared<JsiSkMatrix>(context, std::move(matrix));
       return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-          runtime, JsiSkMatrix, std::move(context), matrix);
+          runtime, hostObjectInstance, context);
     };
   }
 };

@@ -30,8 +30,10 @@ public:
     if (surface == nullptr) {
       return jsi::Value::null();
     }
+    auto hostObjectInstance =
+        std::make_shared<JsiSkSurface>(getContext(), std::move(surface));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, JsiSkSurface, getContext(), std::move(surface));
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(MakeOffscreen) {
@@ -42,8 +44,10 @@ public:
     if (surface == nullptr) {
       return jsi::Value::null();
     }
+    auto hostObjectInstance =
+        std::make_shared<JsiSkSurface>(getContext(), std::move(surface));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, JsiSkSurface, getContext(), std::move(surface));
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurfaceFactory, Make),

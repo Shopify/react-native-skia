@@ -292,16 +292,22 @@ public:
       if (count == 2) {
         auto typeface = JsiSkTypeface::fromValue(runtime, arguments[0]);
         auto size = arguments[1].asNumber();
+        auto hostObjectInstance =
+            std::make_shared<JsiSkFont>(context, SkFont(typeface, size));
         return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-            runtime, JsiSkFont, std::move(context), SkFont(typeface, size));
+            runtime, hostObjectInstance, std::move(context));
       } else if (count == 1) {
         auto typeface = JsiSkTypeface::fromValue(runtime, arguments[0]);
+        auto hostObjectInstance =
+            std::make_shared<JsiSkFont>(context, SkFont(typeface));
         return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-            runtime, JsiSkFont, std::move(context), SkFont(typeface));
+            runtime, hostObjectInstance, std::move(context));
       } else {
         // Return the newly constructed object
+        auto hostObjectInstance =
+            std::make_shared<JsiSkFont>(context, SkFont());
         return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-            runtime, JsiSkFont, std::move(context), SkFont());
+            runtime, hostObjectInstance, std::move(context));
       }
     };
   }

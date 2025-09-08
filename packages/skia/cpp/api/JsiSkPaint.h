@@ -35,8 +35,10 @@ public:
 
   JSI_HOST_FUNCTION(copy) {
     const auto *paint = getObject().get();
+    auto hostObjectInstance =
+        std::make_shared<JsiSkPaint>(getContext(), SkPaint(*paint));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, JsiSkPaint, getContext(), SkPaint(*paint));
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(reset) {
@@ -219,8 +221,9 @@ public:
       auto paint = SkPaint();
       paint.setAntiAlias(true);
       // Return the newly constructed object
+      auto hostObjectInstance = std::make_shared<JsiSkPaint>(context, paint);
       return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-          runtime, JsiSkPaint, std::move(context), paint);
+          runtime, hostObjectInstance, std::move(context));
     };
   }
 };

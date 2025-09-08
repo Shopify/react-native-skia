@@ -74,8 +74,10 @@ public:
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             sk_sp<SkTypeface> tf) {
+    auto hostObjectInstance =
+        std::make_shared<JsiSkTypeface>(context, std::move(tf));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, JsiSkTypeface, std::move(context), std::move(tf));
+        runtime, hostObjectInstance, context);
   }
 };
 

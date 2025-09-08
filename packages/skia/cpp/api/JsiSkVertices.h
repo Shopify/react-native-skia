@@ -29,8 +29,10 @@ public:
 
   JSI_HOST_FUNCTION(bounds) {
     const auto &result = getObject()->bounds();
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, JsiSkRect,
-                                                       getContext(), result);
+    auto hostObjectInstance =
+        std::make_shared<JsiSkRect>(getContext(), std::move(result));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(uniqueID) {
@@ -155,8 +157,10 @@ public:
                                texs.size() > 0 ? texs.data() : nullptr,
                                colors.size() > 0 ? colors.data() : nullptr,
                                indicesSize, indices.data());
+      auto hostObjectInstance =
+          std::make_shared<JsiSkVertices>(context, std::move(vertices));
       return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-          runtime, JsiSkVertices, context, std::move(vertices));
+          runtime, hostObjectInstance, context);
     };
   }
 };
