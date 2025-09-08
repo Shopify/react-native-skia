@@ -62,9 +62,8 @@ public:
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             const SkFontStyle &fontStyle) {
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkFontStyle>(std::move(context), fontStyle));
+    auto fontStyleObj = std::make_shared<JsiSkFontStyle>(std::move(context), fontStyle);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, fontStyleObj, context);
   }
 };
 } // namespace RNSkia
