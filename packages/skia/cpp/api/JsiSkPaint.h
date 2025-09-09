@@ -225,7 +225,7 @@ public:
       // Return the newly constructed object
       auto hostObjectInstance = std::make_shared<JsiSkPaint>(context, paint);
       return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-          runtime, hostObjectInstance, std::move(context));
+          runtime, hostObjectInstance, context);
     };
   }
 };

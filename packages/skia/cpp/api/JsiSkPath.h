@@ -173,8 +173,7 @@ public:
 
   JSI_HOST_FUNCTION(computeTightBounds) {
     auto result = getObject()->computeTightBounds();
-    auto hostObjectInstance =
-        std::make_shared<JsiSkRect>(getContext(), std::move(result));
+    auto hostObjectInstance = std::make_shared<JsiSkRect>(getContext(), result);
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
         runtime, hostObjectInstance, getContext());
   }
@@ -182,8 +181,7 @@ public:
   // TODO-API: Should this be a property?
   JSI_HOST_FUNCTION(getBounds) {
     auto result = getObject()->getBounds();
-    auto hostObjectInstance =
-        std::make_shared<JsiSkRect>(getContext(), std::move(result));
+    auto hostObjectInstance = std::make_shared<JsiSkRect>(getContext(), result);
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
         runtime, hostObjectInstance, getContext());
   }
@@ -334,8 +332,7 @@ public:
   JSI_HOST_FUNCTION(getPoint) {
     auto index = arguments[0].asNumber();
     auto point = getObject()->getPoint(index);
-    auto hostObjectInstance =
-        std::make_shared<JsiSkPoint>(getContext(), std::move(point));
+    auto hostObjectInstance = std::make_shared<JsiSkPoint>(getContext(), point);
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
         runtime, hostObjectInstance, getContext());
   }

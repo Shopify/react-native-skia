@@ -29,8 +29,7 @@ public:
 
   JSI_HOST_FUNCTION(bounds) {
     const auto &result = getObject()->bounds();
-    auto hostObjectInstance =
-        std::make_shared<JsiSkRect>(getContext(), std::move(result));
+    auto hostObjectInstance = std::make_shared<JsiSkRect>(getContext(), result);
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
         runtime, hostObjectInstance, getContext());
   }
