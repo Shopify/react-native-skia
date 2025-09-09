@@ -35,7 +35,7 @@ export const useClient = (): UseClient => {
         ws.close();
         // incrementing retry to rerun the effect
         setRetry((r) => r + 1);
-      }, 500);
+      }, 3000);
     };
     return () => {
       ws.close();
