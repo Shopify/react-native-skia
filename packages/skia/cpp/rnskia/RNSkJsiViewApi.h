@@ -105,10 +105,15 @@ public:
           if (name == "onSize" && isSharedValue(runtime, arguments[2])) {
             jsi::Object size(runtime);
             auto pd = _platformContext->getPixelDensity();
-            size.setProperty(runtime, "width",
-                             info->view->getScaledWidth() / pd);
-            size.setProperty(runtime, "height",
-                             info->view->getScaledHeight() / pd);
+            auto w = info->view != nullptr
+                         ? std::max(info->view->getScaledWidth(), 0)
+                         : 0;
+            auto h = info->view != nullptr
+                         ? std::max(info->view->getScaledHeight(), 0)
+                         : 0;
+
+            size.setProperty(runtime, "width", w / pd);
+            size.setProperty(runtime, "height", h / pd);
             arguments[2].asObject(runtime).setProperty(runtime, "value", size);
           } else {
             info->props.insert_or_assign(
