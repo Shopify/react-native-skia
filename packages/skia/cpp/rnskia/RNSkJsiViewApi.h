@@ -104,8 +104,11 @@ public:
           auto name = arguments[1].asString(runtime).utf8(runtime);
           if (name == "onSize" && isSharedValue(runtime, arguments[2])) {
             jsi::Object size(runtime);
-            size.setProperty(runtime, "width", info->view->getScaledWidth());
-            size.setProperty(runtime, "height", info->view->getScaledHeight());
+            auto pd = _platformContext->getPixelDensity();
+            size.setProperty(runtime, "width",
+                             info->view->getScaledWidth() / pd);
+            size.setProperty(runtime, "height",
+                             info->view->getScaledHeight() / pd);
             arguments[2].asObject(runtime).setProperty(runtime, "value", size);
           } else {
             info->props.insert_or_assign(
