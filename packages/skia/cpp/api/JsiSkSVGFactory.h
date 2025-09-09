@@ -27,17 +27,21 @@ public:
     auto data = JsiSkData::fromValue(runtime, arguments[0]);
     auto stream = SkMemoryStream::Make(data);
     auto svg_dom = SkSVGDOM::Builder().make(*stream);
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkSVG>(getContext(), std::move(svg_dom)));
+    auto svg = std::make_shared<JsiSkSVG>(getContext(), std::move(svg_dom));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, svg,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakeFromString) {
     auto svgText = arguments[0].asString(runtime).utf8(runtime);
     auto stream = SkMemoryStream::MakeDirect(svgText.c_str(), svgText.size());
     auto svg_dom = SkSVGDOM::Builder().make(*stream);
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkSVG>(getContext(), std::move(svg_dom)));
+    auto svg = std::make_shared<JsiSkSVG>(getContext(), std::move(svg_dom));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, svg,
+                                                       getContext());
   }
+
+  size_t getMemoryPressure() const override { return 512; }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSVGFactory, MakeFromData),
                        JSI_EXPORT_FUNC(JsiSkSVGFactory, MakeFromString))

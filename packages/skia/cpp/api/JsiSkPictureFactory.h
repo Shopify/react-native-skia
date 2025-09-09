@@ -35,14 +35,18 @@ public:
         SkData::MakeWithCopy(buffer.data(runtime), buffer.size(runtime));
     auto picture = SkPicture::MakeFromData(data.get());
     if (picture != nullptr) {
-      return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkPicture>(getContext(), picture));
+      auto hostObjectInstance =
+          std::make_shared<JsiSkPicture>(getContext(), std::move(picture));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+          runtime, hostObjectInstance, getContext());
     } else {
       return jsi::Value::undefined();
     }
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPictureFactory, MakePicture))
+
+  size_t getMemoryPressure() const override { return 1024; }
 
   explicit JsiSkPictureFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

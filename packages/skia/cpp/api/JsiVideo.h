@@ -39,8 +39,10 @@ public:
     if (!image) {
       return jsi::Value::null();
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkImage>(getContext(), std::move(image));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(duration) { return getObject()->duration(); }
@@ -96,6 +98,8 @@ public:
       : JsiSkWrappingSharedPtrHostObject(std::move(context), std::move(video)) {
   }
 
+  size_t getMemoryPressure() const override { return 32768; }
+
   /**
    * Creates the function for construction a new instance of the SkFont
    * wrapper
@@ -109,9 +113,10 @@ public:
       auto url = arguments[0].asString(runtime).utf8(runtime);
       auto video = context->createVideo(url);
       // Return the newly constructed object
-      return jsi::Object::createFromHostObject(
-          runtime,
-          std::make_shared<JsiVideo>(std::move(context), std::move(video)));
+      auto videoObj =
+          std::make_shared<JsiVideo>(std::move(context), std::move(video));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, videoObj,
+                                                         context);
     };
   }
 };

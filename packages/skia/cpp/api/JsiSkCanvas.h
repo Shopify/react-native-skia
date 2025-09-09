@@ -681,6 +681,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawAtlas),
                        JSI_EXPORT_FUNC(JsiSkCanvas, readPixels))
 
+  size_t getMemoryPressure() const override { return 1024; }
+
   explicit JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 
