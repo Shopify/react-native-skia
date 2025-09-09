@@ -24,6 +24,11 @@ public:
   JsiSkData(std::shared_ptr<RNSkPlatformContext> context, sk_sp<SkData> asset)
       : JsiSkWrappingSkPtrHostObject(std::move(context), std::move(asset)) {}
 
+  size_t getMemoryPressure() const override {
+    auto data = getObject();
+    return data ? data->size() : 0;
+  }
+
   EXPORT_JSI_API_TYPENAME(JsiSkData, Data)
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkData, dispose))
 };

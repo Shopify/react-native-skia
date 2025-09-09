@@ -83,9 +83,10 @@ public:
                  : nullptr;
     auto shader =
         getObject()->makeShader(tmx, tmy, SkSamplingOptions(fm, mm), m);
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkShader>(getContext(), std::move(shader)));
+    auto shaderObj =
+        std::make_shared<JsiSkShader>(getContext(), std::move(shader));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shaderObj,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(makeShaderCubic) {
@@ -98,9 +99,10 @@ public:
                  : nullptr;
     auto shader =
         getObject()->makeShader(tmx, tmy, SkSamplingOptions({B, C}), m);
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkShader>(getContext(), std::move(shader)));
+    auto shaderObj =
+        std::make_shared<JsiSkShader>(getContext(), std::move(shader));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shaderObj,
+                                                       getContext());
   }
 
   sk_sp<SkData> encodeImageData(const jsi::Value *arguments, size_t count) {
@@ -237,8 +239,10 @@ public:
     auto grContext = getContext()->getDirectContext();
     auto rasterImage = getObject()->makeRasterImage(grContext);
 #endif
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), rasterImage));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkImage>(getContext(), std::move(rasterImage));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(getNativeTextureUnstable) {
@@ -268,6 +272,11 @@ public:
              const sk_sp<SkImage> image)
       : JsiSkWrappingSkPtrHostObject<SkImage>(std::move(context),
                                               std::move(image)) {}
+
+  size_t getMemoryPressure() const override {
+    auto image = getObject();
+    return image ? image->imageInfo().computeMinByteSize() : 0;
+  }
 };
 
 } // namespace RNSkia

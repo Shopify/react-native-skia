@@ -43,9 +43,10 @@ public:
   }
 
   JSI_HOST_FUNCTION(getCanvas) {
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkCanvas>(getContext(), getObject()->getCanvas()));
+    auto canvas =
+        std::make_shared<JsiSkCanvas>(getContext(), getObject()->getCanvas());
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, canvas,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(flush) {
@@ -81,13 +82,28 @@ public:
       jsiImage->setObject(image);
       return jsi::Value(runtime, arguments[1]);
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkImage>(getContext(), std::move(image));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(getNativeTextureUnstable) {
     auto texInfo = getContext()->getTexture(getObject());
     return JsiTextureInfo::toValue(runtime, texInfo);
+  }
+
+  size_t getMemoryPressure() const override {
+    auto surface = getObject();
+    if (!surface)
+      return 0;
+
+    // Surface memory is primarily the pixel buffer: width × height × bytes per
+    // pixel
+    int width = surface->width();
+    int height = surface->height();
+    // Assume 4 bytes per pixel (RGBA) for most surfaces
+    return width * height * 4;
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurface, width),

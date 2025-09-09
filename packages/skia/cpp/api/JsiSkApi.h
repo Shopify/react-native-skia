@@ -61,6 +61,8 @@ namespace jsi = facebook::jsi;
 
 class JsiSkApi : public JsiSkHostObject {
 public:
+  size_t getMemoryPressure() const override { return 8192; }
+
   /**
    * Constructs the Skia Api object that can be installed into a runtime
    * and provide functions for accessing and creating the Skia wrapper objects

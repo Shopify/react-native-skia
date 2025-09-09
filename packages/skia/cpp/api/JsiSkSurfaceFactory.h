@@ -30,9 +30,10 @@ public:
     if (surface == nullptr) {
       return jsi::Value::null();
     }
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkSurface>(getContext(), std::move(surface)));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkSurface>(getContext(), std::move(surface));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(MakeOffscreen) {
@@ -43,13 +44,16 @@ public:
     if (surface == nullptr) {
       return jsi::Value::null();
     }
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkSurface>(getContext(), std::move(surface)));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkSurface>(getContext(), std::move(surface));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurfaceFactory, Make),
                        JSI_EXPORT_FUNC(JsiSkSurfaceFactory, MakeOffscreen))
+
+  size_t getMemoryPressure() const override { return 2048; }
 
   explicit JsiSkSurfaceFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
