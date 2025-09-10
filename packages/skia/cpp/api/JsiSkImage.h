@@ -105,7 +105,7 @@ public:
                                                        getContext());
   }
 
-  sk_sp<SkData> encodeImageData(const jsi::Value *arguments, size_t count) {
+  sk_sp<SkData> encodeImageData(const jsi::Value *arguments, size_t count, bool rasterIfNeeded) {
     // Get optional parameters
     auto format =
         count >= 1 ? static_cast<SkEncodedImageFormat>(arguments[0].asNumber())
@@ -118,12 +118,14 @@ public:
 #if defined(SK_GRAPHITE)
     image = DawnContext::getInstance().MakeRasterImage(image);
 #else
-    if (image->isTextureBacked()) {
+    if (image->isTextureBacked() && rasterIfNeeded) {
       auto grContext = getContext()->getDirectContext();
       image = image->makeRasterImage(grContext);
       if (!image) {
-        return nullptr;
+        throw std::runtime_error("Failed to create raster image from texture in encodeImageData");
       }
+    } else if (image->isTextureBacked() && !rasterIfNeeded) {
+      throw std::runtime_error("Cannot encode texture-backed image directly");
     }
 #endif
     sk_sp<SkData> data;
@@ -146,12 +148,15 @@ public:
       SkPngEncoder::Options options;
       data = SkPngEncoder::Encode(nullptr, image.get(), options);
     }
-
+    if (data == nullptr) {
+      throw std::runtime_error("Failed to encode image data or read pixels from the image");
+    }
     return data;
   }
 
   JSI_HOST_FUNCTION(encodeToBytes) {
-    auto data = encodeImageData(arguments, count);
+    bool rasterIfNeeded = count > 0 && arguments[0].isBool() ? arguments[0].asBool() : true;
+    auto data = encodeImageData(arguments, count, rasterIfNeeded);
     if (!data) {
       return jsi::Value::null();
     }
@@ -174,7 +179,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(encodeToBase64) {
-    auto data = encodeImageData(arguments, count);
+    bool rasterIfNeeded = count > 0 && arguments[0].isBool() ? arguments[0].asBool() : true;
+    auto data = encodeImageData(arguments, count, rasterIfNeeded);
     if (!data) {
       return jsi::Value::null();
     }
