@@ -107,25 +107,21 @@ jobs:
           # Apple builds
           - platform: ios
             arch: arm64
-            toolchain_file: externals/dawn/build-tools/apple.toolchain.cmake
             cmake_args: -DPLATFORM=OS64 -DDEPLOYMENT_TARGET=13.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
             output_dir: externals/dawn/out/ios_arm64
             library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.a
           - platform: ios
             arch: sim_arm64
-            toolchain_file: externals/dawn/build-tools/apple.toolchain.cmake
             cmake_args: -DPLATFORM=SIMULATORARM64 -DDEPLOYMENT_TARGET=13.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
             output_dir: externals/dawn/out/ios_sim_arm64
             library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.a
           - platform: ios
             arch: sim_x86_64
-            toolchain_file: externals/dawn/build-tools/apple.toolchain.cmake
             cmake_args: -DPLATFORM=SIMULATOR64 -DDEPLOYMENT_TARGET=13.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
             output_dir: externals/dawn/out/ios_sim_x86_64
             library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.a
           - platform: macos
             arch: universal
-            toolchain_file: externals/dawn/build-tools/apple.toolchain.cmake
             cmake_args: -DPLATFORM=MAC_UNIVERSAL -DDEPLOYMENT_TARGET=11.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
             output_dir: externals/dawn/out/macos_universal
             library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.a
@@ -149,24 +145,18 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      - name: Install Ninja
-        run: |
-          brew install ninja
-
       - name: Download Apple toolchain
         run: |
           mkdir -p externals/dawn/build-tools
           # Download the ios-cmake toolchain file
           curl -L https://raw.githubusercontent.com/leetal/ios-cmake/6fa909e133b92343db2d099e0478448c05ffec1a/ios.toolchain.cmake -o externals/dawn/build-tools/apple.toolchain.cmake
-          # Verify the toolchain file was downloaded
-          ls -la externals/dawn/build-tools/
 
       - name: Build ${{ matrix.platform }} ${{ matrix.arch }}
         run: |
           cmake -S externals/dawn -B ${{ matrix.output_dir }} -G Ninja \
             -DDAWN_MOBILE_BUILD=apple \
             -C externals/dawn/.github/workflows/dawn-ci.cmake \
-            -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain_file }} \
+            -DCMAKE_TOOLCHAIN_FILE=externals/dawn/build-tools/apple.toolchain.cmake \
             ${{ matrix.cmake_args }} \
             -DCMAKE_BUILD_TYPE=Release
           ninja -C ${{ matrix.output_dir }}
