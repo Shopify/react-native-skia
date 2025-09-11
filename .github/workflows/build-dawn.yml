@@ -24,25 +24,25 @@ jobs:
             toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
             cmake_args: -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-26
             output_dir: externals/dawn/out/android_arm64-v8a
-            library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.a
+            library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.so
             strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
           - arch: armeabi-v7a
             toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
             cmake_args: -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-26
             output_dir: externals/dawn/out/android_armeabi-v7a
-            library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.a
+            library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.so
             strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
           - arch: x86
             toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
             cmake_args: -DANDROID_ABI=x86 -DANDROID_PLATFORM=android-26
             output_dir: externals/dawn/out/android_x86
-            library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.a
+            library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.so
             strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
           - arch: x86_64
             toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
             cmake_args: -DANDROID_ABI=x86_64 -DANDROID_PLATFORM=android-26
             output_dir: externals/dawn/out/android_x86_64
-            library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.a
+            library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.so
             strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
 
     name: Build-android-${{ matrix.arch }}
@@ -75,7 +75,9 @@ jobs:
             -C externals/dawn/.github/workflows/dawn-ci.cmake \
             -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain_file }} \
             ${{ matrix.cmake_args }} \
-            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DDAWN_BUILD_MONOLITHIC_LIBRARY=SHARED
           ninja -C ${{ matrix.output_dir }}
       - name: Strip Android binaries
         run: |
@@ -201,10 +203,10 @@ jobs:
           mkdir -p dawn-android-${{ github.sha }}/armeabi-v7a
           mkdir -p dawn-android-${{ github.sha }}/x86
           mkdir -p dawn-android-${{ github.sha }}/x86_64
-          cp artifacts/build-android-arm64-v8a/libwebgpu_dawn.a dawn-android-${{ github.sha }}/arm64-v8a/
-          cp artifacts/build-android-armeabi-v7a/libwebgpu_dawn.a dawn-android-${{ github.sha }}/armeabi-v7a/
-          cp artifacts/build-android-x86/libwebgpu_dawn.a dawn-android-${{ github.sha }}/x86/
-          cp artifacts/build-android-x86_64/libwebgpu_dawn.a dawn-android-${{ github.sha }}/x86_64/
+          cp artifacts/build-android-arm64-v8a/libwebgpu_dawn.so dawn-android-${{ github.sha }}/arm64-v8a/
+          cp artifacts/build-android-armeabi-v7a/libwebgpu_dawn.so dawn-android-${{ github.sha }}/armeabi-v7a/
+          cp artifacts/build-android-x86/libwebgpu_dawn.so dawn-android-${{ github.sha }}/x86/
+          cp artifacts/build-android-x86_64/libwebgpu_dawn.so dawn-android-${{ github.sha }}/x86_64/
       - name: Create archives
         run: |
           tar -czf dawn-android-${{ github.sha }}.tar.gz dawn-android-${{ github.sha }}
