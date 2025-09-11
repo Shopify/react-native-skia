@@ -154,6 +154,7 @@ jobs:
           mkdir -p externals/dawn/build-tools
           # Download the ios-cmake toolchain file
           curl -L https://raw.githubusercontent.com/leetal/ios-cmake/6fa909e133b92343db2d099e0478448c05ffec1a/ios.toolchain.cmake -o externals/dawn/build-tools/apple.toolchain.cmake
+          cat externals/dawn/build-tools/apple.toolchain.cmake
       - name: Build ${{ matrix.platform }} ${{ matrix.arch }}
         run: |
           cmake -S externals/dawn -B ${{ matrix.output_dir }} -G Ninja \
