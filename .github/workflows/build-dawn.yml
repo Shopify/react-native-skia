@@ -24,25 +24,25 @@ jobs:
             toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
             cmake_args: -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-26
             output_dir: externals/dawn/out/android_arm64-v8a
-            library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.so
+            library_path: src/dawn/native/libwebgpu_dawn.so
             strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
           - arch: armeabi-v7a
             toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
             cmake_args: -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-26
             output_dir: externals/dawn/out/android_armeabi-v7a
-            library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.so
+            library_path: src/dawn/native/libwebgpu_dawn.so
             strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
           - arch: x86
             toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
             cmake_args: -DANDROID_ABI=x86 -DANDROID_PLATFORM=android-26
             output_dir: externals/dawn/out/android_x86
-            library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.so
+            library_path: src/dawn/native/libwebgpu_dawn.so
             strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
           - arch: x86_64
             toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
             cmake_args: -DANDROID_ABI=x86_64 -DANDROID_PLATFORM=android-26
             output_dir: externals/dawn/out/android_x86_64
-            library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.so
+            library_path: src/dawn/native/libwebgpu_dawn.so
             strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
 
     name: Build-android-${{ matrix.arch }}
@@ -57,7 +57,6 @@ jobs:
           repository: google/dawn
           ref: ${{ env.DAWN_BRANCH }}
           path: externals/dawn
-#          submodules: true
 
       - name: Setup Android NDK
         id: setup-ndk
@@ -109,22 +108,22 @@ jobs:
             arch: arm64
             cmake_args: -DPLATFORM=OS64 -DDEPLOYMENT_TARGET=13.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
             output_dir: externals/dawn/out/ios_arm64
-            library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.a
+            library_path: src/dawn/native/libwebgpu_dawn.a
           - platform: ios
             arch: sim_arm64
             cmake_args: -DPLATFORM=SIMULATORARM64 -DDEPLOYMENT_TARGET=13.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
             output_dir: externals/dawn/out/ios_sim_arm64
-            library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.a
+            library_path: src/dawn/native/libwebgpu_dawn.a
           - platform: ios
             arch: sim_x86_64
             cmake_args: -DPLATFORM=SIMULATOR64 -DDEPLOYMENT_TARGET=13.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
             output_dir: externals/dawn/out/ios_sim_x86_64
-            library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.a
+            library_path: src/dawn/native/libwebgpu_dawn.a
           - platform: macos
             arch: universal
             cmake_args: -DPLATFORM=MAC_UNIVERSAL -DDEPLOYMENT_TARGET=11.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
             output_dir: externals/dawn/out/macos_universal
-            library_path: externals/dawn/src/dawn/native/libwebgpu_dawn.a
+            library_path: src/dawn/native/libwebgpu_dawn.a
 
     name: Build-${{ matrix.platform }}-${{ matrix.arch }}
     runs-on: macos-latest-large
