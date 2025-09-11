@@ -1,6 +1,10 @@
 name: Build Dawn
 
-on: workflow_dispatch
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+  workflow_dispatch:
 
 concurrency:
   # Use github.run_id on main branch
