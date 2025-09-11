@@ -149,9 +149,6 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      - name: Setup Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
-
       - name: Download Apple toolchain
         run: |
           mkdir -p externals/dawn/build-tools
