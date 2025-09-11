@@ -76,7 +76,9 @@ jobs:
             ${{ matrix.cmake_args }} \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_SHARED_LIBS=OFF \
-            -DDAWN_BUILD_MONOLITHIC_LIBRARY=SHARED
+            -DDAWN_BUILD_MONOLITHIC_LIBRARY=SHARED \
+            -DCMAKE_EXE_LINKER_FLAGS="-llog" \
+            -DCMAKE_SHARED_LINKER_FLAGS="-llog"
           ninja -C ${{ matrix.output_dir }}
       - name: Strip Android binaries
         run: |
