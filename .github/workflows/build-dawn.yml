@@ -60,7 +60,7 @@ jobs:
           repository: google/dawn
           ref: ${{ env.DAWN_BRANCH }}
           path: externals/dawn
-          submodules: true
+#          submodules: true
 
       - name: Setup Android NDK
         id: setup-ndk
