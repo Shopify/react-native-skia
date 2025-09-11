@@ -1,10 +1,6 @@
 name: Build Dawn
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-  workflow_dispatch:
+on: workflow_dispatch
 
 concurrency:
   # Use github.run_id on main branch
@@ -14,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  DAWN_BRANCH: chromium/7403  # Configure the Dawn branch to checkout
+  DAWN_BRANCH: main  # Configure the Dawn branch to checkout
 
 jobs:
   mobile-android:
