@@ -156,7 +156,7 @@ jobs:
           cmake -S externals/dawn -B ${{ matrix.output_dir }} -G Ninja \
             -DDAWN_MOBILE_BUILD=apple \
             -C externals/dawn/.github/workflows/dawn-ci.cmake \
-            -DCMAKE_TOOLCHAIN_FILE=externals/dawn/build-tools/apple.toolchain.cmake \
+            -DCMAKE_TOOLCHAIN_FILE=build-tools/apple.toolchain.cmake \
             ${{ matrix.cmake_args }} \
             -DCMAKE_BUILD_TYPE=Release
           ninja -C ${{ matrix.output_dir }}
