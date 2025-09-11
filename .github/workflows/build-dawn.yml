@@ -1,0 +1,222 @@
+name: Build Dawn
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DAWN_BRANCH: main  # Configure the Dawn branch to checkout
+
+jobs:
+  mobile-android:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Android builds
+          - arch: arm64-v8a
+            toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
+            cmake_args: -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-26
+            output_dir: externals/dawn/out/android_arm64-v8a
+            library_path: src/dawn/native/libwebgpu_dawn.so
+            strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
+          - arch: armeabi-v7a
+            toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
+            cmake_args: -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-26
+            output_dir: externals/dawn/out/android_armeabi-v7a
+            library_path: src/dawn/native/libwebgpu_dawn.so
+            strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
+          - arch: x86
+            toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
+            cmake_args: -DANDROID_ABI=x86 -DANDROID_PLATFORM=android-26
+            output_dir: externals/dawn/out/android_x86
+            library_path: src/dawn/native/libwebgpu_dawn.so
+            strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
+          - arch: x86_64
+            toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
+            cmake_args: -DANDROID_ABI=x86_64 -DANDROID_PLATFORM=android-26
+            output_dir: externals/dawn/out/android_x86_64
+            library_path: src/dawn/native/libwebgpu_dawn.so
+            strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
+
+    name: Build-android-${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main repository
+        uses: actions/checkout@v4
+
+      - name: Checkout Dawn repository
+        uses: actions/checkout@v4
+        with:
+          repository: google/dawn
+          ref: ${{ env.DAWN_BRANCH }}
+          path: externals/dawn
+
+      - name: Setup Android NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r27d
+
+      - name: Set ANDROID_NDK
+        run: echo "ANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_ENV
+
+      - name: Build android ${{ matrix.arch }}
+        run: |
+          cmake -S externals/dawn -B ${{ matrix.output_dir }} -G Ninja \
+            -DDAWN_MOBILE_BUILD=android \
+            -C externals/dawn/.github/workflows/dawn-ci.cmake \
+            -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain_file }} \
+            ${{ matrix.cmake_args }} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DDAWN_BUILD_MONOLITHIC_LIBRARY=SHARED \
+            -DCMAKE_EXE_LINKER_FLAGS="-llog" \
+            -DCMAKE_SHARED_LINKER_FLAGS="-llog"
+          ninja -C ${{ matrix.output_dir }}
+      - name: Strip Android binaries
+        run: |
+          ${{ matrix.strip_tool }} ${{ matrix.output_dir }}/${{ matrix.library_path }}
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-android-${{ matrix.arch }}
+          path: ${{ matrix.output_dir }}/${{ matrix.library_path }}
+
+      - name: Install headers (from arm64-v8a build only)
+        if: matrix.arch == 'arm64-v8a'
+        run: |
+          cmake --install ${{ matrix.output_dir }} --prefix dawn-headers
+      - name: Upload headers (from arm64-v8a build only)
+        if: matrix.arch == 'arm64-v8a'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dawn-headers-${{ github.sha }}
+          path: dawn-headers/
+
+  mobile-apple:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Apple builds
+          - platform: ios
+            arch: arm64
+            cmake_args: -DPLATFORM=OS64 -DDEPLOYMENT_TARGET=13.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
+            output_dir: externals/dawn/out/ios_arm64
+            library_path: src/dawn/native/libwebgpu_dawn.a
+          - platform: ios
+            arch: sim_arm64
+            cmake_args: -DPLATFORM=SIMULATORARM64 -DDEPLOYMENT_TARGET=13.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
+            output_dir: externals/dawn/out/ios_sim_arm64
+            library_path: src/dawn/native/libwebgpu_dawn.a
+          - platform: ios
+            arch: sim_x86_64
+            cmake_args: -DPLATFORM=SIMULATOR64 -DDEPLOYMENT_TARGET=13.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
+            output_dir: externals/dawn/out/ios_sim_x86_64
+            library_path: src/dawn/native/libwebgpu_dawn.a
+          - platform: macos
+            arch: universal
+            cmake_args: -DPLATFORM=MAC_UNIVERSAL -DDEPLOYMENT_TARGET=11.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
+            output_dir: externals/dawn/out/macos_universal
+            library_path: src/dawn/native/libwebgpu_dawn.a
+
+    name: Build-${{ matrix.platform }}-${{ matrix.arch }}
+    runs-on: macos-latest-large
+    steps:
+      - name: Checkout main repository
+        uses: actions/checkout@v4
+
+      - name: Checkout Dawn repository
+        uses: actions/checkout@v4
+        with:
+          repository: google/dawn
+          ref: ${{ env.DAWN_BRANCH }}
+          path: externals/dawn
+#          submodules: true
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Download Apple toolchain
+        run: |
+          mkdir -p externals/dawn/build-tools
+          # Download the ios-cmake toolchain file
+          curl -L https://raw.githubusercontent.com/leetal/ios-cmake/6fa909e133b92343db2d099e0478448c05ffec1a/ios.toolchain.cmake -o externals/dawn/build-tools/apple.toolchain.cmake
+
+      - name: Build ${{ matrix.platform }} ${{ matrix.arch }}
+        run: |
+          cmake -S externals/dawn -B ${{ matrix.output_dir }} -G Ninja \
+            -DDAWN_MOBILE_BUILD=apple \
+            -C externals/dawn/.github/workflows/dawn-ci.cmake \
+            -DCMAKE_TOOLCHAIN_FILE=build-tools/apple.toolchain.cmake \
+            ${{ matrix.cmake_args }} \
+            -DCMAKE_BUILD_TYPE=Release
+          ninja -C ${{ matrix.output_dir }}
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.platform }}-${{ matrix.arch }}
+          path: ${{ matrix.output_dir }}/${{ matrix.library_path }}
+
+  package-mobile:
+    name: Package Mobile Artifacts
+    runs-on: macos-latest
+    needs: [mobile-android, mobile-apple]
+    steps:
+      - name: Checkout main repository
+        uses: actions/checkout@v4
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: build-*
+          path: artifacts
+
+      - name: Create iOS Simulator fat binary
+        run: |
+          mkdir -p libs/apple/iphonesimulator
+          lipo -create \
+            artifacts/build-ios-sim_x86_64/libwebgpu_dawn.a \
+            artifacts/build-ios-sim_arm64/libwebgpu_dawn.a \
+            -output libs/apple/iphonesimulator/libwebgpu_dawn.a
+      - name: Create XCFramework
+        run: |
+          xcodebuild -create-xcframework \
+            -library libs/apple/iphonesimulator/libwebgpu_dawn.a \
+            -library artifacts/build-ios-arm64/libwebgpu_dawn.a \
+            -library artifacts/build-macos-universal/libwebgpu_dawn.a \
+            -output dawn-apple-${{ github.sha }}.xcframework
+      - name: Package Android libraries
+        run: |
+          mkdir -p dawn-android-${{ github.sha }}/arm64-v8a
+          mkdir -p dawn-android-${{ github.sha }}/armeabi-v7a
+          mkdir -p dawn-android-${{ github.sha }}/x86
+          mkdir -p dawn-android-${{ github.sha }}/x86_64
+          cp artifacts/build-android-arm64-v8a/libwebgpu_dawn.so dawn-android-${{ github.sha }}/arm64-v8a/
+          cp artifacts/build-android-armeabi-v7a/libwebgpu_dawn.so dawn-android-${{ github.sha }}/armeabi-v7a/
+          cp artifacts/build-android-x86/libwebgpu_dawn.so dawn-android-${{ github.sha }}/x86/
+          cp artifacts/build-android-x86_64/libwebgpu_dawn.so dawn-android-${{ github.sha }}/x86_64/
+      - name: Create archives
+        run: |
+          tar -czf dawn-android-${{ github.sha }}.tar.gz dawn-android-${{ github.sha }}
+          tar -czf dawn-apple-${{ github.sha }}.xcframework.tar.gz dawn-apple-${{ github.sha }}.xcframework
+      - name: Upload Android artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dawn-android-${{ github.sha }}
+          path: dawn-android-${{ github.sha }}.tar.gz
+
+      - name: Upload Apple artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dawn-apple-${{ github.sha }}
+          path: dawn-apple-${{ github.sha }}.xcframework.tar.gz
