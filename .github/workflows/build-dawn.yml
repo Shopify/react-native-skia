@@ -149,12 +149,18 @@ jobs:
         with:
           xcode-version: latest-stable
 
+      - name: Install Ninja
+        run: |
+          brew install ninja
+
       - name: Download Apple toolchain
         run: |
           mkdir -p externals/dawn/build-tools
           # Download the ios-cmake toolchain file
           curl -L https://raw.githubusercontent.com/leetal/ios-cmake/6fa909e133b92343db2d099e0478448c05ffec1a/ios.toolchain.cmake -o externals/dawn/build-tools/apple.toolchain.cmake
-          cat externals/dawn/build-tools/apple.toolchain.cmake
+          # Verify the toolchain file was downloaded
+          ls -la externals/dawn/build-tools/
+
       - name: Build ${{ matrix.platform }} ${{ matrix.arch }}
         run: |
           cmake -S externals/dawn -B ${{ matrix.output_dir }} -G Ninja \
