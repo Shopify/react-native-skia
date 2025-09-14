@@ -77,17 +77,17 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
       // we try to render while in the background. (see above issue)
       return false;
     }
-	  
-	  auto surface = _ctx->getSurface();
-	  if (!surface) {
-		return false;
-	  }
-	  auto canvas = surface->getCanvas();
-	  cb(canvas);
-	  _ctx->present();
-	  return true;
+
+    auto surface = _ctx->getSurface();
+    if (!surface) {
+      return false;
+    }
+    auto canvas = surface->getCanvas();
+    cb(canvas);
+    _ctx->present();
+    return true;
   }
-	return false;
+  return false;
 };
 
 void RNSkMetalCanvasProvider::setSize(int width, int height) {

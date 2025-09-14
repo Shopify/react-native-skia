@@ -18,11 +18,15 @@
 #pragma clang diagnostic pop
 
 MetalContext::MetalContext() {
-  auto device = MetalSharedContext::getInstance().getDevice();
+  _device = MTLCreateSystemDefaultDevice();
+  if (!_device) {
+    throw std::runtime_error("Failed to create Metal device");
+  }
+  
   _commandQueue =
-      id<MTLCommandQueue>(CFRetain((GrMTLHandle)[device newCommandQueue]));
+      id<MTLCommandQueue>(CFRetain((GrMTLHandle)[_device newCommandQueue]));
   GrMtlBackendContext backendContext = {};
-  backendContext.fDevice.reset((__bridge void *)device);
+  backendContext.fDevice.reset((__bridge void *)_device);
   backendContext.fQueue.reset((__bridge void *)_commandQueue);
   GrContextOptions grContextOptions; // set different options here.
 
