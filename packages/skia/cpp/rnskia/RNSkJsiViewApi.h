@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "JsiHostObject.h"
+#include "RNSkPictureView.h"
 #include "RNSkPlatformContext.h"
 #include "RNSkView.h"
 #include "ViewProperty.h"
@@ -103,18 +104,32 @@ public:
         nativeId, [&](std::shared_ptr<RNSkViewInfo> info) {
           auto name = arguments[1].asString(runtime).utf8(runtime);
           if (name == "onSize" && isSharedValue(runtime, arguments[2])) {
-            jsi::Object size(runtime);
-            auto pd = _platformContext->getPixelDensity();
-            auto w = info->view != nullptr
-                         ? std::max(info->view->getScaledWidth(), 0)
-                         : 0;
-            auto h = info->view != nullptr
-                         ? std::max(info->view->getScaledHeight(), 0)
-                         : 0;
+            if (info->view != nullptr) {
+              // Update view!
+              // Store the onSize shared value as a global property
+              std::string globalKey = "__onSize_" + std::to_string(nativeId);
+              runtime.global().setProperty(runtime, globalKey.c_str(),
+                                           arguments[2]);
 
-            size.setProperty(runtime, "width", w / pd);
-            size.setProperty(runtime, "height", h / pd);
-            arguments[2].asObject(runtime).setProperty(runtime, "value", size);
+              std::static_pointer_cast<RNSkPictureRenderer>(
+                  info->view->getRenderer())
+                  ->setOnSize([&runtime, this, globalKey,
+                               nativeId](int width, int height) {
+                    jsi::Object size(runtime);
+                    auto pd = _platformContext->getPixelDensity();
+                    size.setProperty(runtime, "width", jsi::Value(width / pd));
+                    size.setProperty(runtime, "height",
+                                     jsi::Value(height / pd));
+
+                    // Get the stored shared value from global
+                    auto globalProp = runtime.global().getProperty(
+                        runtime, globalKey.c_str());
+                    if (!globalProp.isUndefined()) {
+                      globalProp.asObject(runtime).setProperty(runtime, "value",
+                                                               size);
+                    }
+                  });
+            }
           } else {
             info->props.insert_or_assign(
                 arguments[1].asString(runtime).utf8(runtime),
@@ -322,6 +337,20 @@ public:
    * @param nativeId View id
    */
   void unregisterSkiaView(size_t nativeId) {
+    ViewRegistry::getInstance().removeViewInfo(nativeId);
+  }
+
+  /**
+   * Unregisters a Skia draw view and cleans up its global properties
+   * @param nativeId View id
+   * @param runtime JSI runtime to clean up global properties
+   */
+  void unregisterSkiaView(size_t nativeId, jsi::Runtime &runtime) {
+    // Clean up global onSize property
+    std::string globalKey = "__onSize_" + std::to_string(nativeId);
+    runtime.global().setProperty(runtime, globalKey.c_str(),
+                                 jsi::Value::undefined());
+
     ViewRegistry::getInstance().removeViewInfo(nativeId);
   }
 

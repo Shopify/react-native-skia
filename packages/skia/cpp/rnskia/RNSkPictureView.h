@@ -5,6 +5,7 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 #include <jsi/jsi.h>
@@ -55,8 +56,17 @@ public:
     _requestRedraw();
   }
 
+  void setOnSize(std::function<void(int, int)> onSize) { _onSize = onSize; }
+
+  void setOnSize(std::nullptr_t) { _onSize = std::monostate{}; }
+
 private:
   bool performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
+    // Call onSize callback if it exists
+    if (std::holds_alternative<std::function<void(int, int)>>(_onSize)) {
+      std::get<std::function<void(int, int)>>(_onSize)(
+          canvasProvider->getWidth(), canvasProvider->getHeight());
+    }
     return canvasProvider->renderToCanvas([=, this](SkCanvas *canvas) {
       // Make sure to scale correctly
       auto pd = _platformContext->getPixelDensity();
@@ -72,6 +82,7 @@ private:
 
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   sk_sp<SkPicture> _picture;
+  std::variant<std::monostate, std::function<void(int, int)>> _onSize;
 };
 
 class RNSkPictureView : public RNSkView {
@@ -88,7 +99,7 @@ public:
 
   void setJsiProperties(
       std::unordered_map<std::string, RNJsi::ViewProperty> &props) override {
-
+    // Base implementation - no onSize callback
     for (auto &prop : props) {
       if (prop.first == "picture") {
         if (prop.second.isNull()) {

@@ -385,17 +385,17 @@ public:
     for (size_t i = 0; i < shadowCount; i++) {
       auto shadowObj =
           shadowsArray.getValueAtIndex(runtime, i).asObject(runtime);
-      
+
       // Create shadow directly in vector to avoid copy
       shadows.emplace_back();
       BoxShadowCmdProps &shadow = shadows.back();
 
-       convertProperty(runtime, shadowObj, "dx", shadow.dx, variables);
-       convertProperty(runtime, shadowObj, "dy", shadow.dy, variables);
-       convertProperty(runtime, shadowObj, "spread", shadow.spread, variables);
-       convertProperty(runtime, shadowObj, "blur", shadow.blur, variables);
-       convertProperty(runtime, shadowObj, "color", shadow.color, variables);
-       convertProperty(runtime, shadowObj, "inner", shadow.inner, variables);
+      convertProperty(runtime, shadowObj, "dx", shadow.dx, variables);
+      convertProperty(runtime, shadowObj, "dy", shadow.dy, variables);
+      convertProperty(runtime, shadowObj, "spread", shadow.spread, variables);
+      convertProperty(runtime, shadowObj, "blur", shadow.blur, variables);
+      convertProperty(runtime, shadowObj, "color", shadow.color, variables);
+      convertProperty(runtime, shadowObj, "inner", shadow.inner, variables);
     }
   }
 
