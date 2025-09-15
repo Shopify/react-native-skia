@@ -103,18 +103,13 @@ public:
     ViewRegistry::getInstance().withViewInfo(
         nativeId, [&](std::shared_ptr<RNSkViewInfo> info) {
           auto name = arguments[1].asString(runtime).utf8(runtime);
-          if (name == "onSize" && isSharedValue(runtime, arguments[2])) {
+          if (name == "onSize") {
             if (info->view != nullptr) {
               // Update view!
-              // Store the onSize shared value as a global property
-               std::string globalKey = "__onSize_" + std::to_string(nativeId);
-               runtime.global().setProperty(runtime, globalKey.c_str(),
-                                            arguments[2]);
-
               std::static_pointer_cast<RNSkPictureRenderer>(
                   info->view->getRenderer())
-                  ->setOnSize([&runtime, this, globalKey,
-                               nativeId](int width, int height) {
+                  ->setOnSize([&runtime, this, nativeId](int width,
+                                                         int height) {
                     jsi::Object size(runtime);
                     auto pd = _platformContext->getPixelDensity();
                     size.setProperty(runtime, "width", jsi::Value(width / pd));
@@ -122,6 +117,9 @@ public:
                                      jsi::Value(height / pd));
 
                     // Get the stored shared value from global
+                    std::string globalKey =
+                        "__onSize_" +
+                        std::to_string(static_cast<int>(nativeId));
                     auto globalProp = runtime.global().getProperty(
                         runtime, globalKey.c_str());
                     if (!globalProp.isUndefined()) {

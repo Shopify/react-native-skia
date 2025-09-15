@@ -28,7 +28,6 @@ import type { SkImage, SkRect, SkSize } from "../skia/types";
 import { SkiaSGRoot } from "../sksg/Reconciler";
 import { Skia } from "../skia";
 import { Platform } from "../Platform";
-import { notifyChange } from "../external";
 
 export interface CanvasRef extends FC<CanvasProps> {
   makeImageSnapshot(rect?: SkRect): SkImage;
@@ -97,20 +96,23 @@ export const Canvas = ({
   const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
 
   const updateSize = useCallback(
-    (v) => {
+    (value: SkSize) => {
       if (onSize) {
-        onSize.value = v;
+        onSize.value = value;
       }
     },
     [onSize]
   );
   useEffect(() => {
     if (onSize) {
-      const os = makeMutable<SkSize>({ width: 0, height: 0 });
+      const uiOnSize = makeMutable<SkSize>({ width: 0, height: 0 });
       Rea.runOnUI(() => {
-        SkiaViewApi.setJsiProperty(nativeId, "onSize", os);
-        os.addListener(nativeId, (v) => {
-          runOnJS(updateSize)(v);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        global[`__onSize_${nativeId}`] = uiOnSize;
+        SkiaViewApi.setJsiProperty(nativeId, "onSize", null);
+        uiOnSize.addListener(nativeId, (value) => {
+          runOnJS(updateSize)(value);
         });
       })();
     }

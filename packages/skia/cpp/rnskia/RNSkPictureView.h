@@ -70,7 +70,8 @@ private:
       if (_lastWidth != currentWidth || _lastHeight != currentHeight) {
         _lastWidth = currentWidth;
         _lastHeight = currentHeight;
-        std::get<std::function<void(int, int)>>(_onSize)(currentWidth, currentHeight);
+        std::get<std::function<void(int, int)>>(_onSize)(currentWidth,
+                                                         currentHeight);
       }
     }
     return canvasProvider->renderToCanvas([=, this](SkCanvas *canvas) {
