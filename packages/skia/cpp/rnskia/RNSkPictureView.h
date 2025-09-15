@@ -56,9 +56,10 @@ public:
     _requestRedraw();
   }
 
-  void setOnSize(std::function<void(int, int)> onSize) { _onSize = onSize; }
-
-  void setOnSize(std::nullptr_t) { _onSize = std::monostate{}; }
+  void setOnSize(
+      std::variant<std::nullptr_t, std::function<void(int, int)>> onSize) {
+    _onSize = onSize;
+  }
 
 private:
   bool performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
@@ -89,7 +90,7 @@ private:
 
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   sk_sp<SkPicture> _picture;
-  std::variant<std::monostate, std::function<void(int, int)>> _onSize;
+  std::variant<std::nullptr_t, std::function<void(int, int)>> _onSize = nullptr;
   int _lastWidth = -1;
   int _lastHeight = -1;
 };
@@ -117,10 +118,12 @@ public:
               ->setPicture(nullptr);
           continue;
         }
-
         // Save picture
         std::static_pointer_cast<RNSkPictureRenderer>(getRenderer())
             ->setPicture(prop.second.getPicture());
+      } else if (prop.first == "onSize") {
+        std::static_pointer_cast<RNSkPictureRenderer>(getRenderer())
+            ->setOnSize(prop.second.getOnSize());
       }
     }
   }
