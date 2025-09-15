@@ -1,76 +1,242 @@
+import type { LinkingOptions } from "@react-navigation/native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import React from "react";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { StatusBar } from "react-native";
+import type { HeaderBackButtonProps } from "@react-navigation/elements";
+import { HeaderBackButton } from "@react-navigation/elements";
+import { FiberProvider } from "its-fine";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { enableScreens } from "react-native-screens";
+
 import {
-  Alert,
-  Button,
-  PixelRatio,
-  SafeAreaView,
-  StyleSheet,
-} from "react-native";
-import type { SkImage, SkSurface } from "@shopify/react-native-skia";
-import { Canvas, Image, Skia } from "@shopify/react-native-skia";
-import { runOnUI, useSharedValue, withTiming } from "react-native-reanimated";
+  ReanimatedExample,
+  API,
+  Aurora,
+  Breathe,
+  Filters,
+  Gooey,
+  GraphsScreen,
+  Hue,
+  Matrix,
+  Glassmorphism,
+  Neumorphism,
+  PerformanceDrawingTest,
+  Wallpaper,
+  Vertices,
+  Wallet,
+  Severance,
+  Transitions,
+  Stickers,
+  FrostedCard,
+  SpeedTest,
+  Video,
+  Chat,
+  LiquidGlass,
+} from "./Examples";
+import { CI, Tests } from "./Tests";
+import { HomeScreen } from "./Home";
+import type { StackParamList } from "./types";
+import { useAssets } from "./Tests/useAssets";
+import { Chess } from "./Examples/Chess";
 
-export default function App() {
-  const image = useSharedValue<SkImage | null>(null);
-  const surface = useSharedValue<SkSurface | null>(null);
-  const looper = useSharedValue(0);
-  const pixelRatio = PixelRatio.get();
-
-  const start = () => {
-    "worklet";
-    surface.value = Skia.Surface.MakeOffscreen(
-      pixelRatio * 200,
-      pixelRatio * 200
-    );
-    const blink = () => {
-      if (!surface.value) {
-        Alert.alert("surface is null");
-        return;
-      }
-      const canvas = surface.value.getCanvas();
-      const paint = Skia.Paint();
-      paint.setColor(
-        Float32Array.from([Math.random(), Math.random(), Math.random(), 1])
-      );
-      canvas.drawRect(
-        {
-          x: 0,
-          y: 0,
-          width: pixelRatio * 200,
-          height: pixelRatio * 200,
-        },
-        paint
-      );
-      surface.value.flush();
-      image.value = surface.value.makeImageSnapshot();
-      looper.value = withTiming(1 - looper.value, { duration: 10 }, blink);
-    };
-    blink();
-  };
-
-  return (
-    <SafeAreaView style={styles.container}>
-      <Canvas
-        style={{
-          width: 200,
-          height: 200,
-          borderColor: "red",
-          borderWidth: 1,
-        }}
-      >
-        <Image image={image} width={200} height={200} />
-      </Canvas>
-      <Button onPress={runOnUI(start)} title="Start" />
-    </SafeAreaView>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#ecf0f1",
-    padding: 8,
+const linking: LinkingOptions<StackParamList> = {
+  config: {
+    screens: {
+      Home: "",
+      Vertices: "vertices",
+      API: "api",
+      LiquidGlass: "liquid-glass",
+      Breathe: "breathe",
+      Filters: "filters",
+      Gooey: "gooey",
+      Hue: "hue",
+      Matrix: "matrix",
+      Severance: "severance",
+      Aurora: "aurora",
+      Chess: "chess",
+      Glassmorphism: "glassmorphism",
+      Neumorphism: "neumorphism",
+      Wallpaper: "wallpaper",
+      Wallet: "wallet",
+      Graphs: "graphs",
+      Animation: "animation",
+      Reanimated: "reanimated",
+      Performance: "performance",
+      Tests: "test",
+      Transitions: "transitions",
+      Stickers: "stickers",
+      FrostedCard: "frosted-card",
+      SpeedTest: "speedtest",
+      Video: "video",
+      Chat: "chat",
+    },
   },
-});
+  prefixes: ["rnskia://"],
+};
+
+const HeaderLeft = (props: HeaderBackButtonProps) => {
+  const navigation = useNavigation();
+  return (
+    <HeaderBackButton
+      {...props}
+      onPress={() => {
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        }
+      }}
+      testID="back"
+    />
+  );
+};
+
+enableScreens(true);
+
+const App = () => {
+  const Stack = createNativeStackNavigator<StackParamList>();
+  const assets = useAssets();
+  if (assets === null) {
+    return null;
+  }
+  return (
+    <FiberProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <StatusBar hidden />
+        <NavigationContainer linking={linking}>
+          <Stack.Navigator
+            screenOptions={{
+              headerLeft: HeaderLeft,
+            }}
+            initialRouteName={CI ? "Tests" : "Home"}
+          >
+            <Stack.Screen
+              name="Home"
+              key="Home"
+              component={HomeScreen}
+              options={{
+                title: "🎨 Skia",
+              }}
+            />
+            <Stack.Screen
+              key="Tests"
+              name="Tests"
+              options={{
+                title: "🔧 Tests",
+              }}
+            >
+              {(props) => <Tests {...props} assets={assets} />}
+            </Stack.Screen>
+            <Stack.Screen
+              name="Vertices"
+              component={Vertices}
+              options={{
+                header: () => null,
+              }}
+            />
+            <Stack.Screen name="API" component={API} />
+            <Stack.Screen name="LiquidGlass" component={LiquidGlass} />
+            <Stack.Screen name="Breathe" component={Breathe} />
+            <Stack.Screen
+              name="Chess"
+              component={Chess}
+              options={{
+                title: "👸🏼's Gambit",
+              }}
+            />
+            <Stack.Screen name="Filters" component={Filters} />
+            <Stack.Screen name="Gooey" component={Gooey} />
+            <Stack.Screen name="Hue" component={Hue} />
+            <Stack.Screen
+              name="Matrix"
+              component={Matrix}
+              options={{
+                header: () => null,
+              }}
+            />
+            <Stack.Screen
+              name="Severance"
+              component={Severance}
+              options={{
+                header: () => null,
+              }}
+            />
+            <Stack.Screen
+              name="Aurora"
+              component={Aurora}
+              options={{
+                header: () => null,
+              }}
+            />
+            <Stack.Screen
+              name="SpeedTest"
+              component={SpeedTest}
+              options={{
+                header: () => null,
+              }}
+            />
+            <Stack.Screen
+              name="Glassmorphism"
+              component={Glassmorphism}
+              options={{
+                header: () => null,
+              }}
+            />
+            <Stack.Screen
+              name="FrostedCard"
+              component={FrostedCard}
+              options={{
+                header: () => null,
+              }}
+            />
+            <Stack.Screen name="Neumorphism" component={Neumorphism} />
+            <Stack.Screen
+              name="Wallpaper"
+              component={Wallpaper}
+              options={{
+                header: () => null,
+              }}
+            />
+            <Stack.Screen
+              name="Wallet"
+              component={Wallet}
+              options={{
+                header: () => null,
+              }}
+            />
+            <Stack.Screen name="Graphs" component={GraphsScreen} />
+            <Stack.Screen name="Reanimated" component={ReanimatedExample} />
+            <Stack.Screen name="Stickers" component={Stickers} />
+            <Stack.Screen
+              name="Transitions"
+              component={Transitions}
+              options={{
+                header: () => null,
+              }}
+            />
+            <Stack.Screen
+              name="Video"
+              component={Video}
+              options={{
+                header: () => null,
+              }}
+            />
+            <Stack.Screen
+              name="Chat"
+              component={Chat}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="Performance"
+              component={PerformanceDrawingTest}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </GestureHandlerRootView>
+    </FiberProvider>
+  );
+};
+
+// eslint-disable-next-line import/no-default-export
+export default App;

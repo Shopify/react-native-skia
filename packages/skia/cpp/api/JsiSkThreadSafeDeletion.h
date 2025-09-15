@@ -6,6 +6,10 @@
 #include <queue>
 #include <functional>
 
+// Define this to disable thread-safe deletion (for testing purposes)
+//#define DISABLE_THREAD_SAFE_DELETION
+
+
 namespace RNSkia {
 
 /**
@@ -38,6 +42,11 @@ public:
       return nullptr;
     }
     
+#ifdef DISABLE_THREAD_SAFE_DELETION
+    // When disabled, always return the object for immediate deletion
+    // This will likely cause crashes when objects are deleted on wrong thread
+    return object;
+#else
     // Always try to drain the queue when handling deletions
     drainDeletionQueue();
     
@@ -51,6 +60,7 @@ public:
     
     // We're on the correct thread, return object for immediate deletion
     return object;
+#endif
   }
   
   /**
@@ -58,6 +68,7 @@ public:
    * Should be called periodically (e.g., when creating new objects).
    */
   static void drainDeletionQueue() {
+#ifndef DISABLE_THREAD_SAFE_DELETION
     auto currentThreadId = std::this_thread::get_id();
     std::queue<DeletionItem> remainingItems;
     
@@ -80,6 +91,7 @@ public:
     
     // Put back items that couldn't be deleted
     _deletionQueue = std::move(remainingItems);
+#endif
   }
   
   /**
