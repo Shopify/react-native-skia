@@ -6,6 +6,7 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkHostObjects.h"
+#include "JsiSkThreadSafeDeletion.h"
 #include "JsiTextureInfo.h"
 
 #include "JsiSkCanvas.h"
@@ -28,11 +29,29 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 
 class JsiSkSurface : public JsiSkWrappingSkPtrHostObject<SkSurface> {
+private:
+  ThreadSafeDeletion<SkSurface> _deletionHandler;
+
 public:
   JsiSkSurface(std::shared_ptr<RNSkPlatformContext> context,
                sk_sp<SkSurface> surface)
       : JsiSkWrappingSkPtrHostObject<SkSurface>(std::move(context),
-                                                std::move(surface)) {}
+                                                std::move(surface)),
+        _deletionHandler() {
+    // Drain any pending deletions when creating new surfaces
+    ThreadSafeDeletion<SkSurface>::drainDeletionQueue();
+  }
+
+  ~JsiSkSurface() override {
+    // Handle thread-safe deletion
+    auto objectToDelete = _deletionHandler.handleDeletion(getObject());
+    if (!objectToDelete) {
+      // Object was queued for deletion on another thread
+      // Clear it to prevent base class destructor from deleting it
+      setObject(nullptr);
+    }
+    // If objectToDelete is not null, base destructor will handle cleanup
+  }
 
   EXPORT_JSI_API_TYPENAME(JsiSkSurface, Surface)
 
