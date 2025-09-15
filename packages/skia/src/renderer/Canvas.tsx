@@ -105,19 +105,16 @@ export const Canvas = ({
   );
   useEffect(() => {
     if (onSize) {
-      setTimeout(() => {
-        const uiOnSize = makeMutable({ width: 0, height: 0 });
-        Rea.runOnUI(() => {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
-          global[`__onSize_${nativeId}`] = uiOnSize;
-          SkiaViewApi.setJsiProperty(nativeId, "onSize", null);
-          uiOnSize.addListener(nativeId, (value) => {
-            console.log("hello!");
-            runOnJS(updateSize)(value);
-          });
-        })();
-      }, 100);
+      const uiOnSize = makeMutable({ width: 0, height: 0 });
+      Rea.runOnUI(() => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        global[`__onSize_${nativeId}`] = uiOnSize;
+        SkiaViewApi.setJsiProperty(nativeId, "onSize", null);
+        uiOnSize.addListener(nativeId, (value) => {
+          runOnJS(updateSize)(value);
+        });
+      })();
     }
   }, [onSize, nativeId, updateSize]);
 
