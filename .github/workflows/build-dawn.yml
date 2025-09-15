@@ -45,10 +45,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Checkout Dawn repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: google/dawn
           ref: ${{ env.DAWN_BRANCH }}
@@ -127,10 +127,10 @@ jobs:
     runs-on: macos-latest-large
     steps:
       - name: Checkout main repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Checkout Dawn repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: google/dawn
           ref: ${{ env.DAWN_BRANCH }}
@@ -169,7 +169,7 @@ jobs:
     needs: [mobile-android, mobile-apple]
     steps:
       - name: Checkout main repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Download all build artifacts
         uses: actions/download-artifact@v5
