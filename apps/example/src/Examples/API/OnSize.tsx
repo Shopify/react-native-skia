@@ -7,6 +7,14 @@ import { useDerivedValue, useSharedValue } from "react-native-reanimated";
 export const OnSize = () => {
   const size = useSharedValue({ width: 0, height: 0 });
   const redRect = useDerivedValue(() => {
+    console.log(
+      "new size " +
+        size.value.width +
+        "x" +
+        size.value.height +
+        " @ " +
+        new Date()
+    );
     return rect(0, 0, size.value.width, size.value.height);
   });
 

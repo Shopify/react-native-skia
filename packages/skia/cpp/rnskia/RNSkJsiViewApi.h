@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "JsiHostObject.h"
+#include "RNSkPictureView.h"
 #include "RNSkPlatformContext.h"
 #include "RNSkView.h"
 #include "ViewProperty.h"
@@ -102,31 +103,20 @@ public:
     ViewRegistry::getInstance().withViewInfo(
         nativeId, [&](std::shared_ptr<RNSkViewInfo> info) {
           auto name = arguments[1].asString(runtime).utf8(runtime);
-          if (name == "onSize" && isSharedValue(runtime, arguments[2])) {
-            jsi::Object size(runtime);
-            auto pd = _platformContext->getPixelDensity();
-            auto w = info->view != nullptr
-                         ? std::max(info->view->getScaledWidth(), 0)
-                         : 0;
-            auto h = info->view != nullptr
-                         ? std::max(info->view->getScaledHeight(), 0)
-                         : 0;
-
-            size.setProperty(runtime, "width", w / pd);
-            size.setProperty(runtime, "height", h / pd);
-            arguments[2].asObject(runtime).setProperty(runtime, "value", size);
-          } else {
+          info->props.insert_or_assign(
+              arguments[1].asString(runtime).utf8(runtime),
+              RNJsi::ViewProperty(runtime, arguments[2]));
+          if (info->props.find("onSize") == info->props.end()) {
             info->props.insert_or_assign(
-                arguments[1].asString(runtime).utf8(runtime),
-                RNJsi::ViewProperty(runtime, arguments[2]));
-
-            // Now let's see if we have a view that we can update
-            if (info->view != nullptr) {
-              // Update view!
-              info->view->setNativeId(nativeId);
-              info->view->setJsiProperties(info->props);
-              info->props.clear();
-            }
+                "onSize", RNJsi::ViewProperty(runtime, arguments[2],
+                                              _platformContext, nativeId));
+          }
+          // Now let's see if we have a view that we can update
+          if (info->view != nullptr) {
+            // Update view!
+            info->view->setNativeId(nativeId);
+            info->view->setJsiProperties(info->props);
+            info->props.clear();
           }
           return nullptr; // Return type for template deduction
         });

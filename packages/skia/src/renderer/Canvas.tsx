@@ -17,6 +17,7 @@ import type {
 } from "react-native";
 import { type SharedValue } from "react-native-reanimated";
 
+import Rea from "../external/reanimated/ReanimatedProxy";
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
 import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeComponent";
 import type { SkImage, SkRect, SkSize } from "../skia/types";
@@ -88,10 +89,39 @@ export const Canvas = ({
   }, []);
 
   // Root
-  const root = useMemo(
-    () => new SkiaSGRoot(Skia, nativeId, onSize),
-    [nativeId, onSize]
+  const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
+
+  const updateSize = useCallback(
+    (value: SkSize) => {
+      if (onSize) {
+        onSize.value = value;
+      }
+    },
+    [onSize]
   );
+  useEffect(() => {
+    if (onSize) {
+      const { runOnJS } = Rea;
+      const uiOnSize = Rea.makeMutable({ width: 0, height: 0 });
+      Rea.runOnUI(() => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        global[`__onSize_${nativeId}`] = uiOnSize;
+        uiOnSize.addListener(nativeId, (value) => {
+          runOnJS(updateSize)(value);
+        });
+      })();
+      return () => {
+        Rea.runOnUI(() => {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
+          delete global[`__onSize_${nativeId}`];
+          uiOnSize.removeListener(nativeId);
+        })();
+      };
+    }
+    return undefined;
+  }, [onSize, nativeId, updateSize]);
 
   // Render effects
   useLayoutEffect(() => {
