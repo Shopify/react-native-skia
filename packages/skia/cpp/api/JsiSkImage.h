@@ -3,6 +3,9 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <thread>
+#include <mutex>
+#include <queue>
 
 #include "JsiSkHostObjects.h"
 #include "JsiSkImageInfo.h"
@@ -61,6 +64,11 @@ inline SkSamplingOptions SamplingOptionsFromValue(jsi::Runtime &runtime,
 }
 
 class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
+private:
+  static inline std::mutex _deletionQueueMutex;
+  static inline std::queue<sk_sp<SkImage>> _deletionQueue;
+  static inline std::thread::id _jsThreadId;
+  
 public:
   // TODO-API: Properties?
   JSI_HOST_FUNCTION(width) { return static_cast<double>(getObject()->width()); }
@@ -271,8 +279,35 @@ public:
   JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
              const sk_sp<SkImage> image)
       : JsiSkWrappingSkPtrHostObject<SkImage>(std::move(context),
-                                              std::move(image)) {}
-
+                                              std::move(image)) {
+    // Store the JS thread ID when first image is created
+    if (_jsThreadId == std::thread::id()) {
+      _jsThreadId = std::this_thread::get_id();
+    }
+    // Drain any pending deletions when creating new images
+    drainDeletionQueue();
+  }
+  
+  ~JsiSkImage() override {
+    // Check if we're on the correct thread
+    if (std::this_thread::get_id() != _jsThreadId) {
+      // Queue for deletion on JS thread
+      std::lock_guard<std::mutex> lock(_deletionQueueMutex);
+      _deletionQueue.push(getObject());
+      // Clear the object to prevent base class destructor from deleting it
+      setObject(nullptr);
+    }
+    // If we're on the JS thread, the base destructor will handle cleanup
+  }
+  
+  static void drainDeletionQueue() {
+    std::lock_guard<std::mutex> lock(_deletionQueueMutex);
+    while (!_deletionQueue.empty()) {
+      // Pop and let the sk_sp destructor do the cleanup
+      _deletionQueue.pop();
+    }
+  }
+  
   size_t getMemoryPressure() const override {
     auto image = getObject();
     return image ? image->imageInfo().computeMinByteSize() : 0;
