@@ -5,7 +5,7 @@ import { TextInput } from "react-native-gesture-handler";
 import { useDerivedValue, useSharedValue } from "react-native-reanimated";
 
 export const OnSize = () => {
-  const clock = useClock();
+  //const clock = useClock();
   const size = useSharedValue({ width: 0, height: 0 });
   const redRect = useDerivedValue(() => {
     console.log(

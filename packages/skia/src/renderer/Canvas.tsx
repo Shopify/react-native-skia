@@ -93,9 +93,10 @@ export const Canvas = ({
 
   useEffect(() => {
     if (onSize) {
-      Rea.runOnUI((nId: number, os: SharedValue<SkSize>) => {
-        SkiaViewApi.setJsiProperty(nId, "onSize", os);
-      })(nativeId, onSize);
+      global[`__onSize_${nativeId}`] = onSize;
+      Rea.runOnUI(() => {
+        SkiaViewApi.setJsiProperty(nativeId, "onSize", onSize);
+      })();
     }
   }, [onSize, nativeId]);
 
