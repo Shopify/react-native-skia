@@ -11,6 +11,9 @@ export const useSVG = (
   if (
     typeof source !== "object" ||
     source instanceof Uint8Array ||
+    !("uri" in source) ||
+    typeof source.uri !== "string" ||
+    !("default" in source) ||
     typeof source.default !== "string"
   ) {
     throw new Error(
