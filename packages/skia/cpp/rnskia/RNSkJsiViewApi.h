@@ -107,9 +107,9 @@ public:
             if (info->view != nullptr) {
               // Update view!
               // Store the onSize shared value as a global property
-              std::string globalKey = "__onSize_" + std::to_string(nativeId);
-              runtime.global().setProperty(runtime, globalKey.c_str(),
-                                           arguments[2]);
+               std::string globalKey = "__onSize_" + std::to_string(nativeId);
+               runtime.global().setProperty(runtime, globalKey.c_str(),
+                                            arguments[2]);
 
               std::static_pointer_cast<RNSkPictureRenderer>(
                   info->view->getRenderer())

@@ -1,11 +1,10 @@
-import { Canvas, Rect, rect, useClock } from "@shopify/react-native-skia";
+import { Canvas, Rect, rect } from "@shopify/react-native-skia";
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { useDerivedValue, useSharedValue } from "react-native-reanimated";
 
 export const OnSize = () => {
-  //const clock = useClock();
   const size = useSharedValue({ width: 0, height: 0 });
   const redRect = useDerivedValue(() => {
     console.log(

@@ -15,7 +15,11 @@ import type {
   View,
   ViewProps,
 } from "react-native";
-import { type SharedValue } from "react-native-reanimated";
+import {
+  makeMutable,
+  runOnJS,
+  type SharedValue,
+} from "react-native-reanimated";
 
 import Rea from "../external/reanimated/ReanimatedProxy";
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
@@ -24,6 +28,7 @@ import type { SkImage, SkRect, SkSize } from "../skia/types";
 import { SkiaSGRoot } from "../sksg/Reconciler";
 import { Skia } from "../skia";
 import { Platform } from "../Platform";
+import { notifyChange } from "../external";
 
 export interface CanvasRef extends FC<CanvasProps> {
   makeImageSnapshot(rect?: SkRect): SkImage;
@@ -91,14 +96,25 @@ export const Canvas = ({
   // Root
   const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
 
+  const updateSize = useCallback(
+    (v) => {
+      if (onSize) {
+        onSize.value = v;
+      }
+    },
+    [onSize]
+  );
   useEffect(() => {
     if (onSize) {
-      global[`__onSize_${nativeId}`] = onSize;
+      const os = makeMutable<SkSize>({ width: 0, height: 0 });
       Rea.runOnUI(() => {
-        SkiaViewApi.setJsiProperty(nativeId, "onSize", onSize);
+        SkiaViewApi.setJsiProperty(nativeId, "onSize", os);
+        os.addListener(nativeId, (v) => {
+          runOnJS(updateSize)(v);
+        });
       })();
     }
-  }, [onSize, nativeId]);
+  }, [onSize, nativeId, updateSize]);
 
   // Render effects
   useLayoutEffect(() => {
