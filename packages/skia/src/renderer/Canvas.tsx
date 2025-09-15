@@ -20,6 +20,7 @@ import {
   runOnJS,
   type SharedValue,
 } from "react-native-reanimated";
+import { on } from "ws";
 
 import Rea from "../external/reanimated/ReanimatedProxy";
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
@@ -110,7 +111,6 @@ export const Canvas = ({
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
         global[`__onSize_${nativeId}`] = uiOnSize;
-        SkiaViewApi.setJsiProperty(nativeId, "onSize", null);
         uiOnSize.addListener(nativeId, (value) => {
           runOnJS(updateSize)(value);
         });
