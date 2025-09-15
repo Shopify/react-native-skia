@@ -22,7 +22,7 @@ MetalContext::MetalContext() {
   if (!_device) {
     throw std::runtime_error("Failed to create Metal device");
   }
-  
+
   _commandQueue =
       id<MTLCommandQueue>(CFRetain((GrMTLHandle)[_device newCommandQueue]));
   GrMtlBackendContext backendContext = {};

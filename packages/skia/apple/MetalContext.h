@@ -14,7 +14,6 @@
 #import <include/gpu/ganesh/mtl/GrMtlDirectContext.h>
 #import <include/gpu/ganesh/mtl/SkSurfaceMetal.h>
 
-
 struct OffscreenRenderContext {
   id<MTLTexture> texture;
 

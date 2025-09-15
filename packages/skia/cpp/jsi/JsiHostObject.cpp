@@ -2,7 +2,6 @@
 #include <functional>
 #include <vector>
 
-
 namespace RNJsi {
 
 void JsiHostObject::set(jsi::Runtime &rt, const jsi::PropNameID &name,

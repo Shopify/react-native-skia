@@ -64,7 +64,7 @@ inline SkSamplingOptions SamplingOptionsFromValue(jsi::Runtime &runtime,
 class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
 private:
   ThreadSafeDeletion<SkImage> _deletionHandler;
-  
+
 public:
   // TODO-API: Properties?
   JSI_HOST_FUNCTION(width) { return static_cast<double>(getObject()->width()); }
@@ -280,7 +280,7 @@ public:
     // Drain any pending deletions when creating new images
     ThreadSafeDeletion<SkImage>::drainDeletionQueue();
   }
-  
+
   ~JsiSkImage() override {
     // Handle thread-safe deletion
     auto objectToDelete = _deletionHandler.handleDeletion(getObject());
@@ -291,7 +291,7 @@ public:
     }
     // If objectToDelete is not null, base destructor will handle cleanup
   }
-  
+
   size_t getMemoryPressure() const override {
     auto image = getObject();
     return image ? image->imageInfo().computeMinByteSize() : 0;

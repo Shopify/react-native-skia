@@ -1,14 +1,13 @@
 #pragma once
 
+#include <functional>
 #include <memory>
-#include <thread>
 #include <mutex>
 #include <queue>
-#include <functional>
+#include <thread>
 
 // Define this to disable thread-safe deletion (for testing purposes)
-//#define DISABLE_THREAD_SAFE_DELETION
-
+// #define DISABLE_THREAD_SAFE_DELETION
 
 namespace RNSkia {
 
@@ -16,22 +15,21 @@ namespace RNSkia {
  * Utility class for managing thread-safe deletion of Skia objects.
  * Ensures objects are deleted on the thread that created them.
  */
-template <typename T>
-class ThreadSafeDeletion {
+template <typename T> class ThreadSafeDeletion {
 private:
   struct DeletionItem {
     sk_sp<T> object;
     std::thread::id creationThreadId;
   };
-  
+
   static inline std::mutex _queueMutex;
   static inline std::queue<DeletionItem> _deletionQueue;
-  
+
   std::thread::id _creationThreadId;
-  
+
 public:
   ThreadSafeDeletion() : _creationThreadId(std::this_thread::get_id()) {}
-  
+
   /**
    * Handles deletion of the object. If we're on the wrong thread,
    * queues it for later deletion. Returns nullptr if object was queued,
@@ -41,7 +39,7 @@ public:
     if (!object) {
       return nullptr;
     }
-    
+
 #ifdef DISABLE_THREAD_SAFE_DELETION
     // When disabled, always return the object for immediate deletion
     // This will likely cause crashes when objects are deleted on wrong thread
@@ -49,7 +47,7 @@ public:
 #else
     // Always try to drain the queue when handling deletions
     drainDeletionQueue();
-    
+
     // Check if we're on the creation thread
     if (std::this_thread::get_id() != _creationThreadId) {
       // Queue for deletion on the correct thread
@@ -57,12 +55,12 @@ public:
       _deletionQueue.push({object, _creationThreadId});
       return nullptr; // Signal that object was queued
     }
-    
+
     // We're on the correct thread, return object for immediate deletion
     return object;
 #endif
   }
-  
+
   /**
    * Drains the deletion queue for objects created on the current thread.
    * Should be called periodically (e.g., when creating new objects).
@@ -71,14 +69,14 @@ public:
 #ifndef DISABLE_THREAD_SAFE_DELETION
     auto currentThreadId = std::this_thread::get_id();
     std::queue<DeletionItem> remainingItems;
-    
+
     std::lock_guard<std::mutex> lock(_queueMutex);
-    
+
     // Process all items in the queue
     while (!_deletionQueue.empty()) {
       auto item = _deletionQueue.front();
       _deletionQueue.pop();
-      
+
       // If this item belongs to the current thread, let it be deleted
       if (item.creationThreadId == currentThreadId) {
         // The sk_sp destructor will handle the cleanup
@@ -88,12 +86,12 @@ public:
         remainingItems.push(item);
       }
     }
-    
+
     // Put back items that couldn't be deleted
     _deletionQueue = std::move(remainingItems);
 #endif
   }
-  
+
   /**
    * Returns the number of items waiting for deletion.
    * Useful for debugging and testing.
