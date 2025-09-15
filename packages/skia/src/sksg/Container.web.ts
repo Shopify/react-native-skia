@@ -1,7 +1,5 @@
-import type { SharedValue } from "react-native-reanimated";
-
 import Rea from "../external/reanimated/ReanimatedProxy";
-import type { Skia, SkSize } from "../skia/types";
+import type { Skia } from "../skia/types";
 import { HAS_REANIMATED_3 } from "../external/reanimated/renderHelpers";
 
 import type { Recording } from "./Recorder/Recorder";
@@ -64,11 +62,7 @@ class ReanimatedContainer extends Container {
   }
 }
 
-export const createContainer = (
-  Skia: Skia,
-  nativeId: number,
-  _onSize?: SharedValue<SkSize>
-) => {
+export const createContainer = (Skia: Skia, nativeId: number) => {
   if (HAS_REANIMATED_3 && nativeId !== -1) {
     return new ReanimatedContainer(Skia, nativeId);
   } else {

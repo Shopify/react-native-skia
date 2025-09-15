@@ -17,6 +17,7 @@ import type {
 } from "react-native";
 import { type SharedValue } from "react-native-reanimated";
 
+import Rea from "../external/reanimated/ReanimatedProxy";
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
 import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeComponent";
 import type { SkImage, SkRect, SkSize } from "../skia/types";
@@ -88,10 +89,15 @@ export const Canvas = ({
   }, []);
 
   // Root
-  const root = useMemo(
-    () => new SkiaSGRoot(Skia, nativeId, onSize),
-    [nativeId, onSize]
-  );
+  const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
+
+  useEffect(() => {
+    if (onSize) {
+      Rea.runOnUI((nId: number, os: SharedValue<SkSize>) => {
+        SkiaViewApi.setJsiProperty(nId, "onSize", os);
+      })(nativeId, onSize);
+    }
+  }, [onSize, nativeId]);
 
   // Render effects
   useLayoutEffect(() => {

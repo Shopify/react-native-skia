@@ -33,7 +33,7 @@ import { Skottie } from "./Skottie";
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator initialRouteName="OnSize">
       <Stack.Screen
         name="List"
         component={List}

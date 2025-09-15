@@ -134,7 +134,6 @@ public:
             info->props.insert_or_assign(
                 arguments[1].asString(runtime).utf8(runtime),
                 RNJsi::ViewProperty(runtime, arguments[2]));
-
             // Now let's see if we have a view that we can update
             if (info->view != nullptr) {
               // Update view!

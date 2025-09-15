@@ -62,10 +62,16 @@ public:
 
 private:
   bool performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
-    // Call onSize callback if it exists
+    // Call onSize callback only if the size has changed
+    int currentWidth = canvasProvider->getWidth();
+    int currentHeight = canvasProvider->getHeight();
+
     if (std::holds_alternative<std::function<void(int, int)>>(_onSize)) {
-      std::get<std::function<void(int, int)>>(_onSize)(
-          canvasProvider->getWidth(), canvasProvider->getHeight());
+      if (_lastWidth != currentWidth || _lastHeight != currentHeight) {
+        _lastWidth = currentWidth;
+        _lastHeight = currentHeight;
+        std::get<std::function<void(int, int)>>(_onSize)(currentWidth, currentHeight);
+      }
     }
     return canvasProvider->renderToCanvas([=, this](SkCanvas *canvas) {
       // Make sure to scale correctly
@@ -83,6 +89,8 @@ private:
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   sk_sp<SkPicture> _picture;
   std::variant<std::monostate, std::function<void(int, int)>> _onSize;
+  int _lastWidth = -1;
+  int _lastHeight = -1;
 };
 
 class RNSkPictureView : public RNSkView {
