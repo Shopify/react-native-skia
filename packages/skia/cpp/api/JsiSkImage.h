@@ -3,14 +3,12 @@
 #include <memory>
 #include <string>
 #include <utility>
-#include <thread>
-#include <mutex>
-#include <queue>
 
 #include "JsiSkHostObjects.h"
 #include "JsiSkImageInfo.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkShader.h"
+#include "JsiSkThreadSafeDeletion.h"
 #include "third_party/base64.h"
 
 #include "JsiTextureInfo.h"
@@ -65,9 +63,7 @@ inline SkSamplingOptions SamplingOptionsFromValue(jsi::Runtime &runtime,
 
 class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
 private:
-  static inline std::mutex _deletionQueueMutex;
-  static inline std::queue<sk_sp<SkImage>> _deletionQueue;
-  static inline std::thread::id _jsThreadId;
+  ThreadSafeDeletion<SkImage> _deletionHandler;
   
 public:
   // TODO-API: Properties?
@@ -279,33 +275,21 @@ public:
   JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
              const sk_sp<SkImage> image)
       : JsiSkWrappingSkPtrHostObject<SkImage>(std::move(context),
-                                              std::move(image)) {
-    // Store the JS thread ID when first image is created
-    if (_jsThreadId == std::thread::id()) {
-      _jsThreadId = std::this_thread::get_id();
-    }
+                                              std::move(image)),
+        _deletionHandler() {
     // Drain any pending deletions when creating new images
-    drainDeletionQueue();
+    ThreadSafeDeletion<SkImage>::drainDeletionQueue();
   }
   
   ~JsiSkImage() override {
-    // Check if we're on the correct thread
-    if (std::this_thread::get_id() != _jsThreadId) {
-      // Queue for deletion on JS thread
-      std::lock_guard<std::mutex> lock(_deletionQueueMutex);
-      _deletionQueue.push(getObject());
-      // Clear the object to prevent base class destructor from deleting it
+    // Handle thread-safe deletion
+    auto objectToDelete = _deletionHandler.handleDeletion(getObject());
+    if (!objectToDelete) {
+      // Object was queued for deletion on another thread
+      // Clear it to prevent base class destructor from deleting it
       setObject(nullptr);
     }
-    // If we're on the JS thread, the base destructor will handle cleanup
-  }
-  
-  static void drainDeletionQueue() {
-    std::lock_guard<std::mutex> lock(_deletionQueueMutex);
-    while (!_deletionQueue.empty()) {
-      // Pop and let the sk_sp destructor do the cleanup
-      _deletionQueue.pop();
-    }
+    // If objectToDelete is not null, base destructor will handle cleanup
   }
   
   size_t getMemoryPressure() const override {

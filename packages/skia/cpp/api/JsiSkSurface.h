@@ -2,14 +2,12 @@
 
 #include <memory>
 #include <utility>
-#include <thread>
-#include <mutex>
-#include <queue>
 
 #include <jsi/jsi.h>
 
 #include "JsiSkHostObjects.h"
 #include "JsiTextureInfo.h"
+#include "JsiSkThreadSafeDeletion.h"
 
 #include "JsiSkCanvas.h"
 #include "JsiSkImage.h"
@@ -32,41 +30,27 @@ namespace jsi = facebook::jsi;
 
 class JsiSkSurface : public JsiSkWrappingSkPtrHostObject<SkSurface> {
 private:
-  static inline std::mutex _deletionQueueMutex;
-  static inline std::queue<sk_sp<SkSurface>> _deletionQueue;
-  static inline std::thread::id _jsThreadId;
+  ThreadSafeDeletion<SkSurface> _deletionHandler;
   
 public:
   JsiSkSurface(std::shared_ptr<RNSkPlatformContext> context,
                sk_sp<SkSurface> surface)
       : JsiSkWrappingSkPtrHostObject<SkSurface>(std::move(context),
-                                                std::move(surface)) {
-    // Store the JS thread ID when first surface is created
-    if (_jsThreadId == std::thread::id()) {
-      _jsThreadId = std::this_thread::get_id();
-    }
+                                                std::move(surface)),
+        _deletionHandler() {
     // Drain any pending deletions when creating new surfaces
-    drainDeletionQueue();
+    ThreadSafeDeletion<SkSurface>::drainDeletionQueue();
   }
   
   ~JsiSkSurface() override {
-    // Check if we're on the correct thread
-    if (std::this_thread::get_id() != _jsThreadId) {
-      // Queue for deletion on JS thread
-      std::lock_guard<std::mutex> lock(_deletionQueueMutex);
-      _deletionQueue.push(getObject());
-      // Clear the object to prevent base class destructor from deleting it
+    // Handle thread-safe deletion
+    auto objectToDelete = _deletionHandler.handleDeletion(getObject());
+    if (!objectToDelete) {
+      // Object was queued for deletion on another thread
+      // Clear it to prevent base class destructor from deleting it
       setObject(nullptr);
     }
-    // If we're on the JS thread, the base destructor will handle cleanup
-  }
-  
-  static void drainDeletionQueue() {
-    std::lock_guard<std::mutex> lock(_deletionQueueMutex);
-    while (!_deletionQueue.empty()) {
-      // Pop and let the sk_sp destructor do the cleanup
-      _deletionQueue.pop();
-    }
+    // If objectToDelete is not null, base destructor will handle cleanup
   }
 
   EXPORT_JSI_API_TYPENAME(JsiSkSurface, Surface)
