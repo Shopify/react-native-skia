@@ -29,6 +29,7 @@ import { AnimatedImages } from "./AnimatedImages";
 import { Paragraphs } from "./Paragraphs";
 import { Paragraphs2 } from "./Paragraphs2";
 import { Skottie } from "./Skottie";
+import { StressTest } from "./StressTest";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
@@ -222,6 +223,13 @@ export const API = () => {
         component={OnSize}
         options={{
           title: "📏 OnSize",
+        }}
+      />
+      <Stack.Screen
+        name="StressTest"
+        component={StressTest}
+        options={{
+          title: "🔥 Stress Test",
         }}
       />
     </Stack.Navigator>
