@@ -111,7 +111,16 @@ export const Canvas = ({
           runOnJS(updateSize)(value);
         });
       })();
+      return () => {
+        Rea.runOnUI(() => {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
+          delete global[`__onSize_${nativeId}`];
+          uiOnSize.removeListener(nativeId);
+        })();
+      };
     }
+    return undefined;
   }, [onSize, nativeId, updateSize]);
 
   // Render effects

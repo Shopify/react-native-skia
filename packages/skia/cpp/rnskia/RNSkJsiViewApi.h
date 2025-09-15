@@ -316,20 +316,6 @@ public:
   }
 
   /**
-   * Unregisters a Skia draw view and cleans up its global properties
-   * @param nativeId View id
-   * @param runtime JSI runtime to clean up global properties
-   */
-  void unregisterSkiaView(size_t nativeId, jsi::Runtime &runtime) {
-    // Clean up global onSize property
-    std::string globalKey =
-        "__onSize_" + std::to_string(static_cast<int>(nativeId));
-    runtime.global().setProperty(runtime, globalKey.c_str(),
-                                 jsi::Value::undefined());
-    ViewRegistry::getInstance().removeViewInfo(nativeId);
-  }
-
-  /**
    Sets a skia draw view for the given id. This function can be used
    to mark that an underlying SkiaView is not available (it could be
    removed due to ex. a transition). The view can be set to a nullptr
