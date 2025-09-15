@@ -103,42 +103,15 @@ public:
     ViewRegistry::getInstance().withViewInfo(
         nativeId, [&](std::shared_ptr<RNSkViewInfo> info) {
           auto name = arguments[1].asString(runtime).utf8(runtime);
-          if (name == "onSize") {
-            if (info->view != nullptr) {
-              // Update view!
-              std::static_pointer_cast<RNSkPictureRenderer>(
-                  info->view->getRenderer())
-                  ->setOnSize([&runtime, this, nativeId](int width,
-                                                         int height) {
-                    jsi::Object size(runtime);
-                    auto pd = _platformContext->getPixelDensity();
-                    size.setProperty(runtime, "width", jsi::Value(width / pd));
-                    size.setProperty(runtime, "height",
-                                     jsi::Value(height / pd));
-
-                    // Get the stored shared value from global
-                    std::string globalKey =
-                        "__onSize_" +
-                        std::to_string(static_cast<int>(nativeId));
-                    auto globalProp = runtime.global().getProperty(
-                        runtime, globalKey.c_str());
-                    if (!globalProp.isUndefined()) {
-                      globalProp.asObject(runtime).setProperty(runtime, "value",
-                                                               size);
-                    }
-                  });
-            }
-          } else {
-            info->props.insert_or_assign(
-                arguments[1].asString(runtime).utf8(runtime),
-                RNJsi::ViewProperty(runtime, arguments[2]));
-            // Now let's see if we have a view that we can update
-            if (info->view != nullptr) {
-              // Update view!
-              info->view->setNativeId(nativeId);
-              info->view->setJsiProperties(info->props);
-              info->props.clear();
-            }
+          info->props.insert_or_assign(
+              arguments[1].asString(runtime).utf8(runtime),
+              RNJsi::ViewProperty(runtime, arguments[2], _platformContext, nativeId));
+          // Now let's see if we have a view that we can update
+          if (info->view != nullptr) {
+            // Update view!
+            info->view->setNativeId(nativeId);
+            info->view->setJsiProperties(info->props);
+            info->props.clear();
           }
           return nullptr; // Return type for template deduction
         });
@@ -344,10 +317,10 @@ public:
    */
   void unregisterSkiaView(size_t nativeId, jsi::Runtime &runtime) {
     // Clean up global onSize property
-    std::string globalKey = "__onSize_" + std::to_string(nativeId);
+    std::string globalKey =
+        "__onSize_" + std::to_string(static_cast<int>(nativeId));
     runtime.global().setProperty(runtime, globalKey.c_str(),
                                  jsi::Value::undefined());
-
     ViewRegistry::getInstance().removeViewInfo(nativeId);
   }
 
