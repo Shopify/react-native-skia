@@ -15,12 +15,7 @@ import type {
   View,
   ViewProps,
 } from "react-native";
-import {
-  makeMutable,
-  runOnJS,
-  type SharedValue,
-} from "react-native-reanimated";
-import { on } from "ws";
+import { type SharedValue } from "react-native-reanimated";
 
 import Rea from "../external/reanimated/ReanimatedProxy";
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
@@ -106,7 +101,8 @@ export const Canvas = ({
   );
   useEffect(() => {
     if (onSize) {
-      const uiOnSize = makeMutable({ width: 0, height: 0 });
+      const { runOnJS } = Rea;
+      const uiOnSize = Rea.makeMutable({ width: 0, height: 0 });
       Rea.runOnUI(() => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
