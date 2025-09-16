@@ -24,6 +24,7 @@ import type { SkImage, SkRect, SkSize } from "../skia/types";
 import { SkiaSGRoot } from "../sksg/Reconciler";
 import { Skia } from "../skia";
 import { Platform } from "../Platform";
+import { HAS_REANIMATED_3 } from "../external";
 
 export interface CanvasRef extends FC<CanvasProps> {
   makeImageSnapshot(rect?: SkRect): SkImage;
@@ -35,6 +36,8 @@ export interface CanvasRef extends FC<CanvasProps> {
 }
 
 export const useCanvasRef = () => useRef<CanvasRef>(null);
+
+const useFrame = !HAS_REANIMATED_3 ? () => {} : Rea.useFrameCallback;
 
 export const useCanvasSize = (userRef?: RefObject<CanvasRef | null>) => {
   const ourRef = useCanvasRef();
@@ -91,37 +94,26 @@ export const Canvas = ({
   // Root
   const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
 
-  const updateSize = useCallback(
-    (value: SkSize) => {
-      if (onSize) {
-        onSize.value = value;
-      }
-    },
-    [onSize]
-  );
+  useFrame(() => {
+    "worklet";
+  });
   useEffect(() => {
     if (onSize) {
-      const { runOnJS } = Rea;
-      const uiOnSize = Rea.makeMutable({ width: 0, height: 0 });
       Rea.runOnUI(() => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
-        global[`__onSize_${nativeId}`] = uiOnSize;
-        uiOnSize.addListener(nativeId, (value) => {
-          runOnJS(updateSize)(value);
-        });
+        global[`__onSize_${nativeId}`] = onSize;
       })();
       return () => {
         Rea.runOnUI(() => {
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-expect-error
           delete global[`__onSize_${nativeId}`];
-          uiOnSize.removeListener(nativeId);
         })();
       };
     }
     return undefined;
-  }, [onSize, nativeId, updateSize]);
+  }, [onSize, nativeId]);
 
   // Render effects
   useLayoutEffect(() => {
