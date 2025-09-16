@@ -11,7 +11,9 @@
     "mkdist": "node -e \"require('node:fs').mkdirSync('dist', { recursive: true, mode: 0o755 })\"",
     "pod:install": "cd ios && pod install",
     "start": "react-native start",
-    "test": "node --experimental-vm-modules ../../node_modules/.bin/jest",
+    "test": "turbo run test:esm test:commonjs --filter=example",
+    "test:esm": "node --experimental-vm-modules ../../node_modules/.bin/jest",
+    "test:commonjs": "jest --config ./jest.cjs.config.js",
     "tsc": "tsc --noEmit"
   },
   "dependencies": {

@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { jest } from "@jest/globals";
-import JestUtils from "react-native-reanimated/lib/module/jestUtils";
-import Reanimated from "react-native-reanimated/mock";
+const { jest } = require("@jest/globals");
+const JestUtils = require("react-native-reanimated/lib/module/jestUtils");
+const Reanimated = require("react-native-reanimated/mock");
 
 JestUtils.setUpTests();
 global.__reanimatedWorkletInit = () => {};

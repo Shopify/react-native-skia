@@ -1,4 +1,5 @@
 /* globals jest */
+/* eslint-disable import/no-extraneous-dependencies */
 jest.mock("@shopify/react-native-skia", () => {
   jest.mock("@shopify/react-native-skia/lib/commonjs/Platform", () => {
     const Noop = () => undefined;
