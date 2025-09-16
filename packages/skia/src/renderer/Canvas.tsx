@@ -104,18 +104,19 @@ export const Canvas = ({
       const { runOnJS } = Rea;
       const uiOnSize = Rea.makeMutable({ width: 0, height: 0 });
       Rea.runOnUI(() => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        global[`__onSize_${nativeId}`] = uiOnSize;
+        Object.defineProperties(global, {
+          [`__onSize_${nativeId}`]: {
+            value: uiOnSize,
+            writable: true,
+          },
+        });
         uiOnSize.addListener(nativeId, (value) => {
           runOnJS(updateSize)(value);
         });
       })();
       return () => {
         Rea.runOnUI(() => {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
-          delete global[`__onSize_${nativeId}`];
+          delete global[`__onSize_${nativeId}` as keyof typeof global];
           uiOnSize.removeListener(nativeId);
         })();
       };
