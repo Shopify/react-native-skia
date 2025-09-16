@@ -44,13 +44,10 @@ public:
 
   ~JsiSkSurface() override {
     // Handle thread-safe deletion
-    auto objectToDelete = _deletionHandler.handleDeletion(getObject());
-    if (!objectToDelete) {
-      // Object was queued for deletion on another thread
-      // Clear it to prevent base class destructor from deleting it
-      setObject(nullptr);
-    }
-    // If objectToDelete is not null, base destructor will handle cleanup
+    _deletionHandler.handleDeletion(getObject());
+    // Always clear the object to prevent base class destructor from deleting it
+    // handleDeletion takes full responsibility for the object's lifetime
+    setObject(nullptr);
   }
 
   EXPORT_JSI_API_TYPENAME(JsiSkSurface, Surface)
