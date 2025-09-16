@@ -6,6 +6,7 @@ module.exports = {
     "^react-native$": "<rootDir>/../../node_modules/react-native",
   },
   modulePathIgnorePatterns: ["<rootDir>/lib/typescript", "setup.(ts|tsx)$"],
+  setupFiles: ["@shopify/react-native-skia/jestSetup.mjs"],
   setupFilesAfterEnv: [
     "<rootDir>/../../node_modules/react-native-gesture-handler/jestSetup.js",
     "<rootDir>/jestSetup.mjs",

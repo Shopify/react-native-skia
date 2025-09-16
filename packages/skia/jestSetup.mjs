@@ -24,7 +24,7 @@ jest.mock("@shopify/react-native-skia", () => {
       matchFont: () => null,
       listFontFamilies: () => [],
       useFonts: () => null,
-    }
+    };
   });
   return Mock(global.CanvasKit);
 });

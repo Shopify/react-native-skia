@@ -1,14 +1,10 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { jest } from "@jest/globals";
-import CanvasKitInit from "canvaskit-wasm/bin/full/canvaskit";
 import JestUtils from "react-native-reanimated/lib/module/jestUtils";
 import Reanimated from "react-native-reanimated/mock";
 
-import Mock from "../../packages/skia/src/mock";
-
 JestUtils.setUpTests();
 global.__reanimatedWorkletInit = () => {};
-global.CanvasKit = await CanvasKitInit({});
 
 jest.mock("expo-asset", () => ({
   useAssets: () => [[], undefined],
@@ -26,22 +22,6 @@ jest.mock("react-native-reanimated", () => {
   Reanimated.useFrameCallback = () => {};
   Reanimated.convertToRGBA = () => {};
   return Reanimated;
-});
-
-jest.mock("@shopify/react-native-skia", () => {
-  jest.mock("../../packages/skia/src/Platform", () => {
-    const Noop = () => undefined;
-    return {
-      OS: "web",
-      PixelRatio: 1,
-      requireNativeComponent: Noop,
-      resolveAsset: Noop,
-      findNodeHandle: Noop,
-      NativeModules: Noop,
-      View: Noop,
-    };
-  });
-  return Mock.Mock(global.CanvasKit);
 });
 
 const mockedNavigate = jest.fn();
