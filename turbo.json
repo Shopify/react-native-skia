@@ -7,6 +7,9 @@
       "build:ios": {
         "dependsOn": ["pod:install"]
       },
+      "build:macos": {
+        "dependsOn": ["pod:install"]
+      },
       "pod:install": {
         "cache": false
       },
