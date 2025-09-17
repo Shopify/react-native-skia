@@ -75,11 +75,11 @@
     "pod:install:macos": {
       "cache": false,
       "inputs": [
-        "**/ios/Podfile",
-        "**/ios/Podfile.lock"
+        "**/macos/Podfile",
+        "**/macos/Podfile.lock"
       ],
       "outputs": [
-        "**/ios/Pods/**"
+        "**/macos/Pods/**"
       ]
     },
     "lint": {},
