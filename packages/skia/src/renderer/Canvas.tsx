@@ -15,7 +15,7 @@ import type {
   View,
   ViewProps,
 } from "react-native";
-import { type SharedValue } from "react-native-reanimated";
+import type { SharedValue } from "react-native-reanimated";
 
 import Rea from "../external/reanimated/ReanimatedProxy";
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
@@ -24,6 +24,7 @@ import type { SkImage, SkRect, SkSize } from "../skia/types";
 import { SkiaSGRoot } from "../sksg/Reconciler";
 import { Skia } from "../skia";
 import { Platform } from "../Platform";
+import { HAS_REANIMATED_3 } from "../external";
 
 export interface CanvasRef extends FC<CanvasProps> {
   makeImageSnapshot(rect?: SkRect): SkImage;
@@ -35,6 +36,8 @@ export interface CanvasRef extends FC<CanvasProps> {
 }
 
 export const useCanvasRef = () => useRef<CanvasRef>(null);
+
+const useReanimatedFrame = !HAS_REANIMATED_3 ? () => {} : Rea.useFrameCallback;
 
 export const useCanvasSize = (userRef?: RefObject<CanvasRef | null>) => {
   const ourRef = useCanvasRef();
@@ -91,38 +94,26 @@ export const Canvas = ({
   // Root
   const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
 
-  const updateSize = useCallback(
-    (value: SkSize) => {
-      if (onSize) {
-        onSize.value = value;
-      }
-    },
-    [onSize]
-  );
+  useReanimatedFrame(() => {
+    "worklet";
+  }, !!onSize);
   useEffect(() => {
     if (onSize) {
-      const { runOnJS } = Rea;
-      const uiOnSize = Rea.makeMutable({ width: 0, height: 0 });
       Rea.runOnUI(() => {
-        Object.defineProperties(global, {
-          [`__onSize_${nativeId}`]: {
-            value: uiOnSize,
-            writable: true,
-          },
-        });
-        uiOnSize.addListener(nativeId, (value) => {
-          runOnJS(updateSize)(value);
-        });
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        global[`__onSize_${nativeId}`] = onSize;
       })();
       return () => {
         Rea.runOnUI(() => {
-          delete global[`__onSize_${nativeId}` as keyof typeof global];
-          uiOnSize.removeListener(nativeId);
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
+          delete global[`__onSize_${nativeId}`];
         })();
       };
     }
     return undefined;
-  }, [onSize, nativeId, updateSize]);
+  }, [onSize, nativeId]);
 
   // Render effects
   useLayoutEffect(() => {
