@@ -39,8 +39,9 @@ public:
 
     // Create shader
     auto shader = getObject()->makeShader(tmx, tmy, fm, m, tr);
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkShader>(getContext(), shader));
+    auto shaderObj = std::make_shared<JsiSkShader>(getContext(), shader);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shaderObj,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(serialize) {
@@ -67,5 +68,15 @@ public:
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPicture, makeShader),
                        JSI_EXPORT_FUNC(JsiSkPicture, serialize),
                        JSI_EXPORT_FUNC(JsiSkPicture, dispose))
+
+  size_t getMemoryPressure() const override {
+    auto picture = getObject();
+    if (!picture) {
+      return 0;
+    }
+    // SkPicture provides approximateBytesUsed() method to estimate memory usage
+    auto bytesUsed = picture->approximateBytesUsed();
+    return bytesUsed;
+  }
 };
 } // namespace RNSkia

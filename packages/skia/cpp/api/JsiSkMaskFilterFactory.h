@@ -25,12 +25,14 @@ public:
     int blurStyle = arguments[0].asNumber();
     float sigma = arguments[1].asNumber();
     bool respectCTM = arguments[2].getBool();
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkMaskFilter>(
-            getContext(),
-            SkMaskFilter::MakeBlur((SkBlurStyle)blurStyle, sigma, respectCTM)));
+    auto maskFilter = std::make_shared<JsiSkMaskFilter>(
+        getContext(),
+        SkMaskFilter::MakeBlur((SkBlurStyle)blurStyle, sigma, respectCTM));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, maskFilter,
+                                                       getContext());
   }
+
+  size_t getMemoryPressure() const override { return 1024; }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkMaskFilterFactory, MakeBlur))
 

@@ -20,9 +20,11 @@ export type Routes = {
   UseCanvas: undefined;
   PictureView: undefined;
   OnLayout: undefined;
+  OnSize: undefined;
   Snapshot: undefined;
   IconsExample: undefined;
   Paragraphs: undefined;
   Paragraphs2: undefined;
   Skottie: undefined;
+  StressTest: undefined;
 };

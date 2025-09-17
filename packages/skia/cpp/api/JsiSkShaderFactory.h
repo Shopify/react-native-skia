@@ -100,9 +100,10 @@ public:
     sk_sp<SkShader> gradient = SkGradientShader::MakeLinear(
         pts, colors.data(), !positions.empty() ? positions.data() : nullptr,
         static_cast<int>(colorsSize), tileMode, flag, localMatrix);
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkShader>(getContext(), std::move(gradient)));
+    auto shader =
+        std::make_shared<JsiSkShader>(getContext(), std::move(gradient));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shader,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakeRadialGradient) {
@@ -128,9 +129,10 @@ public:
         center, r, colors.data(),
         !positions.empty() ? positions.data() : nullptr,
         static_cast<int>(colorsSize), tileMode, flag, localMatrix);
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkShader>(getContext(), std::move(gradient)));
+    auto shader =
+        std::make_shared<JsiSkShader>(getContext(), std::move(gradient));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shader,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakeSweepGradient) {
@@ -158,9 +160,10 @@ public:
         x, y, colors.data(), !positions.empty() ? positions.data() : nullptr,
         static_cast<int>(colorsSize), tileMode, startAngle, endAngle, flag,
         localMatrix);
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkShader>(getContext(), std::move(gradient)));
+    auto shader =
+        std::make_shared<JsiSkShader>(getContext(), std::move(gradient));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shader,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakeTwoPointConicalGradient) {
@@ -191,9 +194,10 @@ public:
         !positions.empty() ? positions.data() : nullptr,
         static_cast<int>(colorsSize), tileMode, flag, localMatrix);
 
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkShader>(getContext(), std::move(gradient)));
+    auto shader =
+        std::make_shared<JsiSkShader>(getContext(), std::move(gradient));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shader,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakeTurbulence) {
@@ -206,9 +210,10 @@ public:
     SkISize size = SkISize::Make(tileW, tileH);
     sk_sp<SkShader> gradient =
         SkShaders::MakeTurbulence(baseFreqX, baseFreqY, octaves, seed, &size);
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkShader>(getContext(), std::move(gradient)));
+    auto shader =
+        std::make_shared<JsiSkShader>(getContext(), std::move(gradient));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shader,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakeFractalNoise) {
@@ -221,9 +226,10 @@ public:
     SkISize size = SkISize::Make(tileW, tileH);
     sk_sp<SkShader> gradient =
         SkShaders::MakeFractalNoise(baseFreqX, baseFreqY, octaves, seed, &size);
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkShader>(getContext(), std::move(gradient)));
+    auto shader =
+        std::make_shared<JsiSkShader>(getContext(), std::move(gradient));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shader,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakeBlend) {
@@ -231,18 +237,22 @@ public:
     auto one = JsiSkShader::fromValue(runtime, arguments[1]);
     auto two = JsiSkShader::fromValue(runtime, arguments[2]);
     sk_sp<SkShader> gradient = SkShaders::Blend(blendMode, one, two);
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkShader>(getContext(), std::move(gradient)));
+    auto shader =
+        std::make_shared<JsiSkShader>(getContext(), std::move(gradient));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shader,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakeColor) {
     auto color = JsiSkColor::fromValue(runtime, arguments[0]);
     sk_sp<SkShader> gradient = SkShaders::Color(color);
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkShader>(getContext(), std::move(gradient)));
+    auto shader =
+        std::make_shared<JsiSkShader>(getContext(), std::move(gradient));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shader,
+                                                       getContext());
   }
+
+  size_t getMemoryPressure() const override { return 1024; }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkShaderFactory, MakeLinearGradient),
                        JSI_EXPORT_FUNC(JsiSkShaderFactory, MakeRadialGradient),

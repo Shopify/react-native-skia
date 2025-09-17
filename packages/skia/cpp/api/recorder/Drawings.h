@@ -337,7 +337,6 @@ public:
   }
 };
 
-// Add to Drawings.h after existing command structures
 struct BoxShadowCmdProps {
   float dx = 0;
   float dy = 0;
@@ -386,7 +385,10 @@ public:
     for (size_t i = 0; i < shadowCount; i++) {
       auto shadowObj =
           shadowsArray.getValueAtIndex(runtime, i).asObject(runtime);
-      BoxShadowCmdProps shadow;
+
+      // Create shadow directly in vector to avoid copy
+      shadows.emplace_back();
+      BoxShadowCmdProps &shadow = shadows.back();
 
       convertProperty(runtime, shadowObj, "dx", shadow.dx, variables);
       convertProperty(runtime, shadowObj, "dy", shadow.dy, variables);
@@ -394,8 +396,6 @@ public:
       convertProperty(runtime, shadowObj, "blur", shadow.blur, variables);
       convertProperty(runtime, shadowObj, "color", shadow.color, variables);
       convertProperty(runtime, shadowObj, "inner", shadow.inner, variables);
-
-      shadows.push_back(shadow);
     }
   }
 

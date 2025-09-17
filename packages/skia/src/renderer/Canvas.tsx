@@ -1,5 +1,6 @@
 import type { FC, RefObject } from "react";
 import React, {
+  useCallback,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
@@ -8,18 +9,22 @@ import React, {
   useState,
 } from "react";
 import type {
+  LayoutChangeEvent,
   MeasureInWindowOnSuccessCallback,
   MeasureOnSuccessCallback,
   View,
   ViewProps,
 } from "react-native";
-import { type SharedValue } from "react-native-reanimated";
+import type { SharedValue } from "react-native-reanimated";
 
+import Rea from "../external/reanimated/ReanimatedProxy";
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
 import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeComponent";
 import type { SkImage, SkRect, SkSize } from "../skia/types";
 import { SkiaSGRoot } from "../sksg/Reconciler";
 import { Skia } from "../skia";
+import { Platform } from "../Platform";
+import { HAS_REANIMATED_3 } from "../external";
 
 export interface CanvasRef extends FC<CanvasProps> {
   makeImageSnapshot(rect?: SkRect): SkImage;
@@ -31,6 +36,8 @@ export interface CanvasRef extends FC<CanvasProps> {
 }
 
 export const useCanvasRef = () => useRef<CanvasRef>(null);
+
+const useReanimatedFrame = !HAS_REANIMATED_3 ? () => {} : Rea.useFrameCallback;
 
 export const useCanvasSize = (userRef?: RefObject<CanvasRef | null>) => {
   const ourRef = useCanvasRef();
@@ -85,10 +92,28 @@ export const Canvas = ({
   }, []);
 
   // Root
-  const root = useMemo(
-    () => new SkiaSGRoot(Skia, nativeId, onSize),
-    [nativeId, onSize]
-  );
+  const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
+
+  useReanimatedFrame(() => {
+    "worklet";
+  }, !!onSize);
+  useEffect(() => {
+    if (onSize) {
+      Rea.runOnUI(() => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        global[`__onSize_${nativeId}`] = onSize;
+      })();
+      return () => {
+        Rea.runOnUI(() => {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
+          delete global[`__onSize_${nativeId}`];
+        })();
+      };
+    }
+    return undefined;
+  }, [onSize, nativeId]);
 
   // Render effects
   useLayoutEffect(() => {
@@ -127,6 +152,19 @@ export const Canvas = ({
       } as CanvasRef)
   );
 
+  const onLayoutWeb = useCallback(
+    (e: LayoutChangeEvent) => {
+      if (onLayout) {
+        onLayout(e);
+      }
+      if (Platform.OS === "web" && onSize) {
+        const { width, height } = e.nativeEvent.layout;
+        onSize.value = { width, height };
+      }
+    },
+    [onLayout, onSize]
+  );
+
   return (
     <SkiaPictureViewNativeComponent
       ref={viewRef}
@@ -135,6 +173,7 @@ export const Canvas = ({
       debug={debug}
       opaque={opaque}
       colorSpace={colorSpace}
+      onLayout={onLayoutWeb}
       {...viewProps}
     />
   );

@@ -1,6 +1,4 @@
-import type { SharedValue } from "react-native-reanimated";
-
-import type { Skia, SkCanvas, SkSize } from "../skia/types";
+import type { Skia, SkCanvas } from "../skia/types";
 
 import type { Node } from "./Node";
 import type { Recording } from "./Recorder/Recorder";
@@ -50,11 +48,7 @@ export abstract class Container {
 }
 
 export class StaticContainer extends Container {
-  constructor(
-    Skia: Skia,
-    private nativeId: number,
-    private onSize?: SharedValue<SkSize>
-  ) {
+  constructor(Skia: Skia, private nativeId: number) {
     super(Skia);
   }
 
@@ -64,15 +58,6 @@ export class StaticContainer extends Container {
     this.recording = recorder.getRecording();
     const isOnScreen = this.nativeId !== -1;
     if (isOnScreen) {
-      if (this.onSize) {
-        const size = SkiaViewApi.size(this.nativeId);
-        if (
-          size.width !== this.onSize.value.width ||
-          size.height !== this.onSize.value.height
-        ) {
-          this.onSize.value = size;
-        }
-      }
       const rec = this.Skia.PictureRecorder();
       const canvas = rec.beginRecording();
       this.drawOnCanvas(canvas);

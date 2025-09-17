@@ -58,8 +58,10 @@ public:
     DrawingCtx ctx(canvas);
     getObject()->play(&ctx);
     auto picture = pictureRecorder.finishRecordingAsPicture();
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPicture>(getContext(), picture));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkPicture>(getContext(), std::move(picture));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(applyUpdates) {
@@ -119,10 +121,9 @@ public:
   }
 
   JSI_HOST_FUNCTION(pushShader) {
-    getObject()->pushShader(runtime,
-                            arguments[0].asString(runtime).utf8(runtime),
-                            arguments[1].asObject(runtime),
-                            arguments[2].asNumber());
+    getObject()->pushShader(
+        runtime, arguments[0].asString(runtime).utf8(runtime),
+        arguments[1].asObject(runtime), arguments[2].asNumber());
     return jsi::Value::undefined();
   }
 
@@ -313,12 +314,15 @@ public:
                        JSI_EXPORT_FUNC(JsiRecorder, play),
                        JSI_EXPORT_FUNC(JsiRecorder, applyUpdates))
 
+  size_t getMemoryPressure() const override { return 16384; }
+
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
       // Return the newly constructed object
-      return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiRecorder>(std::move(context)));
+      auto recorder = std::make_shared<JsiRecorder>(std::move(context));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, recorder,
+                                                         context);
     };
   }
 };

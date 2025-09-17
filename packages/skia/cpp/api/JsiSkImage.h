@@ -8,6 +8,7 @@
 #include "JsiSkImageInfo.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkShader.h"
+#include "JsiSkThreadSafeDeletion.h"
 #include "third_party/base64.h"
 
 #include "JsiTextureInfo.h"
@@ -61,6 +62,9 @@ inline SkSamplingOptions SamplingOptionsFromValue(jsi::Runtime &runtime,
 }
 
 class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
+private:
+  ThreadSafeDeletion<SkImage> _deletionHandler;
+
 public:
   // TODO-API: Properties?
   JSI_HOST_FUNCTION(width) { return static_cast<double>(getObject()->width()); }
@@ -83,9 +87,10 @@ public:
                  : nullptr;
     auto shader =
         getObject()->makeShader(tmx, tmy, SkSamplingOptions(fm, mm), m);
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkShader>(getContext(), std::move(shader)));
+    auto shaderObj =
+        std::make_shared<JsiSkShader>(getContext(), std::move(shader));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shaderObj,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(makeShaderCubic) {
@@ -98,9 +103,10 @@ public:
                  : nullptr;
     auto shader =
         getObject()->makeShader(tmx, tmy, SkSamplingOptions({B, C}), m);
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkShader>(getContext(), std::move(shader)));
+    auto shaderObj =
+        std::make_shared<JsiSkShader>(getContext(), std::move(shader));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shaderObj,
+                                                       getContext());
   }
 
   sk_sp<SkData> encodeImageData(const jsi::Value *arguments, size_t count) {
@@ -238,8 +244,10 @@ public:
     auto grContext = getContext()->getDirectContext();
     auto rasterImage = getObject()->makeRasterImage(grContext);
 #endif
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), rasterImage));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkImage>(getContext(), std::move(rasterImage));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(getNativeTextureUnstable) {
@@ -268,7 +276,23 @@ public:
   JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
              const sk_sp<SkImage> image)
       : JsiSkWrappingSkPtrHostObject<SkImage>(std::move(context),
-                                              std::move(image)) {}
+                                              std::move(image)) {
+    // Drain any pending deletions when creating new images
+    ThreadSafeDeletion<SkImage>::drainDeletionQueue();
+  }
+
+  ~JsiSkImage() override {
+    // Handle thread-safe deletion
+    _deletionHandler.handleDeletion(getObject());
+    // Always clear the object to prevent base class destructor from deleting it
+    // handleDeletion takes full responsibility for the object's lifetime
+    setObject(nullptr);
+  }
+
+  size_t getMemoryPressure() const override {
+    auto image = getObject();
+    return image ? image->imageInfo().computeMinByteSize() : 0;
+  }
 };
 
 } // namespace RNSkia
