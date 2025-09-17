@@ -21,7 +21,7 @@ import { SkiaObject } from "./e2e/setup";
 
 jest.setTimeout(180 * 1000);
 
-type TestOS = "ios" | "android" | "web" | "node";
+type TestOS = "ios" | "android" | "web" | "node" | "macos";
 
 declare global {
   var testServer: Server;
