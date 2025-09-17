@@ -32,18 +32,18 @@ public:
 
   /**
    * Handles deletion of the object. If we're on the wrong thread,
-   * queues it for later deletion. Returns nullptr if object was queued,
-   * or the object itself if it should be deleted immediately.
+   * queues it for later deletion. Otherwise, allows immediate deletion.
+   * The object is always considered handled after this call.
    */
-  sk_sp<T> handleDeletion(sk_sp<T> object) {
+  void handleDeletion(sk_sp<T> object) {
     if (!object) {
-      return nullptr;
+      return;
     }
 
 #ifdef DISABLE_THREAD_SAFE_DELETION
-    // When disabled, always return the object for immediate deletion
+    // When disabled, allow immediate deletion
     // This will likely cause crashes when objects are deleted on wrong thread
-    return object;
+    return;
 #else
     // Always try to drain the queue when handling deletions
     drainDeletionQueue();
@@ -53,11 +53,11 @@ public:
       // Queue for deletion on the correct thread
       std::lock_guard<std::mutex> lock(_queueMutex);
       _deletionQueue.push({object, _creationThreadId});
-      return nullptr; // Signal that object was queued
+      return;
     }
 
-    // We're on the correct thread, return object for immediate deletion
-    return object;
+    // We're on the correct thread, allow immediate deletion via destructor
+    return;
 #endif
   }
 
