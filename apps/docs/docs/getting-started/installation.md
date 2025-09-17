@@ -96,32 +96,26 @@ The very first step is to make sure that your Skia files are not being transform
 ]
 ```
 
-Next, we recommend using [ESM](https://jestjs.io/docs/ecmascript-modules). To enable ESM support, you need to update your `jest` command to `node --experimental-vm-modules node_modules/.bin/jest`.
-But we also support [CommonJS](#commonjs-setup).
-
-### ESM Setup
-
-To load CanvasKit and subsequently the React Native Skia mock, add the following setup file to your Jest configuration:
+The testing setup now supports jest using both [ESM](https://jestjs.io/docs/ecmascript-modules) and the default CommonJS setup. You just need to add the following to your `jest.config.js` file:
 
 ```js
-// notice the extension: .mjs
-"setupFiles": ["@shopify/react-native-skia/jestSetup.mjs"]
+// jest.config.js
+module.exports = {
+  // Other values
+  testEnvironment: "@shopify/react-native-skia/jestEnv.js",
+  setupFilesAfterEnv: [
+    "@shopify/react-native-skia/jestSetup.js",
+  ],
+};
 ```
 
-### CommonJS Setup
+This will load CanvasKit for you into the jest environment and setup mocks for React Native Skia.
 
-We also offer a version of the setup file without ECMAScript modules support. To use this version, add the following setup file to your Jest configuration:
-
-```js
-// notice the extension: .js
-"setupFiles": ["@shopify/react-native-skia/jestSetup.js"]
-```
-
-With this setup, you need to load the Skia environment in your test. Include the following at the top of your test file:
+Alternatively, you can set the jest test environment just for the tests that use React Native Skia instead of setting the [testEnvironment](https://jestjs.io/docs/configuration#testenvironment-string). Include the following at the top of your test file:
 
 ```js
 /**
- * @jest-environment @shopify/react-native-skia/jestEnv.mjs
+ * @jest-environment @shopify/react-native-skia/jestEnv.js
  */
 ```
 
@@ -129,7 +123,7 @@ For instance:
 
 ```js
 /**
- * @jest-environment @shopify/react-native-skia/jestEnv.mjs
+ * @jest-environment @shopify/react-native-skia/jestEnv.js
  */
 import "react-native";
 import React from "react";
@@ -143,7 +137,7 @@ it("renders correctly", () => {
 afterEach(cleanup);
 ```
 
-With this configuration, you will have properly set up Jest to work with React Native Skia mocks using either ECMAScript Modules or CommonJS.
+With this configuration, you will have properly set up Jest to work with React Native Skia mocks.
 
 ## Playground
 
