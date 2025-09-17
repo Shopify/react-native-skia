@@ -100,15 +100,11 @@ export const Canvas = ({
   useEffect(() => {
     if (onSize) {
       Rea.runOnUI(() => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        global[`__onSize_${nativeId}`] = onSize;
+        (global as Record<string, unknown>)[`__onSize_${nativeId}`] = onSize;
       })();
       return () => {
         Rea.runOnUI(() => {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
-          delete global[`__onSize_${nativeId}`];
+          delete (global as Record<string, unknown>)[`__onSize_${nativeId}`];
         })();
       };
     }
