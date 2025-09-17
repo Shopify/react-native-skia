@@ -15,7 +15,7 @@ import type {
   View,
   ViewProps,
 } from "react-native";
-import { type SharedValue } from "react-native-reanimated";
+import type { SharedValue } from "react-native-reanimated";
 
 import Rea from "../external/reanimated/ReanimatedProxy";
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
@@ -37,7 +37,7 @@ export interface CanvasRef extends FC<CanvasProps> {
 
 export const useCanvasRef = () => useRef<CanvasRef>(null);
 
-const useFrame = !HAS_REANIMATED_3 ? () => {} : Rea.useFrameCallback;
+const useReanimatedFrame = !HAS_REANIMATED_3 ? () => {} : Rea.useFrameCallback;
 
 export const useCanvasSize = (userRef?: RefObject<CanvasRef | null>) => {
   const ourRef = useCanvasRef();
@@ -94,9 +94,9 @@ export const Canvas = ({
   // Root
   const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
 
-  useFrame(() => {
+  useReanimatedFrame(() => {
     "worklet";
-  });
+  }, !!onSize);
   useEffect(() => {
     if (onSize) {
       Rea.runOnUI(() => {
