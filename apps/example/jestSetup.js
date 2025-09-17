@@ -1,7 +1,6 @@
-/* eslint-disable import/no-extraneous-dependencies */
-const { jest } = require("@jest/globals");
+/* globals jest */
 const JestUtils = require("react-native-reanimated/lib/module/jestUtils");
-const Reanimated = require("react-native-reanimated/mock");
+const MockReanimated = require("react-native-reanimated/mock");
 
 JestUtils.setUpTests();
 global.__reanimatedWorkletInit = () => {};
@@ -13,15 +12,15 @@ jest.mock("expo-asset", () => ({
 jest.mock("react-native-reanimated", () => {
   // The mock for `call` immediately calls the callback which is incorrect
   // So we override it with a no-op
-  Reanimated.default.call = () => {};
-  Reanimated.Extrapolation = {
+  MockReanimated.default.call = () => {};
+  MockReanimated.Extrapolation = {
     CLAMP: "clamp",
   };
-  Reanimated.useEvent = () => {};
-  Reanimated.scrollTo = () => {};
-  Reanimated.useFrameCallback = () => {};
-  Reanimated.convertToRGBA = () => {};
-  return Reanimated;
+  MockReanimated.useEvent = () => {};
+  MockReanimated.scrollTo = () => {};
+  MockReanimated.useFrameCallback = () => {};
+  MockReanimated.convertToRGBA = () => {};
+  return MockReanimated;
 });
 
 const mockedNavigate = jest.fn();

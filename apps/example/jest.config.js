@@ -6,10 +6,11 @@ module.exports = {
     "^react-native$": "<rootDir>/../../node_modules/react-native",
   },
   modulePathIgnorePatterns: ["<rootDir>/lib/typescript", "setup.(ts|tsx)$"],
-  setupFiles: ["@shopify/react-native-skia/jestSetup.mjs"],
+  testEnvironment: "@shopify/react-native-skia/jestEnv.js",
   setupFilesAfterEnv: [
+    "@shopify/react-native-skia/jestSetup.js",
     "<rootDir>/../../node_modules/react-native-gesture-handler/jestSetup.js",
-    "<rootDir>/jestSetup.mjs",
+    "<rootDir>/jestSetup.js",
   ],
   preset: "react-native",
   transformIgnorePatterns: [

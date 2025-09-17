@@ -15,8 +15,8 @@
     "pod:install": "cd ios && pod install",
     "start": "react-native start",
     "test": "turbo run test:esm test:commonjs --filter=example",
-    "test:esm": "node --experimental-vm-modules ../../node_modules/.bin/jest",
-    "test:commonjs": "jest --config ./jest.cjs.config.js",
+    "test:esm": "node --experimental-vm-modules ../../node_modules/.bin/jest && node --experimental-vm-modules ../../node_modules/.bin/jest --config ./jest.config.esm.js",
+    "test:commonjs": "jest",
     "tsc": "tsc --noEmit"
   },
   "dependencies": {

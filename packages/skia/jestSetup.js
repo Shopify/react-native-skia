@@ -21,7 +21,7 @@ jest.mock("@shopify/react-native-skia", () => {
       useFonts: () => null,
     };
   });
-  return require("@shopify/react-native-skia/lib/commonjs/mock").Mock(
+  return require("@shopify/react-native-skia/lib/module/mock").Mock(
     global.CanvasKit
   );
 });
