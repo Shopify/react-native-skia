@@ -14,7 +14,8 @@
     "mkdist": "node -e \"require('node:fs').mkdirSync('dist', { recursive: true, mode: 0o755 })\"",
     "pod:install": "cd ios && pod install",
     "test": "jest",
-    "tsc": "tsc --noEmit"
+    "tsc": "tsc --noEmit",
+    "start": "react-native start"
   },
   "dependencies": {
     "@callstack/react-native-visionos": "^0.75.0",
