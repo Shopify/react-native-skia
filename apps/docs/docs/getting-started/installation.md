@@ -96,7 +96,7 @@ The very first step is to make sure that your Skia files are not being transform
 ]
 ```
 
-The testing setup now supports jest using both [ESM](https://jestjs.io/docs/ecmascript-modules) and the default CommonJS setup. You just need to add the following to your `jest.config.js` file:
+You also need to add the following to your `jest.config.js` file:
 
 ```js
 // jest.config.js
@@ -109,35 +109,9 @@ module.exports = {
 };
 ```
 
-This will load CanvasKit for you into the jest environment and setup mocks for React Native Skia.
+The `jestEnv.js` will load CanvasKit for you and `jestEnv.js` mocks React Native Skia.
+You can also have a look at the [example app](https://github.com/Shopify/react-native-skia/tree/main/apps/example) to see how Jest tests are enabled there.
 
-Alternatively, you can set the jest test environment just for the tests that use React Native Skia instead of setting the [testEnvironment](https://jestjs.io/docs/configuration#testenvironment-string). Include the following at the top of your test file:
-
-```js
-/**
- * @jest-environment @shopify/react-native-skia/jestEnv.js
- */
-```
-
-For instance:
-
-```js
-/**
- * @jest-environment @shopify/react-native-skia/jestEnv.js
- */
-import "react-native";
-import React from "react";
-import { cleanup, render } from "@testing-library/react-native";
-import App from "./App";
-
-it("renders correctly", () => {
-  render(<App />);
-});
-
-afterEach(cleanup);
-```
-
-With this configuration, you will have properly set up Jest to work with React Native Skia mocks.
 
 ## Playground
 
