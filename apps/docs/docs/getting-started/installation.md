@@ -96,54 +96,22 @@ The very first step is to make sure that your Skia files are not being transform
 ]
 ```
 
-Next, we recommend using [ESM](https://jestjs.io/docs/ecmascript-modules). To enable ESM support, you need to update your `jest` command to `node --experimental-vm-modules node_modules/.bin/jest`.
-But we also support [CommonJS](#commonjs-setup).
-
-### ESM Setup
-
-To load CanvasKit and subsequently the React Native Skia mock, add the following setup file to your Jest configuration:
+You also need to add the following to your `jest.config.js` file:
 
 ```js
-// notice the extension: .mjs
-"setupFiles": ["@shopify/react-native-skia/jestSetup.mjs"]
+// jest.config.js
+module.exports = {
+  // Other values
+  testEnvironment: "@shopify/react-native-skia/jestEnv.js",
+  setupFilesAfterEnv: [
+    "@shopify/react-native-skia/jestSetup.js",
+  ],
+};
 ```
 
-### CommonJS Setup
+The `jestEnv.js` will load CanvasKit for you and `jestEnv.js` mocks React Native Skia.
+You can also have a look at the [example app](https://github.com/Shopify/react-native-skia/tree/main/apps/example) to see how Jest tests are enabled there.
 
-We also offer a version of the setup file without ECMAScript modules support. To use this version, add the following setup file to your Jest configuration:
-
-```js
-// notice the extension: .js
-"setupFiles": ["@shopify/react-native-skia/jestSetup.js"]
-```
-
-With this setup, you need to load the Skia environment in your test. Include the following at the top of your test file:
-
-```js
-/**
- * @jest-environment @shopify/react-native-skia/jestEnv.mjs
- */
-```
-
-For instance:
-
-```js
-/**
- * @jest-environment @shopify/react-native-skia/jestEnv.mjs
- */
-import "react-native";
-import React from "react";
-import { cleanup, render } from "@testing-library/react-native";
-import App from "./App";
-
-it("renders correctly", () => {
-  render(<App />);
-});
-
-afterEach(cleanup);
-```
-
-With this configuration, you will have properly set up Jest to work with React Native Skia mocks using either ECMAScript Modules or CommonJS.
 
 ## Playground
 

@@ -84,7 +84,17 @@
     },
     "lint": {},
     "tsc": {},
-    "test": {},
-    "build": {}
+    "test": {
+      "dependsOn": [
+        "build"
+      ]
+    },
+    "test:commonjs": {},
+    "test:esm": {},
+    "build": {
+      "dependsOn": [
+        "^build"
+      ]
+    }
   }
 }
