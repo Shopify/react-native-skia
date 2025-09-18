@@ -146,6 +146,9 @@ export const Platform: IPlatform = {
         "Asset source is a number - this is not supported on the web"
       );
     }
+    if ("uri" in source) {
+      return source.uri;
+    }
     return source.default;
   },
   findNodeHandle: () => {

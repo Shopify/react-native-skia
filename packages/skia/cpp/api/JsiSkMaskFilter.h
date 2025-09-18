@@ -25,6 +25,8 @@ public:
       : JsiSkWrappingSkPtrHostObject<SkMaskFilter>(std::move(context),
                                                    std::move(maskFilter)) {}
 
+  size_t getMemoryPressure() const override { return 2048; }
+
   EXPORT_JSI_API_TYPENAME(JsiSkMaskFilter, MaskFilter)
 };
 

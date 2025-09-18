@@ -1,7 +1,5 @@
-import type { SharedValue } from "react-native-reanimated";
-
 import Rea from "../external/reanimated/ReanimatedProxy";
-import type { Skia, SkSize } from "../skia/types";
+import type { Skia } from "../skia/types";
 import { HAS_REANIMATED_3 } from "../external/reanimated/renderHelpers";
 import type { JsiRecorder } from "../skia/types/Recorder";
 
@@ -12,15 +10,9 @@ import { visit } from "./Recorder/Visitor";
 import "../skia/NativeSetup";
 import "../views/api";
 
-const nativeDrawOnscreen = (
-  nativeId: number,
-  recorder: JsiRecorder,
-  onSize?: SharedValue<SkSize>
-) => {
+const nativeDrawOnscreen = (nativeId: number, recorder: JsiRecorder) => {
   "worklet";
-  if (onSize) {
-    SkiaViewApi.setJsiProperty(nativeId, "onSize", onSize);
-  }
+
   //const start = performance.now();
   const picture = recorder.play();
   //const end = performance.now();
@@ -31,11 +23,7 @@ const nativeDrawOnscreen = (
 class NativeReanimatedContainer extends Container {
   private mapperId: number | null = null;
 
-  constructor(
-    Skia: Skia,
-    private nativeId: number,
-    private onSize?: SharedValue<SkSize>
-  ) {
+  constructor(Skia: Skia, private nativeId: number) {
     super(Skia);
   }
 
@@ -51,28 +39,23 @@ class NativeReanimatedContainer extends Container {
     visit(recorder, this.root);
     const sharedValues = recorder.getSharedValues();
     const sharedRecorder = recorder.getRecorder();
-    Rea.runOnUI((onSize?: SharedValue<SkSize>) => {
+    Rea.runOnUI(() => {
       "worklet";
-      nativeDrawOnscreen(nativeId, sharedRecorder, onSize);
-    })(this.onSize);
+      nativeDrawOnscreen(nativeId, sharedRecorder);
+    })();
     if (sharedValues.length > 0) {
-      const { onSize } = this;
       this.mapperId = Rea.startMapper(() => {
         "worklet";
         sharedRecorder.applyUpdates(sharedValues);
-        nativeDrawOnscreen(nativeId, sharedRecorder, onSize);
+        nativeDrawOnscreen(nativeId, sharedRecorder);
       }, sharedValues);
     }
   }
 }
 
-export const createContainer = (
-  Skia: Skia,
-  nativeId: number,
-  onSize?: SharedValue<SkSize>
-) => {
+export const createContainer = (Skia: Skia, nativeId: number) => {
   if (HAS_REANIMATED_3 && nativeId !== -1) {
-    return new NativeReanimatedContainer(Skia, nativeId, onSize);
+    return new NativeReanimatedContainer(Skia, nativeId);
   } else {
     return new StaticContainer(Skia, nativeId);
   }

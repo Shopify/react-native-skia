@@ -24,9 +24,10 @@
     "lint": "turbo run lint",
     "tsc": "turbo run tsc",
     "test": "turbo run test",
-    "build": "turbo run build",
-    "build:ios": "turbo run build:ios",
     "build:android": "turbo run build:android",
+    "build:ios": "turbo run build:ios",
+    "build:macos": "turbo run build:macos",
+    "build": "turbo run build",
     "pod:install": "turbo run pod:install"
   },
   "packageManager": "yarn@3.6.4",

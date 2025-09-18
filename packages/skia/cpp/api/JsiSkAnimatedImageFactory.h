@@ -23,10 +23,13 @@ public:
     if (image == nullptr) {
       return jsi::Value::null();
     }
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkAnimatedImage>(getContext(), std::move(image)));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkAnimatedImage>(getContext(), std::move(image));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
+
+  size_t getMemoryPressure() const override { return 1024; }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkAnimatedImageFactory,
                                        MakeAnimatedImageFromEncoded))

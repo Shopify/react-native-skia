@@ -29,12 +29,22 @@ public:
 
   JSI_HOST_FUNCTION(bounds) {
     const auto &result = getObject()->bounds();
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkRect>(getContext(), result));
+    auto hostObjectInstance = std::make_shared<JsiSkRect>(getContext(), result);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(uniqueID) {
     return static_cast<double>(getObject()->uniqueID());
+  }
+
+  size_t getMemoryPressure() const override {
+    auto vertices = getObject();
+    if (!vertices)
+      return 0;
+
+    // SkVertices provides approximateBytesUsed() to estimate memory usage
+    return vertices->approximateSize();
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkVertices, bounds),
@@ -146,9 +156,10 @@ public:
                                texs.size() > 0 ? texs.data() : nullptr,
                                colors.size() > 0 ? colors.data() : nullptr,
                                indicesSize, indices.data());
-      return jsi::Object::createFromHostObject(
-          runtime,
-          std::make_shared<JsiSkVertices>(context, std::move(vertices)));
+      auto hostObjectInstance =
+          std::make_shared<JsiSkVertices>(context, std::move(vertices));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+          runtime, hostObjectInstance, context);
     };
   }
 };

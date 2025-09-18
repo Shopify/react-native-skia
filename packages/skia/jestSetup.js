@@ -1,4 +1,5 @@
 /* globals jest */
+/* eslint-disable import/no-extraneous-dependencies */
 jest.mock("@shopify/react-native-skia", () => {
   jest.mock("@shopify/react-native-skia/lib/commonjs/Platform", () => {
     const Noop = () => undefined;
@@ -18,9 +19,9 @@ jest.mock("@shopify/react-native-skia", () => {
       matchFont: () => null,
       listFontFamilies: () => [],
       useFonts: () => null,
-    }
+    };
   });
-  return require("@shopify/react-native-skia/lib/commonjs/mock").Mock(
+  return require("@shopify/react-native-skia/lib/module/mock").Mock(
     global.CanvasKit
   );
 });
