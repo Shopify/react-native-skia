@@ -13,10 +13,7 @@
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --cache --fix",
     "mkdist": "node -e \"require('node:fs').mkdirSync('dist', { recursive: true, mode: 0o755 })\"",
     "pod:install": "cd ios && pod install",
-    "start": "react-native start",
-    "test": "turbo run test:esm test:commonjs --filter=example",
-    "test:esm": "node --experimental-vm-modules ../../node_modules/.bin/jest && node --experimental-vm-modules ../../node_modules/.bin/jest --config ./jest.config.esm.js",
-    "test:commonjs": "jest",
+    "test": "jest",
     "tsc": "tsc --noEmit"
   },
   "dependencies": {
