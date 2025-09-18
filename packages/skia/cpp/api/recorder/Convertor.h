@@ -170,18 +170,10 @@ SkColor getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
         object.hasProperty(runtime, prop1) &&
         object.hasProperty(runtime, prop2) &&
         object.hasProperty(runtime, prop3)) {
-      auto r =
-          object.getProperty(runtime, prop0)
-              .asNumber();
-      auto g =
-          object.getProperty(runtime, prop1)
-              .asNumber();
-      auto b =
-          object.getProperty(runtime, prop2)
-              .asNumber();
-      auto a =
-          object.getProperty(runtime, prop3)
-              .asNumber();
+      auto r = object.getProperty(runtime, prop0).asNumber();
+      auto g = object.getProperty(runtime, prop1).asNumber();
+      auto b = object.getProperty(runtime, prop2).asNumber();
+      auto a = object.getProperty(runtime, prop3).asNumber();
       return SkColorSetARGB(a * 255, r * 255, g * 255, b * 255);
     }
     jsi::ArrayBuffer buffer =
