@@ -15,9 +15,9 @@ export class JsiSkRuntimeEffect
     super(CanvasKit, ref, "RuntimeEffect");
   }
 
-  dispose = () => {
+  [Symbol.dispose]() {
     this.ref.delete();
-  };
+  }
 
   source() {
     return this.sksl;

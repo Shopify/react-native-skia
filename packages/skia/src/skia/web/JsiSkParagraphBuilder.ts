@@ -87,7 +87,7 @@ export class JsiSkParagraphBuilder
     return this;
   }
 
-  dispose() {
+  [Symbol.dispose]() {
     this.ref.delete();
   }
 

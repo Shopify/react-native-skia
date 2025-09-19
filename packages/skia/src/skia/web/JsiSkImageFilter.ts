@@ -12,7 +12,7 @@ export class JsiSkImageFilter
     super(CanvasKit, ref, "ImageFilter");
   }
 
-  dispose = () => {
+  [Symbol.dispose]() {
     this.ref.delete();
-  };
+  }
 }

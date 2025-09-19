@@ -21,7 +21,7 @@ export class JsiSkContourMeasureIter
     return new JsiSkContourMeasure(this.CanvasKit, result);
   }
 
-  dispose = () => {
+  [Symbol.dispose]() {
     this.ref.delete();
-  };
+  }
 }

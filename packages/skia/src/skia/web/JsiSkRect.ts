@@ -15,9 +15,7 @@ export class JsiSkRect
     return CanvasKit.XYWHRect(rect.x, rect.y, rect.width, rect.height);
   }
 
-  dispose = () => {
-    // Float32Array
-  };
+  [Symbol.dispose]() {}
 
   constructor(CanvasKit: CanvasKit, ref: Rect) {
     super(CanvasKit, ref, "Rect");

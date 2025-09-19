@@ -50,7 +50,11 @@ export class ParagraphAsset<Ctx extends EvalContext>
   }
   __typename__ = "Paragraph" as const;
 
+  [Symbol.dispose](): void {
+    this.instance[Symbol.dispose]();
+  }
+
   dispose(): void {
-    this.instance.dispose();
+    this[Symbol.dispose]();
   }
 }

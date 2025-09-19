@@ -30,7 +30,7 @@ export class JsiSkTypeface
     return Array.from(this.ref.getGlyphIDs(str, numCodePoints));
   }
 
-  dispose = () => {
+  [Symbol.dispose]() {
     this.ref.delete();
-  };
+  }
 }

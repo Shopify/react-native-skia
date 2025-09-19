@@ -25,9 +25,9 @@ export class JsiSkFont extends HostObject<Font, "Font"> implements SkFont {
     return throwNotImplementedOnRNWeb<SkRect>();
   }
 
-  dispose = () => {
+  [Symbol.dispose]() {
     this.ref.delete();
-  };
+  }
 
   getTextWidth(text: string, paint?: SkPaint | undefined) {
     const ids = this.getGlyphIDs(text);

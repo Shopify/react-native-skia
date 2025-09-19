@@ -9,8 +9,6 @@ export class JsiSkTypefaceFontProvider
   extends HostObject<TypefaceFontProvider, "FontMgr">
   implements SkTypefaceFontProvider
 {
-  private allocatedPointers: number[] = [];
-
   constructor(CanvasKit: CanvasKit, ref: TypefaceFontProvider) {
     super(CanvasKit, ref, "FontMgr");
   }
@@ -37,13 +35,7 @@ export class JsiSkTypefaceFontProvider
     this.ref._registerFont(typeface.ref, strPtr);
   }
 
-  dispose() {
-    for (const ptr of this.allocatedPointers) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      this.CanvasKit._free(ptr);
-    }
-
+  [Symbol.dispose]() {
     this.ref.delete();
   }
 }

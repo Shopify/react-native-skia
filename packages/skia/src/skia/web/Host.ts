@@ -40,6 +40,8 @@ export abstract class BaseHostObject<T, N extends string>
       );
     }
   }
+
+  abstract [Symbol.dispose](): void;
 }
 
 export abstract class HostObject<T, N extends string> extends BaseHostObject<

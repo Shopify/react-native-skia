@@ -58,9 +58,9 @@ export class JsiSkCanvas
     super(CanvasKit, ref, "Canvas");
   }
 
-  dispose = () => {
+  [Symbol.dispose]() {
     this.ref.delete();
-  };
+  }
 
   drawRect(rect: SkRect, paint: SkPaint) {
     this.ref.drawRect(

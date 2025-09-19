@@ -12,7 +12,7 @@ export class JsiSkTextBlob
     super(CanvasKit, ref, "TextBlob");
   }
 
-  dispose = () => {
+  [Symbol.dispose]() {
     this.ref.delete();
-  };
+  }
 }

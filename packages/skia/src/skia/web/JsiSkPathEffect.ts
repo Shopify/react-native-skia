@@ -12,7 +12,7 @@ export class JsiSkPathEffect
     super(CanvasKit, ref, "PathEffect");
   }
 
-  dispose = () => {
+  [Symbol.dispose]() {
     this.ref.delete();
-  };
+  }
 }
