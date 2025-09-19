@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable no-eval */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
@@ -9,7 +10,7 @@ import {
 } from "@shopify/react-native-skia";
 import type { RefObject } from "react";
 import React, { useEffect, useRef, useState } from "react";
-import { PixelRatio, Text, View } from "react-native";
+import { PixelRatio, Platform, Text, View } from "react-native";
 
 import type { SerializedNode } from "./deserialize";
 import { parseNode, parseProps } from "./deserialize";
@@ -20,7 +21,7 @@ export const CI = process.env.CI === "true";
 const s = 3;
 const scale = s / PixelRatio.get();
 const size = 256 * scale;
-const timeToDraw = CI ? 1500 : 500;
+const timeToDraw = CI ? (Platform.OS === "ios" ? 1500 : 3000) : 500;
 
 interface TestsProps {
   assets: { [key: string]: any };
