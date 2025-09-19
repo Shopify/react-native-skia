@@ -291,7 +291,6 @@ describe("Paths", () => {
     await surface.eval((Skia) => {
       using path = Skia.Path.Make();
       path.moveTo(20, 20).lineTo(20, 40).lineTo(40, 20);
-      path.dispose();
       return path;
     });
   });
