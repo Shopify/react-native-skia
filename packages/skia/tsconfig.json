@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "target": "esnext",
+    "target": "es2024",
     "lib": [
       "dom",
-      "es2019"
+      "es2024"
     ],
     "noEmit": true,
     "allowJs": true,
