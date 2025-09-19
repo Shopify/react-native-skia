@@ -1,5 +1,6 @@
 {
   "name": "@shopify/react-native-skia",
+  "type": "module",
   "publishConfig": {
     "access": "public",
     "provenance": true
@@ -43,14 +44,14 @@
     "release": "semantic-release",
     "build": "bob build && merge-dirs lib/typescript/src lib/commonjs && merge-dirs lib/typescript/src lib/module",
     "clean-skia": "yarn rimraf ./libs && yarn rimraf ../../externals/skia/out",
-    "build-skia": "ts-node ./scripts/build-skia.ts",
-    "copy-skia-headers": "ts-node ./scripts/copy-skia-headers.ts",
-    "install-skia": "ts-node ./scripts/download-artifacts.ts && yarn copy-skia-headers",
+    "build-skia": "tsx ./scripts/build-skia.ts",
+    "copy-skia-headers": "tsx ./scripts/copy-skia-headers.ts",
+    "install-skia": "tsx ./scripts/download-artifacts.ts && yarn copy-skia-headers",
     "clang-format": "yarn clang-format-ios && yarn clang-format-android && yarn clang-format-common",
     "clang-format-ios": "find apple/ -iname '*.h' -o -iname '*.mm' -o -iname '*.cpp' | xargs clang-format -i",
     "clang-format-android": "find android/cpp/ -iname '*.h' -o -iname '*.m' -o -iname '*.cpp' | xargs clang-format -i",
     "clang-format-common": "find cpp/ \\( -path 'cpp//skia' -prune \\) -o \\( -iname '*.h' -o -iname '*.m' -o -iname '*.cpp' \\) -print | xargs clang-format -i",
-    "workflow-copy-libs": "yarn ts-node ./scripts/workflow-copy-libs.ts",
+    "workflow-copy-libs": "tsx ./scripts/workflow-copy-libs.ts",
     "cpplint": "cpplint --linelength=230 --filter=-legal/copyright,-whitespace/indent,-whitespace/comments,-whitespace/ending_newline,-build/include_order,-runtime/references,-readability/todo,-whitespace/blank_line,-whitespace/todo,-runtime/int,-build/c++11,-whitespace/parens --exclude=package/cpp/skia --exclude=package/ios --exclude=package/android/build --exclude=package/node_modules --recursive package"
   },
   "repository": {
@@ -119,7 +120,7 @@
     "semantic-release": "^24.1.0",
     "semantic-release-yarn": "^3.0.2",
     "ts-jest": "29.4.3",
-    "ts-node": "^10.9.2",
+    "tsx": "^4.20.5",
     "typescript": "^5.2.2",
     "ws": "8.18.0"
   },

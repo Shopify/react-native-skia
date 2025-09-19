@@ -1,5 +1,4 @@
-/** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
-module.exports = {
+const config = {
   preset: "ts-jest",
   testEnvironment: "node",
   // Ignore lib folder - contains build artifacts and should
@@ -15,3 +14,5 @@ module.exports = {
   globalSetup: "<rootDir>/src/__tests__/globalSetup.ts",
   globalTeardown: "<rootDir>/src/__tests__/globalTeardown.ts",
 };
+
+export default config;

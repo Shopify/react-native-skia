@@ -1,4 +1,4 @@
-module.exports = {
+const config = {
   presets: [
     ["@babel/preset-env", { targets: { node: "current" } }],
     "@babel/preset-typescript"
@@ -7,3 +7,5 @@ module.exports = {
     "@babel/plugin-transform-flow-strip-types"
   ]
 };
+
+export default config;
