@@ -1,4 +1,4 @@
-/* eslint-disable no-eval */
+ 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Canvas,

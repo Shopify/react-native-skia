@@ -1,4 +1,4 @@
-/* eslint-disable react/no-unstable-nested-components */
+ 
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import React, { useMemo } from "react";
 import type { SkTextStyle } from "@shopify/react-native-skia";

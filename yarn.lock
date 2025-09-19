@@ -7395,7 +7395,7 @@ __metadata:
     "@types/ws": 8.5.3
     canvaskit-wasm: 0.40.0
     eslint: 9.35.0
-    eslint-config-react-native-wcandillon: "https://firebasestorage.googleapis.com/v0/b/start-react-native.appspot.com/o/eslint-config-react-native-wcandillon-0.0.0-development.tgz?alt=media&token=794e35f6-97fd-4f6f-902b-bc2477dd43fd"
+    eslint-config-react-native-wcandillon: 4.0.0
     eslint-plugin-import: 2.32.0
     eslint-plugin-react-hooks: ^5.2.0
     jest: 30.1.3
@@ -13763,9 +13763,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-react-native-wcandillon@https://firebasestorage.googleapis.com/v0/b/start-react-native.appspot.com/o/eslint-config-react-native-wcandillon-0.0.0-development.tgz?alt=media&token=794e35f6-97fd-4f6f-902b-bc2477dd43fd":
-  version: 0.0.0-development
-  resolution: "eslint-config-react-native-wcandillon@https://firebasestorage.googleapis.com/v0/b/start-react-native.appspot.com/o/eslint-config-react-native-wcandillon-0.0.0-development.tgz?alt=media&token=794e35f6-97fd-4f6f-902b-bc2477dd43fd"
+"eslint-config-react-native-wcandillon@npm:3.10.2, eslint-config-react-native-wcandillon@npm:^3.10.2":
+  version: 3.10.2
+  resolution: "eslint-config-react-native-wcandillon@npm:3.10.2"
+  dependencies:
+    "@react-native-community/eslint-config": 3.2.0
+    "@typescript-eslint/eslint-plugin": 6.10.0
+    "@typescript-eslint/parser": 6.10.0
+    eslint-plugin-import: 2.27.5
+    prettier: 2.8.7
+    typescript: 5.0.3
+  checksum: 39245c1a0b8941a4b1e5e915c3d3136b857f68d451669bcce6a07ca4d0bb56d8b28b5b5a86deba9fc1e70f2c32ced1302500e173c74a49ecbe716d40db38a3ae
+  languageName: node
+  linkType: hard
+
+"eslint-config-react-native-wcandillon@npm:4.0.0":
+  version: 4.0.0
+  resolution: "eslint-config-react-native-wcandillon@npm:4.0.0"
   dependencies:
     "@react-native-community/eslint-config": ^3.2.0
     "@typescript-eslint/eslint-plugin": ^8.44.0
@@ -13778,21 +13792,7 @@ __metadata:
     eslint-plugin-react-native: ^4.1.0
     prettier: ^3.6.2
     typescript: ^5.9.2
-  checksum: b3ca868e1ccf25583d1660bbc8700c61232510064159342e1801c962c457953abdd524e4fa6d847ef203c5b596c81b5f7ed9fb7c0e2f28fd3428cffce2c46209
-  languageName: node
-  linkType: hard
-
-"eslint-config-react-native-wcandillon@npm:3.10.2, eslint-config-react-native-wcandillon@npm:^3.10.2":
-  version: 3.10.2
-  resolution: "eslint-config-react-native-wcandillon@npm:3.10.2"
-  dependencies:
-    "@react-native-community/eslint-config": 3.2.0
-    "@typescript-eslint/eslint-plugin": 6.10.0
-    "@typescript-eslint/parser": 6.10.0
-    eslint-plugin-import: 2.27.5
-    prettier: 2.8.7
-    typescript: 5.0.3
-  checksum: 39245c1a0b8941a4b1e5e915c3d3136b857f68d451669bcce6a07ca4d0bb56d8b28b5b5a86deba9fc1e70f2c32ced1302500e173c74a49ecbe716d40db38a3ae
+  checksum: 8de869f1867a146251078adc6266f9e3cf11fa62af0ca32501436e66f690936cdb0d2ec5834833430743f2b0731868c8764bdffe76231c0e5e35ccfd13c683ed
   languageName: node
   linkType: hard
 
@@ -14576,7 +14576,7 @@ __metadata:
     babel-plugin-transform-inline-environment-variables: ^0.4.4
     cdt2d: ^1.0.0
     eslint: 9.35.0
-    eslint-config-react-native-wcandillon: ^3.10.2
+    eslint-config-react-native-wcandillon: 4.0.0
     eslint-plugin-import: 2.32.0
     its-fine: ^2.0.0
     jest: ^29.6.3
