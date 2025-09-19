@@ -12,7 +12,7 @@ export class JsiSkShader
     super(CanvasKit, ref, "Shader");
   }
 
-  dispose = () => {
+  [Symbol.dispose]() {
     this.ref.delete();
-  };
+  }
 }

@@ -17,6 +17,8 @@ export abstract class Host {
   }
 }
 
+let hasWarnedAboutDeprecatedDispose = false;
+
 export abstract class BaseHostObject<T, N extends string>
   extends Host
   implements SkJSIInstance<N>
@@ -30,7 +32,14 @@ export abstract class BaseHostObject<T, N extends string>
     this.__typename__ = typename;
   }
 
-  abstract dispose(): void;
+  dispose() {
+    if (!hasWarnedAboutDeprecatedDispose) {
+      hasWarnedAboutDeprecatedDispose = true;
+      console.warn(
+        "dispose() is now a no-op, it will be removed in the future versions"
+      );
+    }
+  }
 }
 
 export abstract class HostObject<T, N extends string> extends BaseHostObject<

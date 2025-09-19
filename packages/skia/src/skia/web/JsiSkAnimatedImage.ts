@@ -33,7 +33,7 @@ export class JsiSkAnimatedImage
     return new JsiSkImage(this.CanvasKit, image);
   }
 
-  dispose = () => {
+  [Symbol.dispose]() {
     this.ref.delete();
-  };
+  }
 }
