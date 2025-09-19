@@ -837,6 +837,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/plugin-proposal-explicit-resource-management@npm:^7.27.4":
+  version: 7.27.4
+  resolution: "@babel/plugin-proposal-explicit-resource-management@npm:7.27.4"
+  dependencies:
+    "@babel/helper-plugin-utils": ^7.27.1
+    "@babel/plugin-transform-destructuring": ^7.27.3
+  peerDependencies:
+    "@babel/core": ^7.0.0-0
+  checksum: 448ca36df031a62fe2b5c7256153cb16d1f2c98ab3cdc56852f9a488a21ccf49a4017a00e60e3670821a323f8c613c46642079ed7c99c4afe2475a5ecdd7a406
+  languageName: node
+  linkType: hard
+
 "@babel/plugin-proposal-export-default-from@npm:^7.0.0, @babel/plugin-proposal-export-default-from@npm:^7.24.7":
   version: 7.25.9
   resolution: "@babel/plugin-proposal-export-default-from@npm:7.25.9"
@@ -1269,7 +1281,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-transform-destructuring@npm:^7.28.0":
+"@babel/plugin-transform-destructuring@npm:^7.27.3, @babel/plugin-transform-destructuring@npm:^7.28.0":
   version: 7.28.0
   resolution: "@babel/plugin-transform-destructuring@npm:7.28.0"
   dependencies:
@@ -14080,6 +14092,7 @@ __metadata:
   resolution: "example@workspace:apps/example"
   dependencies:
     "@babel/core": ^7.25.2
+    "@babel/plugin-proposal-explicit-resource-management": ^7.27.4
     "@babel/preset-env": ^7.25.3
     "@babel/runtime": ^7.25.0
     "@callstack/react-native-visionos": ^0.75.0

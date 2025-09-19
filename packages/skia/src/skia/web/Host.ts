@@ -36,7 +36,9 @@ export abstract class BaseHostObject<T, N extends string>
     if (!hasWarnedAboutDeprecatedDispose) {
       hasWarnedAboutDeprecatedDispose = true;
       console.warn(
-        "dispose() is now a no-op, it will be removed in the future versions"
+        `dispose() is now a no-op, it will be removed in the future versions.
+On Web, please use the using keyword instead.
+See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/using`
       );
     }
   }

@@ -14,7 +14,8 @@
     "mkdist": "node -e \"require('node:fs').mkdirSync('dist', { recursive: true, mode: 0o755 })\"",
     "pod:install": "cd ios && pod install",
     "test": "jest",
-    "tsc": "tsc --noEmit"
+    "tsc": "tsc --noEmit",
+    "start": "react-native start"
   },
   "dependencies": {
     "@callstack/react-native-visionos": "^0.75.0",
@@ -40,6 +41,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@babel/plugin-proposal-explicit-resource-management": "^7.27.4",
     "@babel/preset-env": "^7.25.3",
     "@babel/runtime": "^7.25.0",
     "@react-native-community/cli": "15.0.1",

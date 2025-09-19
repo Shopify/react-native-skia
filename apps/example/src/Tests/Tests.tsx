@@ -43,6 +43,8 @@ export const Tests = ({ assets }: TestsProps) => {
             JSON.stringify(
               eval(
                 `(function Main() {
+                  const __addDisposableResource = (e, o) => { return o; };
+                  const __disposeResources = () => {};
                   return (${tree.code})(this.Skia, this.ctx, this.size, this.scale);
                 })`
               ).call({

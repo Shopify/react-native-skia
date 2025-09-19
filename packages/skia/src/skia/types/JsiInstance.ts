@@ -1,5 +1,4 @@
-export interface SkJSIInstance<T extends string> {
+export interface SkJSIInstance<T extends string> extends Disposable {
   __typename__: T;
   dispose(): void;
-  [Symbol.dispose](): void;
 }
