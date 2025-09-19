@@ -8,7 +8,6 @@ import { HeaderBackButton } from "@react-navigation/elements";
 import { FiberProvider } from "its-fine";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { enableScreens } from "react-native-screens";
-import { Skia } from "@shopify/react-native-skia";
 
 import {
   ReanimatedExample,
