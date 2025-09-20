@@ -103,7 +103,7 @@
     "@types/react-reconciler": "0.28.9",
     "@types/ws": "8.5.3",
     "eslint": "9.35.0",
-    "eslint-config-react-native-wcandillon": "4.0.0",
+    "eslint-config-react-native-wcandillon": "4.0.1",
     "eslint-plugin-import": "2.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "jest": "30.1.3",
