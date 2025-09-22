@@ -97,12 +97,6 @@
         "build"
       ]
     },
-    "test:commonjs": {
-      "cache": false
-    },
-    "test:esm": {
-      "cache": false
-    },
     "build": {
       "cache": false,
       "dependsOn": [
