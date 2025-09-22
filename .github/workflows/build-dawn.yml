@@ -73,8 +73,9 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_SHARED_LIBS=OFF \
             -DDAWN_BUILD_MONOLITHIC_LIBRARY=SHARED \
+            -DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON \
             -DCMAKE_EXE_LINKER_FLAGS="-llog" \
-            -DCMAKE_SHARED_LINKER_FLAGS="-llog"
+            -DCMAKE_SHARED_LINKER_FLAGS="-llog -Wl,-z,max-page-size=16384"
           ninja -C ${{ matrix.output_dir }}
       - name: Strip Android binaries
         run: |
