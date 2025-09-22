@@ -20,6 +20,7 @@
 #include "JsiSkVertices.h"
 
 #include "RNSkTypedArray.h"
+#include "JsiArgumentParserSkia.h"
 
 #include <jsi/jsi.h>
 
@@ -50,31 +51,27 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawLine) {
-    SkScalar x1 = arguments[0].asNumber();
-    SkScalar y1 = arguments[1].asNumber();
-    SkScalar x2 = arguments[2].asNumber();
-    SkScalar y2 = arguments[3].asNumber();
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[4]);
+    PARSE_ARGS_EXACT(5);
+    auto [x1, y1, x2, y2] = parser.get_args<SkScalar, SkScalar, SkScalar, SkScalar>();
+    auto paint = parser.get<std::shared_ptr<SkPaint>>();
     _canvas->drawLine(x1, y1, x2, y2, *paint);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawRect) {
-    auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
+    PARSE_ARGS_EXACT(2);
+    auto rect = parser.get<std::shared_ptr<SkRect>>();
+    auto paint = parser.get<std::shared_ptr<SkPaint>>();
     _canvas->drawRect(*rect, *paint);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawImage) {
-    auto image = JsiSkImage::fromValue(runtime, arguments[0]);
-    auto x = arguments[1].asNumber();
-    auto y = arguments[2].asNumber();
-    std::shared_ptr<SkPaint> paint;
-    if (count == 4) {
-      paint = JsiSkPaint::fromValue(runtime, arguments[3]);
-    }
-    _canvas->drawImage(image, x, y, SkSamplingOptions(), paint.get());
+    PARSE_ARGS_RANGE(3, 4);
+    auto image = parser.get<sk_sp<SkImage>>();
+    auto [x, y] = parser.get_args<float, float>();
+    auto paint = parser.optional<std::shared_ptr<SkPaint>>();
+    _canvas->drawImage(image.get(), x, y, SkSamplingOptions(), paint ? paint->get() : nullptr);
     return jsi::Value::undefined();
   }
 
@@ -176,26 +173,20 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawCircle) {
-    SkScalar cx = arguments[0].asNumber();
-    SkScalar cy = arguments[1].asNumber();
-    SkScalar radius = arguments[2].asNumber();
-
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
+    PARSE_ARGS_EXACT(4);
+    auto [cx, cy, radius] = parser.get_args<SkScalar, SkScalar, SkScalar>();
+    auto paint = parser.get<std::shared_ptr<SkPaint>>();
     _canvas->drawCircle(cx, cy, radius, *paint);
-
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawArc) {
-    auto oval = JsiSkRect::fromValue(runtime, arguments[0]);
-
-    SkScalar startAngle = arguments[1].asNumber();
-    SkScalar sweepAngle = arguments[2].asNumber();
-    bool useCenter = arguments[3].getBool();
-
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[4]);
+    PARSE_ARGS_EXACT(5);
+    auto oval = parser.get<std::shared_ptr<SkRect>>();
+    auto [startAngle, sweepAngle] = parser.get_args<SkScalar, SkScalar>();
+    auto useCenter = parser.get<bool>();
+    auto paint = parser.get<std::shared_ptr<SkPaint>>();
     _canvas->drawArc(*oval, startAngle, sweepAngle, useCenter, *paint);
-
     return jsi::Value::undefined();
   }
 
