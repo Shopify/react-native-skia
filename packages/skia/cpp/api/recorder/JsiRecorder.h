@@ -7,6 +7,7 @@
 
 #include "JsiSkCanvas.h"
 #include "JsiSkHostObjects.h"
+#include "JsiSkThreadSafeDeletion.h"
 
 #include "DrawingCtx.h"
 #include "RNRecorder.h"
@@ -19,10 +20,25 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 
 class JsiRecorder : public JsiSkWrappingSharedPtrHostObject<Recorder> {
+private:
+  ThreadSafeDeletion<Recorder> _deletionHandler;
+
 public:
   JsiRecorder(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkWrappingSharedPtrHostObject(std::move(context),
-                                         std::make_shared<Recorder>()) {}
+                                         std::make_shared<Recorder>()),
+        _deletionHandler() {
+    // Drain any pending deletions when creating new recorders
+    ThreadSafeDeletion<Recorder>::drainDeletionQueue();
+  }
+
+  ~JsiRecorder() override {
+    // Handle thread-safe deletion
+    _deletionHandler.handleDeletion(getObject());
+    // Always clear the object to prevent base class destructor from deleting it
+    // handleDeletion takes full responsibility for the object's lifetime
+    setObject(nullptr);
+  }
 
   JSI_HOST_FUNCTION(savePaint) {
     getObject()->savePaint(runtime, arguments[0].asObject(runtime),
