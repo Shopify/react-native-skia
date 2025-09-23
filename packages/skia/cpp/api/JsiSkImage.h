@@ -277,7 +277,7 @@ public:
       : JsiSkWrappingSkPtrHostObject<SkImage>(std::move(context),
                                               std::move(image)) {
     // Drain any pending deletions when creating new images
-    ThreadSafeDeletion<SkImage>::drainDeletionQueue();
+    //ThreadSafeDeletion<SkImage>::drainDeletionQueue();
   }
 
   ~JsiSkImage() override {

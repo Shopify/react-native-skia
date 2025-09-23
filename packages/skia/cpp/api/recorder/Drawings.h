@@ -6,6 +6,7 @@
 #include "Convertor.h"
 #include "DrawingCtx.h"
 #include "ImageFit.h"
+#include "JsiSkThreadSafeDeletion.h"
 
 namespace RNSkia {
 
@@ -466,6 +467,10 @@ struct ImageCmdProps {
 };
 
 class ImageCmd : public Command {
+private:
+  // TODO: add to Atlas as well
+  ThreadSafeDeletion<SkImage> _deletionHandler;
+
 public:
   ImageCmdProps props;
 
@@ -482,6 +487,19 @@ public:
     convertProperty(runtime, object, "width", props.width, variables);
     convertProperty(runtime, object, "height", props.height, variables);
     convertProperty(runtime, object, "rect", props.rect, variables);
+
+    // Drain any pending deletions when creating new image commands
+    //ThreadSafeDeletion<SkImage>::drainDeletionQueue();
+  }
+
+  ~ImageCmd() {
+    // Handle thread-safe deletion of the image
+    if (props.image.has_value() && props.image.value()) {
+      _deletionHandler.handleDeletion(props.image.value());
+      // Clear the image to prevent base class or other code from accessing it
+      // handleDeletion takes full responsibility for the object's lifetime
+      props.image = std::nullopt;
+    }
   }
 
   void draw(DrawingCtx *ctx) {

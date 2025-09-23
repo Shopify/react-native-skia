@@ -46,7 +46,7 @@ public:
     return;
 #else
     // Always try to drain the queue when handling deletions
-    drainDeletionQueue();
+    //drainDeletionQueue();
 
     // Check if we're on the creation thread
     if (std::this_thread::get_id() != _creationThreadId) {
