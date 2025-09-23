@@ -294,10 +294,13 @@ export const SkiaPictureView = forwardRef<
       redraw,
       makeImageSnapshot,
     } as SkiaPictureViewHandle);
+  }, [setPicture, getSize, redraw, makeImageSnapshot, props.nativeID]);
+
+  useEffect(() => {
     if (props.picture) {
       setPicture(props.picture);
     }
-  }, [setPicture, getSize, redraw, makeImageSnapshot, props]);
+  }, [setPicture, props.picture]);
 
   useEffect(() => {
     tick();
