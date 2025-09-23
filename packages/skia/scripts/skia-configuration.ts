@@ -2,11 +2,14 @@
 import path from "path";
 
 import { $ } from "./utils";
+import { fileURLToPath } from "url";
 
 const DEBUG = false;
 export const GRAPHITE = !!process.env.SK_GRAPHITE;
 const BUILD_WITH_PARAGRAPH = true;
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 export const SkiaSrc = path.join(__dirname, "../../../externals/skia");
 export const ProjectRoot = path.join(__dirname, "../../..");
 export const PackageRoot = path.join(__dirname, "..");

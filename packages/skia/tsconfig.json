@@ -5,6 +5,7 @@
       "dom",
       "es2024"
     ],
+    "module": "es2022",
     "noEmit": true,
     "allowJs": true,
     "skipLibCheck": true,
