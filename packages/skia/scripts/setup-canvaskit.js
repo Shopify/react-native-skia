@@ -48,7 +48,7 @@ function getWetherItsAnExpoProjectWithMetro() {
     const isAnExpoProjectWithMetro =
       appJson.expo && appJson.expo.web && appJson.expo.web.bundler === "metro";
     if (isAnExpoProjectWithMetro) {
-      console.log(`  ${gray(`Expo project with metro bundler detected`)}\n`);
+      console.log(`  ${gray("Expo project with metro bundler detected")}\n`);
       return true;
     } else {
       console.log(
@@ -57,7 +57,7 @@ function getWetherItsAnExpoProjectWithMetro() {
       return false;
     }
   } catch (error) {
-    console.log(`  ${gray(`No Expo settings found`)}\n`);
+    console.log(`  ${gray("No Expo settings found")}\n`);
     return false;
   }
 }
@@ -67,7 +67,8 @@ function getWasmFilePath() {
     return require.resolve("canvaskit-wasm/bin/full/canvaskit.wasm");
   } catch (error) {
     console.error(
-      `Could not find 'canvaskit-wasm'. Please install '@shopify/react-native-skia' and ensure it can be resolved from your project: ${process.cwd()}`
+      `Could not find 'canvaskit-wasm'.
+Please install '@shopify/react-native-skia' and ensure it can be resolved from your project: ${process.cwd()}`
     );
     process.exit(1);
   }
@@ -103,7 +104,8 @@ function copyFile(from, to) {
   console.log(lime("› Success! You are almost there:"));
   console.log(
     gray(
-      "› To load React Native Skia Web, follow these instructions : https://shopify.github.io/react-native-skia/docs/getting-started/web"
+      `› To load React Native Skia Web,
+follow these instructions: https://shopify.github.io/react-native-skia/docs/getting-started/web`
     )
   );
 })();

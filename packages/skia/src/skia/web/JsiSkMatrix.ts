@@ -24,10 +24,6 @@ export class JsiSkMatrix
     this.ref.set(this.CanvasKit.Matrix.multiply(matrix, this.ref));
   }
 
-  dispose = () => {
-    // Do nothing - the matrix is represenetd by a Float32Array
-  };
-
   concat(matrix: InputMatrix) {
     this.preMultiply(
       // eslint-disable-next-line no-nested-ternary

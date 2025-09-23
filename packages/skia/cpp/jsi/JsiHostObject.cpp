@@ -24,6 +24,12 @@ void JsiHostObject::set(jsi::Runtime &rt, const jsi::PropNameID &name,
   }
 }
 
+jsi::Value eval(jsi::Runtime &runtime, const std::string &js) {
+  return runtime.global()
+      .getPropertyAsFunction(runtime, "eval")
+      .call(runtime, js);
+}
+
 jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
                               const jsi::PropNameID &name) {
   auto nameStr = name.utf8(runtime);
@@ -75,6 +81,16 @@ jsi::Value JsiHostObject::get(jsi::Runtime &runtime,
   if (_propMap.count(nameStr) > 0) {
     auto prop = _propMap.at(nameStr);
     return (prop.get)(runtime);
+  }
+
+  // Check for dispose symbol as last resort
+  static const auto disposeSymbol = jsi::PropNameID::forSymbol(
+      runtime,
+      eval(runtime, "Symbol.for('Symbol.dispose');").getSymbol(runtime));
+  if (jsi::PropNameID::compare(runtime, disposeSymbol, name)) {
+    // Recursively call get with "dispose" string
+    auto disposeName = jsi::PropNameID::forAscii(runtime, "dispose");
+    return get(runtime, disposeName);
   }
 
   return jsi::Value::undefined();

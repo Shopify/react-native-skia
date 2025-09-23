@@ -9,9 +9,9 @@ export class JsiSkRRect
   extends BaseHostObject<RRect, "RRect">
   implements SkRRect
 {
-  dispose = () => {
-    // Float32Array
-  };
+  [Symbol.dispose]() {
+    // nothing to do here, RRect is a Float32Array
+  }
 
   static fromValue(CanvasKit: CanvasKit, rect: InputRRect) {
     if (rect instanceof JsiSkRect) {
