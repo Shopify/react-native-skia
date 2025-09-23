@@ -17,10 +17,9 @@ struct CircleCmdProps {
 };
 
 class CircleCmd : public Command {
-private:
+public:
   CircleCmdProps props;
 
-public:
   CircleCmd(jsi::Runtime &runtime, const jsi::Object &object,
             Variables &variables)
       : Command(CommandType::DrawCircle) {
@@ -52,10 +51,9 @@ struct RectCmdProps {
 };
 
 class RectCmd : public Command {
-private:
+public:
   RectCmdProps props;
 
-public:
   RectCmd(jsi::Runtime &runtime, const jsi::Object &object,
           Variables &variables)
       : Command(CommandType::DrawRect) {
@@ -86,10 +84,9 @@ struct PathCmdProps {
 };
 
 class PathCmd : public Command {
-private:
+public:
   PathCmdProps props;
 
-public:
   PathCmd(jsi::Runtime &runtime, const jsi::Object &object,
           Variables &variables)
       : Command(CommandType::DrawPath) {
@@ -196,10 +193,9 @@ struct LineCmdProps {
 };
 
 class LineCmd : public Command {
-private:
+public:
   LineCmdProps props;
 
-public:
   LineCmd(jsi::Runtime &runtime, const jsi::Object &object,
           Variables &variables)
       : Command(CommandType::DrawLine) {
@@ -221,10 +217,9 @@ struct TextPathProps {
 };
 
 class TextPathCmd : public Command {
-private:
+public:
   TextPathProps props;
 
-public:
   TextPathCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
       : Command(CommandType::DrawTextPath) {
@@ -313,10 +308,9 @@ struct TextCmdProps {
 };
 
 class TextCmd : public Command {
-private:
+public:
   TextCmdProps props;
 
-public:
   TextCmd(jsi::Runtime &runtime, const jsi::Object &object,
           Variables &variables)
       : Command(CommandType::DrawText) {
@@ -351,7 +345,7 @@ struct BoxCmdProps {
 };
 
 class BoxCmd : public Command {
-private:
+public:
   BoxCmdProps props;
   std::vector<BoxShadowCmdProps> shadows;
 
@@ -373,7 +367,6 @@ private:
     return inflate(box, -dx, -dy, tx, ty);
   }
 
-public:
   BoxCmd(jsi::Runtime &runtime, const jsi::Object &object,
          const jsi::Array &shadowsArray, Variables &variables)
       : Command(CommandType::DrawBox) {
@@ -473,10 +466,9 @@ struct ImageCmdProps {
 };
 
 class ImageCmd : public Command {
-private:
+public:
   ImageCmdProps props;
 
-public:
   ImageCmd(jsi::Runtime &runtime, const jsi::Object &object,
            Variables &variables)
       : Command(CommandType::DrawImage) {
@@ -522,10 +514,9 @@ struct PointsCmdProps {
 };
 
 class PointsCmd : public Command {
-private:
+public:
   PointsCmdProps props;
 
-public:
   PointsCmd(jsi::Runtime &runtime, const jsi::Object &object,
             Variables &variables)
       : Command(CommandType::DrawPoints) {
@@ -549,10 +540,9 @@ struct RRectCmdProps {
 };
 
 class RRectCmd : public Command {
-private:
+public:
   RRectCmdProps props;
 
-public:
   RRectCmd(jsi::Runtime &runtime, const jsi::Object &object,
            Variables &variables)
       : Command(CommandType::DrawRRect) {
@@ -589,10 +579,9 @@ struct OvalCmdProps {
 };
 
 class OvalCmd : public Command {
-private:
+public:
   OvalCmdProps props;
 
-public:
   OvalCmd(jsi::Runtime &runtime, const jsi::Object &object,
           Variables &variables)
       : Command(CommandType::DrawOval) {
@@ -625,10 +614,9 @@ struct PatchCmdProps {
 };
 
 class PatchCmd : public Command {
-private:
+public:
   PatchCmdProps props;
 
-public:
   PatchCmd(jsi::Runtime &runtime, const jsi::Object &object,
            Variables &variables)
       : Command(CommandType::DrawPatch) {
@@ -674,10 +662,9 @@ struct VerticesCmdProps {
 };
 
 class VerticesCmd : public Command {
-private:
+public:
   VerticesCmdProps props;
 
-public:
   VerticesCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
       : Command(CommandType::DrawVertices) {
@@ -719,10 +706,9 @@ struct DiffRectCmdProps {
 };
 
 class DiffRectCmd : public Command {
-private:
+public:
   DiffRectCmdProps props;
 
-public:
   DiffRectCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
       : Command(CommandType::DrawDiffRect) {
@@ -742,10 +728,9 @@ struct TextBlobCmdProps {
 };
 
 class TextBlobCmd : public Command {
-private:
+public:
   TextBlobCmdProps props;
 
-public:
   TextBlobCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
       : Command(CommandType::DrawTextBlob) {
@@ -767,10 +752,9 @@ struct GlyphsCmdProps {
 };
 
 class GlyphsCmd : public Command {
-private:
+public:
   GlyphsCmdProps props;
 
-public:
   GlyphsCmd(jsi::Runtime &runtime, const jsi::Object &object,
             Variables &variables)
       : Command(CommandType::DrawGlyphs) {
@@ -798,10 +782,9 @@ struct PictureCmdProps {
 };
 
 class PictureCmd : public Command {
-private:
+public:
   PictureCmdProps props;
 
-public:
   PictureCmd(jsi::Runtime &runtime, const jsi::Object &object,
              Variables &variables)
       : Command(CommandType::DrawPicture) {
@@ -821,10 +804,9 @@ struct ImageSVGCmdProps {
 };
 
 class ImageSVGCmd : public Command {
-private:
+public:
   ImageSVGCmdProps props;
 
-public:
   ImageSVGCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
       : Command(CommandType::DrawImageSVG) {
@@ -877,10 +859,9 @@ struct ParagraphCmdProps {
 };
 
 class ParagraphCmd : public Command {
-private:
+public:
   ParagraphCmdProps props;
 
-public:
   ParagraphCmd(jsi::Runtime &runtime, const jsi::Object &object,
                Variables &variables)
       : Command(CommandType::DrawParagraph) {
@@ -905,10 +886,9 @@ struct SkottieCmdProps {
 };
 
 class SkottieCmd : public Command {
-private:
+public:
   SkottieCmdProps props;
 
-public:
   SkottieCmd(jsi::Runtime &runtime, const jsi::Object &object,
              Variables &variables)
       : Command(CommandType::DrawSkottie) {
@@ -932,10 +912,9 @@ struct AtlasCmdProps {
 };
 
 class AtlasCmd : public Command {
-private:
+public:
   AtlasCmdProps props;
 
-public:
   AtlasCmd(jsi::Runtime &runtime, const jsi::Object &object,
            Variables &variables)
       : Command(CommandType::DrawAtlas) {
