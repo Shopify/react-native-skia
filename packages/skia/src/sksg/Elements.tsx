@@ -57,7 +57,6 @@ import type {
 import type { SkiaProps } from "../renderer";
 
 declare module "react" {
-   
   namespace JSX {
     interface IntrinsicElements {
       skGroup: SkiaProps<GroupProps>;

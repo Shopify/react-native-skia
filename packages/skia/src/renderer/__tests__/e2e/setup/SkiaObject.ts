@@ -3,7 +3,7 @@ import type { EvalContext } from "../../setup";
 
 export abstract class SkiaObject<
   Ctx extends EvalContext,
-  R extends SkJSIInstance<string>
+  R extends SkJSIInstance<string>,
 > {
   protected _source: string;
   protected _instance: R;

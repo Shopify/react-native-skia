@@ -1,8 +1,7 @@
-/* eslint-disable max-len */
 import path from "path";
+import { fileURLToPath } from "url";
 
 import { $ } from "./utils";
-import { fileURLToPath } from "url";
 
 const DEBUG = false;
 export const GRAPHITE = !!process.env.SK_GRAPHITE;

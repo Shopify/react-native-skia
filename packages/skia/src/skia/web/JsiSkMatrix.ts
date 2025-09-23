@@ -32,8 +32,8 @@ export class JsiSkMatrix
       isMatrixHostObject(matrix)
         ? JsiSkMatrix.fromValue(matrix)
         : matrix.length === 16
-        ? toMatrix3(matrix as Matrix4)
-        : [...matrix]
+          ? toMatrix3(matrix as Matrix4)
+          : [...matrix]
     );
     return this;
   }

@@ -1,5 +1,5 @@
 /* globals jest */
- 
+
 jest.mock("@shopify/react-native-skia", () => {
   jest.mock("@shopify/react-native-skia/lib/commonjs/Platform", () => {
     const Noop = () => undefined;

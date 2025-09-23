@@ -1,4 +1,3 @@
- 
 import type { Video } from "../../../skia/types";
 import { surface } from "../setup";
 

@@ -84,7 +84,7 @@ export interface PatchProps extends DrawingNodeProps {
     CubicBezierHandle,
     CubicBezierHandle,
     CubicBezierHandle,
-    CubicBezierHandle
+    CubicBezierHandle,
   ];
   texture?: readonly [SkPoint, SkPoint, SkPoint, SkPoint];
   blendMode?: SkEnum<typeof BlendMode>;

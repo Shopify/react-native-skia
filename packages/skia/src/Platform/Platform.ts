@@ -19,8 +19,8 @@ export const Platform: IPlatform = {
     return isRNModule(source)
       ? Image.resolveAssetSource(source).uri
       : "uri" in source
-      ? source.uri
-      : source.default;
+        ? source.uri
+        : source.default;
   },
   findNodeHandle,
   View,

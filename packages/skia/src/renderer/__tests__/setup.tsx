@@ -127,7 +127,6 @@ export const testingFonts = {
   //  NotoColorEmoji: [resolveFont("skia/__tests__/assets/NotoColorEmoji.ttf")],
 };
 
- 
 export interface EmptyProps {}
 
 jest.mock("react-native", () => ({
