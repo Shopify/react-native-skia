@@ -7,7 +7,6 @@ import { isRNModule } from "../skia/types";
 
 import type { IPlatform } from "./IPlatform";
 
-// eslint-disable-next-line max-len
 // https://github.com/necolas/react-native-web/blob/master/packages/react-native-web/src/modules/useElementLayout/index.js
 const DOM_LAYOUT_HANDLER_NAME = "__reactLayoutHandler";
 type OnLayout = ((event: LayoutChangeEvent) => void) | undefined;

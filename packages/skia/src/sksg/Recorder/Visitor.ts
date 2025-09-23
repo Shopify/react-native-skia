@@ -250,7 +250,7 @@ const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
       const shadows = node.children
         .filter((n) => n.type === NodeType.BoxShadow)
         // eslint-disable-next-line @typescript-eslint/no-shadow
-        .map(({ props }) => ({ props } as { props: BoxShadowProps }));
+        .map(({ props }) => ({ props }) as { props: BoxShadowProps });
       recorder.drawBox(props, shadows);
       break;
     case NodeType.Fill:

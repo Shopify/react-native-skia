@@ -2,6 +2,7 @@
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
     "build:android": {
+      "cache": false,
       "env": ["JAVA_HOME", "ANDROID_NDK", "ANDROID_SDK", "ANDROID_HOME"],
       "outputs": [
         "apps/*/android",
@@ -25,6 +26,7 @@
       ]
     },
     "build:ios": {
+      "cache": false,
       "dependsOn": [
         "pod:install:ios"
       ],
@@ -44,6 +46,7 @@
       ]
     },
     "build:macos": {
+      "cache": false,
       "dependsOn": [
         "pod:install:macos"
       ],
@@ -82,16 +85,20 @@
         "**/macos/Pods/**"
       ]
     },
-    "lint": {},
-    "tsc": {},
+    "lint": {
+      "cache": false
+    },
+    "tsc": {
+      "cache": false
+    },
     "test": {
+      "cache": false,
       "dependsOn": [
         "build"
       ]
     },
-    "test:commonjs": {},
-    "test:esm": {},
     "build": {
+      "cache": false,
       "dependsOn": [
         "^build"
       ]
