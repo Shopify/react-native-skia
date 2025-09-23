@@ -285,9 +285,8 @@ describe("Paths", () => {
   });
   it("should be possible to call dispose on a path", async () => {
     await surface.eval((Skia) => {
-      const path = Skia.Path.Make();
+      using path = Skia.Path.Make();
       path.moveTo(20, 20).lineTo(20, 40).lineTo(40, 20);
-      path.dispose();
       return path;
     });
   });
