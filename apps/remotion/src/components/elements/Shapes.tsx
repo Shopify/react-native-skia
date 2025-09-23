@@ -63,8 +63,8 @@ export const PathShape = ({
   const paintProps = fill
     ? { strokeWidth: 0 }
     : smallStroke
-    ? smallerStroke
-    : largeStroke;
+      ? smallerStroke
+      : largeStroke;
   return (
     <Path path={path} {...props} {...paintProps}>
       <LinearGradient colors={colors} start={start} end={end} />

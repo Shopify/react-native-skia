@@ -81,7 +81,6 @@ export const Canvas = ({
 }: CanvasProps) => {
   if (onLayout && isFabric) {
     console.error(
-      // eslint-disable-next-line max-len
       "<Canvas onLayout={onLayout} /> is not supported on the new architecture, to fix the issue, see: https://shopify.github.io/react-native-skia/docs/canvas/overview/#getting-the-canvas-size"
     );
   }
@@ -145,7 +144,7 @@ export const Canvas = ({
         measureInWindow: (callback) => {
           viewRef.current?.measureInWindow(callback);
         },
-      } as CanvasRef)
+      }) as CanvasRef
   );
 
   const onLayoutWeb = useCallback(

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint-disable max-len */
 
 /**
  * A script to automate the setup of `@shopify/react-native-skia` for web.
@@ -39,19 +38,22 @@ const lime = (text) => `\x1b[32m${text}\x1b[0m`;
 
 function getWetherItsAnExpoProjectWithMetro() {
   try {
-    const appJsonPath = path.join(process.cwd(), 'app.json');
+    const appJsonPath = path.join(process.cwd(), "app.json");
 
     console.log(
       `› Reading Expo settings from (if any):\n  ${gray(appJsonPath)}`
     );
 
     const appJson = require(appJsonPath);
-    const isAnExpoProjectWithMetro = appJson.expo && appJson.expo.web && appJson.expo.web.bundler === 'metro';
+    const isAnExpoProjectWithMetro =
+      appJson.expo && appJson.expo.web && appJson.expo.web.bundler === "metro";
     if (isAnExpoProjectWithMetro) {
       console.log(`  ${gray(`Expo project with metro bundler detected`)}\n`);
       return true;
     } else {
-      console.log(`  ${gray(`Metro bundler not detected. Assuming the project is using Webpack.`)}\n`);
+      console.log(
+        `  ${gray(`Metro bundler not detected. Assuming the project is using Webpack.`)}\n`
+      );
       return false;
     }
   } catch (error) {
@@ -73,7 +75,9 @@ function getWasmFilePath() {
 
 function getOutputFilePath(isAnExpoProjectWithMetro) {
   // Default to using `web` public path.
-  const publicFolder = path.resolve(args[0] || ((isAnExpoProjectWithMetro) ? "public" : "web/static/js"));
+  const publicFolder = path.resolve(
+    args[0] || (isAnExpoProjectWithMetro ? "public" : "web/static/js")
+  );
   const publicLocation = "./canvaskit.wasm";
   const output = path.join(publicFolder, publicLocation);
 
