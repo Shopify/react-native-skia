@@ -253,7 +253,4 @@ export class JsiSkottieAnimation
   version() {
     return this.ref.version();
   }
-  [Symbol.dispose]() {
-    this.ref.delete();
-  }
 }

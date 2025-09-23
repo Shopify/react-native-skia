@@ -43,8 +43,4 @@ export class JsiSkRSXform
   get ty() {
     return this.ref[3];
   }
-
-  [Symbol.dispose]() {
-    // nothing to do here
-  }
 }

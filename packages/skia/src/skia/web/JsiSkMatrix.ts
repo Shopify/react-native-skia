@@ -24,8 +24,6 @@ export class JsiSkMatrix
     this.ref.set(this.CanvasKit.Matrix.multiply(matrix, this.ref));
   }
 
-  [Symbol.dispose]() {}
-
   concat(matrix: InputMatrix) {
     this.preMultiply(
       // eslint-disable-next-line no-nested-ternary

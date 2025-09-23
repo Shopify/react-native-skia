@@ -29,8 +29,4 @@ export class JsiSkTypeface
   getGlyphIDs(str: string, numCodePoints?: number) {
     return Array.from(this.ref.getGlyphIDs(str, numCodePoints));
   }
-
-  [Symbol.dispose]() {
-    this.ref.delete();
-  }
 }

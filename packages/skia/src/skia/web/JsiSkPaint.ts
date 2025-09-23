@@ -26,10 +26,6 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
     super(CanvasKit, ref, "Paint");
   }
 
-  [Symbol.dispose]() {
-    this.ref.delete();
-  }
-
   copy() {
     return new JsiSkPaint(this.CanvasKit, this.ref.copy());
   }

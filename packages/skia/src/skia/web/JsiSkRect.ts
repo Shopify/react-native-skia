@@ -15,8 +15,6 @@ export class JsiSkRect
     return CanvasKit.XYWHRect(rect.x, rect.y, rect.width, rect.height);
   }
 
-  [Symbol.dispose]() {}
-
   constructor(CanvasKit: CanvasKit, ref: Rect) {
     super(CanvasKit, ref, "Rect");
   }

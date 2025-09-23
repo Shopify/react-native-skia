@@ -34,10 +34,6 @@ export class JsiSkTypefaceFontProvider
     // @ts-expect-error
     this.ref._registerFont(typeface.ref, strPtr);
   }
-
-  [Symbol.dispose]() {
-    this.ref.delete();
-  }
 }
 
 const lengthBytesUTF8 = (str: string) => {

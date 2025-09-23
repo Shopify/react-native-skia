@@ -175,8 +175,4 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     console.warn("getBackendTexture is not implemented on Web");
     return null;
   }
-
-  [Symbol.dispose]() {
-    this.ref.delete();
-  }
 }

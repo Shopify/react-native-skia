@@ -19,8 +19,6 @@ export class JsiSkPoint
     super(CanvasKit, ref, "Point");
   }
 
-  [Symbol.dispose]() {}
-
   get x() {
     return this.ref[0];
   }

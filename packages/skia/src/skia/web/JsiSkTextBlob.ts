@@ -11,8 +11,4 @@ export class JsiSkTextBlob
   constructor(CanvasKit: CanvasKit, ref: TextBlob) {
     super(CanvasKit, ref, "TextBlob");
   }
-
-  [Symbol.dispose]() {
-    this.ref.delete();
-  }
 }

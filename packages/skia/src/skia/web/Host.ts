@@ -17,8 +17,6 @@ export abstract class Host {
   }
 }
 
-let hasWarnedAboutDeprecatedDispose = false;
-
 export abstract class BaseHostObject<T, N extends string>
   extends Host
   implements SkJSIInstance<N>
@@ -33,17 +31,19 @@ export abstract class BaseHostObject<T, N extends string>
   }
 
   dispose() {
-    if (!hasWarnedAboutDeprecatedDispose) {
-      hasWarnedAboutDeprecatedDispose = true;
-      console.warn(
-        `dispose() is now a no-op, it will be removed in the future versions.
-On Web, please use the using keyword instead.
-See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/using`
-      );
-    }
+    this[Symbol.dispose]();
   }
 
-  abstract [Symbol.dispose](): void;
+  [Symbol.dispose](): void {
+    if (
+      this.ref !== null &&
+      typeof this.ref === "object" &&
+      "delete" in this.ref &&
+      typeof this.ref.delete === "function"
+    ) {
+      this.ref.delete();
+    }
+  }
 }
 
 export abstract class HostObject<T, N extends string> extends BaseHostObject<

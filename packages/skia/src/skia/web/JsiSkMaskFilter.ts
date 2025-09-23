@@ -11,8 +11,4 @@ export class JsiSkMaskFilter
   constructor(CanvasKit: CanvasKit, ref: MaskFilter) {
     super(CanvasKit, ref, "MaskFilter");
   }
-
-  [Symbol.dispose]() {
-    this.ref.delete();
-  }
 }

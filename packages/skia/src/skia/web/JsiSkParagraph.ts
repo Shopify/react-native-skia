@@ -65,10 +65,6 @@ export class JsiSkParagraph
     return this.ref.getLineMetrics();
   }
 
-  [Symbol.dispose]() {
-    this.ref.delete();
-  }
-
   dispose() {
     this[Symbol.dispose]();
   }

@@ -22,10 +22,6 @@ export class JsiSkPicture
     super(CanvasKit, ref, "Picture");
   }
 
-  [Symbol.dispose]() {
-    this.ref.delete();
-  }
-
   makeShader(
     tmx: TileMode,
     tmy: TileMode,

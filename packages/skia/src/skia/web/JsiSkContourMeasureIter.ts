@@ -20,8 +20,4 @@ export class JsiSkContourMeasureIter
     }
     return new JsiSkContourMeasure(this.CanvasKit, result);
   }
-
-  [Symbol.dispose]() {
-    this.ref.delete();
-  }
 }

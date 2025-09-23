@@ -36,8 +36,4 @@ export class JsiSkContourMeasure
   length() {
     return this.ref.length();
   }
-
-  [Symbol.dispose]() {
-    this.ref.delete();
-  }
 }
