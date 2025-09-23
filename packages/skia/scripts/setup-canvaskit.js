@@ -52,7 +52,7 @@ function getWetherItsAnExpoProjectWithMetro() {
       return true;
     } else {
       console.log(
-        `  ${gray("Metro bundler not detected. Assuming the project is using Webpack.")}\n`
+        `  ${gray(`Metro bundler not detected. Assuming the project is using Webpack.`)}\n`
       );
       return false;
     }
