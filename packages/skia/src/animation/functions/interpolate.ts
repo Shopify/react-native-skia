@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 export enum Extrapolate {
   IDENTITY = "identity",
   CLAMP = "clamp",

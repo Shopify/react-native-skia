@@ -29,7 +29,10 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
 class ReanimatedContainer extends Container {
   private mapperId: number | null = null;
 
-  constructor(Skia: Skia, private nativeId: number) {
+  constructor(
+    Skia: Skia,
+    private nativeId: number
+  ) {
     super(Skia);
   }
 
