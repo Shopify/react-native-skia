@@ -1,6 +1,5 @@
 {
   "name": "remotion-skia",
-  "type": "module",
   "version": "1.0.0",
   "description": "My Remotion video",
   "scripts": {

@@ -1,4 +1,4 @@
-const config = {
+module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
   // Ignore lib folder - contains build artifacts and should
@@ -14,5 +14,3 @@ const config = {
   globalSetup: "<rootDir>/src/__tests__/globalSetup.ts",
   globalTeardown: "<rootDir>/src/__tests__/globalTeardown.ts",
 };
-
-export default config;

@@ -1,6 +1,5 @@
 {
   "name": "@shopify/react-native-skia",
-  "type": "module",
   "publishConfig": {
     "access": "public",
     "provenance": true
