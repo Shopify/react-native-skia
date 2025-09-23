@@ -86,7 +86,7 @@ describe("Skottie", () => {
   it("Should render Skottie component with basic slots animation", async () => {
     const { Skia } = importSkia();
     const assets = {
-      NotoSerif: Skia.Data.fromBytes(
+      "NotoSerif": Skia.Data.fromBytes(
         new Uint8Array(Array.from(dataAssets.NotoSansSCRegular))
       ),
       "img_0.png": Skia.Data.fromBytes(
@@ -102,7 +102,7 @@ describe("Skottie", () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     animation.assets = {
-      NotoSerif: Array.from(dataAssets.NotoSansSCRegular),
+      "NotoSerif": Array.from(dataAssets.NotoSansSCRegular),
       "img_0.png": Array.from(dataAssets.img_0),
     };
     // END OF INTERNAL TESTING ONLY
@@ -199,7 +199,7 @@ describe("Skottie", () => {
     const slots = await surface.eval(
       (Skia, ctx) => {
         const assets = {
-          NotoSerif: Skia.Data.fromBytes(new Uint8Array(ctx.NotoSerif)),
+          "NotoSerif": Skia.Data.fromBytes(new Uint8Array(ctx.NotoSerif)),
           "img_0.png": Skia.Data.fromBytes(new Uint8Array(ctx.img_0)),
         };
         const animation = Skia.Skottie.Make(ctx.basicSlotsJSON, assets);
@@ -223,7 +223,7 @@ describe("Skottie", () => {
     const props = await surface.eval(
       (Skia, ctx) => {
         const assets = {
-          NotoSerif: Skia.Data.fromBytes(new Uint8Array(ctx.NotoSerif)),
+          "NotoSerif": Skia.Data.fromBytes(new Uint8Array(ctx.NotoSerif)),
           "img_0.png": Skia.Data.fromBytes(new Uint8Array(ctx.img_0)),
         };
         const animation = Skia.Skottie.Make(ctx.basicSlotsJSON, assets);
@@ -299,7 +299,7 @@ describe("Skottie", () => {
     const raw = await surface.eval(
       (Skia, ctx) => {
         const assets = {
-          NotoSerif: Skia.Data.fromBytes(new Uint8Array(ctx.NotoSerif)),
+          "NotoSerif": Skia.Data.fromBytes(new Uint8Array(ctx.NotoSerif)),
           "img_0.png": Skia.Data.fromBytes(new Uint8Array(ctx.img_0)),
         };
         const animation = Skia.Skottie.Make(ctx.basicSlotsJSON, assets);
@@ -330,7 +330,7 @@ describe("Skottie", () => {
     const raw = await surface.eval(
       (Skia, ctx) => {
         const assets = {
-          NotoSerif: Skia.Data.fromBytes(new Uint8Array(ctx.NotoSerif)),
+          "NotoSerif": Skia.Data.fromBytes(new Uint8Array(ctx.NotoSerif)),
           "img_0.png": Skia.Data.fromBytes(new Uint8Array(ctx.img_0)),
         };
         const animation = Skia.Skottie.Make(ctx.basicSlotsJSON, assets);

@@ -44,7 +44,6 @@ describe("Animated Images", () => {
       return frame.encodeToBase64();
     });
     expect(result).toEqual(
-      // eslint-disable-next-line max-len
       "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAANzQklUCAgI2+FP4AAAAAxJREFUCJljSFwlDwACmgErMAA+hwAAAABJRU5ErkJggg=="
     );
   });
