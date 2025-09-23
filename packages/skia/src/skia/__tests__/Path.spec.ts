@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import { interpolatePaths } from "../../animation/functions/interpolatePaths";
 import type { Skia, SkPath } from "../types";
 import { FillType, PathOp, PathVerb } from "../types";

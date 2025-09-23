@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import path from "path";
 import fs from "fs";
 
@@ -99,7 +98,6 @@ export const checkImage = (
 };
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
     interface Matchers<R> {
       /**

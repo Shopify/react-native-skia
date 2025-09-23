@@ -26,7 +26,10 @@ interface Renderer {
 class WebGLRenderer implements Renderer {
   private surface: JsiSkSurface | null = null;
 
-  constructor(private canvas: HTMLCanvasElement, private pd: number) {
+  constructor(
+    private canvas: HTMLCanvasElement,
+    private pd: number
+  ) {
     this.onResize();
   }
 
@@ -83,7 +86,10 @@ class WebGLRenderer implements Renderer {
 class StaticWebGLRenderer implements Renderer {
   private cachedImage: SkImage | null = null;
 
-  constructor(private canvas: HTMLCanvasElement, private pd: number) {}
+  constructor(
+    private canvas: HTMLCanvasElement,
+    private pd: number
+  ) {}
 
   onResize(): void {
     this.cachedImage = null;
