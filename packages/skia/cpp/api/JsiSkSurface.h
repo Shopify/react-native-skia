@@ -36,10 +36,8 @@ public:
   JsiSkSurface(std::shared_ptr<RNSkPlatformContext> context,
                sk_sp<SkSurface> surface)
       : JsiSkWrappingSkPtrHostObject<SkSurface>(std::move(context),
-                                                std::move(surface)),
-        _deletionHandler() {
-    // Drain any pending deletions when creating new surfaces
-    ThreadSafeDeletion<SkSurface>::drainDeletionQueue();
+                                                std::move(surface)) {
+
   }
 
   ~JsiSkSurface() override {

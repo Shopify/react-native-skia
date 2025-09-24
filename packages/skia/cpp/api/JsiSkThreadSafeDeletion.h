@@ -40,25 +40,12 @@ public:
       return;
     }
 
-#ifdef DISABLE_THREAD_SAFE_DELETION
-    // When disabled, allow immediate deletion
-    // This will likely cause crashes when objects are deleted on wrong thread
-    return;
-#else
-    // Always try to drain the queue when handling deletions
-    //drainDeletionQueue();
-
     // Check if we're on the creation thread
     if (std::this_thread::get_id() != _creationThreadId) {
       // Queue for deletion on the correct thread
       std::lock_guard<std::mutex> lock(_queueMutex);
       _deletionQueue.push({object, _creationThreadId});
-      return;
     }
-
-    // We're on the correct thread, allow immediate deletion via destructor
-    return;
-#endif
   }
 
   /**
@@ -66,7 +53,6 @@ public:
    * Should be called periodically (e.g., when creating new objects).
    */
   static void drainDeletionQueue() {
-#ifndef DISABLE_THREAD_SAFE_DELETION
     auto currentThreadId = std::this_thread::get_id();
     std::queue<DeletionItem> remainingItems;
 
@@ -89,7 +75,6 @@ public:
 
     // Put back items that couldn't be deleted
     _deletionQueue = std::move(remainingItems);
-#endif
   }
 
   /**

@@ -487,9 +487,6 @@ public:
     convertProperty(runtime, object, "width", props.width, variables);
     convertProperty(runtime, object, "height", props.height, variables);
     convertProperty(runtime, object, "rect", props.rect, variables);
-
-    // Drain any pending deletions when creating new image commands
-    //ThreadSafeDeletion<SkImage>::drainDeletionQueue();
   }
 
   ~ImageCmd() {
