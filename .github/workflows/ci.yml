@@ -98,7 +98,6 @@ jobs:
 
   build-android-ubuntu:
     runs-on: ubuntu-latest
-    continue-on-error: true
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
