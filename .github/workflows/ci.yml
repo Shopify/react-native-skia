@@ -159,7 +159,6 @@ jobs:
 
   build-android:
     runs-on: macos-latest-large
-    continue-on-error: true
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
