@@ -5,6 +5,7 @@
 #include "RNSkPlatformContext.h"
 
 #include "JsiSkHostObjects.h"
+#include "JsiSkThreadSafeDeletion.h"
 
 #include "JsiNativeBuffer.h"
 #include "JsiSkAnimatedImage.h"
@@ -60,6 +61,32 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 
 class JsiSkApi : public JsiSkHostObject {
+private:
+  /**
+   * Creates a function that drains the thread-safe deletion queue for all object types
+   */
+  std::function<jsi::Value(jsi::Runtime &, const jsi::Value &, const jsi::Value *, size_t)>
+  makeDrainDeletionQueueFunction() {
+    return [](jsi::Runtime &runtime, const jsi::Value &thisValue, const jsi::Value *arguments, size_t count) -> jsi::Value {
+      // Drain deletion queues for all Skia object types that use ThreadSafeDeletion
+      ThreadSafeDeletion<SkImage>::drainDeletionQueue();
+      ThreadSafeDeletion<SkSurface>::drainDeletionQueue();
+      return jsi::Value::undefined();
+    };
+  }
+
+  /**
+   * Creates a function that returns the total number of pending deletions across all object types
+   */
+  std::function<jsi::Value(jsi::Runtime &, const jsi::Value &, const jsi::Value *, size_t)>
+  makeGetPendingDeletionCountFunction() {
+    return [](jsi::Runtime &runtime, const jsi::Value &thisValue, const jsi::Value *arguments, size_t count) -> jsi::Value {
+      size_t totalCount = ThreadSafeDeletion<SkImage>::getPendingDeletionCount() +
+                         ThreadSafeDeletion<SkSurface>::getPendingDeletionCount();
+      return jsi::Value(static_cast<double>(totalCount));
+    };
+  }
+
 public:
   size_t getMemoryPressure() const override { return 8192; }
 
@@ -138,6 +165,10 @@ public:
                             std::make_shared<JsiNativeBufferFactory>(context));
 
     installFunction("Recorder", JsiRecorder::createCtor(context));
+
+    // Install thread-safe deletion management functions
+    installFunction("drainDeletionQueue", makeDrainDeletionQueueFunction());
+    installFunction("getPendingDeletionCount", makeGetPendingDeletionCountFunction());
   }
 };
 } // namespace RNSkia

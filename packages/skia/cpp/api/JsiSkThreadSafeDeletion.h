@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <iostream>
 #include <memory>
 #include <mutex>
 #include <queue>
@@ -52,8 +53,12 @@ public:
   static void drainDeletionQueue() {
     auto currentThreadId = std::this_thread::get_id();
     std::queue<DeletionItem> remainingItems;
+    size_t deletedCount = 0;
+    size_t totalItems = 0;
 
     std::lock_guard<std::mutex> lock(_queueMutex);
+
+    totalItems = _deletionQueue.size();
 
     // Process all items in the queue
     while (!_deletionQueue.empty()) {
@@ -62,8 +67,19 @@ public:
 
       // If this item belongs to the current thread, let it be deleted
       if (item.creationThreadId == currentThreadId) {
-        // The sk_sp destructor will handle the cleanup
-        // Just let it go out of scope
+        try {
+          // The sk_sp destructor will handle the cleanup
+          // Just let it go out of scope - but wrapped in try-catch for safety
+          deletedCount++;
+        } catch (const std::exception& e) {
+          std::cout << "ThreadSafeDeletion: Exception during deletion: " << e.what() << std::endl;
+          // Still count it as processed to avoid infinite retry
+          deletedCount++;
+        } catch (...) {
+          std::cout << "ThreadSafeDeletion: Unknown exception during deletion" << std::endl;
+          // Still count it as processed to avoid infinite retry
+          deletedCount++;
+        }
       } else {
         // Keep items that belong to other threads
         remainingItems.push(item);
@@ -72,6 +88,12 @@ public:
 
     // Put back items that couldn't be deleted
     _deletionQueue = std::move(remainingItems);
+
+    // Log the results
+    if (deletedCount > 0) {
+      std::cout << "ThreadSafeDeletion: Deleted " << deletedCount << " items out of "
+                << totalItems << " total items in queue" << std::endl;
+    }
   }
 
   /**

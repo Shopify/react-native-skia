@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Alert, Button, ScrollView, StyleSheet } from "react-native";
+import { Button, ScrollView, StyleSheet } from "react-native";
 import type { SkPicture } from "@shopify/react-native-skia";
 import {
   Canvas,
@@ -13,6 +13,13 @@ const createPictureWithGPUResources = (
   picture?: SharedValue<SkPicture | null>
 ) => {
   "worklet";
+  // Drain the deletion queue manually
+  Skia.drainDeletionQueue();
+
+  // Check how many objects are waiting for deletion
+  //const pendingCountUI = Skia.getPendingDeletionCount();
+  //console.log({ pendingCountUI });
+
   const offscreenSurface = Skia.Surface.MakeOffscreen(400, 400)!;
   const surfaceCanvas = offscreenSurface.getCanvas();
   // Create new picture with many GPU-backed elements
@@ -56,7 +63,7 @@ export const StressTest = () => {
   });
   // Use React state instead of shared values to trigger React re-renders
 
-  const [, setRefreshCount] = useState(0);
+  const [count, setRefreshCount] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const intervalRef = useRef<unknown>(-1);
 
@@ -83,6 +90,12 @@ export const StressTest = () => {
 
     // Use setInterval to rapidly update the picture, triggering React re-renders
     intervalRef.current = setInterval(() => {
+      // Drain the deletion queue manually
+      Skia.drainDeletionQueue();
+      // Check how many objects are waiting for deletion
+      //const pendingCountJS = Skia.getPendingDeletionCount();
+      //console.log({ pendingCountJS });
+
       setPicture(() => createPictureWithGPUResources() ?? null);
 
       // This setState will trigger a React re-render, which will:
@@ -91,7 +104,7 @@ export const StressTest = () => {
       // 3. Create the race condition where GPU resources are destroyed on the wrong thread
       setRefreshCount((count) => {
         const newCount = count + 1;
-        console.log("Picture regenerated #" + newCount + " at " + Date.now());
+        //console.log("Picture regenerated #" + newCount + " at " + Date.now());
         return newCount;
       });
     }, 32) as unknown; // ~60fps to stress the system and trigger the race condition
