@@ -469,14 +469,15 @@ struct ImageCmdProps {
 class ImageCmd : public Command {
 private:
   // TODO: add to Atlas as well
-  ThreadSafeDeletion<SkImage> _deletionHandler;
+  std::thread::id _creationThreadId;
 
 public:
   ImageCmdProps props;
 
   ImageCmd(jsi::Runtime &runtime, const jsi::Object &object,
            Variables &variables)
-      : Command(CommandType::DrawImage) {
+      : Command(CommandType::DrawImage),
+        _creationThreadId(std::this_thread::get_id()) {
     convertProperty(runtime, object, "rect", props.rect, variables);
     convertProperty(runtime, object, "image", props.image, variables);
     convertProperty(runtime, object, "sampling", props.sampling, variables);
@@ -492,7 +493,8 @@ public:
   ~ImageCmd() {
     // Handle thread-safe deletion of the image
     if (props.image.has_value() && props.image.value()) {
-      _deletionHandler.handleDeletion(props.image.value());
+      ThreadSafeDeletion<SkImage>::handleDeletion(props.image.value(),
+                                                  _creationThreadId);
       // Clear the image to prevent base class or other code from accessing it
       // handleDeletion takes full responsibility for the object's lifetime
       props.image = std::nullopt;

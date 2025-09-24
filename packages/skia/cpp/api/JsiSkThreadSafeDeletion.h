@@ -25,26 +25,23 @@ private:
   static inline std::mutex _queueMutex;
   static inline std::queue<DeletionItem> _deletionQueue;
 
-  std::thread::id _creationThreadId;
-
 public:
-  ThreadSafeDeletion() : _creationThreadId(std::this_thread::get_id()) {}
-
   /**
    * Handles deletion of the object. If we're on the wrong thread,
    * queues it for later deletion. Otherwise, allows immediate deletion.
    * The object is always considered handled after this call.
    */
-  void handleDeletion(sk_sp<T> object) {
+  static void handleDeletion(sk_sp<T> object,
+                             std::thread::id creationThreadId) {
     if (!object) {
       return;
     }
 
     // Check if we're on the creation thread
-    if (std::this_thread::get_id() != _creationThreadId) {
+    if (std::this_thread::get_id() != creationThreadId) {
       // Queue for deletion on the correct thread
       std::lock_guard<std::mutex> lock(_queueMutex);
-      _deletionQueue.push({object, _creationThreadId});
+      _deletionQueue.push({object, creationThreadId});
     }
   }
 

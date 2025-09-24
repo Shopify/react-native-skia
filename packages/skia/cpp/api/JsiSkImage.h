@@ -63,7 +63,7 @@ inline SkSamplingOptions SamplingOptionsFromValue(jsi::Runtime &runtime,
 
 class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
 private:
-  ThreadSafeDeletion<SkImage> _deletionHandler;
+  std::thread::id _creationThreadId;
 
 public:
   // TODO-API: Properties?
@@ -275,13 +275,12 @@ public:
   JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
              const sk_sp<SkImage> image)
       : JsiSkWrappingSkPtrHostObject<SkImage>(std::move(context),
-                                              std::move(image)) {
-
-  }
+                                              std::move(image)),
+        _creationThreadId(std::this_thread::get_id()) {}
 
   ~JsiSkImage() override {
     // Handle thread-safe deletion
-    _deletionHandler.handleDeletion(getObject());
+    ThreadSafeDeletion<SkImage>::handleDeletion(getObject(), _creationThreadId);
     // Always clear the object to prevent base class destructor from deleting it
     // handleDeletion takes full responsibility for the object's lifetime
     setObject(nullptr);

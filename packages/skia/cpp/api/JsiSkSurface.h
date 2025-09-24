@@ -30,19 +30,19 @@ namespace jsi = facebook::jsi;
 
 class JsiSkSurface : public JsiSkWrappingSkPtrHostObject<SkSurface> {
 private:
-  ThreadSafeDeletion<SkSurface> _deletionHandler;
+  std::thread::id _creationThreadId;
 
 public:
   JsiSkSurface(std::shared_ptr<RNSkPlatformContext> context,
                sk_sp<SkSurface> surface)
       : JsiSkWrappingSkPtrHostObject<SkSurface>(std::move(context),
-                                                std::move(surface)) {
-
-  }
+                                                std::move(surface)),
+        _creationThreadId(std::this_thread::get_id()) {}
 
   ~JsiSkSurface() override {
     // Handle thread-safe deletion
-    _deletionHandler.handleDeletion(getObject());
+    ThreadSafeDeletion<SkSurface>::handleDeletion(getObject(),
+                                                  _creationThreadId);
     // Always clear the object to prevent base class destructor from deleting it
     // handleDeletion takes full responsibility for the object's lifetime
     setObject(nullptr);
