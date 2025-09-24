@@ -8,7 +8,6 @@
 #include "JsiSkImageInfo.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkShader.h"
-#include "JsiSkThreadSafeDeletion.h"
 #include "third_party/base64.h"
 
 #include "JsiTextureInfo.h"
@@ -63,7 +62,6 @@ inline SkSamplingOptions SamplingOptionsFromValue(jsi::Runtime &runtime,
 
 class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
 private:
-  ThreadSafeDeletion<SkImage> _deletionHandler;
 
 public:
   // TODO-API: Properties?
@@ -276,17 +274,9 @@ public:
              const sk_sp<SkImage> image)
       : JsiSkWrappingSkPtrHostObject<SkImage>(std::move(context),
                                               std::move(image)) {
-    // Drain any pending deletions when creating new images
-    ThreadSafeDeletion<SkImage>::drainDeletionQueue();
   }
 
-  ~JsiSkImage() override {
-    // Handle thread-safe deletion
-    _deletionHandler.handleDeletion(getObject());
-    // Always clear the object to prevent base class destructor from deleting it
-    // handleDeletion takes full responsibility for the object's lifetime
-    setObject(nullptr);
-  }
+  ~JsiSkImage() override = default;
 
   size_t getMemoryPressure() const override {
     auto image = getObject();

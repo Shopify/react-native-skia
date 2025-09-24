@@ -27,4 +27,5 @@ export type Routes = {
   Paragraphs2: undefined;
   Skottie: undefined;
   StressTest: undefined;
+  StressTest2: undefined;
 };
