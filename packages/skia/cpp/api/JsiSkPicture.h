@@ -25,6 +25,17 @@ public:
                const sk_sp<SkPicture> picture)
       : JsiSkWrappingSkPtrHostObject<SkPicture>(context, picture) {}
 
+  ~JsiSkPicture() {
+    auto picture = getObject();
+    if (picture) {
+      getContext()->runOnMainThread([picture]() {
+        // Picture will be deleted when this lambda is destroyed on main thread
+      });
+      // Don't let the base class delete the object.
+      setObject(nullptr);
+    }
+  }
+
   JSI_HOST_FUNCTION(makeShader) {
     auto tmx = (SkTileMode)arguments[0].asNumber();
     auto tmy = (SkTileMode)arguments[1].asNumber();

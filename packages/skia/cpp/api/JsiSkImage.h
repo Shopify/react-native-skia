@@ -62,7 +62,6 @@ inline SkSamplingOptions SamplingOptionsFromValue(jsi::Runtime &runtime,
 
 class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
 private:
-
 public:
   // TODO-API: Properties?
   JSI_HOST_FUNCTION(width) { return static_cast<double>(getObject()->width()); }
@@ -273,10 +272,18 @@ public:
   JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
              const sk_sp<SkImage> image)
       : JsiSkWrappingSkPtrHostObject<SkImage>(std::move(context),
-                                              std::move(image)) {
-  }
+                                              std::move(image)) {}
 
-  ~JsiSkImage() override = default;
+  ~JsiSkImage() {
+    auto image = getObject();
+    if (image) {
+      getContext()->runOnMainThread([image]() {
+        // Image will be deleted when this lambda is destroyed on main thread
+      });
+      // Don't let the base class delete the object.
+      setObject(nullptr);
+    }
+  }
 
   size_t getMemoryPressure() const override {
     auto image = getObject();

@@ -29,15 +29,22 @@ namespace jsi = facebook::jsi;
 
 class JsiSkSurface : public JsiSkWrappingSkPtrHostObject<SkSurface> {
 private:
-
 public:
   JsiSkSurface(std::shared_ptr<RNSkPlatformContext> context,
                sk_sp<SkSurface> surface)
       : JsiSkWrappingSkPtrHostObject<SkSurface>(std::move(context),
-                                                std::move(surface)) {
-  }
+                                                std::move(surface)) {}
 
-  ~JsiSkSurface() override = default;
+  ~JsiSkSurface() {
+    auto surface = getObject();
+    if (surface) {
+      getContext()->runOnMainThread([surface]() {
+        // Surface will be deleted when this lambda is destroyed on main thread
+      });
+      // Don't let the base class delete the object.
+      setObject(nullptr);
+    }
+  }
 
   EXPORT_JSI_API_TYPENAME(JsiSkSurface, Surface)
 
