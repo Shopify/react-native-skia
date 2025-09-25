@@ -5,6 +5,11 @@ const MockReanimated = require("react-native-reanimated/mock");
 JestUtils.setUpTests();
 global.__reanimatedWorkletInit = () => {};
 
+const LogLevel = {
+  warn: 1,
+  error: 2,
+};
+
 jest.mock("expo-asset", () => ({
   useAssets: () => [[], undefined],
 }));
@@ -20,6 +25,7 @@ jest.mock("react-native-reanimated", () => {
   MockReanimated.scrollTo = () => {};
   MockReanimated.useFrameCallback = () => {};
   MockReanimated.convertToRGBA = () => {};
+  MockReanimated.ReanimatedLogLevel = LogLevel;
   return MockReanimated;
 });
 

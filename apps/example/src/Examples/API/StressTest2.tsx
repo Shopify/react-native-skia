@@ -119,6 +119,7 @@ export const StressTest2 = () => {
         {/* Use Image with texture as described in crash scenario */}
         <Image image={texture} x={0} y={0} width={400} height={400} />
       </Canvas>
+      <RasterCanvas image={texture} />
       <Button
         onPress={isRunning ? stopStressTest : startStressTest}
         title={
@@ -136,3 +137,25 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+
+interface FrameProps {
+  image: SharedValue<SkImage | null>;
+}
+
+const frame = ({ image }: FrameProps) => {
+  const surface = Skia.Surface.MakeOffscreen(400, 400)!;
+  const canvas = surface.getCanvas();
+  if (image.value) {
+    canvas.drawImage(image.value.makeNonTextureImage(), 0, 0);
+  }
+  surface.flush();
+  //const img = surface.makeImageSnapshot().makeNonTextureImage();
+  requestAnimationFrame(() => frame({ image }));
+};
+
+const RasterCanvas = (props: FrameProps) => {
+  useEffect(() => {
+    frame(props);
+  }, [props]);
+  return null;
+};
