@@ -258,6 +258,10 @@ public:
     return JsiTextureInfo::toValue(runtime, texInfo);
   }
 
+  JSI_HOST_FUNCTION(isTextureBacked) {
+    return jsi::Value(getObject()->isTextureBacked());
+  }
+
   EXPORT_JSI_API_TYPENAME(JsiSkImage, Image)
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImage, width),
@@ -270,6 +274,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkImage, readPixels),
                        JSI_EXPORT_FUNC(JsiSkImage, makeNonTextureImage),
                        JSI_EXPORT_FUNC(JsiSkImage, getNativeTextureUnstable),
+                       JSI_EXPORT_FUNC(JsiSkImage, isTextureBacked),
                        JSI_EXPORT_FUNC(JsiSkImage, dispose))
 
   JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
