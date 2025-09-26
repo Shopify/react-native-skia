@@ -710,7 +710,7 @@ private:
       throw jsi::JSError(runtime, "No GPU context available");
     }
     if (image && !image->isValid(ctx->asRecorder())) {
-      throw jsi::JSError(runtime, "image used drawImage() does not belong in this context");
+      throw jsi::JSError(runtime, "image used in drawImage() does not belong to this context");
     }
 #endif
   }
