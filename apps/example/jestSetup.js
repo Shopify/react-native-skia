@@ -20,6 +20,11 @@ jest.mock("react-native-reanimated", () => {
   MockReanimated.scrollTo = () => {};
   MockReanimated.useFrameCallback = () => {};
   MockReanimated.convertToRGBA = () => {};
+  MockReanimated.configureReanimatedLogger = () => {};
+  MockReanimated.ReanimatedLogLevel = {
+    warn: 1,
+    error: 2,
+  };
   return MockReanimated;
 });
 
