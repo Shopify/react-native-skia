@@ -242,7 +242,7 @@ public:
 #else
     auto grContext = getContext()->getDirectContext();
     auto image = getObject();
-    if (!ctx) {
+    if (!grContext) {
       throw jsi::JSError(runtime, "No GPU context available");
     }
     if (image && !image->isValid(grContext->asRecorder())) {
