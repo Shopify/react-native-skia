@@ -1,12 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import React, { useState, useRef, useEffect } from "react";
 import { Button, ScrollView, StyleSheet } from "react-native";
-import type {
-  SkImage,
-  SkPicture,
-  SkSize,
-  SkSurface,
-} from "@shopify/react-native-skia";
+import type { SkImage, SkPicture, SkSize } from "@shopify/react-native-skia";
 import { Canvas, Image, Skia } from "@shopify/react-native-skia";
 import {
   configureReanimatedLogger,
@@ -77,9 +72,6 @@ const createPictureWithGPUResources = (
 ) => {
   "worklet";
   makeTexture(content);
-  // Check how many objects are waiting for deletion
-  //const pendingCountUI = Skia.getPendingDeletionCount();
-  //console.log({ pendingCountUI });
   const rec = Skia.PictureRecorder();
   const canvas = rec.beginRecording(Skia.XYWHRect(0, 0, 400, 400));
   if (content.value) {
@@ -96,21 +88,12 @@ export const StressTest2 = () => {
     width: 400,
     height: 400,
   });
-  // Use React state instead of shared values to trigger React re-renders
 
   const [isRunning, setIsRunning] = useState(false);
   const intervalRef = useRef<unknown>(-1);
 
-  // Convert picture to texture using useTexture as described in crash scenario
-  // This will recreate the texture on every React re-render when picture changes
-  // const texture = useTexture(
-  //   useMemo(() => <Picture picture={picture} />, [picture]),
-  //   { width: 400, height: 400 }
-  // );
-
   useEffect(() => {
     return () => {
-      // Cleanup interval on unmount
       if (intervalRef.current) {
         clearInterval(intervalRef.current as number);
       }

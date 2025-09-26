@@ -35,9 +35,5 @@ export const drawAsImageFromPicture = (picture: SkPicture, size: SkSize) => {
   canvas.drawPicture(picture);
   surface.flush();
   const image = surface.makeImageSnapshot();
-  if (Platform.OS === "web") {
-    return image.makeNonTextureImage();
-  } else {
-    return image;
-  }
+  return image.makeNonTextureImage();
 };
