@@ -290,7 +290,15 @@ public:
 
   size_t getMemoryPressure() const override {
     auto image = getObject();
-    return image ? image->imageInfo().computeMinByteSize() : 0;
+	  if (image) {
+		  if (image->isTextureBacked()) {
+			  return image->textureSize();
+		  } else {
+			  return image->imageInfo().computeMinByteSize();
+		  }
+	  }
+		  return 0;
+
   }
 };
 
