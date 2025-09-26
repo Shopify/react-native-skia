@@ -8,14 +8,18 @@ export const useSVG = (
   if (source === null || source === undefined) {
     throw new Error(`Invalid svg data source. Got: ${source}`);
   }
-  if (
-    typeof source !== "object" ||
-    source instanceof Uint8Array ||
-    !("uri" in source) ||
-    typeof source.uri !== "string" ||
-    !("default" in source) ||
-    typeof source.default !== "string"
+  let src: string;
+  if (typeof source === "string") {
+    src = source;
+  } else if (
+    typeof source === "object" &&
+    "default" in source &&
+    typeof source.default === "string"
   ) {
+    src = source.default;
+  } else if (typeof source === "object" && "uri" in source) {
+    src = source.uri;
+  } else {
     throw new Error(
       `Invalid svg data source. Make sure that the source resolves to a string. Got: ${JSON.stringify(
         source,
@@ -24,7 +28,7 @@ export const useSVG = (
       )}`
     );
   }
-  const svg = Skia.SVG.MakeFromString(source.default);
+  const svg = Skia.SVG.MakeFromString(src);
   if (svg === null && onError !== undefined) {
     onError(new Error("Failed to create SVG from source."));
   }
