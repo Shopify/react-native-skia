@@ -6,7 +6,7 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkHostObjects.h"
-#include "JsiSkThreadSafeDeletion.h"
+#include "JsiSkDispatcher.h"
 #include "JsiTextureInfo.h"
 
 #include "JsiSkCanvas.h"
@@ -30,23 +30,28 @@ namespace jsi = facebook::jsi;
 
 class JsiSkSurface : public JsiSkWrappingSkPtrHostObject<SkSurface> {
 private:
-  ThreadSafeDeletion<SkSurface> _deletionHandler;
+  std::shared_ptr<Dispatcher> _dispatcher;
 
 public:
   JsiSkSurface(std::shared_ptr<RNSkPlatformContext> context,
                sk_sp<SkSurface> surface)
       : JsiSkWrappingSkPtrHostObject<SkSurface>(std::move(context),
-                                                std::move(surface)),
-        _deletionHandler() {
-    // Drain any pending deletions when creating new surfaces
-    ThreadSafeDeletion<SkSurface>::drainDeletionQueue();
+                                                std::move(surface)) {
+    // Get the dispatcher for the current thread
+    _dispatcher = Dispatcher::getDispatcher();
+    // Process any pending operations
+    _dispatcher->processQueue();
   }
 
   ~JsiSkSurface() override {
-    // Handle thread-safe deletion
-    _deletionHandler.handleDeletion(getObject());
-    // Always clear the object to prevent base class destructor from deleting it
-    // handleDeletion takes full responsibility for the object's lifetime
+    // Queue deletion on the creation thread if needed
+    auto surface = getObject();
+    if (surface && _dispatcher) {
+      _dispatcher->run([surface]() {
+        // Surface will be deleted when this lambda is destroyed
+      });
+    }
+    // Clear the object to prevent base class destructor from deleting it
     setObject(nullptr);
   }
 

@@ -8,7 +8,7 @@
 #include "JsiSkImageInfo.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkShader.h"
-#include "JsiSkThreadSafeDeletion.h"
+#include "JsiSkDispatcher.h"
 #include "third_party/base64.h"
 
 #include "JsiTextureInfo.h"
@@ -63,7 +63,7 @@ inline SkSamplingOptions SamplingOptionsFromValue(jsi::Runtime &runtime,
 
 class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
 private:
-  ThreadSafeDeletion<SkImage> _deletionHandler;
+  std::shared_ptr<Dispatcher> _dispatcher;
 
 public:
   // TODO-API: Properties?
@@ -281,15 +281,21 @@ public:
              const sk_sp<SkImage> image)
       : JsiSkWrappingSkPtrHostObject<SkImage>(std::move(context),
                                               std::move(image)) {
-    // Drain any pending deletions when creating new images
-    ThreadSafeDeletion<SkImage>::drainDeletionQueue();
+    // Get the dispatcher for the current thread
+    _dispatcher = Dispatcher::getDispatcher();
+    // Process any pending operations
+    _dispatcher->processQueue();
   }
 
   ~JsiSkImage() override {
-    // Handle thread-safe deletion
-    _deletionHandler.handleDeletion(getObject());
-    // Always clear the object to prevent base class destructor from deleting it
-    // handleDeletion takes full responsibility for the object's lifetime
+    // Queue deletion on the creation thread if needed
+    auto image = getObject();
+    if (image && _dispatcher) {
+      _dispatcher->run([image]() {
+        // Image will be deleted when this lambda is destroyed
+      });
+    }
+    // Clear the object to prevent base class destructor from deleting it
     setObject(nullptr);
   }
 

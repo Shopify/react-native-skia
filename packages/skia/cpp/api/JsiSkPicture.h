@@ -7,7 +7,7 @@
 #include "JsiSkMatrix.h"
 #include "JsiSkRect.h"
 #include "JsiSkShader.h"
-#include "JsiSkThreadSafeDeletion.h"
+#include "JsiSkDispatcher.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -22,22 +22,27 @@ namespace jsi = facebook::jsi;
 
 class JsiSkPicture : public JsiSkWrappingSkPtrHostObject<SkPicture> {
 private:
-  ThreadSafeDeletion<SkPicture> _deletionHandler;
+  std::shared_ptr<Dispatcher> _dispatcher;
 
 public:
   JsiSkPicture(std::shared_ptr<RNSkPlatformContext> context,
                const sk_sp<SkPicture> picture)
-      : JsiSkWrappingSkPtrHostObject<SkPicture>(context, picture),
-        _deletionHandler() {
-    // Drain any pending deletions when creating new pictures
-    ThreadSafeDeletion<SkPicture>::drainDeletionQueue();
+      : JsiSkWrappingSkPtrHostObject<SkPicture>(context, picture) {
+    // Get the dispatcher for the current thread
+    _dispatcher = Dispatcher::getDispatcher();
+    // Process any pending operations
+    _dispatcher->processQueue();
   }
 
   ~JsiSkPicture() override {
-    // Handle thread-safe deletion
-    _deletionHandler.handleDeletion(getObject());
-    // Always clear the object to prevent base class destructor from deleting it
-    // handleDeletion takes full responsibility for the object's lifetime
+    // Queue deletion on the creation thread if needed
+    auto picture = getObject();
+    if (picture && _dispatcher) {
+      _dispatcher->run([picture]() {
+        // Picture will be deleted when this lambda is destroyed
+      });
+    }
+    // Clear the object to prevent base class destructor from deleting it
     setObject(nullptr);
   }
 
