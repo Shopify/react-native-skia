@@ -26,8 +26,8 @@ import { Circle, drawOffscreen, getSkiaExports, Group, makeOffscreenSurface } fr
   // Once that CanvasKit is loaded, you can access Skia via getSkiaExports()
   // Alternatively you can do const {Skia} = require("@shopify/react-native-skia")
   const {Skia} = getSkiaExports();
-  const surface = makeOffscreenSurface(width, height);
-  const image = await drawOffscreen(surface,
+  using surface = makeOffscreenSurface(width, height);
+  using image = await drawOffscreen(surface,
     <Group blendMode="multiply">
       <Circle cx={r} cy={r} r={r} color="cyan" />
       <Circle cx={size - r} cy={r} r={r} color="magenta" />
@@ -39,9 +39,6 @@ import { Circle, drawOffscreen, getSkiaExports, Group, makeOffscreenSurface } fr
       />
     </Group>);
   console.log(image.encodeToBase64());
-  // Cleaning up CanvasKit resources
-  image.dispose();
-  surface.dispose();
 })();
 ```
 

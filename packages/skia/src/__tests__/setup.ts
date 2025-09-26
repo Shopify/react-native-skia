@@ -23,10 +23,9 @@ export const processResult = (
   overwrite = false
 ) => {
   surface.flush();
-  const image = surface.makeImageSnapshot();
+  using image = surface.makeImageSnapshot();
   surface.getCanvas().clear(Float32Array.of(0, 0, 0, 0));
   const result = checkImage(image, relPath, { overwrite });
-  image.dispose();
   return result;
 };
 

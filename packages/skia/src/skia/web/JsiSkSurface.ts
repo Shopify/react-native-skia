@@ -15,9 +15,9 @@ export class JsiSkSurface
     super(CanvasKit, ref, "Surface");
   }
 
-  dispose = () => {
+  [Symbol.dispose]() {
     this.ref.dispose();
-  };
+  }
 
   flush() {
     this.ref.flush();

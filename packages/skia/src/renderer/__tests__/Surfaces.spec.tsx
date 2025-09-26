@@ -12,15 +12,13 @@ describe("Surface", () => {
     // When leaking, the WASM memory limit will be reached quite quickly
     // causing the test to fail
     for (let i = 0; i < 500; i++) {
-      const surface = Skia.Surface.Make(1920, 1080)!;
+      using surface = Skia.Surface.Make(1920, 1080)!;
       const canvas = surface.getCanvas();
       canvas.clear(Skia.Color("cyan"));
       surface.flush();
-      const image = surface.makeImageSnapshot();
-      const copy = image.makeNonTextureImage();
-      copy.dispose();
-      image.dispose();
-      surface.dispose();
+      using image = surface.makeImageSnapshot();
+      using copy = image.makeNonTextureImage();
+      expect(copy).toBeDefined();
     }
   });
   it("A raster surface shouldn't leak (1)", () => {
@@ -28,13 +26,12 @@ describe("Surface", () => {
     // When leaking, the WASM memory limit will be reached quite quickly
     // causing the test to fail
     for (let i = 0; i < 500; i++) {
-      const surface = Skia.Surface.Make(1920, 1080)!;
+      using surface = Skia.Surface.Make(1920, 1080)!;
       const canvas = surface.getCanvas();
       canvas.clear(Skia.Color("cyan"));
       surface.flush();
-      const image = surface.makeImageSnapshot();
-      image.dispose();
-      surface.dispose();
+      using image = surface.makeImageSnapshot();
+      expect(image).toBeDefined();
     }
   });
   it("A raster surface shouldn't leak (2)", () => {
@@ -42,20 +39,19 @@ describe("Surface", () => {
     // When leaking, the WASM memory limit will be reached quite quickly
     // causing the test to fail
     for (let i = 0; i < 500; i++) {
-      const surface = Skia.Surface.MakeOffscreen(1920, 1080)!;
+      using surface = Skia.Surface.MakeOffscreen(1920, 1080)!;
       const canvas = surface.getCanvas();
       canvas.clear(Skia.Color("cyan"));
       surface.flush();
-      const image = surface.makeImageSnapshot();
-      image.dispose();
-      surface.dispose();
+      using image = surface.makeImageSnapshot();
+      expect(image).toBeDefined();
     }
   });
   it("A raster surface shouldn't leak (3)", async () => {
     for (let i = 0; i < 10; i++) {
       //const t = performance.now();
       const r = 128;
-      const surface = await drawOnNode(
+      using surface = await drawOnNode(
         <>
           <Group blendMode="multiply">
             <Circle cx={r} cy={r} r={r} color="cyan" />
@@ -67,7 +63,6 @@ describe("Surface", () => {
       surface.flush();
       //console.log(`Iteration ${i} took ${Math.floor(performance.now() - t)}ms`);
       processResult(surface, "snapshots/leak.png");
-      surface.dispose();
     }
   });
 });
