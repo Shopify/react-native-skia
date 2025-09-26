@@ -149,7 +149,7 @@ const frame = ({ image }: FrameProps) => {
     canvas.drawImage(image.value.makeNonTextureImage(), 0, 0);
   }
   surface.flush();
-  surface.makeImageSnapshot().makeNonTextureImage();
+  surface.makeImageSnapshot();
   requestAnimationFrame(() => frame({ image }));
 };
 

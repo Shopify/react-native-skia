@@ -6,6 +6,7 @@
 #include "Convertor.h"
 #include "DrawingCtx.h"
 #include "ImageFit.h"
+#include "RNSkPlatformContext.h"
 
 namespace RNSkia {
 
@@ -468,10 +469,11 @@ struct ImageCmdProps {
 class ImageCmd : public Command {
 public:
   ImageCmdProps props;
+  std::shared_ptr<RNSkPlatformContext> _context;
 
-  ImageCmd(jsi::Runtime &runtime, const jsi::Object &object,
-           Variables &variables)
-      : Command(CommandType::DrawImage) {
+  ImageCmd(std::shared_ptr<RNSkPlatformContext> context, jsi::Runtime &runtime,
+           const jsi::Object &object, Variables &variables)
+      : Command(CommandType::DrawImage), _context(context) {
     convertProperty(runtime, object, "rect", props.rect, variables);
     convertProperty(runtime, object, "image", props.image, variables);
     convertProperty(runtime, object, "sampling", props.sampling, variables);
@@ -482,6 +484,17 @@ public:
     convertProperty(runtime, object, "width", props.width, variables);
     convertProperty(runtime, object, "height", props.height, variables);
     convertProperty(runtime, object, "rect", props.rect, variables);
+  }
+
+  ~ImageCmd() {
+    if (props.image.has_value()) {
+      auto image = props.image.value();
+      if (image) {
+        _context->runOnMainThread([image]() {
+          // Image will be deleted when this lambda is destroyed on main thread
+        });
+      }
+    }
   }
 
   void draw(DrawingCtx *ctx) {
@@ -784,11 +797,22 @@ struct PictureCmdProps {
 class PictureCmd : public Command {
 public:
   PictureCmdProps props;
+  std::shared_ptr<RNSkPlatformContext> _context;
 
-  PictureCmd(jsi::Runtime &runtime, const jsi::Object &object,
+  PictureCmd(std::shared_ptr<RNSkPlatformContext> context,
+             jsi::Runtime &runtime, const jsi::Object &object,
              Variables &variables)
-      : Command(CommandType::DrawPicture) {
+      : Command(CommandType::DrawPicture), _context(context) {
     convertProperty(runtime, object, "picture", props.picture, variables);
+  }
+
+  ~PictureCmd() {
+    auto picture = props.picture;
+    if (picture) {
+      _context->runOnMainThread([picture]() {
+        // Picture will be deleted when this lambda is destroyed on main thread
+      });
+    }
   }
 
   void draw(DrawingCtx *ctx) { ctx->canvas->drawPicture(props.picture); }
@@ -914,16 +938,26 @@ struct AtlasCmdProps {
 class AtlasCmd : public Command {
 public:
   AtlasCmdProps props;
+  std::shared_ptr<RNSkPlatformContext> _context;
 
-  AtlasCmd(jsi::Runtime &runtime, const jsi::Object &object,
-           Variables &variables)
-      : Command(CommandType::DrawAtlas) {
+  AtlasCmd(std::shared_ptr<RNSkPlatformContext> context, jsi::Runtime &runtime,
+           const jsi::Object &object, Variables &variables)
+      : Command(CommandType::DrawAtlas), _context(context) {
     convertProperty(runtime, object, "image", props.image, variables);
     convertProperty(runtime, object, "sprites", props.sprites, variables);
     convertProperty(runtime, object, "transforms", props.transforms, variables);
     convertProperty(runtime, object, "colors", props.colors, variables);
     convertProperty(runtime, object, "blendMode", props.blendMode, variables);
     convertProperty(runtime, object, "sampling", props.sampling, variables);
+  }
+
+  ~AtlasCmd() {
+    auto image = props.image;
+    if (image) {
+      _context->runOnMainThread([image]() {
+        // Image will be deleted when this lambda is destroyed on main thread
+      });
+    }
   }
 
   void draw(DrawingCtx *ctx) {
