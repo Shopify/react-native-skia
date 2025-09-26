@@ -5,8 +5,8 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiSkHostObjects.h"
 #include "JsiSkDispatcher.h"
+#include "JsiSkHostObjects.h"
 #include "JsiTextureInfo.h"
 
 #include "JsiSkCanvas.h"

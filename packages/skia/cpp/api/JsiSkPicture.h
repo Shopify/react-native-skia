@@ -3,11 +3,11 @@
 #include <memory>
 
 #include "JsiSkData.h"
+#include "JsiSkDispatcher.h"
 #include "JsiSkHostObjects.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkRect.h"
 #include "JsiSkShader.h"
-#include "JsiSkDispatcher.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

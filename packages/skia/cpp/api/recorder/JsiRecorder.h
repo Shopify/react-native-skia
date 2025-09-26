@@ -22,7 +22,7 @@ class JsiRecorder : public JsiSkWrappingSharedPtrHostObject<Recorder> {
 public:
   JsiRecorder(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkWrappingSharedPtrHostObject(std::move(context),
-                                      std::make_shared<Recorder>()) {
+                                         std::make_shared<Recorder>()) {
     getObject()->_context = getContext();
   }
 

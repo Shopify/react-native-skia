@@ -4,11 +4,11 @@
 #include <string>
 #include <utility>
 
+#include "JsiSkDispatcher.h"
 #include "JsiSkHostObjects.h"
 #include "JsiSkImageInfo.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkShader.h"
-#include "JsiSkDispatcher.h"
 #include "third_party/base64.h"
 
 #include "JsiTextureInfo.h"
@@ -301,15 +301,14 @@ public:
 
   size_t getMemoryPressure() const override {
     auto image = getObject();
-	  if (image) {
-		  if (image->isTextureBacked()) {
-			  return image->textureSize();
-		  } else {
-			  return image->imageInfo().computeMinByteSize();
-		  }
-	  }
-		  return 0;
-
+    if (image) {
+      if (image->isTextureBacked()) {
+        return image->textureSize();
+      } else {
+        return image->imageInfo().computeMinByteSize();
+      }
+    }
+    return 0;
   }
 };
 

@@ -703,14 +703,16 @@ public:
   SkCanvas *getCanvas() { return _canvas; }
 
 private:
-  void validateImageForDrawing(jsi::Runtime &runtime, const sk_sp<SkImage> image) {
+  void validateImageForDrawing(jsi::Runtime &runtime,
+                               const sk_sp<SkImage> image) {
 #if !defined(SK_GRAPHITE)
-	  auto ctx = getContext()->getDirectContext();
+    auto ctx = getContext()->getDirectContext();
     if (!ctx) {
       throw jsi::JSError(runtime, "No GPU context available");
     }
     if (image && !image->isValid(ctx->asRecorder())) {
-      throw jsi::JSError(runtime, "image used in drawImage() does not belong to this context");
+      throw jsi::JSError(
+          runtime, "image used in drawImage() does not belong to this context");
     }
 #endif
   }
