@@ -1,13 +1,13 @@
 import type { Dispatch, SetStateAction } from "react";
 import React, { useState, useRef, useEffect } from "react";
 import { Button, ScrollView, StyleSheet } from "react-native";
-import type { SkImage, SkPicture } from "@shopify/react-native-skia";
-import {
-  Canvas,
-  Image,
-  Skia,
-  usePictureAsTexture,
+import type {
+  SkImage,
+  SkPicture,
+  SkSize,
+  SkSurface,
 } from "@shopify/react-native-skia";
+import { Canvas, Image, Skia } from "@shopify/react-native-skia";
 import {
   configureReanimatedLogger,
   ReanimatedLogLevel,
@@ -22,6 +22,35 @@ configureReanimatedLogger({
   level: ReanimatedLogLevel.error,
   strict: false, // Reanimated runs in strict mode by default
 });
+
+const drawPicture = (
+  picture: SkPicture,
+  texture: SharedValue<SkImage | null>,
+  size: SkSize
+) => {
+  "worklet";
+  const surface = Skia.Surface.MakeOffscreen(size.width, size.height);
+  if (!surface) {
+    console.error("Could not create surface");
+    return;
+  }
+  const canvas = surface.getCanvas();
+  canvas.drawPicture(picture);
+  surface.flush();
+  texture.value = surface.makeImageSnapshot();
+};
+
+const usePictureAsTexture = (picture: SkPicture | null, size: SkSize) => {
+  const texture = useSharedValue<SkImage | null>(null);
+  useEffect(() => {
+    if (!picture) {
+      texture.value = null;
+      return;
+    }
+    runOnUI(drawPicture)(picture, texture, size);
+  }, [picture, size, texture]);
+  return texture;
+};
 
 const makeTexture = (content: SharedValue<SkImage | null>) => {
   "worklet";

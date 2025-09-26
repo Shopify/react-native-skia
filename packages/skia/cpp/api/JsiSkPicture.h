@@ -7,6 +7,7 @@
 #include "JsiSkMatrix.h"
 #include "JsiSkRect.h"
 #include "JsiSkShader.h"
+#include "JsiSkThreadSafeDeletion.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -20,10 +21,25 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 
 class JsiSkPicture : public JsiSkWrappingSkPtrHostObject<SkPicture> {
+private:
+  ThreadSafeDeletion<SkPicture> _deletionHandler;
+
 public:
   JsiSkPicture(std::shared_ptr<RNSkPlatformContext> context,
                const sk_sp<SkPicture> picture)
-      : JsiSkWrappingSkPtrHostObject<SkPicture>(context, picture) {}
+      : JsiSkWrappingSkPtrHostObject<SkPicture>(context, picture),
+        _deletionHandler() {
+    // Drain any pending deletions when creating new pictures
+    ThreadSafeDeletion<SkPicture>::drainDeletionQueue();
+  }
+
+  ~JsiSkPicture() override {
+    // Handle thread-safe deletion
+    _deletionHandler.handleDeletion(getObject());
+    // Always clear the object to prevent base class destructor from deleting it
+    // handleDeletion takes full responsibility for the object's lifetime
+    setObject(nullptr);
+  }
 
   JSI_HOST_FUNCTION(makeShader) {
     auto tmx = (SkTileMode)arguments[0].asNumber();

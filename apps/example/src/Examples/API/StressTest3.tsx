@@ -1,3 +1,4 @@
+import type { Dispatch, SetStateAction } from "react";
 import React, { useState, useRef, useEffect } from "react";
 import { Button, ScrollView, StyleSheet } from "react-native";
 import type { SkImage, SkPicture } from "@shopify/react-native-skia";
@@ -10,6 +11,7 @@ import {
 import {
   configureReanimatedLogger,
   ReanimatedLogLevel,
+  runOnJS,
   runOnUI,
   useSharedValue,
   type SharedValue,
@@ -42,9 +44,10 @@ const makeTexture = (content: SharedValue<SkImage | null>) => {
 
 const createPictureWithGPUResources = (
   content: SharedValue<SkImage | null>,
-  picture?: SharedValue<SkPicture | null>
+  setPicture: Dispatch<SetStateAction<SkPicture | null>>
 ) => {
-  runOnUI(makeTexture)(content);
+  "worklet";
+  makeTexture(content);
   // Check how many objects are waiting for deletion
   //const pendingCountUI = Skia.getPendingDeletionCount();
   //console.log({ pendingCountUI });
@@ -54,10 +57,7 @@ const createPictureWithGPUResources = (
     canvas.drawImage(content.value, 0, 0);
   }
   const result = rec.finishRecordingAsPicture();
-  if (picture) {
-    picture.value = result;
-  }
-  return result;
+  runOnJS(setPicture)(result);
 };
 
 export const StressTest3 = () => {
@@ -95,7 +95,7 @@ export const StressTest3 = () => {
 
     // Use setInterval to rapidly update the picture, triggering React re-renders
     intervalRef.current = setInterval(() => {
-      setPicture(() => createPictureWithGPUResources(content) ?? null);
+      runOnUI(createPictureWithGPUResources)(content, setPicture);
     }, 32) as unknown; // ~60fps to stress the system and trigger the race condition
   };
 
@@ -117,7 +117,6 @@ export const StressTest3 = () => {
         }}
       >
         {/* Use Image with texture as described in crash scenario */}
-        <Image image={texture} x={0} y={0} width={400} height={400} />
       </Canvas>
       <RasterCanvas image={texture} />
       <Button
