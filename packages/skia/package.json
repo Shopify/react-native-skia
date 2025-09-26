@@ -137,6 +137,9 @@
     "jsSrcsDir": "src/specs",
     "android": {
       "javaPackageName": "com.shopify.reactnative.skia"
+    },
+    "ios": {
+      "componentProviders": ["SkiaPictureViewNativeComponent"]
     }
   },
   "react-native-builder-bob": {
