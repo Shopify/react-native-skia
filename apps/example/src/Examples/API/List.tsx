@@ -122,6 +122,10 @@ export const examples = [
     screen: "StressTest3",
     title: "🔥 Stress Test 3",
   },
+  {
+    screen: "StressTest4",
+    title: "🔥 Stress Test 4",
+  },
 ] as const;
 
 const styles = StyleSheet.create({

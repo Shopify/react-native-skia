@@ -29,4 +29,5 @@ export type Routes = {
   StressTest: undefined;
   StressTest2: undefined;
   StressTest3: undefined;
+  StressTest4: undefined;
 };
