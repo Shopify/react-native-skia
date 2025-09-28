@@ -1,3 +1,4 @@
+import React, { useCallback, useState } from "react";
 import {
   Alert,
   Button,
@@ -7,7 +8,6 @@ import {
 } from "react-native";
 import type { SkImage, SkSurface } from "@shopify/react-native-skia";
 import { Canvas, Image, Skia } from "@shopify/react-native-skia";
-import { useCallback, useState } from "react";
 import { Text } from "react-native-gesture-handler";
 import {
   runOnJS,
@@ -73,7 +73,7 @@ export const StressTest4 = () => {
       }
     };
     blink();
-  }, []);
+  }, [image, isLeft, looper, pixelRatio, revert, surface.value, x]);
 
   const start = useCallback(() => {
     "worklet";
@@ -84,7 +84,7 @@ export const StressTest4 = () => {
       );
     }
     startBlink();
-  }, []);
+  }, [pixelRatio, startBlink, surface]);
 
   const imageX = useDerivedValue(() => -x.value);
 
