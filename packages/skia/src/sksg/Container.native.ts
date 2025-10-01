@@ -23,7 +23,10 @@ const nativeDrawOnscreen = (nativeId: number, recorder: JsiRecorder) => {
 class NativeReanimatedContainer extends Container {
   private mapperId: number | null = null;
 
-  constructor(Skia: Skia, private nativeId: number) {
+  constructor(
+    Skia: Skia,
+    private nativeId: number
+  ) {
     super(Skia);
   }
 

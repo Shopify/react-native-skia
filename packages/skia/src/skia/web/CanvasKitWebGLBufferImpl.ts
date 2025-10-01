@@ -5,7 +5,10 @@ import { CanvasKitWebGLBuffer } from "../types";
 export class CanvasKitWebGLBufferImpl extends CanvasKitWebGLBuffer {
   public image: Image | null = null;
 
-  constructor(public surface: Surface, private source: TextureSource) {
+  constructor(
+    public surface: Surface,
+    private source: TextureSource
+  ) {
     super();
   }
 

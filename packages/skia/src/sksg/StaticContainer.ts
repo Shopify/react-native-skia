@@ -48,7 +48,10 @@ export abstract class Container {
 }
 
 export class StaticContainer extends Container {
-  constructor(Skia: Skia, private nativeId: number) {
+  constructor(
+    Skia: Skia,
+    private nativeId: number
+  ) {
     super(Skia);
   }
 

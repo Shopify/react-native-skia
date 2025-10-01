@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import path from "path";
 
 import { $ } from "./utils";

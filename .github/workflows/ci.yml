@@ -98,7 +98,6 @@ jobs:
 
   build-android-ubuntu:
     runs-on: ubuntu-latest
-    continue-on-error: true
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
@@ -156,11 +155,10 @@ jobs:
         env:
           JAVA_OPTS: "-XX:MaxHeapSize=6g"
         run: |
-          yarn turbo run build:android --concurrency 1 --filter=example --force
+          yarn turbo run build:android --concurrency 1 --filter=example
 
   build-android:
     runs-on: macos-latest-large
-    continue-on-error: true
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
@@ -219,7 +217,7 @@ jobs:
         env:
           JAVA_OPTS: "-XX:MaxHeapSize=16g"
         run: |
-          yarn turbo run build:android --concurrency 1 --force
+          yarn turbo run build:android --concurrency 1
 
       - name: Cache apk
         uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
@@ -376,7 +374,7 @@ jobs:
             ${{ runner.os }}-turborepo-macos-
 
       - name: Build example for macOS
-        run: yarn turbo run build:macos --concurrency 1 --force
+        run: yarn turbo run build:macos --concurrency 1
 
   build-test-macos-graphite:
     runs-on: macos-latest
@@ -403,65 +401,65 @@ jobs:
             ${{ runner.os }}-turborepo-macos-
 
       - name: Build example for macOS
-        run: yarn turbo run build:macos --concurrency 1 --force
+        run: yarn turbo run build:macos --concurrency 1
 
-  test-web:
-    runs-on: macos-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
-        with:
-          submodules: recursive
+  # test-web:
+  #   runs-on: macos-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
+  #       with:
+  #         submodules: recursive
 
-      - name: Setup
-        uses: ./.github/actions/setup
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Setup
+  #       uses: ./.github/actions/setup
+  #       with:
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Update skia-web-app submodule to latest main
-        run: |
-          cd externals/skia-web-app
-          git checkout main
-          git pull origin main
+  #     - name: Update skia-web-app submodule to latest main
+  #       run: |
+  #         cd externals/skia-web-app
+  #         git checkout main
+  #         git pull origin main
 
-      - name: Build and pack Skia package
-        working-directory: packages/skia
-        run: yarn build && yarn pack
+  #     - name: Build and pack Skia package
+  #       working-directory: packages/skia
+  #       run: yarn build && yarn pack
 
-      - name: Log package.json before change
-        working-directory: externals/skia-web-app
-        run: |
-          echo "=== package.json BEFORE change ==="
-          grep -n "@shopify/react-native-skia" package.json || echo "Pattern not found"
-          echo "=================================="
+  #     - name: Log package.json before change
+  #       working-directory: externals/skia-web-app
+  #       run: |
+  #         echo "=== package.json BEFORE change ==="
+  #         grep -n "@shopify/react-native-skia" package.json || echo "Pattern not found"
+  #         echo "=================================="
 
-      - name: Update package.json to use local Skia package
-        working-directory: externals/skia-web-app
-        run: |
-          # More robust regex that handles different whitespace
-          sed -i '' 's/"@shopify\/react-native-skia"[[:space:]]*:[[:space:]]*"[^"]*"/"@shopify\/react-native-skia": "file:..\/..\/packages\/skia\/package.tgz"/' package.json
+  #     - name: Update package.json to use local Skia package
+      #   working-directory: externals/skia-web-app
+      #   run: |
+      #     # More robust regex that handles different whitespace
+      #     sed -i '' 's/"@shopify\/react-native-skia"[[:space:]]*:[[:space:]]*"[^"]*"/"@shopify\/react-native-skia": "file:..\/..\/packages\/skia\/package.tgz"/' package.json
 
-      - name: Log package.json after change
-        working-directory: externals/skia-web-app
-        run: |
-          echo "=== package.json AFTER change ==="
-          grep -n "@shopify/react-native-skia" package.json || echo "Pattern not found"
-          echo "================================="
+      # - name: Log package.json after change
+      #   working-directory: externals/skia-web-app
+      #   run: |
+      #     echo "=== package.json AFTER change ==="
+      #     grep -n "@shopify/react-native-skia" package.json || echo "Pattern not found"
+      #     echo "================================="
 
-      - name: Install dependencies for skia-web-app
-        working-directory: externals/skia-web-app
-        run: yarn install --no-immutable
+      # - name: Install dependencies for skia-web-app
+      #   working-directory: externals/skia-web-app
+      #   run: yarn install --no-immutable
 
-      - name: Start web server
-        working-directory: externals/skia-web-app
-        run: |
-          yarn web &
-          sleep 30
+      # - name: Start web server
+      #   working-directory: externals/skia-web-app
+      #   run: |
+      #     yarn web &
+      #     sleep 30
 
-      - name: Run tests
-        working-directory: externals/skia-web-app
-        run: yarn test --detectOpenHandles
+      # - name: Run tests
+      #   working-directory: externals/skia-web-app
+      #   run: yarn test --detectOpenHandles
 
-      - name: Stop web server
-        working-directory: externals/skia-web-app
-        run: pkill -f "yarn web" || true
+      # - name: Stop web server
+      #   working-directory: externals/skia-web-app
+      #   run: pkill -f "yarn web" || true

@@ -253,7 +253,4 @@ export class JsiSkottieAnimation
   version() {
     return this.ref.version();
   }
-  dispose() {
-    this.ref.delete();
-  }
 }

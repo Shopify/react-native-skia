@@ -58,10 +58,6 @@ export class JsiSkCanvas
     super(CanvasKit, ref, "Canvas");
   }
 
-  dispose = () => {
-    this.ref.delete();
-  };
-
   drawRect(rect: SkRect, paint: SkPaint) {
     this.ref.drawRect(
       JsiSkRect.fromValue(this.CanvasKit, rect),
@@ -309,7 +305,9 @@ export class JsiSkCanvas
     );
   }
 
-  drawSvg(svg: SkSVG, _width?: number, _height?: number) {
+  drawSvg(svg: SkSVG, width?: number, height?: number) {
+    const ctm = this.ref.getLocalToDevice();
+    console.log({ ctm, width, height });
     const image = this.CanvasKit.MakeImageFromCanvasImageSource(
       (svg as JsiSkSVG).ref
     );

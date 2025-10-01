@@ -12,7 +12,7 @@ export type Matrix3 = readonly [
   number,
   number,
   number,
-  number
+  number,
 ];
 
 export type Matrix4 = readonly [
@@ -31,7 +31,7 @@ export type Matrix4 = readonly [
   number,
   number,
   number,
-  number
+  number,
 ];
 
 type Transform3dName =
@@ -55,8 +55,8 @@ type Transformations = {
   [Name in Transform3dName]: Name extends "matrix"
     ? Matrix4
     : Name extends "translate"
-    ? Vec3 | Vec2
-    : number;
+      ? Vec3 | Vec2
+      : number;
 };
 
 type Transform3d =

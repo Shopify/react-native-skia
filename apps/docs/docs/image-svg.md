@@ -22,6 +22,8 @@ If the root dimensions are in absolute units, the width/height properties have n
 The `ImageSVG` component doesn't follow the same painting rules as other components.
 [see applying effects](#applying-effects).
 
+On Web, the Current Transformation Matrix (CTM) won't be applied to `ImageSVG` because the component relies on browser SVG rendering instead of CanvasKit. The SVG is rendered as a hidden image element and then imported as image data. This means transformations need to be prepared beforehand or applied through the `Group` component with explicit transform matrices.
+
 :::
 
 ### Example
