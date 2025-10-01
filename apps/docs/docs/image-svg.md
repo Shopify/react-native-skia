@@ -82,7 +82,7 @@ export const SVG = () => {
 
 ## Scaling the SVG
 
-As mentionned above, if the root dimensions are in absolute units, the width/height properties have no effect since the initial viewport is fixed. However you can access these values and use the fitbox function.
+As mentioned above, if the root dimensions are in absolute units, the width/height properties have no effect since the initial viewport is fixed. However you can access these values and use the fitbox function.
 
 ### Example
 
