@@ -106,8 +106,8 @@ const dst = rect(0, 0, width, height);
 export const SVG = () => {
   return (
     <Canvas style={{ flex: 1 }}>
-    <Group transform={fitbox("contain", src, dst)}>
-      <ImageSVG svg={svg} x={0} y={0} width={20} height={20} />
+      <Group transform={fitbox("contain", src, dst)}>
+        <ImageSVG svg={svg} x={0} y={0} width={20} height={20} />
       </Group>
     </Canvas>
   );
@@ -192,12 +192,12 @@ export const SVG = () => {
 The [SVG module from Skia](https://github.com/google/skia/tree/main/modules/svg) displays SVGs as images.
 We expect most SVG files to render correctly out of the box, especially if they come from Figma or Illustrator.
 However, please be aware of some of the quirks below when using it.
-Text elements current won't render and any external XML elements such as XLink or CSS won't render.
+Text elements currently won't render and any external XML elements such as XLink or CSS won't render.
 If your SVG doesn't render correctly and you've considered all the items below, please file [an issue](https://github.com/Shopify/react-native-skia/issues/new).
 
 ### Text
 
-Currently text rendering is not supported
+Currently text rendering is not supported.
 
 ### CSS Styles
 
@@ -280,4 +280,4 @@ We would recommend avoiding using it.
 
 ### Fallbacks
 
-Some SVG with issues display nicely in the browser because they are very tolerant of errors. We found that the Skia SVG module is much less forgiving.
+Some SVGs with issues display nicely in the browser because they are very tolerant of errors. We found that the Skia SVG module is much less forgiving.
