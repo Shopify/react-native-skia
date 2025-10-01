@@ -14,6 +14,20 @@ export const OutFolder = path.join(SkiaSrc, DEBUG ? "debug" : "out");
 
 const NdkDir = process.env.ANDROID_NDK ?? "";
 
+// Get macOS SDK root for Catalyst builds
+const getAppleSdkRoot = () => {
+  try {
+    const result = spawnSync("xcrun", ["--sdk", "macosx", "--show-sdk-path"], {
+      encoding: "utf8",
+    });
+    return result.stdout.trim();
+  } catch (e) {
+    return "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk";
+  }
+};
+
+const appleSdkRoot = getAppleSdkRoot();
+
 const NoParagraphArgs = [
   ["skia_use_harfbuzz", false],
   ["skia_use_icu", false],
