@@ -26,7 +26,16 @@ public:
   JSI_HOST_FUNCTION(MakeFromData) {
     auto data = JsiSkData::fromValue(runtime, arguments[0]);
     auto stream = SkMemoryStream::Make(data);
-    auto svg_dom = SkSVGDOM::Builder().make(*stream);
+
+    auto fontMgr = count > 1 && arguments[1].isObject()
+                       ? JsiSkFontMgr::fromValue(runtime, arguments[1])
+                       : nullptr;
+
+    auto builder = SkSVGDOM::Builder();
+    if (fontMgr) {
+      builder.setFontManager(fontMgr);
+    }
+    auto svg_dom = builder.make(*stream);
     auto svg = std::make_shared<JsiSkSVG>(getContext(), std::move(svg_dom));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, svg,
                                                        getContext());
@@ -35,7 +44,16 @@ public:
   JSI_HOST_FUNCTION(MakeFromString) {
     auto svgText = arguments[0].asString(runtime).utf8(runtime);
     auto stream = SkMemoryStream::MakeDirect(svgText.c_str(), svgText.size());
-    auto svg_dom = SkSVGDOM::Builder().make(*stream);
+
+    auto fontMgr = count > 1 && arguments[1].isObject()
+                       ? JsiSkFontMgr::fromValue(runtime, arguments[1])
+                       : nullptr;
+
+    auto builder = SkSVGDOM::Builder();
+    if (fontMgr) {
+      builder.setFontManager(fontMgr);
+    }
+    auto svg_dom = builder.make(*stream);
     auto svg = std::make_shared<JsiSkSVG>(getContext(), std::move(svg_dom));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, svg,
                                                        getContext());
