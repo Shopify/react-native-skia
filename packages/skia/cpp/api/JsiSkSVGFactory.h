@@ -34,10 +34,6 @@ public:
         new SVGAssetProvider(std::move(assets), strategy));
   }
 
-  ~SVGAssetProvider() override {
-    printf("SVGAssetProvider destructor called\n");
-  }
-
   // Override loadImageAsset() to handle image loading
   sk_sp<skresources::ImageAsset>
   loadImageAsset(const char[] /*path*/, const char name[],
@@ -55,7 +51,6 @@ private:
   explicit SVGAssetProvider(AssetMap assets,
                             skresources::ImageDecodeStrategy strategy)
       : fAssets(std::move(assets)), fStrategy(strategy) {
-    printf("SVGAssetProvider constructor called\n");
   }
   const AssetMap fAssets;
   const skresources::ImageDecodeStrategy fStrategy;
@@ -126,7 +121,8 @@ public:
     auto baseProvider = SVGAssetProvider::Make(
         std::move(assets), skresources::ImageDecodeStrategy::kPreDecode);
     auto provider = skresources::DataURIResourceProviderProxy::Make(
-        baseProvider, skresources::ImageDecodeStrategy::kPreDecode, fontMgr);
+        std::move(baseProvider), skresources::ImageDecodeStrategy::kPreDecode, fontMgr);
+    provider->ref();
     builder.setResourceProvider(provider);
 
     auto svg_dom = builder.make(*stream);
@@ -158,7 +154,8 @@ public:
     auto baseProvider = SVGAssetProvider::Make(
         std::move(assets), skresources::ImageDecodeStrategy::kPreDecode);
     auto provider = skresources::DataURIResourceProviderProxy::Make(
-        baseProvider, skresources::ImageDecodeStrategy::kPreDecode, fontMgr);
+        std::move(baseProvider), skresources::ImageDecodeStrategy::kPreDecode, fontMgr);
+    provider->ref();
     builder.setResourceProvider(provider);
 
     auto svg_dom = builder.make(*stream);
