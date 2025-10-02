@@ -22,6 +22,8 @@ If the root dimensions are in absolute units, the width/height properties have n
 The `ImageSVG` component doesn't follow the same painting rules as other components.
 [see applying effects](#applying-effects).
 
+On Web, the Current Transformation Matrix (CTM) won't be applied to `ImageSVG` because the component relies on browser SVG rendering instead of CanvasKit. The SVG is rendered as a hidden image element and then imported as image data. This means transformations need to be prepared beforehand or applied through the `Group` component with explicit transform matrices.
+
 :::
 
 ### Example
@@ -134,7 +136,7 @@ However, the way you can set the `font-family` attribute is as flexible as on th
 
 ## Scaling the SVG
 
-As mentionned above, if the root dimensions are in absolute units, the width/height properties have no effect since the initial viewport is fixed. However you can access these values and use the fitbox function.
+As mentioned above, if the root dimensions are in absolute units, the width/height properties have no effect since the initial viewport is fixed. However you can access these values and use the fitbox function.
 
 ### Example
 
@@ -158,8 +160,8 @@ const dst = rect(0, 0, width, height);
 export const SVG = () => {
   return (
     <Canvas style={{ flex: 1 }}>
-    <Group transform={fitbox("contain", src, dst)}>
-      <ImageSVG svg={svg} x={0} y={0} width={20} height={20} />
+      <Group transform={fitbox("contain", src, dst)}>
+        <ImageSVG svg={svg} x={0} y={0} width={20} height={20} />
       </Group>
     </Canvas>
   );
@@ -244,7 +246,7 @@ export const SVG = () => {
 The [SVG module from Skia](https://github.com/google/skia/tree/main/modules/svg) displays SVGs as images.
 We expect most SVG files to render correctly out of the box, especially if they come from Figma or Illustrator.
 However, please be aware of some of the quirks below when using it.
-Text elements current won't render and any external XML elements such as XLink or CSS won't render.
+Text elements currently won't render and any external XML elements such as XLink or CSS won't render.
 If your SVG doesn't render correctly and you've considered all the items below, please file [an issue](https://github.com/Shopify/react-native-skia/issues/new).
 
 ### CSS Styles
@@ -309,4 +311,4 @@ We would recommend avoiding using it.
 
 ### Fallbacks
 
-Some SVG with issues display nicely in the browser because they are very tolerant of errors. We found that the Skia SVG module is much less forgiving.
+Some SVGs with issues display nicely in the browser because they are very tolerant of errors. We found that the Skia SVG module is much less forgiving.
