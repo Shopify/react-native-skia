@@ -78,6 +78,60 @@ export const SVG = () => {
 };
 ```
 
+### Text
+
+Both `Skia.SVG.MakeFromData` and `Skia.SVG.MakeFromString` accept an optional second parameter to provide custom font management for text rendering in SVGs.
+This works similarly to the [Paragraph API](/docs/text/paragraph) where you can use the `useFonts` hook to load custom fonts:
+
+```tsx twoslash
+import React from "react";
+import { Canvas, ImageSVG, Skia, useFonts } from "@shopify/react-native-skia";
+
+const SVGWithCustomFonts = () => {
+  const fontMgr = useFonts({
+    Roboto: [
+      require("path/to/Roboto-Regular.ttf"),
+      require("path/to/Roboto-Bold.ttf")
+    ]
+  });
+
+  if (!fontMgr) {
+    return null;
+  }
+
+  const svg = Skia.SVG.MakeFromString(
+    `<svg viewBox='0 0 290 500' xmlns='http://www.w3.org/2000/svg'>
+      <text x='10' y='50' font-family='Roboto' font-size='24'>Custom Font</text>
+    </svg>`,
+    fontMgr
+  )!;
+
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <ImageSVG
+        svg={svg}
+        x={0}
+        y={0}
+        width={290}
+        height={500}
+      />
+    </Canvas>
+  );
+};
+```
+
+When rendering your SVG with Skia, all fonts available in your app are also available to your SVG.
+However, the way you can set the `font-family` attribute is as flexible as on the web.
+```jsx
+// ✅ This is really all that is supported:
+<text font-family="MyFont" />
+// ❌ This won't work. If MyFont is available, this syntax will be accepted.
+// but it will never fallback to monospace
+<text font-family="MyFont, monospace" />
+// ❌ The single quote syntax won't work either.
+<text font-family="'MyFont'" />
+```
+
 ## Scaling the SVG
 
 As mentionned above, if the root dimensions are in absolute units, the width/height properties have no effect since the initial viewport is fixed. However you can access these values and use the fitbox function.
@@ -193,10 +247,6 @@ However, please be aware of some of the quirks below when using it.
 Text elements current won't render and any external XML elements such as XLink or CSS won't render.
 If your SVG doesn't render correctly and you've considered all the items below, please file [an issue](https://github.com/Shopify/react-native-skia/issues/new).
 
-### Text
-
-Currently text rendering is not supported
-
 ### CSS Styles
 
 CSS styles included in SVG are not supported.
@@ -236,34 +286,15 @@ The `opacity` attribute also applies to both the `fill` and `stroke` attributes.
 
 ### Non Supported Elements
 
-Below is the list of non-supported element. Often these SVGs can be rewritten to not use these elements.
-  * `<altGlyph>` (deprecated)
+Below is the list of non-supported element.
   * `<animate>`
-  * `<cursor>` (deprecated)
   * `<feComponentTransfer>`
   * `<feConvolveMatrix>`
   * `<feTile>`
   * `<feDropShadow>` 
-  * `<font>` (deprecated)
   * `<foreignObject>`
-  * `<glyph>` (deprecated)
   * `<script>`
   * `<view>`
-
-
-### Font Family
-
-When rendering your SVG with Skia, all fonts available in your app are also available to your SVG.
-However, the way you can set the `font-family` attribute is as flexible as on the web.
-```jsx
-// ✅ This is really all that is supported:
-<text font-family="MyFont" />
-// ❌ This won't work. If MyFont is available, this syntax will be accepted.
-// but it will never fallback to monospace
-<text font-family="MyFont, monospace" />
-// ❌ The single quote syntax won't work either.
-<text font-family="'MyFont'" />
-```
 
 ### Inlined SVGs
 
