@@ -120,6 +120,54 @@ const SVGWithCustomFonts = () => {
 };
 ```
 
+:::info
+
+On Web, both the `fontMgr` parameter (second parameter) and image resources (third parameter) are ignored as SVG rendering relies on the browser's native SVG renderer rather than Skia's SVG module.
+
+:::
+
+### Images
+
+Both `Skia.SVG.MakeFromData` and `Skia.SVG.MakeFromString` accept an optional third parameter to provide image resources for `<image>` elements in SVGs.
+This works similarly to [image loading in Skottie](/docs/skottie#with-assets).
+You can reference images either through base64 data URIs or by providing a resource map:
+
+```tsx twoslash
+import React from "react";
+import { Canvas, ImageSVG, Skia, useData } from "@shopify/react-native-skia";
+
+const SVGWithImages = () => {
+  // Load an image asset
+  const logo = useData(require("path/to/image.png"));
+
+  if (!logo) {
+    return null;
+  }
+
+  // Option 1: Using base64 data URI (embedded)
+  const svgWithEmbeddedImage = Skia.SVG.MakeFromString(
+    `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+      <image xlink:href="data:image/png;base64,iVBORw0KG..." height="200" width="200" />
+    </svg>`
+  );
+
+  // Option 2: Using external reference with resource map
+  const svgWithExternalImage = Skia.SVG.MakeFromString(
+    `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+      <image xlink:href="logo.png" height="200" width="200" />
+    </svg>`,
+    null,
+    { "logo.png": logo }
+  );
+
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <ImageSVG svg={svgWithExternalImage} x={0} y={0} width={200} height={200} />
+    </Canvas>
+  );
+};
+```
+
 When rendering your SVG with Skia, all fonts available in your app are also available to your SVG.
 However, the way you can set the `font-family` attribute is as flexible as on the web.
 ```jsx
