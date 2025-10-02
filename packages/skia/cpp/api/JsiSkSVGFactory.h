@@ -131,7 +131,7 @@ public:
 
     auto svg_dom = builder.make(*stream);
     auto svg =
-        std::make_shared<JsiSkSVG>(getContext(), std::move(svg_dom), provider);
+        std::make_shared<JsiSkSVG>(getContext(), std::move(svg_dom));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, svg,
                                                        getContext());
   }
@@ -163,7 +163,7 @@ public:
 
     auto svg_dom = builder.make(*stream);
     auto svg =
-        std::make_shared<JsiSkSVG>(getContext(), std::move(svg_dom), provider);
+        std::make_shared<JsiSkSVG>(getContext(), std::move(svg_dom));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, svg,
                                                        getContext());
   }

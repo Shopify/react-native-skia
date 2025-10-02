@@ -23,12 +23,8 @@ public:
   JsiSkSVG(std::shared_ptr<RNSkPlatformContext> context, sk_sp<SkSVGDOM> svgdom,
            sk_sp<skresources::ResourceProvider> resourceProvider = nullptr)
       : JsiSkWrappingSkPtrHostObject<SkSVGDOM>(std::move(context),
-                                               std::move(svgdom)),
-        _resourceProvider(std::move(resourceProvider)) {
-    if (_resourceProvider) {
-      // TODO: sk_sp is buggy with subclasses, we need to fix these
-      _resourceProvider->ref();
-    }
+                                               std::move(svgdom)) {
+
   }
 
   ~JsiSkSVG() = default;
@@ -78,9 +74,6 @@ public:
     return (rasterBufferSize / 4) +
            baseOverhead; // Quarter of full raster + overhead
   }
-
-private:
-  sk_sp<skresources::ResourceProvider> _resourceProvider = nullptr;
 };
 
 } // namespace RNSkia
