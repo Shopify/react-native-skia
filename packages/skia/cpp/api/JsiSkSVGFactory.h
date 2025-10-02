@@ -34,7 +34,9 @@ public:
         new SVGAssetProvider(std::move(assets), strategy));
   }
 
-  ~SVGAssetProvider() override = default;
+  ~SVGAssetProvider() override {
+    printf("SVGAssetProvider destructor called\n");
+  }
 
   // Override loadImageAsset() to handle image loading
   sk_sp<skresources::ImageAsset>
@@ -52,7 +54,9 @@ public:
 private:
   explicit SVGAssetProvider(AssetMap assets,
                             skresources::ImageDecodeStrategy strategy)
-      : fAssets(std::move(assets)), fStrategy(strategy) {}
+      : fAssets(std::move(assets)), fStrategy(strategy) {
+    printf("SVGAssetProvider constructor called\n");
+  }
   const AssetMap fAssets;
   const skresources::ImageDecodeStrategy fStrategy;
 };
@@ -119,16 +123,15 @@ public:
       builder.setFontManager(fontMgr);
     }
 
-    if (!assets.empty()) {
-      auto baseProvider = SVGAssetProvider::Make(
-          std::move(assets), skresources::ImageDecodeStrategy::kPreDecode);
-      auto resourceProvider = skresources::DataURIResourceProviderProxy::Make(
-          baseProvider, skresources::ImageDecodeStrategy::kPreDecode, fontMgr);
-      builder.setResourceProvider(resourceProvider);
-    }
+    auto baseProvider = SVGAssetProvider::Make(
+        std::move(assets), skresources::ImageDecodeStrategy::kPreDecode);
+    auto provider = skresources::DataURIResourceProviderProxy::Make(
+        baseProvider, skresources::ImageDecodeStrategy::kPreDecode, fontMgr);
+    builder.setResourceProvider(provider);
 
     auto svg_dom = builder.make(*stream);
-    auto svg = std::make_shared<JsiSkSVG>(getContext(), std::move(svg_dom));
+    auto svg =
+        std::make_shared<JsiSkSVG>(getContext(), std::move(svg_dom), provider);
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, svg,
                                                        getContext());
   }
@@ -152,15 +155,15 @@ public:
       builder.setFontManager(fontMgr);
     }
 
-    // Wrap with DataURIResourceProviderProxy to handle data: URIs
     auto baseProvider = SVGAssetProvider::Make(
         std::move(assets), skresources::ImageDecodeStrategy::kPreDecode);
-    auto resourceProvider = skresources::DataURIResourceProviderProxy::Make(
+    auto provider = skresources::DataURIResourceProviderProxy::Make(
         baseProvider, skresources::ImageDecodeStrategy::kPreDecode, fontMgr);
-    builder.setResourceProvider(resourceProvider);
+    builder.setResourceProvider(provider);
 
     auto svg_dom = builder.make(*stream);
-    auto svg = std::make_shared<JsiSkSVG>(getContext(), std::move(svg_dom));
+    auto svg =
+        std::make_shared<JsiSkSVG>(getContext(), std::move(svg_dom), provider);
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, svg,
                                                        getContext());
   }

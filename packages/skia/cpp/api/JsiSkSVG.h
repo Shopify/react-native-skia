@@ -20,9 +20,18 @@ namespace jsi = facebook::jsi;
 
 class JsiSkSVG : public JsiSkWrappingSkPtrHostObject<SkSVGDOM> {
 public:
-  JsiSkSVG(std::shared_ptr<RNSkPlatformContext> context, sk_sp<SkSVGDOM> svgdom)
+  JsiSkSVG(std::shared_ptr<RNSkPlatformContext> context, sk_sp<SkSVGDOM> svgdom,
+           sk_sp<skresources::ResourceProvider> resourceProvider = nullptr)
       : JsiSkWrappingSkPtrHostObject<SkSVGDOM>(std::move(context),
-                                               std::move(svgdom)) {}
+                                               std::move(svgdom)),
+        _resourceProvider(std::move(resourceProvider)) {
+    if (_resourceProvider) {
+      // TODO: sk_sp is buggy with subclasses, we need to fix these
+      _resourceProvider->ref();
+    }
+  }
+
+  ~JsiSkSVG() = default;
 
   EXPORT_JSI_API_TYPENAME(JsiSkSVG, SVG)
 
@@ -69,6 +78,9 @@ public:
     return (rasterBufferSize / 4) +
            baseOverhead; // Quarter of full raster + overhead
   }
+
+private:
+  sk_sp<skresources::ResourceProvider> _resourceProvider = nullptr;
 };
 
 } // namespace RNSkia
