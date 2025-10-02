@@ -122,6 +122,8 @@ public:
         std::move(assets), skresources::ImageDecodeStrategy::kPreDecode);
     auto provider = skresources::DataURIResourceProviderProxy::Make(
         std::move(baseProvider), skresources::ImageDecodeStrategy::kPreDecode, fontMgr);
+      
+    // TODO: this sk_sp subclassing issue needs to be fixed.
     provider->ref();
     builder.setResourceProvider(provider);
 
@@ -155,6 +157,7 @@ public:
         std::move(assets), skresources::ImageDecodeStrategy::kPreDecode);
     auto provider = skresources::DataURIResourceProviderProxy::Make(
         std::move(baseProvider), skresources::ImageDecodeStrategy::kPreDecode, fontMgr);
+    // TODO: this sk_sp subclassing issue needs to be fixed.
     provider->ref();
     builder.setResourceProvider(provider);
 
