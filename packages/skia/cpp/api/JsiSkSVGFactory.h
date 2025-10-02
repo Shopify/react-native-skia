@@ -99,6 +99,34 @@ public:
     return assets;
   }
 
+private:
+  jsi::Value makeSVGFromStream(jsi::Runtime &runtime,
+                                 std::unique_ptr<SkMemoryStream> stream,
+                                 sk_sp<SkFontMgr> fontMgr,
+                                 SVGAssetProvider::AssetMap assets) {
+    auto builder = SkSVGDOM::Builder();
+
+    if (fontMgr) {
+      builder.setFontManager(fontMgr);
+    }
+
+    auto baseProvider = SVGAssetProvider::Make(
+        std::move(assets), skresources::ImageDecodeStrategy::kPreDecode);
+    auto provider = skresources::DataURIResourceProviderProxy::Make(
+        std::move(baseProvider), skresources::ImageDecodeStrategy::kPreDecode, fontMgr);
+
+    // TODO: this sk_sp subclassing issue needs to be fixed.
+    provider->ref();
+    builder.setResourceProvider(provider);
+
+    auto svg_dom = builder.make(*stream);
+    auto svg =
+        std::make_shared<JsiSkSVG>(getContext(), std::move(svg_dom));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, svg,
+                                                       getContext());
+  }
+
+public:
   JSI_HOST_FUNCTION(MakeFromData) {
     auto data = JsiSkData::fromValue(runtime, arguments[0]);
     auto stream = SkMemoryStream::Make(data);
@@ -112,26 +140,7 @@ public:
     auto assets = count > 2 ? parseAssetMap(runtime, arguments[2])
                             : SVGAssetProvider::AssetMap();
 
-    auto builder = SkSVGDOM::Builder();
-
-    if (fontMgr) {
-      builder.setFontManager(fontMgr);
-    }
-
-    auto baseProvider = SVGAssetProvider::Make(
-        std::move(assets), skresources::ImageDecodeStrategy::kPreDecode);
-    auto provider = skresources::DataURIResourceProviderProxy::Make(
-        std::move(baseProvider), skresources::ImageDecodeStrategy::kPreDecode, fontMgr);
-      
-    // TODO: this sk_sp subclassing issue needs to be fixed.
-    provider->ref();
-    builder.setResourceProvider(provider);
-
-    auto svg_dom = builder.make(*stream);
-    auto svg =
-        std::make_shared<JsiSkSVG>(getContext(), std::move(svg_dom));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, svg,
-                                                       getContext());
+    return makeSVGFromStream(runtime, std::move(stream), fontMgr, std::move(assets));
   }
 
   JSI_HOST_FUNCTION(MakeFromString) {
@@ -147,25 +156,7 @@ public:
     auto assets = count > 2 ? parseAssetMap(runtime, arguments[2])
                             : SVGAssetProvider::AssetMap();
 
-    auto builder = SkSVGDOM::Builder();
-
-    if (fontMgr) {
-      builder.setFontManager(fontMgr);
-    }
-
-    auto baseProvider = SVGAssetProvider::Make(
-        std::move(assets), skresources::ImageDecodeStrategy::kPreDecode);
-    auto provider = skresources::DataURIResourceProviderProxy::Make(
-        std::move(baseProvider), skresources::ImageDecodeStrategy::kPreDecode, fontMgr);
-    // TODO: this sk_sp subclassing issue needs to be fixed.
-    provider->ref();
-    builder.setResourceProvider(provider);
-
-    auto svg_dom = builder.make(*stream);
-    auto svg =
-        std::make_shared<JsiSkSVG>(getContext(), std::move(svg_dom));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, svg,
-                                                       getContext());
+    return makeSVGFromStream(runtime, std::move(stream), fontMgr, std::move(assets));
   }
 
   size_t getMemoryPressure() const override { return 512; }
