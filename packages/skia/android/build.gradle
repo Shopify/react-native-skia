@@ -156,7 +156,8 @@ android {
                 arguments '-DANDROID_STL=c++_shared',
                           "-DREACT_NATIVE_VERSION=${REACT_NATIVE_VERSION}",
                           "-DNODE_MODULES_DIR=${nodeModules}",
-                          "-DPREBUILT_DIR=${prebuiltDir}"
+                          "-DPREBUILT_DIR=${prebuiltDir}",
+                          "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
 
             }
         }
