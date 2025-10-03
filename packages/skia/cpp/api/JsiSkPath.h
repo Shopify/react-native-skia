@@ -173,15 +173,17 @@ public:
 
   JSI_HOST_FUNCTION(computeTightBounds) {
     auto result = getObject()->computeTightBounds();
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkRect>(getContext(), std::move(result)));
+    auto hostObjectInstance = std::make_shared<JsiSkRect>(getContext(), result);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   // TODO-API: Should this be a property?
   JSI_HOST_FUNCTION(getBounds) {
     auto result = getObject()->getBounds();
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkRect>(getContext(), std::move(result)));
+    auto hostObjectInstance = std::make_shared<JsiSkRect>(getContext(), result);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(conicTo) {
@@ -330,8 +332,9 @@ public:
   JSI_HOST_FUNCTION(getPoint) {
     auto index = arguments[0].asNumber();
     auto point = getObject()->getPoint(index);
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPoint>(getContext(), point));
+    auto hostObjectInstance = std::make_shared<JsiSkPoint>(getContext(), point);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(toSVGString) {
@@ -473,8 +476,10 @@ public:
 
   JSI_HOST_FUNCTION(copy) {
     const auto *path = getObject().get();
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPath>(getContext(), SkPath(*path)));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkPath>(getContext(), SkPath(*path));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(op) {
@@ -509,8 +514,10 @@ public:
     if (!succeed) {
       return nullptr;
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPath>(getContext(), std::move(result)));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkPath>(getContext(), std::move(result));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
   JSI_HOST_FUNCTION(toCmds) {
     auto path = *getObject();
@@ -633,19 +640,30 @@ public:
       : JsiSkWrappingSharedPtrHostObject<SkPath>(
             std::move(context), std::make_shared<SkPath>(std::move(path))) {}
 
+  size_t getMemoryPressure() const override {
+    auto path = getObject();
+    if (!path)
+      return 0;
+
+    // SkPath provides approximateBytesUsed() to estimate memory usage
+    return path->approximateBytesUsed();
+  }
+
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             const SkPath &path) {
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPath>(std::move(context), path));
+    auto hostObjectInstance = std::make_shared<JsiSkPath>(context, path);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, context);
   }
 
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             SkPath &&path) {
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkPath>(std::move(context), std::move(path)));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkPath>(context, std::move(path));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, context);
   }
 };
 

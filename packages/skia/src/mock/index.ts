@@ -1,6 +1,7 @@
 import type { CanvasKit } from "canvaskit-wasm";
 
 import { JsiSkApi } from "../skia/web";
+import { JsiSkImage } from "../skia/web/JsiSkImage";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Noop: () => any = () => undefined;
@@ -22,6 +23,21 @@ export const Mock = (CanvasKit: CanvasKit) => {
     ...require("../dom/types"),
     ...require("../dom/nodes"),
     Canvas: require("react-native").View,
+    SkiaPictureView: require("react-native").View,
+    JsiSkImage: JsiSkImage,
+    drawAsPicture: Noop,
+    drawAsImage: Noop,
+    drawAsImageFromPicture: Noop,
+    useCanvasRef: NoopValue,
+    useCanvasSize: () => ({
+      ref: {
+        current: 0,
+      },
+      size: {
+        width: 0,
+        height: 0,
+      },
+    }),
     // Skia Animations
     useValue: NoopValue,
     useComputedValue: NoopValue,
@@ -31,6 +47,8 @@ export const Mock = (CanvasKit: CanvasKit) => {
     useClockValue: NoopValue,
     useValueEffect: Noop,
     // Reanimated hooks
+    isOnMainThread: () => true,
+    isFabric: true,
     useClock: NoopSharedValue,
     usePathInterpolation: NoopSharedValue,
     useImageAsTexture: NoopSharedValue,

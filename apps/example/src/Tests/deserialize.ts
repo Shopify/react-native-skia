@@ -73,7 +73,6 @@ const parseProp = (value: any, assets: Assets): any => {
     } else if (value.__typename__ === "SVG") {
       return Skia.SVG.MakeFromString(value.source);
     } else if (value.__typename__ === "SkiaObject") {
-      // eslint-disable-next-line no-eval
       return eval(
         `(function Main(){return (${value.source})(this.Skia, this.ctx); })`
       ).call({
@@ -98,7 +97,6 @@ const parseProp = (value: any, assets: Assets): any => {
       }
       return Skia.Skottie.Make(value.source, assets);
     } else if (value.__typename__ === "Function") {
-      // eslint-disable-next-line no-eval
       return eval(
         `(function Main(){ const {Skia, TileMode} = this; return (${value.source}); })`
       ).call({

@@ -8,3 +8,4 @@
 [submodule "externals/skia-web-app"]
 	path = externals/skia-web-app
 	url = https://github.com/wcandillon/skia-web-app.git
+	branch = master

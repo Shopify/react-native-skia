@@ -64,8 +64,4 @@ export class JsiSkParagraph
   getLineMetrics(): LineMetrics[] {
     return this.ref.getLineMetrics();
   }
-
-  dispose() {
-    this.ref.delete();
-  }
 }

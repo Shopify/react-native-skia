@@ -31,8 +31,10 @@ public:
   // TODO-API: Properties?
   JSI_HOST_FUNCTION(getCurrentFrame) {
     auto image = getObject()->getCurrentFrame();
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkImage>(getContext(), std::move(image));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(getFrameCount) {
@@ -60,6 +62,8 @@ public:
                      const sk_sp<SkAnimatedImage> image)
       : JsiSkWrappingSkPtrHostObject<SkAnimatedImage>(std::move(context),
                                                       std::move(image)) {}
+
+  size_t getMemoryPressure() const override { return 8192; }
 };
 
 } // namespace RNSkia

@@ -8,7 +8,7 @@ export type NativeBuffer<
     | ArrayBuffer
     | CanvasImageSource
     | CanvasKitWebGLBuffer
-    | unknown = unknown
+    | unknown = unknown,
 > = T;
 
 export type NativeBufferAddr = NativeBuffer<bigint>;

@@ -37,9 +37,10 @@ public:
     if (surface == nullptr) {
       return jsi::Value::null();
     }
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkSurface>(getContext(), std::move(surface)));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkSurface>(getContext(), std::move(surface));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(present) {
@@ -53,6 +54,8 @@ public:
   JsiSkiaContext(std::shared_ptr<RNSkPlatformContext> context,
                  std::shared_ptr<WindowContext> ctx)
       : JsiSkWrappingSharedPtrHostObject(std::move(context), std::move(ctx)) {}
+
+  size_t getMemoryPressure() const override { return 8192; }
 
   /**
    * Creates the function for construction a new instance of the SkFont
@@ -75,9 +78,10 @@ public:
       auto result =
           context->makeContextFromNativeSurface(surface, width, height);
       // Return the newly constructed object
-      return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkiaContext>(std::move(context),
-                                                    std::move(result)));
+      auto hostObjectInstance =
+          std::make_shared<JsiSkiaContext>(context, std::move(result));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+          runtime, hostObjectInstance, context);
     };
   }
 };

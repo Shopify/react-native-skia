@@ -106,6 +106,22 @@ export const examples = [
     screen: "OnLayout",
     title: "🎛️ OnLayout",
   },
+  {
+    screen: "OnSize",
+    title: "📏 OnSize",
+  },
+  {
+    screen: "StressTest",
+    title: "🔥 Stress Test",
+  },
+  {
+    screen: "StressTest2",
+    title: "🔥 Stress Test 2",
+  },
+  {
+    screen: "StressTest3",
+    title: "🔥 Stress Test 3",
+  },
 ] as const;
 
 const styles = StyleSheet.create({
@@ -132,7 +148,9 @@ export const List = () => {
         <Pressable
           key={thumbnail.screen}
           onPress={() => {
-            navigate(thumbnail.screen);
+            // here the examples tuple is too big
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            navigate(thumbnail.screen as any);
           }}
           testID={thumbnail.screen}
         >

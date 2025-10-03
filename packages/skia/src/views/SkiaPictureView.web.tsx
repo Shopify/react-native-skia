@@ -14,6 +14,7 @@ import { Platform } from "../Platform";
 import type { ISkiaViewApiWeb } from "../specs/NativeSkiaModule.web";
 
 import type { SkiaPictureViewNativeProps } from "./types";
+import { SkiaViewNativeId } from "./SkiaViewNativeId";
 
 interface Renderer {
   onResize(): void;
@@ -22,10 +23,13 @@ interface Renderer {
   dispose(): void;
 }
 
-class WebGPURender implements Renderer {
+class WebGLRenderer implements Renderer {
   private surface: JsiSkSurface | null = null;
 
-  constructor(private canvas: HTMLCanvasElement, private pd: number) {
+  constructor(
+    private canvas: HTMLCanvasElement,
+    private pd: number
+  ) {
     this.onResize();
   }
 
@@ -79,6 +83,128 @@ class WebGPURender implements Renderer {
   }
 }
 
+class StaticWebGLRenderer implements Renderer {
+  private cachedImage: SkImage | null = null;
+
+  constructor(
+    private canvas: HTMLCanvasElement,
+    private pd: number
+  ) {}
+
+  onResize(): void {
+    this.cachedImage = null;
+  }
+
+  private renderPictureToSurface(
+    picture: SkPicture
+  ): { surface: JsiSkSurface; tempCanvas: OffscreenCanvas } | null {
+    const tempCanvas = new OffscreenCanvas(
+      this.canvas.clientWidth * this.pd,
+      this.canvas.clientHeight * this.pd
+    );
+
+    let surface: JsiSkSurface | null = null;
+
+    try {
+      const webglSurface = CanvasKit.MakeWebGLCanvasSurface(tempCanvas);
+      const ctx = tempCanvas.getContext("webgl2");
+      if (ctx) {
+        ctx.drawingBufferColorSpace = "display-p3";
+      }
+
+      if (!webglSurface) {
+        throw new Error("Could not create WebGL surface");
+      }
+
+      surface = new JsiSkSurface(CanvasKit, webglSurface);
+
+      const skiaCanvas = surface.getCanvas();
+      skiaCanvas.clear(Float32Array.of(0, 0, 0, 0));
+      skiaCanvas.save();
+      skiaCanvas.scale(this.pd, this.pd);
+      skiaCanvas.drawPicture(picture);
+      skiaCanvas.restore();
+      surface.ref.flush();
+
+      return { surface, tempCanvas };
+    } catch (error) {
+      if (surface) {
+        surface.ref.delete();
+      }
+      this.cleanupWebGLContext(tempCanvas);
+      return null;
+    }
+  }
+
+  private cleanupWebGLContext(tempCanvas: OffscreenCanvas): void {
+    const ctx = tempCanvas.getContext("webgl2");
+    if (ctx) {
+      const loseContext = ctx.getExtension("WEBGL_lose_context");
+      if (loseContext) {
+        loseContext.loseContext();
+      }
+    }
+  }
+
+  draw(picture: SkPicture): void {
+    const renderResult = this.renderPictureToSurface(picture);
+    if (!renderResult) {
+      return;
+    }
+    const { tempCanvas } = renderResult;
+    const ctx2d = this.canvas.getContext("2d");
+    if (!ctx2d) {
+      throw new Error("Could not get 2D context");
+    }
+
+    // Set canvas dimensions to match pixel density
+    this.canvas.width = this.canvas.clientWidth * this.pd;
+    this.canvas.height = this.canvas.clientHeight * this.pd;
+
+    // Draw the tempCanvas scaled down to the display size
+    ctx2d.drawImage(
+      tempCanvas,
+      0,
+      0,
+      tempCanvas.width,
+      tempCanvas.height,
+      0,
+      0,
+      this.canvas.clientWidth * this.pd,
+      this.canvas.clientHeight * this.pd
+    );
+
+    this.cleanupWebGLContext(tempCanvas);
+  }
+
+  makeImageSnapshot(picture: SkPicture, rect?: SkRect): SkImage | null {
+    if (!this.cachedImage) {
+      const renderResult = this.renderPictureToSurface(picture);
+      if (!renderResult) {
+        return null;
+      }
+
+      const { surface, tempCanvas } = renderResult;
+
+      try {
+        this.cachedImage = surface.makeImageSnapshot(rect);
+      } catch (error) {
+        console.error("Error creating image snapshot:", error);
+      } finally {
+        surface.ref.delete();
+        this.cleanupWebGLContext(tempCanvas);
+      }
+    }
+
+    return this.cachedImage;
+  }
+
+  dispose(): void {
+    this.cachedImage?.dispose();
+    this.cachedImage = null;
+  }
+}
+
 const pd = Platform.PixelRatio;
 
 export interface SkiaPictureViewHandle {
@@ -98,10 +224,7 @@ export const SkiaPictureView = forwardRef<
   const requestIdRef = useRef(0);
   const pictureRef = useRef<SkPicture | null>(null);
 
-  const { nativeID, picture, onLayout } = props;
-  if (!nativeID) {
-    throw new Error("SkiaPictureView requires a nativeID prop");
-  }
+  const { picture, onLayout } = props;
 
   const redraw = useCallback(() => {
     redrawRequestsRef.current++;
@@ -143,7 +266,10 @@ export const SkiaPictureView = forwardRef<
     (evt: LayoutChangeEvent) => {
       const canvas = canvasRef.current;
       if (canvas) {
-        renderer.current = new WebGPURender(canvas, pd);
+        renderer.current =
+          props.__destroyWebGLContextAfterRender === true
+            ? new StaticWebGLRenderer(canvas, pd)
+            : new WebGLRenderer(canvas, pd);
         if (pictureRef.current) {
           renderer.current.draw(pictureRef.current);
         }
@@ -152,7 +278,7 @@ export const SkiaPictureView = forwardRef<
         onLayout(evt);
       }
     },
-    [onLayout]
+    [onLayout, props.__destroyWebGLContextAfterRender]
   );
 
   useImperativeHandle(
@@ -167,13 +293,20 @@ export const SkiaPictureView = forwardRef<
   );
 
   useEffect(() => {
+    const nativeID = props.nativeID ?? `${SkiaViewNativeId.current++}`;
     (global.SkiaViewApi as ISkiaViewApiWeb).registerView(nativeID, {
       setPicture,
       getSize,
       redraw,
       makeImageSnapshot,
     } as SkiaPictureViewHandle);
-  }, [nativeID, setPicture, getSize, redraw, makeImageSnapshot]);
+  }, [setPicture, getSize, redraw, makeImageSnapshot, props.nativeID]);
+
+  useEffect(() => {
+    if (props.picture) {
+      setPicture(props.picture);
+    }
+  }, [setPicture, props.picture]);
 
   useEffect(() => {
     tick();

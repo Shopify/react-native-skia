@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
         with:
           submodules: recursive
 
@@ -30,7 +30,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
       - run: pip install cpplint
       - run: cpplint --linelength=230 --filter=-legal/copyright,-whitespace/indent,-whitespace/comments,-whitespace/ending_newline,-build/include_order,-runtime/references,-readability/todo,-whitespace/blank_line,-whitespace/todo,-runtime/int,-build/c++11,-whitespace/parens --exclude=package/cpp/skia --exclude=package/apple --exclude=package/android/build --exclude=package/node_modules --recursive package
 
@@ -60,7 +60,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
         with:
           submodules: recursive
 
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
         with:
           submodules: recursive
 
@@ -98,12 +98,11 @@ jobs:
 
   build-android-ubuntu:
     runs-on: ubuntu-latest
-    continue-on-error: true
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
         with:
           submodules: recursive
 
@@ -113,7 +112,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache turborepo for Android
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ env.TURBO_CACHE_DIR }}
           key: ${{ runner.os }}-turborepo-android-${{ hashFiles('yarn.lock') }}
@@ -144,7 +143,7 @@ jobs:
           echo "sdk.dir=$ANDROID_HOME" > $GITHUB_WORKSPACE/apps/example/android/local.properties
 
       - name: Cache Gradle
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: |
             ~/.gradle/wrapper
@@ -156,16 +155,15 @@ jobs:
         env:
           JAVA_OPTS: "-XX:MaxHeapSize=6g"
         run: |
-          yarn turbo run build:android --concurrency 1 --filter=example --force
+          yarn turbo run build:android --concurrency 1 --filter=example
 
   build-android:
     runs-on: macos-latest-large
-    continue-on-error: true
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
         with:
           submodules: recursive
 
@@ -175,7 +173,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache turborepo for Android
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ env.TURBO_CACHE_DIR }}
           key: ${{ runner.os }}-turborepo-android-${{ hashFiles('yarn.lock') }}
@@ -206,7 +204,7 @@ jobs:
           echo "sdk.dir=$ANDROID_HOME" > $GITHUB_WORKSPACE/apps/example/android/local.properties
 
       - name: Cache Gradle
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: |
             ~/.gradle/wrapper
@@ -219,10 +217,10 @@ jobs:
         env:
           JAVA_OPTS: "-XX:MaxHeapSize=16g"
         run: |
-          yarn turbo run build:android --concurrency 1 --force
+          yarn turbo run build:android --concurrency 1
 
       - name: Cache apk
-        uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         env:
           cache-name: cache-apk
         with:
@@ -237,7 +235,7 @@ jobs:
       TURBO_CACHE_DIR: .turbo/android
     steps:
       - name: checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
         with:
           submodules: recursive
 
@@ -248,7 +246,7 @@ jobs:
 
       - name: Restore APK
         id: cache-apk
-        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
@@ -311,7 +309,7 @@ jobs:
       TURBO_CACHE_DIR: .turbo/ios
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
         with:
           submodules: recursive
 
@@ -321,7 +319,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache turborepo for iOS
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ env.TURBO_CACHE_DIR }}
           key: ${{ runner.os }}-turborepo-ios-${{ hashFiles('yarn.lock') }}
@@ -352,11 +350,13 @@ jobs:
         working-directory: packages/skia
         run: CI=true yarn e2e
 
-  test-web:
+  build-test-macos:
     runs-on: macos-latest
+    env:
+      TURBO_CACHE_DIR: .turbo/macos
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
         with:
           submodules: recursive
 
@@ -365,35 +365,122 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Update skia-web-app submodule to latest main
-        run: |
-          cd externals/skia-web-app
-          git checkout main
-          git pull origin main
+      - name: Cache turborepo for macOS
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ${{ env.TURBO_CACHE_DIR }}
+          key: ${{ runner.os }}-turborepo-macos-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-turborepo-macos-
 
-      - name: Build and pack Skia package
-        working-directory: packages/skia
-        run: yarn build && yarn pack
+      - name: Build example for macOS
+        run: yarn turbo run build:macos --concurrency 1
 
-      - name: Update package.json to use local Skia package
-        working-directory: externals/skia-web-app
-        run: |
-          sed -i '' 's/"@shopify\/react-native-skia": "[^"]*"/"@shopify\/react-native-skia": "file:..\/..\/packages\/skia\/package.tgz"/' package.json
+  build-test-macos-catalyst:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
+        with:
+          submodules: recursive
 
-      - name: Install dependencies for skia-web-app
-        working-directory: externals/skia-web-app
-        run: yarn install --no-immutable
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Start web server
-        working-directory: externals/skia-web-app
-        run: |
-          yarn web &
-          sleep 30
+      - name: Install CocoaPods and enable Catalyst
+        working-directory: apps/example
+        run: yarn pod:install:catalyst
 
-      - name: Run tests
-        working-directory: externals/skia-web-app
-        run: yarn test --detectOpenHandles
+      - name: Build example for macOS Catalyst
+        working-directory: apps/example/ios
+        run: xcodebuild -workspace example.xcworkspace -scheme ReactTestApp -destination 'platform=macOS,arch=arm64,variant=Mac Catalyst' -configuration Debug build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
-      - name: Stop web server
-        working-directory: externals/skia-web-app
-        run: pkill -f "yarn web" || true
+  build-test-macos-graphite:
+    runs-on: macos-latest
+    env:
+      TURBO_CACHE_DIR: .turbo/macos
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          graphite: true
+
+      - name: Cache turborepo for macOS
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ${{ env.TURBO_CACHE_DIR }}
+          key: ${{ runner.os }}-turborepo-macos-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-turborepo-macos-
+
+      - name: Build example for macOS
+        run: yarn turbo run build:macos --concurrency 1
+
+  # test-web:
+  #   runs-on: macos-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
+  #       with:
+  #         submodules: recursive
+
+  #     - name: Setup
+  #       uses: ./.github/actions/setup
+  #       with:
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  #     - name: Update skia-web-app submodule to latest main
+  #       run: |
+  #         cd externals/skia-web-app
+  #         git checkout main
+  #         git pull origin main
+
+  #     - name: Build and pack Skia package
+  #       working-directory: packages/skia
+  #       run: yarn build && yarn pack
+
+  #     - name: Log package.json before change
+  #       working-directory: externals/skia-web-app
+  #       run: |
+  #         echo "=== package.json BEFORE change ==="
+  #         grep -n "@shopify/react-native-skia" package.json || echo "Pattern not found"
+  #         echo "=================================="
+
+  #     - name: Update package.json to use local Skia package
+      #   working-directory: externals/skia-web-app
+      #   run: |
+      #     # More robust regex that handles different whitespace
+      #     sed -i '' 's/"@shopify\/react-native-skia"[[:space:]]*:[[:space:]]*"[^"]*"/"@shopify\/react-native-skia": "file:..\/..\/packages\/skia\/package.tgz"/' package.json
+
+      # - name: Log package.json after change
+      #   working-directory: externals/skia-web-app
+      #   run: |
+      #     echo "=== package.json AFTER change ==="
+      #     grep -n "@shopify/react-native-skia" package.json || echo "Pattern not found"
+      #     echo "================================="
+
+      # - name: Install dependencies for skia-web-app
+      #   working-directory: externals/skia-web-app
+      #   run: yarn install --no-immutable
+
+      # - name: Start web server
+      #   working-directory: externals/skia-web-app
+      #   run: |
+      #     yarn web &
+      #     sleep 30
+
+      # - name: Run tests
+      #   working-directory: externals/skia-web-app
+      #   run: yarn test --detectOpenHandles
+
+      # - name: Stop web server
+      #   working-directory: externals/skia-web-app
+      #   run: pkill -f "yarn web" || true

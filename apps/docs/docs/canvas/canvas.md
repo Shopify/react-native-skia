@@ -9,7 +9,7 @@ The Canvas component is the root of your Skia drawing.
 You can treat it as a regular React Native view and assign a view style.
 Behind the scenes, it is using its own React renderer.
 
-| Name | Type     |  Description.    |
+| Name | Type     |  Description    |
 |:-----|:---------|:-----------------|
 | style?   | `ViewStyle` | View style |
 | ref?   | `Ref<SkiaView>` | Reference to the `SkiaView` object |
@@ -123,5 +123,5 @@ export const Demo = () => {
 ## Accessibility
 
 The Canvas component supports the same properties as a View component including its [accessibility properties](https://reactnative.dev/docs/accessibility#accessible).
-You can make elements inside the canvas accessible as well by overlayings views on top of your canvas.
+You can make elements inside the canvas accessible as well by overlaying views on top of your canvas.
 This is the same recipe used for [applying gestures on specific canvas elements](https://shopify.github.io/react-native-skia/docs/animations/gestures/#element-tracking).

@@ -30,28 +30,31 @@ public:
       }
     }
     // Return the newly constructed object
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkColorFilter>(
-                     getContext(), SkColorFilters::Matrix(std::move(matrix))));
+    auto colorFilter = std::make_shared<JsiSkColorFilter>(
+        getContext(), SkColorFilters::Matrix(std::move(matrix)));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, colorFilter,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakeBlend) {
     auto color = JsiSkColor::fromValue(runtime, arguments[0]);
     SkBlendMode blend = (SkBlendMode)arguments[1].asNumber();
     // Return the newly constructed object
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkColorFilter>(
-                     getContext(), SkColorFilters::Blend(color, blend)));
+    auto colorFilter = std::make_shared<JsiSkColorFilter>(
+        getContext(), SkColorFilters::Blend(color, blend));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, colorFilter,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakeCompose) {
     auto outer = JsiSkColorFilter::fromValue(runtime, arguments[0]);
     auto inner = JsiSkColorFilter::fromValue(runtime, arguments[1]);
     // Return the newly constructed object
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkColorFilter>(
-                     getContext(), SkColorFilters::Compose(std::move(outer),
-                                                           std::move(inner))));
+    auto colorFilter = std::make_shared<JsiSkColorFilter>(
+        getContext(),
+        SkColorFilters::Compose(std::move(outer), std::move(inner)));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, colorFilter,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakeLerp) {
@@ -59,32 +62,37 @@ public:
     auto dst = JsiSkColorFilter::fromValue(runtime, arguments[1]);
     auto src = JsiSkColorFilter::fromValue(runtime, arguments[2]);
     // Return the newly constructed object
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkColorFilter>(
-                     getContext(),
-                     SkColorFilters::Lerp(t, std::move(dst), std::move(src))));
+    auto colorFilter = std::make_shared<JsiSkColorFilter>(
+        getContext(), SkColorFilters::Lerp(t, std::move(dst), std::move(src)));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, colorFilter,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakeSRGBToLinearGamma) {
     // Return the newly constructed object
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkColorFilter>(
-                     getContext(), SkColorFilters::SRGBToLinearGamma()));
+    auto colorFilter = std::make_shared<JsiSkColorFilter>(
+        getContext(), SkColorFilters::SRGBToLinearGamma());
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, colorFilter,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakeLinearToSRGBGamma) {
     // Return the newly constructed object
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkColorFilter>(
-                     getContext(), SkColorFilters::LinearToSRGBGamma()));
+    auto colorFilter = std::make_shared<JsiSkColorFilter>(
+        getContext(), SkColorFilters::LinearToSRGBGamma());
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, colorFilter,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(MakeLumaColorFilter) {
     // Return the newly constructed object
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkColorFilter>(getContext(),
-                                                    SkLumaColorFilter::Make()));
+    auto colorFilter = std::make_shared<JsiSkColorFilter>(
+        getContext(), SkLumaColorFilter::Make());
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, colorFilter,
+                                                       getContext());
   }
+
+  size_t getMemoryPressure() const override { return 1024; }
 
   JSI_EXPORT_FUNCTIONS(
       JSI_EXPORT_FUNC(JsiSkColorFilterFactory, MakeMatrix),

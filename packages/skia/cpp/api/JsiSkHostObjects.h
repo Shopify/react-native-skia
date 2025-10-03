@@ -23,6 +23,12 @@ public:
   explicit JsiSkHostObject(std::shared_ptr<RNSkPlatformContext> context)
       : _context(context) {}
 
+  /**
+   * Override this method to return the memory pressure for the wrapped object.
+   * @return The memory pressure in bytes
+   */
+  virtual size_t getMemoryPressure() const = 0;
+
 protected:
   /**
    * @return A pointer to the platform context
@@ -42,6 +48,18 @@ private:
   JSI_API_TYPENAME(TYPENAME)                                                   \
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(CLASS, __typename__))
 
+#define JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(                           \
+    runtime, hostObjectInstance, context)                                      \
+  [&]() {                                                                      \
+    auto result =                                                              \
+        jsi::Object::createFromHostObject(runtime, hostObjectInstance);        \
+    auto memoryPressure = hostObjectInstance->getMemoryPressure();             \
+    if (memoryPressure > 0) {                                                  \
+      result.setExternalMemoryPressure(runtime, memoryPressure);               \
+    }                                                                          \
+    return result;                                                             \
+  }()
+
 template <typename T> class JsiSkWrappingHostObject : public JsiSkHostObject {
 public:
   /**
@@ -58,8 +76,8 @@ public:
    * Throws if the object has been disposed.
    * @return Underlying object
    */
-  T getObject() { return validateObject(); }
-  const T getObject() const { return validateObject(); }
+  T getObject() { return _object; }
+  const T getObject() const { return _object; }
 
   /**
    * Updates the inner object with a new version of the object.
@@ -71,44 +89,15 @@ public:
    * macro.
    */
   JSI_HOST_FUNCTION(dispose) {
-    safeDispose();
+    // This is a no-op on native
     return jsi::Value::undefined();
   }
 
-protected:
-  /**
-   * Override to implement disposal of allocated resources like smart pointers.
-   * This method will only be called once for each instance of this class.
-   */
-  virtual void releaseResources() = 0;
-
 private:
-  /**
-   * Validates that _object was not disposed and returns it.
-   */
-  T validateObject() const {
-    if (_isDisposed) {
-      throw std::runtime_error("Attempted to access a disposed object.");
-    }
-    return _object;
-  }
-
-  void safeDispose() {
-    if (!_isDisposed) {
-      _isDisposed = true;
-      releaseResources();
-    }
-  }
-
   /**
    * Wrapped object.
    */
   T _object;
-
-  /**
-   * Resource disposed flag.
-   */
-  std::atomic<bool> _isDisposed = {false};
 };
 
 template <typename T>
@@ -129,12 +118,6 @@ public:
                obj.asObject(runtime).asHostObject(runtime))
         ->getObject();
   }
-
-protected:
-  void releaseResources() override {
-    // Clear internally allocated objects
-    this->setObject(nullptr);
-  }
 };
 
 template <typename T>
@@ -152,12 +135,6 @@ public:
     return std::static_pointer_cast<JsiSkWrappingSkPtrHostObject>(
                obj.asObject(runtime).asHostObject(runtime))
         ->getObject();
-  }
-
-protected:
-  void releaseResources() override {
-    // Clear internally allocated objects
-    this->setObject(nullptr);
   }
 };
 

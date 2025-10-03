@@ -21,6 +21,7 @@ import { FreezeExample } from "./Freeze";
 import { Touch } from "./Touch";
 import { PictureViewExample } from "./PictureView";
 import { OnLayoutDemo } from "./OnLayout";
+import { OnSize } from "./OnSize";
 import { Snapshot } from "./Snapshot";
 import { IconsExample } from "./Icons";
 import { FontMgr } from "./FontMgr";
@@ -28,6 +29,9 @@ import { AnimatedImages } from "./AnimatedImages";
 import { Paragraphs } from "./Paragraphs";
 import { Paragraphs2 } from "./Paragraphs2";
 import { Skottie } from "./Skottie";
+import { StressTest } from "./StressTest";
+import { StressTest2 } from "./StressTest2";
+import { StressTest3 } from "./StressTest3";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
@@ -214,6 +218,34 @@ export const API = () => {
         component={OnLayoutDemo}
         options={{
           title: "🎛️ OnLayout",
+        }}
+      />
+      <Stack.Screen
+        name="OnSize"
+        component={OnSize}
+        options={{
+          title: "📏 OnSize",
+        }}
+      />
+      <Stack.Screen
+        name="StressTest"
+        component={StressTest}
+        options={{
+          title: "🔥 Stress Test",
+        }}
+      />
+      <Stack.Screen
+        name="StressTest2"
+        component={StressTest2}
+        options={{
+          title: "🔥 Stress Test 2",
+        }}
+      />
+      <Stack.Screen
+        name="StressTest3"
+        component={StressTest3}
+        options={{
+          title: "🔥 Stress Test 3",
         }}
       />
     </Stack.Navigator>

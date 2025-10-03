@@ -59,8 +59,10 @@ public:
     if (!typeface) {
       throw std::runtime_error("Could not find font style for " + name);
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkTypeface>(getContext(), typeface));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkTypeface>(getContext(), std::move(typeface));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(countFamilies) { return getObject()->countFamilies(); }
@@ -77,15 +79,18 @@ public:
       : JsiSkWrappingSkPtrHostObject(std::move(context),
                                      std::move(tfProvider)) {}
 
+  size_t getMemoryPressure() const override { return 4096; }
+
   /**
    Returns the jsi object from a host object of this type
   */
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             sk_sp<para::TypefaceFontProvider> tfProvider) {
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkTypefaceFontProvider>(
-                     std::move(context), std::move(tfProvider)));
+    auto provider = std::make_shared<JsiSkTypefaceFontProvider>(
+        std::move(context), std::move(tfProvider));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, provider,
+                                                       context);
   }
 };
 

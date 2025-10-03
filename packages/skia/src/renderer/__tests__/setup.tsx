@@ -21,7 +21,7 @@ import { SkiaObject } from "./e2e/setup";
 
 jest.setTimeout(180 * 1000);
 
-type TestOS = "ios" | "android" | "web" | "node";
+type TestOS = "ios" | "android" | "web" | "node" | "macos";
 
 declare global {
   var testServer: Server;
@@ -127,7 +127,6 @@ export const testingFonts = {
   //  NotoColorEmoji: [resolveFont("skia/__tests__/assets/NotoColorEmoji.ttf")],
 };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EmptyProps {}
 
 jest.mock("react-native", () => ({
