@@ -3239,6 +3239,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@blazediff/core@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "@blazediff/core@npm:1.4.0"
+  dependencies:
+    "@blazediff/types": 1.4.0
+  checksum: fcd4ebf9b7ee570715ac3244b0f2344f21c47906b07abec6f4423557e92d4916b7b1b924461235cb56a41123181a844e0564becfe131d5cb9b04b976a3c2e302
+  languageName: node
+  linkType: hard
+
+"@blazediff/types@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@blazediff/types@npm:1.4.0"
+  checksum: 770e9968c22f449bd5cb89b30803fb0f2603c87686ed1a705f76c85518100fd04fe5e8dafa9e6c5893d8afebe15677089b8278d5cc20c1f913eb0f358ee405f8
+  languageName: node
+  linkType: hard
+
 "@callstack/react-native-visionos@npm:^0.75.0":
   version: 0.75.0
   resolution: "@callstack/react-native-visionos@npm:0.75.0"
@@ -9166,12 +9182,12 @@ __metadata:
   dependencies:
     "@babel/plugin-proposal-nullish-coalescing-operator": 7.18.6
     "@babel/plugin-transform-explicit-resource-management": ^7.28.0
+    "@blazediff/core": ^1.4.0
     "@semantic-release/commit-analyzer": ^13.0.0
     "@semantic-release/exec": ^7.0.3
     "@semantic-release/github": ^10.3.3
     "@semantic-release/release-notes-generator": ^14.0.1
     "@types/jest": 30.0.0
-    "@types/pixelmatch": 5.2.4
     "@types/pngjs": 6.0.1
     "@types/react": ^19.0.0
     "@types/react-reconciler": 0.28.9
@@ -9184,7 +9200,6 @@ __metadata:
     jest: 30.0.0
     jest-diff: 29.7.0
     merge-dirs: 0.2.1
-    pixelmatch: 5.3.0
     pngjs: 6.0.0
     prettier: 2.8.7
     react: 19.0.0
@@ -10280,24 +10295,6 @@ __metadata:
   version: 4.0.2
   resolution: "@types/parse-json@npm:4.0.2"
   checksum: 5bf62eec37c332ad10059252fc0dab7e7da730764869c980b0714777ad3d065e490627be9f40fc52f238ffa3ac4199b19de4127196910576c2fe34dd47c7a470
-  languageName: node
-  linkType: hard
-
-"@types/pixelmatch@npm:5.2.4":
-  version: 5.2.4
-  resolution: "@types/pixelmatch@npm:5.2.4"
-  dependencies:
-    "@types/node": "*"
-  checksum: 8920c3b7df22851ad69192fb7637206cb8f7dc73520f602202e36dd6f6b7701a4b56746175e7d7391ed9dc2c636d4d9bc5d7bd26fc3f1b11df1a63fb86418b91
-  languageName: node
-  linkType: hard
-
-"@types/pixelmatch@npm:^5.2.6":
-  version: 5.2.6
-  resolution: "@types/pixelmatch@npm:5.2.6"
-  dependencies:
-    "@types/node": "*"
-  checksum: 8299207286913414bfd95ac980418342f58e7bc93dc78befbd48ccab110b0341b400712f89fea2b0f0a3a4ad0b1aed18e98e26100b529abe60d4bcc14e11d2e3
   languageName: node
   linkType: hard
 
@@ -27297,28 +27294,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pixelmatch@npm:5.3.0":
-  version: 5.3.0
-  resolution: "pixelmatch@npm:5.3.0"
-  dependencies:
-    pngjs: ^6.0.0
-  bin:
-    pixelmatch: bin/pixelmatch
-  checksum: f542713d89536551181ad9ddb666a1792ba00a8632d831093232a075cb3ccac05856e7a453ed7d0a41aaef64dcb5962e8ae5cbe646dd2761790d8ee51b0a0743
-  languageName: node
-  linkType: hard
-
-"pixelmatch@npm:^7.1.0":
-  version: 7.1.0
-  resolution: "pixelmatch@npm:7.1.0"
-  dependencies:
-    pngjs: ^7.0.0
-  bin:
-    pixelmatch: bin/pixelmatch
-  checksum: 0ad2e863e0e87ae52289c4366860a4040712a30a1e19c606745b9750b3ecda6f587dc959ce452818c50c7753ef6916f23026c14ef4d5f6c3b13c8205d61b923d
-  languageName: node
-  linkType: hard
-
 "pkg-conf@npm:^2.1.0":
   version: 2.1.0
   resolution: "pkg-conf@npm:2.1.0"
@@ -27376,17 +27351,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pngjs@npm:6.0.0, pngjs@npm:^6.0.0":
+"pngjs@npm:6.0.0":
   version: 6.0.0
   resolution: "pngjs@npm:6.0.0"
   checksum: ab6c285086060087097eab9fe6b5a528a24f9e79c03dea2b4fd6264ed4fdb5beff4a3257eeeaf2a9dc18249b539609c2a4e4013c567164a1f6b5ba2c974d5ecb
-  languageName: node
-  linkType: hard
-
-"pngjs@npm:^7.0.0":
-  version: 7.0.0
-  resolution: "pngjs@npm:7.0.0"
-  checksum: b19a018930d27de26229c1b3ff250b3a25d09caa22cbb0b0459987d91eb0a560a18ab5d67da45a38ed7514140f26d1db58de83c31159ec101f2bb270a3c707f1
   languageName: node
   linkType: hard
 
@@ -30876,13 +30844,13 @@ __metadata:
     "@babel/preset-env": ^7.20.2
     "@babel/preset-flow": ^7.25.9
     "@babel/preset-typescript": ^7.18.6
+    "@blazediff/core": ^1.4.0
     "@remotion/cli": 4.0.244
     "@shopify/react-native-skia": "workspace:*"
     "@types/color": ^3.0.6
     "@types/jest": ^29.2.2
     "@types/lodash": ^4.14.182
     "@types/opentype.js": ^1.3.4
-    "@types/pixelmatch": ^5.2.6
     "@types/prismjs": ^1.26.0
     "@types/web": ^0.0.61
     abs-svg-path: ^0.1.1
@@ -30903,7 +30871,6 @@ __metadata:
     normalize-svg-path: ^1.1.0
     opentype.js: ^1.3.4
     parse-svg-path: ^0.1.2
-    pixelmatch: ^7.1.0
     raw-loader: ^4.0.2
     react: ^19.0.0
     react-dom: ^19.0.0
