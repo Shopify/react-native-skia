@@ -11,7 +11,7 @@ Its design particularly useful when using with [Reanimated](#animations).
 
 | Name    | Type             |  Description     |
 |:--------|:-----------------|:-----------------|
-| image   | `SkImage or null` | Altas: image containing the sprites. |
+| image   | `SkImage or null` | Atlas: image containing the sprites. |
 | sprites | `SkRect[]` | locations of sprites in atlas.             |
 | transforms | `RSXform[]` | Rotation/scale transforms to be applied for each sprite. |
 | colors? | `SkColor[]` | Optional. Color to blend the sprites with. |
