@@ -34,7 +34,10 @@
 #include "include/core/SkRegion.h"
 #include "include/core/SkSurface.h"
 #include "include/core/SkTypeface.h"
+
+#if !defined(SK_GRAPHITE)
 #include "include/gpu/ganesh/GrDirectContext.h"
+#endif
 
 #pragma clang diagnostic pop
 
