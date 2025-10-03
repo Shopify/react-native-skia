@@ -17,6 +17,8 @@
 #if defined(SK_GRAPHITE)
 #include "RNDawnContext.h"
 #include "include/gpu/graphite/Context.h"
+#else
+#include "include/gpu/ganesh/GrDirectContext.h"
 #endif
 
 #pragma clang diagnostic push
@@ -241,7 +243,15 @@ public:
     auto rasterImage = DawnContext::getInstance().MakeRasterImage(getObject());
 #else
     auto grContext = getContext()->getDirectContext();
-    auto rasterImage = getObject()->makeRasterImage(grContext);
+    auto image = getObject();
+    if (!grContext) {
+      throw jsi::JSError(runtime, "No GPU context available");
+    }
+    if (image && !image->isValid(grContext->asRecorder())) {
+      throw jsi::JSError(runtime, "invoked makeNonTextureImage() on an image "
+                                  "that does not belong to this context");
+    }
+    auto rasterImage = image->makeRasterImage(grContext);
 #endif
     auto hostObjectInstance =
         std::make_shared<JsiSkImage>(getContext(), std::move(rasterImage));

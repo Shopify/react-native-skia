@@ -23,9 +23,7 @@ public:
   JsiSkSVG(std::shared_ptr<RNSkPlatformContext> context, sk_sp<SkSVGDOM> svgdom,
            sk_sp<skresources::ResourceProvider> resourceProvider = nullptr)
       : JsiSkWrappingSkPtrHostObject<SkSVGDOM>(std::move(context),
-                                               std::move(svgdom)) {
-
-  }
+                                               std::move(svgdom)) {}
 
   ~JsiSkSVG() = default;
 
