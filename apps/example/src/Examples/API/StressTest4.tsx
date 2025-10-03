@@ -78,7 +78,6 @@ function continueBlink(
       isLeft.value = !isLeft.value;
       blinkCnt.value = 0;
       x.value = withTiming(400 - x.value, { duration: 200 }, () => {
-        runOnJS(gc)();
         continueBlink(
           surface,
           image,
