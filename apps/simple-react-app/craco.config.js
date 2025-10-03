@@ -46,6 +46,8 @@ module.exports = {
         ...webpackConfig.resolve.fallback,
         fs: false,
         path: require.resolve("path-browserify"),
+        "react-native-reanimated": false,
+        "react-native-reanimated/package.json": false,
       };
 
       return webpackConfig;

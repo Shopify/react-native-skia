@@ -7,7 +7,7 @@ function App() {
     canvases.push(
       <div key={i} style={{ margin: '10px', display: 'inline-block' }}>
         <h4>Canvas {i + 1}</h4>
-        <Canvas style={{ width: 200, height: 200,  }}>
+        <Canvas style={{ width: 200, height: 200,  }} __destroyWebGLContextAfterRender>
           <Fill color={`hsl(${(i * 18) % 360}, 70%, 50%)`} />
         </Canvas>
       </div>
