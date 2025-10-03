@@ -140,7 +140,6 @@ const buildXCFrameworks = () => {
     $(`mkdir -p ${OutFolder}/${os}/maccatalyst`);
     $(`rm -rf ${OutFolder}/${os}/maccatalyst/${name}`);
     $(
-      // eslint-disable-next-line max-len
       `lipo -create ${OutFolder}/${os}/x64-maccatalyst/${name} ${OutFolder}/${os}/arm64-maccatalyst/${name} -output ${OutFolder}/${os}/maccatalyst/${name}`
     );
     $(`mkdir -p ${OutFolder}/${os}/macosx`);
