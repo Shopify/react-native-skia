@@ -1,7 +1,7 @@
 import path from "path";
+import { spawnSync } from "child_process";
 
 import { $ } from "./utils";
-import { spawnSync } from "child_process";
 
 const DEBUG = false;
 export const GRAPHITE = !!process.env.SK_GRAPHITE;
@@ -262,8 +262,8 @@ export const configurations = {
             `["-isysroot","${appleSdkRoot}",` +
               `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
           ],
-          ["cc", "\"clang\""],
-          ["cxx", "\"clang++\""],
+          ["cc", '"clang"'],
+          ["cxx", '"clang++"'],
         ],
       },
       "x64-maccatalyst": {
@@ -286,8 +286,8 @@ export const configurations = {
             `["-isysroot","${appleSdkRoot}",` +
               `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
           ],
-          ["cc", "\"clang\""],
-          ["cxx", "\"clang++\""],
+          ["cc", '"clang"'],
+          ["cxx", '"clang++"'],
         ],
       },
       "arm64-macosx": {
