@@ -54,13 +54,12 @@
   },
   "devDependencies": {
     "@babel/preset-flow": "^7.25.9",
+    "@blazediff/core": "^1.4.0",
     "@types/color": "^3.0.6",
     "@types/lodash": "^4.14.182",
-    "@types/pixelmatch": "^5.2.6",
     "@types/web": "^0.0.61",
     "babel-loader": "^9.2.1",
     "copy-webpack-plugin": "11",
-    "pixelmatch": "^7.1.0",
     "sharp": "^0.34.3"
   },
   "resolutions": {
