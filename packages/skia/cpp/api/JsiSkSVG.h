@@ -20,9 +20,14 @@ namespace jsi = facebook::jsi;
 
 class JsiSkSVG : public JsiSkWrappingSkPtrHostObject<SkSVGDOM> {
 public:
-  JsiSkSVG(std::shared_ptr<RNSkPlatformContext> context, sk_sp<SkSVGDOM> svgdom)
+  JsiSkSVG(std::shared_ptr<RNSkPlatformContext> context, sk_sp<SkSVGDOM> svgdom,
+           sk_sp<skresources::ResourceProvider> resourceProvider = nullptr)
       : JsiSkWrappingSkPtrHostObject<SkSVGDOM>(std::move(context),
-                                               std::move(svgdom)) {}
+                                               std::move(svgdom)) {
+
+  }
+
+  ~JsiSkSVG() = default;
 
   EXPORT_JSI_API_TYPENAME(JsiSkSVG, SVG)
 
