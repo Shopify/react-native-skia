@@ -5,6 +5,7 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 #include <jsi/jsi.h>
@@ -27,7 +28,7 @@
 #pragma clang diagnostic pop
 
 class SkPicture;
-class SkRect;
+struct SkRect;
 class SkImage;
 
 namespace RNSkia {
@@ -43,6 +44,8 @@ public:
       : RNSkRenderer(std::move(requestRedraw)),
         _platformContext(std::move(context)) {}
 
+  virtual ~RNSkPictureRenderer() = default;
+
   void
   renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvasProvider) override {
     performDraw(canvasProvider);
@@ -53,9 +56,26 @@ public:
     _requestRedraw();
   }
 
+  void setOnSize(
+      std::variant<std::nullptr_t, std::function<void(int, int)>> onSize) {
+    _onSize = onSize;
+  }
+
 private:
   bool performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
-    return canvasProvider->renderToCanvas([=](SkCanvas *canvas) {
+    // Call onSize callback only if the size has changed
+    int currentWidth = canvasProvider->getWidth();
+    int currentHeight = canvasProvider->getHeight();
+
+    if (std::holds_alternative<std::function<void(int, int)>>(_onSize)) {
+      if (_lastWidth != currentWidth || _lastHeight != currentHeight) {
+        _lastWidth = currentWidth;
+        _lastHeight = currentHeight;
+        std::get<std::function<void(int, int)>>(_onSize)(currentWidth,
+                                                         currentHeight);
+      }
+    }
+    return canvasProvider->renderToCanvas([=, this](SkCanvas *canvas) {
       // Make sure to scale correctly
       auto pd = _platformContext->getPixelDensity();
       canvas->clear(SK_ColorTRANSPARENT);
@@ -70,6 +90,9 @@ private:
 
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   sk_sp<SkPicture> _picture;
+  std::variant<std::nullptr_t, std::function<void(int, int)>> _onSize = nullptr;
+  int _lastWidth = -1;
+  int _lastHeight = -1;
 };
 
 class RNSkPictureView : public RNSkView {
@@ -86,7 +109,7 @@ public:
 
   void setJsiProperties(
       std::unordered_map<std::string, RNJsi::ViewProperty> &props) override {
-
+    // Base implementation - no onSize callback
     for (auto &prop : props) {
       if (prop.first == "picture") {
         if (prop.second.isNull()) {
@@ -95,10 +118,12 @@ public:
               ->setPicture(nullptr);
           continue;
         }
-
         // Save picture
         std::static_pointer_cast<RNSkPictureRenderer>(getRenderer())
             ->setPicture(prop.second.getPicture());
+      } else if (prop.first == "onSize") {
+        std::static_pointer_cast<RNSkPictureRenderer>(getRenderer())
+            ->setOnSize(prop.second.getOnSize());
       }
     }
   }

@@ -1,13 +1,12 @@
 import type { ReactNode } from "react";
 import type { OpaqueRoot } from "react-reconciler";
-import type { SharedValue } from "react-native-reanimated";
 import ReactReconciler from "react-reconciler";
 
-import type { SkCanvas, Skia, SkSize } from "../skia/types";
+import type { SkCanvas, Skia } from "../skia/types";
 import { NodeType } from "../dom/types";
 
 import { debug, sksgHostConfig } from "./HostConfig";
-import type { Container } from "./Container";
+import type { Container } from "./StaticContainer";
 import { createContainer } from "./Container";
 
 import "./Elements";
@@ -24,8 +23,11 @@ export class SkiaSGRoot {
   private root: OpaqueRoot;
   private container: Container;
 
-  constructor(public Skia: Skia, nativeId = -1, onSize?: SharedValue<SkSize>) {
-    this.container = createContainer(Skia, nativeId, onSize);
+  constructor(
+    public Skia: Skia,
+    nativeId = -1
+  ) {
+    this.container = createContainer(Skia, nativeId);
     this.root = skiaReconciler.createContainer(
       this.container,
       0,

@@ -95,15 +95,48 @@ public:
     std::vector<para::LineMetrics> metrics;
     getObject()->getLineMetrics(metrics);
     auto returnValue = jsi::Array(runtime, metrics.size());
-    auto height = 0;
+
     for (size_t i = 0; i < metrics.size(); ++i) {
-      returnValue.setValueAtIndex(
-          runtime, i,
-          JsiSkRect::toValue(runtime, getContext(),
-                             SkRect::MakeXYWH(metrics[i].fLeft, height,
-                                              metrics[i].fWidth,
-                                              metrics[i].fHeight)));
-      height += metrics[i].fHeight;
+      auto lineMetrics = jsi::Object(runtime);
+
+      // Text indices
+      lineMetrics.setProperty(runtime, "startIndex",
+                              static_cast<double>(metrics[i].fStartIndex));
+      lineMetrics.setProperty(runtime, "endIndex",
+                              static_cast<double>(metrics[i].fEndIndex));
+      lineMetrics.setProperty(
+          runtime, "endExcludingWhitespaces",
+          static_cast<double>(metrics[i].fEndExcludingWhitespaces));
+      lineMetrics.setProperty(
+          runtime, "endIncludingNewline",
+          static_cast<double>(metrics[i].fEndIncludingNewline));
+
+      // Line break info
+      lineMetrics.setProperty(runtime, "isHardBreak", metrics[i].fHardBreak);
+
+      // Vertical metrics
+      lineMetrics.setProperty(runtime, "ascent",
+                              static_cast<double>(metrics[i].fAscent));
+      lineMetrics.setProperty(runtime, "descent",
+                              static_cast<double>(metrics[i].fDescent));
+      lineMetrics.setProperty(runtime, "height",
+                              static_cast<double>(metrics[i].fHeight));
+
+      // Horizontal metrics
+      lineMetrics.setProperty(runtime, "width",
+                              static_cast<double>(metrics[i].fWidth));
+      lineMetrics.setProperty(runtime, "left",
+                              static_cast<double>(metrics[i].fLeft));
+
+      // Position
+      lineMetrics.setProperty(runtime, "baseline",
+                              static_cast<double>(metrics[i].fBaseline));
+
+      // Line number
+      lineMetrics.setProperty(runtime, "lineNumber",
+                              static_cast<double>(metrics[i].fLineNumber));
+
+      returnValue.setValueAtIndex(runtime, i, lineMetrics);
     }
     return returnValue;
   }
@@ -138,10 +171,12 @@ public:
                        JSI_EXPORT_FUNC(JsiSkParagraph, getLineMetrics),
                        JSI_EXPORT_FUNC(JsiSkParagraph, dispose))
 
+  size_t getMemoryPressure() const override { return 8192; }
+
   explicit JsiSkParagraph(std::shared_ptr<RNSkPlatformContext> context,
                           para::ParagraphBuilder *paragraphBuilder)
       : JsiSkWrappingSharedPtrHostObject<para::Paragraph>(
-            std::move(context), std::move(paragraphBuilder->Build())) {}
+            std::move(context), paragraphBuilder->Build()) {}
 };
 
 } // namespace RNSkia

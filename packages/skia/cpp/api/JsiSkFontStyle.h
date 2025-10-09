@@ -37,21 +37,26 @@ public:
       return object.asHostObject<JsiSkFontStyle>(runtime)->getObject();
     } else {
       auto weightProp = object.getProperty(runtime, "weight");
-      auto weight = static_cast<int>(weightProp.isUndefined()
-                                         ? SkFontStyle::Weight::kNormal_Weight
-                                         : weightProp.asNumber());
+      auto weight = static_cast<int>(
+          weightProp.isUndefined()
+              ? static_cast<double>(SkFontStyle::Weight::kNormal_Weight)
+              : weightProp.asNumber());
       auto widthProp = object.getProperty(runtime, "width");
-      auto width = static_cast<int>(widthProp.isUndefined()
-                                        ? SkFontStyle::Width::kNormal_Width
-                                        : widthProp.asNumber());
+      auto width = static_cast<int>(
+          widthProp.isUndefined()
+              ? static_cast<double>(SkFontStyle::Width::kNormal_Width)
+              : widthProp.asNumber());
       auto slantProp = object.getProperty(runtime, "slant");
       auto slant = static_cast<SkFontStyle::Slant>(
-          slantProp.isUndefined() ? SkFontStyle::Slant::kUpright_Slant
-                                  : slantProp.asNumber());
+          slantProp.isUndefined()
+              ? static_cast<double>(SkFontStyle::Slant::kUpright_Slant)
+              : slantProp.asNumber());
       SkFontStyle style(weight, width, slant);
       return std::make_shared<SkFontStyle>(style);
     }
   }
+
+  size_t getMemoryPressure() const override { return sizeof(SkFontStyle); }
 
   /**
   Returns the jsi object from a host object of this type
@@ -59,9 +64,10 @@ public:
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             const SkFontStyle &fontStyle) {
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkFontStyle>(std::move(context), fontStyle));
+    auto fontStyleObj =
+        std::make_shared<JsiSkFontStyle>(std::move(context), fontStyle);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, fontStyleObj,
+                                                       context);
   }
 };
 } // namespace RNSkia

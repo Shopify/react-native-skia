@@ -69,14 +69,16 @@ protected:
 
 class RNSkOffscreenCanvasProvider : public RNSkCanvasProvider {
 public:
-  RNSkOffscreenCanvasProvider(std::shared_ptr<RNSkPlatformContext> context,
-                              std::function<void()> requestRedraw, float width,
-                              float height)
-      : RNSkCanvasProvider(requestRedraw), _context(context), _width(width),
-        _height(height) {
+  RNSkOffscreenCanvasProvider(
+      const std::shared_ptr<RNSkPlatformContext> &context,
+      std::function<void()> requestRedraw, float width, float height)
+      : RNSkCanvasProvider(std::move(requestRedraw)), _width(width),
+        _height(height), _context(context) {
     _surface = context->makeOffscreenSurface(_width, _height);
     _pd = context->getPixelDensity();
   }
+
+  virtual ~RNSkOffscreenCanvasProvider() = default;
 
   /**
    Returns a snapshot of the current surface/canvas
@@ -145,6 +147,13 @@ public:
 
   virtual void setJsiProperties(
       std::unordered_map<std::string, RNJsi::ViewProperty> &props) = 0;
+
+  virtual void
+  setJsiProperties(std::unordered_map<std::string, RNJsi::ViewProperty> &props,
+                   std::function<jsi::Object(int, int)> onSize) {
+    // Default implementation just calls the base method, ignoring onSize
+    setJsiProperties(props);
+  }
 
   void requestRedraw() {
     if (!_redrawRequested) {

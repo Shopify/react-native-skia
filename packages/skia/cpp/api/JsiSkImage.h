@@ -4,6 +4,7 @@
 #include <string>
 #include <utility>
 
+#include "JsiSkDispatcher.h"
 #include "JsiSkHostObjects.h"
 #include "JsiSkImageInfo.h"
 #include "JsiSkMatrix.h"
@@ -16,6 +17,8 @@
 #if defined(SK_GRAPHITE)
 #include "RNDawnContext.h"
 #include "include/gpu/graphite/Context.h"
+#else
+#include "include/gpu/ganesh/GrDirectContext.h"
 #endif
 
 #pragma clang diagnostic push
@@ -61,6 +64,9 @@ inline SkSamplingOptions SamplingOptionsFromValue(jsi::Runtime &runtime,
 }
 
 class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
+private:
+  std::shared_ptr<Dispatcher> _dispatcher;
+
 public:
   // TODO-API: Properties?
   JSI_HOST_FUNCTION(width) { return static_cast<double>(getObject()->width()); }
@@ -83,9 +89,10 @@ public:
                  : nullptr;
     auto shader =
         getObject()->makeShader(tmx, tmy, SkSamplingOptions(fm, mm), m);
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkShader>(getContext(), std::move(shader)));
+    auto shaderObj =
+        std::make_shared<JsiSkShader>(getContext(), std::move(shader));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shaderObj,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(makeShaderCubic) {
@@ -98,9 +105,10 @@ public:
                  : nullptr;
     auto shader =
         getObject()->makeShader(tmx, tmy, SkSamplingOptions({B, C}), m);
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkShader>(getContext(), std::move(shader)));
+    auto shaderObj =
+        std::make_shared<JsiSkShader>(getContext(), std::move(shader));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shaderObj,
+                                                       getContext());
   }
 
   sk_sp<SkData> encodeImageData(const jsi::Value *arguments, size_t count) {
@@ -185,6 +193,9 @@ public:
   }
 
   JSI_HOST_FUNCTION(readPixels) {
+#if defined(SK_GRAPHITE)
+    throw std::runtime_error("Not implemented yet");
+#else
     int srcX = 0;
     int srcY = 0;
     if (count > 0 && !arguments[0].isUndefined()) {
@@ -217,16 +228,14 @@ public:
             .asObject(runtime)
             .getArrayBuffer(runtime);
     auto bfrPtr = reinterpret_cast<void *>(buffer.data(runtime));
-#if defined(SK_GRAPHITE)
-    throw std::runtime_error("Not implemented yet");
-#else
+
     auto grContext = getContext()->getDirectContext();
     if (!getObject()->readPixels(grContext, info, bfrPtr, bytesPerRow, srcX,
                                  srcY)) {
       return jsi::Value::null();
     }
-#endif
     return dest;
+#endif
   }
 
   JSI_HOST_FUNCTION(makeNonTextureImage) {
@@ -234,10 +243,20 @@ public:
     auto rasterImage = DawnContext::getInstance().MakeRasterImage(getObject());
 #else
     auto grContext = getContext()->getDirectContext();
-    auto rasterImage = getObject()->makeRasterImage(grContext);
+    auto image = getObject();
+    if (!grContext) {
+      throw jsi::JSError(runtime, "No GPU context available");
+    }
+    if (image && !image->isValid(grContext->asRecorder())) {
+      throw jsi::JSError(runtime, "invoked makeNonTextureImage() on an image "
+                                  "that does not belong to this context");
+    }
+    auto rasterImage = image->makeRasterImage(grContext);
 #endif
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), rasterImage));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkImage>(getContext(), std::move(rasterImage));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(getNativeTextureUnstable) {
@@ -247,6 +266,10 @@ public:
     }
     auto texInfo = getContext()->getTexture(image);
     return JsiTextureInfo::toValue(runtime, texInfo);
+  }
+
+  JSI_HOST_FUNCTION(isTextureBacked) {
+    return jsi::Value(getObject()->isTextureBacked());
   }
 
   EXPORT_JSI_API_TYPENAME(JsiSkImage, Image)
@@ -261,12 +284,42 @@ public:
                        JSI_EXPORT_FUNC(JsiSkImage, readPixels),
                        JSI_EXPORT_FUNC(JsiSkImage, makeNonTextureImage),
                        JSI_EXPORT_FUNC(JsiSkImage, getNativeTextureUnstable),
+                       JSI_EXPORT_FUNC(JsiSkImage, isTextureBacked),
                        JSI_EXPORT_FUNC(JsiSkImage, dispose))
 
   JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
              const sk_sp<SkImage> image)
       : JsiSkWrappingSkPtrHostObject<SkImage>(std::move(context),
-                                              std::move(image)) {}
+                                              std::move(image)) {
+    // Get the dispatcher for the current thread
+    _dispatcher = Dispatcher::getDispatcher();
+    // Process any pending operations
+    _dispatcher->processQueue();
+  }
+
+  ~JsiSkImage() override {
+    // Queue deletion on the creation thread if needed
+    auto image = getObject();
+    if (image && _dispatcher) {
+      _dispatcher->run([image]() {
+        // Image will be deleted when this lambda is destroyed
+      });
+    }
+    // Clear the object to prevent base class destructor from deleting it
+    setObject(nullptr);
+  }
+
+  size_t getMemoryPressure() const override {
+    auto image = getObject();
+    if (image) {
+      if (image->isTextureBacked()) {
+        return image->textureSize();
+      } else {
+        return image->imageInfo().computeMinByteSize();
+      }
+    }
+    return 0;
+  }
 };
 
 } // namespace RNSkia

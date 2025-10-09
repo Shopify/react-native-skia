@@ -40,6 +40,8 @@ public:
     return jsi::Value(SkScalarToDouble(getObject()->fTy));
   }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
   JSI_HOST_FUNCTION(set) {
     auto scos = arguments[0].asNumber();
     auto ssin = arguments[1].asNumber();
@@ -48,6 +50,7 @@ public:
     getObject()->set(scos, ssin, tx, ty);
     return jsi::Value::undefined();
   }
+#pragma clang diagnostic pop
 
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkRSXform, __typename__),
                               JSI_EXPORT_PROP_GET(JsiSkRSXform, scos),
@@ -81,8 +84,10 @@ public:
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             const SkRSXform &rsxform) {
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkRSXform>(std::move(context), rsxform));
+    auto rsxformObj =
+        std::make_shared<JsiSkRSXform>(std::move(context), rsxform);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, rsxformObj,
+                                                       context);
   }
 
   /**
@@ -100,11 +105,14 @@ public:
           arguments[2].asNumber(), arguments[3].asNumber(),
           arguments[4].asNumber(), arguments[5].asNumber());
       // Return the newly constructed object
-      return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkRSXform>(std::move(context),
-                                                  std::move(rsxform)));
+      auto rsxformObj = std::make_shared<JsiSkRSXform>(std::move(context),
+                                                       std::move(rsxform));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, rsxformObj,
+                                                         context);
     };
   }
+  size_t getMemoryPressure() const override { return sizeof(SkRSXform); }
+
   /**
    * Creates the function for construction a new instance of the SkRSXform
    * wrapper
@@ -119,9 +127,10 @@ public:
           SkRSXform::Make(arguments[0].asNumber(), arguments[1].asNumber(),
                           arguments[2].asNumber(), arguments[3].asNumber());
       // Return the newly constructed object
-      return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkRSXform>(std::move(context),
-                                                  std::move(rsxform)));
+      auto rsxformObj = std::make_shared<JsiSkRSXform>(std::move(context),
+                                                       std::move(rsxform));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, rsxformObj,
+                                                         context);
     };
   }
 };

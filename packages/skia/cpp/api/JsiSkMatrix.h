@@ -127,6 +127,8 @@ public:
     return thisValue.asObject(runtime);
   }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
   JSI_HOST_FUNCTION(get) {
     auto values = jsi::Array(runtime, 9);
     for (auto i = 0; i < 9; i++) {
@@ -134,6 +136,7 @@ public:
     }
     return values;
   }
+#pragma clang diagnostic pop
 
   EXPORT_JSI_API_TYPENAME(JsiSkMatrix, Matrix)
 
@@ -163,6 +166,8 @@ public:
     }
   }
 
+  size_t getMemoryPressure() const override { return sizeof(SkMatrix); }
+
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
@@ -172,8 +177,10 @@ public:
       } else {
         matrix = SkMatrix::I();
       }
-      return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkMatrix>(std::move(context), matrix));
+      auto hostObjectInstance =
+          std::make_shared<JsiSkMatrix>(context, std::move(matrix));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+          runtime, hostObjectInstance, context);
     };
   }
 };

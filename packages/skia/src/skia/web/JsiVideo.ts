@@ -89,9 +89,13 @@ export class JsiVideo implements Video {
     this.videoElement.volume = volume;
   }
 
-  dispose() {
+  [Symbol.dispose]() {
     if (this.videoElement.parentNode) {
       this.videoElement.parentNode.removeChild(this.videoElement);
     }
+  }
+
+  dispose() {
+    this[Symbol.dispose]();
   }
 }

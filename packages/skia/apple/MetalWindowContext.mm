@@ -26,10 +26,20 @@ MetalWindowContext::MetalWindowContext(GrDirectContext *directContext,
   _layer.drawableSize = CGSizeMake(width, height);
   BOOL supportsWideColor = NO;
   if (useP3ColorSpace) {
+#if !TARGET_OS_OSX
     if (@available(iOS 10.0, *)) {
-      supportsWideColor =
-          [UIScreen mainScreen].traitCollection.displayGamut == UIDisplayGamutP3;
+      supportsWideColor = [UIScreen mainScreen].traitCollection.displayGamut ==
+                          UIDisplayGamutP3;
     }
+#else
+    if (@available(macOS 10.12, *)) {
+      NSScreen *screen = [NSScreen mainScreen];
+      NSColorSpace *displayP3 = [NSColorSpace displayP3ColorSpace];
+      if (screen.colorSpace && displayP3) {
+        supportsWideColor = [screen.colorSpace isEqual:displayP3];
+      }
+    }
+#endif // !TARGET_OS_OSX
   }
   if (supportsWideColor) {
     CGColorSpaceRef colorSpace =

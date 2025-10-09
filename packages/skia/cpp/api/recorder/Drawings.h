@@ -6,6 +6,7 @@
 #include "Convertor.h"
 #include "DrawingCtx.h"
 #include "ImageFit.h"
+#include "RNSkPlatformContext.h"
 
 namespace RNSkia {
 
@@ -17,10 +18,9 @@ struct CircleCmdProps {
 };
 
 class CircleCmd : public Command {
-private:
+public:
   CircleCmdProps props;
 
-public:
   CircleCmd(jsi::Runtime &runtime, const jsi::Object &object,
             Variables &variables)
       : Command(CommandType::DrawCircle) {
@@ -52,10 +52,9 @@ struct RectCmdProps {
 };
 
 class RectCmd : public Command {
-private:
+public:
   RectCmdProps props;
 
-public:
   RectCmd(jsi::Runtime &runtime, const jsi::Object &object,
           Variables &variables)
       : Command(CommandType::DrawRect) {
@@ -86,10 +85,9 @@ struct PathCmdProps {
 };
 
 class PathCmd : public Command {
-private:
+public:
   PathCmdProps props;
 
-public:
   PathCmd(jsi::Runtime &runtime, const jsi::Object &object,
           Variables &variables)
       : Command(CommandType::DrawPath) {
@@ -196,10 +194,9 @@ struct LineCmdProps {
 };
 
 class LineCmd : public Command {
-private:
+public:
   LineCmdProps props;
 
-public:
   LineCmd(jsi::Runtime &runtime, const jsi::Object &object,
           Variables &variables)
       : Command(CommandType::DrawLine) {
@@ -221,10 +218,9 @@ struct TextPathProps {
 };
 
 class TextPathCmd : public Command {
-private:
+public:
   TextPathProps props;
 
-public:
   TextPathCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
       : Command(CommandType::DrawTextPath) {
@@ -313,10 +309,9 @@ struct TextCmdProps {
 };
 
 class TextCmd : public Command {
-private:
+public:
   TextCmdProps props;
 
-public:
   TextCmd(jsi::Runtime &runtime, const jsi::Object &object,
           Variables &variables)
       : Command(CommandType::DrawText) {
@@ -337,7 +332,6 @@ public:
   }
 };
 
-// Add to Drawings.h after existing command structures
 struct BoxShadowCmdProps {
   float dx = 0;
   float dy = 0;
@@ -352,7 +346,7 @@ struct BoxCmdProps {
 };
 
 class BoxCmd : public Command {
-private:
+public:
   BoxCmdProps props;
   std::vector<BoxShadowCmdProps> shadows;
 
@@ -374,7 +368,6 @@ private:
     return inflate(box, -dx, -dy, tx, ty);
   }
 
-public:
   BoxCmd(jsi::Runtime &runtime, const jsi::Object &object,
          const jsi::Array &shadowsArray, Variables &variables)
       : Command(CommandType::DrawBox) {
@@ -386,7 +379,10 @@ public:
     for (size_t i = 0; i < shadowCount; i++) {
       auto shadowObj =
           shadowsArray.getValueAtIndex(runtime, i).asObject(runtime);
-      BoxShadowCmdProps shadow;
+
+      // Create shadow directly in vector to avoid copy
+      shadows.emplace_back();
+      BoxShadowCmdProps &shadow = shadows.back();
 
       convertProperty(runtime, shadowObj, "dx", shadow.dx, variables);
       convertProperty(runtime, shadowObj, "dy", shadow.dy, variables);
@@ -394,8 +390,6 @@ public:
       convertProperty(runtime, shadowObj, "blur", shadow.blur, variables);
       convertProperty(runtime, shadowObj, "color", shadow.color, variables);
       convertProperty(runtime, shadowObj, "inner", shadow.inner, variables);
-
-      shadows.push_back(shadow);
     }
   }
 
@@ -473,13 +467,13 @@ struct ImageCmdProps {
 };
 
 class ImageCmd : public Command {
-private:
-  ImageCmdProps props;
-
 public:
-  ImageCmd(jsi::Runtime &runtime, const jsi::Object &object,
-           Variables &variables)
-      : Command(CommandType::DrawImage) {
+  ImageCmdProps props;
+  std::shared_ptr<RNSkPlatformContext> _context;
+
+  ImageCmd(std::shared_ptr<RNSkPlatformContext> context, jsi::Runtime &runtime,
+           const jsi::Object &object, Variables &variables)
+      : Command(CommandType::DrawImage), _context(context) {
     convertProperty(runtime, object, "rect", props.rect, variables);
     convertProperty(runtime, object, "image", props.image, variables);
     convertProperty(runtime, object, "sampling", props.sampling, variables);
@@ -490,6 +484,17 @@ public:
     convertProperty(runtime, object, "width", props.width, variables);
     convertProperty(runtime, object, "height", props.height, variables);
     convertProperty(runtime, object, "rect", props.rect, variables);
+  }
+
+  ~ImageCmd() {
+    if (props.image.has_value()) {
+      auto image = props.image.value();
+      if (image) {
+        _context->runOnMainThread([image]() {
+          // Image will be deleted when this lambda is destroyed on main thread
+        });
+      }
+    }
   }
 
   void draw(DrawingCtx *ctx) {
@@ -524,10 +529,9 @@ struct PointsCmdProps {
 };
 
 class PointsCmd : public Command {
-private:
+public:
   PointsCmdProps props;
 
-public:
   PointsCmd(jsi::Runtime &runtime, const jsi::Object &object,
             Variables &variables)
       : Command(CommandType::DrawPoints) {
@@ -551,10 +555,9 @@ struct RRectCmdProps {
 };
 
 class RRectCmd : public Command {
-private:
+public:
   RRectCmdProps props;
 
-public:
   RRectCmd(jsi::Runtime &runtime, const jsi::Object &object,
            Variables &variables)
       : Command(CommandType::DrawRRect) {
@@ -591,10 +594,9 @@ struct OvalCmdProps {
 };
 
 class OvalCmd : public Command {
-private:
+public:
   OvalCmdProps props;
 
-public:
   OvalCmd(jsi::Runtime &runtime, const jsi::Object &object,
           Variables &variables)
       : Command(CommandType::DrawOval) {
@@ -627,10 +629,9 @@ struct PatchCmdProps {
 };
 
 class PatchCmd : public Command {
-private:
+public:
   PatchCmdProps props;
 
-public:
   PatchCmd(jsi::Runtime &runtime, const jsi::Object &object,
            Variables &variables)
       : Command(CommandType::DrawPatch) {
@@ -676,10 +677,9 @@ struct VerticesCmdProps {
 };
 
 class VerticesCmd : public Command {
-private:
+public:
   VerticesCmdProps props;
 
-public:
   VerticesCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
       : Command(CommandType::DrawVertices) {
@@ -721,10 +721,9 @@ struct DiffRectCmdProps {
 };
 
 class DiffRectCmd : public Command {
-private:
+public:
   DiffRectCmdProps props;
 
-public:
   DiffRectCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
       : Command(CommandType::DrawDiffRect) {
@@ -744,10 +743,9 @@ struct TextBlobCmdProps {
 };
 
 class TextBlobCmd : public Command {
-private:
+public:
   TextBlobCmdProps props;
 
-public:
   TextBlobCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
       : Command(CommandType::DrawTextBlob) {
@@ -769,10 +767,9 @@ struct GlyphsCmdProps {
 };
 
 class GlyphsCmd : public Command {
-private:
+public:
   GlyphsCmdProps props;
 
-public:
   GlyphsCmd(jsi::Runtime &runtime, const jsi::Object &object,
             Variables &variables)
       : Command(CommandType::DrawGlyphs) {
@@ -800,14 +797,24 @@ struct PictureCmdProps {
 };
 
 class PictureCmd : public Command {
-private:
-  PictureCmdProps props;
-
 public:
-  PictureCmd(jsi::Runtime &runtime, const jsi::Object &object,
+  PictureCmdProps props;
+  std::shared_ptr<RNSkPlatformContext> _context;
+
+  PictureCmd(std::shared_ptr<RNSkPlatformContext> context,
+             jsi::Runtime &runtime, const jsi::Object &object,
              Variables &variables)
-      : Command(CommandType::DrawPicture) {
+      : Command(CommandType::DrawPicture), _context(context) {
     convertProperty(runtime, object, "picture", props.picture, variables);
+  }
+
+  ~PictureCmd() {
+    auto picture = props.picture;
+    if (picture) {
+      _context->runOnMainThread([picture]() {
+        // Picture will be deleted when this lambda is destroyed on main thread
+      });
+    }
   }
 
   void draw(DrawingCtx *ctx) { ctx->canvas->drawPicture(props.picture); }
@@ -823,10 +830,9 @@ struct ImageSVGCmdProps {
 };
 
 class ImageSVGCmd : public Command {
-private:
+public:
   ImageSVGCmdProps props;
 
-public:
   ImageSVGCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
       : Command(CommandType::DrawImageSVG) {
@@ -879,10 +885,9 @@ struct ParagraphCmdProps {
 };
 
 class ParagraphCmd : public Command {
-private:
+public:
   ParagraphCmdProps props;
 
-public:
   ParagraphCmd(jsi::Runtime &runtime, const jsi::Object &object,
                Variables &variables)
       : Command(CommandType::DrawParagraph) {
@@ -907,10 +912,9 @@ struct SkottieCmdProps {
 };
 
 class SkottieCmd : public Command {
-private:
+public:
   SkottieCmdProps props;
 
-public:
   SkottieCmd(jsi::Runtime &runtime, const jsi::Object &object,
              Variables &variables)
       : Command(CommandType::DrawSkottie) {
@@ -934,19 +938,28 @@ struct AtlasCmdProps {
 };
 
 class AtlasCmd : public Command {
-private:
-  AtlasCmdProps props;
-
 public:
-  AtlasCmd(jsi::Runtime &runtime, const jsi::Object &object,
-           Variables &variables)
-      : Command(CommandType::DrawAtlas) {
+  AtlasCmdProps props;
+  std::shared_ptr<RNSkPlatformContext> _context;
+
+  AtlasCmd(std::shared_ptr<RNSkPlatformContext> context, jsi::Runtime &runtime,
+           const jsi::Object &object, Variables &variables)
+      : Command(CommandType::DrawAtlas), _context(context) {
     convertProperty(runtime, object, "image", props.image, variables);
     convertProperty(runtime, object, "sprites", props.sprites, variables);
     convertProperty(runtime, object, "transforms", props.transforms, variables);
     convertProperty(runtime, object, "colors", props.colors, variables);
     convertProperty(runtime, object, "blendMode", props.blendMode, variables);
     convertProperty(runtime, object, "sampling", props.sampling, variables);
+  }
+
+  ~AtlasCmd() {
+    auto image = props.image;
+    if (image) {
+      _context->runOnMainThread([image]() {
+        // Image will be deleted when this lambda is destroyed on main thread
+      });
+    }
   }
 
   void draw(DrawingCtx *ctx) {

@@ -10,12 +10,14 @@
 #include <vector>
 
 #include "JsiHostObject.h"
+#include "RNSkPictureView.h"
 #include "RNSkPlatformContext.h"
 #include "RNSkView.h"
 #include "ViewProperty.h"
 #include <jsi/jsi.h>
 
 namespace RNSkia {
+
 namespace jsi = facebook::jsi;
 
 using RNSkViewInfo = struct RNSkViewInfo {
@@ -100,10 +102,15 @@ public:
     // Safely execute operations while holding the registry lock
     ViewRegistry::getInstance().withViewInfo(
         nativeId, [&](std::shared_ptr<RNSkViewInfo> info) {
+          auto name = arguments[1].asString(runtime).utf8(runtime);
           info->props.insert_or_assign(
               arguments[1].asString(runtime).utf8(runtime),
               RNJsi::ViewProperty(runtime, arguments[2]));
-
+          if (info->props.find("onSize") == info->props.end()) {
+            info->props.insert_or_assign(
+                "onSize", RNJsi::ViewProperty(runtime, arguments[2],
+                                              _platformContext, nativeId));
+          }
           // Now let's see if we have a view that we can update
           if (info->view != nullptr) {
             // Update view!
@@ -234,15 +241,13 @@ public:
 
   JSI_HOST_FUNCTION(size) {
     if (count != 1) {
-      _platformContext->raiseError(
-          std::string("size: Expected 1 argument, got " +
-                      std::to_string(count) + "."));
+      _platformContext->raiseError(std::string(
+          "size: Expected 1 argument, got " + std::to_string(count) + "."));
       return jsi::Value::undefined();
     }
 
     if (!arguments[0].isNumber()) {
-      _platformContext->raiseError(
-          "size: First argument must be a number");
+      _platformContext->raiseError("size: First argument must be a number");
       return jsi::Value::undefined();
     }
 
@@ -254,11 +259,13 @@ public:
     if (view != nullptr) {
       auto pixelDensity = _platformContext->getPixelDensity();
       auto sizeObj = jsi::Object(runtime);
-      sizeObj.setProperty(runtime, "width", view->getScaledWidth() / pixelDensity);
-      sizeObj.setProperty(runtime, "height", view->getScaledHeight() / pixelDensity);
+      sizeObj.setProperty(runtime, "width",
+                          view->getScaledWidth() / pixelDensity);
+      sizeObj.setProperty(runtime, "height",
+                          view->getScaledHeight() / pixelDensity);
       return sizeObj;
     }
-    
+
     // Return default size if view not found
     auto sizeObj = jsi::Object(runtime);
     sizeObj.setProperty(runtime, "width", 0);

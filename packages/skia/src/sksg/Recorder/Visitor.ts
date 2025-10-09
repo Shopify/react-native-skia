@@ -160,7 +160,7 @@ const pushImageFilters = (
     if (isImageFilter(imageFilter.type)) {
       recorder.pushImageFilter(imageFilter.type, imageFilter.props);
     } else if (isShader(imageFilter.type)) {
-      recorder.pushShader(imageFilter.type, imageFilter.props);
+      recorder.pushShader(imageFilter.type, imageFilter.props, 0);
     }
     const needsComposition =
       imageFilter.type !== NodeType.BlendImageFilter &&
@@ -176,7 +176,7 @@ const pushShaders = (recorder: BaseRecorder, shaders: Node<any>[]) => {
     if (shader.children.length > 0) {
       pushShaders(recorder, shader.children);
     }
-    recorder.pushShader(shader.type, shader.props);
+    recorder.pushShader(shader.type, shader.props, shader.children.length);
   });
 };
 
@@ -250,7 +250,7 @@ const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
       const shadows = node.children
         .filter((n) => n.type === NodeType.BoxShadow)
         // eslint-disable-next-line @typescript-eslint/no-shadow
-        .map(({ props }) => ({ props } as { props: BoxShadowProps }));
+        .map(({ props }) => ({ props }) as { props: BoxShadowProps });
       recorder.drawBox(props, shadows);
       break;
     case NodeType.Fill:

@@ -155,6 +155,7 @@ android {
                 abiFilters (*reactNativeArchitectures())
                 arguments '-DANDROID_STL=c++_shared',
                           "-DREACT_NATIVE_VERSION=${REACT_NATIVE_VERSION}",
+                          "-DREACT_NATIVE_DIR=${defaultDir}",
                           "-DNODE_MODULES_DIR=${nodeModules}",
                           "-DPREBUILT_DIR=${prebuiltDir}",
                           "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
@@ -282,17 +283,6 @@ dependencies {
         def rnAAR = fileTree("${nodeModules}/react-native/android").matching({ it.include rnAarMatcher }).singleFile
         logger.warn("react-native-skia: Extracting JNI files (pre RN 0.71) ${rnAAR}")
         extractJNI(files(rnAAR))
-    }
-}
-
-afterEvaluate { project ->
-    android.libraryVariants.all { variant ->
-        def name = variant.name.capitalize()
-        def javaCompileTask = variant.javaCompileProvider.get()
-
-        task "jar${name}"(type: Jar, dependsOn: javaCompileTask) {
-            from javaCompileTask.destinationDir
-        }
     }
 }
 

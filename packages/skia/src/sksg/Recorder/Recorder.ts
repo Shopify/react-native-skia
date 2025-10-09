@@ -152,11 +152,15 @@ export class Recorder implements BaseRecorder {
     });
   }
 
-  pushShader(shaderType: NodeType, props: AnimatedProps<unknown>) {
+  pushShader(
+    shaderType: NodeType,
+    props: AnimatedProps<unknown>,
+    children: number
+  ) {
     if (!isShader(shaderType) && !(shaderType === NodeType.Blend)) {
       throw new Error("Invalid color filter type: " + shaderType);
     }
-    this.add({ type: CommandType.PushShader, shaderType, props });
+    this.add({ type: CommandType.PushShader, shaderType, props, children });
   }
 
   pushBlurMaskFilter(props: AnimatedProps<BlurMaskFilterProps>) {
