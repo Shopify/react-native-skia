@@ -715,7 +715,7 @@ private:
     }
     if (image && !image->isValid(ctx->asRecorder())) {
       throw jsi::JSError(
-          runtime, "image used in drawImage() does not belong to this context");
+          runtime, "image used in drawImage() does not belong to this thread. Use image.makeNonImageTexture() to transfer the image to this thread or create the image directly on this thread.");
     }
 #endif
   }
