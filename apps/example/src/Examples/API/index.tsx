@@ -1,6 +1,8 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
+import { ImageLoading } from "../ImageLoading/ImageLoading";
+
 import type { Routes } from "./Routes";
 import { List } from "./List";
 import { PathEffectDemo } from "./PathEffect";
@@ -72,6 +74,13 @@ export const API = () => {
         component={AnimatedImages}
         options={{
           title: "🌅 Animated Images",
+        }}
+      />
+      <Stack.Screen
+        name="ImageLoading"
+        component={ImageLoading}
+        options={{
+          title: "🖼 Image Loading",
         }}
       />
       <Stack.Screen

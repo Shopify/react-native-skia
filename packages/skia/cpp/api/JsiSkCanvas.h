@@ -72,7 +72,6 @@ public:
 
   JSI_HOST_FUNCTION(drawImage) {
     auto image = JsiSkImage::fromValue(runtime, arguments[0]);
-    validateImageForDrawing(runtime, image);
     auto x = arguments[1].asNumber();
     auto y = arguments[2].asNumber();
     std::shared_ptr<SkPaint> paint;
@@ -85,7 +84,6 @@ public:
 
   JSI_HOST_FUNCTION(drawImageRect) {
     auto image = JsiSkImage::fromValue(runtime, arguments[0]);
-    validateImageForDrawing(runtime, image);
     auto src = JsiSkRect::fromValue(runtime, arguments[1]);
     auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
     auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
@@ -98,7 +96,6 @@ public:
 
   JSI_HOST_FUNCTION(drawImageCubic) {
     auto image = JsiSkImage::fromValue(runtime, arguments[0]);
-    validateImageForDrawing(runtime, image);
     auto x = arguments[1].asNumber();
     auto y = arguments[2].asNumber();
     float B = arguments[3].asNumber();
@@ -115,7 +112,6 @@ public:
 
   JSI_HOST_FUNCTION(drawImageOptions) {
     auto image = JsiSkImage::fromValue(runtime, arguments[0]);
-    validateImageForDrawing(runtime, image);
     auto x = arguments[1].asNumber();
     auto y = arguments[2].asNumber();
     auto fm = (SkFilterMode)arguments[3].asNumber();
@@ -132,7 +128,6 @@ public:
 
   JSI_HOST_FUNCTION(drawImageNine) {
     auto image = JsiSkImage::fromValue(runtime, arguments[0]);
-    validateImageForDrawing(runtime, image);
     auto center = JsiSkRect::fromValue(runtime, arguments[1]);
     auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
     auto fm = (SkFilterMode)arguments[3].asNumber();
@@ -149,7 +144,6 @@ public:
 
   JSI_HOST_FUNCTION(drawImageRectCubic) {
     auto image = JsiSkImage::fromValue(runtime, arguments[0]);
-    validateImageForDrawing(runtime, image);
     auto src = JsiSkRect::fromValue(runtime, arguments[1]);
     auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
     float B = arguments[3].asNumber();
@@ -169,7 +163,6 @@ public:
 
   JSI_HOST_FUNCTION(drawImageRectOptions) {
     auto image = JsiSkImage::fromValue(runtime, arguments[0]);
-    validateImageForDrawing(runtime, image);
     auto src = JsiSkRect::fromValue(runtime, arguments[1]);
     auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
     auto filter = (SkFilterMode)arguments[3].asNumber();
@@ -706,20 +699,6 @@ public:
   SkCanvas *getCanvas() { return _canvas; }
 
 private:
-  void validateImageForDrawing(jsi::Runtime &runtime,
-                               const sk_sp<SkImage> image) {
-#if !defined(SK_GRAPHITE)
-    auto ctx = getContext()->getDirectContext();
-    if (!ctx) {
-      throw jsi::JSError(runtime, "No GPU context available");
-    }
-    if (image && !image->isValid(ctx->asRecorder())) {
-      throw jsi::JSError(
-          runtime, "image used in drawImage() does not belong to this context");
-    }
-#endif
-  }
-
   SkCanvas *_canvas;
 };
 } // namespace RNSkia
