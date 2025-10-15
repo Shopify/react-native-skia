@@ -1,13 +1,11 @@
 import React, { useState } from "react";
+import type { SkImage, SkRect, SkSize } from "@shopify/react-native-skia";
 import {
   Canvas,
   Image,
   ImageFormat,
   PaintStyle,
   Skia,
-  SkImage,
-  SkRect,
-  SkSize,
 } from "@shopify/react-native-skia";
 import { Button, View } from "react-native";
 import { useDerivedValue, useSharedValue } from "react-native-reanimated";
@@ -52,7 +50,7 @@ export const ImageLoading = () => {
       Math.round(skimage.width() * Math.random()),
       Math.round(skimage.height() * Math.random()),
       100,
-      p,
+      p
     );
     // Snapshot kết quả
     let snapshot = offscreen.makeImageSnapshot();
@@ -75,9 +73,9 @@ export const ImageLoading = () => {
     let snapshot = offscreen.makeImageSnapshot();
 
     console.log("Step 3");
-    let image_base64 = snapshot.encodeToBase64(ImageFormat.JPEG, 100);
-    console.log("image encoded to base64", image_base64.length);
-    return image_base64;
+    let imageBase64 = snapshot.encodeToBase64(ImageFormat.JPEG, 100);
+    console.log("image encoded to base64", imageBase64.length);
+    return imageBase64;
   };
   return (
     <View style={{ flex: 1, backgroundColor: "white", paddingTop: 50 }}>
