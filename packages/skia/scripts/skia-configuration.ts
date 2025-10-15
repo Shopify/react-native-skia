@@ -171,6 +171,59 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
       },
     };
 
+// Define MacCatalyst targets separately so they can be conditionally included
+const macCatalystTargets: { [key: string]: Target } = GRAPHITE
+  ? {}
+  : {
+      "arm64-maccatalyst": {
+        cpu: "arm64",
+        platform: "mac",
+        args: [
+          //["skia_enable_gpu", true],
+          ["target_os", `"mac"`],
+          ["target_cpu", `"arm64"`],
+          [
+            "extra_cflags",
+            `["-target","arm64-apple-ios14.0-macabi",` +
+              `"-isysroot","${appleSdkRoot}",` +
+              `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
+              `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
+          ],
+          [
+            "extra_ldflags",
+            `["-target","arm64-apple-ios14.0-macabi",` +
+              `"-isysroot","${appleSdkRoot}",` +
+              `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
+          ],
+          ["cc", '"clang"'],
+          ["cxx", '"clang++"'],
+        ],
+      },
+      "x64-maccatalyst": {
+        cpu: "x64",
+        platform: "mac",
+        args: [
+          ["target_os", `"mac"`],
+          ["target_cpu", `"x64"`],
+          [
+            "extra_cflags",
+            `["-target","x86_64-apple-ios14.0-macabi",` +
+              `"-isysroot","${appleSdkRoot}",` +
+              `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
+              `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
+          ],
+          [
+            "extra_ldflags",
+            `["-target","x86_64-apple-ios14.0-macabi",` +
+              `"-isysroot","${appleSdkRoot}",` +
+              `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
+          ],
+          ["cc", '"clang"'],
+          ["cxx", '"clang++"'],
+        ],
+      },
+    };
+
 export const configurations = {
   android: {
     targets: {
@@ -240,51 +293,7 @@ export const configurations = {
         args: [["ios_min_target", `"${appleSimulatorMinTarget}"`]],
       },
       ...tvosTargets,
-      "arm64-maccatalyst": {
-        cpu: "arm64",
-        platform: "mac",
-        args: [
-          //["skia_enable_gpu", true],
-          ["target_os", `"mac"`],
-          ["target_cpu", `"arm64"`],
-          [
-            "extra_cflags",
-            `["-target","arm64-apple-ios14.0-macabi",` +
-              `"-isysroot","${appleSdkRoot}",` +
-              `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
-              `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
-          ],
-          [
-            "extra_ldflags",
-            `["-isysroot","${appleSdkRoot}",` +
-              `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
-          ],
-          ["cc", '"clang"'],
-          ["cxx", '"clang++"'],
-        ],
-      },
-      "x64-maccatalyst": {
-        cpu: "x64",
-        platform: "mac",
-        args: [
-          ["target_os", `"mac"`],
-          ["target_cpu", `"x64"`],
-          [
-            "extra_cflags",
-            `["-target","x86_64-apple-ios14.0-macabi",` +
-              `"-isysroot","${appleSdkRoot}",` +
-              `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
-              `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
-          ],
-          [
-            "extra_ldflags",
-            `["-isysroot","${appleSdkRoot}",` +
-              `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
-          ],
-          ["cc", '"clang"'],
-          ["cxx", '"clang++"'],
-        ],
-      },
+      ...macCatalystTargets,
       "arm64-macosx": {
         platformGroup: "macosx",
         cpu: "arm64",

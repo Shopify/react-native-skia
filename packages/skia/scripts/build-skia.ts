@@ -137,11 +137,16 @@ const buildXCFrameworks = () => {
     $(
       `lipo -create ${OutFolder}/${os}/x64-iphonesimulator/${name} ${OutFolder}/${os}/arm64-iphonesimulator/${name} -output ${OutFolder}/${os}/iphonesimulator/${name}`
     );
-    $(`mkdir -p ${OutFolder}/${os}/maccatalyst`);
-    $(`rm -rf ${OutFolder}/${os}/maccatalyst/${name}`);
-    $(
-      `lipo -create ${OutFolder}/${os}/x64-maccatalyst/${name} ${OutFolder}/${os}/arm64-maccatalyst/${name} -output ${OutFolder}/${os}/maccatalyst/${name}`
-    );
+
+    // Only create MacCatalyst fat binaries if GRAPHITE is not enabled
+    if (!GRAPHITE) {
+      $(`mkdir -p ${OutFolder}/${os}/maccatalyst`);
+      $(`rm -rf ${OutFolder}/${os}/maccatalyst/${name}`);
+      $(
+        `lipo -create ${OutFolder}/${os}/x64-maccatalyst/${name} ${OutFolder}/${os}/arm64-maccatalyst/${name} -output ${OutFolder}/${os}/maccatalyst/${name}`
+      );
+    }
+
     $(`mkdir -p ${OutFolder}/${os}/macosx`);
     $(`rm -rf ${OutFolder}/${os}/macosx/${name}`);
     $(
@@ -156,7 +161,6 @@ const buildXCFrameworks = () => {
         `-library ${prefix}/arm64-iphoneos/${name} ` +
         `-library ${prefix}/iphonesimulator/${name} ` +
         `-library ${prefix}/macosx/${name} ` +
-        `-library ${prefix}/maccatalyst/${name} ` +
         ` -output ${dstPath}`
       : "xcodebuild -create-xcframework " +
         `-library ${prefix}/arm64-iphoneos/${name} ` +
@@ -232,7 +236,7 @@ const buildXCFrameworks = () => {
   if (GRAPHITE) {
     console.log("🪨 Skia Graphite");
     console.log(
-      "⚠️  Apple TV (tvOS) builds are skipped when GRAPHITE is enabled"
+      "⚠️  Apple TV (tvOS) and MacCatalyst builds are skipped when GRAPHITE is enabled"
     );
   } else {
     console.log("🐘 Skia Ganesh");
