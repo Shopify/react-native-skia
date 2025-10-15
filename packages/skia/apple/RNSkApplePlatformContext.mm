@@ -16,14 +16,14 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
-#import "include/core/SkColorSpace.h"
-#include "include/core/SkColor.h"
 #include "include/core/SkBlendMode.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkColor.h"
+#import "include/core/SkColorSpace.h"
 #include "include/core/SkFontMgr.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkSamplingOptions.h"
 #include "include/core/SkSurface.h"
-#include "include/core/SkCanvas.h"
 
 #include "include/ports/SkFontMgr_mac_ct.h"
 
