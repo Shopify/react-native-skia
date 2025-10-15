@@ -27,7 +27,7 @@
 #include "include/utils/SkParsePath.h"
 #include "include/utils/SkTextUtils.h"
 
-#include "modules/pathops/include/SkPathOps.h"
+#include "include/pathops/SkPathOps.h"
 
 #pragma clang diagnostic pop
 
