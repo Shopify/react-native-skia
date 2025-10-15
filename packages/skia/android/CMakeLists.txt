@@ -61,7 +61,6 @@ set (SKIA_SKUNICODE_CORE_LIB "skunicode_core")
 set (SKIA_SKUNICODE_ICU_LIB "skunicode_icu")
 set (SKIA_SKOTTIE_LIB "skottie")
 set (SKIA_SKSG_LIB "sksg")
-set (SKIA_PATHOPS_LIB "pathops")
 set (SKIA_JSONREADER_LIB "jsonreader")
 
 
@@ -326,7 +325,6 @@ if(${REACT_NATIVE_VERSION} GREATER_EQUAL 76)
         ${SKIA_SKUNICODE_ICU_LIB}
         ${SKIA_SKOTTIE_LIB}
         ${SKIA_SKSG_LIB}
-        ${SKIA_PATHOPS_LIB}
         ${SKIA_JSONREADER_LIB}
         ${SKIA_LIB}
         -ljnigraphics
@@ -350,7 +348,6 @@ else()
         ${SKIA_SKUNICODE_ICU_LIB}
         ${SKIA_SKOTTIE_LIB}
         ${SKIA_SKSG_LIB}
-        ${SKIA_PATHOPS_LIB}
         ${SKIA_JSONREADER_LIB}
         ${SKIA_LIB}
         -ljnigraphics

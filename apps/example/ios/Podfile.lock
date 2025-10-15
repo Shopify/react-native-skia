@@ -2193,7 +2193,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 0502faf46cab8fb89cfc7bf3e6c6109b6ef9b5de
   React-microtasksnativemodule: 663bc64e3a96c5fc91081923ae7481adc1359a78
   react-native-safe-area-context: 286b3e7b5589795bb85ffc38faf4c0706c48a092
-  react-native-skia: ceb4b0bbfcd2d016d7d85a64454fbb06c54ef74d
+  react-native-skia: 0457c9311947ef4642e3f55d5647220c5e529eb2
   react-native-slider: 27263d134d55db948a4706f1e47d0ec88fb354dd
   React-NativeModulesApple: 16fbd5b040ff6c492dacc361d49e63cba7a6a7a1
   React-perflogger: ab51b7592532a0ea45bf6eed7e6cae14a368b678
@@ -2223,8 +2223,8 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: f2e81d80afd71a8058589e19d8a134243fa53f17
   ReactCodegen: 50b6e45bbbef9b39d9798820cdbe87bfc7922e22
   ReactCommon: 3d39389f8e2a2157d5c999f8fba57bd1c8f226f0
-  ReactNativeHost: f2ecc49200441384efb6c6e8bffe62ba29ee16ae
-  ReactTestApp-DevSupport: 15d2ef4884e8f5fd30ded3dec59b010f76384f37
+  ReactNativeHost: e96154926221741f253f2c1ded13c6959c5c3d43
+  ReactTestApp-DevSupport: 6994b53b5b81139a8ce63e0776c726c95de079a1
   ReactTestApp-Resources: 1bd9ff10e4c24f2ad87101a32023721ae923bccf
   RNGestureHandler: 66e593addd8952725107cfaa4f5e3378e946b541
   RNReanimated: 858fe25904af44131b8b608a5005b64778609a6a
