@@ -69,7 +69,6 @@ const ParagraphOutputsAndroid = BUILD_WITH_PARAGRAPH
 
 export const commonArgs = [
   ["skia_use_piex", true],
-  ["skia_use_sfntly", false],
   ["skia_use_system_expat", false],
   ["skia_use_system_libjpeg_turbo", false],
   ["skia_use_system_libpng", false],
@@ -216,7 +215,6 @@ export const configurations = {
       "libsvg.a",
       "libskottie.a",
       "libsksg.a",
-      "libpathops.a",
       "libjsonreader.a",
       ...ParagraphOutputsAndroid,
     ],
@@ -246,10 +244,9 @@ export const configurations = {
         cpu: "arm64",
         platform: "mac",
         args: [
-          ["skia_enable_gpu", true],
+          //["skia_enable_gpu", true],
           ["target_os", `"mac"`],
           ["target_cpu", `"arm64"`],
-          ["mac_deployment_target", `"14.0"`],
           [
             "extra_cflags",
             `["-target","arm64-apple-ios14.0-macabi",` +
@@ -270,10 +267,8 @@ export const configurations = {
         cpu: "x64",
         platform: "mac",
         args: [
-          ["skia_enable_gpu", true],
           ["target_os", `"mac"`],
           ["target_cpu", `"x64"`],
-          ["mac_deployment_target", `"14.0"`],
           [
             "extra_cflags",
             `["-target","x86_64-apple-ios14.0-macabi",` +
@@ -314,7 +309,6 @@ export const configurations = {
       "libsvg.a",
       "libskottie.a",
       "libsksg.a",
-      "libpathops.a",
       ...ParagraphApple,
     ],
   },
@@ -393,7 +387,6 @@ export const copyHeaders = () => {
     ...copyModule("skshaper"),
     ...copyModule("skottie"),
     ...copyModule("sksg"),
-    ...copyModule("pathops"),
 
     "rm -rf ./cpp/skia/modules/jsonreader",
     "cp -a ../../externals/skia/modules/jsonreader/. ./cpp/skia/modules/jsonreader",
@@ -430,8 +423,6 @@ export const copyHeaders = () => {
 
     "mkdir -p ./cpp/skia/modules/skunicode/include/",
     "cp -a ../../externals/skia/modules/skunicode/include/SkUnicode.h ./cpp/skia/modules/skunicode/include/.",
-
-    "rm -rf ./cpp/skia/include/pathops/SkPathOps.h",
   ].map((cmd) => {
     console.log(cmd);
     $(cmd);
