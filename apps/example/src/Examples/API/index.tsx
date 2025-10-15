@@ -33,6 +33,7 @@ import { StressTest } from "./StressTest";
 import { StressTest2 } from "./StressTest2";
 import { StressTest3 } from "./StressTest3";
 import { StressTest4 } from "./StressTest4";
+import { ImageLoading } from "../ImageLoading/ImageLoading";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
@@ -72,6 +73,13 @@ export const API = () => {
         component={AnimatedImages}
         options={{
           title: "🌅 Animated Images",
+        }}
+      />
+      <Stack.Screen
+        name="ImageLoading"
+        component={ImageLoading}
+        options={{
+          title: "🖼 Image Loading",
         }}
       />
       <Stack.Screen

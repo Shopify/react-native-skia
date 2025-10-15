@@ -23,6 +23,10 @@ export const examples = [
     title: "🌅 Animated Images",
   },
   {
+    screen: "ImageLoading",
+    title: "🖼 Image Loading",
+  },
+  {
     screen: "Paragraphs",
     title: "📚 Text & Paragraphs",
   },
