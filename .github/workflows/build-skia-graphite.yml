@@ -20,7 +20,6 @@ jobs:
               ./externals/skia/out/android/arm/libskparagraph.a
               ./externals/skia/out/android/arm/libskunicode_core.a
               ./externals/skia/out/android/arm/libskunicode_icu.a
-              ./externals/skia/out/android/arm/libpathops.a
               ./externals/skia/out/android/arm/libjsonreader.a
           - target: "android-arm64"
             artifact_name: "skia-graphite-android-arm-64"
@@ -33,7 +32,6 @@ jobs:
               ./externals/skia/out/android/arm64/libskparagraph.a
               ./externals/skia/out/android/arm64/libskunicode_core.a
               ./externals/skia/out/android/arm64/libskunicode_icu.a
-              ./externals/skia/out/android/arm64/libpathops.a
               ./externals/skia/out/android/arm64/libjsonreader.a
           - target: "android-x86"
             artifact_name: "skia-graphite-android-arm-x86"
@@ -46,7 +44,6 @@ jobs:
               ./externals/skia/out/android/x86/libskparagraph.a
               ./externals/skia/out/android/x86/libskunicode_core.a
               ./externals/skia/out/android/x86/libskunicode_icu.a
-              ./externals/skia/out/android/x86/libpathops.a
               ./externals/skia/out/android/x86/libjsonreader.a
           - target: "android-x64"
             artifact_name: "skia-graphite-android-arm-x64"
@@ -59,7 +56,6 @@ jobs:
               ./externals/skia/out/android/x64/libskparagraph.a
               ./externals/skia/out/android/x64/libskunicode_core.a
               ./externals/skia/out/android/x64/libskunicode_icu.a
-              ./externals/skia/out/android/x64/libpathops.a
               ./externals/skia/out/android/x64/libjsonreader.a
       fail-fast: false
     steps:
