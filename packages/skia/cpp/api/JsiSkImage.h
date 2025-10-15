@@ -245,11 +245,7 @@ public:
     auto grContext = getContext()->getDirectContext();
     auto image = getObject();
     if (!grContext) {
-      throw jsi::JSError(runtime, "No GPU context available");
-    }
-    if (image && !image->isValid(grContext->asRecorder())) {
-      throw jsi::JSError(runtime, "invoked makeNonTextureImage() on an image "
-                                  "that does not belong to this context");
+      throw jsi::JSError(runtime, "No GPU context available.");
     }
     auto rasterImage = image->makeRasterImage(grContext);
 #endif
