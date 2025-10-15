@@ -1,6 +1,8 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
+import { ImageLoading } from "../ImageLoading/ImageLoading";
+
 import type { Routes } from "./Routes";
 import { List } from "./List";
 import { PathEffectDemo } from "./PathEffect";
@@ -33,7 +35,6 @@ import { StressTest } from "./StressTest";
 import { StressTest2 } from "./StressTest2";
 import { StressTest3 } from "./StressTest3";
 import { StressTest4 } from "./StressTest4";
-import { ImageLoading } from "../ImageLoading/ImageLoading";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const API = () => {
