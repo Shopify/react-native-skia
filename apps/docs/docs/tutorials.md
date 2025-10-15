@@ -29,7 +29,8 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 * 📸 [Instagram Stickers - "Can it be done in React Native?" ](https://www.youtube.com/watch?v=5yM4NPcTwY4)
 
 ## 🌁 Backdrop Filters
-* 🪟 [Glassmorphism in React Native ](https://www.youtube.com/watch?v=ao2i_sOD-z0)
+* 💧 [Liquid Glass with React Native Skia](https://www.youtube.com/watch?v=qYFMOMVZoPY)
+* 🪟 [Glassmorphism in React Native](https://www.youtube.com/watch?v=ao2i_sOD-z0)
 
 ## 📊 Charts
 * 📈 [Charts in React Native Skia ](https://www.youtube.com/watch?v=xeLdmn3se1I)
