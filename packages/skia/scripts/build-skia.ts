@@ -6,6 +6,7 @@ import {
   configurations,
   copyHeaders,
   GRAPHITE,
+  MACCATALYST,
   OutFolder,
   PackageRoot,
   ProjectRoot,
@@ -138,8 +139,8 @@ const buildXCFrameworks = () => {
       `lipo -create ${OutFolder}/${os}/x64-iphonesimulator/${name} ${OutFolder}/${os}/arm64-iphonesimulator/${name} -output ${OutFolder}/${os}/iphonesimulator/${name}`
     );
 
-    // Only create MacCatalyst fat binaries if GRAPHITE is not enabled
-    if (!GRAPHITE) {
+    // Only create macCatalyst frameworks if MACCATALYST is enabled
+    if (MACCATALYST) {
       $(`mkdir -p ${OutFolder}/${os}/maccatalyst`);
       $(`rm -rf ${OutFolder}/${os}/maccatalyst/${name}`);
       $(
@@ -155,21 +156,28 @@ const buildXCFrameworks = () => {
     const [lib] = name.split(".");
     const dstPath = `${PackageRoot}/libs/${os}/${lib}.xcframework`;
 
-    // Build the xcodebuild command conditionally based on GRAPHITE
-    const xcframeworkCmd = GRAPHITE
-      ? "xcodebuild -create-xcframework " +
-        `-library ${prefix}/arm64-iphoneos/${name} ` +
-        `-library ${prefix}/iphonesimulator/${name} ` +
-        `-library ${prefix}/macosx/${name} ` +
-        ` -output ${dstPath}`
-      : "xcodebuild -create-xcframework " +
-        `-library ${prefix}/arm64-iphoneos/${name} ` +
-        `-library ${prefix}/iphonesimulator/${name} ` +
+    // Build the xcodebuild command conditionally based on GRAPHITE and MACCATALYST
+    let xcframeworkCmd = "xcodebuild -create-xcframework " +
+      `-library ${prefix}/arm64-iphoneos/${name} ` +
+      `-library ${prefix}/iphonesimulator/${name} `;
+
+    // Add tvOS libraries if not using GRAPHITE
+    if (!GRAPHITE) {
+      xcframeworkCmd +=
         `-library ${prefix}/arm64-tvos/${name} ` +
-        `-library ${prefix}/tvsimulator/${name} ` +
-        `-library ${prefix}/macosx/${name} ` +
-        `-library ${prefix}/maccatalyst/${name} ` +
-        ` -output ${dstPath}`;
+        `-library ${prefix}/tvsimulator/${name} `;
+    }
+
+    // Add macOS library
+    xcframeworkCmd += `-library ${prefix}/macosx/${name} `;
+
+    // Add macCatalyst library if enabled
+    if (MACCATALYST) {
+      xcframeworkCmd += `-library ${prefix}/maccatalyst/${name} `;
+    }
+
+    // Add output path
+    xcframeworkCmd += ` -output ${dstPath}`;
 
     $(xcframeworkCmd);
   });
@@ -240,6 +248,14 @@ const buildXCFrameworks = () => {
     );
   } else {
     console.log("🐘 Skia Ganesh");
+  }
+
+  if (MACCATALYST) {
+    console.log("✅ macCatalyst builds are enabled");
+  } else {
+    console.log(
+      "⚠️  macCatalyst builds are disabled (set SK_MACCATALYST=1 to enable)"
+    );
   }
 
   // Check Android environment variables if android is in target platforms

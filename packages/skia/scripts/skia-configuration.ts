@@ -5,6 +5,7 @@ import { $ } from "./utils";
 
 const DEBUG = false;
 export const GRAPHITE = !!process.env.SK_GRAPHITE;
+export const MACCATALYST = !!process.env.SK_MACCATALYST;
 const BUILD_WITH_PARAGRAPH = true;
 
 export const SkiaSrc = path.join(__dirname, "../../../externals/skia");
@@ -171,10 +172,9 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
       },
     };
 
-// Define MacCatalyst targets separately so they can be conditionally included
-const macCatalystTargets: { [key: string]: Target } = GRAPHITE
-  ? {}
-  : {
+// Define macCatalyst targets separately so they can be conditionally included
+const maccatalystTargets: { [key: string]: Target } = MACCATALYST
+  ? {
       "arm64-maccatalyst": {
         cpu: "arm64",
         platform: "mac",
@@ -191,8 +191,7 @@ const macCatalystTargets: { [key: string]: Target } = GRAPHITE
           ],
           [
             "extra_ldflags",
-            `["-target","arm64-apple-ios14.0-macabi",` +
-              `"-isysroot","${appleSdkRoot}",` +
+            `["-isysroot","${appleSdkRoot}",` +
               `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
           ],
           ["cc", '"clang"'],
@@ -214,15 +213,15 @@ const macCatalystTargets: { [key: string]: Target } = GRAPHITE
           ],
           [
             "extra_ldflags",
-            `["-target","x86_64-apple-ios14.0-macabi",` +
-              `"-isysroot","${appleSdkRoot}",` +
+            `["-isysroot","${appleSdkRoot}",` +
               `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
           ],
           ["cc", '"clang"'],
           ["cxx", '"clang++"'],
         ],
       },
-    };
+    }
+  : {};
 
 export const configurations = {
   android: {
@@ -293,7 +292,7 @@ export const configurations = {
         args: [["ios_min_target", `"${appleSimulatorMinTarget}"`]],
       },
       ...tvosTargets,
-      ...macCatalystTargets,
+      ...maccatalystTargets,
       "arm64-macosx": {
         platformGroup: "macosx",
         cpu: "arm64",
