@@ -1657,7 +1657,7 @@ PODS:
     - React-logger (= 0.78.0)
     - React-perflogger (= 0.78.0)
     - React-utils (= 0.78.0)
-  - ReactNativeHost (0.5.5):
+  - ReactNativeHost (0.5.12):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1680,7 +1680,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - ReactTestApp-DevSupport (4.3.1):
+  - ReactTestApp-DevSupport (4.4.7):
     - React-Core
     - React-jsi
   - ReactTestApp-Resources (1.0.0-dev)
@@ -1986,8 +1986,8 @@ DEPENDENCIES:
   - ReactAppDependencyProvider (from `build/generated/ios`)
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../../../node_modules/react-native/ReactCommon`)
-  - "ReactNativeHost (from `../../../node_modules/@rnx-kit/react-native-host`)"
-  - ReactTestApp-DevSupport (from `../../../node_modules/react-native-test-app`)
+  - "ReactNativeHost (from `../node_modules/@rnx-kit/react-native-host`)"
+  - ReactTestApp-DevSupport (from `../node_modules/react-native-test-app`)
   - ReactTestApp-Resources (from `..`)
   - RNGestureHandler (from `../../../node_modules/react-native-gesture-handler`)
   - RNReanimated (from `../../../node_modules/react-native-reanimated`)
@@ -2138,9 +2138,9 @@ EXTERNAL SOURCES:
   ReactCommon:
     :path: "../../../node_modules/react-native/ReactCommon"
   ReactNativeHost:
-    :path: "../../../node_modules/@rnx-kit/react-native-host"
+    :path: "../node_modules/@rnx-kit/react-native-host"
   ReactTestApp-DevSupport:
-    :path: "../../../node_modules/react-native-test-app"
+    :path: "../node_modules/react-native-test-app"
   ReactTestApp-Resources:
     :path: ".."
   RNGestureHandler:
