@@ -2,10 +2,9 @@ import fs from "fs";
 import path from "path";
 
 import { $ } from "./utils";
-import { GRAPHITE } from "./skia-configuration";
+import { GRAPHITE, SkiaSrc } from "./skia-configuration";
 
 const repo = "shopify/react-native-skia";
-const workflow = `build-skia${GRAPHITE ? "-graphite" : ""}.yml`;
 const prefix = GRAPHITE ? "skia-graphite" : "skia";
 const names = [
   `${prefix}-android-arm`,
@@ -17,7 +16,37 @@ const names = [
 if (GRAPHITE) {
   names.push("skia-graphite-headers");
 }
-//const branch = "main";
+
+// Get Skia version from the git branch
+const getSkiaVersion = (): string => {
+  try {
+    let branch = $(
+      `git -C "${SkiaSrc}" branch --show-current`
+    ).toString("utf8").trim();
+
+    if (!branch) {
+      branch = $(
+        `git -C "${SkiaSrc}" describe --all --exact-match 2>/dev/null`
+      ).toString("utf8").trim();
+    }
+
+    if (!branch) {
+      throw new Error("Could not determine Skia branch");
+    }
+
+    // Strip remotes/origin/chrome/ or chrome/ prefix if present
+    branch = branch.replace(/^remotes\/origin\/chrome\//, "");
+    branch = branch.replace(/^chrome\//, "");
+
+    return branch;
+  } catch (error) {
+    throw new Error(`Failed to get Skia version: ${error}`);
+  }
+};
+
+const skiaVersion = getSkiaVersion();
+const releaseTag = `skia-${skiaVersion}`;
+console.log(`📦 Downloading Skia prebuilt binaries for version: ${skiaVersion}`);
 
 const artifactsDir = path.resolve(
   __dirname,
@@ -45,19 +74,28 @@ const clearDirectory = (directory: string) => {
   }
 };
 
-const result = $(
-  `gh run list --repo "${repo}" --workflow "${workflow}" --status success --limit 1 --json databaseId --jq '.[0].databaseId'`
-);
-const id = result.toString("utf8").trim();
-
 console.log("🧹 Clearing existing artifacts...");
 clearDirectory(artifactsDir);
 
-console.log(`⬇️  Downloading artifacts to ${artifactsDir}`);
+console.log(`⬇️  Downloading release assets to ${artifactsDir}`);
 names.forEach((artifactName) => {
+  const assetName = `${artifactName}-${releaseTag}.tar.gz`;
+  const assetPath = path.join(artifactsDir, assetName);
+  const extractDir = path.join(artifactsDir, artifactName);
+
+  console.log(`   Downloading ${assetName}...`);
   $(
-    `gh run download "${id}" --repo "${repo}" --name "${artifactName}" --dir ${artifactsDir}/${artifactName}`
+    `gh release download "${releaseTag}" --repo "${repo}" --pattern "${assetName}" --dir "${artifactsDir}"`
   );
+
+  console.log(`   Extracting ${assetName}...`);
+  fs.mkdirSync(extractDir, { recursive: true });
+  $(
+    `tar -xzf "${assetPath}" -C "${extractDir}" --strip-components=0`
+  );
+
+  // Clean up the tar file
+  fs.unlinkSync(assetPath);
 });
 
 // Copy artifacts to libs folder in the required structure
@@ -77,7 +115,8 @@ const androidArchs = [
 ];
 
 androidArchs.forEach(({ src, dest }) => {
-  const srcDir = path.join(artifactsDir, src);
+  // The tar file extracts to artifactName/dest (e.g., skia-android-arm/armeabi-v7a)
+  const srcDir = path.join(artifactsDir, src, dest);
   const destDir = path.join(androidDir, dest);
   if (fs.existsSync(srcDir)) {
     fs.mkdirSync(destDir, { recursive: true });
@@ -89,7 +128,8 @@ androidArchs.forEach(({ src, dest }) => {
 
 // Create apple directory structure
 const appleDir = path.join(libsDir, "apple");
-const appleSrcDir = path.join(artifactsDir, "skia-apple-xcframeworks");
+// The tar file extracts to skia-apple-xcframeworks/apple
+const appleSrcDir = path.join(artifactsDir, "skia-apple-xcframeworks", "apple");
 if (fs.existsSync(appleSrcDir)) {
   fs.mkdirSync(appleDir, { recursive: true });
 
