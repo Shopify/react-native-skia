@@ -5,7 +5,7 @@ import { $ } from "./utils";
 
 const DEBUG = false;
 export const GRAPHITE = !!process.env.SK_GRAPHITE;
-export const MACCATALYST = !!process.env.SK_MACCATALYST;
+export const MACCATALYST = !GRAPHITE;
 const BUILD_WITH_PARAGRAPH = true;
 
 export const SkiaSrc = path.join(__dirname, "../../../externals/skia");
