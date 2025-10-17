@@ -9,24 +9,10 @@ import { copyHeaders } from "./skia-configuration";
 
 const repo = "shopify/react-native-skia";
 
-// For now, we'll read the version from an environment variable or a config file
-// This avoids the dependency on git and the external skia submodule
 const getSkiaVersion = (): string => {
-  // Check environment variable first
-  if (process.env.SKIA_VERSION) {
-    return process.env.SKIA_VERSION;
-  }
-
-  // Try to read from a version file
-  const versionFile = path.join(__dirname, "..", "SKIA_VERSION");
-  if (fs.existsSync(versionFile)) {
-    return fs.readFileSync(versionFile, "utf8").trim();
-  }
-
-  throw new Error(
-    "SKIA_VERSION environment variable or SKIA_VERSION file not found. " +
-      "Please set SKIA_VERSION environment variable (e.g., SKIA_VERSION=m142)"
-  );
+  const packageJsonPath = path.join(__dirname, "..", "package.json");
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+  return packageJson.skiaVersion;
 };
 
 const GRAPHITE = !!process.env.SK_GRAPHITE;
