@@ -30,15 +30,17 @@ jobs:
           if [ -z "$branch" ]; then
             branch=$(git -C externals/skia rev-parse --short HEAD)
           fi
+          # Strip remotes/origin/chrome/ prefix if present
+          branch=${branch#remotes/origin/chrome/}
           slug=${branch//\//-}
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
           echo "branch_slug=$slug" >> "$GITHUB_OUTPUT"
       - name: Compute release metadata
         id: release_meta
         run: |
-          tag="skia-${SKIA_BRANCH_SLUG}-r${GITHUB_RUN_NUMBER}"
+          tag="skia-${SKIA_BRANCH_SLUG}"
           echo "tag_name=$tag" >> "$GITHUB_OUTPUT"
-          echo "release_name=Skia ${SKIA_BRANCH} (Run #${GITHUB_RUN_NUMBER})" >> "$GITHUB_OUTPUT"
+          echo "release_name=Skia ${SKIA_BRANCH}" >> "$GITHUB_OUTPUT"
         env:
           SKIA_BRANCH: ${{ steps.skia_meta.outputs.branch }}
           SKIA_BRANCH_SLUG: ${{ steps.skia_meta.outputs.branch_slug }}
@@ -50,9 +52,10 @@ jobs:
         with:
           tag_name: ${{ steps.release_meta.outputs.tag_name }}
           name: ${{ steps.release_meta.outputs.release_name }}
+          body: "Skia prebuilt binaries for version ${{ steps.skia_meta.outputs.branch }}"
           draft: false
-          prerelease: false
-          generate_release_notes: true
+          prerelease: true
+          generate_release_notes: false
   build:
     needs: prepare-release
     runs-on: macos-latest-xlarge
