@@ -45,7 +45,7 @@
     "clean-skia": "yarn rimraf ./libs && yarn rimraf ../../externals/skia/out",
     "build-skia": "tsx ./scripts/build-skia.ts",
     "copy-skia-headers": "tsx ./scripts/copy-skia-headers.ts",
-    "install-skia": "tsx ./scripts/download-artifacts.ts && yarn copy-skia-headers",
+    "install-skia": "tsx ./scripts/install-skia.ts",
     "clang-format": "yarn clang-format-ios && yarn clang-format-android && yarn clang-format-common",
     "clang-format-ios": "find apple/ -iname '*.h' -o -iname '*.mm' -o -iname '*.cpp' | xargs clang-format -i",
     "clang-format-android": "find android/cpp/ -iname '*.h' -o -iname '*.m' -o -iname '*.cpp' | xargs clang-format -i",
