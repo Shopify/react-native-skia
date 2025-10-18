@@ -146,3 +146,4 @@ jobs:
         with:
           tag_name: ${{ needs.prepare-release.outputs.tag_name }}
           files: ${{ steps.package.outputs.asset_path }}
+          prerelease: true
