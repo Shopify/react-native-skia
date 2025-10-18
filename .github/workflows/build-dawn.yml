@@ -95,11 +95,8 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Checkout Dawn repository
-        uses: actions/checkout@v5
-        with:
-          repository: google/dawn
-          ref: ${{ env.DAWN_BRANCH }}
-          path: externals/dawn
+        run: |
+          git clone --depth 1 --branch ${{ env.DAWN_BRANCH }} https://dawn.googlesource.com/dawn externals/dawn
 
       - name: Setup Android NDK
         id: setup-ndk
@@ -181,11 +178,8 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Checkout Dawn repository
-        uses: actions/checkout@v5
-        with:
-          repository: google/dawn
-          ref: ${{ env.DAWN_BRANCH }}
-          path: externals/dawn
+        run: |
+          git clone --depth 1 --branch ${{ env.DAWN_BRANCH }} https://dawn.googlesource.com/dawn externals/dawn
 #          submodules: true
 
       - name: Setup Xcode
