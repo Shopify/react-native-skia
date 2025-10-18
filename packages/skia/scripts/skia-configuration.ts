@@ -356,6 +356,7 @@ const getFirstAvailableTarget = () => {
 };
 
 export const copyHeaders = () => {
+  console.log("⚙️ Copying Skia headers...");
   process.chdir(PackageRoot);
   [
     "rm -rf ./cpp/skia",
@@ -434,7 +435,6 @@ export const copyHeaders = () => {
   ].map((cmd) => {
     $(cmd);
   });
-  console.log("⚙️ Copying Skia headers...");
   // Check for duplicate header names and issue warnings
   const duplicateHeaders = $(
     "find ./cpp -name '*.h' -type f | sed 's/.*\\///' | sort | uniq -d"
