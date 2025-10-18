@@ -113,10 +113,23 @@ const downloadToFile = (url: string, destPath: string): Promise<void> => {
   });
 };
 
-// On Windows, convert backslashes to forward slashes to avoid tar misinterpreting
-// paths like C:\path as remote host connection specs (C: as hostname)
+// On Windows, convert paths to avoid tar misinterpreting paths like C:\path
+// as remote host connection specs (C: as hostname)
 const normalizePathForTar = (filePath: string): string => {
-  return process.platform === "win32" ? filePath.replace(/\\/g, "/") : filePath;
+  if (process.platform !== "win32") {
+    return filePath;
+  }
+
+  // Convert backslashes to forward slashes
+  let normalized = filePath.replace(/\\/g, "/");
+
+  // Convert C:/path to /c/path for Git Bash tar compatibility
+  normalized = normalized.replace(
+    /^([A-Za-z]):\//,
+    (_, drive) => `/${drive.toLowerCase()}/`
+  );
+
+  return normalized;
 };
 
 const extractTarGz = async (
@@ -193,6 +206,31 @@ const artifactsDir = path.resolve(
 
 const libsDir = path.resolve(__dirname, "../libs");
 
+// Function to check if prebuilt binaries are already installed
+const areBinariesInstalled = (): boolean => {
+  if (!fs.existsSync(libsDir)) {
+    return false;
+  }
+
+  // Check for Android libraries
+  const androidDir = path.join(libsDir, "android");
+  const androidArchs = ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"];
+  for (const arch of androidArchs) {
+    const archDir = path.join(androidDir, arch);
+    if (!fs.existsSync(archDir) || fs.readdirSync(archDir).length === 0) {
+      return false;
+    }
+  }
+
+  // Check for Apple frameworks
+  const appleDir = path.join(libsDir, "apple");
+  if (!fs.existsSync(appleDir) || fs.readdirSync(appleDir).length === 0) {
+    return false;
+  }
+
+  return true;
+};
+
 // Function to clear directory contents
 const clearDirectory = (directory: string) => {
   if (fs.existsSync(directory)) {
@@ -213,6 +251,23 @@ const clearDirectory = (directory: string) => {
 };
 
 const main = async () => {
+  const forceReinstall = process.argv.includes("--force");
+  const skipHeaders = process.argv.includes("--no-headers");
+
+  // Check if binaries are already installed
+  if (!forceReinstall && areBinariesInstalled()) {
+    console.log("✅ Prebuilt binaries already installed, skipping download");
+    console.log("   Use --force to reinstall");
+    return;
+  }
+
+  if (forceReinstall) {
+    console.log("🔄 Force reinstall requested");
+  }
+  if (skipHeaders) {
+    console.log("⏭️  Skipping headers installation");
+  }
+
   console.log("🧹 Clearing existing artifacts...");
   clearDirectory(artifactsDir);
 
@@ -309,7 +364,10 @@ const main = async () => {
   console.log("🗑️  Cleaning up artifacts directory...");
   clearDirectory(artifactsDir);
   fs.rmdirSync(artifactsDir);
-  copyHeaders();
+
+  if (!skipHeaders) {
+    copyHeaders();
+  }
 };
 
 // Run the main function
