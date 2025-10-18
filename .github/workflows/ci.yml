@@ -397,33 +397,6 @@ jobs:
         working-directory: apps/example/ios
         run: xcodebuild -workspace example.xcworkspace -scheme ReactTestApp -destination 'platform=macOS,arch=arm64,variant=Mac Catalyst' -configuration Debug build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
-  build-test-macos-graphite:
-    runs-on: macos-latest
-    env:
-      TURBO_CACHE_DIR: .turbo/macos
-    steps:
-      - name: Checkout
-        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
-        with:
-          submodules: recursive
-
-      - name: Setup
-        uses: ./.github/actions/setup
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          graphite: true
-
-      - name: Cache turborepo for macOS
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: ${{ env.TURBO_CACHE_DIR }}
-          key: ${{ runner.os }}-turborepo-macos-${{ hashFiles('yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-turborepo-macos-
-
-      - name: Build example for macOS
-        run: yarn turbo run build:macos --concurrency 1
-
   # test-web:
   #   runs-on: macos-latest
   #   steps:

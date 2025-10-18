@@ -157,7 +157,8 @@ const buildXCFrameworks = () => {
     const dstPath = `${PackageRoot}/libs/${os}/${lib}.xcframework`;
 
     // Build the xcodebuild command conditionally based on GRAPHITE and MACCATALYST
-    let xcframeworkCmd = "xcodebuild -create-xcframework " +
+    let xcframeworkCmd =
+      "xcodebuild -create-xcframework " +
       `-library ${prefix}/arm64-iphoneos/${name} ` +
       `-library ${prefix}/iphonesimulator/${name} `;
 
