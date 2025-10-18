@@ -229,6 +229,10 @@ public:
     return _jniPlatformContext->takeScreenshotFromViewTag(tag);
   }
 
+  void setRenderEffectAndroid(int viewTag, const std::string &shaderString) override {
+    _jniPlatformContext->setRenderEffectAndroid(viewTag, shaderString);
+  }
+
 private:
   JniPlatformContext *_jniPlatformContext;
 };
