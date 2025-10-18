@@ -16,6 +16,7 @@
   "module": "lib/module/index.js",
   "types": "lib/typescript/index.d.ts",
   "files": [
+    "install-skia.mjs",
     "src/**",
     "lib/**",
     "README.md",
