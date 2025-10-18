@@ -245,7 +245,7 @@ const buildXCFrameworks = () => {
   if (GRAPHITE) {
     console.log("🪨 Skia Graphite");
     console.log(
-      "⚠️  Apple TV (tvOS) builds are skipped when GRAPHITE is enabled"
+      "⚠️  Apple TV (tvOS) and MacCatalyst builds are skipped when GRAPHITE is enabled"
     );
   } else {
     console.log("🐘 Skia Ganesh");
