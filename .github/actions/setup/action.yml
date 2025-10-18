@@ -39,7 +39,7 @@ runs:
     - name: Copy Artifacts to libs folder
       if: ${{ inputs.download_skia == 'true' }}
       working-directory: packages/skia
-      run: yarn install-skia
+      run: yarn install-skia --no-headers
       shell: bash
       env:
         SK_GRAPHITE: ${{ inputs.graphite == 'true' && '1' || '' }}
