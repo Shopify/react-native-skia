@@ -7,10 +7,57 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  DAWN_BRANCH: main  # Configure the Dawn branch to checkout
+  DAWN_BRANCH: chromium/7472  # Configure the Dawn branch to checkout
 
 jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    outputs:
+      dawn_branch: ${{ steps.dawn_meta.outputs.branch }}
+      dawn_branch_slug: ${{ steps.dawn_meta.outputs.branch_slug }}
+      tag_name: ${{ steps.release_meta.outputs.tag_name }}
+      release_name: ${{ steps.release_meta.outputs.release_name }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Determine Dawn branch metadata
+        id: dawn_meta
+        run: |
+          set -eo pipefail
+          branch="${DAWN_BRANCH}"
+          # Convert slashes to hyphens for tag-safe slug
+          slug=${branch//\//-}
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          echo "branch_slug=$slug" >> "$GITHUB_OUTPUT"
+        env:
+          DAWN_BRANCH: ${{ env.DAWN_BRANCH }}
+
+      - name: Compute release metadata
+        id: release_meta
+        run: |
+          tag="dawn-${DAWN_BRANCH_SLUG}"
+          echo "tag_name=$tag" >> "$GITHUB_OUTPUT"
+          echo "release_name=Dawn ${DAWN_BRANCH}" >> "$GITHUB_OUTPUT"
+        env:
+          DAWN_BRANCH: ${{ steps.dawn_meta.outputs.branch }}
+          DAWN_BRANCH_SLUG: ${{ steps.dawn_meta.outputs.branch_slug }}
+
+      - name: Create GitHub release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.release_meta.outputs.tag_name }}
+          name: ${{ steps.release_meta.outputs.release_name }}
+          body: "Dawn prebuilt binaries for version ${{ steps.dawn_meta.outputs.branch }}"
+          draft: false
+          prerelease: true
+          generate_release_notes: false
+
   mobile-android:
+    needs: prepare-release
     strategy:
       fail-fast: false
       matrix:
@@ -80,6 +127,7 @@ jobs:
       - name: Strip Android binaries
         run: |
           ${{ matrix.strip_tool }} ${{ matrix.output_dir }}/${{ matrix.library_path }}
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -90,14 +138,16 @@ jobs:
         if: matrix.arch == 'arm64-v8a'
         run: |
           cmake --install ${{ matrix.output_dir }} --prefix dawn-headers
+
       - name: Upload headers (from arm64-v8a build only)
         if: matrix.arch == 'arm64-v8a'
         uses: actions/upload-artifact@v4
         with:
-          name: dawn-headers-${{ github.sha }}
+          name: dawn-headers
           path: dawn-headers/
 
   mobile-apple:
+    needs: prepare-release
     strategy:
       fail-fast: false
       matrix:
@@ -167,7 +217,7 @@ jobs:
   package-mobile:
     name: Package Mobile Artifacts
     runs-on: macos-latest
-    needs: [mobile-android, mobile-apple]
+    needs: [prepare-release, mobile-android, mobile-apple]
     steps:
       - name: Checkout main repository
         uses: actions/checkout@v5
@@ -178,6 +228,12 @@ jobs:
           pattern: build-*
           path: artifacts
 
+      - name: Download headers
+        uses: actions/download-artifact@v5
+        with:
+          name: dawn-headers
+          path: dawn-headers
+
       - name: Create iOS Simulator fat binary
         run: |
           mkdir -p libs/apple/iphonesimulator
@@ -185,35 +241,41 @@ jobs:
             artifacts/build-ios-sim_x86_64/libwebgpu_dawn.a \
             artifacts/build-ios-sim_arm64/libwebgpu_dawn.a \
             -output libs/apple/iphonesimulator/libwebgpu_dawn.a
+
       - name: Create XCFramework
         run: |
           xcodebuild -create-xcframework \
             -library libs/apple/iphonesimulator/libwebgpu_dawn.a \
             -library artifacts/build-ios-arm64/libwebgpu_dawn.a \
             -library artifacts/build-macos-universal/libwebgpu_dawn.a \
-            -output dawn-apple-${{ github.sha }}.xcframework
+            -output dawn-apple.xcframework
+
       - name: Package Android libraries
         run: |
-          mkdir -p dawn-android-${{ github.sha }}/arm64-v8a
-          mkdir -p dawn-android-${{ github.sha }}/armeabi-v7a
-          mkdir -p dawn-android-${{ github.sha }}/x86
-          mkdir -p dawn-android-${{ github.sha }}/x86_64
-          cp artifacts/build-android-arm64-v8a/libwebgpu_dawn.so dawn-android-${{ github.sha }}/arm64-v8a/
-          cp artifacts/build-android-armeabi-v7a/libwebgpu_dawn.so dawn-android-${{ github.sha }}/armeabi-v7a/
-          cp artifacts/build-android-x86/libwebgpu_dawn.so dawn-android-${{ github.sha }}/x86/
-          cp artifacts/build-android-x86_64/libwebgpu_dawn.so dawn-android-${{ github.sha }}/x86_64/
+          mkdir -p dawn-android/arm64-v8a
+          mkdir -p dawn-android/armeabi-v7a
+          mkdir -p dawn-android/x86
+          mkdir -p dawn-android/x86_64
+          cp artifacts/build-android-arm64-v8a/libwebgpu_dawn.so dawn-android/arm64-v8a/
+          cp artifacts/build-android-armeabi-v7a/libwebgpu_dawn.so dawn-android/armeabi-v7a/
+          cp artifacts/build-android-x86/libwebgpu_dawn.so dawn-android/x86/
+          cp artifacts/build-android-x86_64/libwebgpu_dawn.so dawn-android/x86_64/
+
       - name: Create archives
         run: |
-          tar -czf dawn-android-${{ github.sha }}.tar.gz dawn-android-${{ github.sha }}
-          tar -czf dawn-apple-${{ github.sha }}.xcframework.tar.gz dawn-apple-${{ github.sha }}.xcframework
-      - name: Upload Android artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dawn-android-${{ github.sha }}
-          path: dawn-android-${{ github.sha }}.tar.gz
+          TAG="${{ needs.prepare-release.outputs.tag_name }}"
+          tar -czf dawn-android-${TAG}.tar.gz dawn-android
+          tar -czf dawn-apple-${TAG}.xcframework.tar.gz dawn-apple.xcframework
+          tar -czf dawn-headers-${TAG}.tar.gz dawn-headers
 
-      - name: Upload Apple artifacts
-        uses: actions/upload-artifact@v4
+      - name: Upload to GitHub release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: dawn-apple-${{ github.sha }}
-          path: dawn-apple-${{ github.sha }}.xcframework.tar.gz
+          tag_name: ${{ needs.prepare-release.outputs.tag_name }}
+          files: |
+            dawn-android-${{ needs.prepare-release.outputs.tag_name }}.tar.gz
+            dawn-apple-${{ needs.prepare-release.outputs.tag_name }}.xcframework.tar.gz
+            dawn-headers-${{ needs.prepare-release.outputs.tag_name }}.tar.gz
+          prerelease: true
