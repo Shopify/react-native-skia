@@ -85,10 +85,20 @@ const downloadToFile = (url: string, destPath: string): Promise<void> => {
           res.pipe(fileStream);
 
           fileStream.on("finish", () => {
-            fileStream.close(resolve);
+            fileStream.close((err) => {
+              if (err) {
+                // If closing the stream errors, perform the same cleanup and reject.
+                fileStream.destroy();
+                fs.unlink(destPath, () => reject(err));
+              } else {
+                resolve();
+              }
+            });
           });
 
-          const cleanup = (error: Error) => {
+          const cleanup = (
+            error: Error | NodeJS.ErrnoException | null | undefined
+          ) => {
             fileStream.destroy();
             fs.unlink(destPath, () => reject(error));
           };
@@ -103,18 +113,24 @@ const downloadToFile = (url: string, destPath: string): Promise<void> => {
   });
 };
 
+// On Windows, convert backslashes to forward slashes to avoid tar misinterpreting
+// paths like C:\path as remote host connection specs (C: as hostname)
+const normalizePathForTar = (filePath: string): string => {
+  return process.platform === "win32" ? filePath.replace(/\\/g, "/") : filePath;
+};
+
 const extractTarGz = async (
   archivePath: string,
   destDir: string
 ): Promise<void> => {
   fs.mkdirSync(destDir, { recursive: true });
 
-  // On Windows, convert backslashes to forward slashes to avoid tar misinterpreting
-  // paths like C:\path as remote host connection specs (C: as hostname)
-  const normalizedDestDir =
-    process.platform === "win32" ? destDir.replace(/\\/g, "/") : destDir;
-
-  const args = ["-xzf", archivePath, "-C", normalizedDestDir];
+  const args = [
+    "-xzf",
+    normalizePathForTar(archivePath),
+    "-C",
+    normalizePathForTar(destDir),
+  ];
   const candidates =
     process.platform === "win32"
       ? [
