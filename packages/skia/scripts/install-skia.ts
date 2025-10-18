@@ -109,7 +109,12 @@ const extractTarGz = async (
 ): Promise<void> => {
   fs.mkdirSync(destDir, { recursive: true });
 
-  const args = ["-xzf", archivePath, "-C", destDir];
+  // On Windows, convert backslashes to forward slashes to avoid tar misinterpreting
+  // paths like C:\path as remote host connection specs (C: as hostname)
+  const normalizedDestDir =
+    process.platform === "win32" ? destDir.replace(/\\/g, "/") : destDir;
+
+  const args = ["-xzf", archivePath, "-C", normalizedDestDir];
   const candidates =
     process.platform === "win32"
       ? [
