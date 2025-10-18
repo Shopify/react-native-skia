@@ -1,9 +1,8 @@
 import fs from "fs";
 import https from "https";
 import path from "path";
-import { createGunzip } from "zlib";
-
-import tar from "tar";
+import os from "os";
+import { spawn } from "child_process";
 
 import { copyHeaders } from "./skia-configuration";
 
@@ -34,73 +33,136 @@ console.log(
   `📦 Downloading Skia prebuilt binaries for version: ${skiaVersion}`
 );
 
-// Helper function to make HTTPS requests with redirects
-const httpsGet = (url: string): Promise<Buffer> => {
+const runCommand = (command: string, args: string[]): Promise<void> => {
   return new Promise((resolve, reject) => {
-    https
-      .get(url, { headers: { "User-Agent": "node" } }, (res) => {
-        if (res.statusCode === 302 || res.statusCode === 301) {
-          // Follow redirect
-          httpsGet(res.headers.location!).then(resolve).catch(reject);
-          return;
-        }
-
-        if (res.statusCode !== 200) {
-          reject(
-            new Error(
-              `Failed to download: ${res.statusCode} ${res.statusMessage}`
-            )
-          );
-          return;
-        }
-
-        const chunks: Buffer[] = [];
-        res.on("data", (chunk) => chunks.push(chunk));
-        res.on("end", () => resolve(Buffer.concat(chunks)));
-        res.on("error", reject);
-      })
-      .on("error", reject);
+    const child = spawn(command, args, {
+      stdio: ["ignore", "inherit", "inherit"],
+    });
+    child.on("error", (error) => {
+      reject(error);
+    });
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`Command ${command} exited with code ${code}`));
+      }
+    });
   });
+};
+
+const downloadToFile = (url: string, destPath: string): Promise<void> => {
+  fs.mkdirSync(path.dirname(destPath), { recursive: true });
+  return new Promise((resolve, reject) => {
+    const request = (currentUrl: string) => {
+      https
+        .get(currentUrl, { headers: { "User-Agent": "node" } }, (res) => {
+          if (
+            res.statusCode &&
+            [301, 302, 303, 307, 308].includes(res.statusCode)
+          ) {
+            const { location } = res.headers;
+            if (location) {
+              res.resume();
+              request(location);
+            } else {
+              reject(new Error(`Redirect without location for ${currentUrl}`));
+            }
+            return;
+          }
+
+          if (res.statusCode !== 200) {
+            reject(
+              new Error(
+                `Failed to download: ${res.statusCode} ${res.statusMessage}`
+              )
+            );
+            res.resume();
+            return;
+          }
+
+          const fileStream = fs.createWriteStream(destPath);
+          res.pipe(fileStream);
+
+          fileStream.on("finish", () => {
+            fileStream.close(resolve);
+          });
+
+          const cleanup = (error: Error) => {
+            fileStream.destroy();
+            fs.unlink(destPath, () => reject(error));
+          };
+
+          res.on("error", cleanup);
+          fileStream.on("error", cleanup);
+        })
+        .on("error", reject);
+    };
+
+    request(url);
+  });
+};
+
+const extractTarGz = async (
+  archivePath: string,
+  destDir: string
+): Promise<void> => {
+  fs.mkdirSync(destDir, { recursive: true });
+
+  const args = ["-xzf", archivePath, "-C", destDir];
+  const candidates =
+    process.platform === "win32"
+      ? [
+          "tar.exe",
+          path.join(
+            process.env.SystemRoot ?? "C:\\Windows",
+            "System32",
+            "tar.exe"
+          ),
+          "bsdtar.exe",
+          "bsdtar",
+        ]
+      : ["tar"];
+
+  let lastError: Error | undefined;
+  for (const candidate of candidates) {
+    try {
+      await runCommand(candidate, args);
+      return;
+    } catch (error) {
+      const err = error as NodeJS.ErrnoException;
+      if (err.code === "ENOENT") {
+        lastError = new Error(`Command ${candidate} not found`);
+        continue;
+      }
+      lastError = err;
+    }
+  }
+
+  throw new Error(
+    `Failed to extract ${path.basename(
+      archivePath
+    )}. Please install a compatible tar binary. Last error: ${
+      lastError?.message ?? "unknown error"
+    }`
+  );
 };
 
 // Helper function to download and extract a tar.gz file
 const downloadAndExtract = async (
   url: string,
-  destDir: string
+  destDir: string,
+  tempDir: string
 ): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    https
-      .get(url, { headers: { "User-Agent": "node" } }, (res) => {
-        if (res.statusCode === 302 || res.statusCode === 301) {
-          // Follow redirect
-          downloadAndExtract(res.headers.location!, destDir)
-            .then(resolve)
-            .catch(reject);
-          return;
-        }
-
-        if (res.statusCode !== 200) {
-          reject(
-            new Error(
-              `Failed to download: ${res.statusCode} ${res.statusMessage}`
-            )
-          );
-          return;
-        }
-
-        fs.mkdirSync(destDir, { recursive: true });
-
-        const gunzip = createGunzip();
-        const extract = tar.extract({ cwd: destDir });
-
-        res
-          .pipe(gunzip)
-          .pipe(extract)
-          .on("finish", resolve)
-          .on("error", reject);
-      })
-      .on("error", reject);
-  });
+  const archivePath = path.join(tempDir, path.basename(url));
+  await downloadToFile(url, archivePath);
+  try {
+    await extractTarGz(archivePath, destDir);
+  } finally {
+    if (fs.existsSync(archivePath)) {
+      fs.unlinkSync(archivePath);
+    }
+  }
 };
 
 const artifactsDir = path.resolve(
@@ -134,6 +196,9 @@ const main = async () => {
   clearDirectory(artifactsDir);
 
   console.log(`⬇️  Downloading release assets to ${artifactsDir}`);
+  const tempDownloadDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "skia-download-")
+  );
 
   for (const artifactName of names) {
     const assetName = `${artifactName}-${releaseTag}.tar.gz`;
@@ -142,13 +207,15 @@ const main = async () => {
 
     console.log(`   Downloading ${assetName}...`);
     try {
-      await downloadAndExtract(downloadUrl, extractDir);
+      await downloadAndExtract(downloadUrl, extractDir, tempDownloadDir);
       console.log(`   ✓ ${assetName} extracted`);
     } catch (error) {
       console.error(`   ✗ Failed to download ${assetName}:`, error);
+      fs.rmSync(tempDownloadDir, { recursive: true, force: true });
       throw error;
     }
   }
+  fs.rmSync(tempDownloadDir, { recursive: true, force: true });
 
   // Copy artifacts to libs folder in the required structure
   console.log("📦 Copying artifacts to libs folder...");
