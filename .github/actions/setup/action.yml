@@ -36,31 +36,10 @@ runs:
       env:
         SK_GRAPHITE: ${{ inputs.graphite == 'true' && '1' || '' }}
 
-    - name: Download Skia Binary Artifacts
-      if: ${{ inputs.download_skia == 'true' }}
-      uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
-      with:
-        workflow: ${{ inputs.graphite == 'true' && 'build-skia-graphite.yml' || 'build-skia.yml' }}
-        repo: shopify/react-native-skia
-        path: packages/skia/artifacts
-        branch: main
-
-    - name: Copy Skia Headers
-      if: ${{ inputs.download_skia == 'true' }}
-      working-directory: packages/skia
-      run: yarn copy-skia-headers
-      shell: bash
-
     - name: Copy Artifacts to libs folder
       if: ${{ inputs.download_skia == 'true' }}
       working-directory: packages/skia
-      run: yarn workflow-copy-libs
+      run: yarn install-skia --no-headers
       shell: bash
       env:
         SK_GRAPHITE: ${{ inputs.graphite == 'true' && '1' || '' }}
-
-    - name: Clean up artifacts folder
-      if: ${{ inputs.download_skia == 'true' }}
-      working-directory: packages/skia
-      run: rm -rf artifacts
-      shell: bash

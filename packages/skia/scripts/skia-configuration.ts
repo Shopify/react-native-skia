@@ -5,7 +5,7 @@ import { $ } from "./utils";
 
 const DEBUG = false;
 export const GRAPHITE = !!process.env.SK_GRAPHITE;
-export const MACCATALYST = !!process.env.SK_MACCATALYST;
+export const MACCATALYST = !GRAPHITE;
 const BUILD_WITH_PARAGRAPH = true;
 
 export const SkiaSrc = path.join(__dirname, "../../../externals/skia");
@@ -356,6 +356,7 @@ const getFirstAvailableTarget = () => {
 };
 
 export const copyHeaders = () => {
+  console.log("⚙️ Copying Skia headers...");
   process.chdir(PackageRoot);
   [
     "rm -rf ./cpp/skia",
@@ -432,10 +433,8 @@ export const copyHeaders = () => {
     "mkdir -p ./cpp/skia/modules/skunicode/include/",
     "cp -a ../../externals/skia/modules/skunicode/include/SkUnicode.h ./cpp/skia/modules/skunicode/include/.",
   ].map((cmd) => {
-    console.log(cmd);
     $(cmd);
   });
-
   // Check for duplicate header names and issue warnings
   const duplicateHeaders = $(
     "find ./cpp -name '*.h' -type f | sed 's/.*\\///' | sort | uniq -d"
@@ -480,4 +479,5 @@ export const copyHeaders = () => {
       process.exit(1);
     }
   }
+  console.log("✅ Skia headers copied to ./cpp/skia");
 };
