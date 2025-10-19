@@ -1,7 +1,9 @@
 import { exit } from "process";
+import path from "path";
 
 import type { Platform, PlatformName } from "./skia-configuration";
 import {
+  applyGraphiteSkiaPatches,
   commonArgs,
   configurations,
   copyHeaders,
@@ -279,6 +281,11 @@ const buildXCFrameworks = () => {
   process.chdir(SkiaSrc);
   $("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
   console.log("gclient sync done");
+  if (GRAPHITE) {
+    const patchFile = path.join(__dirname, "dawn-arm64e-simulator.patch");
+    $(`git reset --hard HEAD`);
+    $(`git apply ${patchFile}`);
+  }
   $(`rm -rf ${PackageRoot}/libs`);
 
   // Build specified platforms and targets
