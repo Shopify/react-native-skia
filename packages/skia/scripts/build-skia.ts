@@ -1,7 +1,9 @@
 import { exit } from "process";
+import path from "path";
 
 import type { Platform, PlatformName } from "./skia-configuration";
 import {
+  applyGraphiteSkiaPatches,
   commonArgs,
   configurations,
   copyHeaders,
@@ -279,6 +281,22 @@ const buildXCFrameworks = () => {
   process.chdir(SkiaSrc);
   $("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
   console.log("gclient sync done");
+  if (GRAPHITE) {
+    console.log("Applying Graphite patches...");
+    $(`git reset --hard HEAD`);
+
+    // Apply arm64e simulator patch
+    const arm64ePatchFile = path.join(__dirname, "dawn-arm64e-simulator.patch");
+    $(`cd ${SkiaSrc} && git apply ${arm64ePatchFile}`);
+
+    // Fix Dawn ShaderModuleMTL.mm uint32 typo if it exists
+    const shaderModuleFile = `${SkiaSrc}/third_party/externals/dawn/src/dawn/native/metal/ShaderModuleMTL.mm`;
+    $(
+      `sed -i '' 's/uint32(bindingInfo\\.binding)/uint32_t(bindingInfo.binding)/g' ${shaderModuleFile}`
+    );
+
+    console.log("Patches applied successfully");
+  }
   $(`rm -rf ${PackageRoot}/libs`);
 
   // Build specified platforms and targets
