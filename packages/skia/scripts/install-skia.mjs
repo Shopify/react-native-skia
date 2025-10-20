@@ -24,6 +24,9 @@ const names = [
   `${prefix}-android-arm-x86`,
   `${prefix}-apple-xcframeworks`,
 ];
+if (GRAPHITE) {
+  names.push(`${prefix}-headers`);
+}
 
 const skiaVersion = getSkiaVersion();
 const releaseTag = GRAPHITE ? `skia-graphite-${skiaVersion}` : `skia-${skiaVersion}`;
@@ -341,7 +344,56 @@ const main = async () => {
     });
   }
 
-  console.log("✅ Done");
+  // Copy Graphite headers if using Graphite
+  if (GRAPHITE) {
+    console.log("📦 Copying Graphite headers...");
+    const cppDir = path.resolve(__dirname, "../cpp");
+    const headersSrcDir = path.join(artifactsDir, `${prefix}-headers`);
+
+    if (fs.existsSync(headersSrcDir)) {
+      // Copy dawn/include
+      const dawnIncludeSrc = path.join(headersSrcDir, "dawn", "include");
+      const dawnIncludeDest = path.join(cppDir, "dawn", "include");
+      if (fs.existsSync(dawnIncludeSrc)) {
+        const copyDir = (src, dest) => {
+          fs.mkdirSync(dest, { recursive: true });
+          fs.readdirSync(src).forEach((file) => {
+            const srcFile = path.join(src, file);
+            const destFile = path.join(dest, file);
+            if (fs.lstatSync(srcFile).isDirectory()) {
+              copyDir(srcFile, destFile);
+            } else {
+              fs.copyFileSync(srcFile, destFile);
+            }
+          });
+        };
+        copyDir(dawnIncludeSrc, dawnIncludeDest);
+        console.log("   ✓ Dawn headers copied");
+      }
+
+      // Copy graphite headers
+      const graphiteSrc = path.join(headersSrcDir, "graphite");
+      const graphiteDest = path.join(cppDir, "skia", "src", "gpu", "graphite");
+      if (fs.existsSync(graphiteSrc)) {
+        const copyDir = (src, dest) => {
+          fs.mkdirSync(dest, { recursive: true });
+          fs.readdirSync(src).forEach((file) => {
+            const srcFile = path.join(src, file);
+            const destFile = path.join(dest, file);
+            if (fs.lstatSync(srcFile).isDirectory()) {
+              copyDir(srcFile, destFile);
+            } else {
+              fs.copyFileSync(srcFile, destFile);
+            }
+          });
+        };
+        copyDir(graphiteSrc, graphiteDest);
+        console.log("   ✓ Graphite headers copied");
+      }
+    }
+  }
+
+  console.log("✅ Completed installation of Skia prebuilt binaries.");
 
   // Clean up artifacts directory
   console.log("🗑️  Cleaning up artifacts directory...");
