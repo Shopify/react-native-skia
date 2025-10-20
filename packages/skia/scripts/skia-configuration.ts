@@ -361,61 +361,89 @@ export const copyHeaders = () => {
   console.log("⚙️ Copying Skia headers...");
   process.chdir(PackageRoot);
 
+  console.log("   Cleaning up existing directories...");
   // Clean up existing directories
   fileOps.rm("./cpp/skia");
   fileOps.rm("./cpp/dawn");
 
+  console.log("   Creating base directories...");
   // Create base directories
   fileOps.mkdir("./cpp/skia/include");
   fileOps.mkdir("./cpp/skia/modules");
   fileOps.mkdir("./cpp/skia/src");
 
-  // Graphite-specific setup
+  // Graphite-specific setup - only copy from local build if it exists
   if (GRAPHITE) {
-    fileOps.mkdir("./cpp/dawn/include");
-    fileOps.mkdir("./cpp/skia/src/gpu/graphite");
+    console.log("   Checking for Graphite build source...");
+    // Check if this is a local build (build output exists) vs prebuilt download
+    const fs = require("fs");
+    let hasLocalBuild = false;
+    try {
+      const targetPath = getFirstAvailableTarget();
+      const dawnIncludeSrc = `../../externals/skia/out/${targetPath}/gen/third_party/externals/dawn/include`;
+      console.log(`   Looking for local build at: ${dawnIncludeSrc}`);
+      hasLocalBuild = fs.existsSync(dawnIncludeSrc);
+    } catch (e) {
+      // No local build found
+      hasLocalBuild = false;
+    }
 
-    fileOps.cp(
-      "../../externals/skia/src/gpu/graphite/ContextOptionsPriv.h",
-      "./cpp/skia/src/gpu/graphite/ContextOptionsPriv.h"
-    );
-    fileOps.cp(
-      "../../externals/skia/src/gpu/graphite/ResourceTypes.h",
-      "./cpp/skia/src/gpu/graphite/ResourceTypes.h"
-    );
-    fileOps.cp(
-      "../../externals/skia/src/gpu/graphite/TextureProxyView.h",
-      "./cpp/skia/src/gpu/graphite/TextureProxyView.h"
-    );
+    if (hasLocalBuild) {
+      console.log("   📦 Copying Graphite headers from local build...");
+      fileOps.mkdir("./cpp/dawn/include");
+      fileOps.mkdir("./cpp/skia/src/gpu/graphite");
 
-    const dawnIncludeSrc = `../../externals/skia/out/${getFirstAvailableTarget()}/gen/third_party/externals/dawn/include`;
-    fileOps.cp(dawnIncludeSrc, "./cpp/dawn/include");
-    fileOps.cp(
-      "../../externals/skia/third_party/externals/dawn/include",
-      "./cpp/dawn/include"
-    );
+      console.log("      - Copying Graphite source headers...");
+      fileOps.cp(
+        "../../externals/skia/src/gpu/graphite/ContextOptionsPriv.h",
+        "./cpp/skia/src/gpu/graphite/ContextOptionsPriv.h"
+      );
+      fileOps.cp(
+        "../../externals/skia/src/gpu/graphite/ResourceTypes.h",
+        "./cpp/skia/src/gpu/graphite/ResourceTypes.h"
+      );
+      fileOps.cp(
+        "../../externals/skia/src/gpu/graphite/TextureProxyView.h",
+        "./cpp/skia/src/gpu/graphite/TextureProxyView.h"
+      );
 
-    // Fix WebGPU header references
-    fileOps.sed(
-      "./cpp/dawn/include/dawn/dawn_proc_table.h",
-      /#include "dawn\/webgpu\.h"/g,
-      '#include "webgpu/webgpu.h"'
-    );
-    fileOps.mkdir("./cpp/dawn/include/webgpu");
-    fileOps.cp(
-      "./cpp/dawn/include/dawn/webgpu.h",
-      "./cpp/dawn/include/webgpu/webgpu.h"
-    );
-    fileOps.cp(
-      "./cpp/dawn/include/dawn/webgpu_cpp.h",
-      "./cpp/dawn/include/webgpu/webgpu_cpp.h"
-    );
-    fileOps.rm("./cpp/dawn/include/dawn/webgpu.h");
-    fileOps.rm("./cpp/dawn/include/dawn/webgpu_cpp.h");
-    fileOps.rm("./cpp/dawn/include/dawn/wire");
-    fileOps.rm("./cpp/dawn/include/webgpu/webgpu_cpp_print.h");
+      console.log("      - Copying Dawn headers...");
+      const dawnIncludeSrc = `../../externals/skia/out/${getFirstAvailableTarget()}/gen/third_party/externals/dawn/include`;
+      fileOps.cp(dawnIncludeSrc, "./cpp/dawn/include");
+      fileOps.cp(
+        "../../externals/skia/third_party/externals/dawn/include",
+        "./cpp/dawn/include"
+      );
+
+      console.log("      - Fixing WebGPU header references...");
+      // Fix WebGPU header references
+      fileOps.sed(
+        "./cpp/dawn/include/dawn/dawn_proc_table.h",
+        /#include "dawn\/webgpu\.h"/g,
+        '#include "webgpu/webgpu.h"'
+      );
+      fileOps.mkdir("./cpp/dawn/include/webgpu");
+      fileOps.cp(
+        "./cpp/dawn/include/dawn/webgpu.h",
+        "./cpp/dawn/include/webgpu/webgpu.h"
+      );
+      fileOps.cp(
+        "./cpp/dawn/include/dawn/webgpu_cpp.h",
+        "./cpp/dawn/include/webgpu/webgpu_cpp.h"
+      );
+      fileOps.rm("./cpp/dawn/include/dawn/webgpu.h");
+      fileOps.rm("./cpp/dawn/include/dawn/webgpu_cpp.h");
+      fileOps.rm("./cpp/dawn/include/dawn/wire");
+      fileOps.rm("./cpp/dawn/include/webgpu/webgpu_cpp_print.h");
+      console.log("      ✓ Graphite headers copied from local build");
+    } else {
+      console.log(
+        "   ✓ Skipping Graphite headers copy (using prebuilt headers from download)"
+      );
+    }
   }
 
+  console.log("   Copying main include directory...");
   // Copy main include directory
   fileOps.cp("../../externals/skia/include", "./cpp/skia/include");
 
