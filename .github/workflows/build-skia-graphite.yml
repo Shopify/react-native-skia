@@ -185,8 +185,8 @@ jobs:
           ARCHIVE="skia-graphite-headers-${TAG}.tar.gz"
           mkdir -p release-assets
           tar -czf "release-assets/$ARCHIVE" \
-            -C ./packages/skia/cpp dawn/include \
-            -C ./packages/skia/cpp/skia/src/gpu graphite
+            ./packages/skia/cpp/dawn/include \
+            ./packages/skia/cpp/skia/src/gpu/graphite
           echo "asset_path=release-assets/$ARCHIVE" >> "$GITHUB_OUTPUT"
           echo "asset_name=$ARCHIVE" >> "$GITHUB_OUTPUT"
         shell: bash
