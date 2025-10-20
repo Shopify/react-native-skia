@@ -136,7 +136,7 @@ const extractTarGz = async (archivePath, destDir) => {
 
   const args = [
     "-xzf",
-    normalizePathForTar(archivePath),
+    archivePath,
     "-C",
     normalizePathForTar(destDir),
   ];
