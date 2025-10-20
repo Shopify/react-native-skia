@@ -269,25 +269,32 @@ const main = async () => {
   fs.mkdirSync(androidDir, { recursive: true });
 
   // Copy android artifacts
-  const androidArchs = [
-    { src: `${prefix}-android-arm`, dest: "armeabi-v7a" },
-    { src: `${prefix}-android-arm-64`, dest: "arm64-v8a" },
-    { src: `${prefix}-android-arm-x86`, dest: "x86" },
-    { src: `${prefix}-android-arm-x64`, dest: "x86_64" },
+  const androidArchs = GRAPHITE ? [
+    { artifact: `${prefix}-android-arm`, srcSubdir: "arm", dest: "armeabi-v7a" },
+    { artifact: `${prefix}-android-arm-64`, srcSubdir: "arm64", dest: "arm64-v8a" },
+    { artifact: `${prefix}-android-arm-x86`, srcSubdir: "x86", dest: "x86" },
+    { artifact: `${prefix}-android-arm-x64`, srcSubdir: "x64", dest: "x86_64" },
+  ] : [
+    { artifact: `${prefix}-android-arm`, srcSubdir: "armeabi-v7a", dest: "armeabi-v7a" },
+    { artifact: `${prefix}-android-arm-64`, srcSubdir: "arm64-v8a", dest: "arm64-v8a" },
+    { artifact: `${prefix}-android-arm-x86`, srcSubdir: "x86", dest: "x86" },
+    { artifact: `${prefix}-android-arm-x64`, srcSubdir: "x86_64", dest: "x86_64" },
   ];
 
-  androidArchs.forEach(({ src, dest }) => {
-    // The tar file extracts to artifactName/dest (e.g., skia-android-arm/armeabi-v7a)
-    const srcDir = path.join(artifactsDir, src, dest);
+  androidArchs.forEach(({ artifact, srcSubdir, dest }) => {
+    // The tar file extracts to artifactName/srcSubdir
+    const srcDir = path.join(artifactsDir, artifact, srcSubdir);
     const destDir = path.join(androidDir, dest);
+    console.log(`   Checking ${srcDir} -> ${destDir}`);
     if (fs.existsSync(srcDir)) {
+      console.log(`   ✓ Copying ${artifact}/${srcSubdir}`);
       fs.mkdirSync(destDir, { recursive: true });
 
-      const copyDir = (src, dest) => {
-        fs.mkdirSync(dest, { recursive: true });
-        fs.readdirSync(src).forEach((file) => {
-          const srcFile = path.join(src, file);
-          const destFile = path.join(dest, file);
+      const copyDir = (srcPath, destPath) => {
+        fs.mkdirSync(destPath, { recursive: true });
+        fs.readdirSync(srcPath).forEach((file) => {
+          const srcFile = path.join(srcPath, file);
+          const destFile = path.join(destPath, file);
           const stat = fs.lstatSync(srcFile);
 
           // Skip sockets and other special files
@@ -304,6 +311,8 @@ const main = async () => {
       };
 
       copyDir(srcDir, destDir);
+    } else {
+      console.log(`   ✗ Source directory not found: ${srcDir}`);
     }
   });
 
