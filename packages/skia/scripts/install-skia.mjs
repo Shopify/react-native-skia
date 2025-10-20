@@ -25,11 +25,11 @@ const names = [
   `${prefix}-apple-xcframeworks`,
 ];
 if (GRAPHITE) {
-  names.push("skia-graphite-headers");
+  names.push(`${prefix}-headers`);
 }
 
 const skiaVersion = getSkiaVersion();
-const releaseTag = `skia-${skiaVersion}`;
+const releaseTag = GRAPHITE ? `skia-graphite-${skiaVersion}` : `skia-${skiaVersion}`;
 console.log(
   `📦 Downloading Skia prebuilt binaries for version: ${skiaVersion}`
 );
@@ -224,7 +224,6 @@ const clearDirectory = (directory) => {
 
 const main = async () => {
   const forceReinstall = process.argv.includes("--force");
-
   // Check if binaries are already installed
   if (!forceReinstall && areBinariesInstalled()) {
     console.log("✅ Prebuilt binaries already installed, skipping download");
@@ -270,22 +269,50 @@ const main = async () => {
   fs.mkdirSync(androidDir, { recursive: true });
 
   // Copy android artifacts
-  const androidArchs = [
-    { src: "skia-android-arm", dest: "armeabi-v7a" },
-    { src: "skia-android-arm-64", dest: "arm64-v8a" },
-    { src: "skia-android-arm-x86", dest: "x86" },
-    { src: "skia-android-arm-x64", dest: "x86_64" },
+  const androidArchs = GRAPHITE ? [
+    { artifact: `${prefix}-android-arm`, srcSubdir: "arm", dest: "armeabi-v7a" },
+    { artifact: `${prefix}-android-arm-64`, srcSubdir: "arm64", dest: "arm64-v8a" },
+    { artifact: `${prefix}-android-arm-x86`, srcSubdir: "x86", dest: "x86" },
+    { artifact: `${prefix}-android-arm-x64`, srcSubdir: "x64", dest: "x86_64" },
+  ] : [
+    { artifact: `${prefix}-android-arm`, srcSubdir: "armeabi-v7a", dest: "armeabi-v7a" },
+    { artifact: `${prefix}-android-arm-64`, srcSubdir: "arm64-v8a", dest: "arm64-v8a" },
+    { artifact: `${prefix}-android-arm-x86`, srcSubdir: "x86", dest: "x86" },
+    { artifact: `${prefix}-android-arm-x64`, srcSubdir: "x86_64", dest: "x86_64" },
   ];
 
-  androidArchs.forEach(({ src, dest }) => {
-    // The tar file extracts to artifactName/dest (e.g., skia-android-arm/armeabi-v7a)
-    const srcDir = path.join(artifactsDir, src, dest);
+  androidArchs.forEach(({ artifact, srcSubdir, dest }) => {
+    // The tar file extracts to artifactName/srcSubdir
+    const srcDir = path.join(artifactsDir, artifact, srcSubdir);
     const destDir = path.join(androidDir, dest);
+    console.log(`   Checking ${srcDir} -> ${destDir}`);
     if (fs.existsSync(srcDir)) {
+      console.log(`   ✓ Copying ${artifact}/${srcSubdir}`);
       fs.mkdirSync(destDir, { recursive: true });
-      fs.readdirSync(srcDir).forEach((file) => {
-        fs.copyFileSync(path.join(srcDir, file), path.join(destDir, file));
-      });
+
+      const copyDir = (srcPath, destPath) => {
+        fs.mkdirSync(destPath, { recursive: true });
+        fs.readdirSync(srcPath).forEach((file) => {
+          const srcFile = path.join(srcPath, file);
+          const destFile = path.join(destPath, file);
+          const stat = fs.lstatSync(srcFile);
+
+          // Skip sockets and other special files
+          if (stat.isSocket() || stat.isFIFO() || stat.isCharacterDevice() || stat.isBlockDevice()) {
+            return;
+          }
+
+          if (stat.isDirectory()) {
+            copyDir(srcFile, destFile);
+          } else {
+            fs.copyFileSync(srcFile, destFile);
+          }
+        });
+      };
+
+      copyDir(srcDir, destDir);
+    } else {
+      console.log(`   ✗ Source directory not found: ${srcDir}`);
     }
   });
 
@@ -294,7 +321,7 @@ const main = async () => {
   // The tar file extracts to skia-apple-xcframeworks/apple
   const appleSrcDir = path.join(
     artifactsDir,
-    "skia-apple-xcframeworks",
+    `${prefix}-apple-xcframeworks`,
     "apple"
   );
   if (fs.existsSync(appleSrcDir)) {
@@ -326,7 +353,84 @@ const main = async () => {
     });
   }
 
-  console.log("✅ Done");
+  // Copy Graphite headers if using Graphite
+  if (GRAPHITE) {
+    console.log("📦 Copying Graphite headers...");
+    const cppDir = path.resolve(__dirname, "../cpp");
+    const headersSrcDir = path.join(artifactsDir, `${prefix}-headers`);
+
+    console.log(`   Looking for headers in: ${headersSrcDir}`);
+    console.log(`   Headers dir exists: ${fs.existsSync(headersSrcDir)}`);
+
+    if (fs.existsSync(headersSrcDir)) {
+      console.log(`   Contents: ${fs.readdirSync(headersSrcDir).join(", ")}`);
+
+      // The asset contains packages/skia/cpp structure, so we need to navigate into it
+      const packagesDir = path.join(headersSrcDir, "packages", "skia", "cpp");
+      console.log(`   Looking for packages dir: ${packagesDir}`);
+      console.log(`   Packages dir exists: ${fs.existsSync(packagesDir)}`);
+
+      if (fs.existsSync(packagesDir)) {
+        console.log(`   Packages contents: ${fs.readdirSync(packagesDir).join(", ")}`);
+
+        // Copy dawn/include
+        const dawnIncludeSrc = path.join(packagesDir, "dawn", "include");
+        const dawnIncludeDest = path.join(cppDir, "dawn", "include");
+        console.log(`   Dawn source: ${dawnIncludeSrc}`);
+        console.log(`   Dawn source exists: ${fs.existsSync(dawnIncludeSrc)}`);
+
+        if (fs.existsSync(dawnIncludeSrc)) {
+          const copyDir = (src, dest) => {
+            fs.mkdirSync(dest, { recursive: true });
+            fs.readdirSync(src).forEach((file) => {
+              const srcFile = path.join(src, file);
+              const destFile = path.join(dest, file);
+              if (fs.lstatSync(srcFile).isDirectory()) {
+                copyDir(srcFile, destFile);
+              } else {
+                fs.copyFileSync(srcFile, destFile);
+              }
+            });
+          };
+          copyDir(dawnIncludeSrc, dawnIncludeDest);
+          console.log("   ✓ Dawn headers copied");
+        } else {
+          console.log("   ✗ Dawn headers not found");
+        }
+
+        // Copy graphite headers
+        const graphiteSrc = path.join(packagesDir, "skia", "src", "gpu", "graphite");
+        const graphiteDest = path.join(cppDir, "skia", "src", "gpu", "graphite");
+        console.log(`   Graphite source: ${graphiteSrc}`);
+        console.log(`   Graphite source exists: ${fs.existsSync(graphiteSrc)}`);
+
+        if (fs.existsSync(graphiteSrc)) {
+          const copyDir = (src, dest) => {
+            fs.mkdirSync(dest, { recursive: true });
+            fs.readdirSync(src).forEach((file) => {
+              const srcFile = path.join(src, file);
+              const destFile = path.join(dest, file);
+              if (fs.lstatSync(srcFile).isDirectory()) {
+                copyDir(srcFile, destFile);
+              } else {
+                fs.copyFileSync(srcFile, destFile);
+              }
+            });
+          };
+          copyDir(graphiteSrc, graphiteDest);
+          console.log("   ✓ Graphite headers copied");
+        } else {
+          console.log("   ✗ Graphite headers not found");
+        }
+      } else {
+        console.log("   ✗ Packages directory not found in headers asset");
+      }
+    } else {
+      console.log("   ✗ Headers directory not found");
+    }
+  }
+
+  console.log("✅ Completed installation of Skia prebuilt binaries.");
 
   // Clean up artifacts directory
   console.log("🗑️  Cleaning up artifacts directory...");

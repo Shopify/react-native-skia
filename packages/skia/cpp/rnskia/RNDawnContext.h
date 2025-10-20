@@ -203,9 +203,15 @@ private:
   DawnContext() {
     DawnProcTable backendProcs = dawn::native::GetProcs();
     dawnProcSetProcs(&backendProcs);
-    WGPUInstanceDescriptor desc{};
-    desc.capabilities.timedWaitAnyEnable = true;
-    instance = std::make_unique<dawn::native::Instance>(&desc);
+    static const auto kTimedWaitAny = wgpu::InstanceFeatureName::TimedWaitAny;
+
+    wgpu::InstanceDescriptor instanceDesc{.requiredFeatureCount = 1,
+                                          .requiredFeatures = &kTimedWaitAny};
+
+    // For limits:
+    wgpu::InstanceLimits limits{.timedWaitAnyMaxCount = 64};
+    instanceDesc.requiredLimits = &limits;
+    instance = std::make_unique<dawn::native::Instance>(&instanceDesc);
 
     backendContext = DawnUtils::createDawnBackendContext(instance.get());
 

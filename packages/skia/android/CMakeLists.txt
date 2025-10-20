@@ -11,35 +11,27 @@ set (SKIA_LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../libs/android/${ANDROID_ABI}"
 add_library(skia STATIC IMPORTED)
 set_property(TARGET skia PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskia.a")
 
-# Check if Graphite symbols are available in libskia using nm/objdump
+# Check if Graphite symbols are available in libskia using nm
 set(SK_GRAPHITE_AVAILABLE OFF)
 
 if(EXISTS "${SKIA_LIBS_PATH}/libskia.a")
     # Look for specific Dawn function symbols that indicate Graphite support
-    execute_process(
-        COMMAND nm "${SKIA_LIBS_PATH}/libskia.a"
-        COMMAND grep "dawn::\\|wgpu\\|_ZN4dawn\\|DawnDevice\\|dawn_native"
-        OUTPUT_VARIABLE NM_OUTPUT
-        ERROR_QUIET
-        RESULT_VARIABLE NM_RESULT
-    )
-    
-    if(NM_RESULT EQUAL 0 AND NOT "${NM_OUTPUT}" STREQUAL "")
-        set(SK_GRAPHITE_AVAILABLE ON)
-    else()
-        # Fallback to objdump if nm doesn't work
+    # Check each symbol individually for better reliability
+    set(DAWN_SYMBOLS "dawn::" "wgpu" "_ZN4dawn" "DawnDevice" "dawn_native")
+
+    foreach(SYMBOL ${DAWN_SYMBOLS})
         execute_process(
-            COMMAND objdump -t "${SKIA_LIBS_PATH}/libskia.a"
-            COMMAND grep "dawn::\\|wgpu\\|_ZN4dawn\\|DawnDevice\\|dawn_native"
-            OUTPUT_VARIABLE OBJDUMP_OUTPUT
+            COMMAND sh -c "nm '${SKIA_LIBS_PATH}/libskia.a' 2>/dev/null | grep '${SYMBOL}'"
+            OUTPUT_VARIABLE NM_OUTPUT
             ERROR_QUIET
-            RESULT_VARIABLE OBJDUMP_RESULT
+            RESULT_VARIABLE NM_RESULT
         )
-        
-        if(OBJDUMP_RESULT EQUAL 0 AND NOT "${OBJDUMP_OUTPUT}" STREQUAL "")
+
+        if(NM_RESULT EQUAL 0 AND NOT "${NM_OUTPUT}" STREQUAL "")
             set(SK_GRAPHITE_AVAILABLE ON)
+            break()
         endif()
-    endif()
+    endforeach()
 endif()
 
 if(SK_GRAPHITE_AVAILABLE)
