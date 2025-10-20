@@ -358,13 +358,27 @@ const getFirstAvailableTarget = () => {
 };
 
 export const copyHeaders = () => {
+  // Check if this is a local build (build output exists) vs prebuilt download
+  const fs = require("fs");
+  let hasLocalBuild = false;
+  try {
+    const targetPath = getFirstAvailableTarget();
+    const dawnIncludeSrc = `../../externals/skia/out/${targetPath}/gen/third_party/externals/dawn/include`;
+    console.log(`   Looking for local build at: ${dawnIncludeSrc}`);
+    hasLocalBuild = fs.existsSync(dawnIncludeSrc);
+  } catch (e) {
+    // No local build found
+    hasLocalBuild = false;
+  }
   console.log("⚙️ Copying Skia headers...");
   process.chdir(PackageRoot);
 
   console.log("   Cleaning up existing directories...");
-  // Clean up existing directories
-  fileOps.rm("./cpp/skia");
-  fileOps.rm("./cpp/dawn");
+  if (hasLocalBuild) {
+    // Clean up existing directories
+    fileOps.rm("./cpp/skia");
+    fileOps.rm("./cpp/dawn");
+  }
 
   console.log("   Creating base directories...");
   // Create base directories
@@ -375,18 +389,6 @@ export const copyHeaders = () => {
   // Graphite-specific setup - only copy from local build if it exists
   if (GRAPHITE) {
     console.log("   Checking for Graphite build source...");
-    // Check if this is a local build (build output exists) vs prebuilt download
-    const fs = require("fs");
-    let hasLocalBuild = false;
-    try {
-      const targetPath = getFirstAvailableTarget();
-      const dawnIncludeSrc = `../../externals/skia/out/${targetPath}/gen/third_party/externals/dawn/include`;
-      console.log(`   Looking for local build at: ${dawnIncludeSrc}`);
-      hasLocalBuild = fs.existsSync(dawnIncludeSrc);
-    } catch (e) {
-      // No local build found
-      hasLocalBuild = false;
-    }
 
     if (hasLocalBuild) {
       console.log("   📦 Copying Graphite headers from local build...");
@@ -447,6 +449,7 @@ export const copyHeaders = () => {
   // Copy main include directory
   fileOps.cp("../../externals/skia/include", "./cpp/skia/include");
 
+  console.log("   Copying Skia modules...");
   // Copy modules
   copyModule("svg");
   copyModule("skresources");
@@ -455,6 +458,7 @@ export const copyHeaders = () => {
   copyModule("skottie");
   copyModule("sksg");
 
+  console.log("   Copying jsonreader module...");
   // Copy jsonreader module
   fileOps.rm("./cpp/skia/modules/jsonreader");
   fileOps.cp(
@@ -462,6 +466,7 @@ export const copyHeaders = () => {
     "./cpp/skia/modules/jsonreader"
   );
 
+  console.log("   Copying skottie source files...");
   // Copy skottie src files
   fileOps.rm("./cpp/skia/modules/skottie/src");
   fileOps.mkdir("./cpp/skia/modules/skottie/src");
@@ -492,9 +497,11 @@ export const copyHeaders = () => {
     "./cpp/skia/modules/skottie/src/animator/Animator.h"
   );
 
+  console.log("   Copying skcms module...");
   // Copy skcms module
   fileOps.cp("../../externals/skia/modules/skcms", "./cpp/skia/modules/skcms");
 
+  console.log("   Copying src/core files...");
   // Copy src/core files
   fileOps.mkdir("./cpp/skia/src/");
   fileOps.mkdir("./cpp/skia/src/core/");
@@ -507,6 +514,7 @@ export const copyHeaders = () => {
     "./cpp/skia/src/core/SkTHash.h"
   );
 
+  console.log("   Copying Ganesh GPU files...");
   // TODO: Remove this once migrated to Graphite
   fileOps.mkdir("./cpp/skia/src/gpu/ganesh/gl");
   fileOps.cp(
@@ -518,6 +526,8 @@ export const copyHeaders = () => {
     "../../externals/skia/src/core/SkLRUCache.h",
     "./cpp/skia/src/core/SkLRUCache.h"
   );
+
+  console.log("✅ Skia headers copied successfully");
 
   // Copy src/base files
   fileOps.mkdir("./cpp/skia/src/base");
