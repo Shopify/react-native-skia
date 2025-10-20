@@ -24,12 +24,9 @@ const names = [
   `${prefix}-android-arm-x86`,
   `${prefix}-apple-xcframeworks`,
 ];
-if (GRAPHITE) {
-  names.push("skia-graphite-headers");
-}
 
 const skiaVersion = getSkiaVersion();
-const releaseTag = `skia-${skiaVersion}`;
+const releaseTag = GRAPHITE ? `skia-graphite-${skiaVersion}` : `skia-${skiaVersion}`;
 console.log(
   `📦 Downloading Skia prebuilt binaries for version: ${skiaVersion}`
 );
@@ -243,7 +240,6 @@ const clearDirectory = (directory) => {
 
 const main = async () => {
   const forceReinstall = process.argv.includes("--force");
-
   // Check if binaries are already installed
   if (!forceReinstall && areBinariesInstalled()) {
     console.log("✅ Prebuilt binaries already installed, skipping download");
