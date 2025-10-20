@@ -4,11 +4,11 @@
 #include <string>
 #include <utility>
 
+#include "JsiSkDispatcher.h"
 #include "JsiSkHostObjects.h"
 #include "JsiSkImageInfo.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkShader.h"
-#include "JsiSkThreadSafeDeletion.h"
 #include "third_party/base64.h"
 
 #include "JsiTextureInfo.h"
@@ -17,6 +17,8 @@
 #if defined(SK_GRAPHITE)
 #include "RNDawnContext.h"
 #include "include/gpu/graphite/Context.h"
+#else
+#include "include/gpu/ganesh/GrDirectContext.h"
 #endif
 
 #pragma clang diagnostic push
@@ -63,7 +65,7 @@ inline SkSamplingOptions SamplingOptionsFromValue(jsi::Runtime &runtime,
 
 class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
 private:
-  ThreadSafeDeletion<SkImage> _deletionHandler;
+  std::shared_ptr<Dispatcher> _dispatcher;
 
 public:
   // TODO-API: Properties?
@@ -241,7 +243,11 @@ public:
     auto rasterImage = DawnContext::getInstance().MakeRasterImage(getObject());
 #else
     auto grContext = getContext()->getDirectContext();
-    auto rasterImage = getObject()->makeRasterImage(grContext);
+    auto image = getObject();
+    if (!grContext) {
+      throw jsi::JSError(runtime, "No GPU context available.");
+    }
+    auto rasterImage = image->makeRasterImage(grContext);
 #endif
     auto hostObjectInstance =
         std::make_shared<JsiSkImage>(getContext(), std::move(rasterImage));
@@ -258,6 +264,10 @@ public:
     return JsiTextureInfo::toValue(runtime, texInfo);
   }
 
+  JSI_HOST_FUNCTION(isTextureBacked) {
+    return jsi::Value(getObject()->isTextureBacked());
+  }
+
   EXPORT_JSI_API_TYPENAME(JsiSkImage, Image)
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImage, width),
@@ -270,27 +280,41 @@ public:
                        JSI_EXPORT_FUNC(JsiSkImage, readPixels),
                        JSI_EXPORT_FUNC(JsiSkImage, makeNonTextureImage),
                        JSI_EXPORT_FUNC(JsiSkImage, getNativeTextureUnstable),
+                       JSI_EXPORT_FUNC(JsiSkImage, isTextureBacked),
                        JSI_EXPORT_FUNC(JsiSkImage, dispose))
 
   JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
              const sk_sp<SkImage> image)
       : JsiSkWrappingSkPtrHostObject<SkImage>(std::move(context),
                                               std::move(image)) {
-    // Drain any pending deletions when creating new images
-    ThreadSafeDeletion<SkImage>::drainDeletionQueue();
+    // Get the dispatcher for the current thread
+    _dispatcher = Dispatcher::getDispatcher();
+    // Process any pending operations
+    _dispatcher->processQueue();
   }
 
   ~JsiSkImage() override {
-    // Handle thread-safe deletion
-    _deletionHandler.handleDeletion(getObject());
-    // Always clear the object to prevent base class destructor from deleting it
-    // handleDeletion takes full responsibility for the object's lifetime
+    // Queue deletion on the creation thread if needed
+    auto image = getObject();
+    if (image && _dispatcher) {
+      _dispatcher->run([image]() {
+        // Image will be deleted when this lambda is destroyed
+      });
+    }
+    // Clear the object to prevent base class destructor from deleting it
     setObject(nullptr);
   }
 
   size_t getMemoryPressure() const override {
     auto image = getObject();
-    return image ? image->imageInfo().computeMinByteSize() : 0;
+    if (image) {
+      if (image->isTextureBacked()) {
+        return image->textureSize();
+      } else {
+        return image->imageInfo().computeMinByteSize();
+      }
+    }
+    return 0;
   }
 };
 

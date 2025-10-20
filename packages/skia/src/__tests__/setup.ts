@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 
 import { PNG } from "pngjs";
-import pixelmatch from "pixelmatch";
+import blazediff from "@blazediff/core";
 import { diff } from "jest-diff";
 
 import type { SkSurface, SkImage } from "../skia/types";
@@ -23,10 +23,9 @@ export const processResult = (
   overwrite = false
 ) => {
   surface.flush();
-  const image = surface.makeImageSnapshot();
+  using image = surface.makeImageSnapshot();
   surface.getCanvas().clear(Float32Array.of(0, 0, 0, 0));
   const result = checkImage(image, relPath, { overwrite });
-  image.dispose();
   return result;
 };
 
@@ -70,7 +69,7 @@ export const checkImage = (
         `Image sizes don't match: ${baseline.width}x${baseline.height} vs ${toTest.width}x${toTest.height}`
       );
     }
-    const diffPixelsCount = pixelmatch(
+    const diffPixelsCount = blazediff(
       baseline.data,
       toTest.data,
       diffImage.data,

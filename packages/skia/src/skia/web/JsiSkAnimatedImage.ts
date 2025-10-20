@@ -32,8 +32,4 @@ export class JsiSkAnimatedImage
     }
     return new JsiSkImage(this.CanvasKit, image);
   }
-
-  dispose = () => {
-    this.ref.delete();
-  };
 }

@@ -13,6 +13,7 @@ export type Routes = {
   SVG: undefined;
   Touch: undefined;
   BlendModes: undefined;
+  ImageLoading: undefined;
   FontMgr: undefined;
   Data: undefined;
   Picture: undefined;
@@ -27,4 +28,7 @@ export type Routes = {
   Paragraphs2: undefined;
   Skottie: undefined;
   StressTest: undefined;
+  StressTest2: undefined;
+  StressTest3: undefined;
+  StressTest4: undefined;
 };

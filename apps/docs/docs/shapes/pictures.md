@@ -58,7 +58,7 @@ export const HelloWorld = () => {
 
 The `Picture` component doesn't follow the same painting rules as other components.
 However you can apply effets using the `layer` property.
-For instance, in the example below, fopr  we apply a blur image filter.
+For instance, in the example below, we apply a blur image filter.
 
 ```tsx twoslash
 import React from "react";

@@ -5,6 +5,7 @@
   "scripts": {
     "android": "react-native run-android",
     "pod:install:ios": "pod install --project-directory=ios",
+    "pod:install:catalyst": "pod install --project-directory=ios && node ios/enable-catalyst.js",
     "pod:install:macos": "pod install --project-directory=macos",
     "build:android": "npm run mkdist && react-native bundle --entry-file index.js --platform android --dev true --bundle-output dist/main.android.jsbundle --assets-dest dist/res && cd android && ./gradlew assembleDebug --warning-mode all",
     "build:ios": "npm run mkdist && react-native bundle --entry-file index.js --platform ios --dev true --bundle-output dist/main.ios.jsbundle --assets-dest dist",
@@ -41,6 +42,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@babel/plugin-proposal-explicit-resource-management": "^7.27.4",
     "@babel/preset-env": "^7.25.3",
     "@babel/runtime": "^7.25.0",
     "@react-native-community/cli": "15.0.1",

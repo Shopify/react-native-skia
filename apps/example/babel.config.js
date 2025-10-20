@@ -3,5 +3,6 @@ module.exports = {
   plugins: [
     "react-native-reanimated/plugin",
     "transform-inline-environment-variables",
+    "@babel/plugin-proposal-explicit-resource-management",
   ],
 };

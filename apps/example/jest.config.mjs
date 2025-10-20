@@ -1,4 +1,4 @@
-module.exports = {
+const config = {
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
   moduleNameMapper: {
     "^.+.(css|styl|less|sass|scss|png|jpg|ttf|otf|woff|woff2)$":
@@ -17,3 +17,5 @@ module.exports = {
     "node_modules/(?!(@react-native|react-native|react-native.*|@?react-navigation.*)/)",
   ],
 };
+
+export default config;

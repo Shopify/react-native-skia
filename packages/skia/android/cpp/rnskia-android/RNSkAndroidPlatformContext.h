@@ -19,10 +19,12 @@
 #include "MainThreadDispatcher.h"
 #include "RNSkAndroidVideo.h"
 #include "RNSkPlatformContext.h"
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "include/ports/SkFontMgr_android.h"
+#include "include/ports/SkFontScanner_FreeType.h"
 
 #pragma clang diagnostic pop
 
@@ -215,7 +217,7 @@ public:
 #endif
 
   sk_sp<SkFontMgr> createFontMgr() override {
-    return SkFontMgr_New_Android(nullptr);
+    return SkFontMgr_New_Android(nullptr, SkFontScanner_Make_FreeType());
   }
 
   void runOnMainThread(std::function<void()> task) override {

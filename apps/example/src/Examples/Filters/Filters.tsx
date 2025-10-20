@@ -1,13 +1,13 @@
 import React from "react";
 import { Pressable, useWindowDimensions } from "react-native";
 import {
-  useImage,
   Canvas,
   ImageShader,
   Skia,
   Shader,
   mix,
   Fill,
+  useImageAsTexture,
 } from "@shopify/react-native-skia";
 import { useDerivedValue } from "react-native-reanimated";
 
@@ -32,7 +32,7 @@ export const Filters = () => {
     [progress]
   );
 
-  const image = useImage(require("../../assets/oslo.jpg"));
+  const image = useImageAsTexture(require("../../assets/oslo.jpg"));
 
   return (
     <Pressable style={{ width, height }} onPress={() => setState((i) => i + 1)}>

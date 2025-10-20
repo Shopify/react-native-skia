@@ -23,6 +23,10 @@ export const examples = [
     title: "🌅 Animated Images",
   },
   {
+    screen: "ImageLoading",
+    title: "🖼 Image Loading",
+  },
+  {
     screen: "Paragraphs",
     title: "📚 Text & Paragraphs",
   },
@@ -113,6 +117,18 @@ export const examples = [
   {
     screen: "StressTest",
     title: "🔥 Stress Test",
+  },
+  {
+    screen: "StressTest2",
+    title: "🔥 Stress Test 2",
+  },
+  {
+    screen: "StressTest3",
+    title: "🔥 Stress Test 3",
+  },
+  {
+    screen: "StressTest4",
+    title: "🔥 Stress Test 4",
   },
 ] as const;
 

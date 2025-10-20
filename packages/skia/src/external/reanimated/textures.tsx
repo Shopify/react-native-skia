@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { DependencyList, ReactElement } from "react";
 import type { SharedValue } from "react-native-reanimated";
 
@@ -8,13 +8,30 @@ import type {
   SkPicture,
   SkSize,
 } from "../../skia/types";
-import {
-  drawAsImageFromPicture,
-  drawAsPicture,
-} from "../../renderer/Offscreen";
+import { drawAsPicture } from "../../renderer/Offscreen";
 import { Skia, useImage } from "../../skia";
+import { Platform } from "../../Platform";
 
 import Rea from "./ReanimatedProxy";
+
+const createTextureFromImage = (
+  texture: SharedValue<SkImage | null>,
+  image: SkImage
+) => {
+  "worklet";
+  const surface = Skia.Surface.MakeOffscreen(image.width(), image.height());
+  if (!surface) {
+    texture.value = null;
+    return;
+  }
+  const canvas = surface.getCanvas();
+  canvas.drawImage(image, 0, 0);
+  surface.flush();
+  texture.value = surface.makeImageSnapshot();
+  if (Platform.OS === "web") {
+    texture.value = texture.value.makeNonTextureImage();
+  }
+};
 
 const createTexture = (
   texture: SharedValue<SkImage | null>,
@@ -22,7 +39,14 @@ const createTexture = (
   size: SkSize
 ) => {
   "worklet";
-  texture.value = drawAsImageFromPicture(picture, size);
+  const surface = Skia.Surface.MakeOffscreen(size.width, size.height)!;
+  const canvas = surface.getCanvas();
+  canvas.drawPicture(picture);
+  surface.flush();
+  texture.value = surface.makeImageSnapshot();
+  if (Platform.OS === "web") {
+    texture.value = texture.value.makeNonTextureImage();
+  }
 };
 
 export const useTexture = (
@@ -61,26 +85,11 @@ export const usePictureAsTexture = (
 
 export const useImageAsTexture = (source: DataSourceParam) => {
   const image = useImage(source);
-  const size = useMemo(() => {
-    if (image) {
-      return { width: image.width(), height: image.height() };
+  const texture = Rea.useSharedValue<SkImage | null>(null);
+  useEffect(() => {
+    if (image !== null) {
+      Rea.runOnUI(createTextureFromImage)(texture, image);
     }
-    return { width: 0, height: 0 };
-  }, [image]);
-  const picture = useMemo(() => {
-    if (image) {
-      const recorder = Skia.PictureRecorder();
-      const canvas = recorder.beginRecording({
-        x: 0,
-        y: 0,
-        width: size.width,
-        height: size.height,
-      });
-      canvas.drawImage(image, 0, 0);
-      return recorder.finishRecordingAsPicture();
-    } else {
-      return null;
-    }
-  }, [size, image]);
-  return usePictureAsTexture(picture, size);
+  }, [image, texture]);
+  return texture;
 };
