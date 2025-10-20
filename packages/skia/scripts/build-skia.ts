@@ -3,7 +3,6 @@ import path from "path";
 
 import type { Platform, PlatformName } from "./skia-configuration";
 import {
-  applyGraphiteSkiaPatches,
   commonArgs,
   configurations,
   copyHeaders,

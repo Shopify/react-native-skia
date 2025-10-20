@@ -1,8 +1,13 @@
 import { spawn, execSync } from "child_process";
-import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync } from "fs";
+import fs, {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  statSync,
+} from "fs";
 import { exit } from "process";
 import path from "path";
-import fs from "fs";
 
 export const ensureFolderExists = (dirPath: string) => {
   try {
@@ -115,14 +120,14 @@ export var copyRecursiveSync = function (src: string, dest: string) {
 
 // Cross-platform file operations abstraction
 export const fileOps = {
-  rm: (path: string) => {
-    if (fs.existsSync(path)) {
-      fs.rmSync(path, { recursive: true, force: true });
+  rm: (p: string) => {
+    if (fs.existsSync(p)) {
+      fs.rmSync(p, { recursive: true, force: true });
     }
   },
 
-  mkdir: (path: string) => {
-    fs.mkdirSync(path, { recursive: true });
+  mkdir: (p: string) => {
+    fs.mkdirSync(p, { recursive: true });
   },
 
   cp: (src: string, dest: string) => {
