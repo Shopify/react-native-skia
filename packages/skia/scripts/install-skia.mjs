@@ -112,33 +112,14 @@ const downloadToFile = (url, destPath) => {
   });
 };
 
-// On Windows, convert paths to avoid tar misinterpreting paths like C:\path
-// as remote host connection specs (C: as hostname)
-const normalizePathForTar = (filePath) => {
-  if (process.platform !== "win32") {
-    return filePath;
-  }
-
-  // Convert backslashes to forward slashes
-  let normalized = filePath.replace(/\\/g, "/");
-
-  // Convert C:/path to /c/path for Git Bash tar compatibility
-  normalized = normalized.replace(
-    /^([A-Za-z]):\//,
-    (_, drive) => `/${drive.toLowerCase()}/`
-  );
-
-  return normalized;
-};
-
 const extractTarGz = async (archivePath, destDir) => {
   fs.mkdirSync(destDir, { recursive: true });
 
   const args = [
     "-xzf",
-    normalizePathForTar(archivePath),
+    archivePath,
     "-C",
-    normalizePathForTar(destDir),
+    destDir,
   ];
   const candidates =
     process.platform === "win32"
