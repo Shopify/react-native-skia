@@ -270,10 +270,10 @@ const main = async () => {
 
   // Copy android artifacts
   const androidArchs = [
-    { src: "skia-android-arm", dest: "armeabi-v7a" },
-    { src: "skia-android-arm-64", dest: "arm64-v8a" },
-    { src: "skia-android-arm-x86", dest: "x86" },
-    { src: "skia-android-arm-x64", dest: "x86_64" },
+    { src: `${prefix}-android-arm`, dest: "armeabi-v7a" },
+    { src: `${prefix}-android-arm-64`, dest: "arm64-v8a" },
+    { src: `${prefix}-android-arm-x86`, dest: "x86" },
+    { src: `${prefix}-android-arm-x64`, dest: "x86_64" },
   ];
 
   androidArchs.forEach(({ src, dest }) => {
@@ -282,9 +282,28 @@ const main = async () => {
     const destDir = path.join(androidDir, dest);
     if (fs.existsSync(srcDir)) {
       fs.mkdirSync(destDir, { recursive: true });
-      fs.readdirSync(srcDir).forEach((file) => {
-        fs.copyFileSync(path.join(srcDir, file), path.join(destDir, file));
-      });
+
+      const copyDir = (src, dest) => {
+        fs.mkdirSync(dest, { recursive: true });
+        fs.readdirSync(src).forEach((file) => {
+          const srcFile = path.join(src, file);
+          const destFile = path.join(dest, file);
+          const stat = fs.lstatSync(srcFile);
+
+          // Skip sockets and other special files
+          if (stat.isSocket() || stat.isFIFO() || stat.isCharacterDevice() || stat.isBlockDevice()) {
+            return;
+          }
+
+          if (stat.isDirectory()) {
+            copyDir(srcFile, destFile);
+          } else {
+            fs.copyFileSync(srcFile, destFile);
+          }
+        });
+      };
+
+      copyDir(srcDir, destDir);
     }
   });
 
@@ -293,7 +312,7 @@ const main = async () => {
   // The tar file extracts to skia-apple-xcframeworks/apple
   const appleSrcDir = path.join(
     artifactsDir,
-    "skia-apple-xcframeworks",
+    `${prefix}-apple-xcframeworks`,
     "apple"
   );
   if (fs.existsSync(appleSrcDir)) {
@@ -331,46 +350,74 @@ const main = async () => {
     const cppDir = path.resolve(__dirname, "../cpp");
     const headersSrcDir = path.join(artifactsDir, `${prefix}-headers`);
 
-    if (fs.existsSync(headersSrcDir)) {
-      // Copy dawn/include
-      const dawnIncludeSrc = path.join(headersSrcDir, "dawn", "include");
-      const dawnIncludeDest = path.join(cppDir, "dawn", "include");
-      if (fs.existsSync(dawnIncludeSrc)) {
-        const copyDir = (src, dest) => {
-          fs.mkdirSync(dest, { recursive: true });
-          fs.readdirSync(src).forEach((file) => {
-            const srcFile = path.join(src, file);
-            const destFile = path.join(dest, file);
-            if (fs.lstatSync(srcFile).isDirectory()) {
-              copyDir(srcFile, destFile);
-            } else {
-              fs.copyFileSync(srcFile, destFile);
-            }
-          });
-        };
-        copyDir(dawnIncludeSrc, dawnIncludeDest);
-        console.log("   ✓ Dawn headers copied");
-      }
+    console.log(`   Looking for headers in: ${headersSrcDir}`);
+    console.log(`   Headers dir exists: ${fs.existsSync(headersSrcDir)}`);
 
-      // Copy graphite headers
-      const graphiteSrc = path.join(headersSrcDir, "graphite");
-      const graphiteDest = path.join(cppDir, "skia", "src", "gpu", "graphite");
-      if (fs.existsSync(graphiteSrc)) {
-        const copyDir = (src, dest) => {
-          fs.mkdirSync(dest, { recursive: true });
-          fs.readdirSync(src).forEach((file) => {
-            const srcFile = path.join(src, file);
-            const destFile = path.join(dest, file);
-            if (fs.lstatSync(srcFile).isDirectory()) {
-              copyDir(srcFile, destFile);
-            } else {
-              fs.copyFileSync(srcFile, destFile);
-            }
-          });
-        };
-        copyDir(graphiteSrc, graphiteDest);
-        console.log("   ✓ Graphite headers copied");
+    if (fs.existsSync(headersSrcDir)) {
+      console.log(`   Contents: ${fs.readdirSync(headersSrcDir).join(", ")}`);
+
+      // The asset contains packages/skia/cpp structure, so we need to navigate into it
+      const packagesDir = path.join(headersSrcDir, "packages", "skia", "cpp");
+      console.log(`   Looking for packages dir: ${packagesDir}`);
+      console.log(`   Packages dir exists: ${fs.existsSync(packagesDir)}`);
+
+      if (fs.existsSync(packagesDir)) {
+        console.log(`   Packages contents: ${fs.readdirSync(packagesDir).join(", ")}`);
+
+        // Copy dawn/include
+        const dawnIncludeSrc = path.join(packagesDir, "dawn", "include");
+        const dawnIncludeDest = path.join(cppDir, "dawn", "include");
+        console.log(`   Dawn source: ${dawnIncludeSrc}`);
+        console.log(`   Dawn source exists: ${fs.existsSync(dawnIncludeSrc)}`);
+
+        if (fs.existsSync(dawnIncludeSrc)) {
+          const copyDir = (src, dest) => {
+            fs.mkdirSync(dest, { recursive: true });
+            fs.readdirSync(src).forEach((file) => {
+              const srcFile = path.join(src, file);
+              const destFile = path.join(dest, file);
+              if (fs.lstatSync(srcFile).isDirectory()) {
+                copyDir(srcFile, destFile);
+              } else {
+                fs.copyFileSync(srcFile, destFile);
+              }
+            });
+          };
+          copyDir(dawnIncludeSrc, dawnIncludeDest);
+          console.log("   ✓ Dawn headers copied");
+        } else {
+          console.log("   ✗ Dawn headers not found");
+        }
+
+        // Copy graphite headers
+        const graphiteSrc = path.join(packagesDir, "skia", "src", "gpu", "graphite");
+        const graphiteDest = path.join(cppDir, "skia", "src", "gpu", "graphite");
+        console.log(`   Graphite source: ${graphiteSrc}`);
+        console.log(`   Graphite source exists: ${fs.existsSync(graphiteSrc)}`);
+
+        if (fs.existsSync(graphiteSrc)) {
+          const copyDir = (src, dest) => {
+            fs.mkdirSync(dest, { recursive: true });
+            fs.readdirSync(src).forEach((file) => {
+              const srcFile = path.join(src, file);
+              const destFile = path.join(dest, file);
+              if (fs.lstatSync(srcFile).isDirectory()) {
+                copyDir(srcFile, destFile);
+              } else {
+                fs.copyFileSync(srcFile, destFile);
+              }
+            });
+          };
+          copyDir(graphiteSrc, graphiteDest);
+          console.log("   ✓ Graphite headers copied");
+        } else {
+          console.log("   ✗ Graphite headers not found");
+        }
+      } else {
+        console.log("   ✗ Packages directory not found in headers asset");
       }
+    } else {
+      console.log("   ✗ Headers directory not found");
     }
   }
 
