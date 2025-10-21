@@ -166,3 +166,40 @@ jobs:
           tag_name: ${{ needs.prepare-release.outputs.tag_name }}
           files: ${{ steps.package.outputs.asset_path }}
           prerelease: true
+
+      - name: Package Graphite Headers
+        if: matrix.target == 'apple'
+        id: package_headers
+        run: |
+          set -eo pipefail
+          TAG="${DISPATCH_TAG}"
+          if [ -z "$TAG" ]; then
+            TAG="${SKIA_BRANCH_SLUG}"
+          fi
+          if [ -z "$TAG" ]; then
+            TAG="${GITHUB_REF_NAME:-}"
+          fi
+          if [ -z "$TAG" ]; then
+            TAG="${GITHUB_SHA}"
+          fi
+          ARCHIVE="skia-graphite-headers-${TAG}.tar.gz"
+          mkdir -p release-assets
+          tar -czf "release-assets/$ARCHIVE" \
+            ./packages/skia/cpp/dawn/include \
+            ./packages/skia/cpp/skia/src/gpu/graphite
+          echo "asset_path=release-assets/$ARCHIVE" >> "$GITHUB_OUTPUT"
+          echo "asset_name=$ARCHIVE" >> "$GITHUB_OUTPUT"
+        shell: bash
+        env:
+          DISPATCH_TAG: ${{ needs.prepare-release.outputs.tag_name }}
+          SKIA_BRANCH_SLUG: ${{ needs.prepare-release.outputs.skia_branch_slug }}
+
+      - name: Upload Graphite Headers to GitHub release
+        if: matrix.target == 'apple'
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.prepare-release.outputs.tag_name }}
+          files: ${{ steps.package_headers.outputs.asset_path }}
+          prerelease: true
