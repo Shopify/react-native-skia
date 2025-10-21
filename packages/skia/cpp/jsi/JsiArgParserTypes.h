@@ -28,39 +28,27 @@ class JsiSkData;
 class JsiSkTypeface;
 class JsiSkRSXform;
 
-// Template specializations for shared_ptr types
-// These delegate to the appropriate JsiSk*::fromValue methods
-
-#define DEFINE_SHARED_PTR_PARSER(SkType, JsiType)                              \
-  template <>                                                                  \
-  inline std::shared_ptr<SkType> ArgParser::parseSharedPtr<SkType>(            \
-      const jsi::Value &value) {                                               \
-    return JsiType::fromValue(_runtime, value);                                \
-  }
-
-// Define parsers for common shared_ptr types
-// Note: These will only work if the corresponding JsiSk* header is included
-// Users should include the specific JsiSk*.h headers they need
-
-// Common Skia types with JsiSk wrappers
-// Uncomment and add specific types as needed in the implementation files
-
 } // namespace RNSkia
 
 // Macro to make it easy to define custom parsers in implementation files
+// For shared_ptr types
 #define JSI_ARG_PARSER_SHARED_PTR(SkType, JsiType)                             \
   namespace RNSkia {                                                           \
-  template <>                                                                  \
-  inline std::shared_ptr<SkType>                                               \
-  ArgParser::parseSharedPtr<SkType>(const jsi::Value &value) {                 \
-    return JsiType::fromValue(_runtime, value);                                \
-  }                                                                            \
+  template <> struct ArgParserTraits<SkType> {                                 \
+    static std::shared_ptr<SkType> parseSharedPtr(jsi::Runtime &runtime,       \
+                                                  const jsi::Value &value) {   \
+      return JsiType::fromValue(runtime, value);                               \
+    }                                                                          \
+  };                                                                           \
   }
 
+// For sk_sp types
 #define JSI_ARG_PARSER_SK_SP(SkType, JsiType)                                  \
   namespace RNSkia {                                                           \
-  template <>                                                                  \
-  inline sk_sp<SkType> ArgParser::parseSkSp<SkType>(const jsi::Value &value) { \
-    return JsiType::fromValue(_runtime, value);                                \
-  }                                                                            \
+  template <> struct ArgParserTraits<SkType> {                                 \
+    static sk_sp<SkType> parseSkSp(jsi::Runtime &runtime,                      \
+                                   const jsi::Value &value) {                  \
+      return JsiType::fromValue(runtime, value);                               \
+    }                                                                          \
+  };                                                                           \
   }

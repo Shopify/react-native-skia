@@ -21,6 +21,28 @@ template <typename T>
 inline constexpr bool is_optional_v = is_optional<T>::value;
 
 /**
+ * Traits class for parsing specific types - specialize this for custom types
+ */
+template <typename T> struct ArgParserTraits {
+  static std::shared_ptr<T> parseSharedPtr(jsi::Runtime &runtime,
+                                           const jsi::Value &value) {
+    // Default implementation - will cause linker error if not specialized
+    static_assert(sizeof(T) == 0,
+                  "ArgParserTraits not specialized for this type. "
+                  "Use JSI_ARG_PARSER_SHARED_PTR macro.");
+    return nullptr;
+  }
+
+  static sk_sp<T> parseSkSp(jsi::Runtime &runtime, const jsi::Value &value) {
+    // Default implementation - will cause linker error if not specialized
+    static_assert(sizeof(T) == 0,
+                  "ArgParserTraits not specialized for this type. "
+                  "Use JSI_ARG_PARSER_SK_SP macro.");
+    return nullptr;
+  }
+};
+
+/**
  * ArgParser - A utility class for parsing JSI function arguments sequentially
  *
  * Usage:
@@ -212,32 +234,26 @@ private:
     return static_cast<T>(static_cast<int>(value.asNumber()));
   }
 
-  // For shared_ptr types - assumes the type has a static fromValue method
+  // For shared_ptr types - uses ArgParserTraits for customization
   template <typename T>
   typename std::enable_if<
       std::is_same<T, std::shared_ptr<typename T::element_type>>::value,
       T>::type
   parse(const jsi::Value &value) {
-    // This will work for types like std::shared_ptr<SkPaint>
-    // that have a corresponding JsiSkPaint::fromValue method
-    // The actual implementation will be provided via template specialization
-    return parseSharedPtr<typename T::element_type>(value);
+    // Uses traits class for type-specific parsing
+    return ArgParserTraits<typename T::element_type>::parseSharedPtr(_runtime,
+                                                                     value);
   }
 
-  // Helper for shared_ptr parsing - to be specialized for specific types
-  template <typename U>
-  std::shared_ptr<U> parseSharedPtr(const jsi::Value &value);
-
-  // For sk_sp types - assumes the type has a static fromValue method
+  // For sk_sp types - uses ArgParserTraits for customization
   template <typename T>
   typename std::enable_if<
       std::is_same<T, sk_sp<typename T::element_type>>::value, T>::type
   parse(const jsi::Value &value) {
-    return parseSkSp<typename T::element_type>(value);
+    // Uses traits class for type-specific parsing
+    return ArgParserTraits<typename T::element_type>::parseSkSp(_runtime,
+                                                                value);
   }
-
-  // Helper for sk_sp parsing - to be specialized for specific types
-  template <typename U> sk_sp<U> parseSkSp(const jsi::Value &value);
 };
 
 } // namespace RNSkia

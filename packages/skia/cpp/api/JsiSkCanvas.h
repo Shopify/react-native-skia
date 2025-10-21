@@ -57,7 +57,7 @@ JSI_ARG_PARSER_SHARED_PTR(SkPath, JsiSkPath)
 JSI_ARG_PARSER_SHARED_PTR(SkPoint, JsiSkPoint)
 JSI_ARG_PARSER_SK_SP(SkPicture, JsiSkPicture)
 JSI_ARG_PARSER_SK_SP(SkTextBlob, JsiSkTextBlob)
-JSI_ARG_PARSER_SHARED_PTR(SkVertices, JsiSkVertices)
+JSI_ARG_PARSER_SK_SP(SkVertices, JsiSkVertices)
 JSI_ARG_PARSER_SHARED_PTR(SkFont, JsiSkFont)
 
 class JsiSkCanvas : public JsiSkHostObject {
