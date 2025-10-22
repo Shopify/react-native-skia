@@ -18,10 +18,15 @@
 #include "JsiSkSVG.h"
 #include "JsiSkTextBlob.h"
 #include "JsiSkVertices.h"
+#include "JsiSkColor.h"
+#include "JsiSkImageFilter.h"
 
 #include "RNSkTypedArray.h"
 
 #include <jsi/jsi.h>
+
+#include "JsiArgParser.h"
+#include "JsiArgParserTypes.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -41,6 +46,22 @@
 
 #pragma clang diagnostic pop
 
+// ArgParser specializations for types used in JsiSkCanvas
+// Must be outside namespace RNSkia since the macros define the namespace
+JSI_ARG_PARSER_SK_SP(SkImage, JsiSkImage)
+JSI_ARG_PARSER_SHARED_PTR(SkPaint, JsiSkPaint)
+JSI_ARG_PARSER_SHARED_PTR(SkRect, JsiSkRect)
+JSI_ARG_PARSER_SHARED_PTR(SkRRect, JsiSkRRect)
+JSI_ARG_PARSER_SHARED_PTR(SkPath, JsiSkPath)
+JSI_ARG_PARSER_SHARED_PTR(SkPoint, JsiSkPoint)
+JSI_ARG_PARSER_SK_SP(SkPicture, JsiSkPicture)
+JSI_ARG_PARSER_SK_SP(SkTextBlob, JsiSkTextBlob)
+JSI_ARG_PARSER_SK_SP(SkVertices, JsiSkVertices)
+JSI_ARG_PARSER_SHARED_PTR(SkFont, JsiSkFont)
+JSI_ARG_PARSER_SK_SP(SkSVGDOM, JsiSkSVG)
+JSI_ARG_PARSER_SHARED_PTR(SkMatrix, JsiSkMatrix)
+JSI_ARG_PARSER_SK_SP(SkImageFilter, JsiSkImageFilter)
+
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
@@ -48,191 +69,171 @@ namespace jsi = facebook::jsi;
 class JsiSkCanvas : public JsiSkHostObject {
 public:
   JSI_HOST_FUNCTION(drawPaint) {
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[0]);
+    ArgParser parser(runtime, arguments, count);
+    auto paint = parser.next<std::shared_ptr<SkPaint>>();
     _canvas->drawPaint(*paint);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawLine) {
-    SkScalar x1 = arguments[0].asNumber();
-    SkScalar y1 = arguments[1].asNumber();
-    SkScalar x2 = arguments[2].asNumber();
-    SkScalar y2 = arguments[3].asNumber();
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[4]);
+    ArgParser parser(runtime, arguments, count);
+    auto x1 = parser.next<float>();
+    auto y1 = parser.next<float>();
+    auto x2 = parser.next<float>();
+    auto y2 = parser.next<float>();
+    auto paint = parser.next<std::shared_ptr<SkPaint>>();
     _canvas->drawLine(x1, y1, x2, y2, *paint);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawRect) {
-    auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
+    ArgParser parser(runtime, arguments, count);
+    auto rect = parser.next<std::shared_ptr<SkRect>>();
+    auto paint = parser.next<std::shared_ptr<SkPaint>>();
     _canvas->drawRect(*rect, *paint);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawImage) {
-    auto image = JsiSkImage::fromValue(runtime, arguments[0]);
-    auto x = arguments[1].asNumber();
-    auto y = arguments[2].asNumber();
-    std::shared_ptr<SkPaint> paint;
-    if (count == 4) {
-      paint = JsiSkPaint::fromValue(runtime, arguments[3]);
-    }
-    _canvas->drawImage(image, x, y, SkSamplingOptions(), paint.get());
+    ArgParser parser(runtime, arguments, count);
+    auto image = parser.next<sk_sp<SkImage>>();
+    auto x = parser.next<float>();
+    auto y = parser.next<float>();
+    auto paint = parser.next<std::optional<std::shared_ptr<SkPaint>>>();
+    _canvas->drawImage(image, x, y, SkSamplingOptions(),
+                       paint.has_value() ? paint.value().get() : nullptr);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawImageRect) {
-    auto image = JsiSkImage::fromValue(runtime, arguments[0]);
-    auto src = JsiSkRect::fromValue(runtime, arguments[1]);
-    auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
-    auto fastSample = count >= 5 && arguments[4].getBool();
+    ArgParser parser(runtime, arguments, count);
+    auto image = parser.next<sk_sp<SkImage>>();
+    auto src = parser.next<std::shared_ptr<SkRect>>();
+    auto dest = parser.next<std::shared_ptr<SkRect>>();
+    auto paint = parser.next<std::shared_ptr<SkPaint>>();
+    auto fastSample = parser.next<std::optional<bool>>();
     _canvas->drawImageRect(image, *src, *dest, SkSamplingOptions(), paint.get(),
-                           fastSample ? SkCanvas::kFast_SrcRectConstraint
-                                      : SkCanvas::kStrict_SrcRectConstraint);
+                           fastSample.value_or(false) ? SkCanvas::kFast_SrcRectConstraint
+                                                      : SkCanvas::kStrict_SrcRectConstraint);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawImageCubic) {
-    auto image = JsiSkImage::fromValue(runtime, arguments[0]);
-    auto x = arguments[1].asNumber();
-    auto y = arguments[2].asNumber();
-    float B = arguments[3].asNumber();
-    float C = arguments[4].asNumber();
-    std::shared_ptr<SkPaint> paint;
-    if (count == 6) {
-      if (!arguments[5].isNull()) {
-        paint = JsiSkPaint::fromValue(runtime, arguments[5]);
-      }
-    }
-    _canvas->drawImage(image, x, y, SkSamplingOptions({B, C}), paint.get());
+    ArgParser parser(runtime, arguments, count);
+    auto image = parser.next<sk_sp<SkImage>>();
+    auto x = parser.next<float>();
+    auto y = parser.next<float>();
+    auto B = parser.next<float>();
+    auto C = parser.next<float>();
+    auto paint = parser.next<std::optional<std::shared_ptr<SkPaint>>>();
+    _canvas->drawImage(image, x, y, SkSamplingOptions({B, C}),
+                       paint.has_value() ? paint.value().get() : nullptr);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawImageOptions) {
-    auto image = JsiSkImage::fromValue(runtime, arguments[0]);
-    auto x = arguments[1].asNumber();
-    auto y = arguments[2].asNumber();
-    auto fm = (SkFilterMode)arguments[3].asNumber();
-    auto mm = (SkMipmapMode)arguments[4].asNumber();
-    std::shared_ptr<SkPaint> paint;
-    if (count == 6) {
-      if (!arguments[5].isNull()) {
-        paint = JsiSkPaint::fromValue(runtime, arguments[5]);
-      }
-    }
-    _canvas->drawImage(image, x, y, SkSamplingOptions(fm, mm), paint.get());
+    ArgParser parser(runtime, arguments, count);
+    auto image = parser.next<sk_sp<SkImage>>();
+    auto x = parser.next<float>();
+    auto y = parser.next<float>();
+    auto fm = parser.next<SkFilterMode>();
+    auto mm = parser.next<SkMipmapMode>();
+    auto paint = parser.next<std::optional<std::shared_ptr<SkPaint>>>();
+    _canvas->drawImage(image, x, y, SkSamplingOptions(fm, mm),
+                       paint.has_value() ? paint.value().get() : nullptr);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawImageNine) {
-    auto image = JsiSkImage::fromValue(runtime, arguments[0]);
-    auto center = JsiSkRect::fromValue(runtime, arguments[1]);
-    auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
-    auto fm = (SkFilterMode)arguments[3].asNumber();
-    std::shared_ptr<SkPaint> paint;
-    if (count == 5) {
-      if (!arguments[4].isNull()) {
-        paint = JsiSkPaint::fromValue(runtime, arguments[4]);
-      }
-    }
+    ArgParser parser(runtime, arguments, count);
+    auto image = parser.next<sk_sp<SkImage>>();
+    auto center = parser.next<std::shared_ptr<SkRect>>();
+    auto dest = parser.next<std::shared_ptr<SkRect>>();
+    auto fm = parser.next<SkFilterMode>();
+    auto paint = parser.next<std::optional<std::shared_ptr<SkPaint>>>();
     _canvas->drawImageNine(image.get(), center->round(), *dest, fm,
-                           paint.get());
+                           paint.has_value() ? paint.value().get() : nullptr);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawImageRectCubic) {
-    auto image = JsiSkImage::fromValue(runtime, arguments[0]);
-    auto src = JsiSkRect::fromValue(runtime, arguments[1]);
-    auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
-    float B = arguments[3].asNumber();
-    float C = arguments[4].asNumber();
-    std::shared_ptr<SkPaint> paint;
-    if (count == 6) {
-      if (!arguments[5].isNull()) {
-        paint = JsiSkPaint::fromValue(runtime, arguments[5]);
-      }
-    }
+    ArgParser parser(runtime, arguments, count);
+    auto image = parser.next<sk_sp<SkImage>>();
+    auto src = parser.next<std::shared_ptr<SkRect>>();
+    auto dest = parser.next<std::shared_ptr<SkRect>>();
+    auto B = parser.next<float>();
+    auto C = parser.next<float>();
+    auto paint = parser.next<std::optional<std::shared_ptr<SkPaint>>>();
     auto constraint =
         SkCanvas::kStrict_SrcRectConstraint; // TODO: get from caller
     _canvas->drawImageRect(image.get(), *src, *dest, SkSamplingOptions({B, C}),
-                           paint.get(), constraint);
+                           paint.has_value() ? paint.value().get() : nullptr, constraint);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawImageRectOptions) {
-    auto image = JsiSkImage::fromValue(runtime, arguments[0]);
-    auto src = JsiSkRect::fromValue(runtime, arguments[1]);
-    auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
-    auto filter = (SkFilterMode)arguments[3].asNumber();
-    auto mipmap = (SkMipmapMode)arguments[4].asNumber();
-    std::shared_ptr<SkPaint> paint;
-    if (count == 6) {
-      if (!arguments[5].isNull()) {
-        paint = JsiSkPaint::fromValue(runtime, arguments[5]);
-      }
-    }
+    ArgParser parser(runtime, arguments, count);
+    auto image = parser.next<sk_sp<SkImage>>();
+    auto src = parser.next<std::shared_ptr<SkRect>>();
+    auto dest = parser.next<std::shared_ptr<SkRect>>();
+    auto filter = parser.next<SkFilterMode>();
+    auto mipmap = parser.next<SkMipmapMode>();
+    auto paint = parser.next<std::optional<std::shared_ptr<SkPaint>>>();
     auto constraint = SkCanvas::kStrict_SrcRectConstraint;
     _canvas->drawImageRect(image.get(), *src, *dest, {filter, mipmap},
-                           paint.get(), constraint);
+                           paint.has_value() ? paint.value().get() : nullptr, constraint);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawCircle) {
-    SkScalar cx = arguments[0].asNumber();
-    SkScalar cy = arguments[1].asNumber();
-    SkScalar radius = arguments[2].asNumber();
-
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
+    ArgParser parser(runtime, arguments, count);
+    auto cx = parser.next<float>();
+    auto cy = parser.next<float>();
+    auto radius = parser.next<float>();
+    auto paint = parser.next<std::shared_ptr<SkPaint>>();
     _canvas->drawCircle(cx, cy, radius, *paint);
-
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawArc) {
-    auto oval = JsiSkRect::fromValue(runtime, arguments[0]);
-
-    SkScalar startAngle = arguments[1].asNumber();
-    SkScalar sweepAngle = arguments[2].asNumber();
-    bool useCenter = arguments[3].getBool();
-
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[4]);
+    ArgParser parser(runtime, arguments, count);
+    auto oval = parser.next<std::shared_ptr<SkRect>>();
+    auto startAngle = parser.next<float>();
+    auto sweepAngle = parser.next<float>();
+    auto useCenter = parser.next<bool>();
+    auto paint = parser.next<std::shared_ptr<SkPaint>>();
     _canvas->drawArc(*oval, startAngle, sweepAngle, useCenter, *paint);
-
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawRRect) {
-    auto rect = JsiSkRRect::fromValue(runtime, arguments[0]);
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
-
+    ArgParser parser(runtime, arguments, count);
+    auto rect = parser.next<std::shared_ptr<SkRRect>>();
+    auto paint = parser.next<std::shared_ptr<SkPaint>>();
     _canvas->drawRRect(*rect, *paint);
-
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawDRRect) {
-    auto outer = JsiSkRRect::fromValue(runtime, arguments[0]);
-    auto inner = JsiSkRRect::fromValue(runtime, arguments[1]);
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[2]);
-
+    ArgParser parser(runtime, arguments, count);
+    auto outer = parser.next<std::shared_ptr<SkRRect>>();
+    auto inner = parser.next<std::shared_ptr<SkRRect>>();
+    auto paint = parser.next<std::shared_ptr<SkPaint>>();
     _canvas->drawDRRect(*outer, *inner, *paint);
-
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawOval) {
-    auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
-
+    ArgParser parser(runtime, arguments, count);
+    auto rect = parser.next<std::shared_ptr<SkRect>>();
+    auto paint = parser.next<std::shared_ptr<SkPaint>>();
     _canvas->drawOval(*rect, *paint);
-
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(restoreToCount) {
-    auto c = arguments[0].asNumber();
+    ArgParser parser(runtime, arguments, count);
+    auto c = parser.next<int>();
     _canvas->restoreToCount(c);
     return jsi::Value::undefined();
   }
@@ -247,54 +248,54 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawPoints) {
-    auto pointMode = arguments[0].asNumber();
-    std::vector<SkPoint> points;
+    ArgParser parser(runtime, arguments, count);
+    auto pointMode = parser.next<SkCanvas::PointMode>();
+    auto jsiPoints = parser.next<jsi::Array>();
+    auto paint = parser.next<std::shared_ptr<SkPaint>>();
 
-    auto jsiPoints = arguments[1].asObject(runtime).asArray(runtime);
     auto pointsSize = jsiPoints.size(runtime);
-
-    // Check if we have at least one point
     if (pointsSize == 0) {
       throw std::invalid_argument("Points array must not be empty");
     }
 
+    std::vector<SkPoint> points;
     points.reserve(pointsSize);
-
     for (int i = 0; i < pointsSize; i++) {
       std::shared_ptr<SkPoint> point = JsiSkPoint::fromValue(
           runtime, jsiPoints.getValueAtIndex(runtime, i).asObject(runtime));
       points.push_back(*point.get());
     }
 
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[2]);
     auto p = SkSpan(points.data(), points.size());
-    _canvas->drawPoints((SkCanvas::PointMode)pointMode, p, *paint);
-
+    _canvas->drawPoints(pointMode, p, *paint);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawVertices) {
-    auto vertices = JsiSkVertices::fromValue(runtime, arguments[0]);
-    auto blendMode = (SkBlendMode)arguments[1].getNumber();
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[2]);
+    ArgParser parser(runtime, arguments, count);
+    auto vertices = parser.next<sk_sp<SkVertices>>();
+    auto blendMode = parser.next<SkBlendMode>();
+    auto paint = parser.next<std::shared_ptr<SkPaint>>();
     _canvas->drawVertices(vertices, blendMode, *paint);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawPatch) {
-    std::vector<SkPoint> cubics;
-    std::vector<SkColor> colors;
-    std::vector<SkPoint> texs;
+    ArgParser parser(runtime, arguments, count);
+    auto jsiCubics = parser.next<jsi::Array>();
+    auto jsiColors = parser.next<std::optional<jsi::Array>>();
+    auto jsiTexs = parser.next<std::optional<jsi::Array>>();
+    auto blendMode = parser.next<SkBlendMode>();
+    auto paint = parser.next<std::optional<std::shared_ptr<SkPaint>>>();
 
-    auto jsiCubics = arguments[0].asObject(runtime).asArray(runtime);
+    // Parse cubics
     auto cubicsSize = jsiCubics.size(runtime);
-
-    // Validate cubic points - must be exactly 12 points
     if (cubicsSize != 12) {
       throw std::invalid_argument(
           "Cubic points array must contain exactly 12 points");
     }
 
+    std::vector<SkPoint> cubics;
     cubics.reserve(cubicsSize);
     for (int i = 0; i < cubicsSize; i++) {
       std::shared_ptr<SkPoint> point = JsiSkPoint::fromValue(
@@ -302,11 +303,10 @@ public:
       cubics.push_back(*point.get());
     }
 
-    if (count >= 2 && !arguments[1].isNull() && !arguments[1].isUndefined()) {
-      auto jsiColors = arguments[1].asObject(runtime).asArray(runtime);
-      auto colorsSize = jsiColors.size(runtime);
-
-      // Validate colors array - must be exactly 4 colors
+    // Parse colors (optional)
+    std::vector<SkColor> colors;
+    if (jsiColors.has_value()) {
+      auto colorsSize = jsiColors.value().size(runtime);
       if (colorsSize != 4) {
         throw std::invalid_argument(
             "Colors array must contain exactly 4 colors");
@@ -315,16 +315,15 @@ public:
       colors.reserve(colorsSize);
       for (int i = 0; i < colorsSize; i++) {
         SkColor color = JsiSkColor::fromValue(
-            runtime, jsiColors.getValueAtIndex(runtime, i));
+            runtime, jsiColors.value().getValueAtIndex(runtime, i));
         colors.push_back(color);
       }
     }
 
-    if (count >= 3 && !arguments[2].isNull() && !arguments[2].isUndefined()) {
-      auto jsiTexs = arguments[2].asObject(runtime).asArray(runtime);
-      auto texsSize = jsiTexs.size(runtime);
-
-      // Validate textures array - must be exactly 4 points
+    // Parse texture coordinates (optional)
+    std::vector<SkPoint> texs;
+    if (jsiTexs.has_value()) {
+      auto texsSize = jsiTexs.value().size(runtime);
       if (texsSize != 4) {
         throw std::invalid_argument(
             "Texture coordinates array must contain exactly 4 points");
@@ -333,63 +332,80 @@ public:
       texs.reserve(texsSize);
       for (int i = 0; i < texsSize; i++) {
         auto point = JsiSkPoint::fromValue(
-            runtime, jsiTexs.getValueAtIndex(runtime, i).asObject(runtime));
+            runtime, jsiTexs.value().getValueAtIndex(runtime, i).asObject(runtime));
         texs.push_back(*point.get());
       }
     }
 
-    auto paint =
-        count >= 4 ? JsiSkPaint::fromValue(runtime, arguments[4]) : nullptr;
-    auto blendMode = static_cast<SkBlendMode>(arguments[3].asNumber());
-    _canvas->drawPatch(cubics.data(), colors.empty() ? nullptr : colors.data(),
-                       texs.empty() ? nullptr : texs.data(), blendMode, *paint);
+    if (paint.has_value()) {
+      _canvas->drawPatch(cubics.data(), colors.empty() ? nullptr : colors.data(),
+                         texs.empty() ? nullptr : texs.data(), blendMode,
+                         *paint.value());
+    } else {
+      SkPaint defaultPaint;
+      _canvas->drawPatch(cubics.data(), colors.empty() ? nullptr : colors.data(),
+                         texs.empty() ? nullptr : texs.data(), blendMode,
+                         defaultPaint);
+    }
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawPath) {
-    auto path = JsiSkPath::fromValue(runtime, arguments[0]);
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
-
+    ArgParser parser(runtime, arguments, count);
+    auto path = parser.next<std::shared_ptr<SkPath>>();
+    auto paint = parser.next<std::shared_ptr<SkPaint>>();
     _canvas->drawPath(*path, *paint);
-
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawText) {
-    auto textVal = arguments[0].asString(runtime).utf8(runtime);
-    auto text = textVal.c_str();
-    SkScalar x = arguments[1].asNumber();
-    SkScalar y = arguments[2].asNumber();
-
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
-    auto font = JsiSkFont::fromValue(runtime, arguments[4]);
-
-    _canvas->drawSimpleText(text, strlen(text), SkTextEncoding::kUTF8, x, y,
+    ArgParser parser(runtime, arguments, count);
+    auto textVal = parser.next<std::string>();
+    auto x = parser.next<SkScalar>();
+    auto y = parser.next<SkScalar>();
+    auto paint = parser.next<std::shared_ptr<SkPaint>>();
+    auto font = parser.next<std::shared_ptr<SkFont>>();
+    _canvas->drawSimpleText(textVal.c_str(), textVal.length(), SkTextEncoding::kUTF8, x, y,
                             *font, *paint);
-
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawTextBlob) {
-    auto blob = JsiSkTextBlob::fromValue(runtime, arguments[0]);
-    SkScalar x = arguments[1].asNumber();
-    SkScalar y = arguments[2].asNumber();
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
+    ArgParser parser(runtime, arguments, count);
+    auto blob = parser.next<sk_sp<SkTextBlob>>();
+    auto x = parser.next<SkScalar>();
+    auto y = parser.next<SkScalar>();
+    auto paint = parser.next<std::shared_ptr<SkPaint>>();
     _canvas->drawTextBlob(blob, x, y, *paint);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawGlyphs) {
-    auto jsiGlyphs = arguments[0].asObject(runtime).asArray(runtime);
-    auto jsiPositions = arguments[1].asObject(runtime).asArray(runtime);
-    auto x = arguments[2].asNumber();
-    auto y = arguments[3].asNumber();
-    auto font = JsiSkFont::fromValue(runtime, arguments[4]);
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[5]);
+    ArgParser parser(runtime, arguments, count);
+    auto jsiGlyphs = parser.next<jsi::Array>();
+    auto jsiPositions = parser.next<jsi::Array>();
+    auto x = parser.next<SkScalar>();
+    auto y = parser.next<SkScalar>();
+    auto font = parser.next<std::shared_ptr<SkFont>>();
+    auto paint = parser.next<std::shared_ptr<SkPaint>>();
+
     SkPoint origin = SkPoint::Make(x, y);
 
-    std::vector<SkPoint> positions;
+    int glyphsSize = static_cast<int>(jsiGlyphs.size(runtime));
     int pointsSize = static_cast<int>(jsiPositions.size(runtime));
+
+    if (glyphsSize != pointsSize) {
+      throw std::invalid_argument(
+          "Glyphs and positions arrays must have the same length");
+    }
+
+    std::vector<SkGlyphID> glyphs;
+    glyphs.reserve(glyphsSize);
+    for (int i = 0; i < glyphsSize; i++) {
+      glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
+    }
+
+    std::vector<SkPoint> positions;
     positions.reserve(pointsSize);
     for (int i = 0; i < pointsSize; i++) {
       std::shared_ptr<SkPoint> point = JsiSkPoint::fromValue(
@@ -397,34 +413,20 @@ public:
       positions.push_back(*point.get());
     }
 
-    std::vector<SkGlyphID> glyphs;
-    int glyphsSize = static_cast<int>(jsiGlyphs.size(runtime));
-
-    // Validate that glyphs and positions arrays have the same size
-    if (glyphsSize != pointsSize) {
-      throw std::invalid_argument(
-          "Glyphs and positions arrays must have the same length");
-    }
-
-    glyphs.reserve(glyphsSize);
-    for (int i = 0; i < glyphsSize; i++) {
-      glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
-    }
-
     auto g = SkSpan(glyphs.data(), glyphs.size());
     auto p = SkSpan(positions.data(), positions.size());
     _canvas->drawGlyphs(g, p, origin, *font, *paint);
-
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawSvg) {
-    auto svgdom = JsiSkSVG::fromValue(runtime, arguments[0]);
-    if (count == 3 && arguments[1].isNumber() && arguments[2].isNumber()) {
-      // read size
-      auto w = arguments[1].asNumber();
-      auto h = arguments[2].asNumber();
-      svgdom->setContainerSize(SkSize::Make(w, h));
+    ArgParser parser(runtime, arguments, count);
+    auto svgdom = parser.next<sk_sp<SkSVGDOM>>();
+    auto w = parser.next<std::optional<SkScalar>>();
+    auto h = parser.next<std::optional<SkScalar>>();
+
+    if (w.has_value() && h.has_value()) {
+      svgdom->setContainerSize(SkSize::Make(w.value(), h.value()));
     } else {
       auto canvasSize = _canvas->getBaseLayerSize();
       svgdom->setContainerSize(SkSize::Make(canvasSize));
@@ -434,25 +436,28 @@ public:
   }
 
   JSI_HOST_FUNCTION(clipPath) {
-    auto path = JsiSkPath::fromValue(runtime, arguments[0]);
-    auto op = (SkClipOp)arguments[1].asNumber();
-    auto doAntiAlias = arguments[2].getBool();
+    ArgParser parser(runtime, arguments, count);
+    auto path = parser.next<std::shared_ptr<SkPath>>();
+    auto op = parser.next<SkClipOp>();
+    auto doAntiAlias = parser.next<bool>();
     _canvas->clipPath(*path, op, doAntiAlias);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(clipRect) {
-    auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
-    auto op = (SkClipOp)arguments[1].asNumber();
-    auto doAntiAlias = arguments[2].getBool();
+    ArgParser parser(runtime, arguments, count);
+    auto rect = parser.next<std::shared_ptr<SkRect>>();
+    auto op = parser.next<SkClipOp>();
+    auto doAntiAlias = parser.next<bool>();
     _canvas->clipRect(*rect, op, doAntiAlias);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(clipRRect) {
-    auto rrect = JsiSkRRect::fromValue(runtime, arguments[0]);
-    auto op = (SkClipOp)arguments[1].asNumber();
-    auto doAntiAlias = arguments[2].getBool();
+    ArgParser parser(runtime, arguments, count);
+    auto rrect = parser.next<std::shared_ptr<SkRRect>>();
+    auto op = parser.next<SkClipOp>();
+    auto doAntiAlias = parser.next<bool>();
     _canvas->clipRRect(*rrect, op, doAntiAlias);
     return jsi::Value::undefined();
   }
@@ -460,20 +465,16 @@ public:
   JSI_HOST_FUNCTION(save) { return jsi::Value(_canvas->save()); }
 
   JSI_HOST_FUNCTION(saveLayer) {
-    SkPaint *paint = (count >= 1 && !arguments[0].isUndefined())
-                         ? JsiSkPaint::fromValue(runtime, arguments[0]).get()
-                         : nullptr;
-    SkRect *bounds =
-        count >= 2 && !arguments[1].isNull() && !arguments[1].isUndefined()
-            ? JsiSkRect::fromValue(runtime, arguments[1]).get()
-            : nullptr;
-    SkImageFilter *backdrop =
-        count >= 3 && !arguments[2].isNull() && !arguments[2].isUndefined()
-            ? JsiSkImageFilter::fromValue(runtime, arguments[2]).get()
-            : nullptr;
-    SkCanvas::SaveLayerFlags flags = count >= 4 ? arguments[3].asNumber() : 0;
+    ArgParser parser(runtime, arguments, count);
+    auto paint = parser.next<std::optional<std::shared_ptr<SkPaint>>>();
+    auto bounds = parser.next<std::optional<std::shared_ptr<SkRect>>>();
+    auto backdrop = parser.next<std::optional<sk_sp<SkImageFilter>>>();
+    auto flags = parser.next<std::optional<SkCanvas::SaveLayerFlags>>();
     return jsi::Value(_canvas->saveLayer(
-        SkCanvas::SaveLayerRec(bounds, paint, backdrop, flags)));
+        SkCanvas::SaveLayerRec(bounds.has_value() ? bounds.value().get() : nullptr,
+                              paint.has_value() ? paint.value().get() : nullptr,
+                              backdrop.has_value() ? backdrop.value().get() : nullptr,
+                              flags.value_or(0))));
   }
 
   JSI_HOST_FUNCTION(restore) {
@@ -482,102 +483,108 @@ public:
   }
 
   JSI_HOST_FUNCTION(rotate) {
-    SkScalar degrees = arguments[0].asNumber();
-    SkScalar rx = arguments[1].asNumber();
-    SkScalar ry = arguments[2].asNumber();
+    ArgParser parser(runtime, arguments, count);
+    auto degrees = parser.next<SkScalar>();
+    auto rx = parser.next<SkScalar>();
+    auto ry = parser.next<SkScalar>();
     _canvas->rotate(degrees, rx, ry);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(translate) {
-    SkScalar dx = arguments[0].asNumber();
-    SkScalar dy = arguments[1].asNumber();
+    ArgParser parser(runtime, arguments, count);
+    auto dx = parser.next<SkScalar>();
+    auto dy = parser.next<SkScalar>();
     _canvas->translate(dx, dy);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(scale) {
-    SkScalar sx = arguments[0].asNumber();
-    SkScalar sy = arguments[1].asNumber();
+    ArgParser parser(runtime, arguments, count);
+    auto sx = parser.next<SkScalar>();
+    auto sy = parser.next<SkScalar>();
     _canvas->scale(sx, sy);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(skew) {
-    SkScalar sx = arguments[0].asNumber();
-    SkScalar sy = arguments[1].asNumber();
+    ArgParser parser(runtime, arguments, count);
+    auto sx = parser.next<SkScalar>();
+    auto sy = parser.next<SkScalar>();
     _canvas->skew(sx, sy);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawColor) {
-    SkColor cl = JsiSkColor::fromValue(runtime, arguments[0]);
-    if (count == 1) {
-      _canvas->drawColor(cl);
+    ArgParser parser(runtime, arguments, count);
+    auto cl = parser.next<SkColor>();
+    auto mode = parser.next<std::optional<SkBlendMode>>();
+    if (mode.has_value()) {
+      _canvas->drawColor(cl, mode.value());
     } else {
-      auto mode = static_cast<SkBlendMode>(arguments[1].asNumber());
-      _canvas->drawColor(cl, mode);
+      _canvas->drawColor(cl);
     }
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(clear) {
-    SkColor cl = JsiSkColor::fromValue(runtime, arguments[0]);
+    ArgParser parser(runtime, arguments, count);
+    auto cl = parser.next<SkColor>();
     _canvas->clear(cl);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(concat) {
-    auto matrix = JsiSkMatrix::fromValue(runtime, arguments[0]);
-    _canvas->concat(*matrix.get());
+    ArgParser parser(runtime, arguments, count);
+    auto matrix = parser.next<std::shared_ptr<SkMatrix>>();
+    _canvas->concat(*matrix);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawPicture) {
-    auto picture = JsiSkPicture::fromValue(runtime, arguments[0]);
+    ArgParser parser(runtime, arguments, count);
+    auto picture = parser.next<sk_sp<SkPicture>>();
     _canvas->drawPicture(picture);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(drawAtlas) {
-    auto atlas = JsiSkImage::fromValue(runtime, arguments[0]);
-    auto rects = arguments[1].asObject(runtime).asArray(runtime);
-    auto transforms = arguments[2].asObject(runtime).asArray(runtime);
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
-    auto blendMode = count > 5 && !arguments[4].isUndefined()
-                         ? static_cast<SkBlendMode>(arguments[4].asNumber())
-                         : SkBlendMode::kDstOver;
+    ArgParser parser(runtime, arguments, count);
+    auto atlas = parser.next<sk_sp<SkImage>>();
+    auto rects = parser.next<jsi::Array>();
+    auto transforms = parser.next<jsi::Array>();
+    auto paint = parser.next<std::shared_ptr<SkPaint>>();
+    auto blendMode = parser.next<std::optional<SkBlendMode>>();
+    auto colorsArray = parser.next<std::optional<jsi::Array>>();
+    auto samplingValue = parser.next<std::optional<jsi::Value>>();
 
-    std::vector<SkRSXform> xforms;
-    int xformsSize = static_cast<int>(transforms.size(runtime));
-    xforms.reserve(xformsSize);
-    for (int i = 0; i < xformsSize; i++) {
-      auto xform = JsiSkRSXform::fromValue(
-          runtime, transforms.getValueAtIndex(runtime, i).asObject(runtime));
-      xforms.push_back(*xform.get());
-    }
-
-    std::vector<SkRect> skRects;
     int rectsSize = static_cast<int>(rects.size(runtime));
-    skRects.reserve(rectsSize);
-    for (int i = 0; i < rectsSize; i++) {
-      auto rect = JsiSkRect::fromValue(
-          runtime, rects.getValueAtIndex(runtime, i).asObject(runtime));
-      skRects.push_back(*rect.get());
-    }
+    int xformsSize = static_cast<int>(transforms.size(runtime));
 
-    // Validate transforms and rects have the same size
     if (xformsSize != rectsSize) {
       throw std::invalid_argument(
           "Transforms and rects arrays must have the same length");
     }
 
-    std::vector<SkColor> colors;
-    if (count > 5 && !arguments[5].isUndefined()) {
-      auto colorsArray = arguments[5].asObject(runtime).asArray(runtime);
-      int colorsSize = static_cast<int>(colorsArray.size(runtime));
+    std::vector<SkRect> skRects;
+    skRects.reserve(rectsSize);
+    for (int i = 0; i < rectsSize; i++) {
+      auto rect = JsiSkRect::fromValue(
+          runtime, rects.getValueAtIndex(runtime, i).asObject(runtime));
+      skRects.push_back(*rect);
+    }
 
-      // Validate colors array matches the size of sprites and transforms
+    std::vector<SkRSXform> xforms;
+    xforms.reserve(xformsSize);
+    for (int i = 0; i < xformsSize; i++) {
+      auto xform = JsiSkRSXform::fromValue(
+          runtime, transforms.getValueAtIndex(runtime, i).asObject(runtime));
+      xforms.push_back(*xform);
+    }
+
+    std::vector<SkColor> colors;
+    if (colorsArray.has_value()) {
+      int colorsSize = static_cast<int>(colorsArray.value().size(runtime));
       if (colorsSize != rectsSize) {
         throw std::invalid_argument(
             "Colors array must have the same length as rects/transforms");
@@ -585,14 +592,12 @@ public:
 
       colors.reserve(colorsSize);
       for (int i = 0; i < colorsSize; i++) {
-        // Convert from [r,g,b,a] in [0,1] to SkColor
-        auto val = colorsArray.getValueAtIndex(runtime, i).asObject(runtime);
+        auto val = colorsArray.value().getValueAtIndex(runtime, i).asObject(runtime);
         float r = val.getProperty(runtime, "0").asNumber();
         float g = val.getProperty(runtime, "1").asNumber();
         float b = val.getProperty(runtime, "2").asNumber();
         float a = val.getProperty(runtime, "3").asNumber();
 
-        // Convert to 8-bit color channels and pack into SkColor
         uint8_t r8 = static_cast<uint8_t>(r * 255);
         uint8_t g8 = static_cast<uint8_t>(g * 255);
         uint8_t b8 = static_cast<uint8_t>(b * 255);
@@ -602,39 +607,43 @@ public:
         colors.push_back(color);
       }
     }
+
     SkSamplingOptions sampling(SkFilterMode::kLinear);
-    if (count > 6) {
-      sampling = SamplingOptionsFromValue(runtime, arguments[6]);
+    if (samplingValue.has_value()) {
+      sampling = SamplingOptionsFromValue(runtime, samplingValue.value());
     }
+
     auto x = SkSpan(xforms.data(), xforms.size());
     auto t = SkSpan(skRects.data(), skRects.size());
     auto c = SkSpan(colors.data(), colors.size());
-    _canvas->drawAtlas(atlas.get(), x, t, c, blendMode, sampling, nullptr,
-                       paint.get());
-
+    _canvas->drawAtlas(atlas.get(), x, t, c, blendMode.value_or(SkBlendMode::kDstOver),
+                       sampling, nullptr, paint.get());
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(readPixels) {
-    auto srcX = static_cast<int>(arguments[0].asNumber());
-    auto srcY = static_cast<int>(arguments[1].asNumber());
-    auto info = JsiSkImageInfo::fromValue(runtime, arguments[2]);
+    ArgParser parser(runtime, arguments, count);
+    auto srcX = parser.next<int>();
+    auto srcY = parser.next<int>();
+    auto infoValue = parser.next<jsi::Value>();
+    auto destValue = parser.next<std::optional<jsi::Value>>();
+    auto bytesPerRowOpt = parser.next<std::optional<size_t>>();
+
+    auto info = JsiSkImageInfo::fromValue(runtime, infoValue);
     if (!info) {
       return jsi::Value::null();
     }
-    size_t bytesPerRow = 0;
-    if (count > 4 && !arguments[4].isUndefined()) {
-      bytesPerRow = static_cast<size_t>(arguments[4].asNumber());
-    } else {
-      bytesPerRow = info->minRowBytes();
-    }
-    auto dest =
-        count > 3
-            ? RNSkTypedArray::getTypedArray(runtime, arguments[3], *info)
+
+    size_t bytesPerRow = bytesPerRowOpt.value_or(info->minRowBytes());
+
+    auto dest = destValue.has_value()
+            ? RNSkTypedArray::getTypedArray(runtime, destValue.value(), *info)
             : RNSkTypedArray::getTypedArray(runtime, jsi::Value::null(), *info);
+
     if (!dest.isObject()) {
       return jsi::Value::null();
     }
+
     jsi::ArrayBuffer buffer =
         dest.asObject(runtime)
             .getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
