@@ -48,18 +48,18 @@ jobs:
 
       - name: Create test directory
         run: |
-          mkdir -p $HOME/skia-test-app
-          cd $HOME/skia-test-app
+          mkdir -p /Users/runner/skia-test-app
+          cd /Users/runner/skia-test-app
           pwd
 
       - name: Create Expo app with Skia template
-        working-directory: $HOME/skia-test-app
+        working-directory: /Users/runner/skia-test-app
         run: |
           echo "Creating Expo app with Skia template..."
           yarn create expo-app my-app -e with-skia
 
       - name: Install React Native Skia
-        working-directory: $HOME/skia-test-app/my-app
+        working-directory: /Users/runner/skia-test-app/my-app
         run: |
           if [ "${{ github.event.inputs.skia_version }}" == "latest" ]; then
             echo "Installing @shopify/react-native-skia@latest..."
@@ -70,33 +70,33 @@ jobs:
           fi
 
       - name: Show installed Skia version
-        working-directory: $HOME/skia-test-app/my-app
+        working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Installed React Native Skia version:"
           yarn list @shopify/react-native-skia --depth=0
 
       - name: Install Expo Dev Client
-        working-directory: $HOME/skia-test-app/my-app
+        working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Installing expo-dev-client..."
           npx expo install expo-dev-client
 
       - name: Install iOS dependencies
-        working-directory: $HOME/skia-test-app/my-app
+        working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Installing iOS dependencies..."
           cd ios
           pod install --repo-update
 
       - name: Start Metro bundler
-        working-directory: $HOME/skia-test-app/my-app
+        working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Starting Metro bundler in background..."
           npx expo start --dev-client &
           sleep 10
 
       - name: Build and run iOS app
-        working-directory: $HOME/skia-test-app/my-app
+        working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Building and running iOS app on simulator: ${{ github.event.inputs.simulator_device }}..."
           npx expo run:ios --simulator "${{ github.event.inputs.simulator_device }}"
@@ -112,7 +112,7 @@ jobs:
           SIMULATOR_ID=$(xcrun simctl list devices | grep "${{ github.event.inputs.simulator_device }}" | grep -E 'Booted' | head -n 1 | cut -d '(' -f 2 | cut -d ')' -f 1)
           if [ -n "$SIMULATOR_ID" ]; then
             echo "Capturing screenshot from simulator ID: $SIMULATOR_ID"
-            xcrun simctl io $SIMULATOR_ID screenshot $HOME/skia-test-screenshot.png
+            xcrun simctl io $SIMULATOR_ID screenshot /Users/runner/skia-test-screenshot.png
           else
             echo "No booted simulator found"
           fi
@@ -122,7 +122,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ios-simulator-screenshot
-          path: $HOME/skia-test-screenshot.png
+          path: /Users/runner/skia-test-screenshot.png
           if-no-files-found: ignore
 
       - name: Print test summary
