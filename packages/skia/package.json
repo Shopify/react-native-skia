@@ -9,7 +9,16 @@
   },
   "title": "React Native Skia",
   "version": "0.0.0",
-  "skiaVersion": "m142",
+  "skia": {
+    "version": "m142",
+    "checksums": {
+      "android-arm64-v8a": "ed7ef75f872a46c9455d157ccd9faac8cdfc8c06151e1d0b393494100d9d1a44",
+      "android-armeabi-v7a": "42bdf0ea230be42a5e0bf1f41230cf765ccee0b77467c3042f211e59b15a7c00",
+      "android-x86": "e2b5a5e5252eb9655d3df35bcac73772eebf01014016679ee491c13c7207f0da",
+      "android-x86_64": "eaab000cae0149ca5a5055c559140f3a87bff512b76c3c09ec0c6f9c8c7377b9",
+      "apple-xcframeworks": "448a1d7ff97205454d8a0457c1a0757d0fa29b3d67dd060988410675d2c6312d"
+    }
+  },
   "description": "High-performance React Native Graphics using Skia",
   "main": "lib/module/index.js",
   "react-native": "src/index.ts",
