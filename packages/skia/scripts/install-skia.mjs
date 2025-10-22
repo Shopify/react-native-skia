@@ -2,6 +2,7 @@ import fs from "fs";
 import https from "https";
 import path from "path";
 import os from "os";
+import crypto from "crypto";
 import { spawn } from "child_process";
 import { fileURLToPath } from "url";
 
@@ -9,10 +10,34 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const repo = "shopify/react-native-skia";
 
-const getSkiaVersion = () => {
-  const packageJsonPath = path.join(__dirname, "..", "package.json");
-  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
-  return packageJson.skiaVersion;
+const packageJsonPath = path.join(__dirname, "..", "package.json");
+
+const getPackageJson = () => {
+  return JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+};
+
+const getSkiaConfig = (graphite = false) => {
+  const packageJson = getPackageJson();
+  return graphite ? packageJson["skia-graphite"] : packageJson.skia;
+};
+
+const getSkiaVersion = (graphite = false) => {
+  const packageJson = getPackageJson();
+  const skiaConfig = getSkiaConfig(graphite);
+  return skiaConfig?.version || packageJson.skiaVersion;
+};
+
+const updateSkiaChecksums = (checksums, graphite = false) => {
+  const packageJson = getPackageJson();
+  const field = graphite ? "skia-graphite" : "skia";
+
+  if (!packageJson[field]) {
+    packageJson[field] = { version: packageJson[field]?.version || "m142", checksums: {} };
+  }
+
+  packageJson[field].checksums = checksums;
+
+  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + "\n", "utf8");
 };
 
 const GRAPHITE = !!process.env.SK_GRAPHITE;
@@ -28,10 +53,10 @@ if (GRAPHITE) {
   names.push(`${prefix}-headers`);
 }
 
-const skiaVersion = getSkiaVersion();
+const skiaVersion = getSkiaVersion(GRAPHITE);
 const releaseTag = GRAPHITE ? `skia-graphite-${skiaVersion}` : `skia-${skiaVersion}`;
 console.log(
-  `📦 Downloading Skia prebuilt binaries for version: ${skiaVersion}`
+  `📦 Downloading Skia prebuilt binaries for ${releaseTag}`
 );
 
 const runCommand = (command, args) => {
@@ -178,6 +203,92 @@ const artifactsDir = path.resolve(
 
 const libsDir = path.resolve(__dirname, "../libs");
 
+// Function to calculate the checksum of a directory
+const calculateDirectoryChecksum = (directory) => {
+  if (!fs.existsSync(directory)) {
+    return null;
+  }
+
+  const hash = crypto.createHash("sha256");
+  const files = [];
+
+  const collectFiles = (dir) => {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        collectFiles(fullPath);
+      } else if (entry.isFile()) {
+        files.push(fullPath);
+      }
+    }
+  };
+
+  collectFiles(directory);
+  files.sort();
+
+  for (const file of files) {
+    const relativePath = path.relative(directory, file);
+    hash.update(relativePath);
+    hash.update(fs.readFileSync(file));
+  }
+
+  return hash.digest("hex");
+};
+
+// Function to calculate all library checksums
+const calculateLibraryChecksums = () => {
+  const checksums = {};
+
+  // Android architectures
+  const androidArchs = ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"];
+  for (const arch of androidArchs) {
+    const archDir = path.join(libsDir, "android", arch);
+    const checksum = calculateDirectoryChecksum(archDir);
+    if (checksum) {
+      const checksumKey = `android-${arch}`;
+      checksums[checksumKey] = checksum;
+    }
+  }
+
+  // Apple frameworks
+  const appleDir = path.join(libsDir, "apple");
+  const appleChecksum = calculateDirectoryChecksum(appleDir);
+  if (appleChecksum) {
+    checksums["apple-xcframeworks"] = appleChecksum;
+  }
+
+  return checksums;
+};
+
+// Function to verify if checksums match
+const verifyChecksums = () => {
+  const skiaConfig = getSkiaConfig(GRAPHITE);
+  const expectedChecksums = skiaConfig?.checksums || {};
+
+  // If no checksums in package.json, we need to download
+  if (Object.keys(expectedChecksums).length === 0) {
+    console.log("⚠️  No checksums found in package.json");
+    return false;
+  }
+
+  const actualChecksums = calculateLibraryChecksums();
+
+  // Check if all expected checksums match
+  for (const [key, expectedChecksum] of Object.entries(expectedChecksums)) {
+    const actualChecksum = actualChecksums[key];
+    if (actualChecksum !== expectedChecksum) {
+      console.log(`⚠️  Checksum mismatch for ${key}`);
+      console.log(`   Expected: ${expectedChecksum}`);
+      console.log(`   Actual: ${actualChecksum || "missing"}`);
+      return false;
+    }
+  }
+
+  console.log("✅ All checksums match");
+  return true;
+};
+
 // Function to check if prebuilt binaries are already installed
 const areBinariesInstalled = () => {
   if (!fs.existsSync(libsDir)) {
@@ -223,16 +334,14 @@ const clearDirectory = (directory) => {
 };
 
 const main = async () => {
-  const forceReinstall = process.argv.includes("--force");
-  // Check if binaries are already installed
-  if (!forceReinstall && areBinariesInstalled()) {
-    console.log("✅ Prebuilt binaries already installed, skipping download");
-    console.log("   Use --force to reinstall");
+  // Check if binaries are installed and checksums match
+  if (areBinariesInstalled() && verifyChecksums()) {
+    console.log("✅ Prebuilt binaries already installed with matching checksums, skipping download");
     return;
   }
 
-  if (forceReinstall) {
-    console.log("🔄 Force reinstall requested");
+  if (areBinariesInstalled()) {
+    console.log("⚠️  Binaries installed but checksums don't match, re-downloading...");
   }
 
   console.log("🧹 Clearing existing artifacts...");
@@ -431,6 +540,12 @@ const main = async () => {
   }
 
   console.log("✅ Completed installation of Skia prebuilt binaries.");
+
+  // Calculate and update checksums in package.json
+  console.log("🔐 Calculating and updating checksums...");
+  const newChecksums = calculateLibraryChecksums();
+  updateSkiaChecksums(newChecksums, GRAPHITE);
+  console.log("✅ Checksums updated in package.json");
 
   // Clean up artifacts directory
   console.log("🗑️  Cleaning up artifacts directory...");
