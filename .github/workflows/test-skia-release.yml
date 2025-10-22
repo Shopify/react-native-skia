@@ -75,6 +75,12 @@ jobs:
           echo "Installed React Native Skia version:"
           yarn list @shopify/react-native-skia --depth=0
 
+      - name: Install TypeScript dependencies
+        working-directory: /Users/runner/skia-test-app/my-app
+        run: |
+          echo "Installing TypeScript dependencies..."
+          npx expo install typescript @types/react
+
       - name: Install Expo Dev Client
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
