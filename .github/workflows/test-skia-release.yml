@@ -81,6 +81,12 @@ jobs:
           echo "Installing expo-dev-client..."
           npx expo install expo-dev-client
 
+      - name: Prebuild native directories
+        working-directory: /Users/runner/skia-test-app/my-app
+        run: |
+          echo "Generating native iOS directory..."
+          npx expo prebuild --platform ios
+
       - name: Install iOS dependencies
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
