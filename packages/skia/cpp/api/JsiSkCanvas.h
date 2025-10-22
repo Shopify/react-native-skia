@@ -249,6 +249,11 @@ public:
     return static_cast<int>(_canvas->getSaveCount());
   }
 
+  JSI_HOST_FUNCTION(getTotalMatrix) {
+    auto matrix = std::make_shared<JsiSkMatrix>(getContext(), _canvas->getTotalMatrix());
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, matrix, getContext());
+  }
+
   JSI_HOST_FUNCTION(drawPoints) {
     auto pointMode = arguments[0].asNumber();
     std::vector<SkPoint> points;
@@ -668,6 +673,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawOval),
                        JSI_EXPORT_FUNC(JsiSkCanvas, restoreToCount),
                        JSI_EXPORT_FUNC(JsiSkCanvas, getSaveCount),
+                       JSI_EXPORT_FUNC(JsiSkCanvas, getTotalMatrix),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPoints),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPatch),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPath),
