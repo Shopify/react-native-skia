@@ -6,6 +6,8 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkImage.h"
+#include "JsiArgParser.h"
+#include "JsiArgParserTypes.h"
 
 namespace RNSkia {
 
@@ -18,17 +20,17 @@ namespace jsi = facebook::jsi;
 class JsiNativeBufferFactory : public JsiSkHostObject {
 public:
   JSI_HOST_FUNCTION(MakeFromImage) {
-    auto image = JsiSkImage::fromValue(runtime, arguments[0]);
+    ArgParser parser(runtime, arguments, count);
+    auto image = parser.next<sk_sp<SkImage>>();
     image->makeNonTextureImage();
     uint64_t pointer = getContext()->makeNativeBuffer(image);
     return jsi::BigInt::fromUint64(runtime, pointer);
   }
 
   JSI_HOST_FUNCTION(Release) {
-
-    jsi::BigInt pointer = arguments[0].asBigInt(runtime);
-    const uintptr_t nativeBufferPointer = pointer.asUint64(runtime);
-
+    ArgParser parser(runtime, arguments, count);
+    auto pointer = parser.next<jsi::Value>();
+    const uintptr_t nativeBufferPointer = pointer.asBigInt(runtime).asUint64(runtime);
     getContext()->releaseNativeBuffer(nativeBufferPointer);
     return jsi::Value::undefined();
   }

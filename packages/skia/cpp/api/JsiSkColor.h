@@ -8,6 +8,8 @@
 
 #include "JsiSkHostObjects.h"
 #include "third_party/CSSColorParser.h"
+#include "JsiArgParser.h"
+#include "JsiArgParserTypes.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -65,18 +67,21 @@ public:
    */
   static jsi::HostFunctionType createCtor() {
     return JSI_HOST_FUNCTION_LAMBDA {
-      if (arguments[0].isNumber()) {
-        return JsiSkColor::toValue(runtime, arguments[0].getNumber());
-      } else if (arguments[0].isString()) {
-        auto text = arguments[0].asString(runtime).utf8(runtime);
+      ArgParser parser(runtime, arguments, count);
+      auto arg = parser.next<jsi::Value>();
+
+      if (arg.isNumber()) {
+        return JsiSkColor::toValue(runtime, arg.getNumber());
+      } else if (arg.isString()) {
+        auto text = arg.asString(runtime).utf8(runtime);
         auto color = CSSColorParser::parse(text);
         if (color.a == -1.0f) {
           return JsiSkColor::toValue(runtime, SK_ColorBLACK);
         }
         return JsiSkColor::toValue(
             runtime, SkColorSetARGB(color.a * 255, color.r, color.g, color.b));
-      } else if (arguments[0].isObject()) {
-        return arguments[0].getObject(runtime);
+      } else if (arg.isObject()) {
+        return arg.getObject(runtime);
       }
       return jsi::Value::undefined();
     };

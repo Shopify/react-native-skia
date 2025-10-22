@@ -52,3 +52,12 @@ class JsiSkRSXform;
     }                                                                          \
   };                                                                           \
   }
+
+// For SkColor (special case - it's a typedef, not a class)
+#define JSI_ARG_PARSER_SKCOLOR(JsiColorType)                                   \
+  namespace RNSkia {                                                           \
+  template <>                                                                  \
+  inline SkColor ArgParser::parse<SkColor>(const jsi::Value &value) {         \
+    return JsiColorType::fromValue(_runtime, value);                           \
+  }                                                                            \
+  }

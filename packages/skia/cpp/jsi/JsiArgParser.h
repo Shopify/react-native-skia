@@ -281,16 +281,3 @@ private:
 };
 
 } // namespace RNSkia
-
-// Forward declare JsiSkColor for SkColor parsing
-namespace RNSkia {
-class JsiSkColor;
-}
-
-// Add specialization for SkColor parsing
-namespace RNSkia {
-template <>
-inline SkColor ArgParser::parse<SkColor>(const jsi::Value &value) {
-  return JsiSkColor::fromValue(_runtime, value);
-}
-} // namespace RNSkia

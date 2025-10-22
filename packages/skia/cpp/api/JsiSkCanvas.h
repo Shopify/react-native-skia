@@ -61,6 +61,7 @@ JSI_ARG_PARSER_SHARED_PTR(SkFont, JsiSkFont)
 JSI_ARG_PARSER_SK_SP(SkSVGDOM, JsiSkSVG)
 JSI_ARG_PARSER_SHARED_PTR(SkMatrix, JsiSkMatrix)
 JSI_ARG_PARSER_SK_SP(SkImageFilter, JsiSkImageFilter)
+JSI_ARG_PARSER_SKCOLOR(JsiSkColor)
 
 namespace RNSkia {
 

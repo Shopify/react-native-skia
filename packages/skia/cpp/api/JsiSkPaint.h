@@ -28,6 +28,7 @@ JSI_ARG_PARSER_SK_SP(SkMaskFilter, JsiSkMaskFilter)
 JSI_ARG_PARSER_SK_SP(SkColorFilter, JsiSkColorFilter)
 JSI_ARG_PARSER_SK_SP(SkShader, JsiSkShader)
 JSI_ARG_PARSER_SK_SP(SkPathEffect, JsiSkPathEffect)
+JSI_ARG_PARSER_SKCOLOR(JsiSkColor)
 
 namespace RNSkia {
 namespace jsi = facebook::jsi;
