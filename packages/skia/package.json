@@ -9,7 +9,26 @@
   },
   "title": "React Native Skia",
   "version": "0.0.0",
-  "skiaVersion": "m142",
+  "skia": {
+    "version": "m142",
+    "checksums": {
+      "android-armeabi-v7a": "5ae357eb26d9ec93797bacbc865b86eff6ac54b3a9466a1b0c41c27018cc3150",
+      "android-arm64-v8a": "c310bd5261de1ab5f4afdb05aa51bf0f56d625f6285617e149af517a2d375e52",
+      "android-x86": "26a18ade07de8318be2ec82bd82a1d7f2709893462229d70f0d353c6c8691cc3",
+      "android-x86_64": "46a5576b6f8e7d1372c27576ad750384c2d6f892bfe3fc0ee260c68d08ebd844",
+      "apple-xcframeworks": "343fad71c01e1f8331d4421c7efe0ae6dff3a7d25361c466dcda7dc3737cdd5c"
+    }
+  },
+  "skia-graphite": {
+    "version": "m142",
+    "checksums": {
+      "android-armeabi-v7a": "8ea6fc4e64dfba9afd74aebde114819fecf05924a8209839482d7dca38203f85",
+      "android-arm64-v8a": "6be2711ca4c31523d381420e98cabfe7e7939e246975c7b427968d5dd3b62be9",
+      "android-x86": "888934ddc34f431c7fac5628f633dc11a4e84d68c41adb33307ae7586cc7b0b5",
+      "android-x86_64": "2180a5be52d51bbf1dabaf95051ed0ce422b047157bcda6e486657c2c7b87ceb",
+      "apple-xcframeworks": "cb50d9c85c9f02389ecc433912145e4a7ce2277bfe26a69dd7f7a9db74c9e276"
+    }
+  },
   "description": "High-performance React Native Graphics using Skia",
   "main": "lib/module/index.js",
   "react-native": "src/index.ts",
