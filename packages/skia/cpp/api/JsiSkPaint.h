@@ -13,12 +13,21 @@
 #include "JsiSkPathEffect.h"
 #include "JsiSkShader.h"
 
+#include "JsiArgParser.h"
+#include "JsiArgParserTypes.h"
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "include/core/SkPaint.h"
 
 #pragma clang diagnostic pop
+
+// ArgParser specializations for types used in JsiSkPaint
+JSI_ARG_PARSER_SK_SP(SkMaskFilter, JsiSkMaskFilter)
+JSI_ARG_PARSER_SK_SP(SkColorFilter, JsiSkColorFilter)
+JSI_ARG_PARSER_SK_SP(SkShader, JsiSkShader)
+JSI_ARG_PARSER_SK_SP(SkPathEffect, JsiSkPathEffect)
 
 namespace RNSkia {
 namespace jsi = facebook::jsi;
@@ -28,7 +37,8 @@ public:
   EXPORT_JSI_API_TYPENAME(JsiSkPaint, Paint)
 
   JSI_HOST_FUNCTION(assign) {
-    SkPaint *paint = JsiSkPaint::fromValue(runtime, arguments[0]).get();
+    ArgParser parser(runtime, arguments, count);
+    auto paint = parser.next<std::shared_ptr<SkPaint>>();
     *getObject() = *paint;
     return jsi::Value::undefined();
   }
@@ -72,102 +82,107 @@ public:
   }
 
   JSI_HOST_FUNCTION(setColor) {
-    SkColor color = JsiSkColor::fromValue(runtime, arguments[0]);
+    ArgParser parser(runtime, arguments, count);
+    auto color = parser.next<SkColor>();
     getObject()->setColor(color);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setAlphaf) {
-    SkScalar alpha = arguments[0].asNumber();
+    ArgParser parser(runtime, arguments, count);
+    auto alpha = parser.next<SkScalar>();
     getObject()->setAlphaf(alpha);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setAntiAlias) {
-    bool antiAliased = arguments[0].getBool();
+    ArgParser parser(runtime, arguments, count);
+    auto antiAliased = parser.next<bool>();
     getObject()->setAntiAlias(antiAliased);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setDither) {
-    bool dithered = arguments[0].getBool();
+    ArgParser parser(runtime, arguments, count);
+    auto dithered = parser.next<bool>();
     getObject()->setDither(dithered);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setStrokeWidth) {
-    SkScalar width = arguments[0].asNumber();
+    ArgParser parser(runtime, arguments, count);
+    auto width = parser.next<SkScalar>();
     getObject()->setStrokeWidth(width);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setStyle) {
-    auto style = arguments[0].asNumber();
-    getObject()->setStyle(static_cast<SkPaint::Style>(style));
+    ArgParser parser(runtime, arguments, count);
+    auto style = parser.next<SkPaint::Style>();
+    getObject()->setStyle(style);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setStrokeCap) {
-    auto cap = arguments[0].asNumber();
-    getObject()->setStrokeCap(static_cast<SkPaint::Cap>(cap));
+    ArgParser parser(runtime, arguments, count);
+    auto cap = parser.next<SkPaint::Cap>();
+    getObject()->setStrokeCap(cap);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setStrokeJoin) {
-    int join = arguments[0].asNumber();
-    getObject()->setStrokeJoin(static_cast<SkPaint::Join>(join));
+    ArgParser parser(runtime, arguments, count);
+    auto join = parser.next<SkPaint::Join>();
+    getObject()->setStrokeJoin(join);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setStrokeMiter) {
-    int limit = arguments[0].asNumber();
+    ArgParser parser(runtime, arguments, count);
+    auto limit = parser.next<SkScalar>();
     getObject()->setStrokeMiter(limit);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setBlendMode) {
-    auto blendMode = (SkBlendMode)arguments[0].asNumber();
+    ArgParser parser(runtime, arguments, count);
+    auto blendMode = parser.next<SkBlendMode>();
     getObject()->setBlendMode(blendMode);
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setMaskFilter) {
-    auto maskFilter = arguments[0].isNull() || arguments[0].isUndefined()
-                          ? nullptr
-                          : JsiSkMaskFilter::fromValue(runtime, arguments[0]);
-    getObject()->setMaskFilter(std::move(maskFilter));
+    ArgParser parser(runtime, arguments, count);
+    auto maskFilter = parser.next<std::optional<sk_sp<SkMaskFilter>>>();
+    getObject()->setMaskFilter(maskFilter.value_or(nullptr));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setImageFilter) {
-    auto imageFilter = arguments[0].isNull() || arguments[0].isUndefined()
-                           ? nullptr
-                           : JsiSkImageFilter::fromValue(runtime, arguments[0]);
-    getObject()->setImageFilter(std::move(imageFilter));
+    ArgParser parser(runtime, arguments, count);
+    auto imageFilter = parser.next<std::optional<sk_sp<SkImageFilter>>>();
+    getObject()->setImageFilter(imageFilter.value_or(nullptr));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setColorFilter) {
-    auto colorFilter = arguments[0].isNull() || arguments[0].isUndefined()
-                           ? nullptr
-                           : JsiSkColorFilter::fromValue(runtime, arguments[0]);
-    getObject()->setColorFilter(std::move(colorFilter));
+    ArgParser parser(runtime, arguments, count);
+    auto colorFilter = parser.next<std::optional<sk_sp<SkColorFilter>>>();
+    getObject()->setColorFilter(colorFilter.value_or(nullptr));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setShader) {
-    auto shader = arguments[0].isNull() || arguments[0].isUndefined()
-                      ? nullptr
-                      : JsiSkShader::fromValue(runtime, arguments[0]);
-    getObject()->setShader(std::move(shader));
+    ArgParser parser(runtime, arguments, count);
+    auto shader = parser.next<std::optional<sk_sp<SkShader>>>();
+    getObject()->setShader(shader.value_or(nullptr));
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(setPathEffect) {
-    auto pathEffect = arguments[0].isNull() || arguments[0].isUndefined()
-                          ? nullptr
-                          : JsiSkPathEffect::fromValue(runtime, arguments[0]);
-    getObject()->setPathEffect(std::move(pathEffect));
+    ArgParser parser(runtime, arguments, count);
+    auto pathEffect = parser.next<std::optional<sk_sp<SkPathEffect>>>();
+    getObject()->setPathEffect(pathEffect.value_or(nullptr));
     return jsi::Value::undefined();
   }
 
