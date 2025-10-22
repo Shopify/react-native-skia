@@ -10,6 +10,8 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
+namespace detail {
+
 /**
  * Helper type trait to detect std::optional<T>
  */
@@ -36,13 +38,15 @@ template <typename T> struct is_sk_sp<sk_sp<T>> : std::true_type {
   using element_type = T;
 };
 
+} // namespace detail
+
 /**
  * Traits class for parsing specific types - specialize this for custom types
  */
 template <typename T> struct ArgParserTraits {
   static std::shared_ptr<T> parseSharedPtr(jsi::Runtime &runtime,
                                            const jsi::Value &value) {
-    // Default implementation - will cause linker error if not specialized
+    // Default implementation - will cause compile error if not specialized
     static_assert(sizeof(T) == 0,
                   "ArgParserTraits not specialized for this type. "
                   "Use JSI_ARG_PARSER_SHARED_PTR macro.");
@@ -50,7 +54,7 @@ template <typename T> struct ArgParserTraits {
   }
 
   static sk_sp<T> parseSkSp(jsi::Runtime &runtime, const jsi::Value &value) {
-    // Default implementation - will cause linker error if not specialized
+    // Default implementation - will cause compile error if not specialized
     static_assert(sizeof(T) == 0,
                   "ArgParserTraits not specialized for this type. "
                   "Use JSI_ARG_PARSER_SK_SP macro.");
@@ -86,7 +90,7 @@ public:
    * otherwise T
    */
   template <typename T> T next() {
-    if constexpr (is_optional_v<T>) {
+    if constexpr (detail::is_optional_v<T>) {
       // Handle std::optional<U>
       using U = typename T::value_type;
 
@@ -143,7 +147,25 @@ private:
 
   /**
    * Type-specific parsing implementations
+   * These are ordered by priority - more specific matches first
    */
+
+  // For shared_ptr types - uses ArgParserTraits for customization (highest
+  // priority for ptr types)
+  template <typename T>
+  typename std::enable_if<detail::is_shared_ptr<T>::value, T>::type
+  parse(const jsi::Value &value) {
+    using ElementType = typename detail::is_shared_ptr<T>::element_type;
+    return ArgParserTraits<ElementType>::parseSharedPtr(_runtime, value);
+  }
+
+  // For sk_sp types - uses ArgParserTraits for customization
+  template <typename T>
+  typename std::enable_if<detail::is_sk_sp<T>::value, T>::type
+  parse(const jsi::Value &value) {
+    using ElementType = typename detail::is_sk_sp<T>::element_type;
+    return ArgParserTraits<ElementType>::parseSkSp(_runtime, value);
+  }
 
   // Primitive types
   template <typename T>
@@ -248,24 +270,6 @@ private:
                              std::to_string(_index));
     }
     return static_cast<T>(static_cast<int>(value.asNumber()));
-  }
-
-  // For shared_ptr types - uses ArgParserTraits for customization
-  template <typename T>
-  typename std::enable_if<is_shared_ptr<T>::value, T>::type
-  parse(const jsi::Value &value) {
-    // Uses traits class for type-specific parsing
-    using ElementType = typename is_shared_ptr<T>::element_type;
-    return ArgParserTraits<ElementType>::parseSharedPtr(_runtime, value);
-  }
-
-  // For sk_sp types - uses ArgParserTraits for customization
-  template <typename T>
-  typename std::enable_if<is_sk_sp<T>::value, T>::type
-  parse(const jsi::Value &value) {
-    // Uses traits class for type-specific parsing
-    using ElementType = typename is_sk_sp<T>::element_type;
-    return ArgParserTraits<ElementType>::parseSkSp(_runtime, value);
   }
 };
 
