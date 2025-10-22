@@ -272,7 +272,7 @@ jobs:
       - name: Wait for app to launch
         run: |
           echo "Waiting for app to launch and stabilize..."
-          sleep 30
+          sleep 120
 
       - name: Capture emulator screenshot
         if: always()
