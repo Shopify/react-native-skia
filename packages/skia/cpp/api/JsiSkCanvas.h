@@ -44,11 +44,8 @@
 
 #pragma clang diagnostic pop
 
-namespace RNSkia {
-
-namespace jsi = facebook::jsi;
-
 // ArgParser specializations for types used in JsiSkCanvas
+// Must be outside namespace RNSkia since the macros define the namespace
 JSI_ARG_PARSER_SK_SP(SkImage, JsiSkImage)
 JSI_ARG_PARSER_SHARED_PTR(SkPaint, JsiSkPaint)
 JSI_ARG_PARSER_SHARED_PTR(SkRect, JsiSkRect)
@@ -59,6 +56,10 @@ JSI_ARG_PARSER_SK_SP(SkPicture, JsiSkPicture)
 JSI_ARG_PARSER_SK_SP(SkTextBlob, JsiSkTextBlob)
 JSI_ARG_PARSER_SK_SP(SkVertices, JsiSkVertices)
 JSI_ARG_PARSER_SHARED_PTR(SkFont, JsiSkFont)
+
+namespace RNSkia {
+
+namespace jsi = facebook::jsi;
 
 class JsiSkCanvas : public JsiSkHostObject {
 public:

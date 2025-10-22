@@ -21,6 +21,22 @@ template <typename T>
 inline constexpr bool is_optional_v = is_optional<T>::value;
 
 /**
+ * Helper traits to detect shared_ptr and sk_sp types
+ */
+template <typename T> struct is_shared_ptr : std::false_type {};
+
+template <typename T>
+struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {
+  using element_type = T;
+};
+
+template <typename T> struct is_sk_sp : std::false_type {};
+
+template <typename T> struct is_sk_sp<sk_sp<T>> : std::true_type {
+  using element_type = T;
+};
+
+/**
  * Traits class for parsing specific types - specialize this for custom types
  */
 template <typename T> struct ArgParserTraits {
@@ -236,23 +252,20 @@ private:
 
   // For shared_ptr types - uses ArgParserTraits for customization
   template <typename T>
-  typename std::enable_if<
-      std::is_same<T, std::shared_ptr<typename T::element_type>>::value,
-      T>::type
+  typename std::enable_if<is_shared_ptr<T>::value, T>::type
   parse(const jsi::Value &value) {
     // Uses traits class for type-specific parsing
-    return ArgParserTraits<typename T::element_type>::parseSharedPtr(_runtime,
-                                                                     value);
+    using ElementType = typename is_shared_ptr<T>::element_type;
+    return ArgParserTraits<ElementType>::parseSharedPtr(_runtime, value);
   }
 
   // For sk_sp types - uses ArgParserTraits for customization
   template <typename T>
-  typename std::enable_if<
-      std::is_same<T, sk_sp<typename T::element_type>>::value, T>::type
+  typename std::enable_if<is_sk_sp<T>::value, T>::type
   parse(const jsi::Value &value) {
     // Uses traits class for type-specific parsing
-    return ArgParserTraits<typename T::element_type>::parseSkSp(_runtime,
-                                                                value);
+    using ElementType = typename is_sk_sp<T>::element_type;
+    return ArgParserTraits<ElementType>::parseSkSp(_runtime, value);
   }
 };
 
