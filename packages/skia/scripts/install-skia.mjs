@@ -7,17 +7,37 @@ import { spawn } from "child_process";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 const repo = "shopify/react-native-skia";
 
-const getPackageJsonPath = () => path.join(__dirname, "..", "package.json");
-const getPackageJson = () => JSON.parse(fs.readFileSync(getPackageJsonPath(), "utf8"));
-const writePackageJson = (json) => {
-  fs.writeFileSync(getPackageJsonPath(), JSON.stringify(json, null, 2) + "\n");
+const packageJsonPath = path.join(__dirname, "..", "package.json");
+
+const getPackageJson = () => {
+  return JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
 };
 
-const getSkiaVersion = () => {
-  const pkg = getPackageJson();
-  return pkg.skia?.version ?? pkg.skiaVersion;
+const getSkiaConfig = (graphite = false) => {
+  const packageJson = getPackageJson();
+  return graphite ? packageJson["skia-graphite"] : packageJson.skia;
+};
+
+const getSkiaVersion = (graphite = false) => {
+  const packageJson = getPackageJson();
+  const skiaConfig = getSkiaConfig(graphite);
+  return skiaConfig?.version || packageJson.skiaVersion;
+};
+
+const updateSkiaChecksums = (checksums, graphite = false) => {
+  const packageJson = getPackageJson();
+  const field = graphite ? "skia-graphite" : "skia";
+
+  if (!packageJson[field]) {
+    packageJson[field] = { version: packageJson[field]?.version || "m142", checksums: {} };
+  }
+
+  packageJson[field].checksums = checksums;
+
+  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + "\n", "utf8");
 };
 
 const GRAPHITE = !!process.env.SK_GRAPHITE;
@@ -29,149 +49,511 @@ const names = [
   `${prefix}-android-arm-x86`,
   `${prefix}-apple-xcframeworks`,
 ];
-if (GRAPHITE) names.push(`${prefix}-headers`);
+if (GRAPHITE) {
+  names.push(`${prefix}-headers`);
+}
 
-const skiaVersion = getSkiaVersion();
+const skiaVersion = getSkiaVersion(GRAPHITE);
 const releaseTag = GRAPHITE ? `skia-graphite-${skiaVersion}` : `skia-${skiaVersion}`;
-console.log(`📦 Installing Skia prebuilt binaries (version: ${skiaVersion})`);
+console.log(
+  `📦 Downloading Skia prebuilt binaries for ${releaseTag}`
+);
 
-const runCommand = (command, args) =>
-  new Promise((resolve, reject) => {
-    const child = spawn(command, args, { stdio: ["ignore", "inherit", "inherit"] });
-    child.on("error", reject);
-    child.on("close", (code) => (code === 0 ? resolve() : reject(new Error(`Command ${command} exited with code ${code}`))));
+const runCommand = (command, args) => {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      stdio: ["ignore", "inherit", "inherit"],
+    });
+    child.on("error", (error) => {
+      reject(error);
+    });
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`Command ${command} exited with code ${code}`));
+      }
+    });
   });
+};
 
-const downloadToFile = (url, destPath) =>
-  new Promise((resolve, reject) => {
-    fs.mkdirSync(path.dirname(destPath), { recursive: true });
-    https
-      .get(url, { headers: { "User-Agent": "node" } }, (res) => {
-        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-          return downloadToFile(res.headers.location, destPath).then(resolve).catch(reject);
-        }
-        if (res.statusCode !== 200) return reject(new Error(`Failed to download ${url}: ${res.statusCode}`));
-        const file = fs.createWriteStream(destPath);
-        res.pipe(file);
-        file.on("finish", () => file.close(resolve));
-        file.on("error", reject);
-      })
-      .on("error", reject);
+const downloadToFile = (url, destPath) => {
+  fs.mkdirSync(path.dirname(destPath), { recursive: true });
+  return new Promise((resolve, reject) => {
+    const request = (currentUrl) => {
+      https
+        .get(currentUrl, { headers: { "User-Agent": "node" } }, (res) => {
+          if (
+            res.statusCode &&
+            [301, 302, 303, 307, 308].includes(res.statusCode)
+          ) {
+            const { location } = res.headers;
+            if (location) {
+              res.resume();
+              request(location);
+            } else {
+              reject(new Error(`Redirect without location for ${currentUrl}`));
+            }
+            return;
+          }
+
+          if (res.statusCode !== 200) {
+            reject(
+              new Error(
+                `Failed to download: ${res.statusCode} ${res.statusMessage}`
+              )
+            );
+            res.resume();
+            return;
+          }
+
+          const fileStream = fs.createWriteStream(destPath);
+          res.pipe(fileStream);
+
+          fileStream.on("finish", () => {
+            fileStream.close((err) => {
+              if (err) {
+                // If closing the stream errors, perform the same cleanup and reject.
+                fileStream.destroy();
+                fs.unlink(destPath, () => reject(err));
+              } else {
+                resolve();
+              }
+            });
+          });
+
+          const cleanup = (error) => {
+            fileStream.destroy();
+            fs.unlink(destPath, () => reject(error));
+          };
+
+          res.on("error", cleanup);
+          fileStream.on("error", cleanup);
+        })
+        .on("error", reject);
+    };
+
+    request(url);
   });
+};
 
 const extractTarGz = async (archivePath, destDir) => {
   fs.mkdirSync(destDir, { recursive: true });
-  await runCommand(process.platform === "win32" ? "tar.exe" : "tar", ["-xzf", archivePath, "-C", destDir]);
+
+  const args = [
+    "-xzf",
+    archivePath,
+    "-C",
+    destDir,
+  ];
+  const candidates =
+    process.platform === "win32"
+      ? [
+          "tar.exe",
+          path.join(
+            process.env.SystemRoot ?? "C:\\Windows",
+            "System32",
+            "tar.exe"
+          ),
+          "bsdtar.exe",
+          "bsdtar",
+        ]
+      : ["tar"];
+
+  let lastError;
+  for (const candidate of candidates) {
+    try {
+      await runCommand(candidate, args);
+      return;
+    } catch (err) {
+      if (err.code === "ENOENT") {
+        lastError = new Error(`Command ${candidate} not found`);
+        continue;
+      }
+      lastError = err;
+    }
+  }
+
+  throw new Error(
+    `Failed to extract ${path.basename(
+      archivePath
+    )}. Please install a compatible tar binary. Last error: ${
+      lastError?.message ?? "unknown error"
+    }`
+  );
 };
 
+// Helper function to download and extract a tar.gz file
 const downloadAndExtract = async (url, destDir, tempDir) => {
   const archivePath = path.join(tempDir, path.basename(url));
   await downloadToFile(url, archivePath);
-  await extractTarGz(archivePath, destDir);
-  fs.unlinkSync(archivePath);
+  try {
+    await extractTarGz(archivePath, destDir);
+  } finally {
+    if (fs.existsSync(archivePath)) {
+      fs.unlinkSync(archivePath);
+    }
+  }
 };
 
-const artifactsDir = path.resolve(__dirname, "../../../packages/skia/artifacts");
+const artifactsDir = path.resolve(
+  __dirname,
+  "../../../packages/skia/artifacts"
+);
+
 const libsDir = path.resolve(__dirname, "../libs");
 
-const clearDirectory = (directory) => {
-  if (!fs.existsSync(directory)) return;
-  fs.readdirSync(directory).forEach((file) => {
-    const curPath = path.join(directory, file);
-    if (fs.lstatSync(curPath).isDirectory()) {
-      clearDirectory(curPath);
-      fs.rmdirSync(curPath);
-    } else fs.unlinkSync(curPath);
-  });
-};
+// Function to calculate the checksum of a directory
+const calculateDirectoryChecksum = (directory) => {
+  if (!fs.existsSync(directory)) {
+    return null;
+  }
 
-const hashDirectory = async (dir) => {
   const hash = crypto.createHash("sha256");
-  const walk = (d) => {
-    for (const entry of fs.readdirSync(d)) {
-      const p = path.join(d, entry);
-      const stat = fs.statSync(p);
-      if (stat.isDirectory()) {
-        walk(p);
-      } else {
-        hash.update(entry);
-        hash.update(String(stat.size));
-        hash.update(fs.readFileSync(p));
+  const files = [];
+
+  const collectFiles = (dir) => {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        collectFiles(fullPath);
+      } else if (entry.isFile()) {
+        files.push(fullPath);
       }
     }
   };
-  if (fs.existsSync(dir)) walk(dir);
+
+  collectFiles(directory);
+  files.sort();
+
+  for (const file of files) {
+    const relativePath = path.relative(directory, file);
+    hash.update(relativePath);
+    hash.update(fs.readFileSync(file));
+  }
+
   return hash.digest("hex");
 };
 
-const computeInstallChecksums = async () => {
+// Function to calculate all library checksums
+const calculateLibraryChecksums = () => {
   const checksums = {};
-  const androidDir = path.join(libsDir, "android");
-  if (fs.existsSync(androidDir)) {
-    for (const arch of fs.readdirSync(androidDir)) {
-      const subdir = path.join(androidDir, arch);
-      checksums[`android-${arch}`] = await hashDirectory(subdir);
+
+  // Android architectures
+  const androidArchs = ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"];
+  for (const arch of androidArchs) {
+    const archDir = path.join(libsDir, "android", arch);
+    const checksum = calculateDirectoryChecksum(archDir);
+    if (checksum) {
+      const checksumKey = `android-${arch}`;
+      checksums[checksumKey] = checksum;
     }
   }
+
+  // Apple frameworks
   const appleDir = path.join(libsDir, "apple");
-  if (fs.existsSync(appleDir)) {
-    checksums["apple-xcframeworks"] = await hashDirectory(appleDir);
+  const appleChecksum = calculateDirectoryChecksum(appleDir);
+  if (appleChecksum) {
+    checksums["apple-xcframeworks"] = appleChecksum;
   }
+
   return checksums;
 };
 
-const isInstallUpToDate = async (storedChecksums) => {
-  if (!storedChecksums || Object.keys(storedChecksums).length === 0) {
+// Function to verify if checksums match
+const verifyChecksums = () => {
+  const skiaConfig = getSkiaConfig(GRAPHITE);
+  const expectedChecksums = skiaConfig?.checksums || {};
+
+  // If no checksums in package.json, we need to download
+  if (Object.keys(expectedChecksums).length === 0) {
+    console.log("⚠️  No checksums found in package.json");
     return false;
   }
-  const currentChecksums = await computeInstallChecksums();
-  for (const [key, stored] of Object.entries(storedChecksums)) {
-    if (stored !== currentChecksums[key]) return false;
+
+  const actualChecksums = calculateLibraryChecksums();
+
+  // Check if all expected checksums match
+  for (const [key, expectedChecksum] of Object.entries(expectedChecksums)) {
+    const actualChecksum = actualChecksums[key];
+    if (actualChecksum !== expectedChecksum) {
+      console.log(`⚠️  Checksum mismatch for ${key}`);
+      console.log(`   Expected: ${expectedChecksum}`);
+      console.log(`   Actual: ${actualChecksum || "missing"}`);
+      return false;
+    }
   }
-  return Object.keys(currentChecksums).length > 0;
+
+  console.log("✅ All checksums match");
+  return true;
+};
+
+// Function to check if prebuilt binaries are already installed
+const areBinariesInstalled = () => {
+  if (!fs.existsSync(libsDir)) {
+    return false;
+  }
+
+  // Check for Android libraries
+  const androidDir = path.join(libsDir, "android");
+  const androidArchs = ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"];
+  for (const arch of androidArchs) {
+    const archDir = path.join(androidDir, arch);
+    if (!fs.existsSync(archDir) || fs.readdirSync(archDir).length === 0) {
+      return false;
+    }
+  }
+
+  // Check for Apple frameworks
+  const appleDir = path.join(libsDir, "apple");
+  if (!fs.existsSync(appleDir) || fs.readdirSync(appleDir).length === 0) {
+    return false;
+  }
+
+  return true;
+};
+
+// Function to clear directory contents
+const clearDirectory = (directory) => {
+  if (fs.existsSync(directory)) {
+    fs.readdirSync(directory).forEach((file) => {
+      const curPath = path.join(directory, file);
+      if (fs.lstatSync(curPath).isDirectory()) {
+        clearDirectory(curPath);
+        fs.rmdirSync(curPath);
+      } else {
+        fs.unlinkSync(curPath);
+      }
+    });
+    //console.log(`❌ ${directory}`);
+  } else {
+    console.log(`Directory ${directory} does not exist, creating it...`);
+    fs.mkdirSync(directory, { recursive: true });
+  }
 };
 
 const main = async () => {
-  const pkg = getPackageJson();
-  const storedChecksums = pkg.skia?.checksums ?? {};
-
-  if (await isInstallUpToDate(storedChecksums)) {
-    console.log("✅ Local Skia installation verified via checksum — skipping download.");
+  // Check if binaries are installed and checksums match
+  if (areBinariesInstalled() && verifyChecksums()) {
+    console.log("✅ Prebuilt binaries already installed with matching checksums, skipping download");
     return;
   }
 
-  console.log("⬇️  Downloading Skia release assets...");
+  if (areBinariesInstalled()) {
+    console.log("⚠️  Binaries installed but checksums don't match, re-downloading...");
+  }
+
+  console.log("🧹 Clearing existing artifacts...");
   clearDirectory(artifactsDir);
-  const tempDownloadDir = fs.mkdtempSync(path.join(os.tmpdir(), "skia-download-"));
+
+  console.log(`⬇️  Downloading release assets to ${artifactsDir}`);
+  const tempDownloadDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "skia-download-")
+  );
 
   for (const artifactName of names) {
     const assetName = `${artifactName}-${releaseTag}.tar.gz`;
     const extractDir = path.join(artifactsDir, artifactName);
     const downloadUrl = `https://github.com/${repo}/releases/download/${releaseTag}/${assetName}`;
-    console.log(`   Downloading ${assetName}...`);
-    await downloadAndExtract(downloadUrl, extractDir, tempDownloadDir);
-    console.log(`   ✓ ${assetName} extracted`);
-  }
 
+    console.log(`   Downloading ${assetName}...`);
+    try {
+      await downloadAndExtract(downloadUrl, extractDir, tempDownloadDir);
+      console.log(`   ✓ ${assetName} extracted`);
+    } catch (error) {
+      console.error(`   ✗ Failed to download ${assetName}:`, error);
+      fs.rmSync(tempDownloadDir, { recursive: true, force: true });
+      throw error;
+    }
+  }
   fs.rmSync(tempDownloadDir, { recursive: true, force: true });
 
-  // --- Copy logic identical to before (omitted for brevity) ---
+  // Copy artifacts to libs folder in the required structure
+  console.log("📦 Copying artifacts to libs folder...");
+  clearDirectory(libsDir);
 
-  console.log("📦 Computing install checksums...");
-  const newChecksums = await computeInstallChecksums();
+  // Create android directory structure
+  const androidDir = path.join(libsDir, "android");
+  fs.mkdirSync(androidDir, { recursive: true });
 
-  pkg.skia = {
-    version: skiaVersion,
-    checksums: newChecksums,
-  };
-  writePackageJson(pkg);
-  console.log("   ✓ Checksums written to package.json");
+  // Copy android artifacts
+  const androidArchs = GRAPHITE ? [
+    { artifact: `${prefix}-android-arm`, srcSubdir: "arm", dest: "armeabi-v7a" },
+    { artifact: `${prefix}-android-arm-64`, srcSubdir: "arm64", dest: "arm64-v8a" },
+    { artifact: `${prefix}-android-arm-x86`, srcSubdir: "x86", dest: "x86" },
+    { artifact: `${prefix}-android-arm-x64`, srcSubdir: "x64", dest: "x86_64" },
+  ] : [
+    { artifact: `${prefix}-android-arm`, srcSubdir: "armeabi-v7a", dest: "armeabi-v7a" },
+    { artifact: `${prefix}-android-arm-64`, srcSubdir: "arm64-v8a", dest: "arm64-v8a" },
+    { artifact: `${prefix}-android-arm-x86`, srcSubdir: "x86", dest: "x86" },
+    { artifact: `${prefix}-android-arm-x64`, srcSubdir: "x86_64", dest: "x86_64" },
+  ];
+
+  androidArchs.forEach(({ artifact, srcSubdir, dest }) => {
+    // The tar file extracts to artifactName/srcSubdir
+    const srcDir = path.join(artifactsDir, artifact, srcSubdir);
+    const destDir = path.join(androidDir, dest);
+    console.log(`   Checking ${srcDir} -> ${destDir}`);
+    if (fs.existsSync(srcDir)) {
+      console.log(`   ✓ Copying ${artifact}/${srcSubdir}`);
+      fs.mkdirSync(destDir, { recursive: true });
+
+      const copyDir = (srcPath, destPath) => {
+        fs.mkdirSync(destPath, { recursive: true });
+        fs.readdirSync(srcPath).forEach((file) => {
+          const srcFile = path.join(srcPath, file);
+          const destFile = path.join(destPath, file);
+          const stat = fs.lstatSync(srcFile);
+
+          // Skip sockets and other special files
+          if (stat.isSocket() || stat.isFIFO() || stat.isCharacterDevice() || stat.isBlockDevice()) {
+            return;
+          }
+
+          if (stat.isDirectory()) {
+            copyDir(srcFile, destFile);
+          } else {
+            fs.copyFileSync(srcFile, destFile);
+          }
+        });
+      };
+
+      copyDir(srcDir, destDir);
+    } else {
+      console.log(`   ✗ Source directory not found: ${srcDir}`);
+    }
+  });
+
+  // Create apple directory structure
+  const appleDir = path.join(libsDir, "apple");
+  // The tar file extracts to skia-apple-xcframeworks/apple
+  const appleSrcDir = path.join(
+    artifactsDir,
+    `${prefix}-apple-xcframeworks`,
+    "apple"
+  );
+  if (fs.existsSync(appleSrcDir)) {
+    fs.mkdirSync(appleDir, { recursive: true });
+
+    // Copy all xcframeworks
+    fs.readdirSync(appleSrcDir).forEach((item) => {
+      const srcPath = path.join(appleSrcDir, item);
+      const destPath = path.join(appleDir, item);
+
+      if (fs.lstatSync(srcPath).isDirectory()) {
+        // Copy directory recursively
+        const copyDir = (src, dest) => {
+          fs.mkdirSync(dest, { recursive: true });
+          fs.readdirSync(src).forEach((file) => {
+            const srcFile = path.join(src, file);
+            const destFile = path.join(dest, file);
+            if (fs.lstatSync(srcFile).isDirectory()) {
+              copyDir(srcFile, destFile);
+            } else {
+              fs.copyFileSync(srcFile, destFile);
+            }
+          });
+        };
+        copyDir(srcPath, destPath);
+      } else {
+        fs.copyFileSync(srcPath, destPath);
+      }
+    });
+  }
+
+  // Copy Graphite headers if using Graphite
+  if (GRAPHITE) {
+    console.log("📦 Copying Graphite headers...");
+    const cppDir = path.resolve(__dirname, "../cpp");
+    const headersSrcDir = path.join(artifactsDir, `${prefix}-headers`);
+
+    console.log(`   Looking for headers in: ${headersSrcDir}`);
+    console.log(`   Headers dir exists: ${fs.existsSync(headersSrcDir)}`);
+
+    if (fs.existsSync(headersSrcDir)) {
+      console.log(`   Contents: ${fs.readdirSync(headersSrcDir).join(", ")}`);
+
+      // The asset contains packages/skia/cpp structure, so we need to navigate into it
+      const packagesDir = path.join(headersSrcDir, "packages", "skia", "cpp");
+      console.log(`   Looking for packages dir: ${packagesDir}`);
+      console.log(`   Packages dir exists: ${fs.existsSync(packagesDir)}`);
+
+      if (fs.existsSync(packagesDir)) {
+        console.log(`   Packages contents: ${fs.readdirSync(packagesDir).join(", ")}`);
+
+        // Copy dawn/include
+        const dawnIncludeSrc = path.join(packagesDir, "dawn", "include");
+        const dawnIncludeDest = path.join(cppDir, "dawn", "include");
+        console.log(`   Dawn source: ${dawnIncludeSrc}`);
+        console.log(`   Dawn source exists: ${fs.existsSync(dawnIncludeSrc)}`);
+
+        if (fs.existsSync(dawnIncludeSrc)) {
+          const copyDir = (src, dest) => {
+            fs.mkdirSync(dest, { recursive: true });
+            fs.readdirSync(src).forEach((file) => {
+              const srcFile = path.join(src, file);
+              const destFile = path.join(dest, file);
+              if (fs.lstatSync(srcFile).isDirectory()) {
+                copyDir(srcFile, destFile);
+              } else {
+                fs.copyFileSync(srcFile, destFile);
+              }
+            });
+          };
+          copyDir(dawnIncludeSrc, dawnIncludeDest);
+          console.log("   ✓ Dawn headers copied");
+        } else {
+          console.log("   ✗ Dawn headers not found");
+        }
+
+        // Copy graphite headers
+        const graphiteSrc = path.join(packagesDir, "skia", "src", "gpu", "graphite");
+        const graphiteDest = path.join(cppDir, "skia", "src", "gpu", "graphite");
+        console.log(`   Graphite source: ${graphiteSrc}`);
+        console.log(`   Graphite source exists: ${fs.existsSync(graphiteSrc)}`);
+
+        if (fs.existsSync(graphiteSrc)) {
+          const copyDir = (src, dest) => {
+            fs.mkdirSync(dest, { recursive: true });
+            fs.readdirSync(src).forEach((file) => {
+              const srcFile = path.join(src, file);
+              const destFile = path.join(dest, file);
+              if (fs.lstatSync(srcFile).isDirectory()) {
+                copyDir(srcFile, destFile);
+              } else {
+                fs.copyFileSync(srcFile, destFile);
+              }
+            });
+          };
+          copyDir(graphiteSrc, graphiteDest);
+          console.log("   ✓ Graphite headers copied");
+        } else {
+          console.log("   ✗ Graphite headers not found");
+        }
+      } else {
+        console.log("   ✗ Packages directory not found in headers asset");
+      }
+    } else {
+      console.log("   ✗ Headers directory not found");
+    }
+  }
 
   console.log("✅ Completed installation of Skia prebuilt binaries.");
+
+  // Calculate and update checksums in package.json
+  console.log("🔐 Calculating and updating checksums...");
+  const newChecksums = calculateLibraryChecksums();
+  updateSkiaChecksums(newChecksums, GRAPHITE);
+  console.log("✅ Checksums updated in package.json");
+
+  // Clean up artifacts directory
+  console.log("🗑️  Cleaning up artifacts directory...");
   clearDirectory(artifactsDir);
   fs.rmdirSync(artifactsDir);
 };
 
+// Run the main function
 main().catch((error) => {
   console.error("❌ Error:", error);
   process.exit(1);
