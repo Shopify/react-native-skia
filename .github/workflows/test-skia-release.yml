@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       skia_version:
-        description: 'Skia version to test (leave empty for @latest)'
+        description: 'Skia version to test (version number, "latest", or URL to .tgz file)'
         required: false
         default: 'latest'
         type: string
@@ -71,12 +71,16 @@ jobs:
       - name: Install React Native Skia
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
-          if [ "${{ github.event.inputs.skia_version }}" == "latest" ]; then
+          VERSION="${{ github.event.inputs.skia_version }}"
+          if [ "$VERSION" == "latest" ]; then
             echo "Installing @shopify/react-native-skia@latest..."
             yarn add @shopify/react-native-skia@latest
+          elif [[ "$VERSION" == http* ]]; then
+            echo "Installing @shopify/react-native-skia from URL: $VERSION"
+            yarn add @shopify/react-native-skia@"$VERSION"
           else
-            echo "Installing @shopify/react-native-skia@${{ github.event.inputs.skia_version }}..."
-            yarn add @shopify/react-native-skia@${{ github.event.inputs.skia_version }}
+            echo "Installing @shopify/react-native-skia@$VERSION..."
+            yarn add @shopify/react-native-skia@"$VERSION"
           fi
 
       - name: Show installed Skia version
@@ -211,12 +215,16 @@ jobs:
       - name: Install React Native Skia
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
-          if [ "${{ github.event.inputs.skia_version }}" == "latest" ]; then
+          VERSION="${{ github.event.inputs.skia_version }}"
+          if [ "$VERSION" == "latest" ]; then
             echo "Installing @shopify/react-native-skia@latest..."
             yarn add @shopify/react-native-skia@latest
+          elif [[ "$VERSION" == http* ]]; then
+            echo "Installing @shopify/react-native-skia from URL: $VERSION"
+            yarn add @shopify/react-native-skia@"$VERSION"
           else
-            echo "Installing @shopify/react-native-skia@${{ github.event.inputs.skia_version }}..."
-            yarn add @shopify/react-native-skia@${{ github.event.inputs.skia_version }}
+            echo "Installing @shopify/react-native-skia@$VERSION..."
+            yarn add @shopify/react-native-skia@"$VERSION"
           fi
 
       - name: Show installed Skia version
