@@ -218,6 +218,13 @@ export class JsiSkCanvas
     this.ref.restoreToCount(saveCount);
   }
 
+  getTotalMatrix(): SkMatrix {
+    return new JsiSkMatrix(
+      this.CanvasKit,
+      Float32Array.of(...this.ref.getTotalMatrix())
+    );
+  }
+
   drawPoints(mode: PointMode, points: SkPoint[], paint: SkPaint) {
     this.ref.drawPoints(
       getEnum(this.CanvasKit, "PointMode", mode),
