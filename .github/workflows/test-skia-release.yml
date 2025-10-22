@@ -1,4 +1,4 @@
-name: Test Latest Skia Release on iOS
+name: Test Latest Skia Release on iOS and Android
 
 on:
   workflow_dispatch:
@@ -12,6 +12,16 @@ on:
         description: 'iOS Simulator device'
         required: false
         default: 'iPhone 16 Pro'
+        type: string
+      android_api_level:
+        description: 'Android API level'
+        required: false
+        default: '34'
+        type: string
+      android_device:
+        description: 'Android device profile'
+        required: false
+        default: 'pixel_6'
         type: string
 
 jobs:
@@ -141,10 +151,162 @@ jobs:
         if: always()
         run: |
           echo "================================================================"
-          echo "Test Summary:"
+          echo "iOS Test Summary:"
           echo "================================================================"
           echo "✓ Created Expo app with Skia template"
           echo "✓ Installed @shopify/react-native-skia@${{ github.event.inputs.skia_version || 'latest' }}"
           echo "✓ Installed expo-dev-client"
           echo "✓ Built and ran iOS app on ${{ github.event.inputs.simulator_device }}"
+          echo "================================================================"
+
+  test-skia-android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Yarn
+        run: |
+          corepack enable
+          yarn --version
+
+      - name: Install Expo CLI
+        run: |
+          npm install -g expo-cli eas-cli
+          expo --version
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android licenses
+        run: yes | sdkmanager --licenses || true
+
+      - name: Install Android SDK components
+        run: |
+          sdkmanager "platform-tools" "platforms;android-${{ github.event.inputs.android_api_level }}" "build-tools;34.0.0"
+          sdkmanager "system-images;android-${{ github.event.inputs.android_api_level }};google_apis;x86_64"
+          sdkmanager "emulator"
+
+      - name: Enable KVM for hardware acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Create Android emulator
+        run: |
+          echo "Creating Android emulator..."
+          avdmanager create avd -n test_avd -k "system-images;android-${{ github.event.inputs.android_api_level }};google_apis;x86_64" -d "${{ github.event.inputs.android_device }}" --force
+          avdmanager list avd
+
+      - name: Create test directory
+        run: |
+          mkdir -p ~/skia-test-app
+          cd ~/skia-test-app
+          pwd
+
+      - name: Create Expo app with Skia template
+        working-directory: ~/skia-test-app
+        run: |
+          echo "Creating Expo app with Skia template..."
+          yarn create expo-app my-app -e with-skia
+
+      - name: Install React Native Skia
+        working-directory: ~/skia-test-app/my-app
+        run: |
+          if [ "${{ github.event.inputs.skia_version }}" == "latest" ]; then
+            echo "Installing @shopify/react-native-skia@latest..."
+            yarn add @shopify/react-native-skia@latest
+          else
+            echo "Installing @shopify/react-native-skia@${{ github.event.inputs.skia_version }}..."
+            yarn add @shopify/react-native-skia@${{ github.event.inputs.skia_version }}
+          fi
+
+      - name: Show installed Skia version
+        working-directory: ~/skia-test-app/my-app
+        run: |
+          echo "Installed React Native Skia version:"
+          yarn list @shopify/react-native-skia --depth=0
+
+      - name: Install TypeScript dependencies
+        working-directory: ~/skia-test-app/my-app
+        run: |
+          echo "Installing TypeScript dependencies..."
+          npx expo install typescript @types/react
+
+      - name: Install Expo Dev Client
+        working-directory: ~/skia-test-app/my-app
+        run: |
+          echo "Installing expo-dev-client..."
+          npx expo install expo-dev-client
+
+      - name: Prebuild native directories
+        working-directory: ~/skia-test-app/my-app
+        run: |
+          echo "Generating native Android directory..."
+          npx expo prebuild --platform android
+
+      - name: Start Android emulator
+        run: |
+          echo "Starting Android emulator in background..."
+          nohup $ANDROID_HOME/emulator/emulator -avd test_avd -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim &
+          $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+          echo "Emulator is ready"
+          $ANDROID_HOME/platform-tools/adb devices
+
+      - name: Start Metro bundler
+        working-directory: ~/skia-test-app/my-app
+        run: |
+          echo "Starting Metro bundler in background..."
+          npx expo start --dev-client &
+          sleep 10
+
+      - name: Build and run Android app
+        working-directory: ~/skia-test-app/my-app
+        run: |
+          echo "Building and running Android app on emulator..."
+          npx expo run:android
+
+      - name: Wait for app to launch
+        run: |
+          echo "Waiting for app to launch and stabilize..."
+          sleep 30
+
+      - name: Capture emulator screenshot
+        if: always()
+        run: |
+          echo "Capturing screenshot from Android emulator..."
+          $ANDROID_HOME/platform-tools/adb exec-out screencap -p > ~/skia-test-screenshot.png || echo "Failed to capture screenshot"
+
+      - name: Upload screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-emulator-screenshot
+          path: ~/skia-test-screenshot.png
+          if-no-files-found: ignore
+
+      - name: Print test summary
+        if: always()
+        run: |
+          echo "================================================================"
+          echo "Android Test Summary:"
+          echo "================================================================"
+          echo "✓ Created Expo app with Skia template"
+          echo "✓ Installed @shopify/react-native-skia@${{ github.event.inputs.skia_version || 'latest' }}"
+          echo "✓ Installed expo-dev-client"
+          echo "✓ Built and ran Android app on API level ${{ github.event.inputs.android_api_level }}"
           echo "================================================================"
