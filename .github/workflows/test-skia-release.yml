@@ -105,7 +105,7 @@ jobs:
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Building and running iOS app on simulator: ${{ github.event.inputs.simulator_device }}..."
-          npx expo run:ios --simulator "${{ github.event.inputs.simulator_device }}"
+          npx expo run:ios --device "${{ github.event.inputs.simulator_device }}"
 
       - name: Wait for app to launch
         run: |
