@@ -384,8 +384,8 @@ jobs:
 
       - name: Create test directory
         run: |
-          mkdir -p /home/runner/skia-test-app
-          cd /home/runner/skia-test-app
+          mkdir -p /Users/runner/skia-test-app
+          cd /Users/runner/skia-test-app
           pwd
 
       - name: Create Expo app with Skia template
@@ -395,7 +395,7 @@ jobs:
           max_attempts: 3
           retry_wait_seconds: 120
           command: |
-            cd /home/runner/skia-test-app
+            cd /Users/runner/skia-test-app
             echo "Creating Expo app with Skia template..."
             yarn create expo-app my-app -e with-skia
 
@@ -409,7 +409,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
       - name: Install React Native Skia
-        working-directory: /home/runner/skia-test-app/my-app
+        working-directory: /Users/runner/skia-test-app/my-app
         run: |
           VERSION="${{ inputs.skia_version }}"
           if [ "$VERSION" == "latest" ]; then
@@ -427,13 +427,13 @@ jobs:
           fi
 
       - name: Show installed Skia version
-        working-directory: /home/runner/skia-test-app/my-app
+        working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Installed React Native Skia version:"
           yarn list @shopify/react-native-skia --depth=0
 
       - name: Install TypeScript dependencies
-        working-directory: /home/runner/skia-test-app/my-app
+        working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Installing TypeScript dependencies..."
           npx expo install typescript @types/react
@@ -446,7 +446,7 @@ jobs:
           npx playwright install-deps chromium
 
       - name: Start web server
-        working-directory: /home/runner/skia-test-app/my-app
+        working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Starting web server in background..."
           npx expo start --web &
@@ -463,14 +463,14 @@ jobs:
         if: always()
         run: |
           echo "Taking screenshot of web app..."
-          npx playwright screenshot http://localhost:8081 /home/runner/skia-test-screenshot-web.png || echo "Failed to capture screenshot"
+          npx playwright screenshot http://localhost:8081 /Users/runner/skia-test-screenshot-web.png || echo "Failed to capture screenshot"
 
       - name: Upload screenshot
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: web-screenshot-${{ github.run_id }}
-          path: /home/runner/skia-test-screenshot-web.png
+          path: /Users/runner/skia-test-screenshot-web.png
           if-no-files-found: ignore
 
       - name: Print test summary
