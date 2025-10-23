@@ -78,12 +78,15 @@ jobs:
           pwd
 
       - name: Create Expo app with Skia template
-        working-directory: /Users/runner/skia-test-app
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Creating Expo app with Skia template..."
-          yarn create expo-app my-app -e with-skia
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          retry_wait_seconds: 120
+          command: |
+            cd /Users/runner/skia-test-app
+            echo "Creating Expo app with Skia template..."
+            yarn create expo-app my-app -e with-skia
 
       - name: Download artifact package if specified
         if: startsWith(inputs.skia_version, 'artifact:')
@@ -237,12 +240,15 @@ jobs:
           pwd
 
       - name: Create Expo app with Skia template
-        working-directory: /Users/runner/skia-test-app
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Creating Expo app with Skia template..."
-          yarn create expo-app my-app -e with-skia
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          retry_wait_seconds: 120
+          command: |
+            cd /Users/runner/skia-test-app
+            echo "Creating Expo app with Skia template..."
+            yarn create expo-app my-app -e with-skia
 
       - name: Download artifact package if specified
         if: startsWith(inputs.skia_version, 'artifact:')
@@ -383,12 +389,15 @@ jobs:
           pwd
 
       - name: Create Expo app with Skia template
-        working-directory: /home/runner/skia-test-app
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Creating Expo app with Skia template..."
-          yarn create expo-app my-app -e with-skia
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          retry_wait_seconds: 120
+          command: |
+            cd /home/runner/skia-test-app
+            echo "Creating Expo app with Skia template..."
+            yarn create expo-app my-app -e with-skia
 
       - name: Download artifact package if specified
         if: startsWith(inputs.skia_version, 'artifact:')
