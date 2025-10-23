@@ -115,6 +115,7 @@ jobs:
       skia_version: artifact:${{ needs.build-library.outputs.run_id }}
       test_ios: true
       test_android: true
+      test_web: true
 
   build-windows-library:
     runs-on: windows-latest
