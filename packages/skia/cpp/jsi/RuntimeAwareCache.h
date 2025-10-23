@@ -3,6 +3,7 @@
 #include <jsi/jsi.h>
 
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 #include <utility>
 
@@ -58,6 +59,7 @@ public:
   void onRuntimeDestroyed(jsi::Runtime *rt) override {
     if (getMainJsRuntime() != rt) {
       // We are removing a secondary runtime
+      std::lock_guard<std::mutex> lock(_cacheMutex);
       _secondaryRuntimeCaches.erase(rt);
     }
   }
@@ -76,6 +78,7 @@ public:
     if (getMainJsRuntime() == &rt) {
       return _primaryCache;
     } else {
+      std::lock_guard<std::mutex> lock(_cacheMutex);
       if (_secondaryRuntimeCaches.count(&rt) == 0) {
         // we only add listener when the secondary runtime is used, this assumes
         // that the secondary runtime is terminated first. This lets us avoid
@@ -89,11 +92,12 @@ public:
         T cache;
         _secondaryRuntimeCaches.emplace(&rt, std::move(cache));
       }
+      return _secondaryRuntimeCaches.at(&rt);
     }
-    return _secondaryRuntimeCaches.at(&rt);
   }
 
 private:
+  mutable std::mutex _cacheMutex;
   std::unordered_map<void *, T> _secondaryRuntimeCaches;
   T _primaryCache;
 };

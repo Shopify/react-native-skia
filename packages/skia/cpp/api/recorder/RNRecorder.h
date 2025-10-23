@@ -29,7 +29,18 @@ public:
   Variables variables;
 
   Recorder() = default;
-  ~Recorder() = default;
+
+  ~Recorder() {
+    // Ensure GPU resources are destroyed on the main thread by moving
+    // the commands vector to be cleaned up there
+    if (_context && !commands.empty()) {
+      auto commandsToDestroy = std::move(commands);
+      _context->runOnMainThread([commandsToDestroy = std::move(commandsToDestroy)]() mutable {
+        // Commands will be destroyed here on the main thread
+        commandsToDestroy.clear();
+      });
+    }
+  }
 
   void savePaint(jsi::Runtime &runtime, const jsi::Object &props,
                  bool standalone) {
