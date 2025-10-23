@@ -18,12 +18,19 @@ It should also be mentionned that React Native Skia can be used on projects with
 
 ## Expo
 
-:::info
+### Automatic configuration
 
-Metro and expo-router support is available from v0.1.240 and onwards.
-If you are using v0.1.221 (recommended version for Expo SDK 50), you can use [this patch](https://github.com/Shopify/react-native-skia/files/14357144/%40shopify%2Breact-native-skia%2B0.1.221.patch) (using [`patch-package`](https://www.npmjs.com/package/patch-package).
+For new Expo Router projects, we recommend using the Expo Skia template which sets up web support automatically:
 
-:::
+```bash
+yarn create expo-app my-app -e with-skia
+# or
+npx create-expo-app my-app -e with-skia
+```
+
+This template includes the proper configuration for web support out of the box, so you don't need to manually configure loading methods.
+
+### Manual configuration
 
 Use the `setup-skia-web` script to ensure that the `canvaskit.wasm` file is accessible within your Expo project's public folder.
 If you're [loading CanvasKit from a CDN](#using-a-cdn), running the `setup-skia-web` script is unnecessary.
@@ -33,16 +40,12 @@ $ npx expo install @shopify/react-native-skia
 $ yarn setup-skia-web
 ```
 
-:::info
-
 Run `yarn setup-skia-web` each time you upgrade the `@shopify/react-native-skia` package.
 Consider incorporating it into your `postinstall` script for convenience.
 
-:::
-
 After setup, choose your method to [Load Skia](#loading-skia).
 
-For projects using Expo Router, you can use [code-splitting](#using-code-splitting) or [deferred component registration](#using-deferred-component-registration).
+For existing projects using Expo Router, you can use [code-splitting](#using-code-splitting) or [deferred component registration](#using-deferred-component-registration).
 If you wish to use deferred component registration with Expo Router, you need to create your own `main` property in `package.json`.
 For instance, if you've created `index.tsx` and `index.web.tsx` in your root directory, update your `package.json` accordingly:
 ```patch
@@ -65,12 +68,6 @@ LoadSkiaWeb().then(async () => {
 ```
 
 For the `index.tsx` file, directly invoke `renderRootComponent(App)`.
-
-### Snack
-
-Utilize the [code-splitting](#using-code-splitting) method for incorporating React Native Skia on [snack](https://snack.expo.dev/).
-
-<Snack id="@wcandillon/hello-snack" />
 
 ## Remotion
 
