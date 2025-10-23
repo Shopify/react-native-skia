@@ -441,6 +441,8 @@ jobs:
         run: |
           echo "Waiting for web app to be accessible..."
           timeout 60 bash -c 'until curl -s http://localhost:8081 > /dev/null; do sleep 2; done' || echo "Web server may not be fully ready"
+          echo "Waiting additional time for app to fully render..."
+          sleep 60
 
       - name: Take screenshot
         if: always()
