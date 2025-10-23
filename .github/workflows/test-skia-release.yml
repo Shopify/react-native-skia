@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       skia_version:
-        description: 'Skia version to test (leave empty for @latest)'
+        description: 'Skia version to test (version number, "latest", URL to .tgz, or "artifact:RUN_ID")'
         required: false
         default: 'latest'
         type: string
@@ -68,15 +68,31 @@ jobs:
           echo "Creating Expo app with Skia template..."
           yarn create expo-app my-app -e with-skia
 
+      - name: Download artifact package if specified
+        if: startsWith(github.event.inputs.skia_version, 'artifact:')
+        run: |
+          ARTIFACT_ID=$(echo "${{ github.event.inputs.skia_version }}" | sed 's/artifact://')
+          echo "Downloading artifact ID: $ARTIFACT_ID"
+          gh run download --repo Shopify/react-native-skia $ARTIFACT_ID -n package-tgz -D /tmp
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Install React Native Skia
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
-          if [ "${{ github.event.inputs.skia_version }}" == "latest" ]; then
+          VERSION="${{ github.event.inputs.skia_version }}"
+          if [ "$VERSION" == "latest" ]; then
             echo "Installing @shopify/react-native-skia@latest..."
             yarn add @shopify/react-native-skia@latest
+          elif [[ "$VERSION" == artifact:* ]]; then
+            echo "Installing @shopify/react-native-skia from downloaded artifact..."
+            yarn add @shopify/react-native-skia@file:/tmp/package.tgz
+          elif [[ "$VERSION" == http* ]]; then
+            echo "Installing @shopify/react-native-skia from URL: $VERSION"
+            yarn add @shopify/react-native-skia@"$VERSION"
           else
-            echo "Installing @shopify/react-native-skia@${{ github.event.inputs.skia_version }}..."
-            yarn add @shopify/react-native-skia@${{ github.event.inputs.skia_version }}
+            echo "Installing @shopify/react-native-skia@$VERSION..."
+            yarn add @shopify/react-native-skia@"$VERSION"
           fi
 
       - name: Show installed Skia version
@@ -208,15 +224,31 @@ jobs:
           echo "Creating Expo app with Skia template..."
           yarn create expo-app my-app -e with-skia
 
+      - name: Download artifact package if specified
+        if: startsWith(github.event.inputs.skia_version, 'artifact:')
+        run: |
+          ARTIFACT_ID=$(echo "${{ github.event.inputs.skia_version }}" | sed 's/artifact://')
+          echo "Downloading artifact ID: $ARTIFACT_ID"
+          gh run download --repo Shopify/react-native-skia $ARTIFACT_ID -n package-tgz -D /tmp
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Install React Native Skia
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
-          if [ "${{ github.event.inputs.skia_version }}" == "latest" ]; then
+          VERSION="${{ github.event.inputs.skia_version }}"
+          if [ "$VERSION" == "latest" ]; then
             echo "Installing @shopify/react-native-skia@latest..."
             yarn add @shopify/react-native-skia@latest
+          elif [[ "$VERSION" == artifact:* ]]; then
+            echo "Installing @shopify/react-native-skia from downloaded artifact..."
+            yarn add @shopify/react-native-skia@file:/tmp/package.tgz
+          elif [[ "$VERSION" == http* ]]; then
+            echo "Installing @shopify/react-native-skia from URL: $VERSION"
+            yarn add @shopify/react-native-skia@"$VERSION"
           else
-            echo "Installing @shopify/react-native-skia@${{ github.event.inputs.skia_version }}..."
-            yarn add @shopify/react-native-skia@${{ github.event.inputs.skia_version }}
+            echo "Installing @shopify/react-native-skia@$VERSION..."
+            yarn add @shopify/react-native-skia@"$VERSION"
           fi
 
       - name: Show installed Skia version
