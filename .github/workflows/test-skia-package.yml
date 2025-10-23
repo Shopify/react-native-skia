@@ -79,6 +79,8 @@ jobs:
 
       - name: Create Expo app with Skia template
         working-directory: /Users/runner/skia-test-app
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Creating Expo app with Skia template..."
           yarn create expo-app my-app -e with-skia
@@ -236,6 +238,8 @@ jobs:
 
       - name: Create Expo app with Skia template
         working-directory: /Users/runner/skia-test-app
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Creating Expo app with Skia template..."
           yarn create expo-app my-app -e with-skia
@@ -380,6 +384,8 @@ jobs:
 
       - name: Create Expo app with Skia template
         working-directory: /home/runner/skia-test-app
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Creating Expo app with Skia template..."
           yarn create expo-app my-app -e with-skia
