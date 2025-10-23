@@ -242,8 +242,10 @@ public:
   }
 
   JSI_HOST_FUNCTION(getTotalMatrix) {
-    auto matrix = std::make_shared<JsiSkMatrix>(getContext(), _canvas->getTotalMatrix());
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, matrix, getContext());
+    auto matrix =
+        std::make_shared<JsiSkMatrix>(getContext(), _canvas->getTotalMatrix());
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, matrix,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(drawPoints) {
