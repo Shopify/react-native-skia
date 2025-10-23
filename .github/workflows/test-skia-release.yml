@@ -33,6 +33,11 @@ on:
         required: false
         default: true
         type: boolean
+      test_web:
+        description: 'Run Web tests'
+        required: false
+        default: true
+        type: boolean
 
 jobs:
   test-skia:
@@ -41,6 +46,7 @@ jobs:
       skia_version: ${{ inputs.skia_version }}
       test_ios: ${{ inputs.test_ios }}
       test_android: ${{ inputs.test_android }}
+      test_web: ${{ inputs.test_web }}
       simulator_device: ${{ inputs.simulator_device }}
       android_api_level: ${{ inputs.android_api_level }}
       android_device: ${{ inputs.android_device }}
