@@ -350,7 +350,7 @@ jobs:
 
   test-skia-web:
     if: inputs.test_web
-    runs-on: ubuntu-latest
+    runs-on: macos-latest-large
     timeout-minutes: 30
 
     steps:
@@ -442,7 +442,7 @@ jobs:
           echo "Waiting for web app to be accessible..."
           timeout 60 bash -c 'until curl -s http://localhost:8081 > /dev/null; do sleep 2; done' || echo "Web server may not be fully ready"
           echo "Waiting additional time for app to fully render..."
-          sleep 60
+          sleep 30
 
       - name: Take screenshot
         if: always()
