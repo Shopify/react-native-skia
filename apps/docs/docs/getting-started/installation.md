@@ -17,16 +17,21 @@ For `react-native@<=0.78` and `react@<=18`, you need to use `@shopify/react-nati
 
 tvOS, macOS, and macOS Catalyst are also supported platforms.
 
-**Install the library using yarn:**
-
 ```sh
 yarn add @shopify/react-native-skia
+# or
+npm install @shopify/react-native-skia
 ```
 
-**Or using npm:**
+
+If you're using **bun** or **pnpm**, you'll need to trust the package for the postinstall script to run:
 
 ```sh
-npm install @shopify/react-native-skia
+# bun
+bun add --trust @shopify/react-native-skia
+
+# pnpm (v10+)
+pnpm add --allow-build=@shopify/react-native-skia @shopify/react-native-skia
 ```
 
 ### Bundle Size
