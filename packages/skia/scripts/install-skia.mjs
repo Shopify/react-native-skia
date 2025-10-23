@@ -77,64 +77,89 @@ const runCommand = (command, args) => {
   });
 };
 
-const downloadToFile = (url, destPath) => {
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+const downloadToFile = (url, destPath, maxRetries = 5) => {
   fs.mkdirSync(path.dirname(destPath), { recursive: true });
-  return new Promise((resolve, reject) => {
-    const request = (currentUrl) => {
-      https
-        .get(currentUrl, { headers: { "User-Agent": "node" } }, (res) => {
-          if (
-            res.statusCode &&
-            [301, 302, 303, 307, 308].includes(res.statusCode)
-          ) {
-            const { location } = res.headers;
-            if (location) {
-              res.resume();
-              request(location);
-            } else {
-              reject(new Error(`Redirect without location for ${currentUrl}`));
-            }
-            return;
-          }
 
-          if (res.statusCode !== 200) {
-            reject(
-              new Error(
-                `Failed to download: ${res.statusCode} ${res.statusMessage}`
-              )
-            );
-            res.resume();
-            return;
-          }
-
-          const fileStream = fs.createWriteStream(destPath);
-          res.pipe(fileStream);
-
-          fileStream.on("finish", () => {
-            fileStream.close((err) => {
-              if (err) {
-                // If closing the stream errors, perform the same cleanup and reject.
-                fileStream.destroy();
-                fs.unlink(destPath, () => reject(err));
+  const attemptDownload = (retryCount = 0) => {
+    return new Promise((resolve, reject) => {
+      const request = (currentUrl) => {
+        https
+          .get(currentUrl, { headers: { "User-Agent": "node" } }, (res) => {
+            if (
+              res.statusCode &&
+              [301, 302, 303, 307, 308].includes(res.statusCode)
+            ) {
+              const { location } = res.headers;
+              if (location) {
+                res.resume();
+                request(location);
               } else {
-                resolve();
+                reject(new Error(`Redirect without location for ${currentUrl}`));
               }
+              return;
+            }
+
+            if (res.statusCode !== 200) {
+              const error = new Error(
+                `Failed to download: ${res.statusCode} ${res.statusMessage}`
+              );
+              error.statusCode = res.statusCode;
+              reject(error);
+              res.resume();
+              return;
+            }
+
+            const fileStream = fs.createWriteStream(destPath);
+            res.pipe(fileStream);
+
+            fileStream.on("finish", () => {
+              fileStream.close((err) => {
+                if (err) {
+                  // If closing the stream errors, perform the same cleanup and reject.
+                  fileStream.destroy();
+                  fs.unlink(destPath, () => reject(err));
+                } else {
+                  resolve();
+                }
+              });
             });
-          });
 
-          const cleanup = (error) => {
-            fileStream.destroy();
-            fs.unlink(destPath, () => reject(error));
-          };
+            const cleanup = (error) => {
+              fileStream.destroy();
+              fs.unlink(destPath, () => reject(error));
+            };
 
-          res.on("error", cleanup);
-          fileStream.on("error", cleanup);
-        })
-        .on("error", reject);
-    };
+            res.on("error", cleanup);
+            fileStream.on("error", cleanup);
+          })
+          .on("error", reject);
+      };
 
-    request(url);
-  });
+      request(url);
+    });
+  };
+
+  const downloadWithRetry = async (retryCount = 0) => {
+    try {
+      await attemptDownload(retryCount);
+    } catch (error) {
+      const isRateLimit = error.statusCode === 403 || error.message.includes('rate limit');
+      const shouldRetry = retryCount < maxRetries && (isRateLimit || error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT');
+
+      if (shouldRetry) {
+        const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s, 8s, 16s
+        console.log(`   ⚠️  Download failed (${error.message}), retrying in ${delay/1000}s... (attempt ${retryCount + 1}/${maxRetries})`);
+        await sleep(delay);
+        return downloadWithRetry(retryCount + 1);
+      } else {
+        throw error;
+      }
+    }
+  };
+
+  return downloadWithRetry();
 };
 
 const extractTarGz = async (archivePath, destDir) => {

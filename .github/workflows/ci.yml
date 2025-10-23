@@ -74,6 +74,8 @@ jobs:
 
   build-library:
     runs-on: ubuntu-latest
+    outputs:
+      run_id: ${{ github.run_id }}
     steps:
       - name: Checkout
         uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
@@ -88,6 +90,16 @@ jobs:
       - name: Build package
         run: yarn build
 
+      - name: Pack package
+        working-directory: packages/skia
+        run: yarn pack
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: package-tgz
+          path: packages/skia/package.tgz
+
       - name: Build dry run release
         working-directory: packages/skia
         run: |
@@ -95,6 +107,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  test-package-e2e:
+    needs: build-library
+    uses: ./.github/workflows/test-skia-package.yml
+    with:
+      skia_version: artifact:${{ needs.build-library.outputs.run_id }}
+      test_ios: true
+      test_android: true
 
   build-windows-library:
     runs-on: windows-latest
