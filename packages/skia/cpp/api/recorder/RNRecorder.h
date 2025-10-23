@@ -29,7 +29,22 @@ public:
   Variables variables;
 
   Recorder() = default;
-  ~Recorder() = default;
+  ~Recorder() {
+    if (!_context || commands.empty()) {
+      return;
+    }
+
+    auto context = _context;
+    using CommandList = std::vector<std::unique_ptr<Command>>;
+    auto pendingCommands = std::make_shared<CommandList>(std::move(commands));
+
+    context->runOnMainThread(
+        [pendingCommands = std::move(pendingCommands)]() mutable {
+          // Destroy the recorded commands on the main thread to ensure GPU
+          // backed resources release safely.
+          pendingCommands->clear();
+        });
+  }
 
   void savePaint(jsi::Runtime &runtime, const jsi::Object &props,
                  bool standalone) {
