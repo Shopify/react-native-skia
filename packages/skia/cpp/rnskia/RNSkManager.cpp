@@ -30,6 +30,10 @@ RNSkManager::RNSkManager(
 }
 
 RNSkManager::~RNSkManager() {
+  if (_viewApi != nullptr) {
+    _viewApi->unregisterAll();
+  }
+  RNJsi::BaseRuntimeAwareCache::setMainJsRuntime(nullptr);
   // Free up any references
   _viewApi = nullptr;
   _jsRuntime = nullptr;

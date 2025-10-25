@@ -16,6 +16,8 @@ class BaseRuntimeAwareCache {
 public:
   static void setMainJsRuntime(jsi::Runtime *rt) { _mainRuntime = rt; }
 
+  static jsi::Runtime *tryGetMainJsRuntime() { return _mainRuntime; }
+
 protected:
   static jsi::Runtime *getMainJsRuntime() {
     assert(_mainRuntime != nullptr &&
