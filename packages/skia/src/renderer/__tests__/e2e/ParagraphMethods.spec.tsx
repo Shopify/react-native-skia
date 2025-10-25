@@ -26,6 +26,7 @@ describe("Paragraph Methods", () => {
                 color: Skia.Color("black"),
                 fontFamilies: ["Roboto"],
                 fontSize: 16,
+                halfLeading: false,
               },
             },
             provider
