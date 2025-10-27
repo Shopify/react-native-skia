@@ -486,17 +486,6 @@ public:
     convertProperty(runtime, object, "rect", props.rect, variables);
   }
 
-  ~ImageCmd() {
-    if (props.image.has_value()) {
-      auto image = props.image.value();
-      if (image) {
-        _context->runOnMainThread([image]() {
-          // Image will be deleted when this lambda is destroyed on main thread
-        });
-      }
-    }
-  }
-
   void draw(DrawingCtx *ctx) {
     auto [x, y, width, height, rect, fit, image, sampling] = props;
     if (image.has_value()) {
@@ -806,15 +795,6 @@ public:
     convertProperty(runtime, object, "picture", props.picture, variables);
   }
 
-  ~PictureCmd() {
-    auto picture = props.picture;
-    if (picture) {
-      _context->runOnMainThread([picture]() {
-        // Picture will be deleted when this lambda is destroyed on main thread
-      });
-    }
-  }
-
   void draw(DrawingCtx *ctx) { ctx->canvas->drawPicture(props.picture); }
 };
 
@@ -949,15 +929,6 @@ public:
     convertProperty(runtime, object, "colors", props.colors, variables);
     convertProperty(runtime, object, "blendMode", props.blendMode, variables);
     convertProperty(runtime, object, "sampling", props.sampling, variables);
-  }
-
-  ~AtlasCmd() {
-    auto image = props.image;
-    if (image) {
-      _context->runOnMainThread([image]() {
-        // Image will be deleted when this lambda is destroyed on main thread
-      });
-    }
   }
 
   void draw(DrawingCtx *ctx) {
