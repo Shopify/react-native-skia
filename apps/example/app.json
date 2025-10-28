@@ -32,12 +32,21 @@
     ]
   },
   "ios": {
-    "metalAPIValidation": false
+    "metalAPIValidation": false,
+    "infoPlist": {
+      "NSMicrophoneUsageDescription": "This app needs access to the microphone to test voice recording and reproduce audio-related bugs with Skia rendering."
+    }
   },
   "macos": {
-    "metalAPIValidation": false
+    "metalAPIValidation": false,
+    "infoPlist": {
+      "NSMicrophoneUsageDescription": "This app needs access to the microphone to test voice recording and reproduce audio-related bugs with Skia rendering."
+    }
   },
   "visionos": {
-    "metalAPIValidation": false
+    "metalAPIValidation": false,
+    "infoPlist": {
+      "NSMicrophoneUsageDescription": "This app needs access to the microphone to test voice recording and reproduce audio-related bugs with Skia rendering."
+    }
   }
 }
