@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <functional>
 #include <jsi/jsi.h>
 #include <memory>
@@ -7,9 +8,34 @@
 #include <variant>
 
 #include "JsiSkPicture.h"
+#include "RuntimeLifecycleMonitor.h"
 
 namespace RNJsi {
 namespace jsi = facebook::jsi;
+
+class RuntimeAwareRuntimeGuard : public RuntimeLifecycleListener {
+public:
+  explicit RuntimeAwareRuntimeGuard(jsi::Runtime &runtime)
+      : _runtime(&runtime) {
+    RuntimeLifecycleMonitor::addListener(runtime, this);
+  }
+
+  ~RuntimeAwareRuntimeGuard() override {
+    auto runtime = _runtime.load();
+    if (runtime != nullptr) {
+      RuntimeLifecycleMonitor::removeListener(*runtime, this);
+    }
+  }
+
+  void onRuntimeDestroyed(jsi::Runtime *) override {
+    _runtime.store(nullptr);
+  }
+
+  jsi::Runtime *getRuntime() const { return _runtime.load(); }
+
+private:
+  std::atomic<jsi::Runtime *> _runtime;
+};
 
 class ViewProperty {
 public:
@@ -31,8 +57,15 @@ public:
   ViewProperty(jsi::Runtime &runtime, const jsi::Value &value,
                PlatformContext platformContext, size_t nativeId) {
     // Set the onSize callback with all the necessary context
+    auto runtimeGuard = std::make_shared<RuntimeAwareRuntimeGuard>(runtime);
     _value = std::function<void(int, int)>(
-        [&runtime, platformContext, nativeId](int width, int height) {
+        [runtimeGuard, platformContext, nativeId](int width, int height) {
+          auto runtimePtr = runtimeGuard->getRuntime();
+          if (runtimePtr == nullptr) {
+            return;
+          }
+
+          jsi::Runtime &runtime = *runtimePtr;
           jsi::Object size(runtime);
           auto pd = platformContext->getPixelDensity();
           size.setProperty(runtime, "width", jsi::Value(width / pd));
