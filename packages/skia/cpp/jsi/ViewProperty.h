@@ -35,25 +35,33 @@ public:
     // Set the onSize callback with all the necessary context
     auto weakPlatformContext =
         std::weak_ptr<typename PlatformContext::element_type>(platformContext);
-    _value = std::function<void(int, int)>([weakPlatformContext,
-                                            nativeId](int width, int height) {
+    auto *capturedRuntime = &runtime;
+    auto *mainRuntimeAtRegistration =
+        RNJsi::BaseRuntimeAwareCache::tryGetMainJsRuntime();
+    bool useMainRuntimeInvoker =
+        capturedRuntime != nullptr &&
+        capturedRuntime == mainRuntimeAtRegistration;
+    _value = std::function<void(int, int)>(
+        [weakPlatformContext, nativeId, capturedRuntime,
+         useMainRuntimeInvoker](int width, int height) {
       auto lockedContext = weakPlatformContext.lock();
       if (lockedContext == nullptr) {
         return;
       }
-
-      lockedContext->runOnJavascriptThread([weakPlatformContext, nativeId,
-                                            width, height]() {
+      auto updateSize = [weakPlatformContext, nativeId, width, height,
+                         capturedRuntime, useMainRuntimeInvoker]() {
         auto context = weakPlatformContext.lock();
         if (context == nullptr) {
           return;
         }
 
-        auto *runtime = RNJsi::BaseRuntimeAwareCache::tryGetMainJsRuntime();
+        auto *runtime = useMainRuntimeInvoker
+                            ? RNJsi::BaseRuntimeAwareCache::tryGetMainJsRuntime()
+                            : capturedRuntime;
+
         if (runtime == nullptr) {
           return;
         }
-
         try {
           jsi::Object size(*runtime);
           auto pd = context->getPixelDensity();
@@ -73,7 +81,14 @@ public:
         } catch (const std::exception &err) {
           context->raiseError(err);
         }
-      });
+      };
+
+      if (!useMainRuntimeInvoker) {
+        updateSize();
+        return;
+      }
+
+      lockedContext->runOnJavascriptThread(std::move(updateSize));
     });
   }
 
