@@ -16,11 +16,12 @@
     "pod:install": "cd ios && pod install",
     "test": "jest",
     "tsc": "tsc --noEmit",
-    "start": "react-native start"
+    "start": "react-native start",
+    "postinstall": "yarn pod:install"
   },
   "dependencies": {
     "@callstack/react-native-visionos": "^0.75.0",
-    "@react-native-community/slider": "^4.5.7",
+    "@react-native-community/audio-toolkit": "^2.0.3",
     "@react-navigation/bottom-tabs": "^7.2.1",
     "@react-navigation/elements": "^2.2.6",
     "@react-navigation/native": "^7.0.15",
