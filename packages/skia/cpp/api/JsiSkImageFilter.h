@@ -25,6 +25,8 @@ public:
       : JsiSkWrappingSkPtrHostObject<SkImageFilter>(std::move(context),
                                                     std::move(imageFilter)) {}
 
+  size_t getMemoryPressure() const override { return 4096; }
+
   EXPORT_JSI_API_TYPENAME(JsiSkImageFilter, ImageFilter)
 };
 

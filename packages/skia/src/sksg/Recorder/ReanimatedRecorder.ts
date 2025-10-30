@@ -32,6 +32,10 @@ import type {
 import type { AnimatedProps } from "../../renderer";
 import { isSharedValue } from "../utils";
 
+/**
+ * Currently the recorder only work if the GPU resources (e.g Images) are owned by the main thread.
+ * It will crash otherwise on Ganesh (iOS/Android).
+ */
 export class ReanimatedRecorder implements BaseRecorder {
   private values = new Set<SharedValue<unknown>>();
   private recorder: JsiRecorder;
@@ -111,9 +115,13 @@ export class ReanimatedRecorder implements BaseRecorder {
     this.recorder.pushColorFilter(colorFilterType, props);
   }
 
-  pushShader(shaderType: NodeType, props: AnimatedProps<unknown>): void {
+  pushShader(
+    shaderType: NodeType,
+    props: AnimatedProps<unknown>,
+    children: number
+  ): void {
     this.processAnimationValues(props);
-    this.recorder.pushShader(shaderType, props);
+    this.recorder.pushShader(shaderType, props, children);
   }
 
   pushBlurMaskFilter(props: AnimatedProps<BlurMaskFilterProps>): void {

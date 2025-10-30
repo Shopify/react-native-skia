@@ -1,4 +1,5 @@
 import { exit } from "process";
+import path from "path";
 
 import type { Platform, PlatformName } from "./skia-configuration";
 import {
@@ -6,6 +7,7 @@ import {
   configurations,
   copyHeaders,
   GRAPHITE,
+  MACCATALYST,
   OutFolder,
   PackageRoot,
   ProjectRoot,
@@ -66,7 +68,6 @@ const configurePlatform = async (
       target.options?.reduce((a, cur) => (a += `--${cur[0]}=${cur[1]} `), "") ||
       "";
 
-    // eslint-disable-next-line max-len
     const command = `${commandline} ${options} ${targetOptions} --script-executable=python3 --args='target_os="${target.platform}" target_cpu="${target.cpu}" ${common}${args}${targetArgs}'`;
     await runAsync(command, "⚙️");
     return true;
@@ -129,7 +130,6 @@ const buildXCFrameworks = () => {
       $(`mkdir -p ${OutFolder}/${os}/tvsimulator`);
       $(`rm -rf ${OutFolder}/${os}/tvsimulator/${name}`);
       $(
-        // eslint-disable-next-line max-len
         `lipo -create ${OutFolder}/${os}/x64-tvsimulator/${name} ${OutFolder}/${os}/arm64-tvsimulator/${name} -output ${OutFolder}/${os}/tvsimulator/${name}`
       );
     }
@@ -137,32 +137,49 @@ const buildXCFrameworks = () => {
     $(`mkdir -p ${OutFolder}/${os}/iphonesimulator`);
     $(`rm -rf ${OutFolder}/${os}/iphonesimulator/${name}`);
     $(
-      // eslint-disable-next-line max-len
       `lipo -create ${OutFolder}/${os}/x64-iphonesimulator/${name} ${OutFolder}/${os}/arm64-iphonesimulator/${name} -output ${OutFolder}/${os}/iphonesimulator/${name}`
     );
+
+    // Only create macCatalyst frameworks if MACCATALYST is enabled
+    if (MACCATALYST) {
+      $(`mkdir -p ${OutFolder}/${os}/maccatalyst`);
+      $(`rm -rf ${OutFolder}/${os}/maccatalyst/${name}`);
+      $(
+        `lipo -create ${OutFolder}/${os}/x64-maccatalyst/${name} ${OutFolder}/${os}/arm64-maccatalyst/${name} -output ${OutFolder}/${os}/maccatalyst/${name}`
+      );
+    }
+
     $(`mkdir -p ${OutFolder}/${os}/macosx`);
     $(`rm -rf ${OutFolder}/${os}/macosx/${name}`);
     $(
-      // eslint-disable-next-line max-len
       `lipo -create ${OutFolder}/${os}/x64-macosx/${name} ${OutFolder}/${os}/arm64-macosx/${name} -output ${OutFolder}/${os}/macosx/${name}`
     );
     const [lib] = name.split(".");
     const dstPath = `${PackageRoot}/libs/${os}/${lib}.xcframework`;
 
-    // Build the xcodebuild command conditionally based on GRAPHITE
-    const xcframeworkCmd = GRAPHITE
-      ? "xcodebuild -create-xcframework " +
-        `-library ${prefix}/arm64-iphoneos/${name} ` +
-        `-library ${prefix}/iphonesimulator/${name} ` +
-        `-library ${prefix}/macosx/${name} ` +
-        ` -output ${dstPath}`
-      : "xcodebuild -create-xcframework " +
-        `-library ${prefix}/arm64-iphoneos/${name} ` +
-        `-library ${prefix}/iphonesimulator/${name} ` +
+    // Build the xcodebuild command conditionally based on GRAPHITE and MACCATALYST
+    let xcframeworkCmd =
+      "xcodebuild -create-xcframework " +
+      `-library ${prefix}/arm64-iphoneos/${name} ` +
+      `-library ${prefix}/iphonesimulator/${name} `;
+
+    // Add tvOS libraries if not using GRAPHITE
+    if (!GRAPHITE) {
+      xcframeworkCmd +=
         `-library ${prefix}/arm64-tvos/${name} ` +
-        `-library ${prefix}/tvsimulator/${name} ` +
-        `-library ${prefix}/macosx/${name} ` +
-        ` -output ${dstPath}`;
+        `-library ${prefix}/tvsimulator/${name} `;
+    }
+
+    // Add macOS library
+    xcframeworkCmd += `-library ${prefix}/macosx/${name} `;
+
+    // Add macCatalyst library if enabled
+    if (MACCATALYST) {
+      xcframeworkCmd += `-library ${prefix}/maccatalyst/${name} `;
+    }
+
+    // Add output path
+    xcframeworkCmd += ` -output ${dstPath}`;
 
     $(xcframeworkCmd);
   });
@@ -229,10 +246,18 @@ const buildXCFrameworks = () => {
   if (GRAPHITE) {
     console.log("🪨 Skia Graphite");
     console.log(
-      "⚠️  Apple TV (tvOS) builds are skipped when GRAPHITE is enabled"
+      "⚠️  Apple TV (tvOS) and MacCatalyst builds are skipped when GRAPHITE is enabled"
     );
   } else {
     console.log("🐘 Skia Ganesh");
+  }
+
+  if (MACCATALYST) {
+    console.log("✅ macCatalyst builds are enabled");
+  } else {
+    console.log(
+      "⚠️  macCatalyst builds are disabled (set SK_MACCATALYST=1 to enable)"
+    );
   }
 
   // Check Android environment variables if android is in target platforms
@@ -255,6 +280,28 @@ const buildXCFrameworks = () => {
   process.chdir(SkiaSrc);
   $("PATH=../depot_tools/:$PATH python3 tools/git-sync-deps");
   console.log("gclient sync done");
+  if (GRAPHITE) {
+    console.log("Applying Graphite patches...");
+    $(`git reset --hard HEAD`);
+
+    // Apply arm64e simulator patch
+    const arm64ePatchFile = path.join(__dirname, "dawn-arm64e-simulator.patch");
+    $(`cd ${SkiaSrc} && git apply ${arm64ePatchFile}`);
+
+    // Fix Dawn ShaderModuleMTL.mm uint32 typo if it exists
+    const shaderModuleFile = `${SkiaSrc}/third_party/externals/dawn/src/dawn/native/metal/ShaderModuleMTL.mm`;
+    $(
+      `sed -i '' 's/uint32(bindingInfo\\.binding)/uint32_t(bindingInfo.binding)/g' ${shaderModuleFile}`
+    );
+
+    // Remove partition_alloc line from dawn.gni
+    const dawnGniFile = `${SkiaSrc}/build_overrides/dawn.gni`;
+    $(
+      `sed -i '' '/dawn_partition_alloc_dir = "\\/\\/third_party\\/externals\\/partition_alloc"/d' ${dawnGniFile}`
+    );
+
+    console.log("Patches applied successfully");
+  }
   $(`rm -rf ${PackageRoot}/libs`);
 
   // Build specified platforms and targets

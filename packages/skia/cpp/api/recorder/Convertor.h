@@ -160,6 +160,22 @@ SkColor getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
       auto a = array.getValueAtIndex(runtime, 3).asNumber();
       return SkColorSetARGB(a * 255, r * 255, g * 255, b * 255);
     }
+
+    // Check for properties "0", "1", "2", "3" (even if not an array)
+    auto prop0 = jsi::PropNameID::forAscii(runtime, "0");
+    auto prop1 = jsi::PropNameID::forAscii(runtime, "1");
+    auto prop2 = jsi::PropNameID::forAscii(runtime, "2");
+    auto prop3 = jsi::PropNameID::forAscii(runtime, "3");
+    if (object.hasProperty(runtime, prop0) &&
+        object.hasProperty(runtime, prop1) &&
+        object.hasProperty(runtime, prop2) &&
+        object.hasProperty(runtime, prop3)) {
+      auto r = object.getProperty(runtime, prop0).asNumber();
+      auto g = object.getProperty(runtime, prop1).asNumber();
+      auto b = object.getProperty(runtime, prop2).asNumber();
+      auto a = object.getProperty(runtime, prop3).asNumber();
+      return SkColorSetARGB(a * 255, r * 255, g * 255, b * 255);
+    }
     jsi::ArrayBuffer buffer =
         object
             .getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))

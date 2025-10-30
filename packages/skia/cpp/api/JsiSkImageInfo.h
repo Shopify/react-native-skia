@@ -52,9 +52,10 @@ public:
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             const SkImageInfo &imageInfo) {
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkImageInfo>(std::move(context), imageInfo));
+    auto imageInfoObj =
+        std::make_shared<JsiSkImageInfo>(std::move(context), imageInfo);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, imageInfoObj,
+                                                       context);
   }
 
   JSI_PROPERTY_GET(width) { return static_cast<double>(getObject()->width()); }
@@ -67,6 +68,8 @@ public:
   JSI_PROPERTY_GET(alphaType) {
     return static_cast<double>(getObject()->alphaType());
   }
+
+  size_t getMemoryPressure() const override { return sizeof(SkImageInfo); }
 
   JSI_API_TYPENAME(ImageInfo);
 

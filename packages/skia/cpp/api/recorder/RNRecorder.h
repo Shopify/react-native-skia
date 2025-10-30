@@ -15,6 +15,7 @@
 #include "ImageFilters.h"
 #include "Paint.h"
 #include "PathEffects.h"
+#include "RNSkPlatformContext.h"
 #include "Shaders.h"
 
 namespace RNSkia {
@@ -24,9 +25,26 @@ private:
   std::vector<std::unique_ptr<Command>> commands;
 
 public:
+  std::shared_ptr<RNSkPlatformContext> _context;
   Variables variables;
 
-  ~Recorder() = default;
+  Recorder() = default;
+  ~Recorder() {
+    if (!_context || commands.empty()) {
+      return;
+    }
+
+    auto context = _context;
+    using CommandList = std::vector<std::unique_ptr<Command>>;
+    auto pendingCommands = std::make_shared<CommandList>(std::move(commands));
+
+    context->runOnMainThread(
+        [pendingCommands = std::move(pendingCommands)]() mutable {
+          // Destroy the recorded commands on the main thread to ensure GPU
+          // backed resources release safely.
+          pendingCommands->clear();
+        });
+  }
 
   void savePaint(jsi::Runtime &runtime, const jsi::Object &props,
                  bool standalone) {
@@ -35,10 +53,10 @@ public:
   }
 
   void pushShader(jsi::Runtime &runtime, const std::string &nodeType,
-                  const jsi::Object &props) {
+                  const jsi::Object &props, int children) {
     if (nodeType == "skShader") {
       commands.push_back(
-          std::make_unique<PushShaderCmd>(runtime, props, variables));
+          std::make_unique<PushShaderCmd>(runtime, props, variables, children));
     } else if (nodeType == "skImageShader") {
       commands.push_back(
           std::make_unique<PushImageShaderCmd>(runtime, props, variables));
@@ -216,7 +234,8 @@ public:
   }
 
   void drawImage(jsi::Runtime &runtime, const jsi::Object &props) {
-    commands.push_back(std::make_unique<ImageCmd>(runtime, props, variables));
+    commands.push_back(
+        std::make_unique<ImageCmd>(_context, runtime, props, variables));
   }
 
   void drawPoints(jsi::Runtime &runtime, const jsi::Object &props) {
@@ -255,7 +274,8 @@ public:
   }
 
   void drawPicture(jsi::Runtime &runtime, const jsi::Object &props) {
-    commands.push_back(std::make_unique<PictureCmd>(runtime, props, variables));
+    commands.push_back(
+        std::make_unique<PictureCmd>(_context, runtime, props, variables));
   }
 
   void drawImageSVG(jsi::Runtime &runtime, const jsi::Object &props) {
@@ -269,7 +289,8 @@ public:
   }
 
   void drawAtlas(jsi::Runtime &runtime, const jsi::Object &props) {
-    commands.push_back(std::make_unique<AtlasCmd>(runtime, props, variables));
+    commands.push_back(
+        std::make_unique<AtlasCmd>(_context, runtime, props, variables));
   }
 
   void drawSkottie(jsi::Runtime &runtime, const jsi::Object &props) {

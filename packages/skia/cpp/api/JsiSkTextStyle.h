@@ -137,7 +137,7 @@ public:
     }
     if (object.hasProperty(runtime, "halfLeading")) {
       auto propValue = object.getProperty(runtime, "halfLeading");
-      retVal.setHalfLeading(propValue.asNumber());
+      retVal.setHalfLeading(propValue.getBool());
     }
     if (object.hasProperty(runtime, "letterSpacing")) {
       auto propValue = object.getProperty(runtime, "letterSpacing");

@@ -87,16 +87,20 @@ public:
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             const SkRect &rect) {
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkRect>(std::move(context), rect));
+    auto rectObj = std::make_shared<JsiSkRect>(std::move(context), rect);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, rectObj,
+                                                       context);
   }
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             SkRect &&rect) {
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkRect>(std::move(context), std::move(rect)));
+    auto rectObj =
+        std::make_shared<JsiSkRect>(std::move(context), std::move(rect));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, rectObj,
+                                                       context);
   }
+
+  size_t getMemoryPressure() const override { return sizeof(SkRect); }
 
   /**
    * Creates the function for construction a new instance of the SkRect
@@ -114,9 +118,10 @@ public:
                            arguments[2].asNumber(), arguments[3].asNumber());
 
       // Return the newly constructed object
-      return jsi::Object::createFromHostObject(
-          runtime,
-          std::make_shared<JsiSkRect>(std::move(context), std::move(rect)));
+      auto rectObj =
+          std::make_shared<JsiSkRect>(std::move(context), std::move(rect));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, rectObj,
+                                                         context);
     };
   }
 };

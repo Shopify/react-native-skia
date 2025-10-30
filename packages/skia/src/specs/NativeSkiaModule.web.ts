@@ -1,19 +1,20 @@
 /* eslint-disable import/no-anonymous-default-export */
 import type { SkPicture, SkRect } from "../skia/types";
 import type { ISkiaViewApi } from "../views/types";
-import type { SkiaPictureView } from "../views/SkiaPictureView.web";
+import type { SkiaPictureViewHandle } from "../views/SkiaPictureView.web";
 
 export type ISkiaViewApiWeb = ISkiaViewApi & {
-  views: Record<string, SkiaPictureView>;
+  views: Record<string, SkiaPictureViewHandle>;
   deferedPictures: Record<string, SkPicture>;
-  registerView(nativeId: string, view: SkiaPictureView): void;
+  registerView(nativeId: string, view: SkiaPictureViewHandle): void;
 };
 
 global.SkiaViewApi = {
   views: {},
   deferedPictures: {},
+  deferedOnSize: {},
   web: true,
-  registerView(nativeId: string, view: SkiaPictureView) {
+  registerView(nativeId: string, view: SkiaPictureViewHandle) {
     // Maybe a picture for this view was already set
     if (this.deferedPictures[nativeId]) {
       view.setPicture(this.deferedPictures[nativeId] as SkPicture);

@@ -35,6 +35,10 @@
 #include "include/core/SkSurface.h"
 #include "include/core/SkTypeface.h"
 
+#if !defined(SK_GRAPHITE)
+#include "include/gpu/ganesh/GrDirectContext.h"
+#endif
+
 #pragma clang diagnostic pop
 
 namespace RNSkia {
@@ -235,6 +239,13 @@ public:
 
   JSI_HOST_FUNCTION(getSaveCount) {
     return static_cast<int>(_canvas->getSaveCount());
+  }
+
+  JSI_HOST_FUNCTION(getTotalMatrix) {
+    auto matrix =
+        std::make_shared<JsiSkMatrix>(getContext(), _canvas->getTotalMatrix());
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, matrix,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(drawPoints) {
@@ -656,6 +667,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawOval),
                        JSI_EXPORT_FUNC(JsiSkCanvas, restoreToCount),
                        JSI_EXPORT_FUNC(JsiSkCanvas, getSaveCount),
+                       JSI_EXPORT_FUNC(JsiSkCanvas, getTotalMatrix),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPoints),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPatch),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPath),
@@ -680,6 +692,8 @@ public:
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPicture),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawAtlas),
                        JSI_EXPORT_FUNC(JsiSkCanvas, readPixels))
+
+  size_t getMemoryPressure() const override { return 1024; }
 
   explicit JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

@@ -1,70 +1,86 @@
 name: Build SKIA Graphite
-on: workflow_dispatch
+on:
+  workflow_dispatch:
 jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    outputs:
+      skia_branch: ${{ steps.skia_meta.outputs.branch }}
+      skia_branch_slug: ${{ steps.skia_meta.outputs.branch_slug }}
+      tag_name: ${{ steps.release_meta.outputs.tag_name }}
+      release_name: ${{ steps.release_meta.outputs.release_name }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Determine Skia branch
+        id: skia_meta
+        run: |
+          set -eo pipefail
+          if [ ! -d "externals/skia" ]; then
+            echo "::error::externals/skia not found."
+            exit 1
+          fi
+          branch=$(git -C externals/skia branch --show-current || true)
+          if [ -z "$branch" ]; then
+            branch=$(git -C externals/skia describe --all --exact-match 2>/dev/null || true)
+          fi
+          if [ -z "$branch" ]; then
+            branch=$(git -C externals/skia rev-parse --short HEAD)
+          fi
+          # Strip remotes/origin/chrome/ prefix if present
+          branch=${branch#remotes/origin/chrome/}
+          slug=${branch//\//-}
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          echo "branch_slug=$slug" >> "$GITHUB_OUTPUT"
+      - name: Compute release metadata
+        id: release_meta
+        run: |
+          tag="skia-graphite-${SKIA_BRANCH_SLUG}"
+          echo "tag_name=$tag" >> "$GITHUB_OUTPUT"
+          echo "release_name=Skia Graphite ${SKIA_BRANCH}" >> "$GITHUB_OUTPUT"
+        env:
+          SKIA_BRANCH: ${{ steps.skia_meta.outputs.branch }}
+          SKIA_BRANCH_SLUG: ${{ steps.skia_meta.outputs.branch_slug }}
+      - name: Create GitHub release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.release_meta.outputs.tag_name }}
+          name: ${{ steps.release_meta.outputs.release_name }}
+          body: "Skia Graphite prebuilt binaries for version ${{ steps.skia_meta.outputs.branch }}"
+          draft: false
+          prerelease: true
+          generate_release_notes: false
   build:
+    needs: prepare-release
     runs-on: macos-latest-xlarge
     strategy:
       matrix:
         include:
           - target: "apple"
             artifact_name: "skia-graphite-apple-xcframeworks"
-            artifact_path: "./packages/skia/libs/apple/*.xcframework"
+            package_root: "./packages/skia/libs/apple"
           - target: "android-arm"
             artifact_name: "skia-graphite-android-arm"
-            artifact_path: |
-              ./externals/skia/out/android/arm/libskia.a
-              ./externals/skia/out/android/arm/libskshaper.a
-              ./externals/skia/out/android/arm/libsvg.a
-              ./externals/skia/out/android/arm/libskottie.a
-              ./externals/skia/out/android/arm/libsksg.a
-              ./externals/skia/out/android/arm/libskparagraph.a
-              ./externals/skia/out/android/arm/libskunicode_core.a
-              ./externals/skia/out/android/arm/libskunicode_icu.a
-              ./externals/skia/out/android/arm/libpathops.a
-              ./externals/skia/out/android/arm/libjsonreader.a
+            package_root: "./externals/skia/out/android/arm"
           - target: "android-arm64"
             artifact_name: "skia-graphite-android-arm-64"
-            artifact_path: |
-              ./externals/skia/out/android/arm64/libskia.a
-              ./externals/skia/out/android/arm64/libskshaper.a
-              ./externals/skia/out/android/arm64/libsvg.a
-              ./externals/skia/out/android/arm64/libskottie.a
-              ./externals/skia/out/android/arm64/libsksg.a
-              ./externals/skia/out/android/arm64/libskparagraph.a
-              ./externals/skia/out/android/arm64/libskunicode_core.a
-              ./externals/skia/out/android/arm64/libskunicode_icu.a
-              ./externals/skia/out/android/arm64/libpathops.a
-              ./externals/skia/out/android/arm64/libjsonreader.a
+            package_root: "./externals/skia/out/android/arm64"
           - target: "android-x86"
             artifact_name: "skia-graphite-android-arm-x86"
-            artifact_path: |
-              ./externals/skia/out/android/x86/libskia.a
-              ./externals/skia/out/android/x86/libskshaper.a
-              ./externals/skia/out/android/x86/libsvg.a
-              ./externals/skia/out/android/x86/libskottie.a
-              ./externals/skia/out/android/x86/libsksg.a
-              ./externals/skia/out/android/x86/libskparagraph.a
-              ./externals/skia/out/android/x86/libskunicode_core.a
-              ./externals/skia/out/android/x86/libskunicode_icu.a
-              ./externals/skia/out/android/x86/libpathops.a
-              ./externals/skia/out/android/x86/libjsonreader.a
+            package_root: "./externals/skia/out/android/x86"
           - target: "android-x64"
             artifact_name: "skia-graphite-android-arm-x64"
-            artifact_path: |
-              ./externals/skia/out/android/x64/libskia.a
-              ./externals/skia/out/android/x64/libskshaper.a
-              ./externals/skia/out/android/x64/libsvg.a
-              ./externals/skia/out/android/x64/libskottie.a
-              ./externals/skia/out/android/x64/libsksg.a
-              ./externals/skia/out/android/x64/libskparagraph.a
-              ./externals/skia/out/android/x64/libskunicode_core.a
-              ./externals/skia/out/android/x64/libskunicode_icu.a
-              ./externals/skia/out/android/x64/libpathops.a
-              ./externals/skia/out/android/x64/libjsonreader.a
+            package_root: "./externals/skia/out/android/x64"
       fail-fast: false
     steps:
       - name: checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
         with:
           submodules: recursive
 
@@ -115,18 +131,75 @@ jobs:
           SK_GRAPHITE: 1
         run: yarn build-skia ${{ matrix.target }}
 
-      - name: Upload artifacts - ${{ matrix.artifact_name }}
-        if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: ${{ matrix.artifact_name }}
-          path: ${{ matrix.artifact_path }}
+      - name: Package binaries - ${{ matrix.artifact_name }}
+        id: package
+        run: |
+          set -eo pipefail
+          ROOT="${{ matrix.package_root }}"
+          BASENAME="$(basename "$ROOT")"
+          PARENT="$(dirname "$ROOT")"
+          TAG="${DISPATCH_TAG}"
+          if [ -z "$TAG" ]; then
+            TAG="${SKIA_BRANCH_SLUG}"
+          fi
+          if [ -z "$TAG" ]; then
+            TAG="${GITHUB_REF_NAME:-}"
+          fi
+          if [ -z "$TAG" ]; then
+            TAG="${GITHUB_SHA}"
+          fi
+          ARCHIVE="${{ matrix.artifact_name }}-${TAG}.tar.gz"
+          mkdir -p release-assets
+          tar -czf "release-assets/$ARCHIVE" -C "$PARENT" "$BASENAME"
+          echo "asset_path=release-assets/$ARCHIVE" >> "$GITHUB_OUTPUT"
+          echo "asset_name=$ARCHIVE" >> "$GITHUB_OUTPUT"
+        shell: bash
+        env:
+          DISPATCH_TAG: ${{ needs.prepare-release.outputs.tag_name }}
+          SKIA_BRANCH_SLUG: ${{ needs.prepare-release.outputs.skia_branch_slug }}
 
-      - name: Upload artifacts - Graphite Headers
-        if: github.ref == 'refs/heads/main' && matrix.target == 'apple'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - name: Upload binaries to GitHub release - ${{ matrix.artifact_name }}
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: skia-graphite-headers
-          path: |
-            ./packages/skia/cpp/dawn/include/
-            ./packages/skia/cpp/skia/src/gpu/graphite/
+          tag_name: ${{ needs.prepare-release.outputs.tag_name }}
+          files: ${{ steps.package.outputs.asset_path }}
+          prerelease: true
+
+      - name: Package Graphite Headers
+        if: matrix.target == 'apple'
+        id: package_headers
+        run: |
+          set -eo pipefail
+          TAG="${DISPATCH_TAG}"
+          if [ -z "$TAG" ]; then
+            TAG="${SKIA_BRANCH_SLUG}"
+          fi
+          if [ -z "$TAG" ]; then
+            TAG="${GITHUB_REF_NAME:-}"
+          fi
+          if [ -z "$TAG" ]; then
+            TAG="${GITHUB_SHA}"
+          fi
+          ARCHIVE="skia-graphite-headers-${TAG}.tar.gz"
+          mkdir -p release-assets
+          tar -czf "release-assets/$ARCHIVE" \
+            ./packages/skia/cpp/dawn/include \
+            ./packages/skia/cpp/skia/src/gpu/graphite
+          echo "asset_path=release-assets/$ARCHIVE" >> "$GITHUB_OUTPUT"
+          echo "asset_name=$ARCHIVE" >> "$GITHUB_OUTPUT"
+        shell: bash
+        env:
+          DISPATCH_TAG: ${{ needs.prepare-release.outputs.tag_name }}
+          SKIA_BRANCH_SLUG: ${{ needs.prepare-release.outputs.skia_branch_slug }}
+
+      - name: Upload Graphite Headers to GitHub release
+        if: matrix.target == 'apple'
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.prepare-release.outputs.tag_name }}
+          files: ${{ steps.package_headers.outputs.asset_path }}
+          prerelease: true

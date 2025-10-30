@@ -16,8 +16,13 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#include "include/core/SkBlendMode.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkColor.h"
 #import "include/core/SkColorSpace.h"
 #include "include/core/SkFontMgr.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkSamplingOptions.h"
 #include "include/core/SkSurface.h"
 
 #include "include/ports/SkFontMgr_mac_ct.h"
@@ -74,22 +79,26 @@ void RNSkApplePlatformContext::releaseNativeBuffer(uint64_t pointer) {
 uint64_t RNSkApplePlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
   // 0. If Image is not in BGRA, convert to BGRA as only BGRA is supported.
   if (image->colorType() != kBGRA_8888_SkColorType) {
-#if defined(SK_GRAPHITE)
-    SkImage::RequiredProperties requiredProps;
-    image = image->makeColorTypeAndColorSpace(
-        DawnContext::getInstance().getRecorder(), kBGRA_8888_SkColorType,
-        SkColorSpace::MakeSRGB(), requiredProps);
-#else
-    // on iOS, 32_BGRA is the only supported RGB format for CVPixelBuffers.
-    image = image->makeColorTypeAndColorSpace(
-        MetalContext::getInstance().getDirectContext(), kBGRA_8888_SkColorType,
-        SkColorSpace::MakeSRGB());
-#endif
-    if (image == nullptr) {
+    const SkImageInfo bgraInfo =
+        SkImageInfo::Make(image->dimensions(), kBGRA_8888_SkColorType,
+                          kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
+    auto surface = SkSurfaces::Raster(bgraInfo);
+    if (!surface) {
+      throw std::runtime_error(
+          "Failed to allocate raster surface for BGRA conversion");
+    }
+    SkCanvas *canvas = surface->getCanvas();
+    canvas->clear(SK_ColorTRANSPARENT);
+    SkPaint paint;
+    paint.setBlendMode(SkBlendMode::kSrc);
+    canvas->drawImage(image.get(), 0.0f, 0.0f, SkSamplingOptions(), &paint);
+    auto bgraImage = surface->makeImageSnapshot();
+    if (bgraImage == nullptr) {
       throw std::runtime_error(
           "Failed to convert image to BGRA_8888 colortype! Only BGRA_8888 "
           "NativeBuffers are supported.");
     }
+    image = std::move(bgraImage);
   }
 
   // 1. Get image info
