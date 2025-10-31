@@ -99,5 +99,7 @@ public:
     auto bytesUsed = picture->approximateBytesUsed();
     return bytesUsed;
   }
+
+  std::string getObjectType() const override { return "JsiSkPicture"; }
 };
 } // namespace RNSkia

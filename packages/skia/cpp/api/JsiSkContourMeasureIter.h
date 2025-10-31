@@ -50,6 +50,10 @@ public:
     return sizeof(SkContourMeasureIter);
   }
 
+  std::string getObjectType() const override {
+    return "JsiSkContourMeasureIter";
+  }
+
   /**
    * Creates the function for construction a new instance of the
    * SkContourMeasureIter wrapper

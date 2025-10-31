@@ -649,6 +649,8 @@ public:
     return path->approximateBytesUsed();
   }
 
+  std::string getObjectType() const override { return "JsiSkPath"; }
+
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             const SkPath &path) {

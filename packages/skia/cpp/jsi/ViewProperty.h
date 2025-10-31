@@ -27,9 +27,7 @@ public:
     }
   }
 
-  void onRuntimeDestroyed(jsi::Runtime *) override {
-    _runtime.store(nullptr);
-  }
+  void onRuntimeDestroyed(jsi::Runtime *) override { _runtime.store(nullptr); }
 
   jsi::Runtime *getRuntime() const { return _runtime.load(); }
 

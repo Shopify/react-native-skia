@@ -144,6 +144,8 @@ public:
 
   size_t getMemoryPressure() const override { return 4096; }
 
+  std::string getObjectType() const override { return "JsiSkRuntimeEffect"; }
+
   static RuntimeEffectUniform fromUniform(const SkRuntimeEffect::Uniform &u) {
     RuntimeEffectUniform su;
     su.rows = u.count; // arrayLength

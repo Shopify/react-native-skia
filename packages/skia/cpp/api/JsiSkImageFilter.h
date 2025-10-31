@@ -27,6 +27,8 @@ public:
 
   size_t getMemoryPressure() const override { return 4096; }
 
+  std::string getObjectType() const override { return "JsiSkImageFilter"; }
+
   EXPORT_JSI_API_TYPENAME(JsiSkImageFilter, ImageFilter)
 };
 

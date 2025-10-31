@@ -44,6 +44,11 @@ export class ReanimatedRecorder implements BaseRecorder {
     this.recorder = Skia.Recorder();
   }
 
+  reset() {
+    this.values.clear();
+    this.recorder.reset();
+  }
+
   private processAnimationValues(props?: Record<string, unknown>) {
     if (!props) {
       return;

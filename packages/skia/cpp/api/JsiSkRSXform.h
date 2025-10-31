@@ -113,6 +113,8 @@ public:
   }
   size_t getMemoryPressure() const override { return sizeof(SkRSXform); }
 
+  std::string getObjectType() const override { return "JsiSkRSXform"; }
+
   /**
    * Creates the function for construction a new instance of the SkRSXform
    * wrapper

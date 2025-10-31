@@ -210,6 +210,8 @@ public:
 
   size_t getMemoryPressure() const override { return sizeof(SkPaint); }
 
+  std::string getObjectType() const override { return "JsiSkPaint"; }
+
   /**
    * Creates the function for construction a new instance of the SkPaint
    * wrapper

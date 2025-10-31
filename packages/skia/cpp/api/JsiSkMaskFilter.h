@@ -27,6 +27,8 @@ public:
 
   size_t getMemoryPressure() const override { return 2048; }
 
+  std::string getObjectType() const override { return "JsiSkMaskFilter"; }
+
   EXPORT_JSI_API_TYPENAME(JsiSkMaskFilter, MaskFilter)
 };
 

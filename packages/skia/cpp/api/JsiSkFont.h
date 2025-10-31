@@ -281,6 +281,8 @@ public:
 
   size_t getMemoryPressure() const override { return sizeof(SkFont); }
 
+  std::string getObjectType() const override { return "JsiSkFont"; }
+
   /**
    * Creates the function for construction a new instance of the SkFont
    * wrapper

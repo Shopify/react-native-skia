@@ -615,5 +615,7 @@ public:
 
     return animationMemory + baseOverhead;
   }
+
+  std::string getObjectType() const override { return "JsiSkSkottie"; }
 };
 } // namespace RNSkia

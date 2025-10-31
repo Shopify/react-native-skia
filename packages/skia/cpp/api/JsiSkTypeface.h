@@ -79,6 +79,8 @@ public:
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
         runtime, hostObjectInstance, context);
   }
+
+  std::string getObjectType() const override { return "JsiSkTypeface"; }
 };
 
 } // namespace RNSkia

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Button,
@@ -18,6 +18,27 @@ import {
   withTiming,
 } from "react-native-reanimated";
 
+const logMemoryStats = () => {
+  "worklet";
+  if (
+    typeof HermesInternal !== "undefined" &&
+    // @ts-expect-error - HermesInternal is available in Hermes runtime
+    HermesInternal?.getInstrumentedStats
+  ) {
+    // // @ts-expect-error - HermesInternal is available in Hermes runtime
+    // const stats = HermesInternal.getInstrumentedStats();
+    // const externalMB = (stats.js_externalBytes / (1024 * 1024)).toFixed(2);
+    // const totalAllocatedMB = (
+    //   stats.js_totalAllocatedBytes /
+    //   (1024 * 1024)
+    // ).toFixed(2);
+    // const heapSizeMB = (stats.js_heapSize / (1024 * 1024)).toFixed(2);
+    // console.log(
+    //   `External: ${externalMB} MB, Total Allocated: ${totalAllocatedMB} MB, Heap Size: ${heapSizeMB} MB`
+    // );
+  }
+};
+
 const drawFrame = (
   surface: SharedValue<SkSurface | null>,
   image: SharedValue<SkImage | null>,
@@ -25,6 +46,7 @@ const drawFrame = (
   pixelRatio: number
 ) => {
   "worklet";
+  logMemoryStats();
   if (!surface.value) {
     Alert.alert("surface is null");
     return false;
@@ -56,11 +78,16 @@ function continueBlink(
   blinkCnt: SharedValue<number>,
   isLeft: SharedValue<boolean>,
   pixelRatio: number,
-  revert: (d: string) => void
+  revert: (d: string) => void,
+  shouldContinue: SharedValue<boolean>
 ) {
   "worklet";
+  if (!shouldContinue.value) {
+    return;
+  }
   blinkCnt.value++;
   looper.value = withTiming(1 - looper.value, { duration: 10 }, () => {
+    if (!shouldContinue.value) return;
     if (!drawFrame(surface, image, x, pixelRatio)) return;
     if (blinkCnt.value < 20) {
       continueBlink(
@@ -71,13 +98,16 @@ function continueBlink(
         blinkCnt,
         isLeft,
         pixelRatio,
-        revert
+        revert,
+        shouldContinue
       );
     } else {
+      if (!shouldContinue.value) return;
       runOnJS(revert)(isLeft.value ? "right" : "left");
       isLeft.value = !isLeft.value;
       blinkCnt.value = 0;
       x.value = withTiming(400 - x.value, { duration: 200 }, () => {
+        if (!shouldContinue.value) return;
         continueBlink(
           surface,
           image,
@@ -86,7 +116,8 @@ function continueBlink(
           blinkCnt,
           isLeft,
           pixelRatio,
-          revert
+          revert,
+          shouldContinue
         );
       });
     }
@@ -101,9 +132,11 @@ const startBlink = (
   blinkCnt: SharedValue<number>,
   isLeft: SharedValue<boolean>,
   pixelRatio: number,
-  revert: (d: string) => void
+  revert: (d: string) => void,
+  shouldContinue: SharedValue<boolean>
 ) => {
   "worklet";
+  if (!shouldContinue.value) return;
   blinkCnt.value = 0;
   if (drawFrame(surface, image, x, pixelRatio)) {
     continueBlink(
@@ -114,7 +147,8 @@ const startBlink = (
       blinkCnt,
       isLeft,
       pixelRatio,
-      revert
+      revert,
+      shouldContinue
     );
   }
 };
@@ -127,7 +161,8 @@ const startAnimation = (
   blinkCnt: SharedValue<number>,
   isLeft: SharedValue<boolean>,
   pixelRatio: number,
-  revert: (d: string) => void
+  revert: (d: string) => void,
+  shouldContinue: SharedValue<boolean>
 ) => {
   "worklet";
   if (!surface.value) {
@@ -136,7 +171,17 @@ const startAnimation = (
       pixelRatio * 400
     );
   }
-  startBlink(surface, image, x, looper, blinkCnt, isLeft, pixelRatio, revert);
+  startBlink(
+    surface,
+    image,
+    x,
+    looper,
+    blinkCnt,
+    isLeft,
+    pixelRatio,
+    revert,
+    shouldContinue
+  );
 };
 
 export const StressTest4 = () => {
@@ -149,10 +194,12 @@ export const StressTest4 = () => {
   const [direction, setDirection] = useState("left");
   const isLeft = useSharedValue(true);
   const blinkCnt = useSharedValue(0);
+  const shouldContinue = useSharedValue(true);
 
   const imageX = useDerivedValue(() => -x.value);
 
   const handleStart = () => {
+    shouldContinue.value = true;
     runOnUI(startAnimation)(
       surface,
       image,
@@ -161,9 +208,17 @@ export const StressTest4 = () => {
       blinkCnt,
       isLeft,
       pixelRatio,
-      setDirection
+      setDirection,
+      shouldContinue
     );
   };
+
+  useEffect(() => {
+    // Stop animation on unmount
+    return () => {
+      shouldContinue.value = false;
+    };
+  }, [shouldContinue]);
 
   return (
     <SafeAreaView style={styles.container}>

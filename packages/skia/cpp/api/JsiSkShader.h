@@ -28,6 +28,8 @@ public:
 
   size_t getMemoryPressure() const override { return 4096; }
 
+  std::string getObjectType() const override { return "JsiSkShader"; }
+
   EXPORT_JSI_API_TYPENAME(JsiSkShader, Shader)
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkShader, dispose))
 };

@@ -66,6 +66,10 @@ public:
     return sizeof(SkRuntimeShaderBuilder);
   }
 
+  std::string getObjectType() const override {
+    return "JsiSkRuntimeShaderBuilder";
+  }
+
   /**
    * Creates the function for construction a new instance of the SkRect
    * wrapper

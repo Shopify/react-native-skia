@@ -34,6 +34,10 @@ public:
 
   size_t getMemoryPressure() const override { return 1024; }
 
+  std::string getObjectType() const override {
+    return "JsiSkRuntimeEffectFactory";
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkRuntimeEffectFactory, Make))
 
   explicit JsiSkRuntimeEffectFactory(

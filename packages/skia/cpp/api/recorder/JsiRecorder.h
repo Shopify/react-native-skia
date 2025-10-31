@@ -7,6 +7,7 @@
 
 #include "JsiSkCanvas.h"
 #include "JsiSkHostObjects.h"
+#include "JsiSkPicture.h"
 
 #include "DrawingCtx.h"
 #include "RNRecorder.h"
@@ -53,17 +54,39 @@ public:
   }
 
   JSI_HOST_FUNCTION(play) {
+    // Check if a picture parameter was provided
+    if (count < 1 || arguments[0].isUndefined() || arguments[0].isNull()) {
+      throw jsi::JSError(runtime, "play() requires a Picture parameter");
+    }
+
+    // Get the JsiSkPicture from the argument
+    auto pictureObject = arguments[0].asObject(runtime);
+    auto pictureHostObject = pictureObject.asHostObject<JsiSkPicture>(runtime);
+    if (!pictureHostObject) {
+      throw jsi::JSError(runtime, "Invalid Picture object provided to play()");
+    }
+
+    // Create a new picture recorder to record into
     SkPictureRecorder pictureRecorder;
     SkISize size = SkISize::Make(2'000'000, 2'000'000);
     SkRect rect = SkRect::Make(size);
     auto canvas = pictureRecorder.beginRecording(rect, nullptr);
+
+    // Play the recorded commands into the canvas
     DrawingCtx ctx(canvas);
     getObject()->play(&ctx);
-    auto picture = pictureRecorder.finishRecordingAsPicture();
-    auto hostObjectInstance =
-        std::make_shared<JsiSkPicture>(getContext(), std::move(picture));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+
+    // Finish recording and get the new picture
+    auto newPicture = pictureRecorder.finishRecordingAsPicture();
+
+    // Update the existing JsiSkPicture object with the new SkPicture
+    // This reuses the existing JavaScript object instead of creating a new one
+    pictureHostObject->setObject(std::move(newPicture));
+    auto memoryPressure = pictureHostObject->getMemoryPressure();
+    pictureObject.setExternalMemoryPressure(runtime, memoryPressure);
+
+    // Return undefined since we're modifying the passed-in object
+    return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(applyUpdates) {
@@ -271,6 +294,13 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(reset) {
+    auto newRecorder = std::make_shared<Recorder>();
+    newRecorder->_context = getContext();
+    setObject(newRecorder);
+    return jsi::Value::undefined();
+  }
+
   EXPORT_JSI_API_TYPENAME(JsiRecorder, Recorder)
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiRecorder, saveGroup),
@@ -314,9 +344,14 @@ public:
                        JSI_EXPORT_FUNC(JsiRecorder, drawAtlas),
                        JSI_EXPORT_FUNC(JsiRecorder, drawSkottie),
                        JSI_EXPORT_FUNC(JsiRecorder, play),
-                       JSI_EXPORT_FUNC(JsiRecorder, applyUpdates))
+                       JSI_EXPORT_FUNC(JsiRecorder, applyUpdates),
+                       JSI_EXPORT_FUNC(JsiRecorder, reset))
 
-  size_t getMemoryPressure() const override { return 16384; }
+  // This has no basis in reality but since since these are private long-lived
+  // objects, we think it is more than fine.
+  size_t getMemoryPressure() const override { return 10 * 1024 * 1024; }
+
+  std::string getObjectType() const override { return "JsiRecorder"; }
 
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
