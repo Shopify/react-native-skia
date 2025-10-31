@@ -25,13 +25,13 @@ const logMemoryStats = () => {
     // @ts-expect-error - HermesInternal is available in Hermes runtime
     HermesInternal?.getInstrumentedStats
   ) {
-    // @ts-expect-error - HermesInternal is available in Hermes runtime
-    const stats = HermesInternal.getInstrumentedStats();
-    const externalMB = (stats.js_externalBytes / (1024 * 1024)).toFixed(2);
-    const totalAllocatedMB = (
-      stats.js_totalAllocatedBytes /
-      (1024 * 1024)
-    ).toFixed(2);
+    // // @ts-expect-error - HermesInternal is available in Hermes runtime
+    // const stats = HermesInternal.getInstrumentedStats();
+    // const externalMB = (stats.js_externalBytes / (1024 * 1024)).toFixed(2);
+    // const totalAllocatedMB = (
+    //   stats.js_totalAllocatedBytes /
+    //   (1024 * 1024)
+    // ).toFixed(2);
     // const heapSizeMB = (stats.js_heapSize / (1024 * 1024)).toFixed(2);
     // console.log(
     //   `External: ${externalMB} MB, Total Allocated: ${totalAllocatedMB} MB, Heap Size: ${heapSizeMB} MB`
