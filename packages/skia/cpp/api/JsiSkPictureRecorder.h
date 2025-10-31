@@ -57,9 +57,7 @@ public:
                                        finishRecordingAsPicture),
                        JSI_EXPORT_FUNC(JsiSkPictureRecorder, dispose))
 
-  size_t getMemoryPressure() const override {
-    return sizeof(SkPictureRecorder);
-  }
+  size_t getMemoryPressure() const override { return 1024 * 1024; }
 
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {

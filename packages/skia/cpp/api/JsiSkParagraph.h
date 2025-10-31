@@ -171,7 +171,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkParagraph, getLineMetrics),
                        JSI_EXPORT_FUNC(JsiSkParagraph, dispose))
 
-  size_t getMemoryPressure() const override { return 8192; }
+  size_t getMemoryPressure() const override { return 1024 * 1024; }
 
   explicit JsiSkParagraph(std::shared_ptr<RNSkPlatformContext> context,
                           para::ParagraphBuilder *paragraphBuilder)
