@@ -16,7 +16,8 @@
     "pod:install": "cd ios && pod install",
     "test": "jest",
     "tsc": "tsc --noEmit",
-    "start": "react-native start"
+    "start": "react-native start",
+    "postinstall": "yarn pod:install"
   },
   "dependencies": {
     "@callstack/react-native-visionos": "^0.75.0",
