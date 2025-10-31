@@ -72,6 +72,8 @@ public:
     return (rasterBufferSize / 4) +
            baseOverhead; // Quarter of full raster + overhead
   }
+
+  std::string getObjectType() const override { return "JsiSkSVG"; }
 };
 
 } // namespace RNSkia

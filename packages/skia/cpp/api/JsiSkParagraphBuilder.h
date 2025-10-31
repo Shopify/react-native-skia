@@ -112,6 +112,8 @@ public:
 
   size_t getMemoryPressure() const override { return 1024 * 1024; }
 
+  std::string getObjectType() const override { return "JsiSkParagraphBuilder"; }
+
   explicit JsiSkParagraphBuilder(std::shared_ptr<RNSkPlatformContext> context,
                                  para::ParagraphStyle paragraphStyle,
                                  sk_sp<SkFontMgr> fontManager)

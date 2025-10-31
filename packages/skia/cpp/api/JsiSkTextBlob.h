@@ -37,6 +37,8 @@ public:
            1024; // Area estimation + base overhead
   }
 
+  std::string getObjectType() const override { return "JsiSkTextBlob"; }
+
   EXPORT_JSI_API_TYPENAME(JsiSkTextBlob, TextBlob)
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTextBlob, dispose))
 };

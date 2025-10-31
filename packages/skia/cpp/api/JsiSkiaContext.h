@@ -57,6 +57,8 @@ public:
 
   size_t getMemoryPressure() const override { return 10 * 1024 * 1024; }
 
+  std::string getObjectType() const override { return "JsiSkiaContext"; }
+
   /**
    * Creates the function for construction a new instance of the SkFont
    * wrapper

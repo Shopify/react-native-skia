@@ -100,6 +100,8 @@ public:
 
   size_t getMemoryPressure() const override { return 32768; }
 
+  std::string getObjectType() const override { return "JsiVideo"; }
+
   /**
    * Creates the function for construction a new instance of the SkFont
    * wrapper

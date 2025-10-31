@@ -132,6 +132,8 @@ public:
 
     return estimated;
   }
+
+  std::string getObjectType() const override { return "JsiSkAnimatedImage"; }
 };
 
 } // namespace RNSkia

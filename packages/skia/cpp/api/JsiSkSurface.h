@@ -168,6 +168,8 @@ public:
     return estimated;
   }
 
+  std::string getObjectType() const override { return "JsiSkSurface"; }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurface, width),
                        JSI_EXPORT_FUNC(JsiSkSurface, height),
                        JSI_EXPORT_FUNC(JsiSkSurface, getCanvas),
