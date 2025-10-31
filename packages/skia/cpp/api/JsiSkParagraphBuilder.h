@@ -110,7 +110,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkParagraphBuilder, pushStyle),
                        JSI_EXPORT_FUNC(JsiSkParagraphBuilder, pop))
 
-  size_t getMemoryPressure() const override { return 4096; }
+  size_t getMemoryPressure() const override { return 1024 * 1024; }
 
   std::string getObjectType() const override { return "JsiSkParagraphBuilder"; }
 

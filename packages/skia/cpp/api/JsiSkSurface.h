@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <limits>
 #include <memory>
 #include <utility>
 
@@ -116,15 +118,54 @@ public:
 
   size_t getMemoryPressure() const override {
     auto surface = getObject();
-    if (!surface)
+    if (!surface) {
       return 0;
+    }
 
-    // Surface memory is primarily the pixel buffer: width × height × bytes per
-    // pixel
-    int width = surface->width();
-    int height = surface->height();
-    // Assume 4 bytes per pixel (RGBA) for most surfaces
-    return width * height * 4;
+    const auto safeAdd = [](size_t a, size_t b) {
+      if (std::numeric_limits<size_t>::max() - a < b) {
+        return std::numeric_limits<size_t>::max();
+      }
+      return a + b;
+    };
+
+    SkImageInfo info = surface->imageInfo();
+    size_t pixelBytes = info.computeMinByteSize();
+    if (pixelBytes == 0) {
+      auto width = std::max(info.width(), surface->width());
+      auto height = std::max(info.height(), surface->height());
+      int bytesPerPixel = info.bytesPerPixel();
+      if (bytesPerPixel <= 0) {
+        bytesPerPixel = 4;
+      }
+      if (width > 0 && height > 0) {
+        pixelBytes = static_cast<size_t>(width) * static_cast<size_t>(height) *
+                     static_cast<size_t>(bytesPerPixel);
+      }
+    }
+
+    if (pixelBytes == 0) {
+      return 0;
+    }
+
+    size_t estimated = pixelBytes;
+
+    auto canvas = surface->getCanvas();
+    const bool isGpuBacked =
+        surface->recordingContext() != nullptr || surface->recorder() != nullptr ||
+        (canvas && (canvas->recordingContext() != nullptr ||
+                    canvas->recorder() != nullptr));
+
+    if (isGpuBacked) {
+      // Account for a resolved texture and depth/stencil attachments.
+      estimated = safeAdd(estimated, pixelBytes);      // resolve/texture copy
+      estimated = safeAdd(estimated, pixelBytes / 2);  // depth-stencil buffers
+    }
+
+    // Add a small overhead buffer for bookkeeping allocations.
+    estimated = safeAdd(estimated, 128 * 1024);
+
+    return estimated;
   }
 
   std::string getObjectType() const override { return "JsiSkSurface"; }
