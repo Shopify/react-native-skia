@@ -7,7 +7,6 @@ To develop react-native-skia, you can build the skia libraries on your computer.
 ### Using pre-built binaries
 
 To use the Skia prebuilt binaries from GitHub, use the following commands:
-- Install and authenticate the GitHub CLI, e.g. `brew install gh`, then run `gh auth login`
 - Checkout submodules: `git submodule update --init --recursive`
 - Install dependencies: `yarn`
 - Go to the package folder: `cd packages/skia`
