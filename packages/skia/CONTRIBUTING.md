@@ -9,7 +9,7 @@ To use the Skia prebuilt binaries from GitHub, run:
 $ git submodule update --init --recursive
 $ yarn
 $ cd packages/skia
-$ yarn copy-skia-headers
+$ yarn install-skia
 ```
 
 ### Building Skia
