@@ -30,6 +30,8 @@ public:
 
   size_t getMemoryPressure() const override { return 1024; }
 
+  std::string getObjectType() const override { return "JsiSkTypefaceFactory"; }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTypefaceFactory,
                                        MakeFreeTypeFaceFromData))
 

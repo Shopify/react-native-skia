@@ -61,6 +61,10 @@ public:
     return sizeof(SkPictureRecorder);
   }
 
+  std::string getObjectType() const override {
+    return "JsiSkPictureRecorder";
+  }
+
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {

@@ -115,6 +115,8 @@ public:
 
   size_t getMemoryPressure() const override { return 1024; }
 
+  std::string getObjectType() const override { return "JsiSkImageFactory"; }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromEncoded),
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTag),
                        JSI_EXPORT_FUNC(JsiSkImageFactory,

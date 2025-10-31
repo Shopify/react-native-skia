@@ -102,6 +102,8 @@ public:
 
   size_t getMemoryPressure() const override { return sizeof(SkRect); }
 
+  std::string getObjectType() const override { return "JsiSkRect"; }
+
   /**
    * Creates the function for construction a new instance of the SkRect
    * wrapper

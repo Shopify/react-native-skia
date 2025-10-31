@@ -316,6 +316,8 @@ public:
     }
     return 0;
   }
+
+  std::string getObjectType() const override { return "JsiSkImage"; }
 };
 
 } // namespace RNSkia

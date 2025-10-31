@@ -27,6 +27,10 @@ public:
 
   size_t getMemoryPressure() const override { return 2048; }
 
+  std::string getObjectType() const override {
+    return "JsiSkTypefaceFontProviderFactory";
+  }
+
   explicit JsiSkTypefaceFontProviderFactory(
       std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

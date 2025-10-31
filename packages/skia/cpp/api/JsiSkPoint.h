@@ -64,6 +64,8 @@ public:
 
   size_t getMemoryPressure() const override { return sizeof(SkPoint); }
 
+  std::string getObjectType() const override { return "JsiSkPoint"; }
+
   /**
    * Creates the function for construction a new instance of the SkPoint
    * wrapper

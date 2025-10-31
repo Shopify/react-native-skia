@@ -48,6 +48,8 @@ public:
 
   size_t getMemoryPressure() const override { return 1024; }
 
+  std::string getObjectType() const override { return "JsiSkPictureFactory"; }
+
   explicit JsiSkPictureFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };

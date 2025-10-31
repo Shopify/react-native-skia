@@ -47,6 +47,8 @@ public:
     return vertices->approximateSize();
   }
 
+  std::string getObjectType() const override { return "JsiSkVertices"; }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkVertices, bounds),
                        JSI_EXPORT_FUNC(JsiSkVertices, uniqueID),
                        JSI_EXPORT_FUNC(JsiSkVertices, dispose))

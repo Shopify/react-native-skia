@@ -127,6 +127,8 @@ public:
     return width * height * 4;
   }
 
+  std::string getObjectType() const override { return "JsiSkSurface"; }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurface, width),
                        JSI_EXPORT_FUNC(JsiSkSurface, height),
                        JSI_EXPORT_FUNC(JsiSkSurface, getCanvas),

@@ -318,6 +318,8 @@ public:
 
   size_t getMemoryPressure() const override { return 16384; }
 
+  std::string getObjectType() const override { return "JsiRecorder"; }
+
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
