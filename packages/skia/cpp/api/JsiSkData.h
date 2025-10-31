@@ -29,6 +29,8 @@ public:
     return data ? data->size() : 0;
   }
 
+  std::string getObjectType() const override { return "JsiSkData"; }
+
   EXPORT_JSI_API_TYPENAME(JsiSkData, Data)
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkData, dispose))
 };

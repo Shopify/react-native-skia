@@ -111,6 +111,8 @@ public:
 
   size_t getMemoryPressure() const override { return 2048; }
 
+  std::string getObjectType() const override { return "JsiSkTextBlobFactory"; }
+
   explicit JsiSkTextBlobFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };

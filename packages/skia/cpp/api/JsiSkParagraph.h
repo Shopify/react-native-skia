@@ -173,6 +173,8 @@ public:
 
   size_t getMemoryPressure() const override { return 8192; }
 
+  std::string getObjectType() const override { return "JsiSkParagraph"; }
+
   explicit JsiSkParagraph(std::shared_ptr<RNSkPlatformContext> context,
                           para::ParagraphBuilder *paragraphBuilder)
       : JsiSkWrappingSharedPtrHostObject<para::Paragraph>(

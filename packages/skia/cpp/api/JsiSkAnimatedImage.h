@@ -64,6 +64,8 @@ public:
                                                       std::move(image)) {}
 
   size_t getMemoryPressure() const override { return 8192; }
+
+  std::string getObjectType() const override { return "JsiSkAnimatedImage"; }
 };
 
 } // namespace RNSkia

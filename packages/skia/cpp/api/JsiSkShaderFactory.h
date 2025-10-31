@@ -254,6 +254,8 @@ public:
 
   size_t getMemoryPressure() const override { return 1024; }
 
+  std::string getObjectType() const override { return "JsiSkShaderFactory"; }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkShaderFactory, MakeLinearGradient),
                        JSI_EXPORT_FUNC(JsiSkShaderFactory, MakeRadialGradient),
                        JSI_EXPORT_FUNC(JsiSkShaderFactory, MakeSweepGradient),

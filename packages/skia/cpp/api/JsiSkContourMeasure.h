@@ -68,6 +68,8 @@ public:
 
   size_t getMemoryPressure() const override { return 1024; }
 
+  std::string getObjectType() const override { return "JsiSkContourMeasure"; }
+
   EXPORT_JSI_API_TYPENAME(JsiSkContourMeasure, ContourMeasure)
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkContourMeasure, getPosTan),

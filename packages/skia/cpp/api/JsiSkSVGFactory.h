@@ -162,6 +162,8 @@ public:
 
   size_t getMemoryPressure() const override { return 512; }
 
+  std::string getObjectType() const override { return "JsiSkSVGFactory"; }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSVGFactory, MakeFromData),
                        JSI_EXPORT_FUNC(JsiSkSVGFactory, MakeFromString))
 

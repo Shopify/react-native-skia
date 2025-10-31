@@ -94,6 +94,10 @@ public:
 
   size_t getMemoryPressure() const override { return 1024; }
 
+  std::string getObjectType() const override {
+    return "JsiSkColorFilterFactory";
+  }
+
   JSI_EXPORT_FUNCTIONS(
       JSI_EXPORT_FUNC(JsiSkColorFilterFactory, MakeMatrix),
       JSI_EXPORT_FUNC(JsiSkColorFilterFactory, MakeBlend),

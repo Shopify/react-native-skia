@@ -58,6 +58,8 @@ public:
 
   size_t getMemoryPressure() const override { return sizeof(SkFontStyle); }
 
+  std::string getObjectType() const override { return "JsiSkFontStyle"; }
+
   /**
   Returns the jsi object from a host object of this type
  */

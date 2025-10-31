@@ -31,6 +31,10 @@ public:
 
   size_t getMemoryPressure() const override { return 1024; }
 
+  std::string getObjectType() const override {
+    return "JsiSkAnimatedImageFactory";
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkAnimatedImageFactory,
                                        MakeAnimatedImageFromEncoded))
 

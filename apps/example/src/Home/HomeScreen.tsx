@@ -40,11 +40,6 @@ export const HomeScreen = () => {
         route="Breathe"
       />
       <HomeScreenButton
-        title="🖼 Image Loading"
-        description="Load and edit an image"
-        route="ImageLoading"
-      />
-      <HomeScreenButton
         title="🏞 Filters"
         description="Simple Image Filters"
         route="Filters"

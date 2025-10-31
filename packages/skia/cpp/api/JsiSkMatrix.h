@@ -168,6 +168,8 @@ public:
 
   size_t getMemoryPressure() const override { return sizeof(SkMatrix); }
 
+  std::string getObjectType() const override { return "JsiSkMatrix"; }
+
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {

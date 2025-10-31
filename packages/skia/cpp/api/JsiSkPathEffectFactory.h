@@ -126,6 +126,10 @@ public:
 
   size_t getMemoryPressure() const override { return 1024; }
 
+  std::string getObjectType() const override {
+    return "JsiSkPathEffectFactory";
+  }
+
   explicit JsiSkPathEffectFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };

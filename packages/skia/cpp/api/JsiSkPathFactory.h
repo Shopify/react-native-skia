@@ -172,6 +172,8 @@ public:
 
   size_t getMemoryPressure() const override { return 1024; }
 
+  std::string getObjectType() const override { return "JsiSkPathFactory"; }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPathFactory, Make),
                        JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromSVGString),
                        JSI_EXPORT_FUNC(JsiSkPathFactory, MakeFromOp),

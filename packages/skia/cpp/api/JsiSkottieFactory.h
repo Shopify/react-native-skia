@@ -61,6 +61,8 @@ public:
 
   size_t getMemoryPressure() const override { return 4096; }
 
+  std::string getObjectType() const override { return "JsiSkottieFactory"; }
+
   explicit JsiSkottieFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };

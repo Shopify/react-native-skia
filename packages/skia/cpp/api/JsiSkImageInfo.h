@@ -71,6 +71,8 @@ public:
 
   size_t getMemoryPressure() const override { return sizeof(SkImageInfo); }
 
+  std::string getObjectType() const override { return "JsiSkImageInfo"; }
+
   JSI_API_TYPENAME(ImageInfo);
 
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkImageInfo, width),
