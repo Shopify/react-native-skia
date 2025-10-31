@@ -8,11 +8,12 @@ import { DisplacementMap1 } from "./DisplacementMap1";
 import { DisplacementMap2 } from "./DisplacementMap2";
 import { Shader1 } from "./Shader1";
 import { Shader2 } from "./Shader2";
+import { NativeView } from "./NativeView";
 
 const Stack = createNativeStackNavigator<Routes>();
 export const LiquidGlass = () => {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator initialRouteName="NativeView">
       <Stack.Screen
         name="List"
         component={List}
@@ -54,6 +55,13 @@ export const LiquidGlass = () => {
         component={Shader2}
         options={{
           title: "🎨 Shader 2",
+        }}
+      />
+      <Stack.Screen
+        name="NativeView"
+        component={NativeView}
+        options={{
+          title: "📱 Native View",
         }}
       />
     </Stack.Navigator>
