@@ -27,14 +27,18 @@ const nativeDrawOnscreen = (
 class NativeReanimatedContainer extends Container {
   private mapperId: number | null = null;
   private picture: SkPicture;
-  private recorder: ReanimatedRecorder;
+  private recorderA: ReanimatedRecorder;
+  private recorderB: ReanimatedRecorder;
+  private currentRecorder: ReanimatedRecorder;
 
   constructor(
     Skia: Skia,
     private nativeId: number
   ) {
     super(Skia);
-    this.recorder = new ReanimatedRecorder(Skia);
+    this.recorderA = new ReanimatedRecorder(Skia);
+    this.recorderB = new ReanimatedRecorder(Skia);
+    this.currentRecorder = this.recorderA;
     this.picture = Skia.Picture.MakePicture(null)!;
   }
 
@@ -45,7 +49,13 @@ class NativeReanimatedContainer extends Container {
     if (this.unmounted) {
       return;
     }
-    const { nativeId, recorder, picture } = this;
+
+    // Swap to the next recorder (double buffering)
+    const recorder = this.currentRecorder;
+    this.currentRecorder =
+      this.currentRecorder === this.recorderA ? this.recorderB : this.recorderA;
+
+    const { nativeId, picture } = this;
     recorder.reset();
     visit(recorder, this.root);
     const sharedValues = recorder.getSharedValues();
