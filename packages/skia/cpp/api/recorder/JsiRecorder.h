@@ -270,6 +270,13 @@ public:
     getObject()->drawSkottie(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
+  
+  JSI_HOST_FUNCTION(reset) {
+    auto newRecorder = std::make_shared<Recorder>();
+    newRecorder->_context = getContext();
+    setObject(newRecorder);
+    return jsi::Value::undefined();
+  }
 
   EXPORT_JSI_API_TYPENAME(JsiRecorder, Recorder)
 
@@ -314,7 +321,8 @@ public:
                        JSI_EXPORT_FUNC(JsiRecorder, drawAtlas),
                        JSI_EXPORT_FUNC(JsiRecorder, drawSkottie),
                        JSI_EXPORT_FUNC(JsiRecorder, play),
-                       JSI_EXPORT_FUNC(JsiRecorder, applyUpdates))
+                       JSI_EXPORT_FUNC(JsiRecorder, applyUpdates),
+                       JSI_EXPORT_FUNC(JsiRecorder, reset))
 
   size_t getMemoryPressure() const override { return 16384; }
 

@@ -9,6 +9,7 @@ import { visit } from "./Recorder/Visitor";
 
 import "../skia/NativeSetup";
 import "../views/api";
+import type { SkPicture } from "canvaskit-wasm";
 
 const nativeDrawOnscreen = (nativeId: number, recorder: JsiRecorder) => {
   "worklet";
@@ -22,12 +23,15 @@ const nativeDrawOnscreen = (nativeId: number, recorder: JsiRecorder) => {
 
 class NativeReanimatedContainer extends Container {
   private mapperId: number | null = null;
+  private picture: SkPicture | null = null;
+  private recorder: ReanimatedRecorder;
 
   constructor(
     Skia: Skia,
     private nativeId: number
   ) {
     super(Skia);
+    this.recorder = new ReanimatedRecorder(Skia);
   }
 
   redraw() {
@@ -37,8 +41,8 @@ class NativeReanimatedContainer extends Container {
     if (this.unmounted) {
       return;
     }
-    const { nativeId, Skia } = this;
-    const recorder = new ReanimatedRecorder(Skia);
+    const { nativeId, recorder } = this;
+    recorder.reset();
     visit(recorder, this.root);
     const sharedValues = recorder.getSharedValues();
     const sharedRecorder = recorder.getRecorder();
