@@ -60,7 +60,8 @@ public:
     }
 
     // Get the JsiSkPicture from the argument
-    auto pictureHostObject = arguments[0].asObject(runtime).asHostObject<JsiSkPicture>(runtime);
+    auto pictureObject = arguments[0].asObject(runtime);
+    auto pictureHostObject = pictureObject.asHostObject<JsiSkPicture>(runtime);
     if (!pictureHostObject) {
       throw jsi::JSError(runtime, "Invalid Picture object provided to play()");
     }
@@ -81,6 +82,8 @@ public:
     // Update the existing JsiSkPicture object with the new SkPicture
     // This reuses the existing JavaScript object instead of creating a new one
     pictureHostObject->setObject(std::move(newPicture));
+    auto memoryPressure = pictureHostObject->getMemoryPressure();
+    pictureObject.setExternalMemoryPressure(runtime, memoryPressure);
 
     // Return undefined since we're modifying the passed-in object
     return jsi::Value::undefined();
@@ -290,7 +293,7 @@ public:
     getObject()->drawSkottie(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
-  
+
   JSI_HOST_FUNCTION(reset) {
     auto newRecorder = std::make_shared<Recorder>();
     newRecorder->_context = getContext();

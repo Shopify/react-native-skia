@@ -66,30 +66,30 @@ private:
     auto result =                                                              \
         jsi::Object::createFromHostObject(runtime, hostObjectInstance);        \
     auto memoryPressure = hostObjectInstance->getMemoryPressure();             \
-    const void *hostObjectId = static_cast<const void *>(                     \
-        hostObjectInstance.get());                                            \
-    const char *mpUnit = "bytes";                                             \
-    double mpValue = static_cast<double>(memoryPressure);                     \
-    if (memoryPressure >= 1024ULL * 1024ULL) {                                \
-      mpUnit = "MB";                                                          \
-      mpValue /= (1024.0 * 1024.0);                                           \
-      RNSkLogger::logToConsole(                                               \
-          "Host object %s (id=%p) memory pressure %.2f %s",                   \
-          hostObjectInstance->getObjectType().c_str(), hostObjectId, mpValue, \
-          mpUnit);                                                            \
-    } else if (memoryPressure >= 1024ULL) {                                   \
-      mpUnit = "KB";                                                          \
-      mpValue /= 1024.0;                                                      \
-      RNSkLogger::logToConsole(                                               \
-          "Host object %s (id=%p) memory pressure %.2f %s",                   \
-          hostObjectInstance->getObjectType().c_str(), hostObjectId, mpValue, \
-          mpUnit);                                                            \
-    } else {                                                                  \
-      RNSkLogger::logToConsole(                                               \
-          "Host object %s (id=%p) memory pressure %zu %s",                    \
-          hostObjectInstance->getObjectType().c_str(), hostObjectId,          \
-          memoryPressure, mpUnit);                                            \
-    }                                                                         \
+    const void *hostObjectId =                                                 \
+        static_cast<const void *>(hostObjectInstance.get());                   \
+    const char *mpUnit = "bytes";                                              \
+    double mpValue = static_cast<double>(memoryPressure);                      \
+    if (memoryPressure >= 1024ULL * 1024ULL) {                                 \
+      mpUnit = "MB";                                                           \
+      mpValue /= (1024.0 * 1024.0);                                            \
+      RNSkLogger::logToConsole(                                                \
+          "Host object %s (id=%p) memory pressure %.2f %s",                    \
+          hostObjectInstance->getObjectType().c_str(), hostObjectId, mpValue,  \
+          mpUnit);                                                             \
+    } else if (memoryPressure >= 1024ULL) {                                    \
+      mpUnit = "KB";                                                           \
+      mpValue /= 1024.0;                                                       \
+      RNSkLogger::logToConsole(                                                \
+          "Host object %s (id=%p) memory pressure %.2f %s",                    \
+          hostObjectInstance->getObjectType().c_str(), hostObjectId, mpValue,  \
+          mpUnit);                                                             \
+    } else {                                                                   \
+      RNSkLogger::logToConsole(                                                \
+          "Host object %s (id=%p) memory pressure %zu %s",                     \
+          hostObjectInstance->getObjectType().c_str(), hostObjectId,           \
+          memoryPressure, mpUnit);                                             \
+    }                                                                          \
     if (memoryPressure > 0) {                                                  \
       result.setExternalMemoryPressure(runtime, memoryPressure);               \
     }                                                                          \
