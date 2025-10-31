@@ -1,5 +1,5 @@
 import Rea from "../external/reanimated/ReanimatedProxy";
-import type { Skia } from "../skia/types";
+import type { Skia, SkPicture } from "../skia/types";
 import { HAS_REANIMATED_3 } from "../external/reanimated/renderHelpers";
 import type { JsiRecorder } from "../skia/types/Recorder";
 
@@ -9,13 +9,16 @@ import { visit } from "./Recorder/Visitor";
 
 import "../skia/NativeSetup";
 import "../views/api";
-import type { SkPicture } from "canvaskit-wasm";
 
-const nativeDrawOnscreen = (nativeId: number, recorder: JsiRecorder) => {
+const nativeDrawOnscreen = (
+  nativeId: number,
+  recorder: JsiRecorder,
+  picture: SkPicture
+) => {
   "worklet";
 
   //const start = performance.now();
-  const picture = recorder.play();
+  recorder.play(picture);
   //const end = performance.now();
   //console.log("Recording time: ", end - start);
   SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
@@ -23,7 +26,7 @@ const nativeDrawOnscreen = (nativeId: number, recorder: JsiRecorder) => {
 
 class NativeReanimatedContainer extends Container {
   private mapperId: number | null = null;
-  private picture: SkPicture | null = null;
+  private picture: SkPicture;
   private recorder: ReanimatedRecorder;
 
   constructor(
@@ -32,6 +35,7 @@ class NativeReanimatedContainer extends Container {
   ) {
     super(Skia);
     this.recorder = new ReanimatedRecorder(Skia);
+    this.picture = Skia.Picture.MakePicture(null)!;
   }
 
   redraw() {
@@ -41,20 +45,20 @@ class NativeReanimatedContainer extends Container {
     if (this.unmounted) {
       return;
     }
-    const { nativeId, recorder } = this;
+    const { nativeId, recorder, picture } = this;
     recorder.reset();
     visit(recorder, this.root);
     const sharedValues = recorder.getSharedValues();
     const sharedRecorder = recorder.getRecorder();
     Rea.runOnUI(() => {
       "worklet";
-      nativeDrawOnscreen(nativeId, sharedRecorder);
+      nativeDrawOnscreen(nativeId, sharedRecorder, picture);
     })();
     if (sharedValues.length > 0) {
       this.mapperId = Rea.startMapper(() => {
         "worklet";
         sharedRecorder.applyUpdates(sharedValues);
-        nativeDrawOnscreen(nativeId, sharedRecorder);
+        nativeDrawOnscreen(nativeId, sharedRecorder, picture);
       }, sharedValues);
     }
   }

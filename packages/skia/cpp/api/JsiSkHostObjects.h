@@ -55,6 +55,11 @@ private:
   JSI_API_TYPENAME(TYPENAME)                                                   \
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(CLASS, __typename__))
 
+// Define this macro to enable memory pressure debug logging
+// #define RNSKIA_DEBUG_MEMORY_PRESSURE
+
+#ifdef RNSKIA_DEBUG_MEMORY_PRESSURE
+// Version with debug logging
 #define JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(                           \
     runtime, hostObjectInstance, context)                                      \
   [&]() {                                                                      \
@@ -90,6 +95,20 @@ private:
     }                                                                          \
     return result;                                                             \
   }()
+#else
+// Version without debug logging (optimized)
+#define JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(                           \
+    runtime, hostObjectInstance, context)                                      \
+  [&]() {                                                                      \
+    auto result =                                                              \
+        jsi::Object::createFromHostObject(runtime, hostObjectInstance);        \
+    auto memoryPressure = hostObjectInstance->getMemoryPressure();             \
+    if (memoryPressure > 0) {                                                  \
+      result.setExternalMemoryPressure(runtime, memoryPressure);               \
+    }                                                                          \
+    return result;                                                             \
+  }()
+#endif
 
 template <typename T> class JsiSkWrappingHostObject : public JsiSkHostObject {
 public:

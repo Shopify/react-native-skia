@@ -7,6 +7,7 @@
 
 #include "JsiSkCanvas.h"
 #include "JsiSkHostObjects.h"
+#include "JsiSkPicture.h"
 
 #include "DrawingCtx.h"
 #include "RNRecorder.h"
@@ -53,17 +54,36 @@ public:
   }
 
   JSI_HOST_FUNCTION(play) {
+    // Check if a picture parameter was provided
+    if (count < 1 || arguments[0].isUndefined() || arguments[0].isNull()) {
+      throw jsi::JSError(runtime, "play() requires a Picture parameter");
+    }
+
+    // Get the JsiSkPicture from the argument
+    auto pictureHostObject = arguments[0].asObject(runtime).asHostObject<JsiSkPicture>(runtime);
+    if (!pictureHostObject) {
+      throw jsi::JSError(runtime, "Invalid Picture object provided to play()");
+    }
+
+    // Create a new picture recorder to record into
     SkPictureRecorder pictureRecorder;
     SkISize size = SkISize::Make(2'000'000, 2'000'000);
     SkRect rect = SkRect::Make(size);
     auto canvas = pictureRecorder.beginRecording(rect, nullptr);
+
+    // Play the recorded commands into the canvas
     DrawingCtx ctx(canvas);
     getObject()->play(&ctx);
-    auto picture = pictureRecorder.finishRecordingAsPicture();
-    auto hostObjectInstance =
-        std::make_shared<JsiSkPicture>(getContext(), std::move(picture));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+
+    // Finish recording and get the new picture
+    auto newPicture = pictureRecorder.finishRecordingAsPicture();
+
+    // Update the existing JsiSkPicture object with the new SkPicture
+    // This reuses the existing JavaScript object instead of creating a new one
+    pictureHostObject->setObject(std::move(newPicture));
+
+    // Return undefined since we're modifying the passed-in object
+    return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(applyUpdates) {

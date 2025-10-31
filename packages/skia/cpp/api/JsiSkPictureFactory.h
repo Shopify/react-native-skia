@@ -22,6 +22,14 @@ namespace jsi = facebook::jsi;
 class JsiSkPictureFactory : public JsiSkHostObject {
 public:
   JSI_HOST_FUNCTION(MakePicture) {
+    // Handle null case - create JsiSkPicture with nullptr
+    if (arguments[0].isNull()) {
+      auto hostObjectInstance =
+          std::make_shared<JsiSkPicture>(getContext(), nullptr);
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+          runtime, hostObjectInstance, getContext());
+    }
+
     if (!arguments[0].isObject()) {
       throw jsi::JSError(runtime, "Expected arraybuffer as first parameter");
     }
