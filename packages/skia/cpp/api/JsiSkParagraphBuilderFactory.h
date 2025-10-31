@@ -47,7 +47,7 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraphBuilderFactory, Make))
 
-  size_t getMemoryPressure() const override { return 3072; }
+  size_t getMemoryPressure() const override { return 1024 * 1024; }
 
   std::string getObjectType() const override {
     return "JsiSkParagraphBuilderFactory";

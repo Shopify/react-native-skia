@@ -25,7 +25,7 @@ public:
       : JsiSkWrappingSkPtrHostObject<SkImageFilter>(std::move(context),
                                                     std::move(imageFilter)) {}
 
-  size_t getMemoryPressure() const override { return 4096; }
+  size_t getMemoryPressure() const override { return 1024 * 1024; }
 
   std::string getObjectType() const override { return "JsiSkImageFilter"; }
 
