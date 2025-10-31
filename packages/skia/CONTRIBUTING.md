@@ -2,17 +2,15 @@
 
 ## Library Development
 
-To develop react-native-skia, you can build the skia libraries on your computer. Alternatively, you can use the pre-built binaries.
-
 ### Using pre-built binaries
 
-To use the Skia prebuilt binaries from GitHub, use the following commands:
-- Checkout submodules: `git submodule update --init --recursive`
-- Install dependencies: `yarn`
-- Go to the package folder: `cd packages/skia`
-- Install the Skia libraries: `yarn install-skia`
+To use the Skia prebuilt binaries from GitHub, run:
+```sh
+$ yarn
+```
+And you are set!
 
-### Building
+### Building Skia
 
 If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
 `ANDROID_NDK=/Users/username/Library/Android/sdk/ndk/<version>` for instance.
@@ -35,16 +33,6 @@ If a new version of Skia is included in an upgrade of this library, you need to 
 3. Build Skia: `yarn build-skia`
 4. Copy Skia Headers: `yarn copy-skia-headers`
 5. Run pod install in the example project
-
-### Publishing
-
-- Run the commands in the [Building](#building) section
-- Build the Android binaries with `yarn build-skia-android`
-- Build the NPM package with `yarn build-npm`
-
-Publish the NPM package manually. The output is found in the `dist` folder.
-
-- Install Cocoapods in the example/ios folder `cd example/ios && pod install && cd ..`
 
 ### Testing
 
