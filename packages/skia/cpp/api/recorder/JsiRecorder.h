@@ -347,7 +347,9 @@ public:
                        JSI_EXPORT_FUNC(JsiRecorder, applyUpdates),
                        JSI_EXPORT_FUNC(JsiRecorder, reset))
 
-  size_t getMemoryPressure() const override { return 16384; }
+  // This has no basis in reality but since since these are private long-lived
+  // objects, we think it is more than fine.
+  size_t getMemoryPressure() const override { return 10 * 1024 * 1024; }
 
   std::string getObjectType() const override { return "JsiRecorder"; }
 
