@@ -304,7 +304,7 @@ jobs:
       - name: Start Android emulator
         run: |
           echo "Starting Android emulator in background..."
-          $ANDROID_HOME/emulator/emulator -memory 4096 -avd test_avd -wipe-data -no-window -gpu angle_indirect -no-snapshot -noaudio -no-boot-anim &
+          $ANDROID_HOME/emulator/emulator -memory 4096 -avd test_avd -wipe-data -no-window -gpu host -no-snapshot -noaudio -no-boot-anim &
 
       - name: Wait for emulator to boot
         run: |
