@@ -1,51 +1,27 @@
 name: Setup Android Emulator
-description: Download system image, create AVD, and boot Android emulator
+description: Run Android emulator tests using reactivecircus/android-emulator-runner
 
 inputs:
   api_level:
     description: 'Android API level'
     required: false
     default: '30'
-  device:
+  profile:
     description: 'Android device profile'
     required: false
     default: 'Nexus 5X'
-  gpu_mode:
-    description: 'GPU rendering mode (angle_indirect or swiftshader_indirect)'
-    required: false
-    default: 'angle_indirect'
-  avd_name:
-    description: 'AVD name'
-    required: false
-    default: 'test_avd'
+  script:
+    description: 'Script to run inside the emulator'
+    required: true
 
 runs:
   using: composite
   steps:
-    - name: Download Android system image
-      run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-${{ inputs.api_level }};default;arm64-v8a"
-      shell: bash
-
-    - name: Create Android emulator
-      run: |
-        echo "Creating Android emulator..."
-        $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n ${{ inputs.avd_name }} --device '${{ inputs.device }}' --package "system-images;android-${{ inputs.api_level }};default;arm64-v8a" --sdcard 512M --force
-      shell: bash
-
-    - name: Boot Android emulator
-      run: |
-        echo "Starting Android emulator in background..."
-        # Note: ARM64 macOS runners don't support HVF (Hypervisor Framework) for Android emulators,
-        # so we must disable hardware acceleration with -no-accel. We use angle_indirect GPU mode which
-        # translates OpenGL ES calls to Metal, allowing the host Mac's GPU to be used indirectly
-        # through ANGLE for graphics rendering.
-        $ANDROID_HOME/emulator/emulator -memory 4096 -avd ${{ inputs.avd_name }} -wipe-data -no-window -gpu ${{ inputs.gpu_mode }} -no-snapshot -noaudio -no-boot-anim -qemu -machine virt,accel=tcg &
-      shell: bash
-
-    - name: Wait for emulator to boot
-      run: |
-        echo "Waiting for Android emulator to boot..."
-        adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
-        echo "Emulator is ready"
-        adb devices
-      shell: bash
+    - name: Run tests on Android emulator
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: ${{ inputs.api_level }}
+        target: default
+        arch: arm64-v8a
+        profile: ${{ inputs.profile }}
+        script: ${{ inputs.script }}
