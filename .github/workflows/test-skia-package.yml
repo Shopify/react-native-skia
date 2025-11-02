@@ -197,7 +197,7 @@ jobs:
 
   test-skia-android:
     if: inputs.test_android
-    runs-on: macos-latest-large
+    runs-on: macos-latest-xlarge
     timeout-minutes: 60
 
     steps:
