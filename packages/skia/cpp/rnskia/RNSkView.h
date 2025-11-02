@@ -148,13 +148,6 @@ public:
   virtual void setJsiProperties(
       std::unordered_map<std::string, RNJsi::ViewProperty> &props) = 0;
 
-  virtual void
-  setJsiProperties(std::unordered_map<std::string, RNJsi::ViewProperty> &props,
-                   std::function<jsi::Object(int, int)> onSize) {
-    // Default implementation just calls the base method, ignoring onSize
-    setJsiProperties(props);
-  }
-
   void requestRedraw() {
     if (!_redrawRequested) {
       _redrawRequested = true;
