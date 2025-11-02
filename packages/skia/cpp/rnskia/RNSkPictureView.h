@@ -73,8 +73,6 @@ private:
 
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   sk_sp<SkPicture> _picture;
-  int _lastWidth = -1;
-  int _lastHeight = -1;
 };
 
 class RNSkPictureView : public RNSkView {
