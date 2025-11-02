@@ -15,7 +15,7 @@ import type {
   View,
   ViewProps,
 } from "react-native";
-import type { SharedValue } from "react-native-reanimated";
+import type { AnimatedRef, SharedValue } from "react-native-reanimated";
 
 import Rea from "../external/reanimated/ReanimatedProxy";
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
@@ -38,6 +38,11 @@ export interface CanvasRef extends FC<CanvasProps> {
 export const useCanvasRef = () => useRef<CanvasRef>(null);
 
 const useReanimatedFrame = !HAS_REANIMATED_3 ? () => {} : Rea.useFrameCallback;
+const measure = !HAS_REANIMATED_3 ? null : Rea.measure;
+
+const useCanvasRefPriv: typeof useRef<View> = !HAS_REANIMATED_3
+  ? useRef
+  : Rea.useAnimatedRef;
 
 export const useCanvasSize = (userRef?: RefObject<CanvasRef | null>) => {
   const ourRef = useCanvasRef();
@@ -84,7 +89,7 @@ export const Canvas = ({
       "<Canvas onLayout={onLayout} /> is not supported on the new architecture, to fix the issue, see: https://shopify.github.io/react-native-skia/docs/canvas/overview/#getting-the-canvas-size"
     );
   }
-  const viewRef = useRef<View>(null);
+  const viewRef = useCanvasRefPriv(null);
   // Native ID
   const nativeId = useMemo(() => {
     return SkiaViewNativeId.current++;
@@ -95,25 +100,16 @@ export const Canvas = ({
 
   useReanimatedFrame(() => {
     "worklet";
-  }, !!onSize);
-  useEffect(() => {
-    if (onSize) {
-      Rea.runOnUI(() => {
-        (global as Record<string, unknown>)[`__onSize_${nativeId}`] = onSize;
-      })();
-      return () => {
-        Rea.runOnUI(() => {
-          delete (global as Record<string, unknown>)[`__onSize_${nativeId}`];
-        })();
-      };
+    if (onSize && measure) {
+      const result = measure(viewRef as AnimatedRef<View>);
+      if (result) {
+        const { width, height } = result;
+        if (onSize.value.width !== width || onSize.value.height !== height) {
+          onSize.value = { width, height };
+        }
+      }
     }
-    return undefined;
-  }, [onSize, nativeId]);
-
-  // Render effects
-  useLayoutEffect(() => {
-    root.render(children);
-  }, [children, root, nativeId]);
+  }, !!onSize);
 
   useEffect(() => {
     return () => {
