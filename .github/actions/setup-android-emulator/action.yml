@@ -23,13 +23,13 @@ runs:
   using: composite
   steps:
     - name: Download Android system image
-      run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-${{ inputs.api_level }};default;x86_64"
+      run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-${{ inputs.api_level }};default;arm64-v8a"
       shell: bash
 
     - name: Create Android emulator
       run: |
         echo "Creating Android emulator..."
-        $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n ${{ inputs.avd_name }} --device '${{ inputs.device }}' --package "system-images;android-${{ inputs.api_level }};default;x86_64" --sdcard 512M --force
+        $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n ${{ inputs.avd_name }} --device '${{ inputs.device }}' --package "system-images;android-${{ inputs.api_level }};default;arm64-v8a" --sdcard 512M --force
       shell: bash
 
     - name: Boot Android emulator
