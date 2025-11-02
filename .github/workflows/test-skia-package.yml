@@ -197,7 +197,7 @@ jobs:
 
   test-skia-android:
     if: inputs.test_android
-    runs-on: macos-latest-large
+    runs-on: macos-latest-xlarge
     timeout-minutes: 60
 
     steps:
@@ -224,14 +224,6 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
-
-      - name: Download Android system image
-        run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-${{ inputs.android_api_level }};default;x86_64"
-
-      - name: Create Android emulator
-        run: |
-          echo "Creating Android emulator..."
-          $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test_avd --device '${{ inputs.android_device }}' --package "system-images;android-${{ inputs.android_api_level }};default;x86_64" --sdcard 512M --force
 
       - name: Create test directory
         run: |
@@ -301,18 +293,12 @@ jobs:
           echo "Generating native Android directory..."
           npx expo prebuild --platform android
 
-      - name: Start Android emulator
-        run: |
-          echo "Starting Android emulator in background..."
-          $ANDROID_HOME/emulator/emulator -memory 4096 -avd test_avd -wipe-data -no-window -gpu angle_indirect -no-snapshot -noaudio -no-boot-anim &
-
-      - name: Wait for emulator to boot
-        run: |
-          echo "Waiting for Android emulator to boot..."
-          adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
-          echo "Emulator is ready"
-          adb devices
-        timeout-minutes: 10
+      - name: Setup Android Emulator
+        uses: ./.github/actions/setup-android-emulator
+        with:
+          api_level: ${{ inputs.android_api_level }}
+          device: ${{ inputs.android_device }}
+          gpu_mode: 'angle_indirect'
 
       - name: Start Metro bundler
         working-directory: /Users/runner/skia-test-app/my-app

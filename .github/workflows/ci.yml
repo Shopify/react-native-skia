@@ -266,7 +266,7 @@ jobs:
 
   test-android:
     needs: build-android
-    runs-on: macos-latest-large
+    runs-on: macos-latest-xlarge
     timeout-minutes: 60
     env:
       TURBO_CACHE_DIR: .turbo/android
@@ -287,19 +287,14 @@ jobs:
         with:
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
-      
-      - name: SKDs - download required images
-        run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
 
-      - name: Emulator - Create
-        run: $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n Pixel_API_30 --device 'Nexus 5X' --package "system-images;android-30;default;x86_64" --sdcard 512M
-
-      - name: Emulator - Boot
-        run: $ANDROID_HOME/emulator/emulator -memory 4096 -avd Pixel_API_30 -wipe-data -no-window -gpu angle_indirect -no-snapshot -noaudio -no-boot-anim &
-
-      - name: ADB Wait For Device
-        run: adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
-        timeout-minutes: 10
+      - name: Setup Android Emulator
+        uses: ./.github/actions/setup-android-emulator
+        with:
+          api_level: '30'
+          device: 'Nexus 5X'
+          gpu_mode: 'angle_indirect'
+          avd_name: 'Pixel_API_30'
 
       - name: Start Package Manager
         working-directory: apps/example/
