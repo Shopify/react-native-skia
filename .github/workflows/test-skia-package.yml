@@ -226,12 +226,12 @@ jobs:
           java-version: '17'
 
       - name: Download Android system image
-        run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-${{ inputs.android_api_level }};default;x86_64"
+        run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-${{ inputs.android_api_level }};default;arm64-v8a"
 
       - name: Create Android emulator
         run: |
           echo "Creating Android emulator..."
-          $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test_avd --device '${{ inputs.android_device }}' --package "system-images;android-${{ inputs.android_api_level }};default;x86_64" --sdcard 512M --force
+          $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test_avd --device '${{ inputs.android_device }}' --package "system-images;android-${{ inputs.android_api_level }};default;arm64-v8a" --sdcard 512M --force
 
       - name: Create test directory
         run: |
