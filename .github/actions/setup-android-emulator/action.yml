@@ -39,7 +39,7 @@ runs:
         # so we must disable hardware acceleration with -no-accel. We use angle_indirect GPU mode which
         # translates OpenGL ES calls to Metal, allowing the host Mac's GPU to be used indirectly
         # through ANGLE for graphics rendering.
-        $ANDROID_HOME/emulator/emulator -accel off -memory 4096 -avd ${{ inputs.avd_name }} -wipe-data -no-window -gpu ${{ inputs.gpu_mode }} -no-snapshot -noaudio -no-boot-anim &
+        $ANDROID_HOME/emulator/emulator -memory 4096 -avd ${{ inputs.avd_name }} -wipe-data -no-window -gpu ${{ inputs.gpu_mode }} -no-snapshot -noaudio -no-boot-anim -qemu -machine virt,accel=tcg &
       shell: bash
 
     - name: Wait for emulator to boot
