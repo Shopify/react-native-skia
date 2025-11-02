@@ -111,6 +111,11 @@ export const Canvas = ({
     }
   }, !!onSize);
 
+  // Render effects
+  useLayoutEffect(() => {
+    root.render(children);
+  }, [children, root, nativeId]);
+
   useEffect(() => {
     return () => {
       root.unmount();
