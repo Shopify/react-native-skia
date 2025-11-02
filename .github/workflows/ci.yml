@@ -57,7 +57,7 @@ jobs:
         run: yarn tsc
 
   test:
-    runs-on: macos-latest
+    runs-on: macos-latest-xlarge
     steps:
       - name: Checkout
         uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
@@ -195,7 +195,7 @@ jobs:
           yarn turbo run build:android --concurrency 1 --filter=example
 
   build-android:
-    runs-on: macos-latest-large
+    runs-on: macos-latest-xlarge
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
@@ -388,7 +388,7 @@ jobs:
         run: CI=true yarn e2e
 
   build-test-macos:
-    runs-on: macos-latest
+    runs-on: macos-latest-xlarge
     env:
       TURBO_CACHE_DIR: .turbo/macos
     steps:
@@ -414,7 +414,7 @@ jobs:
         run: yarn turbo run build:macos --concurrency 1
 
   build-test-macos-catalyst:
-    runs-on: macos-latest
+    runs-on: macos-latest-xlarge
     steps:
       - name: Checkout
         uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0

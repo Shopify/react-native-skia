@@ -172,7 +172,7 @@ jobs:
             library_path: src/dawn/native/libwebgpu_dawn.a
 
     name: Build-${{ matrix.platform }}-${{ matrix.arch }}
-    runs-on: macos-latest-large
+    runs-on: macos-latest-xlarge
     steps:
       - name: Checkout main repository
         uses: actions/checkout@v5
