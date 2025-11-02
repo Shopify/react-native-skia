@@ -36,10 +36,10 @@ runs:
       run: |
         echo "Starting Android emulator in background..."
         # Note: ARM64 macOS runners don't support HVF (Hypervisor Framework) for Android emulators,
-        # so we can't use -gpu host (direct GPU passthrough). Instead, we use angle_indirect which
+        # so we must disable hardware acceleration with -no-accel. We use angle_indirect GPU mode which
         # translates OpenGL ES calls to Metal, allowing the host Mac's GPU to be used indirectly
-        # through ANGLE. This provides GPU acceleration while working around the HVF limitation.
-        $ANDROID_HOME/emulator/emulator -memory 4096 -avd ${{ inputs.avd_name }} -wipe-data -no-window -gpu ${{ inputs.gpu_mode }} -no-snapshot -noaudio -no-boot-anim &
+        # through ANGLE for graphics rendering.
+        $ANDROID_HOME/emulator/emulator -memory 4096 -avd ${{ inputs.avd_name }} -wipe-data -no-window -gpu ${{ inputs.gpu_mode }} -no-snapshot -noaudio -no-boot-anim -no-accel &
       shell: bash
 
     - name: Wait for emulator to boot
