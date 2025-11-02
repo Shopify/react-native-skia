@@ -298,7 +298,6 @@ jobs:
         with:
           api_level: ${{ inputs.android_api_level }}
           device: ${{ inputs.android_device }}
-          gpu_mode: 'angle_indirect'
 
       - name: Start Metro bundler
         working-directory: /Users/runner/skia-test-app/my-app

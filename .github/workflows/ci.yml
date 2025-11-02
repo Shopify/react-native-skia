@@ -293,7 +293,6 @@ jobs:
         with:
           api_level: '30'
           device: 'Nexus 5X'
-          gpu_mode: 'angle_indirect'
           avd_name: 'Pixel_API_30'
 
       - name: Start Package Manager

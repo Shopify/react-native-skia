@@ -1,27 +1,44 @@
 name: Setup Android Emulator
-description: Run Android emulator tests using reactivecircus/android-emulator-runner
+description: Download system image, create AVD, and boot Android emulator
 
 inputs:
   api_level:
     description: 'Android API level'
     required: false
     default: '30'
-  profile:
+  device:
     description: 'Android device profile'
     required: false
     default: 'Nexus 5X'
-  script:
-    description: 'Script to run inside the emulator'
-    required: true
+  avd_name:
+    description: 'AVD name'
+    required: false
+    default: 'test_avd'
 
 runs:
   using: composite
   steps:
-    - name: Run tests on Android emulator
-      uses: reactivecircus/android-emulator-runner@v2
-      with:
-        api-level: ${{ inputs.api_level }}
-        target: default
-        arch: arm64-v8a
-        profile: ${{ inputs.profile }}
-        script: ${{ inputs.script }}
+    - name: Download Android system image
+      run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-${{ inputs.api_level }};default;arm64-v8a"
+      shell: bash
+
+    - name: Create Android emulator
+      run: |
+        echo "Creating Android emulator..."
+        $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n ${{ inputs.avd_name }} --device '${{ inputs.device }}' --package "system-images;android-${{ inputs.api_level }};default;arm64-v8a" --sdcard 512M --force
+      shell: bash
+
+    - name: Boot Android emulator
+      run: |
+        echo "Starting Android emulator in background..."
+        # ARM64 macOS runners don't support HVF. Use -engine classic to force QEMU TCG software emulation
+        $ANDROID_HOME/emulator/emulator -engine classic -avd ${{ inputs.avd_name }} -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim &
+      shell: bash
+
+    - name: Wait for emulator to boot
+      run: |
+        echo "Waiting for Android emulator to boot..."
+        adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
+        echo "Emulator is ready"
+        adb devices
+      shell: bash
