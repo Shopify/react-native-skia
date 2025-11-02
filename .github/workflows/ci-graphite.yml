@@ -174,7 +174,7 @@ jobs:
 
   test-android-graphite:
     needs: build-android-graphite
-    runs-on: macos-latest-large
+    runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
       TURBO_CACHE_DIR: .turbo/android
@@ -196,23 +196,6 @@ jobs:
         with:
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
-      
-      - name: SKDs - download required images
-        run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
-
-      - name: Emulator - Create
-        run: $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n Pixel_API_30 --device 'Nexus 5X' --package "system-images;android-30;default;x86_64" --sdcard 512M
-
-      - name: Emulator - Boot
-        run: $ANDROID_HOME/emulator/emulator -memory 4096 -avd Pixel_API_30 -wipe-data -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim &
-
-      - name: ADB Wait For Device
-        run: adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
-        timeout-minutes: 10
-
-      - name: Start Package Manager
-        working-directory: apps/example/
-        run: E2E=true yarn start &
 
       - name: Check APK existence
         uses: andstor/file-existence-action@076e0072799f4942c8bc574a82233e1e4d13e9d6 # v3.0.0
@@ -220,22 +203,41 @@ jobs:
           files: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           fail: true
 
-      - name: Install APK
-        run: adb install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk
+      - name: Run Android tests
+        uses: ./.github/actions/android-emulator
+        with:
+          api-level: '30'
+          target: 'default'
+          arch: 'x86_64'
+          profile: 'Nexus 5X'
+          avd-name: 'Pixel_API_30'
+          emulator-options: '-no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -memory 4096'
+          script: |
+            set -euxo pipefail
 
-      # - name: Set up environment
-      #   run: echo "PACKAGE_NAME=${{ env.PACKAGE_NAME }}" >> $GITHUB_ENV
-      - name: Launch APK
-        env:
-          PACKAGE_NAME: 'com.microsoft.reacttestapp'
-        run: adb shell monkey -p ${{ env.PACKAGE_NAME }} 1  
+            PACKAGE_NAME='com.microsoft.reacttestapp'
+            APK_PATH='apps/example/android/app/build/outputs/apk/debug/app-debug.apk'
 
-      # On fabric, the system fonts are slightly different
-      # so wont run the paragraph tests there for now
-      - name: Run e2e Tests
-        working-directory: packages/skia
-        run: |
-          CI=true E2E=true yarn test -i Paths --testPathIgnorePatterns Paragraphs
+            test -f "${APK_PATH}"
+
+            pushd apps/example
+            E2E=true yarn start &
+            METRO_PID=$!
+            popd
+
+            cleanup() {
+              kill "${METRO_PID}" 2>/dev/null || true
+            }
+            trap cleanup EXIT
+
+            sleep 25
+
+            adb install -r "${APK_PATH}"
+            adb shell monkey -p "${PACKAGE_NAME}" 1
+
+            pushd packages/skia
+            CI=true E2E=true yarn test -i Paths --testPathIgnorePatterns Paragraphs
+            popd
 
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: failure()

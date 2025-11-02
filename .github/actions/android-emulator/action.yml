@@ -1,0 +1,86 @@
+name: 'Android Emulator'
+description: 'Boot an Android emulator using reactivecircus/android-emulator-runner and run a script while it is active.'
+inputs:
+  api-level:
+    description: 'Android API level to use.'
+    required: false
+    default: '30'
+  target:
+    description: 'System image target (for example: default or google_apis).'
+    required: false
+    default: 'default'
+  arch:
+    description: 'CPU architecture of the system image.'
+    required: false
+    default: 'x86_64'
+  profile:
+    description: 'Emulator profile to use.'
+    required: false
+    default: 'pixel_5'
+  avd-name:
+    description: 'Name for the AVD.'
+    required: false
+    default: 'ci_avd'
+  force-avd-creation:
+    description: 'Force AVD creation even if it already exists.'
+    required: false
+    default: 'true'
+  disable-animations:
+    description: 'Disable emulator animations to improve test stability.'
+    required: false
+    default: 'true'
+  emulator-options:
+    description: 'Additional emulator launch options.'
+    required: false
+    default: '-no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -memory 4096'
+  emulator-boot-timeout:
+    description: 'Timeout in seconds for emulator boot.'
+    required: false
+    default: '600'
+  pre-emulator-launch-script:
+    description: 'Commands to run before launching the emulator.'
+    required: false
+    default: ''
+  post-emulator-launch-script:
+    description: 'Commands to run after the emulator has been launched but before the main script.'
+    required: false
+    default: 'adb wait-for-device shell "while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;"'
+  working-directory:
+    description: 'Working directory for the script.'
+    required: false
+    default: '.'
+  script:
+    description: 'Shell commands to execute while the emulator is running.'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Enable KVM group perms
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        set -euxo pipefail
+        if [[ -e /dev/kvm ]]; then
+          echo 'Configuring KVM permissions for hardware acceleration.'
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+        else
+          echo '::warning::/dev/kvm not found. Emulator will run without hardware acceleration.'
+        fi
+    - name: Run commands on Android emulator
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: ${{ inputs.api-level }}
+        target: ${{ inputs.target }}
+        arch: ${{ inputs.arch }}
+        profile: ${{ inputs.profile }}
+        avd-name: ${{ inputs.avd-name }}
+        force-avd-creation: ${{ inputs.force-avd-creation }}
+        disable-animations: ${{ inputs.disable-animations }}
+        emulator-options: ${{ inputs.emulator-options }}
+        emulator-boot-timeout: ${{ inputs.emulator-boot-timeout }}
+        pre-emulator-launch-script: ${{ inputs.pre-emulator-launch-script }}
+        post-emulator-launch-script: ${{ inputs.post-emulator-launch-script }}
+        working-directory: ${{ inputs.working-directory }}
+        script: ${{ inputs.script }}
