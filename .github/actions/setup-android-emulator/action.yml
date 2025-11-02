@@ -49,4 +49,3 @@ runs:
         echo "Emulator is ready"
         adb devices
       shell: bash
-      timeout-minutes: 10
