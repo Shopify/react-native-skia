@@ -410,7 +410,7 @@ jobs:
 
           trap cleanup EXIT
 
-          WEB=true E2E=true CI=true yarn test -i Shader
+          WEB=true E2E=true CI=true yarn test
 
   build-test-ios:
     runs-on: macos-latest-xlarge
