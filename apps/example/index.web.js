@@ -10,7 +10,7 @@ const rootTag = document.getElementById("root");
 if (process.env.NODE_ENV !== "production") {
   if (!rootTag) {
     throw new Error(
-      'Required HTML element with id "root" was not found in the document HTML.',
+      'Required HTML element with id "root" was not found in the document HTML.'
     );
   }
 }
