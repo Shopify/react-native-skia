@@ -397,7 +397,7 @@ jobs:
           });
           EOF
 
-          npx --yes @playwright/test@latest test "$SPEC" --project=chromium --timeout=0 --workers=1 --reporter=line &
+          npx --yes @playwright/test@latest test "$SPEC" --timeout=0 --workers=1 --reporter=line &
           PW_PID=$!
 
           cleanup() {
