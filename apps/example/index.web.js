@@ -3,19 +3,21 @@ import { AppRegistry } from "react-native";
 import App from "./src/App";
 import { name as appName } from "./app.json";
 
-if (!Symbol.dispose) {
-  Symbol.dispose = Symbol.for("Symbol.dispose");
-}
-
 AppRegistry.registerComponent(appName, () => App);
 
-if (typeof document !== "undefined") {
-  const rootTag =
-    document.getElementById("root") ?? document.getElementById("app");
+const rootTag = document.getElementById("root");
+
+if (process.env.NODE_ENV !== "production") {
   if (!rootTag) {
     throw new Error(
-      'React Native Web root element with id "root" was not found in the document',
+      'Required HTML element with id "root" was not found in the document HTML.',
     );
   }
-  AppRegistry.runApplication(appName, { rootTag });
 }
+
+CanvasKitInit({
+  locateFile: (file) => `https://unpkg.com/canvaskit-wasm/bin/full/${file}`,
+}).then((CanvasKit) => {
+  window.CanvasKit = global.CanvasKit = CanvasKit;
+  AppRegistry.runApplication(appName, { rootTag });
+});

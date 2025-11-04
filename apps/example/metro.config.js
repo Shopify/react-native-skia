@@ -1,5 +1,13 @@
 const path = require("path");
+const { resolve: defaultResolve } = require("metro-resolver");
 const { makeMetroConfig } = require("@rnx-kit/metro-config");
+
+const root = path.resolve(__dirname, "../..");
+const rnwPath = path.resolve(root, "node_modules/react-native-web");
+const assetRegistryPath = path.resolve(
+  root,
+  "node_modules/react-native-web/dist/modules/AssetRegistry/index",
+);
 
 const metroConfig = makeMetroConfig({
   transformer: {
@@ -12,44 +20,38 @@ const metroConfig = makeMetroConfig({
   },
 });
 
-const resolver = (metroConfig.resolver = metroConfig.resolver ?? {});
+function getWebMetroConfig(config) {
+  config.resolver = config.resolver ?? {};
+  config.resolver.platforms = ["ios", "android", "web"];
 
-resolver.platforms = Array.from(
-  new Set([...(resolver.platforms ?? []), "web"]),
-);
+  const origResolveRequest =
+    config.resolver.resolveRequest ??
+    ((context, moduleName, platform) =>
+      defaultResolve(context, moduleName, platform));
 
-const webSourceExts = [
-  "web.tsx",
-  "web.ts",
-  "web.jsx",
-  "web.js",
-  "web.mjs",
-  "web.cjs",
-];
-resolver.sourceExts = Array.from(
-  new Set([...(resolver.sourceExts ?? []), ...webSourceExts]),
-);
+  config.resolver.resolveRequest = (contextRaw, moduleName, platform) => {
+    const context = {
+      ...contextRaw,
+      preferNativePlatform: false,
+    };
 
-if (process.env.IS_WEB_BUILD) {
-  const reactNativeWebPath = path.dirname(
-    require.resolve("react-native-web/package.json"),
-  );
+    if (moduleName === "react-native") {
+      return {
+        filePath: path.resolve(rnwPath, "dist/index.js"),
+        type: "sourceFile",
+      };
+    }
 
-  resolver.extraNodeModules = {
-    ...(resolver.extraNodeModules ?? {}),
-    "react-native": path.join(reactNativeWebPath, "dist", "index.js"),
+    // Let default config handle other modules
+    return origResolveRequest(context, moduleName, platform);
   };
 
-  metroConfig.transformer = {
-    ...(metroConfig.transformer ?? {}),
-    assetRegistryPath: path.join(
-      reactNativeWebPath,
-      "dist",
-      "modules",
-      "AssetRegistry",
-      "index.js",
-    ),
-  };
+  config.transformer = config.transformer ?? {};
+  config.transformer.assetRegistryPath = assetRegistryPath;
+
+  return config;
 }
 
-module.exports = metroConfig;
+module.exports = !!process.env.IS_WEB_BUILD
+  ? getWebMetroConfig(metroConfig)
+  : metroConfig;

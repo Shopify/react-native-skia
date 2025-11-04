@@ -2,31 +2,40 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
-    <title>React Native Skia Example</title>
-    <style>
+    <link rel="icon" href="/src/assets/react.png" type="image/png" />
+    <script src="https://unpkg.com/canvaskit-wasm/bin/full/canvaskit.js"></script>
+
+    <title>Example</title>
+    <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
+    <style id="react-native-web-reset">
+      /* These styles make the body full-height */
       html,
-      body,
-      #root {
+      body {
         height: 100%;
       }
-
+      /* These styles disable body scrolling if you are using <ScrollView> */
       body {
-        margin: 0;
         overflow: hidden;
-        font-family: sans-serif;
+      }
+      /* These styles make the root element full-height */
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
       }
     </style>
   </head>
   <body>
-    <noscript
-      >You need to enable JavaScript to run this app.</noscript
-    >
+    <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <script src="index.bundle?platform=web&dev=true&hot=false"></script>
+    <script
+      src="index.bundle?platform=web&dev=true&hot=false&lazy=true&transform.engine=hermes&transform.routerRoot=app&unstable_transformProfile=hermes-stable"
+      defer
+    ></script>
   </body>
 </html>
