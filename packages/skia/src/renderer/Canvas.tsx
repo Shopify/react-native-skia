@@ -159,7 +159,6 @@ export const Canvas = ({
     },
     [onLayout, onSize]
   );
-
   return (
     <SkiaPictureViewNativeComponent
       ref={viewRef}

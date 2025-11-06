@@ -18,6 +18,7 @@ import { Hue } from "./Hue";
 import { Glassmorphism } from "./Glassmorphism";
 import { Filters } from "./Filters";
 import { Boxes } from "./Boxes";
+import { FirstFrame } from "./FirstFrame";
 
 it("should render the Breathe example correctly", () => {
   const { getByTestId } = render(<Breathe />);
@@ -81,6 +82,10 @@ it("should render the Glassmorphism example correctly", () => {
 
 it("should render the Filter example correctly", () => {
   render(<Filters />);
+});
+
+it("should render the FirstFrame example correctly", () => {
+  render(<FirstFrame />);
 });
 
 afterEach(cleanup);
