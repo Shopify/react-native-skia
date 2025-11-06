@@ -306,6 +306,7 @@ export const configurations = {
     },
     args: [
       ["skia_use_metal", true],
+      ["skia_use_gl", false],
       ["cc", '"clang"'],
       ["cxx", '"clang++"'],
       ...ParagraphArgsApple,

@@ -152,14 +152,15 @@ public:
 
     auto canvas = surface->getCanvas();
     const bool isGpuBacked =
-        surface->recordingContext() != nullptr || surface->recorder() != nullptr ||
+        surface->recordingContext() != nullptr ||
+        surface->recorder() != nullptr ||
         (canvas && (canvas->recordingContext() != nullptr ||
                     canvas->recorder() != nullptr));
 
     if (isGpuBacked) {
       // Account for a resolved texture and depth/stencil attachments.
-      estimated = safeAdd(estimated, pixelBytes);      // resolve/texture copy
-      estimated = safeAdd(estimated, pixelBytes / 2);  // depth-stencil buffers
+      estimated = safeAdd(estimated, pixelBytes);     // resolve/texture copy
+      estimated = safeAdd(estimated, pixelBytes / 2); // depth-stencil buffers
     }
 
     // Add a small overhead buffer for bookkeeping allocations.
