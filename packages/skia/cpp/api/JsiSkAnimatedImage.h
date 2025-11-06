@@ -106,10 +106,9 @@ public:
         if (bytesPerPixel == 0) {
           bytesPerPixel = 4;
         }
-        frameBytes =
-            safeMul(safeMul(static_cast<size_t>(frame->width()),
-                            static_cast<size_t>(frame->height())),
-                    bytesPerPixel);
+        frameBytes = safeMul(safeMul(static_cast<size_t>(frame->width()),
+                                     static_cast<size_t>(frame->height())),
+                             bytesPerPixel);
       }
     }
 
