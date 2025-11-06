@@ -93,4 +93,19 @@ describe("Test introductionary examples from our documentation", () => {
     await draw();
     processResult(surface, "snapshots/transparent.png");
   });
+
+  it("Should create a cyan background with a red circle at the center", async () => {
+    const canvasSize = 256; // The actual canvas size (before PIXEL_RATIO)
+    const centerX = canvasSize / 2;
+    const centerY = canvasSize / 2;
+    const radius = 80;
+
+    const surface = await drawOnNode(
+      <>
+        <Fill color="cyan" />
+        <Circle cx={centerX} cy={centerY} r={radius} color="red" />
+      </>
+    );
+    processResult(surface, "snapshots/drawings/cyan-background-red-circle.png");
+  });
 });

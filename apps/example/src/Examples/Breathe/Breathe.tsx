@@ -228,6 +228,12 @@ export const Breathe = () => {
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[styles.button, isRecording && styles.buttonRecording]}
+          onPress={() => {}}
+        >
+          <Text style={styles.buttonText}>Random Button</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, isRecording && styles.buttonRecording]}
           onPress={isRecording ? stopVoiceSession : startVoiceSession}
         >
           <Text style={styles.buttonText}>

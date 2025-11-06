@@ -57,6 +57,7 @@
     "@types/jest": "^29.5.13",
     "@types/react": "^19.0.0",
     "@types/react-test-renderer": "^19.0.0",
+    "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "9.36.0",
     "eslint-config-react-native-wcandillon": "4.0.1",
     "eslint-plugin-import": "2.32.0",
