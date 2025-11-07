@@ -22,7 +22,7 @@ export const FirstFrame = () => {
     if (isRunning) {
       const interval = setInterval(() => {
         setCount((value) => value + 1);
-      }, 16); // 100ms = 10 times per second
+      }, 100); // 100ms = 10 times per second
 
       return () => clearInterval(interval);
     }

@@ -16,6 +16,11 @@
 #include <android/native_window_jni.h>
 #include <fbjni/detail/Hybrid.h>
 
+#include "include/core/SkBitmap.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPictureRecorder.h"
+#include "include/core/SkPaint.h"
+
 namespace RNSkia {
 namespace jsi = facebook::jsi;
 namespace jni = facebook::jni;
@@ -44,7 +49,8 @@ public:
          makeNativeMethod("setDebugMode", JniSkiaPictureView::setDebugMode),
          makeNativeMethod("registerView", JniSkiaPictureView::registerView),
          makeNativeMethod("unregisterView",
-                          JniSkiaPictureView::unregisterView)});
+                          JniSkiaPictureView::unregisterView),
+         makeNativeMethod("getBitmap", JniSkiaPictureView::getBitmap)});
   }
 
 protected:
@@ -67,6 +73,11 @@ protected:
   }
 
   void unregisterView() override { JniSkiaBaseView::unregisterView(); }
+
+  jni::local_ref<jni::JArrayByte> getBitmap(int width, int height) override {
+    // Call base class implementation which creates a green RGBA bitmap
+    return JniSkiaBaseView::getBitmap(width, height);
+  }
 
 private:
   friend HybridBase;

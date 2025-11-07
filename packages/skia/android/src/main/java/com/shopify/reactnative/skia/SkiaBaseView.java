@@ -80,4 +80,6 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
     protected abstract void registerView(int nativeId);
 
     protected abstract void unregisterView();
+
+    protected abstract byte[] getBitmap(int width, int height);
 }
