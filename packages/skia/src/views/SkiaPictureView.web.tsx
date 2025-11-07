@@ -16,6 +16,18 @@ import type { ISkiaViewApiWeb } from "../specs/NativeSkiaModule.web";
 import type { SkiaPictureViewNativeProps } from "./types";
 import { SkiaViewNativeId } from "./SkiaViewNativeId";
 
+const dp2Pixel = (pd: number, rect?: SkRect) => {
+  if (!rect) {
+    return undefined;
+  }
+  return {
+    x: rect.x * pd,
+    y: rect.y * pd,
+    width: rect.width * pd,
+    height: rect.height * pd,
+  };
+};
+
 interface Renderer {
   onResize(): void;
   draw(picture: SkPicture): void;
@@ -41,7 +53,7 @@ class WebGLRenderer implements Renderer {
     canvas!.clear(CanvasKit.TRANSPARENT);
     this.draw(picture);
     this.surface.ref.flush();
-    return this.surface.makeImageSnapshot(rect);
+    return this.surface.makeImageSnapshot(dp2Pixel(this.pd, rect));
   }
 
   onResize() {
@@ -187,7 +199,7 @@ class StaticWebGLRenderer implements Renderer {
       const { surface, tempCanvas } = renderResult;
 
       try {
-        this.cachedImage = surface.makeImageSnapshot(rect);
+        this.cachedImage = surface.makeImageSnapshot(dp2Pixel(this.pd, rect));
       } catch (error) {
         console.error("Error creating image snapshot:", error);
       } finally {
