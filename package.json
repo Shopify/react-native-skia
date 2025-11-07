@@ -34,5 +34,21 @@
   "devDependencies": {
     "react-native-test-app": "^4.2.0",
     "turbo": "^2.1.1"
+  },
+  "resolutions": {
+    "@react-native-community/cli": "18.0.1",
+    "@react-native-community/cli-clean": "18.0.1",
+    "@react-native-community/cli-config": "18.0.1",
+    "@react-native-community/cli-config-android": "18.0.1",
+    "@react-native-community/cli-config-apple": "18.0.1",
+    "@react-native-community/cli-debugger-ui": "18.0.1",
+    "@react-native-community/cli-doctor": "18.0.1",
+    "@react-native-community/cli-hermes": "18.0.1",
+    "@react-native-community/cli-platform-android": "18.0.1",
+    "@react-native-community/cli-platform-apple": "18.0.1",
+    "@react-native-community/cli-platform-ios": "18.0.1",
+    "@react-native-community/cli-server-api": "18.0.1",
+    "@react-native-community/cli-tools": "18.0.1",
+    "@react-native-community/cli-types": "18.0.1"
   }
 }
