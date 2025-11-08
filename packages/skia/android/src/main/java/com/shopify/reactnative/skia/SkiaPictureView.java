@@ -13,10 +13,17 @@ public class SkiaPictureView extends SkiaBaseView {
     @DoNotStrip
     private HybridData mHybridData;
 
+    private boolean coldStart = false;
+
     public SkiaPictureView(Context context) {
         super(context);
         RNSkiaModule skiaModule = ((ReactContext) context).getNativeModule(RNSkiaModule.class);
         mHybridData = initHybrid(skiaModule.getSkiaManager());
+    }
+
+    public void setColdStart(boolean coldStart) {
+        this.coldStart = coldStart;
+        invalidate(); // Trigger redraw when property changes
     }
 
     @Override
@@ -28,6 +35,11 @@ public class SkiaPictureView extends SkiaBaseView {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
+        // Skip the warming up feature if coldStart is true
+        if (coldStart) {
+            return; // Skip the warming up feature when cold start is requested
+        }
 
         // Get the view dimensions
         int width = getWidth();

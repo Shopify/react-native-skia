@@ -22,7 +22,7 @@ export const FirstFrame = () => {
     if (isRunning) {
       const interval = setInterval(() => {
         setCount((value) => value + 1);
-      }, 100); // 100ms = 10 times per second
+      }, 32); // 100ms = 10 times per second
 
       return () => clearInterval(interval);
     }
@@ -37,13 +37,13 @@ export const FirstFrame = () => {
       />
       <Text>{count}</Text>
       <SkiaPictureView
+        key={`picture-${count}`}
         picture={picture}
         style={styles.canvas}
-        key={count}
       ></SkiaPictureView>
-      {/* <Canvas style={styles.canvas} key={count}>
+      <Canvas style={styles.canvas} key={`canvas-${count}`}>
         <Circle cx={100} cy={100} r={50} color="red" />
-      </Canvas> */}
+      </Canvas>
     </View>
   );
 };
