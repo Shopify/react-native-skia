@@ -71,6 +71,17 @@ jobs:
       - name: List available simulators
         run: xcrun simctl list devices
 
+      - name: Boot iOS Simulator  # ✅ Add this step
+        run: |
+          DEVICE_ID=$(xcrun simctl list devices | grep "${{ inputs.simulator_device }}" | grep -v "unavailable" | head -n 1 | sed 's/.*(\([^)]*\)).*/\1/')
+          if [ -z "$DEVICE_ID" ]; then
+            echo "Creating simulator: ${{ inputs.simulator_device }}"
+            DEVICE_ID=$(xcrun simctl create "Test iPhone" "com.apple.CoreSimulator.SimDeviceType.$(echo '${{ inputs.simulator_device }}' | sed 's/ /-/g')" "com.apple.CoreSimulator.SimRuntime.iOS-18-1")
+          fi
+          echo "Booting simulator: $DEVICE_ID"
+          xcrun simctl boot "$DEVICE_ID" || echo "Simulator already booted"
+          xcrun simctl list devices | grep Booted
+
       - name: Create test directory
         run: |
           mkdir -p /Users/runner/skia-test-app
