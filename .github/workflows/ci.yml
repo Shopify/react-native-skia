@@ -376,7 +376,7 @@ jobs:
 
       - name: Install CocoaPods with Bundler
         working-directory: apps/example/ios
-        run: bundle exec pod install
+        run: pod install
 
       - name: Start Package Manager
         working-directory: apps/example
