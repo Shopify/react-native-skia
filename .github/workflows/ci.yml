@@ -373,9 +373,6 @@ jobs:
           echo "=== Removing Gemfile.lock ==="
           rm -f Gemfile.lock
           rm -f ios/Gemfile.lock
-          
-          echo "=== Installing gems with Bundler ==="
-          bundle install
 
       - name: Install CocoaPods with Bundler
         working-directory: apps/example/ios
