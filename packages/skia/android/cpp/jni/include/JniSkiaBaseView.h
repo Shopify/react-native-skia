@@ -27,7 +27,7 @@ class JniSkiaBaseView {
 public:
   JniSkiaBaseView(jni::alias_ref<JniSkiaManager::javaobject> skiaManager,
                   std::shared_ptr<RNSkBaseAndroidView> skiaView)
-      : _manager(skiaManager->cthis()), _skiaAndroidView(std::move(skiaView)) {}
+      : _skiaAndroidView(std::move(skiaView)), _manager(skiaManager->cthis()) {}
 
   ~JniSkiaBaseView() = default;
 
@@ -112,9 +112,11 @@ protected:
     return byteArray;
   }
 
+protected:
+  std::shared_ptr<RNSkBaseAndroidView> _skiaAndroidView;
+
 private:
   JniSkiaManager *_manager;
-  std::shared_ptr<RNSkBaseAndroidView> _skiaAndroidView;
 };
 
 } // namespace RNSkia

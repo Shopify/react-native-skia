@@ -20,6 +20,9 @@
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkPaint.h"
+#include "include/core/SkSurface.h"
+#include "include/core/SkImage.h"
+#include "include/core/SkPicture.h"
 
 namespace RNSkia {
 namespace jsi = facebook::jsi;
@@ -75,8 +78,62 @@ protected:
   void unregisterView() override { JniSkiaBaseView::unregisterView(); }
 
   jni::local_ref<jni::JArrayByte> getBitmap(int width, int height) override {
-    // Call base class implementation which creates a green RGBA bitmap
-    return JniSkiaBaseView::getBitmap(width, height);
+    // Get the RNSkPictureView from the android view
+    auto pictureView = std::static_pointer_cast<RNSkAndroidView<RNSkia::RNSkPictureView>>(_skiaAndroidView);
+    if (!pictureView) {
+      return JniSkiaBaseView::getBitmap(width, height);
+    }
+
+    // Get the renderer and cast it to RNSkPictureRenderer
+    auto renderer = std::static_pointer_cast<RNSkia::RNSkPictureRenderer>(pictureView->getRenderer());
+    if (!renderer) {
+      return JniSkiaBaseView::getBitmap(width, height);
+    }
+
+    // Get the SkPicture from the renderer
+    sk_sp<SkPicture> picture = renderer->getPicture();
+
+    // Create an offscreen Skia surface
+    SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
+    sk_sp<SkSurface> surface = SkSurfaces::Raster(info);
+
+    if (!surface) {
+      return jni::JArrayByte::newArray(0);
+    }
+
+    // Get the canvas from the surface
+    SkCanvas* canvas = surface->getCanvas();
+
+    // Clear the canvas with transparent background
+    canvas->clear(SK_ColorTRANSPARENT);
+
+    // Draw the picture if available
+    if (picture) {
+      // Get pixel density for scaling
+      auto pd = pictureView->getPixelDensity();
+      canvas->save();
+      canvas->scale(pd, pd);
+      canvas->drawPicture(picture);
+      canvas->restore();
+    }
+
+    // Get the image from the surface
+    sk_sp<SkImage> image = surface->makeImageSnapshot();
+
+    // Read pixels from the image
+    size_t bitmapSize = width * height * 4;
+    std::vector<uint8_t> pixels(bitmapSize);
+
+    SkImageInfo readInfo = SkImageInfo::Make(width, height, kRGBA_8888_SkColorType, kUnpremul_SkAlphaType);
+    if (!image->readPixels(nullptr, readInfo, pixels.data(), width * 4, 0, 0)) {
+      return jni::JArrayByte::newArray(0);
+    }
+
+    // Create Java byte array and copy pixel data
+    auto byteArray = jni::JArrayByte::newArray(bitmapSize);
+    byteArray->setRegion(0, bitmapSize, reinterpret_cast<const int8_t*>(pixels.data()));
+
+    return byteArray;
   }
 
 private:
