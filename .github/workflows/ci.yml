@@ -358,17 +358,36 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Fix Bundler and CocoaPods compatibility
+        working-directory: apps/example
+        run: |
+          echo "=== Cleaning old bundled gems ==="
+          rm -rf vendor/bundle
+          
+          echo "=== Uninstalling old Bundler ==="
+          gem uninstall bundler -a -x || true
+          
+          echo "=== Checking Bundler version ==="
+          bundler -v
+          
+          echo "=== Removing Gemfile.lock ==="
+          rm -f Gemfile.lock
+          rm -f ios/Gemfile.lock
+          
+          echo "=== Installing gems with Bundler ==="
+          bundle install
+
+      - name: Install CocoaPods with Bundler
+        working-directory: apps/example/ios
+        run: bundle exec pod install
+
       - name: Start Package Manager
         working-directory: apps/example
         run: E2E=true yarn start &
-  
-      - name: Install CocoaPods
-        working-directory: apps/example/ios
-        run: pod install
 
       - name: Build example for iOS
         working-directory: apps/example
-        run: yarn ios
+        run: yarn ios --simulator 'iPhone 16 Pro'
 
       - name: Run e2e tests
         working-directory: packages/skia
