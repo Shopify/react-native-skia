@@ -168,7 +168,9 @@ export const Canvas = ({
       debug={debug}
       opaque={opaque}
       colorSpace={colorSpace}
-      onLayout={onLayoutWeb}
+      onLayout={
+        Platform.OS === "web" && (onSize || onLayout) ? onLayoutWeb : onLayout
+      }
       {...viewProps}
     />
   );
