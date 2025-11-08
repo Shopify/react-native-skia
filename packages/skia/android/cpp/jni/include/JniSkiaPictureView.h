@@ -23,6 +23,7 @@
 #include "include/core/SkSurface.h"
 #include "include/core/SkImage.h"
 #include "include/core/SkPicture.h"
+#include "OpenGLContext.h"
 
 namespace RNSkia {
 namespace jsi = facebook::jsi;
@@ -93,9 +94,8 @@ protected:
     // Get the SkPicture from the renderer
     sk_sp<SkPicture> picture = renderer->getPicture();
 
-    // Create an offscreen Skia surface
-    SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
-    sk_sp<SkSurface> surface = SkSurfaces::Raster(info);
+    // Create a GPU offscreen surface using OpenGLContext
+    sk_sp<SkSurface> surface = OpenGLContext::getInstance().MakeOffscreen(width, height);
 
     if (!surface) {
       return jni::JArrayByte::newArray(0);
@@ -118,7 +118,7 @@ protected:
     }
 
     // Get the image from the surface
-    sk_sp<SkImage> image = surface->makeImageSnapshot();
+    sk_sp<SkImage> image = surface->makeImageSnapshot()->makeNonTextureImage();
 
     // Read pixels from the image
     size_t bitmapSize = width * height * 4;
