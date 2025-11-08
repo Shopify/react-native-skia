@@ -346,7 +346,7 @@ jobs:
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '26.0.1' 
+          xcode-version: '26.1.0' 
 
       - name: Checkout
         uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
@@ -357,22 +357,6 @@ jobs:
         uses: ./.github/actions/setup
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Fix Bundler and CocoaPods compatibility
-        working-directory: apps/example
-        run: |
-          echo "=== Cleaning old bundled gems ==="
-          rm -rf vendor/bundle
-          
-          echo "=== Uninstalling old Bundler ==="
-          gem uninstall bundler -a -x || true
-          
-          echo "=== Checking Bundler version ==="
-          bundler -v
-          
-          echo "=== Removing Gemfile.lock ==="
-          rm -f Gemfile.lock
-          rm -f ios/Gemfile.lock
 
       - name: Install CocoaPods with Bundler
         working-directory: apps/example/ios
