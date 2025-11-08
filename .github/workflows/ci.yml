@@ -368,7 +368,11 @@ jobs:
 
       - name: Build example for iOS
         working-directory: apps/example
-        run: yarn ios --simulator 'iPhone 16 Pro'
+        run: yarn build:ios --verbose
+
+      - name: Build example for iOS
+        working-directory: apps/example
+        run: yarn ios --simulator 'iPhone 16 Pro' --verbose
 
       - name: Run e2e tests
         working-directory: packages/skia
