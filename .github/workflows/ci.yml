@@ -342,8 +342,6 @@ jobs:
 
   build-test-ios:
     runs-on: macos-latest-xlarge
-    env:
-      TURBO_CACHE_DIR: .turbo/ios
     steps:
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
@@ -366,7 +364,7 @@ jobs:
   
       - name: Build example for iOS
         working-directory: apps/example
-        run: yarn ios --simulator 'iPhone 16 Pro'
+        run: yarn ios --verbose
 
       - name: Run e2e tests
         working-directory: packages/skia
