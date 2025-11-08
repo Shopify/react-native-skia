@@ -297,18 +297,8 @@ public:
           info->view = view;
           info->view->setNativeId(nativeId);
 
-          // Set any properties that were set before the view was registered
-          // = !info->props.empty();
           info->view->setJsiProperties(info->props);
           info->props.clear();
-
-          // If we had properties (like a picture), render immediately
-          // This ensures the first frame shows the content instead of being blank
-          // if (hasProperties) {
-          //   // Use redraw() instead of requestRedraw() to render synchronously
-          //   // This avoids the dispatch_async delay for the first frame
-          //   info->view->redraw();
-          // }
 
           return nullptr;
         });
