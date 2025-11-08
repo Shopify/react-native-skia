@@ -10,7 +10,7 @@ import {
 const red = Skia.PictureRecorder();
 const canvas = red.beginRecording(Skia.XYWHRect(0, 0, 200, 200));
 const paint = Skia.Paint();
-paint.setColor(Skia.Color("red"));
+paint.setColor(Skia.Color("green"));
 canvas.drawCircle(100, 100, 50, paint);
 const picture = red.finishRecordingAsPicture();
 
