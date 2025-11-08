@@ -343,11 +343,6 @@ jobs:
   build-test-ios:
     runs-on: macos-latest-xlarge
     steps:
-      - name: Setup Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '26.1.0' 
-
       - name: Checkout
         uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
         with:
