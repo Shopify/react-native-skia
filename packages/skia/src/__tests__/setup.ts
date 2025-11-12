@@ -9,8 +9,9 @@ import type { SkSurface, SkImage } from "../skia/types";
 
 export const E2E = process.env.E2E === "true";
 export const CI = process.env.CI === "true";
+export const WEB = process.env.WEB === "true";
 export const itFailsE2e = E2E ? it.failing : it;
-export const itRunsE2eOnly = E2E ? it : it.skip;
+export const itRunsE2eOnly = E2E && !WEB ? it : it.skip;
 export const itRunsNodeOnly = E2E ? it.skip : it;
 export const itRunsCIAndNodeOnly = CI || !E2E ? it : it.skip;
 
