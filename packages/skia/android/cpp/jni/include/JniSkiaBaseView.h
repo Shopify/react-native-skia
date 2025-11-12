@@ -64,8 +64,8 @@ protected:
         _skiaAndroidView->getSkiaView()->getNativeId());
   }
 
-  virtual jni::local_ref<jni::JArrayByte> getBitmap(int width, int height) {
-    return jni::JArrayByte::newArray(0);
+  virtual jni::local_ref<jni::JArrayInt> getBitmap(int width, int height) {
+    return jni::JArrayInt::newArray(0);
   }
 
 protected:

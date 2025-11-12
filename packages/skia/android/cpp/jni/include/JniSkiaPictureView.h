@@ -1,7 +1,9 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <fbjni/fbjni.h>
 #include <jni.h>
@@ -78,7 +80,7 @@ protected:
 
   void unregisterView() override { JniSkiaBaseView::unregisterView(); }
 
-  jni::local_ref<jni::JArrayByte> getBitmap(int width, int height) override {
+  jni::local_ref<jni::JArrayInt> getBitmap(int width, int height) override {
     // Get the RNSkPictureView from the android view
     auto pictureView = std::static_pointer_cast<RNSkAndroidView<RNSkia::RNSkPictureView>>(_skiaAndroidView);
     if (!pictureView) {
@@ -88,7 +90,7 @@ protected:
     // Get the renderer and cast it to RNSkPictureRenderer
     auto renderer = std::static_pointer_cast<RNSkia::RNSkPictureRenderer>(pictureView->getRenderer());
     if (!renderer) {
-      return jni::JArrayByte::newArray(0);
+      return jni::JArrayInt::newArray(0);
     }
 
     // Get the SkPicture from the renderer
@@ -98,7 +100,7 @@ protected:
     sk_sp<SkSurface> surface = OpenGLContext::getInstance().MakeOffscreen(width, height);
 
     if (!surface) {
-      return jni::JArrayByte::newArray(0);
+      return jni::JArrayInt::newArray(0);
     }
 
     // Get the canvas from the surface
@@ -121,19 +123,20 @@ protected:
     sk_sp<SkImage> image = surface->makeImageSnapshot()->makeNonTextureImage();
 
     // Read pixels from the image
-    size_t bitmapSize = width * height * 4;
-    std::vector<uint8_t> pixels(bitmapSize);
+    size_t pixelCount = static_cast<size_t>(width) * static_cast<size_t>(height);
+    std::vector<int32_t> pixels(pixelCount);
 
-    SkImageInfo readInfo = SkImageInfo::Make(width, height, kRGBA_8888_SkColorType, kUnpremul_SkAlphaType);
-    if (!image->readPixels(nullptr, readInfo, pixels.data(), width * 4, 0, 0)) {
-      return jni::JArrayByte::newArray(0);
+    SkImageInfo readInfo = SkImageInfo::Make(width, height, kBGRA_8888_SkColorType, kPremul_SkAlphaType);
+    size_t rowBytes = static_cast<size_t>(width) * sizeof(int32_t);
+    if (!image->readPixels(nullptr, readInfo, pixels.data(), rowBytes, 0, 0)) {
+      return jni::JArrayInt::newArray(0);
     }
 
-    // Create Java byte array and copy pixel data
-    auto byteArray = jni::JArrayByte::newArray(bitmapSize);
-    byteArray->setRegion(0, bitmapSize, reinterpret_cast<const int8_t*>(pixels.data()));
+    // Create Java int array and copy pixel data (already in ARGB order on little-endian)
+    auto intArray = jni::JArrayInt::newArray(pixelCount);
+    intArray->setRegion(0, pixelCount, reinterpret_cast<const jint*>(pixels.data()));
 
-    return byteArray;
+    return intArray;
   }
 
 private:
