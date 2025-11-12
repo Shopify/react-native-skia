@@ -60,10 +60,10 @@ class NativeReanimatedContainer extends Container {
     visit(recorder, this.root);
     const sharedValues = recorder.getSharedValues();
     const sharedRecorder = recorder.getRecorder();
-    Rea.runOnUI(() => {
-      "worklet";
-      nativeDrawOnscreen(nativeId, sharedRecorder, picture);
-    })();
+    // Send first frame to be drawn
+    sharedRecorder.play(picture);
+    SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
+    // Animate
     if (sharedValues.length > 0) {
       this.mapperId = Rea.startMapper(() => {
         "worklet";
