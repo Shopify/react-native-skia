@@ -256,20 +256,12 @@ jobs:
         run: |
           yarn turbo run build:android --concurrency 1
 
-      - name: Find APK location
-        run: |
-          echo "Searching for APK files..."
-          find apps/example/android -name "*.apk" -type f || echo "No APK files found"
-          echo "Checking common output directories..."
-          ls -la apps/example/android/app/build/outputs/apk/debug/ 2>/dev/null || echo "outputs/apk/debug doesn't exist"
-          ls -la apps/example/android/app/build/intermediates/apk/debug/ 2>/dev/null || echo "intermediates/apk/debug doesn't exist"
-
       - name: Cache apk
         uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         env:
           cache-name: cache-apk
         with:
-          path: apps/example/android/app/build/intermediates/apk/debug/app-debug.apk
+          path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
 
   test-android:
@@ -293,7 +285,7 @@ jobs:
         id: cache-apk
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
-          path: apps/example/android/app/build/intermediates/apk/debug/app-debug.apk
+          path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
       
       - name: SKDs - download required images
@@ -316,11 +308,11 @@ jobs:
       - name: Check APK existence
         uses: andstor/file-existence-action@076e0072799f4942c8bc574a82233e1e4d13e9d6 # v3.0.0
         with:
-          files: apps/example/android/app/build/intermediates/apk/debug/app-debug.apk
+          files: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           fail: true
 
       - name: Install APK
-        run: adb install -r apps/example/android/app/build/intermediates/apk/debug/app-debug.apk
+        run: adb install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk
 
       # - name: Set up environment
       #   run: echo "PACKAGE_NAME=${{ env.PACKAGE_NAME }}" >> $GITHUB_ENV
@@ -347,78 +339,6 @@ jobs:
         with:
           path: apps/docs/static/
           name: tests-docs-screenshots
-
-  # test-web:
-  #   runs-on: macos-latest-xlarge
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
-  #       with:
-  #         submodules: recursive
-
-  #     - name: Setup
-  #       uses: ./.github/actions/setup
-  #       with:
-  #         github_token: ${{ secrets.GITHUB_TOKEN }}
-
-  #     - name: Start Package Manager
-  #       working-directory: apps/example
-  #       run: E2E=true yarn web &
-
-  #     - name: Install Playwright
-  #       run: |
-  #         npx --yes @playwright/test@latest install chromium
-
-  #     - name: Wait for web app to be ready
-  #       run: |
-  #         echo "Waiting for http://localhost:8081 to become available..."
-  #         ready=false
-  #         for i in {1..120}; do
-  #           if curl --silent --fail http://localhost:8081 >/dev/null; then
-  #             echo "Web app is responding."
-  #             ready=true
-  #             break
-  #           fi
-  #           sleep 1
-  #         done
-
-  #         if [ "$ready" != true ]; then
-  #           echo "Web app did not respond within 120 seconds."
-  #           exit 1
-  #         fi
-
-  #         echo "Giving the app a few extra seconds to finish bundling..."
-  #         sleep 10
-
-  #     - name: Run e2e tests
-  #       working-directory: packages/skia
-  #       run: |
-  #         TMP_DIR="$(mktemp -d -t playwright-keepalive)"
-  #         SPEC="$TMP_DIR/keepalive.spec.js"
-
-  #         cat <<'EOF' > "$SPEC"
-  #         const { test } = require('@playwright/test');
-
-  #         test('keep Expo web app available for Jest', async ({ page }) => {
-  #           await page.goto('http://localhost:8081', { waitUntil: 'networkidle' });
-  #           await page.waitForTimeout(60 * 60 * 1000);
-  #         });
-  #         EOF
-
-  #         npx --yes @playwright/test@latest test "$SPEC" --project=chromium --timeout=0 --workers=1 --reporter=line &
-  #         PW_PID=$!
-
-  #         cleanup() {
-  #           if kill -0 "$PW_PID" 2>/dev/null; then
-  #             kill "$PW_PID" || true
-  #             wait "$PW_PID" || true
-  #           fi
-  #           rm -rf "$TMP_DIR"
-  #         }
-
-  #         trap cleanup EXIT
-
-  #         WEB=true E2E=true CI=true yarn test -i Shader
 
   build-test-ios:
     runs-on: macos-latest-xlarge
