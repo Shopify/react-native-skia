@@ -24,7 +24,7 @@ public class SkiaPictureView extends SkiaBaseView {
 
     public void setColdStart(boolean coldStart) {
         this.coldStart = coldStart;
-        invalidate(); // Trigger redraw when property changes
+        setWillNotDraw(coldStart);
     }
 
     @Override
