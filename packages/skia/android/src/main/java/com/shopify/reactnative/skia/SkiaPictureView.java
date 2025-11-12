@@ -52,7 +52,6 @@ public class SkiaPictureView extends SkiaBaseView {
 
             if (pixels != null && pixels.length == width * height) {
                 // Create bitmap from pixels
-                // TODO: remove allocation
                 Bitmap bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
 
                 // Draw the bitmap on the canvas
