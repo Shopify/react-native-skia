@@ -3,20 +3,20 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "android": "react-native run-android",
     "pod:install:ios": "pod install --project-directory=ios",
     "pod:install:catalyst": "pod install --project-directory=ios && node ios/enable-catalyst.js",
     "pod:install:macos": "pod install --project-directory=macos",
-    "build:android": "rnc-cli build-android",
-    "build:ios": "rnc-cli build-ios",
+    "build:android": "npm run mkdist && react-native bundle --entry-file index.js --platform android --dev true --bundle-output dist/main.android.jsbundle --assets-dest dist/res && cd android && ./gradlew assembleDebug --warning-mode all",
+    "build:ios": "npm run mkdist && react-native bundle --entry-file index.js --platform ios --dev true --bundle-output dist/main.ios.jsbundle --assets-dest dist",
     "build:macos": "react-native build-macos --scheme ReactTestApp --mode Debug",
-    "ios": "rnc-cli run-ios",
-    "android": "rnc-cli run-android",
+    "ios": "react-native run-ios",
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --cache --fix",
     "mkdist": "node -e \"require('node:fs').mkdirSync('dist', { recursive: true, mode: 0o755 })\"",
     "pod:install": "cd ios && pod install",
     "test": "jest",
     "tsc": "tsc --noEmit",
-    "start": "rnc-cli start"
+    "start": "react-native start"
   },
   "dependencies": {
     "@callstack/react-native-visionos": "^0.75.0",
