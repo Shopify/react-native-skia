@@ -246,10 +246,18 @@ public:
 
       // Get glyph widths
       int glyphsSize = static_cast<int>(ids);
+
+      // Validate glyph count
+      if (glyphsSize > numGlyphIds) {
+        throw std::runtime_error(
+            "Glyph count mismatch: got " + std::to_string(glyphsSize) +
+            " glyphs but expected " + std::to_string(numGlyphIds));
+      }
+
       std::vector<SkScalar> widthPtrs;
       widthPtrs.resize(glyphsSize);
       font->getWidthsBounds(
-          SkSpan(glyphIds.data(), numGlyphIds),
+          SkSpan(glyphIds.data(), glyphsSize),
           SkSpan(static_cast<SkScalar *>(widthPtrs.data()), widthPtrs.size()),
           {},
           nullptr); // TODO: Should we use paint somehow here?
@@ -260,7 +268,7 @@ public:
       auto cont = meas.next();
       auto dist = initialOffset;
 
-      for (size_t i = 0; i < text.length() && cont != nullptr; ++i) {
+      for (int i = 0; i < glyphsSize && cont != nullptr; ++i) {
         auto width = widthPtrs[i];
         dist += width / 2;
         if (dist > cont->length()) {
