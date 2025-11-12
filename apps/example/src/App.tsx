@@ -39,6 +39,7 @@ import { HomeScreen } from "./Home";
 import type { StackParamList } from "./types";
 import { useAssets } from "./Tests/useAssets";
 import { Chess } from "./Examples/Chess";
+import "./resolveAssetSourcePolyfill";
 
 const linking: LinkingOptions<StackParamList> = {
   config: {
