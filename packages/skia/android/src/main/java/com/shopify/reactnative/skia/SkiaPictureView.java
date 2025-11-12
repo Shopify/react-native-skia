@@ -12,6 +12,7 @@ import com.facebook.react.bridge.ReactContext;
 public class SkiaPictureView extends SkiaBaseView {
     @DoNotStrip
     private HybridData mHybridData;
+    private Paint paint = new Paint();
 
     private boolean coldStart = false;
 
@@ -51,10 +52,10 @@ public class SkiaPictureView extends SkiaBaseView {
 
             if (pixels != null && pixels.length == width * height) {
                 // Create bitmap from pixels
+                // TODO: remove allocation
                 Bitmap bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
 
                 // Draw the bitmap on the canvas
-                Paint paint = new Paint();
                 paint.setFilterBitmap(true);
                 canvas.drawBitmap(bitmap, 0, 0, paint);
 
