@@ -88,7 +88,7 @@ protected:
     // Get the renderer and cast it to RNSkPictureRenderer
     auto renderer = std::static_pointer_cast<RNSkia::RNSkPictureRenderer>(pictureView->getRenderer());
     if (!renderer) {
-      return JniSkiaBaseView::getBitmap(width, height);
+      return jni::JArrayByte::newArray(0);
     }
 
     // Get the SkPicture from the renderer
