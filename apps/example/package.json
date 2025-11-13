@@ -16,7 +16,8 @@
     "pod:install": "cd ios && pod install",
     "test": "jest",
     "tsc": "tsc --noEmit",
-    "start": "rnc-cli start"
+    "start": "react-native start",
+    "web": "IS_WEB_BUILD=true react-native start"
   },
   "dependencies": {
     "@callstack/react-native-visionos": "^0.75.0",
@@ -30,6 +31,7 @@
     "cdt2d": "^1.0.0",
     "its-fine": "^2.0.0",
     "react": "19.0.0",
+    "react-dom": "19.0.0",
     "react-native": "0.78.0",
     "react-native-gesture-handler": "^2.24.0",
     "react-native-macos": "^0.78.3",
@@ -37,6 +39,7 @@
     "react-native-safe-area-context": "^5.2.0",
     "react-native-screens": "^4.9.1",
     "react-native-svg": "15.14.0",
+    "react-native-web": "^0.21.2",
     "react-native-windows": "^0.75.0"
   },
   "devDependencies": {
@@ -54,6 +57,8 @@
     "@rnx-kit/metro-config": "^2.0.0",
     "@types/jest": "^29.5.13",
     "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/react-native-web": "^0.19.2",
     "@types/react-test-renderer": "^19.0.0",
     "eslint": "9.36.0",
     "eslint-config-react-native-wcandillon": "4.0.1",
