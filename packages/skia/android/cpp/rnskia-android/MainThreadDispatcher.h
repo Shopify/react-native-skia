@@ -1,8 +1,12 @@
 #pragma once
 
 #include <android/looper.h>
+#include <android/log.h>
+#include <functional>
+#include <mutex>
 #include <queue>
 #include <unistd.h>
+#include <utility>
 
 class MainThreadDispatcher {
 private:
@@ -14,10 +18,16 @@ private:
   static constexpr int LOOPER_ID_MAIN = 1;
 
   void processMessages() {
-    std::lock_guard<std::mutex> lock(queueMutex);
-    while (!taskQueue.empty()) {
-      auto task = taskQueue.front();
-      taskQueue.pop();
+    for (;;) {
+      std::function<void()> task;
+      {
+        std::lock_guard<std::mutex> lock(queueMutex);
+        if (taskQueue.empty()) {
+          break;
+        }
+        task = std::move(taskQueue.front());
+        taskQueue.pop();
+      }
       task();
     }
   }
@@ -31,17 +41,16 @@ public:
   bool isOnMainThread() { return ALooper_forThread() == mainLooper; }
 
   void post(std::function<void()> task) {
-    // TODO: this is disabled for now but we can clean this up
-    // if (ALooper_forThread() == mainLooper) {
-    //     task();
-    // } else {
+    if (isOnMainThread()) {
+      task();
+      return;
+    }
     {
       std::lock_guard<std::mutex> lock(queueMutex);
       taskQueue.push(std::move(task));
     }
     char wake = 1;
     write(messagePipe[1], &wake, 1);
-    // }
   }
 
   ~MainThreadDispatcher() {
@@ -51,6 +60,12 @@ public:
 
 private:
   MainThreadDispatcher() {
+    if (getpid() != gettid()) {
+      __android_log_assert(
+          "false", "MainThreadDispatcher",
+          "MainThreadDispatcher must be initialized on the Android main thread.");
+    }
+
     mainLooper = ALooper_forThread();
     if (!mainLooper) {
       mainLooper = ALooper_prepare(ALOOPER_PREPARE_ALLOW_NON_CALLBACKS);
