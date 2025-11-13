@@ -102,26 +102,31 @@ protected:
     // Get the SkPicture from the renderer
     sk_sp<SkPicture> picture = renderer->getPicture();
 
-    // Create a GPU offscreen surface
-    #if defined(SK_GRAPHITE)
-      sk_sp<SkSurface> surface = DawnContext::getInstance().MakeOffscreen(width, height);
-    #else
-      sk_sp<SkSurface> surface =  OpenGLContext::getInstance().MakeOffscreen(width, height);
-    #endif
+    const size_t pixelCount =
+        static_cast<size_t>(width) * static_cast<size_t>(height);
+    if (pixelCount == 0) {
+      return jni::JArrayInt::newArray(0);
+    }
+
+    sk_sp<SkSurface> surface;
+#if defined(SK_GRAPHITE)
+    surface = DawnContext::getInstance().MakeOffscreen(width, height);
+#else
+    surface = OpenGLContext::getInstance().MakeOffscreen(width, height);
+#endif
 
     if (!surface) {
       return jni::JArrayInt::newArray(0);
     }
 
-    // Get the canvas from the surface
     SkCanvas *canvas = surface->getCanvas();
+    if (canvas == nullptr) {
+      return jni::JArrayInt::newArray(0);
+    }
 
-    // Clear the canvas with transparent background
     canvas->clear(SK_ColorTRANSPARENT);
 
-    // Draw the picture if available
     if (picture) {
-      // Get pixel density for scaling
       auto pd = pictureView->getPixelDensity();
       canvas->save();
       canvas->scale(pd, pd);
@@ -129,14 +134,21 @@ protected:
       canvas->restore();
     }
 
-    // Get the image from the surface
-    sk_sp<SkImage> image = surface->makeImageSnapshot()->makeNonTextureImage();
+    sk_sp<SkImage> snapshot = surface->makeImageSnapshot();
+    if (!snapshot) {
+      return jni::JArrayInt::newArray(0);
+    }
 
-    // Read pixels from the image
-    size_t pixelCount =
-        static_cast<size_t>(width) * static_cast<size_t>(height);
+    sk_sp<SkImage> image = snapshot->makeNonTextureImage();
+    if (!image) {
+      image = snapshot;
+    }
+
+    if (!image) {
+      return jni::JArrayInt::newArray(0);
+    }
+
     std::vector<int32_t> pixels(pixelCount);
-
     SkImageInfo readInfo = SkImageInfo::Make(
         width, height, kBGRA_8888_SkColorType, kPremul_SkAlphaType);
     size_t rowBytes = static_cast<size_t>(width) * sizeof(int32_t);
@@ -144,8 +156,6 @@ protected:
       return jni::JArrayInt::newArray(0);
     }
 
-    // Create Java int array and copy pixel data (already in ARGB order on
-    // little-endian)
     auto intArray = jni::JArrayInt::newArray(pixelCount);
     intArray->setRegion(0, pixelCount,
                         reinterpret_cast<const jint *>(pixels.data()));
