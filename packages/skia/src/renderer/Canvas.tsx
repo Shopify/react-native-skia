@@ -160,7 +160,6 @@ export const Canvas = ({
     },
     [onLayout, onSize]
   );
-
   return (
     <SkiaPictureViewNativeComponent
       ref={viewRef}
@@ -169,7 +168,10 @@ export const Canvas = ({
       debug={debug}
       opaque={opaque}
       colorSpace={colorSpace}
-      onLayout={onLayoutWeb}
+      coldStart={false}
+      onLayout={
+        Platform.OS === "web" && (onSize || onLayout) ? onLayoutWeb : onLayout
+      }
       {...viewProps}
     />
   );

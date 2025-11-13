@@ -27,12 +27,13 @@ export class SkiaSGRoot {
     public Skia: Skia,
     nativeId = -1
   ) {
+    const strictMode = false;
     this.container = createContainer(Skia, nativeId);
     this.root = skiaReconciler.createContainer(
       this.container,
       0,
       null,
-      true,
+      strictMode,
       null,
       "",
       console.error,
@@ -48,7 +49,6 @@ export class SkiaSGRoot {
   private updateContainer(element: ReactNode) {
     return new Promise((resolve) => {
       skiaReconciler.updateContainer(element, this.root, null, () => {
-        debug("updateContainer");
         resolve(true);
       });
     });

@@ -56,6 +56,8 @@ public:
     _requestRedraw();
   }
 
+  sk_sp<SkPicture> getPicture() const { return _picture; }
+
 private:
   bool performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
     return canvasProvider->renderToCanvas([=, this](SkCanvas *canvas) {
