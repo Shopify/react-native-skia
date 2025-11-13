@@ -23,8 +23,9 @@ public class SkiaPictureView extends SkiaBaseView {
     }
 
     public void setColdStart(boolean coldStart) {
-        this.coldStart = coldStart;
-        setWillNotDraw(coldStart);
+        // disabled for now
+        //this.coldStart = coldStart;
+        //setWillNotDraw(coldStart);
     }
 
     @Override
