@@ -18,7 +18,11 @@
 #include <android/native_window_jni.h>
 #include <fbjni/detail/Hybrid.h>
 
+#if defined(SK_GRAPHITE)
+#include "DawnContext.h"
+#else
 #include "OpenGLContext.h"
+#endif
 #include "include/core/SkBitmap.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkImage.h"
@@ -98,9 +102,12 @@ protected:
     // Get the SkPicture from the renderer
     sk_sp<SkPicture> picture = renderer->getPicture();
 
-    // Create a GPU offscreen surface using OpenGLContext
-    sk_sp<SkSurface> surface =
-        OpenGLContext::getInstance().MakeOffscreen(width, height);
+    // Create a GPU offscreen surface
+    #if defined(SK_GRAPHITE)
+      sk_sp<SkSurface> surface = DawnContext::getInstance().MakeOffscreen(width, height);
+    #else
+      sk_sp<SkSurface> surface =  OpenGLContext::getInstance().MakeOffscreen(width, height);
+    #endif
 
     if (!surface) {
       return jni::JArrayInt::newArray(0);
