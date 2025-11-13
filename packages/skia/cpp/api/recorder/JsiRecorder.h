@@ -349,7 +349,7 @@ public:
 
   // This has no basis in reality but since since these are private long-lived
   // objects, we think it is more than fine.
-  size_t getMemoryPressure() const override { return 10 * 1024 * 1024; }
+  size_t getMemoryPressure() const override { return 5 * 1024 * 1024; }
 
   std::string getObjectType() const override { return "JsiRecorder"; }
 
