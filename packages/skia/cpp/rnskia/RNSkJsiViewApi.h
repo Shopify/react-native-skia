@@ -296,8 +296,10 @@ public:
         nativeId, [&](std::shared_ptr<RNSkViewInfo> info) {
           info->view = view;
           info->view->setNativeId(nativeId);
+
           info->view->setJsiProperties(info->props);
           info->props.clear();
+
           return nullptr;
         });
   }

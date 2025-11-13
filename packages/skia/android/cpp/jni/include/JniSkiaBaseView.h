@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <fbjni/fbjni.h>
 #include <jni.h>
@@ -12,6 +13,12 @@
 
 #include <android/bitmap.h>
 
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkSurface.h"
+#include "include/core/SkImage.h"
+#include "include/core/SkColorSpace.h"
+
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
@@ -20,7 +27,7 @@ class JniSkiaBaseView {
 public:
   JniSkiaBaseView(jni::alias_ref<JniSkiaManager::javaobject> skiaManager,
                   std::shared_ptr<RNSkBaseAndroidView> skiaView)
-      : _manager(skiaManager->cthis()), _skiaAndroidView(std::move(skiaView)) {}
+      : _skiaAndroidView(std::move(skiaView)), _manager(skiaManager->cthis()) {}
 
   ~JniSkiaBaseView() = default;
 
@@ -57,9 +64,15 @@ protected:
         _skiaAndroidView->getSkiaView()->getNativeId());
   }
 
+  virtual jni::local_ref<jni::JArrayInt> getBitmap(int width, int height) {
+    return jni::JArrayInt::newArray(0);
+  }
+
+protected:
+  std::shared_ptr<RNSkBaseAndroidView> _skiaAndroidView;
+
 private:
   JniSkiaManager *_manager;
-  std::shared_ptr<RNSkBaseAndroidView> _skiaAndroidView;
 };
 
 } // namespace RNSkia

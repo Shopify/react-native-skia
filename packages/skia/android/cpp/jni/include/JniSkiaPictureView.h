@@ -1,7 +1,9 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <fbjni/fbjni.h>
 #include <jni.h>
@@ -15,6 +17,15 @@
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 #include <fbjni/detail/Hybrid.h>
+
+#include "include/core/SkBitmap.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkPictureRecorder.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkSurface.h"
+#include "include/core/SkImage.h"
+#include "include/core/SkPicture.h"
+#include "OpenGLContext.h"
 
 namespace RNSkia {
 namespace jsi = facebook::jsi;
@@ -44,7 +55,8 @@ public:
          makeNativeMethod("setDebugMode", JniSkiaPictureView::setDebugMode),
          makeNativeMethod("registerView", JniSkiaPictureView::registerView),
          makeNativeMethod("unregisterView",
-                          JniSkiaPictureView::unregisterView)});
+                          JniSkiaPictureView::unregisterView),
+         makeNativeMethod("getBitmap", JniSkiaPictureView::getBitmap)});
   }
 
 protected:
@@ -67,6 +79,65 @@ protected:
   }
 
   void unregisterView() override { JniSkiaBaseView::unregisterView(); }
+
+  jni::local_ref<jni::JArrayInt> getBitmap(int width, int height) override {
+    // Get the RNSkPictureView from the android view
+    auto pictureView = std::static_pointer_cast<RNSkAndroidView<RNSkia::RNSkPictureView>>(_skiaAndroidView);
+    if (!pictureView) {
+      return JniSkiaBaseView::getBitmap(width, height);
+    }
+
+    // Get the renderer and cast it to RNSkPictureRenderer
+    auto renderer = std::static_pointer_cast<RNSkia::RNSkPictureRenderer>(pictureView->getRenderer());
+    if (!renderer) {
+      return jni::JArrayInt::newArray(0);
+    }
+
+    // Get the SkPicture from the renderer
+    sk_sp<SkPicture> picture = renderer->getPicture();
+
+    // Create a GPU offscreen surface using OpenGLContext
+    sk_sp<SkSurface> surface = OpenGLContext::getInstance().MakeOffscreen(width, height);
+
+    if (!surface) {
+      return jni::JArrayInt::newArray(0);
+    }
+
+    // Get the canvas from the surface
+    SkCanvas* canvas = surface->getCanvas();
+
+    // Clear the canvas with transparent background
+    canvas->clear(SK_ColorTRANSPARENT);
+
+    // Draw the picture if available
+    if (picture) {
+      // Get pixel density for scaling
+      auto pd = pictureView->getPixelDensity();
+      canvas->save();
+      canvas->scale(pd, pd);
+      canvas->drawPicture(picture);
+      canvas->restore();
+    }
+
+    // Get the image from the surface
+    sk_sp<SkImage> image = surface->makeImageSnapshot()->makeNonTextureImage();
+
+    // Read pixels from the image
+    size_t pixelCount = static_cast<size_t>(width) * static_cast<size_t>(height);
+    std::vector<int32_t> pixels(pixelCount);
+
+    SkImageInfo readInfo = SkImageInfo::Make(width, height, kBGRA_8888_SkColorType, kPremul_SkAlphaType);
+    size_t rowBytes = static_cast<size_t>(width) * sizeof(int32_t);
+    if (!image->readPixels(nullptr, readInfo, pixels.data(), rowBytes, 0, 0)) {
+      return jni::JArrayInt::newArray(0);
+    }
+
+    // Create Java int array and copy pixel data (already in ARGB order on little-endian)
+    auto intArray = jni::JArrayInt::newArray(pixelCount);
+    intArray->setRegion(0, pixelCount, reinterpret_cast<const jint*>(pixels.data()));
+
+    return intArray;
+  }
 
 private:
   friend HybridBase;

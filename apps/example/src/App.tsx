@@ -22,6 +22,7 @@ import {
   Glassmorphism,
   Neumorphism,
   PerformanceDrawingTest,
+  FirstFrame,
   Wallpaper,
   Vertices,
   Wallet,
@@ -64,6 +65,7 @@ const linking: LinkingOptions<StackParamList> = {
       Animation: "animation",
       Reanimated: "reanimated",
       Performance: "performance",
+      FirstFrame: "first-frame",
       Tests: "test",
       Transitions: "transitions",
       Stickers: "stickers",
@@ -166,6 +168,13 @@ const App = () => {
               component={Aurora}
               options={{
                 header: () => null,
+              }}
+            />
+            <Stack.Screen
+              name="FirstFrame"
+              component={FirstFrame}
+              options={{
+                title: "Time to First Frame",
               }}
             />
             <Stack.Screen
