@@ -27,21 +27,12 @@ const nativeDrawOnscreen = (
 class NativeReanimatedContainer extends Container {
   private mapperId: number | null = null;
   private picture: SkPicture;
-  private currentRecorderIndex: number = 0;
-  private recorders: ReanimatedRecorder[];
 
   constructor(
     Skia: Skia,
     private nativeId: number
   ) {
     super(Skia);
-    // Triple buffering: create three recorders to prevent race conditions
-    // between JS thread (redraw) and UI thread (nativeDrawOnscreen/mapper)
-    this.recorders = [
-      new ReanimatedRecorder(Skia),
-      new ReanimatedRecorder(Skia),
-      new ReanimatedRecorder(Skia),
-    ];
     this.picture = Skia.Picture.MakePicture(null)!;
   }
 
@@ -53,23 +44,15 @@ class NativeReanimatedContainer extends Container {
       return;
     }
 
-    // Rotate through the three recorders (triple buffering)
-    // This ensures that even if the UI thread is still using the previous recorder
-    // and the JS thread calls redraw again, we always have a free recorder
-    const recorder = this.recorders[this.currentRecorderIndex];
-    this.currentRecorderIndex = (this.currentRecorderIndex + 1) % 3;
-
+    const recorder = new ReanimatedRecorder(this.Skia);
     const { nativeId, picture } = this;
-    recorder.reset();
     visit(recorder, this.root);
     const sharedValues = recorder.getSharedValues();
     const sharedRecorder = recorder.getRecorder();
-
     Rea.runOnUI(() => {
       "worklet";
       nativeDrawOnscreen(nativeId, sharedRecorder, picture);
     })();
-
     if (sharedValues.length > 0) {
       this.mapperId = Rea.startMapper(() => {
         "worklet";
