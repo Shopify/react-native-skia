@@ -19,7 +19,7 @@
 #include <fbjni/detail/Hybrid.h>
 
 #if defined(SK_GRAPHITE)
-#include "DawnContext.h"
+#include "RNDawnContext.h"
 #else
 #include "OpenGLContext.h"
 #endif
