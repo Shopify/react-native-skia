@@ -43,7 +43,6 @@ class NativeReanimatedContainer extends Container {
     if (this.unmounted) {
       return;
     }
-
     const recorder = new ReanimatedRecorder(this.Skia);
     const { nativeId, picture } = this;
     visit(recorder, this.root);
