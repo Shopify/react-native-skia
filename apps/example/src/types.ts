@@ -24,7 +24,6 @@ export type StackParamList = {
   Animation: undefined;
   Reanimated: undefined;
   Performance: undefined;
-  FirstFrame: undefined;
   Transitions: undefined;
   Stickers: undefined;
   FrostedCard: undefined;

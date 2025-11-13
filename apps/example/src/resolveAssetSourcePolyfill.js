@@ -11,7 +11,7 @@ if (Platform.OS === "web") {
       const asset = getAssetByID(source);
       if (asset == null) {
         throw new Error(
-          `Image: asset with ID "${source}" could not be found. Please check the image source or packager.`,
+          `Image: asset with ID "${source}" could not be found. Please check the image source or packager.`
         );
       }
       // eslint-disable-next-line prefer-destructuring
@@ -22,7 +22,7 @@ if (Platform.OS === "web") {
         scale = asset.scales.reduce((prev, curr) =>
           Math.abs(curr - preferredScale) < Math.abs(prev - preferredScale)
             ? curr
-            : prev,
+            : prev
         );
       }
       const scaleSuffix = scale !== 1 ? `@${scale}x` : "";
