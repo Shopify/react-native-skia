@@ -48,7 +48,7 @@ class NativeReanimatedContainer extends Container {
     visit(recorder, this.root);
     const sharedValues = recorder.getSharedValues();
     const sharedRecorder = recorder.getRecorder();
-    // Send first frame to be drawn
+    // Draw first frame
     Rea.executeOnUIRuntimeSync(() => {
       "worklet";
       const firstPicture = Skia.Picture.MakePicture(null)!;

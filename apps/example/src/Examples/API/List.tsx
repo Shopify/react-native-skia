@@ -130,6 +130,10 @@ export const examples = [
     screen: "StressTest4",
     title: "🔥 Stress Test 4",
   },
+  {
+    screen: "FirstFrame",
+    title: "🎬 First Frame",
+  },
 ] as const;
 
 const styles = StyleSheet.create({
