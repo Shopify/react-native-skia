@@ -14,7 +14,7 @@ public class SkiaPictureView extends SkiaBaseView {
     private HybridData mHybridData;
     private Paint paint = new Paint();
 
-    private boolean coldStart = false;
+    private boolean coldStart = true;
 
     public SkiaPictureView(Context context) {
         super(context);
@@ -23,8 +23,9 @@ public class SkiaPictureView extends SkiaBaseView {
     }
 
     public void setColdStart(boolean coldStart) {
-        this.coldStart = coldStart;
-        setWillNotDraw(coldStart);
+        // disabled for now
+        //this.coldStart = coldStart;
+        //setWillNotDraw(coldStart);
     }
 
     @Override
@@ -38,7 +39,7 @@ public class SkiaPictureView extends SkiaBaseView {
         super.onDraw(canvas);
 
         // Skip the warming up feature if coldStart is true or running on software renderer
-        if (coldStart || !canvas.isHardwareAccelerated()) {
+        if (coldStart) {
             return; // Skip warmup on cold start or software rendering
         }
 
