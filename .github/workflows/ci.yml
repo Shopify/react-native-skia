@@ -148,6 +148,32 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Free disk space
+        shell: bash
+        run: |
+          set -euxo pipefail
+          echo "Disk usage before cleanup:"
+          df -h
+
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            sudo rm -rf /usr/share/dotnet || true
+            sudo rm -rf /opt/ghc || true
+            sudo rm -rf /usr/local/share/boost || true
+          else
+            sudo rm -rf /usr/local/share/dotnet || true
+          fi
+
+          if [[ -n "${ANDROID_HOME:-}" && -d "$ANDROID_HOME" ]]; then
+            sudo rm -rf "$ANDROID_HOME/system-images" "$ANDROID_HOME/emulator" || true
+          fi
+
+          if command -v docker &> /dev/null; then
+            sudo docker system prune -af || true
+          fi
+
+          echo "Disk usage after cleanup:"
+          df -h
+
       - name: Cache turborepo for Android
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
@@ -208,6 +234,32 @@ jobs:
         uses: ./.github/actions/setup
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Free disk space
+        shell: bash
+        run: |
+          set -euxo pipefail
+          echo "Disk usage before cleanup:"
+          df -h
+
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            sudo rm -rf /usr/share/dotnet || true
+            sudo rm -rf /opt/ghc || true
+            sudo rm -rf /usr/local/share/boost || true
+          else
+            sudo rm -rf /usr/local/share/dotnet || true
+          fi
+
+          if [[ -n "${ANDROID_HOME:-}" && -d "$ANDROID_HOME" ]]; then
+            sudo rm -rf "$ANDROID_HOME/system-images" "$ANDROID_HOME/emulator" || true
+          fi
+
+          if command -v docker &> /dev/null; then
+            sudo docker system prune -af || true
+          fi
+
+          echo "Disk usage after cleanup:"
+          df -h
 
       - name: Cache turborepo for Android
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
