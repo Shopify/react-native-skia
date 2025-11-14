@@ -271,13 +271,14 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
           script: |
-            set -eu
+            bash <<'BASH'
+            set -euo pipefail
 
-            ROOT_DIR=$(pwd)
+            ROOT_DIR="$PWD"
             METRO_PID=""
 
             cleanup() {
-              if [ -n "$METRO_PID" ]; then
+              if [[ -n "$METRO_PID" ]]; then
                 kill "$METRO_PID" 2>/dev/null || true
                 wait "$METRO_PID" 2>/dev/null || true
               fi
@@ -295,10 +296,9 @@ jobs:
             adb install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk
             adb shell monkey -p com.microsoft.reacttestapp 1
             
-            (
-              cd packages/skia
-              CI=true yarn e2e --testPathIgnorePatterns Paragraphs
-            )
+            cd packages/skia
+            CI=true yarn e2e --testPathIgnorePatterns Paragraphs
+            BASH
 
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: failure()
