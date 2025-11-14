@@ -267,7 +267,7 @@ jobs:
   test-android:
     needs: build-android
     runs-on: macos-latest-large
-    timeout-minutes: 60
+    timeout-minutes: 40
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
@@ -321,12 +321,29 @@ jobs:
           PACKAGE_NAME: 'com.microsoft.reacttestapp'
         run: adb shell monkey -p ${{ env.PACKAGE_NAME }} 1  
 
+      - name: Clear logcat buffer
+        run: adb logcat -c
+
       # On fabric, the system fonts are slightly different
       # so wont run the paragraph tests there for now
       - name: Run e2e Tests
+        id: run-e2e-tests
         working-directory: packages/skia
         run: |
           CI=true yarn e2e --testPathIgnorePatterns Paragraphs
+
+      - name: Capture logcat on failure
+        if: ${{ failure() && steps.run-e2e-tests.outcome == 'failure' }}
+        run: |
+          mkdir -p artifacts
+          adb logcat -d > artifacts/android-logcat.txt
+
+      - name: Upload logcat on failure
+        if: ${{ failure() && steps.run-e2e-tests.outcome == 'failure' }}
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          path: artifacts/android-logcat.txt
+          name: android-logcat
 
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: failure()
