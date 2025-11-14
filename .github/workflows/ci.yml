@@ -302,12 +302,24 @@ jobs:
       - name: Emulator - Create
         run: $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n Pixel_API_30 --device 'Nexus 5X' --package "system-images;android-30;default;x86_64" --sdcard 512M
 
-      - name: Emulator - Boot
-        run: $ANDROID_HOME/emulator/emulator -memory 4096 -avd Pixel_API_30 -wipe-data -no-window -gpu angle_indirect -no-snapshot -noaudio -no-boot-anim &
+      - name: Check emulator acceleration
+        run: $ANDROID_HOME/emulator/emulator -accel-check
+
+      - name: List available GPU modes
+        run: $ANDROID_HOME/emulator/emulator -help-gpu
+
+      - name: Boot with verbose logging
+        run: $ANDROID_HOME/emulator/emulator -memory 8192 -avd Pixel_API_30 -wipe-data -no-window -gpu angle_indirect -no-snapshot -noaudio -no-boot-anim -verbose -debug-init &
 
       - name: ADB Wait For Device
         run: adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
         timeout-minutes: 10
+
+      - name: Check GPU renderer info
+        run: |
+          adb shell dumpsys SurfaceFlinger | grep -A 5 "GLES"
+          adb shell getprop | grep -i gpu
+          adb shell getprop | grep -i render
 
       - name: Start Package Manager
         working-directory: apps/example/
