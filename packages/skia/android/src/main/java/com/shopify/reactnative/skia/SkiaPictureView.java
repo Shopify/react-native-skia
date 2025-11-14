@@ -23,9 +23,8 @@ public class SkiaPictureView extends SkiaBaseView {
     }
 
     public void setColdStart(boolean coldStart) {
-        // disabled for now
-        //this.coldStart = coldStart;
-        //setWillNotDraw(coldStart);
+        this.coldStart = coldStart;
+        setWillNotDraw(coldStart);
     }
 
     @Override
@@ -38,7 +37,6 @@ public class SkiaPictureView extends SkiaBaseView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        // Skip the warming up feature if coldStart is true or running on software renderer
         if (coldStart) {
             return; // Skip warmup on cold start or software rendering
         }
