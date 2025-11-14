@@ -15,6 +15,10 @@ jobs:
           mkdir -p packages/skia
           touch apps/example/android/app/build/outputs/apk/debug/app-debug.apk
 
+      - name: Start placeholder bundler
+        run: |
+          nohup sh -c 'sleep 120' > "$RUNNER_TEMP/metro.log" 2>&1 &
+
       - name: Emulator script smoke test
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -30,21 +34,6 @@ jobs:
             set -euo pipefail
 
             ROOT_DIR="$GITHUB_WORKSPACE"
-            METRO_PID=""
-
-            cleanup() {
-              if [[ -n "$METRO_PID" ]]; then
-                kill "$METRO_PID" 2>/dev/null || true
-                wait "$METRO_PID" 2>/dev/null || true
-              fi
-            }
-
-            trap cleanup EXIT
-
-            cd "$ROOT_DIR/apps/example"
-            sleep 60 &
-            METRO_PID=$!
-
             adb wait-for-device
             until adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; do
               sleep 2

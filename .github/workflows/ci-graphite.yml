@@ -17,95 +17,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-android-ubuntu-graphite:
+  build-android-graphite:
     runs-on: ubuntu-latest
     continue-on-error: true
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
-      - name: Free Disk Space (Ubuntu)
+      - name: Free disk space
         run: |
-          # Before cleanup
           echo "Disk usage before cleanup:"
           df -h
-          
-          # Remove large packages that are typically not needed
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /opt/ghc
-          sudo rm -rf /usr/local/share/boost
-          sudo rm -rf /usr/local/.ghcup
-          sudo rm -rf /usr/share/swift
-          
-          # Clean apt cache
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker image prune -af || true
           sudo apt-get clean
-          
-          # After cleanup
           echo "Disk usage after cleanup:"
           df -h
-      - name: Checkout
-        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
-        with:
-          submodules: recursive
 
-      - name: Setup
-        uses: ./.github/actions/setup
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          graphite: true
-
-      - name: Cache turborepo for Android
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: ${{ env.TURBO_CACHE_DIR }}
-          key: ${{ runner.os }}-turborepo-android-${{ hashFiles('yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-turborepo-android
-
-      - name: Install JDK
-        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Install NDK
-        uses: nttld/setup-ndk@afb4c9964b521afb97c864b7d40b11e6911bd410 # v1.5.0
-        id: setup-ndk
-        with:
-          ndk-version: r27d
-  
-      - name: Set ANDROID_NDK
-        run: echo "ANDROID_NDK=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
-
-      - name: Finalize Android SDK
-        run: |
-          /bin/bash -c "yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null"
-
-      - name: Install Android SDK
-        run: |
-          echo "sdk.dir=$ANDROID_HOME" > $GITHUB_WORKSPACE/apps/example/android/local.properties
-
-      - name: Cache Gradle
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: |
-            ~/.gradle/wrapper
-            ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('./apps/example/android/gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      - name: Build example for Android
-        env:
-          JAVA_OPTS: "-XX:MaxHeapSize=6g"
-        run: |
-          yarn turbo run build:android --concurrency 1 --filter=example
-
-  build-android-graphite:
-    runs-on: macos-latest-large
-    continue-on-error: true
-    env:
-      TURBO_CACHE_DIR: .turbo/android
-    steps:
       - name: Checkout
         uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
         with:
@@ -160,7 +89,7 @@ jobs:
 
       - name: Build example for Android
         env:
-          JAVA_OPTS: "-XX:MaxHeapSize=16g"
+          JAVA_OPTS: "-XX:MaxHeapSize=6g"
         run: |
           yarn turbo run build:android --concurrency 1
 
@@ -173,12 +102,25 @@ jobs:
           key: apk-${{ github.sha }}
 
   test-android-graphite:
-    needs: build-android-graphite
-    runs-on: macos-latest-large
+    needs:
+      - build-android-graphite
+    runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
+      - name: Free disk space
+        run: |
+          echo "Disk usage before cleanup:"
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker image prune -af || true
+          sudo apt-get clean
+          echo "Disk usage after cleanup:"
+          df -h
+
       - name: checkout
         uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
         with:
@@ -190,52 +132,70 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           graphite: true
 
+      - name: Install JDK
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK tools
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
+          echo "$ANDROID_HOME/emulator" >> $GITHUB_PATH
+
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
       - name: Restore APK
         id: cache-apk
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
-      
-      - name: SKDs - download required images
-        run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
 
-      - name: Emulator - Create
-        run: $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n Pixel_API_30 --device 'Nexus 5X' --package "system-images;android-30;default;x86_64" --sdcard 512M
+      - name: Verify APK exists
+        run: test -f apps/example/android/app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Emulator - Boot
-        run: $ANDROID_HOME/emulator/emulator -memory 4096 -avd Pixel_API_30 -wipe-data -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim &
-
-      - name: ADB Wait For Device
-        run: adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
-        timeout-minutes: 10
-
-      - name: Start Package Manager
-        working-directory: apps/example/
-        run: E2E=true yarn start &
-
-      - name: Check APK existence
-        uses: andstor/file-existence-action@076e0072799f4942c8bc574a82233e1e4d13e9d6 # v3.0.0
-        with:
-          files: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
-          fail: true
-
-      - name: Install APK
-        run: adb install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk
-
-      # - name: Set up environment
-      #   run: echo "PACKAGE_NAME=${{ env.PACKAGE_NAME }}" >> $GITHUB_ENV
-      - name: Launch APK
-        env:
-          PACKAGE_NAME: 'com.microsoft.reacttestapp'
-        run: adb shell monkey -p ${{ env.PACKAGE_NAME }} 1  
-
-      # On fabric, the system fonts are slightly different
-      # so wont run the paragraph tests there for now
-      - name: Run e2e Tests
-        working-directory: packages/skia
+      - name: Start Metro bundler
         run: |
-          CI=true E2E=true yarn test -i Paths --testPathIgnorePatterns Paragraphs
+          cd apps/example
+          nohup sh -c 'E2E=true yarn start' > "$RUNNER_TEMP/metro.log" 2>&1 &
+
+      - name: Run Android Emulator Tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          arch: x86_64
+          profile: Nexus 5X
+          force-avd-creation: true
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: true
+          script: |
+            cat <<'BASH' > /tmp/run-android-tests.sh
+            #!/usr/bin/env bash
+            set -euo pipefail
+
+            ROOT_DIR="$GITHUB_WORKSPACE"
+            cd "$ROOT_DIR/apps/example"
+
+            sleep 20
+
+            adb install -r "$ROOT_DIR/apps/example/android/app/build/outputs/apk/debug/app-debug.apk"
+            adb shell monkey -p com.microsoft.reacttestapp 1
+
+            cd "$ROOT_DIR/packages/skia"
+            CI=true E2E=true yarn test -i Paths --testPathIgnorePatterns Paragraphs
+            BASH
+            chmod +x /tmp/run-android-tests.sh
+            /tmp/run-android-tests.sh
 
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: failure()

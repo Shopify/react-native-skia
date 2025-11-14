@@ -260,6 +260,11 @@ jobs:
         with:
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
+
+      - name: Start Metro bundler
+        run: |
+          cd apps/example
+          nohup sh -c 'E2E=true yarn start' > "$RUNNER_TEMP/metro.log" 2>&1 &
       
       - name: Run Android Emulator Tests
         uses: reactivecircus/android-emulator-runner@v2
@@ -276,21 +281,7 @@ jobs:
             set -euo pipefail
 
             ROOT_DIR="$GITHUB_WORKSPACE"
-            METRO_PID=""
-
-            cleanup() {
-              if [[ -n "$METRO_PID" ]]; then
-                kill "$METRO_PID" 2>/dev/null || true
-                wait "$METRO_PID" 2>/dev/null || true
-              fi
-            }
-
-            trap cleanup EXIT
-
             cd "$ROOT_DIR/apps/example"
-            E2E=true yarn start &
-            METRO_PID=$!
-
             sleep 20
 
             adb install -r "$ROOT_DIR/apps/example/android/app/build/outputs/apk/debug/app-debug.apk"
