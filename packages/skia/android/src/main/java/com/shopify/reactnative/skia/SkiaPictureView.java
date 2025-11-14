@@ -14,7 +14,7 @@ public class SkiaPictureView extends SkiaBaseView {
     private HybridData mHybridData;
     private Paint paint = new Paint();
 
-    private boolean coldStart = true;
+    private boolean coldStart = false;
 
     public SkiaPictureView(Context context) {
         super(context);
@@ -38,7 +38,7 @@ public class SkiaPictureView extends SkiaBaseView {
         super.onDraw(canvas);
 
         if (coldStart) {
-            return; // Skip warmup on cold start or software rendering
+            return; // Skip warmup
         }
 
         // Get the view dimensions
