@@ -25,11 +25,11 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
           script: |
-            bash -lc 'set -euo pipefail
+            set -eu
             ROOT_DIR="$GITHUB_WORKSPACE"
             METRO_PID=""
             cleanup() {
-              if [[ -n "$METRO_PID" ]]; then
+              if [ -n "$METRO_PID" ]; then
                 kill "$METRO_PID" 2>/dev/null || true
                 wait "$METRO_PID" 2>/dev/null || true
               fi
@@ -38,8 +38,12 @@ jobs:
             cd "$ROOT_DIR/apps/example"
             sleep 60 &
             METRO_PID=$!
-            sleep 5
+
+            adb wait-for-device
+            until adb shell getprop sys.boot_completed 2>/dev/null | grep -q "1"; do
+              sleep 2
+            done
+
             adb shell getprop ro.build.version.release >/tmp/emulator-version.txt
             cd "$ROOT_DIR/packages/skia"
             cat /tmp/emulator-version.txt
-            '

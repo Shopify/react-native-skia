@@ -271,11 +271,11 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
           script: |
-            bash -lc 'set -euo pipefail
+            set -eu
             ROOT_DIR="$GITHUB_WORKSPACE"
             METRO_PID=""
             cleanup() {
-              if [[ -n "$METRO_PID" ]]; then
+              if [ -n "$METRO_PID" ]; then
                 kill "$METRO_PID" 2>/dev/null || true
                 wait "$METRO_PID" 2>/dev/null || true
               fi
@@ -289,7 +289,6 @@ jobs:
             adb shell monkey -p com.microsoft.reacttestapp 1
             cd "$ROOT_DIR/packages/skia"
             CI=true yarn e2e --testPathIgnorePatterns Paragraphs
-            '
 
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: failure()
