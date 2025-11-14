@@ -256,50 +256,33 @@ jobs:
 
       - name: Restore APK
         id: cache-apk
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
         with:
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
       
-      - name: SKDs - download required images
-        run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-30;default;x86_64"
-
-      - name: Emulator - Create
-        run: $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n Pixel_API_30 --device 'Nexus 5X' --package "system-images;android-30;default;x86_64" --sdcard 512M
-
-      - name: Emulator - Boot
-        run: $ANDROID_HOME/emulator/emulator -memory 4096 -avd Pixel_API_30 -wipe-data -no-window -gpu host -accel on -no-snapshot -noaudio -no-boot-anim &
-
-      - name: ADB Wait For Device
-        run: adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
-        timeout-minutes: 10
-
-      - name: Start Package Manager
-        working-directory: apps/example/
-        run: E2E=true yarn start &
-
-      - name: Check APK existence
-        uses: andstor/file-existence-action@076e0072799f4942c8bc574a82233e1e4d13e9d6 # v3.0.0
+      - name: Run Android Emulator Tests
+        uses: reactivecircus/android-emulator-runner@v2
         with:
-          files: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
-          fail: true
-
-      - name: Install APK
-        run: adb install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk
-
-      # - name: Set up environment
-      #   run: echo "PACKAGE_NAME=${{ env.PACKAGE_NAME }}" >> $GITHUB_ENV
-      - name: Launch APK
-        env:
-          PACKAGE_NAME: 'com.microsoft.reacttestapp'
-        run: adb shell monkey -p ${{ env.PACKAGE_NAME }} 1  
-
-      # On fabric, the system fonts are slightly different
-      # so wont run the paragraph tests there for now
-      - name: Run e2e Tests
-        working-directory: packages/skia
-        run: |
-          CI=true yarn e2e --testPathIgnorePatterns Paragraphs
+          api-level: 30
+          arch: x86_64
+          profile: Nexus 5X
+          force-avd-creation: true
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: true
+          script: |
+            # Start package manager in background
+            cd apps/example && E2E=true yarn start &
+            
+            # Wait for Metro bundler
+            sleep 10
+            
+            # Install and launch app
+            adb install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk
+            adb shell monkey -p com.microsoft.reacttestapp 1
+            
+            # Run tests
+            cd packages/skia && CI=true yarn e2e --testPathIgnorePatterns Paragraphs
 
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: failure()
