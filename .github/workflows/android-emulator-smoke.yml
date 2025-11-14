@@ -1,0 +1,45 @@
+name: Android Emulator Smoke Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
+
+      - name: Prepare placeholder workspace
+        run: |
+          mkdir -p apps/example/android/app/build/outputs/apk/debug
+          mkdir -p packages/skia
+          touch apps/example/android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Emulator script smoke test
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          arch: x86_64
+          profile: Nexus 5X
+          force-avd-creation: true
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: true
+          script: |
+            bash -lc 'set -euo pipefail
+            ROOT_DIR="$GITHUB_WORKSPACE"
+            METRO_PID=""
+            cleanup() {
+              if [[ -n "$METRO_PID" ]]; then
+                kill "$METRO_PID" 2>/dev/null || true
+                wait "$METRO_PID" 2>/dev/null || true
+              fi
+            }
+            trap cleanup EXIT
+            cd "$ROOT_DIR/apps/example"
+            sleep 60 &
+            METRO_PID=$!
+            sleep 5
+            adb shell getprop ro.build.version.release >/tmp/emulator-version.txt
+            cd "$ROOT_DIR/packages/skia"
+            cat /tmp/emulator-version.txt
+            '
