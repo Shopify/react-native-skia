@@ -251,10 +251,18 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Build example for Android
+        id: build-example-android
         env:
           JAVA_OPTS: "-XX:MaxHeapSize=16g"
         run: |
           yarn turbo run build:android --concurrency 1
+
+      - name: Upload Android build reports
+        if: ${{ failure() && steps.build-example-android.outcome == 'failure' }}
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: android-build-reports
+          path: apps/example/android/build/reports
 
       - name: Cache apk
         uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
