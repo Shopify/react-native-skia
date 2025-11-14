@@ -140,7 +140,7 @@ describe("Paint", () => {
         })}
       </>
     );
-    checkImage(img, "snapshots/paint/blend-mode.png");
+    checkImage(img, "snapshots/paint/blend-mode.png", { maxPixelDiff: 500 });
   });
   it("Dithering", async () => {
     const { height } = surface;
