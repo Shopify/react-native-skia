@@ -69,6 +69,7 @@ export interface CanvasProps extends Omit<ViewProps, "onLayout"> {
   colorSpace?: "p3" | "srgb";
   ref?: React.Ref<CanvasRef>;
   __destroyWebGLContextAfterRender?: boolean;
+  coldStart?: boolean;
 }
 
 export const Canvas = ({
@@ -78,6 +79,7 @@ export const Canvas = ({
   onSize,
   colorSpace = "p3",
   ref,
+  coldStart,
   // Here know this is a type error but this is done on purpose to check it at runtime
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
@@ -168,7 +170,7 @@ export const Canvas = ({
       debug={debug}
       opaque={opaque}
       colorSpace={colorSpace}
-      coldStart={false}
+      coldStart={coldStart}
       onLayout={
         Platform.OS === "web" && (onSize || onLayout) ? onLayoutWeb : onLayout
       }
