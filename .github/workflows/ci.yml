@@ -260,7 +260,11 @@ jobs:
         with:
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
-      
+
+      - name: Start Package Manager
+        working-directory: apps/example/
+        run: E2E=true yarn start &
+
       - name: Run Android Emulator Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -271,36 +275,15 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
           script: |
-            cat <<'BASH' > /tmp/run-android-tests.sh
-            #!/usr/bin/env bash
-            set -euo pipefail
-
-            ROOT_DIR="$GITHUB_WORKSPACE"
-            METRO_PID=""
-
-            cleanup() {
-              if [[ -n "$METRO_PID" ]]; then
-                kill "$METRO_PID" 2>/dev/null || true
-                wait "$METRO_PID" 2>/dev/null || true
-              fi
-            }
-
-            trap cleanup EXIT
-
-            cd "$ROOT_DIR/apps/example"
-            E2E=true yarn start &
-            METRO_PID=$!
-
-            sleep 20
-
-            adb install -r "$ROOT_DIR/apps/example/android/app/build/outputs/apk/debug/app-debug.apk"
+            # Wait for Metro bundler
+            sleep 10
+            
+            # Install and launch app
+            adb install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk
             adb shell monkey -p com.microsoft.reacttestapp 1
-
-            cd "$ROOT_DIR/packages/skia"
-            CI=true yarn e2e --testPathIgnorePatterns Paragraphs
-            BASH
-            chmod +x /tmp/run-android-tests.sh
-            /tmp/run-android-tests.sh
+            
+            # Run tests
+            cd packages/skia && CI=true yarn e2e --testPathIgnorePatterns Paragraphs
 
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: failure()
