@@ -251,18 +251,10 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Build example for Android
-        id: build-example-android
         env:
           JAVA_OPTS: "-XX:MaxHeapSize=16g"
         run: |
           yarn turbo run build:android --concurrency 1
-
-      - name: Upload Android build reports
-        if: ${{ failure() && steps.build-example-android.outcome == 'failure' }}
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
-        with:
-          name: android-build-reports
-          path: apps/example/android/build/reports
 
       - name: Cache apk
         uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
@@ -275,7 +267,7 @@ jobs:
   test-android:
     needs: build-android
     runs-on: macos-latest-large
-    timeout-minutes: 40
+    timeout-minutes: 60
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
@@ -302,24 +294,12 @@ jobs:
       - name: Emulator - Create
         run: $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n Pixel_API_30 --device 'Nexus 5X' --package "system-images;android-30;default;x86_64" --sdcard 512M
 
-      - name: Check emulator acceleration
-        run: $ANDROID_HOME/emulator/emulator -accel-check
-
-      - name: List available GPU modes
-        run: $ANDROID_HOME/emulator/emulator -help-gpu
-
-      - name: Boot with verbose logging
-        run: $ANDROID_HOME/emulator/emulator -memory 8192 -avd Pixel_API_30 -wipe-data -no-window -gpu angle_indirect -no-snapshot -noaudio -no-boot-anim -verbose -debug-init &
+      - name: Emulator - Boot
+        run: $ANDROID_HOME/emulator/emulator -memory 4096 -avd Pixel_API_30 -wipe-data -no-window -gpu angle_indirect -no-snapshot -noaudio -no-boot-anim &
 
       - name: ADB Wait For Device
         run: adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
         timeout-minutes: 10
-
-      - name: Check GPU renderer info
-        run: |
-          adb shell dumpsys SurfaceFlinger | grep -A 5 "GLES"
-          adb shell getprop | grep -i gpu
-          adb shell getprop | grep -i render
 
       - name: Start Package Manager
         working-directory: apps/example/
@@ -341,29 +321,12 @@ jobs:
           PACKAGE_NAME: 'com.microsoft.reacttestapp'
         run: adb shell monkey -p ${{ env.PACKAGE_NAME }} 1  
 
-      - name: Clear logcat buffer
-        run: adb logcat -c
-
       # On fabric, the system fonts are slightly different
       # so wont run the paragraph tests there for now
       - name: Run e2e Tests
-        id: run-e2e-tests
         working-directory: packages/skia
         run: |
           CI=true yarn e2e --testPathIgnorePatterns Paragraphs
-
-      - name: Capture logcat on failure
-        if: ${{ failure() && steps.run-e2e-tests.outcome == 'failure' }}
-        run: |
-          mkdir -p artifacts
-          adb logcat -d > artifacts/android-logcat.txt
-
-      - name: Upload logcat on failure
-        if: ${{ failure() && steps.run-e2e-tests.outcome == 'failure' }}
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
-        with:
-          path: artifacts/android-logcat.txt
-          name: android-logcat
 
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: failure()
