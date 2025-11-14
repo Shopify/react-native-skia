@@ -67,8 +67,13 @@ public class SkiaPictureView extends SkiaBaseView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (coldStart || textureViewReady) {
-            return; // Skip warmup when disabled or TextureView has caught up
+        if (coldStart) {
+            return; // Warmup disabled explicitly
+        }
+
+        final boolean shouldDrawWarmup = !textureViewReady || warmupBitmap != null;
+        if (!shouldDrawWarmup) {
+            return;
         }
 
         // Get the view dimensions
@@ -76,20 +81,28 @@ public class SkiaPictureView extends SkiaBaseView {
         int height = getHeight();
 
         if (width > 0 && height > 0) {
-            // Get the bitmap data from native
-            int[] pixels = getBitmap(width, height);
+            if (!textureViewReady) {
+                // Get the bitmap data from native
+                int[] pixels = getBitmap(width, height);
 
-            if (pixels != null && pixels.length == width * height) {
-                // Prepare or update the warmup bitmap
-                if (warmupBitmap == null || warmupBitmap.getWidth() != width || warmupBitmap.getHeight() != height) {
-                    releaseWarmupBitmap();
-                    warmupBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                if (pixels != null && pixels.length == width * height) {
+                    // Prepare or update the warmup bitmap
+                    if (warmupBitmap == null || warmupBitmap.getWidth() != width || warmupBitmap.getHeight() != height) {
+                        releaseWarmupBitmap();
+                        warmupBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                    }
+                    warmupBitmap.setPixels(pixels, 0, width, 0, 0, width, height);
                 }
-                warmupBitmap.setPixels(pixels, 0, width, 0, 0, width, height);
+            }
 
-                // Draw the bitmap on the canvas
+            if (warmupBitmap != null) {
                 canvas.drawBitmap(warmupBitmap, 0, 0, paint);
             }
+        }
+
+        if (textureViewReady) {
+            releaseWarmupBitmap();
+            updateWillNotDraw();
         }
     }
 
@@ -99,8 +112,11 @@ public class SkiaPictureView extends SkiaBaseView {
             return;
         }
         textureViewReady = true;
-        releaseWarmupBitmap();
-        updateWillNotDraw();
+        if (warmupBitmap != null) {
+            postInvalidateOnAnimation();
+        } else {
+            updateWillNotDraw();
+        }
     }
 
     private native HybridData initHybrid(SkiaManager skiaManager);

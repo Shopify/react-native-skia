@@ -134,9 +134,14 @@ protected:
       canvas->restore();
     }
 
-    sk_sp<SkImage> image = surface->makeImageSnapshot()->makeNonTextureImage();
-    if (!image) {
+    sk_sp<SkImage> snapshot = surface->makeImageSnapshot();
+    if (!snapshot) {
       return jni::JArrayInt::newArray(0);
+    }
+
+    sk_sp<SkImage> image = snapshot->makeNonTextureImage();
+    if (!image) {
+      image = snapshot;
     }
 
     std::vector<int32_t> pixels(pixelCount);
