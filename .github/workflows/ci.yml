@@ -271,18 +271,29 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
           script: |
-            # Start package manager in background
-            cd apps/example && E2E=true yarn start &
-            
-            # Wait for Metro bundler
-            sleep 10
-            
-            # Install and launch app
+            set -euo pipefail
+
+            cleanup() {
+              if [[ -n "${METRO_PID:-}" ]]; then
+                kill "$METRO_PID" 2>/dev/null || true
+                wait "$METRO_PID" 2>/dev/null || true
+              fi
+            }
+
+            pushd apps/example > /dev/null
+            E2E=true yarn start &
+            METRO_PID=$!
+            trap cleanup EXIT
+            popd > /dev/null
+
+            sleep 20
+
             adb install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk
             adb shell monkey -p com.microsoft.reacttestapp 1
             
-            # Run tests
-            cd packages/skia && CI=true yarn e2e --testPathIgnorePatterns Paragraphs
+            pushd packages/skia > /dev/null
+            CI=true yarn e2e --testPathIgnorePatterns Paragraphs
+            popd > /dev/null
 
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: failure()
