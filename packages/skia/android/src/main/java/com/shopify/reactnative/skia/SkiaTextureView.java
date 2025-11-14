@@ -50,6 +50,7 @@ public class SkiaTextureView extends TextureView implements TextureView.SurfaceT
     private long _prevTimestamp = 0;
     @Override
     public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surface) {
+        mApi.onSurfaceTextureUpdated(surface);
         if (!mDebug) {
             return;
         }

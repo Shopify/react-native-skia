@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.SurfaceTexture;
+import android.view.Surface;
 
 import com.facebook.jni.HybridData;
 import com.facebook.jni.annotations.DoNotStrip;
@@ -12,9 +14,11 @@ import com.facebook.react.bridge.ReactContext;
 public class SkiaPictureView extends SkiaBaseView {
     @DoNotStrip
     private HybridData mHybridData;
-    private Paint paint = new Paint();
+    private final Paint paint = new Paint(Paint.FILTER_BITMAP_FLAG);
 
     private boolean coldStart = false;
+    private boolean textureViewReady = false;
+    private Bitmap warmupBitmap = null;
 
     public SkiaPictureView(Context context) {
         super(context);
@@ -24,7 +28,10 @@ public class SkiaPictureView extends SkiaBaseView {
 
     public void setColdStart(boolean coldStart) {
         this.coldStart = coldStart;
-        setWillNotDraw(coldStart);
+        if (coldStart) {
+            releaseWarmupBitmap();
+        }
+        updateWillNotDraw();
     }
 
     @Override
@@ -34,11 +41,34 @@ public class SkiaPictureView extends SkiaBaseView {
     }
 
     @Override
+    public void onSurfaceCreated(Surface surface, int width, int height) {
+        textureViewReady = true;
+        releaseWarmupBitmap();
+        updateWillNotDraw();
+        super.onSurfaceCreated(surface, width, height);
+    }
+
+    @Override
+    public void onSurfaceTextureCreated(SurfaceTexture surface, int width, int height) {
+        textureViewReady = false;
+        updateWillNotDraw();
+        super.onSurfaceTextureCreated(surface, width, height);
+    }
+
+    @Override
+    public void onSurfaceDestroyed() {
+        textureViewReady = false;
+        releaseWarmupBitmap();
+        updateWillNotDraw();
+        super.onSurfaceDestroyed();
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (coldStart) {
-            return; // Skip warmup
+        if (coldStart || textureViewReady) {
+            return; // Skip warmup when disabled or TextureView has caught up
         }
 
         // Get the view dimensions
@@ -50,14 +80,27 @@ public class SkiaPictureView extends SkiaBaseView {
             int[] pixels = getBitmap(width, height);
 
             if (pixels != null && pixels.length == width * height) {
-                // Create bitmap from pixels
-                Bitmap bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
+                // Prepare or update the warmup bitmap
+                if (warmupBitmap == null || warmupBitmap.getWidth() != width || warmupBitmap.getHeight() != height) {
+                    releaseWarmupBitmap();
+                    warmupBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                }
+                warmupBitmap.setPixels(pixels, 0, width, 0, 0, width, height);
 
                 // Draw the bitmap on the canvas
-                paint.setFilterBitmap(true);
-                canvas.drawBitmap(bitmap, 0, 0, paint);
+                canvas.drawBitmap(warmupBitmap, 0, 0, paint);
             }
         }
+    }
+
+    @Override
+    protected void surfaceTextureUpdated(SurfaceTexture surface) {
+        if (textureViewReady) {
+            return;
+        }
+        textureViewReady = true;
+        releaseWarmupBitmap();
+        updateWillNotDraw();
     }
 
     private native HybridData initHybrid(SkiaManager skiaManager);
@@ -77,4 +120,19 @@ public class SkiaPictureView extends SkiaBaseView {
     protected native void unregisterView();
 
     protected native int[] getBitmap(int width, int height);
+
+    private void releaseWarmupBitmap() {
+        if (warmupBitmap != null && !warmupBitmap.isRecycled()) {
+            warmupBitmap.recycle();
+        }
+        warmupBitmap = null;
+    }
+
+    private void updateWillNotDraw() {
+        boolean skipDraw = coldStart || textureViewReady;
+        setWillNotDraw(skipDraw);
+        if (!skipDraw) {
+            invalidate();
+        }
+    }
 }

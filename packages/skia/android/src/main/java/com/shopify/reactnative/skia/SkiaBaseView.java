@@ -65,6 +65,11 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
     }
 
     @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+        surfaceTextureUpdated(surface);
+    }
+
+    @Override
     public void onSurfaceDestroyed() {
         surfaceDestroyed();
     }
@@ -74,6 +79,8 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
     protected abstract void surfaceSizeChanged(Object surface, int width, int height, boolean opaque);
 
     protected abstract void surfaceDestroyed();
+
+    protected abstract void surfaceTextureUpdated(SurfaceTexture surface);
 
     protected abstract void setDebugMode(boolean show);
 

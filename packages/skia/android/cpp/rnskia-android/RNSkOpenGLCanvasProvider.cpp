@@ -79,12 +79,25 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
 void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurfaceTexture,
                                                 int width, int height,
                                                 bool opaque) {
+  // Thread check
+  JNIEnv *env = facebook::jni::Environment::current();
+  jclass threadClass = env->FindClass("java/lang/Thread");
+  jmethodID currentThreadMethod = env->GetStaticMethodID(threadClass, "currentThread", "()Ljava/lang/Thread;");
+  jobject currentThread = env->CallStaticObjectMethod(threadClass, currentThreadMethod);
+  jmethodID getNameMethod = env->GetMethodID(threadClass, "getName", "()Ljava/lang/String;");
+  jstring threadName = (jstring)env->CallObjectMethod(currentThread, getNameMethod);
+  const char* threadNameStr = env->GetStringUTFChars(threadName, nullptr);
+  __android_log_print(ANDROID_LOG_ERROR, "RNSkia", "surfaceAvailable called on thread: %s", threadNameStr);
+  env->ReleaseStringUTFChars(threadName, threadNameStr);
+  env->DeleteLocalRef(threadClass);
+  env->DeleteLocalRef(currentThread);
+  env->DeleteLocalRef(threadName);
+
   // Release the old surface
   _surfaceHolder = nullptr;
 
   // Create renderer!
   ANativeWindow *window = nullptr;
-  JNIEnv *env = facebook::jni::Environment::current();
   if (!opaque) {
     _jSurfaceTexture = env->NewGlobalRef(jSurfaceTexture);
     jclass surfaceClass = env->FindClass("android/view/Surface");
