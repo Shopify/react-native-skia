@@ -25,16 +25,22 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
           script: |
-            set -eu
+            cat <<'BASH' > /tmp/run-android-smoke.sh
+            #!/usr/bin/env bash
+            set -euo pipefail
+
             ROOT_DIR="$GITHUB_WORKSPACE"
             METRO_PID=""
+
             cleanup() {
-              if [ -n "$METRO_PID" ]; then
+              if [[ -n "$METRO_PID" ]]; then
                 kill "$METRO_PID" 2>/dev/null || true
                 wait "$METRO_PID" 2>/dev/null || true
               fi
             }
+
             trap cleanup EXIT
+
             cd "$ROOT_DIR/apps/example"
             sleep 60 &
             METRO_PID=$!
@@ -47,3 +53,6 @@ jobs:
             adb shell getprop ro.build.version.release >/tmp/emulator-version.txt
             cd "$ROOT_DIR/packages/skia"
             cat /tmp/emulator-version.txt
+            BASH
+            chmod +x /tmp/run-android-smoke.sh
+            /tmp/run-android-smoke.sh
