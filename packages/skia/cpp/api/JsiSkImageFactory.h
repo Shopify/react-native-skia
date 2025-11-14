@@ -92,6 +92,29 @@ public:
         });
   }
 
+  JSI_HOST_FUNCTION(MakeImageFromViewTagSync) {
+    // TODO: add safety checks on args[0] and args[1]
+    auto viewTag = arguments[0].asNumber();
+    auto jsiImage = arguments[1].asObject(runtime).asHostObject<JsiSkImage>(runtime);
+    auto context = getContext();
+    // TODO: check we are on the main thread
+    if (viewTag != -1) {
+      auto result = context->makeViewScreenshotSync(viewTag);
+      jsiImage->setObject(result);
+      return jsi::Object::createFromHostObject(
+            runtime, std::make_shared<JsiSkImage>(getContext(), std::move(result)));
+    }
+    return jsi::Value::undefined();
+  }
+
+  JSI_HOST_FUNCTION(setRenderEffectAndroid) {
+    auto viewTag = static_cast<int>(arguments[0].asNumber());
+    auto shaderString = arguments[1].asString(runtime).utf8(runtime);
+    auto context = getContext();
+    context->setRenderEffectAndroid(viewTag, shaderString);
+    return jsi::Value::undefined();
+  }
+
   JSI_HOST_FUNCTION(MakeImageFromNativeTextureUnstable) {
     auto texInfo = JsiTextureInfo::fromValue(runtime, arguments[0]);
     auto image = getContext()->makeImageFromNativeTexture(
@@ -119,6 +142,8 @@ public:
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromEncoded),
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTag),
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTagSync),
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, setRenderEffectAndroid),
                        JSI_EXPORT_FUNC(JsiSkImageFactory,
                                        MakeImageFromNativeBuffer),
                        JSI_EXPORT_FUNC(JsiSkImageFactory,

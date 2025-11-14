@@ -498,22 +498,24 @@ public:
     auto [x, y, width, height, rect, fit, image, sampling] = props;
     if (image.has_value()) {
       auto img = image.value();
-      auto hasRect =
-          rect.has_value() || (width.has_value() && height.has_value());
-      if (hasRect) {
-        auto src = SkRect::MakeXYWH(0, 0, img->width(), img->height());
-        auto dst = rect.has_value()
-                       ? rect.value()
-                       : SkRect::MakeXYWH(x, y, width.value(), height.value());
-        auto rects = RNSkiaImage::fitRects(fit, src, dst);
-        ctx->canvas->drawImageRect(
-            img, rects.src, rects.dst,
-            sampling.value_or(SkSamplingOptions(SkFilterMode::kLinear)),
-            &(ctx->getPaint()), SkCanvas::kStrict_SrcRectConstraint);
-      } else {
-        throw std::runtime_error(
-            "Image node could not resolve image dimension props.");
-      }
+        if (img != nullptr) {
+            auto hasRect =
+            rect.has_value() || (width.has_value() && height.has_value());
+            if (hasRect) {
+                auto src = SkRect::MakeXYWH(0, 0, img->width(), img->height());
+                auto dst = rect.has_value()
+                ? rect.value()
+                : SkRect::MakeXYWH(x, y, width.value(), height.value());
+                auto rects = RNSkiaImage::fitRects(fit, src, dst);
+                ctx->canvas->drawImageRect(
+                                           img, rects.src, rects.dst,
+                                           sampling.value_or(SkSamplingOptions(SkFilterMode::kLinear)),
+                                           &(ctx->getPaint()), SkCanvas::kStrict_SrcRectConstraint);
+            } else {
+                throw std::runtime_error(
+                                         "Image node could not resolve image dimension props.");
+            }
+        }
     }
   }
 };

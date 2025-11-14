@@ -48,13 +48,16 @@ export const Snapshot = () => {
   const image = useSharedValue<SkImage | null>(null);
   const takeSnapshot = useCallback(async () => {
     if (viewRef.current != null) {
+      const start = performance.now();
       image.value = await makeImageFromView(viewRef as RefObject<View>);
+      const end = performance.now();
+      console.log("Performance: " + Math.round(end - start) + " ms");
     }
   }, [image]);
 
   return (
     <View style={{ flex: 1 }}>
-      <View ref={viewRef} style={styles.view}>
+      <View ref={viewRef} style={styles.view} collapsable={false}>
         <Component />
       </View>
       <Button title="Take snapshot" onPress={takeSnapshot} />
