@@ -99,11 +99,6 @@ public class SkiaPictureView extends SkiaBaseView {
                 canvas.drawBitmap(warmupBitmap, 0, 0, paint);
             }
         }
-
-        if (textureViewReady) {
-            releaseWarmupBitmap();
-            updateWillNotDraw();
-        }
     }
 
     @Override
