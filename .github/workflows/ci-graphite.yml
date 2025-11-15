@@ -153,7 +153,7 @@ jobs:
           arch: x86_64
           profile: Nexus 5X
           force-avd-creation: true
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          emulator-options: -no-snapshot-save -no-window -gpu swangle_indirect -noaudio -no-boot-anim
           disable-animations: true
           script: |
             # Wait for Metro bundler
