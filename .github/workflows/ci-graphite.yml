@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   build-android-graphite:
-    runs-on: macos-latest-large
+    runs-on: ubuntu-latest
     continue-on-error: true
     env:
       TURBO_CACHE_DIR: .turbo/android
@@ -34,6 +34,18 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           graphite: true
 
+      - name: Free disk space
+        run: |
+          echo "Disk usage before cleanup:"
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker image prune -af || true
+          sudo apt-get clean
+          echo "Disk usage after cleanup:"
+          df -h
+
       - name: Cache turborepo for Android
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
@@ -42,12 +54,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turborepo-android
 
+      - name: Install JDK
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
       - name: Install NDK
         uses: nttld/setup-ndk@afb4c9964b521afb97c864b7d40b11e6911bd410 # v1.5.0
         id: setup-ndk
         with:
           ndk-version: r26d
-  
+
       - name: Set ANDROID_NDK
         run: echo "ANDROID_NDK=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
 
@@ -71,7 +89,7 @@ jobs:
 
       - name: Build example for Android
         env:
-          JAVA_OPTS: "-XX:MaxHeapSize=16g"
+          JAVA_OPTS: "-XX:MaxHeapSize=6g"
         run: |
           yarn turbo run build:android --concurrency 1
 
@@ -84,23 +102,12 @@ jobs:
           key: apk-${{ github.sha }}
 
   test-android-graphite:
+    needs: build-android-graphite
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
-      - name: Free disk space
-        run: |
-          echo "Disk usage before cleanup:"
-          df -h
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo docker image prune -af || true
-          sudo apt-get clean
-          echo "Disk usage after cleanup:"
-          df -h
-
       - name: checkout
         uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v5.0.0
         with:
@@ -111,12 +118,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           graphite: true
-
-      - name: Install JDK
-        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
-        with:
-          distribution: 'zulu'
-          java-version: '17'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -134,46 +135,12 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Cache turborepo for Android
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      - name: Restore APK
+        id: cache-apk
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
         with:
-          path: ${{ env.TURBO_CACHE_DIR }}
-          key: ${{ runner.os }}-turborepo-android-${{ hashFiles('yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-turborepo-android
-
-      - name: Install NDK
-        uses: nttld/setup-ndk@afb4c9964b521afb97c864b7d40b11e6911bd410 # v1.5.0
-        id: setup-ndk
-        with:
-          ndk-version: r26d
-  
-      - name: Set ANDROID_NDK
-        run: echo "ANDROID_NDK=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
-
-      - name: Finalize Android SDK
-        run: |
-          /bin/bash -c "yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null"
-
-      - name: Install Android SDK
-        run: |
-          echo "sdk.dir=$ANDROID_HOME" > $GITHUB_WORKSPACE/apps/example/android/local.properties
-
-      - name: Cache Gradle
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: |
-            ~/.gradle/wrapper
-            ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('./apps/example/android/gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      - name: Build example for Android
-        env:
-          JAVA_OPTS: "-XX:MaxHeapSize=16g"
-        run: |
-          yarn turbo run build:android --concurrency 1
+          path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
+          key: apk-${{ github.sha }}
 
       - name: Start Package Manager
         working-directory: apps/example/
@@ -189,11 +156,15 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
           script: |
+            # Wait for Metro bundler
             sleep 10
+
+            # Install and launch app
             adb install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk
             adb shell monkey -p com.microsoft.reacttestapp 1
-            cd packages/skia
-            CI=true E2E=true yarn test -i Paths --testPathIgnorePatterns Paragraphs
+
+            # Run tests
+            cd packages/skia && CI=true yarn e2e --testPathIgnorePatterns Paragraphs
 
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: failure()
