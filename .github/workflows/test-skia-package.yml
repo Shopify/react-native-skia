@@ -195,9 +195,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
-      SKIA_TEST_DIR: ${{ runner.temp }}/skia-test-app
-      SKIA_ANDROID_SCREENSHOT: ${{ runner.temp }}/skia-test-screenshot-android.png
-      SKIA_METRO_LOG: ${{ runner.temp }}/metro-android.log
+      SKIA_TEST_DIR: ${{ github.workspace }}/skia-test-app
+      SKIA_ANDROID_SCREENSHOT: ${{ github.workspace }}/skia-test-screenshot-android.png
+      SKIA_METRO_LOG: ${{ github.workspace }}/metro-android.log
 
     steps:
       - name: Checkout repository
