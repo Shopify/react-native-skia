@@ -38,6 +38,8 @@ public:
 
   void runTaskOnMainThread(std::function<void()> task);
 
+  void notifyTaskReadyNative();
+
   float getPixelDensity() { return _pixelDensity; }
 
   sk_sp<SkImage> takeScreenshotFromViewTag(size_t tag);
@@ -49,6 +51,9 @@ private:
   jni::global_ref<JniPlatformContext::javaobject> javaPart_;
 
   float _pixelDensity;
+  std::mutex _mainThreadTasksMutex;
+  std::queue<std::function<void()>> _mainThreadTasks;
+  bool _mainThreadDispatchScheduled = false;
 
   explicit JniPlatformContext(
       jni::alias_ref<JniPlatformContext::jhybridobject> jThis,
