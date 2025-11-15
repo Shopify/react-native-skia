@@ -194,23 +194,8 @@ jobs:
     if: inputs.test_android
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    env:
-      TEST_APP_DIR: /tmp/skia-test-app
-      EXPO_NO_INTERACTIVE: 1
 
     steps:
-      - name: Free disk space
-        run: |
-          echo "Disk usage before cleanup:"
-          df -h
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo docker image prune -af || true
-          sudo apt-get clean
-          echo "Disk usage after cleanup:"
-          df -h
-
       - name: Checkout repository
         uses: actions/checkout@v5
 
@@ -253,8 +238,8 @@ jobs:
 
       - name: Create test directory
         run: |
-          mkdir -p "$TEST_APP_DIR"
-          cd "$TEST_APP_DIR"
+          mkdir -p ~/skia-test-app
+          cd ~/skia-test-app
           pwd
 
       - name: Create Expo app with Skia template
@@ -264,7 +249,7 @@ jobs:
           max_attempts: 3
           retry_wait_seconds: 120
           command: |
-            cd "$TEST_APP_DIR"
+            cd ~/skia-test-app
             echo "Creating Expo app with Skia template..."
             yarn create expo-app my-app -e with-skia
 
@@ -278,7 +263,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
       - name: Install React Native Skia
-        working-directory: ${{ env.TEST_APP_DIR }}/my-app
+        working-directory: ~/skia-test-app/my-app
         run: |
           VERSION="${{ inputs.skia_version }}"
           if [ "$VERSION" == "latest" ]; then
@@ -296,44 +281,38 @@ jobs:
           fi
 
       - name: Show installed Skia version
-        working-directory: ${{ env.TEST_APP_DIR }}/my-app
+        working-directory: ~/skia-test-app/my-app
         run: |
           echo "Installed React Native Skia version:"
           yarn list @shopify/react-native-skia --depth=0
 
       - name: Install TypeScript dependencies
-        working-directory: ${{ env.TEST_APP_DIR }}/my-app
+        working-directory: ~/skia-test-app/my-app
         run: |
           echo "Installing TypeScript dependencies..."
           npx expo install typescript @types/react
 
       - name: Install Expo Dev Client
-        working-directory: ${{ env.TEST_APP_DIR }}/my-app
+        working-directory: ~/skia-test-app/my-app
         run: |
           echo "Installing expo-dev-client..."
           npx expo install expo-dev-client
 
       - name: Prebuild native directories
-        working-directory: ${{ env.TEST_APP_DIR }}/my-app
+        working-directory: ~/skia-test-app/my-app
         run: |
           echo "Generating native Android directory..."
           npx expo prebuild --platform android
 
-      - name: Configure Android SDK path
-        working-directory: ${{ env.TEST_APP_DIR }}/my-app/android
-        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
-
       - name: Start Metro bundler
-        working-directory: ${{ env.TEST_APP_DIR }}/my-app
+        working-directory: ~/skia-test-app/my-app
         run: |
           echo "Starting Metro bundler in background..."
-          nohup npx expo start --dev-client >/tmp/metro-android.log 2>&1 &
+          npx expo start --dev-client &
           sleep 10
 
       - name: Run Android Emulator Tests
         uses: reactivecircus/android-emulator-runner@v2
-        env:
-          TEST_APP_DIR: ${{ env.TEST_APP_DIR }}
         with:
           api-level: ${{ inputs.android_api_level }}
           arch: x86_64
@@ -341,26 +320,23 @@ jobs:
           force-avd-creation: true
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
+          working-directory: ~/skia-test-app/my-app
           script: |
-            set -euo pipefail
-            cd "$TEST_APP_DIR/my-app"
-            echo "Building and running Android app..."
+            echo "Building and running Android app on emulator..."
             npx expo run:android
+
             echo "Waiting for app to launch and stabilize..."
             sleep 120
-            echo "Capturing screenshot from Android emulator..."
-            adb exec-out screencap -p > "$TEST_APP_DIR/android-screenshot.png" || echo "Failed to capture screenshot"
 
-      - name: Stop Metro bundler
-        if: always()
-        run: pkill -f "expo start" || true
+            echo "Capturing screenshot from Android emulator..."
+            adb exec-out screencap -p > ~/skia-test-screenshot-android.png || echo "Failed to capture screenshot"
 
       - name: Upload screenshot
         if: always()
         uses: actions/upload-artifact@v5
         with:
           name: android-emulator-screenshot-${{ github.run_id }}
-          path: ${{ env.TEST_APP_DIR }}/android-screenshot.png
+          path: ~/skia-test-screenshot-android.png
           if-no-files-found: ignore
 
       - name: Print test summary
@@ -372,7 +348,7 @@ jobs:
           echo "✓ Created Expo app with Skia template"
           echo "✓ Installed @shopify/react-native-skia@${{ inputs.skia_version }}"
           echo "✓ Installed expo-dev-client"
-          echo "✓ Built and ran Android app on API level ${{ inputs.android_api_level }} using ubuntu-latest + KVM emulator"
+          echo "✓ Built and ran Android app on API level ${{ inputs.android_api_level }}"
           echo "================================================================"
 
   test-skia-web:
