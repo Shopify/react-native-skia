@@ -232,12 +232,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install JDK
-        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         
