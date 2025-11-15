@@ -194,6 +194,10 @@ jobs:
     if: inputs.test_android
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      SKIA_TEST_DIR: ${{ runner.temp }}/skia-test-app
+      SKIA_ANDROID_SCREENSHOT: ${{ runner.temp }}/skia-test-screenshot-android.png
+      SKIA_METRO_LOG: ${{ runner.temp }}/metro-android.log
 
     steps:
       - name: Checkout repository
@@ -238,8 +242,8 @@ jobs:
 
       - name: Create test directory
         run: |
-          mkdir -p ~/skia-test-app
-          cd ~/skia-test-app
+          mkdir -p "$SKIA_TEST_DIR"
+          cd "$SKIA_TEST_DIR"
           pwd
 
       - name: Create Expo app with Skia template
@@ -249,7 +253,7 @@ jobs:
           max_attempts: 3
           retry_wait_seconds: 120
           command: |
-            cd ~/skia-test-app
+            cd "$SKIA_TEST_DIR"
             echo "Creating Expo app with Skia template..."
             yarn create expo-app my-app -e with-skia
 
@@ -263,7 +267,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
       - name: Install React Native Skia
-        working-directory: ~/skia-test-app/my-app
+        working-directory: ${{ env.SKIA_TEST_DIR }}/my-app
         run: |
           VERSION="${{ inputs.skia_version }}"
           if [ "$VERSION" == "latest" ]; then
@@ -281,37 +285,30 @@ jobs:
           fi
 
       - name: Show installed Skia version
-        working-directory: ~/skia-test-app/my-app
+        working-directory: ${{ env.SKIA_TEST_DIR }}/my-app
         run: |
           echo "Installed React Native Skia version:"
           yarn list @shopify/react-native-skia --depth=0
 
       - name: Install TypeScript dependencies
-        working-directory: ~/skia-test-app/my-app
+        working-directory: ${{ env.SKIA_TEST_DIR }}/my-app
         run: |
           echo "Installing TypeScript dependencies..."
           npx expo install typescript @types/react
 
       - name: Install Expo Dev Client
-        working-directory: ~/skia-test-app/my-app
+        working-directory: ${{ env.SKIA_TEST_DIR }}/my-app
         run: |
           echo "Installing expo-dev-client..."
           npx expo install expo-dev-client
 
       - name: Prebuild native directories
-        working-directory: ~/skia-test-app/my-app
+        working-directory: ${{ env.SKIA_TEST_DIR }}/my-app
         run: |
           echo "Generating native Android directory..."
           npx expo prebuild --platform android
 
-      - name: Start Metro bundler
-        working-directory: ~/skia-test-app/my-app
-        run: |
-          echo "Starting Metro bundler in background..."
-          npx expo start --dev-client &
-          sleep 10
-
-      - name: Run Android Emulator Tests
+      - name: Run Android emulator tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ inputs.android_api_level }}
@@ -321,22 +318,27 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
           script: |
-            cd ~/skia-test-app/my-app
+            set -euo pipefail
+            cd "${SKIA_TEST_DIR}/my-app"
+            echo "Starting Metro bundler in background..."
+            npx expo start --dev-client > "${SKIA_METRO_LOG}" 2>&1 &
+            METRO_PID=$!
+            trap "kill $METRO_PID >/dev/null 2>&1 || true; wait $METRO_PID >/dev/null 2>&1 || true" EXIT
+            sleep 10
             echo "Building and running Android app on emulator..."
             npx expo run:android
-
             echo "Waiting for app to launch and stabilize..."
             sleep 120
-
             echo "Capturing screenshot from Android emulator..."
-            adb exec-out screencap -p > ~/skia-test-screenshot-android.png || echo "Failed to capture screenshot"
+            adb exec-out screencap -p > "${SKIA_ANDROID_SCREENSHOT}" || echo "Failed to capture screenshot"
+            echo "Android emulator test sequence completed."
 
       - name: Upload screenshot
         if: always()
         uses: actions/upload-artifact@v5
         with:
           name: android-emulator-screenshot-${{ github.run_id }}
-          path: ~/skia-test-screenshot-android.png
+          path: ${{ env.SKIA_ANDROID_SCREENSHOT }}
           if-no-files-found: ignore
 
       - name: Print test summary
