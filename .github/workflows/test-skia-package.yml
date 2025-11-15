@@ -58,10 +58,9 @@ jobs:
           corepack enable
           yarn --version
 
-      - name: Install Expo CLI
+      - name: Verify Expo CLI
         run: |
-          npm install -g expo-cli eas-cli
-          expo --version
+          npx --yes expo@latest --version
 
       - name: List available simulators
         run: xcrun simctl list devices
@@ -214,10 +213,9 @@ jobs:
           corepack enable
           yarn --version
 
-      - name: Install Expo CLI
+      - name: Verify Expo CLI
         run: |
-          npm install -g expo-cli eas-cli
-          expo --version
+          npx --yes expo@latest --version
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -336,18 +334,6 @@ jobs:
             adb exec-out screencap -p > "${SKIA_ANDROID_SCREENSHOT}" || echo "Failed to capture screenshot"
             echo "Android emulator test sequence completed."
 
-      - name: Stop Metro bundler
-        if: always()
-        run: |
-          if [ -f "${SKIA_METRO_PID}" ]; then
-            METRO_PID=$(cat "${SKIA_METRO_PID}")
-            if kill -0 "$METRO_PID" 2>/dev/null; then
-              echo "Stopping Metro bundler (PID $METRO_PID)..."
-              kill "$METRO_PID" || true
-            fi
-            rm -f "${SKIA_METRO_PID}"
-          fi
-
       - name: Upload screenshot
         if: always()
         uses: actions/upload-artifact@v5
@@ -387,10 +373,9 @@ jobs:
           corepack enable
           yarn --version
 
-      - name: Install Expo CLI
+      - name: Verify Expo CLI
         run: |
-          npm install -g expo-cli eas-cli
-          expo --version
+          npx --yes expo@latest --version
 
       - name: Create test directory
         run: |
