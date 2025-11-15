@@ -320,8 +320,8 @@ jobs:
           force-avd-creation: true
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
-          working-directory: ~/skia-test-app/my-app
           script: |
+            cd ~/skia-test-app/my-app
             echo "Building and running Android app on emulator..."
             npx expo run:android
 
