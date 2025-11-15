@@ -14,7 +14,7 @@ public class SkiaPictureView extends SkiaBaseView {
     private HybridData mHybridData;
     private Paint paint = new Paint();
 
-    private boolean coldStart = true;
+    private boolean coldStart = false;
 
     public SkiaPictureView(Context context) {
         super(context);
@@ -23,9 +23,8 @@ public class SkiaPictureView extends SkiaBaseView {
     }
 
     public void setColdStart(boolean coldStart) {
-        // disabled for now
-        //this.coldStart = coldStart;
-        //setWillNotDraw(coldStart);
+        this.coldStart = coldStart;
+        setWillNotDraw(coldStart);
     }
 
     @Override

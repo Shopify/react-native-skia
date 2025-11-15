@@ -120,11 +120,6 @@ export const HomeScreen = () => {
         description="Drawing Performance Test"
         route="Performance"
       />
-      <HomeScreenButton
-        title="⏱ Time to First Frame"
-        description="Skia vs native first render"
-        route="FirstFrame"
-      />
       <HomeScreenButton title="📹 Video" description="Video" route="Video" />
       <HomeScreenButton title="💬 Chat" description="Chat" route="Chat" />
     </ScrollView>
