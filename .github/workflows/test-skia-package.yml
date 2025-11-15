@@ -198,6 +198,7 @@ jobs:
       SKIA_TEST_DIR: /tmp/skia-test-app
       SKIA_ANDROID_SCREENSHOT: /tmp/skia-test-screenshot-android.png
       SKIA_METRO_LOG: /tmp/metro-android.log
+      SKIA_METRO_PID: /tmp/metro-android.pid
 
     steps:
       - name: Checkout repository
@@ -308,6 +309,13 @@ jobs:
           echo "Generating native Android directory..."
           npx expo prebuild --platform android
 
+      - name: Start Metro bundler
+        working-directory: ${{ env.SKIA_TEST_DIR }}/my-app
+        run: |
+          echo "Starting Metro bundler in background..."
+          npx expo start --dev-client > "${SKIA_METRO_LOG}" 2>&1 &
+          echo $! > "${SKIA_METRO_PID}"
+
       - name: Run Android emulator tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -318,12 +326,7 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
           script: |
-            set -euo pipefail
             cd "${SKIA_TEST_DIR}/my-app"
-            echo "Starting Metro bundler in background..."
-            npx expo start --dev-client > "${SKIA_METRO_LOG}" 2>&1 &
-            METRO_PID=$!
-            trap "kill $METRO_PID >/dev/null 2>&1 || true; wait $METRO_PID >/dev/null 2>&1 || true" EXIT
             sleep 10
             echo "Building and running Android app on emulator..."
             npx expo run:android
@@ -332,6 +335,18 @@ jobs:
             echo "Capturing screenshot from Android emulator..."
             adb exec-out screencap -p > "${SKIA_ANDROID_SCREENSHOT}" || echo "Failed to capture screenshot"
             echo "Android emulator test sequence completed."
+
+      - name: Stop Metro bundler
+        if: always()
+        run: |
+          if [ -f "${SKIA_METRO_PID}" ]; then
+            METRO_PID=$(cat "${SKIA_METRO_PID}")
+            if kill -0 "$METRO_PID" 2>/dev/null; then
+              echo "Stopping Metro bundler (PID $METRO_PID)..."
+              kill "$METRO_PID" || true
+            fi
+            rm -f "${SKIA_METRO_PID}"
+          fi
 
       - name: Upload screenshot
         if: always()
