@@ -14,7 +14,7 @@ public class SkiaPictureView extends SkiaBaseView {
     private HybridData mHybridData;
     private Paint paint = new Paint();
 
-    private boolean coldStart = true;
+    private boolean coldStart = false;
 
     public SkiaPictureView(Context context) {
         super(context);

@@ -141,7 +141,7 @@ protected:
 
     sk_sp<SkImage> image = snapshot->makeNonTextureImage();
     if (!image) {
-      image = snapshot;
+      return jni::JArrayInt::newArray(0);
     }
 
     if (!image) {
