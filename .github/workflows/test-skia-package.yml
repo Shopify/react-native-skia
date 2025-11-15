@@ -58,9 +58,10 @@ jobs:
           corepack enable
           yarn --version
 
-      - name: Verify Expo CLI
+      - name: Install Expo CLI
         run: |
-          npx --yes expo@latest --version
+          npm install -g expo-cli eas-cli
+          expo --version
 
       - name: List available simulators
         run: xcrun simctl list devices
@@ -191,15 +192,8 @@ jobs:
 
   test-skia-android:
     if: inputs.test_android
-    runs-on: ubuntu-latest
+    runs-on: macos-latest-large
     timeout-minutes: 60
-    env:
-      SKIA_TEST_DIR: /tmp/skia-test-app
-      SKIA_ANDROID_SCREENSHOT: /tmp/skia-test-screenshot-android.png
-      SKIA_METRO_LOG: /tmp/metro-android.log
-      SKIA_METRO_PID: /tmp/metro-android.pid
-      SKIA_ANDROID_APK: /tmp/skia-test-app/my-app/android/app/build/outputs/apk/debug/app-debug.apk
-      SKIA_ANDROID_APP_ID: com.shopify.reactnativeskia.testapp
 
     steps:
       - name: Checkout repository
@@ -215,9 +209,10 @@ jobs:
           corepack enable
           yarn --version
 
-      - name: Verify Expo CLI
+      - name: Install Expo CLI
         run: |
-          npx --yes expo@latest --version
+          npm install -g expo-cli eas-cli
+          expo --version
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -225,26 +220,18 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Download Android system image
+        run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "system-images;android-${{ inputs.android_api_level }};default;x86_64"
 
-      - name: Install Android SDK tools
+      - name: Create Android emulator
         run: |
-          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
-          echo "$ANDROID_HOME/emulator" >> $GITHUB_PATH
-
-      - name: Enable KVM group perms
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
+          echo "Creating Android emulator..."
+          $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test_avd --device '${{ inputs.android_device }}' --package "system-images;android-${{ inputs.android_api_level }};default;x86_64" --sdcard 512M --force
 
       - name: Create test directory
         run: |
-          mkdir -p "$SKIA_TEST_DIR"
-          cd "$SKIA_TEST_DIR"
+          mkdir -p /Users/runner/skia-test-app
+          cd /Users/runner/skia-test-app
           pwd
 
       - name: Create Expo app with Skia template
@@ -254,7 +241,7 @@ jobs:
           max_attempts: 3
           retry_wait_seconds: 120
           command: |
-            cd "$SKIA_TEST_DIR"
+            cd /Users/runner/skia-test-app
             echo "Creating Expo app with Skia template..."
             yarn create expo-app my-app -e with-skia
 
@@ -267,23 +254,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
-      - name: Configure Expo identifiers
-        working-directory: ${{ env.SKIA_TEST_DIR }}/my-app
-        run: |
-          node - <<'NODE'
-          const fs = require('fs');
-          const configPath = 'app.json';
-          const app = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-          app.expo = app.expo || {};
-          app.expo.android = app.expo.android || {};
-          app.expo.android.package = 'com.shopify.reactnativeskia.testapp';
-          app.expo.ios = app.expo.ios || {};
-          app.expo.ios.bundleIdentifier = app.expo.ios.bundleIdentifier || 'com.shopify.reactnativeskia.testapp';
-          fs.writeFileSync(configPath, JSON.stringify(app, null, 2) + '\n');
-          NODE
-
       - name: Install React Native Skia
-        working-directory: ${{ env.SKIA_TEST_DIR }}/my-app
+        working-directory: /Users/runner/skia-test-app/my-app
         run: |
           VERSION="${{ inputs.skia_version }}"
           if [ "$VERSION" == "latest" ]; then
@@ -301,74 +273,72 @@ jobs:
           fi
 
       - name: Show installed Skia version
-        working-directory: ${{ env.SKIA_TEST_DIR }}/my-app
+        working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Installed React Native Skia version:"
           yarn list @shopify/react-native-skia --depth=0
 
       - name: Install TypeScript dependencies
-        working-directory: ${{ env.SKIA_TEST_DIR }}/my-app
+        working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Installing TypeScript dependencies..."
           npx expo install typescript @types/react
 
       - name: Install Expo Dev Client
-        working-directory: ${{ env.SKIA_TEST_DIR }}/my-app
+        working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Installing expo-dev-client..."
           npx expo install expo-dev-client
 
       - name: Prebuild native directories
-        working-directory: ${{ env.SKIA_TEST_DIR }}/my-app
+        working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Generating native Android directory..."
           npx expo prebuild --platform android
 
-      - name: Build Android debug APK
-        working-directory: ${{ env.SKIA_TEST_DIR }}/my-app/android
-        run: ./gradlew assembleDebug
+      - name: Start Android emulator
+        run: |
+          echo "Starting Android emulator in background..."
+          $ANDROID_HOME/emulator/emulator -memory 4096 -avd test_avd -wipe-data -no-window -gpu angle_indirect -no-snapshot -noaudio -no-boot-anim &
+
+      - name: Wait for emulator to boot
+        run: |
+          echo "Waiting for Android emulator to boot..."
+          adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
+          echo "Emulator is ready"
+          adb devices
+        timeout-minutes: 10
 
       - name: Start Metro bundler
-        working-directory: ${{ env.SKIA_TEST_DIR }}/my-app
+        working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Starting Metro bundler in background..."
-          npx expo start --dev-client > "${SKIA_METRO_LOG}" 2>&1 &
-          echo $! > "${SKIA_METRO_PID}"
+          npx expo start --dev-client &
+          sleep 10
 
-      - name: Run Android emulator tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ inputs.android_api_level }}
-          arch: x86_64
-          profile: ${{ inputs.android_device }}
-          force-avd-creation: true
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
-          disable-animations: true
-          script: |
-            bash -lc "set -euo pipefail
-            cd \"${SKIA_TEST_DIR}/my-app\"
-            if [ ! -f \"${SKIA_ANDROID_APK}\" ]; then
-              echo 'APK not found at' \"${SKIA_ANDROID_APK}\"
-              exit 1
-            fi
-            sleep 10
-            echo 'Installing Android app on emulator...'
-            adb install -r \"${SKIA_ANDROID_APK}\"
-            echo 'Launching application...'
-            adb shell monkey -p \"${SKIA_ANDROID_APP_ID}\" 1
-            echo 'Waiting for app to launch and stabilize...'
-            sleep 120
-            echo 'Capturing screenshot from Android emulator...'
-            adb exec-out screencap -p > \"${SKIA_ANDROID_SCREENSHOT}\" || echo 'Failed to capture screenshot'
-            echo 'Android emulator test sequence completed.'
-            "
+      - name: Build and run Android app
+        working-directory: /Users/runner/skia-test-app/my-app
+        run: |
+          echo "Building and running Android app on emulator..."
+          npx expo run:android
+
+      - name: Wait for app to launch
+        run: |
+          echo "Waiting for app to launch and stabilize..."
+          sleep 120
+
+      - name: Capture emulator screenshot
+        if: always()
+        run: |
+          echo "Capturing screenshot from Android emulator..."
+          adb exec-out screencap -p > /Users/runner/skia-test-screenshot-android.png || echo "Failed to capture screenshot"
 
       - name: Upload screenshot
         if: always()
         uses: actions/upload-artifact@v5
         with:
           name: android-emulator-screenshot-${{ github.run_id }}
-          path: ${{ env.SKIA_ANDROID_SCREENSHOT }}
+          path: /Users/runner/skia-test-screenshot-android.png
           if-no-files-found: ignore
 
       - name: Print test summary
@@ -402,9 +372,10 @@ jobs:
           corepack enable
           yarn --version
 
-      - name: Verify Expo CLI
+      - name: Install Expo CLI
         run: |
-          npx --yes expo@latest --version
+          npm install -g expo-cli eas-cli
+          expo --version
 
       - name: Create test directory
         run: |
