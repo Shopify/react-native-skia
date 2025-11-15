@@ -164,7 +164,7 @@ jobs:
             adb shell monkey -p com.microsoft.reacttestapp 1
 
             # Run tests
-            cd packages/skia && CI=true yarn e2e --testPathIgnorePatterns Paragraphs
+            cd packages/skia && CI=true yarn test -i e2e/Path --testPathIgnorePatterns Paragraphs
 
       - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: failure()
