@@ -322,7 +322,7 @@ describe("Drawings", () => {
     // Result: Group 2 (Yellow) should be ON TOP of Group 1 (Cyan), despite Cyan having higher zIndex.
     const image = await surface.draw(
       <>
-        <Group zIndex={1}>
+        <Group>
           <Circle cx={width - r} cy={r} r={r} color="magenta" zIndex={0} />
           <Circle cx={r} cy={r} r={r} color="cyan" zIndex={10} />
         </Group>
