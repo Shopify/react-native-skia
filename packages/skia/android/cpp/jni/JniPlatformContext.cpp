@@ -204,9 +204,11 @@ void JniPlatformContext::runTaskOnMainThread(std::function<void()> task) {
 }
 
 void JniPlatformContext::notifyTaskReadyExternal() {
-  static auto method =
-      javaPart_->getClass()->getMethod<void()>("notifyTaskReady");
-  method(javaPart_.get());
+    jni::ThreadScope ts;
+
+    static auto method =
+        javaPart_->getClass()->getMethod<void()>("notifyTaskReady");
+    method(javaPart_.get());
 }
 
 void JniPlatformContext::notifyTaskReadyNative() {
