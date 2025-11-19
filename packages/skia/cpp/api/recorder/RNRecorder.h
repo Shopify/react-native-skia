@@ -698,11 +698,11 @@ public:
 
     std::function<void(Node *)> executeNode = [&](Node *node) {
       // Sort children
-      std::stable_sort(node->children.begin(), node->children.end(),
-                       [](const std::shared_ptr<Node> &a,
-                          const std::shared_ptr<Node> &b) {
-                         return a->zIndex < b->zIndex;
-                       });
+      std::stable_sort(
+          node->children.begin(), node->children.end(),
+          [](const std::shared_ptr<Node> &a, const std::shared_ptr<Node> &b) {
+            return a->zIndex < b->zIndex;
+          });
 
       // Execute Group begin
       if (node->cmd && node->cmd->type == CommandType::Group) {

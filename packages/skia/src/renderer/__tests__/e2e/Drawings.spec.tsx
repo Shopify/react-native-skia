@@ -294,7 +294,13 @@ describe("Drawings", () => {
       <Group>
         <Circle cx={r} cy={r} r={r} color="cyan" zIndex={-1} />
         <Circle cx={width - r} cy={r} r={r} color="magenta" zIndex={0} />
-        <Circle cx={width / 2} cy={height - r} r={r} color="yellow" zIndex={1} />
+        <Circle
+          cx={width / 2}
+          cy={height - r}
+          r={r}
+          color="yellow"
+          zIndex={1}
+        />
       </Group>
     );
     checkImage(image, "snapshots/drawings/zIndex-negative.png");
@@ -306,11 +312,31 @@ describe("Drawings", () => {
       <Group>
         <Circle cx={r} cy={r} r={r} color="cyan" zIndex={10} />
         <Circle cx={width - r} cy={r} r={r} color="magenta" zIndex={-5} />
-        <Circle cx={width / 2} cy={height - r} r={r} color="yellow" zIndex={0} />
+        <Circle
+          cx={width / 2}
+          cy={height - r}
+          r={r}
+          color="yellow"
+          zIndex={0}
+        />
         <Circle cx={width / 2} cy={r} r={r} color="red" zIndex={5} />
       </Group>
     );
     checkImage(image, "snapshots/drawings/zIndex-mixed.png");
+  });
+  it("Should preserve Paint context when zIndex is applied", async () => {
+    const { width, height } = surface;
+    const half = width / 2;
+    const image = await surface.draw(
+      <Group color="blue">
+        <Group color="red" zIndex={1}>
+          {/* This Rect receives its color exclusively from the Paint context. */}
+          <Rect x={0} y={0} width={half} height={height} />
+        </Group>
+        <Rect x={half} y={0} width={half} height={height} zIndex={0} />
+      </Group>
+    );
+    checkImage(image, "snapshots/drawings/zIndex-paint.png");
   });
   it("Should respect zIndex scoping in sibling Groups", async () => {
     const { width, height } = surface;
@@ -327,7 +353,13 @@ describe("Drawings", () => {
           <Circle cx={r} cy={r} r={r} color="cyan" zIndex={10} />
         </Group>
         <Group>
-          <Circle cx={width / 2} cy={height - r} r={r} color="yellow" zIndex={-10} />
+          <Circle
+            cx={width / 2}
+            cy={height - r}
+            r={r}
+            color="yellow"
+            zIndex={-10}
+          />
         </Group>
       </>
     );

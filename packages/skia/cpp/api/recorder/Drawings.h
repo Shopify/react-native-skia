@@ -28,7 +28,6 @@ public:
     convertProperty(runtime, object, "cy", props.cy, variables);
     convertProperty(runtime, object, "c", props.c, variables);
     convertProperty(runtime, object, "r", props.r, variables);
-
   }
 
   void draw(DrawingCtx *ctx) {
