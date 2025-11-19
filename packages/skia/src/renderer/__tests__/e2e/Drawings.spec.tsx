@@ -351,4 +351,86 @@ describe("Drawings", () => {
     );
     checkImage(image, "snapshots/drawings/zIndex-groups.png");
   });
+
+  it("Should respect zIndex scoping with internal zIndex in sibling Groups", async () => {
+    const { width, height } = surface;
+    const r = width * 0.25;
+    const cx = width / 2;
+    const cy = height / 2;
+
+    // Group 1 (zIndex 10) -> Drawn TOP
+    //   - Cyan (zIndex -100)
+    //   - Magenta (zIndex 50)
+    // Group 2 (zIndex 0) -> Drawn BOTTOM
+    //   - Yellow (zIndex 100)
+    //   - Black (zIndex -50)
+
+    // Expected Order (Bottom to Top):
+    // 1. Group 2: Black (-50)
+    // 2. Group 2: Yellow (100)
+    // 3. Group 1: Cyan (-100)
+    // 4. Group 1: Magenta (50)
+
+    const image = await surface.draw(
+      <>
+        <Group zIndex={10}>
+          <Circle cx={cx - 40} cy={cy - 40} r={r} color="cyan" zIndex={-100} />
+          <Circle cx={cx + 40} cy={cy - 40} r={r} color="magenta" zIndex={50} />
+        </Group>
+        <Group zIndex={0}>
+          <Circle cx={cx - 40} cy={cy + 40} r={r} color="yellow" zIndex={100} />
+          <Circle cx={cx + 40} cy={cy + 40} r={r} color="black" zIndex={-50} />
+        </Group>
+      </>
+    );
+    checkImage(image, "snapshots/drawings/zIndex-groups-internal.png");
+  });
+
+  it("Should respect zIndex in deeply nested Groups", async () => {
+    const { width, height } = surface;
+    const r = width * 0.2;
+    const cx = width / 2;
+    const cy = height / 2;
+
+    // Hierarchy:
+    // Root
+    //  - Group A (zIndex 10) -> Drawn TOP
+    //      - Group A1 (zIndex 5) -> Drawn TOP of A
+    //          - Red (zIndex 1)
+    //          - Orange (zIndex 2)
+    //      - Group A2 (zIndex 1) -> Drawn BOTTOM of A
+    //          - Blue (zIndex 1)
+    //          - Purple (zIndex 2)
+    //  - Group B (zIndex 0) -> Drawn BOTTOM
+    //      - Green (zIndex 100)
+    //      - Gray (zIndex -100)
+
+    // Expected Order (Bottom to Top):
+    // 1. Group B: Gray (-100)
+    // 2. Group B: Green (100)
+    // 3. Group A -> Group A2: Blue (1)
+    // 4. Group A -> Group A2: Purple (2)
+    // 5. Group A -> Group A1: Red (1)
+    // 6. Group A -> Group A1: Orange (2)
+
+    const image = await surface.draw(
+      <>
+        <Group zIndex={10}>
+          <Group zIndex={5}>
+            <Circle cx={cx - 30} cy={cy - 30} r={r} color="red" zIndex={1} />
+            <Circle cx={cx - 10} cy={cy - 10} r={r} color="orange" zIndex={2} />
+          </Group>
+          <Group zIndex={1}>
+            <Circle cx={cx + 30} cy={cy - 30} r={r} color="blue" zIndex={1} />
+            <Circle cx={cx + 50} cy={cy - 10} r={r} color="purple" zIndex={2} />
+          </Group>
+        </Group>
+        <Group zIndex={0}>
+          <Circle cx={cx} cy={cy + 50} r={r} color="green" zIndex={100} />
+          <Circle cx={cx} cy={cy + 70} r={r} color="gray" zIndex={-100} />
+        </Group>
+      </>
+    );
+    checkImage(image, "snapshots/drawings/zIndex-nested-deep.png");
+  });
 });
