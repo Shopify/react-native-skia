@@ -23,7 +23,7 @@ class JsiSkPictureFactory : public JsiSkHostObject {
 public:
   JSI_HOST_FUNCTION(MakePicture) {
     // Handle null case - create JsiSkPicture with nullptr
-    if (arguments[0].isNull()) {
+    if (arguments[0].isNull() || arguments[0].isUndefined()) {
       auto hostObjectInstance =
           std::make_shared<JsiSkPicture>(getContext(), nullptr);
       return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
@@ -33,11 +33,27 @@ public:
     if (!arguments[0].isObject()) {
       throw jsi::JSError(runtime, "Expected arraybuffer as first parameter");
     }
-    auto array = arguments[0].asObject(runtime);
-    jsi::ArrayBuffer buffer =
-        array.getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
-            .asObject(runtime)
-            .getArrayBuffer(runtime);
+    auto obj = arguments[0].asObject(runtime);
+
+    // Check if it's a JsiSkData object first
+    if (auto jsiData = obj.asHostObject<JsiSkData>(runtime)) {
+      auto data = jsiData->getObject();
+      auto picture = SkPicture::MakeFromData(data.get());
+      if (picture != nullptr) {
+        auto hostObjectInstance =
+            std::make_shared<JsiSkPicture>(getContext(), std::move(picture));
+        return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+            runtime, hostObjectInstance, getContext());
+      }
+      return jsi::Value::undefined();
+    }
+
+    // Get ArrayBuffer - try buffer property first (Uint8Array, etc.), then direct ArrayBuffer
+    jsi::ArrayBuffer buffer = obj.hasProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
+        ? obj.getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
+              .asObject(runtime)
+              .getArrayBuffer(runtime)
+        : obj.getArrayBuffer(runtime);
 
     sk_sp<SkData> data =
         SkData::MakeWithCopy(buffer.data(runtime), buffer.size(runtime));
