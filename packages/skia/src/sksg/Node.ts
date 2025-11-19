@@ -1,4 +1,4 @@
-import { NodeType } from "../dom/types";
+import { NodeType, DrawingNodeProps } from "../dom/types";
 
 export interface Node<Props = unknown> {
   type: NodeType;
@@ -93,6 +93,11 @@ export const sortNodeChildren = (parent: Node) => {
     } else {
       drawings.push(node);
     }
+  });
+  drawings.sort((a, b) => {
+    const zIndexA = (a.props as DrawingNodeProps).zIndex ?? 0;
+    const zIndexB = (b.props as DrawingNodeProps).zIndex ?? 0;
+    return zIndexA - zIndexB;
   });
   return {
     colorFilters,

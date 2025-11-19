@@ -10,6 +10,7 @@ import {
   Path,
   Rect,
   Image,
+  BlurMask,
 } from "../../components";
 import { images, importSkia, surface } from "../setup";
 
@@ -250,5 +251,86 @@ describe("Drawings", () => {
       </Group>
     );
     checkImage(image, "snapshots/drawings/image-default-props.png");
+  });
+  it("Should use the zIndex (1)", async () => {
+    const { width, height } = surface;
+    const r = width * 0.33;
+    const image = await surface.draw(
+      <Group>
+        <BlurMask style="solid" blur={10} />
+        <Circle cx={r} cy={r} r={r} color="cyan" zIndex={2} />
+        <Circle cx={width - r} cy={r} r={r} color="magenta" zIndex={1} />
+        <Circle
+          cx={width / 2}
+          cy={height - r}
+          r={r}
+          color="yellow"
+          zIndex={0}
+        />
+      </Group>
+    );
+    checkImage(image, "snapshots/drawings/zIndex.png");
+  });
+
+  it("Should use the zIndex (2)", async () => {
+    const { width, height } = surface;
+    const r = width * 0.33;
+    const image = await surface.draw(
+      <Group>
+        <BlurMask style="solid" blur={10} />
+        <Circle cx={r} cy={r} r={r} color="cyan" zIndex={2} />
+        <Circle cx={width - r} cy={r} r={r} color="magenta" zIndex={1}>
+          <BlurMask style="solid" blur={0} />
+        </Circle>
+        <Circle cx={width / 2} cy={height - r} r={r} color="yellow" />
+      </Group>
+    );
+    checkImage(image, "snapshots/drawings/zIndex2.png");
+  });
+  it("Should use negative zIndex", async () => {
+    const { width, height } = surface;
+    const r = width * 0.33;
+    const image = await surface.draw(
+      <Group>
+        <Circle cx={r} cy={r} r={r} color="cyan" zIndex={-1} />
+        <Circle cx={width - r} cy={r} r={r} color="magenta" zIndex={0} />
+        <Circle cx={width / 2} cy={height - r} r={r} color="yellow" zIndex={1} />
+      </Group>
+    );
+    checkImage(image, "snapshots/drawings/zIndex-negative.png");
+  });
+  it("Should use mixed zIndex", async () => {
+    const { width, height } = surface;
+    const r = width * 0.33;
+    const image = await surface.draw(
+      <Group>
+        <Circle cx={r} cy={r} r={r} color="cyan" zIndex={10} />
+        <Circle cx={width - r} cy={r} r={r} color="magenta" zIndex={-5} />
+        <Circle cx={width / 2} cy={height - r} r={r} color="yellow" zIndex={0} />
+        <Circle cx={width / 2} cy={r} r={r} color="red" zIndex={5} />
+      </Group>
+    );
+    checkImage(image, "snapshots/drawings/zIndex-mixed.png");
+  });
+  it("Should respect zIndex scoping in sibling Groups", async () => {
+    const { width, height } = surface;
+    const r = width * 0.33;
+    // Group 1 is drawn first.
+    // Inside Group 1: Cyan (zIndex 10) is drawn after Magenta (zIndex 0).
+    // Group 2 is drawn second.
+    // Inside Group 2: Yellow (zIndex -10) is drawn before others in Group 2 (none here).
+    // Result: Group 2 (Yellow) should be ON TOP of Group 1 (Cyan), despite Cyan having higher zIndex.
+    const image = await surface.draw(
+      <>
+        <Group>
+          <Circle cx={width - r} cy={r} r={r} color="magenta" zIndex={0} />
+          <Circle cx={r} cy={r} r={r} color="cyan" zIndex={10} />
+        </Group>
+        <Group>
+          <Circle cx={width / 2} cy={height - r} r={r} color="yellow" zIndex={-10} />
+        </Group>
+      </>
+    );
+    checkImage(image, "snapshots/drawings/zIndex-nested.png");
   });
 });
