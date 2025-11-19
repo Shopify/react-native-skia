@@ -333,4 +333,22 @@ describe("Drawings", () => {
     );
     checkImage(image, "snapshots/drawings/zIndex-nested.png");
   });
+
+  it("Should respect zIndex on sibling Groups", async () => {
+    const { width } = surface;
+    const r = width * 0.33;
+    // Group 1 (Cyan) has zIndex 10, so it should be drawn ON TOP of Group 2 (Yellow, zIndex 0)
+    // even though Group 2 is defined later.
+    const image = await surface.draw(
+      <>
+        <Group zIndex={10}>
+          <Circle cx={r} cy={r} r={r} color="cyan" />
+        </Group>
+        <Group zIndex={0}>
+          <Circle cx={width - r} cy={r} r={r} color="yellow" />
+        </Group>
+      </>
+    );
+    checkImage(image, "snapshots/drawings/zIndex-groups.png");
+  });
 });
