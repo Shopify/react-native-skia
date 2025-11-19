@@ -122,6 +122,15 @@ int getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 }
 
 template <>
+std::optional<int> getPropertyValue(jsi::Runtime &runtime,
+                                    const jsi::Value &value) {
+  if (value.isNull() || value.isUndefined()) {
+    return std::nullopt;
+  }
+  return getPropertyValue<int>(runtime, value);
+}
+
+template <>
 std::string getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isString()) {
     return value.asString(runtime).utf8(runtime);

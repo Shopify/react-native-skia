@@ -20,55 +20,16 @@ import type {
   ImageSVGProps,
   ParagraphProps,
   AtlasProps,
+  GroupProps,
   DrawingNodeProps,
   SkottieProps,
 } from "../../dom/types";
+import type { AnimatedProps } from "../../renderer/processors/Animations/Animations";
 
-// export enum CommandType {
-//   // Context
-//   Group = "Group",
-//   SavePaint = "SavePaint",
-//   RestorePaint = "RestorePaint",
-//   SaveCTM = "SaveCTM",
-//   RestoreCTM = "RestoreCTM",
-//   PushColorFilter = "PushColorFilter",
-//   PushBlurMaskFilter = "PushBlurMaskFilter",
-//   PushImageFilter = "PushImageFilter",
-//   PushPathEffect = "PushPathEffect",
-//   PushShader = "PushShader",
-//   ComposeColorFilter = "ComposeColorFilter",
-//   ComposeImageFilter = "ComposeImageFilter",
-//   ComposePathEffect = "ComposePathEffect",
-//   MaterializePaint = "MaterializePaint",
-//   SaveBackdropFilter = "SaveBackdropFilter",
-//   SaveLayer = "SaveLayer",
-//   RestorePaintDeclaration = "RestorePaintDeclaration",
-//   // Drawing
-//   DrawBox = "DrawBox",
-//   DrawImage = "DrawImage",
-//   DrawCircle = "DrawCircle",
-//   DrawPaint = "DrawPaint",
-//   DrawPoints = "DrawPoints",
-//   DrawPath = "DrawPath",
-//   DrawRect = "DrawRect",
-//   DrawRRect = "DrawRRect",
-//   DrawOval = "DrawOval",
-//   DrawLine = "DrawLine",
-//   DrawPatch = "DrawPatch",
-//   DrawVertices = "DrawVertices",
-//   DrawDiffRect = "DrawDiffRect",
-//   DrawText = "DrawText",
-//   DrawTextPath = "DrawTextPath",
-//   DrawTextBlob = "DrawTextBlob",
-//   DrawGlyphs = "DrawGlyphs",
-//   DrawPicture = "DrawPicture",
-//   DrawImageSVG = "DrawImageSVG",
-//   DrawParagraph = "DrawParagraph",
-//   DrawAtlas = "DrawAtlas",
-// }
 export enum CommandType {
   // Context
   Group,
+  RestoreGroup,
   SavePaint,
   RestorePaint,
   SaveCTM,
@@ -137,6 +98,7 @@ export const isCommand = <T extends CommandType>(
 
 interface GroupCommand extends Command<CommandType.Group> {
   children: Command[];
+  props: AnimatedProps<GroupProps>;
 }
 
 export const isGroup = (command: Command): command is GroupCommand => {

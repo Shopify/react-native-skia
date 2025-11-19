@@ -195,4 +195,160 @@ public:
   }
 };
 
+class GroupCmd : public Command {
+public:
+  CTMCmdProps ctmProps;
+  PaintCmdProps paintProps;
+
+  GroupCmd(jsi::Runtime &runtime, const jsi::Object &object,
+           Variables &variables)
+      : Command(CommandType::Group) {
+    // CTM Props
+    convertProperty(runtime, object, "transform", ctmProps.transform,
+                    variables);
+    convertProperty(runtime, object, "origin", ctmProps.origin, variables);
+    convertProperty(runtime, object, "matrix", ctmProps.matrix, variables);
+    convertProperty(runtime, object, "clip", ctmProps.clip, variables);
+    convertProperty(runtime, object, "invertClip", ctmProps.invertClip,
+                    variables);
+    convertProperty(runtime, object, "layer", ctmProps.layer, variables);
+
+    // Paint Props
+    convertProperty(runtime, object, "color", paintProps.color, variables);
+    convertProperty(runtime, object, "blendMode", paintProps.blendMode,
+                    variables);
+    convertProperty(runtime, object, "style", paintProps.style, variables);
+    convertProperty(runtime, object, "strokeJoin", paintProps.strokeJoin,
+                    variables);
+    convertProperty(runtime, object, "strokeCap", paintProps.strokeCap,
+                    variables);
+    convertProperty(runtime, object, "strokeMiter", paintProps.strokeMiter,
+                    variables);
+    convertProperty(runtime, object, "strokeWidth", paintProps.strokeWidth,
+                    variables);
+    convertProperty(runtime, object, "opacity", paintProps.opacity, variables);
+    convertProperty(runtime, object, "antiAlias", paintProps.antiAlias,
+                    variables);
+    convertProperty(runtime, object, "dither", paintProps.dither, variables);
+    convertProperty(runtime, object, "paint", paintProps.paint, variables);
+
+    // zIndex
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
+  }
+
+  void begin(DrawingCtx *ctx) {
+    // Apply CTM logic (SaveCTMCmd logic)
+    auto clip = ctmProps.clip;
+    auto invertClip = ctmProps.invertClip;
+    auto layer = ctmProps.layer;
+    auto hasTransform =
+        ctmProps.matrix.has_value() || ctmProps.transform.has_value();
+    auto hasClip = clip.has_value();
+    auto op = invertClip.has_value() && invertClip.value()
+                  ? SkClipOp::kDifference
+                  : SkClipOp::kIntersect;
+    auto shouldSave = hasTransform || hasClip || layer.has_value();
+    SkMatrix m3 =
+        processTransform(ctmProps.matrix, ctmProps.transform, ctmProps.origin);
+    if (shouldSave) {
+      if (layer.has_value()) {
+        if (std::holds_alternative<bool>(layer.value())) {
+          ctx->canvas->saveLayer(nullptr, nullptr);
+        } else {
+          auto paint = std::get<SkPaint>(layer.value());
+          ctx->canvas->saveLayer(nullptr, &paint);
+        }
+      } else {
+        ctx->canvas->save();
+      }
+      ctx->canvas->concat(m3);
+    }
+    if (clip.has_value()) {
+      auto c = clip.value();
+      if (std::holds_alternative<SkPath>(c)) {
+        auto path = std::get<SkPath>(c);
+        ctx->canvas->clipPath(path, op);
+      } else if (std::holds_alternative<std::string>(c)) {
+        auto pathString = std::get<std::string>(c);
+        SkPath result;
+        if (SkParsePath::FromSVGString(pathString.c_str(), &result)) {
+          ctx->canvas->clipPath(result, op);
+        } else {
+          throw std::runtime_error("Could not parse path from string.");
+        }
+      } else if (std::holds_alternative<SkRect>(c)) {
+        auto rect = std::get<SkRect>(c);
+        ctx->canvas->clipRect(rect, op);
+      } else if (std::holds_alternative<SkRRect>(c)) {
+        auto rrect = std::get<SkRRect>(c);
+        ctx->canvas->clipRRect(rrect, op);
+      }
+    }
+
+    // Apply Paint logic (SavePaintCmd logic)
+    if (paintProps.paint.has_value()) {
+      ctx->pushPaint(paintProps.paint.value());
+      return;
+    }
+    ctx->savePaint();
+    // Group is always standalone=false in terms of paint inheritance?
+    // Actually, Group inherits paint from parent.
+    // But if it has paint props, it modifies the current paint.
+    // We should check how `SavePaint` is used.
+    // `SavePaint` is used for `<Paint>` component.
+    // `<Group>` component also has paint props.
+    // In `Node.ts`, `Group` handles paint props.
+    // So we should apply them to the current paint.
+
+    auto &paint = ctx->getPaint();
+    if (paintProps.opacity.has_value()) {
+      ctx->setOpacity(ctx->getOpacity() * paintProps.opacity.value());
+    }
+    if (paintProps.color.has_value()) {
+      paint.setShader(nullptr);
+      paint.setColor(paintProps.color.value());
+    }
+    if (paintProps.blendMode.has_value()) {
+      paint.setBlendMode(paintProps.blendMode.value());
+    }
+    if (paintProps.style.has_value()) {
+      paint.setStyle(paintProps.style.value());
+    }
+    if (paintProps.strokeJoin.has_value()) {
+      paint.setStrokeJoin(paintProps.strokeJoin.value());
+    }
+    if (paintProps.strokeCap.has_value()) {
+      paint.setStrokeCap(paintProps.strokeCap.value());
+    }
+    if (paintProps.strokeMiter.has_value()) {
+      paint.setStrokeMiter(paintProps.strokeMiter.value());
+    }
+    if (paintProps.strokeWidth.has_value()) {
+      paint.setStrokeWidth(paintProps.strokeWidth.value());
+    }
+    if (paintProps.antiAlias.has_value()) {
+      paint.setAntiAlias(paintProps.antiAlias.value());
+    }
+    if (paintProps.dither.has_value()) {
+      paint.setDither(paintProps.dither.value());
+    }
+  }
+
+  void end(DrawingCtx *ctx) {
+    // Restore Paint
+    ctx->restorePaint();
+
+    // Restore CTM
+    auto layer = ctmProps.layer;
+    auto hasTransform =
+        ctmProps.matrix.has_value() || ctmProps.transform.has_value();
+    auto hasClip = ctmProps.clip.has_value();
+    auto shouldSave = hasTransform || hasClip || layer.has_value();
+
+    if (shouldSave) {
+      ctx->canvas->restore();
+    }
+  }
+};
+
 } // namespace RNSkia

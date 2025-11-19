@@ -202,7 +202,9 @@ const pushPaints = (recorder: BaseRecorder, paints: Node<any>[]) => {
 
 const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
   if (node.type === NodeType.Group) {
-    recorder.saveGroup();
+    recorder.saveGroup(node.props);
+  } else if (node.props.zIndex) {
+    recorder.saveGroup({ zIndex: node.props.zIndex });
   }
   const { props } = node;
   const {
@@ -326,7 +328,7 @@ const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
   if (shouldRestore) {
     recorder.restoreCTM();
   }
-  if (node.type === NodeType.Group) {
+  if (node.type === NodeType.Group || node.props.zIndex) {
     recorder.restoreGroup();
   }
 };

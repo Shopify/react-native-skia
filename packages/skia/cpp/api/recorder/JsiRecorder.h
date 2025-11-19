@@ -110,7 +110,11 @@ public:
   }
 
   JSI_HOST_FUNCTION(saveGroup) {
-    getObject()->saveGroup();
+    jsi::Object props(runtime);
+    if (count > 0 && arguments[0].isObject()) {
+      props = arguments[0].asObject(runtime);
+    }
+    getObject()->saveGroup(runtime, props);
     return jsi::Value::undefined();
   }
 

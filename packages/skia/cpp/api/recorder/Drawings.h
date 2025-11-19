@@ -28,6 +28,7 @@ public:
     convertProperty(runtime, object, "cy", props.cy, variables);
     convertProperty(runtime, object, "c", props.c, variables);
     convertProperty(runtime, object, "r", props.r, variables);
+
   }
 
   void draw(DrawingCtx *ctx) {
@@ -63,6 +64,7 @@ public:
     convertProperty(runtime, object, "width", props.width, variables);
     convertProperty(runtime, object, "height", props.height, variables);
     convertProperty(runtime, object, "rect", props.rect, variables);
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) {
@@ -96,6 +98,7 @@ public:
     convertProperty(runtime, object, "end", props.end, variables);
     convertProperty(runtime, object, "stroke", props.stroke, variables);
     convertProperty(runtime, object, "fillType", props.fillType, variables);
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) {
@@ -202,6 +205,7 @@ public:
       : Command(CommandType::DrawLine) {
     convertProperty(runtime, object, "p1", props.p1, variables);
     convertProperty(runtime, object, "p2", props.p2, variables);
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) {
@@ -229,6 +233,7 @@ public:
     convertProperty(runtime, object, "path", props.path, variables);
     convertProperty(runtime, object, "initialOffset", props.initialOffset,
                     variables);
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) {
@@ -327,6 +332,7 @@ public:
     convertProperty(runtime, object, "text", props.text, variables);
     convertProperty(runtime, object, "x", props.x, variables);
     convertProperty(runtime, object, "y", props.y, variables);
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) {
@@ -399,6 +405,7 @@ public:
       convertProperty(runtime, shadowObj, "color", shadow.color, variables);
       convertProperty(runtime, shadowObj, "inner", shadow.inner, variables);
     }
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) {
@@ -492,6 +499,7 @@ public:
     convertProperty(runtime, object, "width", props.width, variables);
     convertProperty(runtime, object, "height", props.height, variables);
     convertProperty(runtime, object, "rect", props.rect, variables);
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) {
@@ -532,6 +540,7 @@ public:
       : Command(CommandType::DrawPoints) {
     convertProperty(runtime, object, "points", props.points, variables);
     convertProperty(runtime, object, "mode", props.mode, variables);
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) {
@@ -562,6 +571,7 @@ public:
     convertProperty(runtime, object, "width", props.width, variables);
     convertProperty(runtime, object, "height", props.height, variables);
     convertProperty(runtime, object, "r", props.r, variables);
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) {
@@ -600,6 +610,7 @@ public:
     convertProperty(runtime, object, "width", props.width, variables);
     convertProperty(runtime, object, "height", props.height, variables);
     convertProperty(runtime, object, "rect", props.rect, variables);
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) {
@@ -634,6 +645,7 @@ public:
     convertProperty(runtime, object, "colors", props.colors, variables);
     convertProperty(runtime, object, "texture", props.texture, variables);
     convertProperty(runtime, object, "blendMode", props.blendMode, variables);
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) {
@@ -684,6 +696,7 @@ public:
     convertProperty(runtime, object, "mode", props.mode, variables);
     convertProperty(runtime, object, "blendMode", props.blendMode, variables);
     convertProperty(runtime, object, "indices", props.indices, variables);
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) {
@@ -724,6 +737,7 @@ public:
       : Command(CommandType::DrawDiffRect) {
     convertProperty(runtime, object, "outer", props.outer, variables);
     convertProperty(runtime, object, "inner", props.inner, variables);
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) {
@@ -747,6 +761,7 @@ public:
     convertProperty(runtime, object, "blob", props.blob, variables);
     convertProperty(runtime, object, "x", props.x, variables);
     convertProperty(runtime, object, "y", props.y, variables);
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) {
@@ -772,6 +787,7 @@ public:
     convertProperty(runtime, object, "x", props.x, variables);
     convertProperty(runtime, object, "y", props.y, variables);
     convertProperty(runtime, object, "glyphs", props.glyphs, variables);
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) {
@@ -801,6 +817,7 @@ public:
              Variables &variables)
       : Command(CommandType::DrawPicture), _context(context) {
     convertProperty(runtime, object, "picture", props.picture, variables);
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) { ctx->canvas->drawPicture(props.picture); }
@@ -829,6 +846,7 @@ public:
     convertProperty(runtime, object, "width", props.width, variables);
     convertProperty(runtime, object, "height", props.height, variables);
     convertProperty(runtime, object, "rect", props.rect, variables);
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) {
@@ -881,6 +899,7 @@ public:
     convertProperty(runtime, object, "x", props.x, variables);
     convertProperty(runtime, object, "y", props.y, variables);
     convertProperty(runtime, object, "width", props.width, variables);
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) {
@@ -906,6 +925,7 @@ public:
       : Command(CommandType::DrawSkottie) {
     convertProperty(runtime, object, "animation", props.animation, variables);
     convertProperty(runtime, object, "frame", props.frame, variables);
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) {
@@ -937,6 +957,7 @@ public:
     convertProperty(runtime, object, "colors", props.colors, variables);
     convertProperty(runtime, object, "blendMode", props.blendMode, variables);
     convertProperty(runtime, object, "sampling", props.sampling, variables);
+    convertProperty(runtime, object, "zIndex", zIndex, variables);
   }
 
   void draw(DrawingCtx *ctx) {

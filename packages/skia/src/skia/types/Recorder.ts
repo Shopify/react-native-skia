@@ -10,6 +10,7 @@ import type {
   CTMProps,
   DiffRectProps,
   GlyphsProps,
+  GroupProps,
   ImageProps,
   ImageSVGProps,
   LineProps,
@@ -33,7 +34,7 @@ import type { AnimatedProps } from "../../renderer/processors/Animations/Animati
 import type { SkPicture } from "./Picture";
 
 export interface BaseRecorder {
-  saveGroup(): void;
+  saveGroup(props?: AnimatedProps<GroupProps>): void;
   restoreGroup(): void;
   savePaint(props: AnimatedProps<PaintProps>, standalone: boolean): void;
   restorePaint(): void;

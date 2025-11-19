@@ -29,6 +29,7 @@ import type {
   SkottieProps,
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer";
+import type { GroupProps } from "../../dom/types";
 import { isSharedValue } from "../utils";
 import { isColorFilter, isImageFilter, isPathEffect, isShader } from "../Node";
 import type { SkPaint, BaseRecorder } from "../../skia/types";
@@ -93,9 +94,9 @@ export class Recorder implements BaseRecorder {
     this.cursors[this.cursors.length - 1].push(command);
   }
 
-  saveGroup() {
+  saveGroup(props?: AnimatedProps<GroupProps>) {
     const children: Command[] = [];
-    this.add({ type: CommandType.Group, children });
+    this.add({ type: CommandType.Group, children, props });
     this.cursors.push(children);
   }
 

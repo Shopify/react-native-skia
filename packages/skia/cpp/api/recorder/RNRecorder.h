@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <memory>
 #include <optional>
 #include <string>
@@ -316,354 +317,414 @@ public:
         std::make_unique<Command>(CommandType::SaveBackdropFilter));
   }
 
-  void saveGroup() {}
+  void saveGroup(jsi::Runtime &runtime, const jsi::Object &props) {
+    commands.push_back(std::make_unique<GroupCmd>(runtime, props, variables));
+  }
 
-  void restoreGroup() {}
+  void restoreGroup() {
+    commands.push_back(std::make_unique<Command>(CommandType::RestoreGroup));
+  }
+
+  void executeCommand(Command *cmd, DrawingCtx *ctx) {
+    switch (cmd->type) {
+    case CommandType::Group:
+    case CommandType::RestoreGroup:
+      // Handled by play()
+      break;
+
+    case CommandType::ComposeColorFilter: {
+      ctx->composeColorFilter();
+      break;
+    }
+
+    case CommandType::ComposeImageFilter: {
+      ctx->composeImageFilter();
+      break;
+    }
+
+    case CommandType::ComposePathEffect: {
+      ctx->composePathEffect();
+      break;
+    }
+
+    case CommandType::RestorePaintDeclaration: {
+      ctx->materializePaint();
+      auto paint = ctx->restorePaint();
+      ctx->paintDeclarations.push_back(paint);
+      break;
+    }
+
+    case CommandType::SaveBackdropFilter: {
+      ctx->saveBackdropFilter();
+      break;
+    }
+
+    case CommandType::SaveLayer: {
+      ctx->materializePaint();
+      auto paint = ctx->paintDeclarations.back();
+      ctx->paintDeclarations.pop_back();
+      ctx->canvas->saveLayer(
+          SkCanvas::SaveLayerRec(nullptr, &paint, nullptr, 0));
+      break;
+    }
+
+    case CommandType::MaterializePaint: {
+      ctx->materializePaint();
+      break;
+    }
+
+    case CommandType::SavePaint: {
+      auto *savePaintCmd = static_cast<SavePaintCmd *>(cmd);
+      savePaintCmd->savePaint(ctx);
+      break;
+    }
+
+    case CommandType::PushShader: {
+      auto nodeType = cmd->nodeType;
+      if (nodeType == "skShader") {
+        auto *pushShaderCmd = static_cast<PushShaderCmd *>(cmd);
+        pushShaderCmd->pushShader(ctx);
+      } else if (nodeType == "skImageShader") {
+        auto *pushImageShaderCmd = static_cast<PushImageShaderCmd *>(cmd);
+        pushImageShaderCmd->pushShader(ctx);
+      } else if (nodeType == "skColorShader") {
+        auto *colorShaderCmd = static_cast<ColorShaderCmd *>(cmd);
+        colorShaderCmd->pushShader(ctx);
+      } else if (nodeType == "skTurbulence") {
+        auto *turbulenceCmd = static_cast<TurbulenceCmd *>(cmd);
+        turbulenceCmd->pushShader(ctx);
+      } else if (nodeType == "skFractalNoise") {
+        auto *fractalNoiseCmd = static_cast<FractalNoiseCmd *>(cmd);
+        fractalNoiseCmd->pushShader(ctx);
+      } else if (nodeType == "skLinearGradient") {
+        auto *linearGradientCmd = static_cast<LinearGradientCmd *>(cmd);
+        linearGradientCmd->pushShader(ctx);
+      } else if (nodeType == "skRadialGradient") {
+        auto *radialGradientCmd = static_cast<RadialGradientCmd *>(cmd);
+        radialGradientCmd->pushShader(ctx);
+      } else if (nodeType == "skSweepGradient") {
+        auto *sweepGradientCmd = static_cast<SweepGradientCmd *>(cmd);
+        sweepGradientCmd->pushShader(ctx);
+      } else if (nodeType == "skTwoPointConicalGradient") {
+        auto *twoPointConicalGradientCmd =
+            static_cast<TwoPointConicalGradientCmd *>(cmd);
+        twoPointConicalGradientCmd->pushShader(ctx);
+      } else if (nodeType == "skBlendShader") {
+        auto *blendShaderCmd = static_cast<BlendShaderCmd *>(cmd);
+        blendShaderCmd->pushShader(ctx);
+      } else {
+        throw std::runtime_error("Invalid shader type: " + nodeType);
+      }
+      break;
+    }
+
+    case CommandType::PushImageFilter: {
+      auto nodeType = cmd->nodeType;
+      if (nodeType == "skOffsetImageFilter") {
+        auto *offsetCmd = static_cast<OffsetImageFilterCmd *>(cmd);
+        offsetCmd->pushImageFilter(ctx);
+      } else if (nodeType == "skDisplacementMapImageFilter") {
+        auto *displacementCmd =
+            static_cast<DisplacementMapImageFilterCmd *>(cmd);
+        displacementCmd->pushImageFilter(ctx);
+      } else if (nodeType == "skBlurImageFilter") {
+        auto *blurCmd = static_cast<BlurImageFilterCmd *>(cmd);
+        blurCmd->pushImageFilter(ctx);
+      } else if (nodeType == "skDropShadowImageFilter") {
+        auto *dropShadowCmd = static_cast<DropShadowImageFilterCmd *>(cmd);
+        dropShadowCmd->pushImageFilter(ctx);
+      } else if (nodeType == "skMorphologyImageFilter") {
+        auto *morphologyCmd = static_cast<MorphologyImageFilterCmd *>(cmd);
+        morphologyCmd->pushImageFilter(ctx);
+      } else if (nodeType == "skBlendImageFilter") {
+        auto *blendCmd = static_cast<BlendImageFilterCmd *>(cmd);
+        blendCmd->pushImageFilter(ctx);
+      } else if (nodeType == "skRuntimeShaderImageFilter") {
+        auto *runtimeShaderCmd =
+            static_cast<RuntimeShaderImageFilterCmd *>(cmd);
+        runtimeShaderCmd->pushImageFilter(ctx);
+      } else if (nodeType == "skImageFilter") {
+        auto *imageFilterCmd = static_cast<ImageFilterCmd *>(cmd);
+        imageFilterCmd->pushImageFilter(ctx);
+      } else {
+        throw std::runtime_error("Invalid image filter type: " + nodeType);
+      }
+      break;
+    }
+
+    case CommandType::PushPathEffect: {
+      auto nodeType = cmd->nodeType;
+      if (nodeType == "skDiscretePathEffect") {
+        auto *discreteCmd = static_cast<DiscretePathEffectCmd *>(cmd);
+        discreteCmd->pushPathEffect(ctx);
+      } else if (nodeType == "skDashPathEffect") {
+        auto *dashCmd = static_cast<DashPathEffectCmd *>(cmd);
+        dashCmd->pushPathEffect(ctx);
+      } else if (nodeType == "skPath1DPathEffect") {
+        auto *path1DCmd = static_cast<Path1DPathEffectCmd *>(cmd);
+        path1DCmd->pushPathEffect(ctx);
+      } else if (nodeType == "skPath2DPathEffect") {
+        auto *path2DCmd = static_cast<Path2DPathEffectCmd *>(cmd);
+        path2DCmd->pushPathEffect(ctx);
+      } else if (nodeType == "skCornerPathEffect") {
+        auto *cornerCmd = static_cast<CornerPathEffectCmd *>(cmd);
+        cornerCmd->pushPathEffect(ctx);
+      } else if (nodeType == "skSumPathEffect") {
+        auto *sumCmd = static_cast<SumPathEffectCmd *>(cmd);
+        sumCmd->pushPathEffect(ctx);
+      } else if (nodeType == "skLine2DPathEffect") {
+        auto *line2DCmd = static_cast<Line2DPathEffectCmd *>(cmd);
+        line2DCmd->pushPathEffect(ctx);
+      } else {
+        throw std::runtime_error("Invalid path effect type: " + nodeType);
+      }
+      break;
+    }
+
+    case CommandType::PushColorFilter: {
+      auto nodeType = cmd->nodeType;
+      if (nodeType == "skMatrixColorFilter") {
+        auto *matrixCmd = static_cast<MatrixColorFilterCmd *>(cmd);
+        matrixCmd->pushColorFilter(ctx);
+      } else if (nodeType == "skBlendColorFilter") {
+        auto *blendCmd = static_cast<BlendColorFilterCmd *>(cmd);
+        blendCmd->pushColorFilter(ctx);
+      } else if (nodeType == "skLinearToSRGBGammaColorFilter") {
+        auto *linearToSRGBCmd =
+            static_cast<LinearToSRGBGammaColorFilterCmd *>(cmd);
+        linearToSRGBCmd->pushColorFilter(ctx);
+      } else if (nodeType == "skSRGBToLinearGammaColorFilter") {
+        auto *srgbToLinearCmd =
+            static_cast<SRGBToLinearGammaColorFilterCmd *>(cmd);
+        srgbToLinearCmd->pushColorFilter(ctx);
+      } else if (nodeType == "skLumaColorFilter") {
+        auto *lumaCmd = static_cast<LumaColorFilterCmd *>(cmd);
+        lumaCmd->pushColorFilter(ctx);
+      } else if (nodeType == "skLerpColorFilter") {
+        auto *lerpCmd = static_cast<LerpColorFilterCmd *>(cmd);
+        lerpCmd->pushColorFilter(ctx);
+      } else {
+        throw std::runtime_error("Invalid color filter type: " + nodeType);
+      }
+      break;
+    }
+
+    case CommandType::PushBlurMaskFilter: {
+      auto *blurMaskFilterCmd = static_cast<BlurMaskFilterCmd *>(cmd);
+      blurMaskFilterCmd->pushMaskFilter(ctx);
+      break;
+    }
+
+    case CommandType::RestorePaint: {
+      ctx->restorePaint();
+      break;
+    }
+
+    case CommandType::SaveCTM: {
+      auto *saveCTMCmd = static_cast<SaveCTMCmd *>(cmd);
+      saveCTMCmd->saveCTM(ctx);
+      break;
+    }
+
+    case CommandType::RestoreCTM: {
+      ctx->canvas->restore();
+      break;
+    }
+    default: {
+      // Handle all drawing commands
+      auto currentPaints = ctx->paintDeclarations;
+      // apply alpha to the current paint.
+      SkPaint paint(ctx->getPaint());
+      paint.setAlphaf(paint.getAlphaf() * ctx->getOpacity());
+      currentPaints.push_back(paint);
+      ctx->paintDeclarations.clear();
+
+      for (auto &paint : currentPaints) {
+        ctx->pushPaint(paint);
+
+        switch (cmd->type) {
+        case CommandType::DrawPaint: {
+          ctx->canvas->drawPaint(paint);
+          break;
+        }
+        case CommandType::DrawCircle: {
+          auto *circleCmd = static_cast<CircleCmd *>(cmd);
+          circleCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawPath: {
+          auto *pathCmd = static_cast<PathCmd *>(cmd);
+          pathCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawRect: {
+          auto *rectCmd = static_cast<RectCmd *>(cmd);
+          rectCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawLine: {
+          auto *lineCmd = static_cast<LineCmd *>(cmd);
+          lineCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawTextPath: {
+          auto *textPathCmd = static_cast<TextPathCmd *>(cmd);
+          textPathCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawText: {
+          auto *textCmd = static_cast<TextCmd *>(cmd);
+          textCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawBox: {
+          auto *boxCmd = static_cast<BoxCmd *>(cmd);
+          boxCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawImage: {
+          auto *imageCmd = static_cast<ImageCmd *>(cmd);
+          imageCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawPoints: {
+          auto *pointsCmd = static_cast<PointsCmd *>(cmd);
+          pointsCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawRRect: {
+          auto *rRectCmd = static_cast<RRectCmd *>(cmd);
+          rRectCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawOval: {
+          auto *ovalCmd = static_cast<OvalCmd *>(cmd);
+          ovalCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawPatch: {
+          auto *patchCmd = static_cast<PatchCmd *>(cmd);
+          patchCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawVertices: {
+          auto *verticesCmd = static_cast<VerticesCmd *>(cmd);
+          verticesCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawDiffRect: {
+          auto *diffRectCmd = static_cast<DiffRectCmd *>(cmd);
+          diffRectCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawTextBlob: {
+          auto *textBlobCmd = static_cast<TextBlobCmd *>(cmd);
+          textBlobCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawGlyphs: {
+          auto *glyphsCmd = static_cast<GlyphsCmd *>(cmd);
+          glyphsCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawPicture: {
+          auto *pictureCmd = static_cast<PictureCmd *>(cmd);
+          pictureCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawImageSVG: {
+          auto *imageSVGCmd = static_cast<ImageSVGCmd *>(cmd);
+          imageSVGCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawParagraph: {
+          auto *paragraphCmd = static_cast<ParagraphCmd *>(cmd);
+          paragraphCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawAtlas: {
+          auto *atlasCmd = static_cast<AtlasCmd *>(cmd);
+          atlasCmd->draw(ctx);
+          break;
+        }
+        case CommandType::DrawSkottie: {
+          auto *skottieCmd = static_cast<SkottieCmd *>(cmd);
+          skottieCmd->draw(ctx);
+          break;
+        }
+        default:
+          // Context commands (Group, SavePaint, RestorePaint, etc.) are not
+          // handled here
+          break;
+        }
+
+        ctx->restorePaint();
+      }
+      break;
+    }
+    }
+  }
 
   void play(DrawingCtx *ctx) {
+    struct Node {
+      Command *cmd;
+      std::vector<std::shared_ptr<Node>> children;
+      int zIndex = 0;
+      Node(Command *c) : cmd(c) {
+        if (c && c->zIndex.has_value()) {
+          zIndex = c->zIndex.value();
+        }
+      }
+    };
+
+    auto root = std::make_shared<Node>(nullptr);
+    std::vector<std::shared_ptr<Node>> stack;
+    stack.push_back(root);
+
     for (const auto &cmd : commands) {
-      switch (cmd->type) {
-
-      case Group: {
-        // Do nothing here for now
-        break;
-      }
-
-      case CommandType::ComposeColorFilter: {
-        ctx->composeColorFilter();
-        break;
-      }
-
-      case CommandType::ComposeImageFilter: {
-        ctx->composeImageFilter();
-        break;
-      }
-
-      case CommandType::ComposePathEffect: {
-        ctx->composePathEffect();
-        break;
-      }
-
-      case CommandType::RestorePaintDeclaration: {
-        ctx->materializePaint();
-        auto paint = ctx->restorePaint();
-        ctx->paintDeclarations.push_back(paint);
-        break;
-      }
-
-      case CommandType::SaveBackdropFilter: {
-        ctx->saveBackdropFilter();
-        break;
-      }
-
-      case CommandType::SaveLayer: {
-        ctx->materializePaint();
-        auto paint = ctx->paintDeclarations.back();
-        ctx->paintDeclarations.pop_back();
-        ctx->canvas->saveLayer(
-            SkCanvas::SaveLayerRec(nullptr, &paint, nullptr, 0));
-        break;
-      }
-
-      case CommandType::MaterializePaint: {
-        ctx->materializePaint();
-        break;
-      }
-
-      case CommandType::SavePaint: {
-        auto *savePaintCmd = static_cast<SavePaintCmd *>(cmd.get());
-        savePaintCmd->savePaint(ctx);
-        break;
-      }
-
-      case CommandType::PushShader: {
-        auto nodeType = cmd->nodeType;
-        if (nodeType == "skShader") {
-          auto *pushShaderCmd = static_cast<PushShaderCmd *>(cmd.get());
-          pushShaderCmd->pushShader(ctx);
-        } else if (nodeType == "skImageShader") {
-          auto *pushImageShaderCmd =
-              static_cast<PushImageShaderCmd *>(cmd.get());
-          pushImageShaderCmd->pushShader(ctx);
-        } else if (nodeType == "skColorShader") {
-          auto *colorShaderCmd = static_cast<ColorShaderCmd *>(cmd.get());
-          colorShaderCmd->pushShader(ctx);
-        } else if (nodeType == "skTurbulence") {
-          auto *turbulenceCmd = static_cast<TurbulenceCmd *>(cmd.get());
-          turbulenceCmd->pushShader(ctx);
-        } else if (nodeType == "skFractalNoise") {
-          auto *fractalNoiseCmd = static_cast<FractalNoiseCmd *>(cmd.get());
-          fractalNoiseCmd->pushShader(ctx);
-        } else if (nodeType == "skLinearGradient") {
-          auto *linearGradientCmd = static_cast<LinearGradientCmd *>(cmd.get());
-          linearGradientCmd->pushShader(ctx);
-        } else if (nodeType == "skRadialGradient") {
-          auto *radialGradientCmd = static_cast<RadialGradientCmd *>(cmd.get());
-          radialGradientCmd->pushShader(ctx);
-        } else if (nodeType == "skSweepGradient") {
-          auto *sweepGradientCmd = static_cast<SweepGradientCmd *>(cmd.get());
-          sweepGradientCmd->pushShader(ctx);
-        } else if (nodeType == "skTwoPointConicalGradient") {
-          auto *twoPointConicalGradientCmd =
-              static_cast<TwoPointConicalGradientCmd *>(cmd.get());
-          twoPointConicalGradientCmd->pushShader(ctx);
-        } else if (nodeType == "skBlendShader") {
-          auto *blendShaderCmd = static_cast<BlendShaderCmd *>(cmd.get());
-          blendShaderCmd->pushShader(ctx);
-        } else {
-          throw std::runtime_error("Invalid shader type: " + nodeType);
+      if (cmd->type == CommandType::Group) {
+        auto node = std::make_shared<Node>(cmd.get());
+        stack.back()->children.push_back(node);
+        stack.push_back(node);
+      } else if (cmd->type == CommandType::RestoreGroup) {
+        if (stack.size() > 1) {
+          stack.pop_back();
         }
-        break;
-      }
-
-      case CommandType::PushImageFilter: {
-        auto nodeType = cmd->nodeType;
-        if (nodeType == "skOffsetImageFilter") {
-          auto *offsetCmd = static_cast<OffsetImageFilterCmd *>(cmd.get());
-          offsetCmd->pushImageFilter(ctx);
-        } else if (nodeType == "skDisplacementMapImageFilter") {
-          auto *displacementCmd =
-              static_cast<DisplacementMapImageFilterCmd *>(cmd.get());
-          displacementCmd->pushImageFilter(ctx);
-        } else if (nodeType == "skBlurImageFilter") {
-          auto *blurCmd = static_cast<BlurImageFilterCmd *>(cmd.get());
-          blurCmd->pushImageFilter(ctx);
-        } else if (nodeType == "skDropShadowImageFilter") {
-          auto *dropShadowCmd =
-              static_cast<DropShadowImageFilterCmd *>(cmd.get());
-          dropShadowCmd->pushImageFilter(ctx);
-        } else if (nodeType == "skMorphologyImageFilter") {
-          auto *morphologyCmd =
-              static_cast<MorphologyImageFilterCmd *>(cmd.get());
-          morphologyCmd->pushImageFilter(ctx);
-        } else if (nodeType == "skBlendImageFilter") {
-          auto *blendCmd = static_cast<BlendImageFilterCmd *>(cmd.get());
-          blendCmd->pushImageFilter(ctx);
-        } else if (nodeType == "skRuntimeShaderImageFilter") {
-          auto *runtimeShaderCmd =
-              static_cast<RuntimeShaderImageFilterCmd *>(cmd.get());
-          runtimeShaderCmd->pushImageFilter(ctx);
-        } else if (nodeType == "skImageFilter") {
-          auto *imageFilterCmd = static_cast<ImageFilterCmd *>(cmd.get());
-          imageFilterCmd->pushImageFilter(ctx);
-        } else {
-          throw std::runtime_error("Invalid image filter type: " + nodeType);
-        }
-        break;
-      }
-
-      case CommandType::PushPathEffect: {
-        auto nodeType = cmd->nodeType;
-        if (nodeType == "skDiscretePathEffect") {
-          auto *discreteCmd = static_cast<DiscretePathEffectCmd *>(cmd.get());
-          discreteCmd->pushPathEffect(ctx);
-        } else if (nodeType == "skDashPathEffect") {
-          auto *dashCmd = static_cast<DashPathEffectCmd *>(cmd.get());
-          dashCmd->pushPathEffect(ctx);
-        } else if (nodeType == "skPath1DPathEffect") {
-          auto *path1DCmd = static_cast<Path1DPathEffectCmd *>(cmd.get());
-          path1DCmd->pushPathEffect(ctx);
-        } else if (nodeType == "skPath2DPathEffect") {
-          auto *path2DCmd = static_cast<Path2DPathEffectCmd *>(cmd.get());
-          path2DCmd->pushPathEffect(ctx);
-        } else if (nodeType == "skCornerPathEffect") {
-          auto *cornerCmd = static_cast<CornerPathEffectCmd *>(cmd.get());
-          cornerCmd->pushPathEffect(ctx);
-        } else if (nodeType == "skSumPathEffect") {
-          auto *sumCmd = static_cast<SumPathEffectCmd *>(cmd.get());
-          sumCmd->pushPathEffect(ctx);
-        } else if (nodeType == "skLine2DPathEffect") {
-          auto *line2DCmd = static_cast<Line2DPathEffectCmd *>(cmd.get());
-          line2DCmd->pushPathEffect(ctx);
-        } else {
-          throw std::runtime_error("Invalid path effect type: " + nodeType);
-        }
-        break;
-      }
-
-      case CommandType::PushColorFilter: {
-        auto nodeType = cmd->nodeType;
-        if (nodeType == "skMatrixColorFilter") {
-          auto *matrixCmd = static_cast<MatrixColorFilterCmd *>(cmd.get());
-          matrixCmd->pushColorFilter(ctx);
-        } else if (nodeType == "skBlendColorFilter") {
-          auto *blendCmd = static_cast<BlendColorFilterCmd *>(cmd.get());
-          blendCmd->pushColorFilter(ctx);
-        } else if (nodeType == "skLinearToSRGBGammaColorFilter") {
-          auto *linearToSRGBCmd =
-              static_cast<LinearToSRGBGammaColorFilterCmd *>(cmd.get());
-          linearToSRGBCmd->pushColorFilter(ctx);
-        } else if (nodeType == "skSRGBToLinearGammaColorFilter") {
-          auto *srgbToLinearCmd =
-              static_cast<SRGBToLinearGammaColorFilterCmd *>(cmd.get());
-          srgbToLinearCmd->pushColorFilter(ctx);
-        } else if (nodeType == "skLumaColorFilter") {
-          auto *lumaCmd = static_cast<LumaColorFilterCmd *>(cmd.get());
-          lumaCmd->pushColorFilter(ctx);
-        } else if (nodeType == "skLerpColorFilter") {
-          auto *lerpCmd = static_cast<LerpColorFilterCmd *>(cmd.get());
-          lerpCmd->pushColorFilter(ctx);
-        } else {
-          throw std::runtime_error("Invalid color filter type: " + nodeType);
-        }
-        break;
-      }
-
-      case CommandType::PushBlurMaskFilter: {
-        auto *blurMaskFilterCmd = static_cast<BlurMaskFilterCmd *>(cmd.get());
-        blurMaskFilterCmd->pushMaskFilter(ctx);
-        break;
-      }
-
-      case CommandType::RestorePaint: {
-        ctx->restorePaint();
-        break;
-      }
-
-      case CommandType::SaveCTM: {
-        auto *saveCTMCmd = static_cast<SaveCTMCmd *>(cmd.get());
-        saveCTMCmd->saveCTM(ctx);
-        break;
-      }
-
-      case CommandType::RestoreCTM: {
-        ctx->canvas->restore();
-        break;
-      }
-      default: {
-        // Handle all drawing commands
-        auto currentPaints = ctx->paintDeclarations;
-        // apply alpha to the current paint.
-        SkPaint paint(ctx->getPaint());
-        paint.setAlphaf(paint.getAlphaf() * ctx->getOpacity());
-        currentPaints.push_back(paint);
-        ctx->paintDeclarations.clear();
-
-        for (auto &paint : currentPaints) {
-          ctx->pushPaint(paint);
-
-          switch (cmd->type) {
-          case CommandType::DrawPaint: {
-            ctx->canvas->drawPaint(paint);
-            break;
-          }
-          case CommandType::DrawCircle: {
-            auto *circleCmd = static_cast<CircleCmd *>(cmd.get());
-            circleCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawPath: {
-            auto *pathCmd = static_cast<PathCmd *>(cmd.get());
-            pathCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawRect: {
-            auto *rectCmd = static_cast<RectCmd *>(cmd.get());
-            rectCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawLine: {
-            auto *lineCmd = static_cast<LineCmd *>(cmd.get());
-            lineCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawTextPath: {
-            auto *textPathCmd = static_cast<TextPathCmd *>(cmd.get());
-            textPathCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawText: {
-            auto *textCmd = static_cast<TextCmd *>(cmd.get());
-            textCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawBox: {
-            auto *boxCmd = static_cast<BoxCmd *>(cmd.get());
-            boxCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawImage: {
-            auto *imageCmd = static_cast<ImageCmd *>(cmd.get());
-            imageCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawPoints: {
-            auto *pointsCmd = static_cast<PointsCmd *>(cmd.get());
-            pointsCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawRRect: {
-            auto *rRectCmd = static_cast<RRectCmd *>(cmd.get());
-            rRectCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawOval: {
-            auto *ovalCmd = static_cast<OvalCmd *>(cmd.get());
-            ovalCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawPatch: {
-            auto *patchCmd = static_cast<PatchCmd *>(cmd.get());
-            patchCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawVertices: {
-            auto *verticesCmd = static_cast<VerticesCmd *>(cmd.get());
-            verticesCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawDiffRect: {
-            auto *diffRectCmd = static_cast<DiffRectCmd *>(cmd.get());
-            diffRectCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawTextBlob: {
-            auto *textBlobCmd = static_cast<TextBlobCmd *>(cmd.get());
-            textBlobCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawGlyphs: {
-            auto *glyphsCmd = static_cast<GlyphsCmd *>(cmd.get());
-            glyphsCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawPicture: {
-            auto *pictureCmd = static_cast<PictureCmd *>(cmd.get());
-            pictureCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawImageSVG: {
-            auto *imageSVGCmd = static_cast<ImageSVGCmd *>(cmd.get());
-            imageSVGCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawParagraph: {
-            auto *paragraphCmd = static_cast<ParagraphCmd *>(cmd.get());
-            paragraphCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawAtlas: {
-            auto *atlasCmd = static_cast<AtlasCmd *>(cmd.get());
-            atlasCmd->draw(ctx);
-            break;
-          }
-          case CommandType::DrawSkottie: {
-            auto *skottieCmd = static_cast<SkottieCmd *>(cmd.get());
-            skottieCmd->draw(ctx);
-            break;
-          }
-          default:
-            // Context commands (Group, SavePaint, RestorePaint, etc.) are not
-            // handled here
-            break;
-          }
-
-          ctx->restorePaint();
-        }
-        break;
-      }
+      } else {
+        auto node = std::make_shared<Node>(cmd.get());
+        stack.back()->children.push_back(node);
       }
     }
+
+    std::function<void(Node *)> executeNode = [&](Node *node) {
+      // Sort children
+      std::stable_sort(node->children.begin(), node->children.end(),
+                       [](const std::shared_ptr<Node> &a,
+                          const std::shared_ptr<Node> &b) {
+                         return a->zIndex < b->zIndex;
+                       });
+
+      // Execute Group begin
+      if (node->cmd && node->cmd->type == CommandType::Group) {
+        static_cast<GroupCmd *>(node->cmd)->begin(ctx);
+      }
+
+      // Execute children
+      for (const auto &child : node->children) {
+        if (child->cmd && child->cmd->type == CommandType::Group) {
+          executeNode(child.get());
+        } else if (child->cmd) {
+          executeCommand(child->cmd, ctx);
+        }
+      }
+
+      // Execute Group end
+      if (node->cmd && node->cmd->type == CommandType::Group) {
+        static_cast<GroupCmd *>(node->cmd)->end(ctx);
+      }
+    };
+
+    executeNode(root.get());
   }
 };
 

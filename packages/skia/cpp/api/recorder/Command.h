@@ -21,6 +21,7 @@ enum CommandType {
   SaveBackdropFilter,
   SaveLayer,
   RestorePaintDeclaration,
+  RestoreGroup,
   // Drawing
   DrawBox,
   DrawImage,
@@ -50,6 +51,7 @@ class Command {
 public:
   CommandType type;
   std::string nodeType;
+  std::optional<int> zIndex;
 
   Command(CommandType t) : type(t) {}
   Command(CommandType t, std::string nodeT) : type(t), nodeType(nodeT) {}
