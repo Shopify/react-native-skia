@@ -207,7 +207,7 @@ void JniPlatformContext::notifyTaskReadyExternal() {
   jni::ThreadScope ts;
 
   static auto method =
-    javaPart_->getClass()->getMethod<void()>("notifyTaskReady");
+      javaPart_->getClass()->getMethod<void()>("notifyTaskReady");
   method(javaPart_.get());
 }
 

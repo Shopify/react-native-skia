@@ -31,13 +31,27 @@ public:
     }
 
     if (!arguments[0].isObject()) {
-      throw jsi::JSError(runtime, "Expected arraybuffer as first parameter");
+      throw jsi::JSError(
+          runtime, "Expected ArrayBuffer or TypedArray as first parameter");
     }
-    auto array = arguments[0].asObject(runtime);
-    jsi::ArrayBuffer buffer =
-        array.getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
+
+    auto obj = arguments[0].asObject(runtime);
+    jsi::ArrayBuffer buffer = [&]() {
+      // Check if it's already an ArrayBuffer
+      if (obj.isArrayBuffer(runtime)) {
+        return obj.getArrayBuffer(runtime);
+      } else {
+        // Otherwise, assume it's a TypedArray and get its buffer property
+        if (!obj.hasProperty(runtime, "buffer")) {
+          throw jsi::JSError(
+              runtime, "Expected ArrayBuffer or TypedArray as first parameter");
+        }
+        return obj
+            .getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
             .asObject(runtime)
             .getArrayBuffer(runtime);
+      }
+    }();
 
     sk_sp<SkData> data =
         SkData::MakeWithCopy(buffer.data(runtime), buffer.size(runtime));

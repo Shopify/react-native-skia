@@ -98,6 +98,59 @@ describe("Pictures", () => {
     );
     checkImage(img, docPath("simple-picture.png"));
   });
+  it("Should serialize and deserialize a picture (1)", async () => {
+    const image = await surface.drawOffscreen(
+      (Skia, mainCanvas) => {
+        const recorder = Skia.PictureRecorder();
+        const canvas = recorder.beginRecording();
+
+        const size = 256;
+        const r = 0.33 * size;
+        const paint = Skia.Paint();
+        paint.setBlendMode(24);
+
+        paint.setColor(Skia.Color("cyan"));
+        canvas.drawCircle(r, r, r, paint);
+
+        paint.setColor(Skia.Color("magenta"));
+        canvas.drawCircle(size - r, r, r, paint);
+
+        paint.setColor(Skia.Color("yellow"));
+        canvas.drawCircle(size / 2, size - r, r, paint);
+        const picture = recorder.finishRecordingAsPicture();
+        const serialized = picture.serialize();
+        const deserialized = Skia.Picture.MakePicture(serialized);
+        mainCanvas.drawPicture(deserialized!);
+      });
+    checkImage(image, "snapshots/pictures/create-picture.png");
+  });
+  it("Should serialize and deserialize a picture (2)", async () => {
+    const image = await surface.drawOffscreen(
+      (Skia, mainCanvas) => {
+        const recorder = Skia.PictureRecorder();
+        const canvas = recorder.beginRecording();
+
+        const size = 256;
+        const r = 0.33 * size;
+        const paint = Skia.Paint();
+        paint.setBlendMode(24);
+
+        paint.setColor(Skia.Color("cyan"));
+        canvas.drawCircle(r, r, r, paint);
+
+        paint.setColor(Skia.Color("magenta"));
+        canvas.drawCircle(size - r, r, r, paint);
+
+        paint.setColor(Skia.Color("yellow"));
+        canvas.drawCircle(size / 2, size - r, r, paint);
+        const picture = recorder.finishRecordingAsPicture();
+        const serialized = picture.serialize()!;
+        const deserialized = Skia.Picture.MakePicture(serialized.buffer as ArrayBuffer);
+        mainCanvas.drawPicture(deserialized!);
+      });
+    checkImage(image, "snapshots/pictures/create-picture.png");
+  });
+
   itRunsNodeOnly("Blur Picture", async () => {
     const { Skia, createPicture } = importSkia();
     const picture = createPicture((canvas) => {
