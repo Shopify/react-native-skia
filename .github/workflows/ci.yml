@@ -215,6 +215,12 @@ jobs:
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-${{ github.sha }}
 
+      - name: Upload Android APK artifact
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: android-example-apk
+          path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
+
   test-android:
     needs: build-android
     runs-on: ubuntu-latest

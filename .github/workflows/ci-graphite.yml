@@ -101,6 +101,12 @@ jobs:
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-graphite-${{ github.sha }}
 
+      - name: Upload Android APK artifact
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: android-example-apk-graphite
+          path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
+
   test-android-graphite:
     needs: build-android-graphite
     runs-on: ubuntu-latest
