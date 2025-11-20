@@ -7,6 +7,7 @@ export type Routes = {
   Path: undefined;
   Clipping: undefined;
   Transform: undefined;
+  ZIndex: undefined;
   ColorFilter: undefined;
   ImageFilters: undefined;
   Gradients: undefined;

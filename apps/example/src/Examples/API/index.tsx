@@ -1,5 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { BlurMask, Canvas, Circle, Group } from "@shopify/react-native-skia";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import {
+  Easing,
+  useDerivedValue,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
 
 import { ImageLoading } from "../ImageLoading/ImageLoading";
 
@@ -38,6 +46,64 @@ import { StressTest4 } from "./StressTest4";
 import { FirstFrame } from "./FirstFrame";
 
 const Stack = createNativeStackNavigator<Routes>();
+
+const cycleDuration = 3600;
+
+const computeLayerOrder = (value: number, id: number) => {
+  "worklet";
+  const stage = Math.floor(value) % 3;
+  const relative = (id - stage + 3) % 3;
+  return 2 - relative;
+};
+
+export const ZIndexDemo = () => {
+  const r = 80;
+  const width = 256;
+  const height = 256;
+  const phase = useSharedValue(0);
+
+  useEffect(() => {
+    phase.value = withRepeat(
+      withTiming(3, {
+        duration: cycleDuration,
+        easing: Easing.linear,
+      }),
+      -1,
+      false
+    );
+  }, [phase]);
+
+  const cyanZ = useDerivedValue(
+    () => computeLayerOrder(phase.value, 0),
+    [phase]
+  );
+  const magentaZ = useDerivedValue(
+    () => computeLayerOrder(phase.value, 1),
+    [phase]
+  );
+  const yellowZ = useDerivedValue(
+    () => computeLayerOrder(phase.value, 2),
+    [phase]
+  );
+
+  return (
+    <Canvas style={{ width, height }}>
+      <Group>
+        <BlurMask style="solid" blur={10} />
+        <Circle cx={r} cy={r} r={r} color="cyan" zIndex={cyanZ} />
+        <Circle cx={width - r} cy={r} r={r} color="magenta" zIndex={magentaZ} />
+        <Circle
+          cx={width / 2}
+          cy={height - r}
+          r={r}
+          color="yellow"
+          zIndex={yellowZ}
+        />
+      </Group>
+    </Canvas>
+  );
+};
+
 export const API = () => {
   return (
     <Stack.Navigator>
@@ -159,6 +225,13 @@ export const API = () => {
         component={Transform}
         options={{
           title: "🔄 Transformations",
+        }}
+      />
+      <Stack.Screen
+        name="ZIndex"
+        component={ZIndexDemo}
+        options={{
+          title: "🧱 zIndex",
         }}
       />
       <Stack.Screen
