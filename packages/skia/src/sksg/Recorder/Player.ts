@@ -47,7 +47,6 @@ import {
   isGroup,
   materializeCommand,
 } from "./Core";
-import { debugTree } from "./Debug";
 import type { Command } from "./Core";
 import type { DrawingContext } from "./DrawingContext";
 // import { SharedValue } from "react-native-reanimated";
@@ -183,7 +182,7 @@ function play(ctx: DrawingContext, _command: Command) {
 
 export const replay = (ctx: DrawingContext, commands: Command[]) => {
   "worklet";
-  console.log(debugTree(commands));
+  //console.log(debugTree(commands));
   commands.forEach((command) => {
     play(ctx, command);
   });
