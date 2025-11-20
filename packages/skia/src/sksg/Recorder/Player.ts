@@ -1,3 +1,5 @@
+import type { DrawingNodeProps } from "../../dom/types";
+
 import {
   drawCircle,
   drawImage,
@@ -49,12 +51,7 @@ import {
 } from "./Core";
 import type { Command, GroupCommand } from "./Core";
 import type { DrawingContext } from "./DrawingContext";
-import { debugTree } from "./Debug";
-import type { DrawingNodeProps } from "../../dom/types";
-// import { SharedValue } from "react-native-reanimated";
-// import { isSharedValue } from "../utils";
 
-// type ZIndex = number | SharedValue<number> | undefined;
 type PendingGroup = {
   command: GroupCommand;
   zIndex: number;
@@ -227,7 +224,7 @@ function play(ctx: DrawingContext, _command: Command) {
 
 export const replay = (ctx: DrawingContext, commands: Command[]) => {
   "worklet";
-  console.log(debugTree(commands));
+  //console.log(debugTree(commands));
   commands.forEach((command) => {
     play(ctx, command);
   });
