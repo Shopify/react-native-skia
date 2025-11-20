@@ -27,6 +27,7 @@ import type {
   BoxProps,
   BoxShadowProps,
   SkottieProps,
+  DrawingNodeProps,
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer";
 import { isSharedValue } from "../utils";
@@ -93,9 +94,13 @@ export class Recorder implements BaseRecorder {
     this.cursors[this.cursors.length - 1].push(command);
   }
 
-  saveGroup() {
+  saveGroup(props?: AnimatedProps<Pick<DrawingNodeProps, "zIndex">>) {
     const children: Command[] = [];
-    this.add({ type: CommandType.Group, children });
+    const group: Command = { type: CommandType.Group, children };
+    if (props) {
+      group.props = props;
+    }
+    this.add(group);
     this.cursors.push(children);
   }
 

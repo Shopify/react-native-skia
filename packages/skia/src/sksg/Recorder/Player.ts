@@ -1,3 +1,5 @@
+import type { DrawingNodeProps } from "../../dom/types";
+
 import {
   drawCircle,
   drawImage,
@@ -47,13 +49,65 @@ import {
   isGroup,
   materializeCommand,
 } from "./Core";
-import type { Command } from "./Core";
+import type { Command, GroupCommand } from "./Core";
 import type { DrawingContext } from "./DrawingContext";
+
+type PendingGroup = {
+  command: GroupCommand;
+  zIndex: number;
+  order: number;
+};
+
+const getZIndex = (command: GroupCommand) => {
+  "worklet";
+  const materialized = materializeCommand(command);
+  const { zIndex } = (materialized.props ?? {}) as DrawingNodeProps;
+  if (typeof zIndex !== "number" || Number.isNaN(zIndex)) {
+    return 0;
+  }
+  return zIndex;
+};
+
+const flushPendingGroups = (
+  ctx: DrawingContext,
+  pendingGroups: PendingGroup[]
+) => {
+  "worklet";
+  if (pendingGroups.length === 0) {
+    return;
+  }
+  pendingGroups
+    .sort((a, b) =>
+      a.zIndex === b.zIndex ? a.order - b.order : a.zIndex - b.zIndex
+    )
+    .forEach(({ command }) => {
+      play(ctx, command);
+    });
+  pendingGroups.length = 0;
+};
+
+const playGroup = (ctx: DrawingContext, group: GroupCommand) => {
+  "worklet";
+  const pending: PendingGroup[] = [];
+  group.children.forEach((child) => {
+    if (isGroup(child)) {
+      pending.push({
+        command: child,
+        zIndex: getZIndex(child),
+        order: pending.length,
+      });
+      return;
+    }
+    flushPendingGroups(ctx, pending);
+    play(ctx, child);
+  });
+  flushPendingGroups(ctx, pending);
+};
 
 function play(ctx: DrawingContext, _command: Command) {
   "worklet";
   if (isGroup(_command)) {
-    _command.children.forEach((child) => play(ctx, child));
+    playGroup(ctx, _command);
     return;
   }
   const command = materializeCommand(_command);
@@ -170,6 +224,7 @@ function play(ctx: DrawingContext, _command: Command) {
 
 export const replay = (ctx: DrawingContext, commands: Command[]) => {
   "worklet";
+  //console.log(debugTree(commands));
   commands.forEach((command) => {
     play(ctx, command);
   });
