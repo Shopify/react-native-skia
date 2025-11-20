@@ -8,6 +8,7 @@ import { NodeType } from "../../dom/types";
 import type { BaseRecorder } from "../../skia/types/Recorder";
 import type { Node } from "../Node";
 import { isImageFilter, isShader, sortNodeChildren } from "../Node";
+import type { AnimatedProps } from "../../renderer";
 
 export const processPaint = ({
   opacity,
@@ -200,11 +201,24 @@ const pushPaints = (recorder: BaseRecorder, paints: Node<any>[]) => {
   });
 };
 
-const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
-  if (node.type === NodeType.Group) {
-    recorder.saveGroup();
+type StackingContextProps = Pick<DrawingNodeProps, "zIndex">;
+
+const getStackingContextProps = (
+  props: AnimatedProps<DrawingNodeProps>
+): AnimatedProps<StackingContextProps> | undefined => {
+  const { zIndex } = props;
+  if (zIndex === undefined) {
+    return undefined;
   }
+  return { zIndex };
+};
+
+const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
   const { props } = node;
+  const stackingContextProps = getStackingContextProps(
+    props as AnimatedProps<DrawingNodeProps>
+  );
+  recorder.saveGroup(stackingContextProps);
   const {
     colorFilters,
     maskFilters,
@@ -326,9 +340,7 @@ const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
   if (shouldRestore) {
     recorder.restoreCTM();
   }
-  if (node.type === NodeType.Group) {
-    recorder.restoreGroup();
-  }
+  recorder.restoreGroup();
 };
 
 export const visit = (recorder: BaseRecorder, root: Node[]) => {

@@ -34,7 +34,6 @@ import type {
 
 export interface DrawingNodeProps extends GroupProps {
   paint?: SkPaint;
-  zIndex?: number;
 }
 
 export type ImageProps = DrawingNodeProps &

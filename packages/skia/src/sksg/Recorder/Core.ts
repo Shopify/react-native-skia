@@ -93,7 +93,8 @@ export const isCommand = <T extends CommandType>(
   return command.type === type;
 };
 
-interface GroupCommand extends Command<CommandType.Group> {
+export interface GroupCommand extends Command<CommandType.Group> {
+  props?: Pick<DrawingNodeProps, "zIndex">;
   children: Command[];
 }
 

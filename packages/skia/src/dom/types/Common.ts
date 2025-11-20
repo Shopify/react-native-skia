@@ -89,4 +89,6 @@ export interface PaintProps extends ChildrenProps {
   dither?: boolean;
 }
 
-export interface GroupProps extends PaintProps, CTMProps {}
+export interface GroupProps extends PaintProps, CTMProps {
+  zIndex?: number;
+}
