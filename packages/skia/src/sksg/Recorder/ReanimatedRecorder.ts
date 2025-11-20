@@ -73,9 +73,14 @@ export class ReanimatedRecorder implements BaseRecorder {
   }
 
   saveGroup(
-    _props?: AnimatedProps<Pick<DrawingNodeProps, "zIndex">>
+    props?: AnimatedProps<Pick<DrawingNodeProps, "zIndex">>
   ): void {
-    this.recorder.saveGroup();
+    if (props) {
+      this.processAnimationValues(props);
+      this.recorder.saveGroup(props);
+    } else {
+      this.recorder.saveGroup();
+    }
   }
 
   restoreGroup(): void {
