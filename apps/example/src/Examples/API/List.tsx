@@ -59,6 +59,10 @@ export const examples = [
     title: "🔄 Transformations",
   },
   {
+    screen: "ZIndex",
+    title: "🧱 zIndex",
+  },
+  {
     screen: "ColorFilter",
     title: "🌃 Color Filters",
   },
