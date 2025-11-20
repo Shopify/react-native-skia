@@ -34,9 +34,7 @@ import type { AnimatedProps } from "../../renderer/processors/Animations/Animati
 import type { SkPicture } from "./Picture";
 
 export interface BaseRecorder {
-  saveGroup(
-    props?: AnimatedProps<Pick<DrawingNodeProps, "zIndex">>
-  ): void;
+  saveGroup(props?: AnimatedProps<Pick<DrawingNodeProps, "zIndex">>): void;
   restoreGroup(): void;
   savePaint(props: AnimatedProps<PaintProps>, standalone: boolean): void;
   restorePaint(): void;
