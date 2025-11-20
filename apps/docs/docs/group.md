@@ -12,7 +12,7 @@ It can apply the following operations to its children:
 - [Paint properties](#paint-properties)
 - [Transformations](#transformations)
 - [Clipping operations](#clipping-operations)
-- [Bitmap Effects](#bitmap-effects)
+- [Layer Effects](#layer-effects)
 
 | Name        | Type                | Description                                                                                                                                                                                                           |
 | :---------- | :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
