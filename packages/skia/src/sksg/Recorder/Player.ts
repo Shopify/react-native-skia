@@ -47,8 +47,21 @@ import {
   isGroup,
   materializeCommand,
 } from "./Core";
+import { debugTree } from "./Debug";
 import type { Command } from "./Core";
 import type { DrawingContext } from "./DrawingContext";
+// import { SharedValue } from "react-native-reanimated";
+// import { isSharedValue } from "../utils";
+
+
+// type ZIndex = number | SharedValue<number> | undefined;
+// const materialize = (value: ZIndex) => {
+//   "worklet";
+//   if (value === undefined) {
+//     return 0;
+//   }
+//   return isSharedValue<number>(value) ? value.value : value;
+// };
 
 function play(ctx: DrawingContext, _command: Command) {
   "worklet";
@@ -170,6 +183,7 @@ function play(ctx: DrawingContext, _command: Command) {
 
 export const replay = (ctx: DrawingContext, commands: Command[]) => {
   "worklet";
+  console.log(debugTree(commands));
   commands.forEach((command) => {
     play(ctx, command);
   });
