@@ -86,26 +86,27 @@ const flushPendingGroups = (
   pendingGroups.length = 0;
 };
 
-const playGroup = (ctx: DrawingContext, group: GroupCommand) => {
-  "worklet";
-  const pending: PendingGroup[] = [];
-  group.children.forEach((child) => {
-    if (isGroup(child)) {
-      pending.push({
-        command: child,
-        zIndex: getZIndex(child),
-        order: pending.length,
-      });
-      return;
-    }
+const play = (ctx: DrawingContext, _command: Command) => {
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  const playGroup = (ctx: DrawingContext, group: GroupCommand) => {
+    "worklet";
+    const pending: PendingGroup[] = [];
+    group.children.forEach((child) => {
+      if (isGroup(child)) {
+        pending.push({
+          command: child,
+          zIndex: getZIndex(child),
+          order: pending.length,
+        });
+        return;
+      }
+      flushPendingGroups(ctx, pending);
+      play(ctx, child);
+    });
     flushPendingGroups(ctx, pending);
-    play(ctx, child);
-  });
-  flushPendingGroups(ctx, pending);
-};
+  };
 
-function play(ctx: DrawingContext, _command: Command) {
-  "worklet";
+  ("worklet");
   if (isGroup(_command)) {
     playGroup(ctx, _command);
     return;
@@ -220,12 +221,11 @@ function play(ctx: DrawingContext, _command: Command) {
       ctx.paints.pop();
     });
   }
-}
-
-export const replay = (ctx: DrawingContext, commands: Command[]) => {
+};
+export function replay(ctx: DrawingContext, commands: Command[]) {
   "worklet";
   //console.log(debugTree(commands));
   commands.forEach((command) => {
     play(ctx, command);
   });
-};
+}
