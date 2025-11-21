@@ -144,7 +144,7 @@ describe("Pictures", () => {
       const picture = recorder.finishRecordingAsPicture();
       const serialized = picture.serialize()!;
       const deserialized = Skia.Picture.MakePicture(
-        serialized.buffer as ArrayBuffer,
+        serialized.buffer as ArrayBuffer
       );
       mainCanvas.drawPicture(deserialized!);
     });
