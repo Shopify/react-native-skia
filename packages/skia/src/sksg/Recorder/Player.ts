@@ -68,25 +68,25 @@ const getZIndex = (command: GroupCommand) => {
   return zIndex;
 };
 
-const flushPendingGroups = (
-  ctx: DrawingContext,
-  pendingGroups: PendingGroup[]
-) => {
-  "worklet";
-  if (pendingGroups.length === 0) {
-    return;
-  }
-  pendingGroups
-    .sort((a, b) =>
-      a.zIndex === b.zIndex ? a.order - b.order : a.zIndex - b.zIndex
-    )
-    .forEach(({ command }) => {
-      play(ctx, command);
-    });
-  pendingGroups.length = 0;
-};
-
 const play = (ctx: DrawingContext, _command: Command) => {
+  const flushPendingGroups = (
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    ctx: DrawingContext,
+    pendingGroups: PendingGroup[]
+  ) => {
+    "worklet";
+    if (pendingGroups.length === 0) {
+      return;
+    }
+    pendingGroups
+      .sort((a, b) =>
+        a.zIndex === b.zIndex ? a.order - b.order : a.zIndex - b.zIndex
+      )
+      .forEach(({ command }) => {
+        play(ctx, command);
+      });
+    pendingGroups.length = 0;
+  };
   // eslint-disable-next-line @typescript-eslint/no-shadow
   const playGroup = (ctx: DrawingContext, group: GroupCommand) => {
     "worklet";
