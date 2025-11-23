@@ -45,7 +45,6 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
     @Override
     public void onSurfaceCreated(Surface surface, int width, int height) {
         surfaceAvailable(surface, width, height, true);
-        setWillNotDraw(true);
     }
 
     @Override
@@ -57,7 +56,6 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
     @Override
     public void onSurfaceTextureCreated(SurfaceTexture surface, int width, int height) {
         surfaceAvailable(surface, width, height, false);
-        setWillNotDraw(true);
     }
 
     @Override
