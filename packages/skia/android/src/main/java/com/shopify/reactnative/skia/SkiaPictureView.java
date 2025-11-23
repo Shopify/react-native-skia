@@ -57,7 +57,6 @@ public class SkiaPictureView extends SkiaBaseView {
                 // Draw the bitmap on the canvas
                 paint.setFilterBitmap(true);
                 canvas.drawBitmap(bitmap, 0, 0, paint);
-                setWillNotDraw(true);
                 // Let GC release the bitmap; recycling immediately breaks hardware-accelerated draws.
             }
         }
