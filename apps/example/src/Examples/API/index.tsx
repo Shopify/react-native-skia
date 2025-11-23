@@ -35,7 +35,7 @@ import { StressTest } from "./StressTest";
 import { StressTest2 } from "./StressTest2";
 import { StressTest3 } from "./StressTest3";
 import { StressTest4 } from "./StressTest4";
-import { FirstFrame } from "./FirstFrame";
+import { FirstFrame, FirstFrameEmpty } from "./FirstFrame";
 import { ZIndexExample } from "./ZIndex";
 
 const Stack = createNativeStackNavigator<Routes>();
@@ -280,6 +280,13 @@ export const API = () => {
         component={FirstFrame}
         options={{
           title: "🎬 First Frame",
+        }}
+      />
+      <Stack.Screen
+        name="FirstFrameEmpty"
+        component={FirstFrameEmpty}
+        options={{
+          title: "⬜️ Empty Screen",
         }}
       />
     </Stack.Navigator>

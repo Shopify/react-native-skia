@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   Canvas,
   Circle,
   Skia,
   SkiaPictureView,
 } from "@shopify/react-native-skia";
+
+import type { Routes } from "./Routes";
 
 const red = Skia.PictureRecorder();
 const canvas = red.beginRecording(Skia.XYWHRect(0, 0, 200, 200));
@@ -17,6 +21,8 @@ const picture = red.finishRecordingAsPicture();
 export const FirstFrame = () => {
   const [count, setCount] = useState(0);
   const [isRunning, setIsRunning] = useState(true);
+  const navigation =
+    useNavigation<NativeStackNavigationProp<Routes, "FirstFrame">>();
 
   useEffect(() => {
     if (isRunning) {
@@ -44,6 +50,22 @@ export const FirstFrame = () => {
       <Canvas style={styles.canvas} key={`canvas-${count}`}>
         <Circle cx={100} cy={100} r={50} color="red" />
       </Canvas>
+      <Button
+        title="Go to empty screen"
+        onPress={() => navigation.navigate("FirstFrameEmpty")}
+      />
+    </View>
+  );
+};
+
+export const FirstFrameEmpty = () => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<Routes, "FirstFrameEmpty">>();
+
+  return (
+    <View style={styles.container}>
+      <Text>Empty screen</Text>
+      <Button title="Go back" onPress={() => navigation.goBack()} />
     </View>
   );
 };

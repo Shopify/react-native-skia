@@ -33,4 +33,5 @@ export type Routes = {
   StressTest3: undefined;
   StressTest4: undefined;
   FirstFrame: undefined;
+  FirstFrameEmpty: undefined;
 };
