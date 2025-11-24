@@ -13,6 +13,4 @@ public interface SkiaViewAPI {
     void onSurfaceTextureChanged(SurfaceTexture surface, int width, int height);
 
     void onSurfaceDestroyed();
-
-    void onFirstFrameRendered();
 }

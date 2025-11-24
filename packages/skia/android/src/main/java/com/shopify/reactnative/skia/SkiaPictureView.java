@@ -4,40 +4,27 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.SurfaceTexture;
-import android.view.View;
-
-import androidx.core.view.ViewCompat;
 
 import com.facebook.jni.HybridData;
 import com.facebook.jni.annotations.DoNotStrip;
 import com.facebook.react.bridge.ReactContext;
 
 public class SkiaPictureView extends SkiaBaseView {
-
     @DoNotStrip
     private HybridData mHybridData;
-    private final Paint paint = new Paint();
+    private Paint paint = new Paint();
 
     private boolean coldStart = false;
-    private boolean warmupActive = true;
 
     public SkiaPictureView(Context context) {
         super(context);
         RNSkiaModule skiaModule = ((ReactContext) context).getNativeModule(RNSkiaModule.class);
         mHybridData = initHybrid(skiaModule.getSkiaManager());
-        updateWillNotDraw();
-        updateRenderViewAlpha();
     }
 
     public void setColdStart(boolean coldStart) {
         this.coldStart = coldStart;
-        warmupActive = !coldStart && warmupActive;
-        updateWillNotDraw();
-        updateRenderViewAlpha();
-        if (!coldStart && warmupActive) {
-            ViewCompat.postInvalidateOnAnimation(this);
-        }
+        setWillNotDraw(coldStart);
     }
 
     @Override
@@ -50,76 +37,28 @@ public class SkiaPictureView extends SkiaBaseView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (coldStart || !warmupActive) {
-            return;
+        // Skip the warming up feature if coldStart is true or running on software renderer
+        if (coldStart) {
+            return; // Skip warmup on cold start or software rendering
         }
 
+        // Get the view dimensions
         int width = getWidth();
         int height = getHeight();
 
         if (width > 0 && height > 0) {
+            // Get the bitmap data from native
             int[] pixels = getBitmap(width, height);
 
             if (pixels != null && pixels.length == width * height) {
+                // Create bitmap from pixels
                 Bitmap bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
+
+                // Draw the bitmap on the canvas
                 paint.setFilterBitmap(true);
                 canvas.drawBitmap(bitmap, 0, 0, paint);
+                // Let GC release the bitmap; recycling immediately breaks hardware-accelerated draws.
             }
-        }
-    }
-
-    @Override
-    public void onSurfaceTextureCreated(SurfaceTexture surface, int width, int height) {
-        enableWarmupIfNeeded();
-        super.onSurfaceTextureCreated(surface, width, height);
-    }
-
-    @Override
-    public void onFirstFrameRendered() {
-        disableWarmup();
-    }
-
-    private void disableWarmup() {
-        if (coldStart || !warmupActive) {
-            return;
-        }
-        warmupActive = false;
-        updateWillNotDraw();
-        updateRenderViewAlpha();
-        ViewCompat.postInvalidateOnAnimation(this);
-    }
-
-    private void enableWarmupIfNeeded() {
-        if (coldStart) {
-            return;
-        }
-        warmupActive = true;
-        updateWillNotDraw();
-        updateRenderViewAlpha();
-        ViewCompat.postInvalidateOnAnimation(this);
-    }
-
-    private void updateWillNotDraw() {
-        setWillNotDraw(coldStart || !warmupActive);
-    }
-
-    @Override
-    protected void onRenderViewCreated(View view) {
-        super.onRenderViewCreated(view);
-        updateRenderViewAlpha(view);
-    }
-
-    private void updateRenderViewAlpha() {
-        View renderView = getRenderView();
-        if (renderView != null) {
-            updateRenderViewAlpha(renderView);
-        }
-    }
-
-    private void updateRenderViewAlpha(View view) {
-        float alpha = (!coldStart && warmupActive) ? 0f : 1f;
-        if (view.getAlpha() != alpha) {
-            view.setAlpha(alpha);
         }
     }
 
