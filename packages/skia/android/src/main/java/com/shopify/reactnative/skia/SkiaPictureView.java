@@ -38,7 +38,7 @@ public class SkiaPictureView extends SkiaBaseView {
         super.onDraw(canvas);
 
         // Skip the warming up feature if coldStart is true or running on software renderer
-        if (true) {
+        if (coldStart) {
             return; // Skip warmup on cold start or software rendering
         }
 
