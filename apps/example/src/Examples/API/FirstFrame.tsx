@@ -38,7 +38,7 @@ export const FirstFrame = () => {
     if (isRunning) {
       const interval = setInterval(() => {
         setCount((value) => value + 1);
-      }, 100);
+      }, 200);
 
       return () => clearInterval(interval);
     }
