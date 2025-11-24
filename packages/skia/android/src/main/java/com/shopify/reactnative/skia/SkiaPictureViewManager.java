@@ -38,7 +38,7 @@ public class SkiaPictureViewManager extends SkiaBaseViewManager<SkiaPictureView>
     }
 
     @Override
-    public void setColdStart(SkiaPictureView view, boolean value) {
-        view.setColdStart(value);
+    public void setAndroidWarmup(SkiaPictureView view, boolean value) {
+        view.setAndroidWarmup(value);
     }
 }

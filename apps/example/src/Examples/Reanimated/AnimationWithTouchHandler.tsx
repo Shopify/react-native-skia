@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, useWindowDimensions } from "react-native";
-import { Canvas, Circle, Fill } from "@shopify/react-native-skia";
+import { Canvas, Circle } from "@shopify/react-native-skia";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { useSharedValue, withDecay } from "react-native-reanimated";
 
@@ -28,7 +28,6 @@ export const AnimationWithTouchHandler = () => {
     <AnimationDemo title={"Decay animation with touch handler"}>
       <GestureDetector gesture={gesture}>
         <Canvas style={styles.canvas}>
-          <Fill color="white" />
           <Circle cx={translateX} cy={40} r={20} color="#3E3E" />
           <Circle cx={translateX} cy={40} r={15} color="#AEAE" />
         </Canvas>

@@ -18,5 +18,5 @@ public interface SkiaPictureViewManagerInterface<T extends View> {
   void setDebug(T view, boolean value);
   void setOpaque(T view, boolean value);
   void setColorSpace(SkiaPictureView view, @Nullable String value);
-  void setColdStart(T view, boolean value);
+  void setAndroidWarmup(T view, boolean value);
 }

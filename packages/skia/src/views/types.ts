@@ -39,6 +39,7 @@ export interface SkiaBaseViewProps extends ViewProps {
 
 export interface SkiaPictureViewNativeProps extends SkiaBaseViewProps {
   picture?: SkPicture;
+  androidWarmup?: boolean;
 }
 
 export interface SkiaDomViewNativeProps extends SkiaBaseViewProps {
