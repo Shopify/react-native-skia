@@ -18,8 +18,6 @@ public class SkiaPictureView extends SkiaBaseView {
     private Paint paint = new Paint();
 
     private boolean androidWarmup = false;
-    private boolean warmupContentVisible = false;
-    private boolean needsWarmupClear = false;
 
     public SkiaPictureView(Context context) {
         super(context);
@@ -29,14 +27,7 @@ public class SkiaPictureView extends SkiaBaseView {
 
     public void setAndroidWarmup(boolean androidWarmup) {
         this.androidWarmup = androidWarmup;
-        if (androidWarmup) {
-            warmupContentVisible = true;
-            needsWarmupClear = false;
-            setWillNotDraw(false);
-            invalidate();
-        } else {
-            scheduleWarmupClear();
-        }
+        setWillNotDraw(!androidWarmup);
     }
 
     @Override
@@ -49,15 +40,8 @@ public class SkiaPictureView extends SkiaBaseView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (needsWarmupClear) {
-            canvas.drawColor(0, PorterDuff.Mode.CLEAR);
-            needsWarmupClear = false;
-            setWillNotDraw(true);
-            return;
-        }
-
         // Skip the warming up feature if it is disabled or already cleared.
-        if (!androidWarmup || !warmupContentVisible) {
+        if (!androidWarmup) {
             return;
         }
 
@@ -99,39 +83,23 @@ public class SkiaPictureView extends SkiaBaseView {
 
     protected native int[] getBitmap(int width, int height);
 
-    private void scheduleWarmupClear() {
-        if (!warmupContentVisible || needsWarmupClear) {
-            if (!androidWarmup) {
-                setWillNotDraw(true);
-            }
-            return;
-        }
-        warmupContentVisible = false;
-        needsWarmupClear = true;
-        setWillNotDraw(false);
-    }
-
     @Override
     public void onSurfaceTextureCreated(SurfaceTexture surface, int width, int height) {
         super.onSurfaceTextureCreated(surface, width, height);
-        scheduleWarmupClear();
     }
 
     @Override
     public void onSurfaceTextureChanged(SurfaceTexture surface, int width, int height) {
         super.onSurfaceTextureChanged(surface, width, height);
-        scheduleWarmupClear();
     }
 
     @Override
     public void onSurfaceCreated(Surface surface, int width, int height) {
         super.onSurfaceCreated(surface, width, height);
-        scheduleWarmupClear();
     }
 
     @Override
     public void onSurfaceChanged(Surface surface, int width, int height) {
         super.onSurfaceChanged(surface, width, height);
-        scheduleWarmupClear();
     }
 }
