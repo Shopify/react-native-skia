@@ -14,6 +14,7 @@ Behind the scenes, it is using its own React renderer.
 | style?   | `ViewStyle` | View style |
 | ref?   | `Ref<SkiaView>` | Reference to the `SkiaView` object |
 | onSize? | `SharedValue<Size>` | Reanimated value to which the canvas size will be assigned  (see [canvas size](#canvas-size)) |
+| androidWarmup? | `boolean` | Draw the first frame directly on the Android compositor. This works for icons (with transparency but static) or opaque drawings. |
 
 ## Canvas size
 
