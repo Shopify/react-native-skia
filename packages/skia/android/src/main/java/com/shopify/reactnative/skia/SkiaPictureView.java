@@ -14,7 +14,7 @@ public class SkiaPictureView extends SkiaBaseView {
     private HybridData mHybridData;
     private Paint paint = new Paint();
 
-    private boolean coldStart = false;
+    private boolean androidWarmup = false;
 
     public SkiaPictureView(Context context) {
         super(context);
@@ -22,9 +22,9 @@ public class SkiaPictureView extends SkiaBaseView {
         mHybridData = initHybrid(skiaModule.getSkiaManager());
     }
 
-    public void setColdStart(boolean coldStart) {
-        this.coldStart = coldStart;
-        setWillNotDraw(coldStart);
+    public void setAndroidWarmup(boolean androidWarmup) {
+        this.androidWarmup = androidWarmup;
+        setWillNotDraw(!androidWarmup);
     }
 
     @Override
@@ -37,8 +37,8 @@ public class SkiaPictureView extends SkiaBaseView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        // Skip the warming up feature if coldStart is true or running on software renderer
-        if (coldStart) {
+        // Skip the warming up feature if androidWarmup is true or running on software renderer
+        if (!androidWarmup) {
             return; // Skip warmup on cold start or software rendering
         }
 

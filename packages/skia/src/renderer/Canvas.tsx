@@ -68,7 +68,7 @@ export interface CanvasProps extends Omit<ViewProps, "onLayout"> {
   onSize?: SharedValue<SkSize>;
   colorSpace?: "p3" | "srgb";
   ref?: React.Ref<CanvasRef>;
-  coldStart?: boolean;
+  androidWarmup?: boolean;
   __destroyWebGLContextAfterRender?: boolean;
 }
 
@@ -78,7 +78,7 @@ export const Canvas = ({
   children,
   onSize,
   colorSpace = "p3",
-  coldStart = false,
+  androidWarmup = false,
   ref,
   // Here know this is a type error but this is done on purpose to check it at runtime
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -170,7 +170,7 @@ export const Canvas = ({
       debug={debug}
       opaque={opaque}
       colorSpace={colorSpace}
-      coldStart={coldStart}
+      androidWarmup={androidWarmup}
       onLayout={
         Platform.OS === "web" && (onSize || onLayout) ? onLayoutWeb : onLayout
       }

@@ -27,7 +27,7 @@ export const AnimationWithTouchHandler = () => {
   return (
     <AnimationDemo title={"Decay animation with touch handler"}>
       <GestureDetector gesture={gesture}>
-        <Canvas style={styles.canvas}>
+        <Canvas style={styles.canvas} androidWarmup>
           <Circle cx={translateX} cy={40} r={20} color="#3E3E" />
           <Circle cx={translateX} cy={40} r={15} color="#AEAE" />
         </Canvas>

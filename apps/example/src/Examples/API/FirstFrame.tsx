@@ -58,6 +58,7 @@ export const FirstFrame = () => {
           key={`picture-${count}`}
           picture={picture}
           style={styles.canvas}
+          androidWarmup
         ></SkiaPictureView>
         <Canvas style={styles.canvas} key={`canvas-${count}`}>
           <Circle cx={100} cy={100} r={50} color="red" opacity={0.5} />
