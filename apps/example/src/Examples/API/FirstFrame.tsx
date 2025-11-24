@@ -24,7 +24,6 @@ const red = Skia.PictureRecorder();
 const canvas = red.beginRecording(Skia.XYWHRect(0, 0, 200, 200));
 const paint = Skia.Paint();
 paint.setColor(Skia.Color("green"));
-paint.setAlphaf(0.5);
 canvas.drawCircle(100, 100, 50, paint);
 const picture = red.finishRecordingAsPicture();
 
@@ -60,8 +59,8 @@ export const FirstFrame = () => {
           style={styles.canvas}
           androidWarmup
         ></SkiaPictureView>
-        <Canvas style={styles.canvas} key={`canvas-${count}`}>
-          <Circle cx={100} cy={100} r={50} color="red" opacity={0.5} />
+        <Canvas style={styles.canvas} key={`canvas-${count}`} androidWarmup>
+          <Circle cx={100} cy={100} r={50} color="red" />
         </Canvas>
         <View style={{ width, height: 100 }}>
           <AnimationWithTouchHandler />

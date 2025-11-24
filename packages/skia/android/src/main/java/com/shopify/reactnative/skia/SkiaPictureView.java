@@ -4,6 +4,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.SurfaceTexture;
+import android.view.Surface;
 
 import com.facebook.jni.HybridData;
 import com.facebook.jni.annotations.DoNotStrip;
@@ -15,6 +18,8 @@ public class SkiaPictureView extends SkiaBaseView {
     private Paint paint = new Paint();
 
     private boolean androidWarmup = false;
+    private boolean warmupContentVisible = false;
+    private boolean needsWarmupClear = false;
 
     public SkiaPictureView(Context context) {
         super(context);
@@ -24,7 +29,14 @@ public class SkiaPictureView extends SkiaBaseView {
 
     public void setAndroidWarmup(boolean androidWarmup) {
         this.androidWarmup = androidWarmup;
-        setWillNotDraw(!androidWarmup);
+        if (androidWarmup) {
+            warmupContentVisible = true;
+            needsWarmupClear = false;
+            setWillNotDraw(false);
+            invalidate();
+        } else {
+            scheduleWarmupClear();
+        }
     }
 
     @Override
@@ -37,9 +49,16 @@ public class SkiaPictureView extends SkiaBaseView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        // Skip the warming up feature if androidWarmup is true or running on software renderer
-        if (!androidWarmup) {
-            return; // Skip warmup on cold start or software rendering
+        if (needsWarmupClear) {
+            canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+            needsWarmupClear = false;
+            setWillNotDraw(true);
+            return;
+        }
+
+        // Skip the warming up feature if it is disabled or already cleared.
+        if (!androidWarmup || !warmupContentVisible) {
+            return;
         }
 
         // Get the view dimensions
@@ -79,4 +98,40 @@ public class SkiaPictureView extends SkiaBaseView {
     protected native void unregisterView();
 
     protected native int[] getBitmap(int width, int height);
+
+    private void scheduleWarmupClear() {
+        if (!warmupContentVisible || needsWarmupClear) {
+            if (!androidWarmup) {
+                setWillNotDraw(true);
+            }
+            return;
+        }
+        warmupContentVisible = false;
+        needsWarmupClear = true;
+        setWillNotDraw(false);
+    }
+
+    @Override
+    public void onSurfaceTextureCreated(SurfaceTexture surface, int width, int height) {
+        super.onSurfaceTextureCreated(surface, width, height);
+        scheduleWarmupClear();
+    }
+
+    @Override
+    public void onSurfaceTextureChanged(SurfaceTexture surface, int width, int height) {
+        super.onSurfaceTextureChanged(surface, width, height);
+        scheduleWarmupClear();
+    }
+
+    @Override
+    public void onSurfaceCreated(Surface surface, int width, int height) {
+        super.onSurfaceCreated(surface, width, height);
+        scheduleWarmupClear();
+    }
+
+    @Override
+    public void onSurfaceChanged(Surface surface, int width, int height) {
+        super.onSurfaceChanged(surface, width, height);
+        scheduleWarmupClear();
+    }
 }
