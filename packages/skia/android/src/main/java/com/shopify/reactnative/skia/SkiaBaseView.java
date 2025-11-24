@@ -18,6 +18,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
         super(context);
         mView = new SkiaTextureView(context, this, debug);
         addView(mView);
+        onRenderViewCreated(mView);
     }
 
     public void setOpaque(boolean value) {
@@ -25,10 +26,12 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
             removeView(mView);
             mView = new SkiaSurfaceView(getContext(), this, debug);
             addView(mView);
+            onRenderViewCreated(mView);
         } else if (!value && mView instanceof SkiaSurfaceView) {
             removeView(mView);
             mView = new SkiaTextureView(getContext(), this, debug);
             addView(mView);
+            onRenderViewCreated(mView);
         }
     }
 
@@ -67,6 +70,19 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
     @Override
     public void onSurfaceDestroyed() {
         surfaceDestroyed();
+    }
+
+    protected void onRenderViewCreated(View view) {
+        // Subclasses can react when the underlying render surface is (re)created.
+    }
+
+    protected View getRenderView() {
+        return mView;
+    }
+
+    @Override
+    public void onFirstFrameRendered() {
+        // Default no-op, subclasses can override if they need warmup bookkeeping.
     }
 
     protected abstract void surfaceAvailable(Object surface, int width, int height, boolean opaque);

@@ -12,9 +12,12 @@ import androidx.annotation.NonNull;
 public class SkiaTextureView extends TextureView implements TextureView.SurfaceTextureListener {
 
     private String tag = "SkiaTextureView";
+    private static final int MIN_FRAMES_BEFORE_READY = 2;
 
     SkiaViewAPI mApi;
     boolean mDebug;
+    private boolean mFirstFrameDispatched = false;
+    private int mFramesRendered = 0;
 
     public SkiaTextureView(Context context, SkiaViewAPI api, boolean debug) {
         super(context);
@@ -32,6 +35,8 @@ public class SkiaTextureView extends TextureView implements TextureView.SurfaceT
     @Override
     public void onSurfaceTextureAvailable(@NonNull SurfaceTexture surfaceTexture, int width, int height) {
         Log.i(tag, "onSurfaceTextureAvailable:  " + width + "x" + height);
+        mFirstFrameDispatched = false;
+        mFramesRendered = 0;
         mApi.onSurfaceTextureCreated(surfaceTexture, width, height);
     }
 
@@ -43,6 +48,8 @@ public class SkiaTextureView extends TextureView implements TextureView.SurfaceT
 
     @Override
     public boolean onSurfaceTextureDestroyed(@NonNull SurfaceTexture surfaceTexture) {
+        mFirstFrameDispatched = false;
+        mFramesRendered = 0;
         mApi.onSurfaceDestroyed();
         return true;
     }
@@ -50,12 +57,21 @@ public class SkiaTextureView extends TextureView implements TextureView.SurfaceT
     private long _prevTimestamp = 0;
     @Override
     public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surface) {
+        mFramesRendered++;
         if (!mDebug) {
+            if (!mFirstFrameDispatched && mFramesRendered >= MIN_FRAMES_BEFORE_READY) {
+                mFirstFrameDispatched = true;
+                mApi.onFirstFrameRendered();
+            }
             return;
         }
         long timestamp = surface.getTimestamp();
         long frameDuration = (timestamp - _prevTimestamp)/1000000;
         Log.i("SkiaTextureView", "onSurfaceTextureUpdated "+frameDuration+"ms");
         _prevTimestamp = timestamp;
+        if (!mFirstFrameDispatched && mFramesRendered >= MIN_FRAMES_BEFORE_READY) {
+            mFirstFrameDispatched = true;
+            mApi.onFirstFrameRendered();
+        }
     }
 }
