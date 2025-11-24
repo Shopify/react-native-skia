@@ -24,6 +24,7 @@ const red = Skia.PictureRecorder();
 const canvas = red.beginRecording(Skia.XYWHRect(0, 0, 200, 200));
 const paint = Skia.Paint();
 paint.setColor(Skia.Color("green"));
+paint.setAlphaf(0.5);
 canvas.drawCircle(100, 100, 50, paint);
 const picture = red.finishRecordingAsPicture();
 
