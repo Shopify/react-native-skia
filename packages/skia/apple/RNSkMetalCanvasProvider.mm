@@ -68,7 +68,7 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
     auto state = UIApplication.sharedApplication.applicationState;
     bool appIsBackgrounded = (state == UIApplicationStateBackground);
 #else
-    bool appIsBackgrounded = !NSApplication.sharedApplication.isActive;
+    bool appIsBackgrounded = NSApplication.sharedApplication.isHidden;
 #endif // !TARGET_OS_OSX
     if (appIsBackgrounded) {
       // Request a redraw in the next run loop callback
