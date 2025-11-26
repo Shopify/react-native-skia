@@ -106,7 +106,6 @@ const play = (ctx: DrawingContext, _command: Command) => {
     flushPendingGroups(ctx, pending);
   };
 
-  ("worklet");
   if (isGroup(_command)) {
     playGroup(ctx, _command);
     return;
