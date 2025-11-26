@@ -68,46 +68,50 @@ const getZIndex = (command: GroupCommand) => {
   return zIndex;
 };
 
-const play = (ctx: DrawingContext, _command: Command) => {
-  const flushPendingGroups = (
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    ctx: DrawingContext,
-    pendingGroups: PendingGroup[]
-  ) => {
-    "worklet";
-    if (pendingGroups.length === 0) {
+const flushPendingGroups = (
+  ctx: DrawingContext,
+  pendingGroups: PendingGroup[],
+  playFn: (ctx: DrawingContext, cmd: Command) => void
+) => {
+  "worklet";
+  if (pendingGroups.length === 0) {
+    return;
+  }
+  pendingGroups
+    .sort((a, b) =>
+      a.zIndex === b.zIndex ? a.order - b.order : a.zIndex - b.zIndex
+    )
+    .forEach(({ command }) => {
+      playFn(ctx, command);
+    });
+  pendingGroups.length = 0;
+};
+
+const playGroup = (
+  ctx: DrawingContext,
+  group: GroupCommand,
+  playFn: (ctx: DrawingContext, cmd: Command) => void
+) => {
+  "worklet";
+  const pending: PendingGroup[] = [];
+  group.children.forEach((child) => {
+    if (isGroup(child)) {
+      pending.push({
+        command: child,
+        zIndex: getZIndex(child),
+        order: pending.length,
+      });
       return;
     }
-    pendingGroups
-      .sort((a, b) =>
-        a.zIndex === b.zIndex ? a.order - b.order : a.zIndex - b.zIndex
-      )
-      .forEach(({ command }) => {
-        play(ctx, command);
-      });
-    pendingGroups.length = 0;
-  };
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  const playGroup = (ctx: DrawingContext, group: GroupCommand) => {
-    "worklet";
-    const pending: PendingGroup[] = [];
-    group.children.forEach((child) => {
-      if (isGroup(child)) {
-        pending.push({
-          command: child,
-          zIndex: getZIndex(child),
-          order: pending.length,
-        });
-        return;
-      }
-      flushPendingGroups(ctx, pending);
-      play(ctx, child);
-    });
-    flushPendingGroups(ctx, pending);
-  };
+    flushPendingGroups(ctx, pending, playFn);
+    playFn(ctx, child);
+  });
+  flushPendingGroups(ctx, pending, playFn);
+};
 
+const play = (ctx: DrawingContext, _command: Command) => {
   if (isGroup(_command)) {
-    playGroup(ctx, _command);
+    playGroup(ctx, _command, play);
     return;
   }
   const command = materializeCommand(_command);
