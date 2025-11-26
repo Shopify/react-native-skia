@@ -107,7 +107,9 @@ export const Canvas = ({
         Platform.OS === "web"
           ? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-expect-error
-            measure(viewRef.current.canvasRef)
+            viewRef.current?.canvasRef
+            ? measure(viewRef.current.canvasRef)
+            : { width: 0, height: 0 }
           : measure(viewRef as AnimatedRef<View>);
       if (result) {
         const { width, height } = result;
