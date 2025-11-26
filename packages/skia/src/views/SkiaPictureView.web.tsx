@@ -224,6 +224,19 @@ export interface SkiaPictureViewHandle {
   getSize(): { width: number; height: number };
   redraw(): void;
   makeImageSnapshot(rect?: SkRect): SkImage | null;
+  measure(
+    callback: (
+      x: number,
+      y: number,
+      width: number,
+      height: number,
+      pageX: number,
+      pageY: number
+    ) => void
+  ): void;
+  measureInWindow(
+    callback: (x: number, y: number, width: number, height: number) => void
+  ): void;
 }
 
 export const SkiaPictureView = forwardRef<
@@ -264,6 +277,56 @@ export const SkiaPictureView = forwardRef<
     return null;
   }, []);
 
+  const measure = useCallback(
+    (
+      callback: (
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        pageX: number,
+        pageY: number
+      ) => void
+    ) => {
+      if (canvasRef.current) {
+        const rect = canvasRef.current.getBoundingClientRect();
+        const parentElement = canvasRef.current.offsetParent as HTMLElement;
+        const parentRect = parentElement?.getBoundingClientRect() || {
+          left: 0,
+          top: 0,
+        };
+
+        // x, y are relative to the parent
+        const x = rect.left - parentRect.left;
+        const y = rect.top - parentRect.top;
+
+        // pageX, pageY are absolute screen coordinates
+        const pageX = rect.left + window.scrollX;
+        const pageY = rect.top + window.scrollY;
+
+        callback(x, y, rect.width, rect.height, pageX, pageY);
+      }
+    },
+    []
+  );
+
+  const measureInWindow = useCallback(
+    (
+      callback: (x: number, y: number, width: number, height: number) => void
+    ) => {
+      if (canvasRef.current) {
+        const rect = canvasRef.current.getBoundingClientRect();
+
+        // x, y are the absolute coordinates in the window
+        const x = rect.left;
+        const y = rect.top;
+
+        callback(x, y, rect.width, rect.height);
+      }
+    },
+    []
+  );
+
   const tick = useCallback(() => {
     if (redrawRequestsRef.current > 0) {
       redrawRequestsRef.current = 0;
@@ -300,8 +363,13 @@ export const SkiaPictureView = forwardRef<
       getSize,
       redraw,
       makeImageSnapshot,
+      measure,
+      measureInWindow,
+      get canvasRef() {
+        return () => canvasRef.current;
+      },
     }),
-    [setPicture, getSize, redraw, makeImageSnapshot]
+    [setPicture, getSize, redraw, makeImageSnapshot, measure, measureInWindow]
   );
 
   useEffect(() => {
@@ -311,8 +379,18 @@ export const SkiaPictureView = forwardRef<
       getSize,
       redraw,
       makeImageSnapshot,
+      measure,
+      measureInWindow,
     } as SkiaPictureViewHandle);
-  }, [setPicture, getSize, redraw, makeImageSnapshot, props.nativeID]);
+  }, [
+    setPicture,
+    getSize,
+    redraw,
+    makeImageSnapshot,
+    measure,
+    measureInWindow,
+    props.nativeID,
+  ]);
 
   useEffect(() => {
     if (props.picture) {

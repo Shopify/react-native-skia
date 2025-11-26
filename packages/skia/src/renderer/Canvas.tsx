@@ -103,7 +103,12 @@ export const Canvas = ({
   useReanimatedFrame(() => {
     "worklet";
     if (onSize && measure) {
-      const result = measure(viewRef as AnimatedRef<View>);
+      const result =
+        Platform.OS === "web"
+          ? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            measure(viewRef.current.canvasRef)
+          : measure(viewRef as AnimatedRef<View>);
       if (result) {
         const { width, height } = result;
         if (onSize.value.width !== width || onSize.value.height !== height) {
