@@ -24,9 +24,13 @@ const nativeDrawOnscreen = (
   SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
 };
 
+// Force GC every N redraws to release JSI Host Objects
+const GC_INTERVAL = 5;
+
 class NativeReanimatedContainer extends Container {
   private mapperId: number | null = null;
   private picture: SkPicture;
+  private redrawCount = 0;
 
   constructor(
     Skia: Skia,
@@ -42,6 +46,12 @@ class NativeReanimatedContainer extends Container {
     }
     if (this.unmounted) {
       return;
+    }
+    // Periodically force GC to release accumulated JSI Host Objects
+    this.redrawCount++;
+    if (this.redrawCount >= GC_INTERVAL) {
+      this.redrawCount = 0;
+      global.gc?.();
     }
     const recorder = new ReanimatedRecorder(this.Skia);
     const { nativeId, picture, Skia } = this;
