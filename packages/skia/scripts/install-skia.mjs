@@ -487,6 +487,25 @@ const main = async () => {
     });
   }
 
+  // Create or remove Graphite marker files based on build type
+  const androidMarkerFile = path.join(androidDir, "graphite.enabled");
+  const appleMarkerFile = path.join(appleDir, "graphite.enabled");
+
+  if (GRAPHITE) {
+    // Create marker files for Graphite builds
+    fs.writeFileSync(androidMarkerFile, "");
+    fs.writeFileSync(appleMarkerFile, "");
+    console.log("✓ Created Graphite marker files");
+  } else {
+    // Ensure marker files don't exist for non-Graphite builds
+    if (fs.existsSync(androidMarkerFile)) {
+      fs.unlinkSync(androidMarkerFile);
+    }
+    if (fs.existsSync(appleMarkerFile)) {
+      fs.unlinkSync(appleMarkerFile);
+    }
+  }
+
   // Copy Graphite headers if using Graphite
   if (GRAPHITE) {
     console.log("📦 Copying Graphite headers...");
