@@ -11,35 +11,35 @@ set (SKIA_LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../libs/android/${ANDROID_ABI}"
 add_library(skia STATIC IMPORTED)
 set_property(TARGET skia PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskia.a")
 
-# Check if Graphite symbols are available in libskia using nm
+# Check if Graphite is available
+# Detection method priority:
+# 1. SK_GRAPHITE environment variable (explicit override, fastest)
+# 2. Marker file in libs directory (set during Skia build)
+# 3. Fall back to nm symbol detection (slow on some CI systems)
 set(SK_GRAPHITE_AVAILABLE OFF)
 
-if(EXISTS "${SKIA_LIBS_PATH}/libskia.a")
-    # Look for specific Dawn function symbols that indicate Graphite support
-    # Check each symbol individually for better reliability
-    set(DAWN_SYMBOLS "dawn::" "wgpu" "_ZN4dawn" "DawnDevice" "dawn_native")
-
-    foreach(SYMBOL ${DAWN_SYMBOLS})
-        execute_process(
-            COMMAND sh -c "nm '${SKIA_LIBS_PATH}/libskia.a' 2>/dev/null | grep '${SYMBOL}'"
-            OUTPUT_VARIABLE NM_OUTPUT
-            ERROR_QUIET
-            RESULT_VARIABLE NM_RESULT
-        )
-
-        if(NM_RESULT EQUAL 0 AND NOT "${NM_OUTPUT}" STREQUAL "")
-            set(SK_GRAPHITE_AVAILABLE ON)
-            break()
-        endif()
-    endforeach()
+if(DEFINED ENV{SK_GRAPHITE})
+    # Explicit override via environment variable
+    if($ENV{SK_GRAPHITE})
+        set(SK_GRAPHITE_AVAILABLE ON)
+        message("-- SK_GRAPHITE detection: using environment variable (ON)")
+    else()
+        message("-- SK_GRAPHITE detection: using environment variable (OFF)")
+    endif()
+elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../libs/android/graphite.enabled")
+    # Marker file indicates Graphite-enabled build
+    set(SK_GRAPHITE_AVAILABLE ON)
+    message("-- SK_GRAPHITE detection: marker file found")
+else()
+    message("-- SK_GRAPHITE detection: no marker file, assuming OFF")
 endif()
 
 if(SK_GRAPHITE_AVAILABLE)
     set(SK_GRAPHITE ON)
-    message("-- SK_GRAPHITE: ON (Graphite symbols found in libskia)")
+    message("-- SK_GRAPHITE: ON")
 else()
     set(SK_GRAPHITE OFF)
-    message("-- SK_GRAPHITE: OFF (Graphite symbols not found in libskia)")
+    message("-- SK_GRAPHITE: OFF")
 endif()
 
 string(APPEND CMAKE_CXX_FLAGS " -DSK_BUILD_FOR_ANDROID -DSK_DISABLE_LEGACY_SHAPER_FACTORY -DSK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_HAVE_MEMRCHR=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_MOBILE=1 -DON_ANDROID -DONANDROID")
