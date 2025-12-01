@@ -146,7 +146,7 @@ describe("Pictures", () => {
       },
       { size: surface.width, progress, n }
     );
-    checkImage(image, "snapshots/pictures/circle-trail-2.png");
+    checkImage(image, docPath("pictures/circle-trail.png"));
   });
   itRunsNodeOnly("Blur Picture", async () => {
     const { Skia, createPicture } = importSkia();

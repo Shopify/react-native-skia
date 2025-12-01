@@ -64,6 +64,8 @@ export const HelloWorld = () => {
 };
 ```
 
+<img src={require("/static/img/pictures/circle-trail.png").default} width="256" height="256" />
+
 ## Applying Effects
 
 The `Picture` component doesn't follow the same painting rules as other components.
