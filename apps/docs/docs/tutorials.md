@@ -11,6 +11,7 @@ Please [make a PR](https://github.com/Shopify/react-native-skia/edit/main/docs/d
 ## 📏 SDFs
 * ♟️ [The Shader's Gambit ](https://www.youtube.com/watch?v=wUsFNlas620)
 * 📏 [Skia Shaders and the SDF of a Line ](https://www.youtube.com/watch?v=KgJUNYS7ZnA)
+* 💧 [Liquid Glass with React Native Skia](https://www.youtube.com/watch?v=qYFMOMVZoPY)
 
 ## ✨ Animations
 * 💊 [The Matrix Reacts ](https://www.youtube.com/watch?v=49QR0wUDMG0)

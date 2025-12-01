@@ -31,8 +31,8 @@ public class SkiaPictureViewManagerDelegate<T extends View, U extends BaseViewMa
       case "colorSpace":
         mViewManager.setColorSpace(view, value == null ? null : (String) value);
         break;
-      case "coldStart":
-        mViewManager.setColdStart(view, value != null && (boolean) value);
+      case "androidWarmup":
+        mViewManager.setAndroidWarmup(view, value != null && (boolean) value);
         break;
       default:
         super.setProperty(view, propName, value);

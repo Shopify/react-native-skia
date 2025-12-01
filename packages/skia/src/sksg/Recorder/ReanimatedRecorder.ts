@@ -28,6 +28,7 @@ import type {
   ParagraphProps,
   AtlasProps,
   SkottieProps,
+  DrawingNodeProps,
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer";
 import { isSharedValue } from "../utils";
@@ -71,8 +72,13 @@ export class ReanimatedRecorder implements BaseRecorder {
     return Array.from(this.values);
   }
 
-  saveGroup(): void {
-    this.recorder.saveGroup();
+  saveGroup(props?: AnimatedProps<Pick<DrawingNodeProps, "zIndex">>): void {
+    if (props) {
+      this.processAnimationValues(props);
+      this.recorder.saveGroup(props);
+    } else {
+      this.recorder.saveGroup();
+    }
   }
 
   restoreGroup(): void {

@@ -110,7 +110,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(saveGroup) {
-    getObject()->saveGroup();
+    const jsi::Value *value = count > 0 ? &arguments[0] : nullptr;
+    getObject()->saveGroup(runtime, value);
     return jsi::Value::undefined();
   }
 

@@ -300,7 +300,7 @@ If your SVG doesn't render correctly and you've considered all the items below, 
 ### CSS Styles
 
 CSS styles included in SVG are not supported.
-A tool like [SVGO](#using-svgo) can help with converting CSS style attributes to SVG attributes if possible. 
+A tool like SVGO can help with converting CSS style attributes to SVG attributes if possible. 
 You can use it online [here](https://jakearchibald.github.io/svgomg/).
 For instance, it can normalize CSS style attributes that contain transformations to the proper `transform` property.
 

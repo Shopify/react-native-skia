@@ -23,7 +23,6 @@ yarn add @shopify/react-native-skia
 npm install @shopify/react-native-skia
 ```
 
-
 If you're using **bun** or **pnpm**, you'll need to trust the package for the postinstall script to run:
 
 ```sh
@@ -33,6 +32,20 @@ bun add --trust @shopify/react-native-skia
 # pnpm (v10+)
 pnpm add --allow-build=@shopify/react-native-skia @shopify/react-native-skia
 ```
+
+### Using Expo
+
+Expo provides a `with-skia` template, which you can use to create a new project.
+
+```bash
+yarn create expo-app my-app -e with-skia
+# or
+npx create-expo-app my-app -e with-skia
+```
+
+<video width="61%" autoPlay loop muted playsInline>
+  <source src="https://firebasestorage.googleapis.com/v0/b/start-react-native.appspot.com/o/expo-template2.mp4?alt=media&token=cdc13f16-9c5a-488a-b5d6-19d11f3e1842" type="video/mp4" />
+</video>
 
 ### Bundle Size
 

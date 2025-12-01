@@ -1,11 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
+import {
+  Button,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   Canvas,
   Circle,
   Skia,
   SkiaPictureView,
 } from "@shopify/react-native-skia";
+import { ScrollView } from "react-native-gesture-handler";
+
+import { AnimationWithTouchHandler } from "../Reanimated/AnimationWithTouchHandler";
+
+import type { Routes } from "./Routes";
 
 const red = Skia.PictureRecorder();
 const canvas = red.beginRecording(Skia.XYWHRect(0, 0, 200, 200));
@@ -15,14 +28,17 @@ canvas.drawCircle(100, 100, 50, paint);
 const picture = red.finishRecordingAsPicture();
 
 export const FirstFrame = () => {
+  const { width } = useWindowDimensions();
   const [count, setCount] = useState(0);
   const [isRunning, setIsRunning] = useState(true);
+  const navigation =
+    useNavigation<NativeStackNavigationProp<Routes, "FirstFrame">>();
 
   useEffect(() => {
     if (isRunning) {
       const interval = setInterval(() => {
         setCount((value) => value + 1);
-      }, 50);
+      }, 200);
 
       return () => clearInterval(interval);
     }
@@ -30,20 +46,42 @@ export const FirstFrame = () => {
   }, [isRunning]);
 
   return (
+    <ScrollView>
+      <View style={styles.container}>
+        <Button
+          onPress={() => setIsRunning((prev) => !prev)}
+          title={isRunning ? "PAUSE" : "START"}
+        />
+        <Text>{count}</Text>
+        <SkiaPictureView
+          key={`picture-${count}`}
+          picture={picture}
+          style={styles.canvas}
+          androidWarmup
+        ></SkiaPictureView>
+        <Canvas style={styles.canvas} key={`canvas-${count}`} androidWarmup>
+          <Circle cx={100} cy={100} r={50} color="red" />
+        </Canvas>
+        <View style={{ width, height: 100 }}>
+          <AnimationWithTouchHandler />
+        </View>
+        <Button
+          title="Go to empty screen"
+          onPress={() => navigation.navigate("FirstFrameEmpty")}
+        />
+      </View>
+    </ScrollView>
+  );
+};
+
+export const FirstFrameEmpty = () => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<Routes, "FirstFrameEmpty">>();
+
+  return (
     <View style={styles.container}>
-      <Button
-        onPress={() => setIsRunning((prev) => !prev)}
-        title={isRunning ? "PAUSE" : "START"}
-      />
-      <Text>{count}</Text>
-      <SkiaPictureView
-        key={`picture-${count}`}
-        picture={picture}
-        style={styles.canvas}
-      ></SkiaPictureView>
-      <Canvas style={styles.canvas} key={`canvas-${count}`}>
-        <Circle cx={100} cy={100} r={50} color="red" />
-      </Canvas>
+      <Text>Empty screen</Text>
+      <Button title="Go back" onPress={() => navigation.goBack()} />
     </View>
   );
 };

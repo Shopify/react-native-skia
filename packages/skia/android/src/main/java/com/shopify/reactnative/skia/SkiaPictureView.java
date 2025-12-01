@@ -4,6 +4,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.SurfaceTexture;
+import android.view.Surface;
 
 import com.facebook.jni.HybridData;
 import com.facebook.jni.annotations.DoNotStrip;
@@ -14,7 +17,7 @@ public class SkiaPictureView extends SkiaBaseView {
     private HybridData mHybridData;
     private Paint paint = new Paint();
 
-    private boolean coldStart = true;
+    private boolean androidWarmup = false;
 
     public SkiaPictureView(Context context) {
         super(context);
@@ -22,10 +25,9 @@ public class SkiaPictureView extends SkiaBaseView {
         mHybridData = initHybrid(skiaModule.getSkiaManager());
     }
 
-    public void setColdStart(boolean coldStart) {
-        // disabled for now
-        //this.coldStart = coldStart;
-        //setWillNotDraw(coldStart);
+    public void setAndroidWarmup(boolean androidWarmup) {
+        this.androidWarmup = androidWarmup;
+        setWillNotDraw(!androidWarmup);
     }
 
     @Override
@@ -38,9 +40,9 @@ public class SkiaPictureView extends SkiaBaseView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        // Skip the warming up feature if coldStart is true or running on software renderer
-        if (coldStart) {
-            return; // Skip warmup on cold start or software rendering
+        // Skip the warming up feature if it is disabled or already cleared.
+        if (!androidWarmup) {
+            return;
         }
 
         // Get the view dimensions
@@ -80,4 +82,24 @@ public class SkiaPictureView extends SkiaBaseView {
     protected native void unregisterView();
 
     protected native int[] getBitmap(int width, int height);
+
+    @Override
+    public void onSurfaceTextureCreated(SurfaceTexture surface, int width, int height) {
+        super.onSurfaceTextureCreated(surface, width, height);
+    }
+
+    @Override
+    public void onSurfaceTextureChanged(SurfaceTexture surface, int width, int height) {
+        super.onSurfaceTextureChanged(surface, width, height);
+    }
+
+    @Override
+    public void onSurfaceCreated(Surface surface, int width, int height) {
+        super.onSurfaceCreated(surface, width, height);
+    }
+
+    @Override
+    public void onSurfaceChanged(Surface surface, int width, int height) {
+        super.onSurfaceChanged(surface, width, height);
+    }
 }

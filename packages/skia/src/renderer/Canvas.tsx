@@ -68,6 +68,7 @@ export interface CanvasProps extends Omit<ViewProps, "onLayout"> {
   onSize?: SharedValue<SkSize>;
   colorSpace?: "p3" | "srgb";
   ref?: React.Ref<CanvasRef>;
+  androidWarmup?: boolean;
   __destroyWebGLContextAfterRender?: boolean;
 }
 
@@ -77,6 +78,7 @@ export const Canvas = ({
   children,
   onSize,
   colorSpace = "p3",
+  androidWarmup = false,
   ref,
   // Here know this is a type error but this is done on purpose to check it at runtime
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -101,7 +103,17 @@ export const Canvas = ({
   useReanimatedFrame(() => {
     "worklet";
     if (onSize && measure) {
-      const result = measure(viewRef as AnimatedRef<View>);
+      const result =
+        // eslint-disable-next-line no-nested-ternary
+        Platform.OS === "web"
+          ? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            viewRef.current?.canvasRef
+            ? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-expect-error
+              measure(viewRef.current.canvasRef)
+            : { width: 0, height: 0 }
+          : measure(viewRef as AnimatedRef<View>);
       if (result) {
         const { width, height } = result;
         if (onSize.value.width !== width || onSize.value.height !== height) {
@@ -168,7 +180,7 @@ export const Canvas = ({
       debug={debug}
       opaque={opaque}
       colorSpace={colorSpace}
-      coldStart={false}
+      androidWarmup={androidWarmup}
       onLayout={
         Platform.OS === "web" && (onSize || onLayout) ? onLayoutWeb : onLayout
       }
