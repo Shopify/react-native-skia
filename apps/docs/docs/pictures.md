@@ -15,7 +15,6 @@ The picture is immutable and cannot be edited or changed after it has been creat
 | :------ | :---------- | :---------------- |
 | picture | `SkPicture` | Picture to render |
 
-
 ## Hello World
 
 In this example, we animate a trail of circles. The number of circles in the trail changes over time, which is why we need to use pictures: we can't animated on the number of circle components.
@@ -64,7 +63,9 @@ export const HelloWorld = () => {
 };
 ```
 
-<img src={require("/static/img/pictures/circle-trail.png").default} width="256" height="256" />
+| progress=0.25 | progress=0.5 | progress=1 |
+| :-----------: | :----------: | :--------: |
+| <img src={require("/static/img/pictures/circle-trail-0.25.png").default} width="256" height="256" /> | <img src={require("/static/img/pictures/circle-trail-0.5.png").default} width="256" height="256" /> | <img src={require("/static/img/pictures/circle-trail-1.png").default} width="256" height="256" /> |
 
 ## Applying Effects
 
