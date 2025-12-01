@@ -98,6 +98,56 @@ describe("Pictures", () => {
     );
     checkImage(img, docPath("simple-picture.png"));
   });
+  it("Should draw animated circle trail", async () => {
+    const n = 20;
+    const progress = 0.75; // Simulate animation at 75%
+    const image = await surface.drawOffscreen(
+      (Skia, canvas, ctx) => {
+        const { size } = ctx;
+        const recorder = Skia.PictureRecorder();
+        const canvas2 = recorder.beginRecording(
+          Skia.XYWHRect(0, 0, size, size)
+        );
+        const paint = Skia.Paint();
+        const numberOfCircles = Math.floor(ctx.progress * ctx.n);
+        for (let i = 0; i < numberOfCircles; i++) {
+          const alpha = ((i + 1) / ctx.n) * 255;
+          const r = ((i + 1) / ctx.n) * (size / 2);
+          paint.setColor(Skia.Color(`rgba(0, 122, 255, ${alpha / 255})`));
+          canvas2.drawCircle(size / 2, size / 2, r, paint);
+        }
+        const picture = recorder.finishRecordingAsPicture();
+        canvas.drawPicture(picture);
+      },
+      { size: surface.width, progress, n }
+    );
+    checkImage(image, "snapshots/pictures/circle-trail.png");
+  });
+  it("Should draw animated circle trail (2)", async () => {
+    const n = 20;
+    const progress = 0.5; // Simulate animation at 75%
+    const image = await surface.drawOffscreen(
+      (Skia, canvas, ctx) => {
+        const { size } = ctx;
+        const recorder = Skia.PictureRecorder();
+        const canvas2 = recorder.beginRecording(
+          Skia.XYWHRect(0, 0, size, size)
+        );
+        const paint = Skia.Paint();
+        const numberOfCircles = Math.floor(ctx.progress * ctx.n);
+        for (let i = 0; i < numberOfCircles; i++) {
+          const alpha = ((i + 1) / ctx.n) * 255;
+          const r = ((i + 1) / ctx.n) * (size / 2);
+          paint.setColor(Skia.Color(`rgba(0, 122, 255, ${alpha / 255})`));
+          canvas2.drawCircle(size / 2, size / 2, r, paint);
+        }
+        const picture = recorder.finishRecordingAsPicture();
+        canvas.drawPicture(picture);
+      },
+      { size: surface.width, progress, n }
+    );
+    checkImage(image, "snapshots/pictures/circle-trail-2.png");
+  });
   itRunsNodeOnly("Blur Picture", async () => {
     const { Skia, createPicture } = importSkia();
     const picture = createPicture((canvas) => {
