@@ -312,8 +312,7 @@ export class JsiSkCanvas
     );
   }
 
-  drawSvg(svg: SkSVG, width?: number, height?: number) {
-    const ctm = this.ref.getLocalToDevice();
+  drawSvg(svg: SkSVG, _width?: number, _height?: number) {
     const image = this.CanvasKit.MakeImageFromCanvasImageSource(
       (svg as JsiSkSVG).ref
     );
