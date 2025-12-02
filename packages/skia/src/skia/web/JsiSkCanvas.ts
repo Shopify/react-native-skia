@@ -314,7 +314,6 @@ export class JsiSkCanvas
 
   drawSvg(svg: SkSVG, width?: number, height?: number) {
     const ctm = this.ref.getLocalToDevice();
-    console.log({ ctm, width, height });
     const image = this.CanvasKit.MakeImageFromCanvasImageSource(
       (svg as JsiSkSVG).ref
     );
