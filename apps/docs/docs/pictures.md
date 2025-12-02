@@ -33,6 +33,7 @@ const size = 256;
 const n = 20;
 
 const paint = Skia.Paint();
+const recorder = Skia.PictureRecorder();
 
 export const HelloWorld = () => {
   const progress = useSharedValue(0);
@@ -43,7 +44,6 @@ export const HelloWorld = () => {
 
   const picture = useDerivedValue(() => {
     "worklet";
-    const recorder = Skia.PictureRecorder();
     const canvas = recorder.beginRecording(Skia.XYWHRect(0, 0, size, size));
     const numberOfCircles = Math.floor(progress.value * n);
     for (let i = 0; i < numberOfCircles; i++) {
