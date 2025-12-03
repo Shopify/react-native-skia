@@ -4,7 +4,6 @@ import React, {
   useEffect,
   useCallback,
   useImperativeHandle,
-  forwardRef,
 } from "react";
 import type { LayoutChangeEvent } from "react-native";
 
@@ -239,10 +238,12 @@ export interface SkiaPictureViewHandle {
   ): void;
 }
 
-export const SkiaPictureView = forwardRef<
-  SkiaPictureViewHandle,
-  SkiaPictureViewNativeProps
->((props, ref) => {
+interface SkiaPictureViewProps extends SkiaPictureViewNativeProps {
+  ref?: React.Ref<SkiaPictureViewHandle>;
+}
+
+export const SkiaPictureView = (props: SkiaPictureViewProps) => {
+  const { ref } = props;
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const renderer = useRef<Renderer | null>(null);
   const redrawRequestsRef = useRef(0);
@@ -415,10 +416,10 @@ export const SkiaPictureView = forwardRef<
     }
   }, [picture, redraw]);
 
-  const { debug = false, ...viewProps } = props;
+  const { debug = false, ref: _ref, ...viewProps } = props;
   return (
     <Platform.View {...viewProps} onLayout={onLayoutEvent}>
       <canvas ref={canvasRef} style={{ display: "flex", flex: 1 }} />
     </Platform.View>
   );
-});
+};
