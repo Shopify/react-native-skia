@@ -238,7 +238,7 @@ export interface SkiaPictureViewHandle {
   ): void;
 }
 
-interface SkiaPictureViewProps extends SkiaPictureViewNativeProps {
+export interface SkiaPictureViewProps extends SkiaPictureViewNativeProps {
   ref?: React.Ref<SkiaPictureViewHandle>;
 }
 
