@@ -8,7 +8,6 @@ import { NodeType } from "../../dom/types";
 import type { BaseRecorder } from "../../skia/types/Recorder";
 import type { Node } from "../Node";
 import { isImageFilter, isShader, sortNodeChildren } from "../Node";
-import type { AnimatedProps } from "../../renderer";
 
 export const processPaint = ({
   opacity,
@@ -23,6 +22,23 @@ export const processPaint = ({
   dither,
   paint: paintRef,
 }: DrawingNodeProps) => {
+  // Check if any paint property exists before allocating object
+  if (
+    opacity === undefined &&
+    color === undefined &&
+    strokeWidth === undefined &&
+    blendMode === undefined &&
+    style === undefined &&
+    strokeJoin === undefined &&
+    strokeCap === undefined &&
+    strokeMiter === undefined &&
+    antiAlias === undefined &&
+    dither === undefined &&
+    paintRef === undefined
+  ) {
+    return null;
+  }
+
   const paint: DrawingNodeProps = {};
   if (opacity !== undefined) {
     paint.opacity = opacity;
@@ -54,27 +70,11 @@ export const processPaint = ({
   if (dither !== undefined) {
     paint.dither = dither;
   }
-
   if (paintRef !== undefined) {
     paint.paint = paintRef;
   }
 
-  if (
-    opacity !== undefined ||
-    color !== undefined ||
-    strokeWidth !== undefined ||
-    blendMode !== undefined ||
-    style !== undefined ||
-    strokeJoin !== undefined ||
-    strokeCap !== undefined ||
-    strokeMiter !== undefined ||
-    antiAlias !== undefined ||
-    dither !== undefined ||
-    paintRef !== undefined
-  ) {
-    return paint;
-  }
-  return null;
+  return paint;
 };
 
 const processCTM = ({
@@ -85,76 +85,84 @@ const processCTM = ({
   matrix,
   layer,
 }: CTMProps) => {
+  // Check if any CTM property exists before allocating object
+  if (
+    clip === undefined &&
+    invertClip === undefined &&
+    transform === undefined &&
+    origin === undefined &&
+    matrix === undefined &&
+    layer === undefined
+  ) {
+    return null;
+  }
+
   const ctm: CTMProps = {};
-  if (clip) {
+  if (clip !== undefined) {
     ctm.clip = clip;
   }
-  if (invertClip) {
+  if (invertClip !== undefined) {
     ctm.invertClip = invertClip;
   }
-  if (transform) {
+  if (transform !== undefined) {
     ctm.transform = transform;
   }
-  if (origin) {
+  if (origin !== undefined) {
     ctm.origin = origin;
   }
-  if (matrix) {
+  if (matrix !== undefined) {
     ctm.matrix = matrix;
   }
-  if (layer) {
+  if (layer !== undefined) {
     ctm.layer = layer;
   }
-  if (
-    clip !== undefined ||
-    invertClip !== undefined ||
-    transform !== undefined ||
-    origin !== undefined ||
-    matrix !== undefined ||
-    layer !== undefined
-  ) {
-    return ctm;
-  }
-  return null;
+  return ctm;
 };
 
 const pushColorFilters = (
   recorder: BaseRecorder,
   colorFilters: Node<any>[]
 ) => {
-  colorFilters.forEach((colorFilter) => {
+  const len = colorFilters.length;
+  for (let i = 0; i < len; i++) {
+    const colorFilter = colorFilters[i];
     if (colorFilter.children.length > 0) {
       pushColorFilters(recorder, colorFilter.children);
     }
     recorder.pushColorFilter(colorFilter.type, colorFilter.props);
-    const needsComposition =
+    if (
       colorFilter.type !== NodeType.LerpColorFilter &&
-      colorFilter.children.length > 0;
-    if (needsComposition) {
+      colorFilter.children.length > 0
+    ) {
       recorder.composeColorFilter();
     }
-  });
+  }
 };
 
 const pushPathEffects = (recorder: BaseRecorder, pathEffects: Node<any>[]) => {
-  pathEffects.forEach((pathEffect) => {
+  const len = pathEffects.length;
+  for (let i = 0; i < len; i++) {
+    const pathEffect = pathEffects[i];
     if (pathEffect.children.length > 0) {
       pushPathEffects(recorder, pathEffect.children);
     }
     recorder.pushPathEffect(pathEffect.type, pathEffect.props);
-    const needsComposition =
+    if (
       pathEffect.type !== NodeType.SumPathEffect &&
-      pathEffect.children.length > 0;
-    if (needsComposition) {
+      pathEffect.children.length > 0
+    ) {
       recorder.composePathEffect();
     }
-  });
+  }
 };
 
 const pushImageFilters = (
   recorder: BaseRecorder,
   imageFilters: Node<any>[]
 ) => {
-  imageFilters.forEach((imageFilter) => {
+  const len = imageFilters.length;
+  for (let i = 0; i < len; i++) {
+    const imageFilter = imageFilters[i];
     if (imageFilter.children.length > 0) {
       pushImageFilters(recorder, imageFilter.children);
     }
@@ -163,32 +171,37 @@ const pushImageFilters = (
     } else if (isShader(imageFilter.type)) {
       recorder.pushShader(imageFilter.type, imageFilter.props, 0);
     }
-    const needsComposition =
+    if (
       imageFilter.type !== NodeType.BlendImageFilter &&
-      imageFilter.children.length > 0;
-    if (needsComposition) {
+      imageFilter.children.length > 0
+    ) {
       recorder.composeImageFilter();
     }
-  });
+  }
 };
 
 const pushShaders = (recorder: BaseRecorder, shaders: Node<any>[]) => {
-  shaders.forEach((shader) => {
+  const len = shaders.length;
+  for (let i = 0; i < len; i++) {
+    const shader = shaders[i];
     if (shader.children.length > 0) {
       pushShaders(recorder, shader.children);
     }
     recorder.pushShader(shader.type, shader.props, shader.children.length);
-  });
+  }
 };
 
 const pushMaskFilters = (recorder: BaseRecorder, maskFilters: Node<any>[]) => {
-  if (maskFilters.length > 0) {
-    recorder.pushBlurMaskFilter(maskFilters[maskFilters.length - 1].props);
+  const len = maskFilters.length;
+  if (len > 0) {
+    recorder.pushBlurMaskFilter(maskFilters[len - 1].props);
   }
 };
 
 const pushPaints = (recorder: BaseRecorder, paints: Node<any>[]) => {
-  paints.forEach((paint) => {
+  const len = paints.length;
+  for (let i = 0; i < len; i++) {
+    const paint = paints[i];
     recorder.savePaint(paint.props, true);
     const { colorFilters, maskFilters, shaders, imageFilters, pathEffects } =
       sortNodeChildren(paint);
@@ -198,27 +211,19 @@ const pushPaints = (recorder: BaseRecorder, paints: Node<any>[]) => {
     pushShaders(recorder, shaders);
     pushPathEffects(recorder, pathEffects);
     recorder.restorePaintDeclaration();
-  });
-};
-
-type StackingContextProps = Pick<DrawingNodeProps, "zIndex">;
-
-const getStackingContextProps = (
-  props: AnimatedProps<DrawingNodeProps>
-): AnimatedProps<StackingContextProps> | undefined => {
-  const { zIndex } = props;
-  if (zIndex === undefined) {
-    return undefined;
   }
-  return { zIndex };
 };
+
+// Reusable empty object for stacking context
+const EMPTY_STACKING_CONTEXT = undefined;
 
 const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
-  const { props } = node;
-  const stackingContextProps = getStackingContextProps(
-    props as AnimatedProps<DrawingNodeProps>
-  );
-  recorder.saveGroup(stackingContextProps);
+  const { props, type } = node;
+
+  // Get zIndex directly instead of creating wrapper object
+  const zIndex = (props as DrawingNodeProps).zIndex;
+  recorder.saveGroup(zIndex !== undefined ? { zIndex } : EMPTY_STACKING_CONTEXT);
+
   const {
     colorFilters,
     maskFilters,
@@ -228,14 +233,16 @@ const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
     pathEffects,
     paints,
   } = sortNodeChildren(node);
+
   const paint = processPaint(props);
-  const shouldPushPaint =
-    paint ||
+  const hasDeclarations =
     colorFilters.length > 0 ||
     maskFilters.length > 0 ||
     imageFilters.length > 0 ||
     pathEffects.length > 0 ||
     shaders.length > 0;
+  const shouldPushPaint = paint !== null || hasDeclarations;
+
   if (shouldPushPaint) {
     recorder.savePaint(paint ?? {}, false);
     pushColorFilters(recorder, colorFilters);
@@ -244,28 +251,44 @@ const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
     pushShaders(recorder, shaders);
     pushPathEffects(recorder, pathEffects);
     // For mixed nodes like BackdropFilters we don't materialize the paint
-    if (node.type === NodeType.BackdropFilter) {
+    if (type === NodeType.BackdropFilter) {
       recorder.saveBackdropFilter();
     } else {
       recorder.materializePaint();
     }
   }
-  pushPaints(recorder, paints);
-  if (node.type === NodeType.Layer) {
+
+  if (paints.length > 0) {
+    pushPaints(recorder, paints);
+  }
+
+  if (type === NodeType.Layer) {
     recorder.saveLayer();
   }
+
   const ctm = processCTM(props);
-  const shouldRestore = !!ctm || node.type === NodeType.Layer;
-  if (ctm) {
+  const shouldRestore = ctm !== null || type === NodeType.Layer;
+  if (ctm !== null) {
     recorder.saveCTM(ctm);
   }
-  switch (node.type) {
+
+  // Draw based on node type
+  switch (type) {
     case NodeType.Box:
-      const shadows = node.children
-        .filter((n) => n.type === NodeType.BoxShadow)
-        // eslint-disable-next-line @typescript-eslint/no-shadow
-        .map(({ props }) => ({ props }) as { props: BoxShadowProps });
-      recorder.drawBox(props, shadows);
+      // Filter BoxShadow children inline
+      const children = node.children;
+      const childLen = children.length;
+      let shadows: { props: BoxShadowProps }[] | null = null;
+      for (let i = 0; i < childLen; i++) {
+        const child = children[i];
+        if (child.type === NodeType.BoxShadow) {
+          if (shadows === null) {
+            shadows = [];
+          }
+          shadows.push({ props: child.props as BoxShadowProps });
+        }
+      }
+      recorder.drawBox(props, shadows ?? []);
       break;
     case NodeType.Fill:
       recorder.drawPaint();
@@ -331,9 +354,13 @@ const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
       recorder.drawAtlas(props);
       break;
   }
-  drawings.forEach((drawing) => {
-    visitNode(recorder, drawing);
-  });
+
+  // Visit child drawings
+  const drawingsLen = drawings.length;
+  for (let i = 0; i < drawingsLen; i++) {
+    visitNode(recorder, drawings[i]);
+  }
+
   if (shouldPushPaint) {
     recorder.restorePaint();
   }
@@ -344,7 +371,8 @@ const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
 };
 
 export const visit = (recorder: BaseRecorder, root: Node[]) => {
-  root.forEach((node) => {
-    visitNode(recorder, node);
-  });
+  const len = root.length;
+  for (let i = 0; i < len; i++) {
+    visitNode(recorder, root[i]);
+  }
 };

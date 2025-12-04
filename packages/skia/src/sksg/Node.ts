@@ -60,47 +60,102 @@ export const isShader = (type: NodeType) => {
   );
 };
 
+// Reusable empty array to avoid allocation when no children of a type exist
+const EMPTY_ARRAY: Node[] = [];
+
+// Empty result for nodes with no children
+const EMPTY_RESULT = {
+  colorFilters: EMPTY_ARRAY,
+  drawings: EMPTY_ARRAY,
+  maskFilters: EMPTY_ARRAY,
+  shaders: EMPTY_ARRAY,
+  pathEffects: EMPTY_ARRAY,
+  imageFilters: EMPTY_ARRAY,
+  paints: EMPTY_ARRAY,
+};
+
 export const sortNodeChildren = (parent: Node) => {
   "worklet";
-  const maskFilters: Node[] = [];
-  const colorFilters: Node[] = [];
-  const shaders: Node[] = [];
-  const imageFilters: Node[] = [];
-  const pathEffects: Node[] = [];
-  const drawings: Node[] = [];
-  const paints: Node[] = [];
-  parent.children.forEach((node) => {
-    if (isColorFilter(node.type)) {
+  const { children } = parent;
+  const len = children.length;
+
+  // Fast path: no children
+  if (len === 0) {
+    return EMPTY_RESULT;
+  }
+
+  // Allocate arrays only when needed
+  let maskFilters: Node[] | null = null;
+  let colorFilters: Node[] | null = null;
+  let shaders: Node[] | null = null;
+  let imageFilters: Node[] | null = null;
+  let pathEffects: Node[] | null = null;
+  let drawings: Node[] | null = null;
+  let paints: Node[] | null = null;
+
+  for (let i = 0; i < len; i++) {
+    const node = children[i];
+    const type = node.type;
+
+    if (isColorFilter(type)) {
+      if (colorFilters === null) {
+        colorFilters = [];
+      }
       colorFilters.push(node);
-    } else if (node.type === NodeType.BlurMaskFilter) {
+    } else if (type === NodeType.BlurMaskFilter) {
+      if (maskFilters === null) {
+        maskFilters = [];
+      }
       maskFilters.push(node);
-    } else if (isPathEffect(node.type)) {
+    } else if (isPathEffect(type)) {
+      if (pathEffects === null) {
+        pathEffects = [];
+      }
       pathEffects.push(node);
-    } else if (isImageFilter(node.type)) {
+    } else if (isImageFilter(type)) {
+      if (imageFilters === null) {
+        imageFilters = [];
+      }
       imageFilters.push(node);
-    } else if (isShader(node.type)) {
+    } else if (isShader(type)) {
+      if (shaders === null) {
+        shaders = [];
+      }
       shaders.push(node);
-    } else if (node.type === NodeType.Paint) {
+    } else if (type === NodeType.Paint) {
+      if (paints === null) {
+        paints = [];
+      }
       paints.push(node);
-    } else if (node.type === NodeType.Blend) {
+    } else if (type === NodeType.Blend) {
       if (node.children[0] && isImageFilter(node.children[0].type)) {
         node.type = NodeType.BlendImageFilter;
+        if (imageFilters === null) {
+          imageFilters = [];
+        }
         imageFilters.push(node);
       } else {
         node.type = NodeType.Blend;
+        if (shaders === null) {
+          shaders = [];
+        }
         shaders.push(node);
       }
     } else {
+      if (drawings === null) {
+        drawings = [];
+      }
       drawings.push(node);
     }
-  });
+  }
+
   return {
-    colorFilters,
-    drawings,
-    maskFilters,
-    shaders,
-    pathEffects,
-    imageFilters,
-    paints,
+    colorFilters: colorFilters ?? EMPTY_ARRAY,
+    drawings: drawings ?? EMPTY_ARRAY,
+    maskFilters: maskFilters ?? EMPTY_ARRAY,
+    shaders: shaders ?? EMPTY_ARRAY,
+    pathEffects: pathEffects ?? EMPTY_ARRAY,
+    imageFilters: imageFilters ?? EMPTY_ARRAY,
+    paints: paints ?? EMPTY_ARRAY,
   };
 };
