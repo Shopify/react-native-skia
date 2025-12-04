@@ -7,6 +7,7 @@ import type { NodeType } from "../dom/types";
 import { shallowEq } from "../renderer/typeddash";
 
 import type { Node } from "./Node";
+import { bumpChildrenVersion } from "./Node";
 import type { Container } from "./StaticContainer";
 
 type EventPriority = number;
@@ -97,16 +98,18 @@ export const sksgHostConfig: SkiaHostConfig = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { children, ...props } = propsWithChildren as any;
     debug("createInstance", type);
-    const instance = {
+    const instance: Node = {
       type,
       props,
       children: [],
+      __skChildrenVersion: 0,
     };
     return instance;
   },
 
   appendInitialChild(parentInstance: Instance, child: Instance | TextInstance) {
     parentInstance.children.push(child);
+    bumpChildrenVersion(parentInstance);
   },
 
   finalizeInitialChildren(
@@ -185,6 +188,9 @@ export const sksgHostConfig: SkiaHostConfig = {
       type: instance.type,
       props: { ...newProps },
       children: keepChildren ? [...instance.children] : [],
+      __skChildrenVersion: keepChildren
+        ? instance.__skChildrenVersion ?? 0
+        : 0,
     };
   },
 
