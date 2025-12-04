@@ -7,6 +7,7 @@ import type { NodeType } from "../dom/types";
 import { shallowEq } from "../renderer/typeddash";
 
 import type { Node } from "./Node";
+import { computeSortedChildren } from "./Node";
 import type { Container } from "./StaticContainer";
 
 type EventPriority = number;
@@ -117,6 +118,8 @@ export const sksgHostConfig: SkiaHostConfig = {
     _hostContext
   ) {
     debug("finalizeInitialChildren", parentInstance);
+    // Pre-compute sorted children for faster visit() traversal
+    computeSortedChildren(parentInstance);
     return false;
   },
 
@@ -181,11 +184,17 @@ export const sksgHostConfig: SkiaHostConfig = {
     _newChildSet
   ) {
     debug("cloneInstance");
-    return {
+    const cloned: Node = {
       type: instance.type,
       props: { ...newProps },
       children: keepChildren ? [...instance.children] : [],
     };
+    // If keeping children, we can reuse the cached sorted result
+    // Otherwise, sorted will be computed lazily or when children are added
+    if (keepChildren && instance.sorted) {
+      cloned.sorted = instance.sorted;
+    }
+    return cloned;
   },
 
   createContainerChildSet(): ChildSet {

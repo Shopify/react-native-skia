@@ -14,9 +14,25 @@ import {
 } from "../../components";
 import { mountCanvas } from "../setup";
 import { visit, processPaint } from "../../../sksg/Recorder/Visitor";
-import { sortNodeChildren } from "../../../sksg/Node";
+import { sortNodeChildren, computeSortedChildren } from "../../../sksg/Node";
 import { Recorder } from "../../../sksg/Recorder/Recorder";
 import type { Node } from "../../../sksg/Node";
+
+// Helper to clear cache from all nodes in a tree
+const clearSortedCache = (nodes: Node[]): void => {
+  for (const node of nodes) {
+    delete node.sorted;
+    clearSortedCache(node.children);
+  }
+};
+
+// Helper to ensure cache is populated for all nodes
+const ensureSortedCache = (nodes: Node[]): void => {
+  for (const node of nodes) {
+    computeSortedChildren(node);
+    ensureSortedCache(node.children);
+  }
+};
 
 // ============================================================================
 // Test Tree Generators
@@ -605,27 +621,83 @@ describe("Visitor Performance", () => {
   });
 
   describe("Hotspot Analysis", () => {
-    it("sortNodeChildren - 500 children", async () => {
+    it("sortNodeChildren - 500 children (cached vs uncached)", async () => {
       const { root, render } = await mountCanvas(<FlatTree count={500} />);
       await render();
       const groupNode = root.sg.children[0];
+
+      // Test with cache cleared each iteration (simulates no caching)
       runBenchmark(
-        "hotspot:sortNodeChildren-500",
+        "hotspot:sortNodeChildren-500-uncached",
+        () => {
+          delete groupNode.sorted;
+          sortNodeChildren(groupNode);
+        },
+        10000,
+        500
+      );
+
+      // Test with cache populated (simulates caching benefit)
+      computeSortedChildren(groupNode);
+      runBenchmark(
+        "hotspot:sortNodeChildren-500-cached",
         () => sortNodeChildren(groupNode),
         10000,
         500
       );
     });
 
-    it("sortNodeChildren - 1000 children", async () => {
+    it("sortNodeChildren - 1000 children (cached vs uncached)", async () => {
       const { root, render } = await mountCanvas(<FlatTree count={1000} />);
       await render();
       const groupNode = root.sg.children[0];
+
+      // Test uncached
       runBenchmark(
-        "hotspot:sortNodeChildren-1000",
+        "hotspot:sortNodeChildren-1000-uncached",
+        () => {
+          delete groupNode.sorted;
+          sortNodeChildren(groupNode);
+        },
+        5000,
+        1000
+      );
+
+      // Test cached
+      computeSortedChildren(groupNode);
+      runBenchmark(
+        "hotspot:sortNodeChildren-1000-cached",
         () => sortNodeChildren(groupNode),
         5000,
         1000
+      );
+    });
+
+    it("visit() - cached vs uncached (3k nodes)", async () => {
+      const { root, render } = await mountCanvas(<FlatTree count={3000} />);
+      await render();
+      const nodeCount = countNodes(root.sg.children);
+
+      // Test visit with NO cache (clear before each iteration)
+      const recorder1 = new Recorder();
+      runBenchmark(
+        "hotspot:visit-3k-uncached",
+        () => {
+          clearSortedCache(root.sg.children);
+          visit(recorder1, root.sg.children);
+        },
+        100,
+        nodeCount
+      );
+
+      // Test visit WITH cache populated
+      ensureSortedCache(root.sg.children);
+      const recorder2 = new Recorder();
+      runBenchmark(
+        "hotspot:visit-3k-cached",
+        () => visit(recorder2, root.sg.children),
+        100,
+        nodeCount
       );
     });
 

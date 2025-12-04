@@ -1,9 +1,21 @@
 import { NodeType } from "../dom/types";
 
+export interface SortedChildren {
+  colorFilters: Node[];
+  drawings: Node[];
+  maskFilters: Node[];
+  shaders: Node[];
+  pathEffects: Node[];
+  imageFilters: Node[];
+  paints: Node[];
+}
+
 export interface Node<Props = unknown> {
   type: NodeType;
   props: Props;
   children: Node[];
+  // Cached sorted children - computed once when children are finalized
+  sorted?: SortedChildren;
 }
 
 export const isColorFilter = (type: NodeType) => {
@@ -64,7 +76,7 @@ export const isShader = (type: NodeType) => {
 const EMPTY_ARRAY: Node[] = [];
 
 // Empty result for nodes with no children
-const EMPTY_RESULT = {
+const EMPTY_SORTED: SortedChildren = {
   colorFilters: EMPTY_ARRAY,
   drawings: EMPTY_ARRAY,
   maskFilters: EMPTY_ARRAY,
@@ -74,14 +86,19 @@ const EMPTY_RESULT = {
   paints: EMPTY_ARRAY,
 };
 
-export const sortNodeChildren = (parent: Node) => {
+/**
+ * Computes and caches sorted children for a node.
+ * This should be called once when the node's children are finalized.
+ */
+export const computeSortedChildren = (parent: Node): SortedChildren => {
   "worklet";
   const { children } = parent;
   const len = children.length;
 
   // Fast path: no children
   if (len === 0) {
-    return EMPTY_RESULT;
+    parent.sorted = EMPTY_SORTED;
+    return EMPTY_SORTED;
   }
 
   // Allocate arrays only when needed
@@ -149,7 +166,7 @@ export const sortNodeChildren = (parent: Node) => {
     }
   }
 
-  return {
+  const sorted: SortedChildren = {
     colorFilters: colorFilters ?? EMPTY_ARRAY,
     drawings: drawings ?? EMPTY_ARRAY,
     maskFilters: maskFilters ?? EMPTY_ARRAY,
@@ -158,4 +175,20 @@ export const sortNodeChildren = (parent: Node) => {
     imageFilters: imageFilters ?? EMPTY_ARRAY,
     paints: paints ?? EMPTY_ARRAY,
   };
+
+  parent.sorted = sorted;
+  return sorted;
+};
+
+/**
+ * Gets sorted children, using cache if available.
+ */
+export const sortNodeChildren = (parent: Node): SortedChildren => {
+  "worklet";
+  // Use cached result if available
+  if (parent.sorted !== undefined) {
+    return parent.sorted;
+  }
+  // Compute and cache
+  return computeSortedChildren(parent);
 };
