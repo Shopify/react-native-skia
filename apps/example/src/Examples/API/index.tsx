@@ -35,6 +35,7 @@ import { StressTest } from "./StressTest";
 import { StressTest2 } from "./StressTest2";
 import { StressTest3 } from "./StressTest3";
 import { StressTest4 } from "./StressTest4";
+import { PictureViewCrashTest } from "./PictureViewCrashTest";
 import { FirstFrame, FirstFrameEmpty } from "./FirstFrame";
 import { ZIndexExample } from "./ZIndex";
 
@@ -273,6 +274,13 @@ export const API = () => {
         component={StressTest4}
         options={{
           title: "🔥 Stress Test 4",
+        }}
+      />
+      <Stack.Screen
+        name="PictureViewCrashTest"
+        component={PictureViewCrashTest}
+        options={{
+          title: "💥 PictureView Race Condition",
         }}
       />
       <Stack.Screen
