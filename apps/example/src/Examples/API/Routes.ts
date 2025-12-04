@@ -32,6 +32,7 @@ export type Routes = {
   StressTest2: undefined;
   StressTest3: undefined;
   StressTest4: undefined;
+  PictureViewCrashTest: undefined;
   FirstFrame: undefined;
   FirstFrameEmpty: undefined;
 };
