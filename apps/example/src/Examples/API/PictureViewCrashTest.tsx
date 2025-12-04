@@ -1,7 +1,6 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button, ScrollView, StyleSheet, Text, View } from "react-native";
-import type { SkPicture } from "@shopify/react-native-skia";
-import { Canvas, Fill, Skia } from "@shopify/react-native-skia";
+import { Canvas, Fill } from "@shopify/react-native-skia";
 import {
   useSharedValue,
   withRepeat,
@@ -25,7 +24,7 @@ import {
  * the chance of hitting this race condition.
  */
 
-const AnimatedCanvas = ({ id }: { id: number }) => {
+const AnimatedCanvas = () => {
   const progress = useSharedValue(0);
 
   useEffect(() => {
@@ -111,7 +110,7 @@ export const PictureViewCrashTest = () => {
 
       <View style={styles.canvasContainer}>
         {Array.from({ length: canvasCount }).map((_, index) => (
-          <AnimatedCanvas key={`${keyRef.current}-${index}`} id={index} />
+          <AnimatedCanvas key={`${keyRef.current}-${index}`} />
         ))}
       </View>
 
