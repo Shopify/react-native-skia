@@ -406,6 +406,484 @@ public:
       playCommand(ctx, cmd.get());
     }
   }
+
+  // Returns the number of unique shared values (variables) recorded
+  size_t getVariableCount() const {
+    return variables.size();
+  }
+
+  // C++ visitor - traverses node tree directly without JS overhead
+  // Returns an array of shared values found during traversal
+  jsi::Array visit(jsi::Runtime &runtime, const jsi::Array &root) {
+    // Collect shared values during visit
+    std::vector<jsi::Object> sharedValues;
+
+    size_t len = root.size(runtime);
+    for (size_t i = 0; i < len; i++) {
+      auto node = root.getValueAtIndex(runtime, i).asObject(runtime);
+      visitNode(runtime, node, sharedValues);
+    }
+
+    // Return the collected shared values as a JSI array
+    jsi::Array result(runtime, sharedValues.size());
+    for (size_t i = 0; i < sharedValues.size(); i++) {
+      result.setValueAtIndex(runtime, i, std::move(sharedValues[i]));
+    }
+    return result;
+  }
+
+private:
+  // Helper to check if a value is a Reanimated shared value
+  static bool isSharedValue(jsi::Runtime &runtime, const jsi::Value &value) {
+    if (!value.isObject()) {
+      return false;
+    }
+    auto obj = value.asObject(runtime);
+    if (!obj.hasProperty(runtime, "_isReanimatedSharedValue")) {
+      return false;
+    }
+    auto prop = obj.getProperty(runtime, "_isReanimatedSharedValue");
+    return prop.isBool() && prop.asBool();
+  }
+
+  // Collect shared values from a props object and assign names to them
+  void collectSharedValues(jsi::Runtime &runtime, const jsi::Object &props,
+                           std::vector<jsi::Object> &sharedValues) {
+    auto propertyNames = props.getPropertyNames(runtime);
+    size_t propCount = propertyNames.size(runtime);
+
+    for (size_t i = 0; i < propCount; i++) {
+      auto propName = propertyNames.getValueAtIndex(runtime, i).asString(runtime);
+      auto propValue = props.getProperty(runtime, propName);
+
+      if (isSharedValue(runtime, propValue)) {
+        auto sharedValue = propValue.asObject(runtime);
+
+        // Check if this shared value already has a name assigned
+        if (!sharedValue.hasProperty(runtime, "name") ||
+            sharedValue.getProperty(runtime, "name").isUndefined()) {
+          // Assign a new name based on current count
+          std::string name = "variable" + std::to_string(sharedValues.size());
+          sharedValue.setProperty(runtime, "name",
+                                  jsi::String::createFromUtf8(runtime, name));
+          sharedValues.push_back(std::move(sharedValue));
+        } else {
+          // Already named, check if we need to add it to our list
+          auto existingName = sharedValue.getProperty(runtime, "name")
+                                  .asString(runtime)
+                                  .utf8(runtime);
+          // Check if it starts with "variable" - if so, it's already tracked
+          if (existingName.rfind("variable", 0) != 0) {
+            // New shared value with non-standard name, assign proper name
+            std::string name = "variable" + std::to_string(sharedValues.size());
+            sharedValue.setProperty(runtime, "name",
+                                    jsi::String::createFromUtf8(runtime, name));
+            sharedValues.push_back(std::move(sharedValue));
+          }
+        }
+      }
+    }
+  }
+
+  // Node type classification helpers
+  static bool isColorFilter(const std::string &type) {
+    return type == "skBlendColorFilter" || type == "skMatrixColorFilter" ||
+           type == "skLerpColorFilter" || type == "skLumaColorFilter" ||
+           type == "skSRGBToLinearGammaColorFilter" ||
+           type == "skLinearToSRGBGammaColorFilter";
+  }
+
+  static bool isPathEffect(const std::string &type) {
+    return type == "skDiscretePathEffect" || type == "skDashPathEffect" ||
+           type == "skPath1DPathEffect" || type == "skPath2DPathEffect" ||
+           type == "skCornerPathEffect" || type == "skSumPathEffect" ||
+           type == "skLine2DPathEffect";
+  }
+
+  static bool isImageFilterType(const std::string &type) {
+    return type == "skImageFilter" || type == "skOffsetImageFilter" ||
+           type == "skDisplacementMapImageFilter" ||
+           type == "skBlurImageFilter" || type == "skDropShadowImageFilter" ||
+           type == "skMorphologyImageFilter" || type == "skBlendImageFilter" ||
+           type == "skRuntimeShaderImageFilter";
+  }
+
+  static bool isShader(const std::string &type) {
+    return type == "skShader" || type == "skImageShader" ||
+           type == "skColorShader" || type == "skTurbulence" ||
+           type == "skFractalNoise" || type == "skLinearGradient" ||
+           type == "skRadialGradient" || type == "skSweepGradient" ||
+           type == "skTwoPointConicalGradient";
+  }
+
+  // Check if props object has any paint-related properties
+  static bool hasPaintProps(jsi::Runtime &runtime, const jsi::Object &props) {
+    return props.hasProperty(runtime, "opacity") ||
+           props.hasProperty(runtime, "color") ||
+           props.hasProperty(runtime, "strokeWidth") ||
+           props.hasProperty(runtime, "blendMode") ||
+           props.hasProperty(runtime, "style") ||
+           props.hasProperty(runtime, "strokeJoin") ||
+           props.hasProperty(runtime, "strokeCap") ||
+           props.hasProperty(runtime, "strokeMiter") ||
+           props.hasProperty(runtime, "antiAlias") ||
+           props.hasProperty(runtime, "dither") ||
+           props.hasProperty(runtime, "paint");
+  }
+
+  // Check if props object has any CTM-related properties
+  static bool hasCTMProps(jsi::Runtime &runtime, const jsi::Object &props) {
+    return props.hasProperty(runtime, "clip") ||
+           props.hasProperty(runtime, "invertClip") ||
+           props.hasProperty(runtime, "transform") ||
+           props.hasProperty(runtime, "origin") ||
+           props.hasProperty(runtime, "matrix") ||
+           props.hasProperty(runtime, "layer");
+  }
+
+  // Sort children into categories
+  struct SortedChildren {
+    std::vector<jsi::Object> colorFilters;
+    std::vector<jsi::Object> maskFilters;
+    std::vector<jsi::Object> shaders;
+    std::vector<jsi::Object> imageFilters;
+    std::vector<jsi::Object> pathEffects;
+    std::vector<jsi::Object> drawings;
+    std::vector<jsi::Object> paints;
+  };
+
+  SortedChildren sortNodeChildren(jsi::Runtime &runtime,
+                                  const jsi::Object &node) {
+    SortedChildren result;
+
+    if (!node.hasProperty(runtime, "children")) {
+      return result;
+    }
+
+    auto children = node.getProperty(runtime, "children").asObject(runtime).asArray(runtime);
+    size_t len = children.size(runtime);
+
+    for (size_t i = 0; i < len; i++) {
+      auto child = children.getValueAtIndex(runtime, i).asObject(runtime);
+      auto type = child.getProperty(runtime, "type").asString(runtime).utf8(runtime);
+
+      if (isColorFilter(type)) {
+        result.colorFilters.push_back(std::move(child));
+      } else if (type == "skBlurMaskFilter") {
+        result.maskFilters.push_back(std::move(child));
+      } else if (isPathEffect(type)) {
+        result.pathEffects.push_back(std::move(child));
+      } else if (isImageFilterType(type)) {
+        result.imageFilters.push_back(std::move(child));
+      } else if (isShader(type)) {
+        result.shaders.push_back(std::move(child));
+      } else if (type == "skPaint") {
+        result.paints.push_back(std::move(child));
+      } else if (type == "skBlend") {
+        // Check first child to determine if it's an image filter blend or shader blend
+        if (child.hasProperty(runtime, "children")) {
+          auto blendChildren = child.getProperty(runtime, "children").asObject(runtime).asArray(runtime);
+          if (blendChildren.size(runtime) > 0) {
+            auto firstChild = blendChildren.getValueAtIndex(runtime, 0).asObject(runtime);
+            auto firstChildType = firstChild.getProperty(runtime, "type").asString(runtime).utf8(runtime);
+            if (isImageFilterType(firstChildType)) {
+              // Mutate type to BlendImageFilter
+              child.setProperty(runtime, "type", jsi::String::createFromUtf8(runtime, "skBlendImageFilter"));
+              result.imageFilters.push_back(std::move(child));
+            } else {
+              result.shaders.push_back(std::move(child));
+            }
+          } else {
+            result.shaders.push_back(std::move(child));
+          }
+        } else {
+          result.shaders.push_back(std::move(child));
+        }
+      } else {
+        result.drawings.push_back(std::move(child));
+      }
+    }
+
+    return result;
+  }
+
+  void pushColorFilters(jsi::Runtime &runtime,
+                        std::vector<jsi::Object> &colorFilters,
+                        std::vector<jsi::Object> &sharedValues) {
+    for (auto &colorFilter : colorFilters) {
+      // Recurse on children first
+      if (colorFilter.hasProperty(runtime, "children")) {
+        auto children = colorFilter.getProperty(runtime, "children").asObject(runtime).asArray(runtime);
+        size_t len = children.size(runtime);
+        std::vector<jsi::Object> childFilters;
+        for (size_t i = 0; i < len; i++) {
+          childFilters.push_back(children.getValueAtIndex(runtime, i).asObject(runtime));
+        }
+        pushColorFilters(runtime, childFilters, sharedValues);
+      }
+
+      auto type = colorFilter.getProperty(runtime, "type").asString(runtime).utf8(runtime);
+      auto props = colorFilter.getProperty(runtime, "props").asObject(runtime);
+      collectSharedValues(runtime, props, sharedValues);
+      pushColorFilter(runtime, type, props);
+
+      // Check if composition needed
+      bool hasChildren = colorFilter.hasProperty(runtime, "children") &&
+                         colorFilter.getProperty(runtime, "children").asObject(runtime).asArray(runtime).size(runtime) > 0;
+      bool needsComposition = type != "skLerpColorFilter" && hasChildren;
+      if (needsComposition) {
+        composeColorFilter();
+      }
+    }
+  }
+
+  void pushPathEffects(jsi::Runtime &runtime,
+                       std::vector<jsi::Object> &pathEffects,
+                       std::vector<jsi::Object> &sharedValues) {
+    for (auto &pathEffect : pathEffects) {
+      if (pathEffect.hasProperty(runtime, "children")) {
+        auto children = pathEffect.getProperty(runtime, "children").asObject(runtime).asArray(runtime);
+        size_t len = children.size(runtime);
+        std::vector<jsi::Object> childEffects;
+        for (size_t i = 0; i < len; i++) {
+          childEffects.push_back(children.getValueAtIndex(runtime, i).asObject(runtime));
+        }
+        pushPathEffects(runtime, childEffects, sharedValues);
+      }
+
+      auto type = pathEffect.getProperty(runtime, "type").asString(runtime).utf8(runtime);
+      auto props = pathEffect.getProperty(runtime, "props").asObject(runtime);
+      collectSharedValues(runtime, props, sharedValues);
+      pushPathEffect(runtime, type, props);
+
+      bool hasChildren = pathEffect.hasProperty(runtime, "children") &&
+                         pathEffect.getProperty(runtime, "children").asObject(runtime).asArray(runtime).size(runtime) > 0;
+      bool needsComposition = type != "skSumPathEffect" && hasChildren;
+      if (needsComposition) {
+        composePathEffect();
+      }
+    }
+  }
+
+  void pushImageFilters(jsi::Runtime &runtime,
+                        std::vector<jsi::Object> &imageFilters,
+                        std::vector<jsi::Object> &sharedValues) {
+    for (auto &imageFilter : imageFilters) {
+      if (imageFilter.hasProperty(runtime, "children")) {
+        auto children = imageFilter.getProperty(runtime, "children").asObject(runtime).asArray(runtime);
+        size_t len = children.size(runtime);
+        std::vector<jsi::Object> childFilters;
+        for (size_t i = 0; i < len; i++) {
+          childFilters.push_back(children.getValueAtIndex(runtime, i).asObject(runtime));
+        }
+        pushImageFilters(runtime, childFilters, sharedValues);
+      }
+
+      auto type = imageFilter.getProperty(runtime, "type").asString(runtime).utf8(runtime);
+      auto props = imageFilter.getProperty(runtime, "props").asObject(runtime);
+      collectSharedValues(runtime, props, sharedValues);
+
+      if (isImageFilterType(type)) {
+        pushImageFilter(runtime, type, props);
+      } else if (isShader(type)) {
+        pushShader(runtime, type, props, 0);
+      }
+
+      bool hasChildren = imageFilter.hasProperty(runtime, "children") &&
+                         imageFilter.getProperty(runtime, "children").asObject(runtime).asArray(runtime).size(runtime) > 0;
+      bool needsComposition = type != "skBlendImageFilter" && hasChildren;
+      if (needsComposition) {
+        composeImageFilter();
+      }
+    }
+  }
+
+  void pushShaders(jsi::Runtime &runtime, std::vector<jsi::Object> &shaders,
+                   std::vector<jsi::Object> &sharedValues) {
+    for (auto &shader : shaders) {
+      size_t childrenLen = 0;
+      if (shader.hasProperty(runtime, "children")) {
+        auto children = shader.getProperty(runtime, "children").asObject(runtime).asArray(runtime);
+        childrenLen = children.size(runtime);
+        std::vector<jsi::Object> childShaders;
+        for (size_t i = 0; i < childrenLen; i++) {
+          childShaders.push_back(children.getValueAtIndex(runtime, i).asObject(runtime));
+        }
+        pushShaders(runtime, childShaders, sharedValues);
+      }
+
+      auto type = shader.getProperty(runtime, "type").asString(runtime).utf8(runtime);
+      auto props = shader.getProperty(runtime, "props").asObject(runtime);
+      collectSharedValues(runtime, props, sharedValues);
+      pushShader(runtime, type, props, static_cast<int>(childrenLen));
+    }
+  }
+
+  void pushMaskFilters(jsi::Runtime &runtime,
+                       std::vector<jsi::Object> &maskFilters,
+                       std::vector<jsi::Object> &sharedValues) {
+    if (!maskFilters.empty()) {
+      auto &last = maskFilters.back();
+      auto props = last.getProperty(runtime, "props").asObject(runtime);
+      collectSharedValues(runtime, props, sharedValues);
+      pushBlurMaskFilter(runtime, props);
+    }
+  }
+
+  void pushPaints(jsi::Runtime &runtime, std::vector<jsi::Object> &paints,
+                  std::vector<jsi::Object> &sharedValues) {
+    for (auto &paint : paints) {
+      auto props = paint.getProperty(runtime, "props").asObject(runtime);
+      collectSharedValues(runtime, props, sharedValues);
+      savePaint(runtime, props, true);
+
+      auto sorted = sortNodeChildren(runtime, paint);
+      pushColorFilters(runtime, sorted.colorFilters, sharedValues);
+      pushImageFilters(runtime, sorted.imageFilters, sharedValues);
+      pushMaskFilters(runtime, sorted.maskFilters, sharedValues);
+      pushShaders(runtime, sorted.shaders, sharedValues);
+      pushPathEffects(runtime, sorted.pathEffects, sharedValues);
+
+      restorePaintDeclaration();
+    }
+  }
+
+  void visitNode(jsi::Runtime &runtime, jsi::Object &node,
+                 std::vector<jsi::Object> &sharedValues) {
+    auto type = node.getProperty(runtime, "type").asString(runtime).utf8(runtime);
+    auto props = node.getProperty(runtime, "props").asObject(runtime);
+
+    // Collect shared values from this node's props
+    collectSharedValues(runtime, props, sharedValues);
+
+    // Get stacking context props (zIndex)
+    if (props.hasProperty(runtime, "zIndex")) {
+      jsi::Value propsValue = jsi::Value(runtime, props);
+      saveGroup(runtime, &propsValue);
+    } else {
+      saveGroup(runtime, nullptr);
+    }
+
+    // Sort children
+    auto sorted = sortNodeChildren(runtime, node);
+
+    // Check if we need to push paint
+    bool shouldPushPaint = hasPaintProps(runtime, props) ||
+                           !sorted.colorFilters.empty() ||
+                           !sorted.maskFilters.empty() ||
+                           !sorted.imageFilters.empty() ||
+                           !sorted.pathEffects.empty() ||
+                           !sorted.shaders.empty();
+
+    if (shouldPushPaint) {
+      savePaint(runtime, props, false);
+      pushColorFilters(runtime, sorted.colorFilters, sharedValues);
+      pushImageFilters(runtime, sorted.imageFilters, sharedValues);
+      pushMaskFilters(runtime, sorted.maskFilters, sharedValues);
+      pushShaders(runtime, sorted.shaders, sharedValues);
+      pushPathEffects(runtime, sorted.pathEffects, sharedValues);
+
+      if (type == "skBackdropFilter") {
+        saveBackdropFilter();
+      } else {
+        materializePaint();
+      }
+    }
+
+    // Push standalone paints
+    pushPaints(runtime, sorted.paints, sharedValues);
+
+    // Handle Layer
+    if (type == "skLayer") {
+      saveLayer();
+    }
+
+    // Handle CTM
+    bool hasCTM = hasCTMProps(runtime, props);
+    bool shouldRestore = hasCTM || type == "skLayer";
+    if (hasCTM) {
+      saveCTM(runtime, props);
+    }
+
+    // Draw based on node type
+    if (type == "skBox") {
+      // Collect box shadows
+      jsi::Array shadows = jsi::Array(runtime, 0);
+      if (node.hasProperty(runtime, "children")) {
+        auto children = node.getProperty(runtime, "children").asObject(runtime).asArray(runtime);
+        size_t len = children.size(runtime);
+        std::vector<jsi::Value> shadowProps;
+        for (size_t i = 0; i < len; i++) {
+          auto child = children.getValueAtIndex(runtime, i).asObject(runtime);
+          auto childType = child.getProperty(runtime, "type").asString(runtime).utf8(runtime);
+          if (childType == "skBoxShadow") {
+            shadowProps.push_back(child.getProperty(runtime, "props"));
+          }
+        }
+        shadows = jsi::Array(runtime, shadowProps.size());
+        for (size_t i = 0; i < shadowProps.size(); i++) {
+          shadows.setValueAtIndex(runtime, i, std::move(shadowProps[i]));
+        }
+      }
+      drawBox(runtime, props, shadows);
+    } else if (type == "skFill") {
+      drawPaint();
+    } else if (type == "skImage") {
+      drawImage(runtime, props);
+    } else if (type == "skCircle") {
+      drawCircle(runtime, props);
+    } else if (type == "skPoints") {
+      drawPoints(runtime, props);
+    } else if (type == "skPath") {
+      drawPath(runtime, props);
+    } else if (type == "skRect") {
+      drawRect(runtime, props);
+    } else if (type == "skRRect") {
+      drawRRect(runtime, props);
+    } else if (type == "skOval") {
+      drawOval(runtime, props);
+    } else if (type == "skLine") {
+      drawLine(runtime, props);
+    } else if (type == "skPatch") {
+      drawPatch(runtime, props);
+    } else if (type == "skVertices") {
+      drawVertices(runtime, props);
+    } else if (type == "skDiffRect") {
+      drawDiffRect(runtime, props);
+    } else if (type == "skText") {
+      drawText(runtime, props);
+    } else if (type == "skTextPath") {
+      drawTextPath(runtime, props);
+    } else if (type == "skTextBlob") {
+      drawTextBlob(runtime, props);
+    } else if (type == "skGlyphs") {
+      drawGlyphs(runtime, props);
+    } else if (type == "skPicture") {
+      drawPicture(runtime, props);
+    } else if (type == "skImageSVG") {
+      drawImageSVG(runtime, props);
+    } else if (type == "skParagraph") {
+      drawParagraph(runtime, props);
+    } else if (type == "skSkottie") {
+      drawSkottie(runtime, props);
+    } else if (type == "skAtlas") {
+      drawAtlas(runtime, props);
+    }
+
+    // Visit drawing children
+    for (auto &drawing : sorted.drawings) {
+      visitNode(runtime, drawing, sharedValues);
+    }
+
+    // Restore state
+    if (shouldPushPaint) {
+      restorePaint();
+    }
+    if (shouldRestore) {
+      restoreCTM();
+    }
+    restoreGroup();
+  }
 };
 
 inline void Recorder::playCommand(DrawingCtx *ctx, Command *cmd) {
