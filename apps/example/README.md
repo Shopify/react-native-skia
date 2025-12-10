@@ -40,6 +40,15 @@ Run on Android:
 yarn android
 ```
 
+## Atlas buffer crash reproduction
+
+The `⚠️ Atlas buffers repro` screen demonstrates the iOS crash described in the Skia recorder bug report.
+
+1. Run the example app on an iOS simulator or device with Reanimated 3 enabled.
+2. From the home screen pick **⚠️ Atlas buffers repro**.
+3. The screen animates an `Atlas` that relies on `useRectBuffer`/`useRSXformBuffer`.  
+   Within a few seconds Hermes will crash with the `convertPropertyImpl<std::vector<SkRect>>` stack trace.
+
 ### Development
 
 Run linting with auto-fix:
@@ -293,4 +302,3 @@ The LiquidGlass category was created following this exact pattern:
 
 This pattern ensures consistency across all example categories and makes it easy to add new examples or entire categories to the app.
   
-

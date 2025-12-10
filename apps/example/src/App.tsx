@@ -34,6 +34,7 @@ import {
   Chat,
   LiquidGlass,
   Pictures,
+  AtlasBuffersRepro,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
@@ -73,6 +74,7 @@ const linking: LinkingOptions<StackParamList> = {
       Video: "video",
       Chat: "chat",
       Pictures: "pictures",
+      AtlasBuffers: "atlas-buffers",
     },
   },
   prefixes: ["rnskia://"],
@@ -233,6 +235,13 @@ const App = () => {
             <Stack.Screen
               name="Performance"
               component={PerformanceDrawingTest}
+            />
+            <Stack.Screen
+              name="AtlasBuffers"
+              component={AtlasBuffersRepro}
+              options={{
+                title: "⚠️ Atlas buffers repro",
+              }}
             />
             <Stack.Screen name="Pictures" component={Pictures} />
           </Stack.Navigator>

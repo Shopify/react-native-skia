@@ -127,6 +127,11 @@ export const HomeScreen = () => {
         description="Animated circle trail using Pictures"
         route="Pictures"
       />
+      <HomeScreenButton
+        title="⚠️ Atlas buffers repro"
+        description="Reanimated atlas buffers crash example"
+        route="AtlasBuffers"
+      />
     </ScrollView>
   );
 };
