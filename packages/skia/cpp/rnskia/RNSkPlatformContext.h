@@ -153,6 +153,15 @@ public:
   virtual std::vector<std::string> getSystemFontFamilies() { return {}; }
 
   /**
+   * Resolve font family aliases to actual font family names.
+   * For example, "System" on iOS resolves to ".AppleSystemUIFont".
+   * Returns the input unchanged if no mapping exists.
+   */
+  virtual std::string resolveFontFamily(const std::string &familyName) {
+    return familyName;
+  }
+
+  /**
    * Creates an skImage containing the screenshot of a native view and its
    * children.
    * @param viewTag React viewtag

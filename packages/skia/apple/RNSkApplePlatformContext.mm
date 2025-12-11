@@ -346,6 +346,29 @@ std::vector<std::string> RNSkApplePlatformContext::getSystemFontFamilies() {
   return families;
 }
 
+std::string
+RNSkApplePlatformContext::resolveFontFamily(const std::string &familyName) {
+  // Handle special font family names like React Native does
+  // See: RCTFont.mm in React Native
+  if (familyName == "System" || familyName == "system" ||
+      familyName == "sans-serif") {
+    return ".AppleSystemUIFont";
+  }
+  if (familyName == "SystemCondensed" || familyName == "system-condensed") {
+    // Return system font - condensed trait is handled via font style
+    return ".AppleSystemUIFont";
+  }
+  // CSS generic font families
+  if (familyName == "serif") {
+    return "Times New Roman";
+  }
+  if (familyName == "monospace") {
+    return "Courier New";
+  }
+  // Return as-is if no mapping exists
+  return familyName;
+}
+
 void RNSkApplePlatformContext::runOnMainThread(std::function<void()> func) {
   dispatch_async(dispatch_get_main_queue(), ^{
     func();
