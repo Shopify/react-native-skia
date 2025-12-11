@@ -48,7 +48,11 @@ public:
       return jsi::String::createFromUtf8(runtime,
                                          _systemFontFamilies[systemIndex]);
     }
-    return jsi::String::createFromUtf8(runtime, "");
+    throw jsi::JSError(runtime, "Font family index out of bounds: " +
+                                    std::to_string(i) + " (total families: " +
+                                    std::to_string(baseFamilyCount +
+                                                   _systemFontFamilies.size()) +
+                                    ")");
   }
 
   JSI_HOST_FUNCTION(matchFamilyStyle) {

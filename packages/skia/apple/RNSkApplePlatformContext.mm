@@ -304,7 +304,11 @@ sk_sp<SkFontMgr> RNSkApplePlatformContext::createFontMgr() {
 std::vector<std::string> RNSkApplePlatformContext::getSystemFontFamilies() {
   std::vector<std::string> families;
 
-  // List of system UI font types to check
+  // System UI fonts (e.g., .AppleSystemUIFont) are not enumerated by Skia's
+  // font manager. We retrieve them via Core Text's CTFontUIFontType constants.
+  // This list covers common system font types as of iOS 17 / macOS 14.
+  // Apple may add new CTFontUIFontType values in future OS versions,
+  // so this list may need to be updated periodically.
   CTFontUIFontType fontTypes[] = {
       kCTFontUIFontUser,        kCTFontUIFontUserFixedPitch,
       kCTFontUIFontSystem,      kCTFontUIFontEmphasizedSystem,
