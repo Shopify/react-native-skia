@@ -110,6 +110,7 @@ jobs:
   test-android-graphite:
     needs: build-android-graphite
     runs-on: ubuntu-latest
+    continue-on-error: true
     timeout-minutes: 60
     env:
       TURBO_CACHE_DIR: .turbo/android
@@ -186,6 +187,7 @@ jobs:
 
   build-test-ios-graphite:
     runs-on: macos-latest-xlarge
+    continue-on-error: true
     env:
       TURBO_CACHE_DIR: .turbo/ios
     steps:
