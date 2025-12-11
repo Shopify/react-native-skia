@@ -95,10 +95,25 @@ export const matchFont = (
   return Skia.Font(typeface, fontStyle.fontSize);
 };
 
-export const listFontFamilies = (fontMgr: SkFontMgr = Skia.FontMgr.System()) =>
-  new Array(fontMgr.countFamilies())
-    .fill(0)
-    .map((_, i) => fontMgr.getFamilyName(i));
+export const listFontFamilies = (
+  fontMgr: SkFontMgr = Skia.FontMgr.System()
+) => {
+  const families = new Set<string>();
+  for (let i = 0; i < fontMgr.countFamilies(); i++) {
+    families.add(fontMgr.getFamilyName(i));
+  }
+  return [...families].sort((a, b) => {
+    const aStartsWithAlpha = /^[a-zA-Z]/.test(a);
+    const bStartsWithAlpha = /^[a-zA-Z]/.test(b);
+    if (aStartsWithAlpha && !bStartsWithAlpha) {
+      return 1;
+    }
+    if (!aStartsWithAlpha && bStartsWithAlpha) {
+      return -1;
+    }
+    return a.localeCompare(b);
+  });
+};
 
 const loadTypefaces = (typefacesToLoad: Record<string, DataModule[]>) => {
   const promises = Object.keys(typefacesToLoad).flatMap((familyName) => {

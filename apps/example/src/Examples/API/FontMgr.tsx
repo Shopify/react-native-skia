@@ -2,8 +2,8 @@ import React from "react";
 import { ScrollView, useWindowDimensions } from "react-native";
 import {
   Canvas,
-  Skia,
   Text,
+  listFontFamilies,
   matchFont,
   useFonts,
 } from "@shopify/react-native-skia";
@@ -16,11 +16,7 @@ const titleText = "Fonts from the System";
 const titleY = titleFontSize + PADDING;
 const subtitleY = titleY + 14 + PADDING;
 
-const fontMgr = Skia.FontMgr.System();
-const familyNames = new Array(fontMgr.countFamilies())
-  .fill(0)
-  .map((_, i) => fontMgr.getFamilyName(i));
-
+const familyNames = listFontFamilies();
 const title2Y = subtitleY + 16 * familyNames.length + PADDING + titleFontSize;
 
 export const FontMgr = () => {

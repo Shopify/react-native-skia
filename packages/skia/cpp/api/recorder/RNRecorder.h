@@ -78,8 +78,8 @@ private:
     for (const auto &child : group->children) {
       if (child->type == CommandType::Group) {
         auto *childGroup = static_cast<GroupCommand *>(child.get());
-        pending.push_back(
-            {childGroup, sanitizeZIndex(childGroup), static_cast<int>(pending.size())});
+        pending.push_back({childGroup, sanitizeZIndex(childGroup),
+                           static_cast<int>(pending.size())});
       } else {
         flushPendingGroups(ctx, pending);
         playCommand(ctx, child.get());
@@ -94,9 +94,7 @@ public:
   std::shared_ptr<RNSkPlatformContext> _context;
   Variables variables;
 
-  Recorder() {
-    commandStack.push_back(&commands);
-  }
+  Recorder() { commandStack.push_back(&commands); }
   ~Recorder() {
     if (!_context || commands.empty()) {
       return;
@@ -128,14 +126,11 @@ public:
       pushCommand(
           std::make_unique<PushImageShaderCmd>(runtime, props, variables));
     } else if (nodeType == "skColorShader") {
-      pushCommand(
-          std::make_unique<ColorShaderCmd>(runtime, props, variables));
+      pushCommand(std::make_unique<ColorShaderCmd>(runtime, props, variables));
     } else if (nodeType == "skTurbulence") {
-      pushCommand(
-          std::make_unique<TurbulenceCmd>(runtime, props, variables));
+      pushCommand(std::make_unique<TurbulenceCmd>(runtime, props, variables));
     } else if (nodeType == "skFractalNoise") {
-      pushCommand(
-          std::make_unique<FractalNoiseCmd>(runtime, props, variables));
+      pushCommand(std::make_unique<FractalNoiseCmd>(runtime, props, variables));
     } else if (nodeType == "skLinearGradient") {
       pushCommand(
           std::make_unique<LinearGradientCmd>(runtime, props, variables));
@@ -146,12 +141,11 @@ public:
       pushCommand(
           std::make_unique<SweepGradientCmd>(runtime, props, variables));
     } else if (nodeType == "skTwoPointConicalGradient") {
-      pushCommand(std::make_unique<TwoPointConicalGradientCmd>(
-          runtime, props, variables));
+      pushCommand(std::make_unique<TwoPointConicalGradientCmd>(runtime, props,
+                                                               variables));
       // TODO: should receive skBlendShader here
     } else if (nodeType == "skBlend") {
-      pushCommand(
-          std::make_unique<BlendShaderCmd>(runtime, props, variables));
+      pushCommand(std::make_unique<BlendShaderCmd>(runtime, props, variables));
     }
   }
 
@@ -216,41 +210,36 @@ public:
       pushCommand(
           std::make_unique<BlurImageFilterCmd>(runtime, props, variables));
     } else if (nodeType == "skDropShadowImageFilter") {
-      pushCommand(std::make_unique<DropShadowImageFilterCmd>(
-          runtime, props, variables));
+      pushCommand(std::make_unique<DropShadowImageFilterCmd>(runtime, props,
+                                                             variables));
     } else if (nodeType == "skMorphologyImageFilter") {
-      pushCommand(std::make_unique<MorphologyImageFilterCmd>(
-          runtime, props, variables));
+      pushCommand(std::make_unique<MorphologyImageFilterCmd>(runtime, props,
+                                                             variables));
     } else if (nodeType == "skBlendImageFilter") {
       pushCommand(
           std::make_unique<BlendImageFilterCmd>(runtime, props, variables));
     } else if (nodeType == "skRuntimeShaderImageFilter") {
-      pushCommand(std::make_unique<RuntimeShaderImageFilterCmd>(
-          runtime, props, variables));
+      pushCommand(std::make_unique<RuntimeShaderImageFilterCmd>(runtime, props,
+                                                                variables));
     } else if (nodeType == "skImageFilter") {
-      pushCommand(
-          std::make_unique<ImageFilterCmd>(runtime, props, variables));
+      pushCommand(std::make_unique<ImageFilterCmd>(runtime, props, variables));
     }
   }
 
   void composePathEffect() {
-    pushCommand(
-        std::make_unique<Command>(CommandType::ComposePathEffect));
+    pushCommand(std::make_unique<Command>(CommandType::ComposePathEffect));
   }
 
   void composeImageFilter() {
-    pushCommand(
-        std::make_unique<Command>(CommandType::ComposeImageFilter));
+    pushCommand(std::make_unique<Command>(CommandType::ComposeImageFilter));
   }
 
   void composeColorFilter() {
-    pushCommand(
-        std::make_unique<Command>(CommandType::ComposeColorFilter));
+    pushCommand(std::make_unique<Command>(CommandType::ComposeColorFilter));
   }
 
   void pushBlurMaskFilter(jsi::Runtime &runtime, const jsi::Object &props) {
-    pushCommand(
-        std::make_unique<BlurMaskFilterCmd>(runtime, props, variables));
+    pushCommand(std::make_unique<BlurMaskFilterCmd>(runtime, props, variables));
   }
 
   void saveCTM(jsi::Runtime &runtime, const jsi::Object &props) {
@@ -278,8 +267,7 @@ public:
   }
 
   void drawTextPath(jsi::Runtime &runtime, const jsi::Object &props) {
-    pushCommand(
-        std::make_unique<TextPathCmd>(runtime, props, variables));
+    pushCommand(std::make_unique<TextPathCmd>(runtime, props, variables));
   }
 
   void drawText(jsi::Runtime &runtime, const jsi::Object &props) {
@@ -296,8 +284,7 @@ public:
 
   void drawBox(jsi::Runtime &runtime, const jsi::Object &props,
                const jsi::Array &shadows) {
-    pushCommand(
-        std::make_unique<BoxCmd>(runtime, props, shadows, variables));
+    pushCommand(std::make_unique<BoxCmd>(runtime, props, shadows, variables));
   }
 
   void drawImage(jsi::Runtime &runtime, const jsi::Object &props) {
@@ -322,18 +309,15 @@ public:
   }
 
   void drawVertices(jsi::Runtime &runtime, const jsi::Object &props) {
-    pushCommand(
-        std::make_unique<VerticesCmd>(runtime, props, variables));
+    pushCommand(std::make_unique<VerticesCmd>(runtime, props, variables));
   }
 
   void drawDiffRect(jsi::Runtime &runtime, const jsi::Object &props) {
-    pushCommand(
-        std::make_unique<DiffRectCmd>(runtime, props, variables));
+    pushCommand(std::make_unique<DiffRectCmd>(runtime, props, variables));
   }
 
   void drawTextBlob(jsi::Runtime &runtime, const jsi::Object &props) {
-    pushCommand(
-        std::make_unique<TextBlobCmd>(runtime, props, variables));
+    pushCommand(std::make_unique<TextBlobCmd>(runtime, props, variables));
   }
 
   void drawGlyphs(jsi::Runtime &runtime, const jsi::Object &props) {
@@ -346,13 +330,11 @@ public:
   }
 
   void drawImageSVG(jsi::Runtime &runtime, const jsi::Object &props) {
-    pushCommand(
-        std::make_unique<ImageSVGCmd>(runtime, props, variables));
+    pushCommand(std::make_unique<ImageSVGCmd>(runtime, props, variables));
   }
 
   void drawParagraph(jsi::Runtime &runtime, const jsi::Object &props) {
-    pushCommand(
-        std::make_unique<ParagraphCmd>(runtime, props, variables));
+    pushCommand(std::make_unique<ParagraphCmd>(runtime, props, variables));
   }
 
   void drawAtlas(jsi::Runtime &runtime, const jsi::Object &props) {
@@ -365,8 +347,7 @@ public:
   }
 
   void materializePaint() {
-    pushCommand(
-        std::make_unique<Command>(CommandType::MaterializePaint));
+    pushCommand(std::make_unique<Command>(CommandType::MaterializePaint));
   }
 
   void restorePaintDeclaration() {
@@ -379,11 +360,11 @@ public:
   }
 
   void saveBackdropFilter() {
-    pushCommand(
-        std::make_unique<Command>(CommandType::SaveBackdropFilter));
+    pushCommand(std::make_unique<Command>(CommandType::SaveBackdropFilter));
   }
 
-  void saveGroup(jsi::Runtime &runtime, const jsi::Value *propsValue = nullptr) {
+  void saveGroup(jsi::Runtime &runtime,
+                 const jsi::Value *propsValue = nullptr) {
     auto group = std::make_unique<GroupCommand>();
     if (propsValue != nullptr && propsValue->isObject()) {
       auto object = propsValue->asObject(runtime);
@@ -399,7 +380,6 @@ public:
       commandStack.pop_back();
     }
   }
-
 
   void play(DrawingCtx *ctx) {
     for (const auto &cmd : commands) {
@@ -497,8 +477,7 @@ inline void Recorder::playCommand(DrawingCtx *ctx, Command *cmd) {
       auto *offsetCmd = static_cast<OffsetImageFilterCmd *>(cmd);
       offsetCmd->pushImageFilter(ctx);
     } else if (nodeType == "skDisplacementMapImageFilter") {
-      auto *displacementCmd =
-          static_cast<DisplacementMapImageFilterCmd *>(cmd);
+      auto *displacementCmd = static_cast<DisplacementMapImageFilterCmd *>(cmd);
       displacementCmd->pushImageFilter(ctx);
     } else if (nodeType == "skBlurImageFilter") {
       auto *blurCmd = static_cast<BlurImageFilterCmd *>(cmd);
@@ -513,8 +492,7 @@ inline void Recorder::playCommand(DrawingCtx *ctx, Command *cmd) {
       auto *blendCmd = static_cast<BlendImageFilterCmd *>(cmd);
       blendCmd->pushImageFilter(ctx);
     } else if (nodeType == "skRuntimeShaderImageFilter") {
-      auto *runtimeShaderCmd =
-          static_cast<RuntimeShaderImageFilterCmd *>(cmd);
+      auto *runtimeShaderCmd = static_cast<RuntimeShaderImageFilterCmd *>(cmd);
       runtimeShaderCmd->pushImageFilter(ctx);
     } else if (nodeType == "skImageFilter") {
       auto *imageFilterCmd = static_cast<ImageFilterCmd *>(cmd);
