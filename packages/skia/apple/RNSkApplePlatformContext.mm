@@ -3,6 +3,7 @@
 #import <CoreMedia/CMSampleBuffer.h>
 #include <Metal/Metal.h>
 #import <React/RCTUtils.h>
+#include <set>
 #include <thread>
 #include <utility>
 
@@ -298,6 +299,51 @@ SkColorType RNSkApplePlatformContext::mtlPixelFormatToSkColorType(
 
 sk_sp<SkFontMgr> RNSkApplePlatformContext::createFontMgr() {
   return SkFontMgr_New_CoreText(nullptr);
+}
+
+std::vector<std::string> RNSkApplePlatformContext::getSystemFontFamilies() {
+  std::vector<std::string> families;
+
+  // System UI fonts (e.g., .AppleSystemUIFont) are not enumerated by Skia's
+  // font manager. We retrieve them via Core Text's CTFontUIFontType constants.
+  // This list covers common system font types as of iOS 17 / macOS 14.
+  // Apple may add new CTFontUIFontType values in future OS versions,
+  // so this list may need to be updated periodically.
+  CTFontUIFontType fontTypes[] = {
+      kCTFontUIFontUser,        kCTFontUIFontUserFixedPitch,
+      kCTFontUIFontSystem,      kCTFontUIFontEmphasizedSystem,
+      kCTFontUIFontSmallSystem, kCTFontUIFontSmallEmphasizedSystem,
+      kCTFontUIFontMiniSystem,  kCTFontUIFontMiniEmphasizedSystem,
+      kCTFontUIFontLabel,       kCTFontUIFontMessage,
+      kCTFontUIFontToolTip,
+  };
+
+  std::set<std::string> uniqueFamilies;
+
+  for (CTFontUIFontType fontType : fontTypes) {
+    CTFontRef font = CTFontCreateUIFontForLanguage(fontType, 12.0, nullptr);
+    if (font) {
+      CFStringRef familyName = CTFontCopyFamilyName(font);
+      if (familyName) {
+        const char *cstr =
+            CFStringGetCStringPtr(familyName, kCFStringEncodingUTF8);
+        if (cstr) {
+          uniqueFamilies.insert(std::string(cstr));
+        } else {
+          char buffer[256];
+          if (CFStringGetCString(familyName, buffer, sizeof(buffer),
+                                 kCFStringEncodingUTF8)) {
+            uniqueFamilies.insert(std::string(buffer));
+          }
+        }
+        CFRelease(familyName);
+      }
+      CFRelease(font);
+    }
+  }
+
+  families.assign(uniqueFamilies.begin(), uniqueFamilies.end());
+  return families;
 }
 
 void RNSkApplePlatformContext::runOnMainThread(std::function<void()> func) {
