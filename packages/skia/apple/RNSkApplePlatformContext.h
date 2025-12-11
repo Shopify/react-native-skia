@@ -73,6 +73,8 @@ public:
 
   sk_sp<SkFontMgr> createFontMgr() override;
 
+  std::vector<std::string> getSystemFontFamilies() override;
+
 private:
   ViewScreenshotService *_screenshotService;
 
