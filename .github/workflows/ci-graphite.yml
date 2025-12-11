@@ -19,7 +19,6 @@ concurrency:
 jobs:
   build-android-graphite:
     runs-on: ubuntu-latest
-    continue-on-error: true
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
