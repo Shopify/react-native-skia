@@ -110,6 +110,12 @@ jobs:
             yarn add @shopify/react-native-skia@"$VERSION"
           fi
 
+      - name: Install compatible Worklets version
+        working-directory: /Users/runner/skia-test-app/my-app
+        run: |
+          echo "Installing compatible react-native-worklets-core..."
+          yarn add react-native-worklets-core@^0.7.0
+
       - name: Show installed Skia version
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
