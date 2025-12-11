@@ -1,4 +1,4 @@
-import { importSkia, surface } from "../setup";
+import { surface } from "../setup";
 
 describe("Data Encoding", () => {
   it("encodeToBytes() from CPU image", async () => {
@@ -12,13 +12,13 @@ describe("Data Encoding", () => {
       }
       return Array.from(img.encodeToBytes());
     });
-    const { Skia } = importSkia();
-    const data = Skia.Data.fromBase64(
-      "R0lGODlhAQABAIAAAGGqHwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="
-    );
-    const img = Skia.Image.MakeImageFromEncoded(data)!;
-    expect(img).toBeTruthy();
-    expect(result).toEqual(Array.from(img.encodeToBytes()));
+    expect(result).toEqual([
+      137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 1,
+      0, 0, 0, 1, 8, 2, 0, 0, 0, 144, 119, 83, 222, 0, 0, 0, 3, 115, 66, 73, 84,
+      8, 8, 8, 219, 225, 79, 224, 0, 0, 0, 1, 115, 82, 71, 66, 0, 174, 206, 28,
+      233, 0, 0, 0, 12, 73, 68, 65, 84, 8, 153, 99, 72, 92, 37, 15, 0, 2, 154,
+      1, 43, 48, 0, 62, 135, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130,
+    ]);
   });
   it("encodeToBase64() from CPU image", async () => {
     const result = await surface.eval((Skia) => {
@@ -31,14 +31,9 @@ describe("Data Encoding", () => {
       }
       return img.encodeToBase64();
     });
-    const { Skia } = importSkia();
-
-    const data = Skia.Data.fromBase64(
-      "R0lGODlhAQABAIAAAGGqHwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="
+    expect(result).toEqual(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAA3NCSVQICAjb4U/gAAAAAXNSR0IArs4c6QAAAAxJREFUCJljSFwlDwACmgErMAA+hwAAAABJRU5ErkJggg=="
     );
-    const img = Skia.Image.MakeImageFromEncoded(data)!;
-    expect(img).toBeTruthy();
-    expect(result).toEqual(img.encodeToBase64());
   });
   it("encodeToBytes() from GPU image", async () => {
     const result = await surface.eval((Skia) => {
