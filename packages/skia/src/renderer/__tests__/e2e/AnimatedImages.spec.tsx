@@ -1,6 +1,6 @@
 import React from "react";
 
-import { checkImage } from "../../../__tests__/setup";
+import { checkImage, itRunsE2eOnly } from "../../../__tests__/setup";
 import { Image } from "../../components";
 import { BirdGIF, importSkia, surface } from "../setup";
 
@@ -27,7 +27,7 @@ describe("Animated Images", () => {
     });
     expect(result).toEqual(true);
   });
-  it("should decode gifs (2)", async () => {
+  itRunsE2eOnly("should decode gifs (2)", async () => {
     const result = await surface.eval((Skia) => {
       const data = Skia.Data.fromBase64(
         "R0lGODlhAQABAIAAAGGqHwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="

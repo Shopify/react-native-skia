@@ -1,7 +1,8 @@
+import { itRunsE2eOnly } from "../../../__tests__/setup";
 import { surface } from "../setup";
 
 describe("Data Encoding", () => {
-  it("encodeToBytes() from CPU image", async () => {
+  itRunsE2eOnly("encodeToBytes() from CPU image", async () => {
     const result = await surface.eval((Skia) => {
       const data = Skia.Data.fromBase64(
         "R0lGODlhAQABAIAAAGGqHwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="
@@ -20,7 +21,7 @@ describe("Data Encoding", () => {
       1, 43, 48, 0, 62, 135, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130,
     ]);
   });
-  it("encodeToBase64() from CPU image", async () => {
+  itRunsE2eOnly("encodeToBase64() from CPU image", async () => {
     const result = await surface.eval((Skia) => {
       const data = Skia.Data.fromBase64(
         "R0lGODlhAQABAIAAAGGqHwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="

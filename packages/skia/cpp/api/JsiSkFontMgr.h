@@ -48,17 +48,21 @@ public:
       return jsi::String::createFromUtf8(runtime,
                                          _systemFontFamilies[systemIndex]);
     }
-    throw jsi::JSError(runtime, "Font family index out of bounds: " +
-                                    std::to_string(i) + " (total families: " +
-                                    std::to_string(baseFamilyCount +
-                                                   _systemFontFamilies.size()) +
-                                    ")");
+    throw jsi::JSError(
+        runtime,
+        "Font family index out of bounds: " + std::to_string(i) +
+            " (total families: " +
+            std::to_string(baseFamilyCount + _systemFontFamilies.size()) + ")");
   }
 
   JSI_HOST_FUNCTION(matchFamilyStyle) {
     auto name = arguments[0].asString(runtime).utf8(runtime);
+    // Resolve font family aliases (e.g., "System" -> ".AppleSystemUIFont" on
+    // iOS)
+    auto resolvedName = getContext()->resolveFontFamily(name);
     auto fontStyle = JsiSkFontStyle::fromValue(runtime, arguments[1]);
-    auto typeface = getObject()->matchFamilyStyle(name.c_str(), *fontStyle);
+    auto typeface =
+        getObject()->matchFamilyStyle(resolvedName.c_str(), *fontStyle);
     auto hostObjectInstance =
         std::make_shared<JsiSkTypeface>(getContext(), std::move(typeface));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(

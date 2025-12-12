@@ -35,9 +35,9 @@ export const FontMgr = () => {
     .fill(0)
     .map((_, i) => customFontMgr.getFamilyName(i));
   const titleFont = matchFont({
-    fontFamily: "Helvetica",
+    fontFamily: "System",
     fontSize: titleFontSize,
-    fontWeight: "bold",
+    fontWeight: "normal",
   });
   const subtitleFont = matchFont();
   return (

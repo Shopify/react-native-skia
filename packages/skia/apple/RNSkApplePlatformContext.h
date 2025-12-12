@@ -75,6 +75,8 @@ public:
 
   std::vector<std::string> getSystemFontFamilies() override;
 
+  std::string resolveFontFamily(const std::string &familyName) override;
+
 private:
   ViewScreenshotService *_screenshotService;
 
