@@ -25,28 +25,87 @@ export const ensureFolderExists = (dirPath: string) => {
 export const runAsync = (command: string, label: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     const [cmd, ...args] = command.split(" ");
-    console.log({ cmd, args });
+    console.log(`\n🚀 Running: ${cmd} ${args.join(" ")}`);
     const childProcess = spawn(cmd, args, {
       shell: true,
     });
 
+    const stdoutLines: string[] = [];
+    const stderrLines: string[] = [];
+
     childProcess.stdout.on("data", (data) => {
+      const lines = data.toString();
+      stdoutLines.push(lines);
       process.stdout.write(`${label} ${data}`);
     });
 
     childProcess.stderr.on("data", (data) => {
+      const lines = data.toString();
+      stderrLines.push(lines);
       console.error(`${label} ${data}`);
     });
 
     childProcess.on("close", (code) => {
       if (code === 0) {
+        console.log(`✅ ${label} completed successfully`);
         resolve();
       } else {
+        console.log("\n");
+        // prettier-ignore
+        [
+          "╔════════════════════════════════════════════════════════════════╗",
+          "║                        ❌ BUILD FAILED                         ║",
+          "╚════════════════════════════════════════════════════════════════╝",
+        ].forEach(line => console.log(line));
+        console.log(`\n📋 Command: ${command}`);
+        console.log(`🏷️  Label: ${label}`);
+        console.log(`📍 Exit Code: ${code}`);
+        console.log(`📂 Working Directory: ${process.cwd()}`);
+
+        if (stderrLines.length > 0) {
+          // prettier-ignore
+          [
+            "\n┌─────────────────────────────────────────────────────────────────┐",
+            "│ Last stderr output:                                             │",
+            "└─────────────────────────────────────────────────────────────────┘",
+          ].forEach(line => console.log(line));
+          const lastStderr = stderrLines.slice(-20).join("");
+          console.log(lastStderr);
+        }
+
+        if (stdoutLines.length > 0) {
+          // prettier-ignore
+          [
+            "\n┌─────────────────────────────────────────────────────────────────┐",
+            "│ Last stdout output:                                             │",
+            "└─────────────────────────────────────────────────────────────────┘",
+          ].forEach(line => console.log(line));
+          const lastStdout = stdoutLines.slice(-20).join("");
+          console.log(lastStdout);
+        }
+
+        console.log(
+          "\n════════════════════════════════════════════════════════════════════\n"
+        );
         reject(new Error(`${label} exited with code ${code}`));
       }
     });
 
     childProcess.on("error", (error) => {
+      console.log("\n");
+      // prettier-ignore
+      [
+        "╔════════════════════════════════════════════════════════════════╗",
+        "║                     ❌ PROCESS ERROR                           ║",
+        "╚════════════════════════════════════════════════════════════════╝",
+      ].forEach(line => console.log(line));
+      console.log(`\n📋 Command: ${command}`);
+      console.log(`🏷️  Label: ${label}`);
+      console.log(`💥 Error: ${error.message}`);
+      console.log(`📂 Working Directory: ${process.cwd()}`);
+      console.log(
+        "\n════════════════════════════════════════════════════════════════════\n"
+      );
       reject(new Error(`${label} ${error.message}`));
     });
   });
@@ -70,8 +129,48 @@ export const checkFileExists = (filePath: string) => {
 
 export const $ = (command: string) => {
   try {
-    return execSync(command);
+    return execSync(command, { stdio: "pipe" });
   } catch (e) {
+    const error = e as {
+      status?: number;
+      stderr?: Buffer;
+      stdout?: Buffer;
+      message?: string;
+    };
+    console.log("\n");
+    // prettier-ignore
+    [
+      "╔════════════════════════════════════════════════════════════════╗",
+      "║                     ❌ COMMAND FAILED                          ║",
+      "╚════════════════════════════════════════════════════════════════╝",
+    ].forEach(line => console.log(line));
+    console.log(`\n📋 Command: ${command}`);
+    console.log(`📍 Exit Code: ${error.status ?? "unknown"}`);
+    console.log(`📂 Working Directory: ${process.cwd()}`);
+
+    if (error.stderr && error.stderr.length > 0) {
+      // prettier-ignore
+      [
+        "\n┌─────────────────────────────────────────────────────────────────┐",
+        "│ stderr:                                                         │",
+        "└─────────────────────────────────────────────────────────────────┘",
+      ].forEach(line => console.log(line));
+      console.log(error.stderr.toString());
+    }
+
+    if (error.stdout && error.stdout.length > 0) {
+      // prettier-ignore
+      [
+        "\n┌─────────────────────────────────────────────────────────────────┐",
+        "│ stdout:                                                         │",
+        "└─────────────────────────────────────────────────────────────────┘",
+      ].forEach(line => console.log(line));
+      console.log(error.stdout.toString());
+    }
+
+    console.log(
+      "\n════════════════════════════════════════════════════════════════════\n"
+    );
     exit(1);
   }
 };
