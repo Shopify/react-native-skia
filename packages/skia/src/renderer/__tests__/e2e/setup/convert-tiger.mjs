@@ -4,6 +4,11 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+// Round to 3 decimal places
+function round(n) {
+  return Math.round(n * 1000) / 1000;
+}
+
 // Convert relative SVG path commands to absolute commands
 function toAbsolute(pathData) {
   const commands = [];
@@ -35,11 +40,11 @@ function toAbsolute(pathData) {
           x = args[i];
           y = args[i + 1];
           if (i === 0) {
-            commands.push(`M${x} ${y}`);
+            commands.push(`M${round(x)} ${round(y)}`);
             startX = x;
             startY = y;
           } else {
-            commands.push(`L${x} ${y}`);
+            commands.push(`L${round(x)} ${round(y)}`);
           }
         }
         lastCp2X = x;
@@ -51,11 +56,11 @@ function toAbsolute(pathData) {
           x += args[i];
           y += args[i + 1];
           if (i === 0) {
-            commands.push(`M${x} ${y}`);
+            commands.push(`M${round(x)} ${round(y)}`);
             startX = x;
             startY = y;
           } else {
-            commands.push(`L${x} ${y}`);
+            commands.push(`L${round(x)} ${round(y)}`);
           }
         }
         lastCp2X = x;
@@ -66,7 +71,7 @@ function toAbsolute(pathData) {
         for (let i = 0; i < args.length; i += 2) {
           x = args[i];
           y = args[i + 1];
-          commands.push(`L${x} ${y}`);
+          commands.push(`L${round(x)} ${round(y)}`);
         }
         lastCp2X = x;
         lastCp2Y = y;
@@ -76,7 +81,7 @@ function toAbsolute(pathData) {
         for (let i = 0; i < args.length; i += 2) {
           x += args[i];
           y += args[i + 1];
-          commands.push(`L${x} ${y}`);
+          commands.push(`L${round(x)} ${round(y)}`);
         }
         lastCp2X = x;
         lastCp2Y = y;
@@ -85,7 +90,7 @@ function toAbsolute(pathData) {
       case 'H': // Absolute horizontal lineto
         for (const arg of args) {
           x = arg;
-          commands.push(`L${x} ${y}`);
+          commands.push(`L${round(x)} ${round(y)}`);
         }
         lastCp2X = x;
         lastCp2Y = y;
@@ -94,7 +99,7 @@ function toAbsolute(pathData) {
       case 'h': // Relative horizontal lineto
         for (const arg of args) {
           x += arg;
-          commands.push(`L${x} ${y}`);
+          commands.push(`L${round(x)} ${round(y)}`);
         }
         lastCp2X = x;
         lastCp2Y = y;
@@ -103,7 +108,7 @@ function toAbsolute(pathData) {
       case 'V': // Absolute vertical lineto
         for (const arg of args) {
           y = arg;
-          commands.push(`L${x} ${y}`);
+          commands.push(`L${round(x)} ${round(y)}`);
         }
         lastCp2X = x;
         lastCp2Y = y;
@@ -112,7 +117,7 @@ function toAbsolute(pathData) {
       case 'v': // Relative vertical lineto
         for (const arg of args) {
           y += arg;
-          commands.push(`L${x} ${y}`);
+          commands.push(`L${round(x)} ${round(y)}`);
         }
         lastCp2X = x;
         lastCp2Y = y;
@@ -120,7 +125,7 @@ function toAbsolute(pathData) {
         break;
       case 'C': // Absolute cubic bezier
         for (let i = 0; i < args.length; i += 6) {
-          commands.push(`C${args[i]} ${args[i+1]} ${args[i+2]} ${args[i+3]} ${args[i+4]} ${args[i+5]}`);
+          commands.push(`C${round(args[i])} ${round(args[i+1])} ${round(args[i+2])} ${round(args[i+3])} ${round(args[i+4])} ${round(args[i+5])}`);
           lastCp2X = args[i + 2];
           lastCp2Y = args[i + 3];
           x = args[i + 4];
@@ -136,7 +141,7 @@ function toAbsolute(pathData) {
           const y2 = y + args[i + 3];
           const ex = x + args[i + 4];
           const ey = y + args[i + 5];
-          commands.push(`C${x1} ${y1} ${x2} ${y2} ${ex} ${ey}`);
+          commands.push(`C${round(x1)} ${round(y1)} ${round(x2)} ${round(y2)} ${round(ex)} ${round(ey)}`);
           lastCp2X = x2;
           lastCp2Y = y2;
           x = ex;
@@ -159,7 +164,7 @@ function toAbsolute(pathData) {
           const cp2Y = args[i + 1];
           const ex = args[i + 2];
           const ey = args[i + 3];
-          commands.push(`C${cp1X} ${cp1Y} ${cp2X} ${cp2Y} ${ex} ${ey}`);
+          commands.push(`C${round(cp1X)} ${round(cp1Y)} ${round(cp2X)} ${round(cp2Y)} ${round(ex)} ${round(ey)}`);
           lastCp2X = cp2X;
           lastCp2Y = cp2Y;
           x = ex;
@@ -182,7 +187,7 @@ function toAbsolute(pathData) {
           const cp2Y = y + args[i + 1];
           const ex = x + args[i + 2];
           const ey = y + args[i + 3];
-          commands.push(`C${cp1X} ${cp1Y} ${cp2X} ${cp2Y} ${ex} ${ey}`);
+          commands.push(`C${round(cp1X)} ${round(cp1Y)} ${round(cp2X)} ${round(cp2Y)} ${round(ex)} ${round(ey)}`);
           lastCp2X = cp2X;
           lastCp2Y = cp2Y;
           x = ex;
@@ -192,7 +197,7 @@ function toAbsolute(pathData) {
         break;
       case 'Q': // Absolute quadratic bezier
         for (let i = 0; i < args.length; i += 4) {
-          commands.push(`Q${args[i]} ${args[i+1]} ${args[i+2]} ${args[i+3]}`);
+          commands.push(`Q${round(args[i])} ${round(args[i+1])} ${round(args[i+2])} ${round(args[i+3])}`);
           lastCp2X = args[i];
           lastCp2Y = args[i + 1];
           x = args[i + 2];
@@ -206,7 +211,7 @@ function toAbsolute(pathData) {
           const cpY = y + args[i + 1];
           const ex = x + args[i + 2];
           const ey = y + args[i + 3];
-          commands.push(`Q${cpX} ${cpY} ${ex} ${ey}`);
+          commands.push(`Q${round(cpX)} ${round(cpY)} ${round(ex)} ${round(ey)}`);
           lastCp2X = cpX;
           lastCp2Y = cpY;
           x = ex;
@@ -227,7 +232,7 @@ function toAbsolute(pathData) {
           }
           const ex = args[i];
           const ey = args[i + 1];
-          commands.push(`Q${cpX} ${cpY} ${ex} ${ey}`);
+          commands.push(`Q${round(cpX)} ${round(cpY)} ${round(ex)} ${round(ey)}`);
           lastCp2X = cpX;
           lastCp2Y = cpY;
           x = ex;
@@ -248,7 +253,7 @@ function toAbsolute(pathData) {
           }
           const ex = x + args[i];
           const ey = y + args[i + 1];
-          commands.push(`Q${cpX} ${cpY} ${ex} ${ey}`);
+          commands.push(`Q${round(cpX)} ${round(cpY)} ${round(ex)} ${round(ey)}`);
           lastCp2X = cpX;
           lastCp2Y = cpY;
           x = ex;
@@ -258,7 +263,7 @@ function toAbsolute(pathData) {
         break;
       case 'A': // Absolute arc
         for (let i = 0; i < args.length; i += 7) {
-          commands.push(`A${args[i]} ${args[i+1]} ${args[i+2]} ${args[i+3]} ${args[i+4]} ${args[i+5]} ${args[i+6]}`);
+          commands.push(`A${round(args[i])} ${round(args[i+1])} ${round(args[i+2])} ${args[i+3]} ${args[i+4]} ${round(args[i+5])} ${round(args[i+6])}`);
           x = args[i + 5];
           y = args[i + 6];
         }
@@ -270,7 +275,7 @@ function toAbsolute(pathData) {
         for (let i = 0; i < args.length; i += 7) {
           const ex = x + args[i + 5];
           const ey = y + args[i + 6];
-          commands.push(`A${args[i]} ${args[i+1]} ${args[i+2]} ${args[i+3]} ${args[i+4]} ${ex} ${ey}`);
+          commands.push(`A${round(args[i])} ${round(args[i+1])} ${round(args[i+2])} ${args[i+3]} ${args[i+4]} ${round(ex)} ${round(ey)}`);
           x = ex;
           y = ey;
         }
@@ -317,6 +322,7 @@ while ((match = pathRegex.exec(svgContent)) !== null) {
   if (attrs.d) {
     const path = {
       d: toAbsolute(attrs.d),
+      original: attrs.d,
     };
 
     if (attrs.fill && attrs.fill !== 'none') {
@@ -341,6 +347,7 @@ const tsContent = `// Auto-generated from Ghostscript_Tiger.svg
 
 export interface TigerPath {
   d: string;
+  original: string;
   fill?: string;
   stroke?: string;
   strokeWidth?: number;
