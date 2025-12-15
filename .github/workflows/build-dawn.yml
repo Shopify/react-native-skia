@@ -217,13 +217,13 @@ jobs:
         uses: actions/checkout@v6.0.1
 
       - name: Download all build artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: build-*
           path: artifacts
 
       - name: Download headers
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: dawn-headers
           path: dawn-headers
