@@ -4,12 +4,14 @@ import { WebSocketServer } from "ws";
 declare global {
   var testServer: Server;
   var testClient: WebSocket;
-  var testOS: "ios" | "android" | "web" | "node";
+  var testOS: "ios" | "android" | "web" | "node" | "macos";
   var testArch: "paper" | "fabric";
 }
 
-const isOS = (os: string): os is "android" | "ios" | "web" => {
-  return ["ios", "android", "web"].indexOf(os) !== -1;
+const isOS = (
+  os: string
+): os is "android" | "ios" | "web" | "node" | "macos" => {
+  return ["ios", "android", "web", "node", "macos"].indexOf(os) !== -1;
 };
 
 const isArch = (arc: string): arc is "paper" | "fabric" => {

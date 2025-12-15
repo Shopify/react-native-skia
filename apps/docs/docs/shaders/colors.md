@@ -11,7 +11,7 @@ Returns a shader that combines the given shaders with a BlendMode.
 
 | Name        | Type           |  Description                    |
 |:------------|:---------------|:--------------------------------|
-| mode        | `BlendMode` | see [blend modes](paint/properties.md#blend-mode). |
+| mode        | `BlendMode` | see [blend modes](paint/properties.md#blendmode). |
 | children    | `ReactNode` | Shaders to blend |
 
 ### Example

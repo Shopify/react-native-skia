@@ -30,7 +30,20 @@ export abstract class BaseHostObject<T, N extends string>
     this.__typename__ = typename;
   }
 
-  abstract dispose(): void;
+  dispose() {
+    this[Symbol.dispose]();
+  }
+
+  [Symbol.dispose](): void {
+    if (
+      this.ref !== null &&
+      typeof this.ref === "object" &&
+      "delete" in this.ref &&
+      typeof this.ref.delete === "function"
+    ) {
+      this.ref.delete();
+    }
+  }
 }
 
 export abstract class HostObject<T, N extends string> extends BaseHostObject<

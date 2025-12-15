@@ -68,7 +68,7 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
     auto state = UIApplication.sharedApplication.applicationState;
     bool appIsBackgrounded = (state == UIApplicationStateBackground);
 #else
-    bool appIsBackgrounded = !NSApplication.sharedApplication.isActive;
+    bool appIsBackgrounded = NSApplication.sharedApplication.isHidden;
 #endif // !TARGET_OS_OSX
     if (appIsBackgrounded) {
       // Request a redraw in the next run loop callback
@@ -77,11 +77,7 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
       // we try to render while in the background. (see above issue)
       return false;
     }
-  }
-  // Wrap in auto release pool since we want the system to clean up after
-  // rendering and not wait until later - we've seen some example of memory
-  // usage growing very fast in the simulator without this.
-  @autoreleasepool {
+
     auto surface = _ctx->getSurface();
     if (!surface) {
       return false;
@@ -89,8 +85,9 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
     auto canvas = surface->getCanvas();
     cb(canvas);
     _ctx->present();
+    return true;
   }
-  return true;
+  return false;
 };
 
 void RNSkMetalCanvasProvider::setSize(int width, int height) {

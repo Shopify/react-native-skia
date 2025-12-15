@@ -28,16 +28,26 @@ import type {
   ParagraphProps,
   AtlasProps,
   SkottieProps,
+  DrawingNodeProps,
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer";
 import { isSharedValue } from "../utils";
 
+/**
+ * Currently the recorder only work if the GPU resources (e.g Images) are owned by the main thread.
+ * It will crash otherwise on Ganesh (iOS/Android).
+ */
 export class ReanimatedRecorder implements BaseRecorder {
   private values = new Set<SharedValue<unknown>>();
   private recorder: JsiRecorder;
 
   constructor(Skia: Skia) {
     this.recorder = Skia.Recorder();
+  }
+
+  reset() {
+    this.values.clear();
+    this.recorder.reset();
   }
 
   private processAnimationValues(props?: Record<string, unknown>) {
@@ -62,8 +72,13 @@ export class ReanimatedRecorder implements BaseRecorder {
     return Array.from(this.values);
   }
 
-  saveGroup(): void {
-    this.recorder.saveGroup();
+  saveGroup(props?: AnimatedProps<Pick<DrawingNodeProps, "zIndex">>): void {
+    if (props) {
+      this.processAnimationValues(props);
+      this.recorder.saveGroup(props);
+    } else {
+      this.recorder.saveGroup();
+    }
   }
 
   restoreGroup(): void {
@@ -111,9 +126,13 @@ export class ReanimatedRecorder implements BaseRecorder {
     this.recorder.pushColorFilter(colorFilterType, props);
   }
 
-  pushShader(shaderType: NodeType, props: AnimatedProps<unknown>): void {
+  pushShader(
+    shaderType: NodeType,
+    props: AnimatedProps<unknown>,
+    children: number
+  ): void {
     this.processAnimationValues(props);
-    this.recorder.pushShader(shaderType, props);
+    this.recorder.pushShader(shaderType, props, children);
   }
 
   pushBlurMaskFilter(props: AnimatedProps<BlurMaskFilterProps>): void {

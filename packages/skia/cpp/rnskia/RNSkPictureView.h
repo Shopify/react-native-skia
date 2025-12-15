@@ -5,6 +5,7 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 #include <jsi/jsi.h>
@@ -55,16 +56,20 @@ public:
     _requestRedraw();
   }
 
+  sk_sp<SkPicture> getPicture() const { return _picture; }
+
 private:
   bool performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
+    // Capture picture pointer to ensure thread safety - _picture can be
+    // modified from the JS thread while we're drawing on the render thread
+    sk_sp<SkPicture> picture = _picture;
+    auto pd = _platformContext->getPixelDensity();
     return canvasProvider->renderToCanvas([=](SkCanvas *canvas) {
-      // Make sure to scale correctly
-      auto pd = _platformContext->getPixelDensity();
       canvas->clear(SK_ColorTRANSPARENT);
       canvas->save();
       canvas->scale(pd, pd);
-      if (_picture != nullptr) {
-        canvas->drawPicture(_picture);
+      if (picture != nullptr) {
+        canvas->drawPicture(picture);
       }
       canvas->restore();
     });
@@ -88,7 +93,7 @@ public:
 
   void setJsiProperties(
       std::unordered_map<std::string, RNJsi::ViewProperty> &props) override {
-
+    // Base implementation
     for (auto &prop : props) {
       if (prop.first == "picture") {
         if (prop.second.isNull()) {
@@ -97,7 +102,6 @@ public:
               ->setPicture(nullptr);
           continue;
         }
-
         // Save picture
         std::static_pointer_cast<RNSkPictureRenderer>(getRenderer())
             ->setPicture(prop.second.getPicture());

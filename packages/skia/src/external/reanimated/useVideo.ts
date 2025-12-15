@@ -78,7 +78,7 @@ export const useVideo = (
   const lastTimestamp = Rea.useSharedValue(-1);
   const duration = useMemo(() => video?.duration() ?? 0, [video]);
   const framerate = useMemo(
-    () => (Platform.OS === "web" ? -1 : video?.framerate() ?? 0),
+    () => (Platform.OS === "web" ? -1 : (video?.framerate() ?? 0)),
     [video]
   );
   const size = useMemo(() => video?.size() ?? { width: 0, height: 0 }, [video]);

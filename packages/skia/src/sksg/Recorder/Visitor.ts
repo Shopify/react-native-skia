@@ -8,6 +8,7 @@ import { NodeType } from "../../dom/types";
 import type { BaseRecorder } from "../../skia/types/Recorder";
 import type { Node } from "../Node";
 import { isImageFilter, isShader, sortNodeChildren } from "../Node";
+import type { AnimatedProps } from "../../renderer";
 
 export const processPaint = ({
   opacity,
@@ -160,7 +161,7 @@ const pushImageFilters = (
     if (isImageFilter(imageFilter.type)) {
       recorder.pushImageFilter(imageFilter.type, imageFilter.props);
     } else if (isShader(imageFilter.type)) {
-      recorder.pushShader(imageFilter.type, imageFilter.props);
+      recorder.pushShader(imageFilter.type, imageFilter.props, 0);
     }
     const needsComposition =
       imageFilter.type !== NodeType.BlendImageFilter &&
@@ -176,7 +177,7 @@ const pushShaders = (recorder: BaseRecorder, shaders: Node<any>[]) => {
     if (shader.children.length > 0) {
       pushShaders(recorder, shader.children);
     }
-    recorder.pushShader(shader.type, shader.props);
+    recorder.pushShader(shader.type, shader.props, shader.children.length);
   });
 };
 
@@ -200,11 +201,24 @@ const pushPaints = (recorder: BaseRecorder, paints: Node<any>[]) => {
   });
 };
 
-const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
-  if (node.type === NodeType.Group) {
-    recorder.saveGroup();
+type StackingContextProps = Pick<DrawingNodeProps, "zIndex">;
+
+const getStackingContextProps = (
+  props: AnimatedProps<DrawingNodeProps>
+): AnimatedProps<StackingContextProps> | undefined => {
+  const { zIndex } = props;
+  if (zIndex === undefined) {
+    return undefined;
   }
+  return { zIndex };
+};
+
+const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
   const { props } = node;
+  const stackingContextProps = getStackingContextProps(
+    props as AnimatedProps<DrawingNodeProps>
+  );
+  recorder.saveGroup(stackingContextProps);
   const {
     colorFilters,
     maskFilters,
@@ -250,7 +264,7 @@ const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
       const shadows = node.children
         .filter((n) => n.type === NodeType.BoxShadow)
         // eslint-disable-next-line @typescript-eslint/no-shadow
-        .map(({ props }) => ({ props } as { props: BoxShadowProps }));
+        .map(({ props }) => ({ props }) as { props: BoxShadowProps });
       recorder.drawBox(props, shadows);
       break;
     case NodeType.Fill:
@@ -326,9 +340,7 @@ const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
   if (shouldRestore) {
     recorder.restoreCTM();
   }
-  if (node.type === NodeType.Group) {
-    recorder.restoreGroup();
-  }
+  recorder.restoreGroup();
 };
 
 export const visit = (recorder: BaseRecorder, root: Node[]) => {

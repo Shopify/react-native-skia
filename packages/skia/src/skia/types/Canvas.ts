@@ -14,7 +14,7 @@ import type { SkColor } from "./Color";
 import type { InputRRect } from "./RRect";
 import type { BlendMode } from "./Paint/BlendMode";
 import type { SkPoint, PointMode } from "./Point";
-import type { InputMatrix } from "./Matrix";
+import type { InputMatrix, SkMatrix } from "./Matrix";
 import type { SkImageFilter } from "./ImageFilter";
 import type { SkVertices } from "./Vertices";
 import type { SkTextBlob } from "./TextBlob";
@@ -240,6 +240,12 @@ export interface SkCanvas {
    * @param saveCount
    */
   restoreToCount(saveCount: number): void;
+
+  /**
+   * Legacy version of getLocalToDevice(), which strips away any Z information, and
+   * just returns a 3x3 version.
+   */
+  getTotalMatrix(): SkMatrix;
 
   /**
    * Draws the given points using the current clip, current matrix, and the provided paint.

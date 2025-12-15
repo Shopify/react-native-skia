@@ -36,6 +36,12 @@ public:
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiNativeBufferFactory, Release),
                        JSI_EXPORT_FUNC(JsiNativeBufferFactory, MakeFromImage))
 
+  size_t getMemoryPressure() const override { return 1024; }
+
+  std::string getObjectType() const override {
+    return "JsiNativeBufferFactory";
+  }
+
   explicit JsiNativeBufferFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
 };

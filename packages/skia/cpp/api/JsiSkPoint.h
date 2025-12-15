@@ -57,9 +57,14 @@ public:
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             const SkPoint &point) {
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPoint>(std::move(context), point));
+    auto pointObj = std::make_shared<JsiSkPoint>(std::move(context), point);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pointObj,
+                                                       context);
   }
+
+  size_t getMemoryPressure() const override { return sizeof(SkPoint); }
+
+  std::string getObjectType() const override { return "JsiSkPoint"; }
 
   /**
    * Creates the function for construction a new instance of the SkPoint
@@ -75,9 +80,10 @@ public:
           SkPoint::Make(arguments[0].asNumber(), arguments[1].asNumber());
 
       // Return the newly constructed object
-      return jsi::Object::createFromHostObject(
-          runtime,
-          std::make_shared<JsiSkPoint>(std::move(context), std::move(point)));
+      auto pointObj =
+          std::make_shared<JsiSkPoint>(std::move(context), std::move(point));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pointObj,
+                                                         context);
     };
   }
 };

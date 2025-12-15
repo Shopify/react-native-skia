@@ -58,10 +58,6 @@ export class JsiSkCanvas
     super(CanvasKit, ref, "Canvas");
   }
 
-  dispose = () => {
-    this.ref.delete();
-  };
-
   drawRect(rect: SkRect, paint: SkPaint) {
     this.ref.drawRect(
       JsiSkRect.fromValue(this.CanvasKit, rect),
@@ -220,6 +216,13 @@ export class JsiSkCanvas
 
   restoreToCount(saveCount: number) {
     this.ref.restoreToCount(saveCount);
+  }
+
+  getTotalMatrix(): SkMatrix {
+    return new JsiSkMatrix(
+      this.CanvasKit,
+      Float32Array.of(...this.ref.getTotalMatrix())
+    );
   }
 
   drawPoints(mode: PointMode, points: SkPoint[], paint: SkPaint) {

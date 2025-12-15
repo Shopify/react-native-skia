@@ -35,9 +35,10 @@ public:
   JSI_API_TYPENAME("ParagraphBuilder");
 
   JSI_HOST_FUNCTION(build) {
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkParagraph>(getContext(), _builder.get()));
+    auto paragraph =
+        std::make_shared<JsiSkParagraph>(getContext(), _builder.get());
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, paragraph,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(reset) {
@@ -108,6 +109,10 @@ public:
                        JSI_EXPORT_FUNC(JsiSkParagraphBuilder, addPlaceholder),
                        JSI_EXPORT_FUNC(JsiSkParagraphBuilder, pushStyle),
                        JSI_EXPORT_FUNC(JsiSkParagraphBuilder, pop))
+
+  size_t getMemoryPressure() const override { return 1024 * 1024; }
+
+  std::string getObjectType() const override { return "JsiSkParagraphBuilder"; }
 
   explicit JsiSkParagraphBuilder(std::shared_ptr<RNSkPlatformContext> context,
                                  para::ParagraphStyle paragraphStyle,

@@ -74,7 +74,7 @@ interface IconProps {
 const style = { width: 48, height: 48 };
 
 const Icon = ({ icon }: IconProps) => {
-  return <SkiaPictureView picture={icon} style={style} />;
+  return <SkiaPictureView picture={icon} style={style} androidWarmup />;
 };
 
 type Props = { color: string };
@@ -96,7 +96,7 @@ const Screen: React.FC<Props> = ({ color }) => {
         <Icon icon={stackExchange} />
         <Icon icon={overflow} />
         <Text>React Native Skia Canvas</Text>
-        <Canvas style={{ width: 50, height: 50 }}>
+        <Canvas style={{ width: 50, height: 50 }} androidWarmup>
           <Rect x={0} y={0} width={50} height={50} color={color} />
         </Canvas>
       </View>

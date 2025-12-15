@@ -9,6 +9,7 @@ export type StackParamList = {
   LiquidGlass: undefined;
   Chess: undefined;
   Breathe: undefined;
+  ImageLoading: undefined;
   Filters: undefined;
   Gooey: undefined;
   Hue: undefined;
@@ -29,4 +30,5 @@ export type StackParamList = {
   SpeedTest: undefined;
   Video: undefined;
   Chat: undefined;
+  Pictures: undefined;
 };

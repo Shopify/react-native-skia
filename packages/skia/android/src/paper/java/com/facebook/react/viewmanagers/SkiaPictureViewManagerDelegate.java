@@ -22,11 +22,17 @@ public class SkiaPictureViewManagerDelegate<T extends View, U extends BaseViewMa
   @Override
   public void setProperty(T view, String propName, @Nullable Object value) {
     switch (propName) {
+      case "debug":
+        mViewManager.setDebug(view, value != null && (boolean) value);
+        break;
       case "opaque":
         mViewManager.setOpaque(view, value != null && (boolean) value);
         break;
-      case "debug":
-        mViewManager.setDebug(view, value != null && (boolean) value);
+      case "colorSpace":
+        mViewManager.setColorSpace(view, value == null ? null : (String) value);
+        break;
+      case "androidWarmup":
+        mViewManager.setAndroidWarmup(view, value != null && (boolean) value);
         break;
       default:
         super.setProperty(view, propName, value);

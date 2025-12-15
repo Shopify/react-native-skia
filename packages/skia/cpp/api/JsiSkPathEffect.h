@@ -25,6 +25,10 @@ public:
       : JsiSkWrappingSkPtrHostObject<SkPathEffect>(std::move(context),
                                                    std::move(pathEffect)) {}
 
+  size_t getMemoryPressure() const override { return 2048; }
+
+  std::string getObjectType() const override { return "JsiSkPathEffect"; }
+
   EXPORT_JSI_API_TYPENAME(JsiSkPathEffect, PathEffect)
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPathEffect, dispose))
 };

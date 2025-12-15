@@ -27,13 +27,14 @@ import type {
   TextPathProps,
   VerticesProps,
   SkottieProps,
+  DrawingNodeProps,
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer/processors/Animations/Animations";
 
 import type { SkPicture } from "./Picture";
 
 export interface BaseRecorder {
-  saveGroup(): void;
+  saveGroup(props?: AnimatedProps<Pick<DrawingNodeProps, "zIndex">>): void;
   restoreGroup(): void;
   savePaint(props: AnimatedProps<PaintProps>, standalone: boolean): void;
   restorePaint(): void;
@@ -48,7 +49,11 @@ export interface BaseRecorder {
     colorFilterType: NodeType,
     props: AnimatedProps<unknown>
   ): void;
-  pushShader(shaderType: NodeType, props: AnimatedProps<unknown>): void;
+  pushShader(
+    shaderType: NodeType,
+    props: AnimatedProps<unknown>,
+    children: number
+  ): void;
   pushBlurMaskFilter(props: AnimatedProps<BlurMaskFilterProps>): void;
   composePathEffect(): void;
   composeColorFilter(): void;
@@ -88,6 +93,7 @@ export interface BaseRecorder {
 }
 
 export interface JsiRecorder extends BaseRecorder {
-  play(): SkPicture;
+  play(picture: SkPicture): void;
   applyUpdates(variables: SharedValue<unknown>[]): void;
+  reset(): void;
 }

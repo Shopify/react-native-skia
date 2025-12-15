@@ -91,8 +91,9 @@ public:
       getObject()->measureText(str.c_str(), str.length(), SkTextEncoding::kUTF8,
                                &bounds);
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkRect>(getContext(), std::move(bounds)));
+    auto rect = std::make_shared<JsiSkRect>(getContext(), std::move(bounds));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, rect,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(getMetrics) {
@@ -278,6 +279,10 @@ public:
       : JsiSkWrappingSharedPtrHostObject(std::move(context),
                                          std::make_shared<SkFont>(font)) {}
 
+  size_t getMemoryPressure() const override { return sizeof(SkFont); }
+
+  std::string getObjectType() const override { return "JsiSkFont"; }
+
   /**
    * Creates the function for construction a new instance of the SkFont
    * wrapper
@@ -292,18 +297,22 @@ public:
       if (count == 2) {
         auto typeface = JsiSkTypeface::fromValue(runtime, arguments[0]);
         auto size = arguments[1].asNumber();
-        return jsi::Object::createFromHostObject(
-            runtime, std::make_shared<JsiSkFont>(std::move(context),
-                                                 SkFont(typeface, size)));
+        auto hostObjectInstance =
+            std::make_shared<JsiSkFont>(context, SkFont(typeface, size));
+        return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+            runtime, hostObjectInstance, std::move(context));
       } else if (count == 1) {
         auto typeface = JsiSkTypeface::fromValue(runtime, arguments[0]);
-        return jsi::Object::createFromHostObject(
-            runtime,
-            std::make_shared<JsiSkFont>(std::move(context), SkFont(typeface)));
+        auto hostObjectInstance =
+            std::make_shared<JsiSkFont>(context, SkFont(typeface));
+        return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+            runtime, hostObjectInstance, std::move(context));
       } else {
         // Return the newly constructed object
-        return jsi::Object::createFromHostObject(
-            runtime, std::make_shared<JsiSkFont>(std::move(context), SkFont()));
+        auto hostObjectInstance =
+            std::make_shared<JsiSkFont>(context, SkFont());
+        return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+            runtime, hostObjectInstance, std::move(context));
       }
     };
   }

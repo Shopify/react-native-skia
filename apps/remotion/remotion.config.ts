@@ -55,9 +55,9 @@ Config.overrideWebpackConfig((currentConfiguration) => {
     resolve: {
       ...currentConfiguration.resolve,
       fallback: {
-        fs: false,
-        path: false,
-        buffer: require.resolve("buffer/"),
+        "fs": false,
+        "path": false,
+        "buffer": require.resolve("buffer/"),
         "react-native/Libraries/Image/AssetRegistry": false,
       },
       extensions: [

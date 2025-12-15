@@ -23,8 +23,8 @@ For detailed information on library development, building, testing, and contribu
 ## Graphite
 
 Skia has two backends: Ganesh and Graphite. Ganesh is the default backend.
-If you want to experiment with Graphite, you can enable it by building Skia with `SK_GRAPHITE=1 yarn build-skia`.  
+If you want to experiment with Graphite, you can enable it by building Skia with `SK_GRAPHITE=1 yarn build-skia`.
 Skia Graphite requires Android API Level 26 or above.
 
-React Native Skia automatically detects if the Dawn WebGPU implementation library files are available. If they are present, it will automatically assume that Graphite is enabled.
+React Native Skia automatically detects Graphite via a marker file included in the prebuilt libs.
   

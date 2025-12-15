@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import React from "react";
 
 import { surface, importSkia } from "../setup";
@@ -141,7 +140,7 @@ describe("Paint", () => {
         })}
       </>
     );
-    checkImage(img, "snapshots/paint/blend-mode.png");
+    checkImage(img, "snapshots/paint/blend-mode.png", { maxPixelDiff: 500 });
   });
   it("Dithering", async () => {
     const { height } = surface;

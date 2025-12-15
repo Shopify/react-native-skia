@@ -1,5 +1,11 @@
 import { spawn, execSync } from "child_process";
-import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync } from "fs";
+import fs, {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  statSync,
+} from "fs";
 import { exit } from "process";
 import path from "path";
 
@@ -110,4 +116,29 @@ export var copyRecursiveSync = function (src: string, dest: string) {
   } else {
     copyFileSync(src, dest);
   }
+};
+
+// Cross-platform file operations abstraction
+export const fileOps = {
+  rm: (p: string) => {
+    if (fs.existsSync(p)) {
+      fs.rmSync(p, { recursive: true, force: true });
+    }
+  },
+
+  mkdir: (p: string) => {
+    fs.mkdirSync(p, { recursive: true });
+  },
+
+  cp: (src: string, dest: string) => {
+    copyRecursiveSync(src, dest);
+  },
+
+  sed: (file: string, pattern: RegExp, replacement: string) => {
+    if (fs.existsSync(file)) {
+      const content = fs.readFileSync(file, "utf8");
+      const updated = content.replace(pattern, replacement);
+      fs.writeFileSync(file, updated, "utf8");
+    }
+  },
 };

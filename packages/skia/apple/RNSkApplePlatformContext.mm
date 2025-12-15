@@ -3,6 +3,7 @@
 #import <CoreMedia/CMSampleBuffer.h>
 #include <Metal/Metal.h>
 #import <React/RCTUtils.h>
+#include <set>
 #include <thread>
 #include <utility>
 
@@ -16,8 +17,13 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#include "include/core/SkBlendMode.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkColor.h"
 #import "include/core/SkColorSpace.h"
 #include "include/core/SkFontMgr.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkSamplingOptions.h"
 #include "include/core/SkSurface.h"
 
 #include "include/ports/SkFontMgr_mac_ct.h"
@@ -74,22 +80,26 @@ void RNSkApplePlatformContext::releaseNativeBuffer(uint64_t pointer) {
 uint64_t RNSkApplePlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
   // 0. If Image is not in BGRA, convert to BGRA as only BGRA is supported.
   if (image->colorType() != kBGRA_8888_SkColorType) {
-#if defined(SK_GRAPHITE)
-    SkImage::RequiredProperties requiredProps;
-    image = image->makeColorTypeAndColorSpace(
-        DawnContext::getInstance().getRecorder(), kBGRA_8888_SkColorType,
-        SkColorSpace::MakeSRGB(), requiredProps);
-#else
-    // on iOS, 32_BGRA is the only supported RGB format for CVPixelBuffers.
-    image = image->makeColorTypeAndColorSpace(
-        MetalContext::getInstance().getDirectContext(), kBGRA_8888_SkColorType,
-        SkColorSpace::MakeSRGB());
-#endif
-    if (image == nullptr) {
+    const SkImageInfo bgraInfo =
+        SkImageInfo::Make(image->dimensions(), kBGRA_8888_SkColorType,
+                          kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
+    auto surface = SkSurfaces::Raster(bgraInfo);
+    if (!surface) {
+      throw std::runtime_error(
+          "Failed to allocate raster surface for BGRA conversion");
+    }
+    SkCanvas *canvas = surface->getCanvas();
+    canvas->clear(SK_ColorTRANSPARENT);
+    SkPaint paint;
+    paint.setBlendMode(SkBlendMode::kSrc);
+    canvas->drawImage(image.get(), 0.0f, 0.0f, SkSamplingOptions(), &paint);
+    auto bgraImage = surface->makeImageSnapshot();
+    if (bgraImage == nullptr) {
       throw std::runtime_error(
           "Failed to convert image to BGRA_8888 colortype! Only BGRA_8888 "
           "NativeBuffers are supported.");
     }
+    image = std::move(bgraImage);
   }
 
   // 1. Get image info
@@ -289,6 +299,74 @@ SkColorType RNSkApplePlatformContext::mtlPixelFormatToSkColorType(
 
 sk_sp<SkFontMgr> RNSkApplePlatformContext::createFontMgr() {
   return SkFontMgr_New_CoreText(nullptr);
+}
+
+std::vector<std::string> RNSkApplePlatformContext::getSystemFontFamilies() {
+  std::vector<std::string> families;
+
+  // System UI fonts (e.g., .AppleSystemUIFont) are not enumerated by Skia's
+  // font manager. We retrieve them via Core Text's CTFontUIFontType constants.
+  // This list covers common system font types as of iOS 17 / macOS 14.
+  // Apple may add new CTFontUIFontType values in future OS versions,
+  // so this list may need to be updated periodically.
+  CTFontUIFontType fontTypes[] = {
+      kCTFontUIFontUser,        kCTFontUIFontUserFixedPitch,
+      kCTFontUIFontSystem,      kCTFontUIFontEmphasizedSystem,
+      kCTFontUIFontSmallSystem, kCTFontUIFontSmallEmphasizedSystem,
+      kCTFontUIFontMiniSystem,  kCTFontUIFontMiniEmphasizedSystem,
+      kCTFontUIFontLabel,       kCTFontUIFontMessage,
+      kCTFontUIFontToolTip,
+  };
+
+  std::set<std::string> uniqueFamilies;
+
+  for (CTFontUIFontType fontType : fontTypes) {
+    CTFontRef font = CTFontCreateUIFontForLanguage(fontType, 12.0, nullptr);
+    if (font) {
+      CFStringRef familyName = CTFontCopyFamilyName(font);
+      if (familyName) {
+        const char *cstr =
+            CFStringGetCStringPtr(familyName, kCFStringEncodingUTF8);
+        if (cstr) {
+          uniqueFamilies.insert(std::string(cstr));
+        } else {
+          char buffer[256];
+          if (CFStringGetCString(familyName, buffer, sizeof(buffer),
+                                 kCFStringEncodingUTF8)) {
+            uniqueFamilies.insert(std::string(buffer));
+          }
+        }
+        CFRelease(familyName);
+      }
+      CFRelease(font);
+    }
+  }
+
+  families.assign(uniqueFamilies.begin(), uniqueFamilies.end());
+  return families;
+}
+
+std::string
+RNSkApplePlatformContext::resolveFontFamily(const std::string &familyName) {
+  // Handle special font family names like React Native does
+  // See: RCTFont.mm in React Native
+  if (familyName == "System" || familyName == "system" ||
+      familyName == "sans-serif") {
+    return ".AppleSystemUIFont";
+  }
+  if (familyName == "SystemCondensed" || familyName == "system-condensed") {
+    // Return system font - condensed trait is handled via font style
+    return ".AppleSystemUIFont";
+  }
+  // CSS generic font families
+  if (familyName == "serif") {
+    return "Times New Roman";
+  }
+  if (familyName == "monospace") {
+    return "Courier New";
+  }
+  // Return as-is if no mapping exists
+  return familyName;
 }
 
 void RNSkApplePlatformContext::runOnMainThread(std::function<void()> func) {

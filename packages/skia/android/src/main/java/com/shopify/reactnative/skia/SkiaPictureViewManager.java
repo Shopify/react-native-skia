@@ -36,4 +36,9 @@ public class SkiaPictureViewManager extends SkiaBaseViewManager<SkiaPictureView>
     public void setColorSpace(SkiaPictureView view, @Nullable String value) {
         // nothing to do here at the moment
     }
+
+    @Override
+    public void setAndroidWarmup(SkiaPictureView view, boolean value) {
+        view.setAndroidWarmup(value);
+    }
 }

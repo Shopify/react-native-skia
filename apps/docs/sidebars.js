@@ -44,6 +44,11 @@ const sidebars = {
       id: "group",
     },
     {
+      type: "doc",
+      label: "Pictures",
+      id: "pictures",
+    },
+    {
       collapsed: true,
       type: "category",
       label: "Shapes",
@@ -54,7 +59,6 @@ const sidebars = {
         "shapes/atlas",
         "shapes/vertices",
         "shapes/patch",
-        "shapes/pictures",
       ],
     },
     {

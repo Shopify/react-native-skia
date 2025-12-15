@@ -22,9 +22,15 @@ public:
     if (typeface == nullptr) {
       return jsi::Value::null();
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkTypeface>(getContext(), typeface));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkTypeface>(getContext(), std::move(typeface));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
+
+  size_t getMemoryPressure() const override { return 1024; }
+
+  std::string getObjectType() const override { return "JsiSkTypefaceFactory"; }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTypefaceFactory,
                                        MakeFreeTypeFaceFromData))

@@ -4,6 +4,7 @@ import React from "react";
 import { cleanup, render } from "@testing-library/react-native";
 
 import { Breathe } from "./Breathe";
+import { ImageLoading } from "./ImageLoading";
 import { Gooey } from "./Gooey";
 import { Aurora } from "./Aurora";
 import { Wallet } from "./Wallet";
@@ -20,8 +21,14 @@ import { Boxes } from "./Boxes";
 
 it("should render the Breathe example correctly", () => {
   const { getByTestId } = render(<Breathe />);
-  const breatheCanvas = getByTestId("breathe-canvas");
-  expect(breatheCanvas).toBeTruthy();
+  const canvas = getByTestId("breathe-canvas");
+  expect(canvas).toBeTruthy();
+});
+
+it("should render the Image Loading example correctly", () => {
+  const { getByTestId } = render(<ImageLoading />);
+  const canvas = getByTestId("image-loading-canvas");
+  expect(canvas).toBeTruthy();
 });
 
 it("should render the Gooey example correctly", () => {

@@ -166,6 +166,10 @@ public:
     }
   }
 
+  size_t getMemoryPressure() const override { return sizeof(SkMatrix); }
+
+  std::string getObjectType() const override { return "JsiSkMatrix"; }
+
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
@@ -175,8 +179,10 @@ public:
       } else {
         matrix = SkMatrix::I();
       }
-      return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkMatrix>(std::move(context), matrix));
+      auto hostObjectInstance =
+          std::make_shared<JsiSkMatrix>(context, std::move(matrix));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+          runtime, hostObjectInstance, context);
     };
   }
 };

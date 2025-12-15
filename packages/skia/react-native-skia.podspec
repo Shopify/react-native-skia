@@ -4,47 +4,29 @@ require "json"
 
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
-# Check if Graphite symbols are available in libskia
-libskia_path = File.join(__dir__, "libs/apple/libskia.xcframework")
+# Check if Graphite is available
+# Detection method priority:
+# 1. SK_GRAPHITE environment variable (explicit override, fastest)
+# 2. Marker file in libs directory (set during Skia build)
+# 3. Default to OFF (no slow nm symbol detection)
 use_graphite = false
 
-if File.exist?(libskia_path)
-  # Look for any arm64 or x86_64 framework inside the xcframework
-  framework_paths = Dir.glob(File.join(libskia_path, "**/libskia.framework/libskia"))
-  
-  # Also try looking for static libraries if frameworks aren't found
-  if framework_paths.empty?
-    framework_paths = Dir.glob(File.join(libskia_path, "**/libskia.a"))
-  end
-  
-  framework_paths.each do |framework_path|
-    if File.exist?(framework_path)
-      # Look for specific Dawn function symbols that indicate Graphite support
-      dawn_symbols = [
-        'dawn::',
-        'wgpu',
-        '_ZN4dawn',
-        'DawnDevice',
-        'dawn_native'
-      ]
-      
-      dawn_symbols.each do |symbol|
-        nm_output = `nm "#{framework_path}" 2>/dev/null | grep "#{symbol}"`
-        if $?.success? && !nm_output.empty?
-          use_graphite = true
-          break
-        end
-      end
-      
-      break if use_graphite
-    end
-  end
+if ENV['SK_GRAPHITE']
+  # Explicit override via environment variable
+  use_graphite = ENV['SK_GRAPHITE'] == '1' || ENV['SK_GRAPHITE'].downcase == 'true'
+  puts "-- SK_GRAPHITE detection: using environment variable (#{use_graphite ? 'ON' : 'OFF'})"
+elsif File.exist?(File.join(__dir__, "libs/apple/graphite.enabled"))
+  # Marker file indicates Graphite-enabled build
+  use_graphite = true
+  puts "-- SK_GRAPHITE detection: marker file found"
+else
+  puts "-- SK_GRAPHITE detection: no marker file, assuming OFF"
 end
 
 if use_graphite
-  puts "SK_GRAPHITE: ON (Graphite symbols found in libskia)"
+  puts "-- SK_GRAPHITE: ON"
 else
-  puts "SK_GRAPHITE: OFF (Graphite symbols not found in libskia)"
+  puts "-- SK_GRAPHITE: OFF"
 end
 
 # Set preprocessor definitions based on GRAPHITE flag
@@ -60,8 +42,7 @@ base_frameworks = ['libs/apple/libskia.xcframework',
 'libs/apple/libskunicode_core.xcframework',
 'libs/apple/libskunicode_libgrapheme.xcframework',
 'libs/apple/libskottie.xcframework',
-'libs/apple/libsksg.xcframework',
-'libs/apple/libpathops.xcframework',]
+'libs/apple/libsksg.xcframework',]
 
 Pod::Spec.new do |s|
   s.name         = "react-native-skia"

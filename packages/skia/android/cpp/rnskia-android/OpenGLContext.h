@@ -78,6 +78,7 @@ public:
     if (!texture.isValid()) {
       RNSkLogger::logToConsole("couldn't create offscreen texture %dx%d", width,
                                height);
+      return nullptr;
     }
 
     struct ReleaseContext {

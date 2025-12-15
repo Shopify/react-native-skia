@@ -1,6 +1,8 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
+import { ImageLoading } from "../ImageLoading/ImageLoading";
+
 import type { Routes } from "./Routes";
 import { List } from "./List";
 import { PathEffectDemo } from "./PathEffect";
@@ -21,6 +23,7 @@ import { FreezeExample } from "./Freeze";
 import { Touch } from "./Touch";
 import { PictureViewExample } from "./PictureView";
 import { OnLayoutDemo } from "./OnLayout";
+import { OnSize } from "./OnSize";
 import { Snapshot } from "./Snapshot";
 import { IconsExample } from "./Icons";
 import { FontMgr } from "./FontMgr";
@@ -28,8 +31,16 @@ import { AnimatedImages } from "./AnimatedImages";
 import { Paragraphs } from "./Paragraphs";
 import { Paragraphs2 } from "./Paragraphs2";
 import { Skottie } from "./Skottie";
+import { StressTest } from "./StressTest";
+import { StressTest2 } from "./StressTest2";
+import { StressTest3 } from "./StressTest3";
+import { StressTest4 } from "./StressTest4";
+import { PictureViewCrashTest } from "./PictureViewCrashTest";
+import { FirstFrame, FirstFrameEmpty } from "./FirstFrame";
+import { ZIndexExample } from "./ZIndex";
 
 const Stack = createNativeStackNavigator<Routes>();
+
 export const API = () => {
   return (
     <Stack.Navigator>
@@ -67,6 +78,13 @@ export const API = () => {
         component={AnimatedImages}
         options={{
           title: "🌅 Animated Images",
+        }}
+      />
+      <Stack.Screen
+        name="ImageLoading"
+        component={ImageLoading}
+        options={{
+          title: "🖼 Image Loading",
         }}
       />
       <Stack.Screen
@@ -147,6 +165,13 @@ export const API = () => {
         }}
       />
       <Stack.Screen
+        name="ZIndex"
+        component={ZIndexExample}
+        options={{
+          title: "🧱 zIndex",
+        }}
+      />
+      <Stack.Screen
         name="SVG"
         component={SVG}
         options={{
@@ -214,6 +239,62 @@ export const API = () => {
         component={OnLayoutDemo}
         options={{
           title: "🎛️ OnLayout",
+        }}
+      />
+      <Stack.Screen
+        name="OnSize"
+        component={OnSize}
+        options={{
+          title: "📏 OnSize",
+        }}
+      />
+      <Stack.Screen
+        name="StressTest"
+        component={StressTest}
+        options={{
+          title: "🔥 Stress Test",
+        }}
+      />
+      <Stack.Screen
+        name="StressTest2"
+        component={StressTest2}
+        options={{
+          title: "🔥 Stress Test 2",
+        }}
+      />
+      <Stack.Screen
+        name="StressTest3"
+        component={StressTest3}
+        options={{
+          title: "🔥 Stress Test 3",
+        }}
+      />
+      <Stack.Screen
+        name="StressTest4"
+        component={StressTest4}
+        options={{
+          title: "🔥 Stress Test 4",
+        }}
+      />
+      <Stack.Screen
+        name="PictureViewCrashTest"
+        component={PictureViewCrashTest}
+        options={{
+          title: "💥 PictureView Race Condition",
+        }}
+      />
+      <Stack.Screen
+        name="FirstFrame"
+        component={FirstFrame}
+        options={{
+          title: "🎬 First Frame",
+        }}
+      />
+      <Stack.Screen
+        name="FirstFrameEmpty"
+        component={FirstFrameEmpty}
+        options={{
+          title: "⬜️ Empty Screen",
         }}
       />
     </Stack.Navigator>

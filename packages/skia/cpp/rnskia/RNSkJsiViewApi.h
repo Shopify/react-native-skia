@@ -10,12 +10,14 @@
 #include <vector>
 
 #include "JsiHostObject.h"
+#include "RNSkPictureView.h"
 #include "RNSkPlatformContext.h"
 #include "RNSkView.h"
 #include "ViewProperty.h"
 #include <jsi/jsi.h>
 
 namespace RNSkia {
+
 namespace jsi = facebook::jsi;
 
 using RNSkViewInfo = struct RNSkViewInfo {
@@ -100,10 +102,10 @@ public:
     // Safely execute operations while holding the registry lock
     ViewRegistry::getInstance().withViewInfo(
         nativeId, [&](std::shared_ptr<RNSkViewInfo> info) {
+          auto name = arguments[1].asString(runtime).utf8(runtime);
           info->props.insert_or_assign(
               arguments[1].asString(runtime).utf8(runtime),
               RNJsi::ViewProperty(runtime, arguments[2]));
-
           // Now let's see if we have a view that we can update
           if (info->view != nullptr) {
             // Update view!
@@ -294,8 +296,10 @@ public:
         nativeId, [&](std::shared_ptr<RNSkViewInfo> info) {
           info->view = view;
           info->view->setNativeId(nativeId);
+
           info->view->setJsiProperties(info->props);
           info->props.clear();
+
           return nullptr;
         });
   }

@@ -21,11 +21,12 @@ struct PushShaderProps : TransformProps {
 class PushShaderCmd : public Command {
 private:
   PushShaderProps props;
+  int children;
 
 public:
   PushShaderCmd(jsi::Runtime &runtime, const jsi::Object &object,
-                Variables &variables)
-      : Command(CommandType::PushShader, "skShader") {
+                Variables &variables, int children)
+      : Command(CommandType::PushShader, "skShader"), children(children) {
     convertProperty(runtime, object, "transform", props.transform, variables);
     convertProperty(runtime, object, "origin", props.origin, variables);
     convertProperty(runtime, object, "matrix", props.matrix, variables);
@@ -39,9 +40,10 @@ public:
     auto m3 = processTransform(props.matrix, props.transform, props.origin);
     auto uniformsData = processUniforms(source, props.uniforms);
 
-    std::vector<sk_sp<SkShader>> children = ctx->popAllShaders();
-    auto shader = source->makeShader(std::move(uniformsData), children.data(),
-                                     children.size(), &m3);
+    std::vector<sk_sp<SkShader>> childrenShaders = ctx->popShaders(children);
+    auto shader =
+        source->makeShader(std::move(uniformsData), childrenShaders.data(),
+                           childrenShaders.size(), &m3);
 
     ctx->shaders.push_back(shader);
   }

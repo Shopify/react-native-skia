@@ -17,12 +17,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Setup Xcode 16
-      if: runner.os == 'macOS'
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: '16.2.0'
-
     - name: Setup Node.js
       uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
       with:
@@ -36,31 +30,10 @@ runs:
       env:
         SK_GRAPHITE: ${{ inputs.graphite == 'true' && '1' || '' }}
 
-    - name: Download Skia Binary Artifacts
-      if: ${{ inputs.download_skia == 'true' }}
-      uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
-      with:
-        workflow: ${{ inputs.graphite == 'true' && 'build-skia-graphite.yml' || 'build-skia.yml' }}
-        repo: shopify/react-native-skia
-        path: packages/skia/artifacts
-        branch: main
-
-    - name: Copy Skia Headers
-      if: ${{ inputs.download_skia == 'true' }}
-      working-directory: packages/skia
-      run: yarn copy-skia-headers
-      shell: bash
-
     - name: Copy Artifacts to libs folder
       if: ${{ inputs.download_skia == 'true' }}
       working-directory: packages/skia
-      run: yarn workflow-copy-libs
+      run: yarn install-skia
       shell: bash
       env:
         SK_GRAPHITE: ${{ inputs.graphite == 'true' && '1' || '' }}
-
-    - name: Clean up artifacts folder
-      if: ${{ inputs.download_skia == 'true' }}
-      working-directory: packages/skia
-      run: rm -rf artifacts
-      shell: bash

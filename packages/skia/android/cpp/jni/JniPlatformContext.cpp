@@ -63,6 +63,8 @@ using TSelf = jni::local_ref<JniPlatformContext::jhybriddata>;
 void JniPlatformContext::registerNatives() {
   registerHybrid({
       makeNativeMethod("initHybrid", JniPlatformContext::initHybrid),
+      makeNativeMethod("notifyTaskReadyNative",
+                       JniPlatformContext::notifyTaskReadyNative),
   });
 }
 
@@ -136,7 +138,7 @@ void JniPlatformContext::performStreamOperation(
   static auto method = javaPart_->getClass()->getMethod<jbyteArray(jstring)>(
       "getJniStreamFromSource");
 
-  auto loader = [=]() -> void {
+  auto loader = [=, this]() -> void {
     jni::ThreadScope ts;
     jstring jstr =
         (*jni::Environment::current()).NewStringUTF(sourceUri.c_str());
@@ -183,6 +185,47 @@ void JniPlatformContext::performStreamOperation(
 
   // Fire and forget the thread - will be resolved on completion
   std::thread(loader).detach();
+}
+
+void JniPlatformContext::runTaskOnMainThread(std::function<void()> task) {
+  bool shouldSchedule = false;
+  {
+    std::lock_guard<std::mutex> lock(_mainThreadTasksMutex);
+    _mainThreadTasks.push(std::move(task));
+    if (!_mainThreadDispatchScheduled) {
+      _mainThreadDispatchScheduled = true;
+      shouldSchedule = true;
+    }
+  }
+
+  if (shouldSchedule) {
+    notifyTaskReadyExternal();
+  }
+}
+
+void JniPlatformContext::notifyTaskReadyExternal() {
+  jni::ThreadScope ts;
+
+  static auto method =
+      javaPart_->getClass()->getMethod<void()>("notifyTaskReady");
+  method(javaPart_.get());
+}
+
+void JniPlatformContext::notifyTaskReadyNative() {
+  std::queue<std::function<void()>> tasks;
+  {
+    std::lock_guard<std::mutex> lock(_mainThreadTasksMutex);
+    std::swap(tasks, _mainThreadTasks);
+    _mainThreadDispatchScheduled = false;
+  }
+
+  while (!tasks.empty()) {
+    auto handler = std::move(tasks.front());
+    tasks.pop();
+    if (handler) {
+      handler();
+    }
+  }
 }
 
 void JniPlatformContext::raiseError(const std::exception &err) {

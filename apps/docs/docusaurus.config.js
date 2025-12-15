@@ -10,7 +10,8 @@ const config = {
   url: "https://shopify.github.io/",
   baseUrl: "/react-native-skia/",
   onBrokenLinks: "throw",
-  onBrokenMarkdownLinks: "warn",
+  onBrokenMarkdownLinks: "throw",
+  onBrokenAnchors: "throw",
   favicon: "img/favicon.ico",
   organizationName: "shopify", // Usually your GitHub org/user name.
   projectName: "react-native-skia", // Usually your repo name.

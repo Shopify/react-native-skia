@@ -26,6 +26,10 @@ public:
       : JsiSkWrappingSkPtrHostObject<SkShader>(std::move(context),
                                                std::move(shader)) {}
 
+  size_t getMemoryPressure() const override { return 1024 * 1024; }
+
+  std::string getObjectType() const override { return "JsiSkShader"; }
+
   EXPORT_JSI_API_TYPENAME(JsiSkShader, Shader)
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkShader, dispose))
 };

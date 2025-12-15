@@ -11,43 +11,35 @@ set (SKIA_LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../libs/android/${ANDROID_ABI}"
 add_library(skia STATIC IMPORTED)
 set_property(TARGET skia PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskia.a")
 
-# Check if Graphite symbols are available in libskia using nm/objdump
+# Check if Graphite is available
+# Detection method priority:
+# 1. SK_GRAPHITE environment variable (explicit override, fastest)
+# 2. Marker file in libs directory (set during Skia build)
+# 3. Fall back to nm symbol detection (slow on some CI systems)
 set(SK_GRAPHITE_AVAILABLE OFF)
 
-if(EXISTS "${SKIA_LIBS_PATH}/libskia.a")
-    # Look for specific Dawn function symbols that indicate Graphite support
-    execute_process(
-        COMMAND nm "${SKIA_LIBS_PATH}/libskia.a"
-        COMMAND grep "dawn::\\|wgpu\\|_ZN4dawn\\|DawnDevice\\|dawn_native"
-        OUTPUT_VARIABLE NM_OUTPUT
-        ERROR_QUIET
-        RESULT_VARIABLE NM_RESULT
-    )
-    
-    if(NM_RESULT EQUAL 0 AND NOT "${NM_OUTPUT}" STREQUAL "")
+if(DEFINED ENV{SK_GRAPHITE})
+    # Explicit override via environment variable
+    if($ENV{SK_GRAPHITE})
         set(SK_GRAPHITE_AVAILABLE ON)
+        message("-- SK_GRAPHITE detection: using environment variable (ON)")
     else()
-        # Fallback to objdump if nm doesn't work
-        execute_process(
-            COMMAND objdump -t "${SKIA_LIBS_PATH}/libskia.a"
-            COMMAND grep "dawn::\\|wgpu\\|_ZN4dawn\\|DawnDevice\\|dawn_native"
-            OUTPUT_VARIABLE OBJDUMP_OUTPUT
-            ERROR_QUIET
-            RESULT_VARIABLE OBJDUMP_RESULT
-        )
-        
-        if(OBJDUMP_RESULT EQUAL 0 AND NOT "${OBJDUMP_OUTPUT}" STREQUAL "")
-            set(SK_GRAPHITE_AVAILABLE ON)
-        endif()
+        message("-- SK_GRAPHITE detection: using environment variable (OFF)")
     endif()
+elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../libs/android/graphite.enabled")
+    # Marker file indicates Graphite-enabled build
+    set(SK_GRAPHITE_AVAILABLE ON)
+    message("-- SK_GRAPHITE detection: marker file found")
+else()
+    message("-- SK_GRAPHITE detection: no marker file, assuming OFF")
 endif()
 
 if(SK_GRAPHITE_AVAILABLE)
     set(SK_GRAPHITE ON)
-    message("-- SK_GRAPHITE: ON (Graphite symbols found in libskia)")
+    message("-- SK_GRAPHITE: ON")
 else()
     set(SK_GRAPHITE OFF)
-    message("-- SK_GRAPHITE: OFF (Graphite symbols not found in libskia)")
+    message("-- SK_GRAPHITE: OFF")
 endif()
 
 string(APPEND CMAKE_CXX_FLAGS " -DSK_BUILD_FOR_ANDROID -DSK_DISABLE_LEGACY_SHAPER_FACTORY -DSK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_HAVE_MEMRCHR=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_MOBILE=1 -DON_ANDROID -DONANDROID")
@@ -61,7 +53,6 @@ set (SKIA_SKUNICODE_CORE_LIB "skunicode_core")
 set (SKIA_SKUNICODE_ICU_LIB "skunicode_icu")
 set (SKIA_SKOTTIE_LIB "skottie")
 set (SKIA_SKSG_LIB "sksg")
-set (SKIA_PATHOPS_LIB "pathops")
 set (SKIA_JSONREADER_LIB "jsonreader")
 
 
@@ -126,6 +117,8 @@ add_library(
         "${PROJECT_SOURCE_DIR}/../cpp/api/third_party/CSSColorParser.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/api/third_party/base64.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/api/third_party/SkottieUtils.cpp"
+
+        "${PROJECT_SOURCE_DIR}/../cpp/api/JsiSkDispatcher.cpp"
         ${BACKEND_SOURCES}
 )
 
@@ -307,7 +300,7 @@ if(${REACT_NATIVE_VERSION} GREATER_EQUAL 80)
     target_compile_reactnative_options(${PACKAGE_NAME} PRIVATE)
 else()
   string(APPEND CMAKE_CXX_FLAGS
-         "  -fexceptions -frtti -std=c++${CMAKE_CXX_STANDARD} -Wall -Werror -Wunused-function -Wunused-private-field -Woverloaded-virtual -Wreorder-ctor -Wdelete-non-abstract-non-virtual-dtor -Wmismatched-tags -Wunused-variable -Wpessimizing-move -Wswitch -Wdeprecated-declarations")
+         "  -fexceptions -frtti -std=c++${CMAKE_CXX_STANDARD} -Wall -Werror -Wunused-function -Wunused-private-field -Woverloaded-virtual -Wreorder-ctor -Wdelete-non-abstract-non-virtual-dtor -Wmismatched-tags -Wunused-variable -Wpessimizing-move -Wswitch -Wdeprecated-declarations -Werror=deprecated-this-capture")
 endif()
 
 # Link
@@ -324,7 +317,6 @@ if(${REACT_NATIVE_VERSION} GREATER_EQUAL 76)
         ${SKIA_SKUNICODE_ICU_LIB}
         ${SKIA_SKOTTIE_LIB}
         ${SKIA_SKSG_LIB}
-        ${SKIA_PATHOPS_LIB}
         ${SKIA_JSONREADER_LIB}
         ${SKIA_LIB}
         -ljnigraphics
@@ -348,7 +340,6 @@ else()
         ${SKIA_SKUNICODE_ICU_LIB}
         ${SKIA_SKOTTIE_LIB}
         ${SKIA_SKSG_LIB}
-        ${SKIA_PATHOPS_LIB}
         ${SKIA_JSONREADER_LIB}
         ${SKIA_LIB}
         -ljnigraphics

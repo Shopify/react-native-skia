@@ -56,9 +56,18 @@ public:
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             const SkRuntimeShaderBuilder &rt) {
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkRuntimeShaderBuilder>(std::move(context), rt));
+    auto builder =
+        std::make_shared<JsiSkRuntimeShaderBuilder>(std::move(context), rt);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, builder,
+                                                       context);
+  }
+
+  size_t getMemoryPressure() const override {
+    return sizeof(SkRuntimeShaderBuilder);
+  }
+
+  std::string getObjectType() const override {
+    return "JsiSkRuntimeShaderBuilder";
   }
 
   /**
@@ -74,9 +83,10 @@ public:
       auto rt = JsiSkRuntimeEffect::fromValue(runtime, arguments[0]);
       auto rtb = SkRuntimeShaderBuilder(rt);
       // Return the newly constructed object
-      return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkRuntimeShaderBuilder>(
-                       std::move(context), std::move(rtb)));
+      auto builder = std::make_shared<JsiSkRuntimeShaderBuilder>(
+          std::move(context), std::move(rtb));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, builder,
+                                                         context);
     };
   }
 };
