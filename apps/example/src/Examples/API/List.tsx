@@ -135,6 +135,10 @@ export const examples = [
     title: "🔥 Stress Test 4",
   },
   {
+    screen: "PictureViewCrashTest",
+    title: "💥 PictureView Race Condition",
+  },
+  {
     screen: "FirstFrame",
     title: "🎬 First Frame",
   },

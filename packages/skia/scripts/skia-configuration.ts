@@ -7,6 +7,13 @@ const DEBUG = false;
 export const GRAPHITE = !!process.env.SK_GRAPHITE;
 export const MACCATALYST = !GRAPHITE;
 const BUILD_WITH_PARAGRAPH = true;
+// Re-enable mutable SkPath methods (addPath, moveTo, lineTo, etc.)
+// Skia is transitioning to immutable SkPath with SkPathBuilder
+// Set to false once we migrate to SkPathBuilder
+const ENABLE_SKPATH_EDIT_METHODS = true;
+const PATH_EDIT_FLAG = ENABLE_SKPATH_EDIT_METHODS
+  ? "-USK_HIDE_PATH_EDIT_METHODS"
+  : "";
 
 export const SkiaSrc = path.join(__dirname, "../../../externals/skia");
 export const ProjectRoot = path.join(__dirname, "../../..");
@@ -85,7 +92,6 @@ export const commonArgs = [
   //["skia_enable_ganesh", !GRAPHITE],
   ["skia_enable_graphite", GRAPHITE],
   ["skia_use_dawn", GRAPHITE],
-  ["skia_use_cpp20", GRAPHITE],
 ];
 
 export type PlatformName = "apple" | "android";
@@ -120,7 +126,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
         args: [
           [
             "extra_cflags",
-            `["-target", "arm64-apple-tvos", "-mappletvos-version-min=${appleMinTarget}"]`,
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "-target", "arm64-apple-tvos", "-mappletvos-version-min=${appleMinTarget}"]`,
           ],
           [
             "extra_asmflags",
@@ -139,7 +145,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
           ["ios_use_simulator", true],
           [
             "extra_cflags",
-            `["-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
           ],
           [
             "extra_asmflags",
@@ -158,15 +164,15 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
           ["ios_use_simulator", true],
           [
             "extra_cflags",
-            `["-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "-target", "x86_64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
           ],
           [
             "extra_asmflags",
-            `["-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
+            `["-target", "x86_64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
           ],
           [
             "extra_ldflags",
-            `["-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
+            `["-target", "x86_64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
           ],
         ],
       },
@@ -184,7 +190,7 @@ const maccatalystTargets: { [key: string]: Target } = MACCATALYST
           ["target_cpu", `"arm64"`],
           [
             "extra_cflags",
-            `["-target","arm64-apple-ios14.0-macabi",` +
+            `["-fexceptions","-frtti"${PATH_EDIT_FLAG ? `,"${PATH_EDIT_FLAG}"` : ""},"-target","arm64-apple-ios14.0-macabi",` +
               `"-isysroot","${appleSdkRoot}",` +
               `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
               `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
@@ -206,7 +212,7 @@ const maccatalystTargets: { [key: string]: Target } = MACCATALYST
           ["target_cpu", `"x64"`],
           [
             "extra_cflags",
-            `["-target","x86_64-apple-ios14.0-macabi",` +
+            `["-fexceptions","-frtti"${PATH_EDIT_FLAG ? `,"${PATH_EDIT_FLAG}"` : ""},"-target","x86_64-apple-ios14.0-macabi",` +
               `"-isysroot","${appleSdkRoot}",` +
               `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
               `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
@@ -256,7 +262,7 @@ export const configurations = {
       ["cxx", '"clang++"'],
       [
         "extra_cflags",
-        '["-DSKIA_C_DLL", "-DHAVE_SYSCALL_GETRANDOM", "-DXML_DEV_URANDOM"]',
+        `["-DSKIA_C_DLL", "-DHAVE_SYSCALL_GETRANDOM", "-DXML_DEV_URANDOM"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
       ],
       ...ParagraphArgsAndroid,
     ],
@@ -276,7 +282,13 @@ export const configurations = {
       "arm64-iphoneos": {
         cpu: "arm64",
         platform: "ios",
-        args: [["ios_min_target", `"${appleMinTarget}"`]],
+        args: [
+          ["ios_min_target", `"${appleMinTarget}"`],
+          [
+            "extra_cflags",
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+          ],
+        ],
       },
       "arm64-iphonesimulator": {
         cpu: "arm64",
@@ -284,12 +296,22 @@ export const configurations = {
         args: [
           ["ios_min_target", `"${appleSimulatorMinTarget}"`],
           ["ios_use_simulator", true],
+          [
+            "extra_cflags",
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+          ],
         ],
       },
       "x64-iphonesimulator": {
         cpu: "x64",
         platform: "ios",
-        args: [["ios_min_target", `"${appleSimulatorMinTarget}"`]],
+        args: [
+          ["ios_min_target", `"${appleSimulatorMinTarget}"`],
+          [
+            "extra_cflags",
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+          ],
+        ],
       },
       ...tvosTargets,
       ...maccatalystTargets,
@@ -297,11 +319,23 @@ export const configurations = {
         platformGroup: "macosx",
         cpu: "arm64",
         platform: "mac",
+        args: [
+          [
+            "extra_cflags",
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+          ],
+        ],
       },
       "x64-macosx": {
         platformGroup: "macosx",
         cpu: "x64",
         platform: "mac",
+        args: [
+          [
+            "extra_cflags",
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+          ],
+        ],
       },
     },
     args: [

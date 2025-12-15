@@ -667,7 +667,6 @@ describe("FitBox", () => {
       const { Skia } = importSkia();
       const path = Skia.Path.MakeFromSVGString(skiaLogo)!;
       const bounds = path.computeTightBounds();
-      console.log(bounds.x, bounds.y, bounds.width, bounds.height);
       expect(bounds.x).toBeCloseTo(324, 2);
       expect(bounds.y).toBeCloseTo(222, 2);
       expect(bounds.width).toBeCloseTo(631.09, 2);

@@ -60,14 +60,16 @@ public:
 
 private:
   bool performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
-    return canvasProvider->renderToCanvas([=, this](SkCanvas *canvas) {
-      // Make sure to scale correctly
-      auto pd = _platformContext->getPixelDensity();
+    // Capture picture pointer to ensure thread safety - _picture can be
+    // modified from the JS thread while we're drawing on the render thread
+    sk_sp<SkPicture> picture = _picture;
+    auto pd = _platformContext->getPixelDensity();
+    return canvasProvider->renderToCanvas([=](SkCanvas *canvas) {
       canvas->clear(SK_ColorTRANSPARENT);
       canvas->save();
       canvas->scale(pd, pd);
-      if (_picture != nullptr) {
-        canvas->drawPicture(_picture);
+      if (picture != nullptr) {
+        canvas->drawPicture(picture);
       }
       canvas->restore();
     });

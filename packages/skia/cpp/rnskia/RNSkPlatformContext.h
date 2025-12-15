@@ -8,6 +8,7 @@
 #include <thread>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "RNSkVideo.h"
 #include "RNWindowContext.h"
@@ -144,6 +145,21 @@ public:
    * Return the Platform specific font manager
    */
   virtual sk_sp<SkFontMgr> createFontMgr() = 0;
+
+  /**
+   * Return platform-specific system font family names that aren't
+   * enumerated by the standard font manager (e.g., .AppleSystemUIFont on iOS)
+   */
+  virtual std::vector<std::string> getSystemFontFamilies() { return {}; }
+
+  /**
+   * Resolve font family aliases to actual font family names.
+   * For example, "System" on iOS resolves to ".AppleSystemUIFont".
+   * Returns the input unchanged if no mapping exists.
+   */
+  virtual std::string resolveFontFamily(const std::string &familyName) {
+    return familyName;
+  }
 
   /**
    * Creates an skImage containing the screenshot of a native view and its

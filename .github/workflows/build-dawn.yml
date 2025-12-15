@@ -19,7 +19,7 @@ jobs:
       release_name: ${{ steps.release_meta.outputs.release_name }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.0
+        uses: actions/checkout@v6.0.1
 
       - name: Determine Dawn branch metadata
         id: dawn_meta
@@ -92,7 +92,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main repository
-        uses: actions/checkout@v6.0.0
+        uses: actions/checkout@v6.0.1
 
       - name: Checkout Dawn repository
         run: |
@@ -126,7 +126,7 @@ jobs:
           ${{ matrix.strip_tool }} ${{ matrix.output_dir }}/${{ matrix.library_path }}
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: build-android-${{ matrix.arch }}
           path: ${{ matrix.output_dir }}/${{ matrix.library_path }}
@@ -138,7 +138,7 @@ jobs:
 
       - name: Upload headers (from arm64-v8a build only)
         if: matrix.arch == 'arm64-v8a'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: dawn-headers
           path: dawn-headers/
@@ -175,7 +175,7 @@ jobs:
     runs-on: macos-latest-large
     steps:
       - name: Checkout main repository
-        uses: actions/checkout@v6.0.0
+        uses: actions/checkout@v6.0.1
 
       - name: Checkout Dawn repository
         run: |
@@ -203,7 +203,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release
           ninja -C ${{ matrix.output_dir }}
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: build-${{ matrix.platform }}-${{ matrix.arch }}
           path: ${{ matrix.output_dir }}/${{ matrix.library_path }}
@@ -214,16 +214,16 @@ jobs:
     needs: [prepare-release, mobile-android, mobile-apple]
     steps:
       - name: Checkout main repository
-        uses: actions/checkout@v6.0.0
+        uses: actions/checkout@v6.0.1
 
       - name: Download all build artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: build-*
           path: artifacts
 
       - name: Download headers
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: dawn-headers
           path: dawn-headers

@@ -294,12 +294,6 @@ const buildXCFrameworks = () => {
       `sed -i '' 's/uint32(bindingInfo\\.binding)/uint32_t(bindingInfo.binding)/g' ${shaderModuleFile}`
     );
 
-    // Remove partition_alloc line from dawn.gni
-    const dawnGniFile = `${SkiaSrc}/build_overrides/dawn.gni`;
-    $(
-      `sed -i '' '/dawn_partition_alloc_dir = "\\/\\/third_party\\/externals\\/partition_alloc"/d' ${dawnGniFile}`
-    );
-
     console.log("Patches applied successfully");
   }
   $(`rm -rf ${PackageRoot}/libs`);

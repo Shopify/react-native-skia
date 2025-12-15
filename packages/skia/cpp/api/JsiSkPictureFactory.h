@@ -50,12 +50,15 @@ public:
       }
     }
 
-    // Get ArrayBuffer - try buffer property first (Uint8Array, etc.), then direct ArrayBuffer
-    jsi::ArrayBuffer buffer = obj.hasProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
-        ? obj.getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
-              .asObject(runtime)
-              .getArrayBuffer(runtime)
-        : obj.getArrayBuffer(runtime);
+    // Get ArrayBuffer - try buffer property first (Uint8Array, etc.), then
+    // direct ArrayBuffer
+    jsi::ArrayBuffer buffer =
+        obj.hasProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
+            ? obj.getProperty(runtime,
+                              jsi::PropNameID::forAscii(runtime, "buffer"))
+                  .asObject(runtime)
+                  .getArrayBuffer(runtime)
+            : obj.getArrayBuffer(runtime);
 
     sk_sp<SkData> data =
         SkData::MakeWithCopy(buffer.data(runtime), buffer.size(runtime));
