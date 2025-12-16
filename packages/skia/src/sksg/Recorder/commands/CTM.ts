@@ -39,7 +39,8 @@ export const saveCTM = (ctx: DrawingContext, props: CTMProps) => {
     transform,
     origin,
     layer,
-  } = props as CTMProps;
+    saveLayerFlags,
+  } = props;
   const hasTransform = matrix !== undefined || transform !== undefined;
   const clip = computeClip(Skia, rawClip);
   const hasClip = clip !== undefined;
@@ -48,11 +49,8 @@ export const saveCTM = (ctx: DrawingContext, props: CTMProps) => {
   const shouldSave = hasTransform || hasClip || !!layer;
   if (shouldSave) {
     if (layer) {
-      if (typeof layer === "boolean") {
-        canvas.saveLayer();
-      } else {
-        canvas.saveLayer(layer);
-      }
+      const paint = typeof layer === "boolean" ? undefined : layer;
+      canvas.saveLayer(paint, null, null, saveLayerFlags);
     } else {
       canvas.save();
     }

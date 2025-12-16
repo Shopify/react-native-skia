@@ -8,6 +8,8 @@
 #include "Convertor.h"
 #include "DrawingCtx.h"
 
+#include "include/core/SkCanvas.h"
+
 namespace RNSkia {
 
 struct TransformProps {
@@ -38,7 +40,35 @@ SkMatrix processTransform(std::optional<SkMatrix> &matrix,
   return m3;
 }
 
-struct CTMCmdProps : TransformProps {
+struct SaveLayerProps {
+  std::optional<SkCanvas::SaveLayerFlags> saveLayerFlags;
+}
+
+class SaveLayerCmd : public Command {
+private:
+  SaveLayerProps props;
+
+public:
+  SaveLayerCmd(jsi::Runtime &runtime, const jsi::Object &object,
+               Variables &variables)
+      : Command(CommandType::SaveLayer) {
+    convertProperty(runtime, object, "saveLayerFlags", props.saveLayerFlags,
+                    variables);
+  }
+
+  void saveLayer(DrawingCtx *ctx) {
+    ctx->materializePaint();
+    auto paint = ctx->paintDeclarations.back();
+    ctx->paintDeclarations.pop_back();
+
+    SkCanvas::SaveLayerRec layerRec(nullptr, &paint, nullptr,
+                                    props.saveLayerFlags.value_or(0));
+    ctx->canvas->saveLayer(layerRec);
+  }
+}
+
+struct CTMCmdProps : TransformProps,
+                     SaveLayerProps {
   std::optional<ClipDef> clip;
   std::optional<bool> invertClip;
   std::optional<Layer> layer;
@@ -58,12 +88,15 @@ public:
     convertProperty(runtime, object, "clip", props.clip, variables);
     convertProperty(runtime, object, "invertClip", props.invertClip, variables);
     convertProperty(runtime, object, "layer", props.layer, variables);
+    convertProperty(runtime, object, "saveLayerFlags", props.saveLayerFlags,
+                    variables);
   }
 
   void saveCTM(DrawingCtx *ctx) {
     auto clip = props.clip;
     auto invertClip = props.invertClip;
     auto layer = props.layer;
+    auto saveLayerFlags = props.saveLayerFlags;
     auto hasTransform = props.matrix.has_value() || props.transform.has_value();
     auto hasClip = clip.has_value();
     auto op = invertClip.has_value() && invertClip.value()
@@ -73,12 +106,12 @@ public:
     SkMatrix m3 = processTransform(props.matrix, props.transform, props.origin);
     if (shouldSave) {
       if (layer.has_value()) {
-        if (std::holds_alternative<bool>(layer.value())) {
-          ctx->canvas->saveLayer(nullptr, nullptr);
-        } else {
-          auto paint = std::get<SkPaint>(layer.value());
-          ctx->canvas->saveLayer(nullptr, &paint);
+        SkCanvas::SaveLayerRec layerRec;
+        layerRec.fPaint = std::get_if<SkPaint>(layer.value());
+        if (saveLayerFlags.has_value()) {
+          layerRec.fSaveLayerFlags = saveLayerFlags.value();
         }
+        ctx->canvas->saveLayer(layerRec);
       } else {
         ctx->canvas->save();
       }

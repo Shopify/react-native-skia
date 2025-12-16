@@ -184,7 +184,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(saveLayer) {
-    getObject()->saveLayer();
+    getObject()->saveLayer(runtime, arguments[0].asObject(runtime));
     return jsi::Value::undefined();
   }
 
