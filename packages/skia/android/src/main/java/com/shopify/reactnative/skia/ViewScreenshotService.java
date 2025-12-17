@@ -68,13 +68,13 @@ public class ViewScreenshotService {
     }
 
     private static boolean isSvgView(View view) {
-    try {
-        String className = view.getClass().getName();
-        return className != null && className.startsWith("com.horcrux.svg");
-    } catch (Throwable t) {
-        Log.e("SvgCheck", "Error checking class name", t);
-        return false;
-    }
+        try {
+            String className = view.getClass().getName();
+            return className != null && className.startsWith("com.horcrux.svg");
+        } catch (Throwable t) {
+            Log.e("ViewScreenshotService", "Error checking if view is SVG", t);
+            return false;
+        }
     }
 
     private static void renderViewToCanvas(Canvas canvas, View view, Paint paint, float parentOpacity) {
