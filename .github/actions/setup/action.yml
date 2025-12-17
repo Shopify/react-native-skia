@@ -23,6 +23,11 @@ runs:
         node-version-file: .nvmrc
         cache: yarn
         cache-dependency-path: yarn.lock
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Update npm to latest
+      run: npm install -g npm@latest
+      shell: bash
 
     - name: Install dependencies
       run: yarn install --immutable
