@@ -27,6 +27,7 @@ runs:
 
     - name: Update npm to latest
       run: npm install -g npm@latest
+      shell: bash
 
     - name: Install dependencies
       run: yarn install --immutable
