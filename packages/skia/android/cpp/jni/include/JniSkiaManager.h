@@ -12,6 +12,12 @@
 #include "RNSkLog.h"
 #include "RNSkManager.h"
 
+#if defined(SK_GRAPHITE)
+#include "RNDawnContext.h"
+#else
+#include "OpenGLContext.h"
+#endif
+
 namespace RNSkia {
 
 class RNSkManager;
@@ -55,6 +61,15 @@ public:
   void invalidate() {
     _skManager = nullptr;
     _context = nullptr;
+    // Invalidate the OpenGL/Dawn context to ensure fresh GPU resources
+    // are created after a bridge reload (e.g., Expo OTA updates).
+    // Without this, the thread-local singleton would retain stale
+    // GPU context references causing crashes.
+#if defined(SK_GRAPHITE)
+    DawnContext::getInstance().invalidate();
+#else
+    OpenGLContext::getInstance().invalidate();
+#endif
   }
 
 private:

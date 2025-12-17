@@ -44,7 +44,31 @@ public:
     return instance;
   }
 
+  // Invalidate the context - must be called before RN bridge reload
+  // to ensure fresh GPU resources are created after reload.
+  // This is critical for OTA updates (e.g., Expo Updates) where the
+  // main thread survives but the bridge is recreated.
+  void invalidate() {
+    _directContext = nullptr;
+    if (_commandQueue) {
+      CFRelease((GrMTLHandle)_commandQueue);
+      _commandQueue = nullptr;
+    }
+    _device = nullptr;
+  }
+
+  // Check if the context is valid and ready to use
+  bool isValid() const { return _directContext != nullptr && _device != nullptr; }
+
+  // Ensure the context is initialized (creates new resources if invalidated)
+  void ensureValid() {
+    if (!isValid()) {
+      initialize();
+    }
+  }
+
   sk_sp<SkSurface> MakeOffscreen(int width, int height) {
+    ensureValid();
     auto device = _device;
     auto ctx = new OffscreenRenderContext(device, _directContext, _commandQueue,
                                           width, height);
@@ -65,7 +89,7 @@ public:
   }
 
   sk_sp<SkImage> MakeImageFromBuffer(void *buffer) {
-
+    ensureValid();
     CVPixelBufferRef sampleBuffer = (CVPixelBufferRef)buffer;
     SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat format =
         SkiaCVPixelBufferUtils::getCVPixelBufferBaseFormat(sampleBuffer);
@@ -92,18 +116,24 @@ public:
   std::unique_ptr<RNSkia::WindowContext>
   MakeWindow(CALayer *window, int width, int height,
              bool useP3ColorSpace = true) {
+    ensureValid();
     auto device = _device;
     return std::make_unique<MetalWindowContext>(_directContext.get(), device,
                                                 _commandQueue, window, width,
                                                 height, useP3ColorSpace);
   }
 
-  GrDirectContext *getDirectContext() { return _directContext.get(); }
+  GrDirectContext *getDirectContext() {
+    ensureValid();
+    return _directContext.get();
+  }
 
 private:
   id<MTLDevice> _device = nullptr;
   id<MTLCommandQueue> _commandQueue = nullptr;
   sk_sp<GrDirectContext> _directContext = nullptr;
 
-  MetalContext();
+  MetalContext() { initialize(); }
+
+  void initialize();
 };
