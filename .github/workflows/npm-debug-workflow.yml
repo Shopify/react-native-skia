@@ -103,19 +103,22 @@ jobs:
           echo "=== Organization membership check ==="
           npm org ls shopify 2>&1 || echo "Could not list org members (may not have permission)"
 
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Debug - Dry run publish test
         run: |
           echo "=== Attempting dry-run publish ==="
           echo "This will NOT actually publish, just test if it would work"
-          
-          # Build if necessary (adjust based on your setup)
-          if [ -f package.json ] && grep -q '"build"' package.json; then
-            echo "Running build first..."
-            npm ci
-            npm run build || echo "Build step failed or not applicable"
-          fi
-          
-          # Try dry-run publish
+
+          # Build the project using yarn (this is a yarn monorepo)
+          echo "Running build first..."
+          yarn build || echo "Build step failed or not applicable"
+
+          # Try dry-run publish from the skia package
+          cd packages/skia
           npm publish --dry-run --provenance --access public 2>&1 || true
 
       - name: Debug - Check provenance requirements
