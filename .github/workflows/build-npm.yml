@@ -10,7 +10,6 @@ jobs:
       id-token: write # to enable use of OIDC for npm provenance
     env:
       WORKING_DIRECTORY: ./
-      INPUT_TOKEN: ${{ secrets.NPM_TOKEN }}
     concurrency:
       group: npm-${{ github.ref }}
       cancel-in-progress: true
@@ -19,6 +18,12 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5.0.0
         with:
           submodules: recursive
+
+      - name: Setup Node.js with npm registry
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Setup
         uses: ./.github/actions/setup
@@ -34,8 +39,8 @@ jobs:
           yarn release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          YARN_NPM_AUTH_TOKEN: ''
+          NPM_TOKEN: ''
           NPM_CONFIG_PROVENANCE: true
 
       - name: Deploy to GitHub Pages
