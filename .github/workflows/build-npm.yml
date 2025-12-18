@@ -10,7 +10,6 @@ jobs:
       id-token: write # to enable use of OIDC for npm provenance
     env:
       WORKING_DIRECTORY: ./
-      INPUT_TOKEN: ${{ secrets.NPM_TOKEN }}
     concurrency:
       group: npm-${{ github.ref }}
       cancel-in-progress: true
