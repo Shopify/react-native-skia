@@ -1,0 +1,158 @@
+name: Debug npm OIDC Authentication
+
+on:
+  workflow_dispatch: # Manual trigger only
+
+jobs:
+  debug-npm-auth:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Required for OIDC
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js with npm registry
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Debug - Check environment
+        run: |
+          echo "=== Node and npm versions ==="
+          node --version
+          npm --version
+          
+          echo ""
+          echo "=== npm config ==="
+          npm config list
+          
+          echo ""
+          echo "=== Registry configuration ==="
+          npm config get registry
+          
+          echo ""
+          echo "=== .npmrc contents (redacted) ==="
+          if [ -f ~/.npmrc ]; then
+            # Show structure but redact actual tokens
+            sed 's/=.*/=<REDACTED>/' ~/.npmrc
+          else
+            echo "No ~/.npmrc found"
+          fi
+          
+          if [ -f .npmrc ]; then
+            echo ""
+            echo "=== Project .npmrc (redacted) ==="
+            sed 's/=.*/=<REDACTED>/' .npmrc
+          fi
+
+      - name: Debug - Check OIDC token availability
+        run: |
+          echo "=== OIDC Token Check ==="
+          if [ -n "$ACTIONS_ID_TOKEN_REQUEST_URL" ]; then
+            echo "✅ OIDC token request URL is set"
+            echo "URL prefix: ${ACTIONS_ID_TOKEN_REQUEST_URL:0:50}..."
+          else
+            echo "❌ OIDC token request URL is NOT set"
+            echo "Make sure 'id-token: write' permission is configured"
+          fi
+          
+          if [ -n "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" ]; then
+            echo "✅ OIDC token request token is available"
+          else
+            echo "❌ OIDC token request token is NOT available"
+          fi
+
+      - name: Debug - Test npm authentication
+        run: |
+          echo "=== Testing npm whoami ==="
+          if npm whoami 2>&1; then
+            echo "✅ Successfully authenticated with npm"
+          else
+            echo "❌ npm whoami failed - not authenticated"
+          fi
+
+      - name: Debug - Check package info
+        run: |
+          echo "=== Package.json info ==="
+          if [ -f package.json ]; then
+            echo "Package name: $(jq -r '.name' package.json)"
+            echo "Package version: $(jq -r '.version' package.json)"
+            echo "Repository: $(jq -r '.repository.url // .repository // "not set"' package.json)"
+          else
+            echo "No package.json found in root"
+          fi
+
+      - name: Debug - Check access to @shopify scope
+        run: |
+          echo "=== Checking @shopify scope access ==="
+          
+          echo ""
+          echo "Packages you can access in @shopify scope:"
+          npm access list packages @shopify 2>&1 || echo "Could not list packages (may need org membership)"
+          
+          echo ""
+          echo "=== Checking specific package access ==="
+          npm access list collaborators @shopify/react-native-skia 2>&1 || echo "Could not list collaborators"
+
+      - name: Debug - Check npm org membership
+        run: |
+          echo "=== Organization membership check ==="
+          npm org ls shopify 2>&1 || echo "Could not list org members (may not have permission)"
+
+      - name: Debug - Dry run publish test
+        run: |
+          echo "=== Attempting dry-run publish ==="
+          echo "This will NOT actually publish, just test if it would work"
+          
+          # Build if necessary (adjust based on your setup)
+          if [ -f package.json ] && grep -q '"build"' package.json; then
+            echo "Running build first..."
+            npm ci
+            npm run build || echo "Build step failed or not applicable"
+          fi
+          
+          # Try dry-run publish
+          npm publish --dry-run --provenance --access public 2>&1 || true
+
+      - name: Debug - Check provenance requirements
+        run: |
+          echo "=== Provenance publishing requirements ==="
+          echo ""
+          echo "For provenance publishing to work, you need:"
+          echo "1. ✅ id-token: write permission (set in this workflow)"
+          echo "2. Package must be linked to this GitHub repo on npmjs.com"
+          echo "3. Publishing from a GitHub Actions workflow"
+          echo ""
+          echo "Current repository: $GITHUB_REPOSITORY"
+          echo "Current ref: $GITHUB_REF"
+          echo "Current SHA: $GITHUB_SHA"
+          echo ""
+          echo "Check https://www.npmjs.com/package/@shopify/react-native-skia/access"
+          echo "to verify this repo is configured for publishing"
+
+      - name: Summary
+        run: |
+          echo ""
+          echo "========================================"
+          echo "         DEBUG SUMMARY"
+          echo "========================================"
+          echo ""
+          echo "If you see authentication failures above, check:"
+          echo ""
+          echo "1. Is this repo configured in npm package settings?"
+          echo "   → Go to npmjs.com → @shopify/react-native-skia → Settings → Publishing access"
+          echo "   → Verify '$GITHUB_REPOSITORY' is listed"
+          echo ""
+          echo "2. Do you have the right npm org permissions?"
+          echo "   → You need publish access to the @shopify scope"
+          echo ""
+          echo "3. Is the workflow running from the right branch/context?"
+          echo "   → Some orgs restrict publishing to specific branches"
+          echo ""
+          echo "4. Check npm's provenance documentation:"
+          echo "   → https://docs.npmjs.com/generating-provenance-statements"
+          echo ""
