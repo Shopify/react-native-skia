@@ -50,29 +50,41 @@ jobs:
           fi
 
       - name: Debug - Check OIDC token availability
+        id: oidc-check
+        continue-on-error: true
         run: |
           echo "=== OIDC Token Check ==="
+          OIDC_OK=true
           if [ -n "$ACTIONS_ID_TOKEN_REQUEST_URL" ]; then
             echo "✅ OIDC token request URL is set"
             echo "URL prefix: ${ACTIONS_ID_TOKEN_REQUEST_URL:0:50}..."
           else
             echo "❌ OIDC token request URL is NOT set"
             echo "Make sure 'id-token: write' permission is configured"
+            OIDC_OK=false
           fi
-          
+
           if [ -n "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" ]; then
             echo "✅ OIDC token request token is available"
           else
             echo "❌ OIDC token request token is NOT available"
+            OIDC_OK=false
+          fi
+
+          if [ "$OIDC_OK" = "false" ]; then
+            exit 1
           fi
 
       - name: Debug - Test npm authentication
+        id: npm-auth
+        continue-on-error: true
         run: |
           echo "=== Testing npm whoami ==="
           if npm whoami 2>&1; then
             echo "✅ Successfully authenticated with npm"
           else
             echo "❌ npm whoami failed - not authenticated"
+            exit 1
           fi
 
       - name: Debug - Check package info
@@ -109,17 +121,26 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Debug - Dry run publish test
+        id: dry-run
+        continue-on-error: true
         run: |
           echo "=== Attempting dry-run publish ==="
           echo "This will NOT actually publish, just test if it would work"
 
           # Build the project using yarn (this is a yarn monorepo)
           echo "Running build first..."
-          yarn build || echo "Build step failed or not applicable"
+          if ! yarn build; then
+            echo "❌ Build step failed"
+            exit 1
+          fi
 
           # Try dry-run publish from the skia package
           cd packages/skia
-          npm publish --dry-run --provenance --access public 2>&1 || true
+          if ! npm publish --dry-run --provenance --access public 2>&1; then
+            echo "❌ Dry-run publish failed"
+            exit 1
+          fi
+          echo "✅ Dry-run publish succeeded"
 
       - name: Debug - Check provenance requirements
         run: |
@@ -159,3 +180,45 @@ jobs:
           echo "4. Check npm's provenance documentation:"
           echo "   → https://docs.npmjs.com/generating-provenance-statements"
           echo ""
+
+      - name: Final validation
+        run: |
+          echo ""
+          echo "========================================"
+          echo "         VALIDATION RESULTS"
+          echo "========================================"
+          echo ""
+          FAILED=false
+
+          if [ "${{ steps.oidc-check.outcome }}" = "failure" ]; then
+            echo "❌ OIDC token check: FAILED"
+            FAILED=true
+          else
+            echo "✅ OIDC token check: PASSED"
+          fi
+
+          if [ "${{ steps.npm-auth.outcome }}" = "failure" ]; then
+            echo "❌ npm authentication: FAILED"
+            FAILED=true
+          else
+            echo "✅ npm authentication: PASSED"
+          fi
+
+          if [ "${{ steps.dry-run.outcome }}" = "failure" ]; then
+            echo "❌ Dry-run publish: FAILED"
+            FAILED=true
+          else
+            echo "✅ Dry-run publish: PASSED"
+          fi
+
+          echo ""
+          if [ "$FAILED" = "true" ]; then
+            echo "========================================"
+            echo "  ❌ OVERALL: SOME CHECKS FAILED"
+            echo "========================================"
+            exit 1
+          else
+            echo "========================================"
+            echo "  ✅ OVERALL: ALL CHECKS PASSED"
+            echo "========================================"
+          fi
