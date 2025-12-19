@@ -25,6 +25,10 @@ runs:
         cache-dependency-path: yarn.lock
         registry-url: 'https://registry.npmjs.org'
 
+    - name: Upgrade npm for OIDC support
+      run: npm install -g npm@latest
+      shell: bash
+
     - name: Install dependencies
       run: yarn install --immutable
       shell: bash
