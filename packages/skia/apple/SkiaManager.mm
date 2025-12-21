@@ -8,6 +8,12 @@
 
 #import "RNSkApplePlatformContext.h"
 
+#if defined(SK_GRAPHITE)
+#import "RNDawnContext.h"
+#else
+#import "MetalContext.h"
+#endif
+
 static __weak SkiaManager *sharedInstance = nil;
 
 @implementation SkiaManager {
@@ -21,6 +27,15 @@ static __weak SkiaManager *sharedInstance = nil;
 
 - (void)invalidate {
   _skManager = nullptr;
+  // Invalidate the Metal/Dawn context to ensure fresh GPU resources
+  // are created after a bridge reload (e.g., Expo OTA updates).
+  // Without this, the thread-local singleton would retain stale
+  // GPU context references causing crashes.
+#if defined(SK_GRAPHITE)
+  RNSkia::DawnContext::getInstance().invalidate();
+#else
+  MetalContext::getInstance().invalidate();
+#endif
 }
 
 - (instancetype)initWithBridge:(RCTBridge *)bridge

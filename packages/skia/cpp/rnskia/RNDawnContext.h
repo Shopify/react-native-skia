@@ -61,11 +61,41 @@ public:
     return instance;
   }
 
+  // Invalidate the context - must be called before RN bridge reload
+  // to ensure fresh GPU resources are created after reload.
+  // This is critical for OTA updates (e.g., Expo Updates) where the
+  // main thread survives but the bridge is recreated.
+  void invalidate() {
+    std::lock_guard<std::mutex> lock(_mutex);
+    _invalidated = true;
+  }
+
+  // Check if the context is valid
+  bool isValid() const { return !_invalidated && fGraphiteContext != nullptr; }
+
+  // Re-initialize the context if it was invalidated
+  void ensureValid() {
+    std::lock_guard<std::mutex> lock(_mutex);
+    ensureValidLocked();
+  }
+
+private:
+  // Must be called with _mutex held
+  void ensureValidLocked() {
+    if (_invalidated) {
+      reinitialize();
+      _invalidated = false;
+    }
+  }
+
+public:
+
   sk_sp<SkImage> MakeRasterImage(sk_sp<SkImage> image) {
     if (!image->isTextureBacked()) {
       return image;
     }
     std::lock_guard<std::mutex> lock(_mutex);
+    ensureValidLocked();
     AsyncContext asyncContext;
     fGraphiteContext->asyncRescaleAndReadPixels(
         image.get(), image->imageInfo(), image->imageInfo().bounds(),
@@ -96,6 +126,7 @@ public:
       skgpu::graphite::Recording *recording,
       skgpu::graphite::SyncToCpu syncToCpu = skgpu::graphite::SyncToCpu::kNo) {
     std::lock_guard<std::mutex> lock(_mutex);
+    ensureValidLocked();
     skgpu::graphite::InsertRecordingInfo info;
     info.fRecording = recording;
     fGraphiteContext->insertRecording(info);
@@ -103,6 +134,7 @@ public:
   }
 
   sk_sp<SkImage> MakeImageFromBuffer(void *buffer) {
+    ensureValid();
 #ifdef __APPLE__
     wgpu::SharedTextureMemoryIOSurfaceDescriptor platformDesc;
     auto ioSurface = CVPixelBufferGetIOSurface((CVPixelBufferRef)buffer);
@@ -163,6 +195,7 @@ public:
 
   // Create offscreen surface
   sk_sp<SkSurface> MakeOffscreen(int width, int height) {
+    ensureValid();
     SkImageInfo info = SkImageInfo::Make(
         width, height, DawnUtils::PreferedColorType, kPremul_SkAlphaType);
     sk_sp<SkSurface> surface = SkSurfaces::RenderTarget(getRecorder(), info);
@@ -177,6 +210,7 @@ public:
   // Create onscreen surface with window
   std::unique_ptr<WindowContext> MakeWindow(void *window, int width,
                                             int height) {
+    ensureValid();
     // 1. Create Surface
     wgpu::SurfaceDescriptor surfaceDescriptor;
 #ifdef __APPLE__
@@ -199,8 +233,11 @@ private:
   std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
   skgpu::graphite::DawnBackendContext backendContext;
   std::mutex _mutex;
+  bool _invalidated = false;
 
-  DawnContext() {
+  DawnContext() { initialize(); }
+
+  void initialize() {
     DawnProcTable backendProcs = dawn::native::GetProcs();
     dawnProcSetProcs(&backendProcs);
     static const auto kTimedWaitAny = wgpu::InstanceFeatureName::TimedWaitAny;
@@ -225,6 +262,15 @@ private:
     if (!fGraphiteContext) {
       throw std::runtime_error("Failed to create graphite context");
     }
+  }
+
+  void reinitialize() {
+    // Clean up existing resources
+    fGraphiteContext = nullptr;
+    backendContext.fDevice = nullptr;
+    instance = nullptr;
+    // Re-initialize
+    initialize();
   }
 
   ~DawnContext() {

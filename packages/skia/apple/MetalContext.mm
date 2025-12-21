@@ -17,7 +17,7 @@
 
 #pragma clang diagnostic pop
 
-MetalContext::MetalContext() {
+void MetalContext::initialize() {
   _device = MTLCreateSystemDefaultDevice();
   if (!_device) {
     throw std::runtime_error("Failed to create Metal device");

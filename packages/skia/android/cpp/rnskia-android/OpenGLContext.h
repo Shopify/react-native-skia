@@ -58,7 +58,28 @@ public:
     return instance;
   }
 
+  // Invalidate the context - must be called before RN bridge reload
+  // to ensure fresh GPU resources are created after reload.
+  // This is critical for OTA updates (e.g., Expo Updates) where the
+  // main thread survives but the bridge is recreated.
+  void invalidate() {
+    _directContext = nullptr;
+    _glSurface = nullptr;
+    _glContext = nullptr;
+  }
+
+  // Check if the context is valid and ready to use
+  bool isValid() const { return _directContext != nullptr; }
+
+  // Ensure the context is initialized (creates new resources if invalidated)
+  void ensureValid() {
+    if (!isValid()) {
+      initialize();
+    }
+  }
+
   sk_sp<SkSurface> MakeOffscreen(int width, int height) {
+    ensureValid();
     auto colorType = kRGBA_8888_SkColorType;
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
@@ -103,6 +124,7 @@ public:
 
   sk_sp<SkImage> MakeImageFromBuffer(void *buffer,
                                      bool requireKnownFormat = false) {
+    ensureValid();
 #if __ANDROID_API__ >= 26
     const AHardwareBuffer *hardwareBuffer =
         static_cast<AHardwareBuffer *>(buffer);
@@ -168,21 +190,30 @@ public:
 
   // TODO: remove width, height
   std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window) {
+    ensureValid();
     auto display = OpenGLSharedContext::getInstance().getDisplay();
     return std::make_unique<OpenGLWindowContext>(
         _directContext.get(), display, _glContext.get(), window,
         OpenGLSharedContext::getInstance().getConfig());
   }
 
-  GrDirectContext *getDirectContext() { return _directContext.get(); }
-  void makeCurrent() { _glContext->makeCurrent(_glSurface.get()); }
+  GrDirectContext *getDirectContext() {
+    ensureValid();
+    return _directContext.get();
+  }
+  void makeCurrent() {
+    ensureValid();
+    _glContext->makeCurrent(_glSurface.get());
+  }
 
 private:
   std::unique_ptr<gl::Context> _glContext;
   std::unique_ptr<gl::Surface> _glSurface;
   sk_sp<GrDirectContext> _directContext;
 
-  OpenGLContext() {
+  OpenGLContext() { initialize(); }
+
+  void initialize() {
     auto display = OpenGLSharedContext::getInstance().getDisplay();
     auto sharedContext = OpenGLSharedContext::getInstance().getContext();
     auto glConfig = OpenGLSharedContext::getInstance().getConfig();
