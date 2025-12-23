@@ -10,13 +10,14 @@ export interface PublicGroupProps extends Omit<GroupProps, "layer"> {
 
 export const Group = ({
   layer,
+  backdropFilter,
   saveLayerFlags,
   ...props
 }: SkiaProps<PublicGroupProps>) => {
   if (isValidElement(layer) && typeof layer === "object") {
     return (
       // keep the saveLayerFlags on whichever node triggers saveLayer
-      <skLayer saveLayerFlags={saveLayerFlags}>
+      <skLayer saveLayerFlags={saveLayerFlags} backdropFilter={backdropFilter}>
         {layer}
         <skGroup {...props} />
       </skLayer>
@@ -25,6 +26,7 @@ export const Group = ({
   return (
     <skGroup
       layer={layer as GroupProps["layer"]}
+      backdropFilter={backdropFilter}
       saveLayerFlags={saveLayerFlags}
       {...props}
     />

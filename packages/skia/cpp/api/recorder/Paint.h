@@ -42,6 +42,7 @@ SkMatrix processTransform(std::optional<SkMatrix> &matrix,
 
 struct SaveLayerProps {
   std::optional<SkCanvas::SaveLayerFlags> saveLayerFlags;
+  std::optional<sk_sp<SkImageFilter>> backdropFilter;
 }
 
 class SaveLayerCmd : public Command {
@@ -54,6 +55,8 @@ public:
       : Command(CommandType::SaveLayer) {
     convertProperty(runtime, object, "saveLayerFlags", props.saveLayerFlags,
                     variables);
+    convertProperty(runtime, object, "backdropFilter", props.backdropFilter,
+                    variables);
   }
 
   void saveLayer(DrawingCtx *ctx) {
@@ -61,7 +64,8 @@ public:
     auto paint = ctx->paintDeclarations.back();
     ctx->paintDeclarations.pop_back();
 
-    SkCanvas::SaveLayerRec layerRec(nullptr, &paint, nullptr,
+    SkCanvas::SaveLayerRec layerRec(nullptr, &paint,
+                                    props.backdropFilter.value_or(nullptr),
                                     props.saveLayerFlags.value_or(0));
     ctx->canvas->saveLayer(layerRec);
   }
