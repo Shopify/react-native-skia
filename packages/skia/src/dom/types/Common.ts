@@ -7,6 +7,7 @@ import type {
   InputRRect,
   PaintStyle,
   SaveLayerFlag,
+  SkImageFilter,
   SkPaint,
   SkPath,
   SkRect,
@@ -72,6 +73,7 @@ export interface TransformProps {
 }
 
 export interface SaveLayerProps {
+  backdropFilter?: SkImageFilter;
   saveLayerFlags?: SaveLayerFlag;
 }
 
