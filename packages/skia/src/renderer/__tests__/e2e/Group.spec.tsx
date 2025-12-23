@@ -167,7 +167,7 @@ describe("Group", () => {
   it("Copies a layer through a backdrop filter and adds new content to it", async () => {
     const { width, height } = surface;
     const centreY = height / 2;
-    const { BlendMode, TileMode, SaveLayerFlag, ClipOp, rect } = importSkia();
+    const { BlendMode, TileMode, ClipOp, rect } = importSkia();
     const img = await surface.drawOffscreen(
       (Skia, canvas, _ctx) => {
         canvas.clear(Skia.Color("black"));
@@ -191,8 +191,7 @@ describe("Group", () => {
         canvas.saveLayer(
           layerRestorePaint,
           null,
-          Skia.ImageFilter.MakeBlur(width * 0.05, width * 0.05, TileMode.Decal),
-          SaveLayerFlag.SaveLayerInitWithPrevious
+          Skia.ImageFilter.MakeBlur(width * 0.05, width * 0.05, TileMode.Decal)
         );
         canvas.drawCircle(0.75 * width, centreY, 0.2 * width, redPaint);
         canvas.restore();
