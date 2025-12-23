@@ -41,8 +41,8 @@ SkMatrix processTransform(std::optional<SkMatrix> &matrix,
 }
 
 struct SaveLayerProps {
-  std::optional<SkCanvas::SaveLayerFlags> saveLayerFlags;
   std::optional<sk_sp<SkImageFilter>> backdropFilter;
+  std::optional<SkCanvas::SaveLayerFlags> saveLayerFlags;
 }
 
 class SaveLayerCmd : public Command {
@@ -53,9 +53,9 @@ public:
   SaveLayerCmd(jsi::Runtime &runtime, const jsi::Object &object,
                Variables &variables)
       : Command(CommandType::SaveLayer) {
-    convertProperty(runtime, object, "saveLayerFlags", props.saveLayerFlags,
-                    variables);
     convertProperty(runtime, object, "backdropFilter", props.backdropFilter,
+                    variables);
+    convertProperty(runtime, object, "saveLayerFlags", props.saveLayerFlags,
                     variables);
   }
 
@@ -92,6 +92,8 @@ public:
     convertProperty(runtime, object, "clip", props.clip, variables);
     convertProperty(runtime, object, "invertClip", props.invertClip, variables);
     convertProperty(runtime, object, "layer", props.layer, variables);
+    convertProperty(runtime, object, "backdropFilter", props.backdropFilter,
+                    variables);
     convertProperty(runtime, object, "saveLayerFlags", props.saveLayerFlags,
                     variables);
   }
@@ -100,6 +102,7 @@ public:
     auto clip = props.clip;
     auto invertClip = props.invertClip;
     auto layer = props.layer;
+    auto backdropFilter = props.backdropFilter;
     auto saveLayerFlags = props.saveLayerFlags;
     auto hasTransform = props.matrix.has_value() || props.transform.has_value();
     auto hasClip = clip.has_value();
@@ -112,9 +115,9 @@ public:
       if (layer.has_value()) {
         SkCanvas::SaveLayerRec layerRec;
         layerRec.fPaint = std::get_if<SkPaint>(layer.value());
-        if (saveLayerFlags.has_value()) {
-          layerRec.fSaveLayerFlags = saveLayerFlags.value();
-        }
+        layerRec.fBackdropFilter = backdropFilter.value_or(nullptr);
+        layerRec.fSaveLayerFlags = saveLayerFlags.value_or(0);
+
         ctx->canvas->saveLayer(layerRec);
       } else {
         ctx->canvas->save();

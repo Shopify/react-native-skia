@@ -17,7 +17,7 @@ export const Group = ({
   if (isValidElement(layer) && typeof layer === "object") {
     return (
       // keep the saveLayerFlags on whichever node triggers saveLayer
-      <skLayer saveLayerFlags={saveLayerFlags} backdropFilter={backdropFilter}>
+      <skLayer backdropFilter={backdropFilter} saveLayerFlags={saveLayerFlags}>
         {layer}
         <skGroup {...props} />
       </skLayer>

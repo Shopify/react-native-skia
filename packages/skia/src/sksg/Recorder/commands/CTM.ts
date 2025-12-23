@@ -39,6 +39,7 @@ export const saveCTM = (ctx: DrawingContext, props: CTMProps) => {
     transform,
     origin,
     layer,
+    backdropFilter,
     saveLayerFlags,
   } = props;
   const hasTransform = matrix !== undefined || transform !== undefined;
@@ -50,7 +51,7 @@ export const saveCTM = (ctx: DrawingContext, props: CTMProps) => {
   if (shouldSave) {
     if (layer) {
       const paint = typeof layer === "boolean" ? undefined : layer;
-      canvas.saveLayer(paint, null, null, saveLayerFlags);
+      canvas.saveLayer(paint, null, backdropFilter, saveLayerFlags);
     } else {
       canvas.save();
     }
