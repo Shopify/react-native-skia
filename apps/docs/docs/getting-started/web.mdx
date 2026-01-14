@@ -139,6 +139,7 @@ export default function App() {
     <WithSkiaWeb
       opts={{ locateFile: (file) => `https://cdn.jsdelivr.net/npm/canvaskit-wasm@${version}/bin/full/${file}` }}
       getComponent={() => import("./MySkiaComponent")}
+    />
   );
 }
 ```

@@ -44,7 +44,7 @@ const config = {
           sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
           editUrl:
-            "https://github.com/shopify/react-native-skia/edit/main/docs/",
+            "https://github.com/shopify/react-native-skia/edit/main/apps/docs/",
         },
         // blog: {
         //   showReadingTime: true,
