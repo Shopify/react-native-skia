@@ -159,9 +159,9 @@
       "javaPackageName": "com.shopify.reactnative.skia"
     },
     "ios": {
-      "componentProvider": [
-        "SkiaPictureViewNativeComponent"
-      ]
+      "componentProvider": {
+        "SkiaPictureView": "SkiaPictureView"
+      }
     }
   },
   "react-native-builder-bob": {
