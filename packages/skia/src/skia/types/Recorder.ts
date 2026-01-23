@@ -32,6 +32,7 @@ import type {
 import type { AnimatedProps } from "../../renderer/processors/Animations/Animations";
 
 import type { SkPicture } from "./Picture";
+import type { Node } from "../../sksg/Node";
 
 export interface BaseRecorder {
   saveGroup(props?: AnimatedProps<Pick<DrawingNodeProps, "zIndex">>): void;
@@ -96,4 +97,10 @@ export interface JsiRecorder extends BaseRecorder {
   play(picture: SkPicture): void;
   applyUpdates(variables: SharedValue<unknown>[]): void;
   reset(): void;
+  /**
+   * Native C++ visitor - traverses the node tree and records commands.
+   * Returns an array of shared values found during traversal.
+   */
+  visit(root: Node[]): SharedValue<unknown>[];
+  getVariableCount(): number;
 }

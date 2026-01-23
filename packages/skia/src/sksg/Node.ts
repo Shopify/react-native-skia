@@ -4,7 +4,52 @@ export interface Node<Props = unknown> {
   type: NodeType;
   props: Props;
   children: Node[];
+  __skChildrenVersion?: number;
+  __skSortedChildren?: SortedChildrenCache;
 }
+
+export interface SortedChildren {
+  colorFilters: Node[];
+  maskFilters: Node[];
+  shaders: Node[];
+  imageFilters: Node[];
+  pathEffects: Node[];
+  drawings: Node[];
+  paints: Node[];
+}
+
+type SortedChildrenCache = {
+  version: number;
+  buckets: SortedChildren;
+};
+
+const createBuckets = (): SortedChildren => ({
+  colorFilters: [],
+  maskFilters: [],
+  shaders: [],
+  imageFilters: [],
+  pathEffects: [],
+  drawings: [],
+  paints: [],
+});
+
+const resetBuckets = (buckets: SortedChildren) => {
+  buckets.colorFilters.length = 0;
+  buckets.maskFilters.length = 0;
+  buckets.shaders.length = 0;
+  buckets.imageFilters.length = 0;
+  buckets.pathEffects.length = 0;
+  buckets.drawings.length = 0;
+  buckets.paints.length = 0;
+};
+
+export const bumpChildrenVersion = (node: Node) => {
+  node.__skChildrenVersion = (node.__skChildrenVersion ?? 0) + 1;
+};
+
+export const getChildrenVersion = (node: Node) => {
+  return node.__skChildrenVersion ?? 0;
+};
 
 export const isColorFilter = (type: NodeType) => {
   "worklet";
@@ -60,47 +105,59 @@ export const isShader = (type: NodeType) => {
   );
 };
 
-export const sortNodeChildren = (parent: Node) => {
+export const sortNodeChildren = (parent: Node): SortedChildren => {
   "worklet";
-  const maskFilters: Node[] = [];
-  const colorFilters: Node[] = [];
-  const shaders: Node[] = [];
-  const imageFilters: Node[] = [];
-  const pathEffects: Node[] = [];
-  const drawings: Node[] = [];
-  const paints: Node[] = [];
-  parent.children.forEach((node) => {
-    if (isColorFilter(node.type)) {
-      colorFilters.push(node);
-    } else if (node.type === NodeType.BlurMaskFilter) {
-      maskFilters.push(node);
-    } else if (isPathEffect(node.type)) {
-      pathEffects.push(node);
-    } else if (isImageFilter(node.type)) {
-      imageFilters.push(node);
-    } else if (isShader(node.type)) {
-      shaders.push(node);
-    } else if (node.type === NodeType.Paint) {
-      paints.push(node);
-    } else if (node.type === NodeType.Blend) {
+  const version = getChildrenVersion(parent);
+  let cache = parent.__skSortedChildren;
+
+  // Return cached result if version matches
+  if (cache && cache.version === version) {
+    return cache.buckets;
+  }
+
+  // Create or reset cache
+  if (!cache) {
+    cache = {
+      version,
+      buckets: createBuckets(),
+    };
+    parent.__skSortedChildren = cache;
+  } else {
+    cache.version = version;
+    resetBuckets(cache.buckets);
+  }
+
+  const buckets = cache.buckets;
+  const children = parent.children;
+  const len = children.length;
+
+  for (let i = 0; i < len; i++) {
+    const node = children[i];
+    const type = node.type;
+    if (isColorFilter(type)) {
+      buckets.colorFilters.push(node);
+    } else if (type === NodeType.BlurMaskFilter) {
+      buckets.maskFilters.push(node);
+    } else if (isPathEffect(type)) {
+      buckets.pathEffects.push(node);
+    } else if (isImageFilter(type)) {
+      buckets.imageFilters.push(node);
+    } else if (isShader(type)) {
+      buckets.shaders.push(node);
+    } else if (type === NodeType.Paint) {
+      buckets.paints.push(node);
+    } else if (type === NodeType.Blend) {
       if (node.children[0] && isImageFilter(node.children[0].type)) {
         node.type = NodeType.BlendImageFilter;
-        imageFilters.push(node);
+        buckets.imageFilters.push(node);
       } else {
         node.type = NodeType.Blend;
-        shaders.push(node);
+        buckets.shaders.push(node);
       }
     } else {
-      drawings.push(node);
+      buckets.drawings.push(node);
     }
-  });
-  return {
-    colorFilters,
-    drawings,
-    maskFilters,
-    shaders,
-    pathEffects,
-    imageFilters,
-    paints,
-  };
+  }
+
+  return buckets;
 };
