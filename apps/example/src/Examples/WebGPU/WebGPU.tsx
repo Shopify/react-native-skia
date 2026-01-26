@@ -1,5 +1,11 @@
 import type { SkImage } from "@shopify/react-native-skia";
-import { Canvas, ColorMatrix, Image, Skia } from "@shopify/react-native-skia";
+import {
+  Canvas,
+  ColorMatrix,
+  Image,
+  mix,
+  Skia,
+} from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
 import {
   PixelRatio,
@@ -7,6 +13,9 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import { useDerivedValue } from "react-native-reanimated";
+
+import { useLoop } from "../../components/Animations";
 
 import { solidColorLitWGSL, wireframeWGSL } from "./Shaders";
 import { modelData } from "./models";
@@ -88,12 +97,36 @@ type ObjectInfo = {
   model: Model;
 };
 
+// prettier-ignore
+const identityMatrix = [
+  1, 0, 0, 0, 0,
+  0, 1, 0, 0, 0,
+  0, 0, 1, 0, 0,
+  0, 0, 0, 1, 0,
+];
+
+// prettier-ignore
+const grayscaleMatrix = [
+  0.2126, 0.7152, 0.0722, 0, 0,
+  0.2126, 0.7152, 0.0722, 0, 0,
+  0.2126, 0.7152, 0.0722, 0, 0,
+  0,      0,      0,      1, 0,
+];
+
 export function WebGPU() {
   const { width, height } = useWindowDimensions();
   const [image, setImage] = useState<SkImage | null>(null);
   const renderRef = useRef<((ts: number) => void) | null>(null);
   const frameRef = useRef<number>(0);
   const cleanupRef = useRef<(() => void) | null>(null);
+
+  const progress = useLoop({ duration: 3000 });
+
+  const colorMatrix = useDerivedValue(() => {
+    return identityMatrix.map((identity, i) =>
+      mix(progress.value, identity, grayscaleMatrix[i])
+    );
+  });
 
   const pd = PixelRatio.get();
   const canvasWidth = Math.floor(width * pd);
@@ -472,12 +505,7 @@ export function WebGPU() {
             width={width}
             fit="cover"
           >
-            <ColorMatrix
-              matrix={[
-                0.2126, 0.7152, 0.0722, 0, 0, 0.2126, 0.7152, 0.0722, 0, 0,
-                0.2126, 0.7152, 0.0722, 0, 0, 0, 0, 0, 1, 0,
-              ]}
-            />
+            <ColorMatrix matrix={colorMatrix} />
           </Image>
         )}
       </Canvas>
