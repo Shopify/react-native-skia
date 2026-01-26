@@ -102,7 +102,9 @@ const App = () => {
     navigator.gpu
       .requestAdapter()
       .then((adapter) => {
-        console.log("GPU Adapter:", adapter);
+        adapter?.requestDevice().then((device) => {
+          console.log({ device });
+        });
       })
       .catch((error) => {
         console.error("Error requesting GPU adapter:", error);

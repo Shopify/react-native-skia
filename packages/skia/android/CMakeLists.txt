@@ -123,7 +123,6 @@ add_library(
 
         # WebGPU JSI infrastructure (jsi2)
         "${PROJECT_SOURCE_DIR}/../cpp/jsi2/RuntimeLifecycleMonitor.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/jsi2/RuntimeAwareCache.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/jsi2/Promise.cpp"
 
         # WebGPU async system

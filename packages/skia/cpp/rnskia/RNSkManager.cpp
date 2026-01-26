@@ -9,12 +9,10 @@
 #include "RNSkJsiViewApi.h"
 #include "RNSkView.h"
 
-// TODO: Merge runtime aware approaches?
 #include "RuntimeAwareCache.h"
 
 #ifdef SK_GRAPHITE
 #include "RNDawnContext.h"
-#include "jsi2/RuntimeAwareCache.h"
 #include "rnwgpu/api/GPU.h"
 #endif
 
@@ -29,9 +27,8 @@ RNSkManager::RNSkManager(
       _jsCallInvoker(jsCallInvoker),
       _viewApi(std::make_shared<RNSkJsiViewApi>(platformContext)) {
 
-  // Register main runtime
+  // Register main runtime (used by both Skia and WebGPU bindings)
   RNJsi::BaseRuntimeAwareCache::setMainJsRuntime(_jsRuntime);
-  rnwgpu::BaseRuntimeAwareCache::setMainJsRuntime(_jsRuntime);
 
   // Install bindings
   installBindings();

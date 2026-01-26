@@ -14,7 +14,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "RuntimeAwareCache.h"
+#include "jsi/RuntimeAwareCache.h"  // Use Skia's RuntimeAwareCache
 
 // Forward declare to avoid circular dependency
 namespace rnwgpu {
@@ -87,18 +87,18 @@ struct PrototypeCacheEntry {
  * objects after their runtime is gone.
  */
 template <typename T> struct StaticRuntimeAwareCache {
-  RuntimeAwareCache<T> *cache = nullptr;
+  RNJsi::RuntimeAwareCache<T> *cache = nullptr;
   jsi::Runtime *cacheRuntime = nullptr;
 
-  RuntimeAwareCache<T> &get(jsi::Runtime &rt) {
-    auto mainRuntime = BaseRuntimeAwareCache::getMainJsRuntime();
+  RNJsi::RuntimeAwareCache<T> &get(jsi::Runtime &rt) {
+    auto mainRuntime = RNJsi::BaseRuntimeAwareCache::getMainJsRuntime();
     if (&rt == mainRuntime && cacheRuntime != mainRuntime) {
       // Main runtime changed (hot reload) - allocate new cache, leak old one
-      cache = new RuntimeAwareCache<T>();
+      cache = new RNJsi::RuntimeAwareCache<T>();
       cacheRuntime = mainRuntime;
     }
     if (cache == nullptr) {
-      cache = new RuntimeAwareCache<T>();
+      cache = new RNJsi::RuntimeAwareCache<T>();
       cacheRuntime = mainRuntime;
     }
     return *cache;
@@ -235,7 +235,7 @@ public:
    * Uses StaticRuntimeAwareCache to properly handle runtime lifecycle
    * and hot reload (where the main runtime is destroyed and recreated).
    */
-  static RuntimeAwareCache<PrototypeCacheEntry> &
+  static RNJsi::RuntimeAwareCache<PrototypeCacheEntry> &
   getPrototypeCache(jsi::Runtime &runtime) {
     static StaticRuntimeAwareCache<PrototypeCacheEntry> cache;
     return cache.get(runtime);
