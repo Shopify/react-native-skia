@@ -1,10 +1,19 @@
 import type { SkImage } from "@shopify/react-native-skia";
 import {
+  BackdropBlur,
+  Blur,
   Canvas,
-  ColorMatrix,
+  Fill,
+  fitbox,
+  Group,
   Image,
   mix,
+  Path,
+  processTransform3d,
+  rect,
   Skia,
+  StrokeCap,
+  StrokeJoin,
 } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -31,6 +40,10 @@ import {
   mat3FromMat4,
   type Vec3,
 } from "./matrix";
+
+const path = `M1457 851.5C1306.6 687.9 1146.2 811.3 1182.1 949.2 1194.7 997.8 1231.9 1048.3 1302.5 1088.7 1400.2 1144.4 1442.2 1209.1 1445.8 1268 1454.2 1402.7 1262.6 1507.4 1080 1406.3M1521.9 1268C1785.9 918.8 1788.4 730.7 1731.6 714.1 1692.4 704.1 1626.1 771.8 1596.4 924.4 1563.2 1100.6 1550.3 1200.5 1521.9 1439.8M1521.9 1439.9C1563.4 1324.6 1587.1 1226.3 1669.5 1160.3 1693.8 1140.6 1723.7 1129 1755 1127.1 1891.1 1119.9 1871.1 1309.7 1660.2 1268M1660.2 1268C1749.6 1284.8 1738.2 1341.5 1763.5 1406.2 1767.1 1415.7 1773.3 1424.1 1781.4 1430.3 1834.7 1470.2 1930.5 1391 1959.4 1339.3 2004.3 1273.9 2039 1200.1 2073.9 1129.7M2119.5 1022C2119.5 1027.1 2115.3 1031.3 2110.2 1031.3M2110.2 1031.3C2105.1 1031.3 2100.9 1027.1 2100.9 1022M2100.9 1022C2100.9 1016.8 2104.9 1014 2110.2 1014M2110.2 1014C2115.5 1014 2119.5 1016.8 2119.5 1022M2074 1129.8C2038.6 1218.4 2016 1286 2005.9 1332.9 1997.1 1404 2014.9 1436.2 2044.4 1443.4 2109.4 1458.5 2230.5 1351.8 2248.9 1270.3 2284.3 1113.5 2512.7 1055.5 2565.4 1239.5M2565.4 1239.2C2512.7 1055.2 2283.8 1113.5 2248.9 1270.1 2239 1335.3 2259 1382.1 2293.1 1410.6 2311.4 1425.5 2333.5 1435.6 2357 1439.9 2395.3 1446.6 2435 1440.4 2469.3 1422.3M2471.4 1421.3C2471.4 1421.3 2473.6 1419.9 2475.7 1418.9 2497.3 1406.1 2515.9 1388.5 2529.7 1367.5 2543.6 1346.5 2552.4 1322.5 2555.3 1297.5 2563 1238.1 2581.4 1172.9 2593.6 1128.7M2593.6 1128.7C2574.5 1198.7 2539.1 1319.3 2556.9 1389.9 2560.9 1406.1 2571 1420.2 2585.4 1429.3 2599.5 1438 2616.8 1441.2 2633.3 1437.8 2680.9 1427.4 2729.9 1379.2 2760 1331.6`;
+const logo = Skia.Path.MakeFromSVGString(path)!;
+const bounds = logo.computeTightBounds();
 
 function createBufferWithData(
   device: GPUDevice,
@@ -131,6 +144,23 @@ export function WebGPU() {
   const pd = PixelRatio.get();
   const canvasWidth = Math.floor(width * pd);
   const canvasHeight = Math.floor(height * pd);
+  const clip = useDerivedValue(() => {
+    const trimmed = logo.copy();
+    const transform = fitbox(
+      "contain",
+      bounds,
+      rect(20, 20, width - 40, height - 40)
+    );
+    trimmed.transform(processTransform3d(transform));
+    trimmed.trim(0, progress.value, false);
+    trimmed.stroke({
+      width: 20,
+      join: StrokeJoin.Round,
+      cap: StrokeCap.Round,
+    });
+    return trimmed;
+  });
+  //rect(0, 0, 300, (300 * bounds.height) / bounds.width);
 
   useEffect(() => {
     const device = Skia.getDevice();
@@ -504,10 +534,35 @@ export function WebGPU() {
             height={height}
             width={width}
             fit="cover"
-          >
-            <ColorMatrix matrix={colorMatrix} />
-          </Image>
+          ></Image>
         )}
+        <Group clip={clip}>
+          {image && (
+            <Image
+              image={image}
+              x={0}
+              y={0}
+              height={height}
+              width={width}
+              fit="cover"
+            >
+              <Blur blur={5} />
+            </Image>
+          )}
+          <Fill color="rgba(255, 255, 255, 0.4)" />
+        </Group>
+        {/* <Path
+          path={clip}
+          color="rgba(0,0,0,0.5)"
+          strokeCap="round"
+          strokeJoin="round"
+          style="stroke"
+          strokeWidth={20}
+        /> */}
+        {/* <BackdropBlur blur={4} clip={clip}>
+          <Fill color="rgba(0, 0, 0, 0.2)" />
+        </BackdropBlur>
+*/}
       </Canvas>
     </View>
   );
