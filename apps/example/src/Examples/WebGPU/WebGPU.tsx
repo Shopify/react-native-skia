@@ -27,81 +27,79 @@ export function WebGPU() {
   // const [device, setDevice] = useState<GPUDevice | null>(null);
   const [image, setImage] = useState<SkImage | null>(null);
   useEffect(() => {
-    (async () => {
-      const adapter = await navigator.gpu.requestAdapter();
-      if (!adapter) {
-        throw new Error("No adapter");
-      }
+    const device = Skia.getDevice();
 
-      const device = await adapter.requestDevice();
-      if (!device) {
-        throw new Error("No device");
-      }
+    device.onuncapturederror = (event) => {
+      console.error("Uncaptured GPU error:", event.error);
+    };
+    device.lost.then((info) => {
+      console.error("GPU device lost:", info);
+    });
 
-      console.log("Device created");
+    console.log("Device created");
 
-      const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
+    const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
 
-      const pipeline = device.createRenderPipeline({
-        layout: "auto",
-        vertex: {
-          module: device.createShaderModule({
-            code: triangleVertWGSL,
-          }),
-          entryPoint: "main",
-        },
-        fragment: {
-          module: device.createShaderModule({
-            code: redFragWGSL,
-          }),
-          entryPoint: "main",
-          targets: [
-            {
-              format: presentationFormat,
-            },
-          ],
-        },
-        primitive: {
-          topology: "triangle-list",
-        },
-      });
-      console.log("Pipeline created");
-
-      const texture = device.createTexture({
-        size: [512, 512, 1],
-        format: presentationFormat,
-        usage:
-          GPUTextureUsage.TEXTURE_BINDING |
-          GPUTextureUsage.COPY_DST |
-          GPUTextureUsage.RENDER_ATTACHMENT,
-      });
-      console.log("Texture created");
-
-      if (!texture) {
-        throw new Error("Couldn't create texture");
-      }
-      const textureView = texture.createView();
-
-      const renderPassDescriptor: GPURenderPassDescriptor = {
-        colorAttachments: [
+    const pipeline = device.createRenderPipeline({
+      layout: "auto",
+      vertex: {
+        module: device.createShaderModule({
+          code: triangleVertWGSL,
+        }),
+        entryPoint: "main",
+      },
+      fragment: {
+        module: device.createShaderModule({
+          code: redFragWGSL,
+        }),
+        entryPoint: "main",
+        targets: [
           {
-            view: textureView,
-            clearValue: [0, 0, 0, 0],
-            loadOp: "clear",
-            storeOp: "store",
+            format: presentationFormat,
           },
         ],
-      };
-      const commandEncoder = device.createCommandEncoder();
-      const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-      passEncoder.setPipeline(pipeline);
-      passEncoder.draw(3);
-      passEncoder.end();
+      },
+      primitive: {
+        topology: "triangle-list",
+      },
+    });
+    console.log("Pipeline created");
+    const commandEncoder = device.createCommandEncoder();
+    console.log("Command encoder created");
 
-      device.queue.submit([commandEncoder.finish()]);
+    const texture = device.createTexture({
+      size: [512, 512, 1],
+      format: presentationFormat,
+      usage:
+        GPUTextureUsage.TEXTURE_BINDING |
+        GPUTextureUsage.COPY_DST |
+        GPUTextureUsage.RENDER_ATTACHMENT,
+    });
+    console.log("Texture created");
 
-      setImage(Skia.Image.MakeImageFromTexture(texture!));
-    })();
+    if (!texture) {
+      throw new Error("Couldn't create texture");
+    }
+    const textureView = texture.createView();
+
+    const renderPassDescriptor: GPURenderPassDescriptor = {
+      colorAttachments: [
+        {
+          view: textureView,
+          clearValue: [0, 0, 0, 0],
+          loadOp: "clear",
+          storeOp: "store",
+        },
+      ],
+    };
+    const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
+    passEncoder.setPipeline(pipeline);
+    passEncoder.draw(3);
+    passEncoder.end();
+
+    device.queue.submit([commandEncoder.finish()]);
+
+    setImage(Skia.Image.MakeImageFromTexture(texture!));
   }, []);
 
   return (

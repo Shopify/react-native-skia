@@ -14,6 +14,11 @@
 #ifdef SK_GRAPHITE
 #include "RNDawnContext.h"
 #include "rnwgpu/api/GPU.h"
+#include "rnwgpu/api/descriptors/GPUBufferUsage.h"
+#include "rnwgpu/api/descriptors/GPUColorWrite.h"
+#include "rnwgpu/api/descriptors/GPUMapMode.h"
+#include "rnwgpu/api/descriptors/GPUShaderStage.h"
+#include "rnwgpu/api/descriptors/GPUTextureUsage.h"
 #endif
 
 namespace RNSkia {
@@ -84,6 +89,18 @@ void RNSkManager::installBindings() {
     navigator.setProperty(*_jsRuntime, "gpu", rnwgpu::GPU::create(*_jsRuntime, gpu));
     _jsRuntime->global().setProperty(*_jsRuntime, "navigator", std::move(navigator));
   }
+
+  // Install WebGPU constant objects as plain JS objects
+  _jsRuntime->global().setProperty(*_jsRuntime, "GPUBufferUsage",
+                                   rnwgpu::GPUBufferUsage::create(*_jsRuntime));
+  _jsRuntime->global().setProperty(*_jsRuntime, "GPUColorWrite",
+                                   rnwgpu::GPUColorWrite::create(*_jsRuntime));
+  _jsRuntime->global().setProperty(*_jsRuntime, "GPUMapMode",
+                                   rnwgpu::GPUMapMode::create(*_jsRuntime));
+  _jsRuntime->global().setProperty(*_jsRuntime, "GPUShaderStage",
+                                   rnwgpu::GPUShaderStage::create(*_jsRuntime));
+  _jsRuntime->global().setProperty(*_jsRuntime, "GPUTextureUsage",
+                                   rnwgpu::GPUTextureUsage::create(*_jsRuntime));
 #endif
 }
 } // namespace RNSkia

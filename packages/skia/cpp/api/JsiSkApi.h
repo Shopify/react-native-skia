@@ -6,6 +6,12 @@
 
 #include "JsiSkHostObjects.h"
 
+#ifdef SK_GRAPHITE
+#include "RNDawnContext.h"
+#include "rnwgpu/api/GPUDevice.h"
+#include "rnwgpu/async/AsyncRunner.h"
+#endif
+
 #include "JsiNativeBuffer.h"
 #include "JsiSkAnimatedImage.h"
 #include "JsiSkAnimatedImageFactory.h"
@@ -140,6 +146,19 @@ public:
                             std::make_shared<JsiNativeBufferFactory>(context));
 
     installFunction("Recorder", JsiRecorder::createCtor(context));
+
+#ifdef SK_GRAPHITE
+    installFunction("getDevice", JSI_HOST_FUNCTION_LAMBDA {
+      auto &dawnContext = DawnContext::getInstance();
+      auto asyncRunner = rnwgpu::async::AsyncRunner::get(runtime);
+      if (!asyncRunner) {
+        throw jsi::JSError(runtime, "AsyncRunner not initialized");
+      }
+      auto device = std::make_shared<rnwgpu::GPUDevice>(
+          dawnContext.getWGPUDevice(), asyncRunner, "Skia Device");
+      return rnwgpu::GPUDevice::create(runtime, device);
+    });
+#endif
   }
 };
 } // namespace RNSkia
