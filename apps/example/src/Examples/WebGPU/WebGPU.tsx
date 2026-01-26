@@ -1,7 +1,12 @@
 import type { SkImage } from "@shopify/react-native-skia";
 import { Canvas, ColorMatrix, Image, Skia } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
-import { PixelRatio, StyleSheet, View } from "react-native";
+import {
+  PixelRatio,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from "react-native";
 
 export const triangleVertWGSL = /* wgsl */ `@vertex
 fn main(
@@ -22,9 +27,7 @@ fn main() -> @location(0) vec4f {
 }`;
 
 export function WebGPU() {
-  //const texture = useRef<GPUTexture>(null);
-  // const [adapter, setAdapter] = useState<GPUAdapter | null>(null);
-  // const [device, setDevice] = useState<GPUDevice | null>(null);
+  const { width, height } = useWindowDimensions();
   const [image, setImage] = useState<SkImage | null>(null);
   useEffect(() => {
     const device = Skia.getDevice();
@@ -61,7 +64,7 @@ export function WebGPU() {
     console.log("Command encoder created");
 
     const texture = device.createTexture({
-      size: [512, 512, 1],
+      size: [width * PixelRatio.get(), height * PixelRatio.get(), 1],
       format: presentationFormat,
       usage:
         GPUTextureUsage.TEXTURE_BINDING |
@@ -93,7 +96,7 @@ export function WebGPU() {
     device.queue.submit([commandEncoder.finish()]);
 
     setImage(Skia.Image.MakeImageFromTexture(texture!));
-  }, []);
+  }, [height, width]);
 
   return (
     <View style={style.container}>
@@ -103,8 +106,9 @@ export function WebGPU() {
             image={image}
             x={0}
             y={0}
-            height={512 / PixelRatio.get()}
-            width={512 / PixelRatio.get()}
+            height={height}
+            width={width}
+            fit="cover"
           >
             <ColorMatrix
               matrix={[
