@@ -34,6 +34,7 @@ import {
   Chat,
   LiquidGlass,
   Pictures,
+  WebGPU,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
@@ -73,6 +74,7 @@ const linking: LinkingOptions<StackParamList> = {
       Video: "video",
       Chat: "chat",
       Pictures: "pictures",
+      WebGPU: "webgpu",
     },
   },
   prefixes: ["rnskia://"],
@@ -98,18 +100,6 @@ enableScreens(true);
 const App = () => {
   const Stack = createNativeStackNavigator<StackParamList>();
   const assets = useAssets();
-  useEffect(() => {
-    navigator.gpu
-      .requestAdapter()
-      .then((adapter) => {
-        adapter?.requestDevice().then((device) => {
-          console.log({ device });
-        });
-      })
-      .catch((error) => {
-        console.error("Error requesting GPU adapter:", error);
-      });
-  }, []);
   if (assets === null) {
     return null;
   }
@@ -122,7 +112,7 @@ const App = () => {
             screenOptions={{
               headerLeft: HeaderLeft,
             }}
-            initialRouteName={CI ? "Tests" : "Home"}
+            initialRouteName={CI ? "Tests" : "WebGPU"}
           >
             <Stack.Screen
               name="Home"
@@ -247,6 +237,13 @@ const App = () => {
               component={PerformanceDrawingTest}
             />
             <Stack.Screen name="Pictures" component={Pictures} />
+            <Stack.Screen
+              name="WebGPU"
+              component={WebGPU}
+              options={{
+                header: () => null,
+              }}
+            />
           </Stack.Navigator>
         </NavigationContainer>
       </GestureHandlerRootView>

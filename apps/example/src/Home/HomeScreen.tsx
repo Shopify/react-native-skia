@@ -127,6 +127,11 @@ export const HomeScreen = () => {
         description="Animated circle trail using Pictures"
         route="Pictures"
       />
+      <HomeScreenButton
+        title="🔺 WebGPU"
+        description="WebGPU Wireframe demo"
+        route="WebGPU"
+      />
     </ScrollView>
   );
 };

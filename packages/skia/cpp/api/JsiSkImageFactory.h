@@ -11,6 +11,11 @@
 #include "JsiSkImage.h"
 #include "JsiSkImageInfo.h"
 
+#ifdef SK_GRAPHITE
+#include "RNDawnContext.h"
+#include "rnwgpu/api/GPUTexture.h"
+#endif
+
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
@@ -113,10 +118,72 @@ public:
         runtime, hostObjectInstance, getContext());
   }
 
+#ifdef SK_GRAPHITE
+  JSI_HOST_FUNCTION(MakeImageFromTexture) {
+    if (count < 1 || !arguments[0].isObject()) {
+      throw std::runtime_error(
+          "MakeImageFromTexture requires a GPUTexture argument");
+    }
+    auto obj = arguments[0].asObject(runtime);
+    auto gpuTexture = obj.getNativeState<rnwgpu::GPUTexture>(runtime);
+    if (!gpuTexture) {
+      throw std::runtime_error("Invalid GPUTexture object");
+    }
+
+    wgpu::Texture texture = gpuTexture->get();
+    int width = static_cast<int>(gpuTexture->getWidth());
+    int height = static_cast<int>(gpuTexture->getHeight());
+    wgpu::TextureFormat format = gpuTexture->getFormat();
+
+    auto &dawnContext = DawnContext::getInstance();
+    auto image = dawnContext.MakeImageFromTexture(texture, width, height, format);
+    if (image == nullptr) {
+      throw std::runtime_error("Failed to create SkImage from GPUTexture!");
+    }
+    auto hostObjectInstance =
+        std::make_shared<JsiSkImage>(getContext(), std::move(image));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
+  }
+
+  JSI_HOST_FUNCTION(MakeTextureFromImage) {
+    if (count < 1) {
+      throw std::runtime_error(
+          "MakeTextureFromImage requires an SkImage argument");
+    }
+    auto image = JsiSkImage::fromValue(runtime, arguments[0]);
+    if (!image) {
+      throw std::runtime_error("Invalid SkImage object");
+    }
+
+    auto &dawnContext = DawnContext::getInstance();
+    wgpu::Texture texture = dawnContext.MakeTextureFromImage(image);
+    if (!texture) {
+      throw std::runtime_error("Failed to create GPUTexture from SkImage!");
+    }
+
+    auto gpuTexture =
+        std::make_shared<rnwgpu::GPUTexture>(texture, "SkImage Texture");
+    return rnwgpu::GPUTexture::create(runtime, gpuTexture);
+  }
+#endif
+
   size_t getMemoryPressure() const override { return 1024; }
 
   std::string getObjectType() const override { return "JsiSkImageFactory"; }
 
+#ifdef SK_GRAPHITE
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromEncoded),
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTag),
+                       JSI_EXPORT_FUNC(JsiSkImageFactory,
+                                       MakeImageFromNativeBuffer),
+                       JSI_EXPORT_FUNC(JsiSkImageFactory,
+                                       MakeImageFromNativeTextureUnstable),
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage),
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeNull),
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromTexture),
+                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeTextureFromImage))
+#else
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromEncoded),
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTag),
                        JSI_EXPORT_FUNC(JsiSkImageFactory,
@@ -125,6 +192,7 @@ public:
                                        MakeImageFromNativeTextureUnstable),
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage),
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeNull))
+#endif
 
   explicit JsiSkImageFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}
