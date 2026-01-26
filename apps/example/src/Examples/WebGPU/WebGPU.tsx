@@ -8,95 +8,457 @@ import {
   View,
 } from "react-native";
 
-export const triangleVertWGSL = /* wgsl */ `@vertex
-fn main(
-  @builtin(vertex_index) VertexIndex : u32
-) -> @builtin(position) vec4f {
-  var pos = array<vec2f, 3>(
-    vec2(0.0, 0.5),
-    vec2(-0.5, -0.5),
-    vec2(0.5, -0.5)
+import { solidColorLitWGSL, wireframeWGSL } from "./Shaders";
+import { modelData } from "./models";
+import { randColor, randElement } from "./utils";
+import {
+  mat4Identity,
+  mat4Perspective,
+  mat4LookAt,
+  mat4Multiply,
+  mat4Translate,
+  mat4RotateX,
+  mat4RotateY,
+  mat3FromMat4,
+  type Vec3,
+} from "./matrix";
+
+function createBufferWithData(
+  device: GPUDevice,
+  data: Float32Array | Uint32Array,
+  usage: GPUBufferUsageFlags
+) {
+  const buffer = device.createBuffer({
+    size: data.byteLength,
+    usage,
+  });
+  device.queue.writeBuffer(buffer, 0, data as unknown as BufferSource);
+  return buffer;
+}
+
+type Model = {
+  vertexBuffer: GPUBuffer;
+  indexBuffer: GPUBuffer;
+  indexFormat: GPUIndexFormat;
+  vertexCount: number;
+};
+
+const settings = {
+  barycentricCoordinatesBased: false,
+  thickness: 2,
+  alphaThreshold: 0.5,
+  animate: true,
+  lines: true,
+  depthBias: 1,
+  depthBiasSlopeScale: 0.5,
+  models: true,
+};
+
+function createVertexAndIndexBuffer(
+  device: GPUDevice,
+  { vertices, indices }: { vertices: Float32Array; indices: Uint32Array }
+): Model {
+  const vertexBuffer = createBufferWithData(
+    device,
+    vertices,
+    GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
   );
+  const indexBuffer = createBufferWithData(
+    device,
+    indices,
+    GPUBufferUsage.INDEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+  );
+  return {
+    vertexBuffer,
+    indexBuffer,
+    indexFormat: "uint32",
+    vertexCount: indices.length,
+  };
+}
 
-  return vec4f(pos[VertexIndex], 0.0, 1.0);
-}`;
-
-export const redFragWGSL = /* wgsl */ `@fragment
-fn main() -> @location(0) vec4f {
-  return vec4(1.0, 0.0, 0.0, 1.0);
-}`;
+type ObjectInfo = {
+  worldViewProjectionMatrixValue: Float32Array;
+  worldMatrixValue: Float32Array;
+  uniformValues: Float32Array;
+  uniformBuffer: GPUBuffer;
+  lineUniformValues: Float32Array;
+  lineUniformBuffer: GPUBuffer;
+  litBindGroup: GPUBindGroup;
+  wireframeBindGroups: GPUBindGroup[];
+  model: Model;
+};
 
 export function WebGPU() {
   const { width, height } = useWindowDimensions();
   const [image, setImage] = useState<SkImage | null>(null);
+  const renderRef = useRef<((ts: number) => void) | null>(null);
+  const frameRef = useRef<number>(0);
+  const cleanupRef = useRef<(() => void) | null>(null);
+
+  const pd = PixelRatio.get();
+  const canvasWidth = Math.floor(width * pd);
+  const canvasHeight = Math.floor(height * pd);
+
   useEffect(() => {
     const device = Skia.getDevice();
-
-    console.log("Device created");
-
     const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
+    const depthFormat = "depth24plus";
 
-    const pipeline = device.createRenderPipeline({
-      layout: "auto",
+    const models = Object.values(modelData).map((data) =>
+      createVertexAndIndexBuffer(device, data)
+    );
+
+    const litModule = device.createShaderModule({
+      code: solidColorLitWGSL,
+    });
+
+    const wireframeModule = device.createShaderModule({
+      code: wireframeWGSL,
+    });
+
+    const litBindGroupLayout = device.createBindGroupLayout({
+      label: "lit bind group layout",
+      entries: [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+          buffer: {},
+        },
+      ],
+    });
+
+    const litPipeline = device.createRenderPipeline({
+      label: "lit pipeline",
+      layout: device.createPipelineLayout({
+        bindGroupLayouts: [litBindGroupLayout],
+      }),
       vertex: {
-        module: device.createShaderModule({
-          code: triangleVertWGSL,
-        }),
-        entryPoint: "main",
-      },
-      fragment: {
-        module: device.createShaderModule({
-          code: redFragWGSL,
-        }),
-        entryPoint: "main",
-        targets: [
+        module: litModule,
+        buffers: [
           {
-            format: presentationFormat,
+            arrayStride: 6 * 4, // position, normal
+            attributes: [
+              {
+                // position
+                shaderLocation: 0,
+                offset: 0,
+                format: "float32x3",
+              },
+              {
+                // normal
+                shaderLocation: 1,
+                offset: 3 * 4,
+                format: "float32x3",
+              },
+            ],
           },
         ],
       },
+      fragment: {
+        module: litModule,
+        targets: [{ format: presentationFormat }],
+      },
       primitive: {
-        topology: "triangle-list",
+        cullMode: "back",
+      },
+      depthStencil: {
+        depthWriteEnabled: true,
+        depthCompare: "less",
+        depthBias: settings.depthBias,
+        depthBiasSlopeScale: settings.depthBiasSlopeScale,
+        format: depthFormat,
       },
     });
-    console.log("Pipeline created");
-    const commandEncoder = device.createCommandEncoder();
-    console.log("Command encoder created");
 
+    const wireframePipeline = device.createRenderPipeline({
+      label: "wireframe pipeline",
+      layout: "auto",
+      vertex: {
+        module: wireframeModule,
+        entryPoint: "vsIndexedU32",
+      },
+      fragment: {
+        module: wireframeModule,
+        entryPoint: "fs",
+        targets: [{ format: presentationFormat }],
+      },
+      primitive: {
+        topology: "line-list",
+      },
+      depthStencil: {
+        depthWriteEnabled: true,
+        depthCompare: "less-equal",
+        format: depthFormat,
+      },
+    });
+
+    const barycentricCoordinatesBasedWireframePipeline =
+      device.createRenderPipeline({
+        label: "barycentric coordinates based wireframe pipeline",
+        layout: "auto",
+        vertex: {
+          module: wireframeModule,
+          entryPoint: "vsIndexedU32BarycentricCoordinateBasedLines",
+        },
+        fragment: {
+          module: wireframeModule,
+          entryPoint: "fsBarycentricCoordinateBasedLines",
+          targets: [
+            {
+              format: presentationFormat,
+              blend: {
+                color: {
+                  srcFactor: "one",
+                  dstFactor: "one-minus-src-alpha",
+                },
+                alpha: {
+                  srcFactor: "one",
+                  dstFactor: "one-minus-src-alpha",
+                },
+              },
+            },
+          ],
+        },
+        primitive: {
+          topology: "triangle-list",
+        },
+        depthStencil: {
+          depthWriteEnabled: true,
+          depthCompare: "less-equal",
+          format: depthFormat,
+        },
+      });
+
+    const objectInfos: ObjectInfo[] = [];
+
+    const numObjects = 200;
+    for (let i = 0; i < numObjects; ++i) {
+      const uniformValues = new Float32Array(16 + 16 + 4);
+      const uniformBuffer = device.createBuffer({
+        size: uniformValues.byteLength,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      });
+      const kWorldViewProjectionMatrixOffset = 0;
+      const kWorldMatrixOffset = 16;
+      const kColorOffset = 32;
+      const worldViewProjectionMatrixValue = uniformValues.subarray(
+        kWorldViewProjectionMatrixOffset,
+        kWorldViewProjectionMatrixOffset + 16
+      );
+      const worldMatrixValue = uniformValues.subarray(
+        kWorldMatrixOffset,
+        kWorldMatrixOffset + 15
+      );
+      const colorValue = uniformValues.subarray(kColorOffset, kColorOffset + 4);
+      colorValue.set(randColor());
+
+      const model = randElement(models);
+
+      const litBindGroup = device.createBindGroup({
+        layout: litBindGroupLayout,
+        entries: [{ binding: 0, resource: { buffer: uniformBuffer } }],
+      });
+
+      const lineUniformValues = new Float32Array(3 + 1);
+      const lineUniformValuesAsU32 = new Uint32Array(lineUniformValues.buffer);
+      const lineUniformBuffer = device.createBuffer({
+        size: lineUniformValues.byteLength,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      });
+      lineUniformValuesAsU32[0] = 6; // array stride for positions
+
+      const wireframeBindGroup = device.createBindGroup({
+        layout: wireframePipeline.getBindGroupLayout(0),
+        entries: [
+          { binding: 0, resource: { buffer: uniformBuffer } },
+          { binding: 1, resource: { buffer: model.vertexBuffer } },
+          { binding: 2, resource: { buffer: model.indexBuffer } },
+          { binding: 3, resource: { buffer: lineUniformBuffer } },
+        ],
+      });
+
+      const barycentricCoordinatesBasedWireframeBindGroup =
+        device.createBindGroup({
+          layout:
+            barycentricCoordinatesBasedWireframePipeline.getBindGroupLayout(0),
+          entries: [
+            { binding: 0, resource: { buffer: uniformBuffer } },
+            { binding: 1, resource: { buffer: model.vertexBuffer } },
+            { binding: 2, resource: { buffer: model.indexBuffer } },
+            { binding: 3, resource: { buffer: lineUniformBuffer } },
+          ],
+        });
+
+      objectInfos.push({
+        worldViewProjectionMatrixValue,
+        worldMatrixValue,
+        uniformValues,
+        uniformBuffer,
+        lineUniformValues,
+        lineUniformBuffer,
+        litBindGroup,
+        wireframeBindGroups: [
+          wireframeBindGroup,
+          barycentricCoordinatesBasedWireframeBindGroup,
+        ],
+        model,
+      });
+    }
+
+    // Update line uniforms
+    objectInfos.forEach(({ lineUniformBuffer, lineUniformValues }) => {
+      lineUniformValues[1] = settings.thickness;
+      lineUniformValues[2] = settings.alphaThreshold;
+      device.queue.writeBuffer(lineUniformBuffer, 0, lineUniformValues);
+    });
+
+    // Create render target texture
     const texture = device.createTexture({
-      size: [width * PixelRatio.get(), height * PixelRatio.get(), 1],
+      size: [canvasWidth, canvasHeight, 1],
       format: presentationFormat,
       usage:
         GPUTextureUsage.TEXTURE_BINDING |
         GPUTextureUsage.COPY_DST |
         GPUTextureUsage.RENDER_ATTACHMENT,
     });
-    console.log("Texture created");
 
-    if (!texture) {
-      throw new Error("Couldn't create texture");
-    }
-    const textureView = texture.createView();
+    // Create depth texture
+    const depthTexture = device.createTexture({
+      size: [canvasWidth, canvasHeight],
+      format: depthFormat,
+      usage: GPUTextureUsage.RENDER_ATTACHMENT,
+    });
 
     const renderPassDescriptor: GPURenderPassDescriptor = {
+      label: "wireframe render pass",
       colorAttachments: [
         {
-          view: textureView,
-          clearValue: [0, 0, 0, 0],
+          view: texture.createView(),
+          clearValue: [0.3, 0.3, 0.3, 1],
           loadOp: "clear",
           storeOp: "store",
         },
       ],
+      depthStencilAttachment: {
+        view: depthTexture.createView(),
+        depthClearValue: 1.0,
+        depthLoadOp: "clear",
+        depthStoreOp: "store",
+      },
     };
-    const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-    passEncoder.setPipeline(pipeline);
-    passEncoder.draw(3);
-    passEncoder.end();
 
-    device.queue.submit([commandEncoder.finish()]);
+    let time = 0.0;
 
-    setImage(Skia.Image.MakeImageFromTexture(texture!));
-  }, [height, width]);
+    const render = (ts: number) => {
+      if (settings.animate) {
+        time = ts * 0.001;
+      }
+
+      const fov = (60 * Math.PI) / 180;
+      const aspect = canvasWidth / canvasHeight;
+      const projection = mat4Perspective(fov, aspect, 0.1, 1000);
+
+      const view = mat4LookAt(
+        [-300, 0, 300] as Vec3,
+        [0, 0, 0] as Vec3,
+        [0, 1, 0] as Vec3
+      );
+
+      const viewProjection = mat4Multiply(projection, view);
+
+      const encoder = device.createCommandEncoder();
+      const pass = encoder.beginRenderPass(renderPassDescriptor);
+      pass.setPipeline(litPipeline);
+
+      objectInfos.forEach(
+        (
+          {
+            uniformBuffer,
+            uniformValues,
+            worldViewProjectionMatrixValue,
+            worldMatrixValue,
+            litBindGroup,
+            model: { vertexBuffer, indexBuffer, indexFormat, vertexCount },
+          },
+          i
+        ) => {
+          const world = mat4Identity();
+          mat4Translate(
+            world,
+            [0, 0, Math.sin(i * 3.721 + time * 0.1) * 200] as Vec3,
+            world
+          );
+          mat4RotateX(world, i * 4.567, world);
+          mat4RotateY(world, i * 2.967, world);
+          mat4Translate(
+            world,
+            [0, 0, Math.sin(i * 9.721 + time * 0.1) * 200] as Vec3,
+            world
+          );
+          mat4RotateX(world, time * 0.53 + i, world);
+
+          mat4Multiply(viewProjection, world, worldViewProjectionMatrixValue);
+          mat3FromMat4(world, worldMatrixValue);
+
+          device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
+
+          if (settings.models) {
+            pass.setVertexBuffer(0, vertexBuffer);
+            pass.setIndexBuffer(indexBuffer, indexFormat);
+            pass.setBindGroup(0, litBindGroup);
+            pass.drawIndexed(vertexCount);
+          }
+        }
+      );
+
+      if (settings.lines) {
+        const [bindGroupNdx, countMult, pipeline] =
+          settings.barycentricCoordinatesBased
+            ? [1, 1, barycentricCoordinatesBasedWireframePipeline]
+            : [0, 2, wireframePipeline];
+        pass.setPipeline(pipeline);
+        objectInfos.forEach(
+          ({ wireframeBindGroups, model: { vertexCount } }) => {
+            pass.setBindGroup(0, wireframeBindGroups[bindGroupNdx]);
+            pass.draw(vertexCount * countMult);
+          }
+        );
+      }
+
+      pass.end();
+
+      const commandBuffer = encoder.finish();
+      device.queue.submit([commandBuffer]);
+
+      // Convert texture to SkImage
+      const skImage = Skia.Image.MakeImageFromTexture(texture);
+      setImage(skImage);
+    };
+
+    renderRef.current = render;
+
+    // Animation loop
+    let running = true;
+    const animate = (ts: number) => {
+      if (!running) {
+        return;
+      }
+      render(ts);
+      frameRef.current = requestAnimationFrame(animate);
+    };
+    frameRef.current = requestAnimationFrame(animate);
+
+    cleanupRef.current = () => {
+      running = false;
+      cancelAnimationFrame(frameRef.current);
+      texture.destroy();
+      depthTexture.destroy();
+    };
+
+    return () => {
+      cleanupRef.current?.();
+    };
+  }, [canvasWidth, canvasHeight]);
 
   return (
     <View style={style.container}>
@@ -112,8 +474,8 @@ export function WebGPU() {
           >
             <ColorMatrix
               matrix={[
-                -0.578, 0.99, 0.588, 0, 0, 0.469, 0.535, -0.003, 0, 0, 0.015,
-                1.69, -0.703, 0, 0, 0, 0, 0, 1, 0,
+                0.2126, 0.7152, 0.0722, 0, 0, 0.2126, 0.7152, 0.0722, 0, 0,
+                0.2126, 0.7152, 0.0722, 0, 0, 0, 0, 0, 1, 0,
               ]}
             />
           </Image>
