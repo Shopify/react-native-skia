@@ -1,5 +1,5 @@
 import type { SkImage } from "@shopify/react-native-skia";
-import { Canvas, Image, Skia } from "@shopify/react-native-skia";
+import { Canvas, ColorMatrix, Image, Skia } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
 import { PixelRatio, StyleSheet, View } from "react-native";
 
@@ -28,13 +28,6 @@ export function WebGPU() {
   const [image, setImage] = useState<SkImage | null>(null);
   useEffect(() => {
     const device = Skia.getDevice();
-
-    device.onuncapturederror = (event) => {
-      console.error("Uncaptured GPU error:", event.error);
-    };
-    device.lost.then((info) => {
-      console.error("GPU device lost:", info);
-    });
 
     console.log("Device created");
 
@@ -112,7 +105,14 @@ export function WebGPU() {
             y={0}
             height={512 / PixelRatio.get()}
             width={512 / PixelRatio.get()}
-          />
+          >
+            <ColorMatrix
+              matrix={[
+                -0.578, 0.99, 0.588, 0, 0, 0.469, 0.535, -0.003, 0, 0, 0.015,
+                1.69, -0.703, 0, 0, 0, 0, 0, 1, 0,
+              ]}
+            />
+          </Image>
         )}
       </Canvas>
     </View>
