@@ -27,7 +27,7 @@ class GPU : public NativeObject<GPU> {
 public:
   static constexpr const char *CLASS_NAME = "GPU";
 
-  explicit GPU(jsi::Runtime &runtime);
+  explicit GPU(jsi::Runtime &runtime, wgpu::Instance instance);
 
 public:
   std::string getBrand() { return CLASS_NAME; }

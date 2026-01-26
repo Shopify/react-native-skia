@@ -13,15 +13,8 @@
 
 namespace rnwgpu {
 
-GPU::GPU(jsi::Runtime &runtime) : NativeObject(CLASS_NAME) {
-  static const auto kTimedWaitAny = wgpu::InstanceFeatureName::TimedWaitAny;
-  wgpu::InstanceDescriptor instanceDesc{.requiredFeatureCount = 1,
-                                        .requiredFeatures = &kTimedWaitAny};
-
-  wgpu::InstanceLimits limits{.timedWaitAnyMaxCount = 64};
-  instanceDesc.requiredLimits = &limits;
-  _instance = wgpu::CreateInstance(&instanceDesc);
-
+GPU::GPU(jsi::Runtime &runtime, wgpu::Instance instance)
+    : NativeObject(CLASS_NAME), _instance(instance) {
   auto dispatcher = std::make_shared<async::JSIMicrotaskDispatcher>(runtime);
   _async = async::AsyncRunner::getOrCreate(runtime, _instance, dispatcher);
 }

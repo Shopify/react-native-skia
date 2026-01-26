@@ -174,6 +174,16 @@ public:
     return surface;
   }
 
+  // Get the wgpu::Instance for WebGPU bindings
+  wgpu::Instance getWGPUInstance() {
+    return wgpu::Instance(instance->Get());
+  }
+
+  // Get the wgpu::Device for WebGPU bindings
+  wgpu::Device getWGPUDevice() {
+    return backendContext.fDevice;
+  }
+
   // Create onscreen surface with window
   std::unique_ptr<WindowContext> MakeWindow(void *window, int width,
                                             int height) {

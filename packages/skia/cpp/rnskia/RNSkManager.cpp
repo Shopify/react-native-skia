@@ -9,11 +9,14 @@
 #include "RNSkJsiViewApi.h"
 #include "RNSkView.h"
 
+// TODO: Merge runtime aware approaches?
 #include "RuntimeAwareCache.h"
 
-// WebGPU bindings
+#ifdef SK_GRAPHITE
+#include "RNDawnContext.h"
 #include "jsi2/RuntimeAwareCache.h"
 #include "rnwgpu/api/GPU.h"
+#endif
 
 namespace RNSkia {
 namespace jsi = facebook::jsi;
@@ -70,8 +73,10 @@ void RNSkManager::installBindings() {
   // Install WebGPU GPU constructor
   rnwgpu::GPU::installConstructor(*_jsRuntime);
 
-  // Create and expose navigator.gpu
-  auto gpu = std::make_shared<rnwgpu::GPU>(*_jsRuntime);
+#ifdef SK_GRAPHITE
+  // Create and expose navigator.gpu using DawnContext's instance
+  auto &dawnContext = DawnContext::getInstance();
+  auto gpu = std::make_shared<rnwgpu::GPU>(*_jsRuntime, dawnContext.getWGPUInstance());
   auto navigatorValue = _jsRuntime->global().getProperty(*_jsRuntime, "navigator");
   if (navigatorValue.isObject()) {
     auto navigator = navigatorValue.asObject(*_jsRuntime);
@@ -82,5 +87,6 @@ void RNSkManager::installBindings() {
     navigator.setProperty(*_jsRuntime, "gpu", rnwgpu::GPU::create(*_jsRuntime, gpu));
     _jsRuntime->global().setProperty(*_jsRuntime, "navigator", std::move(navigator));
   }
+#endif
 }
 } // namespace RNSkia
