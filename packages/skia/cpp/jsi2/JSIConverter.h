@@ -15,6 +15,7 @@
 #include "EnumMapper.h"
 #include "Promise.h"
 
+#include "rnwgpu/api/descriptors/Unions.h"
 #include "rnwgpu/async/AsyncTaskHandle.h"
 
 // This number is the maximum integer that can be represented exactly as a double

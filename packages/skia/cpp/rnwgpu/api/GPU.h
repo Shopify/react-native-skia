@@ -3,13 +3,21 @@
 #include <memory>
 #include <string>
 #include <unordered_set>
+#include <variant>
 
-#include "NativeObject.h"
+#include "descriptors/Unions.h"
+
+#include "jsi2/NativeObject.h"
 
 #include "rnwgpu/async/AsyncRunner.h"
 #include "rnwgpu/async/AsyncTaskHandle.h"
 
 #include "webgpu/webgpu_cpp.h"
+
+#include "GPUAdapter.h"
+#include "descriptors/GPURequestAdapterOptions.h"
+
+#include <webgpu/webgpu.h>
 
 namespace rnwgpu {
 
@@ -24,10 +32,9 @@ public:
 public:
   std::string getBrand() { return CLASS_NAME; }
 
-  // Stubbed for now - returns a rejected promise
-  async::AsyncTaskHandle requestAdapter();
-
-  std::string getPreferredCanvasFormat();
+  async::AsyncTaskHandle requestAdapter(
+      std::optional<std::shared_ptr<GPURequestAdapterOptions>> options);
+  wgpu::TextureFormat getPreferredCanvasFormat();
 
   std::unordered_set<std::string> getWgslLanguageFeatures();
 

@@ -1,6 +1,6 @@
 import type { LinkingOptions } from "@react-navigation/native";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
-import React from "react";
+import React, { useEffect } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "react-native";
 import type { HeaderBackButtonProps } from "@react-navigation/elements";
@@ -41,8 +41,6 @@ import type { StackParamList } from "./types";
 import { useAssets } from "./Tests/useAssets";
 import { Chess } from "./Examples/Chess";
 import "./resolveAssetSourcePolyfill";
-
-console.log(navigator.gpu.getPreferredCanvasFormat());
 
 const linking: LinkingOptions<StackParamList> = {
   config: {
@@ -100,6 +98,16 @@ enableScreens(true);
 const App = () => {
   const Stack = createNativeStackNavigator<StackParamList>();
   const assets = useAssets();
+  useEffect(() => {
+    navigator.gpu
+      .requestAdapter()
+      .then((adapter) => {
+        console.log("GPU Adapter:", adapter);
+      })
+      .catch((error) => {
+        console.error("Error requesting GPU adapter:", error);
+      });
+  }, []);
   if (assets === null) {
     return null;
   }
