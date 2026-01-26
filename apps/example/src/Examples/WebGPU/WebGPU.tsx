@@ -1,8 +1,8 @@
 import type { SkImage } from "@shopify/react-native-skia";
 import {
   BackdropBlur,
-  Blur,
   Canvas,
+  ColorMatrix,
   Fill,
   fitbox,
   Group,
@@ -546,7 +546,11 @@ export function WebGPU() {
               width={width}
               fit="cover"
             >
-              <Blur blur={5} />
+              <ColorMatrix
+                matrix={[
+                  -1, 0, 0, 0, 1, 0, -1, 0, 0, 1, 0, 0, -1, 0, 1, 0, 0, 0, 1, 0,
+                ]}
+              />
             </Image>
           )}
           <Fill color="rgba(255, 255, 255, 0.4)" />
