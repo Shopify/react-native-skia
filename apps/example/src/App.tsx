@@ -42,6 +42,8 @@ import { useAssets } from "./Tests/useAssets";
 import { Chess } from "./Examples/Chess";
 import "./resolveAssetSourcePolyfill";
 
+console.log(navigator.gpu.getPreferredCanvasFormat());
+
 const linking: LinkingOptions<StackParamList> = {
   config: {
     screens: {

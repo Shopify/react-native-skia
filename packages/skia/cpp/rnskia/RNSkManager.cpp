@@ -11,6 +11,10 @@
 
 #include "RuntimeAwareCache.h"
 
+// WebGPU bindings
+#include "jsi2/RuntimeAwareCache.h"
+#include "rnwgpu/api/GPU.h"
+
 namespace RNSkia {
 namespace jsi = facebook::jsi;
 
@@ -24,6 +28,7 @@ RNSkManager::RNSkManager(
 
   // Register main runtime
   RNJsi::BaseRuntimeAwareCache::setMainJsRuntime(_jsRuntime);
+  rnwgpu::BaseRuntimeAwareCache::setMainJsRuntime(_jsRuntime);
 
   // Install bindings
   installBindings();
@@ -61,5 +66,21 @@ void RNSkManager::installBindings() {
   _jsRuntime->global().setProperty(
       *_jsRuntime, "SkiaViewApi",
       jsi::Object::createFromHostObject(*_jsRuntime, _viewApi));
+
+  // Install WebGPU GPU constructor
+  rnwgpu::GPU::installConstructor(*_jsRuntime);
+
+  // Create and expose navigator.gpu
+  auto gpu = std::make_shared<rnwgpu::GPU>(*_jsRuntime);
+  auto navigatorValue = _jsRuntime->global().getProperty(*_jsRuntime, "navigator");
+  if (navigatorValue.isObject()) {
+    auto navigator = navigatorValue.asObject(*_jsRuntime);
+    navigator.setProperty(*_jsRuntime, "gpu", rnwgpu::GPU::create(*_jsRuntime, gpu));
+  } else {
+    // Create navigator object if it doesn't exist
+    jsi::Object navigator(*_jsRuntime);
+    navigator.setProperty(*_jsRuntime, "gpu", rnwgpu::GPU::create(*_jsRuntime, gpu));
+    _jsRuntime->global().setProperty(*_jsRuntime, "navigator", std::move(navigator));
+  }
 }
 } // namespace RNSkia

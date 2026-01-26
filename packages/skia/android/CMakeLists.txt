@@ -120,6 +120,19 @@ add_library(
 
         "${PROJECT_SOURCE_DIR}/../cpp/api/JsiSkDispatcher.cpp"
         ${BACKEND_SOURCES}
+
+        # WebGPU JSI infrastructure (jsi2)
+        "${PROJECT_SOURCE_DIR}/../cpp/jsi2/RuntimeLifecycleMonitor.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/jsi2/RuntimeAwareCache.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/jsi2/Promise.cpp"
+
+        # WebGPU async system
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/AsyncRunner.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/AsyncTaskHandle.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/JSIMicrotaskDispatcher.cpp"
+
+        # WebGPU API
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPU.cpp"
 )
 
 
@@ -149,6 +162,12 @@ target_include_directories(
         ../cpp/rnskia
         ../cpp/rnskia/values
         ../cpp/utils
+
+        # WebGPU bindings
+        ../cpp/jsi2
+        ../cpp/rnwgpu
+        ../cpp/rnwgpu/api
+        ../cpp/rnwgpu/async
 
         ${libfbjni_include_DIRS}
 )
