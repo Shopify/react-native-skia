@@ -4,35 +4,10 @@
 #include <string>
 #include <variant>
 
+#include "../CustomBlendModes.h"
 #include "Command.h"
 #include "Convertor.h"
 #include "DrawingCtx.h"
-
-#include "include/effects/SkRuntimeEffect.h"
-
-// SkSL for PlusDarker blend mode
-// Formula: rc = max(0, 1 - ((1-dst) + (1-src))) = max(0, src + dst - 1)
-static const char* recorderPlusDarkerSkSL = R"(
-    vec4 main(vec4 src, vec4 dst) {
-        float outAlpha = src.a + dst.a - src.a * dst.a;
-        vec3 srcUnpremul = src.a > 0.0 ? src.rgb / src.a : vec3(0.0);
-        vec3 dstUnpremul = dst.a > 0.0 ? dst.rgb / dst.a : vec3(0.0);
-        vec3 blended = max(vec3(0.0), srcUnpremul + dstUnpremul - vec3(1.0));
-        return vec4(blended * outAlpha, outAlpha);
-    }
-)";
-
-// SkSL for PlusLighter blend mode
-// Formula: rc = min(1, dst + src)
-static const char* recorderPlusLighterSkSL = R"(
-    vec4 main(vec4 src, vec4 dst) {
-        float outAlpha = src.a + dst.a - src.a * dst.a;
-        vec3 srcUnpremul = src.a > 0.0 ? src.rgb / src.a : vec3(0.0);
-        vec3 dstUnpremul = dst.a > 0.0 ? dst.rgb / dst.a : vec3(0.0);
-        vec3 blended = min(vec3(1.0), srcUnpremul + dstUnpremul);
-        return vec4(blended * outAlpha, outAlpha);
-    }
-)";
 
 namespace RNSkia {
 
@@ -195,24 +170,7 @@ public:
       paint.setColor(props.color.value());
     }
     if (props.blendMode.has_value()) {
-      int blendModeValue = props.blendMode.value().value;
-      if (blendModeValue == kRecorderBlendModePlusDarker) {
-        auto [effect, err] =
-            SkRuntimeEffect::MakeForBlender(SkString(recorderPlusDarkerSkSL));
-        if (effect) {
-          sk_sp<SkBlender> blender = effect->makeBlender(nullptr);
-          paint.setBlender(std::move(blender));
-        }
-      } else if (blendModeValue == kRecorderBlendModePlusLighter) {
-        auto [effect, err] =
-            SkRuntimeEffect::MakeForBlender(SkString(recorderPlusLighterSkSL));
-        if (effect) {
-          sk_sp<SkBlender> blender = effect->makeBlender(nullptr);
-          paint.setBlender(std::move(blender));
-        }
-      } else {
-        paint.setBlendMode(static_cast<SkBlendMode>(blendModeValue));
-      }
+      applyBlendMode(paint, props.blendMode.value().value);
     }
     if (props.style.has_value()) {
       paint.setStyle(props.style.value());

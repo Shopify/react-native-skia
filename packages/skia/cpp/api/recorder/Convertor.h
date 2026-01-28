@@ -15,6 +15,7 @@
 #include <modules/skparagraph/include/ParagraphBuilder.h>
 #include <modules/skparagraph/include/ParagraphStyle.h>
 
+#include "../CustomBlendModes.h"
 #include "third_party/CSSColorParser.h"
 
 #include "DataTypes.h"
@@ -666,10 +667,6 @@ SkPath1DPathEffect::Style getPropertyValue(jsi::Runtime &runtime,
   throw std::runtime_error("Invalid prop value for Path1DEffectStyle received");
 }
 
-// Custom blend mode values (must match TypeScript BlendMode enum)
-constexpr int kRecorderBlendModePlusDarker = 1001;
-constexpr int kRecorderBlendModePlusLighter = 1002;
-
 // Wrapper type for blend mode to avoid conflict with int template specialization
 struct BlendModeValue {
   int value;
@@ -740,9 +737,9 @@ BlendModeValue getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
     } else if (value == "luminosity") {
       return BlendModeValue(static_cast<int>(SkBlendMode::kLuminosity));
     } else if (value == "plusDarker") {
-      return BlendModeValue(kRecorderBlendModePlusDarker);
+      return BlendModeValue(kBlendModePlusDarker);
     } else if (value == "plusLighter") {
-      return BlendModeValue(kRecorderBlendModePlusLighter);
+      return BlendModeValue(kBlendModePlusLighter);
     }
   }
   throw std::runtime_error("Invalid prop value for BlendMode received");
