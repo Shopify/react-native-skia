@@ -10,13 +10,13 @@
   "title": "React Native Skia",
   "version": "0.0.0",
   "skia": {
-    "version": "m144",
+    "version": "m145",
     "checksums": {
-      "android-armeabi-v7a": "8f7f83a4ae210cc28007f2c226d754e9ef7c929822ef60c56a4ccc134e726148",
-      "android-arm64-v8a": "5d799d988a6cbc0cb844a92882a2458e67990314791ea38f928d83d5e01cb828",
-      "android-x86": "711fbee4a1721b92604daa78fa6f8c7ce4a6a6c901973919bd030848adc4f81d",
-      "android-x86_64": "fe068aa70b5c8bcf991cfe99e9db38617aaeaf92defd08bc4f89384b4d4dbed4",
-      "apple-xcframeworks": "63e2789bd75236b16779abc7171b351aa50cd01c13f05b3e1d83b34336ceb77c"
+      "android-armeabi-v7a": "e406c3e8103a2efb6a514ac91346d7f9f81adbae14dc2d0e302e84fb8c5f80f7",
+      "android-arm64-v8a": "75069b0f7c66ad3382553e947d583265de033cc856c394110243da098306955f",
+      "android-x86": "714b93a7bdf005a23699f47e6255e4e690086c52a1998c20196a46f95b709b09",
+      "android-x86_64": "5bd2972d13293b09b35e2c0149b7d103dc4fb0f2837c3dd169ce06795b812714",
+      "apple-xcframeworks": "eba12ce20ad6c919a918bcf7dbd514c34d5a29486b068716bdf98a72380ec1b5"
     }
   },
   "skia-graphite": {
