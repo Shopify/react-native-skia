@@ -5,6 +5,7 @@
 
 #include <jsi/jsi.h>
 
+#include "CustomBlendModes.h"
 #include "JsiSkColor.h"
 #include "JsiSkColorFilter.h"
 #include "JsiSkHostObjects.h"
@@ -126,8 +127,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(setBlendMode) {
-    auto blendMode = (SkBlendMode)arguments[0].asNumber();
-    getObject()->setBlendMode(blendMode);
+    int blendModeValue = static_cast<int>(arguments[0].asNumber());
+    applyBlendMode(*getObject(), blendModeValue);
     return jsi::Value::undefined();
   }
 
