@@ -31,6 +31,10 @@ const Noto = Array.from(
   resolveFile("skia/__tests__/assets/NotoColorEmoji.ttf")
 );
 
+const Amiri = Array.from(
+  resolveFile("skia/__tests__/assets/Amiri-Regular.ttf")
+);
+
 describe("Paragraphs", () => {
   it("Should build the first example from the documentation", async () => {
     const img = await surface.drawOffscreen(
@@ -312,6 +316,156 @@ describe("Paragraphs", () => {
     checkImage(
       img,
       `snapshots/paragraph/paragraph-text-align-rtl-${surface.OS}.png`
+    );
+  });
+
+  it("should apply letterSpacing and wordSpacing to RTL Arabic text", async () => {
+    const img = await surface.drawOffscreen(
+      (Skia, canvas, ctx) => {
+        const amiri = Skia.Typeface.MakeFreeTypeFaceFromData(
+          Skia.Data.fromBytes(new Uint8Array(ctx.Amiri))
+        )!;
+        const provider = Skia.TypefaceFontProvider.Make();
+        provider.registerFont(amiri, "Amiri");
+
+        // Paragraph without spacing (reference)
+        const paraNoSpacing = Skia.ParagraphBuilder.Make(
+          {
+            textAlign: ctx.textAlign,
+            textDirection: ctx.textDirection,
+          },
+          provider
+        )
+          .pushStyle({
+            fontFamilies: ["Amiri"],
+            fontSize: 24,
+            color: Skia.Color("black"),
+          })
+          .addText("بِسْمِ اللَّهِ")
+          .pop()
+          .build();
+        paraNoSpacing.layout(ctx.width);
+        paraNoSpacing.paint(canvas, 0, 0);
+
+        // Paragraph with letter spacing
+        const paraLetterSpacing = Skia.ParagraphBuilder.Make(
+          {
+            textAlign: ctx.textAlign,
+            textDirection: ctx.textDirection,
+          },
+          provider
+        )
+          .pushStyle({
+            fontFamilies: ["Amiri"],
+            fontSize: 24,
+            color: Skia.Color("black"),
+            letterSpacing: 10,
+          })
+          .addText("بِسْمِ اللَّهِ")
+          .pop()
+          .build();
+        paraLetterSpacing.layout(ctx.width);
+        paraLetterSpacing.paint(canvas, 0, 50);
+
+        // Paragraph with word spacing
+        const paraWordSpacing = Skia.ParagraphBuilder.Make(
+          {
+            textAlign: ctx.textAlign,
+            textDirection: ctx.textDirection,
+          },
+          provider
+        )
+          .pushStyle({
+            fontFamilies: ["Amiri"],
+            fontSize: 24,
+            color: Skia.Color("black"),
+            wordSpacing: 20,
+          })
+          .addText("بِسْمِ اللَّهِ")
+          .pop()
+          .build();
+        paraWordSpacing.layout(ctx.width);
+        paraWordSpacing.paint(canvas, 0, 100);
+      },
+      {
+        Amiri,
+        textAlign: TextAlign.Right,
+        textDirection: TextDirection.RTL,
+        width: surface.width,
+      }
+    );
+    checkImage(
+      img,
+      `snapshots/paragraph/paragraph-rtl-arabic-spacing-bug-${surface.OS}.png`
+    );
+  });
+
+  it("should compare wordSpacing between LTR and RTL mixed text", async () => {
+    const img = await surface.drawOffscreen(
+      (Skia, canvas, ctx) => {
+        const wordSpacing = 40;
+        const roboto = Skia.Typeface.MakeFreeTypeFaceFromData(
+          Skia.Data.fromBytes(new Uint8Array(ctx.RobotoRegular))
+        )!;
+        const amiri = Skia.Typeface.MakeFreeTypeFaceFromData(
+          Skia.Data.fromBytes(new Uint8Array(ctx.Amiri))
+        )!;
+        const provider = Skia.TypefaceFontProvider.Make();
+        provider.registerFont(roboto, "Roboto");
+        provider.registerFont(amiri, "Amiri");
+
+        const mixedText =
+          "Lorem ipsum dolor sit amet, טקסט ללא רווח בין מילים, نص مع عدم وجود مسافات بين الكلمات";
+
+        // LTR with wordSpacing
+        const paraLTR = Skia.ParagraphBuilder.Make(
+          {
+            textDirection: ctx.LTR,
+          },
+          provider
+        )
+          .pushStyle({
+            fontFamilies: ["Roboto", "Amiri"],
+            fontSize: 16,
+            color: Skia.Color("black"),
+            wordSpacing,
+          })
+          .addText(mixedText)
+          .pop()
+          .build();
+        paraLTR.layout(ctx.width);
+        paraLTR.paint(canvas, 0, 0);
+
+        // RTL with wordSpacing
+        const paraRTL = Skia.ParagraphBuilder.Make(
+          {
+            textDirection: ctx.RTL,
+          },
+          provider
+        )
+          .pushStyle({
+            fontFamilies: ["Roboto", "Amiri"],
+            fontSize: 16,
+            color: Skia.Color("black"),
+            wordSpacing,
+          })
+          .addText(mixedText)
+          .pop()
+          .build();
+        paraRTL.layout(ctx.width);
+        paraRTL.paint(canvas, 0, 80);
+      },
+      {
+        RobotoRegular,
+        Amiri,
+        LTR: TextDirection.LTR,
+        RTL: TextDirection.RTL,
+        width: surface.width,
+      }
+    );
+    checkImage(
+      img,
+      `snapshots/paragraph/paragraph-word-spacing-ltr-rtl-${surface.OS}.png`
     );
   });
 
