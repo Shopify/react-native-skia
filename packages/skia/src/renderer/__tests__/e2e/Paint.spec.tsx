@@ -227,4 +227,96 @@ describe("Paint", () => {
     );
     checkImage(result, docPath("paint/test-paint.png"));
   });
+  it("should apply PlusDarker blend mode", async () => {
+    const { width, height } = surface;
+    const r = width / 4;
+    const result = await surface.draw(
+      <Group>
+        <Fill color="white" />
+        <Circle cx={width / 2 - r / 2} cy={height / 2} r={r} color="red" />
+        <Circle
+          cx={width / 2 + r / 2}
+          cy={height / 2}
+          r={r}
+          color="cyan"
+          blendMode="plusDarker"
+        />
+      </Group>
+    );
+    checkImage(result, "snapshots/paint/plus-darker.png");
+  });
+  it("should apply PlusLighter blend mode", async () => {
+    const { width, height } = surface;
+    const r = width / 4;
+    const result = await surface.draw(
+      <Group>
+        <Fill color="black" />
+        <Circle cx={width / 2 - r / 2} cy={height / 2} r={r} color="red" />
+        <Circle
+          cx={width / 2 + r / 2}
+          cy={height / 2}
+          r={r}
+          color="cyan"
+          blendMode="plusLighter"
+        />
+      </Group>
+    );
+    checkImage(result, "snapshots/paint/plus-lighter.png");
+  });
+  it("should apply PlusDarker blend mode with overlapping RGB circles", async () => {
+    const { width, height } = surface;
+    const r = width / 4;
+    const cx = width / 2;
+    const cy = height / 2;
+    const offset = r / 2;
+    const result = await surface.draw(
+      <Group>
+        <Fill color="white" />
+        <Circle cx={cx} cy={cy - offset} r={r} color="red" />
+        <Circle
+          cx={cx - offset}
+          cy={cy + offset}
+          r={r}
+          color="green"
+          blendMode="plusLighter"
+        />
+        <Circle
+          cx={cx + offset}
+          cy={cy + offset}
+          r={r}
+          color="blue"
+          blendMode="plusLighter"
+        />
+      </Group>
+    );
+    checkImage(result, "snapshots/paint/plus-darker-rgb.png");
+  });
+  it("should apply PlusLighter blend mode with overlapping RGB circles", async () => {
+    const { width, height } = surface;
+    const r = width / 4;
+    const cx = width / 2;
+    const cy = height / 2;
+    const offset = r / 2;
+    const result = await surface.draw(
+      <Group>
+        <Fill color="black" />
+        <Circle cx={cx} cy={cy - offset} r={r} color="red" />
+        <Circle
+          cx={cx - offset}
+          cy={cy + offset}
+          r={r}
+          color="green"
+          blendMode="plusLighter"
+        />
+        <Circle
+          cx={cx + offset}
+          cy={cy + offset}
+          r={r}
+          color="blue"
+          blendMode="plusLighter"
+        />
+      </Group>
+    );
+    checkImage(result, "snapshots/paint/plus-lighter-rgb.png");
+  });
 });

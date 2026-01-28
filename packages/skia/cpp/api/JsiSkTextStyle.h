@@ -143,6 +143,10 @@ public:
       auto propValue = object.getProperty(runtime, "letterSpacing");
       retVal.setLetterSpacing(propValue.asNumber());
     }
+    if (object.hasProperty(runtime, "wordSpacing")) {
+      auto propValue = object.getProperty(runtime, "wordSpacing");
+      retVal.setWordSpacing(propValue.asNumber());
+    }
     if (object.hasProperty(runtime, "locale")) {
       auto propValue = object.getProperty(runtime, "locale");
       retVal.setLocale(SkString(propValue.asString(runtime).utf8(runtime)));

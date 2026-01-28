@@ -19,7 +19,7 @@ jobs:
       release_name: ${{ steps.release_meta.outputs.release_name }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
 
       - name: Determine Dawn branch metadata
         id: dawn_meta
@@ -92,7 +92,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main repository
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
 
       - name: Checkout Dawn repository
         run: |
@@ -175,7 +175,7 @@ jobs:
     runs-on: macos-latest-large
     steps:
       - name: Checkout main repository
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
 
       - name: Checkout Dawn repository
         run: |
@@ -214,7 +214,7 @@ jobs:
     needs: [prepare-release, mobile-android, mobile-apple]
     steps:
       - name: Checkout main repository
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
 
       - name: Download all build artifacts
         uses: actions/download-artifact@v7
