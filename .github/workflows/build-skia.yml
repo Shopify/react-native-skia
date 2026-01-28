@@ -89,7 +89,7 @@ jobs:
         if: startsWith(matrix.target, 'android')
         uses: nttld/setup-ndk@afb4c9964b521afb97c864b7d40b11e6911bd410 # v1.5.0
         with:
-          ndk-version: r22b
+          ndk-version: r27c
 
       - name: Setup Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
