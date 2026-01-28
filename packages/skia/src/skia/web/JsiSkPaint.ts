@@ -49,9 +49,22 @@ const plusLighterSkSL = `
     }
 `;
 
-// Cache for custom blenders to avoid recreating them
-let cachedPlusDarkerBlender: Blender | null = null;
-let cachedPlusLighterBlender: Blender | null = null;
+// Cache for custom blenders per CanvasKit instance
+// Using WeakMap ensures blenders are cleaned up when CanvasKit instance is garbage collected
+interface BlenderCache {
+  plusDarker: Blender | null;
+  plusLighter: Blender | null;
+}
+const blenderCache = new WeakMap<CanvasKit, BlenderCache>();
+
+const getBlenderCache = (ck: CanvasKit): BlenderCache => {
+  let cache = blenderCache.get(ck);
+  if (!cache) {
+    cache = { plusDarker: null, plusLighter: null };
+    blenderCache.set(ck, cache);
+  }
+  return cache;
+};
 
 export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
   constructor(CanvasKit: CanvasKit, ref: Paint) {
@@ -109,29 +122,29 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
   setBlendMode(blendMode: BlendMode) {
     if (blendMode === kBlendModePlusDarker) {
       // Use custom PlusDarker blender via SkRuntimeEffect
-      if (!cachedPlusDarkerBlender) {
-        const effect = this.CanvasKit.RuntimeEffect.MakeForBlender(
-          plusDarkerSkSL
-        );
+      const cache = getBlenderCache(this.CanvasKit);
+      if (!cache.plusDarker) {
+        const effect =
+          this.CanvasKit.RuntimeEffect.MakeForBlender(plusDarkerSkSL);
         if (effect) {
-          cachedPlusDarkerBlender = effect.makeBlender([]);
+          cache.plusDarker = effect.makeBlender([]);
         }
       }
-      if (cachedPlusDarkerBlender) {
-        this.ref.setBlender(cachedPlusDarkerBlender);
+      if (cache.plusDarker) {
+        this.ref.setBlender(cache.plusDarker);
       }
     } else if (blendMode === kBlendModePlusLighter) {
       // Use custom PlusLighter blender via SkRuntimeEffect
-      if (!cachedPlusLighterBlender) {
-        const effect = this.CanvasKit.RuntimeEffect.MakeForBlender(
-          plusLighterSkSL
-        );
+      const cache = getBlenderCache(this.CanvasKit);
+      if (!cache.plusLighter) {
+        const effect =
+          this.CanvasKit.RuntimeEffect.MakeForBlender(plusLighterSkSL);
         if (effect) {
-          cachedPlusLighterBlender = effect.makeBlender([]);
+          cache.plusLighter = effect.makeBlender([]);
         }
       }
-      if (cachedPlusLighterBlender) {
-        this.ref.setBlender(cachedPlusLighterBlender);
+      if (cache.plusLighter) {
+        this.ref.setBlender(cache.plusLighter);
       }
     } else {
       this.ref.setBlendMode(getEnum(this.CanvasKit, "BlendMode", blendMode));
