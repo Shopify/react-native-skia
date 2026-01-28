@@ -210,6 +210,24 @@ std::vector<SkColor> getPropertyValue(jsi::Runtime &runtime,
 }
 
 template <>
+std::vector<SkColor4f> getPropertyValue(jsi::Runtime &runtime,
+                                        const jsi::Value &value) {
+  std::vector<SkColor4f> result;
+  if (value.isObject() && value.asObject(runtime).isArray(runtime)) {
+    auto array = value.asObject(runtime).asArray(runtime);
+    size_t size = array.size(runtime);
+    result.reserve(size);
+
+    for (size_t i = 0; i < size; i++) {
+      SkColor color = getPropertyValue<SkColor>(
+          runtime, array.getValueAtIndex(runtime, i));
+      result.push_back(SkColor4f::FromColor(color));
+    }
+  }
+  return result;
+}
+
+template <>
 SkTileMode getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
   if (val.isString()) {
     auto value = val.asString(runtime).utf8(runtime);
