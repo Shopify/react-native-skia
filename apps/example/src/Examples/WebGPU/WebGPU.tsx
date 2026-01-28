@@ -1,15 +1,11 @@
 import type { SkImage } from "@shopify/react-native-skia";
 import {
-  BackdropBlur,
-  Blur,
   Canvas,
   ColorMatrix,
   Fill,
   fitbox,
   Group,
   Image,
-  mix,
-  Path,
   processTransform3d,
   rect,
   Skia,
@@ -112,21 +108,21 @@ type ObjectInfo = {
   model: Model;
 };
 
-// prettier-ignore
-const identityMatrix = [
-  1, 0, 0, 0, 0,
-  0, 1, 0, 0, 0,
-  0, 0, 1, 0, 0,
-  0, 0, 0, 1, 0,
-];
+// // prettier-ignore
+// const identityMatrix = [
+//   1, 0, 0, 0, 0,
+//   0, 1, 0, 0, 0,
+//   0, 0, 1, 0, 0,
+//   0, 0, 0, 1, 0,
+// ];
 
-// prettier-ignore
-const grayscaleMatrix = [
-  0.2126, 0.7152, 0.0722, 0, 0,
-  0.2126, 0.7152, 0.0722, 0, 0,
-  0.2126, 0.7152, 0.0722, 0, 0,
-  0,      0,      0,      1, 0,
-];
+// // prettier-ignore
+// const grayscaleMatrix = [
+//   0.2126, 0.7152, 0.0722, 0, 0,
+//   0.2126, 0.7152, 0.0722, 0, 0,
+//   0.2126, 0.7152, 0.0722, 0, 0,
+//   0,      0,      0,      1, 0,
+// ];
 
 export function WebGPU() {
   const { width, height } = useWindowDimensions();
@@ -137,11 +133,11 @@ export function WebGPU() {
 
   const progress = useLoop({ duration: 3000 });
 
-  const colorMatrix = useDerivedValue(() => {
-    return identityMatrix.map((identity, i) =>
-      mix(progress.value, identity, grayscaleMatrix[i])
-    );
-  });
+  // const colorMatrix = useDerivedValue(() => {
+  //   return identityMatrix.map((identity, i) =>
+  //     mix(progress.value, identity, grayscaleMatrix[i])
+  //   );
+  // });
 
   const pd = PixelRatio.get();
   const canvasWidth = Math.floor(width * pd);
@@ -553,7 +549,6 @@ export function WebGPU() {
                   -1, 0, 0, 0, 1, 0, -1, 0, 0, 1, 0, 0, -1, 0, 1, 0, 0, 0, 1, 0,
                 ]}
               />
-              <Blur blur={3} />
             </Image>
           )}
           <Fill color="rgba(255, 255, 255, 0.4)" />

@@ -1,6 +1,6 @@
 import type { LinkingOptions } from "@react-navigation/native";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
-import React, { useEffect } from "react";
+import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "react-native";
 import type { HeaderBackButtonProps } from "@react-navigation/elements";
@@ -112,7 +112,7 @@ const App = () => {
             screenOptions={{
               headerLeft: HeaderLeft,
             }}
-            initialRouteName={CI ? "Tests" : "WebGPU"}
+            initialRouteName={CI ? "Tests" : "Home"}
           >
             <Stack.Screen
               name="Home"
