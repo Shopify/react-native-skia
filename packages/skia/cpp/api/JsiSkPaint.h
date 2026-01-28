@@ -17,8 +17,39 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "include/core/SkPaint.h"
+#include "include/effects/SkRuntimeEffect.h"
 
 #pragma clang diagnostic pop
+
+// Custom blend mode values (must match TypeScript BlendMode enum)
+constexpr int kBlendModePlusDarker = 1001;
+constexpr int kBlendModePlusLighter = 1002;
+
+// SkSL for PlusDarker blend mode
+// Formula: rc = max(0, 1 - ((1-dst) + (1-src))) = max(0, src + dst - 1)
+// This darkens the image by subtracting from white
+static const char* plusDarkerSkSL = R"(
+    vec4 main(vec4 src, vec4 dst) {
+        float outAlpha = src.a + dst.a - src.a * dst.a;
+        vec3 srcUnpremul = src.a > 0.0 ? src.rgb / src.a : vec3(0.0);
+        vec3 dstUnpremul = dst.a > 0.0 ? dst.rgb / dst.a : vec3(0.0);
+        vec3 blended = max(vec3(0.0), srcUnpremul + dstUnpremul - vec3(1.0));
+        return vec4(blended * outAlpha, outAlpha);
+    }
+)";
+
+// SkSL for PlusLighter blend mode
+// Formula: rc = min(1, dst + src)
+// This lightens the image by adding colors and clamping
+static const char* plusLighterSkSL = R"(
+    vec4 main(vec4 src, vec4 dst) {
+        float outAlpha = src.a + dst.a - src.a * dst.a;
+        vec3 srcUnpremul = src.a > 0.0 ? src.rgb / src.a : vec3(0.0);
+        vec3 dstUnpremul = dst.a > 0.0 ? dst.rgb / dst.a : vec3(0.0);
+        vec3 blended = min(vec3(1.0), srcUnpremul + dstUnpremul);
+        return vec4(blended * outAlpha, outAlpha);
+    }
+)";
 
 namespace RNSkia {
 namespace jsi = facebook::jsi;
@@ -126,8 +157,28 @@ public:
   }
 
   JSI_HOST_FUNCTION(setBlendMode) {
-    auto blendMode = (SkBlendMode)arguments[0].asNumber();
-    getObject()->setBlendMode(blendMode);
+    int blendModeValue = static_cast<int>(arguments[0].asNumber());
+
+    if (blendModeValue == kBlendModePlusDarker) {
+      // Use custom PlusDarker blender via SkRuntimeEffect
+      auto [effect, err] =
+          SkRuntimeEffect::MakeForBlender(SkString(plusDarkerSkSL));
+      if (effect) {
+        sk_sp<SkBlender> blender = effect->makeBlender(nullptr);
+        getObject()->setBlender(std::move(blender));
+      }
+    } else if (blendModeValue == kBlendModePlusLighter) {
+      // Use custom PlusLighter blender via SkRuntimeEffect
+      auto [effect, err] =
+          SkRuntimeEffect::MakeForBlender(SkString(plusLighterSkSL));
+      if (effect) {
+        sk_sp<SkBlender> blender = effect->makeBlender(nullptr);
+        getObject()->setBlender(std::move(blender));
+      }
+    } else {
+      // Standard Skia blend mode
+      getObject()->setBlendMode(static_cast<SkBlendMode>(blendModeValue));
+    }
     return jsi::Value::undefined();
   }
 

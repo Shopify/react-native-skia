@@ -1,4 +1,4 @@
-import type { CanvasKit, Paint } from "canvaskit-wasm";
+import type { Blender, CanvasKit, Paint } from "canvaskit-wasm";
 
 import type {
   StrokeJoin,
@@ -20,6 +20,38 @@ import { JsiSkImageFilter } from "./JsiSkImageFilter";
 import { JsiSkMaskFilter } from "./JsiSkMaskFilter";
 import { JsiSkPathEffect } from "./JsiSkPathEffect";
 import { JsiSkShader } from "./JsiSkShader";
+
+// Custom blend mode values (must match TypeScript BlendMode enum)
+const kBlendModePlusDarker = 1001;
+const kBlendModePlusLighter = 1002;
+
+// SkSL for PlusDarker blend mode
+// Formula: rc = max(0, 1 - ((1-dst) + (1-src))) = max(0, src + dst - 1)
+const plusDarkerSkSL = `
+    vec4 main(vec4 src, vec4 dst) {
+        float outAlpha = src.a + dst.a - src.a * dst.a;
+        vec3 srcUnpremul = src.a > 0.0 ? src.rgb / src.a : vec3(0.0);
+        vec3 dstUnpremul = dst.a > 0.0 ? dst.rgb / dst.a : vec3(0.0);
+        vec3 blended = max(vec3(0.0), srcUnpremul + dstUnpremul - vec3(1.0));
+        return vec4(blended * outAlpha, outAlpha);
+    }
+`;
+
+// SkSL for PlusLighter blend mode
+// Formula: rc = min(1, dst + src)
+const plusLighterSkSL = `
+    vec4 main(vec4 src, vec4 dst) {
+        float outAlpha = src.a + dst.a - src.a * dst.a;
+        vec3 srcUnpremul = src.a > 0.0 ? src.rgb / src.a : vec3(0.0);
+        vec3 dstUnpremul = dst.a > 0.0 ? dst.rgb / dst.a : vec3(0.0);
+        vec3 blended = min(vec3(1.0), srcUnpremul + dstUnpremul);
+        return vec4(blended * outAlpha, outAlpha);
+    }
+`;
+
+// Cache for custom blenders to avoid recreating them
+let cachedPlusDarkerBlender: Blender | null = null;
+let cachedPlusLighterBlender: Blender | null = null;
 
 export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
   constructor(CanvasKit: CanvasKit, ref: Paint) {
@@ -75,7 +107,35 @@ export class JsiSkPaint extends HostObject<Paint, "Paint"> implements SkPaint {
   }
 
   setBlendMode(blendMode: BlendMode) {
-    this.ref.setBlendMode(getEnum(this.CanvasKit, "BlendMode", blendMode));
+    if (blendMode === kBlendModePlusDarker) {
+      // Use custom PlusDarker blender via SkRuntimeEffect
+      if (!cachedPlusDarkerBlender) {
+        const effect = this.CanvasKit.RuntimeEffect.MakeForBlender(
+          plusDarkerSkSL
+        );
+        if (effect) {
+          cachedPlusDarkerBlender = effect.makeBlender([]);
+        }
+      }
+      if (cachedPlusDarkerBlender) {
+        this.ref.setBlender(cachedPlusDarkerBlender);
+      }
+    } else if (blendMode === kBlendModePlusLighter) {
+      // Use custom PlusLighter blender via SkRuntimeEffect
+      if (!cachedPlusLighterBlender) {
+        const effect = this.CanvasKit.RuntimeEffect.MakeForBlender(
+          plusLighterSkSL
+        );
+        if (effect) {
+          cachedPlusLighterBlender = effect.makeBlender([]);
+        }
+      }
+      if (cachedPlusLighterBlender) {
+        this.ref.setBlender(cachedPlusLighterBlender);
+      }
+    } else {
+      this.ref.setBlendMode(getEnum(this.CanvasKit, "BlendMode", blendMode));
+    }
   }
 
   setColor(color: SkColor) {
