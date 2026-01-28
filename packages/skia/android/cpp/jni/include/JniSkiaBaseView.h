@@ -52,10 +52,16 @@ protected:
   }
 
   virtual void unregisterView() {
-    getSkiaManager()->setSkiaView(
-        _skiaAndroidView->getSkiaView()->getNativeId(), nullptr);
-    getSkiaManager()->unregisterSkiaView(
-        _skiaAndroidView->getSkiaView()->getNativeId());
+    auto manager = getSkiaManager();
+    if (manager == nullptr || _skiaAndroidView == nullptr) {
+      return;
+    }
+    auto skiaView = _skiaAndroidView->getSkiaView();
+    if (skiaView == nullptr) {
+      return;
+    }
+    manager->setSkiaView(skiaView->getNativeId(), nullptr);
+    manager->unregisterSkiaView(skiaView->getNativeId());
   }
 
   virtual jni::local_ref<jni::JArrayInt> getBitmap(int width, int height) {
