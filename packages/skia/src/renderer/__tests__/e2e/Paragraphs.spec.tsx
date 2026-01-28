@@ -400,6 +400,74 @@ describe("Paragraphs", () => {
     );
   });
 
+  it("should compare wordSpacing between LTR and RTL mixed text", async () => {
+    const img = await surface.drawOffscreen(
+      (Skia, canvas, ctx) => {
+        const roboto = Skia.Typeface.MakeFreeTypeFaceFromData(
+          Skia.Data.fromBytes(new Uint8Array(ctx.RobotoRegular))
+        )!;
+        const amiri = Skia.Typeface.MakeFreeTypeFaceFromData(
+          Skia.Data.fromBytes(new Uint8Array(ctx.Amiri))
+        )!;
+        const provider = Skia.TypefaceFontProvider.Make();
+        provider.registerFont(roboto, "Roboto");
+        provider.registerFont(amiri, "Amiri");
+
+        const mixedText =
+          "Lorem ipsum dolor sit amet, טקסט ללא רווח בין מילים, نص مع عدم وجود مسافات بين الكلمات";
+
+        // LTR with wordSpacing
+        const paraLTR = Skia.ParagraphBuilder.Make(
+          {
+            textDirection: ctx.LTR,
+          },
+          provider
+        )
+          .pushStyle({
+            fontFamilies: ["Roboto", "Amiri"],
+            fontSize: 16,
+            color: Skia.Color("black"),
+            wordSpacing: 20,
+          })
+          .addText(mixedText)
+          .pop()
+          .build();
+        paraLTR.layout(ctx.width);
+        paraLTR.paint(canvas, 0, 0);
+
+        // RTL with wordSpacing
+        const paraRTL = Skia.ParagraphBuilder.Make(
+          {
+            textDirection: ctx.RTL,
+          },
+          provider
+        )
+          .pushStyle({
+            fontFamilies: ["Roboto", "Amiri"],
+            fontSize: 16,
+            color: Skia.Color("black"),
+            wordSpacing: 20,
+          })
+          .addText(mixedText)
+          .pop()
+          .build();
+        paraRTL.layout(ctx.width);
+        paraRTL.paint(canvas, 0, 80);
+      },
+      {
+        RobotoRegular,
+        Amiri,
+        LTR: TextDirection.LTR,
+        RTL: TextDirection.RTL,
+        width: surface.width,
+      }
+    );
+    checkImage(
+      img,
+      `snapshots/paragraph/paragraph-word-spacing-ltr-rtl-${surface.OS}.png`
+    );
+  });
+
   itRunsE2eOnly(
     "should show ellipse when line count is above max lines",
     async () => {
