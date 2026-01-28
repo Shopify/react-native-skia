@@ -1,4 +1,4 @@
-project(RNSkia)
+packages/skia/android/CMakeLists.txtproject(RNSkia)
 cmake_minimum_required(VERSION 3.4.1)
 
 set (CMAKE_VERBOSE_MAKEFILE ON)
@@ -122,7 +122,6 @@ add_library(
         ${BACKEND_SOURCES}
 
         # WebGPU JSI infrastructure (jsi2)
-        "${PROJECT_SOURCE_DIR}/../cpp/jsi2/RuntimeLifecycleMonitor.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/jsi2/Promise.cpp"
 
         # WebGPU async system

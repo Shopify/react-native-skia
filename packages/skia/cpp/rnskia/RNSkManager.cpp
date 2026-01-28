@@ -72,10 +72,9 @@ void RNSkManager::installBindings() {
       *_jsRuntime, "SkiaViewApi",
       jsi::Object::createFromHostObject(*_jsRuntime, _viewApi));
 
+#ifdef SK_GRAPHITE
   // Install WebGPU GPU constructor
   rnwgpu::GPU::installConstructor(*_jsRuntime);
-
-#ifdef SK_GRAPHITE
   // Create and expose navigator.gpu using DawnContext's instance
   auto &dawnContext = DawnContext::getInstance();
   auto gpu = std::make_shared<rnwgpu::GPU>(*_jsRuntime, dawnContext.getWGPUInstance());
