@@ -108,4 +108,13 @@ export interface Skia {
   Context(surface: bigint, width: number, height: number): SkiaContext;
   NativeBuffer: NativeBufferFactory;
   Recorder(): JsiRecorder;
+  /**
+   * Returns the shared WebGPU device used by Skia's Graphite backend.
+   * This allows direct access to the GPU device for WebGPU operations.
+   *
+   * Note: This method is only available when the Graphite backend is enabled.
+   *
+   * @returns The GPUDevice used by Skia
+   */
+  getDevice(): GPUDevice;
 }

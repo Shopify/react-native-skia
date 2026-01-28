@@ -31,6 +31,9 @@
     "pod:install": "turbo run pod:install"
   },
   "packageManager": "yarn@3.6.4",
+  "resolutions": {
+    "@webgpu/types": "^0.1.69"
+  },
   "devDependencies": {
     "react-native-test-app": "^4.2.0",
     "turbo": "^2.1.1"

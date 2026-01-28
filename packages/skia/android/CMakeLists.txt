@@ -1,4 +1,4 @@
-project(RNSkia)
+packages/skia/android/CMakeLists.txtproject(RNSkia)
 cmake_minimum_required(VERSION 3.4.1)
 
 set (CMAKE_VERBOSE_MAKEFILE ON)
@@ -120,6 +120,33 @@ add_library(
 
         "${PROJECT_SOURCE_DIR}/../cpp/api/JsiSkDispatcher.cpp"
         ${BACKEND_SOURCES}
+
+        # WebGPU JSI infrastructure (jsi2)
+        "${PROJECT_SOURCE_DIR}/../cpp/jsi2/Promise.cpp"
+
+        # WebGPU async system
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/AsyncRunner.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/AsyncTaskHandle.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/JSIMicrotaskDispatcher.cpp"
+
+        # WebGPU API
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPU.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUAdapter.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUBindGroup.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUBuffer.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUCommandEncoder.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUComputePassEncoder.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUComputePipeline.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUDevice.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUDeviceLostInfo.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUQuerySet.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUQueue.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderBundleEncoder.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderPassEncoder.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderPipeline.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUShaderModule.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUSupportedLimits.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUTexture.cpp"
 )
 
 
@@ -149,6 +176,14 @@ target_include_directories(
         ../cpp/rnskia
         ../cpp/rnskia/values
         ../cpp/utils
+
+        # WebGPU bindings
+        ../cpp
+        ../cpp/jsi2
+        ../cpp/rnwgpu
+        ../cpp/rnwgpu/api
+        ../cpp/rnwgpu/api/descriptors
+        ../cpp/rnwgpu/async
 
         ${libfbjni_include_DIRS}
 )

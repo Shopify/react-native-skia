@@ -174,6 +174,120 @@ public:
     return surface;
   }
 
+  // Get the wgpu::Instance for WebGPU bindings
+  wgpu::Instance getWGPUInstance() {
+    return wgpu::Instance(instance->Get());
+  }
+
+  // Get the wgpu::Device for WebGPU bindings
+  wgpu::Device getWGPUDevice() {
+    return backendContext.fDevice;
+  }
+
+  // Create an SkImage from a WebGPU texture
+  // The texture must have TextureBinding usage
+  sk_sp<SkImage> MakeImageFromTexture(wgpu::Texture texture, int width,
+                                      int height,
+                                      wgpu::TextureFormat format) {
+    if (!texture) {
+      return nullptr;
+    }
+
+    // Map WebGPU format to Skia color type
+    SkColorType colorType;
+    switch (format) {
+    case wgpu::TextureFormat::RGBA8Unorm:
+      colorType = kRGBA_8888_SkColorType;
+      break;
+    case wgpu::TextureFormat::BGRA8Unorm:
+      colorType = kBGRA_8888_SkColorType;
+      break;
+    case wgpu::TextureFormat::RGBA16Float:
+      colorType = kRGBA_F16_SkColorType;
+      break;
+    case wgpu::TextureFormat::R8Unorm:
+      colorType = kGray_8_SkColorType;
+      break;
+    default:
+      // Use preferred color type for unsupported formats
+      colorType = DawnUtils::PreferedColorType;
+      break;
+    }
+
+    skgpu::graphite::BackendTexture backendTexture =
+        skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
+
+    // Wrap the texture - we use a release proc that adds a reference to the
+    // texture to prevent it from being destroyed while the SkImage is alive
+    struct TextureRef {
+      wgpu::Texture texture;
+    };
+    auto textureRef = new TextureRef{texture};
+
+    return SkImages::WrapTexture(
+        getRecorder(), backendTexture, colorType, kPremul_SkAlphaType, nullptr,
+        [](void *context) {
+          auto ref = static_cast<TextureRef *>(context);
+          delete ref;
+        },
+        textureRef);
+  }
+
+  // Create a WebGPU texture from an SkImage
+  // Returns a texture with CopySrc and TextureBinding usage
+  wgpu::Texture MakeTextureFromImage(sk_sp<SkImage> image) {
+    if (!image) {
+      return nullptr;
+    }
+
+    int width = image->width();
+    int height = image->height();
+
+    // Create a texture with the appropriate format
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.label = "SkImage Texture";
+    textureDesc.size = {static_cast<uint32_t>(width),
+                        static_cast<uint32_t>(height), 1};
+    textureDesc.format = DawnUtils::PreferredTextureFormat;
+    textureDesc.usage = wgpu::TextureUsage::CopyDst |
+                        wgpu::TextureUsage::CopySrc |
+                        wgpu::TextureUsage::TextureBinding |
+                        wgpu::TextureUsage::RenderAttachment;
+    textureDesc.dimension = wgpu::TextureDimension::e2D;
+    textureDesc.mipLevelCount = 1;
+    textureDesc.sampleCount = 1;
+
+    wgpu::Texture texture = backendContext.fDevice.CreateTexture(&textureDesc);
+    if (!texture) {
+      return nullptr;
+    }
+
+    // Create a surface backed by this texture
+    skgpu::graphite::BackendTexture backendTexture =
+        skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
+
+    sk_sp<SkSurface> surface = SkSurfaces::WrapBackendTexture(
+        getRecorder(), backendTexture, DawnUtils::PreferedColorType,
+        nullptr,  // colorspace
+        nullptr); // surfaceProps
+
+    if (!surface) {
+      return nullptr;
+    }
+
+    // Draw the image onto the surface
+    SkCanvas *canvas = surface->getCanvas();
+    canvas->drawImage(image, 0, 0);
+
+    // Flush the surface to ensure the image is rendered
+    auto recording = getRecorder()->snap();
+    if (recording) {
+      submitRecording(recording.get(), skgpu::graphite::SyncToCpu::kYes);
+    }
+
+    return texture;
+  }
+
   // Create onscreen surface with window
   std::unique_ptr<WindowContext> MakeWindow(void *window, int width,
                                             int height) {
