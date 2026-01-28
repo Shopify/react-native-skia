@@ -58,4 +58,8 @@ export enum BlendMode {
   //!< destination
   Color, //!< hue and saturation of source with luminosity of destination
   Luminosity, //!< luminosity of source with hue and saturation of
+
+  // Custom blend modes (implemented via SkRuntimeEffect blenders)
+  PlusDarker = 1001, //!< rc = max(0, 1 - ((1-dst) + (1-src))), similar to iOS kCGBlendModePlusDarker
+  PlusLighter = 1002, //!< rc = min(1, dst + src), similar to iOS kCGBlendModePlusLighter
 }

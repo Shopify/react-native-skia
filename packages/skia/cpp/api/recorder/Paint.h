@@ -4,6 +4,7 @@
 #include <string>
 #include <variant>
 
+#include "../CustomBlendModes.h"
 #include "Command.h"
 #include "Convertor.h"
 #include "DrawingCtx.h"
@@ -110,7 +111,7 @@ public:
 
 struct PaintCmdProps {
   std::optional<SkColor> color;
-  std::optional<SkBlendMode> blendMode;
+  std::optional<BlendModeValue> blendMode;
   std::optional<SkPaint::Style> style;
   std::optional<SkPaint::Join> strokeJoin;
   std::optional<SkPaint::Cap> strokeCap;
@@ -169,7 +170,7 @@ public:
       paint.setColor(props.color.value());
     }
     if (props.blendMode.has_value()) {
-      paint.setBlendMode(props.blendMode.value());
+      applyBlendMode(paint, props.blendMode.value().value);
     }
     if (props.style.has_value()) {
       paint.setStyle(props.style.value());
