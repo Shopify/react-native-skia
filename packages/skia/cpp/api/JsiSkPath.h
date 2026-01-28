@@ -17,6 +17,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "include/core/SkPath.h"
+#include "include/core/SkPathBuilder.h"
 #include "include/core/SkPathEffect.h"
 #include "include/core/SkPathTypes.h"
 #include "include/core/SkPathUtils.h"
@@ -59,11 +60,13 @@ public:
     auto mode = count > 2 && arguments[2].isBool() && arguments[2].getBool()
                     ? SkPath::kExtend_AddPathMode
                     : SkPath::kAppend_AddPathMode;
+    SkPathBuilder builder(*getObject());
     if (matrix == nullptr) {
-      getObject()->addPath(*src, mode);
+      builder.addPath(*src, mode);
     } else {
-      getObject()->addPath(*src, *matrix, mode);
+      builder.addPath(*src, *matrix, mode);
     }
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
@@ -71,7 +74,9 @@ public:
     auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
     auto start = arguments[1].asNumber();
     auto sweep = arguments[2].asNumber();
-    getObject()->addArc(*rect, start, sweep);
+    SkPathBuilder builder(*getObject());
+    builder.addArc(*rect, start, sweep);
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
@@ -82,7 +87,9 @@ public:
       direction = SkPathDirection::kCCW;
     }
     unsigned startIndex = count < 3 ? 0 : arguments[2].asNumber();
-    auto result = getObject()->addOval(*rect, direction, startIndex);
+    SkPathBuilder builder(*getObject());
+    builder.addOval(*rect, direction, startIndex);
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
@@ -97,8 +104,9 @@ public:
           runtime, jsiPoints.getValueAtIndex(runtime, i).asObject(runtime));
       points.push_back(*point.get());
     }
-    auto p = SkSpan(points.data(), points.size());
-    getObject()->addPoly(p, close);
+    SkPathBuilder builder(*getObject());
+    builder.addPolygon({points.data(), points.size()}, close);
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
@@ -108,7 +116,9 @@ public:
     if (count >= 2 && arguments[1].getBool()) {
       direction = SkPathDirection::kCCW;
     }
-    getObject()->addRect(*rect, direction);
+    SkPathBuilder builder(*getObject());
+    builder.addRect(*rect, direction);
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
@@ -118,7 +128,9 @@ public:
     if (count >= 2 && arguments[1].getBool()) {
       direction = SkPathDirection::kCCW;
     }
-    getObject()->addRRect(*rrect, direction);
+    SkPathBuilder builder(*getObject());
+    builder.addRRect(*rrect, direction);
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
@@ -127,47 +139,55 @@ public:
     auto start = arguments[1].asNumber();
     auto sweep = arguments[2].asNumber();
     auto forceMoveTo = arguments[3].getBool();
-    getObject()->arcTo(*rect, start, sweep, forceMoveTo);
+    SkPathBuilder builder(*getObject());
+    builder.arcTo(*rect, start, sweep, forceMoveTo);
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(arcToRotated) {
-    auto rx = arguments[0].asNumber();
-    auto ry = arguments[1].asNumber();
-    auto xAxisRotate = arguments[2].asNumber();
+    SkScalar rx = arguments[0].asNumber();
+    SkScalar ry = arguments[1].asNumber();
+    SkScalar xAxisRotate = arguments[2].asNumber();
     auto useSmallArc = arguments[3].getBool();
-    auto arcSize = useSmallArc ? SkPath::ArcSize::kSmall_ArcSize
-                               : SkPath::ArcSize::kLarge_ArcSize;
+    auto arcSize = useSmallArc ? SkPathBuilder::ArcSize::kSmall_ArcSize
+                               : SkPathBuilder::ArcSize::kLarge_ArcSize;
     auto sweep =
         arguments[4].getBool() ? SkPathDirection::kCCW : SkPathDirection::kCW;
-    auto x = arguments[5].asNumber();
-    auto y = arguments[6].asNumber();
-    getObject()->arcTo(rx, ry, xAxisRotate, arcSize, sweep, x, y);
+    SkScalar x = arguments[5].asNumber();
+    SkScalar y = arguments[6].asNumber();
+    SkPathBuilder builder(*getObject());
+    builder.arcTo({rx, ry}, xAxisRotate, arcSize, sweep, {x, y});
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(rArcTo) {
-    auto rx = arguments[0].asNumber();
-    auto ry = arguments[1].asNumber();
-    auto xAxisRotate = arguments[2].asNumber();
+    SkScalar rx = arguments[0].asNumber();
+    SkScalar ry = arguments[1].asNumber();
+    SkScalar xAxisRotate = arguments[2].asNumber();
     auto useSmallArc = arguments[3].getBool();
-    auto arcSize = useSmallArc ? SkPath::ArcSize::kSmall_ArcSize
-                               : SkPath::ArcSize::kLarge_ArcSize;
+    auto arcSize = useSmallArc ? SkPathBuilder::ArcSize::kSmall_ArcSize
+                               : SkPathBuilder::ArcSize::kLarge_ArcSize;
     auto sweep =
         arguments[4].getBool() ? SkPathDirection::kCCW : SkPathDirection::kCW;
-    auto x = arguments[5].asNumber();
-    auto y = arguments[6].asNumber();
-    getObject()->rArcTo(rx, ry, xAxisRotate, arcSize, sweep, x, y);
+    SkScalar x = arguments[5].asNumber();
+    SkScalar y = arguments[6].asNumber();
+    SkPathBuilder builder(*getObject());
+    builder.rArcTo({rx, ry}, xAxisRotate, arcSize, sweep, {x, y});
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(arcToTangent) {
-    auto x1 = arguments[0].asNumber();
-    auto y1 = arguments[1].asNumber();
-    auto x2 = arguments[2].asNumber();
-    auto y2 = arguments[3].asNumber();
-    auto r = arguments[4].asNumber();
-    getObject()->arcTo(x1, y1, x2, y2, r);
+    SkScalar x1 = arguments[0].asNumber();
+    SkScalar y1 = arguments[1].asNumber();
+    SkScalar x2 = arguments[2].asNumber();
+    SkScalar y2 = arguments[3].asNumber();
+    SkScalar r = arguments[4].asNumber();
+    SkPathBuilder builder(*getObject());
+    builder.arcTo({x1, y1}, {x2, y2}, r);
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
@@ -192,7 +212,9 @@ public:
     auto x2 = arguments[2].asNumber();
     auto y2 = arguments[3].asNumber();
     auto w = arguments[4].asNumber();
-    getObject()->conicTo(x1, y1, x2, y2, w);
+    SkPathBuilder builder(*getObject());
+    builder.conicTo(x1, y1, x2, y2, w);
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
@@ -202,7 +224,9 @@ public:
     auto x2 = arguments[2].asNumber();
     auto y2 = arguments[3].asNumber();
     auto w = arguments[4].asNumber();
-    getObject()->rConicTo(x1, y1, x2, y2, w);
+    SkPathBuilder builder(*getObject());
+    builder.rConicTo(x1, y1, x2, y2, w);
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
@@ -266,7 +290,9 @@ public:
 
   JSI_HOST_FUNCTION(transform) {
     auto m3 = *JsiSkMatrix::fromValue(runtime, arguments[0]);
-    getObject()->transform(m3);
+    SkPathBuilder builder(*getObject());
+    builder.transform(m3);
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
@@ -357,56 +383,71 @@ public:
   JSI_HOST_FUNCTION(offset) {
     SkScalar dx = arguments[0].asNumber();
     SkScalar dy = arguments[1].asNumber();
-    getObject()->offset(dx, dy);
+    SkPathBuilder builder(*getObject());
+    builder.transform(SkMatrix::Translate(dx, dy));
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(moveTo) {
     SkScalar x = arguments[0].asNumber();
     SkScalar y = arguments[1].asNumber();
-    getObject()->moveTo(x, y);
+    SkPathBuilder builder(*getObject());
+    builder.moveTo(x, y);
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(rMoveTo) {
     SkScalar x = arguments[0].asNumber();
     SkScalar y = arguments[1].asNumber();
-    getObject()->rMoveTo(x, y);
+    SkPathBuilder builder(*getObject());
+    builder.rMoveTo(x, y);
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
+
   JSI_HOST_FUNCTION(lineTo) {
     SkScalar x = arguments[0].asNumber();
     SkScalar y = arguments[1].asNumber();
-    getObject()->lineTo(x, y);
+    SkPathBuilder builder(*getObject());
+    builder.lineTo(x, y);
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(rLineTo) {
     SkScalar x = arguments[0].asNumber();
     SkScalar y = arguments[1].asNumber();
-    getObject()->rLineTo(x, y);
+    SkPathBuilder builder(*getObject());
+    builder.rLineTo(x, y);
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(cubicTo) {
-    auto x1 = arguments[0].asNumber();
-    auto y1 = arguments[1].asNumber();
-    auto x2 = arguments[2].asNumber();
-    auto y2 = arguments[3].asNumber();
-    auto x3 = arguments[4].asNumber();
-    auto y3 = arguments[5].asNumber();
-    getObject()->cubicTo(x1, y1, x2, y2, x3, y3);
+    SkScalar x1 = arguments[0].asNumber();
+    SkScalar y1 = arguments[1].asNumber();
+    SkScalar x2 = arguments[2].asNumber();
+    SkScalar y2 = arguments[3].asNumber();
+    SkScalar x3 = arguments[4].asNumber();
+    SkScalar y3 = arguments[5].asNumber();
+    SkPathBuilder builder(*getObject());
+    builder.cubicTo(x1, y1, x2, y2, x3, y3);
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(rCubicTo) {
-    auto x1 = arguments[0].asNumber();
-    auto y1 = arguments[1].asNumber();
-    auto x2 = arguments[2].asNumber();
-    auto y2 = arguments[3].asNumber();
-    auto x3 = arguments[4].asNumber();
-    auto y3 = arguments[5].asNumber();
-    getObject()->rCubicTo(x1, y1, x2, y2, x3, y3);
+    SkScalar x1 = arguments[0].asNumber();
+    SkScalar y1 = arguments[1].asNumber();
+    SkScalar x2 = arguments[2].asNumber();
+    SkScalar y2 = arguments[3].asNumber();
+    SkScalar x3 = arguments[4].asNumber();
+    SkScalar y3 = arguments[5].asNumber();
+    SkPathBuilder builder(*getObject());
+    builder.rCubicTo(x1, y1, x2, y2, x3, y3);
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
@@ -416,33 +457,40 @@ public:
   }
 
   JSI_HOST_FUNCTION(rewind) {
-    getObject()->rewind();
+    // rewind() was removed in m145, use reset() instead
+    getObject()->reset();
     return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(quadTo) {
-    auto x1 = arguments[0].asNumber();
-    auto y1 = arguments[1].asNumber();
-    auto x2 = arguments[2].asNumber();
-    auto y2 = arguments[3].asNumber();
-    getObject()->quadTo(x1, y1, x2, y2);
+    SkScalar x1 = arguments[0].asNumber();
+    SkScalar y1 = arguments[1].asNumber();
+    SkScalar x2 = arguments[2].asNumber();
+    SkScalar y2 = arguments[3].asNumber();
+    SkPathBuilder builder(*getObject());
+    builder.quadTo(x1, y1, x2, y2);
+    *getObject() = builder.detach();
     return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(rQuadTo) {
-    auto x1 = arguments[0].asNumber();
-    auto y1 = arguments[1].asNumber();
-    auto x2 = arguments[2].asNumber();
-    auto y2 = arguments[3].asNumber();
-    getObject()->rQuadTo(x1, y1, x2, y2);
+    SkScalar x1 = arguments[0].asNumber();
+    SkScalar y1 = arguments[1].asNumber();
+    SkScalar x2 = arguments[2].asNumber();
+    SkScalar y2 = arguments[3].asNumber();
+    SkPathBuilder builder(*getObject());
+    builder.rQuadTo(x1, y1, x2, y2);
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(addCircle) {
-    auto x = arguments[0].asNumber();
-    auto y = arguments[1].asNumber();
-    auto r = arguments[2].asNumber();
-    getObject()->addCircle(x, y, r);
+    SkScalar x = arguments[0].asNumber();
+    SkScalar y = arguments[1].asNumber();
+    SkScalar r = arguments[2].asNumber();
+    SkPathBuilder builder(*getObject());
+    builder.addCircle(x, y, r);
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 
@@ -456,7 +504,9 @@ public:
   }
 
   JSI_HOST_FUNCTION(close) {
-    getObject()->close();
+    SkPathBuilder builder(*getObject());
+    builder.close();
+    *getObject() = builder.detach();
     return thisValue.getObject(runtime);
   }
 

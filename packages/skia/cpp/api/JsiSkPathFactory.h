@@ -13,6 +13,7 @@
 
 #include "RNSkLog.h"
 #include "include/core/SkPath.h"
+#include "include/core/SkPathBuilder.h"
 #include "include/pathops/SkPathOps.h"
 
 #pragma clang diagnostic pop
@@ -69,7 +70,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(MakeFromCmds) {
-    SkPath path;
+    SkPathBuilder builder;
     auto cmds = arguments[0].asObject(runtime).asArray(runtime);
     auto cmdCount = cmds.size(runtime);
     for (int i = 0; i < cmdCount; i++) {
@@ -86,9 +87,9 @@ public:
           RNSkLogger::logToConsole("Invalid move command found");
           return jsi::Value::null();
         }
-        auto x = cmd.getValueAtIndex(runtime, 1).asNumber();
-        auto y = cmd.getValueAtIndex(runtime, 2).asNumber();
-        path.moveTo(x, y);
+        SkScalar x = cmd.getValueAtIndex(runtime, 1).asNumber();
+        SkScalar y = cmd.getValueAtIndex(runtime, 2).asNumber();
+        builder.moveTo(x, y);
         break;
       }
       case LINE: {
@@ -96,9 +97,9 @@ public:
           RNSkLogger::logToConsole("Invalid line command found");
           return jsi::Value::null();
         }
-        auto x = cmd.getValueAtIndex(runtime, 1).asNumber();
-        auto y = cmd.getValueAtIndex(runtime, 2).asNumber();
-        path.lineTo(x, y);
+        SkScalar x = cmd.getValueAtIndex(runtime, 1).asNumber();
+        SkScalar y = cmd.getValueAtIndex(runtime, 2).asNumber();
+        builder.lineTo(x, y);
         break;
       }
       case QUAD: {
@@ -106,11 +107,11 @@ public:
           RNSkLogger::logToConsole("Invalid line command found");
           return jsi::Value::null();
         }
-        auto x1 = cmd.getValueAtIndex(runtime, 1).asNumber();
-        auto y1 = cmd.getValueAtIndex(runtime, 2).asNumber();
-        auto x2 = cmd.getValueAtIndex(runtime, 3).asNumber();
-        auto y2 = cmd.getValueAtIndex(runtime, 4).asNumber();
-        path.quadTo(x1, y1, x2, y2);
+        SkScalar x1 = cmd.getValueAtIndex(runtime, 1).asNumber();
+        SkScalar y1 = cmd.getValueAtIndex(runtime, 2).asNumber();
+        SkScalar x2 = cmd.getValueAtIndex(runtime, 3).asNumber();
+        SkScalar y2 = cmd.getValueAtIndex(runtime, 4).asNumber();
+        builder.quadTo(x1, y1, x2, y2);
         break;
       }
       case CONIC: {
@@ -118,12 +119,12 @@ public:
           RNSkLogger::logToConsole("Invalid line command found");
           return jsi::Value::null();
         }
-        auto x1 = cmd.getValueAtIndex(runtime, 1).asNumber();
-        auto y1 = cmd.getValueAtIndex(runtime, 2).asNumber();
-        auto x2 = cmd.getValueAtIndex(runtime, 3).asNumber();
-        auto y2 = cmd.getValueAtIndex(runtime, 4).asNumber();
-        auto w = cmd.getValueAtIndex(runtime, 5).asNumber();
-        path.conicTo(x1, y1, x2, y2, w);
+        SkScalar x1 = cmd.getValueAtIndex(runtime, 1).asNumber();
+        SkScalar y1 = cmd.getValueAtIndex(runtime, 2).asNumber();
+        SkScalar x2 = cmd.getValueAtIndex(runtime, 3).asNumber();
+        SkScalar y2 = cmd.getValueAtIndex(runtime, 4).asNumber();
+        SkScalar w = cmd.getValueAtIndex(runtime, 5).asNumber();
+        builder.conicTo(x1, y1, x2, y2, w);
         break;
       }
       case CUBIC: {
@@ -131,17 +132,17 @@ public:
           RNSkLogger::logToConsole("Invalid line command found");
           return jsi::Value::null();
         }
-        auto x1 = cmd.getValueAtIndex(runtime, 1).asNumber();
-        auto y1 = cmd.getValueAtIndex(runtime, 2).asNumber();
-        auto x2 = cmd.getValueAtIndex(runtime, 3).asNumber();
-        auto y2 = cmd.getValueAtIndex(runtime, 4).asNumber();
-        auto x3 = cmd.getValueAtIndex(runtime, 5).asNumber();
-        auto y3 = cmd.getValueAtIndex(runtime, 6).asNumber();
-        path.cubicTo(x1, y1, x2, y2, x3, y3);
+        SkScalar x1 = cmd.getValueAtIndex(runtime, 1).asNumber();
+        SkScalar y1 = cmd.getValueAtIndex(runtime, 2).asNumber();
+        SkScalar x2 = cmd.getValueAtIndex(runtime, 3).asNumber();
+        SkScalar y2 = cmd.getValueAtIndex(runtime, 4).asNumber();
+        SkScalar x3 = cmd.getValueAtIndex(runtime, 5).asNumber();
+        SkScalar y3 = cmd.getValueAtIndex(runtime, 6).asNumber();
+        builder.cubicTo(x1, y1, x2, y2, x3, y3);
         break;
       }
       case CLOSE: {
-        path.close();
+        builder.close();
         break;
       }
       default: {
@@ -151,7 +152,7 @@ public:
       }
     }
     auto hostObjectInstance =
-        std::make_shared<JsiSkPath>(getContext(), std::move(path));
+        std::make_shared<JsiSkPath>(getContext(), builder.detach());
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
         runtime, hostObjectInstance, getContext());
   }

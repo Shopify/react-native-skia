@@ -13,6 +13,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "include/core/SkColorFilter.h"
+#include "include/effects/SkGradient.h"
 #include "include/effects/SkImageFilters.h"
 #include "include/effects/SkPerlinNoiseShader.h"
 
@@ -44,8 +45,9 @@ SkTileMode getTileMode(const jsi::Value *values, int i, size_t size) {
   return static_cast<SkTileMode>(values[i].asNumber());
 }
 
-std::vector<SkColor> getColors(jsi::Runtime &runtime, const jsi::Value &value) {
-  std::vector<SkColor> colors;
+std::vector<SkColor4f> getColors(jsi::Runtime &runtime,
+                                 const jsi::Value &value) {
+  std::vector<SkColor4f> colors;
   if (!value.isNull()) {
     auto jsiColors = value.asObject(runtime).asArray(runtime);
     auto size = jsiColors.size(runtime);
@@ -53,21 +55,21 @@ std::vector<SkColor> getColors(jsi::Runtime &runtime, const jsi::Value &value) {
     for (int i = 0; i < size; i++) {
       SkColor color =
           JsiSkColor::fromValue(runtime, jsiColors.getValueAtIndex(runtime, i));
-      colors.push_back(color);
+      colors.push_back(SkColor4f::FromColor(color));
     }
   }
   return colors;
 }
 
-std::vector<SkScalar> getPositions(jsi::Runtime &runtime,
-                                   const jsi::Value &value) {
-  std::vector<SkScalar> positions;
+std::vector<float> getPositions(jsi::Runtime &runtime,
+                                const jsi::Value &value) {
+  std::vector<float> positions;
   if (!value.isNull()) {
     auto jsiPositions = value.asObject(runtime).asArray(runtime);
     auto size = jsiPositions.size(runtime);
     positions.reserve(size);
     for (int i = 0; i < size; i++) {
-      SkScalar position = jsiPositions.getValueAtIndex(runtime, i).asNumber();
+      float position = jsiPositions.getValueAtIndex(runtime, i).asNumber();
       positions.push_back(position);
     }
   }
@@ -83,13 +85,12 @@ public:
         *JsiSkPoint::fromValue(runtime, arguments[1].asObject(runtime)).get();
     SkPoint pts[] = {p1, p2};
 
-    std::vector<SkColor> colors = getColors(runtime, arguments[2]);
-    auto colorsSize = colors.size();
-    if (colorsSize < 2) {
+    std::vector<SkColor4f> colors = getColors(runtime, arguments[2]);
+    if (colors.size() < 2) {
       throw std::invalid_argument("colors must have at least 2 colors");
     }
-    std::vector<SkScalar> positions = getPositions(runtime, arguments[3]);
-    if (!positions.empty() && positions.size() != colorsSize) {
+    std::vector<float> positions = getPositions(runtime, arguments[3]);
+    if (!positions.empty() && positions.size() != colors.size()) {
       throw std::invalid_argument(
           "positions must be empty or have the same size as colors");
     }
@@ -97,9 +98,11 @@ public:
     auto flag = getFlag(arguments, 6, count);
     auto localMatrix = getLocalMatrix(runtime, arguments, 5, count);
 
-    sk_sp<SkShader> gradient = SkGradientShader::MakeLinear(
-        pts, colors.data(), !positions.empty() ? positions.data() : nullptr,
-        static_cast<int>(colorsSize), tileMode, flag, localMatrix);
+    SkGradient::Colors gradColors(
+        SkSpan(colors.data(), colors.size()),
+        SkSpan(positions.data(), positions.size()), tileMode);
+    SkGradient grad(gradColors, SkGradient::Interpolation::FromFlags(flag));
+    sk_sp<SkShader> gradient = SkShaders::LinearGradient(pts, grad, localMatrix);
     auto shader =
         std::make_shared<JsiSkShader>(getContext(), std::move(gradient));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shader,
@@ -109,15 +112,14 @@ public:
   JSI_HOST_FUNCTION(MakeRadialGradient) {
     auto center =
         *JsiSkPoint::fromValue(runtime, arguments[0].asObject(runtime)).get();
-    auto r = arguments[1].asNumber();
+    float r = arguments[1].asNumber();
 
-    std::vector<SkColor> colors = getColors(runtime, arguments[2]);
-    auto colorsSize = colors.size();
-    if (colorsSize < 2) {
+    std::vector<SkColor4f> colors = getColors(runtime, arguments[2]);
+    if (colors.size() < 2) {
       throw std::invalid_argument("colors must have at least 2 colors");
     }
-    std::vector<SkScalar> positions = getPositions(runtime, arguments[3]);
-    if (!positions.empty() && positions.size() != colorsSize) {
+    std::vector<float> positions = getPositions(runtime, arguments[3]);
+    if (!positions.empty() && positions.size() != colors.size()) {
       throw std::invalid_argument(
           "positions must be empty or the same size as colors");
     }
@@ -125,10 +127,12 @@ public:
     auto flag = getFlag(arguments, 6, count);
     auto localMatrix = getLocalMatrix(runtime, arguments, 5, count);
 
-    sk_sp<SkShader> gradient = SkGradientShader::MakeRadial(
-        center, r, colors.data(),
-        !positions.empty() ? positions.data() : nullptr,
-        static_cast<int>(colorsSize), tileMode, flag, localMatrix);
+    SkGradient::Colors gradColors(
+        SkSpan(colors.data(), colors.size()),
+        SkSpan(positions.data(), positions.size()), tileMode);
+    SkGradient grad(gradColors, SkGradient::Interpolation::FromFlags(flag));
+    sk_sp<SkShader> gradient =
+        SkShaders::RadialGradient(center, r, grad, localMatrix);
     auto shader =
         std::make_shared<JsiSkShader>(getContext(), std::move(gradient));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shader,
@@ -136,30 +140,32 @@ public:
   }
 
   JSI_HOST_FUNCTION(MakeSweepGradient) {
-    auto x = arguments[0].asNumber();
-    auto y = arguments[1].asNumber();
-    std::vector<SkColor> colors = getColors(runtime, arguments[2]);
-    auto colorsSize = colors.size();
-    if (colorsSize < 2) {
+    float x = arguments[0].asNumber();
+    float y = arguments[1].asNumber();
+    std::vector<SkColor4f> colors = getColors(runtime, arguments[2]);
+    if (colors.size() < 2) {
       throw std::invalid_argument("colors must have at least 2 colors");
     }
-    std::vector<SkScalar> positions = getPositions(runtime, arguments[3]);
-    if (!positions.empty() && positions.size() != colorsSize) {
+    std::vector<float> positions = getPositions(runtime, arguments[3]);
+    if (!positions.empty() && positions.size() != colors.size()) {
       throw std::invalid_argument(
           "positions must be empty or the same size as colors");
     }
     auto tileMode = getTileMode(arguments, 4, count);
     auto localMatrix = getLocalMatrix(runtime, arguments, 5, count);
     auto flag = getFlag(arguments, 6, count);
-    auto startAngle =
+    float startAngle =
         (count < 8 || arguments[7].isUndefined()) ? 0 : arguments[7].asNumber();
-    auto endAngle = (count < 9 || arguments[8].isUndefined())
-                        ? 360
-                        : arguments[8].asNumber();
-    sk_sp<SkShader> gradient = SkGradientShader::MakeSweep(
-        x, y, colors.data(), !positions.empty() ? positions.data() : nullptr,
-        static_cast<int>(colorsSize), tileMode, startAngle, endAngle, flag,
-        localMatrix);
+    float endAngle = (count < 9 || arguments[8].isUndefined())
+                         ? 360
+                         : arguments[8].asNumber();
+
+    SkGradient::Colors gradColors(
+        SkSpan(colors.data(), colors.size()),
+        SkSpan(positions.data(), positions.size()), tileMode);
+    SkGradient grad(gradColors, SkGradient::Interpolation::FromFlags(flag));
+    sk_sp<SkShader> gradient =
+        SkShaders::SweepGradient({x, y}, startAngle, endAngle, grad, localMatrix);
     auto shader =
         std::make_shared<JsiSkShader>(getContext(), std::move(gradient));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shader,
@@ -169,19 +175,18 @@ public:
   JSI_HOST_FUNCTION(MakeTwoPointConicalGradient) {
     auto start =
         *JsiSkPoint::fromValue(runtime, arguments[0].asObject(runtime)).get();
-    auto startRadius = arguments[1].asNumber();
+    float startRadius = arguments[1].asNumber();
 
     auto end =
         *JsiSkPoint::fromValue(runtime, arguments[2].asObject(runtime)).get();
-    auto endRadius = arguments[3].asNumber();
+    float endRadius = arguments[3].asNumber();
 
-    std::vector<SkColor> colors = getColors(runtime, arguments[4]);
-    auto colorsSize = colors.size();
-    if (colorsSize < 2) {
+    std::vector<SkColor4f> colors = getColors(runtime, arguments[4]);
+    if (colors.size() < 2) {
       throw std::invalid_argument("colors must have at least 2 colors");
     }
-    std::vector<SkScalar> positions = getPositions(runtime, arguments[5]);
-    if (!positions.empty() && positions.size() != colorsSize) {
+    std::vector<float> positions = getPositions(runtime, arguments[5]);
+    if (!positions.empty() && positions.size() != colors.size()) {
       throw std::invalid_argument(
           "positions must be empty or the same size as colors");
     }
@@ -189,10 +194,12 @@ public:
     auto localMatrix = getLocalMatrix(runtime, arguments, 7, count);
     auto flag = getFlag(arguments, 8, count);
 
-    sk_sp<SkShader> gradient = SkGradientShader::MakeTwoPointConical(
-        start, startRadius, end, endRadius, colors.data(),
-        !positions.empty() ? positions.data() : nullptr,
-        static_cast<int>(colorsSize), tileMode, flag, localMatrix);
+    SkGradient::Colors gradColors(
+        SkSpan(colors.data(), colors.size()),
+        SkSpan(positions.data(), positions.size()), tileMode);
+    SkGradient grad(gradColors, SkGradient::Interpolation::FromFlags(flag));
+    sk_sp<SkShader> gradient =
+        SkShaders::TwoPointConicalGradient(start, startRadius, end, endRadius, grad, localMatrix);
 
     auto shader =
         std::make_shared<JsiSkShader>(getContext(), std::move(gradient));

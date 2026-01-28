@@ -14,6 +14,9 @@ const ENABLE_SKPATH_EDIT_METHODS = true;
 const PATH_EDIT_FLAG = ENABLE_SKPATH_EDIT_METHODS
   ? "-USK_HIDE_PATH_EDIT_METHODS"
   : "";
+// Re-enable legacy gradient shader API (SkGradientShader::MakeLinear, etc.)
+// New API is SkShaders::LinearGradient but requires rebuild
+const LEGACY_GRADIENT_FLAG = "-DSK_SUPPORT_LEGACY_UNSPANNED_GRADIENTS";
 
 export const SkiaSrc = path.join(__dirname, "../../../externals/skia");
 export const ProjectRoot = path.join(__dirname, "../../..");
@@ -126,7 +129,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
         args: [
           [
             "extra_cflags",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "-target", "arm64-apple-tvos", "-mappletvos-version-min=${appleMinTarget}"]`,
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "${LEGACY_GRADIENT_FLAG}", "-target", "arm64-apple-tvos", "-mappletvos-version-min=${appleMinTarget}"]`,
           ],
           [
             "extra_asmflags",
@@ -145,7 +148,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
           ["ios_use_simulator", true],
           [
             "extra_cflags",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "${LEGACY_GRADIENT_FLAG}", "-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
           ],
           [
             "extra_asmflags",
@@ -164,7 +167,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
           ["ios_use_simulator", true],
           [
             "extra_cflags",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "-target", "x86_64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "${LEGACY_GRADIENT_FLAG}", "-target", "x86_64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
           ],
           [
             "extra_asmflags",
@@ -190,7 +193,7 @@ const maccatalystTargets: { [key: string]: Target } = MACCATALYST
           ["target_cpu", `"arm64"`],
           [
             "extra_cflags",
-            `["-fexceptions","-frtti"${PATH_EDIT_FLAG ? `,"${PATH_EDIT_FLAG}"` : ""},"-target","arm64-apple-ios14.0-macabi",` +
+            `["-fexceptions","-frtti"${PATH_EDIT_FLAG ? `,"${PATH_EDIT_FLAG}"` : ""},"${LEGACY_GRADIENT_FLAG}","-target","arm64-apple-ios14.0-macabi",` +
               `"-isysroot","${appleSdkRoot}",` +
               `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
               `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
@@ -212,7 +215,7 @@ const maccatalystTargets: { [key: string]: Target } = MACCATALYST
           ["target_cpu", `"x64"`],
           [
             "extra_cflags",
-            `["-fexceptions","-frtti"${PATH_EDIT_FLAG ? `,"${PATH_EDIT_FLAG}"` : ""},"-target","x86_64-apple-ios14.0-macabi",` +
+            `["-fexceptions","-frtti"${PATH_EDIT_FLAG ? `,"${PATH_EDIT_FLAG}"` : ""},"${LEGACY_GRADIENT_FLAG}","-target","x86_64-apple-ios14.0-macabi",` +
               `"-isysroot","${appleSdkRoot}",` +
               `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
               `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
@@ -262,7 +265,7 @@ export const configurations = {
       ["cxx", '"clang++"'],
       [
         "extra_cflags",
-        `["-DSKIA_C_DLL", "-DHAVE_SYSCALL_GETRANDOM", "-DXML_DEV_URANDOM"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+        `["-DSKIA_C_DLL", "-DHAVE_SYSCALL_GETRANDOM", "-DXML_DEV_URANDOM"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "${LEGACY_GRADIENT_FLAG}"]`,
       ],
       ...ParagraphArgsAndroid,
     ],
@@ -286,7 +289,7 @@ export const configurations = {
           ["ios_min_target", `"${appleMinTarget}"`],
           [
             "extra_cflags",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "${LEGACY_GRADIENT_FLAG}"]`,
           ],
         ],
       },
@@ -298,7 +301,7 @@ export const configurations = {
           ["ios_use_simulator", true],
           [
             "extra_cflags",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "${LEGACY_GRADIENT_FLAG}"]`,
           ],
         ],
       },
@@ -309,7 +312,7 @@ export const configurations = {
           ["ios_min_target", `"${appleSimulatorMinTarget}"`],
           [
             "extra_cflags",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "${LEGACY_GRADIENT_FLAG}"]`,
           ],
         ],
       },
@@ -322,7 +325,7 @@ export const configurations = {
         args: [
           [
             "extra_cflags",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "${LEGACY_GRADIENT_FLAG}"]`,
           ],
         ],
       },
@@ -333,7 +336,7 @@ export const configurations = {
         args: [
           [
             "extra_cflags",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "${LEGACY_GRADIENT_FLAG}"]`,
           ],
         ],
       },
@@ -592,6 +595,16 @@ export const copyHeaders = () => {
   fileOps.cp(
     "../../externals/skia/modules/skunicode/include/SkUnicode.h",
     "./cpp/skia/modules/skunicode/include/SkUnicode.h"
+  );
+  // Android uses ICU
+  fileOps.cp(
+    "../../externals/skia/modules/skunicode/include/SkUnicode_icu.h",
+    "./cpp/skia/modules/skunicode/include/SkUnicode_icu.h"
+  );
+  // Apple uses libgrapheme
+  fileOps.cp(
+    "../../externals/skia/modules/skunicode/include/SkUnicode_libgrapheme.h",
+    "./cpp/skia/modules/skunicode/include/SkUnicode_libgrapheme.h"
   );
   // Check for duplicate header names and issue warnings
   const duplicateHeaders = $(

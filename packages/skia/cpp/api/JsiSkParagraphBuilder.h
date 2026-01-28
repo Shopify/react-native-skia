@@ -18,6 +18,13 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "modules/skparagraph/include/ParagraphBuilder.h"
+#include "modules/skunicode/include/SkUnicode.h"
+
+#ifdef __APPLE__
+#include "modules/skunicode/include/SkUnicode_libgrapheme.h"
+#else
+#include "modules/skunicode/include/SkUnicode_icu.h"
+#endif
 
 #pragma clang diagnostic pop
 
@@ -125,7 +132,13 @@ public:
       _fontCollection->setAssetFontManager(fontManager);
     }
     _fontCollection->enableFontFallback();
-    _builder = para::ParagraphBuilder::make(paragraphStyle, _fontCollection);
+#ifdef __APPLE__
+    auto unicode = SkUnicodes::Libgrapheme::Make();
+#else
+    auto unicode = SkUnicodes::ICU::Make();
+#endif
+    _builder =
+        para::ParagraphBuilder::make(paragraphStyle, _fontCollection, unicode);
   }
 
 private:
