@@ -403,6 +403,7 @@ describe("Paragraphs", () => {
   it("should compare wordSpacing between LTR and RTL mixed text", async () => {
     const img = await surface.drawOffscreen(
       (Skia, canvas, ctx) => {
+        const wordSpacing = 40;
         const roboto = Skia.Typeface.MakeFreeTypeFaceFromData(
           Skia.Data.fromBytes(new Uint8Array(ctx.RobotoRegular))
         )!;
@@ -427,7 +428,7 @@ describe("Paragraphs", () => {
             fontFamilies: ["Roboto", "Amiri"],
             fontSize: 16,
             color: Skia.Color("black"),
-            wordSpacing: 20,
+            wordSpacing,
           })
           .addText(mixedText)
           .pop()
@@ -446,7 +447,7 @@ describe("Paragraphs", () => {
             fontFamilies: ["Roboto", "Amiri"],
             fontSize: 16,
             color: Skia.Color("black"),
-            wordSpacing: 20,
+            wordSpacing,
           })
           .addText(mixedText)
           .pop()
