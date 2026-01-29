@@ -15,8 +15,10 @@
 #include "EnumMapper.h"
 #include "Promise.h"
 
+#ifdef SK_GRAPHITE
 #include "rnwgpu/api/descriptors/Unions.h"
 #include "rnwgpu/async/AsyncTaskHandle.h"
+#endif
 
 // This number is the maximum integer that can be represented exactly as a double
 #define MAX_SAFE_INTEGER static_cast<uint64_t>(9007199254740991)
@@ -196,6 +198,7 @@ template <typename TEnum> struct JSIConverter<TEnum, std::enable_if_t<std::is_en
   }
 };
 
+#ifdef SK_GRAPHITE
 // AsyncTaskHandle <> Promise
 template <> struct JSIConverter<rnwgpu::async::AsyncTaskHandle> {
   static rnwgpu::async::AsyncTaskHandle fromJSI(jsi::Runtime&, const jsi::Value&, bool) {
@@ -214,6 +217,7 @@ template <> struct JSIConverter<rnwgpu::async::AsyncTaskHandle> {
     });
   }
 };
+#endif
 
 // std::map<std::string, T> <> Record<string, T>
 template <typename ValueType> struct JSIConverter<std::map<std::string, ValueType>> {

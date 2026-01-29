@@ -82,9 +82,10 @@ Pod::Spec.new do |s|
   graphite_exclusions = [
     'cpp/rnskia/RNDawnContext.h',
     'cpp/rnskia/RNDawnUtils.h',
-    'cpp/rnskia/RNDawnWindowContext.h', 
+    'cpp/rnskia/RNDawnWindowContext.h',
     'cpp/rnskia/RNDawnWindowContext.cpp',
-    'cpp/rnskia/RNImageProvider.h'
+    'cpp/rnskia/RNImageProvider.h',
+    'cpp/rnwgpu/**/*.{h,cpp}'
   ]
   s.exclude_files = graphite_exclusions unless use_graphite 
 
