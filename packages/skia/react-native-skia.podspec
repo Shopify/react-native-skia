@@ -66,7 +66,7 @@ Pod::Spec.new do |s|
     'GCC_PREPROCESSOR_DEFINITIONS' => preprocessor_defs,
     'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17',
     'DEFINES_MODULE' => 'YES',
-    "HEADER_SEARCH_PATHS" => '"$(PODS_TARGET_SRCROOT)/cpp/"/**'
+    "HEADER_SEARCH_PATHS" => '"$(PODS_TARGET_SRCROOT)/cpp/"/** "$(PODS_TARGET_SRCROOT)/cpp" "$(PODS_TARGET_SRCROOT)/cpp/jsi2" "$(PODS_TARGET_SRCROOT)/cpp/rnwgpu" "$(PODS_TARGET_SRCROOT)/cpp/rnwgpu/api" "$(PODS_TARGET_SRCROOT)/cpp/rnwgpu/api/descriptors" "$(PODS_TARGET_SRCROOT)/cpp/rnwgpu/async" "$(PODS_TARGET_SRCROOT)/cpp/dawn/include"'
   }
 
   s.frameworks = ['MetalKit', 'AVFoundation', 'AVKit', 'CoreMedia']
@@ -82,9 +82,10 @@ Pod::Spec.new do |s|
   graphite_exclusions = [
     'cpp/rnskia/RNDawnContext.h',
     'cpp/rnskia/RNDawnUtils.h',
-    'cpp/rnskia/RNDawnWindowContext.h', 
+    'cpp/rnskia/RNDawnWindowContext.h',
     'cpp/rnskia/RNDawnWindowContext.cpp',
-    'cpp/rnskia/RNImageProvider.h'
+    'cpp/rnskia/RNImageProvider.h',
+    'cpp/rnwgpu/**/*.{h,cpp}'
   ]
   s.exclude_files = graphite_exclusions unless use_graphite 
 

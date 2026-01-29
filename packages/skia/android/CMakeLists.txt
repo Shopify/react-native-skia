@@ -122,6 +122,37 @@ add_library(
         ${BACKEND_SOURCES}
 )
 
+if(SK_GRAPHITE)
+    # WebGPU JSI infrastructure (jsi2)
+    target_sources(${PACKAGE_NAME} PRIVATE
+        "${PROJECT_SOURCE_DIR}/../cpp/jsi2/Promise.cpp"
+
+        # WebGPU async system
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/AsyncRunner.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/AsyncTaskHandle.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/JSIMicrotaskDispatcher.cpp"
+
+        # WebGPU API
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPU.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUAdapter.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUBindGroup.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUBuffer.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUCommandEncoder.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUComputePassEncoder.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUComputePipeline.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUDevice.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUDeviceLostInfo.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUQuerySet.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUQueue.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderBundleEncoder.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderPassEncoder.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderPipeline.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUShaderModule.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUSupportedLimits.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUTexture.cpp"
+    )
+endif()
+
 
 target_include_directories(
         ${PACKAGE_NAME}
@@ -149,6 +180,14 @@ target_include_directories(
         ../cpp/rnskia
         ../cpp/rnskia/values
         ../cpp/utils
+
+        # WebGPU bindings
+        ../cpp
+        ../cpp/jsi2
+        ../cpp/rnwgpu
+        ../cpp/rnwgpu/api
+        ../cpp/rnwgpu/api/descriptors
+        ../cpp/rnwgpu/async
 
         ${libfbjni_include_DIRS}
 )
