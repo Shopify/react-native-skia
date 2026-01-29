@@ -1,5 +1,7 @@
 package com.shopify.reactnative.skia;
 
+import com.facebook.react.uimanager.PointerEvents;
+import com.facebook.react.uimanager.ViewProps;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.views.view.ReactViewGroup;
 import com.facebook.react.views.view.ReactViewManager;
@@ -24,6 +26,11 @@ public abstract class SkiaBaseViewManager<T extends SkiaBaseView> extends ReactV
     @ReactProp(name = "opaque")
     public void setOpaque(T view, boolean value) {
         ((SkiaBaseView)view).setOpaque(value);
+    }
+
+    @ReactProp(name = ViewProps.POINTER_EVENTS)
+    public void setPointerEvents(T view, @Nullable String pointerEventsStr) {
+        view.setPointerEvents(PointerEvents.parsePointerEvents(pointerEventsStr));
     }
 
     @Override
