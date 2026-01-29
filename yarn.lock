@@ -9358,6 +9358,14 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@shopify/react-native-skia-skills@workspace:packages/skia-skills":
+  version: 0.0.0-use.local
+  resolution: "@shopify/react-native-skia-skills@workspace:packages/skia-skills"
+  bin:
+    skia-skills-install: scripts/install.mjs
+  languageName: unknown
+  linkType: soft
+
 "@shopify/react-native-skia@workspace:*, @shopify/react-native-skia@workspace:packages/skia":
   version: 0.0.0-use.local
   resolution: "@shopify/react-native-skia@workspace:packages/skia"

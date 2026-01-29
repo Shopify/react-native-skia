@@ -1,0 +1,21 @@
+{
+  "name": "@shopify/react-native-skia-skills",
+  "version": "0.0.1",
+  "description": "Claude Code skills for React Native Skia",
+  "license": "MIT",
+  "author": "Shopify Inc.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shopify/react-native-skia.git",
+    "directory": "packages/skia-skills"
+  },
+  "files": [
+    "skills/**"
+  ],
+  "scripts": {
+    "build": "node scripts/build-skills.mjs"
+  },
+  "bin": {
+    "skia-skills-install": "scripts/install.mjs"
+  }
+}
