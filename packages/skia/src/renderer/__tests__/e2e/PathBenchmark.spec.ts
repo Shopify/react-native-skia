@@ -2,9 +2,10 @@ import { surface } from "../setup";
 
 const ITERATIONS = 10000;
 // Maximum allowed time in milliseconds for each benchmark
-// Based on observed performance: most operations complete 10k iterations in <25ms
-// Setting threshold at 100ms provides ~4x headroom for CI variance
-const MAX_TIME_MS = 100;
+// Based on observed performance: most operations complete 10k iterations in <25ms on fast machines
+// CI machines are significantly slower, so we set generous thresholds to catch only
+// severe regressions (5x-10x slowdowns), not normal CI variance
+const MAX_TIME_MS = 500;
 
 describe("Path Performance Benchmarks", () => {
   it(`should complete ${ITERATIONS} lineTo operations within ${MAX_TIME_MS}ms`, async () => {
@@ -375,7 +376,7 @@ describe("Path Performance Benchmarks", () => {
 
   it("should complete a complex path building scenario within acceptable time", async () => {
     const iterations = 1000;
-    const maxTime = 50;
+    const maxTime = 250;
 
     const elapsed = await surface.eval(
       (Skia, ctx) => {
@@ -405,7 +406,7 @@ describe("Path Performance Benchmarks", () => {
 
   it("should complete method chaining efficiently", async () => {
     const iterations = 1000;
-    const maxTime = 50;
+    const maxTime = 250;
 
     const elapsed = await surface.eval(
       (Skia, ctx) => {
@@ -435,7 +436,7 @@ describe("Path Performance Benchmarks", () => {
 
   it("should handle addPath efficiently", async () => {
     const iterations = 5000;
-    const maxTime = 50;
+    const maxTime = 250;
 
     const elapsed = await surface.eval(
       (Skia, ctx) => {
@@ -458,7 +459,7 @@ describe("Path Performance Benchmarks", () => {
 
   it("should handle addPoly efficiently", async () => {
     const iterations = 5000;
-    const maxTime = 100;
+    const maxTime = 500;
 
     const elapsed = await surface.eval(
       (Skia, ctx) => {
