@@ -17,6 +17,8 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
     public SkiaBaseView(Context context) {
         super(context);
         mView = new SkiaTextureView(context, this, debug);
+        mView.setClickable(false);
+        mView.setFocusable(false);
         addView(mView);
     }
 
@@ -24,10 +26,14 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
         if (value && mView instanceof SkiaTextureView) {
             removeView(mView);
             mView = new SkiaSurfaceView(getContext(), this, debug);
+            mView.setClickable(false);
+            mView.setFocusable(false);
             addView(mView);
         } else if (!value && mView instanceof SkiaSurfaceView) {
             removeView(mView);
             mView = new SkiaTextureView(getContext(), this, debug);
+            mView.setClickable(false);
+            mView.setFocusable(false);
             addView(mView);
         }
     }
