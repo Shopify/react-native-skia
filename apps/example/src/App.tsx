@@ -34,6 +34,7 @@ import {
   Chat,
   LiquidGlass,
   Pictures,
+  WebGPU,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
@@ -73,6 +74,7 @@ const linking: LinkingOptions<StackParamList> = {
       Video: "video",
       Chat: "chat",
       Pictures: "pictures",
+      WebGPU: "webgpu",
     },
   },
   prefixes: ["rnskia://"],
@@ -235,6 +237,13 @@ const App = () => {
               component={PerformanceDrawingTest}
             />
             <Stack.Screen name="Pictures" component={Pictures} />
+            <Stack.Screen
+              name="WebGPU"
+              component={WebGPU}
+              options={{
+                header: () => null,
+              }}
+            />
           </Stack.Navigator>
         </NavigationContainer>
       </GestureHandlerRootView>
