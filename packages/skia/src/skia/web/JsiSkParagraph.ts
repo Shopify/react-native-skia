@@ -5,7 +5,6 @@ import type {
   SkRectWithDirection,
   SkParagraph,
   LineMetrics,
-  GlyphRun,
 } from "../types";
 
 import { HostObject } from "./Host";
@@ -64,36 +63,5 @@ export class JsiSkParagraph
   }
   getLineMetrics(): LineMetrics[] {
     return this.ref.getLineMetrics();
-  }
-  getGlyphs(): GlyphRun[] {
-    const shapedLines = this.ref.getShapedLines();
-    const result: GlyphRun[] = [];
-
-    shapedLines.forEach((line, lineNumber) => {
-      line.runs.forEach((run) => {
-        const glyphIds: number[] = Array.from(run.glyphs);
-        const positions: { x: number; y: number }[] = [];
-
-        // positions are stored as flat array of floats: [x0, y0, x1, y1, ...]
-        // There's count+1 positions to describe location "after" last glyph
-        for (let i = 0; i < run.glyphs.length; i++) {
-          positions.push({
-            x: run.positions[i * 2],
-            y: run.positions[i * 2 + 1],
-          });
-        }
-
-        result.push({
-          lineNumber,
-          origin: { x: run.positions[0] || 0, y: run.positions[1] || 0 },
-          advanceX:
-            run.positions[run.glyphs.length * 2] - (run.positions[0] || 0),
-          glyphIds,
-          positions,
-        });
-      });
-    });
-
-    return result;
   }
 }

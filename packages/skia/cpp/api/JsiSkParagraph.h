@@ -157,53 +157,6 @@ public:
     return returnValue;
   }
 
-  JSI_HOST_FUNCTION(getGlyphs) {
-    std::vector<jsi::Object> runs;
-
-    getObject()->visit([&](int lineNumber, const para::Paragraph::VisitorInfo* info) {
-      if (info == nullptr) {
-        return; // End of line signal
-      }
-
-      auto run = jsi::Object(runtime);
-      run.setProperty(runtime, "lineNumber", static_cast<double>(lineNumber));
-
-      // Origin position
-      auto origin = jsi::Object(runtime);
-      origin.setProperty(runtime, "x", static_cast<double>(info->origin.fX));
-      origin.setProperty(runtime, "y", static_cast<double>(info->origin.fY));
-      run.setProperty(runtime, "origin", origin);
-
-      // Advance
-      run.setProperty(runtime, "advanceX", static_cast<double>(info->advanceX));
-
-      // Glyph IDs
-      auto glyphIds = jsi::Array(runtime, info->count);
-      for (int i = 0; i < info->count; ++i) {
-        glyphIds.setValueAtIndex(runtime, i, static_cast<double>(info->glyphs[i]));
-      }
-      run.setProperty(runtime, "glyphIds", glyphIds);
-
-      // Positions
-      auto positions = jsi::Array(runtime, info->count);
-      for (int i = 0; i < info->count; ++i) {
-        auto pos = jsi::Object(runtime);
-        pos.setProperty(runtime, "x", static_cast<double>(info->positions[i].fX));
-        pos.setProperty(runtime, "y", static_cast<double>(info->positions[i].fY));
-        positions.setValueAtIndex(runtime, i, pos);
-      }
-      run.setProperty(runtime, "positions", positions);
-
-      runs.push_back(std::move(run));
-    });
-
-    auto returnValue = jsi::Array(runtime, runs.size());
-    for (size_t i = 0; i < runs.size(); ++i) {
-      returnValue.setValueAtIndex(runtime, i, std::move(runs[i]));
-    }
-    return returnValue;
-  }
-
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraph, layout),
                        JSI_EXPORT_FUNC(JsiSkParagraph, paint),
                        JSI_EXPORT_FUNC(JsiSkParagraph, getMaxWidth),
@@ -216,7 +169,6 @@ public:
                                        getGlyphPositionAtCoordinate),
                        JSI_EXPORT_FUNC(JsiSkParagraph, getRectsForRange),
                        JSI_EXPORT_FUNC(JsiSkParagraph, getLineMetrics),
-                       JSI_EXPORT_FUNC(JsiSkParagraph, getGlyphs),
                        JSI_EXPORT_FUNC(JsiSkParagraph, dispose))
 
   size_t getMemoryPressure() const override { return 1024 * 1024; }
