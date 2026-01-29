@@ -1,7 +1,10 @@
+import { Skia } from "@shopify/react-native-skia";
 import React from "react";
 import { ScrollView } from "react-native";
 
 import { HomeScreenButton } from "./HomeScreenButton";
+
+const hasWebGPU = Skia.hasDevice();
 
 export const HomeScreen = () => {
   return (
@@ -127,11 +130,13 @@ export const HomeScreen = () => {
         description="Animated circle trail using Pictures"
         route="Pictures"
       />
-      <HomeScreenButton
-        title="🔺 WebGPU"
-        description="WebGPU Wireframe demo"
-        route="WebGPU"
-      />
+      {hasWebGPU && (
+        <HomeScreenButton
+          title="🔺 WebGPU"
+          description="WebGPU Wireframe demo"
+          route="WebGPU"
+        />
+      )}
     </ScrollView>
   );
 };

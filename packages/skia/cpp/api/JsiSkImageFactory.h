@@ -118,8 +118,8 @@ public:
         runtime, hostObjectInstance, getContext());
   }
 
-#ifdef SK_GRAPHITE
   JSI_HOST_FUNCTION(MakeImageFromTexture) {
+#ifdef SK_GRAPHITE
     if (count < 1 || !arguments[0].isObject()) {
       throw std::runtime_error(
           "MakeImageFromTexture requires a GPUTexture argument");
@@ -136,7 +136,8 @@ public:
     wgpu::TextureFormat format = gpuTexture->getFormat();
 
     auto &dawnContext = DawnContext::getInstance();
-    auto image = dawnContext.MakeImageFromTexture(texture, width, height, format);
+    auto image =
+        dawnContext.MakeImageFromTexture(texture, width, height, format);
     if (image == nullptr) {
       throw std::runtime_error("Failed to create SkImage from GPUTexture!");
     }
@@ -144,9 +145,15 @@ public:
         std::make_shared<JsiSkImage>(getContext(), std::move(image));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
         runtime, hostObjectInstance, getContext());
+#else
+    throw std::runtime_error(
+        "MakeImageFromTexture is only available with the Graphite backend. "
+        "Rebuild with SK_GRAPHITE enabled.");
+#endif
   }
 
   JSI_HOST_FUNCTION(MakeTextureFromImage) {
+#ifdef SK_GRAPHITE
     if (count < 1) {
       throw std::runtime_error(
           "MakeTextureFromImage requires an SkImage argument");
@@ -165,14 +172,17 @@ public:
     auto gpuTexture =
         std::make_shared<rnwgpu::GPUTexture>(texture, "SkImage Texture");
     return rnwgpu::GPUTexture::create(runtime, gpuTexture);
-  }
+#else
+    throw std::runtime_error(
+        "MakeTextureFromImage is only available with the Graphite backend. "
+        "Rebuild with SK_GRAPHITE enabled.");
 #endif
+  }
 
   size_t getMemoryPressure() const override { return 1024; }
 
   std::string getObjectType() const override { return "JsiSkImageFactory"; }
 
-#ifdef SK_GRAPHITE
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromEncoded),
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTag),
                        JSI_EXPORT_FUNC(JsiSkImageFactory,
@@ -183,16 +193,6 @@ public:
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeNull),
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromTexture),
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeTextureFromImage))
-#else
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromEncoded),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTag),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory,
-                                       MakeImageFromNativeBuffer),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory,
-                                       MakeImageFromNativeTextureUnstable),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeNull))
-#endif
 
   explicit JsiSkImageFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

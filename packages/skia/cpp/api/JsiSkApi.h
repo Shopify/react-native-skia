@@ -147,8 +147,16 @@ public:
 
     installFunction("Recorder", JsiRecorder::createCtor(context));
 
+    installFunction("hasDevice", JSI_HOST_FUNCTION_LAMBDA {
 #ifdef SK_GRAPHITE
+      return jsi::Value(true);
+#else
+      return jsi::Value(false);
+#endif
+    });
+
     installFunction("getDevice", JSI_HOST_FUNCTION_LAMBDA {
+#ifdef SK_GRAPHITE
       auto &dawnContext = DawnContext::getInstance();
       auto asyncRunner = rnwgpu::async::AsyncRunner::get(runtime);
       if (!asyncRunner) {
@@ -157,8 +165,12 @@ public:
       auto device = std::make_shared<rnwgpu::GPUDevice>(
           dawnContext.getWGPUDevice(), asyncRunner, "Skia Device");
       return rnwgpu::GPUDevice::create(runtime, device);
-    });
+#else
+      throw jsi::JSError(runtime,
+                         "getDevice() is only available with the Graphite "
+                         "backend. Rebuild with SK_GRAPHITE enabled.");
 #endif
+    });
   }
 };
 } // namespace RNSkia
