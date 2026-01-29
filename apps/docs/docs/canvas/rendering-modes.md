@@ -6,6 +6,9 @@ slug: /canvas/rendering-modes
 ---
 
 React Native Skia supports two rendering paradigms: **Retained Mode** and **Immediate Mode**. Understanding when to use each is key to building performant graphics applications.
+The Retained Mode allows for extremely fast animation time with a virtually zero FFI-cost if the drawing list is updated at low frequency. The immediate mode allows for dynamic drawing list but has a higher FFI-cost to pay.
+Since immediate mode uses the same `<Canvas>` element, you can seamlessly combine both rendering modes in a single scene.
+
 
 ## Retained Mode (Default)
 
@@ -79,6 +82,8 @@ export const ImmediateModeExample = () => {
 ```
 
 ## Choosing the Right Mode
+
+Here is a small list of use-cases and which mode would be best for that scenario. Keep in mind that since these modes use the same `<Canvas>` element they can be nicely composed with each other. For instance a game where the scene is dynamic on every animation frame and some game UI elements are built in Retained Mode.
 
 | Scenario | Recommended Mode | Why |
 |:---------|:-----------------|:----|
