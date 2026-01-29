@@ -48,6 +48,9 @@ export class ParagraphAsset<Ctx extends EvalContext>
   getRectsForPlaceholders() {
     return this.instance.getRectsForPlaceholders();
   }
+  getGlyphs() {
+    return this.instance.getGlyphs();
+  }
   __typename__ = "Paragraph" as const;
 
   [Symbol.dispose](): void {

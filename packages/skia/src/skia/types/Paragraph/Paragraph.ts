@@ -40,6 +40,24 @@ export interface SkRectWithDirection {
   direction: TextDirection;
 }
 
+export interface GlyphPosition {
+  x: number;
+  y: number;
+}
+
+export interface GlyphRun {
+  /** Line number (0-indexed) */
+  lineNumber: number;
+  /** Origin position of this run */
+  origin: GlyphPosition;
+  /** Total advance width of this run */
+  advanceX: number;
+  /** Array of glyph IDs (shaped and in visual order) */
+  glyphIds: number[];
+  /** Array of glyph positions relative to the run origin */
+  positions: GlyphPosition[];
+}
+
 export interface SkParagraph extends SkJSIInstance<"Paragraph"> {
   /**
    * Calculates the position of the the glyphs in the paragraph
@@ -112,4 +130,11 @@ export interface SkParagraph extends SkJSIInstance<"Paragraph"> {
    * to the paragraph.
    */
   getRectsForPlaceholders(): SkRectWithDirection[];
+  /**
+   * Returns the shaped glyph runs for the paragraph. Each run contains
+   * glyph IDs and positions that have been properly shaped (including
+   * RTL text, ligatures, and complex scripts like Arabic).
+   * This method requires the layout method to have been called first.
+   */
+  getGlyphs(): GlyphRun[];
 }
