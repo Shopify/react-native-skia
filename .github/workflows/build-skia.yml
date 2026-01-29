@@ -1,6 +1,11 @@
 name: Build SKIA
 on:
   workflow_dispatch:
+    inputs:
+      tag_suffix:
+        description: 'Optional suffix to append to tag (e.g., "a" for skia-m144a)'
+        required: false
+        default: ''
 jobs:
   prepare-release:
     runs-on: ubuntu-latest
@@ -38,12 +43,13 @@ jobs:
       - name: Compute release metadata
         id: release_meta
         run: |
-          tag="skia-${SKIA_BRANCH_SLUG}"
+          tag="skia-${SKIA_BRANCH_SLUG}${TAG_SUFFIX}"
           echo "tag_name=$tag" >> "$GITHUB_OUTPUT"
-          echo "release_name=Skia ${SKIA_BRANCH}" >> "$GITHUB_OUTPUT"
+          echo "release_name=Skia ${SKIA_BRANCH}${TAG_SUFFIX}" >> "$GITHUB_OUTPUT"
         env:
           SKIA_BRANCH: ${{ steps.skia_meta.outputs.branch }}
           SKIA_BRANCH_SLUG: ${{ steps.skia_meta.outputs.branch_slug }}
+          TAG_SUFFIX: ${{ github.event.inputs.tag_suffix }}
       - name: Create GitHub release
         id: create_release
         uses: softprops/action-gh-release@v2
