@@ -3,9 +3,11 @@ package com.shopify.reactnative.skia;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 
+import com.facebook.react.uimanager.PointerEvents;
 import com.facebook.react.views.view.ReactViewGroup;
 
 public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI {
@@ -17,23 +19,27 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
     public SkiaBaseView(Context context) {
         super(context);
         mView = new SkiaTextureView(context, this, debug);
-        mView.setClickable(false);
-        mView.setFocusable(false);
         addView(mView);
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        // When pointerEvents is "none" or "box-none", make this view completely
+        // transparent to touch dispatch so events pass through to views behind it
+        if (!PointerEvents.canBeTouchTarget(getPointerEvents())) {
+            return false;
+        }
+        return super.dispatchTouchEvent(ev);
     }
 
     public void setOpaque(boolean value) {
         if (value && mView instanceof SkiaTextureView) {
             removeView(mView);
             mView = new SkiaSurfaceView(getContext(), this, debug);
-            mView.setClickable(false);
-            mView.setFocusable(false);
             addView(mView);
         } else if (!value && mView instanceof SkiaSurfaceView) {
             removeView(mView);
             mView = new SkiaTextureView(getContext(), this, debug);
-            mView.setClickable(false);
-            mView.setFocusable(false);
             addView(mView);
         }
     }
