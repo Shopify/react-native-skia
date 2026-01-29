@@ -107,4 +107,28 @@ describe("Text Paths", () => {
     );
     checkImage(img, `snapshots/text/text-path-arabic-${surface.OS}.png`);
   });
+
+  it("Should draw Arabic text along a path with TextPath component", async () => {
+    const { Skia } = importSkia();
+    const font = fonts.Amiri;
+
+    const path = Skia.Path.Make();
+    path.moveTo(20, 120);
+    path.quadTo(surface.width / 2, 20, surface.width - 20, 120);
+
+    const image = await surface.draw(
+      <>
+        <Fill color="white" />
+        <TextPath
+          font={font}
+          path={path}
+          text="بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ"
+        />
+      </>
+    );
+    checkImage(
+      image,
+      `snapshots/text/text-path-arabic-component-${surface.OS}.png`
+    );
+  });
 });
