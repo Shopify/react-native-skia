@@ -1,4 +1,4 @@
-packages/skia/android/CMakeLists.txtproject(RNSkia)
+project(RNSkia)
 cmake_minimum_required(VERSION 3.4.1)
 
 set (CMAKE_VERBOSE_MAKEFILE ON)
@@ -120,8 +120,11 @@ add_library(
 
         "${PROJECT_SOURCE_DIR}/../cpp/api/JsiSkDispatcher.cpp"
         ${BACKEND_SOURCES}
+)
 
-        # WebGPU JSI infrastructure (jsi2)
+if(SK_GRAPHITE)
+    # WebGPU JSI infrastructure (jsi2)
+    target_sources(${PACKAGE_NAME} PRIVATE
         "${PROJECT_SOURCE_DIR}/../cpp/jsi2/Promise.cpp"
 
         # WebGPU async system
@@ -147,7 +150,8 @@ add_library(
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUShaderModule.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUSupportedLimits.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUTexture.cpp"
-)
+    )
+endif()
 
 
 target_include_directories(
