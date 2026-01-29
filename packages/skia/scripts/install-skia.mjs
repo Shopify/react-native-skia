@@ -108,7 +108,9 @@ const runCommandWithOutput = (command, args, options = {}) => {
 const skiaDir = path.resolve(__dirname, "../../../externals/skia");
 
 const checkoutSkiaBranch = async (version) => {
-  const branchName = `chrome/${version}`;
+  // Extract base version (e.g., "m144a" -> "m144", "m142" -> "m142")
+  const baseVersion = version.match(/^(m\d+)/)?.[1] || version;
+  const branchName = `chrome/${baseVersion}`;
 
   // Check if the skia directory exists and is a git repo
   // (won't exist when installed via npm - submodule is not included in the package)
@@ -142,8 +144,7 @@ const checkoutSkiaBranch = async (version) => {
 
     console.log(`   ✓ Successfully checked out ${branchName}`);
   } catch (error) {
-    console.error(`   ⚠️  Failed to checkout branch ${branchName}: ${error.message}`);
-    console.error("   Headers may not match the prebuilt binaries!");
+    throw new Error(`Failed to checkout branch ${branchName}: ${error.message}`);
   }
 };
 
