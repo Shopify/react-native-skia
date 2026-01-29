@@ -426,7 +426,7 @@ public:
     auto x2 = arguments[2].asNumber();
     auto y2 = arguments[3].asNumber();
     getObject()->quadTo(x1, y1, x2, y2);
-    return jsi::Value::undefined();
+    return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(rQuadTo) {

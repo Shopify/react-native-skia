@@ -5,8 +5,8 @@ sidebar_label: Pictures
 slug: /shapes/pictures
 ---
 
-React Native Skia works in retained mode: every re-render, we create a display list with support for animation values.
-This is great to animate property values. However, if you want to execute a variable number of drawing commands, this is where you need to use pictures.
+React Native Skia works in [retained mode](/docs/canvas/rendering-modes): every re-render, we create a display list with support for animation values.
+This is great for animating property values with near-zero performance cost. However, if you need to execute a **variable number of drawing commands** each frame, this is where you need to use the Picture API which works in [immediate mode](/docs/canvas/rendering-modes#immediate-mode) API.
 
 A Picture contains a list of drawing operations to be drawn on a canvas.
 The picture is immutable and cannot be edited or changed after it has been created. It can be used multiple times in any canvas.
