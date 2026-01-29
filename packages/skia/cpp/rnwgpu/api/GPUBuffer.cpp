@@ -12,8 +12,8 @@ GPUBuffer::getMappedRange(std::optional<size_t> o, std::optional<size_t> size) {
   auto offset = o.value_or(0);
   uint64_t s = size.has_value() ? size.value() : (_instance.GetSize() - offset);
 
-  uint64_t start = offset;
-  uint64_t end = offset + s;
+  //uint64_t start = offset;
+  //uint64_t end = offset + s;
   // for (auto& mapping : mappings_) {
   //     if (mapping.Intersects(start, end)) {
   //         Errors::OperationError(env).ThrowAsJavaScriptException();

@@ -23,14 +23,6 @@ struct GPUExternalTextureDescriptor {
   std::optional<std::string> label; // string
 };
 
-static bool conv(wgpu::ExternalTextureDescriptor &out,
-                 const std::shared_ptr<GPUExternalTextureDescriptor> &in) {
-  // TODO: implement
-  // return conv(out.source, in->source) && conv(out.colorSpace, in->colorSpace)
-  // &&
-  // return conv(out.label, in->label);
-  return false;
-}
 } // namespace rnwgpu
 
 namespace rnwgpu {

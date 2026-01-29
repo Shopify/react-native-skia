@@ -103,6 +103,15 @@ std::unordered_set<std::string> GPU::getWgslLanguageFeatures() {
     case wgpu::WGSLLanguageFeatureName::ChromiumTestingShipped:
       name = "chromium_testing_shipped";
       break;
+    case wgpu::WGSLLanguageFeatureName::SizedBindingArray:
+      name = "sized_binding_array";
+      break;
+    case wgpu::WGSLLanguageFeatureName::TexelBuffers:
+      name = "texel_buffers";
+      break;
+    case wgpu::WGSLLanguageFeatureName::ChromiumPrint:
+      name = "chromium_print";
+      break;
     }
     result.insert(name);
   }
