@@ -101,4 +101,12 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
     }
     return new JsiSkImage(this.CanvasKit, image);
   }
+
+  MakeImageFromTexture(_texture: GPUTexture): SkImage {
+    return throwNotImplementedOnRNWeb<SkImage>();
+  }
+
+  MakeTextureFromImage(_image: SkImage): GPUTexture {
+    return throwNotImplementedOnRNWeb<GPUTexture>();
+  }
 }
