@@ -2,7 +2,11 @@ import React from "react";
 
 import { checkImage } from "../../../__tests__/setup";
 import { Fill, Group, TextPath, fitbox } from "../../components";
-import { fonts, importSkia, surface } from "../setup";
+import { fonts, importSkia, resolveFile, surface } from "../setup";
+
+const Amiri = Array.from(
+  resolveFile("skia/__tests__/assets/Amiri-Regular.ttf")
+);
 
 describe("Text Paths", () => {
   // The NotoColorEmoji font is not supported on iOS
@@ -39,5 +43,92 @@ describe("Text Paths", () => {
       </>
     );
     checkImage(image, `snapshots/text/text-path-bug-${surface.OS}.png`);
+  });
+
+  it("Should draw Arabic text along a path", async () => {
+    const img = await surface.drawOffscreen(
+      (Skia, canvas, ctx) => {
+        const amiri = Skia.Typeface.MakeFreeTypeFaceFromData(
+          Skia.Data.fromBytes(new Uint8Array(ctx.Amiri))
+        )!;
+        const font = Skia.Font(amiri, 24);
+
+        const path = Skia.Path.Make();
+        path.moveTo(20, 120);
+        path.quadTo(ctx.width / 2, 20, ctx.width - 20, 120);
+
+        const paint = Skia.Paint();
+        paint.setColor(Skia.Color("black"));
+
+        canvas.drawColor(Skia.Color("white"));
+
+        const glyphIds = font.getGlyphIDs(
+          "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ"
+        );
+        const positions = font.getGlyphWidths(glyphIds);
+        let x = 0;
+        const glyphPositions = positions.map((width) => {
+          const pos = x;
+          x += width;
+          return pos;
+        });
+
+        const pm = Skia.ContourMeasureIter(path, false, 1);
+        const contour = pm.next();
+        if (contour) {
+          for (let i = 0; i < glyphIds.length; i++) {
+            const pos = glyphPositions[i];
+            const posTan = contour.getPosTan(pos);
+            if (posTan) {
+              canvas.save();
+              canvas.translate(posTan[0].x, posTan[0].y);
+              canvas.rotate(
+                (Math.atan2(posTan[1].y, posTan[1].x) * 180) / Math.PI,
+                0,
+                0
+              );
+              canvas.drawGlyphs(
+                [glyphIds[i]],
+                [{ x: 0, y: 0 }],
+                0,
+                0,
+                font,
+                paint
+              );
+              canvas.restore();
+            }
+          }
+        }
+      },
+      {
+        Amiri,
+        width: surface.width,
+      }
+    );
+    checkImage(img, `snapshots/text/text-path-arabic-${surface.OS}.png`);
+  });
+
+  it("Should draw Arabic text along a path with TextPath component", async () => {
+    const { Skia } = importSkia();
+    const font = fonts.Amiri;
+
+    const path = Skia.Path.Make();
+    path.moveTo(20, 120);
+    path.quadTo(surface.width / 2, 20, surface.width - 20, 120);
+
+    const image = await surface.draw(
+      <>
+        <Fill color="white" />
+        <TextPath
+          font={font}
+          path={path}
+          text="بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ"
+        />
+      </>
+    );
+    checkImage(
+      image,
+      `snapshots/text/text-path-arabic-component-${surface.OS}.png`
+    );
   });
 });
