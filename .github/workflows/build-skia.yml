@@ -174,3 +174,11 @@ jobs:
           tag_name: ${{ needs.prepare-release.outputs.tag_name }}
           files: ${{ steps.package.outputs.asset_path }}
           prerelease: true
+
+      - name: Upload binaries as workflow artifact (dry run) - ${{ matrix.artifact_name }}
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ steps.package.outputs.asset_path }}
+          retention-days: 7

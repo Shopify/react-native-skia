@@ -185,6 +185,14 @@ jobs:
           files: ${{ steps.package.outputs.asset_path }}
           prerelease: true
 
+      - name: Upload binaries as workflow artifact (dry run) - ${{ matrix.artifact_name }}
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ steps.package.outputs.asset_path }}
+          retention-days: 7
+
       - name: Package Graphite Headers
         if: matrix.target == 'apple-ios'
         id: package_headers
@@ -221,3 +229,11 @@ jobs:
           tag_name: ${{ needs.prepare-release.outputs.tag_name }}
           files: ${{ steps.package_headers.outputs.asset_path }}
           prerelease: true
+
+      - name: Upload Graphite Headers as workflow artifact (dry run)
+        if: ${{ matrix.target == 'apple-ios' && github.event.inputs.dry_run == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: skia-graphite-headers
+          path: ${{ steps.package_headers.outputs.asset_path }}
+          retention-days: 7
