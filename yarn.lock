@@ -15743,7 +15743,7 @@ __metadata:
     react-native-reanimated: 4.2.1
     react-native-safe-area-context: ^5.2.0
     react-native-screens: ^4.10.0
-    react-native-svg: 15.14.0
+    react-native-svg: "patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch"
     react-native-test-app: 4.4.7
     react-native-web: ^0.21.2
     react-native-windows: ^0.75.0
@@ -28035,6 +28035,20 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: fc583e05fcabf346d92fb6ce725ceb076b51c54636352325c2c770b454f91316366a712a12bcd261da0f8ce8c44ebf039c9fc5a1ca508a54a54d048c4f58ede5
+  languageName: node
+  linkType: hard
+
+"react-native-svg@patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch::locator=example%40workspace%3Aapps%2Fexample":
+  version: 15.14.0
+  resolution: "react-native-svg@patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch::version=15.14.0&hash=f0af0e&locator=example%40workspace%3Aapps%2Fexample"
+  dependencies:
+    css-select: ^5.1.0
+    css-tree: ^1.1.3
+    warn-once: 0.1.1
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 2c06b36399bc6f4c84ce11b3ec5231b73393575d121a790e7701b61e3ad23b5abc628f55b79fc9eea997130a73ad53921b644fdf48eddd564f66192292714063
   languageName: node
   linkType: hard
 
