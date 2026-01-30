@@ -5,9 +5,9 @@ sidebar_label: Atlas
 slug: /shapes/atlas
 ---
 
-The Atlas component is used for efficient rendering of multiple instances of the same texture or image. It is especially useful for drawing a very large number of similar objects, like sprites, with varying transformations.
+The Atlas component is used for efficient rendering of multiple instances of the same texture or image. It is especially useful for drawing a very large number of similar objects, like sprites or tiles, with varying transformations.
 
-Its design particularly useful when using with [Reanimated](#animations).
+Atlas transforms can be animated with near-zero cost using worklets. This makes it ideal for tile-based maps, sprite animations, and any scenario where you have many instances of similar textures. Its design is particularly useful when combined with [Reanimated](#animations).
 
 | Name    | Type             |  Description     |
 |:--------|:-----------------|:-----------------|

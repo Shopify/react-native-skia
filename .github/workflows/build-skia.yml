@@ -1,6 +1,11 @@
 name: Build SKIA
 on:
   workflow_dispatch:
+    inputs:
+      tag_suffix:
+        description: 'Optional suffix to append to tag (e.g., "a" for skia-m144a)'
+        required: false
+        default: ''
 jobs:
   prepare-release:
     runs-on: ubuntu-latest
@@ -11,7 +16,7 @@ jobs:
       release_name: ${{ steps.release_meta.outputs.release_name }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5.0.0
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
         with:
           submodules: recursive
           fetch-depth: 0
@@ -38,12 +43,13 @@ jobs:
       - name: Compute release metadata
         id: release_meta
         run: |
-          tag="skia-${SKIA_BRANCH_SLUG}"
+          tag="skia-${SKIA_BRANCH_SLUG}${TAG_SUFFIX}"
           echo "tag_name=$tag" >> "$GITHUB_OUTPUT"
-          echo "release_name=Skia ${SKIA_BRANCH}" >> "$GITHUB_OUTPUT"
+          echo "release_name=Skia ${SKIA_BRANCH}${TAG_SUFFIX}" >> "$GITHUB_OUTPUT"
         env:
           SKIA_BRANCH: ${{ steps.skia_meta.outputs.branch }}
           SKIA_BRANCH_SLUG: ${{ steps.skia_meta.outputs.branch_slug }}
+          TAG_SUFFIX: ${{ github.event.inputs.tag_suffix }}
       - name: Create GitHub release
         id: create_release
         uses: softprops/action-gh-release@v2
@@ -80,7 +86,7 @@ jobs:
       fail-fast: false
     steps:
       - name: checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5.0.0
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
         with:
           submodules: recursive
 
@@ -89,7 +95,7 @@ jobs:
         if: startsWith(matrix.target, 'android')
         uses: nttld/setup-ndk@afb4c9964b521afb97c864b7d40b11e6911bd410 # v1.5.0
         with:
-          ndk-version: r22b
+          ndk-version: r27c
 
       - name: Setup Ninja
         uses: seanmiddleditch/gha-setup-ninja@master

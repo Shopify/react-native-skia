@@ -26,6 +26,7 @@
     "@react-navigation/native-stack": "^7.2.1",
     "@shopify/react-native-skia": "workspace:*",
     "@testing-library/react-native": "^13.1.0",
+    "@webgpu/types": "^0.1.69",
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
     "cdt2d": "^1.0.0",
     "its-fine": "^2.0.0",

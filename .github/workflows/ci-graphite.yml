@@ -23,7 +23,7 @@ jobs:
       TURBO_CACHE_DIR: .turbo/android
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5.0.0
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
         with:
           submodules: recursive
 
@@ -46,7 +46,7 @@ jobs:
           df -h
 
       - name: Cache turborepo for Android
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
         with:
           path: ${{ env.TURBO_CACHE_DIR }}
           key: ${{ runner.os }}-turborepo-android-${{ hashFiles('yarn.lock') }}
@@ -63,7 +63,7 @@ jobs:
         uses: nttld/setup-ndk@afb4c9964b521afb97c864b7d40b11e6911bd410 # v1.5.0
         id: setup-ndk
         with:
-          ndk-version: r26d
+          ndk-version: r27d
 
       - name: Set ANDROID_NDK
         run: echo "ANDROID_NDK=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
@@ -77,7 +77,7 @@ jobs:
           echo "sdk.dir=$ANDROID_HOME" > $GITHUB_WORKSPACE/apps/example/android/local.properties
 
       - name: Cache Gradle
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
         with:
           path: |
             ~/.gradle/wrapper
@@ -93,7 +93,7 @@ jobs:
           yarn turbo run build:android --concurrency 1
 
       - name: Cache apk
-        uses: actions/cache/save@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        uses: actions/cache/save@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
         env:
           cache-name: cache-apk
         with:
@@ -114,7 +114,7 @@ jobs:
       TURBO_CACHE_DIR: .turbo/android
     steps:
       - name: checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5.0.0
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
         with:
           submodules: recursive
 
@@ -142,7 +142,7 @@ jobs:
 
       - name: Restore APK
         id: cache-apk
-        uses: actions/cache/restore@9255dc7a253b0ccc959486e2bca901246202afeb
+        uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7
         with:
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-graphite-${{ github.sha }}
@@ -189,7 +189,7 @@ jobs:
       TURBO_CACHE_DIR: .turbo/ios
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5.0.0
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
         with:
           submodules: recursive
 
@@ -200,7 +200,7 @@ jobs:
           graphite: true
 
       - name: Cache turborepo for iOS
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
         with:
           path: ${{ env.TURBO_CACHE_DIR }}
           key: ${{ runner.os }}-turborepo-ios-${{ hashFiles('yarn.lock') }}

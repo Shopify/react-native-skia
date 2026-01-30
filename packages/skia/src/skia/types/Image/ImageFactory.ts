@@ -94,4 +94,26 @@ export interface ImageFactory {
    * @param bytesPerRow
    */
   MakeImage(info: ImageInfo, data: SkData, bytesPerRow: number): SkImage | null;
+
+  /**
+   * Creates an SkImage from a WebGPU texture.
+   * This allows using textures rendered by WebGPU in Skia drawings.
+   *
+   * Note: This method is only available when the Graphite backend is enabled.
+   *
+   * @param texture - A GPUTexture object from the WebGPU API
+   * @returns An SkImage wrapping the texture, or throws if the texture is invalid
+   */
+  MakeImageFromTexture(texture: GPUTexture): SkImage;
+
+  /**
+   * Creates a WebGPU texture from an SkImage.
+   * This allows using Skia images in WebGPU rendering pipelines.
+   *
+   * Note: This method is only available when the Graphite backend is enabled.
+   *
+   * @param image - An SkImage to convert to a texture
+   * @returns A GPUTexture containing the image data, or throws if conversion fails
+   */
+  MakeTextureFromImage(image: SkImage): GPUTexture;
 }

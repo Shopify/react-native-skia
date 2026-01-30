@@ -26,7 +26,7 @@
     "@craco/craco": "^7.1.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^8.0.0",
+    "eslint": "^8.57.0",
     "eslint-config-react-app": "^7.0.0",
     "node-polyfill-webpack-plugin": "^2.0.1",
     "path-browserify": "^1.0.1",
