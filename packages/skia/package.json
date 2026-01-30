@@ -12,11 +12,11 @@
   "skia": {
     "version": "m144a",
     "checksums": {
-      "android-armeabi-v7a": "e406c3e8103a2efb6a514ac91346d7f9f81adbae14dc2d0e302e84fb8c5f80f7",
-      "android-arm64-v8a": "75069b0f7c66ad3382553e947d583265de033cc856c394110243da098306955f",
-      "android-x86": "714b93a7bdf005a23699f47e6255e4e690086c52a1998c20196a46f95b709b09",
-      "android-x86_64": "5bd2972d13293b09b35e2c0149b7d103dc4fb0f2837c3dd169ce06795b812714",
-      "apple-xcframeworks": "76b4eb044ec7dd4ca9c9c19cbbe07c4819cc3dd5dd142aca3a4ea5de01ba7501"
+      "android-armeabi-v7a": "8ac74b79da5f3677ad9af50230be5523fee187c8528a038e41a5072aa6188dc4",
+      "android-arm64-v8a": "a1182264cfaf35ef9f85d6ce71ff482b0ac291331e6a01c333adb489ce30ff88",
+      "android-x86": "4245e3dbbe129d2380cc4196ec65911038f87da86667fb6da6ca75412485631f",
+      "android-x86_64": "fcb5ce82fdc1d4fb630d9f7cac400efdb18df647213c0153a3859699624ca704",
+      "apple-xcframeworks": "6b255da9b9a175782981552bbb95f7a2fa170831a9cc1360ee7cc161575cde31"
     }
   },
   "skia-graphite": {
