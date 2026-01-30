@@ -419,7 +419,10 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
   const { debug = false, ref: _ref, ...viewProps } = props;
   return (
     <Platform.View {...viewProps} onLayout={onLayoutEvent}>
-      <canvas ref={canvasRef} style={{ display: "flex", flex: 1 }} />
+      <canvas
+        ref={canvasRef}
+        style={{ display: "block", width: "100%", height: "100%" }}
+      />
     </Platform.View>
   );
 };
