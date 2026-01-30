@@ -6,6 +6,10 @@ on:
         description: 'Skia branch to build (e.g., chrome/m144). Leave empty to use default submodule branch.'
         required: false
         default: ''
+      tag_suffix:
+        description: 'Optional suffix to append to tag (e.g., "a" for skia-graphite-m144a)'
+        required: false
+        default: ''
       dry_run:
         description: 'Test build only - skip GitHub release creation and upload'
         required: false
@@ -63,12 +67,13 @@ jobs:
       - name: Compute release metadata
         id: release_meta
         run: |
-          tag="skia-graphite-${SKIA_BRANCH_SLUG}"
+          tag="skia-graphite-${SKIA_BRANCH_SLUG}${TAG_SUFFIX}"
           echo "tag_name=$tag" >> "$GITHUB_OUTPUT"
-          echo "release_name=Skia Graphite ${SKIA_BRANCH}" >> "$GITHUB_OUTPUT"
+          echo "release_name=Skia Graphite ${SKIA_BRANCH}${TAG_SUFFIX}" >> "$GITHUB_OUTPUT"
         env:
           SKIA_BRANCH: ${{ steps.skia_meta.outputs.branch }}
           SKIA_BRANCH_SLUG: ${{ steps.skia_meta.outputs.branch_slug }}
+          TAG_SUFFIX: ${{ github.event.inputs.tag_suffix }}
       - name: Create GitHub release
         if: ${{ github.event.inputs.dry_run != 'true' }}
         id: create_release
