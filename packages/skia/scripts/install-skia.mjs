@@ -8,6 +8,12 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// Allow skipping download via environment variable (useful for CI builds)
+if (process.env.SKIP_SKIA_DOWNLOAD === '1' || process.env.SKIP_SKIA_DOWNLOAD === 'true') {
+  console.log("⏭️  Skipping Skia download (SKIP_SKIA_DOWNLOAD is set)");
+  process.exit(0);
+}
+
 const repo = "shopify/react-native-skia";
 
 const packageJsonPath = path.join(__dirname, "..", "package.json");

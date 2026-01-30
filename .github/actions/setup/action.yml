@@ -34,6 +34,7 @@ runs:
       shell: bash
       env:
         SK_GRAPHITE: ${{ inputs.graphite == 'true' && '1' || '' }}
+        SKIP_SKIA_DOWNLOAD: ${{ inputs.download_skia == 'false' && '1' || '' }}
 
     - name: Copy Artifacts to libs folder
       if: ${{ inputs.download_skia == 'true' }}
