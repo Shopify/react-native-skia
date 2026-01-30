@@ -1,6 +1,12 @@
 name: Build SKIA Graphite
 on:
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Test build only - skip GitHub release creation and upload'
+        required: false
+        type: boolean
+        default: false
 jobs:
   prepare-release:
     runs-on: ubuntu-latest
@@ -45,6 +51,7 @@ jobs:
           SKIA_BRANCH: ${{ steps.skia_meta.outputs.branch }}
           SKIA_BRANCH_SLUG: ${{ steps.skia_meta.outputs.branch_slug }}
       - name: Create GitHub release
+        if: ${{ github.event.inputs.dry_run != 'true' }}
         id: create_release
         uses: softprops/action-gh-release@v2
         env:
@@ -62,9 +69,14 @@ jobs:
     strategy:
       matrix:
         include:
-          - target: "apple"
-            artifact_name: "skia-graphite-apple-xcframeworks"
-            package_root: "./packages/skia/libs/apple"
+          - target: "apple-ios"
+            artifact_name: "skia-graphite-apple-ios-xcframeworks"
+            package_root: "./packages/skia/libs/apple/ios"
+          - target: "apple-macos"
+            artifact_name: "skia-graphite-apple-macos-xcframeworks"
+            package_root: "./packages/skia/libs/apple/macos"
+          # Note: No apple-tvos (not supported with Graphite)
+          # Note: No apple-maccatalyst (not available with Graphite)
           - target: "android-arm"
             artifact_name: "skia-graphite-android-arm"
             package_root: "./externals/skia/out/android/arm"
@@ -159,6 +171,7 @@ jobs:
           SKIA_BRANCH_SLUG: ${{ needs.prepare-release.outputs.skia_branch_slug }}
 
       - name: Upload binaries to GitHub release - ${{ matrix.artifact_name }}
+        if: ${{ github.event.inputs.dry_run != 'true' }}
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -168,7 +181,7 @@ jobs:
           prerelease: true
 
       - name: Package Graphite Headers
-        if: matrix.target == 'apple'
+        if: matrix.target == 'apple-ios'
         id: package_headers
         run: |
           set -eo pipefail
@@ -195,7 +208,7 @@ jobs:
           SKIA_BRANCH_SLUG: ${{ needs.prepare-release.outputs.skia_branch_slug }}
 
       - name: Upload Graphite Headers to GitHub release
-        if: matrix.target == 'apple'
+        if: ${{ matrix.target == 'apple-ios' && github.event.inputs.dry_run != 'true' }}
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

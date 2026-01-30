@@ -6,6 +6,11 @@ on:
         description: 'Optional suffix to append to tag (e.g., "a" for skia-m144a)'
         required: false
         default: ''
+      dry_run:
+        description: 'Test build only - skip GitHub release creation and upload'
+        required: false
+        type: boolean
+        default: false
 jobs:
   prepare-release:
     runs-on: ubuntu-latest
@@ -51,6 +56,7 @@ jobs:
           SKIA_BRANCH_SLUG: ${{ steps.skia_meta.outputs.branch_slug }}
           TAG_SUFFIX: ${{ github.event.inputs.tag_suffix }}
       - name: Create GitHub release
+        if: ${{ github.event.inputs.dry_run != 'true' }}
         id: create_release
         uses: softprops/action-gh-release@v2
         env:
@@ -68,9 +74,18 @@ jobs:
     strategy:
       matrix:
         include:
-          - target: "apple"
-            artifact_name: "skia-apple-xcframeworks"
-            package_root: "./packages/skia/libs/apple"
+          - target: "apple-ios"
+            artifact_name: "skia-apple-ios-xcframeworks"
+            package_root: "./packages/skia/libs/apple/ios"
+          - target: "apple-tvos"
+            artifact_name: "skia-apple-tvos-xcframeworks"
+            package_root: "./packages/skia/libs/apple/tvos"
+          - target: "apple-macos"
+            artifact_name: "skia-apple-macos-xcframeworks"
+            package_root: "./packages/skia/libs/apple/macos"
+          - target: "apple-maccatalyst"
+            artifact_name: "skia-apple-maccatalyst-xcframeworks"
+            package_root: "./packages/skia/libs/apple/maccatalyst"
           - target: "android-arm"
             artifact_name: "skia-android-arm"
             package_root: "./packages/skia/libs/android/armeabi-v7a"
@@ -146,6 +161,7 @@ jobs:
           SKIA_BRANCH_SLUG: ${{ needs.prepare-release.outputs.skia_branch_slug }}
 
       - name: Upload binaries to GitHub release - ${{ matrix.artifact_name }}
+        if: ${{ github.event.inputs.dry_run != 'true' }}
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

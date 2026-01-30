@@ -94,7 +94,17 @@ export const commonArgs = [
   ["skia_use_dawn", GRAPHITE],
 ];
 
-export type PlatformName = "apple" | "android";
+export type PlatformName =
+  | "apple-ios"
+  | "apple-tvos"
+  | "apple-macos"
+  | "apple-maccatalyst"
+  | "android";
+
+export type ApplePlatformName = Extract<PlatformName, `apple-${string}`>;
+
+export const isApplePlatform = (name: PlatformName): name is ApplePlatformName =>
+  name.startsWith("apple-");
 
 type Arg = (string | boolean | number)[];
 export type Target = {
@@ -229,7 +239,26 @@ const maccatalystTargets: { [key: string]: Target } = MACCATALYST
     }
   : {};
 
-export const configurations = {
+// Common Apple build arguments shared across all Apple platforms
+const appleCommonArgs: Arg[] = [
+  ["skia_use_metal", true],
+  ["skia_use_gl", false],
+  ["cc", '"clang"'],
+  ["cxx", '"clang++"'],
+  ...ParagraphArgsApple,
+];
+
+// Common Apple output names shared across all Apple platforms
+const appleOutputNames = [
+  "libskia.a",
+  "libskshaper.a",
+  "libsvg.a",
+  "libskottie.a",
+  "libsksg.a",
+  ...ParagraphApple,
+];
+
+export const configurations: Record<PlatformName, Platform> = {
   android: {
     targets: {
       arm: {
@@ -277,7 +306,7 @@ export const configurations = {
       ...ParagraphOutputsAndroid,
     ],
   },
-  apple: {
+  "apple-ios": {
     targets: {
       "arm64-iphoneos": {
         cpu: "arm64",
@@ -313,10 +342,27 @@ export const configurations = {
           ],
         ],
       },
-      ...tvosTargets,
-      ...maccatalystTargets,
+    },
+    args: appleCommonArgs,
+    outputRoot: "libs/apple/ios",
+    outputNames: appleOutputNames,
+  },
+  "apple-tvos": GRAPHITE
+    ? {
+        targets: {},
+        args: [],
+        outputRoot: "libs/apple/tvos",
+        outputNames: [],
+      }
+    : {
+        targets: tvosTargets,
+        args: appleCommonArgs,
+        outputRoot: "libs/apple/tvos",
+        outputNames: appleOutputNames,
+      },
+  "apple-macos": {
+    targets: {
       "arm64-macosx": {
-        platformGroup: "macosx",
         cpu: "arm64",
         platform: "mac",
         args: [
@@ -327,7 +373,6 @@ export const configurations = {
         ],
       },
       "x64-macosx": {
-        platformGroup: "macosx",
         cpu: "x64",
         platform: "mac",
         args: [
@@ -338,23 +383,23 @@ export const configurations = {
         ],
       },
     },
-    args: [
-      ["skia_use_metal", true],
-      ["skia_use_gl", false],
-      ["cc", '"clang"'],
-      ["cxx", '"clang++"'],
-      ...ParagraphArgsApple,
-    ],
-    outputRoot: "libs/apple",
-    outputNames: [
-      "libskia.a",
-      "libskshaper.a",
-      "libsvg.a",
-      "libskottie.a",
-      "libsksg.a",
-      ...ParagraphApple,
-    ],
+    args: appleCommonArgs,
+    outputRoot: "libs/apple/macos",
+    outputNames: appleOutputNames,
   },
+  "apple-maccatalyst": MACCATALYST
+    ? {
+        targets: maccatalystTargets,
+        args: appleCommonArgs,
+        outputRoot: "libs/apple/maccatalyst",
+        outputNames: appleOutputNames,
+      }
+    : {
+        targets: {},
+        args: [],
+        outputRoot: "libs/apple/maccatalyst",
+        outputNames: [],
+      },
 };
 
 const copyModule = (module: string) => {

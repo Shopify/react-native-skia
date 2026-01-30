@@ -42,13 +42,27 @@ const updateSkiaChecksums = (checksums, graphite = false) => {
 
 const GRAPHITE = !!process.env.SK_GRAPHITE;
 const prefix = GRAPHITE ? "skia-graphite" : "skia";
+
+// Build artifact names based on platform and Graphite mode
 const names = [
   `${prefix}-android-arm`,
   `${prefix}-android-arm-64`,
   `${prefix}-android-arm-x64`,
   `${prefix}-android-arm-x86`,
-  `${prefix}-apple-xcframeworks`,
+  `${prefix}-apple-ios-xcframeworks`,
+  `${prefix}-apple-macos-xcframeworks`,
 ];
+
+// Add tvOS only for non-Graphite builds
+if (!GRAPHITE) {
+  names.push(`${prefix}-apple-tvos-xcframeworks`);
+}
+
+// Add macCatalyst only for non-Graphite builds
+if (!GRAPHITE) {
+  names.push(`${prefix}-apple-maccatalyst-xcframeworks`);
+}
+
 if (GRAPHITE) {
   names.push(`${prefix}-headers`);
 }
@@ -347,11 +361,17 @@ const calculateLibraryChecksums = () => {
     }
   }
 
-  // Apple frameworks
-  const appleDir = path.join(libsDir, "apple");
-  const appleChecksum = calculateDirectoryChecksum(appleDir);
-  if (appleChecksum) {
-    checksums["apple-xcframeworks"] = appleChecksum;
+  // Apple platforms - calculate separate checksums for each platform
+  const applePlatforms = GRAPHITE
+    ? ["ios", "macos"]
+    : ["ios", "tvos", "macos", "maccatalyst"];
+
+  for (const platform of applePlatforms) {
+    const platformDir = path.join(libsDir, "apple", platform);
+    const checksum = calculateDirectoryChecksum(platformDir);
+    if (checksum) {
+      checksums[`apple-${platform}-xcframeworks`] = checksum;
+    }
   }
 
   return checksums;
@@ -401,10 +421,16 @@ const areBinariesInstalled = () => {
     }
   }
 
-  // Check for Apple frameworks
-  const appleDir = path.join(libsDir, "apple");
-  if (!fs.existsSync(appleDir) || fs.readdirSync(appleDir).length === 0) {
-    return false;
+  // Check for Apple platform frameworks
+  const applePlatforms = GRAPHITE
+    ? ["ios", "macos"]
+    : ["ios", "tvos", "macos", "maccatalyst"];
+
+  for (const platform of applePlatforms) {
+    const platformDir = path.join(libsDir, "apple", platform);
+    if (!fs.existsSync(platformDir) || fs.readdirSync(platformDir).length === 0) {
+      return false;
+    }
   }
 
   return true;
@@ -524,45 +550,65 @@ const main = async () => {
     }
   });
 
-  // Create apple directory structure
+  // Create apple directory structure - now per-platform
   const appleDir = path.join(libsDir, "apple");
-  // The tar file extracts to skia-apple-xcframeworks/apple
-  const appleSrcDir = path.join(
-    artifactsDir,
-    `${prefix}-apple-xcframeworks`,
-    "apple"
-  );
-  if (fs.existsSync(appleSrcDir)) {
-    fs.mkdirSync(appleDir, { recursive: true });
+  fs.mkdirSync(appleDir, { recursive: true });
 
-    // Copy all xcframeworks
-    fs.readdirSync(appleSrcDir).forEach((item) => {
-      const srcPath = path.join(appleSrcDir, item);
-      const destPath = path.join(appleDir, item);
+  // Define the platform artifacts to process
+  const applePlatformArtifacts = GRAPHITE
+    ? [
+        { artifact: `${prefix}-apple-ios-xcframeworks`, srcSubdir: "ios", dest: "ios" },
+        { artifact: `${prefix}-apple-macos-xcframeworks`, srcSubdir: "macos", dest: "macos" },
+      ]
+    : [
+        { artifact: `${prefix}-apple-ios-xcframeworks`, srcSubdir: "ios", dest: "ios" },
+        { artifact: `${prefix}-apple-tvos-xcframeworks`, srcSubdir: "tvos", dest: "tvos" },
+        { artifact: `${prefix}-apple-macos-xcframeworks`, srcSubdir: "macos", dest: "macos" },
+        { artifact: `${prefix}-apple-maccatalyst-xcframeworks`, srcSubdir: "maccatalyst", dest: "maccatalyst" },
+      ];
 
-      if (fs.lstatSync(srcPath).isDirectory()) {
-        // Copy directory recursively
-        const copyDir = (src, dest) => {
-          fs.mkdirSync(dest, { recursive: true });
-          fs.readdirSync(src).forEach((file) => {
-            const srcFile = path.join(src, file);
-            const destFile = path.join(dest, file);
-            if (fs.lstatSync(srcFile).isDirectory()) {
-              copyDir(srcFile, destFile);
-            } else {
-              fs.copyFileSync(srcFile, destFile);
-            }
-          });
-        };
-        copyDir(srcPath, destPath);
-      } else {
-        fs.copyFileSync(srcPath, destPath);
-      }
-    });
-  }
+  applePlatformArtifacts.forEach(({ artifact, srcSubdir, dest }) => {
+    // The tar file extracts to artifact_name/srcSubdir (e.g., skia-apple-ios-xcframeworks/ios)
+    const appleSrcDir = path.join(artifactsDir, artifact, srcSubdir);
+    const destDir = path.join(appleDir, dest);
+
+    console.log(`   Checking ${appleSrcDir} -> ${destDir}`);
+    if (fs.existsSync(appleSrcDir)) {
+      console.log(`   ✓ Copying ${artifact}/${srcSubdir}`);
+      fs.mkdirSync(destDir, { recursive: true });
+
+      // Copy all xcframeworks
+      fs.readdirSync(appleSrcDir).forEach((item) => {
+        const srcPath = path.join(appleSrcDir, item);
+        const destPath = path.join(destDir, item);
+
+        if (fs.lstatSync(srcPath).isDirectory()) {
+          // Copy directory recursively
+          const copyDir = (src, dest) => {
+            fs.mkdirSync(dest, { recursive: true });
+            fs.readdirSync(src).forEach((file) => {
+              const srcFile = path.join(src, file);
+              const destFile = path.join(dest, file);
+              if (fs.lstatSync(srcFile).isDirectory()) {
+                copyDir(srcFile, destFile);
+              } else {
+                fs.copyFileSync(srcFile, destFile);
+              }
+            });
+          };
+          copyDir(srcPath, destPath);
+        } else {
+          fs.copyFileSync(srcPath, destPath);
+        }
+      });
+    } else {
+      console.log(`   ✗ Source directory not found: ${appleSrcDir}`);
+    }
+  });
 
   // Create or remove Graphite marker files based on build type
   const androidMarkerFile = path.join(androidDir, "graphite.enabled");
+  // Apple marker file stays at the apple root level (libs/apple/graphite.enabled)
   const appleMarkerFile = path.join(appleDir, "graphite.enabled");
 
   if (GRAPHITE) {

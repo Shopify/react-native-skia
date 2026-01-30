@@ -140,7 +140,7 @@
     "semantic-release": "^24.1.0",
     "semantic-release-yarn": "^3.0.2",
     "ts-jest": "29.4.3",
-    "tsx": "^4.20.5",
+    "tsx": "^4.21.0",
     "typescript": "^5.2.2",
     "ws": "8.18.0"
   },
