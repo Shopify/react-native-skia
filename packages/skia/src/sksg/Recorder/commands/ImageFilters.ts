@@ -224,8 +224,9 @@ type Props = {
   [NodeType.RuntimeShaderImageFilter]: RuntimeShaderImageFilterProps;
 };
 
-interface PushImageFilter<T extends keyof Props>
-  extends Command<CommandType.PushImageFilter> {
+interface PushImageFilter<
+  T extends keyof Props,
+> extends Command<CommandType.PushImageFilter> {
   imageFilterType: T;
   props: Props[T];
 }

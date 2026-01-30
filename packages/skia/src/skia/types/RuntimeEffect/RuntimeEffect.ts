@@ -10,8 +10,7 @@ export interface SkSLUniform {
   isInteger: boolean;
 }
 
-export interface SkRuntimeShaderBuilder
-  extends SkJSIInstance<"RuntimeShaderBuilder"> {
+export interface SkRuntimeShaderBuilder extends SkJSIInstance<"RuntimeShaderBuilder"> {
   setUniform(name: string, value: readonly number[]): void;
 }
 
