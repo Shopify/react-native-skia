@@ -99,9 +99,9 @@ function createVertexAndIndexBuffer(
 type ObjectInfo = {
   worldViewProjectionMatrixValue: Float32Array;
   worldMatrixValue: Float32Array;
-  uniformValues: Float32Array;
+  uniformValues: BufferSource;
   uniformBuffer: GPUBuffer;
-  lineUniformValues: Float32Array;
+  lineUniformValues: BufferSource;
   lineUniformBuffer: GPUBuffer;
   litBindGroup: GPUBindGroup;
   wireframeBindGroups: GPUBindGroup[];
@@ -368,7 +368,11 @@ export function WebGPU() {
 
     // Update line uniforms
     objectInfos.forEach(({ lineUniformBuffer, lineUniformValues }) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       lineUniformValues[1] = settings.thickness;
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       lineUniformValues[2] = settings.alphaThreshold;
       device.queue.writeBuffer(lineUniformBuffer, 0, lineUniformValues);
     });

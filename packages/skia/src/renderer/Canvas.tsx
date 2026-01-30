@@ -15,7 +15,7 @@ import type {
   View,
   ViewProps,
 } from "react-native";
-import type { AnimatedRef, SharedValue } from "react-native-reanimated";
+import type { SharedValue } from "react-native-reanimated";
 
 import Rea from "../external/reanimated/ReanimatedProxy";
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
@@ -113,7 +113,8 @@ export const Canvas = ({
               // @ts-expect-error
               measure(viewRef.current.canvasRef)
             : { width: 0, height: 0 }
-          : measure(viewRef as AnimatedRef<View>);
+          : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            measure(viewRef as any);
       if (result) {
         const { width, height } = result;
         if (onSize.value.width !== width || onSize.value.height !== height) {
