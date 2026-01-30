@@ -9,6 +9,10 @@ jest.mock("expo-asset", () => ({
   useAssets: () => [[], undefined],
 }));
 
+jest.mock('react-native-worklets', () =>
+  require('react-native-worklets/src/mock')
+);
+
 jest.mock("react-native-reanimated", () => {
   // The mock for `call` immediately calls the callback which is incorrect
   // So we override it with a no-op
