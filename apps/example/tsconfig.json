@@ -8,5 +8,10 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "react-native-worklets": ["./types/react-native-worklets.d.ts"],
+      "react-native-worklets/src/mock": ["./types/react-native-worklets-mock.d.ts"]
+    }
   }
 }
