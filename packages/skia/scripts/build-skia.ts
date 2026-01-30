@@ -325,7 +325,8 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
     const configuration = configurations[platform];
     console.log(`\n🔨 Building platform: ${platform}`);
 
-    const targetsToProcess = targets || mapKeys(configuration.targets);
+    const targetsToProcess =
+      targets || (mapKeys(configuration.targets) as string[]);
 
     for (const target of targetsToProcess) {
       await configurePlatform(platform, configuration, target);

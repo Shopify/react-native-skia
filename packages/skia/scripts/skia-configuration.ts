@@ -103,8 +103,9 @@ export type PlatformName =
 
 export type ApplePlatformName = Extract<PlatformName, `apple-${string}`>;
 
-export const isApplePlatform = (name: PlatformName): name is ApplePlatformName =>
-  name.startsWith("apple-");
+export const isApplePlatform = (
+  name: PlatformName
+): name is ApplePlatformName => name.startsWith("apple-");
 
 type Arg = (string | boolean | number)[];
 export type Target = {
@@ -245,6 +246,8 @@ const appleCommonArgs: Arg[] = [
   ["skia_use_gl", false],
   ["cc", '"clang"'],
   ["cxx", '"clang++"'],
+  // C++20 is required for Dawn/Graphite (uses concepts)
+  ...(GRAPHITE ? [["extra_cflags_cc", '["-std=c++20"]']] : []),
   ...ParagraphArgsApple,
 ];
 
@@ -259,7 +262,7 @@ const appleOutputNames = [
 ];
 
 export const configurations: Record<PlatformName, Platform> = {
-  android: {
+  "android": {
     targets: {
       arm: {
         platform: "android",
@@ -293,6 +296,8 @@ export const configurations: Record<PlatformName, Platform> = {
         "extra_cflags",
         `["-DSKIA_C_DLL", "-DHAVE_SYSCALL_GETRANDOM", "-DXML_DEV_URANDOM"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
       ],
+      // C++20 is required for Dawn/Graphite (uses concepts)
+      ...(GRAPHITE ? [["extra_cflags_cc", '["-std=c++20"]']] : []),
       ...ParagraphArgsAndroid,
     ],
     outputRoot: "libs/android",
