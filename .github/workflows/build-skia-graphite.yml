@@ -2,6 +2,10 @@ name: Build SKIA Graphite
 on:
   workflow_dispatch:
     inputs:
+      skia_branch:
+        description: 'Skia branch to build (e.g., chrome/m144). Leave empty to use default submodule branch.'
+        required: false
+        default: ''
       dry_run:
         description: 'Test build only - skip GitHub release creation and upload'
         required: false
@@ -26,6 +30,16 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - name: Checkout custom Skia branch
+        if: ${{ github.event.inputs.skia_branch != '' }}
+        working-directory: externals/skia
+        run: |
+          echo "Checking out Skia branch: ${{ github.event.inputs.skia_branch }}"
+          git fetch origin ${{ github.event.inputs.skia_branch }}
+          git checkout ${{ github.event.inputs.skia_branch }}
+          echo "Current Skia commit: $(git rev-parse HEAD)"
+
       - name: Determine Skia branch
         id: skia_meta
         run: |
@@ -100,6 +114,15 @@ jobs:
         uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
         with:
           submodules: recursive
+
+      - name: Checkout custom Skia branch
+        if: ${{ github.event.inputs.skia_branch != '' }}
+        working-directory: externals/skia
+        run: |
+          echo "Checking out Skia branch: ${{ github.event.inputs.skia_branch }}"
+          git fetch origin ${{ github.event.inputs.skia_branch }}
+          git checkout ${{ github.event.inputs.skia_branch }}
+          echo "Current Skia commit: $(git rev-parse HEAD)"
 
       - name: Setup Android NDK
         id: setup-ndk
