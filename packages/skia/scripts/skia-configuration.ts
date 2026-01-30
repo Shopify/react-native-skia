@@ -92,6 +92,8 @@ export const commonArgs = [
   //["skia_enable_ganesh", !GRAPHITE],
   ["skia_enable_graphite", GRAPHITE],
   ["skia_use_dawn", GRAPHITE],
+  // C++20 is required for Graphite builds (Dawn uses C++20 concepts)
+  ...(GRAPHITE ? [["skia_use_cpp20", true]] : []),
 ];
 
 export type PlatformName =
@@ -240,9 +242,6 @@ const maccatalystTargets: { [key: string]: Target } = MACCATALYST
     }
   : {};
 
-// C++20 args for Graphite builds (Dawn uses C++20 concepts)
-// Must use extra_cflags_cc to override Skia's default -std=c++17
-const CXX20_ARGS: Arg[] = GRAPHITE ? [["extra_cflags_cc", '["-std=c++20"]']] : [];
 
 // Common Apple build arguments shared across all Apple platforms
 const appleCommonArgs: Arg[] = [
@@ -298,8 +297,6 @@ export const configurations: Record<PlatformName, Platform> = {
         "extra_cflags",
         `["-DSKIA_C_DLL", "-DHAVE_SYSCALL_GETRANDOM", "-DXML_DEV_URANDOM"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
       ],
-      // C++20 is required for Dawn/Graphite (uses concepts)
-      ...(GRAPHITE ? [["extra_cflags_cc", '["-std=c++20"]']] : []),
       ...ParagraphArgsAndroid,
     ],
     outputRoot: "libs/android",
@@ -324,7 +321,6 @@ export const configurations: Record<PlatformName, Platform> = {
             "extra_cflags",
             `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
           ],
-          ...CXX20_ARGS,
         ],
       },
       "arm64-iphonesimulator": {
@@ -337,7 +333,6 @@ export const configurations: Record<PlatformName, Platform> = {
             "extra_cflags",
             `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
           ],
-          ...CXX20_ARGS,
         ],
       },
       "x64-iphonesimulator": {
@@ -349,7 +344,6 @@ export const configurations: Record<PlatformName, Platform> = {
             "extra_cflags",
             `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
           ],
-          ...CXX20_ARGS,
         ],
       },
     },
@@ -380,7 +374,6 @@ export const configurations: Record<PlatformName, Platform> = {
             "extra_cflags",
             `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
           ],
-          ...CXX20_ARGS,
         ],
       },
       "x64-macosx": {
@@ -391,7 +384,6 @@ export const configurations: Record<PlatformName, Platform> = {
             "extra_cflags",
             `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
           ],
-          ...CXX20_ARGS,
         ],
       },
     },
