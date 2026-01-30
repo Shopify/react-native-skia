@@ -240,14 +240,15 @@ const maccatalystTargets: { [key: string]: Target } = MACCATALYST
     }
   : {};
 
+// C++20 flag for Graphite builds (Dawn uses C++20 concepts)
+const CXX20_FLAG = GRAPHITE ? ', "-std=c++20"' : "";
+
 // Common Apple build arguments shared across all Apple platforms
 const appleCommonArgs: Arg[] = [
   ["skia_use_metal", true],
   ["skia_use_gl", false],
   ["cc", '"clang"'],
   ["cxx", '"clang++"'],
-  // C++20 is required for Dawn/Graphite (uses concepts)
-  ...(GRAPHITE ? [["extra_cflags_cc", '["-std=c++20"]']] : []),
   ...ParagraphArgsApple,
 ];
 
@@ -320,7 +321,7 @@ export const configurations: Record<PlatformName, Platform> = {
           ["ios_min_target", `"${appleMinTarget}"`],
           [
             "extra_cflags",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}${CXX20_FLAG}]`,
           ],
         ],
       },
@@ -332,7 +333,7 @@ export const configurations: Record<PlatformName, Platform> = {
           ["ios_use_simulator", true],
           [
             "extra_cflags",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}${CXX20_FLAG}]`,
           ],
         ],
       },
@@ -343,7 +344,7 @@ export const configurations: Record<PlatformName, Platform> = {
           ["ios_min_target", `"${appleSimulatorMinTarget}"`],
           [
             "extra_cflags",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}${CXX20_FLAG}]`,
           ],
         ],
       },
@@ -373,7 +374,7 @@ export const configurations: Record<PlatformName, Platform> = {
         args: [
           [
             "extra_cflags",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}${CXX20_FLAG}]`,
           ],
         ],
       },
@@ -383,7 +384,7 @@ export const configurations: Record<PlatformName, Platform> = {
         args: [
           [
             "extra_cflags",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}${CXX20_FLAG}]`,
           ],
         ],
       },
