@@ -11,6 +11,11 @@ on:
         required: false
         type: boolean
         default: false
+      skip_skia_download:
+        description: 'Skip downloading prebuilt Skia (always true for building from source)'
+        required: false
+        type: boolean
+        default: true
 jobs:
   prepare-release:
     runs-on: ubuntu-latest
@@ -118,7 +123,7 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
         with:
-          download_skia: 'false'
+          download_skia: ${{ github.event.inputs.skip_skia_download == 'true' && 'false' || 'true' }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update depot_tools
