@@ -189,27 +189,11 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
       );
       xcframeworkCmd += `-library ${prefix}/macosx/${name} `;
     } else if (shortPlatform === "maccatalyst") {
-      // Mac Catalyst: lipo arm64 + x64, then fix platform metadata
+      // Mac Catalyst: lipo arm64 + x64
       $(`mkdir -p ${prefix}/maccatalyst`);
       $(`rm -rf ${prefix}/maccatalyst/${name}`);
-
-      // Fix platform metadata before lipo - binaries are built with target_os="mac"
-      // but need maccatalyst platform for xcframework
-      const arm64Lib = `${prefix}/arm64-maccatalyst/${name}`;
-      const x64Lib = `${prefix}/x64-maccatalyst/${name}`;
-      const arm64Fixed = `${arm64Lib}.fixed`;
-      const x64Fixed = `${x64Lib}.fixed`;
-
-      $(`vtool -remove-build-version macos -output ${arm64Fixed} ${arm64Lib} || cp ${arm64Lib} ${arm64Fixed}`);
-      $(`vtool -set-build-version maccatalyst 14.0 17.0 -replace -output ${arm64Lib} ${arm64Fixed}`);
-      $(`rm -f ${arm64Fixed}`);
-
-      $(`vtool -remove-build-version macos -output ${x64Fixed} ${x64Lib} || cp ${x64Lib} ${x64Fixed}`);
-      $(`vtool -set-build-version maccatalyst 14.0 17.0 -replace -output ${x64Lib} ${x64Fixed}`);
-      $(`rm -f ${x64Fixed}`);
-
       $(
-        `lipo -create ${x64Lib} ${arm64Lib} -output ${prefix}/maccatalyst/${name}`
+        `lipo -create ${prefix}/x64-maccatalyst/${name} ${prefix}/arm64-maccatalyst/${name} -output ${prefix}/maccatalyst/${name}`
       );
       xcframeworkCmd += `-library ${prefix}/maccatalyst/${name} `;
     }
