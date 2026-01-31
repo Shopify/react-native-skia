@@ -186,9 +186,15 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
         );
         // Fix Mac Catalyst platform metadata in the fat binary
         // The build uses target_os="mac" but compiler targets ios-macabi, causing platform mismatch
-        // vtool sets the correct LC_BUILD_VERSION for each architecture slice
+        // First remove any existing build versions, then set the correct maccatalyst platform
         $(
-          `vtool -arch arm64 -set-build-version maccatalyst 14.0 17.0 -arch x86_64 -set-build-version maccatalyst 14.0 17.0 -replace -output ${catalystPrefix}/maccatalyst/${name} ${catalystPrefix}/maccatalyst/${name}`
+          `vtool -arch arm64 -remove-build-version maccatalyst -arch x86_64 -remove-build-version maccatalyst -output ${catalystPrefix}/maccatalyst/${name} ${catalystPrefix}/maccatalyst/${name} || true`
+        );
+        $(
+          `vtool -arch arm64 -remove-build-version macos -arch x86_64 -remove-build-version macos -output ${catalystPrefix}/maccatalyst/${name} ${catalystPrefix}/maccatalyst/${name} || true`
+        );
+        $(
+          `vtool -arch arm64 -set-build-version maccatalyst 14.0 17.0 -arch x86_64 -set-build-version maccatalyst 14.0 17.0 -output ${catalystPrefix}/maccatalyst/${name} ${catalystPrefix}/maccatalyst/${name}`
         );
         xcframeworkCmd += `-library ${catalystPrefix}/maccatalyst/${name} `;
       }
