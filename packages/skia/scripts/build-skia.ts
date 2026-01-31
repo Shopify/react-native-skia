@@ -315,6 +315,15 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
       `sed -i '' 's/uint32(bindingInfo\\.binding)/uint32_t(bindingInfo.binding)/g' ${shaderModuleFile}`
     );
 
+    // Remove PartitionAlloc dependency from Dawn (causes linking errors on Android)
+    // The dawn.gni file conditionally sets dawn_partition_alloc_dir for non-MSVC and non-Mac,
+    // which includes Android. We need to remove this to avoid undefined symbol errors.
+    const dawnGniFile = `${SkiaSrc}/build_overrides/dawn.gni`;
+    $(
+      `sed -i '' '/# PartitionAlloc is an optional dependency:/,$d' ${dawnGniFile}`
+    );
+    console.log("   ✓ Removed PartitionAlloc dependency from dawn.gni");
+
     console.log("Patches applied successfully");
   }
   $(`rm -rf ${PackageRoot}/libs`);
