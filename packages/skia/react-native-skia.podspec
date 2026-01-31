@@ -4,6 +4,37 @@ require "json"
 
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
+# Check if Skia prebuilt binaries are installed
+# The postinstall script downloads these - if missing, the user needs to run it
+skia_libs_path = File.join(__dir__, "libs/apple/ios")
+unless File.exist?(skia_libs_path) && Dir.glob(File.join(skia_libs_path, "*.xcframework")).any?
+  Pod::UI.puts "\n"
+  Pod::UI.puts "┌─────────────────────────────────────────────────────────────────────────────┐".red
+  Pod::UI.puts "│                                                                             │".red
+  Pod::UI.puts "│  ERROR: Skia prebuilt binaries not found!                                   │".red
+  Pod::UI.puts "│                                                                             │".red
+  Pod::UI.puts "│  The postinstall script has not run. This is required to download the      │".red
+  Pod::UI.puts "│  Skia binaries. Some package managers (pnpm, bun, yarn berry) require       │".red
+  Pod::UI.puts "│  explicit trust for packages with postinstall scripts.                      │".red
+  Pod::UI.puts "│                                                                             │".red
+  Pod::UI.puts "│  To fix this:                                                               │".red
+  Pod::UI.puts "│                                                                             │".red
+  Pod::UI.puts "│  • npm/yarn classic: Run 'npm rebuild @shopify/react-native-skia' or        │".red
+  Pod::UI.puts "│                       reinstall the package                                 │".red
+  Pod::UI.puts "│                                                                             │".red
+  Pod::UI.puts "│  • bun: Run 'bun add --trust @shopify/react-native-skia'                    │".red
+  Pod::UI.puts "│                                                                             │".red
+  Pod::UI.puts "│  • pnpm: Add to package.json:                                               │".red
+  Pod::UI.puts "│          \"pnpm\": { \"onlyBuiltDependencies\": [\"@shopify/react-native-skia\"] }│".red
+  Pod::UI.puts "│          Then reinstall the package                                         │".red
+  Pod::UI.puts "│                                                                             │".red
+  Pod::UI.puts "│  See: https://shopify.github.io/react-native-skia/docs/getting-started/installation │".red
+  Pod::UI.puts "│                                                                             │".red
+  Pod::UI.puts "└─────────────────────────────────────────────────────────────────────────────┘".red
+  Pod::UI.puts "\n"
+  raise "Skia prebuilt binaries not found. Please run the postinstall script."
+end
+
 # Check if Graphite is available
 # Detection method priority:
 # 1. SK_GRAPHITE environment variable (explicit override, fastest)
