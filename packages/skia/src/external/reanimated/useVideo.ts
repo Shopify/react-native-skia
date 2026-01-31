@@ -76,6 +76,7 @@ export const useVideo = (
   const currentFrame = Rea.useSharedValue<null | SkImage>(null);
   const currentTime = Rea.useSharedValue(0);
   const lastTimestamp = Rea.useSharedValue(-1);
+  const pendingSeek = Rea.useSharedValue(false);
   const duration = useMemo(() => video?.duration() ?? 0, [video]);
   const framerate = useMemo(
     () => (Platform.OS === "web" ? -1 : (video?.framerate() ?? 0)),
@@ -102,6 +103,7 @@ export const useVideo = (
       if (value !== null) {
         video?.seek(value);
         currentTime.value = value;
+        pendingSeek.value = true;
         seek.value = null;
       }
     }
@@ -116,6 +118,15 @@ export const useVideo = (
     "worklet";
     if (!video) {
       return;
+    }
+    // Handle seek while paused: extract one frame then clear the flag
+    if (pendingSeek.value) {
+      setFrame(video, currentFrame);
+      pendingSeek.value = false;
+      lastTimestamp.value = frameInfo.timestamp;
+      if (isPaused.value) {
+        return;
+      }
     }
     if (isPaused.value) {
       return;
