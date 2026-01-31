@@ -7,6 +7,5 @@
   "scripts": {
     "generate": "node src/generate-packages.mjs",
     "clean": "rm -rf dist"
-  },
-  "devDependencies": {}
+  }
 }
