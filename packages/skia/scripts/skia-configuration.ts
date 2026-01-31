@@ -5,7 +5,7 @@ import { $, fileOps } from "./utils";
 
 const DEBUG = false;
 export const GRAPHITE = !!process.env.SK_GRAPHITE;
-export const MACCATALYST = !GRAPHITE;
+export const MACCATALYST = false;
 const BUILD_WITH_PARAGRAPH = true;
 // Re-enable mutable SkPath methods (addPath, moveTo, lineTo, etc.)
 // Skia is transitioning to immutable SkPath with SkPathBuilder
