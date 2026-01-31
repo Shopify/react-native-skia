@@ -1,12 +1,17 @@
 import { exit } from "process";
 import path from "path";
 
-import type { Platform, PlatformName } from "./skia-configuration";
+import type {
+  ApplePlatformName,
+  Platform,
+  PlatformName,
+} from "./skia-configuration";
 import {
   commonArgs,
   configurations,
   copyHeaders,
   GRAPHITE,
+  isApplePlatform,
   MACCATALYST,
   OutFolder,
   PackageRoot,
@@ -117,72 +122,97 @@ export const copyLib = (
     });
 };
 
-const buildXCFrameworks = () => {
-  const os: PlatformName = "apple";
-  const { outputNames } = configurations.apple;
+/**
+ * Builds an XCFramework for a specific Apple platform.
+ * Each platform produces its own XCFramework:
+ * - apple-ios: arm64-iphoneos + lipo'd iphonesimulator (arm64 + x64) + lipo'd maccatalyst (arm64 + x64) when MACCATALYST
+ * - apple-tvos: arm64-tvos + lipo'd tvsimulator (arm64 + x64)
+ * - apple-macos: lipo'd macosx (arm64 + x64)
+ * - apple-maccatalyst: skipped (catalyst is included in iOS xcframework)
+ */
+const buildXCFramework = (platformName: ApplePlatformName) => {
+  // Skip maccatalyst as a separate platform - it's included in iOS xcframework
+  if (platformName === "apple-maccatalyst") {
+    console.log(`⏭️  Skipping ${platformName} - catalyst is included in iOS xcframework`);
+    return;
+  }
+
+  const config = configurations[platformName];
+
+  // Skip if no targets configured (e.g., tvos when GRAPHITE)
+  if (Object.keys(config.targets).length === 0) {
+    console.log(`⏭️  Skipping ${platformName} - no targets configured`);
+    return;
+  }
+
+  const { outputNames } = config;
+  if (outputNames.length === 0) {
+    console.log(`⏭️  Skipping ${platformName} - no outputs configured`);
+    return;
+  }
+
   process.chdir(SkiaSrc);
+  const prefix = `${OutFolder}/${platformName}`;
+
+  // Get the short platform name (ios, tvos, macos)
+  const shortPlatform = platformName.replace("apple-", "");
+
+  // Create output directory
+  const outputDir = `${PackageRoot}/libs/apple/${shortPlatform}`;
+  $(`mkdir -p ${outputDir}`);
+
   outputNames.forEach((name) => {
-    console.log("Building XCFramework for " + name);
-    const prefix = `${OutFolder}/${os}`;
+    console.log(`🍏 Building XCFramework for ${name} (${platformName})`);
 
-    // Only create tvOS frameworks if GRAPHITE is not enabled
-    if (!GRAPHITE) {
-      $(`mkdir -p ${OutFolder}/${os}/tvsimulator`);
-      $(`rm -rf ${OutFolder}/${os}/tvsimulator/${name}`);
+    let xcframeworkCmd = "xcodebuild -create-xcframework ";
+
+    if (shortPlatform === "ios") {
+      // iOS: device + lipo'd simulator (arm64 + x64)
+      $(`mkdir -p ${prefix}/iphonesimulator`);
+      $(`rm -rf ${prefix}/iphonesimulator/${name}`);
       $(
-        `lipo -create ${OutFolder}/${os}/x64-tvsimulator/${name} ${OutFolder}/${os}/arm64-tvsimulator/${name} -output ${OutFolder}/${os}/tvsimulator/${name}`
+        `lipo -create ${prefix}/x64-iphonesimulator/${name} ${prefix}/arm64-iphonesimulator/${name} -output ${prefix}/iphonesimulator/${name}`
       );
+      xcframeworkCmd += `-library ${prefix}/arm64-iphoneos/${name} `;
+      xcframeworkCmd += `-library ${prefix}/iphonesimulator/${name} `;
+
+      // Include Mac Catalyst in iOS xcframework if MACCATALYST is enabled
+      if (MACCATALYST) {
+        const catalystPrefix = `${OutFolder}/apple-maccatalyst`;
+        $(`mkdir -p ${catalystPrefix}/maccatalyst`);
+        $(`rm -rf ${catalystPrefix}/maccatalyst/${name}`);
+        $(
+          `lipo -create ${catalystPrefix}/x64-maccatalyst/${name} ${catalystPrefix}/arm64-maccatalyst/${name} -output ${catalystPrefix}/maccatalyst/${name}`
+        );
+        xcframeworkCmd += `-library ${catalystPrefix}/maccatalyst/${name} `;
+      }
+    } else if (shortPlatform === "tvos") {
+      // tvOS: device + lipo'd simulator (arm64 + x64)
+      $(`mkdir -p ${prefix}/tvsimulator`);
+      $(`rm -rf ${prefix}/tvsimulator/${name}`);
+      $(
+        `lipo -create ${prefix}/x64-tvsimulator/${name} ${prefix}/arm64-tvsimulator/${name} -output ${prefix}/tvsimulator/${name}`
+      );
+      xcframeworkCmd += `-library ${prefix}/arm64-tvos/${name} `;
+      xcframeworkCmd += `-library ${prefix}/tvsimulator/${name} `;
+    } else if (shortPlatform === "macos") {
+      // macOS: lipo arm64 + x64
+      $(`mkdir -p ${prefix}/macosx`);
+      $(`rm -rf ${prefix}/macosx/${name}`);
+      $(
+        `lipo -create ${prefix}/x64-macosx/${name} ${prefix}/arm64-macosx/${name} -output ${prefix}/macosx/${name}`
+      );
+      xcframeworkCmd += `-library ${prefix}/macosx/${name} `;
     }
 
-    $(`mkdir -p ${OutFolder}/${os}/iphonesimulator`);
-    $(`rm -rf ${OutFolder}/${os}/iphonesimulator/${name}`);
-    $(
-      `lipo -create ${OutFolder}/${os}/x64-iphonesimulator/${name} ${OutFolder}/${os}/arm64-iphonesimulator/${name} -output ${OutFolder}/${os}/iphonesimulator/${name}`
-    );
-
-    // Only create macCatalyst frameworks if MACCATALYST is enabled
-    if (MACCATALYST) {
-      $(`mkdir -p ${OutFolder}/${os}/maccatalyst`);
-      $(`rm -rf ${OutFolder}/${os}/maccatalyst/${name}`);
-      $(
-        `lipo -create ${OutFolder}/${os}/x64-maccatalyst/${name} ${OutFolder}/${os}/arm64-maccatalyst/${name} -output ${OutFolder}/${os}/maccatalyst/${name}`
-      );
-    }
-
-    $(`mkdir -p ${OutFolder}/${os}/macosx`);
-    $(`rm -rf ${OutFolder}/${os}/macosx/${name}`);
-    $(
-      `lipo -create ${OutFolder}/${os}/x64-macosx/${name} ${OutFolder}/${os}/arm64-macosx/${name} -output ${OutFolder}/${os}/macosx/${name}`
-    );
     const [lib] = name.split(".");
-    const dstPath = `${PackageRoot}/libs/${os}/${lib}.xcframework`;
-
-    // Build the xcodebuild command conditionally based on GRAPHITE and MACCATALYST
-    let xcframeworkCmd =
-      "xcodebuild -create-xcframework " +
-      `-library ${prefix}/arm64-iphoneos/${name} ` +
-      `-library ${prefix}/iphonesimulator/${name} `;
-
-    // Add tvOS libraries if not using GRAPHITE
-    if (!GRAPHITE) {
-      xcframeworkCmd +=
-        `-library ${prefix}/arm64-tvos/${name} ` +
-        `-library ${prefix}/tvsimulator/${name} `;
-    }
-
-    // Add macOS library
-    xcframeworkCmd += `-library ${prefix}/macosx/${name} `;
-
-    // Add macCatalyst library if enabled
-    if (MACCATALYST) {
-      xcframeworkCmd += `-library ${prefix}/maccatalyst/${name} `;
-    }
-
-    // Add output path
-    xcframeworkCmd += ` -output ${dstPath}`;
+    const dstPath = `${outputDir}/${lib}.xcframework`;
+    xcframeworkCmd += `-output ${dstPath}`;
 
     $(xcframeworkCmd);
   });
+
+  console.log(`✅ XCFramework built for ${platformName}`);
 };
 
 (async () => {
@@ -196,11 +226,14 @@ const buildXCFrameworks = () => {
   const validPlatforms = Object.keys(configurations);
 
   for (const spec of targetSpecs) {
-    if (spec.includes("-")) {
+    // First check if the entire spec is a valid platform name (e.g., "android", "apple-ios")
+    if (validPlatforms.includes(spec)) {
+      buildTargets.push({ platform: spec as PlatformName });
+    } else if (spec.includes("-")) {
       // Handle platform-target format (e.g., android-arm, android-arm64)
       const [platform, target] = spec.split("-", 2);
       if (!validPlatforms.includes(platform)) {
-        console.error(`❌ Invalid platform: ${platform}`);
+        console.error(`❌ Invalid platform or target: ${spec}`);
         console.error(`Valid platforms are: ${validPlatforms.join(", ")}`);
         exit(1);
       }
@@ -231,13 +264,10 @@ const buildXCFrameworks = () => {
       }
       existingPlatform.targets.push(target);
     } else {
-      // Handle platform-only format (e.g., android, apple)
-      if (!validPlatforms.includes(spec)) {
-        console.error(`❌ Invalid platform: ${spec}`);
-        console.error(`Valid platforms are: ${validPlatforms.join(", ")}`);
-        exit(1);
-      }
-      buildTargets.push({ platform: spec as PlatformName });
+      // Invalid spec
+      console.error(`❌ Invalid platform: ${spec}`);
+      console.error(`Valid platforms are: ${validPlatforms.join(", ")}`);
+      exit(1);
     }
   }
 
@@ -294,6 +324,15 @@ const buildXCFrameworks = () => {
       `sed -i '' 's/uint32(bindingInfo\\.binding)/uint32_t(bindingInfo.binding)/g' ${shaderModuleFile}`
     );
 
+    // Remove PartitionAlloc dependency from Dawn (causes linking errors on Android)
+    // The dawn.gni file conditionally sets dawn_partition_alloc_dir for non-MSVC and non-Mac,
+    // which includes Android. We need to remove this to avoid undefined symbol errors.
+    const dawnGniFile = `${SkiaSrc}/build_overrides/dawn.gni`;
+    $(
+      `sed -i '' '/# PartitionAlloc is an optional dependency:/,$d' ${dawnGniFile}`
+    );
+    console.log("   ✓ Removed PartitionAlloc dependency from dawn.gni");
+
     console.log("Patches applied successfully");
   }
   $(`rm -rf ${PackageRoot}/libs`);
@@ -304,7 +343,8 @@ const buildXCFrameworks = () => {
     const configuration = configurations[platform];
     console.log(`\n🔨 Building platform: ${platform}`);
 
-    const targetsToProcess = targets || mapKeys(configuration.targets);
+    const targetsToProcess =
+      targets || (mapKeys(configuration.targets) as string[]);
 
     for (const target of targetsToProcess) {
       await configurePlatform(platform, configuration, target);
@@ -323,10 +363,13 @@ const buildXCFrameworks = () => {
     }
   }
 
-  // Only build XCFrameworks if apple platform is included
-  const hasApple = buildTargets.some((bt) => bt.platform === "apple");
-  if (hasApple) {
-    buildXCFrameworks();
+  // Build XCFrameworks for each Apple platform that was built
+  const applePlatforms = buildTargets
+    .filter((bt) => isApplePlatform(bt.platform))
+    .map((bt) => bt.platform as ApplePlatformName);
+
+  for (const applePlatform of applePlatforms) {
+    buildXCFramework(applePlatform);
   }
 
   copyHeaders();

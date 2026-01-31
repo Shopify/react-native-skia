@@ -34,15 +34,15 @@ preprocessor_defs = use_graphite ?
   '$(inherited) SK_GRAPHITE=1 SK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API=1 SK_DISABLE_LEGACY_SHAPER_FACTORY=1' : 
   '$(inherited) SK_METAL=1 SK_GANESH=1 SK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API=1 SK_DISABLE_LEGACY_SHAPER_FACTORY=1'
 
-# Define base frameworks
-base_frameworks = ['libs/apple/libskia.xcframework', 
-'libs/apple/libsvg.xcframework', 
-'libs/apple/libskshaper.xcframework',
-'libs/apple/libskparagraph.xcframework',
-'libs/apple/libskunicode_core.xcframework',
-'libs/apple/libskunicode_libgrapheme.xcframework',
-'libs/apple/libskottie.xcframework',
-'libs/apple/libsksg.xcframework',]
+# Define framework names (without paths)
+framework_names = ['libskia', 'libsvg', 'libskshaper', 'libskparagraph',
+                   'libskunicode_core', 'libskunicode_libgrapheme',
+                   'libskottie', 'libsksg']
+
+# Build platform-specific framework paths
+ios_frameworks = framework_names.map { |f| "libs/apple/ios/#{f}.xcframework" }
+tvos_frameworks = framework_names.map { |f| "libs/apple/tvos/#{f}.xcframework" }
+osx_frameworks = framework_names.map { |f| "libs/apple/macos/#{f}.xcframework" }
 
 Pod::Spec.new do |s|
   s.name         = "react-native-skia"
@@ -71,7 +71,14 @@ Pod::Spec.new do |s|
 
   s.frameworks = ['MetalKit', 'AVFoundation', 'AVKit', 'CoreMedia']
 
-  s.vendored_frameworks = base_frameworks
+  # Platform-specific vendored frameworks
+  s.ios.vendored_frameworks = ios_frameworks
+  s.osx.vendored_frameworks = osx_frameworks
+
+  # tvOS frameworks only available for non-Graphite builds
+  unless use_graphite
+    s.tvos.vendored_frameworks = tvos_frameworks
+  end
 
   # All iOS cpp/h files
   s.source_files = [

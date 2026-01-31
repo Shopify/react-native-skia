@@ -6,6 +6,16 @@ on:
         description: 'Optional suffix to append to tag (e.g., "a" for skia-m144a)'
         required: false
         default: ''
+      dry_run:
+        description: 'Test build only - skip GitHub release creation and upload'
+        required: false
+        type: boolean
+        default: false
+      skip_skia_download:
+        description: 'Skip downloading prebuilt Skia (always true for building from source)'
+        required: false
+        type: boolean
+        default: true
 jobs:
   prepare-release:
     runs-on: ubuntu-latest
@@ -51,6 +61,7 @@ jobs:
           SKIA_BRANCH_SLUG: ${{ steps.skia_meta.outputs.branch_slug }}
           TAG_SUFFIX: ${{ github.event.inputs.tag_suffix }}
       - name: Create GitHub release
+        if: ${{ github.event.inputs.dry_run != 'true' }}
         id: create_release
         uses: softprops/action-gh-release@v2
         env:
@@ -68,9 +79,16 @@ jobs:
     strategy:
       matrix:
         include:
-          - target: "apple"
-            artifact_name: "skia-apple-xcframeworks"
-            package_root: "./packages/skia/libs/apple"
+          # iOS + macCatalyst combined: builds both and includes catalyst in iOS xcframework
+          - target: "apple-ios apple-maccatalyst"
+            artifact_name: "skia-apple-ios-xcframeworks"
+            package_root: "./packages/skia/libs/apple/ios"
+          - target: "apple-tvos"
+            artifact_name: "skia-apple-tvos-xcframeworks"
+            package_root: "./packages/skia/libs/apple/tvos"
+          - target: "apple-macos"
+            artifact_name: "skia-apple-macos-xcframeworks"
+            package_root: "./packages/skia/libs/apple/macos"
           - target: "android-arm"
             artifact_name: "skia-android-arm"
             package_root: "./packages/skia/libs/android/armeabi-v7a"
@@ -103,7 +121,7 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
         with:
-          download_skia: 'false'
+          download_skia: ${{ github.event.inputs.skip_skia_download == 'true' && 'false' || 'true' }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update depot_tools
@@ -146,6 +164,7 @@ jobs:
           SKIA_BRANCH_SLUG: ${{ needs.prepare-release.outputs.skia_branch_slug }}
 
       - name: Upload binaries to GitHub release - ${{ matrix.artifact_name }}
+        if: ${{ github.event.inputs.dry_run != 'true' }}
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -153,3 +172,11 @@ jobs:
           tag_name: ${{ needs.prepare-release.outputs.tag_name }}
           files: ${{ steps.package.outputs.asset_path }}
           prerelease: true
+
+      - name: Upload binaries as workflow artifact (dry run) - ${{ matrix.artifact_name }}
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ steps.package.outputs.asset_path }}
+          retention-days: 7
