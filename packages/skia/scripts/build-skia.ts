@@ -125,15 +125,21 @@ export const copyLib = (
 /**
  * Builds an XCFramework for a specific Apple platform.
  * Each platform produces its own XCFramework:
- * - apple-ios: arm64-iphoneos + lipo'd iphonesimulator (arm64 + x64)
+ * - apple-ios: arm64-iphoneos + lipo'd iphonesimulator (arm64 + x64) + lipo'd maccatalyst (arm64 + x64) when MACCATALYST
  * - apple-tvos: arm64-tvos + lipo'd tvsimulator (arm64 + x64)
  * - apple-macos: lipo'd macosx (arm64 + x64)
- * - apple-maccatalyst: lipo'd maccatalyst (arm64 + x64)
+ * - apple-maccatalyst: skipped (catalyst is included in iOS xcframework)
  */
 const buildXCFramework = (platformName: ApplePlatformName) => {
+  // Skip maccatalyst as a separate platform - it's included in iOS xcframework
+  if (platformName === "apple-maccatalyst") {
+    console.log(`⏭️  Skipping ${platformName} - catalyst is included in iOS xcframework`);
+    return;
+  }
+
   const config = configurations[platformName];
 
-  // Skip if no targets configured (e.g., tvos when GRAPHITE, maccatalyst when !MACCATALYST)
+  // Skip if no targets configured (e.g., tvos when GRAPHITE)
   if (Object.keys(config.targets).length === 0) {
     console.log(`⏭️  Skipping ${platformName} - no targets configured`);
     return;
@@ -148,7 +154,7 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
   process.chdir(SkiaSrc);
   const prefix = `${OutFolder}/${platformName}`;
 
-  // Get the short platform name (ios, tvos, macos, maccatalyst)
+  // Get the short platform name (ios, tvos, macos)
   const shortPlatform = platformName.replace("apple-", "");
 
   // Create output directory
@@ -169,6 +175,17 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
       );
       xcframeworkCmd += `-library ${prefix}/arm64-iphoneos/${name} `;
       xcframeworkCmd += `-library ${prefix}/iphonesimulator/${name} `;
+
+      // Include Mac Catalyst in iOS xcframework if MACCATALYST is enabled
+      if (MACCATALYST) {
+        const catalystPrefix = `${OutFolder}/apple-maccatalyst`;
+        $(`mkdir -p ${catalystPrefix}/maccatalyst`);
+        $(`rm -rf ${catalystPrefix}/maccatalyst/${name}`);
+        $(
+          `lipo -create ${catalystPrefix}/x64-maccatalyst/${name} ${catalystPrefix}/arm64-maccatalyst/${name} -output ${catalystPrefix}/maccatalyst/${name}`
+        );
+        xcframeworkCmd += `-library ${catalystPrefix}/maccatalyst/${name} `;
+      }
     } else if (shortPlatform === "tvos") {
       // tvOS: device + lipo'd simulator (arm64 + x64)
       $(`mkdir -p ${prefix}/tvsimulator`);
@@ -186,14 +203,6 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
         `lipo -create ${prefix}/x64-macosx/${name} ${prefix}/arm64-macosx/${name} -output ${prefix}/macosx/${name}`
       );
       xcframeworkCmd += `-library ${prefix}/macosx/${name} `;
-    } else if (shortPlatform === "maccatalyst") {
-      // Mac Catalyst: lipo arm64 + x64
-      $(`mkdir -p ${prefix}/maccatalyst`);
-      $(`rm -rf ${prefix}/maccatalyst/${name}`);
-      $(
-        `lipo -create ${prefix}/x64-maccatalyst/${name} ${prefix}/arm64-maccatalyst/${name} -output ${prefix}/maccatalyst/${name}`
-      );
-      xcframeworkCmd += `-library ${prefix}/maccatalyst/${name} `;
     }
 
     const [lib] = name.split(".");

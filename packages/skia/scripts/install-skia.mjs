@@ -64,10 +64,7 @@ if (!GRAPHITE) {
   names.push(`${prefix}-apple-tvos-xcframeworks`);
 }
 
-// Add macCatalyst only for non-Graphite builds
-if (!GRAPHITE) {
-  names.push(`${prefix}-apple-maccatalyst-xcframeworks`);
-}
+// Note: macCatalyst is now included in the iOS xcframeworks, no separate download needed
 
 if (GRAPHITE) {
   names.push(`${prefix}-headers`);
@@ -368,9 +365,10 @@ const calculateLibraryChecksums = () => {
   }
 
   // Apple platforms - calculate separate checksums for each platform
+  // Note: maccatalyst is included in iOS xcframeworks, not a separate artifact
   const applePlatforms = GRAPHITE
     ? ["ios", "macos"]
-    : ["ios", "tvos", "macos", "maccatalyst"];
+    : ["ios", "tvos", "macos"];
 
   for (const platform of applePlatforms) {
     const platformDir = path.join(libsDir, "apple", platform);
@@ -561,6 +559,7 @@ const main = async () => {
   fs.mkdirSync(appleDir, { recursive: true });
 
   // Define the platform artifacts to process
+  // Note: maccatalyst is included in iOS xcframeworks, not a separate artifact
   const applePlatformArtifacts = GRAPHITE
     ? [
         { artifact: `${prefix}-apple-ios-xcframeworks`, srcSubdir: "ios", dest: "ios" },
@@ -570,7 +569,6 @@ const main = async () => {
         { artifact: `${prefix}-apple-ios-xcframeworks`, srcSubdir: "ios", dest: "ios" },
         { artifact: `${prefix}-apple-tvos-xcframeworks`, srcSubdir: "tvos", dest: "tvos" },
         { artifact: `${prefix}-apple-macos-xcframeworks`, srcSubdir: "macos", dest: "macos" },
-        { artifact: `${prefix}-apple-maccatalyst-xcframeworks`, srcSubdir: "maccatalyst", dest: "maccatalyst" },
       ];
 
   applePlatformArtifacts.forEach(({ artifact, srcSubdir, dest }) => {

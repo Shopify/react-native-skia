@@ -18,8 +18,7 @@
       "android-x86_64": "5bd2972d13293b09b35e2c0149b7d103dc4fb0f2837c3dd169ce06795b812714",
       "apple-ios-xcframeworks": "dd70b458d0106462aaa7ecdf5cf352c46a560e7bb367289919af14e2bae34937",
       "apple-tvos-xcframeworks": "a82deca8f7b72a41c2af137e5d650dd2bf2b058d82f6b83e82ecffa0d195848b",
-      "apple-macos-xcframeworks": "d3e290150bf1e5d05583ea8b2effb6c52e827a9631296de707cc29396fd14088",
-      "apple-maccatalyst-xcframeworks": "7f2b259961a6af8d727d6a8ac850d6876e030e9102143438169c6371aa7265f2"
+      "apple-macos-xcframeworks": "d3e290150bf1e5d05583ea8b2effb6c52e827a9631296de707cc29396fd14088"
     }
   },
   "skia-graphite": {

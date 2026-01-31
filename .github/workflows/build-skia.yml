@@ -79,7 +79,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - target: "apple-ios"
+          # iOS + macCatalyst combined: builds both and includes catalyst in iOS xcframework
+          - target: "apple-ios apple-maccatalyst"
             artifact_name: "skia-apple-ios-xcframeworks"
             package_root: "./packages/skia/libs/apple/ios"
           - target: "apple-tvos"
@@ -88,9 +89,6 @@ jobs:
           - target: "apple-macos"
             artifact_name: "skia-apple-macos-xcframeworks"
             package_root: "./packages/skia/libs/apple/macos"
-          - target: "apple-maccatalyst"
-            artifact_name: "skia-apple-maccatalyst-xcframeworks"
-            package_root: "./packages/skia/libs/apple/maccatalyst"
           - target: "android-arm"
             artifact_name: "skia-android-arm"
             package_root: "./packages/skia/libs/android/armeabi-v7a"
