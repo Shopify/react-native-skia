@@ -138,7 +138,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
         platform: "tvos",
         args: [
           [
-            "extra_cflags",
+            "extra_cflags_cc",
             `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "-target", "arm64-apple-tvos", "-mappletvos-version-min=${appleMinTarget}"]`,
           ],
           [
@@ -157,7 +157,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
         args: [
           ["ios_use_simulator", true],
           [
-            "extra_cflags",
+            "extra_cflags_cc",
             `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
           ],
           [
@@ -176,7 +176,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
         args: [
           ["ios_use_simulator", true],
           [
-            "extra_cflags",
+            "extra_cflags_cc",
             `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "-target", "x86_64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
           ],
           [
@@ -202,7 +202,7 @@ const maccatalystTargets: { [key: string]: Target } = MACCATALYST
           ["target_os", `"mac"`],
           ["target_cpu", `"arm64"`],
           [
-            "extra_cflags",
+            "extra_cflags_cc",
             `["-fexceptions","-frtti"${PATH_EDIT_FLAG ? `,"${PATH_EDIT_FLAG}"` : ""},"-target","arm64-apple-ios14.0-macabi",` +
               `"-isysroot","${appleSdkRoot}",` +
               `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
@@ -224,7 +224,7 @@ const maccatalystTargets: { [key: string]: Target } = MACCATALYST
           ["target_os", `"mac"`],
           ["target_cpu", `"x64"`],
           [
-            "extra_cflags",
+            "extra_cflags_cc",
             `["-fexceptions","-frtti"${PATH_EDIT_FLAG ? `,"${PATH_EDIT_FLAG}"` : ""},"-target","x86_64-apple-ios14.0-macabi",` +
               `"-isysroot","${appleSdkRoot}",` +
               `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
@@ -241,7 +241,6 @@ const maccatalystTargets: { [key: string]: Target } = MACCATALYST
       },
     }
   : {};
-
 
 // Common Apple build arguments shared across all Apple platforms
 const appleCommonArgs: Arg[] = [
@@ -318,7 +317,7 @@ export const configurations: Record<PlatformName, Platform> = {
         args: [
           ["ios_min_target", `"${appleMinTarget}"`],
           [
-            "extra_cflags",
+            "extra_cflags_cc",
             `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
           ],
         ],
@@ -330,7 +329,7 @@ export const configurations: Record<PlatformName, Platform> = {
           ["ios_min_target", `"${appleSimulatorMinTarget}"`],
           ["ios_use_simulator", true],
           [
-            "extra_cflags",
+            "extra_cflags_cc",
             `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
           ],
         ],
@@ -341,7 +340,7 @@ export const configurations: Record<PlatformName, Platform> = {
         args: [
           ["ios_min_target", `"${appleSimulatorMinTarget}"`],
           [
-            "extra_cflags",
+            "extra_cflags_cc",
             `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
           ],
         ],
@@ -371,7 +370,7 @@ export const configurations: Record<PlatformName, Platform> = {
         platform: "mac",
         args: [
           [
-            "extra_cflags",
+            "extra_cflags_cc",
             `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
           ],
         ],
@@ -381,7 +380,7 @@ export const configurations: Record<PlatformName, Platform> = {
         platform: "mac",
         args: [
           [
-            "extra_cflags",
+            "extra_cflags_cc",
             `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
           ],
         ],
