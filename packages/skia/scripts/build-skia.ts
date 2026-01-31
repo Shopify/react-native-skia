@@ -184,6 +184,12 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
         $(
           `lipo -create ${catalystPrefix}/x64-maccatalyst/${name} ${catalystPrefix}/arm64-maccatalyst/${name} -output ${catalystPrefix}/maccatalyst/${name}`
         );
+        // Fix Mac Catalyst platform metadata in the fat binary
+        // The build uses target_os="mac" but compiler targets ios-macabi, causing platform mismatch
+        // vtool sets the correct LC_BUILD_VERSION for each architecture slice
+        $(
+          `vtool -arch arm64 -set-build-version maccatalyst 14.0 17.0 -arch x86_64 -set-build-version maccatalyst 14.0 17.0 -replace -output ${catalystPrefix}/maccatalyst/${name} ${catalystPrefix}/maccatalyst/${name}`
+        );
         xcframeworkCmd += `-library ${catalystPrefix}/maccatalyst/${name} `;
       }
     } else if (shortPlatform === "tvos") {
