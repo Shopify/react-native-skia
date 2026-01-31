@@ -1,0 +1,12 @@
+{
+  "name": "@shopify/react-native-skia-binaries",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Build tools for generating Skia binary packages",
+  "type": "module",
+  "scripts": {
+    "generate": "node src/generate-packages.mjs",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {}
+}
