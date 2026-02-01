@@ -18,7 +18,7 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
 
     public SkiaBaseView(Context context) {
         super(context);
-        mView = new SkiaSurfaceView(context, this, debug);
+        mView = new SkiaTextureView(context, this, debug);
         addView(mView);
     }
 
