@@ -28,8 +28,6 @@
 
 namespace RNSkia {
 
-static RNSkDisplayLinkTarget *displayLinkTarget = nil;
-
 RNSkAppleVideo::RNSkAppleVideo(std::string url, RNSkPlatformContext *context)
     : _url(std::move(url)), _context(context) {
   setupPlayer();
@@ -41,6 +39,10 @@ RNSkAppleVideo::~RNSkAppleVideo() {
     [_displayLink invalidate];
     _displayLink = nullptr;
   }
+  if (_displayLinkTarget) {
+    [_displayLinkTarget setVideo:nullptr];
+    _displayLinkTarget = nullptr;
+  }
   if (_endObserver) {
     [[NSNotificationCenter defaultCenter] removeObserver:_endObserver];
     _endObserver = nullptr;
@@ -48,7 +50,6 @@ RNSkAppleVideo::~RNSkAppleVideo() {
   if (_player) {
     [_player pause];
   }
-  displayLinkTarget = nil;
 }
 
 void RNSkAppleVideo::setupPlayer() {
@@ -97,10 +98,10 @@ void RNSkAppleVideo::setupPlayer() {
 }
 
 void RNSkAppleVideo::setupDisplayLink() {
-  displayLinkTarget = [[RNSkDisplayLinkTarget alloc] init];
-  displayLinkTarget.video = this;
+  _displayLinkTarget = [[RNSkDisplayLinkTarget alloc] init];
+  [_displayLinkTarget setVideo:this];
 
-  _displayLink = [CADisplayLink displayLinkWithTarget:displayLinkTarget
+  _displayLink = [CADisplayLink displayLinkWithTarget:_displayLinkTarget
                                              selector:@selector(displayLinkFired:)];
   [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
   _displayLink.paused = YES; // Start paused, will unpause when play() is called

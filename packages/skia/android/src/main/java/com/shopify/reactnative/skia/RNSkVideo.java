@@ -80,13 +80,11 @@ public class RNSkVideo {
                     playWhenReady = false;
                 }
             });
+            // Note: When setLooping(true) is used, this listener won't fire as
+            // MediaPlayer handles looping automatically. This only handles the
+            // non-looping case to update playback state.
             mediaPlayer.setOnCompletionListener(mp -> {
-                if (isLooping) {
-                    mp.seekTo(0);
-                    mp.start();
-                } else {
-                    isPlaying = false;
-                }
+                isPlaying = false;
             });
             mediaPlayer.prepareAsync();
 

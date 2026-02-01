@@ -25,6 +25,7 @@ private:
   AVPlayerItem *_playerItem = nullptr;
   AVPlayerItemVideoOutput *_videoOutput = nullptr;
   CADisplayLink *_displayLink = nullptr;
+  id _displayLinkTarget = nullptr;
   RNSkPlatformContext *_context;
   double _duration = 0;
   double _framerate = 0;
