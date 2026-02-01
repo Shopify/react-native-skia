@@ -44,13 +44,11 @@ const defaultOptions = {
   looping: true,
   paused: false,
   seek: null,
-  currentTime: 0,
   volume: 0,
 };
 
 const useOption = <T>(value: MaybeAnimated<T>) => {
   "worklet";
-  // TODO: only create defaultValue is needed (via makeMutable)
   const defaultValue = Rea.useSharedValue(
     Rea.isSharedValue(value) ? value.value : value
   );
@@ -75,8 +73,6 @@ export const useVideo = (
   const volume = useOption(userOptions?.volume ?? defaultOptions.volume);
   const currentFrame = Rea.useSharedValue<null | SkImage>(null);
   const currentTime = Rea.useSharedValue(0);
-  const lastTimestamp = Rea.useSharedValue(-1);
-  const pendingSeek = Rea.useSharedValue(false);
   const duration = useMemo(() => video?.duration() ?? 0, [video]);
   const framerate = useMemo(
     () => (Platform.OS === "web" ? -1 : (video?.framerate() ?? 0)),
@@ -84,80 +80,73 @@ export const useVideo = (
   );
   const size = useMemo(() => video?.size() ?? { width: 0, height: 0 }, [video]);
   const rotation = useMemo(() => video?.rotation() ?? 0, [video]);
-  const frameDuration = 1000 / framerate;
-  const currentFrameDuration = Math.floor(frameDuration);
+
+  // Handle pause/play state changes
   Rea.useAnimatedReaction(
     () => isPaused.value,
     (paused) => {
       if (paused) {
         video?.pause();
       } else {
-        lastTimestamp.value = -1;
         video?.play();
       }
     }
   );
+
+  // Handle seek
   Rea.useAnimatedReaction(
     () => seek.value,
     (value) => {
       if (value !== null) {
         video?.seek(value);
-        currentTime.value = value;
-        pendingSeek.value = true;
         seek.value = null;
       }
     }
   );
+
+  // Handle volume changes
   Rea.useAnimatedReaction(
     () => volume.value,
     (value) => {
       video?.setVolume(value);
     }
   );
-  Rea.useFrameCallback((frameInfo: FrameInfo) => {
+
+  // Handle looping changes
+  Rea.useAnimatedReaction(
+    () => looping.value,
+    (value) => {
+      video?.setLooping(value);
+    }
+  );
+
+  // Frame callback - simplified since native handles frame timing
+  Rea.useFrameCallback((_frameInfo: FrameInfo) => {
     "worklet";
     if (!video) {
       return;
     }
-    // Handle seek while paused: extract one frame then clear the flag
-    if (pendingSeek.value) {
-      setFrame(video, currentFrame);
-      pendingSeek.value = false;
-      lastTimestamp.value = frameInfo.timestamp;
-      if (isPaused.value) {
-        return;
-      }
-    }
-    if (isPaused.value) {
-      return;
-    }
-    const currentTimestamp = frameInfo.timestamp;
-    if (lastTimestamp.value === -1) {
-      lastTimestamp.value = currentTimestamp;
-    }
-    const delta = currentTimestamp - lastTimestamp.value;
-
-    const isOver = currentTime.value + delta > duration;
-    if (isOver && looping.value) {
-      seek.value = 0;
-      currentTime.value = seek.value;
-      lastTimestamp.value = currentTimestamp;
-    }
-    // On Web the framerate is uknown.
-    // This could be optimized by using requestVideoFrameCallback (Chrome only)
-    if ((delta >= currentFrameDuration && !isOver) || Platform.OS === "web") {
-      setFrame(video, currentFrame);
-      currentTime.value += delta;
-      lastTimestamp.value = currentTimestamp;
-    }
+    // Update current time from native player
+    currentTime.value = video.currentTime();
+    // Get the latest frame (native handles timing via CADisplayLink/etc)
+    setFrame(video, currentFrame);
   });
 
+  // Apply initial state when video becomes available
   useEffect(() => {
+    if (video) {
+      video.setLooping(looping.value);
+      video.setVolume(volume.value);
+      if (isPaused.value) {
+        video.pause();
+      } else {
+        video.play();
+      }
+    }
     return () => {
-      // TODO: should video simply be a shared value instead?
       Rea.runOnUI(disposeVideo)(video);
     };
-  }, [video]);
+  }, [video, isPaused, looping, volume]);
 
   return {
     currentFrame,

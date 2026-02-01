@@ -12,17 +12,43 @@
 #include <AVFoundation/AVFoundation.h>
 #include <CoreVideo/CoreVideo.h>
 
+// Helper class to bridge CADisplayLink callback to C++
+@interface RNSkDisplayLinkTarget : NSObject
+@property (nonatomic, assign) RNSkia::RNSkAppleVideo *video;
+- (void)displayLinkFired:(CADisplayLink *)sender;
+@end
+
+@implementation RNSkDisplayLinkTarget
+- (void)displayLinkFired:(CADisplayLink *)sender {
+  if (_video) {
+    _video->onDisplayLink();
+  }
+}
+@end
+
 namespace RNSkia {
+
+static RNSkDisplayLinkTarget *displayLinkTarget = nil;
 
 RNSkAppleVideo::RNSkAppleVideo(std::string url, RNSkPlatformContext *context)
     : _url(std::move(url)), _context(context) {
   setupPlayer();
+  setupDisplayLink();
 }
 
 RNSkAppleVideo::~RNSkAppleVideo() {
+  if (_displayLink) {
+    [_displayLink invalidate];
+    _displayLink = nullptr;
+  }
+  if (_endObserver) {
+    [[NSNotificationCenter defaultCenter] removeObserver:_endObserver];
+    _endObserver = nullptr;
+  }
   if (_player) {
     [_player pause];
   }
+  displayLinkTarget = nil;
 }
 
 void RNSkAppleVideo::setupPlayer() {
@@ -30,6 +56,7 @@ void RNSkAppleVideo::setupPlayer() {
   AVPlayerItem *playerItem = [AVPlayerItem playerItemWithURL:videoURL];
   _player = [AVPlayer playerWithPlayerItem:playerItem];
   _playerItem = playerItem;
+  _player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
 
   NSDictionary *outputSettings = getOutputSettings();
   _videoOutput =
@@ -50,27 +77,68 @@ void RNSkAppleVideo::setupPlayer() {
     _videoWidth = videoSize.width;
     _videoHeight = videoSize.height;
   }
-  play();
+
+  // Set up end-of-playback observer
+  __weak AVPlayer *weakPlayer = _player;
+  _endObserver = [[NSNotificationCenter defaultCenter]
+      addObserverForName:AVPlayerItemDidPlayToEndTimeNotification
+                  object:playerItem
+                   queue:[NSOperationQueue mainQueue]
+              usingBlock:^(NSNotification *note) {
+                if (_isLooping) {
+                  [weakPlayer seekToTime:kCMTimeZero
+                         toleranceBefore:kCMTimeZero
+                          toleranceAfter:kCMTimeZero
+                       completionHandler:nil];
+                } else {
+                  _isPlaying = false;
+                }
+              }];
+}
+
+void RNSkAppleVideo::setupDisplayLink() {
+  displayLinkTarget = [[RNSkDisplayLinkTarget alloc] init];
+  displayLinkTarget.video = this;
+
+  _displayLink = [CADisplayLink displayLinkWithTarget:displayLinkTarget
+                                             selector:@selector(displayLinkFired:)];
+  [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
+  _displayLink.paused = YES; // Start paused, will unpause when play() is called
+}
+
+void RNSkAppleVideo::onDisplayLink() {
+  CMTime outputItemTime = [_videoOutput itemTimeForHostTime:CACurrentMediaTime()];
+
+  if ([_videoOutput hasNewPixelBufferForItemTime:outputItemTime]) {
+    CVPixelBufferRef pixelBuffer =
+        [_videoOutput copyPixelBufferForItemTime:outputItemTime
+                              itemTimeForDisplay:nullptr];
+    if (pixelBuffer) {
+      _lastImage = _context->makeImageFromNativeBuffer((void *)pixelBuffer);
+      CVPixelBufferRelease(pixelBuffer);
+
+      if (_waitingForFrame) {
+        _waitingForFrame = false;
+        // If paused and we got the frame we were waiting for, pause the display link
+        if (!_isPlaying) {
+          _displayLink.paused = YES;
+        }
+      }
+    }
+  }
+}
+
+
+void RNSkAppleVideo::expectFrame() {
+  _waitingForFrame = true;
+  _displayLink.paused = NO;
 }
 
 sk_sp<SkImage> RNSkAppleVideo::nextImage(double *timeStamp) {
-  CMTime currentTime = [_player currentTime];
-  CVPixelBufferRef pixelBuffer =
-      [_videoOutput copyPixelBufferForItemTime:currentTime
-                            itemTimeForDisplay:nullptr];
-  if (!pixelBuffer) {
-    NSLog(@"No pixel buffer.");
-    return nullptr;
-  }
-
-  auto skImage = _context->makeImageFromNativeBuffer((void *)pixelBuffer);
-
   if (timeStamp) {
-    *timeStamp = CMTimeGetSeconds(currentTime);
+    *timeStamp = CMTimeGetSeconds([_player currentTime]);
   }
-
-  CVPixelBufferRelease(pixelBuffer);
-  return skImage;
+  return _lastImage;
 }
 
 NSDictionary *RNSkAppleVideo::getOutputSettings() {
@@ -83,7 +151,6 @@ NSDictionary *RNSkAppleVideo::getOutputSettings() {
 float RNSkAppleVideo::getRotationInDegrees() {
   CGFloat rotationAngle = 0.0;
   auto transform = _preferredTransform;
-  // Determine the rotation angle in radians
   if (transform.a == 0 && transform.b == 1 && transform.c == -1 &&
       transform.d == 0) {
     rotationAngle = 90;
@@ -100,12 +167,15 @@ float RNSkAppleVideo::getRotationInDegrees() {
 void RNSkAppleVideo::seek(double timeInMilliseconds) {
   CMTime seekTime =
       CMTimeMakeWithSeconds(timeInMilliseconds / 1000.0, NSEC_PER_SEC);
+  CMTime previousTime = [_player currentTime];
+
   [_player seekToTime:seekTime
         toleranceBefore:kCMTimeZero
          toleranceAfter:kCMTimeZero
       completionHandler:^(BOOL finished) {
-        if (!finished) {
-          NSLog(@"Seek failed or was interrupted.");
+        if (finished && CMTimeCompare([_player currentTime], previousTime) != 0) {
+          // Ensure a frame is extracted after seek, even when paused
+          expectFrame();
         }
       }];
 }
@@ -114,6 +184,7 @@ void RNSkAppleVideo::play() {
   if (_player) {
     [_player play];
     _isPlaying = true;
+    _displayLink.paused = NO;
   }
 }
 
@@ -121,6 +192,10 @@ void RNSkAppleVideo::pause() {
   if (_player) {
     [_player pause];
     _isPlaying = false;
+    // Only pause display link if not waiting for a frame
+    if (!_waitingForFrame) {
+      _displayLink.paused = YES;
+    }
   }
 }
 
@@ -128,10 +203,22 @@ double RNSkAppleVideo::duration() { return _duration; }
 
 double RNSkAppleVideo::framerate() { return _framerate; }
 
+double RNSkAppleVideo::currentTime() {
+  return CMTimeGetSeconds([_player currentTime]) * 1000; // Return milliseconds
+}
+
 SkISize RNSkAppleVideo::getSize() {
   return SkISize::Make(_videoWidth, _videoHeight);
 }
 
 void RNSkAppleVideo::setVolume(float volume) { _player.volume = volume; }
+
+void RNSkAppleVideo::setLooping(bool looping) {
+  _isLooping = looping;
+}
+
+bool RNSkAppleVideo::isPlaying() {
+  return _isPlaying;
+}
 
 } // namespace RNSkia

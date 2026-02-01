@@ -41,6 +41,11 @@ public class RNSkVideo {
     private int height = 0;
 
     private boolean isPlaying = false;
+    private boolean isLooping = false;
+    private boolean isPrepared = false;
+    private boolean playWhenReady = false;
+    private HardwareBuffer lastBuffer = null;
+    private boolean pendingSeek = false;
 
     RNSkVideo(Context context, String localUri) {
         this.uri = Uri.parse(localUri);
@@ -65,8 +70,23 @@ public class RNSkVideo {
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mediaPlayer.setOnPreparedListener(mp -> {
                 durationMs = mp.getDuration();
-                mp.start();
-                isPlaying = true;
+                isPrepared = true;
+                // Apply looping setting
+                mp.setLooping(isLooping);
+                // Start playing if play() was called before preparation completed
+                if (playWhenReady) {
+                    mp.start();
+                    isPlaying = true;
+                    playWhenReady = false;
+                }
+            });
+            mediaPlayer.setOnCompletionListener(mp -> {
+                if (isLooping) {
+                    mp.seekTo(0);
+                    mp.start();
+                } else {
+                    isPlaying = false;
+                }
             });
             mediaPlayer.prepareAsync();
 
@@ -125,6 +145,12 @@ public class RNSkVideo {
 
     @DoNotStrip
     public HardwareBuffer nextImage() {
+        // If paused and not seeking, return cached buffer
+        if (!isPlaying && !pendingSeek && lastBuffer != null) {
+            return lastBuffer;
+        }
+
+        // Decode new frame if needed
         if (!decoderOutputAvailable()) {
             decodeFrame();
         }
@@ -133,9 +159,16 @@ public class RNSkVideo {
         if (image != null) {
             HardwareBuffer hardwareBuffer = image.getHardwareBuffer();
             image.close();  // Make sure to close the Image to free up the buffer
+            // Cache the buffer
+            lastBuffer = hardwareBuffer;
+            // Clear pending seek flag after getting frame
+            if (pendingSeek) {
+                pendingSeek = false;
+            }
             return hardwareBuffer;
         }
-        return null;
+        // Return cached buffer if no new frame available
+        return lastBuffer;
     }
 
     @DoNotStrip
@@ -143,7 +176,7 @@ public class RNSkVideo {
         long timestampUs = (long)(timestamp * 1000); // Convert milliseconds to microseconds
 
         extractor.seekTo(timestampUs, MediaExtractor.SEEK_TO_CLOSEST_SYNC);
-        if (mediaPlayer != null) {
+        if (mediaPlayer != null && isPrepared) {
             int timestampMs = (int) timestamp; // Convert to milliseconds
             mediaPlayer.seekTo(timestampMs, MediaPlayer.SEEK_CLOSEST);
         }
@@ -152,6 +185,11 @@ public class RNSkVideo {
         if (decoder != null) {
             decoder.flush();
         }
+
+        // Signal that we need to decode a new frame (for seek while paused)
+        pendingSeek = true;
+        // Decode a frame immediately so it's ready
+        decodeFrame();
     }
 
     @DoNotStrip
@@ -215,14 +253,21 @@ public class RNSkVideo {
 
     @DoNotStrip
     public void play() {
-        if (mediaPlayer != null && !isPlaying) {
+        if (mediaPlayer == null || isPlaying) {
+            return;
+        }
+        if (isPrepared) {
             mediaPlayer.start();
             isPlaying = true;
+        } else {
+            // Queue the play request for when preparation completes
+            playWhenReady = true;
         }
     }
 
     @DoNotStrip
     public void pause() {
+        playWhenReady = false;
         if (mediaPlayer != null && isPlaying) {
             mediaPlayer.pause();
             isPlaying = false;
@@ -236,7 +281,29 @@ public class RNSkVideo {
         }
     }
 
+    @DoNotStrip
+    public double getCurrentTime() {
+        if (mediaPlayer != null && isPrepared) {
+            return mediaPlayer.getCurrentPosition(); // Returns milliseconds
+        }
+        return 0;
+    }
+
+    @DoNotStrip
+    public void setLooping(boolean looping) {
+        isLooping = looping;
+        if (mediaPlayer != null && isPrepared) {
+            mediaPlayer.setLooping(looping);
+        }
+    }
+
+    @DoNotStrip
+    public boolean getIsPlaying() {
+        return isPlaying;
+    }
+
     public void release() {
+        lastBuffer = null;
         if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;
