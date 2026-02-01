@@ -37,6 +37,7 @@ private:
   bool _waitingForFrame = false;
   id _endObserver = nullptr;
   sk_sp<SkImage> _lastImage = nullptr;
+  double _lastFrameTimeMs = 0;
   void setupPlayer();
   void setupDisplayLink();
   NSDictionary *getOutputSettings();

@@ -46,6 +46,7 @@ public class RNSkVideo {
     private boolean playWhenReady = false;
     private HardwareBuffer lastBuffer = null;
     private boolean pendingSeek = false;
+    private double lastFrameTimeMs = 0;
 
     RNSkVideo(Context context, String localUri) {
         this.uri = Uri.parse(localUri);
@@ -240,6 +241,8 @@ public class RNSkVideo {
 
         int outputBufferId = decoder.dequeueOutputBuffer(info, timeoutUs);
         if (outputBufferId >= 0) {
+            // Store the frame's presentation timestamp for accurate time reporting
+            lastFrameTimeMs = info.presentationTimeUs / 1000.0;
             // If we have a valid buffer, release it to make it available to the ImageReader's surface
             decoder.releaseOutputBuffer(outputBufferId, true);
 
@@ -281,10 +284,8 @@ public class RNSkVideo {
 
     @DoNotStrip
     public double getCurrentTime() {
-        if (mediaPlayer != null && isPrepared) {
-            return mediaPlayer.getCurrentPosition(); // Returns milliseconds
-        }
-        return 0;
+        // Return the timestamp of the last decoded frame for accurate synchronization
+        return lastFrameTimeMs;
     }
 
     @DoNotStrip
