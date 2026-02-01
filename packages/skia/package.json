@@ -10,23 +10,26 @@
   "title": "React Native Skia",
   "version": "0.0.0",
   "skia": {
-    "version": "m144",
+    "version": "m144c",
     "checksums": {
-      "android-armeabi-v7a": "8f7f83a4ae210cc28007f2c226d754e9ef7c929822ef60c56a4ccc134e726148",
-      "android-arm64-v8a": "5d799d988a6cbc0cb844a92882a2458e67990314791ea38f928d83d5e01cb828",
-      "android-x86": "711fbee4a1721b92604daa78fa6f8c7ce4a6a6c901973919bd030848adc4f81d",
-      "android-x86_64": "fe068aa70b5c8bcf991cfe99e9db38617aaeaf92defd08bc4f89384b4d4dbed4",
-      "apple-xcframeworks": "63e2789bd75236b16779abc7171b351aa50cd01c13f05b3e1d83b34336ceb77c"
+      "android-armeabi-v7a": "e406c3e8103a2efb6a514ac91346d7f9f81adbae14dc2d0e302e84fb8c5f80f7",
+      "android-arm64-v8a": "75069b0f7c66ad3382553e947d583265de033cc856c394110243da098306955f",
+      "android-x86": "714b93a7bdf005a23699f47e6255e4e690086c52a1998c20196a46f95b709b09",
+      "android-x86_64": "5bd2972d13293b09b35e2c0149b7d103dc4fb0f2837c3dd169ce06795b812714",
+      "apple-ios-xcframeworks": "43f62ea742c55ecc57864505ff752a517fd2c31412a19914032d044ac4f987ee",
+      "apple-tvos-xcframeworks": "0f6b5c75b4e686e72f5cc8508e60074463f757ca7a0dcbd07e095c055a537c58",
+      "apple-macos-xcframeworks": "31f57bcf6caff1c268984609b0e4a2abd966bfa8ddcf074331d94e0f988f93d3"
     }
   },
   "skia-graphite": {
-    "version": "m142",
+    "version": "m142b",
     "checksums": {
-      "android-armeabi-v7a": "8ea6fc4e64dfba9afd74aebde114819fecf05924a8209839482d7dca38203f85",
-      "android-arm64-v8a": "6be2711ca4c31523d381420e98cabfe7e7939e246975c7b427968d5dd3b62be9",
-      "android-x86": "888934ddc34f431c7fac5628f633dc11a4e84d68c41adb33307ae7586cc7b0b5",
-      "android-x86_64": "2180a5be52d51bbf1dabaf95051ed0ce422b047157bcda6e486657c2c7b87ceb",
-      "apple-xcframeworks": "cb50d9c85c9f02389ecc433912145e4a7ce2277bfe26a69dd7f7a9db74c9e276"
+      "android-armeabi-v7a": "3e40f44c804194fa0983c46903f834e8f834c6dd96534c7fa1b4ebb4f409527d",
+      "android-arm64-v8a": "d6c3035449fcf7ef13369b0d6c4ef41f3177d15074eeb195201e0ba4cfb2f527",
+      "android-x86": "6dc229847420b8a43c15098cdcb4fe45b2df20a38ad69f37e0aa91c832499c2a",
+      "android-x86_64": "ecae351d98af3b175d40d894520c2e3263034276bb0b0e9d2f9c19ba7dc046fa",
+      "apple-ios-xcframeworks": "6f60f03faaeebfb798615d09715040790ff95e75bf95028893ced6f514ab5196",
+      "apple-macos-xcframeworks": "07467cd1778053537528ed91c7a35d116e1a4644819f0aad8e06e7d884591dea"
     }
   },
   "description": "High-performance React Native Graphics using Skia",
@@ -132,14 +135,15 @@
     "pngjs": "6.0.0",
     "prettier": "2.8.7",
     "react": "19.0.0",
-    "react-native": "0.78.0",
+    "react-native": "0.83.1",
     "react-native-builder-bob": "0.18.2",
-    "react-native-reanimated": "3.19.1",
+    "react-native-reanimated": "4.2.1",
+    "react-native-worklets": "0.7.1",
     "rimraf": "3.0.2",
     "semantic-release": "^24.1.0",
     "semantic-release-yarn": "^3.0.2",
     "ts-jest": "29.4.3",
-    "tsx": "^4.20.5",
+    "tsx": "^4.21.0",
     "typescript": "^5.2.2",
     "ws": "8.18.0"
   },
@@ -159,9 +163,9 @@
       "javaPackageName": "com.shopify.reactnative.skia"
     },
     "ios": {
-      "componentProviders": [
-        "SkiaPictureViewNativeComponent"
-      ]
+      "componentProvider": {
+        "SkiaPictureView": "SkiaPictureView"
+      }
     }
   },
   "react-native-builder-bob": {

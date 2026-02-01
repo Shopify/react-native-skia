@@ -50,7 +50,11 @@ void RNSkApplePlatformContext::performStreamOperation(
       // load from the embedded iOS app bundle and will try to load image
       // and get data from the image directly. imageNamed will return the
       // best version of the requested image:
+#if !TARGET_OS_OSX
       auto image = [UIImage imageNamed:[url absoluteString]];
+#else
+      auto image = [NSImage imageNamed:[url absoluteString]];
+#endif // !TARGET_OS_OSX
       // We don't know the image format (png, jpg, etc) but
       // UIImagePNGRepresentation will support all of them
       data = UIImagePNGRepresentation(image);

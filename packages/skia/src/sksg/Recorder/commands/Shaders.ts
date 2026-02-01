@@ -257,8 +257,9 @@ type Props = {
   [NodeType.Blend]: BlendProps;
 };
 
-interface PushShader<T extends keyof Props>
-  extends Command<CommandType.PushShader> {
+interface PushShader<
+  T extends keyof Props,
+> extends Command<CommandType.PushShader> {
   shaderType: T;
   props: Props[T];
   children: number;

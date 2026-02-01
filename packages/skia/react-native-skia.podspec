@@ -4,6 +4,37 @@ require "json"
 
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
+# Check if Skia prebuilt binaries are installed
+# The postinstall script downloads these - if missing, the user needs to run it
+skia_libs_path = File.join(__dir__, "libs/apple/ios")
+unless File.exist?(skia_libs_path) && Dir.glob(File.join(skia_libs_path, "*.xcframework")).any?
+  Pod::UI.puts "\n"
+  Pod::UI.puts "┌─────────────────────────────────────────────────────────────────────────────┐".red
+  Pod::UI.puts "│                                                                             │".red
+  Pod::UI.puts "│  ERROR: Skia prebuilt binaries not found!                                   │".red
+  Pod::UI.puts "│                                                                             │".red
+  Pod::UI.puts "│  The postinstall script has not run. This is required to download the      │".red
+  Pod::UI.puts "│  Skia binaries. Some package managers (pnpm, bun, yarn berry) require       │".red
+  Pod::UI.puts "│  explicit trust for packages with postinstall scripts.                      │".red
+  Pod::UI.puts "│                                                                             │".red
+  Pod::UI.puts "│  To fix this:                                                               │".red
+  Pod::UI.puts "│                                                                             │".red
+  Pod::UI.puts "│  • npm/yarn classic: Run 'npm rebuild @shopify/react-native-skia' or        │".red
+  Pod::UI.puts "│                       reinstall the package                                 │".red
+  Pod::UI.puts "│                                                                             │".red
+  Pod::UI.puts "│  • bun: Run 'bun add --trust @shopify/react-native-skia'                    │".red
+  Pod::UI.puts "│                                                                             │".red
+  Pod::UI.puts "│  • pnpm: Add to package.json:                                               │".red
+  Pod::UI.puts "│          \"pnpm\": { \"onlyBuiltDependencies\": [\"@shopify/react-native-skia\"] }│".red
+  Pod::UI.puts "│          Then reinstall the package                                         │".red
+  Pod::UI.puts "│                                                                             │".red
+  Pod::UI.puts "│  See: https://shopify.github.io/react-native-skia/docs/getting-started/installation │".red
+  Pod::UI.puts "│                                                                             │".red
+  Pod::UI.puts "└─────────────────────────────────────────────────────────────────────────────┘".red
+  Pod::UI.puts "\n"
+  raise "Skia prebuilt binaries not found. Please run the postinstall script."
+end
+
 # Check if Graphite is available
 # Detection method priority:
 # 1. SK_GRAPHITE environment variable (explicit override, fastest)
@@ -34,15 +65,15 @@ preprocessor_defs = use_graphite ?
   '$(inherited) SK_GRAPHITE=1 SK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API=1 SK_DISABLE_LEGACY_SHAPER_FACTORY=1' : 
   '$(inherited) SK_METAL=1 SK_GANESH=1 SK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API=1 SK_DISABLE_LEGACY_SHAPER_FACTORY=1'
 
-# Define base frameworks
-base_frameworks = ['libs/apple/libskia.xcframework', 
-'libs/apple/libsvg.xcframework', 
-'libs/apple/libskshaper.xcframework',
-'libs/apple/libskparagraph.xcframework',
-'libs/apple/libskunicode_core.xcframework',
-'libs/apple/libskunicode_libgrapheme.xcframework',
-'libs/apple/libskottie.xcframework',
-'libs/apple/libsksg.xcframework',]
+# Define framework names (without paths)
+framework_names = ['libskia', 'libsvg', 'libskshaper', 'libskparagraph',
+                   'libskunicode_core', 'libskunicode_libgrapheme',
+                   'libskottie', 'libsksg']
+
+# Build platform-specific framework paths
+ios_frameworks = framework_names.map { |f| "libs/apple/ios/#{f}.xcframework" }
+tvos_frameworks = framework_names.map { |f| "libs/apple/tvos/#{f}.xcframework" }
+osx_frameworks = framework_names.map { |f| "libs/apple/macos/#{f}.xcframework" }
 
 Pod::Spec.new do |s|
   s.name         = "react-native-skia"
@@ -66,12 +97,19 @@ Pod::Spec.new do |s|
     'GCC_PREPROCESSOR_DEFINITIONS' => preprocessor_defs,
     'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17',
     'DEFINES_MODULE' => 'YES',
-    "HEADER_SEARCH_PATHS" => '"$(PODS_TARGET_SRCROOT)/cpp/"/**'
+    "HEADER_SEARCH_PATHS" => '"$(PODS_TARGET_SRCROOT)/cpp/"/** "$(PODS_TARGET_SRCROOT)/cpp" "$(PODS_TARGET_SRCROOT)/cpp/jsi2" "$(PODS_TARGET_SRCROOT)/cpp/rnwgpu" "$(PODS_TARGET_SRCROOT)/cpp/rnwgpu/api" "$(PODS_TARGET_SRCROOT)/cpp/rnwgpu/api/descriptors" "$(PODS_TARGET_SRCROOT)/cpp/rnwgpu/async" "$(PODS_TARGET_SRCROOT)/cpp/dawn/include"'
   }
 
   s.frameworks = ['MetalKit', 'AVFoundation', 'AVKit', 'CoreMedia']
 
-  s.vendored_frameworks = base_frameworks
+  # Platform-specific vendored frameworks
+  s.ios.vendored_frameworks = ios_frameworks
+  s.osx.vendored_frameworks = osx_frameworks
+
+  # tvOS frameworks only available for non-Graphite builds
+  unless use_graphite
+    s.tvos.vendored_frameworks = tvos_frameworks
+  end
 
   # All iOS cpp/h files
   s.source_files = [
@@ -82,9 +120,10 @@ Pod::Spec.new do |s|
   graphite_exclusions = [
     'cpp/rnskia/RNDawnContext.h',
     'cpp/rnskia/RNDawnUtils.h',
-    'cpp/rnskia/RNDawnWindowContext.h', 
+    'cpp/rnskia/RNDawnWindowContext.h',
     'cpp/rnskia/RNDawnWindowContext.cpp',
-    'cpp/rnskia/RNImageProvider.h'
+    'cpp/rnskia/RNImageProvider.h',
+    'cpp/rnwgpu/**/*.{h,cpp}'
   ]
   s.exclude_files = graphite_exclusions unless use_graphite 
 

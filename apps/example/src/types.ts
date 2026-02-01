@@ -31,4 +31,5 @@ export type StackParamList = {
   Video: undefined;
   Chat: undefined;
   Pictures: undefined;
+  WebGPU: undefined;
 };

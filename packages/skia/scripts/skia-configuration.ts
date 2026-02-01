@@ -5,7 +5,7 @@ import { $, fileOps } from "./utils";
 
 const DEBUG = false;
 export const GRAPHITE = !!process.env.SK_GRAPHITE;
-export const MACCATALYST = !GRAPHITE;
+export const MACCATALYST = false;
 const BUILD_WITH_PARAGRAPH = true;
 // Re-enable mutable SkPath methods (addPath, moveTo, lineTo, etc.)
 // Skia is transitioning to immutable SkPath with SkPathBuilder
@@ -92,9 +92,22 @@ export const commonArgs = [
   //["skia_enable_ganesh", !GRAPHITE],
   ["skia_enable_graphite", GRAPHITE],
   ["skia_use_dawn", GRAPHITE],
+  // C++20 is required for Graphite builds (Dawn uses C++20 concepts)
+  ...(GRAPHITE ? [["skia_use_cpp20", true]] : []),
 ];
 
-export type PlatformName = "apple" | "android";
+export type PlatformName =
+  | "apple-ios"
+  | "apple-tvos"
+  | "apple-macos"
+  | "apple-maccatalyst"
+  | "android";
+
+export type ApplePlatformName = Extract<PlatformName, `apple-${string}`>;
+
+export const isApplePlatform = (
+  name: PlatformName
+): name is ApplePlatformName => name.startsWith("apple-");
 
 type Arg = (string | boolean | number)[];
 export type Target = {
@@ -125,7 +138,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
         platform: "tvos",
         args: [
           [
-            "extra_cflags",
+            "extra_cflags_cc",
             `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "-target", "arm64-apple-tvos", "-mappletvos-version-min=${appleMinTarget}"]`,
           ],
           [
@@ -144,7 +157,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
         args: [
           ["ios_use_simulator", true],
           [
-            "extra_cflags",
+            "extra_cflags_cc",
             `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
           ],
           [
@@ -163,7 +176,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
         args: [
           ["ios_use_simulator", true],
           [
-            "extra_cflags",
+            "extra_cflags_cc",
             `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "-target", "x86_64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
           ],
           [
@@ -189,7 +202,7 @@ const maccatalystTargets: { [key: string]: Target } = MACCATALYST
           ["target_os", `"mac"`],
           ["target_cpu", `"arm64"`],
           [
-            "extra_cflags",
+            "extra_cflags_cc",
             `["-fexceptions","-frtti"${PATH_EDIT_FLAG ? `,"${PATH_EDIT_FLAG}"` : ""},"-target","arm64-apple-ios14.0-macabi",` +
               `"-isysroot","${appleSdkRoot}",` +
               `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
@@ -211,7 +224,7 @@ const maccatalystTargets: { [key: string]: Target } = MACCATALYST
           ["target_os", `"mac"`],
           ["target_cpu", `"x64"`],
           [
-            "extra_cflags",
+            "extra_cflags_cc",
             `["-fexceptions","-frtti"${PATH_EDIT_FLAG ? `,"${PATH_EDIT_FLAG}"` : ""},"-target","x86_64-apple-ios14.0-macabi",` +
               `"-isysroot","${appleSdkRoot}",` +
               `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
@@ -229,8 +242,27 @@ const maccatalystTargets: { [key: string]: Target } = MACCATALYST
     }
   : {};
 
-export const configurations = {
-  android: {
+// Common Apple build arguments shared across all Apple platforms
+const appleCommonArgs: Arg[] = [
+  ["skia_use_metal", true],
+  ["skia_use_gl", false],
+  ["cc", '"clang"'],
+  ["cxx", '"clang++"'],
+  ...ParagraphArgsApple,
+];
+
+// Common Apple output names shared across all Apple platforms
+const appleOutputNames = [
+  "libskia.a",
+  "libskshaper.a",
+  "libsvg.a",
+  "libskottie.a",
+  "libsksg.a",
+  ...ParagraphApple,
+];
+
+export const configurations: Record<PlatformName, Platform> = {
+  "android": {
     targets: {
       arm: {
         platform: "android",
@@ -277,7 +309,7 @@ export const configurations = {
       ...ParagraphOutputsAndroid,
     ],
   },
-  apple: {
+  "apple-ios": {
     targets: {
       "arm64-iphoneos": {
         cpu: "arm64",
@@ -285,7 +317,7 @@ export const configurations = {
         args: [
           ["ios_min_target", `"${appleMinTarget}"`],
           [
-            "extra_cflags",
+            "extra_cflags_cc",
             `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
           ],
         ],
@@ -297,7 +329,7 @@ export const configurations = {
           ["ios_min_target", `"${appleSimulatorMinTarget}"`],
           ["ios_use_simulator", true],
           [
-            "extra_cflags",
+            "extra_cflags_cc",
             `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
           ],
         ],
@@ -308,53 +340,69 @@ export const configurations = {
         args: [
           ["ios_min_target", `"${appleSimulatorMinTarget}"`],
           [
-            "extra_cflags",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
-          ],
-        ],
-      },
-      ...tvosTargets,
-      ...maccatalystTargets,
-      "arm64-macosx": {
-        platformGroup: "macosx",
-        cpu: "arm64",
-        platform: "mac",
-        args: [
-          [
-            "extra_cflags",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
-          ],
-        ],
-      },
-      "x64-macosx": {
-        platformGroup: "macosx",
-        cpu: "x64",
-        platform: "mac",
-        args: [
-          [
-            "extra_cflags",
+            "extra_cflags_cc",
             `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
           ],
         ],
       },
     },
-    args: [
-      ["skia_use_metal", true],
-      ["skia_use_gl", false],
-      ["cc", '"clang"'],
-      ["cxx", '"clang++"'],
-      ...ParagraphArgsApple,
-    ],
-    outputRoot: "libs/apple",
-    outputNames: [
-      "libskia.a",
-      "libskshaper.a",
-      "libsvg.a",
-      "libskottie.a",
-      "libsksg.a",
-      ...ParagraphApple,
-    ],
+    args: appleCommonArgs,
+    outputRoot: "libs/apple/ios",
+    outputNames: appleOutputNames,
   },
+  "apple-tvos": GRAPHITE
+    ? {
+        targets: {},
+        args: [],
+        outputRoot: "libs/apple/tvos",
+        outputNames: [],
+      }
+    : {
+        targets: tvosTargets,
+        args: appleCommonArgs,
+        outputRoot: "libs/apple/tvos",
+        outputNames: appleOutputNames,
+      },
+  "apple-macos": {
+    targets: {
+      "arm64-macosx": {
+        cpu: "arm64",
+        platform: "mac",
+        args: [
+          [
+            "extra_cflags_cc",
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+          ],
+        ],
+      },
+      "x64-macosx": {
+        cpu: "x64",
+        platform: "mac",
+        args: [
+          [
+            "extra_cflags_cc",
+            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+          ],
+        ],
+      },
+    },
+    args: appleCommonArgs,
+    outputRoot: "libs/apple/macos",
+    outputNames: appleOutputNames,
+  },
+  "apple-maccatalyst": MACCATALYST
+    ? {
+        targets: maccatalystTargets,
+        args: appleCommonArgs,
+        outputRoot: "libs/apple/maccatalyst",
+        outputNames: appleOutputNames,
+      }
+    : {
+        targets: {},
+        args: [],
+        outputRoot: "libs/apple/maccatalyst",
+        outputNames: [],
+      },
 };
 
 const copyModule = (module: string) => {

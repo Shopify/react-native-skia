@@ -7,6 +7,36 @@ set (CMAKE_CXX_STANDARD 20)
 # Import prebuilt SKIA libraries path
 set (SKIA_LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../libs/android/${ANDROID_ABI}")
 
+# Check if Skia prebuilt binaries are installed
+# The postinstall script downloads these - if missing, the user needs to run it
+if(NOT EXISTS "${SKIA_LIBS_PATH}/libskia.a")
+    message("")
+    message("┌─────────────────────────────────────────────────────────────────────────────┐")
+    message("│                                                                             │")
+    message("│  ERROR: Skia prebuilt binaries not found!                                   │")
+    message("│                                                                             │")
+    message("│  The postinstall script has not run. This is required to download the      │")
+    message("│  Skia binaries. Some package managers (pnpm, bun, yarn berry) require       │")
+    message("│  explicit trust for packages with postinstall scripts.                      │")
+    message("│                                                                             │")
+    message("│  To fix this:                                                               │")
+    message("│                                                                             │")
+    message("│  • npm/yarn classic: Run 'npm rebuild @shopify/react-native-skia' or        │")
+    message("│                       reinstall the package                                 │")
+    message("│                                                                             │")
+    message("│  • bun: Run 'bun add --trust @shopify/react-native-skia'                    │")
+    message("│                                                                             │")
+    message("│  • pnpm: Add to package.json:                                               │")
+    message("│          \"pnpm\": { \"onlyBuiltDependencies\": [\"@shopify/react-native-skia\"] }│")
+    message("│          Then reinstall the package                                         │")
+    message("│                                                                             │")
+    message("│  See: https://shopify.github.io/react-native-skia/docs/getting-started/installation │")
+    message("│                                                                             │")
+    message("└─────────────────────────────────────────────────────────────────────────────┘")
+    message("")
+    message(FATAL_ERROR "Skia prebuilt binaries not found at ${SKIA_LIBS_PATH}. Please run the postinstall script.")
+endif()
+
 # Import libskia first so we can check for symbols
 add_library(skia STATIC IMPORTED)
 set_property(TARGET skia PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskia.a")
@@ -122,6 +152,37 @@ add_library(
         ${BACKEND_SOURCES}
 )
 
+if(SK_GRAPHITE)
+    # WebGPU JSI infrastructure (jsi2)
+    target_sources(${PACKAGE_NAME} PRIVATE
+        "${PROJECT_SOURCE_DIR}/../cpp/jsi2/Promise.cpp"
+
+        # WebGPU async system
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/AsyncRunner.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/AsyncTaskHandle.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/JSIMicrotaskDispatcher.cpp"
+
+        # WebGPU API
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPU.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUAdapter.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUBindGroup.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUBuffer.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUCommandEncoder.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUComputePassEncoder.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUComputePipeline.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUDevice.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUDeviceLostInfo.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUQuerySet.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUQueue.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderBundleEncoder.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderPassEncoder.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderPipeline.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUShaderModule.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUSupportedLimits.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUTexture.cpp"
+    )
+endif()
+
 
 target_include_directories(
         ${PACKAGE_NAME}
@@ -149,6 +210,14 @@ target_include_directories(
         ../cpp/rnskia
         ../cpp/rnskia/values
         ../cpp/utils
+
+        # WebGPU bindings
+        ../cpp
+        ../cpp/jsi2
+        ../cpp/rnwgpu
+        ../cpp/rnwgpu/api
+        ../cpp/rnwgpu/api/descriptors
+        ../cpp/rnwgpu/async
 
         ${libfbjni_include_DIRS}
 )

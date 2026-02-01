@@ -1,0 +1,111 @@
+name: Publish Skia Binary Packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      skia_version:
+        description: 'Skia version (e.g., m144b)'
+        required: true
+        type: string
+      npm_version:
+        description: 'NPM package version (e.g., 144.2.0)'
+        required: true
+        type: string
+      graphite:
+        description: 'Publish Graphite packages'
+        type: boolean
+        default: false
+      dry_run:
+        description: 'Dry run (skip npm publish)'
+        type: boolean
+        default: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Set matrix
+        id: set-matrix
+        run: |
+          if [ "${{ inputs.graphite }}" = "true" ]; then
+            echo 'matrix={"package":["android-arm","android-arm64","android-x86","android-x64","apple-ios","apple-macos","headers"]}' >> $GITHUB_OUTPUT
+          else
+            echo 'matrix={"package":["android-arm","android-arm64","android-x86","android-x64","apple-ios","apple-tvos","apple-macos"]}' >> $GITHUB_OUTPUT
+          fi
+
+  publish:
+    needs: generate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # for npm provenance
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.generate.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Generate package
+        run: |
+          GRAPHITE_FLAG=""
+          if [ "${{ inputs.graphite }}" = "true" ]; then
+            GRAPHITE_FLAG="--graphite"
+          fi
+          node packages/skia-binaries/src/generate-packages.mjs \
+            --package=${{ matrix.package }} \
+            --skia-version=${{ inputs.skia_version }} \
+            --npm-version=${{ inputs.npm_version }} \
+            $GRAPHITE_FLAG
+
+      - name: List generated package
+        run: |
+          SUBDIR="${{ inputs.graphite == 'true' && 'graphite' || 'ganesh' }}"
+          ls -la packages/skia-binaries/dist/$SUBDIR/${{ matrix.package }}/
+          cat packages/skia-binaries/dist/$SUBDIR/${{ matrix.package }}/package.json
+
+      - name: Publish to npm (dry run)
+        if: ${{ inputs.dry_run == true }}
+        run: |
+          SUBDIR="${{ inputs.graphite == 'true' && 'graphite' || 'ganesh' }}"
+          cd packages/skia-binaries/dist/$SUBDIR/${{ matrix.package }}
+          npm publish --provenance --access public --dry-run
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to npm
+        if: ${{ inputs.dry_run == false }}
+        run: |
+          SUBDIR="${{ inputs.graphite == 'true' && 'graphite' || 'ganesh' }}"
+          cd packages/skia-binaries/dist/$SUBDIR/${{ matrix.package }}
+          npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  summary:
+    needs: [generate, publish]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Summary
+        run: |
+          echo "## Skia Binary Packages" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Skia Version**: ${{ inputs.skia_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **NPM Version**: ${{ inputs.npm_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Graphite**: ${{ inputs.graphite }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dry Run**: ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "> **Note**: This was a dry run. No packages were published." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Packages published successfully!" >> $GITHUB_STEP_SUMMARY
+          fi

@@ -245,9 +245,11 @@ public:
   JSI_HOST_FUNCTION(MakeRuntimeShader) {
     auto rtb = JsiSkRuntimeShaderBuilder::fromValue(runtime, arguments[0]);
 
-    const char *childName = "";
+    std::string childNameStr = "";
+    const char *childName = childNameStr.c_str();
     if (hasOptionalArgument(arguments, count, 1)) {
-      childName = arguments[1].asString(runtime).utf8(runtime).c_str();
+      childNameStr = arguments[1].asString(runtime).utf8(runtime);
+      childName = childNameStr.c_str();
     }
 
     sk_sp<SkImageFilter> input = nullptr;

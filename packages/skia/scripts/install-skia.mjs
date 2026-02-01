@@ -8,6 +8,12 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// Allow skipping download via environment variable (useful for CI builds)
+if (process.env.SKIP_SKIA_DOWNLOAD === '1' || process.env.SKIP_SKIA_DOWNLOAD === 'true') {
+  console.log("⏭️  Skipping Skia download (SKIP_SKIA_DOWNLOAD is set)");
+  process.exit(0);
+}
+
 const repo = "shopify/react-native-skia";
 
 const packageJsonPath = path.join(__dirname, "..", "package.json");
@@ -42,13 +48,24 @@ const updateSkiaChecksums = (checksums, graphite = false) => {
 
 const GRAPHITE = !!process.env.SK_GRAPHITE;
 const prefix = GRAPHITE ? "skia-graphite" : "skia";
+
+// Build artifact names based on platform and Graphite mode
 const names = [
   `${prefix}-android-arm`,
   `${prefix}-android-arm-64`,
   `${prefix}-android-arm-x64`,
   `${prefix}-android-arm-x86`,
-  `${prefix}-apple-xcframeworks`,
+  `${prefix}-apple-ios-xcframeworks`,
+  `${prefix}-apple-macos-xcframeworks`,
 ];
+
+// Add tvOS only for non-Graphite builds
+if (!GRAPHITE) {
+  names.push(`${prefix}-apple-tvos-xcframeworks`);
+}
+
+// Note: macCatalyst is now included in the iOS xcframeworks, no separate download needed
+
 if (GRAPHITE) {
   names.push(`${prefix}-headers`);
 }
@@ -59,10 +76,11 @@ console.log(
   `📦 Downloading Skia prebuilt binaries for ${releaseTag}`
 );
 
-const runCommand = (command, args) => {
+const runCommand = (command, args, options = {}) => {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
       stdio: ["ignore", "inherit", "inherit"],
+      ...options,
     });
     child.on("error", (error) => {
       reject(error);
@@ -75,6 +93,76 @@ const runCommand = (command, args) => {
       }
     });
   });
+};
+
+const runCommandWithOutput = (command, args, options = {}) => {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      stdio: ["ignore", "pipe", "pipe"],
+      ...options,
+    });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.on("data", (data) => {
+      stdout += data.toString();
+    });
+    child.stderr.on("data", (data) => {
+      stderr += data.toString();
+    });
+    child.on("error", (error) => {
+      reject(error);
+    });
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve(stdout.trim());
+      } else {
+        reject(new Error(`Command ${command} exited with code ${code}: ${stderr}`));
+      }
+    });
+  });
+};
+
+const skiaDir = path.resolve(__dirname, "../../../externals/skia");
+
+const checkoutSkiaBranch = async (version) => {
+  // Extract base version (e.g., "m144a" -> "m144", "m142" -> "m142")
+  const baseVersion = version.match(/^(m\d+)/)?.[1] || version;
+  const branchName = `chrome/${baseVersion}`;
+
+  // Check if the skia directory exists and is a git repo
+  // (won't exist when installed via npm - submodule is not included in the package)
+  if (!fs.existsSync(skiaDir) || !fs.existsSync(path.join(skiaDir, ".git"))) {
+    return;
+  }
+
+  console.log(`🔀 Checking out Skia branch: ${branchName}`);
+
+  try {
+    // Get current branch/commit
+    const currentRef = await runCommandWithOutput("git", ["rev-parse", "--abbrev-ref", "HEAD"], { cwd: skiaDir });
+
+    if (currentRef === branchName) {
+      console.log(`   ✓ Already on branch ${branchName}`);
+      return;
+    }
+
+    // Fetch the branch from origin
+    console.log(`   Fetching branch ${branchName} from origin...`);
+    try {
+      await runCommand("git", ["fetch", "origin", `${branchName}:${branchName}`], { cwd: skiaDir });
+    } catch (e) {
+      // Branch might already exist locally, try to update it
+      await runCommand("git", ["fetch", "origin", branchName], { cwd: skiaDir });
+    }
+
+    // Checkout the branch (use -f to discard local changes in the submodule)
+    console.log(`   Checking out ${branchName}...`);
+    await runCommand("git", ["checkout", "-f", branchName], { cwd: skiaDir });
+
+    console.log(`   ✓ Successfully checked out ${branchName}`);
+  } catch (error) {
+    throw new Error(`Failed to checkout branch ${branchName}: ${error.message}`);
+  }
 };
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -276,11 +364,18 @@ const calculateLibraryChecksums = () => {
     }
   }
 
-  // Apple frameworks
-  const appleDir = path.join(libsDir, "apple");
-  const appleChecksum = calculateDirectoryChecksum(appleDir);
-  if (appleChecksum) {
-    checksums["apple-xcframeworks"] = appleChecksum;
+  // Apple platforms - calculate separate checksums for each platform
+  // Note: maccatalyst is included in iOS xcframeworks, not a separate artifact
+  const applePlatforms = GRAPHITE
+    ? ["ios", "macos"]
+    : ["ios", "tvos", "macos"];
+
+  for (const platform of applePlatforms) {
+    const platformDir = path.join(libsDir, "apple", platform);
+    const checksum = calculateDirectoryChecksum(platformDir);
+    if (checksum) {
+      checksums[`apple-${platform}-xcframeworks`] = checksum;
+    }
   }
 
   return checksums;
@@ -330,10 +425,16 @@ const areBinariesInstalled = () => {
     }
   }
 
-  // Check for Apple frameworks
-  const appleDir = path.join(libsDir, "apple");
-  if (!fs.existsSync(appleDir) || fs.readdirSync(appleDir).length === 0) {
-    return false;
+  // Check for Apple platform frameworks
+  const applePlatforms = GRAPHITE
+    ? ["ios", "macos"]
+    : ["ios", "tvos", "macos", "maccatalyst"];
+
+  for (const platform of applePlatforms) {
+    const platformDir = path.join(libsDir, "apple", platform);
+    if (!fs.existsSync(platformDir) || fs.readdirSync(platformDir).length === 0) {
+      return false;
+    }
   }
 
   return true;
@@ -359,6 +460,9 @@ const clearDirectory = (directory) => {
 };
 
 const main = async () => {
+  // Ensure the skia submodule is on the correct branch for copying headers
+  await checkoutSkiaBranch(skiaVersion);
+
   // Check if binaries are installed and checksums match
   if (areBinariesInstalled() && verifyChecksums()) {
     console.log("✅ Prebuilt binaries already installed with matching checksums, skipping download");
@@ -450,45 +554,65 @@ const main = async () => {
     }
   });
 
-  // Create apple directory structure
+  // Create apple directory structure - now per-platform
   const appleDir = path.join(libsDir, "apple");
-  // The tar file extracts to skia-apple-xcframeworks/apple
-  const appleSrcDir = path.join(
-    artifactsDir,
-    `${prefix}-apple-xcframeworks`,
-    "apple"
-  );
-  if (fs.existsSync(appleSrcDir)) {
-    fs.mkdirSync(appleDir, { recursive: true });
+  fs.mkdirSync(appleDir, { recursive: true });
 
-    // Copy all xcframeworks
-    fs.readdirSync(appleSrcDir).forEach((item) => {
-      const srcPath = path.join(appleSrcDir, item);
-      const destPath = path.join(appleDir, item);
+  // Define the platform artifacts to process
+  // Note: maccatalyst is included in iOS xcframeworks, not a separate artifact
+  const applePlatformArtifacts = GRAPHITE
+    ? [
+        { artifact: `${prefix}-apple-ios-xcframeworks`, srcSubdir: "ios", dest: "ios" },
+        { artifact: `${prefix}-apple-macos-xcframeworks`, srcSubdir: "macos", dest: "macos" },
+      ]
+    : [
+        { artifact: `${prefix}-apple-ios-xcframeworks`, srcSubdir: "ios", dest: "ios" },
+        { artifact: `${prefix}-apple-tvos-xcframeworks`, srcSubdir: "tvos", dest: "tvos" },
+        { artifact: `${prefix}-apple-macos-xcframeworks`, srcSubdir: "macos", dest: "macos" },
+      ];
 
-      if (fs.lstatSync(srcPath).isDirectory()) {
-        // Copy directory recursively
-        const copyDir = (src, dest) => {
-          fs.mkdirSync(dest, { recursive: true });
-          fs.readdirSync(src).forEach((file) => {
-            const srcFile = path.join(src, file);
-            const destFile = path.join(dest, file);
-            if (fs.lstatSync(srcFile).isDirectory()) {
-              copyDir(srcFile, destFile);
-            } else {
-              fs.copyFileSync(srcFile, destFile);
-            }
-          });
-        };
-        copyDir(srcPath, destPath);
-      } else {
-        fs.copyFileSync(srcPath, destPath);
-      }
-    });
-  }
+  applePlatformArtifacts.forEach(({ artifact, srcSubdir, dest }) => {
+    // The tar file extracts to artifact_name/srcSubdir (e.g., skia-apple-ios-xcframeworks/ios)
+    const appleSrcDir = path.join(artifactsDir, artifact, srcSubdir);
+    const destDir = path.join(appleDir, dest);
+
+    console.log(`   Checking ${appleSrcDir} -> ${destDir}`);
+    if (fs.existsSync(appleSrcDir)) {
+      console.log(`   ✓ Copying ${artifact}/${srcSubdir}`);
+      fs.mkdirSync(destDir, { recursive: true });
+
+      // Copy all xcframeworks
+      fs.readdirSync(appleSrcDir).forEach((item) => {
+        const srcPath = path.join(appleSrcDir, item);
+        const destPath = path.join(destDir, item);
+
+        if (fs.lstatSync(srcPath).isDirectory()) {
+          // Copy directory recursively
+          const copyDir = (src, dest) => {
+            fs.mkdirSync(dest, { recursive: true });
+            fs.readdirSync(src).forEach((file) => {
+              const srcFile = path.join(src, file);
+              const destFile = path.join(dest, file);
+              if (fs.lstatSync(srcFile).isDirectory()) {
+                copyDir(srcFile, destFile);
+              } else {
+                fs.copyFileSync(srcFile, destFile);
+              }
+            });
+          };
+          copyDir(srcPath, destPath);
+        } else {
+          fs.copyFileSync(srcPath, destPath);
+        }
+      });
+    } else {
+      console.log(`   ✗ Source directory not found: ${appleSrcDir}`);
+    }
+  });
 
   // Create or remove Graphite marker files based on build type
   const androidMarkerFile = path.join(androidDir, "graphite.enabled");
+  // Apple marker file stays at the apple root level (libs/apple/graphite.enabled)
   const appleMarkerFile = path.join(appleDir, "graphite.enabled");
 
   if (GRAPHITE) {

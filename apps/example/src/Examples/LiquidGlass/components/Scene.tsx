@@ -155,12 +155,7 @@ export const Scene = ({
     progress.value = withSpring(progress.value === 0 ? 1 : 0, {
       duration: 1000,
       dampingRatio: 0.5,
-      // mass: 1,
-      // damping: 10,
-      stiffness: 100,
       overshootClamping: false,
-      restDisplacementThreshold: 0.01,
-      restSpeedThreshold: 2,
       reduceMotion: ReduceMotion.System,
     });
   });
