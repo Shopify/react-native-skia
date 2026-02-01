@@ -12,6 +12,7 @@
 #include <AVFoundation/AVFoundation.h>
 #include <CoreVideo/CoreVideo.h>
 
+#if !TARGET_OS_OSX
 // Helper class to bridge CADisplayLink callback to C++
 @interface RNSkDisplayLinkTarget : NSObject
 @property(nonatomic, assign) RNSkia::RNSkAppleVideo *video;
@@ -25,6 +26,7 @@
   }
 }
 @end
+#endif
 
 namespace RNSkia {
 
@@ -35,6 +37,7 @@ RNSkAppleVideo::RNSkAppleVideo(std::string url, RNSkPlatformContext *context)
 }
 
 RNSkAppleVideo::~RNSkAppleVideo() {
+#if !TARGET_OS_OSX
   if (_displayLink) {
     [_displayLink invalidate];
     _displayLink = nullptr;
@@ -43,6 +46,13 @@ RNSkAppleVideo::~RNSkAppleVideo() {
     [_displayLinkTarget setVideo:nullptr];
     _displayLinkTarget = nullptr;
   }
+#else
+  if (_displayLink) {
+    CVDisplayLinkStop(_displayLink);
+    CVDisplayLinkRelease(_displayLink);
+    _displayLink = nullptr;
+  }
+#endif
   if (_endObserver) {
     [[NSNotificationCenter defaultCenter] removeObserver:_endObserver];
     _endObserver = nullptr;
@@ -98,6 +108,7 @@ void RNSkAppleVideo::setupPlayer() {
 }
 
 void RNSkAppleVideo::setupDisplayLink() {
+#if !TARGET_OS_OSX
   _displayLinkTarget = [[RNSkDisplayLinkTarget alloc] init];
   [_displayLinkTarget setVideo:this];
 
@@ -107,6 +118,12 @@ void RNSkAppleVideo::setupDisplayLink() {
   [_displayLink addToRunLoop:[NSRunLoop mainRunLoop]
                      forMode:NSRunLoopCommonModes];
   _displayLink.paused = YES; // Start paused, will unpause when play() is called
+#else
+  // Create CVDisplayLink for macOS
+  CVDisplayLinkCreateWithActiveCGDisplays(&_displayLink);
+  CVDisplayLinkSetOutputCallback(_displayLink, &displayLinkCallback, this);
+  _displayLinkRunning = false;
+#endif
 }
 
 void RNSkAppleVideo::onDisplayLink() {
@@ -128,7 +145,11 @@ void RNSkAppleVideo::onDisplayLink() {
         // If paused and we got the frame we were waiting for, pause the display
         // link
         if (!_isPlaying) {
+#if !TARGET_OS_OSX
           _displayLink.paused = YES;
+#else
+          stopDisplayLink();
+#endif
         }
       }
     }
@@ -137,8 +158,42 @@ void RNSkAppleVideo::onDisplayLink() {
 
 void RNSkAppleVideo::expectFrame() {
   _waitingForFrame = true;
+#if !TARGET_OS_OSX
   _displayLink.paused = NO;
+#else
+  startDisplayLink();
+#endif
 }
+
+#if TARGET_OS_OSX
+CVReturn RNSkAppleVideo::displayLinkCallback(CVDisplayLinkRef displayLink,
+                                             const CVTimeStamp *now,
+                                             const CVTimeStamp *outputTime,
+                                             CVOptionFlags flagsIn,
+                                             CVOptionFlags *flagsOut,
+                                             void *context) {
+  RNSkAppleVideo *video = static_cast<RNSkAppleVideo *>(context);
+  // Dispatch to main thread since video operations need to happen there
+  dispatch_async(dispatch_get_main_queue(), ^{
+    video->onDisplayLink();
+  });
+  return kCVReturnSuccess;
+}
+
+void RNSkAppleVideo::startDisplayLink() {
+  if (_displayLink && !_displayLinkRunning) {
+    CVDisplayLinkStart(_displayLink);
+    _displayLinkRunning = true;
+  }
+}
+
+void RNSkAppleVideo::stopDisplayLink() {
+  if (_displayLink && _displayLinkRunning) {
+    CVDisplayLinkStop(_displayLink);
+    _displayLinkRunning = false;
+  }
+}
+#endif
 
 sk_sp<SkImage> RNSkAppleVideo::nextImage(double *timeStamp) {
   if (timeStamp) {
@@ -191,7 +246,11 @@ void RNSkAppleVideo::play() {
   if (_player) {
     [_player play];
     _isPlaying = true;
+#if !TARGET_OS_OSX
     _displayLink.paused = NO;
+#else
+    startDisplayLink();
+#endif
   }
 }
 
@@ -201,7 +260,11 @@ void RNSkAppleVideo::pause() {
     _isPlaying = false;
     // Only pause display link if not waiting for a frame
     if (!_waitingForFrame) {
+#if !TARGET_OS_OSX
       _displayLink.paused = YES;
+#else
+      stopDisplayLink();
+#endif
     }
   }
 }

@@ -24,8 +24,13 @@ private:
   AVPlayer *_player = nullptr;
   AVPlayerItem *_playerItem = nullptr;
   AVPlayerItemVideoOutput *_videoOutput = nullptr;
+#if !TARGET_OS_OSX
   CADisplayLink *_displayLink = nullptr;
   id _displayLinkTarget = nullptr;
+#else
+  CVDisplayLinkRef _displayLink = nullptr;
+  bool _displayLinkRunning = false;
+#endif
   RNSkPlatformContext *_context;
   double _duration = 0;
   double _framerate = 0;
@@ -41,6 +46,15 @@ private:
   void setupPlayer();
   void setupDisplayLink();
   NSDictionary *getOutputSettings();
+#if TARGET_OS_OSX
+  void startDisplayLink();
+  void stopDisplayLink();
+  static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink,
+                                      const CVTimeStamp *now,
+                                      const CVTimeStamp *outputTime,
+                                      CVOptionFlags flagsIn,
+                                      CVOptionFlags *flagsOut, void *context);
+#endif
 
 public:
   void onDisplayLink();
