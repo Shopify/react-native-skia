@@ -30,12 +30,15 @@ public:
   sk_sp<SkImage> nextImage(double *timeStamp = nullptr) override;
   double duration() override;
   double framerate() override;
+  double currentTime() override;
   void seek(double timestamp) override;
   float getRotationInDegrees() override;
   SkISize getSize() override;
   void play() override;
   void pause() override;
   void setVolume(float volume) override;
+  void setLooping(bool looping) override;
+  bool isPlaying() override;
 };
 
 } // namespace RNSkia

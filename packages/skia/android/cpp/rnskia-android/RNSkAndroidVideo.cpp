@@ -171,4 +171,38 @@ void RNSkAndroidVideo::setVolume(float volume) {
   }
   env->CallVoidMethod(_jniVideo.get(), mid, volume);
 }
+
+double RNSkAndroidVideo::currentTime() {
+  JNIEnv *env = facebook::jni::Environment::current();
+  jclass cls = env->GetObjectClass(_jniVideo.get());
+  jmethodID mid = env->GetMethodID(cls, "getCurrentTime", "()D");
+  if (!mid) {
+    RNSkLogger::logToConsole("getCurrentTime method not found");
+    return 0.0;
+  }
+  return env->CallDoubleMethod(_jniVideo.get(), mid);
+}
+
+void RNSkAndroidVideo::setLooping(bool looping) {
+  JNIEnv *env = facebook::jni::Environment::current();
+  jclass cls = env->GetObjectClass(_jniVideo.get());
+  jmethodID mid = env->GetMethodID(cls, "setLooping", "(Z)V");
+  if (!mid) {
+    RNSkLogger::logToConsole("setLooping method not found");
+    return;
+  }
+  env->CallVoidMethod(_jniVideo.get(), mid, static_cast<jboolean>(looping));
+}
+
+bool RNSkAndroidVideo::isPlaying() {
+  JNIEnv *env = facebook::jni::Environment::current();
+  jclass cls = env->GetObjectClass(_jniVideo.get());
+  jmethodID mid = env->GetMethodID(cls, "getIsPlaying", "()Z");
+  if (!mid) {
+    RNSkLogger::logToConsole("getIsPlaying method not found");
+    return false;
+  }
+  return env->CallBooleanMethod(_jniVideo.get(), mid);
+}
+
 } // namespace RNSkia
