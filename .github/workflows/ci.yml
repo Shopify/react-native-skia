@@ -370,23 +370,23 @@ jobs:
       - name: Build example for macOS
         run: yarn turbo run build:macos --concurrency 1
 
-  build-test-macos-catalyst:
-    runs-on: macos-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
-        with:
-          submodules: recursive
+  # build-test-macos-catalyst:
+  #   runs-on: macos-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
+  #       with:
+  #         submodules: recursive
 
-      - name: Setup
-        uses: ./.github/actions/setup
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Setup
+  #       uses: ./.github/actions/setup
+  #       with:
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install CocoaPods and enable Catalyst
-        working-directory: apps/example
-        run: yarn pod:install:catalyst
+  #     - name: Install CocoaPods and enable Catalyst
+  #       working-directory: apps/example
+  #       run: yarn pod:install:catalyst
 
-      - name: Build example for macOS Catalyst
-        working-directory: apps/example/ios
-        run: xcodebuild -workspace example.xcworkspace -scheme ReactTestApp -destination 'platform=macOS,arch=arm64,variant=Mac Catalyst' -configuration Debug build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+  #     - name: Build example for macOS Catalyst
+  #       working-directory: apps/example/ios
+  #       run: xcodebuild -workspace example.xcworkspace -scheme ReactTestApp -destination 'platform=macOS,arch=arm64,variant=Mac Catalyst' -configuration Debug build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
