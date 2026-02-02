@@ -124,7 +124,7 @@ type ObjectInfo = {
 //   0,      0,      0,      1, 0,
 // ];
 
-export function WebGPU() {
+export function Wireframes() {
   const { width, height } = useWindowDimensions();
   const [image, setImage] = useState<SkImage | null>(null);
   const renderRef = useRef<((ts: number) => void) | null>(null);

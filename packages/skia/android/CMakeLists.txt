@@ -137,6 +137,7 @@ if(SK_GRAPHITE)
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUAdapter.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUBindGroup.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUBuffer.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUCanvasContext.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUCommandEncoder.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUComputePassEncoder.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUComputePipeline.cpp"
@@ -150,6 +151,9 @@ if(SK_GRAPHITE)
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUShaderModule.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUSupportedLimits.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUTexture.cpp"
+
+        # WebGPU Canvas JNI bindings
+        "${PROJECT_SOURCE_DIR}/cpp/jni/JniWebGPUView.cpp"
     )
 endif()
 
