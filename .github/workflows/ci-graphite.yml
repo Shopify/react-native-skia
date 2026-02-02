@@ -101,7 +101,7 @@ jobs:
           key: apk-graphite-${{ github.sha }}
 
       - name: Upload Android APK artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@47309c993abb98030a35d55ef7ff34b7fa1074b5 # v6.0.0
         with:
           name: android-example-apk-graphite
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
@@ -171,13 +171,13 @@ jobs:
             # Run tests
             cd packages/skia && CI=true yarn test -i e2e/Path --testPathIgnorePatterns Paragraphs
 
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      - uses: actions/upload-artifact@47309c993abb98030a35d55ef7ff34b7fa1074b5 # v6.0.0
         if: failure()
         with:
           path: packages/skia/src/__tests__/snapshots/
           name: tests-snapshots-screenshots
 
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      - uses: actions/upload-artifact@47309c993abb98030a35d55ef7ff34b7fa1074b5 # v6.0.0
         if: failure()
         with:
           path: apps/docs/static/

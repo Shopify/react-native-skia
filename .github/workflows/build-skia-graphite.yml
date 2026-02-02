@@ -223,7 +223,7 @@ jobs:
 
       - name: Upload binaries as workflow artifact (dry run) - ${{ matrix.artifact_name }}
         if: ${{ github.event.inputs.dry_run == 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.artifact_name }}
           path: ${{ steps.package.outputs.asset_path }}
@@ -268,7 +268,7 @@ jobs:
 
       - name: Upload Graphite Headers as workflow artifact (dry run)
         if: ${{ matrix.target == 'apple-ios' && github.event.inputs.dry_run == 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: skia-graphite-headers
           path: ${{ steps.package_headers.outputs.asset_path }}
