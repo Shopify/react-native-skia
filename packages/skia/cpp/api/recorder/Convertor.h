@@ -667,7 +667,8 @@ SkPath1DPathEffect::Style getPropertyValue(jsi::Runtime &runtime,
   throw std::runtime_error("Invalid prop value for Path1DEffectStyle received");
 }
 
-// Wrapper type for blend mode to avoid conflict with int template specialization
+// Wrapper type for blend mode to avoid conflict with int template
+// specialization
 struct BlendModeValue {
   int value;
   BlendModeValue(int v = 0) : value(v) {}
@@ -745,7 +746,8 @@ BlendModeValue getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
   throw std::runtime_error("Invalid prop value for BlendMode received");
 }
 
-// Keep SkBlendMode specialization for other usages (Shaders, ImageFilters, ColorFilters, Drawings)
+// Keep SkBlendMode specialization for other usages (Shaders, ImageFilters,
+// ColorFilters, Drawings)
 template <>
 SkBlendMode getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
   if (val.isString()) {

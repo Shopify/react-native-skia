@@ -6,6 +6,7 @@ export type VideoRotation = 0 | 90 | 180 | 270;
 export interface Video extends SkJSIInstance<"Video"> {
   duration(): number;
   framerate(): number;
+  currentTime(): number;
   nextImage(): SkImage | null;
   seek(time: number): void;
   rotation(): VideoRotation;
@@ -13,4 +14,6 @@ export interface Video extends SkJSIInstance<"Video"> {
   pause(): void;
   play(): void;
   setVolume(volume: number): void;
+  setLooping(looping: boolean): void;
+  isPlaying(): boolean;
 }

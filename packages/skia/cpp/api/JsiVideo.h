@@ -49,6 +49,10 @@ public:
 
   JSI_HOST_FUNCTION(framerate) { return getObject()->framerate(); }
 
+  JSI_HOST_FUNCTION(currentTime) { return getObject()->currentTime(); }
+
+  JSI_HOST_FUNCTION(isPlaying) { return getObject()->isPlaying(); }
+
   JSI_HOST_FUNCTION(seek) {
     double timestamp = arguments[0].asNumber();
     getObject()->seek(timestamp);
@@ -86,12 +90,21 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(setLooping) {
+    auto looping = arguments[0].asBool();
+    getObject()->setLooping(looping);
+    return jsi::Value::undefined();
+  }
+
   JSI_EXPORT_FUNCTIONS(
       JSI_EXPORT_FUNC(JsiVideo, nextImage), JSI_EXPORT_FUNC(JsiVideo, duration),
-      JSI_EXPORT_FUNC(JsiVideo, framerate), JSI_EXPORT_FUNC(JsiVideo, seek),
+      JSI_EXPORT_FUNC(JsiVideo, framerate),
+      JSI_EXPORT_FUNC(JsiVideo, currentTime),
+      JSI_EXPORT_FUNC(JsiVideo, isPlaying), JSI_EXPORT_FUNC(JsiVideo, seek),
       JSI_EXPORT_FUNC(JsiVideo, rotation), JSI_EXPORT_FUNC(JsiVideo, size),
       JSI_EXPORT_FUNC(JsiVideo, play), JSI_EXPORT_FUNC(JsiVideo, pause),
-      JSI_EXPORT_FUNC(JsiVideo, setVolume), JSI_EXPORT_FUNC(JsiVideo, dispose))
+      JSI_EXPORT_FUNC(JsiVideo, setVolume),
+      JSI_EXPORT_FUNC(JsiVideo, setLooping), JSI_EXPORT_FUNC(JsiVideo, dispose))
 
   JsiVideo(std::shared_ptr<RNSkPlatformContext> context,
            std::shared_ptr<RNSkVideo> video)

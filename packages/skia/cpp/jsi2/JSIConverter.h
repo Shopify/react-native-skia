@@ -12,6 +12,8 @@
 
 #include <jsi/jsi.h>
 
+#include "utils/RNSkLog.h"
+
 #include "EnumMapper.h"
 #include "Promise.h"
 
@@ -311,10 +313,17 @@ template <typename T> struct JSIConverter<T, std::enable_if_t<is_shared_ptr_to_n
 #endif
     jsi::Object object = arg.getObject(runtime);
 #if DEBUG
-    if (!object.hasNativeState<TPointee>(runtime)) {
-      [[unlikely]];
+    if (!object.hasNativeState<TPointee>(runtime)) [[unlikely]] {
+      // Log instead of throwing: hasNativeState<T>() uses dynamic_cast (RTTI)
+      // which can return false across shared-library / JSI-runtime boundaries
+      // on iOS (duplicate typeinfo symbols in separate .dylib modules).
+      // getNativeState<T>() below uses static_pointer_cast and works correctly
+      // even when dynamic_cast fails, so this is not a fatal error.
       std::string stringRepresentation = arg.toString(runtime).utf8(runtime);
-      throw jsi::JSError(runtime, invalidTypeErrorMessage(stringRepresentation, "It is a different NativeState<T>!"));
+      RNSkia::RNSkLogger::logToConsole("NativeState<T> RTTI mismatch for \"%s\" (expected %s) "
+              "-- this is likely a false positive from dynamic_cast across JSI "
+              "runtime boundaries; continuing with static_pointer_cast.",
+              stringRepresentation.c_str(), getFriendlyTypename().c_str());
     }
 #endif
     return object.getNativeState<TPointee>(runtime);

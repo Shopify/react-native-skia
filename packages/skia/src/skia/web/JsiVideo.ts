@@ -46,6 +46,10 @@ export class JsiVideo implements Video {
     return throwNotImplementedOnRNWeb<number>();
   }
 
+  currentTime() {
+    return this.videoElement.currentTime * 1000;
+  }
+
   setSurface(surface: Surface) {
     // If we have the surface, we can use the WebGL buffer which is slightly faster
     // This is because WebGL cannot be shared across contextes.
@@ -87,6 +91,14 @@ export class JsiVideo implements Video {
 
   setVolume(volume: number) {
     this.videoElement.volume = volume;
+  }
+
+  setLooping(looping: boolean) {
+    this.videoElement.loop = looping;
+  }
+
+  isPlaying() {
+    return !this.videoElement.paused && !this.videoElement.ended;
   }
 
   [Symbol.dispose]() {

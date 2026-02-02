@@ -23,17 +23,88 @@ yarn add @shopify/react-native-skia
 npm install @shopify/react-native-skia
 ```
 
-If you're using **bun** or **pnpm**, you'll need to trust the package for the postinstall script to run:
+## Postinstall Script
+
+React Native Skia uses a `postinstall` script to download prebuilt Skia binaries. This script **must run** for the library to work. If you see build errors about missing Skia libraries, the postinstall script likely didn't run.
+
+<details>
+<summary><strong>npm / yarn classic</strong></summary>
+
+Postinstall scripts run automatically. If you encounter issues, you can manually trigger it:
 
 ```sh
-# bun
-bun add --trust @shopify/react-native-skia
+npm rebuild @shopify/react-native-skia
+# or
+yarn rebuild @shopify/react-native-skia
+```
 
-# pnpm (v10+)
+</details>
+
+<details>
+<summary><strong>bun</strong></summary>
+
+Bun requires explicit trust for packages with lifecycle scripts:
+
+```sh
+bun add --trust @shopify/react-native-skia
+```
+
+Or add to your `package.json`:
+```json
+{
+  "trustedDependencies": ["@shopify/react-native-skia"]
+}
+```
+
+</details>
+
+<details>
+<summary><strong>pnpm</strong></summary>
+
+pnpm v10+ requires explicit permission for lifecycle scripts. Add to your `package.json`:
+
+```json
+{
+  "pnpm": {
+    "onlyBuiltDependencies": ["@shopify/react-native-skia"]
+  }
+}
+```
+
+Then reinstall:
+```sh
+pnpm install
+```
+
+For older pnpm versions, you may need:
+```sh
 pnpm add --allow-build=@shopify/react-native-skia @shopify/react-native-skia
 ```
 
-### Using Expo
+</details>
+
+<details>
+<summary><strong>Yarn Berry (v2+)</strong></summary>
+
+Yarn Berry doesn't run postinstall scripts by default. You need to enable them:
+
+```sh
+yarn config set enableScripts true
+```
+
+Or add to `.yarnrc.yml`:
+```yaml
+enableScripts: true
+```
+
+Then reinstall:
+```sh
+yarn install
+```
+
+</details>
+
+## Using Expo
 
 Expo provides a `with-skia` template, which you can use to create a new project.
 

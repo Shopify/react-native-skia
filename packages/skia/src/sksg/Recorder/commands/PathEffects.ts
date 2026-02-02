@@ -121,8 +121,9 @@ type Props = {
   [NodeType.Line2DPathEffect]: Line2DPathEffectProps;
 };
 
-interface PushPathEffect<T extends keyof Props>
-  extends Command<CommandType.PushPathEffect> {
+interface PushPathEffect<
+  T extends keyof Props,
+> extends Command<CommandType.PushPathEffect> {
   pathEffectType: T;
   props: Props[T];
 }

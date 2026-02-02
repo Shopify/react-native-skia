@@ -391,4 +391,114 @@ describe("Paths", () => {
     );
     checkImage(img, "snapshots/paths/emptyPath.png");
   });
+  it("should render interpolated path with start and end props", async () => {
+    const { Skia } = importSkia();
+    const p1 = Skia.Path.MakeFromSVGString(
+      "M 50 120 c 0 0 3.9856 -52.2082 41.1011 -51.9873 c 37.1155 0.2209 68.9289 100.9629 102.4579 88.5806 c 33.528 -12.3823 36.062 -96.3129 101.235 -87.4759 c 65.173 8.837 69.064 77.6239 69.064 77.6239"
+    )!;
+    const p2 = Skia.Path.MakeFromSVGString(
+      "M 50 120 c 0 0 18.2053 17.6315 62.5807 4.9968 c 44.3753 -12.6347 83.2043 -62.8651 103.8513 -34.5141 c 20.647 28.3509 -36.822 65.122 28.351 73.959 c 65.173 8.837 119.075 -17.7003 119.075 -17.7003"
+    )!;
+    const interpolated = p1.interpolate(p2, 0.5)!;
+    expect(interpolated).toBeDefined();
+    const img = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Path
+          path={interpolated}
+          style="stroke"
+          strokeWidth={5}
+          color="red"
+          start={0}
+          end={1}
+        />
+        <Group transform={[{ translateY: 80 }]}>
+          <Path
+            path={interpolated}
+            style="stroke"
+            strokeWidth={5}
+            color="green"
+            start={0.5}
+            end={1}
+          />
+        </Group>
+      </>
+    );
+    checkImage(img, "snapshots/paths/interpolated-with-start-end.png");
+  });
+  it("should render same interpolated path multiple times with different start/end", async () => {
+    const { Skia } = importSkia();
+    const p1 = Skia.Path.MakeFromSVGString(
+      "M 50 120 c 0 0 3.9856 -52.2082 41.1011 -51.9873 c 37.1155 0.2209 68.9289 100.9629 102.4579 88.5806 c 33.528 -12.3823 36.062 -96.3129 101.235 -87.4759 c 65.173 8.837 69.064 77.6239 69.064 77.6239"
+    )!;
+    const p2 = Skia.Path.MakeFromSVGString(
+      "M 50 120 c 0 0 18.2053 17.6315 62.5807 4.9968 c 44.3753 -12.6347 83.2043 -62.8651 103.8513 -34.5141 c 20.647 28.3509 -36.822 65.122 28.351 73.959 c 65.173 8.837 119.075 -17.7003 119.075 -17.7003"
+    )!;
+    const interpolated = p1.interpolate(p2, 0.5)!;
+    // Draw the same interpolated path multiple times with different start/end values
+    // This tests that the path is not mutated between draws
+    const img = await surface.draw(
+      <>
+        <Fill color="white" />
+        {/* Full path */}
+        <Path path={interpolated} style="stroke" strokeWidth={5} color="red" />
+        {/* Same path with start/end - should not affect the original */}
+        <Group transform={[{ translateY: 20 }]}>
+          <Path
+            path={interpolated}
+            style="stroke"
+            strokeWidth={5}
+            color="green"
+            start={0.5}
+            end={1}
+          />
+        </Group>
+        {/* Full path again - should still render completely */}
+        <Group transform={[{ translateY: 80 }]}>
+          <Path
+            path={interpolated}
+            style="stroke"
+            strokeWidth={5}
+            color="blue"
+          />
+        </Group>
+        {/* Another partial path */}
+        <Group transform={[{ translateY: 100 }]}>
+          <Path
+            path={interpolated}
+            style="stroke"
+            strokeWidth={5}
+            color="orange"
+            start={0}
+            end={0.5}
+          />
+        </Group>
+      </>
+    );
+    checkImage(img, "snapshots/paths/interpolated-multiple-start-end.png");
+  });
+  it("interpolated path with trim should not mutate original", async () => {
+    const result = await surface.eval((Skia) => {
+      const p1 = Skia.Path.MakeFromSVGString(
+        "M 0 0 L 100 0 L 100 100 L 0 100 Z"
+      )!;
+      const p2 = Skia.Path.MakeFromSVGString(
+        "M 50 50 L 150 50 L 150 150 L 50 150 Z"
+      )!;
+      const interpolated = p1.interpolate(p2, 0.5)!;
+      const originalSvg = interpolated.toSVGString();
+      // Trim creates a copy internally, so original should not be affected
+      const trimmed = interpolated.copy();
+      trimmed.trim(0.5, 1, false);
+      const afterTrimSvg = interpolated.toSVGString();
+      return {
+        original: originalSvg,
+        afterTrim: afterTrimSvg,
+        trimmed: trimmed.toSVGString(),
+        unchanged: originalSvg === afterTrimSvg,
+      };
+    });
+    expect(result.unchanged).toBe(true);
+    expect(result.original).toEqual(result.afterTrim);
+  });
 });
