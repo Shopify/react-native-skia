@@ -6,6 +6,24 @@ import crypto from "crypto";
 import { spawn } from "child_process";
 import { fileURLToPath } from "url";
 
+// ───────────────────────────────────────────────────────────────────────────────
+// PATCH: Proxy support (optional). We dynamically import https-proxy-agent.
+// If it's available and HTTPS_PROXY/HTTP_PROXY/ALL_PROXY is set, we create
+// a single agent and reuse it across all requests & redirects.
+// ───────────────────────────────────────────────────────────────────────────────
+let getProxyAgent = () => undefined;
+
+try {
+  const { HttpsProxyAgent } = await import("https-proxy-agent");
+  getProxyAgent = () => {
+    const env = (n) => process.env[n] || process.env[n.toLowerCase()];
+    const proxyUrl = env("HTTPS_PROXY") || env("HTTP_PROXY") || env("ALL_PROXY") || null;
+    return proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
+  };
+} catch {
+  console.log('https-proxy-agent not installed; proceed without a proxy')
+}
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Allow skipping download via environment variable (useful for CI builds)
@@ -170,59 +188,76 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const downloadToFile = (url, destPath, maxRetries = 5) => {
   fs.mkdirSync(path.dirname(destPath), { recursive: true });
 
+  // Create ONE agent once and reuse it across retries & redirects.
+  const agent = getProxyAgent();
   const attemptDownload = (retryCount = 0) => {
     return new Promise((resolve, reject) => {
       const request = (currentUrl) => {
-        https
-          .get(currentUrl, { headers: { "User-Agent": "node" } }, (res) => {
-            if (
-              res.statusCode &&
-              [301, 302, 303, 307, 308].includes(res.statusCode)
-            ) {
-              const { location } = res.headers;
-              if (location) {
-                res.resume();
-                request(location);
-              } else {
-                reject(new Error(`Redirect without location for ${currentUrl}`));
-              }
-              return;
-            }
-
-            if (res.statusCode !== 200) {
-              const error = new Error(
-                `Failed to download: ${res.statusCode} ${res.statusMessage}`
-              );
-              error.statusCode = res.statusCode;
-              reject(error);
+        const u = new URL(currentUrl);
+        const client = u.protocol === "https:" ? https : http;
+        const options = {
+          agent,
+          headers: {
+            // Using a browser-like UA can help with strict egress filters
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36",
+            "Accept": "*/*",
+          },
+        };
+        const req = client.get(currentUrl, options, (res) => {
+          if (
+            res.statusCode &&
+            [301, 302, 303, 307, 308].includes(res.statusCode)
+          ) {
+            const { location } = res.headers;
+            if (location) {
+              const nextUrl = new URL(location, currentUrl).toString(); // handle relative redirects
               res.resume();
-              return;
+              request(nextUrl); // keep the SAME agent through redirects
+            } else {
+              reject(new Error(`Redirect without location for ${currentUrl}`));
             }
+            return;
+          }
 
-            const fileStream = fs.createWriteStream(destPath);
-            res.pipe(fileStream);
+          if (res.statusCode !== 200) {
+            const error = new Error(
+              `Failed to download: ${res.statusCode} ${res.statusMessage}`
+            );
+            error.statusCode = res.statusCode;
+            reject(error);
+            res.resume();
+            return;
+          }
 
-            fileStream.on("finish", () => {
-              fileStream.close((err) => {
-                if (err) {
-                  // If closing the stream errors, perform the same cleanup and reject.
-                  fileStream.destroy();
-                  fs.unlink(destPath, () => reject(err));
-                } else {
-                  resolve();
-                }
-              });
+          const fileStream = fs.createWriteStream(destPath);
+          res.pipe(fileStream);
+
+          fileStream.on("finish", () => {
+            fileStream.close((err) => {
+              if (err) {
+                // If closing the stream errors, perform the same cleanup and reject.
+                fileStream.destroy();
+                fs.unlink(destPath, () => reject(err));
+              } else {
+                resolve();
+              }
             });
+          });
 
-            const cleanup = (error) => {
-              fileStream.destroy();
-              fs.unlink(destPath, () => reject(error));
-            };
+          const cleanup = (error) => {
+            fileStream.destroy();
+            fs.unlink(destPath, () => reject(error));
+          };
 
-            res.on("error", cleanup);
-            fileStream.on("error", cleanup);
-          })
-          .on("error", reject);
+          res.on("error", cleanup);
+          fileStream.on("error", cleanup);
+        });
+        // Add basic timeout so stalled proxies don't hang forever
+        req.setTimeout(30000, () => {
+          req.destroy(new Error("Request timed out"));
+        });
+        req.on("error", reject);
       };
 
       request(url);
