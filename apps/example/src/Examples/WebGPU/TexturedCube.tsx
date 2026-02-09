@@ -1,11 +1,28 @@
 import React, { useEffect, useRef } from "react";
 import { StyleSheet, View, Text } from "react-native";
-import type { SkCanvas, WebGPUCanvasRef } from "@shopify/react-native-skia";
+import type {
+  SkCanvas,
+  SkParagraph,
+  SkTextStyle,
+  WebGPUCanvasRef,
+} from "@shopify/react-native-skia";
 import {
   WebGPUCanvas,
   Skia,
   BlurStyle,
   BlendMode,
+  FontWeight,
+  FontSlant,
+  PaintStyle,
+  TextDecoration,
+  TextDecorationStyle,
+  useFonts,
+  fitbox,
+  rect,
+  processTransform3d,
+  StrokeCap,
+  StrokeJoin,
+  TileMode,
 } from "@shopify/react-native-skia";
 
 import {
@@ -34,18 +51,67 @@ breathePaint.setMaskFilter(Skia.MaskFilter.MakeBlur(BlurStyle.Solid, 40, true));
 breathePaint.setBlendMode(BlendMode.Screen);
 const breatheColors = ["#529ca0", "#61bea2"];
 
+// Hello path
+const helloSvg =
+  "M13.6 247.8C13.6 247.8 51.8 206.1 84.2 168.8 140.8 103.4 202.8 27.1 150.1 14.3 131 9.7 116.4 29.3 107.3 44.8 69.7 108.4 58 213.8 57.5 302 67.7 271.3 104.4 190.3 140.2 192.5 181.5 195.1 145.3 257 154.5 283.8 168.8 321.6 208.2 292.3 230 276.9 265.9 251.5 289 230.7 289 199.9 289 161 235.3 173.5 223.3 204.6 213.9 228.9 214.3 265.3 229.3 283.6 247.5 305.7 287.7 309.4 312.2 287.9 337 266.2 354.7 234 368.7 212.5 403.9 158.3 464.4 85.6 449.1 29.5 447 21.9 440.4 16 432.5 15.7 393.6 14.2 381.8 98.6 375.3 128.8 368.8 159.3 345.2 260.8 373.1 292.5 404.4 328 446.3 261.9 464.7 231.1 468.7 224.8 472.6 217.9 476.1 212.5 511.3 158.4 571.8 85.6 556.5 29.5 554.4 21.9 547.8 16.1 539.9 15.8 501 14.2 489.2 98.7 482.8 128.8 476.2 159.3 452.6 260.8 480.5 292.6 511.8 328.1 562.4 265 572.6 232.3 587.3 185.4 620.9 171 660.9 179.7M660.9 179.7C616 166.1 580.9 199.1 572.6 232.6 566.8 256.4 573.5 281.6 599.2 295.2 668.5 331.9 742.8 211.1 660.9 179.7ZM660.9 179.7C643.7 181.3 636.1 204.2 643.3 227.2 654.3 263.4 704.3 267.7 733.1 255.5";
+const helloPath = Skia.Path.MakeFromSVGString(helloSvg)!;
+const helloBounds = helloPath.computeTightBounds();
+helloPath.transform(
+  processTransform3d(
+    fitbox(
+      "contain",
+      helloBounds,
+      rect(30, 30, TEXTURE_SIZE - 60, TEXTURE_SIZE - 60)
+    )
+  )
+);
+
+// Paragraph fonts
+const paragraphFonts = {
+  Roboto: [
+    require("../../Tests/assets/Roboto-Medium.ttf"),
+    require("../../Tests/assets/Roboto-Regular.ttf"),
+  ],
+};
+
 function drawTexture1(canvas: SkCanvas, t: number) {
-  canvas.drawColor(Skia.Color("cyan"));
-  paint.setColor(Skia.Color("white"));
-  const r = 100 + Math.sin(t * 2) * 80;
-  canvas.drawCircle(256, 256, r, paint);
+  canvas.drawColor(Skia.Color("white"));
+  const progress = (Math.sin(t * 0.8) + 1) / 2;
+  const trimmed = helloPath.copy();
+  trimmed.trim(0, progress, false);
+  trimmed.stroke({ width: 25, join: StrokeJoin.Round, cap: StrokeCap.Round });
+  paint.setShader(
+    Skia.Shader.MakeLinearGradient(
+      { x: 0, y: 0 },
+      { x: 512, y: 0 },
+      [
+        "#3FCEBC",
+        "#3CBCEB",
+        "#5F96E7",
+        "#816FE3",
+        "#9F5EE2",
+        "#DE589F",
+        "#FF645E",
+        "#FDA859",
+        "#FAEC54",
+        "#9EE671",
+        "#41E08D",
+      ].map((c) => Skia.Color(c)),
+      null,
+      TileMode.Clamp
+    )
+  );
+  canvas.drawPath(trimmed, paint);
 }
 
-function drawTexture2(canvas: SkCanvas, t: number) {
-  canvas.drawColor(Skia.Color("pink"));
-  paint.setColor(Skia.Color("black"));
-  const x = 256 + Math.cos(t * 3) * 100;
-  canvas.drawCircle(x, 256, 80, paint);
+function drawTexture2(canvas: SkCanvas, t: number, paragraph: SkParagraph) {
+  canvas.drawColor(Skia.Color("white"));
+  const progress = (Math.sin(t) + 1) / 2;
+  const minW = TEXTURE_SIZE * 0.3;
+  const maxW = TEXTURE_SIZE * 0.8;
+  const width = minW + progress * (maxW - minW);
+  paragraph.layout(width);
+  paragraph.paint(canvas, 30, 30);
 }
 
 function easeInOut(t: number): number {
@@ -95,6 +161,7 @@ export function TexturedCube() {
   const canvasRef = useRef<WebGPUCanvasRef>(null);
   const animationRef = useRef<number>(0);
   const cleanupRef = useRef<(() => void) | null>(null);
+  const customFontMgr = useFonts(paragraphFonts);
 
   useEffect(() => {
     const timeoutId = setTimeout(async () => {
@@ -102,6 +169,9 @@ export function TexturedCube() {
         return;
       }
       if (typeof RNWebGPU === "undefined") {
+        return;
+      }
+      if (!customFontMgr) {
         return;
       }
       const ctx = canvasRef.current.getContext("webgpu");
@@ -178,6 +248,77 @@ export function TexturedCube() {
       const surface2 = Skia.Surface.MakeOffscreen(TEXTURE_SIZE, TEXTURE_SIZE)!;
       const surface3 = Skia.Surface.MakeOffscreen(TEXTURE_SIZE, TEXTURE_SIZE)!;
 
+      // Build paragraph for texture 2
+      const fontSize = 40;
+      const strokePaint = Skia.Paint();
+      strokePaint.setStyle(PaintStyle.Stroke);
+      strokePaint.setStrokeWidth(1);
+
+      const textStyle = {
+        fontSize,
+        fontFamilies: ["Roboto"],
+        color: Skia.Color("#000"),
+      };
+
+      const coloredTextStyle = {
+        fontSize: fontSize * 1.3,
+        fontFamilies: ["Roboto"],
+        fontStyle: { weight: FontWeight.Medium },
+        color: Skia.Color("#61bea2"),
+      };
+
+      const crazyStyle: SkTextStyle = {
+        color: Skia.Color("#000"),
+        backgroundColor: Skia.Color("#CECECE"),
+        fontSize: fontSize * 1.3,
+        fontFamilies: ["Roboto"],
+        letterSpacing: -1,
+        wordSpacing: 20,
+        fontStyle: {
+          slant: FontSlant.Italic,
+          weight: FontWeight.ExtraBlack,
+        },
+        shadows: [
+          {
+            color: Skia.Color("#00000044"),
+            blurRadius: 4,
+            offset: { x: 4, y: 4 },
+          },
+        ],
+        decorationColor: Skia.Color("#00223A"),
+        decorationThickness: 2,
+        decoration: TextDecoration.Underline,
+        decorationStyle: TextDecorationStyle.Dotted,
+      };
+
+      const paragraph = Skia.ParagraphBuilder.Make({}, customFontMgr)
+        .pushStyle(textStyle)
+        .addText("Hello ")
+        .pushStyle({
+          ...textStyle,
+          fontStyle: { weight: FontWeight.Medium },
+        })
+        .addText("Skia")
+        .pop()
+        .addText("\n\nThis text rendered using the ")
+        .pushStyle(coloredTextStyle)
+        .addText("SkParagraph ")
+        .pop()
+        .addText("module with ")
+        .pushStyle({ ...coloredTextStyle, color: Skia.Color("#f5a623") })
+        .addText("libgrapheme ")
+        .pop()
+        .addText("on iOS.")
+        .pushStyle(textStyle)
+        .addText(
+          "\n\nOn Android we use built-in ICU while on web we use CanvasKit's."
+        )
+        .pop()
+        .pushStyle(crazyStyle, strokePaint)
+        .addText("\n\nWow - this is cool.")
+        .pop()
+        .build();
+
       const sampler = device.createSampler({
         magFilter: "linear",
         minFilter: "linear",
@@ -248,7 +389,7 @@ export function TexturedCube() {
         );
         const bindGroup1 = createBindGroup(tex1);
 
-        drawTexture2(surface2.getCanvas(), t);
+        drawTexture2(surface2.getCanvas(), t, paragraph);
         surface2.flush();
         const tex2 = Skia.Image.MakeTextureFromImage(
           surface2.makeImageSnapshot()
@@ -311,7 +452,7 @@ export function TexturedCube() {
       clearTimeout(timeoutId);
       cleanupRef.current?.();
     };
-  }, []);
+  }, [customFontMgr]);
 
   if (typeof RNWebGPU === "undefined") {
     return (
