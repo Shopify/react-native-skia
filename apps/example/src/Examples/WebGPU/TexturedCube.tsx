@@ -37,6 +37,13 @@ function drawTexture2(canvas: SkCanvas, t: number) {
   canvas.drawCircle(x, 256, 80, paint);
 }
 
+function drawTexture3(canvas: SkCanvas, t: number) {
+  canvas.drawColor(Skia.Color("yellow"));
+  paint.setColor(Skia.Color("red"));
+  const y = 256 + Math.sin(t * 4) * 100;
+  canvas.drawCircle(256, y, 60, paint);
+}
+
 export function TexturedCube() {
   const canvasRef = useRef<WebGPUCanvasRef>(null);
   const animationRef = useRef<number>(0);
