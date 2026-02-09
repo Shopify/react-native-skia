@@ -263,4 +263,8 @@ export const sksgHostConfig: SkiaHostConfig = {
     return DefaultEventPriority;
   },
   resetFormInstance() {},
+
+  // DefinitelyTyped is not up to date, these are needed for devtools
+  rendererVersion: "0.0.1",
+  rendererPackageName: "react-native-skia",
 };
