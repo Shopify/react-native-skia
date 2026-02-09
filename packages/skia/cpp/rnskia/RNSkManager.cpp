@@ -14,6 +14,7 @@
 #ifdef SK_GRAPHITE
 #include "RNDawnContext.h"
 #include "rnwgpu/api/GPU.h"
+#include "rnwgpu/api/RNWebGPU.h"
 #include "rnwgpu/api/descriptors/GPUBufferUsage.h"
 #include "rnwgpu/api/descriptors/GPUColorWrite.h"
 #include "rnwgpu/api/descriptors/GPUMapMode.h"
@@ -100,6 +101,11 @@ void RNSkManager::installBindings() {
                                    rnwgpu::GPUShaderStage::create(*_jsRuntime));
   _jsRuntime->global().setProperty(*_jsRuntime, "GPUTextureUsage",
                                    rnwgpu::GPUTextureUsage::create(*_jsRuntime));
+
+  // Install RNWebGPU global object for WebGPU Canvas support
+  auto rnWebGPU = std::make_shared<rnwgpu::RNWebGPU>(gpu, nullptr);
+  _jsRuntime->global().setProperty(*_jsRuntime, "RNWebGPU",
+                                   rnwgpu::RNWebGPU::create(*_jsRuntime, rnWebGPU));
 #endif
 }
 } // namespace RNSkia

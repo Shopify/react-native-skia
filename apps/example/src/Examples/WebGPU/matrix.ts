@@ -216,6 +216,60 @@ export function mat4RotateY(m: Mat4, angle: number, dst?: Mat4): Mat4 {
   return dst;
 }
 
+export function mat4Rotate(m: Mat4, axis: Vec3, angle: number, dst?: Mat4): Mat4 {
+  dst = dst || new Float32Array(16);
+  let x = axis[0],
+    y = axis[1],
+    z = axis[2];
+  const len = Math.sqrt(x * x + y * y + z * z);
+  if (len === 0) {
+    return m;
+  }
+  x /= len;
+  y /= len;
+  z /= len;
+
+  const s = Math.sin(angle);
+  const c = Math.cos(angle);
+  const t = 1 - c;
+
+  const r00 = t * x * x + c;
+  const r01 = t * x * y + s * z;
+  const r02 = t * x * z - s * y;
+  const r10 = t * x * y - s * z;
+  const r11 = t * y * y + c;
+  const r12 = t * y * z + s * x;
+  const r20 = t * x * z + s * y;
+  const r21 = t * y * z - s * x;
+  const r22 = t * z * z + c;
+
+  const m00 = m[0], m01 = m[1], m02 = m[2], m03 = m[3];
+  const m10 = m[4], m11 = m[5], m12 = m[6], m13 = m[7];
+  const m20 = m[8], m21 = m[9], m22 = m[10], m23 = m[11];
+
+  dst[0] = m00 * r00 + m10 * r01 + m20 * r02;
+  dst[1] = m01 * r00 + m11 * r01 + m21 * r02;
+  dst[2] = m02 * r00 + m12 * r01 + m22 * r02;
+  dst[3] = m03 * r00 + m13 * r01 + m23 * r02;
+  dst[4] = m00 * r10 + m10 * r11 + m20 * r12;
+  dst[5] = m01 * r10 + m11 * r11 + m21 * r12;
+  dst[6] = m02 * r10 + m12 * r11 + m22 * r12;
+  dst[7] = m03 * r10 + m13 * r11 + m23 * r12;
+  dst[8] = m00 * r20 + m10 * r21 + m20 * r22;
+  dst[9] = m01 * r20 + m11 * r21 + m21 * r22;
+  dst[10] = m02 * r20 + m12 * r21 + m22 * r22;
+  dst[11] = m03 * r20 + m13 * r21 + m23 * r22;
+
+  if (dst !== m) {
+    dst[12] = m[12];
+    dst[13] = m[13];
+    dst[14] = m[14];
+    dst[15] = m[15];
+  }
+
+  return dst;
+}
+
 export function mat3FromMat4(m: Mat4, dst?: Float32Array): Float32Array {
   dst = dst || new Float32Array(12);
   dst[0] = m[0];
