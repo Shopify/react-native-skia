@@ -24,12 +24,12 @@
   "skia-graphite": {
     "version": "m142b",
     "checksums": {
-      "android-armeabi-v7a": "3e40f44c804194fa0983c46903f834e8f834c6dd96534c7fa1b4ebb4f409527d",
-      "android-arm64-v8a": "d6c3035449fcf7ef13369b0d6c4ef41f3177d15074eeb195201e0ba4cfb2f527",
-      "android-x86": "6dc229847420b8a43c15098cdcb4fe45b2df20a38ad69f37e0aa91c832499c2a",
-      "android-x86_64": "ecae351d98af3b175d40d894520c2e3263034276bb0b0e9d2f9c19ba7dc046fa",
-      "apple-ios-xcframeworks": "6f60f03faaeebfb798615d09715040790ff95e75bf95028893ced6f514ab5196",
-      "apple-macos-xcframeworks": "07467cd1778053537528ed91c7a35d116e1a4644819f0aad8e06e7d884591dea"
+      "android-armeabi-v7a": "b3db57a758482d479d07a5a31dd46492b5ca58de1cdcb9fbba1f71879561057a",
+      "android-arm64-v8a": "099cb2491723f05bcf44fc2af7b4d33d80b3768dc4be8609d7bd2102efce8e4f",
+      "android-x86": "bcbeb88d1e484b64f6f87722405a9d0319ba1795b85ef3ddd3a673412dfd505f",
+      "android-x86_64": "285448b69b18d619f6d468461c928931ab85b73dc90c4675ffb60a336c2c78d9",
+      "apple-ios-xcframeworks": "5efb7b78b3e748d05f1a79ff4be4561af1a49ef178a46ace319eaa75ece0f27f",
+      "apple-macos-xcframeworks": "1ded51aa285b1925e2ead8a118a01a2775e0c3f940e01263262358e58fdb9b77"
     }
   },
   "description": "High-performance React Native Graphics using Skia",

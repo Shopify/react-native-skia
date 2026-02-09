@@ -5,6 +5,7 @@ import type { Routes } from "./Routes";
 import { List } from "./List";
 import { Triangle } from "./Triangle";
 import { Wireframes } from "./Wireframes";
+import { TexturedCube } from "./TexturedCube";
 
 const Stack = createNativeStackNavigator<Routes>();
 
@@ -32,6 +33,13 @@ export const WebGPU = () => {
         options={{
           title: "Wireframes",
           header: () => null,
+        }}
+      />
+      <Stack.Screen
+        name="TexturedCube"
+        component={TexturedCube}
+        options={{
+          title: "Textured Cube",
         }}
       />
     </Stack.Navigator>

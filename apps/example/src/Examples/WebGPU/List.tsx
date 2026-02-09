@@ -16,6 +16,11 @@ export const examples = [
     title: "Wireframes",
     description: "3D wireframe models with offscreen rendering",
   },
+  {
+    screen: "TexturedCube",
+    title: "Textured Cube",
+    description: "Rotating 3D cube with texture mapping",
+  },
 ] as const;
 
 const styles = StyleSheet.create({
