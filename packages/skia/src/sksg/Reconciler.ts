@@ -13,11 +13,8 @@ import "./Elements";
 
 const skiaReconciler = ReactReconciler(sksgHostConfig);
 
-skiaReconciler.injectIntoDevTools({
-  bundleType: 1,
-  version: "0.0.1",
-  rendererPackageName: "react-native-skia",
-});
+// @ts-expect-error DefinitelyTyped is not up to date
+skiaReconciler.injectIntoDevTools();
 
 export class SkiaSGRoot {
   private root: OpaqueRoot;
