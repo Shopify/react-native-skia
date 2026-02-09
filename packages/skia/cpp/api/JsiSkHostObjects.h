@@ -153,7 +153,7 @@ protected:
   /**
    * Returns true if the object has been disposed.
    */
-  bool isDisposed() const { return _isDisposed.load(); }
+  bool isDisposed() const { return _isDisposed.load(std::memory_order_acquire); }
 
   /**
    * Returns the underlying object without checking if disposed.
@@ -167,15 +167,16 @@ private:
    * Validates that _object was not disposed and returns it.
    */
   T validateObject() const {
-    if (_isDisposed) {
+    if (_isDisposed.load(std::memory_order_acquire)) {
       throw std::runtime_error("Attempted to access a disposed object.");
     }
     return _object;
   }
 
   void safeDispose() {
-    if (!_isDisposed) {
-      _isDisposed = true;
+    bool expected = false;
+    if (_isDisposed.compare_exchange_strong(expected, true,
+                                            std::memory_order_acq_rel)) {
       releaseResources();
     }
   }

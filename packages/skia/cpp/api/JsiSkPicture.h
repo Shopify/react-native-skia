@@ -34,11 +34,8 @@ public:
     _dispatcher->processQueue();
   }
 
-  ~JsiSkPicture() override {
-    // If already disposed, resources were already cleaned up
-    if (isDisposed()) {
-      return;
-    }
+protected:
+  void releaseResources() override {
     // Queue deletion on the creation thread if needed
     auto picture = getObjectUnchecked();
     if (picture && _dispatcher) {
@@ -46,8 +43,18 @@ public:
         // Picture will be deleted when this lambda is destroyed
       });
     }
-    // Clear the object to prevent base class destructor from deleting it
-    setObject(nullptr);
+    // Clear the object
+    JsiSkWrappingSkPtrHostObject<SkPicture>::releaseResources();
+  }
+
+public:
+  ~JsiSkPicture() override {
+    // If already disposed, resources were already cleaned up
+    if (isDisposed()) {
+      return;
+    }
+    // Use the same cleanup path as dispose()
+    releaseResources();
   }
 
   JSI_HOST_FUNCTION(makeShader) {
