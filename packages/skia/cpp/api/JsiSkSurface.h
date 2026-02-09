@@ -45,21 +45,7 @@ public:
     _dispatcher->processQueue();
   }
 
-  ~JsiSkSurface() override {
-    // If already disposed, resources were already cleaned up
-    if (isDisposed()) {
-      return;
-    }
-    // Queue deletion on the creation thread if needed
-    auto surface = getObjectUnchecked();
-    if (surface && _dispatcher) {
-      _dispatcher->run([surface]() {
-        // Surface will be deleted when this lambda is destroyed
-      });
-    }
-    // Clear the object to prevent base class destructor from deleting it
-    setObject(nullptr);
-  }
+  ~JsiSkSurface() override { safeDispose(); }
 
   EXPORT_JSI_API_TYPENAME(JsiSkSurface, Surface)
 
@@ -177,6 +163,19 @@ public:
   }
 
   std::string getObjectType() const override { return "JsiSkSurface"; }
+
+protected:
+  void onDispose() override { safeDispose(); }
+
+  void releaseResources() override {
+    auto surface = getObjectUnchecked();
+    if (surface && _dispatcher) {
+      _dispatcher->run([surface]() {
+        // Surface will be deleted when this lambda is destroyed
+      });
+    }
+    setObject(nullptr);
+  }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurface, width),
                        JSI_EXPORT_FUNC(JsiSkSurface, height),

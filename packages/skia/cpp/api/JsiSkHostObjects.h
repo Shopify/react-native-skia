@@ -136,19 +136,42 @@ public:
 
   /**
    * Dispose function that can be exposed to JS by using the JSI_API_TYPENAME
-   * macro.
+   * macro. By default this is a no-op. Override onDispose() in subclasses
+   * that need explicit resource management.
    */
   JSI_HOST_FUNCTION(dispose) {
-    safeDispose();
+    onDispose();
     return jsi::Value::undefined();
   }
 
 protected:
   /**
+   * Override this method to implement explicit disposal.
+   * Default implementation is a no-op.
+   * Call safeDispose() from your override to trigger resource cleanup.
+   */
+  virtual void onDispose() {
+    // No-op by default for most host objects
+  }
+
+  /**
    * Override to implement disposal of allocated resources like smart pointers.
    * This method will only be called once for each instance of this class.
    */
-  virtual void releaseResources() = 0;
+  virtual void releaseResources() {
+    // Default: empty
+  }
+
+  /**
+   * Call this from onDispose() to safely release resources.
+   * Ensures resources are only released once.
+   */
+  void safeDispose() {
+    if (!_isDisposed) {
+      _isDisposed = true;
+      releaseResources();
+    }
+  }
 
   /**
    * Returns true if the object has been disposed.
@@ -209,12 +232,6 @@ public:
                obj.asObject(runtime).asHostObject(runtime))
         ->getObject();
   }
-
-protected:
-  void releaseResources() override {
-    // Clear internally allocated objects
-    this->setObject(nullptr);
-  }
 };
 
 template <typename T>
@@ -232,12 +249,6 @@ public:
     return std::static_pointer_cast<JsiSkWrappingSkPtrHostObject>(
                obj.asObject(runtime).asHostObject(runtime))
         ->getObject();
-  }
-
-protected:
-  void releaseResources() override {
-    // Clear internally allocated objects
-    this->setObject(nullptr);
   }
 };
 

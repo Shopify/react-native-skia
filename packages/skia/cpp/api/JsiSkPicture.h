@@ -34,21 +34,7 @@ public:
     _dispatcher->processQueue();
   }
 
-  ~JsiSkPicture() override {
-    // If already disposed, resources were already cleaned up
-    if (isDisposed()) {
-      return;
-    }
-    // Queue deletion on the creation thread if needed
-    auto picture = getObjectUnchecked();
-    if (picture && _dispatcher) {
-      _dispatcher->run([picture]() {
-        // Picture will be deleted when this lambda is destroyed
-      });
-    }
-    // Clear the object to prevent base class destructor from deleting it
-    setObject(nullptr);
-  }
+  ~JsiSkPicture() override { safeDispose(); }
 
   JSI_HOST_FUNCTION(makeShader) {
     auto tmx = (SkTileMode)arguments[0].asNumber();
@@ -108,5 +94,18 @@ public:
   }
 
   std::string getObjectType() const override { return "JsiSkPicture"; }
+
+protected:
+  void onDispose() override { safeDispose(); }
+
+  void releaseResources() override {
+    auto picture = getObjectUnchecked();
+    if (picture && _dispatcher) {
+      _dispatcher->run([picture]() {
+        // Picture will be deleted when this lambda is destroyed
+      });
+    }
+    setObject(nullptr);
+  }
 };
 } // namespace RNSkia
