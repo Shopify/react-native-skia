@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { StyleSheet, View, Text } from "react-native";
-import type { WebGPUCanvasRef } from "@shopify/react-native-skia";
+import type { SkCanvas, WebGPUCanvasRef } from "@shopify/react-native-skia";
 import { WebGPUCanvas, Skia } from "@shopify/react-native-skia";
 
 import {
@@ -20,6 +20,23 @@ import {
   type Vec3,
 } from "./matrix";
 
+const TEXTURE_SIZE = 512;
+const paint = Skia.Paint();
+
+function drawTexture1(canvas: SkCanvas, t: number) {
+  canvas.drawColor(Skia.Color("cyan"));
+  paint.setColor(Skia.Color("white"));
+  const r = 100 + Math.sin(t * 2) * 80;
+  canvas.drawCircle(256, 256, r, paint);
+}
+
+function drawTexture2(canvas: SkCanvas, t: number) {
+  canvas.drawColor(Skia.Color("pink"));
+  paint.setColor(Skia.Color("black"));
+  const x = 256 + Math.cos(t * 3) * 100;
+  canvas.drawCircle(x, 256, 80, paint);
+}
+
 export function TexturedCube() {
   const canvasRef = useRef<WebGPUCanvasRef>(null);
   const animationRef = useRef<number>(0);
@@ -30,17 +47,11 @@ export function TexturedCube() {
       if (!canvasRef.current) {
         return;
       }
-
       if (typeof RNWebGPU === "undefined") {
-        console.warn(
-          "RNWebGPU is not available. Make sure SK_GRAPHITE is enabled."
-        );
         return;
       }
-
       const ctx = canvasRef.current.getContext("webgpu");
       if (!ctx) {
-        console.warn("Failed to get WebGPU context");
         return;
       }
 
@@ -54,7 +65,6 @@ export function TexturedCube() {
         alphaMode: "premultiplied",
       });
 
-      // Create a vertex buffer from the cube data.
       const verticesBuffer = device.createBuffer({
         size: cubeVertexArray.byteLength,
         usage: GPUBufferUsage.VERTEX,
@@ -66,21 +76,17 @@ export function TexturedCube() {
       const pipeline = device.createRenderPipeline({
         layout: "auto",
         vertex: {
-          module: device.createShaderModule({
-            code: basicVertWGSL,
-          }),
+          module: device.createShaderModule({ code: basicVertWGSL }),
           buffers: [
             {
               arrayStride: cubeVertexSize,
               attributes: [
                 {
-                  // position
                   shaderLocation: 0,
                   offset: cubePositionOffset,
                   format: "float32x4",
                 },
                 {
-                  // uv
                   shaderLocation: 1,
                   offset: cubeUVOffset,
                   format: "float32x2",
@@ -93,16 +99,9 @@ export function TexturedCube() {
           module: device.createShaderModule({
             code: sampleTextureMixColorWGSL,
           }),
-          targets: [
-            {
-              format: presentationFormat,
-            },
-          ],
+          targets: [{ format: presentationFormat }],
         },
-        primitive: {
-          topology: "triangle-list",
-          cullMode: "back",
-        },
+        primitive: { topology: "triangle-list", cullMode: "back" },
         depthStencil: {
           depthWriteEnabled: true,
           depthCompare: "less",
@@ -116,39 +115,14 @@ export function TexturedCube() {
         usage: GPUTextureUsage.RENDER_ATTACHMENT,
       });
 
-      const uniformBufferSize = 4 * 16; // 4x4 matrix
       const uniformBuffer = device.createBuffer({
-        size: uniformBufferSize,
+        size: 4 * 16,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
       });
 
-      // Create two Skia offscreen surfaces for the cube textures.
-      const textureSize = 512;
-      const surface1 = Skia.Surface.MakeOffscreen(textureSize, textureSize)!;
-      const surface2 = Skia.Surface.MakeOffscreen(textureSize, textureSize)!;
-      const paint = Skia.Paint();
+      const surface1 = Skia.Surface.MakeOffscreen(TEXTURE_SIZE, TEXTURE_SIZE)!;
+      const surface2 = Skia.Surface.MakeOffscreen(TEXTURE_SIZE, TEXTURE_SIZE)!;
 
-      // Draw on surface 1 — customize this per frame below.
-      function drawTexture1(t: number) {
-        const c = surface1.getCanvas();
-        c.drawColor(Skia.Color("cyan"));
-        paint.setColor(Skia.Color("white"));
-        const r = 100 + Math.sin(t * 2) * 80;
-        c.drawCircle(256, 256, r, paint);
-        surface1.flush();
-      }
-
-      // Draw on surface 2 — customize this per frame below.
-      function drawTexture2(t: number) {
-        const c = surface2.getCanvas();
-        c.drawColor(Skia.Color("pink"));
-        paint.setColor(Skia.Color("black"));
-        const x = 256 + Math.cos(t * 3) * 100;
-        c.drawCircle(x, 256, 80, paint);
-        surface2.flush();
-      }
-
-      // Create a sampler with linear filtering for smooth interpolation.
       const sampler = device.createSampler({
         magFilter: "linear",
         minFilter: "linear",
@@ -160,18 +134,9 @@ export function TexturedCube() {
         return device.createBindGroup({
           layout: bindGroupLayout,
           entries: [
-            {
-              binding: 0,
-              resource: { buffer: uniformBuffer },
-            },
-            {
-              binding: 1,
-              resource: sampler,
-            },
-            {
-              binding: 2,
-              resource: texture.createView(),
-            },
+            { binding: 0, resource: { buffer: uniformBuffer } },
+            { binding: 1, resource: sampler },
+            { binding: 2, resource: texture.createView() },
           ],
         });
       }
@@ -201,20 +166,15 @@ export function TexturedCube() {
         1,
         100.0
       );
-      const modelViewProjectionMatrix = mat4Identity();
+      const mvp = mat4Identity();
 
       function getTransformationMatrix(): Mat4 {
-        const viewMatrix = mat4Identity();
-        mat4Translate(viewMatrix, [0, 0, -4] as Vec3, viewMatrix);
+        const view = mat4Identity();
+        mat4Translate(view, [0, 0, -4] as Vec3, view);
         const now = Date.now() / 1000;
-        mat4Rotate(
-          viewMatrix,
-          [Math.sin(now), Math.cos(now), 0] as Vec3,
-          1,
-          viewMatrix
-        );
-        mat4Multiply(projectionMatrix, viewMatrix, modelViewProjectionMatrix);
-        return modelViewProjectionMatrix;
+        mat4Rotate(view, [Math.sin(now), Math.cos(now), 0] as Vec3, 1, view);
+        mat4Multiply(projectionMatrix, view, mvp);
+        return mvp;
       }
 
       let running = true;
@@ -223,29 +183,31 @@ export function TexturedCube() {
         if (!running) {
           return;
         }
-
         const t = Date.now() / 1000;
 
-        // Update Skia drawings each frame
-        drawTexture1(t);
+        // Update Skia textures
+        drawTexture1(surface1.getCanvas(), t);
+        surface1.flush();
         const tex1 = Skia.Image.MakeTextureFromImage(
           surface1.makeImageSnapshot()
         );
         const bindGroup1 = createBindGroup(tex1);
 
-        drawTexture2(t);
+        drawTexture2(surface2.getCanvas(), t);
+        surface2.flush();
         const tex2 = Skia.Image.MakeTextureFromImage(
           surface2.makeImageSnapshot()
         );
         const bindGroup2 = createBindGroup(tex2);
 
-        const transformationMatrix = getTransformationMatrix();
+        // Update MVP matrix
+        const mat = getTransformationMatrix();
         device.queue.writeBuffer(
           uniformBuffer,
           0,
-          transformationMatrix.buffer,
-          transformationMatrix.byteOffset,
-          transformationMatrix.byteLength
+          mat.buffer,
+          mat.byteOffset,
+          mat.byteLength
         );
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -254,20 +216,19 @@ export function TexturedCube() {
           .createView();
 
         const commandEncoder = device.createCommandEncoder();
-        const passEncoder =
-          commandEncoder.beginRenderPass(renderPassDescriptor);
-        passEncoder.setPipeline(pipeline);
-        passEncoder.setVertexBuffer(0, verticesBuffer);
+        const pass = commandEncoder.beginRenderPass(renderPassDescriptor);
+        pass.setPipeline(pipeline);
+        pass.setVertexBuffer(0, verticesBuffer);
 
-        // First 3 faces (18 vertices) with texture 1
-        passEncoder.setBindGroup(0, bindGroup1);
-        passEncoder.draw(18, 1, 0, 0);
+        // First 3 faces with texture 1
+        pass.setBindGroup(0, bindGroup1);
+        pass.draw(18, 1, 0, 0);
 
-        // Last 3 faces (18 vertices) with texture 2
-        passEncoder.setBindGroup(0, bindGroup2);
-        passEncoder.draw(18, 1, 18, 0);
+        // Last 3 faces with texture 2
+        pass.setBindGroup(0, bindGroup2);
+        pass.draw(18, 1, 18, 0);
 
-        passEncoder.end();
+        pass.end();
         device.queue.submit([commandEncoder.finish()]);
         ctx.present();
 
