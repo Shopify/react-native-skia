@@ -1,7 +1,12 @@
 import React, { useEffect, useRef } from "react";
 import { StyleSheet, View, Text } from "react-native";
 import type { SkCanvas, WebGPUCanvasRef } from "@shopify/react-native-skia";
-import { WebGPUCanvas, Skia } from "@shopify/react-native-skia";
+import {
+  WebGPUCanvas,
+  Skia,
+  BlurStyle,
+  BlendMode,
+} from "@shopify/react-native-skia";
 
 import {
   cubePositionOffset,
@@ -23,6 +28,12 @@ import {
 const TEXTURE_SIZE = 512;
 const paint = Skia.Paint();
 
+// Breathe drawing resources
+const breathePaint = Skia.Paint();
+breathePaint.setMaskFilter(Skia.MaskFilter.MakeBlur(BlurStyle.Solid, 40, true));
+breathePaint.setBlendMode(BlendMode.Screen);
+const breatheColors = ["#529ca0", "#61bea2"];
+
 function drawTexture1(canvas: SkCanvas, t: number) {
   canvas.drawColor(Skia.Color("cyan"));
   paint.setColor(Skia.Color("white"));
@@ -37,11 +48,47 @@ function drawTexture2(canvas: SkCanvas, t: number) {
   canvas.drawCircle(x, 256, 80, paint);
 }
 
+function easeInOut(t: number): number {
+  // Attempt to match Easing.inOut(Easing.ease) — a cubic bezier ease-in-out
+  // Approximation using smoothstep: 3t² - 2t³
+  return t * t * (3 - 2 * t);
+}
+
 function drawTexture3(canvas: SkCanvas, t: number) {
-  canvas.drawColor(Skia.Color("yellow"));
-  paint.setColor(Skia.Color("red"));
-  const y = 256 + Math.sin(t * 4) * 100;
-  canvas.drawCircle(256, y, 60, paint);
+  const cx = TEXTURE_SIZE / 2;
+  const cy = TEXTURE_SIZE / 2;
+  const R = TEXTURE_SIZE / 4;
+  const total = 6;
+
+  // Triangle wave: 0→1→0 over 6 seconds (matching useLoop({duration: 3000}))
+  const period = 6;
+  const phase = (t % period) / period; // 0..1
+  const triangle = phase < 0.5 ? phase * 2 : 2 - phase * 2; // 0→1→0
+  const progress = easeInOut(triangle);
+
+  // Background
+  canvas.drawColor(Skia.Color("rgb(36,43,56)"));
+
+  canvas.save();
+
+  // Group rotation: mix(progress, -PI, 0) around center
+  const angle = (-Math.PI * (1 - progress) * 180) / Math.PI;
+  canvas.translate(cx, cy);
+  canvas.rotate(angle, 0, 0);
+  canvas.translate(-cx, -cy);
+
+  // Draw 6 circles
+  for (let i = 0; i < total; i++) {
+    const theta = (i * 2 * Math.PI) / total;
+    const r = progress * R;
+    const x = cx + r * Math.cos(theta);
+    const y = cy + r * Math.sin(theta);
+    const scale = 0.3 + 0.7 * progress;
+    breathePaint.setColor(Skia.Color(breatheColors[i % 2]));
+    canvas.drawCircle(x, y, R * scale, breathePaint);
+  }
+
+  canvas.restore();
 }
 
 export function TexturedCube() {
@@ -129,6 +176,7 @@ export function TexturedCube() {
 
       const surface1 = Skia.Surface.MakeOffscreen(TEXTURE_SIZE, TEXTURE_SIZE)!;
       const surface2 = Skia.Surface.MakeOffscreen(TEXTURE_SIZE, TEXTURE_SIZE)!;
+      const surface3 = Skia.Surface.MakeOffscreen(TEXTURE_SIZE, TEXTURE_SIZE)!;
 
       const sampler = device.createSampler({
         magFilter: "linear",
@@ -207,6 +255,13 @@ export function TexturedCube() {
         );
         const bindGroup2 = createBindGroup(tex2);
 
+        drawTexture3(surface3.getCanvas(), t);
+        surface3.flush();
+        const tex3 = Skia.Image.MakeTextureFromImage(
+          surface3.makeImageSnapshot()
+        );
+        const bindGroup3 = createBindGroup(tex3);
+
         // Update MVP matrix
         const mat = getTransformationMatrix();
         device.queue.writeBuffer(
@@ -227,13 +282,15 @@ export function TexturedCube() {
         pass.setPipeline(pipeline);
         pass.setVertexBuffer(0, verticesBuffer);
 
-        // First 3 faces with texture 1
+        // 2 faces (12 vertices) per texture
         pass.setBindGroup(0, bindGroup1);
-        pass.draw(18, 1, 0, 0);
+        pass.draw(12, 1, 0, 0);
 
-        // Last 3 faces with texture 2
         pass.setBindGroup(0, bindGroup2);
-        pass.draw(18, 1, 18, 0);
+        pass.draw(12, 1, 12, 0);
+
+        pass.setBindGroup(0, bindGroup3);
+        pass.draw(12, 1, 24, 0);
 
         pass.end();
         device.queue.submit([commandEncoder.finish()]);
