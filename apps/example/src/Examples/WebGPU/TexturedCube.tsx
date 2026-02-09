@@ -7,7 +7,6 @@ import {
   cubePositionOffset,
   cubeUVOffset,
   cubeVertexArray,
-  cubeVertexCount,
   cubeVertexSize,
 } from "./cube";
 import { basicVertWGSL, sampleTextureMixColorWGSL } from "./Shaders";
@@ -123,17 +122,31 @@ export function TexturedCube() {
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
       });
 
-      // Create a Skia offscreen drawing and convert to a GPUTexture.
+      // Create two Skia offscreen surfaces for the cube textures.
       const textureSize = 512;
-      const surface = Skia.Surface.MakeOffscreen(textureSize, textureSize)!;
-      const skCanvas = surface.getCanvas();
-      skCanvas.drawColor(Skia.Color("pink"));
+      const surface1 = Skia.Surface.MakeOffscreen(textureSize, textureSize)!;
+      const surface2 = Skia.Surface.MakeOffscreen(textureSize, textureSize)!;
       const paint = Skia.Paint();
-      paint.setColor(Skia.Color("cyan"));
-      skCanvas.drawCircle(256, 256, 200, paint);
-      surface.flush();
-      const skImage = surface.makeImageSnapshot();
-      const cubeTexture = Skia.Image.MakeTextureFromImage(skImage);
+
+      // Draw on surface 1 — customize this per frame below.
+      function drawTexture1(t: number) {
+        const c = surface1.getCanvas();
+        c.drawColor(Skia.Color("cyan"));
+        paint.setColor(Skia.Color("white"));
+        const r = 100 + Math.sin(t * 2) * 80;
+        c.drawCircle(256, 256, r, paint);
+        surface1.flush();
+      }
+
+      // Draw on surface 2 — customize this per frame below.
+      function drawTexture2(t: number) {
+        const c = surface2.getCanvas();
+        c.drawColor(Skia.Color("pink"));
+        paint.setColor(Skia.Color("black"));
+        const x = 256 + Math.cos(t * 3) * 100;
+        c.drawCircle(x, 256, 80, paint);
+        surface2.flush();
+      }
 
       // Create a sampler with linear filtering for smooth interpolation.
       const sampler = device.createSampler({
@@ -141,25 +154,27 @@ export function TexturedCube() {
         minFilter: "linear",
       });
 
-      const uniformBindGroup = device.createBindGroup({
-        layout: pipeline.getBindGroupLayout(0),
-        entries: [
-          {
-            binding: 0,
-            resource: {
-              buffer: uniformBuffer,
+      const bindGroupLayout = pipeline.getBindGroupLayout(0);
+
+      function createBindGroup(texture: GPUTexture) {
+        return device.createBindGroup({
+          layout: bindGroupLayout,
+          entries: [
+            {
+              binding: 0,
+              resource: { buffer: uniformBuffer },
             },
-          },
-          {
-            binding: 1,
-            resource: sampler,
-          },
-          {
-            binding: 2,
-            resource: cubeTexture.createView(),
-          },
-        ],
-      });
+            {
+              binding: 1,
+              resource: sampler,
+            },
+            {
+              binding: 2,
+              resource: texture.createView(),
+            },
+          ],
+        });
+      }
 
       const renderPassDescriptor: GPURenderPassDescriptor = {
         colorAttachments: [
@@ -209,6 +224,21 @@ export function TexturedCube() {
           return;
         }
 
+        const t = Date.now() / 1000;
+
+        // Update Skia drawings each frame
+        drawTexture1(t);
+        const tex1 = Skia.Image.MakeTextureFromImage(
+          surface1.makeImageSnapshot()
+        );
+        const bindGroup1 = createBindGroup(tex1);
+
+        drawTexture2(t);
+        const tex2 = Skia.Image.MakeTextureFromImage(
+          surface2.makeImageSnapshot()
+        );
+        const bindGroup2 = createBindGroup(tex2);
+
         const transformationMatrix = getTransformationMatrix();
         device.queue.writeBuffer(
           uniformBuffer,
@@ -227,9 +257,16 @@ export function TexturedCube() {
         const passEncoder =
           commandEncoder.beginRenderPass(renderPassDescriptor);
         passEncoder.setPipeline(pipeline);
-        passEncoder.setBindGroup(0, uniformBindGroup);
         passEncoder.setVertexBuffer(0, verticesBuffer);
-        passEncoder.draw(cubeVertexCount);
+
+        // First 3 faces (18 vertices) with texture 1
+        passEncoder.setBindGroup(0, bindGroup1);
+        passEncoder.draw(18, 1, 0, 0);
+
+        // Last 3 faces (18 vertices) with texture 2
+        passEncoder.setBindGroup(0, bindGroup2);
+        passEncoder.draw(18, 1, 18, 0);
+
         passEncoder.end();
         device.queue.submit([commandEncoder.finish()]);
         ctx.present();
