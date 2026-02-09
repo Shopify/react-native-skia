@@ -35,8 +35,12 @@ public:
   }
 
   ~JsiSkPicture() override {
+    // If already disposed, resources were already cleaned up
+    if (isDisposed()) {
+      return;
+    }
     // Queue deletion on the creation thread if needed
-    auto picture = getObject();
+    auto picture = getObjectUnchecked();
     if (picture && _dispatcher) {
       _dispatcher->run([picture]() {
         // Picture will be deleted when this lambda is destroyed
@@ -91,7 +95,10 @@ public:
                        JSI_EXPORT_FUNC(JsiSkPicture, dispose))
 
   size_t getMemoryPressure() const override {
-    auto picture = getObject();
+    if (isDisposed()) {
+      return 0;
+    }
+    auto picture = getObjectUnchecked();
     if (!picture) {
       return 0;
     }

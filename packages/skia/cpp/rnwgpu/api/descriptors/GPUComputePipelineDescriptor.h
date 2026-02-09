@@ -7,8 +7,8 @@
 
 #include "jsi2/JSIConverter.h"
 
-#include "rnwgpu/api/GPUPipelineLayout.h"
 #include "GPUProgrammableStage.h"
+#include "rnwgpu/api/GPUPipelineLayout.h"
 
 namespace jsi = facebook::jsi;
 

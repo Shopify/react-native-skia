@@ -43,7 +43,8 @@ public:
 
 private:
   static std::mutex _runnersMutex;
-  static std::unordered_map<jsi::Runtime *, std::shared_ptr<AsyncRunner>> _runners;
+  static std::unordered_map<jsi::Runtime *, std::shared_ptr<AsyncRunner>>
+      _runners;
 
   wgpu::Instance _instance;
   std::shared_ptr<AsyncDispatcher> _dispatcher;

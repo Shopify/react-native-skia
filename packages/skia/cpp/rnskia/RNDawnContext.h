@@ -175,20 +175,15 @@ public:
   }
 
   // Get the wgpu::Instance for WebGPU bindings
-  wgpu::Instance getWGPUInstance() {
-    return wgpu::Instance(instance->Get());
-  }
+  wgpu::Instance getWGPUInstance() { return wgpu::Instance(instance->Get()); }
 
   // Get the wgpu::Device for WebGPU bindings
-  wgpu::Device getWGPUDevice() {
-    return backendContext.fDevice;
-  }
+  wgpu::Device getWGPUDevice() { return backendContext.fDevice; }
 
   // Create an SkImage from a WebGPU texture
   // The texture must have TextureBinding usage
   sk_sp<SkImage> MakeImageFromTexture(wgpu::Texture texture, int width,
-                                      int height,
-                                      wgpu::TextureFormat format) {
+                                      int height, wgpu::TextureFormat format) {
     if (!texture) {
       return nullptr;
     }

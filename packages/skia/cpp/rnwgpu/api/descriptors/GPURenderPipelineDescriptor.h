@@ -10,9 +10,9 @@
 #include "GPUDepthStencilState.h"
 #include "GPUFragmentState.h"
 #include "GPUMultisampleState.h"
-#include "rnwgpu/api/GPUPipelineLayout.h"
 #include "GPUPrimitiveState.h"
 #include "GPUVertexState.h"
+#include "rnwgpu/api/GPUPipelineLayout.h"
 
 namespace jsi = facebook::jsi;
 

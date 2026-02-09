@@ -14,9 +14,9 @@
 
 #include "GPUBindGroup.h"
 #include "GPUBuffer.h"
-#include "descriptors/GPUColor.h"
 #include "GPURenderBundle.h"
 #include "GPURenderPipeline.h"
+#include "descriptors/GPUColor.h"
 
 namespace rnwgpu {
 

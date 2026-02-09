@@ -10,7 +10,8 @@ namespace rnwgpu::async {
 
 // Static member definitions
 std::mutex AsyncRunner::_runnersMutex;
-std::unordered_map<jsi::Runtime *, std::shared_ptr<AsyncRunner>> AsyncRunner::_runners;
+std::unordered_map<jsi::Runtime *, std::shared_ptr<AsyncRunner>>
+    AsyncRunner::_runners;
 
 AsyncRunner::AsyncRunner(wgpu::Instance instance,
                          std::shared_ptr<AsyncDispatcher> dispatcher)

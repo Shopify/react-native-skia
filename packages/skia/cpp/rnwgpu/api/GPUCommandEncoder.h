@@ -11,15 +11,15 @@
 
 #include "GPUBuffer.h"
 #include "GPUCommandBuffer.h"
-#include "descriptors/GPUCommandBufferDescriptor.h"
-#include "descriptors/GPUComputePassDescriptor.h"
 #include "GPUComputePassEncoder.h"
 #include "GPUExtent3D.h"
+#include "GPUQuerySet.h"
+#include "GPURenderPassEncoder.h"
+#include "descriptors/GPUCommandBufferDescriptor.h"
+#include "descriptors/GPUComputePassDescriptor.h"
 #include "descriptors/GPUImageCopyBuffer.h"
 #include "descriptors/GPUImageCopyTexture.h"
-#include "GPUQuerySet.h"
 #include "descriptors/GPURenderPassDescriptor.h"
-#include "GPURenderPassEncoder.h"
 
 namespace rnwgpu {
 
