@@ -21,6 +21,7 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   const ctx = createDrawingContext(Skia, recording.paintPool, canvas);
   replay(ctx, recording.commands);
   const picture = rec.finishRecordingAsPicture();
+  rec.dispose();
   //const end = performance.now();
   //console.log("Recording time: ", end - start);
   SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
