@@ -65,6 +65,7 @@ export class StaticContainer extends Container {
       const canvas = rec.beginRecording();
       this.drawOnCanvas(canvas);
       const picture = rec.finishRecordingAsPicture();
+      rec.dispose();
       SkiaViewApi.setJsiProperty(this.nativeId, "picture", picture);
     }
   }
