@@ -13,7 +13,6 @@
 
 #include "webgpu/webgpu_cpp.h"
 
-#include "rnwgpu/ArrayBuffer.h"
 #include "GPUBuffer.h"
 #include "GPUCommandBuffer.h"
 #include "GPUExtent3D.h"
@@ -21,6 +20,7 @@
 #include "descriptors/GPUImageCopyTexture.h"
 #include "descriptors/GPUImageCopyTextureTagged.h"
 #include "descriptors/GPUImageDataLayout.h"
+#include "rnwgpu/ArrayBuffer.h"
 
 namespace rnwgpu {
 

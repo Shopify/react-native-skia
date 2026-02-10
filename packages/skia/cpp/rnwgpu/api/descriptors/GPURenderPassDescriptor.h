@@ -9,10 +9,10 @@
 
 #include "jsi2/JSIConverter.h"
 
-#include "rnwgpu/api/GPUQuerySet.h"
 #include "GPURenderPassColorAttachment.h"
 #include "GPURenderPassDepthStencilAttachment.h"
 #include "GPURenderPassTimestampWrites.h"
+#include "rnwgpu/api/GPUQuerySet.h"
 
 namespace jsi = facebook::jsi;
 

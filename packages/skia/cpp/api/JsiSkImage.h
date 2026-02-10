@@ -293,20 +293,34 @@ public:
     _dispatcher->processQueue();
   }
 
-  ~JsiSkImage() override {
+protected:
+  void releaseResources() override {
     // Queue deletion on the creation thread if needed
-    auto image = getObject();
+    auto image = getObjectUnchecked();
     if (image && _dispatcher) {
       _dispatcher->run([image]() {
         // Image will be deleted when this lambda is destroyed
       });
     }
-    // Clear the object to prevent base class destructor from deleting it
-    setObject(nullptr);
+    // Clear the object
+    JsiSkWrappingSkPtrHostObject<SkImage>::releaseResources();
+  }
+
+public:
+  ~JsiSkImage() override {
+    // If already disposed, resources were already cleaned up
+    if (isDisposed()) {
+      return;
+    }
+    // Use the same cleanup path as dispose()
+    releaseResources();
   }
 
   size_t getMemoryPressure() const override {
-    auto image = getObject();
+    if (isDisposed()) {
+      return 0;
+    }
+    auto image = getObjectUnchecked();
     if (image) {
       if (image->isTextureBacked()) {
         return image->textureSize();

@@ -45,16 +45,27 @@ public:
     _dispatcher->processQueue();
   }
 
-  ~JsiSkSurface() override {
+protected:
+  void releaseResources() override {
     // Queue deletion on the creation thread if needed
-    auto surface = getObject();
+    auto surface = getObjectUnchecked();
     if (surface && _dispatcher) {
       _dispatcher->run([surface]() {
         // Surface will be deleted when this lambda is destroyed
       });
     }
-    // Clear the object to prevent base class destructor from deleting it
-    setObject(nullptr);
+    // Clear the object
+    JsiSkWrappingSkPtrHostObject<SkSurface>::releaseResources();
+  }
+
+public:
+  ~JsiSkSurface() override {
+    // If already disposed, resources were already cleaned up
+    if (isDisposed()) {
+      return;
+    }
+    // Use the same cleanup path as dispose()
+    releaseResources();
   }
 
   EXPORT_JSI_API_TYPENAME(JsiSkSurface, Surface)
@@ -117,7 +128,10 @@ public:
   }
 
   size_t getMemoryPressure() const override {
-    auto surface = getObject();
+    if (isDisposed()) {
+      return 0;
+    }
+    auto surface = getObjectUnchecked();
     if (!surface) {
       return 0;
     }

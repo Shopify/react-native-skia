@@ -15,8 +15,8 @@
 
 #include "GPUAdapterInfo.h"
 #include "GPUDevice.h"
-#include "descriptors/GPUDeviceDescriptor.h"
 #include "GPUSupportedLimits.h"
+#include "descriptors/GPUDeviceDescriptor.h"
 
 namespace rnwgpu {
 
