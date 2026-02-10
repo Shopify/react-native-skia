@@ -10,8 +10,8 @@
 
 #include "jsi2/JSIConverter.h"
 
-#include "rnwgpu/api/GPUShaderModule.h"
 #include "GPUVertexBufferLayout.h"
+#include "rnwgpu/api/GPUShaderModule.h"
 
 namespace jsi = facebook::jsi;
 

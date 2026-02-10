@@ -126,8 +126,8 @@ public:
    * Throws if the object has been disposed.
    * @return Underlying object
    */
-  T getObject() { return _object; }
-  const T getObject() const { return _object; }
+  T getObject() { return validateObject(); }
+  const T getObject() const { return validateObject(); }
 
   /**
    * Updates the inner object with a new version of the object.
@@ -139,15 +139,57 @@ public:
    * macro.
    */
   JSI_HOST_FUNCTION(dispose) {
-    // This is a no-op on native
+    safeDispose();
     return jsi::Value::undefined();
   }
 
+protected:
+  /**
+   * Override to implement disposal of allocated resources like smart pointers.
+   * This method will only be called once for each instance of this class.
+   */
+  virtual void releaseResources() = 0;
+
+  /**
+   * Returns true if the object has been disposed.
+   */
+  bool isDisposed() const { return _isDisposed.load(std::memory_order_acquire); }
+
+  /**
+   * Returns the underlying object without checking if disposed.
+   * Use this in destructors and releaseResources() where we need to access
+   * the object even after dispose() was called.
+   */
+  T getObjectUnchecked() const { return _object; }
+
 private:
+  /**
+   * Validates that _object was not disposed and returns it.
+   */
+  T validateObject() const {
+    if (_isDisposed.load(std::memory_order_acquire)) {
+      throw std::runtime_error("Attempted to access a disposed object.");
+    }
+    return _object;
+  }
+
+  void safeDispose() {
+    bool expected = false;
+    if (_isDisposed.compare_exchange_strong(expected, true,
+                                            std::memory_order_acq_rel)) {
+      releaseResources();
+    }
+  }
+
   /**
    * Wrapped object.
    */
   T _object;
+
+  /**
+   * Resource disposed flag.
+   */
+  std::atomic<bool> _isDisposed = {false};
 };
 
 template <typename T>
@@ -168,6 +210,12 @@ public:
                obj.asObject(runtime).asHostObject(runtime))
         ->getObject();
   }
+
+protected:
+  void releaseResources() override {
+    // Clear internally allocated objects
+    this->setObject(nullptr);
+  }
 };
 
 template <typename T>
@@ -185,6 +233,12 @@ public:
     return std::static_pointer_cast<JsiSkWrappingSkPtrHostObject>(
                obj.asObject(runtime).asHostObject(runtime))
         ->getObject();
+  }
+
+protected:
+  void releaseResources() override {
+    // Clear internally allocated objects
+    this->setObject(nullptr);
   }
 };
 
