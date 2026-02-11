@@ -148,7 +148,6 @@ add_library(
         "${PROJECT_SOURCE_DIR}/../cpp/api/third_party/base64.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/api/third_party/SkottieUtils.cpp"
 
-        "${PROJECT_SOURCE_DIR}/../cpp/api/JsiSkDispatcher.cpp"
         ${BACKEND_SOURCES}
 )
 
