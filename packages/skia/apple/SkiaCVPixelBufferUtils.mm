@@ -159,7 +159,7 @@ sk_sp<SkImage> SkiaCVPixelBufferUtils::YUV::makeSkImageFromCVPixelBuffer(
     throw std::runtime_error("CVPixelBuffer has " + std::to_string(planesCount) + " textures, but the platform only supports a maximum of " + std::to_string(SkYUVAInfo::kMaxPlanes) + " textures!");
   }
   MultiTexturesHolder *texturesHolder = new MultiTexturesHolder();
-  GrBackendTexture textures[planesCount];
+  GrBackendTexture textures[SkYUVAInfo::kMaxPlanes];
 
   for (size_t planeIndex = 0; planeIndex < planesCount; planeIndex++) {
     TextureHolder *textureHolder =
