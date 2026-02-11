@@ -3,7 +3,6 @@
 #include <memory>
 
 #include "JsiSkData.h"
-#include "JsiSkDispatcher.h"
 #include "JsiSkHostObjects.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkRect.h"
@@ -21,30 +20,10 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 
 class JsiSkPicture : public JsiSkWrappingSkPtrHostObject<SkPicture> {
-private:
-  std::shared_ptr<Dispatcher> _dispatcher;
-
 public:
   JsiSkPicture(std::shared_ptr<RNSkPlatformContext> context,
                const sk_sp<SkPicture> picture)
       : JsiSkWrappingSkPtrHostObject<SkPicture>(context, picture) {
-    // Get the dispatcher for the current thread
-    _dispatcher = Dispatcher::getDispatcher();
-    // Process any pending operations
-    _dispatcher->processQueue();
-  }
-
-protected:
-  void releaseResources() override {
-    // Queue deletion on the creation thread if needed
-    auto picture = getObjectUnchecked();
-    if (picture && _dispatcher) {
-      _dispatcher->run([picture]() {
-        // Picture will be deleted when this lambda is destroyed
-      });
-    }
-    // Clear the object
-    JsiSkWrappingSkPtrHostObject<SkPicture>::releaseResources();
   }
 
 public:

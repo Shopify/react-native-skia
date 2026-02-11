@@ -7,7 +7,6 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiSkDispatcher.h"
 #include "JsiSkHostObjects.h"
 #include "JsiTextureInfo.h"
 
@@ -31,31 +30,11 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 
 class JsiSkSurface : public JsiSkWrappingSkPtrHostObject<SkSurface> {
-private:
-  std::shared_ptr<Dispatcher> _dispatcher;
-
 public:
   JsiSkSurface(std::shared_ptr<RNSkPlatformContext> context,
                sk_sp<SkSurface> surface)
       : JsiSkWrappingSkPtrHostObject<SkSurface>(std::move(context),
                                                 std::move(surface)) {
-    // Get the dispatcher for the current thread
-    _dispatcher = Dispatcher::getDispatcher();
-    // Process any pending operations
-    _dispatcher->processQueue();
-  }
-
-protected:
-  void releaseResources() override {
-    // Queue deletion on the creation thread if needed
-    auto surface = getObjectUnchecked();
-    if (surface && _dispatcher) {
-      _dispatcher->run([surface]() {
-        // Surface will be deleted when this lambda is destroyed
-      });
-    }
-    // Clear the object
-    JsiSkWrappingSkPtrHostObject<SkSurface>::releaseResources();
   }
 
 public:
