@@ -22,7 +22,7 @@ const copyFrameOnAndroid = (currentFrame: SharedValue<SkImage | null>) => {
   if (Platform.OS === "android") {
     const tex = currentFrame.value;
     if (tex) {
-      currentFrame.value = tex.makeNonTextureImage();
+      currentFrame.value = tex; //.makeNonTextureImage();
       tex.dispose();
     }
   }
@@ -32,9 +32,6 @@ const setFrame = (video: Video, currentFrame: SharedValue<SkImage | null>) => {
   "worklet";
   const img = video.nextImage();
   if (img) {
-    if (currentFrame.value) {
-      currentFrame.value.dispose();
-    }
     currentFrame.value = img;
     copyFrameOnAndroid(currentFrame);
   }

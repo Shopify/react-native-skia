@@ -42,6 +42,7 @@ import {
   type Vec3,
 } from "./matrix";
 
+const videoURL = "https://bit.ly/skia-video";
 const TEXTURE_SIZE = 512;
 const paint = Skia.Paint();
 
@@ -248,6 +249,12 @@ export function TexturedCube() {
       const surface2 = Skia.Surface.MakeOffscreen(TEXTURE_SIZE, TEXTURE_SIZE)!;
       const surface3 = Skia.Surface.MakeOffscreen(TEXTURE_SIZE, TEXTURE_SIZE)!;
 
+      // Video player — managed directly on the JS thread
+      const video = await Skia.Video(videoURL);
+      video.setLooping(true);
+      video.setVolume(0);
+      video.play();
+
       // Build paragraph for texture 2
       const fontSize = 40;
       const strokePaint = Skia.Paint();
@@ -403,6 +410,10 @@ export function TexturedCube() {
         );
         const bindGroup3 = createBindGroup(tex3);
 
+        const frame = video.nextImage();
+        const tex4 = frame ? Skia.Image.MakeTextureFromImage(frame) : null;
+        const bindGroup4 = tex4 ? createBindGroup(tex4) : null;
+
         // Update MVP matrix
         const mat = getTransformationMatrix();
         device.queue.writeBuffer(
@@ -423,15 +434,20 @@ export function TexturedCube() {
         pass.setPipeline(pipeline);
         pass.setVertexBuffer(0, verticesBuffer);
 
-        // 2 faces (12 vertices) per texture
+        // 1 face each for hello/paragraph/breathe, 3 faces for video
         pass.setBindGroup(0, bindGroup1);
-        pass.draw(12, 1, 0, 0);
+        pass.draw(6, 1, 0, 0);
 
         pass.setBindGroup(0, bindGroup2);
-        pass.draw(12, 1, 12, 0);
+        pass.draw(6, 1, 6, 0);
 
         pass.setBindGroup(0, bindGroup3);
-        pass.draw(12, 1, 24, 0);
+        pass.draw(6, 1, 12, 0);
+
+        if (bindGroup4) {
+          pass.setBindGroup(0, bindGroup4);
+          pass.draw(18, 1, 18, 0);
+        }
 
         pass.end();
         device.queue.submit([commandEncoder.finish()]);
@@ -445,6 +461,7 @@ export function TexturedCube() {
       cleanupRef.current = () => {
         running = false;
         cancelAnimationFrame(animationRef.current);
+        video.dispose();
       };
     }, 100);
 
