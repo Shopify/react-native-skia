@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <utility>
@@ -11,6 +12,11 @@
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
+
+// Minimum memory pressure reported for any host object.
+// This accounts for C++ wrapper overhead and ensures dispose() never
+// increases reported memory pressure (which would defeat its purpose).
+static constexpr size_t kMinMemoryPressure = 256;
 
 /**
  * Base class for jsi host objects - these are all implemented as JsiHostObjects
@@ -140,7 +146,8 @@ public:
    */
   JSI_HOST_FUNCTION(dispose) {
     if (!isDisposed()) {
-      thisValue.asObject(runtime).setExternalMemoryPressure(runtime, 1024);
+      thisValue.asObject(runtime).setExternalMemoryPressure(runtime,
+                                                            kMinMemoryPressure);
     }
     safeDispose();
     return jsi::Value::undefined();
