@@ -166,7 +166,9 @@ public:
     }
   }
 
-  size_t getMemoryPressure() const override { return sizeof(SkMatrix); }
+  size_t getMemoryPressure() const override {
+    return std::max(sizeof(SkMatrix), kMinMemoryPressure);
+  }
 
   std::string getObjectType() const override { return "JsiSkMatrix"; }
 
