@@ -4,7 +4,6 @@
 #include <string>
 #include <utility>
 
-#include "JsiSkDispatcher.h"
 #include "JsiSkHostObjects.h"
 #include "JsiSkImageInfo.h"
 #include "JsiSkMatrix.h"
@@ -64,9 +63,6 @@ inline SkSamplingOptions SamplingOptionsFromValue(jsi::Runtime &runtime,
 }
 
 class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
-private:
-  std::shared_ptr<Dispatcher> _dispatcher;
-
 public:
   // TODO-API: Properties?
   JSI_HOST_FUNCTION(width) { return static_cast<double>(getObject()->width()); }
@@ -287,23 +283,6 @@ public:
              const sk_sp<SkImage> image)
       : JsiSkWrappingSkPtrHostObject<SkImage>(std::move(context),
                                               std::move(image)) {
-    // Get the dispatcher for the current thread
-    _dispatcher = Dispatcher::getDispatcher();
-    // Process any pending operations
-    _dispatcher->processQueue();
-  }
-
-protected:
-  void releaseResources() override {
-    // Queue deletion on the creation thread if needed
-    auto image = getObjectUnchecked();
-    if (image && _dispatcher) {
-      _dispatcher->run([image]() {
-        // Image will be deleted when this lambda is destroyed
-      });
-    }
-    // Clear the object
-    JsiSkWrappingSkPtrHostObject<SkImage>::releaseResources();
   }
 
 public:
