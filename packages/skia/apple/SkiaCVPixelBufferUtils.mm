@@ -134,13 +134,14 @@ SkColorType SkiaCVPixelBufferUtils::RGB::getCVPixelBufferColorType(
 }
 
 sk_sp<SkImage> SkiaCVPixelBufferUtils::RGB::makeSkImageFromCVPixelBuffer(
-    id<MTLDevice> device, GrDirectContext *context, CVPixelBufferRef pixelBuffer) {
+    id<MTLDevice> device, GrDirectContext *context,
+    CVPixelBufferRef pixelBuffer) {
   // 1. Get Skia color type for RGB buffer
   SkColorType colorType = getCVPixelBufferColorType(pixelBuffer);
 
   // 2. Get texture, RGB buffers only have one plane
-  TextureHolder *texture =
-      getSkiaTextureForCVPixelBufferPlane(device, pixelBuffer, /* planeIndex */ 0);
+  TextureHolder *texture = getSkiaTextureForCVPixelBufferPlane(
+      device, pixelBuffer, /* planeIndex */ 0);
 
   // 3. Convert to image with manual memory cleanup
   return SkImages::BorrowTextureFrom(
@@ -152,11 +153,15 @@ sk_sp<SkImage> SkiaCVPixelBufferUtils::RGB::makeSkImageFromCVPixelBuffer(
 // pragma MARK: YUV
 
 sk_sp<SkImage> SkiaCVPixelBufferUtils::YUV::makeSkImageFromCVPixelBuffer(
-    id<MTLDevice> device, GrDirectContext *context, CVPixelBufferRef pixelBuffer) {
+    id<MTLDevice> device, GrDirectContext *context,
+    CVPixelBufferRef pixelBuffer) {
   // 1. Get all planes (YUV, Y_UV, Y_U_V or Y_U_V_A)
   const size_t planesCount = CVPixelBufferGetPlaneCount(pixelBuffer);
   if (planesCount > SkYUVAInfo::kMaxPlanes) [[unlikely]] {
-    throw std::runtime_error("CVPixelBuffer has " + std::to_string(planesCount) + " textures, but the platform only supports a maximum of " + std::to_string(SkYUVAInfo::kMaxPlanes) + " textures!");
+    throw std::runtime_error(
+        "CVPixelBuffer has " + std::to_string(planesCount) +
+        " textures, but the platform only supports a maximum of " +
+        std::to_string(SkYUVAInfo::kMaxPlanes) + " textures!");
   }
   MultiTexturesHolder *texturesHolder = new MultiTexturesHolder();
   GrBackendTexture textures[SkYUVAInfo::kMaxPlanes];
@@ -311,13 +316,13 @@ TextureHolder *SkiaCVPixelBufferUtils::getSkiaTextureForCVPixelBufferPlane(
 
 // pragma MARK: getTextureCache()
 
-CVMetalTextureCacheRef SkiaCVPixelBufferUtils::getTextureCache(id<MTLDevice> device) {
+CVMetalTextureCacheRef
+SkiaCVPixelBufferUtils::getTextureCache(id<MTLDevice> device) {
   static CVMetalTextureCacheRef textureCache = nil;
   if (textureCache == nil) {
     // Create a new Texture Cache
-    auto result = CVMetalTextureCacheCreate(kCFAllocatorDefault, nil,
-                                            device, nil,
-                                            &textureCache);
+    auto result = CVMetalTextureCacheCreate(kCFAllocatorDefault, nil, device,
+                                            nil, &textureCache);
     if (result != kCVReturnSuccess || textureCache == nil) {
       throw std::runtime_error("Failed to create Metal Texture Cache!");
     }
