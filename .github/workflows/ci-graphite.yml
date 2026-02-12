@@ -42,6 +42,23 @@ jobs:
           sudo rm -rf /opt/hostedtoolcache/CodeQL
           sudo docker image prune -af || true
           sudo apt-get clean
+          # Additional aggressive cleanup
+          sudo rm -rf /usr/local/lib/android/sdk/ndk
+          sudo rm -rf /usr/local/lib/android/sdk/build-tools
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf /usr/share/swift
+          sudo rm -rf /usr/local/lib/android/sdk/platforms
+          sudo rm -rf /opt/hostedtoolcache/go
+          sudo rm -rf /opt/hostedtoolcache/Python
+          sudo rm -rf /opt/hostedtoolcache/Ruby
+          sudo rm -rf /usr/local/.ghcup
+          sudo rm -rf /imagegeneration
+          sudo rm -rf /opt/az
+          sudo rm -rf /usr/share/az_*
+          sudo rm -rf /usr/share/gradle-*
+          sudo rm -rf /usr/share/miniconda
+          sudo rm -rf /usr/local/graalvm
+          sudo rm -rf /usr/local/share/chromium
           echo "Disk usage after cleanup:"
           df -h
 
