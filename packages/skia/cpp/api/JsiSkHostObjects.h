@@ -139,6 +139,9 @@ public:
    * macro.
    */
   JSI_HOST_FUNCTION(dispose) {
+    if (!isDisposed()) {
+      thisValue.asObject(runtime).setExternalMemoryPressure(runtime, 1024);
+    }
     safeDispose();
     return jsi::Value::undefined();
   }
