@@ -84,8 +84,7 @@ public:
      CVPixelBuffer.
      */
     static sk_sp<SkImage>
-    makeSkImageFromCVPixelBuffer(id<MTLDevice> device,
-                                 GrDirectContext *context,
+    makeSkImageFromCVPixelBuffer(id<MTLDevice> device, GrDirectContext *context,
                                  CVPixelBufferRef pixelBuffer);
 
   private:
@@ -99,8 +98,7 @@ public:
      CVPixelBuffer.
      */
     static sk_sp<SkImage>
-    makeSkImageFromCVPixelBuffer(id<MTLDevice> device,
-                                 GrDirectContext *context,
+    makeSkImageFromCVPixelBuffer(id<MTLDevice> device, GrDirectContext *context,
                                  CVPixelBufferRef pixelBuffer);
 
   private:
@@ -112,10 +110,8 @@ public:
 
 private:
   static CVMetalTextureCacheRef getTextureCache(id<MTLDevice> device);
-  static TextureHolder *
-  getSkiaTextureForCVPixelBufferPlane(id<MTLDevice> device,
-                                      CVPixelBufferRef pixelBuffer,
-                                      size_t planeIndex);
+  static TextureHolder *getSkiaTextureForCVPixelBufferPlane(
+      id<MTLDevice> device, CVPixelBufferRef pixelBuffer, size_t planeIndex);
   static MTLPixelFormat
   getMTLPixelFormatForCVPixelBufferPlane(CVPixelBufferRef pixelBuffer,
                                          size_t planeIndex);

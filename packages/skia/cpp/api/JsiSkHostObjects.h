@@ -153,7 +153,9 @@ protected:
   /**
    * Returns true if the object has been disposed.
    */
-  bool isDisposed() const { return _isDisposed.load(std::memory_order_acquire); }
+  bool isDisposed() const {
+    return _isDisposed.load(std::memory_order_acquire);
+  }
 
   /**
    * Returns the underlying object without checking if disposed.
