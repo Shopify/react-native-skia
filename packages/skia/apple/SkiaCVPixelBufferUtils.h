@@ -9,7 +9,7 @@
 
 #import <vector>
 
-#import <CoreMedia/CMSampleBuffer.h>
+#import <CoreVideo/CVPixelBuffer.h>
 #import <CoreVideo/CVMetalTextureCache.h>
 #import <MetalKit/MetalKit.h>
 
@@ -104,7 +104,11 @@ public:
   private:
     static SkYUVAInfo::PlaneConfig getPlaneConfig(OSType pixelFormat);
     static SkYUVAInfo::Subsampling getSubsampling(OSType pixelFormat);
-    static SkYUVColorSpace getColorspace(OSType pixelFormat);
+    static SkYUVColorSpace getColorspace(CVPixelBufferRef pixelBuffer);
+    static bool isFullRangeYUVFormat(OSType pixelFormat);
+    static bool isTenBitYUVFormat(OSType pixelFormat);
+    static SkYUVColorSpace getSkYUVColorSpaceFromMatrix(CFStringRef matrix,
+                                                        OSType pixelFormat);
     static SkYUVAInfo getYUVAInfoForCVPixelBuffer(CVPixelBufferRef pixelBuffer);
   };
 
