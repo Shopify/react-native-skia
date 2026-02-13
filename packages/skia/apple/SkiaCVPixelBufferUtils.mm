@@ -7,6 +7,8 @@
 
 #import "SkiaCVPixelBufferUtils.h"
 
+#import "MetalContext.h"
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -133,28 +135,23 @@ SkColorType SkiaCVPixelBufferUtils::RGB::getCVPixelBufferColorType(
   }
 }
 
-sk_sp<SkImage> SkiaCVPixelBufferUtils::RGB::makeSkImageFromCVPixelBuffer(
-    id<MTLDevice> device, GrDirectContext *context,
-    CVPixelBufferRef pixelBuffer) {
+sk_sp<SkImage> SkiaCVPixelBufferUtils::RGB::makeSkImageFromCVPixelBuffer(MetalContext& context, CVPixelBufferRef pixelBuffer) {
   // 1. Get Skia color type for RGB buffer
   SkColorType colorType = getCVPixelBufferColorType(pixelBuffer);
 
   // 2. Get texture, RGB buffers only have one plane
-  TextureHolder *texture = getSkiaTextureForCVPixelBufferPlane(
-      device, pixelBuffer, /* planeIndex */ 0);
+  TextureHolder *texture = getSkiaTextureForCVPixelBufferPlane(context, pixelBuffer, /* planeIndex */ 0);
 
   // 3. Convert to image with manual memory cleanup
   return SkImages::BorrowTextureFrom(
-      context, texture->toGrBackendTexture(), kTopLeft_GrSurfaceOrigin,
+      context.getDirectContext(), texture->toGrBackendTexture(), kTopLeft_GrSurfaceOrigin,
       colorType, kOpaque_SkAlphaType, nullptr,
       [](void *texture) { delete (TextureHolder *)texture; }, (void *)texture);
 }
 
 // pragma MARK: YUV
 
-sk_sp<SkImage> SkiaCVPixelBufferUtils::YUV::makeSkImageFromCVPixelBuffer(
-    id<MTLDevice> device, GrDirectContext *context,
-    CVPixelBufferRef pixelBuffer) {
+sk_sp<SkImage> SkiaCVPixelBufferUtils::YUV::makeSkImageFromCVPixelBuffer(MetalContext& context, CVPixelBufferRef pixelBuffer) {
   // 1. Get all planes (YUV, Y_UV, Y_U_V or Y_U_V_A)
   const size_t planesCount = CVPixelBufferGetPlaneCount(pixelBuffer);
   if (planesCount > SkYUVAInfo::kMaxPlanes) [[unlikely]] {
@@ -168,7 +165,7 @@ sk_sp<SkImage> SkiaCVPixelBufferUtils::YUV::makeSkImageFromCVPixelBuffer(
 
   for (size_t planeIndex = 0; planeIndex < planesCount; planeIndex++) {
     TextureHolder *textureHolder =
-        getSkiaTextureForCVPixelBufferPlane(device, pixelBuffer, planeIndex);
+        getSkiaTextureForCVPixelBufferPlane(context, pixelBuffer, planeIndex);
     textures[planeIndex] = textureHolder->toGrBackendTexture();
     texturesHolder->addTexture(textureHolder);
   }
@@ -181,7 +178,7 @@ sk_sp<SkImage> SkiaCVPixelBufferUtils::YUV::makeSkImageFromCVPixelBuffer(
 
   // 4. Wrap into SkImage type with manualy memory cleanup
   return SkImages::TextureFromYUVATextures(
-      context, yuvaTextures, nullptr,
+      context.getDirectContext(), yuvaTextures, nullptr,
       [](void *textureHolders) {
         delete (MultiTexturesHolder *)textureHolders;
       },
@@ -290,9 +287,9 @@ SkYUVColorSpace SkiaCVPixelBufferUtils::YUV::getColorspace(OSType pixelFormat) {
 // pragma MARK: CVPixelBuffer -> Skia Texture
 
 TextureHolder *SkiaCVPixelBufferUtils::getSkiaTextureForCVPixelBufferPlane(
-    id<MTLDevice> device, CVPixelBufferRef pixelBuffer, size_t planeIndex) {
+    MetalContext& context, CVPixelBufferRef pixelBuffer, size_t planeIndex) {
   // 1. Get cache
-  CVMetalTextureCacheRef textureCache = getTextureCache(device);
+  CVMetalTextureCacheRef textureCache = context.getMetalTextureCache();
 
   // 2. Get MetalTexture from CMSampleBuffer
   size_t width = CVPixelBufferGetWidthOfPlane(pixelBuffer, planeIndex);
@@ -312,22 +309,6 @@ TextureHolder *SkiaCVPixelBufferUtils::getSkiaTextureForCVPixelBufferPlane(
   }
 
   return new TextureHolder(textureHolder);
-}
-
-// pragma MARK: getTextureCache()
-
-CVMetalTextureCacheRef
-SkiaCVPixelBufferUtils::getTextureCache(id<MTLDevice> device) {
-  static CVMetalTextureCacheRef textureCache = nil;
-  if (textureCache == nil) {
-    // Create a new Texture Cache
-    auto result = CVMetalTextureCacheCreate(kCFAllocatorDefault, nil, device,
-                                            nil, &textureCache);
-    if (result != kCVReturnSuccess || textureCache == nil) {
-      throw std::runtime_error("Failed to create Metal Texture Cache!");
-    }
-  }
-  return textureCache;
 }
 
 // pragma MARK: Get CVPixelBuffer MTLPixelFormat

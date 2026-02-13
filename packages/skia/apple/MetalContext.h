@@ -38,6 +38,7 @@ class MetalContext {
 public:
   MetalContext(const MetalContext &) = delete;
   MetalContext &operator=(const MetalContext &) = delete;
+  ~MetalContext();
 
   static MetalContext &getInstance() {
     static thread_local MetalContext instance;
@@ -71,13 +72,11 @@ public:
     switch (format) {
     case SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat::rgb: {
       // CVPixelBuffer is in any RGB format, single-plane
-      return SkiaCVPixelBufferUtils::RGB::makeSkImageFromCVPixelBuffer(
-          _device, _directContext.get(), sampleBuffer);
+      return SkiaCVPixelBufferUtils::RGB::makeSkImageFromCVPixelBuffer(*this, sampleBuffer);
     }
     case SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat::yuv: {
       // CVPixelBuffer is in any YUV format, multi-plane
-      return SkiaCVPixelBufferUtils::YUV::makeSkImageFromCVPixelBuffer(
-          _device, _directContext.get(), sampleBuffer);
+      return SkiaCVPixelBufferUtils::YUV::makeSkImageFromCVPixelBuffer(*this, sampleBuffer);
     }
     default:
       [[unlikely]] {
@@ -97,12 +96,17 @@ public:
                                                 height, useP3ColorSpace);
   }
 
+public:
   GrDirectContext *getDirectContext() { return _directContext.get(); }
+  id<MTLDevice> getDevice() const { return _device; }
+  CVMetalTextureCacheRef getMetalTextureCache();
 
 private:
   id<MTLDevice> _device = nullptr;
   id<MTLCommandQueue> _commandQueue = nullptr;
   sk_sp<GrDirectContext> _directContext = nullptr;
+  CVMetalTextureCacheRef _metalTextureCache = nullptr;
+  id _memoryWarningObserver = nil;
 
   MetalContext();
 };
