@@ -424,28 +424,68 @@ SkiaCVPixelBufferUtils::getTextureCache(id<MTLDevice> device) {
 MTLPixelFormat SkiaCVPixelBufferUtils::getMTLPixelFormatForCVPixelBufferPlane(
     CVPixelBufferRef pixelBuffer, size_t planeIndex) {
   const OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
+  auto throwInvalidPlaneIndexForFormat = [&](size_t expectedPlanes)
+      -> MTLPixelFormat {
+    throw std::runtime_error(
+        "Invalid plane index " + std::to_string(planeIndex) +
+        " for pixel format " + std::string(FourCC2Str(format)) + " (expected 0.." +
+        std::to_string(expectedPlanes - 1) + ").");
+  };
+
   switch (format) {
   case kCVPixelFormatType_32BGRA:
+    // 1 plane, 8-bit interleaved BGRA.
+    if (planeIndex != 0) {
+      return throwInvalidPlaneIndexForFormat(1);
+    }
     return MTLPixelFormatBGRA8Unorm;
   case kCVPixelFormatType_32RGBA:
+    // 1 plane, 8-bit interleaved RGBA.
+    if (planeIndex != 0) {
+      return throwInvalidPlaneIndexForFormat(1);
+    }
     return MTLPixelFormatRGBA8Unorm;
   case kCVPixelFormatType_420YpCbCr8Planar:
   case kCVPixelFormatType_420YpCbCr8PlanarFullRange:
-    return MTLPixelFormatR8Unorm;
+    // 3 planes, 8-bit 4:2:0 planar (Y, U, V), each plane is single channel.
+    switch (planeIndex) {
+    case 0:
+    case 1:
+    case 2:
+      return MTLPixelFormatR8Unorm;
+    default:
+      return throwInvalidPlaneIndexForFormat(3);
+    }
   case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
   case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
   case kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange:
   case kCVPixelFormatType_422YpCbCr8BiPlanarFullRange:
   case kCVPixelFormatType_444YpCbCr8BiPlanarVideoRange:
   case kCVPixelFormatType_444YpCbCr8BiPlanarFullRange:
-    return planeIndex == 0 ? MTLPixelFormatR8Unorm : MTLPixelFormatRG8Unorm;
+    // 2 planes, 8-bit bi-planar (plane 0 = Y, plane 1 = interleaved CbCr).
+    switch (planeIndex) {
+    case 0:
+      return MTLPixelFormatR8Unorm;
+    case 1:
+      return MTLPixelFormatRG8Unorm;
+    default:
+      return throwInvalidPlaneIndexForFormat(2);
+    }
   case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
   case kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:
   case kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange:
   case kCVPixelFormatType_422YpCbCr10BiPlanarFullRange:
   case kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange:
   case kCVPixelFormatType_444YpCbCr10BiPlanarFullRange:
-    return planeIndex == 0 ? MTLPixelFormatR16Unorm : MTLPixelFormatRG16Unorm;
+    // 2 planes, 10-bit bi-planar stored in 16-bit lanes (Y + interleaved CbCr).
+    switch (planeIndex) {
+    case 0:
+      return MTLPixelFormatR16Unorm;
+    case 1:
+      return MTLPixelFormatRG16Unorm;
+    default:
+      return throwInvalidPlaneIndexForFormat(2);
+    }
   default:
     break;
   }
