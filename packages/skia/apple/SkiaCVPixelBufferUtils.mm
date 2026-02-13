@@ -13,7 +13,7 @@
 #import "include/core/SkCanvas.h"
 #import "include/core/SkColorSpace.h"
 
-#import <CoreMedia/CMSampleBuffer.h>
+#import <CoreVideo/CVImageBuffer.h>
 #import <CoreVideo/CVMetalTextureCache.h>
 
 #import <include/gpu/ganesh/GrBackendSurface.h>
@@ -28,6 +28,7 @@
 #pragma clang diagnostic pop
 
 #include <TargetConditionals.h>
+#include <cmath>
 #if TARGET_RT_BIG_ENDIAN
 #define FourCC2Str(fourcc)                                                     \
   (const char[]) {                                                             \
@@ -90,6 +91,10 @@ SkiaCVPixelBufferUtils::getCVPixelBufferBaseFormat(
   case kCVPixelFormatType_420YpCbCr8PlanarFullRange:
   case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
   case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
+  case kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange:
+  case kCVPixelFormatType_422YpCbCr8BiPlanarFullRange:
+  case kCVPixelFormatType_444YpCbCr8BiPlanarVideoRange:
+  case kCVPixelFormatType_444YpCbCr8BiPlanarFullRange:
   // 10-bit YUV formats
   case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
   case kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:
@@ -198,7 +203,7 @@ SkYUVAInfo SkiaCVPixelBufferUtils::YUV::getYUVAInfoForCVPixelBuffer(
   OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
   SkYUVAInfo::PlaneConfig planeConfig = getPlaneConfig(format);
   SkYUVAInfo::Subsampling subsampling = getSubsampling(format);
-  SkYUVColorSpace colorspace = getColorspace(format);
+  SkYUVColorSpace colorspace = getColorspace(pixelBuffer);
 
   return SkYUVAInfo(size, planeConfig, subsampling, colorspace);
 }
@@ -210,9 +215,13 @@ SkiaCVPixelBufferUtils::YUV::getPlaneConfig(OSType pixelFormat) {
   switch (pixelFormat) {
   case kCVPixelFormatType_420YpCbCr8Planar:
   case kCVPixelFormatType_420YpCbCr8PlanarFullRange:
-    return SkYUVAInfo::PlaneConfig::kYUV;
+    return SkYUVAInfo::PlaneConfig::kY_U_V;
   case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
   case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
+  case kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange:
+  case kCVPixelFormatType_422YpCbCr8BiPlanarFullRange:
+  case kCVPixelFormatType_444YpCbCr8BiPlanarVideoRange:
+  case kCVPixelFormatType_444YpCbCr8BiPlanarFullRange:
   case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
   case kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:
   case kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange:
@@ -241,9 +250,13 @@ SkiaCVPixelBufferUtils::YUV::getSubsampling(OSType pixelFormat) {
   case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
   case kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:
     [[likely]] return SkYUVAInfo::Subsampling::k420;
+  case kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange:
+  case kCVPixelFormatType_422YpCbCr8BiPlanarFullRange:
   case kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange:
   case kCVPixelFormatType_422YpCbCr10BiPlanarFullRange:
     return SkYUVAInfo::Subsampling::k422;
+  case kCVPixelFormatType_444YpCbCr8BiPlanarVideoRange:
+  case kCVPixelFormatType_444YpCbCr8BiPlanarFullRange:
   case kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange:
   case kCVPixelFormatType_444YpCbCr10BiPlanarFullRange:
     return SkYUVAInfo::Subsampling::k444;
@@ -257,34 +270,97 @@ SkiaCVPixelBufferUtils::YUV::getSubsampling(OSType pixelFormat) {
 
 // pragma MARK: YUV getColorspace()
 
-SkYUVColorSpace SkiaCVPixelBufferUtils::YUV::getColorspace(OSType pixelFormat) {
+SkYUVColorSpace SkiaCVPixelBufferUtils::YUV::getColorspace(
+    CVPixelBufferRef pixelBuffer) {
+  const OSType pixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer);
+
+  CFTypeRef matrixAttachment =
+      CVBufferCopyAttachment(pixelBuffer, kCVImageBufferYCbCrMatrixKey, nullptr);
+  CFStringRef matrix = nullptr;
+  if (matrixAttachment != nullptr &&
+      CFGetTypeID(matrixAttachment) == CFStringGetTypeID()) {
+    matrix = reinterpret_cast<CFStringRef>(matrixAttachment);
+  }
+
+  SkYUVColorSpace colorspace = getSkYUVColorSpaceFromMatrix(matrix, pixelFormat);
+  if (matrixAttachment != nullptr) {
+    CFRelease(matrixAttachment);
+  }
+  return colorspace;
+}
+
+// pragma MARK: YUV helpers
+
+bool SkiaCVPixelBufferUtils::YUV::isFullRangeYUVFormat(OSType pixelFormat) {
   switch (pixelFormat) {
-  case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
-    [[likely]]
-    // 8-bit limited
-    return SkYUVColorSpace::kRec709_Limited_SkYUVColorSpace;
-  case kCVPixelFormatType_420YpCbCr8Planar:
   case kCVPixelFormatType_420YpCbCr8PlanarFullRange:
   case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
-    [[likely]]
-    // 8-bit full
-    return SkYUVColorSpace::kRec709_Full_SkYUVColorSpace;
-  case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
-  case kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange:
-  case kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange:
-    // 10-bit limited
-    return SkYUVColorSpace::kBT2020_10bit_Limited_SkYUVColorSpace;
+  case kCVPixelFormatType_422YpCbCr8BiPlanarFullRange:
+  case kCVPixelFormatType_444YpCbCr8BiPlanarFullRange:
   case kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:
   case kCVPixelFormatType_422YpCbCr10BiPlanarFullRange:
   case kCVPixelFormatType_444YpCbCr10BiPlanarFullRange:
-    // 10-bit full
-    return SkYUVColorSpace::kBT2020_10bit_Full_SkYUVColorSpace;
-  // This can be extended with branches for specific YUV formats if Apple
-  // uses new formats.
+    return true;
   default:
-    [[unlikely]] throw std::runtime_error("Invalid pixel format! " +
-                                          std::string(FourCC2Str(pixelFormat)));
+    return false;
   }
+}
+
+bool SkiaCVPixelBufferUtils::YUV::isTenBitYUVFormat(OSType pixelFormat) {
+  switch (pixelFormat) {
+  case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
+  case kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:
+  case kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange:
+  case kCVPixelFormatType_422YpCbCr10BiPlanarFullRange:
+  case kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange:
+  case kCVPixelFormatType_444YpCbCr10BiPlanarFullRange:
+    return true;
+  default:
+    return false;
+  }
+}
+
+SkYUVColorSpace SkiaCVPixelBufferUtils::YUV::getSkYUVColorSpaceFromMatrix(
+    CFStringRef matrix, OSType pixelFormat) {
+  const bool isFullRange = isFullRangeYUVFormat(pixelFormat);
+  const bool isTenBit = isTenBitYUVFormat(pixelFormat);
+
+  if (matrix != nullptr) {
+    if (CFEqual(matrix, kCVImageBufferYCbCrMatrix_ITU_R_2020)) {
+      if (isTenBit) {
+        return isFullRange ? kBT2020_10bit_Full_SkYUVColorSpace
+                           : kBT2020_10bit_Limited_SkYUVColorSpace;
+      }
+      return isFullRange ? kBT2020_8bit_Full_SkYUVColorSpace
+                         : kBT2020_8bit_Limited_SkYUVColorSpace;
+    }
+    if (CFEqual(matrix, kCVImageBufferYCbCrMatrix_ITU_R_601_4)) {
+      return isFullRange ? kJPEG_Full_SkYUVColorSpace
+                         : kRec601_Limited_SkYUVColorSpace;
+    }
+    if (CFEqual(matrix, kCVImageBufferYCbCrMatrix_SMPTE_240M_1995)) {
+      return isFullRange ? kSMPTE240_Full_SkYUVColorSpace
+                         : kSMPTE240_Limited_SkYUVColorSpace;
+    }
+    if (CFEqual(matrix, kCVImageBufferYCbCrMatrix_ITU_R_709_2)) {
+      return isFullRange ? kRec709_Full_SkYUVColorSpace
+                         : kRec709_Limited_SkYUVColorSpace;
+    }
+  }
+
+  if (pixelFormat == kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange ||
+      pixelFormat == kCVPixelFormatType_422YpCbCr8BiPlanarFullRange) {
+    return isFullRange ? kJPEG_Full_SkYUVColorSpace
+                       : kRec601_Limited_SkYUVColorSpace;
+  }
+
+  // Fallback for buffers that don't provide matrix metadata.
+  if (isTenBit) {
+    return isFullRange ? kBT2020_10bit_Full_SkYUVColorSpace
+                       : kBT2020_10bit_Limited_SkYUVColorSpace;
+  }
+  return isFullRange ? kRec709_Full_SkYUVColorSpace
+                     : kRec709_Limited_SkYUVColorSpace;
 }
 
 // pragma MARK: CVPixelBuffer -> Skia Texture
@@ -294,9 +370,22 @@ TextureHolder *SkiaCVPixelBufferUtils::getSkiaTextureForCVPixelBufferPlane(
   // 1. Get cache
   CVMetalTextureCacheRef textureCache = getTextureCache(device);
 
-  // 2. Get MetalTexture from CMSampleBuffer
-  size_t width = CVPixelBufferGetWidthOfPlane(pixelBuffer, planeIndex);
-  size_t height = CVPixelBufferGetHeightOfPlane(pixelBuffer, planeIndex);
+  // 2. Get MetalTexture from CVPixelBuffer
+  const size_t planesCount = CVPixelBufferGetPlaneCount(pixelBuffer);
+  if (planesCount == 0 && planeIndex != 0) [[unlikely]] {
+    throw std::runtime_error("Pixel buffer is not planar, but plane index " +
+                             std::to_string(planeIndex) + " was requested.");
+  }
+  if (planesCount > 0 && planeIndex >= planesCount) [[unlikely]] {
+    throw std::runtime_error(
+        "Requested out-of-bounds plane index " + std::to_string(planeIndex) +
+        " for pixel buffer with " + std::to_string(planesCount) + " planes.");
+  }
+  size_t width = planesCount > 0 ? CVPixelBufferGetWidthOfPlane(pixelBuffer, planeIndex)
+                                 : CVPixelBufferGetWidth(pixelBuffer);
+  size_t height =
+      planesCount > 0 ? CVPixelBufferGetHeightOfPlane(pixelBuffer, planeIndex)
+                      : CVPixelBufferGetHeight(pixelBuffer);
   MTLPixelFormat pixelFormat =
       getMTLPixelFormatForCVPixelBufferPlane(pixelBuffer, planeIndex);
 
@@ -307,7 +396,7 @@ TextureHolder *SkiaCVPixelBufferUtils::getSkiaTextureForCVPixelBufferPlane(
 
   if (result != kCVReturnSuccess) [[unlikely]] {
     throw std::runtime_error(
-        "Failed to create Metal Texture from CMSampleBuffer! Result: " +
+        "Failed to create Metal Texture from CVPixelBuffer! Result: " +
         std::to_string(result));
   }
 
@@ -334,19 +423,57 @@ SkiaCVPixelBufferUtils::getTextureCache(id<MTLDevice> device) {
 
 MTLPixelFormat SkiaCVPixelBufferUtils::getMTLPixelFormatForCVPixelBufferPlane(
     CVPixelBufferRef pixelBuffer, size_t planeIndex) {
-  size_t width = CVPixelBufferGetWidthOfPlane(pixelBuffer, planeIndex);
-  size_t bytesPerRow =
-      CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, planeIndex);
-  double bytesPerPixel = round(static_cast<double>(bytesPerRow) / width);
+  const OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
+  switch (format) {
+  case kCVPixelFormatType_32BGRA:
+    return MTLPixelFormatBGRA8Unorm;
+  case kCVPixelFormatType_32RGBA:
+    return MTLPixelFormatRGBA8Unorm;
+  case kCVPixelFormatType_420YpCbCr8Planar:
+  case kCVPixelFormatType_420YpCbCr8PlanarFullRange:
+    return MTLPixelFormatR8Unorm;
+  case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
+  case kCVPixelFormatType_420YpCbCr8BiPlanarFullRange:
+  case kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange:
+  case kCVPixelFormatType_422YpCbCr8BiPlanarFullRange:
+  case kCVPixelFormatType_444YpCbCr8BiPlanarVideoRange:
+  case kCVPixelFormatType_444YpCbCr8BiPlanarFullRange:
+    return planeIndex == 0 ? MTLPixelFormatR8Unorm : MTLPixelFormatRG8Unorm;
+  case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
+  case kCVPixelFormatType_420YpCbCr10BiPlanarFullRange:
+  case kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange:
+  case kCVPixelFormatType_422YpCbCr10BiPlanarFullRange:
+  case kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange:
+  case kCVPixelFormatType_444YpCbCr10BiPlanarFullRange:
+    return planeIndex == 0 ? MTLPixelFormatR16Unorm : MTLPixelFormatRG16Unorm;
+  default:
+    break;
+  }
+
+  const size_t planesCount = CVPixelBufferGetPlaneCount(pixelBuffer);
+  const size_t width =
+      planesCount > 0 ? CVPixelBufferGetWidthOfPlane(pixelBuffer, planeIndex)
+                      : CVPixelBufferGetWidth(pixelBuffer);
+  const size_t bytesPerRow =
+      planesCount > 0 ? CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, planeIndex)
+                      : CVPixelBufferGetBytesPerRow(pixelBuffer);
+  if (width == 0) [[unlikely]] {
+    throw std::runtime_error("Invalid plane width for pixel format " +
+                             std::string(FourCC2Str(format)) + "!");
+  }
+  const double bytesPerPixel =
+      std::round(static_cast<double>(bytesPerRow) / width);
   if (bytesPerPixel == 1) {
     return MTLPixelFormatR8Unorm;
-  } else if (bytesPerPixel == 2) {
-    return MTLPixelFormatRG8Unorm;
-  } else if (bytesPerPixel == 4) {
-    return MTLPixelFormatBGRA8Unorm;
-  } else [[unlikely]] {
-    throw std::runtime_error("Invalid bytes per row! Expected 1 (R), 2 (RG) or "
-                             "4 (RGBA), but received " +
-                             std::to_string(bytesPerPixel));
   }
+  if (bytesPerPixel == 2) {
+    return MTLPixelFormatRG8Unorm;
+  }
+  if (bytesPerPixel == 4) {
+    return MTLPixelFormatBGRA8Unorm;
+  }
+
+  [[unlikely]] throw std::runtime_error(
+      "Invalid bytes per row! Expected 1 (R), 2 (RG) or 4 (RGBA), but received " +
+      std::to_string(bytesPerPixel));
 }
