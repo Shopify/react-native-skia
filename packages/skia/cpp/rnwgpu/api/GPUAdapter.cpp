@@ -10,6 +10,9 @@
 #include "Convertors.h"
 
 #include "GPUFeatures.h"
+#include "GPUInternalError.h"
+#include "GPUOutOfMemoryError.h"
+#include "GPUValidationError.h"
 #include "jsi2/JSIConverter.h"
 
 namespace rnwgpu {
@@ -74,6 +77,29 @@ async::AsyncTaskHandle GPUAdapter::requestDevice(
                                  std::string(message.data, message.length)
                            : "no message";
     fprintf(stderr, "%s", fullMessage.c_str());
+
+    // Look up the GPUDevice from the registry and notify it
+    auto *gpuDevice = GPUDeviceRegistry::getInstance().getDevice(device.Get());
+    if (gpuDevice != nullptr) {
+      std::string messageStr =
+          message.length > 0 ? std::string(message.data, message.length) : "";
+
+      GPUErrorVariant error;
+      switch (type) {
+      case wgpu::ErrorType::Validation:
+        error = std::make_shared<GPUValidationError>(messageStr);
+        break;
+      case wgpu::ErrorType::OutOfMemory:
+        error = std::make_shared<GPUOutOfMemoryError>(messageStr);
+        break;
+      case wgpu::ErrorType::Internal:
+      case wgpu::ErrorType::Unknown:
+      default:
+        error = std::make_shared<GPUInternalError>(messageStr);
+        break;
+      }
+      gpuDevice->notifyUncapturedError(std::move(error));
+    }
   });
   std::string label =
       descriptor.has_value() ? descriptor.value()->label.value_or("") : "";
