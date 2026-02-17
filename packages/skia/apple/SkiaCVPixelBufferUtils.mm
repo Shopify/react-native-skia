@@ -501,8 +501,13 @@ MTLPixelFormat SkiaCVPixelBufferUtils::getMTLPixelFormatForCVPixelBufferPlane(
     throw std::runtime_error("Invalid plane width for pixel format " +
                              std::string(FourCC2Str(format)) + "!");
   }
-  const double bytesPerPixel =
-      std::round(static_cast<double>(bytesPerRow) / width);
+  if (bytesPerRow % width != 0) [[unlikely]] {
+    throw std::runtime_error(
+        "Invalid bytes per row! Bytes per row must be evenly divisible by width "
+        "for pixel format " +
+        std::string(FourCC2Str(format)) + "!");
+  }
+  const size_t bytesPerPixel = bytesPerRow / width;
   if (bytesPerPixel == 1) {
     return MTLPixelFormatR8Unorm;
   }
