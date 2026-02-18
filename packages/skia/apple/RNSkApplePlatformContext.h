@@ -27,18 +27,7 @@ class RNSkApplePlatformContext : public RNSkPlatformContext {
 public:
   RNSkApplePlatformContext(
       RCTBridge *bridge,
-      std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker)
-#if !TARGET_OS_OSX
-      : RNSkPlatformContext(jsCallInvoker, [[UIScreen mainScreen] scale]) {
-#else
-      : RNSkPlatformContext(jsCallInvoker,
-                            [[NSScreen mainScreen] backingScaleFactor]) {
-#endif // !TARGET_OS_OSX
-
-    // Create screenshot manager
-    _screenshotService =
-        [[ViewScreenshotService alloc] initWithUiManager:bridge.uiManager];
-  }
+      std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker);
 
   ~RNSkApplePlatformContext();
 
