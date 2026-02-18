@@ -54,14 +54,15 @@ export class ReanimatedRecorder implements BaseRecorder {
     if (!props) {
       return;
     }
-    Object.values(props).forEach((value) => {
+    for (const key in props) {
+      const value = props[key];
       if (isSharedValue(value) && !this.values.has(value)) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
         value.name = `variable${this.values.size}`;
         this.values.add(value as SharedValue<unknown>);
       }
-    });
+    }
   }
 
   getRecorder() {

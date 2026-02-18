@@ -302,6 +302,16 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(visit) {
+    auto root = arguments[0].asObject(runtime).asArray(runtime);
+    auto sharedValues = getObject()->visit(runtime, root);
+    return std::move(sharedValues);
+  }
+
+  JSI_HOST_FUNCTION(getVariableCount) {
+    return jsi::Value(static_cast<int>(getObject()->getVariableCount()));
+  }
+
   EXPORT_JSI_API_TYPENAME(JsiRecorder, Recorder)
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiRecorder, saveGroup),
@@ -346,7 +356,9 @@ public:
                        JSI_EXPORT_FUNC(JsiRecorder, drawSkottie),
                        JSI_EXPORT_FUNC(JsiRecorder, play),
                        JSI_EXPORT_FUNC(JsiRecorder, applyUpdates),
-                       JSI_EXPORT_FUNC(JsiRecorder, reset))
+                       JSI_EXPORT_FUNC(JsiRecorder, reset),
+                       JSI_EXPORT_FUNC(JsiRecorder, visit),
+                       JSI_EXPORT_FUNC(JsiRecorder, getVariableCount))
 
   // This has no basis in reality but since since these are private long-lived
   // objects, we think it is more than fine.
