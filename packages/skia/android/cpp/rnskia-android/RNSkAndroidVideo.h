@@ -13,6 +13,7 @@
 
 #pragma clang diagnostic pop
 
+#include "RNSkPlatformContext.h"
 #include "RNSkVideo.h"
 
 namespace RNSkia {
@@ -23,9 +24,11 @@ namespace jni = facebook::jni;
 class RNSkAndroidVideo : public RNSkVideo {
 private:
   jni::global_ref<jobject> _jniVideo;
+  std::shared_ptr<RNSkPlatformContext> _context;
 
 public:
-  explicit RNSkAndroidVideo(jni::global_ref<jobject> jniVideo);
+  explicit RNSkAndroidVideo(jni::global_ref<jobject> jniVideo,
+                            std::shared_ptr<RNSkPlatformContext> context);
   ~RNSkAndroidVideo() override;
   sk_sp<SkImage> nextImage(double *timeStamp = nullptr) override;
   double duration() override;

@@ -7,12 +7,6 @@
 
 #include "RNSkLog.h"
 
-#if defined(SK_GRAPHITE)
-#include "RNDawnContext.h"
-#else
-#include "OpenGLContext.h"
-#endif
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -28,8 +22,9 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 namespace jni = facebook::jni;
 
-RNSkAndroidVideo::RNSkAndroidVideo(jni::global_ref<jobject> jniVideo)
-    : _jniVideo(jniVideo) {
+RNSkAndroidVideo::RNSkAndroidVideo(jni::global_ref<jobject> jniVideo,
+                                   std::shared_ptr<RNSkPlatformContext> context)
+    : _jniVideo(jniVideo), _context(std::move(context)) {
 #if __ANDROID_API__ < 26
   throw std::runtime_error("Skia Videos are only support on API 26 and above");
 #endif
@@ -59,11 +54,7 @@ sk_sp<SkImage> RNSkAndroidVideo::nextImage(double *timeStamp) {
   // Convert jobject to AHardwareBuffer
   AHardwareBuffer *buffer =
       AHardwareBuffer_fromHardwareBuffer(env, jHardwareBuffer);
-#if defined(SK_GRAPHITE)
-  return DawnContext::getInstance().MakeImageFromBuffer(buffer);
-#else
-  return OpenGLContext::getInstance().MakeImageFromBuffer(buffer);
-#endif
+  return _context->makeImageFromNativeBuffer(buffer);
 #else
   return nullptr;
 #endif

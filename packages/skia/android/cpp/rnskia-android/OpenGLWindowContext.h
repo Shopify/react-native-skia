@@ -10,6 +10,7 @@
 #include <android/surface_texture_jni.h>
 #include <condition_variable>
 #include <memory>
+#include <stdexcept>
 #include <thread>
 #include <unordered_map>
 
@@ -39,6 +40,7 @@ public:
       : _directContext(directContext), _glContext(glContext), _window(window) {
     ANativeWindow_acquire(_window);
     _glSurface = display->makeWindowSurface(config, _window);
+    _ownerThread = std::this_thread::get_id();
   }
 
   ~OpenGLWindowContext() override {
@@ -56,6 +58,7 @@ public:
   int getHeight() override { return ANativeWindow_getHeight(_window); };
 
   void resize(int width, int height) override {
+    assertThread("resize");
     if (_skSurface != nullptr) {
       // Let's make sure there is no pending work
       _glContext->makeCurrent(_glSurface.get());
@@ -65,11 +68,24 @@ public:
   }
 
 private:
+  void assertThread(const char *op) const {
+    if (_ownerThread != std::this_thread::get_id()) {
+      RNSkLogger::logToConsole(
+          "OpenGLWindowContext %s called from a different thread. "
+          "The OpenGL backend is thread-affine; ensure all Skia/OpenGL calls "
+          "run on a single thread.",
+          op);
+      throw std::runtime_error(
+          "OpenGLWindowContext used from multiple threads");
+    }
+  }
+
   GrDirectContext *_directContext;
   gl::Context *_glContext = nullptr;
   ANativeWindow *_window;
   sk_sp<SkSurface> _skSurface = nullptr;
   std::unique_ptr<gl::Surface> _glSurface = nullptr;
+  std::thread::id _ownerThread;
 };
 
 } // namespace RNSkia

@@ -4,8 +4,6 @@
 
 #if defined(SK_GRAPHITE)
 #import "RNDawnContext.h"
-#else
-#import "MetalContext.h"
 #endif
 
 #pragma clang diagnostic push
@@ -98,7 +96,8 @@ void RNSkMetalCanvasProvider::setSize(int width, int height) {
   _ctx = RNSkia::DawnContext::getInstance().MakeWindow((__bridge void *)_layer,
                                                        w, h);
 #else
-  _ctx = MetalContext::getInstance().MakeWindow(_layer, w, h, _useP3ColorSpace);
+  _ctx = _context->makeContextFromNativeSurface((__bridge void *)_layer, w, h,
+                                                _useP3ColorSpace);
 #endif
   _requestRedraw();
 }

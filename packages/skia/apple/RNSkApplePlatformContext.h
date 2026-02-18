@@ -5,6 +5,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include "RNSkPlatformContext.h"
@@ -17,6 +18,10 @@ class CallInvoker;
 } // namespace facebook
 
 namespace RNSkia {
+
+#if !defined(SK_GRAPHITE)
+class MetalContext;
+#endif
 
 class RNSkApplePlatformContext : public RNSkPlatformContext {
 public:
@@ -62,7 +67,8 @@ public:
   std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override;
 
   std::shared_ptr<WindowContext>
-  makeContextFromNativeSurface(void *surface, int width, int height) override;
+  makeContextFromNativeSurface(void *surface, int width, int height,
+                               bool useP3ColorSpace = true) override;
 
   virtual void performStreamOperation(
       const std::string &sourceUri,
@@ -79,6 +85,12 @@ public:
 
 private:
   ViewScreenshotService *_screenshotService;
+
+#if !defined(SK_GRAPHITE)
+  MetalContext &metalContext();
+  std::unique_ptr<MetalContext> _metalContext;
+  std::once_flag _metalContextOnce;
+#endif
 
   SkColorType mtlPixelFormatToSkColorType(MTLPixelFormat pixelFormat);
 };

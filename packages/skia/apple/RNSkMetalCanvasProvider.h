@@ -32,7 +32,7 @@ public:
 
 private:
   std::shared_ptr<RNSkia::RNSkPlatformContext> _context;
-  std::unique_ptr<RNSkia::WindowContext> _ctx = nullptr;
+  std::shared_ptr<RNSkia::WindowContext> _ctx = nullptr;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   CAMetalLayer *_layer;
