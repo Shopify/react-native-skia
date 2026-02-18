@@ -50,7 +50,9 @@ class SkiaImageCache {
 
   static async cacheImage(source: string): Promise<SkImage> {
     const uri =
-      typeof source === "string" ? source : Image.resolveAssetSource(source).uri;
+      typeof source === "string"
+        ? source
+        : Image.resolveAssetSource(source).uri;
     const data = await Skia.Data.fromURI(uri);
     const image = imgFactory(data);
 
@@ -255,15 +257,7 @@ const ButtonBackground = memo(function ButtonBackground({
         height: PixelRatio.roundToNearestPixel(height),
       }
     );
-  }, [
-    cachedImages,
-    width,
-    height,
-    roundedSideWidth,
-    sideLeftVariantIndex,
-    sideRightVariantIndex,
-    tint,
-  ]);
+  }, [cachedImages, width, height, tint, roundedSideWidth, sideWidth]);
 
   if (!picture || !cachedImages) {
     return null;
@@ -326,7 +320,10 @@ export const PictureBug = () => {
           <Text style={styles.description}>
             Press the button to regenerate. Some buttons may render blank.
           </Text>
-          <TouchableOpacity style={styles.button} onPress={handleSetRandomValue}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleSetRandomValue}
+          >
             <Text style={styles.buttonText}>Regenerate button backgrounds</Text>
           </TouchableOpacity>
           {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
