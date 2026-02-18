@@ -69,7 +69,9 @@ public:
     return static_cast<double>(getObject()->alphaType());
   }
 
-  size_t getMemoryPressure() const override { return sizeof(SkImageInfo); }
+  size_t getMemoryPressure() const override {
+    return std::max(sizeof(SkImageInfo), kMinMemoryPressure);
+  }
 
   std::string getObjectType() const override { return "JsiSkImageInfo"; }
 

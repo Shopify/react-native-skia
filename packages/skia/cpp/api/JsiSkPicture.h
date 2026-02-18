@@ -34,27 +34,22 @@ public:
     _dispatcher->processQueue();
   }
 
-protected:
-  void releaseResources() override {
-    // Queue deletion on the creation thread if needed
-    auto picture = getObjectUnchecked();
-    if (picture && _dispatcher) {
-      _dispatcher->run([picture]() {
-        // Picture will be deleted when this lambda is destroyed
-      });
-    }
-    // Clear the object
-    JsiSkWrappingSkPtrHostObject<SkPicture>::releaseResources();
-  }
-
 public:
   ~JsiSkPicture() override {
-    // If already disposed, resources were already cleaned up
-    if (isDisposed()) {
-      return;
+    if (!isDisposed()) {
+      // This JSI Object is being deleted from a GC, which might happen
+      // on a separate Thread. GPU resources (like SkPicture) must be deleted
+      // on the same Thread they were created on, so in this case we schedule
+      // deletion to run on the Thread this Object was created on.
+      auto picture = getObjectUnchecked();
+      if (picture && _dispatcher) {
+        _dispatcher->run([picture]() {
+          // Picture will be deleted when this lambda is destroyed, on the
+          // original Thread.
+        });
+      }
+      releaseResources();
     }
-    // Use the same cleanup path as dispose()
-    releaseResources();
   }
 
   JSI_HOST_FUNCTION(makeShader) {

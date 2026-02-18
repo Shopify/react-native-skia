@@ -9,7 +9,7 @@
 
 #import <vector>
 
-#import <CoreMedia/CMSampleBuffer.h>
+#import <CoreVideo/CVPixelBuffer.h>
 #import <CoreVideo/CVMetalTextureCache.h>
 #import <MetalKit/MetalKit.h>
 
@@ -84,7 +84,7 @@ public:
      CVPixelBuffer.
      */
     static sk_sp<SkImage>
-    makeSkImageFromCVPixelBuffer(GrDirectContext *context,
+    makeSkImageFromCVPixelBuffer(id<MTLDevice> device, GrDirectContext *context,
                                  CVPixelBufferRef pixelBuffer);
 
   private:
@@ -98,21 +98,24 @@ public:
      CVPixelBuffer.
      */
     static sk_sp<SkImage>
-    makeSkImageFromCVPixelBuffer(GrDirectContext *context,
+    makeSkImageFromCVPixelBuffer(id<MTLDevice> device, GrDirectContext *context,
                                  CVPixelBufferRef pixelBuffer);
 
   private:
     static SkYUVAInfo::PlaneConfig getPlaneConfig(OSType pixelFormat);
     static SkYUVAInfo::Subsampling getSubsampling(OSType pixelFormat);
-    static SkYUVColorSpace getColorspace(OSType pixelFormat);
+    static SkYUVColorSpace getColorspace(CVPixelBufferRef pixelBuffer);
+    static bool isFullRangeYUVFormat(OSType pixelFormat);
+    static bool isTenBitYUVFormat(OSType pixelFormat);
+    static SkYUVColorSpace getSkYUVColorSpaceFromMatrix(CFStringRef matrix,
+                                                        OSType pixelFormat);
     static SkYUVAInfo getYUVAInfoForCVPixelBuffer(CVPixelBufferRef pixelBuffer);
   };
 
 private:
-  static CVMetalTextureCacheRef getTextureCache();
-  static TextureHolder *
-  getSkiaTextureForCVPixelBufferPlane(CVPixelBufferRef pixelBuffer,
-                                      size_t planeIndex);
+  static CVMetalTextureCacheRef getTextureCache(id<MTLDevice> device);
+  static TextureHolder *getSkiaTextureForCVPixelBufferPlane(
+      id<MTLDevice> device, CVPixelBufferRef pixelBuffer, size_t planeIndex);
   static MTLPixelFormat
   getMTLPixelFormatForCVPixelBufferPlane(CVPixelBufferRef pixelBuffer,
                                          size_t planeIndex);
