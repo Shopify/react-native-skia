@@ -38,6 +38,7 @@ import { StressTest4 } from "./StressTest4";
 import { PictureViewCrashTest } from "./PictureViewCrashTest";
 import { FirstFrame, FirstFrameEmpty } from "./FirstFrame";
 import { ZIndexExample } from "./ZIndex";
+import { PictureBug } from "./PictureBug";
 
 const Stack = createNativeStackNavigator<Routes>();
 
@@ -295,6 +296,13 @@ export const API = () => {
         component={FirstFrameEmpty}
         options={{
           title: "⬜️ Empty Screen",
+        }}
+      />
+      <Stack.Screen
+        name="PictureBug"
+        component={PictureBug}
+        options={{
+          title: "Picture Render Bug",
         }}
       />
     </Stack.Navigator>
