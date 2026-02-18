@@ -268,13 +268,28 @@ const ButtonBackground = memo(function ButtonBackground({
   if (!picture || !cachedImages) {
     return null;
   }
-
+  // this works
+  // return (
+  //   <SkiaPictureView
+  //     picture={picture}
+  //     pointerEvents="none"
+  //     style={[
+  //       styles.canvas,
+  //       {
+  //         height: PixelRatio.roundToNearestPixel(height),
+  //         width: PixelRatio.roundToNearestPixel(width),
+  //       },
+  //     ]}
+  //   />
+  // );
+  // Here sometimes using canvas the canvas will stay pink (no image loaded)
   return (
     <Canvas
       pointerEvents="none"
       style={[
         styles.canvas,
         {
+          backgroundColor: "pink",
           height: PixelRatio.roundToNearestPixel(height),
           width: PixelRatio.roundToNearestPixel(width),
         },
