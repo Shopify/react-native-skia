@@ -11,6 +11,10 @@
 #include "RNSkPlatformContext.h"
 #include "ViewScreenshotService.h"
 
+#if !defined(SK_GRAPHITE)
+#include "MetalContext.h"
+#endif
+
 namespace facebook {
 namespace react {
 class CallInvoker;
@@ -18,10 +22,6 @@ class CallInvoker;
 } // namespace facebook
 
 namespace RNSkia {
-
-#if !defined(SK_GRAPHITE)
-class MetalContext;
-#endif
 
 class RNSkApplePlatformContext : public RNSkPlatformContext {
 public:
