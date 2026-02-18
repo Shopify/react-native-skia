@@ -32,6 +32,8 @@
 
 namespace RNSkia {
 
+RNSkApplePlatformContext::~RNSkApplePlatformContext() = default;
+
 #if !defined(SK_GRAPHITE)
 MetalContext &RNSkApplePlatformContext::metalContext() {
   std::call_once(_metalContextOnce, [this]() {

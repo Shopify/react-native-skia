@@ -30,9 +30,7 @@
 
 namespace RNSkia {
 
-class RNSkAndroidPlatformContext
-    : public RNSkPlatformContext,
-      public std::enable_shared_from_this<RNSkAndroidPlatformContext> {
+class RNSkAndroidPlatformContext : public RNSkPlatformContext {
 public:
   RNSkAndroidPlatformContext(
       JniPlatformContext *jniPlatformContext,
@@ -233,6 +231,8 @@ public:
 
 private:
   JniPlatformContext *_jniPlatformContext;
+
+#if !defined(SK_GRAPHITE)
   std::unique_ptr<OpenGLContext> _openGLContext;
   std::once_flag _openGLContextOnce;
 
@@ -242,6 +242,7 @@ private:
     });
     return *_openGLContext;
   }
+#endif
 };
 
 } // namespace RNSkia

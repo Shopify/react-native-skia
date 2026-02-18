@@ -38,7 +38,8 @@ struct TextureInfo {
   bool glProtected = false;
 };
 
-class RNSkPlatformContext {
+class RNSkPlatformContext
+    : public std::enable_shared_from_this<RNSkPlatformContext> {
 public:
   /**
    * Constructor

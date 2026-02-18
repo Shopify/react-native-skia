@@ -40,7 +40,7 @@ public:
         [[ViewScreenshotService alloc] initWithUiManager:bridge.uiManager];
   }
 
-  ~RNSkApplePlatformContext() = default;
+  ~RNSkApplePlatformContext();
 
   void runOnMainThread(std::function<void()>) override;
 
