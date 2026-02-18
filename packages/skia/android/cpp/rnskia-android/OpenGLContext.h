@@ -2,7 +2,11 @@
 
 #include "GrAHardwareBufferUtils.h"
 #include "OpenGLWindowContext.h"
+#include "RNSkLog.h"
 #include "gl/Display.h"
+
+#include <stdexcept>
+#include <thread>
 
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColorSpace.h"
@@ -50,15 +54,12 @@ class OpenGLContext {
 public:
   friend class OpenGLWindowContext;
 
+  OpenGLContext();
   OpenGLContext(const OpenGLContext &) = delete;
   OpenGLContext &operator=(const OpenGLContext &) = delete;
 
-  static OpenGLContext &getInstance() {
-    static thread_local OpenGLContext instance;
-    return instance;
-  }
-
   sk_sp<SkSurface> MakeOffscreen(int width, int height) {
+    assertThread("MakeOffscreen");
     auto colorType = kRGBA_8888_SkColorType;
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
@@ -103,6 +104,7 @@ public:
 
   sk_sp<SkImage> MakeImageFromBuffer(void *buffer,
                                      bool requireKnownFormat = false) {
+    assertThread("MakeImageFromBuffer");
 #if __ANDROID_API__ >= 26
     const AHardwareBuffer *hardwareBuffer =
         static_cast<AHardwareBuffer *>(buffer);
@@ -168,34 +170,54 @@ public:
 
   // TODO: remove width, height
   std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window) {
+    assertThread("MakeWindow");
     auto display = OpenGLSharedContext::getInstance().getDisplay();
     return std::make_unique<OpenGLWindowContext>(
         _directContext.get(), display, _glContext.get(), window,
         OpenGLSharedContext::getInstance().getConfig());
   }
 
-  GrDirectContext *getDirectContext() { return _directContext.get(); }
-  void makeCurrent() { _glContext->makeCurrent(_glSurface.get()); }
+  GrDirectContext *getDirectContext() {
+    assertThread("getDirectContext");
+    return _directContext.get();
+  }
+  void makeCurrent() {
+    assertThread("makeCurrent");
+    _glContext->makeCurrent(_glSurface.get());
+  }
 
 private:
   std::unique_ptr<gl::Context> _glContext;
   std::unique_ptr<gl::Surface> _glSurface;
   sk_sp<GrDirectContext> _directContext;
+  std::thread::id _ownerThread;
 
-  OpenGLContext() {
-    auto display = OpenGLSharedContext::getInstance().getDisplay();
-    auto sharedContext = OpenGLSharedContext::getInstance().getContext();
-    auto glConfig = OpenGLSharedContext::getInstance().getConfig();
-    _glContext = display->makeContext(glConfig, sharedContext);
-    _glSurface = display->makePixelBufferSurface(glConfig, 1, 1);
-    _glContext->makeCurrent(_glSurface.get());
-    auto backendInterface = GrGLMakeNativeInterface();
-    _directContext = GrDirectContexts::MakeGL(backendInterface);
-
-    if (_directContext == nullptr) {
-      throw std::runtime_error("GrDirectContexts::MakeGL failed");
+  void assertThread(const char *op) const {
+    if (_ownerThread != std::this_thread::get_id()) {
+      RNSkLogger::logToConsole(
+          "OpenGLContext %s called from a different thread. "
+          "The OpenGL backend is thread-affine; ensure all Skia/OpenGL calls "
+          "run on a single thread.",
+          op);
+      throw std::runtime_error("OpenGLContext used from multiple threads");
     }
   }
 };
 
 } // namespace RNSkia
+
+inline RNSkia::OpenGLContext::OpenGLContext() {
+  auto display = OpenGLSharedContext::getInstance().getDisplay();
+  auto sharedContext = OpenGLSharedContext::getInstance().getContext();
+  auto glConfig = OpenGLSharedContext::getInstance().getConfig();
+  _glContext = display->makeContext(glConfig, sharedContext);
+  _glSurface = display->makePixelBufferSurface(glConfig, 1, 1);
+  _glContext->makeCurrent(_glSurface.get());
+  auto backendInterface = GrGLMakeNativeInterface();
+  _directContext = GrDirectContexts::MakeGL(backendInterface);
+
+  if (_directContext == nullptr) {
+    throw std::runtime_error("GrDirectContexts::MakeGL failed");
+  }
+  _ownerThread = std::this_thread::get_id();
+}

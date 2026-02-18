@@ -6,6 +6,7 @@
 #include <exception>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #if defined(SK_GRAPHITE)
@@ -54,17 +55,18 @@ public:
 #if defined(SK_GRAPHITE)
     return DawnContext::getInstance().MakeOffscreen(width, height);
 #else
-    return OpenGLContext::getInstance().MakeOffscreen(width, height);
+    return getOpenGLContext().MakeOffscreen(width, height);
 #endif
   }
 
   std::shared_ptr<WindowContext>
-  makeContextFromNativeSurface(void *surface, int width, int height) override {
+  makeContextFromNativeSurface(void *surface, int width, int height,
+                               bool /*useP3ColorSpace*/ = true) override {
 #if defined(SK_GRAPHITE)
     return DawnContext::getInstance().MakeWindow(surface, width, height);
 #else
     auto aWindow = reinterpret_cast<ANativeWindow *>(surface);
-    return OpenGLContext::getInstance().MakeWindow(aWindow);
+    return getOpenGLContext().MakeWindow(aWindow);
 #endif
   }
 
@@ -72,7 +74,7 @@ public:
 #if defined(SK_GRAPHITE)
     return DawnContext::getInstance().MakeImageFromBuffer(buffer);
 #else
-    return OpenGLContext::getInstance().MakeImageFromBuffer(buffer);
+    return getOpenGLContext().MakeImageFromBuffer(buffer);
 #endif
   }
 
@@ -87,7 +89,7 @@ public:
     textureInfo.fProtected =
         texInfo.glProtected ? skgpu::Protected::kYes : skgpu::Protected::kNo;
 
-    OpenGLContext::getInstance().makeCurrent();
+    getOpenGLContext().makeCurrent();
     if (glIsTexture(textureInfo.fID) == GL_FALSE) {
       throw std::runtime_error("Invalid textureInfo");
     }
@@ -96,16 +98,16 @@ public:
         width, height,
         mipMapped ? skgpu::Mipmapped::kYes : skgpu::Mipmapped::kNo,
         textureInfo);
-    return SkImages::BorrowTextureFrom(
-        OpenGLContext::getInstance().getDirectContext(), backendTexture,
-        kTopLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType, kUnpremul_SkAlphaType,
-        nullptr);
+    return SkImages::BorrowTextureFrom(getOpenGLContext().getDirectContext(),
+                                       backendTexture, kTopLeft_GrSurfaceOrigin,
+                                       kRGBA_8888_SkColorType,
+                                       kUnpremul_SkAlphaType, nullptr);
   }
 #endif
 
   std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override {
     auto jniVideo = _jniPlatformContext->createVideo(url);
-    return std::make_shared<RNSkAndroidVideo>(jniVideo);
+    return std::make_shared<RNSkAndroidVideo>(jniVideo, shared_from_this());
   }
 
   void releaseNativeBuffer(uint64_t pointer) override {
@@ -176,7 +178,7 @@ public:
 
 #if !defined(SK_GRAPHITE)
   GrDirectContext *getDirectContext() override {
-    return OpenGLContext::getInstance().getDirectContext();
+    return getOpenGLContext().getDirectContext();
   }
 
   const TextureInfo getTexture(sk_sp<SkImage> image) override {
@@ -193,7 +195,7 @@ public:
     return getTextureInfo(texture);
   }
 
-  static TextureInfo getTextureInfo(const GrBackendTexture &texture) {
+  TextureInfo getTextureInfo(const GrBackendTexture &texture) {
 
     if (!texture.isValid()) {
       throw std::runtime_error("invalid backend texture");
@@ -203,7 +205,7 @@ public:
       throw std::runtime_error("couldn't get OpenGL texture");
     }
 
-    OpenGLContext::getInstance().makeCurrent();
+    getOpenGLContext().makeCurrent();
     glFlush();
 
     TextureInfo texInfo;
@@ -229,6 +231,18 @@ public:
 
 private:
   JniPlatformContext *_jniPlatformContext;
+
+#if !defined(SK_GRAPHITE)
+  std::unique_ptr<OpenGLContext> _openGLContext;
+  std::once_flag _openGLContextOnce;
+
+  OpenGLContext &getOpenGLContext() {
+    std::call_once(_openGLContextOnce, [this]() {
+      _openGLContext = std::make_unique<OpenGLContext>();
+    });
+    return *_openGLContext;
+  }
+#endif
 };
 
 } // namespace RNSkia

@@ -32,6 +32,31 @@
 
 namespace RNSkia {
 
+RNSkApplePlatformContext::RNSkApplePlatformContext(
+    RCTBridge *bridge,
+    std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker)
+#if !TARGET_OS_OSX
+    : RNSkPlatformContext(jsCallInvoker, [[UIScreen mainScreen] scale]) {
+#else
+    : RNSkPlatformContext(jsCallInvoker,
+                          [[NSScreen mainScreen] backingScaleFactor]) {
+#endif // !TARGET_OS_OSX
+  // Create screenshot manager
+  _screenshotService =
+      [[ViewScreenshotService alloc] initWithUiManager:bridge.uiManager];
+}
+
+RNSkApplePlatformContext::~RNSkApplePlatformContext() = default;
+
+#if !defined(SK_GRAPHITE)
+MetalContext &RNSkApplePlatformContext::metalContext() {
+  std::call_once(_metalContextOnce, [this]() {
+    _metalContext = std::make_unique<MetalContext>();
+  });
+  return *_metalContext;
+}
+#endif
+
 void RNSkApplePlatformContext::performStreamOperation(
     const std::string &sourceUri,
     const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) {
@@ -172,7 +197,7 @@ uint64_t RNSkApplePlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
 
 #if !defined(SK_GRAPHITE)
 GrDirectContext *RNSkApplePlatformContext::getDirectContext() {
-  return MetalContext::getInstance().getDirectContext();
+  return metalContext().getDirectContext();
 }
 
 const TextureInfo RNSkApplePlatformContext::getTexture(sk_sp<SkImage> image) {
@@ -238,12 +263,13 @@ RNSkApplePlatformContext::createVideo(const std::string &url) {
 
 std::shared_ptr<WindowContext>
 RNSkApplePlatformContext::makeContextFromNativeSurface(void *surface, int width,
-                                                       int height) {
+                                                       int height,
+                                                       bool useP3ColorSpace) {
 #if defined(SK_GRAPHITE)
   return DawnContext::getInstance().MakeWindow(surface, width, height);
 #else
-  return MetalContext::getInstance().MakeWindow((__bridge CALayer *)surface,
-                                                width, height);
+  return metalContext().MakeWindow((__bridge CALayer *)surface, width, height,
+                                   useP3ColorSpace);
 #endif
 }
 
@@ -256,7 +282,7 @@ sk_sp<SkSurface> RNSkApplePlatformContext::makeOffscreenSurface(int width,
 #if defined(SK_GRAPHITE)
   return DawnContext::getInstance().MakeOffscreen(width, height);
 #else
-  return MetalContext::getInstance().MakeOffscreen(width, height);
+  return metalContext().MakeOffscreen(width, height);
 #endif
 }
 
@@ -265,7 +291,7 @@ RNSkApplePlatformContext::makeImageFromNativeBuffer(void *buffer) {
 #if defined(SK_GRAPHITE)
   return DawnContext::getInstance().MakeImageFromBuffer(buffer);
 #else
-  return MetalContext::getInstance().MakeImageFromBuffer(buffer);
+  return metalContext().MakeImageFromBuffer(buffer);
 #endif
 }
 

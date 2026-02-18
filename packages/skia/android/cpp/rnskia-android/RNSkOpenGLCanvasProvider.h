@@ -34,7 +34,7 @@ public:
   void surfaceSizeChanged(jobject jSurface, int width, int height, bool opaque);
 
 private:
-  std::unique_ptr<WindowContext> _surfaceHolder = nullptr;
+  std::shared_ptr<WindowContext> _surfaceHolder = nullptr;
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   jobject _jSurfaceTexture = nullptr;
   jmethodID _updateTexImageMethod = nullptr;

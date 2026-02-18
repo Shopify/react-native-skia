@@ -5,10 +5,15 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include "RNSkPlatformContext.h"
 #include "ViewScreenshotService.h"
+
+#if !defined(SK_GRAPHITE)
+#include "MetalContext.h"
+#endif
 
 namespace facebook {
 namespace react {
@@ -22,20 +27,9 @@ class RNSkApplePlatformContext : public RNSkPlatformContext {
 public:
   RNSkApplePlatformContext(
       RCTBridge *bridge,
-      std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker)
-#if !TARGET_OS_OSX
-      : RNSkPlatformContext(jsCallInvoker, [[UIScreen mainScreen] scale]) {
-#else
-      : RNSkPlatformContext(jsCallInvoker,
-                            [[NSScreen mainScreen] backingScaleFactor]) {
-#endif // !TARGET_OS_OSX
+      std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker);
 
-    // Create screenshot manager
-    _screenshotService =
-        [[ViewScreenshotService alloc] initWithUiManager:bridge.uiManager];
-  }
-
-  ~RNSkApplePlatformContext() = default;
+  ~RNSkApplePlatformContext();
 
   void runOnMainThread(std::function<void()>) override;
 
@@ -62,7 +56,8 @@ public:
   std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override;
 
   std::shared_ptr<WindowContext>
-  makeContextFromNativeSurface(void *surface, int width, int height) override;
+  makeContextFromNativeSurface(void *surface, int width, int height,
+                               bool useP3ColorSpace = true) override;
 
   virtual void performStreamOperation(
       const std::string &sourceUri,
@@ -79,6 +74,12 @@ public:
 
 private:
   ViewScreenshotService *_screenshotService;
+
+#if !defined(SK_GRAPHITE)
+  MetalContext &metalContext();
+  std::unique_ptr<MetalContext> _metalContext;
+  std::once_flag _metalContextOnce;
+#endif
 
   SkColorType mtlPixelFormatToSkColorType(MTLPixelFormat pixelFormat);
 };

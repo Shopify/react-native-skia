@@ -36,13 +36,9 @@ struct OffscreenRenderContext {
 class MetalContext {
 
 public:
+  MetalContext();
   MetalContext(const MetalContext &) = delete;
   MetalContext &operator=(const MetalContext &) = delete;
-
-  static MetalContext &getInstance() {
-    static thread_local MetalContext instance;
-    return instance;
-  }
 
   sk_sp<SkSurface> MakeOffscreen(int width, int height) {
     auto device = _device;
@@ -103,6 +99,4 @@ private:
   id<MTLDevice> _device = nullptr;
   id<MTLCommandQueue> _commandQueue = nullptr;
   sk_sp<GrDirectContext> _directContext = nullptr;
-
-  MetalContext();
 };

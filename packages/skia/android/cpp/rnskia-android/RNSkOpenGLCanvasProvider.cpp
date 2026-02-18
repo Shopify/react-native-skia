@@ -7,12 +7,6 @@
 
 #include "RNSkLog.h"
 
-#if defined(SK_GRAPHITE)
-#include "RNDawnContext.h"
-#else
-#include "OpenGLContext.h"
-#endif
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -107,11 +101,8 @@ void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurfaceTexture,
   } else {
     window = ANativeWindow_fromSurface(env, jSurfaceTexture);
   }
-#if defined(SK_GRAPHITE)
-  _surfaceHolder = DawnContext::getInstance().MakeWindow(window, width, height);
-#else
-  _surfaceHolder = OpenGLContext::getInstance().MakeWindow(window);
-#endif
+  _surfaceHolder =
+      _platformContext->makeContextFromNativeSurface(window, width, height);
 
   // Post redraw request to ensure we paint in the next draw cycle.
   _requestRedraw();

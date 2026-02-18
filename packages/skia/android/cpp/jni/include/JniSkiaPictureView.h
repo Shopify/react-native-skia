@@ -18,11 +18,6 @@
 #include <android/native_window_jni.h>
 #include <fbjni/detail/Hybrid.h>
 
-#if defined(SK_GRAPHITE)
-#include "RNDawnContext.h"
-#else
-#include "OpenGLContext.h"
-#endif
 #include "include/core/SkBitmap.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkImage.h"
@@ -109,11 +104,8 @@ protected:
     }
 
     sk_sp<SkSurface> surface;
-#if defined(SK_GRAPHITE)
-    surface = DawnContext::getInstance().MakeOffscreen(width, height);
-#else
-    surface = OpenGLContext::getInstance().MakeOffscreen(width, height);
-#endif
+    auto context = getSkiaManager()->getPlatformContext();
+    surface = context->makeOffscreenSurface(width, height);
 
     if (!surface) {
       return jni::JArrayInt::newArray(0);

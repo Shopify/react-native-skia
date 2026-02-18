@@ -15,6 +15,7 @@
 namespace RNSkia {
 
 sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
+  assertThread("getSurface");
   if (_skSurface == nullptr) {
     _glContext->makeCurrent(_glSurface.get());
     GLint stencil;
@@ -52,6 +53,7 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
 }
 
 void OpenGLWindowContext::present() {
+  assertThread("present");
   _glContext->makeCurrent(_glSurface.get());
   _directContext->flushAndSubmit();
   _glSurface->present();
