@@ -61,7 +61,6 @@ public:
   }
 
   sk_sp<SkImage> MakeImageFromBuffer(void *buffer) {
-
     CVPixelBufferRef sampleBuffer = (CVPixelBufferRef)buffer;
     SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat format =
         SkiaCVPixelBufferUtils::getCVPixelBufferBaseFormat(sampleBuffer);
@@ -69,12 +68,12 @@ public:
     case SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat::rgb: {
       // CVPixelBuffer is in any RGB format, single-plane
       return SkiaCVPixelBufferUtils::RGB::makeSkImageFromCVPixelBuffer(
-          _directContext.get(), sampleBuffer);
+          _device, _directContext.get(), sampleBuffer);
     }
     case SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat::yuv: {
       // CVPixelBuffer is in any YUV format, multi-plane
       return SkiaCVPixelBufferUtils::YUV::makeSkImageFromCVPixelBuffer(
-          _directContext.get(), sampleBuffer);
+          _device, _directContext.get(), sampleBuffer);
     }
     default:
       [[unlikely]] {

@@ -56,7 +56,9 @@ public:
     }
   }
 
-  size_t getMemoryPressure() const override { return sizeof(SkFontStyle); }
+  size_t getMemoryPressure() const override {
+    return std::max(sizeof(SkFontStyle), kMinMemoryPressure);
+  }
 
   std::string getObjectType() const override { return "JsiSkFontStyle"; }
 

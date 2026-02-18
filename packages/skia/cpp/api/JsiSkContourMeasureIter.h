@@ -47,7 +47,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkContourMeasureIter, dispose))
 
   size_t getMemoryPressure() const override {
-    return sizeof(SkContourMeasureIter);
+    return std::max(sizeof(SkContourMeasureIter), kMinMemoryPressure);
   }
 
   std::string getObjectType() const override {

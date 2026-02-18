@@ -131,7 +131,6 @@ export const copyLib = (
  * - apple-maccatalyst: lipo'd maccatalyst (arm64 + x64)
  */
 const buildXCFramework = (platformName: ApplePlatformName) => {
-
   const config = configurations[platformName];
 
   // Skip if no targets configured (e.g., tvos when GRAPHITE)
@@ -170,7 +169,6 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
       );
       xcframeworkCmd += `-library ${prefix}/arm64-iphoneos/${name} `;
       xcframeworkCmd += `-library ${prefix}/iphonesimulator/${name} `;
-
     } else if (shortPlatform === "tvos") {
       // tvOS: device + lipo'd simulator (arm64 + x64)
       $(`mkdir -p ${prefix}/tvsimulator`);
