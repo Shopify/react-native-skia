@@ -48,6 +48,11 @@ public:
     // Handle regular JavaScript arrays
     if (object.isArray(runtime)) {
       auto array = object.asArray(runtime);
+      if (array.size(runtime) != 4) {
+        throw jsi::JSError(runtime,
+                           "Expected array of length 4 for color, got " +
+                               std::to_string(array.size(runtime)));
+      }
       auto r = array.getValueAtIndex(runtime, 0).asNumber();
       auto g = array.getValueAtIndex(runtime, 1).asNumber();
       auto b = array.getValueAtIndex(runtime, 2).asNumber();
@@ -93,6 +98,11 @@ public:
         // Check if it's a regular array - convert to Float32Array
         if (obj.isArray(runtime)) {
           auto arr = obj.getArray(runtime);
+          if (arr.size(runtime) != 4) {
+            throw jsi::JSError(runtime,
+                               "Expected array of length 4 for color, got " +
+                                   std::to_string(arr.size(runtime)));
+          }
           auto r = static_cast<float>(arr.getValueAtIndex(runtime, 0).asNumber());
           auto g = static_cast<float>(arr.getValueAtIndex(runtime, 1).asNumber());
           auto b = static_cast<float>(arr.getValueAtIndex(runtime, 2).asNumber());
