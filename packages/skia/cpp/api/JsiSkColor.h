@@ -44,6 +44,23 @@ public:
 
   static SkColor fromValue(jsi::Runtime &runtime, const jsi::Value &obj) {
     const auto &object = obj.asObject(runtime);
+
+    // Handle regular JavaScript arrays
+    if (object.isArray(runtime)) {
+      auto array = object.asArray(runtime);
+      if (array.size(runtime) != 4) {
+        throw jsi::JSError(runtime,
+                           "Expected array of length 4 for color, got " +
+                               std::to_string(array.size(runtime)));
+      }
+      auto r = array.getValueAtIndex(runtime, 0).asNumber();
+      auto g = array.getValueAtIndex(runtime, 1).asNumber();
+      auto b = array.getValueAtIndex(runtime, 2).asNumber();
+      auto a = array.getValueAtIndex(runtime, 3).asNumber();
+      return SkColorSetARGB(a * 255, r * 255, g * 255, b * 255);
+    }
+
+    // Handle Float32Array (has buffer property)
     jsi::ArrayBuffer buffer =
         object
             .getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
@@ -76,7 +93,42 @@ public:
         return JsiSkColor::toValue(
             runtime, SkColorSetARGB(color.a * 255, color.r, color.g, color.b));
       } else if (arguments[0].isObject()) {
-        return arguments[0].getObject(runtime);
+        auto obj = arguments[0].getObject(runtime);
+
+        // Check if it's a regular array - convert to Float32Array
+        if (obj.isArray(runtime)) {
+          auto arr = obj.getArray(runtime);
+          if (arr.size(runtime) != 4) {
+            throw jsi::JSError(runtime,
+                               "Expected array of length 4 for color, got " +
+                                   std::to_string(arr.size(runtime)));
+          }
+          auto r = static_cast<float>(arr.getValueAtIndex(runtime, 0).asNumber());
+          auto g = static_cast<float>(arr.getValueAtIndex(runtime, 1).asNumber());
+          auto b = static_cast<float>(arr.getValueAtIndex(runtime, 2).asNumber());
+          auto a = static_cast<float>(arr.getValueAtIndex(runtime, 3).asNumber());
+
+          // Create Float32Array and populate
+          auto result = runtime.global()
+                            .getPropertyAsFunction(runtime, "Float32Array")
+                            .callAsConstructor(runtime, 4)
+                            .getObject(runtime);
+          jsi::ArrayBuffer buffer =
+              result
+                  .getProperty(runtime,
+                               jsi::PropNameID::forAscii(runtime, "buffer"))
+                  .asObject(runtime)
+                  .getArrayBuffer(runtime);
+          auto bfrPtr = reinterpret_cast<float *>(buffer.data(runtime));
+          bfrPtr[0] = r;
+          bfrPtr[1] = g;
+          bfrPtr[2] = b;
+          bfrPtr[3] = a;
+          return result;
+        }
+
+        // Already a Float32Array or similar - return as-is
+        return obj;
       }
       return jsi::Value::undefined();
     };
