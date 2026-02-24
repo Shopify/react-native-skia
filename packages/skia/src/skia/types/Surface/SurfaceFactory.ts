@@ -14,6 +14,7 @@ export interface SurfaceFactory {
    * Creates a GPU backed surface.
    * @param width - number of pixels of the width of the drawable area.
    * @param height - number of pixels of the height of the drawable area.
+   * @param useP3ColorSpace - if true, the surface will use the Display P3 color space (iOS only).
    */
-  MakeOffscreen: (width: number, height: number) => SkSurface | null;
+  MakeOffscreen: (width: number, height: number, useP3ColorSpace?: boolean) => SkSurface | null;
 }
