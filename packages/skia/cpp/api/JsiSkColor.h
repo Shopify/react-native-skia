@@ -146,30 +146,12 @@ private:
           if (arr.size(runtime) != 4) {
             throw jsi::JSError(runtime,
                                "Expected array of length 4 for color, got " +
-                                   std::to_string(arr.size(runtime)));
-          }
-          auto r = static_cast<float>(arr.getValueAtIndex(runtime, 0).asNumber());
-          auto g = static_cast<float>(arr.getValueAtIndex(runtime, 1).asNumber());
-          auto b = static_cast<float>(arr.getValueAtIndex(runtime, 2).asNumber());
-          auto a = static_cast<float>(arr.getValueAtIndex(runtime, 3).asNumber());
+        if (obj.isArray(runtime)) {
+          return JsiSkColor::toValue(runtime, JsiSkColor::fromArray(runtime, obj.asArray(runtime)));
+        }
 
-          // Create Float32Array and populate
-          auto result = runtime.global()
-                            .getPropertyAsFunction(runtime, "Float32Array")
-                            .callAsConstructor(runtime, 4)
-                            .getObject(runtime);
-          jsi::ArrayBuffer buffer =
-              result
-                  .getProperty(runtime,
-                               jsi::PropNameID::forAscii(runtime, "buffer"))
-                  .asObject(runtime)
-                  .getArrayBuffer(runtime);
-          auto bfrPtr = reinterpret_cast<float *>(buffer.data(runtime));
-          bfrPtr[0] = r;
-          bfrPtr[1] = g;
-          bfrPtr[2] = b;
-          bfrPtr[3] = a;
-          return result;
+        // Non-JS arrays (e.g. Float32Array or similar) returning as-is
+        return obj;
         }
 
         // Already a Float32Array or similar - return as-is
