@@ -103,4 +103,34 @@ describe("Skia.Color", () => {
     expect(result[2]).toBeCloseTo(0.5);
     expect(result[3]).toBeCloseTo(1);
   });
+
+  it("should reject arrays with insufficient length", async () => {
+    await expect(
+      surface.eval((Skia) => {
+        // Fewer than 4 elements
+        // @ts-expect-error Testing runtime validation of invalid input
+        return Skia.Color([1, 0]);
+      })
+    ).rejects.toThrow();
+  });
+
+  it("should reject empty array input", async () => {
+    await expect(
+      surface.eval((Skia) => {
+        // Empty array
+        // @ts-expect-error Testing runtime validation of invalid input
+        return Skia.Color([]);
+      })
+    ).rejects.toThrow();
+  });
+
+  it("should reject arrays containing non-numeric values", async () => {
+    await expect(
+      surface.eval((Skia) => {
+        // Contains a non-numeric value
+        // @ts-expect-error Testing runtime validation of invalid input
+        return Skia.Color([1, 0, 0, "invalid" as any]);
+      })
+    ).rejects.toThrow();
+  });
 });
