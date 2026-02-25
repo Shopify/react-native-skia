@@ -72,6 +72,51 @@ public:
     }
     return SkColorSetARGB(bfrPtr[3] * 255, bfrPtr[0] * 255, bfrPtr[1] * 255,
                           bfrPtr[2] * 255);
+
+  static SkColor fromValue(jsi::Runtime &runtime, const jsi::Value &obj) {
+    const auto &object = obj.asObject(runtime);
+
+    if (object.isArray(runtime)) {
+      return fromArray(runtime, object.asArray(runtime));
+    }
+
+    return fromBuffer(runtime, object);
+  }
+
+private:
+  static SkColor toSkColor(float r, float g, float b, float a) {
+    return SkColorSetARGB(a * 255, r * 255, g * 255, b * 255);
+  }
+
+  static SkColor fromArray(jsi::Runtime &runtime, jsi::Array arr) {
+    if (arr.size(runtime) < 4) {
+      return SK_ColorBLACK;
+    }
+
+    return toSkColor(
+        arr.getValueAtIndex(runtime, 0).asNumber(),
+        arr.getValueAtIndex(runtime, 1).asNumber(),
+        arr.getValueAtIndex(runtime, 2).asNumber(),
+        arr.getValueAtIndex(runtime, 3).asNumber());
+  }
+
+  static SkColor fromBuffer(jsi::Runtime &runtime, const jsi::Object &object) {
+    auto buffer = object
+                      .getProperty(runtime, jsi::PropNameID::forAscii(runtime, "buffer"))
+                      .asObject(runtime)
+                      .getArrayBuffer(runtime);
+
+    if (buffer.size(runtime) < 4 * sizeof(float)) {
+      return SK_ColorBLACK;
+    }
+    
+    const auto *bfrPtr = reinterpret_cast<const float *>(buffer.data(runtime));
+
+    if (bfrPtr[0] > 1 || bfrPtr[1] > 1 || bfrPtr[2] > 1 || bfrPtr[3] > 1) {
+      return SK_ColorBLACK;
+    }
+
+    return toSkColor(bfrPtr[0], bfrPtr[1], bfrPtr[2], bfrPtr[3]);
   }
 
   /**
