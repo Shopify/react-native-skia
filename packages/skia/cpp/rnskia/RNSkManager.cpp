@@ -80,16 +80,21 @@ void RNSkManager::installBindings() {
   rnwgpu::GPUUncapturedErrorEvent::installConstructor(*_jsRuntime);
   // Create and expose navigator.gpu using DawnContext's instance
   auto &dawnContext = DawnContext::getInstance();
-  auto gpu = std::make_shared<rnwgpu::GPU>(*_jsRuntime, dawnContext.getWGPUInstance());
-  auto navigatorValue = _jsRuntime->global().getProperty(*_jsRuntime, "navigator");
+  auto gpu =
+      std::make_shared<rnwgpu::GPU>(*_jsRuntime, dawnContext.getWGPUInstance());
+  auto navigatorValue =
+      _jsRuntime->global().getProperty(*_jsRuntime, "navigator");
   if (navigatorValue.isObject()) {
     auto navigator = navigatorValue.asObject(*_jsRuntime);
-    navigator.setProperty(*_jsRuntime, "gpu", rnwgpu::GPU::create(*_jsRuntime, gpu));
+    navigator.setProperty(*_jsRuntime, "gpu",
+                          rnwgpu::GPU::create(*_jsRuntime, gpu));
   } else {
     // Create navigator object if it doesn't exist
     jsi::Object navigator(*_jsRuntime);
-    navigator.setProperty(*_jsRuntime, "gpu", rnwgpu::GPU::create(*_jsRuntime, gpu));
-    _jsRuntime->global().setProperty(*_jsRuntime, "navigator", std::move(navigator));
+    navigator.setProperty(*_jsRuntime, "gpu",
+                          rnwgpu::GPU::create(*_jsRuntime, gpu));
+    _jsRuntime->global().setProperty(*_jsRuntime, "navigator",
+                                     std::move(navigator));
   }
 
   // Install WebGPU constant objects as plain JS objects

@@ -44,15 +44,14 @@ class NativeReanimatedContainer extends Container {
       return;
     }
     const recorder = new ReanimatedRecorder(this.Skia);
-    const { nativeId, picture, Skia } = this;
+    const { nativeId, picture } = this;
     visit(recorder, this.root);
     const sharedValues = recorder.getSharedValues();
     const sharedRecorder = recorder.getRecorder();
     // Draw first frame
-    Rea.executeOnUIRuntimeSync(() => {
+    Rea.runOnUI(() => {
       "worklet";
-      const firstPicture = Skia.Picture.MakePicture(null)!;
-      nativeDrawOnscreen(nativeId, sharedRecorder, firstPicture);
+      nativeDrawOnscreen(nativeId, sharedRecorder, picture);
     })();
     // Animate
     if (sharedValues.length > 0) {

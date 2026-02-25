@@ -45,16 +45,22 @@ public:
     _dispatcher->processQueue();
   }
 
+public:
   ~JsiSkSurface() override {
-    // Queue deletion on the creation thread if needed
-    auto surface = getObject();
-    if (surface && _dispatcher) {
-      _dispatcher->run([surface]() {
-        // Surface will be deleted when this lambda is destroyed
-      });
+    if (!isDisposed()) {
+      // This JSI Object is being deleted from a GC, which might happen
+      // on a separate Thread. GPU resources (like SkSurface) must be deleted
+      // on the same Thread they were created on, so in this case we schedule
+      // deletion to run on the Thread this Object was created on.
+      auto surface = getObjectUnchecked();
+      if (surface && _dispatcher) {
+        _dispatcher->run([surface]() {
+          // Surface will be deleted when this lambda is destroyed, on the
+          // original Thread.
+        });
+      }
+      releaseResources();
     }
-    // Clear the object to prevent base class destructor from deleting it
-    setObject(nullptr);
   }
 
   EXPORT_JSI_API_TYPENAME(JsiSkSurface, Surface)
@@ -117,7 +123,10 @@ public:
   }
 
   size_t getMemoryPressure() const override {
-    auto surface = getObject();
+    if (isDisposed()) {
+      return 0;
+    }
+    auto surface = getObjectUnchecked();
     if (!surface) {
       return 0;
     }

@@ -249,6 +249,9 @@ public:
     }
     auto rasterImage = image->makeRasterImage(grContext);
 #endif
+    if (!rasterImage) {
+      return jsi::Value::null();
+    }
     auto hostObjectInstance =
         std::make_shared<JsiSkImage>(getContext(), std::move(rasterImage));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
@@ -289,24 +292,33 @@ public:
                                               std::move(image)) {
     // Get the dispatcher for the current thread
     _dispatcher = Dispatcher::getDispatcher();
-    // Process any pending operations
+    // Process any pending operations (e.g. deletions of previous resources)
     _dispatcher->processQueue();
   }
 
+public:
   ~JsiSkImage() override {
-    // Queue deletion on the creation thread if needed
-    auto image = getObject();
-    if (image && _dispatcher) {
-      _dispatcher->run([image]() {
-        // Image will be deleted when this lambda is destroyed
-      });
+    if (!isDisposed()) {
+      // This JSI Object is being deleted from a GC, which might happen
+      // on a separate Thread. GPU resources (like SkImage) must be deleted
+      // on the same Thread they were created on, so in this case we schedule
+      // deletion to run on the Thread this Object was created on.
+      auto image = getObjectUnchecked();
+      if (image && _dispatcher) {
+        _dispatcher->run([image]() {
+          // Image will be deleted when this lambda is destroyed, on the
+          // original Thread.
+        });
+      }
+      releaseResources();
     }
-    // Clear the object to prevent base class destructor from deleting it
-    setObject(nullptr);
   }
 
   size_t getMemoryPressure() const override {
-    auto image = getObject();
+    if (isDisposed()) {
+      return 0;
+    }
+    auto image = getObjectUnchecked();
     if (image) {
       if (image->isTextureBacked()) {
         return image->textureSize();

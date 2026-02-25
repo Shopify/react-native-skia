@@ -106,7 +106,9 @@ public:
                                                        context);
   }
 
-  size_t getMemoryPressure() const override { return sizeof(SkRRect); }
+  size_t getMemoryPressure() const override {
+    return std::max(sizeof(SkRRect), kMinMemoryPressure);
+  }
 
   std::string getObjectType() const override { return "JsiSkRRect"; }
 

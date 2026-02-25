@@ -65,7 +65,9 @@ export class SkiaSGRoot {
     const recorder = this.Skia.PictureRecorder();
     const canvas = recorder.beginRecording();
     this.drawOnCanvas(canvas);
-    return recorder.finishRecordingAsPicture();
+    const picture = recorder.finishRecordingAsPicture();
+    recorder.dispose();
+    return picture;
   }
 
   unmount() {

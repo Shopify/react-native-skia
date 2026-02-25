@@ -44,8 +44,7 @@ async::AsyncTaskHandle GPUAdapter::requestDevice(
         }
         std::string msg =
             message.length ? std::string(message.data, message.length) : "";
-        fprintf(stderr, "GPU Device Lost (%s): %s\n", lostReason,
-                             msg.c_str());
+        fprintf(stderr, "GPU Device Lost (%s): %s\n", lostReason, msg.c_str());
         if (auto deviceHost = deviceLostBinding->lock()) {
           deviceHost->notifyDeviceLost(reason, std::move(msg));
         }
@@ -129,36 +128,36 @@ async::AsyncTaskHandle GPUAdapter::requestDevice(
                 return;
               }
 
-              device.SetLoggingCallback([creationRuntime](
-                                            wgpu::LoggingType type,
-                                            wgpu::StringView msg) {
-                if (creationRuntime == nullptr) {
-                  return;
-                }
-                const char *logLevel = "";
-                switch (type) {
-                case wgpu::LoggingType::Warning:
-                  logLevel = "Warning";
-                  fprintf(stderr, "WebGPU Warning: %.*s\n",
-                          static_cast<int>(msg.length), msg.data);
-                  break;
-                case wgpu::LoggingType::Error:
-                  logLevel = "Error";
-                  fprintf(stderr, "WebGPU Error: %.*s\n",
-                          static_cast<int>(msg.length), msg.data);
-                  break;
-                case wgpu::LoggingType::Verbose:
-                  logLevel = "Verbose";
-                  break;
-                case wgpu::LoggingType::Info:
-                  logLevel = "Info";
-                  break;
-                default:
-                  logLevel = "Unknown";
-                  fprintf(stderr, "%s: %.*s\n", logLevel,
-                          static_cast<int>(msg.length), msg.data);
-                }
-              });
+              device.SetLoggingCallback(
+                  [creationRuntime](wgpu::LoggingType type,
+                                    wgpu::StringView msg) {
+                    if (creationRuntime == nullptr) {
+                      return;
+                    }
+                    const char *logLevel = "";
+                    switch (type) {
+                    case wgpu::LoggingType::Warning:
+                      logLevel = "Warning";
+                      fprintf(stderr, "WebGPU Warning: %.*s\n",
+                              static_cast<int>(msg.length), msg.data);
+                      break;
+                    case wgpu::LoggingType::Error:
+                      logLevel = "Error";
+                      fprintf(stderr, "WebGPU Error: %.*s\n",
+                              static_cast<int>(msg.length), msg.data);
+                      break;
+                    case wgpu::LoggingType::Verbose:
+                      logLevel = "Verbose";
+                      break;
+                    case wgpu::LoggingType::Info:
+                      logLevel = "Info";
+                      break;
+                    default:
+                      logLevel = "Unknown";
+                      fprintf(stderr, "%s: %.*s\n", logLevel,
+                              static_cast<int>(msg.length), msg.data);
+                    }
+                  });
 
               auto deviceHost = std::make_shared<GPUDevice>(std::move(device),
                                                             asyncRunner, label);

@@ -34,16 +34,22 @@ public:
     _dispatcher->processQueue();
   }
 
+public:
   ~JsiSkPicture() override {
-    // Queue deletion on the creation thread if needed
-    auto picture = getObject();
-    if (picture && _dispatcher) {
-      _dispatcher->run([picture]() {
-        // Picture will be deleted when this lambda is destroyed
-      });
+    if (!isDisposed()) {
+      // This JSI Object is being deleted from a GC, which might happen
+      // on a separate Thread. GPU resources (like SkPicture) must be deleted
+      // on the same Thread they were created on, so in this case we schedule
+      // deletion to run on the Thread this Object was created on.
+      auto picture = getObjectUnchecked();
+      if (picture && _dispatcher) {
+        _dispatcher->run([picture]() {
+          // Picture will be deleted when this lambda is destroyed, on the
+          // original Thread.
+        });
+      }
+      releaseResources();
     }
-    // Clear the object to prevent base class destructor from deleting it
-    setObject(nullptr);
   }
 
   JSI_HOST_FUNCTION(makeShader) {
@@ -91,7 +97,10 @@ public:
                        JSI_EXPORT_FUNC(JsiSkPicture, dispose))
 
   size_t getMemoryPressure() const override {
-    auto picture = getObject();
+    if (isDisposed()) {
+      return 0;
+    }
+    auto picture = getObjectUnchecked();
     if (!picture) {
       return 0;
     }

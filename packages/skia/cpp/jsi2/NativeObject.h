@@ -14,7 +14,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "jsi/RuntimeAwareCache.h"  // Use Skia's RuntimeAwareCache
+#include "jsi/RuntimeAwareCache.h" // Use Skia's RuntimeAwareCache
 
 // Forward declare to avoid circular dependency
 namespace rnwgpu {
@@ -27,6 +27,11 @@ template <typename ArgType, typename SFINAE> struct JSIConverter;
 namespace rnwgpu {
 
 namespace jsi = facebook::jsi;
+
+// Minimum memory pressure reported for any native object.
+// This accounts for C++ wrapper overhead and ensures dispose() never
+// increases reported memory pressure (which would defeat its purpose).
+static constexpr size_t kMinMemoryPressure = 256;
 
 // Forward declaration
 template <typename Derived> class NativeObject;
@@ -135,8 +140,7 @@ public:
       return jsi::Function::createFromHostFunction(
           runtime, jsi::PropNameID::forUtf8(runtime, "unbox"), 0,
           [this](jsi::Runtime &rt, const jsi::Value & /*thisVal*/,
-                 const jsi::Value * /*args*/,
-                 size_t /*count*/) -> jsi::Value {
+                 const jsi::Value * /*args*/, size_t /*count*/) -> jsi::Value {
             // Try to get the prototype from the global constructor
             auto ctor = rt.global().getProperty(rt, _brand.c_str());
             if (!ctor.isObject()) {
@@ -154,8 +158,7 @@ public:
               auto ctorObj = ctor.getObject(rt);
               auto proto = ctorObj.getProperty(rt, "prototype");
               if (proto.isObject()) {
-                auto objectCtor =
-                    rt.global().getPropertyAsObject(rt, "Object");
+                auto objectCtor = rt.global().getPropertyAsObject(rt, "Object");
                 auto setPrototypeOf =
                     objectCtor.getPropertyAsFunction(rt, "setPrototypeOf");
                 setPrototypeOf.call(rt, obj, proto);
@@ -263,8 +266,7 @@ public:
     if (!toStringTag.isUndefined()) {
       // Use Object.defineProperty to set symbol property since setProperty
       // doesn't support symbols directly
-      auto objectCtor =
-          runtime.global().getPropertyAsObject(runtime, "Object");
+      auto objectCtor = runtime.global().getPropertyAsObject(runtime, "Object");
       auto defineProperty =
           objectCtor.getPropertyAsFunction(runtime, "defineProperty");
       jsi::Object descriptor(runtime);
@@ -292,7 +294,8 @@ public:
    * BoxedWebGPUObject::unbox() can install prototypes on secondary runtimes.
    */
   static void installConstructor(jsi::Runtime &runtime) {
-    // Register this class's installer in the registry (only needs to happen once)
+    // Register this class's installer in the registry (only needs to happen
+    // once)
     static std::once_flag registryFlag;
     std::call_once(registryFlag, []() {
       NativeObjectRegistry::getInstance().registerInstaller(
@@ -312,9 +315,9 @@ public:
         runtime, jsi::PropNameID::forUtf8(runtime, Derived::CLASS_NAME), 0,
         [](jsi::Runtime &rt, const jsi::Value & /*thisVal*/,
            const jsi::Value * /*args*/, size_t /*count*/) -> jsi::Value {
-          throw jsi::JSError(
-              rt, std::string("Illegal constructor: ") + Derived::CLASS_NAME +
-                      " objects are created by the WebGPU API");
+          throw jsi::JSError(rt, std::string("Illegal constructor: ") +
+                                     Derived::CLASS_NAME +
+                                     " objects are created by the WebGPU API");
         });
 
     // Set the prototype property on the constructor
@@ -348,8 +351,7 @@ public:
     auto &entry = getPrototypeCache(runtime).get(runtime);
     if (entry.prototype.has_value()) {
       // Use Object.setPrototypeOf to set the prototype
-      auto objectCtor =
-          runtime.global().getPropertyAsObject(runtime, "Object");
+      auto objectCtor = runtime.global().getPropertyAsObject(runtime, "Object");
       auto setPrototypeOf =
           objectCtor.getPropertyAsFunction(runtime, "setPrototypeOf");
       setPrototypeOf.call(runtime, obj, *entry.prototype);
@@ -387,7 +389,7 @@ public:
   /**
    * Memory pressure for GC hints. Override in derived classes.
    */
-  virtual size_t getMemoryPressure() { return 1024; }
+  virtual size_t getMemoryPressure() { return kMinMemoryPressure; }
 
   /**
    * Set the creation runtime. Called during create().
@@ -483,8 +485,8 @@ protected:
             throw jsi::JSError(rt, "Setter requires a value argument");
           }
           auto native = Derived::fromValue(rt, thisVal);
-          auto value =
-              rnwgpu::JSIConverter<std::decay_t<ValueType>>::fromJSI(rt, args[0], false);
+          auto value = rnwgpu::JSIConverter<std::decay_t<ValueType>>::fromJSI(
+              rt, args[0], false);
           (native.get()->*setter)(std::move(value));
           return jsi::Value::undefined();
         });
@@ -504,8 +506,8 @@ protected:
     if (existingDesc.isObject()) {
       auto existingDescObj = existingDesc.getObject(runtime);
       if (existingDescObj.hasProperty(runtime, "get")) {
-        descriptor.setProperty(
-            runtime, "get", existingDescObj.getProperty(runtime, "get"));
+        descriptor.setProperty(runtime, "get",
+                               existingDescObj.getProperty(runtime, "get"));
       }
     }
     descriptor.setProperty(runtime, "set", setterFunc);
@@ -531,8 +533,8 @@ protected:
                  const jsi::Value *args, size_t count) -> jsi::Value {
           auto native = Derived::fromValue(rt, thisVal);
           ReturnType result = (native.get()->*getter)();
-          return rnwgpu::JSIConverter<std::decay_t<ReturnType>>::toJSI(rt,
-                                                               std::move(result));
+          return rnwgpu::JSIConverter<std::decay_t<ReturnType>>::toJSI(
+              rt, std::move(result));
         });
 
     auto setterFunc = jsi::Function::createFromHostFunction(
@@ -544,8 +546,8 @@ protected:
             throw jsi::JSError(rt, "Setter requires a value argument");
           }
           auto native = Derived::fromValue(rt, thisVal);
-          auto value =
-              rnwgpu::JSIConverter<std::decay_t<ValueType>>::fromJSI(rt, args[0], false);
+          auto value = rnwgpu::JSIConverter<std::decay_t<ValueType>>::fromJSI(
+              rt, args[0], false);
           (native.get()->*setter)(std::move(value));
           return jsi::Value::undefined();
         });
@@ -580,10 +582,11 @@ private:
       // This requires the method signature to match HostFunction
       return (obj->*method)(runtime, jsi::Value::undefined(), args, count);
     } else {
-      ReturnType result = (obj->*method)(rnwgpu::JSIConverter<std::decay_t<Args>>::fromJSI(
-          runtime, args[Is], Is >= count)...);
-      return rnwgpu::JSIConverter<std::decay_t<ReturnType>>::toJSI(runtime,
-                                                           std::move(result));
+      ReturnType result =
+          (obj->*method)(rnwgpu::JSIConverter<std::decay_t<Args>>::fromJSI(
+              runtime, args[Is], Is >= count)...);
+      return rnwgpu::JSIConverter<std::decay_t<ReturnType>>::toJSI(
+          runtime, std::move(result));
     }
   }
 };

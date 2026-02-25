@@ -1,4 +1,5 @@
 #import <React/RCTBridge.h>
+#import <QuartzCore/CATransaction.h>
 
 #import "RNSkiaModule.h"
 #import "SkiaUIView.h"
@@ -140,7 +141,10 @@
 - (void)layoutSubviews {
   [super layoutSubviews];
   if (_impl != nullptr) {
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
     _impl->setSize(self.bounds.size.width, self.bounds.size.height);
+    [CATransaction commit];
   }
 }
 

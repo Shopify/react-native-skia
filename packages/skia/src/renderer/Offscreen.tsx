@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 
-import type { SkPicture, SkRect, SkSize } from "../skia/types";
+import type { SkImage, SkPicture, SkRect, SkSize } from "../skia/types";
 import { Skia } from "../skia";
 import { Platform } from "../Platform";
 import { SkiaSGRoot } from "../sksg/Reconciler";
@@ -20,15 +20,22 @@ export const drawAsPicture = async (element: ReactElement, bounds?: SkRect) => {
   await root.render(element);
   root.drawOnCanvas(canvas);
   const picture = recorder.finishRecordingAsPicture();
+  recorder.dispose();
   root.unmount();
   return picture;
 };
 
-export const drawAsImage = async (element: ReactElement, size: SkSize) => {
+export const drawAsImage = async (
+  element: ReactElement,
+  size: SkSize
+): Promise<SkImage | null> => {
   return drawAsImageFromPicture(await drawAsPicture(element), size);
 };
 
-export const drawAsImageFromPicture = (picture: SkPicture, size: SkSize) => {
+export const drawAsImageFromPicture = (
+  picture: SkPicture,
+  size: SkSize
+): SkImage | null => {
   "worklet";
   const surface = Skia.Surface.MakeOffscreen(size.width, size.height)!;
   const canvas = surface.getCanvas();
