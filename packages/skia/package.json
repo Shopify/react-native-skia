@@ -101,7 +101,7 @@
   "readmeFilename": "README.md",
   "peerDependencies": {
     "react": ">=19.0",
-    "react-native": ">=0.84",
+    "react-native": ">=0.78",
     "react-native-reanimated": ">=3.19.1"
   },
   "peerDependenciesMeta": {
