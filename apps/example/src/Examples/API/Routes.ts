@@ -35,4 +35,5 @@ export type Routes = {
   PictureViewCrashTest: undefined;
   FirstFrame: undefined;
   FirstFrameEmpty: undefined;
+  PictureBug: undefined;
 };

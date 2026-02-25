@@ -249,6 +249,9 @@ public:
     }
     auto rasterImage = image->makeRasterImage(grContext);
 #endif
+    if (!rasterImage) {
+      return jsi::Value::null();
+    }
     auto hostObjectInstance =
         std::make_shared<JsiSkImage>(getContext(), std::move(rasterImage));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
