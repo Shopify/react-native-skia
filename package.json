@@ -37,5 +37,8 @@
   "devDependencies": {
     "react-native-test-app": "^4.2.0",
     "turbo": "^2.1.1"
+  },
+  "optionalDependencies": {
+    "https-proxy-agent": "7.0.6"
   }
 }
