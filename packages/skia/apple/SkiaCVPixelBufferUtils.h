@@ -21,6 +21,8 @@
 #import "include/gpu/ganesh/GrYUVABackendTextures.h"
 #pragma clang diagnostic pop
 
+class MetalContext;
+
 /**
  Holds a Metal Texture.
  When the `TextureHolder` is destroyed, the underlying Metal Texture
@@ -84,8 +86,7 @@ public:
      CVPixelBuffer.
      */
     static sk_sp<SkImage>
-    makeSkImageFromCVPixelBuffer(id<MTLDevice> device, GrDirectContext *context,
-                                 CVPixelBufferRef pixelBuffer);
+    makeSkImageFromCVPixelBuffer(MetalContext& context, CVPixelBufferRef pixelBuffer);
 
   private:
     static SkColorType getCVPixelBufferColorType(CVPixelBufferRef pixelBuffer);
@@ -98,8 +99,7 @@ public:
      CVPixelBuffer.
      */
     static sk_sp<SkImage>
-    makeSkImageFromCVPixelBuffer(id<MTLDevice> device, GrDirectContext *context,
-                                 CVPixelBufferRef pixelBuffer);
+    makeSkImageFromCVPixelBuffer(MetalContext& context, CVPixelBufferRef pixelBuffer);
 
   private:
     static SkYUVAInfo::PlaneConfig getPlaneConfig(OSType pixelFormat);
@@ -113,9 +113,7 @@ public:
   };
 
 private:
-  static CVMetalTextureCacheRef getTextureCache(id<MTLDevice> device);
-  static TextureHolder *getSkiaTextureForCVPixelBufferPlane(
-      id<MTLDevice> device, CVPixelBufferRef pixelBuffer, size_t planeIndex);
+  static TextureHolder *getSkiaTextureForCVPixelBufferPlane(MetalContext& context, CVPixelBufferRef pixelBuffer, size_t planeIndex);
   static MTLPixelFormat
   getMTLPixelFormatForCVPixelBufferPlane(CVPixelBufferRef pixelBuffer,
                                          size_t planeIndex);
