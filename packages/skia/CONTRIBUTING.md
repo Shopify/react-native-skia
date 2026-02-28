@@ -6,11 +6,10 @@ To develop react-native-skia, you can build the skia libraries on your computer.
 
 ### Using pre-built binaries
 
-To use the Skia prebuilt binaries from GitHub, use the following commands:
+The Skia prebuilt binaries are automatically installed from npm packages during `yarn install`. The postinstall script copies them to the `libs/` directory.
+
 - Checkout submodules: `git submodule update --init --recursive`
-- Install dependencies: `yarn`
-- Go to the package folder: `cd packages/skia`
-- Install the Skia libraries: `yarn install-skia`
+- Install dependencies: `yarn` (this will automatically download and copy Skia binaries)
 
 ### Building
 

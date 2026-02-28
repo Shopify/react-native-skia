@@ -5,7 +5,7 @@ require "json"
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
 # Check if Skia prebuilt binaries are installed
-# The postinstall script downloads these - if missing, the user needs to run it
+# The postinstall script copies these from the react-native-skia-* npm packages
 skia_libs_path = File.join(__dir__, "libs/apple/ios")
 unless File.exist?(skia_libs_path) && Dir.glob(File.join(skia_libs_path, "*.xcframework")).any?
   Pod::UI.puts "\n"
@@ -13,8 +13,7 @@ unless File.exist?(skia_libs_path) && Dir.glob(File.join(skia_libs_path, "*.xcfr
   Pod::UI.puts "│                                                                             │".red
   Pod::UI.puts "│  ERROR: Skia prebuilt binaries not found!                                   │".red
   Pod::UI.puts "│                                                                             │".red
-  Pod::UI.puts "│  The postinstall script has not run. This is required to download the      │".red
-  Pod::UI.puts "│  Skia binaries. Some package managers (pnpm, bun, yarn berry) require       │".red
+  Pod::UI.puts "│  The postinstall script has not run. Some package managers require          │".red
   Pod::UI.puts "│  explicit trust for packages with postinstall scripts.                      │".red
   Pod::UI.puts "│                                                                             │".red
   Pod::UI.puts "│  To fix this:                                                               │".red

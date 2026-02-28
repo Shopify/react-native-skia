@@ -8,15 +8,14 @@ set (CMAKE_CXX_STANDARD 20)
 set (SKIA_LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../libs/android/${ANDROID_ABI}")
 
 # Check if Skia prebuilt binaries are installed
-# The postinstall script downloads these - if missing, the user needs to run it
+# The postinstall script copies these from the react-native-skia-* npm packages
 if(NOT EXISTS "${SKIA_LIBS_PATH}/libskia.a")
     message("")
     message("┌─────────────────────────────────────────────────────────────────────────────┐")
     message("│                                                                             │")
     message("│  ERROR: Skia prebuilt binaries not found!                                   │")
     message("│                                                                             │")
-    message("│  The postinstall script has not run. This is required to download the      │")
-    message("│  Skia binaries. Some package managers (pnpm, bun, yarn berry) require       │")
+    message("│  The postinstall script has not run. Some package managers require          │")
     message("│  explicit trust for packages with postinstall scripts.                      │")
     message("│                                                                             │")
     message("│  To fix this:                                                               │")

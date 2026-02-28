@@ -9,36 +9,13 @@
   },
   "title": "React Native Skia",
   "version": "0.0.0",
-  "skia": {
-    "version": "m144c",
-    "checksums": {
-      "android-armeabi-v7a": "e406c3e8103a2efb6a514ac91346d7f9f81adbae14dc2d0e302e84fb8c5f80f7",
-      "android-arm64-v8a": "75069b0f7c66ad3382553e947d583265de033cc856c394110243da098306955f",
-      "android-x86": "714b93a7bdf005a23699f47e6255e4e690086c52a1998c20196a46f95b709b09",
-      "android-x86_64": "5bd2972d13293b09b35e2c0149b7d103dc4fb0f2837c3dd169ce06795b812714",
-      "apple-ios-xcframeworks": "43f62ea742c55ecc57864505ff752a517fd2c31412a19914032d044ac4f987ee",
-      "apple-tvos-xcframeworks": "0f6b5c75b4e686e72f5cc8508e60074463f757ca7a0dcbd07e095c055a537c58",
-      "apple-macos-xcframeworks": "31f57bcf6caff1c268984609b0e4a2abd966bfa8ddcf074331d94e0f988f93d3"
-    }
-  },
-  "skia-graphite": {
-    "version": "m142b",
-    "checksums": {
-      "android-armeabi-v7a": "3e40f44c804194fa0983c46903f834e8f834c6dd96534c7fa1b4ebb4f409527d",
-      "android-arm64-v8a": "d6c3035449fcf7ef13369b0d6c4ef41f3177d15074eeb195201e0ba4cfb2f527",
-      "android-x86": "6dc229847420b8a43c15098cdcb4fe45b2df20a38ad69f37e0aa91c832499c2a",
-      "android-x86_64": "ecae351d98af3b175d40d894520c2e3263034276bb0b0e9d2f9c19ba7dc046fa",
-      "apple-ios-xcframeworks": "6f60f03faaeebfb798615d09715040790ff95e75bf95028893ced6f514ab5196",
-      "apple-macos-xcframeworks": "07467cd1778053537528ed91c7a35d116e1a4644819f0aad8e06e7d884591dea"
-    }
-  },
   "description": "High-performance React Native Graphics using Skia",
   "main": "lib/module/index.js",
   "react-native": "src/index.ts",
   "module": "lib/module/index.js",
   "types": "lib/typescript/index.d.ts",
   "files": [
-    "scripts/install-skia.mjs",
+    "scripts/copy-skia-binaries.mjs",
     "scripts/setup-canvaskit.js",
     "src/**",
     "lib/**",
@@ -68,14 +45,13 @@
     "clean-skia": "yarn rimraf ./libs && yarn rimraf ../../externals/skia/out",
     "build-skia": "tsx ./scripts/build-skia.ts",
     "copy-skia-headers": "tsx ./scripts/copy-skia-headers.ts",
-    "install-skia": "node ./scripts/install-skia.mjs --force && yarn copy-skia-headers",
     "clang-format": "yarn clang-format-ios && yarn clang-format-android && yarn clang-format-common",
     "clang-format-ios": "find apple/ -iname '*.h' -o -iname '*.mm' -o -iname '*.cpp' | xargs clang-format -i",
     "clang-format-android": "find android/cpp/ -iname '*.h' -o -iname '*.m' -o -iname '*.cpp' | xargs clang-format -i",
     "clang-format-common": "find cpp/ \\( -path 'cpp//skia' -prune \\) -o \\( -iname '*.h' -o -iname '*.m' -o -iname '*.cpp' \\) -print | xargs clang-format -i",
     "workflow-copy-libs": "tsx ./scripts/workflow-copy-libs.ts",
     "cpplint": "cpplint --linelength=230 --filter=-legal/copyright,-whitespace/indent,-whitespace/comments,-whitespace/ending_newline,-build/include_order,-runtime/references,-readability/todo,-whitespace/blank_line,-whitespace/todo,-runtime/int,-build/c++11,-whitespace/parens --exclude=package/cpp/skia --exclude=package/ios --exclude=package/android/build --exclude=package/node_modules --recursive package",
-    "postinstall": "node ./scripts/install-skia.mjs"
+    "postinstall": "node ./scripts/copy-skia-binaries.mjs"
   },
   "repository": {
     "type": "git",
@@ -149,6 +125,10 @@
   },
   "dependencies": {
     "canvaskit-wasm": "0.40.0",
+    "react-native-skia-android": "144.3.0",
+    "react-native-skia-apple-ios": "144.3.0",
+    "react-native-skia-apple-macos": "144.3.0",
+    "react-native-skia-apple-tvos": "144.3.0",
     "react-reconciler": "0.31.0"
   },
   "eslintIgnore": [
