@@ -7842,12 +7842,12 @@ __metadata:
     react: 19.0.0
     react-native: 0.83.1
     react-native-builder-bob: 0.18.2
-    react-native-reanimated: 4.2.1
+    react-native-reanimated: ^4.2.1
     react-native-skia-android: 144.3.0
     react-native-skia-apple-ios: 144.3.0
     react-native-skia-apple-macos: 144.3.0
     react-native-skia-apple-tvos: 144.3.0
-    react-native-worklets: 0.7.1
+    react-native-worklets: ^0.7.0
     react-reconciler: 0.31.0
     rimraf: 3.0.2
     semantic-release: ^24.1.0
@@ -13945,8 +13945,8 @@ __metadata:
     react-dom: 19.0.0
     react-native: 0.83.1
     react-native-gesture-handler: ^2.24.0
-    react-native-reanimated: 4.2.1
-    react-native-worklets: 0.7.1
+    react-native-reanimated: ^4.2.1
+    react-native-worklets: ^0.7.0
     ts-morph: ^25.0.1
     ts-node: ^10.9.2
     twoslash-cli: 1.3.24
@@ -15744,14 +15744,14 @@ __metadata:
     react-native: 0.83.1
     react-native-gesture-handler: ^2.24.0
     react-native-macos: ^0.81.1
-    react-native-reanimated: 4.2.1
+    react-native-reanimated: ^4.2.1
     react-native-safe-area-context: ^5.2.0
     react-native-screens: ^4.10.0
     react-native-svg: "patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch"
     react-native-test-app: 4.4.7
     react-native-web: ^0.21.2
     react-native-windows: ^0.75.0
-    react-native-worklets: 0.7.1
+    react-native-worklets: ^0.7.0
     react-test-renderer: 19.0.0
     typescript: ^5.2.2
   languageName: unknown
@@ -27982,9 +27982,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:4.2.1":
-  version: 4.2.1
-  resolution: "react-native-reanimated@npm:4.2.1"
+"react-native-reanimated@npm:^4.2.1":
+  version: 4.2.2
+  resolution: "react-native-reanimated@npm:4.2.2"
   dependencies:
     react-native-is-edge-to-edge: 1.2.1
     semver: 7.7.3
@@ -27992,7 +27992,7 @@ __metadata:
     react: "*"
     react-native: "*"
     react-native-worklets: ">=0.7.0"
-  checksum: 102ead7c02411227f8364dec58cffc7a9225c8b9733cce07054064ecfd90cf2b124c8d1caf2bd11fc7db8603e0c91c392957ab0ce5852dcd1b3669e7d7d59931
+  checksum: 2497901472996aece1e350ffa02233ad0f9f7a16e389a201246474fae872f3ec9834a0b7c3801241d5844b9f7dbf0309d868728b3b35555de5d1836b3f527644
   languageName: node
   linkType: hard
 
@@ -28252,9 +28252,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-worklets@npm:0.7.1":
-  version: 0.7.1
-  resolution: "react-native-worklets@npm:0.7.1"
+"react-native-worklets@npm:^0.7.0":
+  version: 0.7.4
+  resolution: "react-native-worklets@npm:0.7.4"
   dependencies:
     "@babel/plugin-transform-arrow-functions": 7.27.1
     "@babel/plugin-transform-class-properties": 7.27.1
@@ -28271,7 +28271,7 @@ __metadata:
     "@babel/core": "*"
     react: "*"
     react-native: "*"
-  checksum: d6ca920ce53cad6ad45ac8379914adfaf73a92d76dc7c68d9b8a8a2913f7042ec8d60bbb6fcf72afe593993d087cbe6277c3f81927d2c0ade9a94acaf58b5dc3
+  checksum: eb92247e208c6ee641dd639319628213aa2f22249b2fb09d5b9b0ea8a13e7bbb906eabc9dfebfe00404eec5d3e233378cc4991b9a43565338a4f083a68b7bd5f
   languageName: node
   linkType: hard
 
@@ -33394,9 +33394,9 @@ __metadata:
     path-browserify: ^1.0.1
     react: 19.0.0
     react-dom: 19.0.0
-    react-native-reanimated: 4.2.1
+    react-native-reanimated: ^4.2.1
     react-native-web: ^0.21.1
-    react-native-worklets: 0.7.1
+    react-native-worklets: ^0.7.0
     react-scripts: 5.0.1
     typescript: ^5.2.2
     web-vitals: ^2.1.0

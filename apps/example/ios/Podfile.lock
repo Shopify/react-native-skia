@@ -2628,7 +2628,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNReanimated (4.2.1):
+  - RNReanimated (4.2.2):
     - boost
     - DoubleConversion
     - fast_float
@@ -2655,11 +2655,11 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNReanimated/reanimated (= 4.2.1)
+    - RNReanimated/reanimated (= 4.2.2)
     - RNWorklets
     - SocketRocket
     - Yoga
-  - RNReanimated/reanimated (4.2.1):
+  - RNReanimated/reanimated (4.2.2):
     - boost
     - DoubleConversion
     - fast_float
@@ -2686,11 +2686,11 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNReanimated/reanimated/apple (= 4.2.1)
+    - RNReanimated/reanimated/apple (= 4.2.2)
     - RNWorklets
     - SocketRocket
     - Yoga
-  - RNReanimated/reanimated/apple (4.2.1):
+  - RNReanimated/reanimated/apple (4.2.2):
     - boost
     - DoubleConversion
     - fast_float
@@ -2836,7 +2836,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNWorklets (0.7.1):
+  - RNWorklets (0.7.4):
     - boost
     - DoubleConversion
     - fast_float
@@ -2863,10 +2863,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNWorklets/worklets (= 0.7.1)
+    - RNWorklets/worklets (= 0.7.4)
     - SocketRocket
     - Yoga
-  - RNWorklets/worklets (0.7.1):
+  - RNWorklets/worklets (0.7.4):
     - boost
     - DoubleConversion
     - fast_float
@@ -2893,10 +2893,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNWorklets/worklets/apple (= 0.7.1)
+    - RNWorklets/worklets/apple (= 0.7.4)
     - SocketRocket
     - Yoga
-  - RNWorklets/worklets/apple (0.7.1):
+  - RNWorklets/worklets/apple (0.7.4):
     - boost
     - DoubleConversion
     - fast_float
@@ -3283,10 +3283,10 @@ SPEC CHECKSUMS:
   ReactTestApp-DevSupport: ea18f446cff64b6c9a3e28788600c82ecf51bde6
   ReactTestApp-Resources: 1bd9ff10e4c24f2ad87101a32023721ae923bccf
   RNGestureHandler: cd4be101cfa17ea6bbd438710caa02e286a84381
-  RNReanimated: 132940c4c15ca2757f4f7d1fd7c9c3c01dbc4689
+  RNReanimated: 8182ef6e805d04dce3618f1a843cb8d2f9ae23b4
   RNScreens: 714e10b6b554f7dc7ad9f78dcf36dc8e3fc73415
   RNSVG: 11354d28dd6cb71a59570b68c91ba6772a2d781d
-  RNWorklets: f2ed333c600377955ac5ab798a14210805de846d
+  RNWorklets: d9fe4a51421f69ce78bb415a7e0710c15fe61150
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 5456bb010373068fc92221140921b09d126b116e
 
