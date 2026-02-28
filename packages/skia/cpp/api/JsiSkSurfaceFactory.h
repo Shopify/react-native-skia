@@ -39,8 +39,10 @@ public:
   JSI_HOST_FUNCTION(MakeOffscreen) {
     auto width = static_cast<int>(arguments[0].asNumber());
     auto height = static_cast<int>(arguments[1].asNumber());
+    bool useP3ColorSpace =
+        count >= 3 && arguments[2].isBool() && arguments[2].getBool();
     auto context = getContext();
-    auto surface = context->makeOffscreenSurface(width, height);
+    auto surface = context->makeOffscreenSurface(width, height, useP3ColorSpace);
     if (surface == nullptr) {
       return jsi::Value::null();
     }
