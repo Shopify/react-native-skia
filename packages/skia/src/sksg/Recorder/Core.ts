@@ -22,6 +22,7 @@ import type {
   AtlasProps,
   DrawingNodeProps,
   SkottieProps,
+  SaveLayerProps,
 } from "../../dom/types";
 
 export enum CommandType {
@@ -107,6 +108,7 @@ interface Props {
   [CommandType.DrawImage]: ImageProps;
   [CommandType.DrawCircle]: CircleProps;
   [CommandType.SaveCTM]: CTMProps;
+  [CommandType.SaveLayer]: SaveLayerProps;
   [CommandType.SavePaint]: DrawingNodeProps;
   [CommandType.PushBlurMaskFilter]: BlurMaskFilterProps;
   [CommandType.DrawPoints]: PointsProps;
