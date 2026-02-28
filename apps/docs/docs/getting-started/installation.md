@@ -25,7 +25,7 @@ npm install @shopify/react-native-skia
 
 ## Postinstall Script
 
-React Native Skia uses a `postinstall` script to download prebuilt Skia binaries. This script **must run** for the library to work. If you see build errors about missing Skia libraries, the postinstall script likely didn't run.
+React Native Skia uses a `postinstall` script to copy prebuilt Skia binaries from its dependency packages. This script **must run** for the library to work. If you see build errors about missing Skia libraries, the postinstall script likely didn't run.
 
 <details>
 <summary><strong>npm / yarn classic</strong></summary>
