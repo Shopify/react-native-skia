@@ -431,4 +431,56 @@ async::AsyncTaskHandle GPUDevice::getLost() {
   _lostHandle = handle;
   return handle;
 }
+void GPUDevice::addEventListener(std::string type, jsi::Function callback) {
+  std::lock_guard<std::mutex> lock(_listenersMutex);
+  auto sharedCallback = std::make_shared<jsi::Function>(std::move(callback));
+  _eventListeners[type].push_back(sharedCallback);
+}
+
+void GPUDevice::removeEventListener(std::string type, jsi::Function callback) {
+  std::lock_guard<std::mutex> lock(_listenersMutex);
+  auto it = _eventListeners.find(type);
+  if (it != _eventListeners.end()) {
+    auto &listeners = it->second;
+    // Remove the last listener of this type (simple approach since we can't
+    // easily compare jsi::Function objects)
+    if (!listeners.empty()) {
+      listeners.pop_back();
+    }
+  }
+}
+
+void GPUDevice::notifyUncapturedError(GPUErrorVariant error) {
+  auto runtime = getCreationRuntime();
+  if (runtime == nullptr) {
+    return;
+  }
+
+  std::vector<std::shared_ptr<jsi::Function>> listeners;
+  {
+    std::lock_guard<std::mutex> lock(_listenersMutex);
+    auto it = _eventListeners.find("uncapturederror");
+    if (it != _eventListeners.end()) {
+      listeners = it->second;
+    }
+  }
+
+  if (listeners.empty()) {
+    return;
+  }
+
+  // Create the event object
+  auto event = std::make_shared<GPUUncapturedErrorEvent>(std::move(error));
+  auto eventValue = GPUUncapturedErrorEvent::create(*runtime, event);
+
+  // Call all listeners
+  for (const auto &listener : listeners) {
+    try {
+      listener->call(*runtime, eventValue);
+    } catch (const std::exception &e) {
+      fprintf(stderr, "Error in uncapturederror listener: %s\n", e.what());
+    }
+  }
+}
+
 } // namespace rnwgpu

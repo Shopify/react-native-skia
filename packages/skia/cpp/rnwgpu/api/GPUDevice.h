@@ -1,11 +1,15 @@
 #pragma once
 
+#include <functional>
+#include <map>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <unordered_set>
 #include <utility>
 #include <variant>
+#include <vector>
 
 #include "descriptors/Unions.h"
 
@@ -15,6 +19,8 @@
 #include "rnwgpu/async/AsyncTaskHandle.h"
 
 #include "webgpu/webgpu_cpp.h"
+
+#include "GPUUncapturedErrorEvent.h"
 
 #include "GPUBindGroup.h"
 #include "GPUBindGroupLayout.h"
@@ -51,6 +57,39 @@ namespace rnwgpu {
 
 namespace jsi = facebook::jsi;
 
+// Forward declaration
+class GPUDevice;
+
+// Static registry to map wgpu::Device handles to GPUDevice instances
+class GPUDeviceRegistry {
+public:
+  static GPUDeviceRegistry &getInstance() {
+    static GPUDeviceRegistry instance;
+    return instance;
+  }
+
+  void registerDevice(WGPUDevice handle, GPUDevice *device) {
+    std::lock_guard<std::mutex> lock(_mutex);
+    _devices[handle] = device;
+  }
+
+  void unregisterDevice(WGPUDevice handle) {
+    std::lock_guard<std::mutex> lock(_mutex);
+    _devices.erase(handle);
+  }
+
+  GPUDevice *getDevice(WGPUDevice handle) {
+    std::lock_guard<std::mutex> lock(_mutex);
+    auto it = _devices.find(handle);
+    return it != _devices.end() ? it->second : nullptr;
+  }
+
+private:
+  GPUDeviceRegistry() = default;
+  std::mutex _mutex;
+  std::map<WGPUDevice, GPUDevice *> _devices;
+};
+
 class GPUDevice : public NativeObject<GPUDevice> {
 public:
   static constexpr const char *CLASS_NAME = "GPUDevice";
@@ -59,7 +98,15 @@ public:
                      std::shared_ptr<async::AsyncRunner> async,
                      std::string label)
       : NativeObject(CLASS_NAME), _instance(instance), _async(async),
-        _label(label) {}
+        _label(label) {
+    // Register this device in the global registry
+    GPUDeviceRegistry::getInstance().registerDevice(_instance.Get(), this);
+  }
+
+  ~GPUDevice() {
+    // Unregister from the global registry
+    GPUDeviceRegistry::getInstance().unregisterDevice(_instance.Get());
+  }
 
 public:
   std::string getBrand() { return CLASS_NAME; }
@@ -104,6 +151,11 @@ public:
   async::AsyncTaskHandle getLost();
   void notifyDeviceLost(wgpu::DeviceLostReason reason, std::string message);
   void forceLossForTesting();
+
+  // Event listener methods
+  void addEventListener(std::string type, jsi::Function callback);
+  void removeEventListener(std::string type, jsi::Function callback);
+  void notifyUncapturedError(GPUErrorVariant error);
 
   std::string getLabel() { return _label; }
   void setLabel(const std::string &label) {
@@ -155,6 +207,10 @@ public:
                         &GPUDevice::setLabel);
     installMethod(runtime, prototype, "forceLossForTesting",
                   &GPUDevice::forceLossForTesting);
+    installMethod(runtime, prototype, "addEventListener",
+                  &GPUDevice::addEventListener);
+    installMethod(runtime, prototype, "removeEventListener",
+                  &GPUDevice::removeEventListener);
   }
 
   inline const wgpu::Device get() { return _instance; }
@@ -169,6 +225,11 @@ private:
   std::shared_ptr<GPUDeviceLostInfo> _lostInfo;
   bool _lostSettled = false;
   std::optional<async::AsyncTaskHandle::ResolveFunction> _lostResolve;
+
+  // Event listeners storage
+  std::mutex _listenersMutex;
+  std::map<std::string, std::vector<std::shared_ptr<jsi::Function>>>
+      _eventListeners;
 };
 
 } // namespace rnwgpu
