@@ -251,13 +251,20 @@ void RNSkApplePlatformContext::raiseError(const std::exception &err) {
   RCTFatal(RCTErrorWithMessage([NSString stringWithUTF8String:err.what()]));
 }
 
+sk_sp<SkSurface>
+RNSkApplePlatformContext::makeOffscreenSurface(int width, int height,
+                                               SkColorType colorType) {
+#if defined(SK_GRAPHITE)
+  return DawnContext::getInstance().MakeOffscreen(width, height, colorType);
+#else
+  return MetalContext::getInstance().MakeOffscreen(width, height, colorType);
+#endif
+}
+
 sk_sp<SkSurface> RNSkApplePlatformContext::makeOffscreenSurface(int width,
                                                                 int height) {
-#if defined(SK_GRAPHITE)
-  return DawnContext::getInstance().MakeOffscreen(width, height);
-#else
-  return MetalContext::getInstance().MakeOffscreen(width, height);
-#endif
+  // Apple/Metal default is BGRA_8888
+  return makeOffscreenSurface(width, height, kBGRA_8888_SkColorType);
 }
 
 sk_sp<SkImage>
