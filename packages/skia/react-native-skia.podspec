@@ -1,10 +1,8 @@
 # @shopify/react-native-skia.podspec
 
 require "json"
-require "pathname"
 
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
-podspec_dir = Pathname.new(__dir__)
 
 # Resolve npm package path using Node.js resolution (handles monorepos, pnpm, etc.)
 resolve_skia_package = lambda do |package_name, required: true|
@@ -89,15 +87,21 @@ framework_names = ['libskia', 'libsvg', 'libskshaper', 'libskparagraph',
                    'libskunicode_core', 'libskunicode_libgrapheme',
                    'libskottie', 'libsksg']
 
-# Helper to compute relative path from podspec directory
-relative_path = lambda do |absolute_path|
-  Pathname.new(absolute_path).relative_path_from(podspec_dir).to_s
-end
+# Build platform-specific framework paths (relative to pod's libs directory)
+ios_frameworks = framework_names.map { |f| "libs/ios/#{f}.xcframework" }
+osx_frameworks = framework_names.map { |f| "libs/macos/#{f}.xcframework" }
+tvos_frameworks = tvos_package ? framework_names.map { |f| "libs/tvos/#{f}.xcframework" } : []
 
-# Build platform-specific framework paths (relative paths for CocoaPods)
-ios_frameworks = framework_names.map { |f| relative_path.call("#{ios_package}/libs/#{f}.xcframework") }
-osx_frameworks = framework_names.map { |f| relative_path.call("#{macos_package}/libs/#{f}.xcframework") }
-tvos_frameworks = tvos_package ? framework_names.map { |f| relative_path.call("#{tvos_package}/libs/#{f}.xcframework") } : []
+# Prepare command to copy xcframeworks from npm packages into pod directory
+prepare_commands = []
+prepare_commands << "rm -rf libs/ios libs/macos libs/tvos"
+prepare_commands << "mkdir -p libs/ios libs/macos"
+prepare_commands << "cp -R '#{ios_package}/libs/'*.xcframework libs/ios/"
+prepare_commands << "cp -R '#{macos_package}/libs/'*.xcframework libs/macos/"
+if tvos_package
+  prepare_commands << "mkdir -p libs/tvos"
+  prepare_commands << "cp -R '#{tvos_package}/libs/'*.xcframework libs/tvos/"
+end
 
 Pod::Spec.new do |s|
   s.name         = "react-native-skia"
@@ -116,6 +120,9 @@ Pod::Spec.new do |s|
   s.platforms    = { :ios => "14.0", :tvos => "13.0", :osx => "11" }
   s.source       = { :git => "https://github.com/shopify/react-native-skia/react-native-skia.git", :tag => "#{s.version}" }
 
+  # Copy xcframeworks from npm packages into pod directory structure
+  s.prepare_command = prepare_commands.join(" && ")
+
   s.requires_arc = true
   s.pod_target_xcconfig = {
     'GCC_PREPROCESSOR_DEFINITIONS' => preprocessor_defs,
@@ -126,7 +133,7 @@ Pod::Spec.new do |s|
 
   s.frameworks = ['MetalKit', 'AVFoundation', 'AVKit', 'CoreMedia']
 
-  # Platform-specific vendored frameworks (absolute paths to npm packages)
+  # Platform-specific vendored frameworks (copied into libs/)
   s.ios.vendored_frameworks = ios_frameworks
   s.osx.vendored_frameworks = osx_frameworks
 
@@ -134,6 +141,9 @@ Pod::Spec.new do |s|
   unless use_graphite
     s.tvos.vendored_frameworks = tvos_frameworks
   end
+
+  # Preserve the copied libs directory
+  s.preserve_paths = ["libs/**/*"]
 
   # All iOS cpp/h files
   s.source_files = [
