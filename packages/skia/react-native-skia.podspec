@@ -1,8 +1,10 @@
 # @shopify/react-native-skia.podspec
 
 require "json"
+require "pathname"
 
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
+podspec_dir = Pathname.new(__dir__)
 
 # Resolve npm package path using Node.js resolution (handles monorepos, pnpm, etc.)
 resolve_skia_package = lambda do |package_name, required: true|
@@ -87,10 +89,15 @@ framework_names = ['libskia', 'libsvg', 'libskshaper', 'libskparagraph',
                    'libskunicode_core', 'libskunicode_libgrapheme',
                    'libskottie', 'libsksg']
 
-# Build platform-specific framework paths (absolute paths to npm packages)
-ios_frameworks = framework_names.map { |f| "#{ios_package}/libs/#{f}.xcframework" }
-osx_frameworks = framework_names.map { |f| "#{macos_package}/libs/#{f}.xcframework" }
-tvos_frameworks = tvos_package ? framework_names.map { |f| "#{tvos_package}/libs/#{f}.xcframework" } : []
+# Helper to compute relative path from podspec directory
+relative_path = lambda do |absolute_path|
+  Pathname.new(absolute_path).relative_path_from(podspec_dir).to_s
+end
+
+# Build platform-specific framework paths (relative paths for CocoaPods)
+ios_frameworks = framework_names.map { |f| relative_path.call("#{ios_package}/libs/#{f}.xcframework") }
+osx_frameworks = framework_names.map { |f| relative_path.call("#{macos_package}/libs/#{f}.xcframework") }
+tvos_frameworks = tvos_package ? framework_names.map { |f| relative_path.call("#{tvos_package}/libs/#{f}.xcframework") } : []
 
 Pod::Spec.new do |s|
   s.name         = "react-native-skia"
