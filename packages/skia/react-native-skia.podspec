@@ -5,7 +5,7 @@ require "json"
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
 # Resolve npm package path using Node.js resolution (handles monorepos, pnpm, etc.)
-def resolve_skia_package(package_name, required: true)
+resolve_skia_package = lambda do |package_name, required: true|
   begin
     # Use node to resolve the package - this handles all edge cases:
     # - Hoisted packages in monorepos
@@ -53,9 +53,9 @@ end
 # Resolve Skia binary packages
 prefix = use_graphite ? "react-native-skia-graphite" : "react-native-skia"
 
-ios_package = resolve_skia_package("#{prefix}-apple-ios")
-macos_package = resolve_skia_package("#{prefix}-apple-macos")
-tvos_package = use_graphite ? nil : resolve_skia_package("#{prefix}-apple-tvos", required: false)
+ios_package = resolve_skia_package.call("#{prefix}-apple-ios")
+macos_package = resolve_skia_package.call("#{prefix}-apple-macos")
+tvos_package = use_graphite ? nil : resolve_skia_package.call("#{prefix}-apple-tvos", required: false)
 
 puts "-- Skia iOS package: #{ios_package}"
 puts "-- Skia macOS package: #{macos_package}"
