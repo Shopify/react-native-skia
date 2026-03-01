@@ -36,4 +36,5 @@ export type Routes = {
   FirstFrame: undefined;
   FirstFrameEmpty: undefined;
   PictureBug: undefined;
+  Atlas: undefined;
 };

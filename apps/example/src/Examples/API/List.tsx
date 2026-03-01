@@ -146,6 +146,10 @@ export const examples = [
     screen: "PictureBug",
     title: "Picture Render Bug",
   },
+  {
+    screen: "Atlas",
+    title: "🎯 Atlas",
+  },
 ] as const;
 
 const styles = StyleSheet.create({

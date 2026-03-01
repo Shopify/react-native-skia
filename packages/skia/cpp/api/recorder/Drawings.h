@@ -935,7 +935,7 @@ public:
     convertProperty(runtime, object, "sprites", props.sprites, variables);
     convertProperty(runtime, object, "transforms", props.transforms, variables);
     convertProperty(runtime, object, "colors", props.colors, variables);
-    convertProperty(runtime, object, "blendMode", props.blendMode, variables);
+    convertProperty(runtime, object, "colorBlendMode", props.blendMode, variables);
     convertProperty(runtime, object, "sampling", props.sampling, variables);
   }
 
