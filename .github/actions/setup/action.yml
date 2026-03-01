@@ -25,7 +25,7 @@ runs:
         cache-dependency-path: yarn.lock
         registry-url: 'https://registry.npmjs.org'
 
-    - name: Upgrade npm for OIDC support
+    - name: Upgrade npm
       run: npm install -g npm@latest
       shell: bash
 
@@ -35,11 +35,3 @@ runs:
       env:
         SK_GRAPHITE: ${{ inputs.graphite == 'true' && '1' || '' }}
         SKIP_SKIA_DOWNLOAD: ${{ inputs.download_skia == 'false' && '1' || '' }}
-
-    - name: Copy Artifacts to libs folder
-      if: ${{ inputs.download_skia == 'true' }}
-      working-directory: packages/skia
-      run: yarn install-skia
-      shell: bash
-      env:
-        SK_GRAPHITE: ${{ inputs.graphite == 'true' && '1' || '' }}
