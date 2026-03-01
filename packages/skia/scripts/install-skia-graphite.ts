@@ -1,0 +1,424 @@
+/**
+ * Install Skia Graphite prebuilt binaries
+ *
+ * This script downloads Graphite-enabled Skia binaries from GitHub releases,
+ * verifies checksums, and sets up the Skia submodule to the matching version.
+ */
+
+import { execSync } from "child_process";
+import { createHash } from "crypto";
+import {
+  createWriteStream,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+} from "fs";
+import https from "https";
+import path from "path";
+import { createGunzip } from "zlib";
+import { extract } from "tar";
+import { fileOps } from "./utils";
+
+// Graphite configuration
+const GRAPHITE_CONFIG = {
+  version: "m142b",
+  checksums: {
+    "android-armeabi-v7a":
+      "3e40f44c804194fa0983c46903f834e8f834c6dd96534c7fa1b4ebb4f409527d",
+    "android-arm64-v8a":
+      "d6c3035449fcf7ef13369b0d6c4ef41f3177d15074eeb195201e0ba4cfb2f527",
+    "android-x86":
+      "6dc229847420b8a43c15098cdcb4fe45b2df20a38ad69f37e0aa91c832499c2a",
+    "android-x86_64":
+      "ecae351d98af3b175d40d894520c2e3263034276bb0b0e9d2f9c19ba7dc046fa",
+    "apple-ios-xcframeworks":
+      "6f60f03faaeebfb798615d09715040790ff95e75bf95028893ced6f514ab5196",
+    "apple-macos-xcframeworks":
+      "07467cd1778053537528ed91c7a35d116e1a4644819f0aad8e06e7d884591dea",
+  },
+} as const;
+
+const SCRIPT_DIR = __dirname;
+const PACKAGE_ROOT = path.resolve(SCRIPT_DIR, "..");
+const REPO_ROOT = path.resolve(PACKAGE_ROOT, "../..");
+const SKIA_DIR = path.resolve(REPO_ROOT, "externals/skia");
+const LIBS_DIR = path.resolve(PACKAGE_ROOT, "libs");
+
+// Get the base Skia version (e.g., "m142b" -> "m142")
+const getBaseVersion = (version: string): string => {
+  const match = version.match(/^(m\d+)/);
+  return match ? match[1] : version;
+};
+
+// Get the GitHub release tag
+const getReleaseTag = (version: string): string => {
+  const baseVersion = getBaseVersion(version);
+  return `skia-graphite-${baseVersion}`;
+};
+
+// Get the download URL for an asset
+const getDownloadUrl = (assetName: string): string => {
+  const releaseTag = getReleaseTag(GRAPHITE_CONFIG.version);
+  return `https://github.com/Shopify/react-native-skia/releases/download/${releaseTag}/${assetName}`;
+};
+
+// Calculate directory checksum (matches the format used for verification)
+const calculateDirectoryChecksum = (dirPath: string): string => {
+  const hash = createHash("sha256");
+  const processDir = (dir: string, relativePath: string = "") => {
+    const entries = readdirSync(dir).sort();
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry);
+      const entryRelativePath = path.join(relativePath, entry);
+      const stat = statSync(fullPath);
+      if (stat.isDirectory()) {
+        processDir(fullPath, entryRelativePath);
+      } else {
+        hash.update(entryRelativePath);
+        hash.update(readFileSync(fullPath));
+      }
+    }
+  };
+  processDir(dirPath);
+  return hash.digest("hex");
+};
+
+// Download a file with redirect support
+const downloadFile = (url: string, destPath: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const file = createWriteStream(destPath);
+    const request = (currentUrl: string, redirectCount = 0) => {
+      if (redirectCount > 5) {
+        reject(new Error("Too many redirects"));
+        return;
+      }
+
+      https
+        .get(currentUrl, (response) => {
+          if (
+            response.statusCode &&
+            response.statusCode >= 300 &&
+            response.statusCode < 400 &&
+            response.headers.location
+          ) {
+            request(response.headers.location, redirectCount + 1);
+            return;
+          }
+
+          if (response.statusCode !== 200) {
+            reject(new Error(`HTTP ${response.statusCode}: ${currentUrl}`));
+            return;
+          }
+
+          response.pipe(file);
+          file.on("finish", () => {
+            file.close();
+            resolve();
+          });
+        })
+        .on("error", (err) => {
+          rmSync(destPath, { force: true });
+          reject(err);
+        });
+    };
+    request(url);
+  });
+};
+
+// Extract a tar.gz file
+const extractTarGz = async (
+  tarPath: string,
+  destDir: string
+): Promise<void> => {
+  mkdirSync(destDir, { recursive: true });
+  await extract({
+    file: tarPath,
+    cwd: destDir,
+  });
+};
+
+// Download and extract an asset
+const downloadAndExtract = async (
+  assetName: string,
+  destDir: string,
+  expectedChecksum?: string
+): Promise<void> => {
+  const url = getDownloadUrl(assetName);
+  const tempFile = path.join(LIBS_DIR, `${assetName}.tmp`);
+
+  console.log(`  Downloading ${assetName}...`);
+
+  await downloadFile(url, tempFile);
+
+  // Extract
+  console.log(`  Extracting to ${destDir}...`);
+  if (existsSync(destDir)) {
+    rmSync(destDir, { recursive: true, force: true });
+  }
+  await extractTarGz(tempFile, destDir);
+
+  // Cleanup temp file
+  rmSync(tempFile, { force: true });
+
+  // Verify checksum if provided
+  if (expectedChecksum) {
+    console.log(`  Verifying checksum...`);
+    const actualChecksum = calculateDirectoryChecksum(destDir);
+    if (actualChecksum !== expectedChecksum) {
+      throw new Error(
+        `Checksum mismatch for ${assetName}:\n` +
+          `  Expected: ${expectedChecksum}\n` +
+          `  Actual:   ${actualChecksum}`
+      );
+    }
+    console.log(`  ✓ Checksum verified`);
+  }
+};
+
+// Checkout the Skia submodule to the correct branch
+const checkoutSkiaSubmodule = (): void => {
+  const baseVersion = getBaseVersion(GRAPHITE_CONFIG.version);
+  const branchName = `chrome/${baseVersion}`;
+
+  console.log(`\n📦 Checking out Skia submodule to ${branchName}...`);
+
+  try {
+    // Fetch the branch
+    execSync(`git -C "${SKIA_DIR}" fetch origin ${branchName}`, {
+      stdio: "inherit",
+    });
+
+    // Checkout the branch
+    execSync(`git -C "${SKIA_DIR}" checkout ${branchName} --`, {
+      stdio: "inherit",
+    });
+
+    console.log(`  ✓ Skia submodule checked out to ${branchName}`);
+  } catch (error) {
+    console.error(`  ✗ Failed to checkout Skia submodule`);
+    throw error;
+  }
+};
+
+// Copy Skia headers from submodule
+const copySkiaHeaders = (): void => {
+  console.log(`\n📋 Copying Skia headers from submodule...`);
+
+  const skiaIncludeSrc = path.join(SKIA_DIR, "include");
+  const skiaIncludeDest = path.join(PACKAGE_ROOT, "cpp/skia/include");
+
+  // Clean existing headers
+  fileOps.rm(path.join(PACKAGE_ROOT, "cpp/skia"));
+  fileOps.mkdir(path.join(PACKAGE_ROOT, "cpp/skia/include"));
+  fileOps.mkdir(path.join(PACKAGE_ROOT, "cpp/skia/modules"));
+  fileOps.mkdir(path.join(PACKAGE_ROOT, "cpp/skia/src"));
+
+  // Copy main include directory
+  fileOps.cp(skiaIncludeSrc, skiaIncludeDest);
+
+  // Copy modules
+  const modules = [
+    "svg",
+    "skresources",
+    "skparagraph",
+    "skshaper",
+    "skottie",
+    "sksg",
+  ];
+  for (const mod of modules) {
+    const srcInclude = path.join(SKIA_DIR, `modules/${mod}/include`);
+    const destInclude = path.join(PACKAGE_ROOT, `cpp/skia/modules/${mod}`);
+    fileOps.rm(destInclude);
+    fileOps.cp(srcInclude, destInclude);
+  }
+
+  // Copy jsonreader module
+  fileOps.rm(path.join(PACKAGE_ROOT, "cpp/skia/modules/jsonreader"));
+  fileOps.cp(
+    path.join(SKIA_DIR, "modules/jsonreader"),
+    path.join(PACKAGE_ROOT, "cpp/skia/modules/jsonreader")
+  );
+
+  // Copy skottie src files
+  fileOps.rm(path.join(PACKAGE_ROOT, "cpp/skia/modules/skottie/src"));
+  fileOps.mkdir(path.join(PACKAGE_ROOT, "cpp/skia/modules/skottie/src"));
+  fileOps.mkdir(path.join(PACKAGE_ROOT, "cpp/skia/modules/skottie/src/text"));
+  fileOps.mkdir(
+    path.join(PACKAGE_ROOT, "cpp/skia/modules/skottie/src/animator")
+  );
+
+  const skottieSrcFiles = [
+    "src/SkottieValue.h",
+    "src/text/TextAdapter.h",
+    "src/text/Font.h",
+    "src/animator/Animator.h",
+    "src/animator/KeyframeAnimator.h",
+  ];
+  for (const file of skottieSrcFiles) {
+    fileOps.cp(
+      path.join(SKIA_DIR, `modules/skottie/${file}`),
+      path.join(PACKAGE_ROOT, `cpp/skia/modules/skottie/${file}`)
+    );
+  }
+
+  // Copy Graphite-specific source files
+  fileOps.mkdir(path.join(PACKAGE_ROOT, "cpp/skia/src/gpu/graphite"));
+  const graphiteSrcFiles = [
+    "src/gpu/graphite/ContextOptionsPriv.h",
+    "src/gpu/graphite/ResourceTypes.h",
+    "src/gpu/graphite/TextureProxyView.h",
+  ];
+  for (const file of graphiteSrcFiles) {
+    if (existsSync(path.join(SKIA_DIR, file))) {
+      fileOps.cp(
+        path.join(SKIA_DIR, file),
+        path.join(PACKAGE_ROOT, `cpp/skia/${file}`)
+      );
+    }
+  }
+
+  console.log(`  ✓ Skia headers copied`);
+};
+
+// Copy Dawn/WebGPU headers from the release
+const copyDawnHeaders = async (): Promise<void> => {
+  console.log(`\n📋 Downloading and copying Dawn/WebGPU headers...`);
+
+  const releaseTag = getReleaseTag(GRAPHITE_CONFIG.version);
+  const headersAsset = `skia-graphite-headers-${releaseTag}.tar.gz`;
+  const headersDir = path.join(LIBS_DIR, "graphite-headers-temp");
+
+  // Download headers
+  await downloadAndExtract(headersAsset, headersDir);
+
+  // Copy Dawn headers to cpp/dawn
+  const dawnDest = path.join(PACKAGE_ROOT, "cpp/dawn/include");
+  fileOps.rm(path.join(PACKAGE_ROOT, "cpp/dawn"));
+  fileOps.mkdir(dawnDest);
+
+  // The headers archive should contain dawn/include structure
+  const extractedDawnPath = path.join(headersDir, "dawn/include");
+  if (existsSync(extractedDawnPath)) {
+    fileOps.cp(extractedDawnPath, dawnDest);
+  } else {
+    // Try alternative structure
+    const altPath = path.join(headersDir, "include");
+    if (existsSync(altPath)) {
+      fileOps.cp(altPath, dawnDest);
+    }
+  }
+
+  // Fix WebGPU header references
+  const dawnProcTable = path.join(dawnDest, "dawn/dawn_proc_table.h");
+  if (existsSync(dawnProcTable)) {
+    fileOps.sed(
+      dawnProcTable,
+      /#include "dawn\/webgpu\.h"/g,
+      '#include "webgpu/webgpu.h"'
+    );
+  }
+
+  // Create webgpu directory and copy headers
+  fileOps.mkdir(path.join(dawnDest, "webgpu"));
+  const webgpuH = path.join(dawnDest, "dawn/webgpu.h");
+  const webgpuCppH = path.join(dawnDest, "dawn/webgpu_cpp.h");
+  if (existsSync(webgpuH)) {
+    fileOps.cp(webgpuH, path.join(dawnDest, "webgpu/webgpu.h"));
+    fileOps.rm(webgpuH);
+  }
+  if (existsSync(webgpuCppH)) {
+    fileOps.cp(webgpuCppH, path.join(dawnDest, "webgpu/webgpu_cpp.h"));
+    fileOps.rm(webgpuCppH);
+  }
+
+  // Cleanup
+  fileOps.rm(path.join(dawnDest, "dawn/wire"));
+  const webgpuPrintH = path.join(dawnDest, "webgpu/webgpu_cpp_print.h");
+  if (existsSync(webgpuPrintH)) {
+    fileOps.rm(webgpuPrintH);
+  }
+
+  // Cleanup temp directory
+  rmSync(headersDir, { recursive: true, force: true });
+
+  console.log(`  ✓ Dawn/WebGPU headers copied`);
+};
+
+// Download Android libraries
+const downloadAndroidLibs = async (): Promise<void> => {
+  console.log(`\n📱 Downloading Android Graphite libraries...`);
+
+  const androidAbis = [
+    { name: "armeabi-v7a", asset: "android-arm" },
+    { name: "arm64-v8a", asset: "android-arm-64" },
+    { name: "x86", asset: "android-arm-x86" },
+    { name: "x86_64", asset: "android-arm-x64" },
+  ];
+
+  const releaseTag = getReleaseTag(GRAPHITE_CONFIG.version);
+
+  for (const abi of androidAbis) {
+    const checksumKey =
+      `android-${abi.name}` as keyof typeof GRAPHITE_CONFIG.checksums;
+    const expectedChecksum = GRAPHITE_CONFIG.checksums[checksumKey];
+    const assetName = `skia-graphite-${abi.asset}-${releaseTag}.tar.gz`;
+    const destDir = path.join(LIBS_DIR, "android", abi.name);
+
+    await downloadAndExtract(assetName, destDir, expectedChecksum);
+  }
+
+  console.log(`  ✓ Android libraries downloaded`);
+};
+
+// Download Apple libraries
+const downloadAppleLibs = async (): Promise<void> => {
+  console.log(`\n🍎 Downloading Apple Graphite libraries...`);
+
+  const releaseTag = getReleaseTag(GRAPHITE_CONFIG.version);
+  const assetName = `skia-graphite-apple-xcframeworks-${releaseTag}.tar.gz`;
+  const destDir = path.join(LIBS_DIR, "apple");
+
+  // Note: The checksum might be for combined iOS+macOS or separate
+  // Using iOS checksum for now
+  await downloadAndExtract(
+    assetName,
+    destDir,
+    GRAPHITE_CONFIG.checksums["apple-ios-xcframeworks"]
+  );
+
+  console.log(`  ✓ Apple libraries downloaded`);
+};
+
+// Main installation function
+const install = async (): Promise<void> => {
+  console.log(`\n🚀 Installing Skia Graphite ${GRAPHITE_CONFIG.version}\n`);
+  console.log(`   Release tag: ${getReleaseTag(GRAPHITE_CONFIG.version)}`);
+  console.log(`   Skia branch: chrome/${getBaseVersion(GRAPHITE_CONFIG.version)}`);
+
+  // Ensure libs directory exists
+  mkdirSync(LIBS_DIR, { recursive: true });
+
+  // Checkout Skia submodule to matching version
+  checkoutSkiaSubmodule();
+
+  // Copy Skia headers
+  copySkiaHeaders();
+
+  // Download and copy Dawn/WebGPU headers
+  await copyDawnHeaders();
+
+  // Download platform libraries
+  await downloadAndroidLibs();
+  await downloadAppleLibs();
+
+  console.log(`\n✅ Skia Graphite ${GRAPHITE_CONFIG.version} installed successfully!\n`);
+};
+
+// Run installation
+install().catch((error) => {
+  console.error(`\n❌ Installation failed: ${error.message}\n`);
+  process.exit(1);
+});
