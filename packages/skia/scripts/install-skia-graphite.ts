@@ -27,17 +27,15 @@ const GRAPHITE_CONFIG = {
   version: "m142b",
   checksums: {
     "android-armeabi-v7a":
-      "3e40f44c804194fa0983c46903f834e8f834c6dd96534c7fa1b4ebb4f409527d",
+      "e0103cf59061e4727e371eea9267cdbca112ed9153b539427a5ebbd95852df45",
     "android-arm64-v8a":
-      "d6c3035449fcf7ef13369b0d6c4ef41f3177d15074eeb195201e0ba4cfb2f527",
+      "058d4b7070719b7c2759dd0712f9fddb276a596011aa61c64ebfec6521d53f7b",
     "android-x86":
-      "6dc229847420b8a43c15098cdcb4fe45b2df20a38ad69f37e0aa91c832499c2a",
+      "e49b2c150250b407fe777e3814cdc6c7b141e7d8f7a2d92ea2cc5b2a6d3c4438",
     "android-x86_64":
-      "ecae351d98af3b175d40d894520c2e3263034276bb0b0e9d2f9c19ba7dc046fa",
-    "apple-ios-xcframeworks":
-      "6f60f03faaeebfb798615d09715040790ff95e75bf95028893ced6f514ab5196",
-    "apple-macos-xcframeworks":
-      "07467cd1778053537528ed91c7a35d116e1a4644819f0aad8e06e7d884591dea",
+      "bcdc22be78cb4acf6d1eb9a77254c2008c7b1b418a219ac054b1e6bd2ae39c72",
+    "apple-xcframeworks":
+      "b76635b99772496cf4b122e1ba6d22fb5fb33cc0497283adba2f6b41529b4cd7",
   },
 } as const;
 
@@ -191,8 +189,8 @@ const checkoutSkiaSubmodule = (): void => {
       stdio: "inherit",
     });
 
-    // Checkout the branch
-    execSync(`git -C "${SKIA_DIR}" checkout ${branchName} --`, {
+    // Checkout the fetched branch (use origin/ prefix since it's a remote branch)
+    execSync(`git -C "${SKIA_DIR}" checkout origin/${branchName} --`, {
       stdio: "inherit",
     });
 
@@ -379,15 +377,38 @@ const downloadAppleLibs = async (): Promise<void> => {
 
   const releaseTag = getReleaseTag(GRAPHITE_CONFIG.version);
   const assetName = `skia-graphite-apple-xcframeworks-${releaseTag}.tar.gz`;
-  const destDir = path.join(LIBS_DIR, "apple");
+  const tempDir = path.join(LIBS_DIR, "apple-temp");
 
-  // Note: The checksum might be for combined iOS+macOS or separate
-  // Using iOS checksum for now
   await downloadAndExtract(
     assetName,
-    destDir,
-    GRAPHITE_CONFIG.checksums["apple-ios-xcframeworks"]
+    tempDir,
+    GRAPHITE_CONFIG.checksums["apple-xcframeworks"]
   );
+
+  // Move xcframeworks from nested 'apple' directory to ios/macos directories
+  const extractedAppleDir = path.join(tempDir, "apple");
+  const iosDir = path.join(LIBS_DIR, "ios");
+  const macosDir = path.join(LIBS_DIR, "macos");
+
+  // Clean and create destination directories
+  fileOps.rm(iosDir);
+  fileOps.rm(macosDir);
+  fileOps.mkdir(iosDir);
+  fileOps.mkdir(macosDir);
+
+  // Copy xcframeworks to both ios and macos (they're universal)
+  if (existsSync(extractedAppleDir)) {
+    const xcframeworks = readdirSync(extractedAppleDir).filter((f) =>
+      f.endsWith(".xcframework")
+    );
+    for (const xcf of xcframeworks) {
+      fileOps.cp(path.join(extractedAppleDir, xcf), path.join(iosDir, xcf));
+      fileOps.cp(path.join(extractedAppleDir, xcf), path.join(macosDir, xcf));
+    }
+  }
+
+  // Cleanup temp directory
+  rmSync(tempDir, { recursive: true, force: true });
 
   console.log(`  ✓ Apple libraries downloaded`);
 };
