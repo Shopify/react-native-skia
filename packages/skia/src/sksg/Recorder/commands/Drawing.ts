@@ -306,8 +306,9 @@ export const drawPicture = (ctx: DrawingContext, props: PictureProps) => {
 
 export const drawAtlas = (ctx: DrawingContext, props: AtlasProps) => {
   "worklet";
-  const { image, sprites, transforms, colors, blendMode, sampling } = props;
-  const blend = blendMode ? BlendMode[enumKey(blendMode)] : undefined;
+  const { image, sprites, transforms, colors, colorBlendMode, sampling } =
+    props;
+  const blend = colorBlendMode ? BlendMode[enumKey(colorBlendMode)] : undefined;
   if (image) {
     ctx.canvas.drawAtlas(
       image,
