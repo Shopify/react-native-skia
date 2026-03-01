@@ -35,3 +35,8 @@ runs:
       env:
         SK_GRAPHITE: ${{ inputs.graphite == 'true' && '1' || '' }}
         SKIP_SKIA_DOWNLOAD: ${{ inputs.download_skia == 'false' && '1' || '' }}
+    
+    - name: Copy Skia headers
+      working-directory: packages/skia
+      run: yarn copy-skia-headers
+      shell: bash
