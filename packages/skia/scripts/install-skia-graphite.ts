@@ -18,8 +18,10 @@ import {
 } from "fs";
 import https from "https";
 import path from "path";
-import { createGunzip } from "zlib";
+
 import { extract } from "tar";
+
+import { copyHeaders } from "./skia-configuration";
 import { fileOps } from "./utils";
 
 // Graphite configuration
@@ -201,86 +203,6 @@ const checkoutSkiaSubmodule = (): void => {
   }
 };
 
-// Copy Skia headers from submodule
-const copySkiaHeaders = (): void => {
-  console.log(`\n📋 Copying Skia headers from submodule...`);
-
-  const skiaIncludeSrc = path.join(SKIA_DIR, "include");
-  const skiaIncludeDest = path.join(PACKAGE_ROOT, "cpp/skia/include");
-
-  // Clean existing headers
-  fileOps.rm(path.join(PACKAGE_ROOT, "cpp/skia"));
-  fileOps.mkdir(path.join(PACKAGE_ROOT, "cpp/skia/include"));
-  fileOps.mkdir(path.join(PACKAGE_ROOT, "cpp/skia/modules"));
-  fileOps.mkdir(path.join(PACKAGE_ROOT, "cpp/skia/src"));
-
-  // Copy main include directory
-  fileOps.cp(skiaIncludeSrc, skiaIncludeDest);
-
-  // Copy modules
-  const modules = [
-    "svg",
-    "skresources",
-    "skparagraph",
-    "skshaper",
-    "skottie",
-    "sksg",
-  ];
-  for (const mod of modules) {
-    const srcInclude = path.join(SKIA_DIR, `modules/${mod}/include`);
-    const destInclude = path.join(PACKAGE_ROOT, `cpp/skia/modules/${mod}`);
-    fileOps.rm(destInclude);
-    fileOps.cp(srcInclude, destInclude);
-  }
-
-  // Copy jsonreader module
-  fileOps.rm(path.join(PACKAGE_ROOT, "cpp/skia/modules/jsonreader"));
-  fileOps.cp(
-    path.join(SKIA_DIR, "modules/jsonreader"),
-    path.join(PACKAGE_ROOT, "cpp/skia/modules/jsonreader")
-  );
-
-  // Copy skottie src files
-  fileOps.rm(path.join(PACKAGE_ROOT, "cpp/skia/modules/skottie/src"));
-  fileOps.mkdir(path.join(PACKAGE_ROOT, "cpp/skia/modules/skottie/src"));
-  fileOps.mkdir(path.join(PACKAGE_ROOT, "cpp/skia/modules/skottie/src/text"));
-  fileOps.mkdir(
-    path.join(PACKAGE_ROOT, "cpp/skia/modules/skottie/src/animator")
-  );
-
-  const skottieSrcFiles = [
-    "src/SkottieValue.h",
-    "src/text/TextAdapter.h",
-    "src/text/Font.h",
-    "src/animator/Animator.h",
-    "src/animator/KeyframeAnimator.h",
-  ];
-  for (const file of skottieSrcFiles) {
-    fileOps.cp(
-      path.join(SKIA_DIR, `modules/skottie/${file}`),
-      path.join(PACKAGE_ROOT, `cpp/skia/modules/skottie/${file}`)
-    );
-  }
-
-  // Copy Graphite-specific source files
-  fileOps.mkdir(path.join(PACKAGE_ROOT, "cpp/skia/src/gpu/graphite"));
-  const graphiteSrcFiles = [
-    "src/gpu/graphite/ContextOptionsPriv.h",
-    "src/gpu/graphite/ResourceTypes.h",
-    "src/gpu/graphite/TextureProxyView.h",
-  ];
-  for (const file of graphiteSrcFiles) {
-    if (existsSync(path.join(SKIA_DIR, file))) {
-      fileOps.cp(
-        path.join(SKIA_DIR, file),
-        path.join(PACKAGE_ROOT, `cpp/skia/${file}`)
-      );
-    }
-  }
-
-  console.log(`  ✓ Skia headers copied`);
-};
-
 // Copy Dawn/WebGPU headers from the release
 const copyDawnHeaders = async (): Promise<void> => {
   console.log(`\n📋 Downloading and copying Dawn/WebGPU headers...`);
@@ -417,7 +339,9 @@ const downloadAppleLibs = async (): Promise<void> => {
 const install = async (): Promise<void> => {
   console.log(`\n🚀 Installing Skia Graphite ${GRAPHITE_CONFIG.version}\n`);
   console.log(`   Release tag: ${getReleaseTag(GRAPHITE_CONFIG.version)}`);
-  console.log(`   Skia branch: chrome/${getBaseVersion(GRAPHITE_CONFIG.version)}`);
+  console.log(
+    `   Skia branch: chrome/${getBaseVersion(GRAPHITE_CONFIG.version)}`
+  );
 
   // Ensure libs directory exists
   mkdirSync(LIBS_DIR, { recursive: true });
@@ -426,7 +350,7 @@ const install = async (): Promise<void> => {
   checkoutSkiaSubmodule();
 
   // Copy Skia headers
-  copySkiaHeaders();
+  copyHeaders();
 
   // Download and copy Dawn/WebGPU headers
   await copyDawnHeaders();
@@ -435,7 +359,9 @@ const install = async (): Promise<void> => {
   await downloadAndroidLibs();
   await downloadAppleLibs();
 
-  console.log(`\n✅ Skia Graphite ${GRAPHITE_CONFIG.version} installed successfully!\n`);
+  console.log(
+    `\n✅ Skia Graphite ${GRAPHITE_CONFIG.version} installed successfully!\n`
+  );
 };
 
 // Run installation
