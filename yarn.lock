@@ -7843,6 +7843,10 @@ __metadata:
     react-native: 0.83.1
     react-native-builder-bob: 0.18.2
     react-native-reanimated: ^4.2.1
+    react-native-skia-android: 144.3.0
+    react-native-skia-apple-ios: 144.3.0
+    react-native-skia-apple-macos: 144.3.0
+    react-native-skia-apple-tvos: 144.3.0
     react-native-worklets: ^0.7.0
     react-reconciler: 0.31.0
     rimraf: 3.0.2
@@ -16087,13 +16091,13 @@ __metadata:
   linkType: hard
 
 "fast-xml-parser@npm:^4.0.0, fast-xml-parser@npm:^4.4.1":
-  version: 4.5.3
-  resolution: "fast-xml-parser@npm:4.5.3"
+  version: 4.5.4
+  resolution: "fast-xml-parser@npm:4.5.4"
   dependencies:
-    strnum: ^1.1.1
+    strnum: ^1.0.5
   bin:
     fxparser: src/cli/cli.js
-  checksum: cd6a184941ec6c23f9e6b514421a3f396cfdff5f4a8c7c27bd0eff896edb4a2b55c27da16f09b789663613dfc4933602b9b71ac3e9d1d2ddcc0492fc46c8fa52
+  checksum: 29db513a5f0ad5ac33691c27d67315ee22e041b5e8fa5982f8bccf46af400e35c576c17f3087f1b8d4cd81fa91519f5fda4b2a31441ff1bf7596ecc5e934f44d
   languageName: node
   linkType: hard
 
@@ -28015,6 +28019,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-skia-android@npm:144.3.0":
+  version: 144.3.0
+  resolution: "react-native-skia-android@npm:144.3.0"
+  checksum: 8b790165b2fbb394ed699f6393aac127d668098a0b38c790584ef15ff577a9a12ecccc3c005506742a4c52035a1761877e496316f4e27f1e0e2fd2b08a2757a6
+  languageName: node
+  linkType: hard
+
+"react-native-skia-apple-ios@npm:144.3.0":
+  version: 144.3.0
+  resolution: "react-native-skia-apple-ios@npm:144.3.0"
+  checksum: 81610efe0b85debc3836b2cce54960079a6616479a8653aa56bf97d411143336a6a753811e80e31c4eb102dc71ad745e984d70ead7faa95c9da1b50a309f43e2
+  languageName: node
+  linkType: hard
+
+"react-native-skia-apple-macos@npm:144.3.0":
+  version: 144.3.0
+  resolution: "react-native-skia-apple-macos@npm:144.3.0"
+  checksum: 6a4b9b9ed62dc965241cb87164a50394ef5aaffa10704fa036fbe323e4ed0ccdbaacaaded4258316271270d2518341abeaa1853600671521ff3ae7a78e083568
+  languageName: node
+  linkType: hard
+
+"react-native-skia-apple-tvos@npm:144.3.0":
+  version: 144.3.0
+  resolution: "react-native-skia-apple-tvos@npm:144.3.0"
+  checksum: 4ba37c80a89263d58506d89afcfe2df1b3075b37d78a4d7d7842084adcf242e3985431e2950682335ea34e5f5b2d1c058abcf3342e4b0451a82469855cd73198
+  languageName: node
+  linkType: hard
+
 "react-native-skia-monorepo@workspace:.":
   version: 0.0.0-use.local
   resolution: "react-native-skia-monorepo@workspace:."
@@ -31131,7 +31163,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"strnum@npm:^1.1.1":
+"strnum@npm:^1.0.5":
   version: 1.1.2
   resolution: "strnum@npm:1.1.2"
   checksum: a85219eda13e97151c95e343a9e5960eacfb0a0ff98104b4c9cb7a212e3008bddf0c9714c9c37c2e508be78e741a04afc80027c2dc18509d1b5ffd4c37191fc2
