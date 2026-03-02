@@ -469,9 +469,21 @@ export const copyHeaders = () => {
   fileOps.mkdir("./cpp/skia/modules");
   fileOps.mkdir("./cpp/skia/src");
 
-  // Graphite-specific setup - only copy from local build if it exists
+  // Graphite-specific setup
   if (GRAPHITE) {
     console.log("   Checking for Graphite build source...");
+
+    // Try to find graphite headers from npm package
+    let graphiteHeadersPath: string | null = null;
+    try {
+      const graphiteHeadersPkg = require.resolve(
+        "react-native-skia-graphite-headers/package.json"
+      );
+      graphiteHeadersPath = path.dirname(graphiteHeadersPkg);
+      console.log(`   Found graphite headers package at: ${graphiteHeadersPath}`);
+    } catch (e) {
+      // Package not installed
+    }
 
     if (hasLocalBuild) {
       console.log("   📦 Copying Graphite headers from local build...");
@@ -521,9 +533,29 @@ export const copyHeaders = () => {
       fileOps.rm("./cpp/dawn/include/dawn/wire");
       fileOps.rm("./cpp/dawn/include/webgpu/webgpu_cpp_print.h");
       console.log("      ✓ Graphite headers copied from local build");
+    } else if (graphiteHeadersPath) {
+      console.log("   📦 Copying Graphite headers from npm package...");
+      fileOps.mkdir("./cpp/dawn/include");
+      fileOps.mkdir("./cpp/skia/src/gpu/graphite");
+
+      // Copy Dawn headers from npm package
+      const dawnSrc = path.join(graphiteHeadersPath, "cpp/dawn/include");
+      const graphiteSrc = path.join(graphiteHeadersPath, "cpp/skia/src/gpu/graphite");
+
+      if (fs.existsSync(dawnSrc)) {
+        console.log("      - Copying Dawn headers from npm package...");
+        fileOps.cp(dawnSrc, "./cpp/dawn/include");
+      }
+
+      if (fs.existsSync(graphiteSrc)) {
+        console.log("      - Copying Graphite source headers from npm package...");
+        fileOps.cp(graphiteSrc, "./cpp/skia/src/gpu/graphite");
+      }
+
+      console.log("      ✓ Graphite headers copied from npm package");
     } else {
       console.log(
-        "   ✓ Skipping Graphite headers copy (using prebuilt headers from download)"
+        "   ⚠️  No Graphite headers source found (no local build or npm package)"
       );
     }
   }

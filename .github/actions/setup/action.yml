@@ -42,8 +42,14 @@ runs:
       run: yarn copy-skia-headers
       shell: bash
 
-    - name: Install Skia Graphite (Graphite build)
+    - name: Install Skia Graphite packages
       if: inputs.graphite == 'true'
       working-directory: packages/skia
-      run: yarn install-skia-graphite
+      run: yarn add react-native-skia-graphite-android react-native-skia-graphite-apple-ios react-native-skia-graphite-apple-macos react-native-skia-graphite-headers
+      shell: bash
+
+    - name: Copy Skia headers (Graphite build)
+      if: inputs.graphite == 'true'
+      working-directory: packages/skia
+      run: yarn copy-skia-headers
       shell: bash
