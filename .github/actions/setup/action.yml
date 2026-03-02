@@ -36,11 +36,11 @@ runs:
         SK_GRAPHITE: ${{ inputs.graphite == 'true' && '1' || '' }}
         SKIP_SKIA_DOWNLOAD: ${{ inputs.download_skia == 'false' && '1' || '' }}
     
-    # - name: Copy Skia headers (standard build)
-    #   if: inputs.graphite != 'true'
-    #   working-directory: packages/skia
-    #   run: yarn copy-skia-headers
-    #   shell: bash
+    - name: Copy Skia headers (standard build)
+      if: inputs.graphite != 'true'
+      working-directory: packages/skia
+      run: yarn copy-skia-headers
+      shell: bash
 
     - name: Install Skia Graphite packages
       if: inputs.graphite == 'true'
