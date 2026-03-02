@@ -184,13 +184,13 @@ const checkoutSkiaSubmodule = (): void => {
   console.log(`\n📦 Checking out Skia submodule to ${branchName}...`);
 
   try {
-    // Fetch the branch
+    // Fetch the branch (this puts it in FETCH_HEAD)
     execSync(`git -C "${SKIA_DIR}" fetch origin ${branchName}`, {
       stdio: "inherit",
     });
 
-    // Checkout the fetched branch (use origin/ prefix since it's a remote branch)
-    execSync(`git -C "${SKIA_DIR}" checkout origin/${branchName} --`, {
+    // Checkout FETCH_HEAD (the fetched branch)
+    execSync(`git -C "${SKIA_DIR}" checkout FETCH_HEAD --`, {
       stdio: "inherit",
     });
 
