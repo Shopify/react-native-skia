@@ -1,4 +1,4 @@
-import type { SkPath } from "@shopify/react-native-skia";
+import type { SkPathBuilder } from "@shopify/react-native-skia";
 import {
   Canvas,
   Circle,
@@ -10,7 +10,11 @@ import React, { useMemo, useState } from "react";
 import { StyleSheet, TouchableOpacity, View, Text, Image } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { runOnJS, useSharedValue } from "react-native-reanimated";
+import {
+  runOnJS,
+  useSharedValue,
+  useDerivedValue,
+} from "react-native-reanimated";
 
 import { WINDOW_WIDTH } from "../constants";
 
@@ -31,7 +35,9 @@ export function DrawingOverlay({ onSend, onCancel }: DrawingOverlayProps) {
     setPaths((prev) => [...prev, path]);
   };
 
-  const currentPath = useSharedValue<SkPath>(Skia.Path.Make());
+  const currentPathBuilder = useSharedValue<SkPathBuilder>(
+    Skia.PathBuilder.Make()
+  );
   const updatePoint = useSharedValue(0);
 
   const handleSend = () => {
@@ -52,32 +58,38 @@ export function DrawingOverlay({ onSend, onCancel }: DrawingOverlayProps) {
     }
   };
 
+  const currentPath = useDerivedValue(() => {
+    // Force update when updatePoint changes
+    void updatePoint.value;
+    return currentPathBuilder.value.build();
+  });
+
   const panGesture = useMemo(
     () =>
       Gesture.Pan()
         .onStart((evt) => {
           updatePoint.value = evt.x + evt.y;
 
-          currentPath.value.reset();
-          currentPath.value.moveTo(evt.x, evt.y);
+          currentPathBuilder.value.reset();
+          currentPathBuilder.value.moveTo(evt.x, evt.y);
         })
         .onChange((evt) => {
           updatePoint.value = evt.x + evt.y;
 
-          currentPath.value.lineTo(evt.x, evt.y);
+          currentPathBuilder.value.lineTo(evt.x, evt.y);
         })
         .onEnd((evt) => {
           updatePoint.value = evt.x + evt.y;
 
-          currentPath.value.lineTo(evt.x, evt.y);
+          currentPathBuilder.value.lineTo(evt.x, evt.y);
 
-          const path = currentPath.value.toSVGString();
+          const path = currentPathBuilder.value.build().toSVGString();
 
-          currentPath.value.reset();
+          currentPathBuilder.value.reset();
 
           runOnJS(savePath)(path);
         }),
-    [currentPath, updatePoint]
+    [currentPathBuilder, updatePoint]
   );
 
   return (

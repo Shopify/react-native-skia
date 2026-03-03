@@ -9,22 +9,21 @@ import { PaintStyle } from "../../../skia/types";
 const star = (Skia: Skia) => {
   const R = 115.2;
   const C = 128.0;
-  const path = Skia.Path.Make();
-  path.moveTo(C + R, C);
+  const builder = Skia.PathBuilder.Make();
+  builder.moveTo(C + R, C);
   for (let i = 1; i < 8; ++i) {
     const a = 2.6927937 * i;
-    path.lineTo(C + R * Math.cos(a), C + R * Math.sin(a));
+    builder.lineTo(C + R * Math.cos(a), C + R * Math.sin(a));
   }
-  return path;
+  return builder.build();
 };
 
 describe("Paths", () => {
   it("can transform a path from a matrix array (1)", async () => {
     const result = await surface.eval((Skia) => {
-      const path = Skia.Path.Make();
-      path.lineTo(30, 30);
-      path.transform([1, 0, 0, 0, 1, 0, 0, 0, 1]);
-      const cmds = path.toCmds();
+      const path = Skia.PathBuilder.Make().lineTo(30, 30).build();
+      const transformed = path.transform([1, 0, 0, 0, 1, 0, 0, 0, 1]);
+      const cmds = transformed.toCmds();
       return cmds;
     });
     expect(result).toEqual([
@@ -34,10 +33,9 @@ describe("Paths", () => {
   });
   it("can transform a path from a matrix array (2)", async () => {
     const result = await surface.eval((Skia) => {
-      const path = Skia.Path.Make();
-      path.lineTo(30, 30);
-      path.transform([2, 0, 0, 0, 2, 0, 0, 0, 1]);
-      const cmds = path.toCmds();
+      const path = Skia.PathBuilder.Make().lineTo(30, 30).build();
+      const transformed = path.transform([2, 0, 0, 0, 2, 0, 0, 0, 1]);
+      const cmds = transformed.toCmds();
       return cmds;
     });
     expect(result).toEqual([
@@ -47,8 +45,7 @@ describe("Paths", () => {
   });
   it("generate commands properly", async () => {
     const result = await surface.eval((Skia) => {
-      const path = Skia.Path.Make();
-      path.lineTo(30, 30);
+      const path = Skia.PathBuilder.Make().lineTo(30, 30).build();
       const cmds = path.toCmds();
       return cmds;
     });
@@ -59,16 +56,15 @@ describe("Paths", () => {
   });
   it("closePath shouldn't crash", async () => {
     const result = await surface.eval((Skia) => {
-      const path = Skia.Path.Make();
-      path.moveTo(0, 0).lineTo(1, 0).lineTo(1, 1);
-      path.close();
+      const path = Skia.PathBuilder.Make()
+        .moveTo(0, 0)
+        .lineTo(1, 0)
+        .lineTo(1, 1)
+        .close()
+        .build();
       const cmds = path.toCmds();
       return cmds;
     });
-    const { Skia } = importSkia();
-    const ref = Skia.Path.Make();
-    ref.moveTo(0, 0).lineTo(1, 0).lineTo(1, 1);
-    ref.close();
     expect(result[result.length - 1]).toEqual([5]);
   });
   it("toCmd should work properly", async () => {
@@ -90,48 +86,53 @@ describe("Paths", () => {
   });
   it("should accept [0, 1] as trim value", async () => {
     const result = await surface.eval((Skia) => {
-      const path = Skia.Path.Make();
-      path.moveTo(20, 20);
-      path.lineTo(20, 40);
-      path.lineTo(40, 20);
-      path.trim(0, 1, false);
-      return path.toSVGString();
+      const path = Skia.PathBuilder.Make()
+        .moveTo(20, 20)
+        .lineTo(20, 40)
+        .lineTo(40, 20)
+        .build();
+      const trimmed = Skia.Path.Trim(path, 0, 1, false);
+      return trimmed?.toSVGString() ?? "";
     });
     expect(result).toEqual("M20 20L20 40L40 20");
   });
   itRunsNodeOnly("should accept [0.0001, 1.00001] as trim value", async () => {
     const result = await surface.eval((Skia) => {
-      const path = Skia.Path.Make();
-      path.moveTo(20, 20);
-      path.lineTo(20, 40);
-      path.lineTo(40, 20);
-      path.trim(0.0001, 1.00001, false);
-      return path.toSVGString();
+      const path = Skia.PathBuilder.Make()
+        .moveTo(20, 20)
+        .lineTo(20, 40)
+        .lineTo(40, 20)
+        .build();
+      const trimmed = Skia.Path.Trim(path, 0.0001, 1.00001, false);
+      return trimmed?.toSVGString() ?? "";
     });
     expect(result).toBeApproximatelyEqual("M20 20.0048L20 40L40 20");
   });
   it("should accept [0, 1.2] as trim value", async () => {
     const result = await surface.eval((Skia) => {
-      const path = Skia.Path.Make();
-      path.moveTo(20, 20);
-      path.lineTo(20, 40);
-      path.lineTo(40, 20);
-      path.trim(0, 1.2, false);
-      return path.toSVGString();
+      const path = Skia.PathBuilder.Make()
+        .moveTo(20, 20)
+        .lineTo(20, 40)
+        .lineTo(40, 20)
+        .build();
+      const trimmed = Skia.Path.Trim(path, 0, 1.2, false);
+      return trimmed?.toSVGString() ?? "";
     });
     expect(result).toEqual("M20 20L20 40L40 20");
   });
   itRunsNodeOnly("interpolation values can overshoot", async () => {
     const result = await surface.eval((Skia) => {
-      const path2 = Skia.Path.Make();
-      path2.moveTo(0, 0);
-      path2.lineTo(20, 20);
-      path2.lineTo(20, 40);
-      const path = Skia.Path.Make();
-      path.moveTo(20, 20);
-      path.lineTo(20, 40);
-      path.lineTo(40, 20);
-      path.trim(0, 1, false);
+      const path2 = Skia.PathBuilder.Make()
+        .moveTo(0, 0)
+        .lineTo(20, 20)
+        .lineTo(20, 40)
+        .build();
+      const pathBase = Skia.PathBuilder.Make()
+        .moveTo(20, 20)
+        .lineTo(20, 40)
+        .lineTo(40, 20)
+        .build();
+      const path = Skia.Path.Trim(pathBase, 0, 1, false)!;
       return [
         path.interpolate(path2, -1)!.toSVGString(),
         path.interpolate(path2, 0)!.toSVGString(),
@@ -156,17 +157,22 @@ describe("Paths", () => {
   });
   it("should add a path", async () => {
     const result = await surface.eval((Skia) => {
-      const path = Skia.Path.Make();
-      const path2 = Skia.Path.Make();
-      path.moveTo(20, 20);
-      path.lineTo(20, 40);
-      path.lineTo(40, 20);
-      path2.moveTo(60, 60);
-      path2.lineTo(80, 60);
-      path2.lineTo(80, 40);
+      const path = Skia.PathBuilder.Make()
+        .moveTo(20, 20)
+        .lineTo(20, 40)
+        .lineTo(40, 20)
+        .build();
+      const path2 = Skia.PathBuilder.Make()
+        .moveTo(60, 60)
+        .lineTo(80, 60)
+        .lineTo(80, 40)
+        .build();
       const results: string[] = [];
       for (let j = 0; j < 2; j++) {
-        const p = path.copy().addPath(path2, undefined, j === 1);
+        const p = Skia.PathBuilder.Make()
+          .addPath(path)
+          .addPath(path2, undefined, j === 1)
+          .build();
         results.push(p.toSVGString());
       }
       return results;
@@ -208,8 +214,7 @@ describe("Paths", () => {
         <>
           {new Array(c).fill(0).map((_, i) => {
             const r2 = i * delta;
-            const path = Skia.Path.Make();
-            path.addCircle(0, 0, r2);
+            const path = Skia.Path.Circle(0, 0, r2);
             return (
               <Path
                 key={i}
@@ -236,8 +241,10 @@ describe("Paths", () => {
             width: center.x * 2 + delta * 2,
             height: center.y * 2 + delta * 2,
           };
-          const path = Skia.Path.Make();
-          path.addArc(rect, 0, 360).close();
+          const path = Skia.PathBuilder.Make()
+            .addArc(rect, 0, 360)
+            .close()
+            .build();
           return (
             <Group key={i} origin={center} transform={[{ scale: 0.6 }]}>
               <Rect
@@ -278,15 +285,18 @@ describe("Paths", () => {
   });
   it("typename should be correct", async () => {
     const typename = await surface.eval((Skia) => {
-      const path = Skia.Path.Make();
+      const path = Skia.PathBuilder.Make().build();
       return path.__typename__;
     });
     return expect(typename).toBe("Path");
   });
   it("should be possible to call dispose on a path", async () => {
     await surface.eval((Skia) => {
-      using path = Skia.Path.Make();
-      path.moveTo(20, 20).lineTo(20, 40).lineTo(40, 20);
+      using path = Skia.PathBuilder.Make()
+        .moveTo(20, 20)
+        .lineTo(20, 40)
+        .lineTo(40, 20)
+        .build();
       return path;
     });
   });
@@ -317,14 +327,14 @@ describe("Paths", () => {
   it("Should interpolate paths", async () => {
     // https://fiddle.skia.org/c/@Path_isInterpolatable
     const { Skia } = importSkia();
-    const path = Skia.Path.Make();
-    const path2 = Skia.Path.Make();
-    path.moveTo(20, 20);
-    path.lineTo(40, 40);
-    path.lineTo(20, 20);
-    path.lineTo(40, 40);
-    path.close();
-    path2.addRect(Skia.XYWHRect(20, 20, 20, 20));
+    const path = Skia.PathBuilder.Make()
+      .moveTo(20, 20)
+      .lineTo(40, 40)
+      .lineTo(20, 20)
+      .lineTo(40, 40)
+      .close()
+      .build();
+    const path2 = Skia.Path.Rect(Skia.XYWHRect(20, 20, 20, 20));
     expect(path.isInterpolatable(path2)).toBe(true);
     const result = path2.interpolate(path, 0.5)!;
     expect(result).toBeDefined();
@@ -333,61 +343,63 @@ describe("Paths", () => {
     );
     checkImage(img, "snapshots/paths/interpolation1.png");
   });
-  it("Should interpolate paths with a pre-allocated Path (1)", async () => {
+  it("Should interpolate paths and return new path (1)", async () => {
     // https://fiddle.skia.org/c/@Path_isInterpolatable
     const { Skia } = importSkia();
-    const path = Skia.Path.Make();
-    const path2 = Skia.Path.Make();
-    path.moveTo(20, 20);
-    path.lineTo(40, 40);
-    path.lineTo(20, 20);
-    path.lineTo(40, 40);
-    path.close();
-    path2.addRect(Skia.XYWHRect(20, 20, 20, 20));
+    const path = Skia.PathBuilder.Make()
+      .moveTo(20, 20)
+      .lineTo(40, 40)
+      .lineTo(20, 20)
+      .lineTo(40, 40)
+      .close()
+      .build();
+    const path2 = Skia.Path.Rect(Skia.XYWHRect(20, 20, 20, 20));
     expect(path.isInterpolatable(path2)).toBe(true);
-    const result = Skia.Path.Make();
-    const result2 = path.interpolate(path2, 0.5, result);
+    const result = path.interpolate(path2, 0.5);
     expect(result).toBeDefined();
-    expect(result2).toBe(result);
+    expect(result).not.toBeNull();
     const img = await surface.draw(
-      <Path path={result} style="stroke" strokeWidth={3} />
+      <Path path={result!} style="stroke" strokeWidth={3} />
     );
     checkImage(img, "snapshots/paths/interpolation1.png");
   });
-  it("Should interpolate paths with a pre-allocated Path (2)", async () => {
+  it("Should interpolate paths and return new path (2)", async () => {
     const result = await surface.eval((Skia) => {
-      const path = Skia.Path.Make();
-      const path2 = Skia.Path.Make();
-      path.moveTo(20, 20);
-      path.lineTo(40, 40);
-      path.lineTo(20, 20);
-      path.lineTo(40, 40);
-      path.close();
-      path2.addRect(Skia.XYWHRect(20, 20, 20, 20));
-      const result3 = Skia.Path.Make();
-      const result4 = path.interpolate(path2, 0.5, result3);
-      return { identity: result3 === result4, result: result3.toSVGString() };
+      const path = Skia.PathBuilder.Make()
+        .moveTo(20, 20)
+        .lineTo(40, 40)
+        .lineTo(20, 20)
+        .lineTo(40, 40)
+        .close()
+        .build();
+      const path2 = Skia.Path.Rect(Skia.XYWHRect(20, 20, 20, 20));
+      const interpolated = path.interpolate(path2, 0.5);
+      return {
+        defined: interpolated !== null,
+        result: interpolated?.toSVGString() ?? "",
+      };
     });
-    expect(result.identity).toBe(true);
+    expect(result.defined).toBe(true);
     expect(result.result).toEqual("M20 20L40 30L30 30L30 40L20 20Z");
   });
-  it("Shouldn't interpolate paths with a pre-allocated Path", async () => {
+  it("Should return null for non-interpolatable paths", async () => {
     // https://fiddle.skia.org/c/@Path_isInterpolatable
     const { Skia } = importSkia();
-    const path = Skia.Path.Make();
-    const path2 = Skia.Path.Make();
-    path.moveTo(20, 20);
-    path.lineTo(40, 40);
-    path.lineTo(20, 20);
-    path.lineTo(40, 40);
-    path.lineTo(0, 0);
-    path.close();
-    path2.addRect(Skia.XYWHRect(20, 20, 20, 20));
-    const result = Skia.Path.Make();
-    const success = path.interpolate(path2, 0.5, result);
-    expect(success).toBe(null);
+    const path = Skia.PathBuilder.Make()
+      .moveTo(20, 20)
+      .lineTo(40, 40)
+      .lineTo(20, 20)
+      .lineTo(40, 40)
+      .lineTo(0, 0)
+      .close()
+      .build();
+    const path2 = Skia.Path.Rect(Skia.XYWHRect(20, 20, 20, 20));
+    const result = path.interpolate(path2, 0.5);
+    expect(result).toBe(null);
+    // Draw an empty path to verify the snapshot
+    const emptyPath = Skia.PathBuilder.Make().build();
     const img = await surface.draw(
-      <Path path={result} style="stroke" strokeWidth={3} />
+      <Path path={emptyPath} style="stroke" strokeWidth={3} />
     );
     checkImage(img, "snapshots/paths/emptyPath.png");
   });
@@ -487,14 +499,13 @@ describe("Paths", () => {
       )!;
       const interpolated = p1.interpolate(p2, 0.5)!;
       const originalSvg = interpolated.toSVGString();
-      // Trim creates a copy internally, so original should not be affected
-      const trimmed = interpolated.copy();
-      trimmed.trim(0.5, 1, false);
+      // Trim creates a new path, so original should not be affected
+      const trimmed = Skia.Path.Trim(interpolated, 0.5, 1, false);
       const afterTrimSvg = interpolated.toSVGString();
       return {
         original: originalSvg,
         afterTrim: afterTrimSvg,
-        trimmed: trimmed.toSVGString(),
+        trimmed: trimmed?.toSVGString() ?? "",
         unchanged: originalSvg === afterTrimSvg,
       };
     });

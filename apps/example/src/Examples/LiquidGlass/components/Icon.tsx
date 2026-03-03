@@ -9,33 +9,39 @@ interface IconProps {
   size: number;
 }
 
-const plus = Skia.Path.Make();
-plus.moveTo(12, 5);
-plus.lineTo(12, 19);
-plus.moveTo(5, 12);
-plus.lineTo(19, 12);
+const plus = Skia.PathBuilder.Make()
+  .moveTo(12, 5)
+  .lineTo(12, 19)
+  .moveTo(5, 12)
+  .lineTo(19, 12)
+  .build();
 
-const search = Skia.Path.Make();
-search.addCircle(11, 11, 8);
-search.moveTo(21, 21);
-search.lineTo(16.65, 16.65);
+const search = Skia.PathBuilder.Make()
+  .addCircle(11, 11, 8)
+  .moveTo(21, 21)
+  .lineTo(16.65, 16.65)
+  .build();
 
-const creditCard = Skia.Path.Make();
-creditCard.addRRect(Skia.RRectXY(Skia.XYWHRect(1, 4, 22, 16), 2, 2));
-creditCard.moveTo(1, 10);
-creditCard.lineTo(23, 10);
+const creditCard = Skia.PathBuilder.Make()
+  .addRRect(Skia.RRectXY(Skia.XYWHRect(1, 4, 22, 16), 2, 2))
+  .moveTo(1, 10)
+  .lineTo(23, 10)
+  .build();
 
-const more = Skia.Path.Make();
-more.addCircle(12, 12, 1);
-more.addCircle(19, 12, 1);
-more.addCircle(5, 12, 1);
+const more = Skia.PathBuilder.Make()
+  .addCircle(12, 12, 1)
+  .addCircle(19, 12, 1)
+  .addCircle(5, 12, 1)
+  .build();
 
-const cast = Skia.Path.MakeFromSVGString(
+const castBase = Skia.Path.MakeFromSVGString(
   "M2 16.1A5 5 0 0 1 5.9 20M2 12.05A9 9 0 0 1 9.95 20M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"
 )!;
-// Small dot line
-cast.moveTo(2, 20);
-cast.lineTo(2.01, 20);
+// Small dot line - combine with the SVG path
+const cast = Skia.PathBuilder.MakeFromPath(castBase)
+  .moveTo(2, 20)
+  .lineTo(2.01, 20)
+  .build();
 
 const paths: Record<IconName, SkPath> = {
   plus,
