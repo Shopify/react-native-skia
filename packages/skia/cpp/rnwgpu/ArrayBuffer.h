@@ -49,8 +49,13 @@ template <> struct JSIConverter<std::shared_ptr<ArrayBuffer>> {
           auto buff = bufferProp.getObject(runtime);
           auto bytesPerElements =
               obj.getProperty(runtime, "BYTES_PER_ELEMENT").asNumber();
-          return createArrayBufferFromJSI(
-              runtime, buff.getArrayBuffer(runtime),
+          auto arrayBuffer = buff.getArrayBuffer(runtime);
+          auto byteOffset = static_cast<size_t>(
+              obj.getProperty(runtime, "byteOffset").asNumber());
+          auto byteLength = static_cast<size_t>(
+              obj.getProperty(runtime, "byteLength").asNumber());
+          return std::make_shared<ArrayBuffer>(
+              arrayBuffer.data(runtime) + byteOffset, byteLength,
               static_cast<size_t>(bytesPerElements));
         }
       }
