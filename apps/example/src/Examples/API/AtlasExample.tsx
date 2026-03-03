@@ -1,21 +1,13 @@
 import React, { useMemo } from "react";
 import { ScrollView, useWindowDimensions } from "react-native";
-import {
-  Atlas,
-  BlendMode,
-  Canvas,
-  Picture,
-  Skia,
-  createPicture,
-  rect,
-} from "@shopify/react-native-skia";
+import { Atlas, Canvas, Skia, rect } from "@shopify/react-native-skia";
 
 import { Title } from "./components/Title";
 
 const SPRITE_SIZE = 24;
 const PADDING = 16;
 
-const palette = [
+const PALETTE = [
   "#6C63FF",
   "#FF6B6B",
   "#4ECDC4",
@@ -71,36 +63,13 @@ export const AtlasExample = () => {
     () =>
       new Array(count)
         .fill(0)
-        .map((_, i) => Skia.Color(palette[i % palette.length])),
+        .map((_, i) => Skia.Color(PALETTE[i % PALETTE.length])),
     [count]
   );
 
-  const imperativePicture = useMemo(() => {
-    if (!dotImage) {
-      return null;
-    }
-    const srcs = sprites.map(() =>
-      Skia.XYWHRect(0, 0, SPRITE_SIZE, SPRITE_SIZE)
-    );
-    return createPicture(
-      (canvas) => {
-        const paint = Skia.Paint();
-        canvas.drawAtlas(
-          dotImage,
-          srcs,
-          transforms,
-          paint,
-          BlendMode.DstIn,
-          colors
-        );
-      },
-      { x: 0, y: 0, width, height: canvasHeight }
-    );
-  }, [sprites, transforms, colors, width, canvasHeight]);
-
   return (
     <ScrollView>
-      <Title>Default (dstOver)</Title>
+      <Title>Default colorBlendMode (dstOver)</Title>
       <Canvas style={{ width, height: canvasHeight }}>
         <Atlas
           image={dotImage}
@@ -119,9 +88,16 @@ export const AtlasExample = () => {
           colorBlendMode="dstIn"
         />
       </Canvas>
-      <Title>Imperative API (dstIn)</Title>
+      <Title>colorBlendMode + blendMode (layer)</Title>
       <Canvas style={{ width, height: canvasHeight }}>
-        {imperativePicture && <Picture picture={imperativePicture} />}
+        <Atlas
+          image={dotImage}
+          sprites={sprites}
+          transforms={transforms}
+          colors={colors}
+          colorBlendMode="dstIn"
+          blendMode="screen"
+        />
       </Canvas>
     </ScrollView>
   );
