@@ -50,31 +50,46 @@ else
   puts "-- SK_GRAPHITE: OFF (set SK_GRAPHITE=1 to enable)"
 end
 
-# Resolve Skia binary packages
-prefix = use_graphite ? "react-native-skia-graphite" : "react-native-skia"
+# Check if xcframeworks already exist (e.g., from install-skia-graphite script)
+local_ios_libs = File.join(__dir__, "libs/ios")
+local_macos_libs = File.join(__dir__, "libs/macos")
+xcframeworks_preinstalled = File.exist?(local_ios_libs) &&
+                            Dir.glob(File.join(local_ios_libs, "*.xcframework")).any? &&
+                            File.exist?(local_macos_libs) &&
+                            Dir.glob(File.join(local_macos_libs, "*.xcframework")).any?
 
-ios_package = resolve_skia_package.call("#{prefix}-apple-ios")
-macos_package = resolve_skia_package.call("#{prefix}-apple-macos")
-tvos_package = use_graphite ? nil : resolve_skia_package.call("#{prefix}-apple-tvos", required: false)
+if xcframeworks_preinstalled
+  puts "-- Using pre-installed xcframeworks from libs/"
+  ios_package = nil
+  macos_package = nil
+  tvos_package = nil
+else
+  # Resolve Skia binary packages from npm
+  prefix = use_graphite ? "react-native-skia-graphite" : "react-native-skia"
 
-puts "-- Skia iOS package: #{ios_package}"
-puts "-- Skia macOS package: #{macos_package}"
-puts "-- Skia tvOS package: #{tvos_package}" if tvos_package
+  ios_package = resolve_skia_package.call("#{prefix}-apple-ios")
+  macos_package = resolve_skia_package.call("#{prefix}-apple-macos")
+  tvos_package = use_graphite ? nil : resolve_skia_package.call("#{prefix}-apple-tvos", required: false)
 
-# Verify the packages contain the expected files
-ios_libs_path = File.join(ios_package, "libs")
-unless File.exist?(ios_libs_path) && Dir.glob(File.join(ios_libs_path, "*.xcframework")).any?
-  Pod::UI.puts "\n"
-  Pod::UI.puts "┌─────────────────────────────────────────────────────────────────────────────┐".red
-  Pod::UI.puts "│                                                                             │".red
-  Pod::UI.puts "│  ERROR: Skia prebuilt binaries not found in #{prefix}-apple-ios!            │".red
-  Pod::UI.puts "│                                                                             │".red
-  Pod::UI.puts "│  The package was found but doesn't contain the expected xcframeworks.      │".red
-  Pod::UI.puts "│  Try reinstalling: yarn add #{prefix}-apple-ios                             │".red
-  Pod::UI.puts "│                                                                             │".red
-  Pod::UI.puts "└─────────────────────────────────────────────────────────────────────────────┘".red
-  Pod::UI.puts "\n"
-  raise "Skia xcframeworks not found in #{ios_libs_path}"
+  puts "-- Skia iOS package: #{ios_package}"
+  puts "-- Skia macOS package: #{macos_package}"
+  puts "-- Skia tvOS package: #{tvos_package}" if tvos_package
+
+  # Verify the packages contain the expected files
+  ios_libs_path = File.join(ios_package, "libs")
+  unless File.exist?(ios_libs_path) && Dir.glob(File.join(ios_libs_path, "*.xcframework")).any?
+    Pod::UI.puts "\n"
+    Pod::UI.puts "┌─────────────────────────────────────────────────────────────────────────────┐".red
+    Pod::UI.puts "│                                                                             │".red
+    Pod::UI.puts "│  ERROR: Skia prebuilt binaries not found in #{prefix}-apple-ios!            │".red
+    Pod::UI.puts "│                                                                             │".red
+    Pod::UI.puts "│  The package was found but doesn't contain the expected xcframeworks.      │".red
+    Pod::UI.puts "│  Try reinstalling: yarn add #{prefix}-apple-ios                             │".red
+    Pod::UI.puts "│                                                                             │".red
+    Pod::UI.puts "└─────────────────────────────────────────────────────────────────────────────┘".red
+    Pod::UI.puts "\n"
+    raise "Skia xcframeworks not found in #{ios_libs_path}"
+  end
 end
 
 # Set preprocessor definitions based on GRAPHITE flag
@@ -93,14 +108,17 @@ osx_frameworks = framework_names.map { |f| "libs/macos/#{f}.xcframework" }
 tvos_frameworks = tvos_package ? framework_names.map { |f| "libs/tvos/#{f}.xcframework" } : []
 
 # Prepare command to copy xcframeworks from npm packages into pod directory
+# (skipped if xcframeworks are already preinstalled)
 prepare_commands = []
-prepare_commands << "rm -rf libs/ios libs/macos libs/tvos"
-prepare_commands << "mkdir -p libs/ios libs/macos"
-prepare_commands << "cp -R '#{ios_package}/libs/'*.xcframework libs/ios/"
-prepare_commands << "cp -R '#{macos_package}/libs/'*.xcframework libs/macos/"
-if tvos_package
-  prepare_commands << "mkdir -p libs/tvos"
-  prepare_commands << "cp -R '#{tvos_package}/libs/'*.xcframework libs/tvos/"
+unless xcframeworks_preinstalled
+  prepare_commands << "rm -rf libs/ios libs/macos libs/tvos"
+  prepare_commands << "mkdir -p libs/ios libs/macos"
+  prepare_commands << "cp -R '#{ios_package}/libs/'*.xcframework libs/ios/"
+  prepare_commands << "cp -R '#{macos_package}/libs/'*.xcframework libs/macos/"
+  if tvos_package
+    prepare_commands << "mkdir -p libs/tvos"
+    prepare_commands << "cp -R '#{tvos_package}/libs/'*.xcframework libs/tvos/"
+  end
 end
 
 Pod::Spec.new do |s|
