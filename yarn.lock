@@ -7842,12 +7842,17 @@ __metadata:
     react: 19.0.0
     react-native: 0.83.1
     react-native-builder-bob: 0.18.2
-    react-native-reanimated: 4.2.1
-    react-native-worklets: 0.7.1
+    react-native-reanimated: ^4.2.1
+    react-native-skia-android: 144.3.0
+    react-native-skia-apple-ios: 144.3.0
+    react-native-skia-apple-macos: 144.3.0
+    react-native-skia-apple-tvos: 144.3.0
+    react-native-worklets: ^0.7.0
     react-reconciler: 0.31.0
     rimraf: 3.0.2
     semantic-release: ^24.1.0
     semantic-release-yarn: ^3.0.2
+    tar: ^7.5.9
     ts-jest: 29.4.3
     tsx: ^4.21.0
     typescript: ^5.2.2
@@ -13941,8 +13946,8 @@ __metadata:
     react-dom: 19.0.0
     react-native: 0.83.1
     react-native-gesture-handler: ^2.24.0
-    react-native-reanimated: 4.2.1
-    react-native-worklets: 0.7.1
+    react-native-reanimated: ^4.2.1
+    react-native-worklets: ^0.7.0
     ts-morph: ^25.0.1
     ts-node: ^10.9.2
     twoslash-cli: 1.3.24
@@ -15740,14 +15745,14 @@ __metadata:
     react-native: 0.83.1
     react-native-gesture-handler: ^2.24.0
     react-native-macos: ^0.81.1
-    react-native-reanimated: 4.2.1
+    react-native-reanimated: ^4.2.1
     react-native-safe-area-context: ^5.2.0
     react-native-screens: ^4.10.0
     react-native-svg: "patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch"
     react-native-test-app: 4.4.7
     react-native-web: ^0.21.2
     react-native-windows: ^0.75.0
-    react-native-worklets: 0.7.1
+    react-native-worklets: ^0.7.0
     react-test-renderer: 19.0.0
     typescript: ^5.2.2
   languageName: unknown
@@ -16087,13 +16092,13 @@ __metadata:
   linkType: hard
 
 "fast-xml-parser@npm:^4.0.0, fast-xml-parser@npm:^4.4.1":
-  version: 4.5.3
-  resolution: "fast-xml-parser@npm:4.5.3"
+  version: 4.5.4
+  resolution: "fast-xml-parser@npm:4.5.4"
   dependencies:
-    strnum: ^1.1.1
+    strnum: ^1.0.5
   bin:
     fxparser: src/cli/cli.js
-  checksum: cd6a184941ec6c23f9e6b514421a3f396cfdff5f4a8c7c27bd0eff896edb4a2b55c27da16f09b789663613dfc4933602b9b71ac3e9d1d2ddcc0492fc46c8fa52
+  checksum: 29db513a5f0ad5ac33691c27d67315ee22e041b5e8fa5982f8bccf46af400e35c576c17f3087f1b8d4cd81fa91519f5fda4b2a31441ff1bf7596ecc5e934f44d
   languageName: node
   linkType: hard
 
@@ -27978,9 +27983,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:4.2.1":
-  version: 4.2.1
-  resolution: "react-native-reanimated@npm:4.2.1"
+"react-native-reanimated@npm:^4.2.1":
+  version: 4.2.2
+  resolution: "react-native-reanimated@npm:4.2.2"
   dependencies:
     react-native-is-edge-to-edge: 1.2.1
     semver: 7.7.3
@@ -27988,7 +27993,7 @@ __metadata:
     react: "*"
     react-native: "*"
     react-native-worklets: ">=0.7.0"
-  checksum: 102ead7c02411227f8364dec58cffc7a9225c8b9733cce07054064ecfd90cf2b124c8d1caf2bd11fc7db8603e0c91c392957ab0ce5852dcd1b3669e7d7d59931
+  checksum: 2497901472996aece1e350ffa02233ad0f9f7a16e389a201246474fae872f3ec9834a0b7c3801241d5844b9f7dbf0309d868728b3b35555de5d1836b3f527644
   languageName: node
   linkType: hard
 
@@ -28012,6 +28017,34 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 7fcecd7d710708476ecb431b0e33efce7fa950d2731ef8f3fa2cbb6c57cd3adeffe1b1d4b29e9449cb72e4bc8b72e57498c9c6286b49e66665ca11ff853381fd
+  languageName: node
+  linkType: hard
+
+"react-native-skia-android@npm:144.3.0":
+  version: 144.3.0
+  resolution: "react-native-skia-android@npm:144.3.0"
+  checksum: 8b790165b2fbb394ed699f6393aac127d668098a0b38c790584ef15ff577a9a12ecccc3c005506742a4c52035a1761877e496316f4e27f1e0e2fd2b08a2757a6
+  languageName: node
+  linkType: hard
+
+"react-native-skia-apple-ios@npm:144.3.0":
+  version: 144.3.0
+  resolution: "react-native-skia-apple-ios@npm:144.3.0"
+  checksum: 81610efe0b85debc3836b2cce54960079a6616479a8653aa56bf97d411143336a6a753811e80e31c4eb102dc71ad745e984d70ead7faa95c9da1b50a309f43e2
+  languageName: node
+  linkType: hard
+
+"react-native-skia-apple-macos@npm:144.3.0":
+  version: 144.3.0
+  resolution: "react-native-skia-apple-macos@npm:144.3.0"
+  checksum: 6a4b9b9ed62dc965241cb87164a50394ef5aaffa10704fa036fbe323e4ed0ccdbaacaaded4258316271270d2518341abeaa1853600671521ff3ae7a78e083568
+  languageName: node
+  linkType: hard
+
+"react-native-skia-apple-tvos@npm:144.3.0":
+  version: 144.3.0
+  resolution: "react-native-skia-apple-tvos@npm:144.3.0"
+  checksum: 4ba37c80a89263d58506d89afcfe2df1b3075b37d78a4d7d7842084adcf242e3985431e2950682335ea34e5f5b2d1c058abcf3342e4b0451a82469855cd73198
   languageName: node
   linkType: hard
 
@@ -28220,9 +28253,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-worklets@npm:0.7.1":
-  version: 0.7.1
-  resolution: "react-native-worklets@npm:0.7.1"
+"react-native-worklets@npm:^0.7.0":
+  version: 0.7.4
+  resolution: "react-native-worklets@npm:0.7.4"
   dependencies:
     "@babel/plugin-transform-arrow-functions": 7.27.1
     "@babel/plugin-transform-class-properties": 7.27.1
@@ -28239,7 +28272,7 @@ __metadata:
     "@babel/core": "*"
     react: "*"
     react-native: "*"
-  checksum: d6ca920ce53cad6ad45ac8379914adfaf73a92d76dc7c68d9b8a8a2913f7042ec8d60bbb6fcf72afe593993d087cbe6277c3f81927d2c0ade9a94acaf58b5dc3
+  checksum: eb92247e208c6ee641dd639319628213aa2f22249b2fb09d5b9b0ea8a13e7bbb906eabc9dfebfe00404eec5d3e233378cc4991b9a43565338a4f083a68b7bd5f
   languageName: node
   linkType: hard
 
@@ -29439,8 +29472,8 @@ __metadata:
   linkType: hard
 
 "rollup@npm:^2.43.1":
-  version: 2.79.2
-  resolution: "rollup@npm:2.79.2"
+  version: 2.80.0
+  resolution: "rollup@npm:2.80.0"
   dependencies:
     fsevents: ~2.3.2
   dependenciesMeta:
@@ -29448,7 +29481,7 @@ __metadata:
       optional: true
   bin:
     rollup: dist/bin/rollup
-  checksum: df7aa4c8b95245dede157b06ab71e1921de6080757d30e9bf31f8fb142064d12dda865e2bafbab4349588f43425b2965a290c9a5da1c048246a70fc21734ebd7
+  checksum: 3eeef19adb648ac475bb76cc474f5f601c76bc26490282715016b8948ef31ebd65e43df3ca5b4850686542822b73b2254d9a96013d9cc50d4d984c61cb0dac37
   languageName: node
   linkType: hard
 
@@ -31131,7 +31164,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"strnum@npm:^1.1.1":
+"strnum@npm:^1.0.5":
   version: 1.1.2
   resolution: "strnum@npm:1.1.2"
   checksum: a85219eda13e97151c95e343a9e5960eacfb0a0ff98104b4c9cb7a212e3008bddf0c9714c9c37c2e508be78e741a04afc80027c2dc18509d1b5ffd4c37191fc2
@@ -31538,6 +31571,19 @@ __metadata:
     minizlib: ^3.1.0
     yallist: ^5.0.0
   checksum: 82fa04804b6cae4c0b46b84e97a08c39e1c17bb959350baa32d139bcf5e1fc7ebc3ceb72465dd3e2e311992386ecc13599a257d5672158490ceb9464146d5573
+  languageName: node
+  linkType: hard
+
+"tar@npm:^7.5.9":
+  version: 7.5.9
+  resolution: "tar@npm:7.5.9"
+  dependencies:
+    "@isaacs/fs-minipass": ^4.0.0
+    chownr: ^3.0.0
+    minipass: ^7.1.2
+    minizlib: ^3.1.0
+    yallist: ^5.0.0
+  checksum: 26fbbdf536895814167d03e4883f80febb6520729169c54d0f29ee8a163557283862752493f0e5b60800a6f3608aac3250c41fac8e20a4f056ba4fa63f3dbad7
   languageName: node
   linkType: hard
 
@@ -33362,9 +33408,9 @@ __metadata:
     path-browserify: ^1.0.1
     react: 19.0.0
     react-dom: 19.0.0
-    react-native-reanimated: 4.2.1
+    react-native-reanimated: ^4.2.1
     react-native-web: ^0.21.1
-    react-native-worklets: 0.7.1
+    react-native-worklets: ^0.7.0
     react-scripts: 5.0.1
     typescript: ^5.2.2
     web-vitals: ^2.1.0
