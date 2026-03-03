@@ -320,6 +320,119 @@ describe("Atlas", () => {
       maxPixelDiff: 500,
     });
   });
+  it("should use the colorBlendMode property properly", async () => {
+    const { Skia, rect, drawAsImage } = importSkia();
+    const size = 64;
+    const half = size / 2;
+    const cx = 128;
+    const cy = 128;
+    const texture = await drawAsImage(
+      <Circle cx={half} cy={half} r={half} color="rgb(36,43,56)" />,
+      { width: size, height: size }
+    );
+    const palette = [
+      "#6C63FF",
+      "#FF6B6B",
+      "#4ECDC4",
+      "#FFE66D",
+      "#A8E6CF",
+      "#FF8B94",
+      "#845EC2",
+      "#00C9A7",
+    ];
+    const rings = [
+      { count: 1, radius: 0, offset: 0 },
+      { count: 8, radius: 50, offset: 0 },
+      { count: 12, radius: 96, offset: Math.PI / 10 },
+    ];
+    const positions: { x: number; y: number }[] = [];
+    for (const ring of rings) {
+      for (let i = 0; i < ring.count; i++) {
+        const angle = (2 * Math.PI * i) / ring.count + ring.offset;
+        positions.push({
+          x: cx + ring.radius * Math.cos(angle),
+          y: cy + ring.radius * Math.sin(angle),
+        });
+      }
+    }
+    const total = positions.length;
+    const sprites = new Array(total).fill(0).map(() => rect(0, 0, size, size));
+    const transforms = positions.map((p) =>
+      Skia.RSXform(1, 0, p.x - half, p.y - half)
+    );
+    const colors = new Array(total)
+      .fill(0)
+      .map((_, i) => Skia.Color(palette[i % palette.length]));
+    const img = await surface.draw(
+      <Atlas
+        image={texture}
+        sprites={sprites}
+        transforms={transforms}
+        colors={colors}
+        colorBlendMode="dstIn"
+      />
+    );
+    checkImage(img, docPath("atlas/color-blend-mode.png"), {
+      maxPixelDiff: 500,
+    });
+  });
+  it("should use the colorBlendMode and blendMode properties independently", async () => {
+    const { Skia, rect, drawAsImage } = importSkia();
+    const size = 64;
+    const half = size / 2;
+    const cx = 128;
+    const cy = 128;
+    const texture = await drawAsImage(
+      <Circle cx={half} cy={half} r={half} color="rgb(36,43,56)" />,
+      { width: size, height: size }
+    );
+    const palette = [
+      "#6C63FF",
+      "#FF6B6B",
+      "#4ECDC4",
+      "#FFE66D",
+      "#A8E6CF",
+      "#FF8B94",
+      "#845EC2",
+      "#00C9A7",
+    ];
+    const rings = [
+      { count: 1, radius: 0, offset: 0 },
+      { count: 8, radius: 50, offset: 0 },
+      { count: 12, radius: 96, offset: Math.PI / 10 },
+    ];
+    const positions: { x: number; y: number }[] = [];
+    for (const ring of rings) {
+      for (let i = 0; i < ring.count; i++) {
+        const angle = (2 * Math.PI * i) / ring.count + ring.offset;
+        positions.push({
+          x: cx + ring.radius * Math.cos(angle),
+          y: cy + ring.radius * Math.sin(angle),
+        });
+      }
+    }
+    const total = positions.length;
+    const sprites = new Array(total).fill(0).map(() => rect(0, 0, size, size));
+    const transforms = positions.map((p) =>
+      Skia.RSXform(1, 0, p.x - half, p.y - half)
+    );
+    const colors = new Array(total)
+      .fill(0)
+      .map((_, i) => Skia.Color(palette[i % palette.length]));
+    const img = await surface.draw(
+      <Atlas
+        image={texture}
+        sprites={sprites}
+        transforms={transforms}
+        colors={colors}
+        blendMode="screen"
+        colorBlendMode="dstIn"
+      />
+    );
+    checkImage(img, docPath("atlas/color-blend-mode-and-blend-mode.png"), {
+      maxPixelDiff: 500,
+    });
+  });
   it("should accept null as a texture", async () => {
     const { Skia, rect } = importSkia();
     const size = { width: 25, height: 25 * 0.45 };

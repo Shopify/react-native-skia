@@ -50,10 +50,7 @@ export const AtlasExample = () => {
   const count = cols * rows;
   const canvasHeight = rows * (SPRITE_SIZE + 8) + 2 * PADDING;
 
-  const sprites = useMemo(
-    () => new Array(count).fill(spriteRect),
-    [count]
-  );
+  const sprites = useMemo(() => new Array(count).fill(spriteRect), [count]);
 
   const transforms = useMemo(
     () =>
@@ -82,11 +79,20 @@ export const AtlasExample = () => {
     if (!dotImage) {
       return null;
     }
-    const srcs = sprites.map(() => Skia.XYWHRect(0, 0, SPRITE_SIZE, SPRITE_SIZE));
+    const srcs = sprites.map(() =>
+      Skia.XYWHRect(0, 0, SPRITE_SIZE, SPRITE_SIZE)
+    );
     return createPicture(
       (canvas) => {
         const paint = Skia.Paint();
-        canvas.drawAtlas(dotImage, srcs, transforms, paint, BlendMode.DstIn, colors);
+        canvas.drawAtlas(
+          dotImage,
+          srcs,
+          transforms,
+          paint,
+          BlendMode.DstIn,
+          colors
+        );
       },
       { x: 0, y: 0, width, height: canvasHeight }
     );
