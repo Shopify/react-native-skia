@@ -53,7 +53,7 @@ if (hasIos && hasMacos) {
 }
 
 // Determine package prefix based on SK_GRAPHITE env var
-const useGraphite = process.env.SK_GRAPHITE === '1' || process.env.SK_GRAPHITE === 'true';
+const useGraphite = process.env.SK_GRAPHITE === '1' || (process.env.SK_GRAPHITE || '').toLowerCase() === 'true';
 const prefix = useGraphite ? 'react-native-skia-graphite' : 'react-native-skia';
 
 // Resolve package paths
