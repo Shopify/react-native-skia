@@ -139,14 +139,14 @@ public:
     auto ry = arguments[1].asNumber();
     auto xAxisRotate = arguments[2].asNumber();
     auto useSmallArc = arguments[3].getBool();
-    auto arcSize = useSmallArc ? SkPath::ArcSize::kSmall_ArcSize
-                               : SkPath::ArcSize::kLarge_ArcSize;
+    auto arcSize = useSmallArc ? SkPathBuilder::ArcSize::kSmall_ArcSize
+                               : SkPathBuilder::ArcSize::kLarge_ArcSize;
     auto sweep =
         arguments[4].getBool() ? SkPathDirection::kCCW : SkPathDirection::kCW;
     auto x = arguments[5].asNumber();
     auto y = arguments[6].asNumber();
-    getObject()->arcTo(SkPoint::Make(x, y), rx, ry, xAxisRotate, arcSize,
-                       sweep);
+    getObject()->arcTo(SkPoint::Make(rx, ry), xAxisRotate, arcSize, sweep,
+                       SkPoint::Make(x, y));
     return thisValue.getObject(runtime);
   }
 
@@ -155,13 +155,14 @@ public:
     auto ry = arguments[1].asNumber();
     auto xAxisRotate = arguments[2].asNumber();
     auto useSmallArc = arguments[3].getBool();
-    auto arcSize = useSmallArc ? SkPath::ArcSize::kSmall_ArcSize
-                               : SkPath::ArcSize::kLarge_ArcSize;
+    auto arcSize = useSmallArc ? SkPathBuilder::ArcSize::kSmall_ArcSize
+                               : SkPathBuilder::ArcSize::kLarge_ArcSize;
     auto sweep =
         arguments[4].getBool() ? SkPathDirection::kCCW : SkPathDirection::kCW;
     auto dx = arguments[5].asNumber();
     auto dy = arguments[6].asNumber();
-    getObject()->rArcTo(rx, ry, xAxisRotate, arcSize, sweep, dx, dy);
+    getObject()->rArcTo(SkPoint::Make(rx, ry), xAxisRotate, arcSize, sweep,
+                        SkPoint::Make(dx, dy));
     return thisValue.getObject(runtime);
   }
 
@@ -238,7 +239,7 @@ public:
           runtime, jsiPoints.getValueAtIndex(runtime, i).asObject(runtime));
       points.push_back(*point.get());
     }
-    getObject()->addPolygon(points.data(), points.size(), close);
+    getObject()->addPolygon(SkSpan(points.data(), points.size()), close);
     return thisValue.getObject(runtime);
   }
 

@@ -19,10 +19,13 @@
 
 #include "RNSkLog.h"
 #include "include/core/SkPath.h"
+#include "include/core/SkPathBuilder.h"
 #include "include/core/SkPathUtils.h"
+#include "include/core/SkStrokeRec.h"
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkTrimPathEffect.h"
 #include "include/pathops/SkPathOps.h"
+#include "include/utils/SkTextUtils.h"
 
 #pragma clang diagnostic pop
 
@@ -341,8 +344,9 @@ public:
       return jsi::Value::null();
     }
     SkStrokeRec rec(SkStrokeRec::InitStyle::kHairline_InitStyle);
-    SkPath result;
-    if (pe->filterPath(&result, path, &rec, nullptr)) {
+    SkPathBuilder resultBuilder;
+    if (pe->filterPath(&resultBuilder, path, &rec)) {
+      auto result = resultBuilder.detach();
       auto hostObjectInstance =
           std::make_shared<JsiSkPath>(getContext(), std::move(result));
       return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
@@ -353,10 +357,10 @@ public:
 
   JSI_HOST_FUNCTION(Simplify) {
     auto srcPath = JsiSkPath::fromValue(runtime, arguments[0]);
-    SkPath result;
-    if (Simplify(*srcPath, &result)) {
+    auto result = ::Simplify(*srcPath);
+    if (result.has_value()) {
       auto hostObjectInstance =
-          std::make_shared<JsiSkPath>(getContext(), std::move(result));
+          std::make_shared<JsiSkPath>(getContext(), std::move(result.value()));
       return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
           runtime, hostObjectInstance, getContext());
     }
@@ -375,8 +379,9 @@ public:
       return jsi::Value::null();
     }
     SkStrokeRec rec(SkStrokeRec::InitStyle::kHairline_InitStyle);
-    SkPath result;
-    if (pe->filterPath(&result, *srcPath, &rec, nullptr)) {
+    SkPathBuilder resultBuilder;
+    if (pe->filterPath(&resultBuilder, *srcPath, &rec)) {
+      auto result = resultBuilder.detach();
       auto hostObjectInstance =
           std::make_shared<JsiSkPath>(getContext(), std::move(result));
       return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
@@ -387,10 +392,10 @@ public:
 
   JSI_HOST_FUNCTION(AsWinding) {
     auto srcPath = JsiSkPath::fromValue(runtime, arguments[0]);
-    SkPath result;
-    if (AsWinding(*srcPath, &result)) {
+    auto result = ::AsWinding(*srcPath);
+    if (result.has_value()) {
       auto hostObjectInstance =
-          std::make_shared<JsiSkPath>(getContext(), std::move(result));
+          std::make_shared<JsiSkPath>(getContext(), std::move(result.value()));
       return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
           runtime, hostObjectInstance, getContext());
     }
