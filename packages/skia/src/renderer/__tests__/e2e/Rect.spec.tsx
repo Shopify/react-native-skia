@@ -75,8 +75,7 @@ describe("Rects and rounded rects", () => {
     const r = width * 0.2;
     const { Skia } = importSkia();
     const rrct = Skia.RRectXY(Skia.XYWHRect(0, 0, width, width), r, r);
-    const path = Skia.Path.Make();
-    path.addRRect(rrct);
+    const path = Skia.Path.RRect(rrct);
     const image = await surface.draw(<Path path={path} color="lightblue" />);
     checkImage(image, docPath("rrect/uniform.png"));
   });
@@ -106,8 +105,7 @@ describe("Rects and rounded rects", () => {
       bottomRight: { x: 0, y: 0 },
       bottomLeft: { x: r, y: r },
     };
-    const path = Skia.Path.Make();
-    path.addRRect(rrct);
+    const path = Skia.Path.RRect(rrct);
     const image = await surface.draw(<Path path={path} color="lightblue" />);
     checkImage(image, docPath("rrect/nonuniform.png"));
   });
@@ -115,8 +113,7 @@ describe("Rects and rounded rects", () => {
     const { Skia } = importSkia();
     const { width, height } = surface;
     const r = width * 0.2;
-    const barPath = Skia.Path.Make();
-    barPath.addRRect({
+    const barPath = Skia.Path.RRect({
       rect: { x: 0, y: 0, width, height },
       topLeft: { x: r, y: r },
       topRight: { x: r, y: r },

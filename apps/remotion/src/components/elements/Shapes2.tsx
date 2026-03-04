@@ -12,9 +12,7 @@ interface PathLineProps extends PaintProps, ProgressProps {
 }
 
 export const PathLine2 = ({ p1, p2, ...props }: PathLineProps) => {
-  const path = Skia.Path.Make();
-  path.moveTo(p1.x, p1.y);
-  path.lineTo(p2.x, p2.y);
+  const path = Skia.Path.Line(p1, p2);
   return <Path path={path} style="stroke" {...props} />;
 };
 
@@ -24,8 +22,7 @@ interface PathCircleProps extends PaintProps, ProgressProps {
 }
 
 export const PathCircle2 = ({ c, r, ...props }: PathCircleProps) => {
-  const path = Skia.Path.Make();
-  path.addCircle(c.x, c.y, r);
+  const path = Skia.Path.Circle(c.x, c.y, r);
   return <Path path={path} {...props} />;
 };
 
@@ -34,7 +31,6 @@ interface PathRectProps extends PaintProps, ProgressProps {
 }
 
 export const PathRect2 = ({ rect, ...props }: PathRectProps) => {
-  const path = Skia.Path.Make();
-  path.addRect(rect);
+  const path = Skia.Path.Rect(rect);
   return <Path path={path} {...props} />;
 };

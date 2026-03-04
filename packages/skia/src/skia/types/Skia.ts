@@ -1,5 +1,5 @@
 import type { ImageFilterFactory } from "./ImageFilter";
-import type { PathFactory } from "./Path";
+import type { PathFactory, PathBuilderFactory } from "./Path";
 import type { ColorFilterFactory } from "./ColorFilter";
 import type { SkFont, FontMgrFactory } from "./Font";
 import type { SkTypeface, TypefaceFactory } from "./Typeface";
@@ -67,6 +67,7 @@ export interface Skia {
   PictureRecorder: () => SkPictureRecorder;
   Picture: PictureFactory;
   Path: PathFactory;
+  PathBuilder: PathBuilderFactory;
   Matrix: (matrix?: readonly number[]) => SkMatrix;
   ColorFilter: ColorFilterFactory;
   Font: (typeface?: SkTypeface, size?: number) => SkFont;
