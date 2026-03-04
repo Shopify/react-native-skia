@@ -4,6 +4,52 @@ import { checkImage, docPath } from "../../../__tests__/setup";
 import { importSkia, surface } from "../setup";
 import { Atlas, Circle, Group, Rect } from "../../components";
 
+const COLOR_BLEND_TEST_PALETTE = [
+  "#6C63FF",
+  "#FF6B6B",
+  "#4ECDC4",
+  "#FFE66D",
+  "#A8E6CF",
+  "#FF8B94",
+  "#845EC2",
+  "#00C9A7",
+];
+
+const COLOR_BLEND_TEST_RINGS = [
+  { count: 1, radius: 0, offset: 0 },
+  { count: 8, radius: 50, offset: 0 },
+  { count: 12, radius: 96, offset: Math.PI / 10 },
+];
+
+const createColorBlendTestData = (
+  Skia: ReturnType<typeof importSkia>["Skia"],
+  rect: ReturnType<typeof importSkia>["rect"],
+  size: number,
+  cx: number,
+  cy: number
+) => {
+  const half = size / 2;
+  const positions: { x: number; y: number }[] = [];
+  for (const ring of COLOR_BLEND_TEST_RINGS) {
+    for (let i = 0; i < ring.count; i++) {
+      const angle = (2 * Math.PI * i) / ring.count + ring.offset;
+      positions.push({
+        x: cx + ring.radius * Math.cos(angle),
+        y: cy + ring.radius * Math.sin(angle),
+      });
+    }
+  }
+  const total = positions.length;
+  const sprites = new Array(total).fill(0).map(() => rect(0, 0, size, size));
+  const transforms = positions.map((p) =>
+    Skia.RSXform(1, 0, p.x - half, p.y - half)
+  );
+  const colors = new Array(total)
+    .fill(0)
+    .map((_, i) => Skia.Color(COLOR_BLEND_TEST_PALETTE[i % COLOR_BLEND_TEST_PALETTE.length]));
+  return { sprites, transforms, colors };
+};
+
 describe("Atlas", () => {
   it("should read the RSXform properties", async () => {
     const result = await surface.eval((Skia) => {
@@ -317,6 +363,61 @@ describe("Atlas", () => {
       />
     );
     checkImage(img, docPath("atlas/colors-and-blend-mode.png"), {
+      maxPixelDiff: 500,
+    });
+  });
+  it("should use the colorBlendMode property properly", async () => {
+    const { Skia, rect, drawAsImage } = importSkia();
+    const size = 64;
+    const texture = await drawAsImage(
+      <Circle cx={size / 2} cy={size / 2} r={size / 2} color="rgb(36,43,56)" />,
+      { width: size, height: size }
+    );
+    const { sprites, transforms, colors } = createColorBlendTestData(
+      Skia,
+      rect,
+      size,
+      128,
+      128
+    );
+    const img = await surface.draw(
+      <Atlas
+        image={texture}
+        sprites={sprites}
+        transforms={transforms}
+        colors={colors}
+        colorBlendMode="dstIn"
+      />
+    );
+    checkImage(img, docPath("atlas/color-blend-mode.png"), {
+      maxPixelDiff: 500,
+    });
+  });
+  it("should use the colorBlendMode and blendMode properties independently", async () => {
+    const { Skia, rect, drawAsImage } = importSkia();
+    const size = 64;
+    const texture = await drawAsImage(
+      <Circle cx={size / 2} cy={size / 2} r={size / 2} color="rgb(36,43,56)" />,
+      { width: size, height: size }
+    );
+    const { sprites, transforms, colors } = createColorBlendTestData(
+      Skia,
+      rect,
+      size,
+      128,
+      128
+    );
+    const img = await surface.draw(
+      <Atlas
+        image={texture}
+        sprites={sprites}
+        transforms={transforms}
+        colors={colors}
+        blendMode="screen"
+        colorBlendMode="dstIn"
+      />
+    );
+    checkImage(img, docPath("atlas/color-blend-mode-and-blend-mode.png"), {
       maxPixelDiff: 500,
     });
   });
