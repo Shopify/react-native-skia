@@ -60,10 +60,6 @@ const goodPath = Skia.PathBuilder.Make()
 
 const c1 = angryPath.computeTightBounds();
 
-const path1 = Skia.PathBuilder.Make().moveTo(0, 0).lineTo(100, 100).build();
-const path2 = Skia.PathBuilder.Make().moveTo(100, 100).lineTo(0, 0).build();
-const path3 = Skia.PathBuilder.Make().moveTo(50, 50).lineTo(50, 50).build();
-
 const strokeWidth = 10;
 const r = 32;
 const d = 2 * r;

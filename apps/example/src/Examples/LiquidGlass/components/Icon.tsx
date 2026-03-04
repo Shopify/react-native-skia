@@ -22,12 +22,6 @@ const search = Skia.PathBuilder.Make()
   .lineTo(16.65, 16.65)
   .build();
 
-const creditCard = Skia.PathBuilder.Make()
-  .addRRect(Skia.RRectXY(Skia.XYWHRect(1, 4, 22, 16), 2, 2))
-  .moveTo(1, 10)
-  .lineTo(23, 10)
-  .build();
-
 const more = Skia.PathBuilder.Make()
   .addCircle(12, 12, 1)
   .addCircle(19, 12, 1)
