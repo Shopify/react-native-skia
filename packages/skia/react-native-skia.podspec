@@ -26,8 +26,12 @@ framework_names = ['libskia', 'libsvg', 'libskshaper', 'libskparagraph',
 # Build platform-specific framework paths (relative to pod's libs directory)
 ios_frameworks = framework_names.map { |f| "libs/ios/#{f}.xcframework" }
 osx_frameworks = framework_names.map { |f| "libs/macos/#{f}.xcframework" }
-# tvOS frameworks - will be populated by prepare_command if available
-tvos_frameworks = use_graphite ? [] : framework_names.map { |f| "libs/tvos/#{f}.xcframework" }
+# tvOS frameworks - only declare if libs/tvos/ already exists (otherwise leave empty)
+tvos_frameworks = if use_graphite || !Dir.exist?(File.join(__dir__, 'libs', 'tvos'))
+  []
+else
+  framework_names.map { |f| "libs/tvos/#{f}.xcframework" }
+end
 
 # Prepare command resolves paths at RUNTIME (not evaluation time) to ensure deterministic checksums
 # This script:
