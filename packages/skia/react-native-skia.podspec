@@ -26,7 +26,7 @@ framework_names = ['libskia', 'libsvg', 'libskshaper', 'libskparagraph',
 # Build platform-specific framework paths (relative to pod's libs directory)
 ios_frameworks = framework_names.map { |f| "libs/ios/#{f}.xcframework" }
 osx_frameworks = framework_names.map { |f| "libs/macos/#{f}.xcframework" }
-# tvOS frameworks - declare based on npm package presence (otherwise leave empty),
+# tvOS frameworks - declare based on npm package presence (otherwise leave empty)
 has_tvos_package = !use_graphite && (
   system('node -e "try { require.resolve(\'react-native-skia-apple-tvos/package.json\'); process.exit(0) } catch (e) { process.exit(1) }"', chdir: __dir__)
 )
