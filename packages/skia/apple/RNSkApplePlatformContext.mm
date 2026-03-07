@@ -251,12 +251,13 @@ void RNSkApplePlatformContext::raiseError(const std::exception &err) {
   RCTFatal(RCTErrorWithMessage([NSString stringWithUTF8String:err.what()]));
 }
 
-sk_sp<SkSurface> RNSkApplePlatformContext::makeOffscreenSurface(int width,
-                                                                int height) {
+sk_sp<SkSurface> RNSkApplePlatformContext::makeOffscreenSurface(
+    int width, int height, bool useP3ColorSpace) {
 #if defined(SK_GRAPHITE)
   return DawnContext::getInstance().MakeOffscreen(width, height);
 #else
-  return MetalContext::getInstance().MakeOffscreen(width, height);
+  return MetalContext::getInstance().MakeOffscreen(width, height,
+                                                   useP3ColorSpace);
 #endif
 }
 

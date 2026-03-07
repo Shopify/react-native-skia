@@ -2,6 +2,7 @@
 
 #include "MetalContext.h"
 #include "RNSkLog.h"
+#include "include/core/SkColorSpace.h"
 
 MetalWindowContext::MetalWindowContext(GrDirectContext *directContext,
                                        id<MTLDevice> device,
@@ -46,6 +47,7 @@ MetalWindowContext::MetalWindowContext(GrDirectContext *directContext,
         CGColorSpaceCreateWithName(kCGColorSpaceDisplayP3);
     _layer.colorspace = colorSpace;
     CGColorSpaceRelease(colorSpace);
+    _useP3ColorSpace = true;
   }
 }
 
@@ -69,9 +71,14 @@ sk_sp<SkSurface> MetalWindowContext::getSurface() {
   GrBackendRenderTarget backendRT = GrBackendRenderTargets::MakeMtl(
       _layer.drawableSize.width, _layer.drawableSize.height, fbInfo);
 
+  sk_sp<SkColorSpace> skColorSpace =
+      _useP3ColorSpace
+          ? SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
+                                  SkNamedGamut::kDisplayP3)
+          : nullptr;
   _skSurface = SkSurfaces::WrapBackendRenderTarget(
       _directContext, backendRT, kTopLeft_GrSurfaceOrigin,
-      kBGRA_8888_SkColorType, nullptr, nullptr);
+      kBGRA_8888_SkColorType, skColorSpace, nullptr);
 
   return _skSurface;
 }
