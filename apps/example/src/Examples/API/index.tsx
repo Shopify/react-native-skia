@@ -39,6 +39,7 @@ import { PictureViewCrashTest } from "./PictureViewCrashTest";
 import { FirstFrame, FirstFrameEmpty } from "./FirstFrame";
 import { ZIndexExample } from "./ZIndex";
 import { PictureBug } from "./PictureBug";
+import { AtlasExample } from "./AtlasExample";
 
 const Stack = createNativeStackNavigator<Routes>();
 
@@ -303,6 +304,13 @@ export const API = () => {
         component={PictureBug}
         options={{
           title: "Picture Render Bug",
+        }}
+      />
+      <Stack.Screen
+        name="Atlas"
+        component={AtlasExample}
+        options={{
+          title: "🎯 Atlas",
         }}
       />
     </Stack.Navigator>
