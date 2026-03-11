@@ -292,7 +292,6 @@ repositories {
         }
     }
     google()
-    maven { url 'https://www.jitpack.io' }
 }
 
 dependencies {
