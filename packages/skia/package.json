@@ -117,7 +117,7 @@
     "rimraf": "3.0.2",
     "semantic-release": "^24.1.0",
     "semantic-release-yarn": "^3.0.2",
-    "tar": "^7.5.10",
+    "tar": "^7.5.11",
     "ts-jest": "29.4.3",
     "tsx": "^4.21.0",
     "typescript": "^5.2.2",
