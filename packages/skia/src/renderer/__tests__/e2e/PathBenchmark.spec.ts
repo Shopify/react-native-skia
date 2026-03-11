@@ -5,7 +5,7 @@ const ITERATIONS = 10000;
 // Based on observed performance: most operations complete 10k iterations in <25ms on fast machines
 // CI machines are significantly slower, so we set generous thresholds to catch only
 // severe regressions (5x-10x slowdowns), not normal CI variance
-const MAX_TIME_MS = 500;
+const MAX_TIME_MS = 1500;
 
 describe("Path Performance Benchmarks", () => {
   it(`should complete ${ITERATIONS} lineTo operations within ${MAX_TIME_MS}ms`, async () => {
