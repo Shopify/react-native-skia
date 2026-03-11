@@ -35,4 +35,23 @@ MetalContext::MetalContext() {
   if (_directContext == nullptr) {
     RNSkia::RNSkLogger::logToConsole("Couldn't create a Skia Metal Context");
   }
+
+#if !TARGET_OS_OSX
+  if (@available(iOS 10.0, *)) {
+    if ([UIScreen mainScreen].traitCollection.displayGamut == UIDisplayGamutP3) {
+      _wideColorSpace = SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
+                                               SkNamedGamut::kDisplayP3);
+    }
+  }
+#else
+  if (@available(macOS 10.12, *)) {
+    NSScreen *screen = [NSScreen mainScreen];
+    NSColorSpace *displayP3 = [NSColorSpace displayP3ColorSpace];
+    if (screen.colorSpace && displayP3 &&
+        [screen.colorSpace isEqual:displayP3]) {
+      _wideColorSpace = SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
+                                               SkNamedGamut::kDisplayP3);
+    }
+  }
+#endif
 }

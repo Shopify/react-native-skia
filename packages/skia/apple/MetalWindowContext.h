@@ -3,6 +3,7 @@
 #import <MetalKit/MetalKit.h>
 
 #include "RNWindowContext.h"
+#include "include/core/SkColorSpace.h"
 
 class SkiaMetalContext;
 
@@ -31,6 +32,7 @@ private:
   GrDirectContext *_directContext;
   id<MTLCommandQueue> _commandQueue;
   sk_sp<SkSurface> _skSurface = nullptr;
+  sk_sp<SkColorSpace> _colorSpace = nullptr;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   CAMetalLayer *_layer;

@@ -3,6 +3,7 @@
 #include "MetalWindowContext.h"
 #include "SkiaCVPixelBufferUtils.h"
 
+#include "include/core/SkColorSpace.h"
 #include "include/core/SkSurface.h"
 
 #import <include/gpu/ganesh/GrBackendSurface.h>
@@ -58,7 +59,7 @@ public:
     // Create a SkSurface from the GrBackendTexture
     auto surface = SkSurfaces::WrapBackendTexture(
         _directContext.get(), backendTexture, kTopLeft_GrSurfaceOrigin, 0,
-        kBGRA_8888_SkColorType, nullptr, nullptr,
+        kBGRA_8888_SkColorType, _wideColorSpace, nullptr,
         [](void *addr) { delete (OffscreenRenderContext *)addr; }, ctx);
 
     return surface;
@@ -103,6 +104,7 @@ private:
   id<MTLDevice> _device = nullptr;
   id<MTLCommandQueue> _commandQueue = nullptr;
   sk_sp<GrDirectContext> _directContext = nullptr;
+  sk_sp<SkColorSpace> _wideColorSpace = nullptr;
 
   MetalContext();
 };
