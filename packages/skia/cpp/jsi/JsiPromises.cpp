@@ -26,12 +26,11 @@ JsiPromises::Promise::~Promise() {
   }
 }
 
-void JsiPromises::Promise::onRuntimeDestroyed(jsi::Runtime *) {
+void JsiPromises::Promise::onRuntimeDestroyed(jsi::Runtime *rt) {
+  if (rt != &runtime_) {
+    return;
+  }
   std::lock_guard<std::mutex> lock(mutex_);
-  // Release JSI Function objects now while the runtime is still alive
-  // enough to handle invalidation. After a move, the source jsi::Function
-  // is in a valid but empty state, making its eventual destruction in
-  // ~Promise() a safe no-op.
   runtimeDestroyed_ = true;
   {
     jsi::Function r(std::move(resolve_));
