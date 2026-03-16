@@ -177,6 +177,12 @@ createDawnBackendContext(dawn::native::Instance *instance) {
   if (adapter.HasFeature(wgpu::FeatureName::SharedTextureMemoryIOSurface)) {
     features.push_back(wgpu::FeatureName::SharedTextureMemoryIOSurface);
   }
+  if (adapter.HasFeature(wgpu::FeatureName::DawnMultiPlanarFormats)) {
+    features.push_back(wgpu::FeatureName::DawnMultiPlanarFormats);
+  }
+  if (adapter.HasFeature(wgpu::FeatureName::MultiPlanarFormatExtendedUsages)) {
+    features.push_back(wgpu::FeatureName::MultiPlanarFormatExtendedUsages);
+  }
 #else
   if (adapter.HasFeature(
           wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer)) {
