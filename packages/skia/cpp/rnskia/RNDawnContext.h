@@ -7,6 +7,7 @@
 #include "RNDawnWindowContext.h"
 #include "RNImageProvider.h"
 
+#include "include/core/SkColorSpace.h"
 #include "include/core/SkData.h"
 #include "include/gpu/graphite/BackendTexture.h"
 #include "include/gpu/graphite/Context.h"
@@ -162,9 +163,16 @@ public:
   }
 
   // Create offscreen surface
-  sk_sp<SkSurface> MakeOffscreen(int width, int height) {
+  sk_sp<SkSurface> MakeOffscreen(int width, int height,
+                                  bool useP3ColorSpace = false) {
+    sk_sp<SkColorSpace> colorSpace =
+        useP3ColorSpace
+            ? SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
+                                    SkNamedGamut::kDisplayP3)
+            : nullptr;
     SkImageInfo info = SkImageInfo::Make(
-        width, height, DawnUtils::PreferedColorType, kPremul_SkAlphaType);
+        width, height, DawnUtils::PreferedColorType, kPremul_SkAlphaType,
+        colorSpace);
     sk_sp<SkSurface> surface = SkSurfaces::RenderTarget(getRecorder(), info);
 
     if (!surface) {
