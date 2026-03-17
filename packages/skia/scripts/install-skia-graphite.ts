@@ -207,24 +207,30 @@ const checkoutSkiaSubmodule = (): void => {
   }
 };
 
-// Copy Dawn/WebGPU headers from the Android build output into cpp/dawn/include
+// Copy Dawn/WebGPU headers into cpp/dawn/include
+// Merges generated headers (from Android build output) with source headers (from Skia submodule)
 const copyDawnHeaders = (): void => {
-  console.log(`\n📋 Copying Dawn/WebGPU headers from Android build output...`);
+  console.log(`\n📋 Copying Dawn/WebGPU headers...`);
 
-  // Use headers from one of the Android ABI build outputs
-  const srcDir = path.join(
-    LIBS_DIR,
-    "android/arm64-v8a/gen/third_party/externals/dawn/include"
-  );
   const dawnDest = path.join(PACKAGE_ROOT, "cpp/dawn/include");
   fileOps.rm(path.join(PACKAGE_ROOT, "cpp/dawn"));
   fileOps.mkdir(dawnDest);
 
-  // Copy the entire include tree (dawn/ and webgpu/ subdirs)
-  fileOps.cp(srcDir, dawnDest);
+  // 1. Copy source headers from the Skia submodule's Dawn
+  const dawnSrcDir = path.join(
+    SKIA_DIR,
+    "third_party/externals/dawn/include"
+  );
+  fileOps.cp(dawnSrcDir, dawnDest);
+
+  // 2. Copy generated headers from Android build output (overrides/adds to source)
+  const genDir = path.join(
+    LIBS_DIR,
+    "android/arm64-v8a/gen/third_party/externals/dawn/include"
+  );
+  fileOps.cp(genDir, dawnDest);
 
   // Move dawn/webgpu.h and dawn/webgpu_cpp.h to webgpu/
-  fileOps.mkdir(path.join(dawnDest, "webgpu"));
   const webgpuH = path.join(dawnDest, "dawn/webgpu.h");
   const webgpuCppH = path.join(dawnDest, "dawn/webgpu_cpp.h");
   if (existsSync(webgpuH)) {
@@ -248,6 +254,7 @@ const copyDawnHeaders = (): void => {
 
   // Cleanup unnecessary files
   fileOps.rm(path.join(dawnDest, "dawn/wire"));
+  fileOps.rm(path.join(dawnDest, "dawn/BUILD.gn"));
   const webgpuPrintH = path.join(dawnDest, "webgpu/webgpu_cpp_print.h");
   if (existsSync(webgpuPrintH)) {
     fileOps.rm(webgpuPrintH);
