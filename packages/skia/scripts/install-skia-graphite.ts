@@ -276,10 +276,10 @@ const downloadAndroidLibs = async (): Promise<void> => {
   console.log(`\n📱 Downloading Android Graphite libraries...`);
 
   const androidAbis = [
-    { name: "armeabi-v7a", asset: "android-arm" },
-    { name: "arm64-v8a", asset: "android-arm-64" },
-    { name: "x86", asset: "android-arm-x86" },
-    { name: "x86_64", asset: "android-arm-x64" },
+    { name: "armeabi-v7a", asset: "android-arm", nested: "arm" },
+    { name: "arm64-v8a", asset: "android-arm-64", nested: "arm64" },
+    { name: "x86", asset: "android-arm-x86", nested: "x86" },
+    { name: "x86_64", asset: "android-arm-x64", nested: "x64" },
   ];
 
   const releaseTag = getReleaseTag(GRAPHITE_CONFIG.version);
@@ -292,6 +292,14 @@ const downloadAndroidLibs = async (): Promise<void> => {
     const destDir = path.join(LIBS_DIR, "android", abi.name);
 
     await downloadAndExtract(assetName, destDir, expectedChecksum);
+
+    // Flatten: tarballs extract with a nested build dir (e.g. arm/, arm64/)
+    // CMake expects libs directly in libs/android/{abi}/
+    const nestedDir = path.join(destDir, abi.nested);
+    if (existsSync(nestedDir)) {
+      execSync(`mv "${nestedDir}"/* "${destDir}"/`);
+      rmSync(nestedDir, { recursive: true, force: true });
+    }
   }
 
   console.log(`  ✓ Android libraries downloaded`);
