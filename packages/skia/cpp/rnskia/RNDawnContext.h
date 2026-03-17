@@ -7,6 +7,7 @@
 #include "RNDawnWindowContext.h"
 #include "RNImageProvider.h"
 
+#include "include/core/SkColorSpace.h"
 #include "include/core/SkData.h"
 #include "include/gpu/graphite/BackendTexture.h"
 #include "include/gpu/graphite/Context.h"
@@ -162,9 +163,16 @@ public:
   }
 
   // Create offscreen surface
-  sk_sp<SkSurface> MakeOffscreen(int width, int height) {
+  sk_sp<SkSurface> MakeOffscreen(int width, int height,
+                                  bool useP3ColorSpace = false) {
+    sk_sp<SkColorSpace> colorSpace =
+        useP3ColorSpace
+            ? SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
+                                    SkNamedGamut::kDisplayP3)
+            : nullptr;
     SkImageInfo info = SkImageInfo::Make(
-        width, height, DawnUtils::PreferedColorType, kPremul_SkAlphaType);
+        width, height, DawnUtils::PreferedColorType, kPremul_SkAlphaType,
+        colorSpace);
     sk_sp<SkSurface> surface = SkSurfaces::RenderTarget(getRecorder(), info);
 
     if (!surface) {
@@ -303,6 +311,20 @@ public:
         getRecorder(), backendContext.fDevice, surface, width, height);
   }
 
+  skgpu::graphite::Recorder *getRecorder() {
+    static thread_local skgpu::graphite::RecorderOptions recorderOptions;
+    if (!recorderOptions.fImageProvider) {
+      auto imageProvider = ImageProvider::Make();
+      recorderOptions.fImageProvider = imageProvider;
+    }
+    static thread_local auto recorder =
+        fGraphiteContext->makeRecorder(recorderOptions);
+    if (!recorder) {
+      throw std::runtime_error("Failed to create graphite context");
+    }
+    return recorder.get();
+  }
+
 private:
   std::unique_ptr<dawn::native::Instance> instance;
   std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
@@ -345,20 +367,6 @@ private:
     if (backendContext.fTick) {
       backendContext.fTick(backendContext.fInstance);
     }
-  }
-
-  skgpu::graphite::Recorder *getRecorder() {
-    static thread_local skgpu::graphite::RecorderOptions recorderOptions;
-    if (!recorderOptions.fImageProvider) {
-      auto imageProvider = ImageProvider::Make();
-      recorderOptions.fImageProvider = imageProvider;
-    }
-    static thread_local auto recorder =
-        fGraphiteContext->makeRecorder(recorderOptions);
-    if (!recorder) {
-      throw std::runtime_error("Failed to create graphite context");
-    }
-    return recorder.get();
   }
 };
 

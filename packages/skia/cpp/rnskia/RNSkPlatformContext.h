@@ -90,9 +90,11 @@ public:
    * Creates an offscreen surface
    * @param width Width of the offscreen surface
    * @param height Height of the offscreen surface
+   * @param useP3ColorSpace If true, surface will use Display P3 color space
    * @return sk_sp<SkSurface>
    */
-  virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) = 0;
+  virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height,
+                                                 bool useP3ColorSpace = false) = 0;
 
   virtual std::shared_ptr<WindowContext>
   makeContextFromNativeSurface(void *surface, int width, int height) = 0;

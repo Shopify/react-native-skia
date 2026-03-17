@@ -23,7 +23,16 @@ yarn add @shopify/react-native-skia
 npm install @shopify/react-native-skia
 ```
 
-The Skia prebuilt binaries are included as npm dependencies and are automatically resolved by the native build systems. No postinstall script is needed.
+This package uses a `postinstall` script to copy Skia prebuilt binaries into the correct location for the native build systems. Some package managers require you to explicitly allow this script to run:
+
+- **Bun**: Add `@shopify/react-native-skia` to `trustedDependencies` in your `package.json`:
+  ```json
+  {
+    "trustedDependencies": ["@shopify/react-native-skia"]
+  }
+  ```
+- **Yarn (Berry/v2+)**: Make sure `enableScripts` is not set to `false` in `.yarnrc.yml`.
+- **npm/Yarn Classic**: The postinstall script runs automatically.
 
 ## Using Expo
 
