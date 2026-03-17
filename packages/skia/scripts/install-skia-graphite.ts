@@ -214,35 +214,47 @@ const copyDawnHeaders = (): void => {
   // Use headers from one of the Android ABI build outputs
   const srcDir = path.join(
     LIBS_DIR,
-    "android/arm64-v8a/gen/third_party/externals/dawn/include/dawn"
+    "android/arm64-v8a/gen/third_party/externals/dawn/include"
   );
   const dawnDest = path.join(PACKAGE_ROOT, "cpp/dawn/include");
   fileOps.rm(path.join(PACKAGE_ROOT, "cpp/dawn"));
-  fileOps.mkdir(path.join(dawnDest, "dawn"));
-  fileOps.mkdir(path.join(dawnDest, "webgpu"));
 
-  // Copy dawn headers
-  fileOps.cp(
-    path.join(srcDir, "dawn_proc_table.h"),
-    path.join(dawnDest, "dawn/dawn_proc_table.h")
-  );
+  // Copy the entire include tree (dawn/ and webgpu/ subdirs)
+  fileOps.cp(srcDir, dawnDest);
+
+  // Move dawn/webgpu.h and dawn/webgpu_cpp.h to webgpu/
+  fileOps.mkdir(path.join(dawnDest, "webgpu"));
+  const webgpuH = path.join(dawnDest, "dawn/webgpu.h");
+  const webgpuCppH = path.join(dawnDest, "dawn/webgpu_cpp.h");
+  if (existsSync(webgpuH)) {
+    fileOps.cp(webgpuH, path.join(dawnDest, "webgpu/webgpu.h"));
+    fileOps.rm(webgpuH);
+  }
+  if (existsSync(webgpuCppH)) {
+    fileOps.cp(webgpuCppH, path.join(dawnDest, "webgpu/webgpu_cpp.h"));
+    fileOps.rm(webgpuCppH);
+  }
 
   // Fix WebGPU header references
-  fileOps.sed(
-    path.join(dawnDest, "dawn/dawn_proc_table.h"),
-    /#include "dawn\/webgpu\.h"/g,
-    '#include "webgpu/webgpu.h"'
-  );
+  const dawnProcTable = path.join(dawnDest, "dawn/dawn_proc_table.h");
+  if (existsSync(dawnProcTable)) {
+    fileOps.sed(
+      dawnProcTable,
+      /#include "dawn\/webgpu\.h"/g,
+      '#include "webgpu/webgpu.h"'
+    );
+  }
 
-  // Copy webgpu headers
-  fileOps.cp(
-    path.join(srcDir, "webgpu.h"),
-    path.join(dawnDest, "webgpu/webgpu.h")
-  );
-  fileOps.cp(
-    path.join(srcDir, "webgpu_cpp.h"),
-    path.join(dawnDest, "webgpu/webgpu_cpp.h")
-  );
+  // Cleanup unnecessary files
+  fileOps.rm(path.join(dawnDest, "dawn/wire"));
+  const webgpuPrintH = path.join(dawnDest, "webgpu/webgpu_cpp_print.h");
+  if (existsSync(webgpuPrintH)) {
+    fileOps.rm(webgpuPrintH);
+  }
+  const dawnPrintH = path.join(dawnDest, "dawn/webgpu_cpp_print.h");
+  if (existsSync(dawnPrintH)) {
+    fileOps.rm(dawnPrintH);
+  }
 
   console.log(`  ✓ Dawn/WebGPU headers copied`);
 };
