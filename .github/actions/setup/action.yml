@@ -33,23 +33,17 @@ runs:
       run: yarn install --immutable
       shell: bash
       env:
-        SK_GRAPHITE: ${{ inputs.graphite == 'true' && '1' || '' }}
         SKIP_SKIA_DOWNLOAD: ${{ inputs.download_skia == 'false' && '1' || '' }}
-    
-    - name: Copy Skia headers (standard build)
-      if: inputs.graphite != 'true'
-      working-directory: packages/skia
-      run: yarn copy-skia-headers
-      shell: bash
 
-    - name: Install Skia Graphite packages
+    - name: Install Skia Graphite packages and copy binaries
       if: inputs.graphite == 'true'
       working-directory: packages/skia
-      run: yarn add react-native-skia-graphite-android react-native-skia-graphite-apple-ios react-native-skia-graphite-apple-macos react-native-skia-graphite-headers
+      run: |
+        yarn add react-native-skia-graphite-android react-native-skia-graphite-apple-ios react-native-skia-graphite-apple-macos react-native-skia-graphite-headers
+        SK_GRAPHITE=1 node scripts/install-libs.js
       shell: bash
 
-    - name: Copy Skia headers (Graphite build)
-      if: inputs.graphite == 'true'
+    - name: Copy Skia headers
       working-directory: packages/skia
       run: yarn copy-skia-headers
       shell: bash

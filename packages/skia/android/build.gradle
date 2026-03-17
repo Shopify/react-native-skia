@@ -58,11 +58,16 @@ static def findNodeModules(baseDir) {
 
 def nodeModules = findNodeModules(projectDir)
 
-// Skia prebuilt libs are copied into libs/android/ by the npm postinstall script
-def useGraphite = System.getenv("SK_GRAPHITE") == "1" || System.getenv("SK_GRAPHITE") == "true"
+// Read backend configuration from marker file written by install-libs.js
+def skiaConfigFile = new File("${projectDir}/../libs/.skia")
+def useGraphite = false
+if (skiaConfigFile.exists()) {
+    def skiaConfig = new groovy.json.JsonSlurper().parse(skiaConfigFile)
+    useGraphite = skiaConfig.backend == "graphite"
+}
 def skiaLibsPath = "${projectDir}/../libs/android"
 
-logger.warn("react-native-skia: SK_GRAPHITE: ${useGraphite}")
+logger.warn("react-native-skia: backend: ${useGraphite ? 'graphite' : 'ganesh'} (from libs/.skia)")
 logger.warn("react-native-skia: Skia libs: ${skiaLibsPath}")
 logger.warn("react-native-skia: node_modules/ found at: ${nodeModules}")
 

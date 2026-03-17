@@ -1,10 +1,19 @@
+import { existsSync, readFileSync } from "fs";
 import path from "path";
 import { spawnSync } from "child_process";
 
 import { $, fileOps } from "./utils";
 
 const DEBUG = false;
-export const GRAPHITE = !!process.env.SK_GRAPHITE;
+
+// Read backend from marker file (written by install-libs.js), fall back to env var
+const skiaConfigPath = path.join(__dirname, "..", "libs", ".skia");
+const skiaConfig = existsSync(skiaConfigPath)
+  ? JSON.parse(readFileSync(skiaConfigPath, "utf8"))
+  : null;
+export const GRAPHITE = skiaConfig
+  ? skiaConfig.backend === "graphite"
+  : !!process.env.SK_GRAPHITE;
 export const MACCATALYST = false;
 const BUILD_WITH_PARAGRAPH = true;
 // Re-enable mutable SkPath methods (addPath, moveTo, lineTo, etc.)
