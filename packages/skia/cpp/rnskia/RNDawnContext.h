@@ -303,6 +303,20 @@ public:
         getRecorder(), backendContext.fDevice, surface, width, height);
   }
 
+  skgpu::graphite::Recorder *getRecorder() {
+    static thread_local skgpu::graphite::RecorderOptions recorderOptions;
+    if (!recorderOptions.fImageProvider) {
+      auto imageProvider = ImageProvider::Make();
+      recorderOptions.fImageProvider = imageProvider;
+    }
+    static thread_local auto recorder =
+        fGraphiteContext->makeRecorder(recorderOptions);
+    if (!recorder) {
+      throw std::runtime_error("Failed to create graphite context");
+    }
+    return recorder.get();
+  }
+
 private:
   std::unique_ptr<dawn::native::Instance> instance;
   std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
@@ -345,20 +359,6 @@ private:
     if (backendContext.fTick) {
       backendContext.fTick(backendContext.fInstance);
     }
-  }
-
-  skgpu::graphite::Recorder *getRecorder() {
-    static thread_local skgpu::graphite::RecorderOptions recorderOptions;
-    if (!recorderOptions.fImageProvider) {
-      auto imageProvider = ImageProvider::Make();
-      recorderOptions.fImageProvider = imageProvider;
-    }
-    static thread_local auto recorder =
-        fGraphiteContext->makeRecorder(recorderOptions);
-    if (!recorder) {
-      throw std::runtime_error("Failed to create graphite context");
-    }
-    return recorder.get();
   }
 };
 
