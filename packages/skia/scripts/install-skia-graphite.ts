@@ -264,7 +264,22 @@ const copyDawnHeaders = (): void => {
     fileOps.rm(dawnPrintH);
   }
 
-  console.log(`  ✓ Dawn/WebGPU headers copied`);
+  // Copy Graphite source headers from Skia submodule
+  const graphiteDest = path.join(PACKAGE_ROOT, "cpp/skia/src/gpu/graphite");
+  fileOps.mkdir(graphiteDest);
+  const graphiteSrc = path.join(SKIA_DIR, "src/gpu/graphite");
+  for (const header of [
+    "ContextOptionsPriv.h",
+    "ResourceTypes.h",
+    "TextureProxyView.h",
+  ]) {
+    fileOps.cp(
+      path.join(graphiteSrc, header),
+      path.join(graphiteDest, header)
+    );
+  }
+
+  console.log(`  ✓ Dawn/WebGPU and Graphite headers copied`);
 };
 
 // Download Android libraries
