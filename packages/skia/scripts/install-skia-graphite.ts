@@ -218,6 +218,7 @@ const copyDawnHeaders = (): void => {
   );
   const dawnDest = path.join(PACKAGE_ROOT, "cpp/dawn/include");
   fileOps.rm(path.join(PACKAGE_ROOT, "cpp/dawn"));
+  fileOps.mkdir(dawnDest);
 
   // Copy the entire include tree (dawn/ and webgpu/ subdirs)
   fileOps.cp(srcDir, dawnDest);
