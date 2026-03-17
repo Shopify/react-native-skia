@@ -35,6 +35,75 @@
 
 #include <jsi/jsi.h>
 
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+#include <CoreGraphics/CoreGraphics.h>
+#include <cstring>
+
+// Replaces Skia's generated "Display P3 Gamut with sRGB Transfer" (Google/Skia
+// copyright) ICC profile in a JPEG with Apple's canonical Display P3 ICC bytes
+// from CGColorSpace.displayP3. This is needed because apps like Instagram only
+// recognise the canonical Apple profile, not Skia's mathematically equivalent
+// but non-standard one. Pixel values are untouched — zero quality loss.
+static sk_sp<SkData> replaceJpegICCWithAppleP3(sk_sp<SkData> jpegData) {
+  if (!jpegData || jpegData->size() < 4) return jpegData;
+
+  const uint8_t *src = jpegData->bytes();
+  size_t srcLen = jpegData->size();
+  if (src[0] != 0xFF || src[1] != 0xD8) return jpegData; // not a JPEG
+
+  CGColorSpaceRef p3 = CGColorSpaceCreateWithName(kCGColorSpaceDisplayP3);
+  if (!p3) return jpegData;
+  CFDataRef cfICC = CGColorSpaceCopyICCData(p3);
+  CGColorSpaceRelease(p3);
+  if (!cfICC) return jpegData;
+
+  const uint8_t *iccBytes = CFDataGetBytePtr(cfICC);
+  size_t iccLen = (size_t)CFDataGetLength(cfICC);
+
+  // "ICC_PROFILE\0" APP2 marker signature (12 bytes)
+  static const uint8_t iccSig[] = {0x49, 0x43, 0x43, 0x5F, 0x50, 0x52,
+                                    0x4F, 0x46, 0x49, 0x4C, 0x45, 0x00};
+
+  SkDynamicMemoryWStream out;
+
+  out.write(src, 2); // SOI
+
+  // Structure: marker(2) + length(2) + "ICC_PROFILE\0"(12) + chunk[1,1](2) + profile
+  size_t iccContentLen = sizeof(iccSig) + 2 + iccLen;
+  size_t segLen = iccContentLen + 2; // length field includes itself
+  uint8_t app2hdr[4] = {0xFF, 0xE2, (uint8_t)(segLen >> 8),
+                        (uint8_t)(segLen & 0xFF)};
+  uint8_t chunkInfo[2] = {0x01, 0x01}; // chunk 1 of 1
+  out.write(app2hdr, 4);
+  out.write(iccSig, sizeof(iccSig));
+  out.write(chunkInfo, 2);
+  out.write(iccBytes, iccLen);
+
+  // Copy all header segments except any existing ICC APP2
+  size_t i = 2;
+  while (i + 3 < srcLen) {
+    if (src[i] != 0xFF) break;
+    uint8_t marker = src[i + 1];
+    if (marker == 0xDA || marker == 0xD9) break; // SOS / EOI
+    size_t segLenVal = (size_t(src[i + 2]) << 8) | src[i + 3];
+    size_t end = i + 2 + segLenVal;
+    if (end > srcLen) break;
+    bool isICC = marker == 0xE2 && end > i + 4 + sizeof(iccSig) &&
+                 memcmp(src + i + 4, iccSig, sizeof(iccSig)) == 0;
+    if (!isICC) {
+      out.write(src + i, end - i);
+    }
+    i = end;
+  }
+
+  out.write(src + i, srcLen - i);
+
+  CFRelease(cfICC);
+  return out.detachAsData();
+}
+#endif // __APPLE__
+
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
@@ -138,6 +207,13 @@ public:
       SkJpegEncoder::Options options;
       options.fQuality = quality;
       data = SkJpegEncoder::Encode(nullptr, image.get(), options);
+#ifdef __APPLE__
+      // Replace Skia's generated ICC with Apple's canonical Display P3 profile
+      // so apps like Instagram recognise the wide-gamut colour space.
+      if (data && image->colorSpace() && !image->colorSpace()->isSRGB()) {
+        data = replaceJpegICCWithAppleP3(data);
+      }
+#endif
     } else if (format == SkEncodedImageFormat::kWEBP) {
       SkWebpEncoder::Options options;
       if (quality >= 100) {
