@@ -5,6 +5,9 @@
  * verifies checksums, and sets up the Skia submodule to the matching version.
  */
 
+// Set SK_GRAPHITE before importing skia-configuration so GRAPHITE flag is true
+process.env.SK_GRAPHITE = "1";
+
 import { execSync } from "child_process";
 import { createHash } from "crypto";
 import {
