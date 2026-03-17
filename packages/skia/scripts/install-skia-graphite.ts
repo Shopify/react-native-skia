@@ -15,6 +15,7 @@ import {
   readdirSync,
   rmSync,
   statSync,
+  writeFileSync,
 } from "fs";
 import https from "https";
 import path from "path";
@@ -358,6 +359,11 @@ const install = async (): Promise<void> => {
   // Download platform libraries
   await downloadAndroidLibs();
   await downloadAppleLibs();
+
+  // Write marker file so podspec and build.gradle can detect Graphite
+  const markerFile = path.join(LIBS_DIR, ".graphite");
+  writeFileSync(markerFile, GRAPHITE_CONFIG.version, "utf-8");
+  console.log(`  ✓ Wrote Graphite marker file: ${markerFile}`);
 
   console.log(
     `\n✅ Skia Graphite ${GRAPHITE_CONFIG.version} installed successfully!\n`

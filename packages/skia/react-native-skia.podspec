@@ -4,14 +4,9 @@ require "json"
 
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
-# Check if Graphite is enabled
-use_graphite = false
-if ENV['SK_GRAPHITE']
-  use_graphite = ENV['SK_GRAPHITE'] == '1' || ENV['SK_GRAPHITE'].downcase == 'true'
-  puts "-- SK_GRAPHITE: using environment variable (#{use_graphite ? 'ON' : 'OFF'})"
-else
-  puts "-- SK_GRAPHITE: OFF (set SK_GRAPHITE=1 to enable)"
-end
+# Check if Graphite is enabled via marker file (created by install-skia-graphite)
+use_graphite = File.exist?(File.join(__dir__, 'libs', '.graphite'))
+puts "-- SK_GRAPHITE: #{use_graphite ? 'ON' : 'OFF'} (detected via libs/.graphite marker file)"
 
 # Set preprocessor definitions based on GRAPHITE flag
 preprocessor_defs = use_graphite ?

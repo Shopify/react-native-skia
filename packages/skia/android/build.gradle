@@ -59,7 +59,8 @@ static def findNodeModules(baseDir) {
 def nodeModules = findNodeModules(projectDir)
 
 // Skia prebuilt libs are copied into libs/android/ by the npm postinstall script
-def useGraphite = System.getenv("SK_GRAPHITE") == "1" || System.getenv("SK_GRAPHITE") == "true"
+// Graphite is detected via marker file created by install-skia-graphite
+def useGraphite = file("${projectDir}/../libs/.graphite").exists()
 def skiaLibsPath = "${projectDir}/../libs/android"
 
 logger.warn("react-native-skia: SK_GRAPHITE: ${useGraphite}")
