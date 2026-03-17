@@ -254,7 +254,8 @@ void RNSkApplePlatformContext::raiseError(const std::exception &err) {
 sk_sp<SkSurface> RNSkApplePlatformContext::makeOffscreenSurface(
     int width, int height, bool useP3ColorSpace) {
 #if defined(SK_GRAPHITE)
-  return DawnContext::getInstance().MakeOffscreen(width, height);
+  return DawnContext::getInstance().MakeOffscreen(width, height,
+                                                   useP3ColorSpace);
 #else
   return MetalContext::getInstance().MakeOffscreen(width, height,
                                                    useP3ColorSpace);

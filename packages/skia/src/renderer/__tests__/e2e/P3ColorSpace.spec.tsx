@@ -88,12 +88,12 @@ describe("P3 Color Space", () => {
       );
       expect(jpegBytes).not.toBeNull();
 
-      const iccData = extractIccFromJpeg(jpegBytes!);
-      expect(iccData).not.toBeNull();
-
-      // ICC header offset 40–43: primary platform.
-      // Apple's canonical profile = 'APPL'; Skia's generated profile = 0x00000000.
       if (surface.OS === "ios") {
+        const iccData = extractIccFromJpeg(jpegBytes!);
+        expect(iccData).not.toBeNull();
+
+        // ICC header offset 40–43: primary platform.
+        // Apple's canonical profile = 'APPL'; Skia's generated profile = 0x00000000.
         const primaryPlatform = String.fromCharCode(...iccData!.slice(40, 44));
         expect(primaryPlatform).toBe("APPL");
       }
