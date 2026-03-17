@@ -207,77 +207,46 @@ const checkoutSkiaSubmodule = (): void => {
   }
 };
 
-// Copy Dawn/WebGPU headers into cpp/dawn/include
-// Merges generated headers (from Android build output) with source headers (from Skia submodule)
-const copyDawnHeaders = (): void => {
-  console.log(`\n📋 Copying Dawn/WebGPU headers...`);
+// Download Dawn/WebGPU headers from the release tarball into cpp/dawn/include
+const copyDawnHeaders = async (): Promise<void> => {
+  console.log(`\n📋 Downloading Dawn/WebGPU headers...`);
 
+  const releaseTag = getReleaseTag(GRAPHITE_CONFIG.version);
+  const assetName = `skia-graphite-headers-${releaseTag}.tar.gz`;
+  const headersDir = path.join(LIBS_DIR, "headers-temp");
+
+  await downloadAndExtract(assetName, headersDir);
+
+  // Copy headers to cpp/dawn/include
   const dawnDest = path.join(PACKAGE_ROOT, "cpp/dawn/include");
   fileOps.rm(path.join(PACKAGE_ROOT, "cpp/dawn"));
   fileOps.mkdir(dawnDest);
 
-  // 1. Copy source headers from the Skia submodule's Dawn
-  const dawnSrcDir = path.join(
-    SKIA_DIR,
-    "third_party/externals/dawn/include"
+  // Find the extracted headers - tarball may have nested structure
+  const candidates = [
+    headersDir,
+    path.join(headersDir, "dawn/include"),
+    path.join(headersDir, "include"),
+    path.join(headersDir, "packages/skia/cpp/dawn/include"),
+  ];
+  const srcDir = candidates.find(
+    (dir) => existsSync(path.join(dir, "webgpu")) && existsSync(path.join(dir, "dawn"))
   );
-  fileOps.cp(dawnSrcDir, dawnDest);
-
-  // 2. Copy generated headers from Android build output (overrides/adds to source)
-  const genDir = path.join(
-    LIBS_DIR,
-    "android/arm64-v8a/gen/third_party/externals/dawn/include"
-  );
-  fileOps.cp(genDir, dawnDest);
-
-  // Move dawn/webgpu.h and dawn/webgpu_cpp.h to webgpu/
-  const webgpuH = path.join(dawnDest, "dawn/webgpu.h");
-  const webgpuCppH = path.join(dawnDest, "dawn/webgpu_cpp.h");
-  if (existsSync(webgpuH)) {
-    fileOps.cp(webgpuH, path.join(dawnDest, "webgpu/webgpu.h"));
-    fileOps.rm(webgpuH);
+  if (!srcDir) {
+    throw new Error("Could not find Dawn headers in extracted tarball");
   }
-  if (existsSync(webgpuCppH)) {
-    fileOps.cp(webgpuCppH, path.join(dawnDest, "webgpu/webgpu_cpp.h"));
-    fileOps.rm(webgpuCppH);
+  fileOps.cp(srcDir, dawnDest);
+
+  // Copy Graphite source headers from the tarball
+  const graphiteSrc = path.join(headersDir, "packages/skia/cpp/skia/src/gpu/graphite");
+  if (existsSync(graphiteSrc)) {
+    const graphiteDest = path.join(PACKAGE_ROOT, "cpp/skia/src/gpu/graphite");
+    fileOps.mkdir(graphiteDest);
+    fileOps.cp(graphiteSrc, graphiteDest);
   }
 
-  // Fix WebGPU header references
-  const dawnProcTable = path.join(dawnDest, "dawn/dawn_proc_table.h");
-  if (existsSync(dawnProcTable)) {
-    fileOps.sed(
-      dawnProcTable,
-      /#include "dawn\/webgpu\.h"/g,
-      '#include "webgpu/webgpu.h"'
-    );
-  }
-
-  // Cleanup unnecessary files
-  fileOps.rm(path.join(dawnDest, "dawn/wire"));
-  fileOps.rm(path.join(dawnDest, "dawn/BUILD.gn"));
-  const webgpuPrintH = path.join(dawnDest, "webgpu/webgpu_cpp_print.h");
-  if (existsSync(webgpuPrintH)) {
-    fileOps.rm(webgpuPrintH);
-  }
-  const dawnPrintH = path.join(dawnDest, "dawn/webgpu_cpp_print.h");
-  if (existsSync(dawnPrintH)) {
-    fileOps.rm(dawnPrintH);
-  }
-
-  // Copy Graphite source headers from Skia submodule
-  const graphiteDest = path.join(PACKAGE_ROOT, "cpp/skia/src/gpu/graphite");
-  fileOps.mkdir(graphiteDest);
-  const graphiteSrc = path.join(SKIA_DIR, "src/gpu/graphite");
-  for (const header of [
-    "ContextOptionsPriv.h",
-    "ResourceTypes.h",
-    "TextureProxyView.h",
-  ]) {
-    fileOps.cp(
-      path.join(graphiteSrc, header),
-      path.join(graphiteDest, header)
-    );
-  }
+  // Cleanup temp directory
+  rmSync(headersDir, { recursive: true, force: true });
 
   console.log(`  ✓ Dawn/WebGPU and Graphite headers copied`);
 };
@@ -379,8 +348,8 @@ const install = async (): Promise<void> => {
   await downloadAndroidLibs();
   await downloadAppleLibs();
 
-  // Copy Dawn/WebGPU headers from Android build output
-  copyDawnHeaders();
+  // Download and copy Dawn/WebGPU headers from release tarball
+  await copyDawnHeaders();
 
   // Write marker file so podspec and build.gradle can detect Graphite
   const markerFile = path.join(LIBS_DIR, ".graphite");
