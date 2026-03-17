@@ -5,6 +5,9 @@
  * verifies checksums, and sets up the Skia submodule to the matching version.
  */
 
+// Set SK_GRAPHITE before importing skia-configuration so GRAPHITE flag is true
+process.env.SK_GRAPHITE = "1";
+
 import { execSync } from "child_process";
 import { createHash } from "crypto";
 import {
@@ -15,6 +18,7 @@ import {
   readdirSync,
   rmSync,
   statSync,
+  writeFileSync,
 } from "fs";
 import https from "https";
 import path from "path";
@@ -203,68 +207,48 @@ const checkoutSkiaSubmodule = (): void => {
   }
 };
 
-// Copy Dawn/WebGPU headers from the release
+// Download Dawn/WebGPU headers from the release tarball into cpp/dawn/include
 const copyDawnHeaders = async (): Promise<void> => {
-  console.log(`\n📋 Downloading and copying Dawn/WebGPU headers...`);
+  console.log(`\n📋 Downloading Dawn/WebGPU headers...`);
 
   const releaseTag = getReleaseTag(GRAPHITE_CONFIG.version);
-  const headersAsset = `skia-graphite-headers-${releaseTag}.tar.gz`;
-  const headersDir = path.join(LIBS_DIR, "graphite-headers-temp");
+  const assetName = `skia-graphite-headers-${releaseTag}.tar.gz`;
+  const headersDir = path.join(LIBS_DIR, "headers-temp");
 
-  // Download headers
-  await downloadAndExtract(headersAsset, headersDir);
+  await downloadAndExtract(assetName, headersDir);
 
-  // Copy Dawn headers to cpp/dawn
+  // Copy headers to cpp/dawn/include
   const dawnDest = path.join(PACKAGE_ROOT, "cpp/dawn/include");
   fileOps.rm(path.join(PACKAGE_ROOT, "cpp/dawn"));
   fileOps.mkdir(dawnDest);
 
-  // The headers archive should contain dawn/include structure
-  const extractedDawnPath = path.join(headersDir, "dawn/include");
-  if (existsSync(extractedDawnPath)) {
-    fileOps.cp(extractedDawnPath, dawnDest);
-  } else {
-    // Try alternative structure
-    const altPath = path.join(headersDir, "include");
-    if (existsSync(altPath)) {
-      fileOps.cp(altPath, dawnDest);
-    }
+  // Find the extracted headers - tarball may have nested structure
+  const candidates = [
+    headersDir,
+    path.join(headersDir, "dawn/include"),
+    path.join(headersDir, "include"),
+    path.join(headersDir, "packages/skia/cpp/dawn/include"),
+  ];
+  const srcDir = candidates.find(
+    (dir) => existsSync(path.join(dir, "webgpu")) && existsSync(path.join(dir, "dawn"))
+  );
+  if (!srcDir) {
+    throw new Error("Could not find Dawn headers in extracted tarball");
   }
+  fileOps.cp(srcDir, dawnDest);
 
-  // Fix WebGPU header references
-  const dawnProcTable = path.join(dawnDest, "dawn/dawn_proc_table.h");
-  if (existsSync(dawnProcTable)) {
-    fileOps.sed(
-      dawnProcTable,
-      /#include "dawn\/webgpu\.h"/g,
-      '#include "webgpu/webgpu.h"'
-    );
-  }
-
-  // Create webgpu directory and copy headers
-  fileOps.mkdir(path.join(dawnDest, "webgpu"));
-  const webgpuH = path.join(dawnDest, "dawn/webgpu.h");
-  const webgpuCppH = path.join(dawnDest, "dawn/webgpu_cpp.h");
-  if (existsSync(webgpuH)) {
-    fileOps.cp(webgpuH, path.join(dawnDest, "webgpu/webgpu.h"));
-    fileOps.rm(webgpuH);
-  }
-  if (existsSync(webgpuCppH)) {
-    fileOps.cp(webgpuCppH, path.join(dawnDest, "webgpu/webgpu_cpp.h"));
-    fileOps.rm(webgpuCppH);
-  }
-
-  // Cleanup
-  fileOps.rm(path.join(dawnDest, "dawn/wire"));
-  const webgpuPrintH = path.join(dawnDest, "webgpu/webgpu_cpp_print.h");
-  if (existsSync(webgpuPrintH)) {
-    fileOps.rm(webgpuPrintH);
+  // Copy Graphite source headers from the tarball
+  const graphiteSrc = path.join(headersDir, "packages/skia/cpp/skia/src/gpu/graphite");
+  if (existsSync(graphiteSrc)) {
+    const graphiteDest = path.join(PACKAGE_ROOT, "cpp/skia/src/gpu/graphite");
+    fileOps.mkdir(graphiteDest);
+    fileOps.cp(graphiteSrc, graphiteDest);
   }
 
   // Cleanup temp directory
   rmSync(headersDir, { recursive: true, force: true });
 
-  console.log(`  ✓ Dawn/WebGPU headers copied`);
+  console.log(`  ✓ Dawn/WebGPU and Graphite headers copied`);
 };
 
 // Download Android libraries
@@ -272,10 +256,10 @@ const downloadAndroidLibs = async (): Promise<void> => {
   console.log(`\n📱 Downloading Android Graphite libraries...`);
 
   const androidAbis = [
-    { name: "armeabi-v7a", asset: "android-arm" },
-    { name: "arm64-v8a", asset: "android-arm-64" },
-    { name: "x86", asset: "android-arm-x86" },
-    { name: "x86_64", asset: "android-arm-x64" },
+    { name: "armeabi-v7a", asset: "android-arm", nested: "arm" },
+    { name: "arm64-v8a", asset: "android-arm-64", nested: "arm64" },
+    { name: "x86", asset: "android-arm-x86", nested: "x86" },
+    { name: "x86_64", asset: "android-arm-x64", nested: "x64" },
   ];
 
   const releaseTag = getReleaseTag(GRAPHITE_CONFIG.version);
@@ -288,6 +272,14 @@ const downloadAndroidLibs = async (): Promise<void> => {
     const destDir = path.join(LIBS_DIR, "android", abi.name);
 
     await downloadAndExtract(assetName, destDir, expectedChecksum);
+
+    // Flatten: tarballs extract with a nested build dir (e.g. arm/, arm64/)
+    // CMake expects libs directly in libs/android/{abi}/
+    const nestedDir = path.join(destDir, abi.nested);
+    if (existsSync(nestedDir)) {
+      execSync(`mv "${nestedDir}"/* "${destDir}"/`);
+      rmSync(nestedDir, { recursive: true, force: true });
+    }
   }
 
   console.log(`  ✓ Android libraries downloaded`);
@@ -352,12 +344,17 @@ const install = async (): Promise<void> => {
   // Copy Skia headers
   copyHeaders();
 
-  // Download and copy Dawn/WebGPU headers
-  await copyDawnHeaders();
-
   // Download platform libraries
   await downloadAndroidLibs();
   await downloadAppleLibs();
+
+  // Download and copy Dawn/WebGPU headers from release tarball
+  await copyDawnHeaders();
+
+  // Write marker file so podspec and build.gradle can detect Graphite
+  const markerFile = path.join(LIBS_DIR, ".graphite");
+  writeFileSync(markerFile, GRAPHITE_CONFIG.version, "utf-8");
+  console.log(`  ✓ Wrote Graphite marker file: ${markerFile}`);
 
   console.log(
     `\n✅ Skia Graphite ${GRAPHITE_CONFIG.version} installed successfully!\n`

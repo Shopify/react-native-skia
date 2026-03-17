@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.4.1)
 set (CMAKE_VERBOSE_MAKEFILE ON)
 set (CMAKE_CXX_STANDARD 20)
 
-# SKIA_LIBS_PATH is passed from Gradle (resolved via Node.js package resolution)
+# SKIA_LIBS_PATH is passed from Gradle (pointing to libs/android/, populated by npm postinstall)
 # Append the ABI to get the full path
 set (SKIA_LIBS_PATH "${SKIA_LIBS_PATH}/${ANDROID_ABI}")
 
@@ -17,14 +17,12 @@ if(NOT EXISTS "${SKIA_LIBS_PATH}/libskia.a")
     message("│                                                                             │")
     message("│  Could not find libskia.a at: ${SKIA_LIBS_PATH}                             │")
     message("│                                                                             │")
-    message("│  Make sure react-native-skia-android is installed:                          │")
-    message("│    yarn add react-native-skia-android                                       │")
-    message("│                                                                             │")
-    message("│  See: https://shopify.github.io/react-native-skia/docs/getting-started/installation │")
+    message("│  Run the following command to install them:                                  │")
+    message("│    npx install-skia                                                         │")
     message("│                                                                             │")
     message("└─────────────────────────────────────────────────────────────────────────────┘")
     message("")
-    message(FATAL_ERROR "Skia prebuilt binaries not found at ${SKIA_LIBS_PATH}")
+    message(FATAL_ERROR "Skia prebuilt binaries not found. Run `npx install-skia` to fix this.")
 endif()
 
 # Import libskia
