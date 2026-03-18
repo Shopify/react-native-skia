@@ -1,6 +1,5 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { StyleSheet } from "react-native";
-import { unstable_createElement as unstableCreateElement } from "react-native-web";
 import type { Int32 } from "react-native/Libraries/Types/CodegenTypes";
 import type { ViewProps } from "react-native";
 
@@ -15,7 +14,7 @@ export interface NativeProps extends ViewProps {
 function debounce<T extends (...args: any[]) => void>(
   func: T,
   wait: number,
-  immediate = false,
+  immediate = false
 ) {
   let timeout: ReturnType<typeof setTimeout> | undefined;
   return function debounced(
@@ -39,7 +38,7 @@ function debounce<T extends (...args: any[]) => void>(
   };
 }
 
-function resizeCanvas(canvas?: HTMLCanvasElement) {
+function resizeCanvas(canvas: HTMLCanvasElement | null) {
   if (!canvas) {
     return;
   }
@@ -55,7 +54,7 @@ function resizeCanvas(canvas?: HTMLCanvasElement) {
 export default function WebGPUViewNativeComponent(props: NativeProps) {
   const { contextId, style, transparent, ...rest } = props;
 
-  const canvasElm = useRef<HTMLCanvasElement>();
+  const canvasElm = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const onResize = debounce(() => resizeCanvas(canvasElm.current), 100);
@@ -65,15 +64,15 @@ export default function WebGPUViewNativeComponent(props: NativeProps) {
     };
   }, []);
 
-  return unstableCreateElement("canvas", {
+  return React.createElement("canvas", {
     ...rest,
-    style: [
-      styles.view,
-      styles.flex1,
-      transparent === false && { backgroundColor: "white" }, // Canvas elements are transparent by default on the web
-      style,
-    ],
     id: contextIdToId(contextId),
+    style: {
+      ...styles.view,
+      ...styles.flex1,
+      ...(transparent === false ? { backgroundColor: "white" } : {}),
+      ...(typeof style === "object" ? style : {}),
+    },
     ref: (ref: HTMLCanvasElement) => {
       canvasElm.current = ref;
       if (ref) {
@@ -90,7 +89,6 @@ const styles = StyleSheet.create({
   view: {
     alignItems: "stretch",
     backgroundColor: "transparent",
-    // @ts-expect-error - not a valid RN style, but it's valid for web
     border: "0 solid black",
     boxSizing: "border-box",
     display: "flex",

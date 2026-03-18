@@ -476,11 +476,12 @@ export const copyHeaders = () => {
     // Try to find graphite headers from npm package
     let graphiteHeadersPath: string | null = null;
     try {
-      const graphiteHeadersPkg = require.resolve(
-        "react-native-skia-graphite-headers/package.json"
-      );
+      const graphiteHeadersPkg =
+        require.resolve("react-native-skia-graphite-headers/package.json");
       graphiteHeadersPath = path.dirname(graphiteHeadersPkg);
-      console.log(`   Found graphite headers package at: ${graphiteHeadersPath}`);
+      console.log(
+        `   Found graphite headers package at: ${graphiteHeadersPath}`
+      );
     } catch (e) {
       // Package not installed
     }
@@ -540,7 +541,10 @@ export const copyHeaders = () => {
 
       // Copy Dawn headers from npm package
       const dawnSrc = path.join(graphiteHeadersPath, "cpp/dawn/include");
-      const graphiteSrc = path.join(graphiteHeadersPath, "cpp/skia/src/gpu/graphite");
+      const graphiteSrc = path.join(
+        graphiteHeadersPath,
+        "cpp/skia/src/gpu/graphite"
+      );
 
       if (fs.existsSync(dawnSrc)) {
         console.log("      - Copying Dawn headers from npm package...");
@@ -548,7 +552,9 @@ export const copyHeaders = () => {
       }
 
       if (fs.existsSync(graphiteSrc)) {
-        console.log("      - Copying Graphite source headers from npm package...");
+        console.log(
+          "      - Copying Graphite source headers from npm package..."
+        );
         fileOps.cp(graphiteSrc, "./cpp/skia/src/gpu/graphite");
       }
 

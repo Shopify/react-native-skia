@@ -230,7 +230,8 @@ const copyDawnHeaders = async (): Promise<void> => {
     path.join(headersDir, "packages/skia/cpp/dawn/include"),
   ];
   const srcDir = candidates.find(
-    (dir) => existsSync(path.join(dir, "webgpu")) && existsSync(path.join(dir, "dawn"))
+    (dir) =>
+      existsSync(path.join(dir, "webgpu")) && existsSync(path.join(dir, "dawn"))
   );
   if (!srcDir) {
     throw new Error("Could not find Dawn headers in extracted tarball");
@@ -238,7 +239,10 @@ const copyDawnHeaders = async (): Promise<void> => {
   fileOps.cp(srcDir, dawnDest);
 
   // Copy Graphite source headers from the tarball
-  const graphiteSrc = path.join(headersDir, "packages/skia/cpp/skia/src/gpu/graphite");
+  const graphiteSrc = path.join(
+    headersDir,
+    "packages/skia/cpp/skia/src/gpu/graphite"
+  );
   if (existsSync(graphiteSrc)) {
     const graphiteDest = path.join(PACKAGE_ROOT, "cpp/skia/src/gpu/graphite");
     fileOps.mkdir(graphiteDest);

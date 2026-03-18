@@ -10,7 +10,6 @@ function generateContextId() {
 }
 
 declare global {
-  // eslint-disable-next-line no-var
   var RNWebGPU: {
     gpu: GPU;
     fabric: boolean;
