@@ -307,19 +307,28 @@ jobs:
           echo "Installing expo-dev-client..."
           npx expo install expo-dev-client
 
+      - name: Override minSdkVersion
+        if: inputs.android_min_sdk != ''
+        working-directory: /Users/runner/skia-test-app/my-app
+        run: |
+          echo "Setting minSdkVersion to ${{ inputs.android_min_sdk }} in app.json..."
+          node -e "
+            const f = './app.json';
+            const app = require(f);
+            app.expo = app.expo || {};
+            app.expo.android = app.expo.android || {};
+            app.expo.plugins = app.expo.plugins || [];
+            app.expo.plugins.push(['expo-build-properties', { android: { minSdkVersion: ${{ inputs.android_min_sdk }} } }]);
+            require('fs').writeFileSync(f, JSON.stringify(app, null, 2) + '\n');
+          "
+          npx expo install expo-build-properties
+          cat app.json
+
       - name: Prebuild native directories
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Generating native Android directory..."
           npx expo prebuild --platform android
-
-      - name: Override minSdkVersion
-        if: inputs.android_min_sdk != ''
-        working-directory: /Users/runner/skia-test-app/my-app/android
-        run: |
-          echo "Setting minSdkVersion to ${{ inputs.android_min_sdk }}..."
-          echo "react.minSdkVersion=${{ inputs.android_min_sdk }}" >> gradle.properties
-          cat gradle.properties
 
       - name: Start Android emulator
         run: |
