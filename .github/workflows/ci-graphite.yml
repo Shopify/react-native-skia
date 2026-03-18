@@ -229,3 +229,41 @@ jobs:
       - name: Run e2e tests
         working-directory: packages/skia
         run: CI=true E2E=true yarn test -i Paths
+
+  build-library-graphite:
+    runs-on: ubuntu-latest
+    outputs:
+      run_id: ${{ github.run_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          graphite: true
+
+      - name: Build package
+        run: yarn build
+
+      - name: Pack package
+        working-directory: packages/skia
+        run: yarn pack
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.0
+        with:
+          name: package-tgz
+          path: packages/skia/package.tgz
+
+  test-package-e2e-graphite:
+    needs: build-library-graphite
+    uses: ./.github/workflows/test-skia-package.yml
+    with:
+      skia_version: artifact:${{ needs.build-library-graphite.outputs.run_id }}
+      test_ios: true
+      test_android: true
+      test_web: true
