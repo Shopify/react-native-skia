@@ -249,6 +249,10 @@ jobs:
       - name: Build package
         run: yarn build
 
+      - name: Prepare package for graphite bundle
+        working-directory: packages/skia
+        run: node -e "const p=require('./package.json'); delete p.scripts.postinstall; p.files.push('libs/**'); require('fs').writeFileSync('./package.json', JSON.stringify(p, null, 2) + '\n')"
+
       - name: Pack package
         working-directory: packages/skia
         run: yarn pack
