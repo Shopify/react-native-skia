@@ -32,6 +32,11 @@ on:
         required: false
         default: 'Nexus 5X'
         type: string
+      android_min_sdk:
+        description: 'Android minSdkVersion override'
+        required: false
+        default: ''
+        type: string
       test_web:
         description: 'Run Web tests'
         required: false
@@ -307,6 +312,18 @@ jobs:
         run: |
           echo "Generating native Android directory..."
           npx expo prebuild --platform android
+
+      - name: Override minSdkVersion
+        if: inputs.android_min_sdk != ''
+        working-directory: /Users/runner/skia-test-app/my-app/android
+        run: |
+          echo "Setting minSdkVersion to ${{ inputs.android_min_sdk }}..."
+          if grep -q 'minSdkVersion' gradle.properties; then
+            sed -i '' "s/minSdkVersion=.*/minSdkVersion=${{ inputs.android_min_sdk }}/" gradle.properties
+          fi
+          if grep -q 'react.minSdkVersion' gradle.properties; then
+            sed -i '' "s/react.minSdkVersion=.*/react.minSdkVersion=${{ inputs.android_min_sdk }}/" gradle.properties
+          fi
 
       - name: Start Android emulator
         run: |

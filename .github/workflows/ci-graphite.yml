@@ -271,3 +271,4 @@ jobs:
       test_ios: true
       test_android: true
       test_web: true
+      android_min_sdk: '26'
