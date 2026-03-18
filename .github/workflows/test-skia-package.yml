@@ -318,12 +318,8 @@ jobs:
         working-directory: /Users/runner/skia-test-app/my-app/android
         run: |
           echo "Setting minSdkVersion to ${{ inputs.android_min_sdk }}..."
-          if grep -q 'minSdkVersion' gradle.properties; then
-            sed -i '' "s/minSdkVersion=.*/minSdkVersion=${{ inputs.android_min_sdk }}/" gradle.properties
-          fi
-          if grep -q 'react.minSdkVersion' gradle.properties; then
-            sed -i '' "s/react.minSdkVersion=.*/react.minSdkVersion=${{ inputs.android_min_sdk }}/" gradle.properties
-          fi
+          echo "react.minSdkVersion=${{ inputs.android_min_sdk }}" >> gradle.properties
+          cat gradle.properties
 
       - name: Start Android emulator
         run: |
