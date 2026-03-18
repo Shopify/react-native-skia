@@ -216,7 +216,12 @@ export function mat4RotateY(m: Mat4, angle: number, dst?: Mat4): Mat4 {
   return dst;
 }
 
-export function mat4Rotate(m: Mat4, axis: Vec3, angle: number, dst?: Mat4): Mat4 {
+export function mat4Rotate(
+  m: Mat4,
+  axis: Vec3,
+  angle: number,
+  dst?: Mat4
+): Mat4 {
   dst = dst || new Float32Array(16);
   let x = axis[0],
     y = axis[1],
@@ -243,9 +248,18 @@ export function mat4Rotate(m: Mat4, axis: Vec3, angle: number, dst?: Mat4): Mat4
   const r21 = t * y * z - s * x;
   const r22 = t * z * z + c;
 
-  const m00 = m[0], m01 = m[1], m02 = m[2], m03 = m[3];
-  const m10 = m[4], m11 = m[5], m12 = m[6], m13 = m[7];
-  const m20 = m[8], m21 = m[9], m22 = m[10], m23 = m[11];
+  const m00 = m[0],
+    m01 = m[1],
+    m02 = m[2],
+    m03 = m[3];
+  const m10 = m[4],
+    m11 = m[5],
+    m12 = m[6],
+    m13 = m[7];
+  const m20 = m[8],
+    m21 = m[9],
+    m22 = m[10],
+    m23 = m[11];
 
   dst[0] = m00 * r00 + m10 * r01 + m20 * r02;
   dst[1] = m01 * r00 + m11 * r01 + m21 * r02;

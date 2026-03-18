@@ -51,7 +51,9 @@ function resizeCanvas(canvas: HTMLCanvasElement | null) {
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function WebGPUViewNativeComponent(props: NativeProps): React.JSX.Element {
+export default function WebGPUViewNativeComponent(
+  props: NativeProps
+): React.JSX.Element {
   const { contextId, style, transparent, ...rest } = props;
 
   const canvasElm = useRef<HTMLCanvasElement>(null);

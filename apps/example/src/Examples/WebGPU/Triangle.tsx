@@ -105,7 +105,8 @@ export function Triangle() {
         };
 
         const commandEncoder = device.createCommandEncoder();
-        const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
+        const passEncoder =
+          commandEncoder.beginRenderPass(renderPassDescriptor);
         passEncoder.setPipeline(pipeline);
         passEncoder.draw(3);
         passEncoder.end();
