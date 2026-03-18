@@ -12,6 +12,9 @@ import { Container, StaticContainer } from "./StaticContainer";
 import "../skia/NativeSetup";
 import "../views/api";
 
+// create local reference for `strictGlobal` option in Worklets
+const SkiaViewApi = globalThis.SkiaViewApi;
+
 const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   "worklet";
   const rec = Skia.PictureRecorder();

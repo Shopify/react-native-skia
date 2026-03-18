@@ -10,6 +10,9 @@ import { visit } from "./Recorder/Visitor";
 import "../skia/NativeSetup";
 import "../views/api";
 
+// create local reference for `strictGlobal` option in Worklets
+const SkiaViewApi = globalThis.SkiaViewApi;
+
 const nativeDrawOnscreen = (
   nativeId: number,
   recorder: JsiRecorder,
