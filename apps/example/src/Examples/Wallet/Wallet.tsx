@@ -1,27 +1,33 @@
-import { Canvas, Group, LinearGradient, Path, vec } from '@shopify/react-native-skia';
-import React, { useMemo } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
-import { GestureDetector, ScrollView } from 'react-native-gesture-handler';
+import {
+  Canvas,
+  Group,
+  LinearGradient,
+  Path,
+  vec,
+} from "@shopify/react-native-skia";
+import React, { useMemo } from "react";
+import { StyleSheet, useWindowDimensions, View } from "react-native";
+import { GestureDetector, ScrollView } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
 
-import { getYForX } from './Math';
-import { COLORS, getGraph, PADDING } from './Model';
-import { Cursor } from './components/Cursor';
-import { Header } from './components/Header';
-import { Label } from './components/Label';
-import { List } from './components/List';
-import { Selection } from './components/Selection';
-import { useGraphTouchHandler } from './components/useGraphTouchHandler';
+import { getYForX } from "./Math";
+import { COLORS, getGraph, PADDING } from "./Model";
+import { Cursor } from "./components/Cursor";
+import { Header } from "./components/Header";
+import { Label } from "./components/Label";
+import { List } from "./components/List";
+import { Selection } from "./components/Selection";
+import { useGraphTouchHandler } from "./components/useGraphTouchHandler";
 
 const touchableCursorSize = 80;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#1F1D2B',
+    backgroundColor: "#1F1D2B",
   },
 });
 
@@ -52,7 +58,7 @@ export const Wallet = () => {
   const gesture = useGraphTouchHandler(x, width);
   const style = useAnimatedStyle(() => {
     return {
-      position: 'absolute',
+      position: "absolute",
       width: touchableCursorSize,
       height: touchableCursorSize,
       left: x.value - touchableCursorSize / 2,
@@ -65,10 +71,26 @@ export const Wallet = () => {
       <GestureDetector gesture={gesture}>
         <View style={{ width, height: chartHeight }}>
           <Canvas style={{ width, height: chartHeight }}>
-            <Label state={state} y={y} graphs={graphs} width={width} height={height} />
+            <Label
+              state={state}
+              y={y}
+              graphs={graphs}
+              width={width}
+              height={height}
+            />
             <Group transform={[{ translateY }]}>
-              <Path style="stroke" path={path} strokeWidth={4} strokeJoin="round" strokeCap="round">
-                <LinearGradient start={vec(0, 0)} end={vec(width, 0)} colors={COLORS} />
+              <Path
+                style="stroke"
+                path={path}
+                strokeWidth={4}
+                strokeJoin="round"
+                strokeCap="round"
+              >
+                <LinearGradient
+                  start={vec(0, 0)}
+                  end={vec(width, 0)}
+                  colors={COLORS}
+                />
               </Path>
               <Cursor x={x} y={y} width={width} />
             </Group>

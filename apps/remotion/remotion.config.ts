@@ -45,6 +45,9 @@ Config.overrideWebpackConfig((currentConfiguration) => {
   }
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
+  currentConfiguration.resolve.alias["react-native"] = "react-native-web";
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   currentConfiguration.resolve.alias["react-native-reanimated"] = false;
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
