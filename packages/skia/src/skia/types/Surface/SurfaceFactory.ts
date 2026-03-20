@@ -27,5 +27,9 @@ export interface SurfaceFactory {
    * @param height - number of pixels of the height of the drawable area.
    * @param opts - optional surface options (e.g. colorSpace: "display-p3" | "srgb").
    */
-  MakeOffscreen: (width: number, height: number, opts?: SurfaceOptions) => SkSurface | null;
+  MakeOffscreen: (
+    width: number,
+    height: number,
+    opts?: SurfaceOptions
+  ) => SkSurface | null;
 }

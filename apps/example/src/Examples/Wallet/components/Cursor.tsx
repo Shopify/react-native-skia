@@ -1,12 +1,14 @@
-import { Circle, Group, Paint } from '@shopify/react-native-skia';
-import React from 'react';
-import type { SharedValue } from 'react-native-reanimated';
-import { interpolateColor, useDerivedValue } from 'react-native-reanimated';
+import { Circle, Group, Paint } from "@shopify/react-native-skia";
+import React from "react";
+import type { SharedValue } from "react-native-reanimated";
+import { interpolateColor, useDerivedValue } from "react-native-reanimated";
 
-import { COLORS } from '../Model';
+import { COLORS } from "../Model";
 
 const COLOR_STOPS =
-  COLORS.length <= 1 ? [0] : COLORS.map((_, index) => index / (COLORS.length - 1));
+  COLORS.length <= 1
+    ? [0]
+    : COLORS.map((_, index) => index / (COLORS.length - 1));
 
 interface CursorProps {
   x: SharedValue<number>;
@@ -16,11 +18,11 @@ interface CursorProps {
 
 export const Cursor = ({ x, y, width }: CursorProps) => {
   const color = useDerivedValue(() => {
-    'worklet';
+    "worklet";
     const ratio = width === 0 ? 0 : x.value / width;
     const clamped = Math.min(Math.max(ratio, 0), 1);
     const interpolated = interpolateColor(clamped, COLOR_STOPS, COLORS);
-    if (typeof interpolated === 'string') {
+    if (typeof interpolated === "string") {
       return interpolated;
     }
     const r = (interpolated & 0xff0000) >> 16;
@@ -30,7 +32,7 @@ export const Cursor = ({ x, y, width }: CursorProps) => {
     return `rgba(${r}, ${g}, ${b}, ${a})`;
   });
   const transform = useDerivedValue(() => {
-    'worklet';
+    "worklet";
     return [{ translateX: x.value }, { translateY: y.value }];
   });
   return (

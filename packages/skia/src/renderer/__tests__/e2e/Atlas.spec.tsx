@@ -46,7 +46,9 @@ const createColorBlendTestData = (
   );
   const colors = new Array(total)
     .fill(0)
-    .map((_, i) => Skia.Color(COLOR_BLEND_TEST_PALETTE[i % COLOR_BLEND_TEST_PALETTE.length]));
+    .map((_, i) =>
+      Skia.Color(COLOR_BLEND_TEST_PALETTE[i % COLOR_BLEND_TEST_PALETTE.length])
+    );
   return { sprites, transforms, colors };
 };
 
