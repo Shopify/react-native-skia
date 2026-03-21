@@ -1,4 +1,5 @@
 import { exit } from "process";
+import fs from "fs";
 import path from "path";
 
 import type {
@@ -309,6 +310,94 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
     const arm64ePatchFile = path.join(__dirname, "dawn-arm64e-simulator.patch");
     $(`cd ${SkiaSrc} && git apply ${arm64ePatchFile}`);
 
+    // Fix Dawn build on iOS (https://github.com/knopp/skia/commit/23f6e4c)
+    const patchFile = (filePath: string, search: string, replace: string) => {
+      const content = fs.readFileSync(filePath, "utf-8");
+      if (!content.includes(search)) {
+        throw new Error(`Patch target not found in ${filePath}`);
+      }
+      fs.writeFileSync(filePath, content.replace(search, replace));
+    };
+    // 1. Remove arm64e arch flags entirely
+    patchFile(
+      `${SkiaSrc}/gn/skia/BUILD.gn`,
+      [
+        `      ]`,
+        `      if (!ios_use_simulator) {`,
+        `        _arch_flags += [`,
+        `          "-arch",`,
+        `          "arm64e",`,
+        `        ]`,
+        `      }`,
+        `    } else if (current_cpu == "x86") {`,
+      ].join("\n"),
+      [`      ]`, `    } else if (current_cpu == "x86") {`].join("\n")
+    );
+    // 2. Remove Cocoa.framework (not available on iOS)
+    patchFile(
+      `${SkiaSrc}/third_party/dawn/BUILD.gn`,
+      `      "Cocoa.framework",\n`,
+      ""
+    );
+    // 3. Pass ios_use_simulator to dawn_cmake action
+    patchFile(
+      `${SkiaSrc}/third_party/dawn/BUILD.gn`,
+      `    "--build_dir=cmake_dawn",\n  ]\n  if (is_clang) {`,
+      [
+        `    "--build_dir=cmake_dawn",`,
+        `  ]`,
+        `  if (is_ios && ios_use_simulator) {`,
+        `    args += [ "--ios_use_simulator" ]`,
+        `  }`,
+        `  if (is_clang) {`,
+      ].join("\n")
+    );
+    // 4. Add ios_use_simulator argument to cmake_utils.py
+    patchFile(
+      `${SkiaSrc}/third_party/dawn/cmake_utils.py`,
+      `      "--target_cpu", required=True, help="Target CPU for cross-compilation.")\n  parser.add_argument(\n      "--win_sdk"`,
+      [
+        `      "--target_cpu", required=True, help="Target CPU for cross-compilation.")`,
+        `  parser.add_argument(`,
+        `      "--ios_use_simulator", action=argparse.BooleanOptionalAction,`,
+        `      help="Whether to build for the iOS simulator.")`,
+        `  parser.add_argument(`,
+        `      "--win_sdk"`,
+      ].join("\n")
+    );
+    // 5. Add iOS os/cpu mapping in cmake_utils.py
+    patchFile(
+      `${SkiaSrc}/third_party/dawn/cmake_utils.py`,
+      `    return "Windows", target_cpu_map[cpu]\n\n  print("Unsupported OS")`,
+      [
+        `    return "Windows", target_cpu_map[cpu]`,
+        ``,
+        `  if os == "ios":`,
+        `    target_cpu_map = {`,
+        `      "arm64": "arm64",`,
+        `      "x64": "x86_64",`,
+        `    }`,
+        `    return "iOS", target_cpu_map[cpu]`,
+        ``,
+        `  print("Unsupported OS")`,
+      ].join("\n")
+    );
+    // 6. Add iOS-specific cmake args in build_dawn.py
+    patchFile(
+      `${SkiaSrc}/third_party/dawn/build_dawn.py`,
+      `    configure_cmd.append(f"-DCMAKE_OSX_ARCHITECTURES={target_cpu}")\n\n  env = os.environ.copy()`,
+      [
+        `    configure_cmd.append(f"-DCMAKE_OSX_ARCHITECTURES={target_cpu}")`,
+        ``,
+        `  if target_os == "iOS":`,
+        `    configure_cmd.append("-DTINT_BUILD_CMD_TOOLS=OFF")`,
+        `    if args.ios_use_simulator:`,
+        `      configure_cmd.append("-DCMAKE_OSX_SYSROOT=iphonesimulator")`,
+        ``,
+        `  env = os.environ.copy()`,
+      ].join("\n")
+    );
+
     // Fix Dawn ShaderModuleMTL.mm uint32 typo if it exists
     const shaderModuleFile = `${SkiaSrc}/third_party/externals/dawn/src/dawn/native/metal/ShaderModuleMTL.mm`;
     $(
@@ -318,11 +407,11 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
     // Remove PartitionAlloc dependency from Dawn (causes linking errors on Android)
     // The dawn.gni file conditionally sets dawn_partition_alloc_dir for non-MSVC and non-Mac,
     // which includes Android. We need to remove this to avoid undefined symbol errors.
-    const dawnGniFile = `${SkiaSrc}/build_overrides/dawn.gni`;
-    $(
-      `sed -i '' '/# PartitionAlloc is an optional dependency:/,$d' ${dawnGniFile}`
-    );
-    console.log("   ✓ Removed PartitionAlloc dependency from dawn.gni");
+    // const dawnGniFile = `${SkiaSrc}/build_overrides/dawn.gni`;
+    // $(
+    //   `sed -i '' '/# PartitionAlloc is an optional dependency:/,$d' ${dawnGniFile}`
+    // );
+    // console.log("   ✓ Removed PartitionAlloc dependency from dawn.gni");
 
     console.log("Patches applied successfully");
   }

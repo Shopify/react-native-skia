@@ -93,7 +93,7 @@ export const commonArgs = [
   ["skia_enable_graphite", GRAPHITE],
   ["skia_use_dawn", GRAPHITE],
   // C++20 is required for Graphite builds (Dawn uses C++20 concepts)
-  ...(GRAPHITE ? [["skia_use_cpp20", true]] : []),
+  // ...(GRAPHITE ? [["skia_use_cpp20", true]] : []),
 ];
 
 export type PlatformName =
