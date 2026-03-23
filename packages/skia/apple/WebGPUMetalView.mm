@@ -45,6 +45,11 @@
       .getSurfaceInfoOrCreate([_contextId intValue], gpu, size.width,
                               size.height)
       ->switchToOnscreen(nativeSurface, surface);
+
+  // Set sRGB color space so RGBA16Float values are interpreted correctly
+  // (without this, RGBA16Float displays in linear/EDR making colors too bright)
+  CAMetalLayer *metalLayer = (CAMetalLayer *)self.layer;
+  metalLayer.colorspace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
 }
 
 - (void)update {
