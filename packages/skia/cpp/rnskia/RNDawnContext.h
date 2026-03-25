@@ -189,93 +189,24 @@ public:
   wgpu::Device getWGPUDevice() { return backendContext.fDevice; }
 
   // Create a secondary Dawn device from the same adapter.
-  // Has its own command queue and mutex — safe for concurrent GPU work
-  // (e.g. ML inference) without blocking the primary device.
+  // Has its own command queue and does NOT enable ImplicitDeviceSynchronization,
+  // so it won't contend with the primary rendering device's mutex.
+  // Safe for concurrent GPU work (e.g. ML inference) alongside Skia rendering.
   wgpu::Device createSecondaryDevice() {
-    // Enumerate adapters with same options as primary
-    wgpu::RequestAdapterOptions options;
+    auto adapter = DawnUtils::getMatchedAdapter(instance.get());
+
+    std::vector<wgpu::FeatureName> features = {
+        wgpu::FeatureName::BufferMapExtendedUsages,
 #ifdef __APPLE__
-    options.backendType = wgpu::BackendType::Metal;
-#elif __ANDROID__
-    options.backendType = wgpu::BackendType::Vulkan;
+        wgpu::FeatureName::SharedTextureMemoryIOSurface,
+        wgpu::FeatureName::DawnMultiPlanarFormats,
+        // Note: SharedFenceMTLSharedEvent intentionally NOT enabled — it causes
+        // EndAccess to encode fence signals that crash with "uncommitted encoder".
+        // IOSurface data is already written by the camera before we read it.
 #endif
-    options.featureLevel = wgpu::FeatureLevel::Core;
-
-    std::vector<dawn::native::Adapter> adapters =
-        instance->EnumerateAdapters(&options);
-    if (adapters.empty()) {
-      return nullptr;
-    }
-
-    dawn::native::Adapter matchedAdapter;
-    for (const auto& adapter : adapters) {
-      wgpu::Adapter wgpuAdapter = adapter.Get();
-      wgpu::AdapterInfo info;
-      wgpuAdapter.GetInfo(&info);
-      if (info.backendType == options.backendType) {
-        matchedAdapter = adapter;
-        break;
-      }
-    }
-    if (!matchedAdapter) return nullptr;
-
-    wgpu::Adapter adapter = matchedAdapter.Get();
-
-    // Same toggles as primary device for performance
-    static constexpr const char *kToggles[] = {
-#if !defined(SK_DEBUG)
-        "skip_validation",
-#endif
-        "disable_lazy_clear_for_mapped_at_creation_buffer",
-        "allow_unsafe_apis",
-        "use_user_defined_labels_in_backend",
-        "disable_robustness",
     };
-    wgpu::DawnTogglesDescriptor togglesDesc;
-    togglesDesc.enabledToggleCount = std::size(kToggles);
-    togglesDesc.enabledToggles = kToggles;
 
-    // Request features needed for ML inference — no ImplicitDeviceSynchronization
-    // so this device's mutex doesn't contend with the primary device.
-    std::vector<wgpu::FeatureName> features;
-    if (adapter.HasFeature(wgpu::FeatureName::BufferMapExtendedUsages)) {
-      features.push_back(wgpu::FeatureName::BufferMapExtendedUsages);
-    }
-#ifdef __APPLE__
-    if (adapter.HasFeature(wgpu::FeatureName::SharedTextureMemoryIOSurface)) {
-      features.push_back(wgpu::FeatureName::SharedTextureMemoryIOSurface);
-    }
-    if (adapter.HasFeature(wgpu::FeatureName::DawnMultiPlanarFormats)) {
-      features.push_back(wgpu::FeatureName::DawnMultiPlanarFormats);
-    }
-    // Note: SharedFenceMTLSharedEvent intentionally NOT enabled — it causes
-    // EndAccess to encode fence signals that crash with "uncommitted encoder".
-    // IOSurface data is already written by the camera before we read it.
-#endif
-
-    wgpu::DeviceDescriptor desc;
-    desc.requiredFeatureCount = features.size();
-    desc.requiredFeatures = features.data();
-    desc.nextInChain = &togglesDesc;
-    desc.SetDeviceLostCallback(
-        wgpu::CallbackMode::AllowSpontaneous,
-        [](const wgpu::Device&, wgpu::DeviceLostReason reason,
-           wgpu::StringView message) {
-          if (reason != wgpu::DeviceLostReason::Destroyed) {
-            RNSkLogger::logToConsole(
-                "Secondary device lost: %.*s",
-                static_cast<int>(message.length), message.data);
-          }
-        });
-    desc.SetUncapturedErrorCallback(
-        [](const wgpu::Device&, wgpu::ErrorType,
-           wgpu::StringView message) {
-          RNSkLogger::logToConsole(
-              "Secondary device error: %.*s",
-              static_cast<int>(message.length), message.data);
-        });
-
-    return wgpu::Device::Acquire(matchedAdapter.CreateDevice(&desc));
+    return DawnUtils::requestDevice(adapter, features, false);
   }
 
   // Create an SkImage from a WebGPU texture
