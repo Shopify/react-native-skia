@@ -42,7 +42,6 @@ public:
     sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
     SkSurfaceProps surfaceProps;
     auto surface = SkSurfaces::WrapBackendTexture(_recorder, backendTex,
-                                                  DawnUtils::PreferedColorType,
                                                   colorSpace, &surfaceProps);
     return surface;
   }

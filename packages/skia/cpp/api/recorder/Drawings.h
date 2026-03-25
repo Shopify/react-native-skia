@@ -123,12 +123,13 @@ public:
             SkTrimPathEffect::Make(start, end, SkTrimPathEffect::Mode::kNormal);
         if (pe != nullptr) {
           SkStrokeRec rec(SkStrokeRec::InitStyle::kHairline_InitStyle);
-          if (!pe->filterPath(&filteredPath, filteredPath, &rec, nullptr)) {
+          SkPathBuilder resultBuilder;
+          if (!pe->filterPath(&resultBuilder, filteredPath, &rec, nullptr)) {
             throw std::runtime_error(
                 "Failed trimming path with parameters start: " +
                 std::to_string(start) + ", end: " + std::to_string(end));
           }
-          filteredPath.swap(filteredPath);
+          filteredPath = resultBuilder.detach();
         } else {
           throw std::runtime_error(
               "Failed trimming path with parameters start: " +

@@ -58,12 +58,12 @@ public:
     auto start = arguments[0].asNumber();
     auto end = arguments[1].asNumber();
     auto startWithMoveTo = arguments[2].getBool();
-    SkPath path;
-    auto result = getObject()->getSegment(start, end, &path, startWithMoveTo);
+    SkPathBuilder builder;
+    auto result = getObject()->getSegment(start, end, &builder, startWithMoveTo);
     if (!result) {
       throw jsi::JSError(runtime, "getSegment() failed");
     }
-    return JsiSkPath::toValue(runtime, getContext(), std::move(path));
+    return JsiSkPath::toValue(runtime, getContext(), builder.detach());
   }
 
   size_t getMemoryPressure() const override { return 1024; }

@@ -234,8 +234,9 @@ public:
     }
     SkStrokeRec rec(SkStrokeRec::InitStyle::kHairline_InitStyle);
     SkPath path = asPath();
-    if (pe->filterPath(&path, path, &rec, nullptr)) {
-      *getObject() = SkPathBuilder(path);
+    SkPathBuilder result;
+    if (pe->filterPath(&result, path, &rec, nullptr)) {
+      *getObject() = std::move(result);
       return jsi::Value(true);
     }
     SkDebugf("Could not make dashed path\n");
@@ -310,10 +311,11 @@ public:
 
     auto jsiPrecision = opts.getProperty(runtime, "precision");
     auto precision = jsiPrecision.isUndefined() ? 1 : jsiPrecision.asNumber();
+    SkPathBuilder resultBuilder;
     auto result =
-        skpathutils::FillPathWithPaint(path, p, &path, nullptr, precision);
+        skpathutils::FillPathWithPaint(path, p, &resultBuilder, nullptr, precision);
     if (result) {
-      *getObject() = SkPathBuilder(path);
+      *getObject() = std::move(resultBuilder);
     }
     return result ? thisValue.getObject(runtime) : jsi::Value::null();
   }
@@ -330,8 +332,9 @@ public:
     if (!pe) {
       return thisValue.getObject(runtime);
     }
-    if (pe->filterPath(&path, path, &rec, nullptr)) {
-      *getObject() = SkPathBuilder(path);
+    SkPathBuilder result;
+    if (pe->filterPath(&result, path, &rec, nullptr)) {
+      *getObject() = std::move(result);
       return thisValue.getObject(runtime);
     }
     return jsi::Value::null();

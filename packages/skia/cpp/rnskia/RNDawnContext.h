@@ -270,7 +270,7 @@ public:
         skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
 
     sk_sp<SkSurface> surface = SkSurfaces::WrapBackendTexture(
-        getRecorder(), backendTexture, DawnUtils::PreferedColorType,
+        getRecorder(), backendTexture,
         nullptr,  // colorspace
         nullptr); // surfaceProps
 
