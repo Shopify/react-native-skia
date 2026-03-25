@@ -36,6 +36,7 @@
 #include "JsiSkPath.h"
 #include "JsiSkPathEffect.h"
 #include "JsiSkPathEffectFactory.h"
+#include "JsiSkPathBuilderFactory.h"
 #include "JsiSkPathFactory.h"
 #include "JsiSkPictureFactory.h"
 #include "JsiSkPictureRecorder.h"
@@ -116,6 +117,8 @@ public:
                             std::make_shared<JsiSkPathEffectFactory>(context));
     installReadonlyProperty("Path",
                             std::make_shared<JsiSkPathFactory>(context));
+    installReadonlyProperty("PathBuilder",
+                            std::make_shared<JsiSkPathBuilderFactory>(context));
     installReadonlyProperty("ColorFilter",
                             std::make_shared<JsiSkColorFilterFactory>(context));
     installReadonlyProperty("MaskFilter",

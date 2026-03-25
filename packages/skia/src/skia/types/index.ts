@@ -13,6 +13,7 @@ export * from "./Font";
 export * from "./Typeface";
 export * from "./Paint";
 export * from "./Path";
+export * from "./PathBuilder";
 export * from "./Color";
 export * from "./Canvas";
 export * from "./ContourMeasure";
