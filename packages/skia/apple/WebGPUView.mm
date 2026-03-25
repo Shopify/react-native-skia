@@ -58,7 +58,17 @@ using namespace facebook::react;
     WebGPUMetalView *metalView = [WebGPUMetalView new];
     self.contentView = metalView;
     [metalView setContextId:@(newViewProps.contextId)];
+    if (!newViewProps.colorSpace.empty()) {
+      [metalView setColorSpace:[NSString stringWithUTF8String:newViewProps.colorSpace.c_str()]];
+    }
     [metalView configure];
+  }
+
+  if (newViewProps.colorSpace != oldViewProps.colorSpace) {
+    NSString *cs = newViewProps.colorSpace.empty()
+        ? nil
+        : [NSString stringWithUTF8String:newViewProps.colorSpace.c_str()];
+    [(WebGPUMetalView *)self.contentView setColorSpace:cs];
   }
 
   [super updateProps:props oldProps:oldProps];

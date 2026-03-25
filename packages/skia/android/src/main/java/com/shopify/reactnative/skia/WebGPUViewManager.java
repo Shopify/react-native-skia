@@ -51,6 +51,12 @@ public class WebGPUViewManager extends ReactViewManager implements WebGPUViewMan
   }
 
   @Override
+  @ReactProp(name = "colorSpace")
+  public void setColorSpace(WebGPUView view, @Nullable String value) {
+    view.setColorSpace(value);
+  }
+
+  @Override
   public void onDropViewInstance(@NonNull ReactViewGroup view) {
     super.onDropViewInstance(view);
     ((WebGPUView) view).surfaceDestroyed();

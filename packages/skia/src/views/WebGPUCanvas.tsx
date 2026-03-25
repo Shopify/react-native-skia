@@ -44,11 +44,13 @@ export interface WebGPUCanvasRef {
 
 interface WebGPUCanvasProps extends ViewProps {
   transparent?: boolean;
+  colorSpace?: "srgb" | "display-p3" | "bt2020-hlg" | "bt2020-pq";
   ref?: React.Ref<WebGPUCanvasRef>;
 }
 
 export const WebGPUCanvas = ({
   transparent,
+  colorSpace,
   ref,
   ...props
 }: WebGPUCanvasProps) => {
@@ -103,6 +105,7 @@ export const WebGPUCanvas = ({
         style={{ flex: 1 }}
         contextId={contextId}
         transparent={!!transparent}
+        colorSpace={colorSpace}
       />
     </View>
   );

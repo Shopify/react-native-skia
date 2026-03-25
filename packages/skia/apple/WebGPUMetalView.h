@@ -5,6 +5,7 @@
 @interface WebGPUMetalView : RNSkPlatformView
 
 @property (nonatomic, strong) NSNumber *contextId;
+@property (nonatomic, strong) NSString *colorSpace;
 
 - (void)configure;
 - (void)update;

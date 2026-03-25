@@ -12,6 +12,29 @@
   BOOL _isConfigured;
 }
 
+- (void)applyColorSpace {
+  CAMetalLayer *metalLayer = (CAMetalLayer *)self.layer;
+  CGColorSpaceRef cs = NULL;
+  if ([_colorSpace isEqualToString:@"display-p3"]) {
+    cs = CGColorSpaceCreateWithName(kCGColorSpaceDisplayP3);
+  } else if ([_colorSpace isEqualToString:@"bt2020-hlg"]) {
+    cs = CGColorSpaceCreateWithName(kCGColorSpaceITUR_2100_HLG);
+  } else if ([_colorSpace isEqualToString:@"bt2020-pq"]) {
+    cs = CGColorSpaceCreateWithName(kCGColorSpaceITUR_2100_PQ);
+  } else {
+    cs = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+  }
+  metalLayer.colorspace = cs;
+  CGColorSpaceRelease(cs);
+}
+
+- (void)setColorSpace:(NSString *)colorSpace {
+  _colorSpace = colorSpace;
+  if (_isConfigured) {
+    [self applyColorSpace];
+  }
+}
+
 #if !TARGET_OS_OSX
 + (Class)layerClass {
   return [CAMetalLayer class];
@@ -46,10 +69,8 @@
                               size.height)
       ->switchToOnscreen(nativeSurface, surface);
 
-  // Set sRGB color space so RGBA16Float values are interpreted correctly
-  // (without this, RGBA16Float displays in linear/EDR making colors too bright)
-  CAMetalLayer *metalLayer = (CAMetalLayer *)self.layer;
-  metalLayer.colorspace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+  _isConfigured = YES;
+  [self applyColorSpace];
 }
 
 - (void)update {

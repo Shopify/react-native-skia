@@ -5,6 +5,7 @@ import type { ViewProps } from "react-native";
 export interface NativeProps extends ViewProps {
   contextId: Int32;
   transparent: boolean;
+  colorSpace?: string;
 }
 
 // eslint-disable-next-line import/no-default-export

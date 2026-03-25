@@ -11,6 +11,7 @@ public class WebGPUView extends ReactViewGroup implements WebGPUViewAPI {
 
   private int mContextId;
   private boolean mTransparent = false;
+  private String mColorSpace = null;
   private View mView = null;
 
   WebGPUView(Context context) {
@@ -19,6 +20,10 @@ public class WebGPUView extends ReactViewGroup implements WebGPUViewAPI {
 
   public void setContextId(int contextId) {
     mContextId = contextId;
+  }
+
+  public void setColorSpace(String value) {
+    mColorSpace = value;
   }
 
   public void setTransparent(boolean value) {
@@ -50,7 +55,7 @@ public class WebGPUView extends ReactViewGroup implements WebGPUViewAPI {
     float density = getResources().getDisplayMetrics().density;
     float width = getWidth() / density;
     float height = getHeight() / density;
-    onSurfaceCreate(surface, mContextId, width, height);
+    onSurfaceCreate(surface, mContextId, width, height, mColorSpace);
   }
 
   @Override
@@ -76,7 +81,8 @@ public class WebGPUView extends ReactViewGroup implements WebGPUViewAPI {
     Surface surface,
     int contextId,
     float width,
-    float height
+    float height,
+    String colorSpace
   );
 
   @DoNotStrip
