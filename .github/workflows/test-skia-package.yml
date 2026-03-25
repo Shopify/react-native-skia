@@ -73,7 +73,7 @@ jobs:
           pwd
 
       - name: Create Expo app with Skia template
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           timeout_minutes: 10
           max_attempts: 3
@@ -241,7 +241,7 @@ jobs:
           pwd
 
       - name: Create Expo app with Skia template
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           timeout_minutes: 10
           max_attempts: 3
@@ -396,7 +396,7 @@ jobs:
           pwd
 
       - name: Create Expo app with Skia template
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           timeout_minutes: 10
           max_attempts: 3
