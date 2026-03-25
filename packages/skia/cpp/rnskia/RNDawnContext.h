@@ -188,6 +188,27 @@ public:
   // Get the wgpu::Device for WebGPU bindings
   wgpu::Device getWGPUDevice() { return backendContext.fDevice; }
 
+  // Create a secondary Dawn device from the same adapter.
+  // Has its own command queue and does NOT enable ImplicitDeviceSynchronization,
+  // so it won't contend with the primary rendering device's mutex.
+  // Safe for concurrent GPU work (e.g. ML inference) alongside Skia rendering.
+  wgpu::Device createSecondaryDevice() {
+    auto adapter = DawnUtils::getMatchedAdapter(instance.get());
+
+    std::vector<wgpu::FeatureName> features = {
+        wgpu::FeatureName::BufferMapExtendedUsages,
+#ifdef __APPLE__
+        wgpu::FeatureName::SharedTextureMemoryIOSurface,
+        wgpu::FeatureName::DawnMultiPlanarFormats,
+        // Note: SharedFenceMTLSharedEvent intentionally NOT enabled — it causes
+        // EndAccess to encode fence signals that crash with "uncommitted encoder".
+        // IOSurface data is already written by the camera before we read it.
+#endif
+    };
+
+    return DawnUtils::requestDevice(adapter, features, false);
+  }
+
   // Create an SkImage from a WebGPU texture
   // The texture must have TextureBinding usage
   sk_sp<SkImage> MakeImageFromTexture(wgpu::Texture texture, int width,
