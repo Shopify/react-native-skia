@@ -21,6 +21,9 @@ public:
   int getWidth() { return _width; }
   int getHeight() { return _height; }
 
+  void setWidth(int width) { _width = width; }
+  void setHeight(int height) { _height = height; }
+
   int getClientWidth() { return _clientWidth; }
   int getClientHeight() { return _clientHeight; }
 
@@ -28,8 +31,10 @@ public:
   void setClientHeight(int height) { _clientHeight = height; }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installGetter(runtime, prototype, "width", &Canvas::getWidth);
-    installGetter(runtime, prototype, "height", &Canvas::getHeight);
+    installGetterSetter(runtime, prototype, "width", &Canvas::getWidth,
+                        &Canvas::setWidth);
+    installGetterSetter(runtime, prototype, "height", &Canvas::getHeight,
+                        &Canvas::setHeight);
     installGetter(runtime, prototype, "clientWidth", &Canvas::getClientWidth);
     installGetter(runtime, prototype, "clientHeight", &Canvas::getClientHeight);
   }

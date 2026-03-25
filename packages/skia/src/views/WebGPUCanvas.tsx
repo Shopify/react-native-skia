@@ -1,6 +1,6 @@
 import React, { useImperativeHandle, useRef, useState } from "react";
 import type { ViewProps } from "react-native";
-import { View, Platform, PixelRatio } from "react-native";
+import { View, Platform } from "react-native";
 
 import WebGPUNativeView from "../specs/WebGPUViewNativeComponent";
 
@@ -84,12 +84,10 @@ export const WebGPUCanvas = ({
         "getBoundingClientRect" in view
           ? view.getBoundingClientRect()
           : view.unstable_getBoundingClientRect();
-      // Scale to device pixels for full resolution rendering
-      const scale = Platform.OS === "web" ? 1 : PixelRatio.get();
       return RNWebGPU.MakeWebGPUCanvasContext(
         contextId,
-        Math.round(size.width * scale),
-        Math.round(size.height * scale)
+        size.width,
+        size.height
       );
     },
   }));
