@@ -153,7 +153,7 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
   const shortPlatform = platformName.replace("apple-", "");
 
   // Create output directory
-  const outputDir = `${PackageRoot}/libs/apple/${shortPlatform}`;
+  const outputDir = `${PackageRoot}/libs/${shortPlatform}`;
   $(`mkdir -p ${outputDir}`);
 
   outputNames.forEach((name) => {
@@ -416,6 +416,11 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
     console.log("Patches applied successfully");
   }
   $(`rm -rf ${PackageRoot}/libs`);
+
+  if (GRAPHITE) {
+    $(`mkdir -p ${PackageRoot}/libs`);
+    fs.writeFileSync(`${PackageRoot}/libs/.graphite`, "");
+  }
 
   // Build specified platforms and targets
   for (const buildTarget of buildTargets) {
