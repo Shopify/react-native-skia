@@ -309,6 +309,53 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
     const arm64ePatchFile = path.join(__dirname, "dawn-arm64e-simulator.patch");
     $(`cd ${SkiaSrc} && git apply ${arm64ePatchFile}`);
 
+    // Add iOS support to Dawn's cmake_utils.py (missing upstream)
+    // build_dawn.py already handles iOS at line 153, but cmake_utils.py
+    // lacks the 'ios' case in get_cmake_os_cpu(), causing "Unsupported OS"
+    const cmakeUtilsFile = `${SkiaSrc}/third_party/dawn/cmake_utils.py`;
+    $(
+      `sed -i '' '/if os == "mac":/i\\
+  if os == "ios":\\
+    target_cpu_map = {\\
+      "arm64": "arm64",\\
+      "x64": "x86_64",\\
+    }\\
+    return "iOS", target_cpu_map[cpu]\\
+' ${cmakeUtilsFile}`
+    );
+
+    // Fix Dawn build_dawn.py: iOS simulator cross-compilation fails to find
+    // pthreads because cmake's FindThreads can't compile test programs.
+    // Add CMAKE_THREAD_LIBS_INIT to skip the thread detection.
+    const buildDawnFile = `${SkiaSrc}/third_party/dawn/build_dawn.py`;
+    const threadsPatch = [
+      '',
+      '  if target_os == "iOS":',
+      '    configure_cmd.append("-DCMAKE_THREAD_LIBS_INIT=-lpthread")',
+      '    configure_cmd.append("-DTHREADS_PREFER_PTHREAD_FLAG=ON")',
+      '    configure_cmd.append("-DCMAKE_HAVE_THREADS_LIBRARY=1")',
+      '    # Detect simulator builds from the output directory path',
+      '    import os as _os',
+      '    if "simulator" in _os.getcwd().lower():',
+      '      configure_cmd.append("-DCMAKE_OSX_SYSROOT=iphonesimulator")',
+    ].join('\n');
+    const fs = require("fs");
+    let buildDawnContent = fs.readFileSync(buildDawnFile, "utf8");
+    buildDawnContent = buildDawnContent.replace(
+      'configure_cmd.append(f"-DCMAKE_OSX_ARCHITECTURES={target_cpu}")',
+      'configure_cmd.append(f"-DCMAKE_OSX_ARCHITECTURES={target_cpu}")' + threadsPatch
+    );
+    fs.writeFileSync(buildDawnFile, buildDawnContent);
+
+    // Fix Tint CMakeLists.txt: install(TARGETS) for cmd targets is not
+    // guarded by TINT_ENABLE_INSTALL, causing cmake configure failure on iOS
+    const tintCMakeFile = `${SkiaSrc}/third_party/externals/dawn/src/tint/CMakeLists.txt`;
+    if (require("fs").existsSync(tintCMakeFile)) {
+      $(
+        `sed -i '' 's/^    install(TARGETS "\${TARGET}")/    if (TINT_ENABLE_INSTALL)\\n      install(TARGETS "\${TARGET}")\\n    endif()/' ${tintCMakeFile}`
+      );
+    }
+
     // Fix Dawn ShaderModuleMTL.mm uint32 typo if it exists
     const shaderModuleFile = `${SkiaSrc}/third_party/externals/dawn/src/dawn/native/metal/ShaderModuleMTL.mm`;
     $(
@@ -319,10 +366,16 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
     // The dawn.gni file conditionally sets dawn_partition_alloc_dir for non-MSVC and non-Mac,
     // which includes Android. We need to remove this to avoid undefined symbol errors.
     const dawnGniFile = `${SkiaSrc}/build_overrides/dawn.gni`;
-    $(
-      `sed -i '' '/# PartitionAlloc is an optional dependency:/,$d' ${dawnGniFile}`
-    );
-    console.log("   ✓ Removed PartitionAlloc dependency from dawn.gni");
+    if (require("fs").existsSync(dawnGniFile)) {
+      $(
+        `sed -i '' '/# PartitionAlloc is an optional dependency:/,$d' ${dawnGniFile}`
+      );
+      console.log("   ✓ Removed PartitionAlloc dependency from dawn.gni");
+    } else {
+      console.log(
+        "   ⏭ dawn.gni not found at Skia root, skipping PartitionAlloc patch"
+      );
+    }
 
     console.log("Patches applied successfully");
   }
