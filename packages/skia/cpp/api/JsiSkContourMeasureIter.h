@@ -64,12 +64,12 @@ public:
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
-      auto path = JsiSkPath::fromValue(runtime, arguments[0]);
+      SkPath path = JsiSkPath::pathFromValue(runtime, arguments[0]);
       auto forceClosed = arguments[1].getBool();
       auto resScale = arguments[2].asNumber();
       // Return the newly constructed object
       auto iter = std::make_shared<JsiSkContourMeasureIter>(
-          std::move(context), *path, forceClosed, resScale);
+          std::move(context), path, forceClosed, resScale);
       return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, iter,
                                                          context);
     };

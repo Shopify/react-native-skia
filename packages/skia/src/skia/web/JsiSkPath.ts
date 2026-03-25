@@ -311,6 +311,16 @@ export class JsiSkPath extends HostObject<Path, "Path"> implements SkPath {
     );
   }
 
+  setLastPoint(_x: number, _y: number) {
+    console.warn("setLastPoint is not supported on React Native Web");
+    return this;
+  }
+
+  setPoint(_index: number, _x: number, _y: number) {
+    console.warn("setPoint is not supported on React Native Web");
+    return this;
+  }
+
   op(path: SkPath, op: PathOp) {
     return this.ref.op(
       JsiSkPath.fromValue(path),
