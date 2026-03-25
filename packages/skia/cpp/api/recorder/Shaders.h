@@ -6,6 +6,8 @@
 
 #include <include/core/SkSamplingOptions.h>
 
+#include "include/effects/SkGradient.h"
+
 #include "Command.h"
 #include "Convertor.h"
 #include "DrawingCtx.h"
@@ -250,11 +252,15 @@ public:
 
     SkMatrix m3 = processTransform(props.matrix, props.transform, props.origin);
     const SkPoint pts[2] = {props.start, props.end};
-    auto shader = SkGradientShader::MakeLinear(
-        pts, props.colors.data(),
-        props.positions ? props.positions->data() : nullptr,
-        props.colors.size(), props.mode.value_or(SkTileMode::kClamp),
-        props.flags.value_or(0), &m3);
+    std::vector<SkColor4f> colors4f;
+    colors4f.reserve(props.colors.size());
+    for (auto c : props.colors) { colors4f.push_back(SkColor4f::FromColor(c)); }
+    SkGradient::Colors gradColors(
+        SkSpan(colors4f),
+        props.positions ? SkSpan<const float>(*props.positions) : SkSpan<const float>(),
+        props.mode.value_or(SkTileMode::kClamp));
+    SkGradient grad(gradColors, SkGradient::Interpolation::FromFlags(props.flags.value_or(0)));
+    auto shader = SkShaders::LinearGradient(pts, grad, &m3);
     ctx->shaders.push_back(shader);
   }
 };
@@ -293,11 +299,15 @@ public:
     }
 
     SkMatrix m3 = processTransform(props.matrix, props.transform, props.origin);
-    auto shader = SkGradientShader::MakeRadial(
-        props.center, props.radius, props.colors.data(),
-        props.positions ? props.positions->data() : nullptr,
-        props.colors.size(), props.mode.value_or(SkTileMode::kClamp),
-        props.flags.value_or(0), &m3);
+    std::vector<SkColor4f> colors4f;
+    colors4f.reserve(props.colors.size());
+    for (auto c : props.colors) { colors4f.push_back(SkColor4f::FromColor(c)); }
+    SkGradient::Colors gradColors(
+        SkSpan(colors4f),
+        props.positions ? SkSpan<const float>(*props.positions) : SkSpan<const float>(),
+        props.mode.value_or(SkTileMode::kClamp));
+    SkGradient grad(gradColors, SkGradient::Interpolation::FromFlags(props.flags.value_or(0)));
+    auto shader = SkShaders::RadialGradient(props.center, props.radius, grad, &m3);
     ctx->shaders.push_back(shader);
   }
 };
@@ -338,12 +348,16 @@ public:
     }
 
     SkMatrix m3 = processTransform(props.matrix, props.transform, props.origin);
-    auto shader = SkGradientShader::MakeSweep(
-        props.center.x(), props.center.y(), props.colors.data(),
-        props.positions ? props.positions->data() : nullptr,
-        props.colors.size(), props.mode.value_or(SkTileMode::kClamp),
-        props.start.value_or(0), props.end.value_or(360),
-        props.flags.value_or(0), &m3);
+    std::vector<SkColor4f> colors4f;
+    colors4f.reserve(props.colors.size());
+    for (auto c : props.colors) { colors4f.push_back(SkColor4f::FromColor(c)); }
+    SkGradient::Colors gradColors(
+        SkSpan(colors4f),
+        props.positions ? SkSpan<const float>(*props.positions) : SkSpan<const float>(),
+        props.mode.value_or(SkTileMode::kClamp));
+    SkGradient grad(gradColors, SkGradient::Interpolation::FromFlags(props.flags.value_or(0)));
+    auto shader = SkShaders::SweepGradient(
+        props.center, props.start.value_or(0), props.end.value_or(360), grad, &m3);
     ctx->shaders.push_back(shader);
   }
 };
@@ -387,12 +401,16 @@ public:
     }
 
     SkMatrix m3 = processTransform(props.matrix, props.transform, props.origin);
-    auto shader = SkGradientShader::MakeTwoPointConical(
-        props.start, props.startRadius, props.end, props.endRadius,
-        props.colors.data(),
-        props.positions ? props.positions->data() : nullptr,
-        props.colors.size(), props.mode.value_or(SkTileMode::kClamp),
-        props.flags.value_or(0), &m3);
+    std::vector<SkColor4f> colors4f;
+    colors4f.reserve(props.colors.size());
+    for (auto c : props.colors) { colors4f.push_back(SkColor4f::FromColor(c)); }
+    SkGradient::Colors gradColors(
+        SkSpan(colors4f),
+        props.positions ? SkSpan<const float>(*props.positions) : SkSpan<const float>(),
+        props.mode.value_or(SkTileMode::kClamp));
+    SkGradient grad(gradColors, SkGradient::Interpolation::FromFlags(props.flags.value_or(0)));
+    auto shader = SkShaders::TwoPointConicalGradient(
+        props.start, props.startRadius, props.end, props.endRadius, grad, &m3);
     ctx->shaders.push_back(shader);
   }
 };
