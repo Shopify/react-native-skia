@@ -30,18 +30,20 @@ import { fileOps } from "./utils";
 
 // Graphite configuration
 const GRAPHITE_CONFIG = {
-  version: "m142b",
+  version: "m144",
   checksums: {
     "android-armeabi-v7a":
-      "e0103cf59061e4727e371eea9267cdbca112ed9153b539427a5ebbd95852df45",
+      "d43f8c6e2a3e90d2cb5287ae6828f414fb636e06ebcf7bffe53b558f2e738467",
     "android-arm64-v8a":
-      "058d4b7070719b7c2759dd0712f9fddb276a596011aa61c64ebfec6521d53f7b",
+      "92b47853e203bd905829928baaa50386b96d651c48c37c9e5af12b33c0767b23",
     "android-x86":
-      "e49b2c150250b407fe777e3814cdc6c7b141e7d8f7a2d92ea2cc5b2a6d3c4438",
+      "efd390f785d3e9f8cca543aa1f56eb52500ffae31f2f5cd414b2ffa8c809d73d",
     "android-x86_64":
-      "bcdc22be78cb4acf6d1eb9a77254c2008c7b1b418a219ac054b1e6bd2ae39c72",
-    "apple-xcframeworks":
-      "b76635b99772496cf4b122e1ba6d22fb5fb33cc0497283adba2f6b41529b4cd7",
+      "0131d78ee5e484b09e4889ac8978714eb38fca34118d494a4665fa35ce4aa9df",
+    "apple-ios-xcframeworks":
+      "69e95a5c559aaee25b3374b760b10d9d51db2dea8b3caec17391bd45b5566806",
+    "apple-macos-xcframeworks":
+      "b0640d8dbea1a9609b31bbd7cedad5aefec776d417bd6a71f8c6b4b47da0984e",
   },
 } as const;
 
@@ -294,17 +296,6 @@ const downloadAppleLibs = async (): Promise<void> => {
   console.log(`\n🍎 Downloading Apple Graphite libraries...`);
 
   const releaseTag = getReleaseTag(GRAPHITE_CONFIG.version);
-  const assetName = `skia-graphite-apple-xcframeworks-${releaseTag}.tar.gz`;
-  const tempDir = path.join(LIBS_DIR, "apple-temp");
-
-  await downloadAndExtract(
-    assetName,
-    tempDir,
-    GRAPHITE_CONFIG.checksums["apple-xcframeworks"]
-  );
-
-  // Move xcframeworks from nested 'apple' directory to ios/macos directories
-  const extractedAppleDir = path.join(tempDir, "apple");
   const iosDir = path.join(LIBS_DIR, "ios");
   const macosDir = path.join(LIBS_DIR, "macos");
 
@@ -314,19 +305,45 @@ const downloadAppleLibs = async (): Promise<void> => {
   fileOps.mkdir(iosDir);
   fileOps.mkdir(macosDir);
 
-  // Copy xcframeworks to both ios and macos (they're universal)
-  if (existsSync(extractedAppleDir)) {
-    const xcframeworks = readdirSync(extractedAppleDir).filter((f) =>
+  // Download iOS xcframeworks
+  const iosAsset = `skia-graphite-apple-ios-xcframeworks-${releaseTag}.tar.gz`;
+  const iosTempDir = path.join(LIBS_DIR, "apple-ios-temp");
+  await downloadAndExtract(
+    iosAsset,
+    iosTempDir,
+    GRAPHITE_CONFIG.checksums["apple-ios-xcframeworks"]
+  );
+
+  const extractedIosDir = path.join(iosTempDir, "ios");
+  if (existsSync(extractedIosDir)) {
+    const xcframeworks = readdirSync(extractedIosDir).filter((f) =>
       f.endsWith(".xcframework")
     );
     for (const xcf of xcframeworks) {
-      fileOps.cp(path.join(extractedAppleDir, xcf), path.join(iosDir, xcf));
-      fileOps.cp(path.join(extractedAppleDir, xcf), path.join(macosDir, xcf));
+      fileOps.cp(path.join(extractedIosDir, xcf), path.join(iosDir, xcf));
     }
   }
+  rmSync(iosTempDir, { recursive: true, force: true });
 
-  // Cleanup temp directory
-  rmSync(tempDir, { recursive: true, force: true });
+  // Download macOS xcframeworks
+  const macosAsset = `skia-graphite-apple-macos-xcframeworks-${releaseTag}.tar.gz`;
+  const macosTempDir = path.join(LIBS_DIR, "apple-macos-temp");
+  await downloadAndExtract(
+    macosAsset,
+    macosTempDir,
+    GRAPHITE_CONFIG.checksums["apple-macos-xcframeworks"]
+  );
+
+  const extractedMacosDir = path.join(macosTempDir, "macos");
+  if (existsSync(extractedMacosDir)) {
+    const xcframeworks = readdirSync(extractedMacosDir).filter((f) =>
+      f.endsWith(".xcframework")
+    );
+    for (const xcf of xcframeworks) {
+      fileOps.cp(path.join(extractedMacosDir, xcf), path.join(macosDir, xcf));
+    }
+  }
+  rmSync(macosTempDir, { recursive: true, force: true });
 
   console.log(`  ✓ Apple libraries downloaded`);
 };
