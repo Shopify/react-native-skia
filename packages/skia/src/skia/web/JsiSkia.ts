@@ -80,14 +80,15 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
     forceClosed: boolean,
     resScale: number
   ): SkContourMeasureIter =>
-    new JsiSkContourMeasureIter(
-      CanvasKit,
-      new CanvasKit.ContourMeasureIter(
-        JsiSkPath.fromValue(path),
-        forceClosed,
-        resScale
-      )
-    ),
+    (() => {
+      const p = JsiSkPath.pathFromValue(path);
+      const iter = new JsiSkContourMeasureIter(
+        CanvasKit,
+        new CanvasKit.ContourMeasureIter(p, forceClosed, resScale)
+      );
+      p.delete();
+      return iter;
+    })(),
   Paint: () => {
     const paint = new JsiSkPaint(CanvasKit, new CanvasKit.Paint());
     paint.setAntiAlias(true);

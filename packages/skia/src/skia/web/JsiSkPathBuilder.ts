@@ -1,4 +1,7 @@
-import type { CanvasKit, Matrix3x3, Path } from "canvaskit-wasm";
+import type {
+  CanvasKit,
+  PathBuilder as CKPathBuilder,
+} from "canvaskit-wasm";
 
 import type {
   FillType,
@@ -12,22 +15,20 @@ import type {
 } from "../types";
 
 import { getEnum, HostObject } from "./Host";
-import { JsiSkPath } from "./JsiSkPath";
+import { JsiSkPath, toMatrix3x3 } from "./JsiSkPath";
 import { JsiSkMatrix } from "./JsiSkMatrix";
 import { JsiSkPoint } from "./JsiSkPoint";
 import { JsiSkRect } from "./JsiSkRect";
 import { JsiSkRRect } from "./JsiSkRRect";
 
 /**
- * Web implementation of SkPathBuilder.
- * CanvasKit doesn't have a separate PathBuilder, so we use Path directly
- * and create a copy when build() is called.
+ * Web implementation of SkPathBuilder using CanvasKit's native PathBuilder.
  */
 export class JsiSkPathBuilder
-  extends HostObject<Path, "PathBuilder">
+  extends HostObject<CKPathBuilder, "PathBuilder">
   implements SkPathBuilder
 {
-  constructor(CanvasKit: CanvasKit, ref: Path) {
+  constructor(CanvasKit: CanvasKit, ref: CKPathBuilder) {
     super(CanvasKit, ref, "PathBuilder");
   }
 
@@ -152,7 +153,13 @@ export class JsiSkPathBuilder
     return this;
   }
 
-  arcToTangent(x1: number, y1: number, x2: number, y2: number, radius: number) {
+  arcToTangent(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    radius: number
+  ) {
     this.ref.arcToTangent(x1, y1, x2, y2, radius);
     return this;
   }
@@ -196,7 +203,7 @@ export class JsiSkPathBuilder
   }
 
   addPoly(points: SkPoint[], close: boolean) {
-    this.ref.addPoly(
+    this.ref.addPolygon(
       points.map((p) => Array.from(JsiSkPoint.fromValue(p))).flat(),
       close
     );
@@ -204,12 +211,14 @@ export class JsiSkPathBuilder
   }
 
   addPath(src: SkPath, matrix?: SkMatrix, extend = false) {
+    const srcPath = JsiSkPath.pathFromValue(src);
     const args = [
-      JsiSkPath.fromValue(src),
+      srcPath,
       ...(matrix ? JsiSkMatrix.fromValue<Float32Array>(matrix) : []),
       extend,
     ];
     this.ref.addPath(...args);
+    srcPath.delete();
     return this;
   }
 
@@ -219,13 +228,24 @@ export class JsiSkPathBuilder
     return this;
   }
 
-  setIsVolatile(isVolatile: boolean) {
-    this.ref.setIsVolatile(isVolatile);
+  setIsVolatile(_isVolatile: boolean) {
+    // Not supported in CanvasKit PathBuilder - no-op
     return this;
   }
 
   reset() {
-    this.ref.reset();
+    // CanvasKit PathBuilder doesn't have reset - recreate
+    const newBuilder = new this.CanvasKit.PathBuilder();
+    // Swap the ref - delete old one
+    if (
+      this.ref !== null &&
+      typeof this.ref === "object" &&
+      "delete" in this.ref &&
+      typeof this.ref.delete === "function"
+    ) {
+      this.ref.delete();
+    }
+    this.ref = newBuilder;
     return this;
   }
 
@@ -235,25 +255,7 @@ export class JsiSkPathBuilder
   }
 
   transform(m: InputMatrix) {
-    let matrix =
-      m instanceof JsiSkMatrix
-        ? Array.from(JsiSkMatrix.fromValue<Matrix3x3>(m))
-        : (m as Exclude<InputMatrix, SkMatrix>);
-    if (matrix.length === 16) {
-      matrix = [
-        matrix[0],
-        matrix[1],
-        matrix[3],
-        matrix[4],
-        matrix[5],
-        matrix[7],
-        matrix[12],
-        matrix[13],
-        matrix[15],
-      ];
-    } else if (matrix.length !== 9) {
-      throw new Error(`Invalid matrix length: ${matrix.length}`);
-    }
+    const matrix = toMatrix3x3(m);
     this.ref.transform(matrix);
     return this;
   }
@@ -272,7 +274,10 @@ export class JsiSkPathBuilder
     if (count === 0) {
       return { x: 0, y: 0 };
     }
-    const pt = this.ref.getPoint(count - 1);
+    // PathBuilder doesn't have getPoint - snapshot to get it
+    const path = this.ref.snapshot();
+    const pt = path.getPoint(count - 1);
+    path.delete();
     return { x: pt[0], y: pt[1] };
   }
 
@@ -282,14 +287,16 @@ export class JsiSkPathBuilder
 
   // Build methods
   build(): SkPath {
-    // Return a copy of the current path
-    return new JsiSkPath(this.CanvasKit, this.ref.copy());
+    const path = this.ref.snapshot();
+    const builder = new this.CanvasKit.PathBuilder(path);
+    path.delete();
+    return new JsiSkPath(this.CanvasKit, builder);
   }
 
   detach(): SkPath {
-    // Return the current path and reset the builder
-    const path = new JsiSkPath(this.CanvasKit, this.ref.copy());
-    this.ref.reset();
-    return path;
+    const path = this.ref.detach();
+    const builder = new this.CanvasKit.PathBuilder(path);
+    path.delete();
+    return new JsiSkPath(this.CanvasKit, builder);
   }
 }

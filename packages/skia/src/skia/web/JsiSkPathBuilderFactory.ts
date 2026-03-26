@@ -1,4 +1,4 @@
-import type { CanvasKit, Path } from "canvaskit-wasm";
+import type { CanvasKit } from "canvaskit-wasm";
 
 import type { PathBuilderFactory, SkPath } from "../types";
 
@@ -15,11 +15,14 @@ export class JsiSkPathBuilderFactory
   }
 
   Make() {
-    return new JsiSkPathBuilder(this.CanvasKit, new this.CanvasKit.Path());
+    return new JsiSkPathBuilder(this.CanvasKit, new this.CanvasKit.PathBuilder());
   }
 
   MakeFromPath(path: SkPath) {
-    const srcPath = JsiSkPath.fromValue<Path>(path);
-    return new JsiSkPathBuilder(this.CanvasKit, srcPath.copy());
+    const srcBuilder = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(path);
+    const srcPath = srcBuilder.snapshot();
+    const builder = new this.CanvasKit.PathBuilder(srcPath);
+    srcPath.delete();
+    return new JsiSkPathBuilder(this.CanvasKit, builder);
   }
 }

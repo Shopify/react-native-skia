@@ -7829,7 +7829,7 @@ __metadata:
     "@types/react": ^19.0.0
     "@types/react-reconciler": 0.28.9
     "@types/ws": 8.5.3
-    canvaskit-wasm: 0.40.0
+    canvaskit-wasm: 0.41.0
     eslint: 9.36.0
     eslint-config-react-native-wcandillon: 4.0.1
     eslint-plugin-import: 2.32.0
@@ -11726,12 +11726,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"canvaskit-wasm@npm:0.40.0":
-  version: 0.40.0
-  resolution: "canvaskit-wasm@npm:0.40.0"
+"canvaskit-wasm@npm:0.41.0":
+  version: 0.41.0
+  resolution: "canvaskit-wasm@npm:0.41.0"
   dependencies:
     "@webgpu/types": 0.1.21
-  checksum: 983e6b2a32babcbf0a8c29412fee57305d55b7e9603d5ba1e4c68f082fb649433cd1eb8cfddf17dda6dc041ef2c77eb9d9c7f0cba852f6f75f4e78809547d9c5
+  checksum: 4204de4bea15f5dd4a1695aab0ff0ab5a103a55e51ac33aaadcad5a436e5ba0574eaa59f552346a64b6d25b7dfbfd332e440225675ad3ae7b517881e255a4b07
   languageName: node
   linkType: hard
 

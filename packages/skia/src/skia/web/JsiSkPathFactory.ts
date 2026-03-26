@@ -1,4 +1,4 @@
-import type { CanvasKit, Path } from "canvaskit-wasm";
+import type { CanvasKit } from "canvaskit-wasm";
 
 import type {
   InputRRect,
@@ -26,7 +26,7 @@ export class JsiSkPathFactory extends Host implements PathFactory {
   }
 
   Make() {
-    return new JsiSkPath(this.CanvasKit, new this.CanvasKit.Path());
+    return new JsiSkPath(this.CanvasKit, new this.CanvasKit.PathBuilder());
   }
 
   MakeFromSVGString(str: string) {
@@ -34,19 +34,33 @@ export class JsiSkPathFactory extends Host implements PathFactory {
     if (path === null) {
       return null;
     }
-    return new JsiSkPath(this.CanvasKit, path);
+    const result = new JsiSkPath(
+      this.CanvasKit,
+      new this.CanvasKit.PathBuilder(path)
+    );
+    path.delete();
+    return result;
   }
 
   MakeFromOp(one: SkPath, two: SkPath, op: PathOp) {
+    const p1 = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(one).snapshot();
+    const p2 = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(two).snapshot();
     const path = this.CanvasKit.Path.MakeFromOp(
-      JsiSkPath.fromValue(one),
-      JsiSkPath.fromValue(two),
+      p1,
+      p2,
       getEnum(this.CanvasKit, "PathOp", op)
     );
+    p1.delete();
+    p2.delete();
     if (path === null) {
       return null;
     }
-    return new JsiSkPath(this.CanvasKit, path);
+    const result = new JsiSkPath(
+      this.CanvasKit,
+      new this.CanvasKit.PathBuilder(path)
+    );
+    path.delete();
+    return result;
   }
 
   MakeFromCmds(cmds: PathCommand[]) {
@@ -54,7 +68,12 @@ export class JsiSkPathFactory extends Host implements PathFactory {
     if (path === null) {
       return null;
     }
-    return new JsiSkPath(this.CanvasKit, path);
+    const result = new JsiSkPath(
+      this.CanvasKit,
+      new this.CanvasKit.PathBuilder(path)
+    );
+    path.delete();
+    return result;
   }
 
   MakeFromText(_text: string, _x: number, _y: number, _font: SkFont) {
@@ -64,52 +83,56 @@ export class JsiSkPathFactory extends Host implements PathFactory {
   // Static shape factories
 
   Rect(rect: SkRect, isCCW?: boolean) {
-    const path = new this.CanvasKit.Path();
-    path.addRect(JsiSkRect.fromValue(this.CanvasKit, rect), isCCW);
-    return new JsiSkPath(this.CanvasKit, path);
+    const builder = new this.CanvasKit.PathBuilder();
+    builder.addRect(JsiSkRect.fromValue(this.CanvasKit, rect), isCCW);
+    return new JsiSkPath(this.CanvasKit, builder);
   }
 
   Oval(rect: SkRect, isCCW?: boolean, startIndex?: number) {
-    const path = new this.CanvasKit.Path();
-    path.addOval(JsiSkRect.fromValue(this.CanvasKit, rect), isCCW, startIndex);
-    return new JsiSkPath(this.CanvasKit, path);
+    const builder = new this.CanvasKit.PathBuilder();
+    builder.addOval(
+      JsiSkRect.fromValue(this.CanvasKit, rect),
+      isCCW,
+      startIndex
+    );
+    return new JsiSkPath(this.CanvasKit, builder);
   }
 
   Circle(x: number, y: number, r: number) {
-    const path = new this.CanvasKit.Path();
-    path.addCircle(x, y, r);
-    return new JsiSkPath(this.CanvasKit, path);
+    const builder = new this.CanvasKit.PathBuilder();
+    builder.addCircle(x, y, r);
+    return new JsiSkPath(this.CanvasKit, builder);
   }
 
   RRect(rrect: InputRRect, isCCW?: boolean) {
-    const path = new this.CanvasKit.Path();
-    path.addRRect(JsiSkRRect.fromValue(this.CanvasKit, rrect), isCCW);
-    return new JsiSkPath(this.CanvasKit, path);
+    const builder = new this.CanvasKit.PathBuilder();
+    builder.addRRect(JsiSkRRect.fromValue(this.CanvasKit, rrect), isCCW);
+    return new JsiSkPath(this.CanvasKit, builder);
   }
 
   Line(p1: SkPoint, p2: SkPoint) {
-    const path = new this.CanvasKit.Path();
+    const builder = new this.CanvasKit.PathBuilder();
     const pt1 = JsiSkPoint.fromValue(p1);
     const pt2 = JsiSkPoint.fromValue(p2);
-    path.moveTo(pt1[0], pt1[1]);
-    path.lineTo(pt2[0], pt2[1]);
-    return new JsiSkPath(this.CanvasKit, path);
+    builder.moveTo(pt1[0], pt1[1]);
+    builder.lineTo(pt2[0], pt2[1]);
+    return new JsiSkPath(this.CanvasKit, builder);
   }
 
   Polygon(points: SkPoint[], close: boolean) {
-    const path = new this.CanvasKit.Path();
-    path.addPoly(
+    const builder = new this.CanvasKit.PathBuilder();
+    builder.addPolygon(
       points.map((p) => Array.from(JsiSkPoint.fromValue(p))).flat(),
       close
     );
-    return new JsiSkPath(this.CanvasKit, path);
+    return new JsiSkPath(this.CanvasKit, builder);
   }
 
   // Static path operations
 
   Stroke(srcPath: SkPath, opts?: StrokeOpts) {
-    const path = JsiSkPath.fromValue<Path>(srcPath).copy();
-    const result = path.stroke(
+    const path = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(srcPath).snapshot();
+    const result = path.makeStroked(
       opts === undefined
         ? undefined
         : {
@@ -121,68 +144,102 @@ export class JsiSkPathFactory extends Host implements PathFactory {
             cap: optEnum(this.CanvasKit, "StrokeCap", opts.cap),
           }
     );
+    path.delete();
     if (result === null) {
       return null;
     }
-    return new JsiSkPath(this.CanvasKit, path);
+    const r = new JsiSkPath(
+      this.CanvasKit,
+      new this.CanvasKit.PathBuilder(result)
+    );
+    result.delete();
+    return r;
   }
 
   Trim(srcPath: SkPath, start: number, end: number, isComplement: boolean) {
     const startT = pinT(start);
     const stopT = pinT(end);
-    const path = JsiSkPath.fromValue<Path>(srcPath).copy();
-    // Special case: full path (no trimming needed)
-    // CanvasKit's trim has edge case issues with exactly 0 and 1
-    if (startT === 0 && stopT === 1 && !isComplement) {
-      return new JsiSkPath(this.CanvasKit, path);
+    const path = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(srcPath).snapshot();
+    if (startT <= 0 && stopT >= 1 && !isComplement) {
+      const r = new JsiSkPath(
+        this.CanvasKit,
+        new this.CanvasKit.PathBuilder(path)
+      );
+      path.delete();
+      return r;
     }
-    // Use small epsilon to avoid edge case issues in CanvasKit
-    const eps = 1e-6;
-    const safeStartT = startT === 0 ? eps : startT;
-    const safeStopT = stopT === 1 ? 1 - eps : stopT;
-    const result = path.trim(safeStartT, safeStopT, isComplement);
+    const result = path.makeTrimmed(startT, stopT, isComplement);
+    path.delete();
     if (result === null) {
       return null;
     }
-    return new JsiSkPath(this.CanvasKit, path);
+    const r = new JsiSkPath(
+      this.CanvasKit,
+      new this.CanvasKit.PathBuilder(result)
+    );
+    result.delete();
+    return r;
   }
 
   Simplify(srcPath: SkPath) {
-    const path = JsiSkPath.fromValue<Path>(srcPath).copy();
-    const success = path.simplify();
-    if (!success) {
-      return null;
-    }
-    return new JsiSkPath(this.CanvasKit, path);
-  }
-
-  Dash(srcPath: SkPath, on: number, off: number, phase: number) {
-    const path = JsiSkPath.fromValue<Path>(srcPath).copy();
-    const success = path.dash(on, off, phase);
-    if (!success) {
-      return null;
-    }
-    return new JsiSkPath(this.CanvasKit, path);
-  }
-
-  AsWinding(srcPath: SkPath) {
-    const path = JsiSkPath.fromValue<Path>(srcPath);
-    const result = path.makeAsWinding();
+    const path = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(srcPath).snapshot();
+    const result = path.makeSimplified();
+    path.delete();
     if (result === null) {
       return null;
     }
-    return new JsiSkPath(this.CanvasKit, result);
+    const r = new JsiSkPath(
+      this.CanvasKit,
+      new this.CanvasKit.PathBuilder(result)
+    );
+    result.delete();
+    return r;
+  }
+
+  Dash(srcPath: SkPath, on: number, off: number, phase: number) {
+    const path = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(srcPath).snapshot();
+    const result = path.makeDashed(on, off, phase);
+    path.delete();
+    if (result === null) {
+      return null;
+    }
+    const r = new JsiSkPath(
+      this.CanvasKit,
+      new this.CanvasKit.PathBuilder(result)
+    );
+    result.delete();
+    return r;
+  }
+
+  AsWinding(srcPath: SkPath) {
+    const path = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(srcPath).snapshot();
+    const result = path.makeAsWinding();
+    path.delete();
+    if (result === null) {
+      return null;
+    }
+    const r = new JsiSkPath(
+      this.CanvasKit,
+      new this.CanvasKit.PathBuilder(result)
+    );
+    result.delete();
+    return r;
   }
 
   Interpolate(start: SkPath, end: SkPath, weight: number) {
-    const path = this.CanvasKit.Path.MakeFromPathInterpolation(
-      JsiSkPath.fromValue(start),
-      JsiSkPath.fromValue(end),
-      weight
-    );
+    const p1 = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(start).snapshot();
+    const p2 = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(end).snapshot();
+    const path = this.CanvasKit.Path.MakeFromPathInterpolation(p1, p2, weight);
+    p1.delete();
+    p2.delete();
     if (path === null) {
       return null;
     }
-    return new JsiSkPath(this.CanvasKit, path);
+    const r = new JsiSkPath(
+      this.CanvasKit,
+      new this.CanvasKit.PathBuilder(path)
+    );
+    path.delete();
+    return r;
   }
 }
