@@ -46,7 +46,7 @@ Java_com_shopify_reactnative_skia_WebGPUView_onSurfaceCreate(
 #endif
 
   // Create surface from ANativeWindow
-  wgpu::SurfaceDescriptorFromAndroidNativeWindow androidSurfaceDesc;
+  wgpu::SurfaceSourceAndroidNativeWindow androidSurfaceDesc;
   androidSurfaceDesc.window = window;
   wgpu::SurfaceDescriptor surfaceDescriptor;
   surfaceDescriptor.nextInChain = &androidSurfaceDesc;
