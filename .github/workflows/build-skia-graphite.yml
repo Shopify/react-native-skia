@@ -103,10 +103,10 @@ jobs:
         include:
           - target: "apple-ios"
             artifact_name: "skia-graphite-apple-ios-xcframeworks"
-            package_root: "./packages/skia/libs/apple/ios"
+            package_root: "./packages/skia/libs/ios"
           - target: "apple-macos"
             artifact_name: "skia-graphite-apple-macos-xcframeworks"
-            package_root: "./packages/skia/libs/apple/macos"
+            package_root: "./packages/skia/libs/macos"
           # Note: No apple-tvos (not supported with Graphite)
           # Note: No apple-maccatalyst (not available with Graphite)
           - target: "android-arm"
