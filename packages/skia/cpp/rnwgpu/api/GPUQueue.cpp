@@ -124,7 +124,7 @@ void GPUQueue::copyExternalImageToTexture(
   //    throw std::runtime_error("Invalid input for GPUQueue::writeTexture()");
   //  }
   //
-  //  if (source->flipY) {
+  //  if (source->flipY.value_or(false)) {
   //    // Calculate the row size and total size
   //    uint32_t rowSize = bytesPerPixel * source->source->getWidth();
   //    uint32_t totalSize = source->source->getSize();
