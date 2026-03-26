@@ -492,6 +492,19 @@ export interface SkPath extends SkJSIInstance<"Path"> {
 
   getLastPt(): { x: number; y: number };
 
+  /** Sets the last point of the path. If the path is empty, behaves like moveTo.
+   *  @param x
+   *  @param y
+   */
+  setLastPoint(x: number, y: number): SkPath;
+
+  /** Changes the point at the given index.
+   *  @param index - The index of the point to change
+   *  @param x
+   *  @param y
+   */
+  setPoint(index: number, x: number, y: number): SkPath;
+
   /** Set this path to the result of applying the Op to this path and the
     specified path: this = (this op operand).
     The resulting path will be constructed from non-overlapping contours.

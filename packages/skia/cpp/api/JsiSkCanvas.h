@@ -349,11 +349,9 @@ public:
   }
 
   JSI_HOST_FUNCTION(drawPath) {
-    auto path = JsiSkPath::fromValue(runtime, arguments[0]);
+    auto path = JsiSkPath::pathFromValue(runtime, arguments[0]);
     auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
-
-    _canvas->drawPath(*path, *paint);
-
+    _canvas->drawPath(path, *paint);
     return jsi::Value::undefined();
   }
 
@@ -436,10 +434,10 @@ public:
   }
 
   JSI_HOST_FUNCTION(clipPath) {
-    auto path = JsiSkPath::fromValue(runtime, arguments[0]);
+    auto path = JsiSkPath::pathFromValue(runtime, arguments[0]);
     auto op = (SkClipOp)arguments[1].asNumber();
     auto doAntiAlias = arguments[2].getBool();
-    _canvas->clipPath(*path, op, doAntiAlias);
+    _canvas->clipPath(path, op, doAntiAlias);
     return jsi::Value::undefined();
   }
 

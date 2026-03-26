@@ -13,6 +13,7 @@
 
 #include "RNSkLog.h"
 #include "include/core/SkPath.h"
+#include "include/core/SkPathBuilder.h"
 #include "include/pathops/SkPathOps.h"
 
 #pragma clang diagnostic pop
@@ -54,8 +55,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(MakeFromOp) {
-    SkPath one = *JsiSkPath::fromValue(runtime, arguments[0]).get();
-    SkPath two = *JsiSkPath::fromValue(runtime, arguments[1]).get();
+    SkPath one = JsiSkPath::pathFromValue(runtime, arguments[0]);
+    SkPath two = JsiSkPath::pathFromValue(runtime, arguments[1]);
     SkPathOp op = (SkPathOp)arguments[2].asNumber();
     SkPath result;
     bool success = Op(one, two, op, &result);
@@ -69,7 +70,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(MakeFromCmds) {
-    SkPath path;
+    SkPathBuilder builder;
     auto cmds = arguments[0].asObject(runtime).asArray(runtime);
     auto cmdCount = cmds.size(runtime);
     for (int i = 0; i < cmdCount; i++) {
@@ -88,7 +89,7 @@ public:
         }
         auto x = cmd.getValueAtIndex(runtime, 1).asNumber();
         auto y = cmd.getValueAtIndex(runtime, 2).asNumber();
-        path.moveTo(x, y);
+        builder.moveTo(x, y);
         break;
       }
       case LINE: {
@@ -98,7 +99,7 @@ public:
         }
         auto x = cmd.getValueAtIndex(runtime, 1).asNumber();
         auto y = cmd.getValueAtIndex(runtime, 2).asNumber();
-        path.lineTo(x, y);
+        builder.lineTo(x, y);
         break;
       }
       case QUAD: {
@@ -110,7 +111,7 @@ public:
         auto y1 = cmd.getValueAtIndex(runtime, 2).asNumber();
         auto x2 = cmd.getValueAtIndex(runtime, 3).asNumber();
         auto y2 = cmd.getValueAtIndex(runtime, 4).asNumber();
-        path.quadTo(x1, y1, x2, y2);
+        builder.quadTo(x1, y1, x2, y2);
         break;
       }
       case CONIC: {
@@ -123,7 +124,7 @@ public:
         auto x2 = cmd.getValueAtIndex(runtime, 3).asNumber();
         auto y2 = cmd.getValueAtIndex(runtime, 4).asNumber();
         auto w = cmd.getValueAtIndex(runtime, 5).asNumber();
-        path.conicTo(x1, y1, x2, y2, w);
+        builder.conicTo(x1, y1, x2, y2, w);
         break;
       }
       case CUBIC: {
@@ -137,11 +138,11 @@ public:
         auto y2 = cmd.getValueAtIndex(runtime, 4).asNumber();
         auto x3 = cmd.getValueAtIndex(runtime, 5).asNumber();
         auto y3 = cmd.getValueAtIndex(runtime, 6).asNumber();
-        path.cubicTo(x1, y1, x2, y2, x3, y3);
+        builder.cubicTo(x1, y1, x2, y2, x3, y3);
         break;
       }
       case CLOSE: {
-        path.close();
+        builder.close();
         break;
       }
       default: {
@@ -151,7 +152,7 @@ public:
       }
     }
     auto hostObjectInstance =
-        std::make_shared<JsiSkPath>(getContext(), std::move(path));
+        std::make_shared<JsiSkPath>(getContext(), std::move(builder));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
         runtime, hostObjectInstance, getContext());
   }

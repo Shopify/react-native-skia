@@ -23,6 +23,7 @@ import { JsiSkContourMeasureIter } from "./JsiSkContourMeasureIter";
 import { JsiSkPictureRecorder } from "./JsiSkPictureRecorder";
 import { JsiSkPictureFactory } from "./JsiSkPictureFactory";
 import { JsiSkPathFactory } from "./JsiSkPathFactory";
+import { JsiSkPathBuilderFactory } from "./JsiSkPathBuilderFactory";
 import { JsiSkMatrix } from "./JsiSkMatrix";
 import { JsiSkColorFilterFactory } from "./JsiSkColorFilterFactory";
 import { JsiSkTypefaceFactory } from "./JsiSkTypefaceFactory";
@@ -96,6 +97,7 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
     new JsiSkPictureRecorder(CanvasKit, new CanvasKit.PictureRecorder()),
   Picture: new JsiSkPictureFactory(CanvasKit),
   Path: new JsiSkPathFactory(CanvasKit),
+  PathBuilder: new JsiSkPathBuilderFactory(CanvasKit),
   Matrix: (matrix?: readonly number[]) =>
     new JsiSkMatrix(
       CanvasKit,

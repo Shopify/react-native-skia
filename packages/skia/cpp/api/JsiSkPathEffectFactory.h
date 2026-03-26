@@ -86,22 +86,22 @@ public:
   }
 
   JSI_HOST_FUNCTION(MakePath1D) {
-    auto path = JsiSkPath::fromValue(runtime, arguments[0]);
+    SkPath path = JsiSkPath::pathFromValue(runtime, arguments[0]);
     auto advance = arguments[1].asNumber();
     auto phase = arguments[2].asNumber();
     auto style =
         static_cast<SkPath1DPathEffect::Style>(arguments[3].asNumber());
     auto pathEffect = std::make_shared<JsiSkPathEffect>(
-        getContext(), SkPath1DPathEffect::Make(*path, advance, phase, style));
+        getContext(), SkPath1DPathEffect::Make(path, advance, phase, style));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect,
                                                        getContext());
   }
 
   JSI_HOST_FUNCTION(MakePath2D) {
     auto matrix = JsiSkMatrix::fromValue(runtime, arguments[0]);
-    auto path = JsiSkPath::fromValue(runtime, arguments[1]);
+    SkPath path = JsiSkPath::pathFromValue(runtime, arguments[1]);
     auto pathEffect = std::make_shared<JsiSkPathEffect>(
-        getContext(), SkPath2DPathEffect::Make(*matrix, *path));
+        getContext(), SkPath2DPathEffect::Make(*matrix, path));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect,
                                                        getContext());
   }
