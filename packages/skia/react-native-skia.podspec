@@ -18,6 +18,9 @@ framework_names = ['libskia', 'libsvg', 'libskshaper', 'libskparagraph',
                    'libskunicode_core', 'libskunicode_libgrapheme',
                    'libskottie', 'libsksg']
 
+# Add Dawn library for Graphite builds (contains dawn::native symbols)
+framework_names += ['libdawn_combined'] if use_graphite
+
 # Verify that prebuilt binaries have been installed by the postinstall script
 unless Dir.exist?(File.join(__dir__, 'libs', 'ios')) && Dir.exist?(File.join(__dir__, 'libs', 'macos'))
   Pod::UI.warn "#{'-' * 72}"

@@ -68,6 +68,10 @@ const ParagraphOutputsAndroid = BUILD_WITH_PARAGRAPH
   ? ["libskparagraph.a", "libskunicode_core.a", "libskunicode_icu.a"]
   : [];
 
+// Dawn library for Graphite builds (contains dawn::native symbols)
+const DawnOutputApple = GRAPHITE ? ["libdawn_combined.a"] : [];
+const DawnOutputAndroid = GRAPHITE ? ["libdawn_combined.a"] : [];
+
 export const commonArgs = [
   ["skia_use_piex", true],
   ["skia_use_system_expat", false],
@@ -86,7 +90,7 @@ export const commonArgs = [
   ["skia_enable_graphite", GRAPHITE],
   ["skia_use_dawn", GRAPHITE],
   // C++20 is required for Graphite builds (Dawn uses C++20 concepts)
-  ...(GRAPHITE ? [["skia_use_cpp20", true]] : []),
+  // ...(GRAPHITE ? [["skia_use_cpp20", true]] : []),
 ];
 
 export type PlatformName =
@@ -252,6 +256,7 @@ const appleOutputNames = [
   "libskottie.a",
   "libsksg.a",
   ...ParagraphApple,
+  ...DawnOutputApple,
 ];
 
 export const configurations: Record<PlatformName, Platform> = {
@@ -300,6 +305,7 @@ export const configurations: Record<PlatformName, Platform> = {
       "libsksg.a",
       "libjsonreader.a",
       ...ParagraphOutputsAndroid,
+      ...DawnOutputAndroid,
     ],
   },
   "apple-ios": {
@@ -331,20 +337,20 @@ export const configurations: Record<PlatformName, Platform> = {
       },
     },
     args: appleCommonArgs,
-    outputRoot: "libs/apple/ios",
+    outputRoot: "libs/ios",
     outputNames: appleOutputNames,
   },
   "apple-tvos": GRAPHITE
     ? {
         targets: {},
         args: [],
-        outputRoot: "libs/apple/tvos",
+        outputRoot: "libs/tvos",
         outputNames: [],
       }
     : {
         targets: tvosTargets,
         args: appleCommonArgs,
-        outputRoot: "libs/apple/tvos",
+        outputRoot: "libs/tvos",
         outputNames: appleOutputNames,
       },
   "apple-macos": {
@@ -361,20 +367,20 @@ export const configurations: Record<PlatformName, Platform> = {
       },
     },
     args: appleCommonArgs,
-    outputRoot: "libs/apple/macos",
+    outputRoot: "libs/macos",
     outputNames: appleOutputNames,
   },
   "apple-maccatalyst": MACCATALYST
     ? {
         targets: maccatalystTargets,
         args: appleCommonArgs,
-        outputRoot: "libs/apple/maccatalyst",
+        outputRoot: "libs/maccatalyst",
         outputNames: appleOutputNames,
       }
     : {
         targets: {},
         args: [],
-        outputRoot: "libs/apple/maccatalyst",
+        outputRoot: "libs/maccatalyst",
         outputNames: [],
       },
 };
@@ -389,6 +395,7 @@ const copyModule = (module: string) => {
 const getFirstAvailableTarget = () => {
   // Use the same logic as build-skia.ts to get the first available target
   const platforms = Object.keys(configurations) as PlatformName[];
+  const fs = require("fs");
 
   for (const platformName of platforms) {
     const configuration = configurations[platformName];
@@ -396,21 +403,19 @@ const getFirstAvailableTarget = () => {
 
     for (const targetName of targetNames) {
       const targetPath = `${platformName}/${targetName}`;
-      const dawnPath = `../../externals/skia/out/${targetPath}/gen/third_party/externals/dawn`;
+      // Check both CMake-based Dawn builds and GN-based Dawn builds
+      const cmakeDawnPath = `../../externals/skia/out/${targetPath}/cmake_dawn/gen/include/dawn`;
+      const gnDawnPath = `../../externals/skia/out/${targetPath}/gen/third_party/externals/dawn`;
 
-      try {
-        require("fs").statSync(dawnPath);
+      if (fs.existsSync(cmakeDawnPath) || fs.existsSync(gnDawnPath)) {
         return targetPath;
-      } catch (e) {
-        // Dawn folder doesn't exist for this target, try next
-        continue;
       }
     }
   }
 
   // No target found with dawn folder
   throw new Error(
-    "No target found with dawn folder at ../../externals/skia/out/{target}/gen/third_party/externals/dawn"
+    "No target found with Dawn headers in ../../externals/skia/out/{target}/"
   );
 };
 
@@ -418,9 +423,17 @@ export const copyHeaders = () => {
   // Check if this is a local build (build output exists) vs prebuilt download
   const fs = require("fs");
   let hasLocalBuild = false;
+  let dawnIncludeSrc = "";
   try {
     const targetPath = getFirstAvailableTarget();
-    const dawnIncludeSrc = `../../externals/skia/out/${targetPath}/gen/third_party/externals/dawn/include`;
+    // Check CMake-based Dawn build first, then GN-based
+    const cmakePath = `../../externals/skia/out/${targetPath}/cmake_dawn/gen/include`;
+    const gnPath = `../../externals/skia/out/${targetPath}/gen/third_party/externals/dawn/include`;
+    if (fs.existsSync(cmakePath)) {
+      dawnIncludeSrc = cmakePath;
+    } else {
+      dawnIncludeSrc = gnPath;
+    }
     console.log(`   Looking for local build at: ${dawnIncludeSrc}`);
     hasLocalBuild = fs.existsSync(dawnIncludeSrc);
   } catch (e) {
@@ -480,7 +493,6 @@ export const copyHeaders = () => {
       );
 
       console.log("      - Copying Dawn headers...");
-      const dawnIncludeSrc = `../../externals/skia/out/${getFirstAvailableTarget()}/gen/third_party/externals/dawn/include`;
       fileOps.cp(dawnIncludeSrc, "./cpp/dawn/include");
       fileOps.cp(
         "../../externals/skia/third_party/externals/dawn/include",
