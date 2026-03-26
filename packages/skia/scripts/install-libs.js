@@ -5,11 +5,32 @@ const path = require("path");
 const fs = require("fs");
 const { execSync } = require("child_process");
 
+const libsDir = path.join(__dirname, "..", "libs");
+
 const useGraphite =
   process.env.SK_GRAPHITE === "1" ||
   (process.env.SK_GRAPHITE || "").toLowerCase() === "true";
 const prefix = useGraphite ? "react-native-skia-graphite" : "react-native-skia";
-const libsDir = path.join(__dirname, "..", "libs");
+
+// Skip if libs were installed via install-skia-graphite or build-skia
+// and the companion npm packages are not available (git submodule workflow)
+const hasExistingLibs = (() => {
+  const iosDir = path.join(libsDir, "ios");
+  return (
+    fs.existsSync(iosDir) &&
+    fs.readdirSync(iosDir).some((f) => f.endsWith(".xcframework"))
+  );
+})();
+
+if (hasExistingLibs) {
+  try {
+    require.resolve(prefix + "-apple-ios/package.json");
+  } catch (e) {
+    // npm packages not available — libs were installed externally
+    console.log("Skia libs already installed, skipping postinstall.");
+    process.exit(0);
+  }
+}
 
 // --- Apple platforms ---
 

@@ -88,6 +88,18 @@ std::unordered_set<std::string> GPU::getWgslLanguageFeatures() {
     case wgpu::WGSLLanguageFeatureName::PointerCompositeAccess:
       name = "pointer_composite_access";
       break;
+    case wgpu::WGSLLanguageFeatureName::UniformBufferStandardLayout:
+      name = "uniform_buffer_standard_layout";
+      break;
+    case wgpu::WGSLLanguageFeatureName::SubgroupId:
+      name = "subgroup_id";
+      break;
+    case wgpu::WGSLLanguageFeatureName::FragmentDepth:
+      name = "fragment_depth";
+      break;
+    case wgpu::WGSLLanguageFeatureName::ImmediateAddressSpace:
+      name = "immediate_address_space";
+      break;
     case wgpu::WGSLLanguageFeatureName::ChromiumTestingUnimplemented:
       name = "chromium_testing_unimplemented";
       break;
