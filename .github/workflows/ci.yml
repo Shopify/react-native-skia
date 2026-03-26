@@ -116,6 +116,7 @@ jobs:
       test_ios: true
       test_android: true
       test_web: true
+      test_windows: true
 
   build-windows-library:
     runs-on: windows-latest
