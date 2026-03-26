@@ -1,4 +1,4 @@
-import { existsSync } from "fs";
+import { existsSync, writeFileSync } from "fs";
 
 import { ensureFolderExists, copyRecursiveSync } from "./utils";
 import { GRAPHITE } from "./skia-configuration";
@@ -31,7 +31,10 @@ const androidFiles = [
   "libskunicode_core.a",
   "libskunicode_icu.a",
   "libjsonreader.a",
+  // Dawn library for Graphite builds
+  ...(GRAPHITE ? ["libdawn_combined.a"] : []),
 ];
+
 const appleFiles = [
   "libskia.xcframework",
   "libskshaper.xcframework",
@@ -41,6 +44,8 @@ const appleFiles = [
   "libskparagraph.xcframework",
   "libskunicode_core.xcframework",
   "libskunicode_libgrapheme.xcframework",
+  // Dawn library for Graphite builds
+  ...(GRAPHITE ? ["libdawn_combined.xcframework"] : []),
 ];
 
 const copyFiles = (from: string, to: string, files: string[]) => {
@@ -77,7 +82,13 @@ destinations.forEach((d, i) => {
 });
 
 console.log("Copying Apple files...");
-copyFiles(`skia${suffix}-apple-xcframeworks`, "./libs/apple", appleFiles);
+copyFiles(`skia${suffix}-apple-ios-xcframeworks`, "./libs/ios", appleFiles);
+copyFiles(`skia${suffix}-apple-macos-xcframeworks`, "./libs/macos", appleFiles);
+
+if (GRAPHITE) {
+  writeFileSync("./libs/.graphite", "");
+  console.log("Created libs/.graphite marker file");
+}
 
 // Copy skia-headers and skia-graphite-headers artifacts to ./cpp/
 if (GRAPHITE) {
