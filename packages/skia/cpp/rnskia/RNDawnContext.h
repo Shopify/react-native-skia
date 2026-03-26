@@ -318,11 +318,11 @@ public:
     // 1. Create Surface
     wgpu::SurfaceDescriptor surfaceDescriptor;
 #ifdef __APPLE__
-    wgpu::SurfaceDescriptorFromMetalLayer metalSurfaceDesc;
+    wgpu::SurfaceSourceMetalLayer metalSurfaceDesc;
     metalSurfaceDesc.layer = window;
     surfaceDescriptor.nextInChain = &metalSurfaceDesc;
 #else
-    wgpu::SurfaceDescriptorFromAndroidNativeWindow androidSurfaceDesc;
+    wgpu::SurfaceSourceAndroidNativeWindow androidSurfaceDesc;
     androidSurfaceDesc.window = window;
     surfaceDescriptor.nextInChain = &androidSurfaceDesc;
 #endif
