@@ -34,9 +34,22 @@ public:
     _configure();
   }
 
+  void setFormatOverride(wgpu::TextureFormat format) {
+    std::unique_lock<std::shared_mutex> lock(_mutex);
+    _formatOverride = format;
+    // If already configured, reconfigure now
+    if (config.device) {
+      config.format = format;
+      _configure();
+    }
+  }
+
   void configure(wgpu::SurfaceConfiguration &newConfig) {
     std::unique_lock<std::shared_mutex> lock(_mutex);
     config = newConfig;
+    if (_formatOverride != wgpu::TextureFormat::Undefined) {
+      config.format = _formatOverride;
+    }
     config.width = width;
     config.height = height;
     config.presentMode = wgpu::PresentMode::Fifo;
@@ -150,6 +163,11 @@ public:
     return config.device;
   }
 
+  wgpu::TextureFormat getFormatOverride() {
+    std::shared_lock<std::shared_mutex> lock(_mutex);
+    return _formatOverride;
+  }
+
 private:
   void _configure() {
     if (surface) {
@@ -172,6 +190,7 @@ private:
   wgpu::Texture texture = nullptr;
   wgpu::Instance gpu;
   wgpu::SurfaceConfiguration config;
+  wgpu::TextureFormat _formatOverride = wgpu::TextureFormat::Undefined;
   int width;
   int height;
 };

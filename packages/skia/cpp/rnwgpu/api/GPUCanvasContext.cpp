@@ -28,6 +28,13 @@ void GPUCanvasContext::configure(
       !conv(surfaceConfiguration.format, configuration->format)) {
     throw std::runtime_error("Error with SurfaceConfiguration");
   }
+  // Check for format override from native colorSpace prop
+  {
+    auto overrideFormat = _surfaceInfo->getFormatOverride();
+    if (overrideFormat != wgpu::TextureFormat::Undefined) {
+      surfaceConfiguration.format = overrideFormat;
+    }
+  }
 
 #ifdef __APPLE__
   surfaceConfiguration.alphaMode = configuration->alphaMode;

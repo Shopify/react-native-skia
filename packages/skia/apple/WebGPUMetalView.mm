@@ -12,6 +12,44 @@
   BOOL _isConfigured;
 }
 
+- (void)applyColorSpace {
+  CAMetalLayer *metalLayer = (CAMetalLayer *)self.layer;
+  CGColorSpaceRef cs = NULL;
+  BOOL needsEDR = NO;
+  if ([_colorSpace isEqualToString:@"display-p3"]) {
+    cs = CGColorSpaceCreateWithName(kCGColorSpaceDisplayP3);
+  } else if ([_colorSpace isEqualToString:@"bt2020-hlg"]) {
+    cs = CGColorSpaceCreateWithName(kCGColorSpaceITUR_2100_HLG);
+    needsEDR = YES;
+  } else if ([_colorSpace isEqualToString:@"bt2020-pq"]) {
+    cs = CGColorSpaceCreateWithName(kCGColorSpaceITUR_2100_PQ);
+    needsEDR = YES;
+  } else {
+    cs = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+  }
+  metalLayer.colorspace = cs;
+  CGColorSpaceRelease(cs);
+#if !TARGET_OS_OSX
+  metalLayer.wantsExtendedDynamicRangeContent = needsEDR;
+#endif
+
+  // Set surface format — HDR needs RGBA16Float
+  auto &registry = rnwgpu::SurfaceRegistry::getInstance();
+  auto surfaceInfo = registry.getSurfaceInfo([_contextId intValue]);
+  if (surfaceInfo) {
+    surfaceInfo->setFormatOverride(needsEDR
+        ? wgpu::TextureFormat::RGBA16Float
+        : wgpu::TextureFormat::Undefined);
+  }
+}
+
+- (void)setColorSpace:(NSString *)colorSpace {
+  _colorSpace = colorSpace;
+  if (_isConfigured) {
+    [self applyColorSpace];
+  }
+}
+
 #if !TARGET_OS_OSX
 + (Class)layerClass {
   return [CAMetalLayer class];
@@ -45,6 +83,9 @@
       .getSurfaceInfoOrCreate([_contextId intValue], gpu, size.width,
                               size.height)
       ->switchToOnscreen(nativeSurface, surface);
+
+  _isConfigured = YES;
+  [self applyColorSpace];
 }
 
 - (void)update {
