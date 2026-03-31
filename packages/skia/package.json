@@ -148,7 +148,7 @@
     "ios": {
       "componentProvider": {
         "SkiaPictureView": "SkiaPictureView",
-        "WebGPUView": "WebGPUView"
+        "SkiaWebGPUView": "SkiaWebGPUView"
       }
     }
   },

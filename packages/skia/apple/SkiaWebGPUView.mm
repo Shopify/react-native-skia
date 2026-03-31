@@ -1,6 +1,6 @@
 #ifdef RCT_NEW_ARCH_ENABLED
 
-#import "WebGPUView.h"
+#import "SkiaWebGPUView.h"
 
 #import <react/renderer/components/rnskia/ComponentDescriptors.h>
 #import <react/renderer/components/rnskia/EventEmitters.h>
@@ -12,18 +12,18 @@
 
 using namespace facebook::react;
 
-@implementation WebGPUView
+@implementation SkiaWebGPUView
 
 - (instancetype)initWithFrame:(CGRect)frame {
   if (self = [super initWithFrame:frame]) {
-    static const auto defaultProps = std::make_shared<const WebGPUViewProps>();
+    static const auto defaultProps = std::make_shared<const SkiaWebGPUViewProps>();
     _props = defaultProps;
   }
   return self;
 }
 
 + (ComponentDescriptorProvider)componentDescriptorProvider {
-  return concreteComponentDescriptorProvider<WebGPUViewComponentDescriptor>();
+  return concreteComponentDescriptorProvider<SkiaWebGPUViewComponentDescriptor>();
 }
 
 - (void)prepareForRecycle {
@@ -46,9 +46,9 @@ using namespace facebook::react;
 - (void)updateProps:(const Props::Shared &)props
            oldProps:(const Props::Shared &)oldProps {
   const auto &oldViewProps =
-      *std::static_pointer_cast<const WebGPUViewProps>(_props);
+      *std::static_pointer_cast<const SkiaWebGPUViewProps>(_props);
   const auto &newViewProps =
-      *std::static_pointer_cast<const WebGPUViewProps>(props);
+      *std::static_pointer_cast<const SkiaWebGPUViewProps>(props);
 
   if (newViewProps.contextId != oldViewProps.contextId) {
     /*
@@ -72,6 +72,6 @@ using namespace facebook::react;
 
 @end
 
-Class<RCTComponentViewProtocol> WebGPUViewCls(void) { return WebGPUView.class; }
+Class<RCTComponentViewProtocol> SkiaWebGPUViewCls(void) { return SkiaWebGPUView.class; }
 
 #endif // RCT_NEW_ARCH_ENABLED
