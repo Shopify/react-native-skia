@@ -66,8 +66,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(MakeFromOp) {
-    SkPath one = *JsiSkPath::fromValue(runtime, arguments[0]).get();
-    SkPath two = *JsiSkPath::fromValue(runtime, arguments[1]).get();
+    SkPath one = JsiSkPath::fromValue(runtime, arguments[0])->snapshot();
+    SkPath two = JsiSkPath::fromValue(runtime, arguments[1])->snapshot();
     SkPathOp op = (SkPathOp)arguments[2].asNumber();
     SkPath result;
     bool success = Op(one, two, op, &result);
@@ -275,7 +275,7 @@ public:
   // Static path operations
   JSI_HOST_FUNCTION(Stroke) {
     auto srcPath = JsiSkPath::fromValue(runtime, arguments[0]);
-    SkPath path = *srcPath;
+    SkPath path = srcPath->snapshot();
     SkPaint p;
     p.setStyle(SkPaint::kStroke_Style);
 
@@ -338,13 +338,13 @@ public:
     auto isComplement = arguments[3].getBool();
     // If requesting the full path in normal mode, just return a copy
     if (start <= 0 && end >= 1 && !isComplement) {
-      SkPath result = *srcPath;
+      SkPath result = srcPath->snapshot();
       auto hostObjectInstance =
           std::make_shared<JsiSkPath>(getContext(), std::move(result));
       return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
           runtime, hostObjectInstance, getContext());
     }
-    SkPath path = *srcPath;
+    SkPath path = srcPath->snapshot();
     auto mode = isComplement ? SkTrimPathEffect::Mode::kInverted
                              : SkTrimPathEffect::Mode::kNormal;
     auto pe = SkTrimPathEffect::Make(start, end, mode);
@@ -365,7 +365,7 @@ public:
 
   JSI_HOST_FUNCTION(Simplify) {
     auto srcPath = JsiSkPath::fromValue(runtime, arguments[0]);
-    auto result = ::Simplify(*srcPath);
+    auto result = ::Simplify(srcPath->snapshot());
     if (result.has_value()) {
       auto hostObjectInstance =
           std::make_shared<JsiSkPath>(getContext(), std::move(result.value()));
@@ -388,7 +388,7 @@ public:
     }
     SkStrokeRec rec(SkStrokeRec::InitStyle::kHairline_InitStyle);
     SkPathBuilder resultBuilder;
-    if (pe->filterPath(&resultBuilder, *srcPath, &rec)) {
+    if (pe->filterPath(&resultBuilder, srcPath->snapshot(), &rec)) {
       auto result = resultBuilder.detach();
       auto hostObjectInstance =
           std::make_shared<JsiSkPath>(getContext(), std::move(result));
@@ -400,7 +400,7 @@ public:
 
   JSI_HOST_FUNCTION(AsWinding) {
     auto srcPath = JsiSkPath::fromValue(runtime, arguments[0]);
-    auto result = ::AsWinding(*srcPath);
+    auto result = ::AsWinding(srcPath->snapshot());
     if (result.has_value()) {
       auto hostObjectInstance =
           std::make_shared<JsiSkPath>(getContext(), std::move(result.value()));
@@ -414,8 +414,10 @@ public:
     auto path1 = JsiSkPath::fromValue(runtime, arguments[0]);
     auto path2 = JsiSkPath::fromValue(runtime, arguments[1]);
     auto weight = arguments[2].asNumber();
+    auto p1 = path1->snapshot();
+    auto p2 = path2->snapshot();
     SkPath result;
-    auto succeed = path1->interpolate(*path2, weight, &result);
+    auto succeed = p1.interpolate(p2, weight, &result);
     if (!succeed) {
       return jsi::Value::null();
     }

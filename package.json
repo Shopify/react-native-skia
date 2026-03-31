@@ -32,7 +32,9 @@
   },
   "packageManager": "yarn@3.6.4",
   "resolutions": {
-    "@webgpu/types": "^0.1.69"
+    "@webgpu/types": "^0.1.69",
+    "react-native@0.83.1": "patch:react-native@npm%3A0.83.1#./.yarn/patches/react-native-npm-0.83.1-939916a7b5.patch",
+    "react-native@*": "patch:react-native@npm%3A0.83.1#./.yarn/patches/react-native-npm-0.83.1-939916a7b5.patch"
   },
   "devDependencies": {
     "react-native-test-app": "^4.2.0",

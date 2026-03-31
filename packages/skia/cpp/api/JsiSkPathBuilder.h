@@ -40,7 +40,7 @@ public:
   JSI_HOST_FUNCTION(rMoveTo) {
     SkScalar x = arguments[0].asNumber();
     SkScalar y = arguments[1].asNumber();
-    getObject()->rMoveTo(x, y);
+    getObject()->rMoveTo({x, y});
     return thisValue.getObject(runtime);
   }
 
@@ -161,8 +161,7 @@ public:
         arguments[4].getBool() ? SkPathDirection::kCCW : SkPathDirection::kCW;
     auto dx = arguments[5].asNumber();
     auto dy = arguments[6].asNumber();
-    getObject()->rArcTo(SkPoint::Make(rx, ry), xAxisRotate, arcSize, sweep,
-                        SkPoint::Make(dx, dy));
+    getObject()->rArcTo(rx, ry, xAxisRotate, arcSize, sweep, dx, dy);
     return thisValue.getObject(runtime);
   }
 
@@ -245,6 +244,7 @@ public:
 
   JSI_HOST_FUNCTION(addPath) {
     auto src = JsiSkPath::fromValue(runtime, arguments[0]);
+    auto srcPath = src->snapshot();
     auto matrix =
         count > 1 && !arguments[1].isUndefined() && !arguments[1].isNull()
             ? JsiSkMatrix::fromValue(runtime, arguments[1])
@@ -253,9 +253,9 @@ public:
                     ? SkPath::kExtend_AddPathMode
                     : SkPath::kAppend_AddPathMode;
     if (matrix == nullptr) {
-      getObject()->addPath(*src, mode);
+      getObject()->addPath(srcPath, mode);
     } else {
-      getObject()->addPath(src->makeTransform(*matrix), mode);
+      getObject()->addPath(srcPath, *matrix, mode);
     }
     return thisValue.getObject(runtime);
   }
@@ -287,10 +287,9 @@ public:
 
   JSI_HOST_FUNCTION(transform) {
     auto m3 = *JsiSkMatrix::fromValue(runtime, arguments[0]);
-    // Create a path from current state, transform, then create new builder
+    // Create a path from current state, transform, then rebuild
     auto path = getObject()->snapshot().makeTransform(m3);
-    getObject()->reset();
-    getObject()->addPath(path);
+    *getObject() = SkPathBuilder(path);
     return thisValue.getObject(runtime);
   }
 
