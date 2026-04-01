@@ -58,11 +58,6 @@ jobs:
           corepack enable
           yarn --version
 
-      - name: Install Expo CLI
-        run: |
-          npm install -g expo-cli eas-cli
-          expo --version
-
       - name: List available simulators
         run: xcrun simctl list devices
 
@@ -214,11 +209,6 @@ jobs:
         run: |
           corepack enable
           yarn --version
-
-      - name: Install Expo CLI
-        run: |
-          npm install -g expo-cli eas-cli
-          expo --version
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -384,11 +374,6 @@ jobs:
           corepack enable
           yarn --version
 
-      - name: Install Expo CLI
-        run: |
-          npm install -g expo-cli eas-cli
-          expo --version
-
       - name: Create test directory
         run: |
           mkdir -p /Users/runner/skia-test-app
@@ -454,9 +439,8 @@ jobs:
       - name: Install Playwright dependencies
         run: |
           echo "Installing Playwright..."
-          npm install -g playwright
-          npx playwright install chromium
-          npx playwright install-deps chromium
+          yarn playwright install chromium
+          yarn playwright install-deps chromium
 
       - name: Start web server
         working-directory: /Users/runner/skia-test-app/my-app
@@ -476,7 +460,7 @@ jobs:
         if: always()
         run: |
           echo "Taking screenshot of web app..."
-          npx playwright screenshot http://localhost:8081 /Users/runner/skia-test-screenshot-web.png || echo "Failed to capture screenshot"
+          yarn playwright screenshot http://localhost:8081 /Users/runner/skia-test-screenshot-web.png || echo "Failed to capture screenshot"
 
       - name: Upload screenshot
         if: always()
