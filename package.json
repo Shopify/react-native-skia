@@ -37,6 +37,8 @@
     "react-native@*": "patch:react-native@npm%3A0.83.1#./.yarn/patches/react-native-npm-0.83.1-939916a7b5.patch"
   },
   "devDependencies": {
+    "eas-cli": "18.4.0",
+    "playwright": "1.59.0",
     "react-native-test-app": "^4.2.0",
     "turbo": "^2.1.1"
   }
