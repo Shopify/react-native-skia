@@ -330,6 +330,27 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
       }
       fs.writeFileSync(filePath, content.replace(search, replace));
     }
+    // C++20 is required for Dawn (uses concepts/requires)
+    {
+      const filePath = `${SkiaSrc}/gn/skia/BUILD.gn`;
+      const content = fs.readFileSync(filePath, "utf-8");
+      fs.writeFileSync(
+        filePath,
+        content.replace(
+          `cflags_cc += [ "-std=c++17" ]`,
+          `cflags_cc += [ "-std=c++20" ]`
+        )
+      );
+    }
+    // Fix Dawn ShaderModuleMTL.mm uint32 typo (should be uint32_t)
+    {
+      const filePath = `${SkiaSrc}/third_party/externals/dawn/src/dawn/native/metal/ShaderModuleMTL.mm`;
+      const content = fs.readFileSync(filePath, "utf-8");
+      fs.writeFileSync(
+        filePath,
+        content.replace(/uint32\(bindingInfo\.binding\)/g, "uint32_t(bindingInfo.binding)")
+      );
+    }
     console.log("Patches applied successfully");
   }
   $(`rm -rf ${PackageRoot}/libs`);

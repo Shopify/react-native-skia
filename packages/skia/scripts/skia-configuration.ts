@@ -122,14 +122,8 @@ export type Platform = {
   options?: Arg[];
 };
 
-// C++20 flags for Graphite builds (Dawn uses C++20 concepts)
-const cpp20Flags = GRAPHITE ? ["-std=c++20"] : [];
-
-// Helper to build extra_cflags_cc with optional C++20 support
-const extraCflagsCc = (...flags: string[]) => {
-  const allFlags = [...flags, ...cpp20Flags];
-  return `[${allFlags.map((f) => `"${f}"`).join(", ")}]`;
-};
+// C++20 is required for Graphite builds (Dawn uses C++20 concepts)
+// Applied via patch in build-skia.ts (replaces -std=c++17 with -std=c++20 in gn/skia/BUILD.gn)
 
 const appleMinTarget = GRAPHITE ? "15.1" : "14.0";
 const appleSimulatorMinTarget = "16.0";
@@ -144,7 +138,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
         args: [
           [
             "extra_cflags_cc",
-            extraCflagsCc("-fexceptions", "-frtti", "-target", "arm64-apple-tvos", `-mappletvos-version-min=${appleMinTarget}`),
+            `["-fexceptions", "-frtti", "-target", "arm64-apple-tvos", "-mappletvos-version-min=${appleMinTarget}"]`,
           ],
           [
             "extra_asmflags",
@@ -163,7 +157,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
           ["ios_use_simulator", true],
           [
             "extra_cflags_cc",
-            extraCflagsCc("-fexceptions", "-frtti", "-target", "arm64-apple-tvos-simulator", `-mappletvsimulator-version-min=${appleSimulatorMinTarget}`),
+            `["-fexceptions", "-frtti", "-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
           ],
           [
             "extra_asmflags",
@@ -182,7 +176,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
           ["ios_use_simulator", true],
           [
             "extra_cflags_cc",
-            extraCflagsCc("-fexceptions", "-frtti", "-target", "x86_64-apple-tvos-simulator", `-mappletvsimulator-version-min=${appleSimulatorMinTarget}`),
+            `["-fexceptions", "-frtti", "-target", "x86_64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
           ],
           [
             "extra_asmflags",
@@ -208,10 +202,10 @@ const maccatalystTargets: { [key: string]: Target } = MACCATALYST
           ["target_cpu", `"arm64"`],
           [
             "extra_cflags_cc",
-            extraCflagsCc("-fexceptions","-frtti","-target","arm64-apple-ios14.0-macabi",
-              `-isysroot`,`${appleSdkRoot}`,
-              `-isystem`,`${appleSdkRoot}/System/iOSSupport/usr/include`,
-              `-iframework`,`${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks`),
+            `["-fexceptions","-frtti","-target","arm64-apple-ios14.0-macabi",` +
+              `"-isysroot","${appleSdkRoot}",` +
+              `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
+              `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
           ],
           [
             "extra_ldflags",
@@ -230,10 +224,10 @@ const maccatalystTargets: { [key: string]: Target } = MACCATALYST
           ["target_cpu", `"x64"`],
           [
             "extra_cflags_cc",
-            extraCflagsCc("-fexceptions","-frtti","-target","x86_64-apple-ios14.0-macabi",
-              `-isysroot`,`${appleSdkRoot}`,
-              `-isystem`,`${appleSdkRoot}/System/iOSSupport/usr/include`,
-              `-iframework`,`${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks`),
+            `["-fexceptions","-frtti","-target","x86_64-apple-ios14.0-macabi",` +
+              `"-isysroot","${appleSdkRoot}",` +
+              `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
+              `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
           ],
           [
             "extra_ldflags",
@@ -292,7 +286,6 @@ export const configurations: Record<PlatformName, Platform> = {
     },
     args: [
       ...(GRAPHITE ? [["ndk_api", 26]] : []),
-      ...(GRAPHITE ? [["extra_cflags_cc", extraCflagsCc()]] : []),
       ["ndk", `"${NdkDir}"`],
       ["skia_use_system_freetype2", false],
       ["skia_use_gl", !GRAPHITE],
@@ -322,7 +315,7 @@ export const configurations: Record<PlatformName, Platform> = {
         platform: "ios",
         args: [
           ["ios_min_target", `"${appleMinTarget}"`],
-          ["extra_cflags_cc", extraCflagsCc("-fexceptions", "-frtti")],
+          ["extra_cflags_cc", `["-fexceptions", "-frtti"]`],
         ],
       },
       "arm64-iphonesimulator": {
@@ -331,7 +324,7 @@ export const configurations: Record<PlatformName, Platform> = {
         args: [
           ["ios_min_target", `"${appleSimulatorMinTarget}"`],
           ["ios_use_simulator", true],
-          ["extra_cflags_cc", extraCflagsCc("-fexceptions", "-frtti")],
+          ["extra_cflags_cc", `["-fexceptions", "-frtti"]`],
         ],
       },
       "x64-iphonesimulator": {
@@ -339,7 +332,7 @@ export const configurations: Record<PlatformName, Platform> = {
         platform: "ios",
         args: [
           ["ios_min_target", `"${appleSimulatorMinTarget}"`],
-          ["extra_cflags_cc", extraCflagsCc("-fexceptions", "-frtti")],
+          ["extra_cflags_cc", `["-fexceptions", "-frtti"]`],
         ],
       },
     },
@@ -365,12 +358,12 @@ export const configurations: Record<PlatformName, Platform> = {
       "arm64-macosx": {
         cpu: "arm64",
         platform: "mac",
-        args: [["extra_cflags_cc", extraCflagsCc("-fexceptions", "-frtti")]],
+        args: [["extra_cflags_cc", `["-fexceptions", "-frtti"]`]],
       },
       "x64-macosx": {
         cpu: "x64",
         platform: "mac",
-        args: [["extra_cflags_cc", extraCflagsCc("-fexceptions", "-frtti")]],
+        args: [["extra_cflags_cc", `["-fexceptions", "-frtti"]`]],
       },
     },
     args: appleCommonArgs,
