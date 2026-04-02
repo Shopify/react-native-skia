@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <memory>
+#include <set>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -12,6 +14,7 @@
 #include "JsiSkPoint.h"
 #include "JsiSkRRect.h"
 #include "JsiSkRect.h"
+#include "RNSkLog.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -35,6 +38,28 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
+// Track which deprecation warnings have been shown to avoid spam
+inline std::set<std::string> &getShownPathDeprecationWarnings() {
+  static std::set<std::string> warnings;
+  return warnings;
+}
+
+inline void warnDeprecatedPathMethod(jsi::Runtime &runtime,
+                                     const char *methodName,
+                                     const char *suggestion) {
+  auto &warnings = getShownPathDeprecationWarnings();
+  if (warnings.find(methodName) != warnings.end()) {
+    return;
+  }
+  warnings.insert(methodName);
+  std::string message =
+      std::string("[react-native-skia] SkPath.") + methodName +
+      "() is deprecated and will be removed in a future release. " + suggestion +
+      " See migration guide: "
+      "https://shopify.github.io/react-native-skia/docs/shapes/path-migration";
+  RNSkLogger::warnToJavascriptConsole(runtime, message);
+}
+
 class JsiSkPath : public JsiSkWrappingSharedPtrHostObject<SkPathBuilder> {
 private:
   static const int MOVE = 0;
@@ -47,9 +72,11 @@ private:
   SkPath asPath() const { return getObject()->snapshot(); }
 
 public:
-  // Mutable building methods
+  // Mutable building methods (deprecated)
 
   JSI_HOST_FUNCTION(moveTo) {
+    warnDeprecatedPathMethod(runtime, "moveTo",
+                             "Use Skia.PathBuilder.Make().moveTo() instead.");
     SkScalar x = arguments[0].asNumber();
     SkScalar y = arguments[1].asNumber();
     getObject()->moveTo(x, y);
@@ -57,6 +84,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(rMoveTo) {
+    warnDeprecatedPathMethod(runtime, "rMoveTo",
+                             "Use Skia.PathBuilder.Make().rMoveTo() instead.");
     SkScalar x = arguments[0].asNumber();
     SkScalar y = arguments[1].asNumber();
     getObject()->rMoveTo({x, y});
@@ -64,6 +93,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(lineTo) {
+    warnDeprecatedPathMethod(runtime, "lineTo",
+                             "Use Skia.PathBuilder.Make().lineTo() instead.");
     SkScalar x = arguments[0].asNumber();
     SkScalar y = arguments[1].asNumber();
     getObject()->lineTo(x, y);
@@ -71,6 +102,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(rLineTo) {
+    warnDeprecatedPathMethod(runtime, "rLineTo",
+                             "Use Skia.PathBuilder.Make().rLineTo() instead.");
     SkScalar x = arguments[0].asNumber();
     SkScalar y = arguments[1].asNumber();
     getObject()->rLineTo(x, y);
@@ -78,6 +111,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(quadTo) {
+    warnDeprecatedPathMethod(runtime, "quadTo",
+                             "Use Skia.PathBuilder.Make().quadTo() instead.");
     SkScalar x1 = arguments[0].asNumber();
     SkScalar y1 = arguments[1].asNumber();
     SkScalar x2 = arguments[2].asNumber();
@@ -87,6 +122,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(rQuadTo) {
+    warnDeprecatedPathMethod(runtime, "rQuadTo",
+                             "Use Skia.PathBuilder.Make().rQuadTo() instead.");
     SkScalar x1 = arguments[0].asNumber();
     SkScalar y1 = arguments[1].asNumber();
     SkScalar x2 = arguments[2].asNumber();
@@ -96,6 +133,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(conicTo) {
+    warnDeprecatedPathMethod(runtime, "conicTo",
+                             "Use Skia.PathBuilder.Make().conicTo() instead.");
     SkScalar x1 = arguments[0].asNumber();
     SkScalar y1 = arguments[1].asNumber();
     SkScalar x2 = arguments[2].asNumber();
@@ -106,6 +145,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(rConicTo) {
+    warnDeprecatedPathMethod(runtime, "rConicTo",
+                             "Use Skia.PathBuilder.Make().rConicTo() instead.");
     SkScalar x1 = arguments[0].asNumber();
     SkScalar y1 = arguments[1].asNumber();
     SkScalar x2 = arguments[2].asNumber();
@@ -116,6 +157,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(cubicTo) {
+    warnDeprecatedPathMethod(runtime, "cubicTo",
+                             "Use Skia.PathBuilder.Make().cubicTo() instead.");
     SkScalar x1 = arguments[0].asNumber();
     SkScalar y1 = arguments[1].asNumber();
     SkScalar x2 = arguments[2].asNumber();
@@ -127,6 +170,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(rCubicTo) {
+    warnDeprecatedPathMethod(runtime, "rCubicTo",
+                             "Use Skia.PathBuilder.Make().rCubicTo() instead.");
     SkScalar x1 = arguments[0].asNumber();
     SkScalar y1 = arguments[1].asNumber();
     SkScalar x2 = arguments[2].asNumber();
@@ -138,21 +183,29 @@ public:
   }
 
   JSI_HOST_FUNCTION(close) {
+    warnDeprecatedPathMethod(runtime, "close",
+                             "Use Skia.PathBuilder.Make().close() instead.");
     getObject()->close();
     return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(reset) {
+    warnDeprecatedPathMethod(runtime, "reset",
+                             "Use Skia.PathBuilder.Make().reset() instead.");
     getObject()->reset();
     return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(rewind) {
+    warnDeprecatedPathMethod(runtime, "rewind",
+                             "Use Skia.PathBuilder.Make().reset() instead.");
     getObject()->reset();
     return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(addPath) {
+    warnDeprecatedPathMethod(runtime, "addPath",
+                             "Use Skia.PathBuilder.Make().addPath() instead.");
     auto src = JsiSkPath::fromValue(runtime, arguments[0]);
     auto srcPath = src->snapshot();
     auto matrix =
@@ -171,6 +224,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(addArc) {
+    warnDeprecatedPathMethod(runtime, "addArc",
+                             "Use Skia.PathBuilder.Make().addArc() instead.");
     auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
     auto start = arguments[1].asNumber();
     auto sweep = arguments[2].asNumber();
@@ -179,6 +234,9 @@ public:
   }
 
   JSI_HOST_FUNCTION(addOval) {
+    warnDeprecatedPathMethod(runtime,
+        "addOval",
+        "Use Skia.Path.Oval() or Skia.PathBuilder.Make().addOval() instead.");
     auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
     auto isCCW = count > 1 && arguments[1].getBool();
     auto startIndex = count > 2 ? static_cast<unsigned>(arguments[2].asNumber()) : 1;
@@ -189,6 +247,9 @@ public:
   }
 
   JSI_HOST_FUNCTION(addRect) {
+    warnDeprecatedPathMethod(runtime,
+        "addRect",
+        "Use Skia.Path.Rect() or Skia.PathBuilder.Make().addRect() instead.");
     auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
     auto isCCW = count > 1 && arguments[1].getBool();
     auto direction =
@@ -198,6 +259,9 @@ public:
   }
 
   JSI_HOST_FUNCTION(addRRect) {
+    warnDeprecatedPathMethod(runtime,
+        "addRRect",
+        "Use Skia.Path.RRect() or Skia.PathBuilder.Make().addRRect() instead.");
     auto rrect = JsiSkRRect::fromValue(runtime, arguments[0]);
     auto isCCW = count > 1 && arguments[1].getBool();
     auto direction =
@@ -207,6 +271,10 @@ public:
   }
 
   JSI_HOST_FUNCTION(addCircle) {
+    warnDeprecatedPathMethod(runtime,
+        "addCircle",
+        "Use Skia.Path.Circle() or Skia.PathBuilder.Make().addCircle() "
+        "instead.");
     SkScalar x = arguments[0].asNumber();
     SkScalar y = arguments[1].asNumber();
     SkScalar r = arguments[2].asNumber();
@@ -215,6 +283,10 @@ public:
   }
 
   JSI_HOST_FUNCTION(addPoly) {
+    warnDeprecatedPathMethod(runtime,
+        "addPoly",
+        "Use Skia.Path.Polygon() or Skia.PathBuilder.Make().addPoly() "
+        "instead.");
     auto jsiPoints = arguments[0].asObject(runtime).asArray(runtime);
     auto close = arguments[1].getBool();
     auto pointsSize = static_cast<int>(jsiPoints.size(runtime));
@@ -231,6 +303,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(arcToOval) {
+    warnDeprecatedPathMethod(runtime,
+        "arcToOval", "Use Skia.PathBuilder.Make().arcToOval() instead.");
     auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
     auto start = arguments[1].asNumber();
     auto sweep = arguments[2].asNumber();
@@ -240,6 +314,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(arcToRotated) {
+    warnDeprecatedPathMethod(runtime,
+        "arcToRotated", "Use Skia.PathBuilder.Make().arcToRotated() instead.");
     SkScalar rx = arguments[0].asNumber();
     SkScalar ry = arguments[1].asNumber();
     SkScalar xAxisRotate = arguments[2].asNumber();
@@ -257,6 +333,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(rArcTo) {
+    warnDeprecatedPathMethod(runtime, "rArcTo",
+                             "Use Skia.PathBuilder.Make().rArcTo() instead.");
     SkScalar rx = arguments[0].asNumber();
     SkScalar ry = arguments[1].asNumber();
     SkScalar xAxisRotate = arguments[2].asNumber();
@@ -275,6 +353,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(arcToTangent) {
+    warnDeprecatedPathMethod(runtime,
+        "arcToTangent", "Use Skia.PathBuilder.Make().arcToTangent() instead.");
     SkScalar x1 = arguments[0].asNumber();
     SkScalar y1 = arguments[1].asNumber();
     SkScalar x2 = arguments[2].asNumber();
@@ -285,35 +365,45 @@ public:
   }
 
   JSI_HOST_FUNCTION(setFillType) {
+    warnDeprecatedPathMethod(runtime,
+        "setFillType", "Use Skia.PathBuilder.Make().setFillType() instead.");
     auto ft = arguments[0].asNumber();
     getObject()->setFillType(static_cast<SkPathFillType>(static_cast<int>(ft)));
     return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(setIsVolatile) {
+    warnDeprecatedPathMethod(runtime,
+        "setIsVolatile", "Use Skia.PathBuilder.Make().setIsVolatile() instead.");
     auto v = arguments[0].getBool();
     getObject()->setIsVolatile(v);
     return thisValue.getObject(runtime);
   }
 
-  // Mutable transform methods
+  // Mutable transform methods (deprecated)
 
   JSI_HOST_FUNCTION(transform) {
+    warnDeprecatedPathMethod(runtime,
+        "transform", "Use Skia.PathBuilder.Make().transform() instead.");
     auto m3 = *JsiSkMatrix::fromValue(runtime, arguments[0]);
     getObject()->transform(m3);
     return thisValue.getObject(runtime);
   }
 
   JSI_HOST_FUNCTION(offset) {
+    warnDeprecatedPathMethod(runtime, "offset",
+                             "Use Skia.PathBuilder.Make().offset() instead.");
     SkScalar dx = arguments[0].asNumber();
     SkScalar dy = arguments[1].asNumber();
     getObject()->offset(dx, dy);
     return thisValue.getObject(runtime);
   }
 
-  // Mutable path operations
+  // Mutable path operations (deprecated)
 
   JSI_HOST_FUNCTION(simplify) {
+    warnDeprecatedPathMethod(runtime, "simplify",
+                             "Use Skia.Path.Simplify(path) instead.");
     auto path = asPath();
     auto result = ::Simplify(path);
     if (result.has_value()) {
@@ -323,6 +413,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(op) {
+    warnDeprecatedPathMethod(runtime, "op", "Use Skia.Path.MakeFromOp() instead.");
     auto path2 = JsiSkPath::fromValue(runtime, arguments[0]);
     auto pathOp = static_cast<SkPathOp>(static_cast<int>(arguments[1].asNumber()));
     auto p1 = asPath();
@@ -335,6 +426,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(makeAsWinding) {
+    warnDeprecatedPathMethod(runtime, "makeAsWinding",
+                             "Use Skia.Path.AsWinding(path) instead.");
     auto path = asPath();
     auto result = ::AsWinding(path);
     if (result.has_value()) {
@@ -344,6 +437,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(dash) {
+    warnDeprecatedPathMethod(runtime, "dash",
+                             "Use Skia.Path.Dash(path, on, off, phase) instead.");
     auto path = asPath();
     SkScalar on = arguments[0].asNumber();
     SkScalar off = arguments[1].asNumber();
@@ -361,6 +456,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(stroke) {
+    warnDeprecatedPathMethod(runtime, "stroke",
+                             "Use Skia.Path.Stroke(path, opts) instead.");
     auto path = asPath();
     SkPaint p;
     p.setStyle(SkPaint::kStroke_Style);
@@ -398,6 +495,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(trim) {
+    warnDeprecatedPathMethod(runtime,
+        "trim", "Use Skia.Path.Trim(path, start, end, isComplement) instead.");
     auto path = asPath();
     float start =
         std::clamp(static_cast<float>(arguments[0].asNumber()), 0.0f, 1.0f);
