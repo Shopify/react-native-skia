@@ -21,35 +21,21 @@ static const wgpu::TextureFormat PreferredTextureFormat =
     wgpu::TextureFormat::RGBA8Unorm;
 #endif
 
-inline skgpu::graphite::DawnBackendContext
-createDawnBackendContext(dawn::native::Instance *instance) {
-
-  auto useTintIR = false;
-  static constexpr const char *kToggles[] = {
-#if !defined(SK_DEBUG)
-      "skip_validation",
-#endif
-      "disable_lazy_clear_for_mapped_at_creation_buffer",
-      "allow_unsafe_apis",
-      "use_user_defined_labels_in_backend",
-      "disable_robustness",
-      "use_tint_ir",
-  };
-  wgpu::DawnTogglesDescriptor togglesDesc;
-  togglesDesc.enabledToggleCount = std::size(kToggles) - (useTintIR ? 0 : 1);
-  togglesDesc.enabledToggles = kToggles;
-
-  dawn::native::Adapter matchedAdaptor;
-
-  wgpu::RequestAdapterOptions options;
+// Find the best matching GPU adapter for the current platform.
+// Sorts by adapter type (DiscreteGPU > IntegratedGPU > CPU) and selects the
+// first adapter matching the platform backend (Metal on Apple, Vulkan on
+// Android).
+inline dawn::native::Adapter
+getMatchedAdapter(dawn::native::Instance *instance) {
 #ifdef __APPLE__
   constexpr auto kDefaultBackendType = wgpu::BackendType::Metal;
 #elif __ANDROID__
   constexpr auto kDefaultBackendType = wgpu::BackendType::Vulkan;
 #endif
+
+  wgpu::RequestAdapterOptions options;
   options.backendType = kDefaultBackendType;
   options.featureLevel = wgpu::FeatureLevel::Core;
-  options.nextInChain = &togglesDesc;
 
   std::vector<dawn::native::Adapter> adapters =
       instance->EnumerateAdapters(&options);
@@ -57,8 +43,6 @@ createDawnBackendContext(dawn::native::Instance *instance) {
     throw std::runtime_error("No matching adapter found");
   }
 
-  // Sort adapters by adapterType(DiscreteGPU, IntegratedGPU, CPU) and
-  // backendType(Metal, Vulkan, OpenGL, OpenGLES, WebGPU).
   std::sort(adapters.begin(), adapters.end(),
             [](dawn::native::Adapter a, dawn::native::Adapter b) {
               wgpu::Adapter wgpuA = a.Get();
@@ -76,16 +60,93 @@ createDawnBackendContext(dawn::native::Instance *instance) {
     wgpu::AdapterInfo props;
     wgpuAdapter.GetInfo(&props);
     if (kDefaultBackendType == props.backendType) {
-      matchedAdaptor = adapter;
-      break;
+      return adapter;
     }
   }
 
-  if (!matchedAdaptor) {
-    throw std::runtime_error("No matching adapter found");
+  throw std::runtime_error("No matching adapter found");
+}
+
+// Create a Dawn device from the given adapter with the requested features.
+// Features not supported by the adapter are silently skipped.
+// Set fatalOnDeviceLost=true for primary rendering devices (SK_ABORT on loss),
+// false for secondary/compute devices (log only).
+inline wgpu::Device
+requestDevice(dawn::native::Adapter &nativeAdapter,
+              const std::vector<wgpu::FeatureName> &requestedFeatures,
+              bool fatalOnDeviceLost = true) {
+  wgpu::Adapter adapter = nativeAdapter.Get();
+
+  // Filter to only features the adapter supports
+  std::vector<wgpu::FeatureName> features;
+  for (auto feature : requestedFeatures) {
+    if (adapter.HasFeature(feature)) {
+      features.push_back(feature);
+    }
   }
 
-  wgpu::Adapter adapter = matchedAdaptor.Get();
+  static constexpr const char *kToggles[] = {
+#if !defined(SK_DEBUG)
+      "skip_validation",
+#endif
+      "disable_lazy_clear_for_mapped_at_creation_buffer",
+      "allow_unsafe_apis",
+      "use_user_defined_labels_in_backend",
+      "disable_robustness",
+  };
+  wgpu::DawnTogglesDescriptor togglesDesc;
+  togglesDesc.enabledToggleCount = std::size(kToggles);
+  togglesDesc.enabledToggles = kToggles;
+
+  wgpu::DeviceDescriptor desc;
+  desc.requiredFeatureCount = features.size();
+  desc.requiredFeatures = features.data();
+  desc.nextInChain = &togglesDesc;
+
+  if (fatalOnDeviceLost) {
+    desc.SetDeviceLostCallback(
+        wgpu::CallbackMode::AllowSpontaneous,
+        [](const wgpu::Device &, wgpu::DeviceLostReason reason,
+           wgpu::StringView message) {
+          if (reason != wgpu::DeviceLostReason::Destroyed) {
+            SK_ABORT("Device lost: %.*s\n",
+                     static_cast<int>(message.length), message.data);
+          }
+        });
+    desc.SetUncapturedErrorCallback(
+        [](const wgpu::Device &, wgpu::ErrorType,
+           wgpu::StringView message) {
+          SkDebugf("Device error: %.*s\n",
+                   static_cast<int>(message.length), message.data);
+        });
+  } else {
+    desc.SetDeviceLostCallback(
+        wgpu::CallbackMode::AllowSpontaneous,
+        [](const wgpu::Device &, wgpu::DeviceLostReason reason,
+           wgpu::StringView message) {
+          if (reason != wgpu::DeviceLostReason::Destroyed) {
+            RNSkia::RNSkLogger::logToConsole(
+                "Device lost: %.*s",
+                static_cast<int>(message.length), message.data);
+          }
+        });
+    desc.SetUncapturedErrorCallback(
+        [](const wgpu::Device &, wgpu::ErrorType,
+           wgpu::StringView message) {
+          RNSkia::RNSkLogger::logToConsole(
+              "Device error: %.*s",
+              static_cast<int>(message.length), message.data);
+        });
+  }
+
+  return wgpu::Device::Acquire(nativeAdapter.CreateDevice(&desc));
+}
+
+inline skgpu::graphite::DawnBackendContext
+createDawnBackendContext(dawn::native::Instance *instance) {
+
+  auto matchedAdapter = getMatchedAdapter(instance);
+  wgpu::Adapter adapter = matchedAdapter.Get();
 
   // Log selected adapter info
   wgpu::AdapterInfo adapterInfo;
@@ -130,93 +191,34 @@ createDawnBackendContext(dawn::native::Instance *instance) {
       "Selected Dawn adapter - Backend: %s, Device: %s, Description: %s",
       backendName.c_str(), deviceName.c_str(), description.c_str());
 
-  std::vector<wgpu::FeatureName> features;
-  if (adapter.HasFeature(wgpu::FeatureName::MSAARenderToSingleSampled)) {
-    features.push_back(wgpu::FeatureName::MSAARenderToSingleSampled);
-  }
-  if (adapter.HasFeature(wgpu::FeatureName::TransientAttachments)) {
-    features.push_back(wgpu::FeatureName::TransientAttachments);
-  }
-  if (adapter.HasFeature(wgpu::FeatureName::Unorm16TextureFormats)) {
-    features.push_back(wgpu::FeatureName::Unorm16TextureFormats);
-  }
-  if (adapter.HasFeature(wgpu::FeatureName::DualSourceBlending)) {
-    features.push_back(wgpu::FeatureName::DualSourceBlending);
-  }
-  if (adapter.HasFeature(wgpu::FeatureName::FramebufferFetch)) {
-    features.push_back(wgpu::FeatureName::FramebufferFetch);
-  }
-  if (adapter.HasFeature(wgpu::FeatureName::BufferMapExtendedUsages)) {
-    features.push_back(wgpu::FeatureName::BufferMapExtendedUsages);
-  }
-  if (adapter.HasFeature(wgpu::FeatureName::TextureCompressionETC2)) {
-    features.push_back(wgpu::FeatureName::TextureCompressionETC2);
-  }
-  if (adapter.HasFeature(wgpu::FeatureName::TextureCompressionBC)) {
-    features.push_back(wgpu::FeatureName::TextureCompressionBC);
-  }
-  if (adapter.HasFeature(wgpu::FeatureName::R8UnormStorage)) {
-    features.push_back(wgpu::FeatureName::R8UnormStorage);
-  }
-  if (adapter.HasFeature(wgpu::FeatureName::DawnLoadResolveTexture)) {
-    features.push_back(wgpu::FeatureName::DawnLoadResolveTexture);
-  }
-  if (adapter.HasFeature(wgpu::FeatureName::DawnPartialLoadResolveTexture)) {
-    features.push_back(wgpu::FeatureName::DawnPartialLoadResolveTexture);
-  }
-  if (adapter.HasFeature(wgpu::FeatureName::TimestampQuery)) {
-    features.push_back(wgpu::FeatureName::TimestampQuery);
-  }
-  if (adapter.HasFeature(wgpu::FeatureName::DawnTexelCopyBufferRowAlignment)) {
-    features.push_back(wgpu::FeatureName::DawnTexelCopyBufferRowAlignment);
-  }
-  if (adapter.HasFeature(wgpu::FeatureName::ImplicitDeviceSynchronization)) {
-    features.push_back(wgpu::FeatureName::ImplicitDeviceSynchronization);
-  }
+  // Primary device features — request everything Skia/Graphite can use
+  std::vector<wgpu::FeatureName> features = {
+      wgpu::FeatureName::MSAARenderToSingleSampled,
+      wgpu::FeatureName::TransientAttachments,
+      wgpu::FeatureName::Unorm16TextureFormats,
+      wgpu::FeatureName::DualSourceBlending,
+      wgpu::FeatureName::FramebufferFetch,
+      wgpu::FeatureName::BufferMapExtendedUsages,
+      wgpu::FeatureName::TextureCompressionETC2,
+      wgpu::FeatureName::TextureCompressionBC,
+      wgpu::FeatureName::R8UnormStorage,
+      wgpu::FeatureName::DawnLoadResolveTexture,
+      wgpu::FeatureName::DawnPartialLoadResolveTexture,
+      wgpu::FeatureName::TimestampQuery,
+      wgpu::FeatureName::DawnTexelCopyBufferRowAlignment,
+      wgpu::FeatureName::ImplicitDeviceSynchronization,
 #ifdef __APPLE__
-  if (adapter.HasFeature(wgpu::FeatureName::SharedTextureMemoryIOSurface)) {
-    features.push_back(wgpu::FeatureName::SharedTextureMemoryIOSurface);
-  }
-  if (adapter.HasFeature(wgpu::FeatureName::DawnMultiPlanarFormats)) {
-    features.push_back(wgpu::FeatureName::DawnMultiPlanarFormats);
-  }
-  if (adapter.HasFeature(wgpu::FeatureName::MultiPlanarFormatP010)) {
-    features.push_back(wgpu::FeatureName::MultiPlanarFormatP010);
-  }
-  if (adapter.HasFeature(wgpu::FeatureName::MultiPlanarFormatP210)) {
-    features.push_back(wgpu::FeatureName::MultiPlanarFormatP210);
-  }
-  if (adapter.HasFeature(wgpu::FeatureName::MultiPlanarFormatExtendedUsages)) {
-    features.push_back(wgpu::FeatureName::MultiPlanarFormatExtendedUsages);
-  }
+      wgpu::FeatureName::SharedTextureMemoryIOSurface,
+      wgpu::FeatureName::DawnMultiPlanarFormats,
+      wgpu::FeatureName::MultiPlanarFormatP010,
+      wgpu::FeatureName::MultiPlanarFormatP210,
+      wgpu::FeatureName::MultiPlanarFormatExtendedUsages,
 #else
-  if (adapter.HasFeature(
-          wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer)) {
-    features.push_back(wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer);
-  }
+      wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer,
 #endif
+  };
 
-  wgpu::DeviceDescriptor desc;
-  desc.requiredFeatureCount = features.size();
-  desc.requiredFeatures = features.data();
-  desc.nextInChain = &togglesDesc;
-  desc.SetDeviceLostCallback(
-      wgpu::CallbackMode::AllowSpontaneous,
-      [](const wgpu::Device &, wgpu::DeviceLostReason reason,
-         wgpu::StringView message) {
-        if (reason != wgpu::DeviceLostReason::Destroyed) {
-          SK_ABORT("Device lost: %.*s\n", static_cast<int>(message.length),
-                   message.data);
-        }
-      });
-  desc.SetUncapturedErrorCallback(
-      [](const wgpu::Device &, wgpu::ErrorType, wgpu::StringView message) {
-        SkDebugf("Device error: %.*s\n", static_cast<int>(message.length),
-                 message.data);
-      });
-
-  wgpu::Device device =
-      wgpu::Device::Acquire(matchedAdaptor.CreateDevice(&desc));
+  wgpu::Device device = requestDevice(matchedAdapter, features, true);
   SkASSERT(device);
 
   skgpu::graphite::DawnBackendContext backendContext;
