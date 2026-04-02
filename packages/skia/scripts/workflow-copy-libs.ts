@@ -31,8 +31,6 @@ const androidFiles = [
   "libskunicode_core.a",
   "libskunicode_icu.a",
   "libjsonreader.a",
-  // Dawn library for Graphite builds
-  ...(GRAPHITE ? ["libdawn_combined.a"] : []),
 ];
 
 const appleFiles = [
@@ -44,8 +42,6 @@ const appleFiles = [
   "libskparagraph.xcframework",
   "libskunicode_core.xcframework",
   "libskunicode_libgrapheme.xcframework",
-  // Dawn library for Graphite builds
-  ...(GRAPHITE ? ["libdawn_combined.xcframework"] : []),
 ];
 
 const copyFiles = (from: string, to: string, files: string[]) => {

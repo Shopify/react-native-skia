@@ -68,9 +68,8 @@ const ParagraphOutputsAndroid = BUILD_WITH_PARAGRAPH
   ? ["libskparagraph.a", "libskunicode_core.a", "libskunicode_icu.a"]
   : [];
 
-// Dawn library for Graphite builds (contains dawn::native symbols)
-const DawnOutputApple = GRAPHITE ? ["libdawn_combined.a"] : [];
-const DawnOutputAndroid = GRAPHITE ? ["libdawn_combined.a"] : [];
+// Dawn is built as source_sets via GN and linked into libskia.a directly
+// (no separate dawn library output needed)
 
 export const commonArgs = [
   ["skia_use_piex", true],
@@ -90,7 +89,7 @@ export const commonArgs = [
   ["skia_enable_graphite", GRAPHITE],
   ["skia_use_dawn", GRAPHITE],
   // C++20 is required for Graphite builds (Dawn uses C++20 concepts)
-  // ...(GRAPHITE ? [["skia_use_cpp20", true]] : []),
+  ...(GRAPHITE ? [["skia_use_cpp20", true]] : []),
 ];
 
 export type PlatformName =
@@ -256,7 +255,6 @@ const appleOutputNames = [
   "libskottie.a",
   "libsksg.a",
   ...ParagraphApple,
-  ...DawnOutputApple,
 ];
 
 export const configurations: Record<PlatformName, Platform> = {
@@ -305,7 +303,6 @@ export const configurations: Record<PlatformName, Platform> = {
       "libsksg.a",
       "libjsonreader.a",
       ...ParagraphOutputsAndroid,
-      ...DawnOutputAndroid,
     ],
   },
   "apple-ios": {
