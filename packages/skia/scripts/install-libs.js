@@ -3,33 +3,30 @@
 
 const path = require("path");
 const fs = require("fs");
-const { execSync } = require("child_process");
-
-const libsDir = path.join(__dirname, "..", "libs");
 
 const useGraphite =
   process.env.SK_GRAPHITE === "1" ||
   (process.env.SK_GRAPHITE || "").toLowerCase() === "true";
 const prefix = useGraphite ? "react-native-skia-graphite" : "react-native-skia";
+const libsDir = path.join(__dirname, "..", "libs");
 
-// Skip if libs were installed via install-skia-graphite or build-skia
-// and the companion npm packages are not available (git submodule workflow)
-const hasExistingLibs = (() => {
-  const iosDir = path.join(libsDir, "ios");
-  return (
-    fs.existsSync(iosDir) &&
-    fs.readdirSync(iosDir).some((f) => f.endsWith(".xcframework"))
-  );
-})();
-
-if (hasExistingLibs) {
-  try {
-    require.resolve(prefix + "-apple-ios/package.json");
-  } catch (e) {
-    // npm packages not available — libs were installed externally
-    console.log("Skia libs already installed, skipping postinstall.");
-    process.exit(0);
+function copySync(src, dest, options) {
+  if (!src.includes("*")) {
+    return fs.cpSync(src, dest, options);
   }
+
+  const wildcardSplit = src.split("*");
+  const basePath = wildcardSplit[0];
+  const files = fs.readdirSync(basePath);
+  files
+    .filter((file) => file.endsWith(wildcardSplit[1]))
+    .forEach((file) => {
+      return fs.cpSync(
+        path.join(basePath, file),
+        path.join(dest, file),
+        options
+      );
+    });
 }
 
 // --- Apple platforms ---
@@ -70,30 +67,18 @@ console.log("-- Skia iOS package: " + iosPackage);
 console.log("-- Skia macOS package: " + macosPackage);
 
 // Clean and copy Apple frameworks
-execSync(
-  "rm -rf " +
-    path.join(libsDir, "ios") +
-    " " +
-    path.join(libsDir, "macos") +
-    " " +
-    path.join(libsDir, "tvos")
-);
+fs.rmSync(path.join(libsDir, "ios"), { recursive: true, force: true });
+fs.rmSync(path.join(libsDir, "macos"), { recursive: true, force: true });
+fs.rmSync(path.join(libsDir, "tvos"), { recursive: true, force: true });
 fs.mkdirSync(path.join(libsDir, "ios"), { recursive: true });
 fs.mkdirSync(path.join(libsDir, "macos"), { recursive: true });
-execSync(
-  'cp -R "' +
-    iosPackage +
-    '/libs/"*.xcframework "' +
-    path.join(libsDir, "ios") +
-    '/"'
-);
-execSync(
-  'cp -R "' +
-    macosPackage +
-    '/libs/"*.xcframework "' +
-    path.join(libsDir, "macos") +
-    '/"'
-);
+
+copySync(iosPackage + "/libs/*.xcframework", path.join(libsDir, "ios"), {
+  recursive: true,
+});
+copySync(macosPackage + "/libs/*.xcframework", path.join(libsDir, "macos"), {
+  recursive: true,
+});
 
 // Handle tvOS (non-Graphite only)
 if (!useGraphite) {
@@ -103,13 +88,9 @@ if (!useGraphite) {
     );
     console.log("-- Skia tvOS package: " + tvosPackage);
     fs.mkdirSync(path.join(libsDir, "tvos"), { recursive: true });
-    execSync(
-      'cp -R "' +
-        tvosPackage +
-        '/libs/"*.xcframework "' +
-        path.join(libsDir, "tvos") +
-        '/"'
-    );
+    copySync(tvosPackage + "/libs/*.xcframework", path.join(libsDir, "tvos"), {
+      recursive: true,
+    });
   } catch (e) {
     console.log("-- tvOS package not found, skipping");
   }
@@ -146,7 +127,7 @@ console.log("-- Skia Android package: " + androidPackage);
 
 // Copy Android libs (per-ABI static libraries)
 const androidDest = path.join(libsDir, "android");
-execSync("rm -rf " + androidDest);
-execSync('cp -R "' + androidSrcLibs + '" "' + androidDest + '"');
+fs.rmSync(androidDest, { recursive: true, force: true });
+copySync(androidSrcLibs, androidDest, { recursive: true });
 
 console.log("-- Copied Android libs to libs/android/");

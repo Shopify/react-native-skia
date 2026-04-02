@@ -60,7 +60,7 @@ export const Chapter = ({
   const r3 = r2 * Math.sin(rotate);
   const r4 = r1;
   const bounds = icon.computeTightBounds();
-  icon.transform(
+  const transformedIcon = icon.transform(
     processTransform2d(
       fitbox(
         "contain",
@@ -142,7 +142,7 @@ export const Chapter = ({
           </PathLine2>
           <Path
             color="rgba(255,255,255,0.5)"
-            path={icon}
+            path={transformedIcon}
             end={progress2}
             strokeWidth={48}
             strokeCap="round"

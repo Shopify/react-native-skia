@@ -83,9 +83,7 @@ interface PathLineProps extends PaintProps, ProgressProps {
 }
 
 export const PathLine = ({ p1, p2, ...props }: PathLineProps) => {
-  const path = Skia.Path.Make();
-  path.moveTo(p1.x, p1.y);
-  path.lineTo(p2.x, p2.y);
+  const path = Skia.Path.Line(p1, p2);
   return <PathShape path={path} {...props} />;
 };
 
@@ -95,8 +93,7 @@ interface PathCircleProps extends PaintProps, ProgressProps {
 }
 
 export const PathCircle = ({ c, r, ...props }: PathCircleProps) => {
-  const path = Skia.Path.Make();
-  path.addCircle(c.x, c.y, r);
+  const path = Skia.Path.Circle(c.x, c.y, r);
   return <PathShape path={path} {...props} />;
 };
 
@@ -105,8 +102,7 @@ interface PathRectProps extends PaintProps, ProgressProps {
 }
 
 export const PathRect = ({ rect, ...props }: PathRectProps) => {
-  const path = Skia.Path.Make();
-  path.addRect(rect);
+  const path = Skia.Path.Rect(rect);
   return <PathShape path={path} {...props} />;
 };
 
@@ -174,7 +170,7 @@ export const PathText = ({
   ...props
 }: PathTextProps) => {
   const font = useOpenTypeFonts()[fontName];
-  const path = getTextPath({ font, text, fontSize });
-  path.offset(x, y);
+  const basePath = getTextPath({ font, text, fontSize });
+  const path = basePath.offset(x, y);
   return <PathShape path={path} {...props} fill />;
 };

@@ -8,6 +8,9 @@
 #include "ImageFit.h"
 #include "RNSkPlatformContext.h"
 
+#include "include/core/SkPathBuilder.h"
+#include "include/core/SkStrokeRec.h"
+
 namespace RNSkia {
 
 struct CircleCmdProps {
@@ -123,12 +126,13 @@ public:
             SkTrimPathEffect::Make(start, end, SkTrimPathEffect::Mode::kNormal);
         if (pe != nullptr) {
           SkStrokeRec rec(SkStrokeRec::InitStyle::kHairline_InitStyle);
-          if (!pe->filterPath(&filteredPath, filteredPath, &rec, nullptr)) {
+          SkPathBuilder filteredBuilder;
+          if (!pe->filterPath(&filteredBuilder, filteredPath, &rec)) {
             throw std::runtime_error(
                 "Failed trimming path with parameters start: " +
                 std::to_string(start) + ", end: " + std::to_string(end));
           }
-          filteredPath.swap(filteredPath);
+          filteredPath = filteredBuilder.detach();
         } else {
           throw std::runtime_error(
               "Failed trimming path with parameters start: " +

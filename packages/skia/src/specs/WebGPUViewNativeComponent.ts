@@ -8,4 +8,4 @@ export interface NativeProps extends ViewProps {
 }
 
 // eslint-disable-next-line import/no-default-export
-export default codegenNativeComponent<NativeProps>("WebGPUView");
+export default codegenNativeComponent<NativeProps>("SkiaWebGPUView");
