@@ -685,12 +685,14 @@ describe("Lighting Image Filters", () => {
           let currentX = startX;
           let currentY = startY;
 
-          const flowPath = Skia.Path.Make();
-          flowPath.moveTo(currentX, currentY);
-
           // Create a wavy downward path
           const length = 100 + 0.5 * 600;
           const segments = 10 + Math.floor(length / 30);
+
+          const flowPathBuilder = Skia.PathBuilder.Make().moveTo(
+            currentX,
+            currentY
+          );
 
           for (let j = 0; j < segments; j++) {
             // Gravity pulls downward
@@ -698,8 +700,10 @@ describe("Lighting Image Filters", () => {
             // Random side-to-side waviness
             currentX += (0.5 - 0.5) * 30;
 
-            flowPath.lineTo(currentX, currentY);
+            flowPathBuilder.lineTo(currentX, currentY);
           }
+
+          const flowPath = flowPathBuilder.build();
 
           // Make the water streak taper and blur
           const streakPaint = Skia.Paint();
@@ -770,15 +774,15 @@ describe("Lighting Image Filters", () => {
           // Calculate angle for each beam
           const angle = (i / beamColors.length) * Math.PI + Math.PI / 2;
 
-          // Create beam path
-          const beamPath = Skia.Path.Make();
-          beamPath.moveTo(384, 384);
-
           // End coordinates based on angle
           const endX = 384 + Math.cos(angle) * 900;
           const endY = 384 + Math.sin(angle) * 900;
 
-          beamPath.lineTo(endX, endY);
+          // Create beam path
+          const beamPath = Skia.PathBuilder.Make()
+            .moveTo(384, 384)
+            .lineTo(endX, endY)
+            .build();
 
           // Draw wide blurred beam
           beamPaint.setStyle(ctx.PaintStyle.Stroke);
@@ -945,15 +949,13 @@ describe("Lighting Image Filters", () => {
         // Add crystal border effect
         const borderPaint = Skia.Paint();
 
-        // Create a crystal-like faceted border
-        const borderPath = Skia.Path.Make();
-
         // Create an irregular crystal shape around the image
         const centerX = 384;
         const centerY = 384;
         const facets = 12;
 
-        borderPath.moveTo(
+        // Create a crystal-like faceted border
+        const borderPathBuilder = Skia.PathBuilder.Make().moveTo(
           centerX + (padding - 20) * Math.cos(0),
           centerY + (padding - 20) * Math.sin(0)
         );
@@ -965,13 +967,13 @@ describe("Lighting Image Filters", () => {
           const radiusVariation = 30 + 0.5 * 40;
           const radius = padding - 20 + radiusVariation;
 
-          borderPath.lineTo(
+          borderPathBuilder.lineTo(
             centerX + radius * Math.cos(angle),
             centerY + radius * Math.sin(angle)
           );
         }
 
-        borderPath.close();
+        const borderPath = borderPathBuilder.close().build();
 
         // Draw crystal border with gradient effect
         const borderShader = Skia.Shader.MakeLinearGradient(
@@ -1000,18 +1002,18 @@ describe("Lighting Image Filters", () => {
         starPaint.setColor(Skia.Color("rgb(255, 255, 255)"));
 
         const createStar = (x: number, y: number, size: number) => {
-          const starPath = Skia.Path.Make();
-
           // Draw 4-point star
-          starPath.moveTo(x, y - size);
-          starPath.lineTo(x + size / 4, y - size / 4);
-          starPath.lineTo(x + size, y);
-          starPath.lineTo(x + size / 4, y + size / 4);
-          starPath.lineTo(x, y + size);
-          starPath.lineTo(x - size / 4, y + size / 4);
-          starPath.lineTo(x - size, y);
-          starPath.lineTo(x - size / 4, y - size / 4);
-          starPath.close();
+          const starPath = Skia.PathBuilder.Make()
+            .moveTo(x, y - size)
+            .lineTo(x + size / 4, y - size / 4)
+            .lineTo(x + size, y)
+            .lineTo(x + size / 4, y + size / 4)
+            .lineTo(x, y + size)
+            .lineTo(x - size / 4, y + size / 4)
+            .lineTo(x - size, y)
+            .lineTo(x - size / 4, y - size / 4)
+            .close()
+            .build();
 
           // Add blur for glow
           const glowPaint = Skia.Paint();
@@ -1061,11 +1063,8 @@ describe("Lighting Image Filters", () => {
         // Create a split-screen effect with fire and ice
 
         // First, create a mask for each half
-        const leftMask = Skia.Path.Make();
-        leftMask.addRect(Skia.XYWHRect(0, 0, 384, 768));
-
-        const rightMask = Skia.Path.Make();
-        rightMask.addRect(Skia.XYWHRect(384, 0, 384, 768));
+        const leftMask = Skia.Path.Rect(Skia.XYWHRect(0, 0, 384, 768));
+        const rightMask = Skia.Path.Rect(Skia.XYWHRect(384, 0, 384, 768));
 
         // Prepare the image with enhanced contrast
         const preprocessFilter = Skia.ImageFilter.MakeColorFilter(
@@ -1121,31 +1120,29 @@ describe("Lighting Image Filters", () => {
           width: number,
           height: number
         ) => {
-          const flamePath = Skia.Path.Make();
-
-          // Start at bottom center
-          flamePath.moveTo(x, y + height);
-
           // Define control points for bezier curve
-          // Left side of flame
-          flamePath.cubicTo(
-            x - width * 0.5,
-            y + height * 0.7, // Control point 1
-            x - width * 0.2,
-            y + height * 0.3, // Control point 2
-            x,
-            y // End point (top of flame)
-          );
-
-          // Right side of flame
-          flamePath.cubicTo(
-            x + width * 0.2,
-            y + height * 0.3, // Control point 1
-            x + width * 0.5,
-            y + height * 0.7, // Control point 2
-            x,
-            y + height // End point (back to start)
-          );
+          const flamePath = Skia.PathBuilder.Make()
+            // Start at bottom center
+            .moveTo(x, y + height)
+            // Left side of flame
+            .cubicTo(
+              x - width * 0.5,
+              y + height * 0.7, // Control point 1
+              x - width * 0.2,
+              y + height * 0.3, // Control point 2
+              x,
+              y // End point (top of flame)
+            )
+            // Right side of flame
+            .cubicTo(
+              x + width * 0.2,
+              y + height * 0.3, // Control point 1
+              x + width * 0.5,
+              y + height * 0.7, // Control point 2
+              x,
+              y + height // End point (back to start)
+            )
+            .build();
 
           // Fill with gradient
           const flamePaint = Skia.Paint();
@@ -1310,14 +1307,15 @@ describe("Lighting Image Filters", () => {
           canvas.rotate(rotation, 0, 0);
 
           // Draw crystal shape
-          const crystalPath = Skia.Path.Make();
-          crystalPath.moveTo(0, -size); // Top
-          crystalPath.lineTo(size / 3, -size / 2); // Upper right
-          crystalPath.lineTo(size / 2, size / 2); // Lower right
-          crystalPath.lineTo(0, size); // Bottom
-          crystalPath.lineTo(-size / 2, size / 2); // Lower left
-          crystalPath.lineTo(-size / 3, -size / 2); // Upper left
-          crystalPath.close();
+          const crystalPath = Skia.PathBuilder.Make()
+            .moveTo(0, -size) // Top
+            .lineTo(size / 3, -size / 2) // Upper right
+            .lineTo(size / 2, size / 2) // Lower right
+            .lineTo(0, size) // Bottom
+            .lineTo(-size / 2, size / 2) // Lower left
+            .lineTo(-size / 3, -size / 2) // Upper left
+            .close()
+            .build();
 
           // Add light refraction effect
           crystalPaint.setImageFilter(
@@ -1334,11 +1332,12 @@ describe("Lighting Image Filters", () => {
           const highlightPaint = Skia.Paint();
           highlightPaint.setColor(Skia.Color("rgba(255, 255, 255, 0.7)"));
 
-          const highlightPath = Skia.Path.Make();
-          highlightPath.moveTo(0, -size * 0.8);
-          highlightPath.lineTo(size / 5, -size / 3);
-          highlightPath.lineTo(-size / 5, -size / 3);
-          highlightPath.close();
+          const highlightPath = Skia.PathBuilder.Make()
+            .moveTo(0, -size * 0.8)
+            .lineTo(size / 5, -size / 3)
+            .lineTo(-size / 5, -size / 3)
+            .close()
+            .build();
 
           canvas.drawPath(highlightPath, highlightPaint);
 

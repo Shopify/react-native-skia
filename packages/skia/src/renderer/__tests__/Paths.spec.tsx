@@ -10,36 +10,33 @@ const size = width;
 describe("Path Examples", () => {
   it("Should draw an arc", async () => {
     const { Skia } = importSkia();
-    const path = Skia.Path.Make();
     const arcRect = {
       x: 0,
       y: 0,
       width: size,
       height: size,
     };
-    path.addArc(arcRect, 45, 270);
+    const path = Skia.PathBuilder.Make().addArc(arcRect, 45, 270).build();
     const surface = await drawOnNode(<Path path={path} color="lightblue" />);
     processResult(surface, "snapshots/paths/arc.png");
   });
 
   it("Should draw an oval", async () => {
     const { Skia } = importSkia();
-    const path = Skia.Path.Make();
     const rct = {
       x: 0,
       y: 0,
       width: size,
       height: size,
     };
-    path.addOval(rct);
+    const path = Skia.Path.Oval(rct);
     const surface = await drawOnNode(<Path path={path} color="lightblue" />);
     processResult(surface, "snapshots/paths/oval.png");
   });
 
   it("Should draw an rounded rectangle", async () => {
     const { Skia } = importSkia();
-    const path = Skia.Path.Make();
-    path.addRRect({
+    const path = Skia.Path.RRect({
       rect: {
         x: 0,
         y: 0,
@@ -55,9 +52,8 @@ describe("Path Examples", () => {
 
   it("Should draw a polygon", async () => {
     const { Skia, vec } = importSkia();
-    const path = Skia.Path.Make();
     const r = size / 4;
-    path.addPoly(
+    const path = Skia.Path.Polygon(
       [
         vec(r, r),
         { x: size - r, y: r },

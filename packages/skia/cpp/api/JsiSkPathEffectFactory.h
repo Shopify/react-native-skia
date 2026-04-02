@@ -92,7 +92,7 @@ public:
     auto style =
         static_cast<SkPath1DPathEffect::Style>(arguments[3].asNumber());
     auto pathEffect = std::make_shared<JsiSkPathEffect>(
-        getContext(), SkPath1DPathEffect::Make(*path, advance, phase, style));
+        getContext(), SkPath1DPathEffect::Make(path->snapshot(), advance, phase, style));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect,
                                                        getContext());
   }
@@ -101,7 +101,7 @@ public:
     auto matrix = JsiSkMatrix::fromValue(runtime, arguments[0]);
     auto path = JsiSkPath::fromValue(runtime, arguments[1]);
     auto pathEffect = std::make_shared<JsiSkPathEffect>(
-        getContext(), SkPath2DPathEffect::Make(*matrix, *path));
+        getContext(), SkPath2DPathEffect::Make(*matrix, path->snapshot()));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect,
                                                        getContext());
   }
