@@ -30,20 +30,20 @@ import { fileOps } from "./utils";
 
 // Graphite configuration
 const GRAPHITE_CONFIG = {
-  version: "m144",
+  version: "m147",
   checksums: {
     "android-armeabi-v7a":
-      "d43f8c6e2a3e90d2cb5287ae6828f414fb636e06ebcf7bffe53b558f2e738467",
+      "e338a4157cb4dc1a15d482e854b67ded1e4bc85a617934f542d09975bb159651",
     "android-arm64-v8a":
-      "92b47853e203bd905829928baaa50386b96d651c48c37c9e5af12b33c0767b23",
+      "584cbf4946dd599bb93a0b707cf25621acd422c825830c751ab5f9aeaa658fa5",
     "android-x86":
-      "efd390f785d3e9f8cca543aa1f56eb52500ffae31f2f5cd414b2ffa8c809d73d",
+      "c931eea8d760d1c0338931c58c72718830ad815ca789f8956db83c8ee4c7227b",
     "android-x86_64":
-      "0131d78ee5e484b09e4889ac8978714eb38fca34118d494a4665fa35ce4aa9df",
+      "8ae94be0588c7f1f91010f7720a881da3b77e34b27e7c9707d157e87cf33f897",
     "apple-ios-xcframeworks":
-      "69e95a5c559aaee25b3374b760b10d9d51db2dea8b3caec17391bd45b5566806",
+      "44597eb5d6de002ad93f23157e24c3a33047bef142c3d7aed7f8b09ec68c4c06",
     "apple-macos-xcframeworks":
-      "b0640d8dbea1a9609b31bbd7cedad5aefec776d417bd6a71f8c6b4b47da0984e",
+      "d6d7b0cd2b7458c35b9a825f821030966280eaea4bb584da916eeb855f3ecd17",
   },
 } as const;
 
