@@ -268,7 +268,9 @@ public:
                                : SkPathBuilder::kLarge_ArcSize;
     auto sweep =
         isCCW ? SkPathDirection::kCCW : SkPathDirection::kCW;
-    getObject()->rArcTo(rx, ry, xAxisRotate, arcSize, sweep, dx, dy);
+    SkVector dxdy(dx, dy);
+    SkPoint r(rx, ry);
+    getObject()->rArcTo(r, xAxisRotate, arcSize, sweep, dxdy);
     return thisValue.getObject(runtime);
   }
 

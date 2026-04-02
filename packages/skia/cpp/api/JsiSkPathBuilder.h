@@ -161,7 +161,9 @@ public:
         arguments[4].getBool() ? SkPathDirection::kCCW : SkPathDirection::kCW;
     auto dx = arguments[5].asNumber();
     auto dy = arguments[6].asNumber();
-    getObject()->rArcTo(rx, ry, xAxisRotate, arcSize, sweep, dx, dy);
+    SkPoint r(rx, ry);
+    SkVector d(dx, dy);
+    getObject()->rArcTo(r, xAxisRotate, arcSize, sweep, d);
     return thisValue.getObject(runtime);
   }
 
