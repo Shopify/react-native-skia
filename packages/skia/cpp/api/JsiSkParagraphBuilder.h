@@ -19,12 +19,10 @@
 
 #include "modules/skparagraph/include/ParagraphBuilder.h"
 
-#if defined(SK_UNICODE_ICU_IMPLEMENTATION)
-#include "modules/skunicode/include/SkUnicode_icu.h"
-#elif defined(SK_UNICODE_LIBGRAPHEME_IMPLEMENTATION)
+#ifdef __APPLE__
 #include "modules/skunicode/include/SkUnicode_libgrapheme.h"
-#elif defined(SK_UNICODE_ICU4X_IMPLEMENTATION)
-#include "modules/skunicode/include/SkUnicode_icu4x.h"
+#else
+#include "modules/skunicode/include/SkUnicode_icu.h"
 #endif
 
 #pragma clang diagnostic pop
@@ -134,12 +132,10 @@ public:
     }
     _fontCollection->enableFontFallback();
     sk_sp<SkUnicode> unicode;
-#if defined(SK_UNICODE_ICU_IMPLEMENTATION)
-    unicode = SkUnicodes::ICU::Make();
-#elif defined(SK_UNICODE_LIBGRAPHEME_IMPLEMENTATION)
+#ifdef __APPLE__
     unicode = SkUnicodes::Libgrapheme::Make();
-#elif defined(SK_UNICODE_ICU4X_IMPLEMENTATION)
-    unicode = SkUnicodes::ICU4X::Make();
+#else
+    unicode = SkUnicodes::ICU::Make();
 #endif
     _builder = para::ParagraphBuilder::make(paragraphStyle, _fontCollection,
                                             unicode);

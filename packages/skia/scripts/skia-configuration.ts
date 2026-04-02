@@ -665,6 +665,14 @@ export const copyHeaders = () => {
     "../../externals/skia/modules/skunicode/include/SkUnicode.h",
     "./cpp/skia/modules/skunicode/include/SkUnicode.h"
   );
+  fileOps.cp(
+    "../../externals/skia/modules/skunicode/include/SkUnicode_libgrapheme.h",
+    "./cpp/skia/modules/skunicode/include/SkUnicode_libgrapheme.h"
+  );
+  fileOps.cp(
+    "../../externals/skia/modules/skunicode/include/SkUnicode_icu.h",
+    "./cpp/skia/modules/skunicode/include/SkUnicode_icu.h"
+  );
   // Check for duplicate header names and issue warnings
   const duplicateHeaders = $(
     "find ./cpp -name '*.h' -type f | sed 's/.*\\///' | sort | uniq -d"
