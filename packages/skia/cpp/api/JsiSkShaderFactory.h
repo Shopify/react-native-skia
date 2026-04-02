@@ -100,7 +100,7 @@ public:
 
     SkGradient::Colors gradColors(
         SkSpan(colors),
-        !positions.empty() ? SkSpan(positions) : SkSpan<const float>(),
+        !positions.empty() ? SkSpan<const float>(positions.data(), positions.size()) : SkSpan<const float>(),
         tileMode);
     SkGradient grad(gradColors, SkGradient::Interpolation::FromFlags(flag));
     sk_sp<SkShader> gradient = SkShaders::LinearGradient(pts, grad, localMatrix);
@@ -131,7 +131,7 @@ public:
 
     SkGradient::Colors gradColors(
         SkSpan(colors),
-        !positions.empty() ? SkSpan(positions) : SkSpan<const float>(),
+        !positions.empty() ? SkSpan<const float>(positions.data(), positions.size()) : SkSpan<const float>(),
         tileMode);
     SkGradient grad(gradColors, SkGradient::Interpolation::FromFlags(flag));
     sk_sp<SkShader> gradient =
@@ -166,7 +166,7 @@ public:
 
     SkGradient::Colors gradColors(
         SkSpan(colors),
-        !positions.empty() ? SkSpan(positions) : SkSpan<const float>(),
+        !positions.empty() ? SkSpan<const float>(positions.data(), positions.size()) : SkSpan<const float>(),
         tileMode);
     SkGradient grad(gradColors, SkGradient::Interpolation::FromFlags(flag));
     sk_sp<SkShader> gradient = SkShaders::SweepGradient(
@@ -202,7 +202,7 @@ public:
 
     SkGradient::Colors gradColors(
         SkSpan(colors),
-        !positions.empty() ? SkSpan(positions) : SkSpan<const float>(),
+        !positions.empty() ? SkSpan<const float>(positions.data(), positions.size()) : SkSpan<const float>(),
         tileMode);
     SkGradient grad(gradColors, SkGradient::Interpolation::FromFlags(flag));
     sk_sp<SkShader> gradient = SkShaders::TwoPointConicalGradient(

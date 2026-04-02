@@ -262,7 +262,7 @@ public:
     auto tileMode = props.mode.value_or(SkTileMode::kClamp);
     SkGradient::Colors gradColors(
         SkSpan(colors4f),
-        props.positions ? SkSpan(*props.positions) : SkSpan<const float>(),
+        props.positions ? SkSpan<const float>(props.positions->data(), props.positions->size()) : SkSpan<const float>(),
         tileMode);
     SkGradient grad(gradColors,
                     SkGradient::Interpolation::FromFlags(props.flags.value_or(0)));
@@ -316,7 +316,7 @@ public:
     auto tileMode = props.mode.value_or(SkTileMode::kClamp);
     SkGradient::Colors gradColors(
         SkSpan(colors4f),
-        props.positions ? SkSpan(*props.positions) : SkSpan<const float>(),
+        props.positions ? SkSpan<const float>(props.positions->data(), props.positions->size()) : SkSpan<const float>(),
         tileMode);
     SkGradient grad(gradColors,
                     SkGradient::Interpolation::FromFlags(props.flags.value_or(0)));
@@ -372,7 +372,7 @@ public:
     auto tileMode = props.mode.value_or(SkTileMode::kClamp);
     SkGradient::Colors gradColors(
         SkSpan(colors4f),
-        props.positions ? SkSpan(*props.positions) : SkSpan<const float>(),
+        props.positions ? SkSpan<const float>(props.positions->data(), props.positions->size()) : SkSpan<const float>(),
         tileMode);
     SkGradient grad(gradColors,
                     SkGradient::Interpolation::FromFlags(props.flags.value_or(0)));
@@ -432,7 +432,7 @@ public:
     auto tileMode = props.mode.value_or(SkTileMode::kClamp);
     SkGradient::Colors gradColors(
         SkSpan(colors4f),
-        props.positions ? SkSpan(*props.positions) : SkSpan<const float>(),
+        props.positions ? SkSpan<const float>(props.positions->data(), props.positions->size()) : SkSpan<const float>(),
         tileMode);
     SkGradient grad(gradColors,
                     SkGradient::Interpolation::FromFlags(props.flags.value_or(0)));

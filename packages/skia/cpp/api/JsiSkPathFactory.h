@@ -52,36 +52,33 @@ public:
 
   JSI_HOST_FUNCTION(MakeFromSVGString) {
     auto svgString = arguments[0].asString(runtime).utf8(runtime);
-    SkPath result;
-
-    if (!SkParsePath::FromSVGString(svgString.c_str(), &result)) {
+    auto result = SkParsePath::FromSVGString(svgString.c_str());
+    if (!result.has_value()) {
       throw jsi::JSError(runtime, "Could not parse Svg path");
       return jsi::Value(nullptr);
     }
-
     auto hostObjectInstance =
-        std::make_shared<JsiSkPath>(getContext(), std::move(result));
+        std::make_shared<JsiSkPath>(getContext(), std::move(result.value()));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
         runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(MakeFromOp) {
-    SkPath one = JsiSkPath::fromValue(runtime, arguments[0])->snapshot();
-    SkPath two = JsiSkPath::fromValue(runtime, arguments[1])->snapshot();
+    auto one = JsiSkPath::fromValue(runtime, arguments[0])->snapshot();
+    auto two = JsiSkPath::fromValue(runtime, arguments[1])->snapshot();
     SkPathOp op = (SkPathOp)arguments[2].asNumber();
-    SkPath result;
-    bool success = Op(one, two, op, &result);
-    if (!success) {
+    auto result = Op(one, two, op);
+    if (!result.has_value()) {
       return jsi::Value(nullptr);
     }
     auto hostObjectInstance =
-        std::make_shared<JsiSkPath>(getContext(), std::move(result));
+        std::make_shared<JsiSkPath>(getContext(), std::move(result.value()));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
         runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(MakeFromCmds) {
-    SkPath path;
+    SkPathBuilder builder;
     auto cmds = arguments[0].asObject(runtime).asArray(runtime);
     auto cmdCount = cmds.size(runtime);
     for (int i = 0; i < cmdCount; i++) {
@@ -100,7 +97,7 @@ public:
         }
         auto x = cmd.getValueAtIndex(runtime, 1).asNumber();
         auto y = cmd.getValueAtIndex(runtime, 2).asNumber();
-        path.moveTo(x, y);
+        builder.moveTo(x, y);
         break;
       }
       case LINE: {
@@ -110,7 +107,7 @@ public:
         }
         auto x = cmd.getValueAtIndex(runtime, 1).asNumber();
         auto y = cmd.getValueAtIndex(runtime, 2).asNumber();
-        path.lineTo(x, y);
+        builder.lineTo(x, y);
         break;
       }
       case QUAD: {
@@ -122,7 +119,7 @@ public:
         auto y1 = cmd.getValueAtIndex(runtime, 2).asNumber();
         auto x2 = cmd.getValueAtIndex(runtime, 3).asNumber();
         auto y2 = cmd.getValueAtIndex(runtime, 4).asNumber();
-        path.quadTo(x1, y1, x2, y2);
+        builder.quadTo(x1, y1, x2, y2);
         break;
       }
       case CONIC: {
@@ -135,7 +132,7 @@ public:
         auto x2 = cmd.getValueAtIndex(runtime, 3).asNumber();
         auto y2 = cmd.getValueAtIndex(runtime, 4).asNumber();
         auto w = cmd.getValueAtIndex(runtime, 5).asNumber();
-        path.conicTo(x1, y1, x2, y2, w);
+        builder.conicTo(x1, y1, x2, y2, w);
         break;
       }
       case CUBIC: {
@@ -149,11 +146,11 @@ public:
         auto y2 = cmd.getValueAtIndex(runtime, 4).asNumber();
         auto x3 = cmd.getValueAtIndex(runtime, 5).asNumber();
         auto y3 = cmd.getValueAtIndex(runtime, 6).asNumber();
-        path.cubicTo(x1, y1, x2, y2, x3, y3);
+        builder.cubicTo(x1, y1, x2, y2, x3, y3);
         break;
       }
       case CLOSE: {
-        path.close();
+        builder.close();
         break;
       }
       default: {
@@ -163,7 +160,7 @@ public:
       }
     }
     auto hostObjectInstance =
-        std::make_shared<JsiSkPath>(getContext(), std::move(path));
+        std::make_shared<JsiSkPath>(getContext(), builder.snapshot());
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
         runtime, hostObjectInstance, getContext());
   }
@@ -189,10 +186,10 @@ public:
     if (count >= 2 && arguments[1].getBool()) {
       direction = SkPathDirection::kCCW;
     }
-    SkPath path;
-    path.addRect(*rect, direction);
+    SkPathBuilder builder;
+    builder.addRect(*rect, direction);
     auto hostObjectInstance =
-        std::make_shared<JsiSkPath>(getContext(), std::move(path));
+        std::make_shared<JsiSkPath>(getContext(), builder.snapshot());
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
         runtime, hostObjectInstance, getContext());
   }
@@ -204,10 +201,10 @@ public:
       direction = SkPathDirection::kCCW;
     }
     unsigned startIndex = count < 3 ? 0 : arguments[2].asNumber();
-    SkPath path;
-    path.addOval(*rect, direction, startIndex);
+    SkPathBuilder builder;
+    builder.addOval(*rect, direction, startIndex);
     auto hostObjectInstance =
-        std::make_shared<JsiSkPath>(getContext(), std::move(path));
+        std::make_shared<JsiSkPath>(getContext(), builder.snapshot());
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
         runtime, hostObjectInstance, getContext());
   }
@@ -216,10 +213,10 @@ public:
     auto x = arguments[0].asNumber();
     auto y = arguments[1].asNumber();
     auto r = arguments[2].asNumber();
-    SkPath path;
-    path.addCircle(x, y, r);
+    SkPathBuilder builder;
+    builder.addCircle(x, y, r);
     auto hostObjectInstance =
-        std::make_shared<JsiSkPath>(getContext(), std::move(path));
+        std::make_shared<JsiSkPath>(getContext(), builder.snapshot());
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
         runtime, hostObjectInstance, getContext());
   }
@@ -230,10 +227,10 @@ public:
     if (count >= 2 && arguments[1].getBool()) {
       direction = SkPathDirection::kCCW;
     }
-    SkPath path;
-    path.addRRect(*rrect, direction);
+    SkPathBuilder builder;
+    builder.addRRect(*rrect, direction);
     auto hostObjectInstance =
-        std::make_shared<JsiSkPath>(getContext(), std::move(path));
+        std::make_shared<JsiSkPath>(getContext(), builder.snapshot());
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
         runtime, hostObjectInstance, getContext());
   }
@@ -243,11 +240,11 @@ public:
         runtime, arguments[0].asObject(runtime));
     auto p2 = JsiSkPoint::fromValue(
         runtime, arguments[1].asObject(runtime));
-    SkPath path;
-    path.moveTo(*p1);
-    path.lineTo(*p2);
+    SkPathBuilder builder;
+    builder.moveTo(*p1);
+    builder.lineTo(*p2);
     auto hostObjectInstance =
-        std::make_shared<JsiSkPath>(getContext(), std::move(path));
+        std::make_shared<JsiSkPath>(getContext(), builder.snapshot());
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
         runtime, hostObjectInstance, getContext());
   }
@@ -263,11 +260,10 @@ public:
           runtime, jsiPoints.getValueAtIndex(runtime, i).asObject(runtime));
       points.push_back(*point.get());
     }
-    SkPath path;
-    auto p = SkSpan(points.data(), points.size());
-    path.addPoly(p, close);
+    SkPathBuilder builder;
+    builder.addPolygon(SkSpan(points), close);
     auto hostObjectInstance =
-        std::make_shared<JsiSkPath>(getContext(), std::move(path));
+        std::make_shared<JsiSkPath>(getContext(), builder.snapshot());
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
         runtime, hostObjectInstance, getContext());
   }
@@ -308,22 +304,23 @@ public:
 
       auto jsiPrecision = opts.getProperty(runtime, "precision");
       auto precision = jsiPrecision.isUndefined() ? 1 : jsiPrecision.asNumber();
-      SkPath result;
+      SkPathBuilder resultBuilder;
+      auto ctm = SkMatrix::Scale(precision, precision);
       auto success =
-          skpathutils::FillPathWithPaint(path, p, &result, nullptr, precision);
+          skpathutils::FillPathWithPaint(path, p, &resultBuilder, nullptr, ctm);
       if (success) {
         auto hostObjectInstance =
-            std::make_shared<JsiSkPath>(getContext(), std::move(result));
+            std::make_shared<JsiSkPath>(getContext(), resultBuilder.snapshot());
         return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
             runtime, hostObjectInstance, getContext());
       }
     } else {
-      SkPath result;
+      SkPathBuilder resultBuilder;
       auto success =
-          skpathutils::FillPathWithPaint(path, p, &result, nullptr, 1);
+          skpathutils::FillPathWithPaint(path, p, &resultBuilder);
       if (success) {
         auto hostObjectInstance =
-            std::make_shared<JsiSkPath>(getContext(), std::move(result));
+            std::make_shared<JsiSkPath>(getContext(), resultBuilder.snapshot());
         return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
             runtime, hostObjectInstance, getContext());
       }

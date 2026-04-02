@@ -19,6 +19,14 @@
 
 #include "modules/skparagraph/include/ParagraphBuilder.h"
 
+#if defined(SK_UNICODE_ICU_IMPLEMENTATION)
+#include "modules/skunicode/include/SkUnicode_icu.h"
+#elif defined(SK_UNICODE_LIBGRAPHEME_IMPLEMENTATION)
+#include "modules/skunicode/include/SkUnicode_libgrapheme.h"
+#elif defined(SK_UNICODE_ICU4X_IMPLEMENTATION)
+#include "modules/skunicode/include/SkUnicode_icu4x.h"
+#endif
+
 #pragma clang diagnostic pop
 
 namespace RNSkia {
@@ -125,7 +133,16 @@ public:
       _fontCollection->setAssetFontManager(fontManager);
     }
     _fontCollection->enableFontFallback();
-    _builder = para::ParagraphBuilder::make(paragraphStyle, _fontCollection);
+    sk_sp<SkUnicode> unicode;
+#if defined(SK_UNICODE_ICU_IMPLEMENTATION)
+    unicode = SkUnicodes::ICU::Make();
+#elif defined(SK_UNICODE_LIBGRAPHEME_IMPLEMENTATION)
+    unicode = SkUnicodes::Libgrapheme::Make();
+#elif defined(SK_UNICODE_ICU4X_IMPLEMENTATION)
+    unicode = SkUnicodes::ICU4X::Make();
+#endif
+    _builder = para::ParagraphBuilder::make(paragraphStyle, _fontCollection,
+                                            unicode);
   }
 
 private:
