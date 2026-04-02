@@ -15,11 +15,15 @@ export class JsiSkPathBuilderFactory
   }
 
   Make() {
-    return new JsiSkPathBuilder(this.CanvasKit, new this.CanvasKit.PathBuilder());
+    return new JsiSkPathBuilder(
+      this.CanvasKit,
+      new this.CanvasKit.PathBuilder()
+    );
   }
 
   MakeFromPath(path: SkPath) {
-    const srcBuilder = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(path);
+    const srcBuilder =
+      JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(path);
     const srcPath = srcBuilder.snapshot();
     const builder = new this.CanvasKit.PathBuilder(srcPath);
     srcPath.delete();

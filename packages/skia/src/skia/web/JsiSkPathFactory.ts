@@ -43,8 +43,14 @@ export class JsiSkPathFactory extends Host implements PathFactory {
   }
 
   MakeFromOp(one: SkPath, two: SkPath, op: PathOp) {
-    const p1 = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(one).snapshot();
-    const p2 = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(two).snapshot();
+    const p1 =
+      JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(
+        one
+      ).snapshot();
+    const p2 =
+      JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(
+        two
+      ).snapshot();
     const path = this.CanvasKit.Path.MakeFromOp(
       p1,
       p2,
@@ -131,7 +137,10 @@ export class JsiSkPathFactory extends Host implements PathFactory {
   // Static path operations
 
   Stroke(srcPath: SkPath, opts?: StrokeOpts) {
-    const path = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(srcPath).snapshot();
+    const path =
+      JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(
+        srcPath
+      ).snapshot();
     const result = path.makeStroked(
       opts === undefined
         ? undefined
@@ -159,7 +168,10 @@ export class JsiSkPathFactory extends Host implements PathFactory {
   Trim(srcPath: SkPath, start: number, end: number, isComplement: boolean) {
     const startT = pinT(start);
     const stopT = pinT(end);
-    const path = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(srcPath).snapshot();
+    const path =
+      JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(
+        srcPath
+      ).snapshot();
     if (startT <= 0 && stopT >= 1 && !isComplement) {
       const r = new JsiSkPath(
         this.CanvasKit,
@@ -182,7 +194,10 @@ export class JsiSkPathFactory extends Host implements PathFactory {
   }
 
   Simplify(srcPath: SkPath) {
-    const path = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(srcPath).snapshot();
+    const path =
+      JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(
+        srcPath
+      ).snapshot();
     const result = path.makeSimplified();
     path.delete();
     if (result === null) {
@@ -197,7 +212,10 @@ export class JsiSkPathFactory extends Host implements PathFactory {
   }
 
   Dash(srcPath: SkPath, on: number, off: number, phase: number) {
-    const path = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(srcPath).snapshot();
+    const path =
+      JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(
+        srcPath
+      ).snapshot();
     const result = path.makeDashed(on, off, phase);
     path.delete();
     if (result === null) {
@@ -212,7 +230,10 @@ export class JsiSkPathFactory extends Host implements PathFactory {
   }
 
   AsWinding(srcPath: SkPath) {
-    const path = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(srcPath).snapshot();
+    const path =
+      JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(
+        srcPath
+      ).snapshot();
     const result = path.makeAsWinding();
     path.delete();
     if (result === null) {
@@ -227,8 +248,14 @@ export class JsiSkPathFactory extends Host implements PathFactory {
   }
 
   Interpolate(start: SkPath, end: SkPath, weight: number) {
-    const p1 = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(start).snapshot();
-    const p2 = JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(end).snapshot();
+    const p1 =
+      JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(
+        start
+      ).snapshot();
+    const p2 =
+      JsiSkPath.fromValue<CanvasKit["PathBuilder"]["prototype"]>(
+        end
+      ).snapshot();
     const path = this.CanvasKit.Path.MakeFromPathInterpolation(p1, p2, weight);
     p1.delete();
     p2.delete();

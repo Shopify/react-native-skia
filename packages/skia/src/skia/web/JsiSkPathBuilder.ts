@@ -1,7 +1,4 @@
-import type {
-  CanvasKit,
-  PathBuilder as CKPathBuilder,
-} from "canvaskit-wasm";
+import type { CanvasKit, PathBuilder as CKPathBuilder } from "canvaskit-wasm";
 
 import type {
   FillType,
@@ -153,13 +150,7 @@ export class JsiSkPathBuilder
     return this;
   }
 
-  arcToTangent(
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-    radius: number
-  ) {
+  arcToTangent(x1: number, y1: number, x2: number, y2: number, radius: number) {
     this.ref.arcToTangent(x1, y1, x2, y2, radius);
     return this;
   }

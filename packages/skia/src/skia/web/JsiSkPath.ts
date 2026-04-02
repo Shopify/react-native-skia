@@ -1,7 +1,4 @@
-import type {
-  CanvasKit,
-  PathBuilder as CKPathBuilder,
-} from "canvaskit-wasm";
+import type { CanvasKit, PathBuilder as CKPathBuilder } from "canvaskit-wasm";
 
 import { PathVerb } from "../types";
 import type {
@@ -250,7 +247,15 @@ export class JsiSkPath
     x: number,
     y: number
   ) {
-    this.ref.arcToRotated(rx, ry, xAxisRotateInDegrees, useSmallArc, isCCW, x, y);
+    this.ref.arcToRotated(
+      rx,
+      ry,
+      xAxisRotateInDegrees,
+      useSmallArc,
+      isCCW,
+      x,
+      y
+    );
     return this;
   }
 
