@@ -351,6 +351,112 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
         content.replace(/uint32\(bindingInfo\.binding\)/g, "uint32_t(bindingInfo.binding)")
       );
     }
+    // Add iOS support to Dawn cmake_utils.py
+    {
+      const filePath = `${SkiaSrc}/third_party/dawn/cmake_utils.py`;
+      let content = fs.readFileSync(filePath, "utf-8");
+      // Add --ios_use_simulator argument
+      content = content.replace(
+        `parser.add_argument(
+      "--enable_rtti", action=argparse.BooleanOptionalAction, help="Enable RTTI.")`,
+        `parser.add_argument(
+      "--enable_rtti", action=argparse.BooleanOptionalAction, help="Enable RTTI.")
+  parser.add_argument(
+      "--ios_use_simulator", action=argparse.BooleanOptionalAction, help="Build for iOS simulator.")`
+      );
+      // Add iOS OS/CPU mapping
+      content = content.replace(
+        `if os == "mac":
+    target_cpu_map = {
+      "arm64": "arm64",
+      "x64": "x86_64",
+    }
+    return "Darwin", target_cpu_map[cpu]
+
+  if os == "win":`,
+        `if os == "mac":
+    target_cpu_map = {
+      "arm64": "arm64",
+      "x64": "x86_64",
+    }
+    return "Darwin", target_cpu_map[cpu]
+
+  if os == "ios":
+    target_cpu_map = {
+      "arm64": "arm64",
+      "x64": "x86_64",
+    }
+    return "iOS", target_cpu_map[cpu]
+
+  if os == "win":`
+      );
+      fs.writeFileSync(filePath, content);
+    }
+    // Add iOS support to Dawn build_dawn.py
+    {
+      const filePath = `${SkiaSrc}/third_party/dawn/build_dawn.py`;
+      let content = fs.readFileSync(filePath, "utf-8");
+      content = content.replace(
+        `if target_os == "Darwin" or target_os == "iOS":
+    configure_cmd.append(f"-DCMAKE_OSX_ARCHITECTURES={target_cpu}")
+
+  env = os.environ.copy()`,
+        `if target_os == "Darwin" or target_os == "iOS":
+    configure_cmd.append(f"-DCMAKE_OSX_ARCHITECTURES={target_cpu}")
+
+  if target_os == "iOS":
+    configure_cmd.append("-DTINT_BUILD_CMD_TOOLS=OFF")
+    if args.ios_use_simulator:
+      configure_cmd.append("-DCMAKE_OSX_SYSROOT=iphonesimulator")
+
+  env = os.environ.copy()`
+      );
+      fs.writeFileSync(filePath, content);
+    }
+    // Fix Dawn BUILD.gn for iOS (Cocoa.framework is macOS only)
+    {
+      const filePath = `${SkiaSrc}/third_party/dawn/BUILD.gn`;
+      let content = fs.readFileSync(filePath, "utf-8");
+      content = content.replace(
+        `"Metal.framework",
+      "QuartzCore.framework",
+      "Cocoa.framework",
+    ]
+  }
+}`,
+        `"Metal.framework",
+      "QuartzCore.framework",
+    ]
+    if (is_mac) {
+      frameworks += [ "Cocoa.framework" ]
+    }
+  }
+}`
+      );
+      // Add ios_use_simulator argument passing
+      content = content.replace(
+        `if (is_android) {
+    args += [
+      "--android_ndk_path=" + ndk,
+      "--android_platform=android-" + ndk_api,
+    ]
+  }
+
+  if (dawn_enable_d3d11) {`,
+        `if (is_android) {
+    args += [
+      "--android_ndk_path=" + ndk,
+      "--android_platform=android-" + ndk_api,
+    ]
+  }
+  if (is_ios && ios_use_simulator) {
+    args += [ "--ios_use_simulator" ]
+  }
+
+  if (dawn_enable_d3d11) {`
+      );
+      fs.writeFileSync(filePath, content);
+    }
     console.log("Patches applied successfully");
   }
   $(`rm -rf ${PackageRoot}/libs`);
