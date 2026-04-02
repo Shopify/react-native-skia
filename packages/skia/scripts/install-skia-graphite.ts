@@ -17,7 +17,6 @@ import {
   readFileSync,
   readdirSync,
   rmSync,
-  statSync,
   writeFileSync,
 } from "fs";
 import https from "https";
@@ -71,24 +70,10 @@ const getDownloadUrl = (assetName: string): string => {
   return `https://github.com/Shopify/react-native-skia/releases/download/${releaseTag}/${assetName}`;
 };
 
-// Calculate directory checksum (matches the format used for verification)
-const calculateDirectoryChecksum = (dirPath: string): string => {
+// Calculate file checksum
+const calculateFileChecksum = (filePath: string): string => {
   const hash = createHash("sha256");
-  const processDir = (dir: string, relativePath: string = "") => {
-    const entries = readdirSync(dir).sort();
-    for (const entry of entries) {
-      const fullPath = path.join(dir, entry);
-      const entryRelativePath = path.join(relativePath, entry);
-      const stat = statSync(fullPath);
-      if (stat.isDirectory()) {
-        processDir(fullPath, entryRelativePath);
-      } else {
-        hash.update(entryRelativePath);
-        hash.update(readFileSync(fullPath));
-      }
-    }
-  };
-  processDir(dirPath);
+  hash.update(readFileSync(filePath));
   return hash.digest("hex");
 };
 
@@ -159,6 +144,21 @@ const downloadAndExtract = async (
 
   await downloadFile(url, tempFile);
 
+  // Verify checksum if provided (before extraction)
+  if (expectedChecksum) {
+    console.log(`  Verifying checksum...`);
+    const actualChecksum = calculateFileChecksum(tempFile);
+    if (actualChecksum !== expectedChecksum) {
+      rmSync(tempFile, { force: true });
+      throw new Error(
+        `Checksum mismatch for ${assetName}:\n` +
+          `  Expected: ${expectedChecksum}\n` +
+          `  Actual:   ${actualChecksum}`
+      );
+    }
+    console.log(`  ✓ Checksum verified`);
+  }
+
   // Extract
   console.log(`  Extracting to ${destDir}...`);
   if (existsSync(destDir)) {
@@ -168,20 +168,6 @@ const downloadAndExtract = async (
 
   // Cleanup temp file
   rmSync(tempFile, { force: true });
-
-  // Verify checksum if provided
-  if (expectedChecksum) {
-    console.log(`  Verifying checksum...`);
-    const actualChecksum = calculateDirectoryChecksum(destDir);
-    if (actualChecksum !== expectedChecksum) {
-      throw new Error(
-        `Checksum mismatch for ${assetName}:\n` +
-          `  Expected: ${expectedChecksum}\n` +
-          `  Actual:   ${actualChecksum}`
-      );
-    }
-    console.log(`  ✓ Checksum verified`);
-  }
 };
 
 // Checkout the Skia submodule to the correct branch
