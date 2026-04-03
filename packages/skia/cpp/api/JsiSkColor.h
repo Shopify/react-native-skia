@@ -103,10 +103,14 @@ public:
                                "Expected array of length 4 for color, got " +
                                    std::to_string(arr.size(runtime)));
           }
-          auto r = static_cast<float>(arr.getValueAtIndex(runtime, 0).asNumber());
-          auto g = static_cast<float>(arr.getValueAtIndex(runtime, 1).asNumber());
-          auto b = static_cast<float>(arr.getValueAtIndex(runtime, 2).asNumber());
-          auto a = static_cast<float>(arr.getValueAtIndex(runtime, 3).asNumber());
+          auto r =
+              static_cast<float>(arr.getValueAtIndex(runtime, 0).asNumber());
+          auto g =
+              static_cast<float>(arr.getValueAtIndex(runtime, 1).asNumber());
+          auto b =
+              static_cast<float>(arr.getValueAtIndex(runtime, 2).asNumber());
+          auto a =
+              static_cast<float>(arr.getValueAtIndex(runtime, 3).asNumber());
 
           // Create Float32Array and populate
           auto result = runtime.global()

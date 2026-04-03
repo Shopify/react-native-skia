@@ -51,7 +51,8 @@ public:
       }
     }
     auto context = getContext();
-    auto surface = context->makeOffscreenSurface(width, height, useP3ColorSpace);
+    auto surface =
+        context->makeOffscreenSurface(width, height, useP3ColorSpace);
     if (surface == nullptr) {
       return jsi::Value::null();
     }

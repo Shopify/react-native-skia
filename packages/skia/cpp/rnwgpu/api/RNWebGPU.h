@@ -5,9 +5,9 @@
 
 #include "jsi2/NativeObject.h"
 
-#include "rnwgpu/Canvas.h"
 #include "GPU.h"
 #include "GPUCanvasContext.h"
+#include "rnwgpu/Canvas.h"
 #include "rnwgpu/PlatformContext.h"
 
 namespace rnwgpu {

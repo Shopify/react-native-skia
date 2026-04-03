@@ -1,10 +1,10 @@
-#include <jni.h>
 #include <android/native_window_jni.h>
+#include <jni.h>
 
 #ifdef SK_GRAPHITE
-#include "webgpu/webgpu_cpp.h"
-#include "rnwgpu/SurfaceRegistry.h"
 #include "rnskia/RNDawnContext.h"
+#include "rnwgpu/SurfaceRegistry.h"
+#include "webgpu/webgpu_cpp.h"
 #endif
 
 extern "C" JNIEXPORT void JNICALL

@@ -100,10 +100,13 @@ public:
 
     SkGradient::Colors gradColors(
         SkSpan(colors),
-        !positions.empty() ? SkSpan<const float>(positions.data(), positions.size()) : SkSpan<const float>(),
+        !positions.empty()
+            ? SkSpan<const float>(positions.data(), positions.size())
+            : SkSpan<const float>(),
         tileMode);
     SkGradient grad(gradColors, SkGradient::Interpolation::FromFlags(flag));
-    sk_sp<SkShader> gradient = SkShaders::LinearGradient(pts, grad, localMatrix);
+    sk_sp<SkShader> gradient =
+        SkShaders::LinearGradient(pts, grad, localMatrix);
     auto shader =
         std::make_shared<JsiSkShader>(getContext(), std::move(gradient));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shader,
@@ -131,7 +134,9 @@ public:
 
     SkGradient::Colors gradColors(
         SkSpan(colors),
-        !positions.empty() ? SkSpan<const float>(positions.data(), positions.size()) : SkSpan<const float>(),
+        !positions.empty()
+            ? SkSpan<const float>(positions.data(), positions.size())
+            : SkSpan<const float>(),
         tileMode);
     SkGradient grad(gradColors, SkGradient::Interpolation::FromFlags(flag));
     sk_sp<SkShader> gradient =
@@ -158,15 +163,18 @@ public:
     auto tileMode = getTileMode(arguments, 4, count);
     auto localMatrix = getLocalMatrix(runtime, arguments, 5, count);
     auto flag = getFlag(arguments, 6, count);
-    auto startAngle =
-        (count < 8 || arguments[7].isUndefined()) ? 0.0f : static_cast<float>(arguments[7].asNumber());
+    auto startAngle = (count < 8 || arguments[7].isUndefined())
+                          ? 0.0f
+                          : static_cast<float>(arguments[7].asNumber());
     auto endAngle = (count < 9 || arguments[8].isUndefined())
                         ? 360.0f
                         : static_cast<float>(arguments[8].asNumber());
 
     SkGradient::Colors gradColors(
         SkSpan(colors),
-        !positions.empty() ? SkSpan<const float>(positions.data(), positions.size()) : SkSpan<const float>(),
+        !positions.empty()
+            ? SkSpan<const float>(positions.data(), positions.size())
+            : SkSpan<const float>(),
         tileMode);
     SkGradient grad(gradColors, SkGradient::Interpolation::FromFlags(flag));
     sk_sp<SkShader> gradient = SkShaders::SweepGradient(
@@ -202,7 +210,9 @@ public:
 
     SkGradient::Colors gradColors(
         SkSpan(colors),
-        !positions.empty() ? SkSpan<const float>(positions.data(), positions.size()) : SkSpan<const float>(),
+        !positions.empty()
+            ? SkSpan<const float>(positions.data(), positions.size())
+            : SkSpan<const float>(),
         tileMode);
     SkGradient grad(gradColors, SkGradient::Interpolation::FromFlags(flag));
     sk_sp<SkShader> gradient = SkShaders::TwoPointConicalGradient(

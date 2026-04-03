@@ -137,8 +137,8 @@ public:
 #else
     unicode = SkUnicodes::ICU::Make();
 #endif
-    _builder = para::ParagraphBuilder::make(paragraphStyle, _fontCollection,
-                                            unicode);
+    _builder =
+        para::ParagraphBuilder::make(paragraphStyle, _fontCollection, unicode);
   }
 
 private:

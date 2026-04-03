@@ -5,8 +5,8 @@
 #import "webgpu/webgpu_cpp.h"
 #import <QuartzCore/CAMetalLayer.h>
 
-#import "rnwgpu/SurfaceRegistry.h"
 #import "rnskia/RNDawnContext.h"
+#import "rnwgpu/SurfaceRegistry.h"
 
 @implementation WebGPUMetalView {
   BOOL _isConfigured;

@@ -236,10 +236,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(Line) {
-    auto p1 = JsiSkPoint::fromValue(
-        runtime, arguments[0].asObject(runtime));
-    auto p2 = JsiSkPoint::fromValue(
-        runtime, arguments[1].asObject(runtime));
+    auto p1 = JsiSkPoint::fromValue(runtime, arguments[0].asObject(runtime));
+    auto p2 = JsiSkPoint::fromValue(runtime, arguments[1].asObject(runtime));
     SkPathBuilder builder;
     builder.moveTo(*p1);
     builder.lineTo(*p2);
@@ -316,8 +314,7 @@ public:
       }
     } else {
       SkPathBuilder resultBuilder;
-      auto success =
-          skpathutils::FillPathWithPaint(path, p, &resultBuilder);
+      auto success = skpathutils::FillPathWithPaint(path, p, &resultBuilder);
       if (success) {
         auto hostObjectInstance =
             std::make_shared<JsiSkPath>(getContext(), resultBuilder.snapshot());
@@ -330,8 +327,10 @@ public:
 
   JSI_HOST_FUNCTION(Trim) {
     auto srcPath = JsiSkPath::fromValue(runtime, arguments[0]);
-    float start = std::clamp(static_cast<float>(arguments[1].asNumber()), 0.0f, 1.0f);
-    float end = std::clamp(static_cast<float>(arguments[2].asNumber()), 0.0f, 1.0f);
+    float start =
+        std::clamp(static_cast<float>(arguments[1].asNumber()), 0.0f, 1.0f);
+    float end =
+        std::clamp(static_cast<float>(arguments[2].asNumber()), 0.0f, 1.0f);
     auto isComplement = arguments[3].getBool();
     // If requesting the full path in normal mode, just return a copy
     if (start <= 0 && end >= 1 && !isComplement) {
