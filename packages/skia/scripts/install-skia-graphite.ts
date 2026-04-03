@@ -60,8 +60,7 @@ const getBaseVersion = (version: string): string => {
 
 // Get the GitHub release tag
 const getReleaseTag = (version: string): string => {
-  const baseVersion = getBaseVersion(version);
-  return `skia-graphite-${baseVersion}`;
+  return `skia-graphite-${version}`;
 };
 
 // Get the download URL for an asset
