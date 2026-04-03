@@ -152,17 +152,17 @@ jobs:
           # Apple builds
           - platform: ios
             arch: arm64
-            cmake_args: -DPLATFORM=OS64 -DDEPLOYMENT_TARGET=13.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
+            cmake_args: -DPLATFORM=OS64 -DDEPLOYMENT_TARGET=14.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
             output_dir: externals/dawn/out/ios_arm64
             library_path: src/dawn/native/libwebgpu_dawn.a
           - platform: ios
             arch: sim_arm64
-            cmake_args: -DPLATFORM=SIMULATORARM64 -DDEPLOYMENT_TARGET=13.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
+            cmake_args: -DPLATFORM=SIMULATORARM64 -DDEPLOYMENT_TARGET=14.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
             output_dir: externals/dawn/out/ios_sim_arm64
             library_path: src/dawn/native/libwebgpu_dawn.a
           - platform: ios
             arch: sim_x86_64
-            cmake_args: -DPLATFORM=SIMULATOR64 -DDEPLOYMENT_TARGET=13.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
+            cmake_args: -DPLATFORM=SIMULATOR64 -DDEPLOYMENT_TARGET=14.0 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DENABLE_VISIBILITY=OFF
             output_dir: externals/dawn/out/ios_sim_x86_64
             library_path: src/dawn/native/libwebgpu_dawn.a
           - platform: macos
