@@ -59,7 +59,7 @@ public:
   }
 
   sk_sp<SkSurface> MakeOffscreen(int width, int height,
-                                  bool useP3ColorSpace = false) {
+                                 bool useP3ColorSpace = false) {
     auto colorType = kRGBA_8888_SkColorType;
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
@@ -91,10 +91,9 @@ public:
                                          .texture = texture};
 
     sk_sp<SkColorSpace> colorSpace =
-        useP3ColorSpace
-            ? SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
-                                    SkNamedGamut::kDisplayP3)
-            : nullptr;
+        useP3ColorSpace ? SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
+                                                SkNamedGamut::kDisplayP3)
+                        : nullptr;
 
     // Create a SkSurface from the GrBackendTexture
     return SkSurfaces::WrapBackendTexture(

@@ -109,15 +109,14 @@ requestDevice(dawn::native::Adapter &nativeAdapter,
         [](const wgpu::Device &, wgpu::DeviceLostReason reason,
            wgpu::StringView message) {
           if (reason != wgpu::DeviceLostReason::Destroyed) {
-            SK_ABORT("Device lost: %.*s\n",
-                     static_cast<int>(message.length), message.data);
+            SK_ABORT("Device lost: %.*s\n", static_cast<int>(message.length),
+                     message.data);
           }
         });
     desc.SetUncapturedErrorCallback(
-        [](const wgpu::Device &, wgpu::ErrorType,
-           wgpu::StringView message) {
-          SkDebugf("Device error: %.*s\n",
-                   static_cast<int>(message.length), message.data);
+        [](const wgpu::Device &, wgpu::ErrorType, wgpu::StringView message) {
+          SkDebugf("Device error: %.*s\n", static_cast<int>(message.length),
+                   message.data);
         });
   } else {
     desc.SetDeviceLostCallback(
@@ -125,18 +124,16 @@ requestDevice(dawn::native::Adapter &nativeAdapter,
         [](const wgpu::Device &, wgpu::DeviceLostReason reason,
            wgpu::StringView message) {
           if (reason != wgpu::DeviceLostReason::Destroyed) {
-            RNSkia::RNSkLogger::logToConsole(
-                "Device lost: %.*s",
-                static_cast<int>(message.length), message.data);
+            RNSkia::RNSkLogger::logToConsole("Device lost: %.*s",
+                                             static_cast<int>(message.length),
+                                             message.data);
           }
         });
-    desc.SetUncapturedErrorCallback(
-        [](const wgpu::Device &, wgpu::ErrorType,
-           wgpu::StringView message) {
-          RNSkia::RNSkLogger::logToConsole(
-              "Device error: %.*s",
-              static_cast<int>(message.length), message.data);
-        });
+    desc.SetUncapturedErrorCallback([](const wgpu::Device &, wgpu::ErrorType,
+                                       wgpu::StringView message) {
+      RNSkia::RNSkLogger::logToConsole(
+          "Device error: %.*s", static_cast<int>(message.length), message.data);
+    });
   }
 
   return wgpu::Device::Acquire(nativeAdapter.CreateDevice(&desc));

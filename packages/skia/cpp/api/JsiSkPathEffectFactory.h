@@ -92,7 +92,8 @@ public:
     auto style =
         static_cast<SkPath1DPathEffect::Style>(arguments[3].asNumber());
     auto pathEffect = std::make_shared<JsiSkPathEffect>(
-        getContext(), SkPath1DPathEffect::Make(path->snapshot(), advance, phase, style));
+        getContext(),
+        SkPath1DPathEffect::Make(path->snapshot(), advance, phase, style));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, pathEffect,
                                                        getContext());
   }

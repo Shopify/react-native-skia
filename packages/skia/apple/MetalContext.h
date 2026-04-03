@@ -5,6 +5,7 @@
 
 #include "include/core/SkSurface.h"
 
+#include "include/core/SkColorSpace.h"
 #import <include/gpu/ganesh/GrBackendSurface.h>
 #import <include/gpu/ganesh/GrDirectContext.h>
 #import <include/gpu/ganesh/SkImageGanesh.h>
@@ -13,7 +14,6 @@
 #import <include/gpu/ganesh/mtl/GrMtlBackendSurface.h>
 #import <include/gpu/ganesh/mtl/GrMtlDirectContext.h>
 #import <include/gpu/ganesh/mtl/SkSurfaceMetal.h>
-#include "include/core/SkColorSpace.h"
 
 struct OffscreenRenderContext {
   id<MTLTexture> texture;
@@ -46,7 +46,7 @@ public:
   }
 
   sk_sp<SkSurface> MakeOffscreen(int width, int height,
-                                  bool useP3ColorSpace = false) {
+                                 bool useP3ColorSpace = false) {
     auto device = _device;
     auto ctx = new OffscreenRenderContext(device, _directContext, _commandQueue,
                                           width, height);
@@ -58,10 +58,9 @@ public:
         GrBackendTextures::MakeMtl(width, height, skgpu::Mipmapped::kNo, info);
 
     sk_sp<SkColorSpace> colorSpace =
-        useP3ColorSpace
-            ? SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
-                                    SkNamedGamut::kDisplayP3)
-            : nullptr;
+        useP3ColorSpace ? SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
+                                                SkNamedGamut::kDisplayP3)
+                        : nullptr;
 
     // Create a SkSurface from the GrBackendTexture
     auto surface = SkSurfaces::WrapBackendTexture(

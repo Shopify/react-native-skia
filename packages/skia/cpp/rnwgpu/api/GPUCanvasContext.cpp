@@ -47,7 +47,7 @@ std::shared_ptr<GPUTexture> GPUCanvasContext::getCurrentTexture() {
     _surfaceInfo->reconfigure(width, height);
   }
   auto texture = _surfaceInfo->getCurrentTexture();
-  return std::make_shared<GPUTexture>(texture, "");
+  return std::make_shared<GPUTexture>(texture, "", false);
 }
 
 void GPUCanvasContext::present() {

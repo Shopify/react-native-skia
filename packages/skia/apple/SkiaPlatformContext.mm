@@ -7,8 +7,8 @@
 namespace rnwgpu {
 
 wgpu::Surface SkiaPlatformContext::makeSurface(wgpu::Instance instance,
-                                                void *surface, int width,
-                                                int height) {
+                                               void *surface, int width,
+                                               int height) {
   wgpu::SurfaceSourceMetalLayer metalSurfaceDesc;
   metalSurfaceDesc.layer = surface;
   wgpu::SurfaceDescriptor surfaceDescriptor;

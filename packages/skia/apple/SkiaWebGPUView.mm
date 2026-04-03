@@ -7,8 +7,8 @@
 #import <react/renderer/components/rnskia/Props.h>
 #import <react/renderer/components/rnskia/RCTComponentViewHelpers.h>
 
-#import "WebGPUMetalView.h"
 #import "RCTFabricComponentsPlugins.h"
+#import "WebGPUMetalView.h"
 
 using namespace facebook::react;
 
@@ -16,14 +16,16 @@ using namespace facebook::react;
 
 - (instancetype)initWithFrame:(CGRect)frame {
   if (self = [super initWithFrame:frame]) {
-    static const auto defaultProps = std::make_shared<const SkiaWebGPUViewProps>();
+    static const auto defaultProps =
+        std::make_shared<const SkiaWebGPUViewProps>();
     _props = defaultProps;
   }
   return self;
 }
 
 + (ComponentDescriptorProvider)componentDescriptorProvider {
-  return concreteComponentDescriptorProvider<SkiaWebGPUViewComponentDescriptor>();
+  return concreteComponentDescriptorProvider<
+      SkiaWebGPUViewComponentDescriptor>();
 }
 
 - (void)prepareForRecycle {
@@ -72,6 +74,8 @@ using namespace facebook::react;
 
 @end
 
-Class<RCTComponentViewProtocol> SkiaWebGPUViewCls(void) { return SkiaWebGPUView.class; }
+Class<RCTComponentViewProtocol> SkiaWebGPUViewCls(void) {
+  return SkiaWebGPUView.class;
+}
 
 #endif // RCT_NEW_ARCH_ENABLED

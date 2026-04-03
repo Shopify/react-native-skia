@@ -106,13 +106,14 @@ void RNSkManager::installBindings() {
                                    rnwgpu::GPUMapMode::create(*_jsRuntime));
   _jsRuntime->global().setProperty(*_jsRuntime, "GPUShaderStage",
                                    rnwgpu::GPUShaderStage::create(*_jsRuntime));
-  _jsRuntime->global().setProperty(*_jsRuntime, "GPUTextureUsage",
-                                   rnwgpu::GPUTextureUsage::create(*_jsRuntime));
+  _jsRuntime->global().setProperty(
+      *_jsRuntime, "GPUTextureUsage",
+      rnwgpu::GPUTextureUsage::create(*_jsRuntime));
 
   // Install RNWebGPU global object for WebGPU Canvas support
   auto rnWebGPU = std::make_shared<rnwgpu::RNWebGPU>(gpu, nullptr);
-  _jsRuntime->global().setProperty(*_jsRuntime, "RNWebGPU",
-                                   rnwgpu::RNWebGPU::create(*_jsRuntime, rnWebGPU));
+  _jsRuntime->global().setProperty(
+      *_jsRuntime, "RNWebGPU", rnwgpu::RNWebGPU::create(*_jsRuntime, rnWebGPU));
 #endif
 }
 } // namespace RNSkia

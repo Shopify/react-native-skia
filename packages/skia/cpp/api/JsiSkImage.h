@@ -46,30 +46,35 @@
 // recognise the canonical Apple profile, not Skia's mathematically equivalent
 // but non-standard one. Pixel values are untouched — zero quality loss.
 static sk_sp<SkData> replaceJpegICCWithAppleP3(sk_sp<SkData> jpegData) {
-  if (!jpegData || jpegData->size() < 4) return jpegData;
+  if (!jpegData || jpegData->size() < 4)
+    return jpegData;
 
   const uint8_t *src = jpegData->bytes();
   size_t srcLen = jpegData->size();
-  if (src[0] != 0xFF || src[1] != 0xD8) return jpegData; // not a JPEG
+  if (src[0] != 0xFF || src[1] != 0xD8)
+    return jpegData; // not a JPEG
 
   CGColorSpaceRef p3 = CGColorSpaceCreateWithName(kCGColorSpaceDisplayP3);
-  if (!p3) return jpegData;
+  if (!p3)
+    return jpegData;
   CFDataRef cfICC = CGColorSpaceCopyICCData(p3);
   CGColorSpaceRelease(p3);
-  if (!cfICC) return jpegData;
+  if (!cfICC)
+    return jpegData;
 
   const uint8_t *iccBytes = CFDataGetBytePtr(cfICC);
   size_t iccLen = (size_t)CFDataGetLength(cfICC);
 
   // "ICC_PROFILE\0" APP2 marker signature (12 bytes)
   static const uint8_t iccSig[] = {0x49, 0x43, 0x43, 0x5F, 0x50, 0x52,
-                                    0x4F, 0x46, 0x49, 0x4C, 0x45, 0x00};
+                                   0x4F, 0x46, 0x49, 0x4C, 0x45, 0x00};
 
   SkDynamicMemoryWStream out;
 
   out.write(src, 2); // SOI
 
-  // Structure: marker(2) + length(2) + "ICC_PROFILE\0"(12) + chunk[1,1](2) + profile
+  // Structure: marker(2) + length(2) + "ICC_PROFILE\0"(12) + chunk[1,1](2) +
+  // profile
   size_t iccContentLen = sizeof(iccSig) + 2 + iccLen;
   size_t segLen = iccContentLen + 2; // length field includes itself
   uint8_t app2hdr[4] = {0xFF, 0xE2, (uint8_t)(segLen >> 8),
@@ -83,12 +88,15 @@ static sk_sp<SkData> replaceJpegICCWithAppleP3(sk_sp<SkData> jpegData) {
   // Copy all header segments except any existing ICC APP2
   size_t i = 2;
   while (i + 3 < srcLen) {
-    if (src[i] != 0xFF) break;
+    if (src[i] != 0xFF)
+      break;
     uint8_t marker = src[i + 1];
-    if (marker == 0xDA || marker == 0xD9) break; // SOS / EOI
+    if (marker == 0xDA || marker == 0xD9)
+      break; // SOS / EOI
     size_t segLenVal = (size_t(src[i + 2]) << 8) | src[i + 3];
     size_t end = i + 2 + segLenVal;
-    if (end > srcLen) break;
+    if (end > srcLen)
+      break;
     bool isICC = marker == 0xE2 && end > i + 4 + sizeof(iccSig) &&
                  memcmp(src + i + 4, iccSig, sizeof(iccSig)) == 0;
     if (!isICC) {
