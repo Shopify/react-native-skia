@@ -7,7 +7,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  DAWN_BRANCH: chromium/7472  # Configure the Dawn branch to checkout
+  DAWN_BRANCH: chromium/7770  # Configure the Dawn branch to checkout
 
 jobs:
   prepare-release:
