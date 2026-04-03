@@ -68,7 +68,6 @@ const ParagraphOutputsAndroid = BUILD_WITH_PARAGRAPH
   ? ["libskparagraph.a", "libskunicode_core.a", "libskunicode_icu.a"]
   : [];
 
-// Dawn library for Graphite builds (contains dawn::native symbols)
 const DawnOutputApple = GRAPHITE ? ["libdawn_combined.a"] : [];
 const DawnOutputAndroid = GRAPHITE ? ["libdawn_combined.a"] : [];
 
@@ -90,7 +89,7 @@ export const commonArgs = [
   ["skia_enable_graphite", GRAPHITE],
   ["skia_use_dawn", GRAPHITE],
   // C++20 is required for Graphite builds (Dawn uses C++20 concepts)
-  // ...(GRAPHITE ? [["skia_use_cpp20", true]] : []),
+  // Passed via extra_cflags_cc per-target instead of skia_use_cpp20 (not available in all Skia versions)
 ];
 
 export type PlatformName =
@@ -122,6 +121,9 @@ export type Platform = {
   outputNames: string[];
   options?: Arg[];
 };
+
+// C++20 is required for Graphite builds (Dawn uses C++20 concepts)
+// Applied via patch in build-skia.ts (replaces -std=c++17 with -std=c++20 in gn/skia/BUILD.gn)
 
 const appleMinTarget = GRAPHITE ? "15.1" : "14.0";
 const appleSimulatorMinTarget = "16.0";
@@ -664,6 +666,14 @@ export const copyHeaders = () => {
   fileOps.cp(
     "../../externals/skia/modules/skunicode/include/SkUnicode.h",
     "./cpp/skia/modules/skunicode/include/SkUnicode.h"
+  );
+  fileOps.cp(
+    "../../externals/skia/modules/skunicode/include/SkUnicode_libgrapheme.h",
+    "./cpp/skia/modules/skunicode/include/SkUnicode_libgrapheme.h"
+  );
+  fileOps.cp(
+    "../../externals/skia/modules/skunicode/include/SkUnicode_icu.h",
+    "./cpp/skia/modules/skunicode/include/SkUnicode_icu.h"
   );
   // Check for duplicate header names and issue warnings
   const duplicateHeaders = $(

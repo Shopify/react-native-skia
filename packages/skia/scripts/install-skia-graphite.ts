@@ -17,7 +17,6 @@ import {
   readFileSync,
   readdirSync,
   rmSync,
-  statSync,
   writeFileSync,
 } from "fs";
 import https from "https";
@@ -30,20 +29,20 @@ import { fileOps } from "./utils";
 
 // Graphite configuration
 const GRAPHITE_CONFIG = {
-  version: "m144",
+  version: "m147a",
   checksums: {
     "android-armeabi-v7a":
-      "d43f8c6e2a3e90d2cb5287ae6828f414fb636e06ebcf7bffe53b558f2e738467",
+      "84bdd468bd50f5e1c32ea8809eba400f1da74893f4675b2822af26ead6d3acd7",
     "android-arm64-v8a":
-      "92b47853e203bd905829928baaa50386b96d651c48c37c9e5af12b33c0767b23",
+      "691865ca5fb750de65f904d163a6a2feff2b671268bb1c781e73d0db99c2e41f",
     "android-x86":
-      "efd390f785d3e9f8cca543aa1f56eb52500ffae31f2f5cd414b2ffa8c809d73d",
+      "7cc2993d68ef7cb50c542b04385239674c4991e519c1890742100cddddf624f1",
     "android-x86_64":
-      "0131d78ee5e484b09e4889ac8978714eb38fca34118d494a4665fa35ce4aa9df",
+      "06d5f88bd12ead9134a0fd512dd54e95fbb936f78d29c507155106cb49c1f163",
     "apple-ios-xcframeworks":
-      "69e95a5c559aaee25b3374b760b10d9d51db2dea8b3caec17391bd45b5566806",
+      "55b188a6f604411ddccff96253268db0134acb6ec5751b196b7552c104d61d7c",
     "apple-macos-xcframeworks":
-      "b0640d8dbea1a9609b31bbd7cedad5aefec776d417bd6a71f8c6b4b47da0984e",
+      "a2cf4591f2471f1b36dc2eae5d4e8c098243b738656dd9daa1ea57ee59cb0a63",
   },
 } as const;
 
@@ -61,8 +60,7 @@ const getBaseVersion = (version: string): string => {
 
 // Get the GitHub release tag
 const getReleaseTag = (version: string): string => {
-  const baseVersion = getBaseVersion(version);
-  return `skia-graphite-${baseVersion}`;
+  return `skia-graphite-${version}`;
 };
 
 // Get the download URL for an asset
@@ -71,24 +69,10 @@ const getDownloadUrl = (assetName: string): string => {
   return `https://github.com/Shopify/react-native-skia/releases/download/${releaseTag}/${assetName}`;
 };
 
-// Calculate directory checksum (matches the format used for verification)
-const calculateDirectoryChecksum = (dirPath: string): string => {
+// Calculate file checksum
+const calculateFileChecksum = (filePath: string): string => {
   const hash = createHash("sha256");
-  const processDir = (dir: string, relativePath: string = "") => {
-    const entries = readdirSync(dir).sort();
-    for (const entry of entries) {
-      const fullPath = path.join(dir, entry);
-      const entryRelativePath = path.join(relativePath, entry);
-      const stat = statSync(fullPath);
-      if (stat.isDirectory()) {
-        processDir(fullPath, entryRelativePath);
-      } else {
-        hash.update(entryRelativePath);
-        hash.update(readFileSync(fullPath));
-      }
-    }
-  };
-  processDir(dirPath);
+  hash.update(readFileSync(filePath));
   return hash.digest("hex");
 };
 
@@ -159,6 +143,21 @@ const downloadAndExtract = async (
 
   await downloadFile(url, tempFile);
 
+  // Verify checksum if provided (before extraction)
+  if (expectedChecksum) {
+    console.log(`  Verifying checksum...`);
+    const actualChecksum = calculateFileChecksum(tempFile);
+    if (actualChecksum !== expectedChecksum) {
+      rmSync(tempFile, { force: true });
+      throw new Error(
+        `Checksum mismatch for ${assetName}:\n` +
+          `  Expected: ${expectedChecksum}\n` +
+          `  Actual:   ${actualChecksum}`
+      );
+    }
+    console.log(`  ✓ Checksum verified`);
+  }
+
   // Extract
   console.log(`  Extracting to ${destDir}...`);
   if (existsSync(destDir)) {
@@ -168,20 +167,6 @@ const downloadAndExtract = async (
 
   // Cleanup temp file
   rmSync(tempFile, { force: true });
-
-  // Verify checksum if provided
-  if (expectedChecksum) {
-    console.log(`  Verifying checksum...`);
-    const actualChecksum = calculateDirectoryChecksum(destDir);
-    if (actualChecksum !== expectedChecksum) {
-      throw new Error(
-        `Checksum mismatch for ${assetName}:\n` +
-          `  Expected: ${expectedChecksum}\n` +
-          `  Actual:   ${actualChecksum}`
-      );
-    }
-    console.log(`  ✓ Checksum verified`);
-  }
 };
 
 // Checkout the Skia submodule to the correct branch

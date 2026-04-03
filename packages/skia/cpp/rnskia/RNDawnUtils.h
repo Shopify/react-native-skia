@@ -201,7 +201,7 @@ createDawnBackendContext(dawn::native::Instance *instance) {
       wgpu::FeatureName::BufferMapExtendedUsages,
       wgpu::FeatureName::TextureCompressionETC2,
       wgpu::FeatureName::TextureCompressionBC,
-      wgpu::FeatureName::R8UnormStorage,
+      wgpu::FeatureName::BGRA8UnormStorage,
       wgpu::FeatureName::DawnLoadResolveTexture,
       wgpu::FeatureName::DawnPartialLoadResolveTexture,
       wgpu::FeatureName::TimestampQuery,

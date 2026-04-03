@@ -166,14 +166,11 @@ public:
           strokePaint.setStrokeMiter(stroke.miter_limit.value());
         }
 
-        float precision = stroke.precision.value_or(1.0f);
-
-        auto strokedPath = std::make_shared<SkPath>();
-        if (!skpathutils::FillPathWithPaint(*p, strokePaint, strokedPath.get(),
-                                            nullptr, precision)) {
+        SkPathBuilder resultBuilder;
+        if (!skpathutils::FillPathWithPaint(*p, strokePaint, &resultBuilder)) {
           throw std::runtime_error("Failed to apply stroke to path");
         }
-        pathToUse = std::const_pointer_cast<const SkPath>(strokedPath);
+        pathToUse = std::make_shared<const SkPath>(resultBuilder.snapshot());
       } else {
         pathToUse = std::const_pointer_cast<const SkPath>(p);
       }

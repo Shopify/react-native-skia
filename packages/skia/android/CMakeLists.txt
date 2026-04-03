@@ -214,7 +214,6 @@ set_property(TARGET pathops PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libpat
 add_library(jsonreader STATIC IMPORTED)
 set_property(TARGET jsonreader PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libjsonreader.a")
 
-# Dawn library for Graphite builds (contains dawn::native symbols)
 if(SK_GRAPHITE)
     add_library(dawn_combined STATIC IMPORTED)
     set_property(TARGET dawn_combined PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_combined.a")

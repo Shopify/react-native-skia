@@ -19,6 +19,12 @@
 
 #include "modules/skparagraph/include/ParagraphBuilder.h"
 
+#ifdef __APPLE__
+#include "modules/skunicode/include/SkUnicode_libgrapheme.h"
+#else
+#include "modules/skunicode/include/SkUnicode_icu.h"
+#endif
+
 #pragma clang diagnostic pop
 
 namespace RNSkia {
@@ -125,7 +131,14 @@ public:
       _fontCollection->setAssetFontManager(fontManager);
     }
     _fontCollection->enableFontFallback();
-    _builder = para::ParagraphBuilder::make(paragraphStyle, _fontCollection);
+    sk_sp<SkUnicode> unicode;
+#ifdef __APPLE__
+    unicode = SkUnicodes::Libgrapheme::Make();
+#else
+    unicode = SkUnicodes::ICU::Make();
+#endif
+    _builder = para::ParagraphBuilder::make(paragraphStyle, _fontCollection,
+                                            unicode);
   }
 
 private:
