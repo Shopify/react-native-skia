@@ -114,7 +114,6 @@ public:
     wgpu::SharedTextureMemoryAHardwareBufferDescriptor platformDesc;
     auto ahb = (AHardwareBuffer *)buffer;
     platformDesc.handle = ahb;
-    platformDesc.useExternalFormat = true;
     AHardwareBuffer_Desc adesc;
     AHardwareBuffer_describe(ahb, &adesc);
     int width = adesc.width;
