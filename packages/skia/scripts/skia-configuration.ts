@@ -68,8 +68,8 @@ const ParagraphOutputsAndroid = BUILD_WITH_PARAGRAPH
   ? ["libskparagraph.a", "libskunicode_core.a", "libskunicode_icu.a"]
   : [];
 
-// Dawn is built as source_sets via GN and linked into libskia.a directly
-// (no separate dawn library output needed)
+const DawnOutputApple = GRAPHITE ? ["libdawn_combined.a"] : [];
+const DawnOutputAndroid = GRAPHITE ? ["libdawn_combined.a"] : [];
 
 export const commonArgs = [
   ["skia_use_piex", true],
@@ -258,6 +258,7 @@ const appleOutputNames = [
   "libskottie.a",
   "libsksg.a",
   ...ParagraphApple,
+  ...DawnOutputApple,
 ];
 
 export const configurations: Record<PlatformName, Platform> = {
@@ -306,6 +307,7 @@ export const configurations: Record<PlatformName, Platform> = {
       "libsksg.a",
       "libjsonreader.a",
       ...ParagraphOutputsAndroid,
+      ...DawnOutputAndroid,
     ],
   },
   "apple-ios": {
