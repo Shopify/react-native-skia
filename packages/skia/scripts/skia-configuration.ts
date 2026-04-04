@@ -122,11 +122,8 @@ export type Platform = {
   options?: Arg[];
 };
 
-// C++20 is required for Graphite builds (Dawn uses C++20 concepts)
-// Applied via patch in build-skia.ts (replaces -std=c++17 with -std=c++20 in gn/skia/BUILD.gn)
-
 const appleMinTarget = GRAPHITE ? "15.1" : "14.0";
-const appleSimulatorMinTarget = "16.0";
+const appleSimulatorMinTarget = appleMinTarget;
 
 // Define tvOS targets separately so they can be conditionally included
 const tvosTargets: { [key: string]: Target } = GRAPHITE

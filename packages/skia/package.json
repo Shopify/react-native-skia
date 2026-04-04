@@ -129,10 +129,10 @@
   },
   "dependencies": {
     "canvaskit-wasm": "0.41.0",
-    "react-native-skia-android": "147.0.0",
-    "react-native-skia-apple-ios": "147.0.0",
-    "react-native-skia-apple-macos": "147.0.0",
-    "react-native-skia-apple-tvos": "147.0.0",
+    "react-native-skia-android": "147.1.0",
+    "react-native-skia-apple-ios": "147.1.0",
+    "react-native-skia-apple-macos": "147.1.0",
+    "react-native-skia-apple-tvos": "147.1.0",
     "react-reconciler": "0.31.0"
   },
   "eslintIgnore": [
