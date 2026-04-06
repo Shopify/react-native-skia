@@ -1,4 +1,4 @@
-  #!/usr/bin/env node
+#!/usr/bin/env node
 "use strict";
 
 const path = require("path");
@@ -170,7 +170,9 @@ if (useGraphite) {
     const graphiteDest = path.join(packageRoot, "cpp/skia/src/gpu/graphite");
     fs.mkdirSync(graphiteDest, { recursive: true });
     fs.cpSync(graphiteSrc, graphiteDest, { recursive: true });
-    console.log("-- Copied Graphite source headers to cpp/skia/src/gpu/graphite/");
+    console.log(
+      "-- Copied Graphite source headers to cpp/skia/src/gpu/graphite/"
+    );
   }
 
   // Write .graphite marker file
