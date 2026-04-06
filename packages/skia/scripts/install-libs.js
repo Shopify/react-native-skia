@@ -4,10 +4,8 @@
 const path = require("path");
 const fs = require("fs");
 
-const useGraphite =
-  process.env.SK_GRAPHITE === "1" ||
-  (process.env.SK_GRAPHITE || "").toLowerCase() === "true";
-const prefix = useGraphite ? "react-native-skia-graphite" : "react-native-skia";
+const useGraphite = true;
+const prefix = "react-native-skia-graphite";
 const libsDir = path.join(__dirname, "..", "libs");
 const packageRoot = path.join(__dirname, "..");
 
