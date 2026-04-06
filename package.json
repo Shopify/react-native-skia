@@ -35,8 +35,11 @@
     "@webgpu/types": "^0.1.69"
   },
   "devDependencies": {
+<<<<<<< HEAD
+=======
     "eas-cli": "18.4.0",
     "playwright": "1.59.0",
+>>>>>>> main
     "react-native-test-app": "^4.2.0",
     "turbo": "^2.1.1"
   }

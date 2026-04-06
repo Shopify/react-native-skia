@@ -12,6 +12,9 @@ import type { Container } from "./StaticContainer";
 type EventPriority = number;
 const NoEventPriority = 0;
 
+type EventPriority = number;
+const NoEventPriority = 0;
+
 const DEBUG = false;
 export const debug = (...args: Parameters<typeof console.log>) => {
   if (DEBUG) {
@@ -177,8 +180,15 @@ export const sksgHostConfig: SkiaHostConfig = {
     _type,
     _oldProps,
     newProps,
+<<<<<<< HEAD
+    _updatePayload,
+    _internalInstanceHandle,
+    keepChildren: boolean,
+    _recyclableInstance: null | Instance
+=======
     keepChildren,
     _newChildSet
+>>>>>>> main
   ) {
     debug("cloneInstance");
     return {
@@ -263,8 +273,11 @@ export const sksgHostConfig: SkiaHostConfig = {
     return DefaultEventPriority;
   },
   resetFormInstance() {},
+<<<<<<< HEAD
+=======
 
   // DefinitelyTyped is not up to date, these are needed for devtools
   rendererVersion: "0.0.1",
   rendererPackageName: "react-native-skia",
+>>>>>>> main
 };

@@ -37,8 +37,12 @@ export interface CanvasRef extends FC<CanvasProps> {
 
 export const useCanvasRef = () => useRef<CanvasRef>(null);
 
+<<<<<<< HEAD
+//const NativeSkiaPictureView = SkiaPictureViewNativeComponent;
+=======
 const useReanimatedFrame = !HAS_REANIMATED_3 ? () => {} : Rea.useFrameCallback;
 const measure = !HAS_REANIMATED_3 ? null : Rea.measure;
+>>>>>>> main
 
 const useCanvasRefPriv: typeof useRef<View> = !HAS_REANIMATED_3
   ? useRef
@@ -68,10 +72,14 @@ export interface CanvasProps extends Omit<ViewProps, "onLayout"> {
   onLayout?: ViewProps["onLayout"];
   opaque?: boolean;
   onSize?: SharedValue<SkSize>;
+<<<<<<< HEAD
+  ref?: React.Ref<CanvasRef>;
+=======
   colorSpace?: "p3" | "srgb";
   ref?: React.Ref<CanvasRef>;
   androidWarmup?: boolean;
   __destroyWebGLContextAfterRender?: boolean;
+>>>>>>> main
 }
 
 export const Canvas = ({
@@ -79,6 +87,13 @@ export const Canvas = ({
   opaque,
   children,
   onSize,
+<<<<<<< HEAD
+  onLayout: _onLayout,
+  ref,
+  ...viewProps
+}: CanvasProps) => {
+  const onLayout = useOnSizeEvent(onSize, _onLayout);
+=======
   colorSpace = "p3",
   androidWarmup = false,
   ref,
@@ -91,6 +106,7 @@ export const Canvas = ({
     );
   }
   const viewRef = useCanvasRefPriv(null);
+>>>>>>> main
   // Native ID
   const nativeId = useMemo(() => {
     return SkiaViewNativeId.current++;
@@ -99,6 +115,12 @@ export const Canvas = ({
   // Root
   const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
 
+<<<<<<< HEAD
+  // Render effects
+  useLayoutEffect(() => {
+    root.render(children);
+  }, [children, root]);
+=======
   useReanimatedFrame(() => {
     "worklet";
     if (onSize && measure) {
@@ -127,6 +149,7 @@ export const Canvas = ({
   useLayoutEffect(() => {
     root.render(children);
   }, [children, root, nativeId]);
+>>>>>>> main
 
   useEffect(() => {
     return () => {
@@ -151,6 +174,12 @@ export const Canvas = ({
         getNativeId: () => {
           return nativeId;
         },
+<<<<<<< HEAD
+      } as CanvasRef)
+  );
+  return (
+    <SkiaPictureViewNativeComponent
+=======
         measure: (callback) => {
           viewRef.current?.measure(callback);
         },
@@ -175,15 +204,20 @@ export const Canvas = ({
   return (
     <SkiaPictureViewNativeComponent
       ref={viewRef}
+>>>>>>> main
       collapsable={false}
       nativeID={`${nativeId}`}
       debug={debug}
       opaque={opaque}
+<<<<<<< HEAD
+      onLayout={onLayout}
+=======
       colorSpace={colorSpace}
       androidWarmup={androidWarmup}
       onLayout={
         Platform.OS === "web" && (onSize || onLayout) ? onLayoutWeb : onLayout
       }
+>>>>>>> main
       {...viewProps}
     />
   );

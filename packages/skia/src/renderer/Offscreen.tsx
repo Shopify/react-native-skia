@@ -25,10 +25,14 @@ export const drawAsPicture = async (element: ReactElement, bounds?: SkRect) => {
   return picture;
 };
 
+<<<<<<< HEAD
+export const drawAsImage = async (element: ReactElement, size: SkSize) => {
+=======
 export const drawAsImage = async (
   element: ReactElement,
   size: SkSize
 ): Promise<SkImage | null> => {
+>>>>>>> main
   return drawAsImageFromPicture(await drawAsPicture(element), size);
 };
 

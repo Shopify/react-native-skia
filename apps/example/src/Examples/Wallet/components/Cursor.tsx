@@ -1,6 +1,19 @@
 import { Circle, Group, Paint } from "@shopify/react-native-skia";
 import React from "react";
 import type { SharedValue } from "react-native-reanimated";
+<<<<<<< HEAD
+import {
+  interpolateColor,
+  useDerivedValue,
+  // In react-native-reanimated <= 3.1.0, convertToRGBA is not exported yet
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  convertToRGBA,
+} from "react-native-reanimated";
+
+import { COLORS } from "../Model";
+
+=======
 import { interpolateColor, useDerivedValue } from "react-native-reanimated";
 
 import { COLORS } from "../Model";
@@ -10,6 +23,7 @@ const COLOR_STOPS =
     ? [0]
     : COLORS.map((_, index) => index / (COLORS.length - 1));
 
+>>>>>>> main
 interface CursorProps {
   x: SharedValue<number>;
   y: SharedValue<number>;
@@ -17,6 +31,21 @@ interface CursorProps {
 }
 
 export const Cursor = ({ x, y, width }: CursorProps) => {
+<<<<<<< HEAD
+  const color = useDerivedValue(() =>
+    convertToRGBA(
+      interpolateColor(
+        x.value / width,
+        COLORS.map((_, i) => i / COLORS.length),
+        COLORS
+      )
+    )
+  );
+  const transform = useDerivedValue(() => [
+    { translateX: x.value },
+    { translateY: y.value },
+  ]);
+=======
   const color = useDerivedValue(() => {
     "worklet";
     const ratio = width === 0 ? 0 : x.value / width;
@@ -35,6 +64,7 @@ export const Cursor = ({ x, y, width }: CursorProps) => {
     "worklet";
     return [{ translateX: x.value }, { translateY: y.value }];
   });
+>>>>>>> main
   return (
     <Group transform={transform}>
       <Circle cx={0} cy={0} r={27} color={color} opacity={0.15} />

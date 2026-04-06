@@ -21,12 +21,15 @@ export const HomeScreen = () => {
         route="API"
         testId="API"
       />
+<<<<<<< HEAD
+=======
       <HomeScreenButton
         title="💧 Liquid Glass"
         description="Liquid Glass examples"
         route="LiquidGlass"
         testId="LiquidGlass"
       />
+>>>>>>> main
       <HomeScreenButton
         title="🎥 Reanimated"
         description="Reanimated & Gesture Handler"

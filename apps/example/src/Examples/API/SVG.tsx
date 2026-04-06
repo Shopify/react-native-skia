@@ -1,4 +1,16 @@
 import React from "react";
+<<<<<<< HEAD
+import { useWindowDimensions } from "react-native";
+import { Canvas, ImageSVG, useSVG } from "@shopify/react-native-skia";
+
+export const SVG = () => {
+  const { width, height } = useWindowDimensions();
+  const svg = useSVG(require("./tiger.svg"));
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <ImageSVG svg={svg} x={0} y={0} width={width / 2} height={height / 2} />
+    </Canvas>
+=======
 import { useWindowDimensions, View } from "react-native";
 import type { DataModule } from "@shopify/react-native-skia";
 import {
@@ -61,5 +73,6 @@ export const SVG = () => {
         <ImageSVG svg={svg4} x={0} y={0} width={200} height={200} />
       </Canvas>
     </View>
+>>>>>>> main
   );
 };

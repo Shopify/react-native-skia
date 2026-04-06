@@ -6,6 +6,10 @@ require "#{ws_dir}/node_modules/react-native-test-app/macos/test_app.rb"
 
 workspace 'example.xcworkspace'
 
+<<<<<<< HEAD
+use_test_app! :hermes_enabled => true
+=======
 platform :osx, '14.0'
 
 use_test_app! :hermes_enabled => true, :new_arch_enabled => true
+>>>>>>> main

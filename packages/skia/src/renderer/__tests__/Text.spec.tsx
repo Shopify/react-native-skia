@@ -46,7 +46,11 @@ describe("Test different text examples", () => {
     const font = loadFont("skia/__tests__/assets/Roboto-Medium.ttf");
     const { Skia } = importSkia();
     const r = width / 2;
+<<<<<<< HEAD
+    path.addCircle(r, r, r / 2);
+=======
     const path = Skia.Path.Circle(r, r, r / 2);
+>>>>>>> main
     const surface = await drawOnNode(
       <>
         <Fill color="white" />

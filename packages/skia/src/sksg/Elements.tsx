@@ -57,6 +57,10 @@ import type {
 import type { SkiaProps } from "../renderer";
 
 declare module "react" {
+<<<<<<< HEAD
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+=======
+>>>>>>> main
   namespace JSX {
     interface IntrinsicElements {
       skGroup: SkiaProps<GroupProps>;

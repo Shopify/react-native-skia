@@ -10,12 +10,23 @@ Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flu
 
 **Version compatibility:**
 `react-native@>=0.79` and `react@>=19` are required. <br />
+<<<<<<< HEAD
+In addition you should make sure you're on at least `iOS 13` and `Android API level 21` or above. <br />
+=======
 In addition you should make sure you're on at least `iOS 14` and `Android API level 21` or above. <br />
+>>>>>>> main
 To use React Native Skia with video support, `Android API level 26` or above is required.
 
 For `react-native@<=0.78` and `react@<=18`, you need to use `@shopify/react-native-skia` version `1.12.4` or below.
 
+<<<<<<< HEAD
+`tvOS >= 13` is also supported.
+
+
+**Install the library using yarn:**
+=======
 tvOS, macOS, and macOS Catalyst are also supported platforms.
+>>>>>>> main
 
 ```sh
 yarn add @shopify/react-native-skia

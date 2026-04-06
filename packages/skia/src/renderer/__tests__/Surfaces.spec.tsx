@@ -51,7 +51,11 @@ describe("Surface", () => {
     for (let i = 0; i < 10; i++) {
       //const t = performance.now();
       const r = 128;
+<<<<<<< HEAD
+      const surface = await drawOnNode(
+=======
       using surface = await drawOnNode(
+>>>>>>> main
         <>
           <Group blendMode="multiply">
             <Circle cx={r} cy={r} r={r} color="cyan" />

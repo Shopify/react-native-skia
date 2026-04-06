@@ -956,9 +956,14 @@ public:
             "colors array must have the same length as transforms/sprites");
       }
 
+<<<<<<< HEAD
+      auto colors =
+          props.colors.has_value() ? props.colors.value().data() : nullptr;
+=======
       auto colors = SkSpan(
           props.colors.has_value() ? props.colors.value().data() : nullptr,
           props.colors.has_value() ? props.colors.value().size() : 0);
+>>>>>>> main
       auto blendMode = props.blendMode.value_or(SkBlendMode::kDstOver);
       auto sampling =
           props.sampling.value_or(SkSamplingOptions(SkFilterMode::kLinear));

@@ -30,6 +30,8 @@
       "dist/assets",
       "dist/main.windows.bundle"
     ]
+<<<<<<< HEAD
+=======
   },
   "ios": {
     "metalAPIValidation": false
@@ -39,5 +41,6 @@
   },
   "visionos": {
     "metalAPIValidation": false
+>>>>>>> main
   }
 }

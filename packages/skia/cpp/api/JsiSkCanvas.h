@@ -608,11 +608,17 @@ public:
     if (count > 6) {
       sampling = SamplingOptionsFromValue(runtime, arguments[6]);
     }
+<<<<<<< HEAD
+    _canvas->drawAtlas(atlas.get(), xforms.data(), skRects.data(),
+                       colors.empty() ? nullptr : colors.data(), skRects.size(),
+                       blendMode, sampling, nullptr, paint.get());
+=======
     auto x = SkSpan(xforms.data(), xforms.size());
     auto t = SkSpan(skRects.data(), skRects.size());
     auto c = SkSpan(colors.data(), colors.size());
     _canvas->drawAtlas(atlas.get(), x, t, c, blendMode, sampling, nullptr,
                        paint.get());
+>>>>>>> main
 
     return jsi::Value::undefined();
   }

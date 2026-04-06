@@ -46,13 +46,20 @@ export class SkiaSGRoot {
   private updateContainer(element: ReactNode) {
     return new Promise((resolve) => {
       skiaReconciler.updateContainer(element, this.root, null, () => {
+<<<<<<< HEAD
+        debug("updateContainer");
+=======
+>>>>>>> main
         resolve(true);
       });
     });
   }
 
   async render(element: ReactNode) {
+<<<<<<< HEAD
+=======
     this.container.mount();
+>>>>>>> main
     await this.updateContainer(element);
     this.container.redraw();
   }

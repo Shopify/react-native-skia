@@ -16,7 +16,11 @@ describe("Path Examples", () => {
       width: size,
       height: size,
     };
+<<<<<<< HEAD
+    path.addArc(arcRect, 45, 270);
+=======
     const path = Skia.PathBuilder.Make().addArc(arcRect, 45, 270).build();
+>>>>>>> main
     const surface = await drawOnNode(<Path path={path} color="lightblue" />);
     processResult(surface, "snapshots/paths/arc.png");
   });
@@ -29,7 +33,11 @@ describe("Path Examples", () => {
       width: size,
       height: size,
     };
+<<<<<<< HEAD
+    path.addOval(rct);
+=======
     const path = Skia.Path.Oval(rct);
+>>>>>>> main
     const surface = await drawOnNode(<Path path={path} color="lightblue" />);
     processResult(surface, "snapshots/paths/oval.png");
   });

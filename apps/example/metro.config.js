@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+const { makeMetroConfig } = require("@rnx-kit/metro-config");
+module.exports = makeMetroConfig({
+=======
 const path = require("path");
 const { resolve: defaultResolve } = require("metro-resolver");
 const { makeMetroConfig } = require("@rnx-kit/metro-config");
@@ -10,6 +14,7 @@ const assetRegistryPath = path.resolve(
 );
 
 const metroConfig = makeMetroConfig({
+>>>>>>> main
   transformer: {
     getTransformOptions: async () => ({
       transform: {
@@ -19,6 +24,8 @@ const metroConfig = makeMetroConfig({
     }),
   },
 });
+<<<<<<< HEAD
+=======
 
 function getWebMetroConfig(config) {
   config.resolver = config.resolver ?? {};
@@ -55,3 +62,4 @@ function getWebMetroConfig(config) {
 module.exports = !!process.env.IS_WEB_BUILD
   ? getWebMetroConfig(metroConfig)
   : metroConfig;
+>>>>>>> main
