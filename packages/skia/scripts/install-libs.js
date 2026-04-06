@@ -4,11 +4,10 @@
 const path = require("path");
 const fs = require("fs");
 
-const useGraphite =
-  process.env.SK_GRAPHITE === "1" ||
-  (process.env.SK_GRAPHITE || "").toLowerCase() === "true";
-const prefix = useGraphite ? "react-native-skia-graphite" : "react-native-skia";
+const useGraphite = true;
+const prefix = "react-native-skia-graphite";
 const libsDir = path.join(__dirname, "..", "libs");
+const packageRoot = path.join(__dirname, "..");
 
 function copySync(src, dest, options) {
   if (!src.includes("*")) {
@@ -131,3 +130,44 @@ fs.rmSync(androidDest, { recursive: true, force: true });
 copySync(androidSrcLibs, androidDest, { recursive: true });
 
 console.log("-- Copied Android libs to libs/android/");
+
+// --- Graphite: headers and marker file ---
+
+if (useGraphite) {
+  // Copy Dawn/WebGPU headers from the headers package
+  let headersPackage;
+  try {
+    headersPackage = path.dirname(
+      require.resolve("react-native-skia-graphite-headers/package.json")
+    );
+  } catch (e) {
+    console.error("ERROR: Could not find react-native-skia-graphite-headers");
+    console.error("Make sure you have run yarn install or npm install");
+    process.exit(1);
+  }
+
+  console.log("-- Skia Graphite headers package: " + headersPackage);
+
+  const headersSrcBase = path.join(headersPackage, "libs/skia/cpp");
+
+  // Copy Dawn/WebGPU headers
+  const dawnSrc = path.join(headersSrcBase, "dawn");
+  const dawnDest = path.join(packageRoot, "cpp/dawn");
+  fs.rmSync(dawnDest, { recursive: true, force: true });
+  fs.cpSync(dawnSrc, dawnDest, { recursive: true });
+  console.log("-- Copied Dawn/WebGPU headers to cpp/dawn/");
+
+  // Copy Graphite source headers
+  const graphiteSrc = path.join(headersSrcBase, "skia/src/gpu/graphite");
+  const graphiteDest = path.join(packageRoot, "cpp/skia/src/gpu/graphite");
+  fs.rmSync(graphiteDest, { recursive: true, force: true });
+  fs.mkdirSync(graphiteDest, { recursive: true });
+  fs.cpSync(graphiteSrc, graphiteDest, { recursive: true });
+  console.log("-- Copied Graphite source headers to cpp/skia/src/gpu/graphite/");
+
+  // Write .graphite marker file
+  const markerFile = path.join(libsDir, ".graphite");
+  const version = "m147a";
+  fs.writeFileSync(markerFile, version, "utf-8");
+  console.log("-- Wrote Graphite marker file: " + markerFile);
+}
