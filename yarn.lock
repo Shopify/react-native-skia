@@ -8488,10 +8488,10 @@ __metadata:
     react-native: 0.83.1
     react-native-builder-bob: 0.18.2
     react-native-reanimated: ^4.2.1
-    react-native-skia-graphite-android: 147.1.0
-    react-native-skia-graphite-apple-ios: 147.1.0
-    react-native-skia-graphite-apple-macos: 147.1.0
-    react-native-skia-graphite-headers: 147.1.0
+    react-native-skia-graphite-android: 147.1.1
+    react-native-skia-graphite-apple-ios: 147.1.1
+    react-native-skia-graphite-apple-macos: 147.1.1
+    react-native-skia-graphite-headers: 147.1.1
     react-native-worklets: ^0.7.0
     react-reconciler: 0.31.0
     rimraf: 3.0.2
@@ -29570,31 +29570,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-skia-graphite-android@npm:147.1.0":
-  version: 147.1.0
-  resolution: "react-native-skia-graphite-android@npm:147.1.0"
-  checksum: 0678eebb1bc389b6cdec96c0f2ed3e88594260ddc835e5cf2a952ab04a954589b26cdc7f4a8ea19c0d50fda54674985401a3b46267ef89307d252e452a78110e
+"react-native-skia-graphite-android@npm:147.1.1":
+  version: 147.1.1
+  resolution: "react-native-skia-graphite-android@npm:147.1.1"
+  checksum: 7b343e6a94616c8feb539722f5deab81ae7750bab7e5feb58515ee1238967496cda7f60b09d5ddc5d4771a08f302ecad4a38092224bb66a52ebcbe46d8f2f6c7
   languageName: node
   linkType: hard
 
-"react-native-skia-graphite-apple-ios@npm:147.1.0":
-  version: 147.1.0
-  resolution: "react-native-skia-graphite-apple-ios@npm:147.1.0"
-  checksum: d032542fb7197866542bbad6eaf78bbf9aa2f5725e5686a267ae76b1a3676e679d02a62b8bd9011c9768fa85e2249901a032c7fb53225a90c7ea6bd924a80764
+"react-native-skia-graphite-apple-ios@npm:147.1.1":
+  version: 147.1.1
+  resolution: "react-native-skia-graphite-apple-ios@npm:147.1.1"
+  checksum: 52e922c1be7188a279a906d97995093551fe2ba195c73af29725b4fd75c88a19388fa54e02763e991f3c4c073c6a77a209ccacdedba3de2fba0cb5e990005ea4
   languageName: node
   linkType: hard
 
-"react-native-skia-graphite-apple-macos@npm:147.1.0":
-  version: 147.1.0
-  resolution: "react-native-skia-graphite-apple-macos@npm:147.1.0"
-  checksum: 679416b4e5911e101c8416796d5968be3bf63e19e3a699d559dbf1fcfeafbee08e20efe82792d1341445f30651b16c078409e222c605a098dda73cc6f1ae34cf
+"react-native-skia-graphite-apple-macos@npm:147.1.1":
+  version: 147.1.1
+  resolution: "react-native-skia-graphite-apple-macos@npm:147.1.1"
+  checksum: 56b6a70a7d146fb40b179726b1a0618fa89a9e8907111ca5e3bee6f6822294ac40a791cfc090278b09d0ee334b2baafe2c5d69af146a21210ea410941a865be9
   languageName: node
   linkType: hard
 
-"react-native-skia-graphite-headers@npm:147.1.0":
-  version: 147.1.0
-  resolution: "react-native-skia-graphite-headers@npm:147.1.0"
-  checksum: 7edc864e698f655a1804ba1a24d88d6b402ad4ccaff6c90c95fecab83a85faa7671e60affe94a489049e4e6cf1ce2609932aa38034d4ff36f92d4707388486c1
+"react-native-skia-graphite-headers@npm:147.1.1":
+  version: 147.1.1
+  resolution: "react-native-skia-graphite-headers@npm:147.1.1"
+  checksum: cb64710b74c8ea44e426e14266a2e4319639f142d9dcaf1fbbb76e2810c3777a66b7c0619066670b26babdee2287abe50b51370174267b19f1b1bd86ebdb79b8
   languageName: node
   linkType: hard
 
