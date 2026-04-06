@@ -148,30 +148,22 @@ if (useGraphite) {
 
   console.log("-- Skia Graphite headers package: " + headersPackage);
 
-  const dawnDest = path.join(packageRoot, "cpp/dawn/include");
-  fs.rmSync(path.join(packageRoot, "cpp/dawn"), {
-    recursive: true,
-    force: true,
-  });
-  fs.mkdirSync(dawnDest, { recursive: true });
+  const headersSrcBase = path.join(headersPackage, "libs/skia/cpp");
 
-  const headersSrcDir = path.join(headersPackage, "include");
-  if (fs.existsSync(headersSrcDir)) {
-    fs.cpSync(headersSrcDir, dawnDest, { recursive: true });
-  }
+  // Copy Dawn/WebGPU headers
+  const dawnSrc = path.join(headersSrcBase, "dawn");
+  const dawnDest = path.join(packageRoot, "cpp/dawn");
+  fs.rmSync(dawnDest, { recursive: true, force: true });
+  fs.cpSync(dawnSrc, dawnDest, { recursive: true });
+  console.log("-- Copied Dawn/WebGPU headers to cpp/dawn/");
 
-  console.log("-- Copied Dawn/WebGPU headers to cpp/dawn/include/");
-
-  // Copy Graphite source headers if available
-  const graphiteSrc = path.join(headersPackage, "src/gpu/graphite");
-  if (fs.existsSync(graphiteSrc)) {
-    const graphiteDest = path.join(packageRoot, "cpp/skia/src/gpu/graphite");
-    fs.mkdirSync(graphiteDest, { recursive: true });
-    fs.cpSync(graphiteSrc, graphiteDest, { recursive: true });
-    console.log(
-      "-- Copied Graphite source headers to cpp/skia/src/gpu/graphite/"
-    );
-  }
+  // Copy Graphite source headers
+  const graphiteSrc = path.join(headersSrcBase, "skia/src/gpu/graphite");
+  const graphiteDest = path.join(packageRoot, "cpp/skia/src/gpu/graphite");
+  fs.rmSync(graphiteDest, { recursive: true, force: true });
+  fs.mkdirSync(graphiteDest, { recursive: true });
+  fs.cpSync(graphiteSrc, graphiteDest, { recursive: true });
+  console.log("-- Copied Graphite source headers to cpp/skia/src/gpu/graphite/");
 
   // Write .graphite marker file
   const markerFile = path.join(libsDir, ".graphite");
