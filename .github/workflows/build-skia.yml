@@ -81,13 +81,13 @@ jobs:
         include:
           - target: "apple-ios"
             artifact_name: "skia-apple-ios-xcframeworks"
-            package_root: "./packages/skia/libs/apple/ios"
+            package_root: "./packages/skia/libs/ios"
           - target: "apple-tvos"
             artifact_name: "skia-apple-tvos-xcframeworks"
-            package_root: "./packages/skia/libs/apple/tvos"
+            package_root: "./packages/skia/libs/tvos"
           - target: "apple-macos"
             artifact_name: "skia-apple-macos-xcframeworks"
-            package_root: "./packages/skia/libs/apple/macos"
+            package_root: "./packages/skia/libs/macos"
           - target: "android-arm"
             artifact_name: "skia-android-arm"
             package_root: "./packages/skia/libs/android/armeabi-v7a"
@@ -174,7 +174,7 @@ jobs:
 
       - name: Upload binaries as workflow artifact (dry run) - ${{ matrix.artifact_name }}
         if: ${{ github.event.inputs.dry_run == 'true' }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact_name }}
           path: ${{ steps.package.outputs.asset_path }}

@@ -27,6 +27,6 @@ index 8e42db771b..30048a1d43 100644
      } else if (current_cpu == "x86") {
        _arch_flags = [
          "-arch",
--- 
+--
 2.42.0
 

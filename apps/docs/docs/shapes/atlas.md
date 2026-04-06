@@ -15,7 +15,8 @@ Atlas transforms can be animated with near-zero cost using worklets. This makes 
 | sprites | `SkRect[]` | locations of sprites in atlas.             |
 | transforms | `RSXform[]` | Rotation/scale transforms to be applied for each sprite. |
 | colors? | `SkColor[]` | Optional. Color to blend the sprites with. |
-| blendMode? | `BlendMode` | Optional. Blend mode used to combine sprites and colors together. |
+| colorBlendMode? | `BlendMode` | Optional. Blend mode used to combine sprite colors with the texture. Default is `dstOver`. |
+| blendMode? | `BlendMode` | Optional. Blend mode used for layer compositing (how the Atlas is drawn onto the canvas). |
 | sampling? | `Sampling` | The method used to sample the image. see ([sampling options](/docs/images#sampling-options)). |
 
 ## RSXform

@@ -9,8 +9,8 @@
 
 #import <vector>
 
-#import <CoreVideo/CVPixelBuffer.h>
 #import <CoreVideo/CVMetalTextureCache.h>
+#import <CoreVideo/CVPixelBuffer.h>
 #import <MetalKit/MetalKit.h>
 
 #pragma clang diagnostic push

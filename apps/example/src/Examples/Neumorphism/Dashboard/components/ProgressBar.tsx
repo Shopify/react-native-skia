@@ -18,8 +18,7 @@ import type { SharedValue } from "react-native-reanimated";
 import { useDerivedValue } from "react-native-reanimated";
 
 const r1 = 85;
-const path = Skia.Path.Make();
-path.addCircle(12 + r1, 12 + r1, r1);
+const path = Skia.Path.Circle(12 + r1, 12 + r1, r1);
 const c = vec(12 + r1, 12 + r1);
 
 const fromCircle = (cx: number, cy: number, r: number) =>

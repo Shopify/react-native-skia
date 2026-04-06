@@ -6,11 +6,10 @@ To develop react-native-skia, you can build the skia libraries on your computer.
 
 ### Using pre-built binaries
 
-To use the Skia prebuilt binaries from GitHub, use the following commands:
+The Skia prebuilt binaries are installed as npm dependencies (`react-native-skia-android`, `react-native-skia-apple-*`). The native build systems (Gradle, CocoaPods) automatically resolve these packages.
+
 - Checkout submodules: `git submodule update --init --recursive`
 - Install dependencies: `yarn`
-- Go to the package folder: `cd packages/skia`
-- Install the Skia libraries: `yarn install-skia`
 
 ### Building
 
@@ -368,42 +367,4 @@ mkdir -p apps/docs/static/img/your-component/
 # Run tests
 yarn test src/renderer/__tests__/e2e/YourComponent.spec.tsx
 ```
-
-### 🔑 Key Differences
-
-#### Drawing Commands (Skottie-style)
-- Use `CommandType::DrawSkottie` or similar
-- Implement `draw(DrawingCtx *ctx)` method
-- Render directly to `ctx->canvas`
-- Examples: Skottie, Circle, Rect, Text
-
-#### Context Declarations (ImageFilter-style)
-- Use `CommandType::PushImageFilter` or similar
-- Implement `pushImageFilter(DrawingCtx *ctx)` method
-- Modify context state (e.g., `ctx->imageFilters.push_back()`)
-- Examples: ImageFilter, ColorFilter, MaskFilter, Shader
-
-### 📋 Checklist
-
-When adding a new component, ensure you:
-
-- [ ] Define props interface in `Drawings.ts`
-- [ ] Add node type in `NodeType.ts`
-- [ ] Create React component
-- [ ] Export component in `index.ts`
-- [ ] Add property converter (if needed) in `Convertor.h`
-- [ ] Implement C++ command class
-- [ ] Register command in `RNRecorder.h`
-- [ ] Add execution logic in `RNRecorder.h`
-- [ ] Update Node classification (if needed) in `Node.ts`
-- [ ] Create comprehensive tests
-- [ ] Verify TypeScript compilation
-- [ ] Run and verify tests pass
-
-### 📚 Reference Implementation
-
-The ImageFilter component serves as a complete reference implementation for context declarations, while Skottie serves as a reference for drawing commands. Both follow the established patterns and can be used as templates for new components.
-
-### 🔄 Pattern Summary
-
 This pattern allows you to add both types of components consistently to the React Native Skia scene graph system, maintaining clean separation between React component layer, type definitions, and native C++ implementation.

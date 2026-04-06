@@ -8,6 +8,9 @@
 #include "ImageFit.h"
 #include "RNSkPlatformContext.h"
 
+#include "include/core/SkPathBuilder.h"
+#include "include/core/SkStrokeRec.h"
+
 namespace RNSkia {
 
 struct CircleCmdProps {
@@ -123,12 +126,13 @@ public:
             SkTrimPathEffect::Make(start, end, SkTrimPathEffect::Mode::kNormal);
         if (pe != nullptr) {
           SkStrokeRec rec(SkStrokeRec::InitStyle::kHairline_InitStyle);
-          if (!pe->filterPath(&filteredPath, filteredPath, &rec, nullptr)) {
+          SkPathBuilder filteredBuilder;
+          if (!pe->filterPath(&filteredBuilder, filteredPath, &rec)) {
             throw std::runtime_error(
                 "Failed trimming path with parameters start: " +
                 std::to_string(start) + ", end: " + std::to_string(end));
           }
-          filteredPath.swap(filteredPath);
+          filteredPath = filteredBuilder.detach();
         } else {
           throw std::runtime_error(
               "Failed trimming path with parameters start: " +
@@ -162,14 +166,11 @@ public:
           strokePaint.setStrokeMiter(stroke.miter_limit.value());
         }
 
-        float precision = stroke.precision.value_or(1.0f);
-
-        auto strokedPath = std::make_shared<SkPath>();
-        if (!skpathutils::FillPathWithPaint(*p, strokePaint, strokedPath.get(),
-                                            nullptr, precision)) {
+        SkPathBuilder resultBuilder;
+        if (!skpathutils::FillPathWithPaint(*p, strokePaint, &resultBuilder)) {
           throw std::runtime_error("Failed to apply stroke to path");
         }
-        pathToUse = std::const_pointer_cast<const SkPath>(strokedPath);
+        pathToUse = std::make_shared<const SkPath>(resultBuilder.snapshot());
       } else {
         pathToUse = std::const_pointer_cast<const SkPath>(p);
       }
@@ -935,7 +936,8 @@ public:
     convertProperty(runtime, object, "sprites", props.sprites, variables);
     convertProperty(runtime, object, "transforms", props.transforms, variables);
     convertProperty(runtime, object, "colors", props.colors, variables);
-    convertProperty(runtime, object, "blendMode", props.blendMode, variables);
+    convertProperty(runtime, object, "colorBlendMode", props.blendMode,
+                    variables);
     convertProperty(runtime, object, "sampling", props.sampling, variables);
   }
 
