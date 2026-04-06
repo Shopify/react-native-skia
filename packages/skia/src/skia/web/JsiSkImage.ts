@@ -152,10 +152,6 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     return this.ref.readPixels(srcX ?? 0, srcY ?? 0, pxInfo);
   }
 
-  dispose = () => {
-    this.ref.delete();
-  };
-
   makeNonTextureImage(): SkImage {
     // if the image is already a non-texture image, this is a no-op
     const partialInfo = this.ref.getImageInfo();

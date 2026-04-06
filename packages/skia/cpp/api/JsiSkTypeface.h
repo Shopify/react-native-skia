@@ -38,12 +38,13 @@ public:
         count > 1 && !arguments[1].isNull() && !arguments[1].isUndefined()
             ? static_cast<int>(arguments[1].asNumber())
             : getObject()->textToGlyphs(str.c_str(), str.length(),
-                                        SkTextEncoding::kUTF8, nullptr, 0);
+                                        SkTextEncoding::kUTF8,
+                                        SkSpan<SkGlyphID>(nullptr, 0));
     std::vector<SkGlyphID> glyphIDs;
     glyphIDs.resize(numGlyphIDs);
-    getObject()->textToGlyphs(str.c_str(), str.length(), SkTextEncoding::kUTF8,
-                              static_cast<SkGlyphID *>(glyphIDs.data()),
-                              numGlyphIDs);
+    getObject()->textToGlyphs(
+        str.c_str(), str.length(), SkTextEncoding::kUTF8,
+        SkSpan(static_cast<SkGlyphID *>(glyphIDs.data()), numGlyphIDs));
     auto jsiGlyphIDs = jsi::Array(runtime, numGlyphIDs);
     for (int i = 0; i < numGlyphIDs; i++) {
       jsiGlyphIDs.setValueAtIndex(runtime, i,
@@ -52,16 +53,34 @@ public:
     return jsiGlyphIDs;
   }
 
+  size_t getMemoryPressure() const override {
+    auto typeface = getObject();
+    if (!typeface) {
+      return 0;
+    }
+
+    // Typefaces can be quite large as they contain font data
+    // Since SkTypeface doesn't provide a direct memory usage method,
+    // estimate based on glyph count (typically ranges from 64KB to several MB)
+    int glyphCount = typeface->countGlyphs();
+    return glyphCount > 0
+               ? glyphCount * 64
+               : 65536; // 64 bytes per glyph estimate, or 64KB minimum
+  }
+
   /**
    Returns the jsi object from a host object of this type
   */
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             sk_sp<SkTypeface> tf) {
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkTypeface>(std::move(context), std::move(tf)));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkTypeface>(context, std::move(tf));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, context);
   }
+
+  std::string getObjectType() const override { return "JsiSkTypeface"; }
 };
 
 } // namespace RNSkia

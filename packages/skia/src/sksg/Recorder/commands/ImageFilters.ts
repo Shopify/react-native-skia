@@ -5,6 +5,7 @@ import type {
   BlurMaskFilterProps,
   DisplacementMapImageFilterProps,
   DropShadowImageFilterProps,
+  ImageFilterProps,
   MorphologyImageFilterProps,
   OffsetImageFilterProps,
   RuntimeShaderImageFilterProps,
@@ -151,7 +152,7 @@ const declareDisplacementMapImageFilter = (
   if (!shader) {
     throw new Error("DisplacementMap expects a shader as child");
   }
-  const map = ctx.Skia.ImageFilter.MakeShader(shader, null);
+  const map = ctx.Skia.ImageFilter.MakeShader(shader);
   const imgf = ctx.Skia.ImageFilter.MakeDisplacementMap(
     ColorChannel[enumKey(channelX)],
     ColorChannel[enumKey(channelY)],
@@ -174,6 +175,12 @@ const declareRuntimeShaderImageFilter = (
   }
   const imgf = ctx.Skia.ImageFilter.MakeRuntimeShader(rtb, null, null);
   ctx.imageFilters.push(imgf);
+};
+
+const declareImageFilter = (ctx: DrawingContext, props: ImageFilterProps) => {
+  "worklet";
+  const { filter } = props;
+  ctx.imageFilters.push(filter);
 };
 
 export const composeImageFilters = (ctx: DrawingContext) => {
@@ -207,6 +214,7 @@ export const isPushImageFilter = (
 };
 
 type Props = {
+  [NodeType.ImageFilter]: ImageFilterProps;
   [NodeType.OffsetImageFilter]: OffsetImageFilterProps;
   [NodeType.DisplacementMapImageFilter]: DisplacementMapImageFilterProps;
   [NodeType.BlurImageFilter]: BlurImageFilterProps;
@@ -216,8 +224,9 @@ type Props = {
   [NodeType.RuntimeShaderImageFilter]: RuntimeShaderImageFilterProps;
 };
 
-interface PushImageFilter<T extends keyof Props>
-  extends Command<CommandType.PushImageFilter> {
+interface PushImageFilter<
+  T extends keyof Props,
+> extends Command<CommandType.PushImageFilter> {
   imageFilterType: T;
   props: Props[T];
 }
@@ -235,7 +244,9 @@ export const pushImageFilter = (
   command: Command<CommandType.PushImageFilter>
 ) => {
   "worklet";
-  if (isImageFilter(command, NodeType.BlurImageFilter)) {
+  if (isImageFilter(command, NodeType.ImageFilter)) {
+    declareImageFilter(ctx, command.props);
+  } else if (isImageFilter(command, NodeType.BlurImageFilter)) {
     declareBlurImageFilter(ctx, command.props);
   } else if (isImageFilter(command, NodeType.MorphologyImageFilter)) {
     declareMorphologyImageFilter(ctx, command.props);

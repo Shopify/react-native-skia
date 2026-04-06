@@ -30,7 +30,20 @@ export abstract class BaseHostObject<T, N extends string>
     this.__typename__ = typename;
   }
 
-  abstract dispose(): void;
+  dispose() {
+    this[Symbol.dispose]();
+  }
+
+  [Symbol.dispose](): void {
+    if (
+      this.ref !== null &&
+      typeof this.ref === "object" &&
+      "delete" in this.ref &&
+      typeof this.ref.delete === "function"
+    ) {
+      this.ref.delete();
+    }
+  }
 }
 
 export abstract class HostObject<T, N extends string> extends BaseHostObject<
@@ -51,7 +64,13 @@ export const getEnum = (
   if (typeof e !== "function") {
     throw new Error(`${name} is not an number`);
   }
-  const result = Object.values(e).find(({ value }) => value === v);
+  const result = Object.values(e).find(
+    (entry) =>
+      entry !== null &&
+      typeof entry === "object" &&
+      "value" in entry &&
+      entry.value === v
+  );
   if (!result) {
     throw new Error(
       `Enum ${name} does not have value ${v} on React Native Web`

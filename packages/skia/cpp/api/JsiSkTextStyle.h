@@ -110,17 +110,17 @@ public:
       auto weight = static_cast<SkFontStyle::Weight>(
           propValue.hasProperty(runtime, "weight")
               ? propValue.getProperty(runtime, "weight").asNumber()
-              : SkFontStyle::Weight::kNormal_Weight);
+              : static_cast<double>(SkFontStyle::Weight::kNormal_Weight));
 
       auto width = static_cast<SkFontStyle::Width>(
           propValue.hasProperty(runtime, "width")
               ? propValue.getProperty(runtime, "width").asNumber()
-              : SkFontStyle::Width::kNormal_Width);
+              : static_cast<double>(SkFontStyle::Width::kNormal_Width));
 
       auto slant = static_cast<SkFontStyle::Slant>(
           propValue.hasProperty(runtime, "slant")
               ? propValue.getProperty(runtime, "slant").asNumber()
-              : SkFontStyle::Slant::kUpright_Slant);
+              : static_cast<double>(SkFontStyle::Slant::kUpright_Slant));
 
       retVal.setFontStyle(SkFontStyle(weight, width, slant));
     }
@@ -137,11 +137,15 @@ public:
     }
     if (object.hasProperty(runtime, "halfLeading")) {
       auto propValue = object.getProperty(runtime, "halfLeading");
-      retVal.setHalfLeading(propValue.asNumber());
+      retVal.setHalfLeading(propValue.getBool());
     }
     if (object.hasProperty(runtime, "letterSpacing")) {
       auto propValue = object.getProperty(runtime, "letterSpacing");
       retVal.setLetterSpacing(propValue.asNumber());
+    }
+    if (object.hasProperty(runtime, "wordSpacing")) {
+      auto propValue = object.getProperty(runtime, "wordSpacing");
+      retVal.setWordSpacing(propValue.asNumber());
     }
     if (object.hasProperty(runtime, "locale")) {
       auto propValue = object.getProperty(runtime, "locale");

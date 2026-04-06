@@ -47,7 +47,7 @@ We offer some [Skia specific animation hooks](/docs/animations/hooks), especiall
 
 ## Colors
 
-For colors, React Native Skia uses a different storage format for than Reanimated.
+For colors, React Native Skia uses a different storage format from Reanimated.
 This means that [`interpolateColor`](https://docs.swmansion.com/react-native-reanimated/docs/utilities/interpolateColor/) from Reanimated won't work out of the box.
 Instead you can use `interpolateColors` from React Native Skia.
 

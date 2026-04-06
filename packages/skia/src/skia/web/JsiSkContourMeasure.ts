@@ -23,10 +23,10 @@ export class JsiSkContourMeasure
   }
 
   getSegment(startD: number, stopD: number, startWithMoveTo: boolean) {
-    return new JsiSkPath(
-      this.CanvasKit,
-      this.ref.getSegment(startD, stopD, startWithMoveTo)
-    );
+    const segment = this.ref.getSegment(startD, stopD, startWithMoveTo);
+    const builder = new this.CanvasKit.PathBuilder(segment);
+    segment.delete();
+    return new JsiSkPath(this.CanvasKit, builder);
   }
 
   isClosed() {
@@ -36,8 +36,4 @@ export class JsiSkContourMeasure
   length() {
     return this.ref.length();
   }
-
-  dispose = () => {
-    this.ref.delete();
-  };
 }

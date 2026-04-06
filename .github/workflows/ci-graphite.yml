@@ -1,0 +1,231 @@
+name: CI Graphite
+on:
+  push:
+    branches:
+      - main
+      - next
+  pull_request:
+    branches:
+      - main
+      - next
+  merge_group:
+    types:
+      - checks_requested
+
+concurrency:
+  group: ${{ github.ref }}-graphite
+  cancel-in-progress: true
+
+jobs:
+  build-android-graphite:
+    runs-on: ubuntu-latest
+    env:
+      TURBO_CACHE_DIR: .turbo/android
+    steps:
+      - name: Checkout
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          graphite: true
+
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - name: Cache turborepo for Android
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: ${{ env.TURBO_CACHE_DIR }}
+          key: ${{ runner.os }}-turborepo-android-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-turborepo-android
+
+      - name: Install JDK
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Install NDK
+        uses: nttld/setup-ndk@afb4c9964b521afb97c864b7d40b11e6911bd410 # v1.5.0
+        id: setup-ndk
+        with:
+          ndk-version: r27d
+
+      - name: Set ANDROID_NDK
+        run: echo "ANDROID_NDK=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
+
+      - name: Finalize Android SDK
+        run: |
+          /bin/bash -c "yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null"
+
+      - name: Install Android SDK
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > $GITHUB_WORKSPACE/apps/example/android/local.properties
+
+      - name: Cache Gradle
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: |
+            ~/.gradle/wrapper
+            ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('./apps/example/android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build example for Android
+        env:
+          JAVA_OPTS: "-XX:MaxHeapSize=6g"
+        run: |
+          yarn turbo run build:android --concurrency 1
+
+      - name: Cache apk
+        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        env:
+          cache-name: cache-apk
+        with:
+          path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
+          key: apk-graphite-${{ github.sha }}
+
+      - name: Upload Android APK artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.0
+        with:
+          name: android-example-apk-graphite
+          path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
+
+  test-android-graphite:
+    needs: build-android-graphite
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      TURBO_CACHE_DIR: .turbo/android
+    steps:
+      - name: checkout
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          graphite: true
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Install Android SDK tools
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
+          echo "$ANDROID_HOME/emulator" >> $GITHUB_PATH
+
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Restore APK
+        id: cache-apk
+        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7
+        with:
+          path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
+          key: apk-graphite-${{ github.sha }}
+
+      - name: Start Package Manager
+        working-directory: apps/example/
+        run: E2E=true yarn start &
+
+      - name: Run Android Emulator Tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          arch: x86_64
+          profile: Nexus 5X
+          force-avd-creation: true
+          emulator-options: -no-snapshot-save -no-window -gpu swangle_indirect -noaudio -no-boot-anim
+          disable-animations: true
+          script: |
+            # Wait for Metro bundler
+            sleep 10
+
+            # Install and launch app
+            adb install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk
+            adb shell monkey -p com.microsoft.reacttestapp 1
+
+            # Run tests
+            cd packages/skia && CI=true yarn test -i e2e/Path --testPathIgnorePatterns Paragraphs
+
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.0
+        if: failure()
+        with:
+          path: packages/skia/src/__tests__/snapshots/
+          name: tests-snapshots-screenshots
+
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.0
+        if: failure()
+        with:
+          path: apps/docs/static/
+          name: tests-docs-screenshots
+
+  build-test-ios-graphite:
+    runs-on: macos-latest-xlarge
+    env:
+      TURBO_CACHE_DIR: .turbo/ios
+    steps:
+      - name: Checkout
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          graphite: true
+
+      - name: Cache turborepo for iOS
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: ${{ env.TURBO_CACHE_DIR }}
+          key: ${{ runner.os }}-turborepo-ios-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-turborepo-ios-
+
+      - name: Check turborepo cache for iOS
+        run: |
+          TURBO_CACHE_STATUS=$(node -p "($(yarn turbo run build:ios --cache-dir=\"${{ env.TURBO_CACHE_DIR }}\" --dry=json)).tasks.find(t => t.task === 'build:ios').cache.status")
+
+          if [[ $TURBO_CACHE_STATUS == "HIT" ]]; then
+            echo "turbo_cache_hit=1" >> $GITHUB_ENV
+          fi
+
+      - name: Install CocoaPods
+        working-directory: apps/example/ios
+        run: pod install
+
+      - name: Start Package Manager
+        working-directory: apps/example
+        run: E2E=true yarn start &
+  
+      - name: Build example for iOS
+        working-directory: apps/example
+        run: yarn ios --simulator 'iPhone 16 Pro'
+
+      - name: Run e2e tests
+        working-directory: packages/skia
+        run: CI=true E2E=true yarn test -i Paths

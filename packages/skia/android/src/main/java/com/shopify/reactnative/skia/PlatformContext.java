@@ -115,6 +115,17 @@ public class PlatformContext {
         });
     }
 
+    @DoNotStrip
+    public void notifyTaskReady() {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            notifyTaskReadyNative();
+        } else {
+            mainHandler.post(this::notifyTaskReadyNative);
+        }
+    }
+
     // Private c++ native methods
     private native HybridData initHybrid(float pixelDensity);
+
+    private native void notifyTaskReadyNative();
 }

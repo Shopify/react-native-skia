@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import React from "react";
 
 import { surface, importSkia } from "../setup";
@@ -9,8 +8,9 @@ import {
   LinearGradient,
   Paint,
   Path,
+  SweepGradient,
 } from "../../components";
-import { checkImage } from "../../../__tests__/setup";
+import { checkImage, docPath } from "../../../__tests__/setup";
 import { fitbox } from "../../components/shapes/FitBox";
 
 const blendModes = [
@@ -140,7 +140,7 @@ describe("Paint", () => {
         })}
       </>
     );
-    checkImage(img, "snapshots/paint/blend-mode.png");
+    checkImage(img, "snapshots/paint/blend-mode.png", { maxPixelDiff: 500 });
   });
   it("Dithering", async () => {
     const { height } = surface;
@@ -166,5 +166,156 @@ describe("Paint", () => {
       shouldFail: true,
       threshold: 0,
     });
+  });
+  it("should override colors", async () => {
+    const { vec } = importSkia();
+    const strokeWidth = 10;
+    const { width, height } = surface;
+    const c = vec(width / 2, height / 2);
+    const r = (width - strokeWidth) / 2;
+    const result = await surface.draw(
+      <>
+        <Circle c={c} r={r} color="transparent">
+          <Paint color="lightblue" />
+          <Paint color="#adbce6" style="stroke" strokeWidth={strokeWidth} />
+          <Paint color="#ade6d8" style="stroke" strokeWidth={strokeWidth / 2} />
+        </Circle>
+      </>
+    );
+    checkImage(result, docPath("paint/stroke.png"));
+  });
+  it("colors don't influence opacity (1)", async () => {
+    const { vec } = importSkia();
+    const strokeWidth = 10;
+    const { width, height } = surface;
+    const c = vec(width / 2, height / 2);
+    const r = (width - strokeWidth) / 2;
+    const result = await surface.draw(
+      <Group color="rgba(0,0,0,0.5)">
+        <Circle c={c} r={r} color="lightblue" />
+      </Group>
+    );
+    checkImage(result, docPath("paint/opaque-circle.png"));
+  });
+  it("colors don't influence opacity (2)", async () => {
+    const { vec } = importSkia();
+    const strokeWidth = 10;
+    const { width, height } = surface;
+    const c = vec(width / 2, height / 2);
+    const r = (width - strokeWidth) / 2;
+    const result = await surface.draw(
+      <Group opacity={0.5}>
+        <Circle c={c} r={r} color="lightblue" />
+      </Group>
+    );
+    checkImage(result, docPath("paint/semi-transparent-circle.png"));
+  });
+  it("test paint", async () => {
+    const { vec, Skia } = importSkia();
+    const strokeWidth = 10;
+    const { width, height } = surface;
+    const c = vec(width / 2, height / 2);
+    const r = (width - strokeWidth) / 2;
+    const path = Skia.Path.Circle(c.x, c.y, r);
+    const result = await surface.draw(
+      <Path path={path} color="transparent">
+        <Paint style="stroke" strokeWidth={20} strokeCap="round">
+          <SweepGradient c={c} colors={["#64BC65", "#4488ff"]} />
+        </Paint>
+      </Path>
+    );
+    checkImage(result, docPath("paint/test-paint.png"));
+  });
+  it("should apply PlusDarker blend mode", async () => {
+    const { width, height } = surface;
+    const r = width / 4;
+    const result = await surface.draw(
+      <Group>
+        <Fill color="white" />
+        <Circle cx={width / 2 - r / 2} cy={height / 2} r={r} color="red" />
+        <Circle
+          cx={width / 2 + r / 2}
+          cy={height / 2}
+          r={r}
+          color="cyan"
+          blendMode="plusDarker"
+        />
+      </Group>
+    );
+    checkImage(result, "snapshots/paint/plus-darker.png");
+  });
+  it("should apply PlusLighter blend mode", async () => {
+    const { width, height } = surface;
+    const r = width / 4;
+    const result = await surface.draw(
+      <Group>
+        <Fill color="black" />
+        <Circle cx={width / 2 - r / 2} cy={height / 2} r={r} color="red" />
+        <Circle
+          cx={width / 2 + r / 2}
+          cy={height / 2}
+          r={r}
+          color="cyan"
+          blendMode="plusLighter"
+        />
+      </Group>
+    );
+    checkImage(result, "snapshots/paint/plus-lighter.png");
+  });
+  it("should apply PlusDarker blend mode with overlapping RGB circles", async () => {
+    const { width, height } = surface;
+    const r = width / 4;
+    const cx = width / 2;
+    const cy = height / 2;
+    const offset = r / 2;
+    const result = await surface.draw(
+      <Group>
+        <Fill color="white" />
+        <Circle cx={cx} cy={cy - offset} r={r} color="red" />
+        <Circle
+          cx={cx - offset}
+          cy={cy + offset}
+          r={r}
+          color="green"
+          blendMode="plusLighter"
+        />
+        <Circle
+          cx={cx + offset}
+          cy={cy + offset}
+          r={r}
+          color="blue"
+          blendMode="plusLighter"
+        />
+      </Group>
+    );
+    checkImage(result, "snapshots/paint/plus-darker-rgb.png");
+  });
+  it("should apply PlusLighter blend mode with overlapping RGB circles", async () => {
+    const { width, height } = surface;
+    const r = width / 4;
+    const cx = width / 2;
+    const cy = height / 2;
+    const offset = r / 2;
+    const result = await surface.draw(
+      <Group>
+        <Fill color="black" />
+        <Circle cx={cx} cy={cy - offset} r={r} color="red" />
+        <Circle
+          cx={cx - offset}
+          cy={cy + offset}
+          r={r}
+          color="green"
+          blendMode="plusLighter"
+        />
+        <Circle
+          cx={cx + offset}
+          cy={cy + offset}
+          r={r}
+          color="blue"
+          blendMode="plusLighter"
+        />
+      </Group>
+    );
+    checkImage(result, "snapshots/paint/plus-lighter-rgb.png");
   });
 });

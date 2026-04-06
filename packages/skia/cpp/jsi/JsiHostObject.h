@@ -125,8 +125,8 @@ using JsiPropertySettersMap =
  */
 class JsiHostObject : public jsi::HostObject {
 public:
-  JsiHostObject();
-  ~JsiHostObject();
+  JsiHostObject() = default;
+  ~JsiHostObject() = default;
 
   /**
    * Overridden jsi::HostObject set property method

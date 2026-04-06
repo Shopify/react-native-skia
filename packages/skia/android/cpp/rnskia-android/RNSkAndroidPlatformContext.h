@@ -9,20 +9,21 @@
 #include <string>
 
 #if defined(SK_GRAPHITE)
-#include "DawnContext.h"
+#include "RNDawnContext.h"
 #else
 #include "OpenGLContext.h"
 #endif
 
 #include "AHardwareBufferUtils.h"
 #include "JniPlatformContext.h"
-#include "MainThreadDispatcher.h"
 #include "RNSkAndroidVideo.h"
 #include "RNSkPlatformContext.h"
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "include/ports/SkFontMgr_android.h"
+#include "include/ports/SkFontScanner_FreeType.h"
 
 #pragma clang diagnostic pop
 
@@ -49,11 +50,14 @@ public:
     _jniPlatformContext->raiseError(err);
   }
 
-  sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override {
+  sk_sp<SkSurface> makeOffscreenSurface(int width, int height,
+                                        bool useP3ColorSpace = false) override {
 #if defined(SK_GRAPHITE)
-    return DawnContext::getInstance().MakeOffscreen(width, height);
+    return DawnContext::getInstance().MakeOffscreen(width, height,
+                                                    useP3ColorSpace);
 #else
-    return OpenGLContext::getInstance().MakeOffscreen(width, height);
+    return OpenGLContext::getInstance().MakeOffscreen(width, height,
+                                                      useP3ColorSpace);
 #endif
   }
 
@@ -75,6 +79,7 @@ public:
 #endif
   }
 
+#if !defined(SK_GRAPHITE)
   sk_sp<SkImage> makeImageFromNativeTexture(const TextureInfo &texInfo,
                                             int width, int height,
                                             bool mipMapped) override {
@@ -99,6 +104,7 @@ public:
         kTopLeft_GrSurfaceOrigin, kRGBA_8888_SkColorType, kUnpremul_SkAlphaType,
         nullptr);
   }
+#endif
 
   std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override {
     auto jniVideo = _jniPlatformContext->createVideo(url);
@@ -171,6 +177,11 @@ public:
 #endif
   }
 
+#if !defined(SK_GRAPHITE)
+  GrDirectContext *getDirectContext() override {
+    return OpenGLContext::getInstance().getDirectContext();
+  }
+
   const TextureInfo getTexture(sk_sp<SkImage> image) override {
     GrBackendTexture texture;
     if (!SkImages::GetBackendTextureFromImage(image, &texture, true)) {
@@ -186,6 +197,7 @@ public:
   }
 
   static TextureInfo getTextureInfo(const GrBackendTexture &texture) {
+
     if (!texture.isValid()) {
       throw std::runtime_error("invalid backend texture");
     }
@@ -204,19 +216,14 @@ public:
     texInfo.glTarget = textureInfo.fTarget;
     return texInfo;
   }
-
-#if !defined(SK_GRAPHITE)
-  GrDirectContext *getDirectContext() override {
-    return OpenGLContext::getInstance().getDirectContext();
-  }
 #endif
 
   sk_sp<SkFontMgr> createFontMgr() override {
-    return SkFontMgr_New_Android(nullptr);
+    return SkFontMgr_New_Android(nullptr, SkFontScanner_Make_FreeType());
   }
 
   void runOnMainThread(std::function<void()> task) override {
-    MainThreadDispatcher::getInstance().post(std::move(task));
+    _jniPlatformContext->runTaskOnMainThread(std::move(task));
   }
 
   sk_sp<SkImage> takeScreenshotFromViewTag(size_t tag) override {

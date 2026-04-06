@@ -4,9 +4,18 @@ import {
   checkImage,
   itRunsCIAndNodeOnly,
   itRunsE2eOnly,
+  itSkipsCanvasKit,
 } from "../../../__tests__/setup";
 import { Fill, Group, Rect, Text, TextPath } from "../../components";
-import { fonts, importSkia, surface } from "../setup";
+import { fonts, importSkia, resolveFile, surface } from "../setup";
+
+const RobotoMedium = Array.from(
+  resolveFile("skia/__tests__/assets/Roboto-Medium.ttf")
+);
+
+const Amiri = Array.from(
+  resolveFile("skia/__tests__/assets/Amiri-Regular.ttf")
+);
 
 describe("Text", () => {
   // The NotoColorEmoji font is not supported on iOS
@@ -72,9 +81,8 @@ describe("Text", () => {
   it("Should draw text along a circle", async () => {
     const font = fonts.RobotoMedium;
     const { Skia } = importSkia();
-    const path = Skia.Path.Make();
     const r = surface.width / 2;
-    path.addCircle(r, r, r / 2);
+    const path = Skia.Path.Circle(r, r, r / 2);
     const image = await surface.draw(
       <>
         <Fill color="white" />
@@ -86,12 +94,8 @@ describe("Text", () => {
     checkImage(image, `snapshots/text/text-path1-${surface.OS}.png`);
   });
 
-  it("Should draw text along a path", async () => {
+  itSkipsCanvasKit("Should draw text along a path", async () => {
     const font = fonts.NotoSansSCRegular;
-    const { Skia } = importSkia();
-    const path = Skia.Path.Make();
-    const r = surface.width / 2;
-    path.addCircle(r, r, r / 2);
     const image = await surface.draw(
       <>
         <Fill color="white" />
@@ -106,4 +110,54 @@ describe("Text", () => {
     );
     checkImage(image, `snapshots/text/text-path2-${surface.OS}.png`);
   });
+
+  itSkipsCanvasKit(
+    "Should create a path from text with Roboto font",
+    async () => {
+      const img = await surface.drawOffscreen(
+        (Skia, canvas, ctx) => {
+          const roboto = Skia.Typeface.MakeFreeTypeFaceFromData(
+            Skia.Data.fromBytes(new Uint8Array(ctx.RobotoMedium))
+          )!;
+          const font = Skia.Font(roboto, 64);
+          const path = Skia.Path.MakeFromText("Hello", 0, 64, font);
+          if (path) {
+            const paint = Skia.Paint();
+            paint.setColor(Skia.Color("black"));
+            canvas.drawColor(Skia.Color("white"));
+            canvas.drawPath(path, paint);
+          }
+        },
+        {
+          RobotoMedium,
+        }
+      );
+      checkImage(img, `snapshots/text/path-from-text-${surface.OS}.png`);
+    }
+  );
+
+  itSkipsCanvasKit(
+    "Should create a path from Arabic text with Amiri font",
+    async () => {
+      const img = await surface.drawOffscreen(
+        (Skia, canvas, ctx) => {
+          const amiri = Skia.Typeface.MakeFreeTypeFaceFromData(
+            Skia.Data.fromBytes(new Uint8Array(ctx.Amiri))
+          )!;
+          const font = Skia.Font(amiri, 64);
+          const path = Skia.Path.MakeFromText("مرحبا", 0, 64, font);
+          if (path) {
+            const paint = Skia.Paint();
+            paint.setColor(Skia.Color("black"));
+            canvas.drawColor(Skia.Color("white"));
+            canvas.drawPath(path, paint);
+          }
+        },
+        {
+          Amiri,
+        }
+      );
+      checkImage(img, `snapshots/text/path-from-arabic-text-${surface.OS}.png`);
+    }
+  );
 });

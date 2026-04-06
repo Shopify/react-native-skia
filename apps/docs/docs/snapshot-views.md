@@ -16,7 +16,7 @@ If the view is optimized away, `makeImageFromView` will crash or return the wron
 
 ::::info
 
-
+### Example
 
 ```tsx
 import { useState, useRef } from "react";

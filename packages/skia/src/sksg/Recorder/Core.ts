@@ -21,50 +21,9 @@ import type {
   ParagraphProps,
   AtlasProps,
   DrawingNodeProps,
+  SkottieProps,
 } from "../../dom/types";
 
-// export enum CommandType {
-//   // Context
-//   Group = "Group",
-//   SavePaint = "SavePaint",
-//   RestorePaint = "RestorePaint",
-//   SaveCTM = "SaveCTM",
-//   RestoreCTM = "RestoreCTM",
-//   PushColorFilter = "PushColorFilter",
-//   PushBlurMaskFilter = "PushBlurMaskFilter",
-//   PushImageFilter = "PushImageFilter",
-//   PushPathEffect = "PushPathEffect",
-//   PushShader = "PushShader",
-//   ComposeColorFilter = "ComposeColorFilter",
-//   ComposeImageFilter = "ComposeImageFilter",
-//   ComposePathEffect = "ComposePathEffect",
-//   MaterializePaint = "MaterializePaint",
-//   SaveBackdropFilter = "SaveBackdropFilter",
-//   SaveLayer = "SaveLayer",
-//   RestorePaintDeclaration = "RestorePaintDeclaration",
-//   // Drawing
-//   DrawBox = "DrawBox",
-//   DrawImage = "DrawImage",
-//   DrawCircle = "DrawCircle",
-//   DrawPaint = "DrawPaint",
-//   DrawPoints = "DrawPoints",
-//   DrawPath = "DrawPath",
-//   DrawRect = "DrawRect",
-//   DrawRRect = "DrawRRect",
-//   DrawOval = "DrawOval",
-//   DrawLine = "DrawLine",
-//   DrawPatch = "DrawPatch",
-//   DrawVertices = "DrawVertices",
-//   DrawDiffRect = "DrawDiffRect",
-//   DrawText = "DrawText",
-//   DrawTextPath = "DrawTextPath",
-//   DrawTextBlob = "DrawTextBlob",
-//   DrawGlyphs = "DrawGlyphs",
-//   DrawPicture = "DrawPicture",
-//   DrawImageSVG = "DrawImageSVG",
-//   DrawParagraph = "DrawParagraph",
-//   DrawAtlas = "DrawAtlas",
-// }
 export enum CommandType {
   // Context
   Group,
@@ -106,6 +65,7 @@ export enum CommandType {
   DrawImageSVG,
   DrawParagraph,
   DrawAtlas,
+  DrawSkottie,
 }
 
 export type Command<T extends CommandType = CommandType> = {
@@ -133,7 +93,8 @@ export const isCommand = <T extends CommandType>(
   return command.type === type;
 };
 
-interface GroupCommand extends Command<CommandType.Group> {
+export interface GroupCommand extends Command<CommandType.Group> {
+  props?: Pick<DrawingNodeProps, "zIndex">;
   children: Command[];
 }
 
@@ -165,6 +126,7 @@ interface Props {
   [CommandType.DrawImageSVG]: ImageSVGProps;
   [CommandType.DrawParagraph]: ParagraphProps;
   [CommandType.DrawAtlas]: AtlasProps;
+  [CommandType.DrawSkottie]: SkottieProps;
 }
 
 interface DrawCommand<T extends CommandType> extends Command<T> {

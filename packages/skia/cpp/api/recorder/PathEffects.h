@@ -54,8 +54,9 @@ public:
   }
 
   void pushPathEffect(DrawingCtx *ctx) {
-    auto pe = SkDashPathEffect::Make(props.intervals.data(),
-                                     props.intervals.size(), props.phase);
+    auto intervals = SkSpan(static_cast<SkScalar *>(props.intervals.data()),
+                            props.intervals.size());
+    auto pe = SkDashPathEffect::Make(intervals, props.phase);
     ctx->pathEffects.push_back(pe);
   }
 };

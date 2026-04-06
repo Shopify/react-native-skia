@@ -1,14 +1,22 @@
 #pragma once
 
+#include <algorithm>
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "JsiHostObject.h"
+#include "RNSkLog.h"
 #include "RNSkPlatformContext.h"
 
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
+
+// Minimum memory pressure reported for any host object.
+// This accounts for C++ wrapper overhead and ensures dispose() never
+// increases reported memory pressure (which would defeat its purpose).
+static constexpr size_t kMinMemoryPressure = 256;
 
 /**
  * Base class for jsi host objects - these are all implemented as JsiHostObjects
@@ -22,6 +30,17 @@ public:
    */
   explicit JsiSkHostObject(std::shared_ptr<RNSkPlatformContext> context)
       : _context(context) {}
+
+  /**
+   * Override this method to return the memory pressure for the wrapped object.
+   * @return The memory pressure in bytes
+   */
+  virtual size_t getMemoryPressure() const = 0;
+
+  /**
+   * Returns the type name of the host object.
+   */
+  virtual std::string getObjectType() const = 0;
 
 protected:
   /**
@@ -41,6 +60,61 @@ private:
 #define EXPORT_JSI_API_TYPENAME(CLASS, TYPENAME)                               \
   JSI_API_TYPENAME(TYPENAME)                                                   \
   JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(CLASS, __typename__))
+
+// Define this macro to enable memory pressure debug logging
+// #define RNSKIA_DEBUG_MEMORY_PRESSURE
+
+#ifdef RNSKIA_DEBUG_MEMORY_PRESSURE
+// Version with debug logging
+#define JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(                           \
+    runtime, hostObjectInstance, context)                                      \
+  [&]() {                                                                      \
+    auto result =                                                              \
+        jsi::Object::createFromHostObject(runtime, hostObjectInstance);        \
+    auto memoryPressure = hostObjectInstance->getMemoryPressure();             \
+    const void *hostObjectId =                                                 \
+        static_cast<const void *>(hostObjectInstance.get());                   \
+    const char *mpUnit = "bytes";                                              \
+    double mpValue = static_cast<double>(memoryPressure);                      \
+    if (memoryPressure >= 1024ULL * 1024ULL) {                                 \
+      mpUnit = "MB";                                                           \
+      mpValue /= (1024.0 * 1024.0);                                            \
+      RNSkLogger::logToConsole(                                                \
+          "Host object %s (id=%p) memory pressure %.2f %s",                    \
+          hostObjectInstance->getObjectType().c_str(), hostObjectId, mpValue,  \
+          mpUnit);                                                             \
+    } else if (memoryPressure >= 1024ULL) {                                    \
+      mpUnit = "KB";                                                           \
+      mpValue /= 1024.0;                                                       \
+      RNSkLogger::logToConsole(                                                \
+          "Host object %s (id=%p) memory pressure %.2f %s",                    \
+          hostObjectInstance->getObjectType().c_str(), hostObjectId, mpValue,  \
+          mpUnit);                                                             \
+    } else {                                                                   \
+      RNSkLogger::logToConsole(                                                \
+          "Host object %s (id=%p) memory pressure %zu %s",                     \
+          hostObjectInstance->getObjectType().c_str(), hostObjectId,           \
+          memoryPressure, mpUnit);                                             \
+    }                                                                          \
+    if (memoryPressure > 0) {                                                  \
+      result.setExternalMemoryPressure(runtime, memoryPressure);               \
+    }                                                                          \
+    return result;                                                             \
+  }()
+#else
+// Version without debug logging (optimized)
+#define JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(                           \
+    runtime, hostObjectInstance, context)                                      \
+  [&]() {                                                                      \
+    auto result =                                                              \
+        jsi::Object::createFromHostObject(runtime, hostObjectInstance);        \
+    auto memoryPressure = hostObjectInstance->getMemoryPressure();             \
+    if (memoryPressure > 0) {                                                  \
+      result.setExternalMemoryPressure(runtime, memoryPressure);               \
+    }                                                                          \
+    return result;                                                             \
+  }()
+#endif
 
 template <typename T> class JsiSkWrappingHostObject : public JsiSkHostObject {
 public:
@@ -71,6 +145,10 @@ public:
    * macro.
    */
   JSI_HOST_FUNCTION(dispose) {
+    if (!isDisposed()) {
+      thisValue.asObject(runtime).setExternalMemoryPressure(runtime,
+                                                            kMinMemoryPressure);
+    }
     safeDispose();
     return jsi::Value::undefined();
   }
@@ -82,20 +160,35 @@ protected:
    */
   virtual void releaseResources() = 0;
 
+  /**
+   * Returns true if the object has been disposed.
+   */
+  bool isDisposed() const {
+    return _isDisposed.load(std::memory_order_acquire);
+  }
+
+  /**
+   * Returns the underlying object without checking if disposed.
+   * Use this in destructors and releaseResources() where we need to access
+   * the object even after dispose() was called.
+   */
+  T getObjectUnchecked() const { return _object; }
+
 private:
   /**
    * Validates that _object was not disposed and returns it.
    */
   T validateObject() const {
-    if (_isDisposed) {
+    if (_isDisposed.load(std::memory_order_acquire)) {
       throw std::runtime_error("Attempted to access a disposed object.");
     }
     return _object;
   }
 
   void safeDispose() {
-    if (!_isDisposed) {
-      _isDisposed = true;
+    bool expected = false;
+    if (_isDisposed.compare_exchange_strong(expected, true,
+                                            std::memory_order_acq_rel)) {
       releaseResources();
     }
   }

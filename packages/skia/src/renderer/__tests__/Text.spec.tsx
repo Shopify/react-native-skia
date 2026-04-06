@@ -45,9 +45,12 @@ describe("Test different text examples", () => {
   it("Should render the text around a circle", async () => {
     const font = loadFont("skia/__tests__/assets/Roboto-Medium.ttf");
     const { Skia } = importSkia();
-    const path = Skia.Path.Make();
     const r = width / 2;
+<<<<<<< HEAD
     path.addCircle(r, r, r / 2);
+=======
+    const path = Skia.Path.Circle(r, r, r / 2);
+>>>>>>> main
     const surface = await drawOnNode(
       <>
         <Fill color="white" />

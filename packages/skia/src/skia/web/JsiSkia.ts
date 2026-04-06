@@ -23,6 +23,7 @@ import { JsiSkContourMeasureIter } from "./JsiSkContourMeasureIter";
 import { JsiSkPictureRecorder } from "./JsiSkPictureRecorder";
 import { JsiSkPictureFactory } from "./JsiSkPictureFactory";
 import { JsiSkPathFactory } from "./JsiSkPathFactory";
+import { JsiSkPathBuilderFactory } from "./JsiSkPathBuilderFactory";
 import { JsiSkMatrix } from "./JsiSkMatrix";
 import { JsiSkColorFilterFactory } from "./JsiSkColorFilterFactory";
 import { JsiSkTypefaceFactory } from "./JsiSkTypefaceFactory";
@@ -46,6 +47,7 @@ import { JsiSkParagraphBuilderFactory } from "./JsiSkParagraphBuilderFactory";
 import { JsiSkNativeBufferFactory } from "./JsiSkNativeBufferFactory";
 import { createVideo } from "./JsiVideo";
 import { throwNotImplementedOnRNWeb } from "./Host";
+import { JsiSkottieFactory } from "./JsiSkottieFactory";
 
 export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   Point: (x: number, y: number) =>
@@ -78,14 +80,15 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
     forceClosed: boolean,
     resScale: number
   ): SkContourMeasureIter =>
-    new JsiSkContourMeasureIter(
-      CanvasKit,
-      new CanvasKit.ContourMeasureIter(
-        JsiSkPath.fromValue(path),
-        forceClosed,
-        resScale
-      )
-    ),
+    (() => {
+      const p = JsiSkPath.pathFromValue(path);
+      const iter = new JsiSkContourMeasureIter(
+        CanvasKit,
+        new CanvasKit.ContourMeasureIter(p, forceClosed, resScale)
+      );
+      p.delete();
+      return iter;
+    })(),
   Paint: () => {
     const paint = new JsiSkPaint(CanvasKit, new CanvasKit.Paint());
     paint.setAntiAlias(true);
@@ -95,6 +98,7 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
     new JsiSkPictureRecorder(CanvasKit, new CanvasKit.PictureRecorder()),
   Picture: new JsiSkPictureFactory(CanvasKit),
   Path: new JsiSkPathFactory(CanvasKit),
+  PathBuilder: new JsiSkPathBuilderFactory(CanvasKit),
   Matrix: (matrix?: readonly number[]) =>
     new JsiSkMatrix(
       CanvasKit,
@@ -131,11 +135,18 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   FontMgr: new JsiSkFontMgrFactory(CanvasKit),
   ParagraphBuilder: new JsiSkParagraphBuilderFactory(CanvasKit),
   NativeBuffer: new JsiSkNativeBufferFactory(CanvasKit),
+  Skottie: new JsiSkottieFactory(CanvasKit),
   Video: createVideo.bind(null, CanvasKit),
   Context: (_surface: bigint, _width: number, _height: number) => {
     return throwNotImplementedOnRNWeb<SkiaContext>();
   },
   Recorder: () => {
     return throwNotImplementedOnRNWeb<JsiRecorder>();
+  },
+  getDevice: () => {
+    return throwNotImplementedOnRNWeb<GPUDevice>();
+  },
+  hasDevice: () => {
+    return false;
   },
 });

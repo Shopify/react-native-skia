@@ -24,6 +24,7 @@ buildscript {
 
 allprojects {
     repositories {
+<<<<<<< HEAD
         maven {
             // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
             url({
@@ -37,6 +38,9 @@ allprojects {
                 throw new GradleException("Could not find `react-native`");
             }())
         }
+=======
+        // React Native artifacts are now published to Maven Central (since RN 0.71+)
+>>>>>>> main
         mavenCentral()
         google()
     }

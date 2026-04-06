@@ -58,7 +58,8 @@ public:
     return instance;
   }
 
-  sk_sp<SkSurface> MakeOffscreen(int width, int height) {
+  sk_sp<SkSurface> MakeOffscreen(int width, int height,
+                                 bool useP3ColorSpace = false) {
     auto colorType = kRGBA_8888_SkColorType;
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
@@ -78,6 +79,7 @@ public:
     if (!texture.isValid()) {
       RNSkLogger::logToConsole("couldn't create offscreen texture %dx%d", width,
                                height);
+      return nullptr;
     }
 
     struct ReleaseContext {
@@ -88,10 +90,15 @@ public:
     auto releaseCtx = new ReleaseContext{.directContext = _directContext.get(),
                                          .texture = texture};
 
+    sk_sp<SkColorSpace> colorSpace =
+        useP3ColorSpace ? SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
+                                                SkNamedGamut::kDisplayP3)
+                        : nullptr;
+
     // Create a SkSurface from the GrBackendTexture
     return SkSurfaces::WrapBackendTexture(
         _directContext.get(), texture, kTopLeft_GrSurfaceOrigin, 0, colorType,
-        nullptr, &props,
+        colorSpace, &props,
         [](void *addr) {
           auto releaseCtx = reinterpret_cast<ReleaseContext *>(addr);
           releaseCtx->directContext->deleteBackendTexture(releaseCtx->texture);

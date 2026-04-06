@@ -34,14 +34,18 @@ import type { Command } from "../Core";
 import { CommandType } from "../Core";
 import type { DrawingContext } from "../DrawingContext";
 
-const declareShader = (ctx: DrawingContext, props: ShaderProps) => {
+const declareShader = (
+  ctx: DrawingContext,
+  props: ShaderProps,
+  children: number
+) => {
   "worklet";
   const { source, uniforms, ...transform } = props;
   const m3 = ctx.Skia.Matrix();
   processTransformProps(m3, transform);
   const shader = source.makeShaderWithChildren(
     processUniforms(source, uniforms),
-    ctx.shaders.splice(0, ctx.shaders.length),
+    ctx.shaders.splice(0, children),
     m3
   );
   ctx.shaders.push(shader);
@@ -253,10 +257,12 @@ type Props = {
   [NodeType.Blend]: BlendProps;
 };
 
-interface PushShader<T extends keyof Props>
-  extends Command<CommandType.PushShader> {
+interface PushShader<
+  T extends keyof Props,
+> extends Command<CommandType.PushShader> {
   shaderType: T;
   props: Props[T];
+  children: number;
 }
 
 const isShader = <T extends keyof Props>(
@@ -273,7 +279,7 @@ export const pushShader = (
 ) => {
   "worklet";
   if (isShader(command, NodeType.Shader)) {
-    declareShader(ctx, command.props);
+    declareShader(ctx, command.props, command.children);
   } else if (isShader(command, NodeType.ImageShader)) {
     declareImageShader(ctx, command.props);
   } else if (isShader(command, NodeType.ColorShader)) {

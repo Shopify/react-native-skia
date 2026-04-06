@@ -2,9 +2,39 @@ project(RNSkia)
 cmake_minimum_required(VERSION 3.4.1)
 
 set (CMAKE_VERBOSE_MAKEFILE ON)
-set (CMAKE_CXX_STANDARD 17)
-set(SK_GRAPHITE OFF)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSK_BUILD_FOR_ANDROID -DSK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_HAVE_MEMRCHR=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_MOBILE=1 -DON_ANDROID -DONANDROID")
+set (CMAKE_CXX_STANDARD 20)
+
+# SKIA_LIBS_PATH is passed from Gradle (pointing to libs/android/, populated by npm postinstall)
+# Append the ABI to get the full path
+set (SKIA_LIBS_PATH "${SKIA_LIBS_PATH}/${ANDROID_ABI}")
+
+# Check if Skia prebuilt binaries are installed
+if(NOT EXISTS "${SKIA_LIBS_PATH}/libskia.a")
+    message("")
+    message("┌─────────────────────────────────────────────────────────────────────────────┐")
+    message("│                                                                             │")
+    message("│  ERROR: Skia prebuilt binaries not found!                                   │")
+    message("│                                                                             │")
+    message("│  Could not find libskia.a at: ${SKIA_LIBS_PATH}                             │")
+    message("│                                                                             │")
+    message("│  Run the following command to install them:                                  │")
+    message("│    npx install-skia                                                         │")
+    message("│                                                                             │")
+    message("└─────────────────────────────────────────────────────────────────────────────┘")
+    message("")
+    message(FATAL_ERROR "Skia prebuilt binaries not found. Run `npx install-skia` to fix this.")
+endif()
+
+# Import libskia
+add_library(skia STATIC IMPORTED)
+set_property(TARGET skia PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskia.a")
+
+# SK_GRAPHITE is passed from Gradle
+message("-- SKIA_LIBS_PATH: ${SKIA_LIBS_PATH}")
+message("-- SK_GRAPHITE: ${SK_GRAPHITE}")
+
+string(APPEND CMAKE_CXX_FLAGS " -DSK_BUILD_FOR_ANDROID -DSK_DISABLE_LEGACY_SHAPER_FACTORY -DSK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_HAVE_MEMRCHR=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_MOBILE=1 -DON_ANDROID -DONANDROID")
+
 set (PACKAGE_NAME "rnskia")
 set (SKIA_LIB "skia")
 set (SKIA_SVG_LIB "svg")
@@ -12,6 +42,9 @@ set (SKIA_SKSHAPER_LIB "skshaper")
 set (SKIA_SKPARAGRAPH_LIB "skparagraph")
 set (SKIA_SKUNICODE_CORE_LIB "skunicode_core")
 set (SKIA_SKUNICODE_ICU_LIB "skunicode_icu")
+set (SKIA_SKOTTIE_LIB "skottie")
+set (SKIA_SKSG_LIB "sksg")
+set (SKIA_JSONREADER_LIB "jsonreader")
 
 
 # Clear some variables
@@ -29,28 +62,14 @@ message("-- PREBUILT: " ${PREBUILT_DIR})
 message("-- BUILD   : " ${build_DIR})
 message("-- LIBRN   : " ${LIBRN_DIR})
 
-link_directories(../libs/android/${ANDROID_ABI}/)
-
-# Import prebuilt SKIA libraries
-set (SKIA_LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../libs/android/${ANDROID_ABI}")
+link_directories(${SKIA_LIBS_PATH}/)
 
 if(SK_GRAPHITE)
     add_definitions(-DSK_GRAPHITE)
-    set(DAWN_NATIVE_LIB "libdawn_native_static")
-    set(DAWN_PLATFORM_LIB "libdawn_platform_static")
-    set(DAWN_PROC_LIB "libdawn_proc_static")
     set(BACKEND_SOURCES
     #TODO: is this source needed to be added?
-        "${PROJECT_SOURCE_DIR}/../cpp/rnskia/DawnWindowContext.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnskia/RNDawnWindowContext.cpp"
     )
-    add_library(libdawn_native_static STATIC IMPORTED)
-    set_property(TARGET libdawn_native_static PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_native_static.a")
-
-    add_library(libdawn_platform_static STATIC IMPORTED)
-    set_property(TARGET libdawn_platform_static PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_platform_static.a")
-
-    add_library(libdawn_proc_static STATIC IMPORTED)
-    set_property(TARGET libdawn_proc_static PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_proc_static.a")
 else()
     add_definitions(-DSK_GL -DSK_GANESH)
     set(BACKEND_SOURCES
@@ -88,8 +107,46 @@ add_library(
 
         "${PROJECT_SOURCE_DIR}/../cpp/api/third_party/CSSColorParser.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/api/third_party/base64.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/api/third_party/SkottieUtils.cpp"
+
+        "${PROJECT_SOURCE_DIR}/../cpp/api/JsiSkDispatcher.cpp"
         ${BACKEND_SOURCES}
 )
+
+if(SK_GRAPHITE)
+    # WebGPU JSI infrastructure (jsi2)
+    target_sources(${PACKAGE_NAME} PRIVATE
+        "${PROJECT_SOURCE_DIR}/../cpp/jsi2/Promise.cpp"
+
+        # WebGPU async system
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/AsyncRunner.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/AsyncTaskHandle.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/JSIMicrotaskDispatcher.cpp"
+
+        # WebGPU API
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPU.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUAdapter.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUBindGroup.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUBuffer.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUCanvasContext.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUCommandEncoder.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUComputePassEncoder.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUComputePipeline.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUDevice.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUDeviceLostInfo.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUQuerySet.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUQueue.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderBundleEncoder.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderPassEncoder.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderPipeline.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUShaderModule.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUSupportedLimits.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUTexture.cpp"
+
+        # WebGPU Canvas JNI bindings
+        "${PROJECT_SOURCE_DIR}/cpp/jni/JniWebGPUView.cpp"
+    )
+endif()
 
 
 target_include_directories(
@@ -119,17 +176,28 @@ target_include_directories(
         ../cpp/rnskia/values
         ../cpp/utils
 
+        # WebGPU bindings
+        ../cpp
+        ../cpp/jsi2
+        ../cpp/rnwgpu
+        ../cpp/rnwgpu/api
+        ../cpp/rnwgpu/api/descriptors
+        ../cpp/rnwgpu/async
+
         ${libfbjni_include_DIRS}
 )
-
-add_library(skia STATIC IMPORTED)
-set_property(TARGET skia PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskia.a")
 
 add_library(svg STATIC IMPORTED)
 set_property(TARGET svg PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libsvg.a")
 
 add_library(skshaper STATIC IMPORTED)
 set_property(TARGET skshaper PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskshaper.a")
+
+add_library(skottie STATIC IMPORTED)
+set_property(TARGET skottie PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskottie.a")
+
+add_library(sksg STATIC IMPORTED)
+set_property(TARGET sksg PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libsksg.a")
 
 add_library(skparagraph STATIC IMPORTED)
 set_property(TARGET skparagraph PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskparagraph.a")
@@ -140,6 +208,16 @@ set_property(TARGET skunicode_core PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}
 add_library(skunicode_icu STATIC IMPORTED)
 set_property(TARGET skunicode_icu PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskunicode_icu.a")
 
+add_library(pathops STATIC IMPORTED)
+set_property(TARGET pathops PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libpathops.a")
+
+add_library(jsonreader STATIC IMPORTED)
+set_property(TARGET jsonreader PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libjsonreader.a")
+
+if(SK_GRAPHITE)
+    add_library(dawn_combined STATIC IMPORTED)
+    set_property(TARGET dawn_combined PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_combined.a")
+endif()
 
 find_library(
         LOG_LIB
@@ -255,6 +333,15 @@ message("-- TURBO   : " ${TURBOMODULES_LIB})
 
 add_definitions(-DREACT_NATIVE_VERSION=${REACT_NATIVE_VERSION})
 
+# Set RN_SERIALIZABLE_STATE and C++ flags for React Native 0.81+
+if(${REACT_NATIVE_VERSION} GREATER_EQUAL 80)
+    include("${REACT_NATIVE_DIR}/ReactCommon/cmake-utils/react-native-flags.cmake")
+    target_compile_reactnative_options(${PACKAGE_NAME} PRIVATE)
+else()
+  string(APPEND CMAKE_CXX_FLAGS
+         "  -fexceptions -frtti -std=c++${CMAKE_CXX_STANDARD} -Wall -Werror -Wunused-function -Wunused-private-field -Woverloaded-virtual -Wreorder-ctor -Wdelete-non-abstract-non-virtual-dtor -Wmismatched-tags -Wunused-variable -Wpessimizing-move -Wswitch -Wdeprecated-declarations -Werror=deprecated-this-capture")
+endif()
+
 # Link
 if(${REACT_NATIVE_VERSION} GREATER_EQUAL 76)
     set(COMMON_LIBS
@@ -267,6 +354,9 @@ if(${REACT_NATIVE_VERSION} GREATER_EQUAL 76)
         ${SKIA_SKPARAGRAPH_LIB}
         ${SKIA_SKUNICODE_CORE_LIB}
         ${SKIA_SKUNICODE_ICU_LIB}
+        ${SKIA_SKOTTIE_LIB}
+        ${SKIA_SKSG_LIB}
+        ${SKIA_JSONREADER_LIB}
         ${SKIA_LIB}
         -ljnigraphics
         -lGLESv2
@@ -287,6 +377,9 @@ else()
         ${SKIA_SKPARAGRAPH_LIB}
         ${SKIA_SKUNICODE_CORE_LIB}
         ${SKIA_SKUNICODE_ICU_LIB}
+        ${SKIA_SKOTTIE_LIB}
+        ${SKIA_SKSG_LIB}
+        ${SKIA_JSONREADER_LIB}
         ${SKIA_LIB}
         -ljnigraphics
         -lGLESv2
@@ -298,9 +391,7 @@ endif()
 if(SK_GRAPHITE)
     target_link_libraries(${PACKAGE_NAME}
         ${COMMON_LIBS}
-        ${DAWN_NATIVE_LIB}
-        ${DAWN_PLATFORM_LIB}
-        ${DAWN_PROC_LIB}
+        dawn_combined
     )
 else()
     target_link_libraries(${PACKAGE_NAME}
@@ -308,4 +399,9 @@ else()
         -lGLESv2
         -lEGL
     )
+endif()
+
+# Enable Android 16kb native library alignment
+if(CMAKE_ANDROID_NDK_VERSION VERSION_LESS "27")
+    target_link_options(${PACKAGE_NAME} PRIVATE "-Wl,-z,max-page-size=16384")
 endif()

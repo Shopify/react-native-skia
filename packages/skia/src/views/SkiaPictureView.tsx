@@ -11,6 +11,7 @@ const NativeSkiaPictureView = SkiaPictureViewNativeComponent;
 
 interface SkiaPictureViewProps extends SkiaPictureViewNativeProps {
   mode?: "default" | "continuous";
+  androidWarmup?: boolean;
 }
 
 export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
@@ -82,13 +83,20 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
   }
 
   render() {
-    const { mode, debug = false, opaque = false, ...viewProps } = this.props;
+    const {
+      mode,
+      debug = false,
+      opaque = false,
+      androidWarmup = false,
+      ...viewProps
+    } = this.props;
     return (
       <NativeSkiaPictureView
         collapsable={false}
         nativeID={`${this._nativeId}`}
         debug={debug}
         opaque={opaque}
+        androidWarmup={androidWarmup}
         {...viewProps}
       />
     );

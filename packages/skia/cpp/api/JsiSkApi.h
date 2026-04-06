@@ -6,6 +6,12 @@
 
 #include "JsiSkHostObjects.h"
 
+#ifdef SK_GRAPHITE
+#include "RNDawnContext.h"
+#include "rnwgpu/api/GPUDevice.h"
+#include "rnwgpu/async/AsyncRunner.h"
+#endif
+
 #include "JsiNativeBuffer.h"
 #include "JsiSkAnimatedImage.h"
 #include "JsiSkAnimatedImageFactory.h"
@@ -28,6 +34,8 @@
 #include "JsiSkParagraphBuilder.h"
 #include "JsiSkParagraphBuilderFactory.h"
 #include "JsiSkPath.h"
+#include "JsiSkPathBuilder.h"
+#include "JsiSkPathBuilderFactory.h"
 #include "JsiSkPathEffect.h"
 #include "JsiSkPathEffectFactory.h"
 #include "JsiSkPathFactory.h"
@@ -51,6 +59,7 @@
 #include "JsiSkTypefaceFontProviderFactory.h"
 #include "JsiSkVertices.h"
 #include "JsiSkiaContext.h"
+#include "JsiSkottieFactory.h"
 #include "JsiVideo.h"
 #include "recorder/JsiRecorder.h"
 
@@ -60,6 +69,10 @@ namespace jsi = facebook::jsi;
 
 class JsiSkApi : public JsiSkHostObject {
 public:
+  size_t getMemoryPressure() const override { return 8192; }
+
+  std::string getObjectType() const override { return "JsiSkApi"; }
+
   /**
    * Constructs the Skia Api object that can be installed into a runtime
    * and provide functions for accessing and creating the Skia wrapper objects
@@ -105,6 +118,8 @@ public:
                             std::make_shared<JsiSkPathEffectFactory>(context));
     installReadonlyProperty("Path",
                             std::make_shared<JsiSkPathFactory>(context));
+    installReadonlyProperty("PathBuilder",
+                            std::make_shared<JsiSkPathBuilderFactory>(context));
     installReadonlyProperty("ColorFilter",
                             std::make_shared<JsiSkColorFilterFactory>(context));
     installReadonlyProperty("MaskFilter",
@@ -121,6 +136,8 @@ public:
                             std::make_shared<JsiSkPictureFactory>(context));
     installReadonlyProperty("FontMgr",
                             std::make_shared<JsiSkFontMgrFactory>(context));
+    installReadonlyProperty("Skottie",
+                            std::make_shared<JsiSkottieFactory>(context));
     installReadonlyProperty(
         "TypefaceFontProvider",
         std::make_shared<JsiSkTypefaceFontProviderFactory>(context));
@@ -133,6 +150,33 @@ public:
                             std::make_shared<JsiNativeBufferFactory>(context));
 
     installFunction("Recorder", JsiRecorder::createCtor(context));
+
+    installFunction(
+        "hasDevice", JSI_HOST_FUNCTION_LAMBDA {
+#ifdef SK_GRAPHITE
+          return jsi::Value(true);
+#else
+      return jsi::Value(false);
+#endif
+        });
+
+    installFunction(
+        "getDevice", JSI_HOST_FUNCTION_LAMBDA {
+#ifdef SK_GRAPHITE
+          auto &dawnContext = DawnContext::getInstance();
+          auto asyncRunner = rnwgpu::async::AsyncRunner::get(runtime);
+          if (!asyncRunner) {
+            throw jsi::JSError(runtime, "AsyncRunner not initialized");
+          }
+          auto device = std::make_shared<rnwgpu::GPUDevice>(
+              dawnContext.getWGPUDevice(), asyncRunner, "Skia Device");
+          return rnwgpu::GPUDevice::create(runtime, device);
+#else
+      throw jsi::JSError(runtime,
+                         "getDevice() is only available with the Graphite "
+                         "backend. Rebuild with SK_GRAPHITE enabled.");
+#endif
+        });
   }
 };
 } // namespace RNSkia

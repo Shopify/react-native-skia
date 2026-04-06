@@ -8,5 +8,9 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
+<<<<<<< HEAD
+=======
+    "baseUrl": ".",
+>>>>>>> main
   }
 }

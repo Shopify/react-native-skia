@@ -1,5 +1,5 @@
 import type { ImageFilterFactory } from "./ImageFilter";
-import type { PathFactory } from "./Path";
+import type { PathFactory, PathBuilderFactory } from "./Path";
 import type { ColorFilterFactory } from "./ColorFilter";
 import type { SkFont, FontMgrFactory } from "./Font";
 import type { SkTypeface, TypefaceFactory } from "./Typeface";
@@ -33,6 +33,7 @@ import type { ParagraphBuilderFactory } from "./Paragraph/ParagraphBuilder";
 import type { Video } from "./Video";
 import type { NativeBufferFactory } from "./NativeBuffer";
 import type { JsiRecorder } from "./Recorder";
+import type { SkottieFactory } from "./Skottie";
 
 export interface SkiaContext {
   getSurface(): SkSurface;
@@ -66,6 +67,7 @@ export interface Skia {
   PictureRecorder: () => SkPictureRecorder;
   Picture: PictureFactory;
   Path: PathFactory;
+  PathBuilder: PathBuilderFactory;
   Matrix: (matrix?: readonly number[]) => SkMatrix;
   ColorFilter: ColorFilterFactory;
   Font: (typeface?: SkTypeface, size?: number) => SkFont;
@@ -102,8 +104,26 @@ export interface Skia {
   TextBlob: TextBlobFactory;
   Surface: SurfaceFactory;
   ParagraphBuilder: ParagraphBuilderFactory;
+  Skottie: SkottieFactory;
   Video: (url: string) => Promise<Video> | Video;
   Context(surface: bigint, width: number, height: number): SkiaContext;
   NativeBuffer: NativeBufferFactory;
   Recorder(): JsiRecorder;
+  /**
+   * Returns whether the Graphite backend is enabled and WebGPU is available.
+   *
+   * @returns true if Graphite/WebGPU is available, false otherwise
+   */
+  hasDevice(): boolean;
+  /**
+   * Returns the shared WebGPU device used by Skia's Graphite backend.
+   * This allows direct access to the GPU device for WebGPU operations.
+   *
+   * Note: This method is only available when the Graphite backend is enabled.
+   * Use hasDevice() to check availability before calling this method.
+   *
+   * @returns The GPUDevice used by Skia
+   * @throws Error if Graphite backend is not enabled
+   */
+  getDevice(): GPUDevice;
 }

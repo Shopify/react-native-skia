@@ -19,6 +19,12 @@
 
 #include "modules/skparagraph/include/ParagraphBuilder.h"
 
+#ifdef __APPLE__
+#include "modules/skunicode/include/SkUnicode_libgrapheme.h"
+#else
+#include "modules/skunicode/include/SkUnicode_icu.h"
+#endif
+
 #pragma clang diagnostic pop
 
 namespace RNSkia {
@@ -35,9 +41,10 @@ public:
   JSI_API_TYPENAME("ParagraphBuilder");
 
   JSI_HOST_FUNCTION(build) {
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkParagraph>(getContext(), _builder.get()));
+    auto paragraph =
+        std::make_shared<JsiSkParagraph>(getContext(), _builder.get());
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, paragraph,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(reset) {
@@ -109,6 +116,10 @@ public:
                        JSI_EXPORT_FUNC(JsiSkParagraphBuilder, pushStyle),
                        JSI_EXPORT_FUNC(JsiSkParagraphBuilder, pop))
 
+  size_t getMemoryPressure() const override { return 1024 * 1024; }
+
+  std::string getObjectType() const override { return "JsiSkParagraphBuilder"; }
+
   explicit JsiSkParagraphBuilder(std::shared_ptr<RNSkPlatformContext> context,
                                  para::ParagraphStyle paragraphStyle,
                                  sk_sp<SkFontMgr> fontManager)
@@ -120,7 +131,14 @@ public:
       _fontCollection->setAssetFontManager(fontManager);
     }
     _fontCollection->enableFontFallback();
-    _builder = para::ParagraphBuilder::make(paragraphStyle, _fontCollection);
+    sk_sp<SkUnicode> unicode;
+#ifdef __APPLE__
+    unicode = SkUnicodes::Libgrapheme::Make();
+#else
+    unicode = SkUnicodes::ICU::Make();
+#endif
+    _builder =
+        para::ParagraphBuilder::make(paragraphStyle, _fontCollection, unicode);
   }
 
 private:

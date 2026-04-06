@@ -11,7 +11,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "include/core/SkShader.h"
-#include "include/effects/SkGradientShader.h"
+#include "include/effects/SkGradient.h"
 
 #pragma clang diagnostic pop
 
@@ -25,6 +25,10 @@ public:
               sk_sp<SkShader> shader)
       : JsiSkWrappingSkPtrHostObject<SkShader>(std::move(context),
                                                std::move(shader)) {}
+
+  size_t getMemoryPressure() const override { return 1024 * 1024; }
+
+  std::string getObjectType() const override { return "JsiSkShader"; }
 
   EXPORT_JSI_API_TYPENAME(JsiSkShader, Shader)
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkShader, dispose))

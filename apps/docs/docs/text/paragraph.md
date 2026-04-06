@@ -11,7 +11,7 @@ React Native Skia offers an API to perform text layouts using the Skia Paragraph
 
 In the example below, we create a simple paragraph based on custom fonts.
 The emojis will be renderer using the emoji font available on the platform.
-Other system fonts will are available as well.
+Other system fonts are available as well.
 
 ```tsx twoslash
 import { useMemo } from "react";
@@ -169,7 +169,7 @@ const MyParagraph = () => {
 
 The `Paragraph` component doesn't follow the same painting rules as other components.
 However you can apply effets using the `layer` property.
-For instance, in the example below, fopr  we apply a blur image filter.
+For instance, in the example below, we apply a blur image filter.
 
 ```tsx twoslash
 import React from "react";
@@ -203,7 +203,7 @@ export const Demo = () => {
 
 ## Paragraph Bounding Box
 
-Before getting the paragraph height and width, you need to compute its layout using `layout()` and and once done, you can invoke `getHeight()` for the height and `getLongestLine()` for the width.
+Before getting the paragraph height and width, you need to compute its layout using `layout()` and once done, you can invoke `getHeight()` for the height and `getLongestLine()` for the width.
 
 ```tsx twoslash
 import { useMemo } from "react";
@@ -240,7 +240,7 @@ const MyParagraph = () => {
 ## Fonts
 
 By default, the paragraph API will use the system fonts.
-You can also use custom fonts with this API was well. 
+You can also use custom fonts with this API as well. 
 
 The `useFonts` hooks allows you to load custom fonts to be used for your Skia drawing.
 The font files should be organized by family names.

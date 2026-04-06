@@ -87,10 +87,6 @@ export class JsiSkParagraphBuilder
     return this;
   }
 
-  dispose() {
-    this.ref.delete();
-  }
-
   private makePaint(color: InputColor) {
     const paint = new this.CanvasKit.Paint();
     paint.setColor(color);

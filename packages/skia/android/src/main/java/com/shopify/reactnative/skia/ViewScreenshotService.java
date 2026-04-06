@@ -67,6 +67,16 @@ public class ViewScreenshotService {
         return paint;
     }
 
+    private static boolean isSvgView(View view) {
+        try {
+            String className = view.getClass().getName();
+            return className != null && className.startsWith("com.horcrux.svg");
+        } catch (Throwable t) {
+            Log.e("ViewScreenshotService", "Error checking if view is SVG", t);
+            return false;
+        }
+    }
+
     private static void renderViewToCanvas(Canvas canvas, View view, Paint paint, float parentOpacity) {
         float combinedOpacity = parentOpacity * view.getAlpha();
         canvas.save();
@@ -83,7 +93,7 @@ public class ViewScreenshotService {
             canvas.clipRect(clipLeft, clipTop, clipRight, clipBottom);
         }
 
-        if (view instanceof ViewGroup) {
+        if (view instanceof ViewGroup && !isSvgView(view)) {
             ViewGroup group = (ViewGroup) view;
             drawBackgroundIfPresent(canvas, view, combinedOpacity);
             drawChildren(canvas, group, paint, combinedOpacity);

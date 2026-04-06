@@ -58,10 +58,6 @@ export class JsiSkCanvas
     super(CanvasKit, ref, "Canvas");
   }
 
-  dispose = () => {
-    this.ref.delete();
-  };
-
   drawRect(rect: SkRect, paint: SkPaint) {
     this.ref.drawRect(
       JsiSkRect.fromValue(this.CanvasKit, rect),
@@ -222,6 +218,13 @@ export class JsiSkCanvas
     this.ref.restoreToCount(saveCount);
   }
 
+  getTotalMatrix(): SkMatrix {
+    return new JsiSkMatrix(
+      this.CanvasKit,
+      Float32Array.of(...this.ref.getTotalMatrix())
+    );
+  }
+
   drawPoints(mode: PointMode, points: SkPoint[], paint: SkPaint) {
     this.ref.drawPoints(
       getEnum(this.CanvasKit, "PointMode", mode),
@@ -269,7 +272,9 @@ export class JsiSkCanvas
   }
 
   drawPath(path: SkPath, paint: SkPaint) {
-    this.ref.drawPath(JsiSkPath.fromValue(path), JsiSkPaint.fromValue(paint));
+    const p = JsiSkPath.pathFromValue(path);
+    this.ref.drawPath(p, JsiSkPaint.fromValue(paint));
+    p.delete();
   }
 
   drawText(str: string, x: number, y: number, paint: SkPaint, font: SkFont) {
@@ -366,11 +371,9 @@ export class JsiSkCanvas
   }
 
   clipPath(path: SkPath, op: ClipOp, doAntiAlias: boolean) {
-    this.ref.clipPath(
-      JsiSkPath.fromValue(path),
-      getEnum(this.CanvasKit, "PathOp", op),
-      doAntiAlias
-    );
+    const p = JsiSkPath.pathFromValue(path);
+    this.ref.clipPath(p, getEnum(this.CanvasKit, "PathOp", op), doAntiAlias);
+    p.delete();
   }
 
   clipRect(rect: SkRect, op: ClipOp, doAntiAlias: boolean) {

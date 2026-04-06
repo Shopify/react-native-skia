@@ -175,7 +175,7 @@ const parseCSSInt = (str: string) => {
   if (str[str.length - 1] === "%") {
     return clampCSSByte((parseFloat(str) / 100) * 255);
   }
-  // eslint-disable-next-line radix
+
   return clampCSSByte(parseInt(str));
 };
 

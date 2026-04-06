@@ -43,15 +43,19 @@ public:
 
   sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) override;
 
+#if !defined(SK_GRAPHITE)
+  GrDirectContext *getDirectContext() override;
+
   sk_sp<SkImage> makeImageFromNativeTexture(const TextureInfo &textureInfo,
                                             int width, int height,
                                             bool mipMapped) override;
 
-  uint64_t makeNativeBuffer(sk_sp<SkImage> image) override;
-
   const TextureInfo getTexture(sk_sp<SkSurface> image) override;
 
   const TextureInfo getTexture(sk_sp<SkImage> image) override;
+#endif
+
+  uint64_t makeNativeBuffer(sk_sp<SkImage> image) override;
 
   void releaseNativeBuffer(uint64_t pointer) override;
 
@@ -65,11 +69,14 @@ public:
       const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) override;
 
   void raiseError(const std::exception &err) override;
-  sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override;
-#if !defined(SK_GRAPHITE)
-  GrDirectContext *getDirectContext() override;
-#endif
+  sk_sp<SkSurface> makeOffscreenSurface(int width, int height,
+                                        bool useP3ColorSpace = false) override;
+
   sk_sp<SkFontMgr> createFontMgr() override;
+
+  std::vector<std::string> getSystemFontFamilies() override;
+
+  std::string resolveFontFamily(const std::string &familyName) override;
 
 private:
   ViewScreenshotService *_screenshotService;

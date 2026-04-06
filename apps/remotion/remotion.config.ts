@@ -8,7 +8,7 @@ Config.setCodec("prores");
 Config.setProResProfile("4444");
 
 //Config.setProResProfile("4444");
-//Config.setFrameRange([140, 244]);
+Config.setFrameRange([1, 1]);
 
 Config.overrideWebpackConfig((currentConfiguration) => {
   if (!currentConfiguration.module) {
@@ -45,6 +45,9 @@ Config.overrideWebpackConfig((currentConfiguration) => {
   }
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
+  currentConfiguration.resolve.alias["react-native"] = "react-native-web";
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   currentConfiguration.resolve.alias["react-native-reanimated"] = false;
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
@@ -55,9 +58,9 @@ Config.overrideWebpackConfig((currentConfiguration) => {
     resolve: {
       ...currentConfiguration.resolve,
       fallback: {
-        fs: false,
-        path: false,
-        buffer: require.resolve("buffer/"),
+        "fs": false,
+        "path": false,
+        "buffer": require.resolve("buffer/"),
         "react-native/Libraries/Image/AssetRegistry": false,
       },
       extensions: [

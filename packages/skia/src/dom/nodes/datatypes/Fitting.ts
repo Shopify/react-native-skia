@@ -19,7 +19,7 @@ export const rect2rect = (
   { translateX: number },
   { translateY: number },
   { scaleX: number },
-  { scaleY: number }
+  { scaleY: number },
 ] => {
   "worklet";
   const scaleX = dst.width / src.width;

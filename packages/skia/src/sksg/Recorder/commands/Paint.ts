@@ -6,11 +6,12 @@ import {
   StrokeCap,
   StrokeJoin,
 } from "../../../skia/types";
-import type { SkPaint, Skia } from "../../../skia/types";
+import type { Skia } from "../../../skia/types";
+import type { DrawingContext } from "../DrawingContext";
 
 export const setPaintProperties = (
   Skia: Skia,
-  paint: SkPaint,
+  ctx: DrawingContext,
   {
     opacity,
     color,
@@ -22,17 +23,22 @@ export const setPaintProperties = (
     strokeMiter,
     antiAlias,
     dither,
-  }: PaintProps
+  }: PaintProps,
+  standalone: boolean
 ) => {
   "worklet";
+  const { paint } = ctx;
+
   if (opacity !== undefined) {
-    paint.setAlphaf(paint.getAlphaf() * opacity);
+    if (standalone) {
+      paint.setAlphaf(paint.getAlphaf() * opacity);
+    } else {
+      ctx.setOpacity(ctx.getOpacity() * opacity);
+    }
   }
   if (color !== undefined) {
-    const currentOpacity = paint.getAlphaf();
     paint.setShader(null);
     paint.setColor(processColor(Skia, color));
-    paint.setAlphaf(currentOpacity * paint.getAlphaf());
   }
   if (blendMode !== undefined) {
     paint.setBlendMode(BlendMode[enumKey(blendMode)]);

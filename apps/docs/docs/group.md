@@ -12,7 +12,7 @@ It can apply the following operations to its children:
 - [Paint properties](#paint-properties)
 - [Transformations](#transformations)
 - [Clipping operations](#clipping-operations)
-- [Bitmap Effects](#bitmap-effects)
+- [Layer Effects](#layer-effects)
 
 | Name        | Type                | Description                                                                                                                                                                                                           |
 | :---------- | :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -21,6 +21,7 @@ It can apply the following operations to its children:
 | clip?       | `RectOrRRectOrPath` | Rectangle, rounded rectangle, or Path to use to clip the children.                                                                                                                                                    |
 | invertClip? | `boolean`           | Invert the clipping region: parts outside the clipping region will be shown and, inside will be hidden.                                                                                                               |
 | layer?      | `RefObject<Paint>`  | Draws the children as a bitmap and applies the effects provided by the paint.                                                                                                                                         |
+| zIndex?      | `number`  | Overrides the drawing order of the children. A child with a higher zIndex will be drawn on top of a child with a lower zIndex. The zIndex is local to the group. The default zIndex is 0. Negative values are supported. |
 
 The following three components are not being affected by the group properties. To apply paint effects on these component, you need to use [layer effects](#layer-effects).
 In each component reference, we also document how to apply paint effects on them.
@@ -288,6 +289,43 @@ const Clip = () => {
 ```
 
 <img alt="Rasterize" src={require("/static/img/group/rasterize.png").default} width="256" height="256" />
+
+## Drawing Order (zIndex)
+
+The `zIndex` property allows you to control the drawing order of elements. It can be applied to a group or a drawing command. An element with a higher `zIndex` will be drawn on top of a sibling element with a lower `zIndex`. The default `zIndex` is 0, and negative values are supported.
+
+The `zIndex` is scoped to the parent [`<Group />`](/docs/group). This means that the `zIndex` of an element only affects its drawing order relative to its siblings within the same group. A group's `zIndex` will determine its order among its sibling groups.
+
+### Example
+
+In the example below, the cyan circle (`zIndex={2}`) is drawn on top, followed by the magenta circle (`zIndex={1}`), and finally the yellow circle (`zIndex={0}`).
+
+```tsx twoslash
+import { Canvas, Circle, Group, BlurMask } from "@shopify/react-native-skia";
+
+export const ZIndexDemo = () => {
+  const r = 80;
+  const width = 256;
+  const height = 256;
+  return (
+    <Canvas style={{ width, height }}>
+      <Group>
+        <BlurMask style="solid" blur={10} />
+        <Circle cx={r} cy={r} r={r} color="cyan" zIndex={2} />
+        <Circle cx={width - r} cy={r} r={r} color="magenta" zIndex={1} />
+        <Circle
+          cx={width / 2}
+          cy={height - r}
+          r={r}
+          color="yellow"
+          zIndex={0}
+        />
+      </Group>
+    </Canvas>
+  );
+};
+```
+
 
 ## Fitbox
 

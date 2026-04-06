@@ -50,6 +50,9 @@
 
   // Convert from UIImage -> CGImage -> SkImage
   CGImageRef cgImage = image.CGImage;
+  if (!cgImage) {
+    return nullptr;
+  }
 
   // Get some info about the image
   auto width = CGImageGetWidth(cgImage);
@@ -59,6 +62,9 @@
   // Convert from UIImage -> SkImage, start by getting the pixels directly from
   // the CGImage:
   auto dataRef = CGDataProviderCopyData(CGImageGetDataProvider(cgImage));
+  if (!dataRef) {
+    return nullptr;
+  }
   auto length = CFDataGetLength(dataRef);
   void *data = CFDataGetMutableBytePtr((CFMutableDataRef)dataRef);
 

@@ -17,12 +17,15 @@ public:
   virtual sk_sp<SkImage> nextImage(double *timeStamp = nullptr) = 0;
   virtual double duration() = 0;
   virtual double framerate() = 0;
+  virtual double currentTime() = 0;
   virtual void seek(double timestamp) = 0;
   virtual float getRotationInDegrees() = 0;
   virtual SkISize getSize() = 0;
   virtual void play() = 0;
   virtual void pause() = 0;
   virtual void setVolume(float volume) = 0;
+  virtual void setLooping(bool looping) = 0;
+  virtual bool isPlaying() = 0;
 };
 
 } // namespace RNSkia

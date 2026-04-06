@@ -9,12 +9,18 @@ import {
   polar2Canvas,
   vec,
 } from "@shopify/react-native-skia";
-import React, { useEffect, useRef } from "react";
-import { View, Animated } from "react-native";
+import React, { useEffect } from "react";
+import { View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useContextBridge } from "its-fine";
 import type { SharedValue } from "react-native-reanimated";
-import { useDerivedValue, useSharedValue } from "react-native-reanimated";
+import Animated, {
+  useDerivedValue,
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
 
 import { useLoop } from "../../components/Animations";
 
@@ -58,9 +64,10 @@ const Ring = ({ index, progress, size }: RingProps) => {
 };
 
 const BreatheDemo = ({ size }: SizeProps) => {
-  const center = useDerivedValue(() =>
-    vec(size.value.width / 2, size.value.height / 2 - 64)
-  );
+  const center = useDerivedValue(() => {
+    console.log(size.value);
+    return vec(size.value.width / 2, size.value.height / 2 - 64);
+  });
 
   const progress = useLoop({ duration: 3000 });
 
@@ -98,25 +105,26 @@ const MyComp = ({ size }: SizeProps) => {
 export const UseCanvas = () => {
   const Bridge = useContextBridge();
   const size = useSharedValue({ width: 0, height: 0 });
-  const height = useRef(new Animated.Value(0));
+  const height = useSharedValue(0);
+
   useEffect(() => {
-    Animated.loop(
-      Animated.timing(height.current, {
-        toValue: 500,
-        duration: 4000,
-        useNativeDriver: false,
-      })
-    ).start();
-  }, []);
+    height.value = withRepeat(withTiming(500, { duration: 4000 }), -1, true);
+  }, [height]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    height: height.value,
+  }));
 
   return (
     <View style={{ flex: 1 }}>
-      <Canvas style={{ flex: 1 }} onSize={size}>
-        <Bridge>
-          <MyComp size={size} />
-        </Bridge>
-      </Canvas>
-      <Animated.View style={{ height: height.current }} />
+      <View style={{ flex: 1 }}>
+        <Canvas style={{ flex: 1 }} onSize={size}>
+          <Bridge>
+            <MyComp size={size} />
+          </Bridge>
+        </Canvas>
+      </View>
+      <Animated.View style={animatedStyle} />
     </View>
   );
 };

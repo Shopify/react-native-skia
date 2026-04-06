@@ -50,8 +50,9 @@ import {useSharedValue, withSpring} from "react-native-reanimated";
 import {Gesture, GestureDetector} from "react-native-gesture-handler";
 import {usePathValue, Canvas, Path, processTransform3d, Skia} from "@shopify/react-native-skia";
 
-const rrct = Skia.Path.Make();
-rrct.addRRect(Skia.RRectXY(Skia.XYWHRect(0, 0, 100, 100), 10, 10));
+const rrct = Skia.PathBuilder.Make()
+  .addRRect(Skia.RRectXY(Skia.XYWHRect(0, 0, 100, 100), 10, 10))
+  .build();
 
 export const FrostedCard = () => {
   const rotateY = useSharedValue(0);
@@ -60,17 +61,23 @@ export const FrostedCard = () => {
     rotateY.value -= event.changeX / 300;
   });
 
-  const clip = usePathValue((path) => {
-    "worklet";
-    path.transform(
-      processTransform3d([
-        { translate: [50, 50] },
-        { perspective: 300 },
-        { rotateY: rotateY.value },
-        { translate: [-50, -50] },
-      ])
-    );
-  }, rrct);
+  const clip = usePathValue(
+    () => {
+      "worklet";
+    },
+    rrct,
+    (path) => {
+      "worklet";
+      return path.transform(
+        processTransform3d([
+          { translate: [50, 50] },
+          { perspective: 300 },
+          { rotateY: rotateY.value },
+          { translate: [-50, -50] },
+        ])
+      );
+    }
+  );
   return (
     <GestureDetector gesture={gesture}>
       <Canvas style={{ flex: 1 }}>
@@ -106,25 +113,6 @@ export default function App() {
     </Canvas>
   );
 }
-```
-
-## Canvas Size
-
-The Canvas element has an `onSize` property that can receive a shared value, which will be updated whenever the canvas size changes.
-
-```tsx twoslash
-import {useSharedValue} from "react-native-reanimated";
-import {Fill, Canvas} from "@shopify/react-native-skia";
-
-const Demo = () => {
-  // size will be updated as the canvas size changes
-  const size = useSharedValue({ width: 0, height: 0 });
-  return (
-    <Canvas style={{ flex: 1 }} onSize={size}>
-      <Fill color="white" />
-    </Canvas>
-  );
-};
 ```
 
 ## useRectBuffer

@@ -92,6 +92,31 @@ export type RandomFn = () => number;
 export type NoiseFunction2D = (x: number, y: number) => number;
 
 /**
+ * Builds a random permutation table.
+ * This is exported only for (internal) testing purposes.
+ * Do not rely on this export.
+ * @private
+ */
+export function buildPermutationTable(random: RandomFn): Uint8Array {
+  "worklet";
+  const tableSize = 512;
+  const p = new Uint8Array(tableSize);
+  for (let i = 0; i < tableSize / 2; i++) {
+    p[i] = i;
+  }
+  for (let i = 0; i < tableSize / 2 - 1; i++) {
+    const r = i + ~~(random() * (256 - i));
+    const aux = p[i];
+    p[i] = p[r];
+    p[r] = aux;
+  }
+  for (let i = 256; i < tableSize; i++) {
+    p[i] = p[i - 256];
+  }
+  return p;
+}
+
+/**
  * Creates a 2D noise function
  * @param random the random function that will be used to build the permutation table
  * @returns {NoiseFunction2D}
@@ -541,29 +566,4 @@ export function createNoise4D(random: RandomFn = Math.random): NoiseFunction4D {
     // Sum up and scale the result to cover the range [-1,1]
     return 27.0 * (n0 + n1 + n2 + n3 + n4);
   };
-}
-
-/**
- * Builds a random permutation table.
- * This is exported only for (internal) testing purposes.
- * Do not rely on this export.
- * @private
- */
-export function buildPermutationTable(random: RandomFn): Uint8Array {
-  "worklet";
-  const tableSize = 512;
-  const p = new Uint8Array(tableSize);
-  for (let i = 0; i < tableSize / 2; i++) {
-    p[i] = i;
-  }
-  for (let i = 0; i < tableSize / 2 - 1; i++) {
-    const r = i + ~~(random() * (256 - i));
-    const aux = p[i];
-    p[i] = p[r];
-    p[r] = aux;
-  }
-  for (let i = 256; i < tableSize; i++) {
-    p[i] = p[i - 256];
-  }
-  return p;
 }

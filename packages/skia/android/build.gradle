@@ -57,6 +57,14 @@ static def findNodeModules(baseDir) {
 }
 
 def nodeModules = findNodeModules(projectDir)
+
+// Skia prebuilt libs are copied into libs/android/ by the npm postinstall script
+// Graphite is detected via marker file created by install-skia-graphite
+def useGraphite = file("${projectDir}/../libs/.graphite").exists()
+def skiaLibsPath = "${projectDir}/../libs/android"
+
+logger.warn("react-native-skia: SK_GRAPHITE: ${useGraphite}")
+logger.warn("react-native-skia: Skia libs: ${skiaLibsPath}")
 logger.warn("react-native-skia: node_modules/ found at: ${nodeModules}")
 
 def sourceBuild = false
@@ -155,8 +163,12 @@ android {
                 abiFilters (*reactNativeArchitectures())
                 arguments '-DANDROID_STL=c++_shared',
                           "-DREACT_NATIVE_VERSION=${REACT_NATIVE_VERSION}",
+                          "-DREACT_NATIVE_DIR=${defaultDir}",
                           "-DNODE_MODULES_DIR=${nodeModules}",
-                          "-DPREBUILT_DIR=${prebuiltDir}"
+                          "-DPREBUILT_DIR=${prebuiltDir}",
+                          "-DSKIA_LIBS_PATH=${skiaLibsPath}",
+                          "-DSK_GRAPHITE=${useGraphite ? 'ON' : 'OFF'}",
+                          "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
 
             }
         }
@@ -173,7 +185,7 @@ android {
 
     sourceSets.main {
         jniLibs {
-            srcDirs += ['../libs/android']
+            srcDirs += [skiaLibsPath]
         }
         java {
             if (!isNewArchitectureEnabled()) {
@@ -254,7 +266,6 @@ repositories {
         }
     }
     google()
-    maven { url 'https://www.jitpack.io' }
 }
 
 dependencies {
@@ -281,17 +292,6 @@ dependencies {
         def rnAAR = fileTree("${nodeModules}/react-native/android").matching({ it.include rnAarMatcher }).singleFile
         logger.warn("react-native-skia: Extracting JNI files (pre RN 0.71) ${rnAAR}")
         extractJNI(files(rnAAR))
-    }
-}
-
-afterEvaluate { project ->
-    android.libraryVariants.all { variant ->
-        def name = variant.name.capitalize()
-        def javaCompileTask = variant.javaCompileProvider.get()
-
-        task "jar${name}"(type: Jar, dependsOn: javaCompileTask) {
-            from javaCompileTask.destinationDir
-        }
     }
 }
 

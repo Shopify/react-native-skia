@@ -1,3 +1,5 @@
+import type { DrawingNodeProps } from "../../dom/types";
+
 import {
   drawCircle,
   drawImage,
@@ -18,6 +20,7 @@ import {
   drawDiffRect,
   drawVertices,
   drawPatch,
+  drawSkottie,
 } from "./commands/Drawing";
 import { drawBox, isBoxCommand } from "./commands/Box";
 import {
@@ -46,13 +49,69 @@ import {
   isGroup,
   materializeCommand,
 } from "./Core";
-import type { Command } from "./Core";
+import type { Command, GroupCommand } from "./Core";
 import type { DrawingContext } from "./DrawingContext";
 
-function play(ctx: DrawingContext, _command: Command) {
+type PendingGroup = {
+  command: GroupCommand;
+  zIndex: number;
+  order: number;
+};
+
+const getZIndex = (command: GroupCommand) => {
   "worklet";
+  const materialized = materializeCommand(command);
+  const { zIndex } = (materialized.props ?? {}) as DrawingNodeProps;
+  if (typeof zIndex !== "number" || Number.isNaN(zIndex)) {
+    return 0;
+  }
+  return zIndex;
+};
+
+const flushPendingGroups = (
+  ctx: DrawingContext,
+  pendingGroups: PendingGroup[],
+  playFn: (ctx: DrawingContext, cmd: Command) => void
+) => {
+  "worklet";
+  if (pendingGroups.length === 0) {
+    return;
+  }
+  pendingGroups
+    .sort((a, b) =>
+      a.zIndex === b.zIndex ? a.order - b.order : a.zIndex - b.zIndex
+    )
+    .forEach(({ command }) => {
+      playFn(ctx, command);
+    });
+  pendingGroups.length = 0;
+};
+
+const playGroup = (
+  ctx: DrawingContext,
+  group: GroupCommand,
+  playFn: (ctx: DrawingContext, cmd: Command) => void
+) => {
+  "worklet";
+  const pending: PendingGroup[] = [];
+  group.children.forEach((child) => {
+    if (isGroup(child)) {
+      pending.push({
+        command: child,
+        zIndex: getZIndex(child),
+        order: pending.length,
+      });
+      return;
+    }
+    flushPendingGroups(ctx, pending, playFn);
+    playFn(ctx, child);
+  });
+  flushPendingGroups(ctx, pending, playFn);
+};
+
+const play = (ctx: DrawingContext, _command: Command) => {
   if (isGroup(_command)) {
-    _command.children.forEach((child) => play(ctx, child));
+    playGroup(ctx, _command, play);
     return;
   }
   const command = materializeCommand(_command);
@@ -66,8 +125,14 @@ function play(ctx: DrawingContext, _command: Command) {
     if (command.props.paint) {
       ctx.paints.push(command.props.paint);
     } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { standalone } = command as any;
       ctx.savePaint();
-      setPaintProperties(ctx.Skia, ctx.paint, command.props);
+      if (standalone) {
+        const freshPaint = ctx.Skia.Paint();
+        ctx.paint.assign(freshPaint);
+      }
+      setPaintProperties(ctx.Skia, ctx, command.props, standalone);
     }
   } else if (isCommand(command, CommandType.RestorePaint)) {
     ctx.restorePaint();
@@ -101,7 +166,11 @@ function play(ctx: DrawingContext, _command: Command) {
   } else if (isCommand(command, CommandType.RestoreCTM)) {
     ctx.canvas.restore();
   } else {
-    const paints = [ctx.paint, ...ctx.paintDeclarations];
+    // TODO: is a copy needed here?
+    // apply opacity to the current paint.
+    const paint = ctx.paint.copy();
+    paint.setAlphaf(paint.getAlphaf() * ctx.getOpacity());
+    const paints = [paint, ...ctx.paintDeclarations];
     ctx.paintDeclarations = [];
     paints.forEach((p) => {
       ctx.paints.push(p);
@@ -147,17 +216,19 @@ function play(ctx: DrawingContext, _command: Command) {
         drawParagraph(ctx, command.props);
       } else if (isDrawCommand(command, CommandType.DrawAtlas)) {
         drawAtlas(ctx, command.props);
+      } else if (isDrawCommand(command, CommandType.DrawSkottie)) {
+        drawSkottie(ctx, command.props);
       } else {
         console.warn(`Unknown command: ${command.type}`);
       }
       ctx.paints.pop();
     });
   }
-}
-
-export const replay = (ctx: DrawingContext, commands: Command[]) => {
+};
+export function replay(ctx: DrawingContext, commands: Command[]) {
   "worklet";
+  //console.log(debugTree(commands));
   commands.forEach((command) => {
     play(ctx, command);
   });
-};
+}

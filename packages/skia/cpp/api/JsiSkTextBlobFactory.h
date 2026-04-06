@@ -28,9 +28,10 @@ public:
     auto str = arguments[0].asString(runtime).utf8(runtime);
     auto font = JsiSkFont::fromValue(runtime, arguments[1]);
     auto textBlob = SkTextBlob::MakeFromString(str.c_str(), *font);
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob)));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(MakeFromGlyphs) {
@@ -46,9 +47,10 @@ public:
     auto textBlob =
         SkTextBlob::MakeFromText(glyphs.data(), glyphs.size() * bytesPerGlyph,
                                  *font, SkTextEncoding::kGlyphID);
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob)));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(MakeFromRSXform) {
@@ -63,11 +65,13 @@ public:
           runtime, jsiRsxforms.getValueAtIndex(runtime, i));
       rsxforms.push_back(*rsxform);
     }
-    auto textBlob = SkTextBlob::MakeFromRSXform(str.c_str(), str.length(),
-                                                rsxforms.data(), *font);
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob)));
+    auto x = SkSpan(rsxforms.data(), rsxforms.size());
+    auto textBlob =
+        SkTextBlob::MakeFromRSXform(str.c_str(), str.length(), x, *font);
+    auto hostObjectInstance =
+        std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(MakeFromRSXformGlyphs) {
@@ -89,12 +93,14 @@ public:
           runtime, jsiRsxforms.getValueAtIndex(runtime, i));
       rsxforms.push_back(*rsxform);
     }
+    auto x = SkSpan(rsxforms.data(), rsxforms.size());
     auto textBlob = SkTextBlob::MakeFromRSXform(
-        glyphs.data(), glyphs.size() * bytesPerGlyph, rsxforms.data(), *font,
+        glyphs.data(), glyphs.size() * bytesPerGlyph, x, *font,
         SkTextEncoding::kGlyphID);
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob)));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTextBlobFactory, MakeFromText),
@@ -102,6 +108,10 @@ public:
                        JSI_EXPORT_FUNC(JsiSkTextBlobFactory, MakeFromRSXform),
                        JSI_EXPORT_FUNC(JsiSkTextBlobFactory,
                                        MakeFromRSXformGlyphs), )
+
+  size_t getMemoryPressure() const override { return 2048; }
+
+  std::string getObjectType() const override { return "JsiSkTextBlobFactory"; }
 
   explicit JsiSkTextBlobFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

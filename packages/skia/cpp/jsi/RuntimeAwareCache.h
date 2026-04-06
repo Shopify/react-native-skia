@@ -15,8 +15,6 @@ namespace jsi = facebook::jsi;
 class BaseRuntimeAwareCache {
 public:
   static void setMainJsRuntime(jsi::Runtime *rt) { _mainRuntime = rt; }
-
-protected:
   static jsi::Runtime *getMainJsRuntime() {
     assert(_mainRuntime != nullptr &&
            "Expected main Javascript runtime to be set in the "

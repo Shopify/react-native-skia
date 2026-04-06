@@ -6,6 +6,10 @@
 #include "Convertor.h"
 #include "DrawingCtx.h"
 #include "ImageFit.h"
+#include "RNSkPlatformContext.h"
+
+#include "include/core/SkPathBuilder.h"
+#include "include/core/SkStrokeRec.h"
 
 namespace RNSkia {
 
@@ -17,10 +21,9 @@ struct CircleCmdProps {
 };
 
 class CircleCmd : public Command {
-private:
+public:
   CircleCmdProps props;
 
-public:
   CircleCmd(jsi::Runtime &runtime, const jsi::Object &object,
             Variables &variables)
       : Command(CommandType::DrawCircle) {
@@ -52,10 +55,9 @@ struct RectCmdProps {
 };
 
 class RectCmd : public Command {
-private:
+public:
   RectCmdProps props;
 
-public:
   RectCmd(jsi::Runtime &runtime, const jsi::Object &object,
           Variables &variables)
       : Command(CommandType::DrawRect) {
@@ -86,10 +88,9 @@ struct PathCmdProps {
 };
 
 class PathCmd : public Command {
-private:
+public:
   PathCmdProps props;
 
-public:
   PathCmd(jsi::Runtime &runtime, const jsi::Object &object,
           Variables &variables)
       : Command(CommandType::DrawPath) {
@@ -125,12 +126,13 @@ public:
             SkTrimPathEffect::Make(start, end, SkTrimPathEffect::Mode::kNormal);
         if (pe != nullptr) {
           SkStrokeRec rec(SkStrokeRec::InitStyle::kHairline_InitStyle);
-          if (!pe->filterPath(&filteredPath, filteredPath, &rec, nullptr)) {
+          SkPathBuilder filteredBuilder;
+          if (!pe->filterPath(&filteredBuilder, filteredPath, &rec)) {
             throw std::runtime_error(
                 "Failed trimming path with parameters start: " +
                 std::to_string(start) + ", end: " + std::to_string(end));
           }
-          filteredPath.swap(filteredPath);
+          filteredPath = filteredBuilder.detach();
         } else {
           throw std::runtime_error(
               "Failed trimming path with parameters start: " +
@@ -164,14 +166,11 @@ public:
           strokePaint.setStrokeMiter(stroke.miter_limit.value());
         }
 
-        float precision = stroke.precision.value_or(1.0f);
-
-        auto strokedPath = std::make_shared<SkPath>();
-        if (!skpathutils::FillPathWithPaint(*p, strokePaint, strokedPath.get(),
-                                            nullptr, precision)) {
+        SkPathBuilder resultBuilder;
+        if (!skpathutils::FillPathWithPaint(*p, strokePaint, &resultBuilder)) {
           throw std::runtime_error("Failed to apply stroke to path");
         }
-        pathToUse = std::const_pointer_cast<const SkPath>(strokedPath);
+        pathToUse = std::make_shared<const SkPath>(resultBuilder.snapshot());
       } else {
         pathToUse = std::const_pointer_cast<const SkPath>(p);
       }
@@ -196,10 +195,9 @@ struct LineCmdProps {
 };
 
 class LineCmd : public Command {
-private:
+public:
   LineCmdProps props;
 
-public:
   LineCmd(jsi::Runtime &runtime, const jsi::Object &object,
           Variables &variables)
       : Command(CommandType::DrawLine) {
@@ -221,10 +219,9 @@ struct TextPathProps {
 };
 
 class TextPathCmd : public Command {
-private:
+public:
   TextPathProps props;
 
-public:
   TextPathCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
       : Command(CommandType::DrawTextPath) {
@@ -246,15 +243,25 @@ public:
       glyphIds.reserve(numGlyphIds);
       auto ids = font->textToGlyphs(
           text.c_str(), text.length(), SkTextEncoding::kUTF8,
-          static_cast<SkGlyphID *>(glyphIds.data()), numGlyphIds);
+          SkSpan(static_cast<SkGlyphID *>(glyphIds.data()), numGlyphIds));
 
       // Get glyph widths
       int glyphsSize = static_cast<int>(ids);
+
+      // Validate glyph count
+      if (glyphsSize > numGlyphIds) {
+        throw std::runtime_error(
+            "Glyph count mismatch: got " + std::to_string(glyphsSize) +
+            " glyphs but expected " + std::to_string(numGlyphIds));
+      }
+
       std::vector<SkScalar> widthPtrs;
       widthPtrs.resize(glyphsSize);
-      font->getWidthsBounds(glyphIds.data(), numGlyphIds,
-                            static_cast<SkScalar *>(widthPtrs.data()), nullptr,
-                            nullptr); // TODO: Should we use paint somehow here?
+      font->getWidthsBounds(
+          SkSpan(glyphIds.data(), glyphsSize),
+          SkSpan(static_cast<SkScalar *>(widthPtrs.data()), widthPtrs.size()),
+          {},
+          nullptr); // TODO: Should we use paint somehow here?
 
       std::vector<SkRSXform> rsx;
       SkContourMeasureIter meas(path, false, 1);
@@ -262,7 +269,7 @@ public:
       auto cont = meas.next();
       auto dist = initialOffset;
 
-      for (size_t i = 0; i < text.length() && cont != nullptr; ++i) {
+      for (int i = 0; i < glyphsSize && cont != nullptr; ++i) {
         auto width = widthPtrs[i];
         dist += width / 2;
         if (dist > cont->length()) {
@@ -295,9 +302,9 @@ public:
         rsx.push_back(SkRSXform::Make(tx, ty, adjustedX, adjustedY));
         dist += width / 2;
       }
-
-      auto blob = SkTextBlob::MakeFromRSXform(text.c_str(), text.length(),
-                                              rsx.data(), *font);
+      auto x = SkSpan(rsx.data(), rsx.size());
+      auto blob =
+          SkTextBlob::MakeFromRSXform(text.c_str(), text.length(), x, *font);
       ctx->canvas->drawTextBlob(blob, 0, 0, ctx->getPaint());
     }
   }
@@ -311,10 +318,9 @@ struct TextCmdProps {
 };
 
 class TextCmd : public Command {
-private:
+public:
   TextCmdProps props;
 
-public:
   TextCmd(jsi::Runtime &runtime, const jsi::Object &object,
           Variables &variables)
       : Command(CommandType::DrawText) {
@@ -335,7 +341,6 @@ public:
   }
 };
 
-// Add to Drawings.h after existing command structures
 struct BoxShadowCmdProps {
   float dx = 0;
   float dy = 0;
@@ -350,7 +355,7 @@ struct BoxCmdProps {
 };
 
 class BoxCmd : public Command {
-private:
+public:
   BoxCmdProps props;
   std::vector<BoxShadowCmdProps> shadows;
 
@@ -372,7 +377,6 @@ private:
     return inflate(box, -dx, -dy, tx, ty);
   }
 
-public:
   BoxCmd(jsi::Runtime &runtime, const jsi::Object &object,
          const jsi::Array &shadowsArray, Variables &variables)
       : Command(CommandType::DrawBox) {
@@ -384,7 +388,10 @@ public:
     for (size_t i = 0; i < shadowCount; i++) {
       auto shadowObj =
           shadowsArray.getValueAtIndex(runtime, i).asObject(runtime);
-      BoxShadowCmdProps shadow;
+
+      // Create shadow directly in vector to avoid copy
+      shadows.emplace_back();
+      BoxShadowCmdProps &shadow = shadows.back();
 
       convertProperty(runtime, shadowObj, "dx", shadow.dx, variables);
       convertProperty(runtime, shadowObj, "dy", shadow.dy, variables);
@@ -392,8 +399,6 @@ public:
       convertProperty(runtime, shadowObj, "blur", shadow.blur, variables);
       convertProperty(runtime, shadowObj, "color", shadow.color, variables);
       convertProperty(runtime, shadowObj, "inner", shadow.inner, variables);
-
-      shadows.push_back(shadow);
     }
   }
 
@@ -471,13 +476,13 @@ struct ImageCmdProps {
 };
 
 class ImageCmd : public Command {
-private:
-  ImageCmdProps props;
-
 public:
-  ImageCmd(jsi::Runtime &runtime, const jsi::Object &object,
-           Variables &variables)
-      : Command(CommandType::DrawImage) {
+  ImageCmdProps props;
+  std::shared_ptr<RNSkPlatformContext> _context;
+
+  ImageCmd(std::shared_ptr<RNSkPlatformContext> context, jsi::Runtime &runtime,
+           const jsi::Object &object, Variables &variables)
+      : Command(CommandType::DrawImage), _context(context) {
     convertProperty(runtime, object, "rect", props.rect, variables);
     convertProperty(runtime, object, "image", props.image, variables);
     convertProperty(runtime, object, "sampling", props.sampling, variables);
@@ -520,10 +525,9 @@ struct PointsCmdProps {
 };
 
 class PointsCmd : public Command {
-private:
+public:
   PointsCmdProps props;
 
-public:
   PointsCmd(jsi::Runtime &runtime, const jsi::Object &object,
             Variables &variables)
       : Command(CommandType::DrawPoints) {
@@ -532,8 +536,8 @@ public:
   }
 
   void draw(DrawingCtx *ctx) {
-    ctx->canvas->drawPoints(props.mode, props.points.size(),
-                            props.points.data(), ctx->getPaint());
+    auto points = SkSpan(props.points.data(), props.points.size());
+    ctx->canvas->drawPoints(props.mode, points, ctx->getPaint());
   }
 };
 
@@ -547,10 +551,9 @@ struct RRectCmdProps {
 };
 
 class RRectCmd : public Command {
-private:
+public:
   RRectCmdProps props;
 
-public:
   RRectCmd(jsi::Runtime &runtime, const jsi::Object &object,
            Variables &variables)
       : Command(CommandType::DrawRRect) {
@@ -587,10 +590,9 @@ struct OvalCmdProps {
 };
 
 class OvalCmd : public Command {
-private:
+public:
   OvalCmdProps props;
 
-public:
   OvalCmd(jsi::Runtime &runtime, const jsi::Object &object,
           Variables &variables)
       : Command(CommandType::DrawOval) {
@@ -623,10 +625,9 @@ struct PatchCmdProps {
 };
 
 class PatchCmd : public Command {
-private:
+public:
   PatchCmdProps props;
 
-public:
   PatchCmd(jsi::Runtime &runtime, const jsi::Object &object,
            Variables &variables)
       : Command(CommandType::DrawPatch) {
@@ -672,10 +673,9 @@ struct VerticesCmdProps {
 };
 
 class VerticesCmd : public Command {
-private:
+public:
   VerticesCmdProps props;
 
-public:
   VerticesCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
       : Command(CommandType::DrawVertices) {
@@ -717,10 +717,9 @@ struct DiffRectCmdProps {
 };
 
 class DiffRectCmd : public Command {
-private:
+public:
   DiffRectCmdProps props;
 
-public:
   DiffRectCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
       : Command(CommandType::DrawDiffRect) {
@@ -740,10 +739,9 @@ struct TextBlobCmdProps {
 };
 
 class TextBlobCmd : public Command {
-private:
+public:
   TextBlobCmdProps props;
 
-public:
   TextBlobCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
       : Command(CommandType::DrawTextBlob) {
@@ -765,10 +763,9 @@ struct GlyphsCmdProps {
 };
 
 class GlyphsCmd : public Command {
-private:
+public:
   GlyphsCmdProps props;
 
-public:
   GlyphsCmd(jsi::Runtime &runtime, const jsi::Object &object,
             Variables &variables)
       : Command(CommandType::DrawGlyphs) {
@@ -780,10 +777,13 @@ public:
 
   void draw(DrawingCtx *ctx) {
     if (props.font.has_value()) {
-      ctx->canvas->drawGlyphs(
-          static_cast<int>(props.glyphs.glyphIds.size()),
-          props.glyphs.glyphIds.data(), props.glyphs.positions.data(),
-          SkPoint::Make(props.x, props.y), props.font.value(), ctx->getPaint());
+      auto glyphs =
+          SkSpan(props.glyphs.glyphIds.data(), props.glyphs.glyphIds.size());
+      auto positions =
+          SkSpan(props.glyphs.positions.data(), props.glyphs.positions.size());
+      ctx->canvas->drawGlyphs(glyphs, positions,
+                              SkPoint::Make(props.x, props.y),
+                              props.font.value(), ctx->getPaint());
     }
   }
 };
@@ -793,13 +793,14 @@ struct PictureCmdProps {
 };
 
 class PictureCmd : public Command {
-private:
-  PictureCmdProps props;
-
 public:
-  PictureCmd(jsi::Runtime &runtime, const jsi::Object &object,
+  PictureCmdProps props;
+  std::shared_ptr<RNSkPlatformContext> _context;
+
+  PictureCmd(std::shared_ptr<RNSkPlatformContext> context,
+             jsi::Runtime &runtime, const jsi::Object &object,
              Variables &variables)
-      : Command(CommandType::DrawPicture) {
+      : Command(CommandType::DrawPicture), _context(context) {
     convertProperty(runtime, object, "picture", props.picture, variables);
   }
 
@@ -816,10 +817,9 @@ struct ImageSVGCmdProps {
 };
 
 class ImageSVGCmd : public Command {
-private:
+public:
   ImageSVGCmdProps props;
 
-public:
   ImageSVGCmd(jsi::Runtime &runtime, const jsi::Object &object,
               Variables &variables)
       : Command(CommandType::DrawImageSVG) {
@@ -872,10 +872,9 @@ struct ParagraphCmdProps {
 };
 
 class ParagraphCmd : public Command {
-private:
+public:
   ParagraphCmdProps props;
 
-public:
   ParagraphCmd(jsi::Runtime &runtime, const jsi::Object &object,
                Variables &variables)
       : Command(CommandType::DrawParagraph) {
@@ -894,6 +893,28 @@ public:
   }
 };
 
+struct SkottieCmdProps {
+  sk_sp<skottie::Animation> animation;
+  float frame;
+};
+
+class SkottieCmd : public Command {
+public:
+  SkottieCmdProps props;
+
+  SkottieCmd(jsi::Runtime &runtime, const jsi::Object &object,
+             Variables &variables)
+      : Command(CommandType::DrawSkottie) {
+    convertProperty(runtime, object, "animation", props.animation, variables);
+    convertProperty(runtime, object, "frame", props.frame, variables);
+  }
+
+  void draw(DrawingCtx *ctx) {
+    props.animation->seekFrame(props.frame);
+    props.animation->render(ctx->canvas);
+  }
+};
+
 struct AtlasCmdProps {
   sk_sp<SkImage> image;
   std::vector<SkRect> sprites;
@@ -904,18 +925,19 @@ struct AtlasCmdProps {
 };
 
 class AtlasCmd : public Command {
-private:
-  AtlasCmdProps props;
-
 public:
-  AtlasCmd(jsi::Runtime &runtime, const jsi::Object &object,
-           Variables &variables)
-      : Command(CommandType::DrawAtlas) {
+  AtlasCmdProps props;
+  std::shared_ptr<RNSkPlatformContext> _context;
+
+  AtlasCmd(std::shared_ptr<RNSkPlatformContext> context, jsi::Runtime &runtime,
+           const jsi::Object &object, Variables &variables)
+      : Command(CommandType::DrawAtlas), _context(context) {
     convertProperty(runtime, object, "image", props.image, variables);
     convertProperty(runtime, object, "sprites", props.sprites, variables);
     convertProperty(runtime, object, "transforms", props.transforms, variables);
     convertProperty(runtime, object, "colors", props.colors, variables);
-    convertProperty(runtime, object, "blendMode", props.blendMode, variables);
+    convertProperty(runtime, object, "colorBlendMode", props.blendMode,
+                    variables);
     convertProperty(runtime, object, "sampling", props.sampling, variables);
   }
 
@@ -934,16 +956,22 @@ public:
             "colors array must have the same length as transforms/sprites");
       }
 
+<<<<<<< HEAD
       auto colors =
           props.colors.has_value() ? props.colors.value().data() : nullptr;
+=======
+      auto colors = SkSpan(
+          props.colors.has_value() ? props.colors.value().data() : nullptr,
+          props.colors.has_value() ? props.colors.value().size() : 0);
+>>>>>>> main
       auto blendMode = props.blendMode.value_or(SkBlendMode::kDstOver);
       auto sampling =
           props.sampling.value_or(SkSamplingOptions(SkFilterMode::kLinear));
-
-      ctx->canvas->drawAtlas(props.image.get(), props.transforms.data(),
-                             props.sprites.data(), colors,
-                             props.transforms.size(), blendMode, sampling,
-                             nullptr, &(ctx->getPaint()));
+      auto transforms =
+          SkSpan(props.transforms.data(), props.transforms.size());
+      auto sprites = SkSpan(props.sprites.data(), props.sprites.size());
+      ctx->canvas->drawAtlas(props.image.get(), transforms, sprites, colors,
+                             blendMode, sampling, nullptr, &(ctx->getPaint()));
     }
   }
 };

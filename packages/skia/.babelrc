@@ -27,6 +27,7 @@
     "@babel/preset-flow"
   ],
   "plugins": [
+    "@babel/plugin-transform-explicit-resource-management",
     "@babel/plugin-proposal-class-properties",
     "@babel/plugin-proposal-nullish-coalescing-operator"
   ]

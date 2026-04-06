@@ -5,17 +5,18 @@ sidebar_label: Atlas
 slug: /shapes/atlas
 ---
 
-The Atlas component is used for efficient rendering of multiple instances of the same texture or image. It is especially useful for drawing a very large number of similar objects, like sprites, with varying transformations.
+The Atlas component is used for efficient rendering of multiple instances of the same texture or image. It is especially useful for drawing a very large number of similar objects, like sprites or tiles, with varying transformations.
 
-Its design particularly useful when using with [Reanimated](#animations).
+Atlas transforms can be animated with near-zero cost using worklets. This makes it ideal for tile-based maps, sprite animations, and any scenario where you have many instances of similar textures. Its design is particularly useful when combined with [Reanimated](#animations).
 
 | Name    | Type             |  Description     |
 |:--------|:-----------------|:-----------------|
-| image   | `SkImage or null` | Altas: image containing the sprites. |
+| image   | `SkImage or null` | Atlas: image containing the sprites. |
 | sprites | `SkRect[]` | locations of sprites in atlas.             |
 | transforms | `RSXform[]` | Rotation/scale transforms to be applied for each sprite. |
 | colors? | `SkColor[]` | Optional. Color to blend the sprites with. |
-| blendMode? | `BlendMode` | Optional. Blend mode used to combine sprites and colors together. |
+| colorBlendMode? | `BlendMode` | Optional. Blend mode used to combine sprite colors with the texture. Default is `dstOver`. |
+| blendMode? | `BlendMode` | Optional. Blend mode used for layer compositing (how the Atlas is drawn onto the canvas). |
 | sampling? | `Sampling` | The method used to sample the image. see ([sampling options](/docs/images#sampling-options)). |
 
 ## RSXform

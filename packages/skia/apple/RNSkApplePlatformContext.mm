@@ -3,11 +3,12 @@
 #import <CoreMedia/CMSampleBuffer.h>
 #include <Metal/Metal.h>
 #import <React/RCTUtils.h>
+#include <set>
 #include <thread>
 #include <utility>
 
 #if defined(SK_GRAPHITE)
-#include "DawnContext.h"
+#include "RNDawnContext.h"
 #else
 #include "MetalContext.h"
 #endif
@@ -16,8 +17,13 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#include "include/core/SkBlendMode.h"
+#include "include/core/SkCanvas.h"
+#include "include/core/SkColor.h"
 #import "include/core/SkColorSpace.h"
 #include "include/core/SkFontMgr.h"
+#include "include/core/SkPaint.h"
+#include "include/core/SkSamplingOptions.h"
 #include "include/core/SkSurface.h"
 
 #include "include/ports/SkFontMgr_mac_ct.h"
@@ -44,7 +50,11 @@ void RNSkApplePlatformContext::performStreamOperation(
       // load from the embedded iOS app bundle and will try to load image
       // and get data from the image directly. imageNamed will return the
       // best version of the requested image:
+#if !TARGET_OS_OSX
       auto image = [UIImage imageNamed:[url absoluteString]];
+#else
+      auto image = [NSImage imageNamed:[url absoluteString]];
+#endif // !TARGET_OS_OSX
       // We don't know the image format (png, jpg, etc) but
       // UIImagePNGRepresentation will support all of them
       data = UIImagePNGRepresentation(image);
@@ -74,22 +84,26 @@ void RNSkApplePlatformContext::releaseNativeBuffer(uint64_t pointer) {
 uint64_t RNSkApplePlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
   // 0. If Image is not in BGRA, convert to BGRA as only BGRA is supported.
   if (image->colorType() != kBGRA_8888_SkColorType) {
-#if defined(SK_GRAPHITE)
-    SkImage::RequiredProperties requiredProps;
-    image = image->makeColorTypeAndColorSpace(
-        DawnContext::getInstance().getRecorder(), kBGRA_8888_SkColorType,
-        SkColorSpace::MakeSRGB(), requiredProps);
-#else
-    // on iOS, 32_BGRA is the only supported RGB format for CVPixelBuffers.
-    image = image->makeColorTypeAndColorSpace(
-        MetalContext::getInstance().getDirectContext(), kBGRA_8888_SkColorType,
-        SkColorSpace::MakeSRGB());
-#endif
-    if (image == nullptr) {
+    const SkImageInfo bgraInfo =
+        SkImageInfo::Make(image->dimensions(), kBGRA_8888_SkColorType,
+                          kPremul_SkAlphaType, SkColorSpace::MakeSRGB());
+    auto surface = SkSurfaces::Raster(bgraInfo);
+    if (!surface) {
+      throw std::runtime_error(
+          "Failed to allocate raster surface for BGRA conversion");
+    }
+    SkCanvas *canvas = surface->getCanvas();
+    canvas->clear(SK_ColorTRANSPARENT);
+    SkPaint paint;
+    paint.setBlendMode(SkBlendMode::kSrc);
+    canvas->drawImage(image.get(), 0.0f, 0.0f, SkSamplingOptions(), &paint);
+    auto bgraImage = surface->makeImageSnapshot();
+    if (bgraImage == nullptr) {
       throw std::runtime_error(
           "Failed to convert image to BGRA_8888 colortype! Only BGRA_8888 "
           "NativeBuffers are supported.");
     }
+    image = std::move(bgraImage);
   }
 
   // 1. Get image info
@@ -156,9 +170,14 @@ uint64_t RNSkApplePlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
   return reinterpret_cast<uint64_t>(pixelBuffer);
 }
 
+#if !defined(SK_GRAPHITE)
+GrDirectContext *RNSkApplePlatformContext::getDirectContext() {
+  return MetalContext::getInstance().getDirectContext();
+}
+
 const TextureInfo RNSkApplePlatformContext::getTexture(sk_sp<SkImage> image) {
-  GrBackendTexture texture;
   TextureInfo result;
+  GrBackendTexture texture;
   if (!SkImages::GetBackendTextureFromImage(image, &texture, true)) {
     throw std::runtime_error("Couldn't get backend texture");
   }
@@ -175,9 +194,12 @@ const TextureInfo RNSkApplePlatformContext::getTexture(sk_sp<SkImage> image) {
 
 const TextureInfo
 RNSkApplePlatformContext::getTexture(sk_sp<SkSurface> surface) {
+<<<<<<< HEAD
+=======
+  TextureInfo result;
+>>>>>>> main
   GrBackendTexture texture = SkSurfaces::GetBackendTexture(
       surface.get(), SkSurfaces::BackendHandleAccess::kFlushRead);
-  TextureInfo result;
   if (!texture.isValid()) {
     throw std::runtime_error("Invalid backend texture");
   }
@@ -189,6 +211,7 @@ RNSkApplePlatformContext::getTexture(sk_sp<SkSurface> surface) {
   return result;
 }
 
+<<<<<<< HEAD
 std::shared_ptr<RNSkVideo>
 RNSkApplePlatformContext::createVideo(const std::string &url) {
   return std::make_shared<RNSkAppleVideo>(url, this);
@@ -227,6 +250,8 @@ RNSkApplePlatformContext::makeImageFromNativeBuffer(void *buffer) {
 #endif
 }
 
+=======
+>>>>>>> main
 sk_sp<SkImage> RNSkApplePlatformContext::makeImageFromNativeTexture(
     const TextureInfo &texInfo, int width, int height, bool mipMapped) {
   id<MTLTexture> mtlTexture = (__bridge id<MTLTexture>)(texInfo.mtlTexture);
@@ -246,6 +271,49 @@ sk_sp<SkImage> RNSkApplePlatformContext::makeImageFromNativeTexture(
   return SkImages::BorrowTextureFrom(getDirectContext(), texture,
                                      kTopLeft_GrSurfaceOrigin, colorType,
                                      kPremul_SkAlphaType, nullptr);
+  return nullptr;
+}
+#endif
+
+std::shared_ptr<RNSkVideo>
+RNSkApplePlatformContext::createVideo(const std::string &url) {
+  return std::make_shared<RNSkAppleVideo>(url, this);
+}
+
+std::shared_ptr<WindowContext>
+RNSkApplePlatformContext::makeContextFromNativeSurface(void *surface, int width,
+                                                       int height) {
+#if defined(SK_GRAPHITE)
+  return DawnContext::getInstance().MakeWindow(surface, width, height);
+#else
+  return MetalContext::getInstance().MakeWindow((__bridge CALayer *)surface,
+                                                width, height);
+#endif
+}
+
+void RNSkApplePlatformContext::raiseError(const std::exception &err) {
+  RCTFatal(RCTErrorWithMessage([NSString stringWithUTF8String:err.what()]));
+}
+
+sk_sp<SkSurface>
+RNSkApplePlatformContext::makeOffscreenSurface(int width, int height,
+                                               bool useP3ColorSpace) {
+#if defined(SK_GRAPHITE)
+  return DawnContext::getInstance().MakeOffscreen(width, height,
+                                                  useP3ColorSpace);
+#else
+  return MetalContext::getInstance().MakeOffscreen(width, height,
+                                                   useP3ColorSpace);
+#endif
+}
+
+sk_sp<SkImage>
+RNSkApplePlatformContext::makeImageFromNativeBuffer(void *buffer) {
+#if defined(SK_GRAPHITE)
+  return DawnContext::getInstance().MakeImageFromBuffer(buffer);
+#else
+  return MetalContext::getInstance().MakeImageFromBuffer(buffer);
+#endif
 }
 
 SkColorType RNSkApplePlatformContext::mtlPixelFormatToSkColorType(
@@ -280,14 +348,76 @@ SkColorType RNSkApplePlatformContext::mtlPixelFormatToSkColorType(
   }
 }
 
-#if !defined(SK_GRAPHITE)
-GrDirectContext *RNSkApplePlatformContext::getDirectContext() {
-  return MetalContext::getInstance().getDirectContext();
-}
-#endif
-
 sk_sp<SkFontMgr> RNSkApplePlatformContext::createFontMgr() {
   return SkFontMgr_New_CoreText(nullptr);
+}
+
+std::vector<std::string> RNSkApplePlatformContext::getSystemFontFamilies() {
+  std::vector<std::string> families;
+
+  // System UI fonts (e.g., .AppleSystemUIFont) are not enumerated by Skia's
+  // font manager. We retrieve them via Core Text's CTFontUIFontType constants.
+  // This list covers common system font types as of iOS 17 / macOS 14.
+  // Apple may add new CTFontUIFontType values in future OS versions,
+  // so this list may need to be updated periodically.
+  CTFontUIFontType fontTypes[] = {
+      kCTFontUIFontUser,        kCTFontUIFontUserFixedPitch,
+      kCTFontUIFontSystem,      kCTFontUIFontEmphasizedSystem,
+      kCTFontUIFontSmallSystem, kCTFontUIFontSmallEmphasizedSystem,
+      kCTFontUIFontMiniSystem,  kCTFontUIFontMiniEmphasizedSystem,
+      kCTFontUIFontLabel,       kCTFontUIFontMessage,
+      kCTFontUIFontToolTip,
+  };
+
+  std::set<std::string> uniqueFamilies;
+
+  for (CTFontUIFontType fontType : fontTypes) {
+    CTFontRef font = CTFontCreateUIFontForLanguage(fontType, 12.0, nullptr);
+    if (font) {
+      CFStringRef familyName = CTFontCopyFamilyName(font);
+      if (familyName) {
+        const char *cstr =
+            CFStringGetCStringPtr(familyName, kCFStringEncodingUTF8);
+        if (cstr) {
+          uniqueFamilies.insert(std::string(cstr));
+        } else {
+          char buffer[256];
+          if (CFStringGetCString(familyName, buffer, sizeof(buffer),
+                                 kCFStringEncodingUTF8)) {
+            uniqueFamilies.insert(std::string(buffer));
+          }
+        }
+        CFRelease(familyName);
+      }
+      CFRelease(font);
+    }
+  }
+
+  families.assign(uniqueFamilies.begin(), uniqueFamilies.end());
+  return families;
+}
+
+std::string
+RNSkApplePlatformContext::resolveFontFamily(const std::string &familyName) {
+  // Handle special font family names like React Native does
+  // See: RCTFont.mm in React Native
+  if (familyName == "System" || familyName == "system" ||
+      familyName == "sans-serif") {
+    return ".AppleSystemUIFont";
+  }
+  if (familyName == "SystemCondensed" || familyName == "system-condensed") {
+    // Return system font - condensed trait is handled via font style
+    return ".AppleSystemUIFont";
+  }
+  // CSS generic font families
+  if (familyName == "serif") {
+    return "Times New Roman";
+  }
+  if (familyName == "monospace") {
+    return "Courier New";
+  }
+  // Return as-is if no mapping exists
+  return familyName;
 }
 
 void RNSkApplePlatformContext::runOnMainThread(std::function<void()> func) {

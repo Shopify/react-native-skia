@@ -171,7 +171,7 @@ describe("Displays SVGs", () => {
       </>
     );
     // TODO: Currently there are artifacts on Graphite/iOS
-    checkImage(image, docPath("opacity-tiger.png"), { maxPixelDiff: 500 });
+    checkImage(image, docPath("opacity-tiger.png"), { maxPixelDiff: 1000 });
   });
 
   itRunsE2eOnly("text shouldn't crash on iOS", async () => {

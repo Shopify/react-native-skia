@@ -27,8 +27,9 @@ type Props = {
   [NodeType.SRGBToLinearGammaColorFilter]: Record<string, never>;
 };
 
-interface PushColorFilter<T extends keyof Props>
-  extends Command<CommandType.PushColorFilter> {
+interface PushColorFilter<
+  T extends keyof Props,
+> extends Command<CommandType.PushColorFilter> {
   colorFilterType: T;
   props: Props[T];
 }

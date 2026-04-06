@@ -26,6 +26,8 @@ import type {
   AtlasProps,
   BoxProps,
   BoxShadowProps,
+  SkottieProps,
+  DrawingNodeProps,
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer";
 import { isSharedValue } from "../utils";
@@ -92,9 +94,13 @@ export class Recorder implements BaseRecorder {
     this.cursors[this.cursors.length - 1].push(command);
   }
 
-  saveGroup() {
+  saveGroup(props?: AnimatedProps<Pick<DrawingNodeProps, "zIndex">>) {
     const children: Command[] = [];
-    this.add({ type: CommandType.Group, children });
+    const group: Command = { type: CommandType.Group, children };
+    if (props) {
+      group.props = props;
+    }
+    this.add(group);
     this.cursors.push(children);
   }
 
@@ -102,8 +108,8 @@ export class Recorder implements BaseRecorder {
     this.cursors.pop();
   }
 
-  savePaint(props: AnimatedProps<PaintProps>) {
-    this.add({ type: CommandType.SavePaint, props });
+  savePaint(props: AnimatedProps<PaintProps>, standalone: boolean) {
+    this.add({ type: CommandType.SavePaint, props, standalone });
   }
 
   restorePaint() {
@@ -151,11 +157,15 @@ export class Recorder implements BaseRecorder {
     });
   }
 
-  pushShader(shaderType: NodeType, props: AnimatedProps<unknown>) {
+  pushShader(
+    shaderType: NodeType,
+    props: AnimatedProps<unknown>,
+    children: number
+  ) {
     if (!isShader(shaderType) && !(shaderType === NodeType.Blend)) {
       throw new Error("Invalid color filter type: " + shaderType);
     }
-    this.add({ type: CommandType.PushShader, shaderType, props });
+    this.add({ type: CommandType.PushShader, shaderType, props, children });
   }
 
   pushBlurMaskFilter(props: AnimatedProps<BlurMaskFilterProps>) {
@@ -289,5 +299,9 @@ export class Recorder implements BaseRecorder {
 
   drawAtlas(props: AnimatedProps<AtlasProps>) {
     this.add({ type: CommandType.DrawAtlas, props });
+  }
+
+  drawSkottie(props: AnimatedProps<SkottieProps>) {
+    this.add({ type: CommandType.DrawSkottie, props });
   }
 }

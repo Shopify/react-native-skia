@@ -7,7 +7,13 @@ type ESModule = {
   __esModule: true;
   default: string;
 };
-export type DataModule = RNModule | ESModule;
+type MetroAsset = {
+  uri: string;
+  width: number;
+  height: number;
+};
+
+export type DataModule = RNModule | ESModule | MetroAsset;
 export type DataSource = DataModule | string | Uint8Array;
 export type DataSourceParam = DataSource | null | undefined;
 

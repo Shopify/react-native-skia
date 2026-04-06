@@ -23,6 +23,10 @@ public:
       : JsiSkWrappingSkPtrHostObject<SkColorFilter>(std::move(context),
                                                     std::move(colorFilter)) {}
 
+  size_t getMemoryPressure() const override { return 2048; }
+
+  std::string getObjectType() const override { return "JsiSkColorFilter"; }
+
   EXPORT_JSI_API_TYPENAME(JsiSkColorFilter, ColorFilter)
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkColorFilter, dispose))
 };

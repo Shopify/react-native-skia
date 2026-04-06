@@ -32,12 +32,16 @@ import {
   SpeedTest,
   Video,
   Chat,
+  LiquidGlass,
+  Pictures,
+  WebGPU,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
 import type { StackParamList } from "./types";
 import { useAssets } from "./Tests/useAssets";
 import { Chess } from "./Examples/Chess";
+import "./resolveAssetSourcePolyfill";
 
 const linking: LinkingOptions<StackParamList> = {
   config: {
@@ -45,6 +49,7 @@ const linking: LinkingOptions<StackParamList> = {
       Home: "",
       Vertices: "vertices",
       API: "api",
+      LiquidGlass: "liquid-glass",
       Breathe: "breathe",
       Filters: "filters",
       Gooey: "gooey",
@@ -68,6 +73,8 @@ const linking: LinkingOptions<StackParamList> = {
       SpeedTest: "speedtest",
       Video: "video",
       Chat: "chat",
+      Pictures: "pictures",
+      WebGPU: "webgpu",
     },
   },
   prefixes: ["rnskia://"],
@@ -132,6 +139,7 @@ const App = () => {
               }}
             />
             <Stack.Screen name="API" component={API} />
+            <Stack.Screen name="LiquidGlass" component={LiquidGlass} />
             <Stack.Screen name="Breathe" component={Breathe} />
             <Stack.Screen
               name="Chess"
@@ -227,6 +235,14 @@ const App = () => {
             <Stack.Screen
               name="Performance"
               component={PerformanceDrawingTest}
+            />
+            <Stack.Screen name="Pictures" component={Pictures} />
+            <Stack.Screen
+              name="WebGPU"
+              component={WebGPU}
+              options={{
+                header: () => null,
+              }}
             />
           </Stack.Navigator>
         </NavigationContainer>

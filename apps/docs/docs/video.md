@@ -71,7 +71,16 @@ export const VideoExample = () => {
 
 ## Returned Values
 
-The `useVideo` hook returns `currentFrame`, which contains the current video frame, as well as `currentTime`, `rotation`, and `size`.
+The `useVideo` hook returns the following values:
+
+| Value         | Description                                                                 |
+|---------------|-----------------------------------------------------------------------------|
+| `currentFrame`| The current video frame as a Skia image (or `null` if not yet loaded).      |
+| `currentTime` | The current playback position in milliseconds (shared value).               |
+| `duration`    | The total duration of the video in milliseconds.                            |
+| `framerate`   | The video's frame rate (frames per second).                                 |
+| `rotation`    | The video's rotation: `0`, `90`, `180`, or `270` degrees.                   |
+| `size`        | The video dimensions: `{ width: number, height: number }`.                  |
 
 ## Playback Options
 

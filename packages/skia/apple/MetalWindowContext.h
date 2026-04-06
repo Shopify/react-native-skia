@@ -2,7 +2,7 @@
 
 #import <MetalKit/MetalKit.h>
 
-#include "WindowContext.h"
+#include "RNWindowContext.h"
 
 class SkiaMetalContext;
 
@@ -10,7 +10,7 @@ class MetalWindowContext : public RNSkia::WindowContext {
 public:
   MetalWindowContext(GrDirectContext *directContext, id<MTLDevice> device,
                      id<MTLCommandQueue> commandQueue, CALayer *layer,
-                     int width, int height);
+                     int width, int height, bool useP3ColorSpace = true);
   ~MetalWindowContext() = default;
 
   sk_sp<SkSurface> getSurface() override;
@@ -36,4 +36,5 @@ private:
   CAMetalLayer *_layer;
 #pragma clang diagnostic pop
   id<CAMetalDrawable> _currentDrawable = nil;
+  bool _useP3ColorSpace = false;
 };

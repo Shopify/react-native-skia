@@ -15,9 +15,12 @@ export const Platform: IPlatform = {
   OS: RNPlatform.OS,
   PixelRatio: PixelRatio.get(),
   resolveAsset: (source: DataModule) => {
+    // eslint-disable-next-line no-nested-ternary
     return isRNModule(source)
       ? Image.resolveAssetSource(source).uri
-      : source.default;
+      : "uri" in source
+        ? source.uri
+        : source.default;
   },
   findNodeHandle,
   View,

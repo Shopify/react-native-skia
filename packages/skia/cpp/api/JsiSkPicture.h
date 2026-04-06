@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "JsiSkData.h"
+#include "JsiSkDispatcher.h"
 #include "JsiSkHostObjects.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkRect.h"
@@ -20,10 +21,36 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 
 class JsiSkPicture : public JsiSkWrappingSkPtrHostObject<SkPicture> {
+private:
+  std::shared_ptr<Dispatcher> _dispatcher;
+
 public:
   JsiSkPicture(std::shared_ptr<RNSkPlatformContext> context,
                const sk_sp<SkPicture> picture)
-      : JsiSkWrappingSkPtrHostObject<SkPicture>(context, picture) {}
+      : JsiSkWrappingSkPtrHostObject<SkPicture>(context, picture) {
+    // Get the dispatcher for the current thread
+    _dispatcher = Dispatcher::getDispatcher();
+    // Process any pending operations
+    _dispatcher->processQueue();
+  }
+
+public:
+  ~JsiSkPicture() override {
+    if (!isDisposed()) {
+      // This JSI Object is being deleted from a GC, which might happen
+      // on a separate Thread. GPU resources (like SkPicture) must be deleted
+      // on the same Thread they were created on, so in this case we schedule
+      // deletion to run on the Thread this Object was created on.
+      auto picture = getObjectUnchecked();
+      if (picture && _dispatcher) {
+        _dispatcher->run([picture]() {
+          // Picture will be deleted when this lambda is destroyed, on the
+          // original Thread.
+        });
+      }
+      releaseResources();
+    }
+  }
 
   JSI_HOST_FUNCTION(makeShader) {
     auto tmx = (SkTileMode)arguments[0].asNumber();
@@ -39,8 +66,9 @@ public:
 
     // Create shader
     auto shader = getObject()->makeShader(tmx, tmy, fm, m, tr);
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkShader>(getContext(), shader));
+    auto shaderObj = std::make_shared<JsiSkShader>(getContext(), shader);
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shaderObj,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(serialize) {
@@ -67,5 +95,20 @@ public:
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPicture, makeShader),
                        JSI_EXPORT_FUNC(JsiSkPicture, serialize),
                        JSI_EXPORT_FUNC(JsiSkPicture, dispose))
+
+  size_t getMemoryPressure() const override {
+    if (isDisposed()) {
+      return 0;
+    }
+    auto picture = getObjectUnchecked();
+    if (!picture) {
+      return 0;
+    }
+    // SkPicture provides approximateBytesUsed() method to estimate memory usage
+    auto bytesUsed = picture->approximateBytesUsed();
+    return bytesUsed;
+  }
+
+  std::string getObjectType() const override { return "JsiSkPicture"; }
 };
 } // namespace RNSkia

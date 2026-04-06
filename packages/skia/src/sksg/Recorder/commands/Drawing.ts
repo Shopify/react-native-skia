@@ -11,7 +11,6 @@ import type {
   AtlasProps,
   CircleProps,
   DiffRectProps,
-  DrawingNodeProps,
   GlyphsProps,
   ImageProps,
   ImageSVGProps,
@@ -24,6 +23,7 @@ import type {
   PointsProps,
   RectProps,
   RoundedRectProps,
+  SkottieProps,
   TextBlobProps,
   TextPathProps,
   TextProps,
@@ -208,25 +208,38 @@ export const drawPath = (ctx: DrawingContext, props: PathProps) => {
     stroke,
     ...pathProps
   } = props;
-  const start = saturate(trimStart);
-  const end = saturate(trimEnd);
+  const start = Math.fround(saturate(trimStart));
+  const end = Math.fround(saturate(trimEnd));
   const hasStartOffset = start !== 0;
   const hasEndOffset = end !== 1;
   const hasStrokeOptions = stroke !== undefined;
   const hasFillType = !!fillType;
-  const willMutatePath =
-    hasStartOffset || hasEndOffset || hasStrokeOptions || hasFillType;
-  const pristinePath = processPath(ctx.Skia, pathProps.path);
-  const path = willMutatePath ? pristinePath.copy() : pristinePath;
+
+  let path = processPath(ctx.Skia, pathProps.path);
+
+  // Apply fill type using PathBuilder
   if (hasFillType) {
-    path.setFillType(FillType[enumKey(fillType)]);
+    const builder = ctx.Skia.PathBuilder.MakeFromPath(path);
+    builder.setFillType(FillType[enumKey(fillType)]);
+    path = builder.build();
   }
+
+  // Apply stroke using static Path.Stroke
   if (hasStrokeOptions) {
-    path.stroke(stroke);
+    const stroked = ctx.Skia.Path.Stroke(path, stroke);
+    if (stroked) {
+      path = stroked;
+    }
   }
+
+  // Apply trim using static Path.Trim
   if (hasStartOffset || hasEndOffset) {
-    path.trim(start, end, false);
+    const trimmed = ctx.Skia.Path.Trim(path, start, end, false);
+    if (trimmed) {
+      path = trimmed;
+    }
   }
+
   ctx.canvas.drawPath(path, ctx.paint);
 };
 
@@ -306,8 +319,9 @@ export const drawPicture = (ctx: DrawingContext, props: PictureProps) => {
 
 export const drawAtlas = (ctx: DrawingContext, props: AtlasProps) => {
   "worklet";
-  const { image, sprites, transforms, colors, blendMode, sampling } = props;
-  const blend = blendMode ? BlendMode[enumKey(blendMode)] : undefined;
+  const { image, sprites, transforms, colors, colorBlendMode, sampling } =
+    props;
+  const blend = colorBlendMode ? BlendMode[enumKey(colorBlendMode)] : undefined;
   if (image) {
     ctx.canvas.drawAtlas(
       image,
@@ -328,7 +342,11 @@ export const drawCircle = (ctx: DrawingContext, props: CircleProps) => {
   ctx.canvas.drawCircle(c.x, c.y, r, ctx.paint);
 };
 
-export const drawFill = (ctx: DrawingContext, _props: DrawingNodeProps) => {
+export const drawSkottie = (ctx: DrawingContext, props: SkottieProps) => {
   "worklet";
-  ctx.canvas.drawPaint(ctx.paint);
+  const { animation, frame } = props;
+  if (animation) {
+    props.animation.seekFrame(frame);
+    props.animation.render(ctx.canvas);
+  }
 };

@@ -1,4 +1,4 @@
-import { Skia } from "@shopify/react-native-skia";
+import { Skia, TileMode } from "@shopify/react-native-skia";
 import React from "react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -73,7 +73,6 @@ const parseProp = (value: any, assets: Assets): any => {
     } else if (value.__typename__ === "SVG") {
       return Skia.SVG.MakeFromString(value.source);
     } else if (value.__typename__ === "SkiaObject") {
-      // eslint-disable-next-line no-eval
       return eval(
         `(function Main(){return (${value.source})(this.Skia, this.ctx); })`
       ).call({
@@ -88,12 +87,21 @@ const parseProp = (value: any, assets: Assets): any => {
       return Skia.Font(asset, value.size);
     } else if (value.__typename__ === "RSXform") {
       return Skia.RSXform(value.scos, value.ssin, value.tx, value.ty);
+    } else if (value.__typename__ === "SkottieAnimation") {
+      // eslint-disable-next-line @typescript-eslint/no-shadow
+      const assets: any = {};
+      if (value.assets) {
+        Object.keys(value.assets).forEach((key) => {
+          assets[key] = Skia.Data.fromBytes(new Uint8Array(value.assets[key]));
+        });
+      }
+      return Skia.Skottie.Make(value.source, assets);
     } else if (value.__typename__ === "Function") {
-      // eslint-disable-next-line no-eval
       return eval(
-        `(function Main(){ const {Skia} = this; return (${value.source}); })`
+        `(function Main(){ const {Skia, TileMode} = this; return (${value.source}); })`
       ).call({
         Skia,
+        TileMode,
       });
     }
   } else if (Array.isArray(value)) {

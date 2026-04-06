@@ -11,6 +11,18 @@
 
 #include "RuntimeAwareCache.h"
 
+#ifdef SK_GRAPHITE
+#include "RNDawnContext.h"
+#include "rnwgpu/api/GPU.h"
+#include "rnwgpu/api/GPUUncapturedErrorEvent.h"
+#include "rnwgpu/api/RNWebGPU.h"
+#include "rnwgpu/api/descriptors/GPUBufferUsage.h"
+#include "rnwgpu/api/descriptors/GPUColorWrite.h"
+#include "rnwgpu/api/descriptors/GPUMapMode.h"
+#include "rnwgpu/api/descriptors/GPUShaderStage.h"
+#include "rnwgpu/api/descriptors/GPUTextureUsage.h"
+#endif
+
 namespace RNSkia {
 namespace jsi = facebook::jsi;
 
@@ -18,11 +30,11 @@ RNSkManager::RNSkManager(
     jsi::Runtime *jsRuntime,
     std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker,
     std::shared_ptr<RNSkPlatformContext> platformContext)
-    : _jsRuntime(jsRuntime), _jsCallInvoker(jsCallInvoker),
-      _platformContext(platformContext),
+    : _jsRuntime(jsRuntime), _platformContext(platformContext),
+      _jsCallInvoker(jsCallInvoker),
       _viewApi(std::make_shared<RNSkJsiViewApi>(platformContext)) {
 
-  // Register main runtime
+  // Register main runtime (used by both Skia and WebGPU bindings)
   RNJsi::BaseRuntimeAwareCache::setMainJsRuntime(_jsRuntime);
 
   // Install bindings
@@ -30,7 +42,6 @@ RNSkManager::RNSkManager(
 }
 
 RNSkManager::~RNSkManager() {
-  invalidate();
   // Free up any references
   _viewApi = nullptr;
   _jsRuntime = nullptr;
@@ -38,36 +49,22 @@ RNSkManager::~RNSkManager() {
   _jsCallInvoker = nullptr;
 }
 
-void RNSkManager::invalidate() {
-  if (_isInvalidated) {
-    return;
-  }
-  _isInvalidated = true;
-
-  // Invalidate members
-  _viewApi->unregisterAll();
-}
-
 void RNSkManager::registerSkiaView(size_t nativeId,
                                    std::shared_ptr<RNSkView> view) {
-  if (!_isInvalidated && _viewApi != nullptr)
-    _viewApi->registerSkiaView(nativeId, std::move(view));
+  _viewApi->registerSkiaView(nativeId, std::move(view));
 }
 
 void RNSkManager::unregisterSkiaView(size_t nativeId) {
-  if (!_isInvalidated && _viewApi != nullptr)
-    _viewApi->unregisterSkiaView(nativeId);
+  _viewApi->unregisterSkiaView(nativeId);
 }
 
 void RNSkManager::setSkiaView(size_t nativeId, std::shared_ptr<RNSkView> view) {
-  if (!_isInvalidated && _viewApi != nullptr)
-    _viewApi->setSkiaView(nativeId, std::move(view));
+  _viewApi->setSkiaView(nativeId, std::move(view));
 }
 
 void RNSkManager::installBindings() {
   // Create the API objects and install it on the global object in the
   // provided runtime.
-
   auto skiaApi = std::make_shared<JsiSkApi>(_platformContext);
   _jsRuntime->global().setProperty(
       *_jsRuntime, "SkiaApi",
@@ -76,5 +73,47 @@ void RNSkManager::installBindings() {
   _jsRuntime->global().setProperty(
       *_jsRuntime, "SkiaViewApi",
       jsi::Object::createFromHostObject(*_jsRuntime, _viewApi));
+
+#ifdef SK_GRAPHITE
+  // Install WebGPU constructors
+  rnwgpu::GPU::installConstructor(*_jsRuntime);
+  rnwgpu::GPUUncapturedErrorEvent::installConstructor(*_jsRuntime);
+  // Create and expose navigator.gpu using DawnContext's instance
+  auto &dawnContext = DawnContext::getInstance();
+  auto gpu =
+      std::make_shared<rnwgpu::GPU>(*_jsRuntime, dawnContext.getWGPUInstance());
+  auto navigatorValue =
+      _jsRuntime->global().getProperty(*_jsRuntime, "navigator");
+  if (navigatorValue.isObject()) {
+    auto navigator = navigatorValue.asObject(*_jsRuntime);
+    navigator.setProperty(*_jsRuntime, "gpu",
+                          rnwgpu::GPU::create(*_jsRuntime, gpu));
+  } else {
+    // Create navigator object if it doesn't exist
+    jsi::Object navigator(*_jsRuntime);
+    navigator.setProperty(*_jsRuntime, "gpu",
+                          rnwgpu::GPU::create(*_jsRuntime, gpu));
+    _jsRuntime->global().setProperty(*_jsRuntime, "navigator",
+                                     std::move(navigator));
+  }
+
+  // Install WebGPU constant objects as plain JS objects
+  _jsRuntime->global().setProperty(*_jsRuntime, "GPUBufferUsage",
+                                   rnwgpu::GPUBufferUsage::create(*_jsRuntime));
+  _jsRuntime->global().setProperty(*_jsRuntime, "GPUColorWrite",
+                                   rnwgpu::GPUColorWrite::create(*_jsRuntime));
+  _jsRuntime->global().setProperty(*_jsRuntime, "GPUMapMode",
+                                   rnwgpu::GPUMapMode::create(*_jsRuntime));
+  _jsRuntime->global().setProperty(*_jsRuntime, "GPUShaderStage",
+                                   rnwgpu::GPUShaderStage::create(*_jsRuntime));
+  _jsRuntime->global().setProperty(
+      *_jsRuntime, "GPUTextureUsage",
+      rnwgpu::GPUTextureUsage::create(*_jsRuntime));
+
+  // Install RNWebGPU global object for WebGPU Canvas support
+  auto rnWebGPU = std::make_shared<rnwgpu::RNWebGPU>(gpu, nullptr);
+  _jsRuntime->global().setProperty(
+      *_jsRuntime, "RNWebGPU", rnwgpu::RNWebGPU::create(*_jsRuntime, rnWebGPU));
+#endif
 }
 } // namespace RNSkia

@@ -56,11 +56,24 @@ public:
     SkPaint paint;
     paint.setAntiAlias(true);
     paints.push_back(paint);
+    opacities.push_back(1.0f);
   }
 
-  void pushPaint(SkPaint &paint) { paints.push_back(paint); }
+  float getOpacity() const { return opacities.back(); }
 
-  void savePaint() { paints.push_back(SkPaint(getPaint())); }
+  void setOpacity(float newOpacity) {
+    opacities.back() = std::clamp(newOpacity, 0.0f, 1.0f);
+  }
+
+  void pushPaint(SkPaint &paint) {
+    paints.push_back(paint);
+    opacities.push_back(opacities.back());
+  }
+
+  void savePaint() {
+    paints.push_back(SkPaint(getPaint()));
+    opacities.push_back(opacities.back());
+  }
 
   void saveBackdropFilter() {
     // Initialize image filter as nullptr
@@ -96,12 +109,28 @@ public:
     }
     auto paint = paints.back();
     paints.pop_back();
+    opacities.pop_back();
     return paint;
   }
 
   std::vector<sk_sp<SkShader>> popAllShaders() {
     auto result = std::move(shaders);
     shaders.clear();
+    return result;
+  }
+
+  std::vector<sk_sp<SkShader>> popShaders(int count) {
+    std::vector<sk_sp<SkShader>> result;
+    int actualCount = std::min(count, static_cast<int>(shaders.size()));
+
+    if (actualCount > 0) {
+      // Get the last 'actualCount' shaders
+      auto start = shaders.end() - actualCount;
+      result.assign(start, shaders.end());
+      // Remove them from the original vector
+      shaders.erase(start, shaders.end());
+    }
+
     return result;
   }
 
@@ -182,6 +211,9 @@ public:
   std::vector<sk_sp<SkImageFilter>> imageFilters;
   std::vector<sk_sp<SkPathEffect>> pathEffects;
   std::vector<SkPaint> paintDeclarations;
+
+private:
+  std::vector<float> opacities;
 };
 
 } // namespace RNSkia

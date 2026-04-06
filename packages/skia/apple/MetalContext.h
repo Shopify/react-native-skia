@@ -5,6 +5,7 @@
 
 #include "include/core/SkSurface.h"
 
+#include "include/core/SkColorSpace.h"
 #import <include/gpu/ganesh/GrBackendSurface.h>
 #import <include/gpu/ganesh/GrDirectContext.h>
 #import <include/gpu/ganesh/SkImageGanesh.h>
@@ -13,29 +14,6 @@
 #import <include/gpu/ganesh/mtl/GrMtlBackendSurface.h>
 #import <include/gpu/ganesh/mtl/GrMtlDirectContext.h>
 #import <include/gpu/ganesh/mtl/SkSurfaceMetal.h>
-
-class MetalSharedContext {
-public:
-  static MetalSharedContext &getInstance() {
-    static MetalSharedContext instance;
-    return instance;
-  }
-
-  id<MTLDevice> getDevice() { return _device; }
-
-private:
-  MetalSharedContext() {
-    _device = MTLCreateSystemDefaultDevice();
-    if (!_device) {
-      throw std::runtime_error("Failed to create Metal device");
-    }
-  }
-
-  MetalSharedContext(const MetalSharedContext &) = delete;
-  MetalSharedContext &operator=(const MetalSharedContext &) = delete;
-
-  id<MTLDevice> _device;
-};
 
 struct OffscreenRenderContext {
   id<MTLTexture> texture;
@@ -67,8 +45,9 @@ public:
     return instance;
   }
 
-  sk_sp<SkSurface> MakeOffscreen(int width, int height) {
-    auto device = MetalSharedContext::getInstance().getDevice();
+  sk_sp<SkSurface> MakeOffscreen(int width, int height,
+                                 bool useP3ColorSpace = false) {
+    auto device = _device;
     auto ctx = new OffscreenRenderContext(device, _directContext, _commandQueue,
                                           width, height);
 
@@ -78,17 +57,21 @@ public:
     GrBackendTexture backendTexture =
         GrBackendTextures::MakeMtl(width, height, skgpu::Mipmapped::kNo, info);
 
+    sk_sp<SkColorSpace> colorSpace =
+        useP3ColorSpace ? SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
+                                                SkNamedGamut::kDisplayP3)
+                        : nullptr;
+
     // Create a SkSurface from the GrBackendTexture
     auto surface = SkSurfaces::WrapBackendTexture(
         _directContext.get(), backendTexture, kTopLeft_GrSurfaceOrigin, 0,
-        kBGRA_8888_SkColorType, nullptr, nullptr,
+        kBGRA_8888_SkColorType, colorSpace, nullptr,
         [](void *addr) { delete (OffscreenRenderContext *)addr; }, ctx);
 
     return surface;
   }
 
   sk_sp<SkImage> MakeImageFromBuffer(void *buffer) {
-
     CVPixelBufferRef sampleBuffer = (CVPixelBufferRef)buffer;
     SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat format =
         SkiaCVPixelBufferUtils::getCVPixelBufferBaseFormat(sampleBuffer);
@@ -96,12 +79,12 @@ public:
     case SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat::rgb: {
       // CVPixelBuffer is in any RGB format, single-plane
       return SkiaCVPixelBufferUtils::RGB::makeSkImageFromCVPixelBuffer(
-          _directContext.get(), sampleBuffer);
+          _device, _directContext.get(), sampleBuffer);
     }
     case SkiaCVPixelBufferUtils::CVPixelBufferBaseFormat::yuv: {
       // CVPixelBuffer is in any YUV format, multi-plane
       return SkiaCVPixelBufferUtils::YUV::makeSkImageFromCVPixelBuffer(
-          _directContext.get(), sampleBuffer);
+          _device, _directContext.get(), sampleBuffer);
     }
     default:
       [[unlikely]] {
@@ -112,16 +95,19 @@ public:
     }
   }
 
-  std::unique_ptr<RNSkia::WindowContext> MakeWindow(CALayer *window, int width,
-                                                    int height) {
-    auto device = MetalSharedContext::getInstance().getDevice();
-    return std::make_unique<MetalWindowContext>(
-        _directContext.get(), device, _commandQueue, window, width, height);
+  std::unique_ptr<RNSkia::WindowContext>
+  MakeWindow(CALayer *window, int width, int height,
+             bool useP3ColorSpace = true) {
+    auto device = _device;
+    return std::make_unique<MetalWindowContext>(_directContext.get(), device,
+                                                _commandQueue, window, width,
+                                                height, useP3ColorSpace);
   }
 
   GrDirectContext *getDirectContext() { return _directContext.get(); }
 
 private:
+  id<MTLDevice> _device = nullptr;
   id<MTLCommandQueue> _commandQueue = nullptr;
   sk_sp<GrDirectContext> _directContext = nullptr;
 

@@ -3,7 +3,7 @@
 #import "RNSkLog.h"
 
 #if defined(SK_GRAPHITE)
-#import "DawnContext.h"
+#import "RNDawnContext.h"
 #else
 #import "MetalContext.h"
 #endif
@@ -23,8 +23,9 @@
 
 RNSkMetalCanvasProvider::RNSkMetalCanvasProvider(
     std::function<void()> requestRedraw,
-    std::shared_ptr<RNSkia::RNSkPlatformContext> context)
-    : RNSkCanvasProvider(requestRedraw), _context(context) {
+    std::shared_ptr<RNSkia::RNSkPlatformContext> context, bool useP3ColorSpace)
+    : RNSkCanvasProvider(requestRedraw), _context(context),
+      _useP3ColorSpace(useP3ColorSpace) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   _layer = [CAMetalLayer layer];
@@ -36,14 +37,14 @@ RNSkMetalCanvasProvider::~RNSkMetalCanvasProvider() {}
 /**
  Returns the scaled width of the view
  */
-int RNSkMetalCanvasProvider::getScaledWidth() {
+int RNSkMetalCanvasProvider::getWidth() {
   return _ctx ? _ctx->getWidth() : -1;
 };
 
 /**
  Returns the scaled height of the view
  */
-int RNSkMetalCanvasProvider::getScaledHeight() {
+int RNSkMetalCanvasProvider::getHeight() {
   return _ctx ? _ctx->getHeight() : -1;
 };
 
@@ -67,7 +68,7 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
     auto state = UIApplication.sharedApplication.applicationState;
     bool appIsBackgrounded = (state == UIApplicationStateBackground);
 #else
-    bool appIsBackgrounded = !NSApplication.sharedApplication.isActive;
+    bool appIsBackgrounded = NSApplication.sharedApplication.isHidden;
 #endif // !TARGET_OS_OSX
     if (appIsBackgrounded) {
       // Request a redraw in the next run loop callback
@@ -76,11 +77,7 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
       // we try to render while in the background. (see above issue)
       return false;
     }
-  }
-  // Wrap in auto release pool since we want the system to clean up after
-  // rendering and not wait until later - we've seen some example of memory
-  // usage growing very fast in the simulator without this.
-  @autoreleasepool {
+
     auto surface = _ctx->getSurface();
     if (!surface) {
       return false;
@@ -88,8 +85,9 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
     auto canvas = surface->getCanvas();
     cb(canvas);
     _ctx->present();
+    return true;
   }
-  return true;
+  return false;
 };
 
 void RNSkMetalCanvasProvider::setSize(int width, int height) {
@@ -100,9 +98,13 @@ void RNSkMetalCanvasProvider::setSize(int width, int height) {
   _ctx = RNSkia::DawnContext::getInstance().MakeWindow((__bridge void *)_layer,
                                                        w, h);
 #else
-  _ctx = MetalContext::getInstance().MakeWindow(_layer, w, h);
+  _ctx = MetalContext::getInstance().MakeWindow(_layer, w, h, _useP3ColorSpace);
 #endif
   _requestRedraw();
 }
 
 CALayer *RNSkMetalCanvasProvider::getLayer() { return _layer; }
+
+void RNSkMetalCanvasProvider::setUseP3ColorSpace(bool useP3ColorSpace) {
+  _useP3ColorSpace = useP3ColorSpace;
+}

@@ -8,6 +8,7 @@ import {
   useWindowDimensions,
   ScrollView,
 } from "react-native";
+import Svg, { Circle, Rect } from "react-native-svg";
 import type { SkImage } from "@shopify/react-native-skia";
 import {
   Canvas,
@@ -54,7 +55,7 @@ export const Snapshot = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <View ref={viewRef} style={styles.view}>
+      <View ref={viewRef} style={styles.view} collapsable={false}>
         <Component />
       </View>
       <Button title="Take snapshot" onPress={takeSnapshot} />
@@ -114,23 +115,11 @@ const Component = () => {
       </View>
       <Text>Hello World!</Text>
       <View style={{ flexDirection: "row" }}>
-        <View
-          style={{
-            width: 80,
-            height: 80,
-            backgroundColor: "blue",
-            opacity: 0.5,
-          }}
-        >
-          <View
-            style={{
-              width: 40,
-              height: 40,
-              backgroundColor: "green",
-              opacity: 0.5,
-            }}
-          />
-        </View>
+        <Svg width={80} height={80} viewBox="0 0 80 80">
+          <Rect x={0} y={0} width={80} height={80} fill="blue" opacity={0.5} />
+          <Circle cx={40} cy={40} r={25} fill="green" opacity={0.7} />
+          <Rect x={30} y={30} width={20} height={20} fill="red" opacity={0.5} />
+        </Svg>
         <View
           style={{
             width: 40,

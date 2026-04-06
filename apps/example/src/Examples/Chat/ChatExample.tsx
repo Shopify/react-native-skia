@@ -12,7 +12,7 @@ export type RootStackParamList = {
 };
 
 export type RouteProps<
-  T extends keyof RootStackParamList = keyof RootStackParamList
+  T extends keyof RootStackParamList = keyof RootStackParamList,
 > = NativeStackNavigationProp<RootStackParamList, T>;
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

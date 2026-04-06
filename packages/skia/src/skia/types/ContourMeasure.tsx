@@ -36,8 +36,7 @@ export interface SkContourMeasure extends SkJSIInstance<"ContourMeasure"> {
   length(): number;
 }
 
-export interface SkContourMeasureIter
-  extends SkJSIInstance<"ContourMeasureIter"> {
+export interface SkContourMeasureIter extends SkJSIInstance<"ContourMeasureIter"> {
   /**
    *  Iterates through contours in path, returning a contour-measure object for each contour
    *  in the path. Returns null when it is done.

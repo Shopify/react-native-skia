@@ -16,16 +16,18 @@
 class RNSkMetalCanvasProvider : public RNSkia::RNSkCanvasProvider {
 public:
   RNSkMetalCanvasProvider(std::function<void()> requestRedraw,
-                          std::shared_ptr<RNSkia::RNSkPlatformContext> context);
+                          std::shared_ptr<RNSkia::RNSkPlatformContext> context,
+                          bool useP3ColorSpace = true);
 
   ~RNSkMetalCanvasProvider();
 
-  int getScaledWidth() override;
-  int getScaledHeight() override;
+  int getWidth() override;
+  int getHeight() override;
 
   bool renderToCanvas(const std::function<void(SkCanvas *)> &cb) override;
 
   void setSize(int width, int height);
+  void setUseP3ColorSpace(bool useP3ColorSpace);
   CALayer *getLayer();
 
 private:
@@ -35,4 +37,5 @@ private:
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   CAMetalLayer *_layer;
 #pragma clang diagnostic pop
+  bool _useP3ColorSpace = true;
 };

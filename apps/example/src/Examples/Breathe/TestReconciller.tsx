@@ -79,7 +79,7 @@ export const Breathe = () => {
         <Button onPress={add} title="add" />
         <Button onPress={remove} title="remove" />
       </View>
-      <Canvas style={styles.container} opaque>
+      <Canvas style={styles.container}>
         <Fill color="rgb(36,43,56)" />
         <Group origin={center} transform={transform} blendMode="screen">
           <BlurMask style="solid" blur={40} />

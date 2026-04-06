@@ -19,9 +19,9 @@ export class JsiSkSVG
     return this.ref.height;
   }
 
-  dispose = () => {
+  [Symbol.dispose]() {
     if (this.ref.parentNode) {
       this.ref.parentNode.removeChild(this.ref);
     }
-  };
+  }
 }

@@ -51,7 +51,6 @@ export const processUniforms = (
     const value = uniforms[name];
     if (value === undefined) {
       throw new Error(
-        // eslint-disable-next-line max-len
         `The runtime effect has the uniform value "${name}" declared, but it is missing from the uniforms property of the Runtime effect.`
       );
     }

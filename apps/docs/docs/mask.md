@@ -12,7 +12,7 @@ Just like its [CSS counterpart](https://developer.mozilla.org/en-US/docs/Web/CSS
 
 The first child of `Mask` is the drawing used as a mask, and the remaining children are the drawings to mask.
 
-By default, the mask is not clipped if you want to clip the mask with the bounds of the contents, the `clip` property. 
+By default, the mask is not clipped. If you want to clip the mask with the bounds of the contents, use the `clip` property. 
 
 | Name      | Type                      | Description                                                   |
 |:----------|:--------------------------|:--------------------------------------------------------------|

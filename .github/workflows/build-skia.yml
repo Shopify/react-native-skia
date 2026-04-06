@@ -1,19 +1,118 @@
 name: Build SKIA
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      tag_suffix:
+        description: 'Optional suffix to append to tag (e.g., "a" for skia-m144a)'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Test build only - skip GitHub release creation and upload'
+        required: false
+        type: boolean
+        default: false
+      skip_skia_download:
+        description: 'Skip downloading prebuilt Skia (always true for building from source)'
+        required: false
+        type: boolean
+        default: true
 jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    outputs:
+      skia_branch: ${{ steps.skia_meta.outputs.branch }}
+      skia_branch_slug: ${{ steps.skia_meta.outputs.branch_slug }}
+      tag_name: ${{ steps.release_meta.outputs.tag_name }}
+      release_name: ${{ steps.release_meta.outputs.release_name }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Determine Skia branch
+        id: skia_meta
+        run: |
+          set -eo pipefail
+          if [ ! -d "externals/skia" ]; then
+            echo "::error::externals/skia not found."
+            exit 1
+          fi
+          branch=$(git -C externals/skia branch --show-current || true)
+          if [ -z "$branch" ]; then
+            branch=$(git -C externals/skia describe --all --exact-match 2>/dev/null || true)
+          fi
+          if [ -z "$branch" ]; then
+            branch=$(git -C externals/skia rev-parse --short HEAD)
+          fi
+          # Strip remotes/origin/chrome/ prefix if present
+          branch=${branch#remotes/origin/chrome/}
+          slug=${branch//\//-}
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          echo "branch_slug=$slug" >> "$GITHUB_OUTPUT"
+      - name: Compute release metadata
+        id: release_meta
+        run: |
+          tag="skia-${SKIA_BRANCH_SLUG}${TAG_SUFFIX}"
+          echo "tag_name=$tag" >> "$GITHUB_OUTPUT"
+          echo "release_name=Skia ${SKIA_BRANCH}${TAG_SUFFIX}" >> "$GITHUB_OUTPUT"
+        env:
+          SKIA_BRANCH: ${{ steps.skia_meta.outputs.branch }}
+          SKIA_BRANCH_SLUG: ${{ steps.skia_meta.outputs.branch_slug }}
+          TAG_SUFFIX: ${{ github.event.inputs.tag_suffix }}
+      - name: Create GitHub release
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.release_meta.outputs.tag_name }}
+          name: ${{ steps.release_meta.outputs.release_name }}
+          body: "Skia prebuilt binaries for version ${{ steps.skia_meta.outputs.branch }}"
+          draft: false
+          prerelease: true
+          generate_release_notes: false
   build:
+    needs: prepare-release
     runs-on: macos-latest-xlarge
+    strategy:
+      matrix:
+        include:
+          - target: "apple-ios"
+            artifact_name: "skia-apple-ios-xcframeworks"
+            package_root: "./packages/skia/libs/ios"
+          - target: "apple-tvos"
+            artifact_name: "skia-apple-tvos-xcframeworks"
+            package_root: "./packages/skia/libs/tvos"
+          - target: "apple-macos"
+            artifact_name: "skia-apple-macos-xcframeworks"
+            package_root: "./packages/skia/libs/macos"
+          - target: "android-arm"
+            artifact_name: "skia-android-arm"
+            package_root: "./packages/skia/libs/android/armeabi-v7a"
+          - target: "android-arm64"
+            artifact_name: "skia-android-arm-64"
+            package_root: "./packages/skia/libs/android/arm64-v8a"
+          - target: "android-x86"
+            artifact_name: "skia-android-arm-x86"
+            package_root: "./packages/skia/libs/android/x86"
+          - target: "android-x64"
+            artifact_name: "skia-android-arm-x64"
+            package_root: "./packages/skia/libs/android/x86_64"
+      fail-fast: false
     steps:
       - name: checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
         with:
           submodules: recursive
 
       - name: Setup Android NDK
         id: setup-ndk
+        if: startsWith(matrix.target, 'android')
         uses: nttld/setup-ndk@afb4c9964b521afb97c864b7d40b11e6911bd410 # v1.5.0
         with:
-          ndk-version: r22b
+          ndk-version: r27c
 
       - name: Setup Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
@@ -21,81 +120,62 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
         with:
-          download_skia: 'false'
+          download_skia: ${{ github.event.inputs.skip_skia_download == 'true' && 'false' || 'true' }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Skia
+      - name: Update depot_tools
+        working-directory: ./externals/depot_tools
+        run: ./update_depot_tools
+
+      - name: Build Skia - ${{ matrix.target }}
         working-directory: ./packages/skia
         env:
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
           GIT_SYNC_DEPS_SKIP_EMSDK: 'true'
           ZERO_AR_DATE: 1
-        run: yarn build-skia
+        run: yarn build-skia ${{ matrix.target }}
+      
+      - name: Package binaries - ${{ matrix.artifact_name }}
+        id: package
+        run: |
+          set -eo pipefail
+          ROOT="${{ matrix.package_root }}"
+          BASENAME="$(basename "$ROOT")"
+          PARENT="$(dirname "$ROOT")"
+          TAG="${DISPATCH_TAG}"
+          if [ -z "$TAG" ]; then
+            TAG="${SKIA_BRANCH_SLUG}"
+          fi
+          if [ -z "$TAG" ]; then
+            TAG="${GITHUB_REF_NAME:-}"
+          fi
+          if [ -z "$TAG" ]; then
+            TAG="${GITHUB_SHA}"
+          fi
+          ARCHIVE="${{ matrix.artifact_name }}-${TAG}.tar.gz"
+          mkdir -p release-assets
+          tar -czf "release-assets/$ARCHIVE" -C "$PARENT" "$BASENAME"
+          echo "asset_path=release-assets/$ARCHIVE" >> "$GITHUB_OUTPUT"
+          echo "asset_name=$ARCHIVE" >> "$GITHUB_OUTPUT"
+        shell: bash
+        env:
+          DISPATCH_TAG: ${{ needs.prepare-release.outputs.tag_name }}
+          SKIA_BRANCH_SLUG: ${{ needs.prepare-release.outputs.skia_branch_slug }}
 
-      - name: Upload artifacts - Android arm
-        if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - name: Upload binaries to GitHub release - ${{ matrix.artifact_name }}
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: skia-android-arm
-          path: |
-            ./externals/skia/out/android/arm/libskia.a
-            ./externals/skia/out/android/arm/libskshaper.a
-            ./externals/skia/out/android/arm/libsvg.a
-            ./externals/skia/out/android/arm/libskottie.a
-            ./externals/skia/out/android/arm/libsksg.a
-            ./externals/skia/out/android/arm/libskparagraph.a
-            ./externals/skia/out/android/arm/libskunicode_core.a
-            ./externals/skia/out/android/arm/libskunicode_icu.a
+          tag_name: ${{ needs.prepare-release.outputs.tag_name }}
+          files: ${{ steps.package.outputs.asset_path }}
+          prerelease: true
 
-      - name: Upload artifacts - Android arm64
-        if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - name: Upload binaries as workflow artifact (dry run) - ${{ matrix.artifact_name }}
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        uses: actions/upload-artifact@v7
         with:
-          name: skia-android-arm-64
-          path: |
-            ./externals/skia/out/android/arm64/libskia.a
-            ./externals/skia/out/android/arm64/libskshaper.a
-            ./externals/skia/out/android/arm64/libsvg.a
-            ./externals/skia/out/android/arm64/libskottie.a
-            ./externals/skia/out/android/arm64/libsksg.a
-            ./externals/skia/out/android/arm64/libskparagraph.a
-            ./externals/skia/out/android/arm64/libskunicode_core.a
-            ./externals/skia/out/android/arm64/libskunicode_icu.a
-
-      - name: Upload artifacts - Android x86
-        if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: skia-android-arm-x86
-          path: |
-            ./externals/skia/out/android/x86/libskia.a
-            ./externals/skia/out/android/x86/libskshaper.a
-            ./externals/skia/out/android/x86/libsvg.a
-            ./externals/skia/out/android/x86/libskottie.a
-            ./externals/skia/out/android/x86/libsksg.a
-            ./externals/skia/out/android/x86/libskparagraph.a
-            ./externals/skia/out/android/x86/libskunicode_core.a
-            ./externals/skia/out/android/x86/libskunicode_icu.a
-
-      - name: Upload artifacts - Android x64
-        if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: skia-android-arm-x64
-          path: |
-            ./externals/skia/out/android/x64/libskia.a
-            ./externals/skia/out/android/x64/libskshaper.a
-            ./externals/skia/out/android/x64/libsvg.a
-            ./externals/skia/out/android/x64/libskottie.a
-            ./externals/skia/out/android/x64/libsksg.a
-            ./externals/skia/out/android/x64/libskparagraph.a
-            ./externals/skia/out/android/x64/libskunicode_core.a
-            ./externals/skia/out/android/x64/libskunicode_icu.a
-
-      - name: Upload artifacts - Apple xcframeworks
-        if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: skia-apple-xcframeworks
-          path: |
-            ./packages/skia/libs/apple/*.xcframework
+          name: ${{ matrix.artifact_name }}
+          path: ${{ steps.package.outputs.asset_path }}
+          retention-days: 7

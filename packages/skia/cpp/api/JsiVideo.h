@@ -39,13 +39,19 @@ public:
     if (!image) {
       return jsi::Value::null();
     }
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkImage>(getContext(), std::move(image));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(duration) { return getObject()->duration(); }
 
   JSI_HOST_FUNCTION(framerate) { return getObject()->framerate(); }
+
+  JSI_HOST_FUNCTION(currentTime) { return getObject()->currentTime(); }
+
+  JSI_HOST_FUNCTION(isPlaying) { return getObject()->isPlaying(); }
 
   JSI_HOST_FUNCTION(seek) {
     double timestamp = arguments[0].asNumber();
@@ -84,17 +90,30 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(setLooping) {
+    auto looping = arguments[0].asBool();
+    getObject()->setLooping(looping);
+    return jsi::Value::undefined();
+  }
+
   JSI_EXPORT_FUNCTIONS(
       JSI_EXPORT_FUNC(JsiVideo, nextImage), JSI_EXPORT_FUNC(JsiVideo, duration),
-      JSI_EXPORT_FUNC(JsiVideo, framerate), JSI_EXPORT_FUNC(JsiVideo, seek),
+      JSI_EXPORT_FUNC(JsiVideo, framerate),
+      JSI_EXPORT_FUNC(JsiVideo, currentTime),
+      JSI_EXPORT_FUNC(JsiVideo, isPlaying), JSI_EXPORT_FUNC(JsiVideo, seek),
       JSI_EXPORT_FUNC(JsiVideo, rotation), JSI_EXPORT_FUNC(JsiVideo, size),
       JSI_EXPORT_FUNC(JsiVideo, play), JSI_EXPORT_FUNC(JsiVideo, pause),
-      JSI_EXPORT_FUNC(JsiVideo, setVolume), JSI_EXPORT_FUNC(JsiVideo, dispose))
+      JSI_EXPORT_FUNC(JsiVideo, setVolume),
+      JSI_EXPORT_FUNC(JsiVideo, setLooping), JSI_EXPORT_FUNC(JsiVideo, dispose))
 
   JsiVideo(std::shared_ptr<RNSkPlatformContext> context,
            std::shared_ptr<RNSkVideo> video)
       : JsiSkWrappingSharedPtrHostObject(std::move(context), std::move(video)) {
   }
+
+  size_t getMemoryPressure() const override { return 32768; }
+
+  std::string getObjectType() const override { return "JsiVideo"; }
 
   /**
    * Creates the function for construction a new instance of the SkFont
@@ -109,9 +128,10 @@ public:
       auto url = arguments[0].asString(runtime).utf8(runtime);
       auto video = context->createVideo(url);
       // Return the newly constructed object
-      return jsi::Object::createFromHostObject(
-          runtime,
-          std::make_shared<JsiVideo>(std::move(context), std::move(video)));
+      auto videoObj =
+          std::make_shared<JsiVideo>(std::move(context), std::move(video));
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, videoObj,
+                                                         context);
     };
   }
 };

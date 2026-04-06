@@ -1,5 +1,9 @@
 #pragma once
 
+#include <memory>
+#include <optional>
+#include <vector>
+
 namespace RNSkia {
 
 enum CommandType {
@@ -43,6 +47,7 @@ enum CommandType {
   DrawImageSVG,
   DrawParagraph,
   DrawAtlas,
+  DrawSkottie
 };
 
 class Command {
@@ -53,6 +58,14 @@ public:
   Command(CommandType t) : type(t) {}
   Command(CommandType t, std::string nodeT) : type(t), nodeType(nodeT) {}
   virtual ~Command() = default;
+};
+
+class GroupCommand : public Command {
+public:
+  std::optional<float> zIndex;
+  std::vector<std::unique_ptr<Command>> children;
+
+  GroupCommand() : Command(CommandType::Group) {}
 };
 
 } // namespace RNSkia

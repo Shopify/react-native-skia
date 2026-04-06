@@ -11,7 +11,11 @@ export class SVGAsset implements SkSVG {
     private _height: number
   ) {}
 
-  dispose() {}
+  [Symbol.dispose]() {}
+
+  dispose() {
+    this[Symbol.dispose]();
+  }
 
   source() {
     return this._source;

@@ -15,6 +15,7 @@
 #include <modules/skparagraph/include/ParagraphBuilder.h>
 #include <modules/skparagraph/include/ParagraphStyle.h>
 
+#include "../CustomBlendModes.h"
 #include "third_party/CSSColorParser.h"
 
 #include "DataTypes.h"
@@ -158,6 +159,22 @@ SkColor getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
       auto g = array.getValueAtIndex(runtime, 1).asNumber();
       auto b = array.getValueAtIndex(runtime, 2).asNumber();
       auto a = array.getValueAtIndex(runtime, 3).asNumber();
+      return SkColorSetARGB(a * 255, r * 255, g * 255, b * 255);
+    }
+
+    // Check for properties "0", "1", "2", "3" (even if not an array)
+    auto prop0 = jsi::PropNameID::forAscii(runtime, "0");
+    auto prop1 = jsi::PropNameID::forAscii(runtime, "1");
+    auto prop2 = jsi::PropNameID::forAscii(runtime, "2");
+    auto prop3 = jsi::PropNameID::forAscii(runtime, "3");
+    if (object.hasProperty(runtime, prop0) &&
+        object.hasProperty(runtime, prop1) &&
+        object.hasProperty(runtime, prop2) &&
+        object.hasProperty(runtime, prop3)) {
+      auto r = object.getProperty(runtime, prop0).asNumber();
+      auto g = object.getProperty(runtime, prop1).asNumber();
+      auto b = object.getProperty(runtime, prop2).asNumber();
+      auto a = object.getProperty(runtime, prop3).asNumber();
       return SkColorSetARGB(a * 255, r * 255, g * 255, b * 255);
     }
     jsi::ArrayBuffer buffer =
@@ -435,6 +452,38 @@ sk_sp<SkSVGDOM> getPropertyValue(jsi::Runtime &runtime,
 }
 
 template <>
+sk_sp<skottie::Animation> getPropertyValue(jsi::Runtime &runtime,
+                                           const jsi::Value &value) {
+  if (value.isObject() && value.asObject(runtime).isHostObject(runtime)) {
+    auto ptr = std::dynamic_pointer_cast<JsiSkSkottie>(
+        value.asObject(runtime).asHostObject(runtime));
+    if (ptr != nullptr) {
+      return ptr->getObject()->_animation;
+    }
+  } else if (value.isNull()) {
+    return nullptr;
+  }
+  throw std::runtime_error(
+      "Expected JsiSkSkottie object or null for the svg property.");
+}
+
+template <>
+sk_sp<SkImageFilter> getPropertyValue(jsi::Runtime &runtime,
+                                      const jsi::Value &value) {
+  if (value.isObject() && value.asObject(runtime).isHostObject(runtime)) {
+    auto ptr = std::dynamic_pointer_cast<JsiSkImageFilter>(
+        value.asObject(runtime).asHostObject(runtime));
+    if (ptr != nullptr) {
+      return ptr->getObject();
+    }
+  } else if (value.isNull()) {
+    return nullptr;
+  }
+  throw std::runtime_error(
+      "Expected JsiSkImageFilter object or null for the imageFilter property.");
+}
+
+template <>
 sk_sp<SkPicture> getPropertyValue(jsi::Runtime &runtime,
                                   const jsi::Value &value) {
   if (value.isObject()) {
@@ -618,6 +667,87 @@ SkPath1DPathEffect::Style getPropertyValue(jsi::Runtime &runtime,
   throw std::runtime_error("Invalid prop value for Path1DEffectStyle received");
 }
 
+// Wrapper type for blend mode to avoid conflict with int template
+// specialization
+struct BlendModeValue {
+  int value;
+  BlendModeValue(int v = 0) : value(v) {}
+  operator int() const { return value; }
+};
+
+template <>
+BlendModeValue getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
+  if (val.isString()) {
+    auto value = val.asString(runtime).utf8(runtime);
+    if (value == "clear") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kClear));
+    } else if (value == "src") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kSrc));
+    } else if (value == "dst") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kDst));
+    } else if (value == "srcOver") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kSrcOver));
+    } else if (value == "dstOver") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kDstOver));
+    } else if (value == "srcIn") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kSrcIn));
+    } else if (value == "dstIn") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kDstIn));
+    } else if (value == "srcOut") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kSrcOut));
+    } else if (value == "dstOut") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kDstOut));
+    } else if (value == "srcATop") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kSrcATop));
+    } else if (value == "dstATop") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kDstATop));
+    } else if (value == "xor") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kXor));
+    } else if (value == "plus") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kPlus));
+    } else if (value == "modulate") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kModulate));
+    } else if (value == "screen") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kScreen));
+    } else if (value == "overlay") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kOverlay));
+    } else if (value == "darken") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kDarken));
+    } else if (value == "lighten") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kLighten));
+    } else if (value == "colorDodge") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kColorDodge));
+    } else if (value == "colorBurn") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kColorBurn));
+    } else if (value == "hardLight") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kHardLight));
+    } else if (value == "softLight") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kSoftLight));
+    } else if (value == "difference") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kDifference));
+    } else if (value == "exclusion") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kExclusion));
+    } else if (value == "multiply") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kMultiply));
+    } else if (value == "hue") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kHue));
+    } else if (value == "saturation") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kSaturation));
+    } else if (value == "color") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kColor));
+    } else if (value == "luminosity") {
+      return BlendModeValue(static_cast<int>(SkBlendMode::kLuminosity));
+    } else if (value == "plusDarker") {
+      return BlendModeValue(kBlendModePlusDarker);
+    } else if (value == "plusLighter") {
+      return BlendModeValue(kBlendModePlusLighter);
+    }
+  }
+  throw std::runtime_error("Invalid prop value for BlendMode received");
+}
+
+// Keep SkBlendMode specialization for other usages (Shaders, ImageFilters,
+// ColorFilters, Drawings)
 template <>
 SkBlendMode getPropertyValue(jsi::Runtime &runtime, const jsi::Value &val) {
   if (val.isString()) {
@@ -1106,6 +1236,12 @@ template <>
 std::optional<SkColor> getPropertyValue(jsi::Runtime &runtime,
                                         const jsi::Value &value) {
   return makeOptionalPropertyValue<SkColor>(runtime, value);
+}
+
+template <>
+std::optional<BlendModeValue> getPropertyValue(jsi::Runtime &runtime,
+                                               const jsi::Value &value) {
+  return makeOptionalPropertyValue<BlendModeValue>(runtime, value);
 }
 
 template <>

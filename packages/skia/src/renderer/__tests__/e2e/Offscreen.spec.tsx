@@ -104,6 +104,7 @@ describe("Offscreen Drawings", () => {
       <Circle r={r} cx={r} cy={r} color="lightblue" />,
       { width, height }
     );
-    checkImage(image, docPath("offscreen/circle.png"));
+    expect(image).not.toBeNull();
+    checkImage(image!, docPath("offscreen/circle.png"));
   });
 });

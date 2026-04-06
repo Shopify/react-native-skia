@@ -118,8 +118,7 @@ describe("Backdrop Filters", () => {
     const { vec, Skia } = importSkia();
     const c = vec(width / 2, height / 2);
     const r = c.x - 32 / 3;
-    const path = Skia.Path.Make();
-    path.addRect(Skia.XYWHRect(0, c.y, width, c.y));
+    const path = Skia.Path.Rect(Skia.XYWHRect(0, c.y, width, c.y));
     const clip = path.toSVGString();
     const img = await surface.draw(
       <>
@@ -137,5 +136,28 @@ describe("Backdrop Filters", () => {
       </>
     );
     checkImage(img, docPath("blur-backdrop-aurora.png"));
+  });
+  it("Blur backdrop blur on text with white background", async () => {
+    const { width, height } = surface;
+    const { rect } = importSkia();
+    const img = await surface.draw(
+      <>
+        <Circle c={{ x: 0, y: 0 }} r={100} color="black" />
+        <BackdropBlur blur={10 / 3} clip={rect(0, 0, width, height)} />
+      </>
+    );
+    checkImage(img, docPath("backdrop-circle.png"));
+  });
+  it("Blur backdrop blur on text with opaque background", async () => {
+    const { width, height } = surface;
+    const { rect } = importSkia();
+    const img = await surface.draw(
+      <>
+        <Fill color="white" />
+        <Circle c={{ x: 0, y: 0 }} r={100} color="black" />
+        <BackdropBlur blur={10 / 3} clip={rect(0, 0, width, height)} />
+      </>
+    );
+    checkImage(img, docPath("backdrop-circle-opaque.png"));
   });
 });

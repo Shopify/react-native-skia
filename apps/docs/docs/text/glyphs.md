@@ -10,8 +10,8 @@ This component draws a run of glyphs, at corresponding positions, in a given fon
 | Name        | Type       |  Description                                                           |
 |:------------|:-----------|:-----------------------------------------------------------------------|
 | glyphs      | `Glyph[]`  | Glyphs to draw                                                         |
-| x?          | `number`.  | x coordinate of the origin of the entire run. Default is 0             |
-| y?          | `number`.  | y coordinate of the origin of the entire run. Default is 0             |
+| x?          | `number`  | x coordinate of the origin of the entire run. Default is 0             |
+| y?          | `number`  | y coordinate of the origin of the entire run. Default is 0             |
 | font        | `SkFont`     | Font to use                                                          |
 
 ## Draw text vertically

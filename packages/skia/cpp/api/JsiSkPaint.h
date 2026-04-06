@@ -5,6 +5,7 @@
 
 #include <jsi/jsi.h>
 
+#include "CustomBlendModes.h"
 #include "JsiSkColor.h"
 #include "JsiSkColorFilter.h"
 #include "JsiSkHostObjects.h"
@@ -35,8 +36,10 @@ public:
 
   JSI_HOST_FUNCTION(copy) {
     const auto *paint = getObject().get();
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkPaint>(getContext(), SkPaint(*paint)));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkPaint>(getContext(), SkPaint(*paint));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(reset) {
@@ -124,8 +127,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(setBlendMode) {
-    auto blendMode = (SkBlendMode)arguments[0].asNumber();
-    getObject()->setBlendMode(blendMode);
+    int blendModeValue = static_cast<int>(arguments[0].asNumber());
+    applyBlendMode(*getObject(), blendModeValue);
     return jsi::Value::undefined();
   }
 
@@ -206,6 +209,12 @@ public:
     setObject(std::make_shared<SkPaint>(std::move(paint)));
   }
 
+  size_t getMemoryPressure() const override {
+    return std::max(sizeof(SkPaint), kMinMemoryPressure);
+  }
+
+  std::string getObjectType() const override { return "JsiSkPaint"; }
+
   /**
    * Creates the function for construction a new instance of the SkPaint
    * wrapper
@@ -219,8 +228,9 @@ public:
       auto paint = SkPaint();
       paint.setAntiAlias(true);
       // Return the newly constructed object
-      return jsi::Object::createFromHostObject(
-          runtime, std::make_shared<JsiSkPaint>(std::move(context), paint));
+      auto hostObjectInstance = std::make_shared<JsiSkPaint>(context, paint);
+      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+          runtime, hostObjectInstance, context);
     };
   }
 };

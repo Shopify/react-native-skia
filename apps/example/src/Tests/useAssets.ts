@@ -51,6 +51,10 @@ export const useAssets = () => {
     require("./assets/DIN-Medium.ttf"),
     errorHandler
   );
+  const Amiri = useTypeface(
+    require("./assets/Amiri-Regular.ttf"),
+    errorHandler
+  );
   if (error) {
     throw new Error("Failed to load assets: " + error.message);
   }
@@ -61,6 +65,7 @@ export const useAssets = () => {
     !NotoSansSCRegular ||
     !UberMoveMediumMono ||
     !DinMedium ||
+    !Amiri ||
     !skiaLogoJpeg ||
     !skiaLogoPng ||
     !mask
@@ -74,6 +79,7 @@ export const useAssets = () => {
     NotoSansSCRegular,
     UberMoveMediumMono,
     DinMedium,
+    Amiri,
     oslo,
     skiaLogoJpeg,
     skiaLogoPng,

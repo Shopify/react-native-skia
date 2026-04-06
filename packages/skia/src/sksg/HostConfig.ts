@@ -7,7 +7,10 @@ import type { NodeType } from "../dom/types";
 import { shallowEq } from "../renderer/typeddash";
 
 import type { Node } from "./Node";
-import type { Container } from "./Container";
+import type { Container } from "./StaticContainer";
+
+type EventPriority = number;
+const NoEventPriority = 0;
 
 type EventPriority = number;
 const NoEventPriority = 0;
@@ -177,10 +180,15 @@ export const sksgHostConfig: SkiaHostConfig = {
     _type,
     _oldProps,
     newProps,
+<<<<<<< HEAD
     _updatePayload,
     _internalInstanceHandle,
     keepChildren: boolean,
     _recyclableInstance: null | Instance
+=======
+    keepChildren,
+    _newChildSet
+>>>>>>> main
   ) {
     debug("cloneInstance");
     return {
@@ -265,4 +273,11 @@ export const sksgHostConfig: SkiaHostConfig = {
     return DefaultEventPriority;
   },
   resetFormInstance() {},
+<<<<<<< HEAD
+=======
+
+  // DefinitelyTyped is not up to date, these are needed for devtools
+  rendererVersion: "0.0.1",
+  rendererPackageName: "react-native-skia",
+>>>>>>> main
 };

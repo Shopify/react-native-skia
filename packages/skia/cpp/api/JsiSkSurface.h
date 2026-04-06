@@ -1,10 +1,13 @@
 #pragma once
 
+#include <algorithm>
+#include <limits>
 #include <memory>
 #include <utility>
 
 #include <jsi/jsi.h>
 
+#include "JsiSkDispatcher.h"
 #include "JsiSkHostObjects.h"
 #include "JsiTextureInfo.h"
 
@@ -12,7 +15,7 @@
 #include "JsiSkImage.h"
 
 #if defined(SK_GRAPHITE)
-#include "DawnContext.h"
+#include "RNDawnContext.h"
 #endif
 
 #pragma clang diagnostic push
@@ -28,11 +31,37 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 
 class JsiSkSurface : public JsiSkWrappingSkPtrHostObject<SkSurface> {
+private:
+  std::shared_ptr<Dispatcher> _dispatcher;
+
 public:
   JsiSkSurface(std::shared_ptr<RNSkPlatformContext> context,
                sk_sp<SkSurface> surface)
       : JsiSkWrappingSkPtrHostObject<SkSurface>(std::move(context),
-                                                std::move(surface)) {}
+                                                std::move(surface)) {
+    // Get the dispatcher for the current thread
+    _dispatcher = Dispatcher::getDispatcher();
+    // Process any pending operations
+    _dispatcher->processQueue();
+  }
+
+public:
+  ~JsiSkSurface() override {
+    if (!isDisposed()) {
+      // This JSI Object is being deleted from a GC, which might happen
+      // on a separate Thread. GPU resources (like SkSurface) must be deleted
+      // on the same Thread they were created on, so in this case we schedule
+      // deletion to run on the Thread this Object was created on.
+      auto surface = getObjectUnchecked();
+      if (surface && _dispatcher) {
+        _dispatcher->run([surface]() {
+          // Surface will be deleted when this lambda is destroyed, on the
+          // original Thread.
+        });
+      }
+      releaseResources();
+    }
+  }
 
   EXPORT_JSI_API_TYPENAME(JsiSkSurface, Surface)
 
@@ -43,9 +72,10 @@ public:
   }
 
   JSI_HOST_FUNCTION(getCanvas) {
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkCanvas>(getContext(), getObject()->getCanvas()));
+    auto canvas =
+        std::make_shared<JsiSkCanvas>(getContext(), getObject()->getCanvas());
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, canvas,
+                                                       getContext());
   }
 
   JSI_HOST_FUNCTION(flush) {
@@ -64,7 +94,7 @@ public:
   JSI_HOST_FUNCTION(makeImageSnapshot) {
     auto surface = getObject();
     sk_sp<SkImage> image;
-    if (count == 1) {
+    if (count > 0 && arguments[0].isObject()) {
       auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
       image = surface->makeImageSnapshot(SkIRect::MakeXYWH(
           rect->x(), rect->y(), rect->width(), rect->height()));
@@ -75,14 +105,80 @@ public:
     auto recording = surface->recorder()->snap();
     DawnContext::getInstance().submitRecording(recording.get());
 #endif
-    return jsi::Object::createFromHostObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+    if (count > 1 && arguments[1].isObject()) {
+      auto jsiImage =
+          arguments[1].asObject(runtime).asHostObject<JsiSkImage>(runtime);
+      jsiImage->setObject(image);
+      return jsi::Value(runtime, arguments[1]);
+    }
+    auto hostObjectInstance =
+        std::make_shared<JsiSkImage>(getContext(), std::move(image));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(getNativeTextureUnstable) {
     auto texInfo = getContext()->getTexture(getObject());
     return JsiTextureInfo::toValue(runtime, texInfo);
   }
+
+  size_t getMemoryPressure() const override {
+    if (isDisposed()) {
+      return 0;
+    }
+    auto surface = getObjectUnchecked();
+    if (!surface) {
+      return 0;
+    }
+
+    const auto safeAdd = [](size_t a, size_t b) {
+      if (std::numeric_limits<size_t>::max() - a < b) {
+        return std::numeric_limits<size_t>::max();
+      }
+      return a + b;
+    };
+
+    SkImageInfo info = surface->imageInfo();
+    size_t pixelBytes = info.computeMinByteSize();
+    if (pixelBytes == 0) {
+      auto width = std::max(info.width(), surface->width());
+      auto height = std::max(info.height(), surface->height());
+      int bytesPerPixel = info.bytesPerPixel();
+      if (bytesPerPixel <= 0) {
+        bytesPerPixel = 4;
+      }
+      if (width > 0 && height > 0) {
+        pixelBytes = static_cast<size_t>(width) * static_cast<size_t>(height) *
+                     static_cast<size_t>(bytesPerPixel);
+      }
+    }
+
+    if (pixelBytes == 0) {
+      return 0;
+    }
+
+    size_t estimated = pixelBytes;
+
+    auto canvas = surface->getCanvas();
+    const bool isGpuBacked =
+        surface->recordingContext() != nullptr ||
+        surface->recorder() != nullptr ||
+        (canvas && (canvas->recordingContext() != nullptr ||
+                    canvas->recorder() != nullptr));
+
+    if (isGpuBacked) {
+      // Account for a resolved texture and depth/stencil attachments.
+      estimated = safeAdd(estimated, pixelBytes);     // resolve/texture copy
+      estimated = safeAdd(estimated, pixelBytes / 2); // depth-stencil buffers
+    }
+
+    // Add a small overhead buffer for bookkeeping allocations.
+    estimated = safeAdd(estimated, 128 * 1024);
+
+    return estimated;
+  }
+
+  std::string getObjectType() const override { return "JsiSkSurface"; }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurface, width),
                        JSI_EXPORT_FUNC(JsiSkSurface, height),

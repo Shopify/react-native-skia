@@ -11,8 +11,4 @@ export class JsiSkPathEffect
   constructor(CanvasKit: CanvasKit, ref: PathEffect) {
     super(CanvasKit, ref, "PathEffect");
   }
-
-  dispose = () => {
-    this.ref.delete();
-  };
 }

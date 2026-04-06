@@ -30,26 +30,44 @@ public:
     if (surface == nullptr) {
       return jsi::Value::null();
     }
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkSurface>(getContext(), std::move(surface)));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkSurface>(getContext(), std::move(surface));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_HOST_FUNCTION(MakeOffscreen) {
     auto width = static_cast<int>(arguments[0].asNumber());
     auto height = static_cast<int>(arguments[1].asNumber());
+    bool useP3ColorSpace = false;
+    if (count >= 3 && arguments[2].isObject()) {
+      auto opts = arguments[2].asObject(runtime);
+      if (opts.hasProperty(runtime, "colorSpace")) {
+        auto colorSpaceVal = opts.getProperty(runtime, "colorSpace");
+        if (colorSpaceVal.isString()) {
+          useP3ColorSpace =
+              colorSpaceVal.asString(runtime).utf8(runtime) == "display-p3";
+        }
+      }
+    }
     auto context = getContext();
-    auto surface = context->makeOffscreenSurface(width, height);
+    auto surface =
+        context->makeOffscreenSurface(width, height, useP3ColorSpace);
     if (surface == nullptr) {
       return jsi::Value::null();
     }
-    return jsi::Object::createFromHostObject(
-        runtime,
-        std::make_shared<JsiSkSurface>(getContext(), std::move(surface)));
+    auto hostObjectInstance =
+        std::make_shared<JsiSkSurface>(getContext(), std::move(surface));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSurfaceFactory, Make),
                        JSI_EXPORT_FUNC(JsiSkSurfaceFactory, MakeOffscreen))
+
+  size_t getMemoryPressure() const override { return 2048; }
+
+  std::string getObjectType() const override { return "JsiSkSurfaceFactory"; }
 
   explicit JsiSkSurfaceFactory(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

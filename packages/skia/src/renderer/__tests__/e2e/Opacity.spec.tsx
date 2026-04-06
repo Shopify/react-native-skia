@@ -14,6 +14,7 @@ import {
   Group,
   Image,
   ImageShader,
+  Paint,
   RoundedRect,
 } from "../../components";
 import { setupSkia } from "../../../skia/__tests__/setup";
@@ -274,5 +275,27 @@ describe("Opacity", () => {
       </Group>
     );
     checkImage(img, "snapshots/drawings/opacity-image.png");
+  });
+  it("Should apply opacity on a layer (1)", async () => {
+    const {} = importSkia();
+    const img = await surface.draw(
+      <Group>
+        <Group layer={<Paint opacity={0.5} />}>
+          <Fill color="lightblue" />
+        </Group>
+      </Group>
+    );
+    checkImage(img, "snapshots/drawings/semi-transparent-layer.png");
+  });
+  it("Should apply opacity on a layer (2)", async () => {
+    const {} = importSkia();
+    const img = await surface.draw(
+      <Group>
+        <Group layer={<Paint opacity={0} />}>
+          <Fill color="lightblue" />
+        </Group>
+      </Group>
+    );
+    checkImage(img, "snapshots/drawings/transparent-layer.png");
   });
 });

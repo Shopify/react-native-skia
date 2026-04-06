@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <fbjni/fbjni.h>
 #include <jni.h>
@@ -20,7 +21,7 @@ class JniSkiaBaseView {
 public:
   JniSkiaBaseView(jni::alias_ref<JniSkiaManager::javaobject> skiaManager,
                   std::shared_ptr<RNSkBaseAndroidView> skiaView)
-      : _manager(skiaManager->cthis()), _skiaAndroidView(std::move(skiaView)) {}
+      : _skiaAndroidView(std::move(skiaView)), _manager(skiaManager->cthis()) {}
 
   ~JniSkiaBaseView() = default;
 
@@ -51,15 +52,27 @@ protected:
   }
 
   virtual void unregisterView() {
-    getSkiaManager()->setSkiaView(
-        _skiaAndroidView->getSkiaView()->getNativeId(), nullptr);
-    getSkiaManager()->unregisterSkiaView(
-        _skiaAndroidView->getSkiaView()->getNativeId());
+    auto manager = getSkiaManager();
+    if (manager == nullptr || _skiaAndroidView == nullptr) {
+      return;
+    }
+    auto skiaView = _skiaAndroidView->getSkiaView();
+    if (skiaView == nullptr) {
+      return;
+    }
+    manager->setSkiaView(skiaView->getNativeId(), nullptr);
+    manager->unregisterSkiaView(skiaView->getNativeId());
   }
+
+  virtual jni::local_ref<jni::JArrayInt> getBitmap(int width, int height) {
+    return jni::JArrayInt::newArray(0);
+  }
+
+protected:
+  std::shared_ptr<RNSkBaseAndroidView> _skiaAndroidView;
 
 private:
   JniSkiaManager *_manager;
-  std::shared_ptr<RNSkBaseAndroidView> _skiaAndroidView;
 };
 
 } // namespace RNSkia

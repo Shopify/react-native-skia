@@ -11,8 +11,9 @@ export class JsiSkFontMgr
   constructor(CanvasKit: CanvasKit, ref: FontMgr) {
     super(CanvasKit, ref, "FontMgr");
   }
+
   dispose() {
-    this.ref.delete();
+    this[Symbol.dispose]();
   }
   countFamilies() {
     return this.ref.countFamilies();

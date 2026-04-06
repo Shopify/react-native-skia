@@ -50,7 +50,7 @@ Creates a color filter with the given color and blend mode.
 | Name      | Type          | Description                                        |
 | :-------- | :------------ | :------------------------------------------------- |
 | color     | `Color`       | Color                                              |
-| mode      | `BlendMode`   | see [blend modes](paint/properties.md#blend-mode). |
+| mode      | `BlendMode`   | see [blend modes](paint/properties.md#blendmode). |
 | children? | `ColorFilter` | Optional color filter to be applied first.         |
 
 ```tsx twoslash

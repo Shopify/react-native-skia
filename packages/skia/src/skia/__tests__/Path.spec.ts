@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import { interpolatePaths } from "../../animation/functions/interpolatePaths";
 import type { Skia, SkPath } from "../types";
 import { FillType, PathOp, PathVerb } from "../types";
@@ -9,6 +8,17 @@ import { setupSkia } from "./setup";
 
 const roundtrip = (Skia: Skia, path: SkPath) =>
   Skia.Path.MakeFromCmds(path.toCmds())!;
+
+// Helper to create a path with moveTo and lineTo
+const makePath = (
+  Skia: Skia,
+  build: (
+    builder: ReturnType<typeof Skia.PathBuilder.Make>
+  ) => ReturnType<typeof Skia.PathBuilder.Make>
+) => {
+  const builder = Skia.PathBuilder.Make();
+  return build(builder).build();
+};
 
 describe("Path", () => {
   it("React logo", () => {
@@ -27,8 +37,11 @@ describe("Path", () => {
     const p2 = roundtrip(Skia, Skia.Path.MakeFromSVGString(svg2)!);
     expect(p2.toSVGString()).toBeApproximatelyEqual(svg2);
 
-    p2.setFillType(FillType.EvenOdd);
-    canvas.drawPath(p2, paint);
+    // Use PathBuilder to set fill type
+    const p2WithFill = Skia.PathBuilder.MakeFromPath(p2)
+      .setFillType(FillType.EvenOdd)
+      .build();
+    canvas.drawPath(p2WithFill, paint);
     const cmds1 = p1.toCmds();
     expect(cmds1).toEqual(Skia.Path.MakeFromCmds(cmds1)?.toCmds());
     processResult(surface, "snapshots/path/logo.png");
@@ -37,22 +50,22 @@ describe("Path", () => {
   it("Should test that path are interpolatable as specificed in fiddle", () => {
     // https://fiddle.skia.org/c/@Path_isInterpolatable
     const { Skia } = setupSkia();
-    const path = Skia.Path.Make();
-    const path2 = Skia.Path.Make();
-    path.moveTo(20, 20);
-    path.lineTo(40, 40);
-    path.lineTo(20, 20);
-    path.lineTo(40, 40);
-    path.close();
-    path2.addRect(Skia.XYWHRect(20, 20, 20, 20));
+    const path = makePath(Skia, (b) =>
+      b.moveTo(20, 20).lineTo(40, 40).lineTo(20, 20).lineTo(40, 40).close()
+    );
+    const path2 = makePath(Skia, (b) =>
+      b.addRect(Skia.XYWHRect(20, 20, 20, 20))
+    );
     expect(path.isInterpolatable(path2)).toBe(true);
   });
 
   it("Should test that path interpolation works as specified in the Skia test suite", () => {
     // https://github.com/google/skia/blob/1f193df9b393d50da39570dab77a0bb5d28ec8ef/tests/PathTest.cpp
     const { Skia } = setupSkia();
-    const p1 = Skia.Path.Make();
-    const p2 = Skia.Path.Make();
+    const builder1 = Skia.PathBuilder.Make();
+    const builder2 = Skia.PathBuilder.Make();
+    let p1 = builder1.build();
+    let p2 = builder2.build();
     let p3: SkPath;
     expect(p1.isInterpolatable(p2)).toBe(true);
     p3 = p1.interpolate(p2, 0)!;
@@ -61,12 +74,14 @@ describe("Path", () => {
     p3 = p1.interpolate(p2, 1)!;
     expect(p3).toBeTruthy();
     expect(p2.toCmds()).toEqual(p3.toCmds());
-    p1.moveTo(0, 2);
-    p1.lineTo(0, 4);
+    builder1.moveTo(0, 2);
+    builder1.lineTo(0, 4);
+    p1 = builder1.build();
     expect(p1.isInterpolatable(p2)).toBe(false);
     expect(p1.interpolate(p2, 1)).toBeNull();
-    p2.moveTo(6, 0);
-    p2.lineTo(8, 0);
+    builder2.moveTo(6, 0);
+    builder2.lineTo(8, 0);
+    p2 = builder2.build();
     expect(p1.isInterpolatable(p2)).toBe(true);
     p3 = p1.interpolate(p2, 0)!;
     expect(p3).toBeTruthy();
@@ -84,12 +99,15 @@ describe("Path", () => {
       rect.width,
       rect.height,
     ]);
-    p1.reset();
-    p1.moveTo(4, 4);
-    p1.conicTo(5, 4, 5, 5, 0.2);
-    p2.reset();
-    p2.moveTo(4, 2);
-    p2.conicTo(7, 2, 7, 5, 0.2);
+    // Reset and build new paths with conics
+    const builder3 = Skia.PathBuilder.Make();
+    const builder4 = Skia.PathBuilder.Make();
+    builder3.moveTo(4, 4);
+    builder3.conicTo(5, 4, 5, 5, 0.2);
+    p1 = builder3.build();
+    builder4.moveTo(4, 2);
+    builder4.conicTo(7, 2, 7, 5, 0.2);
+    p2 = builder4.build();
     expect(p1.isInterpolatable(p2)).toBe(true);
     p3 = p1.interpolate(p2, 0.5)!;
     expect(p3).toBeTruthy();
@@ -105,40 +123,36 @@ describe("Path", () => {
       rect.width,
       rect.height,
     ]);
-    p2.reset();
-    p2.moveTo(4, 2);
-    p2.conicTo(6, 3, 6, 5, 1);
+    const builder5 = Skia.PathBuilder.Make();
+    builder5.moveTo(4, 2);
+    builder5.conicTo(6, 3, 6, 5, 1);
+    p2 = builder5.build();
     expect(p1.isInterpolatable(p2)).toBe(false);
-    p2.reset();
-    p2.moveTo(4, 4);
-    p2.conicTo(5, 4, 5, 5, 0.5);
+    const builder6 = Skia.PathBuilder.Make();
+    builder6.moveTo(4, 4);
+    builder6.conicTo(5, 4, 5, 5, 0.5);
+    p2 = builder6.build();
     expect(p1.isInterpolatable(p2)).toBe(false);
   });
 
   it("Should test that paths can be interpolated", () => {
     const { Skia } = setupSkia();
-    const path1 = Skia.Path.Make();
-    path1.moveTo(0, 0);
-    path1.lineTo(100, 100);
-    const path2 = Skia.Path.Make();
-    path2.moveTo(100, 100);
-    path2.lineTo(0, 0);
+    const path1 = makePath(Skia, (b) => b.moveTo(0, 0).lineTo(100, 100));
+    const builder2 = Skia.PathBuilder.Make();
+    builder2.moveTo(100, 100);
+    builder2.lineTo(0, 0);
+    let path2 = builder2.build();
     expect(path1.isInterpolatable(path2)).toBe(true);
-    path2.lineTo(0, 100);
+    builder2.lineTo(0, 100);
+    path2 = builder2.build();
     expect(path1.isInterpolatable(path2)).toBe(false);
   });
 
   it("Should interpolate one Path", () => {
     const { Skia } = setupSkia();
-    const path1 = Skia.Path.Make();
-    path1.moveTo(0, 0);
-    path1.lineTo(100, 100);
-    const path2 = Skia.Path.Make();
-    path2.moveTo(100, 100);
-    path2.lineTo(0, 0);
-    const path3 = Skia.Path.Make();
-    path3.moveTo(50, 50);
-    path3.lineTo(50, 50);
+    const path1 = makePath(Skia, (b) => b.moveTo(0, 0).lineTo(100, 100));
+    const path2 = makePath(Skia, (b) => b.moveTo(100, 100).lineTo(0, 0));
+    const path3 = makePath(Skia, (b) => b.moveTo(50, 50).lineTo(50, 50));
     expect(path1.isInterpolatable(path2)).toBe(true);
     const interpolate0 = path1.interpolate(path2, 0)!;
     const interpolate05 = path1.interpolate(path2, 0.5)!;
@@ -155,15 +169,9 @@ describe("Path", () => {
 
   it("Should interpolate more than one Path", () => {
     const { Skia } = setupSkia();
-    const path1 = Skia.Path.Make();
-    path1.moveTo(0, 0);
-    path1.lineTo(100, 100);
-    const path2 = Skia.Path.Make();
-    path2.moveTo(100, 100);
-    path2.lineTo(0, 0);
-    const path3 = Skia.Path.Make();
-    path3.moveTo(0, 0);
-    path3.lineTo(200, 200);
+    const path1 = makePath(Skia, (b) => b.moveTo(0, 0).lineTo(100, 100));
+    const path2 = makePath(Skia, (b) => b.moveTo(100, 100).lineTo(0, 0));
+    const path3 = makePath(Skia, (b) => b.moveTo(0, 0).lineTo(200, 200));
     expect(path1.isInterpolatable(path2)).toBe(true);
     expect(path2.isInterpolatable(path3)).toBe(true);
     let path = interpolatePaths(0, [0, 0.5, 1], [path1, path2, path3]);
@@ -176,15 +184,9 @@ describe("Path", () => {
 
   it("Should interpolate more than one path and clamp on the left side", () => {
     const { Skia } = setupSkia();
-    const path1 = Skia.Path.Make();
-    path1.moveTo(0, 0);
-    path1.lineTo(100, 100);
-    const path2 = Skia.Path.Make();
-    path2.moveTo(100, 100);
-    path2.lineTo(0, 0);
-    const path3 = Skia.Path.Make();
-    path3.moveTo(0, 0);
-    path3.lineTo(200, 200);
+    const path1 = makePath(Skia, (b) => b.moveTo(0, 0).lineTo(100, 100));
+    const path2 = makePath(Skia, (b) => b.moveTo(100, 100).lineTo(0, 0));
+    const path3 = makePath(Skia, (b) => b.moveTo(0, 0).lineTo(200, 200));
     const path = interpolatePaths(
       -1,
       [0, 0.5, 1],
@@ -196,15 +198,9 @@ describe("Path", () => {
 
   it("Should interpolate more than one path and clamp on the right side", () => {
     const { Skia } = setupSkia();
-    const path1 = Skia.Path.Make();
-    path1.moveTo(0, 0);
-    path1.lineTo(100, 100);
-    const path2 = Skia.Path.Make();
-    path2.moveTo(100, 100);
-    path2.lineTo(0, 0);
-    const path3 = Skia.Path.Make();
-    path3.moveTo(0, 0);
-    path3.lineTo(200, 200);
+    const path1 = makePath(Skia, (b) => b.moveTo(0, 0).lineTo(100, 100));
+    const path2 = makePath(Skia, (b) => b.moveTo(100, 100).lineTo(0, 0));
+    const path3 = makePath(Skia, (b) => b.moveTo(0, 0).lineTo(200, 200));
     const path = interpolatePaths(
       2,
       [0, 0.5, 1],
@@ -254,11 +250,8 @@ describe("Path", () => {
   it("should create a path by combining two other paths", () => {
     const { Skia } = setupSkia();
     // Get the intersection of two overlapping squares and verify that it is the smaller square.
-    const pathOne = Skia.Path.Make();
-    pathOne.addRect(Skia.XYWHRect(0, 0, 100, 100));
-
-    const pathTwo = Skia.Path.Make();
-    pathTwo.addRect(Skia.XYWHRect(50, 50, 50, 50));
+    const pathOne = Skia.Path.Rect(Skia.XYWHRect(0, 0, 100, 100));
+    const pathTwo = Skia.Path.Rect(Skia.XYWHRect(50, 50, 50, 50));
 
     const path = Skia.Path.MakeFromOp(pathOne, pathTwo, PathOp.Intersect)!;
     expect(path).not.toBeNull();
@@ -294,14 +287,10 @@ describe("Path", () => {
     const paint = Skia.Paint();
     paint.setAntiAlias(true);
     paint.setStyle(PaintStyle.Stroke);
-    const path = Skia.Path.Make();
-    const path2 = Skia.Path.Make();
-    path.moveTo(20, 20);
-    path.lineTo(40, 40);
-    path.lineTo(20, 40);
-    path.lineTo(40, 20);
-    path.close();
-    path2.addRect(Skia.XYWHRect(20, 20, 20, 20));
+    const path = makePath(Skia, (b) =>
+      b.moveTo(20, 20).lineTo(40, 40).lineTo(20, 40).lineTo(40, 20).close()
+    );
+    const path2 = Skia.Path.Rect(Skia.XYWHRect(20, 20, 20, 20));
     for (let i = 0; i <= 1; i += 1 / 6) {
       const interp = path.interpolate(path2, i)!;
       expect(interp).toBeTruthy();
@@ -313,13 +302,8 @@ describe("Path", () => {
 
   it("should support overshooting values in path interpolation", () => {
     const { Skia } = setupSkia();
-    const p1 = Skia.Path.Make();
-    p1.moveTo(0, 0);
-    p1.lineTo(100, 100);
-
-    const p2 = Skia.Path.Make();
-    p2.moveTo(0, 100);
-    p2.lineTo(100, 0);
+    const p1 = makePath(Skia, (b) => b.moveTo(0, 0).lineTo(100, 100));
+    const p2 = makePath(Skia, (b) => b.moveTo(0, 100).lineTo(100, 0));
 
     const p3 = p2.interpolate(p1, 1.1)!;
     expect(p3).not.toBeNull();
@@ -340,21 +324,13 @@ describe("Path", () => {
 
   it("interpolatePath() should support overshooting values", () => {
     const { Skia } = setupSkia();
-    const p1 = Skia.Path.Make();
-    p1.moveTo(0, 0);
-    p1.lineTo(100, 100);
+    const p1 = makePath(Skia, (b) => b.moveTo(0, 0).lineTo(100, 100));
+    const p2 = makePath(Skia, (b) => b.moveTo(0, 100).lineTo(100, 0));
 
-    const p2 = Skia.Path.Make();
-    p2.moveTo(0, 100);
-    p2.lineTo(100, 0);
-
-    const ref1 = Skia.Path.Make();
-    ref1.moveTo(0, -10);
-    ref1.lineTo(100, 110);
-
-    const ref2 = Skia.Path.Make();
-    ref2.moveTo(0, 110);
-    ref2.lineTo(100, -10.000001907348633);
+    const ref1 = makePath(Skia, (b) => b.moveTo(0, -10).lineTo(100, 110));
+    const ref2 = makePath(Skia, (b) =>
+      b.moveTo(0, 110).lineTo(100, -10.000001907348633)
+    );
 
     const p3 = interpolatePaths(-0.1, [0, 1], [p1, p2]);
     expect(p3.toCmds()).toEqual(ref1.toCmds());
@@ -364,13 +340,8 @@ describe("Path", () => {
 
   it("interpolatePath() should support clamping left and right values", () => {
     const { Skia } = setupSkia();
-    const p1 = Skia.Path.Make();
-    p1.moveTo(0, 0);
-    p1.lineTo(100, 100);
-
-    const p2 = Skia.Path.Make();
-    p2.moveTo(0, 100);
-    p2.lineTo(100, 0);
+    const p1 = makePath(Skia, (b) => b.moveTo(0, 0).lineTo(100, 100));
+    const p2 = makePath(Skia, (b) => b.moveTo(0, 100).lineTo(100, 0));
 
     const p3 = interpolatePaths(-0.1, [0, 1], [p1, p2], "clamp");
     expect(p3.toCmds()).toEqual(p1.toCmds());
@@ -379,8 +350,9 @@ describe("Path", () => {
   });
   it("should be possible to call dispose on a path", () => {
     const { Skia } = setupSkia();
-    const path = Skia.Path.Make();
-    path.moveTo(20, 20).lineTo(20, 40).lineTo(40, 20);
-    path.dispose();
+    using path = makePath(Skia, (b) =>
+      b.moveTo(20, 20).lineTo(20, 40).lineTo(40, 20)
+    );
+    expect(path).toBeTruthy();
   });
 });

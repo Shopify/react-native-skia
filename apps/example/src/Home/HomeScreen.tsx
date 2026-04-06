@@ -1,7 +1,10 @@
+import { Skia } from "@shopify/react-native-skia";
 import React from "react";
 import { ScrollView } from "react-native";
 
 import { HomeScreenButton } from "./HomeScreenButton";
+
+const hasWebGPU = Skia.hasDevice();
 
 export const HomeScreen = () => {
   return (
@@ -18,6 +21,15 @@ export const HomeScreen = () => {
         route="API"
         testId="API"
       />
+<<<<<<< HEAD
+=======
+      <HomeScreenButton
+        title="💧 Liquid Glass"
+        description="Liquid Glass examples"
+        route="LiquidGlass"
+        testId="LiquidGlass"
+      />
+>>>>>>> main
       <HomeScreenButton
         title="🎥 Reanimated"
         description="Reanimated & Gesture Handler"
@@ -116,6 +128,18 @@ export const HomeScreen = () => {
       />
       <HomeScreenButton title="📹 Video" description="Video" route="Video" />
       <HomeScreenButton title="💬 Chat" description="Chat" route="Chat" />
+      <HomeScreenButton
+        title="🖼 Pictures"
+        description="Animated circle trail using Pictures"
+        route="Pictures"
+      />
+      {hasWebGPU && (
+        <HomeScreenButton
+          title="🔺 WebGPU"
+          description="WebGPU Wireframe demo"
+          route="WebGPU"
+        />
+      )}
     </ScrollView>
   );
 };

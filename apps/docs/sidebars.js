@@ -30,7 +30,7 @@ const sidebars = {
       collapsed: true,
       type: "category",
       label: "Canvas",
-      items: ["canvas/canvas", "canvas/contexts"],
+      items: ["canvas/canvas", "canvas/rendering-modes", "canvas/contexts"],
     },
     {
       collapsed: true,
@@ -44,17 +44,22 @@ const sidebars = {
       id: "group",
     },
     {
+      type: "doc",
+      label: "Pictures",
+      id: "pictures",
+    },
+    {
       collapsed: true,
       type: "category",
       label: "Shapes",
       items: [
         "shapes/path",
+        "shapes/path-migration",
         "shapes/polygons",
         "shapes/ellipses",
         "shapes/atlas",
         "shapes/vertices",
         "shapes/patch",
-        "shapes/pictures",
       ],
     },
     {
@@ -67,6 +72,11 @@ const sidebars = {
       type: "doc",
       label: "Video",
       id: "video",
+    },
+    {
+      type: "doc",
+      label: "Skottie",
+      id: "skottie",
     },
     {
       collapsed: true,

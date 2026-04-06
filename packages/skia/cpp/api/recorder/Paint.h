@@ -4,6 +4,7 @@
 #include <string>
 #include <variant>
 
+#include "../CustomBlendModes.h"
 #include "Command.h"
 #include "Convertor.h"
 #include "DrawingCtx.h"
@@ -110,7 +111,7 @@ public:
 
 struct PaintCmdProps {
   std::optional<SkColor> color;
-  std::optional<SkBlendMode> blendMode;
+  std::optional<BlendModeValue> blendMode;
   std::optional<SkPaint::Style> style;
   std::optional<SkPaint::Join> strokeJoin;
   std::optional<SkPaint::Cap> strokeCap;
@@ -125,11 +126,12 @@ struct PaintCmdProps {
 class SavePaintCmd : public Command {
 private:
   PaintCmdProps props;
+  bool standalone;
 
 public:
   SavePaintCmd(jsi::Runtime &runtime, const jsi::Object &object,
-               Variables &variables)
-      : Command(CommandType::SavePaint) {
+               Variables &variables, bool lStandalone)
+      : Command(CommandType::SavePaint), standalone(lStandalone) {
     convertProperty(runtime, object, "color", props.color, variables);
     convertProperty(runtime, object, "blendMode", props.blendMode, variables);
     convertProperty(runtime, object, "style", props.style, variables);
@@ -151,18 +153,24 @@ public:
       return;
     }
     ctx->savePaint();
+    if (standalone) {
+      SkPaint freshPaint;
+      ctx->pushPaint(freshPaint);
+    }
     auto &paint = ctx->getPaint();
     if (props.opacity.has_value()) {
-      paint.setAlphaf(paint.getAlphaf() * props.opacity.value());
+      if (standalone) {
+        paint.setAlphaf(paint.getAlphaf() * props.opacity.value());
+      } else {
+        ctx->setOpacity(ctx->getOpacity() * props.opacity.value());
+      }
     }
     if (props.color.has_value()) {
-      auto currentOpacity = paint.getAlphaf();
       paint.setShader(nullptr);
       paint.setColor(props.color.value());
-      paint.setAlphaf(currentOpacity * paint.getAlphaf());
     }
     if (props.blendMode.has_value()) {
-      paint.setBlendMode(props.blendMode.value());
+      applyBlendMode(paint, props.blendMode.value().value);
     }
     if (props.style.has_value()) {
       paint.setStyle(props.style.value());

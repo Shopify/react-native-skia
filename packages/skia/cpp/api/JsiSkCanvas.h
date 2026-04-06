@@ -35,6 +35,10 @@
 #include "include/core/SkSurface.h"
 #include "include/core/SkTypeface.h"
 
+#if !defined(SK_GRAPHITE)
+#include "include/gpu/ganesh/GrDirectContext.h"
+#endif
+
 #pragma clang diagnostic pop
 
 namespace RNSkia {
@@ -237,6 +241,13 @@ public:
     return static_cast<int>(_canvas->getSaveCount());
   }
 
+  JSI_HOST_FUNCTION(getTotalMatrix) {
+    auto matrix =
+        std::make_shared<JsiSkMatrix>(getContext(), _canvas->getTotalMatrix());
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, matrix,
+                                                       getContext());
+  }
+
   JSI_HOST_FUNCTION(drawPoints) {
     auto pointMode = arguments[0].asNumber();
     std::vector<SkPoint> points;
@@ -258,9 +269,8 @@ public:
     }
 
     auto paint = JsiSkPaint::fromValue(runtime, arguments[2]);
-
-    _canvas->drawPoints((SkCanvas::PointMode)pointMode, pointsSize,
-                        points.data(), *paint);
+    auto p = SkSpan(points.data(), points.size());
+    _canvas->drawPoints((SkCanvas::PointMode)pointMode, p, *paint);
 
     return jsi::Value::undefined();
   }
@@ -342,7 +352,7 @@ public:
     auto path = JsiSkPath::fromValue(runtime, arguments[0]);
     auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
 
-    _canvas->drawPath(*path, *paint);
+    _canvas->drawPath(path->snapshot(), *paint);
 
     return jsi::Value::undefined();
   }
@@ -403,8 +413,9 @@ public:
       glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
     }
 
-    _canvas->drawGlyphs(glyphsSize, glyphs.data(), positions.data(), origin,
-                        *font, *paint);
+    auto g = SkSpan(glyphs.data(), glyphs.size());
+    auto p = SkSpan(positions.data(), positions.size());
+    _canvas->drawGlyphs(g, p, origin, *font, *paint);
 
     return jsi::Value::undefined();
   }
@@ -428,7 +439,7 @@ public:
     auto path = JsiSkPath::fromValue(runtime, arguments[0]);
     auto op = (SkClipOp)arguments[1].asNumber();
     auto doAntiAlias = arguments[2].getBool();
-    _canvas->clipPath(*path, op, doAntiAlias);
+    _canvas->clipPath(path->snapshot(), op, doAntiAlias);
     return jsi::Value::undefined();
   }
 
@@ -597,9 +608,17 @@ public:
     if (count > 6) {
       sampling = SamplingOptionsFromValue(runtime, arguments[6]);
     }
+<<<<<<< HEAD
     _canvas->drawAtlas(atlas.get(), xforms.data(), skRects.data(),
                        colors.empty() ? nullptr : colors.data(), skRects.size(),
                        blendMode, sampling, nullptr, paint.get());
+=======
+    auto x = SkSpan(xforms.data(), xforms.size());
+    auto t = SkSpan(skRects.data(), skRects.size());
+    auto c = SkSpan(colors.data(), colors.size());
+    _canvas->drawAtlas(atlas.get(), x, t, c, blendMode, sampling, nullptr,
+                       paint.get());
+>>>>>>> main
 
     return jsi::Value::undefined();
   }
@@ -654,6 +673,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawOval),
                        JSI_EXPORT_FUNC(JsiSkCanvas, restoreToCount),
                        JSI_EXPORT_FUNC(JsiSkCanvas, getSaveCount),
+                       JSI_EXPORT_FUNC(JsiSkCanvas, getTotalMatrix),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPoints),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPatch),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPath),
@@ -678,6 +698,10 @@ public:
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawPicture),
                        JSI_EXPORT_FUNC(JsiSkCanvas, drawAtlas),
                        JSI_EXPORT_FUNC(JsiSkCanvas, readPixels))
+
+  size_t getMemoryPressure() const override { return 1024; }
+
+  std::string getObjectType() const override { return "JsiSkCanvas"; }
 
   explicit JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkHostObject(std::move(context)) {}

@@ -1,17 +1,18 @@
-/* eslint-disable max-len */
 import path from "path";
 import fs from "fs";
 
 import { PNG } from "pngjs";
-import pixelmatch from "pixelmatch";
+import blazediff from "@blazediff/core";
 import { diff } from "jest-diff";
 
 import type { SkSurface, SkImage } from "../skia/types";
 
 export const E2E = process.env.E2E === "true";
 export const CI = process.env.CI === "true";
+export const WEB = process.env.WEB === "true";
 export const itFailsE2e = E2E ? it.failing : it;
-export const itRunsE2eOnly = E2E ? it : it.skip;
+export const itSkipsCanvasKit = WEB || !E2E ? it.skip : it;
+export const itRunsE2eOnly = E2E && !WEB ? it : it.skip;
 export const itRunsNodeOnly = E2E ? it.skip : it;
 export const itRunsCIAndNodeOnly = CI || !E2E ? it : it.skip;
 
@@ -24,10 +25,9 @@ export const processResult = (
   overwrite = false
 ) => {
   surface.flush();
-  const image = surface.makeImageSnapshot();
+  using image = surface.makeImageSnapshot();
   surface.getCanvas().clear(Float32Array.of(0, 0, 0, 0));
   const result = checkImage(image, relPath, { overwrite });
-  image.dispose();
   return result;
 };
 
@@ -71,7 +71,7 @@ export const checkImage = (
         `Image sizes don't match: ${baseline.width}x${baseline.height} vs ${toTest.width}x${toTest.height}`
       );
     }
-    const diffPixelsCount = pixelmatch(
+    const diffPixelsCount = blazediff(
       baseline.data,
       toTest.data,
       diffImage.data,
@@ -99,7 +99,6 @@ export const checkImage = (
 };
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
     interface Matchers<R> {
       /**

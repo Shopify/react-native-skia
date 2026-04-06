@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo } from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Animated, {
   runOnUI,
   useAnimatedScrollHandler,
@@ -11,7 +11,6 @@ import type { RouteProp } from "@react-navigation/native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import type { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
 
 import type { RootStackParamList } from "../ChatExample";
 import DATA from "../data/data.json";
@@ -24,8 +23,8 @@ import { resolveOffscreenChat } from "./ChatUI";
 import { DrawingOverlay } from "./DrawingOverlay";
 
 export function ChatScreen() {
-  const nav =
-    useNavigation<NativeStackNavigationProp<RootStackParamList, "ChatIndex">>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const nav = useNavigation<any>();
   const { chatId } =
     useRoute<RouteProp<RootStackParamList, "ChatIndex">>().params;
 
@@ -38,7 +37,6 @@ export function ChatScreen() {
 
   useLayoutEffect(() => {
     nav.setOptions({
-      // @ts-expect-error - not sure why this is an error
       title: chatData.users.user_1.name,
     });
   }, [chatData, nav]);
@@ -170,7 +168,7 @@ function OffscreenCanvas({ render }: CanvasProps) {
   const [texture] = useOffscreenCanvas(render);
 
   return (
-    <Canvas opaque={Platform.OS === "android"} style={StyleSheet.absoluteFill}>
+    <Canvas style={StyleSheet.absoluteFill}>
       <Image image={texture} width={WINDOW_WIDTH} height={WINDOW_HEIGHT} />
     </Canvas>
   );

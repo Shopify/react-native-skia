@@ -71,4 +71,8 @@ export const enum NodeType {
 
   // Paragraph
   Paragraph = "skParagraph",
+  // Skottie
+  Skottie = "skSkottie",
+  // ImageFilter
+  ImageFilter = "skImageFilter",
 }

@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import fs from "fs";
 import path from "path";
@@ -20,7 +21,7 @@ import { SkiaObject } from "./e2e/setup";
 
 jest.setTimeout(180 * 1000);
 
-type TestOS = "ios" | "android" | "web" | "node";
+type TestOS = "ios" | "android" | "web" | "node" | "macos";
 
 declare global {
   var testServer: Server;
@@ -41,6 +42,13 @@ export let fonts: {
   NotoSansSCRegular: SkFont;
   UberMoveMediumMono: SkFont;
   DinMedium: SkFont;
+  Amiri: SkFont;
+};
+
+export let dataAssets: {
+  NotoSansSCRegular: Uint8Array;
+  img_0: Uint8Array;
+  AvenirHeavy: Uint8Array;
 };
 
 beforeAll(async () => {
@@ -66,10 +74,18 @@ beforeAll(async () => {
     fontSize
   );
   const DinMedium = loadFont("skia/__tests__/assets/DIN-Medium.ttf", fontSize);
+  const Amiri = loadFont("skia/__tests__/assets/Amiri-Regular.ttf", fontSize);
   const oslo = loadImage("skia/__tests__/assets/oslo.jpg");
   const skiaLogoPng = loadImage("skia/__tests__/assets/skia_logo.png");
   const skiaLogoJpeg = loadImage("skia/__tests__/assets/skia_logo_jpeg.jpg");
   const mask = loadImage("skia/__tests__/assets/mask.png");
+  dataAssets = {
+    AvenirHeavy: resolveFile("skia/__tests__/assets/Avenir-Heavy.ttf"),
+    NotoSansSCRegular: resolveFile(
+      "skia/__tests__/assets/NotoSansSC-Regular.otf"
+    ),
+    img_0: resolveFile("skia/__tests__/assets/oslo.jpg"),
+  };
   images = { oslo, skiaLogoPng, skiaLogoJpeg, mask };
   fonts = {
     RobotoMedium,
@@ -77,6 +93,7 @@ beforeAll(async () => {
     NotoSansSCRegular,
     UberMoveMediumMono,
     DinMedium,
+    Amiri,
   };
   assets.set(mask, "mask");
   assets.set(oslo, "oslo");
@@ -85,6 +102,7 @@ beforeAll(async () => {
   assets.set(NotoSansSCRegular, "NotoSansSCRegular");
   assets.set(UberMoveMediumMono, "UberMoveMediumMono");
   assets.set(DinMedium, "DinMedium");
+  assets.set(Amiri, "Amiri");
   assets.set(skiaLogoPng, "skiaLogoPng");
   assets.set(skiaLogoJpeg, "skiaLogoJpeg");
 });
@@ -113,7 +131,6 @@ export const testingFonts = {
   //  NotoColorEmoji: [resolveFont("skia/__tests__/assets/NotoColorEmoji.ttf")],
 };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EmptyProps {}
 
 jest.mock("react-native", () => ({
@@ -126,12 +143,7 @@ jest.mock("react-native", () => ({
   Image: {
     resolveAssetSource: jest.fn,
   },
-  // requireNativeComponent: jest.fn,
-  // TurboModuleRegistry: {
-  //   getEnforcing: jest.fn,
-  // },
 }));
-//jest.mock("react-native/Libraries/Utilities/codegenNativeComponent", jest.fn);
 
 export const BirdGIF = resolveFile("skia/__tests__/assets/bird.gif").toString(
   "base64"
@@ -160,6 +172,7 @@ export const importSkia = (): typeof SkiaExports => {
   const skia = require("../../skia");
   const renderer = require("../../renderer");
   const offscreen = require("../Offscreen");
+  const nodes = require("../../dom/nodes");
   // TODO: to remove
   const animation = require("../../animation");
   return {
@@ -167,6 +180,7 @@ export const importSkia = (): typeof SkiaExports => {
     ...renderer,
     ...animation,
     ...offscreen,
+    ...nodes,
   };
 };
 
@@ -298,6 +312,23 @@ const serializeSkOjects = (obj: any): any => {
         ssin: obj.ssin,
         tx: obj.tx,
         ty: obj.ty,
+      };
+    } else if (obj.__typename__ === "SkottieAnimation") {
+      if (!obj.source) {
+        throw new Error("SkottieAnimation must have a source");
+      }
+      return {
+        __typename__: "SkottieAnimation",
+        source: obj.source,
+        assets: obj.assets,
+      };
+    } else if (obj.__typename__ === "ImageFilter") {
+      if (!obj.source) {
+        throw new Error("ImageFilter must have a source");
+      }
+      return {
+        __typename__: "Function",
+        source: obj.source,
       };
     }
   } else if (obj && typeof obj === "object") {
