@@ -132,6 +132,20 @@ The `jestEnv.js` will load CanvasKit for you and `jestEnv.js` mocks React Native
 You can also have a look at the [example app](https://github.com/Shopify/react-native-skia/tree/main/apps/example) to see how Jest tests are enabled there.
 
 
+## Graphite (Experimental)
+
+Skia has two backends: Ganesh (default) and Graphite. An experimental preview of Graphite is available in the `@next` distribution channel:
+
+```sh
+yarn add @shopify/react-native-skia@next
+```
+
+:::warning
+
+Graphite support is highly experimental. Skia Graphite requires Android API Level 26 or above.
+
+:::
+
 ## Playground
 
 We have example projects you can play with [here](https://github.com/Shopify/react-native-skia/tree/main/apps).
