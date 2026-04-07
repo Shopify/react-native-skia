@@ -32,6 +32,11 @@ on:
         required: false
         default: 'Nexus 5X'
         type: string
+      android_min_sdk:
+        description: 'Android minSdkVersion override'
+        required: false
+        default: ''
+        type: string
       test_web:
         description: 'Run Web tests'
         required: false
@@ -291,6 +296,23 @@ jobs:
         run: |
           echo "Installing expo-dev-client..."
           yarn expo install expo-dev-client
+
+      - name: Override minSdkVersion
+        if: inputs.android_min_sdk != ''
+        working-directory: /Users/runner/skia-test-app/my-app
+        run: |
+          echo "Setting minSdkVersion to ${{ inputs.android_min_sdk }} in app.json..."
+          node -e "
+            const f = './app.json';
+            const app = require(f);
+            app.expo = app.expo || {};
+            app.expo.android = app.expo.android || {};
+            app.expo.plugins = app.expo.plugins || [];
+            app.expo.plugins.push(['expo-build-properties', { android: { minSdkVersion: ${{ inputs.android_min_sdk }} } }]);
+            require('fs').writeFileSync(f, JSON.stringify(app, null, 2) + '\n');
+          "
+          npx expo install expo-build-properties
+          cat app.json
 
       - name: Prebuild native directories
         working-directory: /Users/runner/skia-test-app/my-app
