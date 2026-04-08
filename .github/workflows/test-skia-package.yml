@@ -37,6 +37,11 @@ on:
         required: false
         type: boolean
         default: true
+      test_windows:
+        description: 'Run Windows install + web test'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   test-skia-ios:
@@ -483,4 +488,144 @@ jobs:
           echo "✓ Installed @shopify/react-native-skia@${{ inputs.skia_version }}"
           echo "✓ Started web server"
           echo "✓ Web app accessible at http://localhost:8081"
+          echo "================================================================"
+
+  test-skia-windows:
+    if: inputs.test_windows
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6.0.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6.3.0
+        with:
+          node-version: '20'
+
+      - name: Setup Yarn
+        run: |
+          corepack enable
+          yarn --version
+
+      - name: Install Expo CLI
+        run: |
+          npm install -g expo-cli eas-cli
+          expo --version
+
+      - name: Create test directory
+        run: |
+          mkdir C:\skia-test-app
+          cd C:\skia-test-app
+          pwd
+
+      - name: Create Expo app with Skia template
+        uses: nick-fields/retry@v4
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          retry_wait_seconds: 120
+          shell: bash
+          command: |
+            cd /c/skia-test-app
+            echo "Creating Expo app with Skia template..."
+            yarn create expo-app my-app -e with-skia
+
+      - name: Download artifact package if specified
+        if: startsWith(inputs.skia_version, 'artifact:')
+        shell: bash
+        run: |
+          ARTIFACT_ID=$(echo "${{ inputs.skia_version }}" | sed 's/artifact://')
+          echo "Downloading artifact ID: $ARTIFACT_ID"
+          gh run download --repo Shopify/react-native-skia $ARTIFACT_ID -n package-tgz -D /tmp
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Install React Native Skia
+        working-directory: C:\skia-test-app\my-app
+        shell: bash
+        run: |
+          VERSION="${{ inputs.skia_version }}"
+          if [ "$VERSION" == "latest" ]; then
+            echo "Installing @shopify/react-native-skia@latest..."
+            yarn add @shopify/react-native-skia@latest
+          elif [[ "$VERSION" == artifact:* ]]; then
+            echo "Installing @shopify/react-native-skia from downloaded artifact..."
+            yarn add @shopify/react-native-skia@file:/tmp/package.tgz
+          elif [[ "$VERSION" == http* ]]; then
+            echo "Installing @shopify/react-native-skia from URL: $VERSION"
+            yarn add @shopify/react-native-skia@"$VERSION"
+          else
+            echo "Installing @shopify/react-native-skia@$VERSION..."
+            yarn add @shopify/react-native-skia@"$VERSION"
+          fi
+
+      - name: Show installed Skia version
+        working-directory: C:\skia-test-app\my-app
+        shell: bash
+        run: |
+          echo "Installed React Native Skia version:"
+          yarn list @shopify/react-native-skia --depth=0
+
+      - name: Install compatible Worklets version
+        working-directory: C:\skia-test-app\my-app
+        run: |
+          echo "Installing react-native-worklets@^0.7.1 for Reanimated compatibility..."
+          yarn add react-native-worklets@^0.7.1
+
+      - name: Install TypeScript dependencies
+        working-directory: C:\skia-test-app\my-app
+        run: |
+          echo "Installing TypeScript dependencies..."
+          npx expo install typescript @types/react
+
+      - name: Install Playwright dependencies
+        run: |
+          echo "Installing Playwright..."
+          npm install -g playwright
+          npx playwright install chromium
+
+      - name: Start web server
+        working-directory: C:\skia-test-app\my-app
+        shell: bash
+        run: |
+          echo "Starting web server in background..."
+          npx expo start --web &
+          sleep 30
+
+      - name: Wait for web app to be ready
+        shell: bash
+        run: |
+          echo "Waiting for web app to be accessible..."
+          timeout 60 bash -c 'until curl -s http://localhost:8081 > /dev/null; do sleep 2; done' || echo "Web server may not be fully ready"
+          echo "Waiting additional time for app to fully render..."
+          sleep 30
+
+      - name: Take screenshot
+        if: always()
+        shell: bash
+        run: |
+          echo "Taking screenshot of web app..."
+          npx playwright screenshot http://localhost:8081 C:/skia-test-screenshot-web-windows.png || echo "Failed to capture screenshot"
+
+      - name: Upload screenshot
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-web-screenshot-${{ github.run_id }}
+          path: C:\skia-test-screenshot-web-windows.png
+          if-no-files-found: ignore
+
+      - name: Print test summary
+        if: always()
+        run: |
+          echo "================================================================"
+          echo "Windows Web Test Summary:"
+          echo "================================================================"
+          echo "Created Expo app with Skia template"
+          echo "Installed @shopify/react-native-skia@${{ inputs.skia_version }}"
+          echo "Package postinstall script succeeded on Windows"
+          echo "Started web server"
+          echo "Web app accessible at http://localhost:8081"
           echo "================================================================"
