@@ -49,7 +49,7 @@ jobs:
         uses: actions/checkout@v6.0.2
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6.2.0
+        uses: actions/setup-node@v6.3.0
         with:
           node-version: '20'
 
@@ -57,11 +57,6 @@ jobs:
         run: |
           corepack enable
           yarn --version
-
-      - name: Install Expo CLI
-        run: |
-          npm install -g expo-cli eas-cli
-          expo --version
 
       - name: List available simulators
         run: xcrun simctl list devices
@@ -73,7 +68,7 @@ jobs:
           pwd
 
       - name: Create Expo app with Skia template
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           timeout_minutes: 10
           max_attempts: 3
@@ -126,19 +121,19 @@ jobs:
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Installing TypeScript dependencies..."
-          npx expo install typescript @types/react
+          yarn expo install typescript @types/react
 
       - name: Install Expo Dev Client
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Installing expo-dev-client..."
-          npx expo install expo-dev-client
+          yarn expo install expo-dev-client
 
       - name: Prebuild native directories
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Generating native iOS directory..."
-          npx expo prebuild --platform ios
+          yarn expo prebuild --platform ios
 
       - name: Install iOS dependencies
         working-directory: /Users/runner/skia-test-app/my-app
@@ -151,14 +146,14 @@ jobs:
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Starting Metro bundler in background..."
-          npx expo start --dev-client &
+          yarn expo start --dev-client &
           sleep 10
 
       - name: Build and run iOS app
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Building and running iOS app on simulator: ${{ inputs.simulator_device }}..."
-          npx expo run:ios --device "${{ inputs.simulator_device }}"
+          yarn expo run:ios --device "${{ inputs.simulator_device }}"
 
       - name: Wait for app to launch
         run: |
@@ -178,7 +173,7 @@ jobs:
 
       - name: Upload screenshot
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ios-simulator-screenshot-${{ github.run_id }}
           path: /Users/runner/skia-test-screenshot-ios.png
@@ -206,7 +201,7 @@ jobs:
         uses: actions/checkout@v6.0.2
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6.2.0
+        uses: actions/setup-node@v6.3.0
         with:
           node-version: '20'
 
@@ -214,11 +209,6 @@ jobs:
         run: |
           corepack enable
           yarn --version
-
-      - name: Install Expo CLI
-        run: |
-          npm install -g expo-cli eas-cli
-          expo --version
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -241,7 +231,7 @@ jobs:
           pwd
 
       - name: Create Expo app with Skia template
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           timeout_minutes: 10
           max_attempts: 3
@@ -294,19 +284,19 @@ jobs:
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Installing TypeScript dependencies..."
-          npx expo install typescript @types/react
+          yarn expo install typescript @types/react
 
       - name: Install Expo Dev Client
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Installing expo-dev-client..."
-          npx expo install expo-dev-client
+          yarn expo install expo-dev-client
 
       - name: Prebuild native directories
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Generating native Android directory..."
-          npx expo prebuild --platform android
+          yarn expo prebuild --platform android
 
       - name: Start Android emulator
         run: |
@@ -325,14 +315,14 @@ jobs:
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Starting Metro bundler in background..."
-          npx expo start --dev-client &
+          yarn expo start --dev-client &
           sleep 10
 
       - name: Build and run Android app
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Building and running Android app on emulator..."
-          npx expo run:android
+          yarn expo run:android
 
       - name: Wait for app to launch
         run: |
@@ -347,7 +337,7 @@ jobs:
 
       - name: Upload screenshot
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: android-emulator-screenshot-${{ github.run_id }}
           path: /Users/runner/skia-test-screenshot-android.png
@@ -375,7 +365,7 @@ jobs:
         uses: actions/checkout@v6.0.2
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6.2.0
+        uses: actions/setup-node@v6.3.0
         with:
           node-version: '20'
 
@@ -384,11 +374,6 @@ jobs:
           corepack enable
           yarn --version
 
-      - name: Install Expo CLI
-        run: |
-          npm install -g expo-cli eas-cli
-          expo --version
-
       - name: Create test directory
         run: |
           mkdir -p /Users/runner/skia-test-app
@@ -396,7 +381,7 @@ jobs:
           pwd
 
       - name: Create Expo app with Skia template
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           timeout_minutes: 10
           max_attempts: 3
@@ -449,20 +434,22 @@ jobs:
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Installing TypeScript dependencies..."
-          npx expo install typescript @types/react
+          yarn expo install typescript @types/react
+
+      - name: Install repo dependencies for Playwright
+        run: yarn install --immutable
 
       - name: Install Playwright dependencies
         run: |
           echo "Installing Playwright..."
-          npm install -g playwright
-          npx playwright install chromium
-          npx playwright install-deps chromium
+          yarn playwright install chromium
+          yarn playwright install-deps chromium
 
       - name: Start web server
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
           echo "Starting web server in background..."
-          npx expo start --web &
+          yarn expo start --web &
           sleep 30
 
       - name: Wait for web app to be ready
@@ -476,11 +463,11 @@ jobs:
         if: always()
         run: |
           echo "Taking screenshot of web app..."
-          npx playwright screenshot http://localhost:8081 /Users/runner/skia-test-screenshot-web.png || echo "Failed to capture screenshot"
+          yarn playwright screenshot http://localhost:8081 /Users/runner/skia-test-screenshot-web.png || echo "Failed to capture screenshot"
 
       - name: Upload screenshot
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: web-screenshot-${{ github.run_id }}
           path: /Users/runner/skia-test-screenshot-web.png

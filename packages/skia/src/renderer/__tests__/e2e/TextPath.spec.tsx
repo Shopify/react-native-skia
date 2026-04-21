@@ -21,12 +21,12 @@ describe("Text Paths", () => {
     )!;
     const font = fonts.UberMoveMediumMono;
     const dst = rect(16, 16, surface.width - 32, surface.height - 32);
-    circlePath.transform(
+    const transformedCirclePath = circlePath.transform(
       processTransform2d(
         fitbox("contain", circlePath.computeTightBounds(), dst)
       )
     );
-    reversedPath.transform(
+    const transformedReversedPath = reversedPath.transform(
       processTransform2d(
         fitbox("contain", reversedPath.computeTightBounds(), dst)
       )
@@ -35,10 +35,10 @@ describe("Text Paths", () => {
       <>
         <Fill color="white" />
         <Group>
-          <TextPath font={font} path={circlePath} text="5 Kts" />
+          <TextPath font={font} path={transformedCirclePath} text="5 Kts" />
         </Group>
         <Group>
-          <TextPath font={font} path={reversedPath} text="5 Kts" />
+          <TextPath font={font} path={transformedReversedPath} text="5 Kts" />
         </Group>
       </>
     );
@@ -53,9 +53,10 @@ describe("Text Paths", () => {
         )!;
         const font = Skia.Font(amiri, 24);
 
-        const path = Skia.Path.Make();
-        path.moveTo(20, 120);
-        path.quadTo(ctx.width / 2, 20, ctx.width - 20, 120);
+        const path = Skia.PathBuilder.Make()
+          .moveTo(20, 120)
+          .quadTo(ctx.width / 2, 20, ctx.width - 20, 120)
+          .build();
 
         const paint = Skia.Paint();
         paint.setColor(Skia.Color("black"));
@@ -112,9 +113,10 @@ describe("Text Paths", () => {
     const { Skia } = importSkia();
     const font = fonts.Amiri;
 
-    const path = Skia.Path.Make();
-    path.moveTo(20, 120);
-    path.quadTo(surface.width / 2, 20, surface.width - 20, 120);
+    const path = Skia.PathBuilder.Make()
+      .moveTo(20, 120)
+      .quadTo(surface.width / 2, 20, surface.width - 20, 120)
+      .build();
 
     const image = await surface.draw(
       <>

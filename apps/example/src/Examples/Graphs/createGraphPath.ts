@@ -6,9 +6,9 @@ export const createGraphPath = (
   steps: number,
   round = true
 ) => {
-  const retVal = Skia.Path.Make();
+  const builder = Skia.PathBuilder.Make();
   let y = height / 2;
-  retVal.moveTo(0, y);
+  builder.moveTo(0, y);
   const prevPt = { x: 0, y };
   for (let i = 0; i < width; i += width / steps) {
     // increase y by a random amount between -10 and 10
@@ -18,14 +18,14 @@ export const createGraphPath = (
     if (round && i > 0) {
       const xMid = (prevPt.x + i) / 2;
       const yMid = (prevPt!.y + y) / 2;
-      retVal.quadTo(prevPt.x, prevPt.y, xMid, yMid);
+      builder.quadTo(prevPt.x, prevPt.y, xMid, yMid);
       prevPt.x = i;
       prevPt.y = y;
     } else {
-      retVal.lineTo(i, y);
+      builder.lineTo(i, y);
     }
   }
-  return retVal;
+  return builder.build();
 };
 
 export const createZeroPath = (
@@ -33,11 +33,11 @@ export const createZeroPath = (
   height: number,
   steps: number
 ) => {
-  const retVal = Skia.Path.Make();
+  const builder = Skia.PathBuilder.Make();
   const y = height / 2;
-  retVal.moveTo(0, y);
+  builder.moveTo(0, y);
   for (let i = 0; i < width; i += width / steps) {
-    retVal.lineTo(i, y);
+    builder.lineTo(i, y);
   }
-  return retVal;
+  return builder.build();
 };

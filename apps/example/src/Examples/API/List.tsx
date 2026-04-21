@@ -142,6 +142,14 @@ export const examples = [
     screen: "FirstFrame",
     title: "🎬 First Frame",
   },
+  {
+    screen: "PictureBug",
+    title: "Picture Render Bug",
+  },
+  {
+    screen: "Atlas",
+    title: "🎯 Atlas",
+  },
 ] as const;
 
 const styles = StyleSheet.create({

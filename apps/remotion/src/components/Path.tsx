@@ -19,9 +19,7 @@ export const rectFromCircle = (c: Vector, r: number) =>
   Skia.XYWHRect(c.x - r, c.y - r, r * 2, r * 2);
 
 export const rect = (x: number, y: number, width: number, height: number) => {
-  const path = Skia.Path.Make();
-  path.addRect(Skia.XYWHRect(x, y, width, height));
-  return path;
+  return Skia.Path.Rect(Skia.XYWHRect(x, y, width, height));
 };
 
 export const rrect = (
@@ -31,22 +29,19 @@ export const rrect = (
   height: number,
   r: number
 ) => {
-  const path = Skia.Path.Make();
-  path.addRRect(Skia.RRectXY(Skia.XYWHRect(x, y, width, height), r, r));
-  return path;
+  return Skia.Path.RRect(
+    Skia.RRectXY(Skia.XYWHRect(x, y, width, height), r, r)
+  );
 };
 
 export const circle = (c: Vector, r: number) => {
-  const path = Skia.Path.Make();
-  path.addCircle(c.x, c.y, r);
-  return path;
+  return Skia.Path.Circle(c.x, c.y, r);
 };
 
 export const translate = (path: SkPath, a: Vector) => {
   const m3 = Skia.Matrix();
   m3.translate(a.x, a.y);
-  path.transform(m3);
-  return path;
+  return path.transform(m3);
 };
 
 export const flipH = (path: SkPath) => {
@@ -56,33 +51,23 @@ export const flipH = (path: SkPath) => {
   m3.translate(origin.x, origin.y);
   m3.scale(-1, 1);
   m3.translate(-origin.x, -origin.y);
-  path.transform(m3);
-  return path;
+  return path.transform(m3);
 };
 
 export const line = (a: Vector, b: Vector) => {
-  const path = Skia.Path.Make();
-  path.moveTo(a.x, a.y);
-  path.lineTo(b.x, b.y);
-  return path;
+  return Skia.Path.Line(a, b);
 };
 
 export const vLine = (x: number) => {
-  const path = Skia.Path.Make();
-  path.moveTo(x, 0);
-  path.lineTo(x, CANVAS.height);
-  return path;
+  return Skia.PathBuilder.Make().moveTo(x, 0).lineTo(x, CANVAS.height).build();
 };
 
 export const hLine = (y: number) => {
-  const path = Skia.Path.Make();
-  path.moveTo(0, y);
-  path.lineTo(CANVAS.width, y);
-  return path;
+  return Skia.PathBuilder.Make().moveTo(0, y).lineTo(CANVAS.width, y).build();
 };
 
 export const fitPath = (path: SkPath, dst: SkRect) => {
-  path.transform(
+  return path.transform(
     processTransform2d(fitbox("contain", path.computeTightBounds(), dst))
   );
 };

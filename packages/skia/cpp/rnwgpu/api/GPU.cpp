@@ -88,6 +88,18 @@ std::unordered_set<std::string> GPU::getWgslLanguageFeatures() {
     case wgpu::WGSLLanguageFeatureName::PointerCompositeAccess:
       name = "pointer_composite_access";
       break;
+    case wgpu::WGSLLanguageFeatureName::UniformBufferStandardLayout:
+      name = "uniform_buffer_standard_layout";
+      break;
+    case wgpu::WGSLLanguageFeatureName::SubgroupId:
+      name = "subgroup_id";
+      break;
+    case wgpu::WGSLLanguageFeatureName::FragmentDepth:
+      name = "fragment_depth";
+      break;
+    case wgpu::WGSLLanguageFeatureName::ImmediateAddressSpace:
+      name = "immediate_address_space";
+      break;
     case wgpu::WGSLLanguageFeatureName::ChromiumTestingUnimplemented:
       name = "chromium_testing_unimplemented";
       break;
@@ -111,6 +123,27 @@ std::unordered_set<std::string> GPU::getWgslLanguageFeatures() {
       break;
     case wgpu::WGSLLanguageFeatureName::ChromiumPrint:
       name = "chromium_print";
+      break;
+    case wgpu::WGSLLanguageFeatureName::TextureAndSamplerLet:
+      name = "texture_and_sampler_let";
+      break;
+    case wgpu::WGSLLanguageFeatureName::SubgroupUniformity:
+      name = "subgroup_uniformity";
+      break;
+    case wgpu::WGSLLanguageFeatureName::TextureFormatsTier1:
+      name = "texture_formats_tier1";
+      break;
+    case wgpu::WGSLLanguageFeatureName::BufferView:
+      name = "buffer_view";
+      break;
+    case wgpu::WGSLLanguageFeatureName::FilteringParameters:
+      name = "filtering_parameters";
+      break;
+    case wgpu::WGSLLanguageFeatureName::SwizzleAssignment:
+      name = "swizzle_assignment";
+      break;
+    case wgpu::WGSLLanguageFeatureName::LinearIndexing:
+      name = "linear_indexing";
       break;
     }
     result.insert(name);

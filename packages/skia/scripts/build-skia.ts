@@ -1,4 +1,5 @@
 import { exit } from "process";
+import fs from "fs";
 import path from "path";
 
 import type {
@@ -152,7 +153,7 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
   const shortPlatform = platformName.replace("apple-", "");
 
   // Create output directory
-  const outputDir = `${PackageRoot}/libs/apple/${shortPlatform}`;
+  const outputDir = `${PackageRoot}/libs/${shortPlatform}`;
   $(`mkdir -p ${outputDir}`);
 
   outputNames.forEach((name) => {
@@ -309,24 +310,161 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
     const arm64ePatchFile = path.join(__dirname, "dawn-arm64e-simulator.patch");
     $(`cd ${SkiaSrc} && git apply ${arm64ePatchFile}`);
 
-    // Fix Dawn ShaderModuleMTL.mm uint32 typo if it exists
-    const shaderModuleFile = `${SkiaSrc}/third_party/externals/dawn/src/dawn/native/metal/ShaderModuleMTL.mm`;
-    $(
-      `sed -i '' 's/uint32(bindingInfo\\.binding)/uint32_t(bindingInfo.binding)/g' ${shaderModuleFile}`
-    );
+    // Remove arm64e arch flags (not available on simulator)
+    {
+      const filePath = `${SkiaSrc}/gn/skia/BUILD.gn`;
+      const search = [
+        `      ]`,
+        `      if (!ios_use_simulator) {`,
+        `        _arch_flags += [`,
+        `          "-arch",`,
+        `          "arm64e",`,
+        `        ]`,
+        `      }`,
+        `    } else if (current_cpu == "x86") {`,
+      ].join("\n");
+      const replace = [`      ]`, `    } else if (current_cpu == "x86") {`].join("\n");
+      const content = fs.readFileSync(filePath, "utf-8");
+      if (!content.includes(search)) {
+        throw new Error(`Patch target not found in ${filePath}`);
+      }
+      fs.writeFileSync(filePath, content.replace(search, replace));
+    }
+    // C++20 is required for Dawn (uses concepts/requires)
+    {
+      const filePath = `${SkiaSrc}/gn/skia/BUILD.gn`;
+      const content = fs.readFileSync(filePath, "utf-8");
+      fs.writeFileSync(
+        filePath,
+        content.replace(
+          `cflags_cc += [ "-std=c++17" ]`,
+          `cflags_cc += [ "-std=c++20" ]`
+        )
+      );
+    }
+    // Fix Dawn ShaderModuleMTL.mm uint32 typo (should be uint32_t)
+    {
+      const filePath = `${SkiaSrc}/third_party/externals/dawn/src/dawn/native/metal/ShaderModuleMTL.mm`;
+      const content = fs.readFileSync(filePath, "utf-8");
+      fs.writeFileSync(
+        filePath,
+        content.replace(/uint32\(bindingInfo\.binding\)/g, "uint32_t(bindingInfo.binding)")
+      );
+    }
+    // Add iOS support to Dawn cmake_utils.py
+    {
+      const filePath = `${SkiaSrc}/third_party/dawn/cmake_utils.py`;
+      let content = fs.readFileSync(filePath, "utf-8");
+      // Add --ios_use_simulator argument
+      content = content.replace(
+        `parser.add_argument(
+      "--enable_rtti", action=argparse.BooleanOptionalAction, help="Enable RTTI.")`,
+        `parser.add_argument(
+      "--enable_rtti", action=argparse.BooleanOptionalAction, help="Enable RTTI.")
+  parser.add_argument(
+      "--ios_use_simulator", action=argparse.BooleanOptionalAction, help="Build for iOS simulator.")`
+      );
+      // Add iOS OS/CPU mapping
+      content = content.replace(
+        `if os == "mac":
+    target_cpu_map = {
+      "arm64": "arm64",
+      "x64": "x86_64",
+    }
+    return "Darwin", target_cpu_map[cpu]
 
-    // Remove PartitionAlloc dependency from Dawn (causes linking errors on Android)
-    // The dawn.gni file conditionally sets dawn_partition_alloc_dir for non-MSVC and non-Mac,
-    // which includes Android. We need to remove this to avoid undefined symbol errors.
-    const dawnGniFile = `${SkiaSrc}/build_overrides/dawn.gni`;
-    $(
-      `sed -i '' '/# PartitionAlloc is an optional dependency:/,$d' ${dawnGniFile}`
-    );
-    console.log("   ✓ Removed PartitionAlloc dependency from dawn.gni");
+  if os == "win":`,
+        `if os == "mac":
+    target_cpu_map = {
+      "arm64": "arm64",
+      "x64": "x86_64",
+    }
+    return "Darwin", target_cpu_map[cpu]
 
+  if os == "ios":
+    target_cpu_map = {
+      "arm64": "arm64",
+      "x64": "x86_64",
+    }
+    return "iOS", target_cpu_map[cpu]
+
+  if os == "win":`
+      );
+      fs.writeFileSync(filePath, content);
+    }
+    // Add iOS support to Dawn build_dawn.py
+    {
+      const filePath = `${SkiaSrc}/third_party/dawn/build_dawn.py`;
+      let content = fs.readFileSync(filePath, "utf-8");
+      content = content.replace(
+        `if target_os == "Darwin" or target_os == "iOS":
+    configure_cmd.append(f"-DCMAKE_OSX_ARCHITECTURES={target_cpu}")
+
+  env = os.environ.copy()`,
+        `if target_os == "Darwin" or target_os == "iOS":
+    configure_cmd.append(f"-DCMAKE_OSX_ARCHITECTURES={target_cpu}")
+
+  if target_os == "iOS":
+    configure_cmd.append("-DTINT_BUILD_CMD_TOOLS=OFF")
+    if args.ios_use_simulator:
+      configure_cmd.append("-DCMAKE_OSX_SYSROOT=iphonesimulator")
+
+  env = os.environ.copy()`
+      );
+      fs.writeFileSync(filePath, content);
+    }
+    // Fix Dawn BUILD.gn for iOS (Cocoa.framework is macOS only)
+    {
+      const filePath = `${SkiaSrc}/third_party/dawn/BUILD.gn`;
+      let content = fs.readFileSync(filePath, "utf-8");
+      content = content.replace(
+        `"Metal.framework",
+      "QuartzCore.framework",
+      "Cocoa.framework",
+    ]
+  }
+}`,
+        `"Metal.framework",
+      "QuartzCore.framework",
+    ]
+    if (is_mac) {
+      frameworks += [ "Cocoa.framework" ]
+    }
+  }
+}`
+      );
+      // Add ios_use_simulator argument passing
+      content = content.replace(
+        `if (is_android) {
+    args += [
+      "--android_ndk_path=" + ndk,
+      "--android_platform=android-" + ndk_api,
+    ]
+  }
+
+  if (dawn_enable_d3d11) {`,
+        `if (is_android) {
+    args += [
+      "--android_ndk_path=" + ndk,
+      "--android_platform=android-" + ndk_api,
+    ]
+  }
+  if (is_ios && ios_use_simulator) {
+    args += [ "--ios_use_simulator" ]
+  }
+
+  if (dawn_enable_d3d11) {`
+      );
+      fs.writeFileSync(filePath, content);
+    }
     console.log("Patches applied successfully");
   }
   $(`rm -rf ${PackageRoot}/libs`);
+
+  if (GRAPHITE) {
+    $(`mkdir -p ${PackageRoot}/libs`);
+    fs.writeFileSync(`${PackageRoot}/libs/.graphite`, "");
+  }
 
   // Build specified platforms and targets
   for (const buildTarget of buildTargets) {

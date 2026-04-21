@@ -64,6 +64,8 @@ export const isFabric = Boolean((global as any)?.nativeFabricUIManager);
 
 export interface CanvasProps extends Omit<ViewProps, "onLayout"> {
   debug?: boolean;
+  /** @deprecated Not supported on Fabric. Use `onSize` or `useCanvasSize()` instead. */
+  onLayout?: ViewProps["onLayout"];
   opaque?: boolean;
   onSize?: SharedValue<SkSize>;
   colorSpace?: "p3" | "srgb";
@@ -80,9 +82,6 @@ export const Canvas = ({
   colorSpace = "p3",
   androidWarmup = false,
   ref,
-  // Here know this is a type error but this is done on purpose to check it at runtime
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
   onLayout,
   ...viewProps
 }: CanvasProps) => {

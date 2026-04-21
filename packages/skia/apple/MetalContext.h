@@ -5,6 +5,7 @@
 
 #include "include/core/SkSurface.h"
 
+#include "include/core/SkColorSpace.h"
 #import <include/gpu/ganesh/GrBackendSurface.h>
 #import <include/gpu/ganesh/GrDirectContext.h>
 #import <include/gpu/ganesh/SkImageGanesh.h>
@@ -45,7 +46,8 @@ public:
     return instance;
   }
 
-  sk_sp<SkSurface> MakeOffscreen(int width, int height) {
+  sk_sp<SkSurface> MakeOffscreen(int width, int height,
+                                 bool useP3ColorSpace = false) {
     auto device = _device;
     auto ctx = new OffscreenRenderContext(device, _directContext, _commandQueue,
                                           width, height);
@@ -56,10 +58,15 @@ public:
     GrBackendTexture backendTexture =
         GrBackendTextures::MakeMtl(width, height, skgpu::Mipmapped::kNo, info);
 
+    sk_sp<SkColorSpace> colorSpace =
+        useP3ColorSpace ? SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
+                                                SkNamedGamut::kDisplayP3)
+                        : nullptr;
+
     // Create a SkSurface from the GrBackendTexture
     auto surface = SkSurfaces::WrapBackendTexture(
         _directContext.get(), backendTexture, kTopLeft_GrSurfaceOrigin, 0,
-        kBGRA_8888_SkColorType, nullptr, nullptr,
+        kBGRA_8888_SkColorType, colorSpace, nullptr,
         [](void *addr) { delete (OffscreenRenderContext *)addr; }, ctx);
 
     return surface;
