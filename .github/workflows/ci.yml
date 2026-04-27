@@ -239,7 +239,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v4
+        uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4
         
       - name: Install Android SDK tools
         run: |
@@ -266,7 +266,7 @@ jobs:
         run: E2E=true yarn start &
 
       - name: Run Android Emulator Tests
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@e89f39f1abbbd05b1113a29cf4db69e7540cae5a # v2
         with:
           api-level: 30
           arch: x86_64
