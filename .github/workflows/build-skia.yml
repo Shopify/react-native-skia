@@ -63,7 +63,7 @@ jobs:
       - name: Create GitHub release
         if: ${{ github.event.inputs.dry_run != 'true' }}
         id: create_release
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -115,7 +115,7 @@ jobs:
           ndk-version: r27c
 
       - name: Setup Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
+        uses: seanmiddleditch/gha-setup-ninja@7e868db0f3406270dd46e1dac26c65f621456723 # master
 
       - name: Setup
         uses: ./.github/actions/setup
@@ -164,7 +164,7 @@ jobs:
 
       - name: Upload binaries to GitHub release - ${{ matrix.artifact_name }}
         if: ${{ github.event.inputs.dry_run != 'true' }}
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
