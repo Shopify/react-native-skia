@@ -37,7 +37,7 @@
   "devDependencies": {
     "eas-cli": "18.4.0",
     "playwright": "1.59.0",
-    "react-native-test-app": "^4.2.0",
+    "react-native-test-app": "5.1.0",
     "turbo": "^2.1.1"
   }
 }
