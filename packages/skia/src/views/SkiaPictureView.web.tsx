@@ -2,6 +2,7 @@
 import React, {
   useRef,
   useEffect,
+  useLayoutEffect,
   useCallback,
   useImperativeHandle,
 } from "react";
@@ -341,7 +342,7 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
   const onLayoutEvent = useCallback(
     (evt: LayoutChangeEvent) => {
       const canvas = canvasRef.current;
-      if (canvas) {
+      if (canvas && !renderer.current) {
         renderer.current =
           props.__destroyWebGLContextAfterRender === true
             ? new StaticWebGLRenderer(canvas, pd)
@@ -410,6 +411,42 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
     };
   }, [tick]);
 
+    // Web fallback: Platform.View's onLayout (driven by react-native-web's
+    // ResizeObserver shim) does not always fire before the first picture
+    // arrives, leaving renderer.current === null and the tick loop draining
+    // redrawRequests without ever painting. Initialize the renderer as soon as
+    // the <canvas> has measurable layout.
+    useLayoutEffect(() => {
+      const canvas = canvasRef.current;
+      if (!canvas || renderer.current) {
+        return;
+      }
+      let cancelled = false;
+      let attempts = 0;
+      const init = () => {
+        if (cancelled || renderer.current) return;
+        if (canvas.clientWidth === 0 || canvas.clientHeight === 0) {
+          if (++attempts < 600) requestAnimationFrame(init);
+          return;
+        }
+        try {
+          renderer.current =
+            props.__destroyWebGLContextAfterRender === true
+              ? new StaticWebGLRenderer(canvas, pd)
+              : new WebGLRenderer(canvas, pd);
+          if (pictureRef.current) {
+            renderer.current.draw(pictureRef.current);
+          }
+        } catch (e) {
+          if (++attempts < 600) requestAnimationFrame(init);
+        }
+      };
+      init();
+      return () => {
+        cancelled = true;
+      };
+    }, [props.__destroyWebGLContextAfterRender]);
+  
   useEffect(() => {
     if (renderer.current && pictureRef.current) {
       renderer.current.draw(pictureRef.current);
