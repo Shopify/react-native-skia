@@ -76,6 +76,13 @@ public:
   JSI_PROPERTY_GET(alphaType) {
     return static_cast<double>(getObject()->alphaType());
   }
+  JSI_PROPERTY_GET(colorSpace) {
+    auto name = skColorSpaceToString(getObject()->colorSpace());
+    if (name.empty()) {
+      return jsi::Value::null();
+    }
+    return jsi::String::createFromUtf8(runtime, name);
+  }
 
   size_t getMemoryPressure() const override {
     return std::max(sizeof(SkImageInfo), kMinMemoryPressure);
@@ -89,6 +96,7 @@ public:
                               JSI_EXPORT_PROP_GET(JsiSkImageInfo, height),
                               JSI_EXPORT_PROP_GET(JsiSkImageInfo, colorType),
                               JSI_EXPORT_PROP_GET(JsiSkImageInfo, alphaType),
+                              JSI_EXPORT_PROP_GET(JsiSkImageInfo, colorSpace),
                               JSI_EXPORT_PROP_GET(JsiSkImageInfo, __typename__))
 };
 } // namespace RNSkia

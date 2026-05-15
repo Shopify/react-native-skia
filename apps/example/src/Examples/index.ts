@@ -30,4 +30,3 @@ export * from "./Video";
 export * from "./Chat";
 export * from "./Pictures";
 export * from "./WebGPU";
-export * from "./HDR";

@@ -1,18 +1,13 @@
 import React, { useMemo } from "react";
 import {
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
   View,
   useWindowDimensions,
 } from "react-native";
-import {
-  Canvas,
-  Fill,
-  Shader,
-  Skia,
-  vec,
-} from "@shopify/react-native-skia";
+import { Canvas, Fill, Shader, Skia, vec } from "@shopify/react-native-skia";
 
 // A deliberately stressful scene:
 // 1. A near-black vertical gradient (0 -> 15/255). 8-bit quantization
@@ -93,11 +88,18 @@ const Panel = ({
 const PANEL_HEIGHT = 320;
 
 export const HDR = () => {
+  if (Platform.OS !== "ios") {
+    return (
+      <View style={[styles.container, styles.notSupported]}>
+        <Text style={styles.label}>iOS only</Text>
+        <Text style={styles.description}>
+          The pixelFormat prop is currently implemented on iOS only.
+        </Text>
+      </View>
+    );
+  }
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-    >
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Panel
         format="bgra8"
         colorSpace="srgb"
@@ -133,6 +135,11 @@ const styles = StyleSheet.create({
   },
   panel: {
     marginBottom: 12,
+  },
+  notSupported: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
   },
   labelRow: {
     paddingHorizontal: 12,

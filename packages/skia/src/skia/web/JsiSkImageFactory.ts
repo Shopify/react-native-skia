@@ -84,6 +84,11 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
   }
 
   MakeImage(info: ImageInfo, data: SkData, bytesPerRow: number) {
+    // CanvasKit only exposes a small set of color spaces (SRGB,
+    // DISPLAY_P3, ADOBE_RGB). The wider identifiers accepted by the
+    // native ImageInfo API ("srgb-linear", "rec2020", "rec2020-linear",
+    // "rec2020-hlg", "rec2020-pq") silently fall back to SRGB here.
+    // Native iOS handles them via JsiSkColorSpaceUtils::skColorSpaceFromString.
     let cs = this.CanvasKit.ColorSpace.SRGB;
     if (
       info.colorSpace === "display-p3" ||

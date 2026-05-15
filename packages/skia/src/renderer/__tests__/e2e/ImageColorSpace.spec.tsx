@@ -33,6 +33,7 @@ describe("Image ColorSpace + 16-bit pixel data", () => {
           height: image.height(),
           colorType: info.colorType,
           alphaType: info.alphaType,
+          colorSpace: info.colorSpace ?? null,
         };
       },
       {
@@ -46,6 +47,11 @@ describe("Image ColorSpace + 16-bit pixel data", () => {
     expect(result!.height).toBe(8);
     expect(result!.colorType).toBe(ColorType.RGBA_F16);
     expect(result!.alphaType).toBe(AlphaType.Premul);
+    // Native iOS round-trips the color space identifier. CanvasKit cannot
+    // surface it from getImageInfo, so we accept null or the matching string.
+    if (result!.colorSpace !== null) {
+      expect(result!.colorSpace).toBe(ColorSpace.DisplayP3Linear);
+    }
   });
 
   it("MakeImage with default 8-bit RGBA_8888 still works (no colorSpace)", async () => {

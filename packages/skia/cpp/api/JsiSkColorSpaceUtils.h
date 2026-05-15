@@ -53,4 +53,40 @@ inline sk_sp<SkColorSpace> skColorSpaceFromString(const std::string &name) {
   return nullptr;
 }
 
+/**
+ * Inverse of skColorSpaceFromString. Compares the SkColorSpace against
+ * the known set of identifiers and returns the matching string, or an
+ * empty string if no match (callers should surface that as
+ * undefined/null on the JS side).
+ */
+inline std::string skColorSpaceToString(const SkColorSpace *cs) {
+  if (cs == nullptr) {
+    return "";
+  }
+  static const sk_sp<SkColorSpace> kSrgb = SkColorSpace::MakeSRGB();
+  static const sk_sp<SkColorSpace> kSrgbLinear = SkColorSpace::MakeSRGBLinear();
+  static const sk_sp<SkColorSpace> kP3 = SkColorSpace::MakeRGB(
+      SkNamedTransferFn::kSRGB, SkNamedGamut::kDisplayP3);
+  static const sk_sp<SkColorSpace> kP3Linear = SkColorSpace::MakeRGB(
+      SkNamedTransferFn::kLinear, SkNamedGamut::kDisplayP3);
+  static const sk_sp<SkColorSpace> kRec2020 = SkColorSpace::MakeRGB(
+      SkNamedTransferFn::kRec2020, SkNamedGamut::kRec2020);
+  static const sk_sp<SkColorSpace> kRec2020Linear = SkColorSpace::MakeRGB(
+      SkNamedTransferFn::kLinear, SkNamedGamut::kRec2020);
+  static const sk_sp<SkColorSpace> kRec2020Hlg = SkColorSpace::MakeRGB(
+      SkNamedTransferFn::kHLG, SkNamedGamut::kRec2020);
+  static const sk_sp<SkColorSpace> kRec2020Pq = SkColorSpace::MakeRGB(
+      SkNamedTransferFn::kPQ, SkNamedGamut::kRec2020);
+
+  if (SkColorSpace::Equals(cs, kSrgb.get())) return "srgb";
+  if (SkColorSpace::Equals(cs, kSrgbLinear.get())) return "srgb-linear";
+  if (SkColorSpace::Equals(cs, kP3.get())) return "display-p3";
+  if (SkColorSpace::Equals(cs, kP3Linear.get())) return "display-p3-linear";
+  if (SkColorSpace::Equals(cs, kRec2020.get())) return "rec2020";
+  if (SkColorSpace::Equals(cs, kRec2020Linear.get())) return "rec2020-linear";
+  if (SkColorSpace::Equals(cs, kRec2020Hlg.get())) return "rec2020-hlg";
+  if (SkColorSpace::Equals(cs, kRec2020Pq.get())) return "rec2020-pq";
+  return "";
+}
+
 } // namespace RNSkia
