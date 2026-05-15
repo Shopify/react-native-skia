@@ -37,6 +37,10 @@ public class SkiaPictureViewManager extends SkiaBaseViewManager<SkiaPictureView>
         // nothing to do here at the moment
     }
 
+    public void setPixelFormat(SkiaPictureView view, @Nullable String value) {
+        // iOS-only for now. Codegen regen will turn this into an @Override.
+    }
+
     @Override
     public void setAndroidWarmup(SkiaPictureView view, boolean value) {
         view.setAndroidWarmup(value);

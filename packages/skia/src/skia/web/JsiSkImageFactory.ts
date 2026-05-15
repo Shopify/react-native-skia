@@ -84,11 +84,18 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
   }
 
   MakeImage(info: ImageInfo, data: SkData, bytesPerRow: number) {
+    let cs = this.CanvasKit.ColorSpace.SRGB;
+    if (
+      info.colorSpace === "display-p3" ||
+      info.colorSpace === "display-p3-linear"
+    ) {
+      cs = this.CanvasKit.ColorSpace.DISPLAY_P3;
+    }
     // see toSkImageInfo() from canvaskit
     const image = this.CanvasKit.MakeImage(
       {
         alphaType: getEnum(this.CanvasKit, "AlphaType", info.alphaType),
-        colorSpace: this.CanvasKit.ColorSpace.SRGB,
+        colorSpace: cs,
         colorType: getEnum(this.CanvasKit, "ColorType", info.colorType),
         height: info.height,
         width: info.width,

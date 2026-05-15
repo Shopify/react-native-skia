@@ -16,6 +16,11 @@ export const HomeScreen = () => {
         testId="Tests"
       />
       <HomeScreenButton
+        title="🌈 16-bit / HDR"
+        description="Banding, wide gamut, and EDR comparison"
+        route="HDR"
+      />
+      <HomeScreenButton
         title="API"
         description="API examples"
         route="API"

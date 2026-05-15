@@ -5,11 +5,13 @@
 
 #include <jsi/jsi.h>
 
+#include "JsiSkColorSpaceUtils.h"
 #include "JsiSkHostObjects.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#include "include/core/SkColorSpace.h"
 #include "include/core/SkImageInfo.h"
 
 #pragma clang diagnostic pop
@@ -40,9 +42,15 @@ public:
           object.getProperty(runtime, "colorType").asNumber());
       auto alphaType = static_cast<SkAlphaType>(
           object.getProperty(runtime, "alphaType").asNumber());
-      // TODO: color space not supported yet
-      return std::make_shared<SkImageInfo>(
-          SkImageInfo::Make(width, height, colorType, alphaType));
+      sk_sp<SkColorSpace> colorSpace = nullptr;
+      if (object.hasProperty(runtime, "colorSpace")) {
+        auto cs = object.getProperty(runtime, "colorSpace");
+        if (cs.isString()) {
+          colorSpace = skColorSpaceFromString(cs.asString(runtime).utf8(runtime));
+        }
+      }
+      return std::make_shared<SkImageInfo>(SkImageInfo::Make(
+          width, height, colorType, alphaType, std::move(colorSpace)));
     }
   }
 

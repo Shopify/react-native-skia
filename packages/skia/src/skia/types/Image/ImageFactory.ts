@@ -1,5 +1,6 @@
 import type { SkData } from "../Data";
 import type { NativeBuffer } from "../NativeBuffer";
+import type { ColorSpaceValue } from "../Surface/SurfaceFactory";
 
 import type { ColorType } from "./ColorType";
 import type { SkImage } from "./Image";
@@ -13,9 +14,14 @@ export enum AlphaType {
 
 export interface ImageInfo {
   alphaType: AlphaType;
-  // TODO: add support for color space
-  // colorSpace: ColorSpace;
   colorType: ColorType;
+  /**
+   * Optional color space identifier for the pixel data.
+   * Defaults to the device color space (no tagging) when omitted.
+   * Useful when constructing wide gamut or high bit depth images
+   * (e.g. RGBA_F16 in `display-p3-linear`).
+   */
+  colorSpace?: ColorSpaceValue;
   height: number;
   width: number;
 }

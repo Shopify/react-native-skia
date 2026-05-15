@@ -35,6 +35,7 @@ import {
   LiquidGlass,
   Pictures,
   WebGPU,
+  HDR,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
@@ -75,6 +76,7 @@ const linking: LinkingOptions<StackParamList> = {
       Chat: "chat",
       Pictures: "pictures",
       WebGPU: "webgpu",
+      HDR: "hdr",
     },
   },
   prefixes: ["rnskia://"],
@@ -242,6 +244,13 @@ const App = () => {
               component={WebGPU}
               options={{
                 header: () => null,
+              }}
+            />
+            <Stack.Screen
+              name="HDR"
+              component={HDR}
+              options={{
+                title: "16-bit / HDR",
               }}
             />
           </Stack.Navigator>

@@ -2,6 +2,7 @@
 
 #import "RNSkPlatformContext.h"
 #import "RNSkView.h"
+#import "WindowPixelFormat.h"
 
 #import <MetalKit/MetalKit.h>
 #import <QuartzCore/CAMetalLayer.h>
@@ -28,6 +29,7 @@ public:
 
   void setSize(int width, int height);
   void setUseP3ColorSpace(bool useP3ColorSpace);
+  void setPixelFormat(RNSkia::WindowPixelFormat pixelFormat);
   CALayer *getLayer();
 
 private:
@@ -38,4 +40,5 @@ private:
   CAMetalLayer *_layer;
 #pragma clang diagnostic pop
   bool _useP3ColorSpace = true;
+  RNSkia::WindowPixelFormat _pixelFormat = RNSkia::WindowPixelFormat::BGRA8;
 };
