@@ -125,7 +125,7 @@
     "ts-jest": "29.4.3",
     "tsx": "^4.21.0",
     "typescript": "^5.2.2",
-    "ws": "8.18.0"
+    "ws": "8.20.1"
   },
   "dependencies": {
     "canvaskit-wasm": "0.41.0",
