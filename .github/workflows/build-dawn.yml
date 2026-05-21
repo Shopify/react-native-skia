@@ -117,6 +117,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_SHARED_LIBS=OFF \
             -DDAWN_BUILD_MONOLITHIC_LIBRARY=SHARED \
+            -DDAWN_BUILD_PROTOBUF=OFF \
             -DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON \
             -DCMAKE_EXE_LINKER_FLAGS="-llog" \
             -DCMAKE_SHARED_LINKER_FLAGS="-llog -Wl,-z,max-page-size=16384"
@@ -200,7 +201,8 @@ jobs:
             -C externals/dawn/.github/workflows/dawn-ci.cmake \
             -DCMAKE_TOOLCHAIN_FILE=build-tools/apple.toolchain.cmake \
             ${{ matrix.cmake_args }} \
-            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_BUILD_TYPE=Release \
+            -DDAWN_BUILD_PROTOBUF=OFF
           ninja -C ${{ matrix.output_dir }}
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
