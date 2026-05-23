@@ -61,7 +61,7 @@
 #include "JsiSkiaContext.h"
 #include "JsiSkottieFactory.h"
 #include "JsiVideo.h"
-#include "recorder/JsiRecorder.h"
+#include "api/recorder/JsiRecorder.h"
 
 namespace RNSkia {
 
