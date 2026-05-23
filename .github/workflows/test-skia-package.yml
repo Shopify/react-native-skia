@@ -37,6 +37,11 @@ on:
         required: false
         type: boolean
         default: true
+      ios_use_frameworks:
+        description: 'iOS framework linkage: "dynamic" (default) or "static"'
+        required: false
+        type: string
+        default: 'dynamic'
 
 jobs:
   test-skia-ios:
@@ -129,10 +134,24 @@ jobs:
           echo "Installing expo-dev-client..."
           yarn expo install expo-dev-client
 
+      - name: Enable static frameworks (iOS)
+        if: inputs.ios_use_frameworks == 'static'
+        working-directory: /Users/runner/skia-test-app/my-app
+        run: |
+          echo "Configuring expo-build-properties for useFrameworks: 'static'..."
+          yarn expo install expo-build-properties
+          node -e "
+            const fs = require('fs');
+            const cfg = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+            cfg.expo.plugins = cfg.expo.plugins || [];
+            cfg.expo.plugins.push(['expo-build-properties', { ios: { useFrameworks: 'static' } }]);
+            fs.writeFileSync('app.json', JSON.stringify(cfg, null, 2));
+          "
+
       - name: Prebuild native directories
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
-          echo "Generating native iOS directory..."
+          echo "Generating native iOS directory (linkage: ${{ inputs.ios_use_frameworks }})..."
           yarn expo prebuild --platform ios
 
       - name: Install iOS dependencies
@@ -188,6 +207,7 @@ jobs:
           echo "✓ Created Expo app with Skia template"
           echo "✓ Installed @shopify/react-native-skia@${{ inputs.skia_version }}"
           echo "✓ Installed expo-dev-client"
+          echo "✓ Framework linkage: ${{ inputs.ios_use_frameworks }}"
           echo "✓ Built and ran iOS app on ${{ inputs.simulator_device }}"
           echo "================================================================"
 
