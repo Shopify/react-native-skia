@@ -7,7 +7,7 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkHostObjects.h"
-#include "third_party/CSSColorParser.h"
+#include "api/third_party/CSSColorParser.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
