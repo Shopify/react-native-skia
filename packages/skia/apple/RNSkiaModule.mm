@@ -35,11 +35,13 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(install) {
     // Already initialized, ignore call.
     return @true;
   }
-  RCTCxxBridge *cxxBridge = (RCTCxxBridge *)self.bridge;
+#ifndef RCT_DISABLE_LEGACY_ARCH
   if (!jsInvoker) {
+    RCTCxxBridge *cxxBridge = (RCTCxxBridge *)self.bridge;
     jsInvoker = cxxBridge.jsCallInvoker;
   }
-  skiaManager = [[SkiaManager alloc] initWithBridge:cxxBridge
+#endif
+  skiaManager = [[SkiaManager alloc] initWithBridge:self.bridge
                                           jsInvoker:jsInvoker];
   return @true;
 }
