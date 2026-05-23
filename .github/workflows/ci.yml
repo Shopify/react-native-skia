@@ -117,6 +117,16 @@ jobs:
       test_android: true
       test_web: true
 
+  test-package-e2e-static-frameworks:
+    needs: build-library
+    uses: ./.github/workflows/test-skia-package.yml
+    with:
+      skia_version: artifact:${{ needs.build-library.outputs.run_id }}
+      test_ios: true
+      test_android: false
+      test_web: false
+      ios_use_frameworks: static
+
   build-windows-library:
     runs-on: windows-latest
     steps:
