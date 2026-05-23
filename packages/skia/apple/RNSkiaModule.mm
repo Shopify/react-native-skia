@@ -41,6 +41,10 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(install) {
     jsInvoker = cxxBridge.jsCallInvoker;
   }
 #endif
+  if (!jsInvoker) {
+    NSLog(@"[RNSkiaModule] Failed to install SkiaManager: jsInvoker is not initialized.");
+    return @false;
+  }
   skiaManager = [[SkiaManager alloc] initWithBridge:self.bridge
                                           jsInvoker:jsInvoker];
   return @true;
