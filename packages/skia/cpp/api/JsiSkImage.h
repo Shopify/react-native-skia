@@ -9,7 +9,7 @@
 #include "JsiSkImageInfo.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkShader.h"
-#include "third_party/base64.h"
+#include "api/third_party/base64.h"
 
 #include "JsiTextureInfo.h"
 #include "RNSkTypedArray.h"
