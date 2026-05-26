@@ -162,10 +162,10 @@ jobs:
           pod install --repo-update
 
       - name: Disable dependency analysis for Expo Dev Launcher script
-        working-directory: apps/example
+        working-directory: /Users/runner/skia-test-app/my-app
         run: |
           ruby <<'RUBY'
-          project_file = "ios/ReactTestApp.xcodeproj/project.pbxproj"
+          project_file = "ios/myapp.xcodeproj/project.pbxproj"
           content = File.read(project_file)
           marker = 'name = "[Expo Dev Launcher] Strip Local Network Keys for Release";'
 
