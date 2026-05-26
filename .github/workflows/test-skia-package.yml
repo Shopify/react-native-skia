@@ -119,8 +119,8 @@ jobs:
       - name: Install compatible Worklets version
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
-          echo "Installing react-native-worklets@^0.7.1 for Reanimated compatibility..."
-          yarn add react-native-worklets@^0.7.1
+          echo "Installing react-native-worklets@^0.8.0 for Reanimated compatibility..."
+          yarn add react-native-worklets@^0.8.0
 
       - name: Install TypeScript dependencies
         working-directory: /Users/runner/skia-test-app/my-app
@@ -297,8 +297,8 @@ jobs:
       - name: Install compatible Worklets version
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
-          echo "Installing react-native-worklets@^0.7.1 for Reanimated compatibility..."
-          yarn add react-native-worklets@^0.7.1
+          echo "Installing react-native-worklets@^0.8.0 for Reanimated compatibility..."
+          yarn add react-native-worklets@^0.8.0
 
       - name: Install TypeScript dependencies
         working-directory: /Users/runner/skia-test-app/my-app
@@ -447,8 +447,8 @@ jobs:
       - name: Install compatible Worklets version
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
-          echo "Installing react-native-worklets@^0.7.1 for Reanimated compatibility..."
-          yarn add react-native-worklets@^0.7.1
+          echo "Installing react-native-worklets@^0.8.0 for Reanimated compatibility..."
+          yarn add react-native-worklets@^0.8.0
 
       - name: Install TypeScript dependencies
         working-directory: /Users/runner/skia-test-app/my-app
