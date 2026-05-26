@@ -198,6 +198,21 @@ jobs:
           echo "Building and running iOS app on simulator: ${{ inputs.simulator_device }}..."
           yarn expo run:ios --device "${{ inputs.simulator_device }}"
 
+      - name: Dump xcodebuild log on failure
+        if: failure()
+        run: |
+          echo "Searching for xcactivitylog files in DerivedData..."
+          LOG=$(find ~/Library/Developer/Xcode/DerivedData -name '*.xcactivitylog' -print0 \
+            | xargs -0 ls -t 2>/dev/null | head -n 1)
+          if [ -z "$LOG" ]; then
+            echo "No xcactivitylog found."
+            exit 0
+          fi
+          echo "Dumping: $LOG"
+          echo "================================================================"
+          gunzip -c "$LOG" | tr -d '\0' | tail -c 200000
+          echo "================================================================"
+
       - name: Wait for app to launch
         run: |
           echo "Waiting for app to launch and stabilize..."
