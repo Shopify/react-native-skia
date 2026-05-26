@@ -63,6 +63,14 @@ jobs:
           corepack enable
           yarn --version
 
+      - name: Select latest Xcode
+        run: |
+          LATEST_XCODE=$(ls -d /Applications/Xcode_*.app | sort -V | tail -n 1)
+          echo "Selecting: $LATEST_XCODE"
+          sudo xcode-select -s "$LATEST_XCODE/Contents/Developer"
+          xcodebuild -version
+          swift --version
+
       - name: List available simulators
         run: xcrun simctl list devices
 
