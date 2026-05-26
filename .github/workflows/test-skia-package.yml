@@ -192,54 +192,29 @@ jobs:
           yarn expo start --dev-client &
           sleep 10
 
-      - name: Build and run iOS app
+      - name: Build iOS app (via xcodebuild for full diagnostics)
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
-          echo "Building and running iOS app on simulator: ${{ inputs.simulator_device }}..."
-          yarn expo run:ios --device "${{ inputs.simulator_device }}"
+          set -o pipefail
+          echo "Building iOS app on simulator: ${{ inputs.simulator_device }}..."
+          xcodebuild \
+            -workspace ios/myapp.xcworkspace \
+            -configuration Debug \
+            -scheme myapp \
+            -destination "platform=iOS Simulator,name=${{ inputs.simulator_device }}" \
+            -resultBundlePath /tmp/build.xcresult \
+            COCOAPODS_PARALLEL_CODE_SIGN=true \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            build
 
-      - name: Dump xcodebuild log on failure
+      - name: Dump xcresult on failure
         if: failure()
         run: |
-          set +e
-          BUILD_DIR=$(find ~/Library/Developer/Xcode/DerivedData -type d -path '*/Logs/Build' | head -n 1)
-          echo "Build log dir: $BUILD_DIR"
-          ls -la "$BUILD_DIR" || true
-          echo
-
-          LOG=$(ls -t "$BUILD_DIR"/*.xcactivitylog 2>/dev/null | head -n 1)
-          if [ -n "$LOG" ]; then
-            echo "=== xcactivitylog: $LOG ==="
-            file "$LOG"
-            python3 - "$LOG" <<'PY'
-          import gzip, sys
-          path = sys.argv[1]
-          try:
-              with gzip.open(path, 'rb') as f:
-                  data = bytearray()
-                  while True:
-                      try:
-                          chunk = f.read(65536)
-                      except (OSError, EOFError) as e:
-                          sys.stderr.write(f"(decompression stopped: {e})\n")
-                          break
-                      if not chunk:
-                          break
-                      data.extend(chunk)
-          except Exception as e:
-              sys.stderr.write(f"Could not open as gzip: {e}\n")
-              with open(path, 'rb') as f:
-                  data = f.read()
-          text = data.replace(b'\x00', b'').decode('utf-8', errors='replace')
-          sys.stdout.write(text[-200000:])
-          PY
-            echo
-          fi
-
-          RESULT=$(find ~/Library/Developer/Xcode/DerivedData -name '*.xcresult' -type d | head -n 1)
-          if [ -n "$RESULT" ]; then
-            echo "=== xcresulttool: $RESULT ==="
-            xcrun xcresulttool get build-results --path "$RESULT" 2>&1 | tail -c 200000 || true
+          if [ -d /tmp/build.xcresult ]; then
+            echo "=== xcresulttool build-results ==="
+            xcrun xcresulttool get build-results --path /tmp/build.xcresult 2>&1 | tail -c 200000 || true
+          else
+            echo "No xcresult bundle at /tmp/build.xcresult"
           fi
 
       - name: Wait for app to launch
