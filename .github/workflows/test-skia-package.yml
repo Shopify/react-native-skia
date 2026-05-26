@@ -165,33 +165,24 @@ jobs:
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
           ruby <<'RUBY'
-          project_file = "ios/myapp.xcodeproj/project.pbxproj"
-          content = File.read(project_file)
-          marker = 'name = "[Expo Dev Launcher] Strip Local Network Keys for Release";'
+          require 'xcodeproj'
 
-          abort("Expo Dev Launcher script phase not found") unless content.include?(marker)
+          target_name = '[Expo Dev Launcher] Strip Local Network Keys for Release'
+          project = Xcodeproj::Project.open('ios/myapp.xcodeproj')
+          patched = 0
 
-          pattern = /
-            (name = "\[Expo Dev Launcher\] Strip Local Network Keys for Release";\n
-            [\s\S]*?
-            shellScript = .*?;\n)
-            ([\s\S]*?)
-            (\t\t};)
-          /x
-
-          updated = content.gsub(pattern) do
-            header = Regexp.last_match(1)
-            middle = Regexp.last_match(2)
-            footer = Regexp.last_match(3)
-
-            if middle.include?("alwaysOutOfDate = 1;")
-              Regexp.last_match(0)
-            else
-              "#{header}\t\t\talwaysOutOfDate = 1;\n#{middle}#{footer}"
+          project.targets.each do |target|
+            target.shell_script_build_phases.each do |phase|
+              next unless phase.name == target_name
+              phase.always_out_of_date = '1'
+              patched += 1
+              puts "Patched '#{phase.name}' on target '#{target.name}'"
             end
           end
 
-          File.write(project_file, updated)
+          abort("Expo Dev Launcher script phase not found") if patched.zero?
+          project.save
+          puts "Saved pbxproj with #{patched} patched script phase(s)"
           RUBY
 
       - name: Start Metro bundler
