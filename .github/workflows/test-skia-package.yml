@@ -161,6 +161,39 @@ jobs:
           cd ios
           pod install --repo-update
 
+      - name: Disable dependency analysis for Expo Dev Launcher script
+        working-directory: apps/example
+        run: |
+          ruby <<'RUBY'
+          project_file = "ios/ReactTestApp.xcodeproj/project.pbxproj"
+          content = File.read(project_file)
+          marker = 'name = "[Expo Dev Launcher] Strip Local Network Keys for Release";'
+
+          abort("Expo Dev Launcher script phase not found") unless content.include?(marker)
+
+          pattern = /
+            (name = "\[Expo Dev Launcher\] Strip Local Network Keys for Release";\n
+            [\s\S]*?
+            shellScript = .*?;\n)
+            ([\s\S]*?)
+            (\t\t};)
+          /x
+
+          updated = content.gsub(pattern) do
+            header = Regexp.last_match(1)
+            middle = Regexp.last_match(2)
+            footer = Regexp.last_match(3)
+
+            if middle.include?("alwaysOutOfDate = 1;")
+              Regexp.last_match(0)
+            else
+              "#{header}\t\t\talwaysOutOfDate = 1;\n#{middle}#{footer}"
+            end
+          end
+
+          File.write(project_file, updated)
+          RUBY
+
       - name: Start Metro bundler
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
