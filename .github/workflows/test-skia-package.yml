@@ -161,6 +161,21 @@ jobs:
           cd ios
           pod install --repo-update
 
+      - name: Verify Release iphoneos build (static frameworks)
+        if: inputs.ios_use_frameworks == 'static'
+        working-directory: /Users/runner/skia-test-app/my-app
+        run: |
+          WORKSPACE=$(ls ios/*.xcworkspace | head -n 1)
+          SCHEME=$(basename "$WORKSPACE" .xcworkspace)
+          echo "Compiling $WORKSPACE (scheme: $SCHEME) for Release + iphoneos..."
+          xcodebuild build \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO
+
       - name: Start Metro bundler
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
