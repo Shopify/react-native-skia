@@ -124,12 +124,6 @@ jobs:
           echo "Installed React Native Skia version:"
           yarn list @shopify/react-native-skia --depth=0
 
-      - name: Install compatible Worklets version
-        working-directory: /Users/runner/skia-test-app/my-app
-        run: |
-          echo "Installing react-native-worklets@^0.8.0 for Reanimated compatibility..."
-          yarn add react-native-worklets@^0.8.0
-
       - name: Install TypeScript dependencies
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
@@ -302,12 +296,6 @@ jobs:
           echo "Installed React Native Skia version:"
           yarn list @shopify/react-native-skia --depth=0
 
-      - name: Install compatible Worklets version
-        working-directory: /Users/runner/skia-test-app/my-app
-        run: |
-          echo "Installing react-native-worklets@^0.8.0 for Reanimated compatibility..."
-          yarn add react-native-worklets@^0.8.0
-
       - name: Install TypeScript dependencies
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
@@ -451,12 +439,6 @@ jobs:
         run: |
           echo "Installed React Native Skia version:"
           yarn list @shopify/react-native-skia --depth=0
-
-      - name: Install compatible Worklets version
-        working-directory: /Users/runner/skia-test-app/my-app
-        run: |
-          echo "Installing react-native-worklets@^0.8.0 for Reanimated compatibility..."
-          yarn add react-native-worklets@^0.8.0
 
       - name: Install TypeScript dependencies
         working-directory: /Users/runner/skia-test-app/my-app
