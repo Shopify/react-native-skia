@@ -169,30 +169,6 @@ jobs:
           cd ios
           pod install --repo-update
 
-      - name: Disable dependency analysis for Expo Dev Launcher script
-        working-directory: /Users/runner/skia-test-app/my-app
-        run: |
-          ruby <<'RUBY'
-          require 'xcodeproj'
-
-          target_name = '[Expo Dev Launcher] Strip Local Network Keys for Release'
-          project = Xcodeproj::Project.open('ios/myapp.xcodeproj')
-          patched = 0
-
-          project.targets.each do |target|
-            target.shell_script_build_phases.each do |phase|
-              next unless phase.name == target_name
-              phase.always_out_of_date = '1'
-              patched += 1
-              puts "Patched '#{phase.name}' on target '#{target.name}'"
-            end
-          end
-
-          abort("Expo Dev Launcher script phase not found") if patched.zero?
-          project.save
-          puts "Saved pbxproj with #{patched} patched script phase(s)"
-          RUBY
-
       - name: Start Metro bundler
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
@@ -200,30 +176,11 @@ jobs:
           yarn expo start --dev-client &
           sleep 10
 
-      - name: Build iOS app (via xcodebuild for full diagnostics)
+      - name: Build and run iOS app
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
-          set -o pipefail
-          echo "Building iOS app on simulator: ${{ inputs.simulator_device }}..."
-          xcodebuild \
-            -workspace ios/myapp.xcworkspace \
-            -configuration Debug \
-            -scheme myapp \
-            -destination "platform=iOS Simulator,name=${{ inputs.simulator_device }}" \
-            -resultBundlePath /tmp/build.xcresult \
-            COCOAPODS_PARALLEL_CODE_SIGN=true \
-            COMPILER_INDEX_STORE_ENABLE=NO \
-            build
-
-      - name: Dump xcresult on failure
-        if: failure()
-        run: |
-          if [ -d /tmp/build.xcresult ]; then
-            echo "=== xcresulttool build-results ==="
-            xcrun xcresulttool get build-results --path /tmp/build.xcresult 2>&1 | tail -c 200000 || true
-          else
-            echo "No xcresult bundle at /tmp/build.xcresult"
-          fi
+          echo "Building and running iOS app on simulator: ${{ inputs.simulator_device }}..."
+          yarn expo run:ios --device "${{ inputs.simulator_device }}"
 
       - name: Wait for app to launch
         run: |
