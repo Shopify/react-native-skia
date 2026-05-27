@@ -63,6 +63,14 @@ jobs:
           corepack enable
           yarn --version
 
+      - name: Select latest Xcode
+        run: |
+          LATEST_XCODE=$(ls -d /Applications/Xcode_*.app | sort -V | tail -n 1)
+          echo "Selecting: $LATEST_XCODE"
+          sudo xcode-select -s "$LATEST_XCODE/Contents/Developer"
+          xcodebuild -version
+          swift --version
+
       - name: List available simulators
         run: xcrun simctl list devices
 
@@ -115,12 +123,6 @@ jobs:
         run: |
           echo "Installed React Native Skia version:"
           yarn list @shopify/react-native-skia --depth=0
-
-      - name: Install compatible Worklets version
-        working-directory: /Users/runner/skia-test-app/my-app
-        run: |
-          echo "Installing react-native-worklets@^0.7.1 for Reanimated compatibility..."
-          yarn add react-native-worklets@^0.7.1
 
       - name: Install TypeScript dependencies
         working-directory: /Users/runner/skia-test-app/my-app
@@ -294,12 +296,6 @@ jobs:
           echo "Installed React Native Skia version:"
           yarn list @shopify/react-native-skia --depth=0
 
-      - name: Install compatible Worklets version
-        working-directory: /Users/runner/skia-test-app/my-app
-        run: |
-          echo "Installing react-native-worklets@^0.7.1 for Reanimated compatibility..."
-          yarn add react-native-worklets@^0.7.1
-
       - name: Install TypeScript dependencies
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
@@ -443,12 +439,6 @@ jobs:
         run: |
           echo "Installed React Native Skia version:"
           yarn list @shopify/react-native-skia --depth=0
-
-      - name: Install compatible Worklets version
-        working-directory: /Users/runner/skia-test-app/my-app
-        run: |
-          echo "Installing react-native-worklets@^0.7.1 for Reanimated compatibility..."
-          yarn add react-native-worklets@^0.7.1
 
       - name: Install TypeScript dependencies
         working-directory: /Users/runner/skia-test-app/my-app
