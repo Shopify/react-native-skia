@@ -168,7 +168,13 @@ jobs:
             adb shell monkey -p com.microsoft.reacttestapp 1
 
             # Run tests
-            cd packages/skia && CI=true yarn test -i e2e/Path --testPathIgnorePatterns Paragraphs
+            # On Graphite we run the Path render tests plus the WebGPU specs.
+            # The WebGPU specs (ArrayBuffer, ComputeShader, ErrorScope,
+            # ImageBitmapBounds) are pure surface.eval round-trips that assert on
+            # returned values, so they don't hit the Skia paths that still crash
+            # on Graphite (atlas API, offscreen surfaces, image readPixels) and
+            # don't depend on backend-specific snapshot baselines.
+            cd packages/skia && CI=true yarn test -i "e2e/(Path|ArrayBuffer|ComputeShader|ErrorScope|ImageBitmapBounds)" --testPathIgnorePatterns Paragraphs
 
       - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.0
         if: failure()
@@ -228,4 +234,10 @@ jobs:
 
       - name: Run e2e tests
         working-directory: packages/skia
-        run: CI=true E2E=true yarn test -i Paths
+        # On Graphite we run the Paths render test plus the WebGPU specs. The
+        # WebGPU specs (ArrayBuffer, ComputeShader, ErrorScope, ImageBitmapBounds)
+        # are pure surface.eval round-trips that assert on returned values, so
+        # they don't hit the Skia paths that still crash on Graphite (atlas API,
+        # offscreen surfaces, image readPixels) and don't depend on
+        # backend-specific snapshot baselines.
+        run: CI=true E2E=true yarn test -i "e2e/(Paths|ArrayBuffer|ComputeShader|ErrorScope|ImageBitmapBounds)"
