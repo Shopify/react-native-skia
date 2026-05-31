@@ -10,10 +10,10 @@
 
 #include "jsi2/NativeObject.h"
 
-#include "rnwgpu/Canvas.h"
 #include "GPU.h"
-#include "descriptors/GPUCanvasConfiguration.h"
 #include "GPUTexture.h"
+#include "descriptors/GPUCanvasConfiguration.h"
+#include "rnwgpu/Canvas.h"
 #include "rnwgpu/SurfaceRegistry.h"
 
 namespace rnwgpu {

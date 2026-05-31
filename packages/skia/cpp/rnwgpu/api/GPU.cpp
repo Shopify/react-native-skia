@@ -124,6 +124,27 @@ std::unordered_set<std::string> GPU::getWgslLanguageFeatures() {
     case wgpu::WGSLLanguageFeatureName::ChromiumPrint:
       name = "chromium_print";
       break;
+    case wgpu::WGSLLanguageFeatureName::TextureAndSamplerLet:
+      name = "texture_and_sampler_let";
+      break;
+    case wgpu::WGSLLanguageFeatureName::SubgroupUniformity:
+      name = "subgroup_uniformity";
+      break;
+    case wgpu::WGSLLanguageFeatureName::TextureFormatsTier1:
+      name = "texture_formats_tier1";
+      break;
+    case wgpu::WGSLLanguageFeatureName::BufferView:
+      name = "buffer_view";
+      break;
+    case wgpu::WGSLLanguageFeatureName::FilteringParameters:
+      name = "filtering_parameters";
+      break;
+    case wgpu::WGSLLanguageFeatureName::SwizzleAssignment:
+      name = "swizzle_assignment";
+      break;
+    case wgpu::WGSLLanguageFeatureName::LinearIndexing:
+      name = "linear_indexing";
+      break;
     }
     result.insert(name);
   }

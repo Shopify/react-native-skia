@@ -241,7 +241,7 @@ template <> struct JSIConverter<rnwgpu::async::AsyncTaskHandle> {
 // jsi::Function <> Function
 template <> struct JSIConverter<jsi::Function> {
   static jsi::Function fromJSI(jsi::Runtime &runtime, const jsi::Value &arg,
-                                bool outOfBound) {
+                               bool outOfBound) {
     return arg.asObject(runtime).asFunction(runtime);
   }
   static jsi::Value toJSI(jsi::Runtime &runtime, jsi::Function &&arg) {

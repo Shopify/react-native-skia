@@ -114,7 +114,6 @@ public:
     wgpu::SharedTextureMemoryAHardwareBufferDescriptor platformDesc;
     auto ahb = (AHardwareBuffer *)buffer;
     platformDesc.handle = ahb;
-    platformDesc.useExternalFormat = true;
     AHardwareBuffer_Desc adesc;
     AHardwareBuffer_describe(ahb, &adesc);
     int width = adesc.width;
@@ -164,15 +163,14 @@ public:
 
   // Create offscreen surface
   sk_sp<SkSurface> MakeOffscreen(int width, int height,
-                                  bool useP3ColorSpace = false) {
+                                 bool useP3ColorSpace = false) {
     sk_sp<SkColorSpace> colorSpace =
-        useP3ColorSpace
-            ? SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
-                                    SkNamedGamut::kDisplayP3)
-            : nullptr;
-    SkImageInfo info = SkImageInfo::Make(
-        width, height, DawnUtils::PreferedColorType, kPremul_SkAlphaType,
-        colorSpace);
+        useP3ColorSpace ? SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
+                                                SkNamedGamut::kDisplayP3)
+                        : nullptr;
+    SkImageInfo info =
+        SkImageInfo::Make(width, height, DawnUtils::PreferedColorType,
+                          kPremul_SkAlphaType, colorSpace);
     sk_sp<SkSurface> surface = SkSurfaces::RenderTarget(getRecorder(), info);
 
     if (!surface) {
@@ -187,6 +185,28 @@ public:
 
   // Get the wgpu::Device for WebGPU bindings
   wgpu::Device getWGPUDevice() { return backendContext.fDevice; }
+
+  // Create a secondary Dawn device from the same adapter.
+  // Has its own command queue and does NOT enable
+  // ImplicitDeviceSynchronization, so it won't contend with the primary
+  // rendering device's mutex. Safe for concurrent GPU work (e.g. ML inference)
+  // alongside Skia rendering.
+  wgpu::Device createSecondaryDevice() {
+    auto adapter = DawnUtils::getMatchedAdapter(instance.get());
+
+    std::vector<wgpu::FeatureName> features = {
+        wgpu::FeatureName::BufferMapExtendedUsages,
+#ifdef __APPLE__
+        wgpu::FeatureName::SharedTextureMemoryIOSurface,
+        wgpu::FeatureName::DawnMultiPlanarFormats,
+    // Note: SharedFenceMTLSharedEvent intentionally NOT enabled — it causes
+    // EndAccess to encode fence signals that crash with "uncommitted encoder".
+    // IOSurface data is already written by the camera before we read it.
+#endif
+    };
+
+    return DawnUtils::requestDevice(adapter, features, false);
+  }
 
   // Create an SkImage from a WebGPU texture
   // The texture must have TextureBinding usage

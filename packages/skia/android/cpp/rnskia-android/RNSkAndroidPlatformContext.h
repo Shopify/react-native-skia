@@ -51,7 +51,7 @@ public:
   }
 
   sk_sp<SkSurface> makeOffscreenSurface(int width, int height,
-                                         bool useP3ColorSpace = false) override {
+                                        bool useP3ColorSpace = false) override {
 #if defined(SK_GRAPHITE)
     return DawnContext::getInstance().MakeOffscreen(width, height,
                                                     useP3ColorSpace);

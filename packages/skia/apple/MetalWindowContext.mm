@@ -72,10 +72,9 @@ sk_sp<SkSurface> MetalWindowContext::getSurface() {
       _layer.drawableSize.width, _layer.drawableSize.height, fbInfo);
 
   sk_sp<SkColorSpace> skColorSpace =
-      _useP3ColorSpace
-          ? SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
-                                  SkNamedGamut::kDisplayP3)
-          : nullptr;
+      _useP3ColorSpace ? SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
+                                               SkNamedGamut::kDisplayP3)
+                       : nullptr;
   _skSurface = SkSurfaces::WrapBackendRenderTarget(
       _directContext, backendRT, kTopLeft_GrSurfaceOrigin,
       kBGRA_8888_SkColorType, skColorSpace, nullptr);

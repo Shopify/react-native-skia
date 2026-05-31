@@ -31,16 +31,12 @@
 #include <cmath>
 #if TARGET_RT_BIG_ENDIAN
 #define FourCC2Str(fourcc)                                                     \
-  (const char[]) {                                                             \
-    *((char *)&fourcc), *(((char *)&fourcc) + 1), *(((char *)&fourcc) + 2),    \
-        *(((char *)&fourcc) + 3), 0                                            \
-  }
+  (const char[]){*((char *)&fourcc), *(((char *)&fourcc) + 1),                 \
+                 *(((char *)&fourcc) + 2), *(((char *)&fourcc) + 3), 0}
 #else
 #define FourCC2Str(fourcc)                                                     \
-  (const char[]) {                                                             \
-    *(((char *)&fourcc) + 3), *(((char *)&fourcc) + 2),                        \
-        *(((char *)&fourcc) + 1), *(((char *)&fourcc) + 0), 0                  \
-  }
+  (const char[]){*(((char *)&fourcc) + 3), *(((char *)&fourcc) + 2),           \
+                 *(((char *)&fourcc) + 1), *(((char *)&fourcc) + 0), 0}
 #endif
 
 // pragma MARK: TextureHolder
@@ -270,19 +266,20 @@ SkiaCVPixelBufferUtils::YUV::getSubsampling(OSType pixelFormat) {
 
 // pragma MARK: YUV getColorspace()
 
-SkYUVColorSpace SkiaCVPixelBufferUtils::YUV::getColorspace(
-    CVPixelBufferRef pixelBuffer) {
+SkYUVColorSpace
+SkiaCVPixelBufferUtils::YUV::getColorspace(CVPixelBufferRef pixelBuffer) {
   const OSType pixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer);
 
-  CFTypeRef matrixAttachment =
-      CVBufferCopyAttachment(pixelBuffer, kCVImageBufferYCbCrMatrixKey, nullptr);
+  CFTypeRef matrixAttachment = CVBufferCopyAttachment(
+      pixelBuffer, kCVImageBufferYCbCrMatrixKey, nullptr);
   CFStringRef matrix = nullptr;
   if (matrixAttachment != nullptr &&
       CFGetTypeID(matrixAttachment) == CFStringGetTypeID()) {
     matrix = reinterpret_cast<CFStringRef>(matrixAttachment);
   }
 
-  SkYUVColorSpace colorspace = getSkYUVColorSpaceFromMatrix(matrix, pixelFormat);
+  SkYUVColorSpace colorspace =
+      getSkYUVColorSpaceFromMatrix(matrix, pixelFormat);
   if (matrixAttachment != nullptr) {
     CFRelease(matrixAttachment);
   }
@@ -320,8 +317,9 @@ bool SkiaCVPixelBufferUtils::YUV::isTenBitYUVFormat(OSType pixelFormat) {
   }
 }
 
-SkYUVColorSpace SkiaCVPixelBufferUtils::YUV::getSkYUVColorSpaceFromMatrix(
-    CFStringRef matrix, OSType pixelFormat) {
+SkYUVColorSpace
+SkiaCVPixelBufferUtils::YUV::getSkYUVColorSpaceFromMatrix(CFStringRef matrix,
+                                                          OSType pixelFormat) {
   const bool isFullRange = isFullRangeYUVFormat(pixelFormat);
   const bool isTenBit = isTenBitYUVFormat(pixelFormat);
 
@@ -381,10 +379,11 @@ TextureHolder *SkiaCVPixelBufferUtils::getSkiaTextureForCVPixelBufferPlane(
         "Requested out-of-bounds plane index " + std::to_string(planeIndex) +
         " for pixel buffer with " + std::to_string(planesCount) + " planes.");
   }
-  size_t width = planesCount > 0 ? CVPixelBufferGetWidthOfPlane(pixelBuffer, planeIndex)
-                                 : CVPixelBufferGetWidth(pixelBuffer);
-  size_t height =
-      planesCount > 0 ? CVPixelBufferGetHeightOfPlane(pixelBuffer, planeIndex)
+  size_t width = planesCount > 0
+                     ? CVPixelBufferGetWidthOfPlane(pixelBuffer, planeIndex)
+                     : CVPixelBufferGetWidth(pixelBuffer);
+  size_t height = planesCount > 0
+                      ? CVPixelBufferGetHeightOfPlane(pixelBuffer, planeIndex)
                       : CVPixelBufferGetHeight(pixelBuffer);
   MTLPixelFormat pixelFormat =
       getMTLPixelFormatForCVPixelBufferPlane(pixelBuffer, planeIndex);
@@ -424,12 +423,12 @@ SkiaCVPixelBufferUtils::getTextureCache(id<MTLDevice> device) {
 MTLPixelFormat SkiaCVPixelBufferUtils::getMTLPixelFormatForCVPixelBufferPlane(
     CVPixelBufferRef pixelBuffer, size_t planeIndex) {
   const OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
-  auto throwInvalidPlaneIndexForFormat = [&](size_t expectedPlanes)
-      -> MTLPixelFormat {
+  auto throwInvalidPlaneIndexForFormat =
+      [&](size_t expectedPlanes) -> MTLPixelFormat {
     throw std::runtime_error(
         "Invalid plane index " + std::to_string(planeIndex) +
-        " for pixel format " + std::string(FourCC2Str(format)) + " (expected 0.." +
-        std::to_string(expectedPlanes - 1) + ").");
+        " for pixel format " + std::string(FourCC2Str(format)) +
+        " (expected 0.." + std::to_string(expectedPlanes - 1) + ").");
   };
 
   switch (format) {
@@ -495,17 +494,18 @@ MTLPixelFormat SkiaCVPixelBufferUtils::getMTLPixelFormatForCVPixelBufferPlane(
       planesCount > 0 ? CVPixelBufferGetWidthOfPlane(pixelBuffer, planeIndex)
                       : CVPixelBufferGetWidth(pixelBuffer);
   const size_t bytesPerRow =
-      planesCount > 0 ? CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, planeIndex)
-                      : CVPixelBufferGetBytesPerRow(pixelBuffer);
+      planesCount > 0
+          ? CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, planeIndex)
+          : CVPixelBufferGetBytesPerRow(pixelBuffer);
   if (width == 0) [[unlikely]] {
     throw std::runtime_error("Invalid plane width for pixel format " +
                              std::string(FourCC2Str(format)) + "!");
   }
   if (bytesPerRow % width != 0) [[unlikely]] {
-    throw std::runtime_error(
-        "Invalid bytes per row! Bytes per row must be evenly divisible by width "
-        "for pixel format " +
-        std::string(FourCC2Str(format)) + "!");
+    throw std::runtime_error("Invalid bytes per row! Bytes per row must be "
+                             "evenly divisible by width "
+                             "for pixel format " +
+                             std::string(FourCC2Str(format)) + "!");
   }
   const size_t bytesPerPixel = bytesPerRow / width;
   if (bytesPerPixel == 1) {
@@ -519,6 +519,7 @@ MTLPixelFormat SkiaCVPixelBufferUtils::getMTLPixelFormatForCVPixelBufferPlane(
   }
 
   [[unlikely]] throw std::runtime_error(
-      "Invalid bytes per row! Expected 1 (R), 2 (RG) or 4 (RGBA), but received " +
+      "Invalid bytes per row! Expected 1 (R), 2 (RG) or 4 (RGBA), but "
+      "received " +
       std::to_string(bytesPerPixel));
 }

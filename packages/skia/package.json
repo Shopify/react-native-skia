@@ -48,6 +48,7 @@
     "build-skia": "tsx ./scripts/build-skia.ts",
     "copy-skia-headers": "tsx ./scripts/copy-skia-headers.ts",
     "install-skia-graphite": "tsx ./scripts/install-skia-graphite.ts",
+    "install-skia": "node scripts/install-libs.js",
     "clang-format": "yarn clang-format-ios && yarn clang-format-android && yarn clang-format-common",
     "clang-format-ios": "find apple/ -iname '*.h' -o -iname '*.mm' -o -iname '*.cpp' | xargs clang-format -i",
     "clang-format-android": "find android/cpp/ -iname '*.h' -o -iname '*.m' -o -iname '*.cpp' | xargs clang-format -i",
@@ -115,8 +116,8 @@
     "react": "19.0.0",
     "react-native": "0.83.1",
     "react-native-builder-bob": "0.18.2",
-    "react-native-reanimated": "^4.2.1",
-    "react-native-worklets": "^0.7.0",
+    "react-native-reanimated": "4.3.1",
+    "react-native-worklets": "0.8.3",
     "rimraf": "3.0.2",
     "semantic-release": "^24.1.0",
     "semantic-release-yarn": "^3.0.2",
@@ -124,14 +125,14 @@
     "ts-jest": "29.4.3",
     "tsx": "^4.21.0",
     "typescript": "^5.2.2",
-    "ws": "8.18.0"
+    "ws": "8.20.1"
   },
   "dependencies": {
-    "canvaskit-wasm": "0.40.0",
-    "react-native-skia-android": "144.3.0",
-    "react-native-skia-apple-ios": "144.3.0",
-    "react-native-skia-apple-macos": "144.3.0",
-    "react-native-skia-apple-tvos": "144.3.0",
+    "canvaskit-wasm": "0.41.0",
+    "react-native-skia-android": "147.1.0",
+    "react-native-skia-apple-ios": "147.1.0",
+    "react-native-skia-apple-macos": "147.1.0",
+    "react-native-skia-apple-tvos": "147.1.0",
     "react-reconciler": "0.31.0"
   },
   "eslintIgnore": [
@@ -148,7 +149,7 @@
     "ios": {
       "componentProvider": {
         "SkiaPictureView": "SkiaPictureView",
-        "WebGPUView": "WebGPUView"
+        "SkiaWebGPUView": "SkiaWebGPUView"
       }
     }
   },

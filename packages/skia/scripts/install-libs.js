@@ -19,9 +19,13 @@ function copySync(src, dest, options) {
   const basePath = wildcardSplit[0];
   const files = fs.readdirSync(basePath);
   files
-    .filter(file => file.endsWith(wildcardSplit[1]))
+    .filter((file) => file.endsWith(wildcardSplit[1]))
     .forEach((file) => {
-      return fs.cpSync(path.join(basePath, file), path.join(dest, file), options);
+      return fs.cpSync(
+        path.join(basePath, file),
+        path.join(dest, file),
+        options
+      );
     });
 }
 
@@ -69,8 +73,12 @@ fs.rmSync(path.join(libsDir, "tvos"), { recursive: true, force: true });
 fs.mkdirSync(path.join(libsDir, "ios"), { recursive: true });
 fs.mkdirSync(path.join(libsDir, "macos"), { recursive: true });
 
-copySync(iosPackage + '/libs/*.xcframework', path.join(libsDir, "ios"), {recursive: true});
-copySync(macosPackage + '/libs/*.xcframework', path.join(libsDir, "macos"), {recursive: true});
+copySync(iosPackage + "/libs/*.xcframework", path.join(libsDir, "ios"), {
+  recursive: true,
+});
+copySync(macosPackage + "/libs/*.xcframework", path.join(libsDir, "macos"), {
+  recursive: true,
+});
 
 // Handle tvOS (non-Graphite only)
 if (!useGraphite) {
@@ -80,7 +88,9 @@ if (!useGraphite) {
     );
     console.log("-- Skia tvOS package: " + tvosPackage);
     fs.mkdirSync(path.join(libsDir, "tvos"), { recursive: true });
-    copySync(tvosPackage + '/libs/*.xcframework', path.join(libsDir, "tvos"), {recursive: true});
+    copySync(tvosPackage + "/libs/*.xcframework", path.join(libsDir, "tvos"), {
+      recursive: true,
+    });
   } catch (e) {
     console.log("-- tvOS package not found, skipping");
   }
@@ -118,6 +128,6 @@ console.log("-- Skia Android package: " + androidPackage);
 // Copy Android libs (per-ABI static libraries)
 const androidDest = path.join(libsDir, "android");
 fs.rmSync(androidDest, { recursive: true, force: true });
-copySync(androidSrcLibs, androidDest, {recursive: true});
+copySync(androidSrcLibs, androidDest, { recursive: true });
 
 console.log("-- Copied Android libs to libs/android/");

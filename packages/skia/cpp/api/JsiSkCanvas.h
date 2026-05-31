@@ -352,7 +352,7 @@ public:
     auto path = JsiSkPath::fromValue(runtime, arguments[0]);
     auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
 
-    _canvas->drawPath(*path, *paint);
+    _canvas->drawPath(path->snapshot(), *paint);
 
     return jsi::Value::undefined();
   }
@@ -439,7 +439,7 @@ public:
     auto path = JsiSkPath::fromValue(runtime, arguments[0]);
     auto op = (SkClipOp)arguments[1].asNumber();
     auto doAntiAlias = arguments[2].getBool();
-    _canvas->clipPath(*path, op, doAntiAlias);
+    _canvas->clipPath(path->snapshot(), op, doAntiAlias);
     return jsi::Value::undefined();
   }
 

@@ -5,24 +5,24 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.views.view.ReactViewGroup;
 import com.facebook.react.views.view.ReactViewManager;
-import com.facebook.react.viewmanagers.WebGPUViewManagerDelegate;
-import com.facebook.react.viewmanagers.WebGPUViewManagerInterface;
+import com.facebook.react.viewmanagers.SkiaWebGPUViewManagerDelegate;
+import com.facebook.react.viewmanagers.SkiaWebGPUViewManagerInterface;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 @ReactModule(name = WebGPUViewManager.NAME)
-public class WebGPUViewManager extends ReactViewManager implements WebGPUViewManagerInterface<WebGPUView> {
+public class WebGPUViewManager extends ReactViewManager implements SkiaWebGPUViewManagerInterface<WebGPUView> {
 
-  public static final String NAME = "WebGPUView";
+  public static final String NAME = "SkiaWebGPUView";
 
-  protected WebGPUViewManagerDelegate mDelegate;
+  protected SkiaWebGPUViewManagerDelegate mDelegate;
 
   public WebGPUViewManager() {
-    mDelegate = new WebGPUViewManagerDelegate(this);
+    mDelegate = new SkiaWebGPUViewManagerDelegate(this);
   }
 
-  protected WebGPUViewManagerDelegate getDelegate() {
+  protected SkiaWebGPUViewManagerDelegate getDelegate() {
     return mDelegate;
   }
 

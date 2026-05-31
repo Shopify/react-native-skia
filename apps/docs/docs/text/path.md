@@ -9,7 +9,7 @@ Draws text along a path.
 
 | Name        | Type               |  Description                                                 |
 |:------------|:-------------------|:-------------------------------------------------------------|
-| path        | `Path` or `string` | Path to draw. Can be a string using the [SVG Path notation](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths#line_commands) or an object created with `Skia.Path.Make()` |
+| path        | `Path` or `string` | Path to draw. Can be a string using the [SVG Path notation](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths#line_commands) or an object created with `Skia.PathBuilder` |
 | text        | `string`           | Text to draw                                                 |
 | font        | `SkFont`             | Font to use                                                  |
 
@@ -19,8 +19,7 @@ Draws text along a path.
 import {Canvas, Group, TextPath, Skia, useFont, vec, Fill} from "@shopify/react-native-skia";
 
 const size = 128;
-const path = Skia.Path.Make();
-path.addCircle(size, size, size/2);
+const path = Skia.Path.Circle(size, size, size/2);
 
 export const HelloWorld = () => {
   const font = useFont(require("./my-font.ttf"), 24);

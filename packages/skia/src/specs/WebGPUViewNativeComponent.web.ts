@@ -91,6 +91,8 @@ const styles = StyleSheet.create({
   view: {
     alignItems: "stretch",
     backgroundColor: "transparent",
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     border: "0 solid black",
     boxSizing: "border-box",
     display: "flex",

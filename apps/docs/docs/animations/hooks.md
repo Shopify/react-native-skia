@@ -50,8 +50,9 @@ import {useSharedValue, withSpring} from "react-native-reanimated";
 import {Gesture, GestureDetector} from "react-native-gesture-handler";
 import {usePathValue, Canvas, Path, processTransform3d, Skia} from "@shopify/react-native-skia";
 
-const rrct = Skia.Path.Make();
-rrct.addRRect(Skia.RRectXY(Skia.XYWHRect(0, 0, 100, 100), 10, 10));
+const rrct = Skia.PathBuilder.Make()
+  .addRRect(Skia.RRectXY(Skia.XYWHRect(0, 0, 100, 100), 10, 10))
+  .build();
 
 export const FrostedCard = () => {
   const rotateY = useSharedValue(0);
@@ -60,17 +61,23 @@ export const FrostedCard = () => {
     rotateY.value -= event.changeX / 300;
   });
 
-  const clip = usePathValue((path) => {
-    "worklet";
-    path.transform(
-      processTransform3d([
-        { translate: [50, 50] },
-        { perspective: 300 },
-        { rotateY: rotateY.value },
-        { translate: [-50, -50] },
-      ])
-    );
-  }, rrct);
+  const clip = usePathValue(
+    () => {
+      "worklet";
+    },
+    rrct,
+    (path) => {
+      "worklet";
+      return path.transform(
+        processTransform3d([
+          { translate: [50, 50] },
+          { perspective: 300 },
+          { rotateY: rotateY.value },
+          { translate: [-50, -50] },
+        ])
+      );
+    }
+  );
   return (
     <GestureDetector gesture={gesture}>
       <Canvas style={{ flex: 1 }}>

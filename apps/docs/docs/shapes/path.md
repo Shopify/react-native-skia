@@ -9,7 +9,7 @@ In Skia, paths are semantically identical to [SVG Paths](https://developer.mozil
 
 | Name      | Type      |  Description                                                  |
 |:----------|:----------|:--------------------------------------------------------------|
-| path      | `SkPath` or `string` | Path to draw. Can be a string using the [SVG Path notation](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths#line_commands) or an object created with `Skia.Path.Make()`. |
+| path      | `SkPath` or `string` | Path to draw. Can be a string using the [SVG Path notation](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths#line_commands) or an object created with `Skia.PathBuilder`. |
 | start     | `number` | Trims the start of the path. Value is in the range `[0, 1]` (default is 0). |
 | end       | `number` | Trims the end of the path. Value is in the range `[0, 1]` (default is 1). |
 | stroke    | `StrokeOptions` | Turns this path into the filled equivalent of the stroked path. This will fail if the path is a hairline. `StrokeOptions` describes how the stroked path should look. It contains three properties: `width`, `strokeMiterLimit` and, `precision` |
@@ -40,19 +40,20 @@ const SVGNotation = () => {
 ```tsx twoslash
 import {Canvas, Path, Skia} from "@shopify/react-native-skia";
 
-const path = Skia.Path.Make();
-path.moveTo(128, 0);
-path.lineTo(168, 80);
-path.lineTo(256, 93);
-path.lineTo(192, 155);
-path.lineTo(207, 244);
-path.lineTo(128, 202);
-path.lineTo(49, 244);
-path.lineTo(64, 155);
-path.lineTo(0, 93);
-path.lineTo(88, 80);
-path.lineTo(128, 0);
-path.close();
+const path = Skia.PathBuilder.Make()
+  .moveTo(128, 0)
+  .lineTo(168, 80)
+  .lineTo(256, 93)
+  .lineTo(192, 155)
+  .lineTo(207, 244)
+  .lineTo(128, 202)
+  .lineTo(49, 244)
+  .lineTo(64, 155)
+  .lineTo(0, 93)
+  .lineTo(88, 80)
+  .lineTo(128, 0)
+  .close()
+  .build();
 
 const PathDemo = () => {
   return (
@@ -105,19 +106,19 @@ import {Canvas, Skia, Fill, Path} from "@shopify/react-native-skia";
 const star = () => {
   const R = 115.2;
   const C = 128.0;
-  const path = Skia.Path.Make();
-  path.moveTo(C + R, C);
+  const builder = Skia.PathBuilder.Make();
+  builder.moveTo(C + R, C);
   for (let i = 1; i < 8; ++i) {
     const a = 2.6927937 * i;
-    path.lineTo(C + R * Math.cos(a), C + R * Math.sin(a));
+    builder.lineTo(C + R * Math.cos(a), C + R * Math.sin(a));
   }
-  return path;
+  return builder.build();
 };
 
 export const HelloWorld = () => {
   const path = star();
   return (
-    <Canvas style={{ flex: 1 }}>  
+    <Canvas style={{ flex: 1 }}>
       <Fill color="white" />
       <Path path={path} style="stroke" strokeWidth={4} color="#3EB489"/>
       <Path path={path} color="lightblue" fillType="evenOdd" />

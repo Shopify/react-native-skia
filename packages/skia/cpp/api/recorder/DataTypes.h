@@ -141,7 +141,7 @@ std::shared_ptr<SkPath> processPath(jsi::Runtime &runtime,
     auto ptr = std::dynamic_pointer_cast<JsiSkPath>(
         value.asObject(runtime).asHostObject(runtime));
     if (ptr != nullptr) {
-      return ptr->getObject();
+      return std::make_shared<SkPath>(ptr->getObject()->snapshot());
     }
   }
   return nullptr;

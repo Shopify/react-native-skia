@@ -15,10 +15,9 @@ namespace rnwgpu {
 
 namespace jsi = facebook::jsi;
 
-using GPUErrorVariant =
-    std::variant<std::shared_ptr<GPUValidationError>,
-                 std::shared_ptr<GPUOutOfMemoryError>,
-                 std::shared_ptr<GPUInternalError>>;
+using GPUErrorVariant = std::variant<std::shared_ptr<GPUValidationError>,
+                                     std::shared_ptr<GPUOutOfMemoryError>,
+                                     std::shared_ptr<GPUInternalError>>;
 
 class GPUUncapturedErrorEvent : public NativeObject<GPUUncapturedErrorEvent> {
 public:

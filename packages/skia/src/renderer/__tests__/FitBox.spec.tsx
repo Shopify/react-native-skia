@@ -127,12 +127,13 @@ describe("FitBox", () => {
   test("transform simple rectangle with fitbox fill", () => {
     const { Skia, processTransform2d } = importSkia();
 
-    const path = Skia.Path.Make();
-    path.moveTo(0, 0);
-    path.lineTo(10, 0);
-    path.lineTo(10, 10);
-    path.lineTo(0, 10);
-    path.close();
+    const path = Skia.PathBuilder.Make()
+      .moveTo(0, 0)
+      .lineTo(10, 0)
+      .lineTo(10, 10)
+      .lineTo(0, 10)
+      .close()
+      .build();
 
     const src = path.computeTightBounds();
     const dst = Skia.XYWHRect(0, 0, 20, 20);
@@ -148,20 +149,21 @@ describe("FitBox", () => {
   test("transform simple rectangle with fitbox contain", () => {
     const { Skia, processTransform2d } = importSkia();
 
-    const path = Skia.Path.Make();
-    path.moveTo(0, 0);
-    path.lineTo(10, 0);
-    path.lineTo(10, 5);
-    path.lineTo(0, 5);
-    path.close();
+    const path = Skia.PathBuilder.Make()
+      .moveTo(0, 0)
+      .lineTo(10, 0)
+      .lineTo(10, 5)
+      .lineTo(0, 5)
+      .close()
+      .build();
 
     const src = path.computeTightBounds();
 
     const dst = Skia.XYWHRect(0, 0, 20, 20);
     const matrix = fitbox("contain", src, dst);
 
-    path.transform(processTransform2d(matrix));
-    const newBounds = path.computeTightBounds();
+    const transformedPath = path.transform(processTransform2d(matrix));
+    const newBounds = transformedPath.computeTightBounds();
     expect(newBounds.x).toBe(0);
     expect(newBounds.y).toBe(5);
     expect(newBounds.width).toBe(20);
@@ -170,15 +172,13 @@ describe("FitBox", () => {
 
   test("transform line with fitbox scale", () => {
     const { Skia, processTransform2d } = importSkia();
-    const path = Skia.Path.Make();
-    path.moveTo(0, 0);
-    path.lineTo(5, 5);
+    const path = Skia.PathBuilder.Make().moveTo(0, 0).lineTo(5, 5).build();
 
     const src = path.computeTightBounds();
     const dst = Skia.XYWHRect(0, 0, 10, 10);
     const matrix = fitbox("fill", src, dst);
-    path.transform(processTransform2d(matrix));
-    const newBounds = path.computeTightBounds();
+    const transformedPath = path.transform(processTransform2d(matrix));
+    const newBounds = transformedPath.computeTightBounds();
     expect(newBounds.x).toBe(0);
     expect(newBounds.y).toBe(0);
     expect(newBounds.width).toBe(10);
@@ -187,18 +187,19 @@ describe("FitBox", () => {
 
   test("transform with offset destination", () => {
     const { Skia, processTransform2d } = importSkia();
-    const path = Skia.Path.Make();
-    path.moveTo(0, 0);
-    path.lineTo(4, 0);
-    path.lineTo(4, 4);
-    path.lineTo(0, 4);
-    path.close();
+    const path = Skia.PathBuilder.Make()
+      .moveTo(0, 0)
+      .lineTo(4, 0)
+      .lineTo(4, 4)
+      .lineTo(0, 4)
+      .close()
+      .build();
 
     const src = path.computeTightBounds();
     const dst = Skia.XYWHRect(10, 20, 8, 8);
     const matrix = fitbox("fill", src, dst);
-    path.transform(processTransform2d(matrix));
-    const newBounds = path.computeTightBounds();
+    const transformedPath = path.transform(processTransform2d(matrix));
+    const newBounds = transformedPath.computeTightBounds();
     expect(newBounds.x).toBe(10);
     expect(newBounds.y).toBe(20);
     expect(newBounds.width).toBe(8);
@@ -207,18 +208,19 @@ describe("FitBox", () => {
 
   test("transform with cover fit mode", () => {
     const { Skia, processTransform2d } = importSkia();
-    const path = Skia.Path.Make();
-    path.moveTo(0, 0);
-    path.lineTo(10, 0);
-    path.lineTo(10, 5);
-    path.lineTo(0, 5);
-    path.close();
+    const path = Skia.PathBuilder.Make()
+      .moveTo(0, 0)
+      .lineTo(10, 0)
+      .lineTo(10, 5)
+      .lineTo(0, 5)
+      .close()
+      .build();
 
     const src = path.computeTightBounds();
     const dst = Skia.XYWHRect(0, 0, 10, 10);
     const matrix = fitbox("cover", src, dst);
-    path.transform(processTransform2d(matrix));
-    const newBounds = path.computeTightBounds();
+    const transformedPath = path.transform(processTransform2d(matrix));
+    const newBounds = transformedPath.computeTightBounds();
     expect(newBounds.x).toBe(-5);
     expect(newBounds.y).toBe(0);
     expect(newBounds.width).toBe(20);
@@ -624,9 +626,10 @@ describe("FitBox", () => {
   describe("Path bounds", () => {
     test("computes bounds for cubic with extreme control points", () => {
       const { Skia } = importSkia();
-      const path = Skia.Path.Make();
-      path.moveTo(0, 0);
-      path.cubicTo(-50, 100, 150, -50, 100, 100);
+      const path = Skia.PathBuilder.Make()
+        .moveTo(0, 0)
+        .cubicTo(-50, 100, 150, -50, 100, 100)
+        .build();
       const bounds = path.computeTightBounds();
       // bounds is -8.09475040435791 0 116.1894998550415 100
       expect(bounds.x).toBeCloseTo(-8.09475, 2);
@@ -636,9 +639,10 @@ describe("FitBox", () => {
     });
     test("computes bounds for cubic forming loop", () => {
       const { Skia } = importSkia();
-      const path = Skia.Path.Make();
-      path.moveTo(0, 0);
-      path.cubicTo(100, 0, 100, 100, 0, 50);
+      const path = Skia.PathBuilder.Make()
+        .moveTo(0, 0)
+        .cubicTo(100, 0, 100, 100, 0, 50)
+        .build();
       const bounds = path.computeTightBounds();
       expect(bounds.x).toBeCloseTo(0, 2);
       expect(bounds.y).toBeCloseTo(0, 2);
@@ -647,13 +651,14 @@ describe("FitBox", () => {
     });
     test("computes bounds for multiple cubics forming complex path", () => {
       const { Skia } = importSkia();
-      const path = Skia.Path.Make();
-      path.moveTo(0, 50);
-      path.cubicTo(25, 0, 75, 100, 100, 50);
-      path.moveTo(100, 50);
-      path.cubicTo(125, 0, 175, 100, 200, 50);
-      path.moveTo(200, 50);
-      path.cubicTo(225, 100, 275, 0, 300, 50);
+      const path = Skia.PathBuilder.Make()
+        .moveTo(0, 50)
+        .cubicTo(25, 0, 75, 100, 100, 50)
+        .moveTo(100, 50)
+        .cubicTo(125, 0, 175, 100, 200, 50)
+        .moveTo(200, 50)
+        .cubicTo(225, 100, 275, 0, 300, 50)
+        .build();
 
       const bounds = path.computeTightBounds();
       expect(bounds.x).toBeCloseTo(0, 2);

@@ -35,8 +35,7 @@ export const Circles = () => {
     <>
       {new Array(c).fill(0).map((_, i) => {
         const r2 = i * delta;
-        const path = Skia.Path.Make();
-        path.addCircle(0, 0, r2);
+        const path = Skia.Path.Circle(0, 0, r2);
         return (
           <Path
             key={i}
@@ -62,8 +61,10 @@ const Pattern = () => {
           width: center.x * 2 + delta * 2,
           height: center.y * 2 + delta * 2,
         };
-        const path = Skia.Path.Make();
-        path.addArc(rect, 0, 360).close();
+        const path = Skia.PathBuilder.Make()
+          .addArc(rect, 0, 360)
+          .close()
+          .build();
         return (
           <Group key={i} origin={center} transform={[{ scale: 0.6 }]}>
             <Rect

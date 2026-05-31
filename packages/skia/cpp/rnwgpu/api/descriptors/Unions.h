@@ -463,8 +463,6 @@ inline void convertJSUnionToEnum(const std::string &inUnion,
     *outEnum = wgpu::FeatureName::PixelLocalStorageNonCoherent;
   } else if (inUnion == "unorm16-texture-formats") {
     *outEnum = wgpu::FeatureName::Unorm16TextureFormats;
-  } else if (inUnion == "snorm16-texture-formats") {
-    *outEnum = wgpu::FeatureName::Snorm16TextureFormats;
   } else if (inUnion == "multi-planar-format-extended-usages") {
     *outEnum = wgpu::FeatureName::MultiPlanarFormatExtendedUsages;
   } else if (inUnion == "multi-planar-format-p010") {
@@ -485,12 +483,8 @@ inline void convertJSUnionToEnum(const std::string &inUnion,
     *outEnum = wgpu::FeatureName::AdapterPropertiesD3D;
   } else if (inUnion == "adapter-properties-vk") {
     *outEnum = wgpu::FeatureName::AdapterPropertiesVk;
-  } else if (inUnion == "r8unorm-storage") {
-    *outEnum = wgpu::FeatureName::R8UnormStorage;
   } else if (inUnion == "format-capabilities") {
     *outEnum = wgpu::FeatureName::DawnFormatCapabilities;
-  } else if (inUnion == "norm16-texture-formats") {
-    *outEnum = wgpu::FeatureName::Norm16TextureFormats;
   } else if (inUnion == "multi-planar-format-nv16") {
     *outEnum = wgpu::FeatureName::MultiPlanarFormatNv16;
   } else if (inUnion == "multi-planar-format-nv24") {
@@ -629,9 +623,6 @@ inline void convertEnumToJSUnion(wgpu::FeatureName inEnum,
   case wgpu::FeatureName::Unorm16TextureFormats:
     *outUnion = "unorm16-texture-formats";
     break;
-  case wgpu::FeatureName::Snorm16TextureFormats:
-    *outUnion = "snorm16-texture-formats";
-    break;
   case wgpu::FeatureName::MultiPlanarFormatExtendedUsages:
     *outUnion = "multi-planar-format-extended-usages";
     break;
@@ -661,12 +652,6 @@ inline void convertEnumToJSUnion(wgpu::FeatureName inEnum,
     break;
   case wgpu::FeatureName::AdapterPropertiesVk:
     *outUnion = "adapter-properties-vk";
-    break;
-  case wgpu::FeatureName::R8UnormStorage:
-    *outUnion = "r8unorm-storage";
-    break;
-  case wgpu::FeatureName::Norm16TextureFormats:
-    *outUnion = "norm16-texture-formats";
     break;
   case wgpu::FeatureName::MultiPlanarFormatNv16:
     *outUnion = "multi-planar-format-nv16";

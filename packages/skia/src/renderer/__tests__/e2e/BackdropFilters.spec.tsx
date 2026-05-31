@@ -118,8 +118,7 @@ describe("Backdrop Filters", () => {
     const { vec, Skia } = importSkia();
     const c = vec(width / 2, height / 2);
     const r = c.x - 32 / 3;
-    const path = Skia.Path.Make();
-    path.addRect(Skia.XYWHRect(0, c.y, width, c.y));
+    const path = Skia.Path.Rect(Skia.XYWHRect(0, c.y, width, c.y));
     const clip = path.toSVGString();
     const img = await surface.draw(
       <>

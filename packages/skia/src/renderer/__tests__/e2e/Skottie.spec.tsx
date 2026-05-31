@@ -458,6 +458,10 @@ describe("Skottie", () => {
     const rData = Skia.Data.fromBase64(raw);
     const image = Skia.Image.MakeImageFromEncoded(rData)!;
     expect(rData).toBeDefined();
-    checkImage(image, docPath("skottie/text-prop.png"));
+    if (surface.OS === "node" || surface.OS === "web") {
+      checkImage(image, docPath("skottie/text-prop-web.png"));
+    } else {
+      checkImage(image, docPath("skottie/text-prop.png"));
+    }
   });
 });

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "include/core/SkBlender.h"
+#include "include/core/SkPaint.h"
 #include "include/core/SkString.h"
 #include "include/effects/SkRuntimeEffect.h"
 

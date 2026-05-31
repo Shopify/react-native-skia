@@ -16,7 +16,7 @@
 #include <modules/skparagraph/include/ParagraphStyle.h>
 
 #include "../CustomBlendModes.h"
-#include "third_party/CSSColorParser.h"
+#include "api/third_party/CSSColorParser.h"
 
 #include "DataTypes.h"
 

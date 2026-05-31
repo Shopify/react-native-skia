@@ -7,13 +7,6 @@ const DEBUG = false;
 export const GRAPHITE = !!process.env.SK_GRAPHITE;
 export const MACCATALYST = false;
 const BUILD_WITH_PARAGRAPH = true;
-// Re-enable mutable SkPath methods (addPath, moveTo, lineTo, etc.)
-// Skia is transitioning to immutable SkPath with SkPathBuilder
-// Set to false once we migrate to SkPathBuilder
-const ENABLE_SKPATH_EDIT_METHODS = true;
-const PATH_EDIT_FLAG = ENABLE_SKPATH_EDIT_METHODS
-  ? "-USK_HIDE_PATH_EDIT_METHODS"
-  : "";
 
 export const SkiaSrc = path.join(__dirname, "../../../externals/skia");
 export const ProjectRoot = path.join(__dirname, "../../..");
@@ -75,7 +68,6 @@ const ParagraphOutputsAndroid = BUILD_WITH_PARAGRAPH
   ? ["libskparagraph.a", "libskunicode_core.a", "libskunicode_icu.a"]
   : [];
 
-// Dawn library for Graphite builds (contains dawn::native symbols)
 const DawnOutputApple = GRAPHITE ? ["libdawn_combined.a"] : [];
 const DawnOutputAndroid = GRAPHITE ? ["libdawn_combined.a"] : [];
 
@@ -97,7 +89,7 @@ export const commonArgs = [
   ["skia_enable_graphite", GRAPHITE],
   ["skia_use_dawn", GRAPHITE],
   // C++20 is required for Graphite builds (Dawn uses C++20 concepts)
-  // ...(GRAPHITE ? [["skia_use_cpp20", true]] : []),
+  // Passed via extra_cflags_cc per-target instead of skia_use_cpp20 (not available in all Skia versions)
 ];
 
 export type PlatformName =
@@ -131,7 +123,7 @@ export type Platform = {
 };
 
 const appleMinTarget = GRAPHITE ? "15.1" : "14.0";
-const appleSimulatorMinTarget = "16.0";
+const appleSimulatorMinTarget = appleMinTarget;
 
 // Define tvOS targets separately so they can be conditionally included
 const tvosTargets: { [key: string]: Target } = GRAPHITE
@@ -143,7 +135,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
         args: [
           [
             "extra_cflags_cc",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "-target", "arm64-apple-tvos", "-mappletvos-version-min=${appleMinTarget}"]`,
+            `["-fexceptions", "-frtti", "-target", "arm64-apple-tvos", "-mappletvos-version-min=${appleMinTarget}"]`,
           ],
           [
             "extra_asmflags",
@@ -162,7 +154,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
           ["ios_use_simulator", true],
           [
             "extra_cflags_cc",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
+            `["-fexceptions", "-frtti", "-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
           ],
           [
             "extra_asmflags",
@@ -181,7 +173,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
           ["ios_use_simulator", true],
           [
             "extra_cflags_cc",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "-target", "x86_64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
+            `["-fexceptions", "-frtti", "-target", "x86_64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
           ],
           [
             "extra_asmflags",
@@ -207,7 +199,7 @@ const maccatalystTargets: { [key: string]: Target } = MACCATALYST
           ["target_cpu", `"arm64"`],
           [
             "extra_cflags_cc",
-            `["-fexceptions","-frtti"${PATH_EDIT_FLAG ? `,"${PATH_EDIT_FLAG}"` : ""},"-target","arm64-apple-ios14.0-macabi",` +
+            `["-fexceptions","-frtti","-target","arm64-apple-ios14.0-macabi",` +
               `"-isysroot","${appleSdkRoot}",` +
               `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
               `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
@@ -229,7 +221,7 @@ const maccatalystTargets: { [key: string]: Target } = MACCATALYST
           ["target_cpu", `"x64"`],
           [
             "extra_cflags_cc",
-            `["-fexceptions","-frtti"${PATH_EDIT_FLAG ? `,"${PATH_EDIT_FLAG}"` : ""},"-target","x86_64-apple-ios14.0-macabi",` +
+            `["-fexceptions","-frtti","-target","x86_64-apple-ios14.0-macabi",` +
               `"-isysroot","${appleSdkRoot}",` +
               `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
               `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
@@ -299,7 +291,7 @@ export const configurations: Record<PlatformName, Platform> = {
       ["cxx", '"clang++"'],
       [
         "extra_cflags",
-        `["-DSKIA_C_DLL", "-DHAVE_SYSCALL_GETRANDOM", "-DXML_DEV_URANDOM"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+        `["-DSKIA_C_DLL", "-DHAVE_SYSCALL_GETRANDOM", "-DXML_DEV_URANDOM"]`,
       ],
       ...ParagraphArgsAndroid,
     ],
@@ -322,10 +314,7 @@ export const configurations: Record<PlatformName, Platform> = {
         platform: "ios",
         args: [
           ["ios_min_target", `"${appleMinTarget}"`],
-          [
-            "extra_cflags_cc",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
-          ],
+          ["extra_cflags_cc", `["-fexceptions", "-frtti"]`],
         ],
       },
       "arm64-iphonesimulator": {
@@ -334,10 +323,7 @@ export const configurations: Record<PlatformName, Platform> = {
         args: [
           ["ios_min_target", `"${appleSimulatorMinTarget}"`],
           ["ios_use_simulator", true],
-          [
-            "extra_cflags_cc",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
-          ],
+          ["extra_cflags_cc", `["-fexceptions", "-frtti"]`],
         ],
       },
       "x64-iphonesimulator": {
@@ -345,10 +331,7 @@ export const configurations: Record<PlatformName, Platform> = {
         platform: "ios",
         args: [
           ["ios_min_target", `"${appleSimulatorMinTarget}"`],
-          [
-            "extra_cflags_cc",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
-          ],
+          ["extra_cflags_cc", `["-fexceptions", "-frtti"]`],
         ],
       },
     },
@@ -374,22 +357,12 @@ export const configurations: Record<PlatformName, Platform> = {
       "arm64-macosx": {
         cpu: "arm64",
         platform: "mac",
-        args: [
-          [
-            "extra_cflags_cc",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
-          ],
-        ],
+        args: [["extra_cflags_cc", `["-fexceptions", "-frtti"]`]],
       },
       "x64-macosx": {
         cpu: "x64",
         platform: "mac",
-        args: [
-          [
-            "extra_cflags_cc",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
-          ],
-        ],
+        args: [["extra_cflags_cc", `["-fexceptions", "-frtti"]`]],
       },
     },
     args: appleCommonArgs,
@@ -690,6 +663,14 @@ export const copyHeaders = () => {
   fileOps.cp(
     "../../externals/skia/modules/skunicode/include/SkUnicode.h",
     "./cpp/skia/modules/skunicode/include/SkUnicode.h"
+  );
+  fileOps.cp(
+    "../../externals/skia/modules/skunicode/include/SkUnicode_libgrapheme.h",
+    "./cpp/skia/modules/skunicode/include/SkUnicode_libgrapheme.h"
+  );
+  fileOps.cp(
+    "../../externals/skia/modules/skunicode/include/SkUnicode_icu.h",
+    "./cpp/skia/modules/skunicode/include/SkUnicode_icu.h"
   );
   // Check for duplicate header names and issue warnings
   const duplicateHeaders = $(

@@ -81,8 +81,12 @@ public:
   JSI_HOST_FUNCTION(flush) {
     auto surface = getObject();
 #if defined(SK_GRAPHITE)
-    auto recording = surface->recorder()->snap();
-    DawnContext::getInstance().submitRecording(recording.get());
+    // A raster surface (e.g. Skia.Surface.Make) has no Graphite recorder;
+    // only Graphite-backed surfaces need to snap and submit a recording.
+    if (auto *recorder = surface->recorder()) {
+      auto recording = recorder->snap();
+      DawnContext::getInstance().submitRecording(recording.get());
+    }
 #else
     if (auto dContext = GrAsDirectContext(surface->recordingContext())) {
       dContext->flushAndSubmit();
@@ -102,8 +106,12 @@ public:
       image = surface->makeImageSnapshot();
     }
 #if defined(SK_GRAPHITE)
-    auto recording = surface->recorder()->snap();
-    DawnContext::getInstance().submitRecording(recording.get());
+    // A raster surface (e.g. Skia.Surface.Make) has no Graphite recorder; its
+    // snapshot is already a valid CPU image, so skip the recording submit.
+    if (auto *recorder = surface->recorder()) {
+      auto recording = recorder->snap();
+      DawnContext::getInstance().submitRecording(recording.get());
+    }
 #endif
     if (count > 1 && arguments[1].isObject()) {
       auto jsiImage =
