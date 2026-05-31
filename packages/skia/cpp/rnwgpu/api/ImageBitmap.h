@@ -33,10 +33,13 @@ public:
 
   size_t getHeight() { return _height; }
 
-  // Per the spec, close() releases the bitmap's underlying pixels.
+  // Per the spec, close() releases the bitmap's underlying pixels and zeroes
+  // its dimensions. Idempotent.
   void close() {
     _data.clear();
     _data.shrink_to_fit();
+    _width = 0;
+    _height = 0;
   }
 
   // Decoded, unpremultiplied RGBA8 pixels (row-major, width*height*4 bytes).
