@@ -7,10 +7,10 @@
 
 #include "webgpu/webgpu_cpp.h"
 
-#include "Convertors.h"
+#include "rnwgpu/api/Convertors.h"
 #include "jsi2/JSIConverter.h"
 
-#include "GPUOrigin2D.h"
+#include "rnwgpu/api/GPUOrigin2D.h"
 #include "rnwgpu/api/ImageBitmap.h"
 
 namespace jsi = facebook::jsi;

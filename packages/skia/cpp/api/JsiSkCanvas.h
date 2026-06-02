@@ -19,7 +19,7 @@
 #include "JsiSkTextBlob.h"
 #include "JsiSkVertices.h"
 
-#include "RNSkTypedArray.h"
+#include "utils/RNSkTypedArray.h"
 
 #include <jsi/jsi.h>
 
