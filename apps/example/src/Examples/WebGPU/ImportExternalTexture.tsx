@@ -49,9 +49,12 @@ fn fs_main(in: VsOut) -> @location(0) vec4f {
 }
 `;
 
-// Draw a recognizable, asymmetric image with Skia so the rotation / mirror
-// transforms are easy to read.
-const makeSourceImage = () => {
+// Draw a recognizable, asymmetric image with Skia (so the rotation / mirror
+// transforms are easy to read) and copy it into a native buffer. The offscreen
+// surface is kept alive until MakeFromImage has copied the pixels: on Graphite
+// makeImageSnapshot can alias the surface's texture, so releasing the surface
+// first would leave the buffer sampling freed content.
+const makeSourceBuffer = (): NativeBuffer => {
   const surface = Skia.Surface.MakeOffscreen(SOURCE_SIZE, SOURCE_SIZE)!;
   const canvas = surface.getCanvas();
   const paint = Skia.Paint();
@@ -69,7 +72,7 @@ const makeSourceImage = () => {
   paint.setColor(Skia.Color("white"));
   canvas.drawCircle(half, half, half * 0.4, paint);
   surface.flush();
-  return surface.makeImageSnapshot();
+  return Skia.NativeBuffer.MakeFromImage(surface.makeImageSnapshot());
 };
 
 export function ImportExternalTexture() {
@@ -98,10 +101,9 @@ export function ImportExternalTexture() {
       const format = navigator.gpu.getPreferredCanvasFormat();
       ctx.configure({ device, format, alphaMode: "opaque" });
 
-      // Source image + native buffer are created once; only the import (and the
+      // Source native buffer is created once; only the import (and the
       // rotation/mirror transform it carries) is repeated per frame.
-      const image = makeSourceImage();
-      const nativeBuffer: NativeBuffer = Skia.NativeBuffer.MakeFromImage(image);
+      const nativeBuffer = makeSourceBuffer();
 
       const module = device.createShaderModule({ code: shader });
       const pipeline = device.createRenderPipeline({
