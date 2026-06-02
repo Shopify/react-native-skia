@@ -82,6 +82,15 @@ void RNSkApplePlatformContext::releaseNativeBuffer(uint64_t pointer) {
 }
 
 uint64_t RNSkApplePlatformContext::makeNativeBuffer(sk_sp<SkImage> image) {
+#if defined(SK_GRAPHITE)
+  // A Graphite GPU texture can't be read with readPixels(nullptr) (and can't be
+  // drawn onto a raster surface) — both yield uninitialized/black pixels. Read
+  // it back to a raster image first. (JsiNativeBuffer calls the Ganesh-only
+  // SkImage::makeNonTextureImage(), which is a no-op on Graphite.)
+  if (image && image->isTextureBacked()) {
+    image = DawnContext::getInstance().MakeRasterImage(image);
+  }
+#endif
   // 0. If Image is not in BGRA, convert to BGRA as only BGRA is supported.
   if (image->colorType() != kBGRA_8888_SkColorType) {
     const SkImageInfo bgraInfo =

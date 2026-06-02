@@ -120,6 +120,13 @@ public:
 
   uint64_t makeNativeBuffer(sk_sp<SkImage> image) override {
 #if __ANDROID_API__ >= 26
+#if defined(SK_GRAPHITE)
+    // A Graphite GPU texture can't be read with readPixels(nullptr); read it
+    // back to a raster image first or the buffer ends up uninitialized/black.
+    if (image && image->isTextureBacked()) {
+      image = DawnContext::getInstance().MakeRasterImage(image);
+    }
+#endif
     auto bytesPerPixel = image->imageInfo().bytesPerPixel();
     int bytesPerRow = image->width() * bytesPerPixel;
     auto buf = SkData::MakeUninitialized(image->width() * image->height() *
