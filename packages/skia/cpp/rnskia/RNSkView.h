@@ -94,8 +94,11 @@ public:
       image = _surface->makeImageSnapshot();
     }
 #if defined(SK_GRAPHITE)
-    DawnContext::getInstance().submitRecording(
-        _surface->recorder()->snap().get());
+    // Only Graphite-backed surfaces have a recorder to snap/submit; a raster
+    // surface's snapshot is already a valid CPU image.
+    if (auto *recorder = _surface->recorder()) {
+      DawnContext::getInstance().submitRecording(recorder->snap().get());
+    }
     return DawnContext::getInstance().MakeRasterImage(image);
 #else
     auto grContext = _context->getDirectContext();

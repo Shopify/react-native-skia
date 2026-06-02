@@ -6,4 +6,23 @@ require "#{ws_dir}/node_modules/react-native-test-app/test_app.rb"
 
 workspace 'example.xcworkspace'
 
-use_test_app! :hermes_enabled => true, :new_arch_enabled => true
+# Build the `fmt` pod as C++17. Xcode 26.4's Apple Clang 21 is stricter about
+# consteval, and fmt's compile-time format-string checking (FMT_USE_CONSTEVAL,
+# C++20-only) no longer satisfies the constant-expression rules, failing with
+# "call to consteval function ... is not a constant expression". Since consteval
+# didn't exist before C++20, compiling fmt as C++17 skips that path and falls
+# back to runtime format-string validation. react-native-test-app forwards
+# options[:post_install] to its own post_install hook.
+fix_fmt_consteval = ->(installer) do
+  installer.pods_project.targets.each do |target|
+    next unless target.name == 'fmt'
+
+    target.build_configurations.each do |config|
+      config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+    end
+  end
+end
+
+use_test_app! :hermes_enabled => true,
+              :new_arch_enabled => true,
+              :post_install => fix_fmt_consteval
