@@ -6,8 +6,8 @@
 
 #include "jsi2/JSIConverter.h"
 
-#include "External.h"
-#include "GPUOrigin3D.h"
+#include "rnwgpu/api/External.h"
+#include "rnwgpu/api/GPUOrigin3D.h"
 #include "rnwgpu/api/GPUTexture.h"
 
 namespace jsi = facebook::jsi;

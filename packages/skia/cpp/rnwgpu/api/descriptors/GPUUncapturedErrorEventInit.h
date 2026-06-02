@@ -6,7 +6,7 @@
 
 #include "jsi2/JSIConverter.h"
 
-#include "GPUError.h"
+#include "rnwgpu/api/GPUError.h"
 
 namespace jsi = facebook::jsi;
 

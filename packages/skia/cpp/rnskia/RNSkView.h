@@ -7,11 +7,11 @@
 #include <vector>
 
 #include "RNSkPlatformContext.h"
-#include "ViewProperty.h"
+#include "jsi/ViewProperty.h"
 
-#include "JsiSkImage.h"
-#include "JsiSkPoint.h"
-#include "JsiSkRect.h"
+#include "api/JsiSkImage.h"
+#include "api/JsiSkPoint.h"
+#include "api/JsiSkRect.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
