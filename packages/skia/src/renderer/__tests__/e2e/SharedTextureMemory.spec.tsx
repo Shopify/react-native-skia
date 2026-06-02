@@ -71,10 +71,9 @@ describe("SharedTextureMemory", () => {
 
           const device = Skia.getDevice();
           try {
-            // importSharedTextureMemory is a Skia-only binding, not in
-            // @webgpu/types, so cast the device to reach it.
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const memory = (device as any).importSharedTextureMemory({
+            // importSharedTextureMemory is a Skia extension to GPUDevice (see
+            // the types in src/skia/types/WebGPU.ts).
+            const memory = device.importSharedTextureMemory({
               handle: nativeBuffer,
               label: "test-frame",
             });
@@ -192,10 +191,9 @@ describe("SharedTextureMemory", () => {
 
           const device = Skia.getDevice();
           try {
-            // importSharedTextureMemory is a Skia-only binding, not in
-            // @webgpu/types, so cast the device to reach it.
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const memory = (device as any).importSharedTextureMemory({
+            // importSharedTextureMemory is a Skia extension to GPUDevice (see
+            // the types in src/skia/types/WebGPU.ts).
+            const memory = device.importSharedTextureMemory({
               handle: nativeBuffer,
               label: "test-frame",
             });

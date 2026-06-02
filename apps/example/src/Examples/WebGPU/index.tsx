@@ -6,6 +6,7 @@ import { List } from "./List";
 import { Triangle } from "./Triangle";
 import { Wireframes } from "./Wireframes";
 import { TexturedCube } from "./TexturedCube";
+import { ImportExternalTexture } from "./ImportExternalTexture";
 
 const Stack = createNativeStackNavigator<Routes>();
 
@@ -40,6 +41,13 @@ export const WebGPU = () => {
         component={TexturedCube}
         options={{
           title: "Textured Cube",
+        }}
+      />
+      <Stack.Screen
+        name="ImportExternalTexture"
+        component={ImportExternalTexture}
+        options={{
+          title: "Import External Texture",
         }}
       />
     </Stack.Navigator>

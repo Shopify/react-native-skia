@@ -16,7 +16,7 @@ describe("Dawn toggles", () => {
                 enabledToggles: ["disable_symbol_renaming"],
                 disabledToggles: ["lazy_clear_resource_on_first_use"],
               },
-            } as GPUDeviceDescriptor)
+            })
             .then((device) => !!device)
         );
       });
@@ -46,7 +46,7 @@ describe("Dawn toggles", () => {
           adapter!
             .requestDevice({
               dawnToggles: { enabledToggles: ["this_toggle_does_not_exist"] },
-            } as GPUDeviceDescriptor)
+            })
             .then((device) => !!device)
         );
       });

@@ -26,13 +26,12 @@ describe("ImportExternalTexture", () => {
         try {
           // 2. Import it. The GPUExternalTexture owns the shared-memory access
           // window; there is no createTexture / beginAccess to manage.
+          // Skia's binding accepts the native buffer pointer as `source` (see
+          // the SkiaGPUExternalTextureDescriptor overload it adds to GPUDevice).
           const externalTexture = device.importExternalTexture({
-            // Skia's binding accepts the native buffer pointer as `source`; the
-            // spec type wants a WebCodecs VideoFrame, so cast the descriptor.
             source: nativeBuffer,
             label: "test-frame",
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } as any);
+          });
 
           // 3. Sample the external texture into a render target.
           const module = device.createShaderModule({
@@ -119,8 +118,7 @@ describe("ImportExternalTexture", () => {
           );
           device.queue.submit([encoder.finish()]);
           // End the access window now that the sampling work is submitted.
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (externalTexture as any).destroy();
+          externalTexture.destroy();
 
           return readBuffer.mapAsync(GPUMapMode.READ).then(() => {
             const pixels = new Uint8Array(readBuffer.getMappedRange().slice(0));
