@@ -48,7 +48,11 @@ fn vs_main(@builtin(vertex_index) vid: u32) -> VsOut {
 fn fs_main(in: VsOut) -> @location(0) vec4f {
   let uv = vec2f(0.5) + (in.uv - vec2f(0.5)) * u.uvScale;
   // External textures must be sampled with textureSampleBaseClampToEdge.
-  return textureSampleBaseClampToEdge(srcTex, srcSampler, uv);
+  let color = textureSampleBaseClampToEdge(srcTex, srcSampler, uv);
+  // Video frames are opaque but their BGRA surface often has a 0 alpha channel;
+  // force alpha to 1 so the premultiplied canvas isn't composited transparent
+  // (which shows through as a black screen).
+  return vec4f(color.rgb, 1.0);
 }
 `;
 
