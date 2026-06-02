@@ -3,22 +3,27 @@ import { StyleSheet, View, Text } from "react-native";
 import type { WebGPUCanvasRef, NativeBuffer } from "@shopify/react-native-skia";
 import { WebGPUCanvas, Skia } from "@shopify/react-native-skia";
 
-// This example draws an image with Skia (a 2x2 color grid + a white disc),
-// wraps it as a platform NativeBuffer (CVPixelBufferRef on iOS,
-// AHardwareBuffer on Android) and imports it directly into WebGPU as a
-// GPUExternalTexture — no CPU copy. The texture is then sampled through a
-// `texture_external` binding onto a full-screen quad.
-//
-// It also cycles the Skia-only `rotation` / `mirrored` descriptor fields so you
-// can see those sampling transforms applied each step.
+// Plays a video through GPUDevice.importExternalTexture (Skia port of
+// react-native-webgpu's ImportExternalTexture demo). Each decoded frame is an
+// SkImage; we wrap it as a platform NativeBuffer (CVPixelBufferRef on iOS,
+// AHardwareBuffer on Android) and import it as a GPUExternalTexture — no manual
+// createTexture/beginAccess. A GPUExternalTexture expires once the queue work
+// that used it is submitted, so we re-import one every frame.
+const videoURL = "https://bit.ly/skia-video";
 
-const SOURCE_SIZE = 512;
-
-const shader = /* wgsl */ `
+const SHADER = /* wgsl */ `
 struct VsOut {
   @builtin(position) position: vec4f,
   @location(0) uv: vec2f,
 };
+
+// Per-axis scale applied to UVs around the center so the canvas samples a
+// sub-rectangle of the video matching the canvas aspect ratio ('cover' fit).
+struct Uniforms { uvScale: vec2f };
+
+@group(0) @binding(0) var srcTex: texture_external;
+@group(0) @binding(1) var srcSampler: sampler;
+@group(0) @binding(2) var<uniform> u: Uniforms;
 
 @vertex
 fn vs_main(@builtin(vertex_index) vid: u32) -> VsOut {
@@ -39,41 +44,13 @@ fn vs_main(@builtin(vertex_index) vid: u32) -> VsOut {
   return out;
 }
 
-@group(0) @binding(0) var srcTex: texture_external;
-@group(0) @binding(1) var srcSampler: sampler;
-
 @fragment
 fn fs_main(in: VsOut) -> @location(0) vec4f {
+  let uv = vec2f(0.5) + (in.uv - vec2f(0.5)) * u.uvScale;
   // External textures must be sampled with textureSampleBaseClampToEdge.
-  return textureSampleBaseClampToEdge(srcTex, srcSampler, in.uv);
+  return textureSampleBaseClampToEdge(srcTex, srcSampler, uv);
 }
 `;
-
-// Draw a recognizable, asymmetric image with Skia (so the rotation / mirror
-// transforms are easy to read) and copy it into a native buffer. The offscreen
-// surface is kept alive until MakeFromImage has copied the pixels: on Graphite
-// makeImageSnapshot can alias the surface's texture, so releasing the surface
-// first would leave the buffer sampling freed content.
-const makeSourceBuffer = (): NativeBuffer => {
-  const surface = Skia.Surface.MakeOffscreen(SOURCE_SIZE, SOURCE_SIZE)!;
-  const canvas = surface.getCanvas();
-  const paint = Skia.Paint();
-  const half = SOURCE_SIZE / 2;
-  const quadrants: [string, number, number][] = [
-    ["#e74c3c", 0, 0], // top-left  red
-    ["#2ecc71", half, 0], // top-right green
-    ["#3498db", 0, half], // bottom-left blue
-    ["#f1c40f", half, half], // bottom-right yellow
-  ];
-  quadrants.forEach(([color, x, y]) => {
-    paint.setColor(Skia.Color(color));
-    canvas.drawRect(Skia.XYWHRect(x, y, half, half), paint);
-  });
-  paint.setColor(Skia.Color("white"));
-  canvas.drawCircle(half, half, half * 0.4, paint);
-  surface.flush();
-  return Skia.NativeBuffer.MakeFromImage(surface.makeImageSnapshot());
-};
 
 export function ImportExternalTexture() {
   const canvasRef = useRef<WebGPUCanvasRef>(null);
@@ -81,31 +58,30 @@ export function ImportExternalTexture() {
   const cleanupRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (!canvasRef.current) {
-        return;
-      }
-      if (typeof RNWebGPU === "undefined") {
-        console.warn(
-          "RNWebGPU is not available. Make sure SK_GRAPHITE is enabled."
-        );
+    let cancelled = false;
+
+    const init = async () => {
+      if (!canvasRef.current || typeof RNWebGPU === "undefined") {
         return;
       }
       const ctx = canvasRef.current.getContext("webgpu");
       if (!ctx) {
-        console.warn("Failed to get WebGPU context");
         return;
       }
 
       const device = Skia.getDevice();
+      const canvas = ctx.canvas as unknown as { width: number; height: number };
       const format = navigator.gpu.getPreferredCanvasFormat();
-      ctx.configure({ device, format, alphaMode: "opaque" });
+      ctx.configure({ device, format, alphaMode: "premultiplied" });
 
-      // Source native buffer is created once; only the import (and the
-      // rotation/mirror transform it carries) is repeated per frame.
-      const nativeBuffer = makeSourceBuffer();
+      const video = await Skia.Video(videoURL);
+      if (cancelled) {
+        return;
+      }
+      video.setLooping(true);
+      video.play();
 
-      const module = device.createShaderModule({ code: shader });
+      const module = device.createShaderModule({ code: SHADER });
       const pipeline = device.createRenderPipeline({
         layout: "auto",
         vertex: { module, entryPoint: "vs_main" },
@@ -116,74 +92,116 @@ export function ImportExternalTexture() {
         magFilter: "linear",
         minFilter: "linear",
       });
+      // vec2<f32> padded to the 16-byte uniform alignment.
+      const uniformBuffer = device.createBuffer({
+        size: 16,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      });
 
-      let running = true;
-      let frame = 0;
+      // 'cover' fit: scale UVs around their center so the longer axis of the
+      // video is cropped to match the canvas aspect ratio.
+      const computeUvScale = (texW: number, texH: number): [number, number] => {
+        if (!canvas.width || !canvas.height) {
+          return [1, 1];
+        }
+        const canvasAR = canvas.width / canvas.height;
+        const texAR = texW / texH;
+        return texAR > canvasAR ? [canvasAR / texAR, 1] : [1, texAR / canvasAR];
+      };
+
+      // Hold the current frame's native buffer across ticks. We release the
+      // previous one only when a new frame arrives — by then last tick's GPU
+      // work that sampled it has been submitted (and is a frame old).
+      let currentBuffer: NativeBuffer | null = null;
+      let lastDims: [number, number] | null = null;
 
       const render = () => {
-        if (!running) {
+        if (cancelled) {
           return;
         }
-        // Advance the rotation a quarter-turn (and toggle mirroring) roughly
-        // once a second so the Skia-only sampling transforms are visible.
-        const step = Math.floor(frame / 60);
-        const rotation = (step % 4) * 90;
-        const mirrored = Math.floor(step / 4) % 2 === 1;
-        frame++;
+        const frame = video.nextImage();
+        if (frame) {
+          if (currentBuffer) {
+            Skia.NativeBuffer.Release(currentBuffer);
+          }
+          currentBuffer = Skia.NativeBuffer.MakeFromImage(frame);
+          const w = frame.width();
+          const h = frame.height();
+          if (!lastDims || lastDims[0] !== w || lastDims[1] !== h) {
+            const [sx, sy] = computeUvScale(w, h);
+            device.queue.writeBuffer(
+              uniformBuffer,
+              0,
+              new Float32Array([sx, sy])
+            );
+            lastDims = [w, h];
+          }
+        }
 
-        // Import the native buffer as an external texture for this frame. This
-        // is the same pattern you'd use to import a fresh video frame.
-        const externalTexture = device.importExternalTexture({
-          source: nativeBuffer,
-          rotation,
-          mirrored,
-          label: "skia-frame",
-        });
-        const bindGroup = device.createBindGroup({
-          layout: pipeline.getBindGroupLayout(0),
-          entries: [
-            { binding: 0, resource: externalTexture },
-            { binding: 1, resource: sampler },
-          ],
-        });
-
-        const texture = ctx.getCurrentTexture();
         const encoder = device.createCommandEncoder();
         const pass = encoder.beginRenderPass({
           colorAttachments: [
             {
-              view: texture.createView(),
-              clearValue: { r: 0.1, g: 0.1, b: 0.1, a: 1.0 },
+              view: ctx.getCurrentTexture().createView(),
+              clearValue: { r: 0, g: 0, b: 0, a: 1 },
               loadOp: "clear",
               storeOp: "store",
             },
           ],
         });
-        pass.setPipeline(pipeline);
-        pass.setBindGroup(0, bindGroup);
-        pass.draw(3);
+
+        // Re-import the latest frame each tick (external textures expire after
+        // submit).
+        let externalTexture: GPUExternalTexture | null = null;
+        if (currentBuffer) {
+          try {
+            externalTexture = device.importExternalTexture({
+              source: currentBuffer,
+              label: "video-frame",
+            });
+          } catch (e) {
+            console.warn("[ImportExternalTexture] import failed:", e);
+          }
+          if (externalTexture) {
+            const bindGroup = device.createBindGroup({
+              layout: pipeline.getBindGroupLayout(0),
+              entries: [
+                { binding: 0, resource: externalTexture },
+                { binding: 1, resource: sampler },
+                { binding: 2, resource: { buffer: uniformBuffer } },
+              ],
+            });
+            pass.setPipeline(pipeline);
+            pass.setBindGroup(0, bindGroup);
+            pass.draw(3);
+          }
+        }
+
         pass.end();
         device.queue.submit([encoder.finish()]);
+        // End the access window now that the sampling work is submitted, so the
+        // frame's surface is released promptly instead of at GC.
+        externalTexture?.destroy();
         ctx.present();
-        // End the external texture's access window now that the sampling work
-        // is submitted; Dawn keeps the underlying texture alive for the
-        // in-flight GPU work via its fences.
-        externalTexture.destroy();
-
         animationRef.current = requestAnimationFrame(render);
       };
       animationRef.current = requestAnimationFrame(render);
 
       cleanupRef.current = () => {
-        running = false;
         cancelAnimationFrame(animationRef.current);
-        // All GPU work referencing the buffer has been submitted; release it.
-        Skia.NativeBuffer.Release(nativeBuffer);
+        if (currentBuffer) {
+          Skia.NativeBuffer.Release(currentBuffer);
+          currentBuffer = null;
+        }
+        uniformBuffer.destroy();
+        video.pause();
       };
-    }, 100);
+    };
+
+    init();
 
     return () => {
-      clearTimeout(timeoutId);
+      cancelled = true;
       cleanupRef.current?.();
     };
   }, []);
