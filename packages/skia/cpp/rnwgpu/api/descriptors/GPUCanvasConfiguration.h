@@ -7,7 +7,7 @@
 
 #include "jsi2/JSIConverter.h"
 
-#include "GPUDevice.h"
+#include "rnwgpu/api/GPUDevice.h"
 
 namespace jsi = facebook::jsi;
 

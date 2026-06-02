@@ -17,7 +17,7 @@
 #include "ImageFilters.h"
 #include "Paint.h"
 #include "PathEffects.h"
-#include "RNSkPlatformContext.h"
+#include "rnskia/RNSkPlatformContext.h"
 #include "Shaders.h"
 
 namespace RNSkia {
