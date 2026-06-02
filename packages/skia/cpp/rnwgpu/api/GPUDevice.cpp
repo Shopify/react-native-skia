@@ -9,6 +9,10 @@
 #include "Convertors.h"
 #include "jsi2/JSIConverter.h"
 
+#if defined(__APPLE__)
+#include "AppleNativeBuffer.h"
+#endif
+
 #include "GPUFeatures.h"
 #include "GPUInternalError.h"
 #include "GPUOutOfMemoryError.h"
@@ -234,8 +238,68 @@ std::shared_ptr<GPUPipelineLayout> GPUDevice::createPipelineLayout(
 
 std::shared_ptr<GPUExternalTexture> GPUDevice::importExternalTexture(
     std::shared_ptr<GPUExternalTextureDescriptor> descriptor) {
+  // The import / begin-access / descriptor-build logic, plus the matching
+  // EndAccess, all live on GPUExternalTexture so the begin/end lifecycle stays
+  // in one translation unit (see GPUExternalTexture.cpp).
+  return GPUExternalTexture::Create(_instance, std::move(descriptor));
+}
+
+std::shared_ptr<GPUSharedTextureMemory> GPUDevice::importSharedTextureMemory(
+    std::shared_ptr<GPUSharedTextureMemoryDescriptor> descriptor) {
+  if (!descriptor || descriptor->handle == 0) {
+    throw std::runtime_error(
+        "GPUDevice::importSharedTextureMemory(): handle must be a non-null "
+        "native buffer pointer (from Skia.NativeBuffer.MakeFromImage)");
+  }
+  void *bufferPtr =
+      reinterpret_cast<void *>(static_cast<uintptr_t>(descriptor->handle));
+
+  wgpu::SharedTextureMemoryDescriptor desc{};
+  std::string label = descriptor->label.value_or("");
+  if (!label.empty()) {
+    desc.label = wgpu::StringView(label.c_str(), label.size());
+  }
+
+#if defined(__APPLE__)
+  // Skia's NativeBuffer is a CVPixelBufferRef; extract its backing IOSurface in
+  // Objective-C++ since CoreVideo isn't available from this translation unit.
+  uint32_t width = 0;
+  uint32_t height = 0;
+  void *ioSurface = GetIOSurfaceFromNativeBuffer(bufferPtr, &width, &height);
+  if (ioSurface == nullptr) {
+    throw std::runtime_error(
+        "GPUDevice::importSharedTextureMemory(): native buffer has no "
+        "IOSurface");
+  }
+  wgpu::SharedTextureMemoryIOSurfaceDescriptor platformDesc{};
+  platformDesc.ioSurface = ioSurface;
+  // Default off: enabling it propagates StorageBinding into properties.usage,
+  // which then forces memory.createTexture() (no-descriptor form) to validate
+  // the format against storage capabilities. bgra8unorm (the standard
+  // CVPixelBuffer format) only supports storage when the device opts into the
+  // bgra8unorm-storage feature, so unconditionally setting this here breaks the
+  // common sample-only case.
+  platformDesc.allowStorageBinding = false;
+  desc.nextInChain = &platformDesc;
+#elif defined(__ANDROID__)
+  wgpu::SharedTextureMemoryAHardwareBufferDescriptor platformDesc{};
+  platformDesc.handle = bufferPtr;
+  desc.nextInChain = &platformDesc;
+#else
   throw std::runtime_error(
-      "GPUDevice::importExternalTexture(): Not implemented");
+      "GPUDevice::importSharedTextureMemory(): unsupported platform");
+#endif
+
+  auto memory = _instance.ImportSharedTextureMemory(&desc);
+  if (memory == nullptr) {
+    throw std::runtime_error(
+        "GPUDevice::importSharedTextureMemory(): ImportSharedTextureMemory "
+        "returned null - is the 'shared-texture-memory-iosurface' (Apple) or "
+        "'shared-texture-memory-ahardware-buffer' (Android) feature enabled on "
+        "the device?");
+  }
+  return std::make_shared<GPUSharedTextureMemory>(std::move(memory),
+                                                  std::move(label));
 }
 
 async::AsyncTaskHandle GPUDevice::createComputePipelineAsync(
