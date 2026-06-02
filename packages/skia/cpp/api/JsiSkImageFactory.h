@@ -5,14 +5,14 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiPromises.h"
+#include "jsi/JsiPromises.h"
 #include "JsiSkData.h"
 #include "JsiSkHostObjects.h"
 #include "JsiSkImage.h"
 #include "JsiSkImageInfo.h"
 
 #ifdef SK_GRAPHITE
-#include "RNDawnContext.h"
+#include "rnskia/RNDawnContext.h"
 #include "rnwgpu/api/GPUTexture.h"
 #endif
 

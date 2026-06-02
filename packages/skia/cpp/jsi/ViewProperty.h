@@ -7,7 +7,7 @@
 #include <string>
 #include <variant>
 
-#include "JsiSkPicture.h"
+#include "api/JsiSkPicture.h"
 #include "RuntimeLifecycleMonitor.h"
 
 namespace RNJsi {
