@@ -1,7 +1,6 @@
 #ifdef SK_GRAPHITE
 
 #import <CoreVideo/CoreVideo.h>
-#import <IOSurface/IOSurface.h>
 
 #include "rnwgpu/api/AppleNativeBuffer.h"
 
