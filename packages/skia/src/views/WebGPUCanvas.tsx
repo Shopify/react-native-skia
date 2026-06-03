@@ -9,6 +9,15 @@ function generateContextId() {
   return CONTEXT_COUNTER++;
 }
 
+// Non-standard, Dawn-only device toggles. Mirrors Dawn's DawnTogglesDescriptor
+// and is chained onto the native device descriptor at requestDevice time.
+// Toggle names are open strings (see Dawn's Toggles.cpp); these flags are
+// Dawn-specific and non-portable, so they are ignored on the web backend.
+export interface GPUDawnTogglesDescriptor {
+  enabledToggles?: string[];
+  disabledToggles?: string[];
+}
+
 declare global {
   var RNWebGPU: {
     gpu: GPU;
@@ -20,6 +29,12 @@ declare global {
       height: number
     ) => RNCanvasContext;
   };
+
+  // Non-standard, Dawn-only. Lets callers set Dawn device-stage toggles at
+  // device creation: adapter.requestDevice({ dawnToggles: { ... } }).
+  interface GPUDeviceDescriptor {
+    dawnToggles?: GPUDawnTogglesDescriptor;
+  }
 }
 
 type SurfacePointer = bigint;
