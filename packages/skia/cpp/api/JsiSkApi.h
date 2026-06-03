@@ -2,12 +2,12 @@
 
 #include <memory>
 
-#include "RNSkPlatformContext.h"
+#include "rnskia/RNSkPlatformContext.h"
 
 #include "JsiSkHostObjects.h"
 
 #ifdef SK_GRAPHITE
-#include "RNDawnContext.h"
+#include "rnskia/RNDawnContext.h"
 #include "rnwgpu/api/GPUDevice.h"
 #include "rnwgpu/async/AsyncRunner.h"
 #endif

@@ -1,17 +1,17 @@
 import { surface, itRunsWithGraphite } from "../setup";
 
 // Ported from react-native-webgpu (DawnToggles.spec.ts). Exercises the
-// non-standard, Dawn-only `dawnToggles` device option, which is parsed in
-// cpp/rnwgpu/api/descriptors/GPUDeviceDescriptor.h and chained onto the native
-// wgpu::DeviceDescriptor in GPUAdapter::requestDevice. WebGPU is only available
-// on Graphite (Dawn) builds, and dawnToggles is a Dawn extension, so these are
-// gated on the Graphite backend.
+// non-standard, Dawn-only `dawnToggles` field on GPUDeviceDescriptor, which is
+// parsed in cpp/rnwgpu/api/descriptors/GPUDeviceDescriptor.h and chained onto
+// the native wgpu::DeviceDescriptor in GPUAdapter::requestDevice. WebGPU is
+// only available on Graphite (Dawn) builds, and dawnToggles is a Dawn
+// extension, so these are gated on the Graphite backend.
 describe("Dawn toggles", () => {
   itRunsWithGraphite(
     "requests a device with enabled and disabled dawnToggles",
     async () => {
       const result = await surface.eval(() => {
-        return RNWebGPU.gpu.requestAdapter().then((adapter) =>
+        return navigator.gpu.requestAdapter().then((adapter) =>
           adapter!
             .requestDevice({
               dawnToggles: {
@@ -27,10 +27,24 @@ describe("Dawn toggles", () => {
   );
 
   itRunsWithGraphite(
+    "requests a device with no dawnToggles (unchanged behavior)",
+    async () => {
+      const result = await surface.eval(() => {
+        return navigator.gpu
+          .requestAdapter()
+          .then((adapter) =>
+            adapter!.requestDevice().then((device) => !!device)
+          );
+      });
+      expect(result).toBe(true);
+    }
+  );
+
+  itRunsWithGraphite(
     "ignores unknown toggle names without failing device creation",
     async () => {
       const result = await surface.eval(() => {
-        return RNWebGPU.gpu.requestAdapter().then((adapter) =>
+        return navigator.gpu.requestAdapter().then((adapter) =>
           adapter!
             .requestDevice({
               dawnToggles: { enabledToggles: ["this_toggle_does_not_exist"] },
@@ -59,7 +73,7 @@ describe("Dawn toggles", () => {
           usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.MAP_WRITE,
         };
         // A fresh adapter per device: an adapter only vends a single device.
-        return RNWebGPU.gpu
+        return navigator.gpu
           .requestAdapter()
           .then((adapter) => adapter!.requestDevice())
           .then((control) => {
@@ -68,7 +82,7 @@ describe("Dawn toggles", () => {
             return control.popErrorScope();
           })
           .then((controlError) =>
-            RNWebGPU.gpu
+            navigator.gpu
               .requestAdapter()
               .then((adapter) =>
                 adapter!.requestDevice({

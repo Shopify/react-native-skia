@@ -5,7 +5,7 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
 
-#include "RNSkLog.h"
+#include "utils/RNSkLog.h"
 #include "include/core/SkColorType.h"
 #include "include/gpu/graphite/dawn/DawnBackendContext.h"
 

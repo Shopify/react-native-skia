@@ -7,7 +7,7 @@
 
 #include "JsiSkFontStyle.h"
 #include "JsiSkHostObjects.h"
-#include "RNSkLog.h"
+#include "utils/RNSkLog.h"
 #include <jsi/jsi.h>
 
 #pragma clang diagnostic push

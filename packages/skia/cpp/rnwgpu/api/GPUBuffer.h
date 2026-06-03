@@ -14,7 +14,7 @@
 
 #include "webgpu/webgpu_cpp.h"
 
-#include "ArrayBuffer.h"
+#include "rnwgpu/ArrayBuffer.h"
 
 namespace rnwgpu {
 

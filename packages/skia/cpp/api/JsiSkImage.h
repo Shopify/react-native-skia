@@ -12,10 +12,10 @@
 #include "api/third_party/base64.h"
 
 #include "JsiTextureInfo.h"
-#include "RNSkTypedArray.h"
+#include "utils/RNSkTypedArray.h"
 
 #if defined(SK_GRAPHITE)
-#include "RNDawnContext.h"
+#include "rnskia/RNDawnContext.h"
 #include "include/gpu/graphite/Context.h"
 #else
 #include "include/gpu/ganesh/GrDirectContext.h"

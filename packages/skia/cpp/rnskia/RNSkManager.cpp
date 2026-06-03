@@ -5,11 +5,11 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiSkApi.h"
+#include "api/JsiSkApi.h"
 #include "RNSkJsiViewApi.h"
 #include "RNSkView.h"
 
-#include "RuntimeAwareCache.h"
+#include "jsi/RuntimeAwareCache.h"
 
 #ifdef SK_GRAPHITE
 #include "RNDawnContext.h"
