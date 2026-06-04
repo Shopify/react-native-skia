@@ -3,13 +3,13 @@ import { StyleSheet, View, Text } from "react-native";
 import type { WebGPUCanvasRef, NativeBuffer } from "@shopify/react-native-skia";
 import { WebGPUCanvas, Skia } from "@shopify/react-native-skia";
 
-// Plays a video through GPUDevice.importExternalTexture (Skia port of
-// react-native-webgpu's ImportExternalTexture demo). Each decoded frame is an
-// SkImage; we wrap it as a platform NativeBuffer (CVPixelBufferRef on iOS,
-// AHardwareBuffer on Android) and import it as a GPUExternalTexture — no manual
-// createTexture/beginAccess. A GPUExternalTexture expires once the queue work
-// that used it is submitted, so we re-import one every frame.
-const videoURL = "https://bit.ly/skia-video";
+// Demonstrates GPUDevice.importExternalTexture with a self-contained source: a
+// platform native buffer (CVPixelBufferRef on iOS, AHardwareBuffer on Android)
+// CPU-filled with a procedural test pattern via Skia.NativeBuffer.MakeTestBuffer
+// — no camera or video decode involved. Each frame we import the buffer as a
+// GPUExternalTexture and sample it. A GPUExternalTexture expires once the queue
+// work that used it is submitted, so we re-import one every frame.
+const TEXTURE_SIZE = 512;
 
 const SHADER = /* wgsl */ `
 struct VsOut {
@@ -18,7 +18,7 @@ struct VsOut {
 };
 
 // Per-axis scale applied to UVs around the center so the canvas samples a
-// sub-rectangle of the video matching the canvas aspect ratio ('cover' fit).
+// sub-rectangle of the texture matching the canvas aspect ratio ('cover' fit).
 struct Uniforms { uvScale: vec2f };
 
 @group(0) @binding(0) var srcTex: texture_external;
@@ -49,9 +49,6 @@ fn fs_main(in: VsOut) -> @location(0) vec4f {
   let uv = vec2f(0.5) + (in.uv - vec2f(0.5)) * u.uvScale;
   // External textures must be sampled with textureSampleBaseClampToEdge.
   let color = textureSampleBaseClampToEdge(srcTex, srcSampler, uv);
-  // Video frames are opaque but their BGRA surface often has a 0 alpha channel;
-  // force alpha to 1 so the premultiplied canvas isn't composited transparent
-  // (which shows through as a black screen).
   return vec4f(color.rgb, 1.0);
 }
 `;
@@ -64,7 +61,7 @@ export function ImportExternalTexture() {
   useEffect(() => {
     let cancelled = false;
 
-    const init = async () => {
+    const init = () => {
       if (!canvasRef.current || typeof RNWebGPU === "undefined") {
         return;
       }
@@ -77,13 +74,6 @@ export function ImportExternalTexture() {
       const canvas = ctx.canvas as unknown as { width: number; height: number };
       const format = navigator.gpu.getPreferredCanvasFormat();
       ctx.configure({ device, format, alphaMode: "premultiplied" });
-
-      const video = await Skia.Video(videoURL);
-      if (cancelled) {
-        return;
-      }
-      video.setLooping(true);
-      video.play();
 
       const module = device.createShaderModule({ code: SHADER });
       const pipeline = device.createRenderPipeline({
@@ -103,7 +93,7 @@ export function ImportExternalTexture() {
       });
 
       // 'cover' fit: scale UVs around their center so the longer axis of the
-      // video is cropped to match the canvas aspect ratio.
+      // texture is cropped to match the canvas aspect ratio.
       const computeUvScale = (texW: number, texH: number): [number, number] => {
         if (!canvas.width || !canvas.height) {
           return [1, 1];
@@ -113,33 +103,26 @@ export function ImportExternalTexture() {
         return texAR > canvasAR ? [canvasAR / texAR, 1] : [1, texAR / canvasAR];
       };
 
-      // Hold the current frame's native buffer across ticks. We release the
-      // previous one only when a new frame arrives — by then last tick's GPU
-      // work that sampled it has been submitted (and is a frame old).
-      let currentBuffer: NativeBuffer | null = null;
-      let lastDims: [number, number] | null = null;
+      // A single static test-pattern buffer reused every frame.
+      const nativeBuffer: NativeBuffer = Skia.NativeBuffer.MakeTestBuffer(
+        TEXTURE_SIZE,
+        TEXTURE_SIZE
+      );
+      let uniformsWritten = false;
 
       const render = () => {
         if (cancelled) {
           return;
         }
-        const frame = video.nextImage();
-        if (frame) {
-          if (currentBuffer) {
-            Skia.NativeBuffer.Release(currentBuffer);
-          }
-          currentBuffer = Skia.NativeBuffer.MakeFromImage(frame);
-          const w = frame.width();
-          const h = frame.height();
-          if (!lastDims || lastDims[0] !== w || lastDims[1] !== h) {
-            const [sx, sy] = computeUvScale(w, h);
-            device.queue.writeBuffer(
-              uniformBuffer,
-              0,
-              new Float32Array([sx, sy])
-            );
-            lastDims = [w, h];
-          }
+
+        if (!uniformsWritten) {
+          const [sx, sy] = computeUvScale(TEXTURE_SIZE, TEXTURE_SIZE);
+          device.queue.writeBuffer(
+            uniformBuffer,
+            0,
+            new Float32Array([sx, sy])
+          );
+          uniformsWritten = true;
         }
 
         const encoder = device.createCommandEncoder();
@@ -154,37 +137,33 @@ export function ImportExternalTexture() {
           ],
         });
 
-        // Re-import the latest frame each tick (external textures expire after
-        // submit).
+        // Re-import the buffer each tick (external textures expire after submit).
         let externalTexture: GPUExternalTexture | null = null;
-        if (currentBuffer) {
-          try {
-            externalTexture = device.importExternalTexture({
-              source: currentBuffer,
-              label: "video-frame",
-            });
-          } catch (e) {
-            console.warn("[ImportExternalTexture] import failed:", e);
-          }
-          if (externalTexture) {
-            const bindGroup = device.createBindGroup({
-              layout: pipeline.getBindGroupLayout(0),
-              entries: [
-                { binding: 0, resource: externalTexture },
-                { binding: 1, resource: sampler },
-                { binding: 2, resource: { buffer: uniformBuffer } },
-              ],
-            });
-            pass.setPipeline(pipeline);
-            pass.setBindGroup(0, bindGroup);
-            pass.draw(3);
-          }
+        try {
+          externalTexture = device.importExternalTexture({
+            source: nativeBuffer,
+            label: "test-pattern",
+          });
+        } catch (e) {
+          console.warn("[ImportExternalTexture] import failed:", e);
+        }
+        if (externalTexture) {
+          const bindGroup = device.createBindGroup({
+            layout: pipeline.getBindGroupLayout(0),
+            entries: [
+              { binding: 0, resource: externalTexture },
+              { binding: 1, resource: sampler },
+              { binding: 2, resource: { buffer: uniformBuffer } },
+            ],
+          });
+          pass.setPipeline(pipeline);
+          pass.setBindGroup(0, bindGroup);
+          pass.draw(3);
         }
 
         pass.end();
         device.queue.submit([encoder.finish()]);
-        // End the access window now that the sampling work is submitted, so the
-        // frame's surface is released promptly instead of at GC.
+        // End the access window now that the sampling work is submitted.
         externalTexture?.destroy();
         ctx.present();
         animationRef.current = requestAnimationFrame(render);
@@ -193,12 +172,8 @@ export function ImportExternalTexture() {
 
       cleanupRef.current = () => {
         cancelAnimationFrame(animationRef.current);
-        if (currentBuffer) {
-          Skia.NativeBuffer.Release(currentBuffer);
-          currentBuffer = null;
-        }
+        Skia.NativeBuffer.Release(nativeBuffer);
         uniformBuffer.destroy();
-        video.pause();
       };
     };
 

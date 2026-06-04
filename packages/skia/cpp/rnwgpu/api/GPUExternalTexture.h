@@ -57,6 +57,12 @@ public:
   void destroy() {
     if (_memory && _texture) {
       wgpu::SharedTextureMemoryEndAccessState state{};
+#if defined(__ANDROID__)
+      // Dawn's Vulkan backend requires the released VkImageLayout to be chained
+      // (matches BeginAccess in GPUExternalTexture::Create).
+      wgpu::SharedTextureMemoryVkImageLayoutEndState vkEnd{};
+      state.nextInChain = &vkEnd;
+#endif
       (void)_memory.EndAccess(_texture, &state);
     }
     _texture = nullptr;

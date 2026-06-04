@@ -40,7 +40,8 @@ static const float kIdentityTransferParams[7] = {
 // isn't a clean multiple of 90 snaps to the nearest quadrant; Dawn only
 // supports those four steps for external textures.
 static wgpu::ExternalTextureRotation toExternalTextureRotation(double degrees) {
-  int quadrant = static_cast<int>(std::lround(degrees / 90.0)) & 3;
+  int quadrant = static_cast<int>(std::lround(degrees / 90.0));
+  quadrant = ((quadrant % 4) + 4) % 4;
   switch (quadrant) {
   case 1:
     return wgpu::ExternalTextureRotation::Rotate90Degrees;
@@ -124,6 +125,15 @@ std::shared_ptr<GPUExternalTexture> GPUExternalTexture::Create(
   wgpu::SharedTextureMemoryBeginAccessDescriptor begin{};
   begin.initialized = true;
   begin.concurrentRead = false;
+#if defined(__ANDROID__)
+  // Dawn's Vulkan backend requires the acquired VkImageLayout to be chained.
+  // UNDEFINED (= 0) on both ends is the canonical "no prior GPU producer"
+  // pattern (matches GPUSharedTextureMemory::beginAccess).
+  wgpu::SharedTextureMemoryVkImageLayoutBeginState vkBegin{};
+  vkBegin.oldLayout = 0;
+  vkBegin.newLayout = 0;
+  begin.nextInChain = &vkBegin;
+#endif
   if (!memory.BeginAccess(texture, &begin)) {
     throw std::runtime_error(
         "GPUExternalTexture::Create(): BeginAccess failed");
@@ -152,6 +162,10 @@ std::shared_ptr<GPUExternalTexture> GPUExternalTexture::Create(
   auto external = device.CreateExternalTexture(&extDesc);
   if (external == nullptr) {
     wgpu::SharedTextureMemoryEndAccessState state{};
+#if defined(__ANDROID__)
+    wgpu::SharedTextureMemoryVkImageLayoutEndState vkEnd{};
+    state.nextInChain = &vkEnd;
+#endif
     (void)memory.EndAccess(texture, &state);
     throw std::runtime_error(
         "GPUExternalTexture::Create(): CreateExternalTexture returned null");
