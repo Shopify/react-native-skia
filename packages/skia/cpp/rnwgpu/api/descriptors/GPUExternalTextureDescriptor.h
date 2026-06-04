@@ -46,11 +46,16 @@ struct JSIConverter<std::shared_ptr<rnwgpu::GPUExternalTextureDescriptor>> {
       auto value = arg.getObject(runtime);
       if (value.hasProperty(runtime, "source")) {
         auto prop = value.getProperty(runtime, "source");
-        // The native buffer pointer arrives as a BigInt (uintptr_t value).
+        // The native buffer pointer arrives as a BigInt (uintptr_t value). It
+        // must be a BigInt: a JS number can't represent a 64-bit pointer
+        // without truncation, so we reject it rather than corrupt the address.
         if (prop.isBigInt()) {
           result->source = prop.asBigInt(runtime).asUint64(runtime);
-        } else if (prop.isNumber()) {
-          result->source = static_cast<uint64_t>(prop.asNumber());
+        } else if (!prop.isUndefined() && !prop.isNull()) {
+          throw jsi::JSError(
+              runtime, "GPUExternalTextureDescriptor.source must be a "
+                       "NativeBuffer (BigInt) from "
+                       "Skia.NativeBuffer.MakeFromImage / MakeTestBuffer");
         }
       }
       if (value.hasProperty(runtime, "label")) {

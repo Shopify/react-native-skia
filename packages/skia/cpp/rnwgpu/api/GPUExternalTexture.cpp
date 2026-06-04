@@ -5,13 +5,8 @@
 #include <string>
 #include <utility>
 
+#include "NativeBufferUtils.h"
 #include "descriptors/GPUExternalTextureDescriptor.h"
-
-#if defined(__APPLE__)
-#include "AppleNativeBuffer.h"
-#elif defined(__ANDROID__)
-#include <android/hardware_buffer.h>
-#endif
 
 namespace rnwgpu {
 
@@ -66,46 +61,11 @@ std::shared_ptr<GPUExternalTexture> GPUExternalTexture::Create(
       reinterpret_cast<void *>(static_cast<uintptr_t>(descriptor->source));
   std::string label = descriptor->label.value_or("external-texture");
 
-  // 1. Import the native buffer as SharedTextureMemory and read its
-  //    dimensions. The platform-specific chained descriptor must outlive the
-  //    ImportSharedTextureMemory call, so it lives in this scope.
-  wgpu::SharedTextureMemory memory;
+  // 1. Import the native buffer as SharedTextureMemory and read its dimensions.
   uint32_t width = 0;
   uint32_t height = 0;
-  {
-    wgpu::SharedTextureMemoryDescriptor memDesc{};
-    if (!label.empty()) {
-      memDesc.label = wgpu::StringView(label.c_str(), label.size());
-    }
-#if defined(__APPLE__)
-    // Skia's NativeBuffer is a CVPixelBufferRef; extract its backing IOSurface
-    // (and dimensions) in Objective-C++ since CoreVideo isn't available here.
-    void *ioSurface = GetIOSurfaceFromNativeBuffer(bufferPtr, &width, &height);
-    if (ioSurface == nullptr) {
-      throw std::runtime_error(
-          "GPUExternalTexture::Create(): native buffer has no IOSurface");
-    }
-    wgpu::SharedTextureMemoryIOSurfaceDescriptor platformDesc{};
-    platformDesc.ioSurface = ioSurface;
-    // ExternalTexture views are sampled-only; storage binding isn't needed.
-    platformDesc.allowStorageBinding = false;
-    memDesc.nextInChain = &platformDesc;
-    memory = device.ImportSharedTextureMemory(&memDesc);
-#elif defined(__ANDROID__)
-    auto *ahb = reinterpret_cast<AHardwareBuffer *>(bufferPtr);
-    AHardwareBuffer_Desc ahbDesc = {};
-    AHardwareBuffer_describe(ahb, &ahbDesc);
-    width = ahbDesc.width;
-    height = ahbDesc.height;
-    wgpu::SharedTextureMemoryAHardwareBufferDescriptor platformDesc{};
-    platformDesc.handle = ahb;
-    memDesc.nextInChain = &platformDesc;
-    memory = device.ImportSharedTextureMemory(&memDesc);
-#else
-    throw std::runtime_error(
-        "GPUExternalTexture::Create(): not implemented on this platform");
-#endif
-  }
+  wgpu::SharedTextureMemory memory = importNativeBufferAsSharedTextureMemory(
+      device, bufferPtr, label, &width, &height);
   if (memory == nullptr) {
     throw std::runtime_error(
         "GPUExternalTexture::Create(): ImportSharedTextureMemory returned "
