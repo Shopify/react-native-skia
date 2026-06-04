@@ -61,7 +61,7 @@ public:
     int rsxformsSize = static_cast<int>(jsiRsxforms.size(runtime));
     rsxforms.reserve(rsxformsSize);
     for (int i = 0; i < rsxformsSize; i++) {
-      auto rsxform = JsiSkRSXform::fromValue(
+      auto rsxform = JsiSkRSXform::toRSXform(
           runtime, jsiRsxforms.getValueAtIndex(runtime, i));
       rsxforms.push_back(*rsxform);
     }
@@ -89,7 +89,7 @@ public:
     int rsxformsSize = static_cast<int>(jsiRsxforms.size(runtime));
     rsxforms.reserve(rsxformsSize);
     for (int i = 0; i < rsxformsSize; i++) {
-      auto rsxform = JsiSkRSXform::fromValue(
+      auto rsxform = JsiSkRSXform::toRSXform(
           runtime, jsiRsxforms.getValueAtIndex(runtime, i));
       rsxforms.push_back(*rsxform);
     }

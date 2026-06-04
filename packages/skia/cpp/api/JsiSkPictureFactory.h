@@ -36,18 +36,16 @@ public:
     auto obj = arguments[0].asObject(runtime);
 
     // Check if it's a JsiSkData object first
-    if (obj.isHostObject(runtime)) {
-      if (auto jsiData = obj.asHostObject<JsiSkData>(runtime)) {
-        auto data = jsiData->getObject();
-        auto picture = SkPicture::MakeFromData(data.get());
-        if (picture != nullptr) {
-          auto hostObjectInstance =
-              std::make_shared<JsiSkPicture>(getContext(), std::move(picture));
-          return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-              runtime, hostObjectInstance, getContext());
-        }
-        return jsi::Value::undefined();
+    if (obj.hasNativeState<JsiSkData>(runtime)) {
+      auto data = obj.getNativeState<JsiSkData>(runtime)->getObject();
+      auto picture = SkPicture::MakeFromData(data.get());
+      if (picture != nullptr) {
+        auto hostObjectInstance =
+            std::make_shared<JsiSkPicture>(getContext(), std::move(picture));
+        return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+            runtime, hostObjectInstance, getContext());
       }
+      return jsi::Value::undefined();
     }
 
     // Get ArrayBuffer - try buffer property first (Uint8Array, etc.), then

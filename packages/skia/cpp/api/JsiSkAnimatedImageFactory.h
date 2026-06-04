@@ -17,7 +17,7 @@ namespace jsi = facebook::jsi;
 class JsiSkAnimatedImageFactory : public JsiSkHostObject {
 public:
   JSI_HOST_FUNCTION(MakeAnimatedImageFromEncoded) {
-    auto data = JsiSkData::fromValue(runtime, arguments[0]);
+    auto data = JsiSkData::fromValue(runtime, arguments[0])->getObject();
     auto codec = SkAndroidCodec::MakeFromData(data);
     auto image = SkAnimatedImage::Make(std::move(codec));
     if (image == nullptr) {

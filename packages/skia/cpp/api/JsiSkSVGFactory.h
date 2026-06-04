@@ -85,12 +85,9 @@ public:
 
       if (jsValue.isObject()) {
         auto jsObject = jsValue.asObject(runtime);
-        if (jsObject.isHostObject(runtime)) {
-          auto hostObject = jsObject.getHostObject(runtime);
-          auto skData = std::dynamic_pointer_cast<JsiSkData>(hostObject);
-          if (skData) {
-            assets[key] = skData->getObject();
-          }
+        if (jsObject.hasNativeState<JsiSkData>(runtime)) {
+          assets[key] =
+              jsObject.getNativeState<JsiSkData>(runtime)->getObject();
         }
       }
     }
@@ -127,7 +124,7 @@ private:
 
 public:
   JSI_HOST_FUNCTION(MakeFromData) {
-    auto data = JsiSkData::fromValue(runtime, arguments[0]);
+    auto data = JsiSkData::fromValue(runtime, arguments[0])->getObject();
     auto stream = SkMemoryStream::Make(data);
 
     // Parse fontMgr (second parameter)

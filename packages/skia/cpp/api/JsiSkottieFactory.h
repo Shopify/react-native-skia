@@ -33,14 +33,11 @@ public:
         if (jsValue.isObject()) {
           auto jsObject = jsValue.asObject(runtime);
 
-          // Check if the object is a SkData host object
-          if (jsObject.isHostObject(runtime)) {
-            auto hostObject = jsObject.getHostObject(runtime);
-            auto skData = std::dynamic_pointer_cast<JsiSkData>(hostObject);
-            if (skData) {
-              std::string k = key;
-              assets[k] = skData->getObject();
-            }
+          // Check if the object is a SkData native object
+          if (jsObject.hasNativeState<JsiSkData>(runtime)) {
+            std::string k = key;
+            assets[k] =
+                jsObject.getNativeState<JsiSkData>(runtime)->getObject();
           }
         }
       }
