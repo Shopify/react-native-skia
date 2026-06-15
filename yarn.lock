@@ -8815,7 +8815,6 @@ __metadata:
     react-native-reanimated:
       optional: true
   bin:
-    install-skia: scripts/install-libs.js
     setup-skia-web: scripts/setup-canvaskit.js
   languageName: unknown
   linkType: soft
