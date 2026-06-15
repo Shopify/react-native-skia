@@ -6,10 +6,20 @@ To develop react-native-skia, you can build the skia libraries on your computer.
 
 ### Using pre-built binaries
 
-The Skia prebuilt binaries are installed as npm dependencies (`react-native-skia-android`, `react-native-skia-apple-*`). The native build systems (Gradle, CocoaPods) automatically resolve these packages.
+The Skia prebuilt binaries are installed as npm dependencies (`react-native-skia-android`, `react-native-skia-apple-*`). The native build systems (Gradle, CocoaPods) automatically resolve these packages — there is no `postinstall` step.
 
 - Checkout submodules: `git submodule update --init --recursive`
 - Install dependencies: `yarn`
+- Set up the standard build: `cd packages/skia && yarn install-skia`
+
+`yarn install-skia` copies the Skia headers needed to compile against the prebuilt binaries. The binaries themselves are not copied: Gradle reads them in place from `node_modules`, and the podspec copies them in at `pod install` time.
+
+#### Switching between the standard and Graphite builds
+
+- Standard (Ganesh) build: `yarn install-skia`
+- [Graphite](https://skia.org/docs/user/graphite/) build: `yarn install-skia-graphite` (downloads the Graphite binaries into `libs/` and writes a `libs/.graphite` marker)
+
+Run `yarn install-skia` to switch back from Graphite to the standard build (it removes the `libs/.graphite` marker). After switching, run `pod install` again in the example app so CocoaPods picks up the matching frameworks.
 
 ### Building
 
