@@ -11,7 +11,9 @@ puts "-- SK_GRAPHITE: #{use_graphite ? 'ON' : 'OFF'} (detected via libs/.graphit
 
 # Resolve a node package directory using Node's own module resolution
 # (mirrors `require.resolve(pkg/package.json)`). Returns nil if it can't be found.
-def resolve_node_package(name, base_dir)
+# Defined as a lambda (not a `def`) because CocoaPods evaluates the podspec inside
+# the `Pod` module, where top-level methods are not reachable at the call site.
+resolve_node_package = lambda do |name, base_dir|
   script = "process.stdout.write(require('path').dirname(require.resolve('#{name}/package.json')))"
   dir = Dir.chdir(base_dir) { `node -e "#{script}" 2>/dev/null`.strip }
   dir.empty? ? nil : dir
@@ -27,11 +29,11 @@ end
 # re-copied and CocoaPods picks up the change. This is best-effort: if `pod install`
 # does not detect the change, a clean reinstall fixes it (acceptable until the upcoming
 # Swift Package Manager migration).
-def install_apple_skia_libs(base_dir)
+install_apple_skia_libs = lambda do |base_dir|
   { 'ios' => 'react-native-skia-apple-ios',
     'macos' => 'react-native-skia-apple-macos',
     'tvos' => 'react-native-skia-apple-tvos' }.each do |platform, pkg_name|
-    pkg_dir = resolve_node_package(pkg_name, base_dir)
+    pkg_dir = resolve_node_package.call(pkg_name, base_dir)
     next if pkg_dir.nil?
 
     src = File.join(pkg_dir, 'libs')
@@ -54,7 +56,7 @@ end
 
 # Graphite downloads its binaries directly into libs/; only the default build needs
 # the npm packages copied in.
-install_apple_skia_libs(__dir__) unless use_graphite
+install_apple_skia_libs.call(__dir__) unless use_graphite
 
 # Set preprocessor definitions based on GRAPHITE flag
 preprocessor_defs = use_graphite ?
