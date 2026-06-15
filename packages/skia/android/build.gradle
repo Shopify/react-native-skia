@@ -58,10 +58,29 @@ static def findNodeModules(baseDir) {
 
 def nodeModules = findNodeModules(projectDir)
 
-// Skia prebuilt libs are copied into libs/android/ by the npm postinstall script
-// Graphite is detected via marker file created by install-skia-graphite
+// Resolve a node package directory using Node's own module resolution, so we
+// pick up the prebuilt Skia binaries straight from node_modules (no postinstall
+// copy step needed). Mirrors `require.resolve(pkg/package.json)`.
+static def resolveNodePackage(packageName, baseDir) {
+  def script = "process.stdout.write(require('path').dirname(require.resolve('${packageName}/package.json')))"
+  def proc = ["node", "-e", script].execute(null, baseDir)
+  proc.waitFor()
+  if (proc.exitValue() != 0) {
+    throw new GradleException(
+      "react-native-skia: Could not resolve the '${packageName}' package. " +
+      "Make sure dependencies are installed (yarn install / npm install).\n" + proc.err.text
+    )
+  }
+  return proc.text.trim()
+}
+
+// Graphite is detected via a marker file created by install-skia-graphite, which
+// downloads its binaries directly into libs/. For the default (Ganesh) build the
+// binaries live in the react-native-skia-android npm package and are read in place.
 def useGraphite = file("${projectDir}/../libs/.graphite").exists()
-def skiaLibsPath = "${projectDir}/../libs/android"
+def skiaLibsPath = useGraphite
+    ? "${projectDir}/../libs/android"
+    : "${resolveNodePackage('react-native-skia-android', projectDir)}/libs"
 
 logger.warn("react-native-skia: SK_GRAPHITE: ${useGraphite}")
 logger.warn("react-native-skia: Skia libs: ${skiaLibsPath}")
