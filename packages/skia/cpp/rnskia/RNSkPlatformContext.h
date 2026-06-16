@@ -141,6 +141,13 @@ public:
 
   virtual uint64_t makeNativeBuffer(sk_sp<SkImage> image) = 0;
 
+  // Allocate a platform native buffer (IOSurface on Apple, AHardwareBuffer on
+  // Android) of the given size filled with a procedural test pattern (RGB
+  // gradient + diagonal stripes), entirely on the CPU. Intended for examples
+  // and tests that need a buffer to feed into importExternalTexture without a
+  // camera/video source. Release it with releaseNativeBuffer().
+  virtual uint64_t makeTestNativeBuffer(int width, int height) = 0;
+
   virtual std::shared_ptr<RNSkVideo> createVideo(const std::string &url) = 0;
 
   /**

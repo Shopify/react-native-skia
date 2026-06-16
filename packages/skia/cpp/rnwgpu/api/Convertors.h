@@ -252,13 +252,24 @@ public:
 
   [[nodiscard]] bool Convert(wgpu::BindGroupLayoutEntry &out,
                              const GPUBindGroupLayoutEntry &in) {
-    return Convert(out.binding, in.binding) &&
-           Convert(out.visibility, in.visibility) &&
-           Convert(out.buffer, in.buffer) && Convert(out.sampler, in.sampler) &&
-           Convert(out.texture, in.texture) &&
-           Convert(out.storageTexture, in.storageTexture);
-    // no external textures here
-    //&& Convert(out.externalTexture, in.externalTexture);
+    out = {};
+    if (!Convert(out.binding, in.binding) ||
+        !Convert(out.visibility, in.visibility) ||
+        !Convert(out.buffer, in.buffer) || !Convert(out.sampler, in.sampler) ||
+        !Convert(out.texture, in.texture) ||
+        !Convert(out.storageTexture, in.storageTexture)) {
+      return false;
+    }
+    if (in.externalTexture.has_value() &&
+        in.externalTexture.value() != nullptr) {
+      // External texture layouts bind via a chained struct rather than a
+      // direct field on BindGroupLayoutEntry. The chained struct must outlive
+      // the BindGroupLayoutEntry until Device::CreateBindGroupLayout returns,
+      // so we allocate it on the Convertor's arena.
+      auto *chain = Allocate<wgpu::ExternalTextureBindingLayout>();
+      out.nextInChain = chain;
+    }
+    return true;
   }
 
   [[nodiscard]] bool Convert(wgpu::BlendComponent &out,
@@ -422,9 +433,11 @@ public:
   }
 
   [[nodiscard]] bool Convert(wgpu::ExternalTextureBindingLayout &out,
-                             const GPUExternalTextureBindingLayout &in) {
-    // no external textures at the moment
-    return false;
+                             const GPUExternalTextureBindingLayout & /*in*/) {
+    // ExternalTextureBindingLayout carries no fields of its own; its presence
+    // (as a chained struct) is what marks the entry as an external texture.
+    out = {};
+    return true;
   }
 
   [[nodiscard]] bool Convert(wgpu::ConstantEntry &out, const std::string &key,
@@ -729,7 +742,16 @@ public:
       out.buffer = buffer->get();
       return true;
     }
-    // Not external textures at the moment
+    if (in.externalTexture != nullptr) {
+      // External textures bind via a chained struct rather than a direct field
+      // on BindGroupEntry. The chained struct must outlive the BindGroupEntry
+      // until Device::CreateBindGroup returns, so we allocate it on the
+      // Convertor's arena.
+      auto *chain = Allocate<wgpu::ExternalTextureBindingEntry>();
+      chain->externalTexture = in.externalTexture->get();
+      out.nextInChain = chain;
+      return true;
+    }
     return false;
   }
 

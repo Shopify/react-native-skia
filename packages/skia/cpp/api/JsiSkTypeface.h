@@ -7,7 +7,7 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkHostObjects.h"
-#include "RNSkLog.h"
+#include "utils/RNSkLog.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

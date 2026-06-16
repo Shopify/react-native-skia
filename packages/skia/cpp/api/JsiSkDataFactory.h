@@ -5,9 +5,9 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiPromises.h"
+#include "jsi/JsiPromises.h"
 #include "JsiSkData.h"
-#include "third_party/base64.h"
+#include "api/third_party/base64.h"
 
 namespace RNSkia {
 
