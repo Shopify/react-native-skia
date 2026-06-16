@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "Convertors.h"
+#include "NativeBufferUtils.h"
 #include "jsi2/JSIConverter.h"
 
 #include "GPUFeatures.h"
@@ -234,8 +235,34 @@ std::shared_ptr<GPUPipelineLayout> GPUDevice::createPipelineLayout(
 
 std::shared_ptr<GPUExternalTexture> GPUDevice::importExternalTexture(
     std::shared_ptr<GPUExternalTextureDescriptor> descriptor) {
-  throw std::runtime_error(
-      "GPUDevice::importExternalTexture(): Not implemented");
+  // The import / begin-access / descriptor-build logic, plus the matching
+  // EndAccess, all live on GPUExternalTexture so the begin/end lifecycle stays
+  // in one translation unit (see GPUExternalTexture.cpp).
+  return GPUExternalTexture::Create(_instance, std::move(descriptor));
+}
+
+std::shared_ptr<GPUSharedTextureMemory> GPUDevice::importSharedTextureMemory(
+    std::shared_ptr<GPUSharedTextureMemoryDescriptor> descriptor) {
+  if (!descriptor || descriptor->handle == 0) {
+    throw std::runtime_error(
+        "GPUDevice::importSharedTextureMemory(): handle must be a non-null "
+        "native buffer pointer (from Skia.NativeBuffer.MakeFromImage)");
+  }
+  void *bufferPtr =
+      reinterpret_cast<void *>(static_cast<uintptr_t>(descriptor->handle));
+  std::string label = descriptor->label.value_or("");
+
+  auto memory = importNativeBufferAsSharedTextureMemory(
+      _instance, bufferPtr, label, /*outWidth=*/nullptr, /*outHeight=*/nullptr);
+  if (memory == nullptr) {
+    throw std::runtime_error(
+        "GPUDevice::importSharedTextureMemory(): ImportSharedTextureMemory "
+        "returned null - is the 'shared-texture-memory-iosurface' (Apple) or "
+        "'shared-texture-memory-ahardware-buffer' (Android) feature enabled on "
+        "the device?");
+  }
+  return std::make_shared<GPUSharedTextureMemory>(std::move(memory),
+                                                  std::move(label));
 }
 
 async::AsyncTaskHandle GPUDevice::createComputePipelineAsync(

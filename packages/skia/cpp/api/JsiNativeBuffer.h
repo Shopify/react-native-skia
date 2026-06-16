@@ -24,6 +24,13 @@ public:
     return jsi::BigInt::fromUint64(runtime, pointer);
   }
 
+  JSI_HOST_FUNCTION(MakeTestBuffer) {
+    auto width = static_cast<int>(arguments[0].asNumber());
+    auto height = static_cast<int>(arguments[1].asNumber());
+    uint64_t pointer = getContext()->makeTestNativeBuffer(width, height);
+    return jsi::BigInt::fromUint64(runtime, pointer);
+  }
+
   JSI_HOST_FUNCTION(Release) {
 
     jsi::BigInt pointer = arguments[0].asBigInt(runtime);
@@ -34,7 +41,8 @@ public:
   }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiNativeBufferFactory, Release),
-                       JSI_EXPORT_FUNC(JsiNativeBufferFactory, MakeFromImage))
+                       JSI_EXPORT_FUNC(JsiNativeBufferFactory, MakeFromImage),
+                       JSI_EXPORT_FUNC(JsiNativeBufferFactory, MakeTestBuffer))
 
   size_t getMemoryPressure() const override { return 1024; }
 
