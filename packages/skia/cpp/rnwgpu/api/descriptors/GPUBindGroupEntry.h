@@ -20,7 +20,7 @@ struct GPUBindGroupEntry {
   std::shared_ptr<GPUSampler> sampler = nullptr;
   std::shared_ptr<GPUTextureView> textureView = nullptr;
   std::shared_ptr<GPUBufferBinding> buffer = nullptr;
-  // external textures
+  std::shared_ptr<GPUExternalTexture> externalTexture = nullptr;
 };
 
 } // namespace rnwgpu
@@ -45,6 +45,9 @@ template <> struct JSIConverter<std::shared_ptr<rnwgpu::GPUBindGroupEntry>> {
           } else if (obj.hasNativeState<rnwgpu::GPUTextureView>(runtime)) {
             result->textureView =
                 obj.getNativeState<rnwgpu::GPUTextureView>(runtime);
+          } else if (obj.hasNativeState<rnwgpu::GPUExternalTexture>(runtime)) {
+            result->externalTexture =
+                obj.getNativeState<rnwgpu::GPUExternalTexture>(runtime);
           } else if (obj.hasNativeState<rnwgpu::GPUBuffer>(runtime)) {
             auto binding = std::make_shared<rnwgpu::GPUBufferBinding>();
             binding->buffer = obj.getNativeState<rnwgpu::GPUBuffer>(runtime);

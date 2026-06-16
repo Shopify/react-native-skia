@@ -23,7 +23,7 @@ jobs:
       TURBO_CACHE_DIR: .turbo/android
     steps:
       - name: Checkout
-        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v5.0.0
         with:
           submodules: recursive
 
@@ -34,7 +34,7 @@ jobs:
           graphite: true
 
       - name: Free disk space
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
         with:
           tool-cache: false
           android: false
@@ -45,7 +45,7 @@ jobs:
           swap-storage: true
 
       - name: Cache turborepo for Android
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.TURBO_CACHE_DIR }}
           key: ${{ runner.os }}-turborepo-android-${{ hashFiles('yarn.lock') }}
@@ -59,7 +59,7 @@ jobs:
           java-version: '17'
 
       - name: Install NDK
-        uses: nttld/setup-ndk@afb4c9964b521afb97c864b7d40b11e6911bd410 # v1.5.0
+        uses: nttld/setup-ndk@ed92fe6cadad69be94a966a7ee3271275e62f779 # v1.6.0
         id: setup-ndk
         with:
           ndk-version: r27d
@@ -76,7 +76,7 @@ jobs:
           echo "sdk.dir=$ANDROID_HOME" > $GITHUB_WORKSPACE/apps/example/android/local.properties
 
       - name: Cache Gradle
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: |
             ~/.gradle/wrapper
@@ -92,7 +92,7 @@ jobs:
           yarn turbo run build:android --concurrency 1
 
       - name: Cache apk
-        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         env:
           cache-name: cache-apk
         with:
@@ -113,7 +113,7 @@ jobs:
       TURBO_CACHE_DIR: .turbo/android
     steps:
       - name: checkout
-        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v5.0.0
         with:
           submodules: recursive
 
@@ -124,7 +124,7 @@ jobs:
           graphite: true
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v4
+        uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4.0.1
 
       - name: Install Android SDK tools
         run: |
@@ -141,7 +141,7 @@ jobs:
 
       - name: Restore APK
         id: cache-apk
-        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae
         with:
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           key: apk-graphite-${{ github.sha }}
@@ -151,7 +151,7 @@ jobs:
         run: E2E=true yarn start &
 
       - name: Run Android Emulator Tests
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@e89f39f1abbbd05b1113a29cf4db69e7540cae5a # v2.37.0
         with:
           api-level: 30
           arch: x86_64
@@ -168,7 +168,15 @@ jobs:
             adb shell monkey -p com.microsoft.reacttestapp 1
 
             # Run tests
-            cd packages/skia && CI=true yarn test -i e2e/Path --testPathIgnorePatterns Paragraphs
+            # On Graphite we run the Path render tests plus the WebGPU specs.
+            # ArrayBuffer, ComputeShader, ErrorScope, ImageBitmapBounds and
+            # DawnToggles are pure surface.eval round-trips that assert on
+            # returned values. The external-texture specs (ExternalTexture,
+            # ImportExternalTexture, SharedTextureMemory) additionally exercise
+            # NativeBuffer import and GPU read-back; they self-validate via
+            # copyTextureToBuffer (not Skia image readPixels) and skip
+            # themselves where NativeBuffer/createImageBitmap are unavailable.
+            cd packages/skia && CI=true yarn test -i "e2e/(Path|ArrayBuffer|ComputeShader|ErrorScope|ImageBitmapBounds|DawnToggles|ExternalTexture|ImportExternalTexture|SharedTextureMemory)" --testPathIgnorePatterns Paragraphs
 
       - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.0
         if: failure()
@@ -188,7 +196,7 @@ jobs:
       TURBO_CACHE_DIR: .turbo/ios
     steps:
       - name: Checkout
-        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v5.0.0
         with:
           submodules: recursive
 
@@ -199,7 +207,7 @@ jobs:
           graphite: true
 
       - name: Cache turborepo for iOS
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ env.TURBO_CACHE_DIR }}
           key: ${{ runner.os }}-turborepo-ios-${{ hashFiles('yarn.lock') }}
@@ -228,4 +236,12 @@ jobs:
 
       - name: Run e2e tests
         working-directory: packages/skia
-        run: CI=true E2E=true yarn test -i Paths
+        # On Graphite we run the Paths render test plus the WebGPU specs.
+        # ArrayBuffer, ComputeShader, ErrorScope, ImageBitmapBounds and
+        # DawnToggles are pure surface.eval round-trips that assert on returned
+        # values. The external-texture specs (ExternalTexture,
+        # ImportExternalTexture, SharedTextureMemory) additionally exercise
+        # NativeBuffer import and GPU read-back; they self-validate via
+        # copyTextureToBuffer (not Skia image readPixels) and skip themselves
+        # where NativeBuffer/createImageBitmap are unavailable.
+        run: CI=true E2E=true yarn test -i "e2e/(Paths|ArrayBuffer|ComputeShader|ErrorScope|ImageBitmapBounds|DawnToggles|ExternalTexture|ImportExternalTexture|SharedTextureMemory)"
