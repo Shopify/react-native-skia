@@ -4,7 +4,8 @@ cmake_minimum_required(VERSION 3.4.1)
 set (CMAKE_VERBOSE_MAKEFILE ON)
 set (CMAKE_CXX_STANDARD 20)
 
-# SKIA_LIBS_PATH is passed from Gradle (pointing to libs/android/, populated by npm postinstall)
+# SKIA_LIBS_PATH is passed from Gradle (pointing at the prebuilt Skia binaries,
+# read straight from the react-native-skia-android npm package, or libs/android for Graphite)
 # Append the ABI to get the full path
 set (SKIA_LIBS_PATH "${SKIA_LIBS_PATH}/${ANDROID_ABI}")
 
@@ -17,12 +18,12 @@ if(NOT EXISTS "${SKIA_LIBS_PATH}/libskia.a")
     message("│                                                                             │")
     message("│  Could not find libskia.a at: ${SKIA_LIBS_PATH}                             │")
     message("│                                                                             │")
-    message("│  Run the following command to install them:                                  │")
-    message("│    npx install-skia                                                         │")
+    message("│  Make sure dependencies are installed:                                       │")
+    message("│    yarn install   (or npm install)                                          │")
     message("│                                                                             │")
     message("└─────────────────────────────────────────────────────────────────────────────┘")
     message("")
-    message(FATAL_ERROR "Skia prebuilt binaries not found. Run `npx install-skia` to fix this.")
+    message(FATAL_ERROR "Skia prebuilt binaries not found. Run `yarn install` to fix this.")
 endif()
 
 # Import libskia
@@ -134,12 +135,14 @@ if(SK_GRAPHITE)
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUComputePipeline.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUDevice.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUDeviceLostInfo.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUExternalTexture.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUQuerySet.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUQueue.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderBundleEncoder.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderPassEncoder.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderPipeline.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUShaderModule.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUSharedTextureMemory.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUSupportedLimits.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUTexture.cpp"
 
