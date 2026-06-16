@@ -37,6 +37,7 @@
 #include "GPURenderPipeline.h"
 #include "GPUSampler.h"
 #include "GPUShaderModule.h"
+#include "GPUSharedTextureMemory.h"
 #include "GPUSupportedLimits.h"
 #include "GPUTexture.h"
 #include "descriptors/GPUBindGroupDescriptor.h"
@@ -51,6 +52,7 @@
 #include "descriptors/GPURenderPipelineDescriptor.h"
 #include "descriptors/GPUSamplerDescriptor.h"
 #include "descriptors/GPUShaderModuleDescriptor.h"
+#include "descriptors/GPUSharedTextureMemoryDescriptor.h"
 #include "descriptors/GPUTextureDescriptor.h"
 
 namespace rnwgpu {
@@ -120,6 +122,8 @@ public:
       std::optional<std::shared_ptr<GPUSamplerDescriptor>> descriptor);
   std::shared_ptr<GPUExternalTexture> importExternalTexture(
       std::shared_ptr<GPUExternalTextureDescriptor> descriptor);
+  std::shared_ptr<GPUSharedTextureMemory> importSharedTextureMemory(
+      std::shared_ptr<GPUSharedTextureMemoryDescriptor> descriptor);
   std::shared_ptr<GPUBindGroupLayout> createBindGroupLayout(
       std::shared_ptr<GPUBindGroupLayoutDescriptor> descriptor);
   std::shared_ptr<GPUPipelineLayout>
@@ -173,6 +177,8 @@ public:
                   &GPUDevice::createSampler);
     installMethod(runtime, prototype, "importExternalTexture",
                   &GPUDevice::importExternalTexture);
+    installMethod(runtime, prototype, "importSharedTextureMemory",
+                  &GPUDevice::importSharedTextureMemory);
     installMethod(runtime, prototype, "createBindGroupLayout",
                   &GPUDevice::createBindGroupLayout);
     installMethod(runtime, prototype, "createPipelineLayout",
