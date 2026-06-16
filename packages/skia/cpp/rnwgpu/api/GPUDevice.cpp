@@ -265,6 +265,55 @@ std::shared_ptr<GPUSharedTextureMemory> GPUDevice::importSharedTextureMemory(
                                                   std::move(label));
 }
 
+std::shared_ptr<GPUSharedFence> GPUDevice::importSharedFence(
+    std::shared_ptr<GPUSharedFenceDescriptor> descriptor) {
+  if (!descriptor || descriptor->handle == nullptr) {
+    throw std::runtime_error("GPUDevice::importSharedFence(): handle must be a "
+                             "non-null native handle");
+  }
+
+  wgpu::SharedFenceDescriptor desc{};
+  std::string label = descriptor->label.value_or("");
+  if (!label.empty()) {
+    desc.label = wgpu::StringView(label.c_str(), label.size());
+  }
+
+  // The chained platform descriptor must outlive the synchronous
+  // ImportSharedFence() below; declare them all and chain the matching one.
+  wgpu::SharedFenceMTLSharedEventDescriptor mtlDesc{};
+  wgpu::SharedFenceSyncFDDescriptor syncFdDesc{};
+  wgpu::SharedFenceVkSemaphoreOpaqueFDDescriptor vkFdDesc{};
+
+  const std::string &type = descriptor->type;
+  if (type == "mtl-shared-event") {
+    // handle is an id<MTLSharedEvent> pointer.
+    mtlDesc.sharedEvent = descriptor->handle;
+    desc.nextInChain = &mtlDesc;
+  } else if (type == "sync-fd") {
+    // handle is an OS file descriptor.
+    syncFdDesc.handle =
+        static_cast<int>(reinterpret_cast<uintptr_t>(descriptor->handle));
+    desc.nextInChain = &syncFdDesc;
+  } else if (type == "vk-semaphore-opaque-fd") {
+    vkFdDesc.handle =
+        static_cast<int>(reinterpret_cast<uintptr_t>(descriptor->handle));
+    desc.nextInChain = &vkFdDesc;
+  } else {
+    throw std::runtime_error(
+        "GPUDevice::importSharedFence(): unsupported fence type '" + type +
+        "' (expected 'mtl-shared-event', 'sync-fd' or "
+        "'vk-semaphore-opaque-fd')");
+  }
+
+  auto fence = _instance.ImportSharedFence(&desc);
+  if (fence == nullptr) {
+    throw std::runtime_error(
+        "GPUDevice::importSharedFence(): ImportSharedFence returned null - is "
+        "the matching 'shared-fence-*' feature enabled on the device?");
+  }
+  return std::make_shared<GPUSharedFence>(std::move(fence), std::move(label));
+}
+
 async::AsyncTaskHandle GPUDevice::createComputePipelineAsync(
     std::shared_ptr<GPUComputePipelineDescriptor> descriptor) {
   wgpu::ComputePipelineDescriptor desc{};
