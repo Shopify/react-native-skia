@@ -150,6 +150,10 @@ export const examples = [
     screen: "Atlas",
     title: "🎯 Atlas",
   },
+  {
+    screen: "HDR",
+    title: "🌈 16-bit / HDR (iOS)",
+  },
 ] as const;
 
 const styles = StyleSheet.create({

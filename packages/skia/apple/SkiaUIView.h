@@ -42,5 +42,6 @@
 - (void)setOpaque:(bool)opaque;
 - (void)setNativeId:(size_t)nativeId;
 - (void)setUseP3ColorSpace:(bool)useP3ColorSpace;
+- (void)setPixelFormatString:(NSString *)pixelFormat;
 
 @end

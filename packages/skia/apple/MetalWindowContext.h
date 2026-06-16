@@ -3,6 +3,14 @@
 #import <MetalKit/MetalKit.h>
 
 #include "RNWindowContext.h"
+#include "WindowPixelFormat.h"
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
+#include "include/core/SkColorType.h"
+
+#pragma clang diagnostic pop
 
 class SkiaMetalContext;
 
@@ -10,7 +18,9 @@ class MetalWindowContext : public RNSkia::WindowContext {
 public:
   MetalWindowContext(GrDirectContext *directContext, id<MTLDevice> device,
                      id<MTLCommandQueue> commandQueue, CALayer *layer,
-                     int width, int height, bool useP3ColorSpace = true);
+                     int width, int height, bool useP3ColorSpace = true,
+                     RNSkia::WindowPixelFormat pixelFormat =
+                         RNSkia::WindowPixelFormat::BGRA8);
   ~MetalWindowContext() = default;
 
   sk_sp<SkSurface> getSurface() override;
@@ -37,4 +47,6 @@ private:
 #pragma clang diagnostic pop
   id<CAMetalDrawable> _currentDrawable = nil;
   bool _useP3ColorSpace = false;
+  RNSkia::WindowPixelFormat _pixelFormat = RNSkia::WindowPixelFormat::BGRA8;
+  SkColorType _skColorType = kBGRA_8888_SkColorType;
 };

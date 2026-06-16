@@ -98,7 +98,8 @@ void RNSkMetalCanvasProvider::setSize(int width, int height) {
   _ctx = RNSkia::DawnContext::getInstance().MakeWindow((__bridge void *)_layer,
                                                        w, h);
 #else
-  _ctx = MetalContext::getInstance().MakeWindow(_layer, w, h, _useP3ColorSpace);
+  _ctx = MetalContext::getInstance().MakeWindow(_layer, w, h, _useP3ColorSpace,
+                                                _pixelFormat);
 #endif
   _requestRedraw();
 }
@@ -107,4 +108,9 @@ CALayer *RNSkMetalCanvasProvider::getLayer() { return _layer; }
 
 void RNSkMetalCanvasProvider::setUseP3ColorSpace(bool useP3ColorSpace) {
   _useP3ColorSpace = useP3ColorSpace;
+}
+
+void RNSkMetalCanvasProvider::setPixelFormat(
+    RNSkia::WindowPixelFormat pixelFormat) {
+  _pixelFormat = pixelFormat;
 }

@@ -2,7 +2,13 @@ import type { SkSurface } from "./Surface";
 
 export const ColorSpace = {
   SRGB: "srgb",
+  SRGBLinear: "srgb-linear",
   DisplayP3: "display-p3",
+  DisplayP3Linear: "display-p3-linear",
+  Rec2020: "rec2020",
+  Rec2020Linear: "rec2020-linear",
+  Rec2020HLG: "rec2020-hlg",
+  Rec2020PQ: "rec2020-pq",
 } as const;
 
 export type ColorSpaceValue = (typeof ColorSpace)[keyof typeof ColorSpace];

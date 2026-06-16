@@ -69,6 +69,15 @@ export interface CanvasProps extends Omit<ViewProps, "onLayout"> {
   opaque?: boolean;
   onSize?: SharedValue<SkSize>;
   colorSpace?: "p3" | "srgb";
+  /**
+   * Pixel format of the on-screen drawable.
+   * - "bgra8" (default): 8-bit BGRA, sRGB or Display P3.
+   * - "bgra10": 10-bit BGRA (BGR10A2Unorm), Display P3. iOS only.
+   *   Higher precision than 8-bit (removes banding) but no values >1.0.
+   * - "rgba16f": half-float RGBA, extended linear Display P3, EDR HDR.
+   *    iOS only, requires an HDR-capable display.
+   */
+  pixelFormat?: "bgra8" | "bgra10" | "rgba16f";
   ref?: React.Ref<CanvasRef>;
   androidWarmup?: boolean;
   __destroyWebGLContextAfterRender?: boolean;
@@ -80,6 +89,7 @@ export const Canvas = ({
   children,
   onSize,
   colorSpace = "p3",
+  pixelFormat = "bgra8",
   androidWarmup = false,
   ref,
   onLayout,
@@ -180,6 +190,7 @@ export const Canvas = ({
       debug={debug}
       opaque={opaque}
       colorSpace={colorSpace}
+      pixelFormat={pixelFormat}
       androidWarmup={androidWarmup}
       onLayout={
         Platform.OS === "web" && (onSize || onLayout) ? onLayoutWeb : onLayout

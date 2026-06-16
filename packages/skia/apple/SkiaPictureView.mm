@@ -62,6 +62,7 @@ using namespace facebook::react;
     bool useP3 = true;
     [self setUseP3ColorSpace:useP3];
   }
+  [self setPixelFormatString:RCTNSStringFromString(newProps.pixelFormat)];
 }
 
 @end

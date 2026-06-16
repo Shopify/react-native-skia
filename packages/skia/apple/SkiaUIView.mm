@@ -8,6 +8,7 @@
 #include <vector>
 
 #import "RNSkManager.h"
+#import "WindowPixelFormat.h"
 
 @implementation SkiaUIView {
   std::shared_ptr<RNSkBaseAppleView> _impl;
@@ -18,6 +19,7 @@
   bool _debugMode;
   bool _opaque;
   bool _useP3ColorSpace;
+  RNSkia::WindowPixelFormat _pixelFormat;
   size_t _nativeId;
 }
 
@@ -76,6 +78,7 @@
       }
       _impl->getDrawView()->setShowDebugOverlays(_debugMode);
       _impl->setUseP3ColorSpace(_useP3ColorSpace);
+      _impl->setPixelFormat(_pixelFormat);
     }
   }
 }
@@ -173,6 +176,14 @@
   _useP3ColorSpace = useP3ColorSpace;
   if (_impl != nullptr) {
     _impl->setUseP3ColorSpace(_useP3ColorSpace);
+  }
+}
+
+- (void)setPixelFormatString:(NSString *)pixelFormat {
+  std::string name = pixelFormat ? std::string(pixelFormat.UTF8String) : "";
+  _pixelFormat = RNSkia::windowPixelFormatFromString(name);
+  if (_impl != nullptr) {
+    _impl->setPixelFormat(_pixelFormat);
   }
 }
 

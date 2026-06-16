@@ -2,6 +2,7 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { ImageLoading } from "../ImageLoading/ImageLoading";
+import { HDR } from "../HDR";
 
 import type { Routes } from "./Routes";
 import { List } from "./List";
@@ -311,6 +312,13 @@ export const API = () => {
         component={AtlasExample}
         options={{
           title: "🎯 Atlas",
+        }}
+      />
+      <Stack.Screen
+        name="HDR"
+        component={HDR}
+        options={{
+          title: "🌈 16-bit / HDR (iOS)",
         }}
       />
     </Stack.Navigator>
