@@ -7,17 +7,18 @@
 
 #include "webgpu/webgpu_cpp.h"
 
-#include "Convertors.h"
+#include "rnwgpu/api/Convertors.h"
 #include "jsi2/JSIConverter.h"
 
-#include "GPUOrigin2D.h"
+#include "rnwgpu/api/GPUOrigin2D.h"
+#include "rnwgpu/api/ImageBitmap.h"
 
 namespace jsi = facebook::jsi;
 
 namespace rnwgpu {
 
 struct GPUImageCopyExternalImage {
-  // std::shared_ptr<ImageBitmap> source; // GPUImageCopyExternalImageSource
+  std::shared_ptr<ImageBitmap> source; // GPUImageCopyExternalImageSource
   std::optional<std::shared_ptr<GPUOrigin2D>> origin; // GPUOrigin2DStrict
   std::optional<bool> flipY;                          // boolean
 };
@@ -33,12 +34,11 @@ struct JSIConverter<std::shared_ptr<rnwgpu::GPUImageCopyExternalImage>> {
     auto result = std::make_unique<rnwgpu::GPUImageCopyExternalImage>();
     if (!outOfBounds && arg.isObject()) {
       auto obj = arg.getObject(runtime);
-      //      if (obj.hasProperty(runtime, "source")) {
-      //        auto prop = obj.getProperty(runtime, "source");
-      //        result->source =
-      //        JSIConverter<std::shared_ptr<ImageBitmap>>::fromJSI(
-      //            runtime, prop, false);
-      //      }
+      if (obj.hasProperty(runtime, "source")) {
+        auto prop = obj.getProperty(runtime, "source");
+        result->source = JSIConverter<std::shared_ptr<ImageBitmap>>::fromJSI(
+            runtime, prop, false);
+      }
       if (obj.hasProperty(runtime, "origin")) {
         auto prop = obj.getProperty(runtime, "origin");
         result->origin = JSIConverter<std::shared_ptr<GPUOrigin2D>>::fromJSI(

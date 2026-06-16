@@ -109,9 +109,35 @@ async::AsyncTaskHandle GPUAdapter::requestDevice(
        deviceLostBinding,
        creationRuntime](const async::AsyncTaskHandle::ResolveFunction &resolve,
                         const async::AsyncTaskHandle::RejectFunction &reject) {
-        (void)descriptor;
+        // Build a local mutable copy so we can chain Dawn's device toggles.
+        // The toggle name strings are owned by `descriptor` (captured above),
+        // and the const char* / DawnTogglesDescriptor locals live for the
+        // whole synchronous RequestDevice call below, which is when Dawn reads
+        // the chained struct.
+        wgpu::DeviceDescriptor deviceDesc = aDescriptor;
+        wgpu::DawnTogglesDescriptor toggles{};
+        std::vector<const char *> enabledToggles;
+        std::vector<const char *> disabledToggles;
+        if (descriptor.has_value() && descriptor.value()->dawnToggles) {
+          const auto &dawnToggles = descriptor.value()->dawnToggles.value();
+          if (dawnToggles->enabledToggles) {
+            for (const auto &t : dawnToggles->enabledToggles.value()) {
+              enabledToggles.push_back(t.c_str());
+            }
+            toggles.enabledToggleCount = enabledToggles.size();
+            toggles.enabledToggles = enabledToggles.data();
+          }
+          if (dawnToggles->disabledToggles) {
+            for (const auto &t : dawnToggles->disabledToggles.value()) {
+              disabledToggles.push_back(t.c_str());
+            }
+            toggles.disabledToggleCount = disabledToggles.size();
+            toggles.disabledToggles = disabledToggles.data();
+          }
+          deviceDesc.nextInChain = &toggles;
+        }
         _instance.RequestDevice(
-            &aDescriptor, wgpu::CallbackMode::AllowProcessEvents,
+            &deviceDesc, wgpu::CallbackMode::AllowProcessEvents,
             [asyncRunner = _async, resolve, reject, label, creationRuntime,
              deviceLostBinding](wgpu::RequestDeviceStatus status,
                                 wgpu::Device device,
