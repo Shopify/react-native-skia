@@ -3,4 +3,5 @@ export type Routes = {
   Wireframes: undefined;
   Triangle: undefined;
   TexturedCube: undefined;
+  ImportExternalTexture: undefined;
 };
