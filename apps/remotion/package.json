@@ -14,7 +14,7 @@
   "repository": {},
   "license": "UNLICENSED",
   "dependencies": {
-    "@babel/core": "^7.20.2",
+    "@babel/core": "^7.29.6",
     "@babel/plugin-transform-flow-strip-types": "^7.25.9",
     "@babel/preset-env": "^7.20.2",
     "@babel/preset-typescript": "^7.18.6",
