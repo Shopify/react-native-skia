@@ -141,7 +141,7 @@ async::AsyncTaskHandle GPUAdapter::requestDevice(
             [asyncRunner = _async, resolve, reject, label, creationRuntime,
              deviceLostBinding](wgpu::RequestDeviceStatus status,
                                 wgpu::Device device,
-                                wgpu::StringView message) mutable {
+                                wgpu::StringView message) {
               if (message.length) {
                 fprintf(stderr, "%s", message.data);
               }
