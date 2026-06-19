@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "JsiSkHostObjects.h"
-#include "third_party/base64.h"
+#include "api/third_party/base64.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

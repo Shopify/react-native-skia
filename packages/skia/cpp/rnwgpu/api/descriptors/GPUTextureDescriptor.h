@@ -8,7 +8,7 @@
 
 #include "jsi2/JSIConverter.h"
 
-#include "GPUExtent3D.h"
+#include "rnwgpu/api/GPUExtent3D.h"
 
 namespace jsi = facebook::jsi;
 

@@ -5,7 +5,7 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
 
-#include "RNSkLog.h"
+#include "utils/RNSkLog.h"
 #include "include/core/SkColorType.h"
 #include "include/gpu/graphite/dawn/DawnBackendContext.h"
 
@@ -206,12 +206,22 @@ createDawnBackendContext(dawn::native::Instance *instance) {
       wgpu::FeatureName::ImplicitDeviceSynchronization,
 #ifdef __APPLE__
       wgpu::FeatureName::SharedTextureMemoryIOSurface,
+      // Required to call SharedTextureMemory::EndAccess on Metal (it exports a
+      // MTLSharedEvent fence). importExternalTexture / importSharedTextureMemory
+      // end the access window after submit; without this EndAccess errors with
+      // "Required feature (SharedFenceMTLSharedEvent) is missing". Safe here
+      // because we always queue.submit() before EndAccess (the secondary device
+      // omits it on purpose — its camera path doesn't commit first).
+      wgpu::FeatureName::SharedFenceMTLSharedEvent,
       wgpu::FeatureName::DawnMultiPlanarFormats,
       wgpu::FeatureName::MultiPlanarFormatP010,
       wgpu::FeatureName::MultiPlanarFormatP210,
       wgpu::FeatureName::MultiPlanarFormatExtendedUsages,
 #else
       wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer,
+      // Vulkan equivalent of the above: EndAccess exports a sync-fd fence.
+      wgpu::FeatureName::SharedFenceSyncFD,
+      wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD,
 #endif
   };
 

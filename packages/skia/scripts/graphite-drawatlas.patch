@@ -1,0 +1,57 @@
+../../packages/skia/scripts/graphite-drawatlas.patch From 4d25f90dae867435707631ce0e16d2f8899ae29d Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Fri, 19 Jun 2026 13:54:32 +0000
+Subject: [PATCH] Implement drawAtlas for the Graphite backend
+
+The Graphite Device overrode SkDevice::drawAtlas() with an empty no-op,
+so SkCanvas::drawAtlas() silently drew nothing on Graphite.
+
+drawAtlas is definitionally "drawVertices with an image shader": the
+canvas layer (SkCanvas::onDrawAtlas2) already installs the atlas image
+as the paint's shader, and SkDevice's default drawAtlas() expands the
+RSXform/tex/color spans into an SkVertices and forwards to drawVertices().
+Graphite already fully implements drawVertices() (per-vertex colors,
+primitive blender, and shader-sourced texture coordinates), so removing
+the no-op override lets the inherited implementation light the API up.
+
+This mirrors how Graphite already defers drawRegion and drawPatch to
+their default drawVertices/drawPath/drawRect routing instead of
+specializing them.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01LDRiP7kX2Wa8pD7ewEuhFf
+---
+ src/gpu/graphite/Device.h | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
+
+diff --git a/src/gpu/graphite/Device.h b/src/gpu/graphite/Device.h
+index c5669d2..8b5e9ad 100644
+--- a/src/gpu/graphite/Device.h
++++ b/src/gpu/graphite/Device.h
+@@ -210,8 +210,8 @@ public:
+     void drawPath(const SkPath& path, const SkPaint&) override;
+     void drawDRRect(const SkRRect& outer, const SkRRect& inner, const SkPaint&) override;
+ 
+-    // No need to specialize drawRegion or drawPatch as the default impls all route to drawPath,
+-    // drawRect, or drawVertices as desired.
++    // No need to specialize drawRegion, drawPatch, or drawAtlas as the default impls all route to
++    // drawPath, drawRect, or drawVertices as desired.
+ 
+     void drawEdgeAAQuad(const SkRect& rect, const SkPoint clip[4],
+                         SkCanvas::QuadAAFlags aaFlags, const SkColor4f& color,
+@@ -234,11 +234,9 @@ public:
+                               const SkSamplingOptions&,
+                               const SkPaint&,
+                               SkCanvas::SrcRectConstraint) override;
+-    // TODO: Implement these using per-edge AA quads and an inlined image shader program.
++    // TODO: Implement this using per-edge AA quads and an inlined image shader program.
+     void drawImageLattice(const SkImage*, const SkCanvas::Lattice&,
+                           const SkRect& dst, SkFilterMode, const SkPaint&) override {}
+-    void drawAtlas(SkSpan<const SkRSXform>, SkSpan<const SkRect>, SkSpan<const SkColor>,
+-                   sk_sp<SkBlender>, const SkPaint&) override {}
+ 
+     void drawDrawable(SkCanvas*, SkDrawable*, const SkMatrix*) override {}
+     void drawMesh(const SkMesh&, sk_sp<SkBlender>, const SkPaint&) override {}
+-- 
+2.43.0
+

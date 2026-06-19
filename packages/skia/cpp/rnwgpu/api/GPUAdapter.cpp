@@ -109,13 +109,39 @@ async::AsyncTaskHandle GPUAdapter::requestDevice(
        deviceLostBinding,
        creationRuntime](const async::AsyncTaskHandle::ResolveFunction &resolve,
                         const async::AsyncTaskHandle::RejectFunction &reject) {
-        (void)descriptor;
+        // Build a local mutable copy so we can chain Dawn's device toggles.
+        // The toggle name strings are owned by `descriptor` (captured above),
+        // and the const char* / DawnTogglesDescriptor locals live for the
+        // whole synchronous RequestDevice call below, which is when Dawn reads
+        // the chained struct.
+        wgpu::DeviceDescriptor deviceDesc = aDescriptor;
+        wgpu::DawnTogglesDescriptor toggles{};
+        std::vector<const char *> enabledToggles;
+        std::vector<const char *> disabledToggles;
+        if (descriptor.has_value() && descriptor.value()->dawnToggles) {
+          const auto &dawnToggles = descriptor.value()->dawnToggles.value();
+          if (dawnToggles->enabledToggles) {
+            for (const auto &t : dawnToggles->enabledToggles.value()) {
+              enabledToggles.push_back(t.c_str());
+            }
+            toggles.enabledToggleCount = enabledToggles.size();
+            toggles.enabledToggles = enabledToggles.data();
+          }
+          if (dawnToggles->disabledToggles) {
+            for (const auto &t : dawnToggles->disabledToggles.value()) {
+              disabledToggles.push_back(t.c_str());
+            }
+            toggles.disabledToggleCount = disabledToggles.size();
+            toggles.disabledToggles = disabledToggles.data();
+          }
+          deviceDesc.nextInChain = &toggles;
+        }
         _instance.RequestDevice(
-            &aDescriptor, wgpu::CallbackMode::AllowProcessEvents,
+            &deviceDesc, wgpu::CallbackMode::AllowProcessEvents,
             [asyncRunner = _async, resolve, reject, label, creationRuntime,
              deviceLostBinding](wgpu::RequestDeviceStatus status,
                                 wgpu::Device device,
-                                wgpu::StringView message) mutable {
+                                wgpu::StringView message) {
               if (message.length) {
                 fprintf(stderr, "%s", message.data);
               }
@@ -128,10 +154,13 @@ async::AsyncTaskHandle GPUAdapter::requestDevice(
                 return;
               }
 
+              // SetLoggingCallback is a repeatable callback (no callback mode),
+              // which rejects capturing lambdas. Pass the runtime pointer
+              // through Dawn's userdata argument instead of capturing it.
               device.SetLoggingCallback(
-                  [creationRuntime](wgpu::LoggingType type,
-                                    wgpu::StringView msg) {
-                    if (creationRuntime == nullptr) {
+                  [](wgpu::LoggingType type, wgpu::StringView msg,
+                     jsi::Runtime *runtime) {
+                    if (runtime == nullptr) {
                       return;
                     }
                     const char *logLevel = "";
@@ -157,7 +186,8 @@ async::AsyncTaskHandle GPUAdapter::requestDevice(
                       fprintf(stderr, "%s: %.*s\n", logLevel,
                               static_cast<int>(msg.length), msg.data);
                     }
-                  });
+                  },
+                  creationRuntime);
 
               auto deviceHost = std::make_shared<GPUDevice>(std::move(device),
                                                             asyncRunner, label);

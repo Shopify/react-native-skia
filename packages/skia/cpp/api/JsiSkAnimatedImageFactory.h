@@ -5,7 +5,7 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiPromises.h"
+#include "jsi/JsiPromises.h"
 #include "JsiSkAnimatedImage.h"
 #include "JsiSkData.h"
 #include "JsiSkHostObjects.h"
