@@ -141,7 +141,7 @@ async::AsyncTaskHandle GPUAdapter::requestDevice(
             [context = _async, resolve, reject, label, creationRuntime,
              deviceLostBinding](wgpu::RequestDeviceStatus status,
                                 wgpu::Device device,
-                                wgpu::StringView message) mutable {
+                                wgpu::StringView message) {
               if (message.length) {
                 fprintf(stderr, "%s", message.data);
               }
@@ -154,10 +154,13 @@ async::AsyncTaskHandle GPUAdapter::requestDevice(
                 return;
               }
 
+              // SetLoggingCallback is a repeatable callback (no callback mode),
+              // which rejects capturing lambdas. Pass the runtime pointer
+              // through Dawn's userdata argument instead of capturing it.
               device.SetLoggingCallback(
-                  [creationRuntime](wgpu::LoggingType type,
-                                    wgpu::StringView msg) {
-                    if (creationRuntime == nullptr) {
+                  [](wgpu::LoggingType type, wgpu::StringView msg,
+                     jsi::Runtime *runtime) {
+                    if (runtime == nullptr) {
                       return;
                     }
                     const char *logLevel = "";
@@ -183,7 +186,8 @@ async::AsyncTaskHandle GPUAdapter::requestDevice(
                       fprintf(stderr, "%s: %.*s\n", logLevel,
                               static_cast<int>(msg.length), msg.data);
                     }
-                  });
+                  },
+                  creationRuntime);
 
               auto deviceHost = std::make_shared<GPUDevice>(std::move(device),
                                                             context, label);

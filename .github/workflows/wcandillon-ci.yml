@@ -1,4 +1,10 @@
-name: CI
+# OWNER: wcandillon/react-native-skia
+# RUNNER: macOS jobs (test, build-test-ios, build-test-macos) run on the
+#   self-hosted macOS runner; they serialize naturally since there is a single
+#   runner. Ubuntu jobs stay on GitHub-hosted runners.
+# NOTE: Windows build and package e2e tests are intentionally NOT part of this
+#   automatic CI - they are dispatched manually (see dedicated workflows).
+name: wcandillon - CI
 on:
   push:
     branches:
@@ -13,12 +19,12 @@ on:
       - checks_requested
 
 concurrency:
-  group: ${{ github.ref }}
+  group: wcandillon-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   lint:
-    if: ${{ github.repository == 'shopify/react-native-skia' }}
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,19 +44,6 @@ jobs:
       - name: Install clang-format
         run: sudo apt-get update && sudo apt-get install -y clang-format-18
 
-      # - name: Clang Format Check
-      #   working-directory: packages/skia
-      #   run: |
-      #     yarn clang-format
-      #     if [[ `git status --porcelain` ]]; then
-      #       echo "ERROR: clang-format would modify files. Please run 'yarn clang-format' and commit the changes."
-      #       echo "Files that would be modified:"
-      #       git status --porcelain
-      #       echo "Diff of changes:"
-      #       git diff
-      #       exit 1
-      #     fi
-
       - name: Lint files
         run: yarn lint
 
@@ -58,8 +51,8 @@ jobs:
         run: yarn tsc
 
   test:
-    if: ${{ github.repository == 'shopify/react-native-skia' }}
-    runs-on: macos-latest
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
+    runs-on: [self-hosted, macOS]
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v5.0.0
@@ -75,7 +68,7 @@ jobs:
         run: yarn test
 
   build-library:
-    if: ${{ github.repository == 'shopify/react-native-skia' }}
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
     runs-on: ubuntu-latest
     outputs:
       run_id: ${{ github.run_id }}
@@ -111,46 +104,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  test-package-e2e:
-    if: ${{ github.repository == 'shopify/react-native-skia' }}
-    needs: build-library
-    uses: ./.github/workflows/test-skia-package.yml
-    with:
-      skia_version: artifact:${{ needs.build-library.outputs.run_id }}
-      test_ios: true
-      test_android: true
-      test_web: true
-
-  test-package-e2e-static-frameworks:
-    if: ${{ github.repository == 'shopify/react-native-skia' }}
-    needs: build-library
-    uses: ./.github/workflows/test-skia-package.yml
-    with:
-      skia_version: artifact:${{ needs.build-library.outputs.run_id }}
-      test_ios: true
-      test_android: false
-      test_web: false
-      ios_use_frameworks: static
-
-  build-windows-library:
-    if: ${{ github.repository == 'shopify/react-native-skia' }}
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v5.0.0
-        with:
-          submodules: recursive
-
-      - name: Setup
-        uses: ./.github/actions/setup
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build package
-        run: yarn build
-
   build-android:
-    if: ${{ github.repository == 'shopify/react-native-skia' }}
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
     runs-on: ubuntu-latest
     env:
       TURBO_CACHE_DIR: .turbo/android
@@ -196,7 +151,7 @@ jobs:
         id: setup-ndk
         with:
           ndk-version: r27d
-  
+
       - name: Set ANDROID_NDK
         run: echo "ANDROID_NDK=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
 
@@ -239,7 +194,7 @@ jobs:
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
 
   test-android:
-    if: ${{ github.repository == 'shopify/react-native-skia' }}
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
     needs: build-android
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -258,14 +213,14 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4.0.1
-        
+
       - name: Install Android SDK tools
         run: |
           echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
           echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
           echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
           echo "$ANDROID_HOME/emulator" >> $GITHUB_PATH
-        
+
       - name: Enable KVM group perms
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -295,11 +250,11 @@ jobs:
           script: |
             # Wait for Metro bundler
             sleep 10
-            
+
             # Install and launch app
             adb install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk
             adb shell monkey -p com.microsoft.reacttestapp 1
-            
+
             # Run tests
             cd packages/skia && CI=true yarn e2e --testPathIgnorePatterns Paragraphs
 
@@ -316,8 +271,8 @@ jobs:
           name: tests-docs-screenshots
 
   build-test-ios:
-    if: ${{ github.repository == 'shopify/react-native-skia' }}
-    runs-on: macos-latest-xlarge
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
+    runs-on: [self-hosted, macOS]
     env:
       TURBO_CACHE_DIR: .turbo/ios
     steps:
@@ -354,7 +309,7 @@ jobs:
       - name: Start Package Manager
         working-directory: apps/example
         run: E2E=true yarn start &
-  
+
       - name: Build example for iOS
         working-directory: apps/example
         run: yarn ios --simulator 'iPhone 16 Pro'
@@ -364,8 +319,8 @@ jobs:
         run: CI=true yarn e2e
 
   build-test-macos:
-    if: ${{ github.repository == 'shopify/react-native-skia' }}
-    runs-on: macos-latest
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
+    runs-on: [self-hosted, macOS]
     env:
       TURBO_CACHE_DIR: .turbo/macos
     steps:
@@ -389,24 +344,3 @@ jobs:
 
       - name: Build example for macOS
         run: yarn turbo run build:macos --concurrency 1
-
-  # build-test-macos-catalyst:
-  #   runs-on: macos-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v5.0.0
-  #       with:
-  #         submodules: recursive
-
-  #     - name: Setup
-  #       uses: ./.github/actions/setup
-  #       with:
-  #         github_token: ${{ secrets.GITHUB_TOKEN }}
-
-  #     - name: Install CocoaPods and enable Catalyst
-  #       working-directory: apps/example
-  #       run: yarn pod:install:catalyst
-
-  #     - name: Build example for macOS Catalyst
-  #       working-directory: apps/example/ios
-  #       run: xcodebuild -workspace example.xcworkspace -scheme ReactTestApp -destination 'platform=macOS,arch=arm64,variant=Mac Catalyst' -configuration Debug build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO

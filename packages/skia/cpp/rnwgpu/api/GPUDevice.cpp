@@ -350,7 +350,7 @@ async::AsyncTaskHandle GPUDevice::createComputePipelineAsync(
         &desc, wgpu::CallbackMode::AllowProcessEvents,
         [pipelineHolder, resolve,
          reject](wgpu::CreatePipelineAsyncStatus status,
-                 wgpu::ComputePipeline pipeline, const char *msg) mutable {
+                 wgpu::ComputePipeline pipeline, wgpu::StringView msg) {
           if (status == wgpu::CreatePipelineAsyncStatus::Success && pipeline) {
             pipelineHolder->_instance = pipeline;
             resolve([pipelineHolder](jsi::Runtime &runtime) mutable {
@@ -359,7 +359,8 @@ async::AsyncTaskHandle GPUDevice::createComputePipelineAsync(
             });
           } else {
             std::string error =
-                msg ? std::string(msg) : "Failed to create compute pipeline";
+                msg.length ? std::string(msg.data, msg.length)
+                           : "Failed to create compute pipeline";
             reject(std::move(error));
           }
         });
@@ -391,7 +392,7 @@ async::AsyncTaskHandle GPUDevice::createRenderPipelineAsync(
         &desc, wgpu::CallbackMode::AllowProcessEvents,
         [pipelineHolder, resolve,
          reject](wgpu::CreatePipelineAsyncStatus status,
-                 wgpu::RenderPipeline pipeline, const char *msg) mutable {
+                 wgpu::RenderPipeline pipeline, wgpu::StringView msg) {
           if (status == wgpu::CreatePipelineAsyncStatus::Success && pipeline) {
             pipelineHolder->_instance = pipeline;
             resolve([pipelineHolder](jsi::Runtime &runtime) mutable {
@@ -400,7 +401,8 @@ async::AsyncTaskHandle GPUDevice::createRenderPipelineAsync(
             });
           } else {
             std::string error =
-                msg ? std::string(msg) : "Failed to create render pipeline";
+                msg.length ? std::string(msg.data, msg.length)
+                           : "Failed to create render pipeline";
             reject(std::move(error));
           }
         });

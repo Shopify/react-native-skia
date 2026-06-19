@@ -139,9 +139,6 @@ std::unordered_set<std::string> GPU::getWgslLanguageFeatures() {
     case wgpu::WGSLLanguageFeatureName::BufferView:
       name = "buffer_view";
       break;
-    case wgpu::WGSLLanguageFeatureName::FilteringParameters:
-      name = "filtering_parameters";
-      break;
     case wgpu::WGSLLanguageFeatureName::SwizzleAssignment:
       name = "swizzle_assignment";
       break;
