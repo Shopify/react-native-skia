@@ -78,9 +78,8 @@ describe("SharedTextureMemory", () => {
               label: "test-frame",
             });
             const texture = memory.createTexture();
-            if (!memory.beginAccess(texture, true)) {
-              throw new Error("beginAccess returned false");
-            }
+            // beginAccess returns void and throws on failure.
+            memory.beginAccess(texture, true);
 
             const module = device.createShaderModule({ code: shader });
             const format: GPUTextureFormat = "rgba8unorm";
@@ -198,9 +197,8 @@ describe("SharedTextureMemory", () => {
               label: "test-frame",
             });
             const texture = memory.createTexture();
-            if (!memory.beginAccess(texture, true)) {
-              throw new Error("beginAccess returned false");
-            }
+            // beginAccess returns void and throws on failure.
+            memory.beginAccess(texture, true);
 
             const module = device.createShaderModule({ code: shader });
             const format: GPUTextureFormat = "rgba8unorm";

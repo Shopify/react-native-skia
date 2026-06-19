@@ -142,6 +142,7 @@ if(SK_GRAPHITE)
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderPassEncoder.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderPipeline.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUShaderModule.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUSharedFence.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUSharedTextureMemory.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUSupportedLimits.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUTexture.cpp"
