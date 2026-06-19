@@ -66,7 +66,18 @@ export const checkImage = (
   const options = { ...defaultCheckImageOptions, ...opts };
   const { overwrite, threshold, mute, maxPixelDiff, shouldFail } = options;
   const png = image.encodeToBytes();
-  const p = path.resolve(__dirname, relPath);
+  let p = path.resolve(__dirname, relPath);
+  // Some Skia APIs render differently on the Graphite (Dawn/WebGPU) backend
+  // than on Ganesh. When a backend-specific baseline (…-graphite.png) exists we
+  // compare against it; otherwise we fall back to the shared baseline. With
+  // `overwrite` we always target the Graphite-specific file so its baseline can
+  // be (re)generated without touching the Ganesh one.
+  if (GRAPHITE) {
+    const graphitePath = p.replace(/\.png$/, "-graphite.png");
+    if (overwrite || fs.existsSync(graphitePath)) {
+      p = graphitePath;
+    }
+  }
   if (fs.existsSync(p) && !overwrite) {
     const ref = fs.readFileSync(p);
     const baseline = PNG.sync.read(ref);
