@@ -4,7 +4,7 @@
 #   runner. Ubuntu jobs stay on GitHub-hosted runners.
 # NOTE: Windows build and package e2e tests are intentionally NOT part of this
 #   automatic CI - they are dispatched manually (see dedicated workflows).
-name: 🙋‍♂️ CI
+name: wcandillon - CI
 on:
   push:
     branches:

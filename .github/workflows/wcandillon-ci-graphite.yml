@@ -1,7 +1,7 @@
 # OWNER: wcandillon/react-native-skia
 # RUNNER: the iOS Graphite job runs on the self-hosted macOS runner; the
 #   Android Graphite jobs stay on GitHub-hosted Ubuntu runners.
-name: 🙋‍♂️ CI Graphite
+name: wcandillon - CI Graphite
 on:
   push:
     branches:
