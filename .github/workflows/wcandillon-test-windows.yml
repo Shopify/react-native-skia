@@ -1,7 +1,7 @@
 # OWNER: wcandillon/react-native-skia
 # Manual-dispatch Windows build check. Mirrors the build-windows-library job
 # that used to live in CI. Runs on a GitHub-hosted windows-latest runner.
-name: 🙋‍♂️ Test Windows
+name: wcandillon - Test Windows
 on:
   workflow_dispatch:
 

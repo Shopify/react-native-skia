@@ -3,7 +3,7 @@
 #   concurrency group with wcandillon-build-skia-graphite so the two never
 #   build in parallel on the single runner. The build matrix runs one target
 #   at a time (max-parallel: 1) for the same reason.
-name: 🙋‍♂️ Build SKIA
+name: wcandillon - Build SKIA
 on:
   workflow_dispatch:
     inputs:
