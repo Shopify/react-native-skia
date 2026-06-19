@@ -14,7 +14,7 @@
 #include "JsiSkPoint.h"
 #include "JsiSkRRect.h"
 #include "JsiSkRect.h"
-#include "RNSkLog.h"
+#include "utils/RNSkLog.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

@@ -15,7 +15,7 @@
 #include "JsiSkImage.h"
 
 #if defined(SK_GRAPHITE)
-#include "RNDawnContext.h"
+#include "rnskia/RNDawnContext.h"
 #endif
 
 #pragma clang diagnostic push
@@ -72,8 +72,12 @@ public:
   }
 
   JSI_HOST_FUNCTION(getCanvas) {
+    auto surface = getObject();
     auto canvas =
-        std::make_shared<JsiSkCanvas>(getContext(), getObject()->getCanvas());
+        std::make_shared<JsiSkCanvas>(getContext(), surface->getCanvas());
+    // Keep a reference to the owning surface so the canvas can read pixels back
+    // through a snapshot on Graphite (which lacks synchronous canvas readback).
+    canvas->setSurface(surface);
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, canvas,
                                                        getContext());
   }
@@ -81,8 +85,12 @@ public:
   JSI_HOST_FUNCTION(flush) {
     auto surface = getObject();
 #if defined(SK_GRAPHITE)
-    auto recording = surface->recorder()->snap();
-    DawnContext::getInstance().submitRecording(recording.get());
+    // A raster surface (e.g. Skia.Surface.Make) has no Graphite recorder;
+    // only Graphite-backed surfaces need to snap and submit a recording.
+    if (auto *recorder = surface->recorder()) {
+      auto recording = recorder->snap();
+      DawnContext::getInstance().submitRecording(recording.get());
+    }
 #else
     if (auto dContext = GrAsDirectContext(surface->recordingContext())) {
       dContext->flushAndSubmit();
@@ -102,8 +110,12 @@ public:
       image = surface->makeImageSnapshot();
     }
 #if defined(SK_GRAPHITE)
-    auto recording = surface->recorder()->snap();
-    DawnContext::getInstance().submitRecording(recording.get());
+    // A raster surface (e.g. Skia.Surface.Make) has no Graphite recorder; its
+    // snapshot is already a valid CPU image, so skip the recording submit.
+    if (auto *recorder = surface->recorder()) {
+      auto recording = recorder->snap();
+      DawnContext::getInstance().submitRecording(recording.get());
+    }
 #endif
     if (count > 1 && arguments[1].isObject()) {
       auto jsiImage =

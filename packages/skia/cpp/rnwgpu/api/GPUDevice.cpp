@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "Convertors.h"
+#include "NativeBufferUtils.h"
 #include "jsi2/JSIConverter.h"
 
 #include "GPUFeatures.h"
@@ -234,8 +235,83 @@ std::shared_ptr<GPUPipelineLayout> GPUDevice::createPipelineLayout(
 
 std::shared_ptr<GPUExternalTexture> GPUDevice::importExternalTexture(
     std::shared_ptr<GPUExternalTextureDescriptor> descriptor) {
-  throw std::runtime_error(
-      "GPUDevice::importExternalTexture(): Not implemented");
+  // The import / begin-access / descriptor-build logic, plus the matching
+  // EndAccess, all live on GPUExternalTexture so the begin/end lifecycle stays
+  // in one translation unit (see GPUExternalTexture.cpp).
+  return GPUExternalTexture::Create(_instance, std::move(descriptor));
+}
+
+std::shared_ptr<GPUSharedTextureMemory> GPUDevice::importSharedTextureMemory(
+    std::shared_ptr<GPUSharedTextureMemoryDescriptor> descriptor) {
+  if (!descriptor || descriptor->handle == 0) {
+    throw std::runtime_error(
+        "GPUDevice::importSharedTextureMemory(): handle must be a non-null "
+        "native buffer pointer (from Skia.NativeBuffer.MakeFromImage)");
+  }
+  void *bufferPtr =
+      reinterpret_cast<void *>(static_cast<uintptr_t>(descriptor->handle));
+  std::string label = descriptor->label.value_or("");
+
+  auto memory = importNativeBufferAsSharedTextureMemory(
+      _instance, bufferPtr, label, /*outWidth=*/nullptr, /*outHeight=*/nullptr);
+  if (memory == nullptr) {
+    throw std::runtime_error(
+        "GPUDevice::importSharedTextureMemory(): ImportSharedTextureMemory "
+        "returned null - is the 'shared-texture-memory-iosurface' (Apple) or "
+        "'shared-texture-memory-ahardware-buffer' (Android) feature enabled on "
+        "the device?");
+  }
+  return std::make_shared<GPUSharedTextureMemory>(std::move(memory),
+                                                  std::move(label));
+}
+
+std::shared_ptr<GPUSharedFence> GPUDevice::importSharedFence(
+    std::shared_ptr<GPUSharedFenceDescriptor> descriptor) {
+  if (!descriptor || descriptor->handle == nullptr) {
+    throw std::runtime_error("GPUDevice::importSharedFence(): handle must be a "
+                             "non-null native handle");
+  }
+
+  wgpu::SharedFenceDescriptor desc{};
+  std::string label = descriptor->label.value_or("");
+  if (!label.empty()) {
+    desc.label = wgpu::StringView(label.c_str(), label.size());
+  }
+
+  // The chained platform descriptor must outlive the synchronous
+  // ImportSharedFence() below; declare them all and chain the matching one.
+  wgpu::SharedFenceMTLSharedEventDescriptor mtlDesc{};
+  wgpu::SharedFenceSyncFDDescriptor syncFdDesc{};
+  wgpu::SharedFenceVkSemaphoreOpaqueFDDescriptor vkFdDesc{};
+
+  const std::string &type = descriptor->type;
+  if (type == "mtl-shared-event") {
+    // handle is an id<MTLSharedEvent> pointer.
+    mtlDesc.sharedEvent = descriptor->handle;
+    desc.nextInChain = &mtlDesc;
+  } else if (type == "sync-fd") {
+    // handle is an OS file descriptor.
+    syncFdDesc.handle =
+        static_cast<int>(reinterpret_cast<uintptr_t>(descriptor->handle));
+    desc.nextInChain = &syncFdDesc;
+  } else if (type == "vk-semaphore-opaque-fd") {
+    vkFdDesc.handle =
+        static_cast<int>(reinterpret_cast<uintptr_t>(descriptor->handle));
+    desc.nextInChain = &vkFdDesc;
+  } else {
+    throw std::runtime_error(
+        "GPUDevice::importSharedFence(): unsupported fence type '" + type +
+        "' (expected 'mtl-shared-event', 'sync-fd' or "
+        "'vk-semaphore-opaque-fd')");
+  }
+
+  auto fence = _instance.ImportSharedFence(&desc);
+  if (fence == nullptr) {
+    throw std::runtime_error(
+        "GPUDevice::importSharedFence(): ImportSharedFence returned null - is "
+        "the matching 'shared-fence-*' feature enabled on the device?");
+  }
+  return std::make_shared<GPUSharedFence>(std::move(fence), std::move(label));
 }
 
 async::AsyncTaskHandle GPUDevice::createComputePipelineAsync(
@@ -262,7 +338,7 @@ async::AsyncTaskHandle GPUDevice::createComputePipelineAsync(
         &desc, wgpu::CallbackMode::AllowProcessEvents,
         [pipelineHolder, resolve,
          reject](wgpu::CreatePipelineAsyncStatus status,
-                 wgpu::ComputePipeline pipeline, const char *msg) mutable {
+                 wgpu::ComputePipeline pipeline, wgpu::StringView msg) {
           if (status == wgpu::CreatePipelineAsyncStatus::Success && pipeline) {
             pipelineHolder->_instance = pipeline;
             resolve([pipelineHolder](jsi::Runtime &runtime) mutable {
@@ -271,7 +347,8 @@ async::AsyncTaskHandle GPUDevice::createComputePipelineAsync(
             });
           } else {
             std::string error =
-                msg ? std::string(msg) : "Failed to create compute pipeline";
+                msg.length ? std::string(msg.data, msg.length)
+                           : "Failed to create compute pipeline";
             reject(std::move(error));
           }
         });
@@ -303,7 +380,7 @@ async::AsyncTaskHandle GPUDevice::createRenderPipelineAsync(
         &desc, wgpu::CallbackMode::AllowProcessEvents,
         [pipelineHolder, resolve,
          reject](wgpu::CreatePipelineAsyncStatus status,
-                 wgpu::RenderPipeline pipeline, const char *msg) mutable {
+                 wgpu::RenderPipeline pipeline, wgpu::StringView msg) {
           if (status == wgpu::CreatePipelineAsyncStatus::Success && pipeline) {
             pipelineHolder->_instance = pipeline;
             resolve([pipelineHolder](jsi::Runtime &runtime) mutable {
@@ -312,7 +389,8 @@ async::AsyncTaskHandle GPUDevice::createRenderPipelineAsync(
             });
           } else {
             std::string error =
-                msg ? std::string(msg) : "Failed to create render pipeline";
+                msg.length ? std::string(msg.data, msg.length)
+                           : "Failed to create render pipeline";
             reject(std::move(error));
           }
         });
