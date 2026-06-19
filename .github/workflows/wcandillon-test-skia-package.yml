@@ -2,7 +2,7 @@
 # Fork copy of test-skia-package.yml. Only difference: the package artifact is
 # downloaded from the calling repository (github.repository) instead of being
 # hardcoded to Shopify/react-native-skia. Jobs run on GitHub-hosted macOS.
-name: 🙋‍♂️ Test Skia Package (Reusable)
+name: wcandillon - Test Skia Package (Reusable)
 
 on:
   workflow_call:

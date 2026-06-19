@@ -4,7 +4,7 @@
 # iOS / Android / Web. Mirrors the test-package-e2e jobs that used to live in
 # CI. The macOS test jobs run on GitHub-hosted runners (see
 # wcandillon-test-skia-package.yml).
-name: 🙋‍♂️ Test Package
+name: wcandillon - Test Package
 on:
   workflow_dispatch:
     inputs:
