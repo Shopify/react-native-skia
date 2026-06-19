@@ -9706,10 +9706,10 @@ __metadata:
     react-native: 0.83.1
     react-native-builder-bob: 0.18.2
     react-native-reanimated: 4.3.1
-    react-native-skia-android: 147.1.0
-    react-native-skia-apple-ios: 147.1.0
-    react-native-skia-apple-macos: 147.1.0
-    react-native-skia-apple-tvos: 147.1.0
+    react-native-skia-android: 150.0.0
+    react-native-skia-apple-ios: 150.0.0
+    react-native-skia-apple-macos: 150.0.0
+    react-native-skia-apple-tvos: 150.0.0
     react-native-worklets: 0.8.3
     react-reconciler: 0.31.0
     rimraf: 3.0.2
@@ -30883,31 +30883,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-skia-android@npm:147.1.0":
-  version: 147.1.0
-  resolution: "react-native-skia-android@npm:147.1.0"
-  checksum: 1aca3e311db852a7cc3adce31169cf8dda3e68b3812453b86296d0c27e577438ac4344cd26d25c09329faff470bcdd04c16da547904164677e435ac770c00bc3
+"react-native-skia-android@npm:150.0.0":
+  version: 150.0.0
+  resolution: "react-native-skia-android@npm:150.0.0"
+  checksum: e33eecf360925bc0402c1d6b0db5845f2a38d19244f9c128b7c208abb7dc2c07158cdfcd0c998c31271075ce8ad8a3b1bed329cd010a9df9a3ae58a752e8fded
   languageName: node
   linkType: hard
 
-"react-native-skia-apple-ios@npm:147.1.0":
-  version: 147.1.0
-  resolution: "react-native-skia-apple-ios@npm:147.1.0"
-  checksum: 704d86ebb038b472cc294267893bee1cc733695515dbe87d43edddbc89ccbef9f6a49d0dfe374849230637af304746f341ddce1c5c85e95f3d6d6b6d3520ce6e
+"react-native-skia-apple-ios@npm:150.0.0":
+  version: 150.0.0
+  resolution: "react-native-skia-apple-ios@npm:150.0.0"
+  checksum: d96bfdf9b5bd8eb038b29b4949f591acd9064b00e8d4229f8932b8a9e7bbcf206c6e57a32f1ad0ba6b58ff033388a6dbe059f73d9eb91686afb0f8a3742e5392
   languageName: node
   linkType: hard
 
-"react-native-skia-apple-macos@npm:147.1.0":
-  version: 147.1.0
-  resolution: "react-native-skia-apple-macos@npm:147.1.0"
-  checksum: 4a6f3e1bcae8950de0cd94f9b5958f91c61e2ac41c178d66df2a933451be16bd4aa06191d70317dd07a4e095b775341532d2f7aefa424a8b4f01bf6fed88a503
+"react-native-skia-apple-macos@npm:150.0.0":
+  version: 150.0.0
+  resolution: "react-native-skia-apple-macos@npm:150.0.0"
+  checksum: 0963df1f238a03a6390e9c11eb3cc662a81db5ad2daee77eb7555f35f4ccf06ac32e94c37d42704a33bf8b09d1ebb31193361a5183662df29b9e28f10aa6937d
   languageName: node
   linkType: hard
 
-"react-native-skia-apple-tvos@npm:147.1.0":
-  version: 147.1.0
-  resolution: "react-native-skia-apple-tvos@npm:147.1.0"
-  checksum: 5af05fe914e641f2488ac719aa1763ae2850efaea785b12febdf67ee7594c7b340d2d2cd36870ceb056a249d72b40d34500c5da11dba9fdef26a5652c4ff04f8
+"react-native-skia-apple-tvos@npm:150.0.0":
+  version: 150.0.0
+  resolution: "react-native-skia-apple-tvos@npm:150.0.0"
+  checksum: c96428599c75febf5f0ea9a9282d28dd100be1ddc5953cbd6afc845379ef24de2fd3e8f3643a16c1d864b395ce225f01e35621e613e88edcb5b0b9ba78011a3e
   languageName: node
   linkType: hard
 
