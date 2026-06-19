@@ -1,10 +1,6 @@
 import React from "react";
 
-import {
-  checkImage,
-  describeSkipsGraphite,
-  docPath,
-} from "../../../__tests__/setup";
+import { checkImage, docPath } from "../../../__tests__/setup";
 import { importSkia, surface } from "../setup";
 import { Atlas, Circle, Group, Rect } from "../../components";
 
@@ -56,8 +52,7 @@ const createColorBlendTestData = (
   return { sprites, transforms, colors };
 };
 
-// The drawAtlas API is not implemented in the Graphite backend yet.
-describeSkipsGraphite("Atlas", () => {
+describe("Atlas", () => {
   it("should read the RSXform properties", async () => {
     const result = await surface.eval((Skia) => {
       const transform = Skia.RSXform(1, 2, 3, 4);
