@@ -47,7 +47,7 @@ public:
                        JSI_EXPORT_FUNC(JsiSkContourMeasureIter, dispose))
 
   size_t getMemoryPressure() const override {
-    return sizeof(SkContourMeasureIter);
+    return std::max(sizeof(SkContourMeasureIter), kMinMemoryPressure);
   }
 
   std::string getObjectType() const override {
@@ -69,7 +69,7 @@ public:
       auto resScale = arguments[2].asNumber();
       // Return the newly constructed object
       auto iter = std::make_shared<JsiSkContourMeasureIter>(
-          std::move(context), *path, forceClosed, resScale);
+          std::move(context), path->snapshot(), forceClosed, resScale);
       return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, iter,
                                                          context);
     };

@@ -153,6 +153,7 @@ export interface SkImage extends SkJSIInstance<"Image"> {
    * Returns raster image or lazy image. Copies SkImage backed by GPU texture
    * into CPU memory if needed. Returns original SkImage if decoded in raster
    * bitmap, or if encoded in a stream.
+   * Returns null if the conversion fails.
    */
-  makeNonTextureImage(): SkImage;
+  makeNonTextureImage(): SkImage | null;
 }

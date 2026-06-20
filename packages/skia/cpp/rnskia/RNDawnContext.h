@@ -7,6 +7,7 @@
 #include "RNDawnWindowContext.h"
 #include "RNImageProvider.h"
 
+#include "include/core/SkColorSpace.h"
 #include "include/core/SkData.h"
 #include "include/gpu/graphite/BackendTexture.h"
 #include "include/gpu/graphite/Context.h"
@@ -113,7 +114,6 @@ public:
     wgpu::SharedTextureMemoryAHardwareBufferDescriptor platformDesc;
     auto ahb = (AHardwareBuffer *)buffer;
     platformDesc.handle = ahb;
-    platformDesc.useExternalFormat = true;
     AHardwareBuffer_Desc adesc;
     AHardwareBuffer_describe(ahb, &adesc);
     int width = adesc.width;
@@ -162,9 +162,15 @@ public:
   }
 
   // Create offscreen surface
-  sk_sp<SkSurface> MakeOffscreen(int width, int height) {
-    SkImageInfo info = SkImageInfo::Make(
-        width, height, DawnUtils::PreferedColorType, kPremul_SkAlphaType);
+  sk_sp<SkSurface> MakeOffscreen(int width, int height,
+                                 bool useP3ColorSpace = false) {
+    sk_sp<SkColorSpace> colorSpace =
+        useP3ColorSpace ? SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
+                                                SkNamedGamut::kDisplayP3)
+                        : nullptr;
+    SkImageInfo info =
+        SkImageInfo::Make(width, height, DawnUtils::PreferedColorType,
+                          kPremul_SkAlphaType, colorSpace);
     sk_sp<SkSurface> surface = SkSurfaces::RenderTarget(getRecorder(), info);
 
     if (!surface) {
@@ -179,6 +185,28 @@ public:
 
   // Get the wgpu::Device for WebGPU bindings
   wgpu::Device getWGPUDevice() { return backendContext.fDevice; }
+
+  // Create a secondary Dawn device from the same adapter.
+  // Has its own command queue and does NOT enable
+  // ImplicitDeviceSynchronization, so it won't contend with the primary
+  // rendering device's mutex. Safe for concurrent GPU work (e.g. ML inference)
+  // alongside Skia rendering.
+  wgpu::Device createSecondaryDevice() {
+    auto adapter = DawnUtils::getMatchedAdapter(instance.get());
+
+    std::vector<wgpu::FeatureName> features = {
+        wgpu::FeatureName::BufferMapExtendedUsages,
+#ifdef __APPLE__
+        wgpu::FeatureName::SharedTextureMemoryIOSurface,
+        wgpu::FeatureName::DawnMultiPlanarFormats,
+    // Note: SharedFenceMTLSharedEvent intentionally NOT enabled — it causes
+    // EndAccess to encode fence signals that crash with "uncommitted encoder".
+    // IOSurface data is already written by the camera before we read it.
+#endif
+    };
+
+    return DawnUtils::requestDevice(adapter, features, false);
+  }
 
   // Create an SkImage from a WebGPU texture
   // The texture must have TextureBinding usage
@@ -289,11 +317,11 @@ public:
     // 1. Create Surface
     wgpu::SurfaceDescriptor surfaceDescriptor;
 #ifdef __APPLE__
-    wgpu::SurfaceDescriptorFromMetalLayer metalSurfaceDesc;
+    wgpu::SurfaceSourceMetalLayer metalSurfaceDesc;
     metalSurfaceDesc.layer = window;
     surfaceDescriptor.nextInChain = &metalSurfaceDesc;
 #else
-    wgpu::SurfaceDescriptorFromAndroidNativeWindow androidSurfaceDesc;
+    wgpu::SurfaceSourceAndroidNativeWindow androidSurfaceDesc;
     androidSurfaceDesc.window = window;
     surfaceDescriptor.nextInChain = &androidSurfaceDesc;
 #endif
@@ -301,6 +329,20 @@ public:
         wgpu::Instance(instance->Get()).CreateSurface(&surfaceDescriptor);
     return std::make_unique<DawnWindowContext>(
         getRecorder(), backendContext.fDevice, surface, width, height);
+  }
+
+  skgpu::graphite::Recorder *getRecorder() {
+    static thread_local skgpu::graphite::RecorderOptions recorderOptions;
+    if (!recorderOptions.fImageProvider) {
+      auto imageProvider = ImageProvider::Make();
+      recorderOptions.fImageProvider = imageProvider;
+    }
+    static thread_local auto recorder =
+        fGraphiteContext->makeRecorder(recorderOptions);
+    if (!recorder) {
+      throw std::runtime_error("Failed to create graphite context");
+    }
+    return recorder.get();
   }
 
 private:
@@ -345,20 +387,6 @@ private:
     if (backendContext.fTick) {
       backendContext.fTick(backendContext.fInstance);
     }
-  }
-
-  skgpu::graphite::Recorder *getRecorder() {
-    static thread_local skgpu::graphite::RecorderOptions recorderOptions;
-    if (!recorderOptions.fImageProvider) {
-      auto imageProvider = ImageProvider::Make();
-      recorderOptions.fImageProvider = imageProvider;
-    }
-    static thread_local auto recorder =
-        fGraphiteContext->makeRecorder(recorderOptions);
-    if (!recorder) {
-      throw std::runtime_error("Failed to create graphite context");
-    }
-    return recorder.get();
   }
 };
 

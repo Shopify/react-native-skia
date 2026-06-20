@@ -28,6 +28,11 @@ namespace rnwgpu {
 
 namespace jsi = facebook::jsi;
 
+// Minimum memory pressure reported for any native object.
+// This accounts for C++ wrapper overhead and ensures dispose() never
+// increases reported memory pressure (which would defeat its purpose).
+static constexpr size_t kMinMemoryPressure = 256;
+
 // Forward declaration
 template <typename Derived> class NativeObject;
 
@@ -384,7 +389,7 @@ public:
   /**
    * Memory pressure for GC hints. Override in derived classes.
    */
-  virtual size_t getMemoryPressure() { return 1024; }
+  virtual size_t getMemoryPressure() { return kMinMemoryPressure; }
 
   /**
    * Set the creation runtime. Called during create().

@@ -13,13 +13,12 @@ import { surface, importSkia } from "../setup";
 const star = (Skia: Skia) => {
   const R = 115.2;
   const C = 128.0;
-  const path = Skia.Path.Make();
-  path.moveTo(C + R, C);
+  let builder = Skia.PathBuilder.Make().moveTo(C + R, C);
   for (let i = 1; i < 8; ++i) {
     const a = 2.6927937 * i;
-    path.lineTo(C + R * Math.cos(a), C + R * Math.sin(a));
+    builder = builder.lineTo(C + R * Math.cos(a), C + R * Math.sin(a));
   }
-  return path;
+  return builder.build();
 };
 
 describe("Path Effects", () => {

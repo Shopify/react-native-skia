@@ -50,11 +50,14 @@ public:
     _jniPlatformContext->raiseError(err);
   }
 
-  sk_sp<SkSurface> makeOffscreenSurface(int width, int height) override {
+  sk_sp<SkSurface> makeOffscreenSurface(int width, int height,
+                                        bool useP3ColorSpace = false) override {
 #if defined(SK_GRAPHITE)
-    return DawnContext::getInstance().MakeOffscreen(width, height);
+    return DawnContext::getInstance().MakeOffscreen(width, height,
+                                                    useP3ColorSpace);
 #else
-    return OpenGLContext::getInstance().MakeOffscreen(width, height);
+    return OpenGLContext::getInstance().MakeOffscreen(width, height,
+                                                      useP3ColorSpace);
 #endif
   }
 

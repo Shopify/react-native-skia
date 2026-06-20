@@ -209,7 +209,9 @@ public:
     setObject(std::make_shared<SkPaint>(std::move(paint)));
   }
 
-  size_t getMemoryPressure() const override { return sizeof(SkPaint); }
+  size_t getMemoryPressure() const override {
+    return std::max(sizeof(SkPaint), kMinMemoryPressure);
+  }
 
   std::string getObjectType() const override { return "JsiSkPaint"; }
 

@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "JsiSkHostObjects.h"
-#include "RNSkLog.h"
+#include "utils/RNSkLog.h"
 #include <jsi/jsi.h>
 
 #include "JsiSkPaint.h"
@@ -279,7 +279,9 @@ public:
       : JsiSkWrappingSharedPtrHostObject(std::move(context),
                                          std::make_shared<SkFont>(font)) {}
 
-  size_t getMemoryPressure() const override { return sizeof(SkFont); }
+  size_t getMemoryPressure() const override {
+    return std::max(sizeof(SkFont), kMinMemoryPressure);
+  }
 
   std::string getObjectType() const override { return "JsiSkFont"; }
 

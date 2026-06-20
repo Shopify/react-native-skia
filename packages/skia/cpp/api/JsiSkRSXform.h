@@ -111,7 +111,9 @@ public:
                                                          context);
     };
   }
-  size_t getMemoryPressure() const override { return sizeof(SkRSXform); }
+  size_t getMemoryPressure() const override {
+    return std::max(sizeof(SkRSXform), kMinMemoryPressure);
+  }
 
   std::string getObjectType() const override { return "JsiSkRSXform"; }
 

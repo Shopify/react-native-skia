@@ -36,4 +36,5 @@ private:
   CAMetalLayer *_layer;
 #pragma clang diagnostic pop
   id<CAMetalDrawable> _currentDrawable = nil;
+  bool _useP3ColorSpace = false;
 };

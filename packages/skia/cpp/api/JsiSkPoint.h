@@ -62,7 +62,9 @@ public:
                                                        context);
   }
 
-  size_t getMemoryPressure() const override { return sizeof(SkPoint); }
+  size_t getMemoryPressure() const override {
+    return std::max(sizeof(SkPoint), kMinMemoryPressure);
+  }
 
   std::string getObjectType() const override { return "JsiSkPoint"; }
 

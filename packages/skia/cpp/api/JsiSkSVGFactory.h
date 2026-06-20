@@ -160,7 +160,7 @@ public:
                              std::move(assets));
   }
 
-  size_t getMemoryPressure() const override { return 512; }
+  size_t getMemoryPressure() const override { return kMinMemoryPressure; }
 
   std::string getObjectType() const override { return "JsiSkSVGFactory"; }
 

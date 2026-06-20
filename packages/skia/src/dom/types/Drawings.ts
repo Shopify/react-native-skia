@@ -69,6 +69,7 @@ export interface AtlasProps extends DrawingNodeProps {
   sprites: SkRect[];
   transforms: SkRSXform[];
   colors?: SkColor[];
+  colorBlendMode?: SkEnum<typeof BlendMode>;
   sampling?: SamplingOptions;
 }
 

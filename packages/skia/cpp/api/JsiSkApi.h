@@ -2,12 +2,12 @@
 
 #include <memory>
 
-#include "RNSkPlatformContext.h"
+#include "rnskia/RNSkPlatformContext.h"
 
 #include "JsiSkHostObjects.h"
 
 #ifdef SK_GRAPHITE
-#include "RNDawnContext.h"
+#include "rnskia/RNDawnContext.h"
 #include "rnwgpu/api/GPUDevice.h"
 #include "rnwgpu/async/AsyncRunner.h"
 #endif
@@ -34,6 +34,8 @@
 #include "JsiSkParagraphBuilder.h"
 #include "JsiSkParagraphBuilderFactory.h"
 #include "JsiSkPath.h"
+#include "JsiSkPathBuilder.h"
+#include "JsiSkPathBuilderFactory.h"
 #include "JsiSkPathEffect.h"
 #include "JsiSkPathEffectFactory.h"
 #include "JsiSkPathFactory.h"
@@ -59,7 +61,7 @@
 #include "JsiSkiaContext.h"
 #include "JsiSkottieFactory.h"
 #include "JsiVideo.h"
-#include "recorder/JsiRecorder.h"
+#include "api/recorder/JsiRecorder.h"
 
 namespace RNSkia {
 
@@ -116,6 +118,8 @@ public:
                             std::make_shared<JsiSkPathEffectFactory>(context));
     installReadonlyProperty("Path",
                             std::make_shared<JsiSkPathFactory>(context));
+    installReadonlyProperty("PathBuilder",
+                            std::make_shared<JsiSkPathBuilderFactory>(context));
     installReadonlyProperty("ColorFilter",
                             std::make_shared<JsiSkColorFilterFactory>(context));
     installReadonlyProperty("MaskFilter",

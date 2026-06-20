@@ -4,73 +4,34 @@ cmake_minimum_required(VERSION 3.4.1)
 set (CMAKE_VERBOSE_MAKEFILE ON)
 set (CMAKE_CXX_STANDARD 20)
 
-# Import prebuilt SKIA libraries path
-set (SKIA_LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../libs/android/${ANDROID_ABI}")
+# SKIA_LIBS_PATH is passed from Gradle (pointing to libs/android/, populated by npm postinstall)
+# Append the ABI to get the full path
+set (SKIA_LIBS_PATH "${SKIA_LIBS_PATH}/${ANDROID_ABI}")
 
 # Check if Skia prebuilt binaries are installed
-# The postinstall script downloads these - if missing, the user needs to run it
 if(NOT EXISTS "${SKIA_LIBS_PATH}/libskia.a")
     message("")
     message("┌─────────────────────────────────────────────────────────────────────────────┐")
     message("│                                                                             │")
     message("│  ERROR: Skia prebuilt binaries not found!                                   │")
     message("│                                                                             │")
-    message("│  The postinstall script has not run. This is required to download the      │")
-    message("│  Skia binaries. Some package managers (pnpm, bun, yarn berry) require       │")
-    message("│  explicit trust for packages with postinstall scripts.                      │")
+    message("│  Could not find libskia.a at: ${SKIA_LIBS_PATH}                             │")
     message("│                                                                             │")
-    message("│  To fix this:                                                               │")
-    message("│                                                                             │")
-    message("│  • npm/yarn classic: Run 'npm rebuild @shopify/react-native-skia' or        │")
-    message("│                       reinstall the package                                 │")
-    message("│                                                                             │")
-    message("│  • bun: Run 'bun add --trust @shopify/react-native-skia'                    │")
-    message("│                                                                             │")
-    message("│  • pnpm: Add to package.json:                                               │")
-    message("│          \"pnpm\": { \"onlyBuiltDependencies\": [\"@shopify/react-native-skia\"] }│")
-    message("│          Then reinstall the package                                         │")
-    message("│                                                                             │")
-    message("│  See: https://shopify.github.io/react-native-skia/docs/getting-started/installation │")
+    message("│  Run the following command to install them:                                  │")
+    message("│    npx install-skia                                                         │")
     message("│                                                                             │")
     message("└─────────────────────────────────────────────────────────────────────────────┘")
     message("")
-    message(FATAL_ERROR "Skia prebuilt binaries not found at ${SKIA_LIBS_PATH}. Please run the postinstall script.")
+    message(FATAL_ERROR "Skia prebuilt binaries not found. Run `npx install-skia` to fix this.")
 endif()
 
-# Import libskia first so we can check for symbols
+# Import libskia
 add_library(skia STATIC IMPORTED)
 set_property(TARGET skia PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libskia.a")
 
-# Check if Graphite is available
-# Detection method priority:
-# 1. SK_GRAPHITE environment variable (explicit override, fastest)
-# 2. Marker file in libs directory (set during Skia build)
-# 3. Fall back to nm symbol detection (slow on some CI systems)
-set(SK_GRAPHITE_AVAILABLE OFF)
-
-if(DEFINED ENV{SK_GRAPHITE})
-    # Explicit override via environment variable
-    if($ENV{SK_GRAPHITE})
-        set(SK_GRAPHITE_AVAILABLE ON)
-        message("-- SK_GRAPHITE detection: using environment variable (ON)")
-    else()
-        message("-- SK_GRAPHITE detection: using environment variable (OFF)")
-    endif()
-elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../libs/android/graphite.enabled")
-    # Marker file indicates Graphite-enabled build
-    set(SK_GRAPHITE_AVAILABLE ON)
-    message("-- SK_GRAPHITE detection: marker file found")
-else()
-    message("-- SK_GRAPHITE detection: no marker file, assuming OFF")
-endif()
-
-if(SK_GRAPHITE_AVAILABLE)
-    set(SK_GRAPHITE ON)
-    message("-- SK_GRAPHITE: ON")
-else()
-    set(SK_GRAPHITE OFF)
-    message("-- SK_GRAPHITE: OFF")
-endif()
+# SK_GRAPHITE is passed from Gradle
+message("-- SKIA_LIBS_PATH: ${SKIA_LIBS_PATH}")
+message("-- SK_GRAPHITE: ${SK_GRAPHITE}")
 
 string(APPEND CMAKE_CXX_FLAGS " -DSK_BUILD_FOR_ANDROID -DSK_DISABLE_LEGACY_SHAPER_FACTORY -DSK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_HAVE_MEMRCHR=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_MOBILE=1 -DON_ANDROID -DONANDROID")
 
@@ -101,7 +62,7 @@ message("-- PREBUILT: " ${PREBUILT_DIR})
 message("-- BUILD   : " ${build_DIR})
 message("-- LIBRN   : " ${LIBRN_DIR})
 
-link_directories(../libs/android/${ANDROID_ABI}/)
+link_directories(${SKIA_LIBS_PATH}/)
 
 if(SK_GRAPHITE)
     add_definitions(-DSK_GRAPHITE)
@@ -167,6 +128,7 @@ if(SK_GRAPHITE)
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUAdapter.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUBindGroup.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUBuffer.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUCanvasContext.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUCommandEncoder.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUComputePassEncoder.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUComputePipeline.cpp"
@@ -180,6 +142,9 @@ if(SK_GRAPHITE)
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUShaderModule.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUSupportedLimits.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUTexture.cpp"
+
+        # WebGPU Canvas JNI bindings
+        "${PROJECT_SOURCE_DIR}/cpp/jni/JniWebGPUView.cpp"
     )
 endif()
 
@@ -248,6 +213,11 @@ set_property(TARGET pathops PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libpat
 
 add_library(jsonreader STATIC IMPORTED)
 set_property(TARGET jsonreader PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libjsonreader.a")
+
+if(SK_GRAPHITE)
+    add_library(dawn_combined STATIC IMPORTED)
+    set_property(TARGET dawn_combined PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_combined.a")
+endif()
 
 find_library(
         LOG_LIB
@@ -421,6 +391,7 @@ endif()
 if(SK_GRAPHITE)
     target_link_libraries(${PACKAGE_NAME}
         ${COMMON_LIBS}
+        dawn_combined
     )
 else()
     target_link_libraries(${PACKAGE_NAME}

@@ -7,13 +7,6 @@ const DEBUG = false;
 export const GRAPHITE = !!process.env.SK_GRAPHITE;
 export const MACCATALYST = false;
 const BUILD_WITH_PARAGRAPH = true;
-// Re-enable mutable SkPath methods (addPath, moveTo, lineTo, etc.)
-// Skia is transitioning to immutable SkPath with SkPathBuilder
-// Set to false once we migrate to SkPathBuilder
-const ENABLE_SKPATH_EDIT_METHODS = true;
-const PATH_EDIT_FLAG = ENABLE_SKPATH_EDIT_METHODS
-  ? "-USK_HIDE_PATH_EDIT_METHODS"
-  : "";
 
 export const SkiaSrc = path.join(__dirname, "../../../externals/skia");
 export const ProjectRoot = path.join(__dirname, "../../..");
@@ -75,6 +68,9 @@ const ParagraphOutputsAndroid = BUILD_WITH_PARAGRAPH
   ? ["libskparagraph.a", "libskunicode_core.a", "libskunicode_icu.a"]
   : [];
 
+const DawnOutputApple = GRAPHITE ? ["libdawn_combined.a"] : [];
+const DawnOutputAndroid = GRAPHITE ? ["libdawn_combined.a"] : [];
+
 export const commonArgs = [
   ["skia_use_piex", true],
   ["skia_use_system_expat", false],
@@ -93,7 +89,7 @@ export const commonArgs = [
   ["skia_enable_graphite", GRAPHITE],
   ["skia_use_dawn", GRAPHITE],
   // C++20 is required for Graphite builds (Dawn uses C++20 concepts)
-  ...(GRAPHITE ? [["skia_use_cpp20", true]] : []),
+  // Passed via extra_cflags_cc per-target instead of skia_use_cpp20 (not available in all Skia versions)
 ];
 
 export type PlatformName =
@@ -127,7 +123,7 @@ export type Platform = {
 };
 
 const appleMinTarget = GRAPHITE ? "15.1" : "14.0";
-const appleSimulatorMinTarget = "16.0";
+const appleSimulatorMinTarget = appleMinTarget;
 
 // Define tvOS targets separately so they can be conditionally included
 const tvosTargets: { [key: string]: Target } = GRAPHITE
@@ -139,7 +135,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
         args: [
           [
             "extra_cflags_cc",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "-target", "arm64-apple-tvos", "-mappletvos-version-min=${appleMinTarget}"]`,
+            `["-fexceptions", "-frtti", "-target", "arm64-apple-tvos", "-mappletvos-version-min=${appleMinTarget}"]`,
           ],
           [
             "extra_asmflags",
@@ -158,7 +154,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
           ["ios_use_simulator", true],
           [
             "extra_cflags_cc",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
+            `["-fexceptions", "-frtti", "-target", "arm64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
           ],
           [
             "extra_asmflags",
@@ -177,7 +173,7 @@ const tvosTargets: { [key: string]: Target } = GRAPHITE
           ["ios_use_simulator", true],
           [
             "extra_cflags_cc",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}, "-target", "x86_64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
+            `["-fexceptions", "-frtti", "-target", "x86_64-apple-tvos-simulator", "-mappletvsimulator-version-min=${appleSimulatorMinTarget}"]`,
           ],
           [
             "extra_asmflags",
@@ -203,7 +199,7 @@ const maccatalystTargets: { [key: string]: Target } = MACCATALYST
           ["target_cpu", `"arm64"`],
           [
             "extra_cflags_cc",
-            `["-fexceptions","-frtti"${PATH_EDIT_FLAG ? `,"${PATH_EDIT_FLAG}"` : ""},"-target","arm64-apple-ios14.0-macabi",` +
+            `["-fexceptions","-frtti","-target","arm64-apple-ios14.0-macabi",` +
               `"-isysroot","${appleSdkRoot}",` +
               `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
               `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
@@ -225,7 +221,7 @@ const maccatalystTargets: { [key: string]: Target } = MACCATALYST
           ["target_cpu", `"x64"`],
           [
             "extra_cflags_cc",
-            `["-fexceptions","-frtti"${PATH_EDIT_FLAG ? `,"${PATH_EDIT_FLAG}"` : ""},"-target","x86_64-apple-ios14.0-macabi",` +
+            `["-fexceptions","-frtti","-target","x86_64-apple-ios14.0-macabi",` +
               `"-isysroot","${appleSdkRoot}",` +
               `"-isystem","${appleSdkRoot}/System/iOSSupport/usr/include",` +
               `"-iframework","${appleSdkRoot}/System/iOSSupport/System/Library/Frameworks"]`,
@@ -259,6 +255,7 @@ const appleOutputNames = [
   "libskottie.a",
   "libsksg.a",
   ...ParagraphApple,
+  ...DawnOutputApple,
 ];
 
 export const configurations: Record<PlatformName, Platform> = {
@@ -294,7 +291,7 @@ export const configurations: Record<PlatformName, Platform> = {
       ["cxx", '"clang++"'],
       [
         "extra_cflags",
-        `["-DSKIA_C_DLL", "-DHAVE_SYSCALL_GETRANDOM", "-DXML_DEV_URANDOM"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
+        `["-DSKIA_C_DLL", "-DHAVE_SYSCALL_GETRANDOM", "-DXML_DEV_URANDOM"]`,
       ],
       ...ParagraphArgsAndroid,
     ],
@@ -307,6 +304,7 @@ export const configurations: Record<PlatformName, Platform> = {
       "libsksg.a",
       "libjsonreader.a",
       ...ParagraphOutputsAndroid,
+      ...DawnOutputAndroid,
     ],
   },
   "apple-ios": {
@@ -316,10 +314,7 @@ export const configurations: Record<PlatformName, Platform> = {
         platform: "ios",
         args: [
           ["ios_min_target", `"${appleMinTarget}"`],
-          [
-            "extra_cflags_cc",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
-          ],
+          ["extra_cflags_cc", `["-fexceptions", "-frtti"]`],
         ],
       },
       "arm64-iphonesimulator": {
@@ -328,10 +323,7 @@ export const configurations: Record<PlatformName, Platform> = {
         args: [
           ["ios_min_target", `"${appleSimulatorMinTarget}"`],
           ["ios_use_simulator", true],
-          [
-            "extra_cflags_cc",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
-          ],
+          ["extra_cflags_cc", `["-fexceptions", "-frtti"]`],
         ],
       },
       "x64-iphonesimulator": {
@@ -339,28 +331,25 @@ export const configurations: Record<PlatformName, Platform> = {
         platform: "ios",
         args: [
           ["ios_min_target", `"${appleSimulatorMinTarget}"`],
-          [
-            "extra_cflags_cc",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
-          ],
+          ["extra_cflags_cc", `["-fexceptions", "-frtti"]`],
         ],
       },
     },
     args: appleCommonArgs,
-    outputRoot: "libs/apple/ios",
+    outputRoot: "libs/ios",
     outputNames: appleOutputNames,
   },
   "apple-tvos": GRAPHITE
     ? {
         targets: {},
         args: [],
-        outputRoot: "libs/apple/tvos",
+        outputRoot: "libs/tvos",
         outputNames: [],
       }
     : {
         targets: tvosTargets,
         args: appleCommonArgs,
-        outputRoot: "libs/apple/tvos",
+        outputRoot: "libs/tvos",
         outputNames: appleOutputNames,
       },
   "apple-macos": {
@@ -368,39 +357,29 @@ export const configurations: Record<PlatformName, Platform> = {
       "arm64-macosx": {
         cpu: "arm64",
         platform: "mac",
-        args: [
-          [
-            "extra_cflags_cc",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
-          ],
-        ],
+        args: [["extra_cflags_cc", `["-fexceptions", "-frtti"]`]],
       },
       "x64-macosx": {
         cpu: "x64",
         platform: "mac",
-        args: [
-          [
-            "extra_cflags_cc",
-            `["-fexceptions", "-frtti"${PATH_EDIT_FLAG ? `, "${PATH_EDIT_FLAG}"` : ""}]`,
-          ],
-        ],
+        args: [["extra_cflags_cc", `["-fexceptions", "-frtti"]`]],
       },
     },
     args: appleCommonArgs,
-    outputRoot: "libs/apple/macos",
+    outputRoot: "libs/macos",
     outputNames: appleOutputNames,
   },
   "apple-maccatalyst": MACCATALYST
     ? {
         targets: maccatalystTargets,
         args: appleCommonArgs,
-        outputRoot: "libs/apple/maccatalyst",
+        outputRoot: "libs/maccatalyst",
         outputNames: appleOutputNames,
       }
     : {
         targets: {},
         args: [],
-        outputRoot: "libs/apple/maccatalyst",
+        outputRoot: "libs/maccatalyst",
         outputNames: [],
       },
 };
@@ -415,6 +394,7 @@ const copyModule = (module: string) => {
 const getFirstAvailableTarget = () => {
   // Use the same logic as build-skia.ts to get the first available target
   const platforms = Object.keys(configurations) as PlatformName[];
+  const fs = require("fs");
 
   for (const platformName of platforms) {
     const configuration = configurations[platformName];
@@ -422,21 +402,19 @@ const getFirstAvailableTarget = () => {
 
     for (const targetName of targetNames) {
       const targetPath = `${platformName}/${targetName}`;
-      const dawnPath = `../../externals/skia/out/${targetPath}/gen/third_party/externals/dawn`;
+      // Check both CMake-based Dawn builds and GN-based Dawn builds
+      const cmakeDawnPath = `../../externals/skia/out/${targetPath}/cmake_dawn/gen/include/dawn`;
+      const gnDawnPath = `../../externals/skia/out/${targetPath}/gen/third_party/externals/dawn`;
 
-      try {
-        require("fs").statSync(dawnPath);
+      if (fs.existsSync(cmakeDawnPath) || fs.existsSync(gnDawnPath)) {
         return targetPath;
-      } catch (e) {
-        // Dawn folder doesn't exist for this target, try next
-        continue;
       }
     }
   }
 
   // No target found with dawn folder
   throw new Error(
-    "No target found with dawn folder at ../../externals/skia/out/{target}/gen/third_party/externals/dawn"
+    "No target found with Dawn headers in ../../externals/skia/out/{target}/"
   );
 };
 
@@ -444,9 +422,17 @@ export const copyHeaders = () => {
   // Check if this is a local build (build output exists) vs prebuilt download
   const fs = require("fs");
   let hasLocalBuild = false;
+  let dawnIncludeSrc = "";
   try {
     const targetPath = getFirstAvailableTarget();
-    const dawnIncludeSrc = `../../externals/skia/out/${targetPath}/gen/third_party/externals/dawn/include`;
+    // Check CMake-based Dawn build first, then GN-based
+    const cmakePath = `../../externals/skia/out/${targetPath}/cmake_dawn/gen/include`;
+    const gnPath = `../../externals/skia/out/${targetPath}/gen/third_party/externals/dawn/include`;
+    if (fs.existsSync(cmakePath)) {
+      dawnIncludeSrc = cmakePath;
+    } else {
+      dawnIncludeSrc = gnPath;
+    }
     console.log(`   Looking for local build at: ${dawnIncludeSrc}`);
     hasLocalBuild = fs.existsSync(dawnIncludeSrc);
   } catch (e) {
@@ -469,9 +455,22 @@ export const copyHeaders = () => {
   fileOps.mkdir("./cpp/skia/modules");
   fileOps.mkdir("./cpp/skia/src");
 
-  // Graphite-specific setup - only copy from local build if it exists
+  // Graphite-specific setup
   if (GRAPHITE) {
     console.log("   Checking for Graphite build source...");
+
+    // Try to find graphite headers from npm package
+    let graphiteHeadersPath: string | null = null;
+    try {
+      const graphiteHeadersPkg =
+        require.resolve("react-native-skia-graphite-headers/package.json");
+      graphiteHeadersPath = path.dirname(graphiteHeadersPkg);
+      console.log(
+        `   Found graphite headers package at: ${graphiteHeadersPath}`
+      );
+    } catch (e) {
+      // Package not installed
+    }
 
     if (hasLocalBuild) {
       console.log("   📦 Copying Graphite headers from local build...");
@@ -493,7 +492,6 @@ export const copyHeaders = () => {
       );
 
       console.log("      - Copying Dawn headers...");
-      const dawnIncludeSrc = `../../externals/skia/out/${getFirstAvailableTarget()}/gen/third_party/externals/dawn/include`;
       fileOps.cp(dawnIncludeSrc, "./cpp/dawn/include");
       fileOps.cp(
         "../../externals/skia/third_party/externals/dawn/include",
@@ -521,9 +519,34 @@ export const copyHeaders = () => {
       fileOps.rm("./cpp/dawn/include/dawn/wire");
       fileOps.rm("./cpp/dawn/include/webgpu/webgpu_cpp_print.h");
       console.log("      ✓ Graphite headers copied from local build");
+    } else if (graphiteHeadersPath) {
+      console.log("   📦 Copying Graphite headers from npm package...");
+      fileOps.mkdir("./cpp/dawn/include");
+      fileOps.mkdir("./cpp/skia/src/gpu/graphite");
+
+      // Copy Dawn headers from npm package
+      const dawnSrc = path.join(graphiteHeadersPath, "cpp/dawn/include");
+      const graphiteSrc = path.join(
+        graphiteHeadersPath,
+        "cpp/skia/src/gpu/graphite"
+      );
+
+      if (fs.existsSync(dawnSrc)) {
+        console.log("      - Copying Dawn headers from npm package...");
+        fileOps.cp(dawnSrc, "./cpp/dawn/include");
+      }
+
+      if (fs.existsSync(graphiteSrc)) {
+        console.log(
+          "      - Copying Graphite source headers from npm package..."
+        );
+        fileOps.cp(graphiteSrc, "./cpp/skia/src/gpu/graphite");
+      }
+
+      console.log("      ✓ Graphite headers copied from npm package");
     } else {
       console.log(
-        "   ✓ Skipping Graphite headers copy (using prebuilt headers from download)"
+        "   ⚠️  No Graphite headers source found (no local build or npm package)"
       );
     }
   }
@@ -640,6 +663,14 @@ export const copyHeaders = () => {
   fileOps.cp(
     "../../externals/skia/modules/skunicode/include/SkUnicode.h",
     "./cpp/skia/modules/skunicode/include/SkUnicode.h"
+  );
+  fileOps.cp(
+    "../../externals/skia/modules/skunicode/include/SkUnicode_libgrapheme.h",
+    "./cpp/skia/modules/skunicode/include/SkUnicode_libgrapheme.h"
+  );
+  fileOps.cp(
+    "../../externals/skia/modules/skunicode/include/SkUnicode_icu.h",
+    "./cpp/skia/modules/skunicode/include/SkUnicode_icu.h"
   );
   // Check for duplicate header names and issue warnings
   const duplicateHeaders = $(

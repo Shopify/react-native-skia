@@ -63,7 +63,7 @@ public:
   }
 
   size_t getMemoryPressure() const override {
-    return sizeof(SkRuntimeShaderBuilder);
+    return std::max(sizeof(SkRuntimeShaderBuilder), kMinMemoryPressure);
   }
 
   std::string getObjectType() const override {

@@ -23,86 +23,16 @@ yarn add @shopify/react-native-skia
 npm install @shopify/react-native-skia
 ```
 
-## Postinstall Script
+This package uses a `postinstall` script to copy Skia prebuilt binaries into the correct location for the native build systems. Some package managers require you to explicitly allow this script to run:
 
-React Native Skia uses a `postinstall` script to download prebuilt Skia binaries. This script **must run** for the library to work. If you see build errors about missing Skia libraries, the postinstall script likely didn't run.
-
-<details>
-<summary><strong>npm / yarn classic</strong></summary>
-
-Postinstall scripts run automatically. If you encounter issues, you can manually trigger it:
-
-```sh
-npm rebuild @shopify/react-native-skia
-# or
-yarn rebuild @shopify/react-native-skia
-```
-
-</details>
-
-<details>
-<summary><strong>bun</strong></summary>
-
-Bun requires explicit trust for packages with lifecycle scripts:
-
-```sh
-bun add --trust @shopify/react-native-skia
-```
-
-Or add to your `package.json`:
-```json
-{
-  "trustedDependencies": ["@shopify/react-native-skia"]
-}
-```
-
-</details>
-
-<details>
-<summary><strong>pnpm</strong></summary>
-
-pnpm v10+ requires explicit permission for lifecycle scripts. Add to your `package.json`:
-
-```json
-{
-  "pnpm": {
-    "onlyBuiltDependencies": ["@shopify/react-native-skia"]
+- **Bun**: Add `@shopify/react-native-skia` to `trustedDependencies` in your `package.json`:
+  ```json
+  {
+    "trustedDependencies": ["@shopify/react-native-skia"]
   }
-}
-```
-
-Then reinstall:
-```sh
-pnpm install
-```
-
-For older pnpm versions, you may need:
-```sh
-pnpm add --allow-build=@shopify/react-native-skia @shopify/react-native-skia
-```
-
-</details>
-
-<details>
-<summary><strong>Yarn Berry (v2+)</strong></summary>
-
-Yarn Berry doesn't run postinstall scripts by default. You need to enable them:
-
-```sh
-yarn config set enableScripts true
-```
-
-Or add to `.yarnrc.yml`:
-```yaml
-enableScripts: true
-```
-
-Then reinstall:
-```sh
-yarn install
-```
-
-</details>
+  ```
+- **Yarn (Berry/v2+)**: Make sure `enableScripts` is not set to `false` in `.yarnrc.yml`.
+- **npm/Yarn Classic**: The postinstall script runs automatically.
 
 ## Using Expo
 
@@ -201,6 +131,20 @@ module.exports = {
 The `jestEnv.js` will load CanvasKit for you and `jestEnv.js` mocks React Native Skia.
 You can also have a look at the [example app](https://github.com/Shopify/react-native-skia/tree/main/apps/example) to see how Jest tests are enabled there.
 
+
+## Graphite (Experimental)
+
+Skia has two backends: Ganesh (default) and Graphite. An experimental preview of Graphite is available in the `@next` distribution channel:
+
+```sh
+yarn add @shopify/react-native-skia@next
+```
+
+:::warning
+
+Graphite support is highly experimental. Skia Graphite requires Android API Level 26 or above.
+
+:::
 
 ## Playground
 

@@ -34,8 +34,11 @@ public:
     wgpu::SurfaceTexture surfaceTexture;
     _surface.GetCurrentTexture(&surfaceTexture);
     auto texture = surfaceTexture.texture;
+    if (!texture) {
+      return nullptr;
+    }
     skgpu::graphite::DawnTextureInfo info(
-        /*sampleCount=*/1, skgpu::Mipmapped::kNo,
+        skgpu::graphite::SampleCount::k1, skgpu::Mipmapped::kNo,
         DawnUtils::PreferredTextureFormat, texture.GetUsage(),
         wgpu::TextureAspect::All);
     auto backendTex = skgpu::graphite::BackendTextures::MakeDawn(texture.Get());

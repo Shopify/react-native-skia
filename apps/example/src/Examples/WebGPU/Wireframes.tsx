@@ -124,7 +124,7 @@ type ObjectInfo = {
 //   0,      0,      0,      1, 0,
 // ];
 
-export function WebGPU() {
+export function Wireframes() {
   const { width, height } = useWindowDimensions();
   const [image, setImage] = useState<SkImage | null>(null);
   const renderRef = useRef<((ts: number) => void) | null>(null);
@@ -143,20 +143,22 @@ export function WebGPU() {
   const canvasWidth = Math.floor(width * pd);
   const canvasHeight = Math.floor(height * pd);
   const clip = useDerivedValue(() => {
-    const trimmed = logo.copy();
     const transform = fitbox(
       "contain",
       bounds,
       rect(20, 20, width - 40, height - 40)
     );
-    trimmed.transform(processTransform3d(transform));
-    trimmed.trim(0, progress.value, false);
-    trimmed.stroke({
+    const transformed = logo.transform(processTransform3d(transform));
+    const trimmed = Skia.Path.Trim(transformed, 0, progress.value, false);
+    if (!trimmed) {
+      return transformed;
+    }
+    const stroked = Skia.Path.Stroke(trimmed, {
       width: 20,
       join: StrokeJoin.Round,
       cap: StrokeCap.Round,
     });
-    return trimmed;
+    return stroked ?? trimmed;
   });
   //rect(0, 0, 300, (300 * bounds.height) / bounds.width);
 
