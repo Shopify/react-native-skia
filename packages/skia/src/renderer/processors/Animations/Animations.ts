@@ -1,4 +1,9 @@
-export type AnimatedProp<T> = T | { value: T };
+export type WrappedSharedValue<T> = {
+  __sv: { value: T };
+  __key: string;
+};
+
+export type AnimatedProp<T> = T | { value: T } | WrappedSharedValue<T>;
 
 export type AnimatedProps<T, O extends keyof T | never = never> = {
   [K in keyof T]: K extends "children"

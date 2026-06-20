@@ -10,6 +10,13 @@ export const isSharedValue = <T = unknown>(
   return (value as Record<string, unknown>)?._isReanimatedSharedValue === true;
 };
 
+export const isWrappedSharedValue = (value: unknown): value is { __sv: SharedValue<unknown>; __key: string } => {
+  "worklet";
+  if (!value || typeof value !== "object") return false;
+  const obj = value as any;
+  return isSharedValue(obj.__sv) && typeof obj.__key === "string";
+};
+
 export const materialize = <T extends object>(props: T) => {
   "worklet";
   const result: T = Object.assign({}, props);

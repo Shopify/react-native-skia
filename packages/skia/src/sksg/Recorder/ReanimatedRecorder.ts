@@ -31,7 +31,7 @@ import type {
   DrawingNodeProps,
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer";
-import { isSharedValue } from "../utils";
+import { isSharedValue, isWrappedSharedValue } from "../utils";
 
 /**
  * Currently the recorder only work if the GPU resources (e.g Images) are owned by the main thread.
@@ -55,6 +55,15 @@ export class ReanimatedRecorder implements BaseRecorder {
       return;
     }
     Object.values(props).forEach((value) => {
+      if (isWrappedSharedValue(value) && !this.values.has(value.__sv)) {
+        const sv = value.__sv;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        sv.name = `variable${this.values.size}`;
+        this.values.add(sv as SharedValue<unknown>);
+        return;
+      }
+
       if (isSharedValue(value) && !this.values.has(value)) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
@@ -104,7 +113,7 @@ export class ReanimatedRecorder implements BaseRecorder {
 
   pushPathEffect(
     pathEffectType: NodeType,
-    props: AnimatedProps<unknown>
+    props: AnimatedProps<unknown>,
   ): void {
     this.processAnimationValues(props);
     this.recorder.pushPathEffect(pathEffectType, props);
@@ -112,7 +121,7 @@ export class ReanimatedRecorder implements BaseRecorder {
 
   pushImageFilter(
     imageFilterType: NodeType,
-    props: AnimatedProps<unknown>
+    props: AnimatedProps<unknown>,
   ): void {
     this.processAnimationValues(props);
     this.recorder.pushImageFilter(imageFilterType, props);
@@ -120,7 +129,7 @@ export class ReanimatedRecorder implements BaseRecorder {
 
   pushColorFilter(
     colorFilterType: NodeType,
-    props: AnimatedProps<unknown>
+    props: AnimatedProps<unknown>,
   ): void {
     this.processAnimationValues(props);
     this.recorder.pushColorFilter(colorFilterType, props);
@@ -129,7 +138,7 @@ export class ReanimatedRecorder implements BaseRecorder {
   pushShader(
     shaderType: NodeType,
     props: AnimatedProps<unknown>,
-    children: number
+    children: number,
   ): void {
     this.processAnimationValues(props);
     this.recorder.pushShader(shaderType, props, children);
@@ -177,12 +186,12 @@ export class ReanimatedRecorder implements BaseRecorder {
     boxProps: AnimatedProps<BoxProps>,
     shadows: {
       props: BoxShadowProps;
-    }[]
+    }[],
   ): void {
     this.processAnimationValues(boxProps);
     shadows.forEach((shadow) => {
       this.processAnimationValues(
-        shadow.props as AnimatedProps<BoxShadowProps>
+        shadow.props as AnimatedProps<BoxShadowProps>,
       );
     });
     this.recorder.drawBox(
@@ -190,7 +199,7 @@ export class ReanimatedRecorder implements BaseRecorder {
       // TODO: Fix this type BaseRecorder.drawBox()
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
-      shadows.map((s) => s.props)
+      shadows.map((s) => s.props),
     );
   }
 
