@@ -28,6 +28,9 @@ export const materialize = <T extends object>(props: T) => {
     const value = result[key];
     if (isSharedValue(value)) {
       result[key] = value.value as never;
+    } else if (isSharedValueSelector(value)) {
+      const group = value.__sv.value as Record<string, unknown>;
+      result[key] = group[value.__key] as never;
     }
   });
   return result;
