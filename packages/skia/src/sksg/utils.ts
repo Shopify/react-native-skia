@@ -10,10 +10,14 @@ export const isSharedValue = <T = unknown>(
   return (value as Record<string, unknown>)?._isReanimatedSharedValue === true;
 };
 
-export const isWrappedSharedValue = (value: unknown): value is { __sv: SharedValue<unknown>; __key: string } => {
+export const isSharedValueSelector = (
+  value: unknown
+): value is { __sv: SharedValue<unknown>; __key: string } => {
   "worklet";
-  if (!value || typeof value !== "object") return false;
-  const obj = value as any;
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const obj = value as Record<string, unknown>;
   return isSharedValue(obj.__sv) && typeof obj.__key === "string";
 };
 

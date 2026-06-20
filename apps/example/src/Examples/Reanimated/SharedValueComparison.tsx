@@ -12,7 +12,7 @@ import {
   useFrameCallback,
   useSharedValue,
 } from "react-native-reanimated";
-import { Canvas, Circle, Fill } from "@shopify/react-native-skia";
+import { Canvas, Circle, Fill, select } from "@shopify/react-native-skia";
 
 import { AnimationDemo } from "./Components";
 
@@ -33,15 +33,6 @@ const COUNT = 24;
 const BASE_RADIUS = 6;
 const CANVAS_HEIGHT = 280;
 const COLORS = ["#8556E5", "#3EB489", "#FF7A1A", "#E5563F"];
-
-// Wraps a single (shared OR derived) value so one of its object keys can
-// drive a prop. This lets many props share ONE value instead of needing a
-// separate derived value each. The cast hides the internal { __sv, __key }
-// representation from the call site.
-const pick = <T extends Record<string, unknown>, K extends keyof T>(
-  sv: SharedValue<T>,
-  key: K
-) => ({ __sv: sv, __key: key }) as unknown as T[K];
 
 // Motion of dot `i` at time `t`, shared by both approaches so the animation
 // is visually identical — only the wiring underneath differs.
@@ -110,9 +101,9 @@ const SingleValueScene = ({ clock, cx, cy, orbit }: SceneProps) => {
       {new Array(COUNT).fill(0).map((_, i) => (
         <Circle
           key={i}
-          cx={pick(data, `x${i}`)}
-          cy={pick(data, `y${i}`)}
-          r={pick(data, `r${i}`)}
+          cx={select(data, `x${i}`)}
+          cy={select(data, `y${i}`)}
+          r={select(data, `r${i}`)}
           color={COLORS[i % COLORS.length]}
         />
       ))}
