@@ -310,6 +310,11 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
     const arm64ePatchFile = path.join(__dirname, "dawn-arm64e-simulator.patch");
     $(`cd ${SkiaSrc} && git apply ${arm64ePatchFile}`);
 
+    // Implement drawAtlas for the Graphite backend (removes the no-op override
+    // so the inherited drawVertices-based default lights up the API).
+    const drawAtlasPatchFile = path.join(__dirname, "graphite-drawatlas.patch");
+    $(`cd ${SkiaSrc} && git apply ${drawAtlasPatchFile}`);
+
     // Remove arm64e arch flags (not available on simulator)
     {
       const filePath = `${SkiaSrc}/gn/skia/BUILD.gn`;
@@ -323,7 +328,10 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
         `      }`,
         `    } else if (current_cpu == "x86") {`,
       ].join("\n");
-      const replace = [`      ]`, `    } else if (current_cpu == "x86") {`].join("\n");
+      const replace = [
+        `      ]`,
+        `    } else if (current_cpu == "x86") {`,
+      ].join("\n");
       const content = fs.readFileSync(filePath, "utf-8");
       if (!content.includes(search)) {
         throw new Error(`Patch target not found in ${filePath}`);
@@ -348,7 +356,10 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
       const content = fs.readFileSync(filePath, "utf-8");
       fs.writeFileSync(
         filePath,
-        content.replace(/uint32\(bindingInfo\.binding\)/g, "uint32_t(bindingInfo.binding)")
+        content.replace(
+          /uint32\(bindingInfo\.binding\)/g,
+          "uint32_t(bindingInfo.binding)"
+        )
       );
     }
     // Add iOS support to Dawn cmake_utils.py

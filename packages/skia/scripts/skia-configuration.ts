@@ -657,6 +657,10 @@ export const copyHeaders = () => {
     "../../externals/skia/src/base/SkArenaAlloc.h",
     "./cpp/skia/src/base/SkArenaAlloc.h"
   );
+  fileOps.cp(
+    "../../externals/skia/src/base/SkAutoLocaleSetter.h",
+    "./cpp/skia/src/base/SkAutoLocaleSetter.h"
+  );
 
   // Copy skunicode
   fileOps.mkdir("./cpp/skia/modules/skunicode/include/");

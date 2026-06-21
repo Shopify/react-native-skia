@@ -18,7 +18,7 @@ async::AsyncTaskHandle GPUShaderModule::getCompilationInfo() {
             wgpu::CallbackMode::AllowProcessEvents,
             [result, resolve,
              reject](wgpu::CompilationInfoRequestStatus status,
-                     const wgpu::CompilationInfo *compilationInfo) mutable {
+                     const wgpu::CompilationInfo *compilationInfo) {
               if (status != wgpu::CompilationInfoRequestStatus::Success ||
                   compilationInfo == nullptr) {
                 reject("Failed to get compilation info");
