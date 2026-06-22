@@ -43,7 +43,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-native-web": "^0.19.7",
-    "remotion": "4.0.244",
+    "remotion": "4.0.410",
     "serialize-svg-path": "^0.1.0",
     "simplex-noise": "^4.0.0",
     "svg-mesh-3d": "^1.1.0",
