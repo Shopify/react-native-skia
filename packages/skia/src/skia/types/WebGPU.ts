@@ -1,8 +1,3 @@
-// Ensure the native bindings (which install the global `installWebGPU` host
-// function) are set up before we capture it below. `src/index.ts` already
-// imports this first; this makes the capture robust for direct deep imports too.
-import "../NativeSetup";
-
 import type { NativeBuffer } from "./NativeBuffer";
 
 /**
@@ -40,7 +35,9 @@ export const installWebGPU: () => void = (() => {
     typeof global !== "undefined"
       ? (global as unknown as { installWebGPU?: () => void })
       : undefined;
-  return g && typeof g.installWebGPU === "function" ? g.installWebGPU : () => {};
+  return g && typeof g.installWebGPU === "function"
+    ? g.installWebGPU
+    : () => {};
 })();
 
 // Skia's Graphite/Dawn backend extends the standard WebGPU API (typed by
