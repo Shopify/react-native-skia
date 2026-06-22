@@ -8,8 +8,8 @@
 
 #include "jsi2/NativeObject.h"
 
-#include "rnwgpu/async/AsyncRunner.h"
 #include "rnwgpu/async/AsyncTaskHandle.h"
+#include "rnwgpu/async/RuntimeContext.h"
 
 #include "webgpu/webgpu_cpp.h"
 
@@ -27,7 +27,7 @@ public:
   static constexpr const char *CLASS_NAME = "GPUAdapter";
 
   explicit GPUAdapter(wgpu::Adapter instance,
-                      std::shared_ptr<async::AsyncRunner> async)
+                      std::shared_ptr<async::RuntimeContext> async)
       : NativeObject(CLASS_NAME), _instance(instance), _async(async) {}
 
 public:
@@ -53,7 +53,7 @@ public:
 
 private:
   wgpu::Adapter _instance;
-  std::shared_ptr<async::AsyncRunner> _async;
+  std::shared_ptr<async::RuntimeContext> _async;
 };
 
 } // namespace rnwgpu

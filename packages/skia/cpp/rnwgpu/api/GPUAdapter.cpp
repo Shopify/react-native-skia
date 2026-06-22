@@ -138,7 +138,7 @@ async::AsyncTaskHandle GPUAdapter::requestDevice(
         }
         _instance.RequestDevice(
             &deviceDesc, wgpu::CallbackMode::AllowProcessEvents,
-            [asyncRunner = _async, resolve, reject, label, creationRuntime,
+            [context = _async, resolve, reject, label, creationRuntime,
              deviceLostBinding](wgpu::RequestDeviceStatus status,
                                 wgpu::Device device,
                                 wgpu::StringView message) {
@@ -190,7 +190,7 @@ async::AsyncTaskHandle GPUAdapter::requestDevice(
                   creationRuntime);
 
               auto deviceHost = std::make_shared<GPUDevice>(std::move(device),
-                                                            asyncRunner, label);
+                                                            context, label);
               *deviceLostBinding = deviceHost;
               resolve([deviceHost = std::move(deviceHost)](
                           jsi::Runtime &runtime) mutable {
