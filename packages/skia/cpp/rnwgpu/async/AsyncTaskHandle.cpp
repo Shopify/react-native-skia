@@ -1,11 +1,14 @@
 #include "AsyncTaskHandle.h"
 
+#include <memory>
 #include <string>
 #include <utility>
 
+#include <ReactCommon/CallInvoker.h>
+
 #include "jsi2/Promise.h"
 
-#include "AsyncRunner.h"
+#include "RuntimeContext.h"
 
 namespace rnwgpu::async {
 
@@ -13,8 +16,8 @@ using Action = std::function<void(jsi::Runtime &, rnwgpu::Promise &)>;
 
 struct AsyncTaskHandle::State
     : public std::enable_shared_from_this<AsyncTaskHandle::State> {
-  State(std::shared_ptr<AsyncRunner> runner, bool keepPumping)
-      : runner(std::move(runner)), keepPumping(keepPumping) {}
+  State(std::shared_ptr<RuntimeContext> context, bool keepPumping)
+      : context(std::move(context)), keepPumping(keepPumping) {}
 
   void settle(Action action);
   void attachPromise(const std::shared_ptr<rnwgpu::Promise> &promise);
@@ -26,12 +29,12 @@ struct AsyncTaskHandle::State
   std::shared_ptr<rnwgpu::Promise> currentPromise();
 
   std::mutex mutex;
-  std::weak_ptr<AsyncRunner> runner;
+  std::shared_ptr<RuntimeContext> context;
+  bool keepPumping;
   std::shared_ptr<rnwgpu::Promise> promise;
   std::optional<Action> pendingAction;
   bool settled = false;
   std::shared_ptr<State> keepAlive;
-  bool keepPumping;
 };
 
 // MARK: - State helpers
@@ -77,30 +80,60 @@ void AsyncTaskHandle::State::attachPromise(
 }
 
 void AsyncTaskHandle::State::schedule(Action action) {
-  auto runnerRef = runner.lock();
-  if (!runnerRef) {
-    return;
-  }
-
   auto promiseRef = currentPromise();
   if (!promiseRef) {
-    runnerRef->onTaskSettled(keepPumping);
     return;
   }
 
-  auto dispatcherRef = runnerRef->dispatcher();
-  if (!dispatcherRef) {
-    runnerRef->onTaskSettled(keepPumping);
+  if (!context) {
+    // No context (shouldn't happen): best-effort inline settle.
+    action(promiseRef->runtime, *promiseRef);
+    std::lock_guard<std::mutex> lock(mutex);
+    keepAlive.reset();
     return;
   }
 
-  dispatcherRef->post([self = shared_from_this(), action = std::move(action),
-                       runnerRef, promiseRef](jsi::Runtime &runtime) mutable {
-    runnerRef->onTaskSettled(self->keepPumping);
-    action(runtime, *promiseRef);
-    std::lock_guard<std::mutex> lock(self->mutex);
-    self->keepAlive.reset();
-  });
+  auto self = shared_from_this();
+
+  if (!keepPumping) {
+    // Spontaneous task (e.g. device.lost): not driven by the ProcessEvents pump.
+    // Settle on the owning runtime's JS thread via its CallInvoker, which is
+    // wired only for the main JS runtime. A device created on a worklet runtime
+    // has no invoker, so its device.lost is dropped (best-effort; see the
+    // Threading model). invokeAsync runs the closure on the main JS thread,
+    // where promiseRef->runtime lives for a main-runtime device.
+    auto invoker = context->callInvoker();
+    if (invoker) {
+      invoker->invokeAsync(
+          [self, action = std::move(action), promiseRef]() mutable {
+            action(promiseRef->runtime, *promiseRef);
+            std::lock_guard<std::mutex> lock(self->mutex);
+            self->keepAlive.reset();
+          });
+    } else {
+      std::lock_guard<std::mutex> lock(mutex);
+      keepAlive.reset();
+    }
+    return;
+  }
+
+  // Pumping task (request/response op). The resolve/reject callback may fire on
+  // a thread that is NOT the owning runtime's thread: with a shared
+  // wgpu::Instance, another runtime's ProcessEvents() pump can consume this Dawn
+  // event. Touching the Promise's runtime off-thread would corrupt Hermes. So we
+  // deposit the actual settle (the only JSI-touching work) into the owning
+  // context's mailbox; the context drains it on its own thread during its next
+  // tick. The deposited closure captures only C++ state and runs no JSI until
+  // drained, so depositing from any thread is safe.
+  context->postSettle(
+      [self, action = std::move(action), promiseRef]() mutable {
+        action(promiseRef->runtime, *promiseRef);
+        if (self->context) {
+          self->context->onTaskSettled(/*keepPumping=*/true);
+        }
+        std::lock_guard<std::mutex> lock(self->mutex);
+        self->keepAlive.reset();
+      });
 }
 
 AsyncTaskHandle::ResolveFunction
@@ -149,9 +182,9 @@ AsyncTaskHandle::AsyncTaskHandle(std::shared_ptr<State> state)
 bool AsyncTaskHandle::valid() const { return _state != nullptr; }
 
 AsyncTaskHandle
-AsyncTaskHandle::create(const std::shared_ptr<AsyncRunner> &runner,
+AsyncTaskHandle::create(const std::shared_ptr<RuntimeContext> &context,
                         bool keepPumping) {
-  auto state = std::make_shared<State>(runner, keepPumping);
+  auto state = std::make_shared<State>(context, keepPumping);
   state->keepAlive = state;
   return AsyncTaskHandle(std::move(state));
 }
