@@ -18,10 +18,11 @@ concurrency:
 
 jobs:
   lint:
+    if: ${{ github.repository == 'shopify/react-native-skia' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v5.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
         with:
           submodules: recursive
 
@@ -57,10 +58,11 @@ jobs:
         run: yarn tsc
 
   test:
+    if: ${{ github.repository == 'shopify/react-native-skia' }}
     runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v5.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
         with:
           submodules: recursive
 
@@ -73,12 +75,13 @@ jobs:
         run: yarn test
 
   build-library:
+    if: ${{ github.repository == 'shopify/react-native-skia' }}
     runs-on: ubuntu-latest
     outputs:
       run_id: ${{ github.run_id }}
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v5.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
         with:
           submodules: recursive
 
@@ -109,6 +112,7 @@ jobs:
           YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   test-package-e2e:
+    if: ${{ github.repository == 'shopify/react-native-skia' }}
     needs: build-library
     uses: ./.github/workflows/test-skia-package.yml
     with:
@@ -118,6 +122,7 @@ jobs:
       test_web: true
 
   test-package-e2e-static-frameworks:
+    if: ${{ github.repository == 'shopify/react-native-skia' }}
     needs: build-library
     uses: ./.github/workflows/test-skia-package.yml
     with:
@@ -128,10 +133,11 @@ jobs:
       ios_use_frameworks: static
 
   build-windows-library:
+    if: ${{ github.repository == 'shopify/react-native-skia' }}
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v5.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
         with:
           submodules: recursive
 
@@ -144,12 +150,13 @@ jobs:
         run: yarn build
 
   build-android:
+    if: ${{ github.repository == 'shopify/react-native-skia' }}
     runs-on: ubuntu-latest
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v5.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
         with:
           submodules: recursive
 
@@ -232,6 +239,7 @@ jobs:
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
 
   test-android:
+    if: ${{ github.repository == 'shopify/react-native-skia' }}
     needs: build-android
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -239,7 +247,7 @@ jobs:
       TURBO_CACHE_DIR: .turbo/android
     steps:
       - name: checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v5.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
         with:
           submodules: recursive
 
@@ -308,12 +316,13 @@ jobs:
           name: tests-docs-screenshots
 
   build-test-ios:
+    if: ${{ github.repository == 'shopify/react-native-skia' }}
     runs-on: macos-latest-xlarge
     env:
       TURBO_CACHE_DIR: .turbo/ios
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v5.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
         with:
           submodules: recursive
 
@@ -355,12 +364,13 @@ jobs:
         run: CI=true yarn e2e
 
   build-test-macos:
+    if: ${{ github.repository == 'shopify/react-native-skia' }}
     runs-on: macos-latest
     env:
       TURBO_CACHE_DIR: .turbo/macos
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v5.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
         with:
           submodules: recursive
 
@@ -384,7 +394,7 @@ jobs:
   #   runs-on: macos-latest
   #   steps:
   #     - name: Checkout
-  #       uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v5.0.0
+  #       uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
   #       with:
   #         submodules: recursive
 

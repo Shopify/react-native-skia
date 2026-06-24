@@ -44,7 +44,10 @@ if (existsSync(graphiteMarker)) {
   console.log("-- Removing Graphite marker (switching to the standard build)");
   rmSync(graphiteMarker, { force: true });
   // Drop the Graphite-only Dawn headers so they don't linger in a standard build.
-  rmSync(path.join(packageRoot, "cpp", "dawn"), { recursive: true, force: true });
+  rmSync(path.join(packageRoot, "cpp", "dawn"), {
+    recursive: true,
+    force: true,
+  });
 }
 
 console.log("-- Copying Skia headers");

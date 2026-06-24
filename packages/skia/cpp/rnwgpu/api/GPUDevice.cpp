@@ -6,6 +6,8 @@
 #include <utility>
 #include <vector>
 
+#include <ReactCommon/CallInvoker.h>
+
 #include "Convertors.h"
 #include "NativeBufferUtils.h"
 #include "jsi2/JSIConverter.h"
@@ -19,23 +21,33 @@ namespace rnwgpu {
 
 void GPUDevice::notifyDeviceLost(wgpu::DeviceLostReason reason,
                                  std::string message) {
-  if (_lostSettled) {
-    return;
+  std::optional<async::AsyncTaskHandle::ResolveFunction> resolveToCall;
+  std::shared_ptr<GPUDeviceLostInfo> info;
+  {
+    std::lock_guard<std::mutex> lock(_lostMutex);
+    if (_lostSettled) {
+      return;
+    }
+
+    _lostSettled = true;
+    _lostInfo = std::make_shared<GPUDeviceLostInfo>(reason, std::move(message));
+    info = _lostInfo;
+
+    if (_lostResolve.has_value()) {
+      resolveToCall = std::move(*_lostResolve);
+      _lostResolve.reset();
+    }
+
+    _lostHandle.reset();
   }
 
-  _lostSettled = true;
-  _lostInfo = std::make_shared<GPUDeviceLostInfo>(reason, std::move(message));
-
-  if (_lostResolve.has_value()) {
-    auto resolve = std::move(*_lostResolve);
-    _lostResolve.reset();
-    resolve([info = _lostInfo](jsi::Runtime &runtime) mutable {
+  // Settle outside the lock: resolve() only enqueues onto the JS thread.
+  if (resolveToCall.has_value()) {
+    (*resolveToCall)([info](jsi::Runtime &runtime) mutable {
       return JSIConverter<std::shared_ptr<GPUDeviceLostInfo>>::toJSI(runtime,
                                                                      info);
     });
   }
-
-  _lostHandle.reset();
 }
 
 void GPUDevice::forceLossForTesting() {
@@ -265,6 +277,55 @@ std::shared_ptr<GPUSharedTextureMemory> GPUDevice::importSharedTextureMemory(
                                                   std::move(label));
 }
 
+std::shared_ptr<GPUSharedFence> GPUDevice::importSharedFence(
+    std::shared_ptr<GPUSharedFenceDescriptor> descriptor) {
+  if (!descriptor || descriptor->handle == nullptr) {
+    throw std::runtime_error("GPUDevice::importSharedFence(): handle must be a "
+                             "non-null native handle");
+  }
+
+  wgpu::SharedFenceDescriptor desc{};
+  std::string label = descriptor->label.value_or("");
+  if (!label.empty()) {
+    desc.label = wgpu::StringView(label.c_str(), label.size());
+  }
+
+  // The chained platform descriptor must outlive the synchronous
+  // ImportSharedFence() below; declare them all and chain the matching one.
+  wgpu::SharedFenceMTLSharedEventDescriptor mtlDesc{};
+  wgpu::SharedFenceSyncFDDescriptor syncFdDesc{};
+  wgpu::SharedFenceVkSemaphoreOpaqueFDDescriptor vkFdDesc{};
+
+  const std::string &type = descriptor->type;
+  if (type == "mtl-shared-event") {
+    // handle is an id<MTLSharedEvent> pointer.
+    mtlDesc.sharedEvent = descriptor->handle;
+    desc.nextInChain = &mtlDesc;
+  } else if (type == "sync-fd") {
+    // handle is an OS file descriptor.
+    syncFdDesc.handle =
+        static_cast<int>(reinterpret_cast<uintptr_t>(descriptor->handle));
+    desc.nextInChain = &syncFdDesc;
+  } else if (type == "vk-semaphore-opaque-fd") {
+    vkFdDesc.handle =
+        static_cast<int>(reinterpret_cast<uintptr_t>(descriptor->handle));
+    desc.nextInChain = &vkFdDesc;
+  } else {
+    throw std::runtime_error(
+        "GPUDevice::importSharedFence(): unsupported fence type '" + type +
+        "' (expected 'mtl-shared-event', 'sync-fd' or "
+        "'vk-semaphore-opaque-fd')");
+  }
+
+  auto fence = _instance.ImportSharedFence(&desc);
+  if (fence == nullptr) {
+    throw std::runtime_error(
+        "GPUDevice::importSharedFence(): ImportSharedFence returned null - is "
+        "the matching 'shared-fence-*' feature enabled on the device?");
+  }
+  return std::make_shared<GPUSharedFence>(std::move(fence), std::move(label));
+}
+
 async::AsyncTaskHandle GPUDevice::createComputePipelineAsync(
     std::shared_ptr<GPUComputePipelineDescriptor> descriptor) {
   wgpu::ComputePipelineDescriptor desc{};
@@ -289,7 +350,7 @@ async::AsyncTaskHandle GPUDevice::createComputePipelineAsync(
         &desc, wgpu::CallbackMode::AllowProcessEvents,
         [pipelineHolder, resolve,
          reject](wgpu::CreatePipelineAsyncStatus status,
-                 wgpu::ComputePipeline pipeline, const char *msg) mutable {
+                 wgpu::ComputePipeline pipeline, wgpu::StringView msg) {
           if (status == wgpu::CreatePipelineAsyncStatus::Success && pipeline) {
             pipelineHolder->_instance = pipeline;
             resolve([pipelineHolder](jsi::Runtime &runtime) mutable {
@@ -298,7 +359,8 @@ async::AsyncTaskHandle GPUDevice::createComputePipelineAsync(
             });
           } else {
             std::string error =
-                msg ? std::string(msg) : "Failed to create compute pipeline";
+                msg.length ? std::string(msg.data, msg.length)
+                           : "Failed to create compute pipeline";
             reject(std::move(error));
           }
         });
@@ -330,7 +392,7 @@ async::AsyncTaskHandle GPUDevice::createRenderPipelineAsync(
         &desc, wgpu::CallbackMode::AllowProcessEvents,
         [pipelineHolder, resolve,
          reject](wgpu::CreatePipelineAsyncStatus status,
-                 wgpu::RenderPipeline pipeline, const char *msg) mutable {
+                 wgpu::RenderPipeline pipeline, wgpu::StringView msg) {
           if (status == wgpu::CreatePipelineAsyncStatus::Success && pipeline) {
             pipelineHolder->_instance = pipeline;
             resolve([pipelineHolder](jsi::Runtime &runtime) mutable {
@@ -339,7 +401,8 @@ async::AsyncTaskHandle GPUDevice::createRenderPipelineAsync(
             });
           } else {
             std::string error =
-                msg ? std::string(msg) : "Failed to create render pipeline";
+                msg.length ? std::string(msg.data, msg.length)
+                           : "Failed to create render pipeline";
             reject(std::move(error));
           }
         });
@@ -423,6 +486,11 @@ std::unordered_set<std::string> GPUDevice::getFeatures() {
 }
 
 async::AsyncTaskHandle GPUDevice::getLost() {
+  // Held across the whole body: the postTask callback below runs synchronously
+  // on this (JS) thread and touches the same _lost* fields, so it must not
+  // re-lock. notifyDeviceLost() takes the same lock from its (possibly worker)
+  // thread.
+  std::lock_guard<std::mutex> lock(_lostMutex);
   if (_lostHandle.has_value()) {
     return *_lostHandle;
   }
@@ -437,7 +505,7 @@ async::AsyncTaskHandle GPUDevice::getLost() {
                 runtime, info);
           });
         },
-        false);
+        /*keepPumping=*/false);
   }
 
   auto handle = _async->postTask(
@@ -451,9 +519,10 @@ async::AsyncTaskHandle GPUDevice::getLost() {
           return;
         }
 
+        // Resolved later from notifyDeviceLost().
         _lostResolve = resolve;
       },
-      false);
+      /*keepPumping=*/false);
 
   _lostHandle = handle;
   return handle;
@@ -478,6 +547,23 @@ void GPUDevice::removeEventListener(std::string type, jsi::Function callback) {
 }
 
 void GPUDevice::notifyUncapturedError(GPUErrorVariant error) {
+  // Dawn can surface an uncaptured error from any ProcessEvents pump (a worklet
+  // runtime sharing this instance may pump it on the wrong thread). Marshal to
+  // the owning runtime's JS thread via its CallInvoker before touching JSI. The
+  // invoker is wired only for the main JS runtime, so a device created on a
+  // worklet runtime does not deliver uncaptured errors to JS (best-effort; see
+  // the Threading model).
+  auto invoker = _async ? _async->callInvoker() : nullptr;
+  if (!invoker) {
+    return;
+  }
+  auto self = shared_from_this();
+  invoker->invokeAsync([self, error = std::move(error)]() mutable {
+    self->deliverUncapturedError(std::move(error));
+  });
+}
+
+void GPUDevice::deliverUncapturedError(GPUErrorVariant error) {
   auto runtime = getCreationRuntime();
   if (runtime == nullptr) {
     return;

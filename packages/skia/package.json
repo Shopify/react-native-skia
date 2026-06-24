@@ -89,8 +89,13 @@
     }
   },
   "devDependencies": {
-    "@babel/plugin-proposal-nullish-coalescing-operator": "7.18.6",
+    "@babel/plugin-transform-class-properties": "^7.28.0",
     "@babel/plugin-transform-explicit-resource-management": "^7.28.0",
+    "@babel/plugin-transform-nullish-coalescing-operator": "^7.28.0",
+    "@babel/preset-env": "^7.28.0",
+    "@babel/preset-flow": "^7.28.0",
+    "@babel/preset-react": "^7.28.0",
+    "@babel/preset-typescript": "^7.28.0",
     "@blazediff/core": "^1.4.0",
     "@semantic-release/commit-analyzer": "^13.0.0",
     "@semantic-release/exec": "^7.0.3",
@@ -122,14 +127,14 @@
     "ts-jest": "29.4.3",
     "tsx": "^4.21.0",
     "typescript": "^5.2.2",
-    "ws": "8.20.1"
+    "ws": "8.21.0"
   },
   "dependencies": {
     "canvaskit-wasm": "0.41.0",
-    "react-native-skia-android": "147.1.0",
-    "react-native-skia-apple-ios": "147.1.0",
-    "react-native-skia-apple-macos": "147.1.0",
-    "react-native-skia-apple-tvos": "147.1.0",
+    "react-native-skia-android": "150.0.0",
+    "react-native-skia-apple-ios": "150.0.0",
+    "react-native-skia-apple-macos": "150.0.0",
+    "react-native-skia-apple-tvos": "150.0.0",
     "react-reconciler": "0.31.0"
   },
   "eslintIgnore": [

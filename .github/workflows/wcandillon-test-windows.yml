@@ -1,0 +1,24 @@
+# OWNER: wcandillon/react-native-skia
+# Manual-dispatch Windows build check. Mirrors the build-windows-library job
+# that used to live in CI. Runs on a GitHub-hosted windows-latest runner.
+name: wcandillon - Test Windows
+on:
+  workflow_dispatch:
+
+jobs:
+  build-windows-library:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build package
+        run: yarn build

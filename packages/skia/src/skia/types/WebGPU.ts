@@ -1,5 +1,45 @@
 import type { NativeBuffer } from "./NativeBuffer";
 
+/**
+ * Make the WebGPU flag constants (`GPUBufferUsage`, `GPUColorWrite`,
+ * `GPUMapMode`, `GPUShaderStage`, `GPUTextureUsage`) available on the runtime
+ * that calls this.
+ *
+ * The native module installs these globals on the main JS runtime, but worklet
+ * runtimes (Reanimated UI, dedicated worklet runtimes, Vision Camera frame
+ * processors) start without them, so referencing the bare global inside a
+ * worklet yields `undefined`. Call `installWebGPU()` once at the top of a
+ * worklet to install them there:
+ *
+ * ```tsx
+ * import { installWebGPU } from "@shopify/react-native-skia";
+ *
+ * const work = (device: GPUDevice) => {
+ *   "worklet";
+ *   installWebGPU();
+ *   device.createBuffer({
+ *     usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+ *   });
+ * };
+ * ```
+ *
+ * `installWebGPU` is a native host function. When captured into a worklet, the
+ * Worklets serializer re-creates it on the worklet runtime, so calling it there
+ * installs the constants on that runtime. The values come from the native
+ * `wgpu::*Usage` enums, so they stay a single source of truth across runtimes.
+ * Calling it on a runtime that already has the constants is a safe no-op, and on
+ * web (where the constants are always global) it is a no-op too.
+ */
+export const installWebGPU: () => void = (() => {
+  const g =
+    typeof global !== "undefined"
+      ? (global as unknown as { installWebGPU?: () => void })
+      : undefined;
+  return g && typeof g.installWebGPU === "function"
+    ? g.installWebGPU
+    : () => {};
+})();
+
 // Skia's Graphite/Dawn backend extends the standard WebGPU API (typed by
 // @webgpu/types) with a few Skia- and Dawn-specific entry points. These are
 // only available on native (SK_GRAPHITE) builds, reachable through
@@ -37,6 +77,71 @@ export interface GPUSharedTextureMemoryDescriptor extends GPUObjectDescriptorBas
 }
 
 /**
+ * The kind of native synchronization primitive a {@link GPUSharedFence} wraps,
+ * matching the `shared-fence-*` device feature names. Limited to the kinds
+ * react-native-skia targets (iOS/Metal and Android/Vulkan); `importSharedFence`
+ * accepts these and `export()` reports them.
+ */
+export type GPUSharedFenceType =
+  | "mtl-shared-event"
+  | "sync-fd"
+  | "vk-semaphore-opaque-fd";
+
+/**
+ * Descriptor for {@link GPUDevice.importSharedFence}.
+ */
+export interface GPUSharedFenceDescriptor {
+  /**
+   * The fence kind to import. Must match a `shared-fence-*` feature enabled on
+   * the device.
+   */
+  type: GPUSharedFenceType;
+  /**
+   * The raw native handle as a BigInt: an `id<MTLSharedEvent>` pointer for
+   * `"mtl-shared-event"`, or an OS file descriptor for the `*-fd` kinds.
+   */
+  handle: bigint;
+  label?: string;
+}
+
+export interface GPUSharedFenceExportInfo {
+  type: GPUSharedFenceType;
+  /**
+   * An `id<MTLSharedEvent>` pointer (Apple) or file descriptor (Android), as a
+   * BigInt. The caller takes ownership; e.g. an exported sync-fd must be closed
+   * once consumed.
+   */
+  handle: bigint;
+}
+
+/**
+ * A native GPU synchronization primitive shared across queues/APIs. Produced by
+ * {@link GPUSharedTextureMemory.endAccess}, consumed by
+ * {@link GPUSharedTextureMemory.beginAccess}, or imported from a consumer's
+ * fence with {@link GPUDevice.importSharedFence}.
+ */
+export interface GPUSharedFence {
+  readonly __brand: "GPUSharedFence";
+  label: string;
+  export(): GPUSharedFenceExportInfo;
+}
+
+/** A fence and the timeline value to wait for (0n for binary sync-fd fences). */
+export interface GPUSharedFenceState {
+  fence: GPUSharedFence;
+  signaledValue: bigint;
+}
+
+/**
+ * The result of {@link GPUSharedTextureMemory.endAccess}: each fence is signaled
+ * at its `signaledValue` once Dawn's GPU work for the access completes.
+ */
+export interface GPUSharedTextureMemoryEndAccessState {
+  initialized: boolean;
+  fences: GPUSharedFenceState[];
+}
+
+/**
  * Shared texture memory imported from a platform native buffer via
  * {@link GPUDevice.importSharedTextureMemory}. Create a texture that aliases
  * the memory, then bracket the GPU work that touches it with
@@ -48,14 +153,20 @@ export interface GPUSharedTextureMemory extends GPUObjectBase {
   /**
    * Acquire the memory for GPU access. `initialized` marks whether the existing
    * contents should be preserved (pass `true` for an already-rendered frame).
-   * Returns `false` if access could not be acquired.
+   * Optional `fences` are wait fences: Dawn waits for each to reach its
+   * `signaledValue` before writing the surface. Throws if the access could not
+   * be acquired.
    */
-  beginAccess(texture: GPUTexture, initialized: boolean): boolean;
+  beginAccess(
+    texture: GPUTexture,
+    initialized: boolean,
+    fences?: GPUSharedFenceState[]
+  ): void;
   /**
-   * Release the memory after the GPU work that accessed it has been submitted.
-   * Returns `false` on failure.
+   * Release the memory after the GPU work that accessed it has been submitted,
+   * and return the fences Dawn produced for the access. Throws on failure.
    */
-  endAccess(texture: GPUTexture): boolean;
+  endAccess(texture: GPUTexture): GPUSharedTextureMemoryEndAccessState;
 }
 
 /**
@@ -104,5 +215,12 @@ declare global {
     importSharedTextureMemory(
       descriptor: GPUSharedTextureMemoryDescriptor
     ): GPUSharedTextureMemory;
+    /**
+     * Skia extension: import a native synchronization primitive (an
+     * `id<MTLSharedEvent>` on Apple, a sync-fd / VkSemaphore on Android) as a
+     * {@link GPUSharedFence}, e.g. to wait on a fence a consumer produced. The
+     * matching `shared-fence-*` feature must be enabled on the device.
+     */
+    importSharedFence(descriptor: GPUSharedFenceDescriptor): GPUSharedFence;
   }
 }

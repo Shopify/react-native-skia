@@ -19,7 +19,7 @@ jobs:
       release_name: ${{ steps.release_meta.outputs.release_name }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.0
 
       - name: Determine Dawn branch metadata
         id: dawn_meta
@@ -45,7 +45,7 @@ jobs:
 
       - name: Create GitHub release
         id: create_release
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -92,7 +92,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main repository
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.0
 
       - name: Checkout Dawn repository
         run: |
@@ -176,7 +176,7 @@ jobs:
     runs-on: macos-latest-large
     steps:
       - name: Checkout main repository
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.0
 
       - name: Checkout Dawn repository
         run: |
@@ -216,7 +216,7 @@ jobs:
     needs: [prepare-release, mobile-android, mobile-apple]
     steps:
       - name: Checkout main repository
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.0
 
       - name: Download all build artifacts
         uses: actions/download-artifact@v8
@@ -265,7 +265,7 @@ jobs:
           tar -czf dawn-headers-${TAG}.tar.gz dawn-headers
 
       - name: Upload to GitHub release
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

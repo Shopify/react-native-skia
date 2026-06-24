@@ -54,6 +54,9 @@ public:
   void configure(std::shared_ptr<GPUCanvasConfiguration> configuration);
   void unconfigure();
   std::shared_ptr<GPUTexture> getCurrentTexture();
+  // Present is explicit on every runtime (main JS, Reanimated UI, and dedicated
+  // worklet runtimes). It runs synchronously on the calling thread, preserving
+  // Dawn surface thread-affinity; offscreen surfaces no-op.
   void present();
 
 private:
