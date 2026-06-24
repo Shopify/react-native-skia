@@ -30,6 +30,7 @@ public:
   std::string getObjectType() const override { return "JsiSkMaskFilter"; }
 
   EXPORT_JSI_API_TYPENAME(JsiSkMaskFilter, MaskFilter)
+  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkMaskFilter, dispose))
 };
 
 } // namespace RNSkia
