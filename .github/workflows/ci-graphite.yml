@@ -18,12 +18,13 @@ concurrency:
 
 jobs:
   build-android-graphite:
+    if: ${{ github.repository == 'shopify/react-native-skia' }}
     runs-on: ubuntu-latest
     env:
       TURBO_CACHE_DIR: .turbo/android
     steps:
       - name: Checkout
-        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
         with:
           submodules: recursive
 
@@ -106,6 +107,7 @@ jobs:
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
 
   test-android-graphite:
+    if: ${{ github.repository == 'shopify/react-native-skia' }}
     needs: build-android-graphite
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -113,7 +115,7 @@ jobs:
       TURBO_CACHE_DIR: .turbo/android
     steps:
       - name: checkout
-        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
         with:
           submodules: recursive
 
@@ -168,7 +170,15 @@ jobs:
             adb shell monkey -p com.microsoft.reacttestapp 1
 
             # Run tests
-            cd packages/skia && CI=true yarn test -i e2e/Path --testPathIgnorePatterns Paragraphs
+            # On Graphite we run the Path render tests plus the WebGPU specs.
+            # ArrayBuffer, ComputeShader, ErrorScope, ImageBitmapBounds and
+            # DawnToggles are pure surface.eval round-trips that assert on
+            # returned values. The external-texture specs (ExternalTexture,
+            # ImportExternalTexture, SharedTextureMemory) additionally exercise
+            # NativeBuffer import and GPU read-back; they self-validate via
+            # copyTextureToBuffer (not Skia image readPixels) and skip
+            # themselves where NativeBuffer/createImageBitmap are unavailable.
+            cd packages/skia && CI=true yarn test -i "e2e/(Path|ArrayBuffer|ComputeShader|ErrorScope|ImageBitmapBounds|DawnToggles|ExternalTexture|ImportExternalTexture|SharedTextureMemory)" --testPathIgnorePatterns Paragraphs
 
       - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.0
         if: failure()
@@ -183,12 +193,13 @@ jobs:
           name: tests-docs-screenshots
 
   build-test-ios-graphite:
+    if: ${{ github.repository == 'shopify/react-native-skia' }}
     runs-on: macos-latest-xlarge
     env:
       TURBO_CACHE_DIR: .turbo/ios
     steps:
       - name: Checkout
-        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
         with:
           submodules: recursive
 
@@ -228,4 +239,12 @@ jobs:
 
       - name: Run e2e tests
         working-directory: packages/skia
-        run: CI=true E2E=true yarn test -i Paths
+        # On Graphite we run the Paths render test plus the WebGPU specs.
+        # ArrayBuffer, ComputeShader, ErrorScope, ImageBitmapBounds and
+        # DawnToggles are pure surface.eval round-trips that assert on returned
+        # values. The external-texture specs (ExternalTexture,
+        # ImportExternalTexture, SharedTextureMemory) additionally exercise
+        # NativeBuffer import and GPU read-back; they self-validate via
+        # copyTextureToBuffer (not Skia image readPixels) and skip themselves
+        # where NativeBuffer/createImageBitmap are unavailable.
+        run: CI=true E2E=true yarn test -i "e2e/(Paths|ArrayBuffer|ComputeShader|ErrorScope|ImageBitmapBounds|DawnToggles|ExternalTexture|ImportExternalTexture|SharedTextureMemory)"

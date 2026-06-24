@@ -12,10 +12,10 @@
 #include "api/third_party/base64.h"
 
 #include "JsiTextureInfo.h"
-#include "RNSkTypedArray.h"
+#include "utils/RNSkTypedArray.h"
 
 #if defined(SK_GRAPHITE)
-#include "RNDawnContext.h"
+#include "rnskia/RNDawnContext.h"
 #include "include/gpu/graphite/Context.h"
 #else
 #include "include/gpu/ganesh/GrDirectContext.h"
@@ -277,9 +277,6 @@ public:
   }
 
   JSI_HOST_FUNCTION(readPixels) {
-#if defined(SK_GRAPHITE)
-    throw std::runtime_error("Not implemented yet");
-#else
     int srcX = 0;
     int srcY = 0;
     if (count > 0 && !arguments[0].isUndefined()) {
@@ -313,13 +310,24 @@ public:
             .getArrayBuffer(runtime);
     auto bfrPtr = reinterpret_cast<void *>(buffer.data(runtime));
 
+#if defined(SK_GRAPHITE)
+    // Graphite offers no synchronous GPU readback, so fall back to a CPU raster
+    // copy of the image (a no-op when the image is already raster) and read the
+    // pixels from that. This matches the Ganesh behaviour for non-texture and
+    // texture-backed images alike.
+    auto image = DawnContext::getInstance().MakeRasterImage(getObject());
+    if (!image ||
+        !image->readPixels(nullptr, info, bfrPtr, bytesPerRow, srcX, srcY)) {
+      return jsi::Value::null();
+    }
+#else
     auto grContext = getContext()->getDirectContext();
     if (!getObject()->readPixels(grContext, info, bfrPtr, bytesPerRow, srcX,
                                  srcY)) {
       return jsi::Value::null();
     }
-    return dest;
 #endif
+    return dest;
   }
 
   JSI_HOST_FUNCTION(makeNonTextureImage) {
