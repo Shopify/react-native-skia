@@ -5,11 +5,11 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiSkApi.h"
+#include "api/JsiSkApi.h"
 #include "RNSkJsiViewApi.h"
 #include "RNSkView.h"
 
-#include "RuntimeAwareCache.h"
+#include "jsi/RuntimeAwareCache.h"
 
 #ifdef SK_GRAPHITE
 #include "RNDawnContext.h"
@@ -23,6 +23,8 @@
 #include "rnwgpu/api/descriptors/GPUMapMode.h"
 #include "rnwgpu/api/descriptors/GPUShaderStage.h"
 #include "rnwgpu/api/descriptors/GPUTextureUsage.h"
+#include "rnwgpu/api/WebGPUConstants.h"
+#include "rnwgpu/async/RuntimeContext.h"
 #include "jsi2/Promise.h"
 
 #include "include/core/SkData.h"
@@ -82,6 +84,12 @@ void RNSkManager::installBindings() {
       jsi::Object::createFromHostObject(*_jsRuntime, _viewApi));
 
 #ifdef SK_GRAPHITE
+  // Register the main runtime + its CallInvoker so spontaneous events
+  // (device.lost / uncapturederror) on main-runtime devices can be delivered to
+  // the JS thread without the ProcessEvents pump. Worklet-runtime devices have
+  // no invoker (best-effort; see the RuntimeContext "Threading model" doc).
+  rnwgpu::async::RuntimeContext::registerMainRuntime(_jsRuntime, _jsCallInvoker);
+
   // Install WebGPU constructors
   rnwgpu::GPU::installConstructor(*_jsRuntime);
   rnwgpu::GPUUncapturedErrorEvent::installConstructor(*_jsRuntime);
@@ -104,18 +112,26 @@ void RNSkManager::installBindings() {
                                      std::move(navigator));
   }
 
-  // Install WebGPU constant objects as plain JS objects
-  _jsRuntime->global().setProperty(*_jsRuntime, "GPUBufferUsage",
-                                   rnwgpu::GPUBufferUsage::create(*_jsRuntime));
-  _jsRuntime->global().setProperty(*_jsRuntime, "GPUColorWrite",
-                                   rnwgpu::GPUColorWrite::create(*_jsRuntime));
-  _jsRuntime->global().setProperty(*_jsRuntime, "GPUMapMode",
-                                   rnwgpu::GPUMapMode::create(*_jsRuntime));
-  _jsRuntime->global().setProperty(*_jsRuntime, "GPUShaderStage",
-                                   rnwgpu::GPUShaderStage::create(*_jsRuntime));
+  // Install WebGPU constant objects as plain JS objects on the main runtime.
+  rnwgpu::installWebGPUConstants(*_jsRuntime);
+
+  // Install a global `installWebGPU()` host function so worklet runtimes can get
+  // the same constants. A host function captured into a worklet is serialized as
+  // a SerializableHostFunction and re-created on the worklet runtime, so the body
+  // runs there (its `rt` is the worklet runtime) and installs the constants on
+  // that runtime. The constants come from the native wgpu::*Usage enums, so the
+  // values stay a single source of truth across every runtime. Calling it on a
+  // runtime that already has the globals is a safe, idempotent no-op.
   _jsRuntime->global().setProperty(
-      *_jsRuntime, "GPUTextureUsage",
-      rnwgpu::GPUTextureUsage::create(*_jsRuntime));
+      *_jsRuntime, "installWebGPU",
+      jsi::Function::createFromHostFunction(
+          *_jsRuntime, jsi::PropNameID::forAscii(*_jsRuntime, "installWebGPU"),
+          0,
+          [](jsi::Runtime &rt, const jsi::Value & /*thisVal*/,
+             const jsi::Value * /*args*/, size_t /*count*/) -> jsi::Value {
+            rnwgpu::installWebGPUConstants(rt);
+            return jsi::Value::undefined();
+          }));
 
   // Install RNWebGPU global object for WebGPU Canvas support
   auto rnWebGPU = std::make_shared<rnwgpu::RNWebGPU>(gpu, nullptr);

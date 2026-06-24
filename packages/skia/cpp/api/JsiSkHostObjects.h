@@ -5,9 +5,9 @@
 #include <string>
 #include <utility>
 
-#include "JsiHostObject.h"
-#include "RNSkLog.h"
-#include "RNSkPlatformContext.h"
+#include "jsi/JsiHostObject.h"
+#include "utils/RNSkLog.h"
+#include "rnskia/RNSkPlatformContext.h"
 
 namespace RNSkia {
 
