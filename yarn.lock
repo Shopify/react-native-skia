@@ -32019,7 +32019,7 @@ __metadata:
     react: ^19.0.0
     react-dom: ^19.0.0
     react-native-web: ^0.19.7
-    remotion: 4.0.244
+    remotion: 4.0.410
     serialize-svg-path: ^0.1.0
     sharp: ^0.34.3
     simplex-noise: ^4.0.0
@@ -32038,6 +32038,16 @@ __metadata:
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
   checksum: bc8689a458091422386b5a75aa840a9c70e0f017b66d92caf27186d803a4ffdbea2e7cef4afebf2ca096357c084831b952b749bd31bdb645135cd9a3ba8ea111
+  languageName: node
+  linkType: hard
+
+"remotion@npm:4.0.410":
+  version: 4.0.410
+  resolution: "remotion@npm:4.0.410"
+  peerDependencies:
+    react: ">=16.8.0"
+    react-dom: ">=16.8.0"
+  checksum: 4693815bc877cf9f910e9093a7c133cc3ccacfb2c55acb00844e6c1f29e5b8de1c284e7545443451a38efe7eafa6121939a7a3b183fbc59a20dd35bdd919dc51
   languageName: node
   linkType: hard
 
