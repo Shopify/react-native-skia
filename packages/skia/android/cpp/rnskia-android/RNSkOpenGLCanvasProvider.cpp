@@ -5,8 +5,6 @@
 #include <jni.h>
 #include <memory>
 
-#include "RNSkLog.h"
-
 #if defined(SK_GRAPHITE)
 #include "RNDawnContext.h"
 #else
@@ -56,9 +54,6 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
 
       // Check for exceptions
       if (env->ExceptionCheck()) {
-        RNSkLogger::logToConsole(
-            "updateAndRelease() failed. The exception above "
-            "can safely be ignored");
         env->ExceptionClear();
       }
     }
