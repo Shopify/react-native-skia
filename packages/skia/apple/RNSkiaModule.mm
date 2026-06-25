@@ -35,7 +35,7 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(install) {
     // Already initialized, ignore call.
     return @true;
   }
-#ifndef RCT_DISABLE_LEGACY_ARCH
+#ifndef RCT_REMOVE_LEGACY_ARCH
   if (!jsInvoker) {
     RCTCxxBridge *cxxBridge = (RCTCxxBridge *)self.bridge;
     jsInvoker = cxxBridge.jsCallInvoker;
