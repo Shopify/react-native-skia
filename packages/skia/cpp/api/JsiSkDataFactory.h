@@ -38,10 +38,9 @@ public:
                                                 context = std::move(context),
                                                 promise = std::move(promise),
                                                 result = std::move(result)]() {
-                  auto hostObjectInstance =
-                      std::make_shared<JsiSkData>(context, std::move(result));
-                  promise->resolve(JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-                      runtime, hostObjectInstance, context));
+                  promise->resolve(JsiSkData::create(
+                      runtime,
+                      std::make_shared<JsiSkData>(context, std::move(result))));
                 });
               });
         });
@@ -56,10 +55,8 @@ public:
 
     auto data =
         SkData::MakeWithCopy(buffer.data(runtime), buffer.size(runtime));
-    auto hostObjectInstance =
-        std::make_shared<JsiSkData>(getContext(), std::move(data));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return JsiSkData::create(
+        runtime, std::make_shared<JsiSkData>(getContext(), std::move(data)));
   }
 
   JSI_HOST_FUNCTION(fromBase64) {
@@ -85,10 +82,8 @@ public:
       return jsi::Value::undefined();
     }
 
-    auto hostObjectInstance =
-        std::make_shared<JsiSkData>(getContext(), std::move(data));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return JsiSkData::create(
+        runtime, std::make_shared<JsiSkData>(getContext(), std::move(data)));
   }
 
   size_t getMemoryPressure() const override { return 1024; }

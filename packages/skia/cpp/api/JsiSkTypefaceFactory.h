@@ -16,7 +16,7 @@ namespace jsi = facebook::jsi;
 class JsiSkTypefaceFactory : public JsiSkHostObject {
 public:
   JSI_HOST_FUNCTION(MakeFreeTypeFaceFromData) {
-    auto data = JsiSkData::fromValue(runtime, arguments[0]);
+    auto data = JsiSkData::fromValue(runtime, arguments[0])->getObject();
     auto fontMgr = JsiSkFontMgrFactory::getFontMgr(getContext());
     auto typeface = fontMgr->makeFromData(std::move(data));
     if (typeface == nullptr) {

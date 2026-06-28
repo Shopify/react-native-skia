@@ -558,7 +558,7 @@ public:
     int xformsSize = static_cast<int>(transforms.size(runtime));
     xforms.reserve(xformsSize);
     for (int i = 0; i < xformsSize; i++) {
-      auto xform = JsiSkRSXform::fromValue(
+      auto xform = JsiSkRSXform::toRSXform(
           runtime, transforms.getValueAtIndex(runtime, i).asObject(runtime));
       xforms.push_back(*xform.get());
     }

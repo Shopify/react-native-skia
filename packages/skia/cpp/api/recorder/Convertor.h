@@ -427,9 +427,7 @@ GlyphData getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 template <>
 SkRSXform getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isObject()) {
-    auto form = value.asObject(runtime)
-                    .asHostObject<JsiSkRSXform>(runtime)
-                    ->getObject();
+    auto form = JsiSkRSXform::toRSXform(runtime, value);
     return SkRSXform::Make(form->fSCos, form->fSSin, form->fTx, form->fTy);
   }
   throw std::runtime_error("Invalid prop value for SkRSXform received");
