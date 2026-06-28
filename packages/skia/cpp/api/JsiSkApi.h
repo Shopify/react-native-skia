@@ -9,7 +9,7 @@
 #ifdef SK_GRAPHITE
 #include "rnskia/RNDawnContext.h"
 #include "rnwgpu/api/GPUDevice.h"
-#include "rnwgpu/async/AsyncRunner.h"
+#include "rnwgpu/async/RuntimeContext.h"
 #endif
 
 #include "JsiNativeBuffer.h"
@@ -164,12 +164,12 @@ public:
         "getDevice", JSI_HOST_FUNCTION_LAMBDA {
 #ifdef SK_GRAPHITE
           auto &dawnContext = DawnContext::getInstance();
-          auto asyncRunner = rnwgpu::async::AsyncRunner::get(runtime);
-          if (!asyncRunner) {
-            throw jsi::JSError(runtime, "AsyncRunner not initialized");
-          }
+          // Per-runtime context: async ops on this device resolve on the calling
+          // runtime's own thread (via its ProcessEvents pump).
+          auto context = rnwgpu::async::RuntimeContext::getOrCreate(
+              runtime, dawnContext.getWGPUInstance());
           auto device = std::make_shared<rnwgpu::GPUDevice>(
-              dawnContext.getWGPUDevice(), asyncRunner, "Skia Device");
+              dawnContext.getWGPUDevice(), context, "Skia Device");
           return rnwgpu::GPUDevice::create(runtime, device);
 #else
       throw jsi::JSError(runtime,

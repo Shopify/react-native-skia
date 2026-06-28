@@ -433,6 +433,29 @@ protected:
   }
 
   /**
+   * Install a method whose native implementation needs the calling jsi::Runtime
+   * as its first parameter. Used by entry points that must act per-runtime
+   * (e.g. GPU::requestAdapter, which creates a per-runtime RuntimeContext).
+   */
+  template <typename ReturnType, typename... Args>
+  static void
+  installMethodWithRuntime(jsi::Runtime &runtime, jsi::Object &prototype,
+                           const char *name,
+                           ReturnType (Derived::*method)(jsi::Runtime &,
+                                                         Args...)) {
+    auto func = jsi::Function::createFromHostFunction(
+        runtime, jsi::PropNameID::forUtf8(runtime, name), sizeof...(Args),
+        [method](jsi::Runtime &rt, const jsi::Value &thisVal,
+                 const jsi::Value *args, size_t count) -> jsi::Value {
+          auto native = Derived::fromValue(rt, thisVal);
+          return callMethodWithRuntime(native.get(), method, rt, args,
+                                       std::index_sequence_for<Args...>{},
+                                       count);
+        });
+    prototype.setProperty(runtime, name, func);
+  }
+
+  /**
    * Install a getter on the prototype.
    */
   template <typename ReturnType>
@@ -567,6 +590,22 @@ protected:
   }
 
 private:
+  // Helper to call a method that takes the calling jsi::Runtime as its first
+  // parameter, with JSI argument conversion for the rest and JSI conversion of
+  // the result.
+  template <typename ReturnType, typename... Args, size_t... Is>
+  static jsi::Value
+  callMethodWithRuntime(Derived *obj,
+                        ReturnType (Derived::*method)(jsi::Runtime &, Args...),
+                        jsi::Runtime &runtime, const jsi::Value *args,
+                        std::index_sequence<Is...>, size_t count) {
+    ReturnType result = (obj->*method)(
+        runtime, rnwgpu::JSIConverter<std::decay_t<Args>>::fromJSI(
+                     runtime, args[Is], Is >= count)...);
+    return rnwgpu::JSIConverter<std::decay_t<ReturnType>>::toJSI(
+        runtime, std::move(result));
+  }
+
   // Helper to call a method with JSI argument conversion
   template <typename ReturnType, typename... Args, size_t... Is>
   static jsi::Value callMethod(Derived *obj,
