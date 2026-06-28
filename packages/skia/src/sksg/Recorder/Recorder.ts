@@ -30,7 +30,7 @@ import type {
   DrawingNodeProps,
 } from "../../dom/types";
 import type { AnimatedProps } from "../../renderer";
-import { isSharedValue } from "../utils";
+import { isSharedValue, isSharedValueSelector } from "../utils";
 import { isColorFilter, isImageFilter, isPathEffect, isShader } from "../Node";
 import type { SkPaint, BaseRecorder } from "../../skia/types";
 
@@ -64,13 +64,17 @@ export class Recorder implements BaseRecorder {
   }
 
   private processProps(props: Record<string, unknown>) {
-    const animatedProps: Record<string, SharedValue<unknown>> = {};
+    const animatedProps: Record<string, unknown> = {};
     let hasAnimatedProps = false;
 
     for (const key in props) {
       const prop = props[key];
       if (isSharedValue(prop)) {
         this.animationValues.add(prop);
+        animatedProps[key] = prop;
+        hasAnimatedProps = true;
+      } else if (isSharedValueSelector(prop)) {
+        this.animationValues.add(prop.__sv);
         animatedProps[key] = prop;
         hasAnimatedProps = true;
       }
@@ -208,7 +212,7 @@ export class Recorder implements BaseRecorder {
     boxProps: AnimatedProps<BoxProps>,
     shadows: {
       props: BoxShadowProps;
-      animatedProps?: Record<string, SharedValue<unknown>>;
+      animatedProps?: Record<string, unknown>;
     }[]
   ) {
     shadows.forEach((shadow) => {
