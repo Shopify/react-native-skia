@@ -119,27 +119,34 @@ public:
     AHardwareBuffer_Desc description;
     AHardwareBuffer_describe(hardwareBuffer, &description);
     GrBackendFormat format;
+    auto colorType = kRGBA_8888_SkColorType;
     switch (description.format) {
     // TODO: find out if we can detect, which graphic buffers support
     // GR_GL_TEXTURE_2D
     case AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM:
       format = GrBackendFormats::MakeGL(GR_GL_RGBA8, GR_GL_TEXTURE_EXTERNAL);
+      colorType = kRGBA_8888_SkColorType;
       break;
     case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
       format = GrBackendFormats::MakeGL(GR_GL_RGBA16F, GR_GL_TEXTURE_EXTERNAL);
+      colorType = kRGBA_F16_SkColorType;
       break;
     case AHARDWAREBUFFER_FORMAT_R5G6B5_UNORM:
-      GrBackendFormats::MakeGL(GR_GL_RGB565, GR_GL_TEXTURE_EXTERNAL);
+      format = GrBackendFormats::MakeGL(GR_GL_RGB565, GR_GL_TEXTURE_EXTERNAL);
+      colorType = kRGB_565_SkColorType;
       break;
     case AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM:
       format = GrBackendFormats::MakeGL(GR_GL_RGB10_A2, GR_GL_TEXTURE_EXTERNAL);
+      colorType = kRGBA_1010102_SkColorType;
       break;
     case AHARDWAREBUFFER_FORMAT_R8G8B8_UNORM:
       format = GrBackendFormats::MakeGL(GR_GL_RGB8, GR_GL_TEXTURE_EXTERNAL);
+      colorType = kRGB_888x_SkColorType;
       break;
 #if __ANDROID_API__ >= 33
     case AHARDWAREBUFFER_FORMAT_R8_UNORM:
       format = GrBackendFormats::MakeGL(GR_GL_R8, GR_GL_TEXTURE_EXTERNAL);
+      colorType = kAlpha_8_SkColorType;
       break;
 #endif
     default:
@@ -161,9 +168,8 @@ public:
       return nullptr;
     }
     sk_sp<SkImage> image = SkImages::BorrowTextureFrom(
-        _directContext.get(), backendTex, kTopLeft_GrSurfaceOrigin,
-        kRGBA_8888_SkColorType, kOpaque_SkAlphaType, nullptr, deleteImageProc,
-        deleteImageCtx);
+        _directContext.get(), backendTex, kTopLeft_GrSurfaceOrigin, colorType,
+        kOpaque_SkAlphaType, nullptr, deleteImageProc, deleteImageCtx);
     return image;
 #else
     throw std::runtime_error(
