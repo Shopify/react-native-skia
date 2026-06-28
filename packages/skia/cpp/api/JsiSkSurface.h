@@ -72,8 +72,12 @@ public:
   }
 
   JSI_HOST_FUNCTION(getCanvas) {
+    auto surface = getObject();
     auto canvas =
-        std::make_shared<JsiSkCanvas>(getContext(), getObject()->getCanvas());
+        std::make_shared<JsiSkCanvas>(getContext(), surface->getCanvas());
+    // Keep a reference to the owning surface so the canvas can read pixels back
+    // through a snapshot on Graphite (which lacks synchronous canvas readback).
+    canvas->setSurface(surface);
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, canvas,
                                                        getContext());
   }

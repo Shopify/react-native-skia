@@ -310,6 +310,11 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
     const arm64ePatchFile = path.join(__dirname, "dawn-arm64e-simulator.patch");
     $(`cd ${SkiaSrc} && git apply ${arm64ePatchFile}`);
 
+    // Implement drawAtlas for the Graphite backend (removes the no-op override
+    // so the inherited drawVertices-based default lights up the API).
+    const drawAtlasPatchFile = path.join(__dirname, "graphite-drawatlas.patch");
+    $(`cd ${SkiaSrc} && git apply ${drawAtlasPatchFile}`);
+
     // Remove arm64e arch flags (not available on simulator)
     {
       const filePath = `${SkiaSrc}/gn/skia/BUILD.gn`;

@@ -1,4 +1,8 @@
-name: Test Skia Package (Reusable)
+# OWNER: wcandillon/react-native-skia
+# Fork copy of test-skia-package.yml. Only difference: the package artifact is
+# downloaded from the calling repository (github.repository) instead of being
+# hardcoded to Shopify/react-native-skia. Jobs run on GitHub-hosted macOS.
+name: wcandillon - Test Skia Package (Reusable)
 
 on:
   workflow_call:
@@ -96,7 +100,7 @@ jobs:
         run: |
           ARTIFACT_ID=$(echo "${{ inputs.skia_version }}" | sed 's/artifact://')
           echo "Downloading artifact ID: $ARTIFACT_ID"
-          gh run download --repo Shopify/react-native-skia $ARTIFACT_ID -n package-tgz -D /tmp
+          gh run download --repo ${{ github.repository }} $ARTIFACT_ID -n package-tgz -D /tmp
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -268,7 +272,7 @@ jobs:
         run: |
           ARTIFACT_ID=$(echo "${{ inputs.skia_version }}" | sed 's/artifact://')
           echo "Downloading artifact ID: $ARTIFACT_ID"
-          gh run download --repo Shopify/react-native-skia $ARTIFACT_ID -n package-tgz -D /tmp
+          gh run download --repo ${{ github.repository }} $ARTIFACT_ID -n package-tgz -D /tmp
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -412,7 +416,7 @@ jobs:
         run: |
           ARTIFACT_ID=$(echo "${{ inputs.skia_version }}" | sed 's/artifact://')
           echo "Downloading artifact ID: $ARTIFACT_ID"
-          gh run download --repo Shopify/react-native-skia $ARTIFACT_ID -n package-tgz -D /tmp
+          gh run download --repo ${{ github.repository }} $ARTIFACT_ID -n package-tgz -D /tmp
         env:
           GH_TOKEN: ${{ github.token }}
 

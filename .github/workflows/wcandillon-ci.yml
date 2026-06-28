@@ -1,4 +1,10 @@
-name: CI Graphite
+# OWNER: wcandillon/react-native-skia
+# RUNNER: macOS jobs (test, build-test-ios, build-test-macos) run on the
+#   self-hosted macOS runner; they serialize naturally since there is a single
+#   runner. Ubuntu jobs stay on GitHub-hosted runners.
+# NOTE: Windows build and package e2e tests are intentionally NOT part of this
+#   automatic CI - they are dispatched manually (see dedicated workflows).
+name: wcandillon - CI
 on:
   push:
     branches:
@@ -13,12 +19,93 @@ on:
       - checks_requested
 
 concurrency:
-  group: ${{ github.ref }}-graphite
+  group: wcandillon-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build-android-graphite:
-    if: ${{ github.repository == 'shopify/react-native-skia' }}
+  lint:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      - run: pip install cpplint
+      - run: cpplint --linelength=230 --filter=-legal/copyright,-whitespace/indent,-whitespace/comments,-whitespace/ending_newline,-build/include_order,-runtime/references,-readability/todo,-whitespace/blank_line,-whitespace/todo,-runtime/int,-build/c++11,-whitespace/parens --exclude=package/cpp/skia --exclude=package/apple --exclude=package/android/build --exclude=package/node_modules --recursive package
+
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format-18
+
+      - name: Lint files
+        run: yarn lint
+
+      - name: Typecheck files
+        run: yarn tsc
+
+  test:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
+    runs-on: [self-hosted, macOS]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Test
+        run: yarn test
+
+  build-library:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
+    runs-on: ubuntu-latest
+    outputs:
+      run_id: ${{ github.run_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build package
+        run: yarn build
+
+      - name: Pack package
+        working-directory: packages/skia
+        run: yarn pack
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.0
+        with:
+          name: package-tgz
+          path: packages/skia/package.tgz
+
+      - name: Build dry run release
+        working-directory: packages/skia
+        run: |
+          npx semantic-release --dry-run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  build-android:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
     runs-on: ubuntu-latest
     env:
       TURBO_CACHE_DIR: .turbo/android
@@ -32,18 +119,18 @@ jobs:
         uses: ./.github/actions/setup
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          graphite: true
 
       - name: Free disk space
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
-        with:
-          tool-cache: false
-          android: false
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: true
+        run: |
+          echo "Disk usage before cleanup:"
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker image prune -af || true
+          sudo apt-get clean
+          echo "Disk usage after cleanup:"
+          df -h
 
       - name: Cache turborepo for Android
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
@@ -98,17 +185,17 @@ jobs:
           cache-name: cache-apk
         with:
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
-          key: apk-graphite-${{ github.sha }}
+          key: apk-${{ github.sha }}
 
       - name: Upload Android APK artifact
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.0
         with:
-          name: android-example-apk-graphite
+          name: android-example-apk
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
 
-  test-android-graphite:
-    if: ${{ github.repository == 'shopify/react-native-skia' }}
-    needs: build-android-graphite
+  test-android:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
+    needs: build-android
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -123,7 +210,6 @@ jobs:
         uses: ./.github/actions/setup
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          graphite: true
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4.0.1
@@ -146,7 +232,7 @@ jobs:
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae
         with:
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
-          key: apk-graphite-${{ github.sha }}
+          key: apk-${{ github.sha }}
 
       - name: Start Package Manager
         working-directory: apps/example/
@@ -159,7 +245,7 @@ jobs:
           arch: x86_64
           profile: Nexus 5X
           force-avd-creation: true
-          emulator-options: -no-snapshot-save -no-window -gpu swangle_indirect -noaudio -no-boot-anim
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
           script: |
             # Wait for Metro bundler
@@ -170,15 +256,7 @@ jobs:
             adb shell monkey -p com.microsoft.reacttestapp 1
 
             # Run tests
-            # On Graphite we run the Path render tests plus the WebGPU specs.
-            # ArrayBuffer, ComputeShader, ErrorScope, ImageBitmapBounds and
-            # DawnToggles are pure surface.eval round-trips that assert on
-            # returned values. The external-texture specs (ExternalTexture,
-            # ImportExternalTexture, SharedTextureMemory) additionally exercise
-            # NativeBuffer import and GPU read-back; they self-validate via
-            # copyTextureToBuffer (not Skia image readPixels) and skip
-            # themselves where NativeBuffer/createImageBitmap are unavailable.
-            cd packages/skia && CI=true yarn test -i "e2e/(Path|ArrayBuffer|ComputeShader|ErrorScope|ImageBitmapBounds|DawnToggles|ExternalTexture|ImportExternalTexture|SharedTextureMemory)" --testPathIgnorePatterns Paragraphs
+            cd packages/skia && CI=true yarn e2e --testPathIgnorePatterns Paragraphs
 
       - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.0
         if: failure()
@@ -192,9 +270,9 @@ jobs:
           path: apps/docs/static/
           name: tests-docs-screenshots
 
-  build-test-ios-graphite:
-    if: ${{ github.repository == 'shopify/react-native-skia' }}
-    runs-on: macos-latest-xlarge
+  build-test-ios:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
+    runs-on: [self-hosted, macOS]
     env:
       TURBO_CACHE_DIR: .turbo/ios
     steps:
@@ -207,7 +285,6 @@ jobs:
         uses: ./.github/actions/setup
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          graphite: true
 
       - name: Cache turborepo for iOS
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
@@ -219,7 +296,7 @@ jobs:
 
       - name: Check turborepo cache for iOS
         run: |
-          TURBO_CACHE_STATUS=$(node -p "($(yarn turbo run build:ios --cache-dir=\"${{ env.TURBO_CACHE_DIR }}\" --dry=json)).tasks.find(t => t.task === 'build:ios').cache.status")
+          TURBO_CACHE_STATUS=$(node -p "($(yarn turbo run build:ios --cache-dir="${{ env.TURBO_CACHE_DIR }}" --dry=json)).tasks.find(t => t.task === 'build:ios').cache.status")
 
           if [[ $TURBO_CACHE_STATUS == "HIT" ]]; then
             echo "turbo_cache_hit=1" >> $GITHUB_ENV
@@ -232,19 +309,38 @@ jobs:
       - name: Start Package Manager
         working-directory: apps/example
         run: E2E=true yarn start &
-  
+
       - name: Build example for iOS
         working-directory: apps/example
         run: yarn ios --simulator 'iPhone 16 Pro'
 
       - name: Run e2e tests
         working-directory: packages/skia
-        # On Graphite we run the Paths render test plus the WebGPU specs.
-        # ArrayBuffer, ComputeShader, ErrorScope, ImageBitmapBounds and
-        # DawnToggles are pure surface.eval round-trips that assert on returned
-        # values. The external-texture specs (ExternalTexture,
-        # ImportExternalTexture, SharedTextureMemory) additionally exercise
-        # NativeBuffer import and GPU read-back; they self-validate via
-        # copyTextureToBuffer (not Skia image readPixels) and skip themselves
-        # where NativeBuffer/createImageBitmap are unavailable.
-        run: CI=true E2E=true yarn test -i "e2e/(Paths|ArrayBuffer|ComputeShader|ErrorScope|ImageBitmapBounds|DawnToggles|ExternalTexture|ImportExternalTexture|SharedTextureMemory)"
+        run: CI=true yarn e2e
+
+  build-test-macos:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
+    runs-on: [self-hosted, macOS]
+    env:
+      TURBO_CACHE_DIR: .turbo/macos
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache turborepo for macOS
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ env.TURBO_CACHE_DIR }}
+          key: ${{ runner.os }}-turborepo-macos-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-turborepo-macos-
+
+      - name: Build example for macOS
+        run: yarn turbo run build:macos --concurrency 1

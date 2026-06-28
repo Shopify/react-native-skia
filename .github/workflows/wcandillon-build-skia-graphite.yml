@@ -1,4 +1,9 @@
-name: Build SKIA Graphite
+# OWNER: wcandillon/react-native-skia
+# RUNNER: self-hosted macOS. Shares the `wcandillon-self-hosted-macos-build`
+#   concurrency group with wcandillon-build-skia so the two never build in
+#   parallel on the single runner. The build matrix runs one target at a time
+#   (max-parallel: 1) for the same reason.
+name: wcandillon - Build SKIA Graphite
 on:
   workflow_dispatch:
     inputs:
@@ -15,8 +20,14 @@ on:
         required: false
         type: boolean
         default: false
+
+concurrency:
+  group: wcandillon-self-hosted-macos-build
+  cancel-in-progress: false
+
 jobs:
   prepare-release:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
     runs-on: ubuntu-latest
     outputs:
       skia_branch: ${{ steps.skia_meta.outputs.branch }}
@@ -91,9 +102,11 @@ jobs:
           prerelease: true
           generate_release_notes: false
   build:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
     needs: prepare-release
-    runs-on: macos-latest-xlarge
+    runs-on: [self-hosted, macOS]
     strategy:
+      max-parallel: 1
       matrix:
         include:
           - target: "apple-ios"
