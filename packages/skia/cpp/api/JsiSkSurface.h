@@ -84,16 +84,22 @@ public:
 
   JSI_HOST_FUNCTION(flush) {
     auto surface = getObject();
+    // When `sync` is true, block until the GPU has finished executing the
+    // submitted work. Required before a native consumer on a different command
+    // queue reads this surface's texture via getNativeTextureUnstable(). #3916
+    bool sync = count > 0 && arguments[0].isBool() && arguments[0].getBool();
 #if defined(SK_GRAPHITE)
     // A raster surface (e.g. Skia.Surface.Make) has no Graphite recorder;
     // only Graphite-backed surfaces need to snap and submit a recording.
     if (auto *recorder = surface->recorder()) {
       auto recording = recorder->snap();
-      DawnContext::getInstance().submitRecording(recording.get());
+      DawnContext::getInstance().submitRecording(
+          recording.get(), sync ? skgpu::graphite::SyncToCpu::kYes
+                                : skgpu::graphite::SyncToCpu::kNo);
     }
 #else
     if (auto dContext = GrAsDirectContext(surface->recordingContext())) {
-      dContext->flushAndSubmit();
+      dContext->flushAndSubmit(sync ? GrSyncCpu::kYes : GrSyncCpu::kNo);
     }
 #endif
     return jsi::Value::undefined();
