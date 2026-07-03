@@ -354,10 +354,28 @@ jobs:
       - name: Start Package Manager
         working-directory: apps/example
         run: E2E=true yarn start &
-  
+
+      - name: Select iOS simulator
+        run: |
+          SIMULATOR_NAME=$(xcrun simctl list devices available --json | jq -r '
+            .devices
+            | to_entries
+            | map(select(.key | contains("iOS")))
+            | sort_by(.key)
+            | reverse
+            | map(.value[] | select(.name | startswith("iPhone")))
+            | .[0].name // empty')
+          if [ -z "$SIMULATOR_NAME" ]; then
+            echo "No available iPhone simulator found"
+            xcrun simctl list devices available
+            exit 1
+          fi
+          echo "Using simulator: $SIMULATOR_NAME"
+          echo "IOS_SIMULATOR=$SIMULATOR_NAME" >> $GITHUB_ENV
+
       - name: Build example for iOS
         working-directory: apps/example
-        run: yarn ios --simulator 'iPhone 16 Pro'
+        run: yarn ios --simulator "$IOS_SIMULATOR"
 
       - name: Run e2e tests
         working-directory: packages/skia
