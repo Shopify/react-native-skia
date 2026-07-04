@@ -18,9 +18,9 @@ on:
         type: boolean
         default: true
       simulator_device:
-        description: 'iOS Simulator device'
+        description: 'iOS Simulator device (empty = auto-detect an available iPhone)'
         required: false
-        default: 'iPhone 16 Pro'
+        default: ''
         type: string
       android_api_level:
         description: 'Android API level'
@@ -73,6 +73,27 @@ jobs:
 
       - name: List available simulators
         run: xcrun simctl list devices
+
+      - name: Select iOS simulator
+        run: |
+          SIMULATOR_NAME="${{ inputs.simulator_device }}"
+          if [ -z "$SIMULATOR_NAME" ]; then
+            SIMULATOR_NAME=$(xcrun simctl list devices available --json | jq -r '
+              .devices
+              | to_entries
+              | map(select(.key | contains("iOS")))
+              | sort_by(.key)
+              | reverse
+              | map(.value[] | select(.name | startswith("iPhone")))
+              | .[0].name // empty')
+          fi
+          if [ -z "$SIMULATOR_NAME" ]; then
+            echo "No available iPhone simulator found"
+            xcrun simctl list devices available
+            exit 1
+          fi
+          echo "Using simulator: $SIMULATOR_NAME"
+          echo "IOS_SIMULATOR=$SIMULATOR_NAME" >> $GITHUB_ENV
 
       - name: Create test directory
         run: |
@@ -173,8 +194,8 @@ jobs:
       - name: Build and run iOS app
         working-directory: /Users/runner/skia-test-app/my-app
         run: |
-          echo "Building and running iOS app on simulator: ${{ inputs.simulator_device }}..."
-          yarn expo run:ios --device "${{ inputs.simulator_device }}"
+          echo "Building and running iOS app on simulator: $IOS_SIMULATOR..."
+          yarn expo run:ios --device "$IOS_SIMULATOR"
 
       - name: Wait for app to launch
         run: |
@@ -184,7 +205,7 @@ jobs:
       - name: Capture simulator screenshot
         if: always()
         run: |
-          SIMULATOR_ID=$(xcrun simctl list devices | grep "${{ inputs.simulator_device }}" | grep -E 'Booted' | head -n 1 | cut -d '(' -f 2 | cut -d ')' -f 1)
+          SIMULATOR_ID=$(xcrun simctl list devices | grep "$IOS_SIMULATOR" | grep -E 'Booted' | head -n 1 | cut -d '(' -f 2 | cut -d ')' -f 1)
           if [ -n "$SIMULATOR_ID" ]; then
             echo "Capturing screenshot from simulator ID: $SIMULATOR_ID"
             xcrun simctl io $SIMULATOR_ID screenshot /Users/runner/skia-test-screenshot-ios.png
@@ -210,7 +231,7 @@ jobs:
           echo "✓ Installed @shopify/react-native-skia@${{ inputs.skia_version }}"
           echo "✓ Installed expo-dev-client"
           echo "✓ Framework linkage: ${{ inputs.ios_use_frameworks }}"
-          echo "✓ Built and ran iOS app on ${{ inputs.simulator_device }}"
+          echo "✓ Built and ran iOS app on $IOS_SIMULATOR"
           echo "================================================================"
 
   test-skia-android:
