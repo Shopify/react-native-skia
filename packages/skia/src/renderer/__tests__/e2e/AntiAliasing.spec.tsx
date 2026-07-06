@@ -25,6 +25,78 @@ const magnifyCtx = {
   noMipmap: MipmapMode.None,
   stroke: PaintStyle.Stroke,
   roundCap: StrokeCap.Round,
+  rgba8888: ColorType.RGBA_8888,
+  opaque: AlphaType.Opaque,
+};
+
+// Ground truth: the exact box-filter integral of a union of disks. The
+// intersection of a disk with a vertical line is a closed-form interval, so
+// coverage is integrated exactly in y (interval union merging) and only
+// discretized in x with midpoint sampling; the numerical error is well below
+// one 8-bit gray level. A stroked curve with round caps is exactly the
+// Minkowski sum of the curve with a disk, i.e. a union of disks densely
+// sampled along the curve.
+const LINES_PER_COLUMN = 256;
+
+const exactUnionCoverage = (
+  disks: { x: number; y: number; r: number }[],
+  size: number
+) => {
+  const cov = new Float64Array(size * size);
+  for (let col = 0; col < size; col++) {
+    const candidates = disks.filter(
+      (d) => d.x - d.r < col + 1 && d.x + d.r > col
+    );
+    if (candidates.length === 0) {
+      continue;
+    }
+    for (let k = 0; k < LINES_PER_COLUMN; k++) {
+      const x = col + (k + 0.5) / LINES_PER_COLUMN;
+      const intervals: [number, number][] = [];
+      for (const d of candidates) {
+        const t = d.r * d.r - (x - d.x) * (x - d.x);
+        if (t > 0) {
+          const s = Math.sqrt(t);
+          intervals.push([d.y - s, d.y + s]);
+        }
+      }
+      if (intervals.length === 0) {
+        continue;
+      }
+      intervals.sort((a, b) => a[0] - b[0]);
+      const add = (a: number, b: number) => {
+        const j0 = Math.max(0, Math.floor(a));
+        const j1 = Math.min(size - 1, Math.ceil(b) - 1);
+        for (let j = j0; j <= j1; j++) {
+          const seg = Math.min(b, j + 1) - Math.max(a, j);
+          if (seg > 0) {
+            cov[j * size + col] += seg;
+          }
+        }
+      };
+      let [lo, hi] = intervals[0];
+      for (let m = 1; m < intervals.length; m++) {
+        const [ilo, ihi] = intervals[m];
+        if (ilo <= hi) {
+          hi = Math.max(hi, ihi);
+        } else {
+          add(lo, hi);
+          lo = ilo;
+          hi = ihi;
+        }
+      }
+      add(lo, hi);
+    }
+  }
+  const bytes = new Uint8Array(size * size * 4);
+  for (let i = 0; i < size * size; i++) {
+    const v = Math.round(255 * (1 - cov[i] / LINES_PER_COLUMN));
+    bytes[i * 4] = v;
+    bytes[i * 4 + 1] = v;
+    bytes[i * 4 + 2] = v;
+    bytes[i * 4 + 3] = 255;
+  }
+  return Array.from(bytes);
 };
 
 describe("Anti-aliasing", () => {
@@ -160,6 +232,175 @@ half4 main(float2 p) {
     checkImage(image, "snapshots/aa/circle-sdf-8x.png");
   });
 
+  // Same circle SDF, but coverage is estimated by supersampling: a hard
+  // inside/outside test at NxN stratified sub-pixel positions, averaged.
+  // This converges to the true box-filter area coverage as N grows, so it
+  // acts as ground truth to judge both Skia's analytic coverage and the
+  // linear ramp approximation.
+  it("should magnify a supersampled SDF circle 8x with a pixel grid", async () => {
+    for (const ss of [4, 8]) {
+      const image = await surface.drawOffscreen(
+        (Skia, canvas, ctx) => {
+          const effect = Skia.RuntimeEffect.Make(`
+const float2 c = float2(16.0, 16.0);
+const float r = 13.0;
+
+half4 main(float2 p) {
+  float cov = 0.0;
+  for (int i = 0; i < ${ctx.ss}; i++) {
+    for (int j = 0; j < ${ctx.ss}; j++) {
+      float2 o = (float2(float(i), float(j)) + 0.5) / ${ctx.ss}.0 - 0.5;
+      float sdf = length(p + o - c) - r;
+      cov += sdf <= 0.0 ? 1.0 : 0.0;
+    }
+  }
+  cov /= ${ctx.ss * ctx.ss}.0;
+  return half4(half3(1.0 - cov), 1.0);
+}`)!;
+          const paint = Skia.Paint();
+          paint.setShader(effect.makeShader([]));
+          const src = Skia.Surface.MakeOffscreen(ctx.size, ctx.size)!;
+          const srcCanvas = src.getCanvas();
+          srcCanvas.drawPaint(paint);
+          src.flush();
+          const snapshot = src.makeImageSnapshot();
+          const dstSize = ctx.size * ctx.zoom;
+          canvas.drawImageRectOptions(
+            snapshot,
+            Skia.XYWHRect(0, 0, ctx.size, ctx.size),
+            Skia.XYWHRect(0, 0, dstSize, dstSize),
+            ctx.nearest,
+            ctx.noMipmap
+          );
+          const grid = Skia.Paint();
+          grid.setColor(Skia.Color("rgba(0, 128, 255, 0.5)"));
+          grid.setStyle(ctx.stroke);
+          grid.setStrokeWidth(0);
+          grid.setAntiAlias(false);
+          for (let i = 0; i <= ctx.size; i++) {
+            const p = i * ctx.zoom;
+            canvas.drawLine(p, 0, p, dstSize, grid);
+            canvas.drawLine(0, p, dstSize, p, grid);
+          }
+        },
+        { ...magnifyCtx, ss }
+      );
+      checkImage(image, `snapshots/aa/circle-sdf-ss${ss}-8x.png`);
+    }
+  });
+
+  it("should build the exact box-filter coverage for the circle", async () => {
+    const bytes = exactUnionCoverage([{ x: 16, y: 16, r: 13 }], SRC_SIZE);
+    const image = await surface.drawOffscreen(
+      (Skia, canvas, ctx) => {
+        const data = Skia.Data.fromBytes(new Uint8Array(ctx.bytes));
+        const exact = Skia.Image.MakeImage(
+          {
+            width: ctx.size,
+            height: ctx.size,
+            colorType: ctx.rgba8888,
+            alphaType: ctx.opaque,
+          },
+          data,
+          ctx.size * 4
+        )!;
+        const dstSize = ctx.size * ctx.zoom;
+        canvas.drawImageRectOptions(
+          exact,
+          Skia.XYWHRect(0, 0, ctx.size, ctx.size),
+          Skia.XYWHRect(0, 0, dstSize, dstSize),
+          ctx.nearest,
+          ctx.noMipmap
+        );
+        const grid = Skia.Paint();
+        grid.setColor(Skia.Color("rgba(0, 128, 255, 0.5)"));
+        grid.setStyle(ctx.stroke);
+        grid.setStrokeWidth(0);
+        grid.setAntiAlias(false);
+        for (let i = 0; i <= ctx.size; i++) {
+          const p = i * ctx.zoom;
+          canvas.drawLine(p, 0, p, dstSize, grid);
+          canvas.drawLine(0, p, dstSize, p, grid);
+        }
+      },
+      { ...magnifyCtx, bytes }
+    );
+    checkImage(image, "snapshots/aa/circle-exact-8x.png");
+  });
+
+  it("should build the exact box-filter coverage for the bezier curve", async () => {
+    // Same cubic as the other bezier tests, stroke width 2, round caps. The
+    // stroke region is the union of radius-1 disks centered on the curve;
+    // disks are emitted at even arc-length steps small enough that the
+    // scalloping error is far below one gray level.
+    const A = { x: 2, y: 28 };
+    const B = { x: 8, y: -8 };
+    const C = { x: 24, y: 40 };
+    const D = { x: 30, y: 4 };
+    const cubic = (t: number) => {
+      const mt = 1 - t;
+      const a = mt * mt * mt;
+      const b = 3 * mt * mt * t;
+      const c = 3 * mt * t * t;
+      const d = t * t * t;
+      return {
+        x: a * A.x + b * B.x + c * C.x + d * D.x,
+        y: a * A.y + b * B.y + c * C.y + d * D.y,
+      };
+    };
+    const DS = 0.05;
+    const M = 20000;
+    const disks: { x: number; y: number; r: number }[] = [];
+    let prev = cubic(0);
+    let acc = 0;
+    disks.push({ ...prev, r: 1 });
+    for (let i = 1; i <= M; i++) {
+      const pt = cubic(i / M);
+      acc += Math.hypot(pt.x - prev.x, pt.y - prev.y);
+      prev = pt;
+      if (acc >= DS || i === M) {
+        disks.push({ ...pt, r: 1 });
+        acc = 0;
+      }
+    }
+    const bytes = exactUnionCoverage(disks, SRC_SIZE);
+    const image = await surface.drawOffscreen(
+      (Skia, canvas, ctx) => {
+        const data = Skia.Data.fromBytes(new Uint8Array(ctx.bytes));
+        const exact = Skia.Image.MakeImage(
+          {
+            width: ctx.size,
+            height: ctx.size,
+            colorType: ctx.rgba8888,
+            alphaType: ctx.opaque,
+          },
+          data,
+          ctx.size * 4
+        )!;
+        const dstSize = ctx.size * ctx.zoom;
+        canvas.drawImageRectOptions(
+          exact,
+          Skia.XYWHRect(0, 0, ctx.size, ctx.size),
+          Skia.XYWHRect(0, 0, dstSize, dstSize),
+          ctx.nearest,
+          ctx.noMipmap
+        );
+        const grid = Skia.Paint();
+        grid.setColor(Skia.Color("rgba(0, 128, 255, 0.5)"));
+        grid.setStyle(ctx.stroke);
+        grid.setStrokeWidth(0);
+        grid.setAntiAlias(false);
+        for (let i = 0; i <= ctx.size; i++) {
+          const p = i * ctx.zoom;
+          canvas.drawLine(p, 0, p, dstSize, grid);
+          canvas.drawLine(0, p, dstSize, p, grid);
+        }
+      },
+      { ...magnifyCtx, bytes }
+    );
+    checkImage(image, "snapshots/aa/bezier-exact-8x.png");
+  }, 30000);
+
   it("should magnify an SDF-shaded bezier curve 8x with a pixel grid", async () => {
     const image = await surface.drawOffscreen((Skia, canvas, ctx) => {
       // Distance to the cubic is found with a coarse scan along t followed by
@@ -259,8 +500,6 @@ half4 main(float2 p) {
     step: 1,
     crop: { x: 140, y: 185 },
     linear: FilterMode.Linear,
-    rgba8888: ColorType.RGBA_8888,
-    opaque: AlphaType.Opaque,
   };
 
   // Samples the nib dots on the testing surface and returns them as plain
