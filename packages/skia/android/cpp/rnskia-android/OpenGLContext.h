@@ -179,11 +179,33 @@ public:
   }
 
   // TODO: remove width, height
-  std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window) {
+  std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window,
+                                            bool highBitDepth = false) {
     auto display = OpenGLSharedContext::getInstance().getDisplay();
-    return std::make_unique<OpenGLWindowContext>(
-        _directContext.get(), display, _glContext.get(), window,
-        OpenGLSharedContext::getInstance().getConfig());
+    auto config = OpenGLSharedContext::getInstance().getConfig();
+    bool useHighBitDepth = false;
+    if (highBitDepth) {
+      // A 10-bit window surface is only compatible with our shared context if
+      // the context was created without a config (EGL_KHR_no_config_context),
+      // and Ganesh must support rendering to RGB10_A2.
+      if (display->supportsNoConfigContext() &&
+          _directContext->maxSurfaceSampleCountForColorType(
+              kRGBA_1010102_SkColorType) >= 1) {
+        auto highBitDepthConfig = display->chooseConfig(true);
+        if (highBitDepthConfig != 0) {
+          config = highBitDepthConfig;
+          useHighBitDepth = true;
+        }
+      }
+      if (!useHighBitDepth) {
+        RNSkLogger::logToConsole(
+            "High bit depth was requested but is not supported here, falling "
+            "back to the 8-bit format");
+      }
+    }
+    return std::make_unique<OpenGLWindowContext>(_directContext.get(), display,
+                                                 _glContext.get(), window,
+                                                 config, useHighBitDepth);
   }
 
   GrDirectContext *getDirectContext() { return _directContext.get(); }

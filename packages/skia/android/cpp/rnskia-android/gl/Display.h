@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstring>
 #include <memory>
 
 #include "EGL/egl.h"
@@ -7,6 +8,10 @@
 
 #include "gl/Context.h"
 #include "gl/Error.h"
+
+#ifndef EGL_NO_CONFIG_KHR
+#define EGL_NO_CONFIG_KHR ((EGLConfig)0)
+#endif
 
 namespace gl {
 
@@ -39,20 +44,24 @@ public:
     eglMakeCurrent(_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
   }
 
-  EGLConfig chooseConfig() {
-
+  // With highBitDepth, requests a 10-bit (RGB10_A2) window config for banding
+  // free gradients. Returns 0 if no matching config exists so the caller can
+  // fall back to the default 8-bit config.
+  EGLConfig chooseConfig(bool highBitDepth = false) {
+    EGLint colorDepth = highBitDepth ? 10 : 8;
+    EGLint alphaDepth = highBitDepth ? 2 : 8;
     EGLint att[] = {EGL_RENDERABLE_TYPE,
                     EGL_OPENGL_ES2_BIT,
                     EGL_SURFACE_TYPE,
                     EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
                     EGL_ALPHA_SIZE,
-                    8,
+                    alphaDepth,
                     EGL_BLUE_SIZE,
-                    8,
+                    colorDepth,
                     EGL_GREEN_SIZE,
-                    8,
+                    colorDepth,
                     EGL_RED_SIZE,
-                    8,
+                    colorDepth,
                     EGL_DEPTH_SIZE,
                     0,
                     EGL_STENCIL_SIZE,
@@ -65,20 +74,37 @@ public:
     EGLConfig glConfig = 0;
     if (eglChooseConfig(_display, att, &glConfig, 1, &numConfigs) != EGL_TRUE ||
         numConfigs == 0) {
-      LOG_EGL_ERROR;
+      if (!highBitDepth) {
+        LOG_EGL_ERROR;
+      }
       return 0;
     }
 
     return glConfig;
   }
 
+  // A context created with EGL_KHR_no_config_context is compatible with
+  // surfaces of any config, which lets a single shared context (and a single
+  // GrDirectContext) drive both 8-bit and 10-bit window surfaces.
+  bool supportsNoConfigContext() {
+    const char *extensions = eglQueryString(_display, EGL_EXTENSIONS);
+    return extensions != nullptr &&
+           strstr(extensions, "EGL_KHR_no_config_context") != nullptr;
+  }
+
   std::unique_ptr<Context> makeContext(const EGLConfig &config,
                                        const Context *share_context) {
     EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
-    auto context = eglCreateContext(
-        _display, config,
-        share_context != nullptr ? share_context->getHandle() : nullptr,
-        contextAttribs);
+    auto shareHandle =
+        share_context != nullptr ? share_context->getHandle() : nullptr;
+    EGLContext context = EGL_NO_CONTEXT;
+    if (supportsNoConfigContext()) {
+      context = eglCreateContext(_display, EGL_NO_CONFIG_KHR, shareHandle,
+                                 contextAttribs);
+    }
+    if (context == EGL_NO_CONTEXT) {
+      context = eglCreateContext(_display, config, shareHandle, contextAttribs);
+    }
 
     if (context == EGL_NO_CONTEXT) {
       LOG_EGL_ERROR;

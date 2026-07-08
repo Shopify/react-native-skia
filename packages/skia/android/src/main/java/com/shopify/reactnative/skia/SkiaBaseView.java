@@ -13,6 +13,8 @@ import com.facebook.react.views.view.ReactViewGroup;
 public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI {
     private View mView;
 
+    private boolean mHighBitDepth = false;
+
     private final boolean debug = false;
     private final String tag = "SkiaView";
 
@@ -44,6 +46,20 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
         }
     }
 
+    public void setHighBitDepth(boolean value) {
+        if (mHighBitDepth == value) {
+            return;
+        }
+        mHighBitDepth = value;
+        // Recreate the backing view so its surface is recreated with the new
+        // buffer format.
+        removeView(mView);
+        mView = mView instanceof SkiaSurfaceView
+                ? new SkiaSurfaceView(getContext(), this, debug)
+                : new SkiaTextureView(getContext(), this, debug);
+        addView(mView);
+    }
+
     void dropInstance() {
         if (!RNSkiaModule.isModuleValid()) {
             return;
@@ -59,24 +75,24 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
 
     @Override
     public void onSurfaceCreated(Surface surface, int width, int height) {
-        surfaceAvailable(surface, width, height, true);
+        surfaceAvailable(surface, width, height, true, mHighBitDepth);
     }
 
     @Override
     public void onSurfaceChanged(Surface surface, int width, int height) {
         Log.i(tag, "onSurfaceTextureSizeChanged " + width + "/" + height);
-        surfaceSizeChanged(surface, width, height, true);
+        surfaceSizeChanged(surface, width, height, true, mHighBitDepth);
     }
 
     @Override
     public void onSurfaceTextureCreated(SurfaceTexture surface, int width, int height) {
-        surfaceAvailable(surface, width, height, false);
+        surfaceAvailable(surface, width, height, false, mHighBitDepth);
     }
 
     @Override
     public void onSurfaceTextureChanged(SurfaceTexture surface, int width, int height) {
         Log.i(tag, "onSurfaceTextureSizeChanged " + width + "/" + height);
-        surfaceSizeChanged(surface, width, height, false);
+        surfaceSizeChanged(surface, width, height, false, mHighBitDepth);
     }
 
     @Override
@@ -84,9 +100,9 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
         surfaceDestroyed();
     }
 
-    protected abstract void surfaceAvailable(Object surface, int width, int height, boolean opaque);
+    protected abstract void surfaceAvailable(Object surface, int width, int height, boolean opaque, boolean highBitDepth);
 
-    protected abstract void surfaceSizeChanged(Object surface, int width, int height, boolean opaque);
+    protected abstract void surfaceSizeChanged(Object surface, int width, int height, boolean opaque, boolean highBitDepth);
 
     protected abstract void surfaceDestroyed();
 

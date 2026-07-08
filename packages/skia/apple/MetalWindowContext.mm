@@ -8,8 +8,9 @@ MetalWindowContext::MetalWindowContext(GrDirectContext *directContext,
                                        id<MTLDevice> device,
                                        id<MTLCommandQueue> commandQueue,
                                        CALayer *layer, int width, int height,
-                                       bool useP3ColorSpace)
-    : _directContext(directContext), _commandQueue(commandQueue) {
+                                       bool useP3ColorSpace, bool highBitDepth)
+    : _directContext(directContext), _commandQueue(commandQueue),
+      _highBitDepth(highBitDepth) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   _layer = (CAMetalLayer *)layer;
@@ -22,7 +23,8 @@ MetalWindowContext::MetalWindowContext(GrDirectContext *directContext,
 #else
   _layer.contentsScale = [NSScreen mainScreen].backingScaleFactor;
 #endif // !TARGET_OS_OSX
-  _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
+  _layer.pixelFormat =
+      _highBitDepth ? MTLPixelFormatRGBA16Float : MTLPixelFormatBGRA8Unorm;
   _layer.contentsGravity = kCAGravityBottomLeft;
   _layer.drawableSize = CGSizeMake(width, height);
   BOOL supportsWideColor = NO;
@@ -43,11 +45,25 @@ MetalWindowContext::MetalWindowContext(GrDirectContext *directContext,
 #endif // !TARGET_OS_OSX
   }
   if (supportsWideColor) {
+    _useP3ColorSpace = true;
+  }
+  // The Skia surface writes sRGB-encoded (SDR) values in both cases. With the
+  // 8-bit format a nil colorspace displays them as-is, but Core Animation
+  // interprets a float-format layer with a nil colorspace as extended linear
+  // sRGB, which displays the same values noticeably brighter. Tag the float
+  // layer with the matching gamma-encoded (extended) colorspace so colors are
+  // identical to the 8-bit path, only with more precision.
+  if (_highBitDepth) {
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(
+        _useP3ColorSpace ? kCGColorSpaceExtendedDisplayP3
+                         : kCGColorSpaceExtendedSRGB);
+    _layer.colorspace = colorSpace;
+    CGColorSpaceRelease(colorSpace);
+  } else if (_useP3ColorSpace) {
     CGColorSpaceRef colorSpace =
         CGColorSpaceCreateWithName(kCGColorSpaceDisplayP3);
     _layer.colorspace = colorSpace;
     CGColorSpaceRelease(colorSpace);
-    _useP3ColorSpace = true;
   }
 }
 
@@ -77,7 +93,8 @@ sk_sp<SkSurface> MetalWindowContext::getSurface() {
                        : nullptr;
   _skSurface = SkSurfaces::WrapBackendRenderTarget(
       _directContext, backendRT, kTopLeft_GrSurfaceOrigin,
-      kBGRA_8888_SkColorType, skColorSpace, nullptr);
+      _highBitDepth ? kRGBA_F16_SkColorType : kBGRA_8888_SkColorType,
+      skColorSpace, nullptr);
 
   return _skSurface;
 }

@@ -137,6 +137,11 @@ export const HomeScreen = () => {
           route="WebGPU"
         />
       )}
+      <HomeScreenButton
+        title="🎨 High Bit Depth"
+        description="8-bit vs high bit depth canvas"
+        route="HighBitDepth"
+      />
     </ScrollView>
   );
 };

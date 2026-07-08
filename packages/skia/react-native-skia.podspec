@@ -143,6 +143,7 @@ Pod::Spec.new do |s|
   graphite_exclusions = [
     'cpp/rnskia/RNDawnContext.h',
     'cpp/rnskia/RNDawnUtils.h',
+    'cpp/rnskia/RNMetalLayerColorSpace.h',
     'cpp/rnskia/RNDawnWindowContext.h',
     'cpp/rnskia/RNDawnWindowContext.cpp',
     'cpp/rnskia/RNImageProvider.h',
