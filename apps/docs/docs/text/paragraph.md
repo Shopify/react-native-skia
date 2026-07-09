@@ -236,6 +236,45 @@ const MyParagraph = () => {
 
 <img src={require("/static/img/paragraph/boundingbox-node.png").default} width="256" height="256" />
 
+### Glyph-Tight Bounds
+
+`getHeight()`, `getLineMetrics()`, and `getRectsForRange()` are all based on font metrics: they reserve the full ascent and descent of the fonts on each line, regardless of the glyphs actually present. For instance, `"Hello"` and `"Typography"` report the same height even though only the latter has descenders.
+
+To measure the exact ink bounds of the rendered text (with font fallbacks already applied), convert a line into a path with `getPath(lineNumber)` and compute its tight bounds. This method is available on iOS and Android only. Note that color glyphs (e.g. emojis) cannot be converted to a path and are skipped.
+
+```tsx twoslash
+import { Skia } from "@shopify/react-native-skia";
+
+const paragraph = Skia.ParagraphBuilder.Make()
+  .addText("Hello")
+  .build();
+paragraph.layout(200);
+// The metrics-based height (reserves ascent + descent)
+const height = paragraph.getHeight();
+// The exact bounds of the glyphs on the first line
+const inkBounds = paragraph.getPath(0)!.computeTightBounds();
+```
+
+For full access to the computed layout, `extendedVisit(visitor)` (iOS and Android only) invokes the visitor once for every run of glyphs with the resolved font (after fallback), glyph ids, positions and per-glyph tight ink bounds, and once with a `null` info to signal the end of each line.
+
+```tsx twoslash
+import { Skia } from "@shopify/react-native-skia";
+
+const paragraph = Skia.ParagraphBuilder.Make()
+  .addText("Hello你好")
+  .build();
+paragraph.layout(200);
+paragraph.extendedVisit((lineNumber, info) => {
+  if (info === null) {
+    // End of the line
+    return;
+  }
+  // The font resolved for this run (e.g. a fallback font for CJK glyphs)
+  const font = info.font;
+  // Per-glyph ids, positions and tight ink bounds
+  const { glyphs, positions, bounds } = info;
+});
+```
 
 ## Fonts
 
