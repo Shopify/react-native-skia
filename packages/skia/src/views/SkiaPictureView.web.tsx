@@ -6,6 +6,7 @@ import React, {
   useImperativeHandle,
 } from "react";
 import type { LayoutChangeEvent } from "react-native";
+import type { GrDirectContext, WebGLContextHandle } from "canvaskit-wasm";
 
 import type { SkRect, SkPicture, SkImage } from "../skia/types";
 import { JsiSkSurface } from "../skia/web/JsiSkSurface";
@@ -36,11 +37,27 @@ interface Renderer {
 
 class WebGLRenderer implements Renderer {
   private surface: JsiSkSurface | null = null;
+  private grContext: GrDirectContext | null = null;
+  private contextHandle: WebGLContextHandle = 0;
 
   constructor(
     private canvas: HTMLCanvasElement,
     private pd: number
   ) {
+    this.contextHandle = CanvasKit.GetWebGLContext(canvas);
+    if (!this.contextHandle) {
+      throw new Error("Could not create a WebGL context");
+    }
+    this.grContext = CanvasKit.MakeWebGLContext(this.contextHandle);
+    if (!this.grContext) {
+      CanvasKit.deleteContext(this.contextHandle);
+      this.contextHandle = 0;
+      throw new Error("Could not create a graphics context");
+    }
+    const ctx = canvas.getContext("webgl2");
+    if (ctx) {
+      ctx.drawingBufferColorSpace = "display-p3";
+    }
     this.onResize();
   }
 
@@ -57,13 +74,21 @@ class WebGLRenderer implements Renderer {
 
   onResize() {
     const { canvas, pd } = this;
+    if (!this.grContext) {
+      return;
+    }
     canvas.width = canvas.clientWidth * pd;
     canvas.height = canvas.clientHeight * pd;
-    const surface = CanvasKit.MakeWebGLCanvasSurface(canvas);
-    const ctx = canvas.getContext("webgl2");
-    if (ctx) {
-      ctx.drawingBufferColorSpace = "display-p3";
-    }
+    this.surface?.ref.delete();
+    this.surface = null;
+    // Reuse the existing WebGL context and GrDirectContext: only the surface
+    // needs to be recreated when the canvas is resized.
+    const surface = CanvasKit.MakeOnScreenGLSurface(
+      this.grContext,
+      canvas.width,
+      canvas.height,
+      CanvasKit.ColorSpace.SRGB
+    );
     if (!surface) {
       throw new Error("Could not create surface");
     }
@@ -83,15 +108,37 @@ class WebGLRenderer implements Renderer {
   }
 
   dispose(): void {
-    if (this.surface) {
-      this.canvas
-        ?.getContext("webgl2")
-        ?.getExtension("WEBGL_lose_context")
-        ?.loseContext();
-      this.surface.ref.delete();
-      this.surface = null;
+    this.surface?.ref.delete();
+    this.surface = null;
+    if (this.grContext) {
+      this.grContext.releaseResourcesAndAbandonContext();
+      this.grContext.delete();
+      this.grContext = null;
+    }
+    this.canvas
+      ?.getContext("webgl2")
+      ?.getExtension("WEBGL_lose_context")
+      ?.loseContext();
+    if (this.contextHandle) {
+      // Unregister the context from CanvasKit's internal registry, otherwise
+      // it retains the canvas element (and its detached DOM tree) forever.
+      CanvasKit.deleteContext(this.contextHandle);
+      // Making the now-deleted handle current clears CanvasKit's
+      // current-context globals (GLctx/Module.ctx), which would otherwise
+      // keep referencing the context (and the canvas) until another surface
+      // becomes current. With a deleted handle this is a no-op that returns
+      // null without creating anything.
+      CanvasKit.MakeWebGLContext(this.contextHandle);
+      this.contextHandle = 0;
     }
   }
+}
+
+interface TempRenderResult {
+  surface: JsiSkSurface;
+  tempCanvas: OffscreenCanvas;
+  grContext: GrDirectContext;
+  contextHandle: WebGLContextHandle;
 }
 
 class StaticWebGLRenderer implements Renderer {
@@ -106,22 +153,35 @@ class StaticWebGLRenderer implements Renderer {
     this.cachedImage = null;
   }
 
-  private renderPictureToSurface(
-    picture: SkPicture
-  ): { surface: JsiSkSurface; tempCanvas: OffscreenCanvas } | null {
+  private renderPictureToSurface(picture: SkPicture): TempRenderResult | null {
     const tempCanvas = new OffscreenCanvas(
       this.canvas.clientWidth * this.pd,
       this.canvas.clientHeight * this.pd
     );
 
     let surface: JsiSkSurface | null = null;
+    let grContext: GrDirectContext | null = null;
+    let contextHandle: WebGLContextHandle = 0;
 
     try {
-      const webglSurface = CanvasKit.MakeWebGLCanvasSurface(tempCanvas);
+      contextHandle = CanvasKit.GetWebGLContext(tempCanvas);
+      if (!contextHandle) {
+        throw new Error("Could not create a WebGL context");
+      }
+      grContext = CanvasKit.MakeWebGLContext(contextHandle);
+      if (!grContext) {
+        throw new Error("Could not create a graphics context");
+      }
       const ctx = tempCanvas.getContext("webgl2");
       if (ctx) {
         ctx.drawingBufferColorSpace = "display-p3";
       }
+      const webglSurface = CanvasKit.MakeOnScreenGLSurface(
+        grContext,
+        tempCanvas.width,
+        tempCanvas.height,
+        CanvasKit.ColorSpace.SRGB
+      );
 
       if (!webglSurface) {
         throw new Error("Could not create WebGL surface");
@@ -137,23 +197,39 @@ class StaticWebGLRenderer implements Renderer {
       skiaCanvas.restore();
       surface.ref.flush();
 
-      return { surface, tempCanvas };
+      return { surface, tempCanvas, grContext, contextHandle };
     } catch (error) {
-      if (surface) {
-        surface.ref.delete();
-      }
-      this.cleanupWebGLContext(tempCanvas);
+      this.cleanupRenderResult({
+        surface,
+        tempCanvas,
+        grContext,
+        contextHandle,
+      });
       return null;
     }
   }
 
-  private cleanupWebGLContext(tempCanvas: OffscreenCanvas): void {
-    const ctx = tempCanvas.getContext("webgl2");
-    if (ctx) {
-      const loseContext = ctx.getExtension("WEBGL_lose_context");
-      if (loseContext) {
-        loseContext.loseContext();
-      }
+  private cleanupRenderResult(result: {
+    surface: JsiSkSurface | null;
+    tempCanvas: OffscreenCanvas;
+    grContext: GrDirectContext | null;
+    contextHandle: WebGLContextHandle;
+  }): void {
+    result.surface?.ref.delete();
+    if (result.grContext) {
+      result.grContext.releaseResourcesAndAbandonContext();
+      result.grContext.delete();
+    }
+    result.tempCanvas
+      .getContext("webgl2")
+      ?.getExtension("WEBGL_lose_context")
+      ?.loseContext();
+    if (result.contextHandle) {
+      // Unregister the context from CanvasKit's internal registry, otherwise
+      // it retains the OffscreenCanvas forever.
+      CanvasKit.deleteContext(result.contextHandle);
+      // Clear CanvasKit's current-context globals (see WebGLRenderer.dispose).
+      CanvasKit.MakeWebGLContext(result.contextHandle);
     }
   }
 
@@ -165,6 +241,7 @@ class StaticWebGLRenderer implements Renderer {
     const { tempCanvas } = renderResult;
     const ctx2d = this.canvas.getContext("2d");
     if (!ctx2d) {
+      this.cleanupRenderResult(renderResult);
       throw new Error("Could not get 2D context");
     }
 
@@ -185,7 +262,7 @@ class StaticWebGLRenderer implements Renderer {
       this.canvas.clientHeight * this.pd
     );
 
-    this.cleanupWebGLContext(tempCanvas);
+    this.cleanupRenderResult(renderResult);
   }
 
   makeImageSnapshot(picture: SkPicture, rect?: SkRect): SkImage | null {
@@ -195,15 +272,14 @@ class StaticWebGLRenderer implements Renderer {
         return null;
       }
 
-      const { surface, tempCanvas } = renderResult;
-
       try {
-        this.cachedImage = surface.makeImageSnapshot(dp2Pixel(this.pd, rect));
+        this.cachedImage = renderResult.surface.makeImageSnapshot(
+          dp2Pixel(this.pd, rect)
+        );
       } catch (error) {
         console.error("Error creating image snapshot:", error);
       } finally {
-        surface.ref.delete();
-        this.cleanupWebGLContext(tempCanvas);
+        this.cleanupRenderResult(renderResult);
       }
     }
 
@@ -246,6 +322,7 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
   const { ref } = props;
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const renderer = useRef<Renderer | null>(null);
+  const rendererIsStatic = useRef<boolean | null>(null);
   const redrawRequestsRef = useRef(0);
   const requestIdRef = useRef(0);
   const pictureRef = useRef<SkPicture | null>(null);
@@ -342,10 +419,21 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
     (evt: LayoutChangeEvent) => {
       const canvas = canvasRef.current;
       if (canvas) {
-        renderer.current =
-          props.__destroyWebGLContextAfterRender === true
+        const destroyAfterRender =
+          props.__destroyWebGLContextAfterRender === true;
+        if (
+          renderer.current === null ||
+          rendererIsStatic.current !== destroyAfterRender
+        ) {
+          renderer.current?.dispose();
+          renderer.current = destroyAfterRender
             ? new StaticWebGLRenderer(canvas, pd)
             : new WebGLRenderer(canvas, pd);
+          rendererIsStatic.current = destroyAfterRender;
+        } else {
+          // Reuse the existing renderer (and its WebGL context) on relayout.
+          renderer.current.onResize();
+        }
         if (pictureRef.current) {
           renderer.current.draw(pictureRef.current);
         }
@@ -375,7 +463,8 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
 
   useEffect(() => {
     const nativeID = props.nativeID ?? `${SkiaViewNativeId.current++}`;
-    (global.SkiaViewApi as ISkiaViewApiWeb).registerView(nativeID, {
+    const api = global.SkiaViewApi as ISkiaViewApiWeb;
+    api.registerView(nativeID, {
       setPicture,
       getSize,
       redraw,
@@ -383,6 +472,9 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
       measure,
       measureInWindow,
     } as SkiaPictureViewHandle);
+    return () => {
+      api.unregisterView(nativeID);
+    };
   }, [
     setPicture,
     getSize,
