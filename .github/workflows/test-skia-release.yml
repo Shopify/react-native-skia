@@ -9,9 +9,9 @@ on:
         default: 'latest'
         type: string
       simulator_device:
-        description: 'iOS Simulator device'
+        description: 'iOS Simulator device (empty = auto-detect an available iPhone)'
         required: false
-        default: 'iPhone 16 Pro'
+        default: ''
         type: string
       android_api_level:
         description: 'Android API level'
