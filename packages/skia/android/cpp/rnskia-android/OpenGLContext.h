@@ -179,8 +179,17 @@ public:
   }
 
   // TODO: remove width, height
-  std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window) {
+  std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window,
+                                            bool highBitDepth = false) {
     auto display = OpenGLSharedContext::getInstance().getDisplay();
+    if (highBitDepth) {
+      // A 10-bit window surface would require the shared EGL context to be
+      // created without a config (EGL_KHR_no_config_context) for every app,
+      // which is too risky for existing 8-bit clients on brittle drivers.
+      RNSkLogger::logToConsole(
+          "highBitDepth is not supported on the OpenGL backend, falling back "
+          "to the 8-bit format (the Graphite backend supports it)");
+    }
     return std::make_unique<OpenGLWindowContext>(
         _directContext.get(), display, _glContext.get(), window,
         OpenGLSharedContext::getInstance().getConfig());
