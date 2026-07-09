@@ -60,7 +60,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6.4.0
         with:
-          node-version: '20'
+          node-version-file: .nvmrc
 
       - name: Setup Yarn
         run: |
@@ -229,7 +229,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6.4.0
         with:
-          node-version: '20'
+          node-version-file: .nvmrc
 
       - name: Setup Yarn
         run: |
@@ -387,7 +387,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6.4.0
         with:
-          node-version: '20'
+          node-version-file: .nvmrc
 
       - name: Setup Yarn
         run: |
