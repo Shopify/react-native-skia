@@ -111,7 +111,7 @@ private:
   // TODO: keep device in DawnContext? Do we need it for resizing?
   wgpu::Device _device;
   wgpu::Surface _surface;
-  void *_nativeSurface;
+  [[maybe_unused]] void *_nativeSurface;
   wgpu::TextureFormat _format;
   SkColorType _colorType;
   int _width;
