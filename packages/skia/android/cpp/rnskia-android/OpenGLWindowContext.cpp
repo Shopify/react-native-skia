@@ -23,8 +23,7 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
     GLint samples;
     glGetIntegerv(GL_SAMPLES, &samples);
 
-    auto colorType =
-        _highBitDepth ? kRGBA_1010102_SkColorType : kRGBA_8888_SkColorType;
+    auto colorType = kRGBA_8888_SkColorType;
 
     auto maxSamples =
         _directContext->maxSurfaceSampleCountForColorType(colorType);
@@ -35,7 +34,7 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
 
     GrGLFramebufferInfo fbInfo;
     fbInfo.fFBOID = 0;
-    fbInfo.fFormat = _highBitDepth ? GR_GL_RGB10_A2 : GR_GL_RGBA8;
+    fbInfo.fFormat = GR_GL_RGBA8;
     // fbInfo.fProtected =
     // skgpu::Protected(fDisplayParams.fCreateProtectedNativeBackend);
 
@@ -46,8 +45,8 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
     sk_sp<SkColorSpace> colorSpace(nullptr);
     SkSurfaceProps surfaceProps(0, kRGB_H_SkPixelGeometry);
     _skSurface = SkSurfaces::WrapBackendRenderTarget(
-        _directContext, backendRT, kBottomLeft_GrSurfaceOrigin, colorType,
-        colorSpace, &surfaceProps);
+        _directContext, backendRT, kBottomLeft_GrSurfaceOrigin,
+        kRGBA_8888_SkColorType, colorSpace, &surfaceProps);
   }
   return _skSurface;
 }

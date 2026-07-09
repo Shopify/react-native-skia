@@ -1,6 +1,7 @@
 #include "MetalWindowContext.h"
 
 #include "MetalContext.h"
+#include "MetalLayerColorSpaceUtils.h"
 #include "RNSkLog.h"
 #include "include/core/SkColorSpace.h"
 
@@ -47,24 +48,7 @@ MetalWindowContext::MetalWindowContext(GrDirectContext *directContext,
   if (supportsWideColor) {
     _useP3ColorSpace = true;
   }
-  // The Skia surface writes sRGB-encoded (SDR) values in both cases. With the
-  // 8-bit format a nil colorspace displays them as-is, but Core Animation
-  // interprets a float-format layer with a nil colorspace as extended linear
-  // sRGB, which displays the same values noticeably brighter. Tag the float
-  // layer with the matching gamma-encoded (extended) colorspace so colors are
-  // identical to the 8-bit path, only with more precision.
-  if (_highBitDepth) {
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(
-        _useP3ColorSpace ? kCGColorSpaceExtendedDisplayP3
-                         : kCGColorSpaceExtendedSRGB);
-    _layer.colorspace = colorSpace;
-    CGColorSpaceRelease(colorSpace);
-  } else if (_useP3ColorSpace) {
-    CGColorSpaceRef colorSpace =
-        CGColorSpaceCreateWithName(kCGColorSpaceDisplayP3);
-    _layer.colorspace = colorSpace;
-    CGColorSpaceRelease(colorSpace);
-  }
+  RNSkia::setCAMetalLayerColorSpace(_layer, _highBitDepth, _useP3ColorSpace);
 }
 
 sk_sp<SkSurface> MetalWindowContext::getSurface() {

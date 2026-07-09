@@ -182,30 +182,17 @@ public:
   std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window,
                                             bool highBitDepth = false) {
     auto display = OpenGLSharedContext::getInstance().getDisplay();
-    auto config = OpenGLSharedContext::getInstance().getConfig();
-    bool useHighBitDepth = false;
     if (highBitDepth) {
-      // A 10-bit window surface is only compatible with our shared context if
-      // the context was created without a config (EGL_KHR_no_config_context),
-      // and Ganesh must support rendering to RGB10_A2.
-      if (display->supportsNoConfigContext() &&
-          _directContext->maxSurfaceSampleCountForColorType(
-              kRGBA_1010102_SkColorType) >= 1) {
-        auto highBitDepthConfig = display->chooseConfig(true);
-        if (highBitDepthConfig != 0) {
-          config = highBitDepthConfig;
-          useHighBitDepth = true;
-        }
-      }
-      if (!useHighBitDepth) {
-        RNSkLogger::logToConsole(
-            "High bit depth was requested but is not supported here, falling "
-            "back to the 8-bit format");
-      }
+      // A 10-bit window surface would require the shared EGL context to be
+      // created without a config (EGL_KHR_no_config_context) for every app,
+      // which is too risky for existing 8-bit clients on brittle drivers.
+      RNSkLogger::logToConsole(
+          "highBitDepth is not supported on the OpenGL backend, falling back "
+          "to the 8-bit format (the Graphite backend supports it)");
     }
-    return std::make_unique<OpenGLWindowContext>(_directContext.get(), display,
-                                                 _glContext.get(), window,
-                                                 config, useHighBitDepth);
+    return std::make_unique<OpenGLWindowContext>(
+        _directContext.get(), display, _glContext.get(), window,
+        OpenGLSharedContext::getInstance().getConfig());
   }
 
   GrDirectContext *getDirectContext() { return _directContext.get(); }

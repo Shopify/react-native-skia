@@ -36,13 +36,9 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
 
     public void setOpaque(boolean value) {
         if (value && mView instanceof SkiaTextureView) {
-            removeView(mView);
-            mView = new SkiaSurfaceView(getContext(), this, debug);
-            addView(mView);
+            recreateView(true);
         } else if (!value && mView instanceof SkiaSurfaceView) {
-            removeView(mView);
-            mView = new SkiaTextureView(getContext(), this, debug);
-            addView(mView);
+            recreateView(false);
         }
     }
 
@@ -51,13 +47,37 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
             return;
         }
         mHighBitDepth = value;
-        // Recreate the backing view so its surface is recreated with the new
-        // buffer format.
+        // The flag only affects the opaque SurfaceView path (see
+        // highBitDepthIfOpaque), so only that surface needs to be recreated
+        // with the new buffer format.
+        if (mView instanceof SkiaSurfaceView) {
+            recreateView(true);
+        }
+    }
+
+    private void recreateView(boolean useSurfaceView) {
         removeView(mView);
-        mView = mView instanceof SkiaSurfaceView
+        mView = useSurfaceView
                 ? new SkiaSurfaceView(getContext(), this, debug)
                 : new SkiaTextureView(getContext(), this, debug);
         addView(mView);
+        // React Native sizes native children explicitly through onLayout, so
+        // the requestLayout triggered by addView is ignored; size the new
+        // child ourselves or it stays 0x0 and never gets a surface.
+        if (getWidth() > 0 || getHeight() > 0) {
+            mView.layout(0, 0, getWidth(), getHeight());
+        }
+    }
+
+    private boolean highBitDepthIfOpaque(boolean opaque) {
+        if (mHighBitDepth && !opaque) {
+            // The 10-bit buffer format only has 2 bits of alpha, which would
+            // visibly break translucency; the extra precision would also be
+            // lost in the 8-bit composition pass.
+            Log.w(tag, "highBitDepth requires the opaque prop on Android, falling back to the 8-bit format");
+            return false;
+        }
+        return mHighBitDepth;
     }
 
     void dropInstance() {
@@ -86,13 +106,13 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
 
     @Override
     public void onSurfaceTextureCreated(SurfaceTexture surface, int width, int height) {
-        surfaceAvailable(surface, width, height, false, mHighBitDepth);
+        surfaceAvailable(surface, width, height, false, highBitDepthIfOpaque(false));
     }
 
     @Override
     public void onSurfaceTextureChanged(SurfaceTexture surface, int width, int height) {
         Log.i(tag, "onSurfaceTextureSizeChanged " + width + "/" + height);
-        surfaceSizeChanged(surface, width, height, false, mHighBitDepth);
+        surfaceSizeChanged(surface, width, height, false, highBitDepthIfOpaque(false));
     }
 
     @Override

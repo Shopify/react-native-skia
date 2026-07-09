@@ -35,9 +35,8 @@ class OpenGLWindowContext : public WindowContext {
 public:
   OpenGLWindowContext(GrDirectContext *directContext, gl::Display *display,
                       gl::Context *glContext, ANativeWindow *window,
-                      EGLConfig config, bool highBitDepth = false)
-      : _directContext(directContext), _glContext(glContext), _window(window),
-        _highBitDepth(highBitDepth) {
+                      EGLConfig config)
+      : _directContext(directContext), _glContext(glContext), _window(window) {
     ANativeWindow_acquire(_window);
     _glSurface = display->makeWindowSurface(config, _window);
   }
@@ -71,7 +70,6 @@ private:
   ANativeWindow *_window;
   sk_sp<SkSurface> _skSurface = nullptr;
   std::unique_ptr<gl::Surface> _glSurface = nullptr;
-  bool _highBitDepth = false;
 };
 
 } // namespace RNSkia

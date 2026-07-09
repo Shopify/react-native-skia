@@ -230,7 +230,7 @@ createDawnBackendContext(dawn::native::Instance *instance) {
       // this EndAccess errors with "Required feature
       // (SharedFenceMTLSharedEvent) is missing". Safe here because we always
       // queue.submit() before EndAccess (the secondary device omits it on
-      // purpose — its camera path doesn't commit first).
+      // purpose; its camera path doesn't commit first).
       wgpu::FeatureName::SharedFenceMTLSharedEvent,
       wgpu::FeatureName::DawnMultiPlanarFormats,
       wgpu::FeatureName::MultiPlanarFormatP010,

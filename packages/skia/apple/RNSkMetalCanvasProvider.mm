@@ -111,5 +111,13 @@ void RNSkMetalCanvasProvider::setUseP3ColorSpace(bool useP3ColorSpace) {
 }
 
 void RNSkMetalCanvasProvider::setHighBitDepth(bool highBitDepth) {
+  if (_highBitDepth == highBitDepth) {
+    return;
+  }
   _highBitDepth = highBitDepth;
+  if (_ctx) {
+    // Recreate the window context so the layer's pixel format matches the
+    // new bit depth.
+    setSize(_layer.frame.size.width, _layer.frame.size.height);
+  }
 }

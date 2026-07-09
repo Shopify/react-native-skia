@@ -112,8 +112,9 @@ const Demo = () => {
 
 A few platform notes:
 
-- On Android, the canvas content is composited by the UI renderer unless the canvas is `opaque`. That composition pass is 8-bit, so combine `highBitDepth` with `opaque` to keep the extra precision on screen. The prop must also be set before the canvas is mounted.
-- On Android, 10-bit window surfaces require a device that exposes them (common on modern devices); otherwise the canvas silently falls back to 8-bit.
+- On Android, `highBitDepth` requires the Graphite backend; with the default OpenGL backend the canvas falls back to 8-bit.
+- On Android, `highBitDepth` also requires `opaque`: the 10-bit buffer format only has 2 bits of alpha, and a non-opaque canvas is composited by the UI renderer in an 8-bit pass anyway. Without `opaque` the canvas falls back to 8-bit.
+- On Android, the device must expose 10-bit surfaces (common on modern devices); otherwise the canvas silently falls back to 8-bit.
 - The high bit depth surface uses more memory per pixel (twice as much on iOS).
 
 ## Getting a Canvas Snapshot
