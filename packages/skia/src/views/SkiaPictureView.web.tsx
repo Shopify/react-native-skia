@@ -1,9 +1,10 @@
-/* global HTMLCanvasElement */
+/* global HTMLCanvasElement, ResizeObserver, MediaQueryList */
 import React, {
   useRef,
   useEffect,
   useCallback,
   useImperativeHandle,
+  useLayoutEffect,
 } from "react";
 import type { LayoutChangeEvent } from "react-native";
 import type { GrDirectContext, WebGLContextHandle } from "canvaskit-wasm";
@@ -39,11 +40,9 @@ class WebGLRenderer implements Renderer {
   private surface: JsiSkSurface | null = null;
   private grContext: GrDirectContext | null = null;
   private contextHandle: WebGLContextHandle = 0;
+  private pd = 1;
 
-  constructor(
-    private canvas: HTMLCanvasElement,
-    private pd: number
-  ) {
+  constructor(private canvas: HTMLCanvasElement) {
     this.contextHandle = CanvasKit.GetWebGLContext(canvas);
     if (!this.contextHandle) {
       throw new Error("Could not create a WebGL context");
@@ -73,14 +72,20 @@ class WebGLRenderer implements Renderer {
   }
 
   onResize() {
-    const { canvas, pd } = this;
+    const { canvas } = this;
     if (!this.grContext) {
       return;
     }
-    canvas.width = canvas.clientWidth * pd;
-    canvas.height = canvas.clientHeight * pd;
+    this.pd = window.devicePixelRatio;
+    canvas.width = canvas.clientWidth * this.pd;
+    canvas.height = canvas.clientHeight * this.pd;
     this.surface?.ref.delete();
     this.surface = null;
+    if (canvas.width === 0 || canvas.height === 0) {
+      // The canvas hasn't been laid out yet (or is hidden). The view's
+      // ResizeObserver calls us again as soon as it has a size.
+      return;
+    }
     // Reuse the existing WebGL context and GrDirectContext: only the surface
     // needs to be recreated when the canvas is resized.
     const surface = CanvasKit.MakeOnScreenGLSurface(
@@ -100,7 +105,7 @@ class WebGLRenderer implements Renderer {
       const canvas = this.surface.getCanvas();
       canvas.clear(Float32Array.of(0, 0, 0, 0));
       canvas.save();
-      canvas.scale(pd, pd);
+      canvas.scale(this.pd, this.pd);
       canvas.drawPicture(picture);
       canvas.restore();
       this.surface.ref.flush();
@@ -143,17 +148,19 @@ interface TempRenderResult {
 
 class StaticWebGLRenderer implements Renderer {
   private cachedImage: SkImage | null = null;
+  private pd = 1;
 
-  constructor(
-    private canvas: HTMLCanvasElement,
-    private pd: number
-  ) {}
+  constructor(private canvas: HTMLCanvasElement) {}
 
   onResize(): void {
     this.cachedImage = null;
   }
 
   private renderPictureToSurface(picture: SkPicture): TempRenderResult | null {
+    this.pd = window.devicePixelRatio;
+    if (this.canvas.clientWidth === 0 || this.canvas.clientHeight === 0) {
+      return null;
+    }
     const tempCanvas = new OffscreenCanvas(
       this.canvas.clientWidth * this.pd,
       this.canvas.clientHeight * this.pd
@@ -292,7 +299,43 @@ class StaticWebGLRenderer implements Renderer {
   }
 }
 
-const pd = Platform.PixelRatio;
+// Mirrors the event react-native-web synthesizes for onLayout.
+const makeLayoutEvent = (
+  x: number,
+  y: number,
+  width: number,
+  height: number
+): LayoutChangeEvent => ({
+  timeStamp: Date.now(),
+  nativeEvent: { layout: { x, y, width, height } },
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  currentTarget: 0,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  target: 0,
+  bubbles: false,
+  cancelable: false,
+  defaultPrevented: false,
+  eventPhase: 0,
+  isDefaultPrevented() {
+    throw new Error("Method not supported on web.");
+  },
+  isPropagationStopped() {
+    throw new Error("Method not supported on web.");
+  },
+  persist() {
+    throw new Error("Method not supported on web.");
+  },
+  preventDefault() {
+    throw new Error("Method not supported on web.");
+  },
+  stopPropagation() {
+    throw new Error("Method not supported on web.");
+  },
+  isTrusted: true,
+  type: "",
+});
 
 export interface SkiaPictureViewHandle {
   setPicture(picture: SkPicture): void;
@@ -319,19 +362,42 @@ export interface SkiaPictureViewProps extends SkiaPictureViewNativeProps {
 }
 
 export const SkiaPictureView = (props: SkiaPictureViewProps) => {
-  const { ref } = props;
+  const { ref, picture, onLayout } = props;
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const renderer = useRef<Renderer | null>(null);
-  const rendererIsStatic = useRef<boolean | null>(null);
-  const redrawRequestsRef = useRef(0);
-  const requestIdRef = useRef(0);
+  const rendererRef = useRef<Renderer | null>(null);
   const pictureRef = useRef<SkPicture | null>(null);
+  // The rendering lifecycle deliberately does not depend on layout events:
+  // - The renderer is created synchronously on mount (the canvas element is
+  //   guaranteed to exist in useLayoutEffect; a zero size at that point is
+  //   fine, the surface is created once the canvas is measurable).
+  // - Redraw requests set a flag that is only cleared by an actual draw, so a
+  //   picture dispatched before the canvas has a size is never lost.
+  // - A ResizeObserver on the canvas itself recreates the surface and repaints
+  //   synchronously (its callbacks run after layout, before paint), and is
+  //   also the source of the user-facing onLayout event.
+  const redrawPendingRef = useRef(false);
+  const frameRef = useRef(0);
+  const onLayoutRef = useRef(onLayout);
+  useLayoutEffect(() => {
+    onLayoutRef.current = onLayout;
+  }, [onLayout]);
 
-  const { picture, onLayout } = props;
+  const flushRedraw = useCallback(() => {
+    frameRef.current = 0;
+    if (redrawPendingRef.current && rendererRef.current && pictureRef.current) {
+      redrawPendingRef.current = false;
+      rendererRef.current.draw(pictureRef.current);
+    }
+    // If the renderer or picture isn't available yet, the request stays
+    // pending and is flushed by whichever arrives last.
+  }, []);
 
   const redraw = useCallback(() => {
-    redrawRequestsRef.current++;
-  }, []);
+    redrawPendingRef.current = true;
+    if (frameRef.current === 0) {
+      frameRef.current = requestAnimationFrame(flushRedraw);
+    }
+  }, [flushRedraw]);
 
   const getSize = useCallback(() => {
     return {
@@ -349,8 +415,8 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
   );
 
   const makeImageSnapshot = useCallback((rect?: SkRect) => {
-    if (renderer.current && pictureRef.current) {
-      return renderer.current.makeImageSnapshot(pictureRef.current, rect);
+    if (rendererRef.current && pictureRef.current) {
+      return rendererRef.current.makeImageSnapshot(pictureRef.current, rect);
     }
     return null;
   }, []);
@@ -405,45 +471,98 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
     []
   );
 
-  const tick = useCallback(() => {
-    if (redrawRequestsRef.current > 0) {
-      redrawRequestsRef.current = 0;
-      if (renderer.current && pictureRef.current) {
-        renderer.current.draw(pictureRef.current);
-      }
-    }
-    requestIdRef.current = requestAnimationFrame(tick);
-  }, []);
+  const isStatic = props.__destroyWebGLContextAfterRender === true;
 
-  const onLayoutEvent = useCallback(
-    (evt: LayoutChangeEvent) => {
-      const canvas = canvasRef.current;
-      if (canvas) {
-        const destroyAfterRender =
-          props.__destroyWebGLContextAfterRender === true;
-        if (
-          renderer.current === null ||
-          rendererIsStatic.current !== destroyAfterRender
-        ) {
-          renderer.current?.dispose();
-          renderer.current = destroyAfterRender
-            ? new StaticWebGLRenderer(canvas, pd)
-            : new WebGLRenderer(canvas, pd);
-          rendererIsStatic.current = destroyAfterRender;
-        } else {
-          // Reuse the existing renderer (and its WebGL context) on relayout.
-          renderer.current.onResize();
-        }
-        if (pictureRef.current) {
-          renderer.current.draw(pictureRef.current);
-        }
+  useLayoutEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      return undefined;
+    }
+    const renderer = isStatic
+      ? new StaticWebGLRenderer(canvas)
+      : new WebGLRenderer(canvas);
+    rendererRef.current = renderer;
+
+    const drawPicture = () => {
+      if (pictureRef.current) {
+        redrawPendingRef.current = false;
+        renderer.draw(pictureRef.current);
       }
-      if (onLayout) {
-        onLayout(evt);
+    };
+
+    // The renderer constructor already sized the surface from the current
+    // layout, so the observer's initial delivery only repaints if the size
+    // changed in between.
+    let lastWidth = canvas.clientWidth;
+    let lastHeight = canvas.clientHeight;
+    let lastPixelDensity = window.devicePixelRatio;
+    const resizeIfNeeded = () => {
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      const pixelDensity = window.devicePixelRatio;
+      if (
+        width === lastWidth &&
+        height === lastHeight &&
+        pixelDensity === lastPixelDensity
+      ) {
+        return;
       }
-    },
-    [onLayout, props.__destroyWebGLContextAfterRender]
-  );
+      lastWidth = width;
+      lastHeight = height;
+      lastPixelDensity = pixelDensity;
+      renderer.onResize();
+      drawPicture();
+    };
+
+    const observer = new ResizeObserver((entries) => {
+      resizeIfNeeded();
+      const layoutHandler = onLayoutRef.current;
+      if (layoutHandler) {
+        const { left, top, width, height } = entries[0].contentRect;
+        // setTimeout 0 is taken from react-native-web (UIManager)
+        setTimeout(
+          () => layoutHandler(makeLayoutEvent(left, top, width, height)),
+          0
+        );
+      }
+    });
+    observer.observe(canvas);
+
+    // A pixel-density change with no CSS size change (browser zoom, moving
+    // the window to another display) doesn't trigger the ResizeObserver:
+    // watch it via matchMedia, re-arming the query for each new density.
+    let media: MediaQueryList | null = null;
+    const onPixelDensityChange = () => {
+      resizeIfNeeded();
+      watchPixelDensity();
+    };
+    const watchPixelDensity = () => {
+      media?.removeEventListener("change", onPixelDensityChange);
+      media =
+        typeof window.matchMedia === "function"
+          ? window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`)
+          : null;
+      media?.addEventListener("change", onPixelDensityChange);
+    };
+    watchPixelDensity();
+
+    // Paint any picture that was dispatched before the renderer existed.
+    drawPicture();
+
+    return () => {
+      observer.disconnect();
+      media?.removeEventListener("change", onPixelDensityChange);
+      rendererRef.current = null;
+      renderer.dispose();
+    };
+  }, [isStatic]);
+
+  useEffect(() => {
+    return () => {
+      cancelAnimationFrame(frameRef.current);
+      frameRef.current = 0;
+    };
+  }, []);
 
   useImperativeHandle(
     ref,
@@ -486,31 +605,21 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
   ]);
 
   useEffect(() => {
-    if (props.picture) {
-      setPicture(props.picture);
+    if (picture) {
+      setPicture(picture);
     }
-  }, [setPicture, props.picture]);
+  }, [setPicture, picture]);
 
-  useEffect(() => {
-    tick();
-    return () => {
-      cancelAnimationFrame(requestIdRef.current);
-      if (renderer.current) {
-        renderer.current.dispose();
-        renderer.current = null;
-      }
-    };
-  }, [tick]);
-
-  useEffect(() => {
-    if (renderer.current && pictureRef.current) {
-      renderer.current.draw(pictureRef.current);
-    }
-  }, [picture, redraw]);
-
-  const { debug = false, ref: _ref, ...viewProps } = props;
+  const {
+    debug: _debug,
+    ref: _ref,
+    onLayout: _onLayout,
+    picture: _picture,
+    __destroyWebGLContextAfterRender: _isStatic,
+    ...viewProps
+  } = props;
   return (
-    <Platform.View {...viewProps} onLayout={onLayoutEvent}>
+    <Platform.View {...viewProps}>
       <canvas
         ref={canvasRef}
         style={{ display: "block", width: "100%", height: "100%" }}
