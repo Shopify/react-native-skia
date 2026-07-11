@@ -49,7 +49,7 @@ public:
 
   sk_sp<SkSurface> getSurface() override;
 
-  void present() override;
+  void present(std::function<void()> onPresented = nullptr) override;
 
   int getWidth() override { return ANativeWindow_getWidth(_window); };
 

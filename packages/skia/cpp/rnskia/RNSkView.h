@@ -1,7 +1,10 @@
 
 #pragma once
 
+#include <cstdint>
+#include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -25,6 +28,47 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
+class RNSkFramePresentationObserver
+    : public std::enable_shared_from_this<RNSkFramePresentationObserver> {
+public:
+  void setCallback(std::function<void()> callback) {
+    std::lock_guard<std::mutex> lock(_mutex);
+    _callback = std::move(callback);
+    _generation++;
+  }
+
+  std::function<void()> makeNotifier() {
+    std::lock_guard<std::mutex> lock(_mutex);
+    if (!_callback) {
+      return nullptr;
+    }
+    auto generation = _generation;
+    auto weakThis = weak_from_this();
+    return [weakThis, generation]() {
+      auto observer = weakThis.lock();
+      if (!observer) {
+        return;
+      }
+      std::function<void()> callback;
+      {
+        std::lock_guard<std::mutex> lock(observer->_mutex);
+        if (observer->_generation != generation) {
+          return;
+        }
+        callback = observer->_callback;
+      }
+      if (callback) {
+        callback();
+      }
+    };
+  }
+
+private:
+  std::mutex _mutex;
+  std::function<void()> _callback = nullptr;
+  uint64_t _generation = 0;
+};
+
 class RNSkCanvasProvider {
 public:
   explicit RNSkCanvasProvider(std::function<void()> requestRedraw)
@@ -45,8 +89,21 @@ public:
    */
   virtual bool renderToCanvas(const std::function<void(SkCanvas *)> &) = 0;
 
+  void setFramePresentationObserver(
+      std::weak_ptr<RNSkFramePresentationObserver> observer) {
+    _framePresentationObserver = std::move(observer);
+  }
+
 protected:
+  std::function<void()> makeFramePresentedNotifier() {
+    auto observer = _framePresentationObserver.lock();
+    return observer ? observer->makeNotifier() : nullptr;
+  }
+
   std::function<void()> _requestRedraw;
+
+private:
+  std::weak_ptr<RNSkFramePresentationObserver> _framePresentationObserver;
 };
 
 class RNSkRenderer {
@@ -141,12 +198,16 @@ public:
            std::shared_ptr<RNSkCanvasProvider> canvasProvider,
            std::shared_ptr<RNSkRenderer> renderer)
       : _platformContext(context), _canvasProvider(canvasProvider),
-        _renderer(renderer) {}
+        _renderer(renderer),
+        _framePresentationObserver(
+            std::make_shared<RNSkFramePresentationObserver>()) {
+    _canvasProvider->setFramePresentationObserver(_framePresentationObserver);
+  }
 
   /**
    Destructor
    */
-  virtual ~RNSkView() {}
+  virtual ~RNSkView() { _framePresentationObserver->setCallback(nullptr); }
 
   virtual void setJsiProperties(
       std::unordered_map<std::string, RNJsi::ViewProperty> &props) = 0;
@@ -173,6 +234,10 @@ public:
   void redraw() {
     _renderer->renderImmediate(_canvasProvider);
     _redrawRequested = false;
+  }
+
+  void setOnFramePresented(std::function<void()> callback) {
+    _framePresentationObserver->setCallback(std::move(callback));
   }
 
   /**
@@ -230,6 +295,7 @@ private:
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   std::shared_ptr<RNSkCanvasProvider> _canvasProvider;
   std::shared_ptr<RNSkRenderer> _renderer;
+  std::shared_ptr<RNSkFramePresentationObserver> _framePresentationObserver;
 
   size_t _nativeId;
 

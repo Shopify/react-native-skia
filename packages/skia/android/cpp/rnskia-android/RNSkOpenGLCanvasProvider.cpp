@@ -66,7 +66,7 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
       // Draw into canvas using callback
       cb(surface->getCanvas());
       // Swap buffers and show on screen
-      _surfaceHolder->present();
+      _surfaceHolder->present(makeFramePresentedNotifier());
       return true;
     } else {
       // the render context did not provide a surface

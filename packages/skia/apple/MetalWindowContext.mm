@@ -83,12 +83,27 @@ sk_sp<SkSurface> MetalWindowContext::getSurface() {
   return _skSurface;
 }
 
-void MetalWindowContext::present() {
+void MetalWindowContext::present(std::function<void()> onPresented) {
   if (auto dContext = GrAsDirectContext(_skSurface->recordingContext())) {
     dContext->flushAndSubmit();
   }
 
   id<MTLCommandBuffer> commandBuffer([_commandQueue commandBuffer]);
+#if TARGET_OS_OSX || TARGET_OS_MACCATALYST
+  if (onPresented) {
+    [commandBuffer addCompletedHandler:^(__unused id<MTLCommandBuffer> buffer) {
+      onPresented();
+    }];
+  }
+#else
+  if (onPresented) {
+    [_currentDrawable addPresentedHandler:^(id<MTLDrawable> drawable) {
+      if (drawable.presentedTime > 0) {
+        onPresented();
+      }
+    }];
+  }
+#endif
   [commandBuffer presentDrawable:_currentDrawable];
   [commandBuffer commit];
   _skSurface = nullptr;

@@ -18,6 +18,7 @@ import type {
 import type { SharedValue } from "react-native-reanimated";
 
 import Rea from "../external/reanimated/ReanimatedProxy";
+import { SkiaViewApi } from "../views/api";
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
 import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeComponent";
 import type { SkImage, SkRect, SkSize } from "../skia/types";
@@ -68,6 +69,16 @@ export interface CanvasProps extends Omit<ViewProps, "onLayout"> {
   onLayout?: ViewProps["onLayout"];
   opaque?: boolean;
   onSize?: SharedValue<SkSize>;
+  /**
+   * Called after each successfully rendered frame crosses the platform
+   * presentation boundary. The callback runs on the JavaScript thread.
+   *
+   * On iOS and tvOS with the Metal backend, this means the drawable was
+   * displayed on screen. Android OpenGL, Graphite, macOS, and Mac Catalyst
+   * report the closest native boundary available; see the Canvas documentation
+   * for the exact guarantees.
+   */
+  onFramePresented?: () => void;
   colorSpace?: "p3" | "srgb";
   /**
    * Renders into a surface with more than 8 bits per channel (16-bit float on
@@ -88,6 +99,7 @@ export const Canvas = ({
   opaque,
   children,
   onSize,
+  onFramePresented,
   colorSpace = "p3",
   highBitDepth = false,
   androidWarmup = false,
@@ -108,6 +120,17 @@ export const Canvas = ({
 
   // Root
   const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
+
+  useLayoutEffect(() => {
+    SkiaViewApi?.setJsiProperty(
+      nativeId,
+      "onFramePresented",
+      onFramePresented ?? null
+    );
+    return () => {
+      SkiaViewApi?.setJsiProperty(nativeId, "onFramePresented", null);
+    };
+  }, [nativeId, onFramePresented]);
 
   useReanimatedFrame(() => {
     "worklet";

@@ -13,9 +13,9 @@
 #include "RNSkView.h"
 #include "jsi/ViewProperty.h"
 
+#include "RNSkPlatformContext.h"
 #include "api/JsiSkPicture.h"
 #include "utils/RNSkLog.h"
-#include "RNSkPlatformContext.h"
 #include "utils/RNSkTimingInfo.h"
 
 #pragma clang diagnostic push
@@ -105,6 +105,9 @@ public:
         // Save picture
         std::static_pointer_cast<RNSkPictureRenderer>(getRenderer())
             ->setPicture(prop.second.getPicture());
+      } else if (prop.first == "onFramePresented") {
+        setOnFramePresented(prop.second.isNull() ? nullptr
+                                                 : prop.second.getFunction());
       }
     }
   }
