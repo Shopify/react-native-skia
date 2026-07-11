@@ -79,6 +79,66 @@ export class JsiSkImageFactory extends Host implements ImageFactory {
     return new JsiSkImage(this.CanvasKit, image);
   }
 
+  MakeImageFromEncodedScaled(
+    encoded: SkData,
+    targetWidth: number,
+    targetHeight?: number
+  ) {
+    if (
+      !Number.isFinite(targetWidth) ||
+      targetWidth <= 0 ||
+      (targetHeight !== undefined &&
+        (!Number.isFinite(targetHeight) || targetHeight <= 0))
+    ) {
+      return null;
+    }
+
+    const image = this.CanvasKit.MakeImageFromEncoded(
+      JsiSkData.fromValue(encoded)
+    );
+    if (image === null) {
+      return null;
+    }
+
+    const width = image.width();
+    const height = image.height();
+    let scale = targetWidth / width;
+    if (targetHeight !== undefined) {
+      scale = Math.min(scale, targetHeight / height);
+    }
+    scale = Math.min(scale, 1);
+    if (scale === 1) {
+      return new JsiSkImage(this.CanvasKit, image);
+    }
+
+    const scaledWidth = Math.max(1, Math.round(width * scale));
+    const scaledHeight = Math.max(1, Math.round(height * scale));
+    const surface = this.CanvasKit.MakeSurface(scaledWidth, scaledHeight);
+    if (surface === null) {
+      image.delete();
+      return null;
+    }
+
+    const canvas = surface.getCanvas();
+    canvas.drawImageRectOptions(
+      image,
+      [0, 0, width, height],
+      [0, 0, scaledWidth, scaledHeight],
+      this.CanvasKit.FilterMode.Linear,
+      this.CanvasKit.MipmapMode.None
+    );
+    surface.flush();
+    const scaledImage = surface.makeImageSnapshot();
+    surface.delete();
+
+    if (scaledImage === null) {
+      image.delete();
+      return null;
+    }
+    image.delete();
+    return new JsiSkImage(this.CanvasKit, scaledImage);
+  }
+
   MakeImageFromNativeTextureUnstable() {
     return throwNotImplementedOnRNWeb<SkImage>();
   }

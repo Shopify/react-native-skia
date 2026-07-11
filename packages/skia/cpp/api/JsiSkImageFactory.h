@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <cmath>
 #include <memory>
 #include <utility>
 
@@ -10,6 +12,9 @@
 #include "JsiSkHostObjects.h"
 #include "JsiSkImage.h"
 #include "JsiSkImageInfo.h"
+
+#include "include/codec/SkCodec.h"
+#include "include/codec/SkEncodedOrigin.h"
 
 #ifdef SK_GRAPHITE
 #include "rnskia/RNDawnContext.h"
@@ -35,6 +40,80 @@ public:
     if (image == nullptr) {
       return jsi::Value::null();
     }
+    auto hostObjectInstance =
+        std::make_shared<JsiSkImage>(getContext(), std::move(image));
+    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
+        runtime, hostObjectInstance, getContext());
+  }
+
+  JSI_HOST_FUNCTION(MakeImageFromEncodedScaled) {
+    if (count < 2 || !arguments[1].isNumber()) {
+      return jsi::Value::null();
+    }
+
+    const auto targetWidth = arguments[1].asNumber();
+    if (!std::isfinite(targetWidth) || targetWidth <= 0) {
+      return jsi::Value::null();
+    }
+
+    double targetHeight = 0;
+    if (count > 2 && !arguments[2].isUndefined()) {
+      if (!arguments[2].isNumber()) {
+        return jsi::Value::null();
+      }
+      targetHeight = arguments[2].asNumber();
+      if (!std::isfinite(targetHeight) || targetHeight <= 0) {
+        return jsi::Value::null();
+      }
+    }
+
+    auto data = JsiSkData::fromValue(runtime, arguments[0]);
+    auto codec = SkCodec::MakeFromData(data);
+    if (codec == nullptr) {
+      return jsi::Value::null();
+    }
+
+    const auto encodedDimensions = codec->dimensions();
+    if (encodedDimensions.isEmpty()) {
+      return jsi::Value::null();
+    }
+
+    const bool swapsWidthHeight =
+        SkEncodedOriginSwapsWidthHeight(codec->getOrigin());
+    const auto imageWidth = swapsWidthHeight ? encodedDimensions.height()
+                                             : encodedDimensions.width();
+    const auto imageHeight = swapsWidthHeight ? encodedDimensions.width()
+                                              : encodedDimensions.height();
+
+    auto scale = targetWidth / static_cast<double>(imageWidth);
+    if (targetHeight > 0) {
+      scale = std::min(
+          scale, targetHeight / static_cast<double>(imageHeight));
+    }
+    scale = std::min(scale, 1.0);
+
+    const auto desiredScale = static_cast<float>(scale);
+    if (desiredScale <= 0) {
+      return jsi::Value::null();
+    }
+    const auto scaledDimensions =
+        codec->getScaledDimensions(desiredScale);
+    if (scaledDimensions.isEmpty()) {
+      return jsi::Value::null();
+    }
+
+    const auto outputDimensions =
+        swapsWidthHeight
+            ? SkISize::Make(scaledDimensions.height(),
+                            scaledDimensions.width())
+            : scaledDimensions;
+    const auto scaledInfo =
+        codec->getInfo().makeDimensions(outputDimensions);
+    auto [image, result] = codec->getImage(scaledInfo);
+    if (image == nullptr || result != SkCodec::kSuccess) {
+      return jsi::Value::null();
+    }
+
     auto hostObjectInstance =
         std::make_shared<JsiSkImage>(getContext(), std::move(image));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
@@ -184,6 +263,8 @@ public:
   std::string getObjectType() const override { return "JsiSkImageFactory"; }
 
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromEncoded),
+                       JSI_EXPORT_FUNC(JsiSkImageFactory,
+                                       MakeImageFromEncodedScaled),
                        JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTag),
                        JSI_EXPORT_FUNC(JsiSkImageFactory,
                                        MakeImageFromNativeBuffer),
