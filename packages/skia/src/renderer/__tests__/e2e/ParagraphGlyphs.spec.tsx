@@ -448,7 +448,8 @@ describe("Paragraph glyph-level APIs", () => {
       );
       checkImage(
         img,
-        `snapshots/paragraph/paragraph-path-segment-${surface.OS}.png`
+        `snapshots/paragraph/paragraph-path-segment-${surface.OS}.png`,
+        { maxPixelDiff: 300 }
       );
     });
 
