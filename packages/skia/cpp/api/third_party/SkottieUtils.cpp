@@ -5,7 +5,7 @@
  * found in the LICENSE file.
  */
 
-#include "third_party/SkottieUtils.h"
+#include "SkottieUtils.h"
 
 #include "include/core/SkData.h"
 #include "include/core/SkRect.h"

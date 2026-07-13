@@ -138,6 +138,15 @@ public:
     wgpu::SharedTextureMemoryBeginAccessDescriptor beginAccessDesc;
     beginAccessDesc.initialized = true;
     beginAccessDesc.fenceCount = 0;
+#if defined(__ANDROID__)
+    // Dawn's Vulkan backend requires the acquired VkImageLayout to be chained.
+    // UNDEFINED (= 0) on both ends is the canonical "no prior GPU producer"
+    // pattern (matches GPUSharedTextureMemory::beginAccess).
+    wgpu::SharedTextureMemoryVkImageLayoutBeginState vkBegin = {};
+    vkBegin.oldLayout = 0;
+    vkBegin.newLayout = 0;
+    beginAccessDesc.nextInChain = &vkBegin;
+#endif
     bool success = memory.BeginAccess(texture, &beginAccessDesc);
 
     if (success) {
@@ -149,6 +158,10 @@ public:
           [](void *context) {
             auto ctx = static_cast<SharedTextureContext *>(context);
             wgpu::SharedTextureMemoryEndAccessState endState = {};
+#if defined(__ANDROID__)
+            wgpu::SharedTextureMemoryVkImageLayoutEndState vkEnd = {};
+            endState.nextInChain = &vkEnd;
+#endif
             ctx->sharedTextureMemory.EndAccess(ctx->texture, &endState);
             delete ctx;
           },
@@ -312,8 +325,8 @@ public:
   }
 
   // Create onscreen surface with window
-  std::unique_ptr<WindowContext> MakeWindow(void *window, int width,
-                                            int height) {
+  std::unique_ptr<WindowContext> MakeWindow(void *window, int width, int height,
+                                            bool highBitDepth = false) {
     // 1. Create Surface
     wgpu::SurfaceDescriptor surfaceDescriptor;
 #ifdef __APPLE__
@@ -328,7 +341,8 @@ public:
     auto surface =
         wgpu::Instance(instance->Get()).CreateSurface(&surfaceDescriptor);
     return std::make_unique<DawnWindowContext>(
-        getRecorder(), backendContext.fDevice, surface, width, height);
+        getRecorder(), backendContext.fDevice, surface, window, width, height,
+        highBitDepth);
   }
 
   skgpu::graphite::Recorder *getRecorder() {

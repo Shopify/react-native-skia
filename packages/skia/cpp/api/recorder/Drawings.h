@@ -6,7 +6,7 @@
 #include "Convertor.h"
 #include "DrawingCtx.h"
 #include "ImageFit.h"
-#include "RNSkPlatformContext.h"
+#include "rnskia/RNSkPlatformContext.h"
 
 #include "include/core/SkPathBuilder.h"
 #include "include/core/SkStrokeRec.h"

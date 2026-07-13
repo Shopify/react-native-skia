@@ -5,13 +5,13 @@
 #include <utility>
 #include <vector>
 
-#include "JsiSkCanvas.h"
-#include "JsiSkHostObjects.h"
-#include "JsiSkPicture.h"
+#include "api/JsiSkCanvas.h"
+#include "api/JsiSkHostObjects.h"
+#include "api/JsiSkPicture.h"
 
 #include "DrawingCtx.h"
 #include "RNRecorder.h"
-#include "RNSkLog.h"
+#include "utils/RNSkLog.h"
 
 #include <jsi/jsi.h>
 

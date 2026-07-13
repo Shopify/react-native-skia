@@ -7,6 +7,14 @@
 
 #include "webgpu/webgpu_cpp.h"
 
+#ifdef __APPLE__
+#include "rnskia/RNMetalLayerColorSpace.h"
+
+namespace dawn::native::metal {
+void WaitForCommandsToBeScheduled(WGPUDevice device);
+} // namespace dawn::native::metal
+#endif
+
 namespace rnwgpu {
 
 struct NativeInfo {
@@ -112,11 +120,38 @@ public:
     height = newHeight;
   }
 
-  void present() {
+  // Present the current surface texture. Called synchronously from the thread
+  // that did getCurrentTexture / submit (via GPUCanvasContext::present), so it
+  // preserves Dawn surface thread-affinity. No-op when offscreen / unconfigured
+  // (no surface).
+  void presentFrame() {
+#ifdef __APPLE__
+    // Ensure command buffers are scheduled before presenting. Read the device
+    // under a shared lock, then wait without holding it (the wait can block).
+    // The device may be reconfigured between the two locks; that is safe
+    // because present() is called on the rendering thread right after submit(),
+    // the wait just flushes that thread's already-submitted work, and the
+    // Present() below re-checks `surface` under the unique lock before touching
+    // it.
+    wgpu::Device device;
+    {
+      std::shared_lock<std::shared_mutex> lock(_mutex);
+      device = config.device;
+    }
+    if (device) {
+      dawn::native::metal::WaitForCommandsToBeScheduled(device.Get());
+    }
+#endif
     std::unique_lock<std::shared_mutex> lock(_mutex);
     if (surface) {
       surface.Present();
     }
+  }
+
+  // True when an on-screen wgpu::Surface is attached (vs offscreen texture).
+  bool hasSurface() {
+    std::shared_lock<std::shared_mutex> lock(_mutex);
+    return surface != nullptr;
   }
 
   wgpu::Texture getCurrentTexture() {
@@ -154,6 +189,9 @@ private:
   void _configure() {
     if (surface) {
       surface.Configure(&config);
+#ifdef __APPLE__
+      RNSkia::applyCAMetalLayerColorSpace(nativeSurface, config.format);
+#endif
     } else {
       wgpu::TextureDescriptor textureDesc;
       textureDesc.format = config.format;

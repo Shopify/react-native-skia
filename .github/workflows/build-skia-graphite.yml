@@ -15,11 +15,6 @@ on:
         required: false
         type: boolean
         default: false
-      skip_skia_download:
-        description: 'Skip downloading prebuilt Skia (always true for building from source)'
-        required: false
-        type: boolean
-        default: true
 jobs:
   prepare-release:
     runs-on: ubuntu-latest
@@ -30,7 +25,7 @@ jobs:
       release_name: ${{ steps.release_meta.outputs.release_name }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
         with:
           submodules: recursive
           fetch-depth: 0
@@ -85,7 +80,7 @@ jobs:
       - name: Create GitHub release
         if: ${{ github.event.inputs.dry_run != 'true' }}
         id: create_release
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -124,7 +119,7 @@ jobs:
       fail-fast: false
     steps:
       - name: checkout
-        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98 # v5.0.0
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
         with:
           submodules: recursive
 
@@ -140,7 +135,7 @@ jobs:
       - name: Setup Android NDK
         id: setup-ndk
         if: startsWith(matrix.target, 'android')
-        uses: nttld/setup-ndk@afb4c9964b521afb97c864b7d40b11e6911bd410 # v1.5.0
+        uses: nttld/setup-ndk@ed92fe6cadad69be94a966a7ee3271275e62f779 # v1.6.0
         with:
           ndk-version: r27d
 
@@ -149,12 +144,11 @@ jobs:
         run: echo "ANDROID_NDK=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
 
       - name: Setup Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
+        uses: seanmiddleditch/gha-setup-ninja@7e868db0f3406270dd46e1dac26c65f621456723 # master
 
       - name: Setup
         uses: ./.github/actions/setup
         with:
-          download_skia: ${{ github.event.inputs.skip_skia_download == 'true' && 'false' || 'true' }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update depot_tools
@@ -213,7 +207,7 @@ jobs:
 
       - name: Upload binaries to GitHub release - ${{ matrix.artifact_name }}
         if: ${{ github.event.inputs.dry_run != 'true' }}
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -258,7 +252,7 @@ jobs:
 
       - name: Upload Graphite Headers to GitHub release
         if: ${{ matrix.target == 'apple-ios' && github.event.inputs.dry_run != 'true' }}
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

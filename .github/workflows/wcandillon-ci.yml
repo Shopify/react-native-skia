@@ -1,0 +1,346 @@
+# OWNER: wcandillon/react-native-skia
+# RUNNER: macOS jobs (test, build-test-ios, build-test-macos) run on the
+#   self-hosted macOS runner; they serialize naturally since there is a single
+#   runner. Ubuntu jobs stay on GitHub-hosted runners.
+# NOTE: Windows build and package e2e tests are intentionally NOT part of this
+#   automatic CI - they are dispatched manually (see dedicated workflows).
+name: wcandillon - CI
+on:
+  push:
+    branches:
+      - main
+      - next
+  pull_request:
+    branches:
+      - main
+      - next
+  merge_group:
+    types:
+      - checks_requested
+
+concurrency:
+  group: wcandillon-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+      - run: pip install cpplint
+      - run: cpplint --linelength=230 --filter=-legal/copyright,-whitespace/indent,-whitespace/comments,-whitespace/ending_newline,-build/include_order,-runtime/references,-readability/todo,-whitespace/blank_line,-whitespace/todo,-runtime/int,-build/c++11,-whitespace/parens --exclude=package/cpp/skia --exclude=package/apple --exclude=package/android/build --exclude=package/node_modules --recursive package
+
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format-18
+
+      - name: Lint files
+        run: yarn lint
+
+      - name: Typecheck files
+        run: yarn tsc
+
+  test:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
+    runs-on: [self-hosted, macOS]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Test
+        run: yarn test
+
+  build-library:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
+    runs-on: ubuntu-latest
+    outputs:
+      run_id: ${{ github.run_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build package
+        run: yarn build
+
+      - name: Pack package
+        working-directory: packages/skia
+        run: yarn pack
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.0
+        with:
+          name: package-tgz
+          path: packages/skia/package.tgz
+
+      - name: Build dry run release
+        working-directory: packages/skia
+        run: |
+          npx semantic-release --dry-run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  build-android:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
+    runs-on: ubuntu-latest
+    env:
+      TURBO_CACHE_DIR: .turbo/android
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Free disk space
+        run: |
+          echo "Disk usage before cleanup:"
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker image prune -af || true
+          sudo apt-get clean
+          echo "Disk usage after cleanup:"
+          df -h
+
+      - name: Cache turborepo for Android
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.TURBO_CACHE_DIR }}
+          key: ${{ runner.os }}-turborepo-android-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-turborepo-android
+
+      - name: Install JDK
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Install NDK
+        uses: nttld/setup-ndk@ed92fe6cadad69be94a966a7ee3271275e62f779 # v1.6.0
+        id: setup-ndk
+        with:
+          ndk-version: r27d
+
+      - name: Set ANDROID_NDK
+        run: echo "ANDROID_NDK=$ANDROID_HOME/ndk-bundle" >> $GITHUB_ENV
+
+      - name: Finalize Android SDK
+        run: |
+          /bin/bash -c "yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null"
+
+      - name: Install Android SDK
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > $GITHUB_WORKSPACE/apps/example/android/local.properties
+
+      - name: Cache Gradle
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.gradle/wrapper
+            ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('./apps/example/android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build example for Android
+        env:
+          JAVA_OPTS: "-XX:MaxHeapSize=6g"
+        run: |
+          yarn turbo run build:android --concurrency 1
+
+      - name: Cache apk
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        env:
+          cache-name: cache-apk
+        with:
+          path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
+          key: apk-${{ github.sha }}
+
+      - name: Upload Android APK artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.0
+        with:
+          name: android-example-apk
+          path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
+
+  test-android:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
+    needs: build-android
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      TURBO_CACHE_DIR: .turbo/android
+    steps:
+      - name: checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4.0.1
+
+      - name: Install Android SDK tools
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
+          echo "$ANDROID_HOME/emulator" >> $GITHUB_PATH
+
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Restore APK
+        id: cache-apk
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+        with:
+          path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
+          key: apk-${{ github.sha }}
+
+      - name: Start Package Manager
+        working-directory: apps/example/
+        run: E2E=true yarn start &
+
+      - name: Run Android Emulator Tests
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: 30
+          arch: x86_64
+          profile: Nexus 5X
+          force-avd-creation: true
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: true
+          script: |
+            # Wait for Metro bundler
+            sleep 10
+
+            # Install and launch app
+            adb install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk
+            adb shell monkey -p com.microsoft.reacttestapp 1
+
+            # Run tests
+            cd packages/skia && CI=true yarn e2e --testPathIgnorePatterns Paragraphs
+
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.0
+        if: failure()
+        with:
+          path: packages/skia/src/__tests__/snapshots/
+          name: tests-snapshots-screenshots
+
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.0
+        if: failure()
+        with:
+          path: apps/docs/static/
+          name: tests-docs-screenshots
+
+  build-test-ios:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
+    runs-on: [self-hosted, macOS]
+    env:
+      TURBO_CACHE_DIR: .turbo/ios
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache turborepo for iOS
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.TURBO_CACHE_DIR }}
+          key: ${{ runner.os }}-turborepo-ios-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-turborepo-ios-
+
+      - name: Check turborepo cache for iOS
+        run: |
+          TURBO_CACHE_STATUS=$(node -p "($(yarn turbo run build:ios --cache-dir="${{ env.TURBO_CACHE_DIR }}" --dry=json)).tasks.find(t => t.task === 'build:ios').cache.status")
+
+          if [[ $TURBO_CACHE_STATUS == "HIT" ]]; then
+            echo "turbo_cache_hit=1" >> $GITHUB_ENV
+          fi
+
+      - name: Install CocoaPods
+        working-directory: apps/example/ios
+        run: pod install
+
+      - name: Start Package Manager
+        working-directory: apps/example
+        run: E2E=true yarn start &
+
+      - name: Build example for iOS
+        working-directory: apps/example
+        run: yarn ios --simulator 'iPhone 16 Pro'
+
+      - name: Run e2e tests
+        working-directory: packages/skia
+        run: CI=true yarn e2e
+
+  build-test-macos:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
+    runs-on: [self-hosted, macOS]
+    env:
+      TURBO_CACHE_DIR: .turbo/macos
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache turborepo for macOS
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.TURBO_CACHE_DIR }}
+          key: ${{ runner.os }}-turborepo-macos-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-turborepo-macos-
+
+      - name: Build example for macOS
+        run: yarn turbo run build:macos --concurrency 1

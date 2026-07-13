@@ -15,8 +15,8 @@
 
 #include "jsi2/NativeObject.h"
 
-#include "rnwgpu/async/AsyncRunner.h"
 #include "rnwgpu/async/AsyncTaskHandle.h"
+#include "rnwgpu/async/RuntimeContext.h"
 
 #include "webgpu/webgpu_cpp.h"
 
@@ -37,6 +37,8 @@
 #include "GPURenderPipeline.h"
 #include "GPUSampler.h"
 #include "GPUShaderModule.h"
+#include "GPUSharedFence.h"
+#include "GPUSharedTextureMemory.h"
 #include "GPUSupportedLimits.h"
 #include "GPUTexture.h"
 #include "descriptors/GPUBindGroupDescriptor.h"
@@ -51,6 +53,8 @@
 #include "descriptors/GPURenderPipelineDescriptor.h"
 #include "descriptors/GPUSamplerDescriptor.h"
 #include "descriptors/GPUShaderModuleDescriptor.h"
+#include "descriptors/GPUSharedFenceDescriptor.h"
+#include "descriptors/GPUSharedTextureMemoryDescriptor.h"
 #include "descriptors/GPUTextureDescriptor.h"
 
 namespace rnwgpu {
@@ -95,7 +99,7 @@ public:
   static constexpr const char *CLASS_NAME = "GPUDevice";
 
   explicit GPUDevice(wgpu::Device instance,
-                     std::shared_ptr<async::AsyncRunner> async,
+                     std::shared_ptr<async::RuntimeContext> async,
                      std::string label)
       : NativeObject(CLASS_NAME), _instance(instance), _async(async),
         _label(label) {
@@ -120,6 +124,10 @@ public:
       std::optional<std::shared_ptr<GPUSamplerDescriptor>> descriptor);
   std::shared_ptr<GPUExternalTexture> importExternalTexture(
       std::shared_ptr<GPUExternalTextureDescriptor> descriptor);
+  std::shared_ptr<GPUSharedTextureMemory> importSharedTextureMemory(
+      std::shared_ptr<GPUSharedTextureMemoryDescriptor> descriptor);
+  std::shared_ptr<GPUSharedFence>
+  importSharedFence(std::shared_ptr<GPUSharedFenceDescriptor> descriptor);
   std::shared_ptr<GPUBindGroupLayout> createBindGroupLayout(
       std::shared_ptr<GPUBindGroupLayoutDescriptor> descriptor);
   std::shared_ptr<GPUPipelineLayout>
@@ -173,6 +181,10 @@ public:
                   &GPUDevice::createSampler);
     installMethod(runtime, prototype, "importExternalTexture",
                   &GPUDevice::importExternalTexture);
+    installMethod(runtime, prototype, "importSharedTextureMemory",
+                  &GPUDevice::importSharedTextureMemory);
+    installMethod(runtime, prototype, "importSharedFence",
+                  &GPUDevice::importSharedFence);
     installMethod(runtime, prototype, "createBindGroupLayout",
                   &GPUDevice::createBindGroupLayout);
     installMethod(runtime, prototype, "createPipelineLayout",
@@ -218,9 +230,18 @@ public:
 private:
   friend class GPUAdapter;
 
+  // Runs the uncapturederror listeners on the creation runtime's JS thread.
+  // Invoked from notifyUncapturedError via the main CallInvoker.
+  void deliverUncapturedError(GPUErrorVariant error);
+
   wgpu::Device _instance;
-  std::shared_ptr<async::AsyncRunner> _async;
+  std::shared_ptr<async::RuntimeContext> _async;
   std::string _label;
+  // Guards the device-lost state below. In the ProcessEvents model both
+  // notifyDeviceLost() (fired by Dawn during ProcessEvents) and getLost() run on
+  // the owning runtime's own thread, but device destruction can also trigger
+  // notifyDeviceLost() synchronously, so the mutex keeps these fields safe.
+  std::mutex _lostMutex;
   std::optional<async::AsyncTaskHandle> _lostHandle;
   std::shared_ptr<GPUDeviceLostInfo> _lostInfo;
   bool _lostSettled = false;
