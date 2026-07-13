@@ -43,7 +43,7 @@ import { AtlasExample } from "./AtlasExample";
 import { Web } from "./Web";
 import { WebLayout } from "./WebLayout";
 import { WebGLContexts } from "./WebGLContexts";
-import { WebMemoryLeak } from "./WebMemoryLeak";
+import { WebMemory } from "./WebMemory";
 
 const Stack = createNativeStackNavigator<Routes>();
 
@@ -339,10 +339,10 @@ export const API = () => {
         }}
       />
       <Stack.Screen
-        name="WebMemoryLeak"
-        component={WebMemoryLeak}
+        name="WebMemory"
+        component={WebMemory}
         options={{
-          title: "💧 WASM Memory Leak",
+          title: "💧 WASM Memory",
         }}
       />
     </Stack.Navigator>
