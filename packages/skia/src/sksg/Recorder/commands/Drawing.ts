@@ -131,14 +131,14 @@ export const drawTextPath = (ctx: DrawingContext, props: TextPathProps) => {
     const widths = font.getGlyphWidths(ids);
     const rsx: SkRSXform[] = [];
     const meas = ctx.Skia.ContourMeasureIter(path, false, 1);
-    let cont = meas.next();
+    let cont = ctx.track(meas.next());
     let dist = initialOffset;
     for (let i = 0; i < text.length && cont; i++) {
       const width = widths[i];
       dist += width / 2;
       if (dist > cont.length()) {
         // jump to next contour
-        cont = meas.next();
+        cont = ctx.track(meas.next());
         if (!cont) {
           // We have come to the end of the path - terminate the string
           // right here.
@@ -221,7 +221,7 @@ export const drawPath = (ctx: DrawingContext, props: PathProps) => {
   if (hasFillType) {
     const builder = ctx.Skia.PathBuilder.MakeFromPath(path);
     builder.setFillType(FillType[enumKey(fillType)]);
-    path = builder.build();
+    path = ctx.track(builder.build());
   }
 
   // Apply stroke using static Path.Stroke
