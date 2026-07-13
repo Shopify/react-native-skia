@@ -35,6 +35,7 @@ import {
   LiquidGlass,
   Pictures,
   WebGPU,
+  HighBitDepth,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
@@ -75,6 +76,7 @@ const linking: LinkingOptions<StackParamList> = {
       Chat: "chat",
       Pictures: "pictures",
       WebGPU: "webgpu",
+      HighBitDepth: "high-bit-depth",
     },
   },
   prefixes: ["rnskia://"],
@@ -244,6 +246,7 @@ const App = () => {
                 header: () => null,
               }}
             />
+            <Stack.Screen name="HighBitDepth" component={HighBitDepth} />
           </Stack.Navigator>
         </NavigationContainer>
       </GestureHandlerRootView>

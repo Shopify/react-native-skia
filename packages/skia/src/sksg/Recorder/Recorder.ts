@@ -32,7 +32,7 @@ import type {
 import type { AnimatedProps } from "../../renderer";
 import { isSharedValue } from "../utils";
 import { isColorFilter, isImageFilter, isPathEffect, isShader } from "../Node";
-import type { SkPaint, BaseRecorder } from "../../skia/types";
+import type { SkPaint, SkPicture, BaseRecorder } from "../../skia/types";
 
 import { CommandType } from "./Core";
 import type { Command } from "./Core";
@@ -40,7 +40,21 @@ import type { Command } from "./Core";
 export interface Recording {
   commands: Command[];
   paintPool: SkPaint[];
+  // Last picture produced from this recording. The view keeps its own
+  // reference to the picture it displays, so the renderer owns this one and
+  // disposes it when the next frame replaces it or the recording is disposed.
+  lastPicture?: SkPicture | null;
 }
+
+export const disposeRecording = (recording: Recording) => {
+  "worklet";
+  recording.paintPool.forEach((paint) => paint.dispose());
+  recording.paintPool.length = 0;
+  if (recording.lastPicture) {
+    recording.lastPicture.dispose();
+    recording.lastPicture = null;
+  }
+};
 
 interface AnimationValues {
   animationValues: Set<SharedValue<unknown>>;
