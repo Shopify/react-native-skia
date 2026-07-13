@@ -81,9 +81,8 @@ describe("Text", () => {
   it("Should draw text along a circle", async () => {
     const font = fonts.RobotoMedium;
     const { Skia } = importSkia();
-    const path = Skia.Path.Make();
     const r = surface.width / 2;
-    path.addCircle(r, r, r / 2);
+    const path = Skia.Path.Circle(r, r, r / 2);
     const image = await surface.draw(
       <>
         <Fill color="white" />
@@ -97,10 +96,6 @@ describe("Text", () => {
 
   itSkipsCanvasKit("Should draw text along a path", async () => {
     const font = fonts.NotoSansSCRegular;
-    const { Skia } = importSkia();
-    const path = Skia.Path.Make();
-    const r = surface.width / 2;
-    path.addCircle(r, r, r / 2);
     const image = await surface.draw(
       <>
         <Fill color="white" />

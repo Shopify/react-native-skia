@@ -42,7 +42,10 @@ public class RNSkiaPackage extends TurboReactPackage {
 
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-        return Arrays.<ViewManager>asList(new SkiaPictureViewManager());
+        return Arrays.<ViewManager>asList(
+            new SkiaPictureViewManager(),
+            new WebGPUViewManager()
+        );
     }
 
     @Override

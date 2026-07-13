@@ -7,8 +7,8 @@
 
 #include "jsi2/NativeObject.h"
 
-#include "rnwgpu/async/AsyncRunner.h"
 #include "rnwgpu/async/AsyncTaskHandle.h"
+#include "rnwgpu/async/RuntimeContext.h"
 
 #include "webgpu/webgpu_cpp.h"
 
@@ -23,7 +23,7 @@ public:
   static constexpr const char *CLASS_NAME = "GPUShaderModule";
 
   explicit GPUShaderModule(wgpu::ShaderModule instance,
-                           std::shared_ptr<async::AsyncRunner> async,
+                           std::shared_ptr<async::RuntimeContext> async,
                            std::string label)
       : NativeObject(CLASS_NAME), _instance(instance), _async(async),
         _label(label) {}
@@ -59,7 +59,7 @@ public:
 
 private:
   wgpu::ShaderModule _instance;
-  std::shared_ptr<async::AsyncRunner> _async;
+  std::shared_ptr<async::RuntimeContext> _async;
   std::string _label;
 };
 

@@ -21,8 +21,10 @@ class GPUTexture : public NativeObject<GPUTexture> {
 public:
   static constexpr const char *CLASS_NAME = "GPUTexture";
 
-  explicit GPUTexture(wgpu::Texture instance, std::string label)
-      : NativeObject(CLASS_NAME), _instance(instance), _label(label) {}
+  explicit GPUTexture(wgpu::Texture instance, std::string label,
+                      bool reportsMemoryPressure = true)
+      : NativeObject(CLASS_NAME), _instance(instance), _label(label),
+        _reportsMemoryPressure(reportsMemoryPressure) {}
 
 public:
   std::string getBrand() { return CLASS_NAME; }
@@ -68,6 +70,9 @@ public:
   inline const wgpu::Texture get() { return _instance; }
 
   size_t getMemoryPressure() override {
+    if (!_reportsMemoryPressure) {
+      return sizeof(GPUTexture);
+    }
     // Calculate approximate memory usage based on texture properties
     uint32_t width = getWidth();
     uint32_t height = getHeight();
@@ -85,6 +90,7 @@ public:
     case wgpu::TextureFormat::R8Snorm:
     case wgpu::TextureFormat::R8Uint:
     case wgpu::TextureFormat::R8Sint:
+    case wgpu::TextureFormat::Stencil8:
       bytesPerPixel = 1;
       break;
     case wgpu::TextureFormat::R16Uint:
@@ -94,6 +100,7 @@ public:
     case wgpu::TextureFormat::RG8Snorm:
     case wgpu::TextureFormat::RG8Uint:
     case wgpu::TextureFormat::RG8Sint:
+    case wgpu::TextureFormat::Depth16Unorm:
       bytesPerPixel = 2;
       break;
     case wgpu::TextureFormat::RGBA8Unorm:
@@ -110,6 +117,9 @@ public:
     case wgpu::TextureFormat::RG16Uint:
     case wgpu::TextureFormat::RG16Sint:
     case wgpu::TextureFormat::RG16Float:
+    case wgpu::TextureFormat::Depth24Plus:
+    case wgpu::TextureFormat::Depth24PlusStencil8:
+    case wgpu::TextureFormat::Depth32Float:
       bytesPerPixel = 4;
       break;
     case wgpu::TextureFormat::RG32Float:
@@ -118,6 +128,7 @@ public:
     case wgpu::TextureFormat::RGBA16Uint:
     case wgpu::TextureFormat::RGBA16Sint:
     case wgpu::TextureFormat::RGBA16Float:
+    case wgpu::TextureFormat::Depth32FloatStencil8:
       bytesPerPixel = 8;
       break;
     case wgpu::TextureFormat::RGBA32Float:
@@ -145,6 +156,7 @@ public:
 private:
   wgpu::Texture _instance;
   std::string _label;
+  bool _reportsMemoryPressure = true;
 };
 
 } // namespace rnwgpu

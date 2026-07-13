@@ -1,9 +1,9 @@
-import { useMemo } from 'react';
-import { Gesture } from 'react-native-gesture-handler';
-import type { SharedValue } from 'react-native-reanimated';
+import { useMemo } from "react";
+import { Gesture } from "react-native-gesture-handler";
+import type { SharedValue } from "react-native-reanimated";
 
 const clamp = (value: number, lower: number, upper: number) => {
-  'worklet';
+  "worklet";
   return Math.min(Math.max(value, lower), upper);
 };
 
@@ -13,15 +13,15 @@ export const useGraphTouchHandler = (x: SharedValue<number>, width: number) => {
       Gesture.Pan()
         .minDistance(0)
         .onStart((event) => {
-          'worklet';
+          "worklet";
           x.value = clamp(event.x, 0, width);
         })
         .onChange((event) => {
-          'worklet';
+          "worklet";
           x.value = clamp(event.x, 0, width);
         })
         .onEnd((event) => {
-          'worklet';
+          "worklet";
           // Snap to the last touched point instead of letting decay push it further.
           x.value = clamp(event.x, 0, width);
         }),

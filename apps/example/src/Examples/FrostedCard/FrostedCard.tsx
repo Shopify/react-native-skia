@@ -29,8 +29,7 @@ const rct = Skia.XYWHRect(
   CARD_HEIGHT
 );
 const rrct = Skia.RRectXY(rct, 10, 10);
-const roundedRectPath = Skia.Path.Make();
-roundedRectPath.addRRect(rrct);
+const roundedRectPath = Skia.PathBuilder.Make().addRRect(rrct).build();
 
 const sf = 300;
 const springConfig = (velocity: number) => {
@@ -71,10 +70,16 @@ export const FrostedCard = () => {
     ]);
   });
 
-  const clip = usePathValue((path) => {
-    "worklet";
-    path.transform(matrix.value);
-  }, roundedRectPath);
+  const clip = usePathValue(
+    () => {
+      "worklet";
+    },
+    roundedRectPath,
+    (path) => {
+      "worklet";
+      return path.transform(matrix.value);
+    }
+  );
 
   return (
     <View style={{ flex: 1 }}>

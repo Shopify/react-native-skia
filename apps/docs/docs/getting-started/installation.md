@@ -23,7 +23,7 @@ yarn add @shopify/react-native-skia
 npm install @shopify/react-native-skia
 ```
 
-The Skia prebuilt binaries are included as npm dependencies and are automatically resolved by the native build systems. No postinstall script is needed.
+The Skia prebuilt binaries are delivered as regular npm dependencies (`react-native-skia-android` and `react-native-skia-apple-*`) and are resolved automatically by the native build systems (CocoaPods on iOS/macOS/tvOS, Gradle on Android). No `postinstall` script is required, so there is nothing to allow or configure — `trustedDependencies` (Bun) or `enableScripts` (Yarn Berry) settings are not needed.
 
 ## Using Expo
 
@@ -122,6 +122,20 @@ module.exports = {
 The `jestEnv.js` will load CanvasKit for you and `jestEnv.js` mocks React Native Skia.
 You can also have a look at the [example app](https://github.com/Shopify/react-native-skia/tree/main/apps/example) to see how Jest tests are enabled there.
 
+
+## Graphite (Experimental)
+
+Skia has two backends: Ganesh (default) and Graphite. An experimental preview of Graphite is available in the `@next` distribution channel:
+
+```sh
+yarn add @shopify/react-native-skia@next
+```
+
+:::warning
+
+Graphite support is highly experimental. Skia Graphite requires Android API Level 26 or above.
+
+:::
 
 ## Playground
 

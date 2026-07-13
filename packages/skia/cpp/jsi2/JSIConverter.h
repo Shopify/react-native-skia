@@ -238,6 +238,17 @@ template <> struct JSIConverter<rnwgpu::async::AsyncTaskHandle> {
 };
 #endif
 
+// jsi::Function <> Function
+template <> struct JSIConverter<jsi::Function> {
+  static jsi::Function fromJSI(jsi::Runtime &runtime, const jsi::Value &arg,
+                               bool outOfBound) {
+    return arg.asObject(runtime).asFunction(runtime);
+  }
+  static jsi::Value toJSI(jsi::Runtime &runtime, jsi::Function &&arg) {
+    return std::move(arg);
+  }
+};
+
 // std::map<std::string, T> <> Record<string, T>
 template <typename ValueType>
 struct JSIConverter<std::map<std::string, ValueType>> {

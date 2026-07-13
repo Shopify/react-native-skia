@@ -10,6 +10,9 @@ import { visit } from "./Recorder/Visitor";
 import "../skia/NativeSetup";
 import "../views/api";
 
+// create local reference for `strictGlobal` option in Worklets
+const { SkiaViewApi } = globalThis;
+
 const nativeDrawOnscreen = (
   nativeId: number,
   recorder: JsiRecorder,
@@ -36,9 +39,21 @@ class NativeReanimatedContainer extends Container {
     this.picture = Skia.Picture.MakePicture(null)!;
   }
 
+  unmount() {
+    super.unmount();
+    if (this.mapperId !== null) {
+      // The mapper closure retains the recorder and its resources (e.g.
+      // images) on the UI runtime and keeps updating the picture of an
+      // unmounted view — stop it or it leaks for the lifetime of the app.
+      Rea.stopMapper(this.mapperId);
+      this.mapperId = null;
+    }
+  }
+
   redraw() {
     if (this.mapperId !== null) {
       Rea.stopMapper(this.mapperId);
+      this.mapperId = null;
     }
     if (this.unmounted) {
       return;

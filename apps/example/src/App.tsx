@@ -35,12 +35,14 @@ import {
   LiquidGlass,
   Pictures,
   WebGPU,
+  HighBitDepth,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
 import type { StackParamList } from "./types";
 import { useAssets } from "./Tests/useAssets";
 import { Chess } from "./Examples/Chess";
+import { apiScreenPaths } from "./Examples/API/linking";
 import "./resolveAssetSourcePolyfill";
 
 const linking: LinkingOptions<StackParamList> = {
@@ -48,7 +50,10 @@ const linking: LinkingOptions<StackParamList> = {
     screens: {
       Home: "",
       Vertices: "vertices",
-      API: "api",
+      API: {
+        path: "api",
+        screens: apiScreenPaths,
+      },
       LiquidGlass: "liquid-glass",
       Breathe: "breathe",
       Filters: "filters",
@@ -75,6 +80,7 @@ const linking: LinkingOptions<StackParamList> = {
       Chat: "chat",
       Pictures: "pictures",
       WebGPU: "webgpu",
+      HighBitDepth: "high-bit-depth",
     },
   },
   prefixes: ["rnskia://"],
@@ -244,6 +250,7 @@ const App = () => {
                 header: () => null,
               }}
             />
+            <Stack.Screen name="HighBitDepth" component={HighBitDepth} />
           </Stack.Navigator>
         </NavigationContainer>
       </GestureHandlerRootView>

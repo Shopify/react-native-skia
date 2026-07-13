@@ -90,9 +90,11 @@ public:
    * Creates an offscreen surface
    * @param width Width of the offscreen surface
    * @param height Height of the offscreen surface
+   * @param useP3ColorSpace If true, surface will use Display P3 color space
    * @return sk_sp<SkSurface>
    */
-  virtual sk_sp<SkSurface> makeOffscreenSurface(int width, int height) = 0;
+  virtual sk_sp<SkSurface>
+  makeOffscreenSurface(int width, int height, bool useP3ColorSpace = false) = 0;
 
   virtual std::shared_ptr<WindowContext>
   makeContextFromNativeSurface(void *surface, int width, int height) = 0;
@@ -138,6 +140,13 @@ public:
   virtual void releaseNativeBuffer(uint64_t pointer) = 0;
 
   virtual uint64_t makeNativeBuffer(sk_sp<SkImage> image) = 0;
+
+  // Allocate a platform native buffer (IOSurface on Apple, AHardwareBuffer on
+  // Android) of the given size filled with a procedural test pattern (RGB
+  // gradient + diagonal stripes), entirely on the CPU. Intended for examples
+  // and tests that need a buffer to feed into importExternalTexture without a
+  // camera/video source. Release it with releaseNativeBuffer().
+  virtual uint64_t makeTestNativeBuffer(int width, int height) = 0;
 
   virtual std::shared_ptr<RNSkVideo> createVideo(const std::string &url) = 0;
 

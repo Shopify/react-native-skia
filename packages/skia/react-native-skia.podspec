@@ -1,17 +1,62 @@
 # @shopify/react-native-skia.podspec
 
 require "json"
+require "fileutils"
 
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
-# Check if Graphite is enabled
-use_graphite = false
-if ENV['SK_GRAPHITE']
-  use_graphite = ENV['SK_GRAPHITE'] == '1' || ENV['SK_GRAPHITE'].downcase == 'true'
-  puts "-- SK_GRAPHITE: using environment variable (#{use_graphite ? 'ON' : 'OFF'})"
-else
-  puts "-- SK_GRAPHITE: OFF (set SK_GRAPHITE=1 to enable)"
+# Check if Graphite is enabled via marker file (created by install-skia-graphite)
+use_graphite = File.exist?(File.join(__dir__, 'libs', '.graphite'))
+puts "-- SK_GRAPHITE: #{use_graphite ? 'ON' : 'OFF'} (detected via libs/.graphite marker file)"
+
+# Resolve a node package directory using Node's own module resolution
+# (mirrors `require.resolve(pkg/package.json)`). Returns nil if it can't be found.
+# Defined as a lambda (not a `def`) because CocoaPods evaluates the podspec inside
+# the `Pod` module, where top-level methods are not reachable at the call site.
+resolve_node_package = lambda do |name, base_dir|
+  script = "process.stdout.write(require('path').dirname(require.resolve('#{name}/package.json')))"
+  dir = Dir.chdir(base_dir) { `node -e "#{script}" 2>/dev/null`.strip }
+  dir.empty? ? nil : dir
 end
+
+# Copy the prebuilt xcframeworks from the Skia npm packages into libs/<platform>.
+#
+# This replaces what the old npm `postinstall` script used to do. We do it here, at
+# `pod install` time, so we no longer rely on a lifecycle script. CocoaPods always
+# re-evaluates the podspec for path-based pods, so this runs on every install; to keep
+# it cache-friendly we stamp the copied package version into libs/<platform>/.version
+# and skip the copy when it already matches. On a version bump the frameworks are
+# re-copied and CocoaPods picks up the change. This is best-effort: if `pod install`
+# does not detect the change, a clean reinstall fixes it (acceptable until the upcoming
+# Swift Package Manager migration).
+install_apple_skia_libs = lambda do |base_dir|
+  { 'ios' => 'react-native-skia-apple-ios',
+    'macos' => 'react-native-skia-apple-macos',
+    'tvos' => 'react-native-skia-apple-tvos' }.each do |platform, pkg_name|
+    pkg_dir = resolve_node_package.call(pkg_name, base_dir)
+    next if pkg_dir.nil?
+
+    src = File.join(pkg_dir, 'libs')
+    next unless Dir.exist?(src) && !Dir.glob(File.join(src, '*.xcframework')).empty?
+
+    version = JSON.parse(File.read(File.join(pkg_dir, 'package.json')))['version'].to_s
+    dest = File.join(base_dir, 'libs', platform)
+    marker = File.join(dest, '.version')
+
+    # Already up to date: leave the files untouched so CocoaPods keeps its cache.
+    next if File.exist?(marker) && File.read(marker).strip == version
+
+    Pod::UI.puts "react-native-skia: installing #{platform} Skia frameworks (#{version})"
+    FileUtils.rm_rf(dest)
+    FileUtils.mkdir_p(dest)
+    Dir.glob(File.join(src, '*.xcframework')).each { |xcf| FileUtils.cp_r(xcf, dest) }
+    File.write(marker, version)
+  end
+end
+
+# Graphite downloads its binaries directly into libs/; only the default build needs
+# the npm packages copied in.
+install_apple_skia_libs.call(__dir__) unless use_graphite
 
 # Set preprocessor definitions based on GRAPHITE flag
 preprocessor_defs = use_graphite ?
@@ -23,85 +68,32 @@ framework_names = ['libskia', 'libsvg', 'libskshaper', 'libskparagraph',
                    'libskunicode_core', 'libskunicode_libgrapheme',
                    'libskottie', 'libsksg']
 
+# Add Dawn library for Graphite builds (contains dawn::native symbols)
+framework_names += ['libdawn_combined'] if use_graphite
+
+# Verify that the prebuilt binaries are available (copied in above, or downloaded by
+# install-skia-graphite for Graphite builds).
+unless Dir.exist?(File.join(__dir__, 'libs', 'ios')) && Dir.exist?(File.join(__dir__, 'libs', 'macos'))
+  Pod::UI.warn "#{'-' * 72}"
+  Pod::UI.warn "react-native-skia: Skia prebuilt binaries not found in libs/!"
+  Pod::UI.warn ""
+  Pod::UI.warn "Make sure dependencies are installed (yarn install / npm install) so that"
+  Pod::UI.warn "the react-native-skia-apple-* packages are present, then run `pod install` again."
+  Pod::UI.warn "#{'-' * 72}"
+  raise "react-native-skia: Skia prebuilt binaries not found. Run `yarn install` then `pod install` to fix this."
+end
+
 # Build platform-specific framework paths (relative to pod's libs directory)
+# xcframeworks are copied into libs/ by install_apple_skia_libs above (default build)
+# or downloaded by install-skia-graphite (Graphite build).
 ios_frameworks = framework_names.map { |f| "libs/ios/#{f}.xcframework" }
 osx_frameworks = framework_names.map { |f| "libs/macos/#{f}.xcframework" }
-# tvOS frameworks - only declare if libs/tvos/ already exists (otherwise leave empty)
+# tvOS frameworks - check if libs/tvos/ exists (only populated for the default build)
 tvos_frameworks = if use_graphite || !Dir.exist?(File.join(__dir__, 'libs', 'tvos'))
   []
 else
   framework_names.map { |f| "libs/tvos/#{f}.xcframework" }
 end
-
-# Prepare command resolves paths at RUNTIME (not evaluation time) to ensure deterministic checksums
-# This script:
-# 1. Checks if xcframeworks are already installed (e.g., from Graphite script)
-# 2. If not, resolves npm package paths and copies xcframeworks
-# The script content is deterministic - no machine-specific paths embedded in the podspec
-prepare_command_script = <<-'SCRIPT'
-node -e "
-const path = require('path');
-const fs = require('fs');
-const { execSync } = require('child_process');
-
-const iosLibs = 'libs/ios';
-const macosLibs = 'libs/macos';
-
-// Check if xcframeworks are already installed
-const hasIos = fs.existsSync(iosLibs) && fs.readdirSync(iosLibs).some(f => f.endsWith('.xcframework'));
-const hasMacos = fs.existsSync(macosLibs) && fs.readdirSync(macosLibs).some(f => f.endsWith('.xcframework'));
-
-if (hasIos && hasMacos) {
-  console.log('-- Using pre-installed xcframeworks from libs/');
-  process.exit(0);
-}
-
-// Determine package prefix based on SK_GRAPHITE env var
-const useGraphite = process.env.SK_GRAPHITE === '1' || (process.env.SK_GRAPHITE || '').toLowerCase() === 'true';
-const prefix = useGraphite ? 'react-native-skia-graphite' : 'react-native-skia';
-
-// Resolve package paths
-let iosPackage, macosPackage, tvosPackage;
-try {
-  iosPackage = path.dirname(require.resolve(prefix + '-apple-ios/package.json'));
-  macosPackage = path.dirname(require.resolve(prefix + '-apple-macos/package.json'));
-} catch (e) {
-  console.error('ERROR: Could not find ' + prefix + '-apple-ios or ' + prefix + '-apple-macos');
-  console.error('Make sure you have run yarn install or npm install');
-  process.exit(1);
-}
-
-// Verify xcframeworks exist in the packages
-const iosXcf = path.join(iosPackage, 'libs');
-if (!fs.existsSync(iosXcf) || !fs.readdirSync(iosXcf).some(f => f.endsWith('.xcframework'))) {
-  console.error('ERROR: Skia prebuilt binaries not found in ' + prefix + '-apple-ios!');
-  process.exit(1);
-}
-
-console.log('-- Skia iOS package: ' + iosPackage);
-console.log('-- Skia macOS package: ' + macosPackage);
-
-// Clean and copy
-execSync('rm -rf libs/ios libs/macos libs/tvos', { stdio: 'inherit' });
-execSync('mkdir -p libs/ios libs/macos', { stdio: 'inherit' });
-execSync('cp -R \"' + iosPackage + '/libs/\"*.xcframework libs/ios/', { stdio: 'inherit' });
-execSync('cp -R \"' + macosPackage + '/libs/\"*.xcframework libs/macos/', { stdio: 'inherit' });
-
-// Handle tvOS (non-Graphite only)
-if (!useGraphite) {
-  try {
-    tvosPackage = path.dirname(require.resolve(prefix + '-apple-tvos/package.json'));
-    console.log('-- Skia tvOS package: ' + tvosPackage);
-    execSync('mkdir -p libs/tvos', { stdio: 'inherit' });
-    execSync('cp -R \"' + tvosPackage + '/libs/\"*.xcframework libs/tvos/', { stdio: 'inherit' });
-  } catch (e) {
-    console.log('-- tvOS package not found, skipping');
-  }
-}
-
-console.log('-- Copied xcframeworks from npm packages');
-"
-SCRIPT
 
 Pod::Spec.new do |s|
   s.name         = "react-native-skia"
@@ -120,16 +112,12 @@ Pod::Spec.new do |s|
   s.platforms    = { :ios => "14.0", :tvos => "13.0", :osx => "11" }
   s.source       = { :git => "https://github.com/shopify/react-native-skia/react-native-skia.git", :tag => "#{s.version}" }
 
-  # Copy xcframeworks from npm packages into pod directory structure
-  # The script is deterministic - path resolution happens at runtime, not evaluation time
-  s.prepare_command = prepare_command_script
-
   s.requires_arc = true
   s.pod_target_xcconfig = {
     'GCC_PREPROCESSOR_DEFINITIONS' => preprocessor_defs,
     'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17',
     'DEFINES_MODULE' => 'YES',
-    "HEADER_SEARCH_PATHS" => '"$(PODS_TARGET_SRCROOT)/cpp/"/** "$(PODS_TARGET_SRCROOT)/cpp" "$(PODS_TARGET_SRCROOT)/cpp/jsi2" "$(PODS_TARGET_SRCROOT)/cpp/rnwgpu" "$(PODS_TARGET_SRCROOT)/cpp/rnwgpu/api" "$(PODS_TARGET_SRCROOT)/cpp/rnwgpu/api/descriptors" "$(PODS_TARGET_SRCROOT)/cpp/rnwgpu/async" "$(PODS_TARGET_SRCROOT)/cpp/dawn/include"'
+    "HEADER_SEARCH_PATHS" => '"$(PODS_TARGET_SRCROOT)/cpp"/** "$(PODS_TARGET_SRCROOT)/cpp" "$(PODS_TARGET_SRCROOT)/cpp/skia" "$(PODS_TARGET_SRCROOT)/cpp/dawn/include"'
   }
 
   s.frameworks = ['MetalKit', 'AVFoundation', 'AVKit', 'CoreMedia']
@@ -155,6 +143,7 @@ Pod::Spec.new do |s|
   graphite_exclusions = [
     'cpp/rnskia/RNDawnContext.h',
     'cpp/rnskia/RNDawnUtils.h',
+    'cpp/rnskia/RNMetalLayerColorSpace.h',
     'cpp/rnskia/RNDawnWindowContext.h',
     'cpp/rnskia/RNDawnWindowContext.cpp',
     'cpp/rnskia/RNImageProvider.h',

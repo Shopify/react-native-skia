@@ -1,5 +1,6 @@
 #include "GPUQueue.h"
 
+#include <cstring>
 #include <limits>
 #include <memory>
 #include <vector>
@@ -103,51 +104,55 @@ void GPUQueue::copyExternalImageToTexture(
     std::shared_ptr<GPUImageCopyExternalImage> source,
     std::shared_ptr<GPUImageCopyTextureTagged> destination,
     std::shared_ptr<GPUExtent3D> size) {
-  //  wgpu::TexelCopyTextureInfo dst{};
-  //  wgpu::TexelCopyBufferLayout layout{};
-  //  wgpu::Extent3D sz{};
-  //  Convertor conv;
-  //  uint32_t bytesPerPixel =
-  //      source->source->getSize() /
-  //      (source->source->getWidth() * source->source->getHeight());
-  //  auto dataLayout = std::make_shared<GPUImageDataLayout>(GPUImageDataLayout{
-  //      std::optional<double>{0.0},
-  //      std::optional<double>{
-  //          static_cast<double>(bytesPerPixel * source->source->getWidth())},
-  //      std::optional<double>{static_cast<double>(source->source->getHeight())}});
-  //  if (!conv(dst.aspect, destination->aspect) ||
-  //      !conv(dst.mipLevel, destination->mipLevel) ||
-  //      !conv(dst.origin, destination->origin) ||
-  //      !conv(dst.texture, destination->texture) ||
-  //      !conv(layout, dataLayout) || //
-  //      !conv(sz, size)) {
-  //    throw std::runtime_error("Invalid input for GPUQueue::writeTexture()");
-  //  }
-  //
-  //  if (source->flipY) {
-  //    // Calculate the row size and total size
-  //    uint32_t rowSize = bytesPerPixel * source->source->getWidth();
-  //    uint32_t totalSize = source->source->getSize();
-  //
-  //    // Create a new buffer for the flipped data
-  //    std::vector<uint8_t> flippedData(totalSize);
-  //
-  //    // Flip the data vertically
-  //    for (uint32_t row = 0; row < source->source->getHeight(); ++row) {
-  //      std::memcpy(flippedData.data() +
-  //                      (source->source->getHeight() - 1 - row) * rowSize,
-  //                  static_cast<const uint8_t *>(source->source->getData()) +
-  //                      row * rowSize,
-  //                  rowSize);
-  //    }
-  //    // Use the flipped data for writing to texture
-  //    _instance.WriteTexture(&dst, flippedData.data(), totalSize, &layout,
-  //    &sz);
-  //  } else {
-  //
-  //    _instance.WriteTexture(&dst, source->source->getData(),
-  //                           source->source->getSize(), &layout, &sz);
-  //  }
+  if (!source || source->source == nullptr) {
+    throw std::runtime_error("GPUQueue::copyExternalImageToTexture(): "
+                             "source.source (ImageBitmap) is required");
+  }
+  // ImageBitmap holds decoded, row-major RGBA8 pixels. We upload them with
+  // WriteTexture (a CPU staging copy) rather than a GPU blit; that is enough
+  // for the common "decode an image, sample it" path and avoids needing a
+  // source GPUTexture.
+  const auto &pixels = source->source->data();
+  auto width = static_cast<uint32_t>(source->source->getWidth());
+  auto height = static_cast<uint32_t>(source->source->getHeight());
+  if (pixels.empty() || width == 0 || height == 0) {
+    throw std::runtime_error("GPUQueue::copyExternalImageToTexture(): "
+                             "ImageBitmap has no pixels (was it closed?)");
+  }
+  auto bytesPerPixel = static_cast<uint32_t>(
+      pixels.size() / (static_cast<size_t>(width) * height));
+  uint32_t rowSize = bytesPerPixel * width;
+
+  wgpu::TexelCopyTextureInfo dst{};
+  wgpu::TexelCopyBufferLayout layout{};
+  wgpu::Extent3D sz{};
+  Convertor conv;
+  auto dataLayout = std::make_shared<GPUImageDataLayout>(
+      GPUImageDataLayout{std::optional<double>{0.0},
+                         std::optional<double>{static_cast<double>(rowSize)},
+                         std::optional<double>{static_cast<double>(height)}});
+  if (!conv(dst.aspect, destination->aspect) ||
+      !conv(dst.mipLevel, destination->mipLevel) ||
+      !conv(dst.origin, destination->origin) ||
+      !conv(dst.texture, destination->texture) || !conv(layout, dataLayout) ||
+      !conv(sz, size)) {
+    throw std::runtime_error(
+        "Invalid input for GPUQueue::copyExternalImageToTexture()");
+  }
+
+  if (source->flipY.value_or(false)) {
+    // Flip rows so the image is uploaded bottom-up (matches the WebGPU
+    // copyExternalImageToTexture flipY semantics).
+    std::vector<uint8_t> flippedData(pixels.size());
+    for (uint32_t row = 0; row < height; ++row) {
+      std::memcpy(flippedData.data() + (height - 1 - row) * rowSize,
+                  pixels.data() + row * rowSize, rowSize);
+    }
+    _instance.WriteTexture(&dst, flippedData.data(), flippedData.size(),
+                           &layout, &sz);
+  } else {
+    _instance.WriteTexture(&dst, pixels.data(), pixels.size(), &layout, &sz);
+  }
 }
 
 void GPUQueue::writeTexture(std::shared_ptr<GPUImageCopyTexture> destination,

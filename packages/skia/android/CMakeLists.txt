@@ -4,7 +4,8 @@ cmake_minimum_required(VERSION 3.4.1)
 set (CMAKE_VERBOSE_MAKEFILE ON)
 set (CMAKE_CXX_STANDARD 20)
 
-# SKIA_LIBS_PATH is passed from Gradle (resolved via Node.js package resolution)
+# SKIA_LIBS_PATH is passed from Gradle (pointing at the prebuilt Skia binaries,
+# read straight from the react-native-skia-android npm package, or libs/android for Graphite)
 # Append the ABI to get the full path
 set (SKIA_LIBS_PATH "${SKIA_LIBS_PATH}/${ANDROID_ABI}")
 
@@ -17,14 +18,12 @@ if(NOT EXISTS "${SKIA_LIBS_PATH}/libskia.a")
     message("│                                                                             │")
     message("│  Could not find libskia.a at: ${SKIA_LIBS_PATH}                             │")
     message("│                                                                             │")
-    message("│  Make sure react-native-skia-android is installed:                          │")
-    message("│    yarn add react-native-skia-android                                       │")
-    message("│                                                                             │")
-    message("│  See: https://shopify.github.io/react-native-skia/docs/getting-started/installation │")
+    message("│  Make sure dependencies are installed:                                       │")
+    message("│    yarn install   (or npm install)                                          │")
     message("│                                                                             │")
     message("└─────────────────────────────────────────────────────────────────────────────┘")
     message("")
-    message(FATAL_ERROR "Skia prebuilt binaries not found at ${SKIA_LIBS_PATH}")
+    message(FATAL_ERROR "Skia prebuilt binaries not found. Run `yarn install` to fix this.")
 endif()
 
 # Import libskia
@@ -121,28 +120,34 @@ if(SK_GRAPHITE)
         "${PROJECT_SOURCE_DIR}/../cpp/jsi2/Promise.cpp"
 
         # WebGPU async system
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/AsyncRunner.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/AsyncTaskHandle.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/JSIMicrotaskDispatcher.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/RuntimeContext.cpp"
 
         # WebGPU API
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPU.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUAdapter.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUBindGroup.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUBuffer.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUCanvasContext.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUCommandEncoder.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUComputePassEncoder.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUComputePipeline.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUDevice.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUDeviceLostInfo.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUExternalTexture.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUQuerySet.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUQueue.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderBundleEncoder.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderPassEncoder.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderPipeline.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUShaderModule.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUSharedFence.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUSharedTextureMemory.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUSupportedLimits.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUTexture.cpp"
+
+        # WebGPU Canvas JNI bindings
+        "${PROJECT_SOURCE_DIR}/cpp/jni/JniWebGPUView.cpp"
     )
 endif()
 
@@ -211,6 +216,11 @@ set_property(TARGET pathops PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libpat
 
 add_library(jsonreader STATIC IMPORTED)
 set_property(TARGET jsonreader PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libjsonreader.a")
+
+if(SK_GRAPHITE)
+    add_library(dawn_combined STATIC IMPORTED)
+    set_property(TARGET dawn_combined PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_combined.a")
+endif()
 
 find_library(
         LOG_LIB
@@ -384,6 +394,7 @@ endif()
 if(SK_GRAPHITE)
     target_link_libraries(${PACKAGE_NAME}
         ${COMMON_LIBS}
+        dawn_combined
     )
 else()
     target_link_libraries(${PACKAGE_NAME}

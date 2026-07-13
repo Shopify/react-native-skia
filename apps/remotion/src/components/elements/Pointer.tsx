@@ -15,8 +15,7 @@ interface PointerProps {
 }
 
 export const Pointer = ({ pos }: PointerProps) => {
-  const clip = Skia.Path.Make();
-  clip.addCircle(pos.x, pos.y, 100);
+  const clip = Skia.Path.Circle(pos.x, pos.y, 100);
   return (
     <Group>
       <BackdropFilter filter={<Blur blur={100} mode="clamp" />} clip={clip}>

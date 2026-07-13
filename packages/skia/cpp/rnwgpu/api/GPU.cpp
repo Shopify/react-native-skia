@@ -9,17 +9,15 @@
 
 #include "Convertors.h"
 #include "jsi2/JSIConverter.h"
-#include "rnwgpu/async/JSIMicrotaskDispatcher.h"
+#include "rnwgpu/async/RuntimeContext.h"
 
 namespace rnwgpu {
 
-GPU::GPU(jsi::Runtime &runtime, wgpu::Instance instance)
-    : NativeObject(CLASS_NAME), _instance(instance) {
-  auto dispatcher = std::make_shared<async::JSIMicrotaskDispatcher>(runtime);
-  _async = async::AsyncRunner::getOrCreate(runtime, _instance, dispatcher);
-}
+GPU::GPU(jsi::Runtime & /*runtime*/, wgpu::Instance instance)
+    : NativeObject(CLASS_NAME), _instance(instance) {}
 
 async::AsyncTaskHandle GPU::requestAdapter(
+    jsi::Runtime &runtime,
     std::optional<std::shared_ptr<GPURequestAdapterOptions>> options) {
   wgpu::RequestAdapterOptions aOptions;
   Convertor conv;
@@ -32,12 +30,17 @@ async::AsyncTaskHandle GPU::requestAdapter(
   constexpr auto kDefaultBackendType = wgpu::BackendType::Vulkan;
 #endif
   aOptions.backendType = kDefaultBackendType;
-  return _async->postTask(
-      [this, aOptions](const async::AsyncTaskHandle::ResolveFunction &resolve,
-                       const async::AsyncTaskHandle::RejectFunction &reject) {
+
+  // Per-runtime context: async ops requested on this runtime resolve on this
+  // runtime's own thread (via its ProcessEvents pump).
+  auto context = async::RuntimeContext::getOrCreate(runtime, _instance);
+  return context->postTask(
+      [this, aOptions,
+       context](const async::AsyncTaskHandle::ResolveFunction &resolve,
+                const async::AsyncTaskHandle::RejectFunction &reject) {
         _instance.RequestAdapter(
             &aOptions, wgpu::CallbackMode::AllowProcessEvents,
-            [asyncRunner = _async, resolve,
+            [context, resolve,
              reject](wgpu::RequestAdapterStatus status, wgpu::Adapter adapter,
                      wgpu::StringView message) {
               if (message.length) {
@@ -45,8 +48,8 @@ async::AsyncTaskHandle GPU::requestAdapter(
               }
 
               if (status == wgpu::RequestAdapterStatus::Success && adapter) {
-                auto adapterHost = std::make_shared<GPUAdapter>(
-                    std::move(adapter), asyncRunner);
+                auto adapterHost =
+                    std::make_shared<GPUAdapter>(std::move(adapter), context);
                 auto result =
                     std::variant<std::nullptr_t, std::shared_ptr<GPUAdapter>>(
                         adapterHost);
@@ -88,6 +91,18 @@ std::unordered_set<std::string> GPU::getWgslLanguageFeatures() {
     case wgpu::WGSLLanguageFeatureName::PointerCompositeAccess:
       name = "pointer_composite_access";
       break;
+    case wgpu::WGSLLanguageFeatureName::UniformBufferStandardLayout:
+      name = "uniform_buffer_standard_layout";
+      break;
+    case wgpu::WGSLLanguageFeatureName::SubgroupId:
+      name = "subgroup_id";
+      break;
+    case wgpu::WGSLLanguageFeatureName::FragmentDepth:
+      name = "fragment_depth";
+      break;
+    case wgpu::WGSLLanguageFeatureName::ImmediateAddressSpace:
+      name = "immediate_address_space";
+      break;
     case wgpu::WGSLLanguageFeatureName::ChromiumTestingUnimplemented:
       name = "chromium_testing_unimplemented";
       break;
@@ -111,6 +126,24 @@ std::unordered_set<std::string> GPU::getWgslLanguageFeatures() {
       break;
     case wgpu::WGSLLanguageFeatureName::ChromiumPrint:
       name = "chromium_print";
+      break;
+    case wgpu::WGSLLanguageFeatureName::TextureAndSamplerLet:
+      name = "texture_and_sampler_let";
+      break;
+    case wgpu::WGSLLanguageFeatureName::SubgroupUniformity:
+      name = "subgroup_uniformity";
+      break;
+    case wgpu::WGSLLanguageFeatureName::TextureFormatsTier1:
+      name = "texture_formats_tier1";
+      break;
+    case wgpu::WGSLLanguageFeatureName::BufferView:
+      name = "buffer_view";
+      break;
+    case wgpu::WGSLLanguageFeatureName::SwizzleAssignment:
+      name = "swizzle_assignment";
+      break;
+    case wgpu::WGSLLanguageFeatureName::LinearIndexing:
+      name = "linear_indexing";
       break;
     }
     result.insert(name);

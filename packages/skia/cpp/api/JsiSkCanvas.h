@@ -19,7 +19,11 @@
 #include "JsiSkTextBlob.h"
 #include "JsiSkVertices.h"
 
-#include "RNSkTypedArray.h"
+#include "utils/RNSkTypedArray.h"
+
+#if defined(SK_GRAPHITE)
+#include "rnskia/RNDawnContext.h"
+#endif
 
 #include <jsi/jsi.h>
 
@@ -352,7 +356,7 @@ public:
     auto path = JsiSkPath::fromValue(runtime, arguments[0]);
     auto paint = JsiSkPaint::fromValue(runtime, arguments[1]);
 
-    _canvas->drawPath(*path, *paint);
+    _canvas->drawPath(path->snapshot(), *paint);
 
     return jsi::Value::undefined();
   }
@@ -439,7 +443,7 @@ public:
     auto path = JsiSkPath::fromValue(runtime, arguments[0]);
     auto op = (SkClipOp)arguments[1].asNumber();
     auto doAntiAlias = arguments[2].getBool();
-    _canvas->clipPath(*path, op, doAntiAlias);
+    _canvas->clipPath(path->snapshot(), op, doAntiAlias);
     return jsi::Value::undefined();
   }
 
@@ -644,6 +648,29 @@ public:
             .getArrayBuffer(runtime);
     auto bfrPtr = reinterpret_cast<void *>(buffer.data(runtime));
 
+#if defined(SK_GRAPHITE)
+    // Graphite records draws lazily and offers no synchronous GPU readback. If
+    // this canvas belongs to a surface, snap & submit its recording, snapshot
+    // it to a CPU raster image and read from that (mirroring makeImageSnapshot).
+    // A canvas without an owning surface (e.g. a picture-recording canvas) has
+    // no texture to read back, so fall through to the raster canvas read below.
+    if (_surface) {
+      // Snapshot first: makeImageSnapshot records a copy task into the recorder
+      // that must be submitted before the texture can be read back (this is the
+      // same ordering used by JsiSkSurface::makeImageSnapshot and RNSkView).
+      auto snapshot = _surface->makeImageSnapshot();
+      if (auto *recorder = _surface->recorder()) {
+        DawnContext::getInstance().submitRecording(recorder->snap().get());
+      }
+      auto raster = DawnContext::getInstance().MakeRasterImage(snapshot);
+      if (!raster ||
+          !raster->readPixels(nullptr, *info, bfrPtr, bytesPerRow, srcX, srcY)) {
+        return jsi::Value::null();
+      }
+      return dest;
+    }
+#endif
+
     if (!_canvas->readPixels(*info, bfrPtr, bytesPerRow, srcX, srcY)) {
       return jsi::Value::null();
     }
@@ -708,7 +735,13 @@ public:
   void setCanvas(SkCanvas *canvas) { _canvas = canvas; }
   SkCanvas *getCanvas() { return _canvas; }
 
+  // Optionally associate the canvas with its owning surface. This lets
+  // readPixels fall back to a surface snapshot on Graphite, which has no
+  // synchronous canvas readback.
+  void setSurface(sk_sp<SkSurface> surface) { _surface = std::move(surface); }
+
 private:
   SkCanvas *_canvas;
+  sk_sp<SkSurface> _surface;
 };
 } // namespace RNSkia

@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "JsiSkHostObjects.h"
-#include "RNSkLog.h"
+#include "utils/RNSkLog.h"
 #include <jsi/jsi.h>
 
 #include "JsiSkPaint.h"
@@ -14,7 +14,7 @@
 #include "JsiSkRect.h"
 #include "JsiSkTypeface.h"
 
-#include "RNWindowContext.h"
+#include "rnskia/RNWindowContext.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"

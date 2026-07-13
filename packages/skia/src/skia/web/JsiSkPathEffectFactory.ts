@@ -65,12 +65,14 @@ export class JsiSkPathEffectFactory extends Host implements PathEffectFactory {
     phase: number,
     style: Path1DEffectStyle
   ) {
+    const p = JsiSkPath.pathFromValue(path);
     const pe = this.CanvasKit.PathEffect.MakePath1D(
-      JsiSkPath.fromValue(path),
+      p,
       advance,
       phase,
       getEnum(this.CanvasKit, "Path1DEffect", style)
     );
+    p.delete();
     if (pe === null) {
       return null;
     }
@@ -78,10 +80,12 @@ export class JsiSkPathEffectFactory extends Host implements PathEffectFactory {
   }
 
   MakePath2D(matrix: SkMatrix, path: SkPath) {
+    const p = JsiSkPath.pathFromValue(path);
     const pe = this.CanvasKit.PathEffect.MakePath2D(
       JsiSkMatrix.fromValue(matrix),
-      JsiSkPath.fromValue(path)
+      p
     );
+    p.delete();
     if (pe === null) {
       return null;
     }

@@ -5,7 +5,7 @@ import type {
 } from "react-native-reanimated";
 import { useCallback, useMemo } from "react";
 
-import type { SkPath, SkPoint } from "../../skia/types";
+import type { SkPath, SkPathBuilder, SkPoint } from "../../skia/types";
 import { interpolatePaths, interpolateVector } from "../../animation";
 import { Skia } from "../../skia";
 import { isOnMainThread } from "../../renderer/Offscreen";
@@ -20,15 +20,35 @@ export const notifyChange = <T>(value: SharedValue<T>) => {
   }
 };
 
-export const usePathValue = (cb: (path: SkPath) => void, init?: SkPath) => {
+/**
+ * Hook for creating animated paths using PathBuilder.
+ * The callback receives a mutable PathBuilder that can be used to construct the path.
+ * The resulting immutable SkPath is stored in a shared value.
+ *
+ * @param cb - Callback that receives the PathBuilder to construct the path
+ * @param init - Optional initial path to add to the builder
+ * @param transform - Optional transform function applied to the built path
+ */
+export const usePathValue = (
+  cb: (builder: SkPathBuilder) => void,
+  init?: SkPath,
+  transform?: (path: SkPath) => SkPath
+) => {
+  const builderInit = useMemo(() => Skia.PathBuilder.Make(), []);
   const pathInit = useMemo(() => Skia.Path.Make(), []);
+  const builder = Rea.useSharedValue(builderInit);
   const path = Rea.useSharedValue(pathInit);
   Rea.useDerivedValue(() => {
-    path.value.reset();
+    builder.value.reset();
     if (init !== undefined) {
-      path.value.addPath(init);
+      builder.value.addPath(init);
     }
-    cb(path.value);
+    cb(builder.value);
+    let result = builder.value.build();
+    if (transform !== undefined) {
+      result = transform(result);
+    }
+    path.value = result;
     notifyChange(path);
   });
   return path;

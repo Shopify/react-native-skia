@@ -2,14 +2,14 @@
 
 #include <memory>
 
-#include "RNSkPlatformContext.h"
+#include "rnskia/RNSkPlatformContext.h"
 
 #include "JsiSkHostObjects.h"
 
 #ifdef SK_GRAPHITE
-#include "RNDawnContext.h"
+#include "rnskia/RNDawnContext.h"
 #include "rnwgpu/api/GPUDevice.h"
-#include "rnwgpu/async/AsyncRunner.h"
+#include "rnwgpu/async/RuntimeContext.h"
 #endif
 
 #include "JsiNativeBuffer.h"
@@ -34,6 +34,8 @@
 #include "JsiSkParagraphBuilder.h"
 #include "JsiSkParagraphBuilderFactory.h"
 #include "JsiSkPath.h"
+#include "JsiSkPathBuilder.h"
+#include "JsiSkPathBuilderFactory.h"
 #include "JsiSkPathEffect.h"
 #include "JsiSkPathEffectFactory.h"
 #include "JsiSkPathFactory.h"
@@ -59,7 +61,7 @@
 #include "JsiSkiaContext.h"
 #include "JsiSkottieFactory.h"
 #include "JsiVideo.h"
-#include "recorder/JsiRecorder.h"
+#include "api/recorder/JsiRecorder.h"
 
 namespace RNSkia {
 
@@ -116,6 +118,8 @@ public:
                             std::make_shared<JsiSkPathEffectFactory>(context));
     installReadonlyProperty("Path",
                             std::make_shared<JsiSkPathFactory>(context));
+    installReadonlyProperty("PathBuilder",
+                            std::make_shared<JsiSkPathBuilderFactory>(context));
     installReadonlyProperty("ColorFilter",
                             std::make_shared<JsiSkColorFilterFactory>(context));
     installReadonlyProperty("MaskFilter",
@@ -160,12 +164,12 @@ public:
         "getDevice", JSI_HOST_FUNCTION_LAMBDA {
 #ifdef SK_GRAPHITE
           auto &dawnContext = DawnContext::getInstance();
-          auto asyncRunner = rnwgpu::async::AsyncRunner::get(runtime);
-          if (!asyncRunner) {
-            throw jsi::JSError(runtime, "AsyncRunner not initialized");
-          }
+          // Per-runtime context: async ops on this device resolve on the calling
+          // runtime's own thread (via its ProcessEvents pump).
+          auto context = rnwgpu::async::RuntimeContext::getOrCreate(
+              runtime, dawnContext.getWGPUInstance());
           auto device = std::make_shared<rnwgpu::GPUDevice>(
-              dawnContext.getWGPUDevice(), asyncRunner, "Skia Device");
+              dawnContext.getWGPUDevice(), context, "Skia Device");
           return rnwgpu::GPUDevice::create(runtime, device);
 #else
       throw jsi::JSError(runtime,

@@ -1,7 +1,7 @@
 import React from "react";
 
 import { checkImage } from "../../../__tests__/setup";
-import type { SkPath, SkRect, Vec3, Vec4 } from "../../../skia/types";
+import type { SkPathBuilder, SkRect, Vec3, Vec4 } from "../../../skia/types";
 import {
   mapPoint3d,
   processTransform3d,
@@ -70,31 +70,31 @@ export class Path3 {
     return this;
   }
 
-  project(output: SkPath, tr?: Matrix4) {
+  project(builder: SkPathBuilder, tr?: Matrix4) {
     const transform = tr ?? Matrix4();
     this.commands.forEach(([cmd, ...args]) => {
       switch (cmd) {
         case Path3Command.Move: {
           const to = mapPoint3d(transform, pickPoint(args));
-          output.moveTo(to[0], to[1]);
+          builder.moveTo(to[0], to[1]);
           break;
         }
         case Path3Command.Line: {
           const to = mapPoint3d(transform, pickPoint(args));
-          output.lineTo(to[0], to[1]);
+          builder.lineTo(to[0], to[1]);
           break;
         }
         case Path3Command.Quad: {
           const control = mapPoint3d(transform, pickPoint(args));
           const to = mapPoint3d(transform, pickPoint(args, 1));
-          output.quadTo(control[0], control[1], to[0], to[1]);
+          builder.quadTo(control[0], control[1], to[0], to[1]);
           break;
         }
         case Path3Command.Cubic: {
           const control1 = mapPoint3d(transform, pickPoint(args));
           const control2 = mapPoint3d(transform, pickPoint(args, 1));
           const to = mapPoint3d(transform, pickPoint(args, 2));
-          output.cubicTo(
+          builder.cubicTo(
             control1[0],
             control1[1],
             control2[0],
@@ -105,7 +105,7 @@ export class Path3 {
           break;
         }
         case Path3Command.Close: {
-          output.close();
+          builder.close();
           break;
         }
         default:
@@ -127,11 +127,11 @@ describe("Camera", () => {
       width: width - pad * 2,
       height: height - pad * 2,
     };
-    const path = Skia.Path.Make();
+    const builder = Skia.PathBuilder.Make();
     const path3 = new Path3();
     path3.addHRect(rct, 0);
     path3.project(
-      path,
+      builder,
       processTransform3d([
         { translate: [width / 2, height / 2] },
         { perspective: 300 },
@@ -139,6 +139,7 @@ describe("Camera", () => {
         { translate: [-width / 2, -height / 2] },
       ])
     );
+    const path = builder.build();
     const image = await surface.draw(
       <Group>
         <Rect rect={rct} color="magenta" />
@@ -157,10 +158,11 @@ describe("Camera", () => {
       width: width - pad * 2,
       height: height - pad * 2,
     };
-    const path = Skia.Path.Make();
+    const builder = Skia.PathBuilder.Make();
     const path3 = new Path3();
     path3.addHRect(rct, 0);
-    path3.project(path);
+    path3.project(builder);
+    const path = builder.build();
     const image = await surface.draw(
       <Group>
         <Rect rect={rct} color="magenta" />
@@ -179,7 +181,7 @@ describe("Camera", () => {
       width: width - pad * 2,
       height: height - pad * 2,
     };
-    const path = Skia.Path.Make();
+    const builder = Skia.PathBuilder.Make();
     const path3 = new Path3();
     path3.addHRect(rct, 0);
 
@@ -198,7 +200,8 @@ describe("Camera", () => {
     // Setup camera with surface-based viewport
     const area: Vec4 = [0, 0, width, height];
     const mat = setupCamera(area, Math.min(width, height) / 2, cam);
-    path3.project(path, mat);
+    path3.project(builder, mat);
+    const path = builder.build();
     const image = await surface.draw(
       <Group>
         <Path path={path} color="cyan" opacity={0.5} />
@@ -216,7 +219,7 @@ describe("Camera", () => {
       width: width - pad * 2,
       height: height - pad * 2,
     };
-    const path = Skia.Path.Make();
+    const builder = Skia.PathBuilder.Make();
     const path3 = new Path3();
     path3.addHRect(rct, 0);
 
@@ -235,7 +238,8 @@ describe("Camera", () => {
     // Setup camera with surface-based viewport
     const area: Vec4 = [0, 0, width, height];
     const mat = setupCamera(area, Math.min(width, height) / 2, cam);
-    path3.project(path, mat);
+    path3.project(builder, mat);
+    const path = builder.build();
     const image = await surface.draw(
       <Group>
         <Path path={path} color="cyan" opacity={0.5} />
@@ -253,7 +257,7 @@ describe("Camera", () => {
       width: width - pad * 2,
       height: height - pad * 2,
     };
-    const path = Skia.Path.Make();
+    const builder = Skia.PathBuilder.Make();
     const path3 = new Path3();
     path3.addHRect(rct, 0);
 
@@ -270,7 +274,8 @@ describe("Camera", () => {
 
     const area: Vec4 = [0, 0, width, height];
     const mat = setupCamera(area, Math.min(width, height) / 2, cam);
-    path3.project(path, mat);
+    path3.project(builder, mat);
+    const path = builder.build();
     const image = await surface.draw(
       <Group>
         <Path path={path} color="cyan" opacity={0.5} />
@@ -289,7 +294,7 @@ describe("Camera", () => {
       width: width - pad * 2,
       height: height - pad * 2,
     };
-    const path = Skia.Path.Make();
+    const builder = Skia.PathBuilder.Make();
     const path3 = new Path3();
     path3.addHRect(rct, 0);
 
@@ -306,7 +311,8 @@ describe("Camera", () => {
 
     const area: Vec4 = [0, 0, width, height];
     const mat = setupCamera(area, Math.min(width, height) / 2, cam);
-    path3.project(path, mat);
+    path3.project(builder, mat);
+    const path = builder.build();
     const image = await surface.draw(
       <Group>
         <Path path={path} color="cyan" opacity={0.5} />
@@ -325,7 +331,7 @@ describe("Camera", () => {
       width: width - pad * 2,
       height: height - pad * 2,
     };
-    const path = Skia.Path.Make();
+    const builder = Skia.PathBuilder.Make();
     const path3 = new Path3();
     path3.addHRect(rct, 0);
 
@@ -342,7 +348,8 @@ describe("Camera", () => {
 
     const area: Vec4 = [0, 0, width, height];
     const mat = setupCamera(area, Math.min(width, height) / 2, cam);
-    path3.project(path, mat);
+    path3.project(builder, mat);
+    const path = builder.build();
     const image = await surface.draw(
       <Group>
         <Path path={path} color="cyan" opacity={0.5} />
@@ -361,7 +368,7 @@ describe("Camera", () => {
       width: width - pad * 2,
       height: height - pad * 2,
     };
-    const path = Skia.Path.Make();
+    const builder = Skia.PathBuilder.Make();
     const path3 = new Path3();
     path3.addHRect(rct, 0);
 
@@ -378,7 +385,8 @@ describe("Camera", () => {
 
     const area: Vec4 = [0, 0, width, height];
     const mat = setupCamera(area, Math.min(width, height) / 2, cam);
-    path3.project(path, mat);
+    path3.project(builder, mat);
+    const path = builder.build();
     const image = await surface.draw(
       <Group>
         <Path path={path} color="cyan" opacity={0.5} />
@@ -396,7 +404,7 @@ describe("Camera", () => {
       width: width - pad * 2,
       height: height - pad * 2,
     };
-    const path = Skia.Path.Make();
+    const builder = Skia.PathBuilder.Make();
     const path3 = new Path3();
     path3.addHRect(rct, 0);
 
@@ -413,7 +421,8 @@ describe("Camera", () => {
 
     const area: Vec4 = [0, 0, width, height];
     const mat = setupCamera(area, Math.min(width, height) / 2, cam);
-    path3.project(path, mat);
+    path3.project(builder, mat);
+    const path = builder.build();
     const image = await surface.draw(
       <Group>
         <Path path={path} color="cyan" opacity={0.5} />
@@ -431,7 +440,7 @@ describe("Camera", () => {
       width: width - pad * 2,
       height: height - pad * 2,
     };
-    const path = Skia.Path.Make();
+    const builder = Skia.PathBuilder.Make();
     const path3 = new Path3();
     path3.addHRect(rct, 0);
 
@@ -460,10 +469,12 @@ describe("Camera", () => {
 
     const area: Vec4 = [0, 0, width, height];
     const mat = setupCamera(area, Math.min(width, height) / 2, cam);
-    path3.project(path, mat);
-    const path1 = Skia.Path.Make();
+    path3.project(builder, mat);
+    const path = builder.build();
+    const builder1 = Skia.PathBuilder.Make();
 
-    path3a.project(path1, mat);
+    path3a.project(builder1, mat);
+    const path1 = builder1.build();
     const image = await surface.draw(
       <Group>
         <Path path={path} color="cyan" opacity={0.5} />

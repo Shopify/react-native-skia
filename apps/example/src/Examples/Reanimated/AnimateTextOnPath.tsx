@@ -26,25 +26,27 @@ export const AnimateTextOnPath = () => {
   const font = useFont(Font, 12);
 
   const { path1, path2 } = useMemo(() => {
-    const p1 = Skia.Path.Make();
-    p1.moveTo(Padding, ExampleHeight / 2);
-    p1.quadTo(
-      (width - Padding * 2) / 2,
-      ExampleHeight,
-      width - Padding * 2,
-      ExampleHeight / 2
-    );
-    p1.simplify();
+    const p1Base = Skia.PathBuilder.Make()
+      .moveTo(Padding, ExampleHeight / 2)
+      .quadTo(
+        (width - Padding * 2) / 2,
+        ExampleHeight,
+        width - Padding * 2,
+        ExampleHeight / 2
+      )
+      .build();
+    const p1 = Skia.Path.Simplify(p1Base) ?? p1Base;
 
-    const p2 = Skia.Path.Make();
-    p2.moveTo(Padding, ExampleHeight / 2);
-    p2.quadTo(
-      (width - Padding * 2) / 2,
-      0,
-      width - Padding * 2,
-      ExampleHeight / 2
-    );
-    p2.simplify();
+    const p2Base = Skia.PathBuilder.Make()
+      .moveTo(Padding, ExampleHeight / 2)
+      .quadTo(
+        (width - Padding * 2) / 2,
+        0,
+        width - Padding * 2,
+        ExampleHeight / 2
+      )
+      .build();
+    const p2 = Skia.Path.Simplify(p2Base) ?? p2Base;
     return { path1: p1, path2: p2 };
   }, [width]);
 
@@ -58,7 +60,7 @@ export const AnimateTextOnPath = () => {
   }, [progress]);
 
   const path = useDerivedValue(() => {
-    return path1.interpolate(path2, progress.value)!;
+    return Skia.Path.Interpolate(path1, path2, progress.value)!;
   });
 
   return (

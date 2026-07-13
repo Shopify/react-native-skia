@@ -131,14 +131,14 @@ export const drawTextPath = (ctx: DrawingContext, props: TextPathProps) => {
     const widths = font.getGlyphWidths(ids);
     const rsx: SkRSXform[] = [];
     const meas = ctx.Skia.ContourMeasureIter(path, false, 1);
-    let cont = meas.next();
+    let cont = ctx.track(meas.next());
     let dist = initialOffset;
     for (let i = 0; i < text.length && cont; i++) {
       const width = widths[i];
       dist += width / 2;
       if (dist > cont.length()) {
         // jump to next contour
-        cont = meas.next();
+        cont = ctx.track(meas.next());
         if (!cont) {
           // We have come to the end of the path - terminate the string
           // right here.
@@ -214,19 +214,32 @@ export const drawPath = (ctx: DrawingContext, props: PathProps) => {
   const hasEndOffset = end !== 1;
   const hasStrokeOptions = stroke !== undefined;
   const hasFillType = !!fillType;
-  const willMutatePath =
-    hasStartOffset || hasEndOffset || hasStrokeOptions || hasFillType;
-  const pristinePath = processPath(ctx.Skia, pathProps.path);
-  const path = willMutatePath ? pristinePath.copy() : pristinePath;
+
+  let path = processPath(ctx.Skia, pathProps.path);
+
+  // Apply fill type using PathBuilder
   if (hasFillType) {
-    path.setFillType(FillType[enumKey(fillType)]);
+    const builder = ctx.Skia.PathBuilder.MakeFromPath(path);
+    builder.setFillType(FillType[enumKey(fillType)]);
+    path = ctx.track(builder.build());
   }
+
+  // Apply stroke using static Path.Stroke
   if (hasStrokeOptions) {
-    path.stroke(stroke);
+    const stroked = ctx.Skia.Path.Stroke(path, stroke);
+    if (stroked) {
+      path = stroked;
+    }
   }
+
+  // Apply trim using static Path.Trim
   if (hasStartOffset || hasEndOffset) {
-    path.trim(start, end, false);
+    const trimmed = ctx.Skia.Path.Trim(path, start, end, false);
+    if (trimmed) {
+      path = trimmed;
+    }
   }
+
   ctx.canvas.drawPath(path, ctx.paint);
 };
 

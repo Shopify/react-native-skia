@@ -9,8 +9,8 @@
 
 #include "jsi2/NativeObject.h"
 
-#include "rnwgpu/async/AsyncRunner.h"
 #include "rnwgpu/async/AsyncTaskHandle.h"
+#include "rnwgpu/async/RuntimeContext.h"
 
 #include "webgpu/webgpu_cpp.h"
 
@@ -32,7 +32,10 @@ public:
 public:
   std::string getBrand() { return CLASS_NAME; }
 
+  // requestAdapter needs the calling runtime so each runtime gets its own
+  // RuntimeContext (and ProcessEvents pump on its own thread).
   async::AsyncTaskHandle requestAdapter(
+      jsi::Runtime &runtime,
       std::optional<std::shared_ptr<GPURequestAdapterOptions>> options);
   wgpu::TextureFormat getPreferredCanvasFormat();
 
@@ -40,7 +43,8 @@ public:
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installGetter(runtime, prototype, "__brand", &GPU::getBrand);
-    installMethod(runtime, prototype, "requestAdapter", &GPU::requestAdapter);
+    installMethodWithRuntime(runtime, prototype, "requestAdapter",
+                             &GPU::requestAdapter);
     installMethod(runtime, prototype, "getPreferredCanvasFormat",
                   &GPU::getPreferredCanvasFormat);
     installGetter(runtime, prototype, "wgslLanguageFeatures",
@@ -51,7 +55,6 @@ public:
 
 private:
   wgpu::Instance _instance;
-  std::shared_ptr<async::AsyncRunner> _async;
 };
 
 } // namespace rnwgpu

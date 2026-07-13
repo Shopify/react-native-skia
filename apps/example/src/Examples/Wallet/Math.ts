@@ -192,8 +192,8 @@ export const curveLines = (
   strategy: "complex" | "bezier" | "simple"
 ) => {
   "worklet";
-  const path = Skia.Path.Make();
-  path.moveTo(points[0].x, points[0].y);
+  const builder = Skia.PathBuilder.Make();
+  builder.moveTo(points[0].x, points[0].y);
   // build the d attributes by looping over the points
   for (let i = 0; i < points.length; i++) {
     if (i === 0) {
@@ -210,7 +210,7 @@ export const curveLines = (
           x: (cps.x + cpe.x) / 2,
           y: (cps.y + cpe.y) / 2,
         };
-        path.quadTo(cp.x, cp.y, point.x, point.y);
+        builder.quadTo(cp.x, cp.y, point.x, point.y);
         break;
       case "bezier":
         const p0 = points[i - 2] || prev;
@@ -221,9 +221,9 @@ export const curveLines = (
         const cp2y = (p0.y + 2 * p1.y) / 3;
         const cp3x = (p0.x + 4 * p1.x + point.x) / 6;
         const cp3y = (p0.y + 4 * p1.y + point.y) / 6;
-        path.cubicTo(cp1x, cp1y, cp2x, cp2y, cp3x, cp3y);
+        builder.cubicTo(cp1x, cp1y, cp2x, cp2y, cp3x, cp3y);
         if (i === points.length - 1) {
-          path.cubicTo(
+          builder.cubicTo(
             points[points.length - 1].x,
             points[points.length - 1].y,
             points[points.length - 1].x,
@@ -234,11 +234,11 @@ export const curveLines = (
         }
         break;
       case "complex":
-        path.cubicTo(cps.x, cps.y, cpe.x, cpe.y, point.x, point.y);
+        builder.cubicTo(cps.x, cps.y, cpe.x, cpe.y, point.x, point.y);
         break;
       default:
         exhaustiveCheck(strategy);
     }
   }
-  return path;
+  return builder.build();
 };
