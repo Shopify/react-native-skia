@@ -36,7 +36,6 @@ import {
   Pictures,
   WebGPU,
   HighBitDepth,
-  WebLayout,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
@@ -78,7 +77,6 @@ const linking: LinkingOptions<StackParamList> = {
       Pictures: "pictures",
       WebGPU: "webgpu",
       HighBitDepth: "high-bit-depth",
-      WebLayout: "web-layout",
     },
   },
   prefixes: ["rnskia://"],
@@ -249,13 +247,6 @@ const App = () => {
               }}
             />
             <Stack.Screen name="HighBitDepth" component={HighBitDepth} />
-            <Stack.Screen
-              name="WebLayout"
-              component={WebLayout}
-              options={{
-                title: "🕸️ Web Layout",
-              }}
-            />
           </Stack.Navigator>
         </NavigationContainer>
       </GestureHandlerRootView>

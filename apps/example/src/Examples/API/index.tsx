@@ -40,6 +40,8 @@ import { FirstFrame, FirstFrameEmpty } from "./FirstFrame";
 import { ZIndexExample } from "./ZIndex";
 import { PictureBug } from "./PictureBug";
 import { AtlasExample } from "./AtlasExample";
+import { Web } from "./Web";
+import { WebLayout } from "./WebLayout";
 import { WebGLContexts } from "./WebGLContexts";
 
 const Stack = createNativeStackNavigator<Routes>();
@@ -315,10 +317,24 @@ export const API = () => {
         }}
       />
       <Stack.Screen
+        name="Web"
+        component={Web}
+        options={{
+          title: "🕸️ Web",
+        }}
+      />
+      <Stack.Screen
+        name="WebLayout"
+        component={WebLayout}
+        options={{
+          title: "🕸️ Web Layout",
+        }}
+      />
+      <Stack.Screen
         name="WebGLContexts"
         component={WebGLContexts}
         options={{
-          title: "🕸️ WebGL Contexts",
+          title: "🔥 WebGL Contexts",
         }}
       />
     </Stack.Navigator>

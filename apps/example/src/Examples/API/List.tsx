@@ -151,8 +151,8 @@ export const examples = [
     title: "🎯 Atlas",
   },
   {
-    screen: "WebGLContexts",
-    title: "🕸️ Web: WebGL Contexts",
+    screen: "Web",
+    title: "🕸️ Web",
   },
 ] as const;
 
