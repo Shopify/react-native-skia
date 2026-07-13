@@ -15,8 +15,8 @@ const examples = [
     title: "🔥 WebGL Contexts",
   },
   {
-    screen: "WebMemoryLeak",
-    title: "💧 WASM Memory Leak",
+    screen: "WebMemory",
+    title: "💧 WASM Memory",
   },
 ] as const;
 
