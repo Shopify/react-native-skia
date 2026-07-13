@@ -118,7 +118,7 @@ const App = () => {
             screenOptions={{
               headerLeft: HeaderLeft,
             }}
-            initialRouteName={CI ? "Tests" : "Home"}
+            initialRouteName={CI ? "Tests" : "API"}
           >
             <Stack.Screen
               name="Home"
@@ -144,7 +144,11 @@ const App = () => {
                 header: () => null,
               }}
             />
-            <Stack.Screen name="API" component={API} />
+            <Stack.Screen
+              name="API"
+              component={API}
+              initialParams={{ screen: "ParagraphPath" }}
+            />
             <Stack.Screen name="LiquidGlass" component={LiquidGlass} />
             <Stack.Screen name="Breathe" component={Breathe} />
             <Stack.Screen

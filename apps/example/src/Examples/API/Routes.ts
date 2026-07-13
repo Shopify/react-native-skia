@@ -27,6 +27,8 @@ export type Routes = {
   IconsExample: undefined;
   Paragraphs: undefined;
   Paragraphs2: undefined;
+  ParagraphPath: undefined;
+  GlyphBounds: undefined;
   Skottie: undefined;
   StressTest: undefined;
   StressTest2: undefined;
