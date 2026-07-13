@@ -45,5 +45,5 @@ export const apiScreenPaths: Record<keyof Routes, string> = {
   Web: "web",
   WebLayout: "web-layout",
   WebGLContexts: "webgl-contexts",
-  WebMemoryLeak: "web-memory-leak",
+  WebMemory: "web-memory",
 };

@@ -23,7 +23,7 @@ const skip: Partial<Record<Screen, string>> = {
   ColorFilter: "throws 'invalid color matrix' on web",
   Path: "PathFactory.Simplify is not implemented on web",
   PictureViewCrashTest: "intentional crash reproduction",
-  WebMemoryLeak: "intentionally exhausts WebGL contexts",
+  WebMemory: "intentionally exhausts WebGL contexts",
 };
 
 // Screens that render no canvas by design; they must still load cleanly.
