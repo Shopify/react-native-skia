@@ -59,7 +59,11 @@ export interface ParagraphVisitorInfo {
   advance: SkSize;
   /** The glyph ids of the run. */
   glyphs: number[];
-  /** The position of each glyph. */
+  /**
+   * The position of each glyph, relative to the run `origin`. Add `origin`
+   * to obtain paragraph coordinates: for a run shaped through font fallback,
+   * the run placement is carried by `origin`, not by the positions.
+   */
   positions: SkPoint[];
   /**
    * The tight ink bounds of each glyph, relative to the glyph's origin.

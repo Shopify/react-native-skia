@@ -151,8 +151,37 @@ public:
         static_cast<size_t>(lineNumber) >= paragraph->lineNumber()) {
       return jsi::Value::null();
     }
-    SkPath path;
-    paragraph->getPath(lineNumber, &path);
+    // Paragraph::getPath resets its path builder after every visual run, so
+    // for lines shaped as multiple runs (e.g. through font fallback) it only
+    // returns the glyphs of the last run. Build the path from the per-glyph
+    // data exposed by extendedVisit instead.
+    SkPathBuilder builder;
+    paragraph->extendedVisit(
+        [lineNumber, &builder](
+            int visitedLine, const para::Paragraph::ExtendedVisitorInfo *info) {
+          if (visitedLine != lineNumber || info == nullptr) {
+            return;
+          }
+          struct Rec {
+            SkPathBuilder *builder;
+            SkPoint origin;
+            const SkPoint *pos;
+          } rec = {&builder, info->origin, info->positions};
+          info->font.getPaths(
+              {info->glyphs, static_cast<size_t>(info->count)},
+              [](const SkPath *src, const SkMatrix &mx, void *ctx) {
+                auto *rec = static_cast<Rec *>(ctx);
+                if (src != nullptr) {
+                  SkMatrix total = mx;
+                  total.postTranslate(rec->origin.fX + rec->pos->fX,
+                                      rec->origin.fY + rec->pos->fY);
+                  rec->builder->addPath(*src, total);
+                }
+                rec->pos += 1;
+              },
+              &rec);
+        });
+    SkPath path = builder.detach();
     auto hostObjectInstance =
         std::make_shared<JsiSkPath>(getContext(), std::move(path));
     return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(

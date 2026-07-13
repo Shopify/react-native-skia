@@ -290,8 +290,12 @@ describe("Paragraph glyph-level APIs", () => {
         const maxLatinInk = Math.max(...latin.bounds.map((b) => b.height));
         expect(maxLatinInk).toBeGreaterThan(0);
         expect(maxLatinInk).toBeLessThan(24);
-        // The CJK run starts after the latin run.
-        expect(cjk.positions[0].x).toBeGreaterThan(latin.positions[0].x);
+        // The CJK run starts after the latin run. Glyph positions are
+        // relative to the run origin, so the run placement is carried by
+        // origin.x (positions[0].x is 0 for a run shaped through fallback).
+        expect(cjk.originX + cjk.positions[0].x).toBeGreaterThan(
+          latin.originX + latin.positions[0].x
+        );
       }
     );
 

@@ -238,9 +238,17 @@ const MyParagraph = () => {
 
 ### Glyph-Tight Bounds
 
+:::info
+
+`getPath()` and `extendedVisit()` are not available on Web.
+
+:::
+
 `getHeight()`, `getLineMetrics()`, and `getRectsForRange()` are all based on font metrics: they reserve the full ascent and descent of the fonts on each line, regardless of the glyphs actually present. For instance, `"Hello"` and `"Typography"` report the same height even though only the latter has descenders.
 
-To measure the exact ink bounds of the rendered text (with font fallbacks already applied), convert a line into a path with `getPath(lineNumber)` and compute its tight bounds. This method is available on iOS and Android only. Note that color glyphs (e.g. emojis) cannot be converted to a path and are skipped.
+<img src={require("/static/img/paragraph/metrics-bounds.png").default} width="384" />
+
+To measure the exact ink bounds of the rendered text (with font fallbacks already applied), convert a line into a path with `getPath(lineNumber)` and compute its tight bounds. Note that color glyphs (e.g. emojis) cannot be converted to a path and are skipped.
 
 ```tsx twoslash
 import { Skia } from "@shopify/react-native-skia";
@@ -255,7 +263,7 @@ const height = paragraph.getHeight();
 const inkBounds = paragraph.getPath(0)!.computeTightBounds();
 ```
 
-For full access to the computed layout, `extendedVisit(visitor)` (iOS and Android only) invokes the visitor once for every run of glyphs with the resolved font (after fallback), glyph ids, positions and per-glyph tight ink bounds, and once with a `null` info to signal the end of each line.
+For full access to the computed layout, `extendedVisit(visitor)` invokes the visitor once for every run of glyphs with the resolved font (after fallback), glyph ids, positions and per-glyph tight ink bounds, and once with a `null` info to signal the end of each line.
 
 ```tsx twoslash
 import { Skia } from "@shopify/react-native-skia";
@@ -269,12 +277,20 @@ paragraph.extendedVisit((lineNumber, info) => {
     // End of the line
     return;
   }
+  // The index of the line this run belongs to
+  const line = lineNumber;
   // The font resolved for this run (e.g. a fallback font for CJK glyphs)
   const font = info.font;
-  // Per-glyph ids, positions and tight ink bounds
+  // Per-glyph ids, positions and tight ink bounds.
+  // Positions are relative to the run origin: add info.origin to get
+  // paragraph coordinates (fallback runs carry their placement in origin).
   const { glyphs, positions, bounds } = info;
 });
 ```
+
+Below, the tight ink bounds of every glyph are drawn on top of the paragraph, including the CJK glyphs resolved via font fallback.
+
+<img src={require("/static/img/paragraph/glyph-tight-bounds.png").default} width="384" />
 
 ## Fonts
 

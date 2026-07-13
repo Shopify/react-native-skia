@@ -130,8 +130,8 @@ export const WebMemory = () => {
       <Text style={styles.description}>
         196 animated dots allocate short-lived CanvasKit WASM objects on every
         frame. This used to leak ~4 MB/s until the page crashed; the renderer
-        now disposes them, so the malloc high-water mark should stay flat. If
-        it climbs steadily, a disposal regression has been introduced.
+        now disposes them, so the malloc high-water mark should stay flat. If it
+        climbs steadily, a disposal regression has been introduced.
       </Text>
       <Canvas style={styles.canvas}>
         {Array.from({ length: GRID * GRID }, (_, i) => (
