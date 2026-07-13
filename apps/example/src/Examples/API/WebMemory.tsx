@@ -27,15 +27,13 @@ const SIZE = 320;
 const GRID = 14; // 196 dots
 
 /**
- * One continuously animated dot. react-native-skia's web replay path leaks
- * a handful of CanvasKit WASM objects for it on EVERY frame — a paint copy
- * per draw command, a pool-paint assign, the gradient shader, and the blur
- * mask filter — none of which are ever disposed. ~196 dots leak roughly
- * 4 MB/s at 60 fps.
- *
- * The per-frame JS garbage is tiny (like a typical animated canvas), so the
- * JS GC — the only thing that could reclaim the WASM objects via embind's
- * FinalizationRegistry — barely runs, and the WASM heap grows unreclaimed.
+ * One continuously animated dot. Each frame allocates several short-lived
+ * CanvasKit WASM objects per dot — a paint copy per draw command, a
+ * pool-paint assign, the gradient shader, and the blur mask filter. These
+ * used to leak (~4 MB/s for 196 dots at 60 fps) because nothing disposed
+ * them and the JS GC can't see WASM heap pressure; the renderer now disposes
+ * them explicitly, so this screen doubles as a live regression check that
+ * the malloc high-water mark stays flat.
  */
 const Dot = ({
   index,
@@ -71,7 +69,7 @@ const probe = (size: number) => {
   return address;
 };
 
-export const WebMemoryLeak = () => {
+export const WebMemory = () => {
   const clock = useSharedValue(0);
   useEffect(() => {
     clock.value = withRepeat(
@@ -130,10 +128,10 @@ export const WebMemoryLeak = () => {
       <Text style={styles.stats}>{stats}</Text>
       {crash && <Text style={styles.crash}>{crash}</Text>}
       <Text style={styles.description}>
-        196 animated dots leak ~4 MB of CanvasKit WASM memory per second on web.
-        Watch the malloc high-water climb while the reserved heap grows; with
-        the stock CanvasKit build the heap can grow to the 2-4 GB browser
-        ceiling before Aborted() crashes the page (~30+ minutes).
+        196 animated dots allocate short-lived CanvasKit WASM objects on every
+        frame. This used to leak ~4 MB/s until the page crashed; the renderer
+        now disposes them, so the malloc high-water mark should stay flat. If
+        it climbs steadily, a disposal regression has been introduced.
       </Text>
       <Canvas style={styles.canvas}>
         {Array.from({ length: GRID * GRID }, (_, i) => (
