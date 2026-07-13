@@ -8,12 +8,19 @@ import type {
   SkPathEffect,
 } from "../../skia/types";
 
+import { createFrameScope } from "./FrameScope";
+
 export const createDrawingContext = (
   Skia: Skia,
   paintPool: SkPaint[],
   canvas: SkCanvas
 ) => {
   "worklet";
+
+  // Everything the renderer creates through frameSkia is frame-scoped and
+  // deleted by dispose() once the frame has been recorded. The paint pool is
+  // recording-scoped and deliberately allocated with the raw Skia instance.
+  const { Skia: frameSkia, track, dispose } = createFrameScope(Skia);
 
   // State (formerly class fields)
   const paints: SkPaint[] = [];
@@ -27,7 +34,11 @@ export const createDrawingContext = (
   let nextPaintIndex = 1;
 
   // Initialize first paint and opacity
-  paintPool[0] = Skia.Paint();
+  if (paintPool.length === 0) {
+    paintPool.push(Skia.Paint());
+  } else {
+    paintPool[0].reset();
+  }
   paints.push(paintPool[0]);
   opacities.push(1);
 
@@ -61,7 +72,7 @@ export const createDrawingContext = (
     } else {
       const cf = colorFilters.pop();
       if (cf) {
-        imageFilter = Skia.ImageFilter.MakeColorFilter(cf, null);
+        imageFilter = frameSkia.ImageFilter.MakeColorFilter(cf, null);
       }
     }
     canvas.saveLayer(undefined, null, imageFilter);
@@ -83,7 +94,7 @@ export const createDrawingContext = (
     if (colorFilters.length > 0) {
       getCurrentPaint().setColorFilter(
         colorFilters.reduceRight((inner, outer) =>
-          inner ? Skia.ColorFilter.MakeCompose(outer, inner) : outer
+          inner ? frameSkia.ColorFilter.MakeCompose(outer, inner) : outer
         )
       );
     }
@@ -95,7 +106,7 @@ export const createDrawingContext = (
     if (imageFilters.length > 0) {
       getCurrentPaint().setImageFilter(
         imageFilters.reduceRight((inner, outer) =>
-          inner ? Skia.ImageFilter.MakeCompose(outer, inner) : outer
+          inner ? frameSkia.ImageFilter.MakeCompose(outer, inner) : outer
         )
       );
     }
@@ -104,7 +115,7 @@ export const createDrawingContext = (
     if (pathEffects.length > 0) {
       getCurrentPaint().setPathEffect(
         pathEffects.reduceRight((inner, outer) =>
-          inner ? Skia.PathEffect.MakeCompose(outer, inner) : outer
+          inner ? frameSkia.PathEffect.MakeCompose(outer, inner) : outer
         )
       );
     }
@@ -119,8 +130,10 @@ export const createDrawingContext = (
   // Return an object containing the Skia reference, the canvas, and the methods
   return {
     // Public fields
-    Skia,
+    Skia: frameSkia,
     canvas,
+    track,
+    dispose,
     paints,
     colorFilters,
     shaders,

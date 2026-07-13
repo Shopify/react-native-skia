@@ -14,6 +14,10 @@ const examples = [
     screen: "WebGLContexts",
     title: "🔥 WebGL Contexts",
   },
+  {
+    screen: "WebMemory",
+    title: "💧 WASM Memory",
+  },
 ] as const;
 
 const styles = StyleSheet.create({

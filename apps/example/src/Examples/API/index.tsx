@@ -43,6 +43,7 @@ import { AtlasExample } from "./AtlasExample";
 import { Web } from "./Web";
 import { WebLayout } from "./WebLayout";
 import { WebGLContexts } from "./WebGLContexts";
+import { WebMemory } from "./WebMemory";
 
 const Stack = createNativeStackNavigator<Routes>();
 
@@ -335,6 +336,13 @@ export const API = () => {
         component={WebGLContexts}
         options={{
           title: "🔥 WebGL Contexts",
+        }}
+      />
+      <Stack.Screen
+        name="WebMemory"
+        component={WebMemory}
+        options={{
+          title: "💧 WASM Memory",
         }}
       />
     </Stack.Navigator>
