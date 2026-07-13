@@ -1,20 +1,26 @@
 import React, { useEffect, useMemo } from "react";
 import {
   Platform,
-  ScrollView,
   StyleSheet,
   Text,
   View,
   useWindowDimensions,
 } from "react-native";
-import type { SkRect } from "@shopify/react-native-skia";
+import type {
+  Glyph,
+  SkFont,
+  SkPoint,
+  SkRect,
+} from "@shopify/react-native-skia";
 import {
   Canvas,
+  Glyphs,
   Group,
-  Paragraph,
+  Path,
   RoundedRect,
   Skia,
   useFonts,
+  vec,
 } from "@shopify/react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
 import {
@@ -26,49 +32,101 @@ import {
 } from "react-native-reanimated";
 
 const PADDING = 32;
-// How many glyphs the highlight wave covers on each side of its center.
-const SPREAD = 4;
-const PALETTE = ["#61bea2", "#f5a623", "#5b8def", "#e4667e"];
+const PALETTE = ["#e4667e", "#f5a623", "#61bea2", "#5b8def"];
+// Timeline: center-out reveal, stroke hands over to the fill, short hold,
+// then every glyph drops off the canvas under gravity.
+const REVEAL_END = 0.45;
+const FILL_END = 0.6;
+const DROP_START = 0.72;
 
-interface GlyphHighlightProps {
+// Deterministic pseudo-random in [0, 1) so each glyph falls its own way.
+const shuffle = (index: number) => {
+  "worklet";
+  const x = Math.sin((index + 1) * 12.9898) * 43758.5453;
+  return x - Math.floor(x);
+};
+
+interface GlyphItem {
+  // Tight ink bounds of the glyph, in paragraph coordinates.
   rect: SkRect;
+  // Glyph id and baseline position for the Glyphs component.
+  glyph: Glyph;
+  // The resolved font of the run (the fallback font, if any).
+  font: SkFont;
+  center: SkPoint;
+}
+
+interface FallingGlyphProps {
+  item: GlyphItem;
   index: number;
   count: number;
+  dropHeight: number;
   progress: SharedValue<number>;
 }
 
-const GlyphHighlight = ({
-  rect,
+const FallingGlyph = ({
+  item,
   index,
   count,
+  dropHeight,
   progress,
-}: GlyphHighlightProps) => {
-  const opacity = useDerivedValue(() => {
-    // A highlight wave travels across the glyphs.
-    const center = progress.value * (count + 2 * SPREAD) - SPREAD;
-    const distance = Math.abs(index - center);
-    return 0.15 + 0.85 * Math.max(0, 1 - distance / SPREAD);
+}: FallingGlyphProps) => {
+  // The box pops in when the center-out path reveal reaches its glyph. The
+  // reveal overshoots slightly so the outermost boxes still reach full
+  // opacity by the end of the sweep.
+  const boxOpacity = useDerivedValue(() => {
+    const reveal = Math.min(1, progress.value / REVEAL_END) * 1.2;
+    const middle = (count - 1) / 2;
+    const distance = Math.abs(index - middle) / Math.max(1, middle);
+    return Math.min(1, Math.max(0, (reveal - distance) * 6));
+  });
+  const glyphOpacity = useDerivedValue(() =>
+    Math.min(
+      1,
+      Math.max(0, (progress.value - REVEAL_END) / (FILL_END - REVEAL_END))
+    )
+  );
+  const transform = useDerivedValue(() => {
+    const drop = Math.max(0, (progress.value - DROP_START) / (1 - DROP_START));
+    const rnd = shuffle(index);
+    // Staggered release, then a free fall with a little drift and spin.
+    const t = Math.max(0, drop - rnd * 0.3) / 0.7;
+    return [
+      { translateX: (rnd - 0.5) * 120 * t },
+      { translateY: dropHeight * 1.3 * t * t },
+      { rotate: (rnd - 0.5) * 3 * t },
+    ];
   });
   return (
-    <RoundedRect
-      x={rect.x}
-      y={rect.y}
-      width={rect.width}
-      height={rect.height}
-      r={3}
-      color={PALETTE[index % PALETTE.length]}
-      opacity={opacity}
-    />
+    <Group origin={item.center} transform={transform}>
+      <RoundedRect
+        x={item.rect.x}
+        y={item.rect.y}
+        width={item.rect.width}
+        height={item.rect.height}
+        r={3}
+        color={PALETTE[index % PALETTE.length]}
+        opacity={boxOpacity}
+      />
+      <Glyphs
+        font={item.font}
+        x={0}
+        y={0}
+        glyphs={[item.glyph]}
+        color="#1e1e24"
+        opacity={glyphOpacity}
+      />
+    </Group>
   );
 };
 
 const GlyphBoundsDemo = () => {
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const progress = useSharedValue(0);
 
   useEffect(() => {
     progress.value = withRepeat(
-      withTiming(1, { duration: 6000, easing: Easing.linear }),
+      withTiming(1, { duration: 8000, easing: Easing.linear }),
       -1,
       false
     );
@@ -98,9 +156,10 @@ const GlyphBoundsDemo = () => {
     );
     const paragraph = builder.build();
     paragraph.layout(layoutWidth);
-    // extendedVisit() exposes the exact glyph layout that gets painted:
-    // the resolved font, glyph ids, positions and per-glyph tight ink bounds.
-    const glyphRects: SkRect[] = [];
+    // extendedVisit() exposes the exact glyph layout that gets painted: the
+    // resolved font, glyph ids, positions and per-glyph tight ink bounds.
+    // Keeping each glyph separate lets us animate them individually.
+    const items: GlyphItem[] = [];
     paragraph.extendedVisit((_lineNumber, info) => {
       if (info === null) {
         // end of line
@@ -114,44 +173,80 @@ const GlyphBoundsDemo = () => {
         }
         // positions are relative to the run origin, bounds to the glyph
         // origin: adding all three yields paragraph coordinates.
-        glyphRects.push(
-          Skia.XYWHRect(
-            info.origin.x + info.positions[i].x + bounds.x,
-            info.origin.y + info.positions[i].y + bounds.y,
-            bounds.width,
-            bounds.height
-          )
+        const x = info.origin.x + info.positions[i].x;
+        const y = info.origin.y + info.positions[i].y;
+        const rect = Skia.XYWHRect(
+          x + bounds.x,
+          y + bounds.y,
+          bounds.width,
+          bounds.height
         );
+        items.push({
+          rect,
+          glyph: { id: info.glyphs[i], pos: vec(x, y) },
+          font: info.font,
+          center: vec(rect.x + rect.width / 2, rect.y + rect.height / 2),
+        });
       }
     });
-    return { paragraph, glyphRects, height: paragraph.getHeight() };
+    // getPath() turns the same laid out glyphs into an SkPath used for the
+    // trim reveal below.
+    const path = Skia.Path.Make();
+    paragraph.getLineMetrics().forEach(({ lineNumber }) => {
+      const line = paragraph.getPath(lineNumber);
+      if (line) {
+        path.addPath(line);
+      }
+    });
+    return { path, items, height: paragraph.getHeight() };
   }, [customFontMgr, layoutWidth]);
+
+  // The stroke reveals the text from the center of the path outwards, going
+  // from trim (0.5, 0.5) to (0, 1), then hands over to the fill.
+  const start = useDerivedValue(
+    () => 0.5 * (1 - Math.min(1, progress.value / REVEAL_END))
+  );
+  const end = useDerivedValue(
+    () => 0.5 * (1 + Math.min(1, progress.value / REVEAL_END))
+  );
+  const strokeOpacity = useDerivedValue(
+    () =>
+      1 -
+      Math.min(
+        1,
+        Math.max(0, (progress.value - REVEAL_END) / (FILL_END - REVEAL_END))
+      )
+  );
 
   if (layout === null) {
     return null;
   }
   return (
-    <ScrollView>
-      <Canvas style={{ width, height: layout.height + PADDING * 2 }}>
-        <Group transform={[{ translateX: PADDING }, { translateY: PADDING }]}>
-          {layout.glyphRects.map((rect, index) => (
-            <GlyphHighlight
-              key={index}
-              rect={rect}
-              index={index}
-              count={layout.glyphRects.length}
-              progress={progress}
-            />
-          ))}
-          <Paragraph
-            paragraph={layout.paragraph}
-            x={0}
-            y={0}
-            width={layoutWidth}
+    <Canvas style={{ width, height }}>
+      <Group transform={[{ translateX: PADDING }, { translateY: PADDING }]}>
+        {layout.items.map((item, index) => (
+          <FallingGlyph
+            key={index}
+            item={item}
+            index={index}
+            count={layout.items.length}
+            dropHeight={height}
+            progress={progress}
           />
-        </Group>
-      </Canvas>
-    </ScrollView>
+        ))}
+        <Path
+          path={layout.path}
+          style="stroke"
+          strokeWidth={2}
+          strokeCap="round"
+          strokeJoin="round"
+          color="#1e1e24"
+          opacity={strokeOpacity}
+          start={start}
+          end={end}
+        />
+      </Group>
+    </Canvas>
   );
 };
 
