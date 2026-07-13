@@ -14,6 +14,7 @@ import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.HorizontalScrollView;
 import android.widget.ScrollView;
 import androidx.annotation.NonNull;
 import com.facebook.react.bridge.ReactContext;
@@ -82,13 +83,16 @@ public class ViewScreenshotService {
         canvas.save();
         applyTransformations(canvas, view);
 
-        // If the view is a ScrollView or similar, clip to its bounds
-        if (view instanceof ScrollView) {
-            ScrollView scrollView = (ScrollView) view;
-            int clipLeft = scrollView.getScrollX();
-            int clipTop = scrollView.getScrollY();
-            int clipRight = clipLeft + scrollView.getWidth();
-            int clipBottom = clipTop + scrollView.getHeight();
+        // If the view is a scroll container, clip to its viewport bounds.
+        // HorizontalScrollView does NOT extend ScrollView (both extend
+        // FrameLayout), so it must be checked explicitly — otherwise an
+        // oversized child (e.g. a wide Skia <Canvas> TextureView) bleeds past
+        // a horizontal ScrollView's viewport in the screenshot.
+        if (view instanceof ScrollView || view instanceof HorizontalScrollView) {
+            int clipLeft = view.getScrollX();
+            int clipTop = view.getScrollY();
+            int clipRight = clipLeft + view.getWidth();
+            int clipBottom = clipTop + view.getHeight();
 
             canvas.clipRect(clipLeft, clipTop, clipRight, clipBottom);
         }

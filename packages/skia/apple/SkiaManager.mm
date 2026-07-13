@@ -9,7 +9,7 @@
 
 // Forward-declared runtime accessor that is satisfied by RCTCxxBridge
 // (legacy/transitional) and RCTBridgeProxy (bridgeless). Avoids referencing
-// RCTCxxBridge directly, which is compiled out when RCT_DISABLE_LEGACY_ARCH
+// RCTCxxBridge directly, which is compiled out when RCT_REMOVE_LEGACY_ARCH
 // is set (React Native 0.82+).
 @interface RCTBridge (RNSkiaRuntime)
 - (void *)runtime;
