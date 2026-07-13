@@ -166,9 +166,8 @@ const play = (ctx: DrawingContext, _command: Command) => {
   } else if (isCommand(command, CommandType.RestoreCTM)) {
     ctx.canvas.restore();
   } else {
-    // TODO: is a copy needed here?
     // apply opacity to the current paint.
-    const paint = ctx.paint.copy();
+    const paint = ctx.track(ctx.paint.copy());
     paint.setAlphaf(paint.getAlphaf() * ctx.getOpacity());
     const paints = [paint, ...ctx.paintDeclarations];
     ctx.paintDeclarations = [];
