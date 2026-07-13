@@ -88,6 +88,9 @@ const createCanvasKitMock = () => {
 
 const fakePicture = { ref: { __picture: true }, dispose: jest.fn() };
 
+const display = { pixelDensity: 1 };
+const mediaQueryListeners: Array<() => void> = [];
+
 beforeAll(() => {
   Object.defineProperty(HTMLCanvasElement.prototype, "clientWidth", {
     configurable: true,
@@ -98,6 +101,23 @@ beforeAll(() => {
     get: () => canvasSize.height,
   });
   HTMLCanvasElement.prototype.getContext = jest.fn(() => null);
+  Object.defineProperty(window, "devicePixelRatio", {
+    configurable: true,
+    get: () => display.pixelDensity,
+  });
+  window.matchMedia = ((query: string) => ({
+    query,
+    addEventListener: (_type: string, cb: () => void) => {
+      mediaQueryListeners.push(cb);
+    },
+    removeEventListener: (_type: string, cb: () => void) => {
+      const index = mediaQueryListeners.indexOf(cb);
+      if (index !== -1) {
+        mediaQueryListeners.splice(index, 1);
+      }
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  })) as any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (global as any).ResizeObserver = ResizeObserverMock;
   global.requestAnimationFrame = (cb: FrameRequestCallback) => {
@@ -111,9 +131,11 @@ beforeAll(() => {
 
 beforeEach(() => {
   resizeObservers.length = 0;
+  mediaQueryListeners.length = 0;
   rafQueue.length = 0;
   canvasSize.width = 0;
   canvasSize.height = 0;
+  display.pixelDensity = 1;
 });
 
 const mountView = (nativeID: string, onLayout?: () => void) => {
@@ -194,6 +216,44 @@ describe("SkiaPictureView.web", () => {
       ]);
     });
     expect(CanvasKitMock.MakeOnScreenGLSurface).toHaveBeenCalledTimes(1);
+    expect(rawCanvas.drawPicture).toHaveBeenCalledWith(fakePicture.ref);
+
+    view.unmount();
+  });
+
+  it("recreates the surface at the new density when the pixel density changes", () => {
+    const { CanvasKitMock, rawCanvas } = createCanvasKitMock();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (global as any).CanvasKit = CanvasKitMock;
+    canvasSize.width = 360;
+    canvasSize.height = 520;
+
+    const view = mountView("4");
+    const api = global.SkiaViewApi as ISkiaViewApiWeb;
+    act(() => {
+      api.setJsiProperty(4, "picture", fakePicture as unknown as SkPicture);
+      flushFrames();
+    });
+    expect(CanvasKitMock.MakeOnScreenGLSurface).toHaveBeenLastCalledWith(
+      expect.anything(),
+      360,
+      520,
+      "srgb"
+    );
+
+    // Browser zoom / moving to another display: the density changes while
+    // the CSS size stays identical, so only the matchMedia watcher fires.
+    display.pixelDensity = 2;
+    rawCanvas.drawPicture.mockClear();
+    act(() => {
+      mediaQueryListeners.slice().forEach((cb) => cb());
+    });
+    expect(CanvasKitMock.MakeOnScreenGLSurface).toHaveBeenLastCalledWith(
+      expect.anything(),
+      720,
+      1040,
+      "srgb"
+    );
     expect(rawCanvas.drawPicture).toHaveBeenCalledWith(fakePicture.ref);
 
     view.unmount();

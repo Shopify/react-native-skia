@@ -40,6 +40,7 @@ import { FirstFrame, FirstFrameEmpty } from "./FirstFrame";
 import { ZIndexExample } from "./ZIndex";
 import { PictureBug } from "./PictureBug";
 import { AtlasExample } from "./AtlasExample";
+import { WebGLContexts } from "./WebGLContexts";
 
 const Stack = createNativeStackNavigator<Routes>();
 
@@ -311,6 +312,13 @@ export const API = () => {
         component={AtlasExample}
         options={{
           title: "🎯 Atlas",
+        }}
+      />
+      <Stack.Screen
+        name="WebGLContexts"
+        component={WebGLContexts}
+        options={{
+          title: "🕸️ WebGL Contexts",
         }}
       />
     </Stack.Navigator>

@@ -370,8 +370,10 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
   // - The renderer is created synchronously on mount (the canvas element is
   //   guaranteed to exist in useLayoutEffect; a zero size at that point is
   //   fine, the surface is created once the canvas is measurable).
-  // - Redraw requests set a flag that is only cleared by an actual draw, so a
-  //   picture dispatched before the canvas has a size is never lost.
+  // - Redraw requests coalesce into a single animation frame. A picture
+  //   dispatched before the canvas has a size stays in pictureRef (drawing
+  //   while unmeasured is a no-op) and is painted by the resize path below
+  //   once the canvas becomes measurable, so it is never lost.
   // - A ResizeObserver on the canvas itself recreates the surface and repaints
   //   synchronously (its callbacks run after layout, before paint), and is
   //   also the source of the user-facing onLayout event.
@@ -531,6 +533,10 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
     // A pixel-density change with no CSS size change (browser zoom, moving
     // the window to another display) doesn't trigger the ResizeObserver:
     // watch it via matchMedia, re-arming the query for each new density.
+    // This degrades gracefully where unsupported: without matchMedia or
+    // MediaQueryList.addEventListener (older Safari), or where the query
+    // never matches because the resolution feature is unknown (Safari < 16),
+    // density-only changes simply don't repaint — everything else still does.
     let media: MediaQueryList | null = null;
     const onPixelDensityChange = () => {
       resizeIfNeeded();
@@ -538,11 +544,16 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
     };
     const watchPixelDensity = () => {
       media?.removeEventListener("change", onPixelDensityChange);
-      media =
-        typeof window.matchMedia === "function"
-          ? window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`)
-          : null;
-      media?.addEventListener("change", onPixelDensityChange);
+      media = null;
+      if (typeof window.matchMedia === "function") {
+        const query = window.matchMedia(
+          `(resolution: ${window.devicePixelRatio}dppx)`
+        );
+        if (typeof query.addEventListener === "function") {
+          media = query;
+          media.addEventListener("change", onPixelDensityChange);
+        }
+      }
     };
     watchPixelDensity();
 

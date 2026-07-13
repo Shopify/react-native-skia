@@ -142,6 +142,11 @@ export const HomeScreen = () => {
         description="8-bit vs high bit depth canvas"
         route="HighBitDepth"
       />
+      <HomeScreenButton
+        title="🕸️ Web Layout"
+        description="Web renderer lifecycle (#3829)"
+        route="WebLayout"
+      />
     </ScrollView>
   );
 };

@@ -150,6 +150,10 @@ export const examples = [
     screen: "Atlas",
     title: "🎯 Atlas",
   },
+  {
+    screen: "WebGLContexts",
+    title: "🕸️ Web: WebGL Contexts",
+  },
 ] as const;
 
 const styles = StyleSheet.create({
