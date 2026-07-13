@@ -12,6 +12,8 @@ export const apiScreenPaths: Record<keyof Routes, string> = {
   ImageLoading: "image-loading",
   Paragraphs: "paragraphs",
   Paragraphs2: "paragraphs2",
+  ParagraphPath: "paragraph-path",
+  GlyphBounds: "glyph-bounds",
   Clipping: "clipping",
   Touch: "touch",
   Snapshot: "snapshot",

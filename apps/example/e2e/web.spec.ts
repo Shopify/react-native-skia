@@ -27,7 +27,15 @@ const skip: Partial<Record<Screen, string>> = {
 };
 
 // Screens that render no canvas by design; they must still load cleanly.
-const noCanvas: Screen[] = ["List", "Web", "FirstFrameEmpty"];
+// ParagraphPath and GlyphBounds show a fallback message on web since
+// Paragraph.getPath() and Paragraph.extendedVisit() are native-only.
+const noCanvas: Screen[] = [
+  "List",
+  "Web",
+  "FirstFrameEmpty",
+  "ParagraphPath",
+  "GlyphBounds",
+];
 
 // Expected uncaught errors, e.g. from examples that demo error handling.
 const allowedErrors: Partial<Record<Screen, RegExp>> = {
