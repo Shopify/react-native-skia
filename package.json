@@ -24,6 +24,7 @@
     "lint": "turbo run lint",
     "tsc": "turbo run tsc",
     "test": "turbo run test",
+    "test:web": "playwright test --config apps/example/playwright.config.ts",
     "build:android": "turbo run build:android",
     "build:ios": "turbo run build:ios",
     "build:macos": "turbo run build:macos",
