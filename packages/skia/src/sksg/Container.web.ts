@@ -40,9 +40,21 @@ class ReanimatedContainer extends Container {
     super(Skia);
   }
 
+  unmount() {
+    super.unmount();
+    if (this.mapperId !== null) {
+      // The mapper closure retains the recording and keeps updating the
+      // picture of an unmounted view — stop it or it leaks for the
+      // lifetime of the app.
+      Rea.stopMapper(this.mapperId);
+      this.mapperId = null;
+    }
+  }
+
   redraw() {
     if (this.mapperId !== null) {
       Rea.stopMapper(this.mapperId);
+      this.mapperId = null;
     }
     if (this.unmounted) {
       return;
