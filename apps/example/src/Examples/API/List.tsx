@@ -35,6 +35,14 @@ export const examples = [
     title: "📚 Text & Paragraphs 2",
   },
   {
+    screen: "ParagraphPath",
+    title: "✍️ Paragraph to Path",
+  },
+  {
+    screen: "GlyphBounds",
+    title: "🔠 Glyph Bounds",
+  },
+  {
     screen: "Clipping",
     title: "✂️ & 🎭 Clipping & Masking",
   },

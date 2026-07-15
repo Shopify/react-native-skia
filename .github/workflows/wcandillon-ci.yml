@@ -67,6 +67,45 @@ jobs:
       - name: Test
         run: yarn test
 
+  test-web:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' }}
+    runs-on: [self-hosted, macOS]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Playwright Chromium
+        run: yarn playwright install chromium
+
+      - name: Free Metro port
+        run: lsof -ti :8081 | xargs kill -9 || true
+
+      - name: Run web example tests
+        run: yarn test:web
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.0
+        with:
+          name: web-example-screenshots
+          path: apps/example/e2e/screenshots/
+          if-no-files-found: ignore
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.0
+        with:
+          name: web-example-test-results
+          path: apps/example/test-results/
+          if-no-files-found: ignore
+
   build-library:
     if: ${{ github.repository == 'wcandillon/react-native-skia' }}
     runs-on: ubuntu-latest

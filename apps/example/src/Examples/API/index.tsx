@@ -30,6 +30,8 @@ import { FontMgr } from "./FontMgr";
 import { AnimatedImages } from "./AnimatedImages";
 import { Paragraphs } from "./Paragraphs";
 import { Paragraphs2 } from "./Paragraphs2";
+import { ParagraphPath } from "./ParagraphPath";
+import { GlyphBounds } from "./GlyphBounds";
 import { Skottie } from "./Skottie";
 import { StressTest } from "./StressTest";
 import { StressTest2 } from "./StressTest2";
@@ -105,6 +107,20 @@ export const API = () => {
         component={Paragraphs2}
         options={{
           title: "📚 Text & Paragraphs 2",
+        }}
+      />
+      <Stack.Screen
+        name="ParagraphPath"
+        component={ParagraphPath}
+        options={{
+          title: "✍️ Paragraph to Path",
+        }}
+      />
+      <Stack.Screen
+        name="GlyphBounds"
+        component={GlyphBounds}
+        options={{
+          title: "🔠 Glyph Bounds",
         }}
       />
       <Stack.Screen
