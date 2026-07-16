@@ -42,6 +42,11 @@ private:
     _glConfig = _glDisplay->chooseConfig();
     _glContext = _glDisplay->makeContext(_glConfig, nullptr);
     _glSurface = _glDisplay->makePixelBufferSurface(_glConfig, 1, 1);
+    if (_glContext == nullptr || _glSurface == nullptr) {
+      RNSkLogger::logToConsole(
+          "Couldn't create the shared OpenGL context or surface");
+      return;
+    }
     _glContext->makeCurrent(_glSurface.get());
   }
 };
@@ -60,6 +65,10 @@ public:
 
   sk_sp<SkSurface> MakeOffscreen(int width, int height,
                                  bool useP3ColorSpace = false) {
+    if (_directContext == nullptr) {
+      return nullptr;
+    }
+
     auto colorType = kRGBA_8888_SkColorType;
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
@@ -110,6 +119,9 @@ public:
   sk_sp<SkImage> MakeImageFromBuffer(void *buffer,
                                      bool requireKnownFormat = false) {
 #if __ANDROID_API__ >= 26
+    if (_directContext == nullptr) {
+      return nullptr;
+    }
     const AHardwareBuffer *hardwareBuffer =
         static_cast<AHardwareBuffer *>(buffer);
     DeleteImageProc deleteImageProc = nullptr;
@@ -181,6 +193,11 @@ public:
   // TODO: remove width, height
   std::unique_ptr<WindowContext> MakeWindow(ANativeWindow *window,
                                             bool highBitDepth = false) {
+    if (_directContext == nullptr) {
+      RNSkLogger::logToConsole(
+          "The OpenGL context is invalid, the surface will not be rendered");
+      return nullptr;
+    }
     auto display = OpenGLSharedContext::getInstance().getDisplay();
     if (highBitDepth) {
       // A 10-bit window surface would require the shared EGL context to be
@@ -196,7 +213,11 @@ public:
   }
 
   GrDirectContext *getDirectContext() { return _directContext.get(); }
-  void makeCurrent() { _glContext->makeCurrent(_glSurface.get()); }
+  void makeCurrent() {
+    if (_glContext != nullptr) {
+      _glContext->makeCurrent(_glSurface.get());
+    }
+  }
 
 private:
   std::unique_ptr<gl::Context> _glContext;
@@ -209,12 +230,17 @@ private:
     auto glConfig = OpenGLSharedContext::getInstance().getConfig();
     _glContext = display->makeContext(glConfig, sharedContext);
     _glSurface = display->makePixelBufferSurface(glConfig, 1, 1);
-    _glContext->makeCurrent(_glSurface.get());
+    if (_glContext == nullptr || _glSurface == nullptr ||
+        !_glContext->makeCurrent(_glSurface.get())) {
+      RNSkLogger::logToConsole(
+          "Couldn't create the OpenGL context, Skia rendering is disabled");
+      return;
+    }
     auto backendInterface = GrGLMakeNativeInterface();
     _directContext = GrDirectContexts::MakeGL(backendInterface);
 
     if (_directContext == nullptr) {
-      throw std::runtime_error("GrDirectContexts::MakeGL failed");
+      RNSkLogger::logToConsole("GrDirectContexts::MakeGL failed");
     }
   }
 };
