@@ -36,7 +36,7 @@ import { SkiaViewApi } from "@shopify/react-native-skia/src/views/api";
  */
 
 const NUM_VIEWS = 6;
-const SWAPS_PER_TICK = 10;
+const SWAPS_PER_TICK = 20;
 const SIZE = 96;
 
 // A shared GPU-backed image referenced by every picture (matches the
@@ -122,9 +122,13 @@ export const PictureRaceStressTest = () => {
           swapCount.current++;
         }
       }
-      setImmediate(tick);
+      // setTimeout(0) rather than setImmediate: RN drains nested immediates
+      // in the same event-loop pass, which would starve touches, navigation
+      // and React renders entirely. A timer yields once per pass while still
+      // swapping thousands of pictures per second.
+      timer = setTimeout(tick, 0);
     };
-    tick();
+    let timer: ReturnType<typeof setTimeout> = setTimeout(tick, 0);
 
     const display = setInterval(
       () => setDisplayedSwaps(swapCount.current),
@@ -133,6 +137,7 @@ export const PictureRaceStressTest = () => {
 
     return () => {
       alive = false;
+      clearTimeout(timer);
       clearInterval(display);
     };
   }, [running]);

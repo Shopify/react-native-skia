@@ -2,6 +2,7 @@
 
 #include <fbjni/fbjni.h>
 
+#include <atomic>
 #include <memory>
 
 #include "RNSkView.h"
@@ -36,9 +37,17 @@ public:
                           bool highBitDepth);
 
 private:
+  void updateCachedDimensions();
+
+  // _surfaceHolder is created/destroyed on the UI thread (surface callbacks)
+  // and must only be dereferenced there or on the render path;
+  // getWidth/getHeight are called from the JS thread and read the cached
+  // dimensions instead.
   std::unique_ptr<WindowContext> _surfaceHolder = nullptr;
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   jobject _jSurfaceTexture = nullptr;
   jmethodID _updateTexImageMethod = nullptr;
+  std::atomic<int> _width = 0;
+  std::atomic<int> _height = 0;
 };
 } // namespace RNSkia

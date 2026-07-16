@@ -1,5 +1,7 @@
 #pragma once
 
+#import <atomic>
+
 #import "RNSkPlatformContext.h"
 #import "RNSkView.h"
 
@@ -33,7 +35,12 @@ public:
 
 private:
   std::shared_ptr<RNSkia::RNSkPlatformContext> _context;
+  // _ctx is created/destroyed on the main thread (setSize via
+  // layoutSubviews) and must only be dereferenced there; getWidth/getHeight
+  // are called from the JS thread and read the cached dimensions instead.
   std::unique_ptr<RNSkia::WindowContext> _ctx = nullptr;
+  std::atomic<int> _width = -1;
+  std::atomic<int> _height = -1;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   CAMetalLayer *_layer;

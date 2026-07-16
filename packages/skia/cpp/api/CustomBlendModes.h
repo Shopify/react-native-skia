@@ -46,25 +46,15 @@ public:
   }
 
   sk_sp<SkBlender> getPlusDarkerBlender() {
-    if (!_plusDarkerBlender) {
-      auto [effect, err] =
-          SkRuntimeEffect::MakeForBlender(SkString(kPlusDarkerSkSL));
-      if (effect) {
-        _plusDarkerBlender = effect->makeBlender(nullptr);
-      }
-    }
-    return _plusDarkerBlender;
+    // Function-local static: initialization is thread-safe, and paints can
+    // be built concurrently from the JS thread and the Reanimated UI runtime.
+    static const sk_sp<SkBlender> blender = makeBlender(kPlusDarkerSkSL);
+    return blender;
   }
 
   sk_sp<SkBlender> getPlusLighterBlender() {
-    if (!_plusLighterBlender) {
-      auto [effect, err] =
-          SkRuntimeEffect::MakeForBlender(SkString(kPlusLighterSkSL));
-      if (effect) {
-        _plusLighterBlender = effect->makeBlender(nullptr);
-      }
-    }
-    return _plusLighterBlender;
+    static const sk_sp<SkBlender> blender = makeBlender(kPlusLighterSkSL);
+    return blender;
   }
 
 private:
@@ -73,8 +63,10 @@ private:
   CustomBlenders(const CustomBlenders &) = delete;
   CustomBlenders &operator=(const CustomBlenders &) = delete;
 
-  sk_sp<SkBlender> _plusDarkerBlender;
-  sk_sp<SkBlender> _plusLighterBlender;
+  static sk_sp<SkBlender> makeBlender(const char *sksl) {
+    auto [effect, err] = SkRuntimeEffect::MakeForBlender(SkString(sksl));
+    return effect ? effect->makeBlender(nullptr) : nullptr;
+  }
 };
 
 // Helper function to apply custom blend mode to a paint

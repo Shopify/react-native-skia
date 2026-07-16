@@ -31,18 +31,16 @@ RNSkOpenGLCanvasProvider::RNSkOpenGLCanvasProvider(
 
 RNSkOpenGLCanvasProvider::~RNSkOpenGLCanvasProvider() = default;
 
-int RNSkOpenGLCanvasProvider::getWidth() {
-  if (_surfaceHolder) {
-    return _surfaceHolder->getWidth();
-  }
-  return 0;
-}
+int RNSkOpenGLCanvasProvider::getWidth() { return _width; }
 
-int RNSkOpenGLCanvasProvider::getHeight() {
-  if (_surfaceHolder) {
-    return _surfaceHolder->getHeight();
-  }
-  return 0;
+int RNSkOpenGLCanvasProvider::getHeight() { return _height; }
+
+void RNSkOpenGLCanvasProvider::updateCachedDimensions() {
+  // getWidth/getHeight are called from the JS thread, which must not
+  // dereference _surfaceHolder (it is destroyed/replaced on the UI thread) —
+  // publish the dimensions through atomics instead.
+  _width = _surfaceHolder ? _surfaceHolder->getWidth() : 0;
+  _height = _surfaceHolder ? _surfaceHolder->getHeight() : 0;
 }
 
 bool RNSkOpenGLCanvasProvider::renderToCanvas(
@@ -115,6 +113,7 @@ void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurfaceTexture,
   _surfaceHolder =
       OpenGLContext::getInstance().MakeWindow(window, highBitDepth);
 #endif
+  updateCachedDimensions();
 
   // Post redraw request to ensure we paint in the next draw cycle.
   _requestRedraw();
@@ -123,6 +122,7 @@ void RNSkOpenGLCanvasProvider::surfaceDestroyed() {
   // destroy the renderer (a unique pointer so the dtor will be called
   // immediately.)
   _surfaceHolder = nullptr;
+  updateCachedDimensions();
   if (_jSurfaceTexture) {
     JNIEnv *env = facebook::jni::Environment::current();
     env->DeleteGlobalRef(_jSurfaceTexture);
@@ -144,6 +144,7 @@ void RNSkOpenGLCanvasProvider::surfaceSizeChanged(jobject jSurface, int width,
     surfaceAvailable(jSurface, width, height, opaque, highBitDepth);
   } else {
     _surfaceHolder->resize(width, height);
+    updateCachedDimensions();
   }
 
   // Redraw after size change
