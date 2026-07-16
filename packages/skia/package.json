@@ -140,6 +140,12 @@
     "react-native-skia-apple-tvos": "150.0.0",
     "react-reconciler": "0.31.0"
   },
+  "graphiteDependencies": {
+    "react-native-skia-graphite-android": "150.0.0",
+    "react-native-skia-graphite-apple-ios": "150.0.0",
+    "react-native-skia-graphite-apple-macos": "150.0.0",
+    "react-native-skia-graphite-headers": "150.0.0"
+  },
   "eslintIgnore": [
     "node_modules/",
     "lib/"

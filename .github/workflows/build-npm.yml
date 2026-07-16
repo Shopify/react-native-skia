@@ -27,6 +27,22 @@ jobs:
       - name: Build package and documentation
         run: yarn build
 
+      # Releases from the next branch additionally ship the Graphite prebuilt
+      # binaries so users can opt into the experimental Graphite backend. The
+      # extra packages are pinned in graphiteDependencies (package.json) and only
+      # promoted to dependencies at release time, so main and next stay identical.
+      - name: Add Graphite binary packages (next channel only)
+        if: github.ref_name == 'next'
+        working-directory: packages/skia
+        run: |
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            Object.assign(pkg.dependencies, pkg.graphiteDependencies);
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+          node -p "JSON.stringify(require('./package.json').dependencies, null, 2)"
+
       - name: Build NPM Package
         working-directory: packages/skia
         run: |
