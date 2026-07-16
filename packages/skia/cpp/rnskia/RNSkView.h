@@ -84,6 +84,9 @@ public:
    Returns a snapshot of the current surface/canvas
    */
   sk_sp<SkImage> makeSnapshot(SkRect *bounds) {
+    if (_surface == nullptr) {
+      return nullptr;
+    }
     sk_sp<SkImage> image;
     if (bounds != nullptr) {
       SkIRect b =
@@ -120,6 +123,9 @@ public:
    Render to a canvas
    */
   bool renderToCanvas(const std::function<void(SkCanvas *)> &cb) override {
+    if (_surface == nullptr) {
+      return false;
+    }
     cb(_surface->getCanvas());
     return true;
   };
