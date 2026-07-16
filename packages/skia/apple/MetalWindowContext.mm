@@ -16,18 +16,40 @@ MetalWindowContext::MetalWindowContext(GrDirectContext *directContext,
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   _layer = (CAMetalLayer *)layer;
 #pragma clang diagnostic pop
-  _layer.framebufferOnly = NO;
-  _layer.device = device;
-  _layer.opaque = false;
+  // Only write layer properties when the value actually changes: this
+  // constructor may run on every frame (e.g. via SkiaApi.Context()) and off
+  // the main thread, where redundant CALayer writes trigger the "Modifying
+  // properties of a view's layer off the main thread" diagnostic and its
+  // costly stack trace capture (see #3137).
+  if (_layer.framebufferOnly != NO) {
+    _layer.framebufferOnly = NO;
+  }
+  if (_layer.device != device) {
+    _layer.device = device;
+  }
+  if (_layer.opaque != false) {
+    _layer.opaque = false;
+  }
 #if !TARGET_OS_OSX
-  _layer.contentsScale = [UIScreen mainScreen].scale;
+  CGFloat contentsScale = [UIScreen mainScreen].scale;
 #else
-  _layer.contentsScale = [NSScreen mainScreen].backingScaleFactor;
+  CGFloat contentsScale = [NSScreen mainScreen].backingScaleFactor;
 #endif // !TARGET_OS_OSX
-  _layer.pixelFormat =
+  if (_layer.contentsScale != contentsScale) {
+    _layer.contentsScale = contentsScale;
+  }
+  MTLPixelFormat pixelFormat =
       _highBitDepth ? MTLPixelFormatRGBA16Float : MTLPixelFormatBGRA8Unorm;
-  _layer.contentsGravity = kCAGravityBottomLeft;
-  _layer.drawableSize = CGSizeMake(width, height);
+  if (_layer.pixelFormat != pixelFormat) {
+    _layer.pixelFormat = pixelFormat;
+  }
+  if (![_layer.contentsGravity isEqualToString:kCAGravityBottomLeft]) {
+    _layer.contentsGravity = kCAGravityBottomLeft;
+  }
+  CGSize drawableSize = CGSizeMake(width, height);
+  if (!CGSizeEqualToSize(_layer.drawableSize, drawableSize)) {
+    _layer.drawableSize = drawableSize;
+  }
   BOOL supportsWideColor = NO;
   if (useP3ColorSpace) {
 #if !TARGET_OS_OSX

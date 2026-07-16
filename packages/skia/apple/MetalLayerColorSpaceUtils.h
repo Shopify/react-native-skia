@@ -13,16 +13,18 @@ namespace RNSkia {
 // are identical to the 8-bit path, only with more precision.
 inline void setCAMetalLayerColorSpace(CAMetalLayer *layer, bool isFloatFormat,
                                       bool useP3ColorSpace) {
-  if (isFloatFormat) {
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(
-        useP3ColorSpace ? kCGColorSpaceExtendedDisplayP3
-                        : kCGColorSpaceExtendedSRGB);
-    layer.colorspace = colorSpace;
-    CGColorSpaceRelease(colorSpace);
-  } else if (useP3ColorSpace) {
-    CGColorSpaceRef colorSpace =
-        CGColorSpaceCreateWithName(kCGColorSpaceDisplayP3);
-    layer.colorspace = colorSpace;
+  if (isFloatFormat || useP3ColorSpace) {
+    CFStringRef name = isFloatFormat
+                           ? (useP3ColorSpace ? kCGColorSpaceExtendedDisplayP3
+                                              : kCGColorSpaceExtendedSRGB)
+                           : kCGColorSpaceDisplayP3;
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateWithName(name);
+    // Only write the property when it actually changes so that reconfiguring
+    // an already configured layer (possibly off the main thread) does not
+    // trigger redundant CALayer updates (see #3137).
+    if (layer.colorspace == nil || !CFEqual(layer.colorspace, colorSpace)) {
+      layer.colorspace = colorSpace;
+    }
     CGColorSpaceRelease(colorSpace);
   } else if (layer.colorspace != nil) {
     // Restore the default (no color matching) when reconfiguring a layer
