@@ -9,13 +9,14 @@ The Canvas component is the root of your Skia drawing.
 You can treat it as a regular React Native view and assign a view style.
 Behind the scenes, it is using its own React renderer.
 
-| Name | Type     |  Description    |
-|:-----|:---------|:-----------------|
-| style?   | `ViewStyle` | View style |
-| ref?   | `Ref<SkiaView>` | Reference to the `SkiaView` object |
-| onSize? | `SharedValue<Size>` | Reanimated value to which the canvas size will be assigned  (see [canvas size](#canvas-size)) |
-| highBitDepth? | `boolean` | Render into a surface with more than 8 bits per channel (see [high bit depth](#high-bit-depth)) |
-| androidWarmup? | `boolean` | Draw the first frame directly on the Android compositor. Use it for static icons or fully opaque drawings—animated or translucent canvases can misrender, so it remains opt-in. |
+| Name              | Type                | Description                                                                                                                                                                     |
+| :---------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| style?            | `ViewStyle`         | View style                                                                                                                                                                      |
+| ref?              | `Ref<SkiaView>`     | Reference to the `SkiaView` object                                                                                                                                              |
+| onSize?           | `SharedValue<Size>` | Reanimated value to which the canvas size will be assigned (see [canvas size](#canvas-size))                                                                                    |
+| onFramePresented? | `() => void`        | Called on the JavaScript thread after each successful on-screen render crosses the platform presentation boundary (see [frame presentation](#frame-presentation))               |
+| highBitDepth?     | `boolean`           | Render into a surface with more than 8 bits per channel (see [high bit depth](#high-bit-depth))                                                                                 |
+| androidWarmup?    | `boolean`           | Draw the first frame directly on the Android compositor. Use it for static icons or fully opaque drawings—animated or translucent canvases can misrender, so it remains opt-in. |
 
 ## Canvas size
 
@@ -85,6 +86,56 @@ const Demo = () => {
 };
 ```
 
+## Frame presentation
+
+`onFramePresented` runs once for every successfully rendered on-screen frame.
+Unlike React commit or Skia recording callbacks, it runs after the backend has
+reached its native presentation boundary. This makes it useful for removing a
+placeholder, taking measurements, or starting a capture without racing the
+frame that contains the pixels you are waiting for.
+
+```tsx twoslash
+import { useState } from "react";
+import { Canvas, Circle } from "@shopify/react-native-skia";
+
+const LoadingPlaceholder = () => null;
+
+const Demo = () => {
+  const [presented, setPresented] = useState(false);
+  return (
+    <>
+      <Canvas
+        style={{ width: 256, height: 256 }}
+        onFramePresented={() => setPresented(true)}
+      >
+        <Circle cx={128} cy={128} r={96} color="cyan" />
+      </Canvas>
+      {!presented && <LoadingPlaceholder />}
+    </>
+  );
+};
+```
+
+The exact native boundary depends on the renderer:
+
+- iOS and tvOS Metal call the callback only when Metal reports a nonzero
+  `presentedTime`, meaning that the drawable was displayed on screen.
+- Android OpenGL calls it after a successful `eglSwapBuffers`. At that point
+  the buffer has been handed to the system compositor; this does not prove
+  physical display scanout.
+- Graphite calls it after WebGPU `Surface::Present()` returns. This confirms
+  presentation submission, not physical display scanout.
+- macOS and Mac Catalyst call it after the Metal presentation command buffer
+  completes because `MTLDrawable.addPresentedHandler` is unavailable there.
+- Web does not currently emit this callback.
+
+The callback is delivered asynchronously on the JavaScript thread, so later JS
+work can delay it. Frames that fail before presentation (for example, because
+no drawable or surface is available) do not emit a callback. Updating or
+clearing the prop cancels native notifications that have not started; a
+callback already queued to the JavaScript thread can still run once. Callback
+exceptions are normal JavaScript exceptions and are not swallowed by the
+renderer.
 
 ## High bit depth
 

@@ -62,7 +62,7 @@ public:
     return surface;
   }
 
-  void present() override;
+  void present(std::function<void()> onPresented = nullptr) override;
 
   void resize(int width, int height) override {
     _width = width;

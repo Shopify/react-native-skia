@@ -51,10 +51,12 @@ sk_sp<SkSurface> OpenGLWindowContext::getSurface() {
   return _skSurface;
 }
 
-void OpenGLWindowContext::present() {
+void OpenGLWindowContext::present(std::function<void()> onPresented) {
   _glContext->makeCurrent(_glSurface.get());
   _directContext->flushAndSubmit();
-  _glSurface->present();
+  if (_glSurface->present() && onPresented) {
+    onPresented();
+  }
 }
 
 } // namespace RNSkia

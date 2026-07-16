@@ -84,7 +84,7 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
     }
     auto canvas = surface->getCanvas();
     cb(canvas);
-    _ctx->present();
+    _ctx->present(makeFramePresentedNotifier());
     return true;
   }
   return false;
