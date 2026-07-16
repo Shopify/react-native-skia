@@ -58,6 +58,27 @@ describe("Color Filters", () => {
     );
     checkImage(img, docPath("color-filters/color-blend.png"));
   });
+  it("should warn instead of crashing when the color is undefined (#2683)", async () => {
+    const { width } = surface;
+    const r = width / 2;
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const img = await surface.draw(
+        <Group>
+          <BlendColor color={undefined as unknown as string} mode="multiply" />
+          <Circle cx={r} cy={r} r={r} color="yellow" />
+          <Circle cx={2 * r} cy={r} r={r} color="magenta" />
+        </Group>
+      );
+      // Transparent is used as a fallback color so the renderer doesn't crash.
+      expect(img).toBeDefined();
+      expect(warn).toHaveBeenCalledWith(
+        "The color property of the BlendColor component is missing. Using transparent instead."
+      );
+    } finally {
+      warn.mockRestore();
+    }
+  });
   it("should build the reference result for should use composition", async () => {
     const { surface: ckSurface, Skia, canvas } = setupSkia(wWidth, wHeight);
     const paint = Skia.Paint();

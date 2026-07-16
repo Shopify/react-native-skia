@@ -60,7 +60,12 @@ export const pushColorFilter = (
   if (isColorFilter(command, NodeType.BlendColorFilter)) {
     const { props } = command;
     const { mode } = props;
-    const color = processColor(ctx.Skia, props.color);
+    if (props.color === undefined || props.color === null) {
+      console.warn(
+        "The color property of the BlendColor component is missing. Using transparent instead."
+      );
+    }
+    const color = processColor(ctx.Skia, props.color ?? "transparent");
     cf = ctx.Skia.ColorFilter.MakeBlend(color, BlendMode[enumKey(mode)]);
   } else if (isColorFilter(command, NodeType.MatrixColorFilter)) {
     const { matrix } = command.props;
