@@ -39,6 +39,30 @@ const data = Skia.Data.fromBase64("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJA
 const image = Skia.Image.MakeImageFromEncoded(data);
 ```
 
+### MakeImageFromEncodedScaled
+
+When an encoded image is only needed at a smaller size,
+`MakeImageFromEncodedScaled` can avoid a full-resolution native decode. The
+requested width and optional height form an aspect-preserving bounding box:
+
+```tsx twoslash
+import { Skia } from "@shopify/react-native-skia";
+
+declare const data: ReturnType<typeof Skia.Data.fromBytes>;
+const thumbnail = Skia.Image.MakeImageFromEncodedScaled(data, 400, 300);
+```
+
+Native codecs decode at the closest scale they support, so the returned image
+can be slightly larger or smaller than the requested box. A codec without
+scaled decoding support returns the source resolution. The method never
+upscales beyond that resolution and returns `null` for invalid data or
+non-positive dimensions.
+
+CanvasKit does not expose codec-level scaled decoding. On Web, the method
+preserves the output semantics by decoding at full resolution and resizing
+afterwards, so it does not provide the same CPU and peak-memory benefit as the
+native implementation.
+
 ### MakeImage
 
 `MakeImage` allows you to create an image by providing pixel data and specifying the format.

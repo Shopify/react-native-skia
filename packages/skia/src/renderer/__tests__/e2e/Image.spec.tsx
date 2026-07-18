@@ -1,7 +1,7 @@
 import React from "react";
 
 import { checkImage } from "../../../__tests__/setup";
-import { images, loadImage, surface } from "../setup";
+import { dataAssets, images, loadImage, surface } from "../setup";
 import { Fill, Image as SkiaImage } from "../../components";
 import { AlphaType, ColorType } from "../../../skia/types";
 
@@ -52,6 +52,50 @@ describe("Image loading from bundles", () => {
       171, 188, 198, 255, 171, 188, 198, 255, 171, 188, 198, 255, 171, 188, 198,
       255,
     ]);
+  });
+
+  it("should decode an encoded image at a reduced resolution", async () => {
+    const dimensions = await surface.eval(
+      (Skia, { data }) => {
+        const encoded = Skia.Data.fromBytes(new Uint8Array(data));
+        const fullSize = Skia.Image.MakeImageFromEncoded(encoded)!;
+        const scaled = Skia.Image.MakeImageFromEncodedScaled(
+          encoded,
+          fullSize.width() / 2,
+          fullSize.height() / 2
+        )!;
+        return {
+          fullWidth: fullSize.width(),
+          fullHeight: fullSize.height(),
+          scaledWidth: scaled.width(),
+          scaledHeight: scaled.height(),
+        };
+      },
+      { data: Array.from(dataAssets.img_0) }
+    );
+
+    expect(dimensions.scaledWidth).toBeLessThan(dimensions.fullWidth);
+    expect(dimensions.scaledHeight).toBeLessThan(dimensions.fullHeight);
+    expect(dimensions.scaledWidth / dimensions.scaledHeight).toBeCloseTo(
+      dimensions.fullWidth / dimensions.fullHeight,
+      1
+    );
+  });
+
+  it("should reject non-positive scaled decode dimensions", async () => {
+    const result = await surface.eval(
+      (Skia, { data }) => {
+        const encoded = Skia.Data.fromBytes(new Uint8Array(data));
+        return {
+          width: Skia.Image.MakeImageFromEncodedScaled(encoded, 0) === null,
+          height:
+            Skia.Image.MakeImageFromEncodedScaled(encoded, 100, -1) === null,
+        };
+      },
+      { data: Array.from(dataAssets.img_0) }
+    );
+
+    expect(result).toEqual({ width: true, height: true });
   });
 
   it("should read pixels from a canvas", async () => {

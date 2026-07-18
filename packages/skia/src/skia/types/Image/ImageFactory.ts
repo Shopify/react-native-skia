@@ -35,6 +35,29 @@ export interface ImageFactory {
   MakeImageFromEncoded: (encoded: SkData) => SkImage | null;
 
   /**
+   * Decode an encoded image at a reduced resolution.
+   *
+   * The requested dimensions define an aspect-preserving bounding box. Native
+   * codecs decode at their closest supported scale, which may be slightly
+   * larger or smaller than the requested box. Codecs without scaled decoding
+   * support, and requests larger than the source, return a native-resolution
+   * image.
+   *
+   * On Web, CanvasKit does not expose codec-level scaled decoding, so the image
+   * is decoded at full resolution and then resized to fit the requested box.
+   *
+   * @param encoded - Data object containing encoded image bytes.
+   * @param targetWidth - Positive target width in pixels.
+   * @param targetHeight - Optional positive target height in pixels.
+   * @returns A decoded image, or null if the input or dimensions are invalid.
+   */
+  MakeImageFromEncodedScaled: (
+    encoded: SkData,
+    targetWidth: number,
+    targetHeight?: number
+  ) => SkImage | null;
+
+  /**
    * Return an Image backed by a given native buffer.
    * The native buffer must be a valid owning reference.
    *
