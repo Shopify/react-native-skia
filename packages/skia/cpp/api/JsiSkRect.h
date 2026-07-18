@@ -53,9 +53,16 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(intersects) {
+    auto otherRect = JsiSkRect::fromValue(runtime, arguments[0]);
+    bool result = getObject()->intersects(*otherRect);
+    return jsi::Value(result);
+  }
+
   JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkRect, setXYWH),
                        JSI_EXPORT_FUNC(JsiSkRect, setLTRB),
-                       JSI_EXPORT_FUNC(JsiSkRect, dispose))
+                       JSI_EXPORT_FUNC(JsiSkRect, dispose),
+                       JSI_EXPORT_FUNC(JsiSkRect, intersects))
 
   /**
    Constructor
