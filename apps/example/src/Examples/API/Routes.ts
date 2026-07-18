@@ -35,6 +35,7 @@ export type Routes = {
   StressTest3: undefined;
   StressTest4: undefined;
   PictureViewCrashTest: undefined;
+  PictureRaceStressTest: undefined;
   FirstFrame: undefined;
   FirstFrameEmpty: undefined;
   PictureBug: undefined;

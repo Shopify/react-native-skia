@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -237,7 +238,9 @@ private:
   std::shared_ptr<RNSkCanvasProvider> _canvasProvider;
   std::shared_ptr<RNSkRenderer> _renderer;
 
-  size_t _nativeId;
+  // Written under the ViewRegistry lock but read without it (e.g.
+  // JniSkiaBaseView::unregisterView), so it must be atomic.
+  std::atomic<size_t> _nativeId = {0};
 
   std::atomic<bool> _redrawRequested = {false};
 };

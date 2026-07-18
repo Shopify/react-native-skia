@@ -37,16 +37,12 @@ RNSkMetalCanvasProvider::~RNSkMetalCanvasProvider() {}
 /**
  Returns the scaled width of the view
  */
-int RNSkMetalCanvasProvider::getWidth() {
-  return _ctx ? _ctx->getWidth() : -1;
-};
+int RNSkMetalCanvasProvider::getWidth() { return _width; };
 
 /**
  Returns the scaled height of the view
  */
-int RNSkMetalCanvasProvider::getHeight() {
-  return _ctx ? _ctx->getHeight() : -1;
-};
+int RNSkMetalCanvasProvider::getHeight() { return _height; };
 
 /**
  Render to a canvas
@@ -101,6 +97,11 @@ void RNSkMetalCanvasProvider::setSize(int width, int height) {
   _ctx = MetalContext::getInstance().MakeWindow(_layer, w, h, _useP3ColorSpace,
                                                 _highBitDepth);
 #endif
+  // getWidth/getHeight are called from the JS thread, which must not
+  // dereference _ctx (it is destroyed/replaced here on the main thread) —
+  // publish the dimensions through atomics instead.
+  _width = _ctx ? _ctx->getWidth() : -1;
+  _height = _ctx ? _ctx->getHeight() : -1;
   _requestRedraw();
 }
 
