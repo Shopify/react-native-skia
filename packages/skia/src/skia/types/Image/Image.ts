@@ -106,35 +106,51 @@ export interface SkImage extends SkJSIInstance<"Image"> {
     localMatrix?: SkMatrix
   ): SkShader;
 
-  /** Encodes Image pixels, returning result as UInt8Array. Returns existing
-     encoded data if present; otherwise, SkImage is encoded with
-     SkEncodedImageFormat::kPNG. Skia must be built with SK_ENCODE_PNG to encode
-     SkImage.
-
-    Returns nullptr if existing encoded data is missing or invalid, and
-    encoding fails.
-
+  /** Encodes the current image pixels, returning the result as a Uint8Array.
+   *
     @param fmt - PNG is the default value.
-    @param quality - a value from 0 to 100; 100 is the least lossy. May be ignored.
+    @param quality - Values are clamped to 0..100; undefined and NaN select the
+      format-specific default. JPEG defaults to 100. For PNG, an omitted value
+      uses Skia's default zlib compression level 6; an explicit value maps 0 to
+      maximum compression and 100 to no zlib compression, without changing
+      pixels. For WebP it controls visual quality in lossy mode and encoder
+      effort in lossless mode.
+    @param lossless - WebP only. true/false explicitly selects lossless/lossy.
+      It is ignored for JPEG and PNG. When omitted, the legacy behavior is
+      preserved: an omitted quality or normalized quality 100 selects lossless
+      WebP at effort 75, while lower values select lossy WebP. When the flag is
+      explicit and quality is omitted, quality/effort defaults to 100.
 
-    @return  Uint8Array with data
+    @return Uint8Array with encoded data
   */
-  encodeToBytes(fmt?: ImageFormat, quality?: number): Uint8Array;
+  encodeToBytes(
+    fmt?: ImageFormat,
+    quality?: number,
+    lossless?: boolean
+  ): Uint8Array;
 
-  /** Encodes Image pixels, returning result as a base64 encoded string. Returns existing
-     encoded data if present; otherwise, SkImage is encoded with
-     SkEncodedImageFormat::kPNG. Skia must be built with SK_ENCODE_PNG to encode
-     SkImage.
-
-    Returns nullptr if existing encoded data is missing or invalid, and
-    encoding fails.
-
+  /** Encodes the current image pixels, returning a base64-encoded string.
+   *
     @param fmt - PNG is the default value.
-    @param quality - a value from 0 to 100; 100 is the least lossy. May be ignored.
+    @param quality - Values are clamped to 0..100; undefined and NaN select the
+      format-specific default. JPEG defaults to 100. For PNG, an omitted value
+      uses Skia's default zlib compression level 6; an explicit value maps 0 to
+      maximum compression and 100 to no zlib compression, without changing
+      pixels. For WebP it controls visual quality in lossy mode and encoder
+      effort in lossless mode.
+    @param lossless - WebP only. true/false explicitly selects lossless/lossy.
+      It is ignored for JPEG and PNG. When omitted, the legacy behavior is
+      preserved: an omitted quality or normalized quality 100 selects lossless
+      WebP at effort 75, while lower values select lossy WebP. When the flag is
+      explicit and quality is omitted, quality/effort defaults to 100.
 
-    @return  base64 encoded string of data
+    @return Base64-encoded data
   */
-  encodeToBase64(fmt?: ImageFormat, quality?: number): string;
+  encodeToBase64(
+    fmt?: ImageFormat,
+    quality?: number,
+    lossless?: boolean
+  ): string;
 
   /** Read Image pixels
    *

@@ -1,9 +1,7 @@
 import { AppRegistry } from "react-native";
+import { LoadSkiaWeb } from "@shopify/react-native-skia/src/web";
 
-import App from "./src/App";
 import { name as appName } from "./app.json";
-
-AppRegistry.registerComponent(appName, () => App);
 
 const rootTag = document.getElementById("root");
 
@@ -15,9 +13,10 @@ if (process.env.NODE_ENV !== "production") {
   }
 }
 
-CanvasKitInit({
-  locateFile: (file) => `https://unpkg.com/canvaskit-wasm/bin/full/${file}`,
-}).then((CanvasKit) => {
-  window.CanvasKit = global.CanvasKit = CanvasKit;
+LoadSkiaWeb({
+  locateFile: () => "/canvaskit.wasm",
+}).then(async () => {
+  const { default: App } = await import("./src/App");
+  AppRegistry.registerComponent(appName, () => App);
   AppRegistry.runApplication(appName, { rootTag });
 });

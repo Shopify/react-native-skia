@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <cmath>
 #include <memory>
 #include <string>
 #include <utility>
@@ -142,6 +144,37 @@ inline SkSamplingOptions SamplingOptionsFromValue(jsi::Runtime &runtime,
 
 class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
 private:
+  static constexpr double kDefaultEncodingQuality = 100.0;
+  static constexpr float kLegacyWebpLosslessEffort = 75.0f;
+
+  struct EncodingQuality {
+    double value = kDefaultEncodingQuality;
+    bool provided = false;
+  };
+
+  enum class WebpCompressionMode { kAuto, kLossy, kLossless };
+
+  static EncodingQuality getEncodingQuality(const jsi::Value *arguments,
+                                            size_t count) {
+    if (count < 2 || !arguments[1].isNumber()) {
+      return {};
+    }
+    const auto quality = arguments[1].asNumber();
+    if (std::isnan(quality)) {
+      return {};
+    }
+    return {std::clamp(quality, 0.0, 100.0), true};
+  }
+
+  static WebpCompressionMode getWebpCompressionMode(const jsi::Value *arguments,
+                                                    size_t count) {
+    if (count < 3 || !arguments[2].isBool()) {
+      return WebpCompressionMode::kAuto;
+    }
+    return arguments[2].asBool() ? WebpCompressionMode::kLossless
+                                 : WebpCompressionMode::kLossy;
+  }
+
   std::shared_ptr<Dispatcher> _dispatcher;
 
 public:
@@ -190,13 +223,26 @@ public:
 
   sk_sp<SkData> encodeImageData(const jsi::Value *arguments, size_t count) {
     // Get optional parameters
-    auto format =
-        count >= 1 ? static_cast<SkEncodedImageFormat>(arguments[0].asNumber())
-                   : SkEncodedImageFormat::kPNG;
-
-    auto quality = (count >= 2 && arguments[1].isNumber())
-                       ? arguments[1].asNumber()
-                       : 100.0;
+    auto format = SkEncodedImageFormat::kPNG;
+    if (count >= 1 && !arguments[0].isUndefined()) {
+      if (!arguments[0].isNumber()) {
+        return nullptr;
+      }
+      const auto formatValue = arguments[0].asNumber();
+      if (formatValue == static_cast<double>(SkEncodedImageFormat::kJPEG)) {
+        format = SkEncodedImageFormat::kJPEG;
+      } else if (formatValue ==
+                 static_cast<double>(SkEncodedImageFormat::kPNG)) {
+        format = SkEncodedImageFormat::kPNG;
+      } else if (formatValue ==
+                 static_cast<double>(SkEncodedImageFormat::kWEBP)) {
+        format = SkEncodedImageFormat::kWEBP;
+      } else {
+        return nullptr;
+      }
+    }
+    const auto quality = getEncodingQuality(arguments, count);
+    const auto webpCompression = getWebpCompressionMode(arguments, count);
     auto image = getObject();
 #if defined(SK_GRAPHITE)
     image = DawnContext::getInstance().MakeRasterImage(image);
@@ -213,7 +259,7 @@ public:
 
     if (format == SkEncodedImageFormat::kJPEG) {
       SkJpegEncoder::Options options;
-      options.fQuality = quality;
+      options.fQuality = static_cast<int>(quality.value);
       data = SkJpegEncoder::Encode(nullptr, image.get(), options);
 #ifdef __APPLE__
       // Replace Skia's generated ICC with Apple's canonical Display P3 profile
@@ -224,17 +270,34 @@ public:
 #endif
     } else if (format == SkEncodedImageFormat::kWEBP) {
       SkWebpEncoder::Options options;
-      if (quality >= 100) {
-        options.fCompression = SkWebpEncoder::Compression::kLossless;
-        options.fQuality = 75; // This is effort to compress
+      if (webpCompression == WebpCompressionMode::kAuto) {
+        // Preserve the historical two-argument API: quality 100 (including
+        // the default) selects lossless WebP with effort 75.
+        if (!quality.provided || quality.value >= 100.0) {
+          options.fCompression = SkWebpEncoder::Compression::kLossless;
+          options.fQuality = kLegacyWebpLosslessEffort;
+        } else {
+          options.fCompression = SkWebpEncoder::Compression::kLossy;
+          options.fQuality = static_cast<float>(quality.value);
+        }
       } else {
-        options.fCompression = SkWebpEncoder::Compression::kLossy;
-        options.fQuality = quality;
+        options.fCompression = webpCompression == WebpCompressionMode::kLossless
+                                   ? SkWebpEncoder::Compression::kLossless
+                                   : SkWebpEncoder::Compression::kLossy;
+        options.fQuality = static_cast<float>(quality.value);
       }
       data = SkWebpEncoder::Encode(nullptr, image.get(), options);
-    } else {
+    } else if (format == SkEncodedImageFormat::kPNG) {
       SkPngEncoder::Options options;
+      if (quality.provided) {
+        // PNG is always lossless. Here quality controls zlib compression:
+        // 0 maps to maximum compression (9), 100 disables compression (0).
+        options.fZLibLevel =
+            static_cast<int>(std::round(9.0 * (1.0 - quality.value / 100.0)));
+      }
       data = SkPngEncoder::Encode(nullptr, image.get(), options);
+    } else {
+      return nullptr;
     }
 
     return data;

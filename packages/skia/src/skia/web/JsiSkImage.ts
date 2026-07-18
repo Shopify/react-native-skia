@@ -1,5 +1,6 @@
 import type {
   CanvasKit,
+  EncodedImageFormat,
   ImageInfo as CKImageInfo,
   Image,
 } from "canvaskit-wasm";
@@ -18,6 +19,21 @@ import type {
 import { getEnum, HostObject } from "./Host";
 import { JsiSkMatrix } from "./JsiSkMatrix";
 import { JsiSkShader } from "./JsiSkShader";
+
+type ImageWithEncodingOptions = Omit<Image, "encodeToBytes"> & {
+  encodeToBytes(
+    fmt?: EncodedImageFormat,
+    quality?: number,
+    lossless?: boolean
+  ): Uint8Array | null;
+};
+
+export const normalizeImageEncodingQuality = (quality?: number) => {
+  if (typeof quality !== "number" || Number.isNaN(quality)) {
+    return undefined;
+  }
+  return Math.min(100, Math.max(0, quality));
+};
 
 // https://github.com/google/skia/blob/1f193df9b393d50da39570dab77a0bb5d28ec8ef/modules/canvaskit/htmlcanvas/util.js
 export const toBase64String = (bytes: Uint8Array) => {
@@ -105,28 +121,23 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
     );
   }
 
-  encodeToBytes(fmt?: ImageFormat, quality?: number) {
-    let result: Uint8Array | null;
-    if (fmt && quality) {
-      result = this.ref.encodeToBytes(
-        getEnum(this.CanvasKit, "ImageFormat", fmt),
-        quality
-      );
-    } else if (fmt) {
-      result = this.ref.encodeToBytes(
-        getEnum(this.CanvasKit, "ImageFormat", fmt)
-      );
-    } else {
-      result = this.ref.encodeToBytes();
-    }
+  encodeToBytes(fmt?: ImageFormat, quality?: number, lossless?: boolean) {
+    const image = this.ref as ImageWithEncodingOptions;
+    const result = image.encodeToBytes(
+      fmt === undefined
+        ? undefined
+        : getEnum(this.CanvasKit, "ImageFormat", fmt),
+      normalizeImageEncodingQuality(quality),
+      lossless
+    );
     if (!result) {
       throw new Error("encodeToBytes failed");
     }
     return result;
   }
 
-  encodeToBase64(fmt?: ImageFormat, quality?: number) {
-    const bytes = this.encodeToBytes(fmt, quality);
+  encodeToBase64(fmt?: ImageFormat, quality?: number, lossless?: boolean) {
+    const bytes = this.encodeToBytes(fmt, quality, lossless);
     return toBase64String(bytes);
   }
 

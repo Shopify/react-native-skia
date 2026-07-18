@@ -33,7 +33,10 @@ Config.overrideWebpackConfig((currentConfiguration) => {
     // @ts-ignore
     new CopyPlugin({
       patterns: [
-        { from: "../../node_modules/canvaskit-wasm/bin/full/canvaskit.wasm" },
+        {
+          from: require.resolve("@shopify/react-native-skia/dist/canvaskit/canvaskit.wasm"),
+          to: "canvaskit.wasm",
+        },
       ],
     })
   );

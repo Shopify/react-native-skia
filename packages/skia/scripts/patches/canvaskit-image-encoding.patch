@@ -1,0 +1,360 @@
+diff --git a/modules/canvaskit/canvaskit_bindings.cpp b/modules/canvaskit/canvaskit_bindings.cpp
+index cabeb4d35a..d7c34cf0f5 100644
+--- a/modules/canvaskit/canvaskit_bindings.cpp
++++ b/modules/canvaskit/canvaskit_bindings.cpp
+@@ -73,6 +73,9 @@
+ #include <emscripten/html5.h>
+ #include "modules/canvaskit/WasmCommon.h"
+ 
++#include <algorithm>
++#include <cmath>
++
+ #if defined(CK_ENABLE_WEBGL) || defined(CK_ENABLE_WEBGPU)
+ #define ENABLE_GPU
+ #endif
+@@ -1035,27 +1038,54 @@ sk_sp<SkImage> MakeImageFromGenerator(SimpleImageInfo ii, JSObject callbackObj)
+ }
+ #endif  // CK_ENABLE_WEBGL
+ 
++struct EncodingQuality {
++    double value = 100.0;
++    bool provided = false;
++};
++
++static EncodingQuality normalizeEncodingQuality(double quality) {
++    if (std::isnan(quality)) {
++        return {};
++    }
++    return {std::clamp(quality, 0.0, 100.0), true};
++}
++
+ static Uint8Array encodeImage(GrDirectContext* dContext,
+                               sk_sp<SkImage> img,
+                               SkEncodedImageFormat fmt,
+-                              int quality) {
++                              double qualityValue,
++                              int webpLossless) {
++    const auto quality = normalizeEncodingQuality(qualityValue);
+     sk_sp<SkData> data = nullptr;
+     if (fmt == SkEncodedImageFormat::kJPEG) {
+         SkJpegEncoder::Options opts;
+-        opts.fQuality = quality;
++        opts.fQuality = static_cast<int>(quality.value);
+         data = SkJpegEncoder::Encode(dContext, img.get(), opts);
+     } else if (fmt == SkEncodedImageFormat::kPNG) {
+-        data = SkPngEncoder::Encode(dContext, img.get(), {});
+-    } else {
++        SkPngEncoder::Options opts;
++        if (quality.provided) {
++            opts.fZLibLevel = static_cast<int>(std::round(9.0 * (1.0 - quality.value / 100.0)));
++        }
++        data = SkPngEncoder::Encode(dContext, img.get(), opts);
++    } else if (fmt == SkEncodedImageFormat::kWEBP) {
+         SkWebpEncoder::Options opts;
+-        if (quality >= 100) {
+-            opts.fCompression = SkWebpEncoder::Compression::kLossless;
+-            opts.fQuality = 75;  // This is effort to compress
++        if (webpLossless < 0) {
++            // Preserve CanvasKit's historical two-argument behavior.
++            if (!quality.provided || quality.value >= 100.0) {
++                opts.fCompression = SkWebpEncoder::Compression::kLossless;
++                opts.fQuality = 75.0f;
++            } else {
++                opts.fCompression = SkWebpEncoder::Compression::kLossy;
++                opts.fQuality = static_cast<float>(quality.value);
++            }
+         } else {
+-            opts.fCompression = SkWebpEncoder::Compression::kLossy;
+-            opts.fQuality = quality;
++            opts.fCompression = webpLossless > 0 ? SkWebpEncoder::Compression::kLossless
++                                                 : SkWebpEncoder::Compression::kLossy;
++            opts.fQuality = static_cast<float>(quality.value);
+         }
+         data = SkWebpEncoder::Encode(dContext, img.get(), opts);
++    } else {
++        return emscripten::val::null();
+     }
+     if (!data) {
+         return emscripten::val::null();
+@@ -1116,6 +1146,10 @@ private:
+ };
+ 
+ EMSCRIPTEN_BINDINGS(Skia) {
++    // Keep the JavaScript and WASM halves version-locked. interface.js turns
++    // this into the public capability marker only when both versions match.
++    constant("_rnskiaImageEncodingWasmVersion", 1);
++
+ #ifdef ENABLE_GPU
+     constant("gpu", true);
+     function("_MakeGrContext", &MakeGrContext);
+@@ -1991,16 +2025,18 @@ EMSCRIPTEN_BINDINGS(Skia) {
+             .function("_encodeToBytes",
+                       optional_override([](sk_sp<SkImage> self,
+                                            SkEncodedImageFormat fmt,
+-                                           int quality) -> Uint8Array {
+-                          return encodeImage(nullptr, self, fmt, quality);
++                                           double quality,
++                                           int webpLossless) -> Uint8Array {
++                          return encodeImage(nullptr, self, fmt, quality, webpLossless);
+                       }))
+ #if defined(ENABLE_GPU)
+             .function("_encodeToBytes",
+                       optional_override([](sk_sp<SkImage> self,
+                                            SkEncodedImageFormat fmt,
+-                                           int quality,
++                                           double quality,
++                                           int webpLossless,
+                                            GrDirectContext* dContext) -> Uint8Array {
+-                          return encodeImage(dContext, self, fmt, quality);
++                          return encodeImage(dContext, self, fmt, quality, webpLossless);
+                       }),
+                       allow_raw_pointers())
+ #endif
+diff --git a/modules/canvaskit/externs.js b/modules/canvaskit/externs.js
+index 988f377a7c..d801e1b5c3 100644
+--- a/modules/canvaskit/externs.js
++++ b/modules/canvaskit/externs.js
+@@ -24,6 +24,9 @@
+ 
+ var CanvasKit = {
+   // public API (i.e. things we declare in the pre-js file or in the cpp bindings)
++  _rnskiaImageEncodingOptions: false,
++  _rnskiaImageEncodingVersion: 0,
++  _rnskiaImageEncodingWasmVersion: 0,
+   Color: function() {},
+   Color4f: function() {},
+   ColorAsInt: function() {},
+diff --git a/modules/canvaskit/htmlcanvas/htmlcanvas.js b/modules/canvaskit/htmlcanvas/htmlcanvas.js
+index ce281fdc3b..e91ea4d9b8 100644
+--- a/modules/canvaskit/htmlcanvas/htmlcanvas.js
++++ b/modules/canvaskit/htmlcanvas/htmlcanvas.js
+@@ -60,8 +60,20 @@ function HTMLCanvas(skSurface) {
+     if (codec === 'image/jpeg') {
+       format = CanvasKit.ImageFormat.JPEG;
+     }
+-    quality = quality || 0.92;
+-    var imgBytes = img.encodeToBytes(format, quality);
++    var imgBytes;
++    if (format === CanvasKit.ImageFormat.PNG) {
++      // HTML canvas quality does not apply to PNG. Leave it omitted so Skia's
++      // default zlib compression level is preserved.
++      imgBytes = img.encodeToBytes(format);
++    } else {
++      // HTMLCanvasElement uses 0..1 while Skia's encoders use 0..100. Invalid
++      // values are ignored, matching the browser API, and explicit zero is
++      // preserved.
++      if (typeof quality !== 'number' || !isFinite(quality) || quality < 0 || quality > 1) {
++        quality = 0.92;
++      }
++      imgBytes = img.encodeToBytes(format, quality * 100);
++    }
+     if (!imgBytes) {
+       Debug('encoding failure');
+       return
+diff --git a/modules/canvaskit/interface.js b/modules/canvaskit/interface.js
+index a273c783f6..8ccfe323fb 100644
+--- a/modules/canvaskit/interface.js
++++ b/modules/canvaskit/interface.js
+@@ -6,6 +6,10 @@
+ // Anything that modifies an exposed class (e.g. Path) should be set
+ // after onRuntimeInitialized, otherwise, it can happen outside of that scope.
+ CanvasKit.onRuntimeInitialized = function() {
++  CanvasKit['_rnskiaImageEncodingOptions'] =
++      CanvasKit['_rnskiaImageEncodingWasmVersion'] === 1;
++  CanvasKit['_rnskiaImageEncodingVersion'] =
++      CanvasKit['_rnskiaImageEncodingOptions'] ? 1 : 0;
+   // All calls to 'this' need to go in externs.js so closure doesn't minify them away.
+ 
+   _scratchColor = CanvasKit.Malloc(Float32Array, 4); // 4 color scalars.
+@@ -384,17 +388,21 @@ CanvasKit.onRuntimeInitialized = function() {
+     return this._makeTrimmed(startT, stopT, !!isComplement);
+   };
+ 
+-  CanvasKit.Image.prototype.encodeToBytes = function(fmt, quality) {
++  CanvasKit.Image.prototype.encodeToBytes = function(fmt, quality, lossless) {
+     var grCtx = CanvasKit.getCurrentGrDirectContext();
+-    fmt = fmt || CanvasKit.ImageFormat.PNG;
+-    quality = quality || 100;
++    fmt = fmt === undefined ? CanvasKit.ImageFormat.PNG : fmt;
++    // NaN is an internal sentinel that lets the C++ binding distinguish an
++    // omitted quality from an explicit 100 (needed for PNG's default level 6).
++    quality = typeof quality === 'number' ? quality : NaN;
++    // -1 preserves the historical quality-driven WebP mode. 0/1 represent an
++    // explicit lossy/lossless request.
++    var webpLossless = typeof lossless === 'boolean' ? (lossless ? 1 : 0) : -1;
+     if (grCtx) {
+-      return this._encodeToBytes(fmt, quality, grCtx);
++      return this._encodeToBytes(fmt, quality, webpLossless, grCtx);
+     } else {
+-      return this._encodeToBytes(fmt, quality);
++      return this._encodeToBytes(fmt, quality, webpLossless);
+     }
+   };
+-
+   // makeShaderCubic returns a shader for a given image, allowing it to be used on
+   // a paint as well as other purposes. This shader will be higher quality than
+   // other shader functions. See CubicResampler in SkSamplingOptions.h for more information
+diff --git a/modules/canvaskit/npm_build/types/canvaskit-wasm-tests.ts b/modules/canvaskit/npm_build/types/canvaskit-wasm-tests.ts
+index 99bcc75317..d377732e52 100644
+--- a/modules/canvaskit/npm_build/types/canvaskit-wasm-tests.ts
++++ b/modules/canvaskit/npm_build/types/canvaskit-wasm-tests.ts
+@@ -281,6 +281,7 @@ function imageTests(CK: CanvasKit, imgElement?: HTMLImageElement) {
+     if (!img) return;
+     const dOne = img.encodeToBytes(); // $ExpectType Uint8Array | null
+     const dTwo = img.encodeToBytes(CK.ImageFormat.JPEG, 97);
++    const dThree = img.encodeToBytes(CK.ImageFormat.WEBP, 80, true);
+     const h = img.height();
+     const w = img.width();
+     const s1 = img.makeShaderCubic(CK.TileMode.Decal, CK.TileMode.Repeat, 1 / 3, 1 / 3); // $ExpectType Shader
+diff --git a/modules/canvaskit/npm_build/types/index.d.ts b/modules/canvaskit/npm_build/types/index.d.ts
+index 892a27ebe3..f0c6d8620a 100644
+--- a/modules/canvaskit/npm_build/types/index.d.ts
++++ b/modules/canvaskit/npm_build/types/index.d.ts
+@@ -21,6 +21,13 @@ export interface CanvasKitInitOptions {
+ }
+ 
+ export interface CanvasKit {
++    /** True when this build supports PNG compression quality and explicit WebP lossless mode. */
++    readonly _rnskiaImageEncodingOptions: boolean;
++    /** Version of the React Native Skia image-encoding ABI. */
++    readonly _rnskiaImageEncodingVersion: number;
++    /** Internal marker used to keep the JavaScript and WASM halves version-locked. */
++    readonly _rnskiaImageEncodingWasmVersion: number;
++
+     // Helpers
+     /**
+      * Constructs a Color with the same API as CSS's rgba(), that is
+@@ -2112,9 +2119,14 @@ export interface Image extends EmbindObject<"Image"> {
+      * the specified codec. If the options are unspecified, sensible defaults will be
+      * chosen.
+      * @param fmt - PNG is the default value.
+-     * @param quality - a value from 0 to 100; 100 is the least lossy. May be ignored.
+-     */
+-    encodeToBytes(fmt?: EncodedImageFormat, quality?: number): Uint8Array | null;
++     * @param quality - clamped to 0..100. PNG uses Skia's default zlib
++     * compression level 6 when omitted; for lossless WebP this controls
++     * encoder effort.
++     * @param lossless - WebP only. Explicitly selects lossless/lossy. When
++     * omitted, quality 100 uses legacy lossless effort 75. With an explicit
++     * flag, omitted quality/effort defaults to 100.
++     */
++    encodeToBytes(fmt?: EncodedImageFormat, quality?: number, lossless?: boolean): Uint8Array | null;
+ 
+     /**
+      * Returns the color space associated with this object.
+diff --git a/modules/canvaskit/tests/core_test.js b/modules/canvaskit/tests/core_test.js
+index 904f2c6b77..cc686a7078 100644
+--- a/modules/canvaskit/tests/core_test.js
++++ b/modules/canvaskit/tests/core_test.js
+@@ -1641,6 +1641,111 @@ describe('Core canvas behavior', () => {
+         img && img.delete();
+     }
+ 
++    it('honors image encoding quality bounds and WebP lossless mode', () => {
++        expect(CanvasKit._rnskiaImageEncodingOptions).toBeTrue();
++        expect(CanvasKit._rnskiaImageEncodingVersion).toEqual(1);
++        const pixels = new Uint8Array(64 * 64 * 4);
++        let offset = 0;
++        for (let y = 0; y < 64; y++) {
++            for (let x = 0; x < 64; x++) {
++                pixels[offset++] = (x * 17 + y * 13) % 256;
++                pixels[offset++] = (x * 7 + y * 29) % 256;
++                pixels[offset++] = (x * 31 + y * 3) % 256;
++                pixels[offset++] = 255;
++            }
++        }
++        const img = CanvasKit.MakeImage({
++            'width': 64,
++            'height': 64,
++            'alphaType': CanvasKit.AlphaType.Unpremul,
++            'colorType': CanvasKit.ColorType.RGBA_8888,
++            'colorSpace': CanvasKit.ColorSpace.SRGB,
++        }, pixels, 64 * 4);
++
++        const bytesEqual = (a, b) => {
++            expect(Array.from(a)).toEqual(Array.from(b));
++        };
++        const pngZlibLevelHint = (bytes) => {
++            let chunk = 8;
++            while (chunk + 12 <= bytes.length) {
++                const size = (bytes[chunk] << 24) | (bytes[chunk + 1] << 16) |
++                             (bytes[chunk + 2] << 8) | bytes[chunk + 3];
++                const type = String.fromCharCode(...bytes.subarray(chunk + 4, chunk + 8));
++                if (type === 'IDAT') {
++                    const cmf = bytes[chunk + 8];
++                    const flags = bytes[chunk + 9];
++                    expect(cmf & 0x0f).toEqual(8);
++                    expect(((cmf << 8) | flags) % 31).toEqual(0);
++                    return flags >> 6;
++                }
++                chunk += 12 + size;
++            }
++            throw new Error('PNG has no IDAT chunk');
++        };
++        const webpPayload = (bytes) => {
++            let chunk = 12;
++            while (chunk + 8 <= bytes.length) {
++                const type = String.fromCharCode(...bytes.subarray(chunk, chunk + 4));
++                const size = bytes[chunk + 4] | (bytes[chunk + 5] << 8) |
++                             (bytes[chunk + 6] << 16) | (bytes[chunk + 7] << 24);
++                if (type === 'VP8 ' || type === 'VP8L') {
++                    return type;
++                }
++                chunk += 8 + size + (size & 1);
++            }
++            throw new Error('WebP has no VP8 or VP8L payload');
++        };
++
++        const pngDefault = img.encodeToBytes(CanvasKit.ImageFormat.PNG);
++        const pngZero = img.encodeToBytes(CanvasKit.ImageFormat.PNG, 0);
++        const pngMiddle = img.encodeToBytes(CanvasKit.ImageFormat.PNG, 50);
++        const pngHundred = img.encodeToBytes(CanvasKit.ImageFormat.PNG, 100);
++        expect(pngZlibLevelHint(pngDefault)).toEqual(2);
++        expect(pngZlibLevelHint(pngZero)).toEqual(3);
++        expect(pngZlibLevelHint(pngMiddle)).toEqual(1);
++        expect(pngZlibLevelHint(pngHundred)).toEqual(0);
++        bytesEqual(pngZero, img.encodeToBytes(CanvasKit.ImageFormat.PNG, -1));
++        bytesEqual(pngHundred, img.encodeToBytes(CanvasKit.ImageFormat.PNG, 101));
++        bytesEqual(pngDefault, img.encodeToBytes(CanvasKit.ImageFormat.PNG, NaN));
++
++        const htmlCanvas = CanvasKit.MakeCanvas(4, 4);
++        const dataUrlBytes = (url) => {
++            const binary = atob(url.substring(url.indexOf(',') + 1));
++            return Uint8Array.from(binary, (value) => value.charCodeAt(0));
++        };
++        const pngDataUrl = htmlCanvas.toDataURL('image/png', 0);
++        const pngFromCanvas = dataUrlBytes(pngDataUrl);
++        expect(pngZlibLevelHint(pngFromCanvas)).toEqual(2);
++        const jpegFromCanvas = dataUrlBytes(htmlCanvas.toDataURL('image/jpeg', 0.5));
++        const comparisonSurface = CanvasKit.MakeSurface(4, 4);
++        const canvasSnapshot = comparisonSurface.makeImageSnapshot();
++        bytesEqual(
++            jpegFromCanvas,
++            canvasSnapshot.encodeToBytes(CanvasKit.ImageFormat.JPEG, 50));
++        canvasSnapshot.delete();
++        comparisonSurface.delete();
++        htmlCanvas.dispose();
++
++        const webpLegacy = img.encodeToBytes(CanvasKit.ImageFormat.WEBP, 100);
++        const webpLossy = img.encodeToBytes(CanvasKit.ImageFormat.WEBP, 100, false);
++        const webpLossless = img.encodeToBytes(CanvasKit.ImageFormat.WEBP, 50, true);
++        expect(webpPayload(webpLegacy)).toEqual('VP8L');
++        expect(webpPayload(webpLossy)).toEqual('VP8 ');
++        expect(webpPayload(webpLossless)).toEqual('VP8L');
++        expect(Array.from(
++            img.encodeToBytes(CanvasKit.ImageFormat.WEBP, 0, true)))
++            .not.toEqual(Array.from(
++                img.encodeToBytes(CanvasKit.ImageFormat.WEBP, 100, true)));
++        bytesEqual(
++            img.encodeToBytes(CanvasKit.ImageFormat.WEBP, -Infinity, false),
++            img.encodeToBytes(CanvasKit.ImageFormat.WEBP, 0, false));
++        bytesEqual(
++            img.encodeToBytes(CanvasKit.ImageFormat.WEBP, Infinity, true),
++            img.encodeToBytes(CanvasKit.ImageFormat.WEBP, 100, true));
++
++        img.delete();
++    });
++
+     it('can make a render target', () => {
+         if (!CanvasKit.gpu) {
+             return;

@@ -1,0 +1,3 @@
+Skia revision: 9f330f1704305686dafa9eeef11de77caa5314b1
+Build target: modules/canvaskit/compile.sh (full WebGL release)
+Local patch: scripts/patches/canvaskit-image-encoding.patch

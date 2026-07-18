@@ -5,11 +5,30 @@ sidebar_label: Web
 slug: /getting-started/web
 ---
 
-import {Snack} from '@site/src/components/Snack';
+import { Snack } from "@site/src/components/Snack";
 
 React Native Skia runs in the browser via [CanvasKit](https://skia.org/docs/user/modules/canvaskit/), a WebAssembly (WASM) build of Skia.
-The CanvasKit WASM file, which is 2.9MB when gzipped, is loaded asynchronously.
+The bundled full CanvasKit WASM file, which is approximately 3.3 MB when gzipped, is loaded asynchronously.
 Despite its considerable size, it offers flexibility in determining when and how Skia loads, giving you full control over the user experience.
+
+:::warning CanvasKit JavaScript and WASM must match
+
+React Native Skia uses customized CanvasKit image-encoding bindings. The
+CanvasKit JavaScript imported by React Native Skia and the
+`dist/canvaskit/canvaskit.wasm` file are a versioned pair. The WASM file must
+come from the **same installed version** of `@shopify/react-native-skia` as the
+application JavaScript.
+
+Do not import, preload, or deploy the JavaScript or WASM runtime from
+`canvaskit-wasm`. That dependency is still used for TypeScript declarations,
+but its stock runtime is not compatible with these bindings. `LoadSkiaWeb`
+checks compatibility and rejects a mismatched build.
+
+After every React Native Skia upgrade, rerun `setup-skia-web` and deploy the
+application bundle and WASM file together. Invalidate any CDN, browser, or
+service-worker cache that could retain the previous WASM file.
+
+:::
 
 We support direct integration with [Expo](#expo) and [Remotion](#remotion).
 Additionally, you'll find manual installation steps for any webpack projects.
@@ -31,13 +50,15 @@ npx create-expo-app my-app -e with-skia
 This template includes the proper configuration for web support out of the box, so you don't need to manually configure loading methods.
 
 <video width="61%" autoPlay loop muted playsInline>
-  <source src="https://firebasestorage.googleapis.com/v0/b/start-react-native.appspot.com/o/expo-template2.mp4?alt=media&token=cdc13f16-9c5a-488a-b5d6-19d11f3e1842" type="video/mp4" />
+  <source
+    src="https://firebasestorage.googleapis.com/v0/b/start-react-native.appspot.com/o/expo-template2.mp4?alt=media&token=cdc13f16-9c5a-488a-b5d6-19d11f3e1842"
+    type="video/mp4"
+  />
 </video>
 
 ### Manual configuration
 
 Use the `setup-skia-web` script to ensure that the `canvaskit.wasm` file is accessible within your Expo project's public folder.
-If you're [loading CanvasKit from a CDN](#using-a-cdn), running the `setup-skia-web` script is unnecessary.
 
 ```bash
 $ npx expo install @shopify/react-native-skia
@@ -47,11 +68,20 @@ $ yarn setup-skia-web
 Run `yarn setup-skia-web` each time you upgrade the `@shopify/react-native-skia` package.
 Consider incorporating it into your `postinstall` script for convenience.
 
+```json
+{
+  "scripts": {
+    "postinstall": "setup-skia-web"
+  }
+}
+```
+
 After setup, choose your method to [Load Skia](#loading-skia).
 
 For existing projects using Expo Router, you can use [code-splitting](#using-code-splitting) or [deferred component registration](#using-deferred-component-registration).
 If you wish to use deferred component registration with Expo Router, you need to create your own `main` property in `package.json`.
 For instance, if you've created `index.tsx` and `index.web.tsx` in your root directory, update your `package.json` accordingly:
+
 ```patch
 -  "main": "expo-router/entry",
 +  "main": "index",
@@ -60,11 +90,11 @@ For instance, if you've created `index.tsx` and `index.web.tsx` in your root dir
 Below is an example of `index.web.tsx`:
 
 ```tsx
-import '@expo/metro-runtime';
-import { App } from 'expo-router/build/qualified-entry';
-import { renderRootComponent } from 'expo-router/build/renderRootComponent';
+import "@expo/metro-runtime";
+import { App } from "expo-router/build/qualified-entry";
+import { renderRootComponent } from "expo-router/build/renderRootComponent";
 
-import { LoadSkiaWeb } from '@shopify/react-native-skia/lib/module/web';
+import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
 
 LoadSkiaWeb().then(async () => {
   renderRootComponent(App);
@@ -75,14 +105,50 @@ For the `index.tsx` file, directly invoke `renderRootComponent(App)`.
 
 ## Remotion
 
-Follow these [installation steps](https://remotion.dev/skia) to use React Native Skia with Remotion.
+Follow the [Remotion installation steps](https://remotion.dev/skia) for the
+React and webpack integration. In addition, ensure the final
+`canvaskit.wasm` asset is copied from React Native Skia rather than from
+`canvaskit-wasm`.
+
+If you use Remotion's `enableSkia()` helper, add a final copy rule for the
+matched WASM file. This example uses `copy-webpack-plugin`; `force: true`
+replaces a stock asset emitted by an existing Skia integration:
+
+```tsx
+import { Config } from "@remotion/cli/config";
+import { enableSkia } from "@remotion/skia/enable";
+import CopyPlugin from "copy-webpack-plugin";
+
+Config.overrideWebpackConfig((currentConfiguration) => {
+  const configuration = enableSkia(currentConfiguration);
+  configuration.plugins ??= [];
+  configuration.plugins.push(
+    new CopyPlugin({
+      patterns: [
+        {
+          from: require.resolve(
+            "@shopify/react-native-skia/dist/canvaskit/canvaskit.wasm"
+          ),
+          to: "canvaskit.wasm",
+          force: true,
+        },
+      ],
+    })
+  );
+  return configuration;
+});
+```
+
+The entry point must still call `LoadSkia()` before importing and registering
+components that use React Native Skia, as shown in the Remotion instructions.
 
 ## Loading Skia
 
 Ensure Skia is fully loaded and initialized before importing the Skia module.
 Two methods facilitate Skia's loading:
-* `<WithSkiaWeb />` for code-splitting, delaying the loading of Skia-importing components.
-* `LoadSkiaWeb()` to defer root component registration until Skia loads.
+
+- `<WithSkiaWeb />` for code-splitting, delaying the loading of Skia-importing components.
+- `LoadSkiaWeb()` to defer root component registration until Skia loads.
 
 ### Using Code-Splitting
 
@@ -90,7 +156,7 @@ The `<WithSkiaWeb>` component utilizes [code splitting](https://reactjs.org/docs
 The following example demonstrates preloading Skia before rendering the `MySkiaComponent`:
 
 ```tsx
-import React from 'react';
+import React from "react";
 import { Text } from "react-native";
 import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
 
@@ -104,6 +170,7 @@ export default function App() {
   );
 }
 ```
+
 :::info
 
 When using expo router in dev mode you cannot load components that are inside the app directory, as they will get evaluated by the router before CanvasKit is loaded.
@@ -127,17 +194,32 @@ LoadSkiaWeb().then(async () => {
 
 ## Using a CDN
 
-Below, CanvasKit loads via code-splitting from a CDN.
-It is critical that the CDN-hosted CanvasKit version aligns with React Native Skia's requirements.
+React Native Skia bundles a matched CanvasKit JavaScript/WASM build. Do not load
+`canvaskit-wasm` directly from a public CDN because a stock WASM binary is not
+compatible with the bundled JavaScript bindings.
+
+To serve WASM from your own CDN, upload
+`@shopify/react-native-skia/dist/canvaskit/canvaskit.wasm` from the installed
+package (or the exact file copied by `setup-skia-web`). Use a versioned or
+content-hashed URL so an old WASM file cannot survive a package upgrade in a
+CDN or service-worker cache.
+
+Only the WASM file belongs on the CDN. The matching CanvasKit JavaScript is
+already imported into the application bundle by React Native Skia.
 
 ```tsx
 import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
-import { version } from 'canvaskit-wasm/package.json';
+
+const canvasKitWasmUrl =
+  "https://cdn.example.com/react-native-skia/your-version/canvaskit.wasm";
 
 export default function App() {
   return (
     <WithSkiaWeb
-      opts={{ locateFile: (file) => `https://cdn.jsdelivr.net/npm/canvaskit-wasm@${version}/bin/full/${file}` }}
+      opts={{
+        locateFile: (file) =>
+          file === "canvaskit.wasm" ? canvasKitWasmUrl : file,
+      }}
       getComponent={() => import("./MySkiaComponent")}
     />
   );
@@ -148,15 +230,22 @@ Alternatively, use deferred component registration:
 
 ```tsx
 import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
-import { version } from 'canvaskit-wasm/package.json';
 
 LoadSkiaWeb({
-  locateFile: (file) => `https://cdn.jsdelivr.net/npm/canvaskit-wasm@${version}/bin/full/${file}`
+  locateFile: (file) =>
+    file === "canvaskit.wasm"
+      ? "https://cdn.example.com/react-native-skia/your-version/canvaskit.wasm"
+      : file,
 }).then(async () => {
   const App = (await import("./src/App")).default;
   AppRegistry.registerComponent("Example", () => App);
 });
 ```
+
+If loading fails with `The loaded CanvasKit build is incompatible with React
+Native Skia`, the application JavaScript and WASM file are from different
+builds. Recopy the WASM file from the currently installed package, redeploy both
+assets, and clear any caches that can serve the old file.
 
 ## WebGL Contextes
 
@@ -166,11 +255,12 @@ Usually developers will see this error when they exceed this limit:
 ```
 WARNING: Too many active WebGL contexts. Oldest context will be lost.
 ```
+
 If you canvas is static and doesn't contain animation values, you can use the `__destroyWebGLContextAfterRender={true}` prop on your Canvas components to destroy the WebGL context after rendering.
 This even works with animated canvases but it will come with a performance cost as the context will be recreated on each render.
 
 ```tsx twoslash
-import { View } from 'react-native';
+import { View } from "react-native";
 import { Canvas, Fill } from "@shopify/react-native-skia";
 
 export default function App() {
@@ -179,7 +269,11 @@ export default function App() {
       {
         // 20 Skia Canvases with __destroyWebGLContextAfterRender={true}
         new Array(20).fill(0).map((_, i) => (
-          <Canvas key={i} style={{ width: 100, height: 100 }} __destroyWebGLContextAfterRender={true}>
+          <Canvas
+            key={i}
+            style={{ width: 100, height: 100 }}
+            __destroyWebGLContextAfterRender={true}
+          >
             <Fill color="lightblue" />
           </Canvas>
         ))
@@ -196,10 +290,10 @@ To request these features, please submit [a feature request on GitHub](https://g
 
 **Unsupported**
 
-* `PathEffectFactory.MakeSum()`
-* `PathEffectFactory.MakeCompose()`
-* `PathFactory.MakeFromText()`
-* `ShaderFilter`
+- `PathEffectFactory.MakeSum()`
+- `PathEffectFactory.MakeCompose()`
+- `PathFactory.MakeFromText()`
+- `ShaderFilter`
 
 ## Manual webpack Installation
 
@@ -227,12 +321,19 @@ const newConfiguration = {
           compilation.hooks.processAssets.tapPromise(
             {
               name: "copy-skia",
-              stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
+              stage:
+                compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
             },
             async () => {
-              const src = require.resolve("canvaskit-wasm/bin/full/canvaskit.wasm");
-              if (!compilation.getAsset(src)) {
-                compilation.emitAsset("/canvaskit.wasm", new sources.RawSource(await fs.promises.readFile(src)));
+              const src = require.resolve(
+                "@shopify/react-native-skia/dist/canvaskit/canvaskit.wasm"
+              );
+              const assetName = "canvaskit.wasm";
+              if (!compilation.getAsset(assetName)) {
+                compilation.emitAsset(
+                  assetName,
+                  new sources.RawSource(await fs.promises.readFile(src))
+                );
               }
             }
           );
@@ -241,8 +342,7 @@ const newConfiguration = {
     })(),
     // 2. Polyfill fs and path modules
 
-
-    new NodePolyfillPlugin()
+    new NodePolyfillPlugin(),
   ],
   alias: {
     ...currentConfiguration.alias,
@@ -254,7 +354,7 @@ const newConfiguration = {
     "react-native-reanimated": require.resolve("react-native-reanimated"),
     "react-native/Libraries/Image/AssetRegistry": false,
   },
-}
+};
 ```
 
 Finally, proceed to [load Skia](#loading-skia).
