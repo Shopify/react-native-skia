@@ -45,11 +45,9 @@ export const HelloWorld = () => {
 
 We offer some [Skia specific animation hooks](/docs/animations/hooks), especially for paths.
 
-## Driving multiple props from a single shared value
+## Grouped values
 
-Every animated prop can be backed by its own shared or derived value. When many props derive from the same source — for example several elements driven by one real-time data stream — this usually means one `useDerivedValue` per prop, and therefore one Reanimated subscription (mapper) per prop.
-
-`select` lets a single shared value, whose value is an object, drive multiple props by binding each prop to one key of that object. Reanimated then subscribes once, no matter how many props read from it.
+`select` lets a single shared value, whose value is an object, drive multiple props by binding each prop to one key of that object.
 
 ```tsx
 import { Canvas, Circle, select } from "@shopify/react-native-skia";
@@ -80,7 +78,6 @@ export const Grouped = () => {
 };
 ```
 
-Here one shared value drives three props with a single subscription, instead of three derived values with three subscriptions.
 
 :::note
 Reanimated only animates values assigned directly to a shared value's `.value`, not values nested inside an object. You therefore cannot place `withTiming`/`withSpring` on a key (e.g. `{ cx: withTiming(100) }`); assign plain values to the object (as above), or build the object in a `useDerivedValue` from individually animated shared values.
