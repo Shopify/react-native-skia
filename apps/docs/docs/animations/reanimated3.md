@@ -78,10 +78,7 @@ export const Grouped = () => {
 };
 ```
 
-
-:::note
 Reanimated only animates values assigned directly to a shared value's `.value`, not values nested inside an object. You therefore cannot place `withTiming`/`withSpring` on a key (e.g. `{ cx: withTiming(100) }`); assign plain values to the object (as above), or build the object in a `useDerivedValue` from individually animated shared values.
-:::
 
 ## Colors
 
