@@ -74,12 +74,18 @@ static def resolveNodePackage(packageName, baseDir) {
   return proc.text.trim()
 }
 
-// Graphite is detected via a marker file created by install-skia-graphite, which
-// downloads its binaries directly into libs/. For the default (Ganesh) build the
-// binaries live in the react-native-skia-android npm package and are read in place.
+// Graphite is detected via a marker file (created by install-skia-graphite for
+// in-repo development, or shipped in the npm tarball for next-channel releases).
+// The prebuilt binaries live in the react-native-skia-android npm package for the
+// default (Ganesh) build and in react-native-skia-graphite-android for Graphite.
+// In-repo Graphite development downloads them directly into libs/android instead,
+// which takes precedence over the npm package when present.
 def useGraphite = file("${projectDir}/../libs/.graphite").exists()
+def localGraphiteLibs = file("${projectDir}/../libs/android")
 def skiaLibsPath = useGraphite
-    ? "${projectDir}/../libs/android"
+    ? (localGraphiteLibs.exists()
+        ? "${projectDir}/../libs/android"
+        : "${resolveNodePackage('react-native-skia-graphite-android', projectDir)}/libs")
     : "${resolveNodePackage('react-native-skia-android', projectDir)}/libs"
 
 logger.warn("react-native-skia: SK_GRAPHITE: ${useGraphite}")

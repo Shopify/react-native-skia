@@ -3,7 +3,7 @@ import React, { useMemo } from "react";
 import type { ViewComponent, ViewProps } from "react-native";
 
 import type { DataModule } from "../skia/types";
-import { isRNModule } from "../skia/types";
+import { isRNModule, unwrapModule } from "../skia/types";
 
 import type { IPlatform } from "./IPlatform";
 
@@ -40,12 +40,16 @@ export const Platform: IPlatform = {
   OS: "web",
   PixelRatio: typeof window !== "undefined" ? window.devicePixelRatio : 1, // window is not defined on node
   resolveAsset: (source: DataModule) => {
-    if (isRNModule(source)) {
-      if (typeof source === "number" && typeof require === "function") {
+    const asset = unwrapModule(source);
+    if (typeof asset === "string") {
+      return asset;
+    }
+    if (isRNModule(asset)) {
+      if (typeof require === "function") {
         const {
           getAssetByID,
         } = require("react-native/Libraries/Image/AssetRegistry");
-        const { httpServerLocation, name, type } = getAssetByID(source);
+        const { httpServerLocation, name, type } = getAssetByID(asset);
         const uri = `${httpServerLocation}/${name}.${type}`;
         return uri;
       }
@@ -53,10 +57,7 @@ export const Platform: IPlatform = {
         "Asset source is a number - this is not supported on the web"
       );
     }
-    if ("uri" in source) {
-      return source.uri;
-    }
-    return source.default;
+    return asset.uri;
   },
   findNodeHandle: () => {
     throw new Error("findNodeHandle is not supported on the web");
