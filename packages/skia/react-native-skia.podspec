@@ -29,10 +29,8 @@ end
 # re-copied and CocoaPods picks up the change. This is best-effort: if `pod install`
 # does not detect the change, a clean reinstall fixes it (acceptable until the upcoming
 # Swift Package Manager migration).
-install_apple_skia_libs = lambda do |base_dir|
-  { 'ios' => 'react-native-skia-apple-ios',
-    'macos' => 'react-native-skia-apple-macos',
-    'tvos' => 'react-native-skia-apple-tvos' }.each do |platform, pkg_name|
+install_apple_skia_libs = lambda do |base_dir, packages|
+  packages.each do |platform, pkg_name|
     pkg_dir = resolve_node_package.call(pkg_name, base_dir)
     next if pkg_dir.nil?
 
@@ -54,9 +52,18 @@ install_apple_skia_libs = lambda do |base_dir|
   end
 end
 
-# Graphite downloads its binaries directly into libs/; only the default build needs
-# the npm packages copied in.
-install_apple_skia_libs.call(__dir__) unless use_graphite
+# The default (Ganesh) build ships its binaries in the react-native-skia-apple-*
+# npm packages, the Graphite build in react-native-skia-graphite-apple-* (no tvOS).
+# During in-repo development install-skia-graphite downloads the binaries directly
+# into libs/ and the graphite packages are absent from node_modules, in which case
+# the copy below is a no-op and the downloaded binaries are used as-is.
+apple_skia_packages = use_graphite ?
+  { 'ios' => 'react-native-skia-graphite-apple-ios',
+    'macos' => 'react-native-skia-graphite-apple-macos' } :
+  { 'ios' => 'react-native-skia-apple-ios',
+    'macos' => 'react-native-skia-apple-macos',
+    'tvos' => 'react-native-skia-apple-tvos' }
+install_apple_skia_libs.call(__dir__, apple_skia_packages)
 
 # Set preprocessor definitions based on GRAPHITE flag
 preprocessor_defs = use_graphite ?
@@ -71,14 +78,15 @@ framework_names = ['libskia', 'libsvg', 'libskshaper', 'libskparagraph',
 # Add Dawn library for Graphite builds (contains dawn::native symbols)
 framework_names += ['libdawn_combined'] if use_graphite
 
-# Verify that the prebuilt binaries are available (copied in above, or downloaded by
-# install-skia-graphite for Graphite builds).
+# Verify that the prebuilt binaries are available (copied in above from the npm
+# packages, or downloaded by install-skia-graphite for in-repo Graphite builds).
 unless Dir.exist?(File.join(__dir__, 'libs', 'ios')) && Dir.exist?(File.join(__dir__, 'libs', 'macos'))
+  expected_packages = apple_skia_packages.values.join(', ')
   Pod::UI.warn "#{'-' * 72}"
   Pod::UI.warn "react-native-skia: Skia prebuilt binaries not found in libs/!"
   Pod::UI.warn ""
   Pod::UI.warn "Make sure dependencies are installed (yarn install / npm install) so that"
-  Pod::UI.warn "the react-native-skia-apple-* packages are present, then run `pod install` again."
+  Pod::UI.warn "the #{expected_packages} packages are present, then run `pod install` again."
   Pod::UI.warn "#{'-' * 72}"
   raise "react-native-skia: Skia prebuilt binaries not found. Run `yarn install` then `pod install` to fix this."
 end

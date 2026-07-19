@@ -79,6 +79,10 @@ public:
       }
       auto result =
           context->makeContextFromNativeSurface(surface, width, height);
+      if (result == nullptr) {
+        throw std::runtime_error(
+            "Couldn't create a Skia context from the native surface");
+      }
       // Return the newly constructed object
       auto hostObjectInstance =
           std::make_shared<JsiSkiaContext>(context, std::move(result));
