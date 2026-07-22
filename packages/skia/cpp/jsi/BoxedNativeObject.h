@@ -3,6 +3,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -33,6 +34,12 @@ public:
 
   void registerClass(const std::string &brand, Reconstructor reconstructor) {
     std::lock_guard<std::mutex> lock(_mutex);
+    // Brands are the unboxing key and must be unique process-wide; a silent
+    // overwrite would make one class unbox into another's reconstructor.
+    if (_reconstructors.count(brand) > 0) {
+      throw std::runtime_error("Duplicate native object brand registered: " +
+                               brand);
+    }
     _reconstructors[brand] = std::move(reconstructor);
   }
 

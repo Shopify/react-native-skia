@@ -679,7 +679,6 @@ public:
   }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installCommon(runtime, prototype);
     installHostMethod(runtime, prototype, "drawPaint", &JsiSkCanvas::drawPaint);
     installHostMethod(runtime, prototype, "drawLine", &JsiSkCanvas::drawLine);
     installHostMethod(runtime, prototype, "drawRect", &JsiSkCanvas::drawRect);

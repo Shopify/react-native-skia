@@ -116,6 +116,10 @@ public:
    * Each NativeObject<Derived> type has its own static cache.
    * Uses StaticRuntimeAwareCache to properly handle runtime lifecycle
    * and hot reload (where the main runtime is destroyed and recreated).
+   *
+   * Callers must hold getPrototypeCacheMutex(): the cache is reached
+   * concurrently from the main JS thread (create()) and from worklet
+   * runtime threads (BoxedNativeObject::unbox() -> installPrototype()).
    */
   static RNJsi::RuntimeAwareCache<PrototypeCacheEntry> &
   getPrototypeCache(jsi::Runtime &runtime) {
@@ -124,10 +128,21 @@ public:
   }
 
   /**
+   * Per-class mutex guarding getPrototypeCache() and prototype
+   * installation. Serializes the StaticRuntimeAwareCache pointer swap
+   * (hot reload) and the per-runtime cache lookups.
+   */
+  static std::mutex &getPrototypeCacheMutex() {
+    static std::mutex mutex;
+    return mutex;
+  }
+
+  /**
    * Ensure the prototype is installed for this runtime.
    * Called automatically by create(), but can be called manually.
    */
   static void installPrototype(jsi::Runtime &runtime) {
+    std::lock_guard<std::mutex> lock(getPrototypeCacheMutex());
     auto &entry = getPrototypeCache(runtime).get(runtime);
     if (entry.prototype.has_value()) {
       return; // Already installed
@@ -189,7 +204,18 @@ public:
             if (instance == nullptr) {
               throw jsi::JSError(rt, "Invalid boxed native object state");
             }
-            return Derived::create(rt, std::move(instance));
+            // Unboxing creates a *view* of the object on the target runtime.
+            // Keep the runtime the object was originally created on: async
+            // native code (e.g. GPUDevice error/lost events) delivers into
+            // the creation runtime, and rebinding it to a worklet runtime
+            // would invoke main-runtime jsi::Functions on the wrong runtime
+            // and thread.
+            auto *originalRuntime = instance->getCreationRuntime();
+            auto value = Derived::create(rt, instance);
+            if (originalRuntime != nullptr) {
+              instance->setCreationRuntime(originalRuntime);
+            }
+            return value;
           });
     });
 
@@ -207,6 +233,7 @@ public:
   static void installConstructor(jsi::Runtime &runtime) {
     installPrototype(runtime);
 
+    std::lock_guard<std::mutex> lock(getPrototypeCacheMutex());
     auto &entry = getPrototypeCache(runtime).get(runtime);
     if (!entry.prototype.has_value()) {
       return;
@@ -250,13 +277,17 @@ public:
     obj.setNativeState(runtime, instance);
 
     // Set prototype
-    auto &entry = getPrototypeCache(runtime).get(runtime);
-    if (entry.prototype.has_value()) {
-      // Use Object.setPrototypeOf to set the prototype
-      auto objectCtor = runtime.global().getPropertyAsObject(runtime, "Object");
-      auto setPrototypeOf =
-          objectCtor.getPropertyAsFunction(runtime, "setPrototypeOf");
-      setPrototypeOf.call(runtime, obj, *entry.prototype);
+    {
+      std::lock_guard<std::mutex> lock(getPrototypeCacheMutex());
+      auto &entry = getPrototypeCache(runtime).get(runtime);
+      if (entry.prototype.has_value()) {
+        // Use Object.setPrototypeOf to set the prototype
+        auto objectCtor =
+            runtime.global().getPropertyAsObject(runtime, "Object");
+        auto setPrototypeOf =
+            objectCtor.getPropertyAsFunction(runtime, "setPrototypeOf");
+        setPrototypeOf.call(runtime, obj, *entry.prototype);
+      }
     }
 
     // Set memory pressure hint for GC

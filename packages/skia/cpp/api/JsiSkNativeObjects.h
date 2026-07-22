@@ -47,10 +47,9 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-// Minimum memory pressure reported for any native object.
-// This accounts for C++ wrapper overhead and ensures dispose() never
-// increases reported memory pressure (which would defeat its purpose).
-static constexpr size_t kMinMemoryPressure = 256;
+// Minimum memory pressure reported for any native object — aliased from the
+// NativeObject infrastructure so dispose() and create() agree on the floor.
+static constexpr size_t kMinMemoryPressure = rnwgpu::kMinMemoryPressure;
 
 /**
  * Creates the JS object for a wrapper instance (a class based on the
@@ -109,7 +108,10 @@ std::shared_ptr<T> getJsiObject(jsi::Runtime &runtime,
  * - `static constexpr const char *CLASS_NAME` — the public __typename__
  *   (e.g. "Rect"); also used as the boxing brand, so it must be unique.
  * - `static void definePrototype(jsi::Runtime&, jsi::Object& prototype)` —
- *   installs methods/getters and must call `installCommon(runtime, proto)`.
+ *   installs methods/getters. The shared pieces (`__typename__`, `__box()`
+ *   and the boxing reconstructor) are installed by
+ *   NativeObject::installPrototype; wrapping classes additionally call
+ *   `installCommon(runtime, proto)` to install dispose().
  *
  * The existing JSI_HOST_FUNCTION / JSI_PROPERTY_GET / JSI_PROPERTY_SET method
  * bodies keep working unchanged; they are installed on the prototype with the
@@ -278,15 +280,6 @@ protected:
     installHostSetter(runtime, prototype, name, setter);
   }
 
-  /**
-   * Hook called from every definePrototype(). The shared pieces
-   * (`__typename__`, `__box()` and the boxing reconstructor used for
-   * cross-runtime transfer) are installed by NativeObject::installPrototype
-   * for all native objects (Skia and WebGPU alike); the wrapping subclass
-   * below extends this hook to add dispose().
-   */
-  static void installCommon(jsi::Runtime &runtime, jsi::Object &prototype) {}
-
 private:
   static void defineProperty(jsi::Runtime &runtime, jsi::Object &prototype,
                              const char *name, jsi::Function *getter,
@@ -370,10 +363,11 @@ public:
   }
 
   /**
-   * Installs __typename__, boxing support and dispose() on the prototype.
+   * Installs dispose() on the prototype (the shared pieces — __typename__,
+   * __box() and the boxing reconstructor — are installed by
+   * NativeObject::installPrototype). Must be called from definePrototype().
    */
   static void installCommon(jsi::Runtime &runtime, jsi::Object &prototype) {
-    JsiSkNativeObject<Derived>::installCommon(runtime, prototype);
     JsiSkNativeObject<Derived>::installHostMethod(runtime, prototype, "dispose",
                                                   &Derived::dispose);
   }

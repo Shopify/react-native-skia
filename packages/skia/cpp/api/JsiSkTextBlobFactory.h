@@ -100,7 +100,6 @@ public:
   size_t getMemoryPressure() override { return 2048; }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installCommon(runtime, prototype);
     installHostMethod(runtime, prototype, "MakeFromText",
                       &JsiSkTextBlobFactory::MakeFromText);
     installHostMethod(runtime, prototype, "MakeFromGlyphs",

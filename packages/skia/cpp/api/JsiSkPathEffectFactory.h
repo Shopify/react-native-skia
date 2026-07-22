@@ -112,7 +112,6 @@ public:
   }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installCommon(runtime, prototype);
     installHostMethod(runtime, prototype, "MakeCorner",
                       &JsiSkPathEffectFactory::MakeCorner);
     installHostMethod(runtime, prototype, "MakeDash",

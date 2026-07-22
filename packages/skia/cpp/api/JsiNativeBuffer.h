@@ -45,7 +45,6 @@ public:
   }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installCommon(runtime, prototype);
     installHostMethod(runtime, prototype, "Release",
                       &JsiNativeBufferFactory::Release);
     installHostMethod(runtime, prototype, "MakeFromImage",

@@ -289,7 +289,6 @@ public:
   }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installCommon(runtime, prototype);
     installHostMethod(runtime, prototype, "setJsiProperty",
                       &RNSkJsiViewApi::setJsiProperty);
     installHostMethod(runtime, prototype, "requestRedraw",

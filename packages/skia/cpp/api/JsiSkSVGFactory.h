@@ -158,7 +158,6 @@ public:
   size_t getMemoryPressure() override { return kMinMemoryPressure; }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installCommon(runtime, prototype);
     installHostMethod(runtime, prototype, "MakeFromData",
                       &JsiSkSVGFactory::MakeFromData);
     installHostMethod(runtime, prototype, "MakeFromString",

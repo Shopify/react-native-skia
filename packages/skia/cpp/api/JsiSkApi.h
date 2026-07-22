@@ -253,7 +253,6 @@ public:
   }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installCommon(runtime, prototype);
     installHostMethod(runtime, prototype, "Video", &JsiSkApi::Video);
     installHostMethod(runtime, prototype, "Context", &JsiSkApi::Context);
     installHostMethod(runtime, prototype, "Font", &JsiSkApi::Font);

@@ -10,6 +10,13 @@ export let HAS_REANIMATED_3 = false;
  */
 export let HAS_REANIMATED_4 = false;
 
+/**
+ * Major version of the installed react-native-reanimated package, or null if
+ * it is not installed. Used to give actionable diagnostics when the
+ * integration cannot be enabled.
+ */
+export let REANIMATED_VERSION_MAJOR: number | null = null;
+
 try {
   // This logic is convoluted but necessary
   // In most systems, `require("react-native-reanimated")` throws an error, all is well.
@@ -25,6 +32,9 @@ try {
     HAS_REANIMATED_3 = true;
   }
   const majorVersion = parseInt(reanimatedVersion.split(".")[0], 10);
+  if (!isNaN(majorVersion)) {
+    REANIMATED_VERSION_MAJOR = majorVersion;
+  }
   if (majorVersion >= 4) {
     try {
       const worklets = require("react-native-worklets");

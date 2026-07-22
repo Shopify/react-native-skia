@@ -171,7 +171,6 @@ public:
   size_t getMemoryPressure() override { return 1024; }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installCommon(runtime, prototype);
     installHostMethod(runtime, prototype, "MakeImageFromEncoded",
                       &JsiSkImageFactory::MakeImageFromEncoded);
     installHostMethod(runtime, prototype, "MakeImageFromViewTag",

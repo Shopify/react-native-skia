@@ -108,7 +108,6 @@ public:
   }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installCommon(runtime, prototype);
     installHostMethod(runtime, prototype, "build",
                       &JsiSkParagraphBuilder::build);
     installHostMethod(runtime, prototype, "reset",

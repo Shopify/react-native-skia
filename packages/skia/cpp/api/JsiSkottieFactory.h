@@ -59,7 +59,6 @@ public:
   size_t getMemoryPressure() override { return 4096; }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installCommon(runtime, prototype);
     installHostMethod(runtime, prototype, "Make", &JsiSkottieFactory::Make);
   }
 

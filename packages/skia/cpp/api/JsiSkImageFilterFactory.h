@@ -633,7 +633,6 @@ public:
   }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installCommon(runtime, prototype);
     installHostMethod(runtime, prototype, "MakeBlur",
                       &JsiSkImageFilterFactory::MakeBlur);
     installHostMethod(runtime, prototype, "MakeOffset",
