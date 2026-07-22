@@ -327,6 +327,7 @@ std::shared_ptr<GPUSharedFence> GPUDevice::importSharedFence(
 }
 
 async::AsyncTaskHandle GPUDevice::createComputePipelineAsync(
+    jsi::Runtime &runtime,
     std::shared_ptr<GPUComputePipelineDescriptor> descriptor) {
   wgpu::ComputePipelineDescriptor desc{};
   Convertor conv;
@@ -339,12 +340,16 @@ async::AsyncTaskHandle GPUDevice::createComputePipelineAsync(
       descriptor->label.has_value() ? descriptor->label.value() : "");
   auto pipelineHolder = std::make_shared<GPUComputePipeline>(nullptr, label);
 
-  return _async->postTask([device = _instance, desc, descriptor,
-                           pipelineHolder](
-                              const async::AsyncTaskHandle::ResolveFunction
-                                  &resolve,
-                              const async::AsyncTaskHandle::RejectFunction
-                                  &reject) {
+  // Post to the CALLING runtime's context so the promise settles on the
+  // thread that requested it (see GPUBuffer::mapAsync).
+  auto context =
+      async::RuntimeContext::getOrCreate(runtime, _async->instance());
+  return context->postTask([device = _instance, desc, descriptor,
+                            pipelineHolder](
+                               const async::AsyncTaskHandle::ResolveFunction
+                                   &resolve,
+                               const async::AsyncTaskHandle::RejectFunction
+                                   &reject) {
     (void)descriptor;
     device.CreateComputePipelineAsync(
         &desc, wgpu::CallbackMode::AllowProcessEvents,
@@ -368,6 +373,7 @@ async::AsyncTaskHandle GPUDevice::createComputePipelineAsync(
 }
 
 async::AsyncTaskHandle GPUDevice::createRenderPipelineAsync(
+    jsi::Runtime &runtime,
     std::shared_ptr<GPURenderPipelineDescriptor> descriptor) {
   wgpu::RenderPipelineDescriptor desc{};
   Convertor conv;
@@ -381,12 +387,16 @@ async::AsyncTaskHandle GPUDevice::createRenderPipelineAsync(
       descriptor->label.has_value() ? descriptor->label.value() : "");
   auto pipelineHolder = std::make_shared<GPURenderPipeline>(nullptr, label);
 
-  return _async->postTask([device = _instance, desc, descriptor,
-                           pipelineHolder](
-                              const async::AsyncTaskHandle::ResolveFunction
-                                  &resolve,
-                              const async::AsyncTaskHandle::RejectFunction
-                                  &reject) {
+  // Post to the CALLING runtime's context so the promise settles on the
+  // thread that requested it (see GPUBuffer::mapAsync).
+  auto context =
+      async::RuntimeContext::getOrCreate(runtime, _async->instance());
+  return context->postTask([device = _instance, desc, descriptor,
+                            pipelineHolder](
+                               const async::AsyncTaskHandle::ResolveFunction
+                                   &resolve,
+                               const async::AsyncTaskHandle::RejectFunction
+                                   &reject) {
     (void)descriptor;
     device.CreateRenderPipelineAsync(
         &desc, wgpu::CallbackMode::AllowProcessEvents,
@@ -413,13 +423,18 @@ void GPUDevice::pushErrorScope(wgpu::ErrorFilter filter) {
   _instance.PushErrorScope(filter);
 }
 
-async::AsyncTaskHandle GPUDevice::popErrorScope() {
+async::AsyncTaskHandle GPUDevice::popErrorScope(jsi::Runtime &runtime) {
   auto device = _instance;
 
-  return _async->postTask([device](const async::AsyncTaskHandle::ResolveFunction
-                                       &resolve,
-                                   const async::AsyncTaskHandle::RejectFunction
-                                       &reject) {
+  // Post to the CALLING runtime's context so the promise settles on the
+  // thread that requested it (see GPUBuffer::mapAsync).
+  auto context =
+      async::RuntimeContext::getOrCreate(runtime, _async->instance());
+  return context->postTask([device](
+                               const async::AsyncTaskHandle::ResolveFunction
+                                   &resolve,
+                               const async::AsyncTaskHandle::RejectFunction
+                                   &reject) {
     device.PopErrorScope(
         wgpu::CallbackMode::AllowProcessEvents,
         [resolve, reject](wgpu::PopErrorScopeStatus status,

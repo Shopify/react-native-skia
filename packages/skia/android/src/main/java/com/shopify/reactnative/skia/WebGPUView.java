@@ -62,13 +62,16 @@ public class WebGPUView extends ReactViewGroup implements WebGPUViewAPI {
   }
 
   @Override
-  public void surfaceDestroyed() {
-    onSurfaceDestroy(mContextId);
-  }
-
-  @Override
   public void surfaceOffscreen() {
     switchToOffscreenSurface(mContextId);
+  }
+
+  /**
+   * Called from WebGPUViewManager.onDropViewInstance when React removes this
+   * view: the view dies with its Canvas, so it retires the registry entry.
+   */
+  public void destroy() {
+    onViewDestroyed(mContextId);
   }
 
   @DoNotStrip
@@ -88,8 +91,8 @@ public class WebGPUView extends ReactViewGroup implements WebGPUViewAPI {
   );
 
   @DoNotStrip
-  private native void onSurfaceDestroy(int contextId);
+  private native void switchToOffscreenSurface(int contextId);
 
   @DoNotStrip
-  private native void switchToOffscreenSurface(int contextId);
+  private native void onViewDestroyed(int contextId);
 }

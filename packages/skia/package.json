@@ -32,7 +32,8 @@
     "cpp/**/*.{h,cpp}",
     "apple/**",
     "react-native-skia.podspec",
-    "dist/**"
+    "dist/**",
+    "libs/.graphite"
   ],
   "scripts": {
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --cache --fix",
@@ -126,7 +127,7 @@
     "rimraf": "3.0.2",
     "semantic-release": "^24.1.0",
     "semantic-release-yarn": "^3.0.2",
-    "tar": "^7.5.16",
+    "tar": "^7.5.19",
     "ts-jest": "29.4.3",
     "tsx": "^4.21.0",
     "typescript": "^5.2.2",
@@ -139,6 +140,11 @@
     "react-native-skia-apple-macos": "150.0.0",
     "react-native-skia-apple-tvos": "150.0.0",
     "react-reconciler": "0.31.0"
+  },
+  "graphiteDependencies": {
+    "react-native-skia-graphite-android": "150.0.0",
+    "react-native-skia-graphite-apple-ios": "150.0.0",
+    "react-native-skia-graphite-apple-macos": "150.0.0"
   },
   "eslintIgnore": [
     "node_modules/",

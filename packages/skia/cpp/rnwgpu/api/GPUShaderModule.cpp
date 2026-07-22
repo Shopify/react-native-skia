@@ -7,10 +7,15 @@
 
 namespace rnwgpu {
 
-async::AsyncTaskHandle GPUShaderModule::getCompilationInfo() {
+async::AsyncTaskHandle
+GPUShaderModule::getCompilationInfo(jsi::Runtime &runtime) {
   auto module = _instance;
 
-  return _async->postTask(
+  // Post to the CALLING runtime's context so the promise settles on the
+  // thread that requested it (see GPUBuffer::mapAsync).
+  auto context =
+      async::RuntimeContext::getOrCreate(runtime, _async->instance());
+  return context->postTask(
       [module](const async::AsyncTaskHandle::ResolveFunction &resolve,
                const async::AsyncTaskHandle::RejectFunction &reject) {
         auto result = std::make_shared<GPUCompilationInfo>();
