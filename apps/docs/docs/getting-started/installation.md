@@ -11,7 +11,8 @@ Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flu
 **Version compatibility:**
 `react-native@>=0.79` and `react@>=19` are required. <br />
 In addition you should make sure you're on at least `iOS 14` and `Android API level 21` or above. <br />
-To use React Native Skia with video support, `Android API level 26` or above is required.
+To use React Native Skia with video support, `Android API level 26` or above is required. <br />
+To use React Native Skia with Reanimated on native platforms, `react-native-reanimated@>=4.0.0` (with `react-native-worklets@>=0.7.0`) is required — Reanimated 3 is not supported.
 
 For `react-native@<=0.78` and `react@<=18`, you need to use `@shopify/react-native-skia` version `1.12.4` or below.
 

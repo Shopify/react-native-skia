@@ -6,6 +6,7 @@
 #include "JsiSkDispatcher.h"
 #include "JsiSkHostObjects.h"
 #include "JsiSkMatrix.h"
+#include "JsiSkNativeObjects.h"
 #include "JsiSkRect.h"
 #include "JsiSkShader.h"
 
@@ -20,14 +21,18 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiSkPicture : public JsiSkWrappingSkPtrHostObject<SkPicture> {
+class JsiSkPicture
+    : public JsiSkWrappingSkPtrNativeObject<JsiSkPicture, SkPicture> {
 private:
   std::shared_ptr<Dispatcher> _dispatcher;
 
 public:
+  static constexpr const char *CLASS_NAME = "Picture";
+
   JsiSkPicture(std::shared_ptr<RNSkPlatformContext> context,
                const sk_sp<SkPicture> picture)
-      : JsiSkWrappingSkPtrHostObject<SkPicture>(context, picture) {
+      : JsiSkWrappingSkPtrNativeObject<JsiSkPicture, SkPicture>(context,
+                                                                picture) {
     // Get the dispatcher for the current thread
     _dispatcher = Dispatcher::getDispatcher();
     // Process any pending operations
@@ -66,9 +71,8 @@ public:
 
     // Create shader
     auto shader = getObject()->makeShader(tmx, tmy, fm, m, tr);
-    auto shaderObj = std::make_shared<JsiSkShader>(getContext(), shader);
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shaderObj,
-                                                       getContext());
+    return makeJsiObject(runtime,
+                         std::make_shared<JsiSkShader>(getContext(), shader));
   }
 
   JSI_HOST_FUNCTION(serialize) {
@@ -90,13 +94,23 @@ public:
     return array;
   }
 
-  EXPORT_JSI_API_TYPENAME(JsiSkPicture, Picture)
+  /**
+    Returns the underlying object from a host object of this type
+   */
+  static sk_sp<SkPicture> fromValue(jsi::Runtime &runtime,
+                                    const jsi::Value &obj) {
+    return getJsiObject<JsiSkPicture>(runtime, obj)->getObject();
+  }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPicture, makeShader),
-                       JSI_EXPORT_FUNC(JsiSkPicture, serialize),
-                       JSI_EXPORT_FUNC(JsiSkPicture, dispose))
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    installHostMethod(runtime, prototype, "makeShader",
+                      &JsiSkPicture::makeShader);
+    installHostMethod(runtime, prototype, "serialize",
+                      &JsiSkPicture::serialize);
+  }
 
-  size_t getMemoryPressure() const override {
+  size_t getMemoryPressure() override {
     if (isDisposed()) {
       return 0;
     }
@@ -108,7 +122,5 @@ public:
     auto bytesUsed = picture->approximateBytesUsed();
     return bytesUsed;
   }
-
-  std::string getObjectType() const override { return "JsiSkPicture"; }
 };
 } // namespace RNSkia

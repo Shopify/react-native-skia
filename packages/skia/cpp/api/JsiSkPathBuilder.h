@@ -8,6 +8,7 @@
 
 #include "JsiSkHostObjects.h"
 #include "JsiSkMatrix.h"
+#include "JsiSkNativeObjects.h"
 #include "JsiSkPath.h"
 #include "JsiSkPoint.h"
 #include "JsiSkRRect.h"
@@ -27,8 +28,11 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 
 class JsiSkPathBuilder
-    : public JsiSkWrappingSharedPtrHostObject<SkPathBuilder> {
+    : public JsiSkWrappingSharedPtrNativeObject<JsiSkPathBuilder,
+                                                SkPathBuilder> {
 public:
+  static constexpr const char *CLASS_NAME = "PathBuilder";
+
   // Movement methods
   JSI_HOST_FUNCTION(moveTo) {
     SkScalar x = arguments[0].asNumber();
@@ -299,9 +303,8 @@ public:
   JSI_HOST_FUNCTION(computeBounds) {
     auto path = getObject()->snapshot();
     auto result = path.getBounds();
-    auto hostObjectInstance = std::make_shared<JsiSkRect>(getContext(), result);
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(runtime,
+                         std::make_shared<JsiSkRect>(getContext(), result));
   }
 
   JSI_HOST_FUNCTION(isEmpty) {
@@ -326,73 +329,91 @@ public:
   JSI_HOST_FUNCTION(build) {
     // snapshot() returns a copy without resetting the builder
     auto path = getObject()->snapshot();
-    auto hostObjectInstance =
-        std::make_shared<JsiSkPath>(getContext(), std::move(path));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(
+        runtime, std::make_shared<JsiSkPath>(getContext(), std::move(path)));
   }
 
   JSI_HOST_FUNCTION(detach) {
     // detach() returns the path and resets the builder
     auto path = getObject()->detach();
-    auto hostObjectInstance =
-        std::make_shared<JsiSkPath>(getContext(), std::move(path));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(
+        runtime, std::make_shared<JsiSkPath>(getContext(), std::move(path)));
   }
 
-  EXPORT_JSI_API_TYPENAME(JsiSkPathBuilder, PathBuilder)
-
-  JSI_EXPORT_FUNCTIONS(
-      // Movement
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, moveTo),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, rMoveTo),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, lineTo),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, rLineTo),
-      // Curves
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, quadTo),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, rQuadTo),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, conicTo),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, rConicTo),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, cubicTo),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, rCubicTo),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, close),
-      // Arcs
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, arcToOval),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, arcToRotated),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, rArcTo),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, arcToTangent),
-      // Shapes
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, addRect),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, addOval),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, addArc),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, addRRect),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, addCircle),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, addPoly),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, addPath),
-      // Config
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, setFillType),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, setIsVolatile),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, reset),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, offset),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, transform),
-      // Query
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, computeBounds),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, isEmpty),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, getLastPt),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, countPoints),
-      // Build
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, build),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, detach),
-      JSI_EXPORT_FUNC(JsiSkPathBuilder, dispose))
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    // Movement
+    installHostMethod(runtime, prototype, "moveTo", &JsiSkPathBuilder::moveTo);
+    installHostMethod(runtime, prototype, "rMoveTo",
+                      &JsiSkPathBuilder::rMoveTo);
+    installHostMethod(runtime, prototype, "lineTo", &JsiSkPathBuilder::lineTo);
+    installHostMethod(runtime, prototype, "rLineTo",
+                      &JsiSkPathBuilder::rLineTo);
+    // Curves
+    installHostMethod(runtime, prototype, "quadTo", &JsiSkPathBuilder::quadTo);
+    installHostMethod(runtime, prototype, "rQuadTo",
+                      &JsiSkPathBuilder::rQuadTo);
+    installHostMethod(runtime, prototype, "conicTo",
+                      &JsiSkPathBuilder::conicTo);
+    installHostMethod(runtime, prototype, "rConicTo",
+                      &JsiSkPathBuilder::rConicTo);
+    installHostMethod(runtime, prototype, "cubicTo",
+                      &JsiSkPathBuilder::cubicTo);
+    installHostMethod(runtime, prototype, "rCubicTo",
+                      &JsiSkPathBuilder::rCubicTo);
+    installHostMethod(runtime, prototype, "close", &JsiSkPathBuilder::close);
+    // Arcs
+    installHostMethod(runtime, prototype, "arcToOval",
+                      &JsiSkPathBuilder::arcToOval);
+    installHostMethod(runtime, prototype, "arcToRotated",
+                      &JsiSkPathBuilder::arcToRotated);
+    installHostMethod(runtime, prototype, "rArcTo", &JsiSkPathBuilder::rArcTo);
+    installHostMethod(runtime, prototype, "arcToTangent",
+                      &JsiSkPathBuilder::arcToTangent);
+    // Shapes
+    installHostMethod(runtime, prototype, "addRect",
+                      &JsiSkPathBuilder::addRect);
+    installHostMethod(runtime, prototype, "addOval",
+                      &JsiSkPathBuilder::addOval);
+    installHostMethod(runtime, prototype, "addArc", &JsiSkPathBuilder::addArc);
+    installHostMethod(runtime, prototype, "addRRect",
+                      &JsiSkPathBuilder::addRRect);
+    installHostMethod(runtime, prototype, "addCircle",
+                      &JsiSkPathBuilder::addCircle);
+    installHostMethod(runtime, prototype, "addPoly",
+                      &JsiSkPathBuilder::addPoly);
+    installHostMethod(runtime, prototype, "addPath",
+                      &JsiSkPathBuilder::addPath);
+    // Config
+    installHostMethod(runtime, prototype, "setFillType",
+                      &JsiSkPathBuilder::setFillType);
+    installHostMethod(runtime, prototype, "setIsVolatile",
+                      &JsiSkPathBuilder::setIsVolatile);
+    installHostMethod(runtime, prototype, "reset", &JsiSkPathBuilder::reset);
+    installHostMethod(runtime, prototype, "offset", &JsiSkPathBuilder::offset);
+    installHostMethod(runtime, prototype, "transform",
+                      &JsiSkPathBuilder::transform);
+    // Query
+    installHostMethod(runtime, prototype, "computeBounds",
+                      &JsiSkPathBuilder::computeBounds);
+    installHostMethod(runtime, prototype, "isEmpty",
+                      &JsiSkPathBuilder::isEmpty);
+    installHostMethod(runtime, prototype, "getLastPt",
+                      &JsiSkPathBuilder::getLastPt);
+    installHostMethod(runtime, prototype, "countPoints",
+                      &JsiSkPathBuilder::countPoints);
+    // Build
+    installHostMethod(runtime, prototype, "build", &JsiSkPathBuilder::build);
+    installHostMethod(runtime, prototype, "detach", &JsiSkPathBuilder::detach);
+  }
 
   JsiSkPathBuilder(std::shared_ptr<RNSkPlatformContext> context,
                    SkPathBuilder builder)
-      : JsiSkWrappingSharedPtrHostObject<SkPathBuilder>(
+      : JsiSkWrappingSharedPtrNativeObject<JsiSkPathBuilder, SkPathBuilder>(
             std::move(context),
             std::make_shared<SkPathBuilder>(std::move(builder))) {}
 
-  size_t getMemoryPressure() const override {
+  size_t getMemoryPressure() override {
     auto builder = getObject();
     if (!builder)
       return 0;
@@ -400,15 +421,11 @@ public:
     return builder->snapshot().approximateBytesUsed();
   }
 
-  std::string getObjectType() const override { return "JsiSkPathBuilder"; }
-
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             const SkPathBuilder &builder) {
-    auto hostObjectInstance =
-        std::make_shared<JsiSkPathBuilder>(context, builder);
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, context);
+    return makeJsiObject(runtime,
+                         std::make_shared<JsiSkPathBuilder>(context, builder));
   }
 };
 

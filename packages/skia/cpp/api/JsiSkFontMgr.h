@@ -7,6 +7,7 @@
 
 #include "JsiSkFontStyle.h"
 #include "JsiSkHostObjects.h"
+#include "JsiSkNativeObjects.h"
 #include "utils/RNSkLog.h"
 #include <jsi/jsi.h>
 
@@ -21,13 +22,15 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiSkFontMgr : public JsiSkWrappingSkPtrHostObject<SkFontMgr> {
+class JsiSkFontMgr
+    : public JsiSkWrappingSkPtrNativeObject<JsiSkFontMgr, SkFontMgr> {
 public:
-  EXPORT_JSI_API_TYPENAME(JsiSkFontMgr, FontMgr)
+  static constexpr const char *CLASS_NAME = "FontMgr";
 
   JsiSkFontMgr(std::shared_ptr<RNSkPlatformContext> context,
                sk_sp<SkFontMgr> fontMgr)
-      : JsiSkWrappingSkPtrHostObject(context, fontMgr),
+      : JsiSkWrappingSkPtrNativeObject<JsiSkFontMgr, SkFontMgr>(context,
+                                                                fontMgr),
         _systemFontFamilies(context->getSystemFontFamilies()) {}
 
   JSI_HOST_FUNCTION(countFamilies) {
@@ -63,19 +66,26 @@ public:
     auto fontStyle = JsiSkFontStyle::fromValue(runtime, arguments[1]);
     auto typeface =
         getObject()->matchFamilyStyle(resolvedName.c_str(), *fontStyle);
-    auto hostObjectInstance =
-        std::make_shared<JsiSkTypeface>(getContext(), std::move(typeface));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(runtime, std::make_shared<JsiSkTypeface>(
+                                      getContext(), std::move(typeface)));
   }
 
-  size_t getMemoryPressure() const override { return 2048; }
+  size_t getMemoryPressure() override { return 2048; }
 
-  std::string getObjectType() const override { return "JsiSkFontMgr"; }
+  static sk_sp<SkFontMgr> fromValue(jsi::Runtime &runtime,
+                                    const jsi::Value &obj) {
+    return objectFromValue(runtime, obj);
+  }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkFontMgr, countFamilies),
-                       JSI_EXPORT_FUNC(JsiSkFontMgr, getFamilyName),
-                       JSI_EXPORT_FUNC(JsiSkFontMgr, matchFamilyStyle))
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    installHostMethod(runtime, prototype, "countFamilies",
+                      &JsiSkFontMgr::countFamilies);
+    installHostMethod(runtime, prototype, "getFamilyName",
+                      &JsiSkFontMgr::getFamilyName);
+    installHostMethod(runtime, prototype, "matchFamilyStyle",
+                      &JsiSkFontMgr::matchFamilyStyle);
+  }
 
 private:
   std::vector<std::string> _systemFontFamilies;

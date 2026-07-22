@@ -9,6 +9,7 @@
 #include "JsiSkFontMgr.h"
 #include "JsiSkFontMgrFactory.h"
 #include "JsiSkHostObjects.h"
+#include "JsiSkNativeObjects.h"
 #include "JsiSkParagraph.h"
 #include "JsiSkParagraphStyle.h"
 #include "JsiSkTextStyle.h"
@@ -36,15 +37,13 @@ namespace para = skia::textlayout;
 /**
  Implementation of the ParagraphBuilder object in JSI
  */
-class JsiSkParagraphBuilder : public JsiSkHostObject {
+class JsiSkParagraphBuilder : public JsiSkNativeObject<JsiSkParagraphBuilder> {
 public:
-  JSI_API_TYPENAME("ParagraphBuilder");
+  static constexpr const char *CLASS_NAME = "ParagraphBuilder";
 
   JSI_HOST_FUNCTION(build) {
-    auto paragraph =
-        std::make_shared<JsiSkParagraph>(getContext(), _builder.get());
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, paragraph,
-                                                       getContext());
+    return makeJsiObject(runtime, std::make_shared<JsiSkParagraph>(
+                                      getContext(), _builder.get()));
   }
 
   JSI_HOST_FUNCTION(reset) {
@@ -84,16 +83,16 @@ public:
     auto textStyle = JsiSkTextStyle::fromValue(runtime, arguments[0]);
     // Foreground paint
     if (count >= 2) {
-      auto foreground =
-          tryGetArgumentAsHostObject<JsiSkPaint>(runtime, arguments, count, 1);
+      auto foreground = tryGetJsiObject<JsiSkPaint>(
+          runtime, getArgument(runtime, arguments, count, 1));
       if (foreground) {
         textStyle.setForegroundPaint(*foreground->getObject().get());
       }
     }
     // Background paint
     if (count >= 3) {
-      auto background =
-          tryGetArgumentAsHostObject<JsiSkPaint>(runtime, arguments, count, 2);
+      auto background = tryGetJsiObject<JsiSkPaint>(
+          runtime, getArgument(runtime, arguments, count, 2));
       if (background) {
         textStyle.setBackgroundPaint(*background->getObject().get());
       }
@@ -109,21 +108,27 @@ public:
     return thisValue.asObject(runtime);
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraphBuilder, build),
-                       JSI_EXPORT_FUNC(JsiSkParagraphBuilder, reset),
-                       JSI_EXPORT_FUNC(JsiSkParagraphBuilder, addText),
-                       JSI_EXPORT_FUNC(JsiSkParagraphBuilder, addPlaceholder),
-                       JSI_EXPORT_FUNC(JsiSkParagraphBuilder, pushStyle),
-                       JSI_EXPORT_FUNC(JsiSkParagraphBuilder, pop))
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    installHostMethod(runtime, prototype, "build",
+                      &JsiSkParagraphBuilder::build);
+    installHostMethod(runtime, prototype, "reset",
+                      &JsiSkParagraphBuilder::reset);
+    installHostMethod(runtime, prototype, "addText",
+                      &JsiSkParagraphBuilder::addText);
+    installHostMethod(runtime, prototype, "addPlaceholder",
+                      &JsiSkParagraphBuilder::addPlaceholder);
+    installHostMethod(runtime, prototype, "pushStyle",
+                      &JsiSkParagraphBuilder::pushStyle);
+    installHostMethod(runtime, prototype, "pop", &JsiSkParagraphBuilder::pop);
+  }
 
-  size_t getMemoryPressure() const override { return 1024 * 1024; }
-
-  std::string getObjectType() const override { return "JsiSkParagraphBuilder"; }
+  size_t getMemoryPressure() override { return 1024 * 1024; }
 
   explicit JsiSkParagraphBuilder(std::shared_ptr<RNSkPlatformContext> context,
                                  para::ParagraphStyle paragraphStyle,
                                  sk_sp<SkFontMgr> fontManager)
-      : JsiSkHostObject(std::move(context)) {
+      : JsiSkNativeObject<JsiSkParagraphBuilder>(std::move(context)) {
     _fontCollection = sk_make_sp<para::FontCollection>();
     auto fontMgr = JsiSkFontMgrFactory::getFontMgr(getContext());
     _fontCollection->setDefaultFontManager(fontMgr);

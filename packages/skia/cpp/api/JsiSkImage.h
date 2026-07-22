@@ -8,6 +8,7 @@
 #include "JsiSkHostObjects.h"
 #include "JsiSkImageInfo.h"
 #include "JsiSkMatrix.h"
+#include "JsiSkNativeObjects.h"
 #include "JsiSkShader.h"
 #include "api/third_party/base64.h"
 
@@ -15,8 +16,8 @@
 #include "utils/RNSkTypedArray.h"
 
 #if defined(SK_GRAPHITE)
-#include "rnskia/RNDawnContext.h"
 #include "include/gpu/graphite/Context.h"
+#include "rnskia/RNDawnContext.h"
 #else
 #include "include/gpu/ganesh/GrDirectContext.h"
 #endif
@@ -140,11 +141,13 @@ inline SkSamplingOptions SamplingOptionsFromValue(jsi::Runtime &runtime,
   return samplingOptions;
 }
 
-class JsiSkImage : public JsiSkWrappingSkPtrHostObject<SkImage> {
+class JsiSkImage : public JsiSkWrappingSkPtrNativeObject<JsiSkImage, SkImage> {
 private:
   std::shared_ptr<Dispatcher> _dispatcher;
 
 public:
+  static constexpr const char *CLASS_NAME = "Image";
+
   // TODO-API: Properties?
   JSI_HOST_FUNCTION(width) { return static_cast<double>(getObject()->width()); }
   JSI_HOST_FUNCTION(height) {
@@ -166,10 +169,8 @@ public:
                  : nullptr;
     auto shader =
         getObject()->makeShader(tmx, tmy, SkSamplingOptions(fm, mm), m);
-    auto shaderObj =
-        std::make_shared<JsiSkShader>(getContext(), std::move(shader));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shaderObj,
-                                                       getContext());
+    return makeJsiObject(runtime, std::make_shared<JsiSkShader>(
+                                      getContext(), std::move(shader)));
   }
 
   JSI_HOST_FUNCTION(makeShaderCubic) {
@@ -182,10 +183,8 @@ public:
                  : nullptr;
     auto shader =
         getObject()->makeShader(tmx, tmy, SkSamplingOptions({B, C}), m);
-    auto shaderObj =
-        std::make_shared<JsiSkShader>(getContext(), std::move(shader));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, shaderObj,
-                                                       getContext());
+    return makeJsiObject(runtime, std::make_shared<JsiSkShader>(
+                                      getContext(), std::move(shader)));
   }
 
   sk_sp<SkData> encodeImageData(const jsi::Value *arguments, size_t count) {
@@ -344,10 +343,8 @@ public:
     if (!rasterImage) {
       return jsi::Value::null();
     }
-    auto hostObjectInstance =
-        std::make_shared<JsiSkImage>(getContext(), std::move(rasterImage));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(runtime, std::make_shared<JsiSkImage>(
+                                      getContext(), std::move(rasterImage)));
   }
 
   JSI_HOST_FUNCTION(getNativeTextureUnstable) {
@@ -363,25 +360,42 @@ public:
     return jsi::Value(getObject()->isTextureBacked());
   }
 
-  EXPORT_JSI_API_TYPENAME(JsiSkImage, Image)
+  /**
+    Returns the underlying object from a host object of this type
+   */
+  static sk_sp<SkImage> fromValue(jsi::Runtime &runtime,
+                                  const jsi::Value &obj) {
+    return objectFromValue(runtime, obj);
+  }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImage, width),
-                       JSI_EXPORT_FUNC(JsiSkImage, height),
-                       JSI_EXPORT_FUNC(JsiSkImage, getImageInfo),
-                       JSI_EXPORT_FUNC(JsiSkImage, makeShaderOptions),
-                       JSI_EXPORT_FUNC(JsiSkImage, makeShaderCubic),
-                       JSI_EXPORT_FUNC(JsiSkImage, encodeToBytes),
-                       JSI_EXPORT_FUNC(JsiSkImage, encodeToBase64),
-                       JSI_EXPORT_FUNC(JsiSkImage, readPixels),
-                       JSI_EXPORT_FUNC(JsiSkImage, makeNonTextureImage),
-                       JSI_EXPORT_FUNC(JsiSkImage, getNativeTextureUnstable),
-                       JSI_EXPORT_FUNC(JsiSkImage, isTextureBacked),
-                       JSI_EXPORT_FUNC(JsiSkImage, dispose))
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    installHostMethod(runtime, prototype, "width", &JsiSkImage::width);
+    installHostMethod(runtime, prototype, "height", &JsiSkImage::height);
+    installHostMethod(runtime, prototype, "getImageInfo",
+                      &JsiSkImage::getImageInfo);
+    installHostMethod(runtime, prototype, "makeShaderOptions",
+                      &JsiSkImage::makeShaderOptions);
+    installHostMethod(runtime, prototype, "makeShaderCubic",
+                      &JsiSkImage::makeShaderCubic);
+    installHostMethod(runtime, prototype, "encodeToBytes",
+                      &JsiSkImage::encodeToBytes);
+    installHostMethod(runtime, prototype, "encodeToBase64",
+                      &JsiSkImage::encodeToBase64);
+    installHostMethod(runtime, prototype, "readPixels",
+                      &JsiSkImage::readPixels);
+    installHostMethod(runtime, prototype, "makeNonTextureImage",
+                      &JsiSkImage::makeNonTextureImage);
+    installHostMethod(runtime, prototype, "getNativeTextureUnstable",
+                      &JsiSkImage::getNativeTextureUnstable);
+    installHostMethod(runtime, prototype, "isTextureBacked",
+                      &JsiSkImage::isTextureBacked);
+  }
 
   JsiSkImage(std::shared_ptr<RNSkPlatformContext> context,
              const sk_sp<SkImage> image)
-      : JsiSkWrappingSkPtrHostObject<SkImage>(std::move(context),
-                                              std::move(image)) {
+      : JsiSkWrappingSkPtrNativeObject<JsiSkImage, SkImage>(std::move(context),
+                                                            std::move(image)) {
     // Get the dispatcher for the current thread
     _dispatcher = Dispatcher::getDispatcher();
     // Process any pending operations (e.g. deletions of previous resources)
@@ -406,7 +420,7 @@ public:
     }
   }
 
-  size_t getMemoryPressure() const override {
+  size_t getMemoryPressure() override {
     if (isDisposed()) {
       return 0;
     }
@@ -420,8 +434,6 @@ public:
     }
     return 0;
   }
-
-  std::string getObjectType() const override { return "JsiSkImage"; }
 };
 
 } // namespace RNSkia

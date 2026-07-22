@@ -7,6 +7,7 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkHostObjects.h"
+#include "JsiSkNativeObjects.h"
 #include "utils/RNSkLog.h"
 
 #pragma clang diagnostic push
@@ -22,15 +23,15 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiSkTypeface : public JsiSkWrappingSkPtrHostObject<SkTypeface> {
+class JsiSkTypeface
+    : public JsiSkWrappingSkPtrNativeObject<JsiSkTypeface, SkTypeface> {
 public:
-  EXPORT_JSI_API_TYPENAME(JsiSkTypeface, Typeface)
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTypeface, getGlyphIDs),
-                       JSI_EXPORT_FUNC(JsiSkTypeface, dispose))
+  static constexpr const char *CLASS_NAME = "Typeface";
 
   JsiSkTypeface(std::shared_ptr<RNSkPlatformContext> context,
                 sk_sp<SkTypeface> typeface)
-      : JsiSkWrappingSkPtrHostObject(std::move(context), std::move(typeface)) {}
+      : JsiSkWrappingSkPtrNativeObject<JsiSkTypeface, SkTypeface>(
+            std::move(context), std::move(typeface)) {}
 
   JSI_HOST_FUNCTION(getGlyphIDs) {
     auto str = arguments[0].asString(runtime).utf8(runtime);
@@ -53,7 +54,7 @@ public:
     return jsiGlyphIDs;
   }
 
-  size_t getMemoryPressure() const override {
+  size_t getMemoryPressure() override {
     auto typeface = getObject();
     if (!typeface) {
       return 0;
@@ -74,13 +75,20 @@ public:
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             sk_sp<SkTypeface> tf) {
-    auto hostObjectInstance =
-        std::make_shared<JsiSkTypeface>(context, std::move(tf));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, context);
+    return makeJsiObject(
+        runtime, std::make_shared<JsiSkTypeface>(context, std::move(tf)));
   }
 
-  std::string getObjectType() const override { return "JsiSkTypeface"; }
+  static sk_sp<SkTypeface> fromValue(jsi::Runtime &runtime,
+                                     const jsi::Value &obj) {
+    return objectFromValue(runtime, obj);
+  }
+
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    installHostMethod(runtime, prototype, "getGlyphIDs",
+                      &JsiSkTypeface::getGlyphIDs);
+  }
 };
 
 } // namespace RNSkia

@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "JsiSkHostObjects.h"
+#include "JsiSkNativeObjects.h"
 #include "utils/RNSkLog.h"
 #include <jsi/jsi.h>
 
@@ -28,19 +29,18 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiSkiaContext : public JsiSkWrappingSharedPtrHostObject<WindowContext> {
+class JsiSkiaContext
+    : public JsiSkWrappingSharedPtrNativeObject<JsiSkiaContext, WindowContext> {
 public:
-  EXPORT_JSI_API_TYPENAME(JsiSkiaContext, SkiaContext)
+  static constexpr const char *CLASS_NAME = "SkiaContext";
 
   JSI_HOST_FUNCTION(getSurface) {
     auto surface = getObject()->getSurface();
     if (surface == nullptr) {
       return jsi::Value::null();
     }
-    auto hostObjectInstance =
-        std::make_shared<JsiSkSurface>(getContext(), std::move(surface));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(runtime, std::make_shared<JsiSkSurface>(
+                                      getContext(), std::move(surface)));
   }
 
   JSI_HOST_FUNCTION(present) {
@@ -48,16 +48,19 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkiaContext, getSurface),
-                       JSI_EXPORT_FUNC(JsiSkiaContext, present))
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    installHostMethod(runtime, prototype, "getSurface",
+                      &JsiSkiaContext::getSurface);
+    installHostMethod(runtime, prototype, "present", &JsiSkiaContext::present);
+  }
 
   JsiSkiaContext(std::shared_ptr<RNSkPlatformContext> context,
                  std::shared_ptr<WindowContext> ctx)
-      : JsiSkWrappingSharedPtrHostObject(std::move(context), std::move(ctx)) {}
+      : JsiSkWrappingSharedPtrNativeObject<JsiSkiaContext, WindowContext>(
+            std::move(context), std::move(ctx)) {}
 
-  size_t getMemoryPressure() const override { return 10 * 1024 * 1024; }
-
-  std::string getObjectType() const override { return "JsiSkiaContext"; }
+  size_t getMemoryPressure() override { return 10 * 1024 * 1024; }
 
   /**
    * Creates the function for construction a new instance of the SkFont
@@ -84,10 +87,8 @@ public:
             "Couldn't create a Skia context from the native surface");
       }
       // Return the newly constructed object
-      auto hostObjectInstance =
-          std::make_shared<JsiSkiaContext>(context, std::move(result));
-      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-          runtime, hostObjectInstance, context);
+      return makeJsiObject(runtime, std::make_shared<JsiSkiaContext>(
+                                        context, std::move(result)));
     };
   }
 };

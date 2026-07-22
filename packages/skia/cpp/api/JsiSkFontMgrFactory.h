@@ -7,6 +7,7 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkHostObjects.h"
+#include "JsiSkNativeObjects.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -20,8 +21,10 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiSkFontMgrFactory : public JsiSkHostObject {
+class JsiSkFontMgrFactory : public JsiSkNativeObject<JsiSkFontMgrFactory> {
 public:
+  static constexpr const char *CLASS_NAME = "FontMgrFactory";
+
   static sk_sp<SkFontMgr>
   getFontMgr(std::shared_ptr<RNSkPlatformContext> context) {
     static SkOnce once;
@@ -32,19 +35,20 @@ public:
 
   JSI_HOST_FUNCTION(System) {
     auto fontMgr = JsiSkFontMgrFactory::getFontMgr(getContext());
-    auto fontMgrObj = std::make_shared<JsiSkFontMgr>(getContext(), fontMgr);
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, fontMgrObj,
-                                                       getContext());
+    return makeJsiObject(runtime,
+                         std::make_shared<JsiSkFontMgr>(getContext(), fontMgr));
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkFontMgrFactory, System))
+  size_t getMemoryPressure() override { return 1024; }
 
-  size_t getMemoryPressure() const override { return 1024; }
-
-  std::string getObjectType() const override { return "JsiSkFontMgrFactory"; }
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    installHostMethod(runtime, prototype, "System",
+                      &JsiSkFontMgrFactory::System);
+  }
 
   explicit JsiSkFontMgrFactory(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(std::move(context)) {}
+      : JsiSkNativeObject<JsiSkFontMgrFactory>(std::move(context)) {}
 };
 
 } // namespace RNSkia

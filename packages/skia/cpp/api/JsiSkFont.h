@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "JsiSkHostObjects.h"
+#include "JsiSkNativeObjects.h"
 #include "utils/RNSkLog.h"
 #include <jsi/jsi.h>
 
@@ -26,8 +27,10 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiSkFont : public JsiSkWrappingSharedPtrHostObject<SkFont> {
+class JsiSkFont : public JsiSkWrappingSharedPtrNativeObject<JsiSkFont, SkFont> {
 public:
+  static constexpr const char *CLASS_NAME = "Font";
+
   JSI_HOST_FUNCTION(getGlyphWidths) {
     auto jsiGlyphs = arguments[0].asObject(runtime).asArray(runtime);
     std::vector<SkGlyphID> glyphs;
@@ -91,9 +94,8 @@ public:
       getObject()->measureText(str.c_str(), str.length(), SkTextEncoding::kUTF8,
                                &bounds);
     }
-    auto rect = std::make_shared<JsiSkRect>(getContext(), std::move(bounds));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, rect,
-                                                       getContext());
+    return makeJsiObject(
+        runtime, std::make_shared<JsiSkRect>(getContext(), std::move(bounds)));
   }
 
   JSI_HOST_FUNCTION(getMetrics) {
@@ -251,39 +253,56 @@ public:
     return jsi::Value::undefined();
   }
 
-  EXPORT_JSI_API_TYPENAME(JsiSkFont, Font)
-
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkFont, getSize),
-                       JSI_EXPORT_FUNC(JsiSkFont, getMetrics),
-                       JSI_EXPORT_FUNC(JsiSkFont, getGlyphIDs),
-                       JSI_EXPORT_FUNC(JsiSkFont, getGlyphIntercepts),
-                       JSI_EXPORT_FUNC(JsiSkFont, getScaleX),
-                       JSI_EXPORT_FUNC(JsiSkFont, getSkewX),
-                       JSI_EXPORT_FUNC(JsiSkFont, getTypeface),
-                       JSI_EXPORT_FUNC(JsiSkFont, setEdging),
-                       JSI_EXPORT_FUNC(JsiSkFont, embeddedBitmaps),
-                       JSI_EXPORT_FUNC(JsiSkFont, setHinting),
-                       JSI_EXPORT_FUNC(JsiSkFont, setLinearMetrics),
-                       JSI_EXPORT_FUNC(JsiSkFont, setScaleX),
-                       JSI_EXPORT_FUNC(JsiSkFont, setSkewX),
-                       JSI_EXPORT_FUNC(JsiSkFont, setSize),
-                       JSI_EXPORT_FUNC(JsiSkFont, setEmbolden),
-                       JSI_EXPORT_FUNC(JsiSkFont, setSubpixel),
-                       JSI_EXPORT_FUNC(JsiSkFont, setTypeface),
-                       JSI_EXPORT_FUNC(JsiSkFont, getGlyphWidths),
-                       JSI_EXPORT_FUNC(JsiSkFont, getTextWidth),
-                       JSI_EXPORT_FUNC(JsiSkFont, measureText),
-                       JSI_EXPORT_FUNC(JsiSkFont, dispose))
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    installHostMethod(runtime, prototype, "getSize", &JsiSkFont::getSize);
+    installHostMethod(runtime, prototype, "getMetrics", &JsiSkFont::getMetrics);
+    installHostMethod(runtime, prototype, "getGlyphIDs",
+                      &JsiSkFont::getGlyphIDs);
+    installHostMethod(runtime, prototype, "getGlyphIntercepts",
+                      &JsiSkFont::getGlyphIntercepts);
+    installHostMethod(runtime, prototype, "getScaleX", &JsiSkFont::getScaleX);
+    installHostMethod(runtime, prototype, "getSkewX", &JsiSkFont::getSkewX);
+    installHostMethod(runtime, prototype, "getTypeface",
+                      &JsiSkFont::getTypeface);
+    installHostMethod(runtime, prototype, "setEdging", &JsiSkFont::setEdging);
+    installHostMethod(runtime, prototype, "embeddedBitmaps",
+                      &JsiSkFont::embeddedBitmaps);
+    installHostMethod(runtime, prototype, "setHinting", &JsiSkFont::setHinting);
+    installHostMethod(runtime, prototype, "setLinearMetrics",
+                      &JsiSkFont::setLinearMetrics);
+    installHostMethod(runtime, prototype, "setScaleX", &JsiSkFont::setScaleX);
+    installHostMethod(runtime, prototype, "setSkewX", &JsiSkFont::setSkewX);
+    installHostMethod(runtime, prototype, "setSize", &JsiSkFont::setSize);
+    installHostMethod(runtime, prototype, "setEmbolden",
+                      &JsiSkFont::setEmbolden);
+    installHostMethod(runtime, prototype, "setSubpixel",
+                      &JsiSkFont::setSubpixel);
+    installHostMethod(runtime, prototype, "setTypeface",
+                      &JsiSkFont::setTypeface);
+    installHostMethod(runtime, prototype, "getGlyphWidths",
+                      &JsiSkFont::getGlyphWidths);
+    installHostMethod(runtime, prototype, "getTextWidth",
+                      &JsiSkFont::getTextWidth);
+    installHostMethod(runtime, prototype, "measureText",
+                      &JsiSkFont::measureText);
+  }
 
   JsiSkFont(std::shared_ptr<RNSkPlatformContext> context, const SkFont &font)
-      : JsiSkWrappingSharedPtrHostObject(std::move(context),
-                                         std::make_shared<SkFont>(font)) {}
+      : JsiSkWrappingSharedPtrNativeObject<JsiSkFont, SkFont>(
+            std::move(context), std::make_shared<SkFont>(font)) {}
 
-  size_t getMemoryPressure() const override {
+  size_t getMemoryPressure() override {
     return std::max(sizeof(SkFont), kMinMemoryPressure);
   }
 
-  std::string getObjectType() const override { return "JsiSkFont"; }
+  /**
+    Returns the underlying object from a host object of this type
+   */
+  static std::shared_ptr<SkFont> fromValue(jsi::Runtime &runtime,
+                                           const jsi::Value &obj) {
+    return objectFromValue(runtime, obj);
+  }
 
   /**
    * Creates the function for construction a new instance of the SkFont
@@ -299,22 +318,16 @@ public:
       if (count == 2) {
         auto typeface = JsiSkTypeface::fromValue(runtime, arguments[0]);
         auto size = arguments[1].asNumber();
-        auto hostObjectInstance =
-            std::make_shared<JsiSkFont>(context, SkFont(typeface, size));
-        return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-            runtime, hostObjectInstance, std::move(context));
+        return makeJsiObject(runtime, std::make_shared<JsiSkFont>(
+                                          context, SkFont(typeface, size)));
       } else if (count == 1) {
         auto typeface = JsiSkTypeface::fromValue(runtime, arguments[0]);
-        auto hostObjectInstance =
-            std::make_shared<JsiSkFont>(context, SkFont(typeface));
-        return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-            runtime, hostObjectInstance, std::move(context));
+        return makeJsiObject(
+            runtime, std::make_shared<JsiSkFont>(context, SkFont(typeface)));
       } else {
         // Return the newly constructed object
-        auto hostObjectInstance =
-            std::make_shared<JsiSkFont>(context, SkFont());
-        return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-            runtime, hostObjectInstance, std::move(context));
+        return makeJsiObject(runtime,
+                             std::make_shared<JsiSkFont>(context, SkFont()));
       }
     };
   }

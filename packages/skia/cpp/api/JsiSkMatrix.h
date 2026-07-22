@@ -6,6 +6,7 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkHostObjects.h"
+#include "JsiSkNativeObjects.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -18,10 +19,13 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiSkMatrix : public JsiSkWrappingSharedPtrHostObject<SkMatrix> {
+class JsiSkMatrix
+    : public JsiSkWrappingSharedPtrNativeObject<JsiSkMatrix, SkMatrix> {
 public:
+  static constexpr const char *CLASS_NAME = "Matrix";
+
   JsiSkMatrix(std::shared_ptr<RNSkPlatformContext> context, SkMatrix m)
-      : JsiSkWrappingSharedPtrHostObject<SkMatrix>(
+      : JsiSkWrappingSharedPtrNativeObject<JsiSkMatrix, SkMatrix>(
             context, std::make_shared<SkMatrix>(std::move(m))) {}
 
   static SkMatrix getMatrix(jsi::Runtime &runtime, const jsi::Value &value) {
@@ -57,10 +61,9 @@ public:
   }
 
   JSI_HOST_FUNCTION(concat) {
-    if (arguments[0].isObject() &&
-        arguments[0].asObject(runtime).isHostObject(runtime)) {
-      auto m3 = JsiSkMatrix::fromValue(runtime, arguments[0]);
-      getObject()->preConcat(*m3);
+    auto matrix = tryGetJsiObject<JsiSkMatrix>(runtime, arguments[0]);
+    if (matrix) {
+      getObject()->preConcat(*matrix->getObject());
     } else {
       auto m3 = JsiSkMatrix::getMatrix(runtime, arguments[0]);
       getObject()->preConcat(m3);
@@ -138,39 +141,39 @@ public:
   }
 #pragma clang diagnostic pop
 
-  EXPORT_JSI_API_TYPENAME(JsiSkMatrix, Matrix)
-
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkMatrix, concat),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, translate),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, postTranslate),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, scale),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, postScale),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, skew),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, postSkew),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, rotate),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, postRotate),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, identity),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, get),
-                       JSI_EXPORT_FUNC(JsiSkMatrix, dispose))
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    installHostMethod(runtime, prototype, "concat", &JsiSkMatrix::concat);
+    installHostMethod(runtime, prototype, "translate", &JsiSkMatrix::translate);
+    installHostMethod(runtime, prototype, "postTranslate",
+                      &JsiSkMatrix::postTranslate);
+    installHostMethod(runtime, prototype, "scale", &JsiSkMatrix::scale);
+    installHostMethod(runtime, prototype, "postScale", &JsiSkMatrix::postScale);
+    installHostMethod(runtime, prototype, "skew", &JsiSkMatrix::skew);
+    installHostMethod(runtime, prototype, "postSkew", &JsiSkMatrix::postSkew);
+    installHostMethod(runtime, prototype, "rotate", &JsiSkMatrix::rotate);
+    installHostMethod(runtime, prototype, "postRotate",
+                      &JsiSkMatrix::postRotate);
+    installHostMethod(runtime, prototype, "identity", &JsiSkMatrix::identity);
+    installHostMethod(runtime, prototype, "get", &JsiSkMatrix::get);
+  }
 
   /**
    * Returns the underlying object from a host object of this type
    */
   static std::shared_ptr<SkMatrix> fromValue(jsi::Runtime &runtime,
                                              const jsi::Value &obj) {
-    const auto &object = obj.asObject(runtime);
-    if (object.isHostObject(runtime)) {
-      return object.asHostObject<JsiSkMatrix>(runtime)->getObject();
+    auto matrix = tryGetJsiObject<JsiSkMatrix>(runtime, obj);
+    if (matrix) {
+      return matrix->getObject();
     } else {
       return std::make_shared<SkMatrix>(JsiSkMatrix::getMatrix(runtime, obj));
     }
   }
 
-  size_t getMemoryPressure() const override {
+  size_t getMemoryPressure() override {
     return std::max(sizeof(SkMatrix), kMinMemoryPressure);
   }
-
-  std::string getObjectType() const override { return "JsiSkMatrix"; }
 
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
@@ -181,10 +184,8 @@ public:
       } else {
         matrix = SkMatrix::I();
       }
-      auto hostObjectInstance =
-          std::make_shared<JsiSkMatrix>(context, std::move(matrix));
-      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-          runtime, hostObjectInstance, context);
+      return makeJsiObject(
+          runtime, std::make_shared<JsiSkMatrix>(context, std::move(matrix)));
     };
   }
 };

@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "JsiSkHostObjects.h"
+#include "JsiSkNativeObjects.h"
 #include "utils/RNSkLog.h"
 #include <jsi/jsi.h>
 
@@ -28,9 +29,10 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiVideo : public JsiSkWrappingSharedPtrHostObject<RNSkVideo> {
+class JsiVideo
+    : public JsiSkWrappingSharedPtrNativeObject<JsiVideo, RNSkVideo> {
 public:
-  EXPORT_JSI_API_TYPENAME(JsiVideo, Video)
+  static constexpr const char *CLASS_NAME = "Video";
 
   JSI_HOST_FUNCTION(nextImage) {
     double timestamp = 0;
@@ -39,10 +41,8 @@ public:
     if (!image) {
       return jsi::Value::null();
     }
-    auto hostObjectInstance =
-        std::make_shared<JsiSkImage>(getContext(), std::move(image));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(
+        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
 
   JSI_HOST_FUNCTION(duration) { return getObject()->duration(); }
@@ -96,24 +96,29 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_EXPORT_FUNCTIONS(
-      JSI_EXPORT_FUNC(JsiVideo, nextImage), JSI_EXPORT_FUNC(JsiVideo, duration),
-      JSI_EXPORT_FUNC(JsiVideo, framerate),
-      JSI_EXPORT_FUNC(JsiVideo, currentTime),
-      JSI_EXPORT_FUNC(JsiVideo, isPlaying), JSI_EXPORT_FUNC(JsiVideo, seek),
-      JSI_EXPORT_FUNC(JsiVideo, rotation), JSI_EXPORT_FUNC(JsiVideo, size),
-      JSI_EXPORT_FUNC(JsiVideo, play), JSI_EXPORT_FUNC(JsiVideo, pause),
-      JSI_EXPORT_FUNC(JsiVideo, setVolume),
-      JSI_EXPORT_FUNC(JsiVideo, setLooping), JSI_EXPORT_FUNC(JsiVideo, dispose))
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    installHostMethod(runtime, prototype, "nextImage", &JsiVideo::nextImage);
+    installHostMethod(runtime, prototype, "duration", &JsiVideo::duration);
+    installHostMethod(runtime, prototype, "framerate", &JsiVideo::framerate);
+    installHostMethod(runtime, prototype, "currentTime",
+                      &JsiVideo::currentTime);
+    installHostMethod(runtime, prototype, "isPlaying", &JsiVideo::isPlaying);
+    installHostMethod(runtime, prototype, "seek", &JsiVideo::seek);
+    installHostMethod(runtime, prototype, "rotation", &JsiVideo::rotation);
+    installHostMethod(runtime, prototype, "size", &JsiVideo::size);
+    installHostMethod(runtime, prototype, "play", &JsiVideo::play);
+    installHostMethod(runtime, prototype, "pause", &JsiVideo::pause);
+    installHostMethod(runtime, prototype, "setVolume", &JsiVideo::setVolume);
+    installHostMethod(runtime, prototype, "setLooping", &JsiVideo::setLooping);
+  }
 
   JsiVideo(std::shared_ptr<RNSkPlatformContext> context,
            std::shared_ptr<RNSkVideo> video)
-      : JsiSkWrappingSharedPtrHostObject(std::move(context), std::move(video)) {
-  }
+      : JsiSkWrappingSharedPtrNativeObject<JsiVideo, RNSkVideo>(
+            std::move(context), std::move(video)) {}
 
-  size_t getMemoryPressure() const override { return 32768; }
-
-  std::string getObjectType() const override { return "JsiVideo"; }
+  size_t getMemoryPressure() override { return 32768; }
 
   /**
    * Creates the function for construction a new instance of the SkFont
@@ -128,10 +133,8 @@ public:
       auto url = arguments[0].asString(runtime).utf8(runtime);
       auto video = context->createVideo(url);
       // Return the newly constructed object
-      auto videoObj =
-          std::make_shared<JsiVideo>(std::move(context), std::move(video));
-      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, videoObj,
-                                                         context);
+      return makeJsiObject(runtime, std::make_shared<JsiVideo>(
+                                        std::move(context), std::move(video)));
     };
   }
 };

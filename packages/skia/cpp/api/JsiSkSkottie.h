@@ -5,6 +5,7 @@
 #include "JsiSkCanvas.h"
 #include "JsiSkColor.h"
 #include "JsiSkHostObjects.h"
+#include "JsiSkNativeObjects.h"
 #include "JsiSkPoint.h"
 #include "JsiSkRect.h"
 #include "api/third_party/SkottieUtils.h"
@@ -146,8 +147,12 @@ public:
   std::unique_ptr<CustomPropertyManager> _propManager = nullptr;
 };
 
-class JsiSkSkottie : public JsiSkWrappingSharedPtrHostObject<ManagedAnimation> {
+class JsiSkSkottie
+    : public JsiSkWrappingSharedPtrNativeObject<JsiSkSkottie,
+                                                ManagedAnimation> {
 public:
+  static constexpr const char *CLASS_NAME = "Skottie";
+
   // #region Properties
   JSI_HOST_FUNCTION(duration) {
     return static_cast<double>(getObject()->_animation->duration());
@@ -155,12 +160,6 @@ public:
   JSI_HOST_FUNCTION(fps) {
     return static_cast<double>(getObject()->_animation->fps());
   }
-
-  JSI_PROPERTY_GET(__typename__) {
-    return jsi::String::createFromUtf8(runtime, "Skottie");
-  }
-
-  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkSkottie, __typename__))
   // #endregion
 
   // #region Methods
@@ -186,10 +185,7 @@ public:
   }
 
   JSI_HOST_FUNCTION(render) {
-    auto canvas = arguments[0]
-                      .asObject(runtime)
-                      .asHostObject<JsiSkCanvas>(runtime)
-                      ->getCanvas();
+    auto canvas = getJsiObject<JsiSkCanvas>(runtime, arguments[0])->getCanvas();
     if (count > 1) {
       auto rect = JsiSkRect::fromValue(runtime, arguments[1]);
       getObject()->_animation->render(canvas, rect.get());
@@ -554,29 +550,46 @@ public:
     return transformProps;
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkSkottie, duration),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, fps),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, seekFrame),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, render),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, size),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, version),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, getSlotInfo),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, setColorSlot),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, setScalarSlot),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, setVec2Slot),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, setTextSlot),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, setImageSlot),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, getColorSlot),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, getScalarSlot),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, getVec2Slot),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, getTextSlot),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, getColorProps),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, getOpacityProps),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, getTransformProps),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, getTextProps),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, setColor),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, setText),
-                       JSI_EXPORT_FUNC(JsiSkSkottie, dispose))
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    installHostMethod(runtime, prototype, "duration", &JsiSkSkottie::duration);
+    installHostMethod(runtime, prototype, "fps", &JsiSkSkottie::fps);
+    installHostMethod(runtime, prototype, "seekFrame",
+                      &JsiSkSkottie::seekFrame);
+    installHostMethod(runtime, prototype, "render", &JsiSkSkottie::render);
+    installHostMethod(runtime, prototype, "size", &JsiSkSkottie::size);
+    installHostMethod(runtime, prototype, "version", &JsiSkSkottie::version);
+    installHostMethod(runtime, prototype, "getSlotInfo",
+                      &JsiSkSkottie::getSlotInfo);
+    installHostMethod(runtime, prototype, "setColorSlot",
+                      &JsiSkSkottie::setColorSlot);
+    installHostMethod(runtime, prototype, "setScalarSlot",
+                      &JsiSkSkottie::setScalarSlot);
+    installHostMethod(runtime, prototype, "setVec2Slot",
+                      &JsiSkSkottie::setVec2Slot);
+    installHostMethod(runtime, prototype, "setTextSlot",
+                      &JsiSkSkottie::setTextSlot);
+    installHostMethod(runtime, prototype, "setImageSlot",
+                      &JsiSkSkottie::setImageSlot);
+    installHostMethod(runtime, prototype, "getColorSlot",
+                      &JsiSkSkottie::getColorSlot);
+    installHostMethod(runtime, prototype, "getScalarSlot",
+                      &JsiSkSkottie::getScalarSlot);
+    installHostMethod(runtime, prototype, "getVec2Slot",
+                      &JsiSkSkottie::getVec2Slot);
+    installHostMethod(runtime, prototype, "getTextSlot",
+                      &JsiSkSkottie::getTextSlot);
+    installHostMethod(runtime, prototype, "getColorProps",
+                      &JsiSkSkottie::getColorProps);
+    installHostMethod(runtime, prototype, "getOpacityProps",
+                      &JsiSkSkottie::getOpacityProps);
+    installHostMethod(runtime, prototype, "getTransformProps",
+                      &JsiSkSkottie::getTransformProps);
+    installHostMethod(runtime, prototype, "getTextProps",
+                      &JsiSkSkottie::getTextProps);
+    installHostMethod(runtime, prototype, "setColor", &JsiSkSkottie::setColor);
+    installHostMethod(runtime, prototype, "setText", &JsiSkSkottie::setText);
+  }
   // #endregion
 
   /**
@@ -584,10 +597,10 @@ public:
   */
   JsiSkSkottie(std::shared_ptr<RNSkPlatformContext> context,
                std::shared_ptr<ManagedAnimation> animation)
-      : JsiSkWrappingSharedPtrHostObject<ManagedAnimation>(
+      : JsiSkWrappingSharedPtrNativeObject<JsiSkSkottie, ManagedAnimation>(
             std::move(context), std::move(animation)) {}
 
-  size_t getMemoryPressure() const override {
+  size_t getMemoryPressure() override {
     auto animation = getObject();
     if (!animation || !animation->_animation) {
       return 1024; // Base size if no animation
@@ -615,7 +628,5 @@ public:
 
     return animationMemory + baseOverhead;
   }
-
-  std::string getObjectType() const override { return "JsiSkSkottie"; }
 };
 } // namespace RNSkia

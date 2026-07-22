@@ -1,6 +1,9 @@
 import Rea from "../external/reanimated/ReanimatedProxy";
 import type { Skia, SkPicture } from "../skia/types";
-import { HAS_REANIMATED_3 } from "../external/reanimated/renderHelpers";
+import {
+  HAS_REANIMATED_3,
+  HAS_REANIMATED_4,
+} from "../external/reanimated/renderHelpers";
 import type { JsiRecorder } from "../skia/types/Recorder";
 
 import { ReanimatedRecorder } from "./Recorder/ReanimatedRecorder";
@@ -79,10 +82,23 @@ class NativeReanimatedContainer extends Container {
   }
 }
 
+let hasWarnedAboutReanimated3 = false;
+
 export const createContainer = (Skia: Skia, nativeId: number) => {
-  if (HAS_REANIMATED_3 && nativeId !== -1) {
+  if (HAS_REANIMATED_4 && nativeId !== -1) {
     return new NativeReanimatedContainer(Skia, nativeId);
   } else {
+    if (HAS_REANIMATED_3 && !HAS_REANIMATED_4 && !hasWarnedAboutReanimated3) {
+      hasWarnedAboutReanimated3 = true;
+      console.error(
+        "React Native Skia requires Reanimated 4 (react-native-worklets >= 0.7.0) " +
+          "for its Reanimated integration on native platforms. " +
+          "Reanimated 3 is not supported anymore: Skia objects cannot be used " +
+          "inside worklets or shared values with it. " +
+          "Falling back to static rendering (animations will not run). " +
+          "Please upgrade to react-native-reanimated >= 4.0.0."
+      );
+    }
     return new StaticContainer(Skia, nativeId);
   }
 };

@@ -1,257 +1,100 @@
 #pragma once
 
-#include <algorithm>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <utility>
 
-#include "jsi/JsiHostObject.h"
-#include "utils/RNSkLog.h"
+#include <jsi/jsi.h>
+
 #include "rnskia/RNSkPlatformContext.h"
+#include "utils/RNSkLog.h"
+
+#define STR_CAT_NX(A, B) A##B
+#define STR_CAT(A, B) STR_CAT_NX(A, B)
+#define STR_GET get_
+#define STR_SET set_
+
+/**
+ * Creates a new Host function declaration as a lambda with all deps passed
+ * with implicit lambda capture clause
+ */
+#define JSI_HOST_FUNCTION_LAMBDA                                               \
+  [=](jsi::Runtime & runtime, const jsi::Value &thisValue,                     \
+      const jsi::Value *arguments, size_t count) -> jsi::Value
+
+/**
+ * Creates a new Host function declaration
+ */
+#define JSI_HOST_FUNCTION(NAME)                                                \
+  jsi::Value NAME(jsi::Runtime &runtime, const jsi::Value &thisValue,          \
+                  const jsi::Value *arguments, size_t count)
+
+/**
+ * Creates a new property setter function declaration
+ */
+#define JSI_PROPERTY_SET(NAME)                                                 \
+  void STR_CAT(STR_SET, NAME)(jsi::Runtime & runtime, const jsi::Value &value)
+
+/**
+ * Creates a new property getter function declaration
+ */
+#define JSI_PROPERTY_GET(NAME)                                                 \
+  jsi::Value STR_CAT(STR_GET, NAME)(jsi::Runtime & runtime)
 
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-// Minimum memory pressure reported for any host object.
+// Minimum memory pressure reported for any native object.
 // This accounts for C++ wrapper overhead and ensures dispose() never
 // increases reported memory pressure (which would defeat its purpose).
 static constexpr size_t kMinMemoryPressure = 256;
 
 /**
- * Base class for jsi host objects - these are all implemented as JsiHostObjects
- * and has a pointer to the platform context.
+ * Creates the JS object for a wrapper instance (a class based on the
+ * NativeObject pattern, see JsiSkNativeObjects.h).
  */
-class JsiSkHostObject : public RNJsi::JsiHostObject {
-public:
-  /**
-   * Default constructor
-   * @param context Platform context
-   */
-  explicit JsiSkHostObject(std::shared_ptr<RNSkPlatformContext> context)
-      : _context(context) {}
+template <typename T>
+jsi::Value makeJsiObject(jsi::Runtime &runtime, std::shared_ptr<T> instance) {
+  return T::create(runtime, std::move(instance));
+}
 
-  /**
-   * Override this method to return the memory pressure for the wrapped object.
-   * @return The memory pressure in bytes
-   */
-  virtual size_t getMemoryPressure() const = 0;
-
-  /**
-   * Returns the type name of the host object.
-   */
-  virtual std::string getObjectType() const = 0;
-
-protected:
-  /**
-   * @return A pointer to the platform context
-   */
-  std::shared_ptr<RNSkPlatformContext> getContext() { return _context; }
-
-private:
-  std::shared_ptr<RNSkPlatformContext> _context;
-};
-
-#define JSI_API_TYPENAME(A)                                                    \
-  JSI_PROPERTY_GET(__typename__) {                                             \
-    return jsi::String::createFromUtf8(runtime, #A);                           \
+/**
+ * Returns the wrapper instance backing the given JS object or nullptr if the
+ * object is not backed by the requested type.
+ */
+template <typename T>
+std::shared_ptr<T> tryGetJsiObject(jsi::Runtime &runtime,
+                                   const jsi::Object &object) {
+  if (object.hasNativeState<T>(runtime)) {
+    return object.getNativeState<T>(runtime);
   }
-
-#define EXPORT_JSI_API_TYPENAME(CLASS, TYPENAME)                               \
-  JSI_API_TYPENAME(TYPENAME)                                                   \
-  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(CLASS, __typename__))
-
-// Define this macro to enable memory pressure debug logging
-// #define RNSKIA_DEBUG_MEMORY_PRESSURE
-
-#ifdef RNSKIA_DEBUG_MEMORY_PRESSURE
-// Version with debug logging
-#define JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(                           \
-    runtime, hostObjectInstance, context)                                      \
-  [&]() {                                                                      \
-    auto result =                                                              \
-        jsi::Object::createFromHostObject(runtime, hostObjectInstance);        \
-    auto memoryPressure = hostObjectInstance->getMemoryPressure();             \
-    const void *hostObjectId =                                                 \
-        static_cast<const void *>(hostObjectInstance.get());                   \
-    const char *mpUnit = "bytes";                                              \
-    double mpValue = static_cast<double>(memoryPressure);                      \
-    if (memoryPressure >= 1024ULL * 1024ULL) {                                 \
-      mpUnit = "MB";                                                           \
-      mpValue /= (1024.0 * 1024.0);                                            \
-      RNSkLogger::logToConsole(                                                \
-          "Host object %s (id=%p) memory pressure %.2f %s",                    \
-          hostObjectInstance->getObjectType().c_str(), hostObjectId, mpValue,  \
-          mpUnit);                                                             \
-    } else if (memoryPressure >= 1024ULL) {                                    \
-      mpUnit = "KB";                                                           \
-      mpValue /= 1024.0;                                                       \
-      RNSkLogger::logToConsole(                                                \
-          "Host object %s (id=%p) memory pressure %.2f %s",                    \
-          hostObjectInstance->getObjectType().c_str(), hostObjectId, mpValue,  \
-          mpUnit);                                                             \
-    } else {                                                                   \
-      RNSkLogger::logToConsole(                                                \
-          "Host object %s (id=%p) memory pressure %zu %s",                     \
-          hostObjectInstance->getObjectType().c_str(), hostObjectId,           \
-          memoryPressure, mpUnit);                                             \
-    }                                                                          \
-    if (memoryPressure > 0) {                                                  \
-      result.setExternalMemoryPressure(runtime, memoryPressure);               \
-    }                                                                          \
-    return result;                                                             \
-  }()
-#else
-// Version without debug logging (optimized)
-#define JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(                           \
-    runtime, hostObjectInstance, context)                                      \
-  [&]() {                                                                      \
-    auto result =                                                              \
-        jsi::Object::createFromHostObject(runtime, hostObjectInstance);        \
-    auto memoryPressure = hostObjectInstance->getMemoryPressure();             \
-    if (memoryPressure > 0) {                                                  \
-      result.setExternalMemoryPressure(runtime, memoryPressure);               \
-    }                                                                          \
-    return result;                                                             \
-  }()
-#endif
-
-template <typename T> class JsiSkWrappingHostObject : public JsiSkHostObject {
-public:
-  /**
-   * Default constructor
-   * @param context Platform context
-   */
-  JsiSkWrappingHostObject(std::shared_ptr<RNSkPlatformContext> context,
-                          T object)
-      : JsiSkHostObject(std::move(context)), _object(std::move(object)) {}
-
-  /**
-   * Returns the underlying object exposed by this host object. This object
-   * should be wrapped in a shared pointer of some kind.
-   * Throws if the object has been disposed.
-   * @return Underlying object
-   */
-  T getObject() { return validateObject(); }
-  const T getObject() const { return validateObject(); }
-
-  /**
-   * Updates the inner object with a new version of the object.
-   */
-  void setObject(T object) { _object = object; }
-
-  /**
-   * Dispose function that can be exposed to JS by using the JSI_API_TYPENAME
-   * macro.
-   */
-  JSI_HOST_FUNCTION(dispose) {
-    if (!isDisposed()) {
-      thisValue.asObject(runtime).setExternalMemoryPressure(runtime,
-                                                            kMinMemoryPressure);
-    }
-    safeDispose();
-    return jsi::Value::undefined();
-  }
-
-protected:
-  /**
-   * Override to implement disposal of allocated resources like smart pointers.
-   * This method will only be called once for each instance of this class.
-   */
-  virtual void releaseResources() = 0;
-
-  /**
-   * Returns true if the object has been disposed.
-   */
-  bool isDisposed() const {
-    return _isDisposed.load(std::memory_order_acquire);
-  }
-
-  /**
-   * Returns the underlying object without checking if disposed.
-   * Use this in destructors and releaseResources() where we need to access
-   * the object even after dispose() was called.
-   */
-  T getObjectUnchecked() const { return _object; }
-
-private:
-  /**
-   * Validates that _object was not disposed and returns it.
-   */
-  T validateObject() const {
-    if (_isDisposed.load(std::memory_order_acquire)) {
-      throw std::runtime_error("Attempted to access a disposed object.");
-    }
-    return _object;
-  }
-
-  void safeDispose() {
-    bool expected = false;
-    if (_isDisposed.compare_exchange_strong(expected, true,
-                                            std::memory_order_acq_rel)) {
-      releaseResources();
-    }
-  }
-
-  /**
-   * Wrapped object.
-   */
-  T _object;
-
-  /**
-   * Resource disposed flag.
-   */
-  std::atomic<bool> _isDisposed = {false};
-};
+  return nullptr;
+}
 
 template <typename T>
-class JsiSkWrappingSharedPtrHostObject
-    : public JsiSkWrappingHostObject<std::shared_ptr<T>> {
-public:
-  JsiSkWrappingSharedPtrHostObject(std::shared_ptr<RNSkPlatformContext> context,
-                                   std::shared_ptr<T> object)
-      : JsiSkWrappingHostObject<std::shared_ptr<T>>(std::move(context),
-                                                    std::move(object)) {}
-
-  /**
-    Returns the underlying object from a host object of this type
-   */
-  static std::shared_ptr<T> fromValue(jsi::Runtime &runtime,
-                                      const jsi::Value &obj) {
-    return std::static_pointer_cast<JsiSkWrappingSharedPtrHostObject>(
-               obj.asObject(runtime).asHostObject(runtime))
-        ->getObject();
+std::shared_ptr<T> tryGetJsiObject(jsi::Runtime &runtime,
+                                   const jsi::Value &value) {
+  if (!value.isObject()) {
+    return nullptr;
   }
+  auto object = value.asObject(runtime);
+  return tryGetJsiObject<T>(runtime, object);
+}
 
-protected:
-  void releaseResources() override {
-    // Clear internally allocated objects
-    this->setObject(nullptr);
-  }
-};
-
+/**
+ * Returns the wrapper instance backing the given JS value or throws a JS
+ * error if the value is not backed by the requested type.
+ */
 template <typename T>
-class JsiSkWrappingSkPtrHostObject : public JsiSkWrappingHostObject<sk_sp<T>> {
-public:
-  JsiSkWrappingSkPtrHostObject(std::shared_ptr<RNSkPlatformContext> context,
-                               sk_sp<T> object)
-      : JsiSkWrappingHostObject<sk_sp<T>>(std::move(context),
-                                          std::move(object)) {}
-
-  /**
-    Returns the underlying object from a host object of this type
-   */
-  static sk_sp<T> fromValue(jsi::Runtime &runtime, const jsi::Value &obj) {
-    return std::static_pointer_cast<JsiSkWrappingSkPtrHostObject>(
-               obj.asObject(runtime).asHostObject(runtime))
-        ->getObject();
+std::shared_ptr<T> getJsiObject(jsi::Runtime &runtime,
+                                const jsi::Value &value) {
+  auto result = tryGetJsiObject<T>(runtime, value);
+  if (result == nullptr) {
+    throw jsi::JSError(runtime, "Expected a Skia object of a different type.");
   }
-
-protected:
-  void releaseResources() override {
-    // Clear internally allocated objects
-    this->setObject(nullptr);
-  }
-};
+  return result;
+}
 
 } // namespace RNSkia

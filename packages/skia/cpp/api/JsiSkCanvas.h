@@ -9,6 +9,7 @@
 #include "JsiSkImage.h"
 #include "JsiSkImageInfo.h"
 #include "JsiSkMatrix.h"
+#include "JsiSkNativeObjects.h"
 #include "JsiSkPaint.h"
 #include "JsiSkPath.h"
 #include "JsiSkPicture.h"
@@ -49,8 +50,10 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiSkCanvas : public JsiSkHostObject {
+class JsiSkCanvas : public JsiSkNativeObject<JsiSkCanvas> {
 public:
+  static constexpr const char *CLASS_NAME = "Canvas";
+
   JSI_HOST_FUNCTION(drawPaint) {
     auto paint = JsiSkPaint::fromValue(runtime, arguments[0]);
     _canvas->drawPaint(*paint);
@@ -246,10 +249,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(getTotalMatrix) {
-    auto matrix =
-        std::make_shared<JsiSkMatrix>(getContext(), _canvas->getTotalMatrix());
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, matrix,
-                                                       getContext());
+    return makeJsiObject(runtime, std::make_shared<JsiSkMatrix>(
+                                      getContext(), _canvas->getTotalMatrix()));
   }
 
   JSI_HOST_FUNCTION(drawPoints) {
@@ -651,9 +652,10 @@ public:
 #if defined(SK_GRAPHITE)
     // Graphite records draws lazily and offers no synchronous GPU readback. If
     // this canvas belongs to a surface, snap & submit its recording, snapshot
-    // it to a CPU raster image and read from that (mirroring makeImageSnapshot).
-    // A canvas without an owning surface (e.g. a picture-recording canvas) has
-    // no texture to read back, so fall through to the raster canvas read below.
+    // it to a CPU raster image and read from that (mirroring
+    // makeImageSnapshot). A canvas without an owning surface (e.g. a
+    // picture-recording canvas) has no texture to read back, so fall through to
+    // the raster canvas read below.
     if (_surface) {
       // Snapshot first: makeImageSnapshot records a copy task into the recorder
       // that must be submitted before the texture can be read back (this is the
@@ -663,8 +665,8 @@ public:
         DawnContext::getInstance().submitRecording(recorder->snap().get());
       }
       auto raster = DawnContext::getInstance().MakeRasterImage(snapshot);
-      if (!raster ||
-          !raster->readPixels(nullptr, *info, bfrPtr, bytesPerRow, srcX, srcY)) {
+      if (!raster || !raster->readPixels(nullptr, *info, bfrPtr, bytesPerRow,
+                                         srcX, srcY)) {
         return jsi::Value::null();
       }
       return dest;
@@ -677,55 +679,73 @@ public:
     return dest;
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkCanvas, drawPaint),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawLine),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawRect),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawImage),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawImageRect),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawImageCubic),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawImageOptions),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawImageNine),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawImageRectCubic),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawImageRectOptions),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawCircle),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawArc),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawRRect),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawDRRect),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawOval),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, restoreToCount),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, getSaveCount),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, getTotalMatrix),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawPoints),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawPatch),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawPath),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawVertices),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawText),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawTextBlob),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawGlyphs),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawSvg),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, clipPath),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, clipRect),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, clipRRect),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, save),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, saveLayer),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, restore),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, rotate),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, translate),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, scale),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, skew),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawColor),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, clear),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, concat),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawPicture),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, drawAtlas),
-                       JSI_EXPORT_FUNC(JsiSkCanvas, readPixels))
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    installHostMethod(runtime, prototype, "drawPaint", &JsiSkCanvas::drawPaint);
+    installHostMethod(runtime, prototype, "drawLine", &JsiSkCanvas::drawLine);
+    installHostMethod(runtime, prototype, "drawRect", &JsiSkCanvas::drawRect);
+    installHostMethod(runtime, prototype, "drawImage", &JsiSkCanvas::drawImage);
+    installHostMethod(runtime, prototype, "drawImageRect",
+                      &JsiSkCanvas::drawImageRect);
+    installHostMethod(runtime, prototype, "drawImageCubic",
+                      &JsiSkCanvas::drawImageCubic);
+    installHostMethod(runtime, prototype, "drawImageOptions",
+                      &JsiSkCanvas::drawImageOptions);
+    installHostMethod(runtime, prototype, "drawImageNine",
+                      &JsiSkCanvas::drawImageNine);
+    installHostMethod(runtime, prototype, "drawImageRectCubic",
+                      &JsiSkCanvas::drawImageRectCubic);
+    installHostMethod(runtime, prototype, "drawImageRectOptions",
+                      &JsiSkCanvas::drawImageRectOptions);
+    installHostMethod(runtime, prototype, "drawCircle",
+                      &JsiSkCanvas::drawCircle);
+    installHostMethod(runtime, prototype, "drawArc", &JsiSkCanvas::drawArc);
+    installHostMethod(runtime, prototype, "drawRRect", &JsiSkCanvas::drawRRect);
+    installHostMethod(runtime, prototype, "drawDRRect",
+                      &JsiSkCanvas::drawDRRect);
+    installHostMethod(runtime, prototype, "drawOval", &JsiSkCanvas::drawOval);
+    installHostMethod(runtime, prototype, "restoreToCount",
+                      &JsiSkCanvas::restoreToCount);
+    installHostMethod(runtime, prototype, "getSaveCount",
+                      &JsiSkCanvas::getSaveCount);
+    installHostMethod(runtime, prototype, "getTotalMatrix",
+                      &JsiSkCanvas::getTotalMatrix);
+    installHostMethod(runtime, prototype, "drawPoints",
+                      &JsiSkCanvas::drawPoints);
+    installHostMethod(runtime, prototype, "drawPatch", &JsiSkCanvas::drawPatch);
+    installHostMethod(runtime, prototype, "drawPath", &JsiSkCanvas::drawPath);
+    installHostMethod(runtime, prototype, "drawVertices",
+                      &JsiSkCanvas::drawVertices);
+    installHostMethod(runtime, prototype, "drawText", &JsiSkCanvas::drawText);
+    installHostMethod(runtime, prototype, "drawTextBlob",
+                      &JsiSkCanvas::drawTextBlob);
+    installHostMethod(runtime, prototype, "drawGlyphs",
+                      &JsiSkCanvas::drawGlyphs);
+    installHostMethod(runtime, prototype, "drawSvg", &JsiSkCanvas::drawSvg);
+    installHostMethod(runtime, prototype, "clipPath", &JsiSkCanvas::clipPath);
+    installHostMethod(runtime, prototype, "clipRect", &JsiSkCanvas::clipRect);
+    installHostMethod(runtime, prototype, "clipRRect", &JsiSkCanvas::clipRRect);
+    installHostMethod(runtime, prototype, "save", &JsiSkCanvas::save);
+    installHostMethod(runtime, prototype, "saveLayer", &JsiSkCanvas::saveLayer);
+    installHostMethod(runtime, prototype, "restore", &JsiSkCanvas::restore);
+    installHostMethod(runtime, prototype, "rotate", &JsiSkCanvas::rotate);
+    installHostMethod(runtime, prototype, "translate", &JsiSkCanvas::translate);
+    installHostMethod(runtime, prototype, "scale", &JsiSkCanvas::scale);
+    installHostMethod(runtime, prototype, "skew", &JsiSkCanvas::skew);
+    installHostMethod(runtime, prototype, "drawColor", &JsiSkCanvas::drawColor);
+    installHostMethod(runtime, prototype, "clear", &JsiSkCanvas::clear);
+    installHostMethod(runtime, prototype, "concat", &JsiSkCanvas::concat);
+    installHostMethod(runtime, prototype, "drawPicture",
+                      &JsiSkCanvas::drawPicture);
+    installHostMethod(runtime, prototype, "drawAtlas", &JsiSkCanvas::drawAtlas);
+    installHostMethod(runtime, prototype, "readPixels",
+                      &JsiSkCanvas::readPixels);
+  }
 
-  size_t getMemoryPressure() const override { return 1024; }
-
-  std::string getObjectType() const override { return "JsiSkCanvas"; }
+  size_t getMemoryPressure() override { return 1024; }
 
   explicit JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(std::move(context)) {}
+      : JsiSkNativeObject<JsiSkCanvas>(std::move(context)) {}
 
   JsiSkCanvas(std::shared_ptr<RNSkPlatformContext> context, SkCanvas *canvas)
       : JsiSkCanvas(std::move(context)) {

@@ -5,17 +5,21 @@
 
 #include <jsi/jsi.h>
 
-#include "jsi/JsiPromises.h"
 #include "JsiSkAnimatedImage.h"
 #include "JsiSkData.h"
 #include "JsiSkHostObjects.h"
+#include "JsiSkNativeObjects.h"
+#include "jsi/JsiPromises.h"
 
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiSkAnimatedImageFactory : public JsiSkHostObject {
+class JsiSkAnimatedImageFactory
+    : public JsiSkNativeObject<JsiSkAnimatedImageFactory> {
 public:
+  static constexpr const char *CLASS_NAME = "AnimatedImageFactory";
+
   JSI_HOST_FUNCTION(MakeAnimatedImageFromEncoded) {
     auto data = JsiSkData::fromValue(runtime, arguments[0]);
     auto codec = SkAndroidCodec::MakeFromData(data);
@@ -23,24 +27,21 @@ public:
     if (image == nullptr) {
       return jsi::Value::null();
     }
-    auto hostObjectInstance =
-        std::make_shared<JsiSkAnimatedImage>(getContext(), std::move(image));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(runtime, std::make_shared<JsiSkAnimatedImage>(
+                                      getContext(), std::move(image)));
   }
 
-  size_t getMemoryPressure() const override { return 1024; }
+  size_t getMemoryPressure() override { return 1024; }
 
-  std::string getObjectType() const override {
-    return "JsiSkAnimatedImageFactory";
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    installHostMethod(runtime, prototype, "MakeAnimatedImageFromEncoded",
+                      &JsiSkAnimatedImageFactory::MakeAnimatedImageFromEncoded);
   }
-
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkAnimatedImageFactory,
-                                       MakeAnimatedImageFromEncoded))
 
   explicit JsiSkAnimatedImageFactory(
       std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(std::move(context)) {}
+      : JsiSkNativeObject<JsiSkAnimatedImageFactory>(std::move(context)) {}
 };
 
 } // namespace RNSkia

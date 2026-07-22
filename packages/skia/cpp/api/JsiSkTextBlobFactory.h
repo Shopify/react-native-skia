@@ -8,6 +8,7 @@
 
 #include "JsiSkFont.h"
 #include "JsiSkHostObjects.h"
+#include "JsiSkNativeObjects.h"
 #include "JsiSkRSXform.h"
 #include "JsiSkTextBlob.h"
 
@@ -22,16 +23,16 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiSkTextBlobFactory : public JsiSkHostObject {
+class JsiSkTextBlobFactory : public JsiSkNativeObject<JsiSkTextBlobFactory> {
 public:
+  static constexpr const char *CLASS_NAME = "TextBlobFactory";
+
   JSI_HOST_FUNCTION(MakeFromText) {
     auto str = arguments[0].asString(runtime).utf8(runtime);
     auto font = JsiSkFont::fromValue(runtime, arguments[1]);
     auto textBlob = SkTextBlob::MakeFromString(str.c_str(), *font);
-    auto hostObjectInstance =
-        std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(runtime, std::make_shared<JsiSkTextBlob>(
+                                      getContext(), std::move(textBlob)));
   }
 
   JSI_HOST_FUNCTION(MakeFromGlyphs) {
@@ -47,10 +48,8 @@ public:
     auto textBlob =
         SkTextBlob::MakeFromText(glyphs.data(), glyphs.size() * bytesPerGlyph,
                                  *font, SkTextEncoding::kGlyphID);
-    auto hostObjectInstance =
-        std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(runtime, std::make_shared<JsiSkTextBlob>(
+                                      getContext(), std::move(textBlob)));
   }
 
   JSI_HOST_FUNCTION(MakeFromRSXform) {
@@ -68,10 +67,8 @@ public:
     auto x = SkSpan(rsxforms.data(), rsxforms.size());
     auto textBlob =
         SkTextBlob::MakeFromRSXform(str.c_str(), str.length(), x, *font);
-    auto hostObjectInstance =
-        std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(runtime, std::make_shared<JsiSkTextBlob>(
+                                      getContext(), std::move(textBlob)));
   }
 
   JSI_HOST_FUNCTION(MakeFromRSXformGlyphs) {
@@ -97,24 +94,26 @@ public:
     auto textBlob = SkTextBlob::MakeFromRSXform(
         glyphs.data(), glyphs.size() * bytesPerGlyph, x, *font,
         SkTextEncoding::kGlyphID);
-    auto hostObjectInstance =
-        std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(runtime, std::make_shared<JsiSkTextBlob>(
+                                      getContext(), std::move(textBlob)));
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkTextBlobFactory, MakeFromText),
-                       JSI_EXPORT_FUNC(JsiSkTextBlobFactory, MakeFromGlyphs),
-                       JSI_EXPORT_FUNC(JsiSkTextBlobFactory, MakeFromRSXform),
-                       JSI_EXPORT_FUNC(JsiSkTextBlobFactory,
-                                       MakeFromRSXformGlyphs), )
+  size_t getMemoryPressure() override { return 2048; }
 
-  size_t getMemoryPressure() const override { return 2048; }
-
-  std::string getObjectType() const override { return "JsiSkTextBlobFactory"; }
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    installHostMethod(runtime, prototype, "MakeFromText",
+                      &JsiSkTextBlobFactory::MakeFromText);
+    installHostMethod(runtime, prototype, "MakeFromGlyphs",
+                      &JsiSkTextBlobFactory::MakeFromGlyphs);
+    installHostMethod(runtime, prototype, "MakeFromRSXform",
+                      &JsiSkTextBlobFactory::MakeFromRSXform);
+    installHostMethod(runtime, prototype, "MakeFromRSXformGlyphs",
+                      &JsiSkTextBlobFactory::MakeFromRSXformGlyphs);
+  }
 
   explicit JsiSkTextBlobFactory(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(std::move(context)) {}
+      : JsiSkNativeObject<JsiSkTextBlobFactory>(std::move(context)) {}
 };
 
 } // namespace RNSkia

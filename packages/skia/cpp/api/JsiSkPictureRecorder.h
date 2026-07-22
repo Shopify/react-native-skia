@@ -4,6 +4,7 @@
 
 #include "JsiSkCanvas.h"
 #include "JsiSkHostObjects.h"
+#include "JsiSkNativeObjects.h"
 #include "JsiSkPicture.h"
 #include "JsiSkRect.h"
 
@@ -20,10 +21,14 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 
 class JsiSkPictureRecorder
-    : public JsiSkWrappingSharedPtrHostObject<SkPictureRecorder> {
+    : public JsiSkWrappingSharedPtrNativeObject<JsiSkPictureRecorder,
+                                                SkPictureRecorder> {
 public:
+  static constexpr const char *CLASS_NAME = "PictureRecorder";
+
   explicit JsiSkPictureRecorder(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkWrappingSharedPtrHostObject<SkPictureRecorder>(
+      : JsiSkWrappingSharedPtrNativeObject<JsiSkPictureRecorder,
+                                           SkPictureRecorder>(
             context, std::make_shared<SkPictureRecorder>()) {}
 
   JSI_HOST_FUNCTION(beginRecording) {
@@ -37,36 +42,31 @@ public:
       SkRect rect = SkRect::Make(size);
       canvas = getObject()->beginRecording(rect, nullptr);
     }
-    auto canvasObj = std::make_shared<JsiSkCanvas>(getContext(), canvas);
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, canvasObj,
-                                                       getContext());
+    return makeJsiObject(runtime,
+                         std::make_shared<JsiSkCanvas>(getContext(), canvas));
   }
 
   JSI_HOST_FUNCTION(finishRecordingAsPicture) {
     auto picture = getObject()->finishRecordingAsPicture();
-    auto hostObjectInstance =
-        std::make_shared<JsiSkPicture>(getContext(), std::move(picture));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(runtime, std::make_shared<JsiSkPicture>(
+                                      getContext(), std::move(picture)));
   }
 
-  EXPORT_JSI_API_TYPENAME(JsiSkPictureRecorder, PictureRecorder)
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    installHostMethod(runtime, prototype, "beginRecording",
+                      &JsiSkPictureRecorder::beginRecording);
+    installHostMethod(runtime, prototype, "finishRecordingAsPicture",
+                      &JsiSkPictureRecorder::finishRecordingAsPicture);
+  }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPictureRecorder, beginRecording),
-                       JSI_EXPORT_FUNC(JsiSkPictureRecorder,
-                                       finishRecordingAsPicture),
-                       JSI_EXPORT_FUNC(JsiSkPictureRecorder, dispose))
-
-  size_t getMemoryPressure() const override { return 1024 * 1024; }
-
-  std::string getObjectType() const override { return "JsiSkPictureRecorder"; }
+  size_t getMemoryPressure() override { return 1024 * 1024; }
 
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
     return JSI_HOST_FUNCTION_LAMBDA {
-      auto recorder = std::make_shared<JsiSkPictureRecorder>(context);
-      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, recorder,
-                                                         context);
+      return makeJsiObject(runtime,
+                           std::make_shared<JsiSkPictureRecorder>(context));
     };
   }
 };

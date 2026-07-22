@@ -13,7 +13,8 @@
 #include "RNSkPictureView.h"
 #include "RNSkPlatformContext.h"
 #include "RNSkView.h"
-#include "jsi/JsiHostObject.h"
+#include "api/JsiSkNativeObjects.h"
+#include "jsi/JsiPromises.h"
 #include "jsi/ViewProperty.h"
 #include <jsi/jsi.h>
 
@@ -92,9 +93,10 @@ private:
   std::unordered_set<size_t> _unregistered;
 };
 
-class RNSkJsiViewApi : public RNJsi::JsiHostObject,
-                       public std::enable_shared_from_this<RNSkJsiViewApi> {
+class RNSkJsiViewApi : public JsiSkNativeObject<RNSkJsiViewApi> {
 public:
+  static constexpr const char *CLASS_NAME = "ViewApi";
+
   /**
    Sets a custom property on a view given a view id. The property name/value
    will be stored in a map alongside the id of the view and propagated to the
@@ -199,7 +201,7 @@ public:
                            "Could not create image from current surface.");
         return jsi::Value::undefined();
       }
-      return jsi::Object::createFromHostObject(
+      return makeJsiObject(
           runtime, std::make_shared<JsiSkImage>(_platformContext, image));
     }
     throw jsi::JSError(runtime, "No Skia View currently available.");
@@ -245,7 +247,7 @@ public:
                     promise->reject("Failed to make snapshot from view.");
                     return;
                   }
-                  promise->resolve(jsi::Object::createFromHostObject(
+                  promise->resolve(makeJsiObject(
                       runtime, std::make_shared<JsiSkImage>(std::move(context),
                                                             std::move(image))));
                 });
@@ -286,18 +288,26 @@ public:
     return sizeObj;
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(RNSkJsiViewApi, setJsiProperty),
-                       JSI_EXPORT_FUNC(RNSkJsiViewApi, requestRedraw),
-                       JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshotAsync),
-                       JSI_EXPORT_FUNC(RNSkJsiViewApi, makeImageSnapshot),
-                       JSI_EXPORT_FUNC(RNSkJsiViewApi, size))
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    installHostMethod(runtime, prototype, "setJsiProperty",
+                      &RNSkJsiViewApi::setJsiProperty);
+    installHostMethod(runtime, prototype, "requestRedraw",
+                      &RNSkJsiViewApi::requestRedraw);
+    installHostMethod(runtime, prototype, "makeImageSnapshotAsync",
+                      &RNSkJsiViewApi::makeImageSnapshotAsync);
+    installHostMethod(runtime, prototype, "makeImageSnapshot",
+                      &RNSkJsiViewApi::makeImageSnapshot);
+    installHostMethod(runtime, prototype, "size", &RNSkJsiViewApi::size);
+  }
 
   /**
    * Constructor
    * @param platformContext Platform context
    */
   explicit RNSkJsiViewApi(std::shared_ptr<RNSkPlatformContext> platformContext)
-      : JsiHostObject(), _platformContext(platformContext) {}
+      : JsiSkNativeObject<RNSkJsiViewApi>(platformContext),
+        _platformContext(platformContext) {}
 
   /**
    Call to remove all draw view infos

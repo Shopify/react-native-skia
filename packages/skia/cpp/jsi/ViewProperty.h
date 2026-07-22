@@ -7,8 +7,8 @@
 #include <string>
 #include <variant>
 
-#include "api/JsiSkPicture.h"
 #include "RuntimeLifecycleMonitor.h"
+#include "api/JsiSkPicture.h"
 
 namespace RNJsi {
 namespace jsi = facebook::jsi;
@@ -38,16 +38,10 @@ private:
 class ViewProperty {
 public:
   ViewProperty(jsi::Runtime &runtime, const jsi::Value &value) {
-    if (value.isObject()) {
-      auto object = value.asObject(runtime);
-      if (object.isHostObject(runtime)) {
-        auto hostObject = object.asHostObject(runtime);
-        auto jsiPicture =
-            std::dynamic_pointer_cast<RNSkia::JsiSkPicture>(hostObject);
-        if (jsiPicture) {
-          _value = jsiPicture->getObject();
-        }
-      }
+    auto jsiPicture =
+        RNSkia::tryGetJsiObject<RNSkia::JsiSkPicture>(runtime, value);
+    if (jsiPicture) {
+      _value = jsiPicture->getObject();
     }
   }
 
