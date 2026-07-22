@@ -6,7 +6,6 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiSkHostObjects.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkNativeObjects.h"
 #include "JsiSkPath.h"

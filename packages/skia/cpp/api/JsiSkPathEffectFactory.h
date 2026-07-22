@@ -6,7 +6,6 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiSkHostObjects.h"
 #include "JsiSkNativeObjects.h"
 #include "JsiSkPathEffect.h"
 

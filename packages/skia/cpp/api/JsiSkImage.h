@@ -5,7 +5,6 @@
 #include <utility>
 
 #include "JsiSkDispatcher.h"
-#include "JsiSkHostObjects.h"
 #include "JsiSkImageInfo.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkNativeObjects.h"

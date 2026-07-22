@@ -7,7 +7,6 @@
 
 #include "JsiSkAnimatedImage.h"
 #include "JsiSkData.h"
-#include "JsiSkHostObjects.h"
 #include "JsiSkNativeObjects.h"
 #include "jsi/JsiPromises.h"
 

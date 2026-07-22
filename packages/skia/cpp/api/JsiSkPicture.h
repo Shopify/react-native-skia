@@ -4,7 +4,6 @@
 
 #include "JsiSkData.h"
 #include "JsiSkDispatcher.h"
-#include "JsiSkHostObjects.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkNativeObjects.h"
 #include "JsiSkRect.h"

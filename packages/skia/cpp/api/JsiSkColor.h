@@ -6,7 +6,7 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiSkHostObjects.h"
+#include "JsiSkNativeObjects.h"
 #include "api/third_party/CSSColorParser.h"
 
 #pragma clang diagnostic push

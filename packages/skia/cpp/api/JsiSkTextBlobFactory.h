@@ -7,7 +7,6 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkFont.h"
-#include "JsiSkHostObjects.h"
 #include "JsiSkNativeObjects.h"
 #include "JsiSkRSXform.h"
 #include "JsiSkTextBlob.h"

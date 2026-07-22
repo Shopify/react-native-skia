@@ -6,7 +6,6 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkData.h"
-#include "JsiSkHostObjects.h"
 #include "JsiSkImage.h"
 #include "JsiSkImageInfo.h"
 #include "JsiSkNativeObjects.h"

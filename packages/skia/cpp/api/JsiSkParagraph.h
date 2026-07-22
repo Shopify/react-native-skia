@@ -9,7 +9,6 @@
 
 #include "JsiSkCanvas.h"
 #include "JsiSkFont.h"
-#include "JsiSkHostObjects.h"
 #include "JsiSkNativeObjects.h"
 #include "JsiSkPath.h"
 #include "JsiSkRect.h"

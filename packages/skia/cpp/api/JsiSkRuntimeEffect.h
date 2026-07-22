@@ -5,7 +5,6 @@
 #include <utility>
 #include <vector>
 
-#include "JsiSkHostObjects.h"
 #include "JsiSkMatrix.h"
 #include "JsiSkNativeObjects.h"
 #include "JsiSkShader.h"

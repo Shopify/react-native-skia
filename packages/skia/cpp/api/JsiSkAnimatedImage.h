@@ -7,7 +7,6 @@
 #include <string>
 #include <utility>
 
-#include "JsiSkHostObjects.h"
 #include "JsiSkNativeObjects.h"
 #include "api/third_party/base64.h"
 

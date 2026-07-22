@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "JsiSkFont.h"
-#include "JsiSkHostObjects.h"
 #include "JsiSkImage.h"
 #include "JsiSkImageInfo.h"
 #include "JsiSkMatrix.h"

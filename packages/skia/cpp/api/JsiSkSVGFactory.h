@@ -7,7 +7,6 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkData.h"
-#include "JsiSkHostObjects.h"
 #include "JsiSkNativeObjects.h"
 #include "JsiSkSVG.h"
 #include "JsiSkTypeface.h"

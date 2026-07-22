@@ -7,7 +7,6 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkColorFilter.h"
-#include "JsiSkHostObjects.h"
 #include "JsiSkNativeObjects.h"
 
 #pragma clang diagnostic push

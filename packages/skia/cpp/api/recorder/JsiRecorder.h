@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "api/JsiSkCanvas.h"
-#include "api/JsiSkHostObjects.h"
 #include "api/JsiSkNativeObjects.h"
 #include "api/JsiSkPicture.h"
 

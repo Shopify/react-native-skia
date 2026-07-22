@@ -2,7 +2,6 @@
 
 #include "JsiSkColor.h"
 #include "JsiSkColorFilter.h"
-#include "JsiSkHostObjects.h"
 #include "JsiSkNativeObjects.h"
 #include <jsi/jsi.h>
 #include <memory>

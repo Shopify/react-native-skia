@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "JsiSkFontStyle.h"
-#include "JsiSkHostObjects.h"
 #include "JsiSkNativeObjects.h"
 #include "utils/RNSkLog.h"
 #include <jsi/jsi.h>

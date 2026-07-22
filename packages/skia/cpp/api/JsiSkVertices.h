@@ -5,7 +5,6 @@
 #include <utility>
 #include <vector>
 
-#include "JsiSkHostObjects.h"
 #include "JsiSkNativeObjects.h"
 
 #pragma clang diagnostic push

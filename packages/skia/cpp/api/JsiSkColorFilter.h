@@ -1,6 +1,5 @@
 #pragma once
 
-#include "JsiSkHostObjects.h"
 #include "JsiSkNativeObjects.h"
 #include <jsi/jsi.h>
 #include <memory>

@@ -8,7 +8,6 @@
 #include "CustomBlendModes.h"
 #include "JsiSkColor.h"
 #include "JsiSkColorFilter.h"
-#include "JsiSkHostObjects.h"
 #include "JsiSkImageFilter.h"
 #include "JsiSkMaskFilter.h"
 #include "JsiSkNativeObjects.h"

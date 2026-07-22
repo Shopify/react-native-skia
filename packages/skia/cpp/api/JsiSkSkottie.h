@@ -4,7 +4,6 @@
 
 #include "JsiSkCanvas.h"
 #include "JsiSkColor.h"
-#include "JsiSkHostObjects.h"
 #include "JsiSkNativeObjects.h"
 #include "JsiSkPoint.h"
 #include "JsiSkRect.h"

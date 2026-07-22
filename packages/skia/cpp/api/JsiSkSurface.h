@@ -8,7 +8,6 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkDispatcher.h"
-#include "JsiSkHostObjects.h"
 #include "JsiSkNativeObjects.h"
 #include "JsiTextureInfo.h"
 

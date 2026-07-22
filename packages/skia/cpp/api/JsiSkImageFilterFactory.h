@@ -5,7 +5,6 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiSkHostObjects.h"
 #include "JsiSkImageFilter.h"
 #include "JsiSkNativeObjects.h"
 #include "JsiSkPicture.h"

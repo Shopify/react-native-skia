@@ -4,7 +4,6 @@
 
 #include "JsiSkColorFilter.h"
 #include "JsiSkData.h"
-#include "JsiSkHostObjects.h"
 #include "JsiSkNativeObjects.h"
 #include "JsiSkPicture.h"
 

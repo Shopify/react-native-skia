@@ -4,7 +4,6 @@
 
 #include "rnskia/RNSkPlatformContext.h"
 
-#include "JsiSkHostObjects.h"
 #include "JsiSkNativeObjects.h"
 
 #ifdef SK_GRAPHITE

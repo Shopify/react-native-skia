@@ -8,7 +8,6 @@
 #include "JsiSkFont.h"
 #include "JsiSkFontMgr.h"
 #include "JsiSkFontMgrFactory.h"
-#include "JsiSkHostObjects.h"
 #include "JsiSkNativeObjects.h"
 #include "JsiSkParagraph.h"
 #include "JsiSkParagraphStyle.h"

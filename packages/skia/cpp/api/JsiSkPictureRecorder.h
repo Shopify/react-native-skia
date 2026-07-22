@@ -3,7 +3,6 @@
 #include <memory>
 
 #include "JsiSkCanvas.h"
-#include "JsiSkHostObjects.h"
 #include "JsiSkNativeObjects.h"
 #include "JsiSkPicture.h"
 #include "JsiSkRect.h"
