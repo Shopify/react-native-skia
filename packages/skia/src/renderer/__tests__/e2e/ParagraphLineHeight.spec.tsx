@@ -1,3 +1,4 @@
+import type { SkTextStyle } from "../../../skia/types";
 import { resolveFile, surface } from "../setup";
 
 const RobotoRegular = Array.from(
@@ -179,6 +180,49 @@ describe("Paragraph line height via heightMultiplier (#2561)", () => {
     // every line to the same 40 pixels.
     expect(result.normalized.lines).toEqual([40, 40]);
     expect(result.normalized.height).toBe(80);
+  });
+
+  it("treats undefined style values the same as absent keys (web parity)", async () => {
+    const result = await surface.eval(
+      (Skia, ctx) => {
+        const typeface = Skia.Typeface.MakeFreeTypeFaceFromData(
+          Skia.Data.fromBytes(new Uint8Array(ctx.RobotoRegular))
+        )!;
+        const provider = Skia.TypefaceFontProvider.Make();
+        provider.registerFont(typeface, "Roboto");
+        const measure = (style: SkTextStyle) => {
+          const builder = Skia.ParagraphBuilder.Make(
+            { heightMultiplier: undefined, strutStyle: undefined },
+            provider
+          );
+          builder.pushStyle(style);
+          builder.addText("Hello");
+          const paragraph = builder.build();
+          paragraph.layout(512);
+          return paragraph.getHeight();
+        };
+        return {
+          absent: measure({
+            color: Skia.Color("black"),
+            fontFamilies: ["Roboto"],
+            fontSize: 24,
+          }),
+          explicitUndefined: measure({
+            color: Skia.Color("black"),
+            fontFamilies: ["Roboto"],
+            fontSize: 24,
+            heightMultiplier: undefined,
+            halfLeading: undefined,
+            letterSpacing: undefined,
+          }),
+        };
+      },
+      { RobotoRegular }
+    );
+    // On web, CanvasKit treats a key set to undefined like a missing key; the
+    // JSI implementation must not throw and must produce the same layout.
+    expect(result.absent).toBe(28);
+    expect(result.explicitUndefined).toBe(28);
   });
 
   it("halfLeading changes where the extra space goes, not the line height", async () => {
