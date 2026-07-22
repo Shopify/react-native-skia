@@ -18,6 +18,7 @@
 namespace rnwgpu {
 
 async::AsyncTaskHandle GPUAdapter::requestDevice(
+    jsi::Runtime &runtime,
     std::optional<std::shared_ptr<GPUDeviceDescriptor>> descriptor) {
   wgpu::DeviceDescriptor aDescriptor;
   Convertor conv;
@@ -104,9 +105,15 @@ async::AsyncTaskHandle GPUAdapter::requestDevice(
       descriptor.has_value() ? descriptor.value()->label.value_or("") : "";
 
   auto creationRuntime = getCreationRuntime();
-  return _async->postTask(
+  // Post to the CALLING runtime's context so the promise settles on the
+  // thread that requested it (see GPUBuffer::mapAsync). The GPUDevice is also
+  // bound to this context, honoring the contract that a device belongs to the
+  // runtime that requested it.
+  auto context =
+      async::RuntimeContext::getOrCreate(runtime, _async->instance());
+  return context->postTask(
       [this, aDescriptor, descriptor, label = std::move(label),
-       deviceLostBinding,
+       deviceLostBinding, context,
        creationRuntime](const async::AsyncTaskHandle::ResolveFunction &resolve,
                         const async::AsyncTaskHandle::RejectFunction &reject) {
         // Build a local mutable copy so we can chain Dawn's device toggles.
@@ -138,7 +145,7 @@ async::AsyncTaskHandle GPUAdapter::requestDevice(
         }
         _instance.RequestDevice(
             &deviceDesc, wgpu::CallbackMode::AllowProcessEvents,
-            [context = _async, resolve, reject, label, creationRuntime,
+            [context, resolve, reject, label, creationRuntime,
              deviceLostBinding](wgpu::RequestDeviceStatus status,
                                 wgpu::Device device,
                                 wgpu::StringView message) {
