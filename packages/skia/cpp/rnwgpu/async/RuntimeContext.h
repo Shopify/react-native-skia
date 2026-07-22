@@ -55,8 +55,15 @@ namespace rnwgpu::async {
  * ProcessEvents on one instance is not guaranteed reentrant.
  *
  * Threading contract: a RuntimeContext must only be pumped from the runtime it
- * was created for. Create and use a GPUDevice (and the buffers/queues derived
- * from it) on the same runtime that requested the adapter.
+ * was created for. Request/response async entry points (mapAsync,
+ * onSubmittedWorkDone, popErrorScope, createComputePipelineAsync,
+ * createRenderPipelineAsync, getCompilationInfo, requestAdapter,
+ * requestDevice) must NOT use a context captured when the object was created —
+ * the object may have been boxed across to another runtime. They resolve the
+ * CALLING runtime's context via getOrCreate(runtime, instance) so the promise
+ * is settled on the thread it was created on. Spontaneous events (device.lost,
+ * uncapturederror) remain bound to the device's own context (best-effort, main
+ * runtime only; see the class doc above).
  */
 class RuntimeContext : public std::enable_shared_from_this<RuntimeContext> {
 public:
@@ -83,6 +90,12 @@ public:
   const std::shared_ptr<facebook::react::CallInvoker> &callInvoker() const {
     return _callInvoker;
   }
+
+  // The main JS runtime's CallInvoker (registered on install), or null before
+  // install. Used by the platform views to apply latched surface attaches from
+  // the JS thread for contexts that are not actively rendering (see
+  // SurfaceInfo::applyPendingAttach).
+  static std::shared_ptr<facebook::react::CallInvoker> mainCallInvoker();
 
   // The wgpu::Instance bound to this runtime.
   wgpu::Instance instance() const { return _instance; }

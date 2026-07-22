@@ -33,7 +33,7 @@ public:
 public:
   std::string getBrand() { return CLASS_NAME; }
 
-  async::AsyncTaskHandle mapAsync(uint64_t modeIn,
+  async::AsyncTaskHandle mapAsync(jsi::Runtime &runtime, uint64_t modeIn,
                                   std::optional<uint64_t> offset,
                                   std::optional<uint64_t> size);
   std::shared_ptr<ArrayBuffer> getMappedRange(std::optional<size_t> offset,
@@ -53,7 +53,8 @@ public:
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installGetter(runtime, prototype, "__brand", &GPUBuffer::getBrand);
-    installMethod(runtime, prototype, "mapAsync", &GPUBuffer::mapAsync);
+    installMethodWithRuntime(runtime, prototype, "mapAsync",
+                             &GPUBuffer::mapAsync);
     installMethod(runtime, prototype, "getMappedRange",
                   &GPUBuffer::getMappedRange);
     installMethod(runtime, prototype, "unmap", &GPUBuffer::unmap);

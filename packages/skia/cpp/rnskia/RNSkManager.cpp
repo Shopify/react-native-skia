@@ -51,6 +51,12 @@ RNSkManager::RNSkManager(
 }
 
 RNSkManager::~RNSkManager() {
+#ifdef SK_GRAPHITE
+  // Drop all canvas registry entries: after a reload the JS side restarts its
+  // contextId counter, and stale entries would alias new canvases onto dead
+  // surfaces.
+  rnwgpu::SurfaceRegistry::getInstance().clear();
+#endif
   // Free up any references
   _viewApi = nullptr;
   _jsRuntime = nullptr;
