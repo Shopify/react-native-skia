@@ -45,11 +45,31 @@ public:
                                     nativeInfo.height);
   }
 
+  // Retires a canvas context from the JS side (Canvas unmount cleanup).
+  // Registry entries have two owners, split by whether a native surface is
+  // attached:
+  // - A native view currently owns a surface (or one is pending): its own
+  //   teardown (WebGPUMetalView dealloc / WebGPUViewManager.onDropViewInstance)
+  //   removes the entry. Skipping here keeps React StrictMode safe: its
+  //   simulated unmount re-runs JS effects without unmounting native views,
+  //   and removing the entry then would orphan the still-attached surface.
+  // - No native surface: the JS side is the last owner and removes the entry.
+  // The check-and-erase runs atomically under the registry lock
+  // (removeSurfaceInfoIfDetached), serialized against the UI thread's
+  // find-or-create + attach (SurfaceRegistry::attachSurface), so a concurrent
+  // attach can never be orphaned by this removal.
+  void destroyContext(int contextId) {
+    auto &registry = rnwgpu::SurfaceRegistry::getInstance();
+    registry.removeSurfaceInfoIfDetached(contextId);
+  }
+
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installGetter(runtime, prototype, "fabric", &RNWebGPU::getFabric);
     installGetter(runtime, prototype, "gpu", &RNWebGPU::getGPU);
     installMethod(runtime, prototype, "getNativeSurface",
                   &RNWebGPU::getNativeSurface);
+    installMethod(runtime, prototype, "destroyContext",
+                  &RNWebGPU::destroyContext);
     installMethod(runtime, prototype, "MakeWebGPUCanvasContext",
                   &RNWebGPU::MakeWebGPUCanvasContext);
   }

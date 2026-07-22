@@ -37,7 +37,8 @@ GPUBuffer::getMappedRange(std::optional<size_t> o, std::optional<size_t> size) {
 
 void GPUBuffer::destroy() { _instance.Destroy(); }
 
-async::AsyncTaskHandle GPUBuffer::mapAsync(uint64_t modeIn,
+async::AsyncTaskHandle GPUBuffer::mapAsync(jsi::Runtime &runtime,
+                                           uint64_t modeIn,
                                            std::optional<uint64_t> offset,
                                            std::optional<uint64_t> size) {
   Convertor conv;
@@ -51,7 +52,16 @@ async::AsyncTaskHandle GPUBuffer::mapAsync(uint64_t modeIn,
   auto bufferHandle = _instance;
   uint64_t resolvedOffset = offset.value_or(0);
 
-  return _async->postTask(
+  // Post to the CALLING runtime's context, not the one captured at buffer
+  // creation (_async): the buffer may have been created on another runtime and
+  // boxed across (e.g. device created on the main JS runtime, mapAsync called
+  // from a worklet). The returned Promise lives on the calling runtime, so it
+  // must be settled from that runtime's own thread — and postTask itself
+  // schedules the pump through its context's runtime (setTimeout), which is
+  // only safe for the runtime we are currently executing on.
+  auto context =
+      async::RuntimeContext::getOrCreate(runtime, _async->instance());
+  return context->postTask(
       [bufferHandle, mode, resolvedOffset,
        rangeSize](const async::AsyncTaskHandle::ResolveFunction &resolve,
                   const async::AsyncTaskHandle::RejectFunction &reject) {

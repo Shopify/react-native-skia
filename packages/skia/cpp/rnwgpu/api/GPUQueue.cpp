@@ -79,9 +79,13 @@ void GPUQueue::writeBuffer(std::shared_ptr<GPUBuffer> buffer,
                         static_cast<size_t>(size64));
 }
 
-async::AsyncTaskHandle GPUQueue::onSubmittedWorkDone() {
+async::AsyncTaskHandle GPUQueue::onSubmittedWorkDone(jsi::Runtime &runtime) {
   auto queue = _instance;
-  return _async->postTask(
+  // Post to the CALLING runtime's context so the promise settles on the
+  // thread that requested it (see GPUBuffer::mapAsync).
+  auto context =
+      async::RuntimeContext::getOrCreate(runtime, _async->instance());
+  return context->postTask(
       [queue](const async::AsyncTaskHandle::ResolveFunction &resolve,
               const async::AsyncTaskHandle::RejectFunction &reject) {
         queue.OnSubmittedWorkDone(

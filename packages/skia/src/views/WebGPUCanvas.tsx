@@ -1,4 +1,4 @@
-import React, { useImperativeHandle, useRef, useState } from "react";
+import React, { useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { ViewProps } from "react-native";
 import { View, Platform } from "react-native";
 
@@ -19,6 +19,9 @@ declare global {
       width: number,
       height: number
     ) => RNCanvasContext;
+    // Retires a canvas context; called by the Canvas on unmount (the Canvas
+    // owns the native registry entry for its contextId).
+    destroyContext: (contextId: number) => void;
   };
 }
 
@@ -54,6 +57,19 @@ export const WebGPUCanvas = ({
 }: WebGPUCanvasProps) => {
   const viewRef = useRef(null);
   const [contextId] = useState(() => generateContextId());
+
+  // Retire the native registry entry for this contextId on unmount. When a
+  // native surface is still attached, this is a no-op and the native view's
+  // own teardown retires the entry instead — which keeps StrictMode's
+  // simulated unmount (which re-runs effects without unmounting native views)
+  // from orphaning a live surface.
+  useEffect(() => {
+    return () => {
+      if (typeof RNWebGPU !== "undefined") {
+        RNWebGPU.destroyContext(contextId);
+      }
+    };
+  }, [contextId]);
 
   useImperativeHandle(ref, () => ({
     getContextId: () => contextId,

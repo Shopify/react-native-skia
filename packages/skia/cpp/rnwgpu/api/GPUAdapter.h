@@ -33,8 +33,9 @@ public:
 public:
   std::string getBrand() { return CLASS_NAME; }
 
-  async::AsyncTaskHandle
-  requestDevice(std::optional<std::shared_ptr<GPUDeviceDescriptor>> descriptor);
+  async::AsyncTaskHandle requestDevice(
+      jsi::Runtime &runtime,
+      std::optional<std::shared_ptr<GPUDeviceDescriptor>> descriptor);
 
   std::unordered_set<std::string> getFeatures();
   std::shared_ptr<GPUSupportedLimits> getLimits();
@@ -42,8 +43,8 @@ public:
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installGetter(runtime, prototype, "__brand", &GPUAdapter::getBrand);
-    installMethod(runtime, prototype, "requestDevice",
-                  &GPUAdapter::requestDevice);
+    installMethodWithRuntime(runtime, prototype, "requestDevice",
+                             &GPUAdapter::requestDevice);
     installGetter(runtime, prototype, "features", &GPUAdapter::getFeatures);
     installGetter(runtime, prototype, "limits", &GPUAdapter::getLimits);
     installGetter(runtime, prototype, "info", &GPUAdapter::getInfo);
