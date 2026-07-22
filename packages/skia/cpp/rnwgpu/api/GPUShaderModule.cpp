@@ -3,7 +3,7 @@
 #include <memory>
 #include <utility>
 
-#include "jsi2/JSIConverter.h"
+#include "jsi/JSIConverter.h"
 
 namespace rnwgpu {
 

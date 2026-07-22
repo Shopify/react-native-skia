@@ -6,7 +6,7 @@
 
 #include "descriptors/Unions.h"
 
-#include "jsi2/NativeObject.h"
+#include "jsi/NativeObject.h"
 
 #include "rnwgpu/async/AsyncTaskHandle.h"
 #include "rnwgpu/async/RuntimeContext.h"
@@ -33,9 +33,9 @@ public:
 public:
   std::string getBrand() { return CLASS_NAME; }
 
-  async::AsyncTaskHandle requestDevice(
-      jsi::Runtime &runtime,
-      std::optional<std::shared_ptr<GPUDeviceDescriptor>> descriptor);
+  async::AsyncTaskHandle
+  requestDevice(jsi::Runtime &runtime,
+                std::optional<std::shared_ptr<GPUDeviceDescriptor>> descriptor);
 
   std::unordered_set<std::string> getFeatures();
   std::shared_ptr<GPUSupportedLimits> getLimits();

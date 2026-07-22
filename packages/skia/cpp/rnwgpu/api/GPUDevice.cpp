@@ -10,7 +10,7 @@
 
 #include "Convertors.h"
 #include "NativeBufferUtils.h"
-#include "jsi2/JSIConverter.h"
+#include "jsi/JSIConverter.h"
 
 #include "GPUFeatures.h"
 #include "GPUInternalError.h"
@@ -363,9 +363,9 @@ async::AsyncTaskHandle GPUDevice::createComputePipelineAsync(
                   runtime, pipelineHolder);
             });
           } else {
-            std::string error =
-                msg.length ? std::string(msg.data, msg.length)
-                           : "Failed to create compute pipeline";
+            std::string error = msg.length
+                                    ? std::string(msg.data, msg.length)
+                                    : "Failed to create compute pipeline";
             reject(std::move(error));
           }
         });
@@ -410,9 +410,8 @@ async::AsyncTaskHandle GPUDevice::createRenderPipelineAsync(
                   runtime, pipelineHolder);
             });
           } else {
-            std::string error =
-                msg.length ? std::string(msg.data, msg.length)
-                           : "Failed to create render pipeline";
+            std::string error = msg.length ? std::string(msg.data, msg.length)
+                                           : "Failed to create render pipeline";
             reject(std::move(error));
           }
         });

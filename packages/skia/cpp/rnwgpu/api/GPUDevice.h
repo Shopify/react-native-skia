@@ -13,7 +13,7 @@
 
 #include "descriptors/Unions.h"
 
-#include "jsi2/NativeObject.h"
+#include "jsi/NativeObject.h"
 
 #include "rnwgpu/async/AsyncTaskHandle.h"
 #include "rnwgpu/async/RuntimeContext.h"
@@ -240,8 +240,8 @@ private:
   std::shared_ptr<async::RuntimeContext> _async;
   std::string _label;
   // Guards the device-lost state below. In the ProcessEvents model both
-  // notifyDeviceLost() (fired by Dawn during ProcessEvents) and getLost() run on
-  // the owning runtime's own thread, but device destruction can also trigger
+  // notifyDeviceLost() (fired by Dawn during ProcessEvents) and getLost() run
+  // on the owning runtime's own thread, but device destruction can also trigger
   // notifyDeviceLost() synchronously, so the mutex keeps these fields safe.
   std::mutex _lostMutex;
   std::optional<async::AsyncTaskHandle> _lostHandle;

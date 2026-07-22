@@ -13,7 +13,7 @@
 #include "GPUInternalError.h"
 #include "GPUOutOfMemoryError.h"
 #include "GPUValidationError.h"
-#include "jsi2/JSIConverter.h"
+#include "jsi/JSIConverter.h"
 
 namespace rnwgpu {
 
@@ -147,8 +147,7 @@ async::AsyncTaskHandle GPUAdapter::requestDevice(
             &deviceDesc, wgpu::CallbackMode::AllowProcessEvents,
             [context, resolve, reject, label, creationRuntime,
              deviceLostBinding](wgpu::RequestDeviceStatus status,
-                                wgpu::Device device,
-                                wgpu::StringView message) {
+                                wgpu::Device device, wgpu::StringView message) {
               if (message.length) {
                 fprintf(stderr, "%s", message.data);
               }

@@ -5,7 +5,7 @@
 
 #include "webgpu/webgpu_cpp.h"
 
-#include "jsi2/JSIConverter.h"
+#include "jsi/JSIConverter.h"
 
 #include "rnwgpu/api/GPUPipelineLayout.h"
 

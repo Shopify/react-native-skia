@@ -102,6 +102,7 @@ add_library(
         "${PROJECT_SOURCE_DIR}/../cpp/jsi/RuntimeLifecycleMonitor.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/jsi/RuntimeAwareCache.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/jsi/JsiPromises.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/jsi/Promise.cpp"
 
         "${PROJECT_SOURCE_DIR}/../cpp/rnskia/RNSkManager.cpp"
 
@@ -114,10 +115,7 @@ add_library(
 )
 
 if(SK_GRAPHITE)
-    # WebGPU JSI infrastructure (jsi2)
     target_sources(${PACKAGE_NAME} PRIVATE
-        "${PROJECT_SOURCE_DIR}/../cpp/jsi2/Promise.cpp"
-
         # WebGPU async system
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/AsyncTaskHandle.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/RuntimeContext.cpp"
@@ -180,7 +178,6 @@ target_include_directories(
 
         # WebGPU bindings
         ../cpp
-        ../cpp/jsi2
         ../cpp/rnwgpu
         ../cpp/rnwgpu/api
         ../cpp/rnwgpu/api/descriptors

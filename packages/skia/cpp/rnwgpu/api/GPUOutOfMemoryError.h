@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "jsi2/NativeObject.h"
+#include "jsi/NativeObject.h"
 
 namespace rnwgpu {
 

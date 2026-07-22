@@ -1,17 +1,13 @@
 #pragma once
 
 #include <atomic>
-#include <functional>
 #include <memory>
-#include <mutex>
 #include <string>
-#include <unordered_map>
 #include <utility>
-#include <vector>
 
 #include <jsi/jsi.h>
 
-#include "NativeObject.h"
+#include "jsi/NativeObject.h"
 #include "rnskia/RNSkPlatformContext.h"
 #include "utils/RNSkLog.h"
 
@@ -103,129 +99,8 @@ std::shared_ptr<T> getJsiObject(jsi::Runtime &runtime,
 }
 
 /**
- * Registry mapping a class brand (CLASS_NAME) to a reconstructor that can
- * recreate a fully functional JS object (prototype + native state) on any
- * runtime. This is what enables Skia objects to travel between the React
- * Native runtime and secondary runtimes (Reanimated worklets) via
- * JsiSkBoxedObject.
- */
-class JsiSkObjectRegistry {
-public:
-  using Reconstructor = std::function<jsi::Value(
-      jsi::Runtime &, std::shared_ptr<jsi::NativeState>)>;
-
-  static JsiSkObjectRegistry &getInstance() {
-    static JsiSkObjectRegistry instance;
-    return instance;
-  }
-
-  void registerClass(const std::string &brand, Reconstructor reconstructor) {
-    std::lock_guard<std::mutex> lock(_mutex);
-    _reconstructors[brand] = std::move(reconstructor);
-  }
-
-  jsi::Value reconstruct(jsi::Runtime &runtime, const std::string &brand,
-                         std::shared_ptr<jsi::NativeState> state) {
-    Reconstructor reconstructor;
-    {
-      std::lock_guard<std::mutex> lock(_mutex);
-      auto it = _reconstructors.find(brand);
-      if (it == _reconstructors.end()) {
-        throw jsi::JSError(runtime,
-                           "No Skia class registered for brand: " + brand);
-      }
-      reconstructor = it->second;
-    }
-    return reconstructor(runtime, std::move(state));
-  }
-
-private:
-  JsiSkObjectRegistry() = default;
-  std::mutex _mutex;
-  std::unordered_map<std::string, Reconstructor> _reconstructors;
-};
-
-/**
- * HostObject bridge used to move Skia NativeObjects between runtimes.
- *
- * NativeObject-based values are plain JS objects carrying jsi::NativeState;
- * worklets cannot serialize their prototype, so they are "boxed" into this
- * HostObject (which worklets pass across runtimes by reference) and unboxed
- * on the target runtime, where the prototype is re-installed from the class
- * registry. See registerCustomSerializable in src/skia/SkiaSerializable.ts.
- */
-class JsiSkBoxedObject : public jsi::HostObject {
-public:
-  JsiSkBoxedObject(std::shared_ptr<jsi::NativeState> state, std::string brand)
-      : _state(std::move(state)), _brand(std::move(brand)) {}
-
-  jsi::Value get(jsi::Runtime &runtime, const jsi::PropNameID &name) override {
-    auto propName = name.utf8(runtime);
-    if (propName == "unbox") {
-      auto state = _state;
-      auto brand = _brand;
-      return jsi::Function::createFromHostFunction(
-          runtime, jsi::PropNameID::forUtf8(runtime, "unbox"), 0,
-          [state, brand](jsi::Runtime &rt, const jsi::Value &,
-                         const jsi::Value *, size_t) -> jsi::Value {
-            return JsiSkObjectRegistry::getInstance().reconstruct(rt, brand,
-                                                                  state);
-          });
-    }
-    if (propName == "__boxedSkiaObject") {
-      return jsi::Value(true);
-    }
-    if (propName == "__brand") {
-      return jsi::String::createFromUtf8(runtime, _brand);
-    }
-    return jsi::Value::undefined();
-  }
-
-  void set(jsi::Runtime &runtime, const jsi::PropNameID &,
-           const jsi::Value &) override {
-    throw jsi::JSError(runtime, "Boxed Skia objects are read-only");
-  }
-
-  std::vector<jsi::PropNameID> getPropertyNames(jsi::Runtime &rt) override {
-    std::vector<jsi::PropNameID> names;
-    names.reserve(3);
-    names.push_back(jsi::PropNameID::forUtf8(rt, "unbox"));
-    names.push_back(jsi::PropNameID::forUtf8(rt, "__boxedSkiaObject"));
-    names.push_back(jsi::PropNameID::forUtf8(rt, "__brand"));
-    return names;
-  }
-
-private:
-  std::shared_ptr<jsi::NativeState> _state;
-  std::string _brand;
-};
-
-/**
- * Boxes a Skia NativeObject-backed JS value so it can be serialized by
- * worklets and unboxed on another runtime.
- */
-inline jsi::Value boxSkiaObject(jsi::Runtime &runtime,
-                                const jsi::Value &value) {
-  if (!value.isObject()) {
-    throw jsi::JSError(runtime, "box() expects a Skia object");
-  }
-  auto object = value.asObject(runtime);
-  if (!object.hasNativeState(runtime)) {
-    throw jsi::JSError(runtime, "box() expects a Skia object");
-  }
-  auto brand = object.getProperty(runtime, "__typename__");
-  if (!brand.isString()) {
-    throw jsi::JSError(runtime, "box() expects a Skia object");
-  }
-  return jsi::Object::createFromHostObject(
-      runtime, std::make_shared<JsiSkBoxedObject>(
-                   object.getNativeState(runtime),
-                   brand.asString(runtime).utf8(runtime)));
-}
-
-/**
  * Base class for Skia API objects implemented with the NativeObject /
- * jsi::NativeState pattern (see jsi2/NativeObject.h). Instead of a HostObject
+ * jsi::NativeState pattern (see jsi/NativeObject.h). Instead of a HostObject
  * intercepting every property access, methods and properties live on a shared
  * per-runtime prototype and the C++ instance is attached to plain JS objects
  * as native state.
@@ -404,40 +279,13 @@ protected:
   }
 
   /**
-   * Installs the shared pieces every Skia class needs:
-   * - the `__typename__` property (CLASS_NAME) used by JS type guards
-   * - the `__box()` method and boxing reconstructor used to transfer objects
-   *   across runtimes (see registerCustomSerializable in
-   *   src/skia/SkiaWorkletSerialization.ts). `__box()` only relies on the
-   *   prototype and native state, so it works on every runtime the object
-   *   can live on.
-   * Must be called from definePrototype().
+   * Hook called from every definePrototype(). The shared pieces
+   * (`__typename__`, `__box()` and the boxing reconstructor used for
+   * cross-runtime transfer) are installed by NativeObject::installPrototype
+   * for all native objects (Skia and WebGPU alike); the wrapping subclass
+   * below extends this hook to add dispose().
    */
-  static void installCommon(jsi::Runtime &runtime, jsi::Object &prototype) {
-    prototype.setProperty(
-        runtime, "__typename__",
-        jsi::String::createFromUtf8(runtime, Derived::CLASS_NAME));
-
-    auto boxFunc = jsi::Function::createFromHostFunction(
-        runtime, jsi::PropNameID::forUtf8(runtime, "__box"), 0,
-        [](jsi::Runtime &rt, const jsi::Value &thisValue, const jsi::Value *,
-           size_t) -> jsi::Value { return boxSkiaObject(rt, thisValue); });
-    prototype.setProperty(runtime, "__box", boxFunc);
-
-    static std::once_flag registered;
-    std::call_once(registered, []() {
-      JsiSkObjectRegistry::getInstance().registerClass(
-          Derived::CLASS_NAME,
-          [](jsi::Runtime &rt,
-             std::shared_ptr<jsi::NativeState> state) -> jsi::Value {
-            auto instance = std::dynamic_pointer_cast<Derived>(state);
-            if (instance == nullptr) {
-              throw jsi::JSError(rt, "Invalid boxed Skia object state");
-            }
-            return Derived::create(rt, std::move(instance));
-          });
-    });
-  }
+  static void installCommon(jsi::Runtime &runtime, jsi::Object &prototype) {}
 
 private:
   static void defineProperty(jsi::Runtime &runtime, jsi::Object &prototype,

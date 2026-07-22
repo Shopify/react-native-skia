@@ -3207,7 +3207,7 @@ SPEC CHECKSUMS:
   FBLazyVector: 309703e71d3f2f1ed7dc7889d58309c9d77a95a4
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
-  hermes-engine: 11b010917f5f15150b2c015abddef1573d2bb05d
+  hermes-engine: ad676c360175e5b8af471b8ce1389e6cf4f9e1ee
   RCT-Folly: 59ec0ac1f2f39672a0c6e6cecdd39383b764646f
   RCTDeprecation: a41bbdd9af30bf2e5715796b313e44ec43eefff1
   RCTRequired: 7be34aabb0b77c3cefe644528df0fa0afad4e4d0
@@ -3245,7 +3245,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 2e0e7cc5b7064eaed9c8b8afc3a87621cb7ef5cd
   React-microtasksnativemodule: dd4d33b251b57e5027c572c6d0b45cbfbcfaa386
   react-native-safe-area-context: 54d812805f3c4e08a4580ad086cbde1d8780c2e4
-  react-native-skia: b28747dc1cf8c344ad041f14a618eda7f429bfeb
+  react-native-skia: 4a90dfa21f4544d69c6be0c49958378169a88532
   React-NativeModulesApple: 7f2f2fed3f6c858889eb61d09941be965d52df58
   React-networking: 43e5e6773ac2ca2a93261a1388fed269c9fce092
   React-oscompat: 80166b66da22e7af7fad94474e9997bd52d4c8c6

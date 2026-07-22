@@ -13,7 +13,7 @@
 
 #ifdef SK_GRAPHITE
 #include "RNDawnContext.h"
-#include "jsi2/Promise.h"
+#include "jsi/Promise.h"
 #include "rnwgpu/ArrayBuffer.h"
 #include "rnwgpu/api/GPU.h"
 #include "rnwgpu/api/GPUUncapturedErrorEvent.h"
