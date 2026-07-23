@@ -7,6 +7,7 @@
 
 #include <jsi/jsi.h>
 
+#include "JsiSkConverters.h"
 #include "JsiSkDispatcher.h"
 #include "JsiSkNativeObjects.h"
 #include "JsiTextureInfo.h"
@@ -67,27 +68,25 @@ public:
   }
 
   // TODO-API: Properties?
-  JSI_HOST_FUNCTION(width) { return static_cast<double>(getObject()->width()); }
-  JSI_HOST_FUNCTION(height) {
-    return static_cast<double>(getObject()->height());
-  }
+  double width() { return static_cast<double>(getObject()->width()); }
+  double height() { return static_cast<double>(getObject()->height()); }
 
-  JSI_HOST_FUNCTION(getCanvas) {
+  std::shared_ptr<JsiSkCanvas> getCanvas() {
     auto surface = getObject();
     auto canvas =
         std::make_shared<JsiSkCanvas>(getContext(), surface->getCanvas());
     // Keep a reference to the owning surface so the canvas can read pixels back
     // through a snapshot on Graphite (which lacks synchronous canvas readback).
     canvas->setSurface(surface);
-    return makeJsiObject(runtime, std::move(canvas));
+    return canvas;
   }
 
-  JSI_HOST_FUNCTION(flush) {
+  void flush(JsiOptional<bool> syncParam) {
     auto surface = getObject();
     // When `sync` is true, block until the GPU has finished executing the
     // submitted work. Required before a native consumer on a different command
     // queue reads this surface's texture via getNativeTextureUnstable(). #3916
-    bool sync = count > 0 && arguments[0].isBool() && arguments[0].getBool();
+    bool sync = syncParam.has_value() && *syncParam;
 #if defined(SK_GRAPHITE)
     // A raster surface (e.g. Skia.Surface.Make) has no Graphite recorder;
     // only Graphite-backed surfaces need to snap and submit a recording.
@@ -102,7 +101,6 @@ public:
       dContext->flushAndSubmit(sync ? GrSyncCpu::kYes : GrSyncCpu::kNo);
     }
 #endif
-    return jsi::Value::undefined();
   }
 
   JSI_HOST_FUNCTION(makeImageSnapshot) {
@@ -195,13 +193,12 @@ public:
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installCommon(runtime, prototype);
-    installHostMethod(runtime, prototype, "width", &JsiSkSurface::width);
-    installHostMethod(runtime, prototype, "height", &JsiSkSurface::height);
-    installHostMethod(runtime, prototype, "getCanvas",
-                      &JsiSkSurface::getCanvas);
+    installMethod(runtime, prototype, "width", &JsiSkSurface::width);
+    installMethod(runtime, prototype, "height", &JsiSkSurface::height);
+    installMethod(runtime, prototype, "getCanvas", &JsiSkSurface::getCanvas);
     installHostMethod(runtime, prototype, "makeImageSnapshot",
                       &JsiSkSurface::makeImageSnapshot);
-    installHostMethod(runtime, prototype, "flush", &JsiSkSurface::flush);
+    installMethod(runtime, prototype, "flush", &JsiSkSurface::flush);
     installHostMethod(runtime, prototype, "getNativeTextureUnstable",
                       &JsiSkSurface::getNativeTextureUnstable);
   }

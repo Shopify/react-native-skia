@@ -312,6 +312,34 @@ template <> struct JSIConverter<SkPoint3> {
   }
 };
 
+// std::string | null (nullable string results)
+template <> struct JSIConverter<std::variant<std::nullptr_t, std::string>> {
+  using Target = std::variant<std::nullptr_t, std::string>;
+  static Target fromJSI(jsi::Runtime &runtime, const jsi::Value &arg,
+                        bool outOfBound) {
+    if (arg.isNull()) {
+      return Target(nullptr);
+    }
+    return Target(JSIConverter<std::string>::fromJSI(runtime, arg, outOfBound));
+  }
+  static jsi::Value toJSI(jsi::Runtime &runtime, const Target &arg) {
+    if (std::holds_alternative<std::nullptr_t>(arg)) {
+      return jsi::Value::null();
+    }
+    return JSIConverter<std::string>::toJSI(runtime, std::get<std::string>(arg));
+  }
+};
+
+// SkSize -> {width, height} (fractional)
+template <> struct JSIConverter<SkSize> {
+  static jsi::Value toJSI(jsi::Runtime &runtime, const SkSize &size) {
+    jsi::Object result(runtime);
+    result.setProperty(runtime, "width", static_cast<double>(size.width()));
+    result.setProperty(runtime, "height", static_cast<double>(size.height()));
+    return result;
+  }
+};
+
 // SkISize <> {width, height}
 template <> struct JSIConverter<SkISize> {
   static SkISize fromJSI(jsi::Runtime &runtime, const jsi::Value &arg,
