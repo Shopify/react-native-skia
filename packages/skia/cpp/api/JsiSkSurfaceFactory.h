@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <utility>
+#include <variant>
 
 #include <jsi/jsi.h>
 
@@ -24,16 +25,14 @@ class JsiSkSurfaceFactory : public JsiSkNativeObject<JsiSkSurfaceFactory> {
 public:
   static constexpr const char *CLASS_NAME = "SurfaceFactory";
 
-  JSI_HOST_FUNCTION(Make) {
-    auto width = static_cast<int>(arguments[0].asNumber());
-    auto height = static_cast<int>(arguments[1].asNumber());
+  std::variant<std::nullptr_t, std::shared_ptr<JsiSkSurface>> Make(int width,
+                                                                   int height) {
     auto imageInfo = SkImageInfo::MakeN32Premul(width, height);
     auto surface = SkSurfaces::Raster(imageInfo);
     if (surface == nullptr) {
-      return jsi::Value::null();
+      return nullptr;
     }
-    return makeJsiObject(runtime, std::make_shared<JsiSkSurface>(
-                                      getContext(), std::move(surface)));
+    return std::make_shared<JsiSkSurface>(getContext(), std::move(surface));
   }
 
   JSI_HOST_FUNCTION(MakeOffscreen) {
@@ -63,7 +62,7 @@ public:
   size_t getMemoryPressure() override { return 2048; }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installHostMethod(runtime, prototype, "Make", &JsiSkSurfaceFactory::Make);
+    installMethod(runtime, prototype, "Make", &JsiSkSurfaceFactory::Make);
     installHostMethod(runtime, prototype, "MakeOffscreen",
                       &JsiSkSurfaceFactory::MakeOffscreen);
   }
