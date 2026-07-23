@@ -5,16 +5,19 @@
 
 #include <jsi/jsi.h>
 
-#include "jsi/JsiPromises.h"
 #include "JsiSkData.h"
+#include "JsiSkNativeObjects.h"
 #include "api/third_party/base64.h"
+#include "jsi/JsiPromises.h"
 
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiSkDataFactory : public JsiSkHostObject {
+class JsiSkDataFactory : public JsiSkNativeObject<JsiSkDataFactory> {
 public:
+  static constexpr const char *CLASS_NAME = "DataFactory";
+
   JSI_HOST_FUNCTION(fromURI) {
     auto jsiLocalUri = arguments[0].asString(runtime);
     auto localUri = jsiLocalUri.utf8(runtime);
@@ -38,10 +41,9 @@ public:
                                                 context = std::move(context),
                                                 promise = std::move(promise),
                                                 result = std::move(result)]() {
-                  auto hostObjectInstance =
-                      std::make_shared<JsiSkData>(context, std::move(result));
-                  promise->resolve(JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-                      runtime, hostObjectInstance, context));
+                  promise->resolve(makeJsiObject(
+                      runtime,
+                      std::make_shared<JsiSkData>(context, std::move(result))));
                 });
               });
         });
@@ -56,10 +58,8 @@ public:
 
     auto data =
         SkData::MakeWithCopy(buffer.data(runtime), buffer.size(runtime));
-    auto hostObjectInstance =
-        std::make_shared<JsiSkData>(getContext(), std::move(data));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(
+        runtime, std::make_shared<JsiSkData>(getContext(), std::move(data)));
   }
 
   JSI_HOST_FUNCTION(fromBase64) {
@@ -85,22 +85,23 @@ public:
       return jsi::Value::undefined();
     }
 
-    auto hostObjectInstance =
-        std::make_shared<JsiSkData>(getContext(), std::move(data));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(
+        runtime, std::make_shared<JsiSkData>(getContext(), std::move(data)));
   }
 
-  size_t getMemoryPressure() const override { return 1024; }
+  size_t getMemoryPressure() override { return 1024; }
 
-  std::string getObjectType() const override { return "JsiSkDataFactory"; }
-
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkDataFactory, fromURI),
-                       JSI_EXPORT_FUNC(JsiSkDataFactory, fromBytes),
-                       JSI_EXPORT_FUNC(JsiSkDataFactory, fromBase64))
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installHostMethod(runtime, prototype, "fromURI",
+                      &JsiSkDataFactory::fromURI);
+    installHostMethod(runtime, prototype, "fromBytes",
+                      &JsiSkDataFactory::fromBytes);
+    installHostMethod(runtime, prototype, "fromBase64",
+                      &JsiSkDataFactory::fromBase64);
+  }
 
   explicit JsiSkDataFactory(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(std::move(context)) {}
+      : JsiSkNativeObject<JsiSkDataFactory>(std::move(context)) {}
 };
 
 } // namespace RNSkia

@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "Convertors.h"
-#include "jsi2/JSIConverter.h"
+#include "jsi/JSIConverter.h"
 #include "rnwgpu/async/RuntimeContext.h"
 
 namespace rnwgpu {
@@ -40,9 +40,9 @@ async::AsyncTaskHandle GPU::requestAdapter(
                 const async::AsyncTaskHandle::RejectFunction &reject) {
         _instance.RequestAdapter(
             &aOptions, wgpu::CallbackMode::AllowProcessEvents,
-            [context, resolve,
-             reject](wgpu::RequestAdapterStatus status, wgpu::Adapter adapter,
-                     wgpu::StringView message) {
+            [context, resolve, reject](wgpu::RequestAdapterStatus status,
+                                       wgpu::Adapter adapter,
+                                       wgpu::StringView message) {
               if (message.length) {
                 fprintf(stderr, "%s", message.data);
               }

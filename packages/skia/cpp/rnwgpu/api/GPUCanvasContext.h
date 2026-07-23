@@ -8,7 +8,7 @@
 
 #include "webgpu/webgpu_cpp.h"
 
-#include "jsi2/NativeObject.h"
+#include "jsi/NativeObject.h"
 
 #include "GPU.h"
 #include "GPUTexture.h"
@@ -56,7 +56,9 @@ public:
   std::shared_ptr<GPUTexture> getCurrentTexture();
   // Present is explicit on every runtime (main JS, Reanimated UI, and dedicated
   // worklet runtimes). It runs synchronously on the calling thread, preserving
-  // Dawn surface thread-affinity; offscreen surfaces no-op.
+  // Dawn surface thread-affinity; frames rendered offscreen (no surface
+  // attached) are skipped. It is also the end-of-frame boundary at which a
+  // newly attached native surface is adopted (see SurfaceInfo).
   void present();
 
 private:

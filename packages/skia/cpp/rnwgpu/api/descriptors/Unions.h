@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "jsi2/EnumMapper.h"
+#include "jsi/EnumMapper.h"
 #include "rnwgpu/api/External.h"
 #include "webgpu/webgpu_cpp.h"
 

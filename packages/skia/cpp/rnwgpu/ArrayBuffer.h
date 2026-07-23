@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <memory>
 
-#include "jsi2/JSIConverter.h"
+#include "jsi/JSIConverter.h"
 
 namespace rnwgpu {
 
@@ -77,8 +77,7 @@ template <> struct JSIConverter<std::shared_ptr<ArrayBuffer>> {
           const size_t byteLength = static_cast<size_t>(byteLengthValue);
 
           // Overflow-safe bounds check: byteOffset + byteLength <= bufferSize.
-          if (byteOffset > bufferSize ||
-              byteLength > bufferSize - byteOffset) {
+          if (byteOffset > bufferSize || byteLength > bufferSize - byteOffset) {
             throw std::runtime_error(
                 "ArrayBuffer::fromJSI: view bounds [byteOffset, byteOffset + "
                 "byteLength) exceed the backing ArrayBuffer size");
@@ -98,9 +97,9 @@ template <> struct JSIConverter<std::shared_ptr<ArrayBuffer>> {
             }
           }
 
-          return std::make_shared<ArrayBuffer>(
-              arrayBuffer.data(runtime) + byteOffset, byteLength,
-              bytesPerElements);
+          return std::make_shared<ArrayBuffer>(arrayBuffer.data(runtime) +
+                                                   byteOffset,
+                                               byteLength, bytesPerElements);
         }
       }
     }

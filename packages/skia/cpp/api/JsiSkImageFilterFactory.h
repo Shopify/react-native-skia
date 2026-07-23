@@ -5,8 +5,8 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiSkHostObjects.h"
 #include "JsiSkImageFilter.h"
+#include "JsiSkNativeObjects.h"
 #include "JsiSkPicture.h"
 #include "JsiSkRuntimeShaderBuilder.h"
 
@@ -28,8 +28,11 @@ inline bool hasOptionalArgument(const jsi::Value *arguments, size_t count,
           !arguments[index].isUndefined());
 }
 
-class JsiSkImageFilterFactory : public JsiSkHostObject {
+class JsiSkImageFilterFactory
+    : public JsiSkNativeObject<JsiSkImageFilterFactory> {
 public:
+  static constexpr const char *CLASS_NAME = "ImageFilterFactory";
+
   JSI_HOST_FUNCTION(MakeBlur) {
     float sigmaX = arguments[0].asNumber();
     float sigmaY = arguments[1].asNumber();
@@ -45,8 +48,7 @@ public:
     auto filter = std::make_shared<JsiSkImageFilter>(
         getContext(), SkImageFilters::Blur(sigmaX, sigmaY, (SkTileMode)tileMode,
                                            imageFilter, cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeColorFilter) {
@@ -62,8 +64,7 @@ public:
     auto filter = std::make_shared<JsiSkImageFilter>(
         getContext(),
         SkImageFilters::ColorFilter(std::move(cf), std::move(input), cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeOffset) {
@@ -79,8 +80,7 @@ public:
     }
     auto filter = std::make_shared<JsiSkImageFilter>(
         getContext(), SkImageFilters::Offset(x, y, std::move(input), cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeDisplacementMap) {
@@ -102,8 +102,7 @@ public:
         getContext(), SkImageFilters::DisplacementMap(
                           fXChannelSelector, fYChannelSelector, scale,
                           std::move(in2), std::move(input), cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeShader) {
@@ -120,8 +119,7 @@ public:
     auto filter = std::make_shared<JsiSkImageFilter>(
         getContext(),
         SkImageFilters::Shader(std::move(shader), dither, cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeCompose) {
@@ -136,8 +134,7 @@ public:
     auto filter = std::make_shared<JsiSkImageFilter>(
         getContext(),
         SkImageFilters::Compose(std::move(outer), std::move(inner)));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeBlend) {
@@ -159,8 +156,7 @@ public:
         getContext(),
         SkImageFilters::Blend(std::move(mode), std::move(background),
                               std::move(foreground), cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeDropShadow) {
@@ -180,8 +176,7 @@ public:
     auto filter = std::make_shared<JsiSkImageFilter>(
         getContext(), SkImageFilters::DropShadow(dx, dy, sigmaX, sigmaY, color,
                                                  std::move(input), cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeDropShadowOnly) {
@@ -202,8 +197,7 @@ public:
         getContext(),
         SkImageFilters::DropShadowOnly(dx, dy, sigmaX, sigmaY, color,
                                        std::move(input), cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeErode) {
@@ -220,8 +214,7 @@ public:
     auto filter = std::make_shared<JsiSkImageFilter>(
         getContext(),
         SkImageFilters::Erode(rx, ry, std::move(input), cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeDilate) {
@@ -238,8 +231,7 @@ public:
     auto filter = std::make_shared<JsiSkImageFilter>(
         getContext(),
         SkImageFilters::Dilate(rx, ry, std::move(input), cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeRuntimeShader) {
@@ -259,8 +251,7 @@ public:
     auto filter = std::make_shared<JsiSkImageFilter>(
         getContext(),
         SkImageFilters::RuntimeShader(*rtb, childName, std::move(input)));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeArithmetic) {
@@ -285,8 +276,7 @@ public:
         getContext(), SkImageFilters::Arithmetic(
                           k1, k2, k3, k4, enforcePMColor, std::move(background),
                           std::move(foreground), cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeCrop) {
@@ -302,15 +292,13 @@ public:
     auto filter = std::make_shared<JsiSkImageFilter>(
         getContext(),
         SkImageFilters::Crop(rect, tileMode, std::move(imageFilter)));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeEmpty) {
     auto filter = std::make_shared<JsiSkImageFilter>(getContext(),
                                                      SkImageFilters::Empty());
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   inline SkPoint3 SkPoint3FromValue(jsi::Runtime &runtime,
@@ -339,8 +327,7 @@ public:
         getContext(),
         SkImageFilters::DistantLitDiffuse(direction, lightColor, surfaceScale,
                                           kd, std::move(input), cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakePointLitDiffuse) {
@@ -360,8 +347,7 @@ public:
         getContext(),
         SkImageFilters::PointLitDiffuse(location, lightColor, surfaceScale, kd,
                                         std::move(input), cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeSpotLitDiffuse) {
@@ -385,8 +371,7 @@ public:
         SkImageFilters::SpotLitDiffuse(location, target, falloffExponent,
                                        cutoffAngle, lightColor, surfaceScale,
                                        kd, std::move(input), cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeDistantLitSpecular) {
@@ -407,8 +392,7 @@ public:
         getContext(), SkImageFilters::DistantLitSpecular(
                           direction, lightColor, surfaceScale, ks, shininess,
                           std::move(input), cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakePointLitSpecular) {
@@ -429,8 +413,7 @@ public:
         getContext(), SkImageFilters::PointLitSpecular(
                           location, lightColor, surfaceScale, ks, shininess,
                           std::move(input), cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeSpotLitSpecular) {
@@ -455,8 +438,7 @@ public:
         SkImageFilters::SpotLitSpecular(
             location, target, falloffExponent, cutoffAngle, lightColor,
             surfaceScale, ks, shininess, std::move(input), cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeImage) {
@@ -485,8 +467,7 @@ public:
         getContext(),
         SkImageFilters::Image(std::move(image), srcRect, dstRect,
                               SkSamplingOptions(filterMode, mipmap)));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeMagnifier) {
@@ -514,8 +495,7 @@ public:
         SkImageFilters::Magnifier(lensBounds, zoomAmount, inset,
                                   SkSamplingOptions(filterMode, mipmap), input,
                                   cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeMatrixConvolution) {
@@ -545,8 +525,7 @@ public:
         getContext(), SkImageFilters::MatrixConvolution(
                           kernelSize, kernel.data(), gain, bias, kernelOffset,
                           tileMode, convolveAlpha, std::move(input), cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeMatrixTransform) {
@@ -567,8 +546,7 @@ public:
         getContext(),
         SkImageFilters::MatrixTransform(
             matrix, SkSamplingOptions(filterMode, mipmap), std::move(input)));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeMerge) {
@@ -590,8 +568,7 @@ public:
     auto filter = std::make_shared<JsiSkImageFilter>(
         getContext(),
         SkImageFilters::Merge(filters.data(), filtersCount, cropRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakePicture) {
@@ -604,8 +581,7 @@ public:
     }
     auto filter = std::make_shared<JsiSkImageFilter>(
         getContext(), SkImageFilters::Picture(std::move(picture), targetRect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeRuntimeShaderWithChildren) {
@@ -641,8 +617,7 @@ public:
         getContext(), SkImageFilters::RuntimeShader(*rtb, maxSampleRadius,
                                                     childNamesStringView.data(),
                                                     inputs.data(), length));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
   JSI_HOST_FUNCTION(MakeTile) {
@@ -654,49 +629,74 @@ public:
     }
     auto filter = std::make_shared<JsiSkImageFilter>(
         getContext(), SkImageFilters::Tile(src, dst, std::move(input)));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, filter,
-                                                       getContext());
+    return makeJsiObject(runtime, std::move(filter));
   }
 
-  JSI_EXPORT_FUNCTIONS(
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeBlur),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeOffset),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeColorFilter),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeShader),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDisplacementMap),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeCompose),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeErode),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDilate),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeBlend),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDropShadow),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDropShadowOnly),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeRuntimeShader),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeArithmetic),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeCrop),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeEmpty),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeImage),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeMagnifier),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeMatrixConvolution),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeMatrixTransform),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeMerge),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakePicture),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeRuntimeShaderWithChildren),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeTile),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDistantLitDiffuse),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakePointLitDiffuse),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeSpotLitDiffuse),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeDistantLitSpecular),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakePointLitSpecular),
-      JSI_EXPORT_FUNC(JsiSkImageFilterFactory, MakeSpotLitSpecular))
-
-  size_t getMemoryPressure() const override { return 2048; }
-
-  std::string getObjectType() const override {
-    return "JsiSkImageFilterFactory";
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installHostMethod(runtime, prototype, "MakeBlur",
+                      &JsiSkImageFilterFactory::MakeBlur);
+    installHostMethod(runtime, prototype, "MakeOffset",
+                      &JsiSkImageFilterFactory::MakeOffset);
+    installHostMethod(runtime, prototype, "MakeColorFilter",
+                      &JsiSkImageFilterFactory::MakeColorFilter);
+    installHostMethod(runtime, prototype, "MakeShader",
+                      &JsiSkImageFilterFactory::MakeShader);
+    installHostMethod(runtime, prototype, "MakeDisplacementMap",
+                      &JsiSkImageFilterFactory::MakeDisplacementMap);
+    installHostMethod(runtime, prototype, "MakeCompose",
+                      &JsiSkImageFilterFactory::MakeCompose);
+    installHostMethod(runtime, prototype, "MakeErode",
+                      &JsiSkImageFilterFactory::MakeErode);
+    installHostMethod(runtime, prototype, "MakeDilate",
+                      &JsiSkImageFilterFactory::MakeDilate);
+    installHostMethod(runtime, prototype, "MakeBlend",
+                      &JsiSkImageFilterFactory::MakeBlend);
+    installHostMethod(runtime, prototype, "MakeDropShadow",
+                      &JsiSkImageFilterFactory::MakeDropShadow);
+    installHostMethod(runtime, prototype, "MakeDropShadowOnly",
+                      &JsiSkImageFilterFactory::MakeDropShadowOnly);
+    installHostMethod(runtime, prototype, "MakeRuntimeShader",
+                      &JsiSkImageFilterFactory::MakeRuntimeShader);
+    installHostMethod(runtime, prototype, "MakeArithmetic",
+                      &JsiSkImageFilterFactory::MakeArithmetic);
+    installHostMethod(runtime, prototype, "MakeCrop",
+                      &JsiSkImageFilterFactory::MakeCrop);
+    installHostMethod(runtime, prototype, "MakeEmpty",
+                      &JsiSkImageFilterFactory::MakeEmpty);
+    installHostMethod(runtime, prototype, "MakeImage",
+                      &JsiSkImageFilterFactory::MakeImage);
+    installHostMethod(runtime, prototype, "MakeMagnifier",
+                      &JsiSkImageFilterFactory::MakeMagnifier);
+    installHostMethod(runtime, prototype, "MakeMatrixConvolution",
+                      &JsiSkImageFilterFactory::MakeMatrixConvolution);
+    installHostMethod(runtime, prototype, "MakeMatrixTransform",
+                      &JsiSkImageFilterFactory::MakeMatrixTransform);
+    installHostMethod(runtime, prototype, "MakeMerge",
+                      &JsiSkImageFilterFactory::MakeMerge);
+    installHostMethod(runtime, prototype, "MakePicture",
+                      &JsiSkImageFilterFactory::MakePicture);
+    installHostMethod(runtime, prototype, "MakeRuntimeShaderWithChildren",
+                      &JsiSkImageFilterFactory::MakeRuntimeShaderWithChildren);
+    installHostMethod(runtime, prototype, "MakeTile",
+                      &JsiSkImageFilterFactory::MakeTile);
+    installHostMethod(runtime, prototype, "MakeDistantLitDiffuse",
+                      &JsiSkImageFilterFactory::MakeDistantLitDiffuse);
+    installHostMethod(runtime, prototype, "MakePointLitDiffuse",
+                      &JsiSkImageFilterFactory::MakePointLitDiffuse);
+    installHostMethod(runtime, prototype, "MakeSpotLitDiffuse",
+                      &JsiSkImageFilterFactory::MakeSpotLitDiffuse);
+    installHostMethod(runtime, prototype, "MakeDistantLitSpecular",
+                      &JsiSkImageFilterFactory::MakeDistantLitSpecular);
+    installHostMethod(runtime, prototype, "MakePointLitSpecular",
+                      &JsiSkImageFilterFactory::MakePointLitSpecular);
+    installHostMethod(runtime, prototype, "MakeSpotLitSpecular",
+                      &JsiSkImageFilterFactory::MakeSpotLitSpecular);
   }
+
+  size_t getMemoryPressure() override { return 2048; }
 
   explicit JsiSkImageFilterFactory(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(std::move(context)) {}
+      : JsiSkNativeObject<JsiSkImageFilterFactory>(std::move(context)) {}
 };
 
 } // namespace RNSkia
