@@ -9,8 +9,7 @@
  * 0. Try to detect if it's an expo project and if the bundler is set to metro
  * 1. Resolve the public path relative to wherever the script is being run.
  * 2. Log out some useful info about the web setup, just in case anything goes wrong.
- * 3. Resolve the installed wasm file `canvaskit-wasm/bin/full/canvaskit.wasm`
- *  from `@shopify/react-native-skia -> canvaskit`.
+ * 3. Resolve the CanvasKit WASM bundled with `@shopify/react-native-skia`.
  * 4. Recursively ensure the path exists and copy the file into the desired location.
  *
  *
@@ -52,7 +51,9 @@ function getWetherItsAnExpoProjectWithMetro() {
       return true;
     } else {
       console.log(
-        `  ${gray(`Metro bundler not detected. Assuming the project is using Webpack.`)}\n`
+        `  ${gray(
+          `Metro bundler not detected. Assuming the project is using Webpack.`
+        )}\n`
       );
       return false;
     }
@@ -63,15 +64,14 @@ function getWetherItsAnExpoProjectWithMetro() {
 }
 
 function getWasmFilePath() {
-  try {
-    return require.resolve("canvaskit-wasm/bin/full/canvaskit.wasm");
-  } catch (error) {
+  const wasmPath = path.resolve(__dirname, "../dist/canvaskit/canvaskit.wasm");
+  if (!fs.existsSync(wasmPath)) {
     console.error(
-      `Could not find 'canvaskit-wasm'.
-Please install '@shopify/react-native-skia' and ensure it can be resolved from your project: ${process.cwd()}`
+      `Could not find the CanvasKit WASM bundled with '@shopify/react-native-skia': ${wasmPath}`
     );
     process.exit(1);
   }
+  return wasmPath;
 }
 
 function getOutputFilePath(isAnExpoProjectWithMetro) {

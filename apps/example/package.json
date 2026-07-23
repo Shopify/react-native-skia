@@ -17,7 +17,7 @@
     "test": "jest",
     "tsc": "tsc --noEmit",
     "start": "react-native start",
-    "web": "IS_WEB_BUILD=true react-native start"
+    "web": "node ../../packages/skia/scripts/setup-canvaskit.js . && IS_WEB_BUILD=true react-native start"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^7.2.1",

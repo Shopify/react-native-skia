@@ -1,11 +1,12 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import CanvasKitInit from "canvaskit-wasm/bin/full/canvaskit";
 import type { ReactNode } from "react";
 
 import type { SkSurface } from "../skia";
 import { JsiSkApi } from "../skia/web";
 import { SkiaSGRoot } from "../sksg/Reconciler";
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import CanvasKitInit from "@shopify/react-native-skia/dist/canvaskit/canvaskit.js";
 
 export * from "../renderer/components";
 export * from "../skia/types";
