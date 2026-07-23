@@ -23,14 +23,14 @@ class JsiSkPoint
 public:
   static constexpr const char *CLASS_NAME = "Point";
 
-  JSI_PROPERTY_GET(x) { return static_cast<double>(getObject()->x()); }
+  double getX() { return static_cast<double>(getObject()->x()); }
 
-  JSI_PROPERTY_GET(y) { return static_cast<double>(getObject()->y()); }
+  double getY() { return static_cast<double>(getObject()->y()); }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installCommon(runtime, prototype);
-    installHostGetter(runtime, prototype, "x", &JsiSkPoint::get_x);
-    installHostGetter(runtime, prototype, "y", &JsiSkPoint::get_y);
+    installGetter(runtime, prototype, "x", &JsiSkPoint::getX);
+    installGetter(runtime, prototype, "y", &JsiSkPoint::getY);
   }
 
   JsiSkPoint(std::shared_ptr<RNSkPlatformContext> context, const SkPoint &point)

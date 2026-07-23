@@ -1,11 +1,13 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
 #include <jsi/jsi.h>
 
+#include "JsiSkConverters.h"
 #include "JsiSkNativeObjects.h"
 #include "utils/RNSkLog.h"
 
@@ -32,11 +34,10 @@ public:
       : JsiSkWrappingSkPtrNativeObject<JsiSkTypeface, SkTypeface>(
             std::move(context), std::move(typeface)) {}
 
-  JSI_HOST_FUNCTION(getGlyphIDs) {
-    auto str = arguments[0].asString(runtime).utf8(runtime);
+  std::vector<int> getGlyphIDs(std::string str, JsiOptional<int> numGlyphs) {
     int numGlyphIDs =
-        count > 1 && !arguments[1].isNull() && !arguments[1].isUndefined()
-            ? static_cast<int>(arguments[1].asNumber())
+        numGlyphs.has_value()
+            ? *numGlyphs
             : getObject()->textToGlyphs(str.c_str(), str.length(),
                                         SkTextEncoding::kUTF8,
                                         SkSpan<SkGlyphID>(nullptr, 0));
@@ -45,12 +46,7 @@ public:
     getObject()->textToGlyphs(
         str.c_str(), str.length(), SkTextEncoding::kUTF8,
         SkSpan(static_cast<SkGlyphID *>(glyphIDs.data()), numGlyphIDs));
-    auto jsiGlyphIDs = jsi::Array(runtime, numGlyphIDs);
-    for (int i = 0; i < numGlyphIDs; i++) {
-      jsiGlyphIDs.setValueAtIndex(runtime, i,
-                                  jsi::Value(static_cast<int>(glyphIDs[i])));
-    }
-    return jsiGlyphIDs;
+    return std::vector<int>(glyphIDs.begin(), glyphIDs.end());
   }
 
   size_t getMemoryPressure() override {
@@ -85,8 +81,8 @@ public:
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installCommon(runtime, prototype);
-    installHostMethod(runtime, prototype, "getGlyphIDs",
-                      &JsiSkTypeface::getGlyphIDs);
+    installMethod(runtime, prototype, "getGlyphIDs",
+                  &JsiSkTypeface::getGlyphIDs);
   }
 };
 
