@@ -6,6 +6,7 @@
 
 #include <jsi/jsi.h>
 
+#include "JsiSkFontMgr.h"
 #include "JsiSkNativeObjects.h"
 
 #pragma clang diagnostic push
@@ -32,17 +33,15 @@ public:
     return fontMgr;
   }
 
-  JSI_HOST_FUNCTION(System) {
+  std::shared_ptr<JsiSkFontMgr> System() {
     auto fontMgr = JsiSkFontMgrFactory::getFontMgr(getContext());
-    return makeJsiObject(runtime,
-                         std::make_shared<JsiSkFontMgr>(getContext(), fontMgr));
+    return std::make_shared<JsiSkFontMgr>(getContext(), fontMgr);
   }
 
   size_t getMemoryPressure() override { return 1024; }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installHostMethod(runtime, prototype, "System",
-                      &JsiSkFontMgrFactory::System);
+    installMethod(runtime, prototype, "System", &JsiSkFontMgrFactory::System);
   }
 
   explicit JsiSkFontMgrFactory(std::shared_ptr<RNSkPlatformContext> context)

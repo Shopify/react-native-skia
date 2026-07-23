@@ -1,11 +1,13 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
 #include <jsi/jsi.h>
 
+#include "JsiSkConverters.h"
 #include "JsiSkFont.h"
 #include "JsiSkNativeObjects.h"
 #include "JsiSkRSXform.h"
@@ -26,88 +28,63 @@ class JsiSkTextBlobFactory : public JsiSkNativeObject<JsiSkTextBlobFactory> {
 public:
   static constexpr const char *CLASS_NAME = "TextBlobFactory";
 
-  JSI_HOST_FUNCTION(MakeFromText) {
-    auto str = arguments[0].asString(runtime).utf8(runtime);
-    auto font = JsiSkFont::fromValue(runtime, arguments[1]);
+  std::shared_ptr<JsiSkTextBlob> MakeFromText(std::string str,
+                                              std::shared_ptr<SkFont> font) {
     auto textBlob = SkTextBlob::MakeFromString(str.c_str(), *font);
-    return makeJsiObject(runtime, std::make_shared<JsiSkTextBlob>(
-                                      getContext(), std::move(textBlob)));
+    return std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob));
   }
 
-  JSI_HOST_FUNCTION(MakeFromGlyphs) {
-    auto jsiGlyphs = arguments[0].asObject(runtime).asArray(runtime);
-    auto font = JsiSkFont::fromValue(runtime, arguments[1]);
+  std::shared_ptr<JsiSkTextBlob> MakeFromGlyphs(std::vector<int> glyphIds,
+                                                std::shared_ptr<SkFont> font) {
     int bytesPerGlyph = 2;
     std::vector<SkGlyphID> glyphs;
-    int glyphsSize = static_cast<int>(jsiGlyphs.size(runtime));
-    glyphs.reserve(glyphsSize);
-    for (int i = 0; i < glyphsSize; i++) {
-      glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
+    glyphs.reserve(glyphIds.size());
+    for (auto glyph : glyphIds) {
+      glyphs.push_back(static_cast<SkGlyphID>(glyph));
     }
     auto textBlob =
         SkTextBlob::MakeFromText(glyphs.data(), glyphs.size() * bytesPerGlyph,
                                  *font, SkTextEncoding::kGlyphID);
-    return makeJsiObject(runtime, std::make_shared<JsiSkTextBlob>(
-                                      getContext(), std::move(textBlob)));
+    return std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob));
   }
 
-  JSI_HOST_FUNCTION(MakeFromRSXform) {
-    auto str = arguments[0].asString(runtime).utf8(runtime);
-    auto jsiRsxforms = arguments[1].asObject(runtime).asArray(runtime);
-    auto font = JsiSkFont::fromValue(runtime, arguments[2]);
-    std::vector<SkRSXform> rsxforms;
-    int rsxformsSize = static_cast<int>(jsiRsxforms.size(runtime));
-    rsxforms.reserve(rsxformsSize);
-    for (int i = 0; i < rsxformsSize; i++) {
-      auto rsxform = JsiSkRSXform::fromValue(
-          runtime, jsiRsxforms.getValueAtIndex(runtime, i));
-      rsxforms.push_back(*rsxform);
-    }
+  std::shared_ptr<JsiSkTextBlob>
+  MakeFromRSXform(std::string str, std::vector<SkRSXform> rsxforms,
+                  std::shared_ptr<SkFont> font) {
     auto x = SkSpan(rsxforms.data(), rsxforms.size());
     auto textBlob =
         SkTextBlob::MakeFromRSXform(str.c_str(), str.length(), x, *font);
-    return makeJsiObject(runtime, std::make_shared<JsiSkTextBlob>(
-                                      getContext(), std::move(textBlob)));
+    return std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob));
   }
 
-  JSI_HOST_FUNCTION(MakeFromRSXformGlyphs) {
-    auto jsiGlyphs = arguments[0].asObject(runtime).asArray(runtime);
-    auto jsiRsxforms = arguments[1].asObject(runtime).asArray(runtime);
-    auto font = JsiSkFont::fromValue(runtime, arguments[2]);
+  std::shared_ptr<JsiSkTextBlob>
+  MakeFromRSXformGlyphs(std::vector<int> glyphIds,
+                        std::vector<SkRSXform> rsxforms,
+                        std::shared_ptr<SkFont> font) {
     int bytesPerGlyph = 2;
     std::vector<SkGlyphID> glyphs;
-    int glyphsSize = static_cast<int>(jsiGlyphs.size(runtime));
-    glyphs.reserve(glyphsSize);
-    for (int i = 0; i < glyphsSize; i++) {
-      glyphs.push_back(jsiGlyphs.getValueAtIndex(runtime, i).asNumber());
-    }
-    std::vector<SkRSXform> rsxforms;
-    int rsxformsSize = static_cast<int>(jsiRsxforms.size(runtime));
-    rsxforms.reserve(rsxformsSize);
-    for (int i = 0; i < rsxformsSize; i++) {
-      auto rsxform = JsiSkRSXform::fromValue(
-          runtime, jsiRsxforms.getValueAtIndex(runtime, i));
-      rsxforms.push_back(*rsxform);
+    glyphs.reserve(glyphIds.size());
+    for (auto glyph : glyphIds) {
+      glyphs.push_back(static_cast<SkGlyphID>(glyph));
     }
     auto x = SkSpan(rsxforms.data(), rsxforms.size());
     auto textBlob = SkTextBlob::MakeFromRSXform(
         glyphs.data(), glyphs.size() * bytesPerGlyph, x, *font,
         SkTextEncoding::kGlyphID);
-    return makeJsiObject(runtime, std::make_shared<JsiSkTextBlob>(
-                                      getContext(), std::move(textBlob)));
+    return std::make_shared<JsiSkTextBlob>(getContext(), std::move(textBlob));
   }
 
   size_t getMemoryPressure() override { return 2048; }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installHostMethod(runtime, prototype, "MakeFromText",
-                      &JsiSkTextBlobFactory::MakeFromText);
-    installHostMethod(runtime, prototype, "MakeFromGlyphs",
-                      &JsiSkTextBlobFactory::MakeFromGlyphs);
-    installHostMethod(runtime, prototype, "MakeFromRSXform",
-                      &JsiSkTextBlobFactory::MakeFromRSXform);
-    installHostMethod(runtime, prototype, "MakeFromRSXformGlyphs",
-                      &JsiSkTextBlobFactory::MakeFromRSXformGlyphs);
+    installMethod(runtime, prototype, "MakeFromText",
+                  &JsiSkTextBlobFactory::MakeFromText);
+    installMethod(runtime, prototype, "MakeFromGlyphs",
+                  &JsiSkTextBlobFactory::MakeFromGlyphs);
+    installMethod(runtime, prototype, "MakeFromRSXform",
+                  &JsiSkTextBlobFactory::MakeFromRSXform);
+    installMethod(runtime, prototype, "MakeFromRSXformGlyphs",
+                  &JsiSkTextBlobFactory::MakeFromRSXformGlyphs);
   }
 
   explicit JsiSkTextBlobFactory(std::shared_ptr<RNSkPlatformContext> context)

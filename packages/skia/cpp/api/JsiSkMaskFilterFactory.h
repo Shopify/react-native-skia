@@ -6,6 +6,7 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkColorFilter.h"
+#include "JsiSkConverters.h"
 #include "JsiSkMaskFilter.h"
 #include "JsiSkNativeObjects.h"
 
@@ -25,22 +26,18 @@ class JsiSkMaskFilterFactory
 public:
   static constexpr const char *CLASS_NAME = "MaskFilterFactory";
 
-  JSI_HOST_FUNCTION(MakeBlur) {
-    int blurStyle = arguments[0].asNumber();
-    float sigma = arguments[1].asNumber();
-    bool respectCTM = arguments[2].getBool();
-    return makeJsiObject(
-        runtime,
-        std::make_shared<JsiSkMaskFilter>(
-            getContext(),
-            SkMaskFilter::MakeBlur((SkBlurStyle)blurStyle, sigma, respectCTM)));
+  std::shared_ptr<JsiSkMaskFilter> MakeBlur(int blurStyle, float sigma,
+                                            bool respectCTM) {
+    return std::make_shared<JsiSkMaskFilter>(
+        getContext(), SkMaskFilter::MakeBlur(static_cast<SkBlurStyle>(blurStyle),
+                                             sigma, respectCTM));
   }
 
   size_t getMemoryPressure() override { return 1024; }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installHostMethod(runtime, prototype, "MakeBlur",
-                      &JsiSkMaskFilterFactory::MakeBlur);
+    installMethod(runtime, prototype, "MakeBlur",
+                  &JsiSkMaskFilterFactory::MakeBlur);
   }
 
   explicit JsiSkMaskFilterFactory(std::shared_ptr<RNSkPlatformContext> context)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <utility>
 #include <variant>
 
@@ -11,6 +12,8 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
+#include "include/core/SkColor.h"
+#include "include/core/SkPoint3.h"
 #include "include/core/SkRefCnt.h"
 #include "include/core/SkSize.h"
 
@@ -30,6 +33,7 @@ class SkData;
 class SkPicture;
 class SkTextBlob;
 class SkRuntimeEffect;
+class SkRuntimeEffectBuilder;
 class SkVertices;
 class SkFontMgr;
 class SkSVGDOM;
@@ -59,6 +63,7 @@ class JsiSkData;
 class JsiSkPicture;
 class JsiSkTextBlob;
 class JsiSkRuntimeEffect;
+class JsiSkRuntimeShaderBuilder;
 class JsiSkVertices;
 class JsiSkFontMgr;
 class JsiSkSVG;
@@ -114,6 +119,9 @@ template <> struct JsiSkWrapperFor<SkTextBlob> {
 template <> struct JsiSkWrapperFor<SkRuntimeEffect> {
   using type = JsiSkRuntimeEffect;
 };
+template <> struct JsiSkWrapperFor<SkRuntimeEffectBuilder> {
+  using type = JsiSkRuntimeShaderBuilder;
+};
 template <> struct JsiSkWrapperFor<SkVertices> {
   using type = JsiSkVertices;
 };
@@ -157,6 +165,32 @@ template <> struct JsiSkWrapperFor<SkRSXform> {
 
 template <typename T>
 using JsiSkWrapperFor_t = typename JsiSkWrapperFor<T>::type;
+
+class JsiSkColor;
+
+/**
+ * SkColor is a typedef of uint32_t, which already has a JSIConverter, so
+ * color arguments use this strong typedef to route through
+ * JsiSkColor::fromValue (array | Float32Array) instead.
+ */
+struct JsiColor {
+  SkColor color;
+  operator SkColor() const { return color; }
+};
+
+template <> struct JsiSkWrapperFor<JsiColor> {
+  using type = JsiSkColor;
+};
+
+/**
+ * An argument the JS API treats as absent when it is omitted, undefined, or
+ * null. This matches the pervasive `hasOptionalArgument` pattern of the raw
+ * bindings. Use std::optional instead when null must be distinguished from
+ * undefined (it treats only omitted/undefined as absent).
+ */
+template <typename T> struct JsiOptional : std::optional<T> {
+  using std::optional<T>::optional;
+};
 
 } // namespace RNSkia
 
@@ -215,31 +249,66 @@ struct JSIConverter<std::variant<std::nullptr_t, sk_sp<T>>,
 };
 
 /**
- * SkRect / SkPoint / SkMatrix by value — the wrapper's fromValue provides the
- * plain-object/array fallbacks. fromJSI only; returning these types is done
- * through std::shared_ptr<JsiSkRect> etc. (see above).
+ * SkRect / SkPoint / SkMatrix / SkRSXform by value — the wrapper's fromValue
+ * provides the plain-object/array fallbacks. fromJSI only; returning these
+ * types is done through std::shared_ptr<JsiSkRect> etc. (see above).
+ *
+ * All bodies below reach the wrapper through JsiSkWrapperFor_t<T> so the
+ * name stays dependent on T and is only looked up at instantiation, when the
+ * wrapper class is complete (two-phase lookup would otherwise bind — and
+ * reject — the incomplete forward declaration at definition time).
  */
 template <typename T>
-struct JSIConverter<T, std::enable_if_t<std::is_same_v<T, SkRect>>> {
-  static SkRect fromJSI(jsi::Runtime &runtime, const jsi::Value &arg,
-                        bool outOfBound) {
-    return *RNSkia::JsiSkRect::fromValue(runtime, arg);
+struct JSIConverter<T, std::enable_if_t<std::is_same_v<T, SkRect> ||
+                                        std::is_same_v<T, SkPoint> ||
+                                        std::is_same_v<T, SkMatrix> ||
+                                        std::is_same_v<T, SkRSXform>>> {
+  static T fromJSI(jsi::Runtime &runtime, const jsi::Value &arg,
+                   bool outOfBound) {
+    return *RNSkia::JsiSkWrapperFor_t<T>::fromValue(runtime, arg);
   }
 };
 
+// Colors via the JsiColor strong typedef (see above).
 template <typename T>
-struct JSIConverter<T, std::enable_if_t<std::is_same_v<T, SkPoint>>> {
-  static SkPoint fromJSI(jsi::Runtime &runtime, const jsi::Value &arg,
-                         bool outOfBound) {
-    return *RNSkia::JsiSkPoint::fromValue(runtime, arg);
+struct JSIConverter<T, std::enable_if_t<std::is_same_v<T, RNSkia::JsiColor>>> {
+  static T fromJSI(jsi::Runtime &runtime, const jsi::Value &arg,
+                   bool outOfBound) {
+    return {RNSkia::JsiSkWrapperFor_t<T>::fromValue(runtime, arg)};
+  }
+  static jsi::Value toJSI(jsi::Runtime &runtime, const T &arg) {
+    return RNSkia::JsiSkWrapperFor_t<T>::toValue(runtime, arg.color);
   }
 };
 
-template <typename T>
-struct JSIConverter<T, std::enable_if_t<std::is_same_v<T, SkMatrix>>> {
-  static SkMatrix fromJSI(jsi::Runtime &runtime, const jsi::Value &arg,
+// JsiOptional<T>: omitted | undefined | null -> absent
+template <typename T> struct JSIConverter<RNSkia::JsiOptional<T>> {
+  static RNSkia::JsiOptional<T> fromJSI(jsi::Runtime &runtime,
+                                        const jsi::Value &arg,
+                                        bool outOfBound) {
+    if (outOfBound || arg.isUndefined() || arg.isNull()) {
+      return {};
+    }
+    return {JSIConverter<T>::fromJSI(runtime, arg, outOfBound)};
+  }
+  static jsi::Value toJSI(jsi::Runtime &runtime,
+                          const RNSkia::JsiOptional<T> &arg) {
+    if (!arg.has_value()) {
+      return jsi::Value::null();
+    }
+    return JSIConverter<T>::toJSI(runtime, arg.value());
+  }
+};
+
+// SkPoint3 <- {x, y, z}
+template <> struct JSIConverter<SkPoint3> {
+  static SkPoint3 fromJSI(jsi::Runtime &runtime, const jsi::Value &arg,
                           bool outOfBound) {
-    return *RNSkia::JsiSkMatrix::fromValue(runtime, arg);
+    auto object = arg.asObject(runtime);
+    auto x = object.getProperty(runtime, "x").asNumber();
+    auto y = object.getProperty(runtime, "y").asNumber();
+    auto z = object.getProperty(runtime, "z").asNumber();
+    return SkPoint3::Make(x, y, z);
   }
 };
 

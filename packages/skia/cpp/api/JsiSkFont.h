@@ -96,14 +96,11 @@ public:
     return metrics;
   }
 
-  std::vector<int>
-  getGlyphIDs(std::string str,
-              std::optional<std::variant<int, std::nullptr_t>> numGlyphs) {
-    int numGlyphIDs =
-        numGlyphs.has_value() && std::holds_alternative<int>(*numGlyphs)
-            ? std::get<int>(*numGlyphs)
-            : getObject()->countText(str.c_str(), str.length(),
-                                     SkTextEncoding::kUTF8);
+  std::vector<int> getGlyphIDs(std::string str, JsiOptional<int> numGlyphs) {
+    int numGlyphIDs = numGlyphs.has_value()
+                          ? *numGlyphs
+                          : getObject()->countText(str.c_str(), str.length(),
+                                                   SkTextEncoding::kUTF8);
     std::vector<SkGlyphID> glyphIDs;
     glyphIDs.resize(numGlyphIDs);
     auto g = SkSpan(static_cast<SkGlyphID *>(glyphIDs.data()), glyphIDs.size());
