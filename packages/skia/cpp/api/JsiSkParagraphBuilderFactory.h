@@ -5,9 +5,11 @@
 
 #include <jsi/jsi.h>
 
+#include "JsiSkConverters.h"
 #include "JsiSkNativeObjects.h"
 #include "JsiSkParagraphBuilder.h"
 #include "JsiSkParagraphStyle.h"
+#include "JsiSkTypefaceFontProvider.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -31,25 +33,18 @@ class JsiSkParagraphBuilderFactory
 public:
   static constexpr const char *CLASS_NAME = "ParagraphBuilderFactory";
 
-  JSI_HOST_FUNCTION(Make) {
-    // Get paragraph style from params
-    auto paragraphStyle =
-        count > 0 ? JsiSkParagraphStyle::fromValue(runtime, arguments[0])
-                  : para::ParagraphStyle();
-
-    // get font manager
-    auto fontMgr =
-        count > 1 ? JsiSkTypefaceFontProvider::fromValue(runtime, arguments[1])
-                  : nullptr;
-
-    // Create the paragraph builder
-    return makeJsiObject(runtime, std::make_shared<JsiSkParagraphBuilder>(
-                                      getContext(), paragraphStyle, fontMgr));
+  std::shared_ptr<JsiSkParagraphBuilder>
+  Make(JsiOptional<para::ParagraphStyle> paragraphStyle,
+       JsiOptional<sk_sp<para::TypefaceFontProvider>> fontMgr) {
+    return std::make_shared<JsiSkParagraphBuilder>(
+        getContext(),
+        paragraphStyle.has_value() ? *paragraphStyle : para::ParagraphStyle(),
+        fontMgr.has_value() ? *fontMgr : nullptr);
   }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installHostMethod(runtime, prototype, "Make",
-                      &JsiSkParagraphBuilderFactory::Make);
+    installMethod(runtime, prototype, "Make",
+                  &JsiSkParagraphBuilderFactory::Make);
   }
 
   size_t getMemoryPressure() override { return 1024 * 1024; }

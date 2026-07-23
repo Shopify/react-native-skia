@@ -1,10 +1,12 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <utility>
 
 #include <jsi/jsi.h>
 
+#include "JsiSkConverters.h"
 #include "JsiSkFont.h"
 #include "JsiSkFontMgr.h"
 #include "JsiSkFontMgrFactory.h"
@@ -40,85 +42,55 @@ class JsiSkParagraphBuilder : public JsiSkNativeObject<JsiSkParagraphBuilder> {
 public:
   static constexpr const char *CLASS_NAME = "ParagraphBuilder";
 
-  JSI_HOST_FUNCTION(build) {
-    return makeJsiObject(runtime, std::make_shared<JsiSkParagraph>(
-                                      getContext(), _builder.get()));
+  std::shared_ptr<JsiSkParagraph> build() {
+    return std::make_shared<JsiSkParagraph>(getContext(), _builder.get());
   }
 
-  JSI_HOST_FUNCTION(reset) {
-    _builder->Reset();
-    return jsi::Value::undefined();
-  }
+  void reset() { _builder->Reset(); }
 
-  JSI_HOST_FUNCTION(addText) {
-    auto text = getArgumentAsString(runtime, arguments, count, 0).utf8(runtime);
-    _builder->addText(text.c_str());
-    return thisValue.asObject(runtime);
-  }
+  void addText(std::string text) { _builder->addText(text.c_str()); }
 
-  JSI_HOST_FUNCTION(addPlaceholder) {
-    auto width =
-        count >= 1 ? getArgumentAsNumber(runtime, arguments, count, 0) : 0;
-    auto height =
-        count >= 2 ? getArgumentAsNumber(runtime, arguments, count, 1) : 0;
-    auto alignment =
-        count >= 3 ? static_cast<para::PlaceholderAlignment>(
-                         getArgumentAsNumber(runtime, arguments, count, 2))
-                   : para::PlaceholderAlignment::kBaseline;
-    auto baseline = count >= 4
-                        ? static_cast<para::TextBaseline>(
-                              getArgumentAsNumber(runtime, arguments, count, 3))
+  void addPlaceholder(JsiOptional<double> width, JsiOptional<double> height,
+                      JsiOptional<double> alignmentParam,
+                      JsiOptional<double> baselineParam,
+                      JsiOptional<double> offset) {
+    auto alignment = alignmentParam.has_value()
+                         ? static_cast<para::PlaceholderAlignment>(
+                               *alignmentParam)
+                         : para::PlaceholderAlignment::kBaseline;
+    auto baseline = baselineParam.has_value()
+                        ? static_cast<para::TextBaseline>(*baselineParam)
                         : para::TextBaseline::kAlphabetic;
-    auto offset =
-        count >= 5 ? getArgumentAsNumber(runtime, arguments, count, 4) : 0;
-
-    para::PlaceholderStyle style(width, height, alignment, baseline, offset);
+    para::PlaceholderStyle style(width.value_or(0), height.value_or(0),
+                                 alignment, baseline, offset.value_or(0));
     _builder->addPlaceholder(style);
-
-    return thisValue.asObject(runtime);
   }
 
-  JSI_HOST_FUNCTION(pushStyle) {
-    auto textStyle = JsiSkTextStyle::fromValue(runtime, arguments[0]);
-    // Foreground paint
-    if (count >= 2) {
-      auto foreground = tryGetJsiObject<JsiSkPaint>(
-          runtime, getArgument(runtime, arguments, count, 1));
-      if (foreground) {
-        textStyle.setForegroundPaint(*foreground->getObject().get());
-      }
+  void pushStyle(para::TextStyle textStyle,
+                 JsiOptional<std::shared_ptr<SkPaint>> foreground,
+                 JsiOptional<std::shared_ptr<SkPaint>> background) {
+    if (foreground.has_value()) {
+      textStyle.setForegroundPaint(**foreground);
     }
-    // Background paint
-    if (count >= 3) {
-      auto background = tryGetJsiObject<JsiSkPaint>(
-          runtime, getArgument(runtime, arguments, count, 2));
-      if (background) {
-        textStyle.setBackgroundPaint(*background->getObject().get());
-      }
+    if (background.has_value()) {
+      textStyle.setBackgroundPaint(**background);
     }
-
     _builder->pushStyle(textStyle);
-
-    return thisValue.asObject(runtime);
   }
 
-  JSI_HOST_FUNCTION(pop) {
-    _builder->pop();
-    return thisValue.asObject(runtime);
-  }
+  void pop() { _builder->pop(); }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installHostMethod(runtime, prototype, "build",
-                      &JsiSkParagraphBuilder::build);
-    installHostMethod(runtime, prototype, "reset",
-                      &JsiSkParagraphBuilder::reset);
-    installHostMethod(runtime, prototype, "addText",
-                      &JsiSkParagraphBuilder::addText);
-    installHostMethod(runtime, prototype, "addPlaceholder",
-                      &JsiSkParagraphBuilder::addPlaceholder);
-    installHostMethod(runtime, prototype, "pushStyle",
-                      &JsiSkParagraphBuilder::pushStyle);
-    installHostMethod(runtime, prototype, "pop", &JsiSkParagraphBuilder::pop);
+    installMethod(runtime, prototype, "build", &JsiSkParagraphBuilder::build);
+    installMethod(runtime, prototype, "reset", &JsiSkParagraphBuilder::reset);
+    installChainableMethod(runtime, prototype, "addText",
+                           &JsiSkParagraphBuilder::addText);
+    installChainableMethod(runtime, prototype, "addPlaceholder",
+                           &JsiSkParagraphBuilder::addPlaceholder);
+    installChainableMethod(runtime, prototype, "pushStyle",
+                           &JsiSkParagraphBuilder::pushStyle);
+    installChainableMethod(runtime, prototype, "pop",
+                           &JsiSkParagraphBuilder::pop);
   }
 
   size_t getMemoryPressure() override { return 1024 * 1024; }
