@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "jsi2/JSIConverter.h"
+#include "jsi/JSIConverter.h"
 
 #include "webgpu/webgpu_cpp.h"
 

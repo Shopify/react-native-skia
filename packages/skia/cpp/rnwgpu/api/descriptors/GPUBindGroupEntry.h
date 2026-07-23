@@ -6,7 +6,7 @@
 #include "webgpu/webgpu_cpp.h"
 
 #include "GPUBufferBinding.h"
-#include "jsi2/JSIConverter.h"
+#include "jsi/JSIConverter.h"
 #include "rnwgpu/api/GPUExternalTexture.h"
 #include "rnwgpu/api/GPUSampler.h"
 #include "rnwgpu/api/GPUTextureView.h"

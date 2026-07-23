@@ -6,15 +6,18 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiSkHostObjects.h"
+#include "JsiSkNativeObjects.h"
 #include "JsiSkRuntimeEffect.h"
 
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiSkRuntimeEffectFactory : public JsiSkHostObject {
+class JsiSkRuntimeEffectFactory
+    : public JsiSkNativeObject<JsiSkRuntimeEffectFactory> {
 public:
+  static constexpr const char *CLASS_NAME = "RuntimeEffectFactory";
+
   JSI_HOST_FUNCTION(Make) {
     auto sksl = arguments[0].asString(runtime).utf8(runtime);
     auto result = SkRuntimeEffect::MakeForShader(SkString(sksl));
@@ -26,23 +29,20 @@ public:
                                       .c_str());
       return jsi::Value::null();
     }
-    auto runtimeEffect =
-        std::make_shared<JsiSkRuntimeEffect>(getContext(), std::move(effect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, runtimeEffect,
-                                                       getContext());
+    return makeJsiObject(runtime, std::make_shared<JsiSkRuntimeEffect>(
+                                      getContext(), std::move(effect)));
   }
 
-  size_t getMemoryPressure() const override { return 1024; }
+  size_t getMemoryPressure() override { return 1024; }
 
-  std::string getObjectType() const override {
-    return "JsiSkRuntimeEffectFactory";
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installHostMethod(runtime, prototype, "Make",
+                      &JsiSkRuntimeEffectFactory::Make);
   }
-
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkRuntimeEffectFactory, Make))
 
   explicit JsiSkRuntimeEffectFactory(
       std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(std::move(context)) {}
+      : JsiSkNativeObject<JsiSkRuntimeEffectFactory>(std::move(context)) {}
 };
 
 } // namespace RNSkia

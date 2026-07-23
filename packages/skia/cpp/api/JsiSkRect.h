@@ -5,7 +5,7 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiSkHostObjects.h"
+#include "JsiSkNativeObjects.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -18,8 +18,10 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiSkRect : public JsiSkWrappingSharedPtrHostObject<SkRect> {
+class JsiSkRect : public JsiSkWrappingSharedPtrNativeObject<JsiSkRect, SkRect> {
 public:
+  static constexpr const char *CLASS_NAME = "Rect";
+
   JSI_PROPERTY_GET(x) { return static_cast<double>(getObject()->x()); }
   JSI_PROPERTY_GET(y) { return static_cast<double>(getObject()->y()); }
   JSI_PROPERTY_GET(width) { return static_cast<double>(getObject()->width()); }
@@ -33,14 +35,6 @@ public:
     return static_cast<double>(getObject()->bottom());
   }
 
-  JSI_API_TYPENAME("Rect");
-
-  JSI_EXPORT_PROPERTY_GETTERS(JSI_EXPORT_PROP_GET(JsiSkRect, x),
-                              JSI_EXPORT_PROP_GET(JsiSkRect, y),
-                              JSI_EXPORT_PROP_GET(JsiSkRect, width),
-                              JSI_EXPORT_PROP_GET(JsiSkRect, height),
-                              JSI_EXPORT_PROP_GET(JsiSkRect, __typename__))
-
   JSI_HOST_FUNCTION(setXYWH) {
     getObject()->setXYWH(arguments[0].asNumber(), arguments[1].asNumber(),
                          arguments[2].asNumber(), arguments[3].asNumber());
@@ -53,15 +47,25 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkRect, setXYWH),
-                       JSI_EXPORT_FUNC(JsiSkRect, setLTRB),
-                       JSI_EXPORT_FUNC(JsiSkRect, dispose))
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    installHostGetter(runtime, prototype, "x", &JsiSkRect::get_x);
+    installHostGetter(runtime, prototype, "y", &JsiSkRect::get_y);
+    installHostGetter(runtime, prototype, "width", &JsiSkRect::get_width);
+    installHostGetter(runtime, prototype, "height", &JsiSkRect::get_height);
+    installHostGetter(runtime, prototype, "left", &JsiSkRect::get_left);
+    installHostGetter(runtime, prototype, "top", &JsiSkRect::get_top);
+    installHostGetter(runtime, prototype, "right", &JsiSkRect::get_right);
+    installHostGetter(runtime, prototype, "bottom", &JsiSkRect::get_bottom);
+    installHostMethod(runtime, prototype, "setXYWH", &JsiSkRect::setXYWH);
+    installHostMethod(runtime, prototype, "setLTRB", &JsiSkRect::setLTRB);
+  }
 
   /**
    Constructor
    */
   JsiSkRect(std::shared_ptr<RNSkPlatformContext> context, const SkRect &rect)
-      : JsiSkWrappingSharedPtrHostObject<SkRect>(
+      : JsiSkWrappingSharedPtrNativeObject<JsiSkRect, SkRect>(
             std::move(context), std::make_shared<SkRect>(rect)) {}
 
   /**
@@ -70,8 +74,9 @@ public:
   static std::shared_ptr<SkRect> fromValue(jsi::Runtime &runtime,
                                            const jsi::Value &obj) {
     const auto &object = obj.asObject(runtime);
-    if (object.isHostObject(runtime)) {
-      return object.asHostObject<JsiSkRect>(runtime)->getObject();
+    auto rect = tryGetJsiObject<JsiSkRect>(runtime, object);
+    if (rect) {
+      return rect->getObject();
     } else {
       auto x = object.getProperty(runtime, "x").asNumber();
       auto y = object.getProperty(runtime, "y").asNumber();
@@ -87,24 +92,19 @@ public:
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             const SkRect &rect) {
-    auto rectObj = std::make_shared<JsiSkRect>(std::move(context), rect);
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, rectObj,
-                                                       context);
+    return makeJsiObject(runtime,
+                         std::make_shared<JsiSkRect>(std::move(context), rect));
   }
   static jsi::Value toValue(jsi::Runtime &runtime,
                             std::shared_ptr<RNSkPlatformContext> context,
                             SkRect &&rect) {
-    auto rectObj =
-        std::make_shared<JsiSkRect>(std::move(context), std::move(rect));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, rectObj,
-                                                       context);
+    return makeJsiObject(runtime, std::make_shared<JsiSkRect>(
+                                      std::move(context), std::move(rect)));
   }
 
-  size_t getMemoryPressure() const override {
+  size_t getMemoryPressure() override {
     return std::max(sizeof(SkRect), kMinMemoryPressure);
   }
-
-  std::string getObjectType() const override { return "JsiSkRect"; }
 
   /**
    * Creates the function for construction a new instance of the SkRect
@@ -122,10 +122,8 @@ public:
                            arguments[2].asNumber(), arguments[3].asNumber());
 
       // Return the newly constructed object
-      auto rectObj =
-          std::make_shared<JsiSkRect>(std::move(context), std::move(rect));
-      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(runtime, rectObj,
-                                                         context);
+      return makeJsiObject(runtime, std::make_shared<JsiSkRect>(
+                                        std::move(context), std::move(rect)));
     };
   }
 };

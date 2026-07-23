@@ -5,7 +5,7 @@
 
 #include <jsi/jsi.h>
 
-#include "JsiSkHostObjects.h"
+#include "JsiSkNativeObjects.h"
 #include "JsiSkPathBuilder.h"
 
 #pragma clang diagnostic push
@@ -20,34 +20,33 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiSkPathBuilderFactory : public JsiSkHostObject {
+class JsiSkPathBuilderFactory
+    : public JsiSkNativeObject<JsiSkPathBuilderFactory> {
 public:
+  static constexpr const char *CLASS_NAME = "PathBuilderFactory";
+
   JSI_HOST_FUNCTION(Make) {
-    auto hostObjectInstance =
-        std::make_shared<JsiSkPathBuilder>(getContext(), SkPathBuilder());
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(runtime, std::make_shared<JsiSkPathBuilder>(
+                                      getContext(), SkPathBuilder()));
   }
 
   JSI_HOST_FUNCTION(MakeFromPath) {
     auto path = JsiSkPath::fromValue(runtime, arguments[0]);
-    auto hostObjectInstance =
-        std::make_shared<JsiSkPathBuilder>(getContext(), SkPathBuilder(*path));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(runtime, std::make_shared<JsiSkPathBuilder>(
+                                      getContext(), SkPathBuilder(*path)));
   }
 
-  size_t getMemoryPressure() const override { return 1024; }
+  size_t getMemoryPressure() override { return 1024; }
 
-  std::string getObjectType() const override {
-    return "JsiSkPathBuilderFactory";
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installHostMethod(runtime, prototype, "Make",
+                      &JsiSkPathBuilderFactory::Make);
+    installHostMethod(runtime, prototype, "MakeFromPath",
+                      &JsiSkPathBuilderFactory::MakeFromPath);
   }
-
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkPathBuilderFactory, Make),
-                       JSI_EXPORT_FUNC(JsiSkPathBuilderFactory, MakeFromPath))
 
   explicit JsiSkPathBuilderFactory(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(std::move(context)) {}
+      : JsiSkNativeObject<JsiSkPathBuilderFactory>(std::move(context)) {}
 };
 
 } // namespace RNSkia

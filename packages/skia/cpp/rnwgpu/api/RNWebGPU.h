@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 
-#include "jsi2/NativeObject.h"
+#include "jsi/NativeObject.h"
 
 #include "GPU.h"
 #include "GPUCanvasContext.h"

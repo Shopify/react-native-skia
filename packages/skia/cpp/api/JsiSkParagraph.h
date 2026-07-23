@@ -9,7 +9,7 @@
 
 #include "JsiSkCanvas.h"
 #include "JsiSkFont.h"
-#include "JsiSkHostObjects.h"
+#include "JsiSkNativeObjects.h"
 #include "JsiSkPath.h"
 #include "JsiSkRect.h"
 
@@ -31,9 +31,10 @@ namespace para = skia::textlayout;
  * Implementation of the Paragraph object in JSI
  */
 class JsiSkParagraph
-    : public JsiSkWrappingSharedPtrHostObject<para::Paragraph> {
+    : public JsiSkWrappingSharedPtrNativeObject<JsiSkParagraph,
+                                                para::Paragraph> {
 public:
-  EXPORT_JSI_API_TYPENAME(JsiSkParagraph, Paragraph)
+  static constexpr const char *CLASS_NAME = "Paragraph";
 
   JSI_HOST_FUNCTION(layout) {
     auto width = getArgumentAsNumber(runtime, arguments, count, 0);
@@ -42,8 +43,8 @@ public:
   }
 
   JSI_HOST_FUNCTION(paint) {
-    auto jsiCanvas =
-        getArgumentAsHostObject<JsiSkCanvas>(runtime, arguments, count, 0);
+    auto jsiCanvas = getJsiObject<JsiSkCanvas>(
+        runtime, getArgument(runtime, arguments, count, 0));
     auto x = getArgumentAsNumber(runtime, arguments, count, 1);
     auto y = getArgumentAsNumber(runtime, arguments, count, 2);
     getObject()->paint(jsiCanvas->getCanvas(), x, y);
@@ -182,10 +183,8 @@ public:
               &rec);
         });
     SkPath path = builder.detach();
-    auto hostObjectInstance =
-        std::make_shared<JsiSkPath>(getContext(), std::move(path));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(
+        runtime, std::make_shared<JsiSkPath>(getContext(), std::move(path)));
   }
 
   JSI_HOST_FUNCTION(extendedVisit) {
@@ -203,10 +202,9 @@ public:
           }
           auto value = jsi::Object(runtime);
 
-          auto fontInstance = std::make_shared<JsiSkFont>(context, info->font);
           value.setProperty(runtime, "font",
-                            JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-                                runtime, fontInstance, context));
+                            makeJsiObject(runtime, std::make_shared<JsiSkFont>(
+                                                       context, info->font)));
 
           auto origin = jsi::Object(runtime);
           origin.setProperty(runtime, "x",
@@ -269,29 +267,38 @@ public:
     return returnValue;
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkParagraph, layout),
-                       JSI_EXPORT_FUNC(JsiSkParagraph, paint),
-                       JSI_EXPORT_FUNC(JsiSkParagraph, getMaxWidth),
-                       JSI_EXPORT_FUNC(JsiSkParagraph, getMinIntrinsicWidth),
-                       JSI_EXPORT_FUNC(JsiSkParagraph, getMaxIntrinsicWidth),
-                       JSI_EXPORT_FUNC(JsiSkParagraph, getLongestLine),
-                       JSI_EXPORT_FUNC(JsiSkParagraph, getHeight),
-                       JSI_EXPORT_FUNC(JsiSkParagraph, getRectsForPlaceholders),
-                       JSI_EXPORT_FUNC(JsiSkParagraph,
-                                       getGlyphPositionAtCoordinate),
-                       JSI_EXPORT_FUNC(JsiSkParagraph, getRectsForRange),
-                       JSI_EXPORT_FUNC(JsiSkParagraph, getLineMetrics),
-                       JSI_EXPORT_FUNC(JsiSkParagraph, getPath),
-                       JSI_EXPORT_FUNC(JsiSkParagraph, extendedVisit),
-                       JSI_EXPORT_FUNC(JsiSkParagraph, dispose))
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    installHostMethod(runtime, prototype, "layout", &JsiSkParagraph::layout);
+    installHostMethod(runtime, prototype, "paint", &JsiSkParagraph::paint);
+    installHostMethod(runtime, prototype, "getMaxWidth",
+                      &JsiSkParagraph::getMaxWidth);
+    installHostMethod(runtime, prototype, "getMinIntrinsicWidth",
+                      &JsiSkParagraph::getMinIntrinsicWidth);
+    installHostMethod(runtime, prototype, "getMaxIntrinsicWidth",
+                      &JsiSkParagraph::getMaxIntrinsicWidth);
+    installHostMethod(runtime, prototype, "getLongestLine",
+                      &JsiSkParagraph::getLongestLine);
+    installHostMethod(runtime, prototype, "getHeight",
+                      &JsiSkParagraph::getHeight);
+    installHostMethod(runtime, prototype, "getRectsForPlaceholders",
+                      &JsiSkParagraph::getRectsForPlaceholders);
+    installHostMethod(runtime, prototype, "getGlyphPositionAtCoordinate",
+                      &JsiSkParagraph::getGlyphPositionAtCoordinate);
+    installHostMethod(runtime, prototype, "getRectsForRange",
+                      &JsiSkParagraph::getRectsForRange);
+    installHostMethod(runtime, prototype, "getLineMetrics",
+                      &JsiSkParagraph::getLineMetrics);
+    installHostMethod(runtime, prototype, "getPath", &JsiSkParagraph::getPath);
+    installHostMethod(runtime, prototype, "extendedVisit",
+                      &JsiSkParagraph::extendedVisit);
+  }
 
-  size_t getMemoryPressure() const override { return 1024 * 1024; }
-
-  std::string getObjectType() const override { return "JsiSkParagraph"; }
+  size_t getMemoryPressure() override { return 1024 * 1024; }
 
   explicit JsiSkParagraph(std::shared_ptr<RNSkPlatformContext> context,
                           para::ParagraphBuilder *paragraphBuilder)
-      : JsiSkWrappingSharedPtrHostObject<para::Paragraph>(
+      : JsiSkWrappingSharedPtrNativeObject<JsiSkParagraph, para::Paragraph>(
             std::move(context), paragraphBuilder->Build()) {}
 };
 

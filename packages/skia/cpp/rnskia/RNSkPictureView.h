@@ -13,9 +13,9 @@
 #include "RNSkView.h"
 #include "jsi/ViewProperty.h"
 
+#include "RNSkPlatformContext.h"
 #include "api/JsiSkPicture.h"
 #include "utils/RNSkLog.h"
-#include "RNSkPlatformContext.h"
 #include "utils/RNSkTimingInfo.h"
 
 #pragma clang diagnostic push

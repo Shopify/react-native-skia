@@ -4,7 +4,7 @@
 #include <string>
 #include <variant>
 
-#include "jsi2/NativeObject.h"
+#include "jsi/NativeObject.h"
 
 #include "GPUError.h"
 #include "GPUInternalError.h"

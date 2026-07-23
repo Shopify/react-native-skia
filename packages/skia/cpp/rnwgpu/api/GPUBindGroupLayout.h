@@ -4,7 +4,7 @@
 
 #include "descriptors/Unions.h"
 
-#include "jsi2/NativeObject.h"
+#include "jsi/NativeObject.h"
 
 #include "webgpu/webgpu_cpp.h"
 

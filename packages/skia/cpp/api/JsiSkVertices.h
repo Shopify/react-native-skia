@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 
-#include "JsiSkHostObjects.h"
+#include "JsiSkNativeObjects.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -18,27 +18,27 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiSkVertices : public JsiSkWrappingSkPtrHostObject<SkVertices> {
+class JsiSkVertices
+    : public JsiSkWrappingSkPtrNativeObject<JsiSkVertices, SkVertices> {
 public:
+  static constexpr const char *CLASS_NAME = "Vertices";
+
   JsiSkVertices(std::shared_ptr<RNSkPlatformContext> context,
                 sk_sp<SkVertices> vertices)
-      : JsiSkWrappingSkPtrHostObject<SkVertices>(std::move(context),
-                                                 std::move(vertices)) {}
-
-  EXPORT_JSI_API_TYPENAME(JsiSkVertices, Vertices)
+      : JsiSkWrappingSkPtrNativeObject<JsiSkVertices, SkVertices>(
+            std::move(context), std::move(vertices)) {}
 
   JSI_HOST_FUNCTION(bounds) {
     const auto &result = getObject()->bounds();
-    auto hostObjectInstance = std::make_shared<JsiSkRect>(getContext(), result);
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(runtime,
+                         std::make_shared<JsiSkRect>(getContext(), result));
   }
 
   JSI_HOST_FUNCTION(uniqueID) {
     return static_cast<double>(getObject()->uniqueID());
   }
 
-  size_t getMemoryPressure() const override {
+  size_t getMemoryPressure() override {
     auto vertices = getObject();
     if (!vertices)
       return 0;
@@ -47,11 +47,16 @@ public:
     return vertices->approximateSize();
   }
 
-  std::string getObjectType() const override { return "JsiSkVertices"; }
+  static sk_sp<SkVertices> fromValue(jsi::Runtime &runtime,
+                                     const jsi::Value &obj) {
+    return objectFromValue(runtime, obj);
+  }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkVertices, bounds),
-                       JSI_EXPORT_FUNC(JsiSkVertices, uniqueID),
-                       JSI_EXPORT_FUNC(JsiSkVertices, dispose))
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installCommon(runtime, prototype);
+    installHostMethod(runtime, prototype, "bounds", &JsiSkVertices::bounds);
+    installHostMethod(runtime, prototype, "uniqueID", &JsiSkVertices::uniqueID);
+  }
 
   /**
    * Creates the function for construction a new instance of the SkVertices
@@ -158,10 +163,8 @@ public:
                                texs.size() > 0 ? texs.data() : nullptr,
                                colors.size() > 0 ? colors.data() : nullptr,
                                indicesSize, indices.data());
-      auto hostObjectInstance =
-          std::make_shared<JsiSkVertices>(context, std::move(vertices));
-      return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-          runtime, hostObjectInstance, context);
+      return makeJsiObject(runtime, std::make_shared<JsiSkVertices>(
+                                        context, std::move(vertices)));
     };
   }
 };

@@ -6,6 +6,7 @@
 #include <jsi/jsi.h>
 
 #include "JsiSkImage.h"
+#include "JsiSkNativeObjects.h"
 
 namespace RNSkia {
 
@@ -15,8 +16,11 @@ namespace jsi = facebook::jsi;
  Implementation of the ParagraphBuilderFactory for making ParagraphBuilder JSI
  object
  */
-class JsiNativeBufferFactory : public JsiSkHostObject {
+class JsiNativeBufferFactory
+    : public JsiSkNativeObject<JsiNativeBufferFactory> {
 public:
+  static constexpr const char *CLASS_NAME = "NativeBufferFactory";
+
   JSI_HOST_FUNCTION(MakeFromImage) {
     auto image = JsiSkImage::fromValue(runtime, arguments[0]);
     image->makeNonTextureImage();
@@ -40,18 +44,19 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiNativeBufferFactory, Release),
-                       JSI_EXPORT_FUNC(JsiNativeBufferFactory, MakeFromImage),
-                       JSI_EXPORT_FUNC(JsiNativeBufferFactory, MakeTestBuffer))
-
-  size_t getMemoryPressure() const override { return 1024; }
-
-  std::string getObjectType() const override {
-    return "JsiNativeBufferFactory";
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installHostMethod(runtime, prototype, "Release",
+                      &JsiNativeBufferFactory::Release);
+    installHostMethod(runtime, prototype, "MakeFromImage",
+                      &JsiNativeBufferFactory::MakeFromImage);
+    installHostMethod(runtime, prototype, "MakeTestBuffer",
+                      &JsiNativeBufferFactory::MakeTestBuffer);
   }
 
+  size_t getMemoryPressure() override { return 1024; }
+
   explicit JsiNativeBufferFactory(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(std::move(context)) {}
+      : JsiSkNativeObject<JsiNativeBufferFactory>(std::move(context)) {}
 };
 
 } // namespace RNSkia

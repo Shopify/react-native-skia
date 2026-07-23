@@ -5,27 +5,27 @@
 
 #include <jsi/jsi.h>
 
-#include "api/JsiSkApi.h"
 #include "RNSkJsiViewApi.h"
 #include "RNSkView.h"
+#include "api/JsiSkApi.h"
 
 #include "jsi/RuntimeAwareCache.h"
 
 #ifdef SK_GRAPHITE
 #include "RNDawnContext.h"
+#include "jsi/Promise.h"
 #include "rnwgpu/ArrayBuffer.h"
 #include "rnwgpu/api/GPU.h"
 #include "rnwgpu/api/GPUUncapturedErrorEvent.h"
 #include "rnwgpu/api/ImageBitmap.h"
 #include "rnwgpu/api/RNWebGPU.h"
+#include "rnwgpu/api/WebGPUConstants.h"
 #include "rnwgpu/api/descriptors/GPUBufferUsage.h"
 #include "rnwgpu/api/descriptors/GPUColorWrite.h"
 #include "rnwgpu/api/descriptors/GPUMapMode.h"
 #include "rnwgpu/api/descriptors/GPUShaderStage.h"
 #include "rnwgpu/api/descriptors/GPUTextureUsage.h"
-#include "rnwgpu/api/WebGPUConstants.h"
 #include "rnwgpu/async/RuntimeContext.h"
-#include "jsi2/Promise.h"
 
 #include "include/core/SkData.h"
 #include "include/core/SkImage.h"
@@ -82,19 +82,18 @@ void RNSkManager::installBindings() {
   // provided runtime.
   auto skiaApi = std::make_shared<JsiSkApi>(_platformContext);
   _jsRuntime->global().setProperty(
-      *_jsRuntime, "SkiaApi",
-      jsi::Object::createFromHostObject(*_jsRuntime, std::move(skiaApi)));
+      *_jsRuntime, "SkiaApi", makeJsiObject(*_jsRuntime, std::move(skiaApi)));
 
-  _jsRuntime->global().setProperty(
-      *_jsRuntime, "SkiaViewApi",
-      jsi::Object::createFromHostObject(*_jsRuntime, _viewApi));
+  _jsRuntime->global().setProperty(*_jsRuntime, "SkiaViewApi",
+                                   makeJsiObject(*_jsRuntime, _viewApi));
 
 #ifdef SK_GRAPHITE
   // Register the main runtime + its CallInvoker so spontaneous events
   // (device.lost / uncapturederror) on main-runtime devices can be delivered to
   // the JS thread without the ProcessEvents pump. Worklet-runtime devices have
   // no invoker (best-effort; see the RuntimeContext "Threading model" doc).
-  rnwgpu::async::RuntimeContext::registerMainRuntime(_jsRuntime, _jsCallInvoker);
+  rnwgpu::async::RuntimeContext::registerMainRuntime(_jsRuntime,
+                                                     _jsCallInvoker);
 
   // Install WebGPU constructors
   rnwgpu::GPU::installConstructor(*_jsRuntime);
@@ -121,13 +120,14 @@ void RNSkManager::installBindings() {
   // Install WebGPU constant objects as plain JS objects on the main runtime.
   rnwgpu::installWebGPUConstants(*_jsRuntime);
 
-  // Install a global `installWebGPU()` host function so worklet runtimes can get
-  // the same constants. A host function captured into a worklet is serialized as
-  // a SerializableHostFunction and re-created on the worklet runtime, so the body
-  // runs there (its `rt` is the worklet runtime) and installs the constants on
-  // that runtime. The constants come from the native wgpu::*Usage enums, so the
-  // values stay a single source of truth across every runtime. Calling it on a
-  // runtime that already has the globals is a safe, idempotent no-op.
+  // Install a global `installWebGPU()` host function so worklet runtimes can
+  // get the same constants. A host function captured into a worklet is
+  // serialized as a SerializableHostFunction and re-created on the worklet
+  // runtime, so the body runs there (its `rt` is the worklet runtime) and
+  // installs the constants on that runtime. The constants come from the native
+  // wgpu::*Usage enums, so the values stay a single source of truth across
+  // every runtime. Calling it on a runtime that already has the globals is a
+  // safe, idempotent no-op.
   _jsRuntime->global().setProperty(
       *_jsRuntime, "installWebGPU",
       jsi::Function::createFromHostFunction(
@@ -172,9 +172,8 @@ void RNSkManager::installBindings() {
             bool isBufferSource = obj.isArrayBuffer(rt);
             if (!isBufferSource && obj.hasProperty(rt, "buffer")) {
               auto bufferProp = obj.getProperty(rt, "buffer");
-              isBufferSource =
-                  bufferProp.isObject() &&
-                  bufferProp.getObject(rt).isArrayBuffer(rt);
+              isBufferSource = bufferProp.isObject() &&
+                               bufferProp.getObject(rt).isArrayBuffer(rt);
             }
             if (!isBufferSource) {
               throw jsi::JSError(rt, "createImageBitmap: unsupported source "
@@ -183,9 +182,9 @@ void RNSkManager::installBindings() {
             }
             // Validates bounds and THROWS synchronously on a spoofed view, so
             // the bad pointer never reaches the copy below.
-            auto buffer =
-                rnwgpu::JSIConverter<std::shared_ptr<rnwgpu::ArrayBuffer>>::
-                    fromJSI(rt, args[0], false);
+            auto buffer = rnwgpu::JSIConverter<
+                std::shared_ptr<rnwgpu::ArrayBuffer>>::fromJSI(rt, args[0],
+                                                               false);
             // Copy the encoded bytes off the JS-owned ArrayBuffer.
             const uint8_t *bytes = buffer->data();
             std::vector<uint8_t> encoded(bytes, bytes + buffer->size());
@@ -204,9 +203,8 @@ void RNSkManager::installBindings() {
                   }
                   const int w = image->width();
                   const int h = image->height();
-                  auto info =
-                      SkImageInfo::Make(w, h, kRGBA_8888_SkColorType,
-                                        kUnpremul_SkAlphaType);
+                  auto info = SkImageInfo::Make(w, h, kRGBA_8888_SkColorType,
+                                                kUnpremul_SkAlphaType);
                   std::vector<uint8_t> pixels(info.computeMinByteSize());
                   // nullptr context: decode/read on the CPU (raster).
                   if (!image->readPixels(nullptr, info, pixels.data(),
