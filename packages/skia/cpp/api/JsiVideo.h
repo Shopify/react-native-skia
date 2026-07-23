@@ -1,28 +1,16 @@
 #pragma once
 
 #include <memory>
-#include <numeric>
 #include <utility>
-#include <vector>
+#include <variant>
 
 #include "JsiSkNativeObjects.h"
-#include "utils/RNSkLog.h"
 #include <jsi/jsi.h>
 
-#include "JsiSkPaint.h"
-#include "JsiSkPoint.h"
-#include "JsiSkRect.h"
-#include "JsiSkTypeface.h"
+#include "JsiSkConverters.h"
+#include "JsiSkImage.h"
 
 #include "rnskia/RNSkVideo.h"
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdocumentation"
-
-#include "include/core/SkFont.h"
-#include "include/core/SkFontMetrics.h"
-
-#pragma clang diagnostic pop
 
 namespace RNSkia {
 
@@ -33,83 +21,55 @@ class JsiVideo
 public:
   static constexpr const char *CLASS_NAME = "Video";
 
-  JSI_HOST_FUNCTION(nextImage) {
+  std::variant<std::nullptr_t, std::shared_ptr<JsiSkImage>> nextImage() {
     double timestamp = 0;
-    auto video = getObject();
-    auto image = video->nextImage(&timestamp);
+    auto image = getObject()->nextImage(&timestamp);
     if (!image) {
-      return jsi::Value::null();
+      return nullptr;
     }
-    return makeJsiObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
+    return std::make_shared<JsiSkImage>(getContext(), std::move(image));
   }
 
-  JSI_HOST_FUNCTION(duration) { return getObject()->duration(); }
+  double duration() { return getObject()->duration(); }
 
-  JSI_HOST_FUNCTION(framerate) { return getObject()->framerate(); }
+  double framerate() { return getObject()->framerate(); }
 
-  JSI_HOST_FUNCTION(currentTime) { return getObject()->currentTime(); }
+  double currentTime() { return getObject()->currentTime(); }
 
-  JSI_HOST_FUNCTION(isPlaying) { return getObject()->isPlaying(); }
+  bool isPlaying() { return getObject()->isPlaying(); }
 
-  JSI_HOST_FUNCTION(seek) {
-    double timestamp = arguments[0].asNumber();
-    getObject()->seek(timestamp);
-    return jsi::Value::undefined();
+  void seek(double timestamp) { getObject()->seek(timestamp); }
+
+  double rotation() {
+    return static_cast<double>(getObject()->getRotationInDegrees());
   }
 
-  JSI_HOST_FUNCTION(rotation) {
-    auto context = getContext();
-    auto rot = getObject()->getRotationInDegrees();
-    return jsi::Value(static_cast<double>(rot));
-  }
+  SkISize size() { return getObject()->getSize(); }
 
-  JSI_HOST_FUNCTION(size) {
-    auto context = getContext();
-    auto size = getObject()->getSize();
-    auto result = jsi::Object(runtime);
-    result.setProperty(runtime, "width", static_cast<double>(size.width()));
-    result.setProperty(runtime, "height", static_cast<double>(size.height()));
-    return result;
-  }
+  void play() { getObject()->play(); }
 
-  JSI_HOST_FUNCTION(play) {
-    getObject()->play();
-    return jsi::Value::undefined();
-  }
+  void pause() { getObject()->pause(); }
 
-  JSI_HOST_FUNCTION(pause) {
-    getObject()->pause();
-    return jsi::Value::undefined();
-  }
-
-  JSI_HOST_FUNCTION(setVolume) {
-    auto volume = arguments[0].asNumber();
+  void setVolume(double volume) {
     getObject()->setVolume(static_cast<float>(volume));
-    return jsi::Value::undefined();
   }
 
-  JSI_HOST_FUNCTION(setLooping) {
-    auto looping = arguments[0].asBool();
-    getObject()->setLooping(looping);
-    return jsi::Value::undefined();
-  }
+  void setLooping(bool looping) { getObject()->setLooping(looping); }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installCommon(runtime, prototype);
-    installHostMethod(runtime, prototype, "nextImage", &JsiVideo::nextImage);
-    installHostMethod(runtime, prototype, "duration", &JsiVideo::duration);
-    installHostMethod(runtime, prototype, "framerate", &JsiVideo::framerate);
-    installHostMethod(runtime, prototype, "currentTime",
-                      &JsiVideo::currentTime);
-    installHostMethod(runtime, prototype, "isPlaying", &JsiVideo::isPlaying);
-    installHostMethod(runtime, prototype, "seek", &JsiVideo::seek);
-    installHostMethod(runtime, prototype, "rotation", &JsiVideo::rotation);
-    installHostMethod(runtime, prototype, "size", &JsiVideo::size);
-    installHostMethod(runtime, prototype, "play", &JsiVideo::play);
-    installHostMethod(runtime, prototype, "pause", &JsiVideo::pause);
-    installHostMethod(runtime, prototype, "setVolume", &JsiVideo::setVolume);
-    installHostMethod(runtime, prototype, "setLooping", &JsiVideo::setLooping);
+    installMethod(runtime, prototype, "nextImage", &JsiVideo::nextImage);
+    installMethod(runtime, prototype, "duration", &JsiVideo::duration);
+    installMethod(runtime, prototype, "framerate", &JsiVideo::framerate);
+    installMethod(runtime, prototype, "currentTime", &JsiVideo::currentTime);
+    installMethod(runtime, prototype, "isPlaying", &JsiVideo::isPlaying);
+    installMethod(runtime, prototype, "seek", &JsiVideo::seek);
+    installMethod(runtime, prototype, "rotation", &JsiVideo::rotation);
+    installMethod(runtime, prototype, "size", &JsiVideo::size);
+    installMethod(runtime, prototype, "play", &JsiVideo::play);
+    installMethod(runtime, prototype, "pause", &JsiVideo::pause);
+    installMethod(runtime, prototype, "setVolume", &JsiVideo::setVolume);
+    installMethod(runtime, prototype, "setLooping", &JsiVideo::setLooping);
   }
 
   JsiVideo(std::shared_ptr<RNSkPlatformContext> context,

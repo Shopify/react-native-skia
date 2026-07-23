@@ -22,43 +22,35 @@ class JsiSkRect : public JsiSkWrappingSharedPtrNativeObject<JsiSkRect, SkRect> {
 public:
   static constexpr const char *CLASS_NAME = "Rect";
 
-  JSI_PROPERTY_GET(x) { return static_cast<double>(getObject()->x()); }
-  JSI_PROPERTY_GET(y) { return static_cast<double>(getObject()->y()); }
-  JSI_PROPERTY_GET(width) { return static_cast<double>(getObject()->width()); }
-  JSI_PROPERTY_GET(height) {
-    return static_cast<double>(getObject()->height());
-  }
-  JSI_PROPERTY_GET(left) { return static_cast<double>(getObject()->left()); }
-  JSI_PROPERTY_GET(top) { return static_cast<double>(getObject()->top()); }
-  JSI_PROPERTY_GET(right) { return static_cast<double>(getObject()->right()); }
-  JSI_PROPERTY_GET(bottom) {
-    return static_cast<double>(getObject()->bottom());
+  double getX() { return static_cast<double>(getObject()->x()); }
+  double getY() { return static_cast<double>(getObject()->y()); }
+  double getWidth() { return static_cast<double>(getObject()->width()); }
+  double getHeight() { return static_cast<double>(getObject()->height()); }
+  double getLeft() { return static_cast<double>(getObject()->left()); }
+  double getTop() { return static_cast<double>(getObject()->top()); }
+  double getRight() { return static_cast<double>(getObject()->right()); }
+  double getBottom() { return static_cast<double>(getObject()->bottom()); }
+
+  void setXYWH(double x, double y, double width, double height) {
+    getObject()->setXYWH(x, y, width, height);
   }
 
-  JSI_HOST_FUNCTION(setXYWH) {
-    getObject()->setXYWH(arguments[0].asNumber(), arguments[1].asNumber(),
-                         arguments[2].asNumber(), arguments[3].asNumber());
-    return jsi::Value::undefined();
-  }
-
-  JSI_HOST_FUNCTION(setLTRB) {
-    getObject()->setLTRB(arguments[0].asNumber(), arguments[1].asNumber(),
-                         arguments[2].asNumber(), arguments[3].asNumber());
-    return jsi::Value::undefined();
+  void setLTRB(double left, double top, double right, double bottom) {
+    getObject()->setLTRB(left, top, right, bottom);
   }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installCommon(runtime, prototype);
-    installHostGetter(runtime, prototype, "x", &JsiSkRect::get_x);
-    installHostGetter(runtime, prototype, "y", &JsiSkRect::get_y);
-    installHostGetter(runtime, prototype, "width", &JsiSkRect::get_width);
-    installHostGetter(runtime, prototype, "height", &JsiSkRect::get_height);
-    installHostGetter(runtime, prototype, "left", &JsiSkRect::get_left);
-    installHostGetter(runtime, prototype, "top", &JsiSkRect::get_top);
-    installHostGetter(runtime, prototype, "right", &JsiSkRect::get_right);
-    installHostGetter(runtime, prototype, "bottom", &JsiSkRect::get_bottom);
-    installHostMethod(runtime, prototype, "setXYWH", &JsiSkRect::setXYWH);
-    installHostMethod(runtime, prototype, "setLTRB", &JsiSkRect::setLTRB);
+    installGetter(runtime, prototype, "x", &JsiSkRect::getX);
+    installGetter(runtime, prototype, "y", &JsiSkRect::getY);
+    installGetter(runtime, prototype, "width", &JsiSkRect::getWidth);
+    installGetter(runtime, prototype, "height", &JsiSkRect::getHeight);
+    installGetter(runtime, prototype, "left", &JsiSkRect::getLeft);
+    installGetter(runtime, prototype, "top", &JsiSkRect::getTop);
+    installGetter(runtime, prototype, "right", &JsiSkRect::getRight);
+    installGetter(runtime, prototype, "bottom", &JsiSkRect::getBottom);
+    installMethod(runtime, prototype, "setXYWH", &JsiSkRect::setXYWH);
+    installMethod(runtime, prototype, "setLTRB", &JsiSkRect::setLTRB);
   }
 
   /**

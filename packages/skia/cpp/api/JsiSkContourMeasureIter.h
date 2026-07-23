@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <utility>
 
 #include "JsiSkContourMeasure.h"
@@ -33,19 +34,18 @@ public:
             std::move(context), std::make_shared<SkContourMeasureIter>(
                                     path, forceClosed, resScale)) {}
 
-  JSI_HOST_FUNCTION(next) {
+  std::optional<std::shared_ptr<JsiSkContourMeasure>> next() {
     auto next = getObject()->next();
     if (next == nullptr) {
-      return jsi::Value::undefined();
+      return std::nullopt;
     }
-    return makeJsiObject(runtime, std::make_shared<JsiSkContourMeasure>(
-                                      getContext(), std::move(next)));
+    return std::make_shared<JsiSkContourMeasure>(getContext(),
+                                                 std::move(next));
   }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installCommon(runtime, prototype);
-    installHostMethod(runtime, prototype, "next",
-                      &JsiSkContourMeasureIter::next);
+    installMethod(runtime, prototype, "next", &JsiSkContourMeasureIter::next);
   }
 
   size_t getMemoryPressure() override {

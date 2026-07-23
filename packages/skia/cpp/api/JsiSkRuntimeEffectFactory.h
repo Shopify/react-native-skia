@@ -18,26 +18,22 @@ class JsiSkRuntimeEffectFactory
 public:
   static constexpr const char *CLASS_NAME = "RuntimeEffectFactory";
 
-  JSI_HOST_FUNCTION(Make) {
-    auto sksl = arguments[0].asString(runtime).utf8(runtime);
+  std::shared_ptr<JsiSkRuntimeEffect> Make(std::string sksl) {
     auto result = SkRuntimeEffect::MakeForShader(SkString(sksl));
     auto effect = result.effect;
     auto errorText = result.errorText;
     if (!effect) {
-      throw jsi::JSError(runtime, std::string("Error in sksl:\n" +
-                                              std::string(errorText.c_str()))
-                                      .c_str());
-      return jsi::Value::null();
+      throw std::runtime_error("Error in sksl:\n" +
+                               std::string(errorText.c_str()));
     }
-    return makeJsiObject(runtime, std::make_shared<JsiSkRuntimeEffect>(
-                                      getContext(), std::move(effect)));
+    return std::make_shared<JsiSkRuntimeEffect>(getContext(),
+                                                std::move(effect));
   }
 
   size_t getMemoryPressure() override { return 1024; }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installHostMethod(runtime, prototype, "Make",
-                      &JsiSkRuntimeEffectFactory::Make);
+    installMethod(runtime, prototype, "Make", &JsiSkRuntimeEffectFactory::Make);
   }
 
   explicit JsiSkRuntimeEffectFactory(

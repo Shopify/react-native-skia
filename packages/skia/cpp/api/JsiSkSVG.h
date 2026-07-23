@@ -29,18 +29,18 @@ public:
 
   ~JsiSkSVG() = default;
 
-  JSI_HOST_FUNCTION(width) {
+  double width() {
     return static_cast<double>(getObject()->containerSize().width());
   }
 
-  JSI_HOST_FUNCTION(height) {
+  double height() {
     return static_cast<double>(getObject()->containerSize().height());
   }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installCommon(runtime, prototype);
-    installHostMethod(runtime, prototype, "width", &JsiSkSVG::width);
-    installHostMethod(runtime, prototype, "height", &JsiSkSVG::height);
+    installMethod(runtime, prototype, "width", &JsiSkSVG::width);
+    installMethod(runtime, prototype, "height", &JsiSkSVG::height);
   }
 
   /**

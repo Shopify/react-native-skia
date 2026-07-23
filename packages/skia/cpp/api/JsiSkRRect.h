@@ -26,22 +26,21 @@ class JsiSkRRect
 public:
   static constexpr const char *CLASS_NAME = "RRect";
 
-  JSI_PROPERTY_GET(rx) {
+  double getRx() {
     return static_cast<double>(getObject()->getSimpleRadii().x());
   }
-  JSI_PROPERTY_GET(ry) {
+  double getRy() {
     return static_cast<double>(getObject()->getSimpleRadii().y());
   }
-  JSI_PROPERTY_GET(rect) {
-    return makeJsiObject(runtime, std::make_shared<JsiSkRect>(
-                                      getContext(), getObject()->getBounds()));
+  std::shared_ptr<JsiSkRect> getRect() {
+    return std::make_shared<JsiSkRect>(getContext(), getObject()->getBounds());
   }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installCommon(runtime, prototype);
-    installHostGetter(runtime, prototype, "rx", &JsiSkRRect::get_rx);
-    installHostGetter(runtime, prototype, "ry", &JsiSkRRect::get_ry);
-    installHostGetter(runtime, prototype, "rect", &JsiSkRRect::get_rect);
+    installGetter(runtime, prototype, "rx", &JsiSkRRect::getRx);
+    installGetter(runtime, prototype, "ry", &JsiSkRRect::getRy);
+    installGetter(runtime, prototype, "rect", &JsiSkRRect::getRect);
   }
 
   JsiSkRRect(std::shared_ptr<RNSkPlatformContext> context, const SkRRect &rect)
