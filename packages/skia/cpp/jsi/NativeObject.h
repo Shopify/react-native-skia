@@ -392,6 +392,11 @@ protected:
 
   /**
    * Install a method on the prototype.
+   *
+   * The installers below resolve `this` with NativeObject<Derived>::fromValue
+   * (explicitly qualified): derived classes may shadow fromValue with a
+   * public static of the same name that returns the wrapped inner object
+   * (the RNSkia wrappers do), which must not be picked up here.
    */
   template <typename ReturnType, typename... Args>
   static void installMethod(jsi::Runtime &runtime, jsi::Object &prototype,
@@ -401,7 +406,7 @@ protected:
         runtime, jsi::PropNameID::forUtf8(runtime, name), sizeof...(Args),
         [method](jsi::Runtime &rt, const jsi::Value &thisVal,
                  const jsi::Value *args, size_t count) -> jsi::Value {
-          auto native = Derived::fromValue(rt, thisVal);
+          auto native = NativeObject<Derived>::fromValue(rt, thisVal);
           return callMethod(native.get(), method, rt, args,
                             std::index_sequence_for<Args...>{}, count);
         });
@@ -421,7 +426,7 @@ protected:
         runtime, jsi::PropNameID::forUtf8(runtime, name), sizeof...(Args),
         [method](jsi::Runtime &rt, const jsi::Value &thisVal,
                  const jsi::Value *args, size_t count) -> jsi::Value {
-          auto native = Derived::fromValue(rt, thisVal);
+          auto native = NativeObject<Derived>::fromValue(rt, thisVal);
           return callMethodWithRuntime(native.get(), method, rt, args,
                                        std::index_sequence_for<Args...>{},
                                        count);
@@ -441,7 +446,7 @@ protected:
         0,
         [getter](jsi::Runtime &rt, const jsi::Value &thisVal,
                  const jsi::Value *args, size_t count) -> jsi::Value {
-          auto native = Derived::fromValue(rt, thisVal);
+          auto native = NativeObject<Derived>::fromValue(rt, thisVal);
           if constexpr (std::is_same_v<ReturnType, void>) {
             (native.get()->*getter)();
             return jsi::Value::undefined();
@@ -481,7 +486,7 @@ protected:
           if (count < 1) {
             throw jsi::JSError(rt, "Setter requires a value argument");
           }
-          auto native = Derived::fromValue(rt, thisVal);
+          auto native = NativeObject<Derived>::fromValue(rt, thisVal);
           auto value = rnwgpu::JSIConverter<std::decay_t<ValueType>>::fromJSI(
               rt, args[0], false);
           (native.get()->*setter)(std::move(value));
@@ -528,7 +533,7 @@ protected:
         0,
         [getter](jsi::Runtime &rt, const jsi::Value &thisVal,
                  const jsi::Value *args, size_t count) -> jsi::Value {
-          auto native = Derived::fromValue(rt, thisVal);
+          auto native = NativeObject<Derived>::fromValue(rt, thisVal);
           ReturnType result = (native.get()->*getter)();
           return rnwgpu::JSIConverter<std::decay_t<ReturnType>>::toJSI(
               rt, std::move(result));
@@ -542,7 +547,7 @@ protected:
           if (count < 1) {
             throw jsi::JSError(rt, "Setter requires a value argument");
           }
-          auto native = Derived::fromValue(rt, thisVal);
+          auto native = NativeObject<Derived>::fromValue(rt, thisVal);
           auto value = rnwgpu::JSIConverter<std::decay_t<ValueType>>::fromJSI(
               rt, args[0], false);
           (native.get()->*setter)(std::move(value));

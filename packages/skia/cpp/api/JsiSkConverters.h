@@ -1,0 +1,264 @@
+#pragma once
+
+#include <memory>
+#include <utility>
+#include <variant>
+
+#include <jsi/jsi.h>
+
+#include "jsi/JSIConverter.h"
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+
+#include "include/core/SkRefCnt.h"
+#include "include/core/SkSize.h"
+
+#pragma clang diagnostic pop
+
+// Forward declarations of the wrapped Skia types. Only the trait below needs
+// them; the converter bodies are templates and are instantiated lazily, at
+// which point the classes are complete.
+class SkImage;
+class SkShader;
+class SkTypeface;
+class SkColorFilter;
+class SkImageFilter;
+class SkMaskFilter;
+class SkPathEffect;
+class SkData;
+class SkPicture;
+class SkTextBlob;
+class SkRuntimeEffect;
+class SkVertices;
+class SkFontMgr;
+class SkSVGDOM;
+class SkPaint;
+class SkFont;
+class SkMatrix;
+class SkPathBuilder;
+struct SkRect;
+struct SkPoint;
+class SkRRect;
+class SkFontStyle;
+struct SkImageInfo;
+struct SkRSXform;
+
+namespace RNSkia {
+
+namespace jsi = facebook::jsi;
+
+class JsiSkImage;
+class JsiSkShader;
+class JsiSkTypeface;
+class JsiSkColorFilter;
+class JsiSkImageFilter;
+class JsiSkMaskFilter;
+class JsiSkPathEffect;
+class JsiSkData;
+class JsiSkPicture;
+class JsiSkTextBlob;
+class JsiSkRuntimeEffect;
+class JsiSkVertices;
+class JsiSkFontMgr;
+class JsiSkSVG;
+class JsiSkPaint;
+class JsiSkFont;
+class JsiSkMatrix;
+class JsiSkPath;
+class JsiSkRect;
+class JsiSkPoint;
+class JsiSkRRect;
+class JsiSkFontStyle;
+class JsiSkImageInfo;
+class JsiSkRSXform;
+
+/**
+ * Maps a wrapped Skia type to the JsiSk* class whose `fromValue` knows how to
+ * read it from a JS value (including the plain-object fallbacks, e.g. SkRect
+ * from {x, y, width, height}). The JSIConverter specializations below are
+ * enabled for exactly the types listed here.
+ */
+template <typename T> struct JsiSkWrapperFor;
+
+template <> struct JsiSkWrapperFor<SkImage> {
+  using type = JsiSkImage;
+};
+template <> struct JsiSkWrapperFor<SkShader> {
+  using type = JsiSkShader;
+};
+template <> struct JsiSkWrapperFor<SkTypeface> {
+  using type = JsiSkTypeface;
+};
+template <> struct JsiSkWrapperFor<SkColorFilter> {
+  using type = JsiSkColorFilter;
+};
+template <> struct JsiSkWrapperFor<SkImageFilter> {
+  using type = JsiSkImageFilter;
+};
+template <> struct JsiSkWrapperFor<SkMaskFilter> {
+  using type = JsiSkMaskFilter;
+};
+template <> struct JsiSkWrapperFor<SkPathEffect> {
+  using type = JsiSkPathEffect;
+};
+template <> struct JsiSkWrapperFor<SkData> {
+  using type = JsiSkData;
+};
+template <> struct JsiSkWrapperFor<SkPicture> {
+  using type = JsiSkPicture;
+};
+template <> struct JsiSkWrapperFor<SkTextBlob> {
+  using type = JsiSkTextBlob;
+};
+template <> struct JsiSkWrapperFor<SkRuntimeEffect> {
+  using type = JsiSkRuntimeEffect;
+};
+template <> struct JsiSkWrapperFor<SkVertices> {
+  using type = JsiSkVertices;
+};
+template <> struct JsiSkWrapperFor<SkFontMgr> {
+  using type = JsiSkFontMgr;
+};
+template <> struct JsiSkWrapperFor<SkSVGDOM> {
+  using type = JsiSkSVG;
+};
+template <> struct JsiSkWrapperFor<SkPaint> {
+  using type = JsiSkPaint;
+};
+template <> struct JsiSkWrapperFor<SkFont> {
+  using type = JsiSkFont;
+};
+template <> struct JsiSkWrapperFor<SkMatrix> {
+  using type = JsiSkMatrix;
+};
+// Note: JsiSkPath wraps an SkPathBuilder (not an SkPath).
+template <> struct JsiSkWrapperFor<SkPathBuilder> {
+  using type = JsiSkPath;
+};
+template <> struct JsiSkWrapperFor<SkRect> {
+  using type = JsiSkRect;
+};
+template <> struct JsiSkWrapperFor<SkPoint> {
+  using type = JsiSkPoint;
+};
+template <> struct JsiSkWrapperFor<SkRRect> {
+  using type = JsiSkRRect;
+};
+template <> struct JsiSkWrapperFor<SkFontStyle> {
+  using type = JsiSkFontStyle;
+};
+template <> struct JsiSkWrapperFor<SkImageInfo> {
+  using type = JsiSkImageInfo;
+};
+template <> struct JsiSkWrapperFor<SkRSXform> {
+  using type = JsiSkRSXform;
+};
+
+template <typename T>
+using JsiSkWrapperFor_t = typename JsiSkWrapperFor<T>::type;
+
+} // namespace RNSkia
+
+namespace rnwgpu {
+
+/**
+ * sk_sp<T> arguments (SkImage, SkShader, ...). Delegates to the wrapper
+ * class's fromValue, so wrapper objects and any legacy fallback shapes keep
+ * working. Conversion is strict: null/undefined throw, matching the previous
+ * raw JSI_HOST_FUNCTION bodies. Arguments that explicitly accept null use
+ * std::variant<std::nullptr_t, sk_sp<T>> (see below); arguments that may be
+ * omitted use std::optional.
+ *
+ * There is intentionally no toJSI: building a wrapper requires the platform
+ * context, so methods return std::shared_ptr<JsiSkFoo> built with
+ * getContext() instead (handled by the NativeObject converter).
+ */
+template <typename T>
+struct JSIConverter<sk_sp<T>,
+                    std::void_t<typename RNSkia::JsiSkWrapperFor<T>::type>> {
+  static sk_sp<T> fromJSI(jsi::Runtime &runtime, const jsi::Value &arg,
+                          bool outOfBound) {
+    return RNSkia::JsiSkWrapperFor_t<T>::fromValue(runtime, arg);
+  }
+};
+
+/**
+ * std::shared_ptr<T> arguments for the wrapped non-refcounted Skia types
+ * (SkPaint, SkFont, SkMatrix, SkRect, ...). Same rules as sk_sp above.
+ */
+template <typename T>
+struct JSIConverter<std::shared_ptr<T>,
+                    std::void_t<typename RNSkia::JsiSkWrapperFor<T>::type>> {
+  static std::shared_ptr<T> fromJSI(jsi::Runtime &runtime,
+                                    const jsi::Value &arg, bool outOfBound) {
+    return RNSkia::JsiSkWrapperFor_t<T>::fromValue(runtime, arg);
+  }
+};
+
+/**
+ * Nullable sk_sp<T> arguments: JS null maps to the std::nullptr_t
+ * alternative, anything else goes through the strict converter above.
+ */
+template <typename T>
+struct JSIConverter<std::variant<std::nullptr_t, sk_sp<T>>,
+                    std::void_t<typename RNSkia::JsiSkWrapperFor<T>::type>> {
+  using Target = std::variant<std::nullptr_t, sk_sp<T>>;
+
+  static Target fromJSI(jsi::Runtime &runtime, const jsi::Value &arg,
+                        bool outOfBound) {
+    if (arg.isNull()) {
+      return Target(nullptr);
+    }
+    return Target(JSIConverter<sk_sp<T>>::fromJSI(runtime, arg, outOfBound));
+  }
+};
+
+/**
+ * SkRect / SkPoint / SkMatrix by value — the wrapper's fromValue provides the
+ * plain-object/array fallbacks. fromJSI only; returning these types is done
+ * through std::shared_ptr<JsiSkRect> etc. (see above).
+ */
+template <typename T>
+struct JSIConverter<T, std::enable_if_t<std::is_same_v<T, SkRect>>> {
+  static SkRect fromJSI(jsi::Runtime &runtime, const jsi::Value &arg,
+                        bool outOfBound) {
+    return *RNSkia::JsiSkRect::fromValue(runtime, arg);
+  }
+};
+
+template <typename T>
+struct JSIConverter<T, std::enable_if_t<std::is_same_v<T, SkPoint>>> {
+  static SkPoint fromJSI(jsi::Runtime &runtime, const jsi::Value &arg,
+                         bool outOfBound) {
+    return *RNSkia::JsiSkPoint::fromValue(runtime, arg);
+  }
+};
+
+template <typename T>
+struct JSIConverter<T, std::enable_if_t<std::is_same_v<T, SkMatrix>>> {
+  static SkMatrix fromJSI(jsi::Runtime &runtime, const jsi::Value &arg,
+                          bool outOfBound) {
+    return *RNSkia::JsiSkMatrix::fromValue(runtime, arg);
+  }
+};
+
+// SkISize <> {width, height}
+template <> struct JSIConverter<SkISize> {
+  static SkISize fromJSI(jsi::Runtime &runtime, const jsi::Value &arg,
+                         bool outOfBound) {
+    auto object = arg.asObject(runtime);
+    auto width = object.getProperty(runtime, "width").asNumber();
+    auto height = object.getProperty(runtime, "height").asNumber();
+    return SkISize::Make(static_cast<int32_t>(width),
+                         static_cast<int32_t>(height));
+  }
+  static jsi::Value toJSI(jsi::Runtime &runtime, const SkISize &size) {
+    jsi::Object result(runtime);
+    result.setProperty(runtime, "width", static_cast<double>(size.width()));
+    result.setProperty(runtime, "height", static_cast<double>(size.height()));
+    return result;
+  }
+};
+
+} // namespace rnwgpu
