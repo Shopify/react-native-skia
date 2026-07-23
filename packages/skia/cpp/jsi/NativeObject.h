@@ -192,6 +192,49 @@ public:
         });
     prototype.setProperty(runtime, "__box", boxFunc);
 
+    // Install a generic toJSON so JSON.stringify sees the data properties.
+    // They live on the prototype (getters), and JSON.stringify only
+    // serializes *own* enumerable properties — with the legacy HostObject
+    // pattern all properties were reported as own, so e.g.
+    // JSON.stringify(rect) used to produce {x, y, width, height,
+    // __typename__} and now would produce {} without this.
+    auto toJSONFunc = jsi::Function::createFromHostFunction(
+        runtime, jsi::PropNameID::forUtf8(runtime, "toJSON"), 0,
+        [](jsi::Runtime &rt, const jsi::Value &thisValue, const jsi::Value *,
+           size_t) -> jsi::Value {
+          if (!thisValue.isObject()) {
+            return jsi::Value::undefined();
+          }
+          auto self = thisValue.asObject(rt);
+          auto objectCtor = rt.global().getPropertyAsObject(rt, "Object");
+          auto getPrototypeOf =
+              objectCtor.getPropertyAsFunction(rt, "getPrototypeOf");
+          auto getOwnPropertyNames =
+              objectCtor.getPropertyAsFunction(rt, "getOwnPropertyNames");
+          auto proto = getPrototypeOf.call(rt, self);
+          jsi::Object result(rt);
+          if (proto.isObject()) {
+            auto names =
+                getOwnPropertyNames.call(rt, proto).asObject(rt).asArray(rt);
+            auto size = names.size(rt);
+            for (size_t i = 0; i < size; i++) {
+              auto name = names.getValueAtIndex(rt, i).asString(rt).utf8(rt);
+              if (name == "constructor" || name == "toJSON") {
+                continue;
+              }
+              auto value = self.getProperty(rt, name.c_str());
+              // Skip methods (dispose, __box, ...) — JSON.stringify would
+              // drop them anyway; skipping avoids serializing them at all.
+              if (value.isObject() && value.asObject(rt).isFunction(rt)) {
+                continue;
+              }
+              result.setProperty(rt, name.c_str(), value);
+            }
+          }
+          return result;
+        });
+    prototype.setProperty(runtime, "toJSON", toJSONFunc);
+
     // Register the reconstructor used by BoxedNativeObject::unbox() to
     // rebuild this object (prototype + native state) on another runtime.
     static std::once_flag boxingRegistered;
