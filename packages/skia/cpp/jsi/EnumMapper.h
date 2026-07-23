@@ -12,7 +12,10 @@ namespace EnumMapper {
 // outEnum)`
 // 2. `static void convertEnumToJSUnion(Enum inEnum, std::string* outUnion)`
 
-static std::runtime_error invalidUnion(const std::string &passedUnion) {
+// inline (not static): this header is now included by every TU via
+// NativeObject.h, and an unused file-scope static would trip
+// -Werror=unused-function in non-Graphite builds.
+inline std::runtime_error invalidUnion(const std::string &passedUnion) {
   return std::runtime_error(
       "Cannot convert JS Value to Enum: Invalid Union value passed! (\"" +
       std::string(passedUnion) + "\")");
