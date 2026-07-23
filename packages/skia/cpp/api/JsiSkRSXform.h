@@ -28,38 +28,25 @@ public:
       : JsiSkWrappingSharedPtrNativeObject<JsiSkRSXform, SkRSXform>(
             std::move(context), std::make_shared<SkRSXform>(rsxform)) {}
 
-  JSI_PROPERTY_GET(scos) {
-    return jsi::Value(SkScalarToDouble(getObject()->fSCos));
-  }
-  JSI_PROPERTY_GET(ssin) {
-    return jsi::Value(SkScalarToDouble(getObject()->fSSin));
-  }
-  JSI_PROPERTY_GET(tx) {
-    return jsi::Value(SkScalarToDouble(getObject()->fTx));
-  }
-  JSI_PROPERTY_GET(ty) {
-    return jsi::Value(SkScalarToDouble(getObject()->fTy));
-  }
+  double getScos() { return SkScalarToDouble(getObject()->fSCos); }
+  double getSsin() { return SkScalarToDouble(getObject()->fSSin); }
+  double getTx() { return SkScalarToDouble(getObject()->fTx); }
+  double getTy() { return SkScalarToDouble(getObject()->fTy); }
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Woverloaded-virtual"
-  JSI_HOST_FUNCTION(set) {
-    auto scos = arguments[0].asNumber();
-    auto ssin = arguments[1].asNumber();
-    auto tx = arguments[2].asNumber();
-    auto ty = arguments[3].asNumber();
+  void set(double scos, double ssin, double tx, double ty) {
     getObject()->set(scos, ssin, tx, ty);
-    return jsi::Value::undefined();
   }
 #pragma clang diagnostic pop
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installCommon(runtime, prototype);
-    installHostGetter(runtime, prototype, "scos", &JsiSkRSXform::get_scos);
-    installHostGetter(runtime, prototype, "ssin", &JsiSkRSXform::get_ssin);
-    installHostGetter(runtime, prototype, "tx", &JsiSkRSXform::get_tx);
-    installHostGetter(runtime, prototype, "ty", &JsiSkRSXform::get_ty);
-    installHostMethod(runtime, prototype, "set", &JsiSkRSXform::set);
+    installGetter(runtime, prototype, "scos", &JsiSkRSXform::getScos);
+    installGetter(runtime, prototype, "ssin", &JsiSkRSXform::getSsin);
+    installGetter(runtime, prototype, "tx", &JsiSkRSXform::getTx);
+    installGetter(runtime, prototype, "ty", &JsiSkRSXform::getTy);
+    installMethod(runtime, prototype, "set", &JsiSkRSXform::set);
   }
 
   /**

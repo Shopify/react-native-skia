@@ -60,14 +60,12 @@ public:
                                       std::move(context), imageInfo));
   }
 
-  JSI_PROPERTY_GET(width) { return static_cast<double>(getObject()->width()); }
-  JSI_PROPERTY_GET(height) {
-    return static_cast<double>(getObject()->height());
-  }
-  JSI_PROPERTY_GET(colorType) {
+  double getWidth() { return static_cast<double>(getObject()->width()); }
+  double getHeight() { return static_cast<double>(getObject()->height()); }
+  double getColorType() {
     return static_cast<double>(getObject()->colorType());
   }
-  JSI_PROPERTY_GET(alphaType) {
+  double getAlphaType() {
     return static_cast<double>(getObject()->alphaType());
   }
 
@@ -77,13 +75,12 @@ public:
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installCommon(runtime, prototype);
-    installHostGetter(runtime, prototype, "width", &JsiSkImageInfo::get_width);
-    installHostGetter(runtime, prototype, "height",
-                      &JsiSkImageInfo::get_height);
-    installHostGetter(runtime, prototype, "colorType",
-                      &JsiSkImageInfo::get_colorType);
-    installHostGetter(runtime, prototype, "alphaType",
-                      &JsiSkImageInfo::get_alphaType);
+    installGetter(runtime, prototype, "width", &JsiSkImageInfo::getWidth);
+    installGetter(runtime, prototype, "height", &JsiSkImageInfo::getHeight);
+    installGetter(runtime, prototype, "colorType",
+                  &JsiSkImageInfo::getColorType);
+    installGetter(runtime, prototype, "alphaType",
+                  &JsiSkImageInfo::getAlphaType);
   }
 };
 } // namespace RNSkia

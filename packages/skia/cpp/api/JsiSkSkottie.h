@@ -1,9 +1,16 @@
 #pragma once
 
+#include <memory>
+#include <optional>
+#include <string>
+#include <utility>
+#include <variant>
+
 #include <jsi/jsi.h>
 
 #include "JsiSkCanvas.h"
 #include "JsiSkColor.h"
+#include "JsiSkConverters.h"
 #include "JsiSkNativeObjects.h"
 #include "JsiSkPoint.h"
 #include "JsiSkRect.h"
@@ -153,84 +160,64 @@ public:
   static constexpr const char *CLASS_NAME = "Skottie";
 
   // #region Properties
-  JSI_HOST_FUNCTION(duration) {
+  double duration() {
     return static_cast<double>(getObject()->_animation->duration());
   }
-  JSI_HOST_FUNCTION(fps) {
-    return static_cast<double>(getObject()->_animation->fps());
-  }
+  double fps() { return static_cast<double>(getObject()->_animation->fps()); }
   // #endregion
 
   // #region Methods
-  JSI_HOST_FUNCTION(seekFrame) {
+  void seekFrame(double frame,
+                 std::optional<std::shared_ptr<SkRect>> rectParam) {
     sksg::InvalidationController ic;
-    getObject()->_animation->seekFrame(arguments[0].asNumber(), &ic);
+    getObject()->_animation->seekFrame(frame, &ic);
     auto bounds = ic.bounds();
-    if (count >= 2) {
-      auto rect = JsiSkRect::fromValue(runtime, arguments[1]);
-      if (rect != nullptr) {
-        rect->setXYWH(bounds.x(), bounds.y(), bounds.width(), bounds.height());
-      }
+    if (rectParam.has_value() && *rectParam != nullptr) {
+      auto rect = *rectParam;
+      rect->setXYWH(bounds.x(), bounds.y(), bounds.width(), bounds.height());
     }
-    return jsi::Value::undefined();
   }
 
-  JSI_HOST_FUNCTION(size) {
-    auto size = getObject()->_animation->size();
-    jsi::Object jsiSize(runtime);
-    jsiSize.setProperty(runtime, "width", size.width());
-    jsiSize.setProperty(runtime, "height", size.height());
-    return jsiSize;
-  }
+  SkSize size() { return getObject()->_animation->size(); }
 
-  JSI_HOST_FUNCTION(render) {
-    auto canvas = getJsiObject<JsiSkCanvas>(runtime, arguments[0])->getCanvas();
-    if (count > 1) {
-      auto rect = JsiSkRect::fromValue(runtime, arguments[1]);
-      getObject()->_animation->render(canvas, rect.get());
+  void render(std::shared_ptr<JsiSkCanvas> jsiCanvas,
+              std::optional<std::shared_ptr<SkRect>> rect) {
+    auto canvas = jsiCanvas->getCanvas();
+    if (rect.has_value()) {
+      getObject()->_animation->render(canvas, rect->get());
     } else {
       getObject()->_animation->render(canvas);
     }
-
-    return jsi::Value::undefined();
   }
 
-  JSI_HOST_FUNCTION(version) {
-    return jsi::String::createFromUtf8(
-        runtime, getObject()->_animation->version().c_str());
+  std::string version() {
+    return std::string(getObject()->_animation->version().c_str());
   }
 
-  JSI_HOST_FUNCTION(setColor) {
-    if (count < 2) {
-      return jsi::Value(false);
+  bool setColor(JsiOptional<std::string> key, JsiOptional<JsiColor> color) {
+    if (!key.has_value() || !color.has_value()) {
+      return false;
     }
-    auto key = arguments[0].asString(runtime).utf8(runtime);
-    auto color = JsiSkColor::fromValue(runtime, arguments[1]);
-    return getObject()->_propManager->setColor(key, color);
+    return getObject()->_propManager->setColor(*key, *color);
   }
 
-  JSI_HOST_FUNCTION(setOpacity) {
-    if (count < 2) {
-      return jsi::Value(false);
+  bool setOpacity(JsiOptional<std::string> key, JsiOptional<double> opacity) {
+    if (!key.has_value() || !opacity.has_value()) {
+      return false;
     }
-
-    auto key = arguments[0].asString(runtime).utf8(runtime);
-    auto opacity = arguments[1].asNumber();
-    return getObject()->_propManager->setOpacity(key, opacity);
+    return getObject()->_propManager->setOpacity(*key, *opacity);
   }
 
-  JSI_HOST_FUNCTION(setText) {
-    if (count < 3) {
-      return jsi::Value(false);
+  bool setText(JsiOptional<std::string> key, JsiOptional<std::string> text,
+               JsiOptional<double> size) {
+    if (!key.has_value() || !text.has_value() || !size.has_value()) {
+      return false;
     }
-    auto key = arguments[0].asString(runtime).utf8(runtime);
-    auto text = arguments[1].asString(runtime).utf8(runtime);
-    auto size = arguments[2].asNumber();
     // preserve all other text fields
-    auto t = getObject()->_propManager->getText(key);
-    t.fText = SkString(text);
-    t.fTextSize = size;
-    return getObject()->_propManager->setText(key, t);
+    auto t = getObject()->_propManager->getText(*key);
+    t.fText = SkString(*text);
+    t.fTextSize = *size;
+    return getObject()->_propManager->setText(*key, t);
   }
 
   JSI_HOST_FUNCTION(getTextProps) {
@@ -251,27 +238,24 @@ public:
     return props;
   }
 
-  JSI_HOST_FUNCTION(setTransform) {
-    if (count < 7) {
-      return jsi::Value(false);
+  bool setTransform(JsiOptional<std::string> key, JsiOptional<SkPoint> anchor,
+                    JsiOptional<SkPoint> position, JsiOptional<SkPoint> scale,
+                    JsiOptional<double> rotation, JsiOptional<double> skew,
+                    JsiOptional<double> skewAxis) {
+    if (!key.has_value() || !anchor.has_value() || !position.has_value() ||
+        !scale.has_value() || !rotation.has_value() || !skew.has_value() ||
+        !skewAxis.has_value()) {
+      return false;
     }
-
-    auto key = arguments[0].asString(runtime).utf8(runtime);
-    auto anchor = JsiSkPoint::fromValue(runtime, arguments[1]);
-    auto position = JsiSkPoint::fromValue(runtime, arguments[2]);
-    auto scale = JsiSkPoint::fromValue(runtime, arguments[3]);
-    auto rotation = arguments[4].asNumber();
-    auto skew = arguments[5].asNumber();
-    auto skewAxis = arguments[6].asNumber();
 
     skottie::TransformPropertyValue transform;
     transform.fAnchorPoint = {anchor->x(), anchor->y()};
     transform.fPosition = {position->x(), position->y()};
     transform.fScale = {scale->x(), scale->y()};
-    transform.fRotation = rotation;
-    transform.fSkew = skew;
-    transform.fSkewAxis = skewAxis;
-    return getObject()->_propManager->setTransform(key, transform);
+    transform.fRotation = *rotation;
+    transform.fSkew = *skew;
+    transform.fSkewAxis = *skewAxis;
+    return getObject()->_propManager->setTransform(*key, transform);
   }
 
   JSI_HOST_FUNCTION(getSlotInfo) {
@@ -325,52 +309,47 @@ public:
     return slotInfoJS;
   }
 
-  JSI_HOST_FUNCTION(setColorSlot) {
-    if (count < 2) {
-      return jsi::Value(false);
+  bool setColorSlot(JsiOptional<std::string> slotID,
+                    JsiOptional<JsiColor> color) {
+    if (!slotID.has_value() || !color.has_value()) {
+      return false;
     }
-    auto slotID = arguments[0].asString(runtime).utf8(runtime);
-    auto color = JsiSkColor::fromValue(runtime, arguments[1]);
-    return getObject()->_slotManager->setColorSlot(SkString(slotID), color);
+    return getObject()->_slotManager->setColorSlot(SkString(*slotID), *color);
   }
 
-  JSI_HOST_FUNCTION(setScalarSlot) {
-    if (count < 2) {
-      return jsi::Value(false);
+  bool setScalarSlot(JsiOptional<std::string> slotID,
+                     JsiOptional<double> scalar) {
+    if (!slotID.has_value() || !scalar.has_value()) {
+      return false;
     }
-    auto slotID = arguments[0].asString(runtime).utf8(runtime);
-    auto scalar = arguments[1].asNumber();
-    return getObject()->_slotManager->setScalarSlot(SkString(slotID), scalar);
+    return getObject()->_slotManager->setScalarSlot(SkString(*slotID),
+                                                    *scalar);
   }
 
-  JSI_HOST_FUNCTION(setVec2Slot) {
-    if (count < 2) {
-      return jsi::Value(false);
+  bool setVec2Slot(JsiOptional<std::string> slotID,
+                   JsiOptional<SkPoint> point) {
+    if (!slotID.has_value() || !point.has_value()) {
+      return false;
     }
-    auto slotID = arguments[0].asString(runtime).utf8(runtime);
-    auto point = JsiSkPoint::fromValue(runtime, arguments[1]);
     SkV2 vec2{point->x(), point->y()};
-    return getObject()->_slotManager->setVec2Slot(SkString(slotID), vec2);
+    return getObject()->_slotManager->setVec2Slot(SkString(*slotID), vec2);
   }
 
-  JSI_HOST_FUNCTION(setTextSlot) {
-    if (count < 2) {
-      return jsi::Value(false);
-    }
-    auto key = arguments[0].asString(runtime).utf8(runtime);
+  // The text value argument is intentionally not declared: the raw binding
+  // never read it (the method is not implemented yet).
+  bool setTextSlot(JsiOptional<std::string> key) {
     // TODO: Implement proper text slot setting
-    return jsi::Value(false);
+    return false;
   }
 
-  JSI_HOST_FUNCTION(setImageSlot) {
-    if (count < 2) {
-      return jsi::Value(false);
+  bool setImageSlot(JsiOptional<std::string> slotID,
+                    JsiOptional<std::string> assetName) {
+    if (!slotID.has_value() || !assetName.has_value()) {
+      return false;
     }
-    auto slotID = arguments[0].asString(runtime).utf8(runtime);
-    auto assetName = arguments[1].asString(runtime).utf8(runtime);
     return getObject()->_slotManager->setImageSlot(
-        SkString(slotID), getObject()->_resourceProvider->loadImageAsset(
-                              nullptr, assetName.data(), nullptr));
+        SkString(*slotID), getObject()->_resourceProvider->loadImageAsset(
+                               nullptr, assetName->data(), nullptr));
   }
 
   JSI_HOST_FUNCTION(getColorSlot) {
@@ -384,15 +363,15 @@ public:
     return jsi::Value::null();
   }
 
-  JSI_HOST_FUNCTION(getScalarSlot) {
-    if (count < 1) {
-      return jsi::Value::null();
+  std::variant<double, std::nullptr_t>
+  getScalarSlot(JsiOptional<std::string> slotID) {
+    if (!slotID.has_value()) {
+      return nullptr;
     }
-    auto slotID = arguments[0].asString(runtime).utf8(runtime);
-    if (auto v = getObject()->_slotManager->getScalarSlot(SkString(slotID))) {
-      return jsi::Value(v.value());
+    if (auto v = getObject()->_slotManager->getScalarSlot(SkString(*slotID))) {
+      return static_cast<double>(v.value());
     }
-    return jsi::Value::null();
+    return nullptr;
   }
 
   JSI_HOST_FUNCTION(getVec2Slot) {
@@ -551,29 +530,28 @@ public:
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installCommon(runtime, prototype);
-    installHostMethod(runtime, prototype, "duration", &JsiSkSkottie::duration);
-    installHostMethod(runtime, prototype, "fps", &JsiSkSkottie::fps);
-    installHostMethod(runtime, prototype, "seekFrame",
-                      &JsiSkSkottie::seekFrame);
-    installHostMethod(runtime, prototype, "render", &JsiSkSkottie::render);
-    installHostMethod(runtime, prototype, "size", &JsiSkSkottie::size);
-    installHostMethod(runtime, prototype, "version", &JsiSkSkottie::version);
+    installMethod(runtime, prototype, "duration", &JsiSkSkottie::duration);
+    installMethod(runtime, prototype, "fps", &JsiSkSkottie::fps);
+    installMethod(runtime, prototype, "seekFrame", &JsiSkSkottie::seekFrame);
+    installMethod(runtime, prototype, "render", &JsiSkSkottie::render);
+    installMethod(runtime, prototype, "size", &JsiSkSkottie::size);
+    installMethod(runtime, prototype, "version", &JsiSkSkottie::version);
     installHostMethod(runtime, prototype, "getSlotInfo",
                       &JsiSkSkottie::getSlotInfo);
-    installHostMethod(runtime, prototype, "setColorSlot",
-                      &JsiSkSkottie::setColorSlot);
-    installHostMethod(runtime, prototype, "setScalarSlot",
-                      &JsiSkSkottie::setScalarSlot);
-    installHostMethod(runtime, prototype, "setVec2Slot",
-                      &JsiSkSkottie::setVec2Slot);
-    installHostMethod(runtime, prototype, "setTextSlot",
-                      &JsiSkSkottie::setTextSlot);
-    installHostMethod(runtime, prototype, "setImageSlot",
-                      &JsiSkSkottie::setImageSlot);
+    installMethod(runtime, prototype, "setColorSlot",
+                  &JsiSkSkottie::setColorSlot);
+    installMethod(runtime, prototype, "setScalarSlot",
+                  &JsiSkSkottie::setScalarSlot);
+    installMethod(runtime, prototype, "setVec2Slot",
+                  &JsiSkSkottie::setVec2Slot);
+    installMethod(runtime, prototype, "setTextSlot",
+                  &JsiSkSkottie::setTextSlot);
+    installMethod(runtime, prototype, "setImageSlot",
+                  &JsiSkSkottie::setImageSlot);
     installHostMethod(runtime, prototype, "getColorSlot",
                       &JsiSkSkottie::getColorSlot);
-    installHostMethod(runtime, prototype, "getScalarSlot",
-                      &JsiSkSkottie::getScalarSlot);
+    installMethod(runtime, prototype, "getScalarSlot",
+                  &JsiSkSkottie::getScalarSlot);
     installHostMethod(runtime, prototype, "getVec2Slot",
                       &JsiSkSkottie::getVec2Slot);
     installHostMethod(runtime, prototype, "getTextSlot",
@@ -586,8 +564,8 @@ public:
                       &JsiSkSkottie::getTransformProps);
     installHostMethod(runtime, prototype, "getTextProps",
                       &JsiSkSkottie::getTextProps);
-    installHostMethod(runtime, prototype, "setColor", &JsiSkSkottie::setColor);
-    installHostMethod(runtime, prototype, "setText", &JsiSkSkottie::setText);
+    installMethod(runtime, prototype, "setColor", &JsiSkSkottie::setColor);
+    installMethod(runtime, prototype, "setText", &JsiSkSkottie::setText);
   }
   // #endregion
 
