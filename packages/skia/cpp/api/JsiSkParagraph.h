@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include <jsi/jsi.h>
@@ -36,61 +37,46 @@ class JsiSkParagraph
 public:
   static constexpr const char *CLASS_NAME = "Paragraph";
 
-  JSI_HOST_FUNCTION(layout) {
-    auto width = getArgumentAsNumber(runtime, arguments, count, 0);
-    getObject()->layout(width);
-    return jsi::Value::undefined();
-  }
+  void layout(double width) { getObject()->layout(width); }
 
-  JSI_HOST_FUNCTION(paint) {
-    auto jsiCanvas = getJsiObject<JsiSkCanvas>(
-        runtime, getArgument(runtime, arguments, count, 0));
-    auto x = getArgumentAsNumber(runtime, arguments, count, 1);
-    auto y = getArgumentAsNumber(runtime, arguments, count, 2);
+  void paint(std::shared_ptr<JsiSkCanvas> jsiCanvas, double x, double y) {
     getObject()->paint(jsiCanvas->getCanvas(), x, y);
-    return jsi::Value::undefined();
   }
 
-  JSI_HOST_FUNCTION(getHeight) {
-    return static_cast<double>(getObject()->getHeight());
-  }
+  double getHeight() { return static_cast<double>(getObject()->getHeight()); }
 
-  JSI_HOST_FUNCTION(getMaxWidth) {
+  double getMaxWidth() {
     return static_cast<double>(getObject()->getMaxWidth());
   }
 
-  JSI_HOST_FUNCTION(getMaxIntrinsicWidth) {
+  double getMaxIntrinsicWidth() {
     return static_cast<double>(getObject()->getMaxIntrinsicWidth());
   }
 
-  JSI_HOST_FUNCTION(getMinIntrinsicWidth) {
+  double getMinIntrinsicWidth() {
     return static_cast<double>(getObject()->getMinIntrinsicWidth());
   }
 
-  JSI_HOST_FUNCTION(getLongestLine) {
+  double getLongestLine() {
     return static_cast<double>(getObject()->getLongestLine());
   }
 
-  JSI_HOST_FUNCTION(getGlyphPositionAtCoordinate) {
-    auto dx = getArgumentAsNumber(runtime, arguments, count, 0);
-    auto dy = getArgumentAsNumber(runtime, arguments, count, 1);
+  int getGlyphPositionAtCoordinate(double dx, double dy) {
     auto result = getObject()->getGlyphPositionAtCoordinate(dx, dy);
     return result.position;
   }
 
-  JSI_HOST_FUNCTION(getRectsForRange) {
-    auto start = getArgumentAsNumber(runtime, arguments, count, 0);
-    auto end = getArgumentAsNumber(runtime, arguments, count, 1);
+  std::vector<std::shared_ptr<JsiSkRect>> getRectsForRange(double start,
+                                                           double end) {
     auto result =
         getObject()->getRectsForRange(start, end, para::RectHeightStyle::kTight,
                                       para::RectWidthStyle::kTight);
-    auto returnValue = jsi::Array(runtime, result.size());
-    for (size_t i = 0; i < result.size(); ++i) {
-      returnValue.setValueAtIndex(
-          runtime, i,
-          JsiSkRect::toValue(runtime, getContext(), result[i].rect));
+    std::vector<std::shared_ptr<JsiSkRect>> rects;
+    rects.reserve(result.size());
+    for (const auto &box : result) {
+      rects.push_back(std::make_shared<JsiSkRect>(getContext(), box.rect));
     }
-    return returnValue;
+    return rects;
   }
 
   JSI_HOST_FUNCTION(getLineMetrics) {
@@ -143,14 +129,13 @@ public:
     return returnValue;
   }
 
-  JSI_HOST_FUNCTION(getPath) {
-    auto lineNumber =
-        static_cast<int>(getArgumentAsNumber(runtime, arguments, count, 0));
+  std::variant<std::nullptr_t, std::shared_ptr<JsiSkPath>>
+  getPath(int lineNumber) {
     auto paragraph = getObject();
     // Paragraph::getPath does not bounds-check the line number.
     if (lineNumber < 0 ||
         static_cast<size_t>(lineNumber) >= paragraph->lineNumber()) {
-      return jsi::Value::null();
+      return nullptr;
     }
     // Paragraph::getPath resets its path builder after every visual run, so
     // for lines shaped as multiple runs (e.g. through font fallback) it only
@@ -183,8 +168,7 @@ public:
               &rec);
         });
     SkPath path = builder.detach();
-    return makeJsiObject(
-        runtime, std::make_shared<JsiSkPath>(getContext(), std::move(path)));
+    return std::make_shared<JsiSkPath>(getContext(), std::move(path));
   }
 
   JSI_HOST_FUNCTION(extendedVisit) {
@@ -269,27 +253,26 @@ public:
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installCommon(runtime, prototype);
-    installHostMethod(runtime, prototype, "layout", &JsiSkParagraph::layout);
-    installHostMethod(runtime, prototype, "paint", &JsiSkParagraph::paint);
-    installHostMethod(runtime, prototype, "getMaxWidth",
-                      &JsiSkParagraph::getMaxWidth);
-    installHostMethod(runtime, prototype, "getMinIntrinsicWidth",
-                      &JsiSkParagraph::getMinIntrinsicWidth);
-    installHostMethod(runtime, prototype, "getMaxIntrinsicWidth",
-                      &JsiSkParagraph::getMaxIntrinsicWidth);
-    installHostMethod(runtime, prototype, "getLongestLine",
-                      &JsiSkParagraph::getLongestLine);
-    installHostMethod(runtime, prototype, "getHeight",
-                      &JsiSkParagraph::getHeight);
+    installMethod(runtime, prototype, "layout", &JsiSkParagraph::layout);
+    installMethod(runtime, prototype, "paint", &JsiSkParagraph::paint);
+    installMethod(runtime, prototype, "getMaxWidth",
+                  &JsiSkParagraph::getMaxWidth);
+    installMethod(runtime, prototype, "getMinIntrinsicWidth",
+                  &JsiSkParagraph::getMinIntrinsicWidth);
+    installMethod(runtime, prototype, "getMaxIntrinsicWidth",
+                  &JsiSkParagraph::getMaxIntrinsicWidth);
+    installMethod(runtime, prototype, "getLongestLine",
+                  &JsiSkParagraph::getLongestLine);
+    installMethod(runtime, prototype, "getHeight", &JsiSkParagraph::getHeight);
     installHostMethod(runtime, prototype, "getRectsForPlaceholders",
                       &JsiSkParagraph::getRectsForPlaceholders);
-    installHostMethod(runtime, prototype, "getGlyphPositionAtCoordinate",
-                      &JsiSkParagraph::getGlyphPositionAtCoordinate);
-    installHostMethod(runtime, prototype, "getRectsForRange",
-                      &JsiSkParagraph::getRectsForRange);
+    installMethod(runtime, prototype, "getGlyphPositionAtCoordinate",
+                  &JsiSkParagraph::getGlyphPositionAtCoordinate);
+    installMethod(runtime, prototype, "getRectsForRange",
+                  &JsiSkParagraph::getRectsForRange);
     installHostMethod(runtime, prototype, "getLineMetrics",
                       &JsiSkParagraph::getLineMetrics);
-    installHostMethod(runtime, prototype, "getPath", &JsiSkParagraph::getPath);
+    installMethod(runtime, prototype, "getPath", &JsiSkParagraph::getPath);
     installHostMethod(runtime, prototype, "extendedVisit",
                       &JsiSkParagraph::extendedVisit);
   }
