@@ -178,11 +178,11 @@ public:
                                                  count);
   }
 
-  JSI_HOST_FUNCTION(hasDevice) {
+  bool hasDevice() {
 #ifdef SK_GRAPHITE
-    return jsi::Value(true);
+    return true;
 #else
-    return jsi::Value(false);
+    return false;
 #endif
   }
 
@@ -206,50 +206,63 @@ public:
   // Factory properties: like the legacy HostObject implementation, each
   // property access returns a fresh JS wrapper around the shared factory
   // instance.
-  JSI_PROPERTY_GET(SVG) { return makeJsiObject(runtime, _svgFactory); }
-  JSI_PROPERTY_GET(Image) { return makeJsiObject(runtime, _imageFactory); }
-  JSI_PROPERTY_GET(AnimatedImage) {
-    return makeJsiObject(runtime, _animatedImageFactory);
+  std::shared_ptr<JsiSkSVGFactory> getSVGFactory() { return _svgFactory; }
+  std::shared_ptr<JsiSkImageFactory> getImageFactory() {
+    return _imageFactory;
   }
-  JSI_PROPERTY_GET(Typeface) {
-    return makeJsiObject(runtime, _typefaceFactory);
+  std::shared_ptr<JsiSkAnimatedImageFactory> getAnimatedImageFactory() {
+    return _animatedImageFactory;
   }
-  JSI_PROPERTY_GET(Data) { return makeJsiObject(runtime, _dataFactory); }
-  JSI_PROPERTY_GET(ImageFilter) {
-    return makeJsiObject(runtime, _imageFilterFactory);
+  std::shared_ptr<JsiSkTypefaceFactory> getTypefaceFactory() {
+    return _typefaceFactory;
   }
-  JSI_PROPERTY_GET(PathEffect) {
-    return makeJsiObject(runtime, _pathEffectFactory);
+  std::shared_ptr<JsiSkDataFactory> getDataFactory() { return _dataFactory; }
+  std::shared_ptr<JsiSkImageFilterFactory> getImageFilterFactory() {
+    return _imageFilterFactory;
   }
-  JSI_PROPERTY_GET(Path) { return makeJsiObject(runtime, _pathFactory); }
-  JSI_PROPERTY_GET(PathBuilder) {
-    return makeJsiObject(runtime, _pathBuilderFactory);
+  std::shared_ptr<JsiSkPathEffectFactory> getPathEffectFactory() {
+    return _pathEffectFactory;
   }
-  JSI_PROPERTY_GET(ColorFilter) {
-    return makeJsiObject(runtime, _colorFilterFactory);
+  std::shared_ptr<JsiSkPathFactory> getPathFactory() { return _pathFactory; }
+  std::shared_ptr<JsiSkPathBuilderFactory> getPathBuilderFactory() {
+    return _pathBuilderFactory;
   }
-  JSI_PROPERTY_GET(MaskFilter) {
-    return makeJsiObject(runtime, _maskFilterFactory);
+  std::shared_ptr<JsiSkColorFilterFactory> getColorFilterFactory() {
+    return _colorFilterFactory;
   }
-  JSI_PROPERTY_GET(RuntimeEffect) {
-    return makeJsiObject(runtime, _runtimeEffectFactory);
+  std::shared_ptr<JsiSkMaskFilterFactory> getMaskFilterFactory() {
+    return _maskFilterFactory;
   }
-  JSI_PROPERTY_GET(Shader) { return makeJsiObject(runtime, _shaderFactory); }
-  JSI_PROPERTY_GET(TextBlob) {
-    return makeJsiObject(runtime, _textBlobFactory);
+  std::shared_ptr<JsiSkRuntimeEffectFactory> getRuntimeEffectFactory() {
+    return _runtimeEffectFactory;
   }
-  JSI_PROPERTY_GET(Surface) { return makeJsiObject(runtime, _surfaceFactory); }
-  JSI_PROPERTY_GET(Picture) { return makeJsiObject(runtime, _pictureFactory); }
-  JSI_PROPERTY_GET(FontMgr) { return makeJsiObject(runtime, _fontMgrFactory); }
-  JSI_PROPERTY_GET(Skottie) { return makeJsiObject(runtime, _skottieFactory); }
-  JSI_PROPERTY_GET(TypefaceFontProvider) {
-    return makeJsiObject(runtime, _typefaceFontProviderFactory);
+  std::shared_ptr<JsiSkShaderFactory> getShaderFactory() {
+    return _shaderFactory;
   }
-  JSI_PROPERTY_GET(ParagraphBuilder) {
-    return makeJsiObject(runtime, _paragraphBuilderFactory);
+  std::shared_ptr<JsiSkTextBlobFactory> getTextBlobFactory() {
+    return _textBlobFactory;
   }
-  JSI_PROPERTY_GET(NativeBuffer) {
-    return makeJsiObject(runtime, _nativeBufferFactory);
+  std::shared_ptr<JsiSkSurfaceFactory> getSurfaceFactory() {
+    return _surfaceFactory;
+  }
+  std::shared_ptr<JsiSkPictureFactory> getPictureFactory() {
+    return _pictureFactory;
+  }
+  std::shared_ptr<JsiSkFontMgrFactory> getFontMgrFactory() {
+    return _fontMgrFactory;
+  }
+  std::shared_ptr<JsiSkottieFactory> getSkottieFactory() {
+    return _skottieFactory;
+  }
+  std::shared_ptr<JsiSkTypefaceFontProviderFactory>
+  getTypefaceFontProviderFactory() {
+    return _typefaceFontProviderFactory;
+  }
+  std::shared_ptr<JsiSkParagraphBuilderFactory> getParagraphBuilderFactory() {
+    return _paragraphBuilderFactory;
+  }
+  std::shared_ptr<JsiNativeBufferFactory> getNativeBufferFactory() {
+    return _nativeBufferFactory;
   }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
@@ -274,39 +287,41 @@ public:
                       &JsiSkApi::PictureRecorder);
     installHostMethod(runtime, prototype, "Color", &JsiSkApi::Color);
     installHostMethod(runtime, prototype, "Recorder", &JsiSkApi::Recorder);
-    installHostMethod(runtime, prototype, "hasDevice", &JsiSkApi::hasDevice);
+    installMethod(runtime, prototype, "hasDevice", &JsiSkApi::hasDevice);
     installHostMethod(runtime, prototype, "getDevice", &JsiSkApi::getDevice);
-    installHostGetter(runtime, prototype, "SVG", &JsiSkApi::get_SVG);
-    installHostGetter(runtime, prototype, "Image", &JsiSkApi::get_Image);
-    installHostGetter(runtime, prototype, "AnimatedImage",
-                      &JsiSkApi::get_AnimatedImage);
-    installHostGetter(runtime, prototype, "Typeface", &JsiSkApi::get_Typeface);
-    installHostGetter(runtime, prototype, "Data", &JsiSkApi::get_Data);
-    installHostGetter(runtime, prototype, "ImageFilter",
-                      &JsiSkApi::get_ImageFilter);
-    installHostGetter(runtime, prototype, "PathEffect",
-                      &JsiSkApi::get_PathEffect);
-    installHostGetter(runtime, prototype, "Path", &JsiSkApi::get_Path);
-    installHostGetter(runtime, prototype, "PathBuilder",
-                      &JsiSkApi::get_PathBuilder);
-    installHostGetter(runtime, prototype, "ColorFilter",
-                      &JsiSkApi::get_ColorFilter);
-    installHostGetter(runtime, prototype, "MaskFilter",
-                      &JsiSkApi::get_MaskFilter);
-    installHostGetter(runtime, prototype, "RuntimeEffect",
-                      &JsiSkApi::get_RuntimeEffect);
-    installHostGetter(runtime, prototype, "Shader", &JsiSkApi::get_Shader);
-    installHostGetter(runtime, prototype, "TextBlob", &JsiSkApi::get_TextBlob);
-    installHostGetter(runtime, prototype, "Surface", &JsiSkApi::get_Surface);
-    installHostGetter(runtime, prototype, "Picture", &JsiSkApi::get_Picture);
-    installHostGetter(runtime, prototype, "FontMgr", &JsiSkApi::get_FontMgr);
-    installHostGetter(runtime, prototype, "Skottie", &JsiSkApi::get_Skottie);
-    installHostGetter(runtime, prototype, "TypefaceFontProvider",
-                      &JsiSkApi::get_TypefaceFontProvider);
-    installHostGetter(runtime, prototype, "ParagraphBuilder",
-                      &JsiSkApi::get_ParagraphBuilder);
-    installHostGetter(runtime, prototype, "NativeBuffer",
-                      &JsiSkApi::get_NativeBuffer);
+    installGetter(runtime, prototype, "SVG", &JsiSkApi::getSVGFactory);
+    installGetter(runtime, prototype, "Image", &JsiSkApi::getImageFactory);
+    installGetter(runtime, prototype, "AnimatedImage",
+                  &JsiSkApi::getAnimatedImageFactory);
+    installGetter(runtime, prototype, "Typeface",
+                  &JsiSkApi::getTypefaceFactory);
+    installGetter(runtime, prototype, "Data", &JsiSkApi::getDataFactory);
+    installGetter(runtime, prototype, "ImageFilter",
+                  &JsiSkApi::getImageFilterFactory);
+    installGetter(runtime, prototype, "PathEffect",
+                  &JsiSkApi::getPathEffectFactory);
+    installGetter(runtime, prototype, "Path", &JsiSkApi::getPathFactory);
+    installGetter(runtime, prototype, "PathBuilder",
+                  &JsiSkApi::getPathBuilderFactory);
+    installGetter(runtime, prototype, "ColorFilter",
+                  &JsiSkApi::getColorFilterFactory);
+    installGetter(runtime, prototype, "MaskFilter",
+                  &JsiSkApi::getMaskFilterFactory);
+    installGetter(runtime, prototype, "RuntimeEffect",
+                  &JsiSkApi::getRuntimeEffectFactory);
+    installGetter(runtime, prototype, "Shader", &JsiSkApi::getShaderFactory);
+    installGetter(runtime, prototype, "TextBlob",
+                  &JsiSkApi::getTextBlobFactory);
+    installGetter(runtime, prototype, "Surface", &JsiSkApi::getSurfaceFactory);
+    installGetter(runtime, prototype, "Picture", &JsiSkApi::getPictureFactory);
+    installGetter(runtime, prototype, "FontMgr", &JsiSkApi::getFontMgrFactory);
+    installGetter(runtime, prototype, "Skottie", &JsiSkApi::getSkottieFactory);
+    installGetter(runtime, prototype, "TypefaceFontProvider",
+                  &JsiSkApi::getTypefaceFontProviderFactory);
+    installGetter(runtime, prototype, "ParagraphBuilder",
+                  &JsiSkApi::getParagraphBuilderFactory);
+    installGetter(runtime, prototype, "NativeBuffer",
+                  &JsiSkApi::getNativeBufferFactory);
   }
 
 private:
