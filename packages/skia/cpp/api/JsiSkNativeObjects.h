@@ -11,11 +11,6 @@
 #include "rnskia/RNSkPlatformContext.h"
 #include "utils/RNSkLog.h"
 
-#define STR_CAT_NX(A, B) A##B
-#define STR_CAT(A, B) STR_CAT_NX(A, B)
-#define STR_GET get_
-#define STR_SET set_
-
 /**
  * Creates a new Host function declaration as a lambda with all deps passed
  * with implicit lambda capture clause
@@ -25,23 +20,15 @@
       const jsi::Value *arguments, size_t count) -> jsi::Value
 
 /**
- * Creates a new Host function declaration
+ * Creates a new Host function declaration. Only used for methods that cannot
+ * be expressed as typed signatures (heterogeneous argument dispatch, typed
+ * array construction, lenient options objects, promises) — everything else
+ * uses installMethod/installGetter/installChainableMethod with typed C++
+ * signatures converted through rnwgpu::JSIConverter.
  */
 #define JSI_HOST_FUNCTION(NAME)                                                \
   jsi::Value NAME(jsi::Runtime &runtime, const jsi::Value &thisValue,          \
                   const jsi::Value *arguments, size_t count)
-
-/**
- * Creates a new property setter function declaration
- */
-#define JSI_PROPERTY_SET(NAME)                                                 \
-  void STR_CAT(STR_SET, NAME)(jsi::Runtime & runtime, const jsi::Value &value)
-
-/**
- * Creates a new property getter function declaration
- */
-#define JSI_PROPERTY_GET(NAME)                                                 \
-  jsi::Value STR_CAT(STR_GET, NAME)(jsi::Runtime & runtime)
 
 namespace RNSkia {
 
@@ -113,10 +100,12 @@ std::shared_ptr<T> getJsiObject(jsi::Runtime &runtime,
  *   NativeObject::installPrototype; wrapping classes additionally call
  *   `installCommon(runtime, proto)` to install dispose().
  *
- * The existing JSI_HOST_FUNCTION / JSI_PROPERTY_GET / JSI_PROPERTY_SET method
- * bodies keep working unchanged; they are installed on the prototype with the
- * installHostMethod / installHostGetter / installHostSetter helpers below,
- * which resolve the C++ instance from `this` via native state.
+ * Most methods use typed C++ signatures installed with installMethod /
+ * installGetter / installChainableMethod (arguments and results converted
+ * through rnwgpu::JSIConverter, see JsiSkConverters.h). Methods that cannot
+ * be typed keep the classic JSI_HOST_FUNCTION signature and are installed
+ * with installHostMethod, which resolves the C++ instance from `this` via
+ * native state.
  */
 template <typename Derived>
 class JsiSkNativeObject : public rnwgpu::NativeObject<Derived> {
@@ -213,8 +202,6 @@ protected:
 
   using HostMethod = jsi::Value (Derived::*)(jsi::Runtime &, const jsi::Value &,
                                              const jsi::Value *, size_t);
-  using HostGetter = jsi::Value (Derived::*)(jsi::Runtime &);
-  using HostSetter = void (Derived::*)(jsi::Runtime &, const jsi::Value &);
 
   /**
    * Installs a method with the classic host-function signature
@@ -230,54 +217,6 @@ protected:
           return ((*native).*method)(rt, thisValue, arguments, count);
         });
     prototype.setProperty(runtime, name, func);
-  }
-
-  /**
-   * Installs a property getter with the classic JSI_PROPERTY_GET signature on
-   * the prototype.
-   */
-  static void installHostGetter(jsi::Runtime &runtime, jsi::Object &prototype,
-                                const char *name, HostGetter getter) {
-    auto getterFunc = jsi::Function::createFromHostFunction(
-        runtime, jsi::PropNameID::forUtf8(runtime, std::string("get_") + name),
-        0,
-        [getter](jsi::Runtime &rt, const jsi::Value &thisValue,
-                 const jsi::Value *, size_t) -> jsi::Value {
-          auto native = fromThis(rt, thisValue);
-          return ((*native).*getter)(rt);
-        });
-    defineProperty(runtime, prototype, name, &getterFunc, nullptr);
-  }
-
-  /**
-   * Installs a property setter with the classic JSI_PROPERTY_SET signature on
-   * the prototype, preserving a previously installed getter.
-   */
-  static void installHostSetter(jsi::Runtime &runtime, jsi::Object &prototype,
-                                const char *name, HostSetter setter) {
-    auto setterFunc = jsi::Function::createFromHostFunction(
-        runtime, jsi::PropNameID::forUtf8(runtime, std::string("set_") + name),
-        1,
-        [setter](jsi::Runtime &rt, const jsi::Value &thisValue,
-                 const jsi::Value *arguments, size_t count) -> jsi::Value {
-          if (count < 1) {
-            throw jsi::JSError(rt, "Setter requires a value argument");
-          }
-          auto native = fromThis(rt, thisValue);
-          ((*native).*setter)(rt, arguments[0]);
-          return jsi::Value::undefined();
-        });
-    defineProperty(runtime, prototype, name, nullptr, &setterFunc);
-  }
-
-  /**
-   * Installs both getter and setter for a property on the prototype.
-   */
-  static void installHostProperty(jsi::Runtime &runtime, jsi::Object &prototype,
-                                  const char *name, HostGetter getter,
-                                  HostSetter setter) {
-    installHostGetter(runtime, prototype, name, getter);
-    installHostSetter(runtime, prototype, name, setter);
   }
 
   /**
@@ -343,41 +282,6 @@ private:
     (obj->*method)(runtime,
                    rnwgpu::JSIConverter<std::decay_t<Args>>::fromJSI(
                        runtime, args[Is], Is >= count)...);
-  }
-
-  static void defineProperty(jsi::Runtime &runtime, jsi::Object &prototype,
-                             const char *name, jsi::Function *getter,
-                             jsi::Function *setter) {
-    auto objectCtor = runtime.global().getPropertyAsObject(runtime, "Object");
-    auto defineProp =
-        objectCtor.getPropertyAsFunction(runtime, "defineProperty");
-    auto getOwnPropertyDescriptor =
-        objectCtor.getPropertyAsFunction(runtime, "getOwnPropertyDescriptor");
-    auto existing = getOwnPropertyDescriptor.call(
-        runtime, prototype, jsi::String::createFromUtf8(runtime, name));
-
-    jsi::Object descriptor(runtime);
-    if (existing.isObject()) {
-      auto existingObj = existing.getObject(runtime);
-      if (existingObj.hasProperty(runtime, "get")) {
-        descriptor.setProperty(runtime, "get",
-                               existingObj.getProperty(runtime, "get"));
-      }
-      if (existingObj.hasProperty(runtime, "set")) {
-        descriptor.setProperty(runtime, "set",
-                               existingObj.getProperty(runtime, "set"));
-      }
-    }
-    if (getter != nullptr) {
-      descriptor.setProperty(runtime, "get", *getter);
-    }
-    if (setter != nullptr) {
-      descriptor.setProperty(runtime, "set", *setter);
-    }
-    descriptor.setProperty(runtime, "enumerable", true);
-    descriptor.setProperty(runtime, "configurable", true);
-    defineProp.call(runtime, prototype,
-                    jsi::String::createFromUtf8(runtime, name), descriptor);
   }
 
   std::shared_ptr<RNSkPlatformContext> _context;
