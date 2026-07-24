@@ -260,29 +260,12 @@ struct JSIConverter<std::variant<std::nullptr_t, sk_sp<T>>,
  */
 template <typename T>
 struct JSIConverter<T, std::enable_if_t<std::is_same_v<T, SkRect> ||
+                                        std::is_same_v<T, SkPoint> ||
                                         std::is_same_v<T, SkMatrix> ||
                                         std::is_same_v<T, SkRSXform>>> {
   static T fromJSI(jsi::Runtime &runtime, const jsi::Value &arg,
                    bool outOfBound) {
     return *RNSkia::JsiSkWrapperFor_t<T>::fromValue(runtime, arg);
-  }
-};
-
-// SkPoint additionally converts back to a plain {x, y} object — this is what
-// the raw bindings returned for point results (e.g. getLastPt), NOT a Point
-// wrapper. Methods that should return a wrapper use
-// std::shared_ptr<JsiSkPoint> instead.
-template <typename T>
-struct JSIConverter<T, std::enable_if_t<std::is_same_v<T, SkPoint>>> {
-  static T fromJSI(jsi::Runtime &runtime, const jsi::Value &arg,
-                   bool outOfBound) {
-    return *RNSkia::JsiSkWrapperFor_t<T>::fromValue(runtime, arg);
-  }
-  static jsi::Value toJSI(jsi::Runtime &runtime, const T &point) {
-    jsi::Object result(runtime);
-    result.setProperty(runtime, "x", static_cast<double>(point.x()));
-    result.setProperty(runtime, "y", static_cast<double>(point.y()));
-    return result;
   }
 };
 
