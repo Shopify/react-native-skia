@@ -69,6 +69,17 @@ describe("materializeCommand", () => {
     expect(props.cx).toBe(5);
     expect(props.cy).toBe(8);
   });
+
+  it("does not crash when the grouped value is null", () => {
+    const sv = makeSharedValue<{ x: number }>(null as unknown as { x: number });
+    const command = {
+      type: CommandType.DrawCircle,
+      props: { cx: 0 },
+      animatedProps: { cx: select(sv, "x") },
+    };
+    expect(() => materializeCommand(command)).not.toThrow();
+    expect(materializeCommand(command).props.cx).toBeUndefined();
+  });
 });
 
 describe("Recorder selector collection (web path)", () => {

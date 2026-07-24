@@ -82,8 +82,11 @@ export const materializeCommand = (command: any) => {
     for (const key in command.animatedProps) {
       const entry = command.animatedProps[key];
       if (isSharedValueSelector(entry)) {
-        const group = entry.__sv.value as Record<string, unknown>;
-        newProps[key] = group[entry.__key];
+        const group = entry.__sv.value;
+        newProps[key] =
+          group && typeof group === "object"
+            ? (group as Record<string, unknown>)[entry.__key]
+            : undefined;
       } else {
         newProps[key] = entry.value;
       }
