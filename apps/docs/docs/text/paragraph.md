@@ -380,8 +380,8 @@ These properties are used to style specific segments of text within a paragraph.
 | `fontStyle`           | Font style (weight, width, slant).                                                  |
 | `fontVariations`      | Font variations.                                                                    |
 | `foregroundColor`     | Foreground color (for effects like gradients).                                      |
-| `heightMultiplier`    | Multiplier for line height.                                                         |
-| `halfLeading`         | Controls half-leading value.                                                        |
+| `heightMultiplier`    | Line height as a multiple of the font size (see [Line Height](#line-height)).       |
+| `halfLeading`         | Distributes the extra line height evenly above and below the text.                  |
 | `letterSpacing`       | Space between characters.                                                           |
 | `locale`              | Locale for the text (affects things like sorting).                                  |
 | `shadows`             | List of text shadows.                                                               |
@@ -437,3 +437,66 @@ const MyParagraph = () => {
 #### Result
 
 <img src={require("/static/img/paragraph/font-style-node.png").default} width="256" height="256" />
+
+## Line Height
+
+Skia has no absolute `lineHeight` property like CSS or React Native.
+Instead, the text style has a `heightMultiplier` property: the line height is exactly `heightMultiplier * fontSize` pixels.
+This means you can emulate `lineHeight` with the following formula:
+
+```tsx
+heightMultiplier = lineHeight / fontSize
+```
+
+For instance, `fontSize: 24` with `heightMultiplier: 40 / 24` produces lines that are exactly 40 pixels tall.
+When `heightMultiplier` is not set, the line height comes from the font metrics (ascent + descent), which is usually larger than the font size and differs from font to font.
+
+Since `heightMultiplier` is a text style property, it can also be used to normalize line heights when mixing fonts or font sizes: give each style a `heightMultiplier` of `lineHeight / fontSize` and every line will have the same height, regardless of the natural metrics of each font.
+
+```tsx twoslash
+import { useMemo } from "react";
+import { Paragraph, Skia, useFonts, Canvas } from "@shopify/react-native-skia";
+
+const MyParagraph = () => {
+  const customFontMgr = useFonts({
+    Roboto: [require("path/to/Roboto-Regular.ttf")],
+    "Noto Sans SC": [require("path/to/NotoSansSC-Regular.otf")],
+  });
+
+  const paragraph = useMemo(() => {
+    if (!customFontMgr) {
+      return null;
+    }
+    // Every line will be exactly 40px tall, like lineHeight: 40 in CSS
+    const lineHeight = 40;
+    const paragraphBuilder = Skia.ParagraphBuilder.Make({}, customFontMgr);
+    paragraphBuilder
+      .pushStyle({
+        color: Skia.Color("black"),
+        fontFamilies: ["Roboto"],
+        fontSize: 24,
+        heightMultiplier: lineHeight / 24,
+      })
+      .addText("Hello\n")
+      .pop()
+      .pushStyle({
+        color: Skia.Color("black"),
+        fontFamilies: ["Noto Sans SC"],
+        fontSize: 16,
+        heightMultiplier: lineHeight / 16,
+      })
+      .addText("你好")
+      .pop();
+    return paragraphBuilder.build();
+  }, [customFontMgr]);
+
+  return (
+    <Canvas style={{ width: 256, height: 256 }}>
+      <Paragraph paragraph={paragraph} x={0} y={0} width={256} />
+    </Canvas>
+  );
+};
+```
+
+By default, the extra space added by `heightMultiplier` is distributed proportionally to the font's ascent and descent.
+Setting `halfLeading: true` splits the extra space evenly above and below the text instead (like CSS half-leading); the line height stays the same but the text sits higher within the line.

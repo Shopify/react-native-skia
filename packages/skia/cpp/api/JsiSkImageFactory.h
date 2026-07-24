@@ -2,14 +2,16 @@
 
 #include <memory>
 #include <utility>
+#include <variant>
 
 #include <jsi/jsi.h>
 
-#include "jsi/JsiPromises.h"
+#include "JsiSkConverters.h"
 #include "JsiSkData.h"
-#include "JsiSkHostObjects.h"
 #include "JsiSkImage.h"
 #include "JsiSkImageInfo.h"
+#include "JsiSkNativeObjects.h"
+#include "jsi/JsiPromises.h"
 
 #ifdef SK_GRAPHITE
 #include "rnskia/RNDawnContext.h"
@@ -20,53 +22,39 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-class JsiSkImageFactory : public JsiSkHostObject {
+class JsiSkImageFactory : public JsiSkNativeObject<JsiSkImageFactory> {
 public:
-  JSI_HOST_FUNCTION(MakeNull) {
-    auto hostObjectInstance =
-        std::make_shared<JsiSkImage>(getContext(), nullptr);
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+  static constexpr const char *CLASS_NAME = "ImageFactory";
+
+  std::shared_ptr<JsiSkImage> MakeNull() {
+    return std::make_shared<JsiSkImage>(getContext(), nullptr);
   }
 
-  JSI_HOST_FUNCTION(MakeImageFromEncoded) {
-    auto data = JsiSkData::fromValue(runtime, arguments[0]);
+  std::variant<std::nullptr_t, std::shared_ptr<JsiSkImage>>
+  MakeImageFromEncoded(sk_sp<SkData> data) {
     auto image = SkImages::DeferredFromEncodedData(data);
     if (image == nullptr) {
-      return jsi::Value::null();
+      return nullptr;
     }
-    auto hostObjectInstance =
-        std::make_shared<JsiSkImage>(getContext(), std::move(image));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return std::make_shared<JsiSkImage>(getContext(), std::move(image));
   }
 
-  JSI_HOST_FUNCTION(MakeImageFromNativeBuffer) {
-    jsi::BigInt pointer = arguments[0].asBigInt(runtime);
-    const uintptr_t nativeBufferPointer = pointer.asUint64(runtime);
-    void *rawPointer = reinterpret_cast<void *>(nativeBufferPointer);
+  std::shared_ptr<JsiSkImage> MakeImageFromNativeBuffer(void *rawPointer) {
     auto image = getContext()->makeImageFromNativeBuffer(rawPointer);
     if (image == nullptr) {
       throw std::runtime_error("Failed to convert NativeBuffer to SkImage!");
     }
-    auto hostObjectInstance =
-        std::make_shared<JsiSkImage>(getContext(), std::move(image));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return std::make_shared<JsiSkImage>(getContext(), std::move(image));
   }
 
-  JSI_HOST_FUNCTION(MakeImage) {
-    auto imageInfo = JsiSkImageInfo::fromValue(runtime, arguments[0]);
-    auto pixelData = JsiSkData::fromValue(runtime, arguments[1]);
-    auto bytesPerRow = arguments[2].asNumber();
+  std::variant<std::nullptr_t, std::shared_ptr<JsiSkImage>>
+  MakeImage(std::shared_ptr<SkImageInfo> imageInfo, sk_sp<SkData> pixelData,
+            double bytesPerRow) {
     auto image = SkImages::RasterFromData(*imageInfo, pixelData, bytesPerRow);
     if (image == nullptr) {
-      return jsi::Value::null();
+      return nullptr;
     }
-    auto hostObjectInstance =
-        std::make_shared<JsiSkImage>(getContext(), std::move(image));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return std::make_shared<JsiSkImage>(getContext(), std::move(image));
   }
 
   JSI_HOST_FUNCTION(MakeImageFromViewTag) {
@@ -88,10 +76,9 @@ public:
                     promise->reject("Failed to create image from view tag");
                     return;
                   }
-                  auto hostObjectInstance =
-                      std::make_shared<JsiSkImage>(context, std::move(result));
-                  promise->resolve(JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-                      runtime, hostObjectInstance, context));
+                  promise->resolve(
+                      makeJsiObject(runtime, std::make_shared<JsiSkImage>(
+                                                 context, std::move(result))));
                 });
               });
         });
@@ -105,17 +92,15 @@ public:
     if (image == nullptr) {
       throw std::runtime_error("Failed to convert native texture to SkImage!");
     }
-    if (count > 4 && arguments[4].isObject() &&
-        arguments[4].asObject(runtime).isHostObject(runtime)) {
-      auto jsiImage =
-          arguments[4].asObject(runtime).asHostObject<JsiSkImage>(runtime);
-      jsiImage->setObject(image);
-      return jsi::Value(runtime, arguments[4]);
+    if (count > 4) {
+      auto jsiImage = tryGetJsiObject<JsiSkImage>(runtime, arguments[4]);
+      if (jsiImage) {
+        jsiImage->setObject(image);
+        return jsi::Value(runtime, arguments[4]);
+      }
     }
-    auto hostObjectInstance =
-        std::make_shared<JsiSkImage>(getContext(), std::move(image));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(
+        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
   }
 
   JSI_HOST_FUNCTION(MakeImageFromTexture) {
@@ -141,10 +126,8 @@ public:
     if (image == nullptr) {
       throw std::runtime_error("Failed to create SkImage from GPUTexture!");
     }
-    auto hostObjectInstance =
-        std::make_shared<JsiSkImage>(getContext(), std::move(image));
-    return JSI_CREATE_HOST_OBJECT_WITH_MEMORY_PRESSURE(
-        runtime, hostObjectInstance, getContext());
+    return makeJsiObject(
+        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
 #else
     throw std::runtime_error(
         "MakeImageFromTexture is only available with the Graphite backend. "
@@ -179,23 +162,28 @@ public:
 #endif
   }
 
-  size_t getMemoryPressure() const override { return 1024; }
+  size_t getMemoryPressure() override { return 1024; }
 
-  std::string getObjectType() const override { return "JsiSkImageFactory"; }
-
-  JSI_EXPORT_FUNCTIONS(JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromEncoded),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromViewTag),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory,
-                                       MakeImageFromNativeBuffer),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory,
-                                       MakeImageFromNativeTextureUnstable),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImage),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeNull),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeImageFromTexture),
-                       JSI_EXPORT_FUNC(JsiSkImageFactory, MakeTextureFromImage))
+  static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installMethod(runtime, prototype, "MakeImageFromEncoded",
+                  &JsiSkImageFactory::MakeImageFromEncoded);
+    installHostMethod(runtime, prototype, "MakeImageFromViewTag",
+                      &JsiSkImageFactory::MakeImageFromViewTag);
+    installMethod(runtime, prototype, "MakeImageFromNativeBuffer",
+                  &JsiSkImageFactory::MakeImageFromNativeBuffer);
+    installHostMethod(runtime, prototype, "MakeImageFromNativeTextureUnstable",
+                      &JsiSkImageFactory::MakeImageFromNativeTextureUnstable);
+    installMethod(runtime, prototype, "MakeImage",
+                  &JsiSkImageFactory::MakeImage);
+    installMethod(runtime, prototype, "MakeNull", &JsiSkImageFactory::MakeNull);
+    installHostMethod(runtime, prototype, "MakeImageFromTexture",
+                      &JsiSkImageFactory::MakeImageFromTexture);
+    installHostMethod(runtime, prototype, "MakeTextureFromImage",
+                      &JsiSkImageFactory::MakeTextureFromImage);
+  }
 
   explicit JsiSkImageFactory(std::shared_ptr<RNSkPlatformContext> context)
-      : JsiSkHostObject(std::move(context)) {}
+      : JsiSkNativeObject<JsiSkImageFactory>(std::move(context)) {}
 };
 
 } // namespace RNSkia

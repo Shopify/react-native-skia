@@ -7,8 +7,8 @@
 
 #include "webgpu/webgpu_cpp.h"
 
+#include "jsi/JSIConverter.h"
 #include "rnwgpu/api/Convertors.h"
-#include "jsi2/JSIConverter.h"
 
 #include "rnwgpu/api/GPUOrigin2D.h"
 #include "rnwgpu/api/ImageBitmap.h"

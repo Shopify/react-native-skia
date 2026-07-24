@@ -13,7 +13,7 @@
 
 #include "descriptors/Unions.h"
 
-#include "jsi2/NativeObject.h"
+#include "jsi/NativeObject.h"
 
 #include "rnwgpu/async/AsyncTaskHandle.h"
 #include "rnwgpu/async/RuntimeContext.h"
@@ -141,8 +141,10 @@ public:
   std::shared_ptr<GPURenderPipeline>
   createRenderPipeline(std::shared_ptr<GPURenderPipelineDescriptor> descriptor);
   async::AsyncTaskHandle createComputePipelineAsync(
+      jsi::Runtime &runtime,
       std::shared_ptr<GPUComputePipelineDescriptor> descriptor);
   async::AsyncTaskHandle createRenderPipelineAsync(
+      jsi::Runtime &runtime,
       std::shared_ptr<GPURenderPipelineDescriptor> descriptor);
   std::shared_ptr<GPUCommandEncoder> createCommandEncoder(
       std::optional<std::shared_ptr<GPUCommandEncoderDescriptor>> descriptor);
@@ -151,7 +153,7 @@ public:
   std::shared_ptr<GPUQuerySet>
   createQuerySet(std::shared_ptr<GPUQuerySetDescriptor> descriptor);
   void pushErrorScope(wgpu::ErrorFilter filter);
-  async::AsyncTaskHandle popErrorScope();
+  async::AsyncTaskHandle popErrorScope(jsi::Runtime &runtime);
 
   std::unordered_set<std::string> getFeatures();
   std::shared_ptr<GPUSupportedLimits> getLimits();
@@ -197,10 +199,10 @@ public:
                   &GPUDevice::createComputePipeline);
     installMethod(runtime, prototype, "createRenderPipeline",
                   &GPUDevice::createRenderPipeline);
-    installMethod(runtime, prototype, "createComputePipelineAsync",
-                  &GPUDevice::createComputePipelineAsync);
-    installMethod(runtime, prototype, "createRenderPipelineAsync",
-                  &GPUDevice::createRenderPipelineAsync);
+    installMethodWithRuntime(runtime, prototype, "createComputePipelineAsync",
+                             &GPUDevice::createComputePipelineAsync);
+    installMethodWithRuntime(runtime, prototype, "createRenderPipelineAsync",
+                             &GPUDevice::createRenderPipelineAsync);
     installMethod(runtime, prototype, "createCommandEncoder",
                   &GPUDevice::createCommandEncoder);
     installMethod(runtime, prototype, "createRenderBundleEncoder",
@@ -209,8 +211,8 @@ public:
                   &GPUDevice::createQuerySet);
     installMethod(runtime, prototype, "pushErrorScope",
                   &GPUDevice::pushErrorScope);
-    installMethod(runtime, prototype, "popErrorScope",
-                  &GPUDevice::popErrorScope);
+    installMethodWithRuntime(runtime, prototype, "popErrorScope",
+                             &GPUDevice::popErrorScope);
     installGetter(runtime, prototype, "features", &GPUDevice::getFeatures);
     installGetter(runtime, prototype, "limits", &GPUDevice::getLimits);
     installGetter(runtime, prototype, "queue", &GPUDevice::getQueue);
@@ -238,8 +240,8 @@ private:
   std::shared_ptr<async::RuntimeContext> _async;
   std::string _label;
   // Guards the device-lost state below. In the ProcessEvents model both
-  // notifyDeviceLost() (fired by Dawn during ProcessEvents) and getLost() run on
-  // the owning runtime's own thread, but device destruction can also trigger
+  // notifyDeviceLost() (fired by Dawn during ProcessEvents) and getLost() run
+  // on the owning runtime's own thread, but device destruction can also trigger
   // notifyDeviceLost() synchronously, so the mutex keeps these fields safe.
   std::mutex _lostMutex;
   std::optional<async::AsyncTaskHandle> _lostHandle;

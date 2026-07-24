@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "jsi2/NativeObject.h"
+#include "jsi/NativeObject.h"
 
 namespace rnwgpu {
 
@@ -10,7 +10,9 @@ namespace jsi = facebook::jsi;
 
 class Canvas : public NativeObject<Canvas> {
 public:
-  static constexpr const char *CLASS_NAME = "Canvas";
+  // Note: not "Canvas" — that brand belongs to RNSkia::JsiSkCanvas, and
+  // boxing brands must be unique process-wide (see BoxedNativeObjectRegistry).
+  static constexpr const char *CLASS_NAME = "WebGPUCanvas";
 
   Canvas(void *nativeSurface, int width, int height)
       : NativeObject(CLASS_NAME), _nativeSurface(nativeSurface), _width(width),

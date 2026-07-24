@@ -2,7 +2,9 @@
 
 #include <jsi/jsi.h>
 
+#include <atomic>
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 #include <utility>
 
@@ -14,17 +16,21 @@ namespace jsi = facebook::jsi;
 
 class BaseRuntimeAwareCache {
 public:
-  static void setMainJsRuntime(jsi::Runtime *rt) { _mainRuntime = rt; }
+  static void setMainJsRuntime(jsi::Runtime *rt) {
+    // Atomic: hot reload rewrites this from the JS thread while worklet
+    // runtime threads read it concurrently.
+    _mainRuntime.store(rt, std::memory_order_release);
+  }
   static jsi::Runtime *getMainJsRuntime() {
-    assert(_mainRuntime != nullptr &&
-           "Expected main Javascript runtime to be set in the "
-           "BaseRuntimeAwareCache class.");
+    auto *rt = _mainRuntime.load(std::memory_order_acquire);
+    assert(rt != nullptr && "Expected main Javascript runtime to be set in the "
+                            "BaseRuntimeAwareCache class.");
 
-    return _mainRuntime;
+    return rt;
   }
 
 private:
-  static jsi::Runtime *_mainRuntime;
+  static std::atomic<jsi::Runtime *> _mainRuntime;
 };
 
 /**
@@ -55,7 +61,10 @@ class RuntimeAwareCache : public BaseRuntimeAwareCache,
 public:
   void onRuntimeDestroyed(jsi::Runtime *rt) override {
     if (getMainJsRuntime() != rt) {
-      // We are removing a secondary runtime
+      // We are removing a secondary runtime. This is invoked by
+      // RuntimeLifecycleMonitor on the destroyed runtime's thread, which may
+      // run concurrently with get() on another runtime's thread.
+      std::lock_guard<std::mutex> lock(_secondaryCachesMutex);
       _secondaryRuntimeCaches.erase(rt);
     }
   }
@@ -74,6 +83,14 @@ public:
     if (getMainJsRuntime() == &rt) {
       return _primaryCache;
     } else {
+      // Guard the secondary map: it can be mutated concurrently by get()
+      // on a worklet runtime's thread and by onRuntimeDestroyed() when
+      // another secondary runtime is torn down. The main-runtime path above
+      // stays lock-free. References into the map remain valid after the
+      // lock is released (unordered_map never invalidates references on
+      // insert/erase of other keys, and this runtime's entry can only be
+      // erased from this runtime's own thread).
+      std::lock_guard<std::mutex> lock(_secondaryCachesMutex);
       if (_secondaryRuntimeCaches.count(&rt) == 0) {
         // we only add listener when the secondary runtime is used, this assumes
         // that the secondary runtime is terminated first. This lets us avoid
@@ -87,11 +104,12 @@ public:
         T cache;
         _secondaryRuntimeCaches.emplace(&rt, std::move(cache));
       }
+      return _secondaryRuntimeCaches.at(&rt);
     }
-    return _secondaryRuntimeCaches.at(&rt);
   }
 
 private:
+  std::mutex _secondaryCachesMutex;
   std::unordered_map<void *, T> _secondaryRuntimeCaches;
   T _primaryCache;
 };

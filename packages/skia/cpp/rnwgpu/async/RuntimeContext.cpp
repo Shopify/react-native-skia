@@ -39,6 +39,11 @@ void RuntimeContext::registerMainRuntime(
   sMainInvoker = std::move(invoker);
 }
 
+std::shared_ptr<facebook::react::CallInvoker>
+RuntimeContext::mainCallInvoker() {
+  return sMainInvoker;
+}
+
 RuntimeContext::RuntimeContext(jsi::Runtime &runtime, wgpu::Instance instance)
     : _runtime(runtime), _instance(std::move(instance)) {}
 

@@ -53,6 +53,6 @@ public class WebGPUViewManager extends ReactViewManager implements SkiaWebGPUVie
   @Override
   public void onDropViewInstance(@NonNull ReactViewGroup view) {
     super.onDropViewInstance(view);
-    ((WebGPUView) view).surfaceDestroyed();
+    ((WebGPUView) view).destroy();
   }
 }

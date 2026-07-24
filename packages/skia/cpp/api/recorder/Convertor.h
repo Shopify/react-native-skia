@@ -442,8 +442,7 @@ SkSamplingOptions getPropertyValue(jsi::Runtime &runtime,
 template <>
 SkFont getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isObject()) {
-    auto font =
-        value.asObject(runtime).asHostObject<JsiSkFont>(runtime)->getObject();
+    auto font = getJsiObject<JsiSkFont>(runtime, value)->getObject();
     return SkFont(*font);
   }
   throw std::runtime_error("Invalid prop value for SkFont received");
@@ -475,9 +474,7 @@ GlyphData getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 template <>
 SkRSXform getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isObject()) {
-    auto form = value.asObject(runtime)
-                    .asHostObject<JsiSkRSXform>(runtime)
-                    ->getObject();
+    auto form = getJsiObject<JsiSkRSXform>(runtime, value)->getObject();
     return SkRSXform::Make(form->fSCos, form->fSSin, form->fTx, form->fTy);
   }
   throw std::runtime_error("Invalid prop value for SkRSXform received");
@@ -486,13 +483,11 @@ SkRSXform getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 template <>
 sk_sp<SkSVGDOM> getPropertyValue(jsi::Runtime &runtime,
                                  const jsi::Value &value) {
-  if (value.isObject() && value.asObject(runtime).isHostObject(runtime)) {
-    auto ptr = std::dynamic_pointer_cast<JsiSkSVG>(
-        value.asObject(runtime).asHostObject(runtime));
-    if (ptr != nullptr) {
-      return ptr->getObject();
-    }
-  } else if (value.isNull()) {
+  auto ptr = tryGetJsiObject<JsiSkSVG>(runtime, value);
+  if (ptr != nullptr) {
+    return ptr->getObject();
+  }
+  if (value.isNull()) {
     return nullptr;
   }
   throw std::runtime_error(
@@ -502,13 +497,11 @@ sk_sp<SkSVGDOM> getPropertyValue(jsi::Runtime &runtime,
 template <>
 sk_sp<skottie::Animation> getPropertyValue(jsi::Runtime &runtime,
                                            const jsi::Value &value) {
-  if (value.isObject() && value.asObject(runtime).isHostObject(runtime)) {
-    auto ptr = std::dynamic_pointer_cast<JsiSkSkottie>(
-        value.asObject(runtime).asHostObject(runtime));
-    if (ptr != nullptr) {
-      return ptr->getObject()->_animation;
-    }
-  } else if (value.isNull()) {
+  auto ptr = tryGetJsiObject<JsiSkSkottie>(runtime, value);
+  if (ptr != nullptr) {
+    return ptr->getObject()->_animation;
+  }
+  if (value.isNull()) {
     return nullptr;
   }
   throw std::runtime_error(
@@ -518,13 +511,11 @@ sk_sp<skottie::Animation> getPropertyValue(jsi::Runtime &runtime,
 template <>
 sk_sp<SkImageFilter> getPropertyValue(jsi::Runtime &runtime,
                                       const jsi::Value &value) {
-  if (value.isObject() && value.asObject(runtime).isHostObject(runtime)) {
-    auto ptr = std::dynamic_pointer_cast<JsiSkImageFilter>(
-        value.asObject(runtime).asHostObject(runtime));
-    if (ptr != nullptr) {
-      return ptr->getObject();
-    }
-  } else if (value.isNull()) {
+  auto ptr = tryGetJsiObject<JsiSkImageFilter>(runtime, value);
+  if (ptr != nullptr) {
+    return ptr->getObject();
+  }
+  if (value.isNull()) {
     return nullptr;
   }
   throw std::runtime_error(
@@ -535,9 +526,7 @@ template <>
 sk_sp<SkPicture> getPropertyValue(jsi::Runtime &runtime,
                                   const jsi::Value &value) {
   if (value.isObject()) {
-    auto picture = value.asObject(runtime)
-                       .asHostObject<JsiSkPicture>(runtime)
-                       ->getObject();
+    auto picture = getJsiObject<JsiSkPicture>(runtime, value)->getObject();
     return picture;
   }
   throw std::runtime_error("Invalid prop value for SkTextBlob received");
@@ -546,8 +535,7 @@ sk_sp<SkPicture> getPropertyValue(jsi::Runtime &runtime,
 template <>
 SkPaint getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isObject()) {
-    auto paint =
-        value.asObject(runtime).asHostObject<JsiSkPaint>(runtime)->getObject();
+    auto paint = getJsiObject<JsiSkPaint>(runtime, value)->getObject();
     return SkPaint(*paint);
   }
   throw std::runtime_error("Invalid prop value for SkPaint received");
@@ -556,28 +544,15 @@ SkPaint getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
 template <>
 std::shared_ptr<JsiSkParagraph> getPropertyValue(jsi::Runtime &runtime,
                                                  const jsi::Value &value) {
-  if (value.isObject()) {
-    auto hostObject = value.asObject(runtime).asHostObject(runtime);
-    if (!hostObject) {
-      return nullptr;
-    }
-    auto para = std::dynamic_pointer_cast<JsiSkParagraph>(hostObject);
-    if (!para) {
-      return nullptr;
-    }
-    // Return a shared_ptr instead of raw pointer
-    return para;
-  }
-  return nullptr;
+  // Return a shared_ptr instead of raw pointer
+  return tryGetJsiObject<JsiSkParagraph>(runtime, value);
 }
 
 template <>
 sk_sp<SkTextBlob> getPropertyValue(jsi::Runtime &runtime,
                                    const jsi::Value &value) {
   if (value.isObject()) {
-    auto blob = value.asObject(runtime)
-                    .asHostObject<JsiSkTextBlob>(runtime)
-                    ->getObject();
+    auto blob = getJsiObject<JsiSkTextBlob>(runtime, value)->getObject();
     return blob;
   }
   throw std::runtime_error("Invalid prop value for SkTextBlob received");
@@ -587,9 +562,7 @@ template <>
 sk_sp<SkRuntimeEffect> getPropertyValue(jsi::Runtime &runtime,
                                         const jsi::Value &value) {
   if (value.isObject()) {
-    auto effect = value.asObject(runtime)
-                      .asHostObject<JsiSkRuntimeEffect>(runtime)
-                      ->getObject();
+    auto effect = getJsiObject<JsiSkRuntimeEffect>(runtime, value)->getObject();
     return effect;
   }
   throw std::runtime_error("Invalid prop value for SkRuntimeEffect received");
@@ -600,8 +573,7 @@ sk_sp<SkImage> getPropertyValue(jsi::Runtime &runtime,
                                 const jsi::Value &value) {
 
   if (value.isObject()) {
-    auto effect =
-        value.asObject(runtime).asHostObject<JsiSkImage>(runtime)->getObject();
+    auto effect = getJsiObject<JsiSkImage>(runtime, value)->getObject();
     return effect;
   } else if (value.isNull()) {
     return nullptr;
@@ -612,11 +584,9 @@ sk_sp<SkImage> getPropertyValue(jsi::Runtime &runtime,
 template <>
 SkMatrix getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isObject()) {
-    auto object = value.asObject(runtime);
-
-    if (object.isHostObject(runtime)) {
-      auto matrix =
-          object.asHostObject<JsiSkMatrix>(runtime)->getObject().get();
+    auto ptr = tryGetJsiObject<JsiSkMatrix>(runtime, value);
+    if (ptr != nullptr) {
+      auto matrix = ptr->getObject().get();
       return SkMatrix(*matrix);
     } else {
       return JsiSkMatrix::getMatrix(runtime, value);
@@ -1056,10 +1026,10 @@ Layer getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value) {
   if (value.isBool()) {
     Layer layer = value.asBool();
     return layer;
-  } else if (value.isObject() &&
-             value.asObject(runtime).isHostObject(runtime)) {
-    auto paint =
-        value.asObject(runtime).asHostObject<JsiSkPaint>(runtime)->getObject();
+  }
+  auto ptr = tryGetJsiObject<JsiSkPaint>(runtime, value);
+  if (ptr != nullptr) {
+    auto paint = ptr->getObject();
     Layer layer = SkPaint(*paint);
     return layer;
   }

@@ -2,6 +2,6 @@
 
 namespace RNJsi {
 
-jsi::Runtime *BaseRuntimeAwareCache::_mainRuntime = nullptr;
+std::atomic<jsi::Runtime *> BaseRuntimeAwareCache::_mainRuntime{nullptr};
 
 } // namespace RNJsi

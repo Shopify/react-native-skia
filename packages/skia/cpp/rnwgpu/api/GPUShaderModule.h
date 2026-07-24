@@ -5,7 +5,7 @@
 
 #include "descriptors/Unions.h"
 
-#include "jsi2/NativeObject.h"
+#include "jsi/NativeObject.h"
 
 #include "rnwgpu/async/AsyncTaskHandle.h"
 #include "rnwgpu/async/RuntimeContext.h"
@@ -31,7 +31,7 @@ public:
 public:
   std::string getBrand() { return CLASS_NAME; }
 
-  async::AsyncTaskHandle getCompilationInfo();
+  async::AsyncTaskHandle getCompilationInfo(jsi::Runtime &runtime);
 
   std::string getLabel() { return _label; }
   void setLabel(const std::string &label) {
@@ -41,8 +41,8 @@ public:
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installGetter(runtime, prototype, "__brand", &GPUShaderModule::getBrand);
-    installMethod(runtime, prototype, "getCompilationInfo",
-                  &GPUShaderModule::getCompilationInfo);
+    installMethodWithRuntime(runtime, prototype, "getCompilationInfo",
+                             &GPUShaderModule::getCompilationInfo);
     installGetterSetter(runtime, prototype, "label", &GPUShaderModule::getLabel,
                         &GPUShaderModule::setLabel);
   }
