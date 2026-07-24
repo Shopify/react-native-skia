@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -35,26 +36,16 @@ public:
                                            SkRuntimeShaderBuilder>(
             std::move(context), std::make_shared<SkRuntimeShaderBuilder>(rt)) {}
 
-  JSI_HOST_FUNCTION(setUniform) {
-    auto name = arguments[0].asString(runtime).utf8(runtime);
-    auto jsiValue = arguments[1].asObject(runtime).asArray(runtime);
-    auto size = jsiValue.size(runtime);
-    std::vector<SkScalar> value;
-    value.reserve(size);
-    for (int i = 0; i < size; i++) {
-      auto e = jsiValue.getValueAtIndex(runtime, i).asNumber();
-      value.push_back(e);
-    }
+  void setUniform(std::string name, std::vector<float> value) {
     getObject()
         ->uniform(name.c_str())
-        .set(value.data(), static_cast<int>(size));
-    return jsi::Value::undefined();
+        .set(value.data(), static_cast<int>(value.size()));
   }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installCommon(runtime, prototype);
-    installHostMethod(runtime, prototype, "setUniform",
-                      &JsiSkRuntimeShaderBuilder::setUniform);
+    installMethod(runtime, prototype, "setUniform",
+                  &JsiSkRuntimeShaderBuilder::setUniform);
   }
 
   /**

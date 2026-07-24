@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <utility>
 
 #include <jsi/jsi.h>
@@ -62,31 +63,24 @@ public:
         runtime, std::make_shared<JsiSkData>(getContext(), std::move(data)));
   }
 
-  JSI_HOST_FUNCTION(fromBase64) {
-    auto base64 = arguments[0].asString(runtime);
-    auto base64Str = base64.utf8(runtime);
+  std::shared_ptr<JsiSkData> fromBase64(std::string base64Str) {
     auto size = base64Str.size();
 
     // Calculate length
     size_t len;
-    auto err =
-        Base64::Decode(&base64.utf8(runtime).c_str()[0], size, nullptr, &len);
+    auto err = Base64::Decode(base64Str.c_str(), size, nullptr, &len);
     if (err != Base64::Error::kNone) {
-      throw jsi::JSError(runtime, "Error decoding base64 string");
-      return jsi::Value::undefined();
+      throw std::runtime_error("Error decoding base64 string");
     }
 
     // Create data object and decode
     auto data = SkData::MakeUninitialized(len);
-    err = Base64::Decode(&base64.utf8(runtime).c_str()[0], size,
-                         data->writable_data(), &len);
+    err = Base64::Decode(base64Str.c_str(), size, data->writable_data(), &len);
     if (err != Base64::Error::kNone) {
-      throw jsi::JSError(runtime, "Error decoding base64 string");
-      return jsi::Value::undefined();
+      throw std::runtime_error("Error decoding base64 string");
     }
 
-    return makeJsiObject(
-        runtime, std::make_shared<JsiSkData>(getContext(), std::move(data)));
+    return std::make_shared<JsiSkData>(getContext(), std::move(data));
   }
 
   size_t getMemoryPressure() override { return 1024; }
@@ -96,8 +90,8 @@ public:
                       &JsiSkDataFactory::fromURI);
     installHostMethod(runtime, prototype, "fromBytes",
                       &JsiSkDataFactory::fromBytes);
-    installHostMethod(runtime, prototype, "fromBase64",
-                      &JsiSkDataFactory::fromBase64);
+    installMethod(runtime, prototype, "fromBase64",
+                  &JsiSkDataFactory::fromBase64);
   }
 
   explicit JsiSkDataFactory(std::shared_ptr<RNSkPlatformContext> context)

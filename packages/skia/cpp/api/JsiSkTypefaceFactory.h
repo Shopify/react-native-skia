@@ -2,10 +2,13 @@
 
 #include <memory>
 #include <utility>
+#include <variant>
 
 #include <jsi/jsi.h>
 
+#include "JsiSkConverters.h"
 #include "JsiSkData.h"
+#include "JsiSkFontMgrFactory.h"
 #include "JsiSkNativeObjects.h"
 #include "JsiSkTypeface.h"
 
@@ -17,22 +20,21 @@ class JsiSkTypefaceFactory : public JsiSkNativeObject<JsiSkTypefaceFactory> {
 public:
   static constexpr const char *CLASS_NAME = "TypefaceFactory";
 
-  JSI_HOST_FUNCTION(MakeFreeTypeFaceFromData) {
-    auto data = JsiSkData::fromValue(runtime, arguments[0]);
+  std::variant<std::nullptr_t, std::shared_ptr<JsiSkTypeface>>
+  MakeFreeTypeFaceFromData(sk_sp<SkData> data) {
     auto fontMgr = JsiSkFontMgrFactory::getFontMgr(getContext());
     auto typeface = fontMgr->makeFromData(std::move(data));
     if (typeface == nullptr) {
-      return jsi::Value::null();
+      return nullptr;
     }
-    return makeJsiObject(runtime, std::make_shared<JsiSkTypeface>(
-                                      getContext(), std::move(typeface)));
+    return std::make_shared<JsiSkTypeface>(getContext(), std::move(typeface));
   }
 
   size_t getMemoryPressure() override { return 1024; }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installHostMethod(runtime, prototype, "MakeFreeTypeFaceFromData",
-                      &JsiSkTypefaceFactory::MakeFreeTypeFaceFromData);
+    installMethod(runtime, prototype, "MakeFreeTypeFaceFromData",
+                  &JsiSkTypefaceFactory::MakeFreeTypeFaceFromData);
   }
 
   explicit JsiSkTypefaceFactory(std::shared_ptr<RNSkPlatformContext> context)

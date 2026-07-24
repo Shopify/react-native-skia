@@ -19,17 +19,16 @@ class JsiSkTypefaceFontProviderFactory
 public:
   static constexpr const char *CLASS_NAME = "TypefaceFontProviderFactory";
 
-  JSI_HOST_FUNCTION(Make) {
-    return makeJsiObject(
-        runtime, std::make_shared<JsiSkTypefaceFontProvider>(
-                     getContext(), sk_make_sp<para::TypefaceFontProvider>()));
+  std::shared_ptr<JsiSkTypefaceFontProvider> Make() {
+    return std::make_shared<JsiSkTypefaceFontProvider>(
+        getContext(), sk_make_sp<para::TypefaceFontProvider>());
   }
 
   size_t getMemoryPressure() override { return 2048; }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
-    installHostMethod(runtime, prototype, "Make",
-                      &JsiSkTypefaceFontProviderFactory::Make);
+    installMethod(runtime, prototype, "Make",
+                  &JsiSkTypefaceFontProviderFactory::Make);
   }
 
   explicit JsiSkTypefaceFontProviderFactory(

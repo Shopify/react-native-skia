@@ -1,7 +1,9 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 
+#include "JsiSkConverters.h"
 #include "JsiSkData.h"
 #include "JsiSkDispatcher.h"
 #include "JsiSkMatrix.h"
@@ -56,22 +58,15 @@ public:
     }
   }
 
-  JSI_HOST_FUNCTION(makeShader) {
-    auto tmx = (SkTileMode)arguments[0].asNumber();
-    auto tmy = (SkTileMode)arguments[1].asNumber();
-    auto fm = (SkFilterMode)arguments[2].asNumber();
-    auto m = count > 3 && !arguments[3].isUndefined()
-                 ? JsiSkMatrix::fromValue(runtime, arguments[3]).get()
-                 : nullptr;
-
-    auto tr = count > 4 && !arguments[4].isUndefined()
-                  ? JsiSkRect::fromValue(runtime, arguments[4]).get()
-                  : nullptr;
-
-    // Create shader
-    auto shader = getObject()->makeShader(tmx, tmy, fm, m, tr);
-    return makeJsiObject(runtime,
-                         std::make_shared<JsiSkShader>(getContext(), shader));
+  std::shared_ptr<JsiSkShader>
+  makeShader(double tmx, double tmy, double fm,
+             std::optional<std::shared_ptr<SkMatrix>> m,
+             std::optional<std::shared_ptr<SkRect>> tr) {
+    auto shader = getObject()->makeShader(
+        static_cast<SkTileMode>(tmx), static_cast<SkTileMode>(tmy),
+        static_cast<SkFilterMode>(fm), m.has_value() ? m->get() : nullptr,
+        tr.has_value() ? tr->get() : nullptr);
+    return std::make_shared<JsiSkShader>(getContext(), shader);
   }
 
   JSI_HOST_FUNCTION(serialize) {
@@ -103,8 +98,7 @@ public:
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installCommon(runtime, prototype);
-    installHostMethod(runtime, prototype, "makeShader",
-                      &JsiSkPicture::makeShader);
+    installMethod(runtime, prototype, "makeShader", &JsiSkPicture::makeShader);
     installHostMethod(runtime, prototype, "serialize",
                       &JsiSkPicture::serialize);
   }

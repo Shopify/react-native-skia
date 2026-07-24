@@ -280,7 +280,71 @@ protected:
     installHostSetter(runtime, prototype, name, setter);
   }
 
+  /**
+   * Installs a typed mutating method that returns `this` for chaining
+   * (e.g. path.moveTo(...).lineTo(...)). Arguments are converted through
+   * rnwgpu::JSIConverter like installMethod; the member function's return
+   * value (if any) is ignored and the JS function returns thisValue.
+   */
+  template <typename ReturnType, typename... Args>
+  static void installChainableMethod(jsi::Runtime &runtime,
+                                     jsi::Object &prototype, const char *name,
+                                     ReturnType (Derived::*method)(Args...)) {
+    auto func = jsi::Function::createFromHostFunction(
+        runtime, jsi::PropNameID::forUtf8(runtime, name), sizeof...(Args),
+        [method](jsi::Runtime &rt, const jsi::Value &thisValue,
+                 const jsi::Value *args, size_t count) -> jsi::Value {
+          auto native = fromThis(rt, thisValue);
+          invokeChainable(native.get(), method, rt, args,
+                          std::index_sequence_for<Args...>{}, count);
+          return jsi::Value(rt, thisValue);
+        });
+    prototype.setProperty(runtime, name, func);
+  }
+
+  /**
+   * Chainable variant for methods that need the calling jsi::Runtime as
+   * their first parameter (e.g. the deprecated SkPath mutators, which log a
+   * warning to the JS console).
+   */
+  template <typename ReturnType, typename... Args>
+  static void installChainableMethodWithRuntime(
+      jsi::Runtime &runtime, jsi::Object &prototype, const char *name,
+      ReturnType (Derived::*method)(jsi::Runtime &, Args...)) {
+    auto func = jsi::Function::createFromHostFunction(
+        runtime, jsi::PropNameID::forUtf8(runtime, name), sizeof...(Args),
+        [method](jsi::Runtime &rt, const jsi::Value &thisValue,
+                 const jsi::Value *args, size_t count) -> jsi::Value {
+          auto native = fromThis(rt, thisValue);
+          invokeChainableWithRuntime(native.get(), method, rt, args,
+                                     std::index_sequence_for<Args...>{}, count);
+          return jsi::Value(rt, thisValue);
+        });
+    prototype.setProperty(runtime, name, func);
+  }
+
 private:
+  // Invokes a typed member function with JSI argument conversion, discarding
+  // the result. Used by installChainableMethod, which returns thisValue.
+  template <typename ReturnType, typename... Args, size_t... Is>
+  static void invokeChainable(Derived *obj,
+                              ReturnType (Derived::*method)(Args...),
+                              jsi::Runtime &runtime, const jsi::Value *args,
+                              std::index_sequence<Is...>, size_t count) {
+    (obj->*method)(rnwgpu::JSIConverter<std::decay_t<Args>>::fromJSI(
+        runtime, args[Is], Is >= count)...);
+  }
+
+  template <typename ReturnType, typename... Args, size_t... Is>
+  static void invokeChainableWithRuntime(
+      Derived *obj, ReturnType (Derived::*method)(jsi::Runtime &, Args...),
+      jsi::Runtime &runtime, const jsi::Value *args, std::index_sequence<Is...>,
+      size_t count) {
+    (obj->*method)(runtime,
+                   rnwgpu::JSIConverter<std::decay_t<Args>>::fromJSI(
+                       runtime, args[Is], Is >= count)...);
+  }
+
   static void defineProperty(jsi::Runtime &runtime, jsi::Object &prototype,
                              const char *name, jsi::Function *getter,
                              jsi::Function *setter) {

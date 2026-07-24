@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "JsiSkNativeObjects.h"
+#include "JsiSkRect.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
@@ -28,15 +29,12 @@ public:
       : JsiSkWrappingSkPtrNativeObject<JsiSkVertices, SkVertices>(
             std::move(context), std::move(vertices)) {}
 
-  JSI_HOST_FUNCTION(bounds) {
+  std::shared_ptr<JsiSkRect> bounds() {
     const auto &result = getObject()->bounds();
-    return makeJsiObject(runtime,
-                         std::make_shared<JsiSkRect>(getContext(), result));
+    return std::make_shared<JsiSkRect>(getContext(), result);
   }
 
-  JSI_HOST_FUNCTION(uniqueID) {
-    return static_cast<double>(getObject()->uniqueID());
-  }
+  double uniqueID() { return static_cast<double>(getObject()->uniqueID()); }
 
   size_t getMemoryPressure() override {
     auto vertices = getObject();
@@ -54,8 +52,8 @@ public:
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installCommon(runtime, prototype);
-    installHostMethod(runtime, prototype, "bounds", &JsiSkVertices::bounds);
-    installHostMethod(runtime, prototype, "uniqueID", &JsiSkVertices::uniqueID);
+    installMethod(runtime, prototype, "bounds", &JsiSkVertices::bounds);
+    installMethod(runtime, prototype, "uniqueID", &JsiSkVertices::uniqueID);
   }
 
   /**

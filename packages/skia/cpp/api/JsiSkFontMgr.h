@@ -2,11 +2,14 @@
 
 #include <memory>
 #include <numeric>
+#include <string>
 #include <utility>
 #include <vector>
 
+#include "JsiSkConverters.h"
 #include "JsiSkFontStyle.h"
 #include "JsiSkNativeObjects.h"
+#include "JsiSkTypeface.h"
 #include "utils/RNSkLog.h"
 #include <jsi/jsi.h>
 
@@ -32,41 +35,36 @@ public:
                                                                 fontMgr),
         _systemFontFamilies(context->getSystemFontFamilies()) {}
 
-  JSI_HOST_FUNCTION(countFamilies) {
+  int countFamilies() {
     return static_cast<int>(getObject()->countFamilies() +
                             _systemFontFamilies.size());
   }
 
-  JSI_HOST_FUNCTION(getFamilyName) {
-    auto i = static_cast<int>(arguments[0].asNumber());
+  std::string getFamilyName(int i) {
     auto baseFamilyCount = getObject()->countFamilies();
     if (i < baseFamilyCount) {
       SkString name;
       getObject()->getFamilyName(i, &name);
-      return jsi::String::createFromUtf8(runtime, name.c_str());
+      return std::string(name.c_str());
     }
     auto systemIndex = i - baseFamilyCount;
     if (systemIndex < static_cast<int>(_systemFontFamilies.size())) {
-      return jsi::String::createFromUtf8(runtime,
-                                         _systemFontFamilies[systemIndex]);
+      return _systemFontFamilies[systemIndex];
     }
-    throw jsi::JSError(
-        runtime,
+    throw std::runtime_error(
         "Font family index out of bounds: " + std::to_string(i) +
-            " (total families: " +
-            std::to_string(baseFamilyCount + _systemFontFamilies.size()) + ")");
+        " (total families: " +
+        std::to_string(baseFamilyCount + _systemFontFamilies.size()) + ")");
   }
 
-  JSI_HOST_FUNCTION(matchFamilyStyle) {
-    auto name = arguments[0].asString(runtime).utf8(runtime);
+  std::shared_ptr<JsiSkTypeface>
+  matchFamilyStyle(std::string name, std::shared_ptr<SkFontStyle> fontStyle) {
     // Resolve font family aliases (e.g., "System" -> ".AppleSystemUIFont" on
     // iOS)
     auto resolvedName = getContext()->resolveFontFamily(name);
-    auto fontStyle = JsiSkFontStyle::fromValue(runtime, arguments[1]);
     auto typeface =
         getObject()->matchFamilyStyle(resolvedName.c_str(), *fontStyle);
-    return makeJsiObject(runtime, std::make_shared<JsiSkTypeface>(
-                                      getContext(), std::move(typeface)));
+    return std::make_shared<JsiSkTypeface>(getContext(), std::move(typeface));
   }
 
   size_t getMemoryPressure() override { return 2048; }
@@ -78,12 +76,12 @@ public:
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installCommon(runtime, prototype);
-    installHostMethod(runtime, prototype, "countFamilies",
-                      &JsiSkFontMgr::countFamilies);
-    installHostMethod(runtime, prototype, "getFamilyName",
-                      &JsiSkFontMgr::getFamilyName);
-    installHostMethod(runtime, prototype, "matchFamilyStyle",
-                      &JsiSkFontMgr::matchFamilyStyle);
+    installMethod(runtime, prototype, "countFamilies",
+                  &JsiSkFontMgr::countFamilies);
+    installMethod(runtime, prototype, "getFamilyName",
+                  &JsiSkFontMgr::getFamilyName);
+    installMethod(runtime, prototype, "matchFamilyStyle",
+                  &JsiSkFontMgr::matchFamilyStyle);
   }
 
 private:
