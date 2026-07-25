@@ -3,8 +3,10 @@
 #include <memory>
 #include <numeric>
 #include <utility>
+#include <variant>
 #include <vector>
 
+#include "JsiSkConverters.h"
 #include "JsiSkNativeObjects.h"
 #include "utils/RNSkLog.h"
 #include <jsi/jsi.h>
@@ -12,6 +14,7 @@
 #include "JsiSkPaint.h"
 #include "JsiSkPoint.h"
 #include "JsiSkRect.h"
+#include "JsiSkSurface.h"
 #include "JsiSkTypeface.h"
 
 #include "rnskia/RNWindowContext.h"
@@ -33,25 +36,21 @@ class JsiSkiaContext
 public:
   static constexpr const char *CLASS_NAME = "SkiaContext";
 
-  JSI_HOST_FUNCTION(getSurface) {
+  std::variant<std::nullptr_t, std::shared_ptr<JsiSkSurface>> getSurface() {
     auto surface = getObject()->getSurface();
     if (surface == nullptr) {
-      return jsi::Value::null();
+      return nullptr;
     }
-    return makeJsiObject(runtime, std::make_shared<JsiSkSurface>(
-                                      getContext(), std::move(surface)));
+    return std::make_shared<JsiSkSurface>(getContext(), std::move(surface));
   }
 
-  JSI_HOST_FUNCTION(present) {
-    getObject()->present();
-    return jsi::Value::undefined();
-  }
+  void present() { getObject()->present(); }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installCommon(runtime, prototype);
-    installHostMethod(runtime, prototype, "getSurface",
-                      &JsiSkiaContext::getSurface);
-    installHostMethod(runtime, prototype, "present", &JsiSkiaContext::present);
+    installMethod(runtime, prototype, "getSurface",
+                  &JsiSkiaContext::getSurface);
+    installMethod(runtime, prototype, "present", &JsiSkiaContext::present);
   }
 
   JsiSkiaContext(std::shared_ptr<RNSkPlatformContext> context,

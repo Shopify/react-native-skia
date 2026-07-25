@@ -48,6 +48,14 @@ class SkFontStyle;
 struct SkImageInfo;
 struct SkRSXform;
 
+namespace skia {
+namespace textlayout {
+class TextStyle;
+struct ParagraphStyle;
+class TypefaceFontProvider;
+} // namespace textlayout
+} // namespace skia
+
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
@@ -77,6 +85,9 @@ class JsiSkRRect;
 class JsiSkFontStyle;
 class JsiSkImageInfo;
 class JsiSkRSXform;
+class JsiSkTextStyle;
+class JsiSkParagraphStyle;
+class JsiSkTypefaceFontProvider;
 
 /**
  * Maps a wrapped Skia type to the JsiSk* class whose `fromValue` knows how to
@@ -161,6 +172,15 @@ template <> struct JsiSkWrapperFor<SkImageInfo> {
 };
 template <> struct JsiSkWrapperFor<SkRSXform> {
   using type = JsiSkRSXform;
+};
+template <> struct JsiSkWrapperFor<skia::textlayout::TextStyle> {
+  using type = JsiSkTextStyle;
+};
+template <> struct JsiSkWrapperFor<skia::textlayout::ParagraphStyle> {
+  using type = JsiSkParagraphStyle;
+};
+template <> struct JsiSkWrapperFor<skia::textlayout::TypefaceFontProvider> {
+  using type = JsiSkTypefaceFontProvider;
 };
 
 template <typename T>
@@ -283,6 +303,18 @@ struct JSIConverter<T, std::enable_if_t<std::is_same_v<T, SkPoint>>> {
     result.setProperty(runtime, "x", static_cast<double>(point.x()));
     result.setProperty(runtime, "y", static_cast<double>(point.y()));
     return result;
+  }
+};
+
+// Paragraph style values — their fromValue helpers return by value and read
+// plain JS style objects.
+template <typename T>
+struct JSIConverter<
+    T, std::enable_if_t<std::is_same_v<T, skia::textlayout::TextStyle> ||
+                        std::is_same_v<T, skia::textlayout::ParagraphStyle>>> {
+  static T fromJSI(jsi::Runtime &runtime, const jsi::Value &arg,
+                   bool outOfBound) {
+    return RNSkia::JsiSkWrapperFor_t<T>::fromValue(runtime, arg);
   }
 };
 
