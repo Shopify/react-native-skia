@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "JsiSkCanvas.h"
+#include "JsiSkConverters.h"
 #include "JsiSkNativeObjects.h"
 #include "JsiSkPicture.h"
 #include "JsiSkRect.h"
@@ -30,33 +31,31 @@ public:
                                            SkPictureRecorder>(
             context, std::make_shared<SkPictureRecorder>()) {}
 
-  JSI_HOST_FUNCTION(beginRecording) {
+  std::shared_ptr<JsiSkCanvas>
+  beginRecording(JsiOptional<std::shared_ptr<SkRect>> rect) {
     SkCanvas *canvas;
-    if (count > 0 && !arguments[0].isUndefined()) {
-      auto rect = JsiSkRect::fromValue(runtime, arguments[0]);
+    if (rect.has_value()) {
       SkRTreeFactory factory;
-      canvas = getObject()->beginRecording(*rect, &factory);
+      canvas = getObject()->beginRecording(**rect, &factory);
     } else {
       SkISize size = SkISize::Make(2'000'000, 2'000'000);
-      SkRect rect = SkRect::Make(size);
-      canvas = getObject()->beginRecording(rect, nullptr);
+      SkRect bounds = SkRect::Make(size);
+      canvas = getObject()->beginRecording(bounds, nullptr);
     }
-    return makeJsiObject(runtime,
-                         std::make_shared<JsiSkCanvas>(getContext(), canvas));
+    return std::make_shared<JsiSkCanvas>(getContext(), canvas);
   }
 
-  JSI_HOST_FUNCTION(finishRecordingAsPicture) {
+  std::shared_ptr<JsiSkPicture> finishRecordingAsPicture() {
     auto picture = getObject()->finishRecordingAsPicture();
-    return makeJsiObject(runtime, std::make_shared<JsiSkPicture>(
-                                      getContext(), std::move(picture)));
+    return std::make_shared<JsiSkPicture>(getContext(), std::move(picture));
   }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installCommon(runtime, prototype);
-    installHostMethod(runtime, prototype, "beginRecording",
-                      &JsiSkPictureRecorder::beginRecording);
-    installHostMethod(runtime, prototype, "finishRecordingAsPicture",
-                      &JsiSkPictureRecorder::finishRecordingAsPicture);
+    installMethod(runtime, prototype, "beginRecording",
+                  &JsiSkPictureRecorder::beginRecording);
+    installMethod(runtime, prototype, "finishRecordingAsPicture",
+                  &JsiSkPictureRecorder::finishRecordingAsPicture);
   }
 
   size_t getMemoryPressure() override { return 1024 * 1024; }
