@@ -9111,7 +9111,7 @@ __metadata:
     rimraf: 3.0.2
     semantic-release: ^24.1.0
     semantic-release-yarn: ^3.0.2
-    tar: ^7.5.19
+    tar: ^7.5.21
     ts-jest: 29.4.3
     tsx: ^4.21.0
     typescript: ^5.2.2
@@ -30513,16 +30513,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar@npm:^7.5.19":
-  version: 7.5.19
-  resolution: "tar@npm:7.5.19"
+"tar@npm:^7.5.21":
+  version: 7.5.21
+  resolution: "tar@npm:7.5.21"
   dependencies:
     "@isaacs/fs-minipass": ^4.0.0
     chownr: ^3.0.0
     minipass: ^7.1.2
     minizlib: ^3.1.0
     yallist: ^5.0.0
-  checksum: 72bedc26089d2b3372f5c833f2e69b1ce9a2e8138a461cbb4b2eab48bef2453b3a12e17d47f6a1883a6929cdc348c622179b016ffed765ce21da51e43f2f4209
+  checksum: 339cab1cd6a9ce7201866a8e96db7b95d2ecf5b5249eb69780c09ef14e9c466c898ffed286e9116a1fd7835c8150e4e65d0cf555ed2857a65c30ff989c32025f
   languageName: node
   linkType: hard
 
