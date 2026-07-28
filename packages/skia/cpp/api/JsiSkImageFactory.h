@@ -15,7 +15,6 @@
 
 #ifdef SK_GRAPHITE
 #include "rnskia/RNDawnContext.h"
-#include "rnwgpu/api/GPUTexture.h"
 #endif
 
 namespace RNSkia {
@@ -104,62 +103,21 @@ public:
   }
 
   JSI_HOST_FUNCTION(MakeImageFromTexture) {
-#ifdef SK_GRAPHITE
-    if (count < 1 || !arguments[0].isObject()) {
-      throw std::runtime_error(
-          "MakeImageFromTexture requires a GPUTexture argument");
-    }
-    auto obj = arguments[0].asObject(runtime);
-    auto gpuTexture = obj.getNativeState<rnwgpu::GPUTexture>(runtime);
-    if (!gpuTexture) {
-      throw std::runtime_error("Invalid GPUTexture object");
-    }
-
-    wgpu::Texture texture = gpuTexture->get();
-    int width = static_cast<int>(gpuTexture->getWidth());
-    int height = static_cast<int>(gpuTexture->getHeight());
-    wgpu::TextureFormat format = gpuTexture->getFormat();
-
-    auto &dawnContext = DawnContext::getInstance();
-    auto image =
-        dawnContext.MakeImageFromTexture(texture, width, height, format);
-    if (image == nullptr) {
-      throw std::runtime_error("Failed to create SkImage from GPUTexture!");
-    }
-    return makeJsiObject(
-        runtime, std::make_shared<JsiSkImage>(getContext(), std::move(image)));
-#else
+    // The GPUTexture JS objects now come from react-native-webgpu; wrapping
+    // them requires the cross-package interop API (importDevice /
+    // native-texture handoff) which is not implemented yet.
     throw std::runtime_error(
-        "MakeImageFromTexture is only available with the Graphite backend. "
-        "Rebuild with SK_GRAPHITE enabled.");
-#endif
+        "MakeImageFromTexture is temporarily unavailable: the WebGPU API "
+        "moved to react-native-webgpu and the texture interop is not wired "
+        "up yet.");
   }
 
   JSI_HOST_FUNCTION(MakeTextureFromImage) {
-#ifdef SK_GRAPHITE
-    if (count < 1) {
-      throw std::runtime_error(
-          "MakeTextureFromImage requires an SkImage argument");
-    }
-    auto image = JsiSkImage::fromValue(runtime, arguments[0]);
-    if (!image) {
-      throw std::runtime_error("Invalid SkImage object");
-    }
-
-    auto &dawnContext = DawnContext::getInstance();
-    wgpu::Texture texture = dawnContext.MakeTextureFromImage(image);
-    if (!texture) {
-      throw std::runtime_error("Failed to create GPUTexture from SkImage!");
-    }
-
-    auto gpuTexture =
-        std::make_shared<rnwgpu::GPUTexture>(texture, "SkImage Texture");
-    return rnwgpu::GPUTexture::create(runtime, gpuTexture);
-#else
+    // See MakeImageFromTexture: pending the react-native-webgpu interop API.
     throw std::runtime_error(
-        "MakeTextureFromImage is only available with the Graphite backend. "
-        "Rebuild with SK_GRAPHITE enabled.");
-#endif
+        "MakeTextureFromImage is temporarily unavailable: the WebGPU API "
+        "moved to react-native-webgpu and the texture interop is not wired "
+        "up yet.");
   }
 
   size_t getMemoryPressure() override { return 1024; }

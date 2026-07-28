@@ -1,12 +1,13 @@
-import { Skia } from "@shopify/react-native-skia";
 import React from "react";
 import { ScrollView } from "react-native";
 
 import { HomeScreenButton } from "./HomeScreenButton";
 
-const hasWebGPU = Skia.hasDevice();
-
 export const HomeScreen = () => {
+  // navigator.gpu is installed by react-native-webgpu at module load; checked
+  // at render time so module evaluation order does not matter.
+  const hasWebGPU =
+    typeof navigator !== "undefined" && navigator.gpu != null;
   return (
     <ScrollView>
       <HomeScreenButton

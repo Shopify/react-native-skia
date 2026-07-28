@@ -114,39 +114,6 @@ add_library(
         ${BACKEND_SOURCES}
 )
 
-if(SK_GRAPHITE)
-    target_sources(${PACKAGE_NAME} PRIVATE
-        # WebGPU async system
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/AsyncTaskHandle.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/async/RuntimeContext.cpp"
-
-        # WebGPU API
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPU.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUAdapter.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUBindGroup.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUBuffer.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUCanvasContext.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUCommandEncoder.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUComputePassEncoder.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUComputePipeline.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUDevice.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUDeviceLostInfo.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUExternalTexture.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUQuerySet.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUQueue.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderBundleEncoder.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderPassEncoder.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPURenderPipeline.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUShaderModule.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUSharedFence.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUSharedTextureMemory.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUSupportedLimits.cpp"
-        "${PROJECT_SOURCE_DIR}/../cpp/rnwgpu/api/GPUTexture.cpp"
-
-        # WebGPU Canvas JNI bindings
-        "${PROJECT_SOURCE_DIR}/cpp/jni/JniWebGPUView.cpp"
-    )
-endif()
 
 
 target_include_directories(
@@ -176,12 +143,8 @@ target_include_directories(
         ../cpp/rnskia/values
         ../cpp/utils
 
-        # WebGPU bindings
+        # Shared JSI infrastructure (cpp/jsi) via prefix-qualified includes
         ../cpp
-        ../cpp/rnwgpu
-        ../cpp/rnwgpu/api
-        ../cpp/rnwgpu/api/descriptors
-        ../cpp/rnwgpu/async
 
         ${libfbjni_include_DIRS}
 )

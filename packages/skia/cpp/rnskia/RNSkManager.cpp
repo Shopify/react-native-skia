@@ -11,10 +11,6 @@
 
 #include "jsi/RuntimeAwareCache.h"
 
-#ifdef SK_GRAPHITE
-#include "rnwgpu/SurfaceRegistry.h"
-#endif
-
 namespace RNSkia {
 namespace jsi = facebook::jsi;
 
@@ -26,7 +22,7 @@ RNSkManager::RNSkManager(
       _jsCallInvoker(jsCallInvoker),
       _viewApi(std::make_shared<RNSkJsiViewApi>(platformContext)) {
 
-  // Register main runtime (used by both Skia and WebGPU bindings)
+  // Register main runtime
   RNJsi::BaseRuntimeAwareCache::setMainJsRuntime(_jsRuntime);
 
   // Install bindings
@@ -34,12 +30,6 @@ RNSkManager::RNSkManager(
 }
 
 RNSkManager::~RNSkManager() {
-#ifdef SK_GRAPHITE
-  // Drop all canvas registry entries: after a reload the JS side restarts its
-  // contextId counter, and stale entries would alias new canvases onto dead
-  // surfaces.
-  rnwgpu::SurfaceRegistry::getInstance().clear();
-#endif
   // Free up any references
   _viewApi = nullptr;
   _jsRuntime = nullptr;

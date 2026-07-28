@@ -1,4 +1,3 @@
-import { Skia } from "@shopify/react-native-skia";
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 
@@ -9,13 +8,11 @@ const HOST = OS === "android" ? ANDROID_WS_HOST : IOS_WS_HOST;
 const PORT = 4242;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const arch = (global as any)?.nativeFabricUIManager ? "fabric" : "paper";
-// Whether this build runs the Graphite backend, i.e. WebGPU bindings
-// (navigator.gpu / Skia.getDevice()) are available. Reported to the test
-// server so it can gate Graphite-only specs. Guarded in case an older runtime
-// doesn't expose hasDevice().
+// Whether the WebGPU API (navigator.gpu, installed by react-native-webgpu)
+// is available. Reported to the test server so it can gate GPU-only specs.
 const graphite = (() => {
   try {
-    return Skia.hasDevice?.() ?? false;
+    return typeof navigator !== "undefined" && navigator.gpu != null;
   } catch {
     return false;
   }

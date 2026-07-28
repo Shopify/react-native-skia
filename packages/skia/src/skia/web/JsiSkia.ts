@@ -143,10 +143,4 @@ export const JsiSkApi = (CanvasKit: CanvasKit): Skia => ({
   Recorder: () => {
     return throwNotImplementedOnRNWeb<JsiRecorder>();
   },
-  getDevice: () => {
-    return throwNotImplementedOnRNWeb<GPUDevice>();
-  },
-  hasDevice: () => {
-    return false;
-  },
 });

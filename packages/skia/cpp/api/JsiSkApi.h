@@ -8,8 +8,6 @@
 
 #ifdef SK_GRAPHITE
 #include "rnskia/RNDawnContext.h"
-#include "rnwgpu/api/GPUDevice.h"
-#include "rnwgpu/async/RuntimeContext.h"
 #endif
 
 #include "JsiNativeBuffer.h"
@@ -178,31 +176,6 @@ public:
                                                  count);
   }
 
-  bool hasDevice() {
-#ifdef SK_GRAPHITE
-    return true;
-#else
-    return false;
-#endif
-  }
-
-  JSI_HOST_FUNCTION(getDevice) {
-#ifdef SK_GRAPHITE
-    auto &dawnContext = DawnContext::getInstance();
-    // Per-runtime context: async ops on this device resolve on the calling
-    // runtime's own thread (via its ProcessEvents pump).
-    auto context = rnwgpu::async::RuntimeContext::getOrCreate(
-        runtime, dawnContext.getWGPUInstance());
-    auto device = std::make_shared<rnwgpu::GPUDevice>(
-        dawnContext.getWGPUDevice(), context, "Skia Device");
-    return rnwgpu::GPUDevice::create(runtime, device);
-#else
-    throw jsi::JSError(runtime,
-                       "getDevice() is only available with the Graphite "
-                       "backend. Rebuild with SK_GRAPHITE enabled.");
-#endif
-  }
-
   // Factory properties: like the legacy HostObject implementation, each
   // property access returns a fresh JS wrapper around the shared factory
   // instance.
@@ -287,8 +260,6 @@ public:
                       &JsiSkApi::PictureRecorder);
     installHostMethod(runtime, prototype, "Color", &JsiSkApi::Color);
     installHostMethod(runtime, prototype, "Recorder", &JsiSkApi::Recorder);
-    installMethod(runtime, prototype, "hasDevice", &JsiSkApi::hasDevice);
-    installHostMethod(runtime, prototype, "getDevice", &JsiSkApi::getDevice);
     installGetter(runtime, prototype, "SVG", &JsiSkApi::getSVGFactory);
     installGetter(runtime, prototype, "Image", &JsiSkApi::getImageFactory);
     installGetter(runtime, prototype, "AnimatedImage",
