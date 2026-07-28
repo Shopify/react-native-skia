@@ -7,7 +7,7 @@
 #import <react/renderer/components/rnskia/Props.h>
 #import <react/renderer/components/rnskia/RCTComponentViewHelpers.h>
 
-#import "RCTFabricComponentsPlugins.h"
+#import <React/RCTFabricComponentsPlugins.h>
 #import "WebGPUMetalView.h"
 
 using namespace facebook::react;

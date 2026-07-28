@@ -214,8 +214,10 @@ add_library(jsonreader STATIC IMPORTED)
 set_property(TARGET jsonreader PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libjsonreader.a")
 
 if(SK_GRAPHITE)
-    add_library(dawn_combined STATIC IMPORTED)
-    set_property(TARGET dawn_combined PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libdawn_combined.a")
+    # Dawn is a shared library, the same artifact react-native-webgpu links, so
+    # an app that installs both packages loads exactly one Dawn copy.
+    add_library(webgpu_dawn SHARED IMPORTED)
+    set_property(TARGET webgpu_dawn PROPERTY IMPORTED_LOCATION "${SKIA_LIBS_PATH}/libwebgpu_dawn.so")
 endif()
 
 find_library(
@@ -390,7 +392,7 @@ endif()
 if(SK_GRAPHITE)
     target_link_libraries(${PACKAGE_NAME}
         ${COMMON_LIBS}
-        dawn_combined
+        webgpu_dawn
     )
 else()
     target_link_libraries(${PACKAGE_NAME}

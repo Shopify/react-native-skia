@@ -75,8 +75,17 @@ framework_names = ['libskia', 'libsvg', 'libskshaper', 'libskparagraph',
                    'libskunicode_core', 'libskunicode_libgrapheme',
                    'libskottie', 'libsksg']
 
-# Add Dawn library for Graphite builds (contains dawn::native symbols)
-framework_names += ['libdawn_combined'] if use_graphite
+# Add Dawn library for Graphite builds (contains dawn::native symbols).
+# libwebgpu_dawn is the same artifact react-native-webgpu vendors. When
+# react-native-webgpu is installed, it provides Dawn for the whole app and
+# vendoring the framework here as well would fail CocoaPods'
+# duplicate-framework-name check, so Skia only vendors it when alone. The
+# skia pod's dawn::native references resolve from webgpu's copy at app link.
+has_webgpu_pkg = !resolve_node_package.call('react-native-webgpu', __dir__).nil?
+if use_graphite && has_webgpu_pkg
+  Pod::UI.puts 'react-native-skia: react-native-webgpu detected, Dawn is provided by its libwebgpu_dawn'
+end
+framework_names += ['libwebgpu_dawn'] if use_graphite && !has_webgpu_pkg
 
 # Verify that the prebuilt binaries are available (copied in above from the npm
 # packages, or downloaded by install-skia-graphite for in-repo Graphite builds).

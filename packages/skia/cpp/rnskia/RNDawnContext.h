@@ -366,8 +366,9 @@ private:
   std::mutex _mutex;
 
   DawnContext() {
-    DawnProcTable backendProcs = dawn::native::GetProcs();
-    dawnProcSetProcs(&backendProcs);
+    // No dawnProcSetProcs() here: the monolithic libwebgpu_dawn (shared with
+    // react-native-webgpu) exposes the real wgpu* C entry points directly
+    // rather than the settable dawn_proc trampoline, which it does not ship.
     static const auto kTimedWaitAny = wgpu::InstanceFeatureName::TimedWaitAny;
 
     wgpu::InstanceDescriptor instanceDesc{.requiredFeatureCount = 1,

@@ -1,8 +1,11 @@
 #pragma once
 
+#if defined(__APPLE__)
+#include <TargetConditionals.h>
+#endif
+
 #include "webgpu/webgpu_cpp.h"
 
-#include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
 
 #include "include/core/SkColorType.h"
@@ -115,6 +118,20 @@ requestDevice(dawn::native::Adapter &nativeAdapter,
   wgpu::DawnTogglesDescriptor togglesDesc;
   togglesDesc.enabledToggleCount = std::size(kToggles);
   togglesDesc.enabledToggles = kToggles;
+#if defined(TARGET_OS_SIMULATOR) && TARGET_OS_SIMULATOR
+  // The iOS Simulator only advertises MTLFeatureSet_iOS_GPUFamily2, so Dawn
+  // defaults disable_base_instance/disable_base_vertex on and then rejects
+  // every draw with a non-zero firstInstance or baseVertex, which Graphite
+  // emits routinely. The simulator forwards Metal calls to the host GPU,
+  // which does support base vertex/instance drawing, so force the toggles
+  // off. Device builds are unaffected: Graphite-capable iPhones and iPads
+  // are all GPUFamily3+. (Same override as react-native-webgpu; see
+  // https://issues.chromium.org/issues/42241591.)
+  static constexpr const char *kDisabledToggles[] = {"disable_base_instance",
+                                                     "disable_base_vertex"};
+  togglesDesc.disabledToggleCount = std::size(kDisabledToggles);
+  togglesDesc.disabledToggles = kDisabledToggles;
+#endif
 
   wgpu::DeviceDescriptor desc;
   desc.requiredFeatureCount = features.size();
