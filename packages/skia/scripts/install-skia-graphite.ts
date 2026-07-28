@@ -442,6 +442,13 @@ const install = async (): Promise<void> => {
   writeFileSync(markerFile, GRAPHITE_CONFIG.version, "utf-8");
   console.log(`  ✓ Wrote Graphite marker file: ${markerFile}`);
 
+  // Record the Dawn release tag so the podspec and build.gradle can verify it
+  // matches the tag react-native-webgpu was built against (both packages must
+  // link the exact same Dawn artifact).
+  const dawnMarkerFile = path.join(LIBS_DIR, ".dawn-version");
+  writeFileSync(dawnMarkerFile, DAWN_CONFIG.releaseTag, "utf-8");
+  console.log(`  ✓ Wrote Dawn version marker: ${dawnMarkerFile}`);
+
   console.log(
     `\n✅ Skia Graphite ${GRAPHITE_CONFIG.version} installed successfully!\n`
   );

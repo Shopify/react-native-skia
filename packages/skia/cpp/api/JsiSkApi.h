@@ -171,6 +171,22 @@ public:
   JSI_HOST_FUNCTION(Color) {
     return JsiSkColor::createCtor()(runtime, thisValue, arguments, count);
   }
+  JSI_HOST_FUNCTION(getNativeDevice) {
+#ifdef SK_GRAPHITE
+    // Raw WGPUDevice pointer of the Graphite device, as a BigInt. Consumed by
+    // react-native-webgpu's importDevice(), which AddRefs it; the pointer
+    // stays owned by DawnContext and is valid for the process lifetime.
+    auto &dawnContext = DawnContext::getInstance();
+    return jsi::BigInt::fromUint64(
+        runtime,
+        reinterpret_cast<uint64_t>(dawnContext.getWGPUDevice().Get()));
+#else
+    throw jsi::JSError(runtime,
+                       "getNativeDevice() is only available with the Graphite "
+                       "backend. Rebuild with SK_GRAPHITE enabled.");
+#endif
+  }
+
   JSI_HOST_FUNCTION(Recorder) {
     return JsiRecorder::createCtor(getContext())(runtime, thisValue, arguments,
                                                  count);
@@ -241,6 +257,8 @@ public:
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installHostMethod(runtime, prototype, "Video", &JsiSkApi::Video);
     installHostMethod(runtime, prototype, "Context", &JsiSkApi::Context);
+    installHostMethod(runtime, prototype, "getNativeDevice",
+                      &JsiSkApi::getNativeDevice);
     installHostMethod(runtime, prototype, "Font", &JsiSkApi::Font);
     installHostMethod(runtime, prototype, "Paint", &JsiSkApi::Paint);
     installHostMethod(runtime, prototype, "RSXform", &JsiSkApi::RSXform);

@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import { StyleSheet, View } from "react-native";
 import type { CanvasRef } from "react-native-webgpu";
-import { Canvas } from "react-native-webgpu";
+import { Canvas, importDevice } from "react-native-webgpu";
+import { Skia } from "@shopify/react-native-skia";
 
 const triangleShader = `
 @vertex
@@ -28,12 +29,27 @@ export function Triangle() {
     let frame = 0;
 
     (async () => {
-      const adapter = await navigator.gpu.requestAdapter();
-      if (!adapter) {
-        console.warn("Failed to get GPU adapter");
-        return;
+      // Shared-device interop: adopt Skia's Graphite device so WebGPU work and
+      // Skia rendering share one wgpu::Device (zero-copy handoff becomes
+      // possible). Falls back to a standalone device when unavailable.
+      let device: GPUDevice;
+      try {
+        device = importDevice(Skia.getNativeDevice());
+        console.log(
+          "[webgpu-coexistence] rendering with Skia's Graphite device"
+        );
+      } catch (e) {
+        console.log(
+          "[webgpu-coexistence] falling back to a standalone device",
+          e
+        );
+        const adapter = await navigator.gpu.requestAdapter();
+        if (!adapter) {
+          console.warn("Failed to get GPU adapter");
+          return;
+        }
+        device = await adapter.requestDevice();
       }
-      const device = await adapter.requestDevice();
 
       const context = ref.current?.getContext("webgpu");
       if (!context) {

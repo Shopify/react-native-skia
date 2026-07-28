@@ -81,9 +81,24 @@ framework_names = ['libskia', 'libsvg', 'libskshaper', 'libskparagraph',
 # vendoring the framework here as well would fail CocoaPods'
 # duplicate-framework-name check, so Skia only vendors it when alone. The
 # skia pod's dawn::native references resolve from webgpu's copy at app link.
-has_webgpu_pkg = !resolve_node_package.call('react-native-webgpu', __dir__).nil?
+webgpu_pkg_dir = resolve_node_package.call('react-native-webgpu', __dir__)
+has_webgpu_pkg = !webgpu_pkg_dir.nil?
 if use_graphite && has_webgpu_pkg
   Pod::UI.puts 'react-native-skia: react-native-webgpu detected, Dawn is provided by its libwebgpu_dawn'
+
+  # Both packages must link the exact same Dawn artifact. Compare the release
+  # tag this Graphite build was installed with (libs/.dawn-version) against
+  # the tag react-native-webgpu declares in its package.json `dawn` field.
+  dawn_marker = File.join(__dir__, 'libs', '.dawn-version')
+  if File.exist?(dawn_marker)
+    skia_dawn = File.read(dawn_marker).strip
+    webgpu_dawn_field = JSON.parse(File.read(File.join(webgpu_pkg_dir, 'package.json')))['dawn'].to_s
+    webgpu_dawn = "dawn-#{webgpu_dawn_field.tr('/', '-')}"
+    unless skia_dawn == webgpu_dawn
+      raise "react-native-skia: Dawn version mismatch. This Graphite build "             "links #{skia_dawn} but react-native-webgpu links #{webgpu_dawn}. "             "Align the two packages so the app contains exactly one Dawn."
+    end
+    Pod::UI.puts "react-native-skia: Dawn versions match (#{skia_dawn})"
+  end
 end
 framework_names += ['libwebgpu_dawn'] if use_graphite && !has_webgpu_pkg
 
@@ -163,6 +178,7 @@ Pod::Spec.new do |s|
     'cpp/rnskia/RNMetalLayerColorSpace.h',
     'cpp/rnskia/RNDawnWindowContext.h',
     'cpp/rnskia/RNDawnWindowContext.cpp',
+    'cpp/rnskia/RNDawnInterop.cpp',
     'cpp/rnskia/RNImageProvider.h'
   ]
   s.exclude_files = graphite_exclusions unless use_graphite

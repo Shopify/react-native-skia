@@ -1,11 +1,14 @@
 import React from "react";
 import { ScrollView } from "react-native";
+// Side-effect import: installs navigator.gpu. Required here because Metro's
+// inlineRequires defers module evaluation to first binding use, so without it
+// react-native-webgpu would not be initialized when the WebGPU section's
+// availability check below runs.
+import "react-native-webgpu";
 
 import { HomeScreenButton } from "./HomeScreenButton";
 
 export const HomeScreen = () => {
-  // navigator.gpu is installed by react-native-webgpu at module load; checked
-  // at render time so module evaluation order does not matter.
   const hasWebGPU =
     typeof navigator !== "undefined" && navigator.gpu != null;
   return (

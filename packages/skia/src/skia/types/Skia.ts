@@ -109,4 +109,11 @@ export interface Skia {
   Context(surface: bigint, width: number, height: number): SkiaContext;
   NativeBuffer: NativeBufferFactory;
   Recorder(): JsiRecorder;
+  /**
+   * Raw WGPUDevice pointer of Skia's Graphite device, as a BigInt. Pass it to
+   * react-native-webgpu's importDevice() to get a GPUDevice sharing Skia's
+   * device (zero-copy interop). Only available on Graphite builds; throws
+   * otherwise.
+   */
+  getNativeDevice(): bigint;
 }
