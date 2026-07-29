@@ -16339,7 +16339,7 @@ __metadata:
     react-native-svg: "patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch"
     react-native-test-app: 4.4.7
     react-native-web: ^0.21.2
-    react-native-webgpu: 0.7.1
+    react-native-webgpu: 0.8.0
     react-native-windows: ^0.75.0
     react-native-worklets: 0.8.3
     react-test-renderer: 19.0.0
@@ -27328,9 +27328,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-webgpu@npm:0.7.1":
-  version: 0.7.1
-  resolution: "react-native-webgpu@npm:0.7.1"
+"react-native-webgpu@npm:0.8.0":
+  version: 0.8.0
+  resolution: "react-native-webgpu@npm:0.8.0"
   peerDependencies:
     react: "*"
     react-native: ">=0.81.0"
@@ -27341,7 +27341,7 @@ __metadata:
       optional: true
     react-native-worklets:
       optional: true
-  checksum: 936846c21580f2490d265a30ab7aef5e7eda8503300b4b111ac0c8eb7d2190709f070049fd18c8342e915fa585b03afa35b74c26efd4405c4f7fdb0886678beb
+  checksum: 75a850ebf19d57395ca1b4ba7d4f6f24ff203e047c99493d1a3d4fbb4bbb08308a573ead0e2c88ef5de367d355e576d181b9513fb6cec93ab77e548211976c0c
   languageName: node
   linkType: hard
 
