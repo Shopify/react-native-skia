@@ -257,12 +257,4 @@ jobs:
 
       - name: Run e2e tests
         working-directory: packages/skia
-        # On Graphite we run the Paths render test plus the WebGPU specs.
-        # ArrayBuffer, ComputeShader, ErrorScope, ImageBitmapBounds and
-        # DawnToggles are pure surface.eval round-trips that assert on returned
-        # values. The external-texture specs (ExternalTexture,
-        # ImportExternalTexture, SharedTextureMemory) additionally exercise
-        # NativeBuffer import and GPU read-back; they self-validate via
-        # copyTextureToBuffer (not Skia image readPixels) and skip themselves
-        # where NativeBuffer/createImageBitmap are unavailable.
-        run: CI=true E2E=true yarn test -i "e2e/(Paths|ArrayBuffer|ComputeShader|ErrorScope|ImageBitmapBounds|DawnToggles|ExternalTexture|ImportExternalTexture|SharedTextureMemory)"
+        run: CI=true yarn e2e --testPathIgnorePatterns "Paragraph|Atlas"
