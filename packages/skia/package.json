@@ -163,8 +163,7 @@
     },
     "ios": {
       "componentProvider": {
-        "SkiaPictureView": "SkiaPictureView",
-        "SkiaWebGPUView": "SkiaWebGPUView"
+        "SkiaPictureView": "SkiaPictureView"
       }
     }
   },

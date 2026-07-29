@@ -110,20 +110,10 @@ export interface Skia {
   NativeBuffer: NativeBufferFactory;
   Recorder(): JsiRecorder;
   /**
-   * Returns whether the Graphite backend is enabled and WebGPU is available.
-   *
-   * @returns true if Graphite/WebGPU is available, false otherwise
+   * Raw WGPUDevice pointer of Skia's Graphite device, as a BigInt. Pass it to
+   * react-native-webgpu's importDevice() to get a GPUDevice sharing Skia's
+   * device (zero-copy interop). Only available on Graphite builds; throws
+   * otherwise.
    */
-  hasDevice(): boolean;
-  /**
-   * Returns the shared WebGPU device used by Skia's Graphite backend.
-   * This allows direct access to the GPU device for WebGPU operations.
-   *
-   * Note: This method is only available when the Graphite backend is enabled.
-   * Use hasDevice() to check availability before calling this method.
-   *
-   * @returns The GPUDevice used by Skia
-   * @throws Error if Graphite backend is not enabled
-   */
-  getDevice(): GPUDevice;
+  getNativeDevice(): bigint;
 }
