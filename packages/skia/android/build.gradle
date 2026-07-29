@@ -102,6 +102,14 @@ if (useGraphite) {
     if (dawnMarker.exists() && webgpuDir != null) {
         def skiaDawn = dawnMarker.text.trim()
         def webgpuJson = new groovy.json.JsonSlurper().parse(file("${webgpuDir}/package.json"))
+        if (webgpuJson.dawn == null) {
+            throw new GradleException(
+                "react-native-skia: the installed react-native-webgpu " +
+                "(${webgpuJson.version}) does not declare a `dawn` field in its " +
+                "package.json, so it predates shared-Dawn support and cannot be " +
+                "paired with this Graphite build (which links ${skiaDawn}). " +
+                "Upgrade react-native-webgpu.")
+        }
         def webgpuDawn = "dawn-" + webgpuJson.dawn.toString().replace('/', '-')
         if (skiaDawn != webgpuDawn) {
             throw new GradleException(

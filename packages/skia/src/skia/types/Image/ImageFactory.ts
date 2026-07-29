@@ -100,8 +100,11 @@ export interface ImageFactory {
    * This allows using textures rendered by WebGPU in Skia drawings. The
    * texture crosses the package boundary as a raw pointer: pass
    * `texture.nativePointer` from a react-native-webgpu GPUTexture created on
-   * the shared device (importDevice(Skia.getNativeDevice())). The texture is
-   * borrowed: keep the GPUTexture alive while the image is in use.
+   * the shared device (importDevice(Skia.getNativeDevice())). The native side
+   * takes its own reference, so the handle stays valid even if the JS
+   * GPUTexture is garbage collected — but do not call texture.destroy()
+   * while the image is in use: destroy() releases the underlying GPU
+   * resource regardless of reference counts.
    *
    * Note: This method is only available when the Graphite backend is enabled.
    *

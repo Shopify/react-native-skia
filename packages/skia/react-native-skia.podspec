@@ -92,10 +92,20 @@ if use_graphite && has_webgpu_pkg
   dawn_marker = File.join(__dir__, 'libs', '.dawn-version')
   if File.exist?(dawn_marker)
     skia_dawn = File.read(dawn_marker).strip
-    webgpu_dawn_field = JSON.parse(File.read(File.join(webgpu_pkg_dir, 'package.json')))['dawn'].to_s
+    webgpu_pkg = JSON.parse(File.read(File.join(webgpu_pkg_dir, 'package.json')))
+    webgpu_dawn_field = webgpu_pkg['dawn'].to_s
+    if webgpu_dawn_field.empty?
+      raise "react-native-skia: the installed react-native-webgpu " \
+            "(#{webgpu_pkg['version']}) does not declare a `dawn` field in its " \
+            "package.json, so it predates shared-Dawn support and cannot be " \
+            "paired with this Graphite build (which links #{skia_dawn}). " \
+            "Upgrade react-native-webgpu."
+    end
     webgpu_dawn = "dawn-#{webgpu_dawn_field.tr('/', '-')}"
     unless skia_dawn == webgpu_dawn
-      raise "react-native-skia: Dawn version mismatch. This Graphite build "             "links #{skia_dawn} but react-native-webgpu links #{webgpu_dawn}. "             "Align the two packages so the app contains exactly one Dawn."
+      raise "react-native-skia: Dawn version mismatch. This Graphite build " \
+            "links #{skia_dawn} but react-native-webgpu links #{webgpu_dawn}. " \
+            "Align the two packages so the app contains exactly one Dawn."
     end
     Pod::UI.puts "react-native-skia: Dawn versions match (#{skia_dawn})"
   end

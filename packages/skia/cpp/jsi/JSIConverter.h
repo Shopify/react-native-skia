@@ -17,9 +17,6 @@
 #include "EnumMapper.h"
 #include "Promise.h"
 
-#ifdef SK_GRAPHITE
-#endif
-
 // This number is the maximum integer that can be represented exactly as a
 // double
 #define MAX_SAFE_INTEGER static_cast<uint64_t>(9007199254740991)

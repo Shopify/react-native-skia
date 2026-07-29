@@ -452,6 +452,15 @@ export function TexturedCube() {
         device.queue.submit([commandEncoder.finish()]);
         ctx.present();
 
+        // These textures are recreated every frame; destroy them eagerly
+        // instead of waiting for GC so VRAM stays bounded. destroy() after
+        // submit is safe: already-submitted work keeps the texture alive
+        // until it completes.
+        tex1.destroy();
+        tex2.destroy();
+        tex3.destroy();
+        tex4?.destroy();
+
         animationRef.current = requestAnimationFrame(render);
       };
 

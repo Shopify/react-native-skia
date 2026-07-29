@@ -132,9 +132,9 @@ const parseErrorResponse = (raw: Buffer): string | null => {
 // Registers a test that only runs against a device using the Graphite backend
 // (Dawn/WebGPU). The backend is only known after the websocket handshake, so —
 // like itSkipsOnWeb in react-native-webgpu — the guard is a runtime early
-// return rather than it.skip at collection time. This also keeps the WebGPU
-// specs inert in Node/Local mode and on Ganesh builds, where Skia.getDevice()
-// would throw.
+// return rather than it.skip at collection time. This also keeps the Graphite
+// specs inert in Node/Local mode and on Ganesh builds, where
+// Skia.getNativeDevice() would throw.
 export const itRunsWithGraphite = (
   name: string,
   fn: () => Promise<void>,
@@ -420,9 +420,9 @@ interface TestingSurface {
   fontSize: number;
   OS: TestOS;
   arch: "paper" | "fabric";
-  // True when the connected device runs the Graphite backend, i.e. the WebGPU
-  // API (navigator.gpu / Skia.getDevice()) is available. Always false in Node
-  // (LocalSurface) and on Ganesh builds.
+  // True when the connected device runs the Graphite backend, i.e.
+  // Skia.getNativeDevice() is available (see useClient.ts in the example
+  // app). Always false in Node (LocalSurface) and on Ganesh builds.
   graphite: boolean;
 }
 

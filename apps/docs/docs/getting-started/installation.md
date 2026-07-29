@@ -124,7 +124,7 @@ The `jestEnv.js` will load CanvasKit for you and `jestEnv.js` mocks React Native
 You can also have a look at the [example app](https://github.com/Shopify/react-native-skia/tree/main/apps/example) to see how Jest tests are enabled there.
 
 
-## Graphite (Experimental)
+## Graphite
 
 Skia has two backends: Ganesh (default) and Graphite. An experimental preview of Graphite is available in the `@next` distribution channel:
 
@@ -132,11 +132,27 @@ Skia has two backends: Ganesh (default) and Graphite. An experimental preview of
 yarn add @shopify/react-native-skia@next
 ```
 
-:::warning
+Skia Graphite requires Android API Level 26 or above.
 
-Graphite support is highly experimental. Skia Graphite requires Android API Level 26 or above.
+Graphite runs on [Dawn](https://dawn.googlesource.com/dawn), Google's WebGPU implementation. This is an internal implementation detail: React Native Skia does not expose a WebGPU API itself. To use WebGPU in your app, install [react-native-webgpu](https://github.com/wcandillon/react-native-webgpu) alongside it.
 
-:::
+When both packages are installed, they share a single Dawn instance, which enables zero-copy interop between Skia and WebGPU on the shared device:
+
+```tsx
+import { Skia } from "@shopify/react-native-skia";
+import { importDevice, adoptTexture } from "react-native-webgpu";
+
+// A WebGPU device backed by Skia's Graphite device
+const device = importDevice(Skia.getNativeDevice());
+
+// Use an SkImage as a WebGPU texture
+const texture = adoptTexture(Skia.Image.MakeNativeTextureFromImage(image));
+
+// Use a WebGPU texture as an SkImage
+const skImage = Skia.Image.MakeImageFromNativeTexture(texture.nativePointer);
+```
+
+Both packages must link the exact same Dawn build so that only one copy of Dawn exists in the app — the native build verifies this and fails with a version-mismatch error if the two packages were built against different Dawn releases. If you see that error, align the `@shopify/react-native-skia` and `react-native-webgpu` versions.
 
 ## Playground
 
