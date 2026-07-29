@@ -9,13 +9,14 @@ const HOST = OS === "android" ? ANDROID_WS_HOST : IOS_WS_HOST;
 const PORT = 4242;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const arch = (global as any)?.nativeFabricUIManager ? "fabric" : "paper";
-// Whether this build runs the Graphite backend, i.e. WebGPU bindings
-// (navigator.gpu / Skia.getDevice()) are available. Reported to the test
-// server so it can gate Graphite-only specs. Guarded in case an older runtime
-// doesn't expose hasDevice().
+// Whether this Skia build runs the Graphite backend. Probed via
+// getNativeDevice(), which throws on Ganesh builds — checking navigator.gpu
+// would only tell us react-native-webgpu is installed, which can be true on
+// a non-Graphite build. Reported to the test server so it can gate
+// Graphite-only specs.
 const graphite = (() => {
   try {
-    return Skia.hasDevice?.() ?? false;
+    return typeof Skia.getNativeDevice() === "bigint";
   } catch {
     return false;
   }

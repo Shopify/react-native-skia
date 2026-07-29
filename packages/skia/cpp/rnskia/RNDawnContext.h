@@ -366,8 +366,9 @@ private:
   std::mutex _mutex;
 
   DawnContext() {
-    DawnProcTable backendProcs = dawn::native::GetProcs();
-    dawnProcSetProcs(&backendProcs);
+    // No dawnProcSetProcs() here: the monolithic libwebgpu_dawn (shared with
+    // react-native-webgpu) exposes the real wgpu* C entry points directly
+    // rather than the settable dawn_proc trampoline, which it does not ship.
     static const auto kTimedWaitAny = wgpu::InstanceFeatureName::TimedWaitAny;
 
     wgpu::InstanceDescriptor instanceDesc{.requiredFeatureCount = 1,
@@ -376,6 +377,21 @@ private:
     // For limits:
     wgpu::InstanceLimits limits{.timedWaitAnyMaxCount = 64};
     instanceDesc.requiredLimits = &limits;
+
+    // Same instance-stage toggles react-native-webgpu sets on its own
+    // instance: when webgpu adopts this instance (rnskia_getWGPUInstance),
+    // its external-texture path expects experimental adapter features to be
+    // visible. These only un-hide features in adapter.features; nothing
+    // becomes active unless a device requests it.
+    static const char *const kInstanceToggles[] = {
+        "allow_unsafe_apis",
+        "expose_wgsl_experimental_features",
+    };
+    wgpu::DawnTogglesDescriptor instanceToggles;
+    instanceToggles.enabledToggleCount = std::size(kInstanceToggles);
+    instanceToggles.enabledToggles = kInstanceToggles;
+    instanceDesc.nextInChain = &instanceToggles;
+
     instance = std::make_unique<dawn::native::Instance>(&instanceDesc);
 
     backendContext = DawnUtils::createDawnBackendContext(instance.get());

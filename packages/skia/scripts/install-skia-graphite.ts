@@ -46,6 +46,20 @@ const GRAPHITE_CONFIG = {
   },
 } as const;
 
+// Dawn prebuilt binaries. These are the exact artifacts react-native-webgpu
+// links; both packages must consume the same Dawn build so that only one Dawn
+// copy exists in an app that installs both. The Dawn commit is the one from
+// this Skia milestone's DEPS.
+const DAWN_CONFIG = {
+  releaseTag: "dawn-chrome-m150",
+  baseUrl:
+    "https://github.com/wcandillon/react-native-webgpu/releases/download",
+  checksums: {
+    android: "dee507d4fe66b57f6d33c0dac8cfd1b1263fcd9a8997bfebf936b62341580e60",
+    apple: "5bacd90c56aa3144d8ba74ac2d769d28b28ebf99c67a4959185c7181d8aeaf31",
+  },
+} as const;
+
 const SCRIPT_DIR = __dirname;
 const PACKAGE_ROOT = path.resolve(SCRIPT_DIR, "..");
 const REPO_ROOT = path.resolve(PACKAGE_ROOT, "../..");
@@ -134,9 +148,10 @@ const extractTarGz = async (
 const downloadAndExtract = async (
   assetName: string,
   destDir: string,
-  expectedChecksum?: string
+  expectedChecksum?: string,
+  urlOverride?: string
 ): Promise<void> => {
-  const url = getDownloadUrl(assetName);
+  const url = urlOverride ?? getDownloadUrl(assetName);
   const tempFile = path.join(LIBS_DIR, `${assetName}.tmp`);
 
   console.log(`  Downloading ${assetName}...`);
@@ -271,9 +286,68 @@ const downloadAndroidLibs = async (): Promise<void> => {
       execSync(`mv "${nestedDir}"/* "${destDir}"/`);
       rmSync(nestedDir, { recursive: true, force: true });
     }
+
+    // Dawn comes from the shared dawn-chrome release instead (see
+    // downloadDawnLibs); drop the bundled copy so it cannot be linked by
+    // mistake.
+    rmSync(path.join(destDir, "libdawn_combined.a"), { force: true });
   }
 
   console.log(`  ✓ Android libraries downloaded`);
+};
+
+// Download the shared Dawn binaries (same artifacts react-native-webgpu links)
+const downloadDawnLibs = async (): Promise<void> => {
+  console.log(`\n🌅 Downloading Dawn libraries (${DAWN_CONFIG.releaseTag})...`);
+
+  const dawnUrl = (asset: string) =>
+    `${DAWN_CONFIG.baseUrl}/${DAWN_CONFIG.releaseTag}/${asset}`;
+
+  // Android: shared libwebgpu_dawn.so per ABI, next to the Skia static libs
+  const androidAsset = `dawn-android-${DAWN_CONFIG.releaseTag}.tar.gz`;
+  const androidTempDir = path.join(LIBS_DIR, "dawn-android-temp");
+  await downloadAndExtract(
+    androidAsset,
+    androidTempDir,
+    DAWN_CONFIG.checksums.android,
+    dawnUrl(androidAsset)
+  );
+  for (const abi of ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"]) {
+    const src = path.join(
+      androidTempDir,
+      "dawn-android",
+      abi,
+      "libwebgpu_dawn.so"
+    );
+    if (!existsSync(src)) {
+      throw new Error(`Missing libwebgpu_dawn.so for ${abi} in ${androidAsset}`);
+    }
+    fileOps.cp(src, path.join(LIBS_DIR, "android", abi, "libwebgpu_dawn.so"));
+  }
+  rmSync(androidTempDir, { recursive: true, force: true });
+
+  // Apple: one xcframework carrying ios-device, ios-simulator and macos
+  // slices; the podspec vendors it from both platform dirs
+  const appleAsset = `dawn-apple-${DAWN_CONFIG.releaseTag}.xcframework.tar.gz`;
+  const appleTempDir = path.join(LIBS_DIR, "dawn-apple-temp");
+  await downloadAndExtract(
+    appleAsset,
+    appleTempDir,
+    DAWN_CONFIG.checksums.apple,
+    dawnUrl(appleAsset)
+  );
+  const xcframework = path.join(appleTempDir, "dawn-apple.xcframework");
+  if (!existsSync(xcframework)) {
+    throw new Error(`Missing dawn-apple.xcframework in ${appleAsset}`);
+  }
+  for (const platform of ["ios", "macos"]) {
+    const dest = path.join(LIBS_DIR, platform, "libwebgpu_dawn.xcframework");
+    fileOps.rm(dest);
+    fileOps.cp(xcframework, dest);
+  }
+  rmSync(appleTempDir, { recursive: true, force: true });
+
+  console.log(`  ✓ Dawn libraries downloaded`);
 };
 
 // Download Apple libraries
@@ -301,8 +375,9 @@ const downloadAppleLibs = async (): Promise<void> => {
 
   const extractedIosDir = path.join(iosTempDir, "ios");
   if (existsSync(extractedIosDir)) {
-    const xcframeworks = readdirSync(extractedIosDir).filter((f) =>
-      f.endsWith(".xcframework")
+    const xcframeworks = readdirSync(extractedIosDir).filter(
+      (f) =>
+        f.endsWith(".xcframework") && f !== "libdawn_combined.xcframework"
     );
     for (const xcf of xcframeworks) {
       fileOps.cp(path.join(extractedIosDir, xcf), path.join(iosDir, xcf));
@@ -321,8 +396,9 @@ const downloadAppleLibs = async (): Promise<void> => {
 
   const extractedMacosDir = path.join(macosTempDir, "macos");
   if (existsSync(extractedMacosDir)) {
-    const xcframeworks = readdirSync(extractedMacosDir).filter((f) =>
-      f.endsWith(".xcframework")
+    const xcframeworks = readdirSync(extractedMacosDir).filter(
+      (f) =>
+        f.endsWith(".xcframework") && f !== "libdawn_combined.xcframework"
     );
     for (const xcf of xcframeworks) {
       fileOps.cp(path.join(extractedMacosDir, xcf), path.join(macosDir, xcf));
@@ -354,6 +430,10 @@ const install = async (): Promise<void> => {
   await downloadAndroidLibs();
   await downloadAppleLibs();
 
+  // Download the shared Dawn binaries (must run after the platform libs, which
+  // clean the destination directories)
+  await downloadDawnLibs();
+
   // Download and copy Dawn/WebGPU headers from release tarball
   await copyDawnHeaders();
 
@@ -361,6 +441,13 @@ const install = async (): Promise<void> => {
   const markerFile = path.join(LIBS_DIR, ".graphite");
   writeFileSync(markerFile, GRAPHITE_CONFIG.version, "utf-8");
   console.log(`  ✓ Wrote Graphite marker file: ${markerFile}`);
+
+  // Record the Dawn release tag so the podspec and build.gradle can verify it
+  // matches the tag react-native-webgpu was built against (both packages must
+  // link the exact same Dawn artifact).
+  const dawnMarkerFile = path.join(LIBS_DIR, ".dawn-version");
+  writeFileSync(dawnMarkerFile, DAWN_CONFIG.releaseTag, "utf-8");
+  console.log(`  ✓ Wrote Dawn version marker: ${dawnMarkerFile}`);
 
   console.log(
     `\n✅ Skia Graphite ${GRAPHITE_CONFIG.version} installed successfully!\n`

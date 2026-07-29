@@ -1,7 +1,9 @@
 import React, { useEffect, useRef } from "react";
-import { StyleSheet, View, Text } from "react-native";
-import type { WebGPUCanvasRef, NativeBuffer } from "@shopify/react-native-skia";
-import { WebGPUCanvas, Skia } from "@shopify/react-native-skia";
+import { StyleSheet, View } from "react-native";
+import type { NativeBuffer } from "@shopify/react-native-skia";
+import { Skia } from "@shopify/react-native-skia";
+import type { CanvasRef } from "react-native-webgpu";
+import { Canvas, importDevice } from "react-native-webgpu";
 
 // Demonstrates GPUDevice.importExternalTexture with a self-contained source: a
 // platform native buffer (CVPixelBufferRef on iOS, AHardwareBuffer on Android)
@@ -54,7 +56,7 @@ fn fs_main(in: VsOut) -> @location(0) vec4f {
 `;
 
 export function ImportExternalTexture() {
-  const canvasRef = useRef<WebGPUCanvasRef>(null);
+  const canvasRef = useRef<CanvasRef>(null);
   const animationRef = useRef<number>(0);
   const cleanupRef = useRef<(() => void) | null>(null);
 
@@ -62,7 +64,7 @@ export function ImportExternalTexture() {
     let cancelled = false;
 
     const init = () => {
-      if (!canvasRef.current || typeof RNWebGPU === "undefined") {
+      if (!canvasRef.current) {
         return;
       }
       const ctx = canvasRef.current.getContext("webgpu");
@@ -70,7 +72,7 @@ export function ImportExternalTexture() {
         return;
       }
 
-      const device = Skia.getDevice();
+      const device = importDevice(Skia.getNativeDevice());
       const canvas = ctx.canvas as unknown as { width: number; height: number };
       const format = navigator.gpu.getPreferredCanvasFormat();
       ctx.configure({ device, format, alphaMode: "premultiplied" });
@@ -108,6 +110,11 @@ export function ImportExternalTexture() {
         TEXTURE_SIZE,
         TEXTURE_SIZE
       );
+      // Wrap the platform buffer (CVPixelBuffer / AHardwareBuffer pointer) in
+      // a react-native-webgpu VideoFrame so it can feed importExternalTexture.
+      const videoFrame = RNWebGPU.createVideoFrameFromNativeBuffer(
+        nativeBuffer as bigint
+      );
       let uniformsWritten = false;
 
       const render = () => {
@@ -141,7 +148,7 @@ export function ImportExternalTexture() {
         let externalTexture: GPUExternalTexture | null = null;
         try {
           externalTexture = device.importExternalTexture({
-            source: nativeBuffer,
+            source: videoFrame as unknown as VideoFrame,
             label: "test-pattern",
           });
         } catch (e) {
@@ -185,24 +192,9 @@ export function ImportExternalTexture() {
     };
   }, []);
 
-  if (typeof RNWebGPU === "undefined") {
-    return (
-      <View style={styles.container}>
-        <View style={styles.messageContainer}>
-          <Text style={styles.message}>
-            External textures require SK_GRAPHITE to be enabled.
-          </Text>
-          <Text style={styles.submessage}>
-            Build react-native-skia with Graphite support to use this feature.
-          </Text>
-        </View>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
-      <WebGPUCanvas ref={canvasRef} style={styles.canvas} />
+      <Canvas ref={canvasRef} style={styles.canvas} />
     </View>
   );
 }

@@ -17,11 +17,6 @@
 #include "EnumMapper.h"
 #include "Promise.h"
 
-#ifdef SK_GRAPHITE
-#include "rnwgpu/api/descriptors/Unions.h"
-#include "rnwgpu/async/AsyncTaskHandle.h"
-#endif
-
 // This number is the maximum integer that can be represented exactly as a
 // double
 #define MAX_SAFE_INTEGER static_cast<uint64_t>(9007199254740991)
@@ -211,32 +206,6 @@ struct JSIConverter<TEnum, std::enable_if_t<std::is_enum<TEnum>::value>> {
     return jsi::String::createFromUtf8(runtime, outUnion);
   }
 };
-
-#ifdef SK_GRAPHITE
-// AsyncTaskHandle <> Promise
-template <> struct JSIConverter<rnwgpu::async::AsyncTaskHandle> {
-  static rnwgpu::async::AsyncTaskHandle fromJSI(jsi::Runtime &,
-                                                const jsi::Value &, bool) {
-    throw std::runtime_error(
-        "Cannot convert a Promise to AsyncTaskHandle on the native side.");
-  }
-
-  static jsi::Value toJSI(jsi::Runtime &runtime,
-                          rnwgpu::async::AsyncTaskHandle &&handle) {
-    return rnwgpu::Promise::createPromise(
-        runtime, [handle = std::move(handle)](
-                     jsi::Runtime &runtime,
-                     std::shared_ptr<rnwgpu::Promise> promise) mutable {
-          if (!handle.valid()) {
-            promise->resolve(jsi::Value::undefined());
-            return;
-          }
-
-          handle.attachPromise(promise);
-        });
-  }
-};
-#endif
 
 // jsi::Function <> Function
 template <> struct JSIConverter<jsi::Function> {
