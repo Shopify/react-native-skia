@@ -16689,9 +16689,9 @@ __metadata:
   linkType: hard
 
 "fast-uri@npm:^3.0.1":
-  version: 3.1.4
-  resolution: "fast-uri@npm:3.1.4"
-  checksum: 6e1262dd5901f4f095eeb4c446111f5818320f05a8f11eaa46d9117eec3b5fd6114507a66338c564004eaa002b0eb865ca998b34780373fd205d53b5182c3bd2
+  version: 3.1.5
+  resolution: "fast-uri@npm:3.1.5"
+  checksum: 8a95af13e0730ac5c3abeb7f3939dee9fa95f2652e0ebac7a072b5597f836200084340c9bc2030f392318cdb49ec04e3fd6f558fa24c58d6d373557b9c01d7fb
   languageName: node
   linkType: hard
 
@@ -18902,9 +18902,9 @@ __metadata:
   linkType: hard
 
 "ip-address@npm:^10.0.1":
-  version: 10.2.0
-  resolution: "ip-address@npm:10.2.0"
-  checksum: 3ffba04dc4cdaf81ed2ed6edc47eee1494bb97550ef73f1918ca28405d175c03efa416b8337e868123b08c2cc677e3a07c5ce03eda3b1aeb2741c149bd37ddf9
+  version: 10.4.0
+  resolution: "ip-address@npm:10.4.0"
+  checksum: 04e729990bc597bb0c86a02f71ffb8a19a47cd78e635209923079137fa06b8a27291d62fdddfeaf67b8e710ee51c46d2bbee1d1bf92f5101305e8276359c3df6
   languageName: node
   linkType: hard
 

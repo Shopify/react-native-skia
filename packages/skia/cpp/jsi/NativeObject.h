@@ -18,14 +18,14 @@
 #include "jsi/RuntimeAwareCache.h" // Use Skia's RuntimeAwareCache
 
 // Forward declare to avoid circular dependency
-namespace rnwgpu {
+namespace RNJsi {
 template <typename ArgType, typename SFINAE> struct JSIConverter;
-} // namespace rnwgpu
+} // namespace RNJsi
 
 // Include the converter - must come after forward declaration
 #include "JSIConverter.h"
 
-namespace rnwgpu {
+namespace RNJsi {
 
 namespace jsi = facebook::jsi;
 
@@ -452,7 +452,7 @@ protected:
             return jsi::Value::undefined();
           } else {
             ReturnType result = (native.get()->*getter)();
-            return rnwgpu::JSIConverter<std::decay_t<ReturnType>>::toJSI(
+            return RNJsi::JSIConverter<std::decay_t<ReturnType>>::toJSI(
                 rt, std::move(result));
           }
         });
@@ -487,7 +487,7 @@ protected:
             throw jsi::JSError(rt, "Setter requires a value argument");
           }
           auto native = NativeObject<Derived>::fromValue(rt, thisVal);
-          auto value = rnwgpu::JSIConverter<std::decay_t<ValueType>>::fromJSI(
+          auto value = RNJsi::JSIConverter<std::decay_t<ValueType>>::fromJSI(
               rt, args[0], false);
           (native.get()->*setter)(std::move(value));
           return jsi::Value::undefined();
@@ -535,7 +535,7 @@ protected:
                  const jsi::Value *args, size_t count) -> jsi::Value {
           auto native = NativeObject<Derived>::fromValue(rt, thisVal);
           ReturnType result = (native.get()->*getter)();
-          return rnwgpu::JSIConverter<std::decay_t<ReturnType>>::toJSI(
+          return RNJsi::JSIConverter<std::decay_t<ReturnType>>::toJSI(
               rt, std::move(result));
         });
 
@@ -548,7 +548,7 @@ protected:
             throw jsi::JSError(rt, "Setter requires a value argument");
           }
           auto native = NativeObject<Derived>::fromValue(rt, thisVal);
-          auto value = rnwgpu::JSIConverter<std::decay_t<ValueType>>::fromJSI(
+          auto value = RNJsi::JSIConverter<std::decay_t<ValueType>>::fromJSI(
               rt, args[0], false);
           (native.get()->*setter)(std::move(value));
           return jsi::Value::undefined();
@@ -579,9 +579,9 @@ private:
                         jsi::Runtime &runtime, const jsi::Value *args,
                         std::index_sequence<Is...>, size_t count) {
     ReturnType result = (obj->*method)(
-        runtime, rnwgpu::JSIConverter<std::decay_t<Args>>::fromJSI(
+        runtime, RNJsi::JSIConverter<std::decay_t<Args>>::fromJSI(
                      runtime, args[Is], Is >= count)...);
-    return rnwgpu::JSIConverter<std::decay_t<ReturnType>>::toJSI(
+    return RNJsi::JSIConverter<std::decay_t<ReturnType>>::toJSI(
         runtime, std::move(result));
   }
 
@@ -592,7 +592,7 @@ private:
                                jsi::Runtime &runtime, const jsi::Value *args,
                                std::index_sequence<Is...>, size_t count) {
     if constexpr (std::is_same_v<ReturnType, void>) {
-      (obj->*method)(rnwgpu::JSIConverter<std::decay_t<Args>>::fromJSI(
+      (obj->*method)(RNJsi::JSIConverter<std::decay_t<Args>>::fromJSI(
           runtime, args[Is], Is >= count)...);
       return jsi::Value::undefined();
     } else if constexpr (std::is_same_v<ReturnType, jsi::Value>) {
@@ -601,9 +601,9 @@ private:
       return (obj->*method)(runtime, jsi::Value::undefined(), args, count);
     } else {
       ReturnType result =
-          (obj->*method)(rnwgpu::JSIConverter<std::decay_t<Args>>::fromJSI(
+          (obj->*method)(RNJsi::JSIConverter<std::decay_t<Args>>::fromJSI(
               runtime, args[Is], Is >= count)...);
-      return rnwgpu::JSIConverter<std::decay_t<ReturnType>>::toJSI(
+      return RNJsi::JSIConverter<std::decay_t<ReturnType>>::toJSI(
           runtime, std::move(result));
     }
   }
@@ -616,4 +616,4 @@ template <typename T>
 struct is_native_object<std::shared_ptr<T>>
     : std::bool_constant<std::is_base_of_v<NativeObject<T>, T>> {};
 
-} // namespace rnwgpu
+} // namespace RNJsi

@@ -25,7 +25,7 @@
 #include <cxxabi.h>
 #endif
 
-namespace rnwgpu {
+namespace RNJsi {
 
 namespace jsi = facebook::jsi;
 
@@ -495,4 +495,4 @@ template <> struct JSIConverter<std::unordered_set<std::string>> {
   }
 };
 
-} // namespace rnwgpu
+} // namespace RNJsi

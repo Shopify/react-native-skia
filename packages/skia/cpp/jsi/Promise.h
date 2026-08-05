@@ -6,7 +6,7 @@
 #include <utility>
 #include <vector>
 
-namespace rnwgpu {
+namespace RNJsi {
 
 namespace jsi = facebook::jsi;
 
@@ -34,4 +34,4 @@ public:
   static jsi::Value createPromise(jsi::Runtime &runtime, RunPromise run);
 };
 
-} // namespace rnwgpu
+} // namespace RNJsi
