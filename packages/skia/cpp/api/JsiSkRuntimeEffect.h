@@ -39,7 +39,7 @@ struct RuntimeEffectUniform {
 
 } // namespace RNSkia
 
-namespace rnwgpu {
+namespace RNJsi {
 
 // RuntimeEffectUniform -> {columns, rows, slot, isInteger}
 template <> struct JSIConverter<RNSkia::RuntimeEffectUniform> {
@@ -54,7 +54,7 @@ template <> struct JSIConverter<RNSkia::RuntimeEffectUniform> {
   }
 };
 
-} // namespace rnwgpu
+} // namespace RNJsi
 
 namespace RNSkia {
 
