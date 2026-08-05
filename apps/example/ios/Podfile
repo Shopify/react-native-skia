@@ -23,6 +23,22 @@ fix_fmt_consteval = ->(installer) do
   end
 end
 
+# react-native-skia and react-native-webgpu both ship a copy of the shared
+# JSI infrastructure at identical relative paths (e.g. jsi/NativeObject.h).
+# Xcode's all-target headermap would let one pod's include resolve into the
+# other pod's file, so disable headermaps for both; each then resolves
+# includes only through its own HEADER_SEARCH_PATHS.
+example_post_install = ->(installer) do
+  fix_fmt_consteval.call(installer)
+  installer.pods_project.targets.each do |target|
+    next unless ['react-native-skia', 'react-native-webgpu'].include?(target.name)
+
+    target.build_configurations.each do |config|
+      config.build_settings['USE_HEADERMAP'] = 'NO'
+    end
+  end
+end
+
 use_test_app! :hermes_enabled => true,
               :new_arch_enabled => true,
-              :post_install => fix_fmt_consteval
+              :post_install => example_post_install

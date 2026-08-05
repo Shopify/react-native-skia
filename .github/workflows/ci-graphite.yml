@@ -24,7 +24,7 @@ jobs:
       TURBO_CACHE_DIR: .turbo/android
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
         with:
           submodules: recursive
 
@@ -115,7 +115,7 @@ jobs:
       TURBO_CACHE_DIR: .turbo/android
     steps:
       - name: checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
         with:
           submodules: recursive
 
@@ -199,7 +199,7 @@ jobs:
       TURBO_CACHE_DIR: .turbo/ios
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v5.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
         with:
           submodules: recursive
 
@@ -257,12 +257,4 @@ jobs:
 
       - name: Run e2e tests
         working-directory: packages/skia
-        # On Graphite we run the Paths render test plus the WebGPU specs.
-        # ArrayBuffer, ComputeShader, ErrorScope, ImageBitmapBounds and
-        # DawnToggles are pure surface.eval round-trips that assert on returned
-        # values. The external-texture specs (ExternalTexture,
-        # ImportExternalTexture, SharedTextureMemory) additionally exercise
-        # NativeBuffer import and GPU read-back; they self-validate via
-        # copyTextureToBuffer (not Skia image readPixels) and skip themselves
-        # where NativeBuffer/createImageBitmap are unavailable.
-        run: CI=true E2E=true yarn test -i "e2e/(Paths|ArrayBuffer|ComputeShader|ErrorScope|ImageBitmapBounds|DawnToggles|ExternalTexture|ImportExternalTexture|SharedTextureMemory)"
+        run: CI=true yarn e2e --testPathIgnorePatterns "Paragraph|Atlas"

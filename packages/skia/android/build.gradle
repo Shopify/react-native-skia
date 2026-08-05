@@ -88,6 +88,39 @@ def skiaLibsPath = useGraphite
         : "${resolveNodePackage('react-native-skia-graphite-android', projectDir)}/libs")
     : "${resolveNodePackage('react-native-skia-android', projectDir)}/libs"
 
+// Both packages must link the exact same Dawn artifact: compare this
+// Graphite build's Dawn release tag (libs/.dawn-version) with the tag
+// react-native-webgpu declares in its package.json `dawn` field.
+if (useGraphite) {
+    def dawnMarker = file("${projectDir}/../libs/.dawn-version")
+    def webgpuDir = null
+    try {
+        webgpuDir = resolveNodePackage('react-native-webgpu', projectDir)
+    } catch (Exception ignored) {
+        // react-native-webgpu not installed: nothing to check
+    }
+    if (dawnMarker.exists() && webgpuDir != null) {
+        def skiaDawn = dawnMarker.text.trim()
+        def webgpuJson = new groovy.json.JsonSlurper().parse(file("${webgpuDir}/package.json"))
+        if (webgpuJson.dawn == null) {
+            throw new GradleException(
+                "react-native-skia: the installed react-native-webgpu " +
+                "(${webgpuJson.version}) does not declare a `dawn` field in its " +
+                "package.json, so it predates shared-Dawn support and cannot be " +
+                "paired with this Graphite build (which links ${skiaDawn}). " +
+                "Upgrade react-native-webgpu.")
+        }
+        def webgpuDawn = "dawn-" + webgpuJson.dawn.toString().replace('/', '-')
+        if (skiaDawn != webgpuDawn) {
+            throw new GradleException(
+                "react-native-skia: Dawn version mismatch. This Graphite build links " +
+                "${skiaDawn} but react-native-webgpu links ${webgpuDawn}. " +
+                "Align the two packages so the app contains exactly one Dawn.")
+        }
+        logger.warn("react-native-skia: Dawn versions match (${skiaDawn})")
+    }
+}
+
 logger.warn("react-native-skia: SK_GRAPHITE: ${useGraphite}")
 logger.warn("react-native-skia: Skia libs: ${skiaLibsPath}")
 logger.warn("react-native-skia: node_modules/ found at: ${nodeModules}")

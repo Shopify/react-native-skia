@@ -24,7 +24,7 @@
  * be expressed as typed signatures (heterogeneous argument dispatch, typed
  * array construction, lenient options objects, promises) — everything else
  * uses installMethod/installGetter/installChainableMethod with typed C++
- * signatures converted through rnwgpu::JSIConverter.
+ * signatures converted through RNJsi::JSIConverter.
  */
 #define JSI_HOST_FUNCTION(NAME)                                                \
   jsi::Value NAME(jsi::Runtime &runtime, const jsi::Value &thisValue,          \
@@ -36,7 +36,7 @@ namespace jsi = facebook::jsi;
 
 // Minimum memory pressure reported for any native object — aliased from the
 // NativeObject infrastructure so dispose() and create() agree on the floor.
-static constexpr size_t kMinMemoryPressure = rnwgpu::kMinMemoryPressure;
+static constexpr size_t kMinMemoryPressure = RNJsi::kMinMemoryPressure;
 
 /**
  * Creates the JS object for a wrapper instance (a class based on the
@@ -102,16 +102,16 @@ std::shared_ptr<T> getJsiObject(jsi::Runtime &runtime,
  *
  * Most methods use typed C++ signatures installed with installMethod /
  * installGetter / installChainableMethod (arguments and results converted
- * through rnwgpu::JSIConverter, see JsiSkConverters.h). Methods that cannot
+ * through RNJsi::JSIConverter, see JsiSkConverters.h). Methods that cannot
  * be typed keep the classic JSI_HOST_FUNCTION signature and are installed
  * with installHostMethod, which resolves the C++ instance from `this` via
  * native state.
  */
 template <typename Derived>
-class JsiSkNativeObject : public rnwgpu::NativeObject<Derived> {
+class JsiSkNativeObject : public RNJsi::NativeObject<Derived> {
 public:
   explicit JsiSkNativeObject(std::shared_ptr<RNSkPlatformContext> context)
-      : rnwgpu::NativeObject<Derived>(Derived::CLASS_NAME),
+      : RNJsi::NativeObject<Derived>(Derived::CLASS_NAME),
         _context(std::move(context)) {}
 
   /**
@@ -120,7 +120,7 @@ public:
    */
   static std::shared_ptr<Derived> fromThis(jsi::Runtime &runtime,
                                            const jsi::Value &thisValue) {
-    return rnwgpu::NativeObject<Derived>::fromValue(runtime, thisValue);
+    return RNJsi::NativeObject<Derived>::fromValue(runtime, thisValue);
   }
 
 protected:
@@ -222,7 +222,7 @@ protected:
   /**
    * Installs a typed mutating method that returns `this` for chaining
    * (e.g. path.moveTo(...).lineTo(...)). Arguments are converted through
-   * rnwgpu::JSIConverter like installMethod; the member function's return
+   * RNJsi::JSIConverter like installMethod; the member function's return
    * value (if any) is ignored and the JS function returns thisValue.
    */
   template <typename ReturnType, typename... Args>
@@ -270,7 +270,7 @@ private:
                               ReturnType (Derived::*method)(Args...),
                               jsi::Runtime &runtime, const jsi::Value *args,
                               std::index_sequence<Is...>, size_t count) {
-    (obj->*method)(rnwgpu::JSIConverter<std::decay_t<Args>>::fromJSI(
+    (obj->*method)(RNJsi::JSIConverter<std::decay_t<Args>>::fromJSI(
         runtime, args[Is], Is >= count)...);
   }
 
@@ -280,7 +280,7 @@ private:
       jsi::Runtime &runtime, const jsi::Value *args, std::index_sequence<Is...>,
       size_t count) {
     (obj->*method)(runtime,
-                   rnwgpu::JSIConverter<std::decay_t<Args>>::fromJSI(
+                   RNJsi::JSIConverter<std::decay_t<Args>>::fromJSI(
                        runtime, args[Is], Is >= count)...);
   }
 
