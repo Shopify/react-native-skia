@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace rnwgpu {
+namespace RNJsi {
 
 namespace EnumMapper {
 // Add these two methods in namespace "EnumMapper" to allow parsing a custom
@@ -60,4 +60,4 @@ static void convertEnumToJSUnion(TEnum, std::string *) {
 }
 } // namespace EnumMapper
 
-} // namespace rnwgpu
+} // namespace RNJsi

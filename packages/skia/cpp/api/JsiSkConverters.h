@@ -214,7 +214,7 @@ template <typename T> struct JsiOptional : std::optional<T> {
 
 } // namespace RNSkia
 
-namespace rnwgpu {
+namespace RNJsi {
 
 /**
  * sk_sp<T> arguments (SkImage, SkShader, ...). Delegates to the wrapper
@@ -407,4 +407,4 @@ template <> struct JSIConverter<SkISize> {
   }
 };
 
-} // namespace rnwgpu
+} // namespace RNJsi
