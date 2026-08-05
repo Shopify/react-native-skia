@@ -6,7 +6,7 @@
 #include <utility>
 #include <vector>
 
-namespace rnwgpu {
+namespace RNJsi {
 
 namespace jsi = facebook::jsi;
 
@@ -45,4 +45,4 @@ void Promise::reject(std::string message) {
   _rejecter.call(runtime, error.value());
 }
 
-} // namespace rnwgpu
+} // namespace RNJsi
