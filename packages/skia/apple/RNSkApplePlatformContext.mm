@@ -307,17 +307,6 @@ RNSkApplePlatformContext::createVideo(const std::string &url) {
   return std::make_shared<RNSkAppleVideo>(url, this);
 }
 
-std::shared_ptr<WindowContext>
-RNSkApplePlatformContext::makeContextFromNativeSurface(void *surface, int width,
-                                                       int height) {
-#if defined(SK_GRAPHITE)
-  return DawnContext::getInstance().MakeWindow(surface, width, height);
-#else
-  return MetalContext::getInstance().MakeWindow((__bridge CALayer *)surface,
-                                                width, height);
-#endif
-}
-
 void RNSkApplePlatformContext::raiseError(const std::exception &err) {
   RCTFatal(RCTErrorWithMessage([NSString stringWithUTF8String:err.what()]));
 }

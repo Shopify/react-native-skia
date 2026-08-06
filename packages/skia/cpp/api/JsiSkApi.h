@@ -56,7 +56,6 @@
 #include "JsiSkTypefaceFactory.h"
 #include "JsiSkTypefaceFontProviderFactory.h"
 #include "JsiSkVertices.h"
-#include "JsiSkiaContext.h"
 #include "JsiSkottieFactory.h"
 #include "JsiVideo.h"
 #include "api/recorder/JsiRecorder.h"
@@ -115,10 +114,6 @@ public:
   JSI_HOST_FUNCTION(Video) {
     return JsiVideo::createCtor(getContext())(runtime, thisValue, arguments,
                                               count);
-  }
-  JSI_HOST_FUNCTION(Context) {
-    return JsiSkiaContext::createCtor(getContext())(runtime, thisValue,
-                                                    arguments, count);
   }
   JSI_HOST_FUNCTION(Font) {
     return JsiSkFont::createCtor(getContext())(runtime, thisValue, arguments,
@@ -256,7 +251,6 @@ public:
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installHostMethod(runtime, prototype, "Video", &JsiSkApi::Video);
-    installHostMethod(runtime, prototype, "Context", &JsiSkApi::Context);
     installHostMethod(runtime, prototype, "getNativeDevice",
                       &JsiSkApi::getNativeDevice);
     installHostMethod(runtime, prototype, "Font", &JsiSkApi::Font);
