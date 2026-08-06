@@ -69,7 +69,51 @@ template <typename T> struct unwrap_optional<std::optional<T>> {
 template <typename T>
 T getPropertyValue(jsi::Runtime &runtime, const jsi::Value &value);
 
-// Base template for convertProperty
+template <typename T, typename Target>
+bool convertSelectorProperty(jsi::Runtime &runtime, const jsi::Value &prop,
+                             Target &target, Variables &variables) {
+  if (!prop.isObject()) {
+    return false;
+  }
+  auto wrapper = prop.asObject(runtime);
+  if (!wrapper.hasProperty(runtime, "__sv") ||
+      !wrapper.hasProperty(runtime, "__key")) {
+    return false;
+  }
+  auto svVal = wrapper.getProperty(runtime, "__sv");
+  auto keyVal = wrapper.getProperty(runtime, "__key");
+  if (!isSharedValue(runtime, svVal) || !keyVal.isString()) {
+    return false;
+  }
+  auto sharedValue = svVal.asObject(runtime);
+  auto key = keyVal.asString(runtime).utf8(runtime);
+  auto name =
+      sharedValue.getProperty(runtime, "name").asString(runtime).utf8(runtime);
+
+  auto conv = [target = &target, key](jsi::Runtime &runtime,
+                                      const jsi::Object &val) {
+    auto value = val.getProperty(runtime, "value");
+    if (!value.isObject()) {
+      return;
+    }
+    auto values = value.asObject(runtime);
+    if (!values.hasProperty(runtime, key.c_str())) {
+      return;
+    }
+
+    auto selected = values.getProperty(runtime, key.c_str());
+    if (selected.isUndefined() || selected.isNull() ||
+        (selected.isObject() && selected.asObject(runtime).isFunction(runtime))) {
+      return;
+    }
+    *target = getPropertyValue<T>(runtime, selected);
+  };
+
+  variables[name].push_back(conv);
+  conv(runtime, sharedValue);
+  return true;
+}
+
 template <typename T, typename Target>
 void convertPropertyImpl(jsi::Runtime &runtime, const jsi::Object &object,
                          const std::string &propertyName, Target &target,
@@ -78,13 +122,16 @@ void convertPropertyImpl(jsi::Runtime &runtime, const jsi::Object &object,
     return;
   }
 
-  auto property = object.getProperty(runtime, propertyName.c_str());
+  auto prop = object.getProperty(runtime, propertyName.c_str());
 
-  if (isSharedValue(runtime, property)) {
-    auto sharedValue = property.asObject(runtime);
-    auto name = sharedValue.getProperty(runtime, "name")
-                    .asString(runtime)
-                    .utf8(runtime);
+  if (convertSelectorProperty<T>(runtime, prop, target, variables)) {
+    return;
+  }
+
+  if (isSharedValue(runtime, prop)) {
+    auto sharedValue = prop.asObject(runtime);
+    auto name =
+        sharedValue.getProperty(runtime, "name").asString(runtime).utf8(runtime);
     auto conv = [target = &target](jsi::Runtime &runtime,
                                    const jsi::Object &val) {
       auto value = val.getProperty(runtime, "value");
@@ -92,9 +139,10 @@ void convertPropertyImpl(jsi::Runtime &runtime, const jsi::Object &object,
     };
     variables[name].push_back(conv);
     conv(runtime, sharedValue);
-  } else {
-    target = getPropertyValue<T>(runtime, property);
+    return;
   }
+
+  target = getPropertyValue<T>(runtime, prop);
 }
 
 // Main convertProperty template

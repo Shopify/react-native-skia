@@ -29,27 +29,32 @@ import { fileOps } from "./utils";
 
 // Graphite configuration
 const GRAPHITE_CONFIG = {
-  version: "m150",
+  version: "m152",
   checksums: {
     "android-armeabi-v7a":
-      "c8a1f9d259599280b737497a914e6fcb1b47fbf6e59537cffe3e3ebbc3aa0394",
+      "edc363fb63d3e629d7023d63d505c2d075030dfc40e04890d988eaff5c31c2fc",
     "android-arm64-v8a":
-      "21667587386ebbaba1b61926f81dc1562443eefec5d1489b9278084f18ebb8e4",
+      "cefc18191d46deec3e164f3b717b06c6ae7845eeec21fe11cca53339063cf1e2",
     "android-x86":
-      "0679a34612b98b5397180e027f7592026eb4af950b36e55bf7882ea86e2cb1e3",
+      "78041f4d58fafda1821c96f83e4818cce492a7047b16f267527e3e140d0b4c0d",
     "android-x86_64":
-      "eec546cf240e76129e9e6d16e51c61acfd62b7c00d655b133eddfab890c3488b",
+      "8cfcd40b87b42aa0aaaba89852aa51f3316c90debcdf24dcc5a9b7b562a8aa6f",
     "apple-ios-xcframeworks":
-      "0ad5434961b22a59541c0364be20a54c5cde599c1ffd4d6b653fefb19c2119fc",
+      "9a64915dd95bf22ab3f38624ac2fc7e4a14cfd155f218170317ccef6ab9dfc69",
     "apple-macos-xcframeworks":
-      "e3861d45386309dfed851488293027f3026a35684007595071426f4e46bef023",
+      "995cc77d575368d2df08a16ed0345395ba66308b00ba57ef190e70eb710d74f9",
   },
 } as const;
 
 // Dawn prebuilt binaries. These are the exact artifacts react-native-webgpu
 // links; both packages must consume the same Dawn build so that only one Dawn
-// copy exists in an app that installs both. The Dawn commit is the one from
-// this Skia milestone's DEPS.
+// copy exists in an app that installs both, which is why the release tag is
+// pinned here rather than derived from GRAPHITE_CONFIG.version.
+//
+// STALE: this is still the m150 Dawn (63f25feec51e9351fb25222b6d5de1af791d7c4f)
+// while m152's DEPS pins 1e897275172a23f27b0022fa6beae3084ed54a9b. Bump this to
+// dawn-chrome-m152 (with new checksums) once react-native-webgpu publishes that
+// release; until then Graphite installs pair m152 Skia with m150 Dawn.
 const DAWN_CONFIG = {
   releaseTag: "dawn-chrome-m150",
   baseUrl:
