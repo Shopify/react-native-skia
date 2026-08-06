@@ -96,9 +96,6 @@ public:
   virtual sk_sp<SkSurface>
   makeOffscreenSurface(int width, int height, bool useP3ColorSpace = false) = 0;
 
-  virtual std::shared_ptr<WindowContext>
-  makeContextFromNativeSurface(void *surface, int width, int height) = 0;
-
   /**
    * Creates an image from a native buffer.
    * - On iOS, this is a `CVPixelBufferRef`

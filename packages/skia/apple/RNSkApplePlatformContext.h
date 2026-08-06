@@ -63,9 +63,6 @@ public:
 
   std::shared_ptr<RNSkVideo> createVideo(const std::string &url) override;
 
-  std::shared_ptr<WindowContext>
-  makeContextFromNativeSurface(void *surface, int width, int height) override;
-
   virtual void performStreamOperation(
       const std::string &sourceUri,
       const std::function<void(std::unique_ptr<SkStreamAsset>)> &op) override;

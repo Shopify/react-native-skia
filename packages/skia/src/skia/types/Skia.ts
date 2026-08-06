@@ -21,7 +21,7 @@ import type { SkVertices, VertexMode } from "./Vertices/Vertices";
 import type { DataFactory } from "./Data";
 import type { SVGFactory } from "./SVG";
 import type { TextBlobFactory } from "./TextBlob";
-import type { SkSurface, SurfaceFactory } from "./Surface";
+import type { SurfaceFactory } from "./Surface";
 import type { SkRSXform } from "./RSXform";
 import type { SkPath } from "./Path/Path";
 import type { SkContourMeasureIter } from "./ContourMeasure";
@@ -34,11 +34,6 @@ import type { Video } from "./Video";
 import type { NativeBufferFactory } from "./NativeBuffer";
 import type { JsiRecorder } from "./Recorder";
 import type { SkottieFactory } from "./Skottie";
-
-export interface SkiaContext {
-  getSurface(): SkSurface;
-  present(): void;
-}
 
 /**
  * Declares the interface for the native Skia API
@@ -106,7 +101,6 @@ export interface Skia {
   ParagraphBuilder: ParagraphBuilderFactory;
   Skottie: SkottieFactory;
   Video: (url: string) => Promise<Video> | Video;
-  Context(surface: bigint, width: number, height: number): SkiaContext;
   NativeBuffer: NativeBufferFactory;
   Recorder(): JsiRecorder;
   /**
