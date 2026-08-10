@@ -45,19 +45,40 @@ class WebGLRenderer implements Renderer {
   constructor(private canvas: HTMLCanvasElement) {
     this.contextHandle = CanvasKit.GetWebGLContext(canvas);
     if (!this.contextHandle) {
-      throw new Error("Could not create a WebGL context");
+      // WebGL is unavailable (disabled, blocklisted GPU, or the per-page
+      // context limit is exhausted). Throwing here would escape the layout
+      // effect that constructs the renderer, so degrade to an inert renderer
+      // instead: draw() and makeImageSnapshot() already no-op on a null
+      // surface, and the event lets embedders show a fallback UI.
+      this.announceSurfaceUnavailable();
+      return;
     }
     this.grContext = CanvasKit.MakeWebGLContext(this.contextHandle);
     if (!this.grContext) {
       CanvasKit.deleteContext(this.contextHandle);
       this.contextHandle = 0;
-      throw new Error("Could not create a graphics context");
+      this.announceSurfaceUnavailable();
+      return;
     }
     const ctx = canvas.getContext("webgl2");
     if (ctx) {
       ctx.drawingBufferColorSpace = "display-p3";
     }
     this.onResize();
+  }
+
+  // Announces that no drawing surface could be created, on the next frame so
+  // listeners attached in an effect of the same commit that mounted the view
+  // are registered first. Bubbles so embedders can react (e.g. swap in a
+  // fallback UI); without a listener it is a no-op. Mirrors how
+  // StaticWebGLRenderer already treats a failed surface as recoverable
+  // rather than fatal.
+  private announceSurfaceUnavailable() {
+    requestAnimationFrame(() => {
+      this.canvas.dispatchEvent(
+        new CustomEvent("skia-surface-unavailable", { bubbles: true })
+      );
+    });
   }
 
   makeImageSnapshot(picture: SkPicture, rect?: SkRect): SkImage | null {
@@ -95,7 +116,12 @@ class WebGLRenderer implements Renderer {
       CanvasKit.ColorSpace.SRGB
     );
     if (!surface) {
-      throw new Error("Could not create surface");
+      // onResize runs from a ResizeObserver callback, so a throw here escapes
+      // as an unhandled error that no try/catch or React error boundary can
+      // reach. Leave the surface null instead — draw() and makeImageSnapshot()
+      // already no-op on it — and let embedders know.
+      this.announceSurfaceUnavailable();
+      return;
     }
     this.surface = new JsiSkSurface(CanvasKit, surface);
   }
