@@ -120,10 +120,13 @@ class WebGLRenderer implements Renderer {
       this.grContext.delete();
       this.grContext = null;
     }
-    this.canvas
-      ?.getContext("webgl2")
-      ?.getExtension("WEBGL_lose_context")
-      ?.loseContext();
+    // NOTE: the canvas element's WebGL context is deliberately *not* lost
+    // here. dispose() runs from the cleanup of a layout effect, which does
+    // not imply the element is gone: React re-runs layout effects on a
+    // preserved host node under StrictMode's DEV double-invoke and when an
+    // Activity/offscreen subtree is revealed. WEBGL_lose_context.loseContext()
+    // is permanent for the element, so losing it here left the canvas
+    // unusable for the next renderer built on it.
     if (this.contextHandle) {
       // Unregister the context from CanvasKit's internal registry, otherwise
       // it retains the canvas element (and its detached DOM tree) forever.

@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 /* global HTMLCanvasElement */
-import React, { act } from "react";
+import React, { act, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import type { SkPicture } from "../../skia/types";
@@ -46,6 +46,34 @@ class ResizeObserverMock {
 
 const canvasSize = { width: 0, height: 0 };
 
+// A canvas element owns at most one WebGL context for its whole lifetime, and
+// WEBGL_lose_context.loseContext() puts that context into a *permanently* lost
+// state: a later getContext("webgl2") hands back the same lost object and only
+// restoreContext() (which resolves asynchronously) can revive it. See
+// https://registry.khronos.org/webgl/extensions/WEBGL_lose_context/
+const lostContexts = new WeakSet<object>();
+const contexts = new WeakMap<object, { drawingBufferColorSpace: string }>();
+
+const getWebGLContextMock = function (this: object, kind: string) {
+  if (kind !== "webgl2") {
+    return null;
+  }
+  let ctx = contexts.get(this);
+  if (!ctx) {
+    ctx = {
+      drawingBufferColorSpace: "srgb",
+      getExtension: (name: string) =>
+        name === "WEBGL_lose_context"
+          ? { loseContext: () => lostContexts.add(ctx!) }
+          : null,
+      isContextLost: () => lostContexts.has(ctx!),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any;
+    contexts.set(this, ctx!);
+  }
+  return ctx;
+};
+
 const makeRawCanvas = () => ({
   clear: jest.fn(),
   save: jest.fn(),
@@ -66,13 +94,46 @@ const createCanvasKitMock = () => {
     releaseResourcesAndAbandonContext: jest.fn(),
     delete: jest.fn(),
   };
+  // Emscripten hands out an integer handle per GL context and keeps the
+  // canvas it came from in its registry.
+  const canvasByHandle = new Map<number, object>();
+  let nextHandle = 1;
   const CanvasKitMock = {
-    GetWebGLContext: jest.fn(() => 1),
-    MakeWebGLContext: jest.fn(() => grContext),
+    // As reported in #3976, this still returns a non-zero handle for a canvas
+    // whose context is lost, so the "Could not create a WebGL context" guard
+    // in the renderer never fires.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    GetWebGLContext: jest.fn((canvas: any) => {
+      const handle = nextHandle++;
+      canvasByHandle.set(handle, canvas);
+      return handle;
+    }),
+    MakeWebGLContext: jest.fn((handle: number) => {
+      const canvas = canvasByHandle.get(handle);
+      // MakeWebGLContext starts by making the handle current, and returns
+      // null if it is not in the registry (never created, or deleted).
+      if (!canvas) {
+        return null;
+      }
+      // A GrDirectContext cannot be built on a lost context. In the browser
+      // this faults inside wasm on a null pointer (the "rangeMin" error in
+      // #3976); a null return is the well-behaved model of the same failure,
+      // and the renderer already handles it.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ctx = (canvas as any).getContext("webgl2");
+      if (ctx && lostContexts.has(ctx)) {
+        return null;
+      }
+      return grContext;
+    }),
     MakeOnScreenGLSurface: jest.fn((_ctx, width, height) =>
       width === 0 || height === 0 ? null : rawSurface
     ),
-    deleteContext: jest.fn(),
+    // Unregistering the context is what releases the canvas element that
+    // CanvasKit's GL registry retained in #3924.
+    deleteContext: jest.fn((handle: number) => {
+      canvasByHandle.delete(handle);
+    }),
     ColorSpace: { SRGB: "srgb" },
     TRANSPARENT: Float32Array.of(0, 0, 0, 0),
   };
@@ -93,7 +154,8 @@ beforeAll(() => {
     configurable: true,
     get: () => canvasSize.height,
   });
-  HTMLCanvasElement.prototype.getContext = jest.fn(() => null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  HTMLCanvasElement.prototype.getContext = getWebGLContextMock as any;
   Object.defineProperty(window, "devicePixelRatio", {
     configurable: true,
     get: () => display.pixelDensity,
@@ -125,18 +187,19 @@ beforeEach(() => {
   display.pixelDensity = 1;
 });
 
-const mountView = (nativeID: string, onLayout?: () => void) => {
+const mountView = (nativeID: string, onLayout?: () => void, strict = false) => {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
+  const view = (
+    <SkiaPictureView
+      nativeID={nativeID}
+      onLayout={onLayout}
+      style={{ width: 360, height: 520 }}
+    />
+  );
   act(() => {
-    root.render(
-      <SkiaPictureView
-        nativeID={nativeID}
-        onLayout={onLayout}
-        style={{ width: 360, height: 520 }}
-      />
-    );
+    root.render(strict ? <StrictMode>{view}</StrictMode> : view);
   });
   return {
     unmount: () => {
@@ -272,6 +335,40 @@ describe("SkiaPictureView.web", () => {
       width: 360,
       height: 520,
     });
+
+    view.unmount();
+  });
+
+  // #3976: the renderer is built and disposed in a layout effect, but effect
+  // cleanup does not imply the host node is gone. React re-runs layout
+  // effects on a *preserved* <canvas> element under StrictMode's DEV
+  // double-invoke (doubleInvokeEffectsOnFiber) and when an Activity/offscreen
+  // subtree is revealed (reappearLayoutEffects). Losing the element's WebGL
+  // context on dispose lost it permanently, so the second construction could
+  // not build a GrDirectContext on it.
+  it("survives its layout effect being re-run on the same canvas element", async () => {
+    const { CanvasKitMock, rawCanvas } = createCanvasKitMock();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (global as any).CanvasKit = CanvasKitMock;
+    canvasSize.width = 360;
+    canvasSize.height = 520;
+
+    const view = mountView("5", undefined, true);
+
+    // The effect really was torn down and re-run, against the very same
+    // element. Without this the test could pass without exercising the bug.
+    const canvasArgs = CanvasKitMock.GetWebGLContext.mock.calls.map(
+      ([canvas]) => canvas
+    );
+    expect(canvasArgs.length).toBeGreaterThan(1);
+    expect(new Set(canvasArgs).size).toBe(1);
+
+    // ...and the renderer that came out of it can still paint.
+    const api = global.SkiaViewApi as ISkiaViewApiWeb;
+    await act(async () => {
+      api.setJsiProperty(5, "picture", fakePicture as unknown as SkPicture);
+    });
+    expect(rawCanvas.drawPicture).toHaveBeenCalledWith(fakePicture.ref);
 
     view.unmount();
   });
