@@ -136,7 +136,7 @@ public:
 
   std::shared_ptr<JsiSkTypeface> getTypeface() {
     return std::make_shared<JsiSkTypeface>(
-        getContext(), sk_sp<SkTypeface>(getObject()->getTypeface()));
+        getContext(), sk_ref_sp(getObject()->getTypeface()));
   }
 
   void setEdging(double edging) {
