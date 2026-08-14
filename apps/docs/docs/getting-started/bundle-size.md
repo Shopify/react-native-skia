@@ -7,9 +7,9 @@ slug: /getting-started/bundle-size
 
 Below is the app size increase to be expected when adding React Native Skia to your project.
 
-| Apple    | Android      | Web      |
-|----------|--------------| -------- |
-| 6 MB     | 4 MB         | 2.9 MB\* |
+| Apple | Android | Web      |
+| ----- | ------- | -------- |
+| 6 MB  | 4 MB    | 2.9 MB\* |
 
 \*This figure is the size of the gzipped file served through a CDN ([learn more](web)).
 
@@ -42,12 +42,12 @@ Meaning that we’ve increased the size of our app by around 5,8 MB after adding
 
 The npm download is bigger than these numbers indicate because we need to distribute Skia for all target platforms on both iOS and Android. The prebuilt binaries ship as separate packages that `@shopify/react-native-skia` depends on:
 
-| Package | Needed for | Can be pruned? |
-| ------- | ---------- | -------------- |
-| `react-native-skia-apple-ios` | iOS | No |
-| `react-native-skia-android` | Android | No |
-| `react-native-skia-apple-macos` | macOS | Yes |
-| `react-native-skia-apple-tvos` | tvOS | Yes |
+| Package                         | Needed for | Can be pruned? |
+| ------------------------------- | ---------- | -------------- |
+| `react-native-skia-apple-ios`   | iOS        | No             |
+| `react-native-skia-android`     | Android    | No             |
+| `react-native-skia-apple-macos` | macOS      | Yes            |
+| `react-native-skia-apple-tvos`  | tvOS       | Yes            |
 
 These affect the size of your `node_modules` and the time your installs and CI caches take — not the size of the app you ship. App size is determined by what actually gets linked, so an iOS-only app never ships the macOS or tvOS binaries either way.
 
@@ -78,20 +78,6 @@ The field name depends on your package manager:
 - **Yarn Berry** (v2+): use `resolutions` with the `portal:` protocol instead of `file:`.
 
 Repeat for `react-native-skia-apple-tvos` if you don't build for Apple TV.
-
-Finally, remove any copy left behind by a previous install, otherwise the old frameworks are still found and you save nothing:
-
-```sh
-rm -rf node_modules/@shopify/react-native-skia/libs/macos
-```
-
-Then run `pod install` again.
-
-:::info
-
-`patch-package` cannot do this. It runs in `postinstall`, after resolution and download have already happened, so editing the `dependencies` field that way frees no space. Only a resolution-level override prevents the fetch.
-
-:::
 
 ### Why iOS and Android cannot be pruned
 
