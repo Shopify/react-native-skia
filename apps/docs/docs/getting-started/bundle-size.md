@@ -38,6 +38,63 @@ Unlike Android, there is no standard way to find the app size increase on iOS - 
 
 Meaning that we’ve increased the size of our app by around 5,8 MB after adding React Native Skia. If we add the increased Javascript bundle of about 220 KB, we end up with about 6 MB of increased download size after including React Native Skia.
 
-### NPM Package
+## NPM Package
 
-The NPM download is bigger than these numbers indicate because we need to distribute Skia for all target platforms on both iOS and Android.
+The npm download is bigger than these numbers indicate because we need to distribute Skia for all target platforms on both iOS and Android. The prebuilt binaries ship as separate packages that `@shopify/react-native-skia` depends on:
+
+| Package | Needed for | Can be pruned? |
+| ------- | ---------- | -------------- |
+| `react-native-skia-apple-ios` | iOS | No |
+| `react-native-skia-android` | Android | No |
+| `react-native-skia-apple-macos` | macOS | Yes |
+| `react-native-skia-apple-tvos` | tvOS | Yes |
+
+These affect the size of your `node_modules` and the time your installs and CI caches take — not the size of the app you ship. App size is determined by what actually gets linked, so an iOS-only app never ships the macOS or tvOS binaries either way.
+
+### Pruning unused platforms
+
+If you do want to keep them out of `node_modules`, redirect the unused packages to an empty local stub. Package managers cannot remove a dependency, but every one of them can override where it resolves from.
+
+Create `stubs/skia-apple-macos/package.json` in your app:
+
+```json
+{ "name": "react-native-skia-apple-macos", "version": "0.0.0" }
+```
+
+That is the whole file — the version is required but is not checked, since overrides bypass range matching. Then point the dependency at it from your app's `package.json`:
+
+```json
+{
+  "overrides": {
+    "react-native-skia-apple-macos": "file:./stubs/skia-apple-macos"
+  }
+}
+```
+
+The field name depends on your package manager:
+
+- **npm** and **Bun**: `overrides`, as above.
+- **pnpm**: the same object, nested under `pnpm.overrides`.
+- **Yarn Berry** (v2+): use `resolutions` with the `portal:` protocol instead of `file:`.
+
+Repeat for `react-native-skia-apple-tvos` if you don't build for Apple TV.
+
+Finally, remove any copy left behind by a previous install, otherwise the old frameworks are still found and you save nothing:
+
+```sh
+rm -rf node_modules/@shopify/react-native-skia/libs/macos
+```
+
+Then run `pod install` again.
+
+:::info
+
+`patch-package` cannot do this. It runs in `postinstall`, after resolution and download have already happened, so editing the `dependencies` field that way frees no space. Only a resolution-level override prevents the fetch.
+
+:::
+
+### Why iOS and Android cannot be pruned
+
+Both are resolved during the native build and fail loudly when missing — CocoaPods raises if `libs/ios` is absent, and Gradle raises if `react-native-skia-android` cannot be resolved. Note that Gradle runs whenever your app has an `android/` directory, even if you never ship an Android build, so pruning the Android package will break your build rather than shrink it.
+
+`canvaskit-wasm` should also be left alone: it backs both the [web build](web) and the Jest mocks, so removing it breaks `yarn test` in apps that follow the [testing setup](installation#testing-with-jest).
