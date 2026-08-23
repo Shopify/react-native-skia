@@ -11,32 +11,25 @@ import { importSkia, surface } from "../setup";
 // generated across the whole interior and tints it - even when the blur and the
 // offset are both zero (issue #2990).
 //
-// None of the references below is drawn with a shadow, so none of them encodes
-// the behaviour under test.
-
-const REF_TRANSLUCENT = "snapshots/drawings/inner-shadow-translucent.png";
-const REF_TRANSLUCENT_CENTER =
-  "snapshots/drawings/inner-shadow-translucent-center.png";
-const REF_OPAQUE = "snapshots/drawings/inner-shadow-opaque.png";
-
-const shape = (color: string, children?: React.ReactNode) => (
-  <RoundedRect x={32} y={32} width={192} height={192} r={24} color={color}>
-    {children}
-  </RoundedRect>
-);
-
-const TRANSLUCENT = "rgba(255,0,0,0.5)";
-const OPAQUE = "rgb(255,0,0)";
+// The reference results are drawn without a shadow, so they don't encode the
+// behaviour under test.
 
 describe("Inner shadow", () => {
   it("Build reference result", async () => {
     const image = await surface.draw(
       <>
         <Fill color="white" />
-        {shape(TRANSLUCENT)}
+        <RoundedRect
+          x={32}
+          y={32}
+          width={192}
+          height={192}
+          r={24}
+          color="rgba(255, 0, 0, 0.5)"
+        />
       </>
     );
-    checkImage(image, REF_TRANSLUCENT);
+    checkImage(image, "snapshots/drawings/inner-shadow-translucent.png");
   });
 
   it("should be a no-op without blur and offset on a translucent shape", async () => {
@@ -45,23 +38,36 @@ describe("Inner shadow", () => {
     const image = await surface.draw(
       <>
         <Fill color="white" />
-        {shape(
-          TRANSLUCENT,
+        <RoundedRect
+          x={32}
+          y={32}
+          width={192}
+          height={192}
+          r={24}
+          color="rgba(255, 0, 0, 0.5)"
+        >
           <Shadow inner dx={0} dy={0} blur={0} color="black" />
-        )}
+        </RoundedRect>
       </>
     );
-    checkImage(image, REF_TRANSLUCENT);
+    checkImage(image, "snapshots/drawings/inner-shadow-translucent.png");
   });
 
   it("Build opaque reference result", async () => {
     const image = await surface.draw(
       <>
         <Fill color="white" />
-        {shape(OPAQUE)}
+        <RoundedRect
+          x={32}
+          y={32}
+          width={192}
+          height={192}
+          r={24}
+          color="red"
+        />
       </>
     );
-    checkImage(image, REF_OPAQUE);
+    checkImage(image, "snapshots/drawings/inner-shadow-opaque.png");
   });
 
   it("should be a no-op without blur and offset on an opaque shape", async () => {
@@ -69,10 +75,19 @@ describe("Inner shadow", () => {
     const image = await surface.draw(
       <>
         <Fill color="white" />
-        {shape(OPAQUE, <Shadow inner dx={0} dy={0} blur={0} color="black" />)}
+        <RoundedRect
+          x={32}
+          y={32}
+          width={192}
+          height={192}
+          r={24}
+          color="red"
+        >
+          <Shadow inner dx={0} dy={0} blur={0} color="black" />
+        </RoundedRect>
       </>
     );
-    checkImage(image, REF_OPAQUE);
+    checkImage(image, "snapshots/drawings/inner-shadow-opaque.png");
   });
 
   it("Build centered reference result", async () => {
@@ -80,10 +95,19 @@ describe("Inner shadow", () => {
     const image = await surface.draw(
       <>
         <Fill color="white" />
-        <Group clip={rect(80, 80, 96, 96)}>{shape(TRANSLUCENT)}</Group>
+        <Group clip={rect(80, 80, 96, 96)}>
+          <RoundedRect
+            x={32}
+            y={32}
+            width={192}
+            height={192}
+            r={24}
+            color="rgba(255, 0, 0, 0.5)"
+          />
+        </Group>
       </>
     );
-    checkImage(image, REF_TRANSLUCENT_CENTER);
+    checkImage(image, "snapshots/drawings/inner-shadow-translucent-center.png");
   });
 
   it("should stay within reach of the blur on a translucent shape", async () => {
@@ -94,13 +118,38 @@ describe("Inner shadow", () => {
       <>
         <Fill color="white" />
         <Group clip={rect(80, 80, 96, 96)}>
-          {shape(
-            TRANSLUCENT,
+          <RoundedRect
+            x={32}
+            y={32}
+            width={192}
+            height={192}
+            r={24}
+            color="rgba(255, 0, 0, 0.5)"
+          >
             <Shadow inner dx={0} dy={0} blur={4} color="black" />
-          )}
+          </RoundedRect>
         </Group>
       </>
     );
-    checkImage(image, REF_TRANSLUCENT_CENTER);
+    checkImage(image, "snapshots/drawings/inner-shadow-translucent-center.png");
+  });
+
+  it("should draw the blurred shadow along the edges of a translucent shape", async () => {
+    const image = await surface.draw(
+      <>
+        <Fill color="white" />
+        <RoundedRect
+          x={32}
+          y={32}
+          width={192}
+          height={192}
+          r={24}
+          color="rgba(255, 0, 0, 0.5)"
+        >
+          <Shadow inner dx={0} dy={0} blur={4} color="black" />
+        </RoundedRect>
+      </>
+    );
+    checkImage(image, "snapshots/drawings/inner-shadow-translucent-blur.png");
   });
 });
