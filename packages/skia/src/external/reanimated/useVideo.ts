@@ -16,24 +16,27 @@ interface PlaybackOptions {
   volume: MaybeAnimated<number>;
 }
 
-const copyFrameOnAndroid = (currentFrame: SharedValue<SkImage | null>) => {
+// on android we need to copy the texture before it's invalidated
+const copyFrameOnAndroid = (tex: SkImage) => {
   "worklet";
-  // on android we need to copy the texture before it's invalidated
-  if (Platform.OS === "android") {
-    const tex = currentFrame.value;
-    if (tex) {
-      currentFrame.value = tex; //.makeNonTextureImage();
-      tex.dispose();
-    }
+  if (Platform.OS !== "android") {
+    return tex;
   }
+  const copy = tex.makeNonTextureImage();
+  tex.dispose();
+  return copy;
 };
 
 const setFrame = (video: Video, currentFrame: SharedValue<SkImage | null>) => {
   "worklet";
   const img = video.nextImage();
   if (img) {
-    currentFrame.value = img;
-    copyFrameOnAndroid(currentFrame);
+    const frame = copyFrameOnAndroid(img);
+    // A failed readback returns null: keep the last good frame rather than
+    // blanking the canvas.
+    if (frame) {
+      currentFrame.value = frame;
+    }
   }
 };
 
