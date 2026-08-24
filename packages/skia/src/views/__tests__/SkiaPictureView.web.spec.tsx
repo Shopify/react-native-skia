@@ -44,6 +44,39 @@ class ResizeObserverMock {
   }
 }
 
+interface WebGLContextMock {
+  drawingBufferColorSpace: string;
+  lost: boolean;
+  getExtension(name: string): { loseContext(): void } | null;
+  isContextLost(): boolean;
+}
+
+// Models the one detail that matters: a lost context stays lost, and the
+// element keeps handing back that same dead context.
+const webglContexts = new WeakMap<HTMLCanvasElement, WebGLContextMock>();
+
+const webglContextFor = (canvas: HTMLCanvasElement) => {
+  let context = webglContexts.get(canvas);
+  if (!context) {
+    const created: WebGLContextMock = {
+      drawingBufferColorSpace: "srgb",
+      lost: false,
+      getExtension: (name: string) =>
+        name === "WEBGL_lose_context"
+          ? {
+              loseContext: () => {
+                created.lost = true;
+              },
+            }
+          : null,
+      isContextLost: () => created.lost,
+    };
+    context = created;
+    webglContexts.set(canvas, context);
+  }
+  return context;
+};
+
 const canvasSize = { width: 0, height: 0 };
 
 const makeRawCanvas = () => ({
@@ -66,13 +99,35 @@ const createCanvasKitMock = () => {
     releaseResourcesAndAbandonContext: jest.fn(),
     delete: jest.fn(),
   };
+  const canvasForHandle = new Map<number, HTMLCanvasElement>();
+  const deletedHandles = new Set<number>();
+  let nextHandle = 1;
   const CanvasKitMock = {
-    GetWebGLContext: jest.fn(() => 1),
-    MakeWebGLContext: jest.fn(() => grContext),
+    // A lost context still yields a handle, so the "Could not create a WebGL
+    // context" guard never fires; MakeWebGLContext is where it faults (#3976).
+    GetWebGLContext: jest.fn((canvas: HTMLCanvasElement) => {
+      const handle = nextHandle++;
+      canvasForHandle.set(handle, canvas);
+      return handle;
+    }),
+    MakeWebGLContext: jest.fn((handle: number) => {
+      if (deletedHandles.has(handle)) {
+        return null;
+      }
+      const canvas = canvasForHandle.get(handle);
+      if (canvas && webglContextFor(canvas).lost) {
+        throw new TypeError(
+          "Cannot read properties of null (reading 'rangeMin')"
+        );
+      }
+      return grContext;
+    }),
     MakeOnScreenGLSurface: jest.fn((_ctx, width, height) =>
       width === 0 || height === 0 ? null : rawSurface
     ),
-    deleteContext: jest.fn(),
+    deleteContext: jest.fn((handle: number) => {
+      deletedHandles.add(handle);
+    }),
     ColorSpace: { SRGB: "srgb" },
     TRANSPARENT: Float32Array.of(0, 0, 0, 0),
   };
@@ -93,7 +148,13 @@ beforeAll(() => {
     configurable: true,
     get: () => canvasSize.height,
   });
-  HTMLCanvasElement.prototype.getContext = jest.fn(() => null);
+  HTMLCanvasElement.prototype.getContext = jest.fn(function (
+    this: HTMLCanvasElement,
+    contextId: string
+  ) {
+    return contextId === "webgl2" ? webglContextFor(this) : null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  }) as any;
   Object.defineProperty(window, "devicePixelRatio", {
     configurable: true,
     get: () => display.pixelDensity,
@@ -274,5 +335,45 @@ describe("SkiaPictureView.web", () => {
     });
 
     view.unmount();
+  });
+
+  it("survives its layout effect being re-run on the same canvas", async () => {
+    const { CanvasKitMock } = createCanvasKitMock();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (global as any).CanvasKit = CanvasKitMock;
+    canvasSize.width = 360;
+    canvasSize.height = 520;
+
+    // StrictMode re-runs the layout effect against the same <canvas>, the way
+    // an Activity reveal does. Effect cleanup is not unmount.
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(
+        <React.StrictMode>
+          <SkiaPictureView nativeID="5" style={{ width: 360, height: 520 }} />
+        </React.StrictMode>
+      );
+    });
+    const canvas = container.querySelector("canvas") as HTMLCanvasElement;
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(CanvasKitMock.GetWebGLContext).toHaveBeenCalledTimes(2);
+    expect(webglContextFor(canvas).lost).toBe(false);
+
+    // The element is still released once it is really gone.
+    await act(async () => {
+      root.unmount();
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(canvas.isConnected).toBe(false);
+    expect(webglContextFor(canvas).lost).toBe(true);
+
+    container.remove();
   });
 });

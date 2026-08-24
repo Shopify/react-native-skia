@@ -120,10 +120,17 @@ class WebGLRenderer implements Renderer {
       this.grContext.delete();
       this.grContext = null;
     }
-    this.canvas
-      ?.getContext("webgl2")
-      ?.getExtension("WEBGL_lose_context")
-      ?.loseContext();
+    // A lost context is permanent and effect cleanup is not unmount, so only
+    // release the drawing buffer once React has really detached the element.
+    const { canvas } = this;
+    queueMicrotask(() => {
+      if (!canvas.isConnected) {
+        canvas
+          .getContext("webgl2")
+          ?.getExtension("WEBGL_lose_context")
+          ?.loseContext();
+      }
+    });
     if (this.contextHandle) {
       // Unregister the context from CanvasKit's internal registry, otherwise
       // it retains the canvas element (and its detached DOM tree) forever.
