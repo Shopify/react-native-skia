@@ -138,6 +138,18 @@ SwiftPM support requires **React Native 0.87 or newer** — earlier releases shi
 no `scripts/spm`. `apps/example` is on an older version, so it cannot exercise
 this path.
 
+The harness is `spm-example/` at the repo root, deliberately outside the yarn
+workspace so its React Native does not collide with the workspace's. Its
+[README](../../spm-example/README.md) covers the details; the short form is:
+
+```sh
+cd spm-example && npm install
+cd ios && npx react-native spm update
+xcodebuild -project SpmExample.xcodeproj -scheme SpmExample \
+  -configuration Debug -sdk iphonesimulator \
+  -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
+```
+
 Autolinking references the library through a symlink at
 `<app>/ios/build/generated/autolinking/libs/ReactNativeSkia`, and SwiftPM
 resolves the manifest's relative paths against that symlink rather than against
