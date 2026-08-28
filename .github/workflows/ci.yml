@@ -464,3 +464,39 @@ jobs:
   #     - name: Build example for macOS Catalyst
   #       working-directory: apps/example/ios
   #       run: xcodebuild -workspace example.xcworkspace -scheme ReactTestApp -destination 'platform=macOS,arch=arm64,variant=Mac Catalyst' -configuration Debug build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+
+  build-test-ios-spm:
+    if: ${{ github.repository == 'shopify/react-native-skia' }}
+    runs-on: macos-latest-xlarge
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      # spm-example sits outside the yarn workspace so its React Native can
+      # differ from the one apps/example pins. It ships no lockfile; react and
+      # react-native are pinned exactly in its package.json.
+      - name: Install spm-example dependencies
+        working-directory: spm-example
+        run: npm install
+
+      # The .xcodeproj is committed already injected, so this refreshes the
+      # injection, runs codegen and downloads the React Native artifacts. It
+      # exits 2 if a linked library ships no Package.swift.
+      - name: Set up Swift Package Manager
+        working-directory: spm-example/ios
+        run: npx react-native spm update
+
+      - name: Build spm-example for iOS
+        working-directory: spm-example/ios
+        run: |
+          xcodebuild -project SpmExample.xcodeproj -scheme SpmExample \
+            -configuration Debug -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build
