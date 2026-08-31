@@ -82,12 +82,11 @@ export const SnapshotBeforeLayout = () => {
         resolved: {counts.resolved} / rejected: {counts.rejected}
       </Text>
 
-      {/* A) never mounted natively */}
-      <View style={styles.hidden}>
-        <Canvas ref={refHidden} style={styles.hiddenCanvas}>
-          <Circle cx={150} cy={150} r={100} color="magenta" />
-        </Canvas>
-      </View>
+      {/* control — kept first in the DOM: the web smoke test asserts the
+          first canvas on the page is visible */}
+      <Canvas ref={refVisible} style={styles.visible}>
+        <Circle cx={60} cy={60} r={50} color="teal" />
+      </Canvas>
 
       {/* C) zero size */}
       <Canvas ref={refZero} style={styles.zero}>
@@ -97,10 +96,12 @@ export const SnapshotBeforeLayout = () => {
       {/* B) freshly mounted, snapshot before first layout */}
       {stress && <FreshCanvas key={mountKey} log={log} />}
 
-      {/* control */}
-      <Canvas ref={refVisible} style={styles.visible}>
-        <Circle cx={60} cy={60} r={50} color="teal" />
-      </Canvas>
+      {/* A) never mounted natively */}
+      <View style={styles.hidden}>
+        <Canvas ref={refHidden} style={styles.hiddenCanvas}>
+          <Circle cx={150} cy={150} r={100} color="magenta" />
+        </Canvas>
+      </View>
 
       <Button
         title={`B) remount + snapshot loop: ${
