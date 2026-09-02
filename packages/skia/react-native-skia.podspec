@@ -121,6 +121,8 @@ unless Dir.exist?(File.join(__dir__, 'libs', 'ios'))
   Pod::UI.warn ""
   Pod::UI.warn "Make sure dependencies are installed (yarn install / npm install) so that"
   Pod::UI.warn "the #{expected_packages} packages are present, then run `pod install` again."
+  Pod::UI.warn "If you installed with --omit=optional (or an equivalent), these packages were"
+  Pod::UI.warn "skipped. Reinstall without it."
   Pod::UI.warn "#{'-' * 72}"
   raise "react-native-skia: Skia prebuilt binaries not found. Run `yarn install` then `pod install` to fix this."
 end

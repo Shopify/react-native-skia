@@ -26,6 +26,8 @@ npm install @shopify/react-native-skia
 
 The Skia prebuilt binaries are delivered as regular npm dependencies (`react-native-skia-android` and `react-native-skia-apple-*`) and are resolved automatically by the native build systems (CocoaPods on iOS/macOS/tvOS, Gradle on Android). No `postinstall` script is required, so there is nothing to allow or configure — `trustedDependencies` (Bun) or `enableScripts` (Yarn Berry) settings are not needed.
 
+The `react-native-skia-apple-*` packages are optional dependencies. Do not skip optional dependencies (`npm install --omit=optional` or an equivalent): that also drops the iOS binaries and `pod install` fails.
+
 Every platform's binaries are downloaded, including ones your app may not target. This does not affect the size of the app you ship, but if you want to keep the unused ones out of `node_modules`, see [pruning unused platforms](bundle-size#pruning-unused-platforms).
 
 ## Using Expo

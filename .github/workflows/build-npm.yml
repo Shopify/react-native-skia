@@ -33,8 +33,8 @@ jobs:
         run: yarn build
 
       # Swap the prebuilt binary packages for their Graphite variants, pinned in
-      # graphiteDependencies (package.json). Only done at release time so that
-      # main and next stay identical.
+      # graphiteDependencies / graphiteOptionalDependencies (package.json). Only
+      # done at release time so that main and next stay identical.
       - name: Swap in Graphite binary packages (next channel only)
         if: github.ref_name == 'next'
         working-directory: packages/skia
@@ -42,13 +42,18 @@ jobs:
           node -e "
             const fs = require('fs');
             const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-            for (const name of Object.keys(pkg.dependencies)) {
-              if (name.startsWith('react-native-skia-')) delete pkg.dependencies[name];
+            for (const field of ['dependencies', 'optionalDependencies']) {
+              for (const name of Object.keys(pkg[field])) {
+                if (name.startsWith('react-native-skia-')) delete pkg[field][name];
+              }
             }
-            Object.assign(pkg.dependencies, pkg.graphiteDependencies);
+            for (const [src, dst] of [['graphiteDependencies', 'dependencies'], ['graphiteOptionalDependencies', 'optionalDependencies']]) {
+              if (!pkg[src] || Object.keys(pkg[src]).length === 0) throw new Error(src + ' is missing or empty');
+              Object.assign(pkg[dst], pkg[src]);
+            }
             fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
           "
-          node -p "JSON.stringify(require('./package.json').dependencies, null, 2)"
+          node -p "const p = require('./package.json'); JSON.stringify({ dependencies: p.dependencies, optionalDependencies: p.optionalDependencies }, null, 2)"
 
       - name: Build NPM Package
         working-directory: packages/skia
