@@ -8,14 +8,14 @@
 #include <jsi/jsi.h>
 #include <memory>
 #include <mutex>
-#include <optional>
 #include <string>
 #include <type_traits>
+#include <typeindex>
 #include <unordered_map>
 #include <utility>
 
 #include "jsi/BoxedNativeObject.h"
-#include "jsi/RuntimeAwareCache.h" // Use Skia's RuntimeAwareCache
+#include "jsi/JSICache.h"
 
 // Forward declare to avoid circular dependency
 namespace RNJsi {
@@ -36,45 +36,6 @@ static constexpr size_t kMinMemoryPressure = 256;
 
 // Forward declaration
 template <typename Derived> class NativeObject;
-
-/**
- * Per-runtime cache entry for a prototype object.
- * Uses std::optional<jsi::Object> so the prototype is stored directly
- * without extra indirection.
- */
-struct PrototypeCacheEntry {
-  std::optional<jsi::Object> prototype;
-};
-
-/**
- * Wrapper for static RuntimeAwareCache that handles hot reload.
- *
- * When used with static storage (like prototype caches), the cache persists
- * across hot reloads. But the JSI objects inside become invalid when the
- * runtime is destroyed. This wrapper tracks which runtime the cache was
- * created for and allocates a new cache when the runtime changes.
- *
- * The old cache is intentionally leaked - we cannot safely destroy JSI
- * objects after their runtime is gone.
- */
-template <typename T> struct StaticRuntimeAwareCache {
-  RNJsi::RuntimeAwareCache<T> *cache = nullptr;
-  jsi::Runtime *cacheRuntime = nullptr;
-
-  RNJsi::RuntimeAwareCache<T> &get(jsi::Runtime &rt) {
-    auto mainRuntime = RNJsi::BaseRuntimeAwareCache::getMainJsRuntime();
-    if (&rt == mainRuntime && cacheRuntime != mainRuntime) {
-      // Main runtime changed (hot reload) - allocate new cache, leak old one
-      cache = new RNJsi::RuntimeAwareCache<T>();
-      cacheRuntime = mainRuntime;
-    }
-    if (cache == nullptr) {
-      cache = new RNJsi::RuntimeAwareCache<T>();
-      cacheRuntime = mainRuntime;
-    }
-    return *cache;
-  }
-};
 
 /**
  * Base class for native objects using the NativeState pattern.
@@ -112,29 +73,20 @@ public:
   using IsNativeObject = std::true_type;
 
   /**
-   * Get the prototype cache for this type.
-   * Each NativeObject<Derived> type has its own static cache.
-   * Uses StaticRuntimeAwareCache to properly handle runtime lifecycle
-   * and hot reload (where the main runtime is destroyed and recreated).
-   *
-   * Callers must hold getPrototypeCacheMutex(): the cache is reached
-   * concurrently from the main JS thread (create()) and from worklet
-   * runtime threads (BoxedNativeObject::unbox() -> installPrototype()).
+   * Key under which this class's prototype is stored in the per-runtime
+   * JSICache: the C++ type of Derived.
    */
-  static RNJsi::RuntimeAwareCache<PrototypeCacheEntry> &
-  getPrototypeCache(jsi::Runtime &runtime) {
-    static StaticRuntimeAwareCache<PrototypeCacheEntry> cache;
-    return cache.get(runtime);
+  static JSICache::PrototypeKey prototypeKey() {
+    return std::type_index(typeid(Derived));
   }
 
   /**
-   * Per-class mutex guarding getPrototypeCache() and prototype
-   * installation. Serializes the StaticRuntimeAwareCache pointer swap
-   * (hot reload) and the per-runtime cache lookups.
+   * Returns this class's prototype on `runtime`, or nullptr if it has not
+   * been installed there yet. The prototype is owned by the runtime (see
+   * JSICache), so the pointer is valid for as long as `runtime` is.
    */
-  static std::mutex &getPrototypeCacheMutex() {
-    static std::mutex mutex;
-    return mutex;
+  static jsi::Object *getCachedPrototype(jsi::Runtime &runtime) {
+    return JSICache::get(runtime).getPrototype(prototypeKey());
   }
 
   /**
@@ -142,10 +94,21 @@ public:
    * Called automatically by create(), but can be called manually.
    */
   static void installPrototype(jsi::Runtime &runtime) {
-    std::lock_guard<std::mutex> lock(getPrototypeCacheMutex());
-    auto &entry = getPrototypeCache(runtime).get(runtime);
-    if (entry.prototype.has_value()) {
-      return; // Already installed
+    ensurePrototype(runtime);
+  }
+
+  /**
+   * Look up (and install on first use) the prototype for this runtime.
+   *
+   * The returned reference is owned by the runtime's JSICache and stays
+   * valid for as long as the runtime does (std::unordered_map keeps
+   * references to its elements stable across rehashes). No locking is
+   * needed: a jsi::Runtime is single-threaded and its cache is only ever
+   * touched from its own thread.
+   */
+  static jsi::Object &ensurePrototype(jsi::Runtime &runtime) {
+    if (auto *cached = getCachedPrototype(runtime)) {
+      return *cached; // Already installed on this runtime
     }
 
     // Create prototype object
@@ -262,8 +225,9 @@ public:
           });
     });
 
-    // Cache the prototype
-    entry.prototype = std::move(prototype);
+    // Hand the prototype to the runtime-owned cache
+    return JSICache::get(runtime).setPrototype(prototypeKey(),
+                                               std::move(prototype));
   }
 
   /**
@@ -274,13 +238,7 @@ public:
    * created internally by the native code).
    */
   static void installConstructor(jsi::Runtime &runtime) {
-    installPrototype(runtime);
-
-    std::lock_guard<std::mutex> lock(getPrototypeCacheMutex());
-    auto &entry = getPrototypeCache(runtime).get(runtime);
-    if (!entry.prototype.has_value()) {
-      return;
-    }
+    auto &prototype = ensurePrototype(runtime);
 
     // Create a constructor function that throws when called directly
     auto ctor = jsi::Function::createFromHostFunction(
@@ -294,10 +252,10 @@ public:
 
     // Set the prototype property on the constructor
     // This is what makes `instanceof` work
-    ctor.setProperty(runtime, "prototype", *entry.prototype);
+    ctor.setProperty(runtime, "prototype", prototype);
 
     // Set constructor property on prototype pointing back to constructor
-    entry.prototype->setProperty(runtime, "constructor", ctor);
+    prototype.setProperty(runtime, "constructor", ctor);
 
     // Install on global
     runtime.global().setProperty(runtime, Derived::CLASS_NAME, std::move(ctor));
@@ -308,8 +266,6 @@ public:
    */
   static jsi::Value create(jsi::Runtime &runtime,
                            std::shared_ptr<Derived> instance) {
-    installPrototype(runtime);
-
     // Store creation runtime for logging etc.
     instance->setCreationRuntime(&runtime);
 
@@ -319,18 +275,13 @@ public:
     // Attach native state
     obj.setNativeState(runtime, instance);
 
-    // Set prototype
+    // Install (on first use) and apply the prototype
     {
-      std::lock_guard<std::mutex> lock(getPrototypeCacheMutex());
-      auto &entry = getPrototypeCache(runtime).get(runtime);
-      if (entry.prototype.has_value()) {
-        // Use Object.setPrototypeOf to set the prototype
-        auto objectCtor =
-            runtime.global().getPropertyAsObject(runtime, "Object");
-        auto setPrototypeOf =
-            objectCtor.getPropertyAsFunction(runtime, "setPrototypeOf");
-        setPrototypeOf.call(runtime, obj, *entry.prototype);
-      }
+      auto &prototype = ensurePrototype(runtime);
+      auto objectCtor = runtime.global().getPropertyAsObject(runtime, "Object");
+      auto setPrototypeOf =
+          objectCtor.getPropertyAsFunction(runtime, "setPrototypeOf");
+      setPrototypeOf.call(runtime, obj, prototype);
     }
 
     // Set memory pressure hint for GC
