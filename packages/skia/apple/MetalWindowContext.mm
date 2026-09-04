@@ -89,10 +89,16 @@ void MetalWindowContext::present() {
   }
 
   id<MTLCommandBuffer> commandBuffer([_commandQueue commandBuffer]);
-  [commandBuffer presentDrawable:_currentDrawable];
-  [commandBuffer commit];
   if (_layer.presentsWithTransaction) {
+    // Present inside the current Core Animation transaction: commit, wait
+    // until the command buffer is scheduled, then present the drawable
+    // directly (CAMetalLayer.presentsWithTransaction documentation).
+    [commandBuffer commit];
     [commandBuffer waitUntilScheduled];
+    [_currentDrawable present];
+  } else {
+    [commandBuffer presentDrawable:_currentDrawable];
+    [commandBuffer commit];
   }
   _skSurface = nullptr;
 }
