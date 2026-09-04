@@ -91,5 +91,8 @@ void MetalWindowContext::present() {
   id<MTLCommandBuffer> commandBuffer([_commandQueue commandBuffer]);
   [commandBuffer presentDrawable:_currentDrawable];
   [commandBuffer commit];
+  if (_layer.presentsWithTransaction) {
+    [commandBuffer waitUntilScheduled];
+  }
   _skSurface = nullptr;
 }
