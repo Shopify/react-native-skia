@@ -140,13 +140,17 @@
   "dependencies": {
     "canvaskit-wasm": "0.41.0",
     "react-native-skia-android": "152.0.0",
-    "react-native-skia-apple-ios": "152.0.0",
-    "react-native-skia-apple-macos": "152.0.0",
-    "react-native-skia-apple-tvos": "152.0.0",
     "react-reconciler": "0.31.0"
   },
+  "optionalDependencies": {
+    "react-native-skia-apple-ios": "152.0.0",
+    "react-native-skia-apple-macos": "152.0.0",
+    "react-native-skia-apple-tvos": "152.0.0"
+  },
   "graphiteDependencies": {
-    "react-native-skia-graphite-android": "152.0.0",
+    "react-native-skia-graphite-android": "152.0.0"
+  },
+  "graphiteOptionalDependencies": {
     "react-native-skia-graphite-apple-ios": "152.0.0",
     "react-native-skia-graphite-apple-macos": "152.0.0"
   },
