@@ -9091,6 +9091,7 @@ __metadata:
     eslint-config-react-native-wcandillon: 4.0.1
     eslint-plugin-import: 2.32.0
     eslint-plugin-react-hooks: ^5.2.0
+    extract-zip: ^2.0.1
     jest: 30.0.0
     jest-diff: 29.7.0
     jest-environment-jsdom: 30.0.0
@@ -16589,7 +16590,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"extract-zip@npm:2.0.1":
+"extract-zip@npm:2.0.1, extract-zip@npm:^2.0.1":
   version: 2.0.1
   resolution: "extract-zip@npm:2.0.1"
   dependencies:

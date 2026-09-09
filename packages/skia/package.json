@@ -51,7 +51,6 @@
     "clang-format-ios": "find apple/ -iname '*.h' -o -iname '*.mm' -o -iname '*.cpp' | xargs clang-format -i",
     "clang-format-android": "find android/cpp/ -iname '*.h' -o -iname '*.m' -o -iname '*.cpp' | xargs clang-format -i",
     "clang-format-common": "find cpp/ \\( -path 'cpp//skia' -prune \\) -o \\( -iname '*.h' -o -iname '*.m' -o -iname '*.cpp' \\) -print | xargs clang-format -i",
-    "workflow-copy-libs": "tsx ./scripts/workflow-copy-libs.ts",
     "cpplint": "cpplint --linelength=230 --filter=-legal/copyright,-whitespace/indent,-whitespace/comments,-whitespace/ending_newline,-build/include_order,-runtime/references,-readability/todo,-whitespace/blank_line,-whitespace/todo,-runtime/int,-build/c++11,-whitespace/parens --exclude=package/cpp/skia --exclude=package/ios --exclude=package/android/build --exclude=package/node_modules --recursive package"
   },
   "repository": {
@@ -116,6 +115,7 @@
     "eslint-config-react-native-wcandillon": "4.0.1",
     "eslint-plugin-import": "2.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "extract-zip": "^2.0.1",
     "jest": "30.0.0",
     "jest-diff": "29.7.0",
     "jest-environment-jsdom": "30.0.0",
