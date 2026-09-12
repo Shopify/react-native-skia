@@ -9103,10 +9103,10 @@ __metadata:
     react-native: 0.83.1
     react-native-builder-bob: 0.18.2
     react-native-reanimated: 4.3.1
-    react-native-skia-android: 152.0.0
-    react-native-skia-apple-ios: 152.0.0
-    react-native-skia-apple-macos: 152.0.0
-    react-native-skia-apple-tvos: 152.0.0
+    react-native-skia-android: 154.0.0
+    react-native-skia-apple-ios: 154.0.0
+    react-native-skia-apple-macos: 154.0.0
+    react-native-skia-apple-tvos: 154.0.0
     react-native-worklets: 0.8.3
     react-reconciler: 0.31.0
     rimraf: 3.0.2
@@ -16340,7 +16340,7 @@ __metadata:
     react-native-svg: "patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch"
     react-native-test-app: 4.4.7
     react-native-web: ^0.21.2
-    react-native-webgpu: 0.8.0
+    react-native-webgpu: 0.10.0
     react-native-windows: ^0.75.0
     react-native-worklets: 0.8.3
     react-test-renderer: 19.0.0
@@ -27159,31 +27159,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-skia-android@npm:152.0.0":
-  version: 152.0.0
-  resolution: "react-native-skia-android@npm:152.0.0"
-  checksum: c01ae79040ea04997340861828d79fb4591ad922a50a94cbcdb1b4d7f4e7fa1ad9a892cdb87f40a059489350cb2cfdd647448570d109dcab25342d9d287d1bbc
+"react-native-skia-android@npm:154.0.0":
+  version: 154.0.0
+  resolution: "react-native-skia-android@npm:154.0.0"
+  checksum: 7428991fc10e5d489a17f5049579b3ac31e949a070ecbcd3b2bbcefdce43c137eb749ab5ecf08cd36c2f03828a893ab00499f994a1c6f2224f798a473471e818
   languageName: node
   linkType: hard
 
-"react-native-skia-apple-ios@npm:152.0.0":
-  version: 152.0.0
-  resolution: "react-native-skia-apple-ios@npm:152.0.0"
-  checksum: 42ef9929664d197eaf1116e172573ad1ed68944b7349ee692bb542761fd4aa6d171d23a293ee64b0a1f0d0bf3c6cd2f1f32ef8bda2b4dd1749466af5f25dd8a3
+"react-native-skia-apple-ios@npm:154.0.0":
+  version: 154.0.0
+  resolution: "react-native-skia-apple-ios@npm:154.0.0"
+  checksum: b627209b8bcd747238cb39d605527ad46569988aab6e025ac2118455031c98cf7da30a3da5af1295ba824336a322a99f46baa6e870f9452e623f430619143baf
   languageName: node
   linkType: hard
 
-"react-native-skia-apple-macos@npm:152.0.0":
-  version: 152.0.0
-  resolution: "react-native-skia-apple-macos@npm:152.0.0"
-  checksum: d8e220ce0ac0f41c35916c5b416cbdb6436ad4189884a70524949949df8990a43c5d116865932dd244dad412e77cab368f3f820e1400b3bd00736ee37435810b
+"react-native-skia-apple-macos@npm:154.0.0":
+  version: 154.0.0
+  resolution: "react-native-skia-apple-macos@npm:154.0.0"
+  checksum: be282528ca301cc69e7d94505cd0e8dc051eb22e1b69c15c4b5721bca18b9330c6c06bbf548a3d309150e7dd41d3118bef7d318a6664a2c367587f6fc778d8d9
   languageName: node
   linkType: hard
 
-"react-native-skia-apple-tvos@npm:152.0.0":
-  version: 152.0.0
-  resolution: "react-native-skia-apple-tvos@npm:152.0.0"
-  checksum: ae80993eb127b5ee4502b0428204b980347d6cf31444de74984ae64373e1bc4a992b79ddae0aa9983cd3a6e5b979ae5d810f88eca92976b40907fdb578b508d5
+"react-native-skia-apple-tvos@npm:154.0.0":
+  version: 154.0.0
+  resolution: "react-native-skia-apple-tvos@npm:154.0.0"
+  checksum: 8dcee573d91be4ddfc47112d0098840854c1c21fc0e5190f1d8f4495d0c2c86b3168c2070a089c3072ed6a5e5fa2639de60b7772ddb8f9993e1e93007e1409c3
   languageName: node
   linkType: hard
 
@@ -27338,9 +27338,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-webgpu@npm:0.8.0":
-  version: 0.8.0
-  resolution: "react-native-webgpu@npm:0.8.0"
+"react-native-webgpu@npm:0.10.0":
+  version: 0.10.0
+  resolution: "react-native-webgpu@npm:0.10.0"
   peerDependencies:
     react: "*"
     react-native: ">=0.81.0"
@@ -27351,7 +27351,7 @@ __metadata:
       optional: true
     react-native-worklets:
       optional: true
-  checksum: 75a850ebf19d57395ca1b4ba7d4f6f24ff203e047c99493d1a3d4fbb4bbb08308a573ead0e2c88ef5de367d355e576d181b9513fb6cec93ab77e548211976c0c
+  checksum: eba53c650302110f8a84dc3041b4e5098adf68062e3dc98fff2094313d1dccdd15b89873dc131110eabf464c3124d83be9411fc37e18a726d6ef975080e46724
   languageName: node
   linkType: hard
 

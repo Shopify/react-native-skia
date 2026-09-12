@@ -43,30 +43,63 @@ const APPLE_FRAMEWORKS = [
 ] as const;
 
 // Graphite configuration
-//
-// NOTE: the "apple" checksums below are placeholders (build-skia-graphite.yml
-// now zips each xcframework individually - see its "Package Apple
-// xcframeworks" step). They must be regenerated from that workflow's
-// `*.checksums.txt` release asset once this GRAPHITE_CONFIG.version has
-// actually been built by build-skia-graphite.yml, or `yarn install-skia-graphite`
-// will fail on the Apple download step.
 const GRAPHITE_CONFIG = {
   version: "m154",
   checksums: {
     android: {
-      "armeabi-v7a": "REPLACE_WITH_REAL_CHECKSUM",
-      "arm64-v8a": "REPLACE_WITH_REAL_CHECKSUM",
-      "x86": "REPLACE_WITH_REAL_CHECKSUM",
-      "x86_64": "REPLACE_WITH_REAL_CHECKSUM",
+      "armeabi-v7a":
+        "2035f570a696da94ee73c1ac9fcdc3e86e128e0c022ea54b3d15a91aa6310382",
+      "arm64-v8a":
+        "adbb7179c8e4d743c6b5459902937b29568fe11c5926f04d7710b70c55587d42",
+      "x86": "cb0f02edbb469f3f0e26edb8f61d41c0a3b9878346df2908a192f1de18892a52",
+      "x86_64":
+        "51892783c32c23fb67e1db2eb74700cbb21f66ed9710d5dbc3c603cbf7f1174a",
     },
     apple: {
-      ios: Object.fromEntries(
-        APPLE_FRAMEWORKS.map((name) => [name, "REPLACE_WITH_REAL_CHECKSUM"])
-      ) as Record<(typeof APPLE_FRAMEWORKS)[number], string>,
-      macos: Object.fromEntries(
-        APPLE_FRAMEWORKS.map((name) => [name, "REPLACE_WITH_REAL_CHECKSUM"])
-      ) as Record<(typeof APPLE_FRAMEWORKS)[number], string>,
-    },
+      ios: {
+        libskia:
+          "03c11d6891d9710f644f6a2108c494a1fe1a7b1105748686176fd7d9ae6cfa7e",
+        libskottie:
+          "f2bf18b9a3221661534764e5585ca8e2b82afeaeb9f88f1cd5177ffe7029550e",
+        libskparagraph:
+          "0f938255ab9f174af83f3cff56aa73235990154ea8d493c4bfc74ac94bffeb42",
+        libsksg:
+          "2ecb0c45a6822e5bfca0c78520273ac173a795c83a857fed775cd26d34b06950",
+        libskshaper:
+          "3c2553852cc94ba66537e3f5b923ecc4e77d3ec299ea875360bbfd72a0e375bf",
+        // eslint-disable-next-line camelcase
+        libskunicode_core:
+          "a6c42ec4cabf1e51c51d58490bc86904237fb37f5f2455119185882db05f62d2",
+        // eslint-disable-next-line camelcase
+        libskunicode_libgrapheme:
+          "2eac399778103b8b0ae653483bbd25d5cf4df6890bc5bf9db87d64b9e7e12215",
+        libsvg:
+          "3ce34cab4f82fa14da97a10eb497027af1bf59e210cde66e5f78af4a4c009cb7",
+      },
+      macos: {
+        libskia:
+          "4077f56da97cec4462c0819201dda6c8fe5f375f1e3fcad2b1ddb44101ec857f",
+        libskottie:
+          "4d6bbf98f008993b28d327c16477ca4d0f6f9f60f7d6186814070ea4613b08e1",
+        libskparagraph:
+          "9b50c4fc121355564f5985b511a969f445e9e894c1d8594778c805355e674391",
+        libsksg:
+          "8303505887aaf3646933180953562a401935d5f2a2384819930b077fa56da801",
+        libskshaper:
+          "15339f4a5f4cab50e39d457ffb0d0a3c23ad552f0447a0d4404718600baeb260",
+        // eslint-disable-next-line camelcase
+        libskunicode_core:
+          "de677cdc80b76191dcbd199f1866d6b5b258cd9bf422ac8a8574492cf0a4a9cb",
+        // eslint-disable-next-line camelcase
+        libskunicode_libgrapheme:
+          "562daca2f2c26fbc35cbb3772429d61a4c40005768cc754f0bff4c2fc39f559a",
+        libsvg:
+          "0e4fb622a1ce003372a3a005ca3a5166659766046a13e9ab978e9a989d617845",
+      },
+    } as Record<
+      "ios" | "macos",
+      Record<(typeof APPLE_FRAMEWORKS)[number], string>
+    >,
   },
 } as const;
 
