@@ -36,32 +36,191 @@ interface Renderer {
   dispose(): void;
 }
 
+// A <canvas> element owns at most one WebGL context for its whole lifetime.
+// A renderer, on the other hand, lives as long as the layout effect that
+// creates it, which is shorter: React re-runs layout effects on a *preserved*
+// host node under StrictMode's DEV double-invoke and when an Activity/offscreen
+// subtree is hidden and revealed (#3976). What belongs to the element rather
+// than to a renderer is tracked here, per element:
+// - the context, so that a new renderer can tell whether the element already
+//   has one (and whether it is lost) without calling getContext() itself,
+//   which on a fresh element would create a context with the wrong attributes
+//   (CanvasKit.GetWebGLContext requests its own);
+// - the WEBGL_lose_context extension, captured while the context is healthy:
+//   getExtension() returns null on a lost context, and this object is the only
+//   way to lose a context on purpose or to ask the browser to restore one;
+// - whether the browser has announced the loss of the context yet: a lost
+//   context can only be restored once its webglcontextlost event has been
+//   dispatched, and that event is asynchronous;
+// - the renderer currently attached to the element, if any.
+interface CanvasWebGL {
+  gl: WebGLRenderingContext | WebGL2RenderingContext;
+  // The WEBGL_lose_context extension.
+  loseContext: { loseContext(): void; restoreContext(): void } | null;
+  lossAnnounced: boolean;
+  owner: WebGLRenderer | null;
+}
+const canvasWebGL = new WeakMap<HTMLCanvasElement, CanvasWebGL>();
+
+// Unregisters a context from CanvasKit's registry, which otherwise retains the
+// canvas element (and its detached DOM tree) forever (#3924).
+const deleteContextHandle = (handle: WebGLContextHandle) => {
+  CanvasKit.deleteContext(handle);
+  // Making the now-deleted handle current clears CanvasKit's current-context
+  // globals (GLctx/Module.ctx), which would otherwise keep referencing the
+  // context (and the canvas) until another surface becomes current. With a
+  // deleted handle this is a no-op that returns null without creating
+  // anything.
+  CanvasKit.MakeWebGLContext(handle);
+};
+
 class WebGLRenderer implements Renderer {
   private surface: JsiSkSurface | null = null;
   private grContext: GrDirectContext | null = null;
   private contextHandle: WebGLContextHandle = 0;
   private pd = 1;
+  // Set while the renderer is waiting for a lost context to be restored.
+  private restoreWanted = false;
+  private restoreRequest: ReturnType<typeof setTimeout> | null = null;
 
-  constructor(private canvas: HTMLCanvasElement) {
-    this.contextHandle = CanvasKit.GetWebGLContext(canvas);
-    if (!this.contextHandle) {
+  constructor(
+    private canvas: HTMLCanvasElement,
+    // Called when the renderer becomes able to paint again and the current
+    // picture should be drawn.
+    private requestRedraw: () => void
+  ) {
+    const entry = canvasWebGL.get(canvas);
+    if (entry) {
+      entry.owner = this;
+    }
+    canvas.addEventListener("webglcontextlost", this.onContextLost);
+    canvas.addEventListener("webglcontextrestored", this.onContextRestored);
+    this.acquire();
+  }
+
+  // Builds the GrDirectContext and the surface on the element's WebGL
+  // context, creating the context first if the element has none.
+  private acquire() {
+    const { canvas } = this;
+    const known = canvasWebGL.get(canvas);
+    if (known?.gl.isContextLost()) {
+      // Nothing can be built on a lost context: CanvasKit.GetWebGLContext
+      // happily registers it, and MakeWebGLContext then faults inside wasm
+      // (#3976). Ask the browser for it back and finish in onContextRestored;
+      // if the loss hasn't been announced yet, onContextLost asks.
+      this.restoreWanted = true;
+      if (known.lossAnnounced) {
+        known.loseContext?.restoreContext();
+      }
+      return;
+    }
+    const handle = CanvasKit.GetWebGLContext(canvas);
+    if (!handle) {
       throw new Error("Could not create a WebGL context");
     }
-    this.grContext = CanvasKit.MakeWebGLContext(this.contextHandle);
-    if (!this.grContext) {
-      CanvasKit.deleteContext(this.contextHandle);
-      this.contextHandle = 0;
+    const entry = known ?? this.trackContext();
+    let grContext: GrDirectContext | null = null;
+    try {
+      grContext = CanvasKit.MakeWebGLContext(handle);
+    } finally {
+      if (!grContext) {
+        // Whether it returned null or threw, don't leave the registry
+        // holding on to the canvas.
+        deleteContextHandle(handle);
+      }
+    }
+    if (!grContext) {
       throw new Error("Could not create a graphics context");
     }
-    const ctx = canvas.getContext("webgl2");
-    if (ctx) {
-      ctx.drawingBufferColorSpace = "display-p3";
+    this.restoreWanted = false;
+    this.contextHandle = handle;
+    this.grContext = grContext;
+    if (entry) {
+      entry.gl.drawingBufferColorSpace = "display-p3";
     }
     this.onResize();
   }
 
+  // CanvasKit just created the element's context; asking for it again hands
+  // back the same object (the attributes are only honored the first time).
+  private trackContext(): CanvasWebGL | null {
+    const { canvas } = this;
+    const gl = canvas.getContext("webgl2") ?? canvas.getContext("webgl");
+    if (!gl) {
+      return null;
+    }
+    const entry: CanvasWebGL = {
+      gl,
+      loseContext: gl.getExtension("WEBGL_lose_context"),
+      lossAnnounced: false,
+      owner: this,
+    };
+    canvasWebGL.set(canvas, entry);
+    // Browsers restore a lost context (evicted as the oldest one when the
+    // page exceeds the active-context limit, or lost to a GPU reset) only if
+    // the page called preventDefault() on the webglcontextlost event. A
+    // renderer isn't necessarily attached when that happens (the canvas may
+    // be in a hidden Activity), so these listeners live as long as the
+    // element does. They are registered ahead of any renderer's, and the
+    // loss can't be announced before they exist since the event is
+    // asynchronous.
+    canvas.addEventListener("webglcontextlost", (event) => {
+      event.preventDefault();
+      entry.lossAnnounced = true;
+    });
+    canvas.addEventListener("webglcontextrestored", () => {
+      entry.lossAnnounced = false;
+    });
+    return entry;
+  }
+
+  // Frees everything built on the context. The context itself belongs to the
+  // element, see dispose().
+  private release() {
+    this.surface?.ref.delete();
+    this.surface = null;
+    if (this.grContext) {
+      this.grContext.releaseResourcesAndAbandonContext();
+      this.grContext.delete();
+      this.grContext = null;
+    }
+    if (this.contextHandle) {
+      deleteContextHandle(this.contextHandle);
+      this.contextHandle = 0;
+    }
+  }
+
+  private isContextLost() {
+    return canvasWebGL.get(this.canvas)?.gl.isContextLost() ?? false;
+  }
+
+  private onContextLost = () => {
+    // The browser already dropped every GL object; drop our references to
+    // them. Restoration is left to the browser (it restores an evicted
+    // context as soon as a slot frees up), except when this renderer was
+    // built on an already-lost context and is waiting to paint for the first
+    // time: chasing an eviction from here would evict the next-oldest context
+    // in turn, and with more live canvases than the browser allows the
+    // canvases would endlessly evict each other.
+    this.release();
+    if (this.restoreWanted) {
+      // The permission granted by preventDefault() is only recorded by the
+      // browser once the event dispatch is over: a restoreContext() call
+      // from inside the handler is refused, so ask from a later task.
+      this.restoreRequest = setTimeout(() => {
+        this.restoreRequest = null;
+        canvasWebGL.get(this.canvas)?.loseContext?.restoreContext();
+      }, 0);
+    }
+  };
+
+  private onContextRestored = () => {
+    this.acquire();
+    this.requestRedraw();
+  };
+
   makeImageSnapshot(picture: SkPicture, rect?: SkRect): SkImage | null {
-    if (!this.surface) {
+    if (!this.surface || this.isContextLost()) {
       return null;
     }
     const canvas = this.surface.getCanvas();
@@ -73,7 +232,10 @@ class WebGLRenderer implements Renderer {
 
   onResize() {
     const { canvas } = this;
-    if (!this.grContext) {
+    if (!this.grContext || this.isContextLost()) {
+      // Waiting for the context to be restored (the restore path resizes),
+      // or the loss hasn't been announced yet and onContextLost is about to
+      // release everything: either way there is nothing to build on.
       return;
     }
     this.pd = window.devicePixelRatio;
@@ -101,41 +263,57 @@ class WebGLRenderer implements Renderer {
   }
 
   draw(picture: SkPicture) {
-    if (this.surface) {
-      const canvas = this.surface.getCanvas();
-      canvas.clear(Float32Array.of(0, 0, 0, 0));
-      canvas.save();
-      canvas.scale(this.pd, this.pd);
-      canvas.drawPicture(picture);
-      canvas.restore();
-      this.surface.ref.flush();
+    if (!this.surface || this.isContextLost()) {
+      return;
     }
+    const canvas = this.surface.getCanvas();
+    canvas.clear(Float32Array.of(0, 0, 0, 0));
+    canvas.save();
+    canvas.scale(this.pd, this.pd);
+    canvas.drawPicture(picture);
+    canvas.restore();
+    this.surface.ref.flush();
   }
 
   dispose(): void {
-    this.surface?.ref.delete();
-    this.surface = null;
-    if (this.grContext) {
-      this.grContext.releaseResourcesAndAbandonContext();
-      this.grContext.delete();
-      this.grContext = null;
+    const { canvas } = this;
+    canvas.removeEventListener("webglcontextlost", this.onContextLost);
+    canvas.removeEventListener("webglcontextrestored", this.onContextRestored);
+    if (this.restoreRequest !== null) {
+      clearTimeout(this.restoreRequest);
+      this.restoreRequest = null;
     }
-    this.canvas
-      ?.getContext("webgl2")
-      ?.getExtension("WEBGL_lose_context")
-      ?.loseContext();
-    if (this.contextHandle) {
-      // Unregister the context from CanvasKit's internal registry, otherwise
-      // it retains the canvas element (and its detached DOM tree) forever.
-      CanvasKit.deleteContext(this.contextHandle);
-      // Making the now-deleted handle current clears CanvasKit's
-      // current-context globals (GLctx/Module.ctx), which would otherwise
-      // keep referencing the context (and the canvas) until another surface
-      // becomes current. With a deleted handle this is a no-op that returns
-      // null without creating anything.
-      CanvasKit.MakeWebGLContext(this.contextHandle);
-      this.contextHandle = 0;
+    this.restoreWanted = false;
+    this.release();
+    // Free the drawing buffer, which CanvasKit requests with depth and stencil
+    // attachments (about 8 bytes per pixel): a canvas that stays in the
+    // document without a renderer, hidden in an Activity say, would otherwise
+    // keep a full-size buffer around. The next renderer's onResize() sizes it
+    // again.
+    canvas.width = 0;
+    canvas.height = 0;
+    const entry = canvasWebGL.get(canvas);
+    if (!entry) {
+      return;
     }
+    entry.owner = null;
+    // Whether the element is going away is only known once the commit is
+    // over: on a real unmount React runs this cleanup *before* removing the
+    // node from the document, while StrictMode's double-invoke and an
+    // Activity hide keep the node in place (and the former builds the next
+    // renderer on it right away). Losing the context of a detached element
+    // matters: it would otherwise stay alive until the element is garbage
+    // collected, and browsers cap the number of live contexts per page
+    // (16 in Chrome, which then evicts the oldest one, visible or not).
+    queueMicrotask(() => {
+      if (
+        entry.owner === null &&
+        !canvas.isConnected &&
+        !entry.gl.isContextLost()
+      ) {
+        entry.loseContext?.loseContext();
+      }
+    });
   }
 }
 
@@ -382,6 +560,9 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
   // - A ResizeObserver on the canvas itself recreates the surface and repaints
   //   synchronously (its callbacks run after layout, before paint), and is
   //   also the source of the user-facing onLayout event.
+  // - The renderer belongs to the layout effect, the WebGL context to the
+  //   <canvas> element, whose lifetime is longer; see WebGLRenderer for how
+  //   the two are reconciled.
   const redrawPendingRef = useRef(false);
   const flushScheduledRef = useRef(false);
   const onLayoutRef = useRef(onLayout);
@@ -488,7 +669,7 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
     }
     const renderer = isStatic
       ? new StaticWebGLRenderer(canvas)
-      : new WebGLRenderer(canvas);
+      : new WebGLRenderer(canvas, redraw);
     rendererRef.current = renderer;
 
     const drawPicture = () => {
@@ -572,7 +753,7 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
       rendererRef.current = null;
       renderer.dispose();
     };
-  }, [isStatic]);
+  }, [isStatic, redraw]);
 
   // No flush cancellation is needed on unmount: a microtask queued before
   // unmount runs within the same task, and flushRedraw no-ops once the
@@ -635,6 +816,10 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
   return (
     <Platform.View {...viewProps}>
       <canvas
+        // A canvas element is bound to one context kind for life (WebGL for
+        // the live renderer, 2D for the static one), so switching renderers
+        // needs a fresh element.
+        key={isStatic ? "static" : "webgl"}
         ref={canvasRef}
         style={{ display: "block", width: "100%", height: "100%" }}
       />
