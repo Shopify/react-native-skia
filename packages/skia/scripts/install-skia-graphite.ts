@@ -47,19 +47,17 @@ const APPLE_FRAMEWORKS = [
 // NOTE: the "apple" checksums below are placeholders (build-skia-graphite.yml
 // now zips each xcframework individually - see its "Package Apple
 // xcframeworks" step). They must be regenerated from that workflow's
-// `*.checksums.txt` release asset the next time this GRAPHITE_CONFIG.version
-// is built, or `yarn install-skia-graphite` will fail on the Apple download step.
+// `*.checksums.txt` release asset once this GRAPHITE_CONFIG.version has
+// actually been built by build-skia-graphite.yml, or `yarn install-skia-graphite`
+// will fail on the Apple download step.
 const GRAPHITE_CONFIG = {
-  version: "m152",
+  version: "m154",
   checksums: {
     android: {
-      "armeabi-v7a":
-        "edc363fb63d3e629d7023d63d505c2d075030dfc40e04890d988eaff5c31c2fc",
-      "arm64-v8a":
-        "cefc18191d46deec3e164f3b717b06c6ae7845eeec21fe11cca53339063cf1e2",
-      "x86": "78041f4d58fafda1821c96f83e4818cce492a7047b16f267527e3e140d0b4c0d",
-      "x86_64":
-        "8cfcd40b87b42aa0aaaba89852aa51f3316c90debcdf24dcc5a9b7b562a8aa6f",
+      "armeabi-v7a": "REPLACE_WITH_REAL_CHECKSUM",
+      "arm64-v8a": "REPLACE_WITH_REAL_CHECKSUM",
+      "x86": "REPLACE_WITH_REAL_CHECKSUM",
+      "x86_64": "REPLACE_WITH_REAL_CHECKSUM",
     },
     apple: {
       ios: Object.fromEntries(
@@ -75,19 +73,17 @@ const GRAPHITE_CONFIG = {
 // Dawn prebuilt binaries. These are the exact artifacts react-native-webgpu
 // links; both packages must consume the same Dawn build so that only one Dawn
 // copy exists in an app that installs both, which is why the release tag is
-// pinned here rather than derived from GRAPHITE_CONFIG.version.
-//
-// STALE: this is still the m150 Dawn (63f25feec51e9351fb25222b6d5de1af791d7c4f)
-// while m152's DEPS pins 1e897275172a23f27b0022fa6beae3084ed54a9b. Bump this to
-// dawn-chrome-m152 (with new checksums) once react-native-webgpu publishes that
-// release; until then Graphite installs pair m152 Skia with m150 Dawn.
+// pinned here rather than derived from GRAPHITE_CONFIG.version. Skia's DEPS at
+// chrome/m154 pins Dawn @ 3d786993a7ded64c4ebb4884b9b079db9ad0e580 - keep this
+// tag aligned with whatever milestone react-native-webgpu's Package.swift
+// pins (its dawnReleaseTag fatalError check enforces the match at build time).
 const DAWN_CONFIG = {
-  releaseTag: "dawn-chrome-m150",
+  releaseTag: "dawn-chrome-m154",
   baseUrl:
     "https://github.com/wcandillon/react-native-webgpu/releases/download",
   checksums: {
-    android: "dee507d4fe66b57f6d33c0dac8cfd1b1263fcd9a8997bfebf936b62341580e60",
-    apple: "5bacd90c56aa3144d8ba74ac2d769d28b28ebf99c67a4959185c7181d8aeaf31",
+    android: "6fe8766dc3711e1e41e8b9d919fadd83f0e364945e66c01f49f316f4a3d96b1f",
+    apple: "896575ffbc99610198a83d061f8c5a2789139b7f16c669fbf3a9f7a7ac9be123",
   },
 } as const;
 
@@ -220,9 +216,10 @@ const downloadAndExtract = async (
 const downloadAndExtractZip = async (
   assetName: string,
   destDir: string,
-  expectedChecksum: string
+  expectedChecksum: string,
+  urlOverride?: string
 ): Promise<void> => {
-  const url = getDownloadUrl(assetName);
+  const url = urlOverride ?? getDownloadUrl(assetName);
   const tempFile = path.join(LIBS_DIR, `${assetName}.tmp`);
 
   console.log(`  Downloading ${assetName}...`);
@@ -393,10 +390,12 @@ const downloadDawnLibs = async (): Promise<void> => {
   rmSync(androidTempDir, { recursive: true, force: true });
 
   // Apple: one xcframework carrying ios-device, ios-simulator and macos
-  // slices; the podspec vendors it from both platform dirs
-  const appleAsset = `dawn-apple-${DAWN_CONFIG.releaseTag}.xcframework.tar.gz`;
+  // slices; the podspec vendors it from both platform dirs. Published as a
+  // .zip (not .tar.gz) since it's the same SPM-compatible artifact
+  // react-native-webgpu's Package.swift binaryTarget links.
+  const appleAsset = `dawn-apple-${DAWN_CONFIG.releaseTag}.xcframework.zip`;
   const appleTempDir = path.join(LIBS_DIR, "dawn-apple-temp");
-  await downloadAndExtract(
+  await downloadAndExtractZip(
     appleAsset,
     appleTempDir,
     DAWN_CONFIG.checksums.apple,
