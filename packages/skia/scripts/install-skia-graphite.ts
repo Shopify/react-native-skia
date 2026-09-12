@@ -15,53 +15,75 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
-  readdirSync,
   rmSync,
   writeFileSync,
 } from "fs";
 import https from "https";
 import path from "path";
 
+import extractZip from "extract-zip";
 import { extract } from "tar";
 
 import { copyHeaders } from "./skia-configuration";
 import { fileOps } from "./utils";
 
+// The xcframeworks bundled for each Apple platform. Each one is published as
+// its own .zip (SPM's binaryTarget requires one .xcframework per archive), so
+// this list drives both the download loop below and, eventually, the
+// per-framework binaryTargets in Package.swift.
+const APPLE_FRAMEWORKS = [
+  "libskia",
+  "libskottie",
+  "libskparagraph",
+  "libsksg",
+  "libskshaper",
+  "libskunicode_core",
+  "libskunicode_libgrapheme",
+  "libsvg",
+] as const;
+
 // Graphite configuration
+//
+// NOTE: the "apple" checksums below are placeholders (build-skia-graphite.yml
+// now zips each xcframework individually - see its "Package Apple
+// xcframeworks" step). They must be regenerated from that workflow's
+// `*.checksums.txt` release asset once this GRAPHITE_CONFIG.version has
+// actually been built by build-skia-graphite.yml, or `yarn install-skia-graphite`
+// will fail on the Apple download step.
 const GRAPHITE_CONFIG = {
-  version: "m152",
+  version: "m154",
   checksums: {
-    "android-armeabi-v7a":
-      "edc363fb63d3e629d7023d63d505c2d075030dfc40e04890d988eaff5c31c2fc",
-    "android-arm64-v8a":
-      "cefc18191d46deec3e164f3b717b06c6ae7845eeec21fe11cca53339063cf1e2",
-    "android-x86":
-      "78041f4d58fafda1821c96f83e4818cce492a7047b16f267527e3e140d0b4c0d",
-    "android-x86_64":
-      "8cfcd40b87b42aa0aaaba89852aa51f3316c90debcdf24dcc5a9b7b562a8aa6f",
-    "apple-ios-xcframeworks":
-      "9a64915dd95bf22ab3f38624ac2fc7e4a14cfd155f218170317ccef6ab9dfc69",
-    "apple-macos-xcframeworks":
-      "995cc77d575368d2df08a16ed0345395ba66308b00ba57ef190e70eb710d74f9",
+    android: {
+      "armeabi-v7a": "REPLACE_WITH_REAL_CHECKSUM",
+      "arm64-v8a": "REPLACE_WITH_REAL_CHECKSUM",
+      "x86": "REPLACE_WITH_REAL_CHECKSUM",
+      "x86_64": "REPLACE_WITH_REAL_CHECKSUM",
+    },
+    apple: {
+      ios: Object.fromEntries(
+        APPLE_FRAMEWORKS.map((name) => [name, "REPLACE_WITH_REAL_CHECKSUM"])
+      ) as Record<(typeof APPLE_FRAMEWORKS)[number], string>,
+      macos: Object.fromEntries(
+        APPLE_FRAMEWORKS.map((name) => [name, "REPLACE_WITH_REAL_CHECKSUM"])
+      ) as Record<(typeof APPLE_FRAMEWORKS)[number], string>,
+    },
   },
 } as const;
 
 // Dawn prebuilt binaries. These are the exact artifacts react-native-webgpu
 // links; both packages must consume the same Dawn build so that only one Dawn
 // copy exists in an app that installs both, which is why the release tag is
-// pinned here rather than derived from GRAPHITE_CONFIG.version.
-//
-// STALE: this is still the m150 Dawn (63f25feec51e9351fb25222b6d5de1af791d7c4f)
-// while m152's DEPS pins 1e897275172a23f27b0022fa6beae3084ed54a9b. Bump this to
-// dawn-chrome-m152 (with new checksums) once react-native-webgpu publishes that
-// release; until then Graphite installs pair m152 Skia with m150 Dawn.
+// pinned here rather than derived from GRAPHITE_CONFIG.version. Skia's DEPS at
+// chrome/m154 pins Dawn @ 3d786993a7ded64c4ebb4884b9b079db9ad0e580 - keep this
+// tag aligned with whatever milestone react-native-webgpu's Package.swift
+// pins (its dawnReleaseTag fatalError check enforces the match at build time).
 const DAWN_CONFIG = {
-  releaseTag: "dawn-chrome-m150",
+  releaseTag: "dawn-chrome-m154",
   baseUrl:
     "https://github.com/wcandillon/react-native-webgpu/releases/download",
   checksums: {
-    android: "dee507d4fe66b57f6d33c0dac8cfd1b1263fcd9a8997bfebf936b62341580e60",
-    apple: "5bacd90c56aa3144d8ba74ac2d769d28b28ebf99c67a4959185c7181d8aeaf31",
+    android: "6fe8766dc3711e1e41e8b9d919fadd83f0e364945e66c01f49f316f4a3d96b1f",
+    apple: "896575ffbc99610198a83d061f8c5a2789139b7f16c669fbf3a9f7a7ac9be123",
   },
 } as const;
 
@@ -189,6 +211,39 @@ const downloadAndExtract = async (
   rmSync(tempFile, { force: true });
 };
 
+// Download and extract a single-xcframework .zip asset (SPM-compatible
+// packaging - see APPLE_FRAMEWORKS above) into destDir.
+const downloadAndExtractZip = async (
+  assetName: string,
+  destDir: string,
+  expectedChecksum: string,
+  urlOverride?: string
+): Promise<void> => {
+  const url = urlOverride ?? getDownloadUrl(assetName);
+  const tempFile = path.join(LIBS_DIR, `${assetName}.tmp`);
+
+  console.log(`  Downloading ${assetName}...`);
+  await downloadFile(url, tempFile);
+
+  console.log(`  Verifying checksum...`);
+  const actualChecksum = calculateFileChecksum(tempFile);
+  if (actualChecksum !== expectedChecksum) {
+    rmSync(tempFile, { force: true });
+    throw new Error(
+      `Checksum mismatch for ${assetName}:\n` +
+        `  Expected: ${expectedChecksum}\n` +
+        `  Actual:   ${actualChecksum}`
+    );
+  }
+  console.log(`  ✓ Checksum verified`);
+
+  console.log(`  Extracting to ${destDir}...`);
+  mkdirSync(destDir, { recursive: true });
+  await extractZip(tempFile, { dir: destDir });
+
+  rmSync(tempFile, { force: true });
+};
+
 // Checkout the Skia submodule to the correct branch
 const checkoutSkiaSubmodule = (): void => {
   const baseVersion = getBaseVersion(GRAPHITE_CONFIG.version);
@@ -276,9 +331,10 @@ const downloadAndroidLibs = async (): Promise<void> => {
   const releaseTag = getReleaseTag(GRAPHITE_CONFIG.version);
 
   for (const abi of androidAbis) {
-    const checksumKey =
-      `android-${abi.name}` as keyof typeof GRAPHITE_CONFIG.checksums;
-    const expectedChecksum = GRAPHITE_CONFIG.checksums[checksumKey];
+    const expectedChecksum =
+      GRAPHITE_CONFIG.checksums.android[
+        abi.name as keyof typeof GRAPHITE_CONFIG.checksums.android
+      ];
     const assetName = `skia-graphite-${abi.asset}-${releaseTag}.tar.gz`;
     const destDir = path.join(LIBS_DIR, "android", abi.name);
 
@@ -334,10 +390,12 @@ const downloadDawnLibs = async (): Promise<void> => {
   rmSync(androidTempDir, { recursive: true, force: true });
 
   // Apple: one xcframework carrying ios-device, ios-simulator and macos
-  // slices; the podspec vendors it from both platform dirs
-  const appleAsset = `dawn-apple-${DAWN_CONFIG.releaseTag}.xcframework.tar.gz`;
+  // slices; the podspec vendors it from both platform dirs. Published as a
+  // .zip (not .tar.gz) since it's the same SPM-compatible artifact
+  // react-native-webgpu's Package.swift binaryTarget links.
+  const appleAsset = `dawn-apple-${DAWN_CONFIG.releaseTag}.xcframework.zip`;
   const appleTempDir = path.join(LIBS_DIR, "dawn-apple-temp");
-  await downloadAndExtract(
+  await downloadAndExtractZip(
     appleAsset,
     appleTempDir,
     DAWN_CONFIG.checksums.apple,
@@ -357,59 +415,46 @@ const downloadDawnLibs = async (): Promise<void> => {
   console.log(`  ✓ Dawn libraries downloaded`);
 };
 
-// Download Apple libraries
+// Download Apple libraries. Each xcframework is published as its own zip
+// (see APPLE_FRAMEWORKS), named
+// `skia-graphite-apple-<platform>-xcframeworks-<name>-<releaseTag>.zip`.
+const downloadApplePlatformLibs = async (
+  platform: "ios" | "macos",
+  artifactPrefix: string
+): Promise<void> => {
+  const releaseTag = getReleaseTag(GRAPHITE_CONFIG.version);
+  const destDir = path.join(LIBS_DIR, platform);
+  fileOps.rm(destDir);
+  fileOps.mkdir(destDir);
+
+  const checksums = GRAPHITE_CONFIG.checksums.apple[platform];
+  for (const framework of APPLE_FRAMEWORKS) {
+    const assetName = `${artifactPrefix}-${framework}-${releaseTag}.zip`;
+    const tempDir = path.join(LIBS_DIR, `apple-${platform}-${framework}-temp`);
+
+    await downloadAndExtractZip(assetName, tempDir, checksums[framework]);
+
+    const xcfName = `${framework}.xcframework`;
+    const extracted = path.join(tempDir, xcfName);
+    if (!existsSync(extracted)) {
+      throw new Error(`Missing ${xcfName} in ${assetName}`);
+    }
+    fileOps.cp(extracted, path.join(destDir, xcfName));
+    rmSync(tempDir, { recursive: true, force: true });
+  }
+};
+
 const downloadAppleLibs = async (): Promise<void> => {
   console.log(`\n🍎 Downloading Apple Graphite libraries...`);
 
-  const releaseTag = getReleaseTag(GRAPHITE_CONFIG.version);
-  const iosDir = path.join(LIBS_DIR, "ios");
-  const macosDir = path.join(LIBS_DIR, "macos");
-
-  // Clean and create destination directories
-  fileOps.rm(iosDir);
-  fileOps.rm(macosDir);
-  fileOps.mkdir(iosDir);
-  fileOps.mkdir(macosDir);
-
-  // Download iOS xcframeworks
-  const iosAsset = `skia-graphite-apple-ios-xcframeworks-${releaseTag}.tar.gz`;
-  const iosTempDir = path.join(LIBS_DIR, "apple-ios-temp");
-  await downloadAndExtract(
-    iosAsset,
-    iosTempDir,
-    GRAPHITE_CONFIG.checksums["apple-ios-xcframeworks"]
+  await downloadApplePlatformLibs(
+    "ios",
+    "skia-graphite-apple-ios-xcframeworks"
   );
-
-  const extractedIosDir = path.join(iosTempDir, "ios");
-  if (existsSync(extractedIosDir)) {
-    const xcframeworks = readdirSync(extractedIosDir).filter(
-      (f) => f.endsWith(".xcframework") && f !== "libdawn_combined.xcframework"
-    );
-    for (const xcf of xcframeworks) {
-      fileOps.cp(path.join(extractedIosDir, xcf), path.join(iosDir, xcf));
-    }
-  }
-  rmSync(iosTempDir, { recursive: true, force: true });
-
-  // Download macOS xcframeworks
-  const macosAsset = `skia-graphite-apple-macos-xcframeworks-${releaseTag}.tar.gz`;
-  const macosTempDir = path.join(LIBS_DIR, "apple-macos-temp");
-  await downloadAndExtract(
-    macosAsset,
-    macosTempDir,
-    GRAPHITE_CONFIG.checksums["apple-macos-xcframeworks"]
+  await downloadApplePlatformLibs(
+    "macos",
+    "skia-graphite-apple-macos-xcframeworks"
   );
-
-  const extractedMacosDir = path.join(macosTempDir, "macos");
-  if (existsSync(extractedMacosDir)) {
-    const xcframeworks = readdirSync(extractedMacosDir).filter(
-      (f) => f.endsWith(".xcframework") && f !== "libdawn_combined.xcframework"
-    );
-    for (const xcf of xcframeworks) {
-      fileOps.cp(path.join(extractedMacosDir, xcf), path.join(macosDir, xcf));
-    }
-  }
-  rmSync(macosTempDir, { recursive: true, force: true });
 
   console.log(`  ✓ Apple libraries downloaded`);
 };
