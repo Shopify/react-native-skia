@@ -147,7 +147,8 @@ public:
     vkBegin.newLayout = 0;
     beginAccessDesc.nextInChain = &vkBegin;
 #endif
-    bool success = memory.BeginAccess(texture, &beginAccessDesc);
+    bool success =
+        memory.BeginAccess(texture, &beginAccessDesc) == wgpu::Status::Success;
 
     if (success) {
       skgpu::graphite::BackendTexture betFromView =
