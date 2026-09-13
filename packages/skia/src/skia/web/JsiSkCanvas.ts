@@ -3,6 +3,7 @@ import type {
   CanvasKit,
   CubicResampler as CKCubicResampler,
   FilterOptions as CKFilterOptions,
+  Paint,
 } from "canvaskit-wasm";
 
 import {
@@ -65,12 +66,12 @@ export class JsiSkCanvas
     );
   }
 
-  drawImage(image: SkImage, x: number, y: number, paint?: SkPaint) {
+  drawImage(image: SkImage, x: number, y: number, paint?: SkPaint | null) {
     this.ref.drawImage(
       JsiSkImage.fromValue(image),
       x,
       y,
-      paint ? JsiSkPaint.fromValue(paint) : paint
+      paint ? JsiSkPaint.fromValue(paint) : undefined
     );
   }
 
@@ -78,16 +79,22 @@ export class JsiSkCanvas
     img: SkImage,
     src: SkRect,
     dest: SkRect,
-    paint: SkPaint,
+    paint?: SkPaint | null,
     fastSample?: boolean
   ) {
+    const p = paint
+      ? JsiSkPaint.fromValue<Paint>(paint)
+      : new this.CanvasKit.Paint();
     this.ref.drawImageRect(
       JsiSkImage.fromValue(img),
       JsiSkRect.fromValue(this.CanvasKit, src),
       JsiSkRect.fromValue(this.CanvasKit, dest),
-      JsiSkPaint.fromValue(paint),
+      p,
       fastSample
     );
+    if (!paint) {
+      p.delete();
+    }
   }
 
   drawImageCubic(
@@ -203,17 +210,23 @@ export class JsiSkCanvas
     colors?: SkColor[] | null,
     texs?: SkPoint[] | null,
     mode?: BlendMode | null,
-    paint?: SkPaint
+    paint?: SkPaint | null
   ) {
+    const p = paint
+      ? JsiSkPaint.fromValue<Paint>(paint)
+      : new this.CanvasKit.Paint();
     this.ref.drawPatch(
       cubics.map(({ x, y }) => [x, y]).flat(),
-      colors,
-      texs ? texs.flatMap((p) => Array.from(JsiSkPoint.fromValue(p))) : texs,
+      colors ?? null,
+      texs ? texs.flatMap((pt) => Array.from(JsiSkPoint.fromValue(pt))) : null,
       mode !== undefined && mode !== null
         ? getEnum(this.CanvasKit, "BlendMode", mode)
         : null,
-      paint ? JsiSkPaint.fromValue(paint) : undefined
+      p
     );
+    if (!paint) {
+      p.delete();
+    }
   }
 
   restoreToCount(saveCount: number) {
@@ -228,6 +241,9 @@ export class JsiSkCanvas
   }
 
   drawPoints(mode: PointMode, points: SkPoint[], paint: SkPaint) {
+    if (points.length === 0) {
+      return;
+    }
     this.ref.drawPoints(
       getEnum(this.CanvasKit, "PointMode", mode),
       points.map(({ x, y }) => [x, y]).flat(),

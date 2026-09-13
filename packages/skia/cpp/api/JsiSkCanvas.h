@@ -75,7 +75,7 @@ public:
     auto x = arguments[1].asNumber();
     auto y = arguments[2].asNumber();
     std::shared_ptr<SkPaint> paint;
-    if (count == 4) {
+    if (count >= 4 && !arguments[3].isNull() && !arguments[3].isUndefined()) {
       paint = JsiSkPaint::fromValue(runtime, arguments[3]);
     }
     _canvas->drawImage(image, x, y, SkSamplingOptions(), paint.get());
@@ -86,8 +86,11 @@ public:
     auto image = JsiSkImage::fromValue(runtime, arguments[0]);
     auto src = JsiSkRect::fromValue(runtime, arguments[1]);
     auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
-    auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
-    auto fastSample = count >= 5 && arguments[4].getBool();
+    std::shared_ptr<SkPaint> paint;
+    if (count >= 4 && !arguments[3].isNull() && !arguments[3].isUndefined()) {
+      paint = JsiSkPaint::fromValue(runtime, arguments[3]);
+    }
+    auto fastSample = count >= 5 && !arguments[4].isUndefined() && arguments[4].getBool();
     _canvas->drawImageRect(image, *src, *dest, SkSamplingOptions(), paint.get(),
                            fastSample ? SkCanvas::kFast_SrcRectConstraint
                                       : SkCanvas::kStrict_SrcRectConstraint);
@@ -101,10 +104,8 @@ public:
     float B = arguments[3].asNumber();
     float C = arguments[4].asNumber();
     std::shared_ptr<SkPaint> paint;
-    if (count == 6) {
-      if (!arguments[5].isNull()) {
-        paint = JsiSkPaint::fromValue(runtime, arguments[5]);
-      }
+    if (count >= 6 && !arguments[5].isNull() && !arguments[5].isUndefined()) {
+      paint = JsiSkPaint::fromValue(runtime, arguments[5]);
     }
     _canvas->drawImage(image, x, y, SkSamplingOptions({B, C}), paint.get());
     return jsi::Value::undefined();
@@ -117,10 +118,8 @@ public:
     auto fm = (SkFilterMode)arguments[3].asNumber();
     auto mm = (SkMipmapMode)arguments[4].asNumber();
     std::shared_ptr<SkPaint> paint;
-    if (count == 6) {
-      if (!arguments[5].isNull()) {
-        paint = JsiSkPaint::fromValue(runtime, arguments[5]);
-      }
+    if (count >= 6 && !arguments[5].isNull() && !arguments[5].isUndefined()) {
+      paint = JsiSkPaint::fromValue(runtime, arguments[5]);
     }
     _canvas->drawImage(image, x, y, SkSamplingOptions(fm, mm), paint.get());
     return jsi::Value::undefined();
@@ -132,10 +131,8 @@ public:
     auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
     auto fm = (SkFilterMode)arguments[3].asNumber();
     std::shared_ptr<SkPaint> paint;
-    if (count == 5) {
-      if (!arguments[4].isNull()) {
-        paint = JsiSkPaint::fromValue(runtime, arguments[4]);
-      }
+    if (count >= 5 && !arguments[4].isNull() && !arguments[4].isUndefined()) {
+      paint = JsiSkPaint::fromValue(runtime, arguments[4]);
     }
     _canvas->drawImageNine(image.get(), center->round(), *dest, fm,
                            paint.get());
@@ -149,10 +146,8 @@ public:
     float B = arguments[3].asNumber();
     float C = arguments[4].asNumber();
     std::shared_ptr<SkPaint> paint;
-    if (count == 6) {
-      if (!arguments[5].isNull()) {
-        paint = JsiSkPaint::fromValue(runtime, arguments[5]);
-      }
+    if (count >= 6 && !arguments[5].isNull() && !arguments[5].isUndefined()) {
+      paint = JsiSkPaint::fromValue(runtime, arguments[5]);
     }
     auto constraint =
         SkCanvas::kStrict_SrcRectConstraint; // TODO: get from caller
@@ -168,10 +163,8 @@ public:
     auto filter = (SkFilterMode)arguments[3].asNumber();
     auto mipmap = (SkMipmapMode)arguments[4].asNumber();
     std::shared_ptr<SkPaint> paint;
-    if (count == 6) {
-      if (!arguments[5].isNull()) {
-        paint = JsiSkPaint::fromValue(runtime, arguments[5]);
-      }
+    if (count >= 6 && !arguments[5].isNull() && !arguments[5].isUndefined()) {
+      paint = JsiSkPaint::fromValue(runtime, arguments[5]);
     }
     auto constraint = SkCanvas::kStrict_SrcRectConstraint;
     _canvas->drawImageRect(image.get(), *src, *dest, {filter, mipmap},
@@ -216,9 +209,8 @@ public:
 
   void drawPoints(double pointMode, std::vector<SkPoint> points,
                   std::shared_ptr<SkPaint> paint) {
-    // Check if we have at least one point
     if (points.empty()) {
-      throw std::invalid_argument("Points array must not be empty");
+      return;
     }
     auto p = SkSpan(points.data(), points.size());
     _canvas->drawPoints(static_cast<SkCanvas::PointMode>(pointMode), p, *paint);
@@ -287,11 +279,22 @@ public:
       }
     }
 
-    auto paint =
-        count >= 4 ? JsiSkPaint::fromValue(runtime, arguments[4]) : nullptr;
-    auto blendMode = static_cast<SkBlendMode>(arguments[3].asNumber());
+    SkBlendMode defaultBlendMode =
+        colors.empty() ? SkBlendMode::kSrcOver : SkBlendMode::kDstOver;
+    SkBlendMode blendMode = defaultBlendMode;
+    if (count >= 4 && !arguments[3].isNull() && !arguments[3].isUndefined()) {
+      blendMode = static_cast<SkBlendMode>(arguments[3].asNumber());
+    }
+
+    std::shared_ptr<SkPaint> paint;
+    if (count >= 5 && !arguments[4].isNull() && !arguments[4].isUndefined()) {
+      paint = JsiSkPaint::fromValue(runtime, arguments[4]);
+    }
+    SkPaint defaultPaint;
+    const auto &paintRef = paint != nullptr ? *paint : defaultPaint;
+
     _canvas->drawPatch(cubics.data(), colors.empty() ? nullptr : colors.data(),
-                       texs.empty() ? nullptr : texs.data(), blendMode, *paint);
+                       texs.empty() ? nullptr : texs.data(), blendMode, paintRef);
     return jsi::Value::undefined();
   }
 
@@ -362,9 +365,10 @@ public:
   int save() { return _canvas->save(); }
 
   JSI_HOST_FUNCTION(saveLayer) {
-    SkPaint *paint = (count >= 1 && !arguments[0].isUndefined())
-                         ? JsiSkPaint::fromValue(runtime, arguments[0]).get()
-                         : nullptr;
+    SkPaint *paint =
+        (count >= 1 && !arguments[0].isNull() && !arguments[0].isUndefined())
+            ? JsiSkPaint::fromValue(runtime, arguments[0]).get()
+            : nullptr;
     SkRect *bounds =
         count >= 2 && !arguments[1].isNull() && !arguments[1].isUndefined()
             ? JsiSkRect::fromValue(runtime, arguments[1]).get()
@@ -373,7 +377,10 @@ public:
         count >= 3 && !arguments[2].isNull() && !arguments[2].isUndefined()
             ? JsiSkImageFilter::fromValue(runtime, arguments[2]).get()
             : nullptr;
-    SkCanvas::SaveLayerFlags flags = count >= 4 ? arguments[3].asNumber() : 0;
+    SkCanvas::SaveLayerFlags flags =
+        count >= 4 && !arguments[3].isNull() && !arguments[3].isUndefined()
+            ? static_cast<SkCanvas::SaveLayerFlags>(arguments[3].asNumber())
+            : 0;
     return jsi::Value(_canvas->saveLayer(
         SkCanvas::SaveLayerRec(bounds, paint, backdrop, flags)));
   }
@@ -411,7 +418,8 @@ public:
     auto rects = arguments[1].asObject(runtime).asArray(runtime);
     auto transforms = arguments[2].asObject(runtime).asArray(runtime);
     auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
-    auto blendMode = count > 5 && !arguments[4].isUndefined()
+    auto blendMode = count >= 5 && !arguments[4].isNull() &&
+                         !arguments[4].isUndefined()
                          ? static_cast<SkBlendMode>(arguments[4].asNumber())
                          : SkBlendMode::kDstOver;
 
@@ -440,7 +448,7 @@ public:
     }
 
     std::vector<SkColor> colors;
-    if (count > 5 && !arguments[5].isUndefined()) {
+    if (count >= 6 && !arguments[5].isNull() && !arguments[5].isUndefined()) {
       auto colorsArray = arguments[5].asObject(runtime).asArray(runtime);
       int colorsSize = static_cast<int>(colorsArray.size(runtime));
 
@@ -470,7 +478,7 @@ public:
       }
     }
     SkSamplingOptions sampling(SkFilterMode::kLinear);
-    if (count > 6) {
+    if (count >= 7 && !arguments[6].isNull() && !arguments[6].isUndefined()) {
       sampling = SamplingOptionsFromValue(runtime, arguments[6]);
     }
     auto x = SkSpan(xforms.data(), xforms.size());
