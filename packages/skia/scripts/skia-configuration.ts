@@ -502,6 +502,12 @@ export const copyHeaders = () => {
         "../../externals/skia/third_party/externals/dawn/include",
         "./cpp/dawn/include"
       );
+      // Dawn's cmake build (as of the Dawn revision pinned at chrome/m154)
+      // also generates a webgpu_upstream/ copy of webgpu_cpp.h and friends
+      // under its own path. Nothing in this repo or react-native-webgpu
+      // includes from webgpu_upstream/, and leaving it in trips the
+      // duplicate-header check below (same basenames as dawn/ and webgpu/).
+      fileOps.rm("./cpp/dawn/include/webgpu_upstream");
 
       console.log("      - Fixing WebGPU header references...");
       // Fix WebGPU header references
