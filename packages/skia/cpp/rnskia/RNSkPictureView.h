@@ -52,17 +52,30 @@ public:
   }
 
   void setPicture(sk_sp<SkPicture> picture) {
-    _picture = picture;
+    {
+      std::lock_guard<std::mutex> lock(_pictureMutex);
+      _picture = std::move(picture);
+    }
     _requestRedraw();
   }
 
-  sk_sp<SkPicture> getPicture() const { return _picture; }
+  sk_sp<SkPicture> getPicture() const {
+    std::lock_guard<std::mutex> lock(_pictureMutex);
+    return _picture;
+  }
 
 private:
   bool performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
-    // Capture picture pointer to ensure thread safety - _picture can be
-    // modified from the JS thread while we're drawing on the render thread
-    sk_sp<SkPicture> picture = _picture;
+    // Copy under the lock: _picture can be replaced from the JS thread while
+    // the render thread draws, and copying an sk_sp is not atomic. Without
+    // the lock, this copy can ref a picture whose count the replacement on
+    // the other thread has already taken to zero, and drawing it fails in
+    // __cxa_pure_virtual.
+    sk_sp<SkPicture> picture;
+    {
+      std::lock_guard<std::mutex> lock(_pictureMutex);
+      picture = _picture;
+    }
     auto pd = _platformContext->getPixelDensity();
     return canvasProvider->renderToCanvas([=](SkCanvas *canvas) {
       canvas->clear(SK_ColorTRANSPARENT);
@@ -77,6 +90,7 @@ private:
 
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   sk_sp<SkPicture> _picture;
+  mutable std::mutex _pictureMutex;
 };
 
 class RNSkPictureView : public RNSkView {
