@@ -90,7 +90,8 @@ public:
     if (count >= 4 && !arguments[3].isNull() && !arguments[3].isUndefined()) {
       paint = JsiSkPaint::fromValue(runtime, arguments[3]);
     }
-    auto fastSample = count >= 5 && !arguments[4].isUndefined() && arguments[4].getBool();
+    auto fastSample = count >= 5 && !arguments[4].isNull() &&
+                      !arguments[4].isUndefined() && arguments[4].getBool();
     _canvas->drawImageRect(image, *src, *dest, SkSamplingOptions(), paint.get(),
                            fastSample ? SkCanvas::kFast_SrcRectConstraint
                                       : SkCanvas::kStrict_SrcRectConstraint);
@@ -279,9 +280,9 @@ public:
       }
     }
 
-    SkBlendMode defaultBlendMode =
-        colors.empty() ? SkBlendMode::kSrcOver : SkBlendMode::kDstOver;
-    SkBlendMode blendMode = defaultBlendMode;
+    // Matches CanvasKit's web default (see drawPatch in interface.js), which
+    // always falls back to kModulate regardless of whether colors are given.
+    SkBlendMode blendMode = SkBlendMode::kModulate;
     if (count >= 4 && !arguments[3].isNull() && !arguments[3].isUndefined()) {
       blendMode = static_cast<SkBlendMode>(arguments[3].asNumber());
     }
@@ -365,24 +366,29 @@ public:
   int save() { return _canvas->save(); }
 
   JSI_HOST_FUNCTION(saveLayer) {
-    SkPaint *paint =
+    // Keep the wrapper smart pointers alive for the duration of the call:
+    // JsiSkRect::fromValue() (and, in principle, the others) may return a
+    // freshly allocated temporary when the argument is a plain JS object
+    // rather than a host object, so taking .get() from a temporary would
+    // leave a dangling pointer once the expression finishes evaluating.
+    std::shared_ptr<SkPaint> paintPtr =
         (count >= 1 && !arguments[0].isNull() && !arguments[0].isUndefined())
-            ? JsiSkPaint::fromValue(runtime, arguments[0]).get()
+            ? JsiSkPaint::fromValue(runtime, arguments[0])
             : nullptr;
-    SkRect *bounds =
-        count >= 2 && !arguments[1].isNull() && !arguments[1].isUndefined()
-            ? JsiSkRect::fromValue(runtime, arguments[1]).get()
+    std::shared_ptr<SkRect> boundsPtr =
+        (count >= 2 && !arguments[1].isNull() && !arguments[1].isUndefined())
+            ? JsiSkRect::fromValue(runtime, arguments[1])
             : nullptr;
-    SkImageFilter *backdrop =
-        count >= 3 && !arguments[2].isNull() && !arguments[2].isUndefined()
-            ? JsiSkImageFilter::fromValue(runtime, arguments[2]).get()
+    sk_sp<SkImageFilter> backdropPtr =
+        (count >= 3 && !arguments[2].isNull() && !arguments[2].isUndefined())
+            ? JsiSkImageFilter::fromValue(runtime, arguments[2])
             : nullptr;
     SkCanvas::SaveLayerFlags flags =
         count >= 4 && !arguments[3].isNull() && !arguments[3].isUndefined()
             ? static_cast<SkCanvas::SaveLayerFlags>(arguments[3].asNumber())
             : 0;
-    return jsi::Value(_canvas->saveLayer(
-        SkCanvas::SaveLayerRec(bounds, paint, backdrop, flags)));
+    return jsi::Value(_canvas->saveLayer(SkCanvas::SaveLayerRec(
+        boundsPtr.get(), paintPtr.get(), backdropPtr.get(), flags)));
   }
 
   void restore() { _canvas->restore(); }

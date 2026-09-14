@@ -82,19 +82,15 @@ export class JsiSkCanvas
     paint?: SkPaint | null,
     fastSample?: boolean
   ) {
-    const p = paint
-      ? JsiSkPaint.fromValue<Paint>(paint)
-      : new this.CanvasKit.Paint();
-    this.ref.drawImageRect(
-      JsiSkImage.fromValue(img),
-      JsiSkRect.fromValue(this.CanvasKit, src),
-      JsiSkRect.fromValue(this.CanvasKit, dest),
-      p,
-      fastSample
-    );
-    if (!paint) {
-      p.delete();
-    }
+    this.withPaint(paint, (p) => {
+      this.ref.drawImageRect(
+        JsiSkImage.fromValue(img),
+        JsiSkRect.fromValue(this.CanvasKit, src),
+        JsiSkRect.fromValue(this.CanvasKit, dest),
+        p,
+        fastSample
+      );
+    });
   }
 
   drawImageCubic(
@@ -212,20 +208,38 @@ export class JsiSkCanvas
     mode?: BlendMode | null,
     paint?: SkPaint | null
   ) {
+    this.withPaint(paint, (p) => {
+      this.ref.drawPatch(
+        cubics.map(({ x, y }) => [x, y]).flat(),
+        colors ?? null,
+        texs
+          ? texs.flatMap((pt) => Array.from(JsiSkPoint.fromValue(pt)))
+          : null,
+        mode !== undefined && mode !== null
+          ? getEnum(this.CanvasKit, "BlendMode", mode)
+          : null,
+        p
+      );
+    });
+  }
+
+  // Draws with the caller's paint if given, otherwise a default CanvasKit
+  // paint that is deleted afterwards even if `draw` throws (e.g. drawPatch
+  // rejecting a malformed colors/texs array) so it never leaks on the WASM
+  // heap, which has no GC of its own.
+  private withPaint(
+    paint: SkPaint | null | undefined,
+    draw: (p: Paint) => void
+  ) {
     const p = paint
       ? JsiSkPaint.fromValue<Paint>(paint)
       : new this.CanvasKit.Paint();
-    this.ref.drawPatch(
-      cubics.map(({ x, y }) => [x, y]).flat(),
-      colors ?? null,
-      texs ? texs.flatMap((pt) => Array.from(JsiSkPoint.fromValue(pt))) : null,
-      mode !== undefined && mode !== null
-        ? getEnum(this.CanvasKit, "BlendMode", mode)
-        : null,
-      p
-    );
-    if (!paint) {
-      p.delete();
+    try {
+      draw(p);
+    } finally {
+      if (!paint) {
+        p.delete();
+      }
     }
   }
 
