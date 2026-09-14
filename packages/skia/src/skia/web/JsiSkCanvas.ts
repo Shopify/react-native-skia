@@ -55,8 +55,18 @@ export class JsiSkCanvas
   extends HostObject<Canvas, "Canvas">
   implements SkCanvas
 {
+  private defaultPaint?: Paint;
+
   constructor(CanvasKit: CanvasKit, ref: Canvas) {
     super(CanvasKit, ref, "Canvas");
+  }
+
+  override [Symbol.dispose](): void {
+    if (this.defaultPaint && !this.defaultPaint.isDeleted()) {
+      this.defaultPaint.delete();
+    }
+    this.defaultPaint = undefined;
+    super[Symbol.dispose]();
   }
 
   drawRect(rect: SkRect, paint: SkPaint) {
@@ -224,23 +234,21 @@ export class JsiSkCanvas
   }
 
   // Draws with the caller's paint if given, otherwise a default CanvasKit
-  // paint that is deleted afterwards even if `draw` throws (e.g. drawPatch
-  // rejecting a malformed colors/texs array) so it never leaks on the WASM
-  // heap, which has no GC of its own.
+  // paint that is cached on this canvas and reused (deleted only when the
+  // canvas itself is disposed) so it doesn't allocate/free on the WASM
+  // heap on every call.
   private withPaint(
     paint: SkPaint | null | undefined,
     draw: (p: Paint) => void
   ) {
-    const p = paint
-      ? JsiSkPaint.fromValue<Paint>(paint)
-      : new this.CanvasKit.Paint();
-    try {
-      draw(p);
-    } finally {
-      if (!paint) {
-        p.delete();
-      }
+    if (paint) {
+      draw(JsiSkPaint.fromValue<Paint>(paint));
+      return;
     }
+    if (!this.defaultPaint) {
+      this.defaultPaint = new this.CanvasKit.Paint();
+    }
+    draw(this.defaultPaint);
   }
 
   restoreToCount(saveCount: number) {
@@ -358,7 +366,7 @@ export class JsiSkCanvas
   }
 
   saveLayer(
-    paint?: SkPaint,
+    paint?: SkPaint | null,
     bounds?: SkRect | null,
     backdrop?: SkImageFilter | null,
     flags?: SaveLayerFlag
