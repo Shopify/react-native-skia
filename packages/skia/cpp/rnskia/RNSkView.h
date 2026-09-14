@@ -203,10 +203,20 @@ public:
    Renders the view into an SkImage instead of the screen.
    */
   sk_sp<SkImage> makeImageSnapshot(SkRect *bounds) {
+    // A view that has not been laid out yet (or whose window context was
+    // released) reports -1/0 as its size. Creating an offscreen surface with
+    // that size aborts in Metal texture validation (width = (uint64)-1).
+    // Returning nullptr degrades this to the existing
+    // "Failed to make snapshot from view." rejection.
+    auto width = _canvasProvider->getWidth();
+    auto height = _canvasProvider->getHeight();
+    if (width <= 0 || height <= 0) {
+      return nullptr;
+    }
 
     auto provider = std::make_shared<RNSkOffscreenCanvasProvider>(
-        getPlatformContext(), std::bind(&RNSkView::requestRedraw, this),
-        _canvasProvider->getWidth(), _canvasProvider->getHeight());
+        getPlatformContext(), std::bind(&RNSkView::requestRedraw, this), width,
+        height);
 
     _renderer->renderImmediate(provider);
     return provider->makeSnapshot(bounds);
