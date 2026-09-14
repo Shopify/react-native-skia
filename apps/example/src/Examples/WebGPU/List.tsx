@@ -11,21 +11,6 @@ export const examples = [
     title: "Triangle",
     description: "Basic WebGPU Canvas rendering",
   },
-  {
-    screen: "Wireframes",
-    title: "Wireframes",
-    description: "3D wireframe models with offscreen rendering",
-  },
-  {
-    screen: "TexturedCube",
-    title: "Textured Cube",
-    description: "Rotating 3D cube with texture mapping",
-  },
-  {
-    screen: "ImportExternalTexture",
-    title: "Import External Texture",
-    description: "Import a Skia NativeBuffer as a GPUExternalTexture",
-  },
 ] as const;
 
 const styles = StyleSheet.create({
