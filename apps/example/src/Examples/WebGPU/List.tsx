@@ -11,6 +11,11 @@ export const examples = [
     title: "Triangle",
     description: "Basic WebGPU Canvas rendering",
   },
+  {
+    screen: "Cube",
+    title: "Three.js Cube",
+    description: "Spinning cube rendered with the three.js WebGPURenderer",
+  },
 ] as const;
 
 const styles = StyleSheet.create({
