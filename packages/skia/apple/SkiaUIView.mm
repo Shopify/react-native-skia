@@ -138,6 +138,24 @@
   }
 }
 
+#if !TARGET_OS_OSX
+- (void)didMoveToWindow {
+  [super didMoveToWindow];
+  // A frame drawn while the view was detached from the window (an inactive
+  // tab, a covered screen) is never presented, so redraw the current picture
+  // as soon as the view is back in a window instead of showing the last
+  // frame that was presented before it left. Present it inside the current
+  // Core Animation transaction so it is on screen in the same frame the view
+  // appears rather than one later.
+  if (self.window != nil && _impl != nullptr) {
+    CAMetalLayer *layer = (CAMetalLayer *)_impl->getLayer();
+    layer.presentsWithTransaction = YES;
+    _impl->getDrawView()->redraw();
+    layer.presentsWithTransaction = NO;
+  }
+}
+#endif // !TARGET_OS_OSX
+
 #pragma mark Layout
 
 - (void)layoutSubviews {
