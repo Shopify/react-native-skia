@@ -195,7 +195,11 @@ describe("SkCanvas", () => {
     const size = 60;
     const gap = 10;
     const img = await surface.drawOffscreen(
-      (Skia, canvas, ctx) => {
+      (
+        Skia,
+        canvas,
+        ctx: { BlendMode: typeof BlendMode; size: number; gap: number }
+      ) => {
         const flatPatch = (x: number, y: number, s: number) => {
           const tl = { x, y };
           const tr = { x: x + s, y };
@@ -237,10 +241,16 @@ describe("SkCanvas", () => {
         paint.setAlphaf(0.5);
 
         // Left: mode omitted, must resolve to the same default as CanvasKit.
-        canvas.drawPatch(flatPatch(gap, gap, size), colors, null, null, paint);
+        canvas.drawPatch(
+          flatPatch(ctx.gap, ctx.gap, ctx.size),
+          colors,
+          null,
+          null,
+          paint
+        );
         // Middle: explicit Modulate, the expected default.
         canvas.drawPatch(
-          flatPatch(gap * 2 + size, gap, size),
+          flatPatch(ctx.gap * 2 + ctx.size, ctx.gap, ctx.size),
           colors,
           null,
           ctx.BlendMode.Modulate,
@@ -250,14 +260,14 @@ describe("SkCanvas", () => {
         // when colors were present. Kept for visual contrast against the two
         // patches above, which must look identical to each other.
         canvas.drawPatch(
-          flatPatch(gap * 3 + size * 2, gap, size),
+          flatPatch(ctx.gap * 3 + ctx.size * 2, ctx.gap, ctx.size),
           colors,
           null,
           ctx.BlendMode.DstOver,
           paint
         );
       },
-      { BlendMode }
+      { BlendMode, size, gap }
     );
     checkImage(img, "snapshots/canvas/drawpatch-default-blendmode.png");
 
