@@ -91,6 +91,7 @@ class SkiaImageCache {
 
 const skiaImageCache = new SkiaImageCache();
 
+// eslint-disable-next-line @typescript-eslint/no-shadow
 const ButtonBackground = memo(function ButtonBackground({
   width,
   height,

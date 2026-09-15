@@ -1,6 +1,8 @@
 {
   "extends": "eslint-config-react-native-wcandillon/tsconfig.base",
-	"compilerOptions": {
-		 "module": "es2022",
-	}
+  "compilerOptions": {
+    "paths": {
+      "sharp": ["../../node_modules/sharp/lib/index.d.ts"]
+    }
+  }
 }
