@@ -21,6 +21,11 @@ export const examples = [
     title: "Three.js Helmet",
     description: "glTF model with HDR environment lighting",
   },
+  {
+    screen: "Cloth",
+    title: "Three.js Cloth",
+    description: "Verlet cloth simulation running in compute shaders",
+  },
 ] as const;
 
 const styles = StyleSheet.create({

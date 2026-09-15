@@ -6,6 +6,7 @@ import { List } from "./List";
 import { Triangle } from "./Triangle";
 import { Cube } from "./Cube";
 import { Helmet } from "./Helmet";
+import { Cloth } from "./Cloth";
 
 const Stack = createNativeStackNavigator<Routes>();
 
@@ -39,6 +40,13 @@ export const WebGPU = () => {
         component={Helmet}
         options={{
           title: "Three.js Helmet",
+        }}
+      />
+      <Stack.Screen
+        name="Cloth"
+        component={Cloth}
+        options={{
+          title: "Three.js Cloth",
         }}
       />
     </Stack.Navigator>

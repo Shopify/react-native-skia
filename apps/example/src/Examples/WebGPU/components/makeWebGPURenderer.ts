@@ -6,18 +6,21 @@ export interface WebGPURendererOptions {
   // (required when the context's texture lives on a shared device).
   device?: GPUDevice;
   antialias?: boolean;
+  requiredLimits?: Record<string, number>;
 }
 
 export const makeWebGPURenderer = ({
   context,
   device,
   antialias = true,
+  requiredLimits,
 }: WebGPURendererOptions) =>
   new THREE.WebGPURenderer({
     antialias,
     canvas: context.canvas,
     context,
     device,
+    requiredLimits,
   });
 
 // Tears a renderer down so the GC can reclaim it and its GPU resources

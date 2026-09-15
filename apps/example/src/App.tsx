@@ -121,7 +121,7 @@ const App = () => {
             screenOptions={{
               headerLeft: HeaderLeft,
             }}
-            initialRouteName={CI ? "Tests" : "Home"}
+            initialRouteName={CI ? "Tests" : "WebGPU"}
           >
             <Stack.Screen
               name="Home"
@@ -249,6 +249,7 @@ const App = () => {
             <Stack.Screen
               name="WebGPU"
               component={WebGPU}
+              initialParams={{ screen: "Cloth" }}
               options={{
                 header: () => null,
               }}
