@@ -2,20 +2,79 @@ import React, { useEffect, useRef } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import * as THREE from "three";
 import type { CanvasRef } from "react-native-webgpu";
-import { Canvas } from "react-native-webgpu";
+import { Canvas, importDevice } from "react-native-webgpu";
+import type { SkCanvas } from "@shopify/react-native-skia";
+import { Skia, matchFont } from "@shopify/react-native-skia";
 
 import { useHDR } from "./components/AssetManager";
 import { setupCloth } from "./components/cloth";
+import { makeSkiaTexture } from "./components/makeSkiaTexture";
 import {
   makeWebGPURenderer,
   disposeWebGPURenderer,
 } from "./components/makeWebGPURenderer";
 
 // Screen for the cloth simulation in ./components/cloth.ts, rendered on a
-// plain WebGPU canvas.
+// plain WebGPU canvas. The cloth is textured with an image drawn by Skia into
+// an offscreen surface and handed to three as a GPU texture (Graphite builds
+// only; other builds show the plain cloth).
 const params = {
   sphere: true,
   wind: 1.0,
+};
+
+const textureSize = 1024;
+
+const drawClothTexture = (canvas: SkCanvas) => {
+  const size = textureSize;
+  const paint = Skia.Paint();
+  paint.setShader(
+    Skia.Shader.MakeLinearGradient(
+      { x: 0, y: 0 },
+      { x: size, y: size },
+      [Skia.Color("#f6d365"), Skia.Color("#fda085"), Skia.Color("#a18cd1")],
+      null,
+      0
+    )
+  );
+  canvas.drawRect({ x: 0, y: 0, width: size, height: size }, paint);
+
+  const stripe = Skia.Paint();
+  stripe.setColor(Skia.Color("rgba(255, 255, 255, 0.35)"));
+  const cells = 8;
+  const cell = size / cells;
+  for (let i = 0; i < cells; i++) {
+    for (let j = 0; j < cells; j++) {
+      if ((i + j) % 2 === 0) {
+        canvas.drawRect(
+          { x: i * cell, y: j * cell, width: cell, height: cell },
+          stripe
+        );
+      }
+    }
+  }
+
+  const font = matchFont({
+    fontFamily: "Helvetica",
+    fontSize: size / 4,
+    fontWeight: "bold",
+  });
+  const text = "Skia";
+  const textWidth = font.measureText(text).width;
+  const textPaint = Skia.Paint();
+  textPaint.setColor(Skia.Color("#1a1a1a"));
+  canvas.drawText(text, (size - textWidth) / 2, size * 0.6, textPaint, font);
+};
+
+// Skia's Graphite device, when available: three must render on it to sample
+// the texture Skia produced.
+const getSharedDevice = () => {
+  try {
+    return importDevice(Skia.getNativeDevice());
+  } catch (e) {
+    console.warn("Cloth: no shared Skia device, rendering the plain cloth", e);
+    return undefined;
+  }
 };
 
 export const Cloth = () => {
@@ -33,8 +92,14 @@ export const Cloth = () => {
     }
     const { width, height } = context.canvas;
 
+    const device = getSharedDevice();
+    const skiaTexture = device
+      ? makeSkiaTexture(textureSize, textureSize, drawClothTexture)
+      : undefined;
+
     const renderer = makeWebGPURenderer({
       context,
+      device,
       // the cloth vertex shader reads the verlet positions storage buffer
       requiredLimits: { maxStorageBuffersInVertexStage: 1 },
     });
@@ -58,7 +123,7 @@ export const Cloth = () => {
       spherePositionUniform,
       sphereUniform,
       windUniform,
-    } = setupCloth(scene);
+    } = setupCloth(scene, { map: skiaTexture?.texture });
 
     const timer = new THREE.Timer();
     let timeSinceLastStep = 0;
@@ -100,6 +165,7 @@ export const Cloth = () => {
 
     return () => {
       disposeWebGPURenderer(renderer);
+      skiaTexture?.destroy();
     };
   }, [hdr]);
 

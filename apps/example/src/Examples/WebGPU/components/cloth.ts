@@ -14,6 +14,7 @@ import {
   cross,
   triNoise3D,
   time,
+  texture as textureNode,
 } from "three/tsl";
 
 // Port of https://threejs.org/examples/webgpu_compute_cloth.html: a grid of
@@ -102,7 +103,12 @@ const setupVerletGeometry = () => {
   return { verletVertices, verletSprings, verletVertexColumns };
 };
 
-export const setupCloth = (scene: THREE.Scene) => {
+export interface ClothOptions {
+  // sRGB texture mapped onto the cloth; its top edge lands on the pinned edge.
+  map?: THREE.Texture;
+}
+
+export const setupCloth = (scene: THREE.Scene, { map }: ClothOptions = {}) => {
   const { verletVertices, verletSprings, verletVertexColumns } =
     setupVerletGeometry();
   const vertexCount = verletVertices.length;
@@ -252,6 +258,10 @@ export const setupCloth = (scene: THREE.Scene) => {
   const meshVertexCount = clothNumSegmentsX * clothNumSegmentsY;
   const geometry = new THREE.BufferGeometry();
   const verletVertexIdArray = new Uint32Array(meshVertexCount * 4);
+  // UVs follow the grid: u across the width, v from the pinned edge down.
+  // u is mirrored because the camera looks at the cloth from the -z side,
+  // where +x runs right to left on screen.
+  const uvArray = new Float32Array(meshVertexCount * 2);
   const indices: number[] = [];
   const getIndex = (x: number, y: number) => y * clothNumSegmentsX + x;
   for (let x = 0; x < clothNumSegmentsX; x++) {
@@ -261,6 +271,8 @@ export const setupCloth = (scene: THREE.Scene) => {
       verletVertexIdArray[index * 4 + 1] = verletVertexColumns[x + 1][y].id;
       verletVertexIdArray[index * 4 + 2] = verletVertexColumns[x][y + 1].id;
       verletVertexIdArray[index * 4 + 3] = verletVertexColumns[x + 1][y + 1].id;
+      uvArray[index * 2] = 1 - x / (clothNumSegmentsX - 1);
+      uvArray[index * 2 + 1] = y / (clothNumSegmentsY - 1);
       if (x > 0 && y > 0) {
         indices.push(
           getIndex(x, y),
@@ -283,6 +295,7 @@ export const setupCloth = (scene: THREE.Scene) => {
     "vertexIds",
     new THREE.BufferAttribute(verletVertexIdArray, 4, false)
   );
+  geometry.setAttribute("uv", new THREE.BufferAttribute(uvArray, 2, false));
   geometry.setIndex(indices);
 
   const clothMaterial = new THREE.MeshPhysicalNodeMaterial({
@@ -294,6 +307,16 @@ export const setupCloth = (scene: THREE.Scene) => {
     sheenRoughness: 0.5,
     sheenColor: new THREE.Color().setHex(0xffffff),
   });
+
+  if (map) {
+    // Sample the map ourselves rather than through `map`: the WebGPU backend
+    // relies on sRGB texture formats for decoding, which an external texture
+    // (e.g. one exported by Skia) does not carry, so decode in the shader.
+    // (@types/three declares ColorSpaceNode without its vec4 value type)
+    clothMaterial.colorNode = textureNode(map).colorSpaceToWorking(
+      THREE.SRGBColorSpace
+    ) as unknown as THREE.Node<"vec4">;
+  }
 
   clothMaterial.positionNode = Fn(() => {
     const vertexIds = attribute("vertexIds", "uvec4" as const);
