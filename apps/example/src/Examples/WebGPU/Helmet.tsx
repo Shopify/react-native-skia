@@ -1,74 +1,67 @@
-import React, { useEffect, useRef } from "react";
+import React, { useCallback } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import * as THREE from "three";
-import type { CanvasRef } from "react-native-webgpu";
-import { Canvas } from "react-native-webgpu";
+import { Canvas, Image, useCanvasSize } from "@shopify/react-native-skia";
 
 import { useGLTF, useHDR } from "./components/AssetManager";
-import {
-  makeWebGPURenderer,
-  disposeWebGPURenderer,
-} from "./components/makeWebGPURenderer";
+import type { ThreeSceneFactory } from "./components/useThreeScene";
+import { useThreeScene } from "./components/useThreeScene";
 
+// three.js renders into an offscreen WebGPU texture that is wrapped into an
+// SkImage every frame and drawn by a Skia Canvas (see useThreeScene).
 export const Helmet = () => {
   const texture = useHDR(require("./assets/helmet/royal_esplanade_1k.hdr"));
   const gltf = useGLTF(require("./assets/helmet/DamagedHelmet.gltf"));
-  const ref = useRef<CanvasRef>(null);
+  const { ref, size } = useCanvasSize();
 
-  useEffect(() => {
-    if (!texture || !gltf) {
-      return;
-    }
-    const context = ref.current?.getContext("webgpu");
-    if (!context) {
-      console.warn("Failed to get WebGPU context");
-      return;
-    }
-    const { width, height } = context.canvas;
+  const makeScene = useCallback<ThreeSceneFactory>(
+    (renderer, { width, height }) => {
+      if (!texture || !gltf) {
+        return undefined;
+      }
+      const timer = new THREE.Timer();
 
-    const timer = new THREE.Timer();
+      const camera = new THREE.PerspectiveCamera(45, width / height, 0.25, 20);
+      camera.position.set(-1.8, 0.6, 2.7);
 
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.25, 20);
-    camera.position.set(-1.8, 0.6, 2.7);
+      const scene = new THREE.Scene();
 
-    const scene = new THREE.Scene();
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
-    const renderer = makeWebGPURenderer(context);
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      texture.mapping = THREE.EquirectangularReflectionMapping;
+      scene.background = texture;
+      scene.environment = texture;
 
-    texture.mapping = THREE.EquirectangularReflectionMapping;
-    scene.background = texture;
-    scene.environment = texture;
+      scene.add(gltf.scene);
 
-    scene.add(gltf.scene);
+      const update = () => {
+        timer.update();
+        const elapsed = timer.getElapsed();
+        const distance = 5;
+        camera.position.x = Math.sin(elapsed) * distance;
+        camera.position.z = Math.cos(elapsed) * distance;
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+      };
 
-    const animateCamera = () => {
-      timer.update();
-      const elapsed = timer.getElapsed();
-      const distance = 5;
-      camera.position.x = Math.sin(elapsed) * distance;
-      camera.position.z = Math.cos(elapsed) * distance;
-      camera.lookAt(new THREE.Vector3(0, 0, 0));
-    };
-
-    const animate = () => {
-      animateCamera();
-      renderer.render(scene, camera);
-      context.present();
-    };
-    renderer.setAnimationLoop(animate);
-
-    return () => {
-      disposeWebGPURenderer(renderer);
-    };
-  }, [texture, gltf]);
+      return { scene, camera, update };
+    },
+    [texture, gltf]
+  );
+  const scene = useThreeScene(size, makeScene, [makeScene]);
 
   return (
     <View style={styles.container}>
       <Text style={styles.loading}>Loading assets...</Text>
-      <View style={StyleSheet.absoluteFill}>
-        <Canvas ref={ref} style={styles.canvas} />
-      </View>
+      <Canvas ref={ref} style={StyleSheet.absoluteFill}>
+        <Image
+          image={scene}
+          x={0}
+          y={0}
+          width={size.width}
+          height={size.height}
+          fit="fill"
+        />
+      </Canvas>
     </View>
   );
 };
@@ -79,9 +72,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#1a1a1a",
-  },
-  canvas: {
-    flex: 1,
   },
   loading: {
     color: "#fff",
