@@ -4,7 +4,7 @@ import * as THREE from "three";
 import type { CanvasRef } from "react-native-webgpu";
 import { Canvas, importDevice } from "react-native-webgpu";
 import type { SkCanvas } from "@shopify/react-native-skia";
-import { Skia, matchFont } from "@shopify/react-native-skia";
+import { Skia, StrokeCap, matchFont } from "@shopify/react-native-skia";
 
 import { useHDR } from "./components/AssetManager";
 import { setupCloth } from "./components/cloth";
@@ -15,9 +15,9 @@ import {
 } from "./components/makeWebGPURenderer";
 
 // Screen for the cloth simulation in ./components/cloth.ts, rendered on a
-// plain WebGPU canvas. The cloth is textured with an image drawn by Skia into
-// an offscreen surface and handed to three as a GPU texture (Graphite builds
-// only; other builds show the plain cloth).
+// plain WebGPU canvas. The cloth is textured with a Skia drawing that is
+// redrawn every frame straight into the GPU texture three samples, with no
+// copy (Graphite builds only; other builds show the plain cloth).
 const params = {
   sphere: true,
   wind: 1.0,
@@ -25,7 +25,7 @@ const params = {
 
 const textureSize = 1024;
 
-const drawClothTexture = (canvas: SkCanvas) => {
+const drawClothTexture = (canvas: SkCanvas, time: number) => {
   const size = textureSize;
   const paint = Skia.Paint();
   paint.setShader(
@@ -64,6 +64,22 @@ const drawClothTexture = (canvas: SkCanvas) => {
   const textPaint = Skia.Paint();
   textPaint.setColor(Skia.Color("#1a1a1a"));
   canvas.drawText(text, (size - textWidth) / 2, size * 0.6, textPaint, font);
+
+  // A clock hand so it is visible that the texture updates every frame.
+  const hand = Skia.Paint();
+  hand.setColor(Skia.Color("#1a1a1a"));
+  hand.setStrokeWidth(size / 64);
+  hand.setStrokeCap(StrokeCap.Round);
+  const cx = size / 2;
+  const cy = size * 0.3;
+  const angle = time * 2;
+  canvas.drawLine(
+    cx,
+    cy,
+    cx + Math.cos(angle) * size * 0.2,
+    cy + Math.sin(angle) * size * 0.2,
+    hand
+  );
 };
 
 // Skia's Graphite device, when available: three must render on it to sample
@@ -94,7 +110,7 @@ export const Cloth = () => {
 
     const device = getSharedDevice();
     const skiaTexture = device
-      ? makeSkiaTexture(textureSize, textureSize, drawClothTexture)
+      ? makeSkiaTexture(device, textureSize, textureSize)
       : undefined;
 
     const renderer = makeWebGPURenderer({
@@ -158,6 +174,7 @@ export const Cloth = () => {
         renderer.compute(computeVertexForces);
       }
 
+      skiaTexture?.draw((canvas) => drawClothTexture(canvas, timestamp));
       renderer.render(scene, camera);
       context.present();
     };
