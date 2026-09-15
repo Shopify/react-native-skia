@@ -16,6 +16,11 @@ export const examples = [
     title: "Three.js Cube",
     description: "Spinning cube rendered with the three.js WebGPURenderer",
   },
+  {
+    screen: "Helmet",
+    title: "Three.js Helmet",
+    description: "glTF model with HDR environment lighting",
+  },
 ] as const;
 
 const styles = StyleSheet.create({
