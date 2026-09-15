@@ -3,6 +3,7 @@ import type {
   CanvasKit,
   CubicResampler as CKCubicResampler,
   FilterOptions as CKFilterOptions,
+  Paint,
 } from "canvaskit-wasm";
 
 import {
@@ -54,8 +55,18 @@ export class JsiSkCanvas
   extends HostObject<Canvas, "Canvas">
   implements SkCanvas
 {
+  private defaultPaint?: Paint;
+
   constructor(CanvasKit: CanvasKit, ref: Canvas) {
     super(CanvasKit, ref, "Canvas");
+  }
+
+  override [Symbol.dispose](): void {
+    if (this.defaultPaint && !this.defaultPaint.isDeleted()) {
+      this.defaultPaint.delete();
+    }
+    this.defaultPaint = undefined;
+    super[Symbol.dispose]();
   }
 
   drawRect(rect: SkRect, paint: SkPaint) {
@@ -65,12 +76,12 @@ export class JsiSkCanvas
     );
   }
 
-  drawImage(image: SkImage, x: number, y: number, paint?: SkPaint) {
+  drawImage(image: SkImage, x: number, y: number, paint?: SkPaint | null) {
     this.ref.drawImage(
       JsiSkImage.fromValue(image),
       x,
       y,
-      paint ? JsiSkPaint.fromValue(paint) : paint
+      paint ? JsiSkPaint.fromValue(paint) : undefined
     );
   }
 
@@ -78,16 +89,18 @@ export class JsiSkCanvas
     img: SkImage,
     src: SkRect,
     dest: SkRect,
-    paint: SkPaint,
+    paint?: SkPaint | null,
     fastSample?: boolean
   ) {
-    this.ref.drawImageRect(
-      JsiSkImage.fromValue(img),
-      JsiSkRect.fromValue(this.CanvasKit, src),
-      JsiSkRect.fromValue(this.CanvasKit, dest),
-      JsiSkPaint.fromValue(paint),
-      fastSample
-    );
+    this.withPaint(paint, (p) => {
+      this.ref.drawImageRect(
+        JsiSkImage.fromValue(img),
+        JsiSkRect.fromValue(this.CanvasKit, src),
+        JsiSkRect.fromValue(this.CanvasKit, dest),
+        p,
+        fastSample
+      );
+    });
   }
 
   drawImageCubic(
@@ -203,17 +216,39 @@ export class JsiSkCanvas
     colors?: SkColor[] | null,
     texs?: SkPoint[] | null,
     mode?: BlendMode | null,
-    paint?: SkPaint
+    paint?: SkPaint | null
   ) {
-    this.ref.drawPatch(
-      cubics.map(({ x, y }) => [x, y]).flat(),
-      colors,
-      texs ? texs.flatMap((p) => Array.from(JsiSkPoint.fromValue(p))) : texs,
-      mode !== undefined && mode !== null
-        ? getEnum(this.CanvasKit, "BlendMode", mode)
-        : null,
-      paint ? JsiSkPaint.fromValue(paint) : undefined
-    );
+    this.withPaint(paint, (p) => {
+      this.ref.drawPatch(
+        cubics.map(({ x, y }) => [x, y]).flat(),
+        colors ?? null,
+        texs
+          ? texs.flatMap((pt) => Array.from(JsiSkPoint.fromValue(pt)))
+          : null,
+        mode !== undefined && mode !== null
+          ? getEnum(this.CanvasKit, "BlendMode", mode)
+          : null,
+        p
+      );
+    });
+  }
+
+  // Draws with the caller's paint if given, otherwise a default CanvasKit
+  // paint that is cached on this canvas and reused (deleted only when the
+  // canvas itself is disposed) so it doesn't allocate/free on the WASM
+  // heap on every call.
+  private withPaint(
+    paint: SkPaint | null | undefined,
+    draw: (p: Paint) => void
+  ) {
+    if (paint) {
+      draw(JsiSkPaint.fromValue<Paint>(paint));
+      return;
+    }
+    if (!this.defaultPaint) {
+      this.defaultPaint = new this.CanvasKit.Paint();
+    }
+    draw(this.defaultPaint);
   }
 
   restoreToCount(saveCount: number) {
@@ -228,6 +263,9 @@ export class JsiSkCanvas
   }
 
   drawPoints(mode: PointMode, points: SkPoint[], paint: SkPaint) {
+    if (points.length === 0) {
+      return;
+    }
     this.ref.drawPoints(
       getEnum(this.CanvasKit, "PointMode", mode),
       points.map(({ x, y }) => [x, y]).flat(),
@@ -328,7 +366,7 @@ export class JsiSkCanvas
   }
 
   saveLayer(
-    paint?: SkPaint,
+    paint?: SkPaint | null,
     bounds?: SkRect | null,
     backdrop?: SkImageFilter | null,
     flags?: SaveLayerFlag
