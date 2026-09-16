@@ -114,13 +114,15 @@ framework_names += ['libwebgpu_dawn'] if use_graphite && !has_webgpu_pkg
 
 # Verify that the prebuilt binaries are available (copied in above from the npm
 # packages, or downloaded by install-skia-graphite for in-repo Graphite builds).
-unless Dir.exist?(File.join(__dir__, 'libs', 'ios')) && Dir.exist?(File.join(__dir__, 'libs', 'macos'))
+unless Dir.exist?(File.join(__dir__, 'libs', 'ios'))
   expected_packages = apple_skia_packages.values.join(', ')
   Pod::UI.warn "#{'-' * 72}"
   Pod::UI.warn "react-native-skia: Skia prebuilt binaries not found in libs/!"
   Pod::UI.warn ""
   Pod::UI.warn "Make sure dependencies are installed (yarn install / npm install) so that"
   Pod::UI.warn "the #{expected_packages} packages are present, then run `pod install` again."
+  Pod::UI.warn "If you installed with --omit=optional (or an equivalent), these packages were"
+  Pod::UI.warn "skipped. Reinstall without it."
   Pod::UI.warn "#{'-' * 72}"
   raise "react-native-skia: Skia prebuilt binaries not found. Run `yarn install` then `pod install` to fix this."
 end
@@ -129,7 +131,13 @@ end
 # xcframeworks are copied into libs/ by install_apple_skia_libs above (default build)
 # or downloaded by install-skia-graphite (Graphite build).
 ios_frameworks = framework_names.map { |f| "libs/ios/#{f}.xcframework" }
-osx_frameworks = framework_names.map { |f| "libs/macos/#{f}.xcframework" }
+# macOS frameworks - check if libs/macos/ exists (mirrors the tvOS handling below, so that
+# iOS-only consumers who prune react-native-skia-apple-macos can still run pod install)
+osx_frameworks = if !Dir.exist?(File.join(__dir__, 'libs', 'macos'))
+  []
+else
+  framework_names.map { |f| "libs/macos/#{f}.xcframework" }
+end
 # tvOS frameworks - check if libs/tvos/ exists (only populated for the default build)
 tvos_frameworks = if use_graphite || !Dir.exist?(File.join(__dir__, 'libs', 'tvos'))
   []
