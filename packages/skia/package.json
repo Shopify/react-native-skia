@@ -32,6 +32,9 @@
     "cpp/**/*.{h,cpp}",
     "apple/**",
     "react-native-skia.podspec",
+    "Package.swift",
+    "include/**",
+    "react-native.config.js",
     "dist/**",
     "libs/.graphite"
   ],
