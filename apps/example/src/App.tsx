@@ -44,6 +44,9 @@ import { useAssets } from "./Tests/useAssets";
 import { Chess } from "./Examples/Chess";
 import { apiScreenPaths } from "./Examples/API/linking";
 import "./resolveAssetSourcePolyfill";
+// The two lines below are needed by three.js
+import "fast-text-encoding";
+window.parent = window;
 
 const linking: LinkingOptions<StackParamList> = {
   config: {

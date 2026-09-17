@@ -9,8 +9,7 @@ import "react-native-webgpu";
 import { HomeScreenButton } from "./HomeScreenButton";
 
 export const HomeScreen = () => {
-  const hasWebGPU =
-    typeof navigator !== "undefined" && navigator.gpu != null;
+  const hasWebGPU = typeof navigator !== "undefined" && navigator.gpu != null;
   return (
     <ScrollView>
       <HomeScreenButton

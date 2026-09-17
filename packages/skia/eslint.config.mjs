@@ -1,6 +1,5 @@
 // eslint.config.js
 import wcandillon from "eslint-config-react-native-wcandillon";
-import reactHooks from "eslint-plugin-react-hooks";
 
 export default [
   {
@@ -9,9 +8,6 @@ export default [
   ...wcandillon,
   {
     files: ["src/**/*.{ts,tsx}"],
-    plugins: {
-      "react-hooks": reactHooks
-    },
     languageOptions: {
       parserOptions: {
         ecmaVersion: "latest",
@@ -42,9 +38,6 @@ export default [
   },
   {
     files: ["*.{js,jsx}", "scripts/**/*.js"],
-    plugins: {
-      "react-hooks": reactHooks
-    },
     rules: {
       "prefer-destructuring": [
         "error",
