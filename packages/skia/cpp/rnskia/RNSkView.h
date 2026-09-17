@@ -1,34 +1,35 @@
-
 #pragma once
 
+#include <atomic>
+#include <functional>
 #include <memory>
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include <utility>
 
 #include "RNSkPlatformContext.h"
-#include "jsi/ViewProperty.h"
 
-#include "api/JsiSkImage.h"
-#include "api/JsiSkPoint.h"
-#include "api/JsiSkRect.h"
+#if defined(SK_GRAPHITE)
+#include "RNDawnContext.h"
+#endif
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "include/core/SkCanvas.h"
+#include "include/core/SkImage.h"
+#include "include/core/SkPicture.h"
+#include "include/core/SkRect.h"
 #include "include/core/SkSurface.h"
 
 #pragma clang diagnostic pop
 
 namespace RNSkia {
 
-namespace jsi = facebook::jsi;
-
 class RNSkCanvasProvider {
 public:
   explicit RNSkCanvasProvider(std::function<void()> requestRedraw)
-      : _requestRedraw(requestRedraw) {}
+      : _requestRedraw(std::move(requestRedraw)) {}
+
+  virtual ~RNSkCanvasProvider() = default;
 
   /**
    Returns the scaled width of the view
@@ -47,24 +48,6 @@ public:
 
 protected:
   std::function<void()> _requestRedraw;
-};
-
-class RNSkRenderer {
-public:
-  explicit RNSkRenderer(std::function<void()> requestRedraw)
-      : _requestRedraw(std::move(requestRedraw)), _showDebugOverlays(false) {}
-
-  virtual void
-  renderImmediate(std::shared_ptr<RNSkCanvasProvider> canvasProvider) = 0;
-
-  void setShowDebugOverlays(bool showDebugOverlays) {
-    _showDebugOverlays = showDebugOverlays;
-  }
-  bool getShowDebugOverlays() const { return _showDebugOverlays; }
-
-protected:
-  std::function<void()> _requestRedraw;
-  bool _showDebugOverlays;
 };
 
 class RNSkOffscreenCanvasProvider : public RNSkCanvasProvider {
@@ -138,25 +121,36 @@ private:
   std::shared_ptr<RNSkPlatformContext> _context;
 };
 
+/**
+ A Skia view: an SkPicture drawn onto the canvas of a platform-specific
+ canvas provider (Metal layer, Android surface) scaled by the pixel density.
+ The picture is set from the JS thread via the ViewApi while frames are drawn
+ on the main thread, so it is held in an sk_sp that is copied per draw.
+ */
 class RNSkView : public std::enable_shared_from_this<RNSkView> {
 public:
-  /**
-   * Constructor
-   */
   RNSkView(std::shared_ptr<RNSkPlatformContext> context,
-           std::shared_ptr<RNSkCanvasProvider> canvasProvider,
-           std::shared_ptr<RNSkRenderer> renderer)
-      : _platformContext(context), _canvasProvider(canvasProvider),
-        _renderer(renderer) {}
+           std::shared_ptr<RNSkCanvasProvider> canvasProvider)
+      : _platformContext(std::move(context)),
+        _canvasProvider(std::move(canvasProvider)) {}
+
+  ~RNSkView() = default;
 
   /**
-   Destructor
+   Sets the picture to draw and schedules a redraw. Passing nullptr clears the
+   view.
    */
-  virtual ~RNSkView() {}
+  void setPicture(sk_sp<SkPicture> picture) {
+    _picture = std::move(picture);
+    requestRedraw();
+  }
 
-  virtual void setJsiProperties(
-      std::unordered_map<std::string, RNJsi::ViewProperty> &props) = 0;
+  sk_sp<SkPicture> getPicture() const { return _picture; }
 
+  /**
+   Schedules a draw on the main thread. Coalesces concurrent requests so that
+   at most one draw is pending at a time.
+   */
   void requestRedraw() {
     if (!_redrawRequested) {
       _redrawRequested = true;
@@ -167,8 +161,8 @@ public:
         // Try to lock the weak pointer
         if (auto strongThis = weakThis.lock()) {
           // Only proceed if the object still exists
-          if (strongThis->_renderer && strongThis->_redrawRequested) {
-            strongThis->_renderer->renderImmediate(strongThis->_canvasProvider);
+          if (strongThis->_redrawRequested) {
+            strongThis->drawPicture(strongThis->_canvasProvider);
             strongThis->_redrawRequested = false;
           }
         }
@@ -176,26 +170,29 @@ public:
     }
   }
 
+  /**
+   Draws synchronously on the calling thread and clears any pending request.
+   */
   void redraw() {
-    _renderer->renderImmediate(_canvasProvider);
+    drawPicture(_canvasProvider);
     _redrawRequested = false;
   }
 
   /**
    Sets the native id of the view
    */
-  virtual void setNativeId(size_t nativeId) { _nativeId = nativeId; }
+  void setNativeId(size_t nativeId) { _nativeId = nativeId; }
 
   /**
    Returns the native id
    */
-  size_t getNativeId() { return _nativeId; }
+  size_t getNativeId() const { return _nativeId; }
 
   /**
    * Set to true to show the debug overlays on render
    */
   void setShowDebugOverlays(bool show) {
-    _renderer->setShowDebugOverlays(show);
+    _showDebugOverlays = show;
     requestRedraw();
   }
 
@@ -203,16 +200,13 @@ public:
    Renders the view into an SkImage instead of the screen.
    */
   sk_sp<SkImage> makeImageSnapshot(SkRect *bounds) {
-
     auto provider = std::make_shared<RNSkOffscreenCanvasProvider>(
-        getPlatformContext(), std::bind(&RNSkView::requestRedraw, this),
-        _canvasProvider->getWidth(), _canvasProvider->getHeight());
+        _platformContext, []() {}, _canvasProvider->getWidth(),
+        _canvasProvider->getHeight());
 
-    _renderer->renderImmediate(provider);
+    drawPicture(provider);
     return provider->makeSnapshot(bounds);
   }
-
-  std::shared_ptr<RNSkRenderer> getRenderer() { return _renderer; }
 
   /**
    Returns the scaled width of the view
@@ -224,21 +218,37 @@ public:
    */
   int getScaledHeight() { return _canvasProvider->getHeight(); }
 
-protected:
   std::shared_ptr<RNSkPlatformContext> getPlatformContext() {
     return _platformContext;
   }
+
   std::shared_ptr<RNSkCanvasProvider> getCanvasProvider() {
     return _canvasProvider;
   }
 
 private:
+  bool drawPicture(const std::shared_ptr<RNSkCanvasProvider> &canvasProvider) {
+    // Capture picture pointer to ensure thread safety - _picture can be
+    // modified from the JS thread while we're drawing on the render thread
+    sk_sp<SkPicture> picture = _picture;
+    auto pd = _platformContext->getPixelDensity();
+    return canvasProvider->renderToCanvas([=](SkCanvas *canvas) {
+      canvas->clear(SK_ColorTRANSPARENT);
+      canvas->save();
+      canvas->scale(pd, pd);
+      if (picture != nullptr) {
+        canvas->drawPicture(picture);
+      }
+      canvas->restore();
+    });
+  }
+
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   std::shared_ptr<RNSkCanvasProvider> _canvasProvider;
-  std::shared_ptr<RNSkRenderer> _renderer;
+  sk_sp<SkPicture> _picture;
 
-  size_t _nativeId;
-
+  size_t _nativeId = 0;
+  bool _showDebugOverlays = false;
   std::atomic<bool> _redrawRequested = {false};
 };
 

@@ -10,22 +10,44 @@
 #include <utility>
 #include <vector>
 
-#include "RNSkPictureView.h"
 #include "RNSkPlatformContext.h"
 #include "RNSkView.h"
+#include "api/JsiSkImage.h"
 #include "api/JsiSkNativeObjects.h"
+#include "api/JsiSkPicture.h"
+#include "api/JsiSkRect.h"
 #include "jsi/JsiPromises.h"
-#include "jsi/ViewProperty.h"
 #include <jsi/jsi.h>
 
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
-using RNSkViewInfo = struct RNSkViewInfo {
-  RNSkViewInfo() { view = nullptr; }
+struct RNSkViewInfo {
   std::shared_ptr<RNSkView> view;
-  std::unordered_map<std::string, RNJsi::ViewProperty> props;
+  // A picture set from JS before the native view exists (or while it is
+  // detached) is parked here and applied when a view is (re)attached.
+  sk_sp<SkPicture> pendingPicture;
+  bool hasPendingPicture = false;
+
+  void setPicture(sk_sp<SkPicture> picture) {
+    if (view != nullptr) {
+      view->setPicture(std::move(picture));
+    } else {
+      pendingPicture = std::move(picture);
+      hasPendingPicture = true;
+    }
+  }
+
+  void attachView(size_t nativeId, std::shared_ptr<RNSkView> newView) {
+    view = std::move(newView);
+    view->setNativeId(nativeId);
+    if (hasPendingPicture) {
+      view->setPicture(std::move(pendingPicture));
+      pendingPicture = nullptr;
+      hasPendingPicture = false;
+    }
+  }
 };
 
 class ViewRegistry {
@@ -44,7 +66,7 @@ public:
     // Remember that this id was explicitly unregistered. Property updates
     // can arrive after unregistration (e.g. a Reanimated worklet setting the
     // picture racing with unmount); without a tombstone they would recreate
-    // the entry and its props (an SkPicture retaining every image it draws)
+    // the entry and its pending picture (which retains every image it draws)
     // would stay in this global registry forever.
     _unregistered.insert(id);
   }
@@ -98,9 +120,11 @@ public:
   static constexpr const char *CLASS_NAME = "ViewApi";
 
   /**
-   Sets a custom property on a view given a view id. The property name/value
-   will be stored in a map alongside the id of the view and propagated to the
-   view when needed.
+   Sets the picture drawn by the view with the given id. The picture is stored
+   alongside the id so that it survives the view being created later or
+   detached and re-attached. `name` is kept for API compatibility with the JS
+   side and must be "picture"; the value is an SkPicture, or null/undefined
+   to clear the view.
    */
   JSI_HOST_FUNCTION(setJsiProperty) {
     if (count != 3) {
@@ -116,11 +140,22 @@ public:
       return jsi::Value::undefined();
     }
 
-    if (!arguments[1].isString()) {
+    if (!arguments[1].isString() ||
+        arguments[1].asString(runtime).utf8(runtime) != "picture") {
       _platformContext->raiseError("setJsiProperty: Second argument must be "
-                                   "the name of the property to set.");
-
+                                   "the property name \"picture\".");
       return jsi::Value::undefined();
+    }
+
+    sk_sp<SkPicture> picture = nullptr;
+    if (!arguments[2].isNull() && !arguments[2].isUndefined()) {
+      auto jsiPicture = tryGetJsiObject<JsiSkPicture>(runtime, arguments[2]);
+      if (jsiPicture == nullptr) {
+        _platformContext->raiseError(
+            "setJsiProperty: Third argument must be an SkPicture or null.");
+        return jsi::Value::undefined();
+      }
+      picture = jsiPicture->getObject();
     }
 
     auto nativeId = arguments[0].asNumber();
@@ -128,17 +163,7 @@ public:
     // Safely execute operations while holding the registry lock
     ViewRegistry::getInstance().withViewInfo(
         nativeId, [&](std::shared_ptr<RNSkViewInfo> info) {
-          auto name = arguments[1].asString(runtime).utf8(runtime);
-          info->props.insert_or_assign(
-              arguments[1].asString(runtime).utf8(runtime),
-              RNJsi::ViewProperty(runtime, arguments[2]));
-          // Now let's see if we have a view that we can update
-          if (info->view != nullptr) {
-            // Update view!
-            info->view->setNativeId(nativeId);
-            info->view->setJsiProperties(info->props);
-            info->props.clear();
-          }
+          info->setPicture(std::move(picture));
           return nullptr; // Return type for template deduction
         });
 
@@ -322,12 +347,7 @@ public:
     ViewRegistry::getInstance().withViewInfo(
         nativeId,
         [&](std::shared_ptr<RNSkViewInfo> info) {
-          info->view = view;
-          info->view->setNativeId(nativeId);
-
-          info->view->setJsiProperties(info->props);
-          info->props.clear();
-
+          info->attachView(nativeId, std::move(view));
           return nullptr;
         },
         /* revive= */ true);
@@ -352,12 +372,9 @@ public:
         nativeId,
         [&](std::shared_ptr<RNSkViewInfo> info) {
           if (view != nullptr) {
-            info->view = view;
-            info->view->setNativeId(nativeId);
-            info->view->setJsiProperties(info->props);
-            info->props.clear();
+            info->attachView(nativeId, std::move(view));
           } else {
-            info->view = view; // Set to nullptr
+            info->view = nullptr;
           }
           return nullptr;
         },
