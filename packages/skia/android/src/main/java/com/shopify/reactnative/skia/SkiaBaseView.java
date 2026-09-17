@@ -81,9 +81,6 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
     }
 
     void dropInstance() {
-        if (!RNSkiaModule.isModuleValid()) {
-            return;
-        }
         unregisterView();
     }
 
