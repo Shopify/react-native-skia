@@ -6,11 +6,11 @@ import java.nio.file.Paths
 // https://github.com/facebookincubator/fbjni/blob/main/docs/android_setup.md
 
 // These defaults should reflect the SDK versions used by
-// the minimum React Native version supported.
-def DEFAULT_COMPILE_SDK_VERSION = 28
-def DEFAULT_BUILD_TOOLS_VERSION = '28.0.3'
-def DEFAULT_MIN_SDK_VERSION = 21
-def DEFAULT_TARGET_SDK_VERSION = 28
+// the minimum React Native version supported (0.78).
+def DEFAULT_COMPILE_SDK_VERSION = 35
+def DEFAULT_BUILD_TOOLS_VERSION = '35.0.0'
+def DEFAULT_MIN_SDK_VERSION = 24
+def DEFAULT_TARGET_SDK_VERSION = 34
 
 def safeExtGet(prop, fallback) {
     rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
@@ -137,28 +137,8 @@ logger.warn("react-native-skia: isSourceBuild: ${sourceBuild}")
 logger.warn("react-native-skia: buildDir: ${buildDir}")
 logger.warn("react-native-skia: node_modules: ${nodeModules}")
 
-buildscript {
-    // The Android Gradle plugin is only required when opening the android folder stand-alone.
-    // This avoids unnecessary downloads and potential conflicts when the library is included as a
-    // module dependency in an application project.
-    // ref: https://docs.gradle.org/current/userguide/tutorial_using_tasks.html#sec:build_script_external_dependencies
-    if (project == rootProject) {
-        repositories {
-            google()
-        }
-        dependencies {
-            // This should reflect the Gradle plugin version used by
-            // the minimum React Native version supported.
-            classpath 'com.android.tools.build:gradle:3.4.1'
-        }
-    }
-}
-
 android {
-    def agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
-    if (agpVersion.tokenize('.')[0].toInteger() >= 7) {
-      namespace "com.shopify.reactnative.skia"
-    }
+    namespace "com.shopify.reactnative.skia"
 
     compileSdkVersion safeExtGet('compileSdkVersion', DEFAULT_COMPILE_SDK_VERSION)
     buildToolsVersion safeExtGet('buildToolsVersion', DEFAULT_BUILD_TOOLS_VERSION)
@@ -180,7 +160,7 @@ android {
 
         externalNativeBuild {
             cmake {
-                cppFlags "-fexceptions", "-frtti", "-std=c++1y", "-DONANDROID"
+                cppFlags "-fexceptions", "-frtti"
                 abiFilters (*reactNativeArchitectures())
                 arguments '-DANDROID_STL=c++_shared',
                           "-DREACT_NATIVE_VERSION=${REACT_NATIVE_VERSION}",
@@ -220,10 +200,6 @@ android {
              "**/libc++_shared.so",
              "**/libfbjni.so",
              "**/libjsi.so",
-             "**/libreact_nativemodule_core.so",
-             "**/libreactnativejni.so",
-             "**/libruntimeexecutor.so",
-             "**/libturbomodulejsijni.so",
              "**/libreactnative.so",
              "META-INF/**"
         ]
@@ -241,14 +217,6 @@ android {
 }
 
 repositories {
-    maven {
-        // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
-        url("$rootDir/../node_modules/react-native/android")
-    }
-    maven {
-        // Android JSC is installed from npm
-        url("$rootDir/../node_modules/jsc-android/dist")
-    }
     mavenCentral {
         // We don't want to fetch react-native from Maven Central as there are
         // older versions over there.

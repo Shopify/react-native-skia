@@ -1,7 +1,6 @@
 project(RNSkia)
 cmake_minimum_required(VERSION 3.4.1)
 
-set (CMAKE_VERBOSE_MAKEFILE ON)
 set (CMAKE_CXX_STANDARD 20)
 
 # SKIA_LIBS_PATH is passed from Gradle (pointing at the prebuilt Skia binaries,
@@ -208,8 +207,6 @@ if(SK_GRAPHITE)
 else()
     target_link_libraries(${PACKAGE_NAME}
         ${COMMON_LIBS}
-        -lGLESv2
-        -lEGL
     )
 endif()
 
