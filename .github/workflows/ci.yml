@@ -142,7 +142,7 @@ jobs:
       - name: Build dry run release
         working-directory: packages/skia
         run: |
-          yarn release --dry-run
+          npx semantic-release --dry-run
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
