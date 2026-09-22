@@ -287,11 +287,19 @@ public:
       }
     }
 
-    auto paint =
-        count >= 4 ? JsiSkPaint::fromValue(runtime, arguments[4]) : nullptr;
-    auto blendMode = static_cast<SkBlendMode>(arguments[3].asNumber());
+    auto blendMode =
+        count >= 4 && !arguments[3].isNull() && !arguments[3].isUndefined()
+            ? static_cast<SkBlendMode>(arguments[3].asNumber())
+            : SkBlendMode::kModulate;
+
+    std::shared_ptr<SkPaint> paint;
+    if (count >= 5 && !arguments[4].isNull() && !arguments[4].isUndefined()) {
+      paint = JsiSkPaint::fromValue(runtime, arguments[4]);
+    }
+    SkPaint defaultPaint;
     _canvas->drawPatch(cubics.data(), colors.empty() ? nullptr : colors.data(),
-                       texs.empty() ? nullptr : texs.data(), blendMode, *paint);
+                       texs.empty() ? nullptr : texs.data(), blendMode,
+                       paint ? *paint : defaultPaint);
     return jsi::Value::undefined();
   }
 
@@ -411,7 +419,7 @@ public:
     auto rects = arguments[1].asObject(runtime).asArray(runtime);
     auto transforms = arguments[2].asObject(runtime).asArray(runtime);
     auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
-    auto blendMode = count > 5 && !arguments[4].isUndefined()
+    auto blendMode = count > 4 && !arguments[4].isUndefined()
                          ? static_cast<SkBlendMode>(arguments[4].asNumber())
                          : SkBlendMode::kDstOver;
 
