@@ -40,7 +40,12 @@ export interface SkCanvas {
    * @param top
    * @param paint
    */
-  drawImage: (image: SkImage, x: number, y: number, paint?: SkPaint) => void;
+  drawImage: (
+    image: SkImage,
+    x: number,
+    y: number,
+    paint?: SkPaint | null
+  ) => void;
 
   /**
    * Draws sub-rectangle src from provided image, scaled and translated to fill dst rectangle.
@@ -232,7 +237,7 @@ export interface SkCanvas {
     colors?: readonly SkColor[] | null,
     texs?: readonly SkPoint[] | null,
     mode?: BlendMode | null,
-    paint?: SkPaint
+    paint?: SkPaint | null
   ): void;
 
   /**
@@ -405,7 +410,7 @@ export interface SkCanvas {
    * @param flags
    */
   saveLayer(
-    paint?: SkPaint,
+    paint?: SkPaint | null,
     bounds?: SkRect | null,
     backdrop?: SkImageFilter | null,
     flags?: SaveLayerFlag
