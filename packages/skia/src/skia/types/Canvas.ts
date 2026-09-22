@@ -59,7 +59,7 @@ export interface SkCanvas {
     img: SkImage,
     src: SkRect,
     dest: SkRect,
-    paint?: SkPaint | null,
+    paint: SkPaint,
     fastSample?: boolean
   ): void;
 

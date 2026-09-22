@@ -89,18 +89,16 @@ export class JsiSkCanvas
     img: SkImage,
     src: SkRect,
     dest: SkRect,
-    paint?: SkPaint | null,
+    paint: SkPaint,
     fastSample?: boolean
   ) {
-    this.withPaint(paint, (p) => {
-      this.ref.drawImageRect(
-        JsiSkImage.fromValue(img),
-        JsiSkRect.fromValue(this.CanvasKit, src),
-        JsiSkRect.fromValue(this.CanvasKit, dest),
-        p,
-        fastSample
-      );
-    });
+    this.ref.drawImageRect(
+      JsiSkImage.fromValue(img),
+      JsiSkRect.fromValue(this.CanvasKit, src),
+      JsiSkRect.fromValue(this.CanvasKit, dest),
+      JsiSkPaint.fromValue(paint),
+      fastSample
+    );
   }
 
   drawImageCubic(

@@ -119,7 +119,7 @@ describe("SkCanvas", () => {
     checkImage(img, "snapshots/canvas/drawatlas-no-colors.png");
   });
 
-  it("drawImage and drawImageRect accept null or omitted paint", async () => {
+  it("drawImage accepts null or omitted paint", async () => {
     const img = await surface.drawOffscreen((Skia, canvas) => {
       canvas.drawColor(Skia.Color("white"));
       const size = 20;
@@ -127,22 +127,11 @@ describe("SkCanvas", () => {
       const texCanvas = texSurface.getCanvas();
       texCanvas.drawColor(Skia.Color("purple"));
       const image = texSurface.makeImageSnapshot();
-      const rect = Skia.XYWHRect(0, 0, size, size);
 
       // drawImage without paint
       canvas.drawImage(image, 10, 10);
       // drawImage with null paint
       canvas.drawImage(image, 40, 10, null);
-
-      // drawImageRect without paint
-      canvas.drawImageRect(image, rect, Skia.XYWHRect(10, 40, size, size));
-      // drawImageRect with null paint
-      canvas.drawImageRect(
-        image,
-        rect,
-        Skia.XYWHRect(40, 40, size, size),
-        null
-      );
     });
     checkImage(img, "snapshots/canvas/drawimage-optional-paint.png");
   });

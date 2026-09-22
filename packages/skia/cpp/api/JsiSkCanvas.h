@@ -86,12 +86,8 @@ public:
     auto image = JsiSkImage::fromValue(runtime, arguments[0]);
     auto src = JsiSkRect::fromValue(runtime, arguments[1]);
     auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
-    std::shared_ptr<SkPaint> paint;
-    if (count >= 4 && !arguments[3].isNull() && !arguments[3].isUndefined()) {
-      paint = JsiSkPaint::fromValue(runtime, arguments[3]);
-    }
-    auto fastSample = count >= 5 && !arguments[4].isNull() &&
-                      !arguments[4].isUndefined() && arguments[4].getBool();
+    auto paint = JsiSkPaint::fromValue(runtime, arguments[3]);
+    auto fastSample = count >= 5 && arguments[4].getBool();
     _canvas->drawImageRect(image, *src, *dest, SkSamplingOptions(), paint.get(),
                            fastSample ? SkCanvas::kFast_SrcRectConstraint
                                       : SkCanvas::kStrict_SrcRectConstraint);
