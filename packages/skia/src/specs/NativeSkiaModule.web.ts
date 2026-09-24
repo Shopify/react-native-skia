@@ -67,6 +67,9 @@ global.SkiaViewApi = {
     }
     return view.makeImageSnapshot(rect);
   },
+  makeGraphiteContext() {
+    throw new Error("SkiaGraphiteView is not supported on the web.");
+  },
   makeImageSnapshotAsync(nativeId: number, rect?: SkRect) {
     return new Promise((resolve, reject) => {
       const view = this.views[`${nativeId}`];

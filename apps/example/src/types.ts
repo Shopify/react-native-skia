@@ -37,4 +37,5 @@ export type StackParamList = {
   Pictures: undefined;
   WebGPU: undefined;
   HighBitDepth: undefined;
+  Graphite: undefined;
 };

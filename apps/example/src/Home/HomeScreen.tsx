@@ -5,12 +5,22 @@ import { ScrollView } from "react-native";
 // react-native-webgpu would not be initialized when the WebGPU section's
 // availability check below runs.
 import "react-native-webgpu";
+import { Skia } from "@shopify/react-native-skia";
 
 import { HomeScreenButton } from "./HomeScreenButton";
 
+// Whether this build runs the Graphite backend (getNativeDevice throws on
+// Ganesh builds).
+const hasGraphite = (() => {
+  try {
+    return typeof Skia.getNativeDevice() === "bigint";
+  } catch {
+    return false;
+  }
+})();
+
 export const HomeScreen = () => {
-  const hasWebGPU =
-    typeof navigator !== "undefined" && navigator.gpu != null;
+  const hasWebGPU = typeof navigator !== "undefined" && navigator.gpu != null;
   return (
     <ScrollView>
       <HomeScreenButton
@@ -146,6 +156,13 @@ export const HomeScreen = () => {
         description="8-bit vs high bit depth canvas"
         route="HighBitDepth"
       />
+      {hasGraphite && (
+        <HomeScreenButton
+          title="🗿 Graphite View"
+          description="Frames recorded from JS and worklet runtimes"
+          route="Graphite"
+        />
+      )}
     </ScrollView>
   );
 };
