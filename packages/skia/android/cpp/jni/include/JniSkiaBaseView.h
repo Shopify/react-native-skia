@@ -35,14 +35,14 @@ public:
 
 protected:
   virtual void surfaceAvailable(jobject surface, int width, int height,
-                                bool opaque, bool highBitDepth) {
-    _skiaAndroidView->surfaceAvailable(surface, width, height, opaque,
+                                bool isSurface, bool highBitDepth) {
+    _skiaAndroidView->surfaceAvailable(surface, width, height, isSurface,
                                        highBitDepth);
   }
 
   virtual void surfaceSizeChanged(jobject surface, int width, int height,
-                                  bool opaque, bool highBitDepth) {
-    _skiaAndroidView->surfaceSizeChanged(surface, width, height, opaque,
+                                  bool isSurface, bool highBitDepth) {
+    _skiaAndroidView->surfaceSizeChanged(surface, width, height, isSurface,
                                          highBitDepth);
   }
 

@@ -63,15 +63,15 @@ public:
   }
 
 protected:
-  void surfaceAvailable(jobject surface, int width, int height, bool opaque,
+  void surfaceAvailable(jobject surface, int width, int height, bool isSurface,
                         bool highBitDepth) override {
-    JniSkiaBaseView::surfaceAvailable(surface, width, height, opaque,
+    JniSkiaBaseView::surfaceAvailable(surface, width, height, isSurface,
                                       highBitDepth);
   }
 
-  void surfaceSizeChanged(jobject surface, int width, int height, bool opaque,
+  void surfaceSizeChanged(jobject surface, int width, int height, bool isSurface,
                           bool highBitDepth) override {
-    JniSkiaBaseView::surfaceSizeChanged(surface, width, height, opaque,
+    JniSkiaBaseView::surfaceSizeChanged(surface, width, height, isSurface,
                                         highBitDepth);
   }
 

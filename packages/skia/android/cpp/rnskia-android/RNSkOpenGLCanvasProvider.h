@@ -27,12 +27,12 @@ public:
 
   bool renderToCanvas(const std::function<void(SkCanvas *)> &cb) override;
 
-  void surfaceAvailable(jobject surface, int width, int height, bool opaque,
+  void surfaceAvailable(jobject surface, int width, int height, bool isSurface,
                         bool highBitDepth);
 
   void surfaceDestroyed();
 
-  void surfaceSizeChanged(jobject jSurface, int width, int height, bool opaque,
+  void surfaceSizeChanged(jobject jSurface, int width, int height, bool isSurface,
                           bool highBitDepth);
 
 private:
