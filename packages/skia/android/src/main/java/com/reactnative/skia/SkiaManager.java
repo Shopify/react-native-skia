@@ -1,4 +1,4 @@
-package com.shopify.reactnative.skia;
+package com.reactnative.skia;
 
 import com.facebook.jni.HybridData;
 import com.facebook.proguard.annotations.DoNotStrip;
