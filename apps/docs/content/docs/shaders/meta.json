@@ -1,0 +1,4 @@
+{
+  "title": "Shaders",
+  "pages": ["overview", "images", "gradients", "perlin-noise", "colors"]
+}

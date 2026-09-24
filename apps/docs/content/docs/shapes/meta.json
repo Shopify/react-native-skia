@@ -1,0 +1,12 @@
+{
+  "title": "Shapes",
+  "pages": [
+    "path",
+    "path-migration",
+    "polygons",
+    "ellipses",
+    "atlas",
+    "vertices",
+    "patch"
+  ]
+}

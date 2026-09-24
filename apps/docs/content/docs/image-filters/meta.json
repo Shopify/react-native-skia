@@ -1,0 +1,12 @@
+{
+  "title": "Image Filters",
+  "pages": [
+    "overview",
+    "shadows",
+    "blur",
+    "displacement-map",
+    "offset",
+    "morphology",
+    "runtime-shader"
+  ]
+}

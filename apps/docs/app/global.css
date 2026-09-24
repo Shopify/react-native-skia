@@ -1,0 +1,20 @@
+@import "tailwindcss";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+@import "fumadocs-twoslash/twoslash.css";
+
+@source "../src/**/*.tsx";
+
+:root {
+  --color-fd-primary: #3884ff;
+}
+
+.dark {
+  --color-fd-primary: #6ba4ff;
+}
+
+/* Twoslash type popups are portaled next to <body>: keep them above the
+   sidebar and the navbar. */
+:has(> .fd-twoslash-popover) {
+  z-index: 50;
+}

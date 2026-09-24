@@ -1,0 +1,5 @@
+{
+  "title": "Getting started",
+  "defaultOpen": true,
+  "pages": ["installation", "hello-world", "web", "headless", "bundle-size"]
+}
