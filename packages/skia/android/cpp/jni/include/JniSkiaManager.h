@@ -22,7 +22,7 @@ using JavaPlatformContext = jni::alias_ref<JniPlatformContext::javaobject>;
 class JniSkiaManager : public jni::HybridClass<JniSkiaManager> {
 public:
   static auto constexpr kJavaDescriptor =
-      "Lcom/shopify/reactnative/skia/SkiaManager;";
+      "Lcom/reactnative/skia/SkiaManager;";
   static auto constexpr TAG = "ReactNativeSkia";
 
   static jni::local_ref<jni::HybridClass<JniSkiaManager>::jhybriddata>

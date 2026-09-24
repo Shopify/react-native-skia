@@ -1,6 +1,6 @@
 // RnskiaPackage.java
 
-package com.shopify.reactnative.skia;
+package com.reactnative.skia;
 
 import androidx.annotation.Nullable;
 
