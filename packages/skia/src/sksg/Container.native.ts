@@ -34,6 +34,7 @@ const nativeDrawOnscreen = (
 class NativeReanimatedContainer extends Container {
   private mapperId: number | null = null;
   private picture: SkPicture;
+  private recorder: JsiRecorder | null = null;
 
   constructor(
     Skia: Skia,
@@ -52,6 +53,31 @@ class NativeReanimatedContainer extends Container {
       Rea.stopMapper(this.mapperId);
       this.mapperId = null;
     }
+    // Stopping the mapper is not enough: the recorder's commands and the last
+    // recorded picture both hold native references to what was drawn (a
+    // full-screen SkImage, say), and Hermes cannot see that native memory, so
+    // it can outlive the view for as long as the UI runtime avoids a GC.
+    // Release them explicitly, on the UI thread so it is ordered after any
+    // frame already queued there. The native view keeps its own reference to
+    // the picture it is showing, so this never pulls one out from under a draw.
+    this.releaseRecorder();
+    const retired = this.picture;
+    this.picture = this.Skia.Picture.MakePicture(null)!;
+    Rea.runOnUI(() => {
+      "worklet";
+      retired.dispose();
+    })();
+  }
+
+  private releaseRecorder() {
+    const retired = this.recorder;
+    this.recorder = null;
+    if (retired !== null) {
+      Rea.runOnUI(() => {
+        "worklet";
+        retired.dispose();
+      })();
+    }
   }
 
   redraw() {
@@ -62,11 +88,13 @@ class NativeReanimatedContainer extends Container {
     if (this.unmounted) {
       return;
     }
+    this.releaseRecorder();
     const recorder = new ReanimatedRecorder(this.Skia);
     const { nativeId, picture } = this;
     visit(recorder, this.root);
     const sharedValues = recorder.getSharedValues();
     const sharedRecorder = recorder.getRecorder();
+    this.recorder = sharedRecorder;
     // Draw first frame
     Rea.runOnUI(() => {
       "worklet";
