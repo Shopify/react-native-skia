@@ -10,7 +10,7 @@
  * @nolint
  */
 
-package com.shopify.reactnative.skia;
+package com.reactnative.skia;
 
 import com.facebook.proguard.annotations.DoNotStrip;
 import com.facebook.react.bridge.ReactApplicationContext;
