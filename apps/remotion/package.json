@@ -30,7 +30,7 @@
     "cdt2d": "^1.0.0",
     "color": "^4.2.3",
     "eslint": "9.36.0",
-    "eslint-config-react-native-wcandillon": "4.0.1",
+    "eslint-config-react-native-wcandillon": "5.0.0",
     "eslint-plugin-import": "2.27.5",
     "flubber": "^0.4.2",
     "geometry-extrude": "^0.2.1",
