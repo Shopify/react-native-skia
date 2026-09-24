@@ -10,13 +10,17 @@ import java.util.List;
 import java.util.Map;
 
 import com.facebook.react.BaseReactPackage;
+import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.module.model.ReactModuleInfo;
 import com.facebook.react.module.model.ReactModuleInfoProvider;
 import com.facebook.react.uimanager.ViewManager;
 
-public class RNSkiaPackage extends BaseReactPackage {
+// `implements ReactPackage` is redundant (BaseReactPackage already implements it)
+// but required: older @react-native-community/cli versions only autolink
+// classes matching `implements ReactPackage` or `extends TurboReactPackage`.
+public class RNSkiaPackage extends BaseReactPackage implements ReactPackage {
     @Nullable
     @Override
     public NativeModule getModule(String name, ReactApplicationContext reactApplicationContext) {
