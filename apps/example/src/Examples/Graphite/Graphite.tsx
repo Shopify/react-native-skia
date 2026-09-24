@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import type {
   SkGraphiteContext,
   SkImage,
@@ -91,7 +91,10 @@ const useGpuImage = () =>
     );
     canvas.drawCircle(size / 2, size / 2, size / 2, paint);
     surface.flush();
-    return surface.makeImageSnapshot();
+    const image = surface.makeImageSnapshot();
+    // On the web a texture belongs to the WebGL context that made it; the
+    // views have their own, so they need a CPU copy.
+    return Platform.OS === "web" ? image.makeNonTextureImage() : image;
   }, []);
 
 const JSThreadView = ({ image }: { image: SkImage | null }) => {

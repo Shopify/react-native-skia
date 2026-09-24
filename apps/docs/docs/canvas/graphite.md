@@ -10,7 +10,7 @@ A frame is a Graphite recording: you record it on the thread you are on (the JS 
 
 :::info
 
-The view requires the Graphite backend. On the default backend and on the web it renders nothing, and `getContext()` throws.
+On native the view requires the Graphite backend; with the default backend it renders nothing and `getContext()` throws. On the web, where Skia runs on WebGL, the same API is emulated: see [Web](#web) below.
 
 :::
 
@@ -88,3 +88,8 @@ A few rules follow from this model:
 ## Snapshots
 
 `makeImageSnapshot()` and `makeImageSnapshotAsync()` from `SkiaViewApi` replay the current frame into an offscreen surface, like they do for a `Canvas`.
+
+## Web
+
+The web has no Graphite. `SkiaGraphiteView` keeps the same API there: a recording is an `SkPicture`, and the view replays the queued recordings onto its WebGL surface, using the same renderer as `SkiaPictureView` (context-loss recovery included, and `__destroyWebGLContextAfterRender` to stay under the browser's limit on live WebGL contexts).
+Frames are presented in submission order and never dropped, right before the browser paints. Two differences to keep in mind: the surface starts cleared on every frame, so a recording should draw the whole frame rather than a delta on top of the previous one; and a WebGL texture belongs to the context that created it, so an image snapshot taken from an offscreen surface must go through `makeNonTextureImage()` before another view can draw it.

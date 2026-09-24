@@ -1,7 +1,7 @@
 import type { ViewProps } from "react-native";
 import { createElement } from "react";
 
-import { Platform } from "../Platform";
+import { SkiaGraphiteView } from "../views/SkiaGraphiteView.web";
 
 export interface NativeProps extends ViewProps {
   debug?: boolean;
@@ -10,14 +10,22 @@ export interface NativeProps extends ViewProps {
   nativeID: string;
 }
 
-// Graphite is a native backend: on the web the view is an empty container.
 const SkiaGraphiteViewNativeComponent = ({
-  debug: _debug,
-  opaque: _opaque,
-  highBitDepth: _highBitDepth,
+  nativeID,
+  debug,
+  opaque,
+  highBitDepth,
+  onLayout,
   ...viewProps
 }: NativeProps) => {
-  return createElement(Platform.View, viewProps);
+  return createElement(SkiaGraphiteView, {
+    nativeID,
+    debug,
+    opaque,
+    highBitDepth,
+    onLayout,
+    ...viewProps,
+  });
 };
 // eslint-disable-next-line import/no-default-export
 export default SkiaGraphiteViewNativeComponent;
