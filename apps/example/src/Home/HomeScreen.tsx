@@ -146,6 +146,11 @@ export const HomeScreen = () => {
         description="8-bit vs high bit depth canvas"
         route="HighBitDepth"
       />
+      <HomeScreenButton
+        title="🤖 Android Views"
+        description="SurfaceView vs TextureView"
+        route="AndroidViews"
+      />
     </ScrollView>
   );
 };

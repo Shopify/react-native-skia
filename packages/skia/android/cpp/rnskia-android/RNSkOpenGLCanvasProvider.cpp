@@ -78,7 +78,7 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
 
 void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurfaceTexture,
                                                 int width, int height,
-                                                bool opaque,
+                                                bool isSurface,
                                                 bool highBitDepth) {
   // Release the old surface
   _surfaceHolder = nullptr;
@@ -86,7 +86,7 @@ void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurfaceTexture,
   // Create renderer!
   ANativeWindow *window = nullptr;
   JNIEnv *env = facebook::jni::Environment::current();
-  if (!opaque) {
+  if (!isSurface) {
     _jSurfaceTexture = env->NewGlobalRef(jSurfaceTexture);
     jclass surfaceClass = env->FindClass("android/view/Surface");
     jmethodID surfaceConstructor = env->GetMethodID(
@@ -131,7 +131,7 @@ void RNSkOpenGLCanvasProvider::surfaceDestroyed() {
 }
 
 void RNSkOpenGLCanvasProvider::surfaceSizeChanged(jobject jSurface, int width,
-                                                  int height, bool opaque,
+                                                  int height, bool isSurface,
                                                   bool highBitDepth) {
   if (width == 0 && height == 0) {
     // Setting width/height to zero is nothing we need to care about when
@@ -141,7 +141,7 @@ void RNSkOpenGLCanvasProvider::surfaceSizeChanged(jobject jSurface, int width,
 
   if (_surfaceHolder == nullptr) {
     _surfaceHolder = nullptr;
-    surfaceAvailable(jSurface, width, height, opaque, highBitDepth);
+    surfaceAvailable(jSurface, width, height, isSurface, highBitDepth);
   } else {
     _surfaceHolder->resize(width, height);
   }

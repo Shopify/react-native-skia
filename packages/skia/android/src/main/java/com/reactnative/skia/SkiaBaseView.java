@@ -11,17 +11,28 @@ import com.facebook.react.uimanager.PointerEvents;
 import com.facebook.react.views.view.ReactViewGroup;
 
 public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI {
+    // Backing view kinds, see updateView().
+    private static final int KIND_SURFACE_VIEW = 0;
+    private static final int KIND_TEXTURE_VIEW = 1;
+
     private View mView;
 
+    // Props, applied together in updateView().
+    private boolean mOpaque = false;
+    private String mSurfaceType = "auto";
+    private boolean mZOrderOnTop = false;
     private boolean mHighBitDepth = false;
+
+    // What the current backing view was created with.
+    private int mAppliedKind = -1;
+    private boolean mAppliedZOrderOnTop;
+    private boolean mAppliedHighBitDepth;
 
     private final boolean debug = false;
     private final String tag = "SkiaView";
 
     public SkiaBaseView(Context context) {
         super(context);
-        mView = new SkiaTextureView(context, this, debug);
-        addView(mView);
     }
 
     @Override
@@ -35,49 +46,81 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
     }
 
     public void setOpaque(boolean value) {
-        if (value && mView instanceof SkiaTextureView) {
-            recreateView(true);
-        } else if (!value && mView instanceof SkiaSurfaceView) {
-            recreateView(false);
-        }
+        mOpaque = value;
+    }
+
+    public void setSurfaceType(String value) {
+        mSurfaceType = value == null ? "auto" : value;
+    }
+
+    public void setZOrderOnTop(boolean value) {
+        mZOrderOnTop = value;
     }
 
     public void setHighBitDepth(boolean value) {
-        if (mHighBitDepth == value) {
-            return;
-        }
         mHighBitDepth = value;
-        // The flag only affects the opaque SurfaceView path (see
-        // highBitDepthIfOpaque), so only that surface needs to be recreated
-        // with the new buffer format.
-        if (mView instanceof SkiaSurfaceView) {
-            recreateView(true);
-        }
     }
 
-    private void recreateView(boolean useSurfaceView) {
-        removeView(mView);
-        mView = useSurfaceView
-                ? new SkiaSurfaceView(getContext(), this, debug)
-                : new SkiaTextureView(getContext(), this, debug);
-        addView(mView);
-        // React Native sizes native children explicitly through onLayout, so
-        // the requestLayout triggered by addView is ignored; size the new
-        // child ourselves or it stays 0x0 and never gets a surface.
-        if (getWidth() > 0 || getHeight() > 0) {
-            mView.layout(0, 0, getWidth(), getHeight());
+    // Resolve the backing view from the props. "auto" picks SurfaceView for an
+    // opaque canvas and TextureView for a non-opaque one.
+    private int resolveKind() {
+        if ("SurfaceView".equals(mSurfaceType)) {
+            return KIND_SURFACE_VIEW;
         }
+        if ("TextureView".equals(mSurfaceType)) {
+            return KIND_TEXTURE_VIEW;
+        }
+        return mOpaque ? KIND_SURFACE_VIEW : KIND_TEXTURE_VIEW;
     }
 
-    private boolean highBitDepthIfOpaque(boolean opaque) {
-        if (mHighBitDepth && !opaque) {
-            // The 10-bit buffer format only has 2 bits of alpha, which would
-            // visibly break translucency; the extra precision would also be
-            // lost in the 8-bit composition pass.
-            Log.w(tag, "highBitDepth requires the opaque prop on Android, falling back to the 8-bit format");
+    // The 10-bit buffer format only has 2 bits of alpha, which would visibly
+    // break translucency, and the extra precision would be lost in the 8-bit
+    // composition pass of a TextureView anyway. So the flag only applies to an
+    // opaque SurfaceView.
+    private boolean resolveHighBitDepth(int kind) {
+        if (!mHighBitDepth) {
             return false;
         }
-        return mHighBitDepth;
+        if (kind != KIND_SURFACE_VIEW || !mOpaque) {
+            Log.w(tag, "highBitDepth requires an opaque SurfaceView on Android, falling back to the 8-bit format");
+            return false;
+        }
+        return true;
+    }
+
+    // Apply the complete prop transaction once, after every prop has arrived.
+    // Only a change of backing view, or of a setting the view must know before
+    // it attaches (zOrderOnTop, the buffer format), replaces the child; opacity
+    // is applied in place.
+    void updateView() {
+        int kind = resolveKind();
+        boolean zOrderOnTop = kind == KIND_SURFACE_VIEW && mZOrderOnTop;
+        boolean highBitDepth = resolveHighBitDepth(kind);
+        if (mView == null
+                || kind != mAppliedKind
+                || zOrderOnTop != mAppliedZOrderOnTop
+                || highBitDepth != mAppliedHighBitDepth) {
+            if (mView != null) {
+                removeView(mView);
+            }
+            mAppliedKind = kind;
+            mAppliedZOrderOnTop = zOrderOnTop;
+            mAppliedHighBitDepth = highBitDepth;
+            mView = kind == KIND_SURFACE_VIEW
+                    ? new SkiaSurfaceView(getContext(), this, debug, zOrderOnTop, mOpaque)
+                    : new SkiaTextureView(getContext(), this, debug, mOpaque);
+            addView(mView);
+            // React Native sizes native children explicitly through onLayout, so
+            // the requestLayout triggered by addView is ignored; size the new
+            // child ourselves or it stays 0x0 and never gets a surface.
+            if (getWidth() > 0 || getHeight() > 0) {
+                mView.layout(0, 0, getWidth(), getHeight());
+            }
+        } else if (kind == KIND_SURFACE_VIEW) {
+            ((SkiaSurfaceView) mView).setOpaque(mOpaque);
+        } else {
+            ((SkiaTextureView) mView).setOpaque(mOpaque);
+        }
     }
 
     void dropInstance() {
@@ -90,29 +133,36 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        mView.layout(0, 0, right - left, bottom - top);
+        if (mView != null) {
+            mView.layout(0, 0, right - left, bottom - top);
+        }
     }
+
+    // SurfaceView callbacks: the native side receives an android.view.Surface.
 
     @Override
     public void onSurfaceCreated(Surface surface, int width, int height) {
-        surfaceAvailable(surface, width, height, true, mHighBitDepth);
+        surfaceAvailable(surface, width, height, true, mAppliedHighBitDepth);
     }
 
     @Override
     public void onSurfaceChanged(Surface surface, int width, int height) {
-        Log.i(tag, "onSurfaceTextureSizeChanged " + width + "/" + height);
-        surfaceSizeChanged(surface, width, height, true, mHighBitDepth);
+        Log.i(tag, "onSurfaceChanged " + width + "/" + height);
+        surfaceSizeChanged(surface, width, height, true, mAppliedHighBitDepth);
     }
+
+    // TextureView callbacks: the native side receives a SurfaceTexture and
+    // drives updateTexImage itself. The 10-bit format is never used here.
 
     @Override
     public void onSurfaceTextureCreated(SurfaceTexture surface, int width, int height) {
-        surfaceAvailable(surface, width, height, false, highBitDepthIfOpaque(false));
+        surfaceAvailable(surface, width, height, false, false);
     }
 
     @Override
     public void onSurfaceTextureChanged(SurfaceTexture surface, int width, int height) {
         Log.i(tag, "onSurfaceTextureSizeChanged " + width + "/" + height);
-        surfaceSizeChanged(surface, width, height, false, highBitDepthIfOpaque(false));
+        surfaceSizeChanged(surface, width, height, false, false);
     }
 
     @Override
@@ -120,9 +170,11 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
         surfaceDestroyed();
     }
 
-    protected abstract void surfaceAvailable(Object surface, int width, int height, boolean opaque, boolean highBitDepth);
+    // isSurface tells the native side whether `surface` is an
+    // android.view.Surface (SurfaceView) or a SurfaceTexture (TextureView).
+    protected abstract void surfaceAvailable(Object surface, int width, int height, boolean isSurface, boolean highBitDepth);
 
-    protected abstract void surfaceSizeChanged(Object surface, int width, int height, boolean opaque, boolean highBitDepth);
+    protected abstract void surfaceSizeChanged(Object surface, int width, int height, boolean isSurface, boolean highBitDepth);
 
     protected abstract void surfaceDestroyed();
 

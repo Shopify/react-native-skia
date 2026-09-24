@@ -36,6 +36,7 @@ import {
   Pictures,
   WebGPU,
   HighBitDepth,
+  AndroidViews,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
@@ -81,6 +82,7 @@ const linking: LinkingOptions<StackParamList> = {
       Pictures: "pictures",
       WebGPU: "webgpu",
       HighBitDepth: "high-bit-depth",
+      AndroidViews: "android-views",
     },
   },
   prefixes: ["rnskia://"],
@@ -251,6 +253,7 @@ const App = () => {
               }}
             />
             <Stack.Screen name="HighBitDepth" component={HighBitDepth} />
+            <Stack.Screen name="AndroidViews" component={AndroidViews} />
           </Stack.Navigator>
         </NavigationContainer>
       </GestureHandlerRootView>
