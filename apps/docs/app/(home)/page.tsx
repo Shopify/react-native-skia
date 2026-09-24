@@ -1,9 +1,12 @@
 import Link from "next/link";
 
+import { SkiaLogo } from "@/components/home/SkiaLogo";
+
 export default function HomePage() {
   return (
     <main className="flex flex-1 flex-col items-center px-4 py-16 text-center">
-      <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+      <SkiaLogo />
+      <h1 className="mt-12 text-4xl font-semibold tracking-tight sm:text-5xl">
         React Native Skia
       </h1>
       <p className="mt-4 max-w-xl text-lg text-fd-muted-foreground">

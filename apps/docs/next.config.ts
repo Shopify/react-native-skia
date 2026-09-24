@@ -24,6 +24,26 @@ const config: NextConfig = {
     "react-native-worklets",
   ],
   turbopack: {
+    rules: {
+      // TypeGPU compiles "use gpu" callbacks (the Redraw scene on the home
+      // page) to WGSL at build time.
+      "*.ts": {
+        condition: {
+          all: [{ not: "foreign" }, { content: /["']use gpu["']/ }],
+        },
+        loaders: [
+          {
+            loader: "babel-loader",
+            options: {
+              babelrc: false,
+              configFile: false,
+              presets: ["@babel/preset-typescript"],
+              plugins: ["unplugin-typegpu/babel"],
+            },
+          },
+        ],
+      },
+    },
     resolveAlias: {
       "react-native": "./src/lib/react-native.ts",
       "fs": { browser: "./src/lib/empty.ts" },
