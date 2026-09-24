@@ -6,6 +6,7 @@ import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeCompon
 import { SkiaViewApi } from "./api";
 import type { SkiaPictureViewNativeProps } from "./types";
 import { SkiaViewNativeId } from "./SkiaViewNativeId";
+import { resolveSurfaceType } from "./resolveSurfaceType";
 
 const NativeSkiaPictureView = SkiaPictureViewNativeComponent;
 
@@ -81,6 +82,7 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
       opaque = false,
       highBitDepth = false,
       androidWarmup = false,
+      android,
       ...viewProps
     } = this.props;
     return (
@@ -91,6 +93,8 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
         opaque={opaque}
         highBitDepth={highBitDepth}
         androidWarmup={androidWarmup}
+        androidSurfaceType={resolveSurfaceType(android?.surfaceType)}
+        androidZOrderOnTop={!!android?.zOrderOnTop}
         {...viewProps}
       />
     );

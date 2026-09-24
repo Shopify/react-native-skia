@@ -19,7 +19,8 @@ import type { SharedValue } from "react-native-reanimated";
 
 import Rea from "../external/reanimated/ReanimatedProxy";
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
-import type { AndroidCanvasProps, AndroidSurfaceType } from "../views/types";
+import type { AndroidCanvasProps } from "../views/types";
+import { resolveSurfaceType } from "../views/resolveSurfaceType";
 import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeComponent";
 import type { SkImage, SkRect, SkSize } from "../skia/types";
 import { SkiaSGRoot } from "../sksg/Reconciler";
@@ -88,15 +89,6 @@ export interface CanvasProps extends Omit<ViewProps, "onLayout"> {
   androidWarmup?: boolean;
   __destroyWebGLContextAfterRender?: boolean;
 }
-
-// Anything else reaching the native component would hit the generated
-// string-enum parser, which aborts on unknown values.
-const resolveSurfaceType = (
-  surfaceType: AndroidSurfaceType | undefined
-): "auto" | AndroidSurfaceType =>
-  surfaceType === "SurfaceView" || surfaceType === "TextureView"
-    ? surfaceType
-    : "auto";
 
 export const Canvas = ({
   debug,
