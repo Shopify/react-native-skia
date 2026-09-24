@@ -1,0 +1,24 @@
+{
+  "title": "Documentation",
+  "pages": [
+    "getting-started",
+    "canvas",
+    "paint",
+    "group",
+    "shapes/pictures",
+    "shapes",
+    "(images)",
+    "video",
+    "skottie",
+    "text",
+    "shaders",
+    "image-filters",
+    "backdrops-filters",
+    "mask-filters",
+    "color-filters",
+    "mask",
+    "path-effects",
+    "animations",
+    "tutorials"
+  ]
+}

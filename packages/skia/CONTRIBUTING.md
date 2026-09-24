@@ -493,7 +493,7 @@ describe("ImageFilter", () => {
 yarn tsc --noEmit
 
 # Create test image directory
-mkdir -p apps/docs/static/img/your-component/
+mkdir -p apps/docs/public/img/your-component/
 
 # Run tests
 yarn test src/renderer/__tests__/e2e/YourComponent.spec.tsx
