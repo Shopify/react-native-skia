@@ -96,4 +96,5 @@ export interface JsiRecorder extends BaseRecorder {
   play(picture: SkPicture): void;
   applyUpdates(variables: SharedValue<unknown>[]): void;
   reset(): void;
+  dispose(): void;
 }
