@@ -21,13 +21,17 @@ class JniSkiaBaseView {
 public:
   JniSkiaBaseView(jni::alias_ref<JniSkiaManager::javaobject> skiaManager,
                   std::shared_ptr<RNSkBaseAndroidView> skiaView)
-      : _skiaAndroidView(std::move(skiaView)), _manager(skiaManager->cthis()) {}
+      : _skiaAndroidView(std::move(skiaView)),
+        _manager(skiaManager->cthis()->getSkiaManager()) {}
 
   ~JniSkiaBaseView() = default;
 
-  std::shared_ptr<RNSkManager> getSkiaManager() {
-    return _manager->getSkiaManager();
-  }
+  // The manager is owned by the RNSkiaModule and is destroyed when the module
+  // is invalidated (reload). Fabric drops views on the UI thread while the
+  // module is invalidated on a background thread, so a view can outlive its
+  // manager: holding a weak reference makes a late unregister a no-op and a
+  // concurrent one keep the manager alive for the duration of the call.
+  std::shared_ptr<RNSkManager> getSkiaManager() { return _manager.lock(); }
 
 protected:
   virtual void surfaceAvailable(jobject surface, int width, int height,
@@ -49,8 +53,11 @@ protected:
   }
 
   virtual void registerView(int nativeId) {
-    getSkiaManager()->registerSkiaView(nativeId,
-                                       _skiaAndroidView->getSkiaView());
+    auto manager = getSkiaManager();
+    if (manager == nullptr) {
+      return;
+    }
+    manager->registerSkiaView(nativeId, _skiaAndroidView->getSkiaView());
   }
 
   virtual void unregisterView() {
@@ -74,7 +81,7 @@ protected:
   std::shared_ptr<RNSkBaseAndroidView> _skiaAndroidView;
 
 private:
-  JniSkiaManager *_manager;
+  std::weak_ptr<RNSkManager> _manager;
 };
 
 } // namespace RNSkia
