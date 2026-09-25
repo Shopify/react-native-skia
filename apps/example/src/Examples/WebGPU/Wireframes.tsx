@@ -499,7 +499,9 @@ export function Wireframes() {
       device.queue.submit([commandBuffer]);
 
       // Convert texture to SkImage
-      const skImage = Skia.Image.MakeImageFromNativeTexture(texture.nativePointer);
+      const skImage = Skia.Image.MakeImageFromNativeTexture(
+        texture.nativePointer
+      );
       setImage(skImage);
     };
 

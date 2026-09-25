@@ -48,6 +48,19 @@ int RNSkMetalCanvasProvider::getHeight() {
   return _ctx ? _ctx->getHeight() : -1;
 };
 
+// Whether rendering must be skipped: drawing while the app is in the
+// background can clear the CAMetalLayer, leaving the canvas empty when the app
+// comes back (https://github.com/Shopify/react-native-skia/issues/1257). The
+// application state is main-thread only, so this is answered there only.
+static bool appIsBackgrounded() {
+#if !TARGET_OS_OSX
+  auto state = UIApplication.sharedApplication.applicationState;
+  return state == UIApplicationStateBackground;
+#else
+  return NSApplication.sharedApplication.isHidden;
+#endif // !TARGET_OS_OSX
+}
+
 /**
  Render to a canvas
  */
@@ -57,20 +70,8 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
     return false;
   }
 
-  // Make sure to NOT render or try any render operations while we're in the
-  // background or inactive. This will cause an error that might clear the
-  // CAMetalLayer so that the canvas is empty when the app receives focus again.
-  // Reference: https://github.com/Shopify/react-native-skia/issues/1257
-  // NOTE: UIApplication.sharedApplication.applicationState can only be
-  // accessed from the main thread so we need to check here.
   if ([[NSThread currentThread] isMainThread]) {
-#if !TARGET_OS_OSX
-    auto state = UIApplication.sharedApplication.applicationState;
-    bool appIsBackgrounded = (state == UIApplicationStateBackground);
-#else
-    bool appIsBackgrounded = NSApplication.sharedApplication.isHidden;
-#endif // !TARGET_OS_OSX
-    if (appIsBackgrounded) {
+    if (appIsBackgrounded()) {
       // Request a redraw in the next run loop callback
       _requestRedraw();
       // and don't draw now since it might cause errors in the metal renderer if
@@ -90,6 +91,31 @@ bool RNSkMetalCanvasProvider::renderToCanvas(
   return false;
 };
 
+#if defined(SK_GRAPHITE)
+bool RNSkMetalCanvasProvider::getGraphiteTargetInfo(
+    RNSkia::RNSkGraphiteTargetInfo *info) {
+  std::lock_guard<std::mutex> lock(_targetInfoMutex);
+  if (!_hasTargetInfo) {
+    return false;
+  }
+  *info = _targetInfo;
+  return true;
+}
+
+bool RNSkMetalCanvasProvider::presentRecordings(
+    const std::vector<skgpu::graphite::Recording *> &recordings) {
+  if (!_ctx || ![[NSThread currentThread] isMainThread]) {
+    return false;
+  }
+  if (appIsBackgrounded()) {
+    _requestRedraw();
+    return false;
+  }
+  return static_cast<RNSkia::DawnWindowContext *>(_ctx.get())
+      ->presentRecordings(recordings);
+}
+#endif
+
 void RNSkMetalCanvasProvider::setSize(int width, int height) {
   _layer.frame = CGRectMake(0, 0, width, height);
   auto w = width * _context->getPixelDensity();
@@ -97,6 +123,15 @@ void RNSkMetalCanvasProvider::setSize(int width, int height) {
 #if defined(SK_GRAPHITE)
   _ctx = RNSkia::DawnContext::getInstance().MakeWindow((__bridge void *)_layer,
                                                        w, h, _highBitDepth);
+  {
+    auto *window = static_cast<RNSkia::DawnWindowContext *>(_ctx.get());
+    std::lock_guard<std::mutex> lock(_targetInfoMutex);
+    _targetInfo.width = window->getWidth();
+    _targetInfo.height = window->getHeight();
+    _targetInfo.colorType = window->getColorType();
+    _targetInfo.textureInfo = window->getTextureInfo();
+    _hasTargetInfo = true;
+  }
 #else
   _ctx = MetalContext::getInstance().MakeWindow(_layer, w, h, _useP3ColorSpace,
                                                 _highBitDepth);

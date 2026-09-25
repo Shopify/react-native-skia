@@ -45,23 +45,62 @@ int RNSkOpenGLCanvasProvider::getHeight() {
   return 0;
 }
 
+void RNSkOpenGLCanvasProvider::updateTexImage() {
+  if (_jSurfaceTexture) {
+    JNIEnv *env = facebook::jni::Environment::current();
+    env->CallVoidMethod(_jSurfaceTexture, _updateTexImageMethod);
+
+    // Check for exceptions
+    if (env->ExceptionCheck()) {
+      RNSkLogger::logToConsole("updateAndRelease() failed. The exception above "
+                               "can safely be ignored");
+      env->ExceptionClear();
+    }
+  }
+}
+
+#if defined(SK_GRAPHITE)
+void RNSkOpenGLCanvasProvider::updateTargetInfo() {
+  std::lock_guard<std::mutex> lock(_targetInfoMutex);
+  if (_surfaceHolder == nullptr) {
+    _hasTargetInfo = false;
+    return;
+  }
+  auto *window = static_cast<DawnWindowContext *>(_surfaceHolder.get());
+  _targetInfo.width = window->getWidth();
+  _targetInfo.height = window->getHeight();
+  _targetInfo.colorType = window->getColorType();
+  _targetInfo.textureInfo = window->getTextureInfo();
+  _hasTargetInfo = true;
+}
+
+bool RNSkOpenGLCanvasProvider::getGraphiteTargetInfo(
+    RNSkGraphiteTargetInfo *info) {
+  std::lock_guard<std::mutex> lock(_targetInfoMutex);
+  if (!_hasTargetInfo) {
+    return false;
+  }
+  *info = _targetInfo;
+  return true;
+}
+
+bool RNSkOpenGLCanvasProvider::presentRecordings(
+    const std::vector<skgpu::graphite::Recording *> &recordings) {
+  if (_surfaceHolder == nullptr) {
+    return false;
+  }
+  updateTexImage();
+  return static_cast<DawnWindowContext *>(_surfaceHolder.get())
+      ->presentRecordings(recordings);
+}
+#endif
+
 bool RNSkOpenGLCanvasProvider::renderToCanvas(
     const std::function<void(SkCanvas *)> &cb) {
   if (_surfaceHolder != nullptr && cb != nullptr) {
     // Get the surface
     auto surface = _surfaceHolder->getSurface();
-    if (_jSurfaceTexture) {
-      JNIEnv *env = facebook::jni::Environment::current();
-      env->CallVoidMethod(_jSurfaceTexture, _updateTexImageMethod);
-
-      // Check for exceptions
-      if (env->ExceptionCheck()) {
-        RNSkLogger::logToConsole(
-            "updateAndRelease() failed. The exception above "
-            "can safely be ignored");
-        env->ExceptionClear();
-      }
-    }
+    updateTexImage();
     if (surface) {
       // Draw into canvas using callback
       cb(surface->getCanvas());
@@ -111,6 +150,7 @@ void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurfaceTexture,
 #if defined(SK_GRAPHITE)
   _surfaceHolder = DawnContext::getInstance().MakeWindow(window, width, height,
                                                          highBitDepth);
+  updateTargetInfo();
 #else
   _surfaceHolder =
       OpenGLContext::getInstance().MakeWindow(window, highBitDepth);
@@ -123,6 +163,9 @@ void RNSkOpenGLCanvasProvider::surfaceDestroyed() {
   // destroy the renderer (a unique pointer so the dtor will be called
   // immediately.)
   _surfaceHolder = nullptr;
+#if defined(SK_GRAPHITE)
+  updateTargetInfo();
+#endif
   if (_jSurfaceTexture) {
     JNIEnv *env = facebook::jni::Environment::current();
     env->DeleteGlobalRef(_jSurfaceTexture);
@@ -144,6 +187,9 @@ void RNSkOpenGLCanvasProvider::surfaceSizeChanged(jobject jSurface, int width,
     surfaceAvailable(jSurface, width, height, isSurface, highBitDepth);
   } else {
     _surfaceHolder->resize(width, height);
+#if defined(SK_GRAPHITE)
+    updateTargetInfo();
+#endif
   }
 
   // Redraw after size change

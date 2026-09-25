@@ -18,6 +18,11 @@
 #include "jsi/ViewProperty.h"
 #include <jsi/jsi.h>
 
+#if defined(SK_GRAPHITE)
+#include "RNSkGraphiteView.h"
+#include "api/JsiSkGraphiteContext.h"
+#endif
+
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
@@ -288,6 +293,37 @@ public:
     return sizeObj;
   }
 
+  /**
+   Returns the recording side of a SkiaGraphiteView: (nativeId, width,
+   height, opaque, highBitDepth), the size in points as laid out and the
+   props the surface format follows from. The view may not exist yet; the
+   context binds to it by id when it does.
+   */
+  JSI_HOST_FUNCTION(makeGraphiteContext) {
+#if defined(SK_GRAPHITE)
+    if (count < 3 || !arguments[0].isNumber() || !arguments[1].isNumber() ||
+        !arguments[2].isNumber()) {
+      throw jsi::JSError(runtime, "makeGraphiteContext: expected (nativeId, "
+                                  "width, height, opaque, highBitDepth)");
+    }
+    auto nativeId = static_cast<size_t>(arguments[0].asNumber());
+    auto width = static_cast<float>(arguments[1].asNumber());
+    auto height = static_cast<float>(arguments[2].asNumber());
+    bool opaque = count > 3 && arguments[3].isBool() && arguments[3].getBool();
+    bool highBitDepth =
+        count > 4 && arguments[4].isBool() && arguments[4].getBool();
+    auto target = RNSkGraphiteTargetRegistry::getInstance().getOrCreate(
+        nativeId, _platformContext);
+    target->setLayout(width, height, opaque, highBitDepth);
+    return makeJsiObject(runtime, std::make_shared<JsiSkGraphiteContext>(
+                                      _platformContext, std::move(target)));
+#else
+    throw jsi::JSError(runtime,
+                       "SkiaGraphiteView requires the Graphite backend. "
+                       "Rebuild with SK_GRAPHITE enabled.");
+#endif
+  }
+
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installHostMethod(runtime, prototype, "setJsiProperty",
                       &RNSkJsiViewApi::setJsiProperty);
@@ -298,6 +334,8 @@ public:
     installHostMethod(runtime, prototype, "makeImageSnapshot",
                       &RNSkJsiViewApi::makeImageSnapshot);
     installHostMethod(runtime, prototype, "size", &RNSkJsiViewApi::size);
+    installHostMethod(runtime, prototype, "makeGraphiteContext",
+                      &RNSkJsiViewApi::makeGraphiteContext);
   }
 
   /**

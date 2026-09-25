@@ -19,16 +19,60 @@
 #include "include/core/SkCanvas.h"
 #include "include/core/SkSurface.h"
 
+#if defined(SK_GRAPHITE)
+#include "RNDawnContext.h"
+#include "RNDawnUtils.h"
+#include "include/gpu/graphite/Recording.h"
+#include "include/gpu/graphite/TextureInfo.h"
+#include "include/gpu/graphite/dawn/DawnGraphiteTypes.h"
+#endif
+
 #pragma clang diagnostic pop
 
 namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
+#if defined(SK_GRAPHITE)
+/**
+ * Describes the texture a Graphite recording is replayed onto: the pixel size
+ * and the format of a window (or offscreen) surface. A deferred canvas is
+ * recorded against this description, so it can be created before the surface
+ * itself exists.
+ */
+struct RNSkGraphiteTargetInfo {
+  int width = 0;
+  int height = 0;
+  SkColorType colorType = kUnknown_SkColorType;
+  skgpu::graphite::TextureInfo textureInfo;
+};
+#endif
+
 class RNSkCanvasProvider {
 public:
   explicit RNSkCanvasProvider(std::function<void()> requestRedraw)
       : _requestRedraw(requestRedraw) {}
+
+  virtual ~RNSkCanvasProvider() = default;
+
+#if defined(SK_GRAPHITE)
+  /**
+   Describes the current target texture. Safe to call from any thread;
+   returns false while there is no surface to describe.
+   */
+  virtual bool getGraphiteTargetInfo(RNSkGraphiteTargetInfo *info) {
+    return false;
+  }
+
+  /**
+   Replays the recordings, in order, onto the target texture and presents
+   it. Called on the thread that owns the surface.
+   */
+  virtual bool presentRecordings(
+      const std::vector<skgpu::graphite::Recording *> &recordings) {
+    return false;
+  }
+#endif
 
   /**
    Returns the scaled width of the view
@@ -130,6 +174,35 @@ public:
     return true;
   };
 
+#if defined(SK_GRAPHITE)
+  bool getGraphiteTargetInfo(RNSkGraphiteTargetInfo *info) override {
+    if (_surface == nullptr || _surface->recorder() == nullptr) {
+      return false;
+    }
+    // Graphite gives its render targets the sampled+renderable usage, a
+    // superset of what a deferred canvas asks for.
+    auto colorType = _surface->imageInfo().colorType();
+    info->width = _width;
+    info->height = _height;
+    info->colorType = colorType;
+    info->textureInfo = skgpu::graphite::TextureInfos::MakeDawn(
+        skgpu::graphite::DawnTextureInfo(
+            skgpu::graphite::SampleCount::k1, skgpu::Mipmapped::kNo,
+            DawnUtils::textureFormatForColorType(colorType),
+            DawnUtils::DefaultTargetUsage, wgpu::TextureAspect::All));
+    return true;
+  }
+
+  bool presentRecordings(
+      const std::vector<skgpu::graphite::Recording *> &recordings) override {
+    if (_surface == nullptr || _surface->recorder() == nullptr) {
+      return false;
+    }
+    return DawnContext::getInstance().insertRecordings(recordings,
+                                                       _surface.get());
+  }
+#endif
+
 private:
   int _width;
   int _height;
@@ -202,7 +275,7 @@ public:
   /**
    Renders the view into an SkImage instead of the screen.
    */
-  sk_sp<SkImage> makeImageSnapshot(SkRect *bounds) {
+  virtual sk_sp<SkImage> makeImageSnapshot(SkRect *bounds) {
 
     auto provider = std::make_shared<RNSkOffscreenCanvasProvider>(
         getPlatformContext(), std::bind(&RNSkView::requestRedraw, this),

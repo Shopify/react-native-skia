@@ -36,6 +36,7 @@ import {
   Pictures,
   WebGPU,
   HighBitDepth,
+  Graphite,
   AndroidViews,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
@@ -82,6 +83,7 @@ const linking: LinkingOptions<StackParamList> = {
       Pictures: "pictures",
       WebGPU: "webgpu",
       HighBitDepth: "high-bit-depth",
+      Graphite: "graphite",
       AndroidViews: "android-views",
     },
   },
@@ -253,6 +255,7 @@ const App = () => {
               }}
             />
             <Stack.Screen name="HighBitDepth" component={HighBitDepth} />
+            <Stack.Screen name="Graphite" component={Graphite} />
             <Stack.Screen name="AndroidViews" component={AndroidViews} />
           </Stack.Navigator>
         </NavigationContainer>
