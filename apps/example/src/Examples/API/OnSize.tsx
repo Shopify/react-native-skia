@@ -4,7 +4,7 @@ import { View, StyleSheet } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { useDerivedValue, useSharedValue } from "react-native-reanimated";
 
-export const OnSize = () => {
+const SizedCanvas = () => {
   const size = useSharedValue({ width: 0, height: 0 });
   const redRect = useDerivedValue(() => {
     console.log(
@@ -35,6 +35,18 @@ World!
  `}
         multiline
       />
+    </View>
+  );
+};
+
+export const OnSize = () => {
+  return (
+    <View>
+      <SizedCanvas />
+      {/* A scaled ancestor must not change the size onSize reports (#3836) */}
+      <View style={{ transform: [{ scale: 0.5 }] }}>
+        <SizedCanvas />
+      </View>
     </View>
   );
 };
