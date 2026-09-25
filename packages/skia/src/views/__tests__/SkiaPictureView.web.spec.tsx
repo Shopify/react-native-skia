@@ -393,6 +393,42 @@ describe("SkiaPictureView.web", () => {
     await view.unmount();
   });
 
+  it("sizes the surface to the painted size when an ancestor scales the canvas", async () => {
+    const { CanvasKitMock, rawCanvas } = installCanvasKit();
+    canvasSize.width = 680;
+    canvasSize.height = 430;
+    display.pixelDensity = 2;
+    // A CSS transform: scale(0.75) on an ancestor shrinks the painted box
+    // while clientWidth/clientHeight keep reporting the layout size.
+    const rectSpy = jest
+      .spyOn(HTMLCanvasElement.prototype, "getBoundingClientRect")
+      .mockReturnValue({
+        width: 510,
+        height: 322.5,
+        x: 0,
+        y: 0,
+        top: 0,
+        left: 0,
+        right: 510,
+        bottom: 322.5,
+        toJSON: () => ({}),
+      } as DOMRect);
+
+    const view = mountView("11");
+    await setPicture(11);
+    // 510 CSS px painted at density 2 is 1020 device px, not 680 * 2.
+    expect(CanvasKitMock.MakeOnScreenGLSurface).toHaveBeenLastCalledWith(
+      expect.anything(),
+      1020,
+      645,
+      "srgb"
+    );
+    expect(rawCanvas.scale).toHaveBeenLastCalledWith(1.5, 1.5);
+
+    rectSpy.mockRestore();
+    await view.unmount();
+  });
+
   it("fires onLayout from the resize observer", async () => {
     installCanvasKit();
     canvasSize.width = 360;
