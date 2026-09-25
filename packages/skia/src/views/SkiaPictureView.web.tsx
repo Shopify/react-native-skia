@@ -238,9 +238,17 @@ class WebGLRenderer implements Renderer {
       // release everything: either way there is nothing to build on.
       return;
     }
-    this.pd = window.devicePixelRatio;
-    canvas.width = canvas.clientWidth * this.pd;
-    canvas.height = canvas.clientHeight * this.pd;
+    // clientWidth ignores CSS transforms on ancestors, so a scaled canvas would
+    // get a backing store sized for its layout box and the browser would
+    // resample it. Fold the painted/layout ratio into the pixel density.
+    const paintedWidth = canvas.getBoundingClientRect().width;
+    const transformScale =
+      canvas.clientWidth > 0 && paintedWidth > 0
+        ? paintedWidth / canvas.clientWidth
+        : 1;
+    this.pd = window.devicePixelRatio * transformScale;
+    canvas.width = Math.round(canvas.clientWidth * this.pd);
+    canvas.height = Math.round(canvas.clientHeight * this.pd);
     this.surface?.ref.delete();
     this.surface = null;
     if (canvas.width === 0 || canvas.height === 0) {
