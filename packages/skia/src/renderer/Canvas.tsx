@@ -24,7 +24,6 @@ import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeCompon
 import type { SkImage, SkRect, SkSize } from "../skia/types";
 import { SkiaSGRoot } from "../sksg/Reconciler";
 import { Skia } from "../skia";
-import { Platform } from "../Platform";
 import { HAS_REANIMATED_3 } from "../external";
 
 export interface CanvasRef extends FC<CanvasProps> {
@@ -37,9 +36,6 @@ export interface CanvasRef extends FC<CanvasProps> {
 }
 
 export const useCanvasRef = () => useRef<CanvasRef>(null);
-
-const useReanimatedFrame = !HAS_REANIMATED_3 ? () => {} : Rea.useFrameCallback;
-const measure = !HAS_REANIMATED_3 ? null : Rea.measure;
 
 const useCanvasRefPriv: typeof useRef<View> = !HAS_REANIMATED_3
   ? useRef
@@ -60,10 +56,8 @@ export const useCanvasSize = (userRef?: RefObject<CanvasRef | null>) => {
   return { ref, size };
 };
 
-export interface CanvasProps extends Omit<ViewProps, "onLayout"> {
+export interface CanvasProps extends ViewProps {
   debug?: boolean;
-  /** @deprecated Not supported on native. Use `onSize` or `useCanvasSize()` instead. */
-  onLayout?: ViewProps["onLayout"];
   /**
    * Declares that the canvas covers every pixel of its bounds, so nothing
    * behind it needs to show through. On Android an opaque canvas is backed by
@@ -111,11 +105,6 @@ export const Canvas = ({
   onLayout,
   ...viewProps
 }: CanvasProps) => {
-  if (onLayout && Platform.OS !== "web") {
-    console.error(
-      "<Canvas onLayout={onLayout} /> is not supported on the new architecture, to fix the issue, see: https://shopify.github.io/react-native-skia/docs/canvas/overview/#getting-the-canvas-size"
-    );
-  }
   const viewRef = useCanvasRefPriv(null);
   // Native ID
   const nativeId = useMemo(() => {
@@ -125,29 +114,13 @@ export const Canvas = ({
   // Root
   const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
 
-  useReanimatedFrame(() => {
-    "worklet";
-    if (onSize && measure) {
-      const result =
-        // eslint-disable-next-line no-nested-ternary
-        Platform.OS === "web"
-          ? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
-            viewRef.current?.canvasRef
-            ? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-expect-error
-              measure(viewRef.current.canvasRef)
-            : { width: 0, height: 0 }
-          : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            measure(viewRef as any);
-      if (result) {
-        const { width, height } = result;
-        if (onSize.value.width !== width || onSize.value.height !== height) {
-          onSize.value = { width, height };
-        }
-      }
+  // The size comes from the view's own layout event: a per-frame measure outlives the view until its effect cleanup and reports the transformed box.
+  const layoutSize = useRef<SkSize | null>(null);
+  useLayoutEffect(() => {
+    if (onSize && layoutSize.current) {
+      onSize.value = layoutSize.current;
     }
-  }, !!onSize);
+  }, [onSize]);
 
   // Render effects
   useLayoutEffect(() => {
@@ -186,13 +159,18 @@ export const Canvas = ({
       }) as CanvasRef
   );
 
-  const onLayoutWeb = useCallback(
+  const onLayoutWithSize = useCallback(
     (e: LayoutChangeEvent) => {
       if (onLayout) {
         onLayout(e);
       }
-      if (Platform.OS === "web" && onSize) {
-        const { width, height } = e.nativeEvent.layout;
+      const { width, height } = e.nativeEvent.layout;
+      const previous = layoutSize.current;
+      if (previous && previous.width === width && previous.height === height) {
+        return;
+      }
+      layoutSize.current = { width, height };
+      if (onSize) {
         onSize.value = { width, height };
       }
     },
@@ -210,9 +188,7 @@ export const Canvas = ({
       androidWarmup={androidWarmup}
       androidSurfaceType={resolveSurfaceType(android?.surfaceType)}
       androidZOrderOnTop={!!android?.zOrderOnTop}
-      onLayout={
-        Platform.OS === "web" && (onSize || onLayout) ? onLayoutWeb : onLayout
-      }
+      onLayout={onLayoutWithSize}
       {...viewProps}
     />
   );
