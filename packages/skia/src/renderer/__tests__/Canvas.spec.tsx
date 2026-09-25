@@ -6,7 +6,6 @@ import { createRoot } from "react-dom/client";
 import type { LayoutChangeEvent } from "react-native";
 import type { SharedValue } from "react-native-reanimated";
 
-import type { Platform as PlatformValue } from "../../Platform";
 import type { SkSize } from "../../skia/types";
 import type { Canvas as CanvasComponent } from "../Canvas";
 
@@ -45,8 +44,6 @@ jest.doMock("../../external/reanimated/ReanimatedProxy", () => ({
 
 jest.doMock("../../external", () => ({ HAS_REANIMATED_3: true }));
 
-jest.doMock("../../Platform", () => ({ Platform: { OS: "android" } }));
-
 jest.doMock("../../skia", () => ({ Skia: {} }));
 
 jest.doMock("../../sksg/Reconciler", () => ({
@@ -57,9 +54,6 @@ jest.doMock("../../sksg/Reconciler", () => ({
 }));
 
 const { Canvas } = require("../Canvas") as { Canvas: typeof CanvasComponent };
-const { Platform } = require("../../Platform") as {
-  Platform: typeof PlatformValue;
-};
 
 type CanvasProps = React.ComponentProps<typeof CanvasComponent>;
 
@@ -116,7 +110,6 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  Platform.OS = "android";
   mockNativeProps = {};
   mockFrameCallback = undefined;
 });
@@ -158,8 +151,10 @@ describe("Canvas onSize", () => {
     canvas.unmount();
   });
 
-  it("forwards the layout event to onLayout", () => {
-    Platform.OS = "web";
+  it("forwards the layout event to onLayout without reporting it unsupported", () => {
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     const onLayout = jest.fn();
     const size = makeSizeValue();
     const canvas = mountCanvas({ onLayout, onSize: asSharedValue(size) });
@@ -170,6 +165,11 @@ describe("Canvas onSize", () => {
     expect(onLayout.mock.calls[0][0].nativeEvent.layout).toEqual(
       layoutUnderHalfScale
     );
+    expect(consoleError).not.toHaveBeenCalled();
     canvas.unmount();
   });
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
 });

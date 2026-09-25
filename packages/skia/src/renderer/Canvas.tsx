@@ -24,7 +24,6 @@ import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeCompon
 import type { SkImage, SkRect, SkSize } from "../skia/types";
 import { SkiaSGRoot } from "../sksg/Reconciler";
 import { Skia } from "../skia";
-import { Platform } from "../Platform";
 import { HAS_REANIMATED_3 } from "../external";
 
 export interface CanvasRef extends FC<CanvasProps> {
@@ -57,10 +56,8 @@ export const useCanvasSize = (userRef?: RefObject<CanvasRef | null>) => {
   return { ref, size };
 };
 
-export interface CanvasProps extends Omit<ViewProps, "onLayout"> {
+export interface CanvasProps extends ViewProps {
   debug?: boolean;
-  /** @deprecated Not supported on native. Use `onSize` or `useCanvasSize()` instead. */
-  onLayout?: ViewProps["onLayout"];
   /**
    * Declares that the canvas covers every pixel of its bounds, so nothing
    * behind it needs to show through. On Android an opaque canvas is backed by
@@ -108,11 +105,6 @@ export const Canvas = ({
   onLayout,
   ...viewProps
 }: CanvasProps) => {
-  if (onLayout && Platform.OS !== "web") {
-    console.error(
-      "<Canvas onLayout={onLayout} /> is not supported on the new architecture, to fix the issue, see: https://shopify.github.io/react-native-skia/docs/canvas/overview/#getting-the-canvas-size"
-    );
-  }
   const viewRef = useCanvasRefPriv(null);
   // Native ID
   const nativeId = useMemo(() => {
