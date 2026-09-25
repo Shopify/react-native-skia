@@ -59,9 +59,9 @@ public class SkiaGraphiteView extends SkiaBaseView implements Choreographer.Fram
 
     private native HybridData initHybrid(SkiaManager skiaManager);
 
-    protected native void surfaceAvailable(Object surface, int width, int height, boolean opaque, boolean highBitDepth);
+    protected native void surfaceAvailable(Object surface, int width, int height, boolean isSurface, boolean highBitDepth);
 
-    protected native void surfaceSizeChanged(Object surface, int width, int height, boolean opaque, boolean highBitDepth);
+    protected native void surfaceSizeChanged(Object surface, int width, int height, boolean isSurface, boolean highBitDepth);
 
     protected native void surfaceDestroyed();
 

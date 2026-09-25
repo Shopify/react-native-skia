@@ -166,6 +166,11 @@ export const HomeScreen = () => {
           route="Graphite"
         />
       )}
+      <HomeScreenButton
+        title="🤖 Android Views"
+        description="SurfaceView vs TextureView"
+        route="AndroidViews"
+      />
     </ScrollView>
   );
 };

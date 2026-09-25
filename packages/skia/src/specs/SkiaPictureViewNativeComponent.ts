@@ -9,6 +9,11 @@ export interface NativeProps extends ViewProps {
   colorSpace?: string;
   highBitDepth?: boolean;
   androidWarmup?: boolean;
+  androidSurfaceType?: WithDefault<
+    "auto" | "SurfaceView" | "TextureView",
+    "auto"
+  >;
+  androidZOrderOnTop?: WithDefault<boolean, false>;
   pointerEvents?: WithDefault<
     "auto" | "none" | "box-none" | "box-only",
     "auto"
