@@ -358,6 +358,39 @@ describe("Path", () => {
     const p4 = interpolatePaths(1.1, [0, 1], [p1, p2], "clamp");
     expect(p4.toCmds()).toEqual(p2.toCmds());
   });
+
+  it("interpolatePath() should reject paths that are not interpolatable", () => {
+    const { Skia } = setupSkia();
+    const p1 = makePath(Skia, (b) => b.moveTo(0, 0).lineTo(100, 100));
+    const p2 = makePath(Skia, (b) =>
+      b.moveTo(0, 0).lineTo(50, 50).lineTo(100, 100)
+    );
+    expect(p1.isInterpolatable(p2)).toBe(false);
+    expect(() => interpolatePaths(0.5, [0, 1], [p1, p2])).toThrow(
+      /Not all paths in the output range are interpolable/
+    );
+    expect(() => interpolatePaths(-1, [0, 1], [p1, p2])).toThrow(
+      /Not all paths in the output range are interpolable/
+    );
+    expect(() => interpolatePaths(2, [0, 1], [p1, p2])).toThrow(
+      /Not all paths in the output range are interpolable/
+    );
+  });
+
+  it("interpolatePath() should reject a segment that is not interpolatable", () => {
+    const { Skia } = setupSkia();
+    const p1 = makePath(Skia, (b) => b.moveTo(0, 0).lineTo(100, 100));
+    const p2 = makePath(Skia, (b) => b.moveTo(100, 100).lineTo(0, 0));
+    const p3 = makePath(Skia, (b) =>
+      b.moveTo(0, 0).lineTo(50, 50).lineTo(100, 100)
+    );
+    expect(interpolatePaths(0.25, [0, 0.5, 1], [p1, p2, p3]).toCmds()).toEqual(
+      p2.interpolate(p1, 0.5)!.toCmds()
+    );
+    expect(() => interpolatePaths(0.75, [0, 0.5, 1], [p1, p2, p3])).toThrow(
+      /Not all paths in the output range are interpolable/
+    );
+  });
   it("should be possible to call dispose on a path", () => {
     const { Skia } = setupSkia();
     using path = makePath(Skia, (b) =>
