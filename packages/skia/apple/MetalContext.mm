@@ -31,7 +31,7 @@ MetalContext::MetalContext() {
   GrContextOptions grContextOptions; // set different options here.
 
   // Create the Skia Direct Context
-  _directContext = GrDirectContexts::MakeMetal(backendContext);
+  _directContext = GrDirectContexts::MakeMetal(backendContext, grContextOptions);
   if (_directContext == nullptr) {
     RNSkia::RNSkLogger::logToConsole("Couldn't create a Skia Metal Context");
   }

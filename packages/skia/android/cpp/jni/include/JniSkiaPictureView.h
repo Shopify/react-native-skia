@@ -39,7 +39,7 @@ class JniSkiaPictureView : public jni::HybridClass<JniSkiaPictureView>,
                            public JniSkiaBaseView {
 public:
   static auto constexpr kJavaDescriptor =
-      "Lcom/shopify/reactnative/skia/SkiaPictureView;";
+      "Lcom/reactnative/skia/SkiaPictureView;";
 
   static jni::local_ref<jhybriddata>
   initHybrid(jni::alias_ref<jhybridobject> jThis,
@@ -63,15 +63,15 @@ public:
   }
 
 protected:
-  void surfaceAvailable(jobject surface, int width, int height, bool opaque,
+  void surfaceAvailable(jobject surface, int width, int height, bool isSurface,
                         bool highBitDepth) override {
-    JniSkiaBaseView::surfaceAvailable(surface, width, height, opaque,
+    JniSkiaBaseView::surfaceAvailable(surface, width, height, isSurface,
                                       highBitDepth);
   }
 
-  void surfaceSizeChanged(jobject surface, int width, int height, bool opaque,
+  void surfaceSizeChanged(jobject surface, int width, int height, bool isSurface,
                           bool highBitDepth) override {
-    JniSkiaBaseView::surfaceSizeChanged(surface, width, height, opaque,
+    JniSkiaBaseView::surfaceSizeChanged(surface, width, height, isSurface,
                                         highBitDepth);
   }
 
