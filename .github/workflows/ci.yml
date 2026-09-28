@@ -145,7 +145,6 @@ jobs:
           npx semantic-release --dry-run
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   test-package-e2e:
     if: ${{ github.repository == 'shopify/react-native-skia' }}
