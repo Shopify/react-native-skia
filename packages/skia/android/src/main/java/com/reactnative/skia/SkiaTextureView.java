@@ -16,11 +16,13 @@ public class SkiaTextureView extends TextureView implements TextureView.SurfaceT
     SkiaViewAPI mApi;
     boolean mDebug;
 
-    public SkiaTextureView(Context context, SkiaViewAPI api, boolean debug) {
+    public SkiaTextureView(Context context, SkiaViewAPI api, boolean debug, boolean opaque) {
         super(context);
         mApi = api;
         mDebug = debug;
-        setOpaque(false);
+        // An opaque TextureView lets the UI toolkit skip blending it; it can be
+        // toggled on a live view.
+        setOpaque(opaque);
         setSurfaceTextureListener(this);
     }
 

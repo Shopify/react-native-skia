@@ -17,11 +17,6 @@ public class RNSkiaModule extends NativeSkiaModuleSpec {
 
     private final WeakReference<ReactApplicationContext> weakReactContext;
     private SkiaManager skiaManager;
-    private static volatile boolean sIsValid = false;
-
-    public static boolean isModuleValid() {
-        return sIsValid;
-    }
 
     public RNSkiaModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -31,7 +26,6 @@ public class RNSkiaModule extends NativeSkiaModuleSpec {
     @Override
     public void invalidate() {
         super.invalidate();
-        sIsValid = false;
 
         if (this.skiaManager != null) {
             this.skiaManager.invalidate();
@@ -64,7 +58,6 @@ public class RNSkiaModule extends NativeSkiaModuleSpec {
                 return false;
             }
             skiaManager = new SkiaManager(context);
-            sIsValid = true;
             return true;
         } catch (Exception exception) {
             Log.e(NAME, "Failed to initialize Skia Manager!", exception);
