@@ -86,10 +86,10 @@ let package = Package(
         .headerSearchPath("cpp/rnskia"), // apple/ uses bare "RNSkView.h"
         .headerSearchPath("cpp/utils"), // apple/ uses bare "RNSkLog.h"
 
-        // CocoaPods forces both project-wide; the SwiftPM path defines neither.
-        // Skia's Apple sources still gate on them: without them RNSkiaModule's
-        // legacy branch fails to compile and -getTurboModule: is dropped, so
-        // the JSI bindings never install.
+        // CocoaPods defines both project-wide for a New Architecture app; the
+        // SwiftPM path defines neither. Skia's own sources no longer gate on
+        // them, but React's headers do (RCT_REMOVE_LEGACY_ARCH hides the
+        // legacy bridge API), so mirror what CocoaPods does.
         .define("RCT_NEW_ARCH_ENABLED", to: "1"),
         .define("RCT_REMOVE_LEGACY_ARCH", to: "1"),
 

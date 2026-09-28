@@ -1,13 +1,27 @@
 import type { ViewProps } from "react-native";
-import type { SharedValue } from "react-native-reanimated";
 
-import type { Node } from "../dom/types";
 import type { SkImage, SkPicture, SkRect, SkSize } from "../skia/types";
 
 export type NativeSkiaViewProps = ViewProps & {
   debug?: boolean;
   opaque?: boolean;
 };
+
+export type AndroidSurfaceType = "SurfaceView" | "TextureView";
+
+export interface AndroidCanvasProps {
+  /**
+   * Backing view. Defaults to `SurfaceView` when the canvas is `opaque` and to
+   * `TextureView` otherwise; both composite correctly in React Native stacking
+   * order without further flags.
+   */
+  surfaceType?: AndroidSurfaceType;
+  /**
+   * SurfaceView only: composite above every React Native view in the window,
+   * ignoring `zIndex`. Ignored for TextureView. Defaults to false.
+   */
+  zOrderOnTop?: boolean;
+}
 
 export interface ISkiaViewApi {
   web?: boolean;
@@ -24,12 +38,12 @@ export interface SkiaBaseViewProps extends ViewProps {
    * average time it takes to render.
    */
   debug?: boolean;
-  /**
-   * Pass an animated value to the onSize property to get updates when
-   * the Skia view is resized.
-   */
-  onSize?: SharedValue<SkSize>;
 
+  /**
+   * Declares that the canvas covers every pixel of its bounds. On Android an
+   * opaque canvas is backed by a `SurfaceView` by default, the cheapest path
+   * (see `android.surfaceType`). Defaults to false.
+   */
   opaque?: boolean;
 
   /**
@@ -39,6 +53,9 @@ export interface SkiaBaseViewProps extends ViewProps {
    */
   highBitDepth?: boolean;
 
+  /** Android-only rendering options. Ignored on iOS and web. */
+  android?: AndroidCanvasProps;
+
   // On web, only 16 WebGL contextes are allowed. If the drawing is non-animated, set
   // __destroyWebGLContextAfterRender to true to release the context after each draw.
   __destroyWebGLContextAfterRender?: boolean;
@@ -47,8 +64,4 @@ export interface SkiaBaseViewProps extends ViewProps {
 export interface SkiaPictureViewNativeProps extends SkiaBaseViewProps {
   picture?: SkPicture;
   androidWarmup?: boolean;
-}
-
-export interface SkiaDomViewNativeProps extends SkiaBaseViewProps {
-  root?: Node<unknown>;
 }

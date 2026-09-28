@@ -12,12 +12,12 @@ namespace RNSkia {
 class RNSkBaseAndroidView {
 public:
   virtual void surfaceAvailable(jobject surface, int width, int height,
-                                bool opaque, bool highBitDepth) = 0;
+                                bool isSurface, bool highBitDepth) = 0;
 
   virtual void surfaceDestroyed() = 0;
 
   virtual void surfaceSizeChanged(jobject surface, int width, int height,
-                                  bool opaque, bool highBitDepth) = 0;
+                                  bool isSurface, bool highBitDepth) = 0;
 
   virtual float getPixelDensity() = 0;
 
@@ -34,10 +34,10 @@ public:
           std::make_shared<RNSkOpenGLCanvasProvider>(
               std::bind(&RNSkia::RNSkView::requestRedraw, this), context)) {}
 
-  void surfaceAvailable(jobject surface, int width, int height, bool opaque,
+  void surfaceAvailable(jobject surface, int width, int height, bool isSurface,
                         bool highBitDepth) override {
     std::static_pointer_cast<RNSkOpenGLCanvasProvider>(T::getCanvasProvider())
-        ->surfaceAvailable(surface, width, height, opaque, highBitDepth);
+        ->surfaceAvailable(surface, width, height, isSurface, highBitDepth);
     RNSkView::redraw();
   }
 
@@ -46,10 +46,10 @@ public:
         ->surfaceDestroyed();
   }
 
-  void surfaceSizeChanged(jobject surface, int width, int height, bool opaque,
+  void surfaceSizeChanged(jobject surface, int width, int height, bool isSurface,
                           bool highBitDepth) override {
     std::static_pointer_cast<RNSkOpenGLCanvasProvider>(T::getCanvasProvider())
-        ->surfaceSizeChanged(surface, width, height, opaque, highBitDepth);
+        ->surfaceSizeChanged(surface, width, height, isSurface, highBitDepth);
     // This is only need for the first time to frame, this renderImmediate call
     // will invoke updateTexImage for the previous frame
     RNSkView::redraw();

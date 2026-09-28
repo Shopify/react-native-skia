@@ -1,4 +1,4 @@
-package com.shopify.reactnative.skia;
+package com.reactnative.skia;
 
 import com.facebook.react.uimanager.PointerEvents;
 import com.facebook.react.uimanager.ViewProps;
@@ -31,6 +31,25 @@ public abstract class SkiaBaseViewManager<T extends SkiaBaseView> extends ReactV
     @ReactProp(name = "highBitDepth")
     public void setHighBitDepth(T view, boolean value) {
         ((SkiaBaseView)view).setHighBitDepth(value);
+    }
+
+    @ReactProp(name = "androidSurfaceType")
+    public void setAndroidSurfaceType(T view, @Nullable String value) {
+        ((SkiaBaseView)view).setSurfaceType(value);
+    }
+
+    @ReactProp(name = "androidZOrderOnTop")
+    public void setAndroidZOrderOnTop(T view, boolean value) {
+        ((SkiaBaseView)view).setZOrderOnTop(value);
+    }
+
+    // The backing view depends on several props (opaque, androidSurfaceType,
+    // androidZOrderOnTop, highBitDepth), so it is resolved once per transaction
+    // rather than in each setter.
+    @Override
+    protected void onAfterUpdateTransaction(@NonNull ReactViewGroup view) {
+        super.onAfterUpdateTransaction(view);
+        ((SkiaBaseView)view).updateView();
     }
 
     @ReactProp(name = ViewProps.POINTER_EVENTS)

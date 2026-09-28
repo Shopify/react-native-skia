@@ -19,6 +19,7 @@ import type { SharedValue } from "react-native-reanimated";
 
 import Rea from "../external/reanimated/ReanimatedProxy";
 import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
+import type { AndroidCanvasProps, AndroidSurfaceType } from "../views/types";
 import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeComponent";
 import type { SkImage, SkRect, SkSize } from "../skia/types";
 import { SkiaSGRoot } from "../sksg/Reconciler";
@@ -59,13 +60,16 @@ export const useCanvasSize = (userRef?: RefObject<CanvasRef | null>) => {
   return { ref, size };
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const isFabric = Boolean((global as any)?.nativeFabricUIManager);
-
 export interface CanvasProps extends Omit<ViewProps, "onLayout"> {
   debug?: boolean;
-  /** @deprecated Not supported on Fabric. Use `onSize` or `useCanvasSize()` instead. */
+  /** @deprecated Not supported on native. Use `onSize` or `useCanvasSize()` instead. */
   onLayout?: ViewProps["onLayout"];
+  /**
+   * Declares that the canvas covers every pixel of its bounds, so nothing
+   * behind it needs to show through. On Android an opaque canvas is backed by
+   * a `SurfaceView` by default, the cheapest path (see `android.surfaceType`).
+   * Defaults to false.
+   */
   opaque?: boolean;
   onSize?: SharedValue<SkSize>;
   colorSpace?: "p3" | "srgb";
@@ -78,10 +82,21 @@ export interface CanvasProps extends Omit<ViewProps, "onLayout"> {
    * before the canvas is mounted.
    */
   highBitDepth?: boolean;
+  /** Android-only rendering options. Ignored on iOS and web. */
+  android?: AndroidCanvasProps;
   ref?: React.Ref<CanvasRef>;
   androidWarmup?: boolean;
   __destroyWebGLContextAfterRender?: boolean;
 }
+
+// Anything else reaching the native component would hit the generated
+// string-enum parser, which aborts on unknown values.
+const resolveSurfaceType = (
+  surfaceType: AndroidSurfaceType | undefined
+): "auto" | AndroidSurfaceType =>
+  surfaceType === "SurfaceView" || surfaceType === "TextureView"
+    ? surfaceType
+    : "auto";
 
 export const Canvas = ({
   debug,
@@ -91,11 +106,12 @@ export const Canvas = ({
   colorSpace = "p3",
   highBitDepth = false,
   androidWarmup = false,
+  android,
   ref,
   onLayout,
   ...viewProps
 }: CanvasProps) => {
-  if (onLayout && isFabric) {
+  if (onLayout && Platform.OS !== "web") {
     console.error(
       "<Canvas onLayout={onLayout} /> is not supported on the new architecture, to fix the issue, see: https://shopify.github.io/react-native-skia/docs/canvas/overview/#getting-the-canvas-size"
     );
@@ -192,6 +208,8 @@ export const Canvas = ({
       colorSpace={colorSpace}
       highBitDepth={highBitDepth}
       androidWarmup={androidWarmup}
+      androidSurfaceType={resolveSurfaceType(android?.surfaceType)}
+      androidZOrderOnTop={!!android?.zOrderOnTop}
       onLayout={
         Platform.OS === "web" && (onSize || onLayout) ? onLayoutWeb : onLayout
       }

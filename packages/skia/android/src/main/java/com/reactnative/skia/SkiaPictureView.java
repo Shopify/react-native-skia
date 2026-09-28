@@ -1,4 +1,4 @@
-package com.shopify.reactnative.skia;
+package com.reactnative.skia;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -67,9 +67,9 @@ public class SkiaPictureView extends SkiaBaseView {
 
     private native HybridData initHybrid(SkiaManager skiaManager);
 
-    protected native void surfaceAvailable(Object surface, int width, int height, boolean opaque, boolean highBitDepth);
+    protected native void surfaceAvailable(Object surface, int width, int height, boolean isSurface, boolean highBitDepth);
 
-    protected native void surfaceSizeChanged(Object surface, int width, int height, boolean opaque, boolean highBitDepth);
+    protected native void surfaceSizeChanged(Object surface, int width, int height, boolean isSurface, boolean highBitDepth);
 
     protected native void surfaceDestroyed();
 
