@@ -32,7 +32,7 @@
 #pragma clang diagnostic pop
 
 namespace RNSkia {
-using namespace facebook;
+namespace jsi = facebook::jsi;
 
 std::unique_ptr<SkCodec> DecodeImageData(sk_sp<SkData> data) {
   if (data == nullptr) {
