@@ -7,6 +7,7 @@ import { useCallback, useMemo } from "react";
 
 import type { SkPath, SkPathBuilder, SkPoint } from "../../skia/types";
 import { interpolatePaths, interpolateVector } from "../../animation";
+import { NOT_INTERPOLABLE_MESSAGE } from "../../animation/functions/errors";
 import { Skia } from "../../skia";
 import { isOnMainThread } from "../../renderer/Offscreen";
 
@@ -111,12 +112,7 @@ export const usePathInterpolation = (
     .slice(1)
     .every((path) => outputRange[0].isInterpolatable(path));
   if (!allPathsInterpolable) {
-    // Handle the case where not all paths are interpolable
-    // For example, throw an error or return early
-    throw new Error(
-      `Not all paths in the output range are interpolable.
-See: https://shopify.github.io/react-native-skia/docs/animations/hooks#usepathinterpolation`
-    );
+    throw new Error(NOT_INTERPOLABLE_MESSAGE);
   }
   return useInterpolator(
     () => Skia.Path.Make(),

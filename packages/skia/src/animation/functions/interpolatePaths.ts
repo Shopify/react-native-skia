@@ -3,6 +3,7 @@ import { exhaustiveCheck } from "../../renderer/typeddash";
 
 import type { ExtrapolationType } from "./interpolate";
 import { validateInterpolationOptions, Extrapolate } from "./interpolate";
+import { NOT_INTERPOLABLE_MESSAGE } from "./errors";
 
 const lerp = (
   value: number,
@@ -14,7 +15,11 @@ const lerp = (
   "worklet";
   const t = (value - from) / (to - from);
   // interpolate returns a new path (immutable operation)
-  return p2.interpolate(p1, t)!;
+  const result = p2.interpolate(p1, t);
+  if (result === null) {
+    throw new Error(NOT_INTERPOLABLE_MESSAGE);
+  }
+  return result;
 };
 
 /**
