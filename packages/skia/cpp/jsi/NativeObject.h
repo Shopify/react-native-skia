@@ -217,7 +217,7 @@ public:
             // would invoke main-runtime jsi::Functions on the wrong runtime
             // and thread.
             auto *originalRuntime = instance->getCreationRuntime();
-            auto value = Derived::create(rt, instance);
+            auto value = Derived::createView(rt, instance);
             if (originalRuntime != nullptr) {
               instance->setCreationRuntime(originalRuntime);
             }
@@ -262,10 +262,33 @@ public:
   }
 
   /**
-   * Create a JS object with native state attached.
+   * Create a JS object with native state attached. The wrapper reports the
+   * native memory it owns to the GC through setExternalMemoryPressure.
    */
   static jsi::Value create(jsi::Runtime &runtime,
                            std::shared_ptr<Derived> instance) {
+    return createObject(runtime, std::move(instance),
+                        /*chargeMemoryPressure=*/true);
+  }
+
+  /**
+   * Create a view of an existing native object on another runtime (the
+   * unboxing path used by worklets). The native memory is already reported
+   * to the GC of the runtime the object was created on, so the view only
+   * carries the minimum pressure: charging it again would multiply the
+   * amount by the number of times the object is captured in a worklet, and
+   * Hermes aborts once the sum of the charges reaches its max heap size.
+   */
+  static jsi::Value createView(jsi::Runtime &runtime,
+                               std::shared_ptr<Derived> instance) {
+    return createObject(runtime, std::move(instance),
+                        /*chargeMemoryPressure=*/false);
+  }
+
+private:
+  static jsi::Value createObject(jsi::Runtime &runtime,
+                                 std::shared_ptr<Derived> instance,
+                                 bool chargeMemoryPressure) {
     // Store creation runtime for logging etc.
     instance->setCreationRuntime(&runtime);
 
@@ -285,7 +308,8 @@ public:
     }
 
     // Set memory pressure hint for GC
-    auto pressure = instance->getMemoryPressure();
+    auto pressure = chargeMemoryPressure ? instance->getMemoryPressure()
+                                         : kMinMemoryPressure;
     if (pressure > 0) {
       obj.setExternalMemoryPressure(runtime, pressure);
     }
@@ -293,6 +317,7 @@ public:
     return std::move(obj);
   }
 
+public:
   /**
    * Get the native state from a JS value.
    * Throws if the value doesn't have the expected native state.
