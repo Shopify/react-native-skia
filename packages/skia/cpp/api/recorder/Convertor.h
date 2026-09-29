@@ -706,7 +706,7 @@ inline SkPath1DPathEffect::Style getPropertyValue(jsi::Runtime &runtime,
 // specialization
 struct BlendModeValue {
   int value;
-  BlendModeValue(int v = 0) : value(v) {}
+  explicit BlendModeValue(int v = 0) : value(v) {}
   operator int() const { return value; }
 };
 
