@@ -1,11 +1,9 @@
 name: Build on Windows
-# The Windows job only exercises the JS build of the package (path handling in
-# the build scripts). A nightly run is enough for that, so it is out of the
-# per-PR CI.
-on:
-  schedule:
-    - cron: '0 3 * * *'
-  workflow_dispatch:
+# This only exercises the JS build of the package and the docs on Windows
+# (path handling in the build scripts); there is no native Windows code.
+# Run it by hand when touching the build scripts or when a Windows
+# contributor reports a problem.
+on: workflow_dispatch
 
 jobs:
   build-windows-library:
