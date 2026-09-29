@@ -78,7 +78,7 @@ SkPoint processPoint(jsi::Runtime &runtime, const jsi::Value &value) {
     }
   }
   throw std::runtime_error("Couldn't read point value");
-};
+}
 
 // TODO: return the SkRRect directly
 std::shared_ptr<SkRRect> processRRect(jsi::Runtime &runtime,
