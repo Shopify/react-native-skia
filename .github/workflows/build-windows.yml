@@ -1,0 +1,26 @@
+name: Build on Windows
+# The Windows job only exercises the JS build of the package (path handling in
+# the build scripts). A nightly run is enough for that, so it is out of the
+# per-PR CI.
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  build-windows-library:
+    if: ${{ github.repository == 'shopify/react-native-skia' }}
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build package
+        run: yarn build

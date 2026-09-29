@@ -24,7 +24,7 @@ class JsiRecorder
 public:
   static constexpr const char *CLASS_NAME = "Recorder";
 
-  JsiRecorder(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiRecorder(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkWrappingSharedPtrNativeObject<JsiRecorder, Recorder>(
             std::move(context), std::make_shared<Recorder>()) {
     getObject()->_context = getContext();
