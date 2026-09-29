@@ -40,4 +40,4 @@ private:
   Surface &operator=(const Surface &) = delete;
 };
 
-} // Namespace gl
+} // namespace gl
