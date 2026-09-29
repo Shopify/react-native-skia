@@ -24,7 +24,7 @@ class JsiRecorder
 public:
   static constexpr const char *CLASS_NAME = "Recorder";
 
-  JsiRecorder(std::shared_ptr<RNSkPlatformContext> context)
+  explicit JsiRecorder(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkWrappingSharedPtrNativeObject<JsiRecorder, Recorder>(
             std::move(context), std::make_shared<Recorder>()) {
     getObject()->_context = getContext();
@@ -379,9 +379,12 @@ public:
     installHostMethod(runtime, prototype, "reset", &JsiRecorder::reset);
   }
 
-  // This has no basis in reality but since since these are private long-lived
-  // objects, we think it is more than fine.
-  size_t getMemoryPressure() override { return 5 * 1024 * 1024; }
+  // The recorder itself is a small command list. The resources it references
+  // (images, pictures, paths) report their own size through their wrappers
+  // and the pictures produced by play() report theirs. Do not put a made-up
+  // number here: a new recorder is created on every React commit and the
+  // charge is repeated each time it is unboxed on the UI runtime.
+  size_t getMemoryPressure() override { return kMinMemoryPressure; }
 
   static const jsi::HostFunctionType
   createCtor(std::shared_ptr<RNSkPlatformContext> context) {
