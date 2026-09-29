@@ -129,9 +129,12 @@ public:
     ViewRegistry::getInstance().withViewInfo(
         nativeId, [&](std::shared_ptr<RNSkViewInfo> info) {
           auto name = arguments[1].asString(runtime).utf8(runtime);
-          info->props.insert_or_assign(
-              arguments[1].asString(runtime).utf8(runtime),
-              RNJsi::ViewProperty(runtime, arguments[2]));
+          auto property =
+              name == "recorder"
+                  ? RNJsi::ViewProperty(RNSkPictureRenderer::recorderFromValue(
+                        runtime, arguments[2]))
+                  : RNJsi::ViewProperty(runtime, arguments[2]);
+          info->props.insert_or_assign(name, std::move(property));
           // Now let's see if we have a view that we can update
           if (info->view != nullptr) {
             // Update view!
@@ -165,6 +168,34 @@ public:
     int nativeId = arguments[0].asNumber();
     auto view = ViewRegistry::getInstance().getView(nativeId);
     if (view != nullptr) {
+      view->requestRedraw();
+    }
+    return jsi::Value::undefined();
+  }
+
+  /**
+   Reads the given shared values into the recorder owned by the view and
+   schedules a redraw. Called from the Reanimated mapper on every frame; the
+   only things crossing runtimes are the view id and the shared values.
+   */
+  JSI_HOST_FUNCTION(applyUpdates) {
+    if (count != 2 || !arguments[0].isNumber() || !arguments[1].isObject() ||
+        !arguments[1].asObject(runtime).isArray(runtime)) {
+      _platformContext->raiseError(
+          "applyUpdates: expected (nativeId: number, values: SharedValue[])");
+      return jsi::Value::undefined();
+    }
+    int nativeId = arguments[0].asNumber();
+    auto view = ViewRegistry::getInstance().getView(nativeId);
+    if (view == nullptr) {
+      // The view is not mounted (yet, or anymore): the recorder was recorded
+      // with the current values, or has been released. Nothing to update.
+      return jsi::Value::undefined();
+    }
+    auto renderer =
+        std::static_pointer_cast<RNSkPictureRenderer>(view->getRenderer());
+    auto values = arguments[1].asObject(runtime).asArray(runtime);
+    if (renderer->applyUpdates(runtime, values)) {
       view->requestRedraw();
     }
     return jsi::Value::undefined();
@@ -293,6 +324,8 @@ public:
                       &RNSkJsiViewApi::setJsiProperty);
     installHostMethod(runtime, prototype, "requestRedraw",
                       &RNSkJsiViewApi::requestRedraw);
+    installHostMethod(runtime, prototype, "applyUpdates",
+                      &RNSkJsiViewApi::applyUpdates);
     installHostMethod(runtime, prototype, "makeImageSnapshotAsync",
                       &RNSkJsiViewApi::makeImageSnapshotAsync);
     installHostMethod(runtime, prototype, "makeImageSnapshot",

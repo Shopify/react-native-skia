@@ -1,11 +1,10 @@
 import Rea from "../external/reanimated/ReanimatedProxy";
-import type { Skia, SkPicture } from "../skia/types";
+import type { Skia } from "../skia/types";
 import {
   HAS_REANIMATED_3,
   HAS_REANIMATED_4,
   REANIMATED_VERSION_MAJOR,
 } from "../external/reanimated/renderHelpers";
-import type { JsiRecorder } from "../skia/types/Recorder";
 
 import { ReanimatedRecorder } from "./Recorder/ReanimatedRecorder";
 import { Container, StaticContainer } from "./StaticContainer";
@@ -17,67 +16,55 @@ import "../views/api";
 // create local reference for `strictGlobal` option in Worklets
 const { SkiaViewApi } = globalThis;
 
-const nativeDrawOnscreen = (
-  nativeId: number,
-  recorder: JsiRecorder,
-  picture: SkPicture
-) => {
-  "worklet";
-
-  //const start = performance.now();
-  recorder.play(picture);
-  //const end = performance.now();
-  //console.log("Recording time: ", end - start);
-  SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
-};
-
+/**
+ * Records the scene graph on the JS thread and hands the native recorder to
+ * the view, which owns it and replays it on every draw. The Reanimated mapper
+ * only pushes the shared values into that recorder through the view id: no
+ * Skia object is captured by a worklet, so nothing on the UI runtime holds
+ * native memory, and the resources referenced by the recording (images,
+ * pictures) are released as soon as the view replaces or clears it, not when
+ * a garbage collector gets around to a wrapper.
+ */
 class NativeReanimatedContainer extends Container {
   private mapperId: number | null = null;
-  private picture: SkPicture;
 
   constructor(
     Skia: Skia,
     private nativeId: number
   ) {
     super(Skia);
-    this.picture = Skia.Picture.MakePicture(null)!;
+  }
+
+  private stopMapper() {
+    if (this.mapperId !== null) {
+      Rea.stopMapper(this.mapperId);
+      this.mapperId = null;
+    }
   }
 
   unmount() {
     super.unmount();
-    if (this.mapperId !== null) {
-      // The mapper closure retains the recorder and its resources (e.g.
-      // images) on the UI runtime and keeps updating the picture of an
-      // unmounted view — stop it or it leaks for the lifetime of the app.
-      Rea.stopMapper(this.mapperId);
-      this.mapperId = null;
-    }
+    this.stopMapper();
+    // Release the recording and everything it references now; the view is
+    // about to unmount and would otherwise keep its last frame resident.
+    SkiaViewApi.setJsiProperty(this.nativeId, "recorder", null);
   }
 
   redraw() {
-    if (this.mapperId !== null) {
-      Rea.stopMapper(this.mapperId);
-      this.mapperId = null;
-    }
+    this.stopMapper();
     if (this.unmounted) {
       return;
     }
     const recorder = new ReanimatedRecorder(this.Skia);
-    const { nativeId, picture } = this;
     visit(recorder, this.root);
     const sharedValues = recorder.getSharedValues();
-    const sharedRecorder = recorder.getRecorder();
-    // Draw first frame
-    Rea.runOnUI(() => {
-      "worklet";
-      nativeDrawOnscreen(nativeId, sharedRecorder, picture);
-    })();
-    // Animate
+    const { nativeId } = this;
+    // The view takes ownership of the recorder and draws the first frame.
+    SkiaViewApi.setJsiProperty(nativeId, "recorder", recorder.getRecorder());
     if (sharedValues.length > 0) {
       this.mapperId = Rea.startMapper(() => {
         "worklet";
-        sharedRecorder.applyUpdates(sharedValues);
-        nativeDrawOnscreen(nativeId, sharedRecorder, picture);
+        SkiaViewApi.applyUpdates(nativeId, sharedValues);
       }, sharedValues);
     }
   }

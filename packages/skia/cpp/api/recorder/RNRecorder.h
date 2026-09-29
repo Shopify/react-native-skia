@@ -386,6 +386,25 @@ public:
       playCommand(ctx, cmd.get());
     }
   }
+
+  /**
+   * Reads the current value of each shared value (in the order they were
+   * registered as variable0, variable1, ...) on the calling runtime and
+   * writes it into the recorded commands.
+   */
+  void applyUpdates(jsi::Runtime &runtime, const jsi::Array &values) {
+    auto size = values.size(runtime);
+    for (size_t i = 0; i < size; i++) {
+      auto sharedValue = values.getValueAtIndex(runtime, i).asObject(runtime);
+      auto name = "variable" + std::to_string(i);
+      auto it = variables.find(name);
+      if (it != variables.end()) {
+        for (const auto &conversionFunc : it->second) {
+          conversionFunc(runtime, sharedValue);
+        }
+      }
+    }
+  }
 };
 
 inline void Recorder::playCommand(DrawingCtx *ctx, Command *cmd) {
