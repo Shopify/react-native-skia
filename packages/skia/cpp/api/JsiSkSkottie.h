@@ -342,7 +342,8 @@ public:
     if (!slotID.has_value() || !scalar.has_value()) {
       return false;
     }
-    return getObject()->_slotManager->setScalarSlot(SkString(*slotID), *scalar);
+    return getObject()->_slotManager->setScalarSlot(SkString(*slotID),
+                                                    *scalar);
   }
 
   bool setVec2Slot(JsiOptional<std::string> slotID,

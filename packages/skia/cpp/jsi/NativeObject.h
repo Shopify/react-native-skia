@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <algorithm>
 #include <functional>
 #include <jsi/jsi.h>
 #include <memory>
@@ -14,7 +13,6 @@
 #include <typeindex>
 #include <unordered_map>
 #include <utility>
-#include <vector>
 
 #include "jsi/BoxedNativeObject.h"
 #include "jsi/JSICache.h"
@@ -212,14 +210,14 @@ public:
             if (instance == nullptr) {
               throw jsi::JSError(rt, "Invalid boxed native object state");
             }
-            // Unboxing creates a *view* of the object on the target runtime.
-            // Keep the runtime the object was originally created on: async
-            // native code (e.g. GPUDevice error/lost events) delivers into
-            // the creation runtime, and rebinding it to a worklet runtime
-            // would invoke main-runtime jsi::Functions on the wrong runtime
-            // and thread.
+            // Unboxing hands back the wrapper cached for the target runtime,
+            // creating it on first use. Keep the runtime the object was
+            // originally created on: async native code (e.g. GPUDevice
+            // error/lost events) delivers into the creation runtime, and
+            // rebinding it to a worklet runtime would invoke main-runtime
+            // jsi::Functions on the wrong runtime and thread.
             auto *originalRuntime = instance->getCreationRuntime();
-            auto value = Derived::createView(rt, instance);
+            auto value = Derived::create(rt, instance);
             if (originalRuntime != nullptr) {
               instance->setCreationRuntime(originalRuntime);
             }
@@ -264,35 +262,37 @@ public:
   }
 
   /**
-   * Create a JS object with native state attached. The wrapper reports the
-   * native memory it owns to the GC through setExternalMemoryPressure.
+   * Returns the JS wrapper of `instance` on `runtime`, creating it on first
+   * use.
+   *
+   * A native object has at most one live wrapper per runtime. The wrapper is
+   * cached (weakly, so it stays collectable) in the runtime's JSICache, and
+   * converting the same object again (returning it from another native
+   * call, unboxing it in a worklet on every frame, ...) hands back that
+   * wrapper instead of a new one. Each wrapper reports the native memory the
+   * object owns to the GC of its runtime through setExternalMemoryPressure,
+   * so the memory is charged exactly once per runtime that can reach the
+   * object, however often it is converted; charging every conversion used
+   * to multiply the amount by the number of captures in a worklet until
+   * Hermes hit its max heap size. The hint is refreshed on every round trip
+   * for objects whose size changes after creation (path and paragraph
+   * builders).
    */
   static jsi::Value create(jsi::Runtime &runtime,
                            std::shared_ptr<Derived> instance) {
-    return createObject(runtime, std::move(instance),
-                        /*chargeMemoryPressure=*/true);
-  }
+    auto &cache = JSICache::get(runtime);
+    const void *key = instance.get();
 
-  /**
-   * Create a view of an existing native object on another runtime (the
-   * unboxing path used by worklets). The first view on a runtime other than
-   * the creation runtime carries the full memory pressure: the view can
-   * outlive the original wrapper, and the GC of that runtime must see the
-   * memory it keeps alive. Later views on the same runtime only carry the
-   * minimum pressure: charging each of them would multiply the amount by the
-   * number of times the object is captured in a worklet, and Hermes aborts
-   * once the sum of the charges reaches its max heap size.
-   */
-  static jsi::Value createView(jsi::Runtime &runtime,
-                               std::shared_ptr<Derived> instance) {
-    bool charge = instance->markChargedOn(&runtime);
-    return createObject(runtime, std::move(instance), charge);
-  }
+    auto existing = cache.lockWrapper(runtime, key);
+    if (existing.isObject()) {
+      auto pressure = instance->getMemoryPressure();
+      if (pressure > 0) {
+        existing.getObject(runtime).setExternalMemoryPressure(runtime,
+                                                              pressure);
+      }
+      return existing;
+    }
 
-private:
-  static jsi::Value createObject(jsi::Runtime &runtime,
-                                 std::shared_ptr<Derived> instance,
-                                 bool chargeMemoryPressure) {
     // Store creation runtime for logging etc.
     instance->setCreationRuntime(&runtime);
 
@@ -312,12 +312,12 @@ private:
     }
 
     // Set memory pressure hint for GC
-    auto pressure = chargeMemoryPressure ? instance->getMemoryPressure()
-                                         : kMinMemoryPressure;
+    auto pressure = instance->getMemoryPressure();
     if (pressure > 0) {
       obj.setExternalMemoryPressure(runtime, pressure);
     }
 
+    cache.setWrapper(runtime, key, obj);
     return std::move(obj);
   }
 
@@ -358,25 +358,6 @@ public:
    */
   jsi::Runtime *getCreationRuntime() const { return _creationRuntime; }
 
-  /**
-   * Record that a wrapper on `runtime` reports the full memory pressure of
-   * this object. Returns false if one already does (the creation runtime,
-   * or a previous view on the same runtime).
-   */
-  bool markChargedOn(jsi::Runtime *runtime) {
-    if (runtime == _creationRuntime) {
-      return false;
-    }
-    static std::mutex chargedRuntimesMutex;
-    std::lock_guard<std::mutex> lock(chargedRuntimesMutex);
-    if (std::find(_chargedRuntimes.begin(), _chargedRuntimes.end(), runtime) !=
-        _chargedRuntimes.end()) {
-      return false;
-    }
-    _chargedRuntimes.push_back(runtime);
-    return true;
-  }
-
 protected:
   explicit NativeObject(const char *name) : _name(name) {}
 
@@ -384,9 +365,6 @@ protected:
 
   const char *_name;
   jsi::Runtime *_creationRuntime = nullptr;
-  // Runtimes (other than the creation runtime) where a view of this object
-  // reports its full memory pressure. Guarded by the mutex in markChargedOn.
-  std::vector<jsi::Runtime *> _chargedRuntimes;
 
   // ============================================================
   // Helper methods for definePrototype() implementations
