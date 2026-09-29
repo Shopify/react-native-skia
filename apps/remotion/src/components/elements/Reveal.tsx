@@ -20,7 +20,7 @@ export const CircleReveal = ({ progress, children }: CircleRevealProps) => {
   const s = mix(progress, 0, 1);
   m3.scale(s, s);
   m3.translate(-center.x, -center.y);
-  const clip = circle.transform(m3);
+  const clip = Skia.PathBuilder.MakeFromPath(circle).transform(m3).build();
   return <Group clip={clip}>{children}</Group>;
 };
 

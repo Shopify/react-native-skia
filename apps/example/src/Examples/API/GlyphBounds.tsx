@@ -133,7 +133,7 @@ const GlyphBoundsDemo = () => {
   }, [progress]);
 
   const customFontMgr = useFonts({
-    "Roboto": [
+    Roboto: [
       require("../../Tests/assets/Roboto-Medium.ttf"),
       require("../../Tests/assets/Roboto-Regular.ttf"),
     ],
@@ -191,13 +191,14 @@ const GlyphBoundsDemo = () => {
     });
     // getPath() turns the same laid out glyphs into an SkPath used for the
     // trim reveal below.
-    const path = Skia.Path.Make();
+    const pathBuilder = Skia.PathBuilder.Make();
     paragraph.getLineMetrics().forEach(({ lineNumber }) => {
       const line = paragraph.getPath(lineNumber);
       if (line) {
-        path.addPath(line);
+        pathBuilder.addPath(line);
       }
     });
+    const path = pathBuilder.build();
     return { path, items, height: paragraph.getHeight() };
   }, [customFontMgr, layoutWidth]);
 

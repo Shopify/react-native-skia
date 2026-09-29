@@ -171,6 +171,6 @@ export const PathText = ({
 }: PathTextProps) => {
   const font = useOpenTypeFonts()[fontName];
   const basePath = getTextPath({ font, text, fontSize });
-  const path = basePath.offset(x, y);
+  const path = Skia.PathBuilder.MakeFromPath(basePath).offset(x, y).build();
   return <PathShape path={path} {...props} fill />;
 };

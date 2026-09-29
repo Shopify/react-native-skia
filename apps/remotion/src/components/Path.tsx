@@ -41,7 +41,7 @@ export const circle = (c: Vector, r: number) => {
 export const translate = (path: SkPath, a: Vector) => {
   const m3 = Skia.Matrix();
   m3.translate(a.x, a.y);
-  return path.transform(m3);
+  return Skia.PathBuilder.MakeFromPath(path).transform(m3).build();
 };
 
 export const flipH = (path: SkPath) => {
@@ -51,7 +51,7 @@ export const flipH = (path: SkPath) => {
   m3.translate(origin.x, origin.y);
   m3.scale(-1, 1);
   m3.translate(-origin.x, -origin.y);
-  return path.transform(m3);
+  return Skia.PathBuilder.MakeFromPath(path).transform(m3).build();
 };
 
 export const line = (a: Vector, b: Vector) => {
@@ -67,7 +67,7 @@ export const hLine = (y: number) => {
 };
 
 export const fitPath = (path: SkPath, dst: SkRect) => {
-  return path.transform(
+  return Skia.PathBuilder.MakeFromPath(path).transform(
     processTransform2d(fitbox("contain", path.computeTightBounds(), dst))
-  );
+  ).build();
 };

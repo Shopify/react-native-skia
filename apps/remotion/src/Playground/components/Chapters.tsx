@@ -60,7 +60,7 @@ export const Chapter = ({
   const r3 = r2 * Math.sin(rotate);
   const r4 = r1;
   const bounds = icon.computeTightBounds();
-  const transformedIcon = icon.transform(
+  const transformedIcon = Skia.PathBuilder.MakeFromPath(icon).transform(
     processTransform2d(
       fitbox(
         "contain",
@@ -68,7 +68,7 @@ export const Chapter = ({
         rect(center.x - r4, center.y - r4, r4 * 2, r4 * 2)
       )
     )
-  );
+  ).build();
   return (
     <>
       <Text
