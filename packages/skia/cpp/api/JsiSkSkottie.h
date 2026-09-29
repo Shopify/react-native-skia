@@ -75,6 +75,8 @@ public:
       if (!codec) {
         return nullptr;
       }
+      // The asset keeps its decoded frame for the lifetime of the animation.
+      _decodedImageBytes += codec->getInfo().computeMinByteSize();
       return skresources::MultiFrameImageAsset::Make(std::move(codec));
     }
 
@@ -103,11 +105,16 @@ public:
     return this->findAsset(name);
   }
 
+  // Bytes of the decoded images for the assets loaded so far.
+  size_t decodedImageBytes() const { return _decodedImageBytes; }
+
 private:
   explicit SkottieAssetProvider(AssetMap assets, sk_sp<SkFontMgr> fontMgr)
       : fAssets(std::move(assets)), fFontMgr(std::move(fontMgr)) {}
   const AssetMap fAssets;
   const sk_sp<SkFontMgr> fFontMgr;
+  // loadImageAsset() is const in skottie::ResourceProvider.
+  mutable size_t _decodedImageBytes = 0;
 
   sk_sp<SkData> findAsset(const char name[]) const {
     auto it = fAssets.find(name);
@@ -139,6 +146,8 @@ public:
     builder->setPropertyObserver(_propManager->getPropertyObserver());
     _animation = builder->make(json.c_str(), json.size());
     _slotManager = builder->getSlotManager();
+    // Image assets are loaded while the animation is built.
+    _approximateBytesUsed += _resourceProvider->decodedImageBytes();
   }
 
   ~ManagedAnimation() {
@@ -158,9 +167,9 @@ public:
   sk_sp<skottie::SlotManager> _slotManager = nullptr;
   sk_sp<SkottieAssetProvider> _resourceProvider = nullptr;
   std::unique_ptr<CustomPropertyManager> _propManager = nullptr;
-  // Size of the animation JSON plus its encoded assets: the memory the
-  // animation actually owns (the scene graph is in the same order as the
-  // JSON). Used as the GC hint for the wrapper.
+  // Size of the animation JSON, its encoded assets and its decoded images:
+  // the memory the animation actually owns (the scene graph is in the same
+  // order as the JSON). Used as the GC hint for the wrapper.
   size_t _approximateBytesUsed = 0;
 };
 
@@ -333,8 +342,7 @@ public:
     if (!slotID.has_value() || !scalar.has_value()) {
       return false;
     }
-    return getObject()->_slotManager->setScalarSlot(SkString(*slotID),
-                                                    *scalar);
+    return getObject()->_slotManager->setScalarSlot(SkString(*slotID), *scalar);
   }
 
   bool setVec2Slot(JsiOptional<std::string> slotID,

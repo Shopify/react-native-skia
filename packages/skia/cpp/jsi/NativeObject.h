@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <functional>
 #include <jsi/jsi.h>
 #include <memory>
@@ -13,6 +14,7 @@
 #include <typeindex>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "jsi/BoxedNativeObject.h"
 #include "jsi/JSICache.h"
@@ -273,16 +275,18 @@ public:
 
   /**
    * Create a view of an existing native object on another runtime (the
-   * unboxing path used by worklets). The native memory is already reported
-   * to the GC of the runtime the object was created on, so the view only
-   * carries the minimum pressure: charging it again would multiply the
-   * amount by the number of times the object is captured in a worklet, and
-   * Hermes aborts once the sum of the charges reaches its max heap size.
+   * unboxing path used by worklets). The first view on a runtime other than
+   * the creation runtime carries the full memory pressure: the view can
+   * outlive the original wrapper, and the GC of that runtime must see the
+   * memory it keeps alive. Later views on the same runtime only carry the
+   * minimum pressure: charging each of them would multiply the amount by the
+   * number of times the object is captured in a worklet, and Hermes aborts
+   * once the sum of the charges reaches its max heap size.
    */
   static jsi::Value createView(jsi::Runtime &runtime,
                                std::shared_ptr<Derived> instance) {
-    return createObject(runtime, std::move(instance),
-                        /*chargeMemoryPressure=*/false);
+    bool charge = instance->markChargedOn(&runtime);
+    return createObject(runtime, std::move(instance), charge);
   }
 
 private:
@@ -354,6 +358,25 @@ public:
    */
   jsi::Runtime *getCreationRuntime() const { return _creationRuntime; }
 
+  /**
+   * Record that a wrapper on `runtime` reports the full memory pressure of
+   * this object. Returns false if one already does (the creation runtime,
+   * or a previous view on the same runtime).
+   */
+  bool markChargedOn(jsi::Runtime *runtime) {
+    if (runtime == _creationRuntime) {
+      return false;
+    }
+    static std::mutex chargedRuntimesMutex;
+    std::lock_guard<std::mutex> lock(chargedRuntimesMutex);
+    if (std::find(_chargedRuntimes.begin(), _chargedRuntimes.end(), runtime) !=
+        _chargedRuntimes.end()) {
+      return false;
+    }
+    _chargedRuntimes.push_back(runtime);
+    return true;
+  }
+
 protected:
   explicit NativeObject(const char *name) : _name(name) {}
 
@@ -361,6 +384,9 @@ protected:
 
   const char *_name;
   jsi::Runtime *_creationRuntime = nullptr;
+  // Runtimes (other than the creation runtime) where a view of this object
+  // reports its full memory pressure. Guarded by the mutex in markChargedOn.
+  std::vector<jsi::Runtime *> _chargedRuntimes;
 
   // ============================================================
   // Helper methods for definePrototype() implementations
