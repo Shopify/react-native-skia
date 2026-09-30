@@ -100,6 +100,20 @@ void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject jSurfaceTexture,
     _updateTexImageMethod =
         env->GetMethodID(surfaceTextureClass, "updateTexImage", "()V");
 
+    // ANativeWindow_fromSurface acquires its own reference on the underlying
+    // buffer producer, so the Java Surface wrapper can be released here.
+    // Without this, every Canvas leaks one android.view.Surface until
+    // finalization and CloseGuard reports "A resource failed to call
+    // Surface.release."
+    jmethodID surfaceRelease =
+        env->GetMethodID(surfaceClass, "release", "()V");
+    if (surfaceRelease != nullptr) {
+      env->CallVoidMethod(jSurface, surfaceRelease);
+      if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+      }
+    }
+
     // Acquire the native window from the Surface
     // Clean up local references
     env->DeleteLocalRef(jSurface);
