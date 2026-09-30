@@ -46,6 +46,7 @@ import { AtlasExample } from "./AtlasExample";
 import { Web } from "./Web";
 import { WebLayout } from "./WebLayout";
 import { WebGLContexts } from "./WebGLContexts";
+import { WebGLLifecycle } from "./WebGLLifecycle";
 import { WebMemory } from "./WebMemory";
 
 const Stack = createNativeStackNavigator<Routes>();
@@ -360,6 +361,13 @@ export const API = () => {
         component={WebGLContexts}
         options={{
           title: "🔥 WebGL Contexts",
+        }}
+      />
+      <Stack.Screen
+        name="WebGLLifecycle"
+        component={WebGLLifecycle}
+        options={{
+          title: "♻️ WebGL Lifecycle",
         }}
       />
       <Stack.Screen

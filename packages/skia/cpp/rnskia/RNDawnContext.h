@@ -112,7 +112,7 @@ public:
     int height = static_cast<int>(IOSurfaceGetHeight(ioSurface));
 #else
     wgpu::SharedTextureMemoryAHardwareBufferDescriptor platformDesc;
-    auto ahb = (AHardwareBuffer *)buffer;
+    auto ahb = reinterpret_cast<AHardwareBuffer *>(buffer);
     platformDesc.handle = ahb;
     AHardwareBuffer_Desc adesc;
     AHardwareBuffer_describe(ahb, &adesc);
@@ -147,7 +147,8 @@ public:
     vkBegin.newLayout = 0;
     beginAccessDesc.nextInChain = &vkBegin;
 #endif
-    bool success = memory.BeginAccess(texture, &beginAccessDesc);
+    bool success =
+        memory.BeginAccess(texture, &beginAccessDesc) == wgpu::Status::Success;
 
     if (success) {
       skgpu::graphite::BackendTexture betFromView =

@@ -7,6 +7,8 @@ export interface NativeProps extends ViewProps {
   debug?: boolean;
   opaque?: boolean;
   nativeID: string;
+  androidSurfaceType?: "auto" | "SurfaceView" | "TextureView";
+  androidZOrderOnTop?: boolean;
 }
 
 const SkiaPictureViewNativeComponent = ({
@@ -14,6 +16,9 @@ const SkiaPictureViewNativeComponent = ({
   debug,
   opaque,
   onLayout,
+  // Android-only, never reaches the DOM
+  androidSurfaceType: _androidSurfaceType,
+  androidZOrderOnTop: _androidZOrderOnTop,
   ...viewProps
 }: NativeProps) => {
   return createElement(SkiaPictureView, {
