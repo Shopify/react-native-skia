@@ -43,7 +43,8 @@ const Demo = () => {
 
 This hooks offers an easy way to animate paths.
 Behind the scene, it make sure that everything is done as efficiently as possible.
-There is an optional second parameter available to set the default path value.
+The callback receives a mutable path builder, and the resulting immutable `SkPath` is stored in a shared value.
+There is an optional second parameter available to set the default path value: it is added to the builder before the callback runs.
 
 ```tsx twoslash
 import {useSharedValue, withSpring} from "react-native-reanimated";
@@ -62,13 +63,9 @@ export const FrostedCard = () => {
   });
 
   const clip = usePathValue(
-    () => {
+    (builder) => {
       "worklet";
-    },
-    rrct,
-    (path) => {
-      "worklet";
-      return path.transform(
+      builder.transform(
         processTransform3d([
           { translate: [50, 50] },
           { perspective: 300 },
@@ -76,7 +73,8 @@ export const FrostedCard = () => {
           { translate: [-50, -50] },
         ])
       );
-    }
+    },
+    rrct
   );
   return (
     <GestureDetector gesture={gesture}>
