@@ -4,7 +4,7 @@
 // that the wrapper is disposed once the view owns the recording, and that
 // unmount leaves the view's last frame in place.
 
-type MockRecorder = { id: number; dispose: jest.Mock };
+type MockRecorder = { id: number; getId: () => number; dispose: jest.Mock };
 
 const mockRecorders: MockRecorder[] = [];
 let mockSharedValues: unknown[] = [];
@@ -34,6 +34,9 @@ jest.mock("../Recorder/ReanimatedRecorder", () => ({
   ReanimatedRecorder: class {
     private recorder: MockRecorder = {
       id: mockRecorders.length,
+      getId() {
+        return this.id;
+      },
       dispose: jest.fn(),
     };
     constructor() {
@@ -117,7 +120,13 @@ describe("NativeReanimatedContainer", () => {
     ];
     expect(deps).toEqual([sv]);
     mapper();
-    expect(SkiaViewApi.applyUpdates).toHaveBeenCalledWith(7, [sv]);
+    // The updates are tagged with the recording id so that a mapper that
+    // outlives its recording cannot write into the one that replaced it.
+    expect(SkiaViewApi.applyUpdates).toHaveBeenCalledWith(
+      7,
+      mockRecorders[0].id,
+      [sv]
+    );
     // No recorder or picture reaches the worklet: the only view call it
     // makes is applyUpdates.
     expect(SkiaViewApi.setJsiProperty).toHaveBeenCalledTimes(1);

@@ -5,11 +5,14 @@
 #include <cmath>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <vector>
 
 #include <jsi/jsi.h>
+
+#include "include/core/SkPictureRecorder.h"
 
 #include "ColorFilters.h"
 #include "Command.h"
@@ -41,6 +44,12 @@ private:
 
   CommandList commands;
   std::vector<CommandList *> commandStack;
+
+  // Once a view owns the recording, the Reanimated mapper writes the shared
+  // values into the commands (applyUpdates, UI thread) while the view replays
+  // them (play, main thread). Both hold this lock; nothing else does, so it
+  // never nests with the view's lock.
+  std::mutex _commandsMutex;
 
   CommandList &currentCommands() { return *commandStack.back(); }
 
@@ -394,9 +403,24 @@ public:
   }
 
   void play(DrawingCtx *ctx) {
+    std::lock_guard<std::mutex> lock(_commandsMutex);
     for (const auto &cmd : commands) {
       playCommand(ctx, cmd.get());
     }
+  }
+
+  /**
+   * Plays the recording into a picture. The cull rect is deliberately huge:
+   * a recording is not tied to a view size.
+   */
+  sk_sp<SkPicture> makePicture() {
+    SkPictureRecorder pictureRecorder;
+    SkISize size = SkISize::Make(2'000'000, 2'000'000);
+    SkRect rect = SkRect::Make(size);
+    auto canvas = pictureRecorder.beginRecording(rect, nullptr);
+    DrawingCtx ctx(canvas);
+    play(&ctx);
+    return pictureRecorder.finishRecordingAsPicture();
   }
 
   /**
@@ -405,6 +429,7 @@ public:
    * writes it into the recorded commands.
    */
   void applyUpdates(jsi::Runtime &runtime, const jsi::Array &values) {
+    std::lock_guard<std::mutex> lock(_commandsMutex);
     auto size = values.size(runtime);
     for (size_t i = 0; i < size; i++) {
       auto sharedValue = values.getValueAtIndex(runtime, i).asObject(runtime);

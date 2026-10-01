@@ -10,13 +10,37 @@
 
 namespace RNSkia {
 
+void RNSkPictureRenderer::setRecorder(std::shared_ptr<Recorder> recorder) {
+  sk_sp<SkPicture> picture;
+  if (recorder != nullptr && recorder->variables.empty()) {
+    picture = recorder->makePicture();
+    recorder = nullptr;
+  }
+  std::shared_ptr<Recorder> retired;
+  {
+    std::lock_guard<std::mutex> lock(_mutex);
+    retired = std::move(_recorder);
+    _recorder = std::move(recorder);
+    _picture = std::move(picture);
+  }
+  retired = nullptr;
+  _requestRedraw();
+}
+
 bool RNSkPictureRenderer::applyUpdates(jsi::Runtime &runtime, double recorderId,
                                        const jsi::Array &values) {
-  std::lock_guard<std::mutex> lock(_mutex);
-  if (_recorder == nullptr || _recorder->id != recorderId) {
-    return false;
+  std::shared_ptr<Recorder> recorder;
+  {
+    std::lock_guard<std::mutex> lock(_mutex);
+    if (_recorder == nullptr || _recorder->id != recorderId) {
+      return false;
+    }
+    recorder = _recorder;
   }
-  _recorder->applyUpdates(runtime, values);
+  // Outside the renderer lock: a commit replacing the recorder must not wait
+  // for the update. Should it land while this runs, the update goes into the
+  // retired recorder and the redraw that follows draws the new one.
+  recorder->applyUpdates(runtime, values);
   return true;
 }
 

@@ -70,18 +70,7 @@ public:
       throw jsi::JSError(runtime, "Invalid Picture object provided to play()");
     }
 
-    // Create a new picture recorder to record into
-    SkPictureRecorder pictureRecorder;
-    SkISize size = SkISize::Make(2'000'000, 2'000'000);
-    SkRect rect = SkRect::Make(size);
-    auto canvas = pictureRecorder.beginRecording(rect, nullptr);
-
-    // Play the recorded commands into the canvas
-    DrawingCtx ctx(canvas);
-    getObject()->play(&ctx);
-
-    // Finish recording and get the new picture
-    auto newPicture = pictureRecorder.finishRecordingAsPicture();
+    auto newPicture = getObject()->makePicture();
 
     // Update the existing JsiSkPicture object with the new SkPicture
     // This reuses the existing JavaScript object instead of creating a new one

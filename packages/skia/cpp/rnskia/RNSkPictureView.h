@@ -38,13 +38,20 @@ namespace jsi = facebook::jsi;
 class Recorder;
 
 /**
- * Draws either an SkPicture (imperative API, static container) or a Recorder
- * (declarative <Canvas> with Reanimated). The recorder is owned by the
+ * Draws either an SkPicture (imperative API, or a recording without shared
+ * values, played once into a picture) or a Recorder (declarative <Canvas>
+ * driven by Reanimated shared values). The recorder is owned by the
  * renderer, not by a JS wrapper: its commands hold every native resource the
  * canvas draws (images, pictures, paths), and tying their lifetime to the
  * garbage collector of a runtime that rarely allocates (the UI runtime) kept
  * them resident long after unmount. Here they are released as soon as the
  * recorder is replaced, or when the host view is torn down (see clear()).
+ *
+ * Threading: setPicture/setRecorder run on the JS thread (React commit),
+ * applyUpdates on the UI thread (Reanimated mapper), drawInto on the main
+ * thread (onscreen draws) or the JS thread (snapshots). _mutex only guards
+ * the two pointers, so a commit never waits for a draw; the recorder
+ * serializes its replay against its updates on its own.
  */
 class RNSkPictureRenderer
     : public RNSkRenderer,
@@ -72,22 +79,16 @@ public:
   }
 
   /**
-   * Takes ownership of a recorder. The previous recorder (and the resources
-   * its commands reference) is released here; Recorder's destructor moves
-   * the commands to the main thread before destroying them so GPU-backed
-   * resources are freed on the thread that used them.
+   * Takes ownership of a recorder. A recording without shared values is
+   * played once into a picture here (and its commands released): nothing
+   * will ever update it, and drawing a picture on every redraw (resize,
+   * foreground, ref.redraw(), snapshots) is cheaper than replaying commands.
+   * The previous recorder (and the resources its commands reference) is
+   * released here; Recorder's destructor moves the commands to the main
+   * thread before destroying them so GPU-backed resources are freed on the
+   * thread that used them.
    */
-  void setRecorder(std::shared_ptr<Recorder> recorder) {
-    std::shared_ptr<Recorder> retired;
-    {
-      std::lock_guard<std::mutex> lock(_mutex);
-      retired = std::move(_recorder);
-      _recorder = std::move(recorder);
-      _picture = nullptr;
-    }
-    retired = nullptr;
-    _requestRedraw();
-  }
+  void setRecorder(std::shared_ptr<Recorder> recorder);
 
   /**
    * Drops the recorder and the picture without scheduling a redraw. Called
@@ -122,16 +123,24 @@ public:
    * bitmap export.
    */
   void drawInto(SkCanvas *canvas, float pixelDensity) {
-    // Hold the lock for the whole draw: the recorder's commands are mutated
-    // by applyUpdates() and swapped by setRecorder() from other threads.
-    std::lock_guard<std::mutex> lock(_mutex);
+    // Copy the content under the lock and draw from the copies: a React
+    // commit swapping the content must only ever wait for a pointer swap,
+    // never for a draw. If the recorder is replaced mid-draw, this frame
+    // finishes with the old one and the swap schedules the next frame.
+    std::shared_ptr<Recorder> recorder;
+    sk_sp<SkPicture> picture;
+    {
+      std::lock_guard<std::mutex> lock(_mutex);
+      recorder = _recorder;
+      picture = _picture;
+    }
     canvas->clear(SK_ColorTRANSPARENT);
     canvas->save();
     canvas->scale(pixelDensity, pixelDensity);
-    if (_recorder != nullptr) {
-      replay(canvas, _recorder.get());
-    } else if (_picture != nullptr) {
-      canvas->drawPicture(_picture);
+    if (recorder != nullptr) {
+      replay(canvas, recorder.get());
+    } else if (picture != nullptr) {
+      canvas->drawPicture(picture);
     }
     canvas->restore();
   }
