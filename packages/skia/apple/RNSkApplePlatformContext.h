@@ -1,7 +1,6 @@
 #pragma once
 
-#import <React/RCTBridge+Private.h>
-#import <React/RCTBridge.h>
+#import <React/RCTBridgeModule.h>
 
 #include <functional>
 #include <memory>
@@ -21,7 +20,7 @@ namespace RNSkia {
 class RNSkApplePlatformContext : public RNSkPlatformContext {
 public:
   RNSkApplePlatformContext(
-      RCTBridge *bridge,
+      RCTViewRegistry *viewRegistry,
       std::shared_ptr<facebook::react::CallInvoker> jsCallInvoker)
 #if !TARGET_OS_OSX
       : RNSkPlatformContext(jsCallInvoker, [[UIScreen mainScreen] scale]) {
@@ -32,7 +31,7 @@ public:
 
     // Create screenshot manager
     _screenshotService =
-        [[ViewScreenshotService alloc] initWithUiManager:bridge.uiManager];
+        [[ViewScreenshotService alloc] initWithViewRegistry:viewRegistry];
   }
 
   ~RNSkApplePlatformContext() = default;
