@@ -66,7 +66,7 @@ static sk_sp<SkData> replaceJpegICCWithAppleP3(sk_sp<SkData> jpegData) {
     return jpegData;
 
   const uint8_t *iccBytes = CFDataGetBytePtr(cfICC);
-  size_t iccLen = (size_t)CFDataGetLength(cfICC);
+  size_t iccLen = static_cast<size_t>(CFDataGetLength(cfICC));
 
   // "ICC_PROFILE\0" APP2 marker signature (12 bytes)
   static const uint8_t iccSig[] = {0x49, 0x43, 0x43, 0x5F, 0x50, 0x52,
