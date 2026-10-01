@@ -6,6 +6,7 @@
 
 #include "RNSkView.h"
 #include "RNWindowContext.h"
+#include "SurfaceFrameRateVote.h"
 
 #include <android/native_window.h>
 
@@ -28,17 +29,19 @@ public:
   bool renderToCanvas(const std::function<void(SkCanvas *)> &cb) override;
 
   void surfaceAvailable(jobject surface, int width, int height, bool isSurface,
-                        bool highBitDepth);
+                        bool highBitDepth, float maxRefreshRate);
 
   void surfaceDestroyed();
 
-  void surfaceSizeChanged(jobject jSurface, int width, int height, bool isSurface,
-                          bool highBitDepth);
+  void surfaceSizeChanged(jobject jSurface, int width, int height,
+                          bool isSurface, bool highBitDepth,
+                          float maxRefreshRate);
 
 private:
   std::unique_ptr<WindowContext> _surfaceHolder = nullptr;
   std::shared_ptr<RNSkPlatformContext> _platformContext;
   jobject _jSurfaceTexture = nullptr;
   jmethodID _updateTexImageMethod = nullptr;
+  SurfaceFrameRateVote _frameRateVote;
 };
 } // namespace RNSkia
