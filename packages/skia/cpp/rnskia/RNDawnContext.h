@@ -6,6 +6,9 @@
 #include "RNDawnUtils.h"
 #include "RNDawnWindowContext.h"
 #include "RNImageProvider.h"
+#include "utils/RNSkLog.h"
+
+#include <vector>
 
 #include "include/core/SkColorSpace.h"
 #include "include/core/SkData.h"
@@ -91,6 +94,43 @@ public:
     auto rasterImage =
         SkImages::RasterFromData(image->imageInfo(), data, bytesPerRow);
     return rasterImage;
+  }
+
+  // A recorder of its own for a client that records on one thread and replays
+  // on another (SkiaGraphiteView): unlike getRecorder() it is not tied to the
+  // calling thread. Creating a recorder is a Context operation, hence the lock.
+  std::unique_ptr<skgpu::graphite::Recorder> makeRecorder() {
+    std::lock_guard<std::mutex> lock(_mutex);
+    skgpu::graphite::RecorderOptions options;
+    options.fImageProvider = ImageProvider::Make();
+    return fGraphiteContext->makeRecorder(options);
+  }
+
+  // Replays the recordings, in order, onto the target surface (a deferred
+  // canvas target) and submits them as one batch. Returns false if any of
+  // them was rejected; the others are still submitted.
+  bool
+  insertRecordings(const std::vector<skgpu::graphite::Recording *> &recordings,
+                   SkSurface *targetSurface) {
+    std::lock_guard<std::mutex> lock(_mutex);
+    bool success = true;
+    for (auto *recording : recordings) {
+      skgpu::graphite::InsertRecordingInfo info;
+      info.fRecording = recording;
+      info.fTargetSurface = targetSurface;
+      auto status = fGraphiteContext->insertRecording(info);
+      // InsertStatus converts to true on success.
+      if (!static_cast<bool>(status)) {
+        RNSkLogger::logToConsole(
+            "Graphite rejected a recording (InsertStatus %d): %s",
+            static_cast<int>(
+                static_cast<skgpu::graphite::InsertStatus::V>(status)),
+            status.message().c_str());
+        success = false;
+      }
+    }
+    fGraphiteContext->submit();
+    return success;
   }
 
   void submitRecording(

@@ -9,6 +9,8 @@
 
 #include "include/core/SkColorSpace.h"
 
+#include <vector>
+
 #include "include/gpu/graphite/BackendTexture.h"
 #include "include/gpu/graphite/Context.h"
 #include "include/gpu/graphite/ContextOptions.h"
@@ -16,7 +18,9 @@
 #include "include/gpu/graphite/Recorder.h"
 #include "include/gpu/graphite/Recording.h"
 #include "include/gpu/graphite/Surface.h"
+#include "include/gpu/graphite/TextureInfo.h"
 #include "include/gpu/graphite/dawn/DawnBackendContext.h"
+#include "include/gpu/graphite/dawn/DawnGraphiteTypes.h"
 #include "include/gpu/graphite/dawn/DawnTypes.h"
 #include "include/gpu/graphite/dawn/DawnUtils.h"
 
@@ -64,6 +68,23 @@ public:
 
   void present() override;
 
+  // Replays Graphite recordings (deferred canvas targets) onto the current
+  // swapchain texture, in order, and presents it. Nothing is recorded on the
+  // window's own recorder.
+  bool presentRecordings(
+      const std::vector<skgpu::graphite::Recording *> &recordings);
+
+  SkColorType getColorType() const { return _colorType; }
+
+  // The texture description a deferred canvas must be recorded with to be
+  // replayed onto this window.
+  skgpu::graphite::TextureInfo getTextureInfo() const {
+    return skgpu::graphite::TextureInfos::MakeDawn(
+        skgpu::graphite::DawnTextureInfo(skgpu::graphite::SampleCount::k1,
+                                         skgpu::Mipmapped::kNo, _format, _usage,
+                                         wgpu::TextureAspect::All));
+  }
+
   void resize(int width, int height) override {
     _width = width;
     _height = height;
@@ -82,7 +103,8 @@ private:
     config.width = _width;
     config.height = _height;
     config.presentMode = wgpu::PresentMode::Fifo;
-    config.usage = supportedSurfaceUsage();
+    _usage = supportedSurfaceUsage();
+    config.usage = _usage;
 #ifdef __APPLE__
     config.alphaMode = wgpu::CompositeAlphaMode::Premultiplied;
 #endif
@@ -108,7 +130,8 @@ private:
     }
     for (auto extra :
          {wgpu::TextureUsage::TextureBinding, wgpu::TextureUsage::CopySrc}) {
-      if (capabilities.usages & extra) {
+      if ((capabilities.usages & extra) &&
+          (DawnUtils::DefaultTargetUsage & extra)) {
         usage |= extra;
       }
     }
@@ -135,6 +158,7 @@ private:
   wgpu::Surface _surface;
   [[maybe_unused]] void *_nativeSurface;
   wgpu::TextureFormat _format;
+  wgpu::TextureUsage _usage = wgpu::TextureUsage::RenderAttachment;
   SkColorType _colorType;
   int _width;
   int _height;

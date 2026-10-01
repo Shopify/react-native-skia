@@ -42,6 +42,31 @@ static const wgpu::TextureFormat HighBitDepthTextureFormat =
     wgpu::TextureFormat::RGB10A2Unorm;
 #endif
 
+// Usage requested for a window texture when the surface supports it (see
+// DawnWindowContext::supportedSurfaceUsage), and assumed for a Graphite
+// recording made before its window exists: TextureBinding lets a render pass
+// reload the existing contents, CopySrc serves copy tasks.
+static const wgpu::TextureUsage DefaultTargetUsage =
+    wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding |
+    wgpu::TextureUsage::CopySrc;
+
+// The texture format backing a surface of the given color type; the
+// preferred format for color types no surface uses.
+inline wgpu::TextureFormat textureFormatForColorType(SkColorType colorType) {
+  switch (colorType) {
+  case kBGRA_8888_SkColorType:
+    return wgpu::TextureFormat::BGRA8Unorm;
+  case kRGBA_8888_SkColorType:
+    return wgpu::TextureFormat::RGBA8Unorm;
+  case kRGBA_F16_SkColorType:
+    return wgpu::TextureFormat::RGBA16Float;
+  case kRGBA_1010102_SkColorType:
+    return wgpu::TextureFormat::RGB10A2Unorm;
+  default:
+    return PreferredTextureFormat;
+  }
+}
+
 // Find the best matching GPU adapter for the current platform.
 // Sorts by adapter type (DiscreteGPU > IntegratedGPU > CPU) and selects the
 // first adapter matching the platform backend (Metal on Apple, Vulkan on
