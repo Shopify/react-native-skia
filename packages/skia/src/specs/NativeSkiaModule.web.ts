@@ -99,6 +99,10 @@ global.SkiaViewApi = {
     // The view may already have unmounted (e.g. a trailing animation frame).
     this.views[`${nativeId}`]?.redraw();
   },
+  applyUpdates() {
+    // Web canvases are driven from JS (see Container.web.ts); there is no
+    // view-owned recorder to update.
+  },
   makeImageSnapshot(nativeId: number, rect?: SkRect) {
     const view = this.views[`${nativeId}`];
     if (!view) {

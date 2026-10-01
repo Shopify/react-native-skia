@@ -1,4 +1,5 @@
 import type { ViewProps } from "react-native";
+import type { SharedValue } from "react-native-reanimated";
 
 import type {
   SkGraphiteContext,
@@ -33,6 +34,11 @@ export interface ISkiaViewApi {
   web?: boolean;
   setJsiProperty: <T>(nativeId: number, name: string, value: T) => void;
   requestRedraw: (nativeId: number) => void;
+  /**
+   * Reads the shared values into the recorder owned by the view and
+   * schedules a redraw. Native only; called from a worklet on every frame.
+   */
+  applyUpdates: (nativeId: number, values: SharedValue<unknown>[]) => void;
   makeImageSnapshot: (nativeId: number, rect?: SkRect) => SkImage;
   makeImageSnapshotAsync: (nativeId: number, rect?: SkRect) => Promise<SkImage>;
   size: (nativeId: number) => SkSize;

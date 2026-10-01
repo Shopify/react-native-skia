@@ -95,21 +95,7 @@ public:
 
   JSI_HOST_FUNCTION(applyUpdates) {
     auto values = arguments[0].asObject(runtime).asArray(runtime);
-    auto size = values.size(runtime);
-    auto recorder = getObject();
-    for (int i = 0; i < size; i++) {
-      auto sharedValue = values.getValueAtIndex(runtime, i).asObject(runtime);
-      auto name = "variable" + std::to_string(i);
-      // Look up the conversion functions for this name
-      auto it = recorder->variables.find(name);
-      if (it != recorder->variables.end()) {
-        // Execute each conversion function in the vector
-        const auto &conversionFunctions = it->second;
-        for (const auto &conversionFunc : conversionFunctions) {
-          conversionFunc(runtime, sharedValue);
-        }
-      }
-    }
+    getObject()->applyUpdates(runtime, values);
     return jsi::Value::undefined();
   }
 

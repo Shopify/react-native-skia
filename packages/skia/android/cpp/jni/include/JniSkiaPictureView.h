@@ -69,8 +69,8 @@ protected:
                                       highBitDepth);
   }
 
-  void surfaceSizeChanged(jobject surface, int width, int height, bool isSurface,
-                          bool highBitDepth) override {
+  void surfaceSizeChanged(jobject surface, int width, int height,
+                          bool isSurface, bool highBitDepth) override {
     JniSkiaBaseView::surfaceSizeChanged(surface, width, height, isSurface,
                                         highBitDepth);
   }
@@ -101,9 +101,6 @@ protected:
       return jni::JArrayInt::newArray(0);
     }
 
-    // Get the SkPicture from the renderer
-    sk_sp<SkPicture> picture = renderer->getPicture();
-
     const size_t pixelCount =
         static_cast<size_t>(width) * static_cast<size_t>(height);
     if (pixelCount == 0) {
@@ -126,15 +123,8 @@ protected:
       return jni::JArrayInt::newArray(0);
     }
 
-    canvas->clear(SK_ColorTRANSPARENT);
-
-    if (picture) {
-      auto pd = pictureView->getPixelDensity();
-      canvas->save();
-      canvas->scale(pd, pd);
-      canvas->drawPicture(picture);
-      canvas->restore();
-    }
+    // Draws whatever the view currently shows: a picture or a recorder.
+    renderer->drawInto(canvas, pictureView->getPixelDensity());
 
     sk_sp<SkImage> snapshot = surface->makeImageSnapshot();
     if (!snapshot) {
