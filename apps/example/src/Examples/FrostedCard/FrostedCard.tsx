@@ -77,7 +77,9 @@ export const FrostedCard = () => {
     roundedRectPath,
     (path) => {
       "worklet";
-      return Skia.PathBuilder.MakeFromPath(path).transform(matrix.value).build();
+      return Skia.PathBuilder.MakeFromPath(path)
+        .transform(matrix.value)
+        .build();
     }
   );
 

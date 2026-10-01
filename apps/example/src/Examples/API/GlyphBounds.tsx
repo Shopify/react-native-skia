@@ -133,7 +133,7 @@ const GlyphBoundsDemo = () => {
   }, [progress]);
 
   const customFontMgr = useFonts({
-    Roboto: [
+    "Roboto": [
       require("../../Tests/assets/Roboto-Medium.ttf"),
       require("../../Tests/assets/Roboto-Regular.ttf"),
     ],
