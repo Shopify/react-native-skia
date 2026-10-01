@@ -41,22 +41,36 @@ public:
 
   void surfaceDestroyed();
 
-  void surfaceSizeChanged(jobject jSurface, int width, int height, bool isSurface,
-                          bool highBitDepth);
+  void surfaceSizeChanged(jobject jSurface, int width, int height,
+                          bool isSurface, bool highBitDepth);
 
 private:
+  // Takes the ANativeWindow behind an android.view.Surface (SurfaceView) or a
+  // SurfaceTexture (TextureView), keeping the Java references the window
+  // needs. Returns nullptr if the window could not be acquired.
+  ANativeWindow *acquireWindow(jobject surface, bool isSurface);
+  // Gives back what acquireWindow() took. Call after the window context that
+  // draws into the window is gone.
+  void releaseWindow();
+#if !defined(SK_GRAPHITE)
   // Lets the SurfaceTexture of a TextureView consume the previous frame.
   void updateTexImage();
-#if defined(SK_GRAPHITE)
+#else
   // Copies the window's target description where any thread can read it.
   void updateTargetInfo();
 #endif
 
   std::unique_ptr<WindowContext> _surfaceHolder = nullptr;
   std::shared_ptr<RNSkPlatformContext> _platformContext;
+  ANativeWindow *_window = nullptr;
+  // The Surface created over a TextureView's SurfaceTexture; it lives as long
+  // as the window and is released with it (a SurfaceView's Surface is owned by
+  // the view).
+  jobject _jSurface = nullptr;
+#if !defined(SK_GRAPHITE)
   jobject _jSurfaceTexture = nullptr;
   jmethodID _updateTexImageMethod = nullptr;
-#if defined(SK_GRAPHITE)
+#else
   std::mutex _targetInfoMutex;
   RNSkGraphiteTargetInfo _targetInfo;
   bool _hasTargetInfo = false;
