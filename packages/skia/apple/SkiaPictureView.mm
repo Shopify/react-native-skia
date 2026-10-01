@@ -5,10 +5,10 @@
 #import "RNSkPlatformContext.h"
 
 #import "RNSkiaModule.h"
-#import "SkiaManager.h"
 #import "SkiaUIView.h"
 
 #import <React/RCTConversions.h>
+#import <React/RCTConvert.h>
 #import <React/RCTFabricComponentsPlugins.h>
 
 #import <react/renderer/components/rnskia/ComponentDescriptors.h>
@@ -23,7 +23,7 @@ using namespace facebook::react;
 - (instancetype)initWithFrame:(CGRect)frame {
   if (self = [super initWithFrame:frame]) {
     // Pass SkManager as a raw pointer to avoid circular dependencies
-    auto skManager = [SkiaManager latestActiveSkManager].get();
+    auto skManager = [RNSkiaModule latestActiveSkManager].get();
     [self initCommon:skManager
              factory:[](std::shared_ptr<RNSkia::RNSkPlatformContext> context) {
                return std::make_shared<RNSkAppleView<RNSkia::RNSkPictureView>>(
