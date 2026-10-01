@@ -53,8 +53,7 @@ const setup = () => {
     setJsiProperty: jest.fn(),
     applyUpdates: jest.fn(),
   };
-  (globalThis as unknown as { SkiaViewApi: unknown }).SkiaViewApi =
-    SkiaViewApi;
+  (globalThis as unknown as { SkiaViewApi: unknown }).SkiaViewApi = SkiaViewApi;
   // The module reads SkiaViewApi from globalThis when it loads.
   jest.isolateModules(() => {
     const { createContainer } = require("../Container.native");
