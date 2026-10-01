@@ -62,15 +62,29 @@ void RNSkGraphiteProducer::setPicture(sk_sp<SkPicture> picture) {
   retired = nullptr;
 }
 
+void RNSkGraphiteProducer::clear() {
+  std::shared_ptr<Recorder> retired;
+  sk_sp<SkPicture> picture;
+  {
+    std::lock_guard<std::mutex> lock(_mutex);
+    retired = std::move(_recorder);
+    picture = std::move(_picture);
+    _pendingWrites.clear();
+    _dirty = false;
+  }
+  // Both are destroyed here, outside the lock.
+}
+
 bool RNSkGraphiteProducer::hasContent() {
   std::lock_guard<std::mutex> lock(_mutex);
   return _recorder != nullptr || _picture != nullptr;
 }
 
 bool RNSkGraphiteProducer::applyUpdates(jsi::Runtime &runtime,
+                                        double recorderId,
                                         const jsi::Array &values) {
   std::lock_guard<std::mutex> lock(_mutex);
-  if (_recorder == nullptr) {
+  if (_recorder == nullptr || _recorder->id != recorderId) {
     return false;
   }
   _recorder->readUpdates(runtime, values, [this](PendingWrite write) {
@@ -125,36 +139,33 @@ void RNSkGraphiteProducer::produce() {
   }
   std::shared_ptr<RNSkGraphiteRecording> recording;
   bool recorded = false;
-  {
-    std::lock_guard<std::mutex> replayLock(_replayMutex);
-    // The writes are applied whether or not a frame can be recorded: the
-    // commands must hold the latest values for the next frame or snapshot.
-    for (auto &write : writes) {
-      write();
+  // The writes are applied whether or not a frame can be recorded: the
+  // commands must hold the latest values for the next frame or snapshot.
+  if (recorder && !writes.empty()) {
+    recorder->applyWrites(writes);
+  }
+  if (target && (recorder || picture)) {
+    SkCanvas *canvas = nullptr;
+    try {
+      canvas = target->beginRecording();
+    } catch (const std::exception &) {
+      // No surface and no layout yet: the view asks for a frame once it
+      // has a size.
     }
-    if (target && (recorder || picture)) {
-      SkCanvas *canvas = nullptr;
+    if (canvas != nullptr) {
       try {
-        canvas = target->beginRecording();
-      } catch (const std::exception &) {
-        // No surface and no layout yet: the view asks for a frame once it
-        // has a size.
+        canvas->clear(SK_ColorTRANSPARENT);
+        draw(canvas, recorder.get(), picture);
+      } catch (const std::exception &e) {
+        RNSkLogger::logToConsole("Canvas2: replaying the scene failed: %s",
+                                 e.what());
       }
-      if (canvas != nullptr) {
-        try {
-          canvas->clear(SK_ColorTRANSPARENT);
-          draw(canvas, recorder.get(), picture);
-        } catch (const std::exception &e) {
-          RNSkLogger::logToConsole("Canvas2: replaying the scene failed: %s",
-                                   e.what());
-        }
-        try {
-          recording = target->finishRecording();
-          recorded = recording != nullptr;
-        } catch (const std::exception &e) {
-          RNSkLogger::logToConsole("Canvas2: recording the frame failed: %s",
-                                   e.what());
-        }
+      try {
+        recording = target->finishRecording();
+        recorded = recording != nullptr;
+      } catch (const std::exception &e) {
+        RNSkLogger::logToConsole("Canvas2: recording the frame failed: %s",
+                                 e.what());
       }
     }
   }
@@ -186,9 +197,8 @@ void RNSkGraphiteProducer::renderInto(SkCanvas *canvas, float pixelDensity) {
     writes = std::move(_pendingWrites);
     _pendingWrites.clear();
   }
-  std::lock_guard<std::mutex> replayLock(_replayMutex);
-  for (auto &write : writes) {
-    write();
+  if (recorder && !writes.empty()) {
+    recorder->applyWrites(writes);
   }
   canvas->clear(SK_ColorTRANSPARENT);
   canvas->save();

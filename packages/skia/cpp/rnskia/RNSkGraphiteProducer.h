@@ -31,9 +31,10 @@ class RNSkGraphiteTarget;
  * Three threads meet here. The JS thread hands over the content. A Reanimated
  * mapper, on the UI runtime, reads the shared values into pending writes: that
  * is the only step that needs a JS runtime, and it never waits for a replay.
- * A pool thread applies the writes, replays the commands into a deferred
- * canvas of the view's target and submits the recording; the main thread
- * presents it on the next vsync.
+ * A pool thread applies the writes and replays the commands (the recorder
+ * serializes the two against each other) into a deferred canvas of the
+ * view's target and submits the recording; the main thread presents it on
+ * the next vsync.
  *
  * Pacing: a view has at most one job in flight and at most one recording
  * waiting to be presented. Updates that arrive meanwhile only mark the content
@@ -59,10 +60,18 @@ public:
   bool hasContent();
 
   /**
-   Reads the shared values on the calling runtime into pending writes and
-   schedules a frame. Returns false when there is no recorder to update.
+   Drops the content and the pending writes without scheduling a frame:
+   the host view is being torn down.
    */
-  bool applyUpdates(jsi::Runtime &runtime, const jsi::Array &values);
+  void clear();
+
+  /**
+   Reads the shared values on the calling runtime into pending writes and
+   schedules a frame. Returns false when there is no recorder to update, or
+   another recording than recorderId (a stale mapper).
+   */
+  bool applyUpdates(jsi::Runtime &runtime, double recorderId,
+                    const jsi::Array &values);
 
   /** Marks the content dirty and schedules a frame if one can start. */
   void requestFrame();
@@ -93,10 +102,6 @@ private:
   bool _dirty = false;
   bool _inFlight = false;
   bool _presentPending = false;
-
-  // Held while the commands are written to or replayed: a pool thread and a
-  // snapshot never touch them at the same time.
-  std::mutex _replayMutex;
 };
 
 } // namespace RNSkia

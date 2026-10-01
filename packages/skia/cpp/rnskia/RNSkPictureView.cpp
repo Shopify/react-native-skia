@@ -6,29 +6,48 @@
 #include "RNSkPictureView.h"
 
 #include "api/recorder/DrawingCtx.h"
-#include "api/recorder/JsiRecorder.h"
 #include "api/recorder/RNRecorder.h"
 
 namespace RNSkia {
 
-bool RNSkPictureRenderer::applyUpdates(jsi::Runtime &runtime,
-                                       const jsi::Array &values) {
-  std::lock_guard<std::mutex> lock(_mutex);
-  if (_recorder == nullptr) {
+void RNSkPictureRenderer::setRecorder(std::shared_ptr<Recorder> recorder) {
+  sk_sp<SkPicture> picture;
+  if (recorder != nullptr && recorder->variables.empty()) {
+    picture = recorder->makePicture();
+    recorder = nullptr;
+  }
+  std::shared_ptr<Recorder> retired;
+  {
+    std::lock_guard<std::mutex> lock(_mutex);
+    retired = std::move(_recorder);
+    _recorder = std::move(recorder);
+    _picture = std::move(picture);
+  }
+  retired = nullptr;
+  _requestRedraw();
+}
+
+bool RNSkPictureRenderer::applyUpdatesTo(
+    const std::shared_ptr<Recorder> &recorder, jsi::Runtime &runtime,
+    double recorderId, const jsi::Array &values) {
+  if (recorder == nullptr || recorder->id != recorderId) {
     return false;
   }
-  _recorder->applyUpdates(runtime, values);
+  recorder->applyUpdates(runtime, values);
   return true;
 }
 
-std::shared_ptr<Recorder>
-RNSkPictureRenderer::recorderFromValue(jsi::Runtime &runtime,
-                                       const jsi::Value &value) {
-  auto jsiRecorder = tryGetJsiObject<JsiRecorder>(runtime, value);
-  if (jsiRecorder == nullptr) {
-    return nullptr;
+bool RNSkPictureRenderer::applyUpdates(jsi::Runtime &runtime, double recorderId,
+                                       const jsi::Array &values) {
+  std::shared_ptr<Recorder> recorder;
+  {
+    std::lock_guard<std::mutex> lock(_mutex);
+    recorder = _recorder;
   }
-  return jsiRecorder->getObject();
+  // Outside the renderer lock: a commit replacing the recorder must not wait
+  // for the update. Should it land while this runs, the update goes into the
+  // retired recorder and the redraw that follows draws the new one.
+  return applyUpdatesTo(recorder, runtime, recorderId, values);
 }
 
 void RNSkPictureRenderer::replay(SkCanvas *canvas, Recorder *recorder) {

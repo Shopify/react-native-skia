@@ -59,8 +59,8 @@ protected:
                                       highBitDepth);
   }
 
-  void surfaceSizeChanged(jobject surface, int width, int height, bool isSurface,
-                          bool highBitDepth) override {
+  void surfaceSizeChanged(jobject surface, int width, int height,
+                          bool isSurface, bool highBitDepth) override {
     JniSkiaBaseView::surfaceSizeChanged(surface, width, height, isSurface,
                                         highBitDepth);
   }
@@ -73,7 +73,14 @@ protected:
     JniSkiaBaseView::registerView(nativeId);
   }
 
-  void unregisterView() override { JniSkiaBaseView::unregisterView(); }
+  void unregisterView() override {
+    JniSkiaBaseView::unregisterView();
+    // React drops the Java view here, but the native view behind it (and the
+    // recording it owns) is only destroyed when the Java object is finalized.
+    if (_skiaAndroidView != nullptr) {
+      getGraphiteView()->clearContent();
+    }
+  }
 
   jni::local_ref<jni::JArrayInt> getBitmap(int width, int height) override {
     return JniSkiaBaseView::getBitmap(width, height);

@@ -38,13 +38,20 @@ namespace jsi = facebook::jsi;
 class Recorder;
 
 /**
- * Draws either an SkPicture (imperative API, static container) or a Recorder
- * (declarative <Canvas> with Reanimated). The recorder is owned by the
+ * Draws either an SkPicture (imperative API, or a recording without shared
+ * values, played once into a picture) or a Recorder (declarative <Canvas>
+ * driven by Reanimated shared values). The recorder is owned by the
  * renderer, not by a JS wrapper: its commands hold every native resource the
  * canvas draws (images, pictures, paths), and tying their lifetime to the
  * garbage collector of a runtime that rarely allocates (the UI runtime) kept
  * them resident long after unmount. Here they are released as soon as the
- * recorder is replaced or cleared.
+ * recorder is replaced, or when the host view is torn down (see clear()).
+ *
+ * Threading: setPicture/setRecorder run on the JS thread (React commit),
+ * applyUpdates on the UI thread (Reanimated mapper), drawInto on the main
+ * thread (onscreen draws) or the JS thread (snapshots). _mutex only guards
+ * the two pointers, so a commit never waits for a draw; the recorder
+ * serializes its replay against its updates on its own.
  */
 class RNSkPictureRenderer
     : public RNSkRenderer,
@@ -71,40 +78,52 @@ public:
     _requestRedraw();
   }
 
-  sk_sp<SkPicture> getPicture() const {
-    std::lock_guard<std::mutex> lock(_mutex);
-    return _picture;
-  }
+  /**
+   * Takes ownership of a recorder. A recording without shared values is
+   * played once into a picture here (and its commands released): nothing
+   * will ever update it, and drawing a picture on every redraw (resize,
+   * foreground, ref.redraw(), snapshots) is cheaper than replaying commands.
+   * The previous recorder (and the resources its commands reference) is
+   * released here; Recorder's destructor moves the commands to the main
+   * thread before destroying them so GPU-backed resources are freed on the
+   * thread that used them.
+   */
+  void setRecorder(std::shared_ptr<Recorder> recorder);
 
   /**
-   * Takes ownership of a recorder. The previous recorder (and the resources
-   * its commands reference) is released here; Recorder's destructor moves
-   * the commands to the main thread before destroying them so GPU-backed
-   * resources are freed on the thread that used them.
+   * Drops the recorder and the picture without scheduling a redraw. Called
+   * when the host view is torn down, so that the resources go away with the
+   * view rather than with the garbage collection of its host object (on
+   * Android the native view is only destroyed when the Java view is
+   * finalized).
    */
-  void setRecorder(std::shared_ptr<Recorder> recorder) {
+  void clear() {
     std::shared_ptr<Recorder> retired;
+    sk_sp<SkPicture> picture;
     {
       std::lock_guard<std::mutex> lock(_mutex);
       retired = std::move(_recorder);
-      _recorder = std::move(recorder);
-      _picture = nullptr;
+      picture = std::move(_picture);
     }
-    retired = nullptr;
-    _requestRedraw();
+    // Both are destroyed here, outside the lock.
   }
 
   /**
    * Reads the shared values on the calling runtime into the recorder's
-   * commands. Returns false when there is no recorder to update.
+   * commands. Returns false when there is no recorder to update, or when the
+   * view holds a different recording than recorderId (a stale mapper whose
+   * values would otherwise land in the new recording's slots).
    */
-  bool applyUpdates(jsi::Runtime &runtime, const jsi::Array &values);
+  bool applyUpdates(jsi::Runtime &runtime, double recorderId,
+                    const jsi::Array &values);
 
   /**
-   * Extracts the native recorder from a JS Recorder object, or nullptr.
+   * Same as applyUpdates(), for a recording that no view owns yet (one
+   * queued in the view registry until its view registers).
    */
-  static std::shared_ptr<Recorder> recorderFromValue(jsi::Runtime &runtime,
-                                                     const jsi::Value &value);
+  static bool applyUpdatesTo(const std::shared_ptr<Recorder> &recorder,
+                             jsi::Runtime &runtime, double recorderId,
+                             const jsi::Array &values);
 
   /**
    * Draws the current content (recorder or picture) into the canvas, scaled
@@ -112,16 +131,24 @@ public:
    * bitmap export.
    */
   void drawInto(SkCanvas *canvas, float pixelDensity) {
-    // Hold the lock for the whole draw: the recorder's commands are mutated
-    // by applyUpdates() and swapped by setRecorder() from other threads.
-    std::lock_guard<std::mutex> lock(_mutex);
+    // Copy the content under the lock and draw from the copies: a React
+    // commit swapping the content must only ever wait for a pointer swap,
+    // never for a draw. If the recorder is replaced mid-draw, this frame
+    // finishes with the old one and the swap schedules the next frame.
+    std::shared_ptr<Recorder> recorder;
+    sk_sp<SkPicture> picture;
+    {
+      std::lock_guard<std::mutex> lock(_mutex);
+      recorder = _recorder;
+      picture = _picture;
+    }
     canvas->clear(SK_ColorTRANSPARENT);
     canvas->save();
     canvas->scale(pixelDensity, pixelDensity);
-    if (_recorder != nullptr) {
-      replay(canvas, _recorder.get());
-    } else if (_picture != nullptr) {
-      canvas->drawPicture(_picture);
+    if (recorder != nullptr) {
+      replay(canvas, recorder.get());
+    } else if (picture != nullptr) {
+      canvas->drawPicture(picture);
     }
     canvas->restore();
   }
@@ -168,10 +195,11 @@ public:
     }
   }
 
-  bool applyUpdates(jsi::Runtime &runtime, const jsi::Array &values) override {
+  bool applyUpdates(jsi::Runtime &runtime, double recorderId,
+                    const jsi::Array &values) override {
     auto renderer =
         std::static_pointer_cast<RNSkPictureRenderer>(getRenderer());
-    if (!renderer->applyUpdates(runtime, values)) {
+    if (!renderer->applyUpdates(runtime, recorderId, values)) {
       return false;
     }
     requestRedraw();

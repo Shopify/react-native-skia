@@ -231,11 +231,12 @@ public:
       std::unordered_map<std::string, RNJsi::ViewProperty> &props) = 0;
 
   /**
-   Reads the shared values on the calling runtime into the content the view
-   draws and schedules a frame. Returns false when there is nothing to
-   update (no recorder).
+   Reads the shared values on the calling runtime into the recording the
+   view owns and schedules a frame. Returns false when there is nothing to
+   update: no recording, or one other than recorderId (a stale mapper).
    */
-  virtual bool applyUpdates(jsi::Runtime &runtime, const jsi::Array &values) {
+  virtual bool applyUpdates(jsi::Runtime &runtime, double recorderId,
+                            const jsi::Array &values) {
     return false;
   }
 

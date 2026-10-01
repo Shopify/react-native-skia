@@ -582,9 +582,17 @@ public:
     }
   }
 
-  bool applyUpdates(jsi::Runtime &runtime, const jsi::Array &values) override {
-    return _producer->applyUpdates(runtime, values);
+  bool applyUpdates(jsi::Runtime &runtime, double recorderId,
+                    const jsi::Array &values) override {
+    return _producer->applyUpdates(runtime, recorderId, values);
   }
+
+  /**
+   Releases the declarative content without scheduling a frame: the host
+   view is torn down (on Android the native view outlives the Java view
+   until it is finalized).
+   */
+  void clearContent() { _producer->clear(); }
 
   void setNativeId(size_t nativeId) override {
     RNSkView::setNativeId(nativeId);

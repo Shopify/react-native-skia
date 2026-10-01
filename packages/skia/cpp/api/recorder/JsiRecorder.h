@@ -70,18 +70,7 @@ public:
       throw jsi::JSError(runtime, "Invalid Picture object provided to play()");
     }
 
-    // Create a new picture recorder to record into
-    SkPictureRecorder pictureRecorder;
-    SkISize size = SkISize::Make(2'000'000, 2'000'000);
-    SkRect rect = SkRect::Make(size);
-    auto canvas = pictureRecorder.beginRecording(rect, nullptr);
-
-    // Play the recorded commands into the canvas
-    DrawingCtx ctx(canvas);
-    getObject()->play(&ctx);
-
-    // Finish recording and get the new picture
-    auto newPicture = pictureRecorder.finishRecordingAsPicture();
+    auto newPicture = getObject()->makePicture();
 
     // Update the existing JsiSkPicture object with the new SkPicture
     // This reuses the existing JavaScript object instead of creating a new one
@@ -98,6 +87,8 @@ public:
     getObject()->applyUpdates(runtime, values);
     return jsi::Value::undefined();
   }
+
+  JSI_HOST_FUNCTION(getId) { return jsi::Value(getObject()->id); }
 
   JSI_HOST_FUNCTION(saveGroup) {
     const jsi::Value *value = count > 0 ? &arguments[0] : nullptr;
@@ -363,13 +354,16 @@ public:
     installHostMethod(runtime, prototype, "applyUpdates",
                       &JsiRecorder::applyUpdates);
     installHostMethod(runtime, prototype, "reset", &JsiRecorder::reset);
+    installHostMethod(runtime, prototype, "getId", &JsiRecorder::getId);
   }
 
   // The recorder itself is a small command list. The resources it references
   // (images, pictures, paths) report their own size through their wrappers
   // and the pictures produced by play() report theirs. Do not put a made-up
-  // number here: a new recorder is created on every React commit and the
-  // charge is repeated each time it is unboxed on the UI runtime.
+  // number here: a new recorder is created on every React commit, and the
+  // wrapper is disposed as soon as the view takes ownership of the recording
+  // (see NativeReanimatedContainer), so the charge would never drive a
+  // collection anyway.
   size_t getMemoryPressure() override { return kMinMemoryPressure; }
 
   static const jsi::HostFunctionType

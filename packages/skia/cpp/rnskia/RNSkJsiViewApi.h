@@ -78,6 +78,19 @@ public:
     return func(info);
   }
 
+  // Runs func on an existing entry under the registry's shared lock. Unlike
+  // withViewInfo(), this never creates an entry: func is not called for an
+  // unknown id. Other readers may hold the entry at the same time, so func
+  // must not modify it; the objects its props reference may be modified
+  // under their own lock.
+  template <typename F> void withExistingViewInfo(size_t id, F &&func) {
+    std::shared_lock<std::shared_mutex> lock(_mutex);
+    auto it = _registry.find(id);
+    if (it != _registry.end()) {
+      func(it->second);
+    }
+  }
+
   // Read-only lookup: never creates a registry entry.
   std::shared_ptr<RNSkView> getView(size_t id) {
     std::shared_lock<std::shared_mutex> lock(_mutex);
@@ -134,12 +147,8 @@ public:
     ViewRegistry::getInstance().withViewInfo(
         nativeId, [&](std::shared_ptr<RNSkViewInfo> info) {
           auto name = arguments[1].asString(runtime).utf8(runtime);
-          auto property =
-              name == "recorder"
-                  ? RNJsi::ViewProperty(RNSkPictureRenderer::recorderFromValue(
-                        runtime, arguments[2]))
-                  : RNJsi::ViewProperty(runtime, arguments[2]);
-          info->props.insert_or_assign(name, std::move(property));
+          info->props.insert_or_assign(
+              name, RNJsi::ViewProperty(runtime, arguments[2]));
           // Now let's see if we have a view that we can update
           if (info->view != nullptr) {
             // Update view!
@@ -179,26 +188,51 @@ public:
   }
 
   /**
-   Reads the given shared values into the recorder owned by the view and
+   Reads the given shared values into the recording held for the view and
    schedules a redraw. Called from the Reanimated mapper on every frame; the
-   only things crossing runtimes are the view id and the shared values.
+   only things crossing runtimes are the view id, the recording id and the
+   shared values. The recording is either owned by the view or, until the
+   view registers, queued for it in the registry. Updates for a recording
+   that is neither (a stale mapper, a view that has been torn down) are
+   ignored.
    */
   JSI_HOST_FUNCTION(applyUpdates) {
-    if (count != 2 || !arguments[0].isNumber() || !arguments[1].isObject() ||
-        !arguments[1].asObject(runtime).isArray(runtime)) {
+    if (count != 3 || !arguments[0].isNumber() || !arguments[1].isNumber() ||
+        !arguments[2].isObject() ||
+        !arguments[2].asObject(runtime).isArray(runtime)) {
       _platformContext->raiseError(
-          "applyUpdates: expected (nativeId: number, values: SharedValue[])");
+          "applyUpdates: expected (nativeId: number, recorderId: number, "
+          "values: SharedValue[])");
       return jsi::Value::undefined();
     }
     int nativeId = arguments[0].asNumber();
-    auto view = ViewRegistry::getInstance().getView(nativeId);
+    auto recorderId = arguments[1].asNumber();
+    auto values = arguments[2].asObject(runtime).asArray(runtime);
+    std::shared_ptr<RNSkView> view;
+    ViewRegistry::getInstance().withExistingViewInfo(
+        nativeId, [&](const std::shared_ptr<RNSkViewInfo> &info) {
+          view = info->view;
+          if (view != nullptr) {
+            return;
+          }
+          // The view has not registered yet (or is detached, which on iOS
+          // destroys it): the recording waits in the registry and is drawn,
+          // with whatever values it holds by then, once a view registers.
+          // Keep it current, under the registry lock so that a registration
+          // cannot slip in between; the first frame would otherwise show
+          // the values from recording time until the next change.
+          auto it = info->props.find("recorder");
+          if (it != info->props.end() && it->second.isRecorder()) {
+            RNSkPictureRenderer::applyUpdatesTo(it->second.getRecorder(),
+                                                runtime, recorderId, values);
+          }
+        });
     if (view == nullptr) {
-      // The view is not mounted (yet, or anymore): the recorder was recorded
-      // with the current values, or has been released. Nothing to update.
       return jsi::Value::undefined();
     }
-    auto values = arguments[1].asObject(runtime).asArray(runtime);
-    view->applyUpdates(runtime, values);
+    // Outside the registry lock: the update must not hold up the commits
+    // and registrations of other views. The view schedules its own frame.
+    view->applyUpdates(runtime, recorderId, values);
     return jsi::Value::undefined();
   }
 
