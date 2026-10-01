@@ -36,6 +36,7 @@ import {
   Pictures,
   WebGPU,
   HighBitDepth,
+  Graphite,
   AndroidViews,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
@@ -45,6 +46,9 @@ import { useAssets } from "./Tests/useAssets";
 import { Chess } from "./Examples/Chess";
 import { apiScreenPaths } from "./Examples/API/linking";
 import "./resolveAssetSourcePolyfill";
+// The two lines below are needed by three.js
+import "fast-text-encoding";
+window.parent = window;
 
 const linking: LinkingOptions<StackParamList> = {
   config: {
@@ -82,6 +86,7 @@ const linking: LinkingOptions<StackParamList> = {
       Pictures: "pictures",
       WebGPU: "webgpu",
       HighBitDepth: "high-bit-depth",
+      Graphite: "graphite",
       AndroidViews: "android-views",
     },
   },
@@ -253,6 +258,7 @@ const App = () => {
               }}
             />
             <Stack.Screen name="HighBitDepth" component={HighBitDepth} />
+            <Stack.Screen name="Graphite" component={Graphite} />
             <Stack.Screen name="AndroidViews" component={AndroidViews} />
           </Stack.Navigator>
         </NavigationContainer>

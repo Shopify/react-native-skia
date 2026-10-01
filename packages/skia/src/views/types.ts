@@ -1,6 +1,13 @@
 import type { ViewProps } from "react-native";
+import type { SharedValue } from "react-native-reanimated";
 
-import type { SkImage, SkPicture, SkRect, SkSize } from "../skia/types";
+import type {
+  SkGraphiteContext,
+  SkImage,
+  SkPicture,
+  SkRect,
+  SkSize,
+} from "../skia/types";
 
 export type NativeSkiaViewProps = ViewProps & {
   debug?: boolean;
@@ -27,9 +34,32 @@ export interface ISkiaViewApi {
   web?: boolean;
   setJsiProperty: <T>(nativeId: number, name: string, value: T) => void;
   requestRedraw: (nativeId: number) => void;
+  /**
+   * Reads the shared values into the recording held for the view and
+   * schedules a redraw. Native only; called from a worklet on every frame.
+   * Until the view registers, the recording is queued for it and kept
+   * current all the same. Ignored when the recording `recorderId` is neither
+   * held by the view nor queued for it.
+   */
+  applyUpdates: (
+    nativeId: number,
+    recorderId: number,
+    values: SharedValue<unknown>[]
+  ) => void;
   makeImageSnapshot: (nativeId: number, rect?: SkRect) => SkImage;
   makeImageSnapshotAsync: (nativeId: number, rect?: SkRect) => Promise<SkImage>;
   size: (nativeId: number) => SkSize;
+  /**
+   * The recording side of a SkiaGraphiteView: its native id, the layout size
+   * in points, and the props its surface format follows from. Graphite only.
+   */
+  makeGraphiteContext: (
+    nativeId: number,
+    width: number,
+    height: number,
+    opaque: boolean,
+    highBitDepth: boolean
+  ) => SkGraphiteContext;
 }
 
 export interface SkiaBaseViewProps extends ViewProps {
@@ -65,3 +95,5 @@ export interface SkiaPictureViewNativeProps extends SkiaBaseViewProps {
   picture?: SkPicture;
   androidWarmup?: boolean;
 }
+
+export type SkiaGraphiteViewNativeProps = SkiaBaseViewProps;

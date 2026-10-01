@@ -148,8 +148,8 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
         surfaceSizeChanged(surface, width, height, true, mAppliedHighBitDepth);
     }
 
-    // TextureView callbacks: the native side receives a SurfaceTexture and
-    // drives updateTexImage itself. The 10-bit format is never used here.
+    // TextureView callbacks: the native side receives the SurfaceTexture and
+    // creates the Surface it draws into. The 10-bit format is never used here.
 
     @Override
     public void onSurfaceTextureCreated(SurfaceTexture surface, int width, int height) {

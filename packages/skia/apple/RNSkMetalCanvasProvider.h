@@ -6,6 +6,9 @@
 #import <MetalKit/MetalKit.h>
 #import <QuartzCore/CAMetalLayer.h>
 
+#include <mutex>
+#include <vector>
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -26,6 +29,13 @@ public:
 
   bool renderToCanvas(const std::function<void(SkCanvas *)> &cb) override;
 
+#if defined(SK_GRAPHITE)
+  bool getGraphiteTargetInfo(RNSkia::RNSkGraphiteTargetInfo *info) override;
+
+  bool presentRecordings(
+      const std::vector<skgpu::graphite::Recording *> &recordings) override;
+#endif
+
   void setSize(int width, int height);
   void setUseP3ColorSpace(bool useP3ColorSpace);
   void setHighBitDepth(bool highBitDepth);
@@ -40,4 +50,11 @@ private:
 #pragma clang diagnostic pop
   bool _useP3ColorSpace = true;
   bool _highBitDepth = false;
+#if defined(SK_GRAPHITE)
+  // A copy of the window's target description, readable from any thread
+  // while the window itself belongs to the main thread.
+  std::mutex _targetInfoMutex;
+  RNSkia::RNSkGraphiteTargetInfo _targetInfo;
+  bool _hasTargetInfo = false;
+#endif
 };

@@ -16,4 +16,30 @@ void DawnWindowContext::present() {
   _surface.Present();
 }
 
+bool DawnWindowContext::presentRecordings(
+    const std::vector<skgpu::graphite::Recording *> &recordings) {
+  wgpu::SurfaceTexture surfaceTexture;
+  _surface.GetCurrentTexture(&surfaceTexture);
+  auto texture = surfaceTexture.texture;
+  if (!texture) {
+    return false;
+  }
+  // The surface only names the replay target; wrapping the swapchain texture
+  // records nothing on the window's recorder.
+  auto backendTex = skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
+  SkSurfaceProps surfaceProps;
+  auto surface = SkSurfaces::WrapBackendTexture(
+      _recorder, backendTex, SkColorSpace::MakeSRGB(), &surfaceProps);
+  if (!surface) {
+    return false;
+  }
+  bool success =
+      DawnContext::getInstance().insertRecordings(recordings, surface.get());
+#ifdef __APPLE__
+  dawn::native::metal::WaitForCommandsToBeScheduled(_device.Get());
+#endif
+  _surface.Present();
+  return success;
+}
+
 } // namespace RNSkia

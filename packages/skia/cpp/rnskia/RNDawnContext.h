@@ -6,6 +6,9 @@
 #include "RNDawnUtils.h"
 #include "RNDawnWindowContext.h"
 #include "RNImageProvider.h"
+#include "utils/RNSkLog.h"
+
+#include <vector>
 
 #include "include/core/SkColorSpace.h"
 #include "include/core/SkData.h"
@@ -91,6 +94,43 @@ public:
     auto rasterImage =
         SkImages::RasterFromData(image->imageInfo(), data, bytesPerRow);
     return rasterImage;
+  }
+
+  // A recorder of its own for a client that records on one thread and replays
+  // on another (SkiaGraphiteView): unlike getRecorder() it is not tied to the
+  // calling thread. Creating a recorder is a Context operation, hence the lock.
+  std::unique_ptr<skgpu::graphite::Recorder> makeRecorder() {
+    std::lock_guard<std::mutex> lock(_mutex);
+    skgpu::graphite::RecorderOptions options;
+    options.fImageProvider = ImageProvider::Make();
+    return fGraphiteContext->makeRecorder(options);
+  }
+
+  // Replays the recordings, in order, onto the target surface (a deferred
+  // canvas target) and submits them as one batch. Returns false if any of
+  // them was rejected; the others are still submitted.
+  bool
+  insertRecordings(const std::vector<skgpu::graphite::Recording *> &recordings,
+                   SkSurface *targetSurface) {
+    std::lock_guard<std::mutex> lock(_mutex);
+    bool success = true;
+    for (auto *recording : recordings) {
+      skgpu::graphite::InsertRecordingInfo info;
+      info.fRecording = recording;
+      info.fTargetSurface = targetSurface;
+      auto status = fGraphiteContext->insertRecording(info);
+      // InsertStatus converts to true on success.
+      if (!static_cast<bool>(status)) {
+        RNSkLogger::logToConsole(
+            "Graphite rejected a recording (InsertStatus %d): %s",
+            static_cast<int>(
+                static_cast<skgpu::graphite::InsertStatus::V>(status)),
+            status.message().c_str());
+        success = false;
+      }
+    }
+    fGraphiteContext->submit();
+    return success;
   }
 
   void submitRecording(
@@ -263,6 +303,39 @@ public:
 
     return SkImages::WrapTexture(
         getRecorder(), backendTexture, colorType, kPremul_SkAlphaType, nullptr,
+        [](void *context) {
+          auto ref = static_cast<TextureRef *>(context);
+          delete ref;
+        },
+        textureRef);
+  }
+
+  // Create an SkSurface that draws straight into a WebGPU texture (zero-copy).
+  // The texture must have RenderAttachment usage; give it TextureBinding too
+  // to sample it from WebGPU (e.g. as a three.js texture) after each flush.
+  // The surface retains the texture for its lifetime.
+  sk_sp<SkSurface> MakeSurfaceFromTexture(wgpu::Texture texture) {
+    if (!texture) {
+      return nullptr;
+    }
+    if (!(texture.GetUsage() & wgpu::TextureUsage::RenderAttachment)) {
+      throw std::runtime_error(
+          "MakeSurfaceFromTexture: the texture needs RenderAttachment usage");
+    }
+
+    skgpu::graphite::BackendTexture backendTexture =
+        skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
+
+    struct TextureRef {
+      wgpu::Texture texture;
+    };
+    auto textureRef = new TextureRef{texture};
+
+    // The color type is derived from the texture format.
+    return SkSurfaces::WrapBackendTexture(
+        getRecorder(), backendTexture,
+        nullptr, // colorspace
+        nullptr, // surfaceProps
         [](void *context) {
           auto ref = static_cast<TextureRef *>(context);
           delete ref;

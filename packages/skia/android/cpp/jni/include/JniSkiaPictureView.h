@@ -69,8 +69,8 @@ protected:
                                       highBitDepth);
   }
 
-  void surfaceSizeChanged(jobject surface, int width, int height, bool isSurface,
-                          bool highBitDepth) override {
+  void surfaceSizeChanged(jobject surface, int width, int height,
+                          bool isSurface, bool highBitDepth) override {
     JniSkiaBaseView::surfaceSizeChanged(surface, width, height, isSurface,
                                         highBitDepth);
   }
@@ -83,7 +83,18 @@ protected:
     JniSkiaBaseView::registerView(nativeId);
   }
 
-  void unregisterView() override { JniSkiaBaseView::unregisterView(); }
+  void unregisterView() override {
+    JniSkiaBaseView::unregisterView();
+    // React drops the Java view here, but the native view behind it (and the
+    // recording it owns) is only destroyed when the Java object is finalized.
+    // Release the content now so it does not wait for the Java garbage
+    // collector.
+    if (_skiaAndroidView != nullptr) {
+      auto renderer = std::static_pointer_cast<RNSkia::RNSkPictureRenderer>(
+          _skiaAndroidView->getSkiaView()->getRenderer());
+      renderer->clear();
+    }
+  }
 
   jni::local_ref<jni::JArrayInt> getBitmap(int width, int height) override {
     // Get the RNSkPictureView from the android view
@@ -100,9 +111,6 @@ protected:
     if (!renderer) {
       return jni::JArrayInt::newArray(0);
     }
-
-    // Get the SkPicture from the renderer
-    sk_sp<SkPicture> picture = renderer->getPicture();
 
     const size_t pixelCount =
         static_cast<size_t>(width) * static_cast<size_t>(height);
@@ -126,15 +134,8 @@ protected:
       return jni::JArrayInt::newArray(0);
     }
 
-    canvas->clear(SK_ColorTRANSPARENT);
-
-    if (picture) {
-      auto pd = pictureView->getPixelDensity();
-      canvas->save();
-      canvas->scale(pd, pd);
-      canvas->drawPicture(picture);
-      canvas->restore();
-    }
+    // Draws whatever the view currently shows: a picture or a recorder.
+    renderer->drawInto(canvas, pictureView->getPixelDensity());
 
     sk_sp<SkImage> snapshot = surface->makeImageSnapshot();
     if (!snapshot) {
