@@ -71,11 +71,6 @@ public:
     _requestRedraw();
   }
 
-  sk_sp<SkPicture> getPicture() const {
-    std::lock_guard<std::mutex> lock(_mutex);
-    return _picture;
-  }
-
   /**
    * Takes ownership of a recorder. The previous recorder (and the resources
    * its commands reference) is released here; Recorder's destructor moves
@@ -117,12 +112,6 @@ public:
    * commands. Returns false when there is no recorder to update.
    */
   bool applyUpdates(jsi::Runtime &runtime, const jsi::Array &values);
-
-  /**
-   * Extracts the native recorder from a JS Recorder object, or nullptr.
-   */
-  static std::shared_ptr<Recorder> recorderFromValue(jsi::Runtime &runtime,
-                                                     const jsi::Value &value);
 
   /**
    * Draws the current content (recorder or picture) into the canvas, scaled

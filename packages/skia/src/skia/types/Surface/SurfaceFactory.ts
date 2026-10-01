@@ -38,8 +38,10 @@ export interface SurfaceFactory {
    * (zero-copy). The texture must be created on Skia's device
    * (importDevice(Skia.getNativeDevice())) with RENDER_ATTACHMENT usage; add
    * TEXTURE_BINDING to sample what Skia drew from WebGPU after each flush().
-   * The surface only borrows the texture: the caller keeps ownership of the
-   * GPUTexture and must keep it alive as long as the surface.
+   * The surface holds its own reference to the texture and keeps it alive
+   * for its lifetime, so the caller may release the GPUTexture once the
+   * surface exists. Calling destroy() on the GPUTexture still invalidates
+   * the surface.
    *
    * Note: This method is only available when the Graphite backend is enabled.
    *

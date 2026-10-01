@@ -79,9 +79,9 @@ public:
       throw std::runtime_error(
           "MakeFromNativeTexture: pointer must be non-null");
     }
-    // Borrow: AddRef so our wgpu::Texture holds its own reference; the
-    // surface retains the texture for its lifetime and the caller keeps
-    // ownership of the JS GPUTexture.
+    // AddRef so our wgpu::Texture holds its own reference: the surface keeps
+    // the texture alive for its lifetime, and the JS GPUTexture keeps its own
+    // reference, which the caller may release once the surface exists.
     wgpuTextureAddRef(raw);
     wgpu::Texture texture = wgpu::Texture::Acquire(raw);
     auto surface = DawnContext::getInstance().MakeSurfaceFromTexture(texture);

@@ -129,12 +129,8 @@ public:
     ViewRegistry::getInstance().withViewInfo(
         nativeId, [&](std::shared_ptr<RNSkViewInfo> info) {
           auto name = arguments[1].asString(runtime).utf8(runtime);
-          auto property =
-              name == "recorder"
-                  ? RNJsi::ViewProperty(RNSkPictureRenderer::recorderFromValue(
-                        runtime, arguments[2]))
-                  : RNJsi::ViewProperty(runtime, arguments[2]);
-          info->props.insert_or_assign(name, std::move(property));
+          info->props.insert_or_assign(
+              name, RNJsi::ViewProperty(runtime, arguments[2]));
           // Now let's see if we have a view that we can update
           if (info->view != nullptr) {
             // Update view!

@@ -81,6 +81,7 @@ add_library(
         "${PROJECT_SOURCE_DIR}/../cpp/jsi/JSICache.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/jsi/JsiPromises.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/jsi/Promise.cpp"
+        "${PROJECT_SOURCE_DIR}/../cpp/jsi/ViewProperty.cpp"
 
         "${PROJECT_SOURCE_DIR}/../cpp/rnskia/RNSkManager.cpp"
         "${PROJECT_SOURCE_DIR}/../cpp/rnskia/RNSkPictureView.cpp"
