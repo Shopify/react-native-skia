@@ -149,7 +149,9 @@ export function Wireframes() {
       bounds,
       rect(20, 20, width - 40, height - 40)
     );
-    const transformed = logo.transform(processTransform3d(transform));
+    const transformed = Skia.PathBuilder.MakeFromPath(logo)
+      .transform(processTransform3d(transform))
+      .build();
     const trimmed = Skia.Path.Trim(transformed, 0, progress.value, false);
     if (!trimmed) {
       return transformed;
@@ -499,7 +501,9 @@ export function Wireframes() {
       device.queue.submit([commandBuffer]);
 
       // Convert texture to SkImage
-      const skImage = Skia.Image.MakeImageFromNativeTexture(texture.nativePointer);
+      const skImage = Skia.Image.MakeImageFromNativeTexture(
+        texture.nativePointer
+      );
       setImage(skImage);
     };
 

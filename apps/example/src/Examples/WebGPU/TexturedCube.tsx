@@ -55,17 +55,19 @@ const breatheColors = ["#529ca0", "#61bea2"];
 // Hello path
 const helloSvg =
   "M13.6 247.8C13.6 247.8 51.8 206.1 84.2 168.8 140.8 103.4 202.8 27.1 150.1 14.3 131 9.7 116.4 29.3 107.3 44.8 69.7 108.4 58 213.8 57.5 302 67.7 271.3 104.4 190.3 140.2 192.5 181.5 195.1 145.3 257 154.5 283.8 168.8 321.6 208.2 292.3 230 276.9 265.9 251.5 289 230.7 289 199.9 289 161 235.3 173.5 223.3 204.6 213.9 228.9 214.3 265.3 229.3 283.6 247.5 305.7 287.7 309.4 312.2 287.9 337 266.2 354.7 234 368.7 212.5 403.9 158.3 464.4 85.6 449.1 29.5 447 21.9 440.4 16 432.5 15.7 393.6 14.2 381.8 98.6 375.3 128.8 368.8 159.3 345.2 260.8 373.1 292.5 404.4 328 446.3 261.9 464.7 231.1 468.7 224.8 472.6 217.9 476.1 212.5 511.3 158.4 571.8 85.6 556.5 29.5 554.4 21.9 547.8 16.1 539.9 15.8 501 14.2 489.2 98.7 482.8 128.8 476.2 159.3 452.6 260.8 480.5 292.6 511.8 328.1 562.4 265 572.6 232.3 587.3 185.4 620.9 171 660.9 179.7M660.9 179.7C616 166.1 580.9 199.1 572.6 232.6 566.8 256.4 573.5 281.6 599.2 295.2 668.5 331.9 742.8 211.1 660.9 179.7ZM660.9 179.7C643.7 181.3 636.1 204.2 643.3 227.2 654.3 263.4 704.3 267.7 733.1 255.5";
-const helloPath = Skia.Path.MakeFromSVGString(helloSvg)!;
-const helloBounds = helloPath.computeTightBounds();
-helloPath.transform(
-  processTransform3d(
-    fitbox(
-      "contain",
-      helloBounds,
-      rect(30, 30, TEXTURE_SIZE - 60, TEXTURE_SIZE - 60)
+const helloSvgPath = Skia.Path.MakeFromSVGString(helloSvg)!;
+const helloBounds = helloSvgPath.computeTightBounds();
+const helloPath = Skia.PathBuilder.MakeFromPath(helloSvgPath)
+  .transform(
+    processTransform3d(
+      fitbox(
+        "contain",
+        helloBounds,
+        rect(30, 30, TEXTURE_SIZE - 60, TEXTURE_SIZE - 60)
+      )
     )
   )
-);
+  .build();
 
 // Paragraph fonts
 const paragraphFonts = {
@@ -78,9 +80,10 @@ const paragraphFonts = {
 function drawTexture1(canvas: SkCanvas, t: number) {
   canvas.drawColor(Skia.Color("white"));
   const progress = (Math.sin(t * 0.8) + 1) / 2;
-  const trimmed = helloPath.copy();
-  trimmed.trim(0, progress, false);
-  trimmed.stroke({ width: 25, join: StrokeJoin.Round, cap: StrokeCap.Round });
+  const trimmed = Skia.Path.Stroke(
+    Skia.Path.Trim(helloPath, 0, progress, false) ?? helloPath,
+    { width: 25, join: StrokeJoin.Round, cap: StrokeCap.Round }
+  )!;
   paint.setShader(
     Skia.Shader.MakeLinearGradient(
       { x: 0, y: 0 },
