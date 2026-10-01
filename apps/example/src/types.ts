@@ -38,5 +38,6 @@ export type StackParamList = {
   WebGPU: undefined;
   HighBitDepth: undefined;
   Graphite: undefined;
+  GraphiteCanvas: undefined;
   AndroidViews: undefined;
 };

@@ -1,6 +1,7 @@
 #import "SkiaGraphiteView.h"
 
 #import <React/RCTConversions.h>
+#import <React/RCTConvert.h>
 #import <React/RCTFabricComponentsPlugins.h>
 #import <React/RCTLog.h>
 
@@ -18,7 +19,7 @@ using namespace facebook::react;
 #import "RNSkAppleView.h"
 #import "RNSkGraphiteView.h"
 #import "RNSkPlatformContext.h"
-#import "SkiaManager.h"
+#import "RNSkiaModule.h"
 
 @implementation SkiaGraphiteView {
 #if !TARGET_OS_OSX
@@ -29,7 +30,7 @@ using namespace facebook::react;
 - (instancetype)initWithFrame:(CGRect)frame {
   if (self = [super initWithFrame:frame]) {
     // Pass SkManager as a raw pointer to avoid circular dependencies
-    auto skManager = [SkiaManager latestActiveSkManager].get();
+    auto skManager = [RNSkiaModule latestActiveSkManager].get();
     [self initCommon:skManager
              factory:[](std::shared_ptr<RNSkia::RNSkPlatformContext> context) {
                return std::make_shared<RNSkAppleView<RNSkia::RNSkGraphiteView>>(

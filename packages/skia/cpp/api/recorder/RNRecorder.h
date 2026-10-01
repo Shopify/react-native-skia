@@ -392,7 +392,14 @@ public:
    * registered as variable0, variable1, ...) on the calling runtime and
    * writes it into the recorded commands.
    */
-  void applyUpdates(jsi::Runtime &runtime, const jsi::Array &values) {
+  /**
+   Reads the shared values on the calling runtime and hands each resulting
+   write to the callback, in order. The writes do not need the runtime: the
+   caller applies them on whichever thread owns the commands.
+   */
+  template <typename F>
+  void readUpdates(jsi::Runtime &runtime, const jsi::Array &values,
+                   F &&onWrite) {
     auto size = values.size(runtime);
     for (size_t i = 0; i < size; i++) {
       auto sharedValue = values.getValueAtIndex(runtime, i).asObject(runtime);
@@ -400,10 +407,19 @@ public:
       auto it = variables.find(name);
       if (it != variables.end()) {
         for (const auto &conversionFunc : it->second) {
-          conversionFunc(runtime, sharedValue);
+          if (auto write = conversionFunc(runtime, sharedValue)) {
+            onWrite(std::move(write));
+          }
         }
       }
     }
+  }
+
+  /**
+   Reads the shared values and writes them into the commands right away.
+   */
+  void applyUpdates(jsi::Runtime &runtime, const jsi::Array &values) {
+    readUpdates(runtime, values, [](PendingWrite write) { write(); });
   }
 };
 

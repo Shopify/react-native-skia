@@ -197,12 +197,8 @@ public:
       // with the current values, or has been released. Nothing to update.
       return jsi::Value::undefined();
     }
-    auto renderer =
-        std::static_pointer_cast<RNSkPictureRenderer>(view->getRenderer());
     auto values = arguments[1].asObject(runtime).asArray(runtime);
-    if (renderer->applyUpdates(runtime, values)) {
-      view->requestRedraw();
-    }
+    view->applyUpdates(runtime, values);
     return jsi::Value::undefined();
   }
 

@@ -70,7 +70,7 @@ const drawFrame = (
 
 // A GPU-backed image: drawn into an offscreen surface on the JS thread and
 // sampled by both views.
-const useGpuImage = () =>
+export const useGpuImage = () =>
   useMemo(() => {
     const size = 256;
     const surface = Skia.Surface.MakeOffscreen(size, size);

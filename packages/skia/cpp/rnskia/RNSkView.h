@@ -230,6 +230,15 @@ public:
   virtual void setJsiProperties(
       std::unordered_map<std::string, RNJsi::ViewProperty> &props) = 0;
 
+  /**
+   Reads the shared values on the calling runtime into the content the view
+   draws and schedules a frame. Returns false when there is nothing to
+   update (no recorder).
+   */
+  virtual bool applyUpdates(jsi::Runtime &runtime, const jsi::Array &values) {
+    return false;
+  }
+
   void requestRedraw() {
     if (!_redrawRequested) {
       _redrawRequested = true;

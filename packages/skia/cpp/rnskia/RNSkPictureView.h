@@ -167,5 +167,15 @@ public:
       }
     }
   }
+
+  bool applyUpdates(jsi::Runtime &runtime, const jsi::Array &values) override {
+    auto renderer =
+        std::static_pointer_cast<RNSkPictureRenderer>(getRenderer());
+    if (!renderer->applyUpdates(runtime, values)) {
+      return false;
+    }
+    requestRedraw();
+    return true;
+  }
 };
 } // namespace RNSkia

@@ -166,6 +166,13 @@ export const HomeScreen = () => {
           route="Graphite"
         />
       )}
+      {hasGraphite && (
+        <HomeScreenButton
+          title="🗿 Canvas2"
+          description="Declarative canvas on the Graphite view, replayed off-thread"
+          route="GraphiteCanvas"
+        />
+      )}
       <HomeScreenButton
         title="🤖 Android Views"
         description="SurfaceView vs TextureView"

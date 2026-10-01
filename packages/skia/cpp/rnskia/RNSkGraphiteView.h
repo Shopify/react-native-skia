@@ -14,6 +14,7 @@
 
 #include "RNDawnContext.h"
 #include "RNDawnUtils.h"
+#include "RNSkGraphiteProducer.h"
 #include "RNSkPlatformContext.h"
 #include "RNSkView.h"
 #include "jsi/ViewProperty.h"
@@ -365,6 +366,19 @@ public:
   }
 
   /**
+   Called on the main thread after each presented frame (the producer paces
+   itself on it) and whenever the view asks for a redraw: a new surface, a
+   resize, or SkiaViewApi.requestRedraw. Set once, at construction.
+   */
+  void setOnPresented(std::function<void()> callback) {
+    _onPresented = std::move(callback);
+  }
+
+  void setOnRedraw(std::function<void()> callback) {
+    _onRedraw = std::move(callback);
+  }
+
+  /**
    Presents everything submitted since the last frame. With nothing queued,
    presents the last frame again: a redraw after a resize or on a new
    surface. Without a surface the queue is left alone: the surface presents
@@ -375,6 +389,11 @@ public:
     RNSkGraphiteTargetInfo targetInfo;
     if (!canvasProvider->getGraphiteTargetInfo(&targetInfo)) {
       return;
+    }
+    // Declarative content is re-recorded for the surface as it is now;
+    // meanwhile the last frame is presented again below.
+    if (_onRedraw) {
+      _onRedraw();
     }
     std::shared_ptr<RNSkGraphiteTarget> target;
     std::shared_ptr<RNSkGraphiteRecording> lastPresented;
@@ -485,25 +504,42 @@ private:
     }
     if (raw.empty()) {
       // Nothing presentable: the recordings are consumed, not kept.
+      if (remember) {
+        notifyPresented();
+      }
       return true;
     }
     bool success = provider->presentRecordings(raw);
     if (success && remember) {
-      std::lock_guard<std::mutex> lock(_mutex);
-      _lastPresented = last;
+      {
+        std::lock_guard<std::mutex> lock(_mutex);
+        _lastPresented = last;
+      }
+      notifyPresented();
     }
     return success;
+  }
+
+  void notifyPresented() {
+    if (_onPresented) {
+      _onPresented();
+    }
   }
 
   std::mutex _mutex;
   std::shared_ptr<RNSkGraphiteTarget> _target;
   std::shared_ptr<RNSkGraphiteRecording> _lastPresented;
+  std::function<void()> _onPresented;
+  std::function<void()> _onRedraw;
 };
 
 /**
- * A view that presents Graphite recordings. JS records frames through the
- * target (SkiaViewApi.makeGraphiteContext); the platform view presents them
- * on its display link. Only available with the Graphite backend.
+ * A view that presents Graphite recordings. Frames come from one of two
+ * producers: JS records them itself through the target
+ * (SkiaViewApi.makeGraphiteContext), or <Canvas2> hands over a recorder (or a
+ * picture) that the render thread pool records for the view. The platform
+ * view presents them on its display link. Only available with the Graphite
+ * backend.
  */
 class RNSkGraphiteView : public RNSkView {
 public:
@@ -511,7 +547,20 @@ public:
                    std::shared_ptr<RNSkCanvasProvider> canvasProvider)
       : RNSkView(context, canvasProvider,
                  std::make_shared<RNSkGraphiteRenderer>(
-                     std::bind(&RNSkGraphiteView::requestRedraw, this))) {}
+                     std::bind(&RNSkGraphiteView::requestRedraw, this))),
+        _producer(std::make_shared<RNSkGraphiteProducer>(context)) {
+    std::weak_ptr<RNSkGraphiteProducer> weakProducer = _producer;
+    getGraphiteRenderer()->setOnPresented([weakProducer]() {
+      if (auto producer = weakProducer.lock()) {
+        producer->onFramePresented();
+      }
+    });
+    getGraphiteRenderer()->setOnRedraw([weakProducer]() {
+      if (auto producer = weakProducer.lock()) {
+        producer->requestFrame();
+      }
+    });
+  }
 
   ~RNSkGraphiteView() override {
     if (_target) {
@@ -519,9 +568,23 @@ public:
     }
   }
 
-  // No JSI properties: frames arrive through the target.
+  /** Declarative content: the recorder of <Canvas2>, or a picture. */
   void setJsiProperties(
-      std::unordered_map<std::string, RNJsi::ViewProperty> &props) override {}
+      std::unordered_map<std::string, RNJsi::ViewProperty> &props) override {
+    for (auto &prop : props) {
+      if (prop.first == "recorder") {
+        _producer->setRecorder(
+            prop.second.isRecorder() ? prop.second.getRecorder() : nullptr);
+      } else if (prop.first == "picture") {
+        _producer->setPicture(prop.second.isPicture() ? prop.second.getPicture()
+                                                      : nullptr);
+      }
+    }
+  }
+
+  bool applyUpdates(jsi::Runtime &runtime, const jsi::Array &values) override {
+    return _producer->applyUpdates(runtime, values);
+  }
 
   void setNativeId(size_t nativeId) override {
     RNSkView::setNativeId(nativeId);
@@ -546,6 +609,7 @@ public:
       });
     };
     _target->attach(getCanvasProvider(), scheduleOnMainThread);
+    _producer->setTarget(_target);
     // Frames recorded before the view existed are presented now.
     if (_target->hasQueued()) {
       scheduleOnMainThread();
@@ -579,12 +643,22 @@ public:
 
   bool hasQueuedRecordings() { return _target && _target->hasQueued(); }
 
-  /** Replays the current frame into an offscreen surface. */
+  /**
+   Renders the view into an offscreen surface: declarative content is
+   replayed on the calling thread with the latest values, so the snapshot
+   does not wait for a frame; otherwise the current frame is replayed.
+   */
   sk_sp<SkImage> makeImageSnapshot(SkRect *bounds) override {
     auto provider = std::make_shared<RNSkOffscreenCanvasProvider>(
         getPlatformContext(), std::bind(&RNSkView::requestRedraw, this),
         getScaledWidth(), getScaledHeight());
-    getGraphiteRenderer()->renderLastFrame(provider);
+    if (_producer->hasContent()) {
+      auto pd = getPlatformContext()->getPixelDensity();
+      provider->renderToCanvas(
+          [this, pd](SkCanvas *canvas) { _producer->renderInto(canvas, pd); });
+    } else {
+      getGraphiteRenderer()->renderLastFrame(provider);
+    }
     return provider->makeSnapshot(bounds);
   }
 
@@ -593,6 +667,7 @@ private:
     return std::static_pointer_cast<RNSkGraphiteRenderer>(getRenderer());
   }
 
+  std::shared_ptr<RNSkGraphiteProducer> _producer;
   std::shared_ptr<RNSkGraphiteTarget> _target;
   size_t _targetId = 0;
   std::function<void()> _frameScheduler;
