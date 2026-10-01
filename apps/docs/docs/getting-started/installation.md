@@ -150,6 +150,18 @@ const texture = adoptTexture(Skia.Image.MakeNativeTextureFromImage(image));
 
 // Use a WebGPU texture as an SkImage
 const skImage = Skia.Image.MakeImageFromNativeTexture(texture.nativePointer);
+
+// Draw with Skia directly into a WebGPU texture (zero-copy): create the
+// texture on the shared device with RENDER_ATTACHMENT usage (and
+// TEXTURE_BINDING to sample it), wrap it once, then draw and flush per frame.
+const target = device.createTexture({
+  size: [width, height],
+  format: navigator.gpu.getPreferredCanvasFormat(),
+  usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
+});
+const skSurface = Skia.Surface.MakeFromNativeTexture(target.nativePointer);
+skSurface.getCanvas().drawCircle(width / 2, height / 2, 100, paint);
+skSurface.flush();
 ```
 
 Both packages must link the exact same Dawn build so that only one copy of Dawn exists in the app — the native build verifies this and fails with a version-mismatch error if the two packages were built against different Dawn releases. If you see that error, align the `@shopify/react-native-skia` and `react-native-webgpu` versions.

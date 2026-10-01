@@ -98,11 +98,7 @@ export const commonArgs = [
 ];
 
 export type PlatformName =
-  | "apple-ios"
-  | "apple-tvos"
-  | "apple-macos"
-  | "apple-maccatalyst"
-  | "android";
+  "apple-ios" | "apple-tvos" | "apple-macos" | "apple-maccatalyst" | "android";
 
 export type ApplePlatformName = Extract<PlatformName, `apple-${string}`>;
 

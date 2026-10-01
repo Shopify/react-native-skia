@@ -270,6 +270,39 @@ public:
         textureRef);
   }
 
+  // Create an SkSurface that draws straight into a WebGPU texture (zero-copy).
+  // The texture must have RenderAttachment usage; give it TextureBinding too
+  // to sample it from WebGPU (e.g. as a three.js texture) after each flush.
+  // The surface retains the texture for its lifetime.
+  sk_sp<SkSurface> MakeSurfaceFromTexture(wgpu::Texture texture) {
+    if (!texture) {
+      return nullptr;
+    }
+    if (!(texture.GetUsage() & wgpu::TextureUsage::RenderAttachment)) {
+      throw std::runtime_error(
+          "MakeSurfaceFromTexture: the texture needs RenderAttachment usage");
+    }
+
+    skgpu::graphite::BackendTexture backendTexture =
+        skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
+
+    struct TextureRef {
+      wgpu::Texture texture;
+    };
+    auto textureRef = new TextureRef{texture};
+
+    // The color type is derived from the texture format.
+    return SkSurfaces::WrapBackendTexture(
+        getRecorder(), backendTexture,
+        nullptr, // colorspace
+        nullptr, // surfaceProps
+        [](void *context) {
+          auto ref = static_cast<TextureRef *>(context);
+          delete ref;
+        },
+        textureRef);
+  }
+
   // Create a WebGPU texture from an SkImage
   // Returns a texture with CopySrc and TextureBinding usage
   wgpu::Texture MakeTextureFromImage(sk_sp<SkImage> image) {

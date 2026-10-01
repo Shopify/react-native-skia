@@ -32,4 +32,19 @@ export interface SurfaceFactory {
     height: number,
     opts?: SurfaceOptions
   ) => SkSurface | null;
+
+  /**
+   * Creates a GPU backed surface that draws directly into a WebGPU texture
+   * (zero-copy). The texture must be created on Skia's device
+   * (importDevice(Skia.getNativeDevice())) with RENDER_ATTACHMENT usage; add
+   * TEXTURE_BINDING to sample what Skia drew from WebGPU after each flush().
+   * The surface only borrows the texture: the caller keeps ownership of the
+   * GPUTexture and must keep it alive as long as the surface.
+   *
+   * Note: This method is only available when the Graphite backend is enabled.
+   *
+   * @param pointer - The WGPUTexture pointer (texture.nativePointer)
+   * @returns An SkSurface rendering into the texture, or throws if the texture is invalid
+   */
+  MakeFromNativeTexture: (pointer: bigint) => SkSurface;
 }
