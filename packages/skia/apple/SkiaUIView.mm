@@ -88,7 +88,7 @@
     // this flag is only set when the view is inserted and we want to set the
     // manager here since the view could be recycled or the app could be
     // refreshed and we would have a stale manager then
-    _manager = [SkiaManager latestActiveSkManager].get();
+    _manager = [RNSkiaModule latestActiveSkManager].get();
   }
 }
 
