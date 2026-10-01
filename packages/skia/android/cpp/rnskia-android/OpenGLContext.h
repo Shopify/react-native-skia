@@ -28,7 +28,7 @@ public:
 
   gl::Display *getDisplay() { return _glDisplay.get(); }
   gl::Context *getContext() { return _glContext.get(); }
-  gl::Surface *getSurface() { return _glSurface.get(); };
+  gl::Surface *getSurface() { return _glSurface.get(); }
   EGLConfig getConfig() { return _glConfig; }
 
 private:
