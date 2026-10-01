@@ -368,8 +368,10 @@ public:
   // The recorder itself is a small command list. The resources it references
   // (images, pictures, paths) report their own size through their wrappers
   // and the pictures produced by play() report theirs. Do not put a made-up
-  // number here: a new recorder is created on every React commit and the
-  // charge is repeated each time it is unboxed on the UI runtime.
+  // number here: a new recorder is created on every React commit, and the
+  // wrapper is disposed as soon as the view takes ownership of the recording
+  // (see NativeReanimatedContainer), so the charge would never drive a
+  // collection anyway.
   size_t getMemoryPressure() override { return kMinMemoryPressure; }
 
   static const jsi::HostFunctionType

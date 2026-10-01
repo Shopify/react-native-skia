@@ -21,9 +21,14 @@ const { SkiaViewApi } = globalThis;
  * the view, which owns it and replays it on every draw. The Reanimated mapper
  * only pushes the shared values into that recorder through the view id: no
  * Skia object is captured by a worklet, so nothing on the UI runtime holds
- * native memory, and the resources referenced by the recording (images,
- * pictures) are released as soon as the view replaces or clears it, not when
- * a garbage collector gets around to a wrapper.
+ * native memory. The JS wrapper is disposed right after the handoff, so the
+ * view is the sole owner and the resources referenced by the recording
+ * (images, pictures) are released when the view replaces it or is torn down,
+ * not when a garbage collector gets around to a wrapper.
+ *
+ * Unmounting does not clear the view: the native view can outlive the React
+ * tree (exit animations, screen transitions) and keeps showing its last frame
+ * until it is torn down, which is when the recording is released.
  */
 class NativeReanimatedContainer extends Container {
   private mapperId: number | null = null;
@@ -45,9 +50,6 @@ class NativeReanimatedContainer extends Container {
   unmount() {
     super.unmount();
     this.stopMapper();
-    // Release the recording and everything it references now; the view is
-    // about to unmount and would otherwise keep its last frame resident.
-    SkiaViewApi.setJsiProperty(this.nativeId, "recorder", null);
   }
 
   redraw() {
@@ -59,8 +61,12 @@ class NativeReanimatedContainer extends Container {
     visit(recorder, this.root);
     const sharedValues = recorder.getSharedValues();
     const { nativeId } = this;
-    // The view takes ownership of the recorder and draws the first frame.
-    SkiaViewApi.setJsiProperty(nativeId, "recorder", recorder.getRecorder());
+    const nativeRecorder = recorder.getRecorder();
+    // The view takes ownership of the recorder and draws the first frame. The
+    // wrapper is disposed right away: it would otherwise co-own the recording
+    // until the JS garbage collector finalizes it.
+    SkiaViewApi.setJsiProperty(nativeId, "recorder", nativeRecorder);
+    nativeRecorder.dispose();
     if (sharedValues.length > 0) {
       this.mapperId = Rea.startMapper(() => {
         "worklet";

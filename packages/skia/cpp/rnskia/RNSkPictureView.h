@@ -44,7 +44,7 @@ class Recorder;
  * canvas draws (images, pictures, paths), and tying their lifetime to the
  * garbage collector of a runtime that rarely allocates (the UI runtime) kept
  * them resident long after unmount. Here they are released as soon as the
- * recorder is replaced or cleared.
+ * recorder is replaced, or when the host view is torn down (see clear()).
  */
 class RNSkPictureRenderer
     : public RNSkRenderer,
@@ -92,6 +92,24 @@ public:
     }
     retired = nullptr;
     _requestRedraw();
+  }
+
+  /**
+   * Drops the recorder and the picture without scheduling a redraw. Called
+   * when the host view is torn down, so that the resources go away with the
+   * view rather than with the garbage collection of its host object (on
+   * Android the native view is only destroyed when the Java view is
+   * finalized).
+   */
+  void clear() {
+    std::shared_ptr<Recorder> retired;
+    sk_sp<SkPicture> picture;
+    {
+      std::lock_guard<std::mutex> lock(_mutex);
+      retired = std::move(_recorder);
+      picture = std::move(_picture);
+    }
+    // Both are destroyed here, outside the lock.
   }
 
   /**

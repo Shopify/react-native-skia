@@ -1,9 +1,10 @@
 // The native Reanimated container hands its recording to the view (which
 // owns the native recorder) and drives animations through the view id only.
-// These tests pin down that no recorder or picture is captured by a worklet
-// and that the recording is released on unmount.
+// These tests pin down that no recorder or picture is captured by a worklet,
+// that the wrapper is disposed once the view owns the recording, and that
+// unmount leaves the view's last frame in place.
 
-type MockRecorder = { id: number };
+type MockRecorder = { id: number; dispose: jest.Mock };
 
 const mockRecorders: MockRecorder[] = [];
 let mockSharedValues: unknown[] = [];
@@ -31,7 +32,10 @@ jest.mock("../../external/reanimated/renderHelpers", () => ({
 
 jest.mock("../Recorder/ReanimatedRecorder", () => ({
   ReanimatedRecorder: class {
-    private recorder: MockRecorder = { id: mockRecorders.length };
+    private recorder: MockRecorder = {
+      id: mockRecorders.length,
+      dispose: jest.fn(),
+    };
     constructor() {
       mockRecorders.push(this.recorder);
     }
@@ -90,6 +94,17 @@ describe("NativeReanimatedContainer", () => {
     expect(mockStartMapper).not.toHaveBeenCalled();
   });
 
+  it("disposes the wrapper once the view owns the recording", () => {
+    const { SkiaViewApi, container } = setup();
+    container.redraw();
+    const { dispose } = mockRecorders[0];
+    expect(dispose).toHaveBeenCalledTimes(1);
+    // The view must hold the recording before the wrapper lets go of it.
+    expect(dispose.mock.invocationCallOrder[0]).toBeGreaterThan(
+      SkiaViewApi.setJsiProperty.mock.invocationCallOrder[0]
+    );
+  });
+
   it("drives animations through the view id and the shared values only", () => {
     const sv = { value: 0 };
     mockSharedValues = [sv];
@@ -121,17 +136,16 @@ describe("NativeReanimatedContainer", () => {
     );
   });
 
-  it("releases the recording and stops the mapper on unmount", () => {
+  it("stops the mapper and keeps the last frame on the view on unmount", () => {
     mockSharedValues = [{ value: 0 }];
     const { SkiaViewApi, container } = setup();
     container.redraw();
     container.unmount();
     expect(mockStopMapper).toHaveBeenCalledWith(42);
-    expect(SkiaViewApi.setJsiProperty).toHaveBeenLastCalledWith(
-      7,
-      "recorder",
-      null
-    );
+    // The native view can outlive the React tree (exit animations, screen
+    // transitions) and keeps drawing its last frame until it is torn down,
+    // which is when it releases the recording: unmount must not clear it.
+    expect(SkiaViewApi.setJsiProperty).toHaveBeenCalledTimes(1);
     // The unmount commit triggers a last redraw: it must not resurrect a
     // recording for the view.
     container.redraw();
