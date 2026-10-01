@@ -29,9 +29,11 @@ export interface ISkiaViewApi {
   setJsiProperty: <T>(nativeId: number, name: string, value: T) => void;
   requestRedraw: (nativeId: number) => void;
   /**
-   * Reads the shared values into the recorder owned by the view and
+   * Reads the shared values into the recording held for the view and
    * schedules a redraw. Native only; called from a worklet on every frame.
-   * Ignored when the view no longer holds the recording `recorderId`.
+   * Until the view registers, the recording is queued for it and kept
+   * current all the same. Ignored when the recording `recorderId` is neither
+   * held by the view nor queued for it.
    */
   applyUpdates: (
     nativeId: number,

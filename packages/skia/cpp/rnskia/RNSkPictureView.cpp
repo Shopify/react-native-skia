@@ -27,21 +27,27 @@ void RNSkPictureRenderer::setRecorder(std::shared_ptr<Recorder> recorder) {
   _requestRedraw();
 }
 
+bool RNSkPictureRenderer::applyUpdatesTo(
+    const std::shared_ptr<Recorder> &recorder, jsi::Runtime &runtime,
+    double recorderId, const jsi::Array &values) {
+  if (recorder == nullptr || recorder->id != recorderId) {
+    return false;
+  }
+  recorder->applyUpdates(runtime, values);
+  return true;
+}
+
 bool RNSkPictureRenderer::applyUpdates(jsi::Runtime &runtime, double recorderId,
                                        const jsi::Array &values) {
   std::shared_ptr<Recorder> recorder;
   {
     std::lock_guard<std::mutex> lock(_mutex);
-    if (_recorder == nullptr || _recorder->id != recorderId) {
-      return false;
-    }
     recorder = _recorder;
   }
   // Outside the renderer lock: a commit replacing the recorder must not wait
   // for the update. Should it land while this runs, the update goes into the
   // retired recorder and the redraw that follows draws the new one.
-  recorder->applyUpdates(runtime, values);
-  return true;
+  return applyUpdatesTo(recorder, runtime, recorderId, values);
 }
 
 void RNSkPictureRenderer::replay(SkCanvas *canvas, Recorder *recorder) {

@@ -118,6 +118,14 @@ public:
                     const jsi::Array &values);
 
   /**
+   * Same as applyUpdates(), for a recording that no view owns yet (one
+   * queued in the view registry until its view registers).
+   */
+  static bool applyUpdatesTo(const std::shared_ptr<Recorder> &recorder,
+                             jsi::Runtime &runtime, double recorderId,
+                             const jsi::Array &values);
+
+  /**
    * Draws the current content (recorder or picture) into the canvas, scaled
    * by the pixel density. Used for onscreen draws, snapshots and the Android
    * bitmap export.
