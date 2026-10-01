@@ -62,6 +62,10 @@ class NativeReanimatedContainer extends Container {
     const sharedValues = recorder.getSharedValues();
     const { nativeId } = this;
     const nativeRecorder = recorder.getRecorder();
+    // stopMapper() only takes effect on the UI thread later, so the previous
+    // mapper can still fire after the new recording is installed. Tagging the
+    // updates with the recording id lets the view ignore them.
+    const recorderId = nativeRecorder.getId();
     // The view takes ownership of the recorder and draws the first frame. The
     // wrapper is disposed right away: it would otherwise co-own the recording
     // until the JS garbage collector finalizes it.
@@ -70,7 +74,7 @@ class NativeReanimatedContainer extends Container {
     if (sharedValues.length > 0) {
       this.mapperId = Rea.startMapper(() => {
         "worklet";
-        SkiaViewApi.applyUpdates(nativeId, sharedValues);
+        SkiaViewApi.applyUpdates(nativeId, recorderId, sharedValues);
       }, sharedValues);
     }
   }

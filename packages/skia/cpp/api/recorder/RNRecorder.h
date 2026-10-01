@@ -1,7 +1,9 @@
 #pragma once
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <string>
@@ -25,6 +27,11 @@ namespace RNSkia {
 class Recorder {
 private:
   using CommandList = std::vector<std::unique_ptr<Command>>;
+
+  static double nextId() {
+    static std::atomic<uint64_t> counter{0};
+    return static_cast<double>(++counter);
+  }
 
   struct PendingGroup {
     GroupCommand *group;
@@ -93,6 +100,11 @@ private:
 public:
   std::shared_ptr<RNSkPlatformContext> _context;
   Variables variables;
+
+  // Unique per recording. The Reanimated mapper tags its updates with it so a
+  // mapper that outlives its recording (stopMapper() is asynchronous) cannot
+  // write into the recording that replaced it.
+  const double id = nextId();
 
   Recorder() { commandStack.push_back(&commands); }
   ~Recorder() {

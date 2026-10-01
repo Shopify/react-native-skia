@@ -99,6 +99,8 @@ public:
     return jsi::Value::undefined();
   }
 
+  JSI_HOST_FUNCTION(getId) { return jsi::Value(getObject()->id); }
+
   JSI_HOST_FUNCTION(saveGroup) {
     const jsi::Value *value = count > 0 ? &arguments[0] : nullptr;
     getObject()->saveGroup(runtime, value);
@@ -363,6 +365,7 @@ public:
     installHostMethod(runtime, prototype, "applyUpdates",
                       &JsiRecorder::applyUpdates);
     installHostMethod(runtime, prototype, "reset", &JsiRecorder::reset);
+    installHostMethod(runtime, prototype, "getId", &JsiRecorder::getId);
   }
 
   // The recorder itself is a small command list. The resources it references

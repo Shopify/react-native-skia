@@ -109,9 +109,12 @@ public:
 
   /**
    * Reads the shared values on the calling runtime into the recorder's
-   * commands. Returns false when there is no recorder to update.
+   * commands. Returns false when there is no recorder to update, or when the
+   * view holds a different recording than recorderId (a stale mapper whose
+   * values would otherwise land in the new recording's slots).
    */
-  bool applyUpdates(jsi::Runtime &runtime, const jsi::Array &values);
+  bool applyUpdates(jsi::Runtime &runtime, double recorderId,
+                    const jsi::Array &values);
 
   /**
    * Draws the current content (recorder or picture) into the canvas, scaled

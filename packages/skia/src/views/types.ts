@@ -31,8 +31,13 @@ export interface ISkiaViewApi {
   /**
    * Reads the shared values into the recorder owned by the view and
    * schedules a redraw. Native only; called from a worklet on every frame.
+   * Ignored when the view no longer holds the recording `recorderId`.
    */
-  applyUpdates: (nativeId: number, values: SharedValue<unknown>[]) => void;
+  applyUpdates: (
+    nativeId: number,
+    recorderId: number,
+    values: SharedValue<unknown>[]
+  ) => void;
   makeImageSnapshot: (nativeId: number, rect?: SkRect) => SkImage;
   makeImageSnapshotAsync: (nativeId: number, rect?: SkRect) => Promise<SkImage>;
   size: (nativeId: number) => SkSize;

@@ -172,13 +172,17 @@ public:
   /**
    Reads the given shared values into the recorder owned by the view and
    schedules a redraw. Called from the Reanimated mapper on every frame; the
-   only things crossing runtimes are the view id and the shared values.
+   only things crossing runtimes are the view id, the recording id and the
+   shared values. Updates for a recording the view no longer holds are
+   ignored.
    */
   JSI_HOST_FUNCTION(applyUpdates) {
-    if (count != 2 || !arguments[0].isNumber() || !arguments[1].isObject() ||
-        !arguments[1].asObject(runtime).isArray(runtime)) {
+    if (count != 3 || !arguments[0].isNumber() || !arguments[1].isNumber() ||
+        !arguments[2].isObject() ||
+        !arguments[2].asObject(runtime).isArray(runtime)) {
       _platformContext->raiseError(
-          "applyUpdates: expected (nativeId: number, values: SharedValue[])");
+          "applyUpdates: expected (nativeId: number, recorderId: number, "
+          "values: SharedValue[])");
       return jsi::Value::undefined();
     }
     int nativeId = arguments[0].asNumber();
@@ -190,8 +194,9 @@ public:
     }
     auto renderer =
         std::static_pointer_cast<RNSkPictureRenderer>(view->getRenderer());
-    auto values = arguments[1].asObject(runtime).asArray(runtime);
-    if (renderer->applyUpdates(runtime, values)) {
+    auto recorderId = arguments[1].asNumber();
+    auto values = arguments[2].asObject(runtime).asArray(runtime);
+    if (renderer->applyUpdates(runtime, recorderId, values)) {
       view->requestRedraw();
     }
     return jsi::Value::undefined();

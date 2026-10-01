@@ -10,10 +10,10 @@
 
 namespace RNSkia {
 
-bool RNSkPictureRenderer::applyUpdates(jsi::Runtime &runtime,
+bool RNSkPictureRenderer::applyUpdates(jsi::Runtime &runtime, double recorderId,
                                        const jsi::Array &values) {
   std::lock_guard<std::mutex> lock(_mutex);
-  if (_recorder == nullptr) {
+  if (_recorder == nullptr || _recorder->id != recorderId) {
     return false;
   }
   _recorder->applyUpdates(runtime, values);
