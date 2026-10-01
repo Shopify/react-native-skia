@@ -30,7 +30,12 @@ const sidebars = {
       collapsed: true,
       type: "category",
       label: "Canvas",
-      items: ["canvas/canvas", "canvas/rendering-modes", "canvas/contexts"],
+      items: [
+        "canvas/canvas",
+        "canvas/rendering-modes",
+        "canvas/contexts",
+        "canvas/graphite",
+      ],
     },
     {
       collapsed: true,

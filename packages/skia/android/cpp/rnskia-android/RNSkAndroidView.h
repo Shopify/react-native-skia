@@ -55,8 +55,7 @@ public:
     std::static_pointer_cast<RNSkOpenGLCanvasProvider>(T::getCanvasProvider())
         ->surfaceSizeChanged(surface, width, height, isSurface, highBitDepth,
                              maxRefreshRate);
-    // This is only need for the first time to frame, this renderImmediate call
-    // will invoke updateTexImage for the previous frame
+    // Paint the new size right away rather than on the next scheduled redraw.
     RNSkView::redraw();
   }
 

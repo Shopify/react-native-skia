@@ -31,4 +31,5 @@ export * from "./Chat";
 export * from "./Pictures";
 export * from "./WebGPU";
 export * from "./HighBitDepth";
+export * from "./Graphite";
 export * from "./AndroidViews";
