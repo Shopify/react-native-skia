@@ -1,13 +1,18 @@
 #pragma once
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
+#include <cstdint>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <vector>
 
 #include <jsi/jsi.h>
+
+#include "include/core/SkPictureRecorder.h"
 
 #include "ColorFilters.h"
 #include "Command.h"
@@ -26,6 +31,11 @@ class Recorder {
 private:
   using CommandList = std::vector<std::unique_ptr<Command>>;
 
+  static double nextId() {
+    static std::atomic<uint64_t> counter{0};
+    return static_cast<double>(++counter);
+  }
+
   struct PendingGroup {
     GroupCommand *group;
     float zIndex;
@@ -34,6 +44,12 @@ private:
 
   CommandList commands;
   std::vector<CommandList *> commandStack;
+
+  // Once a view owns the recording, the Reanimated mapper writes the shared
+  // values into the commands (applyUpdates, UI thread) while the view replays
+  // them (play, main thread). Both hold this lock; nothing else does, so it
+  // never nests with the view's lock.
+  std::mutex _commandsMutex;
 
   CommandList &currentCommands() { return *commandStack.back(); }
 
@@ -93,6 +109,11 @@ private:
 public:
   std::shared_ptr<RNSkPlatformContext> _context;
   Variables variables;
+
+  // Unique per recording. The Reanimated mapper tags its updates with it so a
+  // mapper that outlives its recording (stopMapper() is asynchronous) cannot
+  // write into the recording that replaced it.
+  const double id = nextId();
 
   Recorder() { commandStack.push_back(&commands); }
   ~Recorder() {
@@ -382,8 +403,43 @@ public:
   }
 
   void play(DrawingCtx *ctx) {
+    std::lock_guard<std::mutex> lock(_commandsMutex);
     for (const auto &cmd : commands) {
       playCommand(ctx, cmd.get());
+    }
+  }
+
+  /**
+   * Plays the recording into a picture. The cull rect is deliberately huge:
+   * a recording is not tied to a view size.
+   */
+  sk_sp<SkPicture> makePicture() {
+    SkPictureRecorder pictureRecorder;
+    SkISize size = SkISize::Make(2'000'000, 2'000'000);
+    SkRect rect = SkRect::Make(size);
+    auto canvas = pictureRecorder.beginRecording(rect, nullptr);
+    DrawingCtx ctx(canvas);
+    play(&ctx);
+    return pictureRecorder.finishRecordingAsPicture();
+  }
+
+  /**
+   * Reads the current value of each shared value (in the order they were
+   * registered as variable0, variable1, ...) on the calling runtime and
+   * writes it into the recorded commands.
+   */
+  void applyUpdates(jsi::Runtime &runtime, const jsi::Array &values) {
+    std::lock_guard<std::mutex> lock(_commandsMutex);
+    auto size = values.size(runtime);
+    for (size_t i = 0; i < size; i++) {
+      auto sharedValue = values.getValueAtIndex(runtime, i).asObject(runtime);
+      auto name = "variable" + std::to_string(i);
+      auto it = variables.find(name);
+      if (it != variables.end()) {
+        for (const auto &conversionFunc : it->second) {
+          conversionFunc(runtime, sharedValue);
+        }
+      }
     }
   }
 };
