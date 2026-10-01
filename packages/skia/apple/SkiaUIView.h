@@ -14,7 +14,6 @@
 
 #import "RNSkAppleView.h"
 #import "RNSkManager.h"
-#import "SkiaManager.h"
 
 @interface SkiaUIView : RCTViewComponentView
 
