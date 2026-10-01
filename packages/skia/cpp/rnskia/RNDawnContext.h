@@ -112,7 +112,7 @@ public:
     int height = static_cast<int>(IOSurfaceGetHeight(ioSurface));
 #else
     wgpu::SharedTextureMemoryAHardwareBufferDescriptor platformDesc;
-    auto ahb = (AHardwareBuffer *)buffer;
+    auto ahb = reinterpret_cast<AHardwareBuffer *>(buffer);
     platformDesc.handle = ahb;
     AHardwareBuffer_Desc adesc;
     AHardwareBuffer_describe(ahb, &adesc);
