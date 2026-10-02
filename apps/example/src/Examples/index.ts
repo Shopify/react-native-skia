@@ -26,8 +26,6 @@ export * from "./Transitions";
 export * from "./Stickers";
 export * from "./FrostedCard";
 export * from "./SpeedTest";
-export * from "./Video";
-export * from "./Chat";
 export * from "./Pictures";
 export * from "./WebGPU";
 export * from "./HighBitDepth";

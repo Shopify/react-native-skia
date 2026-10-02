@@ -150,8 +150,6 @@ export const HomeScreen = () => {
         description="Mount and unmount 25k or 100k rects"
         route="CanvasMemoryRect"
       />
-      <HomeScreenButton title="📹 Video" description="Video" route="Video" />
-      <HomeScreenButton title="💬 Chat" description="Chat" route="Chat" />
       <HomeScreenButton
         title="🖼 Pictures"
         description="Animated circle trail using Pictures"
