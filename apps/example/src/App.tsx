@@ -30,8 +30,6 @@ import {
   Stickers,
   FrostedCard,
   SpeedTest,
-  Video,
-  Chat,
   LiquidGlass,
   Pictures,
   WebGPU,
@@ -82,8 +80,6 @@ const linking: LinkingOptions<StackParamList> = {
       Stickers: "stickers",
       FrostedCard: "frosted-card",
       SpeedTest: "speedtest",
-      Video: "video",
-      Chat: "chat",
       Pictures: "pictures",
       WebGPU: "webgpu",
       HighBitDepth: "high-bit-depth",
@@ -231,20 +227,6 @@ const App = () => {
               component={Transitions}
               options={{
                 header: () => null,
-              }}
-            />
-            <Stack.Screen
-              name="Video"
-              component={Video}
-              options={{
-                header: () => null,
-              }}
-            />
-            <Stack.Screen
-              name="Chat"
-              component={Chat}
-              options={{
-                headerShown: false,
               }}
             />
             <Stack.Screen
