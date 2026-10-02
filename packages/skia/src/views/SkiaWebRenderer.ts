@@ -93,7 +93,8 @@ export class WebGLRenderer implements Renderer {
     private canvas: HTMLCanvasElement,
     // Called when the renderer becomes able to paint again and the current
     // frame should be drawn.
-    private requestRedraw: () => void
+    private requestRedraw: () => void,
+    private getPixelDensity: () => number
   ) {
     const entry = canvasWebGL.get(canvas);
     if (entry) {
@@ -244,7 +245,7 @@ export class WebGLRenderer implements Renderer {
       // release everything: either way there is nothing to build on.
       return;
     }
-    this.pd = window.devicePixelRatio;
+    this.pd = this.getPixelDensity();
     canvas.width = canvas.clientWidth * this.pd;
     canvas.height = canvas.clientHeight * this.pd;
     this.surface?.ref.delete();
@@ -337,14 +338,17 @@ export class StaticWebGLRenderer implements Renderer {
   private cachedImage: SkImage | null = null;
   private pd = 1;
 
-  constructor(private canvas: HTMLCanvasElement) {}
+  constructor(
+    private canvas: HTMLCanvasElement,
+    private getPixelDensity: () => number
+  ) {}
 
   onResize(): void {
     this.cachedImage = null;
   }
 
   private renderFrameToSurface(frame: WebFrame): TempRenderResult | null {
-    this.pd = window.devicePixelRatio;
+    this.pd = this.getPixelDensity();
     if (this.canvas.clientWidth === 0 || this.canvas.clientHeight === 0) {
       return null;
     }
@@ -535,6 +539,8 @@ export interface WebRendererHost {
    */
   paint: (renderer: Renderer) => void;
   onLayout?: (event: LayoutChangeEvent) => void;
+  // See SkiaBaseViewProps.pixelDensity.
+  pixelDensity?: number;
 }
 
 /**
@@ -559,6 +565,7 @@ export const useSkiaWebRenderer = (
   host: WebRendererHost
 ): RefObject<Renderer | null> => {
   const rendererRef = useRef<Renderer | null>(null);
+  const resizeRef = useRef<(() => void) | null>(null);
   const hostRef = useRef(host);
   useLayoutEffect(() => {
     hostRef.current = host;
@@ -569,9 +576,15 @@ export const useSkiaWebRenderer = (
     if (!canvas) {
       return undefined;
     }
+    const getPixelDensity = () =>
+      hostRef.current.pixelDensity ?? window.devicePixelRatio;
     const renderer: Renderer = isStatic
-      ? new StaticWebGLRenderer(canvas)
-      : new WebGLRenderer(canvas, () => hostRef.current.paint(renderer));
+      ? new StaticWebGLRenderer(canvas, getPixelDensity)
+      : new WebGLRenderer(
+          canvas,
+          () => hostRef.current.paint(renderer),
+          getPixelDensity
+        );
     rendererRef.current = renderer;
 
     const paint = () => hostRef.current.paint(renderer);
@@ -581,11 +594,11 @@ export const useSkiaWebRenderer = (
     // changed in between.
     let lastWidth = canvas.clientWidth;
     let lastHeight = canvas.clientHeight;
-    let lastPixelDensity = window.devicePixelRatio;
+    let lastPixelDensity = getPixelDensity();
     const resizeIfNeeded = () => {
       const width = canvas.clientWidth;
       const height = canvas.clientHeight;
-      const pixelDensity = window.devicePixelRatio;
+      const pixelDensity = getPixelDensity();
       if (
         width === lastWidth &&
         height === lastHeight &&
@@ -599,6 +612,7 @@ export const useSkiaWebRenderer = (
       renderer.onResize();
       paint();
     };
+    resizeRef.current = resizeIfNeeded;
 
     const observer = new ResizeObserver((entries) => {
       resizeIfNeeded();
@@ -647,10 +661,16 @@ export const useSkiaWebRenderer = (
     return () => {
       observer.disconnect();
       media?.removeEventListener("change", onPixelDensityChange);
+      resizeRef.current = null;
       rendererRef.current = null;
       renderer.dispose();
     };
   }, [canvasRef, isStatic]);
+
+  // A pixelDensity prop change resizes nothing, so no observer fires for it.
+  useLayoutEffect(() => {
+    resizeRef.current?.();
+  }, [host.pixelDensity]);
 
   return rendererRef;
 };

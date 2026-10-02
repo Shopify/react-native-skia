@@ -53,6 +53,7 @@ interface MountOptions {
   onLayout?: () => void;
   strict?: boolean;
   isStatic?: boolean;
+  pixelDensity?: number;
 }
 
 const mountView = (nativeID: string, options: MountOptions = {}) => {
@@ -63,12 +64,14 @@ const mountView = (nativeID: string, options: MountOptions = {}) => {
     onLayout,
     strict = false,
     isStatic = false,
+    pixelDensity,
   }: MountOptions) => {
     const view = (
       <SkiaPictureView
         nativeID={nativeID}
         onLayout={onLayout}
         __destroyWebGLContextAfterRender={isStatic}
+        pixelDensity={pixelDensity}
         style={{ width: 360, height: 520 }}
       />
     );
@@ -162,6 +165,48 @@ describe("SkiaPictureView.web", () => {
       "srgb"
     );
     expect(rawCanvas.drawPicture).toHaveBeenCalledWith(fakePicture.ref);
+
+    await view.unmount();
+  });
+
+  it("renders at the density given by the pixelDensity prop", async () => {
+    const { CanvasKitMock, rawCanvas } = installCanvasKit();
+    canvasSize.width = 360;
+    canvasSize.height = 520;
+
+    // A canvas painted at 75% of its layout size under a CSS transform, on a
+    // 2x display.
+    display.pixelDensity = 2;
+    const view = mountView("12", { pixelDensity: 1.5 });
+    await setPicture(12);
+    expect(CanvasKitMock.MakeOnScreenGLSurface).toHaveBeenLastCalledWith(
+      expect.anything(),
+      540,
+      780,
+      "srgb"
+    );
+    expect(rawCanvas.scale).toHaveBeenLastCalledWith(1.5, 1.5);
+
+    // The prop changes while the CSS size stays the same, so no observer
+    // fires: the surface must follow the prop anyway.
+    rawCanvas.drawPicture.mockClear();
+    view.render({ pixelDensity: 3 });
+    expect(CanvasKitMock.MakeOnScreenGLSurface).toHaveBeenLastCalledWith(
+      expect.anything(),
+      1080,
+      1560,
+      "srgb"
+    );
+    expect(rawCanvas.drawPicture).toHaveBeenCalledWith(fakePicture.ref);
+
+    // Without the prop, the display density applies again.
+    view.render({});
+    expect(CanvasKitMock.MakeOnScreenGLSurface).toHaveBeenLastCalledWith(
+      expect.anything(),
+      720,
+      1040,
+      "srgb"
+    );
 
     await view.unmount();
   });

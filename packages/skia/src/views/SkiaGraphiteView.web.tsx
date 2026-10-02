@@ -195,6 +195,7 @@ export const SkiaGraphiteView = (props: SkiaGraphiteViewProps) => {
   const rendererRef = useSkiaWebRenderer(canvasRef, isStatic, {
     paint,
     onLayout,
+    pixelDensity: props.pixelDensity,
   });
 
   const flush = useCallback(() => {
@@ -348,6 +349,7 @@ export const SkiaGraphiteView = (props: SkiaGraphiteViewProps) => {
     onLayout: _onLayout,
     nativeID: _nativeID,
     __destroyWebGLContextAfterRender: _isStatic,
+    pixelDensity: _pixelDensity,
     ...viewProps
   } = props;
   return (

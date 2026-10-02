@@ -89,6 +89,13 @@ export interface SkiaBaseViewProps extends ViewProps {
   // On web, only 16 WebGL contextes are allowed. If the drawing is non-animated, set
   // __destroyWebGLContextAfterRender to true to release the context after each draw.
   __destroyWebGLContextAfterRender?: boolean;
+
+  /**
+   * Web only. The pixel density the canvas is rendered at, defaults to
+   * `window.devicePixelRatio`. Set it when the canvas is painted at a
+   * different size than its layout size, under a CSS transform for instance.
+   */
+  pixelDensity?: number;
 }
 
 export interface SkiaPictureViewNativeProps extends SkiaBaseViewProps {
