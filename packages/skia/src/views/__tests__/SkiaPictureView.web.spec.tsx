@@ -174,8 +174,7 @@ describe("SkiaPictureView.web", () => {
     canvasSize.width = 360;
     canvasSize.height = 520;
 
-    // A canvas painted at 75% of its layout size under a CSS transform, on a
-    // 2x display.
+    // Painted at 75% of its layout size on a 2x display.
     display.pixelDensity = 2;
     const view = mountView("12", { pixelDensity: 1.5 });
     await setPicture(12);
@@ -187,8 +186,6 @@ describe("SkiaPictureView.web", () => {
     );
     expect(rawCanvas.scale).toHaveBeenLastCalledWith(1.5, 1.5);
 
-    // The prop changes while the CSS size stays the same, so no observer
-    // fires: the surface must follow the prop anyway.
     rawCanvas.drawPicture.mockClear();
     view.render({ pixelDensity: 3 });
     expect(CanvasKitMock.MakeOnScreenGLSurface).toHaveBeenLastCalledWith(
@@ -199,7 +196,6 @@ describe("SkiaPictureView.web", () => {
     );
     expect(rawCanvas.drawPicture).toHaveBeenCalledWith(fakePicture.ref);
 
-    // Without the prop, the display density applies again.
     view.render({});
     expect(CanvasKitMock.MakeOnScreenGLSurface).toHaveBeenLastCalledWith(
       expect.anything(),

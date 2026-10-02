@@ -539,7 +539,6 @@ export interface WebRendererHost {
    */
   paint: (renderer: Renderer) => void;
   onLayout?: (event: LayoutChangeEvent) => void;
-  // See SkiaBaseViewProps.pixelDensity.
   pixelDensity?: number;
 }
 
