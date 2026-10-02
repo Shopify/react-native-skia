@@ -30,7 +30,7 @@ You can see it in action in the example below.
 
 ```tsx twoslash
 import {useSharedValue, useDerivedValue} from "react-native-reanimated";
-import {Fill, Canvas, Rect} from "@shopify/react-native-skia";
+import {Fill, Canvas, Rect} from "react-native-skia";
 
 const Demo = () => {
   // size will be updated as the canvas size changes
@@ -53,7 +53,7 @@ To get the canvas size on the JS thread, you can use `useLayoutEffect` and `meas
 Since this is a very common pattern, we offer a `useCanvasSize` hook you can use for convenience.
 
 ```tsx twoslash
-import {Fill, Canvas, Rect, useCanvasSize} from "@shopify/react-native-skia";
+import {Fill, Canvas, Rect, useCanvasSize} from "react-native-skia";
 
 const Demo = () => {
   const {ref, size: {width, height}} = useCanvasSize();
@@ -69,7 +69,7 @@ This example is equivalent to the code below:
 
 ```tsx twoslash
 import {useLayoutEffect, useState} from "react";
-import {Fill, Canvas, Rect, useCanvasRef} from "@shopify/react-native-skia";
+import {Fill, Canvas, Rect, useCanvasRef} from "react-native-skia";
 
 const Demo = () => {
   const ref = useCanvasRef();
@@ -122,7 +122,7 @@ The defaults composite correctly in React Native stacking order without further 
 Set `surfaceType` when you need a different trade-off:
 
 ```tsx twoslash
-import {Canvas, Fill} from "@shopify/react-native-skia";
+import {Canvas, Fill} from "react-native-skia";
 
 // Opaque TextureView: stays in stacking order, e.g. inside a ScrollView
 export const InScrollView = () => (
@@ -159,7 +159,7 @@ With `highBitDepth`, the canvas renders into a 16-bit float surface on iOS and a
 Colors are identical to the default surface, only with more precision: this is about bit depth, not HDR.
 
 ```tsx twoslash
-import {Canvas, Fill, LinearGradient, vec} from "@shopify/react-native-skia";
+import {Canvas, Fill, LinearGradient, vec} from "react-native-skia";
 
 const Demo = () => {
   return (
@@ -194,7 +194,7 @@ If your drawing does not contain textures, you may also use the synchronous `mak
 
 ```tsx twoslash
 import {useEffect} from "react";
-import {Canvas, useCanvasRef, Circle} from "@shopify/react-native-skia";
+import {Canvas, useCanvasRef, Circle} from "react-native-skia";
 
 export const Demo = () => {
   const ref = useCanvasRef();

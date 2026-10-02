@@ -10,21 +10,20 @@ Skia serves as the graphics engine for Google Chrome and Chrome OS, Android, Flu
 
 **Version compatibility:**
 `react-native@>=0.79` and `react@>=19` are required. <br />
-In addition you should make sure you're on at least `iOS 14` and `Android API level 21` or above. <br />
-To use React Native Skia with video support, `Android API level 26` or above is required. <br />
+In addition you should make sure you're on at least `iOS 14` and `Android API level 26` or above (`minSdkVersion = 26`). <br />
 To use React Native Skia with Reanimated on native platforms, `react-native-reanimated@>=4.0.0` (with `react-native-worklets@>=0.7.0`) is required.
 
 For `react-native@<=0.78` and `react@<=18`, you need to use `@shopify/react-native-skia` version `1.12.4` or below.
 
-tvOS, macOS, and macOS Catalyst are also supported platforms.
+macOS and macOS Catalyst are also supported platforms (tvOS is only supported by the Ganesh backend on the v2.x line).
 
 ```sh
-yarn add @shopify/react-native-skia
+yarn add react-native-skia
 # or
-npm install @shopify/react-native-skia
+npm install react-native-skia
 ```
 
-The Skia prebuilt binaries are delivered as regular npm dependencies (`react-native-skia-android` and `react-native-skia-apple-*`) and are resolved automatically by the native build systems (CocoaPods on iOS/macOS/tvOS, Gradle on Android). No `postinstall` script is required, so there is nothing to allow or configure — `trustedDependencies` (Bun) or `enableScripts` (Yarn Berry) settings are not needed.
+The Skia prebuilt binaries are delivered as regular npm dependencies (`react-native-skia-graphite-android` and `react-native-skia-graphite-apple-*`) and are resolved automatically by the native build systems (CocoaPods on iOS/macOS/tvOS, Gradle on Android). No `postinstall` script is required, so there is nothing to allow or configure — `trustedDependencies` (Bun) or `enableScripts` (Yarn Berry) settings are not needed.
 
 ## Using Expo
 
@@ -103,7 +102,7 @@ React Native Skia test mocks use a web implementation that depends on loading Ca
 The very first step is to make sure that your Skia files are not being transformed by jest, for instance, we can add it the `transformIgnorePatterns` directive:
 ```js
 "transformIgnorePatterns": [
-  "node_modules/(?!(react-native|react-native.*|@react-native.*|@?react-navigation.*|@shopify/react-native-skia)/)"
+  "node_modules/(?!(react-native|react-native.*|@react-native.*|@?react-navigation.*|react-native-skia)/)"
 ]
 ```
 
@@ -113,9 +112,9 @@ You also need to add the following to your `jest.config.js` file:
 // jest.config.js
 module.exports = {
   // Other values
-  testEnvironment: "@shopify/react-native-skia/jestEnv.js",
+  testEnvironment: "react-native-skia/jestEnv.js",
   setupFilesAfterEnv: [
-    "@shopify/react-native-skia/jestSetup.js",
+    "react-native-skia/jestSetup.js",
   ],
 };
 ```
@@ -126,20 +125,14 @@ You can also have a look at the [example app](https://github.com/Shopify/react-n
 
 ## Graphite
 
-Skia has two backends: Ganesh (default) and Graphite. An experimental preview of Graphite is available in the `@next` distribution channel:
-
-```sh
-yarn add @shopify/react-native-skia@next
-```
-
-Skia Graphite requires Android API Level 26 or above.
+Skia has two backends: Ganesh and Graphite. Starting with v3, Graphite is the default backend. The Ganesh backend remains available on the v2.x line (`react-native-skia@2`).
 
 Graphite runs on [Dawn](https://dawn.googlesource.com/dawn), Google's WebGPU implementation. This is an internal implementation detail: React Native Skia does not expose a WebGPU API itself. To use WebGPU in your app, install [react-native-webgpu](https://github.com/wcandillon/react-native-webgpu) alongside it.
 
 When both packages are installed, they share a single Dawn instance, which enables zero-copy interop between Skia and WebGPU on the shared device:
 
 ```tsx
-import { Skia } from "@shopify/react-native-skia";
+import { Skia } from "react-native-skia";
 import { importDevice, adoptTexture } from "react-native-webgpu";
 
 // A WebGPU device backed by Skia's Graphite device
@@ -164,7 +157,7 @@ skSurface.getCanvas().drawCircle(width / 2, height / 2, 100, paint);
 skSurface.flush();
 ```
 
-Both packages must link the exact same Dawn build so that only one copy of Dawn exists in the app — the native build verifies this and fails with a version-mismatch error if the two packages were built against different Dawn releases. If you see that error, align the `@shopify/react-native-skia` and `react-native-webgpu` versions.
+Both packages must link the exact same Dawn build so that only one copy of Dawn exists in the app — the native build verifies this and fails with a version-mismatch error if the two packages were built against different Dawn releases. If you see that error, align the `react-native-skia` and `react-native-webgpu` versions.
 
 ## Playground
 

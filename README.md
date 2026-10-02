@@ -3,7 +3,7 @@
 High-performance 2d Graphics for React Native using Skia
 
 [![CI](https://github.com/Shopify/react-native-skia/actions/workflows/ci.yml/badge.svg)](https://github.com/Shopify/react-native-skia/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/@shopify/react-native-skia.svg?style=flat)](https://www.npmjs.com/package/@shopify/react-native-skia)
+[![npm version](https://img.shields.io/npm/v/react-native-skia.svg?style=flat)](https://www.npmjs.com/package/react-native-skia)
 [![issues](https://img.shields.io/github/issues/shopify/react-native-skia.svg?style=flat)](https://github.com/shopify/react-native-skia/issues)
 
 <img width="400" alt="skia" src="https://user-images.githubusercontent.com/306134/146549218-b7959ad9-0107-4c1c-b439-b96c780f5230.png">
@@ -22,15 +22,9 @@ For detailed information on library development, building, testing, and contribu
 
 ## Graphite
 
-Skia has two backends: Ganesh and Graphite. Ganesh is the default backend.
-Graphite is available as an experimental preview in the `@next` distribution channel:
-
-```sh
-yarn add @shopify/react-native-skia@next
-```
-
-**This is highly experimental and not recommended for production use.**
-Skia Graphite requires Android API Level 26 or above.
+Skia has two backends: Ganesh and Graphite. Starting with v3, Graphite is the default backend.
+React Native Skia v3 requires Android API Level 26 or above.
+The Ganesh backend remains available on the v2.x line (`react-native-skia@2`).
 
 If you prefer to build Skia yourself with Graphite support, you can do so with `SK_GRAPHITE=1 yarn build-skia`.
 React Native Skia automatically detects Graphite via a marker file included in the prebuilt libs.

@@ -1,4 +1,4 @@
-import { Skia } from "@shopify/react-native-skia";
+import { Skia } from "react-native-skia";
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 
