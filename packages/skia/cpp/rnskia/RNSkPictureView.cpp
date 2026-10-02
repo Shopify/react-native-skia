@@ -1,9 +1,9 @@
-// The recorder headers depend on the include order established by
-// JsiSkApi.h, so everything that needs a complete Recorder lives here rather
-// than in RNSkPictureView.h (which platform views include on its own).
-#include "api/JsiSkApi.h"
-
+// Everything that needs a complete Recorder lives here rather than in
+// RNSkPictureView.h (which platform views include on its own).
 #include "RNSkPictureView.h"
+
+#include <memory>
+#include <utility>
 
 #include "api/recorder/DrawingCtx.h"
 #include "api/recorder/RNRecorder.h"

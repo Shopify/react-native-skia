@@ -1,12 +1,10 @@
-// The recorder headers depend on the include order established by
-// JsiSkApi.h, so everything that needs a complete Recorder lives here rather
-// than in RNSkGraphiteProducer.h (which the view headers include on their own).
+// Everything that needs a complete Recorder lives here rather than in
+// RNSkGraphiteProducer.h (which the view headers include on their own).
 #if defined(SK_GRAPHITE)
-
-#include "api/JsiSkApi.h"
 
 #include "RNSkGraphiteProducer.h"
 
+#include <memory>
 #include <utility>
 
 #include "RNSkGraphiteView.h"

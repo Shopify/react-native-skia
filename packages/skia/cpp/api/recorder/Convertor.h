@@ -10,12 +10,25 @@
 #include <include/core/SkPaint.h>
 #include <include/core/SkPathEffect.h>
 #include <include/core/SkPoint.h>
+#include <include/effects/Sk1DPathEffect.h>
 #include <include/effects/SkRuntimeEffect.h>
 #include <modules/skparagraph/include/Paragraph.h>
 #include <modules/skparagraph/include/ParagraphBuilder.h>
 #include <modules/skparagraph/include/ParagraphStyle.h>
 
 #include "../CustomBlendModes.h"
+#include "api/JsiSkFont.h"
+#include "api/JsiSkImage.h"
+#include "api/JsiSkImageFilter.h"
+#include "api/JsiSkMatrix.h"
+#include "api/JsiSkPaint.h"
+#include "api/JsiSkParagraph.h"
+#include "api/JsiSkPicture.h"
+#include "api/JsiSkRSXform.h"
+#include "api/JsiSkRuntimeEffect.h"
+#include "api/JsiSkSVG.h"
+#include "api/JsiSkSkottie.h"
+#include "api/JsiSkTextBlob.h"
 #include "api/third_party/CSSColorParser.h"
 
 #include "DataTypes.h"

@@ -40,7 +40,9 @@ jobs:
           haskell: true
           large-packages: true
           docker-images: true
-          swap-storage: true
+          # Keep the swap file: the Graphite C++ build peaks close to the
+          # runner's 16 GB and the swap is the only headroom left.
+          swap-storage: false
 
       - name: Install JDK
         uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
@@ -90,6 +92,8 @@ jobs:
       - name: Build example for Android
         env:
           JAVA_OPTS: "-XX:MaxHeapSize=6g"
+          # Only the emulator ABI is tested below, so skip the other three.
+          ORG_GRADLE_PROJECT_reactNativeArchitectures: x86_64
         run: |
           yarn turbo run build:android --concurrency 1
 

@@ -1,6 +1,18 @@
 #pragma once
 
+#include <memory>
+#include <string>
+#include <vector>
+
 #include <jsi/jsi.h>
+
+#include "include/core/SkData.h"
+#include "include/utils/SkParsePath.h"
+
+#include "api/JsiSkPath.h"
+#include "api/JsiSkRRect.h"
+#include "api/JsiSkRect.h"
+#include "api/JsiSkRuntimeEffect.h"
 
 namespace RNSkia {
 
