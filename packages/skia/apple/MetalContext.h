@@ -107,10 +107,19 @@ public:
 
   GrDirectContext *getDirectContext() { return _directContext.get(); }
 
+  // Schedules cleanup on the onscreen context's owning thread without waiting
+  // synchronously for the GPU or creating another Metal context.
+  static void RequestMainThreadCleanup();
+
 private:
   id<MTLDevice> _device = nullptr;
   id<MTLCommandQueue> _commandQueue = nullptr;
   sk_sp<GrDirectContext> _directContext = nullptr;
+  bool _cleanupInFlight = false;
+  bool _cleanupRequested = false;
 
   MetalContext();
+  ~MetalContext();
+  void scheduleCleanup();
+  void finishCleanup();
 };

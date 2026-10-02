@@ -36,6 +36,8 @@ import {
   HighBitDepth,
   Graphite,
   AndroidViews,
+  CanvasMemory,
+  CanvasMemoryRect,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
 import { HomeScreen } from "./Home";
@@ -84,6 +86,8 @@ const linking: LinkingOptions<StackParamList> = {
       HighBitDepth: "high-bit-depth",
       Graphite: "graphite",
       AndroidViews: "android-views",
+      CanvasMemory: "canvas-memory",
+      CanvasMemoryRect: "canvas-memory-rect",
     },
   },
   prefixes: ["rnskia://"],
@@ -242,6 +246,11 @@ const App = () => {
             <Stack.Screen name="HighBitDepth" component={HighBitDepth} />
             <Stack.Screen name="Graphite" component={Graphite} />
             <Stack.Screen name="AndroidViews" component={AndroidViews} />
+            <Stack.Screen name="CanvasMemory" component={CanvasMemory} />
+            <Stack.Screen
+              name="CanvasMemoryRect"
+              component={CanvasMemoryRect}
+            />
           </Stack.Navigator>
         </NavigationContainer>
       </GestureHandlerRootView>

@@ -37,4 +37,6 @@ export type StackParamList = {
   HighBitDepth: undefined;
   Graphite: undefined;
   AndroidViews: undefined;
+  CanvasMemory: undefined;
+  CanvasMemoryRect: undefined;
 };

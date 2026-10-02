@@ -141,6 +141,16 @@ export const HomeScreen = () => {
         route="Performance"
       />
       <HomeScreenButton
+        title="🧠 Canvas Memory: Points"
+        description="Mount and unmount 250k or 1m points"
+        route="CanvasMemory"
+      />
+      <HomeScreenButton
+        title="🧠 Canvas Memory: Rects"
+        description="Mount and unmount 25k or 100k rects"
+        route="CanvasMemoryRect"
+      />
+      <HomeScreenButton
         title="🖼 Pictures"
         description="Animated circle trail using Pictures"
         route="Pictures"
