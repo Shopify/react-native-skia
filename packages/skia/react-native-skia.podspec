@@ -37,6 +37,11 @@ install_apple_skia_libs = lambda do |base_dir, packages|
     src = File.join(pkg_dir, 'libs')
     next unless Dir.exist?(src) && !Dir.glob(File.join(src, '*.xcframework')).empty?
 
+    # Graphite packages carry the Dawn release tag they ship (libs/.dawn-version),
+    # used below for the react-native-webgpu version check.
+    dawn_version = File.join(src, '.dawn-version')
+    FileUtils.cp(dawn_version, File.join(base_dir, 'libs', '.dawn-version')) if File.exist?(dawn_version)
+
     version = JSON.parse(File.read(File.join(pkg_dir, 'package.json')))['version'].to_s
     dest = File.join(base_dir, 'libs', platform)
     marker = File.join(dest, '.version')
@@ -110,7 +115,19 @@ if use_graphite && has_webgpu_pkg
     Pod::UI.puts "react-native-skia: Dawn versions match (#{skia_dawn})"
   end
 end
-framework_names += ['libwebgpu_dawn'] if use_graphite && !has_webgpu_pkg
+if use_graphite && !has_webgpu_pkg
+  # CocoaPods silently skips missing vendored frameworks, which would surface
+  # later as undefined dawn::native symbols at link time. Fail early instead.
+  %w[ios macos].each do |platform|
+    platform_dir = File.join(__dir__, 'libs', platform)
+    # A missing libs/<platform> is reported by the prebuilt binaries check below.
+    next if !Dir.exist?(platform_dir) || Dir.exist?(File.join(platform_dir, 'libwebgpu_dawn.xcframework'))
+    raise "react-native-skia: libwebgpu_dawn.xcframework not found in libs/#{platform}. " \
+          "The installed #{apple_skia_packages[platform]} package does not ship the shared " \
+          "Dawn library this Graphite build links against. Upgrade it, then run `pod install` again."
+  end
+  framework_names += ['libwebgpu_dawn']
+end
 
 # Verify that the prebuilt binaries are available (copied in above from the npm
 # packages, or downloaded by install-skia-graphite for in-repo Graphite builds).

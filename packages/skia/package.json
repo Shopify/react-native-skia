@@ -149,9 +149,9 @@
     "react-reconciler": "0.31.0"
   },
   "graphiteDependencies": {
-    "react-native-skia-graphite-android": "154.0.0",
-    "react-native-skia-graphite-apple-ios": "154.0.0",
-    "react-native-skia-graphite-apple-macos": "154.0.0"
+    "react-native-skia-graphite-android": "154.0.1",
+    "react-native-skia-graphite-apple-ios": "154.0.1",
+    "react-native-skia-graphite-apple-macos": "154.0.1"
   },
   "eslintIgnore": [
     "node_modules/",
