@@ -1,0 +1,169 @@
+name: Create a release (react-native-skia)
+on:
+  workflow_dispatch:
+    inputs:
+      graphite:
+        description: 'Ship the Graphite build (Dawn/WebGPU backend) instead of the default Ganesh build. Ignored on 2.x, which always ships Ganesh.'
+        type: boolean
+        default: true
+      skip_npm_publish:
+        description: 'Skip the npm publish and upload the package tarball as a workflow artifact instead'
+        type: boolean
+        default: false
+      version:
+        description: 'Release this exact version (e.g. 3.0.0) instead of letting semantic-release compute it. Leave empty for a regular release.'
+        type: string
+        required: false
+        default: ''
+jobs:
+  build:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' && (github.ref_name == 'main' || github.ref_name == '2.x') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to be able to publish a GitHub release
+      issues: write # to be able to comment on released issues
+      pull-requests: write # to be able to comment on released pull requests
+      id-token: write # to enable use of OIDC for npm provenance
+    env:
+      WORKING_DIRECTORY: ./
+      PACKAGE_NAME: react-native-skia
+      REPOSITORY: wcandillon/react-native-skia
+      # 2.x is the maintenance branch for the Ganesh v2 line: it never ships
+      # Graphite and publishes under the 2.x dist-tag so latest stays on main.
+      GRAPHITE: ${{ inputs.graphite && github.ref_name != '2.x' }}
+      NPM_DIST_TAG: ${{ github.ref_name == '2.x' && '2.x' || 'latest' }}
+    concurrency:
+      group: npm-react-native-skia-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      # The graphite setup bakes the Dawn and Graphite headers into cpp/ and
+      # creates the libs/.graphite marker (shipped via the files field) that the
+      # podspec and build.gradle key off at build time.
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          graphite: ${{ env.GRAPHITE }}
+
+      - name: Build package and documentation
+        run: yarn build
+
+      # Swap the prebuilt binary packages for their Graphite variants, pinned in
+      # graphiteDependencies (package.json).
+      - name: Swap in Graphite binary packages
+        if: ${{ env.GRAPHITE == 'true' }}
+        working-directory: packages/skia
+        run: |
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            for (const name of Object.keys(pkg.dependencies)) {
+              if (name.startsWith('react-native-skia-')) delete pkg.dependencies[name];
+            }
+            Object.assign(pkg.dependencies, pkg.graphiteDependencies);
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+          node -p "JSON.stringify(require('./package.json').dependencies, null, 2)"
+
+      # Publish as react-native-skia (unscoped) from this repository. The
+      # repository field drives both the semantic-release remote and npm provenance.
+      - name: Rename package
+        working-directory: packages/skia
+        run: |
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            pkg.name = process.env.PACKAGE_NAME;
+            pkg.repository = {
+              type: 'git',
+              url: 'git+https://github.com/' + process.env.REPOSITORY + '.git',
+              baseUrl: 'https://github.com/' + process.env.REPOSITORY,
+            };
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+          sed -i "s#@shopify/react-native-skia#${PACKAGE_NAME}#g" jestSetup.js scripts/setup-canvaskit.js
+          node -p "require('./package.json').name + ' ' + JSON.stringify(require('./package.json').repository)"
+
+      # The upstream .releaserc only knows main and next; releases from the 2.x
+      # branch are maintenance releases (>=2.0.0 <3.0.0) on the 2.x channel.
+      - name: Add 2.x maintenance branch to semantic-release
+        working-directory: packages/skia
+        run: |
+          node -e "
+            const fs = require('fs');
+            const rc = JSON.parse(fs.readFileSync('.releaserc', 'utf8'));
+            rc.branches.unshift({ name: '2.x', range: '2.x', channel: '2.x' });
+            fs.writeFileSync('.releaserc', JSON.stringify(rc, null, 2) + '\n');
+          "
+
+      # Without npm publish, semantic-release still tags, creates the GitHub
+      # release and writes the tarball to dist/, which is uploaded below.
+      - name: Disable npm publish in semantic-release
+        if: ${{ inputs.skip_npm_publish && inputs.version == '' }}
+        working-directory: packages/skia
+        run: |
+          node -e "
+            const fs = require('fs');
+            const rc = JSON.parse(fs.readFileSync('.releaserc', 'utf8'));
+            rc.plugins = rc.plugins.filter((p) => (Array.isArray(p) ? p[0] : p) !== '@semantic-release/exec');
+            fs.writeFileSync('.releaserc', JSON.stringify(rc, null, 2) + '\n');
+          "
+          cat .releaserc
+
+      - name: Build NPM Package
+        if: ${{ inputs.version == '' }}
+        working-directory: packages/skia
+        run: |
+          yarn release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          YARN_NPM_AUTH_TOKEN: ''
+          NPM_TOKEN: ''
+          NPM_CONFIG_PROVENANCE: true
+
+      # Bootstrap path: release an exact version and push the matching vX.Y.Z
+      # tag so that semantic-release picks up from it on the next regular run.
+      - name: Build NPM Package (explicit version)
+        if: ${{ inputs.version != '' }}
+        working-directory: packages/skia
+        run: |
+          VERSION="${INPUT_VERSION#v}"
+          TAG="v${VERSION}"
+          if git rev-parse -q --verify "refs/tags/${TAG}" > /dev/null; then
+            echo "Tag ${TAG} already exists" && exit 1
+          fi
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            pkg.version = process.argv[1];
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          " "$VERSION"
+          mkdir -p dist
+          yarn pack --out "dist/%s-%v.tgz"
+          if [ "$SKIP_NPM_PUBLISH" != "true" ]; then
+            mkdir -p /tmp/npm-publish && cp dist/*.tgz /tmp/npm-publish/
+            (cd /tmp/npm-publish && npm publish *.tgz --provenance --access public --tag "$NPM_DIST_TAG")
+          fi
+          git tag "$TAG"
+          git push origin "$TAG"
+          if [ "$NPM_DIST_TAG" = "latest" ]; then LATEST=true; else LATEST=false; fi
+          gh release create "$TAG" dist/*.tgz --title "$TAG" --generate-notes --latest="$LATEST"
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          SKIP_NPM_PUBLISH: ${{ inputs.skip_npm_publish }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
+
+      - name: Upload package tarball
+        if: ${{ inputs.skip_npm_publish }}
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6.0.0
+        with:
+          name: react-native-skia-tarball
+          path: packages/skia/dist/*.tgz
+          if-no-files-found: error
