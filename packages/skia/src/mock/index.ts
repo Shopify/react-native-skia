@@ -25,6 +25,7 @@ export const Mock = (CanvasKit: CanvasKit) => {
     Canvas: require("react-native").View,
     CanvasOld: require("react-native").View,
     Canvas2: require("react-native").View,
+    setCanvas2AsDefault: Noop,
     getPreferredHighBitDepthCanvasFormat: () => "rgba16float",
     SkiaPictureView: require("react-native").View,
     SkiaGraphiteView: require("react-native").View,
