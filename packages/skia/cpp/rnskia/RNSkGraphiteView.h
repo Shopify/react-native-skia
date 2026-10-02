@@ -60,12 +60,29 @@ public:
   skgpu::graphite::Recording *get() const { return _recording.get(); }
 
   /**
-   Whether the recording can be replayed onto the given target: same format,
-   and the target supports every usage the recording relies on.
+   Whether the recording was made for a texture of the given size. A deferred
+   canvas records against fixed dimensions: replaying it onto a texture of
+   another size makes Graphite copy and draw outside of it, which Dawn
+   rejects (the whole frame is then dropped). A view that was resized has
+   stale recordings in flight; they are skipped and the content is recorded
+   again for the new size.
    */
-  bool isCompatibleWith(const RNSkGraphiteTargetInfo &target) const {
+  bool hasSizeOf(const RNSkGraphiteTargetInfo &target) const {
+    return _target.width == target.width && _target.height == target.height;
+  }
+
+  /**
+   Whether the recording has the format of the given target, and the target
+   supports every usage the recording relies on.
+   */
+  bool hasFormatOf(const RNSkGraphiteTargetInfo &target) const {
     return _target.colorType == target.colorType &&
            _target.textureInfo.canBeFulfilledBy(target.textureInfo);
+  }
+
+  /** Whether the recording can be replayed onto the given target. */
+  bool isCompatibleWith(const RNSkGraphiteTargetInfo &target) const {
+    return hasSizeOf(target) && hasFormatOf(target);
   }
 
 private:
@@ -407,7 +424,9 @@ public:
       recordings = target->takeQueued();
     }
     if (recordings.empty()) {
-      if (lastPresented == nullptr) {
+      // After a resize the last frame has the old size: it cannot be
+      // replayed, the layer keeps showing it until the new frame lands.
+      if (lastPresented == nullptr || !lastPresented->hasSizeOf(targetInfo)) {
         return;
       }
       present(canvasProvider, targetInfo, {lastPresented},
@@ -491,10 +510,15 @@ private:
     std::vector<skgpu::graphite::Recording *> raw;
     std::shared_ptr<RNSkGraphiteRecording> last;
     for (const auto &recording : recordings) {
+      // A recording made for the size the view had before a resize is
+      // dropped quietly: the next one is recorded for the new size.
+      if (!recording->hasSizeOf(targetInfo)) {
+        continue;
+      }
       // A recording made for another format (recorded before the surface
       // existed, with a bit depth the surface did not get) cannot be
       // replayed onto this one.
-      if (!recording->isCompatibleWith(targetInfo)) {
+      if (!recording->hasFormatOf(targetInfo)) {
         RNSkLogger::logToConsole("SkiaGraphiteView: skipping a recording made "
                                  "for a different surface format");
         continue;
