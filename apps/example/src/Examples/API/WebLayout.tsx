@@ -5,7 +5,7 @@ import {
   Line,
   Rect,
   vec,
-} from "@shopify/react-native-skia";
+} from "react-native-skia";
 import React, { useEffect, useState } from "react";
 import {
   Platform,

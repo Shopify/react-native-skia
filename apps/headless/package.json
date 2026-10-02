@@ -6,8 +6,8 @@
 		"tsc": "tsc"
 	},
 	"dependencies": {
-		"@shopify/react-native-skia": "workspace:*",
 		"react": "^19.0.0",
+		"react-native-skia": "workspace:*",
 		"typescript": "^5.2.2"
 	},
 	"devDependencies": {

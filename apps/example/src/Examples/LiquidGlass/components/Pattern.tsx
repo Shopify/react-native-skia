@@ -4,7 +4,7 @@ import {
   ImageShader,
   useClock,
   useImage,
-} from "@shopify/react-native-skia";
+} from "react-native-skia";
 import { useDerivedValue } from "react-native-reanimated";
 
 export const Pattern = () => {

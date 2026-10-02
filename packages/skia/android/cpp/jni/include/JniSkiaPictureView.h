@@ -84,18 +84,7 @@ protected:
     JniSkiaBaseView::registerView(nativeId);
   }
 
-  void unregisterView() override {
-    JniSkiaBaseView::unregisterView();
-    // React drops the Java view here, but the native view behind it (and the
-    // recording it owns) is only destroyed when the Java object is finalized.
-    // Release the content now so it does not wait for the Java garbage
-    // collector.
-    if (_skiaAndroidView != nullptr) {
-      auto renderer = std::static_pointer_cast<RNSkia::RNSkPictureRenderer>(
-          _skiaAndroidView->getSkiaView()->getRenderer());
-      renderer->clear();
-    }
-  }
+  void unregisterView() override { JniSkiaBaseView::unregisterView(); }
 
   jni::local_ref<jni::JArrayInt> getBitmap(int width, int height) override {
     // Get the RNSkPictureView from the android view

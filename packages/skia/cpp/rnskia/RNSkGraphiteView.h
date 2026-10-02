@@ -14,6 +14,7 @@
 
 #include "RNDawnContext.h"
 #include "RNDawnUtils.h"
+#include "RNSkGraphiteProducer.h"
 #include "RNSkPlatformContext.h"
 #include "RNSkView.h"
 #include "jsi/ViewProperty.h"
@@ -59,12 +60,29 @@ public:
   skgpu::graphite::Recording *get() const { return _recording.get(); }
 
   /**
-   Whether the recording can be replayed onto the given target: same format,
-   and the target supports every usage the recording relies on.
+   Whether the recording was made for a texture of the given size. A deferred
+   canvas records against fixed dimensions: replaying it onto a texture of
+   another size makes Graphite copy and draw outside of it, which Dawn
+   rejects (the whole frame is then dropped). A view that was resized has
+   stale recordings in flight; they are skipped and the content is recorded
+   again for the new size.
    */
-  bool isCompatibleWith(const RNSkGraphiteTargetInfo &target) const {
+  bool hasSizeOf(const RNSkGraphiteTargetInfo &target) const {
+    return _target.width == target.width && _target.height == target.height;
+  }
+
+  /**
+   Whether the recording has the format of the given target, and the target
+   supports every usage the recording relies on.
+   */
+  bool hasFormatOf(const RNSkGraphiteTargetInfo &target) const {
     return _target.colorType == target.colorType &&
            _target.textureInfo.canBeFulfilledBy(target.textureInfo);
+  }
+
+  /** Whether the recording can be replayed onto the given target. */
+  bool isCompatibleWith(const RNSkGraphiteTargetInfo &target) const {
+    return hasSizeOf(target) && hasFormatOf(target);
   }
 
 private:
@@ -365,6 +383,20 @@ public:
   }
 
   /**
+   Called on the main thread after each presented frame (the producer paces
+   itself on it) and whenever the view asks for a redraw: a new surface, a
+   resize, or SkiaViewApi.requestRedraw. The latter returns whether a frame
+   is coming for it. Set once, at construction.
+   */
+  void setOnPresented(std::function<void()> callback) {
+    _onPresented = std::move(callback);
+  }
+
+  void setOnRedraw(std::function<bool()> callback) {
+    _onRedraw = std::move(callback);
+  }
+
+  /**
    Presents everything submitted since the last frame. With nothing queued,
    presents the last frame again: a redraw after a resize or on a new
    surface. Without a surface the queue is left alone: the surface presents
@@ -376,6 +408,8 @@ public:
     if (!canvasProvider->getGraphiteTargetInfo(&targetInfo)) {
       return;
     }
+    // Declarative content is recorded again for the surface as it is now.
+    const bool frameComing = _onRedraw && _onRedraw();
     std::shared_ptr<RNSkGraphiteTarget> target;
     std::shared_ptr<RNSkGraphiteRecording> lastPresented;
     {
@@ -388,24 +422,33 @@ public:
       recordings = target->takeQueued();
     }
     if (recordings.empty()) {
-      if (lastPresented == nullptr) {
+      // With a frame on its way, the layer keeps showing the last one until
+      // it lands: presenting it again would only cost a second present. The
+      // same holds after a resize, when the last frame has the old size.
+      if (frameComing || lastPresented == nullptr ||
+          !lastPresented->hasSizeOf(targetInfo)) {
         return;
       }
-      present(canvasProvider, targetInfo, {lastPresented},
-              /* remember= */ true);
+      if (present(canvasProvider, targetInfo, {lastPresented},
+                  /* remember= */ true)) {
+        notifyPresented();
+      }
       return;
     }
-    if (!present(canvasProvider, targetInfo, recordings,
-                 /* remember= */ true) &&
-        target) {
+    if (present(canvasProvider, targetInfo, recordings,
+                /* remember= */ true)) {
+      notifyPresented();
+    } else if (target) {
       target->requeue(recordings);
     }
   }
 
   /**
    Presents the queued recordings, if any. Returns whether more are waiting,
-   so that the caller keeps its frame callback armed. Without a surface the
-   queue is left alone: the surface presents it when it appears.
+   so that the caller keeps its frame callback armed: also when the present
+   failed (the app is in the background), so that the recordings are tried
+   again on the next frame rather than left waiting for a redraw. Without a
+   surface the queue is left alone: the surface presents it when it appears.
    */
   bool presentQueued(const std::shared_ptr<RNSkCanvasProvider> &provider) {
     std::shared_ptr<RNSkGraphiteTarget> target;
@@ -426,8 +469,9 @@ public:
     }
     if (!present(provider, targetInfo, recordings, /* remember= */ true)) {
       target->requeue(recordings);
-      return false;
+      return true;
     }
+    notifyPresented();
     return target->hasQueued();
   }
 
@@ -460,9 +504,11 @@ public:
 
 private:
   /**
-   Replays the recordings onto the provider's target. Returns false when the
-   provider could not present (no surface, app in the background), in which
-   case nothing was consumed and the caller keeps the recordings.
+   Replays the recordings onto the provider's target, and remembers the last
+   one for the next redraw when asked to (not for a snapshot). Returns false
+   when the provider could not present (no surface, app in the background),
+   in which case nothing was consumed and the caller keeps the recordings.
+   The on-screen callers tell the producer about a consumed frame.
    */
   bool
   present(const std::shared_ptr<RNSkCanvasProvider> &provider,
@@ -472,10 +518,15 @@ private:
     std::vector<skgpu::graphite::Recording *> raw;
     std::shared_ptr<RNSkGraphiteRecording> last;
     for (const auto &recording : recordings) {
+      // A recording made for the size the view had before a resize is
+      // dropped quietly: the next one is recorded for the new size.
+      if (!recording->hasSizeOf(targetInfo)) {
+        continue;
+      }
       // A recording made for another format (recorded before the surface
       // existed, with a bit depth the surface did not get) cannot be
       // replayed onto this one.
-      if (!recording->isCompatibleWith(targetInfo)) {
+      if (!recording->hasFormatOf(targetInfo)) {
         RNSkLogger::logToConsole("SkiaGraphiteView: skipping a recording made "
                                  "for a different surface format");
         continue;
@@ -495,15 +546,26 @@ private:
     return success;
   }
 
+  void notifyPresented() {
+    if (_onPresented) {
+      _onPresented();
+    }
+  }
+
   std::mutex _mutex;
   std::shared_ptr<RNSkGraphiteTarget> _target;
   std::shared_ptr<RNSkGraphiteRecording> _lastPresented;
+  std::function<void()> _onPresented;
+  std::function<bool()> _onRedraw;
 };
 
 /**
- * A view that presents Graphite recordings. JS records frames through the
- * target (SkiaViewApi.makeGraphiteContext); the platform view presents them
- * on its display link. Only available with the Graphite backend.
+ * A view that presents Graphite recordings. Frames come from one of two
+ * producers: JS records them itself through the target
+ * (SkiaViewApi.makeGraphiteContext), or <GraphiteCanvas> hands over a recorder
+ * (or a picture) that the render thread pool records for the view. The
+ * platform view presents them on its display link. Only available with the
+ * Graphite backend.
  */
 class RNSkGraphiteView : public RNSkView {
 public:
@@ -511,7 +573,21 @@ public:
                    std::shared_ptr<RNSkCanvasProvider> canvasProvider)
       : RNSkView(context, canvasProvider,
                  std::make_shared<RNSkGraphiteRenderer>(
-                     std::bind(&RNSkGraphiteView::requestRedraw, this))) {}
+                     std::bind(&RNSkGraphiteView::requestRedraw, this))),
+        _producer(std::make_shared<RNSkGraphiteProducer>()) {
+    std::weak_ptr<RNSkGraphiteProducer> weakProducer = _producer;
+    getGraphiteRenderer()->setOnPresented([weakProducer]() {
+      if (auto producer = weakProducer.lock()) {
+        producer->onFramePresented();
+      }
+    });
+    getGraphiteRenderer()->setOnRedraw([weakProducer]() {
+      if (auto producer = weakProducer.lock()) {
+        return producer->requestFrame();
+      }
+      return false;
+    });
+  }
 
   ~RNSkGraphiteView() override {
     if (_target) {
@@ -519,9 +595,26 @@ public:
     }
   }
 
-  // No JSI properties: frames arrive through the target.
+  /** Declarative content: the recorder of <GraphiteCanvas>, or a picture. */
   void setJsiProperties(
-      std::unordered_map<std::string, RNJsi::ViewProperty> &props) override {}
+      std::unordered_map<std::string, RNJsi::ViewProperty> &props) override {
+    for (auto &prop : props) {
+      if (prop.first == "recorder") {
+        _producer->setRecorder(
+            prop.second.isRecorder() ? prop.second.getRecorder() : nullptr);
+      } else if (prop.first == "picture") {
+        _producer->setPicture(prop.second.isPicture() ? prop.second.getPicture()
+                                                      : nullptr);
+      }
+    }
+  }
+
+  bool applyUpdates(jsi::Runtime &runtime, double recorderId,
+                    const jsi::Array &values) override {
+    return _producer->applyUpdates(runtime, recorderId, values);
+  }
+
+  void releaseContent() override { _producer->clear(); }
 
   void setNativeId(size_t nativeId) override {
     RNSkView::setNativeId(nativeId);
@@ -546,6 +639,7 @@ public:
       });
     };
     _target->attach(getCanvasProvider(), scheduleOnMainThread);
+    _producer->setTarget(_target);
     // Frames recorded before the view existed are presented now.
     if (_target->hasQueued()) {
       scheduleOnMainThread();
@@ -579,12 +673,22 @@ public:
 
   bool hasQueuedRecordings() { return _target && _target->hasQueued(); }
 
-  /** Replays the current frame into an offscreen surface. */
+  /**
+   Renders the view into an offscreen surface: declarative content is
+   replayed on the calling thread with the latest values, so the snapshot
+   does not wait for a frame; otherwise the current frame is replayed.
+   */
   sk_sp<SkImage> makeImageSnapshot(SkRect *bounds) override {
     auto provider = std::make_shared<RNSkOffscreenCanvasProvider>(
         getPlatformContext(), std::bind(&RNSkView::requestRedraw, this),
         getScaledWidth(), getScaledHeight());
-    getGraphiteRenderer()->renderLastFrame(provider);
+    if (_producer->hasContent()) {
+      auto pd = getPlatformContext()->getPixelDensity();
+      provider->renderToCanvas(
+          [this, pd](SkCanvas *canvas) { _producer->renderInto(canvas, pd); });
+    } else {
+      getGraphiteRenderer()->renderLastFrame(provider);
+    }
     return provider->makeSnapshot(bounds);
   }
 
@@ -593,6 +697,7 @@ private:
     return std::static_pointer_cast<RNSkGraphiteRenderer>(getRenderer());
   }
 
+  std::shared_ptr<RNSkGraphiteProducer> _producer;
   std::shared_ptr<RNSkGraphiteTarget> _target;
   size_t _targetId = 0;
   std::function<void()> _frameScheduler;

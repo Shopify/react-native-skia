@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Switch, Text, View } from "react-native";
-import type { AndroidSurfaceType } from "@shopify/react-native-skia";
+import type { AndroidSurfaceType } from "react-native-skia";
 import {
   Canvas,
   Circle,
@@ -10,7 +10,7 @@ import {
   useClock,
   useFont,
   vec,
-} from "@shopify/react-native-skia";
+} from "react-native-skia";
 import {
   useDerivedValue,
   useFrameCallback,

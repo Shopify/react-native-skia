@@ -230,6 +230,24 @@ public:
   virtual void setJsiProperties(
       std::unordered_map<std::string, RNJsi::ViewProperty> &props) = 0;
 
+  /**
+   Reads the shared values on the calling runtime into the recording the
+   view owns and schedules a frame. Returns false when there is nothing to
+   update: no recording, or one other than recorderId (a stale mapper).
+   */
+  virtual bool applyUpdates(jsi::Runtime &runtime, double recorderId,
+                            const jsi::Array &values) {
+    return false;
+  }
+
+  /**
+   Releases the content the view draws without scheduling a frame: the host
+   view is torn down. On Android the native view outlives the Java view
+   until it is finalized, so the resources go away here rather than with the
+   garbage collector.
+   */
+  virtual void releaseContent() {}
+
   void requestRedraw() {
     if (!_redrawRequested) {
       _redrawRequested = true;

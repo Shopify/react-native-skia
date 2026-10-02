@@ -1,7 +1,10 @@
 import "./skia/NativeSetup";
 export { JsiSkImage } from "./skia/web/JsiSkImage";
 export * from "./renderer";
-export * from "./renderer/Canvas";
+export { useCanvasRef, useCanvasSize } from "./renderer/Canvas";
+export type { CanvasProps, CanvasRef } from "./renderer/Canvas";
+export { GraphiteCanvas } from "./renderer/GraphiteCanvas";
+export { Canvas } from "./renderer/DefaultCanvas";
 export * from "./renderer/Offscreen";
 export * from "./views";
 export * from "./skia";

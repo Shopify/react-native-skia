@@ -13,7 +13,7 @@ import {
   Circle,
   Skia,
   SkiaPictureView,
-} from "@shopify/react-native-skia";
+} from "react-native-skia";
 import { ScrollView } from "react-native-gesture-handler";
 
 import { AnimationWithTouchHandler } from "../Reanimated/AnimationWithTouchHandler";

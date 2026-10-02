@@ -22,7 +22,7 @@ export interface SkiaGraphiteViewProps extends SkiaGraphiteViewNativeProps {
 
 /**
  * A view presenting frames recorded with Skia Graphite. Requires the Graphite
- * backend (install-skia-graphite); with the default backend it renders
+ * backend (the default since v3); with a Ganesh build it renders
  * nothing. See {@link SkGraphiteContext}.
  */
 export const SkiaGraphiteView = ({

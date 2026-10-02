@@ -17,8 +17,7 @@ export const WebGPU = () => {
         name="List"
         component={List}
         options={{
-          title: "WebGPU",
-          header: () => null,
+          title: "🔺 WebGPU",
         }}
       />
       <Stack.Screen
