@@ -92,4 +92,7 @@ void MetalWindowContext::present() {
   [commandBuffer presentDrawable:_currentDrawable];
   [commandBuffer commit];
   _skSurface = nullptr;
+  // The presentation command owns the drawable until it is finished. Keeping
+  // last drawable alive pins its texture while an otherwise idle view lives.
+  _currentDrawable = nil;
 }

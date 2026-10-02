@@ -7,6 +7,11 @@
 #include <vector>
 
 #import "RNSkManager.h"
+#import "RNSkPictureView.h"
+#import "SkiaPictureView.h"
+#if !defined(SK_GRAPHITE)
+#import "MetalContext.h"
+#endif
 
 @implementation SkiaUIView {
   std::shared_ptr<RNSkBaseAppleView> _impl;
@@ -61,13 +66,11 @@
 - (void)removeFromSuperview {
   // Cleanup when removed from view hierarchy
   if (_impl != nullptr) {
-    [_impl->getLayer() removeFromSuperlayer];
-
     if (_nativeId != 0 && _manager != nullptr) {
       _manager->setSkiaView(_nativeId, nullptr);
     }
 
-    _impl = nullptr;
+    [self releaseDrawView];
   }
 
   [super removeFromSuperview];
@@ -75,11 +78,34 @@
 
 - (void)dealloc {
   [self unregisterView];
+  [self releaseDrawView];
 }
 
 - (void)prepareForRecycle {
-  [super prepareForRecycle];
+  // Recycling keeps the UIView alive. Release its native scene and Metal layer
+  // now, even if UIKit did not call this view's removeFromSuperview override.
   [self unregisterView];
+  [self releaseDrawView];
+  [super prepareForRecycle];
+}
+
+#pragma mark - Native resource lifetime
+- (void)releaseDrawView {
+  if (_impl == nullptr) {
+    return;
+  }
+  // A queued mapper/snapshot may still hold the draw view. Clear its scene
+  // explicitly instead of waiting for the last shared_ptr or a runtime GC.
+  if ([self isKindOfClass:[SkiaPictureView class]]) {
+    auto renderer = std::static_pointer_cast<RNSkia::RNSkPictureRenderer>(
+        _impl->getDrawView()->getRenderer());
+    renderer->clear();
+  }
+  [_impl->getLayer() removeFromSuperlayer];
+  _impl = nullptr;
+#if !defined(SK_GRAPHITE)
+  MetalContext::RequestMainThreadCleanup();
+#endif
 }
 
 - (void)finalizeUpdates:(RNComponentViewUpdateMask)updateMask {
@@ -96,6 +122,7 @@
   if (_manager != nullptr && _nativeId != 0) {
     _manager->unregisterSkiaView(_nativeId);
   }
+  _nativeId = 0;
 }
 
 #pragma Render
