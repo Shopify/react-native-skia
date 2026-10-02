@@ -11,7 +11,8 @@ if (!Symbol.dispose) {
   Symbol.dispose = Symbol.for("Symbol.dispose");
 }
 
-// Debug: render every <Canvas> with Canvas2 (requires the Graphite backend).
-setCanvas2AsDefault(true);
+// Render every <Canvas> with Canvas2 (requires the Graphite backend).
+// ci-graphite.yml flips this flag to true before starting Metro.
+setCanvas2AsDefault(false);
 
 AppRegistry.registerComponent(appName, () => App);
