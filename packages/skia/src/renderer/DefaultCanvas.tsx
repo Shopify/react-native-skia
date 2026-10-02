@@ -1,25 +1,40 @@
 import React from "react";
 
+import { Skia } from "../skia";
+import { Platform } from "../Platform";
+
 import type { CanvasProps } from "./Canvas";
 import { Canvas as PictureCanvas } from "./Canvas";
-import { Canvas2 } from "./Canvas2";
+import { GraphiteCanvas } from "./GraphiteCanvas";
 
-let canvas2AsDefault = false;
+let useGraphite: boolean | null = null;
 
-/**
- * Debug flag: when enabled, `<Canvas>` renders {@link Canvas2} (the
- * declarative canvas on the Graphite view) instead of the picture view based
- * canvas. Call it once at startup, before the first canvas is rendered:
- * canvases already mounted switch implementation (and remount) on their next
- * render. On the web, `Canvas2` is the regular canvas so the flag has no effect.
- */
-export const setCanvas2AsDefault = (enabled: boolean) => {
-  canvas2AsDefault = enabled;
+// Whether this build runs the Graphite backend. Resolved on the first render
+// (the native API is installed by then) and cached: getNativeDevice() throws
+// on Ganesh builds. On the web, GraphiteCanvas is the regular canvas anyway.
+const hasGraphite = () => {
+  if (useGraphite === null) {
+    if (Platform.OS === "web") {
+      useGraphite = false;
+    } else {
+      try {
+        useGraphite = typeof Skia.getNativeDevice() === "bigint";
+      } catch {
+        useGraphite = false;
+      }
+    }
+  }
+  return useGraphite;
 };
 
+/**
+ * `<Canvas>` renders {@link GraphiteCanvas} when React Native Skia is
+ * configured with the Graphite backend (install-skia-graphite), and the
+ * picture view based canvas otherwise. Both take the same props and ref.
+ */
 export const Canvas = (props: CanvasProps) => {
-  return canvas2AsDefault ? (
-    <Canvas2 {...props} />
+  return hasGraphite() ? (
+    <GraphiteCanvas {...props} />
   ) : (
     <PictureCanvas {...props} />
   );

@@ -1,2 +1,2 @@
 export * from "./Graphite";
-export * from "./Canvas2";
+export * from "./GraphiteCanvas";

@@ -140,8 +140,6 @@ export const HomeScreen = () => {
         description="Drawing Performance Test"
         route="Performance"
       />
-      <HomeScreenButton title="📹 Video" description="Video" route="Video" />
-      <HomeScreenButton title="💬 Chat" description="Chat" route="Chat" />
       <HomeScreenButton
         title="🖼 Pictures"
         description="Animated circle trail using Pictures"
@@ -168,7 +166,7 @@ export const HomeScreen = () => {
       )}
       {hasGraphite && (
         <HomeScreenButton
-          title="🗿 Canvas2"
+          title="🗿 Graphite Canvas"
           description="Declarative canvas on the Graphite view, replayed off-thread"
           route="GraphiteCanvas"
         />

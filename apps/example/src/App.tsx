@@ -30,14 +30,12 @@ import {
   Stickers,
   FrostedCard,
   SpeedTest,
-  Video,
-  Chat,
   LiquidGlass,
   Pictures,
   WebGPU,
   HighBitDepth,
   Graphite,
-  GraphiteCanvas,
+  GraphiteCanvasExample,
   AndroidViews,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
@@ -82,8 +80,6 @@ const linking: LinkingOptions<StackParamList> = {
       Stickers: "stickers",
       FrostedCard: "frosted-card",
       SpeedTest: "speedtest",
-      Video: "video",
-      Chat: "chat",
       Pictures: "pictures",
       WebGPU: "webgpu",
       HighBitDepth: "high-bit-depth",
@@ -234,20 +230,6 @@ const App = () => {
               }}
             />
             <Stack.Screen
-              name="Video"
-              component={Video}
-              options={{
-                header: () => null,
-              }}
-            />
-            <Stack.Screen
-              name="Chat"
-              component={Chat}
-              options={{
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
               name="Performance"
               component={PerformanceDrawingTest}
             />
@@ -261,7 +243,10 @@ const App = () => {
             />
             <Stack.Screen name="HighBitDepth" component={HighBitDepth} />
             <Stack.Screen name="Graphite" component={Graphite} />
-            <Stack.Screen name="GraphiteCanvas" component={GraphiteCanvas} />
+            <Stack.Screen
+              name="GraphiteCanvas"
+              component={GraphiteCanvasExample}
+            />
             <Stack.Screen name="AndroidViews" component={AndroidViews} />
           </Stack.Navigator>
         </NavigationContainer>

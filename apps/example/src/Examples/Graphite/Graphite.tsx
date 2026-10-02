@@ -15,7 +15,7 @@ import { useFrameCallback, useSharedValue } from "react-native-reanimated";
 // draw a GPU-backed image made on the JS thread, so the picture is complete:
 // images can be shared between the runtimes and the views.
 
-const palette = [
+export const palette = [
   "#ff6b6b",
   "#feca57",
   "#48dbfb",

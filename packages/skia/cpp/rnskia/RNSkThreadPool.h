@@ -6,7 +6,6 @@
 #include <mutex>
 #include <string>
 #include <thread>
-#include <vector>
 
 #include <condition_variable>
 
@@ -47,13 +46,11 @@ public:
     _condition.notify_one();
   }
 
-  size_t size() const { return _size; }
-
 private:
   RNSkThreadPool() {
     auto cores = std::thread::hardware_concurrency();
-    _size = cores == 0 ? 2 : std::clamp(cores / 2, 2u, 4u);
-    for (unsigned i = 0; i < _size; i++) {
+    const unsigned size = cores == 0 ? 2u : std::clamp(cores / 2, 2u, 4u);
+    for (unsigned i = 0; i < size; i++) {
       std::thread([this, i]() { run(i); }).detach();
     }
   }
@@ -86,7 +83,6 @@ private:
     }
   }
 
-  unsigned _size = 0;
   std::mutex _mutex;
   std::condition_variable _condition;
   std::deque<std::function<void()>> _jobs;

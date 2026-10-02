@@ -31,8 +31,8 @@ struct Radius {
 
 // A value read from a shared value, waiting to be written into a command
 // property. Reading needs the runtime the shared value lives on; writing does
-// not, so a producer on another thread can apply the writes right before it
-// replays the commands. Empty when there is nothing to write.
+// not, so the thread that replays the commands writes it right before.
+// Empty when there is nothing to write.
 using PendingWrite = std::function<void()>;
 using ConversionFunction = std::function<PendingWrite(
     jsi::Runtime &runtime, const jsi::Object &object)>;
@@ -112,9 +112,10 @@ bool convertSelectorProperty(jsi::Runtime &runtime, const jsi::Value &prop,
          selected.asObject(runtime).isFunction(runtime))) {
       return nullptr;
     }
-    return [target, converted = getPropertyValue<T>(runtime, selected)]() {
-      *target = converted;
-    };
+    return
+        [target, converted = getPropertyValue<T>(runtime, selected)]() mutable {
+          *target = std::move(converted);
+        };
   };
 
   variables[name].push_back(conv);
@@ -146,9 +147,10 @@ void convertPropertyImpl(jsi::Runtime &runtime, const jsi::Object &object,
     auto conv = [target = &target](jsi::Runtime &runtime,
                                    const jsi::Object &val) -> PendingWrite {
       auto value = val.getProperty(runtime, "value");
-      return [target, converted = getPropertyValue<T>(runtime, value)]() {
-        *target = converted;
-      };
+      return
+          [target, converted = getPropertyValue<T>(runtime, value)]() mutable {
+            *target = std::move(converted);
+          };
     };
     variables[name].push_back(conv);
     if (auto write = conv(runtime, sharedValue)) {

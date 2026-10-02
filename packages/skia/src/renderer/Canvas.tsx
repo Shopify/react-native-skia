@@ -98,19 +98,17 @@ const resolveSurfaceType = (
     ? surfaceType
     : "auto";
 
-export const Canvas = ({
-  debug,
-  opaque,
+/**
+ * What every canvas shares, whichever native view it renders into: the native
+ * id, the scene graph root rendered into it, the `onSize` measurement and the
+ * imperative handle of the ref.
+ */
+export const useCanvasRoot = ({
   children,
   onSize,
-  colorSpace = "p3",
-  highBitDepth = false,
-  androidWarmup = false,
-  android,
   ref,
   onLayout,
-  ...viewProps
-}: CanvasProps) => {
+}: Pick<CanvasProps, "children" | "onSize" | "ref" | "onLayout">) => {
   if (onLayout && Platform.OS !== "web") {
     console.error(
       "<Canvas onLayout={onLayout} /> is not supported on the new architecture, to fix the issue, see: https://shopify.github.io/react-native-skia/docs/canvas/overview/#getting-the-canvas-size"
@@ -185,6 +183,28 @@ export const Canvas = ({
         },
       }) as CanvasRef
   );
+  return { nativeId, viewRef };
+};
+
+export const Canvas = ({
+  debug,
+  opaque,
+  children,
+  onSize,
+  colorSpace = "p3",
+  highBitDepth = false,
+  androidWarmup = false,
+  android,
+  ref,
+  onLayout,
+  ...viewProps
+}: CanvasProps) => {
+  const { nativeId, viewRef } = useCanvasRoot({
+    children,
+    onSize,
+    ref,
+    onLayout,
+  });
 
   const onLayoutWeb = useCallback(
     (e: LayoutChangeEvent) => {
