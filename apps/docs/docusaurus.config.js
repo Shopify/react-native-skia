@@ -7,7 +7,7 @@ import { themes } from "prism-react-renderer";
 const config = {
   title: "React Native Skia",
   tagline: "High Performance 2D Graphics",
-  url: "https://shopify.github.io/",
+  url: "https://wcandillon.github.io/",
   baseUrl: "/react-native-skia/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "throw",
@@ -88,6 +88,13 @@ const config = {
             label: "Docs",
           },
           // {to: '/blog', label: 'Blog', position: 'left'},
+          {
+            // Frozen v2 build, deployed from the docs-v2 branch
+            label: "v2",
+            to: "pathname:///react-native-skia/v2/",
+            target: "_self",
+            position: "right",
+          },
           {
             label: "GitHub",
             href: "https://github.com/shopify/react-native-skia",
