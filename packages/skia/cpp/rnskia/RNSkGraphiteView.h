@@ -385,13 +385,14 @@ public:
   /**
    Called on the main thread after each presented frame (the producer paces
    itself on it) and whenever the view asks for a redraw: a new surface, a
-   resize, or SkiaViewApi.requestRedraw. Set once, at construction.
+   resize, or SkiaViewApi.requestRedraw. The latter returns whether a frame
+   is coming for it. Set once, at construction.
    */
   void setOnPresented(std::function<void()> callback) {
     _onPresented = std::move(callback);
   }
 
-  void setOnRedraw(std::function<void()> callback) {
+  void setOnRedraw(std::function<bool()> callback) {
     _onRedraw = std::move(callback);
   }
 
@@ -407,11 +408,8 @@ public:
     if (!canvasProvider->getGraphiteTargetInfo(&targetInfo)) {
       return;
     }
-    // Declarative content is re-recorded for the surface as it is now;
-    // meanwhile the last frame is presented again below.
-    if (_onRedraw) {
-      _onRedraw();
-    }
+    // Declarative content is recorded again for the surface as it is now.
+    const bool frameComing = _onRedraw && _onRedraw();
     std::shared_ptr<RNSkGraphiteTarget> target;
     std::shared_ptr<RNSkGraphiteRecording> lastPresented;
     {
@@ -424,26 +422,33 @@ public:
       recordings = target->takeQueued();
     }
     if (recordings.empty()) {
-      // After a resize the last frame has the old size: it cannot be
-      // replayed, the layer keeps showing it until the new frame lands.
-      if (lastPresented == nullptr || !lastPresented->hasSizeOf(targetInfo)) {
+      // With a frame on its way, the layer keeps showing the last one until
+      // it lands: presenting it again would only cost a second present. The
+      // same holds after a resize, when the last frame has the old size.
+      if (frameComing || lastPresented == nullptr ||
+          !lastPresented->hasSizeOf(targetInfo)) {
         return;
       }
-      present(canvasProvider, targetInfo, {lastPresented},
-              /* remember= */ true);
+      if (present(canvasProvider, targetInfo, {lastPresented},
+                  /* remember= */ true)) {
+        notifyPresented();
+      }
       return;
     }
-    if (!present(canvasProvider, targetInfo, recordings,
-                 /* remember= */ true) &&
-        target) {
+    if (present(canvasProvider, targetInfo, recordings,
+                /* remember= */ true)) {
+      notifyPresented();
+    } else if (target) {
       target->requeue(recordings);
     }
   }
 
   /**
    Presents the queued recordings, if any. Returns whether more are waiting,
-   so that the caller keeps its frame callback armed. Without a surface the
-   queue is left alone: the surface presents it when it appears.
+   so that the caller keeps its frame callback armed: also when the present
+   failed (the app is in the background), so that the recordings are tried
+   again on the next frame rather than left waiting for a redraw. Without a
+   surface the queue is left alone: the surface presents it when it appears.
    */
   bool presentQueued(const std::shared_ptr<RNSkCanvasProvider> &provider) {
     std::shared_ptr<RNSkGraphiteTarget> target;
@@ -464,8 +469,9 @@ public:
     }
     if (!present(provider, targetInfo, recordings, /* remember= */ true)) {
       target->requeue(recordings);
-      return false;
+      return true;
     }
+    notifyPresented();
     return target->hasQueued();
   }
 
@@ -498,9 +504,11 @@ public:
 
 private:
   /**
-   Replays the recordings onto the provider's target. Returns false when the
-   provider could not present (no surface, app in the background), in which
-   case nothing was consumed and the caller keeps the recordings.
+   Replays the recordings onto the provider's target, and remembers the last
+   one for the next redraw when asked to (not for a snapshot). Returns false
+   when the provider could not present (no surface, app in the background),
+   in which case nothing was consumed and the caller keeps the recordings.
+   The on-screen callers tell the producer about a consumed frame.
    */
   bool
   present(const std::shared_ptr<RNSkCanvasProvider> &provider,
@@ -528,18 +536,12 @@ private:
     }
     if (raw.empty()) {
       // Nothing presentable: the recordings are consumed, not kept.
-      if (remember) {
-        notifyPresented();
-      }
       return true;
     }
     bool success = provider->presentRecordings(raw);
     if (success && remember) {
-      {
-        std::lock_guard<std::mutex> lock(_mutex);
-        _lastPresented = last;
-      }
-      notifyPresented();
+      std::lock_guard<std::mutex> lock(_mutex);
+      _lastPresented = last;
     }
     return success;
   }
@@ -554,7 +556,7 @@ private:
   std::shared_ptr<RNSkGraphiteTarget> _target;
   std::shared_ptr<RNSkGraphiteRecording> _lastPresented;
   std::function<void()> _onPresented;
-  std::function<void()> _onRedraw;
+  std::function<bool()> _onRedraw;
 };
 
 /**
@@ -572,7 +574,7 @@ public:
       : RNSkView(context, canvasProvider,
                  std::make_shared<RNSkGraphiteRenderer>(
                      std::bind(&RNSkGraphiteView::requestRedraw, this))),
-        _producer(std::make_shared<RNSkGraphiteProducer>(context)) {
+        _producer(std::make_shared<RNSkGraphiteProducer>()) {
     std::weak_ptr<RNSkGraphiteProducer> weakProducer = _producer;
     getGraphiteRenderer()->setOnPresented([weakProducer]() {
       if (auto producer = weakProducer.lock()) {
@@ -581,8 +583,9 @@ public:
     });
     getGraphiteRenderer()->setOnRedraw([weakProducer]() {
       if (auto producer = weakProducer.lock()) {
-        producer->requestFrame();
+        return producer->requestFrame();
       }
+      return false;
     });
   }
 
@@ -611,12 +614,7 @@ public:
     return _producer->applyUpdates(runtime, recorderId, values);
   }
 
-  /**
-   Releases the declarative content without scheduling a frame: the host
-   view is torn down (on Android the native view outlives the Java view
-   until it is finalized).
-   */
-  void clearContent() { _producer->clear(); }
+  void releaseContent() override { _producer->clear(); }
 
   void setNativeId(size_t nativeId) override {
     RNSkView::setNativeId(nativeId);

@@ -7,9 +7,11 @@
 
 #include "RNSkGraphiteProducer.h"
 
+#include <utility>
+
 #include "RNSkGraphiteView.h"
+#include "RNSkPictureView.h"
 #include "RNSkThreadPool.h"
-#include "api/recorder/DrawingCtx.h"
 #include "api/recorder/RNRecorder.h"
 #include "utils/RNSkLog.h"
 
@@ -17,10 +19,6 @@
 #include "include/core/SkPicture.h"
 
 namespace RNSkia {
-
-RNSkGraphiteProducer::RNSkGraphiteProducer(
-    std::shared_ptr<RNSkPlatformContext> context)
-    : _context(std::move(context)) {}
 
 RNSkGraphiteProducer::~RNSkGraphiteProducer() = default;
 
@@ -33,46 +31,37 @@ void RNSkGraphiteProducer::setTarget(
 }
 
 void RNSkGraphiteProducer::setRecorder(std::shared_ptr<Recorder> recorder) {
-  std::shared_ptr<Recorder> retired;
-  {
-    std::lock_guard<std::mutex> lock(_mutex);
-    retired = std::move(_recorder);
-    _recorder = std::move(recorder);
-    _picture = nullptr;
-    // Writes read for the previous recorder point into its commands.
-    _pendingWrites.clear();
-    _dirty = true;
-    kickLocked();
+  sk_sp<SkPicture> picture;
+  if (recorder != nullptr && recorder->variables.empty()) {
+    picture = recorder->makePicture();
+    recorder = nullptr;
   }
-  // Released outside the lock: the destructor hands the commands to the main
-  // thread. A pool thread still replaying it keeps it alive until it is done.
-  retired = nullptr;
+  replaceContent(std::move(recorder), std::move(picture), /* dirty= */ true);
 }
 
 void RNSkGraphiteProducer::setPicture(sk_sp<SkPicture> picture) {
-  std::shared_ptr<Recorder> retired;
-  {
-    std::lock_guard<std::mutex> lock(_mutex);
-    retired = std::move(_recorder);
-    _picture = std::move(picture);
-    _pendingWrites.clear();
-    _dirty = true;
-    kickLocked();
-  }
-  retired = nullptr;
+  replaceContent(nullptr, std::move(picture), /* dirty= */ true);
 }
 
 void RNSkGraphiteProducer::clear() {
-  std::shared_ptr<Recorder> retired;
-  sk_sp<SkPicture> picture;
+  replaceContent(nullptr, nullptr, /* dirty= */ false);
+}
+
+void RNSkGraphiteProducer::replaceContent(std::shared_ptr<Recorder> recorder,
+                                          sk_sp<SkPicture> picture,
+                                          bool dirty) {
+  std::shared_ptr<Recorder> retiredRecorder;
+  sk_sp<SkPicture> retiredPicture;
   {
     std::lock_guard<std::mutex> lock(_mutex);
-    retired = std::move(_recorder);
-    picture = std::move(_picture);
-    _pendingWrites.clear();
-    _dirty = false;
+    retiredRecorder = std::exchange(_recorder, std::move(recorder));
+    retiredPicture = std::exchange(_picture, std::move(picture));
+    _dirty = dirty;
+    if (dirty) {
+      kickLocked();
+    }
   }
-  // Both are destroyed here, outside the lock.
+  // Both are released here, outside the lock.
 }
 
 bool RNSkGraphiteProducer::hasContent() {
@@ -83,22 +72,29 @@ bool RNSkGraphiteProducer::hasContent() {
 bool RNSkGraphiteProducer::applyUpdates(jsi::Runtime &runtime,
                                         double recorderId,
                                         const jsi::Array &values) {
-  std::lock_guard<std::mutex> lock(_mutex);
-  if (_recorder == nullptr || _recorder->id != recorderId) {
+  std::shared_ptr<Recorder> recorder;
+  {
+    std::lock_guard<std::mutex> lock(_mutex);
+    recorder = _recorder;
+  }
+  if (recorder == nullptr || recorder->id != recorderId) {
     return false;
   }
-  _recorder->readUpdates(runtime, values, [this](PendingWrite write) {
-    _pendingWrites.push_back(std::move(write));
-  });
+  // Outside the lock: a commit replacing the recorder must not wait for the
+  // read. Should it land while this runs, the values go into the retired
+  // recorder and the commit's own frame draws the new one.
+  recorder->readUpdates(runtime, values);
+  std::lock_guard<std::mutex> lock(_mutex);
   _dirty = true;
   kickLocked();
   return true;
 }
 
-void RNSkGraphiteProducer::requestFrame() {
+bool RNSkGraphiteProducer::requestFrame() {
   std::lock_guard<std::mutex> lock(_mutex);
   _dirty = true;
   kickLocked();
+  return _target != nullptr && (_recorder != nullptr || _picture != nullptr);
 }
 
 void RNSkGraphiteProducer::onFramePresented() {
@@ -127,23 +123,14 @@ void RNSkGraphiteProducer::produce() {
   std::shared_ptr<RNSkGraphiteTarget> target;
   std::shared_ptr<Recorder> recorder;
   sk_sp<SkPicture> picture;
-  std::vector<std::function<void()>> writes;
   {
     std::lock_guard<std::mutex> lock(_mutex);
     target = _target;
     recorder = _recorder;
     picture = _picture;
-    writes = std::move(_pendingWrites);
-    _pendingWrites.clear();
     _dirty = false;
   }
   std::shared_ptr<RNSkGraphiteRecording> recording;
-  bool recorded = false;
-  // The writes are applied whether or not a frame can be recorded: the
-  // commands must hold the latest values for the next frame or snapshot.
-  if (recorder && !writes.empty()) {
-    recorder->applyWrites(writes);
-  }
   if (target && (recorder || picture)) {
     SkCanvas *canvas = nullptr;
     try {
@@ -154,67 +141,49 @@ void RNSkGraphiteProducer::produce() {
     }
     if (canvas != nullptr) {
       try {
-        canvas->clear(SK_ColorTRANSPARENT);
-        draw(canvas, recorder.get(), picture);
+        // The deferred canvas already draws in points.
+        drawContent(canvas, recorder.get(), picture, /* pixelDensity= */ 1.0f);
       } catch (const std::exception &e) {
         RNSkLogger::logToConsole(
             "GraphiteCanvas: replaying the scene failed: %s", e.what());
       }
       try {
         recording = target->finishRecording();
-        recorded = recording != nullptr;
       } catch (const std::exception &e) {
         RNSkLogger::logToConsole(
             "GraphiteCanvas: recording the frame failed: %s", e.what());
       }
     }
   }
-  {
-    std::lock_guard<std::mutex> lock(_mutex);
-    _inFlight = false;
-    if (recorded) {
-      // The next job starts when this frame is on screen.
-      _presentPending = true;
-    } else {
-      // Nothing was recorded: keep the content dirty so that the next
-      // request (a surface, a resize) records it.
-      _dirty = true;
-    }
-  }
-  if (recorded) {
+  std::lock_guard<std::mutex> lock(_mutex);
+  _inFlight = false;
+  if (recording != nullptr) {
+    // The next job starts when this frame is on screen. Submitted under the
+    // lock: a frame presented in between (a redraw replaying the last one)
+    // would otherwise clear the flag before the recording is even queued.
+    _presentPending = true;
     target->submit(std::move(recording));
+    return;
+  }
+  // Nothing was recorded: keep the content dirty so that the next request
+  // (a surface, a resize) records it. A request that landed while this job
+  // ran was only noted as dirty; it starts the next job now.
+  const bool requested = _dirty;
+  _dirty = true;
+  if (requested) {
+    kickLocked();
   }
 }
 
 void RNSkGraphiteProducer::renderInto(SkCanvas *canvas, float pixelDensity) {
   std::shared_ptr<Recorder> recorder;
   sk_sp<SkPicture> picture;
-  std::vector<std::function<void()>> writes;
   {
     std::lock_guard<std::mutex> lock(_mutex);
     recorder = _recorder;
     picture = _picture;
-    writes = std::move(_pendingWrites);
-    _pendingWrites.clear();
   }
-  if (recorder && !writes.empty()) {
-    recorder->applyWrites(writes);
-  }
-  canvas->clear(SK_ColorTRANSPARENT);
-  canvas->save();
-  canvas->scale(pixelDensity, pixelDensity);
-  draw(canvas, recorder.get(), picture);
-  canvas->restore();
-}
-
-void RNSkGraphiteProducer::draw(SkCanvas *canvas, Recorder *recorder,
-                                const sk_sp<SkPicture> &picture) {
-  if (recorder != nullptr) {
-    DrawingCtx ctx(canvas);
-    recorder->play(&ctx);
-  } else if (picture != nullptr) {
-    canvas->drawPicture(picture);
-  }
+  drawContent(canvas, recorder.get(), picture, pixelDensity);
 }
 
 } // namespace RNSkia

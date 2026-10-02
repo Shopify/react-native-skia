@@ -1,29 +1,9 @@
-import React, {
-  useEffect,
-  useImperativeHandle,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-} from "react";
-import type { View } from "react-native";
+import React from "react";
 
-import Rea from "../external/reanimated/ReanimatedProxy";
-import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
 import SkiaGraphiteViewNativeComponent from "../specs/SkiaGraphiteViewNativeComponent";
-import type { SkRect } from "../skia/types";
-import { SkiaSGRoot } from "../sksg/Reconciler";
-import { Skia } from "../skia";
-import { Platform } from "../Platform";
-import { HAS_REANIMATED_3 } from "../external";
 
-import type { CanvasProps, CanvasRef } from "./Canvas";
-
-const useReanimatedFrame = !HAS_REANIMATED_3 ? () => {} : Rea.useFrameCallback;
-const measure = !HAS_REANIMATED_3 ? null : Rea.measure;
-
-const useCanvasRefPriv: typeof useRef<View> = !HAS_REANIMATED_3
-  ? useRef
-  : Rea.useAnimatedRef;
+import type { CanvasProps } from "./Canvas";
+import { useCanvasRoot } from "./Canvas";
 
 /**
  * The declarative canvas on the Graphite view. It takes the same props and
@@ -60,71 +40,12 @@ export const GraphiteCanvas = ({
   onLayout,
   ...viewProps
 }: CanvasProps) => {
-  if (onLayout && Platform.OS !== "web") {
-    console.error(
-      "<GraphiteCanvas onLayout={onLayout} /> is not supported on the new architecture, to fix the issue, see: https://shopify.github.io/react-native-skia/docs/canvas/overview/#getting-the-canvas-size"
-    );
-  }
-  const viewRef = useCanvasRefPriv(null);
-  // Native ID
-  const nativeId = useMemo(() => {
-    return SkiaViewNativeId.current++;
-  }, []);
-
-  // Root
-  const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
-
-  useReanimatedFrame(() => {
-    "worklet";
-    if (onSize && measure) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = measure(viewRef as any);
-      if (result) {
-        const { width, height } = result;
-        if (onSize.value.width !== width || onSize.value.height !== height) {
-          onSize.value = { width, height };
-        }
-      }
-    }
-  }, !!onSize);
-
-  // Render effects
-  useLayoutEffect(() => {
-    root.render(children);
-  }, [children, root, nativeId]);
-
-  useEffect(() => {
-    return () => {
-      root.unmount();
-    };
-  }, [root]);
-
-  // Component methods
-  useImperativeHandle(
+  const { nativeId, viewRef } = useCanvasRoot({
+    children,
+    onSize,
     ref,
-    () =>
-      ({
-        makeImageSnapshot: (rect?: SkRect) => {
-          return SkiaViewApi.makeImageSnapshot(nativeId, rect);
-        },
-        makeImageSnapshotAsync: (rect?: SkRect) => {
-          return SkiaViewApi.makeImageSnapshotAsync(nativeId, rect);
-        },
-        redraw: () => {
-          SkiaViewApi.requestRedraw(nativeId);
-        },
-        getNativeId: () => {
-          return nativeId;
-        },
-        measure: (callback) => {
-          viewRef.current?.measure(callback);
-        },
-        measureInWindow: (callback) => {
-          viewRef.current?.measureInWindow(callback);
-        },
-      }) as CanvasRef
-  );
-
+    onLayout,
+  });
   return (
     <SkiaGraphiteViewNativeComponent
       ref={viewRef}

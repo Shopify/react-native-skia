@@ -2,14 +2,10 @@
 
 #if defined(SK_GRAPHITE)
 
-#include <functional>
 #include <memory>
 #include <mutex>
-#include <vector>
 
 #include <jsi/jsi.h>
-
-#include "RNSkPlatformContext.h"
 
 #include "include/core/SkRefCnt.h"
 
@@ -29,12 +25,12 @@ class RNSkGraphiteTarget;
  * render thread pool.
  *
  * Three threads meet here. The JS thread hands over the content. A Reanimated
- * mapper, on the UI runtime, reads the shared values into pending writes: that
- * is the only step that needs a JS runtime, and it never waits for a replay.
- * A pool thread applies the writes and replays the commands (the recorder
- * serializes the two against each other) into a deferred canvas of the
- * view's target and submits the recording; the main thread presents it on
- * the next vsync.
+ * mapper, on the UI runtime, reads the shared values into the recorder's
+ * pending writes: that is the only step that needs a JS runtime, and it never
+ * waits for a replay. A pool thread replays the commands (the recorder writes
+ * the pending values into them first) into a deferred canvas of the view's
+ * target and submits the recording; the main thread presents it on the next
+ * vsync.
  *
  * Pacing: a view has at most one job in flight and at most one recording
  * waiting to be presented. Updates that arrive meanwhile only mark the content
@@ -45,13 +41,17 @@ class RNSkGraphiteTarget;
 class RNSkGraphiteProducer
     : public std::enable_shared_from_this<RNSkGraphiteProducer> {
 public:
-  explicit RNSkGraphiteProducer(std::shared_ptr<RNSkPlatformContext> context);
+  RNSkGraphiteProducer() = default;
   ~RNSkGraphiteProducer();
 
   /** The target to record into. Main thread. */
   void setTarget(std::shared_ptr<RNSkGraphiteTarget> target);
 
-  /** Takes ownership of the recorder (or releases it with nullptr). */
+  /**
+   Takes ownership of the recorder (or releases it with nullptr). A recording
+   without shared values is played once into a picture: nothing will ever
+   update it, and drawing a picture is cheaper than replaying commands.
+   */
   void setRecorder(std::shared_ptr<Recorder> recorder);
 
   /** Content from the static container: a picture to replay. */
@@ -60,21 +60,25 @@ public:
   bool hasContent();
 
   /**
-   Drops the content and the pending writes without scheduling a frame:
-   the host view is being torn down.
+   Drops the content without scheduling a frame: the host view is being torn
+   down.
    */
   void clear();
 
   /**
-   Reads the shared values on the calling runtime into pending writes and
+   Reads the shared values on the calling runtime into the recorder and
    schedules a frame. Returns false when there is no recorder to update, or
    another recording than recorderId (a stale mapper).
    */
   bool applyUpdates(jsi::Runtime &runtime, double recorderId,
                     const jsi::Array &values);
 
-  /** Marks the content dirty and schedules a frame if one can start. */
-  void requestFrame();
+  /**
+   Marks the content dirty and schedules a frame if one can start. Returns
+   whether a frame is coming at all: there is content and a target to record
+   it into.
+   */
+  bool requestFrame();
 
   /** The view presented a frame: the next one may start. */
   void onFramePresented();
@@ -86,19 +90,22 @@ public:
   void renderInto(SkCanvas *canvas, float pixelDensity);
 
 private:
+  /**
+   Swaps the content under the lock and releases the previous one outside of
+   it: the recorder's destructor hands the commands to the main thread, and a
+   pool thread still replaying it keeps it alive until it is done. Pending
+   writes go away with their recorder.
+   */
+  void replaceContent(std::shared_ptr<Recorder> recorder,
+                      sk_sp<SkPicture> picture, bool dirty);
   void kickLocked();
   void produce();
-  void draw(SkCanvas *canvas, Recorder *recorder,
-            const sk_sp<SkPicture> &picture);
 
-  std::shared_ptr<RNSkPlatformContext> _context;
-
-  // Content, pending writes and scheduling state.
+  // Content and scheduling state.
   std::mutex _mutex;
   std::shared_ptr<RNSkGraphiteTarget> _target;
   std::shared_ptr<Recorder> _recorder;
   sk_sp<SkPicture> _picture;
-  std::vector<std::function<void()>> _pendingWrites;
   bool _dirty = false;
   bool _inFlight = false;
   bool _presentPending = false;

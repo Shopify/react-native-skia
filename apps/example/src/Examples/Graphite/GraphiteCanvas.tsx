@@ -20,7 +20,7 @@ import {
   useSharedValue,
 } from "react-native-reanimated";
 
-import { useGpuImage } from "./Graphite";
+import { palette, useGpuImage } from "./Graphite";
 
 // <GraphiteCanvas> is the declarative API on the Graphite view. The scene is
 // recorded once on the JS thread; the Reanimated UI runtime only reads the
@@ -28,17 +28,6 @@ import { useGpuImage } from "./Graphite";
 // Graphite frame, at most once per vsync; the view presents it. The GPU image
 // is made on the JS thread and drawn by a pool thread: textures are shared
 // across the recorders of the Graphite context.
-
-const palette = [
-  "#ff6b6b",
-  "#feca57",
-  "#48dbfb",
-  "#1dd1a1",
-  "#5f27cd",
-  "#ff9ff3",
-  "#54a0ff",
-  "#00d2d3",
-];
 
 const COUNT = 12;
 
