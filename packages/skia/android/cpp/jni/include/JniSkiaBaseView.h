@@ -61,16 +61,21 @@ protected:
   }
 
   virtual void unregisterView() {
-    auto manager = getSkiaManager();
-    if (manager == nullptr || _skiaAndroidView == nullptr) {
+    if (_skiaAndroidView == nullptr) {
       return;
     }
     auto skiaView = _skiaAndroidView->getSkiaView();
     if (skiaView == nullptr) {
       return;
     }
-    manager->setSkiaView(skiaView->getNativeId(), nullptr);
-    manager->unregisterSkiaView(skiaView->getNativeId());
+    if (auto manager = getSkiaManager()) {
+      manager->setSkiaView(skiaView->getNativeId(), nullptr);
+      manager->unregisterSkiaView(skiaView->getNativeId());
+    }
+    // React drops the Java view here, but the native view behind it (and the
+    // content it owns) is only destroyed when the Java object is finalized.
+    // Release the content now so it does not wait for the garbage collector.
+    skiaView->releaseContent();
   }
 
   virtual jni::local_ref<jni::JArrayInt> getBitmap(int width, int height) {

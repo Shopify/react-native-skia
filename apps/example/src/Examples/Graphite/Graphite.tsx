@@ -15,7 +15,7 @@ import { useFrameCallback, useSharedValue } from "react-native-reanimated";
 // draw a GPU-backed image made on the JS thread, so the picture is complete:
 // images can be shared between the runtimes and the views.
 
-const palette = [
+export const palette = [
   "#ff6b6b",
   "#feca57",
   "#48dbfb",
@@ -70,7 +70,7 @@ const drawFrame = (
 
 // A GPU-backed image: drawn into an offscreen surface on the JS thread and
 // sampled by both views.
-const useGpuImage = () =>
+export const useGpuImage = () =>
   useMemo(() => {
     const size = 256;
     const surface = Skia.Surface.MakeOffscreen(size, size);

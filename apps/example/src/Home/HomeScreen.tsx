@@ -148,7 +148,7 @@ export const HomeScreen = () => {
       {hasWebGPU && (
         <HomeScreenButton
           title="🔺 WebGPU"
-          description="WebGPU Wireframe demo"
+          description="WebGPU canvas and three.js scenes, with Skia interop"
           route="WebGPU"
         />
       )}
@@ -162,6 +162,13 @@ export const HomeScreen = () => {
           title="🗿 Graphite View"
           description="Frames recorded from JS and worklet runtimes"
           route="Graphite"
+        />
+      )}
+      {hasGraphite && (
+        <HomeScreenButton
+          title="🗿 Graphite Canvas"
+          description="Declarative canvas on the Graphite view, replayed off-thread"
+          route="GraphiteCanvas"
         />
       )}
       <HomeScreenButton

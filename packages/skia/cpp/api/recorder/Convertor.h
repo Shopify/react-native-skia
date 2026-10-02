@@ -10,12 +10,25 @@
 #include <include/core/SkPaint.h>
 #include <include/core/SkPathEffect.h>
 #include <include/core/SkPoint.h>
+#include <include/effects/Sk1DPathEffect.h>
 #include <include/effects/SkRuntimeEffect.h>
 #include <modules/skparagraph/include/Paragraph.h>
 #include <modules/skparagraph/include/ParagraphBuilder.h>
 #include <modules/skparagraph/include/ParagraphStyle.h>
 
 #include "../CustomBlendModes.h"
+#include "api/JsiSkFont.h"
+#include "api/JsiSkImage.h"
+#include "api/JsiSkImageFilter.h"
+#include "api/JsiSkMatrix.h"
+#include "api/JsiSkPaint.h"
+#include "api/JsiSkParagraph.h"
+#include "api/JsiSkPicture.h"
+#include "api/JsiSkRSXform.h"
+#include "api/JsiSkRuntimeEffect.h"
+#include "api/JsiSkSVG.h"
+#include "api/JsiSkSkottie.h"
+#include "api/JsiSkTextBlob.h"
 #include "api/third_party/CSSColorParser.h"
 
 #include "DataTypes.h"
@@ -29,8 +42,13 @@ struct Radius {
   float rY;
 };
 
-using ConversionFunction =
-    std::function<void(jsi::Runtime &runtime, const jsi::Object &object)>;
+// A value read from a shared value, waiting to be written into a command
+// property. Reading needs the runtime the shared value lives on; writing does
+// not, so the thread that replays the commands writes it right before.
+// Empty when there is nothing to write.
+using PendingWrite = std::function<void()>;
+using ConversionFunction = std::function<PendingWrite(
+    jsi::Runtime &runtime, const jsi::Object &object)>;
 using Variables = std::map<std::string, std::vector<ConversionFunction>>;
 
 using Patch = std::array<SkPoint, 12>;
@@ -91,27 +109,32 @@ bool convertSelectorProperty(jsi::Runtime &runtime, const jsi::Value &prop,
       sharedValue.getProperty(runtime, "name").asString(runtime).utf8(runtime);
 
   auto conv = [target = &target, key](jsi::Runtime &runtime,
-                                      const jsi::Object &val) {
+                                      const jsi::Object &val) -> PendingWrite {
     auto value = val.getProperty(runtime, "value");
     if (!value.isObject()) {
-      return;
+      return nullptr;
     }
     auto values = value.asObject(runtime);
     if (!values.hasProperty(runtime, key.c_str())) {
-      return;
+      return nullptr;
     }
 
     auto selected = values.getProperty(runtime, key.c_str());
     if (selected.isUndefined() || selected.isNull() ||
         (selected.isObject() &&
          selected.asObject(runtime).isFunction(runtime))) {
-      return;
+      return nullptr;
     }
-    *target = getPropertyValue<T>(runtime, selected);
+    return
+        [target, converted = getPropertyValue<T>(runtime, selected)]() mutable {
+          *target = std::move(converted);
+        };
   };
 
   variables[name].push_back(conv);
-  conv(runtime, sharedValue);
+  if (auto write = conv(runtime, sharedValue)) {
+    write();
+  }
   return true;
 }
 
@@ -135,12 +158,17 @@ void convertPropertyImpl(jsi::Runtime &runtime, const jsi::Object &object,
                     .asString(runtime)
                     .utf8(runtime);
     auto conv = [target = &target](jsi::Runtime &runtime,
-                                   const jsi::Object &val) {
+                                   const jsi::Object &val) -> PendingWrite {
       auto value = val.getProperty(runtime, "value");
-      *target = getPropertyValue<T>(runtime, value);
+      return
+          [target, converted = getPropertyValue<T>(runtime, value)]() mutable {
+            *target = std::move(converted);
+          };
     };
     variables[name].push_back(conv);
-    conv(runtime, sharedValue);
+    if (auto write = conv(runtime, sharedValue)) {
+      write();
+    }
     return;
   }
 
