@@ -76,7 +76,24 @@ def skiaLibsPath = useGraphite
 // Graphite build's Dawn release tag (libs/.dawn-version) with the tag
 // react-native-webgpu declares in its package.json `dawn` field.
 if (useGraphite) {
+    // Fail early rather than with a ninja "missing and no known rule" error.
+    def missingDawn = ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"].findAll {
+        !file("${skiaLibsPath}/${it}/libwebgpu_dawn.so").exists()
+    }
+    if (!missingDawn.isEmpty()) {
+        throw new GradleException(
+            "react-native-skia: libwebgpu_dawn.so not found in ${skiaLibsPath} " +
+            "for ${missingDawn.join(', ')}. The installed react-native-skia-graphite-android " +
+            "package does not ship the shared Dawn library this Graphite build links against. " +
+            "Upgrade it and rebuild.")
+    }
+
+    // In-repo builds write the marker into libs/, npm installs ship it in the
+    // react-native-skia-graphite-android package.
     def dawnMarker = file("${projectDir}/../libs/.dawn-version")
+    if (!dawnMarker.exists()) {
+        dawnMarker = file("${skiaLibsPath}/.dawn-version")
+    }
     def webgpuDir = null
     try {
         webgpuDir = resolveNodePackage('react-native-webgpu', projectDir)
