@@ -21,10 +21,6 @@
  *   --output-dir    Output directory (default: ./dist)
  *   --repo          owner/name of the GitHub repository hosting the SwiftPM
  *                   release assets (default: wcandillon/react-native-skia-binaries)
- *
- * Graphite packages also bundle the shared Dawn binaries (libwebgpu_dawn), the
- * same artifacts react-native-webgpu links, pinned by the "dawn" section of
- * skia-config.json.
  */
 
 import fs from "fs";
@@ -37,11 +33,11 @@ import { fileURLToPath } from "url";
 
 import {
   copyDir,
-  DAWN_ANDROID_ABIS,
-  type DawnConfig,
   downloadAndExtractAsset,
-  downloadDawn,
+  downloadToFile,
   downloadXcframeworks,
+  extractTarGz,
+  extractZip,
   runCommand,
   DEFAULT_RELEASES_REPO,
   setReleasesRepo,
@@ -193,35 +189,9 @@ const ANDROID_REQUIRED_LIBS = new Set([
   "libskunicode_icu.a",
   "libpathops.a",
   "libjsonreader.a",
+  // libdawn_combined.a is intentionally dropped: Graphite packages ship the
+  // shared libwebgpu_dawn.so instead (see addSharedDawn).
 ]);
-
-// Graphite links the shared Dawn (libwebgpu_dawn) instead of the static
-// libdawn_combined that the Skia build bundles, so that Skia and
-// react-native-webgpu share a single Dawn in an app that installs both.
-const BUNDLED_DAWN = "libdawn_combined";
-
-const DEFAULT_CONFIG = path.join(ROOT_DIR, "skia-config.json");
-
-const readDawnConfig = (configPath: string): DawnConfig => {
-  const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
-  if (!config.dawn?.releaseTag) {
-    throw new Error(`No "dawn" section in ${configPath}`);
-  }
-  return config.dawn as DawnConfig;
-};
-
-// The Dawn binaries are shared by every Graphite package of a run, so they are
-// downloaded once into a temporary directory.
-let dawnDir: Promise<string> | null = null;
-const getDawnDir = (dawn: DawnConfig): Promise<string> => {
-  if (!dawnDir) {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "skia-dawn-"));
-    process.on("exit", () => fs.rmSync(dir, { recursive: true, force: true }));
-    console.log(`    Downloading Dawn ${dawn.releaseTag}...`);
-    dawnDir = downloadDawn(dawn, dir).then(() => dir);
-  }
-  return dawnDir;
-};
 
 const cleanupAndroidLibs = (libsDir: string): void => {
   const entries = fs.readdirSync(libsDir, { withFileTypes: true });
@@ -314,9 +284,6 @@ interface GeneratedPackageJson {
     version: string;
     platform: string;
     graphite: boolean;
-    // Release tag of the shared Dawn build (Graphite binaries only), checked by
-    // the native builds against react-native-webgpu's own Dawn.
-    dawn?: string;
   };
 }
 
@@ -339,8 +306,7 @@ const generatePackageJson = (
   skiaVersion: string,
   npmVersion: string,
   graphite: boolean,
-  hasPackageSwift: boolean,
-  dawn?: DawnConfig
+  hasPackageSwift: boolean
 ): GeneratedPackageJson => {
   const packageName = getPackageName(pkg, graphite);
 
@@ -364,7 +330,6 @@ const generatePackageJson = (
       version: skiaVersion,
       platform: pkg.platform,
       graphite,
-      ...(dawn && pkg.platform !== "common" ? { dawn: dawn.releaseTag } : {}),
     },
   };
 };
@@ -603,6 +568,107 @@ const generateRemoteSpmPackage = async (
   console.log(`  Generated Package.swift (${targets.length} binary targets)`);
 };
 
+// --- Shared Dawn ---
+
+// Graphite links Dawn as a shared artifact, the exact one react-native-webgpu
+// links, so an app installing both packages contains a single Dawn copy.
+// react-native-skia's podspec and build.gradle expect libwebgpu_dawn (an
+// xcframework on Apple, a .so per ABI on Android) next to the Skia libs, plus
+// libs/.dawn-version holding the release tag for the react-native-webgpu
+// version check. The libdawn_combined artifact from the Skia release is dropped.
+const DAWN_REPO = "wcandillon/react-native-webgpu";
+
+interface DawnConfig {
+  releaseTag: string;
+  checksums: { android: string; apple: string };
+}
+
+const loadDawnConfig = (): DawnConfig => {
+  const configPath = path.join(ROOT_DIR, "skia-config.json");
+  const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+  const dawn = config.dawn as DawnConfig | undefined;
+  if (!dawn?.releaseTag || !dawn.checksums?.android || !dawn.checksums?.apple) {
+    throw new Error(`${configPath} has no usable "dawn" entry (releaseTag + checksums)`);
+  }
+  return dawn;
+};
+
+const downloadDawnAsset = async (
+  dawn: DawnConfig,
+  assetName: string,
+  expectedChecksum: string,
+  extractDir: string
+): Promise<void> => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "dawn-download-"));
+  try {
+    const archivePath = path.join(tempDir, assetName);
+    const url = `https://github.com/${DAWN_REPO}/releases/download/${dawn.releaseTag}/${assetName}`;
+    console.log(`      Downloading ${assetName}...`);
+    await downloadToFile(url, archivePath);
+    const actual = await sha256File(archivePath);
+    if (actual !== expectedChecksum) {
+      throw new Error(
+        `Checksum mismatch for ${assetName}: expected ${expectedChecksum}, got ${actual}`
+      );
+    }
+    if (assetName.endsWith(".zip")) {
+      await extractZip(archivePath, extractDir);
+    } else {
+      await extractTarGz(archivePath, extractDir);
+    }
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+};
+
+const addSharedDawn = async (pkg: PackageConfig, libsDir: string): Promise<void> => {
+  if (pkg.platform !== "android" && pkg.platform !== "apple") {
+    return;
+  }
+  const dawn = loadDawnConfig();
+  const extractDir = fs.mkdtempSync(path.join(os.tmpdir(), "dawn-extract-"));
+  try {
+    if (pkg.platform === "android" && pkg.androidArchs) {
+      await downloadDawnAsset(
+        dawn,
+        `dawn-android-${dawn.releaseTag}.tar.gz`,
+        dawn.checksums.android,
+        extractDir
+      );
+      for (const { arch } of pkg.androidArchs) {
+        const src = path.join(extractDir, "dawn-android", arch, "libwebgpu_dawn.so");
+        if (!fs.existsSync(src)) {
+          throw new Error(`Missing libwebgpu_dawn.so for ${arch} in ${dawn.releaseTag}`);
+        }
+        fs.rmSync(path.join(libsDir, arch, "libdawn_combined.a"), { force: true });
+        fs.copyFileSync(src, path.join(libsDir, arch, "libwebgpu_dawn.so"));
+      }
+    } else if (pkg.platform === "apple") {
+      await downloadDawnAsset(
+        dawn,
+        `dawn-apple-${dawn.releaseTag}.xcframework.zip`,
+        dawn.checksums.apple,
+        extractDir
+      );
+      const src = path.join(extractDir, "dawn-apple.xcframework");
+      if (!fs.existsSync(src)) {
+        throw new Error(`Missing dawn-apple.xcframework in ${dawn.releaseTag}`);
+      }
+      fs.rmSync(path.join(libsDir, "libdawn_combined.xcframework"), {
+        recursive: true,
+        force: true,
+      });
+      const dest = path.join(libsDir, "libwebgpu_dawn.xcframework");
+      fs.rmSync(dest, { recursive: true, force: true });
+      copyDir(src, dest);
+    }
+  } finally {
+    fs.rmSync(extractDir, { recursive: true, force: true });
+  }
+  fs.writeFileSync(path.join(libsDir, ".dawn-version"), `${dawn.releaseTag}\n`);
+  console.log(`    Added shared Dawn (${dawn.releaseTag})`);
+};
+
 const generateReadme = (
   pkg: PackageConfig,
   skiaVersion: string,
@@ -654,8 +720,7 @@ const generatePackage = async (
   outputDir: string,
   skiaVersion: string,
   npmVersion: string,
-  graphite: boolean,
-  dawn?: DawnConfig
+  graphite: boolean
 ): Promise<string> => {
   const packageName = getPackageName(pkg, graphite);
   const pkgDir = path.join(outputDir, packageName);
@@ -693,27 +758,8 @@ const generatePackage = async (
     console.log(`    Created graphite.enabled marker file`);
   }
 
-  // Swap the bundled static Dawn for the shared libwebgpu_dawn.
-  if (graphite && dawn && pkg.platform === "android") {
-    const dawnSrc = path.join(await getDawnDir(dawn), "android");
-    for (const abi of DAWN_ANDROID_ABIS) {
-      fs.copyFileSync(
-        path.join(dawnSrc, abi, "libwebgpu_dawn.so"),
-        path.join(libsDir, abi, "libwebgpu_dawn.so")
-      );
-    }
-    console.log(`    Added libwebgpu_dawn.so (${dawn.releaseTag})`);
-  }
-  if (graphite && dawn && pkg.platform === "apple") {
-    fs.rmSync(path.join(libsDir, `${BUNDLED_DAWN}.xcframework`), {
-      recursive: true,
-      force: true,
-    });
-    copyDir(
-      path.join(await getDawnDir(dawn), "apple", "libwebgpu_dawn.xcframework"),
-      path.join(libsDir, "libwebgpu_dawn.xcframework")
-    );
-    console.log(`    Replaced ${BUNDLED_DAWN} with libwebgpu_dawn (${dawn.releaseTag})`);
+  if (graphite) {
+    await addSharedDawn(pkg, libsDir);
   }
 
   // Generate Package.swift for Apple packages (SwiftPM consumers). This is a
@@ -730,8 +776,7 @@ const generatePackage = async (
     skiaVersion,
     npmVersion,
     graphite,
-    packageSwift !== null,
-    dawn
+    packageSwift !== null
   );
   fs.writeFileSync(
     path.join(pkgDir, "package.json"),
@@ -768,7 +813,6 @@ interface SkiaConfig {
 interface ConfigFile {
   skia?: SkiaConfig;
   "skia-graphite"?: SkiaConfig;
-  dawn?: DawnConfig;
 }
 
 const generateAllFromConfig = async (
@@ -824,10 +868,8 @@ const generateAllFromConfig = async (
     console.log(`  NPM version: ${npmVersion}`);
     console.log("");
 
-    const dawn = readDawnConfig(configFullPath);
-    console.log(`  Dawn: ${dawn.releaseTag}`);
     for (const pkg of GRAPHITE_PACKAGES) {
-      const pkgDir = await generatePackage(pkg, outputDir, skiaVersion, npmVersion, true, dawn);
+      const pkgDir = await generatePackage(pkg, outputDir, skiaVersion, npmVersion, true);
       generatedDirs.push(pkgDir);
       console.log("");
     }
@@ -886,7 +928,6 @@ const main = async (): Promise<void> => {
     }
   }
   const graphite = args.graphite === true;
-  const dawn = graphite ? readDawnConfig(DEFAULT_CONFIG) : undefined;
   const specificPackage = args.package as string | undefined;
 
   const packages = graphite ? GRAPHITE_PACKAGES : GANESH_PACKAGES;
@@ -918,8 +959,7 @@ const main = async (): Promise<void> => {
         outputDir,
         skiaVersion,
         npmVersion,
-        graphite,
-        dawn
+        graphite
       );
       generatedDirs.push(pkgDir);
       console.log("");

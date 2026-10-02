@@ -1,7 +1,6 @@
 /**
  * Shared helpers for downloading and extracting Skia binaries from the
- * Build SKIA GitHub releases, and the shared Dawn binaries from
- * the react-native-webgpu releases.
+ * Build SKIA GitHub releases.
  *
  * Two asset layouts exist:
  *
@@ -404,76 +403,4 @@ export const downloadXcframeworks = async (
 
     console.log(`      Verified ${assets.length} xcframework archive(s)`);
   });
-};
-
-export interface DawnConfig {
-  // Release tag of the shared Dawn build, e.g. dawn-chrome-m154
-  releaseTag: string;
-  // owner/name of the GitHub repository hosting the Dawn release
-  repo: string;
-  checksums: {
-    android: string;
-    apple: string;
-  };
-}
-
-export const DAWN_ANDROID_ABIS = ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"];
-
-/**
- * Downloads the shared Dawn binaries (the exact artifacts react-native-webgpu
- * links) into `destDir`, verifying both archives against `dawn.checksums`:
- *
- *   destDir/android/<abi>/libwebgpu_dawn.so
- *   destDir/apple/libwebgpu_dawn.xcframework
- *
- * Skia and react-native-webgpu must link the same Dawn so that an app that
- * installs both contains a single copy of it.
- */
-export const downloadDawn = async (
-  dawn: DawnConfig,
-  destDir: string
-): Promise<void> => {
-  const url = (asset: string) =>
-    `https://github.com/${dawn.repo}/releases/download/${dawn.releaseTag}/${asset}`;
-  const verify = (filePath: string, expected: string) => {
-    const actual = sha256File(filePath);
-    if (actual !== expected) {
-      throw new Error(
-        `Checksum mismatch for ${path.basename(filePath)}: expected ${expected}, got ${actual}`
-      );
-    }
-  };
-
-  await withTempDir(async (tempDir) => {
-    const androidAsset = `dawn-android-${dawn.releaseTag}.tar.gz`;
-    const androidArchive = path.join(tempDir, androidAsset);
-    console.log(`      Downloading ${androidAsset}...`);
-    await downloadToFile(url(androidAsset), androidArchive);
-    verify(androidArchive, dawn.checksums.android);
-    const androidExtract = path.join(tempDir, "android");
-    await extractTarGz(androidArchive, androidExtract);
-    for (const abi of DAWN_ANDROID_ABIS) {
-      const src = path.join(androidExtract, "dawn-android", abi, "libwebgpu_dawn.so");
-      if (!fs.existsSync(src)) {
-        throw new Error(`Missing libwebgpu_dawn.so for ${abi} in ${androidAsset}`);
-      }
-      const dest = path.join(destDir, "android", abi);
-      fs.mkdirSync(dest, { recursive: true });
-      fs.copyFileSync(src, path.join(dest, "libwebgpu_dawn.so"));
-    }
-
-    const appleAsset = `dawn-apple-${dawn.releaseTag}.xcframework.zip`;
-    const appleArchive = path.join(tempDir, appleAsset);
-    console.log(`      Downloading ${appleAsset}...`);
-    await downloadToFile(url(appleAsset), appleArchive);
-    verify(appleArchive, dawn.checksums.apple);
-    const appleExtract = path.join(tempDir, "apple");
-    await extractZip(appleArchive, appleExtract);
-    const xcframework = path.join(appleExtract, "dawn-apple.xcframework");
-    if (!fs.existsSync(xcframework)) {
-      throw new Error(`Missing dawn-apple.xcframework in ${appleAsset}`);
-    }
-    copyDir(xcframework, path.join(destDir, "apple", "libwebgpu_dawn.xcframework"));
-  });
-  console.log(`      Verified Dawn ${dawn.releaseTag}`);
 };

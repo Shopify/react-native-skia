@@ -26,7 +26,6 @@
   },
   "dawn": {
     "releaseTag": "dawn-chrome-m154",
-    "repo": "wcandillon/react-native-webgpu",
     "checksums": {
       "android": "6fe8766dc3711e1e41e8b9d919fadd83f0e364945e66c01f49f316f4a3d96b1f",
       "apple": "896575ffbc99610198a83d061f8c5a2789139b7f16c669fbf3a9f7a7ac9be123"

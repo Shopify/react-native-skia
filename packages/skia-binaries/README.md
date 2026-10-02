@@ -4,7 +4,7 @@ This workspace generates and publishes prebuilt Skia binary packages for [React 
 
 The remote SwiftPM manifest (`dist/spm/Package.swift`) and its release zips are published to [wcandillon/react-native-skia-binaries](https://github.com/wcandillon/react-native-skia-binaries), since SwiftPM resolves a package from a repository root.
 
-Graphite packages bundle the shared Dawn (`libwebgpu_dawn`, the same artifact react-native-webgpu links) instead of the static `libdawn_combined`, pinned by the `dawn` section of `skia-config.json`.
+Graphite packages bundle the shared Dawn (`libwebgpu_dawn`, the same artifact react-native-webgpu links) instead of the static `libdawn_combined`, pinned by the `dawn` section of `skia-config.json`. The release tag is written to `libs/.dawn-version` in each package, which react-native-skia checks against react-native-webgpu's own Dawn.
 
 ## Overview
 

@@ -369,9 +369,20 @@ const validateRootSpmPackage = (distDir: string, errors: string[]): boolean => {
   }
 
   // 2. Declared checksums match the archives. A plain checkout has no dist/,
-  //    and then the tag check above is all that can be done.
+  //    and then the tag check above is all that can be done. The archives are
+  //    only comparable when the root manifest pins the release being generated:
+  //    while a new release is cut it still describes the previous one, whose
+  //    assets live on GitHub (and zips are not byte-reproducible anyway).
   const spmDir = path.join(distDir, REMOTE_SPM_DIR);
-  if (fs.existsSync(spmDir)) {
+  const pkgJsonPath = path.join(distDir, REMOTE_SPM_SOURCE_PACKAGE, "package.json");
+  const generatedVersion = fs.existsSync(pkgJsonPath)
+    ? (JSON.parse(fs.readFileSync(pkgJsonPath, "utf8")).version as string)
+    : null;
+  if (generatedVersion !== null && !tags.has(generatedVersion)) {
+    console.log(
+      `  Root ${ROOT_MANIFEST} pins ${[...tags].join(", ")}, not ${generatedVersion}: skipped archive checks (commit dist/${REMOTE_SPM_DIR}/${ROOT_MANIFEST} after this release)`
+    );
+  } else if (fs.existsSync(spmDir)) {
     for (const target of targets) {
       const archiveName = target.url.split("/").pop() ?? "";
       const archivePath = path.join(spmDir, archiveName);
