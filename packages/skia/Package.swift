@@ -1,6 +1,6 @@
 // swift-tools-version: 6.0
 //
-// SwiftPM manifest for @shopify/react-native-skia. iOS, Ganesh.
+// SwiftPM manifest for react-native-skia. iOS, Ganesh.
 // Additive: the CocoaPods podspec remains the supported default.
 //
 // React Native 0.87+ references a library that ships its own Package.swift
@@ -12,7 +12,7 @@ import Foundation
 import PackageDescription
 
 // Skia's xcframeworks are ~200MB and are not carried in this package. They come
-// from the react-native-skia-apple-ios npm package, which @shopify/react-native-skia
+// from the react-native-skia-apple-ios npm package, which react-native-skia
 // depends on, so a checkout that has installed its dependencies builds offline.
 // Xcode passes the symlink as the package directory, hence resolvingSymlinks.
 let packageRoot = URL(fileURLWithPath: Context.packageDirectory)
@@ -31,7 +31,7 @@ guard let binariesPath else {
   // unresolvable dependency path.
   fatalError(
     """
-    react-native-skia-apple-ios was not found next to @shopify/react-native-skia. \
+    react-native-skia-apple-ios was not found next to react-native-skia. \
     It ships the prebuilt Skia binaries this package links against. Reinstall \
     dependencies without --omit=optional, on macOS.
     """)

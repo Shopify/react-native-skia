@@ -17,7 +17,7 @@ import {
   SkiaPictureView,
   createPicture,
   Fill,
-} from "@shopify/react-native-skia";
+} from "react-native-skia";
 
 import { Title } from "./components/Title";
 

@@ -29,7 +29,7 @@ const hasGraphite = () => {
 
 /**
  * `<Canvas>` renders {@link GraphiteCanvas} when React Native Skia is
- * configured with the Graphite backend (install-skia-graphite), and the
+ * configured with the Graphite backend (the default since v3), and the
  * picture view based canvas otherwise. Both take the same props and ref.
  */
 export const Canvas = (props: CanvasProps) => {

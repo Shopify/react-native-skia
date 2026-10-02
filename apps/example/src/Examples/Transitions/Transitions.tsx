@@ -13,7 +13,7 @@ import {
   ImageShader,
   Shader,
   clamp,
-} from "@shopify/react-native-skia";
+} from "react-native-skia";
 
 import { snapPoint } from "./Math";
 import {

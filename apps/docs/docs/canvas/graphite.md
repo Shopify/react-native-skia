@@ -21,8 +21,8 @@ The context knows the size of the view in points and produces one recording at a
 
 ```tsx
 import { useEffect, useRef } from "react";
-import { Skia, SkiaGraphiteView } from "@shopify/react-native-skia";
-import type { SkiaGraphiteViewRef } from "@shopify/react-native-skia";
+import { Skia, SkiaGraphiteView } from "react-native-skia";
+import type { SkiaGraphiteViewRef } from "react-native-skia";
 
 export const Demo = () => {
   const ref = useRef<SkiaGraphiteViewRef>(null);
@@ -52,8 +52,8 @@ The context can be captured into a worklet, so a frame loop can run on the Reani
 ```tsx
 import { useEffect, useRef } from "react";
 import { useFrameCallback, useSharedValue } from "react-native-reanimated";
-import { Skia, SkiaGraphiteView } from "@shopify/react-native-skia";
-import type { SkGraphiteContext, SkiaGraphiteViewRef } from "@shopify/react-native-skia";
+import { Skia, SkiaGraphiteView } from "react-native-skia";
+import type { SkGraphiteContext, SkiaGraphiteViewRef } from "react-native-skia";
 
 export const Demo = () => {
   const ref = useRef<SkiaGraphiteViewRef>(null);

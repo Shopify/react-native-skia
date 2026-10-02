@@ -20,7 +20,6 @@
     "@docusaurus/core": "latest",
     "@docusaurus/preset-classic": "latest",
     "@mdx-js/react": "^3.1.0",
-    "@shopify/react-native-skia": "workspace:*",
     "@svgr/webpack": "^5.5.0",
     "clsx": "^1.1.1",
     "expo-asset": "^10.0.6",
@@ -32,6 +31,7 @@
     "react-native": "0.83.1",
     "react-native-gesture-handler": "^2.24.0",
     "react-native-reanimated": "4.3.1",
+    "react-native-skia": "workspace:*",
     "react-native-worklets": "0.8.3",
     "url-loader": "^4.1.1"
   },

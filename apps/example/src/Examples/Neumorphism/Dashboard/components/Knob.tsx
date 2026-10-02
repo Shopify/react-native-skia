@@ -4,7 +4,7 @@ import {
   Group,
   LinearGradient,
   vec,
-} from "@shopify/react-native-skia";
+} from "react-native-skia";
 
 export const Knob = () => {
   return (
