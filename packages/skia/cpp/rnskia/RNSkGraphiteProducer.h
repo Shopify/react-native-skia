@@ -25,8 +25,8 @@ class RNSkGraphiteTarget;
 
 /**
  * Records the declarative content of a SkiaGraphiteView (a Recorder handed
- * over by <Canvas2>, or a picture) into Graphite recordings, on the render
- * thread pool.
+ * over by <GraphiteCanvas>, or a picture) into Graphite recordings, on the
+ * render thread pool.
  *
  * Three threads meet here. The JS thread hands over the content. A Reanimated
  * mapper, on the UI runtime, reads the shared values into pending writes: that

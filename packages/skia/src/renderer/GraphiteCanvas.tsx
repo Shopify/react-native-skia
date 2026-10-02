@@ -44,7 +44,7 @@ const useCanvasRefPriv: typeof useRef<View> = !HAS_REANIMATED_3
  * for API compatibility and ignored: the Graphite view renders in sRGB and
  * uses its own backing view.
  */
-export const Canvas2 = ({
+export const GraphiteCanvas = ({
   debug,
   opaque,
   children,
@@ -62,7 +62,7 @@ export const Canvas2 = ({
 }: CanvasProps) => {
   if (onLayout && Platform.OS !== "web") {
     console.error(
-      "<Canvas2 onLayout={onLayout} /> is not supported on the new architecture, to fix the issue, see: https://shopify.github.io/react-native-skia/docs/canvas/overview/#getting-the-canvas-size"
+      "<GraphiteCanvas onLayout={onLayout} /> is not supported on the new architecture, to fix the issue, see: https://shopify.github.io/react-native-skia/docs/canvas/overview/#getting-the-canvas-size"
     );
   }
   const viewRef = useCanvasRefPriv(null);

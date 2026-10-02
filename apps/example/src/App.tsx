@@ -35,7 +35,7 @@ import {
   WebGPU,
   HighBitDepth,
   Graphite,
-  GraphiteCanvas,
+  GraphiteCanvasExample,
   AndroidViews,
 } from "./Examples";
 import { CI, Tests } from "./Tests";
@@ -243,7 +243,10 @@ const App = () => {
             />
             <Stack.Screen name="HighBitDepth" component={HighBitDepth} />
             <Stack.Screen name="Graphite" component={Graphite} />
-            <Stack.Screen name="GraphiteCanvas" component={GraphiteCanvas} />
+            <Stack.Screen
+              name="GraphiteCanvas"
+              component={GraphiteCanvasExample}
+            />
             <Stack.Screen name="AndroidViews" component={AndroidViews} />
           </Stack.Navigator>
         </NavigationContainer>

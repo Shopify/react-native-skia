@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Image as RNImage, StyleSheet, Text, View } from "react-native";
 import type { SkImage, SkSize } from "@shopify/react-native-skia";
 import {
-  Canvas2,
+  GraphiteCanvas,
   Circle,
   Fill,
   Group,
@@ -22,7 +22,7 @@ import {
 
 import { useGpuImage } from "./Graphite";
 
-// <Canvas2> is the declarative API on the Graphite view. The scene is
+// <GraphiteCanvas> is the declarative API on the Graphite view. The scene is
 // recorded once on the JS thread; the Reanimated UI runtime only reads the
 // shared values into it; the native render thread pool replays it into a
 // Graphite frame, at most once per vsync; the view presents it. The GPU image
@@ -105,7 +105,7 @@ const AnimatedCanvas = ({ image, onSnapshot }: AnimatedCanvasProps) => {
     () => size.value.height / 2 - imageSize.value / 2
   );
   return (
-    <Canvas2 ref={ref} style={styles.canvas} opaque onSize={size}>
+    <GraphiteCanvas ref={ref} style={styles.canvas} opaque onSize={size}>
       <Fill color="#0b1020" />
       {image && (
         <Group transform={transform} origin={origin}>
@@ -122,13 +122,13 @@ const AnimatedCanvas = ({ image, onSnapshot }: AnimatedCanvasProps) => {
       {Array.from({ length: COUNT }, (_, index) => (
         <Dot key={index} index={index} t={t} size={size} />
       ))}
-    </Canvas2>
+    </GraphiteCanvas>
   );
 };
 
 // No shared value: the recorder is replayed once and the view keeps the frame.
 const StaticCanvas = () => (
-  <Canvas2 style={styles.canvas}>
+  <GraphiteCanvas style={styles.canvas}>
     <Fill color="#0b1020" />
     <Rect x={16} y={16} width={360} height={120}>
       <LinearGradient
@@ -141,19 +141,20 @@ const StaticCanvas = () => (
     {palette.map((color, index) => (
       <Circle key={color} cx={160 + index * 28} cy={76} r={12} color={color} />
     ))}
-  </Canvas2>
+  </GraphiteCanvas>
 );
 
-export const GraphiteCanvas = () => {
+export const GraphiteCanvasExample = () => {
   const image = useGpuImage();
   const [snapshot, setSnapshot] = useState<string | null>(null);
   return (
     <View style={styles.container}>
       <Text style={styles.label}>
-        Canvas2, animated with Reanimated: replayed on the render thread pool
+        GraphiteCanvas, animated with Reanimated: replayed on the render thread
+        pool
       </Text>
       <AnimatedCanvas image={image} onSnapshot={setSnapshot} />
-      <Text style={styles.label}>Canvas2, static scene</Text>
+      <Text style={styles.label}>GraphiteCanvas, static scene</Text>
       <StaticCanvas />
       <Text style={styles.label}>
         makeImageSnapshot() of the animated canvas

@@ -166,7 +166,7 @@ export const HomeScreen = () => {
       )}
       {hasGraphite && (
         <HomeScreenButton
-          title="🗿 Canvas2"
+          title="🗿 Graphite Canvas"
           description="Declarative canvas on the Graphite view, replayed off-thread"
           route="GraphiteCanvas"
         />

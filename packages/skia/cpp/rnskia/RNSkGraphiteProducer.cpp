@@ -157,15 +157,15 @@ void RNSkGraphiteProducer::produce() {
         canvas->clear(SK_ColorTRANSPARENT);
         draw(canvas, recorder.get(), picture);
       } catch (const std::exception &e) {
-        RNSkLogger::logToConsole("Canvas2: replaying the scene failed: %s",
-                                 e.what());
+        RNSkLogger::logToConsole(
+            "GraphiteCanvas: replaying the scene failed: %s", e.what());
       }
       try {
         recording = target->finishRecording();
         recorded = recording != nullptr;
       } catch (const std::exception &e) {
-        RNSkLogger::logToConsole("Canvas2: recording the frame failed: %s",
-                                 e.what());
+        RNSkLogger::logToConsole(
+            "GraphiteCanvas: recording the frame failed: %s", e.what());
       }
     }
   }

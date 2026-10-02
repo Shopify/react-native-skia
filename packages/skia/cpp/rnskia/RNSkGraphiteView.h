@@ -560,10 +560,10 @@ private:
 /**
  * A view that presents Graphite recordings. Frames come from one of two
  * producers: JS records them itself through the target
- * (SkiaViewApi.makeGraphiteContext), or <Canvas2> hands over a recorder (or a
- * picture) that the render thread pool records for the view. The platform
- * view presents them on its display link. Only available with the Graphite
- * backend.
+ * (SkiaViewApi.makeGraphiteContext), or <GraphiteCanvas> hands over a recorder
+ * (or a picture) that the render thread pool records for the view. The
+ * platform view presents them on its display link. Only available with the
+ * Graphite backend.
  */
 class RNSkGraphiteView : public RNSkView {
 public:
@@ -592,7 +592,7 @@ public:
     }
   }
 
-  /** Declarative content: the recorder of <Canvas2>, or a picture. */
+  /** Declarative content: the recorder of <GraphiteCanvas>, or a picture. */
   void setJsiProperties(
       std::unordered_map<std::string, RNJsi::ViewProperty> &props) override {
     for (auto &prop : props) {
