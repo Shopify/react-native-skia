@@ -1,7 +1,11 @@
-name: Create a release (react-native-skia, Graphite)
+name: Create a release (react-native-skia)
 on:
   workflow_dispatch:
     inputs:
+      graphite:
+        description: 'Ship the Graphite build (Dawn/WebGPU backend) instead of the default Ganesh build'
+        type: boolean
+        default: true
       skip_npm_publish:
         description: 'Skip the npm publish and upload the package tarball as a workflow artifact instead'
         type: boolean
@@ -25,7 +29,7 @@ jobs:
       PACKAGE_NAME: react-native-skia
       REPOSITORY: wcandillon/react-native-skia
     concurrency:
-      group: npm-graphite-${{ github.ref }}
+      group: npm-react-native-skia-${{ github.ref }}
       cancel-in-progress: true
     steps:
       - name: checkout
@@ -34,14 +38,14 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      # Always ships the Graphite build: the graphite setup bakes the Dawn and
-      # Graphite headers into cpp/ and creates the libs/.graphite marker (shipped
-      # via the files field) that the podspec and build.gradle key off at build time.
+      # The graphite setup bakes the Dawn and Graphite headers into cpp/ and
+      # creates the libs/.graphite marker (shipped via the files field) that the
+      # podspec and build.gradle key off at build time.
       - name: Setup
         uses: ./.github/actions/setup
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          graphite: true
+          graphite: ${{ inputs.graphite }}
 
       - name: Build package and documentation
         run: yarn build
@@ -49,6 +53,7 @@ jobs:
       # Swap the prebuilt binary packages for their Graphite variants, pinned in
       # graphiteDependencies (package.json).
       - name: Swap in Graphite binary packages
+        if: ${{ inputs.graphite }}
         working-directory: packages/skia
         run: |
           node -e "
