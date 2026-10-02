@@ -2,6 +2,7 @@ name: Create a release
 on: workflow_dispatch
 jobs:
   build:
+    if: ${{ github.repository == 'shopify/react-native-skia' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write # to be able to publish a GitHub release

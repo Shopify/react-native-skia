@@ -17,6 +17,7 @@ on:
         default: false
 jobs:
   prepare-release:
+    if: ${{ github.repository == 'shopify/react-native-skia' }}
     runs-on: ubuntu-latest
     outputs:
       skia_branch: ${{ steps.skia_meta.outputs.branch }}
@@ -91,6 +92,7 @@ jobs:
           prerelease: true
           generate_release_notes: false
   build:
+    if: ${{ github.repository == 'shopify/react-native-skia' }}
     needs: prepare-release
     runs-on: macos-latest-xlarge
     strategy:

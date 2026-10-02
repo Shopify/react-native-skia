@@ -7,6 +7,7 @@ on:
 
 jobs:
   build_and_deploy_docs:
+    if: ${{ github.repository == 'shopify/react-native-skia' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
