@@ -2,10 +2,6 @@ name: Create a release (react-native-skia)
 on:
   workflow_dispatch:
     inputs:
-      graphite:
-        description: 'Ship the Graphite build (Dawn/WebGPU backend) instead of the default Ganesh build. Ignored on 2.x, which always ships Ganesh.'
-        type: boolean
-        default: true
       skip_npm_publish:
         description: 'Skip the npm publish and upload the package tarball as a workflow artifact instead'
         type: boolean
@@ -26,11 +22,9 @@ jobs:
       id-token: write # to enable use of OIDC for npm provenance
     env:
       WORKING_DIRECTORY: ./
-      PACKAGE_NAME: react-native-skia
       REPOSITORY: wcandillon/react-native-skia
-      # 2.x is the maintenance branch for the Ganesh v2 line: it never ships
-      # Graphite and publishes under the 2.x dist-tag so latest stays on main.
-      GRAPHITE: ${{ inputs.graphite && github.ref_name != '2.x' }}
+      # 2.x is the maintenance branch for the Ganesh v2 line: it publishes under
+      # the 2.x dist-tag so latest stays on main.
       NPM_DIST_TAG: ${{ github.ref_name == '2.x' && '2.x' || 'latest' }}
     concurrency:
       group: npm-react-native-skia-${{ github.ref }}
@@ -42,39 +36,17 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      # The graphite setup bakes the Dawn and Graphite headers into cpp/ and
-      # creates the libs/.graphite marker (shipped via the files field) that the
-      # podspec and build.gradle key off at build time.
+      # The setup copies the Skia, Graphite and Dawn headers into cpp/, which
+      # ship in the package (files field).
       - name: Setup
         uses: ./.github/actions/setup
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          graphite: ${{ env.GRAPHITE }}
 
       - name: Build package and documentation
         run: yarn build
 
-      # Swap the prebuilt binary packages for their Graphite variants, pinned in
-      # graphiteDependencies (package.json).
-      - name: Swap in Graphite binary packages
-        if: ${{ env.GRAPHITE == 'true' }}
-        working-directory: packages/skia
-        run: |
-          node -e "
-            const fs = require('fs');
-            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-            for (const name of Object.keys(pkg.dependencies)) {
-              if (name.startsWith('react-native-skia-')) delete pkg.dependencies[name];
-            }
-            Object.assign(pkg.dependencies, pkg.graphiteDependencies);
-            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
-          "
-          node -p "JSON.stringify(require('./package.json').dependencies, null, 2)"
-
-      # Configure semantic-release for this repository. The workspace keeps its
-      # @shopify/react-native-skia name (the apps depend on it), so the packed
-      # tarball is renamed to react-native-skia right after semantic-release-yarn
-      # writes it to dist/, before it is published and attached to the release.
+      # Configure semantic-release for this repository.
       # The 2.x branch is a maintenance branch (>=2.0.0 <3.0.0) on the 2.x channel.
       # Commenting on released issues and PRs is off: the commit messages
       # reference Shopify/react-native-skia numbers that don't exist here.
@@ -88,7 +60,6 @@ jobs:
             rc.repositoryUrl = 'https://github.com/' + process.env.REPOSITORY + '.git';
             rc.branches.unshift({ name: '2.x', range: '2.x', channel: '2.x' });
             const exec = rc.plugins.find((p) => Array.isArray(p) && p[0] === '@semantic-release/exec');
-            exec[1].prepareCmd = 'bash ../../.github/scripts/rename-package-tarball.sh dist';
             if (process.env.SKIP_NPM_PUBLISH === 'true') delete exec[1].publishCmd;
             const github = rc.plugins.find((p) => Array.isArray(p) && p[0] === '@semantic-release/github');
             github[1].successCommentCondition = false;
@@ -128,8 +99,7 @@ jobs:
             fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
           " "$VERSION"
           mkdir -p dist
-          yarn pack --out dist/package.tgz
-          bash ../../.github/scripts/rename-package-tarball.sh dist
+          yarn pack --out "dist/react-native-skia-${VERSION}.tgz"
           if [ "$SKIP_NPM_PUBLISH" != "true" ]; then
             mkdir -p /tmp/npm-publish && cp dist/*.tgz /tmp/npm-publish/
             (cd /tmp/npm-publish && npm publish *.tgz --provenance --access public --tag "$NPM_DIST_TAG")

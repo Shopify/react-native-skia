@@ -19,7 +19,7 @@ import { useCanvasRoot } from "./Canvas";
  * - the view presents the recording on the next vsync.
  *
  * Neither the JS thread nor the UI thread pays for drawing. It requires the
- * Graphite backend (install-skia-graphite); with the default backend the view
+ * Graphite backend (the default since v3); with a Ganesh build the view
  * renders nothing. `colorSpace`, `android` and `androidWarmup` are accepted
  * for API compatibility and ignored: the Graphite view renders in sRGB and
  * uses its own backing view.

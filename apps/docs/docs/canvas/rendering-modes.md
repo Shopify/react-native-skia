@@ -17,7 +17,7 @@ This approach is extremely fast and is best suited for user-interfaces and inter
 
 ```tsx twoslash
 import React, {useEffect} from "react";
-import { Canvas, Circle, Group } from "@shopify/react-native-skia";
+import { Canvas, Circle, Group } from "react-native-skia";
 import { useSharedValue, withSpring, useDerivedValue } from "react-native-reanimated";
 
 export const RetainedModeExample = () => {
@@ -43,7 +43,7 @@ React Native Skia provides immediate mode through the [Picture API](/docs/shapes
 This mode is extremely well-suited for scenes where the number of drawing commands changes on every animation frame. This is often the case for games, generative art, and particle systems where the scene changes unpredictably on each animation frame.
 
 ```tsx twoslash
-import { Canvas, Picture, Skia } from "@shopify/react-native-skia";
+import { Canvas, Picture, Skia } from "react-native-skia";
 import { useDerivedValue, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
 import { useEffect } from "react";
 

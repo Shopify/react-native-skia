@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Image as RNImage, StyleSheet, Text, View } from "react-native";
-import type { SkImage, SkSize } from "@shopify/react-native-skia";
+import type { SkImage, SkSize } from "react-native-skia";
 import {
   GraphiteCanvas,
   Circle,
@@ -12,7 +12,7 @@ import {
   RoundedRect,
   useCanvasRef,
   vec,
-} from "@shopify/react-native-skia";
+} from "react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
 import {
   useDerivedValue,

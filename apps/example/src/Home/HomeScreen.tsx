@@ -5,7 +5,7 @@ import { Platform, ScrollView } from "react-native";
 // react-native-webgpu would not be initialized when the WebGPU section's
 // availability check below runs.
 import "react-native-webgpu";
-import { Skia } from "@shopify/react-native-skia";
+import { Skia } from "react-native-skia";
 
 import { HomeScreenButton } from "./HomeScreenButton";
 

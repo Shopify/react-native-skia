@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.4.1)
 set (CMAKE_CXX_STANDARD 20)
 
 # SKIA_LIBS_PATH is passed from Gradle (pointing at the prebuilt Skia binaries,
-# read straight from the react-native-skia-android npm package, or libs/android for Graphite)
+# read straight from the react-native-skia-graphite-android npm package, or libs/android for local builds)
 # Append the ABI to get the full path
 set (SKIA_LIBS_PATH "${SKIA_LIBS_PATH}/${ANDROID_ABI}")
 

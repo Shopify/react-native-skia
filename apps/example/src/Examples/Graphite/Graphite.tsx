@@ -4,8 +4,8 @@ import type {
   SkGraphiteContext,
   SkImage,
   SkiaGraphiteViewRef,
-} from "@shopify/react-native-skia";
-import { Skia, SkiaGraphiteView, TileMode } from "@shopify/react-native-skia";
+} from "react-native-skia";
+import { Skia, SkiaGraphiteView, TileMode } from "react-native-skia";
 import { useFrameCallback, useSharedValue } from "react-native-reanimated";
 
 // Two SkiaGraphiteViews, each fed by Graphite recordings from a different

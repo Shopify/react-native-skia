@@ -456,8 +456,10 @@ export const copyHeaders = () => {
   fileOps.mkdir("./cpp/skia/modules");
   fileOps.mkdir("./cpp/skia/src");
 
-  // Graphite-specific setup
-  if (GRAPHITE) {
+  // Graphite and Dawn headers. Graphite is the default backend, so these are
+  // copied for every build: from a local Skia build when there is one,
+  // otherwise from the react-native-skia-graphite-headers package.
+  {
     console.log("   Checking for Graphite build source...");
 
     // Try to find graphite headers from npm package
@@ -538,6 +540,18 @@ export const copyHeaders = () => {
         "cpp/skia/src/gpu/graphite"
       );
 
+      // The headers package ships them under libs/skia/cpp/.
+      const legacyRoot = path.join(graphiteHeadersPath, "libs/skia/cpp");
+      if (!fs.existsSync(dawnSrc) && fs.existsSync(legacyRoot)) {
+        fileOps.cp(path.join(legacyRoot, "dawn/include"), "./cpp/dawn/include");
+        if (fs.existsSync(path.join(legacyRoot, "skia/src/gpu/graphite"))) {
+          fileOps.cp(
+            path.join(legacyRoot, "skia/src/gpu/graphite"),
+            "./cpp/skia/src/gpu/graphite"
+          );
+        }
+      }
+
       if (fs.existsSync(dawnSrc)) {
         console.log("      - Copying Dawn headers from npm package...");
         fileOps.cp(dawnSrc, "./cpp/dawn/include");
@@ -552,8 +566,8 @@ export const copyHeaders = () => {
 
       console.log("      ✓ Graphite headers copied from npm package");
     } else {
-      console.log(
-        "   ⚠️  No Graphite headers source found (no local build or npm package)"
+      throw new Error(
+        "No Graphite headers source found: build Skia locally or install react-native-skia-graphite-headers"
       );
     }
   }

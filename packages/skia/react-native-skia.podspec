@@ -1,13 +1,9 @@
-# @shopify/react-native-skia.podspec
+# react-native-skia.podspec
 
 require "json"
 require "fileutils"
 
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
-
-# Check if Graphite is enabled via marker file (created by install-skia-graphite)
-use_graphite = File.exist?(File.join(__dir__, 'libs', '.graphite'))
-puts "-- SK_GRAPHITE: #{use_graphite ? 'ON' : 'OFF'} (detected via libs/.graphite marker file)"
 
 # Resolve a node package directory using Node's own module resolution
 # (mirrors `require.resolve(pkg/package.json)`). Returns nil if it can't be found.
@@ -40,11 +36,21 @@ install_apple_skia_libs = lambda do |base_dir, packages|
     # Graphite packages carry the Dawn release tag they ship (libs/.dawn-version),
     # used below for the react-native-webgpu version check.
     dawn_version = File.join(src, '.dawn-version')
-    FileUtils.cp(dawn_version, File.join(base_dir, 'libs', '.dawn-version')) if File.exist?(dawn_version)
+    if File.exist?(dawn_version)
+      FileUtils.mkdir_p(File.join(base_dir, 'libs'))
+      FileUtils.cp(dawn_version, File.join(base_dir, 'libs', '.dawn-version'))
+    end
 
     version = JSON.parse(File.read(File.join(pkg_dir, 'package.json')))['version'].to_s
     dest = File.join(base_dir, 'libs', platform)
     marker = File.join(dest, '.version')
+
+    # Frameworks without a .version stamp were built locally (`yarn build-skia`):
+    # keep them instead of overwriting them with the npm package.
+    if !File.exist?(marker) && !Dir.glob(File.join(dest, '*.xcframework')).empty?
+      Pod::UI.puts "react-native-skia: using locally built #{platform} Skia frameworks"
+      next
+    end
 
     # Already up to date: leave the files untouched so CocoaPods keeps its cache.
     next if File.exist?(marker) && File.read(marker).strip == version
@@ -57,23 +63,15 @@ install_apple_skia_libs = lambda do |base_dir, packages|
   end
 end
 
-# The default (Ganesh) build ships its binaries in the react-native-skia-apple-*
-# npm packages, the Graphite build in react-native-skia-graphite-apple-* (no tvOS).
-# During in-repo development install-skia-graphite downloads the binaries directly
-# into libs/ and the graphite packages are absent from node_modules, in which case
-# the copy below is a no-op and the downloaded binaries are used as-is.
-apple_skia_packages = use_graphite ?
-  { 'ios' => 'react-native-skia-graphite-apple-ios',
-    'macos' => 'react-native-skia-graphite-apple-macos' } :
-  { 'ios' => 'react-native-skia-apple-ios',
-    'macos' => 'react-native-skia-apple-macos',
-    'tvos' => 'react-native-skia-apple-tvos' }
+# The Graphite binaries ship in the react-native-skia-graphite-apple-* npm
+# packages (no tvOS), together with the shared Dawn (libwebgpu_dawn.xcframework).
+apple_skia_packages = {
+  'ios' => 'react-native-skia-graphite-apple-ios',
+  'macos' => 'react-native-skia-graphite-apple-macos'
+}
 install_apple_skia_libs.call(__dir__, apple_skia_packages)
 
-# Set preprocessor definitions based on GRAPHITE flag
-preprocessor_defs = use_graphite ?
-  '$(inherited) SK_GRAPHITE=1 SK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API=1 SK_DISABLE_LEGACY_SHAPER_FACTORY=1' :
-  '$(inherited) SK_METAL=1 SK_GANESH=1 SK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API=1 SK_DISABLE_LEGACY_SHAPER_FACTORY=1'
+preprocessor_defs = '$(inherited) SK_GRAPHITE=1 SK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API=1 SK_DISABLE_LEGACY_SHAPER_FACTORY=1'
 
 # Define framework names
 framework_names = ['libskia', 'libsvg', 'libskshaper', 'libskparagraph',
@@ -88,12 +86,13 @@ framework_names = ['libskia', 'libsvg', 'libskshaper', 'libskparagraph',
 # skia pod's dawn::native references resolve from webgpu's copy at app link.
 webgpu_pkg_dir = resolve_node_package.call('react-native-webgpu', __dir__)
 has_webgpu_pkg = !webgpu_pkg_dir.nil?
-if use_graphite && has_webgpu_pkg
+if has_webgpu_pkg
   Pod::UI.puts 'react-native-skia: react-native-webgpu detected, Dawn is provided by its libwebgpu_dawn'
 
   # Both packages must link the exact same Dawn artifact. Compare the release
-  # tag this Graphite build was installed with (libs/.dawn-version) against
-  # the tag react-native-webgpu declares in its package.json `dawn` field.
+  # tag the Skia binaries were packaged with (libs/.dawn-version, copied in from
+  # the binary package above) against the tag react-native-webgpu declares in
+  # its package.json `dawn` field.
   dawn_marker = File.join(__dir__, 'libs', '.dawn-version')
   if File.exist?(dawn_marker)
     skia_dawn = File.read(dawn_marker).strip
@@ -115,7 +114,7 @@ if use_graphite && has_webgpu_pkg
     Pod::UI.puts "react-native-skia: Dawn versions match (#{skia_dawn})"
   end
 end
-if use_graphite && !has_webgpu_pkg
+unless has_webgpu_pkg
   # CocoaPods silently skips missing vendored frameworks, which would surface
   # later as undefined dawn::native symbols at link time. Fail early instead.
   %w[ios macos].each do |platform|
@@ -130,7 +129,7 @@ if use_graphite && !has_webgpu_pkg
 end
 
 # Verify that the prebuilt binaries are available (copied in above from the npm
-# packages, or downloaded by install-skia-graphite for in-repo Graphite builds).
+# packages, or built locally with `yarn build-skia`).
 unless Dir.exist?(File.join(__dir__, 'libs', 'ios')) && Dir.exist?(File.join(__dir__, 'libs', 'macos'))
   expected_packages = apple_skia_packages.values.join(', ')
   Pod::UI.warn "#{'-' * 72}"
@@ -143,33 +142,26 @@ unless Dir.exist?(File.join(__dir__, 'libs', 'ios')) && Dir.exist?(File.join(__d
 end
 
 # Build platform-specific framework paths (relative to pod's libs directory)
-# xcframeworks are copied into libs/ by install_apple_skia_libs above (default build)
-# or downloaded by install-skia-graphite (Graphite build).
+# xcframeworks are copied into libs/ by install_apple_skia_libs above.
 ios_frameworks = framework_names.map { |f| "libs/ios/#{f}.xcframework" }
 osx_frameworks = framework_names.map { |f| "libs/macos/#{f}.xcframework" }
-# tvOS frameworks - check if libs/tvos/ exists (only populated for the default build)
-tvos_frameworks = if use_graphite || !Dir.exist?(File.join(__dir__, 'libs', 'tvos'))
-  []
-else
-  framework_names.map { |f| "libs/tvos/#{f}.xcframework" }
-end
 
 Pod::Spec.new do |s|
   s.name         = "react-native-skia"
   s.version      = package["version"]
   s.summary      = package["description"]
   s.description  = <<-DESC
-                  @shopify/react-native-skia
+                  react-native-skia
                    DESC
-  s.homepage     = "https://github.com/shopify/react-native-skia"
+  s.homepage     = "https://github.com/wcandillon/react-native-skia"
   s.license      = "MIT"
   s.license    = { :type => "MIT", :file => "LICENSE.md" }
   s.authors      = {
     "Christian Falch" => "christian.falch@gmail.com",
     "William Candillon" => "wcandillon@gmail.com"
   }
-  s.platforms    = { :ios => "14.0", :tvos => "13.0", :osx => "11" }
-  s.source       = { :git => "https://github.com/shopify/react-native-skia/react-native-skia.git", :tag => "#{s.version}" }
+  s.platforms    = { :ios => "14.0", :osx => "11" }
+  s.source       = { :git => "https://github.com/wcandillon/react-native-skia.git", :tag => "#{s.version}" }
 
   s.requires_arc = true
   s.pod_target_xcconfig = {
@@ -185,11 +177,6 @@ Pod::Spec.new do |s|
   s.ios.vendored_frameworks = ios_frameworks
   s.osx.vendored_frameworks = osx_frameworks
 
-  # tvOS frameworks only available for non-Graphite builds
-  unless use_graphite
-    s.tvos.vendored_frameworks = tvos_frameworks
-  end
-
   # Preserve the copied libs directory
   s.preserve_paths = ["libs/**/*"]
 
@@ -198,20 +185,6 @@ Pod::Spec.new do |s|
     "apple/**/*.{h,c,cc,cpp,m,mm,swift}",
     "cpp/**/*.{h,cpp}"
   ]
-
-  graphite_exclusions = [
-    'cpp/rnskia/RNDawnContext.h',
-    'cpp/rnskia/RNDawnUtils.h',
-    'cpp/rnskia/RNMetalLayerColorSpace.h',
-    'cpp/rnskia/RNDawnWindowContext.h',
-    'cpp/rnskia/RNDawnWindowContext.cpp',
-    'cpp/rnskia/RNDawnInterop.cpp',
-    'cpp/rnskia/RNImageProvider.h',
-    'cpp/rnskia/RNSkGraphiteView.h',
-    'cpp/api/JsiSkGraphiteContext.h',
-    'cpp/api/JsiSkGraphiteRecording.h'
-  ]
-  s.exclude_files = graphite_exclusions unless use_graphite
 
   install_modules_dependencies(s)
   s.dependency "React"

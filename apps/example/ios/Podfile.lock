@@ -3002,7 +3002,7 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../../../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../../../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - react-native-safe-area-context (from `../../../node_modules/react-native-safe-area-context`)
-  - "react-native-skia (from `../../../node_modules/@shopify/react-native-skia`)"
+  - "react-native-skia (from `../../../node_modules/react-native-skia`)"
   - react-native-webgpu (from `../../../node_modules/react-native-webgpu`)
   - React-NativeModulesApple (from `../../../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-networking (from `../../../node_modules/react-native/ReactCommon/react/networking`)
@@ -3143,7 +3143,7 @@ EXTERNAL SOURCES:
   react-native-safe-area-context:
     :path: "../../../node_modules/react-native-safe-area-context"
   react-native-skia:
-    :path: "../../../node_modules/@shopify/react-native-skia"
+    :path: "../../../node_modules/react-native-skia"
   react-native-webgpu:
     :path: "../../../node_modules/react-native-webgpu"
   React-NativeModulesApple:

@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import type { SkCanvas } from "@shopify/react-native-skia";
-import { Skia } from "@shopify/react-native-skia";
+import type { SkCanvas } from "react-native-skia";
+import { Skia } from "react-native-skia";
 
 export interface SkiaTexture {
   texture: THREE.ExternalTexture;

@@ -3,8 +3,8 @@ import type { DependencyList } from "react";
 import { PixelRatio } from "react-native";
 import type * as THREE from "three";
 import { importDevice } from "react-native-webgpu";
-import type { SkImage, SkSize } from "@shopify/react-native-skia";
-import { Skia } from "@shopify/react-native-skia";
+import type { SkImage, SkSize } from "react-native-skia";
+import { Skia } from "react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
 import { useSharedValue } from "react-native-reanimated";
 
