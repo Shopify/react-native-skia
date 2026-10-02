@@ -231,12 +231,8 @@ public:
       return jsi::Value::undefined();
     }
     // Outside the registry lock: the update must not hold up the commits
-    // and registrations of other views.
-    auto renderer =
-        std::static_pointer_cast<RNSkPictureRenderer>(view->getRenderer());
-    if (renderer->applyUpdates(runtime, recorderId, values)) {
-      view->requestRedraw();
-    }
+    // and registrations of other views. The view schedules its own frame.
+    view->applyUpdates(runtime, recorderId, values);
     return jsi::Value::undefined();
   }
 

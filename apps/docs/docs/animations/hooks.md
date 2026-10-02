@@ -18,7 +18,7 @@ To interpolate two completely different paths, we found the [flubber library](ht
 ```tsx twoslash
 import React, { useEffect } from 'react';
 import { useSharedValue, withTiming } from 'react-native-reanimated';
-import { Skia, usePathInterpolation, Canvas, Path } from '@shopify/react-native-skia';
+import { Skia, usePathInterpolation, Canvas, Path } from 'react-native-skia';
 
 const angryPath = Skia.Path.MakeFromSVGString("M 16 25 C 32 27 43 28 49 28 C 54 28 62 28 73 26 C 66 54 60 70 55 74 C 51 77 40 75 27 55 C 25 50 21 40 27 55 Z")!;
 const normalPath = Skia.Path.MakeFromSVGString("M 21 31 C 31 32 39 32 43 33 C 67 35 80 36 81 38 C 84 42 74 57 66 60 C 62 61 46 59 32 50 C 24 44 20 37 21 31 Z")!;
@@ -49,7 +49,7 @@ There is an optional second parameter available to set the default path value: i
 ```tsx twoslash
 import {useSharedValue, withSpring} from "react-native-reanimated";
 import {Gesture, GestureDetector} from "react-native-gesture-handler";
-import {usePathValue, Canvas, Path, processTransform3d, Skia} from "@shopify/react-native-skia";
+import {usePathValue, Canvas, Path, processTransform3d, Skia} from "react-native-skia";
 
 const rrct = Skia.PathBuilder.Make()
   .addRRect(Skia.RRectXY(Skia.XYWHRect(0, 0, 100, 100), 10, 10))
@@ -91,7 +91,7 @@ export const FrostedCard = () => {
 This hook returns a number indicating the time in milliseconds since the hook was activated.
 
 ```tsx twoslash
-import { Canvas, useClock, vec, Circle } from "@shopify/react-native-skia";
+import { Canvas, useClock, vec, Circle } from "react-native-skia";
 import { useDerivedValue } from "react-native-reanimated";
 
 export default function App() {
@@ -119,7 +119,7 @@ Creates an array for rectangle to be animated.
 Can be used by any component that takes an array of rectangles as property, like the [Atlas API](/docs/shapes/atlas).
 
 ```tsx twoslash
-import {useRectBuffer} from "@shopify/react-native-skia";
+import {useRectBuffer} from "react-native-skia";
 
 const width = 256;
 const size = 10;
@@ -137,7 +137,7 @@ Creates an array for [rotate scale transforms](/docs/shapes/atlas#rsxform) to be
 Can be used by any component that takes an array of rotate scale transforms as property, like the [Atlas API](/docs/shapes/atlas).
 
 ```tsx twoslash
-import {useRSXformBuffer} from "@shopify/react-native-skia";
+import {useRSXformBuffer} from "react-native-skia";
 import {useSharedValue} from "react-native-reanimated";
 
 const xforms = 100;

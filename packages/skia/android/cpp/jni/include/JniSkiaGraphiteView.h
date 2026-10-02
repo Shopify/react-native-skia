@@ -59,8 +59,8 @@ protected:
                                       highBitDepth);
   }
 
-  void surfaceSizeChanged(jobject surface, int width, int height, bool isSurface,
-                          bool highBitDepth) override {
+  void surfaceSizeChanged(jobject surface, int width, int height,
+                          bool isSurface, bool highBitDepth) override {
     JniSkiaBaseView::surfaceSizeChanged(surface, width, height, isSurface,
                                         highBitDepth);
   }

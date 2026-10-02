@@ -5,7 +5,7 @@ import { Platform, ScrollView } from "react-native";
 // react-native-webgpu would not be initialized when the WebGPU section's
 // availability check below runs.
 import "react-native-webgpu";
-import { Skia } from "@shopify/react-native-skia";
+import { Skia } from "react-native-skia";
 
 import { HomeScreenButton } from "./HomeScreenButton";
 
@@ -140,8 +140,6 @@ export const HomeScreen = () => {
         description="Drawing Performance Test"
         route="Performance"
       />
-      <HomeScreenButton title="📹 Video" description="Video" route="Video" />
-      <HomeScreenButton title="💬 Chat" description="Chat" route="Chat" />
       <HomeScreenButton
         title="🖼 Pictures"
         description="Animated circle trail using Pictures"
@@ -150,7 +148,7 @@ export const HomeScreen = () => {
       {hasWebGPU && (
         <HomeScreenButton
           title="🔺 WebGPU"
-          description="WebGPU Wireframe demo"
+          description="WebGPU canvas and three.js scenes, with Skia interop"
           route="WebGPU"
         />
       )}
@@ -164,6 +162,13 @@ export const HomeScreen = () => {
           title="🗿 Graphite View"
           description="Frames recorded from JS and worklet runtimes"
           route="Graphite"
+        />
+      )}
+      {hasGraphite && (
+        <HomeScreenButton
+          title="🗿 Graphite Canvas"
+          description="Declarative canvas on the Graphite view, replayed off-thread"
+          route="GraphiteCanvas"
         />
       )}
       <HomeScreenButton

@@ -38,6 +38,14 @@ namespace jsi = facebook::jsi;
 class Recorder;
 
 /**
+ * Replays declarative content, a recorder if there is one, else a picture,
+ * into a canvas that draws in pixels: clears it and applies the density.
+ * Shared by the picture renderer and the Graphite producer.
+ */
+void drawContent(SkCanvas *canvas, Recorder *recorder,
+                 const sk_sp<SkPicture> &picture, float pixelDensity);
+
+/**
  * Draws either an SkPicture (imperative API, or a recording without shared
  * values, played once into a picture) or a Recorder (declarative <Canvas>
  * driven by Reanimated shared values). The recorder is owned by the
@@ -142,20 +150,10 @@ public:
       recorder = _recorder;
       picture = _picture;
     }
-    canvas->clear(SK_ColorTRANSPARENT);
-    canvas->save();
-    canvas->scale(pixelDensity, pixelDensity);
-    if (recorder != nullptr) {
-      replay(canvas, recorder.get());
-    } else if (picture != nullptr) {
-      canvas->drawPicture(picture);
-    }
-    canvas->restore();
+    drawContent(canvas, recorder.get(), picture, pixelDensity);
   }
 
 private:
-  void replay(SkCanvas *canvas, Recorder *recorder);
-
   bool performDraw(std::shared_ptr<RNSkCanvasProvider> canvasProvider) {
     auto pd = _platformContext->getPixelDensity();
     return canvasProvider->renderToCanvas(
@@ -193,6 +191,21 @@ public:
             prop.second.isRecorder() ? prop.second.getRecorder() : nullptr);
       }
     }
+  }
+
+  bool applyUpdates(jsi::Runtime &runtime, double recorderId,
+                    const jsi::Array &values) override {
+    auto renderer =
+        std::static_pointer_cast<RNSkPictureRenderer>(getRenderer());
+    if (!renderer->applyUpdates(runtime, recorderId, values)) {
+      return false;
+    }
+    requestRedraw();
+    return true;
+  }
+
+  void releaseContent() override {
+    std::static_pointer_cast<RNSkPictureRenderer>(getRenderer())->clear();
   }
 };
 } // namespace RNSkia

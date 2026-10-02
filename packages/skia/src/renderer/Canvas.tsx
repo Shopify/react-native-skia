@@ -92,19 +92,17 @@ const resolveSurfaceType = (
     ? surfaceType
     : "auto";
 
-export const Canvas = ({
-  debug,
-  opaque,
+/**
+ * What every canvas shares, whichever native view it renders into: the native
+ * id, the scene graph root rendered into it, the layout handler that reports
+ * `onSize`, and the imperative handle of the ref.
+ */
+export const useCanvasRoot = ({
   children,
   onSize,
-  colorSpace = "p3",
-  highBitDepth = false,
-  androidWarmup = false,
-  android,
   ref,
   onLayout,
-  ...viewProps
-}: CanvasProps) => {
+}: Pick<CanvasProps, "children" | "onSize" | "ref" | "onLayout">) => {
   const viewRef = useCanvasRefPriv(null);
   // Native ID
   const nativeId = useMemo(() => {
@@ -176,6 +174,28 @@ export const Canvas = ({
     },
     [onLayout, onSize]
   );
+  return { nativeId, viewRef, onLayoutWithSize };
+};
+
+export const Canvas = ({
+  debug,
+  opaque,
+  children,
+  onSize,
+  colorSpace = "p3",
+  highBitDepth = false,
+  androidWarmup = false,
+  android,
+  ref,
+  onLayout,
+  ...viewProps
+}: CanvasProps) => {
+  const { nativeId, viewRef, onLayoutWithSize } = useCanvasRoot({
+    children,
+    onSize,
+    ref,
+    onLayout,
+  });
   return (
     <SkiaPictureViewNativeComponent
       ref={viewRef}

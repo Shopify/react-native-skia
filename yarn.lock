@@ -7467,76 +7467,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@shopify/react-native-skia@workspace:*, @shopify/react-native-skia@workspace:packages/skia":
-  version: 0.0.0-use.local
-  resolution: "@shopify/react-native-skia@workspace:packages/skia"
-  dependencies:
-    "@babel/plugin-transform-class-properties": ^7.28.0
-    "@babel/plugin-transform-explicit-resource-management": ^7.28.0
-    "@babel/plugin-transform-nullish-coalescing-operator": ^7.28.0
-    "@babel/preset-env": ^7.28.0
-    "@babel/preset-flow": ^7.28.0
-    "@babel/preset-react": ^7.28.0
-    "@babel/preset-typescript": ^7.28.0
-    "@blazediff/core": ^1.4.0
-    "@semantic-release/commit-analyzer": ^13.0.0
-    "@semantic-release/exec": ^7.0.3
-    "@semantic-release/github": ^10.3.3
-    "@semantic-release/release-notes-generator": ^14.0.1
-    "@types/jest": 30.0.0
-    "@types/pngjs": 6.0.1
-    "@types/react": ^19.0.0
-    "@types/react-dom": ^19.0.0
-    "@types/react-reconciler": 0.28.9
-    "@types/ws": 8.5.3
-    canvaskit-wasm: 0.41.0
-    eslint: 9.36.0
-    eslint-config-react-native-wcandillon: 5.0.0
-    eslint-plugin-import: 2.32.0
-    eslint-plugin-react-hooks: ^5.2.0
-    extract-zip: ^2.0.1
-    jest: 30.0.0
-    jest-diff: 29.7.0
-    jest-environment-jsdom: 30.0.0
-    merge-dirs: 0.2.1
-    pngjs: 6.0.0
-    prettier: 2.8.7
-    react: 19.0.0
-    react-dom: 19.0.0
-    react-native: 0.83.1
-    react-native-builder-bob: 0.18.2
-    react-native-reanimated: 4.3.1
-    react-native-skia-android: 154.0.0
-    react-native-skia-apple-ios: 154.0.0
-    react-native-skia-apple-macos: 154.0.0
-    react-native-skia-apple-tvos: 154.0.0
-    react-native-worklets: 0.8.3
-    react-reconciler: 0.31.0
-    rimraf: 3.0.2
-    semantic-release: ^24.1.0
-    semantic-release-yarn: ^3.0.2
-    tar: ^7.5.21
-    ts-jest: 29.4.3
-    tsx: ^4.21.0
-    typescript: ^5.2.2
-    ws: 8.21.0
-  peerDependencies:
-    react: ">=19.0"
-    react-native: ">=0.79"
-    react-native-reanimated: ">=4.0.0"
-    react-native-worklets: ">=0.7.0"
-  peerDependenciesMeta:
-    react-native:
-      optional: true
-    react-native-reanimated:
-      optional: true
-    react-native-worklets:
-      optional: true
-  bin:
-    setup-skia-web: scripts/setup-canvaskit.js
-  languageName: unknown
-  linkType: soft
-
 "@sideway/address@npm:^4.1.3, @sideway/address@npm:^4.1.5":
   version: 4.1.5
   resolution: "@sideway/address@npm:4.1.5"
@@ -8518,6 +8448,15 @@ __metadata:
   version: 17.0.45
   resolution: "@types/node@npm:17.0.45"
   checksum: aa04366b9103b7d6cfd6b2ef64182e0eaa7d4462c3f817618486ea0422984c51fc69fd0d436eae6c9e696ddfdbec9ccaa27a917f7c2e8c75c5d57827fe3d95e8
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^20.0.0":
+  version: 20.19.43
+  resolution: "@types/node@npm:20.19.43"
+  dependencies:
+    undici-types: ~6.21.0
+  checksum: c959b5d256b073da95aa1892acb071b487c2f652f98b2cb75e92657d51b99bd691aa811023fb13acd6752bc1bcb75dc579db02190a4da70926cf6f372011bc4e
   languageName: node
   linkType: hard
 
@@ -12798,7 +12737,6 @@ __metadata:
     "@docusaurus/module-type-aliases": latest
     "@docusaurus/preset-classic": latest
     "@mdx-js/react": ^3.1.0
-    "@shopify/react-native-skia": "workspace:*"
     "@svgr/webpack": ^5.5.0
     "@tsconfig/docusaurus": ^1.0.4
     "@types/minimist": ^1.2.5
@@ -12816,6 +12754,7 @@ __metadata:
     react-native: 0.83.1
     react-native-gesture-handler: ^2.24.0
     react-native-reanimated: 4.3.1
+    react-native-skia: "workspace:*"
     react-native-worklets: 0.8.3
     ts-morph: ^25.0.1
     ts-node: ^10.9.2
@@ -14292,7 +14231,6 @@ __metadata:
     "@react-navigation/native": ^7.0.15
     "@react-navigation/native-stack": ^7.2.1
     "@rnx-kit/metro-config": ^2.0.0
-    "@shopify/react-native-skia": "workspace:*"
     "@testing-library/react-native": ^13.1.0
     "@types/jest": ^29.5.13
     "@types/react": ^19.0.0
@@ -14320,6 +14258,7 @@ __metadata:
     react-native-reanimated: 4.3.1
     react-native-safe-area-context: ^5.2.0
     react-native-screens: ^4.10.0
+    react-native-skia: "workspace:*"
     react-native-svg: "patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch"
     react-native-test-app: 4.4.7
     react-native-web: ^0.21.2
@@ -16006,12 +15945,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "headless-skia@workspace:apps/headless"
   dependencies:
-    "@shopify/react-native-skia": "workspace:*"
     "@types/jest": ^29.5.0
     eslint: 9.36.0
     eslint-config-react-native-wcandillon: 5.0.0
     jest: ^29.7.0
     react: ^19.0.0
+    react-native-skia: "workspace:*"
     ts-jest: ^29.1.1
     ts-node: ^10.9.2
     typescript: ^5.2.2
@@ -25173,31 +25112,41 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-skia-android@npm:154.0.0":
-  version: 154.0.0
-  resolution: "react-native-skia-android@npm:154.0.0"
-  checksum: 7428991fc10e5d489a17f5049579b3ac31e949a070ecbcd3b2bbcefdce43c137eb749ab5ecf08cd36c2f03828a893ab00499f994a1c6f2224f798a473471e818
+"react-native-skia-binaries@workspace:packages/skia-binaries":
+  version: 0.0.0-use.local
+  resolution: "react-native-skia-binaries@workspace:packages/skia-binaries"
+  dependencies:
+    "@types/node": ^20.0.0
+    tsx: ^4.21.0
+    typescript: ^5.2.2
+  languageName: unknown
+  linkType: soft
+
+"react-native-skia-graphite-android@npm:154.0.1":
+  version: 154.0.1
+  resolution: "react-native-skia-graphite-android@npm:154.0.1"
+  checksum: 2d61647f0f3ddf145f941993156f0157c63ef659a10665b60b6a563ebca4f3bc12968aa61b5ab1a38debccc925718ff66c8dda2b4c80a7ae3aa7f235c1be225f
   languageName: node
   linkType: hard
 
-"react-native-skia-apple-ios@npm:154.0.0":
-  version: 154.0.0
-  resolution: "react-native-skia-apple-ios@npm:154.0.0"
-  checksum: b627209b8bcd747238cb39d605527ad46569988aab6e025ac2118455031c98cf7da30a3da5af1295ba824336a322a99f46baa6e870f9452e623f430619143baf
+"react-native-skia-graphite-apple-ios@npm:154.0.1":
+  version: 154.0.1
+  resolution: "react-native-skia-graphite-apple-ios@npm:154.0.1"
+  checksum: a46f650407a798f9f01a969e712ced62567c53e6c0d47160ac9c4e0d2149373c92cd988f9580564be847275ae688635cf407c1ee0e2e82b3ae1525e69755fe43
   languageName: node
   linkType: hard
 
-"react-native-skia-apple-macos@npm:154.0.0":
-  version: 154.0.0
-  resolution: "react-native-skia-apple-macos@npm:154.0.0"
-  checksum: be282528ca301cc69e7d94505cd0e8dc051eb22e1b69c15c4b5721bca18b9330c6c06bbf548a3d309150e7dd41d3118bef7d318a6664a2c367587f6fc778d8d9
+"react-native-skia-graphite-apple-macos@npm:154.0.1":
+  version: 154.0.1
+  resolution: "react-native-skia-graphite-apple-macos@npm:154.0.1"
+  checksum: af5df399fb7ef572d1f90c2419d042a11a36e5c8ae4ff7e5e019e7a70099f546777ac894a7fd38a57e15a74e4c43362a252a4f72dce4b7b166a11e279bd369dc
   languageName: node
   linkType: hard
 
-"react-native-skia-apple-tvos@npm:154.0.0":
-  version: 154.0.0
-  resolution: "react-native-skia-apple-tvos@npm:154.0.0"
-  checksum: 8dcee573d91be4ddfc47112d0098840854c1c21fc0e5190f1d8f4495d0c2c86b3168c2070a089c3072ed6a5e5fa2639de60b7772ddb8f9993e1e93007e1409c3
+"react-native-skia-graphite-headers@npm:154.0.1":
+  version: 154.0.1
+  resolution: "react-native-skia-graphite-headers@npm:154.0.1"
+  checksum: 459921c2b4c16de606c0b790f4261ce7851d6c5e6a05ccf244572f98c4d653bda3c44dc9dce2f4d0b19925ad41196c94f91db54c272256f89a32da3ddeed5ca7
   languageName: node
   linkType: hard
 
@@ -25209,6 +25158,76 @@ __metadata:
     playwright: 1.59.0
     react-native-test-app: ^4.2.0
     turbo: ^2.9.14
+  languageName: unknown
+  linkType: soft
+
+"react-native-skia@workspace:*, react-native-skia@workspace:packages/skia":
+  version: 0.0.0-use.local
+  resolution: "react-native-skia@workspace:packages/skia"
+  dependencies:
+    "@babel/plugin-transform-class-properties": ^7.28.0
+    "@babel/plugin-transform-explicit-resource-management": ^7.28.0
+    "@babel/plugin-transform-nullish-coalescing-operator": ^7.28.0
+    "@babel/preset-env": ^7.28.0
+    "@babel/preset-flow": ^7.28.0
+    "@babel/preset-react": ^7.28.0
+    "@babel/preset-typescript": ^7.28.0
+    "@blazediff/core": ^1.4.0
+    "@semantic-release/commit-analyzer": ^13.0.0
+    "@semantic-release/exec": ^7.0.3
+    "@semantic-release/github": ^10.3.3
+    "@semantic-release/release-notes-generator": ^14.0.1
+    "@types/jest": 30.0.0
+    "@types/pngjs": 6.0.1
+    "@types/react": ^19.0.0
+    "@types/react-dom": ^19.0.0
+    "@types/react-reconciler": 0.28.9
+    "@types/ws": 8.5.3
+    canvaskit-wasm: 0.41.0
+    eslint: 9.36.0
+    eslint-config-react-native-wcandillon: 5.0.0
+    eslint-plugin-import: 2.32.0
+    eslint-plugin-react-hooks: ^5.2.0
+    extract-zip: ^2.0.1
+    jest: 30.0.0
+    jest-diff: 29.7.0
+    jest-environment-jsdom: 30.0.0
+    merge-dirs: 0.2.1
+    pngjs: 6.0.0
+    prettier: 2.8.7
+    react: 19.0.0
+    react-dom: 19.0.0
+    react-native: 0.83.1
+    react-native-builder-bob: 0.18.2
+    react-native-reanimated: 4.3.1
+    react-native-skia-graphite-android: 154.0.1
+    react-native-skia-graphite-apple-ios: 154.0.1
+    react-native-skia-graphite-apple-macos: 154.0.1
+    react-native-skia-graphite-headers: 154.0.1
+    react-native-worklets: 0.8.3
+    react-reconciler: 0.31.0
+    rimraf: 3.0.2
+    semantic-release: ^24.1.0
+    semantic-release-yarn: ^3.0.2
+    tar: ^7.5.21
+    ts-jest: 29.4.3
+    tsx: ^4.21.0
+    typescript: ^5.2.2
+    ws: 8.21.0
+  peerDependencies:
+    react: ">=19.0"
+    react-native: ">=0.79"
+    react-native-reanimated: ">=4.0.0"
+    react-native-worklets: ">=0.7.0"
+  peerDependenciesMeta:
+    react-native:
+      optional: true
+    react-native-reanimated:
+      optional: true
+    react-native-worklets:
+      optional: true
+  bin:
+    setup-skia-web: scripts/setup-canvaskit.js
   languageName: unknown
   linkType: soft
 

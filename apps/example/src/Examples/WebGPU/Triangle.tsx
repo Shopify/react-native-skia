@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { StyleSheet, View } from "react-native";
 import type { CanvasRef } from "react-native-webgpu";
 import { Canvas, importDevice } from "react-native-webgpu";
-import { Skia } from "@shopify/react-native-skia";
+import { Skia } from "react-native-skia";
 
 const sampleCount = 4;
 

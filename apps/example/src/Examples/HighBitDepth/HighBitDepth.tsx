@@ -6,7 +6,7 @@ import {
   LinearGradient,
   vec,
   useClock,
-} from "@shopify/react-native-skia";
+} from "react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
 import { useDerivedValue, useSharedValue } from "react-native-reanimated";
 
