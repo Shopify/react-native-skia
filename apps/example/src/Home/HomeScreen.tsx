@@ -140,8 +140,6 @@ export const HomeScreen = () => {
         description="Drawing Performance Test"
         route="Performance"
       />
-      <HomeScreenButton title="📹 Video" description="Video" route="Video" />
-      <HomeScreenButton title="💬 Chat" description="Chat" route="Chat" />
       <HomeScreenButton
         title="🖼 Pictures"
         description="Animated circle trail using Pictures"
