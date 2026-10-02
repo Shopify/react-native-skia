@@ -150,7 +150,7 @@ export const HomeScreen = () => {
       {hasWebGPU && (
         <HomeScreenButton
           title="🔺 WebGPU"
-          description="WebGPU Wireframe demo"
+          description="WebGPU canvas and three.js scenes, with Skia interop"
           route="WebGPU"
         />
       )}
