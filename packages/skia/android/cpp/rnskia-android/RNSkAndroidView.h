@@ -12,12 +12,14 @@ namespace RNSkia {
 class RNSkBaseAndroidView {
 public:
   virtual void surfaceAvailable(jobject surface, int width, int height,
-                                bool isSurface, bool highBitDepth) = 0;
+                                bool isSurface, bool highBitDepth,
+                                float maxRefreshRate) = 0;
 
   virtual void surfaceDestroyed() = 0;
 
   virtual void surfaceSizeChanged(jobject surface, int width, int height,
-                                  bool isSurface, bool highBitDepth) = 0;
+                                  bool isSurface, bool highBitDepth,
+                                  float maxRefreshRate) = 0;
 
   virtual float getPixelDensity() = 0;
 
@@ -35,9 +37,10 @@ public:
               std::bind(&RNSkia::RNSkView::requestRedraw, this), context)) {}
 
   void surfaceAvailable(jobject surface, int width, int height, bool isSurface,
-                        bool highBitDepth) override {
+                        bool highBitDepth, float maxRefreshRate) override {
     std::static_pointer_cast<RNSkOpenGLCanvasProvider>(T::getCanvasProvider())
-        ->surfaceAvailable(surface, width, height, isSurface, highBitDepth);
+        ->surfaceAvailable(surface, width, height, isSurface, highBitDepth,
+                           maxRefreshRate);
     RNSkView::redraw();
   }
 
@@ -47,9 +50,11 @@ public:
   }
 
   void surfaceSizeChanged(jobject surface, int width, int height,
-                          bool isSurface, bool highBitDepth) override {
+                          bool isSurface, bool highBitDepth,
+                          float maxRefreshRate) override {
     std::static_pointer_cast<RNSkOpenGLCanvasProvider>(T::getCanvasProvider())
-        ->surfaceSizeChanged(surface, width, height, isSurface, highBitDepth);
+        ->surfaceSizeChanged(surface, width, height, isSurface, highBitDepth,
+                             maxRefreshRate);
     // Paint the new size right away rather than on the next scheduled redraw.
     RNSkView::redraw();
   }

@@ -54,15 +54,16 @@ public:
 
 protected:
   void surfaceAvailable(jobject surface, int width, int height, bool isSurface,
-                        bool highBitDepth) override {
+                        bool highBitDepth, float maxRefreshRate) override {
     JniSkiaBaseView::surfaceAvailable(surface, width, height, isSurface,
-                                      highBitDepth);
+                                      highBitDepth, maxRefreshRate);
   }
 
   void surfaceSizeChanged(jobject surface, int width, int height,
-                          bool isSurface, bool highBitDepth) override {
+                          bool isSurface, bool highBitDepth,
+                          float maxRefreshRate) override {
     JniSkiaBaseView::surfaceSizeChanged(surface, width, height, isSurface,
-                                        highBitDepth);
+                                        highBitDepth, maxRefreshRate);
   }
 
   void surfaceDestroyed() override { JniSkiaBaseView::surfaceDestroyed(); }
@@ -155,8 +156,8 @@ public:
   }
 
 protected:
-  void surfaceAvailable(jobject, int, int, bool, bool) {}
-  void surfaceSizeChanged(jobject, int, int, bool, bool) {}
+  void surfaceAvailable(jobject, int, int, bool, bool, float) {}
+  void surfaceSizeChanged(jobject, int, int, bool, bool, float) {}
   void surfaceDestroyed() {}
   void setDebugMode(bool) {}
   void registerView(int) {}

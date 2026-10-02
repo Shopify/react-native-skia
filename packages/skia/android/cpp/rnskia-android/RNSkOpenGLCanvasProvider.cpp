@@ -79,6 +79,7 @@ ANativeWindow *RNSkOpenGLCanvasProvider::acquireWindow(jobject surface,
 }
 
 void RNSkOpenGLCanvasProvider::releaseWindow() {
+  _frameRateVote.detach();
   if (_window == nullptr && _jSurface == nullptr) {
     return;
   }
@@ -152,8 +153,12 @@ bool RNSkOpenGLCanvasProvider::presentRecordings(
   if (_surfaceHolder == nullptr) {
     return false;
   }
-  return static_cast<DawnWindowContext *>(_surfaceHolder.get())
-      ->presentRecordings(recordings);
+  const bool presented = static_cast<DawnWindowContext *>(_surfaceHolder.get())
+                             ->presentRecordings(recordings);
+  if (presented) {
+    _frameRateVote.onFramePresented();
+  }
+  return presented;
 }
 #endif
 
@@ -170,6 +175,7 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
       cb(surface->getCanvas());
       // Swap buffers and show on screen
       _surfaceHolder->present();
+      _frameRateVote.onFramePresented();
       return true;
     } else {
       // the render context did not provide a surface
@@ -181,7 +187,8 @@ bool RNSkOpenGLCanvasProvider::renderToCanvas(
 
 void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject surface, int width,
                                                 int height, bool isSurface,
-                                                bool highBitDepth) {
+                                                bool highBitDepth,
+                                                float maxRefreshRate) {
   // Release the old surface and its window
   _surfaceHolder = nullptr;
   releaseWindow();
@@ -191,6 +198,11 @@ void RNSkOpenGLCanvasProvider::surfaceAvailable(jobject surface, int width,
     RNSkLogger::logToConsole("Could not acquire the native window");
     releaseWindow();
     return;
+  }
+  if (isSurface) {
+    // Only a SurfaceView votes: a TextureView is composited into its window,
+    // which casts its own vote.
+    _frameRateVote.attach(window, maxRefreshRate);
   }
 #if defined(SK_GRAPHITE)
   _surfaceHolder = DawnContext::getInstance().MakeWindow(window, width, height,
@@ -217,7 +229,8 @@ void RNSkOpenGLCanvasProvider::surfaceDestroyed() {
 
 void RNSkOpenGLCanvasProvider::surfaceSizeChanged(jobject jSurface, int width,
                                                   int height, bool isSurface,
-                                                  bool highBitDepth) {
+                                                  bool highBitDepth,
+                                                  float maxRefreshRate) {
   if (width == 0 && height == 0) {
     // Setting width/height to zero is nothing we need to care about when
     // it comes to invalidating the surface.
@@ -225,7 +238,8 @@ void RNSkOpenGLCanvasProvider::surfaceSizeChanged(jobject jSurface, int width,
   }
 
   if (_surfaceHolder == nullptr) {
-    surfaceAvailable(jSurface, width, height, isSurface, highBitDepth);
+    surfaceAvailable(jSurface, width, height, isSurface, highBitDepth,
+                     maxRefreshRate);
   } else {
     _surfaceHolder->resize(width, height);
 #if defined(SK_GRAPHITE)

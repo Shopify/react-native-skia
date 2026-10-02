@@ -8,6 +8,7 @@
 
 #include "RNSkView.h"
 #include "RNWindowContext.h"
+#include "SurfaceFrameRateVote.h"
 
 #include <android/native_window.h>
 
@@ -37,12 +38,13 @@ public:
 #endif
 
   void surfaceAvailable(jobject surface, int width, int height, bool isSurface,
-                        bool highBitDepth);
+                        bool highBitDepth, float maxRefreshRate);
 
   void surfaceDestroyed();
 
   void surfaceSizeChanged(jobject jSurface, int width, int height,
-                          bool isSurface, bool highBitDepth);
+                          bool isSurface, bool highBitDepth,
+                          float maxRefreshRate);
 
 private:
   // Takes the ANativeWindow behind an android.view.Surface (SurfaceView) or a
@@ -75,5 +77,6 @@ private:
   RNSkGraphiteTargetInfo _targetInfo;
   bool _hasTargetInfo = false;
 #endif
+  SurfaceFrameRateVote _frameRateVote;
 };
 } // namespace RNSkia

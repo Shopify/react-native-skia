@@ -3,6 +3,7 @@ package com.reactnative.skia;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
@@ -135,17 +136,29 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
         }
     }
 
+    private float resolveMaxRefreshRate() {
+        Display display = getDisplay();
+        if (display == null) {
+            return 0f;
+        }
+        float maxRefreshRate = 0f;
+        for (Display.Mode mode : display.getSupportedModes()) {
+            maxRefreshRate = Math.max(maxRefreshRate, mode.getRefreshRate());
+        }
+        return maxRefreshRate;
+    }
+
     // SurfaceView callbacks: the native side receives an android.view.Surface.
 
     @Override
     public void onSurfaceCreated(Surface surface, int width, int height) {
-        surfaceAvailable(surface, width, height, true, mAppliedHighBitDepth);
+        surfaceAvailable(surface, width, height, true, mAppliedHighBitDepth, resolveMaxRefreshRate());
     }
 
     @Override
     public void onSurfaceChanged(Surface surface, int width, int height) {
         Log.i(tag, "onSurfaceChanged " + width + "/" + height);
-        surfaceSizeChanged(surface, width, height, true, mAppliedHighBitDepth);
+        surfaceSizeChanged(surface, width, height, true, mAppliedHighBitDepth, resolveMaxRefreshRate());
     }
 
     // TextureView callbacks: the native side receives the SurfaceTexture and
@@ -153,13 +166,13 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
 
     @Override
     public void onSurfaceTextureCreated(SurfaceTexture surface, int width, int height) {
-        surfaceAvailable(surface, width, height, false, false);
+        surfaceAvailable(surface, width, height, false, false, 0f);
     }
 
     @Override
     public void onSurfaceTextureChanged(SurfaceTexture surface, int width, int height) {
         Log.i(tag, "onSurfaceTextureSizeChanged " + width + "/" + height);
-        surfaceSizeChanged(surface, width, height, false, false);
+        surfaceSizeChanged(surface, width, height, false, false, 0f);
     }
 
     @Override
@@ -169,9 +182,9 @@ public abstract class SkiaBaseView extends ReactViewGroup implements SkiaViewAPI
 
     // isSurface tells the native side whether `surface` is an
     // android.view.Surface (SurfaceView) or a SurfaceTexture (TextureView).
-    protected abstract void surfaceAvailable(Object surface, int width, int height, boolean isSurface, boolean highBitDepth);
+    protected abstract void surfaceAvailable(Object surface, int width, int height, boolean isSurface, boolean highBitDepth, float maxRefreshRate);
 
-    protected abstract void surfaceSizeChanged(Object surface, int width, int height, boolean isSurface, boolean highBitDepth);
+    protected abstract void surfaceSizeChanged(Object surface, int width, int height, boolean isSurface, boolean highBitDepth, float maxRefreshRate);
 
     protected abstract void surfaceDestroyed();
 
