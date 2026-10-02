@@ -76,6 +76,8 @@ jobs:
       # tarball is renamed to react-native-skia right after semantic-release-yarn
       # writes it to dist/, before it is published and attached to the release.
       # The 2.x branch is a maintenance branch (>=2.0.0 <3.0.0) on the 2.x channel.
+      # Commenting on released issues and PRs is off: the commit messages
+      # reference Shopify/react-native-skia numbers that don't exist here.
       - name: Configure semantic-release
         if: ${{ inputs.version == '' }}
         working-directory: packages/skia
@@ -88,6 +90,9 @@ jobs:
             const exec = rc.plugins.find((p) => Array.isArray(p) && p[0] === '@semantic-release/exec');
             exec[1].prepareCmd = 'bash ../../.github/scripts/rename-package-tarball.sh dist';
             if (process.env.SKIP_NPM_PUBLISH === 'true') delete exec[1].publishCmd;
+            const github = rc.plugins.find((p) => Array.isArray(p) && p[0] === '@semantic-release/github');
+            github[1].successCommentCondition = false;
+            github[1].failCommentCondition = false;
             fs.writeFileSync('.releaserc', JSON.stringify(rc, null, 2) + '\n');
           "
           cat .releaserc
