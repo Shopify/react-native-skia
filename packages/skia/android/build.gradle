@@ -64,23 +64,38 @@ static def resolveNodePackage(packageName, baseDir) {
 // the react-native-skia-graphite-android npm package. Binaries built locally
 // with `yarn build-skia` land in libs/android and take precedence when present.
 def localSkiaLibs = file("${projectDir}/../libs/android")
-def skiaBinariesDir = resolveNodePackage('react-native-skia-graphite-android', projectDir)
 def skiaLibsPath = localSkiaLibs.exists()
     ? "${projectDir}/../libs/android"
-    : "${skiaBinariesDir}/libs"
+    : "${resolveNodePackage('react-native-skia-graphite-android', projectDir)}/libs"
+
+// Fail early rather than with a ninja "missing and no known rule" error.
+def missingDawn = ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"].findAll {
+    !file("${skiaLibsPath}/${it}/libwebgpu_dawn.so").exists()
+}
+if (!missingDawn.isEmpty()) {
+    throw new GradleException(
+        "react-native-skia: libwebgpu_dawn.so not found in ${skiaLibsPath} " +
+        "for ${missingDawn.join(', ')}. The installed react-native-skia-graphite-android " +
+        "package does not ship the shared Dawn library this Graphite build links against. " +
+        "Upgrade it and rebuild.")
+}
 
 // Both packages must link the exact same Dawn artifact: compare the Dawn
-// release tag the Skia binaries were packaged with (`skia.dawn` in the binary
-// package's package.json) with the tag react-native-webgpu declares in its
-// package.json `dawn` field.
-def skiaDawn = new groovy.json.JsonSlurper().parse(file("${skiaBinariesDir}/package.json")).skia?.dawn
+// release tag the Skia binaries were packaged with (libs/.dawn-version in the
+// react-native-skia-graphite-android package, or next to a local build) with
+// the tag react-native-webgpu declares in its package.json `dawn` field.
+def dawnMarker = file("${skiaLibsPath}/.dawn-version")
+if (!dawnMarker.exists()) {
+    dawnMarker = file("${projectDir}/../libs/.dawn-version")
+}
 def webgpuDir = null
 try {
     webgpuDir = resolveNodePackage('react-native-webgpu', projectDir)
 } catch (Exception ignored) {
     // react-native-webgpu not installed: nothing to check
 }
-if (skiaDawn != null && webgpuDir != null) {
+if (dawnMarker.exists() && webgpuDir != null) {
+    def skiaDawn = dawnMarker.text.trim()
     def webgpuJson = new groovy.json.JsonSlurper().parse(file("${webgpuDir}/package.json"))
     if (webgpuJson.dawn == null) {
         throw new GradleException(

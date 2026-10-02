@@ -144,6 +144,11 @@ public:
   }
 
   sk_sp<SkImage> MakeImageFromBuffer(void *buffer) {
+#if defined(__ANDROID__) && __ANDROID_API__ < 26
+    // AHardwareBuffer is only available from API 26
+    (void)buffer;
+    return nullptr;
+#else
 #ifdef __APPLE__
     wgpu::SharedTextureMemoryIOSurfaceDescriptor platformDesc;
     auto ioSurface = CVPixelBufferGetIOSurface((CVPixelBufferRef)buffer);
@@ -213,6 +218,7 @@ public:
       return nullptr;
     }
     return nullptr;
+#endif
   }
 
   // Create offscreen surface
