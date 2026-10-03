@@ -40,7 +40,7 @@ export const GraphiteCanvas = ({
   onLayout,
   ...viewProps
 }: CanvasProps) => {
-  const { nativeId, viewRef } = useCanvasRoot({
+  const { nativeId, viewRef, onLayoutWithSize } = useCanvasRoot({
     children,
     onSize,
     ref,
@@ -54,7 +54,7 @@ export const GraphiteCanvas = ({
       debug={debug}
       opaque={opaque}
       highBitDepth={highBitDepth}
-      onLayout={onLayout}
+      onLayout={onLayoutWithSize}
       {...viewProps}
     />
   );
