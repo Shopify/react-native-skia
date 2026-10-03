@@ -53,6 +53,7 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
   const rendererRef = useSkiaWebRenderer(canvasRef, isStatic, {
     paint,
     onLayout,
+    pixelDensity: props.pixelDensity,
   });
 
   const flushRedraw = useCallback(() => {
@@ -207,6 +208,7 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
     onLayout: _onLayout,
     picture: _picture,
     __destroyWebGLContextAfterRender: _isStatic,
+    pixelDensity: _pixelDensity,
     ...viewProps
   } = props;
   return (

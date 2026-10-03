@@ -87,6 +87,12 @@ export interface CanvasProps extends Omit<ViewProps, "onLayout"> {
   ref?: React.Ref<CanvasRef>;
   androidWarmup?: boolean;
   __destroyWebGLContextAfterRender?: boolean;
+  /**
+   * Web only. The pixel density the canvas is rendered at, defaults to
+   * `window.devicePixelRatio`. Set it when the canvas is painted at a
+   * different size than its layout size, under a CSS transform for instance.
+   */
+  pixelDensity?: number;
 }
 
 // Anything else reaching the native component would hit the generated
