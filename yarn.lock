@@ -25124,6 +25124,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-skia-graphite-apple-tvos@npm:154.3.0":
+  version: 154.3.0
+  resolution: "react-native-skia-graphite-apple-tvos@npm:154.3.0"
+  checksum: 38a3e4d8dcdeb8bb9351cd452e05ba04d591214ecb7399852ea440ed8edeb8ff4115836280d8db73b0284e1c842a029a5e15e6a5aa65a6a1794cc96b8e64d349
+  languageName: node
+  linkType: hard
+
 "react-native-skia-monorepo@workspace:.":
   version: 0.0.0-use.local
   resolution: "react-native-skia-monorepo@workspace:."
@@ -25177,6 +25184,7 @@ __metadata:
     react-native-skia-graphite-android: 154.3.0
     react-native-skia-graphite-apple-ios: 154.3.0
     react-native-skia-graphite-apple-macos: 154.3.0
+    react-native-skia-graphite-apple-tvos: 154.3.0
     react-native-webgpu-dawn: 154.3.0
     react-native-worklets: 0.8.3
     react-reconciler: 0.31.0
