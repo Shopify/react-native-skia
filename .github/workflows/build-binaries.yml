@@ -438,7 +438,7 @@ jobs:
       # A package already on npm at this version is left alone: npm would
       # reject it, and failing here would block the packages still missing.
       - name: Publish to npm
-        if: ${{ !inputs.dry_run && github.repository == 'wcandillon/react-native-skia' && github.ref == 'refs/heads/main' }}
+        if: ${{ !inputs.dry_run && github.repository == 'wcandillon/react-native-skia' }}
         working-directory: packages/skia/build/binaries
         run: |
           set -eo pipefail
