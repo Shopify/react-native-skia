@@ -85,7 +85,8 @@ export const commonArgs = [
   // Passed via extra_cflags_cc per-target instead of skia_use_cpp20 (not available in all Skia versions)
 ];
 
-export type PlatformName = "apple-ios" | "apple-macos" | "android";
+export type PlatformName =
+  "apple-ios" | "apple-tvos" | "apple-macos" | "android";
 
 export type ApplePlatformName = Extract<PlatformName, `apple-${string}`>;
 
@@ -113,9 +114,11 @@ export type Platform<PlatformTarget extends Target = Target> = {
   options?: Arg[];
 };
 
-// The deployment target of the podspec (s.platforms).
-const appleMinTarget = "15.1";
-const appleSimulatorMinTarget = appleMinTarget;
+// Deployment targets of the binaries.
+// Each target has separate GN args; ios_min_target also carries tvOS/macOS minima.
+const iosMinTarget = "15.1";
+const tvosMinTarget = "15.1";
+const macosMinTarget = "11.0";
 
 // Common Apple build arguments shared across all Apple platforms
 const appleCommonArgs: Arg[] = [
@@ -198,7 +201,7 @@ export const configurations: { android: Platform<AndroidTarget> } & Record<
         cpu: "arm64",
         platform: "ios",
         args: [
-          ["ios_min_target", `"${appleMinTarget}"`],
+          ["ios_min_target", `"${iosMinTarget}"`],
           ["extra_cflags_cc", `["-fexceptions", "-frtti"]`],
         ],
       },
@@ -206,7 +209,7 @@ export const configurations: { android: Platform<AndroidTarget> } & Record<
         cpu: "arm64",
         platform: "ios",
         args: [
-          ["ios_min_target", `"${appleSimulatorMinTarget}"`],
+          ["ios_min_target", `"${iosMinTarget}"`],
           ["ios_use_simulator", true],
           ["extra_cflags_cc", `["-fexceptions", "-frtti"]`],
         ],
@@ -215,7 +218,25 @@ export const configurations: { android: Platform<AndroidTarget> } & Record<
         cpu: "x64",
         platform: "ios",
         args: [
-          ["ios_min_target", `"${appleSimulatorMinTarget}"`],
+          ["ios_min_target", `"${iosMinTarget}"`],
+          ["extra_cflags_cc", `["-fexceptions", "-frtti"]`],
+        ],
+      },
+      "arm64-maccatalyst": {
+        cpu: "arm64",
+        platform: "mac",
+        args: [
+          ["target_environment", '"catalyst"'],
+          ["ios_min_target", `"${iosMinTarget}"`],
+          ["extra_cflags_cc", `["-fexceptions", "-frtti"]`],
+        ],
+      },
+      "x64-maccatalyst": {
+        cpu: "x64",
+        platform: "mac",
+        args: [
+          ["target_environment", '"catalyst"'],
+          ["ios_min_target", `"${iosMinTarget}"`],
           ["extra_cflags_cc", `["-fexceptions", "-frtti"]`],
         ],
       },
@@ -224,17 +245,56 @@ export const configurations: { android: Platform<AndroidTarget> } & Record<
     outputRoot: "libs/ios",
     outputNames: appleOutputNames,
   },
+  "apple-tvos": {
+    targets: {
+      "arm64-tvos": {
+        cpu: "arm64",
+        platform: "tvos",
+        args: [
+          ["ios_min_target", `"${tvosMinTarget}"`],
+          ["extra_cflags_cc", `["-fexceptions", "-frtti"]`],
+        ],
+      },
+      "arm64-tvsimulator": {
+        cpu: "arm64",
+        platform: "tvos",
+        args: [
+          ["ios_min_target", `"${tvosMinTarget}"`],
+          ["ios_use_simulator", true],
+          ["extra_cflags_cc", `["-fexceptions", "-frtti"]`],
+        ],
+      },
+      "x64-tvsimulator": {
+        cpu: "x64",
+        platform: "tvos",
+        args: [
+          ["ios_min_target", `"${tvosMinTarget}"`],
+          ["ios_use_simulator", true],
+          ["extra_cflags_cc", `["-fexceptions", "-frtti"]`],
+        ],
+      },
+    },
+    args: appleCommonArgs,
+    outputRoot: "libs/tvos",
+    outputNames: appleOutputNames,
+  },
   "apple-macos": {
     targets: {
       "arm64-macosx": {
         cpu: "arm64",
         platform: "mac",
-        args: [["extra_cflags_cc", `["-fexceptions", "-frtti"]`]],
+        args: [
+          ["ios_min_target", `"${macosMinTarget}"`],
+          ["extra_cflags_cc", `["-fexceptions", "-frtti"]`],
+        ],
       },
       "x64-macosx": {
         cpu: "x64",
         platform: "mac",
-        args: [["extra_cflags_cc", `["-fexceptions", "-frtti"]`]],
+        args: [
+          ["ios_min_target", `"${macosMinTarget}"`],
+          ["extra_cflags_cc", `["-fexceptions", "-frtti"]`],
+        ],
       },
     },
     args: appleCommonArgs,
@@ -250,184 +310,84 @@ const copyModule = (module: string) => {
   fileOps.cp(srcDir, destDir);
 };
 
-const getFirstAvailableTarget = () => {
-  // Use the same logic as build-skia.ts to get the first available target
-  const platforms = Object.keys(configurations) as PlatformName[];
-  const fs = require("fs");
-
-  for (const platformName of platforms) {
-    const configuration = configurations[platformName];
-    const targetNames = Object.keys(configuration.targets);
-
-    for (const targetName of targetNames) {
-      const targetPath = `${platformName}/${targetName}`;
-      // Check both CMake-based Dawn builds and GN-based Dawn builds
-      const cmakeDawnPath = `../../externals/skia/out/${targetPath}/cmake_dawn/gen/include/dawn`;
-      const gnDawnPath = `../../externals/skia/out/${targetPath}/gen/third_party/externals/dawn`;
-
-      if (fs.existsSync(cmakeDawnPath) || fs.existsSync(gnDawnPath)) {
-        return targetPath;
-      }
-    }
-  }
-
-  // No target found with dawn folder
-  throw new Error(
-    "No target found with Dawn headers in ../../externals/skia/out/{target}/"
-  );
-};
-
 export const copyHeaders = () => {
-  // Check if this is a local build (build output exists) vs prebuilt download
   const fs = require("fs");
-  let hasLocalBuild = false;
-  let dawnIncludeSrc = "";
-  try {
-    const targetPath = getFirstAvailableTarget();
-    // Check CMake-based Dawn build first, then GN-based
-    const cmakePath = `../../externals/skia/out/${targetPath}/cmake_dawn/gen/include`;
-    const gnPath = `../../externals/skia/out/${targetPath}/gen/third_party/externals/dawn/include`;
-    if (fs.existsSync(cmakePath)) {
-      dawnIncludeSrc = cmakePath;
-    } else {
-      dawnIncludeSrc = gnPath;
-    }
-    console.log(`   Looking for local build at: ${dawnIncludeSrc}`);
-    hasLocalBuild = fs.existsSync(dawnIncludeSrc);
-  } catch (e) {
-    // No local build found
-    hasLocalBuild = false;
-  }
   console.log("⚙️ Copying Skia headers...");
   process.chdir(PackageRoot);
 
   console.log("   Cleaning up existing directories...");
-  if (hasLocalBuild) {
-    // Clean up existing directories
-    fileOps.rm("./cpp/skia");
-    fileOps.rm("./cpp/dawn");
-  }
+  fileOps.rm("./cpp/skia");
+  fileOps.rm("./cpp/dawn");
 
   console.log("   Creating base directories...");
-  // Create base directories
   fileOps.mkdir("./cpp/skia/include");
   fileOps.mkdir("./cpp/skia/modules");
   fileOps.mkdir("./cpp/skia/src");
 
-  // Graphite and Dawn headers. Graphite is the default backend, so these are
-  // copied for every build: from a local Skia build when there is one,
-  // otherwise from the react-native-skia-graphite-headers package.
+  // Graphite source headers the wrapper needs beyond Skia's public include/.
+  console.log("   Copying Graphite source headers...");
+  fileOps.mkdir("./cpp/skia/src/gpu/graphite");
+  for (const header of [
+    "ContextOptionsPriv.h",
+    "ResourceTypes.h",
+    "TextureProxyView.h",
+  ]) {
+    fileOps.cp(
+      `../../externals/skia/src/gpu/graphite/${header}`,
+      `./cpp/skia/src/gpu/graphite/${header}`
+    );
+  }
+
+  // Dawn headers: from the Dawn built locally with `yarn build-dawn` when there
+  // is one (it is what the native builds then link), otherwise from the
+  // react-native-webgpu-dawn package, the same way Gradle and the podspec pick
+  // the library.
   {
-    console.log("   Checking for Graphite build source...");
-
-    // Try to find graphite headers from npm package
-    let graphiteHeadersPath: string | null = null;
-    try {
-      const graphiteHeadersPkg =
-        require.resolve("react-native-skia-graphite-headers/package.json");
-      graphiteHeadersPath = path.dirname(graphiteHeadersPkg);
+    const localDawnInclude = path.join(PackageRoot, "libs", "dawn", "include");
+    let dawnInclude: string;
+    if (fs.existsSync(path.join(localDawnInclude, "webgpu", "webgpu.h"))) {
       console.log(
-        `   Found graphite headers package at: ${graphiteHeadersPath}`
+        "   📦 Copying Dawn headers from the local build (libs/dawn)..."
       );
-    } catch (e) {
-      // Package not installed
-    }
-
-    if (hasLocalBuild) {
-      console.log("   📦 Copying Graphite headers from local build...");
-      fileOps.mkdir("./cpp/dawn/include");
-      fileOps.mkdir("./cpp/skia/src/gpu/graphite");
-
-      console.log("      - Copying Graphite source headers...");
-      fileOps.cp(
-        "../../externals/skia/src/gpu/graphite/ContextOptionsPriv.h",
-        "./cpp/skia/src/gpu/graphite/ContextOptionsPriv.h"
-      );
-      fileOps.cp(
-        "../../externals/skia/src/gpu/graphite/ResourceTypes.h",
-        "./cpp/skia/src/gpu/graphite/ResourceTypes.h"
-      );
-      fileOps.cp(
-        "../../externals/skia/src/gpu/graphite/TextureProxyView.h",
-        "./cpp/skia/src/gpu/graphite/TextureProxyView.h"
-      );
-
-      console.log("      - Copying Dawn headers...");
-      fileOps.cp(dawnIncludeSrc, "./cpp/dawn/include");
-      fileOps.cp(
-        "../../externals/skia/third_party/externals/dawn/include",
-        "./cpp/dawn/include"
-      );
-      // Dawn's cmake build (as of the Dawn revision pinned at chrome/m154)
-      // also generates a webgpu_upstream/ copy of webgpu_cpp.h and friends
-      // under its own path. Nothing in this repo or react-native-webgpu
-      // includes from webgpu_upstream/, and leaving it in trips the
-      // duplicate-header check below (same basenames as dawn/ and webgpu/).
-      fileOps.rm("./cpp/dawn/include/webgpu_upstream");
-
-      console.log("      - Fixing WebGPU header references...");
-      // Fix WebGPU header references
-      fileOps.sed(
-        "./cpp/dawn/include/dawn/dawn_proc_table.h",
-        /#include "dawn\/webgpu\.h"/g,
-        '#include "webgpu/webgpu.h"'
-      );
-      fileOps.mkdir("./cpp/dawn/include/webgpu");
-      fileOps.cp(
-        "./cpp/dawn/include/dawn/webgpu.h",
-        "./cpp/dawn/include/webgpu/webgpu.h"
-      );
-      fileOps.cp(
-        "./cpp/dawn/include/dawn/webgpu_cpp.h",
-        "./cpp/dawn/include/webgpu/webgpu_cpp.h"
-      );
-      fileOps.rm("./cpp/dawn/include/dawn/webgpu.h");
-      fileOps.rm("./cpp/dawn/include/dawn/webgpu_cpp.h");
-      fileOps.rm("./cpp/dawn/include/dawn/wire");
-      fileOps.rm("./cpp/dawn/include/webgpu/webgpu_cpp_print.h");
-      console.log("      ✓ Graphite headers copied from local build");
-    } else if (graphiteHeadersPath) {
-      console.log("   📦 Copying Graphite headers from npm package...");
-      fileOps.mkdir("./cpp/dawn/include");
-      fileOps.mkdir("./cpp/skia/src/gpu/graphite");
-
-      // Copy Dawn headers from npm package
-      const dawnSrc = path.join(graphiteHeadersPath, "cpp/dawn/include");
-      const graphiteSrc = path.join(
-        graphiteHeadersPath,
-        "cpp/skia/src/gpu/graphite"
-      );
-
-      // The headers package ships them under libs/skia/cpp/.
-      const legacyRoot = path.join(graphiteHeadersPath, "libs/skia/cpp");
-      if (!fs.existsSync(dawnSrc) && fs.existsSync(legacyRoot)) {
-        fileOps.cp(path.join(legacyRoot, "dawn/include"), "./cpp/dawn/include");
-        if (fs.existsSync(path.join(legacyRoot, "skia/src/gpu/graphite"))) {
-          fileOps.cp(
-            path.join(legacyRoot, "skia/src/gpu/graphite"),
-            "./cpp/skia/src/gpu/graphite"
-          );
-        }
-      }
-
-      if (fs.existsSync(dawnSrc)) {
-        console.log("      - Copying Dawn headers from npm package...");
-        fileOps.cp(dawnSrc, "./cpp/dawn/include");
-      }
-
-      if (fs.existsSync(graphiteSrc)) {
-        console.log(
-          "      - Copying Graphite source headers from npm package..."
-        );
-        fileOps.cp(graphiteSrc, "./cpp/skia/src/gpu/graphite");
-      }
-
-      console.log("      ✓ Graphite headers copied from npm package");
+      dawnInclude = localDawnInclude;
     } else {
-      throw new Error(
-        "No Graphite headers source found: build Skia locally or install react-native-skia-graphite-headers"
-      );
+      let dawnPackage: string;
+      try {
+        dawnPackage = path.dirname(
+          require.resolve("react-native-webgpu-dawn/package.json")
+        );
+      } catch (e) {
+        throw new Error(
+          "No Dawn headers found: install dependencies (react-native-webgpu-dawn) or build Dawn locally with `yarn build-dawn`"
+        );
+      }
+      console.log(`   📦 Copying Dawn headers from ${dawnPackage}...`);
+      dawnInclude = path.join(dawnPackage, "include");
     }
+    fileOps.mkdir("./cpp/dawn/include");
+    fileOps.cp(path.join(dawnInclude, "dawn"), "./cpp/dawn/include/dawn");
+    fileOps.cp(path.join(dawnInclude, "webgpu"), "./cpp/dawn/include/webgpu");
+
+    // Dawn ships the generated webgpu.h and webgpu_cpp.h under dawn/ and
+    // forwarding shims under webgpu/. Xcode's header maps resolve by basename,
+    // so keep one file per name: the generated headers move to webgpu/, which
+    // is where the sources include them from.
+    fileOps.rm("./cpp/dawn/include/dawn/wire");
+    fileOps.sed(
+      "./cpp/dawn/include/dawn/dawn_proc_table.h",
+      /#include "dawn\/webgpu\.h"/g,
+      '#include "webgpu/webgpu.h"'
+    );
+    for (const header of ["webgpu.h", "webgpu_cpp.h"]) {
+      fileOps.rm(`./cpp/dawn/include/webgpu/${header}`);
+      fileOps.cp(
+        `./cpp/dawn/include/dawn/${header}`,
+        `./cpp/dawn/include/webgpu/${header}`
+      );
+      fileOps.rm(`./cpp/dawn/include/dawn/${header}`);
+    }
+    fileOps.rm("./cpp/dawn/include/webgpu/webgpu_cpp_print.h");
+    console.log("      ✓ Dawn headers copied");
   }
 
   console.log("   Copying main include directory...");

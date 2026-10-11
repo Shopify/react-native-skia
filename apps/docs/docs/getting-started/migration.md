@@ -10,7 +10,7 @@ Graphite is Skia's new GPU backend. In React Native Skia it runs on [Dawn](https
 
 :::info[Staying on v2]
 
-v2 is still maintained. It renders with OpenGL ES on Android and has lower version requirements: it runs on Android devices below API level 26 or without Vulkan, and it supports tvOS, Android TV, Mac Catalyst, and Expo Go.
+v2 is still maintained. It renders with OpenGL ES on Android and has lower version requirements: it runs on Android devices below API level 26 or without Vulkan, and it supports Android TV and Expo Go.
 If you need any of these, stay on v2 (`yarn add react-native-skia@2`) and use the [v2 documentation](https://wcandillon.github.io/react-native-skia/v2/).
 
 :::
@@ -88,10 +88,10 @@ buildscript {
 }
 ```
 
-### iOS and macOS
+### iOS, tvOS, and macOS
 
 The minimum deployment target is iOS 15.1.
-Run `pod install` again after upgrading: the Skia binaries come from new npm packages (`react-native-skia-graphite-apple-ios` and `react-native-skia-graphite-apple-macos`), which also ship Dawn.
+Run `pod install` again after upgrading: the Skia binaries come from new npm packages (`react-native-skia-graphite-apple-ios`, `react-native-skia-graphite-apple-tvos`, `react-native-skia-graphite-apple-macos`), alongside `react-native-webgpu-dawn`.
 
 ### Expo
 
@@ -115,9 +115,9 @@ Use [expo-build-properties](https://docs.expo.dev/versions/latest/sdk/build-prop
 }
 ```
 
-### TV and Mac Catalyst
+### Android TV
 
-tvOS, Android TV, and Mac Catalyst are not available with Graphite. These platforms remain supported on v2.
+Android TV is not available with Graphite. It remains supported on v2.
 
 ### React Native WebGPU
 
@@ -151,6 +151,9 @@ The following APIs were removed in favor of it:
 | `Skia.Image.MakeImageFromNativeTextureUnstable()` | `Skia.Image.MakeImageFromGPUTexture(texture)`, which takes a WebGPU texture. See [WebGPU](/docs/webgpu). |
 | `image.getNativeTextureUnstable()` and `surface.getNativeTextureUnstable()` | `Skia.Image.MakeGPUTextureFromImage()` and `Skia.Surface.MakeFromGPUTexture()`: textures are shared as WebGPU textures. |
 | `Skia.Image.MakeImageFromNativeBuffer(pointer)` on native platforms | React Native WebGPU's `copyExternalImageToTexture()` renders the frame into a texture, which `Skia.Image.MakeImageFromGPUTexture()` wraps. See [native buffers](/docs/webgpu#native-buffers). The method remains on Web, where it takes a `CanvasImageSource`. |
+| `ref.current.makeImageSnapshotAsync()` on a `Canvas` | `makeImageSnapshot()`: with Graphite the snapshot is taken on the calling thread and returns a GPU image. To encode it or read its pixels without blocking, read it back with `image.makeRasterImage()`. See [snapshots](/docs/canvas/overview#getting-a-canvas-snapshot). |
+
+When an image cannot be decoded, `useImage()` now calls `onError` with the message `Could not decode the image` (it was `Could not load data`).
 
 ## What is new
 
@@ -193,6 +196,9 @@ Run `pod install` again so CocoaPods picks up the new binary packages.
 
 **The app does not run in Expo Go.**
 Expo Go ships the native code of v2. Use a development build.
+
+**The `Atlas` component is slower than in v2.**
+Graphite draws an atlas one sprite at a time, where Ganesh drew it in a single GPU operation. See the [performance notes](/docs/shapes/atlas#performance) of the Atlas component.
 
 **Screenshot tests report differences.**
 Graphite is a different renderer than Ganesh, and its output can differ slightly. Review the differences and update your reference images.

@@ -25,7 +25,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation"
 
 #include "include/core/SkCanvas.h"
-#include "include/core/SkColorSpace.h"
+
 #include "include/core/SkImage.h"
 #include "include/core/SkRect.h"
 
@@ -139,14 +139,6 @@ public:
     return _producer->applyUpdates(runtime, recorderId, values);
   }
 
-  /**
-   Releases the content the view draws without scheduling a frame: the host
-   view is torn down. On Android the native view outlives the Java view
-   until it is finalized, so the resources go away here rather than with the
-   garbage collector.
-   */
-  void releaseContent() { _producer->clear(); }
-
   /** Schedules redraw() on the main thread, once. */
   void requestRedraw() {
     if (_redrawRequested.exchange(true)) {
@@ -209,12 +201,13 @@ public:
   }
 
   /**
-   Renders the view into an offscreen surface: declarative content is
-   replayed on the calling thread with the latest values, so the snapshot
-   does not wait for a frame; otherwise the current frame is replayed. A
-   snapshot is in sRGB whichever color space the view renders in: a frame
-   recorded in Display P3 is replayed into a surface in that color space and
-   the image is converted.
+   Renders the view into an offscreen surface and returns a GPU image of it,
+   usable by any canvas: declarative content is replayed on the calling
+   thread with the latest values, so the snapshot does not wait for a frame;
+   otherwise the current frame is replayed. A snapshot is in sRGB whichever
+   color space the view renders in: a frame recorded in Display P3 is
+   replayed into a surface in that color space and converted on the GPU (see
+   RNSkOffscreenSurface::makeSnapshot).
    */
   sk_sp<SkImage> makeImageSnapshot(SkRect *bounds) {
     if (_producer->hasContent()) {
@@ -233,12 +226,7 @@ public:
     if (frame != nullptr) {
       renderFrame(surface, frame);
     }
-    auto image = surface.makeSnapshot(bounds);
-    if (image != nullptr && useP3ColorSpace) {
-      // A raster image: converted on the CPU, no recorder involved.
-      image = image->makeColorSpace(nullptr, SkColorSpace::MakeSRGB(), {});
-    }
-    return image;
+    return surface.makeSnapshot(bounds);
   }
 
   /** Width of the surface, in pixels. */
