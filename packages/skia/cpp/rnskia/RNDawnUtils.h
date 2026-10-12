@@ -4,7 +4,6 @@
 #include <TargetConditionals.h>
 #endif
 
-#include <algorithm>
 #include <optional>
 
 #include "webgpu/webgpu_cpp.h"
