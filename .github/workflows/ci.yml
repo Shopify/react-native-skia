@@ -562,11 +562,15 @@ jobs:
           adb reverse tcp:8081 tcp:$METRO_PORT
           adb reverse tcp:$E2E_PORT tcp:$E2E_PORT
 
-      # CI=true is inlined into the bundle and opens the app on the Tests
-      # screen, which connects to the test server.
+      # The phone may carry the app from another machine, signed with that
+      # machine's debug key, and Android refuses to update across keys
+      # (INSTALL_FAILED_UPDATE_INCOMPATIBLE), so remove it first. CI=true is
+      # inlined into the bundle and opens the app on the Tests screen, which
+      # connects to the test server.
       - name: Install and launch app on the phone
         run: |
-          adb install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk
+          adb uninstall $APP_ID > /dev/null 2>&1 || true
+          adb install apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           adb shell am start -n $APP_ID/.MainActivity
 
       # The whole suite, Paragraphs included: on a phone the paragraph
