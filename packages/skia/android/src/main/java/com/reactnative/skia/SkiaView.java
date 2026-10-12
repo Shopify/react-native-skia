@@ -63,6 +63,14 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
 
     public SkiaView(Context context) {
         super(context);
+        // ReactViewGroup disables clipChildren (RN overflow is handled with canvas
+        // clipping instead). Android copies the parent's clipChildren into each
+        // child's RenderNode.clipToBounds, and HWUI treats a damaged node without
+        // it as unbounded damage (RenderNode::damageSelf). The TextureView child
+        // invalidates on every frame, so without this every non-opaque canvas
+        // frame repaints the whole window. Our only child exactly fills this
+        // view, so clipping it changes nothing visually.
+        setClipChildren(true);
         RNSkiaModule skiaModule = ((ReactContext) context).getNativeModule(RNSkiaModule.class);
         mHybridData = initHybrid(skiaModule.getSkiaManager());
     }
@@ -75,15 +83,6 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
             return false;
         }
         return super.dispatchTouchEvent(ev);
-    }
-
-    // ReactViewGroup.initView() turns child clipping off. HWUI then treats a change to the
-    // backing view as unbounded damage, so each frame repaints the whole window instead of
-    // this view's box. The backing view is always laid out at (0, 0, width, height), so
-    // clipping it changes nothing visible.
-    @Override
-    public void setClipChildren(boolean clipChildren) {
-        super.setClipChildren(true);
     }
 
     public void setOpaque(boolean value) {
