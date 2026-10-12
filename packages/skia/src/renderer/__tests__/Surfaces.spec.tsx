@@ -25,6 +25,21 @@ describe("Surface", () => {
     });
     expect(Array.from(pixels!)).toEqual([0, 255, 255, 255]);
   });
+  it("Make() accepts a color space option", () => {
+    const { Skia } = setupSkia();
+    for (const colorSpace of ["srgb", "display-p3"] as const) {
+      using surface = Skia.Surface.Make(2, 2, { colorSpace })!;
+      surface.getCanvas().drawColor(Skia.Color("cyan"));
+      surface.flush();
+      const pixels = surface.makeImageSnapshot().readPixels(0, 0, {
+        width: 1,
+        height: 1,
+        colorType: ColorType.RGBA_8888,
+        alphaType: AlphaType.Unpremul,
+      });
+      expect(Array.from(pixels!)).toEqual([0, 255, 255, 255]);
+    }
+  });
   it("MakeNonImageTexture on a CPU surface shouldn't leak", () => {
     const { Skia } = setupSkia();
     // When leaking, the WASM memory limit will be reached quite quickly
