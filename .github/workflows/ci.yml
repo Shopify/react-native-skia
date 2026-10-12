@@ -201,7 +201,11 @@ jobs:
 
       # Compiler cache for the C++ builds (this library, React Native and the
       # other native modules). CMake reads the launcher from the environment,
-      # which Gradle passes on to it, so build.gradle needs no change. Most
+      # which Gradle passes on to it, so build.gradle needs no change; turbo
+      # runs tasks in strict env mode, so turbo.json lists the launcher, the
+      # CCACHE_* settings and the architecture property, or none of them would
+      # reach the build (they did not until then: every ABI was built and the
+      # compiler check fell back to mtime, which the NDK reinstall defeats). Most
       # pull requests touch little C++, and a hit turns the compile into a
       # copy. The key is unique per run: the cache is a rolling one, always
       # saved, and restored from the most recent run on this ref or on the
