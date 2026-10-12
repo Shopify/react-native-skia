@@ -39,8 +39,13 @@
     },
     "build:ios": {
       "cache": false,
-      "dependsOn": ["pod:install:ios"],
-      "outputs": ["apps/*/ios/build", "apps/*/ios/Pods"],
+      "dependsOn": [
+        "pod:install:ios"
+      ],
+      "outputs": [
+        "apps/*/ios/build",
+        "apps/*/ios/Pods"
+      ],
       "inputs": [
         "**/package.json",
         "**/*.podspec",
@@ -54,8 +59,13 @@
     },
     "build:macos": {
       "cache": false,
-      "dependsOn": ["pod:install:macos"],
-      "outputs": ["apps/*/macos/build", "apps/*/macos/Pods"],
+      "dependsOn": [
+        "pod:install:macos"
+      ],
+      "outputs": [
+        "apps/*/macos/build",
+        "apps/*/macos/Pods"
+      ],
       "inputs": [
         "**/package.json",
         "**/*.podspec",
@@ -69,13 +79,23 @@
     },
     "pod:install:ios": {
       "cache": false,
-      "inputs": ["**/ios/Podfile", "**/ios/Podfile.lock"],
-      "outputs": ["**/ios/Pods/**"]
+      "inputs": [
+        "**/ios/Podfile",
+        "**/ios/Podfile.lock"
+      ],
+      "outputs": [
+        "**/ios/Pods/**"
+      ]
     },
     "pod:install:macos": {
       "cache": false,
-      "inputs": ["**/macos/Podfile", "**/macos/Podfile.lock"],
-      "outputs": ["**/macos/Pods/**"]
+      "inputs": [
+        "**/macos/Podfile",
+        "**/macos/Podfile.lock"
+      ],
+      "outputs": [
+        "**/macos/Pods/**"
+      ]
     },
     "lint": {
       "cache": false
@@ -85,11 +105,15 @@
     },
     "test": {
       "cache": false,
-      "dependsOn": ["build"]
+      "dependsOn": [
+        "build"
+      ]
     },
     "build": {
       "cache": false,
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     }
   }
 }
