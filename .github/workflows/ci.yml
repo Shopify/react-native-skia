@@ -300,10 +300,11 @@ jobs:
       # Three repositories share this self-hosted machine. Each job runs on its
       # own Metro port, test server port and simulator so they can run
       # concurrently:
-      #   Metro  test server  simulator
+      #   Metro  test server  simulator / device
       #   8081   4242         (React Native defaults, used by redraw)
       #   8082   4243         skia-ci     (this job)
       #   8083   4244         webgpu-ci   (react-native-webgpu)
+      #   8084   4245         Pixel 4     (build-test-android-device)
       # RCT_METRO_PORT is compiled into the app by xcodebuild; E2E_PORT is
       # inlined into the JS bundle (useClient) and read by the jest
       # globalSetup, so the app and the test server agree on the port.
@@ -412,6 +413,174 @@ jobs:
           if [ -n "$IOS_SIMULATOR_UDID" ]; then
             xcrun simctl shutdown "$IOS_SIMULATOR_UDID" || true
           fi
+
+  # Runs the e2e suite on the Android phone plugged into the self-hosted Mac
+  # (a Pixel 4), on its real GPU driver. The emulator job renders through
+  # SwiftShader, so this is the only run that can catch driver-specific bugs,
+  # like the Mali shader loop hang. The phone must be authorized for adb under
+  # the runner's user account, set to stay awake while charging, and have no
+  # secure lock screen; the job wakes the screen and dismisses the swipe
+  # keyguard itself. Not on push: a merge should not occupy the phone.
+  build-test-android-device:
+    if: github.event_name != 'push'
+    runs-on: [self-hosted, macOS]
+    timeout-minutes: 60
+    # There is one phone, so runs from different pull requests queue behind
+    # each other instead of sharing it.
+    concurrency:
+      group: android-device
+      cancel-in-progress: false
+    env:
+      # Fourth port pair on the shared machine (see the table in
+      # build-test-ios). On the phone the app still talks to localhost:8081
+      # for Metro and to localhost:$E2E_PORT for the test server; adb reverse
+      # maps both to the host. E2E_PORT is inlined into the JS bundle, so it
+      # is set for the build and for Metro alike.
+      METRO_PORT: 8084
+      E2E_PORT: 4245
+      APP_ID: com.microsoft.reacttestapp
+      # Compiler cache outside the workspace, which the checkout cleans. Used
+      # only when ccache is installed on the machine (brew install ccache).
+      CCACHE_DIR: ${{ github.workspace }}/../ccache/skia-ci-android
+      CCACHE_MAXSIZE: 2G
+      CCACHE_COMPILERCHECK: content
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
+        with:
+          submodules: recursive
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install JDK
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # Android Studio's SDK when the machine has one, otherwise the SDK that
+      # setup-android installs under ~/.android/sdk. Both live outside the
+      # workspace and persist between runs. Gradle installs the NDK it needs
+      # into the SDK; setup-android accepts the licenses that requires.
+      - name: Locate Android SDK
+        run: |
+          sdk="$HOME/Library/Android/sdk"
+          [ -d "$sdk" ] || sdk="$HOME/.android/sdk"
+          echo "ANDROID_HOME=$sdk" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$sdk" >> "$GITHUB_ENV"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
+
+      - name: Configure Gradle and adb
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > apps/example/android/local.properties
+          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+
+      # Without ccache every run is a full C++ compile, because the checkout
+      # removes the previous build directories.
+      - name: Use ccache when installed
+        run: |
+          ccache="$(command -v ccache || true)"
+          if [ -z "$ccache" ] && [ -x /opt/homebrew/bin/ccache ]; then
+            ccache=/opt/homebrew/bin/ccache
+          fi
+          if [ -n "$ccache" ]; then
+            echo "CMAKE_C_COMPILER_LAUNCHER=$ccache" >> "$GITHUB_ENV"
+            echo "CMAKE_CXX_COMPILER_LAUNCHER=$ccache" >> "$GITHUB_ENV"
+            "$ccache" --zero-stats
+          else
+            echo "::notice::ccache is not installed on the runner (brew install ccache); building without it"
+          fi
+
+      # Before the build, so a missing phone fails in seconds.
+      - name: Check the phone
+        run: |
+          adb start-server
+          serial="$(adb devices | awk 'NR > 1 && $2 == "device" { print $1; exit }')"
+          if [ -z "$serial" ]; then
+            adb devices -l
+            echo "::error::no authorized Android device is connected to the runner"
+            exit 1
+          fi
+          echo "ANDROID_SERIAL=$serial" >> "$GITHUB_ENV"
+          adb -s "$serial" shell 'getprop ro.product.model; getprop ro.build.version.release; wm size; wm density'
+
+      - name: Build example for Android
+        env:
+          ORG_GRADLE_PROJECT_reactNativeArchitectures: arm64-v8a
+        run: yarn turbo run build:android --concurrency 1
+
+      - name: Show ccache statistics
+        if: env.CMAKE_C_COMPILER_LAUNCHER != ''
+        run: |
+          "$CMAKE_C_COMPILER_LAUNCHER" --show-stats
+
+      # Clear anything a previous or cancelled run left on this job's ports.
+      - name: Ensure Metro and test server ports are free
+        run: |
+          lsof -ti :$METRO_PORT | xargs -r kill -9 || true
+          lsof -ti :$E2E_PORT | xargs -r kill -9 || true
+
+      # --reset-cache for the same reason as in build-test-ios.
+      - name: Start Package Manager
+        working-directory: apps/example
+        run: E2E=true yarn start --port $METRO_PORT --reset-cache &
+
+      - name: Prepare the phone
+        run: |
+          adb shell svc power stayon true || true
+          adb shell input keyevent KEYCODE_WAKEUP || true
+          adb shell wm dismiss-keyguard || true
+          adb reverse tcp:8081 tcp:$METRO_PORT
+          adb reverse tcp:$E2E_PORT tcp:$E2E_PORT
+
+      # CI=true is inlined into the bundle and opens the app on the Tests
+      # screen, which connects to the test server.
+      - name: Install and launch app on the phone
+        run: |
+          adb install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk
+          adb shell am start -n $APP_ID/.MainActivity
+
+      # The whole suite, Paragraphs included: on a phone the paragraph
+      # references match (they were captured on one), unlike on the emulator
+      # and the simulator.
+      - name: Run e2e tests
+        working-directory: packages/skia
+        run: CI=true yarn e2e
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v6.0.0
+        if: failure()
+        with:
+          path: packages/skia/src/__tests__/snapshots/
+          name: android-device-snapshots
+
+      # Snapshot.spec writes a missing *-android-ci.png reference instead of
+      # failing, and the next checkout removes it again. Keep the files as an
+      # artifact so they can be committed once they look right.
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v6.0.0
+        if: always()
+        with:
+          path: packages/skia/src/__tests__/snapshots/screens/*-android-ci.png
+          name: android-device-references
+          if-no-files-found: ignore
+
+      # Stop Metro, the app and the Gradle daemon so they don't hold the
+      # machine while it runs the other repositories' jobs.
+      - name: Clean up
+        if: always()
+        run: |
+          lsof -ti :$METRO_PORT | xargs -r kill -9 || true
+          lsof -ti :$E2E_PORT | xargs -r kill -9 || true
+          adb shell am force-stop $APP_ID || true
+          adb reverse --remove-all || true
+          (cd apps/example/android && ./gradlew --stop) || true
 
   build-test-macos:
     runs-on: [self-hosted, macOS]
