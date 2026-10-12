@@ -224,16 +224,15 @@ bool RNSkWindowSurface::presentRecordings(
   if (!surface) {
     return false;
   }
-  bool success =
-      DawnContext::getInstance().insertRecordings(recordings, surface.get());
+  // A recording Graphite rejects is logged there and dropped: it would be
+  // rejected again on every frame, and the frames behind it would never come.
+  DawnContext::getInstance().insertRecordings(recordings, surface.get());
 #ifdef __APPLE__
   dawn::native::metal::WaitForCommandsToBeScheduled(_device.Get());
 #endif
   _surface.Present();
-  if (success) {
-    didPresent();
-  }
-  return success;
+  didPresent();
+  return true;
 }
 
 bool RNSkWindowSurface::presentImage(const sk_sp<SkImage> &image) {
