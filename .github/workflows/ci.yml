@@ -472,8 +472,9 @@ jobs:
       # Fourth port pair on the shared machine (see the table in
       # build-test-ios). On the phone the app still talks to localhost:8081
       # for Metro and to localhost:$E2E_PORT for the test server; adb reverse
-      # maps both to the host. E2E_PORT is inlined into the JS bundle, so it
-      # is set for the build and for Metro alike.
+      # maps Metro's port to the host below and the jest globalSetup maps the
+      # test server's. E2E_PORT is inlined into the JS bundle, so it is set
+      # for the build and for Metro alike.
       METRO_PORT: 8084
       E2E_PORT: 4245
       APP_ID: com.microsoft.reacttestapp
@@ -598,7 +599,6 @@ jobs:
           adb shell input keyevent KEYCODE_WAKEUP || true
           adb shell wm dismiss-keyguard || true
           adb reverse tcp:8081 tcp:$METRO_PORT
-          adb reverse tcp:$E2E_PORT tcp:$E2E_PORT
 
       # The phone may carry the app from another machine, signed with that
       # machine's debug key, and Android refuses to update across keys
@@ -611,28 +611,21 @@ jobs:
           adb install apps/example/android/app/build/outputs/apk/debug/app-debug.apk
           adb shell am start -n $APP_ID/.MainActivity
 
-      # The whole suite, Paragraphs included: on a phone the paragraph
-      # references match (they were captured on one), unlike on the emulator
-      # and the simulator.
+      # The whole suite but Snapshot.spec. Paragraphs run here, unlike on the
+      # emulator and the simulator: the phone matches their references. The
+      # view snapshots do not: their *-android-ci.png references are the
+      # emulator's captures, and the phone's density and font rendering put
+      # every screen 13k to 83k pixels away from them. They stay covered by
+      # the emulator job until the phone gets references of its own.
       - name: Run e2e tests
         working-directory: packages/skia
-        run: CI=true yarn e2e
+        run: CI=true yarn e2e --testPathIgnorePatterns Snapshot
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v6.0.0
         if: failure()
         with:
           path: packages/skia/src/__tests__/snapshots/
           name: android-device-snapshots
-
-      # Snapshot.spec writes a missing *-android-ci.png reference instead of
-      # failing, and the next checkout removes it again. Keep the files as an
-      # artifact so they can be committed once they look right.
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v6.0.0
-        if: always()
-        with:
-          path: packages/skia/src/__tests__/snapshots/screens/*-android-ci.png
-          name: android-device-references
-          if-no-files-found: ignore
 
       # Stop Metro, the app and the Gradle daemon so they don't hold the
       # machine while it runs the other repositories' jobs.
