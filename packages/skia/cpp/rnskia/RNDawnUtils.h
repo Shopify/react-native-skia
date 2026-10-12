@@ -302,7 +302,19 @@ createDawnBackendContext(dawn::native::Instance *instance) {
 
   // Primary device features — request everything Skia/Graphite can use
   std::vector<wgpu::FeatureName> features = {
+#if !defined(__ANDROID__)
+      // Not on Android: Dawn creates its Vulkan swapchain images without
+      // VK_IMAGE_CREATE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_BIT_EXT, so every
+      // MSAA pass Graphite draws onto the window with this feature violates
+      // VUID-VkFramebufferCreateInfo-samples-06881 (confirmed with the
+      // validation layers on a Pixel 8). Mali tolerates it; Adreno crashes in
+      // vkCreateFramebuffer (#4158). Without the feature Graphite renders
+      // through a transient MSAA attachment and resolves, the same path as on
+      // GPUs without the extension. Re-enable once Dawn creates swapchains
+      // with the flag or reports which textures cannot take an implicit
+      // sample count: https://issues.chromium.org/issues/571594984
       wgpu::FeatureName::MSAARenderToSingleSampled,
+#endif
       wgpu::FeatureName::TransientAttachments,
       wgpu::FeatureName::Unorm16TextureFormats,
       wgpu::FeatureName::DualSourceBlending,
@@ -349,19 +361,6 @@ createDawnBackendContext(dawn::native::Instance *instance) {
       wgpu::FeatureName::OpaqueYCbCrAndroidForExternalTexture,
 #endif
   };
-
-  // Adreno's Vulkan driver advertises
-  // VK_EXT_multisampled_render_to_single_sampled but crashes in
-  // vkCreateFramebuffer when a render pass uses it (seen on an Adreno 840).
-  // Without the feature, Graphite keeps MSAA with a separate multisampled
-  // attachment that it resolves.
-  constexpr uint32_t kQualcommVendorId = 0x5143;
-  if (adapterInfo.backendType == wgpu::BackendType::Vulkan &&
-      adapterInfo.vendorID == kQualcommVendorId) {
-    features.erase(std::remove(features.begin(), features.end(),
-                               wgpu::FeatureName::MSAARenderToSingleSampled),
-                   features.end());
-  }
 
   wgpu::Device device = requestDevice(matchedAdapter, features, true);
   SkASSERT(device);
