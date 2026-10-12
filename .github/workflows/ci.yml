@@ -499,14 +499,20 @@ jobs:
             echo "::notice::ccache is not installed on the runner (brew install ccache); building without it"
           fi
 
-      # Before the build, so a missing phone fails in seconds.
+      # Before the build, so a missing phone fails in seconds. The phone must
+      # have accepted the adb key of the account the runner runs as; a key
+      # accepted from another account on the same machine does not count.
       - name: Check the phone
         run: |
           adb start-server
+          adb devices -l
           serial="$(adb devices | awk 'NR > 1 && $2 == "device" { print $1; exit }')"
           if [ -z "$serial" ]; then
-            adb devices -l
-            echo "::error::no authorized Android device is connected to the runner"
+            if adb devices | awk 'NR > 1' | grep -q unauthorized; then
+              echo "::error::the phone is attached but has not authorized this machine: accept the USB debugging prompt on it for the runner's account ($USER), with 'Always allow from this computer'"
+            else
+              echo "::error::no Android device is connected to the runner"
+            fi
             exit 1
           fi
           echo "ANDROID_SERIAL=$serial" >> "$GITHUB_ENV"
