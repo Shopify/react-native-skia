@@ -145,6 +145,7 @@
     "react-native-skia-graphite-android": "154.3.0",
     "react-native-skia-graphite-apple-ios": "154.3.0",
     "react-native-skia-graphite-apple-macos": "154.3.0",
+    "react-native-skia-graphite-apple-tvos": "154.3.0",
     "react-native-webgpu-dawn": "154.3.0",
     "react-reconciler": "0.31.0"
   },
