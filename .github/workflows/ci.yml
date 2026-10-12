@@ -1,8 +1,10 @@
 name: CI
 # Pushes to main/next only run the cheap ubuntu jobs (lint, test, test-web,
-# build-library). The native builds and the emulator/simulator runs happen on
-# pull requests and in the merge queue, so a merge does not pay for the full
-# suite twice.
+# build-library) and the Android build without its emulator run. The native
+# builds and the emulator/simulator runs happen on pull requests and in the
+# merge queue, so a merge does not pay for the full suite twice. The Android
+# build runs on push because a pull request can only restore caches saved by
+# its own earlier runs or by its base branch (see build-test-android).
 on:
   push:
     branches:
@@ -118,8 +120,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # On pull requests and in the merge queue this builds the example app and
+  # runs the e2e suite on the emulator. On push it stops after the build: its
+  # only purpose there is to save the Gradle cache and the ccache on the base
+  # branch, where every pull request can restore them. Without that producer
+  # each pull request started cold (0 ccache hits, 28 minutes of C++) and saved
+  # its own 1.8 GB Gradle cache, which kept the repository above its 10 GB
+  # cache limit and evicted every entry within hours.
   build-test-android:
-    if: ${{ github.event_name != 'push' }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -196,9 +204,10 @@ jobs:
       # which Gradle passes on to it, so build.gradle needs no change. Most
       # pull requests touch little C++, and a hit turns the compile into a
       # copy. The key is unique per run: the cache is a rolling one, always
-      # saved, and restored from the most recent run. The compiler check is on
-      # the binary's content rather than its mtime because the NDK is
-      # reinstalled on every run.
+      # saved, and restored from the most recent run on this ref or on the
+      # base branch (the push runs keep the base branch's entry fresh). The
+      # compiler check is on the binary's content rather than its mtime
+      # because the NDK is reinstalled on every run.
       - name: Install ccache
         run: sudo apt-get install -y ccache
 
@@ -231,29 +240,36 @@ jobs:
           path: ~/.cache/ccache
           key: ${{ runner.os }}-ccache-android-${{ github.sha }}
 
+      # Everything below is the emulator run, skipped on push (see the job
+      # comment).
       - name: Unit test the Android library
+        if: github.event_name != 'push'
         working-directory: apps/example/android
         env:
           ORG_GRADLE_PROJECT_reactNativeArchitectures: x86_64
         run: ./gradlew :react-native-skia:testDebugUnitTest
 
       - name: Upload Android APK artifact
+        if: github.event_name != 'push'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v6.0.0
         with:
           name: android-example-apk
           path: apps/example/android/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Enable KVM group perms
+        if: github.event_name != 'push'
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
       - name: Start Package Manager
+        if: github.event_name != 'push'
         working-directory: apps/example/
         run: E2E=true yarn start &
 
       - name: Run Android Emulator Tests
+        if: github.event_name != 'push'
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with:
           api-level: 30
@@ -270,25 +286,21 @@ jobs:
             adb install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk
             adb shell monkey -p com.microsoft.reacttestapp 1
 
-            # Run tests
-            # We run the Path render tests plus the WebGPU specs.
-            # ArrayBuffer, ComputeShader, ErrorScope, ImageBitmapBounds and
-            # DawnToggles are pure surface.eval round-trips that assert on
-            # returned values. The external-texture specs (ExternalTexture,
-            # ImportExternalTexture, SharedTextureMemory) additionally exercise
-            # NativeBuffer import and GPU read-back; they self-validate via
-            # copyTextureToBuffer (not Skia image readPixels) and skip
-            # themselves where NativeBuffer/createImageBitmap are unavailable.
-            cd packages/skia && CI=true yarn test -i "e2e/(Path|ArrayBuffer|ComputeShader|ErrorScope|ImageBitmapBounds|DawnToggles|ExternalTexture|ImportExternalTexture|SharedTextureMemory)" --testPathIgnorePatterns Paragraphs
+            # Run the whole e2e suite, as the iOS job does. The emulator's
+            # swangle GPU runs Graphite through Dawn on SwiftShader's Vulkan
+            # device, and the shared snapshot references already match
+            # Graphite output (the iOS job compares against the same files).
+            # Paragraphs stays excluded, as it was before the Graphite switch.
+            cd packages/skia && CI=true yarn e2e --testPathIgnorePatterns Paragraphs
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v6.0.0
-        if: failure()
+        if: failure() && github.event_name != 'push'
         with:
           path: packages/skia/src/__tests__/snapshots/
           name: tests-snapshots-screenshots
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v6.0.0
-        if: failure()
+        if: failure() && github.event_name != 'push'
         with:
           path: apps/docs/static/
           name: tests-docs-screenshots
