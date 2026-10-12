@@ -1,6 +1,7 @@
 import React from "react";
 
-import { checkImage, docPath } from "../../../__tests__/setup";
+import { checkImage, docPath, itRunsE2eOnly } from "../../../__tests__/setup";
+import { AlphaType, ColorType } from "../../../skia/types";
 import { Circle } from "../../components";
 import { surface, importSkia } from "../setup";
 
@@ -107,4 +108,22 @@ describe("Offscreen Drawings", () => {
     expect(image).not.toBeNull();
     checkImage(image!, docPath("offscreen/circle.png"));
   });
+});
+
+describe("isOnMainThread", () => {
+  itRunsE2eOnly(
+    "is true on the UI thread and false on the JS thread",
+    async () => {
+      const image = await surface.screen("IsOnMainThread");
+      const pixel = image.readPixels(10, 10, {
+        width: 1,
+        height: 1,
+        colorType: ColorType.RGBA_8888,
+        alphaType: AlphaType.Unpremul,
+      });
+      expect(pixel === null ? null : Array.from(pixel)).toEqual([
+        0, 255, 255, 255,
+      ]);
+    }
+  );
 });

@@ -13,6 +13,7 @@ import { Skia, useImage } from "../../skia";
 import { Platform } from "../../Platform";
 
 import Rea from "./ReanimatedProxy";
+import { Worklets } from "./WorkletsProxy";
 
 const createTextureFromImage = (
   texture: SharedValue<SkImage | null>,
@@ -71,7 +72,7 @@ export const usePictureAsTexture = (
   const texture = Rea.useSharedValue<SkImage | null>(null);
   useEffect(() => {
     if (picture !== null) {
-      Rea.runOnUI(createTexture)(texture, picture, size);
+      Worklets.scheduleOnUI(createTexture, texture, picture, size);
     }
   }, [picture, size, texture]);
   return texture;
@@ -82,7 +83,7 @@ export const useImageAsTexture = (source: DataSourceParam) => {
   const texture = Rea.useSharedValue<SkImage | null>(null);
   useEffect(() => {
     if (image !== null) {
-      Rea.runOnUI(createTextureFromImage)(texture, image);
+      Worklets.scheduleOnUI(createTextureFromImage, texture, image);
     }
   }, [image, texture]);
   return texture;

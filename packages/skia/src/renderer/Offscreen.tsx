@@ -5,10 +5,14 @@ import { Skia } from "../skia";
 import { Platform } from "../Platform";
 import { SkiaSGRoot } from "../sksg/Reconciler";
 
+// react-native-worklets' RuntimeKind.ReactNative; every worklet runtime has another kind.
+const REACT_NATIVE_RUNTIME_KIND = 1;
+
 export const isOnMainThread = () => {
   "worklet";
+  const runtimeKind = globalThis.__RUNTIME_KIND;
   return (
-    (typeof _WORKLET !== "undefined" && _WORKLET === true) ||
+    (runtimeKind !== undefined && runtimeKind !== REACT_NATIVE_RUNTIME_KIND) ||
     Platform.OS === "web"
   );
 };
