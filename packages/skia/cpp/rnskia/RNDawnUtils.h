@@ -4,10 +4,13 @@
 #include <TargetConditionals.h>
 #endif
 
+#include <optional>
+
 #include "webgpu/webgpu_cpp.h"
 
 #include "dawn/native/DawnNative.h"
 
+#include "include/core/SkColorSpace.h"
 #include "include/core/SkColorType.h"
 #include "include/gpu/graphite/dawn/DawnBackendContext.h"
 #include "utils/RNSkLog.h"
@@ -41,6 +44,64 @@ static const SkColorType HighBitDepthColorType = kRGBA_1010102_SkColorType;
 static const wgpu::TextureFormat HighBitDepthTextureFormat =
     wgpu::TextureFormat::RGB10A2Unorm;
 #endif
+
+// The color space a view renders in: Display P3 (with the sRGB transfer
+// function) where the platform prefers it (a wide gamut display on Apple
+// platforms, see RNSkPlatformContext::prefersP3ColorSpace), sRGB otherwise.
+// Colors are managed either way: content looks the same in both, Display P3
+// only adds the colors sRGB cannot represent.
+inline sk_sp<SkColorSpace> viewColorSpace(bool useP3ColorSpace) {
+  return useP3ColorSpace ? SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
+                                                 SkNamedGamut::kDisplayP3)
+                         : SkColorSpace::MakeSRGB();
+}
+
+// Usage requested for a window texture when the surface supports it (see
+// RNSkWindowSurface::supportedSurfaceUsage), and assumed for a Graphite
+// recording made before its window exists: TextureBinding lets a render pass
+// reload the existing contents, CopySrc serves copy tasks.
+static const wgpu::TextureUsage DefaultTargetUsage =
+    wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding |
+    wgpu::TextureUsage::CopySrc;
+
+// The texture format backing a surface of the given color type; the
+// preferred format for color types no surface uses.
+inline wgpu::TextureFormat textureFormatForColorType(SkColorType colorType) {
+  switch (colorType) {
+  case kBGRA_8888_SkColorType:
+    return wgpu::TextureFormat::BGRA8Unorm;
+  case kRGBA_8888_SkColorType:
+    return wgpu::TextureFormat::RGBA8Unorm;
+  case kRGBA_F16_SkColorType:
+    return wgpu::TextureFormat::RGBA16Float;
+  case kRGBA_1010102_SkColorType:
+    return wgpu::TextureFormat::RGB10A2Unorm;
+  default:
+    return PreferredTextureFormat;
+  }
+}
+
+// The color type Skia samples a texture of the given format with, or none
+// when Skia cannot sample the format: multi-planar YUV (the biplanar
+// 4:2:0 formats of an NV12 IOSurface, OpaqueYCbCrAndroid), depth/stencil and
+// compressed formats.
+inline std::optional<SkColorType>
+colorTypeForTextureFormat(wgpu::TextureFormat format) {
+  switch (format) {
+  case wgpu::TextureFormat::RGBA8Unorm:
+    return kRGBA_8888_SkColorType;
+  case wgpu::TextureFormat::BGRA8Unorm:
+    return kBGRA_8888_SkColorType;
+  case wgpu::TextureFormat::RGBA16Float:
+    return kRGBA_F16_SkColorType;
+  case wgpu::TextureFormat::RGB10A2Unorm:
+    return kRGBA_1010102_SkColorType;
+  case wgpu::TextureFormat::R8Unorm:
+    return kGray_8_SkColorType;
+  default:
+    return std::nullopt;
+  }
+}
 
 // Find the best matching GPU adapter for the current platform.
 // Sorts by adapter type (DiscreteGPU > IntegratedGPU > CPU) and selects the
@@ -98,12 +159,28 @@ requestDevice(dawn::native::Adapter &nativeAdapter,
               bool fatalOnDeviceLost = true) {
   wgpu::Adapter adapter = nativeAdapter.Get();
 
-  // Filter to only features the adapter supports
+  // Filter to only features the adapter supports.
+  // Dawn's Vulkan backend accepts at most one shared-fence feature per device
+  // (SyncFD, VkSemaphoreOpaqueFD or VkSemaphoreZirconHandle) and fails device
+  // creation otherwise. Some drivers (Samsung Xclipse, the Android emulator)
+  // advertise several, so keep only the first supported one in request order.
   std::vector<wgpu::FeatureName> features;
+  bool hasVulkanSharedFence = false;
   for (auto feature : requestedFeatures) {
-    if (adapter.HasFeature(feature)) {
-      features.push_back(feature);
+    if (!adapter.HasFeature(feature)) {
+      continue;
     }
+    const bool isVulkanSharedFence =
+        feature == wgpu::FeatureName::SharedFenceSyncFD ||
+        feature == wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD ||
+        feature == wgpu::FeatureName::SharedFenceVkSemaphoreZirconHandle;
+    if (isVulkanSharedFence) {
+      if (hasVulkanSharedFence) {
+        continue;
+      }
+      hasVulkanSharedFence = true;
+    }
+    features.push_back(feature);
   }
 
   static constexpr const char *kToggles[] = {
@@ -112,7 +189,6 @@ requestDevice(dawn::native::Adapter &nativeAdapter,
 #endif
       "disable_lazy_clear_for_mapped_at_creation_buffer",
       "allow_unsafe_apis",
-      "use_user_defined_labels_in_backend",
       "disable_robustness",
   };
   wgpu::DawnTogglesDescriptor togglesDesc;
@@ -256,8 +332,20 @@ createDawnBackendContext(dawn::native::Instance *instance) {
 #else
       wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer,
       // Vulkan equivalent of the above: EndAccess exports a sync-fd fence.
+      // Only one of these is enabled (see requestDevice). SyncFD comes first
+      // because AHardwareBuffer interop is sync-fd based; OpaqueFD is a
+      // fallback for drivers that do not advertise sync-fd semaphores.
       wgpu::FeatureName::SharedFenceSyncFD,
       wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD,
+      // Video and camera frames are YUV AHardwareBuffers. Dawn imports them
+      // as OpaqueYCbCrAndroid textures, a format it only accepts on a device
+      // with one of its two YCbCr features, and react-native-webgpu samples
+      // them as external textures (importExternalTexture,
+      // copyExternalImageToTexture), which needs this one in particular.
+      // Without it, importing a frame on the shared device fails with
+      // "Unsupported texture format TextureFormat::OpaqueYCbCrAndroid".
+      // Experimental in Dawn, hence the allow_unsafe_apis instance toggle.
+      wgpu::FeatureName::OpaqueYCbCrAndroidForExternalTexture,
 #endif
   };
 

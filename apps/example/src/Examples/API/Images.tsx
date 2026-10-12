@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { ScrollView, useWindowDimensions } from "react-native";
-import { useImage, Canvas, Image, Rect } from "@shopify/react-native-skia";
+import { useImage, Canvas, Image, Rect } from "react-native-skia";
 
 import { Title } from "./components/Title";
 
@@ -17,16 +17,16 @@ const fits = [
 export const Images = () => {
   // Verifies that the error handler for images are working correctly.
   useImage(new Uint8Array([0, 0, 0, 255]), (err) => {
-    if (err.message !== "Could not load data") {
+    if (err.message !== "Could not decode the image") {
       throw new Error(
-        `Expected error message to be 'Could not load data' - got '${err.message}'`
+        `Expected error message to be 'Could not decode the image' - got '${err.message}'`
       );
     }
   });
   useImage("https://reactjs.org/invalid.jpg", (err) => {
-    if (err.message !== "Could not load data") {
+    if (err.message !== "Could not decode the image") {
       throw new Error(
-        `Expected error message to be 'Could not load data' - got '${err.message}'`
+        `Expected error message to be 'Could not decode the image' - got '${err.message}'`
       );
     }
   });

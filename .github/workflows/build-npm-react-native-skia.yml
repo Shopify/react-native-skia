@@ -1,0 +1,61 @@
+name: Create a release (react-native-skia)
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    if: ${{ github.repository == 'wcandillon/react-native-skia' && (github.ref_name == 'main' || github.ref_name == '2.x') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to be able to publish a GitHub release
+      issues: write # to be able to comment on released issues
+      pull-requests: write # to be able to comment on released pull requests
+      id-token: write # to enable use of OIDC for npm provenance
+    env:
+      WORKING_DIRECTORY: ./
+      REPOSITORY: wcandillon/react-native-skia
+    concurrency:
+      group: npm-react-native-skia-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      # The setup copies the Skia, Graphite and Dawn headers into cpp/, which
+      # ship in the package (files field).
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build package and documentation
+        run: yarn build
+
+      # Configure semantic-release for this repository.
+      # The 2.x branch is a maintenance branch (>=2.0.0 <3.0.0) on the release-2.x
+      # channel, which is also its npm dist-tag so latest stays on main (npm
+      # rejects dist-tags that are a valid semver range, such as 2.x).
+      - name: Configure semantic-release
+        working-directory: packages/skia
+        run: |
+          node -e "
+            const fs = require('fs');
+            const rc = JSON.parse(fs.readFileSync('.releaserc', 'utf8'));
+            rc.repositoryUrl = 'https://github.com/' + process.env.REPOSITORY + '.git';
+            rc.branches.unshift({ name: '2.x', range: '2.x', channel: 'release-2.x' });
+            fs.writeFileSync('.releaserc', JSON.stringify(rc, null, 2) + '\n');
+          "
+          cat .releaserc
+
+      - name: Build NPM Package
+        working-directory: packages/skia
+        run: |
+          yarn release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          YARN_NPM_AUTH_TOKEN: ''
+          NPM_TOKEN: ''
+          NPM_CONFIG_PROVENANCE: true
+

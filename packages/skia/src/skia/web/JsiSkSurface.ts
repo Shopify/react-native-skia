@@ -36,6 +36,11 @@ export class JsiSkSurface
     return new JsiSkCanvas(this.CanvasKit, this.ref.getCanvas());
   }
 
+  asImage(): SkImage {
+    // CanvasKit has no image sharing the backing of a surface.
+    return this.makeImageSnapshot();
+  }
+
   makeImageSnapshot(bounds?: SkRect, outputImage?: JsiSkImage): SkImage {
     const image = this.ref.makeImageSnapshot(
       bounds
@@ -46,10 +51,5 @@ export class JsiSkSurface
       outputImage.ref = image;
     }
     return new JsiSkImage(this.CanvasKit, image);
-  }
-
-  getNativeTextureUnstable(): unknown {
-    console.warn("getBackendTexture is not implemented on Web");
-    return null;
   }
 }

@@ -1,11 +1,25 @@
 #pragma once
 
+#include <algorithm>
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <functional>
 #include <memory>
 #include <mutex>
+#include <thread>
+#include <utility>
+#include <vector>
+
+#if defined(__APPLE__)
+#include <pthread.h>
+#elif defined(__ANDROID__)
+#include <pthread.h>
+#endif
 
 #include "RNDawnUtils.h"
-#include "RNDawnWindowContext.h"
 #include "RNImageProvider.h"
+#include "utils/RNSkLog.h"
 
 #include "include/core/SkColorSpace.h"
 #include "include/core/SkData.h"
@@ -13,6 +27,7 @@
 #include "include/gpu/graphite/Context.h"
 #include "include/gpu/graphite/ContextOptions.h"
 #include "include/gpu/graphite/GraphiteTypes.h"
+#include "include/gpu/graphite/Image.h"
 #include "include/gpu/graphite/Recorder.h"
 #include "include/gpu/graphite/Recording.h"
 #include "include/gpu/graphite/Surface.h"
@@ -22,75 +37,184 @@
 
 #include "src/gpu/graphite/ContextOptionsPriv.h"
 
-#ifdef __APPLE__
-#include <CoreVideo/CVPixelBuffer.h>
-#else
-#include <android/hardware_buffer.h>
-#include <android/hardware_buffer_jni.h>
-#endif
-
 namespace RNSkia {
 
-struct AsyncContext {
-  bool fCalled = false;
-  std::unique_ptr<const SkSurface::AsyncReadResult> fResult;
-};
-
-struct SharedTextureContext {
-  wgpu::SharedTextureMemory sharedTextureMemory;
-  wgpu::Texture texture;
-};
-
-static void
-async_callback(void *c,
-               std::unique_ptr<const SkImage::AsyncReadResult> result) {
-  auto context = static_cast<AsyncContext *>(c);
-  context->fResult = std::move(result);
-  context->fCalled = true;
-}
+/** The pixels read back from a Graphite image; nullptr when the read failed. */
+using ReadResult = std::unique_ptr<const SkImage::AsyncReadResult>;
 
 class DawnContext {
 public:
-  // TODO: remove
-  friend class RNSkApplePlatformContext;
-
   DawnContext(const DawnContext &) = delete;
   DawnContext &operator=(const DawnContext &) = delete;
 
   static DawnContext &getInstance() {
-    static DawnContext instance;
-    return instance;
+    // Never destroyed: the readback poller is a detached thread using the
+    // context, which the process takes down at exit instead of a static
+    // destructor tearing the context down under it.
+    static auto *instance = new DawnContext();
+    return *instance;
   }
 
-  sk_sp<SkImage> MakeRasterImage(sk_sp<SkImage> image) {
+  // Readbacks ----------------------------------------------------------------
+  //
+  // Graphite reads pixels back asynchronously: the request goes to the GPU
+  // with the next submit and the result is delivered by the context once the
+  // GPU is done, from checkAsyncWorkCompletion() or from any later submit. A
+  // thread of its own polls the context while readbacks are pending, so a
+  // caller never has to wait inside the context lock (which would hold up
+  // the frames of every view meanwhile).
+
+  /**
+   Reads `srcRect` of a Graphite image back into CPU memory, in the color
+   type and color space of the image. The callback runs on whichever thread
+   completes the GPU work, inside the context lock: it must not use the
+   context nor a JS runtime (hand the result to the right thread instead). It
+   is called exactly once, with nullptr when the read failed.
+   */
+  void readPixels(const sk_sp<SkImage> &image, const SkIRect &srcRect,
+                  std::function<void(ReadResult)> callback) {
+    struct Request {
+      std::function<void(ReadResult)> callback;
+    };
+    auto *request = new Request{std::move(callback)};
+    auto info = image->imageInfo().makeDimensions(srcRect.size());
+    {
+      std::lock_guard<std::mutex> lock(_mutex);
+      _pendingReadbacks.fetch_add(1, std::memory_order_acq_rel);
+      fGraphiteContext->asyncRescaleAndReadPixels(
+          image.get(), info, srcRect, SkImage::RescaleGamma::kSrc,
+          SkImage::RescaleMode::kNearest,
+          [](void *context, ReadResult result) {
+            auto *request = static_cast<Request *>(context);
+            getInstance()._pendingReadbacks.fetch_sub(
+                1, std::memory_order_acq_rel);
+            request->callback(std::move(result));
+            delete request;
+          },
+          request);
+      fGraphiteContext->submit();
+    }
+    wakeReadbackPoller();
+  }
+
+  /**
+   Same as readPixels(), waiting for the result. The wait happens outside the
+   context lock; the calling thread blocks for a GPU round trip.
+   */
+  ReadResult readPixelsSync(const sk_sp<SkImage> &image,
+                            const SkIRect &srcRect) {
+    struct Wait {
+      std::mutex mutex;
+      std::condition_variable condition;
+      bool done = false;
+      ReadResult result;
+    };
+    auto wait = std::make_shared<Wait>();
+    readPixels(image, srcRect, [wait](ReadResult result) {
+      {
+        std::lock_guard<std::mutex> lock(wait->mutex);
+        wait->result = std::move(result);
+        wait->done = true;
+      }
+      wait->condition.notify_one();
+    });
+    std::unique_lock<std::mutex> lock(wait->mutex);
+    wait->condition.wait(lock, [&wait]() { return wait->done; });
+    return std::move(wait->result);
+  }
+
+  /**
+   A raster image over the pixels of a read result (nullptr for a failed
+   read). `info` describes the pixels: the image's, for the size that was
+   read.
+   */
+  static sk_sp<SkImage> MakeRasterImage(const SkImageInfo &info,
+                                        ReadResult result) {
+    if (result == nullptr) {
+      return nullptr;
+    }
+    auto rowBytes = result->rowBytes(0);
+    auto size = rowBytes * static_cast<size_t>(info.height());
+    auto *raw = result.release();
+    auto data = SkData::MakeWithProc(
+        raw->data(0), size,
+        [](const void *, void *context) {
+          delete static_cast<const SkImage::AsyncReadResult *>(context);
+        },
+        const_cast<SkImage::AsyncReadResult *>(raw));
+    return SkImages::RasterFromData(info, std::move(data), rowBytes);
+  }
+
+  /**
+   A CPU copy of a Graphite image, read back synchronously; the image itself
+   when it is not texture-backed.
+   */
+  sk_sp<SkImage> MakeRasterImage(const sk_sp<SkImage> &image) {
     if (!image->isTextureBacked()) {
       return image;
     }
-    std::lock_guard<std::mutex> lock(_mutex);
-    AsyncContext asyncContext;
-    fGraphiteContext->asyncRescaleAndReadPixels(
-        image.get(), image->imageInfo(), image->imageInfo().bounds(),
-        SkImage::RescaleGamma::kSrc, SkImage::RescaleMode::kNearest,
-        async_callback, &asyncContext);
-    fGraphiteContext->submit();
-    while (!asyncContext.fCalled) {
-      tick();
-      fGraphiteContext->checkAsyncWorkCompletion();
+    return MakeRasterImage(image->imageInfo(),
+                           readPixelsSync(image, image->bounds()));
+  }
+
+  /**
+   A Graphite image of `image`: uploaded on an upload recorder of this thread
+   and submitted, so that any recorder can draw it once this returns. The image
+   itself when it already is one (with mipmaps when asked for). An encoded
+   image is decoded on the calling thread first. nullptr when the upload
+   failed.
+   */
+  sk_sp<SkImage> MakeTextureImage(const sk_sp<SkImage> &image, bool mipmapped) {
+    if (image->isTextureBacked() && (!mipmapped || image->hasMipmaps())) {
+      return image;
     }
-    auto bytesPerRow = asyncContext.fResult->rowBytes(0);
-    auto bufferSize = bytesPerRow * image->imageInfo().height();
-    auto data = SkData::MakeWithProc(
-        asyncContext.fResult->data(0), bufferSize,
-        [](const void *ptr, void *context) {
-          auto *result =
-              reinterpret_cast<const SkSurface::AsyncReadResult *>(context);
-          delete result;
-        },
-        reinterpret_cast<void *>(const_cast<SkSurface::AsyncReadResult *>(
-            asyncContext.fResult.release())));
-    auto rasterImage =
-        SkImages::RasterFromData(image->imageInfo(), data, bytesPerRow);
-    return rasterImage;
+    // A recorder of its own: snapping the recorder of this thread would also
+    // submit what the offscreen surfaces of this thread recorded so far.
+    static thread_local auto uploadRecorder = makeRecorder();
+    auto *recorder = uploadRecorder.get();
+    auto texture =
+        SkImages::TextureFromImage(recorder, image.get(), {mipmapped});
+    if (texture == nullptr) {
+      return nullptr;
+    }
+    if (auto recording = recorder->snap()) {
+      submitRecording(recording.get());
+    }
+    return texture;
+  }
+
+  // A recorder of its own for a client that records on one thread and replays
+  // on another (SkiaGraphiteView): unlike getRecorder() it is not tied to the
+  // calling thread. Creating a recorder is a Context operation, hence the lock.
+  std::unique_ptr<skgpu::graphite::Recorder> makeRecorder() {
+    std::lock_guard<std::mutex> lock(_mutex);
+    skgpu::graphite::RecorderOptions options;
+    options.fImageProvider = ImageProvider::Make();
+    return fGraphiteContext->makeRecorder(options);
+  }
+
+  // Replays the recordings, in order, onto the target surface (a deferred
+  // canvas target) and submits them as one batch. A recording Graphite
+  // rejects is logged and skipped; the others are still submitted.
+  void
+  insertRecordings(const std::vector<skgpu::graphite::Recording *> &recordings,
+                   SkSurface *targetSurface) {
+    std::lock_guard<std::mutex> lock(_mutex);
+    for (auto *recording : recordings) {
+      skgpu::graphite::InsertRecordingInfo info;
+      info.fRecording = recording;
+      info.fTargetSurface = targetSurface;
+      auto status = fGraphiteContext->insertRecording(info);
+      // InsertStatus converts to true on success.
+      if (!static_cast<bool>(status)) {
+        RNSkLogger::logToConsole(
+            "Graphite rejected a recording (InsertStatus %d): %s",
+            static_cast<int>(
+                static_cast<skgpu::graphite::InsertStatus::V>(status)),
+            status.message().c_str());
+      }
+    }
+    fGraphiteContext->submit();
   }
 
   void submitRecording(
@@ -101,78 +225,6 @@ public:
     info.fRecording = recording;
     fGraphiteContext->insertRecording(info);
     fGraphiteContext->submit(syncToCpu);
-  }
-
-  sk_sp<SkImage> MakeImageFromBuffer(void *buffer) {
-#ifdef __APPLE__
-    wgpu::SharedTextureMemoryIOSurfaceDescriptor platformDesc;
-    auto ioSurface = CVPixelBufferGetIOSurface((CVPixelBufferRef)buffer);
-    platformDesc.ioSurface = ioSurface;
-    int width = static_cast<int>(IOSurfaceGetWidth(ioSurface));
-    int height = static_cast<int>(IOSurfaceGetHeight(ioSurface));
-#else
-    wgpu::SharedTextureMemoryAHardwareBufferDescriptor platformDesc;
-    auto ahb = (AHardwareBuffer *)buffer;
-    platformDesc.handle = ahb;
-    AHardwareBuffer_Desc adesc;
-    AHardwareBuffer_describe(ahb, &adesc);
-    int width = adesc.width;
-    int height = adesc.height;
-#endif
-
-    wgpu::SharedTextureMemoryDescriptor desc = {};
-    desc.nextInChain = &platformDesc;
-    wgpu::SharedTextureMemory memory =
-        backendContext.fDevice.ImportSharedTextureMemory(&desc);
-
-    wgpu::TextureDescriptor textureDesc;
-    textureDesc.format = DawnUtils::PreferredTextureFormat;
-    textureDesc.dimension = wgpu::TextureDimension::e2D;
-    textureDesc.usage =
-        wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc;
-    textureDesc.size = {static_cast<uint32_t>(width),
-                        static_cast<uint32_t>(height), 1};
-
-    wgpu::Texture texture = memory.CreateTexture(&textureDesc);
-
-    wgpu::SharedTextureMemoryBeginAccessDescriptor beginAccessDesc;
-    beginAccessDesc.initialized = true;
-    beginAccessDesc.fenceCount = 0;
-#if defined(__ANDROID__)
-    // Dawn's Vulkan backend requires the acquired VkImageLayout to be chained.
-    // UNDEFINED (= 0) on both ends is the canonical "no prior GPU producer"
-    // pattern (matches GPUSharedTextureMemory::beginAccess).
-    wgpu::SharedTextureMemoryVkImageLayoutBeginState vkBegin = {};
-    vkBegin.oldLayout = 0;
-    vkBegin.newLayout = 0;
-    beginAccessDesc.nextInChain = &vkBegin;
-#endif
-    bool success =
-        memory.BeginAccess(texture, &beginAccessDesc) == wgpu::Status::Success;
-
-    if (success) {
-      skgpu::graphite::BackendTexture betFromView =
-          skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
-      auto result = SkImages::WrapTexture(
-          getRecorder(), betFromView, DawnUtils::PreferedColorType,
-          kPremul_SkAlphaType, nullptr,
-          [](void *context) {
-            auto ctx = static_cast<SharedTextureContext *>(context);
-            wgpu::SharedTextureMemoryEndAccessState endState = {};
-#if defined(__ANDROID__)
-            wgpu::SharedTextureMemoryVkImageLayoutEndState vkEnd = {};
-            endState.nextInChain = &vkEnd;
-#endif
-            ctx->sharedTextureMemory.EndAccess(ctx->texture, &endState);
-            delete ctx;
-          },
-          new SharedTextureContext{memory, texture});
-      return result;
-    }
-    if (!success) {
-      return nullptr;
-    }
-    return nullptr;
   }
 
   // Create offscreen surface
@@ -230,26 +282,11 @@ public:
       return nullptr;
     }
 
-    // Map WebGPU format to Skia color type
-    SkColorType colorType;
-    switch (format) {
-    case wgpu::TextureFormat::RGBA8Unorm:
-      colorType = kRGBA_8888_SkColorType;
-      break;
-    case wgpu::TextureFormat::BGRA8Unorm:
-      colorType = kBGRA_8888_SkColorType;
-      break;
-    case wgpu::TextureFormat::RGBA16Float:
-      colorType = kRGBA_F16_SkColorType;
-      break;
-    case wgpu::TextureFormat::R8Unorm:
-      colorType = kGray_8_SkColorType;
-      break;
-    default:
-      // Use preferred color type for unsupported formats
-      colorType = DawnUtils::PreferedColorType;
-      break;
-    }
+    // Map the WebGPU format to a Skia color type; fall back to the preferred
+    // color type for formats Skia does not sample.
+    SkColorType colorType =
+        DawnUtils::colorTypeForTextureFormat(format).value_or(
+            DawnUtils::PreferedColorType);
 
     skgpu::graphite::BackendTexture backendTexture =
         skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
@@ -263,6 +300,39 @@ public:
 
     return SkImages::WrapTexture(
         getRecorder(), backendTexture, colorType, kPremul_SkAlphaType, nullptr,
+        [](void *context) {
+          auto ref = static_cast<TextureRef *>(context);
+          delete ref;
+        },
+        textureRef);
+  }
+
+  // Create an SkSurface that draws straight into a WebGPU texture (zero-copy).
+  // The texture must have RenderAttachment usage; give it TextureBinding too
+  // to sample it from WebGPU (e.g. as a three.js texture) after each flush.
+  // The surface retains the texture for its lifetime.
+  sk_sp<SkSurface> MakeSurfaceFromTexture(wgpu::Texture texture) {
+    if (!texture) {
+      return nullptr;
+    }
+    if (!(texture.GetUsage() & wgpu::TextureUsage::RenderAttachment)) {
+      throw std::runtime_error(
+          "MakeSurfaceFromTexture: the texture needs RenderAttachment usage");
+    }
+
+    skgpu::graphite::BackendTexture backendTexture =
+        skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
+
+    struct TextureRef {
+      wgpu::Texture texture;
+    };
+    auto textureRef = new TextureRef{texture};
+
+    // The color type is derived from the texture format.
+    return SkSurfaces::WrapBackendTexture(
+        getRecorder(), backendTexture,
+        nullptr, // colorspace
+        nullptr, // surfaceProps
         [](void *context) {
           auto ref = static_cast<TextureRef *>(context);
           delete ref;
@@ -325,10 +395,9 @@ public:
     return texture;
   }
 
-  // Create onscreen surface with window
-  std::unique_ptr<WindowContext> MakeWindow(void *window, int width, int height,
-                                            bool highBitDepth = false) {
-    // 1. Create Surface
+  // The Dawn surface over a native window: a CAMetalLayer on Apple
+  // platforms, an ANativeWindow on Android (see RNSkWindowSurface).
+  wgpu::Surface MakeWGPUSurface(void *window) {
     wgpu::SurfaceDescriptor surfaceDescriptor;
 #ifdef __APPLE__
     wgpu::SurfaceSourceMetalLayer metalSurfaceDesc;
@@ -339,11 +408,7 @@ public:
     androidSurfaceDesc.window = window;
     surfaceDescriptor.nextInChain = &androidSurfaceDesc;
 #endif
-    auto surface =
-        wgpu::Instance(instance->Get()).CreateSurface(&surfaceDescriptor);
-    return std::make_unique<DawnWindowContext>(
-        getRecorder(), backendContext.fDevice, surface, window, width, height,
-        highBitDepth);
+    return wgpu::Instance(instance->Get()).CreateSurface(&surfaceDescriptor);
   }
 
   skgpu::graphite::Recorder *getRecorder() {
@@ -365,6 +430,58 @@ private:
   std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
   skgpu::graphite::DawnBackendContext backendContext;
   std::mutex _mutex;
+
+  // The readback poller: started on the first readback, it checks the
+  // context for finished GPU work while readbacks are pending and sleeps
+  // otherwise (see readPixels).
+  std::atomic<int> _pendingReadbacks{0};
+  std::once_flag _pollerOnce;
+  std::mutex _pollerMutex;
+  std::condition_variable _pollerCondition;
+
+  void wakeReadbackPoller() {
+    std::call_once(_pollerOnce, [this]() {
+      std::thread([this]() { pollReadbacks(); }).detach();
+    });
+    // Taken so that a poller between its predicate check and its wait cannot
+    // miss the notification.
+    {
+      std::lock_guard<std::mutex> lock(_pollerMutex);
+    }
+    _pollerCondition.notify_one();
+  }
+
+  void pollReadbacks() {
+#if defined(__APPLE__)
+    pthread_setname_np("RNSkia Readback");
+#elif defined(__ANDROID__)
+    pthread_setname_np(pthread_self(), "RNSkia Readback");
+#endif
+    for (;;) {
+      {
+        std::unique_lock<std::mutex> lock(_pollerMutex);
+        _pollerCondition.wait(lock, [this]() {
+          return _pendingReadbacks.load(std::memory_order_acquire) > 0;
+        });
+      }
+      // Polls every millisecond at first, then backs off: a short readback
+      // is delivered quickly, a long one does not take the context lock a
+      // thousand times a second.
+      auto interval = std::chrono::milliseconds(1);
+      while (_pendingReadbacks.load(std::memory_order_acquire) > 0) {
+        // A busy context is a view rendering: skip this round rather than
+        // hold up its frame.
+        std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
+        if (lock.owns_lock()) {
+          tick();
+          fGraphiteContext->checkAsyncWorkCompletion();
+          lock.unlock();
+          interval = std::min(interval * 2, std::chrono::milliseconds(4));
+        }
+        std::this_thread::sleep_for(interval);
+      }
+    }
+  }
 
   DawnContext() {
     // No dawnProcSetProcs() here: the monolithic libwebgpu_dawn (shared with

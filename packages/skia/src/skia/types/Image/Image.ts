@@ -63,17 +63,6 @@ export interface SkImage extends SkJSIInstance<"Image"> {
   getImageInfo(): ImageInfo;
 
   /**
-   * Returns the backend texture of the image.
-   * The returned object can be used to create a Skia Image object.
-   * The returned object is backend specific and should be used with caution.
-   * It is the caller's responsibility to ensure that the texture is not used after the image is deleted.
-   * The returned object may be null if the image does not have a backend texture.
-   *
-   * @return backend texture of the image or null
-   */
-  getNativeTextureUnstable(): unknown;
-
-  /**
    * Returns this image as a shader with the specified tiling. It will use cubic sampling.
    * @param tx - tile mode in the x direction.
    * @param ty - tile mode in the y direction.
@@ -138,6 +127,10 @@ export interface SkImage extends SkJSIInstance<"Image"> {
 
   /** Read Image pixels
    *
+   * On a GPU image, only the requested rectangle is read back from the GPU,
+   * and the call waits for it. To read back without blocking, call
+   * {@link makeRasterImage} first.
+   *
    * @param srcX - optional x-axis upper left corner of the rectangle to read from
    * @param srcY - optional y-axis upper left corner of the rectangle to read from
    * @param imageInfo - optional describes the pixel format and dimensions of the data to read into
@@ -151,9 +144,38 @@ export interface SkImage extends SkJSIInstance<"Image"> {
 
   /**
    * Returns raster image or lazy image. Copies SkImage backed by GPU texture
-   * into CPU memory if needed. Returns original SkImage if decoded in raster
-   * bitmap, or if encoded in a stream.
+   * into CPU memory if needed, waiting for the GPU. Returns original SkImage
+   * if decoded in raster bitmap, or if encoded in a stream.
    * Returns null if the conversion fails.
+   *
+   * This is the synchronous counterpart of {@link makeRasterImage}, for
+   * worklets and scripts; on the JS thread, prefer `makeRasterImage()`.
    */
   makeNonTextureImage(): SkImage | null;
+
+  /**
+   * Resolves to a CPU image, without blocking the calling thread: a GPU
+   * image is read back from the GPU, an encoded image is decoded on a
+   * background thread, and a raster image resolves to itself.
+   *
+   * Encoding or reading the pixels of the result is then a CPU operation.
+   * The promise resolves on the JS thread: call it from there, not from a
+   * worklet (see {@link makeNonTextureImage}).
+   */
+  makeRasterImage(): Promise<SkImage>;
+
+  /**
+   * Returns a GPU image: the image is uploaded now, on the calling thread,
+   * and every canvas draws it afterwards without a copy. A raster image
+   * drawn directly is uploaded once per canvas instead, and an encoded
+   * image is decoded first. Returns the image itself when it already is a
+   * GPU image. Throws if the upload fails.
+   *
+   * Native only: on the Web, a texture belongs to the canvas that created
+   * it, so the image is returned as is.
+   *
+   * @param opts - `mipmapped`: also build the mipmaps, for the
+   * `MipmapMode` sampling options.
+   */
+  makeTextureImage(opts?: { mipmapped?: boolean }): SkImage;
 }
