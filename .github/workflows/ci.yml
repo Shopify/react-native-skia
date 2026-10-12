@@ -306,8 +306,9 @@ jobs:
           script: |
             adb reverse tcp:8081 tcp:8081
             nohup adb logcat > logcat.txt 2>&1 &
-            adb install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk
-            adb shell monkey -p com.microsoft.reacttestapp 1
+            # Right after "Emulator booted" adb can still answer "device offline" for a moment, so wait and retry the install.
+            ok=0; for i in 1 2 3 4 5; do adb wait-for-device install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk && ok=1 && break; echo "adb install failed (attempt $i)"; sleep 5; done; [ "$ok" = 1 ]
+            adb wait-for-device shell monkey -p com.microsoft.reacttestapp 1
             cd packages/skia && CI=true yarn e2e --testPathIgnorePatterns Paragraphs
 
       # References written on this run (the *-android-ci.png screen snapshots
