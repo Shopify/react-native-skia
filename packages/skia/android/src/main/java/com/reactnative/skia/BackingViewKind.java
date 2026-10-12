@@ -42,16 +42,21 @@ enum BackingViewKind {
     /**
      * Whether a view of this kind, replaced on screen, stays attached and
      * undrawn rather than being removed, so that it leaves the screen with the
-     * window frame that covers it. Android 10 removes a detached SurfaceView's
-     * layer at once, ahead of that frame, and hides the layer of one the
-     * window stops drawing in step with the frame (SurfaceView.positionLost).
-     * Android 11 releases a detached SurfaceView in step with the frame, and
-     * Android 9 and earlier hide nothing in positionLost. A view that is not
-     * shown or not laid out has nothing on screen to keep.
+     * window frame that covers it. Android 10 to 12 remove a detached
+     * SurfaceView's layer ahead of that frame (10 in onDetachedFromWindow,
+     * 11 and 12 in a positionLost that no longer has the view's root to defer
+     * to) and hide the layer of an attached one the window stops drawing in
+     * step with the frame. Android 12L removes a detached one with the window's
+     * next draw, and Android 9 and earlier hide nothing in positionLost. A view
+     * that is not shown or not laid out has nothing on screen to keep.
      */
     boolean retiresWhenReplaced(int sdkInt, boolean shown, int width, int height) {
         return switch (this) {
-            case SURFACE_VIEW -> sdkInt == Build.VERSION_CODES.Q && shown && width > 0 && height > 0;
+            case SURFACE_VIEW -> sdkInt >= Build.VERSION_CODES.Q
+                    && sdkInt <= Build.VERSION_CODES.S
+                    && shown
+                    && width > 0
+                    && height > 0;
             case TEXTURE_VIEW -> false;
         };
     }

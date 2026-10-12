@@ -9,13 +9,15 @@ import org.junit.Test;
 
 public class BackingViewKindTest {
     @Test
-    public void surfaceViewShownAndLaidOutIsRetiredWhenReplacedOnAndroid10() {
+    public void surfaceViewShownAndLaidOutIsRetiredWhenReplacedOnAndroid10To12() {
         assertTrue(BackingViewKind.SURFACE_VIEW.retiresWhenReplaced(Build.VERSION_CODES.Q, true, 260, 200));
+        assertTrue(BackingViewKind.SURFACE_VIEW.retiresWhenReplaced(Build.VERSION_CODES.R, true, 260, 200));
+        assertTrue(BackingViewKind.SURFACE_VIEW.retiresWhenReplaced(Build.VERSION_CODES.S, true, 260, 200));
     }
 
     @Test
-    public void surfaceViewIsRemovedWhenReplacedFromAndroid11() {
-        assertFalse(BackingViewKind.SURFACE_VIEW.retiresWhenReplaced(Build.VERSION_CODES.R, true, 260, 200));
+    public void surfaceViewIsRemovedWhenReplacedFromAndroid12L() {
+        assertFalse(BackingViewKind.SURFACE_VIEW.retiresWhenReplaced(Build.VERSION_CODES.S_V2, true, 260, 200));
         assertFalse(BackingViewKind.SURFACE_VIEW.retiresWhenReplaced(Build.VERSION_CODES.UPSIDE_DOWN_CAKE, true, 260, 200));
     }
 
