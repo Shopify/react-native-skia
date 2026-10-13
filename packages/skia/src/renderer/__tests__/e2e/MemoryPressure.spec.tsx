@@ -64,10 +64,10 @@ describe("Native object memory pressure", () => {
         data,
         width * 4
       )!;
-      // __box()/unbox() is how worklets move an object to another runtime.
+      // box()/unbox() is how worklets move an object to another runtime.
       // Unboxing on the runtime that already has a wrapper must resolve to
       // that wrapper, and charge nothing more.
-      const boxed = (image as any).__box();
+      const boxed = (globalThis as any).__skiaWorkletHelpers.box(image);
       const before = externalBytes();
       let sameObject = true;
       for (let i = 0; i < 100; i++) {
