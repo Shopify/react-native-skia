@@ -144,3 +144,40 @@ test("WebGLLifecycle: context lifetime", async ({ page }) => {
   await expect(status).not.toContainText("error:");
   expect(errors, errors.join("\n")).toEqual([]);
 });
+
+// Skia.Surface.MakeOffscreen() creates a WebGL context per call on web.
+// Disposing a surface must not leave its context alive: past the browser's
+// limit the oldest contexts are evicted, the reference canvas and the
+// offscreen surface the app kept from before the run included.
+test("WebOffscreen: offscreen surfaces don't exhaust WebGL contexts", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.stack ?? error.message));
+  const evictions: string[] = [];
+  page.on("console", (message) => {
+    if (/WebGL contexts/i.test(message.text())) {
+      evictions.push(message.text());
+    }
+  });
+  await page.goto("/api/web-offscreen");
+  const status = page.getByTestId("status");
+  const reference = page.getByTestId("reference").locator("canvas");
+  await expect(reference).toBeVisible({ timeout: 60_000 });
+  await expect(status).toContainText("reference: ok");
+
+  await page.getByTestId("run").click();
+  await expect(status).toContainText("kept surface:", { timeout: 30_000 });
+  // Chrome's eviction runs on a timer after the context count is exceeded.
+  await page.waitForTimeout(500);
+  await page.screenshot({
+    path: path.join(screenshotsDir, "WebOffscreen.png"),
+  });
+
+  expect(evictions).toEqual([]);
+  await expect(status).toContainText("reference: ok");
+  await expect(status).toContainText("kept surface: ok");
+  await expect(status).toContainText("snapshot: ok");
+  await expect(status).not.toContainText("error:");
+  expect(errors, errors.join("\n")).toEqual([]);
+});
