@@ -55,18 +55,8 @@ export class JsiSkCanvas
   extends HostObject<Canvas, "Canvas">
   implements SkCanvas
 {
-  private defaultPaint?: Paint;
-
   constructor(CanvasKit: CanvasKit, ref: Canvas) {
     super(CanvasKit, ref, "Canvas");
-  }
-
-  override [Symbol.dispose](): void {
-    if (this.defaultPaint && !this.defaultPaint.isDeleted()) {
-      this.defaultPaint.delete();
-    }
-    this.defaultPaint = undefined;
-    super[Symbol.dispose]();
   }
 
   drawRect(rect: SkRect, paint: SkPaint) {
@@ -231,10 +221,9 @@ export class JsiSkCanvas
     });
   }
 
-  // Draws with the caller's paint if given, otherwise a default CanvasKit
-  // paint that is cached on this canvas and reused (deleted only when the
-  // canvas itself is disposed) so it doesn't allocate/free on the WASM
-  // heap on every call.
+  // Draws with the caller's paint if given, otherwise with a temporary
+  // CanvasKit paint that is deleted right after the call. Canvas wrappers
+  // are rarely disposed, so caching the paint on them would leak it.
   private withPaint(
     paint: SkPaint | null | undefined,
     draw: (p: Paint) => void
@@ -243,10 +232,12 @@ export class JsiSkCanvas
       draw(JsiSkPaint.fromValue<Paint>(paint));
       return;
     }
-    if (!this.defaultPaint) {
-      this.defaultPaint = new this.CanvasKit.Paint();
+    const defaultPaint = new this.CanvasKit.Paint();
+    try {
+      draw(defaultPaint);
+    } finally {
+      defaultPaint.delete();
     }
-    draw(this.defaultPaint);
   }
 
   restoreToCount(saveCount: number) {
@@ -445,7 +436,7 @@ export class JsiSkCanvas
     srcs: SkRect[],
     dsts: SkRSXform[],
     paint: SkPaint,
-    blendMode?: BlendMode,
+    blendMode?: BlendMode | null,
     colors?: SkColor[],
     sampling?: CubicResampler | FilterOptions
   ) {
@@ -481,7 +472,7 @@ export class JsiSkCanvas
       src,
       dst,
       JsiSkPaint.fromValue(paint),
-      blendMode !== undefined
+      blendMode !== undefined && blendMode !== null
         ? getEnum(this.CanvasKit, "BlendMode", blendMode)
         : this.CanvasKit.BlendMode.DstOver,
       cls,
