@@ -1,5 +1,6 @@
 import type { FC } from "react";
 
+import { IsOnMainThread } from "./IsOnMainThread";
 import { Snapshot1 } from "./Snapshot1";
 import { Snapshot2 } from "./Snapshot2";
 import { Snapshot3 } from "./Snapshot3";
@@ -9,6 +10,7 @@ import { Snapshot6 } from "./Snapshot6";
 import { Snapshot7 } from "./Snapshot7";
 
 export const Screens: Record<string, FC> = {
+  IsOnMainThread,
   Snapshot1,
   Snapshot2,
   Snapshot3,
