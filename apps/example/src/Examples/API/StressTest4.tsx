@@ -6,12 +6,11 @@ import { Text } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { SharedValue } from "react-native-reanimated";
 import {
-  runOnJS,
-  runOnUI,
   useDerivedValue,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { scheduleOnRN, scheduleOnUI } from "react-native-worklets";
 
 const logMemoryStats = () => {
   "worklet";
@@ -98,7 +97,7 @@ function continueBlink(
       );
     } else {
       if (!shouldContinue.value) return;
-      runOnJS(revert)(isLeft.value ? "right" : "left");
+      scheduleOnRN(revert, isLeft.value ? "right" : "left");
       isLeft.value = !isLeft.value;
       blinkCnt.value = 0;
       x.value = withTiming(400 - x.value, { duration: 200 }, () => {
@@ -195,7 +194,8 @@ export const StressTest4 = () => {
 
   const handleStart = () => {
     shouldContinue.value = true;
-    runOnUI(startAnimation)(
+    scheduleOnUI(
+      startAnimation,
       surface,
       image,
       x,
