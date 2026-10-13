@@ -22,20 +22,21 @@ export interface SkiaGraphiteViewProps extends SkiaGraphiteViewNativeProps {
   ref?: React.Ref<SkiaGraphiteViewRef>;
 }
 
-// The layout is known synchronously on the new architecture;
-// getBoundingClientRect became stable in React Native 0.83. On the web the
-// view measures itself (see SkiaView.web).
-const measureLayout = (view: unknown) => {
+// A view measured relative to itself gets its layout size, without the
+// transforms getBoundingClientRect() includes; measureLayout() calls back
+// synchronously on the new architecture. On the web the view measures itself
+// (see SkiaView.web).
+const measureLayout = (
+  view: React.ComponentRef<typeof SkiaViewNativeComponent>
+) => {
   if (Platform.OS === "web") {
     return { width: 0, height: 0 };
   }
-  const host = view as {
-    getBoundingClientRect?: () => { width: number; height: number };
-    unstable_getBoundingClientRect: () => { width: number; height: number };
-  };
-  return host.getBoundingClientRect
-    ? host.getBoundingClientRect()
-    : host.unstable_getBoundingClientRect();
+  let size = { width: 0, height: 0 };
+  view.measureLayout(view, (_left, _top, width, height) => {
+    size = { width, height };
+  });
+  return size;
 };
 
 /**
