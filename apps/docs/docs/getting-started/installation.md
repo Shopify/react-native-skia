@@ -47,7 +47,7 @@ Run `pod install` on the `ios/` directory.
 ## Android
 
 React Native Skia requires Android API level 26 or above and renders with Vulkan.
-On a device without Vulkan, canvases stay empty and the calls that need the GPU throw.
+On a device without Vulkan, canvases stay empty and the calls that need the GPU throw; [v2](https://wcandillon.github.io/react-native-skia/v2/docs/getting-started/installation) supports such devices.
 React Native projects default to a lower `minSdkVersion`, so raise it in `android/build.gradle`:
 
 ```groovy

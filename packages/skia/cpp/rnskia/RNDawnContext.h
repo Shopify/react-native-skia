@@ -458,7 +458,9 @@ private:
       return {new DawnContext(), ""};
     } catch (const std::exception &error) {
       std::string reason =
-          std::string("Skia cannot render on this device: ") + error.what();
+          std::string("Skia cannot render on this device: ") + error.what() +
+          ". React Native Skia v3 renders with Vulkan on Android; v2 "
+          "(react-native-skia@2) supports devices without it.";
       RNSkLogger::logToConsole("%s", reason.c_str());
       return {nullptr, reason};
     }
