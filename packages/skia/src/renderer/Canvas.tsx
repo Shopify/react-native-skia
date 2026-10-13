@@ -183,7 +183,8 @@ export const Canvas = ({
         measureInWindow: (callback) => {
           viewRef.current?.measureInWindow(callback);
         },
-      }) as CanvasRef
+      }) as CanvasRef,
+    [nativeId, viewRef]
   );
 
   const onLayoutWeb = useCallback(
