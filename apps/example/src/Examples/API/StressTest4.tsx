@@ -1,14 +1,9 @@
 import React, { useEffect, useState } from "react";
-import {
-  Alert,
-  Button,
-  PixelRatio,
-  SafeAreaView,
-  StyleSheet,
-} from "react-native";
+import { Alert, Button, PixelRatio, StyleSheet } from "react-native";
 import type { SkImage, SkSurface } from "react-native-skia";
 import { Canvas, Image, Skia } from "react-native-skia";
 import { Text } from "react-native-gesture-handler";
+import { SafeAreaView } from "react-native-safe-area-context";
 import type { SharedValue } from "react-native-reanimated";
 import {
   useDerivedValue,

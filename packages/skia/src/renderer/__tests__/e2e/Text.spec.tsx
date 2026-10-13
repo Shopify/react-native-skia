@@ -33,7 +33,9 @@ describe("Text", () => {
     const font = fonts.NotoSansSCRegular;
     const result = await surface.eval(
       (_Skia, ctx) => {
-        return ctx.font.getTextWidth("欢迎");
+        return ctx.font
+          .getGlyphWidths(ctx.font.getGlyphIDs("欢迎"))
+          .reduce((sum, glyphWidth) => sum + glyphWidth, 0);
       },
       { font }
     );
