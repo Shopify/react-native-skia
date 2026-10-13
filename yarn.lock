@@ -14250,7 +14250,7 @@ __metadata:
     react-native-safe-area-context: ^5.2.0
     react-native-screens: ^4.10.0
     react-native-skia: "workspace:*"
-    react-native-svg: "patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch"
+    react-native-svg: "patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch&../../.yarn/patches/react-native-svg-npm-15.14.0-position-props.patch"
     react-native-test-app: 4.4.7
     react-native-web: ^0.21.2
     react-native-webgpu: 0.12.1
@@ -25227,9 +25227,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-svg@patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch::locator=example%40workspace%3Aapps%2Fexample":
+"react-native-svg@patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch&../../.yarn/patches/react-native-svg-npm-15.14.0-position-props.patch::locator=example%40workspace%3Aapps%2Fexample":
   version: 15.14.0
-  resolution: "react-native-svg@patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch::version=15.14.0&hash=f0af0e&locator=example%40workspace%3Aapps%2Fexample"
+  resolution: "react-native-svg@patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch&../../.yarn/patches/react-native-svg-npm-15.14.0-position-props.patch::version=15.14.0&hash=50ed0f&locator=example%40workspace%3Aapps%2Fexample"
   dependencies:
     css-select: ^5.1.0
     css-tree: ^1.1.3
@@ -25237,7 +25237,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 2c06b36399bc6f4c84ce11b3ec5231b73393575d121a790e7701b61e3ad23b5abc628f55b79fc9eea997130a73ad53921b644fdf48eddd564f66192292714063
+  checksum: 2a4568118dc390fe00b325fc295360b0e4dadd4b5908104d9fa9c1f1b3f05fccea5294986d55a40e680d0d3a48bda6b829aecdc2ad8325469855bda8b5236d5a
   languageName: node
   linkType: hard
 
