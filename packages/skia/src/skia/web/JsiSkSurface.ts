@@ -1,4 +1,4 @@
-import type { CanvasKit, Surface } from "canvaskit-wasm";
+import type { CanvasKit, GrDirectContext, Surface } from "canvaskit-wasm";
 
 import type { SkCanvas, SkImage, SkRect, SkSurface } from "../types";
 
@@ -11,7 +11,12 @@ export class JsiSkSurface
   extends HostObject<Surface, "Surface">
   implements SkSurface
 {
-  constructor(CanvasKit: CanvasKit, ref: Surface) {
+  constructor(
+    CanvasKit: CanvasKit,
+    ref: Surface,
+    // The context of a GPU surface, which its snapshots are read back through.
+    private grContext: GrDirectContext | null = null
+  ) {
     super(CanvasKit, ref, "Surface");
   }
 
@@ -49,7 +54,8 @@ export class JsiSkSurface
     );
     if (outputImage) {
       outputImage.ref = image;
+      outputImage.grContext = this.grContext;
     }
-    return new JsiSkImage(this.CanvasKit, image);
+    return new JsiSkImage(this.CanvasKit, image, this.grContext);
   }
 }

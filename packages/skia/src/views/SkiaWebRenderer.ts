@@ -265,7 +265,7 @@ export class WebGLRenderer implements Renderer {
     if (!surface) {
       throw new Error("Could not create surface");
     }
-    this.surface = new JsiSkSurface(CanvasKit, surface);
+    this.surface = new JsiSkSurface(CanvasKit, surface, this.grContext);
   }
 
   draw(frame: WebFrame) {

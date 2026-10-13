@@ -7,7 +7,14 @@ import {
   Text,
   View,
 } from "react-native";
-import { AlphaType, Canvas, ColorType, Fill, Skia } from "react-native-skia";
+import {
+  AlphaType,
+  Canvas,
+  ColorType,
+  Fill,
+  Skia,
+  useCanvasRef,
+} from "react-native-skia";
 import type { SkImage } from "react-native-skia";
 
 // Skia.Surface.MakeOffscreen() on web creates an OffscreenCanvas, a WebGL
@@ -17,11 +24,15 @@ import type { SkImage } from "react-native-skia";
 // oldest one past that, visible canvases and offscreen surfaces alike.
 // "Run" makes ITERATIONS short-lived offscreen surfaces, each disposed right
 // away, then checks what was alive before them: the reference canvas, a
-// surface the app keeps, and a snapshot taken from that surface. Web only.
+// surface the app keeps, and a snapshot taken from that surface.
+// CanvasKit reads an image back through whichever WebGL context is current,
+// and every surface or canvas that draws makes its own context current: each
+// snapshot is read back right after the other context drew. Web only.
 
 const ITERATIONS = 30;
 const SIZE = 200;
 const RED = "255,0,0,255";
+const TEAL = "91,192,190,255";
 
 const isWeb = Platform.OS === "web" && typeof document !== "undefined";
 
@@ -42,13 +53,14 @@ const topLeftPixel = (image: SkImage) => {
   return pixels ? Array.from(pixels).join(",") : "null";
 };
 
-const verdict = (pixel: string) =>
-  pixel === RED ? "ok" : `BROKEN (read ${pixel}, expected ${RED})`;
+const verdict = (pixel: string, expected: string) =>
+  pixel === expected ? "ok" : `BROKEN (read ${pixel}, expected ${expected})`;
 
 export const WebOffscreen = () => {
   const [contextState, setContextState] = useState("unknown");
   const [report, setReport] = useState("not run");
   const [error, setError] = useState<string | null>(null);
+  const reference = useCanvasRef();
 
   // A lost context is what an evicted canvas looks like from the outside.
   useEffect(() => {
@@ -93,19 +105,24 @@ export const WebOffscreen = () => {
       // Chrome evicts on a timer once the limit is exceeded.
       setTimeout(() => {
         try {
+          // Snapshotting the reference canvas paints it.
+          const referenceSnapshot = reference.current?.makeImageSnapshot();
           kept.getCanvas().drawColor(Skia.Color("red"));
           kept.flush();
           const redrawn = kept.makeImageSnapshot();
+          const referencePixel = referenceSnapshot
+            ? topLeftPixel(referenceSnapshot)
+            : "null";
+          referenceSnapshot?.dispose();
+          reference.current?.makeImageSnapshot()?.dispose();
           const keptPixel = topLeftPixel(redrawn);
           redrawn.dispose();
-          // CanvasKit reads an image through the current context: flushing
-          // the kept surface makes its context current again.
-          kept.flush();
           const snapshotPixel = topLeftPixel(keptSnapshot);
           setReport(
             `${ITERATIONS} surfaces in ${Math.round(elapsed)} ms` +
-              ` · kept surface: ${verdict(keptPixel)}` +
-              ` · snapshot: ${verdict(snapshotPixel)}`
+              ` · kept surface: ${verdict(keptPixel, RED)}` +
+              ` · snapshot: ${verdict(snapshotPixel, RED)}` +
+              ` · reference snapshot: ${verdict(referencePixel, TEAL)}`
           );
         } catch (e) {
           setError((e as Error).message);
@@ -122,7 +139,8 @@ export const WebOffscreen = () => {
       <Text style={styles.description}>
         Run makes {ITERATIONS} offscreen surfaces (MakeOffscreen, draw,
         makeImageSnapshot, dispose). Expected: the reference canvas keeps
-        painting, and the surface kept from before the run still reads back red.
+        painting, the surface kept from before the run and its snapshot still
+        read back red, and a snapshot of the reference canvas reads back teal.
         Chrome logs "Too many active WebGL contexts" for every context it
         evicts. Web only.
       </Text>
@@ -131,7 +149,7 @@ export const WebOffscreen = () => {
           (error ? ` · error: ${error}` : "")}
       </Text>
       <View testID="reference">
-        <Canvas style={styles.canvas}>
+        <Canvas ref={reference} style={styles.canvas}>
           <Fill color="#5bc0be" />
         </Canvas>
       </View>

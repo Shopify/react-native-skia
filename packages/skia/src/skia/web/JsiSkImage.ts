@@ -1,5 +1,6 @@
 import type {
   CanvasKit,
+  GrDirectContext,
   ImageInfo as CKImageInfo,
   Image,
 } from "canvaskit-wasm";
@@ -45,8 +46,23 @@ export const toBase64String = (bytes: Uint8Array) => {
 };
 
 export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
-  constructor(CanvasKit: CanvasKit, ref: Image) {
+  constructor(
+    CanvasKit: CanvasKit,
+    ref: Image,
+    // The context holding the texture of a GPU image.
+    public grContext: GrDirectContext | null = null
+  ) {
     super(CanvasKit, ref, "Image");
+  }
+
+  // CanvasKit reads an image back through the current WebGL context, which
+  // any canvas or surface drawing in the meantime has made its own: make the
+  // image's context current again. CanvasKit has no public setCurrentContext(),
+  // but every GrDirectContext method makes its context current first.
+  private makeContextCurrent() {
+    if (this.grContext && !this.grContext.isDeleted()) {
+      this.grContext.getResourceCacheUsageBytes();
+    }
   }
 
   height() {
@@ -107,6 +123,7 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
 
   encodeToBytes(fmt?: ImageFormat, quality?: number) {
     let result: Uint8Array | null;
+    this.makeContextCurrent();
     if (fmt !== undefined && quality !== undefined) {
       // CanvasKit's encodeToBytes() applies `quality || 100`, which would
       // turn a valid quality of 0 into 100. The encoders clamp any quality
@@ -152,6 +169,7 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
         (imageInfo ?? info).colorType
       ),
     };
+    this.makeContextCurrent();
     return this.ref.readPixels(srcX ?? 0, srcY ?? 0, pxInfo);
   }
 
@@ -178,6 +196,7 @@ export class JsiSkImage extends HostObject<Image, "Image"> implements SkImage {
       ...partialInfo,
       colorSpace,
     };
+    this.makeContextCurrent();
     const pixels = this.ref.readPixels(0, 0, info) as Uint8Array | null;
     if (!pixels) {
       throw new Error("Could not read pixels from image");

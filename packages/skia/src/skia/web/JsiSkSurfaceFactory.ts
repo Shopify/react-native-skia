@@ -1,7 +1,6 @@
 import type {
   CanvasKit,
   GrDirectContext,
-  Surface,
   WebGLContextHandle,
 } from "canvaskit-wasm";
 
@@ -88,17 +87,15 @@ export class JsiSkSurfaceFactory extends Host implements SurfaceFactory {
     // OffscreenCanvas may be unvailable in some environments.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const OC = (globalThis as any).OffscreenCanvas;
-    let surface: Surface | null;
     if (OC === undefined) {
       return this.MakeRaster(width, height);
-    } else {
-      const grContext = getOffscreenContext(this.CanvasKit, OC);
-      surface = this.CanvasKit.MakeRenderTarget(grContext, width, height);
     }
+    const grContext = getOffscreenContext(this.CanvasKit, OC);
+    const surface = this.CanvasKit.MakeRenderTarget(grContext, width, height);
     if (!surface) {
       return null;
     }
-    return new JsiSkSurface(this.CanvasKit, surface);
+    return new JsiSkSurface(this.CanvasKit, surface, grContext);
   }
 
   MakeFromGPUTexture(_texture: GPUTextureHandle): SkSurface {

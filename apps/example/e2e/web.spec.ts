@@ -148,7 +148,8 @@ test("WebGLLifecycle: context lifetime", async ({ page }) => {
 // Skia.Surface.MakeOffscreen() creates a WebGL context per call on web.
 // Disposing a surface must not leave its context alive: past the browser's
 // limit the oldest contexts are evicted, the reference canvas and the
-// offscreen surface the app kept from before the run included.
+// offscreen surface the app kept from before the run included. Snapshots of
+// both must read back through their own context, whichever one drew last.
 test("WebOffscreen: offscreen surfaces don't exhaust WebGL contexts", async ({
   page,
 }) => {
@@ -177,7 +178,8 @@ test("WebOffscreen: offscreen surfaces don't exhaust WebGL contexts", async ({
   expect(evictions).toEqual([]);
   await expect(status).toContainText("reference: ok");
   await expect(status).toContainText("kept surface: ok");
-  await expect(status).toContainText("snapshot: ok");
+  await expect(status).toContainText("· snapshot: ok");
+  await expect(status).toContainText("reference snapshot: ok");
   await expect(status).not.toContainText("error:");
   expect(errors, errors.join("\n")).toEqual([]);
 });
