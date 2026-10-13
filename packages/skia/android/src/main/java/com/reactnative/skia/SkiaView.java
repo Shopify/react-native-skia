@@ -168,10 +168,10 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
                 || highBitDepth != mAppliedHighBitDepth) {
             mOutgoingView.release();
             if (mView != null) {
-                if (kind.keepsOutgoingUntilFirstFrame(mAppliedKind, isShown(), getWidth(), getHeight())) {
+                if (kind.keepsOutgoingOnScreen(mAppliedKind, isShown(), getWidth(), getHeight())) {
                     SkiaTextureView outgoing = (SkiaTextureView) mView;
                     outgoing.detachFromRenderer();
-                    mOutgoingView.hold(outgoing);
+                    mOutgoingView.hold(outgoing, OutgoingViewHold.Arrival.ofSurfaceView(Build.VERSION.SDK_INT, zOrderOnTop));
                 } else {
                     removeView(mView);
                 }
@@ -183,7 +183,7 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
                 case SURFACE_VIEW -> new SkiaSurfaceView(getContext(), this, zOrderOnTop, mOpaque);
                 case TEXTURE_VIEW -> new SkiaTextureView(getContext(), this, mOpaque);
             };
-            // Beneath an outgoing view, which covers it until its first frame.
+            // Beneath an outgoing view, which covers it until it shows the canvas.
             addView(mView, 0);
             // React Native sizes native children explicitly through onLayout, so
             // the requestLayout triggered by addView is ignored; size the new
@@ -248,6 +248,17 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
             ((SkiaSurfaceView) mView).onFirstFramePresented();
         }
         mOutgoingView.onFirstFramePresented();
+    }
+
+    // A SurfaceView asks its parent for the window's transparent region as it
+    // attaches and, from Android 11, as it opens its hole
+    // (SurfaceView.performDrawFinished).
+    @Override
+    public void requestTransparentRegion(View child) {
+        super.requestTransparentRegion(child);
+        if (child == mView) {
+            mOutgoingView.onTransparentRegionRequested();
+        }
     }
 
     /** A recording was submitted. Main thread; called from native. */

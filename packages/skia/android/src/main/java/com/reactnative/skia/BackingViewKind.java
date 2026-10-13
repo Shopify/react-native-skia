@@ -24,15 +24,15 @@ enum BackingViewKind {
 
     /**
      * Whether a new view of this kind, replacing an outgoing one, keeps that
-     * view on screen until the new one presents its first frame. A SurfaceView
-     * shows nothing before then, while an outgoing TextureView leaves with the
-     * window frame that removes it, so swapping a canvas on screen would show
-     * what lies under it in between. An outgoing SurfaceView is not kept: a
-     * TextureView draws inside the window, so it reaches the screen with the
-     * window frame the SurfaceView leaves with, and keeping the SurfaceView
-     * longer would only blend the two.
+     * view on screen until the new one shows the canvas (OutgoingViewHold). A
+     * SurfaceView shows nothing before its first frame, while an outgoing
+     * TextureView leaves with the window frame that removes it, so swapping a
+     * canvas on screen would show what lies under it in between. An outgoing
+     * SurfaceView is not kept: a TextureView draws inside the window, so it
+     * reaches the screen with the window frame the SurfaceView leaves with,
+     * and keeping the SurfaceView longer would only blend the two.
      */
-    boolean keepsOutgoingUntilFirstFrame(BackingViewKind outgoing, boolean shown, int width, int height) {
+    boolean keepsOutgoingOnScreen(BackingViewKind outgoing, boolean shown, int width, int height) {
         return switch (this) {
             case SURFACE_VIEW -> outgoing == TEXTURE_VIEW && shown && width > 0 && height > 0;
             case TEXTURE_VIEW -> false;

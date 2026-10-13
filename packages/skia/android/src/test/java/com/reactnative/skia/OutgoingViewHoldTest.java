@@ -55,12 +55,15 @@ public class OutgoingViewHoldTest {
         }
     }
 
+    private static final OutgoingViewHold.Arrival FIRST_FRAME = OutgoingViewHold.Arrival.FIRST_FRAME;
+    private static final OutgoingViewHold.Arrival HOLE_AFTER_FIRST_FRAME = OutgoingViewHold.Arrival.HOLE_AFTER_FIRST_FRAME;
+
     private final RecordingHost mHost = new RecordingHost();
     private final OutgoingViewHold<String> mHold = new OutgoingViewHold<>(mHost);
 
     @Test
     public void heldViewLeavesOnceAWindowFrameAfterTheFirstFrameHasCommitted() {
-        mHold.hold("texture");
+        mHold.hold("texture", FIRST_FRAME);
         mHold.onFirstFramePresented();
         assertEquals(Arrays.asList(), mHost.removed);
         assertSame("texture", mHold.held());
@@ -72,7 +75,7 @@ public class OutgoingViewHoldTest {
 
     @Test
     public void heldViewStaysWhileNoFirstFrameHasBeenPresented() {
-        mHold.hold("texture");
+        mHold.hold("texture", FIRST_FRAME);
         mHost.commitWindowFrame();
         assertEquals(Arrays.asList(), mHost.removed);
         assertSame("texture", mHold.held());
@@ -80,7 +83,7 @@ public class OutgoingViewHoldTest {
 
     @Test
     public void releaseRemovesTheHeldViewAtOnce() {
-        mHold.hold("texture");
+        mHold.hold("texture", FIRST_FRAME);
         mHold.release();
         assertEquals(Arrays.asList("texture"), mHost.removed);
         assertNull(mHold.held());
@@ -88,17 +91,17 @@ public class OutgoingViewHoldTest {
 
     @Test
     public void holdingAnotherViewRemovesTheFirstAtOnce() {
-        mHold.hold("first");
-        mHold.hold("second");
+        mHold.hold("first", FIRST_FRAME);
+        mHold.hold("second", FIRST_FRAME);
         assertEquals(Arrays.asList("first"), mHost.removed);
         assertSame("second", mHold.held());
     }
 
     @Test
     public void aCommitScheduledForAReplacedViewLeavesTheNewOneHeld() {
-        mHold.hold("first");
+        mHold.hold("first", FIRST_FRAME);
         mHold.onFirstFramePresented();
-        mHold.hold("second");
+        mHold.hold("second", FIRST_FRAME);
         mHost.commitWindowFrame();
         assertEquals(Arrays.asList("first"), mHost.removed);
         assertSame("second", mHold.held());
@@ -106,7 +109,7 @@ public class OutgoingViewHoldTest {
 
     @Test
     public void eachViewIsRemovedOnce() {
-        mHold.hold("texture");
+        mHold.hold("texture", FIRST_FRAME);
         mHold.onFirstFramePresented();
         mHold.onFirstFramePresented();
         mHost.commitWindowFrame();
@@ -118,6 +121,7 @@ public class OutgoingViewHoldTest {
     @Test
     public void nothingHeldMeansNothingScheduledOrRemoved() {
         mHold.onFirstFramePresented();
+        mHold.onTransparentRegionRequested();
         mHold.release();
         assertEquals(0, mHost.afterFrameCommit.size());
         assertEquals(0, mHost.delayed.size());
@@ -127,7 +131,7 @@ public class OutgoingViewHoldTest {
 
     @Test
     public void aFirstFrameThatNeverComesIsWaitedForOnlyUntilTheDeadline() {
-        mHold.hold("texture");
+        mHold.hold("texture", FIRST_FRAME);
         assertEquals(Arrays.asList(Long.valueOf(FirstFrameDrawGate.FIRST_FRAME_WAIT_MILLIS)), mHost.delays);
 
         mHost.elapse();
@@ -137,26 +141,103 @@ public class OutgoingViewHoldTest {
 
     @Test
     public void theFirstFrameCancelsTheDeadline() {
-        mHold.hold("texture");
+        mHold.hold("texture", FIRST_FRAME);
         mHold.onFirstFramePresented();
         assertEquals(0, mHost.delayed.size());
     }
 
     @Test
     public void releasingCancelsTheDeadline() {
-        mHold.hold("texture");
+        mHold.hold("texture", FIRST_FRAME);
         mHold.release();
         assertEquals(0, mHost.delayed.size());
     }
 
     @Test
     public void holdingAnotherViewRestartsTheDeadline() {
-        mHold.hold("first");
-        mHold.hold("second");
+        mHold.hold("first", FIRST_FRAME);
+        mHold.hold("second", FIRST_FRAME);
         assertEquals(1, mHost.delayed.size());
         assertEquals(Arrays.asList("first"), mHost.removed);
 
         mHost.elapse();
         assertEquals(Arrays.asList("first", "second"), mHost.removed);
+    }
+
+    @Test
+    public void aTransparentRegionRequestDoesNotMoveAViewArrivingWithItsFirstFrame() {
+        mHold.hold("texture", FIRST_FRAME);
+        mHold.onTransparentRegionRequested();
+        assertEquals(0, mHost.afterFrameCommit.size());
+
+        mHold.onFirstFramePresented();
+        mHold.onTransparentRegionRequested();
+        assertEquals(1, mHost.afterFrameCommit.size());
+    }
+
+    @Test
+    public void heldViewWaitingForTheHoleStaysThroughWindowFramesAfterTheFirstFrame() {
+        mHold.hold("texture", HOLE_AFTER_FIRST_FRAME);
+        mHold.onFirstFramePresented();
+        assertEquals(0, mHost.afterFrameCommit.size());
+
+        mHost.commitWindowFrame();
+        assertEquals(Arrays.asList(), mHost.removed);
+        assertSame("texture", mHold.held());
+    }
+
+    @Test
+    public void heldViewLeavesOnceAWindowFrameAfterTheHoleHasCommitted() {
+        mHold.hold("texture", HOLE_AFTER_FIRST_FRAME);
+        mHold.onFirstFramePresented();
+        mHold.onTransparentRegionRequested();
+        assertEquals(Arrays.asList(), mHost.removed);
+        assertEquals(0, mHost.delayed.size());
+
+        mHost.commitWindowFrame();
+        assertEquals(Arrays.asList("texture"), mHost.removed);
+        assertNull(mHold.held());
+    }
+
+    @Test
+    public void theRequestAViewMakesAsItAttachesIsNotItsHole() {
+        mHold.hold("texture", HOLE_AFTER_FIRST_FRAME);
+        mHold.onTransparentRegionRequested();
+        mHold.onFirstFramePresented();
+        mHost.commitWindowFrame();
+        assertEquals(Arrays.asList(), mHost.removed);
+
+        mHold.onTransparentRegionRequested();
+        mHost.commitWindowFrame();
+        assertEquals(Arrays.asList("texture"), mHost.removed);
+    }
+
+    @Test
+    public void aHoleThatNeverOpensIsWaitedForOnlyUntilTheDeadline() {
+        mHold.hold("texture", HOLE_AFTER_FIRST_FRAME);
+        mHold.onFirstFramePresented();
+        assertEquals(1, mHost.delayed.size());
+
+        mHost.elapse();
+        assertEquals(Arrays.asList("texture"), mHost.removed);
+        assertNull(mHold.held());
+    }
+
+    @Test
+    public void eachHoleIsWaitedOnOnce() {
+        mHold.hold("texture", HOLE_AFTER_FIRST_FRAME);
+        mHold.onFirstFramePresented();
+        mHold.onTransparentRegionRequested();
+        mHold.onTransparentRegionRequested();
+        assertEquals(1, mHost.afterFrameCommit.size());
+    }
+
+    @Test
+    public void onlyASurfaceViewBehindTheWindowOnAndroid13WaitsForItsHole() {
+        for (int sdkInt = 26; sdkInt <= 37; sdkInt++) {
+            OutgoingViewHold.Arrival behindTheWindow = sdkInt == 33 ? HOLE_AFTER_FIRST_FRAME : FIRST_FRAME;
+            assertEquals("API " + sdkInt, behindTheWindow, OutgoingViewHold.Arrival.ofSurfaceView(sdkInt, false));
+            assertEquals("API " + sdkInt, FIRST_FRAME, OutgoingViewHold.Arrival.ofSurfaceView(sdkInt, true));
+        }
     }
 }
