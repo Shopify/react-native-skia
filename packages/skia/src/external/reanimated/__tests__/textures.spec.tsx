@@ -13,8 +13,8 @@ const mockUIQueue: (() => void)[] = [];
 const mockCalls = { scheduleOnUI: 0, deprecatedRunOnUI: 0 };
 const mockPlatform = { OS: "ios" };
 const mockLoadedImage: { current: SkImage | null } = { current: null };
-const mockNonTextureSnapshot = {};
-const mockSnapshot = { makeNonTextureImage: () => mockNonTextureSnapshot };
+const mockRasterSnapshot = {};
+const mockSnapshot = { makeRasterImageSync: () => mockRasterSnapshot };
 const mockCanvas = { drawPicture: jest.fn() };
 const mockSurface = {
   getCanvas: () => mockCanvas,
@@ -111,7 +111,7 @@ const size = { width: 32, height: 16 };
 
 describe.each([
   ["ios", mockSnapshot],
-  ["web", mockNonTextureSnapshot],
+  ["web", mockRasterSnapshot],
 ])("usePictureAsTexture on %s", (OS, expectedTexture) => {
   beforeEach(() => {
     mockPlatform.OS = OS;
