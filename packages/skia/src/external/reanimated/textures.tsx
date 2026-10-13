@@ -39,7 +39,7 @@ const createTexture = (
   surface.flush();
   texture.value = surface.makeImageSnapshot();
   if (Platform.OS === "web") {
-    texture.value = texture.value.makeNonTextureImage();
+    texture.value = texture.value.makeRasterImageSync();
   }
 };
 
