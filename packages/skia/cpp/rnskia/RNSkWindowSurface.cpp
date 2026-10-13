@@ -191,7 +191,7 @@ bool RNSkWindowSurface::surfaceSupportsFormat(wgpu::TextureFormat format) {
 }
 
 bool RNSkWindowSurface::canPresent() {
-  if (!_surface) {
+  if (!_surface || _presentsHeld) {
     return false;
   }
   if (_canPresent && !_canPresent()) {

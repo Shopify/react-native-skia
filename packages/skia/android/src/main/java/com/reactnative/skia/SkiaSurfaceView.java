@@ -25,14 +25,24 @@ public class SkiaSurfaceView extends SurfaceView implements SurfaceHolder.Callba
             // Only reached on API 29 and later, see SurfaceHandOver.defersArrivalToWindowFrame.
             @Override
             @RequiresApi(Build.VERSION_CODES.Q)
-            public void runAfterWindowFrameCommits(Runnable handOver) {
-                getViewTreeObserver().registerFrameCommitCallback(handOver);
+            public void runAfterWindowFrameCommits(Runnable release) {
+                getViewTreeObserver().registerFrameCommitCallback(release);
                 invalidate();
             }
 
             @Override
             public void handOverSurface() {
                 mApi.onSurfaceCreated(getHolder().getSurface(), getWidth(), getHeight());
+            }
+
+            @Override
+            public void holdFirstFrame() {
+                mApi.holdFirstFrame();
+            }
+
+            @Override
+            public void releaseFirstFrame() {
+                mApi.releaseFirstFrame();
             }
 
             @Override

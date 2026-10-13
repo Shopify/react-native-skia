@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <functional>
 #include <mutex>
 #include <utility>
@@ -107,6 +108,13 @@ public:
     _canPresent = std::move(canPresent);
   }
 
+  /**
+   Declines every present while held, without requesting a redraw: the
+   platform view holds the presents of a window whose layer shows before the
+   window frame that lays it out, and presents once it lets go. Main thread.
+   */
+  void setPresentsHeld(bool held) { _presentsHeld = held; }
+
   // RNSkSurface -------------------------------------------------------------
 
   /** Width of the window, in pixels; 0 without a window. Any thread. */
@@ -169,6 +177,7 @@ private:
 
   std::function<void()> _requestRedraw;
   std::function<bool()> _canPresent;
+  std::atomic<bool> _presentsHeld{false};
 };
 
 } // namespace RNSkia

@@ -12,7 +12,9 @@ import org.junit.Test;
 
 public class SurfaceHandOverTest {
     private enum Call {
+        HELD,
         CREATED,
+        RELEASED,
         CHANGED,
         DESTROYED
     }
@@ -22,13 +24,23 @@ public class SurfaceHandOverTest {
         final List<Runnable> afterFrameCommit = new ArrayList<>();
 
         @Override
-        public void runAfterWindowFrameCommits(Runnable handOver) {
-            afterFrameCommit.add(handOver);
+        public void runAfterWindowFrameCommits(Runnable release) {
+            afterFrameCommit.add(release);
         }
 
         @Override
         public void handOverSurface() {
             calls.add(Call.CREATED);
+        }
+
+        @Override
+        public void holdFirstFrame() {
+            calls.add(Call.HELD);
+        }
+
+        @Override
+        public void releaseFirstFrame() {
+            calls.add(Call.RELEASED);
         }
 
         @Override
@@ -44,9 +56,13 @@ public class SurfaceHandOverTest {
         void commitWindowFrame() {
             List<Runnable> pending = new ArrayList<>(afterFrameCommit);
             afterFrameCommit.clear();
-            for (Runnable handOver : pending) {
-                handOver.run();
+            for (Runnable release : pending) {
+                release.run();
             }
+        }
+
+        void commitWindowFrameRegisteredFirst() {
+            afterFrameCommit.remove(0).run();
         }
     }
 
@@ -75,51 +91,60 @@ public class SurfaceHandOverTest {
     }
 
     @Test
-    public void deferredSurfaceIsHandedOverOnceTheWindowFrameCommits() {
+    public void deferredSurfaceIsHandedOverAtOnceWithItsFirstFrameHeldUntilTheWindowFrameCommits() {
         mHandOver.onSurfaceCreated(true);
-        assertEquals(Arrays.asList(), mHost.calls);
+        assertEquals(Arrays.asList(Call.HELD, Call.CREATED), mHost.calls);
 
         mHost.commitWindowFrame();
-        assertEquals(Arrays.asList(Call.CREATED), mHost.calls);
+        assertEquals(Arrays.asList(Call.HELD, Call.CREATED, Call.RELEASED), mHost.calls);
     }
 
     @Test
-    public void undeferredSurfaceIsHandedOverAtOnce() {
+    public void undeferredSurfaceIsHandedOverAtOnceAndHoldsNothing() {
         mHandOver.onSurfaceCreated(false);
         assertEquals(Arrays.asList(Call.CREATED), mHost.calls);
         assertEquals(0, mHost.afterFrameCommit.size());
     }
 
     @Test
-    public void surfaceReleasedBeforeTheCommitIsNeverHandedOver() {
+    public void surfaceReleasedBeforeTheCommitLetsGoOfItsHoldOnce() {
         mHandOver.onSurfaceCreated(true);
         mHandOver.onSurfaceReleased();
         mHost.commitWindowFrame();
-        assertEquals(Arrays.asList(), mHost.calls);
+        assertEquals(Arrays.asList(Call.HELD, Call.CREATED, Call.DESTROYED, Call.RELEASED), mHost.calls);
     }
 
     @Test
-    public void surfaceRecreatedBeforeTheCommitIsHandedOverOnce() {
+    public void surfaceRecreatedBeforeTheCommitIsReleasedOnceByItsOwnCommit() {
         mHandOver.onSurfaceCreated(true);
         mHandOver.onSurfaceReleased();
         mHandOver.onSurfaceCreated(true);
         mHost.commitWindowFrame();
-        assertEquals(Arrays.asList(Call.CREATED), mHost.calls);
+        assertEquals(
+                Arrays.asList(Call.HELD, Call.CREATED, Call.DESTROYED, Call.RELEASED, Call.HELD, Call.CREATED,
+                        Call.RELEASED),
+                mHost.calls);
     }
 
     @Test
-    public void changesReachTheRendererOnlyForAHandedOverSurface() {
+    public void commitAwaitedByAReleasedSurfaceLeavesTheNextSurfaceHeld() {
+        mHandOver.onSurfaceCreated(true);
+        mHandOver.onSurfaceReleased();
+        mHandOver.onSurfaceCreated(true);
+        mHost.commitWindowFrameRegisteredFirst();
+        assertEquals(Arrays.asList(Call.HELD, Call.CREATED, Call.DESTROYED, Call.RELEASED, Call.HELD, Call.CREATED),
+                mHost.calls);
+    }
+
+    @Test
+    public void changesReachTheRendererForAHandedOverSurfaceWhileItsFirstFrameIsHeld() {
         mHandOver.onSurfaceCreated(true);
         mHandOver.onSurfaceChanged();
-        assertEquals(Arrays.asList(), mHost.calls);
-
-        mHost.commitWindowFrame();
-        mHandOver.onSurfaceChanged();
-        assertEquals(Arrays.asList(Call.CREATED, Call.CHANGED), mHost.calls);
+        assertEquals(Arrays.asList(Call.HELD, Call.CREATED, Call.CHANGED), mHost.calls);
     }
 
     @Test
-    public void firstSurfaceReplacingACanvasOnScreenIsHandedOverAtOnce() {
+    public void firstSurfaceReplacingACanvasOnScreenHoldsNothing() {
         SurfaceHandOver replacing = new SurfaceHandOver(mHost, true);
         replacing.onSurfaceCreated(true);
         assertEquals(Arrays.asList(Call.CREATED), mHost.calls);
@@ -127,15 +152,16 @@ public class SurfaceHandOverTest {
     }
 
     @Test
-    public void laterSurfaceOfAReplacingViewWaitsForTheWindowFrame() {
+    public void laterSurfaceOfAReplacingViewHoldsItsFirstFrameForTheWindowFrame() {
         SurfaceHandOver replacing = new SurfaceHandOver(mHost, true);
         replacing.onSurfaceCreated(true);
         replacing.onSurfaceReleased();
         replacing.onSurfaceCreated(true);
-        assertEquals(Arrays.asList(Call.CREATED, Call.DESTROYED), mHost.calls);
+        assertEquals(Arrays.asList(Call.CREATED, Call.DESTROYED, Call.HELD, Call.CREATED), mHost.calls);
 
         mHost.commitWindowFrame();
-        assertEquals(Arrays.asList(Call.CREATED, Call.DESTROYED, Call.CREATED), mHost.calls);
+        assertEquals(Arrays.asList(Call.CREATED, Call.DESTROYED, Call.HELD, Call.CREATED, Call.RELEASED),
+                mHost.calls);
     }
 
     @Test
