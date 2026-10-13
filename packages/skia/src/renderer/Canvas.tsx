@@ -146,24 +146,28 @@ const useCanvasRoot = ({
   }, [root]);
 
   // Component methods
-  useImperativeHandle(ref, (): CanvasRef => ({
-    makeImageSnapshot: (rect?: SkRect) => {
-      return SkiaViewApi.makeImageSnapshot(nativeId, rect);
-    },
+  useImperativeHandle(
+    ref,
+    (): CanvasRef => ({
+      makeImageSnapshot: (rect?: SkRect) => {
+        return SkiaViewApi.makeImageSnapshot(nativeId, rect);
+      },
 
-    redraw: () => {
-      SkiaViewApi.requestRedraw(nativeId);
-    },
-    getNativeId: () => {
-      return nativeId;
-    },
-    measure: (callback) => {
-      viewRef.current?.measure(callback);
-    },
-    measureInWindow: (callback) => {
-      viewRef.current?.measureInWindow(callback);
-    },
-  }));
+      redraw: () => {
+        SkiaViewApi.requestRedraw(nativeId);
+      },
+      getNativeId: () => {
+        return nativeId;
+      },
+      measure: (callback) => {
+        viewRef.current?.measure(callback);
+      },
+      measureInWindow: (callback) => {
+        viewRef.current?.measureInWindow(callback);
+      },
+    }),
+    [nativeId, viewRef]
+  );
   return { nativeId, viewRef };
 };
 
