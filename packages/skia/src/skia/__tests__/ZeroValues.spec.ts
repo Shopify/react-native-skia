@@ -24,7 +24,7 @@ const rgbaAt = (canvasOwner: SkSurface, x = 0, y = 0) => {
 };
 
 const makeGradientImage = (Skia: Skia, size = 64) => {
-  const surface = Skia.Surface.Make(size, size)!;
+  const surface = Skia.Surface.MakeRaster(size, size)!;
   const canvas = surface.getCanvas();
   const paint = Skia.Paint();
   paint.setShader(
