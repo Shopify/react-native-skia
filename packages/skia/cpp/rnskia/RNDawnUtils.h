@@ -159,12 +159,28 @@ requestDevice(dawn::native::Adapter &nativeAdapter,
               bool fatalOnDeviceLost = true) {
   wgpu::Adapter adapter = nativeAdapter.Get();
 
-  // Filter to only features the adapter supports
+  // Filter to only features the adapter supports.
+  // Dawn's Vulkan backend accepts at most one shared-fence feature per device
+  // (SyncFD, VkSemaphoreOpaqueFD or VkSemaphoreZirconHandle) and fails device
+  // creation otherwise. Some drivers (Samsung Xclipse, the Android emulator)
+  // advertise several, so keep only the first supported one in request order.
   std::vector<wgpu::FeatureName> features;
+  bool hasVulkanSharedFence = false;
   for (auto feature : requestedFeatures) {
-    if (adapter.HasFeature(feature)) {
-      features.push_back(feature);
+    if (!adapter.HasFeature(feature)) {
+      continue;
     }
+    const bool isVulkanSharedFence =
+        feature == wgpu::FeatureName::SharedFenceSyncFD ||
+        feature == wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD ||
+        feature == wgpu::FeatureName::SharedFenceVkSemaphoreZirconHandle;
+    if (isVulkanSharedFence) {
+      if (hasVulkanSharedFence) {
+        continue;
+      }
+      hasVulkanSharedFence = true;
+    }
+    features.push_back(feature);
   }
 
   static constexpr const char *kToggles[] = {
@@ -285,7 +301,19 @@ createDawnBackendContext(dawn::native::Instance *instance) {
 
   // Primary device features — request everything Skia/Graphite can use
   std::vector<wgpu::FeatureName> features = {
+#if !defined(__ANDROID__)
+      // Not on Android: Dawn creates its Vulkan swapchain images without
+      // VK_IMAGE_CREATE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_BIT_EXT, so every
+      // MSAA pass Graphite draws onto the window with this feature violates
+      // VUID-VkFramebufferCreateInfo-samples-06881 (confirmed with the
+      // validation layers on a Pixel 8). Mali tolerates it; Adreno crashes in
+      // vkCreateFramebuffer (#4158). Without the feature Graphite renders
+      // through a transient MSAA attachment and resolves, the same path as on
+      // GPUs without the extension. Re-enable once Dawn creates swapchains
+      // with the flag or reports which textures cannot take an implicit
+      // sample count: https://issues.chromium.org/issues/571594984
       wgpu::FeatureName::MSAARenderToSingleSampled,
+#endif
       wgpu::FeatureName::TransientAttachments,
       wgpu::FeatureName::Unorm16TextureFormats,
       wgpu::FeatureName::DualSourceBlending,
@@ -316,6 +344,9 @@ createDawnBackendContext(dawn::native::Instance *instance) {
 #else
       wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer,
       // Vulkan equivalent of the above: EndAccess exports a sync-fd fence.
+      // Only one of these is enabled (see requestDevice). SyncFD comes first
+      // because AHardwareBuffer interop is sync-fd based; OpaqueFD is a
+      // fallback for drivers that do not advertise sync-fd semaphores.
       wgpu::FeatureName::SharedFenceSyncFD,
       wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD,
       // Video and camera frames are YUV AHardwareBuffers. Dawn imports them

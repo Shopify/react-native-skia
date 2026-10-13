@@ -8,6 +8,7 @@
 #include "RNSkJsiViewApi.h"
 #include "RNSkView.h"
 #include "api/JsiSkApi.h"
+#include "jsi/BoxedNativeObject.h"
 
 namespace RNSkia {
 namespace jsi = facebook::jsi;
@@ -53,6 +54,15 @@ void RNSkManager::installBindings() {
 
   _jsRuntime->global().setProperty(*_jsRuntime, "SkiaViewApi",
                                    makeJsiObject(*_jsRuntime, _viewApi));
+
+  // The native half of the worklet serializer (see
+  // src/skia/SkiaWorkletSerialization.ts). The serializer worklets capture it
+  // by closure and worklets passes a HostObject to every runtime by reference,
+  // so the main runtime is the only place it needs installing.
+  _jsRuntime->global().setProperty(
+      *_jsRuntime, "__skiaWorkletHelpers",
+      jsi::Object::createFromHostObject(
+          *_jsRuntime, std::make_shared<RNJsi::NativeObjectWorkletHelpers>()));
 
   // The WebGPU JS API (RNWebGPU, navigator.gpu, constants, createImageBitmap)
   // is no longer installed here: react-native-webgpu is the single WebGPU API

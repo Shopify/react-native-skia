@@ -4,6 +4,7 @@
  *
  *   react-native-skia-graphite-android      libs/<abi>/*.a
  *   react-native-skia-graphite-apple-ios    libs/*.xcframework, Package.swift
+ *   react-native-skia-graphite-apple-tvos   libs/*.xcframework, Package.swift
  *   react-native-skia-graphite-apple-macos  libs/*.xcframework, Package.swift
  *   react-native-webgpu-dawn                libs/android/<abi>/libwebgpu_dawn.so,
  *                                           libs/apple/libwebgpu_dawn.xcframework,
@@ -90,6 +91,7 @@ const DAWN_PACKAGE = "react-native-webgpu-dawn";
 // targets. React Native's generated aggregate links at iOS 15, and SwiftPM
 // accepts any lower floor.
 const SPM_IOS = ".iOS(.v13)";
+const SPM_TVOS = ".tvOS(.v13)";
 const SPM_MACOS = ".macOS(.v10_15)";
 
 const parseArgs = () => {
@@ -125,6 +127,7 @@ export const deriveNpmVersion = (skiaVersion: string): string => {
 const artifactDestinations = (): Record<string, string> => {
   const destinations: Record<string, string> = {
     "skia-apple-ios": path.join(LibsRoot, "ios"),
+    "skia-apple-tvos": path.join(LibsRoot, "tvos"),
     "skia-apple-macos": path.join(LibsRoot, "macos"),
     "dawn-headers": DawnLibs,
   };
@@ -220,7 +223,8 @@ const packageSpecs = (skiaVersion: string): PackageSpec[] => [
   },
   {
     name: "react-native-skia-graphite-apple-ios",
-    description: "Skia Graphite prebuilt binaries for iOS (device + simulator)",
+    description:
+      "Skia Graphite prebuilt binaries for iOS (device + simulator + Mac Catalyst)",
     populate: (pkgDir) =>
       copyXcframeworks(
         path.join(LibsRoot, "ios"),
@@ -228,6 +232,18 @@ const packageSpecs = (skiaVersion: string): PackageSpec[] => [
         APPLE_SKIA_FRAMEWORKS
       ),
     spmPlatforms: [SPM_IOS],
+  },
+  {
+    name: "react-native-skia-graphite-apple-tvos",
+    description:
+      "Skia Graphite prebuilt binaries for tvOS (device + simulator)",
+    populate: (pkgDir) =>
+      copyXcframeworks(
+        path.join(LibsRoot, "tvos"),
+        path.join(pkgDir, "libs"),
+        APPLE_SKIA_FRAMEWORKS
+      ),
+    spmPlatforms: [SPM_TVOS],
   },
   {
     name: "react-native-skia-graphite-apple-macos",
@@ -269,7 +285,7 @@ const packageSpecs = (skiaVersion: string): PackageSpec[] => [
       );
       return [DawnLib];
     },
-    spmPlatforms: [SPM_IOS, SPM_MACOS],
+    spmPlatforms: [SPM_IOS, SPM_TVOS, SPM_MACOS],
     license: { name: "BSD-3-Clause", file: path.join(DawnLibs, "LICENSE") },
     extra: {
       dawn: {
