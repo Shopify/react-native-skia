@@ -9,6 +9,7 @@ import { Snapshot4 } from "./Snapshot4";
 import { Snapshot5 } from "./Snapshot5";
 import { Snapshot6 } from "./Snapshot6";
 import { Snapshot7 } from "./Snapshot7";
+import { OnLayout } from "./OnLayout";
 
 export const Screens: Record<string, FC> = {
   GraphiteView,
@@ -21,4 +22,5 @@ export const Screens: Record<string, FC> = {
   Snapshot5,
   Snapshot6,
   Snapshot7,
+  OnLayout,
 };
