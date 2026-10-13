@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     display: "none",
   },
   plainScreen: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: "#ff9500",
   },
   canvas: {
