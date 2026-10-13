@@ -158,7 +158,8 @@ const useCanvasRoot = ({
         measureInWindow: (callback) => {
           viewRef.current?.measureInWindow(callback);
         },
-      }) as CanvasRef
+      }) as CanvasRef,
+    [nativeId, viewRef]
   );
   return { nativeId, viewRef };
 };
