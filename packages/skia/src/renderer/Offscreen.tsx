@@ -32,19 +32,19 @@ export const drawAsPicture = async (element: ReactElement, bounds?: SkRect) => {
 export const drawAsImage = async (
   element: ReactElement,
   size: SkSize
-): Promise<SkImage | null> => {
+): Promise<SkImage> => {
   return drawAsImageFromPicture(await drawAsPicture(element), size);
 };
 
 export const drawAsImageFromPicture = (
   picture: SkPicture,
   size: SkSize
-): SkImage | null => {
+): SkImage => {
   "worklet";
   const surface = Skia.Surface.MakeOffscreen(size.width, size.height)!;
   const canvas = surface.getCanvas();
   canvas.drawPicture(picture);
   surface.flush();
   const image = surface.makeImageSnapshot();
-  return image.makeNonTextureImage();
+  return image.makeRasterImageSync();
 };
