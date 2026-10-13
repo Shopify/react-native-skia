@@ -80,8 +80,9 @@ export interface SkiaBaseViewProps extends ViewProps {
   /** Android-only rendering options. Ignored on iOS and web. */
   android?: AndroidCanvasProps;
 
-  // On web, only 16 WebGL contextes are allowed. If the drawing is non-animated, set
-  // __destroyWebGLContextAfterRender to true to release the context after each draw.
+  // On web, browsers allow about 16 live WebGL contexts per page. Set
+  // __destroyWebGLContextAfterRender to true to draw the canvas through one
+  // context shared by every such canvas instead, at the cost of a copy per frame.
   __destroyWebGLContextAfterRender?: boolean;
 }
 

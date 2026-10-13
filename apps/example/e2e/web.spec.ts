@@ -130,12 +130,13 @@ test("WebGLLifecycle: context lifetime", async ({ page }) => {
     })
   ).toBe(true);
 
-  // Live -> static -> live: each renderer kind needs its own element.
+  // Own context -> shared context -> own context: each renderer kind needs
+  // its own element.
   await page.getByTestId("renderer").click();
-  await expect(status).toContainText("renderer: static");
+  await expect(status).toContainText("renderer: shared");
   await expect(reference).toBeVisible();
   await page.getByTestId("renderer").click();
-  await expect(status).toContainText("renderer: live");
+  await expect(status).toContainText("renderer: own context");
   await expect(status).toContainText("reference: ok");
 
   await page.screenshot({
@@ -181,5 +182,49 @@ test("WebOffscreen: offscreen surfaces don't exhaust WebGL contexts", async ({
   await expect(status).toContainText("· snapshot: ok");
   await expect(status).toContainText("reference snapshot: ok");
   await expect(status).not.toContainText("error:");
+  expect(errors, errors.join("\n")).toEqual([]);
+});
+
+// __destroyWebGLContextAfterRender canvases hold no WebGL context of their
+// own: they are drawn through one shared context, so a page can have more of
+// them than the browser allows live contexts, animated ones included.
+test("WebGLContexts: canvases are drawn through one shared context", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.stack ?? error.message));
+  const evictions: string[] = [];
+  page.on("console", (message) => {
+    if (/WebGL contexts/i.test(message.text())) {
+      evictions.push(message.text());
+    }
+  });
+  await page.goto("/api/webgl-contexts");
+  const status = page.getByTestId("status");
+  await expect(status).toContainText("canvases: 30/30", { timeout: 60_000 });
+  const grid = page.getByTestId("grid").locator("canvas");
+  expect(
+    await grid.evaluateAll((canvases: HTMLCanvasElement[]) =>
+      canvases.every((canvas) => canvas.getContext("webgl2") === null)
+    )
+  ).toBe(true);
+
+  // The animated canvases keep drawing.
+  const animated = page.getByTestId("animated").first().locator("canvas");
+  const frame = () =>
+    animated.evaluate((canvas: HTMLCanvasElement) =>
+      canvas.toDataURL("image/png")
+    );
+  const before = await frame();
+  await page.waitForTimeout(300);
+  expect(await frame()).not.toEqual(before);
+
+  // Chrome's eviction runs on a timer after the context count is exceeded.
+  await page.waitForTimeout(500);
+  await page.screenshot({
+    path: path.join(screenshotsDir, "WebGLContexts-shared.png"),
+  });
+  await expect(status).toContainText("canvases: 30/30");
+  expect(evictions).toEqual([]);
   expect(errors, errors.join("\n")).toEqual([]);
 });

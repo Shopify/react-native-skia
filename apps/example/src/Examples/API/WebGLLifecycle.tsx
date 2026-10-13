@@ -34,8 +34,9 @@ import {
 //   the number of live contexts (16 in Chrome, which then evicts the oldest,
 //   visible or not) (#3349).
 // - A context the browser evicted has to be picked up again once restored.
-// - Switching between the live and the static renderer needs a fresh
-//   element, as an element is bound to one context kind for life.
+// - Switching between a canvas with its own context and one drawn through
+//   the shared context needs a fresh element, as an element is bound to one
+//   context kind (WebGL or 2D) for life.
 // Every action below reports on the status line; on native they are no-ops.
 
 const SIZE = 200;
@@ -97,7 +98,7 @@ class Boundary extends Component<BoundaryProps, { failed: boolean }> {
 
 export const WebGLLifecycle = () => {
   const [strict, setStrict] = useState(false);
-  const [isStatic, setIsStatic] = useState(false);
+  const [isShared, setIsShared] = useState(false);
   const [churnMounted, setChurnMounted] = useState(false);
   const [cycle, setCycle] = useState(0);
   const [contextState, setContextState] = useState("unknown");
@@ -119,8 +120,8 @@ export const WebGLLifecycle = () => {
         setContextState("no canvas");
         return;
       }
-      if (isStatic) {
-        setContextState("static");
+      if (isShared) {
+        setContextState("shared");
         return;
       }
       const gl = canvas.getContext("webgl2");
@@ -133,7 +134,7 @@ export const WebGLLifecycle = () => {
     tick();
     const interval = setInterval(tick, 250);
     return () => clearInterval(interval);
-  }, [isStatic, strict]);
+  }, [isShared, strict]);
 
   const remount = () => {
     setError(null);
@@ -167,7 +168,7 @@ export const WebGLLifecycle = () => {
 
   const reference = (
     <Boundary onError={setError}>
-      <Canvas style={styles.canvas} __destroyWebGLContextAfterRender={isStatic}>
+      <Canvas style={styles.canvas} __destroyWebGLContextAfterRender={isShared}>
         <Spinner />
       </Canvas>
     </Boundary>
@@ -183,7 +184,7 @@ export const WebGLLifecycle = () => {
       <Text style={styles.status} testID="status">
         {`cycles ${cycle}/${CHURN_CYCLES} · reference: ${contextState}` +
           ` · strict: ${strict ? "on" : "off"}` +
-          ` · renderer: ${isStatic ? "static" : "live"}` +
+          ` · renderer: ${isShared ? "shared" : "own context"}` +
           (error ? ` · error: ${error}` : "")}
       </Text>
       <View style={styles.row}>
@@ -219,8 +220,8 @@ export const WebGLLifecycle = () => {
         <Button testID="restore" title="Restore context" onPress={restore} />
         <Button
           testID="renderer"
-          title={isStatic ? "Renderer: static" : "Renderer: live"}
-          onPress={() => setIsStatic((s) => !s)}
+          title={isShared ? "Renderer: shared" : "Renderer: own context"}
+          onPress={() => setIsShared((s) => !s)}
         />
       </View>
       <Text style={styles.description}>
@@ -228,8 +229,8 @@ export const WebGLLifecycle = () => {
         reference canvas must not be evicted (Chrome logs "Too many active WebGL
         contexts" when it is). StrictMode: re-runs the renderer on the same
         element; the canvas must keep painting. Lose then restore: the canvas
-        goes blank, then resumes. Renderer: switches between the live and the
-        static renderer; both must paint.
+        goes blank, then resumes. Renderer: switches between a canvas with its
+        own context and one drawn through the shared context; both must paint.
       </Text>
     </ScrollView>
   );

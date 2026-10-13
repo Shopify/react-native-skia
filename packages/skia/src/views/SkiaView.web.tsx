@@ -28,13 +28,14 @@ import { useSkiaWebRenderer } from "./SkiaWebRenderer";
 import type { Renderer, WebFrame } from "./SkiaWebRenderer";
 
 // The web has no Graphite: the view paints pictures on a WebGL canvas (with
-// context-loss recovery and the destroy-context-after-render mode). It shows
-// one of two kinds of content. The picture of a <Canvas> or a
-// <SkiaPictureView> is a whole frame: the latest one wins. The recordings
-// submitted through the view's context (SkiaGraphiteView) keep their native
-// semantics, presented in submission order and never dropped, with one
-// difference: the surface starts cleared on every frame, so a recording draws
-// the whole frame rather than a delta.
+// context-loss recovery), or through the WebGL context shared by every
+// __destroyWebGLContextAfterRender canvas. It shows one of two kinds of
+// content. The picture of a <Canvas> or a <SkiaPictureView> is a whole
+// frame: the latest one wins. The recordings submitted through the view's
+// context (SkiaGraphiteView) keep their native semantics, presented in
+// submission order and never dropped, with one difference: the surface starts
+// cleared on every frame, so a recording draws the whole frame rather than a
+// delta.
 
 export interface SkiaViewHandle extends SkiaWebViewHandle {
   /** The canvas element, for Reanimated's measure(). */
@@ -164,7 +165,7 @@ export const SkiaView = (props: SkiaViewProps) => {
     [props.nativeID]
   );
 
-  const isStatic = props.__destroyWebGLContextAfterRender === true;
+  const shared = props.__destroyWebGLContextAfterRender === true;
 
   // Presents the recordings submitted since the last frame. A frame that
   // cannot be painted yet (unmeasured canvas, lost context) stays queued for
@@ -198,7 +199,7 @@ export const SkiaView = (props: SkiaViewProps) => {
     },
     [present]
   );
-  const rendererRef = useSkiaWebRenderer(canvasRef, isStatic, {
+  const rendererRef = useSkiaWebRenderer(canvasRef, shared, {
     paint,
     onLayout,
   });
@@ -394,16 +395,16 @@ export const SkiaView = (props: SkiaViewProps) => {
     ref: _ref,
     onLayout: _onLayout,
     nativeID: _nativeID,
-    __destroyWebGLContextAfterRender: _isStatic,
+    __destroyWebGLContextAfterRender: _shared,
     ...viewProps
   } = props;
   return (
     <Platform.View nativeID={`${nativeId}`} {...viewProps}>
       <canvas
         // A canvas element is bound to one context kind for life (WebGL for
-        // the live renderer, 2D for the static one), so switching renderers
-        // needs a fresh element.
-        key={isStatic ? "static" : "webgl"}
+        // its own context, 2D when drawn through the shared one), so
+        // switching renderers needs a fresh element.
+        key={shared ? "shared" : "webgl"}
         ref={canvasRef}
         style={{ display: "block", width: "100%", height: "100%" }}
       />

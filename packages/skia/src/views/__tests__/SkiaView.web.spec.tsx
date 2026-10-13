@@ -17,6 +17,8 @@ import {
   installCanvasKit,
   contexts,
   contextOf,
+  context2dOf,
+  OffscreenCanvasMock,
   fakePicture,
   display,
   mediaQueryListeners,
@@ -384,5 +386,113 @@ describe("SkiaView.web", () => {
     expect(contexts.has(staticCanvas)).toBe(false);
 
     await view.unmount();
+  });
+
+  // A __destroyWebGLContextAfterRender canvas holds no WebGL context: its
+  // frames are painted on the drawing buffer of the context shared with the
+  // offscreen surfaces, and copied into the element's 2D context.
+  describe("drawn through the shared context", () => {
+    it("draws any number of canvases through one context", async () => {
+      const { CanvasKitMock, rawCanvas, rawSurface, registry } =
+        installCanvasKit();
+      canvasSize.width = 360;
+      canvasSize.height = 520;
+      display.pixelDensity = 2;
+
+      const views = ["20", "21", "22"].map((id) =>
+        mountView(id, { isStatic: true })
+      );
+      await setPicture(20);
+      await setPicture(21);
+      await setPicture(22);
+
+      expect(CanvasKitMock.GetWebGLContext).toHaveBeenCalledTimes(1);
+      const shared = CanvasKitMock.GetWebGLContext.mock.calls[0][0];
+      expect(shared).toBeInstanceOf(OffscreenCanvasMock);
+      expect(registry.size).toBe(1);
+      // The buffer covers the canvases, in pixels, and is sized once.
+      expect(CanvasKitMock.MakeOnScreenGLSurface).toHaveBeenCalledTimes(1);
+      expect(shared.width).toBe(720);
+      expect(shared.height).toBe(1040);
+      expect(rawCanvas.drawPicture).toHaveBeenCalledTimes(3);
+      for (const view of views) {
+        const canvas = view.canvas();
+        expect(contexts.has(canvas)).toBe(false);
+        const ctx2d = context2dOf(canvas);
+        expect(ctx2d.attributes).toEqual({ colorSpace: "display-p3" });
+        expect(ctx2d.globalCompositeOperation).toBe("copy");
+        expect(ctx2d.drawImage).toHaveBeenCalledTimes(1);
+        expect(ctx2d.drawImage).toHaveBeenCalledWith(
+          shared,
+          0,
+          0,
+          720,
+          1040,
+          0,
+          0,
+          720,
+          1040
+        );
+      }
+
+      for (const view of views) {
+        await view.unmount();
+      }
+      // The shared buffer goes with the last canvas; the context stays, for
+      // the offscreen surfaces and the next canvases.
+      expect(rawSurface.delete).toHaveBeenCalledTimes(1);
+      expect(registry.size).toBe(1);
+    });
+
+    it("draws the next frames on a new context once the shared one is lost", async () => {
+      const { CanvasKitMock, rawCanvas } = installCanvasKit();
+      canvasSize.width = 360;
+      canvasSize.height = 520;
+
+      const view = mountView("23", { isStatic: true });
+      await setPicture(23);
+      const lost = CanvasKitMock.GetWebGLContext.mock.calls[0][0];
+      const ctx2d = context2dOf(view.canvas());
+      expect(ctx2d.drawImage).toHaveBeenCalledTimes(1);
+
+      contextOf(lost).lose();
+      // The canvas keeps its last frame until the next one is painted, on a
+      // new context.
+      await flushMicrotasks();
+      await flushTimers();
+      expect(CanvasKitMock.GetWebGLContext).toHaveBeenCalledTimes(2);
+      const next = CanvasKitMock.GetWebGLContext.mock.calls[1][0];
+      expect(next).not.toBe(lost);
+      expect(rawCanvas.drawPicture).toHaveBeenCalledTimes(2);
+      expect(ctx2d.drawImage).toHaveBeenCalledTimes(2);
+      expect(ctx2d.drawImage.mock.calls[1][0]).toBe(next);
+
+      await view.unmount();
+    });
+
+    it("takes snapshots on a render target of the shared context", async () => {
+      const { CanvasKitMock, rawCanvas } = installCanvasKit();
+      canvasSize.width = 360;
+      canvasSize.height = 520;
+
+      const view = mountView("24", { isStatic: true });
+      await setPicture(24);
+      const api = global.SkiaViewApi as ISkiaViewApiWeb;
+      const image = api.makeImageSnapshot(24);
+
+      expect(image).not.toBeNull();
+      expect(CanvasKitMock.GetWebGLContext).toHaveBeenCalledTimes(1);
+      expect(CanvasKitMock.MakeRenderTarget).toHaveBeenCalledWith(
+        expect.anything(),
+        360,
+        520
+      );
+      const target = CanvasKitMock.MakeRenderTarget.mock.results[0].value;
+      expect(target.makeImageSnapshot).toHaveBeenCalledTimes(1);
+      expect(target.delete).toHaveBeenCalledTimes(1);
+      expect(rawCanvas.drawPicture).toHaveBeenCalledTimes(2);
+
+      await view.unmount();
+    });
   });
 });

@@ -87,8 +87,35 @@ export class MockWebGLContext {
 
 export const contexts = new WeakMap<HTMLCanvasElement, MockWebGLContext>();
 
-export function getContextMock(this: HTMLCanvasElement, kind: string) {
-  if (kind !== "webgl2") {
+// The 2D context a canvas drawn through the shared WebGL context copies its
+// frames into.
+export class Mock2DContext {
+  globalCompositeOperation = "source-over";
+  drawImage = jest.fn();
+
+  constructor(readonly attributes?: CanvasRenderingContext2DSettings) {}
+}
+
+export const contexts2d = new WeakMap<HTMLCanvasElement, Mock2DContext>();
+
+export function getContextMock(
+  this: HTMLCanvasElement,
+  kind: string,
+  attributes?: CanvasRenderingContext2DSettings
+) {
+  if (kind === "2d") {
+    // An element bound to a WebGL context has no 2D context, and vice versa.
+    if (contexts.has(this)) {
+      return null;
+    }
+    let ctx2d = contexts2d.get(this);
+    if (!ctx2d) {
+      ctx2d = new Mock2DContext(attributes);
+      contexts2d.set(this, ctx2d);
+    }
+    return ctx2d;
+  }
+  if (kind !== "webgl2" || contexts2d.has(this)) {
     return null;
   }
   let ctx = contexts.get(this);
@@ -97,6 +124,28 @@ export function getContextMock(this: HTMLCanvasElement, kind: string) {
     contexts.set(this, ctx);
   }
   return ctx;
+}
+
+export const context2dOf = (canvas: HTMLCanvasElement) => {
+  const ctx = contexts2d.get(canvas);
+  if (!ctx) {
+    throw new Error("The canvas has no 2D context");
+  }
+  return ctx;
+};
+
+// The canvas the shared WebGL context is created on.
+export class OffscreenCanvasMock extends EventTarget {
+  constructor(
+    public width: number,
+    public height: number
+  ) {
+    super();
+  }
+
+  getContext(kind: string) {
+    return getContextMock.call(this as unknown as HTMLCanvasElement, kind);
+  }
 }
 
 export const contextOf = (canvas: HTMLCanvasElement) => {
@@ -109,6 +158,7 @@ export const contextOf = (canvas: HTMLCanvasElement) => {
 
 export const makeRawCanvas = () => ({
   clear: jest.fn(),
+  clipRect: jest.fn(),
   save: jest.fn(),
   scale: jest.fn(),
   drawPicture: jest.fn(),
@@ -159,12 +209,22 @@ export const createCanvasKitMock = () => {
     MakeOnScreenGLSurface: jest.fn((_ctx, width, height) =>
       width === 0 || height === 0 ? null : rawSurface
     ),
+    MakeRenderTarget: jest.fn(() => ({
+      ...rawSurface,
+      delete: jest.fn(),
+      makeImageSnapshot: jest.fn(() => ({ __snapshot: true })),
+    })),
     // Unregistering the context is what releases the canvas element that
     // CanvasKit's GL registry retained in #3924.
     deleteContext: jest.fn((handle: number) => {
       registry.delete(handle);
     }),
     ColorSpace: { SRGB: "srgb" },
+    // An embind enum: a function whose properties are the entries.
+    PathOp: Object.assign(() => {}, {
+      Difference: { value: 0 },
+      Intersect: { value: 1 },
+    }),
     TRANSPARENT: Float32Array.of(0, 0, 0, 0),
     XYWHRect: (x: number, y: number, w: number, h: number) =>
       Float32Array.of(x, y, x + w, y + h),
@@ -225,6 +285,8 @@ export const installWebEnvironment = () => {
   })) as any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (global as any).ResizeObserver = ResizeObserverMock;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (global as any).OffscreenCanvas = OffscreenCanvasMock;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (global as any).IS_REACT_ACT_ENVIRONMENT = true;
 };

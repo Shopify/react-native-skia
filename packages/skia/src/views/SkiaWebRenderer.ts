@@ -5,12 +5,16 @@ import type { LayoutChangeEvent } from "react-native";
 import type { GrDirectContext, WebGLContextHandle } from "canvaskit-wasm";
 
 import type { SkRect, SkPicture, SkImage } from "../skia/types";
+import { ClipOp } from "../skia/types";
 import { JsiSkSurface } from "../skia/web/JsiSkSurface";
+import { getSharedWebGLContext } from "../skia/web/SharedWebGLContext";
+import type { SharedWebGLContext } from "../skia/web/SharedWebGLContext";
 
-// The WebGL renderers behind the web view (SkiaView.web):
-// a <canvas> element, its WebGL context and the CanvasKit surface built on
-// it, with the context-loss handling and the "destroy the context after each
-// draw" mode that keeps a page under the browser's live-context limit.
+// The WebGL renderers behind the web view (SkiaView.web): a <canvas> element,
+// its WebGL context and the CanvasKit surface built on it, with the
+// context-loss handling; or, to keep a page under the browser's live-context
+// limit, a <canvas> element drawn through one context shared by every such
+// canvas (__destroyWebGLContextAfterRender).
 
 const dp2Pixel = (pd: number, rect?: SkRect) => {
   if (!rect) {
@@ -326,166 +330,202 @@ export class WebGLRenderer implements Renderer {
   }
 }
 
-interface TempRenderResult {
-  surface: JsiSkSurface;
-  tempCanvas: OffscreenCanvas;
-  grContext: GrDirectContext;
-  contextHandle: WebGLContextHandle;
-}
+// The canvases drawn through the shared context (see SharedWebGLRenderer).
+const sharedRenderers = new Set<SharedWebGLRenderer>();
 
-export class StaticWebGLRenderer implements Renderer {
-  private cachedImage: SkImage | null = null;
+// The surface on the shared context's drawing buffer, which those canvases
+// paint their frames on. It covers the largest of them, so that drawing a
+// canvas never resizes it: a resize reallocates the buffer and rebuilds the
+// surface, which costs milliseconds.
+interface SharedBuffer {
+  context: SharedWebGLContext;
+  surface: JsiSkSurface;
+  width: number;
+  height: number;
+}
+let sharedBuffer: SharedBuffer | null = null;
+// Set when a canvas was added, removed or resized: the buffer may have to
+// grow or shrink.
+let sharedBufferStale = true;
+
+const releaseSharedBuffer = () => {
+  sharedBuffer?.surface.ref.delete();
+  sharedBuffer = null;
+};
+
+const onSharedContextLost = () => {
+  // The canvases keep showing their last frame. Their next one is painted on
+  // a new context, which getSharedWebGLContext() creates once the browser
+  // has marked this one lost.
+  setTimeout(() =>
+    sharedRenderers.forEach((renderer) => renderer.requestRedraw())
+  );
+};
+
+const getSharedBuffer = (): SharedBuffer | null => {
+  const context = getSharedWebGLContext(CanvasKit, OffscreenCanvas);
+  if (sharedBuffer?.context === context && !sharedBufferStale) {
+    return sharedBuffer;
+  }
+  sharedBufferStale = false;
+  let width = 0;
+  let height = 0;
+  sharedRenderers.forEach(({ canvas }) => {
+    width = Math.max(width, canvas.width);
+    height = Math.max(height, canvas.height);
+  });
+  if (
+    sharedBuffer?.context === context &&
+    sharedBuffer.width === width &&
+    sharedBuffer.height === height
+  ) {
+    return sharedBuffer;
+  }
+  releaseSharedBuffer();
+  if (width === 0 || height === 0) {
+    return null;
+  }
+  const { canvas, gl, grContext } = context;
+  // Adding the same listener again is a no-op.
+  canvas.addEventListener("webglcontextlost", onSharedContextLost);
+  gl.drawingBufferColorSpace = "display-p3";
+  canvas.width = width;
+  canvas.height = height;
+  const surface = CanvasKit.MakeOnScreenGLSurface(
+    grContext,
+    width,
+    height,
+    CanvasKit.ColorSpace.SRGB
+  );
+  if (!surface) {
+    throw new Error("Could not create surface");
+  }
+  sharedBuffer = {
+    context,
+    surface: new JsiSkSurface(CanvasKit, surface, grContext),
+    width,
+    height,
+  };
+  return sharedBuffer;
+};
+
+// Paints a frame on the top-left width x height pixels of a surface.
+const paintFrame = (
+  surface: JsiSkSurface,
+  frame: WebFrame,
+  pd: number,
+  width: number,
+  height: number
+) => {
+  const canvas = surface.getCanvas();
+  canvas.save();
+  canvas.clipRect({ x: 0, y: 0, width, height }, ClipOp.Intersect, false);
+  canvas.clear(Float32Array.of(0, 0, 0, 0));
+  canvas.scale(pd, pd);
+  for (const picture of frame) {
+    canvas.drawPicture(picture);
+  }
+  canvas.restore();
+  surface.ref.flush();
+};
+
+/**
+ * Draws a canvas without a WebGL context of its own, the way three.js and
+ * Babylon render many views: the frame is painted on the drawing buffer of
+ * the context shared with the offscreen surfaces, then copied into the
+ * element's 2D context. However many such canvases a page has, they take one
+ * context, and images from offscreen surfaces can be drawn on them.
+ */
+export class SharedWebGLRenderer implements Renderer {
+  private context2d: CanvasRenderingContext2D | null = null;
   private pd = 1;
 
-  constructor(private canvas: HTMLCanvasElement) {}
-
-  onResize(): void {
-    this.cachedImage = null;
+  constructor(
+    readonly canvas: HTMLCanvasElement,
+    // Called when the canvas lost its content and the current frame should
+    // be drawn again.
+    readonly requestRedraw: () => void
+  ) {
+    sharedRenderers.add(this);
+    // A 2D canvas can lose its backing store too (a GPU reset, for one); it
+    // comes back blank.
+    canvas.addEventListener("contextrestored", requestRedraw);
+    this.onResize();
   }
 
-  private renderFrameToSurface(frame: WebFrame): TempRenderResult | null {
+  onResize() {
+    const { canvas } = this;
     this.pd = window.devicePixelRatio;
-    if (this.canvas.clientWidth === 0 || this.canvas.clientHeight === 0) {
-      return null;
-    }
-    const tempCanvas = new OffscreenCanvas(
-      this.canvas.clientWidth * this.pd,
-      this.canvas.clientHeight * this.pd
-    );
-
-    let surface: JsiSkSurface | null = null;
-    let grContext: GrDirectContext | null = null;
-    let contextHandle: WebGLContextHandle = 0;
-
-    try {
-      contextHandle = CanvasKit.GetWebGLContext(tempCanvas);
-      if (!contextHandle) {
-        throw new Error("Could not create a WebGL context");
-      }
-      grContext = CanvasKit.MakeWebGLContext(contextHandle);
-      if (!grContext) {
-        throw new Error("Could not create a graphics context");
-      }
-      const ctx = tempCanvas.getContext("webgl2");
-      if (ctx) {
-        ctx.drawingBufferColorSpace = "display-p3";
-      }
-      const webglSurface = CanvasKit.MakeOnScreenGLSurface(
-        grContext,
-        tempCanvas.width,
-        tempCanvas.height,
-        CanvasKit.ColorSpace.SRGB
-      );
-
-      if (!webglSurface) {
-        throw new Error("Could not create WebGL surface");
-      }
-
-      surface = new JsiSkSurface(CanvasKit, webglSurface);
-
-      const skiaCanvas = surface.getCanvas();
-      skiaCanvas.clear(Float32Array.of(0, 0, 0, 0));
-      skiaCanvas.save();
-      skiaCanvas.scale(this.pd, this.pd);
-      for (const picture of frame) {
-        skiaCanvas.drawPicture(picture);
-      }
-      skiaCanvas.restore();
-      surface.ref.flush();
-
-      return { surface, tempCanvas, grContext, contextHandle };
-    } catch (error) {
-      this.cleanupRenderResult({
-        surface,
-        tempCanvas,
-        grContext,
-        contextHandle,
-      });
-      return null;
-    }
-  }
-
-  private cleanupRenderResult(result: {
-    surface: JsiSkSurface | null;
-    tempCanvas: OffscreenCanvas;
-    grContext: GrDirectContext | null;
-    contextHandle: WebGLContextHandle;
-  }): void {
-    result.surface?.ref.delete();
-    if (result.grContext) {
-      result.grContext.releaseResourcesAndAbandonContext();
-      result.grContext.delete();
-    }
-    result.tempCanvas
-      .getContext("webgl2")
-      ?.getExtension("WEBGL_lose_context")
-      ?.loseContext();
-    if (result.contextHandle) {
-      // Unregister the context from CanvasKit's internal registry, otherwise
-      // it retains the OffscreenCanvas forever.
-      CanvasKit.deleteContext(result.contextHandle);
-      // Clear CanvasKit's current-context globals (see WebGLRenderer.dispose).
-      CanvasKit.MakeWebGLContext(result.contextHandle);
-    }
+    canvas.width = canvas.clientWidth * this.pd;
+    canvas.height = canvas.clientHeight * this.pd;
+    sharedBufferStale = true;
   }
 
   draw(frame: WebFrame) {
-    const renderResult = this.renderFrameToSurface(frame);
-    if (!renderResult) {
+    const { canvas } = this;
+    const { width, height } = canvas;
+    if (width === 0 || height === 0) {
       return false;
     }
-    const { tempCanvas } = renderResult;
-    const ctx2d = this.canvas.getContext("2d");
-    if (!ctx2d) {
-      this.cleanupRenderResult(renderResult);
-      throw new Error("Could not get 2D context");
+    // Display P3 like the WebGL canvases (#3154), so that the frame is
+    // copied as is.
+    this.context2d ??= canvas.getContext("2d", { colorSpace: "display-p3" });
+    if (!this.context2d) {
+      return false;
     }
-
-    // Set canvas dimensions to match pixel density
-    this.canvas.width = this.canvas.clientWidth * this.pd;
-    this.canvas.height = this.canvas.clientHeight * this.pd;
-
-    // Draw the tempCanvas scaled down to the display size
-    ctx2d.drawImage(
-      tempCanvas,
+    const buffer = getSharedBuffer();
+    if (!buffer) {
+      return false;
+    }
+    paintFrame(buffer.surface, frame, this.pd, width, height);
+    if (buffer.context.gl.isContextLost()) {
+      // Copying now would blank the canvas; onSharedContextLost redraws it.
+      return false;
+    }
+    // Resizing the element resets the 2D state, so this is set every time.
+    this.context2d.globalCompositeOperation = "copy";
+    this.context2d.drawImage(
+      buffer.context.canvas,
       0,
       0,
-      tempCanvas.width,
-      tempCanvas.height,
+      width,
+      height,
       0,
       0,
-      this.canvas.clientWidth * this.pd,
-      this.canvas.clientHeight * this.pd
+      width,
+      height
     );
-
-    this.cleanupRenderResult(renderResult);
     return true;
   }
 
   makeImageSnapshot(frame: WebFrame, rect?: SkRect): SkImage | null {
-    if (!this.cachedImage) {
-      const renderResult = this.renderFrameToSurface(frame);
-      if (!renderResult) {
-        return null;
-      }
-
-      try {
-        this.cachedImage = renderResult.surface.makeImageSnapshot(
-          dp2Pixel(this.pd, rect)
-        );
-      } catch (error) {
-        console.error("Error creating image snapshot:", error);
-      } finally {
-        this.cleanupRenderResult(renderResult);
-      }
+    const { width, height } = this.canvas;
+    if (width === 0 || height === 0) {
+      return null;
     }
-
-    return this.cachedImage;
+    const { grContext } = getSharedWebGLContext(CanvasKit, OffscreenCanvas);
+    const target = CanvasKit.MakeRenderTarget(grContext, width, height);
+    if (!target) {
+      return null;
+    }
+    const surface = new JsiSkSurface(CanvasKit, target, grContext);
+    paintFrame(surface, frame, this.pd, width, height);
+    const image = surface.makeImageSnapshot(dp2Pixel(this.pd, rect));
+    target.delete();
+    return image;
   }
 
   dispose(): void {
-    this.cachedImage?.dispose();
-    this.cachedImage = null;
+    const { canvas } = this;
+    canvas.removeEventListener("contextrestored", this.requestRedraw);
+    sharedRenderers.delete(this);
+    sharedBufferStale = true;
+    if (sharedRenderers.size === 0) {
+      releaseSharedBuffer();
+    }
+    // Free the 2D backing store, see WebGLRenderer.dispose().
+    canvas.width = 0;
+    canvas.height = 0;
   }
 }
 
@@ -555,7 +595,7 @@ export interface WebRendererHost {
  */
 export const useSkiaWebRenderer = (
   canvasRef: RefObject<HTMLCanvasElement | null>,
-  isStatic: boolean,
+  shared: boolean,
   host: WebRendererHost
 ): RefObject<Renderer | null> => {
   const rendererRef = useRef<Renderer | null>(null);
@@ -569,12 +609,11 @@ export const useSkiaWebRenderer = (
     if (!canvas) {
       return undefined;
     }
-    const renderer: Renderer = isStatic
-      ? new StaticWebGLRenderer(canvas)
-      : new WebGLRenderer(canvas, () => hostRef.current.paint(renderer));
-    rendererRef.current = renderer;
-
     const paint = () => hostRef.current.paint(renderer);
+    const renderer: Renderer = shared
+      ? new SharedWebGLRenderer(canvas, paint)
+      : new WebGLRenderer(canvas, paint);
+    rendererRef.current = renderer;
 
     // The renderer constructor already sized the surface from the current
     // layout, so the observer's initial delivery only repaints if the size
@@ -650,7 +689,7 @@ export const useSkiaWebRenderer = (
       rendererRef.current = null;
       renderer.dispose();
     };
-  }, [canvasRef, isStatic]);
+  }, [canvasRef, shared]);
 
   return rendererRef;
 };
