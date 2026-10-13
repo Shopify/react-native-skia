@@ -244,10 +244,12 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
     /** The first frame was presented into a SurfaceView's surface. Main thread; called from native. */
     @DoNotStrip
     public void onFirstFramePresented() {
+        // Before the SurfaceView reports its draw: a report made during a window
+        // relayout opens the hole at once, even on Android 13.
+        mOutgoingView.onFirstFramePresented();
         if (mView instanceof SkiaSurfaceView) {
             ((SkiaSurfaceView) mView).onFirstFramePresented();
         }
-        mOutgoingView.onFirstFramePresented();
     }
 
     // A SurfaceView asks its parent for the window's transparent region as it
