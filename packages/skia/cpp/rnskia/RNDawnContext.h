@@ -7,6 +7,8 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <stdexcept>
+#include <string>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -47,13 +49,25 @@ public:
   DawnContext(const DawnContext &) = delete;
   DawnContext &operator=(const DawnContext &) = delete;
 
+  /**
+   The process's context. Throws when the device has no GPU adapter Graphite
+   can render with (see tryGetInstance).
+   */
   static DawnContext &getInstance() {
-    // Never destroyed: the readback poller is a detached thread using the
-    // context, which the process takes down at exit instead of a static
-    // destructor tearing the context down under it.
-    static auto *instance = new DawnContext();
-    return *instance;
+    const auto &availability = getAvailability();
+    if (availability.context == nullptr) {
+      throw std::runtime_error(availability.unavailableReason);
+    }
+    return *availability.context;
   }
+
+  /**
+   The process's context, or nullptr when the device has no GPU adapter
+   Graphite can render with, such as an Android device without Vulkan. The
+   first call creates the context; a device without an adapter is found out
+   by that call alone.
+   */
+  static DawnContext *tryGetInstance() { return getAvailability().context; }
 
   // Readbacks ----------------------------------------------------------------
   //
@@ -426,6 +440,30 @@ public:
   }
 
 private:
+  struct Availability {
+    DawnContext *context;
+    std::string unavailableReason;
+  };
+
+  static const Availability &getAvailability() {
+    // Never destroyed: the readback poller is a detached thread using the
+    // context, which the process takes down at exit instead of a static
+    // destructor tearing the context down under it.
+    static const Availability availability = createContext();
+    return availability;
+  }
+
+  static Availability createContext() {
+    try {
+      return {new DawnContext(), ""};
+    } catch (const std::exception &error) {
+      std::string reason =
+          std::string("Skia cannot render on this device: ") + error.what();
+      RNSkLogger::logToConsole("%s", reason.c_str());
+      return {nullptr, reason};
+    }
+  }
+
   std::unique_ptr<dawn::native::Instance> instance;
   std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
   skgpu::graphite::DawnBackendContext backendContext;

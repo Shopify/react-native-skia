@@ -28,12 +28,17 @@ void RNSkWindowSurface::attach(void *nativeHandle, int width, int height,
                                bool highBitDepth, bool useP3ColorSpace,
                                Releaser releaser) {
   detach();
-  auto &context = DawnContext::getInstance();
-  _device = context.getWGPUDevice();
-  _recorder = context.getRecorder();
   _nativeHandle = nativeHandle;
   _releaser = std::move(releaser);
-  _surface = context.MakeWGPUSurface(nativeHandle);
+  // Without a GPU context the view shows nothing, and the window goes back.
+  auto *context = DawnContext::tryGetInstance();
+  if (context == nullptr) {
+    detach();
+    return;
+  }
+  _device = context->getWGPUDevice();
+  _recorder = context->getRecorder();
+  _surface = context->MakeWGPUSurface(nativeHandle);
   if (!_surface) {
     RNSkLogger::logToConsole("Could not create a surface over the window");
     detach();

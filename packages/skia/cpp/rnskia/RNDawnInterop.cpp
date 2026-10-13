@@ -9,7 +9,9 @@
 // sound: async callbacks of imported devices settle on the instance webgpu
 // pumps. Plain C, default visibility: no C++ ABI surface, works across
 // separately compiled pods, and stays dlsym-able under -fvisibility=hidden.
+// Without a GPU context it returns null, and webgpu creates its own instance.
 extern "C" __attribute__((visibility("default"))) WGPUInstance
 rnskia_getWGPUInstance() {
-  return RNSkia::DawnContext::getInstance().getWGPUInstance().Get();
+  auto *context = RNSkia::DawnContext::tryGetInstance();
+  return context != nullptr ? context->getWGPUInstance().Get() : nullptr;
 }
