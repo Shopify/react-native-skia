@@ -1,4 +1,4 @@
-name: Create a release (react-native-skia)
+name: Create a release
 on:
   workflow_dispatch:
 jobs:
