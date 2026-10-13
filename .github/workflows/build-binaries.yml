@@ -226,7 +226,7 @@ jobs:
           ZERO_AR_DATE: 1
 
       - name: Upload
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v6.0.0
         with:
           name: skia-${{ matrix.target }}
           path: ${{ matrix.output }}
@@ -337,7 +337,7 @@ jobs:
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
 
       - name: Upload
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v6.0.0
         with:
           name: dawn-${{ matrix.target }}
           path: ${{ matrix.output }}
@@ -347,7 +347,7 @@ jobs:
       # The headers are the same for every target; one job ships them.
       - name: Upload headers
         if: matrix.target == 'ios-arm64'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v6.0.0
         with:
           name: dawn-headers
           path: |
@@ -403,7 +403,7 @@ jobs:
           SKIA_VERSION: ${{ needs.prepare.outputs.skia_version }}
 
       - name: Upload the packages
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v6.0.0
         with:
           name: npm-packages
           path: packages/skia/build/binaries
