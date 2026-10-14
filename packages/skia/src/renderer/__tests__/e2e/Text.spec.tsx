@@ -48,6 +48,7 @@ describe("Text", () => {
         ctx.font.setLinearMetrics(true);
         const text = "Lorem ipsum dolor sit amet";
         const advances = ctx.font.getGlyphWidths(ctx.font.getGlyphIDs(text));
+        // eslint-disable-next-line @typescript-eslint/no-deprecated -- this case pins getTextWidth's own result, the method this PR fixes
         const width = ctx.font.getTextWidth(text);
         ctx.font.setLinearMetrics(false);
         return {
