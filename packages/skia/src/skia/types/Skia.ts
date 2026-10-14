@@ -30,8 +30,6 @@ import type { Color, SkColor } from "./Color";
 import type { TypefaceFontProviderFactory } from "./Paragraph/TypefaceFontProviderFactory";
 import type { AnimatedImageFactory } from "./AnimatedImage";
 import type { ParagraphBuilderFactory } from "./Paragraph/ParagraphBuilder";
-import type { Video } from "./Video";
-import type { NativeBufferFactory } from "./NativeBuffer";
 import type { JsiRecorder } from "./Recorder";
 import type { SkottieFactory } from "./Skottie";
 
@@ -78,16 +76,18 @@ export interface Skia {
    * Returns an Vertices based on the given positions and optional parameters.
    * See SkVertices.h (especially the Builder) for more details.
    * @param mode
-   * @param positions
-   * @param textureCoordinates
+   * @param positions - a list of points, or a Float32Array of interleaved
+   * x, y pairs. The Float32Array is copied in one go, which is much faster
+   * for large meshes that are rebuilt on every frame.
+   * @param textureCoordinates - in the same form as positions.
    * @param colors - either a list of int colors or a flattened color array.
    * @param indices
    * @param isVolatile
    */
   MakeVertices(
     mode: VertexMode,
-    positions: SkPoint[],
-    textureCoordinates?: SkPoint[] | null,
+    positions: SkPoint[] | Float32Array,
+    textureCoordinates?: SkPoint[] | Float32Array | null,
     colors?: SkColor[],
     indices?: number[] | null,
     isVolatile?: boolean
@@ -100,14 +100,11 @@ export interface Skia {
   Surface: SurfaceFactory;
   ParagraphBuilder: ParagraphBuilderFactory;
   Skottie: SkottieFactory;
-  Video: (url: string) => Promise<Video> | Video;
-  NativeBuffer: NativeBufferFactory;
   Recorder(): JsiRecorder;
   /**
    * Raw WGPUDevice pointer of Skia's Graphite device, as a BigInt. Pass it to
    * react-native-webgpu's importDevice() to get a GPUDevice sharing Skia's
-   * device (zero-copy interop). Only available on Graphite builds; throws
-   * otherwise.
+   * device (zero-copy interop). Native only.
    */
   getNativeDevice(): bigint;
 }

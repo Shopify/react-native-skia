@@ -1,6 +1,6 @@
 import React from "react";
-import { SafeAreaView, StyleSheet, Text, View } from "react-native";
-import { Canvas, RoundedRect } from "@shopify/react-native-skia";
+import { StyleSheet, Text, View } from "react-native";
+import { Canvas, RoundedRect } from "react-native-skia";
 
 function SkiaRoundedButton() {
   const width = 96;
@@ -33,7 +33,7 @@ function RoundedButton() {
 
 export function Snapshot6() {
   return (
-    <SafeAreaView
+    <View
       style={{
         flex: 1,
         alignItems: "center",
@@ -80,6 +80,6 @@ export function Snapshot6() {
         <RoundedButton />
         <RoundedButton />
       </View>
-    </SafeAreaView>
+    </View>
   );
 }

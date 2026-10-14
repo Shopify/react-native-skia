@@ -14,7 +14,7 @@ Images are loaded using the `useImage` hook. This hook returns an `SkImage` inst
 Images can be loaded using require statements or by passing a network URL directly. It is also possible to load images from the app bundle using named images.
 
 ```tsx twoslash
-import { useImage } from "@shopify/react-native-skia";
+import { useImage } from "react-native-skia";
 // Loads an image from the JavaScript bundle
 const image1 = useImage(require("./assets/oslo"));
 // Loads an image from the network
@@ -24,27 +24,29 @@ const image3 = useImage("Logo");
 ```
 
 Loading an image is an asynchronous operation, so the `useImage` hook will return null until the image is fully loaded. You can use this behavior to conditionally render the `Image` component, as shown in the [example below](#example).
+The image is also decoded before the hook returns it, off the JS thread: the canvas that draws it never decodes on its first frame (see [GPU and CPU images](#gpu-and-cpu-images)).
 
-The hook also provides an optional error handler as a second parameter.
+The hook also provides an optional error handler as a second parameter, called when the image cannot be loaded or decoded (the hook then returns null).
+`loadImage(source)` does the same outside of React: it returns a promise that rejects on failure.
 
 ### MakeImageFromEncoded
 
 You can also create image instances manually using `MakeImageFromEncoded`.
 
 ```tsx twoslash
-import { Skia } from "@shopify/react-native-skia";
+import { Skia } from "react-native-skia";
 
 // A sample base64-encoded pixel
 const data = Skia.Data.fromBase64("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==");
 const image = Skia.Image.MakeImageFromEncoded(data);
 ```
 
-### MakeImage
+### MakeRasterImage
 
-`MakeImage` allows you to create an image by providing pixel data and specifying the format.
+`MakeRasterImage` creates a CPU image from pixel data in the given format. The pixels are copied; see [GPU and CPU images](#gpu-and-cpu-images) for what that means when drawing it.
 
 ```tsx twoslash
-import { Skia, AlphaType, ColorType } from "@shopify/react-native-skia";
+import { Skia, AlphaType, ColorType } from "react-native-skia";
 
 const pixels = new Uint8Array(256 * 256 * 4);
 pixels.fill(255);
@@ -55,7 +57,7 @@ for (let x = 0; x < 256; x++) {
   }
 }
 const data = Skia.Data.fromBytes(pixels);
-const img = Skia.Image.MakeImage(
+const img = Skia.Image.MakeRasterImage(
   {
     width: 256,
     height: 256,
@@ -69,9 +71,42 @@ const img = Skia.Image.MakeImage(
 
 **Note**: The nested for-loops in the code sample above seem to have a mistake in the loop conditions. They should loop up to `256`, not `256 * 4`, as the pixel data array has been initialized with `256 * 256 * 4` elements representing a 256 by 256 image where each pixel is represented by 4 bytes (RGBA).
 
-### useImage
+## GPU and CPU images
 
-`useImage` is simply a helper function to load image data. 
+An image lives either on the CPU, as pixels in memory, or on the GPU, as a texture. Where it lives decides what is cheap.
+
+The API names follow this split. "Raster" means CPU: `Skia.Surface.MakeRaster()`, `Skia.Image.MakeRasterImage()`, `image.makeRasterImage()`. "Texture" means GPU: `image.makeTextureImage()`. "GPUTexture" is a WebGPU texture shared with [React Native WebGPU](/docs/webgpu): `Skia.Image.MakeImageFromGPUTexture()`, `Skia.Surface.MakeFromGPUTexture()`.
+A surface follows the same split: `Skia.Surface.MakeRaster()` draws on the CPU and its snapshots are CPU images, `Skia.Surface.MakeOffscreen()` draws on the GPU and its snapshots are GPU images.
+
+| Image | Lives | Drawing it | Reading its pixels |
+| :-- | :-- | :-- | :-- |
+| `useImage()`, `Skia.Image.MakeRasterImage()`, `makeRasterImage()` | CPU | Uploaded once per canvas, then cached | Immediate |
+| `surface.makeImageSnapshot()`, `surface.asImage()`, `makeTextureImage()`, `Skia.Image.MakeImageFromGPUTexture()` | GPU | No copy, from any canvas and any thread | Waits for the GPU |
+| `Skia.Image.MakeImageFromEncoded()` | Encoded bytes | Decoded and uploaded by the first canvas that draws it, on that frame | Decodes |
+
+Moving an image from one side to the other is explicit:
+
+- `image.makeTextureImage()` uploads a CPU image (or decodes and uploads an encoded one) now, on the calling thread, and returns the GPU image. Use it for an image drawn by several canvases, or to pay the upload before the first frame: this is what [`useImageAsTexture`](/docs/animations/textures#useimageastexture) does. Pass `{ mipmapped: true }` to also build the mipmaps for the `MipmapMode` sampling options.
+- `image.makeRasterImage()` resolves to a CPU copy of a GPU image without blocking the JS thread (an encoded image is decoded on a background thread, a CPU image resolves to itself). `encodeToBytes()`, `encodeToBase64()` and `readPixels()` work on a GPU image too, but they wait for the GPU: when the JS thread should not wait, read the image back first.
+
+```tsx twoslash
+import { Skia } from "react-native-skia";
+
+const surface = Skia.Surface.MakeOffscreen(256, 256)!;
+surface.getCanvas().drawColor(Skia.Color("cyan"));
+surface.flush();
+// A GPU image: drawing it anywhere costs nothing.
+const image = surface.makeImageSnapshot();
+// Encoding it waits for the GPU; reading it back first does not.
+image.makeRasterImage().then((raster) => {
+  const base64 = raster.encodeToBase64();
+  console.log(base64);
+});
+```
+
+`makeRasterImageSync()` is the synchronous counterpart of `makeRasterImage()`, for worklets: it waits for the GPU on the calling thread.
+
+On the Web, a texture belongs to the canvas that created it: `makeTextureImage()` returns the image as is, and `surface.asImage()` is a snapshot.
 
 ## Image Component
 
@@ -90,7 +125,7 @@ Images can be drawn by specifying the output rectangle and how the image should 
 ### Example
 
 ```tsx twoslash
-import { Canvas, Image, useImage } from "@shopify/react-native-skia";
+import { Canvas, Image, useImage } from "react-native-skia";
 
 const ImageDemo = () => {
   const image = useImage(require("./assets/oslo.jpg"));
@@ -107,10 +142,10 @@ const ImageDemo = () => {
 The `sampling` prop allows you to control how the image is sampled when it is drawn.
 Use cubic sampling for best quality: you can use the default `sampling={CubicSampling}` (defaults to `{ B: 0, C: 0 }`) or any value you would like: `sampling={{ B: 0, C: 0.5 }}`.
 
-You can also use filter modes (`nearest` or `linear`) and mimap modes (`none`, `nearest`, or `linear`). Default is `nearest`.
+You can also use filter modes (`nearest` or `linear`) and mipmap modes (`none`, `nearest`, or `linear`). The defaults are `linear` filtering and `none` mipmapping.
 
 ```tsx twoslash
-import { Canvas, Image, useImage, CubicSampling, FilterMode, MipmapMode } from "@shopify/react-native-skia";
+import { Canvas, Image, useImage, CubicSampling, FilterMode, MipmapMode } from "react-native-skia";
 
 const ImageDemo = () => {
   const image = useImage(require("./assets/oslo.jpg"));
@@ -176,4 +211,7 @@ const ImageDemo = () => {
 | `getImageInfo`  | Returns the image info for the image.                                 |
 | `encodeToBytes` | Encodes the image pixels, returning the result as a `UInt8Array`.     |
 | `encodeToBase64`| Encodes the image pixels, returning the result as a base64-encoded string. |
-| `readPixels`    | Reads the image pixels, returning result as UInt8Array or Float32Array |
+| `readPixels`    | Reads the image pixels, returning result as UInt8Array or Float32Array. On a GPU image, waits for the GPU. |
+| `makeRasterImage` | Resolves to a CPU copy of the image, read back from the GPU or decoded on a background thread. See [GPU and CPU images](#gpu-and-cpu-images). |
+| `makeTextureImage` | Uploads the image to the GPU now and returns the GPU image. See [GPU and CPU images](#gpu-and-cpu-images). |
+| `makeRasterImageSync` | Synchronous counterpart of `makeRasterImage`, for worklets. |

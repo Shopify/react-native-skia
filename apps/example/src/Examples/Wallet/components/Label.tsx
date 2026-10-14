@@ -1,4 +1,4 @@
-import { useFont, Text } from "@shopify/react-native-skia";
+import { useFont, Text } from "react-native-skia";
 import React from "react";
 import type { SharedValue } from "react-native-reanimated";
 import { interpolate, useDerivedValue } from "react-native-reanimated";
@@ -49,11 +49,11 @@ export const Label = ({ state, y, graphs, width, height }: LabelProps) => {
     }
     const graph = graphs[state.value.current];
     const title = format(graph.data.maxPrice);
-    const titleWidth = titleFont.getTextWidth(title);
+    const titleWidth = titleFont.measureText(title).width;
     return width / 2 - titleWidth / 2;
   }, [state, titleFont]);
 
-  const subtitleWidth = subtitleFont?.getTextWidth(subtitle) ?? 0;
+  const subtitleWidth = subtitleFont?.measureText(subtitle).width ?? 0;
   return (
     <>
       <Text

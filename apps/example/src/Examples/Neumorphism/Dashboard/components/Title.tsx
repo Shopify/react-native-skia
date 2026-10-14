@@ -1,4 +1,4 @@
-import { Group, Text, useFont } from "@shopify/react-native-skia";
+import { Group, Text, useFont } from "react-native-skia";
 import React from "react";
 
 import { Button, BUTTON_SIZE } from "./Button";
@@ -11,7 +11,7 @@ interface Title {
 
 export const Title = ({ title }: Title) => {
   const font = useFont(require("./SF-Pro-Display-Bold.otf"), 28);
-  const titleWidth = font?.getTextWidth(title) ?? 0;
+  const titleWidth = font?.measureText(title).width ?? 0;
   const offsetX = 30 + BUTTON_SIZE;
   const space = 298 - offsetX;
   return (

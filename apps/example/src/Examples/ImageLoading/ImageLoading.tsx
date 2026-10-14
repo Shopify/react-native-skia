@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import type { SkImage, SkRect, SkSize } from "@shopify/react-native-skia";
+import type { SkImage, SkRect, SkSize } from "react-native-skia";
 import {
   Canvas,
   Image,
   ImageFormat,
   PaintStyle,
   Skia,
-} from "@shopify/react-native-skia";
+} from "react-native-skia";
 import { Button, View } from "react-native";
 import { useDerivedValue, useSharedValue } from "react-native-reanimated";
 
@@ -33,7 +33,7 @@ export const ImageLoading = () => {
   };
   const updateImage = () => {
     if (!skimage) return;
-    const offscreen = Skia.Surface.Make(skimage.width(), skimage.height());
+    const offscreen = Skia.Surface.MakeRaster(skimage.width(), skimage.height());
     if (!offscreen) {
       throw new Error("Couldn't load the image");
     }
@@ -59,7 +59,7 @@ export const ImageLoading = () => {
   };
   const saveImage = async () => {
     if (!skimage) return;
-    const offscreen = Skia.Surface.Make(skimage.width(), skimage.height());
+    const offscreen = Skia.Surface.MakeRaster(skimage.width(), skimage.height());
     if (!offscreen) {
       throw new Error("Couldn't load the image");
     }

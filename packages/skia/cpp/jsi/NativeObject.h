@@ -66,7 +66,7 @@ template <typename Derived> class NativeObject;
  * ```
  */
 template <typename Derived>
-class NativeObject : public jsi::NativeState,
+class NativeObject : public NativeObjectBase,
                      public std::enable_shared_from_this<Derived> {
 public:
   // Marker type for SFINAE detection in JSIConverter
@@ -136,24 +136,13 @@ public:
       defineProperty.call(runtime, prototype, toStringTag, descriptor);
     }
 
-    // Install the shared pieces every native object needs for JS type
-    // detection and cross-runtime transfer (worklets):
-    // - `__typename__` (CLASS_NAME), used by JS type guards and as the
-    //   boxing brand
-    // - `__box()`, which wraps the object into a RNJsi::BoxedNativeObject
-    //   HostObject that worklets can pass across runtimes by reference
-    // See registerCustomSerializable in src/skia/SkiaWorkletSerialization.ts.
+    // `__typename__` (CLASS_NAME) is what the JS type guards read. Worklet
+    // serialization does not go through the prototype: the serializer
+    // recognizes and boxes native objects from their native state, see
+    // NativeObjectWorkletHelpers in jsi/BoxedNativeObject.h.
     prototype.setProperty(
         runtime, "__typename__",
         jsi::String::createFromUtf8(runtime, Derived::CLASS_NAME));
-
-    auto boxFunc = jsi::Function::createFromHostFunction(
-        runtime, jsi::PropNameID::forUtf8(runtime, "__box"), 0,
-        [](jsi::Runtime &rt, const jsi::Value &thisValue, const jsi::Value *,
-           size_t) -> jsi::Value {
-          return RNJsi::boxNativeObject(rt, thisValue);
-        });
-    prototype.setProperty(runtime, "__box", boxFunc);
 
     // Install a generic toJSON so JSON.stringify sees the data properties.
     // They live on the prototype (getters), and JSON.stringify only
@@ -186,7 +175,7 @@ public:
                 continue;
               }
               auto value = self.getProperty(rt, name.c_str());
-              // Skip methods (dispose, __box, ...) — JSON.stringify would
+              // Skip methods (dispose, ...) — JSON.stringify would
               // drop them anyway; skipping avoids serializing them at all.
               if (value.isObject() && value.asObject(rt).isFunction(rt)) {
                 continue;
@@ -210,12 +199,12 @@ public:
             if (instance == nullptr) {
               throw jsi::JSError(rt, "Invalid boxed native object state");
             }
-            // Unboxing creates a *view* of the object on the target runtime.
-            // Keep the runtime the object was originally created on: async
-            // native code (e.g. GPUDevice error/lost events) delivers into
-            // the creation runtime, and rebinding it to a worklet runtime
-            // would invoke main-runtime jsi::Functions on the wrong runtime
-            // and thread.
+            // Unboxing hands back the wrapper cached for the target runtime,
+            // creating it on first use. Keep the runtime the object was
+            // originally created on: async native code (e.g. GPUDevice
+            // error/lost events) delivers into the creation runtime, and
+            // rebinding it to a worklet runtime would invoke main-runtime
+            // jsi::Functions on the wrong runtime and thread.
             auto *originalRuntime = instance->getCreationRuntime();
             auto value = Derived::create(rt, instance);
             if (originalRuntime != nullptr) {
@@ -262,10 +251,37 @@ public:
   }
 
   /**
-   * Create a JS object with native state attached.
+   * Returns the JS wrapper of `instance` on `runtime`, creating it on first
+   * use.
+   *
+   * A native object has at most one live wrapper per runtime. The wrapper is
+   * cached (weakly, so it stays collectable) in the runtime's JSICache, and
+   * converting the same object again (returning it from another native
+   * call, unboxing it in a worklet on every frame, ...) hands back that
+   * wrapper instead of a new one. Each wrapper reports the native memory the
+   * object owns to the GC of its runtime through setExternalMemoryPressure,
+   * so the memory is charged exactly once per runtime that can reach the
+   * object, however often it is converted; charging every conversion used
+   * to multiply the amount by the number of captures in a worklet until
+   * Hermes hit its max heap size. The hint is refreshed on every round trip
+   * for objects whose size changes after creation (path and paragraph
+   * builders).
    */
   static jsi::Value create(jsi::Runtime &runtime,
                            std::shared_ptr<Derived> instance) {
+    auto &cache = JSICache::get(runtime);
+    const void *key = instance.get();
+
+    auto existing = cache.lockWrapper(runtime, key);
+    if (existing.isObject()) {
+      auto pressure = instance->getMemoryPressure();
+      if (pressure > 0) {
+        existing.getObject(runtime).setExternalMemoryPressure(runtime,
+                                                              pressure);
+      }
+      return existing;
+    }
+
     // Store creation runtime for logging etc.
     instance->setCreationRuntime(&runtime);
 
@@ -290,9 +306,11 @@ public:
       obj.setExternalMemoryPressure(runtime, pressure);
     }
 
+    cache.setWrapper(runtime, key, obj);
     return std::move(obj);
   }
 
+public:
   /**
    * Get the native state from a JS value.
    * Throws if the value doesn't have the expected native state.
@@ -330,11 +348,10 @@ public:
   jsi::Runtime *getCreationRuntime() const { return _creationRuntime; }
 
 protected:
-  explicit NativeObject(const char *name) : _name(name) {}
+  explicit NativeObject(const char *name) : NativeObjectBase(name) {}
 
   virtual ~NativeObject() {}
 
-  const char *_name;
   jsi::Runtime *_creationRuntime = nullptr;
 
   // ============================================================
