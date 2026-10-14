@@ -155,6 +155,15 @@ The following APIs were removed in favor of it:
 
 When an image cannot be decoded, `useImage()` now calls `onError` with the message `Could not decode the image` (it was `Could not load data`).
 
+A few methods were renamed so that the name says whether the result lives on the CPU or on the GPU: "raster" is a CPU surface or image, "texture" a GPU one (see [GPU and CPU images](/docs/images#gpu-and-cpu-images)).
+`Skia.Surface.MakeOffscreen()`, which creates a GPU surface, keeps its name.
+
+| Renamed | New name |
+|:--|:--|
+| `Skia.Surface.Make(width, height)` | `Skia.Surface.MakeRaster(width, height)`: a CPU surface. |
+| `Skia.Image.MakeImage(info, data, bytesPerRow)` | `Skia.Image.MakeRasterImage(info, data, bytesPerRow)`: a CPU image. |
+| `image.makeNonTextureImage()` | `image.makeRasterImageSync()`: the synchronous counterpart of `image.makeRasterImage()`, for worklets. It now throws when the readback fails instead of returning `null`. |
+
 ## What is new
 
 ### Rendering off the JS and UI threads
