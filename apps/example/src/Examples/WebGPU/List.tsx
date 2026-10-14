@@ -26,6 +26,11 @@ export const examples = [
     title: "Three.js Cloth",
     description: "Verlet cloth simulation running in compute shaders",
   },
+  {
+    screen: "Video",
+    title: "Video",
+    description: "Video frames decoded by WebGPU and drawn by a Skia Canvas",
+  },
 ] as const;
 
 const styles = StyleSheet.create({
@@ -51,15 +56,14 @@ const styles = StyleSheet.create({
 });
 
 export const List = () => {
-  const { navigate } =
-    useNavigation<NativeStackNavigationProp<Routes, "List">>();
+  const navigation = useNavigation<NativeStackNavigationProp<Routes, "List">>();
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {examples.map((example) => (
         <Pressable
           key={example.screen}
           onPress={() => {
-            navigate(example.screen as keyof Routes);
+            navigation.navigate(example.screen as keyof Routes);
           }}
           testID={example.screen}
         >

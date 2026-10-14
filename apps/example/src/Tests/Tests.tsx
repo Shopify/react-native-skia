@@ -5,7 +5,7 @@ import {
   makeImageFromView,
   Skia,
   useCanvasRef,
-} from "@shopify/react-native-skia";
+} from "react-native-skia";
 import type { RefObject } from "react";
 import React, { useEffect, useRef, useState } from "react";
 import { PixelRatio, Text, View } from "react-native";
@@ -14,6 +14,7 @@ import type { SerializedNode } from "./deserialize";
 import { parseNode, parseProps } from "./deserialize";
 import { Screens } from "./Screens";
 import { useClient } from "./useClient";
+import { workletSerialization } from "./workletSerialization";
 
 export const CI = process.env.CI === "true";
 const s = 3;
@@ -56,7 +57,9 @@ export const Tests = ({ assets }: TestsProps) => {
                 })`
             ).call({
               Skia,
-              ctx: parseProps(tree.ctx, assets),
+              // The worklet serializer spec needs app-side worklets (see
+              // workletSerialization.ts); hand them over through the context.
+              ctx: { ...parseProps(tree.ctx, assets), workletSerialization },
               size: size * PixelRatio.get(),
               scale: s,
             });
@@ -97,23 +100,18 @@ export const Tests = ({ assets }: TestsProps) => {
     if (drawing && client) {
       const it = setTimeout(() => {
         if (ref.current) {
-          ref.current
-            .makeImageSnapshotAsync({
+          try {
+            const image = ref.current.makeImageSnapshot({
               x: 0,
               y: 0,
               width: size,
               height: size,
-            })
-            .then((image) => {
-              if (image && client) {
-                const data = image.encodeToBytes();
-                client.send(data);
-              }
-            })
-            .catch((e) => {
-              console.error(e);
-              client.send(errorEnvelope(e));
             });
+            client.send(image.encodeToBytes());
+          } catch (e) {
+            console.error(e);
+            client.send(errorEnvelope(e));
+          }
         }
       }, timeToDraw);
       return () => {

@@ -1,26 +1,12 @@
 import React from "react";
-import { Platform, ScrollView } from "react-native";
+import { ScrollView } from "react-native";
 // Side-effect import: installs navigator.gpu. Required here because Metro's
 // inlineRequires defers module evaluation to first binding use, so without it
 // react-native-webgpu would not be initialized when the WebGPU section's
 // availability check below runs.
 import "react-native-webgpu";
-import { Skia } from "@shopify/react-native-skia";
 
 import { HomeScreenButton } from "./HomeScreenButton";
-
-// Whether this build runs the Graphite backend (getNativeDevice throws on
-// Ganesh builds). The web emulates the Graphite view on WebGL.
-const hasGraphite = (() => {
-  if (Platform.OS === "web") {
-    return true;
-  }
-  try {
-    return typeof Skia.getNativeDevice() === "bigint";
-  } catch {
-    return false;
-  }
-})();
 
 export const HomeScreen = () => {
   const hasWebGPU = typeof navigator !== "undefined" && navigator.gpu != null;
@@ -140,8 +126,6 @@ export const HomeScreen = () => {
         description="Drawing Performance Test"
         route="Performance"
       />
-      <HomeScreenButton title="📹 Video" description="Video" route="Video" />
-      <HomeScreenButton title="💬 Chat" description="Chat" route="Chat" />
       <HomeScreenButton
         title="🖼 Pictures"
         description="Animated circle trail using Pictures"
@@ -150,7 +134,7 @@ export const HomeScreen = () => {
       {hasWebGPU && (
         <HomeScreenButton
           title="🔺 WebGPU"
-          description="WebGPU Wireframe demo"
+          description="WebGPU canvas and three.js scenes, with Skia interop"
           route="WebGPU"
         />
       )}
@@ -159,13 +143,16 @@ export const HomeScreen = () => {
         description="8-bit vs high bit depth canvas"
         route="HighBitDepth"
       />
-      {hasGraphite && (
-        <HomeScreenButton
-          title="🗿 Graphite View"
-          description="Frames recorded from JS and worklet runtimes"
-          route="Graphite"
-        />
-      )}
+      <HomeScreenButton
+        title="🗿 Graphite View"
+        description="Frames recorded from JS and worklet runtimes"
+        route="Graphite"
+      />
+      <HomeScreenButton
+        title="🗿 Canvas off the JS thread"
+        description="Declarative canvas replayed on the render thread pool"
+        route="GraphiteCanvas"
+      />
       <HomeScreenButton
         title="🤖 Android Views"
         description="SurfaceView vs TextureView"

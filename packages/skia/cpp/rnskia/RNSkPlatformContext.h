@@ -10,9 +10,6 @@
 #include <utility>
 #include <vector>
 
-#include "RNSkVideo.h"
-#include "RNWindowContext.h"
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdocumentation"
 
@@ -29,14 +26,6 @@
 namespace RNSkia {
 
 namespace react = facebook::react;
-
-struct TextureInfo {
-  const void *mtlTexture = nullptr;
-  unsigned int glTarget = 0;
-  unsigned int glID = 0;
-  unsigned int glFormat = 0;
-  bool glProtected = false;
-};
 
 class RNSkPlatformContext {
 public:
@@ -55,6 +44,17 @@ public:
    */
   void runOnJavascriptThread(std::function<void()> func) {
     _callInvoker->invokeAsync(std::move(func));
+  }
+
+  /**
+   * Same, with the runtime the function runs on. Asynchronous work uses this
+   * one rather than a runtime captured when it started: a reload may have
+   * destroyed that runtime by then, and the function is dropped instead.
+   * @param func Function to run
+   */
+  void
+  runOnJavascriptThread(std::function<void(facebook::jsi::Runtime &)> func) {
+    _callInvoker->invokeAsync(react::CallFunc(std::move(func)));
   }
 
   /**
@@ -95,57 +95,6 @@ public:
    */
   virtual sk_sp<SkSurface>
   makeOffscreenSurface(int width, int height, bool useP3ColorSpace = false) = 0;
-
-  /**
-   * Creates an image from a native buffer.
-   * - On iOS, this is a `CVPixelBufferRef`
-   * - On Android, this is a `AHardwareBuffer*`
-   * @param buffer The native buffer.
-   * @return sk_sp<SkImage>
-   */
-  virtual sk_sp<SkImage> makeImageFromNativeBuffer(void *buffer) = 0;
-
-#if !defined(SK_GRAPHITE)
-  virtual sk_sp<SkImage>
-  makeImageFromNativeTexture(const TextureInfo &textureInfo, int width,
-                             int height, bool mipMapped) = 0;
-
-  virtual const TextureInfo getTexture(sk_sp<SkSurface> image) = 0;
-
-  virtual const TextureInfo getTexture(sk_sp<SkImage> image) = 0;
-
-  virtual GrDirectContext *getDirectContext() = 0;
-#else
-  sk_sp<SkImage> makeImageFromNativeTexture(const TextureInfo &textureInfo,
-                                            int width, int height,
-                                            bool mipMapped) {
-    throw std::runtime_error(
-        "makeImageFromNativeTexture not implemented yet on Graphite");
-  }
-
-  const TextureInfo getTexture(sk_sp<SkSurface> image) {
-    throw std::runtime_error(
-        "getTexture(surface) not implemented yet on Graphite");
-  }
-
-  const TextureInfo getTexture(sk_sp<SkImage> image) {
-    throw std::runtime_error(
-        "getTexture(image) not implemented yet on Graphite");
-  }
-#endif
-
-  virtual void releaseNativeBuffer(uint64_t pointer) = 0;
-
-  virtual uint64_t makeNativeBuffer(sk_sp<SkImage> image) = 0;
-
-  // Allocate a platform native buffer (IOSurface on Apple, AHardwareBuffer on
-  // Android) of the given size filled with a procedural test pattern (RGB
-  // gradient + diagonal stripes), entirely on the CPU. Intended for examples
-  // and tests that need a buffer to feed into importExternalTexture without a
-  // camera/video source. Release it with releaseNativeBuffer().
-  virtual uint64_t makeTestNativeBuffer(int width, int height) = 0;
-
-  virtual std::shared_ptr<RNSkVideo> createVideo(const std::string &url) = 0;
 
   /**
    * Return the Platform specific font manager
@@ -196,6 +145,14 @@ public:
    * @return Current scale factor for pixels
    */
   float getPixelDensity() { return _pixelDensity; }
+
+  /**
+   * Whether views render in Display P3 rather than sRGB: true on Apple
+   * platforms when the main screen has a wide color gamut. The answer does
+   * not change over the lifetime of the context, so a frame can be recorded
+   * for a view before its surface exists.
+   */
+  virtual bool prefersP3ColorSpace() { return false; }
 
 private:
   float _pixelDensity;

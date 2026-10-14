@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { ScrollView, useWindowDimensions } from "react-native";
-import { Atlas, Canvas, Skia, rect } from "@shopify/react-native-skia";
+import { Atlas, Canvas, Skia, rect } from "react-native-skia";
 
 import { Title } from "./components/Title";
 
@@ -19,7 +19,7 @@ const PALETTE = [
 ];
 
 const makeDotImage = () => {
-  const surface = Skia.Surface.Make(SPRITE_SIZE, SPRITE_SIZE);
+  const surface = Skia.Surface.MakeRaster(SPRITE_SIZE, SPRITE_SIZE);
   if (!surface) {
     return null;
   }

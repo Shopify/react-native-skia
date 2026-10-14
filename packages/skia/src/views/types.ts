@@ -9,11 +9,6 @@ import type {
   SkSize,
 } from "../skia/types";
 
-export type NativeSkiaViewProps = ViewProps & {
-  debug?: boolean;
-  opaque?: boolean;
-};
-
 export type AndroidSurfaceType = "SurfaceView" | "TextureView";
 
 export interface AndroidCanvasProps {
@@ -46,12 +41,16 @@ export interface ISkiaViewApi {
     recorderId: number,
     values: SharedValue<unknown>[]
   ) => void;
+  /**
+   * Renders the view into an offscreen surface and returns a GPU image of
+   * it, on the calling thread. Native: the declarative content is replayed
+   * with its latest values; otherwise the current frame is.
+   */
   makeImageSnapshot: (nativeId: number, rect?: SkRect) => SkImage;
-  makeImageSnapshotAsync: (nativeId: number, rect?: SkRect) => Promise<SkImage>;
   size: (nativeId: number) => SkSize;
   /**
-   * The recording side of a SkiaGraphiteView: its native id, the layout size
-   * in points, and the props its surface format follows from. Graphite only.
+   * The recording side of a view: its native id, the layout size in points,
+   * and the props its surface format follows from.
    */
   makeGraphiteContext: (
     nativeId: number,
@@ -60,15 +59,16 @@ export interface ISkiaViewApi {
     opaque: boolean,
     highBitDepth: boolean
   ) => SkGraphiteContext;
+  /**
+   * Retires what `makeGraphiteContext` made for a view id, once the view
+   * component unmounts. A no-op when a view bound to the id: its own
+   * teardown retires it. On the web the view owns its context; a no-op.
+   */
+  destroyGraphiteContext: (nativeId: number) => void;
 }
 
+/** The props every Skia view takes, whichever way it is drawn. */
 export interface SkiaBaseViewProps extends ViewProps {
-  /**
-   * When set to true the view will display information about the
-   * average time it takes to render.
-   */
-  debug?: boolean;
-
   /**
    * Declares that the canvas covers every pixel of its bounds. On Android an
    * opaque canvas is backed by a `SurfaceView` by default, the cheapest path
@@ -86,8 +86,7 @@ export interface SkiaBaseViewProps extends ViewProps {
   /** Android-only rendering options. Ignored on iOS and web. */
   android?: AndroidCanvasProps;
 
-  // On web, only 16 WebGL contextes are allowed. If the drawing is non-animated, set
-  // __destroyWebGLContextAfterRender to true to release the context after each draw.
+  /** @deprecated Does nothing: on web, every view shares one WebGL context. */
   __destroyWebGLContextAfterRender?: boolean;
 
   /**
@@ -100,7 +99,6 @@ export interface SkiaBaseViewProps extends ViewProps {
 
 export interface SkiaPictureViewNativeProps extends SkiaBaseViewProps {
   picture?: SkPicture;
-  androidWarmup?: boolean;
 }
 
 export type SkiaGraphiteViewNativeProps = SkiaBaseViewProps;

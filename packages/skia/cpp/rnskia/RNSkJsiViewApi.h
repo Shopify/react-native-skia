@@ -10,18 +10,15 @@
 #include <utility>
 #include <vector>
 
-#include "RNSkPictureView.h"
+#include "RNSkGraphiteProducer.h"
+#include "RNSkGraphiteTarget.h"
 #include "RNSkPlatformContext.h"
 #include "RNSkView.h"
+#include "api/JsiSkGraphiteContext.h"
 #include "api/JsiSkNativeObjects.h"
-#include "jsi/JsiPromises.h"
+
 #include "jsi/ViewProperty.h"
 #include <jsi/jsi.h>
-
-#if defined(SK_GRAPHITE)
-#include "RNSkGraphiteView.h"
-#include "api/JsiSkGraphiteContext.h"
-#endif
 
 namespace RNSkia {
 
@@ -223,20 +220,16 @@ public:
           // the values from recording time until the next change.
           auto it = info->props.find("recorder");
           if (it != info->props.end() && it->second.isRecorder()) {
-            RNSkPictureRenderer::applyUpdatesTo(it->second.getRecorder(),
-                                                runtime, recorderId, values);
+            RNSkGraphiteProducer::applyUpdatesTo(it->second.getRecorder(),
+                                                 runtime, recorderId, values);
           }
         });
     if (view == nullptr) {
       return jsi::Value::undefined();
     }
     // Outside the registry lock: the update must not hold up the commits
-    // and registrations of other views.
-    auto renderer =
-        std::static_pointer_cast<RNSkPictureRenderer>(view->getRenderer());
-    if (renderer->applyUpdates(runtime, recorderId, values)) {
-      view->requestRedraw();
-    }
+    // and registrations of other views. The view schedules its own frame.
+    view->applyUpdates(runtime, recorderId, values);
     return jsi::Value::undefined();
   }
 
@@ -278,53 +271,6 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_HOST_FUNCTION(makeImageSnapshotAsync) {
-    if (count < 1) {
-      _platformContext->raiseError(std::string(
-          "makeImageSnapshotAsync: Expected at least 1 argument, got " +
-          std::to_string(count) + "."));
-      return jsi::Value::undefined();
-    }
-
-    if (!arguments[0].isNumber()) {
-      _platformContext->raiseError(
-          "makeImageSnapshot: First argument must be a number");
-      return jsi::Value::undefined();
-    }
-
-    // find Skia view
-    int nativeId = arguments[0].asNumber();
-    std::shared_ptr<RNSkView> view =
-        ViewRegistry::getInstance().getView(nativeId);
-    auto context = _platformContext;
-    auto bounds =
-        count > 1 && !arguments[1].isUndefined() && !arguments[1].isNull()
-            ? JsiSkRect::fromValue(runtime, arguments[1])
-            : nullptr;
-    return RNJsi::JsiPromises::createPromiseAsJSIValue(
-        runtime, [context = std::move(context), view, bounds](
-                     jsi::Runtime &runtime,
-                     std::shared_ptr<RNJsi::JsiPromises::Promise> promise) {
-          context->runOnMainThread([&runtime, view = std::move(view),
-                                    promise = std::move(promise),
-                                    context = std::move(context), bounds]() {
-            auto image = view->makeImageSnapshot(
-                bounds == nullptr ? nullptr : bounds.get());
-            context->runOnJavascriptThread(
-                [&runtime, context = std::move(context),
-                 promise = std::move(promise), image = std::move(image)]() {
-                  if (image == nullptr) {
-                    promise->reject("Failed to make snapshot from view.");
-                    return;
-                  }
-                  promise->resolve(makeJsiObject(
-                      runtime, std::make_shared<JsiSkImage>(std::move(context),
-                                                            std::move(image))));
-                });
-          });
-        });
-  }
-
   JSI_HOST_FUNCTION(size) {
     if (count != 1) {
       _platformContext->raiseError(std::string(
@@ -359,13 +305,13 @@ public:
   }
 
   /**
-   Returns the recording side of a SkiaGraphiteView: (nativeId, width,
-   height, opaque, highBitDepth), the size in points as laid out and the
-   props the surface format follows from. The view may not exist yet; the
-   context binds to it by id when it does.
+   Returns the recording side of a view: (nativeId, width, height, opaque,
+   highBitDepth), the size in points as laid out and the props the surface
+   format follows from. The view may not exist yet; the context binds to it
+   by id when it does, and the registry owns the target in between, so a
+   frame submitted before then is kept whether or not JS keeps the context.
    */
   JSI_HOST_FUNCTION(makeGraphiteContext) {
-#if defined(SK_GRAPHITE)
     if (count < 3 || !arguments[0].isNumber() || !arguments[1].isNumber() ||
         !arguments[2].isNumber()) {
       throw jsi::JSError(runtime, "makeGraphiteContext: expected (nativeId, "
@@ -382,11 +328,21 @@ public:
     target->setLayout(width, height, opaque, highBitDepth);
     return makeJsiObject(runtime, std::make_shared<JsiSkGraphiteContext>(
                                       _platformContext, std::move(target)));
-#else
-    throw jsi::JSError(runtime,
-                       "SkiaGraphiteView requires the Graphite backend. "
-                       "Rebuild with SK_GRAPHITE enabled.");
-#endif
+  }
+
+  /**
+   Retires the target made for a view id from the JS side: (nativeId). Called
+   when the view component unmounts; a no-op once a view bound to the id,
+   whose teardown retires it (see RNSkGraphiteTargetRegistry).
+   */
+  JSI_HOST_FUNCTION(destroyGraphiteContext) {
+    if (count < 1 || !arguments[0].isNumber()) {
+      throw jsi::JSError(runtime,
+                         "destroyGraphiteContext: expected (nativeId)");
+    }
+    auto nativeId = static_cast<size_t>(arguments[0].asNumber());
+    RNSkGraphiteTargetRegistry::getInstance().removeIfUnbound(nativeId);
+    return jsi::Value::undefined();
   }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
@@ -396,13 +352,14 @@ public:
                       &RNSkJsiViewApi::requestRedraw);
     installHostMethod(runtime, prototype, "applyUpdates",
                       &RNSkJsiViewApi::applyUpdates);
-    installHostMethod(runtime, prototype, "makeImageSnapshotAsync",
-                      &RNSkJsiViewApi::makeImageSnapshotAsync);
+
     installHostMethod(runtime, prototype, "makeImageSnapshot",
                       &RNSkJsiViewApi::makeImageSnapshot);
     installHostMethod(runtime, prototype, "size", &RNSkJsiViewApi::size);
     installHostMethod(runtime, prototype, "makeGraphiteContext",
                       &RNSkJsiViewApi::makeGraphiteContext);
+    installHostMethod(runtime, prototype, "destroyGraphiteContext",
+                      &RNSkJsiViewApi::destroyGraphiteContext);
   }
 
   /**
@@ -444,6 +401,7 @@ public:
    */
   void unregisterSkiaView(size_t nativeId) {
     ViewRegistry::getInstance().removeViewInfo(nativeId);
+    RNSkGraphiteTargetRegistry::getInstance().remove(nativeId);
   }
 
   /**

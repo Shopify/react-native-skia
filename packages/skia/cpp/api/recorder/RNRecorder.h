@@ -4,6 +4,7 @@
 #include <atomic>
 #include <cmath>
 #include <cstdint>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -45,11 +46,50 @@ private:
   CommandList commands;
   std::vector<CommandList *> commandStack;
 
-  // Once a view owns the recording, the Reanimated mapper writes the shared
-  // values into the commands (applyUpdates, UI thread) while the view replays
-  // them (play, main thread). Both hold this lock; nothing else does, so it
-  // never nests with the view's lock.
+  // Once a view owns the recording, the Reanimated mapper reads the shared
+  // values into pending writes (readUpdates, UI thread) and whoever replays
+  // the commands writes them into the commands first (play, under this
+  // lock). Nothing else holds this lock, so it never nests with a view's
+  // lock.
   std::mutex _commandsMutex;
+
+  // The pending writes, one slot per conversion function: a value read
+  // several times between two replays is written once (the last read wins),
+  // and the memory stays bounded whatever the ratio of updates to replays.
+  // The slots are assigned on the first read, once the recording, and thus
+  // `variables`, is complete.
+  std::mutex _pendingMutex;
+  std::vector<PendingWrite> _pendingWrites;
+  std::map<std::string, size_t> _slotBase;
+  bool _hasPendingWrites = false;
+
+  size_t slotBase(const std::string &name) {
+    std::lock_guard<std::mutex> lock(_pendingMutex);
+    if (_slotBase.empty()) {
+      size_t count = 0;
+      for (const auto &entry : variables) {
+        _slotBase[entry.first] = count;
+        count += entry.second.size();
+      }
+      _pendingWrites.resize(count);
+    }
+    return _slotBase.at(name);
+  }
+
+  /** Writes the pending values into the commands. Under _commandsMutex. */
+  void flushPendingWritesLocked() {
+    std::lock_guard<std::mutex> lock(_pendingMutex);
+    if (!_hasPendingWrites) {
+      return;
+    }
+    for (auto &write : _pendingWrites) {
+      if (write) {
+        write();
+        write = nullptr;
+      }
+    }
+    _hasPendingWrites = false;
+  }
 
   CommandList &currentCommands() { return *commandStack.back(); }
 
@@ -404,6 +444,7 @@ public:
 
   void play(DrawingCtx *ctx) {
     std::lock_guard<std::mutex> lock(_commandsMutex);
+    flushPendingWritesLocked();
     for (const auto &cmd : commands) {
       playCommand(ctx, cmd.get());
     }
@@ -425,22 +466,38 @@ public:
 
   /**
    * Reads the current value of each shared value (in the order they were
-   * registered as variable0, variable1, ...) on the calling runtime and
-   * writes it into the recorded commands.
+   * registered as variable0, variable1, ...) on the calling runtime into the
+   * pending writes. The writes do not need the runtime: the next replay
+   * (play, on whichever thread owns the commands) writes them into the
+   * commands first, so the caller never waits for a replay.
    */
-  void applyUpdates(jsi::Runtime &runtime, const jsi::Array &values) {
-    std::lock_guard<std::mutex> lock(_commandsMutex);
+  void readUpdates(jsi::Runtime &runtime, const jsi::Array &values) {
     auto size = values.size(runtime);
     for (size_t i = 0; i < size; i++) {
       auto sharedValue = values.getValueAtIndex(runtime, i).asObject(runtime);
       auto name = "variable" + std::to_string(i);
       auto it = variables.find(name);
-      if (it != variables.end()) {
-        for (const auto &conversionFunc : it->second) {
-          conversionFunc(runtime, sharedValue);
+      if (it == variables.end()) {
+        continue;
+      }
+      auto base = slotBase(name);
+      for (size_t j = 0; j < it->second.size(); j++) {
+        if (auto write = it->second[j](runtime, sharedValue)) {
+          std::lock_guard<std::mutex> lock(_pendingMutex);
+          _pendingWrites[base + j] = std::move(write);
+          _hasPendingWrites = true;
         }
       }
     }
+  }
+
+  /**
+   * Reads the shared values and writes them into the commands right away.
+   */
+  void applyUpdates(jsi::Runtime &runtime, const jsi::Array &values) {
+    readUpdates(runtime, values);
+    std::lock_guard<std::mutex> lock(_commandsMutex);
+    flushPendingWritesLocked();
   }
 };
 

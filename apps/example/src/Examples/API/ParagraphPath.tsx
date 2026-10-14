@@ -17,7 +17,7 @@ import {
   TextAlign,
   useFonts,
   vec,
-} from "@shopify/react-native-skia";
+} from "react-native-skia";
 import {
   Easing,
   useDerivedValue,

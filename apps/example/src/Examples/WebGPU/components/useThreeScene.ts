@@ -3,8 +3,8 @@ import type { DependencyList } from "react";
 import { PixelRatio } from "react-native";
 import type * as THREE from "three";
 import { importDevice } from "react-native-webgpu";
-import type { SkImage, SkSize } from "@shopify/react-native-skia";
-import { Skia } from "@shopify/react-native-skia";
+import type { SkImage, SkSize } from "react-native-skia";
+import { Skia } from "react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
 import { useSharedValue } from "react-native-reanimated";
 
@@ -90,9 +90,7 @@ export const useThreeScene = (
       // SkImage only references the texture) and a new object is what makes
       // the Skia Canvas redraw with this frame's contents.
       const previous = image.value;
-      image.value = Skia.Image.MakeImageFromNativeTexture(
-        target.texture.nativePointer
-      );
+      image.value = Skia.Image.MakeImageFromGPUTexture(target.texture);
       previous?.dispose();
     };
     // Initialize the backend up front so the first published frame is a

@@ -6,12 +6,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import type {
-  Glyph,
-  SkFont,
-  SkPoint,
-  SkRect,
-} from "@shopify/react-native-skia";
+import type { Glyph, SkFont, SkPoint, SkRect } from "react-native-skia";
 import {
   Canvas,
   Glyphs,
@@ -21,7 +16,7 @@ import {
   Skia,
   useFonts,
   vec,
-} from "@shopify/react-native-skia";
+} from "react-native-skia";
 import type { SharedValue } from "react-native-reanimated";
 import {
   Easing,

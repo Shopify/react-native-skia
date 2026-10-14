@@ -3,8 +3,8 @@ import { StyleSheet, Text, View } from "react-native";
 import * as THREE from "three";
 import type { CanvasRef } from "react-native-webgpu";
 import { Canvas, importDevice } from "react-native-webgpu";
-import type { SkCanvas } from "@shopify/react-native-skia";
-import { Skia, StrokeCap, matchFont } from "@shopify/react-native-skia";
+import type { SkCanvas } from "react-native-skia";
+import { Skia, StrokeCap, matchFont } from "react-native-skia";
 
 import { useHDR } from "./components/AssetManager";
 import { setupCloth } from "./components/cloth";

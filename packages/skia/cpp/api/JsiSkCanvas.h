@@ -7,6 +7,7 @@
 
 #include "CustomBlendModes.h"
 #include "JsiSkConverters.h"
+#include "JsiSkDispatcher.h"
 #include "JsiSkFont.h"
 #include "JsiSkImage.h"
 #include "JsiSkImageInfo.h"
@@ -24,9 +25,7 @@
 
 #include "utils/RNSkTypedArray.h"
 
-#if defined(SK_GRAPHITE)
 #include "rnskia/RNDawnContext.h"
-#endif
 
 #include <jsi/jsi.h>
 
@@ -42,10 +41,6 @@
 #include "include/core/SkSurface.h"
 #include "include/core/SkTypeface.h"
 
-#if !defined(SK_GRAPHITE)
-#include "include/gpu/ganesh/GrDirectContext.h"
-#endif
-
 #pragma clang diagnostic pop
 
 namespace RNSkia {
@@ -56,9 +51,7 @@ class JsiSkCanvas : public JsiSkNativeObject<JsiSkCanvas> {
 public:
   static constexpr const char *CLASS_NAME = "Canvas";
 
-  void drawPaint(std::shared_ptr<SkPaint> paint) {
-    _canvas->drawPaint(*paint);
-  }
+  void drawPaint(std::shared_ptr<SkPaint> paint) { _canvas->drawPaint(*paint); }
 
   void drawLine(double x1, double y1, double x2, double y2,
                 std::shared_ptr<SkPaint> paint) {
@@ -76,7 +69,7 @@ public:
     auto x = arguments[1].asNumber();
     auto y = arguments[2].asNumber();
     std::shared_ptr<SkPaint> paint;
-    if (count == 4) {
+    if (count >= 4 && !arguments[3].isNull() && !arguments[3].isUndefined()) {
       paint = JsiSkPaint::fromValue(runtime, arguments[3]);
     }
     _canvas->drawImage(image, x, y, SkSamplingOptions(), paint.get());
@@ -102,10 +95,8 @@ public:
     float B = arguments[3].asNumber();
     float C = arguments[4].asNumber();
     std::shared_ptr<SkPaint> paint;
-    if (count == 6) {
-      if (!arguments[5].isNull()) {
-        paint = JsiSkPaint::fromValue(runtime, arguments[5]);
-      }
+    if (count >= 6 && !arguments[5].isNull() && !arguments[5].isUndefined()) {
+      paint = JsiSkPaint::fromValue(runtime, arguments[5]);
     }
     _canvas->drawImage(image, x, y, SkSamplingOptions({B, C}), paint.get());
     return jsi::Value::undefined();
@@ -118,10 +109,8 @@ public:
     auto fm = (SkFilterMode)arguments[3].asNumber();
     auto mm = (SkMipmapMode)arguments[4].asNumber();
     std::shared_ptr<SkPaint> paint;
-    if (count == 6) {
-      if (!arguments[5].isNull()) {
-        paint = JsiSkPaint::fromValue(runtime, arguments[5]);
-      }
+    if (count >= 6 && !arguments[5].isNull() && !arguments[5].isUndefined()) {
+      paint = JsiSkPaint::fromValue(runtime, arguments[5]);
     }
     _canvas->drawImage(image, x, y, SkSamplingOptions(fm, mm), paint.get());
     return jsi::Value::undefined();
@@ -133,10 +122,8 @@ public:
     auto dest = JsiSkRect::fromValue(runtime, arguments[2]);
     auto fm = (SkFilterMode)arguments[3].asNumber();
     std::shared_ptr<SkPaint> paint;
-    if (count == 5) {
-      if (!arguments[4].isNull()) {
-        paint = JsiSkPaint::fromValue(runtime, arguments[4]);
-      }
+    if (count >= 5 && !arguments[4].isNull() && !arguments[4].isUndefined()) {
+      paint = JsiSkPaint::fromValue(runtime, arguments[4]);
     }
     _canvas->drawImageNine(image.get(), center->round(), *dest, fm,
                            paint.get());
@@ -150,10 +137,8 @@ public:
     float B = arguments[3].asNumber();
     float C = arguments[4].asNumber();
     std::shared_ptr<SkPaint> paint;
-    if (count == 6) {
-      if (!arguments[5].isNull()) {
-        paint = JsiSkPaint::fromValue(runtime, arguments[5]);
-      }
+    if (count >= 6 && !arguments[5].isNull() && !arguments[5].isUndefined()) {
+      paint = JsiSkPaint::fromValue(runtime, arguments[5]);
     }
     auto constraint =
         SkCanvas::kStrict_SrcRectConstraint; // TODO: get from caller
@@ -169,10 +154,8 @@ public:
     auto filter = (SkFilterMode)arguments[3].asNumber();
     auto mipmap = (SkMipmapMode)arguments[4].asNumber();
     std::shared_ptr<SkPaint> paint;
-    if (count == 6) {
-      if (!arguments[5].isNull()) {
-        paint = JsiSkPaint::fromValue(runtime, arguments[5]);
-      }
+    if (count >= 6 && !arguments[5].isNull() && !arguments[5].isUndefined()) {
+      paint = JsiSkPaint::fromValue(runtime, arguments[5]);
     }
     auto constraint = SkCanvas::kStrict_SrcRectConstraint;
     _canvas->drawImageRect(image.get(), *src, *dest, {filter, mipmap},
@@ -217,9 +200,8 @@ public:
 
   void drawPoints(double pointMode, std::vector<SkPoint> points,
                   std::shared_ptr<SkPaint> paint) {
-    // Check if we have at least one point
     if (points.empty()) {
-      throw std::invalid_argument("Points array must not be empty");
+      return;
     }
     auto p = SkSpan(points.data(), points.size());
     _canvas->drawPoints(static_cast<SkCanvas::PointMode>(pointMode), p, *paint);
@@ -355,8 +337,7 @@ public:
 
   void clipPath(std::shared_ptr<SkPathBuilder> path, double op,
                 bool doAntiAlias) {
-    _canvas->clipPath(path->snapshot(), static_cast<SkClipOp>(op),
-                      doAntiAlias);
+    _canvas->clipPath(path->snapshot(), static_cast<SkClipOp>(op), doAntiAlias);
   }
 
   void clipRect(std::shared_ptr<SkRect> rect, double op, bool doAntiAlias) {
@@ -370,20 +351,29 @@ public:
   int save() { return _canvas->save(); }
 
   JSI_HOST_FUNCTION(saveLayer) {
-    SkPaint *paint = (count >= 1 && !arguments[0].isUndefined())
-                         ? JsiSkPaint::fromValue(runtime, arguments[0]).get()
-                         : nullptr;
-    SkRect *bounds =
-        count >= 2 && !arguments[1].isNull() && !arguments[1].isUndefined()
-            ? JsiSkRect::fromValue(runtime, arguments[1]).get()
+    // Keep the wrapper smart pointers alive for the duration of the call:
+    // JsiSkRect::fromValue() (and, in principle, the others) may return a
+    // freshly allocated temporary when the argument is a plain JS object
+    // rather than a host object, so taking .get() from a temporary would
+    // leave a dangling pointer once the expression finishes evaluating.
+    std::shared_ptr<SkPaint> paintPtr =
+        (count >= 1 && !arguments[0].isNull() && !arguments[0].isUndefined())
+            ? JsiSkPaint::fromValue(runtime, arguments[0])
             : nullptr;
-    SkImageFilter *backdrop =
-        count >= 3 && !arguments[2].isNull() && !arguments[2].isUndefined()
-            ? JsiSkImageFilter::fromValue(runtime, arguments[2]).get()
+    std::shared_ptr<SkRect> boundsPtr =
+        (count >= 2 && !arguments[1].isNull() && !arguments[1].isUndefined())
+            ? JsiSkRect::fromValue(runtime, arguments[1])
             : nullptr;
-    SkCanvas::SaveLayerFlags flags = count >= 4 ? arguments[3].asNumber() : 0;
-    return jsi::Value(_canvas->saveLayer(
-        SkCanvas::SaveLayerRec(bounds, paint, backdrop, flags)));
+    sk_sp<SkImageFilter> backdropPtr =
+        (count >= 3 && !arguments[2].isNull() && !arguments[2].isUndefined())
+            ? JsiSkImageFilter::fromValue(runtime, arguments[2])
+            : nullptr;
+    SkCanvas::SaveLayerFlags flags =
+        count >= 4 && !arguments[3].isNull() && !arguments[3].isUndefined()
+            ? static_cast<SkCanvas::SaveLayerFlags>(arguments[3].asNumber())
+            : 0;
+    return jsi::Value(_canvas->saveLayer(SkCanvas::SaveLayerRec(
+        boundsPtr.get(), paintPtr.get(), backdropPtr.get(), flags)));
   }
 
   void restore() { _canvas->restore(); }
@@ -410,9 +400,7 @@ public:
 
   void concat(std::shared_ptr<SkMatrix> matrix) { _canvas->concat(*matrix); }
 
-  void drawPicture(sk_sp<SkPicture> picture) {
-    _canvas->drawPicture(picture);
-  }
+  void drawPicture(sk_sp<SkPicture> picture) { _canvas->drawPicture(picture); }
 
   JSI_HOST_FUNCTION(drawAtlas) {
     auto atlas = JsiSkImage::fromValue(runtime, arguments[0]);
@@ -449,7 +437,7 @@ public:
     }
 
     std::vector<SkColor> colors;
-    if (count > 5 && !arguments[5].isUndefined()) {
+    if (count >= 6 && !arguments[5].isNull() && !arguments[5].isUndefined()) {
       auto colorsArray = arguments[5].asObject(runtime).asArray(runtime);
       int colorsSize = static_cast<int>(colorsArray.size(runtime));
 
@@ -479,7 +467,7 @@ public:
       }
     }
     SkSamplingOptions sampling(SkFilterMode::kLinear);
-    if (count > 6) {
+    if (count >= 7 && !arguments[6].isNull() && !arguments[6].isUndefined()) {
       sampling = SamplingOptionsFromValue(runtime, arguments[6]);
     }
     auto x = SkSpan(xforms.data(), xforms.size());
@@ -518,29 +506,22 @@ public:
             .getArrayBuffer(runtime);
     auto bfrPtr = reinterpret_cast<void *>(buffer.data(runtime));
 
-#if defined(SK_GRAPHITE)
-    // Graphite records draws lazily and offers no synchronous GPU readback. If
-    // this canvas belongs to a surface, snap & submit its recording, snapshot
-    // it to a CPU raster image and read from that (mirroring
-    // makeImageSnapshot). A canvas without an owning surface (e.g. a
-    // picture-recording canvas) has no texture to read back, so fall through to
-    // the raster canvas read below.
+    // A Graphite canvas has no readback of its own: the canvas of a surface
+    // reads from a snapshot of the surface (a copy task on its recorder,
+    // submitted so that the texture can be read back). A canvas without an
+    // owning surface (a picture-recording canvas) falls through to the raster
+    // read below.
     if (_surface) {
-      // Snapshot first: makeImageSnapshot records a copy task into the recorder
-      // that must be submitted before the texture can be read back (this is the
-      // same ordering used by JsiSkSurface::makeImageSnapshot and RNSkView).
       auto snapshot = _surface->makeImageSnapshot();
       if (auto *recorder = _surface->recorder()) {
         DawnContext::getInstance().submitRecording(recorder->snap().get());
       }
-      auto raster = DawnContext::getInstance().MakeRasterImage(snapshot);
-      if (!raster || !raster->readPixels(nullptr, *info, bfrPtr, bytesPerRow,
-                                         srcX, srcY)) {
+      if (!JsiSkImage::readPixelsInto(snapshot, *info, bfrPtr, bytesPerRow,
+                                      srcX, srcY)) {
         return jsi::Value::null();
       }
       return dest;
     }
-#endif
 
     if (!_canvas->readPixels(*info, bfrPtr, bytesPerRow, srcX, srcY)) {
       return jsi::Value::null();
@@ -599,8 +580,7 @@ public:
     installMethod(runtime, prototype, "drawColor", &JsiSkCanvas::drawColor);
     installMethod(runtime, prototype, "clear", &JsiSkCanvas::clear);
     installMethod(runtime, prototype, "concat", &JsiSkCanvas::concat);
-    installMethod(runtime, prototype, "drawPicture",
-                  &JsiSkCanvas::drawPicture);
+    installMethod(runtime, prototype, "drawPicture", &JsiSkCanvas::drawPicture);
     installHostMethod(runtime, prototype, "drawAtlas", &JsiSkCanvas::drawAtlas);
     installHostMethod(runtime, prototype, "readPixels",
                       &JsiSkCanvas::readPixels);
@@ -616,16 +596,31 @@ public:
     setCanvas(canvas);
   }
 
+  ~JsiSkCanvas() override {
+    // The canvas may hold the last reference to its surface, and the GC may
+    // finalize it on any thread: a Graphite surface has to be destroyed on
+    // the thread of its recorder (see Dispatcher).
+    if (_dispatcher) {
+      _dispatcher->release(std::move(_surface));
+    }
+  }
+
   void setCanvas(SkCanvas *canvas) { _canvas = canvas; }
   SkCanvas *getCanvas() { return _canvas; }
 
-  // Optionally associate the canvas with its owning surface. This lets
-  // readPixels fall back to a surface snapshot on Graphite, which has no
-  // synchronous canvas readback.
-  void setSurface(sk_sp<SkSurface> surface) { _surface = std::move(surface); }
+  // Optionally associate the canvas with its owning surface, keeping it alive
+  // as long as the canvas. This lets readPixels fall back to a surface
+  // snapshot on Graphite, which has no synchronous canvas readback. The
+  // dispatcher is the one of the thread the surface was created on.
+  void setSurface(sk_sp<SkSurface> surface,
+                  std::shared_ptr<Dispatcher> dispatcher) {
+    _surface = std::move(surface);
+    _dispatcher = std::move(dispatcher);
+  }
 
 private:
   SkCanvas *_canvas;
   sk_sp<SkSurface> _surface;
+  std::shared_ptr<Dispatcher> _dispatcher;
 };
 } // namespace RNSkia

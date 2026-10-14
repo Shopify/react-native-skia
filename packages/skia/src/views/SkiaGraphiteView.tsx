@@ -1,9 +1,11 @@
-import React, { useImperativeHandle, useMemo, useRef } from "react";
+import React, { useEffect, useImperativeHandle, useMemo, useRef } from "react";
 
 import type { SkGraphiteContext } from "../skia/types";
-import SkiaGraphiteViewNativeComponent from "../specs/SkiaGraphiteViewNativeComponent";
+import SkiaViewNativeComponent from "../specs/SkiaViewNativeComponent";
+import { Platform } from "../Platform";
 
 import { SkiaViewApi } from "./api";
+import { androidNativeProps } from "./android";
 import type { SkiaGraphiteViewNativeProps } from "./types";
 import { SkiaViewNativeId } from "./SkiaViewNativeId";
 
@@ -20,40 +22,60 @@ export interface SkiaGraphiteViewProps extends SkiaGraphiteViewNativeProps {
   ref?: React.Ref<SkiaGraphiteViewRef>;
 }
 
+// A view measured relative to itself gets its layout size, without the
+// transforms getBoundingClientRect() includes; measureLayout() calls back
+// synchronously on the new architecture. On the web the view measures itself
+// (see SkiaView.web).
+const measureLayout = (
+  view: React.ComponentRef<typeof SkiaViewNativeComponent>
+) => {
+  if (Platform.OS === "web") {
+    return { width: 0, height: 0 };
+  }
+  let size = { width: 0, height: 0 };
+  view.measureLayout(view, (_left, _top, width, height) => {
+    size = { width, height };
+  });
+  return size;
+};
+
 /**
- * A view presenting frames recorded with Skia Graphite. Requires the Graphite
- * backend (install-skia-graphite); with the default backend it renders
- * nothing. See {@link SkGraphiteContext}.
+ * A view whose frames are recorded from JavaScript, on any runtime, through
+ * the context of its ref. See {@link SkGraphiteContext}.
  */
 export const SkiaGraphiteView = ({
-  debug = false,
   opaque = false,
   highBitDepth = false,
+  android,
   ref,
   ...viewProps
 }: SkiaGraphiteViewProps) => {
   const nativeId = useMemo(() => SkiaViewNativeId.current++, []);
   const viewRef =
-    useRef<React.ComponentRef<typeof SkiaGraphiteViewNativeComponent>>(null);
+    useRef<React.ComponentRef<typeof SkiaViewNativeComponent>>(null);
+  // Retires the native target made for this id on unmount, in case no native
+  // view ever bound to it; a bound target is retired by the view's teardown.
+  useEffect(
+    () => () => {
+      if (SkiaViewApi && SkiaViewApi.destroyGraphiteContext) {
+        SkiaViewApi.destroyGraphiteContext(nativeId);
+      }
+    },
+    [nativeId]
+  );
   useImperativeHandle(
     ref,
     () => ({
       getNativeId: () => nativeId,
       getContext: () => {
         assertSkiaViewApi();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const view = viewRef.current as any;
+        const view = viewRef.current;
         if (!view) {
           throw new Error(
             "SkiaGraphiteView: getContext() was called before the view was mounted."
           );
         }
-        // The layout is known synchronously on the new architecture;
-        // getBoundingClientRect became stable in React Native 0.83.
-        const size =
-          "getBoundingClientRect" in view
-            ? view.getBoundingClientRect()
-            : view.unstable_getBoundingClientRect();
+        const size = measureLayout(view);
         return SkiaViewApi.makeGraphiteContext(
           nativeId,
           size.width,
@@ -66,13 +88,13 @@ export const SkiaGraphiteView = ({
     [nativeId, opaque, highBitDepth]
   );
   return (
-    <SkiaGraphiteViewNativeComponent
+    <SkiaViewNativeComponent
       ref={viewRef}
       collapsable={false}
       nativeID={`${nativeId}`}
-      debug={debug}
       opaque={opaque}
       highBitDepth={highBitDepth}
+      {...androidNativeProps(android)}
       {...viewProps}
     />
   );
