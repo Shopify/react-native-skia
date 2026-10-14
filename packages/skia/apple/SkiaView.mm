@@ -194,9 +194,13 @@ static bool appIsBackgrounded() {
   // A frame presented while the view was detached from the window (an
   // inactive tab, a covered screen) never makes it on screen, so present the
   // current frame again as soon as the view is back in a window instead of
-  // showing the last frame presented before it left.
-  if (self.window != nil && _view != nullptr) {
-    _view->redraw();
+  // showing the last frame presented before it left. The redraw is requested
+  // rather than run here, so that it usually lands after the layout of the
+  // attach (a single present at the new size if the size changed meanwhile).
+  // In the background the present would fail and request itself again until
+  // the app comes back, which presents the queue anyway.
+  if (self.window != nil && _view != nullptr && !appIsBackgrounded()) {
+    _view->requestRedraw();
   }
 }
 #endif // !TARGET_OS_OSX
