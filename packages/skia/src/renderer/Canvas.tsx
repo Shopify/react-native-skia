@@ -81,12 +81,6 @@ export interface CanvasProps extends ViewProps {
   /** Android-only rendering options. Ignored on iOS and web. */
   android?: AndroidCanvasProps;
   ref?: React.Ref<CanvasRef>;
-  /**
-   * @deprecated Does nothing. On web, every canvas and offscreen surface
-   * shares one WebGL context, so there is no per-canvas context to release
-   * and no limit on the number of canvases.
-   */
-  __destroyWebGLContextAfterRender?: boolean;
 }
 
 /**
