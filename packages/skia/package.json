@@ -42,6 +42,7 @@
     "lint": "eslint . --ext .ts,.tsx  --max-warnings 0 --cache --fix",
     "tsc": "tsc --noEmit",
     "test": "jest",
+    "test:cpp": "cmake -S cpp/tests -B build/cpp-tests && cmake --build build/cpp-tests && ctest --test-dir build/cpp-tests --output-on-failure",
     "e2e": "E2E=true yarn test -i e2e",
     "release": "semantic-release",
     "build": "bob build && merge-dirs lib/typescript/src lib/commonjs && merge-dirs lib/typescript/src lib/module",

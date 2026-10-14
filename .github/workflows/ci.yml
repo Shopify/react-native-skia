@@ -62,6 +62,10 @@ jobs:
       - name: Test
         run: yarn test
 
+      - name: C++ tests
+        working-directory: packages/skia
+        run: yarn test:cpp
+
   test-web:
     runs-on: ubuntu-latest
     steps:
