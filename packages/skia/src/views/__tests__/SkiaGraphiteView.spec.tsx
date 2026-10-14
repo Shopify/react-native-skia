@@ -20,11 +20,17 @@ jest.mock("../../specs/SkiaViewNativeComponent", () => ({
   },
 }));
 jest.mock("../api", () => ({
-  SkiaViewApi: { makeGraphiteContext: jest.fn() },
+  SkiaViewApi: {
+    makeGraphiteContext: jest.fn(),
+    destroyGraphiteContext: jest.fn(),
+  },
 }));
 
 const { SkiaViewApi } = jest.requireMock<{
-  SkiaViewApi: { makeGraphiteContext: jest.Mock };
+  SkiaViewApi: {
+    makeGraphiteContext: jest.Mock;
+    destroyGraphiteContext: jest.Mock;
+  };
 }>("../api");
 
 const mountView = () => {
@@ -54,6 +60,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   SkiaViewApi.makeGraphiteContext.mockReset();
+  SkiaViewApi.destroyGraphiteContext.mockReset();
 });
 
 // A host laid out at 200 × 100 points and drawn at half that size: measured
@@ -88,5 +95,19 @@ describe("SkiaGraphiteView on native", () => {
       false
     );
     await unmount();
+  });
+
+  // The native target made for the id outlives the context JS holds; the
+  // view retires it on unmount in case no native view ever bound to it.
+  it("retires its context on unmount", async () => {
+    mockHost = createScaledHost();
+    const { view, unmount } = mountView();
+    view.getContext();
+    expect(SkiaViewApi.destroyGraphiteContext).not.toHaveBeenCalled();
+    await unmount();
+    expect(SkiaViewApi.destroyGraphiteContext).toHaveBeenCalledTimes(1);
+    expect(SkiaViewApi.destroyGraphiteContext).toHaveBeenCalledWith(
+      view.getNativeId()
+    );
   });
 });

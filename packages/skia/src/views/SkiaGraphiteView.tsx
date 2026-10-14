@@ -1,4 +1,4 @@
-import React, { useImperativeHandle, useMemo, useRef } from "react";
+import React, { useEffect, useImperativeHandle, useMemo, useRef } from "react";
 
 import type { SkGraphiteContext } from "../skia/types";
 import SkiaViewNativeComponent from "../specs/SkiaViewNativeComponent";
@@ -53,6 +53,16 @@ export const SkiaGraphiteView = ({
   const nativeId = useMemo(() => SkiaViewNativeId.current++, []);
   const viewRef =
     useRef<React.ComponentRef<typeof SkiaViewNativeComponent>>(null);
+  // Retires the native target made for this id on unmount, in case no native
+  // view ever bound to it; a bound target is retired by the view's teardown.
+  useEffect(
+    () => () => {
+      if (SkiaViewApi && SkiaViewApi.destroyGraphiteContext) {
+        SkiaViewApi.destroyGraphiteContext(nativeId);
+      }
+    },
+    [nativeId]
+  );
   useImperativeHandle(
     ref,
     () => ({
