@@ -437,7 +437,12 @@ public:
       auto it = _entries.find(nativeId);
       if (it != _entries.end() && !it->second.bound && it->second.target) {
         target = std::move(it->second.target);
-        it->second.retired = target;
+        if (target.use_count() == 1) {
+          // No context holds it: nothing is left to take over.
+          _entries.erase(it);
+        } else {
+          it->second.retired = target;
+        }
       }
       // The entries retired earlier whose context is gone by now.
       for (auto entry = _entries.begin(); entry != _entries.end();) {
