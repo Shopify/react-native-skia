@@ -25,7 +25,7 @@ type TestOS = "ios" | "android" | "web" | "node" | "macos";
 
 declare global {
   var testServer: Server;
-  var testClient: WebSocket;
+  var testConnection: { client: WebSocket | null };
   var testOS: TestOS;
 }
 export let surface: TestingSurface;
@@ -499,10 +499,11 @@ return surface.makeImageSnapshot().encodeToBase64();
   }
 
   private get client() {
-    if (global.testClient === null) {
+    const { client } = global.testConnection;
+    if (client === null) {
       throw new Error("Client is not connected. Did you call init?");
     }
-    return global.testClient!;
+    return client;
   }
 
   private prepareContext<Ctx extends EvalContext>(context?: Ctx): EvalContext {
