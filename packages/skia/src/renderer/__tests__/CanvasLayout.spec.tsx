@@ -6,7 +6,11 @@ import type { ReactElement } from "react";
 import { createRoot } from "react-dom/client";
 import type { LayoutChangeEvent, ViewProps } from "react-native";
 
-import type { Canvas as CanvasComponent } from "../Canvas";
+import type {
+  Canvas as CanvasComponent,
+  useCanvasSize as useCanvasSizeHook,
+} from "../Canvas";
+import type { SkSize } from "../../skia/types";
 
 // The native view: records the props the canvas hands it.
 const mockNativeView = { props: {} as ViewProps };
@@ -21,17 +25,6 @@ jest.doMock("../../specs/SkiaViewNativeComponent", () => ({
   default: MockNativeView,
 }));
 
-jest.doMock("../../external/reanimated/ReanimatedProxy", () => ({
-  __esModule: true,
-  default: {
-    useAnimatedRef: () => require("react").useRef(null),
-    useFrameCallback: () => ({}),
-    measure: () => null,
-  },
-}));
-
-jest.doMock("../../external", () => ({ HAS_REANIMATED_3: true }));
-
 jest.doMock("../../skia", () => ({ Skia: {} }));
 
 jest.doMock("../../sksg/Reconciler", () => ({
@@ -41,17 +34,21 @@ jest.doMock("../../sksg/Reconciler", () => ({
   },
 }));
 
-const loadCanvas = (OS: "android" | "ios"): typeof CanvasComponent => {
-  let Canvas: typeof CanvasComponent | null = null;
+interface CanvasModule {
+  Canvas: typeof CanvasComponent;
+  useCanvasSize: typeof useCanvasSizeHook;
+}
+
+const loadCanvas = (): CanvasModule => {
+  let loaded: CanvasModule | null = null;
   jest.isolateModules(() => {
     jest.doMock("react", () => React);
-    jest.doMock("../../Platform", () => ({ Platform: { OS } }));
-    ({ Canvas } = require("../Canvas") as { Canvas: typeof CanvasComponent });
+    loaded = require("../Canvas") as CanvasModule;
   });
-  if (Canvas === null) {
+  if (loaded === null) {
     throw new Error("the canvas module did not load");
   }
-  return Canvas;
+  return loaded;
 };
 
 const mount = (element: ReactElement) => {
@@ -75,8 +72,8 @@ beforeAll(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 });
 
-describe.each(["android", "ios"] as const)("Canvas onLayout on %s", (OS) => {
-  const Canvas = loadCanvas(OS);
+describe("Canvas onLayout", () => {
+  const { Canvas, useCanvasSize } = loadCanvas();
 
   it("hands onLayout to the view and logs no error", () => {
     const errors = jest.spyOn(console, "error").mockImplementation(() => {});
@@ -89,5 +86,30 @@ describe.each(["android", "ios"] as const)("Canvas onLayout on %s", (OS) => {
     expect(errors).not.toHaveBeenCalled();
     unmount();
     errors.mockRestore();
+  });
+
+  it("useCanvasSize follows the layout and ignores a repeated one", () => {
+    const sizes: SkSize[] = [];
+    const Demo = () => {
+      const { size, onLayout } = useCanvasSize();
+      sizes.push(size);
+      return <Canvas onLayout={onLayout} />;
+    };
+    const unmount = mount(<Demo />);
+    expect(sizes[sizes.length - 1]).toEqual({ width: 0, height: 0 });
+
+    act(() => {
+      mockNativeView.props.onLayout?.(layoutEvent);
+    });
+    const size = sizes[sizes.length - 1];
+    expect(size).toEqual({ width: 48, height: 89 });
+
+    // The same layout again keeps the same size object, so nothing keyed on
+    // it (effects, memos) runs again.
+    act(() => {
+      mockNativeView.props.onLayout?.(layoutEvent);
+    });
+    expect(sizes[sizes.length - 1]).toBe(size);
+    unmount();
   });
 });
