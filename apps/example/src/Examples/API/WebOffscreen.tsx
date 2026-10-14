@@ -7,17 +7,26 @@ import {
   Text,
   View,
 } from "react-native";
-import { AlphaType, Canvas, ColorType, Fill, Skia } from "react-native-skia";
+import {
+  AlphaType,
+  Canvas,
+  ColorType,
+  Fill,
+  Image,
+  Skia,
+} from "react-native-skia";
 import type { SkImage } from "react-native-skia";
+import type { CanvasKit as CanvasKitType } from "canvaskit-wasm";
+import { peekSharedWebGLContext } from "react-native-skia/src/skia/web/SharedWebGLContext";
 
-// Skia.Surface.MakeOffscreen() on web creates an OffscreenCanvas, a WebGL
-// context and a GrDirectContext on every call, and disposing the surface
-// deletes the surface only: the context stays registered with CanvasKit.
-// Browsers cap the number of live WebGL contexts (16 in Chrome) and evict the
-// oldest one past that, visible canvases and offscreen surfaces alike.
-// "Run" makes ITERATIONS short-lived offscreen surfaces, each disposed right
-// away, then checks what was alive before them: the reference canvas, a
-// surface the app keeps, and a snapshot taken from that surface. Web only.
+// Skia.Surface.MakeOffscreen() on web is a render target on the WebGL
+// context the page shares with its canvases: no context of its own (a
+// context per surface, never released, used to get the oldest live context
+// evicted past the browser's limit of 16), and a snapshot of it can be drawn
+// by any canvas. "Run" makes ITERATIONS short-lived offscreen surfaces, each
+// disposed right away, then checks what was alive before them: the shared
+// context, a surface the app keeps, and a snapshot taken from that surface,
+// which the canvas on the right draws. Web only.
 
 const ITERATIONS = 30;
 const SIZE = 200;
@@ -25,11 +34,12 @@ const RED = "255,0,0,255";
 
 const isWeb = Platform.OS === "web" && typeof document !== "undefined";
 
-const referenceCanvas = () =>
-  isWeb
-    ? document.querySelector<HTMLCanvasElement>(
-        '[data-testid="reference"] canvas'
-      )
+// index.web.js puts the CanvasKit instance on globalThis.
+declare const CanvasKit: CanvasKitType;
+
+const sharedContext = () =>
+  isWeb && typeof CanvasKit !== "undefined"
+    ? peekSharedWebGLContext(CanvasKit)
     : null;
 
 const topLeftPixel = (image: SkImage) => {
@@ -49,24 +59,29 @@ export const WebOffscreen = () => {
   const [contextState, setContextState] = useState("unknown");
   const [report, setReport] = useState("not run");
   const [error, setError] = useState<string | null>(null);
+  const [snapshot, setSnapshot] = useState<SkImage | null>(null);
 
-  // A lost context is what an evicted canvas looks like from the outside.
+  // A lost context is what an eviction or a GPU reset looks like from the
+  // outside.
   useEffect(() => {
     if (!isWeb) {
       return undefined;
     }
     const tick = () => {
-      const gl = referenceCanvas()?.getContext("webgl2");
-      if (!gl) {
+      const shared = sharedContext();
+      if (!shared) {
         setContextState("none");
       } else {
-        setContextState(gl.isContextLost() ? "LOST" : "ok");
+        setContextState(shared.gl.isContextLost() ? "LOST" : "ok");
       }
     };
     tick();
     const interval = setInterval(tick, 250);
     return () => clearInterval(interval);
   }, []);
+
+  // The snapshot on display is replaced by each run.
+  useEffect(() => () => snapshot?.dispose(), [snapshot]);
 
   const run = () => {
     setError(null);
@@ -84,8 +99,8 @@ export const WebOffscreen = () => {
         const surface = Skia.Surface.MakeOffscreen(256, 256)!;
         surface.getCanvas().drawColor(Skia.Color(`hsl(${i * 12}, 70%, 50%)`));
         surface.flush();
-        const snapshot = surface.makeImageSnapshot();
-        snapshot.dispose();
+        const snap = surface.makeImageSnapshot();
+        snap.dispose();
         surface.dispose();
       }
       const elapsed = performance.now() - start;
@@ -98,15 +113,15 @@ export const WebOffscreen = () => {
           const redrawn = kept.makeImageSnapshot();
           const keptPixel = topLeftPixel(redrawn);
           redrawn.dispose();
-          // CanvasKit reads an image through the current context: flushing
-          // the kept surface makes its context current again.
-          kept.flush();
           const snapshotPixel = topLeftPixel(keptSnapshot);
           setReport(
             `${ITERATIONS} surfaces in ${Math.round(elapsed)} ms` +
               ` · kept surface: ${verdict(keptPixel)}` +
               ` · snapshot: ${verdict(snapshotPixel)}`
           );
+          // The canvas draws the snapshot; the surface is done with.
+          setSnapshot(keptSnapshot);
+          kept.dispose();
         } catch (e) {
           setError((e as Error).message);
         }
@@ -122,18 +137,35 @@ export const WebOffscreen = () => {
       <Text style={styles.description}>
         Run makes {ITERATIONS} offscreen surfaces (MakeOffscreen, draw,
         makeImageSnapshot, dispose). Expected: the reference canvas keeps
-        painting, and the surface kept from before the run still reads back red.
-        Chrome logs "Too many active WebGL contexts" for every context it
-        evicts. Web only.
+        painting, the surface kept from before the run still reads back red, and
+        the canvas on the right shows its snapshot. Chrome logs "Too many active
+        WebGL contexts" for every context it evicts. Web only.
       </Text>
       <Text style={styles.status} testID="status">
-        {`reference: ${contextState} · ${report}` +
+        {`context: ${contextState} · ${report}` +
           (error ? ` · error: ${error}` : "")}
       </Text>
-      <View testID="reference">
-        <Canvas style={styles.canvas}>
-          <Fill color="#5bc0be" />
-        </Canvas>
+      <View style={styles.row}>
+        <View testID="reference">
+          <Canvas style={styles.canvas}>
+            <Fill color="#5bc0be" />
+          </Canvas>
+        </View>
+        <View testID="snapshot">
+          <Canvas style={styles.canvas}>
+            <Fill color="#1c2541" />
+            {snapshot && (
+              <Image
+                image={snapshot}
+                x={0}
+                y={0}
+                width={SIZE}
+                height={SIZE}
+                fit="fill"
+              />
+            )}
+          </Canvas>
+        </View>
       </View>
       <View style={styles.actions}>
         <Button
@@ -162,6 +194,10 @@ const styles = StyleSheet.create({
   status: {
     fontSize: 13,
     fontFamily: Platform.select({ web: "monospace", default: undefined }),
+  },
+  row: {
+    flexDirection: "row",
+    gap: 12,
   },
   actions: {
     gap: 8,
