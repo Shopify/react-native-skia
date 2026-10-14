@@ -14,12 +14,6 @@ name: Agent
 # allowlist in claude_args is the only guard, so keep it tight.
 on:
   workflow_dispatch:
-  # Nightly at 02:00 CET (03:00 CEST; GitHub's cron is UTC only): a quiet
-  # hour on the shared runner, and the night's screenshots are the baseline
-  # the pull request runs compare against. GitHub only fires schedules from
-  # the default branch.
-  schedule:
-    - cron: "0 1 * * *"
 
 # One agent run at a time on the shared machine.
 concurrency:
