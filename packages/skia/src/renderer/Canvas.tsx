@@ -161,7 +161,6 @@ export interface CanvasProps extends ViewProps {
   /** Android-only rendering options. Ignored on iOS and web. */
   android?: AndroidCanvasProps;
   ref?: React.Ref<CanvasRef>;
-  __destroyWebGLContextAfterRender?: boolean;
 }
 
 const LAYOUT_SIZE_EVENT = "onLayoutSize";

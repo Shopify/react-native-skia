@@ -1,5 +1,6 @@
 import type { FC } from "react";
 
+import { GraphiteView, GraphiteViewTransform } from "./GraphiteView";
 import { IsOnMainThread } from "./IsOnMainThread";
 import { Snapshot1 } from "./Snapshot1";
 import { Snapshot2 } from "./Snapshot2";
@@ -12,6 +13,8 @@ import { OnLayout } from "./OnLayout";
 import { OnSize, OnSizeEmpty } from "./OnSize";
 
 export const Screens: Record<string, FC> = {
+  GraphiteView,
+  GraphiteViewTransform,
   IsOnMainThread,
   Snapshot1,
   Snapshot2,
