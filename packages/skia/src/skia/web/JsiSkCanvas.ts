@@ -437,8 +437,8 @@ export class JsiSkCanvas
     dsts: SkRSXform[],
     paint: SkPaint,
     blendMode?: BlendMode | null,
-    colors?: SkColor[],
-    sampling?: CubicResampler | FilterOptions
+    colors?: readonly SkColor[] | null,
+    sampling?: CubicResampler | FilterOptions | null
   ) {
     const src = srcs.flatMap((s) =>
       Array.from(JsiSkRect.fromValue(this.CanvasKit, s))
