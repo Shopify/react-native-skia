@@ -1,0 +1,54 @@
+name: Agent
+# A Claude Code agent run on the self-hosted Mac, started by hand. This is the
+# first rung of a ladder that ends with the agent touring the example app on a
+# simulator: it only proves the integration (Bun and the Claude Code CLI
+# install on the runner, the subscription token, the tool allowlist, the report
+# in the step summary) and never builds or launches anything.
+#
+# Only workflow_dispatch and, later, schedule may start this workflow. Both are
+# maintainer-only, so the token never reaches a run that executes code from a
+# fork. The action's subprocess isolation is Linux-only: on this Mac the tool
+# allowlist in claude_args is the only guard, so keep it tight.
+on:
+  workflow_dispatch:
+
+# One agent run at a time on the shared machine.
+concurrency:
+  group: agent
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: [self-hosted, macOS]
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code
+        uses: anthropics/claude-code-action@34968b5981d5d170904281aa3df6f3c0d4a28855 # v1.0.249
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # The workflow's own token instead of the Claude GitHub App, which is
+          # not installed on this repository.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Claude's final report goes to the run's step summary.
+          display_report: true
+          prompt: |
+            This is an integration check of Claude Code on a self-hosted macOS
+            runner. Run exactly these two commands:
+
+              xcodebuild -version
+              xcrun simctl list devices available
+
+            Then reply with a three-line report: the Xcode version, the number
+            of available iPhone simulators, and whether a simulator named
+            "skia-ci" exists and in which state. Do nothing else.
+          claude_args: |
+            --max-turns 5
+            --allowedTools "Bash(xcodebuild -version),Bash(xcrun simctl list:*)"
