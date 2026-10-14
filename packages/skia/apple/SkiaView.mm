@@ -52,6 +52,8 @@ static bool appIsBackgrounded() {
   bool _highBitDepth;
 #if !TARGET_OS_OSX
   CADisplayLink *_displayLink;
+#else
+  bool _presentAgainScheduled;
 #endif
 }
 
@@ -60,6 +62,9 @@ static bool appIsBackgrounded() {
     _manager = [RNSkiaModule latestActiveSkManager].get();
     _nativeId = 0;
     _highBitDepth = false;
+#if TARGET_OS_OSX
+    _presentAgainScheduled = false;
+#endif
     static const auto defaultProps = std::make_shared<const SkiaViewProps>();
     _props = defaultProps;
   }
@@ -147,7 +152,7 @@ static bool appIsBackgrounded() {
 // Presents on the display link: armed when a recording is submitted, paused
 // again once the queue is empty. macOS has no CADisplayLink on the minimum
 // deployment target, so frames are presented as soon as the main thread gets
-// to them there.
+// to them there, and tried again a frame later while some are left.
 - (void)scheduleFrame {
 #if !TARGET_OS_OSX
   if (_displayLink == nil) {
@@ -158,8 +163,8 @@ static bool appIsBackgrounded() {
   }
   _displayLink.paused = NO;
 #else
-  if (_view != nullptr) {
-    _view->presentFrame();
+  if (_view != nullptr && _view->presentFrame()) {
+    [self presentAgainLater];
   }
 #endif
 }
@@ -169,6 +174,23 @@ static bool appIsBackgrounded() {
   if (_view == nullptr || !_view->presentFrame()) {
     link.paused = YES;
   }
+}
+#else
+- (void)presentAgainLater {
+  if (_presentAgainScheduled) {
+    return;
+  }
+  _presentAgainScheduled = true;
+  __weak SkiaView *weakSelf = self;
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC / 60),
+                 dispatch_get_main_queue(), ^{
+                   SkiaView *strongSelf = weakSelf;
+                   if (strongSelf == nil) {
+                     return;
+                   }
+                   strongSelf->_presentAgainScheduled = false;
+                   [strongSelf scheduleFrame];
+                 });
 }
 #endif
 

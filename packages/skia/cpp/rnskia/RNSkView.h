@@ -158,7 +158,9 @@ public:
    Main thread. Presents everything submitted since the last frame; with
    nothing queued, presents the last frame again (a redraw after a resize or
    on a new surface). Without a surface the queue is left alone: the surface
-   presents it when it appears.
+   presents it when it appears. A frame the window declines is queued again
+   and handed to the frame scheduler, which tries it on the view's next frame
+   (see setFrameScheduler).
    */
   void redraw() {
     _redrawRequested = false;
@@ -169,34 +171,35 @@ public:
     // Declarative content is recorded again for the surface as it is now.
     const bool frameComing = _producer->requestFrame();
     auto target = getTarget();
-    std::shared_ptr<RNSkGraphiteRecording> lastPresented;
-    {
-      std::lock_guard<std::mutex> lock(_mutex);
-      lastPresented = _lastPresented;
+    if (target == nullptr) {
+      return;
     }
-    std::vector<std::shared_ptr<RNSkGraphiteRecording>> recordings;
-    if (target) {
-      recordings = target->takeQueued();
-    }
+    auto recordings = target->takeQueued();
     if (recordings.empty()) {
       // With a frame on its way, the layer keeps showing the last one until
       // it lands: presenting it again would only cost a second present.
       // Otherwise the last frame is presented again, also onto a surface of
       // another size (the view was resized and nothing records for it): the
       // frame then shows at its own size rather than nothing at all.
+      std::shared_ptr<RNSkGraphiteRecording> lastPresented;
+      {
+        std::lock_guard<std::mutex> lock(_mutex);
+        lastPresented = _lastPresented;
+      }
       if (frameComing || lastPresented == nullptr) {
         return;
       }
-      if (present(*_surface, targetInfo, {lastPresented},
-                  /* remember= */ true)) {
-        _producer->onFramePresented();
-      }
-      return;
+      recordings.push_back(std::move(lastPresented));
     }
     if (present(*_surface, targetInfo, recordings, /* remember= */ true)) {
       _producer->onFramePresented();
-    } else if (target) {
-      target->requeue(recordings);
+      return;
+    }
+    target->requeue(recordings);
+    // Not scheduleFrame(): without a scheduler it redraws, which would decline
+    // again and recurse.
+    if (_frameScheduler) {
+      _frameScheduler();
     }
   }
 
@@ -239,9 +242,11 @@ public:
 
   /**
    Installed by the platform view, which calls presentFrame() once its surface
-   can show a new frame: on the display link on iOS, straight away on macOS,
-   and on Android as its FrameScheduler decides. Main thread. Without one,
-   frames are presented as soon as the main thread gets to them.
+   can show a new frame, and again a frame later while it returns true: on the
+   display link on iOS, straight away and then a frame apart on macOS, and on
+   Android as its FrameScheduler decides. Main thread. Without one, frames are
+   presented as soon as the main thread gets to them, and a declined one waits
+   for the next redraw.
    */
   void setFrameScheduler(std::function<void()> scheduler) {
     _frameScheduler = std::move(scheduler);

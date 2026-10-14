@@ -91,8 +91,7 @@ public:
 
   /**
    Installed by the view owning the surface: asks it for a frame when the
-   window appears or changes size, and when a present was declined so that
-   it is tried again (the app coming back to the foreground).
+   window appears or changes size.
    */
   void setRequestRedraw(std::function<void()> requestRedraw) {
     _requestRedraw = std::move(requestRedraw);
@@ -100,8 +99,9 @@ public:
 
   /**
    Installed by the platform view: whether the window can show a frame right
-   now. Presenting is declined while it returns false, and a redraw is
-   requested instead. Without one, an attached window always can.
+   now. Presenting is declined while it returns false; the caller keeps the
+   frame for the view's next frame (see RNSkView::redraw). Without one, an
+   attached window always can.
    */
   void setCanPresent(std::function<bool()> canPresent) {
     _canPresent = std::move(canPresent);
