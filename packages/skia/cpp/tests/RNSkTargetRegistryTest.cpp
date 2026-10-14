@@ -63,6 +63,39 @@ TEST_F(RNSkTargetRegistryTest, ReleasesARetiredTargetNothingHolds) {
   EXPECT_TRUE(target.expired());
 }
 
+// StrictMode's simulated unmount retires the id before its view may exist,
+// while the caller keeps the context it made on the first effect run.
+TEST_F(RNSkTargetRegistryTest, BindsARetiredTargetAContextStillHolds) {
+  auto held = registry.getOrCreate(1, context);
+  registry.removeIfUnbound(1);
+  EXPECT_EQ(registry.bind(1, context), held);
+}
+
+TEST_F(RNSkTargetRegistryTest, GivesAContextARetiredTargetAContextStillHolds) {
+  auto held = registry.getOrCreate(1, context);
+  registry.removeIfUnbound(1);
+  EXPECT_EQ(registry.getOrCreate(1, context), held);
+}
+
+TEST_F(RNSkTargetRegistryTest, MakesANewTargetOnceARetiredOneIsReleased) {
+  std::weak_ptr<Target> released;
+  {
+    auto held = registry.getOrCreate(1, context);
+    released = held;
+    registry.removeIfUnbound(1);
+  }
+  EXPECT_TRUE(released.expired());
+  EXPECT_NE(registry.bind(1, context), nullptr);
+}
+
+TEST_F(RNSkTargetRegistryTest, KeepsARetiredTargetOnlyWhileItIsHeld) {
+  auto held = registry.getOrCreate(1, context);
+  registry.removeIfUnbound(1);
+  std::weak_ptr<Target> target = held;
+  held.reset();
+  EXPECT_TRUE(target.expired());
+}
+
 TEST_F(RNSkTargetRegistryTest, ReleasesEveryTargetOnClear) {
   std::weak_ptr<Target> bound = registry.bind(1, context);
   std::weak_ptr<Target> unbound = registry.getOrCreate(2, context);

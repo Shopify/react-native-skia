@@ -14,9 +14,11 @@ namespace RNSkia {
  * use). The registry owns every target. An entry is made by whichever side
  * comes first, the context JS makes for the id or the view binding to it, and
  * kept until the platform view of the id is unregistered or, for an id no view
- * ever bound to, until JS retires it. A reload clears the registry, as native
- * ids start over with the next bundle (see ~RNSkManager). The same ownership
- * as the SurfaceRegistry of react-native-webgpu.
+ * ever bound to, until JS retires it; a target JS retires while a context still
+ * holds it stays the target of its id until that context lets go of it. A
+ * reload clears the registry, as native ids start over with the next bundle
+ * (see ~RNSkManager). The same ownership as the SurfaceRegistry of
+ * react-native-webgpu.
  */
 template <typename Target, typename Context> class RNSkTargetRegistry {
 public:
@@ -29,7 +31,7 @@ public:
                                       const std::shared_ptr<Context> &context) {
     std::lock_guard<std::mutex> lock(_mutex);
     auto &entry = getOrCreateLocked(nativeId, context);
-    return entry.target;
+    return entry.owned;
   }
 
   /**
@@ -44,7 +46,7 @@ public:
     std::lock_guard<std::mutex> lock(_mutex);
     auto &entry = getOrCreateLocked(nativeId, context);
     entry.bound = true;
-    return entry.target;
+    return entry.owned;
   }
 
   /** Retires the entry of a platform view that is gone. */
@@ -56,7 +58,7 @@ public:
       if (it == _entries.end()) {
         return;
       }
-      target = std::move(it->second.target);
+      target = std::move(it->second.owned);
       _entries.erase(it);
     }
     // The target, and the GPU resources of its queue, may be destroyed here,
@@ -67,7 +69,9 @@ public:
    Retires the entry from the JS side, when the view component unmounts,
    unless a view bound to it: that entry is the view's, and its teardown
    retires it. React's StrictMode simulates an unmount without unmounting
-   the native views, which would otherwise orphan a bound view.
+   the native views, which would otherwise orphan a bound view, and it can
+   do so before the view binds while the component goes on with the context
+   it made: a target a context still holds therefore stays the id's.
    */
   void removeIfUnbound(size_t nativeId) {
     std::shared_ptr<Target> target;
@@ -77,9 +81,12 @@ public:
       if (it == _entries.end() || it->second.bound) {
         return;
       }
-      target = std::move(it->second.target);
-      _entries.erase(it);
+      target = std::move(it->second.owned);
+      if (target.use_count() == 1) {
+        _entries.erase(it);
+      }
     }
+    // Released here, outside of the lock, unless a context holds it.
   }
 
   /** Drops every entry: the bundle is going away (see ~RNSkManager). */
@@ -93,18 +100,39 @@ public:
 
 private:
   struct Entry {
-    std::shared_ptr<Target> target;
+    // Null once JS retired the entry while a context held the target.
+    std::shared_ptr<Target> owned;
+    std::weak_ptr<Target> target;
     bool bound = false;
   };
 
   Entry &getOrCreateLocked(size_t nativeId,
                            const std::shared_ptr<Context> &context) {
+    eraseReleasedLocked();
     auto it = _entries.find(nativeId);
     if (it != _entries.end()) {
-      return it->second;
+      auto &entry = it->second;
+      if (entry.owned == nullptr) {
+        entry.owned = entry.target.lock();
+      }
+      if (entry.owned != nullptr) {
+        return entry;
+      }
+      _entries.erase(it);
     }
-    return _entries.emplace(nativeId, Entry{std::make_shared<Target>(context)})
-        .first->second;
+    auto target = std::make_shared<Target>(context);
+    return _entries.emplace(nativeId, Entry{target, target}).first->second;
+  }
+
+  // Retired entries whose target every context has let go of.
+  void eraseReleasedLocked() {
+    for (auto it = _entries.begin(); it != _entries.end();) {
+      if (it->second.owned == nullptr && it->second.target.expired()) {
+        it = _entries.erase(it);
+      } else {
+        ++it;
+      }
+    }
   }
 
   std::mutex _mutex;
