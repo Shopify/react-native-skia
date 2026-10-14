@@ -55,6 +55,9 @@ packages/skia/libs
 packages/skia/cpp/skia
 packages/skia/cpp/dawn
 
+# Images of failed image checks (checkImage writes <reference>.test.png)
+*.test.png
+
 # BUCK
 buck-out/
 \.buckd/
