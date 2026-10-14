@@ -12734,7 +12734,7 @@ __metadata:
     "@types/node": ^22.13.9
     clsx: ^1.1.1
     eslint: 9.36.0
-    eslint-config-react-native-wcandillon: 5.0.0
+    eslint-config-react-native-wcandillon: 5.0.1
     expo-asset: ^10.0.6
     file-loader: ^6.2.0
     its-fine: ^1.0.8
@@ -13657,9 +13657,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-react-native-wcandillon@npm:5.0.0":
-  version: 5.0.0
-  resolution: "eslint-config-react-native-wcandillon@npm:5.0.0"
+"eslint-config-react-native-wcandillon@npm:5.0.1":
+  version: 5.0.1
+  resolution: "eslint-config-react-native-wcandillon@npm:5.0.1"
   dependencies:
     "@typescript-eslint/eslint-plugin": ^8.70.0
     "@typescript-eslint/parser": ^8.70.0
@@ -13673,7 +13673,7 @@ __metadata:
     eslint-plugin-react-native: ^5.0.0
     prettier: ^3.9.6
     typescript: ^5.9.3
-  checksum: 2cf8efb99986fc6f91c8e0bc0d64906e59034adad4e3e90bbcc6c4901b0bf86c1c909fb100269ab231d5a68967e06a8b5bef4a7042ef54c1452b20d2072175f1
+  checksum: 8d32aac9260c9defedba6b5ef0f395d1a274701d343c3639d93bd0765de6c5682e31af0b882fd516ab3d45dbf472cf7f3e1dff63367bc0ba40d559dc08064982
   languageName: node
   linkType: hard
 
@@ -14233,7 +14233,7 @@ __metadata:
     babel-plugin-transform-inline-environment-variables: ^0.4.4
     cdt2d: ^1.0.0
     eslint: 9.36.0
-    eslint-config-react-native-wcandillon: 5.0.0
+    eslint-config-react-native-wcandillon: 5.0.1
     eslint-plugin-import: 2.32.0
     fast-text-encoding: ^1.0.6
     its-fine: ^2.0.0
@@ -14250,7 +14250,7 @@ __metadata:
     react-native-safe-area-context: ^5.2.0
     react-native-screens: ^4.10.0
     react-native-skia: "workspace:*"
-    react-native-svg: "patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch"
+    react-native-svg: "patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch&../../.yarn/patches/react-native-svg-npm-15.14.0-position-props.patch"
     react-native-test-app: 4.4.7
     react-native-web: ^0.21.2
     react-native-webgpu: 0.12.1
@@ -15938,7 +15938,7 @@ __metadata:
   dependencies:
     "@types/jest": ^29.5.0
     eslint: 9.36.0
-    eslint-config-react-native-wcandillon: 5.0.0
+    eslint-config-react-native-wcandillon: 5.0.1
     jest: ^29.7.0
     react: ^19.0.0
     react-native-skia: "workspace:*"
@@ -25166,7 +25166,7 @@ __metadata:
     "@types/ws": 8.5.3
     canvaskit-wasm: 0.41.0
     eslint: 9.36.0
-    eslint-config-react-native-wcandillon: 5.0.0
+    eslint-config-react-native-wcandillon: 5.0.1
     eslint-plugin-import: 2.32.0
     eslint-plugin-react-hooks: ^5.2.0
     extract-zip: ^2.0.1
@@ -25227,9 +25227,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-svg@patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch::locator=example%40workspace%3Aapps%2Fexample":
+"react-native-svg@patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch&../../.yarn/patches/react-native-svg-npm-15.14.0-position-props.patch::locator=example%40workspace%3Aapps%2Fexample":
   version: 15.14.0
-  resolution: "react-native-svg@patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch::version=15.14.0&hash=f0af0e&locator=example%40workspace%3Aapps%2Fexample"
+  resolution: "react-native-svg@patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch&../../.yarn/patches/react-native-svg-npm-15.14.0-position-props.patch::version=15.14.0&hash=50ed0f&locator=example%40workspace%3Aapps%2Fexample"
   dependencies:
     css-select: ^5.1.0
     css-tree: ^1.1.3
@@ -25237,7 +25237,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 2c06b36399bc6f4c84ce11b3ec5231b73393575d121a790e7701b61e3ad23b5abc628f55b79fc9eea997130a73ad53921b644fdf48eddd564f66192292714063
+  checksum: 2a4568118dc390fe00b325fc295360b0e4dadd4b5908104d9fa9c1f1b3f05fccea5294986d55a40e680d0d3a48bda6b829aecdc2ad8325469855bda8b5236d5a
   languageName: node
   linkType: hard
 
