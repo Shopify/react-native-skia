@@ -1,12 +1,22 @@
 /**
  * @jest-environment jsdom
  */
+import { setFlagsFromString } from "v8";
+import { runInNewContext } from "vm";
+
 import React, { act } from "react";
 import type { Ref } from "react";
 import { createRoot } from "react-dom/client";
 
 import { SkiaGraphiteView } from "../SkiaGraphiteView";
 import type { SkiaGraphiteViewRef } from "../SkiaGraphiteView";
+
+// A full collection without --expose-gc, the way jest-leak-detector gets one.
+setFlagsFromString("--expose-gc");
+const collectGarbage: () => void = runInNewContext("gc");
+
+// A WeakRef keeps its target until the job that made or read it ends.
+const endJob = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 // The host instance of the native view, which getContext() measures.
 let mockHost: object = {};
@@ -87,6 +97,29 @@ describe("SkiaGraphiteView on native", () => {
       false,
       false
     );
+    await unmount();
+  });
+
+  // A frame submitted before the native view exists waits in the context's
+  // target, which nothing else holds until that view binds to it.
+  it("keeps the context it hands out while it is mounted", async () => {
+    mockHost = createScaledHost();
+    const handedOut: WeakRef<object>[] = [];
+    SkiaViewApi.makeGraphiteContext.mockImplementation(() => {
+      const context = {};
+      handedOut.push(new WeakRef(context));
+      return context;
+    });
+    const unheld = new WeakRef({});
+    const { view, unmount } = mountView();
+    view.getContext();
+    // The mock keeps what it returned.
+    SkiaViewApi.makeGraphiteContext.mockClear();
+    await endJob();
+    collectGarbage();
+    expect(unheld.deref()).toBeUndefined();
+    expect(handedOut).toHaveLength(1);
+    expect(handedOut[0].deref()).toBeDefined();
     await unmount();
   });
 });

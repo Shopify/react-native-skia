@@ -53,6 +53,9 @@ export const SkiaGraphiteView = ({
   const nativeId = useMemo(() => SkiaViewNativeId.current++, []);
   const viewRef =
     useRef<React.ComponentRef<typeof SkiaViewNativeComponent>>(null);
+  // A frame submitted before the native view exists waits in the context's
+  // target, which nothing else holds until that view binds to it.
+  const contextRef = useRef<SkGraphiteContext | null>(null);
   useImperativeHandle(
     ref,
     () => ({
@@ -66,13 +69,14 @@ export const SkiaGraphiteView = ({
           );
         }
         const size = measureLayout(view);
-        return SkiaViewApi.makeGraphiteContext(
+        contextRef.current = SkiaViewApi.makeGraphiteContext(
           nativeId,
           size.width,
           size.height,
           opaque,
           highBitDepth
         );
+        return contextRef.current;
       },
     }),
     [nativeId, opaque, highBitDepth]
