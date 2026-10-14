@@ -59,6 +59,12 @@ export interface ISkiaViewApi {
     opaque: boolean,
     highBitDepth: boolean
   ) => SkGraphiteContext;
+  /**
+   * Retires what `makeGraphiteContext` made for a view id, once the view
+   * component unmounts. A no-op when a view bound to the id: its own
+   * teardown retires it. On the web the view owns its context; a no-op.
+   */
+  destroyGraphiteContext: (nativeId: number) => void;
 }
 
 /** The props every Skia view takes, whichever way it is drawn. */
