@@ -322,9 +322,11 @@ public:
     bool opaque = count > 3 && arguments[3].isBool() && arguments[3].getBool();
     bool highBitDepth =
         count > 4 && arguments[4].isBool() && arguments[4].getBool();
-    auto target = RNSkGraphiteTargetRegistry::getInstance().getOrCreate(
-        nativeId, _platformContext);
+    auto &targets = RNSkGraphiteTargetRegistry::getInstance();
+    auto target = targets.getOrCreate(nativeId, _platformContext);
     target->setLayout(width, height, opaque, highBitDepth);
+    // Until the view is gone: JS may drop the context before the view binds.
+    targets.retain(nativeId, target);
     return makeJsiObject(runtime, std::make_shared<JsiSkGraphiteContext>(
                                       _platformContext, std::move(target)));
   }
@@ -383,6 +385,7 @@ public:
    */
   void unregisterSkiaView(size_t nativeId) {
     ViewRegistry::getInstance().removeViewInfo(nativeId);
+    RNSkGraphiteTargetRegistry::getInstance().release(nativeId);
   }
 
   /**

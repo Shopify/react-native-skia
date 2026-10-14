@@ -202,7 +202,9 @@ public:
 
   /**
    Queues a recording for the next frame. Recordings are never dropped: a
-   later frame may depend on resources an earlier one uploaded.
+   later frame may depend on resources an earlier one uploaded. This holds
+   before the view exists too: the registry keeps the target until the
+   view's id is unregistered (see RNSkGraphiteTargetRegistry::retain).
    */
   void submit(std::shared_ptr<RNSkGraphiteRecording> recording) {
     std::function<void()> requestFrame;
@@ -357,7 +359,8 @@ private:
 
 /**
  * Targets by native view id. Entries are weak: a target lives as long as the
- * view or a JS context object holds it.
+ * view or a JS context object holds it, or as long as its id is retained
+ * (from the first context made for it until the view of that id is gone).
  */
 class RNSkGraphiteTargetRegistry {
 public:
@@ -388,10 +391,55 @@ public:
     return target;
   }
 
+  /**
+   Keeps the target of the given id alive until release(). A frame submitted
+   before the view binds waits in the target, and the JS context that
+   submitted it may be collected before that happens: the view would then
+   bind a new, empty target and stay blank. The hold lasts for the life of
+   the platform view rather than until it binds, so that a target also
+   survives the view leaving and re-entering the hierarchy (iOS recreates
+   its RNSkView on the way back in).
+   */
+  void retain(size_t nativeId, std::shared_ptr<RNSkGraphiteTarget> target) {
+    std::lock_guard<std::mutex> lock(_mutex);
+    _retained[nativeId] = std::move(target);
+  }
+
+  /**
+   Undoes retain(), once the view of the given id is gone. Native ids are
+   reused across reloads: a previous bundle's view unregistering late would
+   drop the hold of its successor, the race ViewRegistry has with its
+   tombstones. The old tree is torn down before the new bundle starts.
+   */
+  void release(size_t nativeId) {
+    std::shared_ptr<RNSkGraphiteTarget> target;
+    {
+      std::lock_guard<std::mutex> lock(_mutex);
+      auto it = _retained.find(nativeId);
+      if (it == _retained.end()) {
+        return;
+      }
+      target = std::move(it->second);
+      _retained.erase(it);
+    }
+    // The target, and the GPU resources of its queue, may be destroyed here,
+    // outside of the lock.
+  }
+
+  /** Undoes every retain(): the bundle is going away (see ~RNSkManager). */
+  void releaseAll() {
+    std::unordered_map<size_t, std::shared_ptr<RNSkGraphiteTarget>> retained;
+    {
+      std::lock_guard<std::mutex> lock(_mutex);
+      retained.swap(_retained);
+    }
+  }
+
 private:
   RNSkGraphiteTargetRegistry() = default;
   std::mutex _mutex;
   std::unordered_map<size_t, std::weak_ptr<RNSkGraphiteTarget>> _targets;
+  std::unordered_map<size_t, std::shared_ptr<RNSkGraphiteTarget>> _retained;
 };
 
 } // namespace RNSkia
