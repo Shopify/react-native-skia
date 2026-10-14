@@ -443,7 +443,7 @@ class LocalSurface implements TestingSurface {
   }
 }
 
-class RemoteSurface implements TestingSurface {
+export class RemoteSurface implements TestingSurface {
   readonly width = 256;
   readonly height = 256;
   readonly fontSize = 32;
@@ -525,6 +525,7 @@ return surface.makeImageSnapshot().encodeToBase64();
     // a single failing case would stall the whole serial suite.
     const EVAL_TIMEOUT_MS = 30 * 1000;
     return new Promise((resolve, reject) => {
+      const { client } = this;
       const onMessage = (raw: Buffer) => {
         clearTimeout(timeout);
         // The device reports a thrown error as { $$error: message } (always
@@ -538,15 +539,15 @@ return surface.makeImageSnapshot().encodeToBase64();
         resolve(json ? JSON.parse(raw.toString()) : this.decodeImage(raw));
       };
       const timeout = setTimeout(() => {
-        this.client.off("message", onMessage);
+        client.off("message", onMessage);
         reject(
           new Error(
             `eval timed out after ${EVAL_TIMEOUT_MS}ms without a response from the device`
           )
         );
       }, EVAL_TIMEOUT_MS);
-      this.client.once("message", onMessage);
-      this.client.send(body);
+      client.once("message", onMessage);
+      client.send(body);
     });
   }
 
