@@ -119,6 +119,31 @@ describe("SkCanvas", () => {
     checkImage(img, "snapshots/canvas/drawatlas-no-colors.png");
   });
 
+  it("drawAtlas accepts null for blendMode, colors and sampling", async () => {
+    const img = await surface.drawOffscreen((Skia, canvas) => {
+      canvas.drawColor(Skia.Color("white"));
+      const size = 40;
+      const texSurface = Skia.Surface.MakeOffscreen(size, size)!;
+      const texCanvas = texSurface.getCanvas();
+      texCanvas.drawColor(Skia.Color("orange"));
+      const image = texSurface.makeImageSnapshot();
+      const paint = Skia.Paint();
+
+      // null is accepted for every trailing argument and falls back to the
+      // defaults (DstOver, no per-sprite colors, linear sampling).
+      canvas.drawAtlas(
+        image,
+        [Skia.XYWHRect(0, 0, size, size)],
+        [Skia.RSXform(1, 0, 10, 10)],
+        paint,
+        null,
+        null,
+        null
+      );
+    });
+    checkImage(img, "snapshots/canvas/drawatlas-no-colors.png");
+  });
+
   it("drawImage accepts null or omitted paint", async () => {
     const img = await surface.drawOffscreen((Skia, canvas) => {
       canvas.drawColor(Skia.Color("white"));
