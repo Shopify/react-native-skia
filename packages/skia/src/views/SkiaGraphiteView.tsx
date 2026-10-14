@@ -55,6 +55,9 @@ export const SkiaGraphiteView = ({
     useRef<React.ComponentRef<typeof SkiaViewNativeComponent>>(null);
   // Retires the native target made for this id on unmount, in case no native
   // view ever bound to it; a bound target is retired by the view's teardown.
+  // StrictMode runs this cleanup right after mount too, possibly before the
+  // native view registered: a context kept from the first effect run keeps
+  // its target, which the native view takes over when it registers.
   useEffect(
     () => () => {
       if (SkiaViewApi && SkiaViewApi.destroyGraphiteContext) {
