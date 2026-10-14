@@ -335,8 +335,9 @@ private:
   /**
    Replays the recordings onto the surface's target, in order, and remembers
    the last one for the next redraw when asked to (not for a snapshot).
-   Returns false when the surface could not present (no window, app in the
-   background), in which case the caller keeps the recordings.
+   Returns false when the surface could not present one of them (no window,
+   app in the background), also through a texture, in which case the caller
+   keeps the recordings. One made for another format is skipped: consumed.
    */
   bool
   present(RNSkSurface &surface, const RNSkGraphiteTargetInfo &targetInfo,
@@ -376,11 +377,7 @@ private:
       }
     }
     flush();
-    if (last == nullptr) {
-      // Nothing presentable: the recordings are consumed, not kept.
-      return true;
-    }
-    if (success && remember) {
+    if (success && remember && last != nullptr) {
       std::lock_guard<std::mutex> lock(_mutex);
       _lastPresented = last;
     }
