@@ -79,8 +79,8 @@ export class WebGLRenderer implements Renderer {
   onResize() {
     const { canvas } = this;
     this.pd = window.devicePixelRatio;
-    const width = canvas.clientWidth * this.pd;
-    const height = canvas.clientHeight * this.pd;
+    const width = Math.floor(canvas.clientWidth * this.pd);
+    const height = Math.floor(canvas.clientHeight * this.pd);
     if (width === this.width && height === this.height) {
       return;
     }
