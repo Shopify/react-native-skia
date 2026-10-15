@@ -22,8 +22,7 @@ export type Routes = {
   UseCanvas: undefined;
   PictureView: undefined;
   OnLayout: undefined;
-  OnSize: undefined;
-  Snapshot: undefined;
+  CanvasSize: undefined;
   IconsExample: undefined;
   Paragraphs: undefined;
   Paragraphs2: undefined;
@@ -44,4 +43,5 @@ export type Routes = {
   WebGLContexts: undefined;
   WebGLLifecycle: undefined;
   WebMemory: undefined;
+  WebOffscreen: undefined;
 };

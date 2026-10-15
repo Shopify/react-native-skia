@@ -1,13 +1,13 @@
-import React, { useImperativeHandle, useMemo, useRef } from "react";
+import React, { useEffect, useImperativeHandle, useMemo, useRef } from "react";
 
 import type { SkGraphiteContext } from "../skia/types";
 import SkiaViewNativeComponent from "../specs/SkiaViewNativeComponent";
-import { Platform } from "../Platform";
 
 import { SkiaViewApi } from "./api";
 import { androidNativeProps } from "./android";
 import type { SkiaGraphiteViewNativeProps } from "./types";
 import { SkiaViewNativeId } from "./SkiaViewNativeId";
+import { measureLayout } from "./measureLayout";
 
 export interface SkiaGraphiteViewRef {
   /**
@@ -21,22 +21,6 @@ export interface SkiaGraphiteViewRef {
 export interface SkiaGraphiteViewProps extends SkiaGraphiteViewNativeProps {
   ref?: React.Ref<SkiaGraphiteViewRef>;
 }
-
-// The layout is known synchronously on the new architecture;
-// getBoundingClientRect became stable in React Native 0.83. On the web the
-// view measures itself (see SkiaView.web).
-const measureLayout = (view: unknown) => {
-  if (Platform.OS === "web") {
-    return { width: 0, height: 0 };
-  }
-  const host = view as {
-    getBoundingClientRect?: () => { width: number; height: number };
-    unstable_getBoundingClientRect: () => { width: number; height: number };
-  };
-  return host.getBoundingClientRect
-    ? host.getBoundingClientRect()
-    : host.unstable_getBoundingClientRect();
-};
 
 /**
  * A view whose frames are recorded from JavaScript, on any runtime, through
@@ -52,6 +36,19 @@ export const SkiaGraphiteView = ({
   const nativeId = useMemo(() => SkiaViewNativeId.current++, []);
   const viewRef =
     useRef<React.ComponentRef<typeof SkiaViewNativeComponent>>(null);
+  // Retires the native target made for this id on unmount, in case no native
+  // view ever bound to it; a bound target is retired by the view's teardown.
+  // StrictMode runs this cleanup right after mount too, possibly before the
+  // native view registered: a context kept from the first effect run keeps
+  // its target, which the native view takes over when it registers.
+  useEffect(
+    () => () => {
+      if (SkiaViewApi && SkiaViewApi.destroyGraphiteContext) {
+        SkiaViewApi.destroyGraphiteContext(nativeId);
+      }
+    },
+    [nativeId]
+  );
   useImperativeHandle(
     ref,
     () => ({

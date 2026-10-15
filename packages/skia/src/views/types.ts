@@ -59,6 +59,15 @@ export interface ISkiaViewApi {
     opaque: boolean,
     highBitDepth: boolean
   ) => SkGraphiteContext;
+  /**
+   * Retires what `makeGraphiteContext` made for a view id, once the view
+   * component unmounts. A no-op when a view bound to the id: its own
+   * teardown retires it. A context still held keeps its target for the
+   * native view to bind to, as React's StrictMode runs the unmount cleanup
+   * right after mount and keeps the first effect run's context. On the web
+   * the view owns its context; a no-op.
+   */
+  destroyGraphiteContext: (nativeId: number) => void;
 }
 
 /** The props every Skia view takes, whichever way it is drawn. */
@@ -80,8 +89,7 @@ export interface SkiaBaseViewProps extends ViewProps {
   /** Android-only rendering options. Ignored on iOS and web. */
   android?: AndroidCanvasProps;
 
-  // On web, only 16 WebGL contextes are allowed. If the drawing is non-animated, set
-  // __destroyWebGLContextAfterRender to true to release the context after each draw.
+  /** @deprecated Does nothing: on web, every view shares one WebGL context. */
   __destroyWebGLContextAfterRender?: boolean;
 }
 

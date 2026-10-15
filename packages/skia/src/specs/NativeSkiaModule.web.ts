@@ -43,7 +43,6 @@ global.SkiaViewApi = {
   views: {},
   deferedPictures: {},
   unregisteredViews: new Set<string>(),
-  deferedOnSize: {},
   web: true,
   registerView(nativeId: string, view: SkiaWebViewHandle) {
     this.unregisteredViews.delete(nativeId);
@@ -108,6 +107,9 @@ global.SkiaViewApi = {
       );
     }
     return view.getContext();
+  },
+  destroyGraphiteContext() {
+    // The web view owns its context and lets go of it when it unregisters.
   },
 } as ISkiaViewApiWeb;
 

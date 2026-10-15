@@ -12,7 +12,6 @@
 #include "JsiSkImage.h"
 #include "JsiSkImageInfo.h"
 #include "JsiSkNativeObjects.h"
-#include "jsi/JsiPromises.h"
 
 #include "rnskia/RNDawnContext.h"
 
@@ -50,42 +49,15 @@ public:
         "Skia.Image.MakeImageFromGPUTexture()");
   }
 
+  // A raster (CPU) image holding a copy of the pixels.
   std::variant<std::nullptr_t, std::shared_ptr<JsiSkImage>>
-  MakeImage(std::shared_ptr<SkImageInfo> imageInfo, sk_sp<SkData> pixelData,
-            double bytesPerRow) {
+  MakeRasterImage(std::shared_ptr<SkImageInfo> imageInfo,
+                  sk_sp<SkData> pixelData, double bytesPerRow) {
     auto image = SkImages::RasterFromData(*imageInfo, pixelData, bytesPerRow);
     if (image == nullptr) {
       return nullptr;
     }
     return std::make_shared<JsiSkImage>(getContext(), std::move(image));
-  }
-
-  JSI_HOST_FUNCTION(MakeImageFromViewTag) {
-    auto viewTag = arguments[0].asNumber();
-    auto context = getContext();
-    return RNJsi::JsiPromises::createPromiseAsJSIValue(
-        runtime,
-        [context = std::move(context), viewTag](
-            jsi::Runtime &runtime,
-            std::shared_ptr<RNJsi::JsiPromises::Promise> promise) -> void {
-          context->makeViewScreenshot(
-              viewTag, [context = std::move(context),
-                        promise = std::move(promise)](sk_sp<SkImage> image) {
-                // The runtime the result is delivered on, not the one the
-                // screenshot started on: a reload may have destroyed it.
-                context->runOnJavascriptThread(
-                    [context = std::move(context), promise = std::move(promise),
-                     result = std::move(image)](jsi::Runtime &runtime) {
-                      if (result == nullptr) {
-                        promise->reject("Failed to create image from view tag");
-                        return;
-                      }
-                      promise->resolve(makeJsiObject(
-                          runtime, std::make_shared<JsiSkImage>(
-                                       context, std::move(result))));
-                    });
-              });
-        });
   }
 
   // Texture interop with react-native-webgpu. Both packages link one Dawn and
@@ -145,12 +117,10 @@ public:
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installMethod(runtime, prototype, "MakeImageFromEncoded",
                   &JsiSkImageFactory::MakeImageFromEncoded);
-    installHostMethod(runtime, prototype, "MakeImageFromViewTag",
-                      &JsiSkImageFactory::MakeImageFromViewTag);
     installHostMethod(runtime, prototype, "MakeImageFromNativeBuffer",
                       &JsiSkImageFactory::MakeImageFromNativeBuffer);
-    installMethod(runtime, prototype, "MakeImage",
-                  &JsiSkImageFactory::MakeImage);
+    installMethod(runtime, prototype, "MakeRasterImage",
+                  &JsiSkImageFactory::MakeRasterImage);
     installMethod(runtime, prototype, "MakeNull", &JsiSkImageFactory::MakeNull);
     installHostMethod(runtime, prototype, "MakeImageFromGPUTexture",
                       &JsiSkImageFactory::MakeImageFromGPUTexture);
