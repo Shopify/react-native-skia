@@ -1,8 +1,8 @@
 import { surface } from "../setup";
 
 // Linear work grows SCALE times over SCALE times the operations, quadratic work SCALE squared, on any machine load.
-const SCALE = 4;
-const MAX_RATIO = 10;
+const SCALE = 8;
+const MAX_RATIO = 24;
 const RUNS = 3;
 
 const CASES = [
