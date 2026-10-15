@@ -3,7 +3,7 @@ import { createContext } from "react";
 import type { Fiber, HostConfig } from "react-reconciler";
 import { DefaultEventPriority } from "react-reconciler/constants";
 
-import type { NodeType } from "../dom/types";
+import { NodeType } from "../dom/types";
 import { shallowEq } from "../renderer/typeddash";
 
 import type { Node } from "./Node";
@@ -48,6 +48,13 @@ type SkiaHostConfig = HostConfig<
   NoTimeout
 >;
 let currentUpdatePriority: EventPriority = NoEventPriority;
+
+// What React appends in place of each node a Suspense boundary hides: a hidden node draws nothing, so it never enters the scene.
+const hiddenInstance: Instance = {
+  type: NodeType.Group,
+  props: {},
+  children: [],
+};
 
 export const sksgHostConfig: SkiaHostConfig = {
   /**
@@ -106,7 +113,9 @@ export const sksgHostConfig: SkiaHostConfig = {
   },
 
   appendInitialChild(parentInstance: Instance, child: Instance | TextInstance) {
-    parentInstance.children.push(child);
+    if (child !== hiddenInstance) {
+      parentInstance.children.push(child);
+    }
   },
 
   finalizeInitialChildren(
@@ -197,7 +206,9 @@ export const sksgHostConfig: SkiaHostConfig = {
     childSet: ChildSet,
     child: Instance | TextInstance
   ): void {
-    childSet.push(child);
+    if (child !== hiddenInstance) {
+      childSet.push(child);
+    }
   },
 
   finalizeContainerChildren(container: Container, newChildren: ChildSet) {
@@ -215,7 +226,7 @@ export const sksgHostConfig: SkiaHostConfig = {
     _props: Props
   ): Instance {
     debug("cloneHiddenInstance");
-    throw new Error("Not yet implemented.");
+    return hiddenInstance;
   },
 
   cloneHiddenTextInstance(_instance: Instance, _text: string): TextInstance {
