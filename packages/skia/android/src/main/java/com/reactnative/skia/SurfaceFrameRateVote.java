@@ -20,8 +20,9 @@ import androidx.annotation.Nullable;
  * 11 a layer can say what it wants with Surface.setFrameRate. Once the canvas
  * presents frames back to back, this asks for the highest rate the display can
  * switch to seamlessly, as the window does for its own views, and takes the
- * vote back once the frames stop: a layer with a vote counts as active for
- * SurfaceFlinger even when it no longer draws. Main thread.
+ * vote back once the animation stops, whether the canvas stops drawing or
+ * drops back to a few redraws a second: a layer with a vote counts as active
+ * for SurfaceFlinger even when it no longer draws. Main thread.
  */
 final class SurfaceFrameRateVote {
     private static final String TAG = "SurfaceFrameRateVote";
@@ -33,7 +34,11 @@ final class SurfaceFrameRateVote {
     // that redraws a few times a second never votes.
     private static final long ANIMATING_INTERVAL_NANOS = 25_000_000L;
 
-    // The vote is taken back once no frame has been presented for this long.
+    // The vote is taken back once the canvas has not animated (no two presents
+    // within ANIMATING_INTERVAL_NANOS) for this long. Measured from the last
+    // back-to-back present rather than the last present, so that a canvas that
+    // slows down to a few redraws a second lets the vote lapse like one that
+    // stops drawing.
     private static final long IDLE_AFTER_NANOS = 500_000_000L;
 
     private final View mView;
@@ -46,6 +51,9 @@ final class SurfaceFrameRateVote {
     private boolean mIdleCheckPending = false;
     // 0 before the first present on the surface.
     private long mLastPresentNanos = 0;
+    // The last present that followed its predecessor within
+    // ANIMATING_INTERVAL_NANOS; 0 until the first.
+    private long mLastAnimatingNanos = 0;
 
     /** The view the surface belongs to; its display decides the rate to ask for. */
     SurfaceFrameRateVote(View view) {
@@ -69,8 +77,11 @@ final class SurfaceFrameRateVote {
         long now = System.nanoTime();
         boolean animating = mLastPresentNanos != 0 && now - mLastPresentNanos <= ANIMATING_INTERVAL_NANOS;
         mLastPresentNanos = now;
-        if (animating && !mVoting) {
-            vote();
+        if (animating) {
+            mLastAnimatingNanos = now;
+            if (!mVoting) {
+                vote();
+            }
         }
         if (mVoting && !mIdleCheckPending) {
             scheduleIdleCheck(IDLE_AFTER_NANOS);
@@ -86,6 +97,7 @@ final class SurfaceFrameRateVote {
         mHandler.removeCallbacks(mIdleCheck);
         mIdleCheckPending = false;
         mLastPresentNanos = 0;
+        mLastAnimatingNanos = 0;
         mSurface = null;
     }
 
@@ -131,7 +143,7 @@ final class SurfaceFrameRateVote {
         if (!mVoting) {
             return;
         }
-        long idleNanos = System.nanoTime() - mLastPresentNanos;
+        long idleNanos = System.nanoTime() - mLastAnimatingNanos;
         if (idleNanos >= IDLE_AFTER_NANOS) {
             withdraw();
         } else {
