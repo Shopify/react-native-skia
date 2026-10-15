@@ -53,7 +53,9 @@ const Demo = () => {
   return (
     <Canvas
       style={{ flex: 1 }}
-      onLayout={({ nativeEvent: { layout } }) => setSize(layout)}
+      onLayout={({ nativeEvent: { layout: { width, height } } }) =>
+        setSize({ width, height })
+      }
     >
       <Rect color="cyan" rect={{ x: 0, y: 0, ...size }} />
     </Canvas>
