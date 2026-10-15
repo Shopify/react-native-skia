@@ -140,19 +140,16 @@ public:
     return _producer->applyUpdates(runtime, recorderId, values);
   }
 
-  /** Schedules redraw() on the main thread, once. */
+  /**
+   Schedules redraw() on the main thread, once. A redraw the window could not
+   show (the app in the background) stays requested until onCanPresent()
+   schedules it again.
+   */
   void requestRedraw() {
     if (_redrawRequested.exchange(true)) {
       return;
     }
-    std::weak_ptr<RNSkView> weakThis = weak_from_this();
-    _platformContext->runOnMainThread([weakThis]() {
-      if (auto view = weakThis.lock()) {
-        if (view->_redrawRequested) {
-          view->redraw();
-        }
-      }
-    });
+    postRedraw();
   }
 
   /** What the window a redraw presents into shows until a frame lands. */
@@ -168,25 +165,30 @@ public:
    nothing queued, presents the last frame again, unless a new one is on its
    way and the window still shows the last (see WindowContent). Without a
    surface the queue is left alone: the surface presents it when it appears.
+   While the window cannot show a frame (the app in the background, see
+   RNSkWindowSurface::setCanPresent) nothing is replayed either: the redraw
+   stays requested, and onCanPresent() schedules it again. A frame the window
+   could not take (no drawable) is queued again and handed to the frame
+   scheduler, which tries it on the view's next frame (see
+   setFrameScheduler).
    */
   void redraw(WindowContent windowContent = WindowContent::LastFrame) {
-    _redrawRequested = false;
     RNSkGraphiteTargetInfo targetInfo;
     if (!_surface->getTargetInfo(&targetInfo)) {
+      _redrawRequested = false;
       return;
     }
+    if (!_surface->canPresent()) {
+      return;
+    }
+    _redrawRequested = false;
     // Declarative content is recorded again for the surface as it is now.
     const bool frameComing = _producer->requestFrame();
     auto target = getTarget();
-    std::shared_ptr<RNSkGraphiteRecording> lastPresented;
-    {
-      std::lock_guard<std::mutex> lock(_mutex);
-      lastPresented = _lastPresented;
+    if (target == nullptr) {
+      return;
     }
-    std::vector<std::shared_ptr<RNSkGraphiteRecording>> recordings;
-    if (target) {
-      recordings = target->takeQueued();
-    }
+    auto recordings = target->takeQueued();
     if (recordings.empty()) {
       // With a frame on its way, a window that shows the last one keeps
       // showing it until the new one lands: presenting it again would only
@@ -196,20 +198,25 @@ public:
       // a surface of another size (the view was resized and nothing records
       // for it): the frame then shows at its own size rather than nothing at
       // all.
+      std::shared_ptr<RNSkGraphiteRecording> lastPresented;
+      {
+        std::lock_guard<std::mutex> lock(_mutex);
+        lastPresented = _lastPresented;
+      }
       if (lastPresented == nullptr ||
           (frameComing && windowContent == WindowContent::LastFrame)) {
         return;
       }
-      if (present(*_surface, targetInfo, {lastPresented},
-                  /* remember= */ true)) {
-        _producer->onFramePresented();
-      }
+      recordings.push_back(std::move(lastPresented));
+    }
+    if (presentOrKeep(*target, targetInfo, recordings)) {
+      _producer->onFramePresented();
       return;
     }
-    if (present(*_surface, targetInfo, recordings, /* remember= */ true)) {
-      _producer->onFramePresented();
-    } else if (target) {
-      target->requeue(recordings);
+    // Not scheduleFrame(): without a scheduler it redraws, which would fail
+    // again and recurse.
+    if (_frameScheduler) {
+      _frameScheduler();
     }
   }
 
@@ -252,9 +259,11 @@ public:
 
   /**
    Installed by the platform view, which calls presentFrame() once its surface
-   can show a new frame: on the display link on iOS, straight away on macOS,
-   and on Android as its FrameScheduler decides. Main thread. Without one,
-   frames are presented as soon as the main thread gets to them.
+   can show a new frame, and again a frame later while it returns true: on the
+   display link on iOS, straight away and then a frame apart on macOS, and on
+   Android as its FrameScheduler decides. Main thread. Without one, frames are
+   presented as soon as the main thread gets to them, and one the window could
+   not take waits for the next redraw.
    */
   void setFrameScheduler(std::function<void()> scheduler) {
     _frameScheduler = std::move(scheduler);
@@ -272,10 +281,11 @@ public:
   /**
    Presents the queued recordings (see setFrameScheduler for when). Returns
    whether more are waiting, so that the platform view asks again: also when
-   the present failed (the app is in the background), so that the recordings
-   are tried again on the next frame rather than left waiting for a redraw.
-   Without a surface the queue is left alone: the surface presents it when
-   it appears.
+   the window could not take one (no drawable), so that it is tried again on
+   the next frame rather than left waiting for a redraw. Without a surface the
+   queue is left alone: the surface presents it when it appears. While the
+   window cannot show a frame (the app in the background) the queue is left
+   alone too, and nobody asks again before onCanPresent().
    */
   bool presentFrame() {
     auto target = getTarget();
@@ -283,19 +293,32 @@ public:
       return false;
     }
     RNSkGraphiteTargetInfo targetInfo;
-    if (!_surface->getTargetInfo(&targetInfo)) {
+    if (!_surface->getTargetInfo(&targetInfo) || !_surface->canPresent()) {
       return false;
     }
     auto recordings = target->takeQueued();
     if (recordings.empty()) {
       return false;
     }
-    if (!present(*_surface, targetInfo, recordings, /* remember= */ true)) {
-      target->requeue(recordings);
+    if (!presentOrKeep(*target, targetInfo, recordings)) {
       return true;
     }
     _producer->onFramePresented();
     return target->hasQueued();
+  }
+
+  /**
+   Main thread. The window can show frames again (the app came back to the
+   foreground, see RNSkWindowSurface::setCanPresent): a redraw it could not
+   show is scheduled again, else the recordings queued meanwhile are handed
+   to the frame scheduler. Nothing is replayed on the spot.
+   */
+  void onCanPresent() {
+    if (_redrawRequested) {
+      postRedraw();
+    } else if (hasQueuedRecordings()) {
+      scheduleFrame();
+    }
   }
 
   bool hasQueuedRecordings() {
@@ -337,31 +360,73 @@ private:
     if (!surface.getTargetInfo(&targetInfo)) {
       return false;
     }
-    return present(surface, targetInfo, {recording}, /* remember= */ false);
+    return present(surface, targetInfo, {recording}, /* remember= */ false) ==
+           1;
+  }
+
+  /** Runs redraw() on the main thread, when it gets to it. */
+  void postRedraw() {
+    std::weak_ptr<RNSkView> weakThis = weak_from_this();
+    _platformContext->runOnMainThread([weakThis]() {
+      if (auto view = weakThis.lock()) {
+        if (view->_redrawRequested) {
+          view->redraw();
+        }
+      }
+    });
+  }
+
+  /**
+   Presents the recordings onto the window and remembers the last one shown.
+   Returns whether all of them went through; the one the window could not
+   take and the ones behind it go back to the front of the target's queue.
+   */
+  bool presentOrKeep(
+      RNSkGraphiteTarget &target, const RNSkGraphiteTargetInfo &targetInfo,
+      const std::vector<std::shared_ptr<RNSkGraphiteRecording>> &recordings) {
+    const size_t done =
+        present(*_surface, targetInfo, recordings, /* remember= */ true);
+    if (done == recordings.size()) {
+      return true;
+    }
+    target.requeue(std::vector<std::shared_ptr<RNSkGraphiteRecording>>(
+        recordings.begin() + done, recordings.end()));
+    return false;
   }
 
   /**
    Replays the recordings onto the surface's target, in order, and remembers
-   the last one for the next redraw when asked to (not for a snapshot).
-   Returns false when the surface could not present (no window, app in the
-   background), in which case the caller keeps the recordings.
+   the last one shown for the next redraw when asked to (not for a snapshot).
+   Returns how many of them are done, from the front: all, unless the surface
+   could not take one (no drawable), also through a texture; that one and the
+   ones behind it are left to the caller. One made for another format, or
+   whose replay into a texture failed, is skipped: done, not shown.
    */
-  bool
+  size_t
   present(RNSkSurface &surface, const RNSkGraphiteTargetInfo &targetInfo,
           const std::vector<std::shared_ptr<RNSkGraphiteRecording>> &recordings,
           bool remember) {
     // Recordings of the target's size and color space are replayed straight
     // onto it, as one batch; any other goes through a texture of its own.
     std::vector<skgpu::graphite::Recording *> batch;
+    std::shared_ptr<RNSkGraphiteRecording> batchLast;
     std::shared_ptr<RNSkGraphiteRecording> last;
-    bool success = true;
-    auto flush = [&]() {
+    size_t done = 0;
+    // Presents the batch; the recordings before upTo are then done.
+    auto flush = [&](size_t upTo) {
       if (!batch.empty()) {
-        success = surface.presentRecordings(batch) && success;
+        if (!surface.presentRecordings(batch)) {
+          return false;
+        }
         batch.clear();
+        last = std::move(batchLast);
       }
+      done = upTo;
+      return true;
     };
-    for (const auto &recording : recordings) {
+    bool taken = true;
+    for (size_t i = 0; i < recordings.size(); i++) {
+      const auto &recording = recordings[i];
       // A recording made for another format (recorded before the surface
       // existed, with a bit depth the surface did not get) cannot be
       // replayed onto this one.
@@ -373,27 +438,35 @@ private:
       if (recording->hasSizeOf(targetInfo) &&
           recording->hasColorSpaceOf(targetInfo)) {
         batch.push_back(recording->get());
-        last = recording;
+        batchLast = recording;
         continue;
       }
-      flush();
-      if (presentThroughTexture(surface, recording)) {
-        last = recording;
-      } else {
-        success = false;
+      if (!flush(i)) {
+        taken = false;
+        break;
       }
+      const auto result = presentThroughTexture(surface, recording);
+      if (result == TexturePresent::kDeclined) {
+        taken = false;
+        break;
+      }
+      if (result == TexturePresent::kPresented) {
+        last = recording;
+      }
+      done = i + 1;
     }
-    flush();
-    if (last == nullptr) {
-      // Nothing presentable: the recordings are consumed, not kept.
-      return true;
+    if (taken) {
+      flush(recordings.size());
     }
-    if (success && remember) {
+    if (remember && last != nullptr) {
       std::lock_guard<std::mutex> lock(_mutex);
       _lastPresented = last;
     }
-    return success;
+    return done;
   }
+
+  /** What became of a recording presented through a texture. */
+  enum class TexturePresent { kPresented, kConsumed, kDeclined };
 
   /**
    Presents a recording made for another size than the target's: the size
@@ -404,9 +477,11 @@ private:
    being dropped; the copy only happens while the sizes differ. The same goes
    for a recording made in another color space than the target's: the
    texture is in the color space of the recording, and drawing it converts
-   the colors.
+   the colors. A recording that cannot be replayed into such a texture is
+   consumed; one the surface could not take (no drawable) is declined, for
+   the caller to keep.
    */
-  bool presentThroughTexture(
+  TexturePresent presentThroughTexture(
       RNSkSurface &surface,
       const std::shared_ptr<RNSkGraphiteRecording> &recording) {
     const auto &size = recording->getTarget();
@@ -420,16 +495,19 @@ private:
                                "surface is %dx%d",
                                size.width, size.height, surface.getWidth(),
                                surface.getHeight());
-      return true;
+      return TexturePresent::kConsumed;
     }
-    if (!intermediate.presentRecordings({recording->get()})) {
-      return false;
-    }
-    auto image = intermediate.makeImage();
+    auto image = intermediate.presentRecordings({recording->get()})
+                     ? intermediate.makeImage()
+                     : nullptr;
     if (image == nullptr) {
-      return false;
+      RNSkLogger::logToConsole("SkiaView: skipping a %dx%d recording, it "
+                               "could not be replayed into a texture",
+                               size.width, size.height);
+      return TexturePresent::kConsumed;
     }
-    return surface.presentImage(image);
+    return surface.presentImage(image) ? TexturePresent::kPresented
+                                       : TexturePresent::kDeclined;
   }
 
   std::shared_ptr<RNSkPlatformContext> _platformContext;
