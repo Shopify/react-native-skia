@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Switch, Text, View } from "react-native";
 import type { AndroidSurfaceType } from "react-native-skia";
 import {
@@ -50,11 +50,15 @@ export const AndroidViews = () => {
     [clock]
   );
   const frameRate = useSharedValue(0);
-  useFrameCallback(({ timeSincePreviousFrame }) => {
+  const fps = useFrameCallback(({ timeSincePreviousFrame }) => {
     if (timeSincePreviousFrame !== null && timeSincePreviousFrame > 0) {
       frameRate.value += (1000 / timeSincePreviousFrame - frameRate.value) / 10;
     }
   });
+  // The counter is only shown while animating; off, nothing should tick.
+  useEffect(() => {
+    fps.setActive(animate);
+  }, [fps, animate]);
   const frameRateLabel = useDerivedValue(
     () => `${Math.round(frameRate.value)} fps`,
     [frameRate]
