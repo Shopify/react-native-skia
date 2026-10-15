@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.util.Log;
 import android.view.Choreographer;
-import android.view.Display;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
@@ -44,6 +43,7 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
     private boolean mAppliedZOrderOnTop;
     private boolean mAppliedHighBitDepth;
 
+    private final SurfaceFrameRateVote mFrameRateVote = new SurfaceFrameRateVote(this);
     private final Runnable mPostedPresent = this::onPostedPresent;
     private final FrameScheduler mFrameScheduler = new FrameScheduler(new FrameScheduler.Host() {
         @Override
@@ -58,7 +58,16 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
 
         @Override
         public boolean presentFrame() {
-            return hasNativeView() && SkiaView.this.presentFrame();
+            if (!hasNativeView()) {
+                return false;
+            }
+            boolean moreQueued = SkiaView.this.presentFrame();
+            // Only a SurfaceView votes (attached in onSurfaceCreated): a
+            // TextureView is composited into its window, which votes for it.
+            // A frame the surface could not take counts as presented here,
+            // which at worst votes a frame early.
+            mFrameRateVote.onFramePresented();
+            return moreQueued;
         }
     });
 
@@ -234,26 +243,15 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
 
     // Surfaces ------------------------------------------------------------
 
-    private float resolveMaxRefreshRate() {
-        Display display = getDisplay();
-        if (display == null) {
-            return 0f;
-        }
-        float maxRefreshRate = 0f;
-        for (Display.Mode mode : display.getSupportedModes()) {
-            maxRefreshRate = Math.max(maxRefreshRate, mode.getRefreshRate());
-        }
-        return maxRefreshRate;
-    }
-
     // SurfaceView callbacks: the native side receives an android.view.Surface.
 
     @Override
     public void onSurfaceCreated(Surface surface, int width, int height) {
+        mFrameRateVote.attach(surface);
         if (!hasNativeView()) {
             return;
         }
-        surfaceAvailable(surface, width, height, true, mAppliedHighBitDepth, resolveMaxRefreshRate());
+        surfaceAvailable(surface, width, height, true, mAppliedHighBitDepth);
     }
 
     @Override
@@ -262,7 +260,7 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
         if (!hasNativeView()) {
             return;
         }
-        surfaceSizeChanged(surface, width, height, true, mAppliedHighBitDepth, resolveMaxRefreshRate());
+        surfaceSizeChanged(surface, width, height, true, mAppliedHighBitDepth);
     }
 
     // TextureView callbacks: the native side receives the SurfaceTexture and
@@ -273,7 +271,7 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
         if (!hasNativeView()) {
             return;
         }
-        surfaceAvailable(surface, width, height, false, false, 0f);
+        surfaceAvailable(surface, width, height, false, false);
     }
 
     @Override
@@ -282,11 +280,13 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
         if (!hasNativeView()) {
             return;
         }
-        surfaceSizeChanged(surface, width, height, false, false, 0f);
+        surfaceSizeChanged(surface, width, height, false, false);
     }
 
     @Override
     public void onSurfaceDestroyed() {
+        // The surface is still valid here, so the vote can be taken back.
+        mFrameRateVote.detach();
         if (!hasNativeView()) {
             return;
         }
@@ -299,9 +299,9 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
 
     // isSurface tells the native side whether `surface` is an
     // android.view.Surface (SurfaceView) or a SurfaceTexture (TextureView).
-    private native void surfaceAvailable(Object surface, int width, int height, boolean isSurface, boolean highBitDepth, float maxRefreshRate);
+    private native void surfaceAvailable(Object surface, int width, int height, boolean isSurface, boolean highBitDepth);
 
-    private native void surfaceSizeChanged(Object surface, int width, int height, boolean isSurface, boolean highBitDepth, float maxRefreshRate);
+    private native void surfaceSizeChanged(Object surface, int width, int height, boolean isSurface, boolean highBitDepth);
 
     private native void surfaceDestroyed();
 
