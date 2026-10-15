@@ -182,7 +182,6 @@ target_link_libraries(${PACKAGE_NAME}
     ${SKIA_JSONREADER_LIB}
     ${SKIA_LIB}
     webgpu_dawn
-    -ljnigraphics
     -landroid
 )
 
