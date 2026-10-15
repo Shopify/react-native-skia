@@ -1,9 +1,9 @@
 diff --git a/jest/resolver.js b/jest/resolver.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..8334a50c634965e4521f53dc036f13657f675e27
+index 0000000000000000000000000000000000000000..4c14179d3832a793bf38702ca9c0a7b7e4892c2e
 --- /dev/null
 +++ b/jest/resolver.js
-@@ -0,0 +1,35 @@
+@@ -0,0 +1,36 @@
 +const workletsResolver = require('react-native-worklets/jest/resolver');
 +
 +const WEB_ONLY_IN_JEST = new Set([
@@ -14,6 +14,7 @@ index 0000000000000000000000000000000000000000..8334a50c634965e4521f53dc036f1365
 +  'UpdateLayoutAnimations',
 +  'useAnimatedRef',
 +  'useAnimatedStyle',
++  'WorkletEventHandler',
 +  'JSPropsUpdater',
 +  'updateProps',
 +  'util',
