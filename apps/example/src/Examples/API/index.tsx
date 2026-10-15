@@ -23,8 +23,7 @@ import { FreezeExample } from "./Freeze";
 import { Touch } from "./Touch";
 import { PictureViewExample } from "./PictureView";
 import { OnLayoutDemo } from "./OnLayout";
-import { OnSize } from "./OnSize";
-import { Snapshot } from "./Snapshot";
+import { CanvasSize } from "./CanvasSize";
 import { IconsExample } from "./Icons";
 import { FontMgr } from "./FontMgr";
 import { AnimatedImages } from "./AnimatedImages";
@@ -123,13 +122,6 @@ export const API = () => {
         component={GlyphBounds}
         options={{
           title: "🔠 Glyph Bounds",
-        }}
-      />
-      <Stack.Screen
-        name="Snapshot"
-        component={Snapshot}
-        options={{
-          title: "📺 View Snapshot",
         }}
       />
       <Stack.Screen
@@ -266,10 +258,10 @@ export const API = () => {
         }}
       />
       <Stack.Screen
-        name="OnSize"
-        component={OnSize}
+        name="CanvasSize"
+        component={CanvasSize}
         options={{
-          title: "📏 OnSize",
+          title: "📏 Canvas Size",
         }}
       />
       <Stack.Screen

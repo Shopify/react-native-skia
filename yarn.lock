@@ -10890,12 +10890,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"canvaskit-wasm@npm:0.41.0":
-  version: 0.41.0
-  resolution: "canvaskit-wasm@npm:0.41.0"
+"canvaskit-wasm@npm:0.41.1":
+  version: 0.41.1
+  resolution: "canvaskit-wasm@npm:0.41.1"
   dependencies:
     "@webgpu/types": 0.1.21
-  checksum: 4204de4bea15f5dd4a1695aab0ff0ab5a103a55e51ac33aaadcad5a436e5ba0574eaa59f552346a64b6d25b7dfbfd332e440225675ad3ae7b517881e255a4b07
+  checksum: d8d673497e41f07b843766234dd89d73d95d5da3bbc2befa1e67d399c4a54ff2196126391f110b985ac2cadce6928a0a2880b00843c06d61ba747a1b5b8b3b90
   languageName: node
   linkType: hard
 
@@ -14268,7 +14268,7 @@ __metadata:
     react-native-svg: "patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch&../../.yarn/patches/react-native-svg-npm-15.14.0-position-props.patch"
     react-native-test-app: 4.4.7
     react-native-web: ^0.21.2
-    react-native-webgpu: 0.12.1
+    react-native-webgpu: 0.14.2
     react-native-windows: ^0.75.0
     react-native-worklets: 0.12.2
     react-test-renderer: 19.0.0
@@ -25179,7 +25179,7 @@ __metadata:
     "@types/react-dom": ^19.0.0
     "@types/react-reconciler": 0.28.9
     "@types/ws": 8.5.3
-    canvaskit-wasm: 0.41.0
+    canvaskit-wasm: 0.41.1
     eslint: 9.36.0
     eslint-config-react-native-wcandillon: 5.0.1
     eslint-plugin-import: 2.32.0
@@ -25356,9 +25356,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-webgpu@npm:0.12.1":
-  version: 0.12.1
-  resolution: "react-native-webgpu@npm:0.12.1"
+"react-native-webgpu@npm:0.14.2":
+  version: 0.14.2
+  resolution: "react-native-webgpu@npm:0.14.2"
+  dependencies:
+    react-native-webgpu-dawn: 154.3.0
   peerDependencies:
     react: "*"
     react-native: ">=0.81.0"
@@ -25369,7 +25371,7 @@ __metadata:
       optional: true
     react-native-worklets:
       optional: true
-  checksum: ef4caa76b130f180101193b8c044e1116030f3e46bde8cd40046532c3f5b7f0f82718868f667834ef65993b230dcf4c7916c724e3e22d3ef832f0d4c88cc0d7a
+  checksum: d1e74cb3cfcca74f07eac27c3f10e4c3f04ea293cb1f5fb7b0320cc499bcc7c5b1226a3834d2f472ea32856ffead3d05d3a0a0bf6e1727b2dbc1a45cf40cfc10
   languageName: node
   linkType: hard
 

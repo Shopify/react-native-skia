@@ -51,10 +51,6 @@ export const examples = [
     title: "🖱 Touch Handling",
   },
   {
-    screen: "Snapshot",
-    title: "📺 View Snapshot",
-  },
-  {
     screen: "PathEffect",
     title: "⭐️ Path Effect",
   },
@@ -123,8 +119,8 @@ export const examples = [
     title: "🎛️ OnLayout",
   },
   {
-    screen: "OnSize",
-    title: "📏 OnSize",
+    screen: "CanvasSize",
+    title: "📏 Canvas Size",
   },
   {
     screen: "StressTest",
