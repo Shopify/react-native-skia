@@ -18,6 +18,8 @@ import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
 import { androidNativeProps } from "../views/android";
 import type { AndroidCanvasProps } from "../views/types";
 import SkiaViewNativeComponent from "../specs/SkiaViewNativeComponent";
+import { measureLayout } from "../views/measureLayout";
+import type { NativeView } from "../views/measureLayout";
 import type { SkImage, SkRect, SkSize } from "../skia/types";
 import { SkiaSGRoot } from "../sksg/Reconciler";
 import { Skia } from "../skia";
@@ -28,6 +30,13 @@ export interface CanvasRef {
   getNativeId(): number;
   measure(callback: MeasureOnSuccessCallback): void;
   measureInWindow(callback: MeasureInWindowOnSuccessCallback): void;
+  /**
+   * The size of the canvas in points, the one of its layout, read
+   * synchronously: for a one-off read, in an event handler for instance. It
+   * is `0x0` before the canvas is mounted. To follow the size across layout
+   * changes, see `useCanvasSize`.
+   */
+  readonly size: SkSize;
 }
 
 export const useCanvasRef = () => useRef<CanvasRef>(null);
@@ -72,8 +81,6 @@ export interface CanvasProps extends ViewProps {
   android?: AndroidCanvasProps;
   ref?: React.Ref<CanvasRef>;
 }
-
-type NativeView = React.ComponentRef<typeof SkiaViewNativeComponent>;
 
 /**
  * What the canvas owns: the native id, the scene graph root rendered into it
@@ -122,6 +129,10 @@ const useCanvasRoot = ({
       },
       measureInWindow: (callback) => {
         viewRef.current?.measureInWindow(callback);
+      },
+      get size() {
+        const view = viewRef.current;
+        return view ? measureLayout(view) : { width: 0, height: 0 };
       },
     }),
     [nativeId, viewRef]

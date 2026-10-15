@@ -2,12 +2,12 @@ import React, { useEffect, useImperativeHandle, useMemo, useRef } from "react";
 
 import type { SkGraphiteContext } from "../skia/types";
 import SkiaViewNativeComponent from "../specs/SkiaViewNativeComponent";
-import { Platform } from "../Platform";
 
 import { SkiaViewApi } from "./api";
 import { androidNativeProps } from "./android";
 import type { SkiaGraphiteViewNativeProps } from "./types";
 import { SkiaViewNativeId } from "./SkiaViewNativeId";
+import { measureLayout } from "./measureLayout";
 
 export interface SkiaGraphiteViewRef {
   /**
@@ -21,23 +21,6 @@ export interface SkiaGraphiteViewRef {
 export interface SkiaGraphiteViewProps extends SkiaGraphiteViewNativeProps {
   ref?: React.Ref<SkiaGraphiteViewRef>;
 }
-
-// A view measured relative to itself gets its layout size, without the
-// transforms getBoundingClientRect() includes; measureLayout() calls back
-// synchronously on the new architecture. On the web the view measures itself
-// (see SkiaView.web).
-const measureLayout = (
-  view: React.ComponentRef<typeof SkiaViewNativeComponent>
-) => {
-  if (Platform.OS === "web") {
-    return { width: 0, height: 0 };
-  }
-  let size = { width: 0, height: 0 };
-  view.measureLayout(view, (_left, _top, width, height) => {
-    size = { width, height };
-  });
-  return size;
-};
 
 /**
  * A view whose frames are recorded from JavaScript, on any runtime, through

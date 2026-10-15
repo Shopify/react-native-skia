@@ -12,7 +12,7 @@ Behind the scenes, it is using its own React renderer.
 | Name | Type     |  Description    |
 |:-----|:---------|:-----------------|
 | style?   | `ViewStyle` | View style |
-| ref?   | `Ref<CanvasRef>` | Reference to the canvas (see [snapshots](#getting-a-canvas-snapshot)) |
+| ref?   | `Ref<CanvasRef>` | Reference to the canvas (see [size](#one-off-reads) and [snapshots](#getting-a-canvas-snapshot)) |
 | onLayout? | `(event: LayoutChangeEvent) => void` | Called with the layout of the canvas whenever it changes (see [canvas size](#canvas-size)) |
 | opaque? | `boolean` | Declares that the canvas covers every pixel of its bounds. Defaults to `false`. On Android it selects the cheapest backing view (see [Android rendering options](#android-rendering-options)) |
 | android? | `AndroidCanvasProps` | Android-only rendering options, ignored on iOS and web (see [Android rendering options](#android-rendering-options)) |
@@ -58,6 +58,27 @@ const Demo = () => {
       }
     >
       <Rect color="cyan" rect={{ x: 0, y: 0, ...size }} />
+    </Canvas>
+  );
+};
+```
+
+### One-off reads
+
+For a single read, in an event handler for instance, `size` on the canvas ref is the current layout, read synchronously.
+It is the layout size, without the transforms applied to the view, and `0x0` before the canvas is mounted.
+
+```tsx twoslash
+import {Canvas, useCanvasRef, Fill} from "react-native-skia";
+
+const Demo = () => {
+  const ref = useCanvasRef();
+  const logSize = () => {
+    console.log(ref.current?.size);
+  };
+  return (
+    <Canvas ref={ref} style={{ flex: 1 }} onTouchEnd={logSize}>
+      <Fill color="cyan" />
     </Canvas>
   );
 };

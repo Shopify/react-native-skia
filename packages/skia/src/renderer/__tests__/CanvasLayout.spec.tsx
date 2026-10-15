@@ -2,21 +2,27 @@
  * @jest-environment jsdom
  */
 import React, { act } from "react";
-import type { ReactElement } from "react";
+import type { ReactElement, Ref } from "react";
 import { createRoot } from "react-dom/client";
 import type { LayoutChangeEvent, ViewProps } from "react-native";
 
 import type {
   Canvas as CanvasComponent,
+  CanvasRef,
   useCanvasSize as useCanvasSizeHook,
 } from "../Canvas";
 import type { SkSize } from "../../skia/types";
 
-// The native view: records the props the canvas hands it.
-const mockNativeView = { props: {} as ViewProps };
+// The native view: records the props the canvas hands it and attaches the
+// host instance the canvas measures.
+const mockNativeView = { props: {} as ViewProps, host: {} as object };
 
-const MockNativeView = (props: ViewProps) => {
+const MockNativeView = ({
+  ref,
+  ...props
+}: ViewProps & { ref?: Ref<object> }) => {
   mockNativeView.props = props;
+  React.useImperativeHandle(ref, () => mockNativeView.host);
   return null;
 };
 
@@ -39,10 +45,11 @@ interface CanvasModule {
   useCanvasSize: typeof useCanvasSizeHook;
 }
 
-const loadCanvas = (): CanvasModule => {
+const loadCanvas = ({ os = "android" } = {}): CanvasModule => {
   let loaded: CanvasModule | null = null;
   jest.isolateModules(() => {
     jest.doMock("react", () => React);
+    jest.doMock("../../Platform", () => ({ Platform: { OS: os } }));
     loaded = require("../Canvas") as CanvasModule;
   });
   if (loaded === null) {
@@ -110,6 +117,45 @@ describe("Canvas onLayout", () => {
       mockNativeView.props.onLayout?.(layoutEvent);
     });
     expect(sizes[sizes.length - 1]).toBe(size);
+    unmount();
+  });
+});
+
+// A host laid out at 200 × 100 points and drawn at half that size: measured
+// relative to itself, React Native reports its layout box.
+const createScaledHost = () => {
+  const host = {
+    measureLayout: (
+      relativeTo: object,
+      onSuccess: (
+        left: number,
+        top: number,
+        width: number,
+        height: number
+      ) => void,
+      onFail: () => void
+    ) => (relativeTo === host ? onSuccess(0, 0, 200, 100) : onFail()),
+    getBoundingClientRect: () => ({ width: 100, height: 50 }),
+  };
+  return host;
+};
+
+describe("Canvas ref size", () => {
+  it("reads the layout synchronously, not the transformed box", () => {
+    const { Canvas } = loadCanvas();
+    mockNativeView.host = createScaledHost();
+    const ref = React.createRef<CanvasRef>();
+    const unmount = mount(<Canvas ref={ref} />);
+    expect(ref.current?.size).toEqual({ width: 200, height: 100 });
+    unmount();
+  });
+
+  it("asks the web view for its size", () => {
+    const { Canvas } = loadCanvas({ os: "web" });
+    mockNativeView.host = { getSize: () => ({ width: 320, height: 240 }) };
+    const ref = React.createRef<CanvasRef>();
+    const unmount = mount(<Canvas ref={ref} />);
+    expect(ref.current?.size).toEqual({ width: 320, height: 240 });
     unmount();
   });
 });
