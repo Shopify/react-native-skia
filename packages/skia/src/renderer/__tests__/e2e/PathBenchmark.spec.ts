@@ -1,9 +1,17 @@
 import { surface } from "../setup";
 
-// Linear work grows SCALE times over SCALE times the operations, quadratic work SCALE squared, on any machine load.
+// Linear work costs the same per chunk however long the path has grown; quadratic work costs more as it grows.
 const SCALE = 4;
-const MAX_RATIO = 10;
-const RUNS = 3;
+const CHUNKS = 16;
+const QUARTER = CHUNKS / 4;
+const BUILDS = 3;
+const MAX_RATIO = 3;
+
+const median = (values: number[]) => {
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = sorted.length / 2;
+  return (sorted[middle - 1] + sorted[middle]) / 2;
+};
 
 const CASES = [
   { operation: "lineTo", count: 10000 },
@@ -37,9 +45,9 @@ describe("Path Performance Benchmarks", () => {
   it.each(CASES)(
     "$operation scales linearly from $count operations",
     async ({ operation, count }) => {
-      const { small, large } = await surface.eval(
+      const fastest = await surface.eval(
         (Skia, ctx) => {
-          // Builds what one run needs and returns the loop to time.
+          // Prepares one build and returns the loop that extends it.
           const prepare = (): ((iterations: number) => void) => {
             switch (ctx.operation) {
               case "lineTo": {
@@ -309,23 +317,27 @@ describe("Path Performance Benchmarks", () => {
               }
             }
           };
-          const time = (iterations: number) => {
+          // The fastest of several builds at each chunk drops a chunk the process was descheduled in.
+          const iterations = (ctx.count * ctx.scale) / ctx.chunks;
+          const chunks: number[] = new Array(ctx.chunks).fill(Infinity);
+          for (let build = 0; build < ctx.builds; build++) {
             const loop = prepare();
-            const start = performance.now();
-            loop(iterations);
-            return performance.now() - start;
-          };
-          let smallest = Infinity;
-          let largest = Infinity;
-          for (let run = 0; run < ctx.runs; run++) {
-            smallest = Math.min(smallest, time(ctx.count));
-            largest = Math.min(largest, time(ctx.count * ctx.scale));
+            for (let chunk = 0; chunk < ctx.chunks; chunk++) {
+              const start = performance.now();
+              loop(iterations);
+              chunks[chunk] = Math.min(
+                chunks[chunk],
+                performance.now() - start
+              );
+            }
           }
-          return { small: smallest, large: largest };
+          return chunks;
         },
-        { operation, count, scale: SCALE, runs: RUNS }
+        { operation, count, scale: SCALE, chunks: CHUNKS, builds: BUILDS }
       );
-      expect(large / small).toBeLessThan(MAX_RATIO);
+      const first = median(fastest.slice(0, QUARTER));
+      const last = median(fastest.slice(-QUARTER));
+      expect(last / first).toBeLessThan(MAX_RATIO);
     }
   );
 });
