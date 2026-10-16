@@ -82,6 +82,11 @@ If you prefer to ship to those devices and handle them yourself, remove the decl
 </manifest>
 ```
 
+Two things to know about how the manifest merger treats this element:
+
+- `android:required` is merged with OR: declaring the same feature with `required="false"` in your app does not override the library. Use `tools:node="remove"` as above, or `tools:replace="android:required"`.
+- `android:version` must agree across declarations. If your app or another dependency already declares `android.hardware.vulkan.version` with another version (`0x400003` for 1.0, for instance), the build fails with a merger conflict; keep one declaration and mark it `tools:replace="android:version"`.
+
 ```tsx
 import { Canvas, Skia } from "react-native-skia";
 

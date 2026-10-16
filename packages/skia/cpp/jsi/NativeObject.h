@@ -403,6 +403,25 @@ protected:
   }
 
   /**
+   * Defines `name` on the prototype as an enumerable, configurable accessor
+   * whose getter is `getterFunc` (Object.defineProperty).
+   */
+  static void defineGetter(jsi::Runtime &runtime, jsi::Object &prototype,
+                           const char *name, jsi::Function getterFunc) {
+    auto objectCtor = runtime.global().getPropertyAsObject(runtime, "Object");
+    auto defineProperty =
+        objectCtor.getPropertyAsFunction(runtime, "defineProperty");
+
+    jsi::Object descriptor(runtime);
+    descriptor.setProperty(runtime, "get", getterFunc);
+    descriptor.setProperty(runtime, "enumerable", true);
+    descriptor.setProperty(runtime, "configurable", true);
+
+    defineProperty.call(runtime, prototype,
+                        jsi::String::createFromUtf8(runtime, name), descriptor);
+  }
+
+  /**
    * Install a getter on the prototype.
    */
   template <typename ReturnType>
@@ -424,19 +443,7 @@ protected:
                 rt, std::move(result));
           }
         });
-
-    // Use Object.defineProperty to create a proper getter
-    auto objectCtor = runtime.global().getPropertyAsObject(runtime, "Object");
-    auto defineProperty =
-        objectCtor.getPropertyAsFunction(runtime, "defineProperty");
-
-    jsi::Object descriptor(runtime);
-    descriptor.setProperty(runtime, "get", getterFunc);
-    descriptor.setProperty(runtime, "enumerable", true);
-    descriptor.setProperty(runtime, "configurable", true);
-
-    defineProperty.call(runtime, prototype,
-                        jsi::String::createFromUtf8(runtime, name), descriptor);
+    defineGetter(runtime, prototype, name, std::move(getterFunc));
   }
 
   /**
@@ -456,18 +463,7 @@ protected:
           auto native = NativeObject<Derived>::fromValue(rt, thisVal);
           return (native.get()->*getter)(rt);
         });
-
-    auto objectCtor = runtime.global().getPropertyAsObject(runtime, "Object");
-    auto defineProperty =
-        objectCtor.getPropertyAsFunction(runtime, "defineProperty");
-
-    jsi::Object descriptor(runtime);
-    descriptor.setProperty(runtime, "get", getterFunc);
-    descriptor.setProperty(runtime, "enumerable", true);
-    descriptor.setProperty(runtime, "configurable", true);
-
-    defineProperty.call(runtime, prototype,
-                        jsi::String::createFromUtf8(runtime, name), descriptor);
+    defineGetter(runtime, prototype, name, std::move(getterFunc));
   }
 
   /**

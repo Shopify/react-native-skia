@@ -8,6 +8,7 @@
 #include <optional>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "webgpu/webgpu_cpp.h"
@@ -126,8 +127,11 @@ inline const char *backendTypeName(wgpu::BackendType type) {
   }
 }
 
+// Through Dawn's own conversion: a length of wgpu::kStrlen means
+// null-terminated, which a std::string built from (data, length) would not
+// survive.
 inline std::string toString(wgpu::StringView view) {
-  return view.data ? std::string(view.data, view.length) : std::string();
+  return std::string(std::string_view(view));
 }
 
 // What an adapter reports about itself, in the terms of GPUAdapterInfo.
@@ -232,27 +236,26 @@ getMatchedAdapter(dawn::native::Instance *instance) {
   throw std::runtime_error(describeMissingAdapter(instance));
 }
 
-// Told when the primary rendering device is lost (a driver reset, the GPU
-// out of memory, a device-level validation error), with Dawn's message.
-// Installed by DawnContext, which records the loss (see
-// DawnContext::isDeviceLost); until then, or without one, a loss is logged.
-// The callback runs on whichever thread Dawn detects the loss on.
-using DeviceLostHandler = std::function<void(const std::string &message)>;
-inline DeviceLostHandler &primaryDeviceLostHandler() {
-  static auto *handler = new DeviceLostHandler();
-  return *handler;
-}
+// Where requestDevice() reports what becomes of the device. A loss after
+// creation (a driver reset, the GPU out of memory, a device-level error)
+// goes to onLost with Dawn's message, on whichever thread Dawn detects it.
+// A creation failure leaves Dawn's message in creationFailure, for the
+// caller of requestDevice(): that callback runs inside CreateDevice, on the
+// calling thread. The listener must outlive the device.
+struct DeviceLostListener {
+  std::function<void(const std::string &message)> onLost;
+  std::string creationFailure;
+};
 
 // Create a Dawn device from the given adapter with the requested features.
-// Features not supported by the adapter are silently skipped.
-// The loss of a primary rendering device is reported through
-// primaryDeviceLostHandler(); the loss of a secondary (compute) device is
-// only logged. Neither takes the process down: a lost device fails its
-// later operations, which the callers handle.
+// Features not supported by the adapter are silently skipped. The device's
+// loss is reported to `listener` (see DeviceLostListener), or only logged
+// without one (a secondary device). Neither takes the process down: a lost
+// device fails its later operations, which the callers handle.
 inline wgpu::Device
 requestDevice(dawn::native::Adapter &nativeAdapter,
               const std::vector<wgpu::FeatureName> &requestedFeatures,
-              bool primary = true) {
+              DeviceLostListener *listener) {
   wgpu::Adapter adapter = nativeAdapter.Get();
 
   // Filter to only features the adapter supports.
@@ -310,34 +313,32 @@ requestDevice(dawn::native::Adapter &nativeAdapter,
   desc.requiredFeatures = features.data();
   desc.nextInChain = &togglesDesc;
 
-  // Destroyed is the context tearing the device down on purpose, not a loss.
-  if (primary) {
-    desc.SetDeviceLostCallback(
-        wgpu::CallbackMode::AllowSpontaneous,
-        [](const wgpu::Device &, wgpu::DeviceLostReason reason,
-           wgpu::StringView message) {
-          if (reason == wgpu::DeviceLostReason::Destroyed) {
-            return;
+  // Destroyed is the context tearing the device down on purpose, and
+  // CallbackCancelled the instance going away: neither is a loss.
+  desc.SetDeviceLostCallback(
+      wgpu::CallbackMode::AllowSpontaneous,
+      [](const wgpu::Device &, wgpu::DeviceLostReason reason,
+         wgpu::StringView message, DeviceLostListener *listener) {
+        switch (reason) {
+        case wgpu::DeviceLostReason::Destroyed:
+        case wgpu::DeviceLostReason::CallbackCancelled:
+          return;
+        case wgpu::DeviceLostReason::FailedCreation:
+          if (listener != nullptr) {
+            listener->creationFailure = toString(message);
           }
-          auto &handler = primaryDeviceLostHandler();
-          if (handler) {
-            handler(toString(message));
+          return;
+        default:
+          if (listener != nullptr && listener->onLost) {
+            listener->onLost(toString(message));
           } else {
             RNSkia::RNSkLogger::logToConsole("Device lost: " +
                                              toString(message));
           }
-        });
-  } else {
-    desc.SetDeviceLostCallback(
-        wgpu::CallbackMode::AllowSpontaneous,
-        [](const wgpu::Device &, wgpu::DeviceLostReason reason,
-           wgpu::StringView message) {
-          if (reason != wgpu::DeviceLostReason::Destroyed) {
-            RNSkia::RNSkLogger::logToConsole("Secondary device lost: " +
-                                             toString(message));
-          }
-        });
-  }
+          return;
+        }
+      },
+      listener);
   desc.SetUncapturedErrorCallback(
       [](const wgpu::Device &, wgpu::ErrorType, wgpu::StringView message) {
         RNSkia::RNSkLogger::logToConsole("Device error: " + toString(message));
@@ -346,8 +347,11 @@ requestDevice(dawn::native::Adapter &nativeAdapter,
   return wgpu::Device::Acquire(nativeAdapter.CreateDevice(&desc));
 }
 
+// `listener` is told of the primary device's loss (see DeviceLostListener)
+// and must outlive the device.
 inline skgpu::graphite::DawnBackendContext
-createDawnBackendContext(dawn::native::Instance *instance) {
+createDawnBackendContext(dawn::native::Instance *instance,
+                         DeviceLostListener *listener) {
 
   auto matchedAdapter = getMatchedAdapter(instance);
   wgpu::Adapter adapter = matchedAdapter.Get();
@@ -421,13 +425,16 @@ createDawnBackendContext(dawn::native::Instance *instance) {
 #endif
   };
 
-  wgpu::Device device =
-      requestDevice(matchedAdapter, features, /* primary= */ true);
+  wgpu::Device device = requestDevice(matchedAdapter, features, listener);
   if (!device) {
-    throw std::runtime_error(
+    std::string error =
         "React Native Skia could not create a GPU device on the " +
         adapterInfo.backend + " adapter " + adapterInfo.device + " (" +
-        adapterInfo.description + ").");
+        adapterInfo.description + ").";
+    if (listener != nullptr && !listener->creationFailure.empty()) {
+      error += " Reason: " + listener->creationFailure;
+    }
+    throw std::runtime_error(error);
   }
 
   skgpu::graphite::DawnBackendContext backendContext;

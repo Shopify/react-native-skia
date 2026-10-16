@@ -58,12 +58,9 @@ public:
    */
   struct GpuInfo {
     bool available = false;
-    std::string backend;
-    std::string vendor;
-    std::string architecture;
-    std::string device;
-    std::string description;
-    /** Empty when available. */
+    /** The adapter Skia renders on; empty when unavailable. */
+    DawnUtils::AdapterDescription adapter;
+    /** Why the GPU is unavailable; empty when it is. */
     std::string error;
   };
 
@@ -91,16 +88,31 @@ public:
    */
   static GpuInfo getGpuInfo() noexcept {
     GpuInfo info = probe().info;
-    if (!info.available) {
+    if (!info.available || !isDeviceLost()) {
       return info;
     }
     auto &state = lostState();
     std::lock_guard<std::mutex> lock(state.mutex);
-    if (state.lost) {
-      info.available = false;
-      info.error = state.message;
-    }
+    info.available = false;
+    info.error = state.message;
     return info;
+  }
+
+  /**
+   Starts the probe on a thread of its own, so that installing the module
+   does not wait for the GPU (drivers load, a device and a Graphite context
+   are created). Whoever needs the context first (a view's window, a GPU
+   call, Skia.gpu) waits for the probe to finish instead.
+   */
+  static void probeInBackground() {
+    std::thread([]() {
+#if defined(__APPLE__)
+      pthread_setname_np("RNSkia GPU Probe");
+#elif defined(__ANDROID__)
+      pthread_setname_np(pthread_self(), "RNSkia GPU Probe");
+#endif
+      probe();
+    }).detach();
   }
 
   /**
@@ -112,9 +124,7 @@ public:
    device short of restarting the app. Any thread.
    */
   static bool isDeviceLost() noexcept {
-    auto &state = lostState();
-    std::lock_guard<std::mutex> lock(state.mutex);
-    return state.lost;
+    return lostState().lost.load(std::memory_order_acquire);
   }
 
   // Readbacks ----------------------------------------------------------------
@@ -209,14 +219,16 @@ public:
 
   /**
    A CPU copy of a Graphite image, read back synchronously; the image itself
-   when it is not texture-backed.
+   when it is not texture-backed, which needs no GPU (nor the context: it
+   works on a device without one). Throws without a GPU for a Graphite
+   image, like getInstance().
    */
-  sk_sp<SkImage> MakeRasterImage(const sk_sp<SkImage> &image) {
+  static sk_sp<SkImage> MakeRasterImage(const sk_sp<SkImage> &image) {
     if (!image->isTextureBacked()) {
       return image;
     }
-    return MakeRasterImage(image->imageInfo(),
-                           readPixelsSync(image, image->bounds()));
+    return MakeRasterImage(image->imageInfo(), getInstance().readPixelsSync(
+                                                   image, image->bounds()));
   }
 
   /**
@@ -333,7 +345,7 @@ public:
 #endif
     };
 
-    return DawnUtils::requestDevice(adapter, features, /* primary= */ false);
+    return DawnUtils::requestDevice(adapter, features, /* listener= */ nullptr);
   }
 
   // Create an SkImage from a WebGPU texture
@@ -494,8 +506,10 @@ private:
   };
 
   struct LostState {
+    // Read on every frame of every view (RNSkWindowSurface::canPresent):
+    // the flag is atomic, the mutex only guards the message.
+    std::atomic<bool> lost{false};
     std::mutex mutex;
-    bool lost = false;
     std::string message;
   };
 
@@ -516,11 +530,11 @@ private:
         message;
     {
       std::lock_guard<std::mutex> lock(state.mutex);
-      if (state.lost) {
+      if (state.lost.load(std::memory_order_relaxed)) {
         return;
       }
-      state.lost = true;
       state.message = error;
+      state.lost.store(true, std::memory_order_release);
     }
     RNSkLogger::logToConsole(error);
   }
@@ -535,14 +549,9 @@ private:
       auto *probe = new Probe();
       try {
         probe->instance = new DawnContext();
-        auto adapter = DawnUtils::describeAdapter(
-            probe->instance->backendContext.fDevice.GetAdapter());
         probe->info.available = true;
-        probe->info.backend = std::move(adapter.backend);
-        probe->info.vendor = std::move(adapter.vendor);
-        probe->info.architecture = std::move(adapter.architecture);
-        probe->info.device = std::move(adapter.device);
-        probe->info.description = std::move(adapter.description);
+        probe->info.adapter = DawnUtils::describeAdapter(
+            probe->instance->backendContext.fDevice.GetAdapter());
       } catch (const std::exception &e) {
         probe->info.error = e.what();
         RNSkLogger::logToConsole(probe->info.error);
@@ -552,6 +561,8 @@ private:
     return *result;
   }
 
+  // Declared before the device it listens to, so that it outlives it.
+  DawnUtils::DeviceLostListener _deviceLostListener;
   std::unique_ptr<dawn::native::Instance> instance;
   std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
   skgpu::graphite::DawnBackendContext backendContext;
@@ -638,12 +649,13 @@ private:
 
     instance = std::make_unique<dawn::native::Instance>(&instanceDesc);
 
-    // Installed before the device exists: Dawn reports a loss from whichever
-    // thread detects it, and this context is the one place that keeps it.
-    DawnUtils::primaryDeviceLostHandler() = [](const std::string &message) {
+    // Dawn reports a loss from whichever thread detects it; the record is
+    // static (lostState), so the listener needs nothing of this object.
+    _deviceLostListener.onLost = [](const std::string &message) {
       DawnContext::markDeviceLost(message);
     };
-    backendContext = DawnUtils::createDawnBackendContext(instance.get());
+    backendContext = DawnUtils::createDawnBackendContext(instance.get(),
+                                                         &_deviceLostListener);
 
     skgpu::graphite::ContextOptions ctxOptions;
     skgpu::graphite::ContextOptionsPriv contextOptionsPriv;

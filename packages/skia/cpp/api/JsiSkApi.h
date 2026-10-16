@@ -179,11 +179,12 @@ public:
     };
     jsi::Object result(runtime);
     result.setProperty(runtime, "isAvailable", gpu.available);
-    result.setProperty(runtime, "backend", string(gpu.backend));
-    result.setProperty(runtime, "vendor", string(gpu.vendor));
-    result.setProperty(runtime, "architecture", string(gpu.architecture));
-    result.setProperty(runtime, "device", string(gpu.device));
-    result.setProperty(runtime, "description", string(gpu.description));
+    result.setProperty(runtime, "backend", string(gpu.adapter.backend));
+    result.setProperty(runtime, "vendor", string(gpu.adapter.vendor));
+    result.setProperty(runtime, "architecture",
+                       string(gpu.adapter.architecture));
+    result.setProperty(runtime, "device", string(gpu.adapter.device));
+    result.setProperty(runtime, "description", string(gpu.adapter.description));
     result.setProperty(runtime, "error",
                        gpu.available ? jsi::Value::null()
                                      : jsi::Value(runtime, string(gpu.error)));
