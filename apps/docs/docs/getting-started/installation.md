@@ -57,6 +57,44 @@ buildscript {
 }
 ```
 
+### Vulkan
+
+React Native Skia renders through Dawn's Vulkan backend, which needs Vulkan 1.1.
+Every 64-bit device that shipped with Android 10 or later has it; the devices without it are older hardware and a few TV boxes.
+The library declares the requirement in its manifest, so it merges into your app's manifest:
+
+```xml
+<uses-feature android:name="android.hardware.vulkan.version" android:version="0x401000" android:required="true" />
+```
+
+The Play Store then does not serve your app to devices without Vulkan 1.1, where every canvas would stay blank.
+This does not affect sideloaded builds or the emulator (use an API 29 or later system image with hardware graphics acceleration).
+
+On a device without Vulkan the app keeps running: the module installs, `Skia.gpu.isAvailable` is false and `Skia.gpu.error` says why, every `Canvas` stays blank, and the APIs that need the GPU (offscreen surfaces, snapshots, texture images) throw an Error with that message.
+The same message is logged once with `console.error` when the module is installed.
+
+If you prefer to ship to those devices and handle them yourself, remove the declaration from your app's `AndroidManifest.xml` and check the flag before rendering with Skia:
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools">
+  <uses-feature android:name="android.hardware.vulkan.version" tools:node="remove" />
+</manifest>
+```
+
+```tsx
+import { Canvas, Skia } from "react-native-skia";
+
+const Chart = () => {
+  if (!Skia.gpu.isAvailable) {
+    return <FallbackChart />;
+  }
+  return <Canvas style={{ flex: 1 }}>{/* ... */}</Canvas>;
+};
+```
+
+`Skia.gpu` also reports the selected adapter (`backend`, `vendor`, `architecture`, `device`, `description`), which is worth including in bug reports.
+
 Currently, you will need Android NDK to be installed.
 If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
 `ANDROID_NDK=/Users/username/Library/Android/sdk/ndk/<version>` for instance.

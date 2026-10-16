@@ -5,6 +5,9 @@
 #endif
 
 #include <optional>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 #include "webgpu/webgpu_cpp.h"
 
@@ -103,17 +106,96 @@ colorTypeForTextureFormat(wgpu::TextureFormat format) {
   }
 }
 
+inline const char *backendTypeName(wgpu::BackendType type) {
+  switch (type) {
+  case wgpu::BackendType::Metal:
+    return "Metal";
+  case wgpu::BackendType::Vulkan:
+    return "Vulkan";
+  case wgpu::BackendType::OpenGL:
+    return "OpenGL";
+  case wgpu::BackendType::OpenGLES:
+    return "OpenGLES";
+  case wgpu::BackendType::WebGPU:
+    return "WebGPU";
+  case wgpu::BackendType::Null:
+    return "Null";
+  default:
+    return "Undefined";
+  }
+}
+
+inline std::string toString(wgpu::StringView view) {
+  return view.data ? std::string(view.data, view.length) : std::string();
+}
+
+// What an adapter reports about itself, in the terms of GPUAdapterInfo.
+struct AdapterDescription {
+  std::string backend;
+  std::string vendor;
+  std::string architecture;
+  std::string device;
+  std::string description;
+};
+
+inline AdapterDescription describeAdapter(const wgpu::Adapter &adapter) {
+  wgpu::AdapterInfo info;
+  adapter.GetInfo(&info);
+  AdapterDescription result;
+  result.backend = backendTypeName(info.backendType);
+  result.vendor = toString(info.vendor);
+  result.architecture = toString(info.architecture);
+  result.device = toString(info.device);
+  result.description = toString(info.description);
+  return result;
+}
+
+// The backend Skia renders with: Metal on Apple, Vulkan on Android.
+#ifdef __APPLE__
+constexpr auto kPlatformBackendType = wgpu::BackendType::Metal;
+#elif __ANDROID__
+constexpr auto kPlatformBackendType = wgpu::BackendType::Vulkan;
+#endif
+
+// Why no adapter was found, for the error raised to JS: every adapter Dawn
+// can see on any backend and at the compatibility feature level, so that the
+// message tells a device without Vulkan apart from one whose driver falls
+// short of the WebGPU core requirements.
+inline std::string describeMissingAdapter(dawn::native::Instance *instance) {
+  std::string message = "React Native Skia renders with ";
+  message += backendTypeName(kPlatformBackendType);
+#ifdef __ANDROID__
+  message += " (Vulkan 1.1 or later)";
+#endif
+  message += " and found no GPU adapter meeting the WebGPU core requirements "
+             "on this device.";
+  wgpu::RequestAdapterOptions options;
+  options.featureLevel = wgpu::FeatureLevel::Compatibility;
+  auto adapters = instance->EnumerateAdapters(&options);
+  if (adapters.empty()) {
+    message += " No adapter is available on any backend.";
+    return message;
+  }
+  message += " Adapters found:";
+  for (const auto &adapter : adapters) {
+    auto info = describeAdapter(adapter.Get());
+    message += " [" + info.backend + ": " + info.device;
+    if (!info.description.empty()) {
+      message += ", " + info.description;
+    }
+    message += "]";
+  }
+  return message;
+}
+
 // Find the best matching GPU adapter for the current platform.
 // Sorts by adapter type (DiscreteGPU > IntegratedGPU > CPU) and selects the
 // first adapter matching the platform backend (Metal on Apple, Vulkan on
-// Android).
+// Android). Throws std::runtime_error, with a message describing the
+// device, when there is none.
 inline dawn::native::Adapter
 getMatchedAdapter(dawn::native::Instance *instance) {
-#ifdef __APPLE__
-  constexpr auto kDefaultBackendType = wgpu::BackendType::Metal;
-#elif __ANDROID__
-  constexpr auto kDefaultBackendType = wgpu::BackendType::Vulkan;
-#endif
+  constexpr auto kDefaultBackendType = kPlatformBackendType;
 
   wgpu::RequestAdapterOptions options;
   options.backendType = kDefaultBackendType;
@@ -122,7 +204,7 @@ getMatchedAdapter(dawn::native::Instance *instance) {
   std::vector<dawn::native::Adapter> adapters =
       instance->EnumerateAdapters(&options);
   if (adapters.empty()) {
-    throw std::runtime_error("No matching adapter found");
+    throw std::runtime_error(describeMissingAdapter(instance));
   }
 
   std::sort(adapters.begin(), adapters.end(),
@@ -146,7 +228,7 @@ getMatchedAdapter(dawn::native::Instance *instance) {
     }
   }
 
-  throw std::runtime_error("No matching adapter found");
+  throw std::runtime_error(describeMissingAdapter(instance));
 }
 
 // Create a Dawn device from the given adapter with the requested features.
@@ -257,47 +339,11 @@ createDawnBackendContext(dawn::native::Instance *instance) {
   wgpu::Adapter adapter = matchedAdapter.Get();
 
   // Log selected adapter info
-  wgpu::AdapterInfo adapterInfo;
-  adapter.GetInfo(&adapterInfo);
-  std::string deviceName =
-      adapterInfo.device.data
-          ? std::string(adapterInfo.device.data, adapterInfo.device.length)
-          : "Unknown";
-  std::string description = adapterInfo.description.data
-                                ? std::string(adapterInfo.description.data,
-                                              adapterInfo.description.length)
-                                : "Unknown";
-
-  std::string backendName;
-  switch (adapterInfo.backendType) {
-  case wgpu::BackendType::Metal:
-    backendName = "Metal";
-    break;
-  case wgpu::BackendType::Vulkan:
-    backendName = "Vulkan";
-    break;
-  case wgpu::BackendType::OpenGL:
-    backendName = "OpenGL";
-    break;
-  case wgpu::BackendType::OpenGLES:
-    backendName = "OpenGLES";
-    break;
-  case wgpu::BackendType::WebGPU:
-    backendName = "WebGPU";
-    break;
-  case wgpu::BackendType::Null:
-    backendName = "Null";
-    break;
-  default:
-    backendName = "Undefined (" +
-                  std::to_string(static_cast<int>(adapterInfo.backendType)) +
-                  ")";
-    break;
-  }
-
+  auto adapterInfo = describeAdapter(adapter);
   RNSkia::RNSkLogger::logToConsole(
       "Selected Dawn adapter - Backend: %s, Device: %s, Description: %s",
-      backendName.c_str(), deviceName.c_str(), description.c_str());
+      adapterInfo.backend.c_str(), adapterInfo.device.c_str(),
+      adapterInfo.description.c_str());
 
   // Primary device features — request everything Skia/Graphite can use
   std::vector<wgpu::FeatureName> features = {
@@ -362,7 +408,12 @@ createDawnBackendContext(dawn::native::Instance *instance) {
   };
 
   wgpu::Device device = requestDevice(matchedAdapter, features, true);
-  SkASSERT(device);
+  if (!device) {
+    throw std::runtime_error(
+        "React Native Skia could not create a GPU device on the " +
+        adapterInfo.backend + " adapter " + adapterInfo.device + " (" +
+        adapterInfo.description + ").");
+  }
 
   skgpu::graphite::DawnBackendContext backendContext;
   backendContext.fInstance = wgpu::Instance(instance->Get());

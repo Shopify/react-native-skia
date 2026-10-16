@@ -34,6 +34,30 @@ import type { JsiRecorder } from "./Recorder";
 import type { SkottieFactory } from "./Skottie";
 
 /**
+ * The GPU Skia renders with, probed once when the module is installed.
+ * On Android Skia renders with Vulkan (1.1 or later), on iOS with Metal.
+ * When `isAvailable` is false, `error` says why: every `Canvas` stays blank
+ * and the APIs that need the GPU (offscreen surfaces, snapshots, texture
+ * images) throw an Error with the same message. The library's Android
+ * manifest declares Vulkan 1.1 as a required feature, so the Play Store
+ * does not serve the app to such devices unless the app removes that
+ * declaration and handles them itself with this flag.
+ */
+export interface SkGpuInfo {
+  /** Whether Skia can render on this device. */
+  readonly isAvailable: boolean;
+  /** "Vulkan", "Metal" or "WebGL"; empty when unavailable. */
+  readonly backend: string;
+  /** The adapter in the terms of WebGPU's GPUAdapterInfo (native only). */
+  readonly vendor: string;
+  readonly architecture: string;
+  readonly device: string;
+  readonly description: string;
+  /** Why the GPU is unavailable; null when it is. */
+  readonly error: string | null;
+}
+
+/**
  * Declares the interface for the native Skia API
  */
 export interface Skia {
@@ -107,4 +131,8 @@ export interface Skia {
    * device (zero-copy interop). Native only.
    */
   getNativeDevice(): bigint;
+  /**
+   * The GPU Skia renders with, or why there is none. See {@link SkGpuInfo}.
+   */
+  readonly gpu: SkGpuInfo;
 }

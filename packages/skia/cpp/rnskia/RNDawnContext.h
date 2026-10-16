@@ -7,6 +7,8 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <stdexcept>
+#include <string>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -47,13 +49,44 @@ public:
   DawnContext(const DawnContext &) = delete;
   DawnContext &operator=(const DawnContext &) = delete;
 
+  /**
+   The GPU Skia renders with, or why there is none: a device without a
+   Vulkan 1.1 driver on Android, a driver short of the WebGPU core
+   requirements, a device creation failure. Probed once per process, the
+   first time the context is asked for (RNSkManager does so when the module
+   is installed), and reported to JS as Skia.gpu.
+   */
+  struct GpuInfo {
+    bool available = false;
+    std::string backend;
+    std::string vendor;
+    std::string architecture;
+    std::string device;
+    std::string description;
+    /** Empty when available. */
+    std::string error;
+  };
+
+  /**
+   The context. Throws std::runtime_error, with the reason, when the device
+   has no GPU Skia can render with: a JSI host function lets it propagate
+   and JS gets an Error; native code on a thread of its own, or called from
+   Java or Objective-C, uses tryGetInstance() instead, since an exception
+   there takes the process down.
+   */
   static DawnContext &getInstance() {
-    // Never destroyed: the readback poller is a detached thread using the
-    // context, which the process takes down at exit instead of a static
-    // destructor tearing the context down under it.
-    static auto *instance = new DawnContext();
+    auto *instance = tryGetInstance();
+    if (instance == nullptr) {
+      throw std::runtime_error(getGpuInfo().error);
+    }
     return *instance;
   }
+
+  /** The context, or nullptr when the GPU is unavailable. Never throws. */
+  static DawnContext *tryGetInstance() noexcept { return probe().instance; }
+
+  /** Probes the GPU if not done yet and describes it. Never throws. */
+  static const GpuInfo &getGpuInfo() noexcept { return probe().info; }
 
   // Readbacks ----------------------------------------------------------------
   //
@@ -426,6 +459,38 @@ public:
   }
 
 private:
+  struct Probe {
+    DawnContext *instance = nullptr;
+    GpuInfo info;
+  };
+
+  static const Probe &probe() noexcept {
+    // Attempted once: a device without a usable GPU does not get one by
+    // asking again, and the attempt enumerates drivers. The context is never
+    // destroyed: the readback poller is a detached thread using it, which
+    // the process takes down at exit instead of a static destructor tearing
+    // the context down under it.
+    static const Probe *result = []() noexcept {
+      auto *probe = new Probe();
+      try {
+        probe->instance = new DawnContext();
+        auto adapter = DawnUtils::describeAdapter(
+            probe->instance->backendContext.fDevice.GetAdapter());
+        probe->info.available = true;
+        probe->info.backend = std::move(adapter.backend);
+        probe->info.vendor = std::move(adapter.vendor);
+        probe->info.architecture = std::move(adapter.architecture);
+        probe->info.device = std::move(adapter.device);
+        probe->info.description = std::move(adapter.description);
+      } catch (const std::exception &e) {
+        probe->info.error = e.what();
+        RNSkLogger::logToConsole(probe->info.error);
+      }
+      return probe;
+    }();
+    return *result;
+  }
+
   std::unique_ptr<dawn::native::Instance> instance;
   std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
   skgpu::graphite::DawnBackendContext backendContext;
@@ -522,7 +587,9 @@ private:
         skgpu::graphite::ContextFactory::MakeDawn(backendContext, ctxOptions);
 
     if (!fGraphiteContext) {
-      throw std::runtime_error("Failed to create graphite context");
+      throw std::runtime_error(
+          "React Native Skia could not create its Graphite context on the "
+          "GPU device.");
     }
   }
 

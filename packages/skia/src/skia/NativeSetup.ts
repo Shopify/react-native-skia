@@ -21,4 +21,13 @@ if (Platform.OS !== "web" && global.SkiaApi == null) {
   // Skia objects use the JSI NativeState pattern and need a custom
   // serializer to be transferable to worklet runtimes (Reanimated).
   registerSkiaWorkletSerialization();
+  // No GPU (no Vulkan 1.1 on Android, for instance): the module is installed
+  // and the app runs, but every canvas stays blank and the GPU APIs throw.
+  // Said once here, with the reason, rather than left to the first blank
+  // screen. See Skia.gpu. (globalThis: `global.SkiaApi` is narrowed to null
+  // by the check above, install() having set it behind the compiler's back.)
+  const { gpu } = globalThis.SkiaApi;
+  if (!gpu.isAvailable) {
+    console.error(`[react-native-skia] ${gpu.error}`);
+  }
 }
