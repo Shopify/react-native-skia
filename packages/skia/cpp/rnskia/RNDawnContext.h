@@ -85,8 +85,37 @@ public:
   /** The context, or nullptr when the GPU is unavailable. Never throws. */
   static DawnContext *tryGetInstance() noexcept { return probe().instance; }
 
-  /** Probes the GPU if not done yet and describes it. Never throws. */
-  static const GpuInfo &getGpuInfo() noexcept { return probe().info; }
+  /**
+   Probes the GPU if not done yet and describes it. Once the device is lost
+   (see isDeviceLost), unavailable, with the loss as the error. Never throws.
+   */
+  static GpuInfo getGpuInfo() noexcept {
+    GpuInfo info = probe().info;
+    if (!info.available) {
+      return info;
+    }
+    auto &state = lostState();
+    std::lock_guard<std::mutex> lock(state.mutex);
+    if (state.lost) {
+      info.available = false;
+      info.error = state.message;
+    }
+    return info;
+  }
+
+  /**
+   Whether the GPU device was lost since it was created: a driver reset, the
+   GPU out of memory, a device-level error. A lost Dawn device fails every
+   later operation instead of crashing, so the context stays usable in the
+   sense that calls return: views stop presenting (RNSkWindowSurface), GPU
+   APIs return nothing, and Skia.gpu reports the loss. Nothing recovers the
+   device short of restarting the app. Any thread.
+   */
+  static bool isDeviceLost() noexcept {
+    auto &state = lostState();
+    std::lock_guard<std::mutex> lock(state.mutex);
+    return state.lost;
+  }
 
   // Readbacks ----------------------------------------------------------------
   //
@@ -304,7 +333,7 @@ public:
 #endif
     };
 
-    return DawnUtils::requestDevice(adapter, features, false);
+    return DawnUtils::requestDevice(adapter, features, /* primary= */ false);
   }
 
   // Create an SkImage from a WebGPU texture
@@ -464,6 +493,38 @@ private:
     GpuInfo info;
   };
 
+  struct LostState {
+    std::mutex mutex;
+    bool lost = false;
+    std::string message;
+  };
+
+  // Never destroyed: Dawn reports a loss from any of its threads, possibly
+  // during process teardown.
+  static LostState &lostState() noexcept {
+    static auto *state = new LostState();
+    return *state;
+  }
+
+  // The primary device's loss callback (DawnUtils::requestDevice): records
+  // the loss for isDeviceLost() and getGpuInfo(), and logs it once.
+  static void markDeviceLost(const std::string &message) noexcept {
+    auto &state = lostState();
+    std::string error =
+        "React Native Skia lost its GPU device; nothing renders until the "
+        "app is restarted. Reason: " +
+        message;
+    {
+      std::lock_guard<std::mutex> lock(state.mutex);
+      if (state.lost) {
+        return;
+      }
+      state.lost = true;
+      state.message = error;
+    }
+    RNSkLogger::logToConsole(error);
+  }
+
   static const Probe &probe() noexcept {
     // Attempted once: a device without a usable GPU does not get one by
     // asking again, and the attempt enumerates drivers. The context is never
@@ -577,6 +638,11 @@ private:
 
     instance = std::make_unique<dawn::native::Instance>(&instanceDesc);
 
+    // Installed before the device exists: Dawn reports a loss from whichever
+    // thread detects it, and this context is the one place that keeps it.
+    DawnUtils::primaryDeviceLostHandler() = [](const std::string &message) {
+      DawnContext::markDeviceLost(message);
+    };
     backendContext = DawnUtils::createDawnBackendContext(instance.get());
 
     skgpu::graphite::ContextOptions ctxOptions;

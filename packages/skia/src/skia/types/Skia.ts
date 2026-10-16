@@ -42,9 +42,14 @@ import type { SkottieFactory } from "./Skottie";
  * manifest declares Vulkan 1.1 as a required feature, so the Play Store
  * does not serve the app to such devices unless the app removes that
  * declaration and handles them itself with this flag.
+ *
+ * `isAvailable` also turns false if the GPU device is lost while the app
+ * runs (a driver reset, the GPU out of memory): canvases keep their last
+ * frame and stop updating, `error` says so, and only a restart of the app
+ * recovers.
  */
 export interface SkGpuInfo {
-  /** Whether Skia can render on this device. */
+  /** Whether Skia can render on this device, right now. */
   readonly isAvailable: boolean;
   /** "Vulkan", "Metal" or "WebGL"; empty when unavailable. */
   readonly backend: string;

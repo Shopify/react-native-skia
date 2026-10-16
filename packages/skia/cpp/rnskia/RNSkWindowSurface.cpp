@@ -199,7 +199,10 @@ bool RNSkWindowSurface::surfaceSupportsFormat(wgpu::TextureFormat format) {
 }
 
 bool RNSkWindowSurface::canPresent() {
-  return _surface && (!_canPresent || _canPresent());
+  // A lost device (see DawnContext::isDeviceLost) takes no frame: the view
+  // keeps its last one and the queue waits, as while in the background.
+  return _surface && !DawnContext::isDeviceLost() &&
+         (!_canPresent || _canPresent());
 }
 
 bool RNSkWindowSurface::presentRecordings(

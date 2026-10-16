@@ -4,6 +4,7 @@
 #include <TargetConditionals.h>
 #endif
 
+#include <functional>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -231,14 +232,27 @@ getMatchedAdapter(dawn::native::Instance *instance) {
   throw std::runtime_error(describeMissingAdapter(instance));
 }
 
+// Told when the primary rendering device is lost (a driver reset, the GPU
+// out of memory, a device-level validation error), with Dawn's message.
+// Installed by DawnContext, which records the loss (see
+// DawnContext::isDeviceLost); until then, or without one, a loss is logged.
+// The callback runs on whichever thread Dawn detects the loss on.
+using DeviceLostHandler = std::function<void(const std::string &message)>;
+inline DeviceLostHandler &primaryDeviceLostHandler() {
+  static auto *handler = new DeviceLostHandler();
+  return *handler;
+}
+
 // Create a Dawn device from the given adapter with the requested features.
 // Features not supported by the adapter are silently skipped.
-// Set fatalOnDeviceLost=true for primary rendering devices (SK_ABORT on loss),
-// false for secondary/compute devices (log only).
+// The loss of a primary rendering device is reported through
+// primaryDeviceLostHandler(); the loss of a secondary (compute) device is
+// only logged. Neither takes the process down: a lost device fails its
+// later operations, which the callers handle.
 inline wgpu::Device
 requestDevice(dawn::native::Adapter &nativeAdapter,
               const std::vector<wgpu::FeatureName> &requestedFeatures,
-              bool fatalOnDeviceLost = true) {
+              bool primary = true) {
   wgpu::Adapter adapter = nativeAdapter.Get();
 
   // Filter to only features the adapter supports.
@@ -296,20 +310,22 @@ requestDevice(dawn::native::Adapter &nativeAdapter,
   desc.requiredFeatures = features.data();
   desc.nextInChain = &togglesDesc;
 
-  if (fatalOnDeviceLost) {
+  // Destroyed is the context tearing the device down on purpose, not a loss.
+  if (primary) {
     desc.SetDeviceLostCallback(
         wgpu::CallbackMode::AllowSpontaneous,
         [](const wgpu::Device &, wgpu::DeviceLostReason reason,
            wgpu::StringView message) {
-          if (reason != wgpu::DeviceLostReason::Destroyed) {
-            SK_ABORT("Device lost: %.*s\n", static_cast<int>(message.length),
-                     message.data);
+          if (reason == wgpu::DeviceLostReason::Destroyed) {
+            return;
           }
-        });
-    desc.SetUncapturedErrorCallback(
-        [](const wgpu::Device &, wgpu::ErrorType, wgpu::StringView message) {
-          SkDebugf("Device error: %.*s\n", static_cast<int>(message.length),
-                   message.data);
+          auto &handler = primaryDeviceLostHandler();
+          if (handler) {
+            handler(toString(message));
+          } else {
+            RNSkia::RNSkLogger::logToConsole("Device lost: " +
+                                             toString(message));
+          }
         });
   } else {
     desc.SetDeviceLostCallback(
@@ -317,17 +333,15 @@ requestDevice(dawn::native::Adapter &nativeAdapter,
         [](const wgpu::Device &, wgpu::DeviceLostReason reason,
            wgpu::StringView message) {
           if (reason != wgpu::DeviceLostReason::Destroyed) {
-            RNSkia::RNSkLogger::logToConsole("Device lost: %.*s",
-                                             static_cast<int>(message.length),
-                                             message.data);
+            RNSkia::RNSkLogger::logToConsole("Secondary device lost: " +
+                                             toString(message));
           }
         });
-    desc.SetUncapturedErrorCallback([](const wgpu::Device &, wgpu::ErrorType,
-                                       wgpu::StringView message) {
-      RNSkia::RNSkLogger::logToConsole(
-          "Device error: %.*s", static_cast<int>(message.length), message.data);
-    });
   }
+  desc.SetUncapturedErrorCallback(
+      [](const wgpu::Device &, wgpu::ErrorType, wgpu::StringView message) {
+        RNSkia::RNSkLogger::logToConsole("Device error: " + toString(message));
+      });
 
   return wgpu::Device::Acquire(nativeAdapter.CreateDevice(&desc));
 }
@@ -407,7 +421,8 @@ createDawnBackendContext(dawn::native::Instance *instance) {
 #endif
   };
 
-  wgpu::Device device = requestDevice(matchedAdapter, features, true);
+  wgpu::Device device =
+      requestDevice(matchedAdapter, features, /* primary= */ true);
   if (!device) {
     throw std::runtime_error(
         "React Native Skia could not create a GPU device on the " +

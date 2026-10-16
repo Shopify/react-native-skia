@@ -94,6 +94,7 @@ const Chart = () => {
 ```
 
 `Skia.gpu` also reports the selected adapter (`backend`, `vendor`, `architecture`, `device`, `description`), which is worth including in bug reports.
+The flag turns false as well if the GPU device is lost while the app runs (a driver reset, for instance): canvases keep their last frame and stop updating instead of the app crashing, and `Skia.gpu.error` carries the driver's message.
 
 Currently, you will need Android NDK to be installed.
 If you have Android Studio installed, make sure `$ANDROID_NDK` is available.
