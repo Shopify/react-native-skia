@@ -2,10 +2,14 @@ package com.reactnative.skia;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.PixelFormat;
+import android.graphics.Region;
+import android.os.Build;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 @SuppressLint("ViewConstructor")
 public class SkiaSurfaceView extends SurfaceView implements SurfaceHolder.Callback2 {
@@ -21,7 +25,12 @@ public class SkiaSurfaceView extends SurfaceView implements SurfaceHolder.Callba
         public void removeCallbacks(Runnable action) {
             SkiaSurfaceView.this.removeCallbacks(action);
         }
-    });
+
+        @Override
+        public void invalidate() {
+            SkiaSurfaceView.this.invalidate();
+        }
+    }, Build.VERSION.SDK_INT);
 
     public SkiaSurfaceView(Context context, SkiaViewAPI api, boolean zOrderOnTop, boolean opaque) {
         super(context);
@@ -36,6 +45,21 @@ public class SkiaSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     // change on a live surface: SurfaceView reports it through surfaceChanged.
     public void setOpaque(boolean opaque) {
         getHolder().setFormat(opaque ? PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT);
+    }
+
+    // SurfaceView skips draw() and punches its hole in dispatchDraw.
+    @Override
+    protected void dispatchDraw(@NonNull Canvas canvas) {
+        if (mDrawGate.hasFrame()) {
+            super.dispatchDraw(canvas);
+        }
+    }
+
+    // SurfaceView adds its bounds to the window's transparent region once its
+    // draw is reported, and the compositor skips the window there.
+    @Override
+    public boolean gatherTransparentRegion(@Nullable Region region) {
+        return !mDrawGate.hasFrame() || super.gatherTransparentRegion(region);
     }
 
     @Override
