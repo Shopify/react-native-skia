@@ -64,12 +64,19 @@ export const AndroidViews = () => {
     [frameRate]
   );
   const font = useFont(require("../../assets/SF-Mono-Semibold.otf"), 18);
+  // The backing view is chosen when the canvas mounts, so a change of the
+  // chips remounts it. opaque only takes part in that choice on auto;
+  // explicitly selected, a view applies it in place.
+  const backingKey = `${surfaceType}-${zOrderOnTop}-${
+    surfaceType === "auto" ? opaque : ""
+  }`;
   return (
     <View style={styles.container}>
       <View style={styles.stage}>
         <Stripes />
         <View style={styles.clip}>
           <Canvas
+            key={backingKey}
             style={styles.canvas}
             opaque={opaque}
             android={{
@@ -135,9 +142,11 @@ export const AndroidViews = () => {
           <Switch value={animate} onValueChange={setAnimate} />
         </View>
         <Text style={styles.hint}>
-          auto picks SurfaceView when opaque and TextureView otherwise. A
-          SurfaceView ignores the rounded clip and the overlay; with zOrderOnTop
-          it also covers the controls when they overlap.
+          auto picks SurfaceView when opaque and TextureView otherwise, when the
+          canvas mounts: a chip remounts the canvas, opaque on an explicit view
+          updates it in place. A SurfaceView ignores the rounded clip and the
+          overlay; with zOrderOnTop it also covers the controls when they
+          overlap.
         </Text>
       </View>
     </View>

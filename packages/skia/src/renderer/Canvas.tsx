@@ -64,8 +64,9 @@ export interface CanvasProps extends ViewProps {
   /**
    * Declares that the canvas covers every pixel of its bounds, so nothing
    * behind it needs to show through. On Android an opaque canvas is backed by
-   * a `SurfaceView` by default, the cheapest path (see `android.surfaceType`).
-   * Defaults to false.
+   * a `SurfaceView` by default, the cheapest path (see `android.surfaceType`);
+   * that choice is made when the canvas mounts, a later change of `opaque`
+   * only updates the backing view in place. Defaults to false.
    */
   opaque?: boolean;
   /**
@@ -73,11 +74,15 @@ export interface CanvasProps extends ViewProps {
    * iOS, 10-bit on Android) to avoid banding in subtle gradients. Colors are
    * identical to the default 8-bit surface, only with more precision (this is
    * about bit depth, not HDR). On Android the extra precision survives
-   * composition only when combined with `opaque`, and the prop must be set
-   * before the canvas is mounted.
+   * composition only when combined with `opaque`, and the prop is read once,
+   * when the canvas mounts.
    */
   highBitDepth?: boolean;
-  /** Android-only rendering options. Ignored on iOS and web. */
+  /**
+   * Android-only rendering options. They select the backing view, which is
+   * chosen when the canvas mounts and kept: a later change is ignored. Remount
+   * the canvas, with a `key`, to change it. Ignored on iOS and web.
+   */
   android?: AndroidCanvasProps;
   ref?: React.Ref<CanvasRef>;
 }

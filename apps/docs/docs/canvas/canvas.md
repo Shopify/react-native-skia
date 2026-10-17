@@ -160,13 +160,17 @@ That routing costs an extra texture copy and typically a frame of latency, and i
 | Selected when | `opaque` (default) | `opaque={false}` (default) |
 
 `opaque` applies to whichever view is selected: on a `SurfaceView` it picks `PixelFormat.OPAQUE` or `PixelFormat.TRANSLUCENT`, on a `TextureView` it calls `setOpaque`.
-Changing `opaque` at runtime updates the view in place; changing `surfaceType` or `zOrderOnTop` replaces the backing view, which recreates its surface.
+
+The backing view is chosen when the canvas mounts, from `opaque`, `surfaceType`, `zOrderOnTop` and `highBitDepth` as they are then, and kept for as long as the canvas is mounted.
+Changing `opaque` afterwards updates the view in place (a canvas mounted opaque on the default `SurfaceView` stays on it, see the warning below); a change of `surfaceType`, `zOrderOnTop` or `highBitDepth` is ignored, and the native log says so.
+Android cannot hand a canvas from one backing view to another without a frame of nothing, or of black, in between, so a canvas that needs another backing view is remounted instead: give it a `key` that changes with these props.
 
 The defaults composite correctly in React Native stacking order without further flags.
 Set `surfaceType` when you need a different trade-off:
 
 ```tsx twoslash
 import {Canvas, Fill} from "react-native-skia";
+import type {AndroidSurfaceType} from "react-native-skia";
 
 // Opaque TextureView: stays in stacking order, e.g. inside a ScrollView
 export const InScrollView = () => (
@@ -182,6 +186,13 @@ export const Overlay = () => (
     android={{ surfaceType: "SurfaceView", zOrderOnTop: true }}
   >
     <Fill color="rgba(0, 255, 255, 0.5)" />
+  </Canvas>
+);
+
+// The backing view is chosen at mount: a canvas that switches it remounts
+export const Switchable = ({ surfaceType }: { surfaceType: AndroidSurfaceType }) => (
+  <Canvas key={surfaceType} style={{ flex: 1 }} android={{ surfaceType }}>
+    <Fill color="cyan" />
   </Canvas>
 );
 ```
