@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
-import { Platform } from "react-native";
+
+import { Platform } from "../Platform";
 
 import type { AndroidCanvasProps, AndroidSurfaceType } from "./types";
 
