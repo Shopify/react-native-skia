@@ -4,7 +4,7 @@ import type { SkGraphiteContext } from "../skia/types";
 import SkiaViewNativeComponent from "../specs/SkiaViewNativeComponent";
 
 import { SkiaViewApi } from "./api";
-import { androidNativeProps } from "./android";
+import { androidNativeProps, useBackingViewWarning } from "./android";
 import type { SkiaGraphiteViewNativeProps } from "./types";
 import { SkiaViewNativeId } from "./SkiaViewNativeId";
 import { measureLayout } from "./measureLayout";
@@ -36,6 +36,7 @@ export const SkiaGraphiteView = ({
   const nativeId = useMemo(() => SkiaViewNativeId.current++, []);
   const viewRef =
     useRef<React.ComponentRef<typeof SkiaViewNativeComponent>>(null);
+  useBackingViewWarning({ opaque, highBitDepth, android });
   // Retires the native target made for this id on unmount, in case no native
   // view ever bound to it; a bound target is retired by the view's teardown.
   // StrictMode runs this cleanup right after mount too, possibly before the

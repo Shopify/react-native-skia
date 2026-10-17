@@ -149,18 +149,6 @@ public class FrameSchedulerTest {
     }
 
     @Test
-    public void kindSwitchWhileAFrameCallbackIsOutstandingPresentsBehindThePendingDraw() {
-        mScheduler.requestFrame(BackingViewKind.SURFACE_VIEW);
-        // updateView() replaced the SurfaceView with a TextureView meanwhile.
-        mScheduler.requestFrame(BackingViewKind.TEXTURE_VIEW);
-        mScheduler.onFrame(BackingViewKind.TEXTURE_VIEW);
-        mScheduler.onPosted();
-        assertEquals(
-                Arrays.asList(Call.POST_FRAME_CALLBACK, Call.POST_BEHIND_PENDING_DRAW, Call.PRESENT),
-                mHost.takeCalls());
-    }
-
-    @Test
     public void withoutABackingViewNothingIsPostedOrPresented() {
         mScheduler.requestFrame(null);
         mScheduler.onFrame(null);

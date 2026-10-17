@@ -118,6 +118,7 @@ static bool appIsBackgrounded() {
   _layer = [CAMetalLayer layer];
 #pragma clang diagnostic pop
   _surface = std::make_shared<RNSkia::RNSkWindowSurface>();
+  _surface->setHighBitDepth(_highBitDepth);
   // The window belongs to the main thread, and is left alone while the app
   // is in the background: what the view holds is presented on its next frame
   // once the app is back (see appWillEnterForeground:).
@@ -323,7 +324,13 @@ static bool appIsBackgrounded() {
     return;
   }
   _highBitDepth = highBitDepth;
-  if (_surface != nullptr && _surface->isAttached()) {
+  if (_surface == nullptr) {
+    return;
+  }
+  // The layer is re-attached with the new format; until then (or without a
+  // size), frames are recorded for it.
+  _surface->setHighBitDepth(highBitDepth);
+  if (_surface->isAttached()) {
     [self attachSurface];
   }
 }

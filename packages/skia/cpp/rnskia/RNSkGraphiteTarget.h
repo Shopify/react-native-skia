@@ -123,7 +123,8 @@ public:
 
   /**
    The layout size (points) and the props the format follows from, as known
-   to JS. Used until the view has a surface of its own.
+   to JS. Used until the platform view knows better: the pixel size it was
+   laid out with, and the bit depth of its surface (see resolveTargetInfo).
    */
   void setLayout(float width, float height, bool opaque, bool highBitDepth) {
     std::lock_guard<std::mutex> lock(_stateMutex);
@@ -294,8 +295,9 @@ private:
    The target to record against: the view's surface when it has one, else
    the pixel size the platform laid the view out with, else the layout size
    JS measured; in the last two cases with the format and the color space
-   the surface will be created with, following the same rules (see
-   RNSkWindowSurface and SkiaView.java).
+   the surface has, or will have: the bit depth the platform view knows
+   (the one of its backing view, which keeps it, see SkiaView.java), else
+   the one the props call for, following the same rules.
    */
   RNSkGraphiteTargetInfo resolveTargetInfo() {
     std::shared_ptr<RNSkWindowSurface> surface;
@@ -324,6 +326,13 @@ private:
 #else
     (void)opaque;
 #endif
+    if (surface) {
+      // The window keeps the bit depth it was attached with, whatever the
+      // props say later (on Android they are read at mount): a frame
+      // recorded while it is away is recorded for the one it comes back
+      // with.
+      surface->getHighBitDepth(&highBitDepth);
+    }
     if (!surface || !surface->getLayoutSize(&info.width, &info.height)) {
       // Not laid out yet (JS gets its onLayout before the platform lays the
       // view out): the size JS measured, in points. The layout is on the
