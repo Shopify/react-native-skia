@@ -1,5 +1,9 @@
 import type { LinkingOptions } from "@react-navigation/native";
-import { NavigationContainer, useNavigation } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  useNavigation,
+  useNavigationContainerRef,
+} from "@react-navigation/native";
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "react-native";
@@ -44,6 +48,9 @@ import type { StackParamList } from "./types";
 import { useAssets } from "./Tests/useAssets";
 import { Chess } from "./Examples/Chess";
 import { apiScreenPaths } from "./Examples/API/linking";
+import { Benchmarks } from "./Examples/Benchmarks";
+import { BenchmarkRemoteControl } from "./Examples/Benchmarks/RemoteControl";
+import { benchmarkScreenPaths } from "./Examples/Benchmarks/linking";
 import "./resolveAssetSourcePolyfill";
 // The two lines below are needed by three.js
 import "fast-text-encoding";
@@ -86,6 +93,10 @@ const linking: LinkingOptions<StackParamList> = {
       Graphite: "graphite",
       GraphiteCanvas: "graphite-canvas",
       AndroidViews: "android-views",
+      Benchmarks: {
+        path: "benchmarks",
+        screens: benchmarkScreenPaths,
+      },
     },
   },
   // react-native-test-app registers its bundle id as the iOS URL scheme, and
@@ -119,6 +130,7 @@ enableScreens(true);
 
 const App = () => {
   const Stack = createNativeStackNavigator<StackParamList>();
+  const navigationRef = useNavigationContainerRef<StackParamList>();
   const assets = useAssets();
   if (assets === null) {
     return null;
@@ -127,7 +139,8 @@ const App = () => {
     <FiberProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <StatusBar hidden />
-        <NavigationContainer linking={linking}>
+        <NavigationContainer ref={navigationRef} linking={linking}>
+          <BenchmarkRemoteControl navigationRef={navigationRef} />
           <Stack.Navigator
             screenOptions={{
               headerLeft: HeaderLeft,
@@ -257,6 +270,11 @@ const App = () => {
               component={GraphiteCanvasExample}
             />
             <Stack.Screen name="AndroidViews" component={AndroidViews} />
+            <Stack.Screen
+              name="Benchmarks"
+              component={Benchmarks}
+              options={{ headerShown: false }}
+            />
           </Stack.Navigator>
         </NavigationContainer>
       </GestureHandlerRootView>

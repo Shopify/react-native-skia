@@ -158,6 +158,11 @@ export const HomeScreen = () => {
         description="SurfaceView vs TextureView"
         route="AndroidViews"
       />
+      <HomeScreenButton
+        title="🏁 Benchmarks"
+        description="v2 vs v3 performance scenarios"
+        route="Benchmarks"
+      />
     </ScrollView>
   );
 };

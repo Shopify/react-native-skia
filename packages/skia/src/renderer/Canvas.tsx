@@ -157,7 +157,8 @@ const useCanvasRoot = ({
  * - the Reanimated UI runtime only reads the shared values into it (the one
  *   step that needs a JS runtime), it never replays anything;
  * - a dedicated native thread pool replays the recorder into a Graphite
- *   recording whenever the content changed, at most once per presented frame;
+ *   recording whenever the content changed, keeping at most one frame ahead
+ *   of the display;
  * - the view presents the recording on the next vsync.
  *
  * On the web the scene is drawn into a picture on the JS thread and painted

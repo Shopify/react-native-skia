@@ -1,6 +1,7 @@
 import type { NavigatorScreenParams } from "@react-navigation/native";
 
 import type { Routes as APIRoutes } from "./Examples/API/Routes";
+import type { Routes as BenchmarkRoutes } from "./Examples/Benchmarks/Routes";
 
 export type StackParamList = {
   Tests: {
@@ -38,4 +39,5 @@ export type StackParamList = {
   Graphite: undefined;
   GraphiteCanvas: undefined;
   AndroidViews: undefined;
+  Benchmarks: NavigatorScreenParams<BenchmarkRoutes> | undefined;
 };

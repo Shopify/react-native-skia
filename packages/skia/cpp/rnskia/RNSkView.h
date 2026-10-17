@@ -197,7 +197,7 @@ public:
       recordings.push_back(std::move(lastPresented));
     }
     if (presentOrKeep(*target, targetInfo, recordings)) {
-      _producer->onFramePresented();
+      _producer->onFramePresented(recordings.size());
       return;
     }
     // Not scheduleFrame(): without a scheduler it redraws, which would fail
@@ -290,7 +290,7 @@ public:
     if (!presentOrKeep(*target, targetInfo, recordings)) {
       return true;
     }
-    _producer->onFramePresented();
+    _producer->onFramePresented(recordings.size());
     return target->hasQueued();
   }
 
