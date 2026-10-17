@@ -37,7 +37,7 @@ The Skia prebuilt binaries are delivered as regular npm dependencies (`react-nat
 
 React Native Skia runs on iOS, Android, macOS, Mac Catalyst, tvOS, and [the Web](/docs/getting-started/web).
 
-Android TV is not supported by v3. It remain supported by [v2](https://wcandillon.github.io/react-native-skia/v2/docs/getting-started/installation).
+Android TV is not supported by v3. It remain supported by [v2](https://wcandillon.github.io/react-native-skia/v2/docs/getting-started/installation/).
 For `react-native@<=0.78` and `react@<=18`, you need to use `@shopify/react-native-skia` version `1.12.4` or below.
 
 ## iOS
@@ -64,6 +64,7 @@ The library's manifest declares it as a required feature, so the Play Store does
 This does not affect the emulator (use an API 29 or later image with hardware graphics acceleration).
 
 On a device without Vulkan the app still runs: `Skia.gpu.isAvailable` is false, `Skia.gpu.error` says why, and canvases stay blank.
+An app that has to render on such devices uses [v2](https://wcandillon.github.io/react-native-skia/v2/docs/getting-started/installation/), which renders with OpenGL ES.
 To ship to those devices anyway, remove the declaration from your app's manifest and check the flag before rendering with Skia:
 
 ```xml
