@@ -115,7 +115,11 @@ public:
    */
   void setPresentsHeld(bool held) { _presentsHeld = held; }
 
-  /** Whether a window is attached and can show a frame right now. */
+  /**
+   Whether a window is attached and can show a frame right now: not while its
+   presents are held or the platform view says it cannot, nor once the GPU
+   device is lost.
+   */
   bool canPresent();
 
   // RNSkSurface -------------------------------------------------------------
