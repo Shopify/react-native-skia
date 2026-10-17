@@ -49,12 +49,15 @@ type SkiaHostConfig = HostConfig<
 >;
 let currentUpdatePriority: EventPriority = NoEventPriority;
 
-// What React appends in place of each node a Suspense boundary hides: a hidden node draws nothing, so it never enters the scene.
-const hiddenInstance: Instance = {
+// cloneHiddenInstance returns this for every node a Suspense (or Activity/Offscreen) boundary hides.
+// React never stores it: it only hands it to appendInitialChild and appendChildToContainerChildSet,
+// and both must skip it so a hidden node never enters the scene. Frozen so a copy or mutation
+// cannot turn it into an ordinary empty group that slips past those identity checks.
+const hiddenInstance: Instance = Object.freeze({
   type: NodeType.Group,
   props: {},
   children: [],
-};
+});
 
 export const sksgHostConfig: SkiaHostConfig = {
   /**
