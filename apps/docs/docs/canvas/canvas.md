@@ -162,7 +162,8 @@ That routing costs an extra texture copy and typically a frame of latency, and i
 `opaque` applies to whichever view is selected: on a `SurfaceView` it picks `PixelFormat.OPAQUE` or `PixelFormat.TRANSLUCENT`, on a `TextureView` it calls `setOpaque`.
 
 The backing view is chosen when the canvas mounts, from `opaque`, `surfaceType`, `zOrderOnTop` and `highBitDepth` as they are then, and kept for as long as the canvas is mounted.
-Changing `opaque` afterwards updates the view in place (a canvas mounted opaque on the default `SurfaceView` stays on it, see the warning below); a change of `surfaceType`, `zOrderOnTop` or `highBitDepth` is ignored, and the native log says so.
+Changing `opaque` afterwards updates the view in place (a canvas mounted opaque on the default `SurfaceView` stays on it, see the warning below), and so does changing `zOrderOnTop` on Android 11 and later.
+A change of `surfaceType` or `highBitDepth` is ignored, as is a change of `opaque` on a `SurfaceView` with `highBitDepth`, where the pair selects the buffer format (see [High bit depth](#high-bit-depth)); a warning says so in development.
 Android cannot hand a canvas from one backing view to another without a frame of nothing, or of black, in between, so a canvas that needs another backing view is remounted instead: give it a `key` that changes with these props.
 
 The defaults composite correctly in React Native stacking order without further flags.
@@ -235,6 +236,7 @@ const Demo = () => {
 
 On Android, `highBitDepth` requires an opaque `SurfaceView` (the default for `opaque`): the 10-bit format only has 2 bits of alpha, and a `TextureView` composites through an 8-bit pass anyway.
 When the surface does not support the 10-bit format, the canvas falls back to 8-bit.
+The format is chosen when the canvas mounts, so a `SurfaceView` canvas with `highBitDepth` reads `opaque` at mount as well: to change either, remount the canvas with a new `key`.
 
 :::
 

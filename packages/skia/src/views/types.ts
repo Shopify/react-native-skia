@@ -13,8 +13,8 @@ export type AndroidSurfaceType = "SurfaceView" | "TextureView";
 
 /**
  * Android-only rendering options. They select the backing view, which is
- * chosen when the canvas mounts and kept: a later change is ignored (the
- * native log says so). Remount the canvas, with a `key`, to change it.
+ * chosen when the canvas mounts and kept: a later change is ignored, with a
+ * warning in development. Remount the canvas, with a `key`, to change it.
  */
 export interface AndroidCanvasProps {
   /**
@@ -25,8 +25,8 @@ export interface AndroidCanvasProps {
   surfaceType?: AndroidSurfaceType;
   /**
    * SurfaceView only: composite above every React Native view in the window,
-   * ignoring `zIndex`. Ignored for TextureView. Defaults to false. Read once,
-   * at mount.
+   * ignoring `zIndex`. Ignored for TextureView. Defaults to false. Applied in
+   * place on Android 11 and later; read once, at mount, before that.
    */
   zOrderOnTop?: boolean;
 }
@@ -82,8 +82,9 @@ export interface SkiaBaseViewProps extends ViewProps {
    * Declares that the canvas covers every pixel of its bounds. On Android an
    * opaque canvas is backed by a `SurfaceView` by default, the cheapest path
    * (see `android.surfaceType`); that choice is made when the canvas mounts,
-   * a later change of `opaque` only updates the backing view in place.
-   * Defaults to false.
+   * a later change of `opaque` only updates the backing view in place (except
+   * on a `SurfaceView` with `highBitDepth`, where the pair selects the buffer
+   * format and both are read at mount). Defaults to false.
    */
   opaque?: boolean;
 
@@ -91,13 +92,13 @@ export interface SkiaBaseViewProps extends ViewProps {
    * Renders into a surface with more than 8 bits per channel (16-bit float on
    * iOS, 10-bit on Android) to avoid banding in subtle gradients. On Android
    * the extra precision survives composition only when combined with `opaque`,
-   * and the prop is read once, when the canvas mounts.
+   * and both props are read once, when the canvas mounts.
    */
   highBitDepth?: boolean;
 
   /**
-   * Android-only rendering options, read once when the canvas mounts. Ignored
-   * on iOS and web.
+   * Android-only rendering options, read once when the canvas mounts (a later
+   * change is ignored, with a warning in development). Ignored on iOS and web.
    */
   android?: AndroidCanvasProps;
 

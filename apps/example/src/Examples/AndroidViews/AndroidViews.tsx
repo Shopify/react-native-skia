@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Switch, Text, View } from "react-native";
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from "react-native";
 import type { AndroidSurfaceType } from "react-native-skia";
 import {
   Canvas,
@@ -66,9 +73,14 @@ export const AndroidViews = () => {
   const font = useFont(require("../../assets/SF-Mono-Semibold.otf"), 18);
   // The backing view is chosen when the canvas mounts, so a change of the
   // chips remounts it. opaque only takes part in that choice on auto;
-  // explicitly selected, a view applies it in place.
-  const backingKey = `${surfaceType}-${zOrderOnTop}-${
-    surfaceType === "auto" ? opaque : ""
+  // explicitly selected, a view applies it in place. zOrderOnTop only
+  // matters to a SurfaceView, which Android 11 and later moves in place.
+  const autoKind = opaque ? "SurfaceView" : "TextureView";
+  const kind = surfaceType === "auto" ? autoKind : surfaceType;
+  const zOrderOnTopAtMount =
+    kind === "SurfaceView" && Number(Platform.Version) < 30;
+  const backingKey = `${surfaceType}-${surfaceType === "auto" ? opaque : ""}-${
+    zOrderOnTopAtMount ? zOrderOnTop : ""
   }`;
   return (
     <View style={styles.container}>
@@ -144,9 +156,9 @@ export const AndroidViews = () => {
         <Text style={styles.hint}>
           auto picks SurfaceView when opaque and TextureView otherwise, when the
           canvas mounts: a chip remounts the canvas, opaque on an explicit view
-          updates it in place. A SurfaceView ignores the rounded clip and the
-          overlay; with zOrderOnTop it also covers the controls when they
-          overlap.
+          updates it in place, and so does zOrderOnTop on Android 11 and later.
+          A SurfaceView ignores the rounded clip and the overlay; with
+          zOrderOnTop it also covers the controls when they overlap.
         </Text>
       </View>
     </View>
