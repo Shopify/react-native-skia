@@ -11,16 +11,22 @@ import type {
 
 export type AndroidSurfaceType = "SurfaceView" | "TextureView";
 
+/**
+ * Android-only rendering options. They select the backing view, which is
+ * chosen when the canvas mounts and kept: a later change is ignored, with a
+ * warning in development. Remount the canvas, with a `key`, to change it.
+ */
 export interface AndroidCanvasProps {
   /**
-   * Backing view. Defaults to `SurfaceView` when the canvas is `opaque` and to
-   * `TextureView` otherwise; both composite correctly in React Native stacking
-   * order without further flags.
+   * Backing view. Defaults to `SurfaceView` when the canvas mounts `opaque`
+   * and to `TextureView` otherwise; both composite correctly in React Native
+   * stacking order without further flags. Read once, at mount.
    */
   surfaceType?: AndroidSurfaceType;
   /**
    * SurfaceView only: composite above every React Native view in the window,
-   * ignoring `zIndex`. Ignored for TextureView. Defaults to false.
+   * ignoring `zIndex`. Ignored for TextureView. Defaults to false. Applied in
+   * place on Android 11 and later; read once, at mount, before that.
    */
   zOrderOnTop?: boolean;
 }
@@ -75,18 +81,25 @@ export interface SkiaBaseViewProps extends ViewProps {
   /**
    * Declares that the canvas covers every pixel of its bounds. On Android an
    * opaque canvas is backed by a `SurfaceView` by default, the cheapest path
-   * (see `android.surfaceType`). Defaults to false.
+   * (see `android.surfaceType`); that choice is made when the canvas mounts,
+   * a later change of `opaque` only updates the backing view in place (except
+   * on a `SurfaceView` with `highBitDepth`, where the pair selects the buffer
+   * format and both are read at mount). Defaults to false.
    */
   opaque?: boolean;
 
   /**
    * Renders into a surface with more than 8 bits per channel (16-bit float on
    * iOS, 10-bit on Android) to avoid banding in subtle gradients. On Android
-   * the extra precision survives composition only when combined with `opaque`.
+   * the extra precision survives composition only when combined with `opaque`,
+   * and both props are read once, when the canvas mounts.
    */
   highBitDepth?: boolean;
 
-  /** Android-only rendering options. Ignored on iOS and web. */
+  /**
+   * Android-only rendering options, read once when the canvas mounts (a later
+   * change is ignored, with a warning in development). Ignored on iOS and web.
+   */
   android?: AndroidCanvasProps;
 
   /** @deprecated Does nothing: on web, every view shares one WebGL context. */

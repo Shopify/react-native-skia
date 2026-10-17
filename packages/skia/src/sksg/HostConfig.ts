@@ -3,7 +3,7 @@ import { createContext } from "react";
 import type { Fiber, HostConfig } from "react-reconciler";
 import { DefaultEventPriority } from "react-reconciler/constants";
 
-import type { NodeType } from "../dom/types";
+import { NodeType } from "../dom/types";
 import { shallowEq } from "../renderer/typeddash";
 
 import type { Node } from "./Node";
@@ -48,6 +48,16 @@ type SkiaHostConfig = HostConfig<
   NoTimeout
 >;
 let currentUpdatePriority: EventPriority = NoEventPriority;
+
+// cloneHiddenInstance returns this for every node a Suspense (or Activity/Offscreen) boundary hides.
+// React never stores it: it only hands it to appendInitialChild and appendChildToContainerChildSet,
+// and both must skip it so a hidden node never enters the scene. Frozen so a copy or mutation
+// cannot turn it into an ordinary empty group that slips past those identity checks.
+const hiddenInstance: Instance = Object.freeze({
+  type: NodeType.Group,
+  props: {},
+  children: [],
+});
 
 export const sksgHostConfig: SkiaHostConfig = {
   /**
@@ -106,7 +116,9 @@ export const sksgHostConfig: SkiaHostConfig = {
   },
 
   appendInitialChild(parentInstance: Instance, child: Instance | TextInstance) {
-    parentInstance.children.push(child);
+    if (child !== hiddenInstance) {
+      parentInstance.children.push(child);
+    }
   },
 
   finalizeInitialChildren(
@@ -197,7 +209,9 @@ export const sksgHostConfig: SkiaHostConfig = {
     childSet: ChildSet,
     child: Instance | TextInstance
   ): void {
-    childSet.push(child);
+    if (child !== hiddenInstance) {
+      childSet.push(child);
+    }
   },
 
   finalizeContainerChildren(container: Container, newChildren: ChildSet) {
@@ -215,7 +229,7 @@ export const sksgHostConfig: SkiaHostConfig = {
     _props: Props
   ): Instance {
     debug("cloneHiddenInstance");
-    throw new Error("Not yet implemented.");
+    return hiddenInstance;
   },
 
   cloneHiddenTextInstance(_instance: Instance, _text: string): TextInstance {
