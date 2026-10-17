@@ -165,7 +165,8 @@ constexpr auto kPlatformBackendType = wgpu::BackendType::Vulkan;
 // Why no adapter was found, for the error raised to JS: every adapter Dawn
 // can see on any backend and at the compatibility feature level, so that the
 // message tells a device without Vulkan apart from one whose driver falls
-// short of the WebGPU core requirements.
+// short of the WebGPU core requirements. On Android it names v2, which renders
+// with OpenGL ES on such devices.
 inline std::string describeMissingAdapter(dawn::native::Instance *instance) {
   std::string message = "React Native Skia renders with ";
   message += backendTypeName(kPlatformBackendType);
@@ -179,17 +180,21 @@ inline std::string describeMissingAdapter(dawn::native::Instance *instance) {
   auto adapters = instance->EnumerateAdapters(&options);
   if (adapters.empty()) {
     message += " No adapter is available on any backend.";
-    return message;
-  }
-  message += " Adapters found:";
-  for (const auto &adapter : adapters) {
-    auto info = describeAdapter(adapter.Get());
-    message += " [" + info.backend + ": " + info.device;
-    if (!info.description.empty()) {
-      message += ", " + info.description;
+  } else {
+    message += " Adapters found:";
+    for (const auto &adapter : adapters) {
+      auto info = describeAdapter(adapter.Get());
+      message += " [" + info.backend + ": " + info.device;
+      if (!info.description.empty()) {
+        message += ", " + info.description;
+      }
+      message += "]";
     }
-    message += "]";
   }
+#ifdef __ANDROID__
+  message += " v2 (react-native-skia@2) renders with OpenGL ES on devices "
+             "without Vulkan.";
+#endif
   return message;
 }
 
