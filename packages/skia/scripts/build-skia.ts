@@ -235,9 +235,9 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
       // Handle platform-target format (android-arm64,
       // apple-ios-arm64-iphonesimulator): the platform is the longest
       // platform name the spec starts with, the rest is the target.
-      const platform = validPlatforms
+      const [platform] = validPlatforms
         .filter((name) => spec.startsWith(`${name}-`))
-        .sort((a, b) => b.length - a.length)[0];
+        .sort((a, b) => b.length - a.length);
       if (!platform) {
         console.error(`❌ Invalid platform or target: ${spec}`);
         console.error(`Valid platforms are: ${validPlatforms.join(", ")}`);
