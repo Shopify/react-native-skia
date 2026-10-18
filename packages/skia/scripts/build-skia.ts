@@ -232,13 +232,18 @@ const buildXCFramework = (platformName: ApplePlatformName) => {
     if (validPlatforms.includes(spec)) {
       buildTargets.push({ platform: spec as PlatformName });
     } else if (spec.includes("-")) {
-      // Handle platform-target format (e.g., android-arm, android-arm64)
-      const [platform, target] = spec.split("-", 2);
-      if (!validPlatforms.includes(platform)) {
+      // Handle platform-target format (android-arm64,
+      // apple-ios-arm64-iphonesimulator): the platform is the longest
+      // platform name the spec starts with, the rest is the target.
+      const platform = validPlatforms
+        .filter((name) => spec.startsWith(`${name}-`))
+        .sort((a, b) => b.length - a.length)[0];
+      if (!platform) {
         console.error(`❌ Invalid platform or target: ${spec}`);
         console.error(`Valid platforms are: ${validPlatforms.join(", ")}`);
         exit(1);
       }
+      const target = spec.slice(platform.length + 1);
 
       const platformConfig = configurations[platform as PlatformName];
       if (!(target in platformConfig.targets)) {
