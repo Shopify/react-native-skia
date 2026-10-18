@@ -16,6 +16,9 @@
 
 namespace RNSkia {
 
+RNSkGraphiteProducer::RNSkGraphiteProducer(ReplayPacing pacing)
+    : _schedule(pacing) {}
+
 RNSkGraphiteProducer::~RNSkGraphiteProducer() = default;
 
 void RNSkGraphiteProducer::drawContent(SkCanvas *canvas, Recorder *recorder,
@@ -39,7 +42,11 @@ void RNSkGraphiteProducer::setTarget(
   {
     std::lock_guard<std::mutex> lock(_mutex);
     retiredTarget = std::exchange(_target, std::move(target));
-    _schedule.retarget();
+    // A target never drops a recording (see produce()): the deferred one goes
+    // to the target it was made for.
+    if (auto deferred = _schedule.retarget()) {
+      retiredTarget->submit(std::move(*deferred));
+    }
     _dirty = true;
     kickLocked();
   }
@@ -119,9 +126,14 @@ bool RNSkGraphiteProducer::requestFrame() {
   return _target != nullptr && (_recorder != nullptr || _picture != nullptr);
 }
 
-void RNSkGraphiteProducer::onFramePresented(size_t presented) {
+void RNSkGraphiteProducer::onRecordingsPresented(
+    const std::vector<std::shared_ptr<RNSkGraphiteRecording>> &recordings) {
   std::lock_guard<std::mutex> lock(_mutex);
-  _schedule.framePresented(presented);
+  for (const auto &recording : recordings) {
+    if (auto deferred = _schedule.recordingPresented(recording)) {
+      _target->submit(std::move(*deferred));
+    }
+  }
   if (_dirty) {
     kickLocked();
   }
@@ -184,8 +196,8 @@ void RNSkGraphiteProducer::produce() {
     if (auto ready = _schedule.finishJob(std::move(recording))) {
       target->submit(std::move(*ready));
     }
-    // Values that arrived during the replay start the next job right away,
-    // while this frame waits for its vsync, as long as there is room.
+    // Values that arrived during the replay start the next job as soon as
+    // the pacing lets it.
     if (_dirty) {
       kickLocked();
     }

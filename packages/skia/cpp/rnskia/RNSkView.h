@@ -50,10 +50,14 @@ namespace jsi = facebook::jsi;
  */
 class RNSkView : public std::enable_shared_from_this<RNSkView> {
 public:
+  /**
+   The platform view chooses when the next replay of declarative content may
+   start (see RNSkReplaySchedule).
+   */
   RNSkView(std::shared_ptr<RNSkPlatformContext> context,
-           std::shared_ptr<RNSkWindowSurface> surface)
+           std::shared_ptr<RNSkWindowSurface> surface, ReplayPacing pacing)
       : _platformContext(std::move(context)), _surface(std::move(surface)),
-        _producer(std::make_shared<RNSkGraphiteProducer>()) {
+        _producer(std::make_shared<RNSkGraphiteProducer>(pacing)) {
     // A new window or a new size: present again. The platform view owns
     // the surface together with this view, and the destructor clears the
     // callback, so a raw capture is safe.
@@ -161,7 +165,7 @@ public:
    replayed either: the redraw stays requested, and onCanPresent() schedules
    it again. A frame the window could not take (no drawable) is queued again
    and handed to the frame scheduler, which tries it on the view's next frame
-   (see setFrameScheduler).
+   (see setFrameScheduler), as is a frame the window holds for the GPU.
    */
   void redraw() {
     RNSkGraphiteTargetInfo targetInfo;
@@ -196,8 +200,8 @@ public:
       }
       recordings.push_back(std::move(lastPresented));
     }
-    if (presentOrKeep(*target, targetInfo, recordings)) {
-      _producer->onFramePresented(recordings.size());
+    if (presentOrKeep(*target, targetInfo, recordings) &&
+        !_surface->hasHeldFrame()) {
       return;
     }
     // Not scheduleFrame(): without a scheduler it redraws, which would fail
@@ -266,13 +270,14 @@ public:
   }
 
   /**
-   Presents the queued recordings (see setFrameScheduler for when). Returns
-   whether more are waiting, so that the platform view asks again: also when
-   the window could not take one (no drawable), so that it is tried again on
-   the next frame rather than left waiting for a redraw. Without a surface the
-   queue is left alone: the surface presents it when it appears. While the
-   window cannot show a frame (the app in the background) the queue is left
-   alone too, and nobody asks again before onCanPresent().
+   Presents the frame the window holds for the GPU once the GPU is done with
+   the one before it, then the queued recordings (see setFrameScheduler for
+   when). Returns whether a frame is still waiting, so that the platform view
+   asks again: also when the window could not take one (no drawable), so that
+   it is tried again on the next frame rather than left waiting for a redraw.
+   Without a surface the queue is left alone: the surface presents it when it
+   appears. While the window cannot show a frame (the app in the background)
+   the queue is left alone too, and nobody asks again before onCanPresent().
    */
   bool presentFrame() {
     auto target = getTarget();
@@ -283,6 +288,13 @@ public:
     if (!_surface->getTargetInfo(&targetInfo) || !_surface->canPresent()) {
       return false;
     }
+    switch (_surface->presentHeldFrame()) {
+    case HeldFrame::kWaiting:
+      return true;
+    case HeldFrame::kNone:
+    case HeldFrame::kPresented:
+      break;
+    }
     auto recordings = target->takeQueued();
     if (recordings.empty()) {
       return false;
@@ -290,27 +302,21 @@ public:
     if (!presentOrKeep(*target, targetInfo, recordings)) {
       return true;
     }
-    _producer->onFramePresented(recordings.size());
-    return target->hasQueued();
+    return hasFrameToShow();
   }
 
   /**
    Main thread. The window can show frames again (the app came back to the
    foreground, see RNSkWindowSurface::setCanPresent): a redraw it could not
-   show is scheduled again, else the recordings queued meanwhile are handed
-   to the frame scheduler. Nothing is replayed on the spot.
+   show is scheduled again, else the frames waiting meanwhile are handed to
+   the frame scheduler. Nothing is replayed on the spot.
    */
   void onCanPresent() {
     if (_redrawRequested) {
       postRedraw();
-    } else if (hasQueuedRecordings()) {
+    } else if (hasFrameToShow()) {
       scheduleFrame();
     }
-  }
-
-  bool hasQueuedRecordings() {
-    auto target = getTarget();
-    return target && target->hasQueued();
   }
 
   std::shared_ptr<RNSkPlatformContext> getPlatformContext() {
@@ -321,6 +327,15 @@ private:
   std::shared_ptr<RNSkGraphiteTarget> getTarget() {
     std::lock_guard<std::mutex> lock(_mutex);
     return _target;
+  }
+
+  /**
+   Whether a frame waits to be shown: queued on the target, or held by the
+   window for the GPU. Main thread.
+   */
+  bool hasFrameToShow() {
+    auto target = getTarget();
+    return (target && target->hasQueued()) || _surface->hasHeldFrame();
   }
 
   /** The frame on screen, or the one about to be, if any. Any thread. */
@@ -364,9 +379,10 @@ private:
   }
 
   /**
-   Presents the recordings onto the window and remembers the last one shown.
-   Returns whether all of them went through; the one the window could not
-   take and the ones behind it go back to the front of the target's queue.
+   Presents the recordings onto the window, remembers the last one shown and
+   tells the producer which ones are done. Returns whether all of them went
+   through; the one the window could not take and the ones behind it go back
+   to the front of the target's queue.
    */
   bool presentOrKeep(
       RNSkGraphiteTarget &target, const RNSkGraphiteTargetInfo &targetInfo,
@@ -374,7 +390,13 @@ private:
     const size_t done =
         present(*_surface, targetInfo, recordings, /* remember= */ true);
     if (done == recordings.size()) {
+      _producer->onRecordingsPresented(recordings);
       return true;
+    }
+    if (done > 0) {
+      _producer->onRecordingsPresented(
+          std::vector<std::shared_ptr<RNSkGraphiteRecording>>(
+              recordings.begin(), recordings.begin() + done));
     }
     target.requeue(std::vector<std::shared_ptr<RNSkGraphiteRecording>>(
         recordings.begin() + done, recordings.end()));

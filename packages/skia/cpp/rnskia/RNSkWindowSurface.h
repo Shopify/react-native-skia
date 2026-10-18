@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "RNSkGraphiteTargetInfo.h"
+#include "RNSkPresentHold.h"
 #include "RNSkSurface.h"
 
 #include "webgpu/webgpu_cpp.h"
@@ -42,7 +43,12 @@ public:
    */
   using Releaser = std::function<void(void *nativeHandle)>;
 
-  RNSkWindowSurface() = default;
+  /**
+   The platform view chooses whether the window holds a frame's present for
+   the GPU (see RNSkPresentHold).
+   */
+  explicit RNSkWindowSurface(PresentHold presentHold)
+      : _presentHold(presentHold, DawnQueue()) {}
 
   ~RNSkWindowSurface() override;
 
@@ -137,6 +143,18 @@ public:
     _didPresent = std::move(didPresent);
   }
 
+  /**
+   Presents the frame the window holds for the GPU once the GPU has finished
+   the frame presented before it, without waiting for the GPU. Main thread.
+   */
+  HeldFrame presentHeldFrame();
+
+  /**
+   Whether the window holds a frame for the GPU: it takes no other frame
+   meanwhile. Main thread.
+   */
+  bool hasHeldFrame() const { return _presentHold.hasHeldFrame(); }
+
   // RNSkSurface -------------------------------------------------------------
 
   /** Width of the window, in pixels; 0 without a window. Any thread. */
@@ -177,6 +195,17 @@ private:
       _didPresent();
     }
   }
+  // Whether the window takes a frame now: it can present, and holds none.
+  bool takesFrame() { return canPresent() && !_presentHold.hasHeldFrame(); }
+  // Presents the frame replayed last.
+  void presentNow();
+
+  // The GPU as RNSkPresentHold asks about it: the work given to Dawn's queue.
+  struct DawnQueue {
+    using Work = wgpu::Future;
+    Work track();
+    bool isDone(const Work &work);
+  };
 
   wgpu::Device _device;
   wgpu::Surface _surface;
@@ -207,6 +236,8 @@ private:
   std::function<void()> _requestRedraw;
   std::function<bool()> _canPresent;
   std::function<void()> _didPresent;
+  // Main thread.
+  RNSkPresentHold<DawnQueue> _presentHold;
 };
 
 } // namespace RNSkia

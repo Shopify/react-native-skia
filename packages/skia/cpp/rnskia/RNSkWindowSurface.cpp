@@ -79,6 +79,7 @@ void RNSkWindowSurface::resize(int width, int height) {
 }
 
 void RNSkWindowSurface::detach() {
+  _presentHold.dropFrames();
   // The surface goes before the window it draws into.
   _surface = nullptr;
   _recorder = nullptr;
@@ -166,6 +167,7 @@ skgpu::graphite::TextureInfo RNSkWindowSurface::getTextureInfo() const {
 }
 
 void RNSkWindowSurface::configureSurface() {
+  _presentHold.dropFrames();
   wgpu::SurfaceConfiguration config;
   config.device = _device;
   config.format = _format;
@@ -226,7 +228,7 @@ bool RNSkWindowSurface::canPresent() {
 
 bool RNSkWindowSurface::presentRecordings(
     const std::vector<skgpu::graphite::Recording *> &recordings) {
-  if (!canPresent()) {
+  if (!takesFrame()) {
     return false;
   }
   wgpu::SurfaceTexture surfaceTexture;
@@ -251,13 +253,12 @@ bool RNSkWindowSurface::presentRecordings(
 #ifdef __APPLE__
   dawn::native::metal::WaitForCommandsToBeScheduled(_device.Get());
 #endif
-  _surface.Present();
-  didPresent();
+  _presentHold.presentOrHold([this]() { presentNow(); });
   return true;
 }
 
 bool RNSkWindowSurface::presentImage(const sk_sp<SkImage> &image) {
-  if (!canPresent()) {
+  if (!takesFrame()) {
     return false;
   }
   wgpu::SurfaceTexture surfaceTexture;
@@ -283,9 +284,25 @@ bool RNSkWindowSurface::presentImage(const sk_sp<SkImage> &image) {
 #ifdef __APPLE__
   dawn::native::metal::WaitForCommandsToBeScheduled(_device.Get());
 #endif
+  _presentHold.presentOrHold([this]() { presentNow(); });
+  return true;
+}
+
+HeldFrame RNSkWindowSurface::presentHeldFrame() {
+  return _presentHold.presentHeldFrame([this]() { presentNow(); });
+}
+
+void RNSkWindowSurface::presentNow() {
   _surface.Present();
   didPresent();
-  return true;
+}
+
+RNSkWindowSurface::DawnQueue::Work RNSkWindowSurface::DawnQueue::track() {
+  return DawnContext::getInstance().trackSubmittedWork();
+}
+
+bool RNSkWindowSurface::DawnQueue::isDone(const Work &work) {
+  return DawnContext::getInstance().isWorkDone(work);
 }
 
 } // namespace RNSkia

@@ -17,6 +17,7 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(
   cpp-tests
+  RNSkPresentHoldTest.cpp
   RNSkReplayScheduleTest.cpp
 )
 target_include_directories(

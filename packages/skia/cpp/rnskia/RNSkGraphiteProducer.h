@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <mutex>
+#include <vector>
 
 #include <jsi/jsi.h>
 
@@ -36,13 +37,14 @@ class RNSkGraphiteTarget;
  * Pacing: when a job may start and where its recording goes is the
  * RNSkReplaySchedule's. Updates that arrive meanwhile only mark the content
  * dirty; the next job (started by the update, by the end of the job before,
- * or by a presented frame) picks them up. A producer that outruns the display
- * therefore records once per vsync, and the queue of the target never grows.
+ * or by a presented recording) picks them up. A producer that outruns the
+ * display therefore records once per vsync, and the target never holds more
+ * than one of its recordings.
  */
 class RNSkGraphiteProducer
     : public std::enable_shared_from_this<RNSkGraphiteProducer> {
 public:
-  RNSkGraphiteProducer() = default;
+  explicit RNSkGraphiteProducer(ReplayPacing pacing);
   ~RNSkGraphiteProducer();
 
   /**
@@ -91,10 +93,11 @@ public:
   bool requestFrame();
 
   /**
-   The view presented `presented` recordings (every one it had taken from the
-   queue): as many slots free up for the next jobs.
+   The view is done with these recordings, taken off its target: presented,
+   or skipped as ones it cannot replay. Main thread.
    */
-  void onFramePresented(size_t presented);
+  void onRecordingsPresented(
+      const std::vector<std::shared_ptr<RNSkGraphiteRecording>> &recordings);
 
   /**
    Replays the current content into a canvas, on the calling thread (a

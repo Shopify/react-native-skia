@@ -144,7 +144,15 @@ private:
                        jni::alias_ref<JniSkiaManager::javaobject> skiaManager)
       : _manager(skiaManager->cthis()->getSkiaManager()) {
     auto context = skiaManager->cthis()->getPlatformContext();
-    _surface = std::make_shared<RNSkWindowSurface>();
+    // Before Android 12 SurfaceFlinger gives a SurfaceView's buffer back only
+    // after compositing the next frame, so a pipelined present that misses
+    // the latch keeps every later frame waiting for one.
+    const bool pipelined = android_get_device_api_level() >= __ANDROID_API_S__;
+    // A window's present waits, on the main thread that presents, until the
+    // GPU has finished the frame presented before it; pipelined, a frame is
+    // often replayed that early, so its present is held instead.
+    _surface = std::make_shared<RNSkWindowSurface>(
+        pipelined ? PresentHold::kUntilPreviousFrameDone : PresentHold::kNone);
     // A TextureView takes a frame only when its window draws, on the main
     // thread that also presents. A present before that draw replaces the
     // frame still queued, and on Android 11 waits up to 4.29 s for a buffer
@@ -162,7 +170,9 @@ private:
     _surface->setCanPresent([framePendingLatch = _framePendingLatch]() {
       return !framePendingLatch->load();
     });
-    _view = std::make_shared<RNSkView>(context, _surface);
+    _view = std::make_shared<RNSkView>(context, _surface,
+                                       pipelined ? ReplayPacing::kPipelined
+                                                 : ReplayPacing::kAfterPresent);
     // A submitted recording arms the Java view's frame callback. Weak: the
     // Java view owns this object through its hybrid data.
     jni::weak_ref<jhybridobject> weakJava = jni::make_weak(jThis);
