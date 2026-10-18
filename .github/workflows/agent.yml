@@ -236,7 +236,7 @@ jobs:
       METRO_PORT: 8081
       ANDROID_AVD: skia-agent
       ANDROID_SYSTEM_IMAGE: system-images;android-35;default;x86_64
-      ANDROID_PACKAGE: com.microsoft.reacttestapp
+      ANDROID_PACKAGE: com.reactnativeskia.example
       AGENT_OUTPUT: ${{ github.workspace }}/agent-output
     steps:
       # The pull request's head when a number is given. The build then runs
@@ -402,7 +402,9 @@ jobs:
           ok=0; for i in 1 2 3 4 5; do adb wait-for-device install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk && ok=1 && break; echo "adb install failed (attempt $i)"; sleep 5; done; [ "$ok" = 1 ]
           curl -sf --max-time 900 -o /dev/null \
             "http://localhost:$METRO_PORT/index.bundle?platform=android&dev=true&lazy=true&minify=false"
-          adb shell am start -W -n "$ANDROID_PACKAGE/.MainActivity"
+          # The activity keeps react-native-test-app's own package name: the
+          # application id is the example's, the Java namespace is not.
+          adb shell am start -W -n "$ANDROID_PACKAGE/com.microsoft.reacttestapp.MainActivity"
           sleep 20
           adb exec-out screencap -p > "$AGENT_OUTPUT/launch.png"
 
