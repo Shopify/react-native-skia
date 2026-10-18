@@ -1,12 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  Canvas,
-  Group,
-  makeImageFromView,
-  Skia,
-  useCanvasRef,
-} from "react-native-skia";
-import type { RefObject } from "react";
+import { Canvas, Group, Skia, useCanvasRef } from "react-native-skia";
+import { importDevice } from "react-native-webgpu";
 import React, { useEffect, useRef, useState } from "react";
 import { PixelRatio, Text, View } from "react-native";
 
@@ -14,6 +8,7 @@ import type { SerializedNode } from "./deserialize";
 import { parseNode, parseProps } from "./deserialize";
 import { Screens } from "./Screens";
 import { useClient } from "./useClient";
+import { workletSerialization } from "./workletSerialization";
 
 export const CI = process.env.CI === "true";
 const s = 3;
@@ -29,6 +24,41 @@ const errorEnvelope = (error: unknown) =>
   JSON.stringify({
     $$error: error instanceof Error ? error.message : String(error),
   });
+
+// The encoded pixels of a native view: React Native WebGPU rasterizes the view
+// into a texture of the shared device, and Skia wraps that texture. This is
+// the one way to snapshot a view with Skia v3 (see docs/webgpu#view-snapshots).
+let sharedDevice: GPUDevice | null = null;
+const encodeView = async (view: React.RefObject<View | null>) => {
+  if (sharedDevice === null) {
+    sharedDevice = importDevice(Skia.getNativeDevice());
+  }
+  const device = sharedDevice;
+  const pixels = Math.round(size * PixelRatio.get());
+  const texture = device.createTexture({
+    size: [pixels, pixels],
+    format: "rgba8unorm",
+    usage:
+      GPUTextureUsage.COPY_DST |
+      GPUTextureUsage.RENDER_ATTACHMENT |
+      GPUTextureUsage.TEXTURE_BINDING,
+  });
+  try {
+    // Skia wraps textures as premultiplied images.
+    await device.queue.drawElementImageToTexture(
+      { source: view },
+      { texture, premultipliedAlpha: true }
+    );
+    const image = Skia.Image.MakeImageFromGPUTexture(texture);
+    try {
+      return image.encodeToBytes();
+    } finally {
+      image.dispose();
+    }
+  } finally {
+    texture.destroy();
+  }
+};
 
 interface TestsProps {
   assets: { [key: string]: any };
@@ -56,7 +86,9 @@ export const Tests = ({ assets }: TestsProps) => {
                 })`
             ).call({
               Skia,
-              ctx: parseProps(tree.ctx, assets),
+              // The worklet serializer spec needs app-side worklets (see
+              // workletSerialization.ts); hand them over through the context.
+              ctx: { ...parseProps(tree.ctx, assets), workletSerialization },
               size: size * PixelRatio.get(),
               scale: s,
             });
@@ -122,11 +154,7 @@ export const Tests = ({ assets }: TestsProps) => {
     if (screen && client) {
       const it = setTimeout(async () => {
         try {
-          const image = await makeImageFromView(viewRef as RefObject<View>);
-          if (image && client) {
-            const data = image.encodeToBytes();
-            client.send(data);
-          }
+          client.send(await encodeView(viewRef));
         } catch (e) {
           console.error(e);
           client.send(errorEnvelope(e));

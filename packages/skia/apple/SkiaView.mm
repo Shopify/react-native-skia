@@ -24,10 +24,13 @@
 
 using namespace facebook::react;
 
-// Whether rendering must be skipped: drawing while the app is in the
-// background can clear the CAMetalLayer, leaving the canvas empty when the app
-// comes back (https://github.com/Shopify/react-native-skia/issues/1257). The
-// application state is main-thread only, so this is answered there only.
+// Whether the window can show a frame: not while the app is in the background
+// (hidden on macOS), where GPU work is refused and can leave the canvas empty
+// when the app comes back
+// (https://github.com/Shopify/react-native-skia/issues/1257). Read once when
+// the view is created; the application's notifications keep it up to date
+// from then on (see appDidEnterBackground:). The application state is
+// main-thread only, so this is answered there only.
 static bool appIsBackgrounded() {
 #if !TARGET_OS_OSX
   auto state = UIApplication.sharedApplication.applicationState;
@@ -50,8 +53,12 @@ static bool appIsBackgrounded() {
   RNSkia::RNSkManager *_manager;
   size_t _nativeId;
   bool _highBitDepth;
+  // Whether the window can show a frame (see appIsBackgrounded). Main thread.
+  bool _canPresent;
 #if !TARGET_OS_OSX
   CADisplayLink *_displayLink;
+#else
+  bool _presentAgainScheduled;
 #endif
 }
 
@@ -60,8 +67,32 @@ static bool appIsBackgrounded() {
     _manager = [RNSkiaModule latestActiveSkManager].get();
     _nativeId = 0;
     _highBitDepth = false;
+    _canPresent = !appIsBackgrounded();
+#if TARGET_OS_OSX
+    _presentAgainScheduled = false;
+#endif
     static const auto defaultProps = std::make_shared<const SkiaViewProps>();
     _props = defaultProps;
+    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+#if !TARGET_OS_OSX
+    [center addObserver:self
+               selector:@selector(appDidEnterBackground:)
+                   name:UIApplicationDidEnterBackgroundNotification
+                 object:nil];
+    [center addObserver:self
+               selector:@selector(appWillEnterForeground:)
+                   name:UIApplicationWillEnterForegroundNotification
+                 object:nil];
+#else
+    [center addObserver:self
+               selector:@selector(appDidEnterBackground:)
+                   name:NSApplicationDidHideNotification
+                 object:nil];
+    [center addObserver:self
+               selector:@selector(appWillEnterForeground:)
+                   name:NSApplicationDidUnhideNotification
+                 object:nil];
+#endif
   }
   return self;
 }
@@ -87,17 +118,21 @@ static bool appIsBackgrounded() {
   _layer = [CAMetalLayer layer];
 #pragma clang diagnostic pop
   _surface = std::make_shared<RNSkia::RNSkWindowSurface>();
+  _surface->setHighBitDepth(_highBitDepth);
   // The window belongs to the main thread, and is left alone while the app
-  // is in the background (the frame is requeued and presented on return).
-  _surface->setCanPresent([]() {
-    return [[NSThread currentThread] isMainThread] && !appIsBackgrounded();
+  // is in the background: what the view holds is presented on its next frame
+  // once the app is back (see appWillEnterForeground:).
+  __weak SkiaView *weakSelf = self;
+  _surface->setCanPresent([weakSelf]() {
+    SkiaView *strongSelf = weakSelf;
+    return strongSelf != nil && [[NSThread currentThread] isMainThread] &&
+           strongSelf->_canPresent;
   });
   _view = std::make_shared<RNSkia::RNSkView>(context, _surface);
   [self.layer addSublayer:_layer];
   if (_nativeId != 0) {
     _manager->setSkiaView(_nativeId, _view);
   }
-  __weak SkiaView *weakSelf = self;
   _view->setFrameScheduler([weakSelf]() { [weakSelf scheduleFrame]; });
 }
 
@@ -116,6 +151,7 @@ static bool appIsBackgrounded() {
 }
 
 - (void)dealloc {
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
   [self stopDisplayLink];
   [self unregisterView];
 }
@@ -142,12 +178,28 @@ static bool appIsBackgrounded() {
   }
 }
 
+#pragma mark - Application state
+
+// The app went to the background (was hidden on macOS): frames wait there.
+- (void)appDidEnterBackground:(NSNotification *)notification {
+  _canPresent = false;
+}
+
+// The app is coming back: what waited is presented on the view's next frame.
+- (void)appWillEnterForeground:(NSNotification *)notification {
+  _canPresent = true;
+  if (_view != nullptr) {
+    _view->onCanPresent();
+  }
+}
+
 #pragma mark - Frames
 
 // Presents on the display link: armed when a recording is submitted, paused
 // again once the queue is empty. macOS has no CADisplayLink on the minimum
 // deployment target, so frames are presented as soon as the main thread gets
-// to them there.
+// to them there, and tried again a frame later while some are left (more were
+// submitted meanwhile, or the window could not take one).
 - (void)scheduleFrame {
 #if !TARGET_OS_OSX
   if (_displayLink == nil) {
@@ -158,8 +210,8 @@ static bool appIsBackgrounded() {
   }
   _displayLink.paused = NO;
 #else
-  if (_view != nullptr) {
-    _view->presentFrame();
+  if (_view != nullptr && _view->presentFrame()) {
+    [self presentAgainLater];
   }
 #endif
 }
@@ -169,6 +221,23 @@ static bool appIsBackgrounded() {
   if (_view == nullptr || !_view->presentFrame()) {
     link.paused = YES;
   }
+}
+#else
+- (void)presentAgainLater {
+  if (_presentAgainScheduled) {
+    return;
+  }
+  _presentAgainScheduled = true;
+  __weak SkiaView *weakSelf = self;
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC / 60),
+                 dispatch_get_main_queue(), ^{
+                   SkiaView *strongSelf = weakSelf;
+                   if (strongSelf == nil) {
+                     return;
+                   }
+                   strongSelf->_presentAgainScheduled = false;
+                   [strongSelf scheduleFrame];
+                 });
 }
 #endif
 
@@ -213,6 +282,11 @@ static bool appIsBackgrounded() {
   int w = static_cast<int>(std::lround(_layer.frame.size.width * pd));
   int h = static_cast<int>(std::lround(_layer.frame.size.height * pd));
   _surface->setLayoutSize(w, h);
+  if (w == 0 || h == 0) {
+    // Dawn refuses an empty surface: without one the frames wait for a size.
+    _surface->detach();
+    return;
+  }
   // The layer is owned by the view: nothing to release with the window.
   _surface->attach((__bridge void *)_layer, w, h, _highBitDepth,
                    context->prefersP3ColorSpace(), nullptr);
@@ -232,8 +306,8 @@ static bool appIsBackgrounded() {
       [[RCTConvert NSString:RCTNSStringFromString(newProps.nativeId)] intValue];
   [self bindNativeId:nativeId];
   [self setHighBitDepth:newProps.highBitDepth];
-  // opaque, androidSurfaceType and androidZOrderOnTop select the backing view
-  // on Android; a CAMetalLayer composites like any other layer.
+  // The android* props (backing view, opacity, z-order) select and set up the
+  // backing view on Android; a CAMetalLayer composites like any other layer.
 }
 
 // Not setNativeId:, which is the setter of RCTViewComponentView's nativeId
@@ -250,7 +324,13 @@ static bool appIsBackgrounded() {
     return;
   }
   _highBitDepth = highBitDepth;
-  if (_surface != nullptr && _surface->isAttached()) {
+  if (_surface == nullptr) {
+    return;
+  }
+  // The layer is re-attached with the new format; until then (or without a
+  // size), frames are recorded for it.
+  _surface->setHighBitDepth(highBitDepth);
+  if (_surface->isAttached()) {
     [self attachSurface];
   }
 }

@@ -94,7 +94,7 @@ export const useGpuImage = () =>
     const image = surface.makeImageSnapshot();
     // On the web a texture belongs to the WebGL context that made it; the
     // views have their own, so they need a CPU copy.
-    return Platform.OS === "web" ? image.makeNonTextureImage() : image;
+    return Platform.OS === "web" ? image.makeRasterImageSync() : image;
   }, []);
 
 const JSThreadView = ({ image }: { image: SkImage | null }) => {
@@ -112,7 +112,13 @@ const JSThreadView = ({ image }: { image: SkImage | null }) => {
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
   }, [image]);
-  return <SkiaGraphiteView ref={ref} style={styles.view} opaque />;
+  return (
+    <SkiaGraphiteView
+      ref={ref}
+      style={styles.view}
+      android={{ backingView: "SurfaceView" }}
+    />
+  );
 };
 
 const UIRuntimeView = ({ image }: { image: SkImage | null }) => {
@@ -129,7 +135,13 @@ const UIRuntimeView = ({ image }: { image: SkImage | null }) => {
       drawFrame(ctx.value, image, frame.timestamp / 1000);
     }
   });
-  return <SkiaGraphiteView ref={ref} style={styles.view} opaque />;
+  return (
+    <SkiaGraphiteView
+      ref={ref}
+      style={styles.view}
+      android={{ backingView: "SurfaceView" }}
+    />
+  );
 };
 
 export const Graphite = () => {

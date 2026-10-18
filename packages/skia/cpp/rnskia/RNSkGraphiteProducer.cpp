@@ -41,7 +41,7 @@ void RNSkGraphiteProducer::setTarget(
     retiredTarget = std::exchange(_target, std::move(target));
     // A frame still queued on the previous target is not coming through this
     // view anymore (the view unbound itself from it): do not wait for it.
-    _presentPending = false;
+    _queued = 0;
     _dirty = true;
     kickLocked();
   }
@@ -121,16 +121,18 @@ bool RNSkGraphiteProducer::requestFrame() {
   return _target != nullptr && (_recorder != nullptr || _picture != nullptr);
 }
 
-void RNSkGraphiteProducer::onFramePresented() {
+void RNSkGraphiteProducer::onFramePresented(size_t presented) {
   std::lock_guard<std::mutex> lock(_mutex);
-  _presentPending = false;
+  // The view may present recordings that are not this producer's (a client
+  // recording, the last frame shown again), hence the clamp.
+  _queued = presented >= _queued ? 0 : _queued - presented;
   if (_dirty) {
     kickLocked();
   }
 }
 
 void RNSkGraphiteProducer::kickLocked() {
-  if (_inFlight || _presentPending || _target == nullptr ||
+  if (_inFlight || _queued >= kMaxQueued || _target == nullptr ||
       (_recorder == nullptr && _picture == nullptr)) {
     return;
   }
@@ -189,8 +191,12 @@ void RNSkGraphiteProducer::produce() {
     // would otherwise clear the flag before the recording is even queued.
     target->submit(std::move(recording));
     if (target == _target) {
-      // The next job starts when this frame is on screen.
-      _presentPending = true;
+      _queued++;
+      // Values that arrived during the replay start the next job right away,
+      // while this frame waits for its vsync, as long as there is room.
+      if (_dirty) {
+        kickLocked();
+      }
       return;
     }
     // The frame went to the previous target; the new one has none yet.

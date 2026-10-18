@@ -51,10 +51,6 @@ export const examples = [
     title: "🖱 Touch Handling",
   },
   {
-    screen: "Snapshot",
-    title: "📺 View Snapshot",
-  },
-  {
     screen: "PathEffect",
     title: "⭐️ Path Effect",
   },
@@ -123,8 +119,8 @@ export const examples = [
     title: "🎛️ OnLayout",
   },
   {
-    screen: "OnSize",
-    title: "📏 OnSize",
+    screen: "CanvasSize",
+    title: "📏 Canvas Size",
   },
   {
     screen: "StressTest",
@@ -180,8 +176,7 @@ const styles = StyleSheet.create({
 });
 
 export const List = () => {
-  const { navigate } =
-    useNavigation<NativeStackNavigationProp<Routes, "List">>();
+  const navigation = useNavigation<NativeStackNavigationProp<Routes, "List">>();
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {examples.map((thumbnail) => (
@@ -190,7 +185,7 @@ export const List = () => {
           onPress={() => {
             // here the examples tuple is too big
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            navigate(thumbnail.screen as any);
+            navigation.navigate(thumbnail.screen as any);
           }}
           testID={thumbnail.screen}
         >

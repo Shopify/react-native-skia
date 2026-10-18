@@ -16,7 +16,6 @@ export const apiScreenPaths: Record<keyof Routes, string> = {
   GlyphBounds: "glyph-bounds",
   Clipping: "clipping",
   Touch: "touch",
-  Snapshot: "snapshot",
   PathEffect: "path-effect",
   IconsExample: "icons",
   Transform: "transform",
@@ -34,7 +33,7 @@ export const apiScreenPaths: Record<keyof Routes, string> = {
   Checker: "checker",
   UseCanvas: "use-canvas",
   OnLayout: "on-layout",
-  OnSize: "on-size",
+  CanvasSize: "canvas-size",
   StressTest: "stress-test",
   StressTest2: "stress-test2",
   StressTest3: "stress-test3",
@@ -49,4 +48,5 @@ export const apiScreenPaths: Record<keyof Routes, string> = {
   WebGLContexts: "webgl-contexts",
   WebGLLifecycle: "webgl-lifecycle",
   WebMemory: "web-memory",
+  WebOffscreen: "web-offscreen",
 };

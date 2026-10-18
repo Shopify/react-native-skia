@@ -30,9 +30,9 @@
     "react-dom": "19.0.0",
     "react-native": "0.83.1",
     "react-native-gesture-handler": "^2.24.0",
-    "react-native-reanimated": "4.3.1",
+    "react-native-reanimated": "4.6.0",
     "react-native-skia": "workspace:*",
-    "react-native-worklets": "0.8.3",
+    "react-native-worklets": "0.12.2",
     "url-loader": "^4.1.1"
   },
   "devDependencies": {
@@ -41,7 +41,7 @@
     "@types/minimist": "^1.2.5",
     "@types/node": "^22.13.9",
     "eslint": "9.36.0",
-    "eslint-config-react-native-wcandillon": "5.0.0",
+    "eslint-config-react-native-wcandillon": "5.0.1",
     "minimist": "^1.2.8",
     "ts-morph": "^25.0.1",
     "ts-node": "^10.9.2",

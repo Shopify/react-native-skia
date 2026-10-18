@@ -123,7 +123,8 @@ public:
 
   /**
    The layout size (points) and the props the format follows from, as known
-   to JS. Used until the view has a surface of its own.
+   to JS. Used until the platform view knows better: the pixel size it was
+   laid out with, and the bit depth of its surface (see resolveTargetInfo).
    */
   void setLayout(float width, float height, bool opaque, bool highBitDepth) {
     std::lock_guard<std::mutex> lock(_stateMutex);
@@ -202,12 +203,21 @@ public:
 
   /**
    Queues a recording for the next frame. Recordings are never dropped: a
-   later frame may depend on resources an earlier one uploaded.
+   later frame may depend on resources an earlier one uploaded. This holds
+   before the view exists too, as the registry owns the target until the
+   view is gone (see RNSkGraphiteTargetRegistry). The one exception is a
+   lost GPU device: nothing presents ever again (RNSkWindowSurface), and a
+   client recording on every frame regardless would grow the queue without
+   bound, so the recordings are dropped instead.
    */
   void submit(std::shared_ptr<RNSkGraphiteRecording> recording) {
     std::function<void()> requestFrame;
     {
       std::lock_guard<std::mutex> lock(_queueMutex);
+      if (DawnContext::isDeviceLost()) {
+        _queue.clear();
+        return;
+      }
       _queue.push_back(std::move(recording));
       requestFrame = _requestFrame;
     }
@@ -285,8 +295,9 @@ private:
    The target to record against: the view's surface when it has one, else
    the pixel size the platform laid the view out with, else the layout size
    JS measured; in the last two cases with the format and the color space
-   the surface will be created with, following the same rules (see
-   RNSkWindowSurface and SkiaView.java).
+   the surface has, or will have: the bit depth the platform view knows
+   (the one of its backing view, which keeps it, see SkiaView.java), else
+   the one the props call for, following the same rules.
    */
   RNSkGraphiteTargetInfo resolveTargetInfo() {
     std::shared_ptr<RNSkWindowSurface> surface;
@@ -315,6 +326,13 @@ private:
 #else
     (void)opaque;
 #endif
+    if (surface) {
+      // The window keeps the bit depth it was attached with, whatever the
+      // props say later (on Android they are read at mount): a frame
+      // recorded while it is away is recorded for the one it comes back
+      // with.
+      surface->getHighBitDepth(&highBitDepth);
+    }
     if (!surface || !surface->getLayoutSize(&info.width, &info.height)) {
       // Not laid out yet (JS gets its onLayout before the platform lays the
       // view out): the size JS measured, in points. The layout is on the
@@ -356,8 +374,16 @@ private:
 };
 
 /**
- * Targets by native view id. Entries are weak: a target lives as long as the
- * view or a JS context object holds it.
+ * Targets by native view id. The registry owns every target. An entry is
+ * made by whichever side comes first, the context JS makes for the id or the
+ * view binding to it, and kept until the platform view of the id is
+ * unregistered or, for an id no view ever bound to, until JS retires it. A
+ * retired entry lets go of its target without forgetting it: for as long as
+ * a context JS made holds the target, whoever comes for the id next, the view
+ * binding to it or another context, takes it over (see removeIfUnbound). A
+ * reload clears the registry, as native ids start over with the next bundle
+ * (see ~RNSkManager). The same ownership as the SurfaceRegistry of
+ * react-native-webgpu.
  */
 class RNSkGraphiteTargetRegistry {
 public:
@@ -370,28 +396,122 @@ public:
   RNSkGraphiteTargetRegistry &
   operator=(const RNSkGraphiteTargetRegistry &) = delete;
 
+  /** The target of the id, for the context JS makes; made when missing. */
   std::shared_ptr<RNSkGraphiteTarget>
   getOrCreate(size_t nativeId,
               const std::shared_ptr<RNSkPlatformContext> &context) {
     std::lock_guard<std::mutex> lock(_mutex);
-    auto it = _targets.find(nativeId);
-    if (it != _targets.end()) {
-      if (auto target = it->second.lock()) {
-        return target;
+    auto &entry = getOrCreateLocked(nativeId, context);
+    return entry.target;
+  }
+
+  /**
+   The target of the id, for the view binding to it; made when missing. From
+   here on the entry is the view's: its unregistration retires it, not JS
+   (see removeIfUnbound). Made and marked under one lock, so that a removal
+   racing with the bind either finds the entry bound or runs before it is
+   made again.
+   */
+  std::shared_ptr<RNSkGraphiteTarget>
+  bind(size_t nativeId, const std::shared_ptr<RNSkPlatformContext> &context) {
+    std::lock_guard<std::mutex> lock(_mutex);
+    auto &entry = getOrCreateLocked(nativeId, context);
+    entry.bound = true;
+    return entry.target;
+  }
+
+  /** Retires the entry of a platform view that is gone. */
+  void remove(size_t nativeId) {
+    std::shared_ptr<RNSkGraphiteTarget> target;
+    {
+      std::lock_guard<std::mutex> lock(_mutex);
+      auto it = _entries.find(nativeId);
+      if (it == _entries.end()) {
+        return;
+      }
+      target = std::move(it->second.target);
+      _entries.erase(it);
+    }
+    // The target, and the GPU resources of its queue, may be destroyed here,
+    // outside of the lock.
+  }
+
+  /**
+   Retires the entry from the JS side, when the view component unmounts,
+   unless a view bound to it: that entry is the view's, and its teardown
+   retires it. React's StrictMode simulates an unmount without unmounting
+   the native views, which would otherwise orphan a bound view. It runs that
+   cleanup right after mount, before the native view registered when the UI
+   thread lags, and the context the first effect run made stays in use. So
+   the target is let go of, not forgotten: for as long as a context holds
+   it, the view binding to the id takes it over (see getOrCreateLocked).
+   */
+  void removeIfUnbound(size_t nativeId) {
+    std::shared_ptr<RNSkGraphiteTarget> target;
+    {
+      std::lock_guard<std::mutex> lock(_mutex);
+      auto it = _entries.find(nativeId);
+      if (it != _entries.end() && !it->second.bound && it->second.target) {
+        target = std::move(it->second.target);
+        if (target.use_count() == 1) {
+          // No context holds it: nothing is left to take over.
+          _entries.erase(it);
+        } else {
+          it->second.retired = target;
+        }
+      }
+      // The entries retired earlier whose context is gone by now.
+      for (auto entry = _entries.begin(); entry != _entries.end();) {
+        entry = entry->second.isExpired() ? _entries.erase(entry) : ++entry;
       }
     }
-    for (auto entry = _targets.begin(); entry != _targets.end();) {
-      entry = entry->second.expired() ? _targets.erase(entry) : ++entry;
+    // The target, and the GPU resources of its queue, may be destroyed here,
+    // outside of the lock, when no context holds it.
+  }
+
+  /** Drops every entry: the bundle is going away (see ~RNSkManager). */
+  void clear() {
+    std::unordered_map<size_t, Entry> entries;
+    {
+      std::lock_guard<std::mutex> lock(_mutex);
+      entries.swap(_entries);
     }
-    auto target = std::make_shared<RNSkGraphiteTarget>(context);
-    _targets[nativeId] = target;
-    return target;
   }
 
 private:
+  struct Entry {
+    /** The target, owned until JS retires the entry. */
+    std::shared_ptr<RNSkGraphiteTarget> target;
+    /**
+     The target of a retired entry, for as long as a context JS made holds
+     it, for whoever comes for the id next (see getOrCreateLocked).
+     */
+    std::weak_ptr<RNSkGraphiteTarget> retired;
+    bool bound = false;
+    /** Retired, and its context gone: nothing left to take over. */
+    bool isExpired() const { return !target && retired.expired(); }
+  };
+
   RNSkGraphiteTargetRegistry() = default;
+
+  Entry &
+  getOrCreateLocked(size_t nativeId,
+                    const std::shared_ptr<RNSkPlatformContext> &context) {
+    auto &entry = _entries[nativeId];
+    if (!entry.target) {
+      // A new id, or one JS retired: the target a context still holds, when
+      // there is one, is owned again from here on.
+      entry.target = entry.retired.lock();
+      entry.retired.reset();
+      if (!entry.target) {
+        entry.target = std::make_shared<RNSkGraphiteTarget>(context);
+      }
+    }
+    return entry;
+  }
+
   std::mutex _mutex;
-  std::unordered_map<size_t, std::weak_ptr<RNSkGraphiteTarget>> _targets;
+  std::unordered_map<size_t, Entry> _entries;
 };
 
 } // namespace RNSkia

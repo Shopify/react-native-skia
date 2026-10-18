@@ -48,24 +48,20 @@ export interface ImageFactory {
   MakeImageFromNativeBuffer: (source: CanvasImageSource) => SkImage;
 
   /**
-   * Returns an image that will be a screenshot of the view represented by
-   * the view tag
-   * @param viewTag - The tag of the view to make an image from.
-   * @returns Returns a valid SkImage, if the view tag is invalid, nullptr is returned.
-   */
-  MakeImageFromViewTag: (viewTag: number) => Promise<SkImage | null>;
-
-  /**
-   * Returns an image with the given pixel data and format.
-   * Note that we will always make a copy of the pixel data, because of inconsistencies in
-   * behavior between GPU and CPU (i.e. the pixel data will be turned into a GPU texture and
-   * not modifiable after creation).
+   * Returns a raster (CPU) image with the given pixel data and format.
+   * The pixel data is always copied: the image is not modifiable after
+   * creation. Drawing the image uploads it once per canvas; call
+   * `makeTextureImage()` on it to upload it once for every canvas.
    *
    * @param info
    * @param data - bytes representing the pixel data.
    * @param bytesPerRow
    */
-  MakeImage(info: ImageInfo, data: SkData, bytesPerRow: number): SkImage | null;
+  MakeRasterImage(
+    info: ImageInfo,
+    data: SkData,
+    bytesPerRow: number
+  ): SkImage | null;
 
   /**
    * Creates an SkImage from a WebGPU texture, without copying it.

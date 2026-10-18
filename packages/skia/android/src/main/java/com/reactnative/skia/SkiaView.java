@@ -2,6 +2,7 @@ package com.reactnative.skia;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
+import android.os.Build;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.MotionEvent;
@@ -18,9 +19,11 @@ import com.facebook.react.views.view.ReactViewGroup;
 
 /**
  * The Android view behind <Canvas>, <SkiaPictureView> and <SkiaGraphiteView>.
- * It is backed by a SurfaceView or a TextureView (see updateView()) that the
- * native side draws into with Graphite, presenting the queued recordings when
- * the backing view can show them (see FrameScheduler).
+ * It is backed by a TextureView or a SurfaceView, named by the
+ * androidBackingView prop and created once, from the props of the first
+ * transaction, for the life of the view (see updateView()), that the native
+ * side draws into with Graphite, presenting the queued recordings when the
+ * backing view can show them (see FrameScheduler).
  */
 public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreographer.FrameCallback {
     private static final String TAG = "SkiaView";
@@ -28,21 +31,25 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
     @DoNotStrip
     private HybridData mHybridData;
 
-    private View mView;
-
-    // Props, applied together in updateView(). A null kind is "auto".
+    // Props. opaque is applied in place, unless the buffer format implies it
+    // (see setOpaque), and so are the z-order props where Android allows it
+    // (see takesZOrder); the others are read once, when the backing view is
+    // created (see updateView()).
+    private BackingViewKind mBackingView = BackingViewKind.TEXTURE_VIEW;
     private boolean mOpaque = false;
-    @Nullable
-    private BackingViewKind mRequestedKind = null;
     private boolean mZOrderOnTop = false;
+    private boolean mZOrderMediaOverlay = false;
     private boolean mHighBitDepth = false;
 
-    // What the current backing view was created with; no kind before the first one.
+    // The backing view, created by the first prop transaction and kept, with
+    // the kind and the buffer format it was created with. The kind is null
+    // until then: it is what tells a mounted canvas apart.
+    private View mView;
     @Nullable
-    private BackingViewKind mAppliedKind = null;
-    private boolean mAppliedZOrderOnTop;
-    private boolean mAppliedHighBitDepth;
+    private BackingViewKind mKind = null;
+    private boolean mSurfaceHighBitDepth = false;
 
+    private final SurfaceFrameRateVote mFrameRateVote = new SurfaceFrameRateVote(this);
     private final Runnable mPostedPresent = this::onPostedPresent;
     private final FrameScheduler mFrameScheduler = new FrameScheduler(new FrameScheduler.Host() {
         @Override
@@ -57,12 +64,29 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
 
         @Override
         public boolean presentFrame() {
-            return hasNativeView() && SkiaView.this.presentFrame();
+            if (!hasNativeView()) {
+                return false;
+            }
+            boolean moreQueued = SkiaView.this.presentFrame();
+            // Only a SurfaceView votes (attached in onSurfaceCreated): a
+            // TextureView is composited into its window, which votes for it.
+            // A frame the surface could not take counts as presented here,
+            // which at worst votes a frame early.
+            mFrameRateVote.onFramePresented();
+            return moreQueued;
         }
     });
 
     public SkiaView(Context context) {
         super(context);
+        // ReactViewGroup disables clipChildren (RN overflow is handled with canvas
+        // clipping instead). Android copies the parent's clipChildren into each
+        // child's RenderNode.clipToBounds, and HWUI treats a damaged node without
+        // it as unbounded damage (RenderNode::damageSelf). The TextureView child
+        // invalidates on every frame, so without this every non-opaque canvas
+        // frame repaints the whole window. Our only child exactly fills this
+        // view, so clipping it changes nothing visually.
+        setClipChildren(true);
         RNSkiaModule skiaModule = ((ReactContext) context).getNativeModule(RNSkiaModule.class);
         mHybridData = initHybrid(skiaModule.getSkiaManager());
     }
@@ -77,80 +101,133 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
         return super.dispatchTouchEvent(ev);
     }
 
+    // The backing view is created from the props of the first transaction and
+    // kept (see updateView()). React calls a setter again only when its prop
+    // changed, so a call on a mounted canvas is a change: the setters below
+    // apply it in place where the view can take it, else they ignore it and
+    // say so (a canvas that needs another backing view is remounted, with a
+    // new key). The JS side warns about the same changes in development
+    // (see views/android.ts), mirroring these rules.
+
+    public void setBackingView(@Nullable String value) {
+        if (mKind != null) {
+            warnIgnoredOnceMounted("android.backingView");
+            return;
+        }
+        mBackingView = BackingViewKind.fromBackingView(value);
+    }
+
     public void setOpaque(boolean value) {
+        // The 10-bit format only has 2 bits of alpha: a canvas that got it is
+        // opaque whatever the prop says (see BackingViewKind.resolveOpaque).
+        if (mKind != null && mSurfaceHighBitDepth) {
+            warnIgnoredOnceMounted("android.opaque (a highBitDepth canvas is opaque)");
+            return;
+        }
         mOpaque = value;
     }
 
-    public void setSurfaceType(@Nullable String value) {
-        mRequestedKind = BackingViewKind.fromSurfaceType(value);
+    public void setZOrderOnTop(boolean value) {
+        if (takesZOrder("android.zOrderOnTop")) {
+            mZOrderOnTop = value;
+            applyZOrder();
+        }
     }
 
-    public void setZOrderOnTop(boolean value) {
-        mZOrderOnTop = value;
+    public void setZOrderMediaOverlay(boolean value) {
+        if (takesZOrder("android.zOrderMediaOverlay")) {
+            mZOrderMediaOverlay = value;
+            applyZOrder();
+        }
+    }
+
+    // Whether a z-order prop is taken. Before the backing view exists it is
+    // read when the view is created. After that only a SurfaceView has a
+    // z-order of its own (elsewhere the prop never applied, and the change is
+    // moot), and SurfaceView moves a live surface since Android 11, for an app
+    // targeting it; before that, the surface reads it when it is created.
+    private boolean takesZOrder(String prop) {
+        if (mKind == null) {
+            return true;
+        }
+        if (mKind != BackingViewKind.SURFACE_VIEW) {
+            return false;
+        }
+        boolean inPlace = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                && getContext().getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R;
+        if (!inPlace) {
+            warnIgnoredOnceMounted(prop);
+        }
+        return inPlace;
+    }
+
+    private void applyZOrder() {
+        if (mKind == BackingViewKind.SURFACE_VIEW) {
+            ((SkiaSurfaceView) mView).setZOrder(mZOrderOnTop, mZOrderMediaOverlay);
+        }
     }
 
     public void setHighBitDepth(boolean value) {
-        mHighBitDepth = value;
+        if (mKind == null) {
+            mHighBitDepth = value;
+            return;
+        }
+        // Ignored, and said so, when it would change the buffer format.
+        if (BackingViewKind.resolveHighBitDepth(mKind, value) != mSurfaceHighBitDepth) {
+            warnIgnoredOnceMounted("highBitDepth");
+        }
     }
 
-    // Resolve the backing view from the props. "auto" picks SurfaceView for an
-    // opaque canvas and TextureView for a non-opaque one.
-    private BackingViewKind resolveKind() {
-        if (mRequestedKind != null) {
-            return mRequestedKind;
-        }
-        return mOpaque ? BackingViewKind.SURFACE_VIEW : BackingViewKind.TEXTURE_VIEW;
-    }
-
-    // The 10-bit buffer format only has 2 bits of alpha, which would visibly
-    // break translucency, and the extra precision would be lost in the 8-bit
-    // composition pass of a TextureView anyway. So the flag only applies to an
-    // opaque SurfaceView.
-    private boolean resolveHighBitDepth(BackingViewKind kind) {
-        if (!mHighBitDepth) {
-            return false;
-        }
-        if (kind != BackingViewKind.SURFACE_VIEW || !mOpaque) {
-            Log.w(TAG, "highBitDepth requires an opaque SurfaceView on Android, falling back to the 8-bit format");
-            return false;
-        }
-        return true;
+    private void warnIgnoredOnceMounted(String prop) {
+        Log.w(TAG, "Ignoring a change of " + prop + " on a mounted canvas: the backing view"
+                + " is chosen when the canvas mounts. Remount the canvas (give it a new key)"
+                + " to change it.");
     }
 
     // Apply the complete prop transaction once, after every prop has arrived.
-    // Only a change of backing view, or of a setting the view must know before
-    // it attaches (zOrderOnTop, the buffer format), replaces the child; opacity
-    // is applied in place.
+    // The first one creates the backing view, which is then kept: a
+    // SurfaceView must know its buffer format before it attaches (and its
+    // z-order, before Android 11), and keeping a canvas on screen while its
+    // backing view is replaced takes hold-and-retire logic specific to each
+    // Android release (see PRs #4189 and #4192), which this view does not
+    // carry. A canvas that needs another backing view is remounted instead,
+    // and is off screen for a frame or two until the new view draws its first
+    // frame. Later transactions apply the opacity in place: the surface's
+    // pixel format on a SurfaceView, the view's opacity on a TextureView (the
+    // setters decide what else is taken).
     void updateView() {
-        BackingViewKind kind = resolveKind();
-        boolean zOrderOnTop = kind == BackingViewKind.SURFACE_VIEW && mZOrderOnTop;
-        boolean highBitDepth = resolveHighBitDepth(kind);
-        if (mView == null
-                || kind != mAppliedKind
-                || zOrderOnTop != mAppliedZOrderOnTop
-                || highBitDepth != mAppliedHighBitDepth) {
-            if (mView != null) {
-                removeView(mView);
-            }
-            mAppliedKind = kind;
-            mAppliedZOrderOnTop = zOrderOnTop;
-            mAppliedHighBitDepth = highBitDepth;
-            mView = switch (kind) {
-                case SURFACE_VIEW -> new SkiaSurfaceView(getContext(), this, zOrderOnTop, mOpaque);
-                case TEXTURE_VIEW -> new SkiaTextureView(getContext(), this, mOpaque);
-            };
-            addView(mView);
-            // React Native sizes native children explicitly through onLayout, so
-            // the requestLayout triggered by addView is ignored; size the new
-            // child ourselves or it stays 0x0 and never gets a surface.
-            if (getWidth() > 0 || getHeight() > 0) {
-                mView.layout(0, 0, getWidth(), getHeight());
-            }
-        } else {
+        BackingViewKind kind = mKind;
+        if (kind != null) {
+            boolean opaque = BackingViewKind.resolveOpaque(mOpaque, mSurfaceHighBitDepth);
             switch (kind) {
-                case SURFACE_VIEW -> ((SkiaSurfaceView) mView).setOpaque(mOpaque);
-                case TEXTURE_VIEW -> ((SkiaTextureView) mView).setOpaque(mOpaque);
+                case SURFACE_VIEW -> ((SkiaSurfaceView) mView).setOpaque(opaque);
+                case TEXTURE_VIEW -> ((SkiaTextureView) mView).setOpaque(opaque);
             }
+            return;
+        }
+        kind = mBackingView;
+        mKind = kind;
+        mSurfaceHighBitDepth = BackingViewKind.resolveHighBitDepth(kind, mHighBitDepth);
+        if (mHighBitDepth && !mSurfaceHighBitDepth) {
+            Log.w(TAG, "highBitDepth needs a SurfaceView on Android, keeping the 8-bit format");
+        }
+        boolean opaque = BackingViewKind.resolveOpaque(mOpaque, mSurfaceHighBitDepth);
+        // The surface will have this format: a frame recorded before it
+        // exists, or while it is away, is recorded for it.
+        if (hasNativeView()) {
+            setSurfaceHighBitDepth(mSurfaceHighBitDepth);
+        }
+        mView = switch (kind) {
+            case SURFACE_VIEW -> new SkiaSurfaceView(getContext(), this, mZOrderOnTop,
+                    mZOrderMediaOverlay, opaque);
+            case TEXTURE_VIEW -> new SkiaTextureView(getContext(), this, opaque);
+        };
+        addView(mView);
+        // React Native sizes native children explicitly through onLayout, so
+        // the requestLayout triggered by addView is ignored; size the new
+        // child ourselves or it stays 0x0 and never gets a surface.
+        if (getWidth() > 0 || getHeight() > 0) {
+            mView.layout(0, 0, getWidth(), getHeight());
         }
     }
 
@@ -195,12 +272,12 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
     /** A recording was submitted. Main thread; called from native. */
     @DoNotStrip
     public void scheduleFrame() {
-        mFrameScheduler.requestFrame(mAppliedKind);
+        mFrameScheduler.requestFrame(mKind);
     }
 
     @Override
     public void doFrame(long frameTimeNanos) {
-        mFrameScheduler.onFrame(mAppliedKind);
+        mFrameScheduler.onFrame(mKind);
     }
 
     private void onPostedPresent() {
@@ -229,10 +306,11 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
 
     @Override
     public void onSurfaceCreated(Surface surface, int width, int height) {
+        mFrameRateVote.attach(surface);
         if (!hasNativeView()) {
             return;
         }
-        surfaceAvailable(surface, width, height, true, mAppliedHighBitDepth);
+        surfaceAvailable(surface, width, height, true, mSurfaceHighBitDepth);
     }
 
     @Override
@@ -241,7 +319,7 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
         if (!hasNativeView()) {
             return;
         }
-        surfaceSizeChanged(surface, width, height, true, mAppliedHighBitDepth);
+        surfaceSizeChanged(surface, width, height, true, mSurfaceHighBitDepth);
     }
 
     // TextureView callbacks: the native side receives the SurfaceTexture and
@@ -266,6 +344,8 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
 
     @Override
     public void onSurfaceDestroyed() {
+        // The surface is still valid here, so the vote can be taken back.
+        mFrameRateVote.detach();
         if (!hasNativeView()) {
             return;
         }
@@ -285,6 +365,8 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
     private native void surfaceDestroyed();
 
     private native void setLayoutSize(int width, int height);
+
+    private native void setSurfaceHighBitDepth(boolean highBitDepth);
 
     native void registerView(int nativeId);
 

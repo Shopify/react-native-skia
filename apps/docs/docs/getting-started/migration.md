@@ -10,14 +10,14 @@ Graphite is Skia's new GPU backend. In React Native Skia it runs on [Dawn](https
 
 :::info[Staying on v2]
 
-v2 is still maintained. It renders with OpenGL ES on Android and has lower version requirements: it runs on Android devices below API level 26 or without Vulkan, and it supports tvOS, Android TV, Mac Catalyst, and Expo Go.
+v2 is still maintained. It renders with OpenGL ES on Android and has lower version requirements: it runs on Android devices below API level 26 or without Vulkan, and it supports Android TV and Expo Go.
 If you need any of these, stay on v2 (`yarn add react-native-skia@2`) and use the [v2 documentation](https://wcandillon.github.io/react-native-skia/v2/).
 
 :::
 
 The drawing API is the same as in v2: components, hooks, shaders, and the imperative `Skia` API all work as before.
 What changes is the package name, the platform requirements, and a few `Canvas` props.
-Most apps migrate in three steps, and a fourth one applies to apps that play videos or draw camera frames:
+Most apps migrate in three steps, and a fourth one applies to apps that play videos, draw camera frames, or snapshot views:
 
 1. [Rename the package](#1-rename-the-package)
 2. [Check the platform requirements](#2-check-the-platform-requirements)
@@ -88,10 +88,16 @@ buildscript {
 }
 ```
 
-### iOS and macOS
+Vulkan 1.1 is a hard requirement: the library's manifest declares `android.hardware.vulkan.version` as a required feature, which merges into your app's manifest.
+The Play Store then stops serving your app to devices without Vulkan 1.1 (older hardware, some TV boxes).
+This is a change in distribution compared to v2, which rendered with OpenGL ES on every device.
+On a device without Vulkan the app still runs: `Skia.gpu.isAvailable` is false and canvases stay blank.
+See [the Vulkan section of the installation guide](/docs/getting-started/installation#vulkan) for the details and how to opt out of the declaration.
+
+### iOS, tvOS, and macOS
 
 The minimum deployment target is iOS 15.1.
-Run `pod install` again after upgrading: the Skia binaries come from new npm packages (`react-native-skia-graphite-apple-ios` and `react-native-skia-graphite-apple-macos`), which also ship Dawn.
+Run `pod install` again after upgrading: the Skia binaries come from new npm packages (`react-native-skia-graphite-apple-ios`, `react-native-skia-graphite-apple-tvos`, `react-native-skia-graphite-apple-macos`), alongside `react-native-webgpu-dawn`.
 
 ### Expo
 
@@ -115,9 +121,9 @@ Use [expo-build-properties](https://docs.expo.dev/versions/latest/sdk/build-prop
 }
 ```
 
-### TV
+### Android TV
 
-tvOS and Android TV are not available with Graphite. These platforms remain supported on v2.
+Android TV is not available with Graphite. It remains supported on v2.
 
 ### React Native WebGPU
 
@@ -127,19 +133,22 @@ In exchange, Skia and WebGPU can now share a device and textures without any cop
 
 ## 3. Update the Canvas props
 
-Three props of `<Canvas>` were removed:
+Five props of `<Canvas>` were removed:
 
 | Prop | Replacement |
 |:--|:--|
 | `debug` | None, remove the prop. |
 | `colorSpace` | None, remove the prop. The canvas picks its [color space](/docs/canvas/overview#color-space) itself: Display P3 on Apple devices with a wide color gamut display (the default of v2), sRGB everywhere else. |
 | `androidWarmup` | None, remove the prop. To control how the canvas is composited on Android, see the [Android rendering options](/docs/canvas/overview#android-rendering-options). |
+| `opaque` | `android.opaque`: the prop only ever applied to Android, where it is now one of the options of the backing view, applied in place. A canvas that relied on `opaque` to get a `SurfaceView` asks for it with `android={{ backingView: "SurfaceView" }}`, see the [Android rendering options](/docs/canvas/overview#android-rendering-options). |
+| `onSize` | `onLayout`, the view prop: the size of the canvas is the one of its layout. Write the layout into your shared value, see [canvas size](/docs/canvas/overview#canvas-size). |
 
 The `NativeSkiaViewProps` type was removed as well.
+Early v3 releases named the Android backing view with `android.surfaceType` and derived its default from `opaque`; `android.backingView` replaces it, with `TextureView` as the default whatever the opacity.
 
 ## 4. Replace the removed APIs
 
-Native buffers (camera and video frames) are now produced and owned by [React Native WebGPU](https://wcandillon.github.io/react-native-webgpu/), and Skia only wraps them.
+Native buffers (camera and video frames) and view snapshots are now produced by [React Native WebGPU](https://wcandillon.github.io/react-native-webgpu/), and Skia only wraps the textures it renders them into.
 The following APIs were removed in favor of it:
 
 | Removed | Replacement |
@@ -150,10 +159,21 @@ The following APIs were removed in favor of it:
 | `Skia.NativeBuffer.Release()` | `NativeVideoFrame.release()`: React Native WebGPU owns the buffers it hands out. |
 | `Skia.Image.MakeImageFromNativeTextureUnstable()` | `Skia.Image.MakeImageFromGPUTexture(texture)`, which takes a WebGPU texture. See [WebGPU](/docs/webgpu). |
 | `image.getNativeTextureUnstable()` and `surface.getNativeTextureUnstable()` | `Skia.Image.MakeGPUTextureFromImage()` and `Skia.Surface.MakeFromGPUTexture()`: textures are shared as WebGPU textures. |
+| `makeImageFromView()` and `Skia.Image.MakeImageFromViewTag()` | React Native WebGPU's `queue.drawElementImageToTexture()` draws the view into a texture, which `Skia.Image.MakeImageFromGPUTexture()` wraps. The snapshot is a GPU image, and on iOS and Android 13+ it never leaves the GPU. See [view snapshots](/docs/webgpu#view-snapshots). |
 | `Skia.Image.MakeImageFromNativeBuffer(pointer)` on native platforms | React Native WebGPU's `copyExternalImageToTexture()` renders the frame into a texture, which `Skia.Image.MakeImageFromGPUTexture()` wraps. See [native buffers](/docs/webgpu#native-buffers). The method remains on Web, where it takes a `CanvasImageSource`. |
 | `ref.current.makeImageSnapshotAsync()` on a `Canvas` | `makeImageSnapshot()`: with Graphite the snapshot is taken on the calling thread and returns a GPU image. To encode it or read its pixels without blocking, read it back with `image.makeRasterImage()`. See [snapshots](/docs/canvas/overview#getting-a-canvas-snapshot). |
+| `useCanvasSize()` returning `{ ref, size }` | It returns `{ size, onLayout }` and no longer takes a ref: pass `onLayout` to the canvas instead of `ref`, and `size` follows every layout change instead of being measured once. Keep `useCanvasRef()` for the ref: its `size` property reads the layout synchronously. See [canvas size](/docs/canvas/overview#canvas-size). |
 
 When an image cannot be decoded, `useImage()` now calls `onError` with the message `Could not decode the image` (it was `Could not load data`).
+
+A few methods were renamed so that the name says whether the result lives on the CPU or on the GPU: "raster" is a CPU surface or image, "texture" a GPU one (see [GPU and CPU images](/docs/images#gpu-and-cpu-images)).
+`Skia.Surface.MakeOffscreen()`, which creates a GPU surface, keeps its name.
+
+| Renamed | New name |
+|:--|:--|
+| `Skia.Surface.Make(width, height)` | `Skia.Surface.MakeRaster(width, height)`: a CPU surface. |
+| `Skia.Image.MakeImage(info, data, bytesPerRow)` | `Skia.Image.MakeRasterImage(info, data, bytesPerRow)`: a CPU image. |
+| `image.makeNonTextureImage()` | `image.makeRasterImageSync()`: the synchronous counterpart of `image.makeRasterImage()`, for worklets. It now throws when the readback fails instead of returning `null`. |
 
 ## What is new
 
