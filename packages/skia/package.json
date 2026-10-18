@@ -142,11 +142,11 @@
   },
   "dependencies": {
     "canvaskit-wasm": "0.41.1",
-    "react-native-skia-graphite-android": "154.3.0",
-    "react-native-skia-graphite-apple-ios": "154.3.0",
-    "react-native-skia-graphite-apple-macos": "154.3.0",
-    "react-native-skia-graphite-apple-tvos": "154.3.0",
-    "react-native-webgpu-dawn": "154.3.0",
+    "react-native-skia-graphite-android": "157.0.0",
+    "react-native-skia-graphite-apple-ios": "157.0.0",
+    "react-native-skia-graphite-apple-macos": "157.0.0",
+    "react-native-skia-graphite-apple-tvos": "157.0.0",
+    "react-native-webgpu-dawn": "157.0.0",
     "react-reconciler": "0.31.0"
   },
   "eslintIgnore": [
