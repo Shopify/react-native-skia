@@ -140,8 +140,8 @@ The prop is ignored on iOS and web.
 | --- | --- | --- |
 | `backingView` | `"TextureView" \| "SurfaceView" \| "HardwareBufferView"` | The native view behind the canvas. Defaults to `TextureView` |
 | `opaque` | `boolean` | Declares that the canvas covers every pixel of its bounds, so it is composited without blending. Defaults to `false` on a `TextureView` and to `true` on a `SurfaceView`. Applied in place |
-| `zOrderOnTop` | `boolean` | `SurfaceView` only: composites above every React Native view in the window. Defaults to `false` |
-| `zOrderMediaOverlay` | `boolean` | `SurfaceView` only: composites above the other `SurfaceView`s below the window (video players, other canvases). Defaults to `false`; `zOrderOnTop` takes precedence |
+| `zOrderOnTop` | `boolean` | `SurfaceView` only: composites above every React Native view in the window. Defaults to `false`. Applied in place on Android 11 and later, on Android 13 only without `zOrderMediaOverlay` |
+| `zOrderMediaOverlay` | `boolean` | `SurfaceView` only: composites above the other `SurfaceView`s below the window (video players, other canvases). Defaults to `false`; `zOrderOnTop` takes precedence. Applied in place on Android 14 and later |
 
 **`TextureView`** is the default.
 It is a regular Android view: frames go through a `SurfaceTexture` that the UI toolkit samples as a texture when it draws the view, so parent transforms, clipping, alpha, and z-order all apply, and the canvas composites over and under other React Native views.
@@ -205,8 +205,8 @@ export const Switchable = ({ backingView }: { backingView: AndroidBackingView })
 
 ### Choosing the view at mount
 
-The backing view is created when the canvas mounts, from `backingView` and `highBitDepth` as they are then (and, before Android 11, the z-order options), and kept for as long as the canvas is mounted.
-`opaque` applies in place, and so do `zOrderOnTop` and `zOrderMediaOverlay` on Android 11 and later; a change of the other props is ignored, with a warning in development.
+The backing view is created when the canvas mounts, from `backingView` and `highBitDepth` as they are then (and the z-order options where Android does not move a live surface: `zOrderOnTop` before Android 11 and, with `zOrderMediaOverlay`, on Android 13; `zOrderMediaOverlay` before Android 14), and kept for as long as the canvas is mounted.
+`opaque` applies in place, and so do `zOrderOnTop` on Android 11 and later (on Android 13 only without `zOrderMediaOverlay`) and `zOrderMediaOverlay` on Android 14 and later; a change of the other props is ignored, with a warning in development.
 A canvas that needs another backing view is remounted instead: give it a `key` that changes with `backingView`.
 The remount leaves the canvas off screen for a frame or two, showing what is behind it, or black, until the new view draws its first frame: the old view leaves and the new one arrives in different window frames.
 Keeping a canvas on screen through such a swap is possible, but takes hold-and-retire logic specific to each Android release ([#4189](https://github.com/wcandillon/react-native-skia/pull/4189), [#4192](https://github.com/wcandillon/react-native-skia/pull/4192)) that the library does not carry.

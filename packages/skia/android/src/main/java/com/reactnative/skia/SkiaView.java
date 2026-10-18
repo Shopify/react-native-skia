@@ -128,43 +128,39 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
     }
 
     public void setZOrderOnTop(boolean value) {
-        if (takesZOrder("android.zOrderOnTop")) {
+        boolean changesInPlace = BackingViewKind.zOrderOnTopChangesInPlace(Build.VERSION.SDK_INT,
+                getContext().getApplicationInfo().targetSdkVersion, mZOrderMediaOverlay);
+        if (takesZOrder("android.zOrderOnTop", changesInPlace)) {
             mZOrderOnTop = value;
-            applyZOrder();
         }
     }
 
     public void setZOrderMediaOverlay(boolean value) {
-        if (takesZOrder("android.zOrderMediaOverlay")) {
+        boolean changesInPlace =
+                BackingViewKind.zOrderMediaOverlayChangesInPlace(Build.VERSION.SDK_INT);
+        if (takesZOrder("android.zOrderMediaOverlay", changesInPlace)) {
             mZOrderMediaOverlay = value;
-            applyZOrder();
         }
     }
 
     // Whether a z-order prop is taken. Before the backing view exists it is
     // read when the view is created. After that only a SurfaceView has a
     // z-order of its own (elsewhere the prop never applied, and the change is
-    // moot), and SurfaceView moves a live surface since Android 11, for an app
-    // targeting it; before that, the surface reads it when it is created.
-    private boolean takesZOrder(String prop) {
+    // moot), and it moves its live surface only where Android allows it (see
+    // BackingViewKind); elsewhere, the surface keeps the z-order it was created
+    // with.
+    private boolean takesZOrder(String prop, boolean changesInPlace) {
         if (mKind == null) {
             return true;
         }
         if (mKind != BackingViewKind.SURFACE_VIEW) {
             return false;
         }
-        boolean inPlace = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
-                && getContext().getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R;
-        if (!inPlace) {
+        if (!changesInPlace) {
             warnIgnoredOnceMounted(prop);
+            return false;
         }
-        return inPlace;
-    }
-
-    private void applyZOrder() {
-        if (mKind == BackingViewKind.SURFACE_VIEW) {
-            ((SkiaSurfaceView) mView).setZOrder(mZOrderOnTop, mZOrderMediaOverlay);
-        }
+        return true;
     }
 
     public void setHighBitDepth(boolean value) {
@@ -187,20 +183,26 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
     // Apply the complete prop transaction once, after every prop has arrived.
     // The first one creates the backing view, which is then kept: a
     // SurfaceView must know its buffer format before it attaches (and its
-    // z-order, before Android 11), and keeping a canvas on screen while its
+    // z-order, where Android does not move a live surface), and keeping a
+    // canvas on screen while its
     // backing view is replaced takes hold-and-retire logic specific to each
     // Android release (see PRs #4189 and #4192), which this view does not
     // carry. A canvas that needs another backing view is remounted instead,
     // and is off screen for a frame or two until the new view draws its first
     // frame. Later transactions apply the opacity in place: the surface's
-    // pixel format on a SurfaceView, the view's opacity on a TextureView (the
-    // setters decide what else is taken).
+    // pixel format on a SurfaceView, the view's opacity on a TextureView; and
+    // a SurfaceView's z-order as its setters took it, once per transaction so
+    // that a change of both z-order props moves the surface once.
     void updateView() {
         BackingViewKind kind = mKind;
         if (kind != null) {
             boolean opaque = BackingViewKind.resolveOpaque(mOpaque, mSurfaceHighBitDepth);
             switch (kind) {
-                case SURFACE_VIEW -> ((SkiaSurfaceView) mView).setOpaque(opaque);
+                case SURFACE_VIEW -> {
+                    SkiaSurfaceView surfaceView = (SkiaSurfaceView) mView;
+                    surfaceView.setOpaque(opaque);
+                    surfaceView.setZOrder(mZOrderOnTop, mZOrderMediaOverlay);
+                }
                 case TEXTURE_VIEW -> ((SkiaTextureView) mView).setOpaque(opaque);
             }
             return;

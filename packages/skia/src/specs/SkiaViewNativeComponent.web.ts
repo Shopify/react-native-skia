@@ -2,14 +2,11 @@ import type { ViewProps } from "react-native";
 import { createElement } from "react";
 
 import { SkiaView } from "../views/SkiaView.web";
+import type { AndroidNativeProps } from "../views/android";
 
-export interface NativeProps extends ViewProps {
+export interface NativeProps extends ViewProps, Partial<AndroidNativeProps> {
   highBitDepth?: boolean;
   nativeID: string;
-  androidBackingView?: "TextureView" | "SurfaceView" | "HardwareBufferView";
-  androidOpaque?: boolean;
-  androidZOrderOnTop?: boolean;
-  androidZOrderMediaOverlay?: boolean;
 }
 
 const SkiaViewNativeComponent = ({

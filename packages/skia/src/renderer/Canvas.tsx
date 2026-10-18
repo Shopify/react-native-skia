@@ -173,7 +173,7 @@ export const Canvas = ({
       collapsable={false}
       nativeID={`${nativeId}`}
       highBitDepth={highBitDepth}
-      {...androidNativeProps({ highBitDepth, android })}
+      {...androidNativeProps(android)}
       {...viewProps}
     />
   );

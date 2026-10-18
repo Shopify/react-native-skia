@@ -1,8 +1,9 @@
 import { useEffect, useRef } from "react";
 
 import { Platform } from "../Platform";
+import type { NativeProps } from "../specs/SkiaViewNativeComponent";
 
-import type { AndroidBackingView, AndroidCanvasProps } from "./types";
+import type { AndroidCanvasProps } from "./types";
 
 /** The props the Android backing view is chosen from when a canvas mounts. */
 export interface BackingViewProps {
@@ -10,80 +11,78 @@ export interface BackingViewProps {
   android?: AndroidCanvasProps;
 }
 
+type AndroidNativePropName =
+  | "androidBackingView"
+  | "androidOpaque"
+  | "androidZOrderOnTop"
+  | "androidZOrderMediaOverlay";
+
 /** What the native component is handed for the `android` prop. */
-export interface AndroidNativeProps {
-  androidBackingView: AndroidBackingView;
-  androidOpaque: boolean;
-  androidZOrderOnTop: boolean;
-  androidZOrderMediaOverlay: boolean;
-}
-
-// The union read as one bag of options; which of them apply to the view is
-// decided below, as it is on the native side.
-type AndroidOptions = Partial<{
-  backingView: AndroidBackingView;
-  opaque: boolean;
-  zOrderOnTop: boolean;
-  zOrderMediaOverlay: boolean;
-}>;
-
-const options = (android?: AndroidCanvasProps): AndroidOptions =>
-  (android ?? {}) as AndroidOptions;
-
-// Anything else reaching the native component would hit the generated
-// string-enum parser, which aborts on unknown values.
-export const resolveBackingView = (
-  android?: AndroidCanvasProps
-): AndroidBackingView => {
-  const { backingView } = options(android);
-  return backingView === "SurfaceView" || backingView === "HardwareBufferView"
-    ? backingView
-    : "TextureView";
+export type AndroidNativeProps = {
+  [Name in AndroidNativePropName]-?: NonNullable<NativeProps[Name]>;
 };
 
-// The view that is created: a HardwareBufferView is not available yet and
-// falls back to a TextureView, see BackingViewKind.fromBackingView().
-const resolveKind = (android?: AndroidCanvasProps) =>
-  resolveBackingView(android) === "SurfaceView" ? "SurfaceView" : "TextureView";
+const textureViewProps = (opaque: boolean): AndroidNativeProps => ({
+  androidBackingView: "TextureView",
+  androidOpaque: opaque,
+  androidZOrderOnTop: false,
+  androidZOrderMediaOverlay: false,
+});
 
-// Whether the canvas gets the 10-bit format, see
-// BackingViewKind.resolveHighBitDepth().
+// A value a JavaScript caller can pass that no view takes would hit the
+// generated string-enum parser, which aborts on unknown values: it gets the
+// default view, while TypeScript still reports a view the switch misses.
+const resolveUnknownBackingView = (_android: never): AndroidNativeProps =>
+  textureViewProps(false);
+
+/**
+ * The native props the `android` prop resolves to: the view it names, the
+ * opacity it asks for with the default of that view (a SurfaceView is opaque
+ * unless asked otherwise, a TextureView translucent unless asked otherwise, a
+ * HardwareBufferView always composites with alpha), and the z-order options
+ * of a SurfaceView. The native view adds the opacity of the 10-bit format it
+ * was created with (see BackingViewKind.resolveOpaque()).
+ */
+export const androidNativeProps = (
+  android?: AndroidCanvasProps
+): AndroidNativeProps => {
+  switch (android?.backingView) {
+    case "SurfaceView":
+      return {
+        androidBackingView: "SurfaceView",
+        androidOpaque: android.opaque !== false,
+        androidZOrderOnTop: !!android.zOrderOnTop,
+        androidZOrderMediaOverlay: !!android.zOrderMediaOverlay,
+      };
+    case "HardwareBufferView":
+      return {
+        ...textureViewProps(false),
+        androidBackingView: "HardwareBufferView",
+      };
+    case "TextureView":
+    case undefined:
+      return textureViewProps(android?.opaque === true);
+    default:
+      return resolveUnknownBackingView(android);
+  }
+};
+
+// Whether the canvas gets the high bit depth format: on Android only on a
+// SurfaceView (see BackingViewKind.resolveHighBitDepth()), elsewhere whenever
+// it asks for it.
 export const resolveHighBitDepth = ({
   highBitDepth,
   android,
 }: BackingViewProps) =>
-  !!highBitDepth && resolveKind(android) === "SurfaceView";
+  !!highBitDepth &&
+  (Platform.OS !== "android" || android?.backingView === "SurfaceView");
 
-// Whether the canvas composites as opaque, see BackingViewKind.resolveOpaque():
-// a SurfaceView is opaque unless asked otherwise, and always with the 10-bit
-// format; a TextureView is translucent unless asked otherwise; a
-// HardwareBufferView always composites with alpha.
-export const resolveOpaque = (props: BackingViewProps): boolean => {
-  const { opaque } = options(props.android);
-  switch (resolveBackingView(props.android)) {
-    case "SurfaceView":
-      return resolveHighBitDepth(props) || opaque !== false;
-    case "TextureView":
-      return opaque === true;
-    case "HardwareBufferView":
-      return false;
-  }
-};
-
-/** The native props the `highBitDepth` and `android` props resolve to. */
-export const androidNativeProps = (
-  props: BackingViewProps
-): AndroidNativeProps => {
-  const backingView = resolveBackingView(props.android);
-  const { zOrderOnTop, zOrderMediaOverlay } = options(props.android);
-  const surfaceView = backingView === "SurfaceView";
-  return {
-    androidBackingView: backingView,
-    androidOpaque: resolveOpaque(props),
-    androidZOrderOnTop: surfaceView && !!zOrderOnTop,
-    androidZOrderMediaOverlay: surfaceView && !!zOrderMediaOverlay,
-  };
-};
+// The releases whose SurfaceView moves a mounted surface's z-order, see
+// BackingViewKind.java, which also needs an app targeting Android 11 for
+// zOrderOnTop.
+const zOrderOnTopChangesInPlace = (version: number, mediaOverlay: boolean) =>
+  version >= 30 && !(mediaOverlay && version === 33);
+const zOrderMediaOverlayChangesInPlace = (version: number) => version >= 34;
 
 const warnIgnoredChange = (prop: string) =>
   console.warn(
@@ -98,27 +97,40 @@ const warnIgnoredChange = (prop: string) =>
  * these mirror). The native side only says so in logcat, which is not where a
  * JS developer looks.
  */
-export const warnBackingViewAtMount = (mount: BackingViewProps) => {
+export const warnBackingViewAtMount = ({
+  highBitDepth,
+  android,
+}: BackingViewProps) => {
   if (!__DEV__ || Platform.OS !== "android") {
     return;
   }
-  const backingView = resolveBackingView(mount.android);
-  if (backingView === "HardwareBufferView") {
+  const { androidBackingView } = androidNativeProps(android);
+  if (androidBackingView === "HardwareBufferView") {
     console.warn(
       "android.backingView: HardwareBufferView is not available in React " +
         "Native Skia yet, the canvas uses a TextureView."
     );
   }
-  if (mount.highBitDepth && backingView !== "SurfaceView") {
+  if (highBitDepth && androidBackingView !== "SurfaceView") {
     console.warn(
       "highBitDepth needs a SurfaceView on Android (android.backingView: " +
         '"SurfaceView"), the canvas keeps the 8-bit format.'
     );
   }
   if (
-    mount.highBitDepth &&
-    backingView === "SurfaceView" &&
-    options(mount.android).opaque === false
+    androidBackingView !== "SurfaceView" &&
+    (android?.zOrderOnTop || android?.zOrderMediaOverlay)
+  ) {
+    console.warn(
+      "android.zOrderOnTop and android.zOrderMediaOverlay only apply to a " +
+        'SurfaceView (android.backingView: "SurfaceView"), the canvas ignores ' +
+        "them."
+    );
+  }
+  if (
+    highBitDepth &&
+    androidBackingView === "SurfaceView" &&
+    android?.opaque === false
   ) {
     console.warn(
       "Ignoring android.opaque: false, a highBitDepth canvas is opaque on " +
@@ -140,24 +152,28 @@ export const warnBackingViewChange = (
   if (!__DEV__ || Platform.OS !== "android") {
     return;
   }
-  if (resolveBackingView(prev.android) !== resolveBackingView(next.android)) {
+  // Read as the native side receives them, so these rules see what its
+  // setters see.
+  const before = androidNativeProps(prev.android);
+  const after = androidNativeProps(next.android);
+  if (before.androidBackingView !== after.androidBackingView) {
     warnIgnoredChange("android.backingView");
   }
-  const before = options(prev.android);
-  const after = options(next.android);
-  // Only a SurfaceView has a z-order of its own, which Android 11 and later
-  // changes in place.
-  const zOrderAtMount =
-    resolveKind(mount.android) === "SurfaceView" &&
-    Number(Platform.Version) < 30;
-  if (zOrderAtMount && !!before.zOrderOnTop !== !!after.zOrderOnTop) {
-    warnIgnoredChange("android.zOrderOnTop");
-  }
-  if (
-    zOrderAtMount &&
-    !!before.zOrderMediaOverlay !== !!after.zOrderMediaOverlay
-  ) {
-    warnIgnoredChange("android.zOrderMediaOverlay");
+  const mounted = androidNativeProps(mount.android);
+  if (mounted.androidBackingView === "SurfaceView") {
+    const version = Number(Platform.Version);
+    if (
+      !zOrderOnTopChangesInPlace(version, mounted.androidZOrderMediaOverlay) &&
+      before.androidZOrderOnTop !== after.androidZOrderOnTop
+    ) {
+      warnIgnoredChange("android.zOrderOnTop");
+    }
+    if (
+      !zOrderMediaOverlayChangesInPlace(version) &&
+      before.androidZOrderMediaOverlay !== after.androidZOrderMediaOverlay
+    ) {
+      warnIgnoredChange("android.zOrderMediaOverlay");
+    }
   }
   // The buffer format is read at mount, and so is the opacity the 10-bit
   // format implies.
@@ -166,7 +182,7 @@ export const warnBackingViewChange = (
   }
   if (
     resolveHighBitDepth(mount) &&
-    (before.opaque !== false) !== (after.opaque !== false)
+    (prev.android?.opaque !== false) !== (next.android?.opaque !== false)
   ) {
     warnIgnoredChange("android.opaque (a highBitDepth canvas is opaque)");
   }

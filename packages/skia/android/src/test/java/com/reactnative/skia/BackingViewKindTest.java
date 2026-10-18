@@ -37,4 +37,26 @@ public class BackingViewKindTest {
         assertTrue(BackingViewKind.resolveOpaque(true, false));
         assertFalse(BackingViewKind.resolveOpaque(false, false));
     }
+
+    @Test
+    public void zOrderOnTopMovesALiveSurfaceFromAndroid11ForAnAppTargetingIt() {
+        assertFalse(BackingViewKind.zOrderOnTopChangesInPlace(29, 35, false));
+        assertTrue(BackingViewKind.zOrderOnTopChangesInPlace(30, 35, false));
+        assertFalse(BackingViewKind.zOrderOnTopChangesInPlace(30, 29, false));
+    }
+
+    @Test
+    public void zOrderOnTopOnAMediaOverlayIsReadAtMountOnAndroid13() {
+        assertTrue(BackingViewKind.zOrderOnTopChangesInPlace(32, 35, true));
+        assertFalse(BackingViewKind.zOrderOnTopChangesInPlace(33, 35, true));
+        assertTrue(BackingViewKind.zOrderOnTopChangesInPlace(33, 35, false));
+        assertTrue(BackingViewKind.zOrderOnTopChangesInPlace(34, 35, true));
+    }
+
+    @Test
+    public void zOrderMediaOverlayMovesALiveSurfaceFromAndroid14() {
+        assertFalse(BackingViewKind.zOrderMediaOverlayChangesInPlace(30));
+        assertFalse(BackingViewKind.zOrderMediaOverlayChangesInPlace(33));
+        assertTrue(BackingViewKind.zOrderMediaOverlayChangesInPlace(34));
+    }
 }

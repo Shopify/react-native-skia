@@ -99,7 +99,7 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
         collapsable={false}
         nativeID={`${this._nativeId}`}
         highBitDepth={highBitDepth}
-        {...androidNativeProps({ highBitDepth, android })}
+        {...androidNativeProps(android)}
         {...viewProps}
       />
     );
