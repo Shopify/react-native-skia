@@ -152,6 +152,8 @@ Each frame goes straight to the system compositor as its own layer, with no extr
 The price is that it is not really view content: it punches a hole through the window, so parent transforms, clipping, rounded corners, and z-ordering with sibling views do not apply to it.
 Use it for a canvas that is a plain rectangle: a full-screen scene, a game, a video-like surface.
 On an adaptive display (Android 11 and later) the canvas asks for the display's highest refresh rate while it animates, as the window does for regular views, and lets the rate drop again once the animation stops.
+Up to Android 12 its layer also leaves the screen ahead of the window: when the canvas unmounts (navigating away, a conditional render), the hole it punched can show black for a frame before the next screen's frame lands.
+From Android 12L the layer leaves with the window's frame, as a `TextureView` always does.
 
 **`HardwareBufferView`** is a plain view that draws each frame's `AHardwareBuffer` inline: composited like a `TextureView`, without its extra copy.
 React Native WebGPU offers it as an opt-in on Android 10 and later; React Native Skia accepts the value, so both canvases take the same options, but does not implement it yet: the canvas uses a `TextureView`, with a warning in development.
@@ -162,6 +164,7 @@ React Native WebGPU offers it as an opt-in on Android 10 and later; React Native
 | Extra copy | one | none |
 | Latency | one frame more | lowest |
 | Opaque by default | no | yes |
+| Leaves the screen with its window's frame | yes | from Android 12L |
 
 `opaque` is a compositing hint, applied in place whenever it changes.
 On a `TextureView` it calls `setOpaque`, so the UI toolkit skips blending the view; on a `SurfaceView` it picks `PixelFormat.OPAQUE` or `PixelFormat.TRANSLUCENT`, so the compositor skips blending the layer and can show it through a hardware overlay.

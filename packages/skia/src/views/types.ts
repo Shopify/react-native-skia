@@ -34,7 +34,9 @@ export interface AndroidSurfaceViewProps {
    * A `SurfaceView`: each frame goes to the system compositor as its own
    * layer, the fastest path, with no extra copy. It is not view content:
    * parent transforms, clipping, rounded corners and z-order with sibling
-   * views do not apply to it.
+   * views do not apply to it. Up to Android 12 its layer leaves the screen a
+   * frame before the window when the canvas unmounts, so its area can show
+   * black for that frame.
    */
   backingView: "SurfaceView";
   /**
