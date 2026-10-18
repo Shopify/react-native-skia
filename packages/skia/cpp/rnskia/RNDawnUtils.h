@@ -293,7 +293,16 @@ requestDevice(dawn::native::Adapter &nativeAdapter,
 #endif
       "disable_lazy_clear_for_mapped_at_creation_buffer",
       "allow_unsafe_apis",
+#if !defined(__ANDROID__)
+      // Not on Android: with robustness disabled, Qualcomm's shader compiler
+      // (libllvm-qgl, CreateQGLCProgram) segfaults inside
+      // vkCreateGraphicsPipelines while Dawn builds some Graphite render
+      // pipelines (Adreno 740, driver 3df4c357f0). It is not yet known whether
+      // the driver or the SPIR-V Tint emits without robustness is at fault.
+      // Robustness only adds bounds checks to shader buffer and texture
+      // accesses; Chrome ships WebGPU with it on.
       "disable_robustness",
+#endif
   };
   wgpu::DawnTogglesDescriptor togglesDesc;
   togglesDesc.enabledToggleCount = std::size(kToggles);
