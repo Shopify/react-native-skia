@@ -28,12 +28,20 @@ void RNSkWindowSurface::attach(void *nativeHandle, int width, int height,
                                bool highBitDepth, bool useP3ColorSpace,
                                Releaser releaser) {
   detach();
-  auto &context = DawnContext::getInstance();
-  _device = context.getWGPUDevice();
-  _recorder = context.getRecorder();
   _nativeHandle = nativeHandle;
   _releaser = std::move(releaser);
-  _surface = context.MakeWGPUSurface(nativeHandle);
+  // Called from the platform view (Java or Objective-C), where an exception
+  // would take the process down: without a GPU (reported when the module was
+  // installed, see DawnContext::getGpuInfo) the window is given back and the
+  // view stays blank.
+  auto *context = DawnContext::tryGetInstance();
+  if (context == nullptr) {
+    detach();
+    return;
+  }
+  _device = context->getWGPUDevice();
+  _recorder = context->getRecorder();
+  _surface = context->MakeWGPUSurface(nativeHandle);
   if (!_surface) {
     RNSkLogger::logToConsole("Could not create a surface over the window");
     detach();
@@ -108,6 +116,21 @@ int RNSkWindowSurface::getHeight() {
   return _hasTargetInfo ? _targetInfo.height : 0;
 }
 
+void RNSkWindowSurface::setHighBitDepth(bool highBitDepth) {
+  std::lock_guard<std::mutex> lock(_targetInfoMutex);
+  _knownHighBitDepth = highBitDepth;
+  _hasKnownHighBitDepth = true;
+}
+
+bool RNSkWindowSurface::getHighBitDepth(bool *highBitDepth) {
+  std::lock_guard<std::mutex> lock(_targetInfoMutex);
+  if (!_hasKnownHighBitDepth) {
+    return false;
+  }
+  *highBitDepth = _knownHighBitDepth;
+  return true;
+}
+
 bool RNSkWindowSurface::getTargetInfo(RNSkGraphiteTargetInfo *info) {
   std::lock_guard<std::mutex> lock(_targetInfoMutex);
   if (!_hasTargetInfo) {
@@ -129,6 +152,10 @@ void RNSkWindowSurface::updateTargetInfo() {
   _targetInfo.useP3ColorSpace = _useP3ColorSpace;
   _targetInfo.textureInfo = getTextureInfo();
   _hasTargetInfo = true;
+  // What the surface granted, kept once the window is detached: it is what
+  // the window comes back with.
+  _knownHighBitDepth = _colorType == DawnUtils::HighBitDepthColorType;
+  _hasKnownHighBitDepth = true;
 }
 
 skgpu::graphite::TextureInfo RNSkWindowSurface::getTextureInfo() const {
@@ -191,7 +218,10 @@ bool RNSkWindowSurface::surfaceSupportsFormat(wgpu::TextureFormat format) {
 }
 
 bool RNSkWindowSurface::canPresent() {
-  return _surface && (!_canPresent || _canPresent());
+  // A lost device (see DawnContext::isDeviceLost) takes no frame: the view
+  // keeps its last one and the queue waits, as while in the background.
+  return _surface && !DawnContext::isDeviceLost() &&
+         (!_canPresent || _canPresent());
 }
 
 bool RNSkWindowSurface::presentRecordings(

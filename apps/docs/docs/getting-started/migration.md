@@ -88,6 +88,12 @@ buildscript {
 }
 ```
 
+Vulkan 1.1 is a hard requirement: the library's manifest declares `android.hardware.vulkan.version` as a required feature, which merges into your app's manifest.
+The Play Store then stops serving your app to devices without Vulkan 1.1 (older hardware, some TV boxes).
+This is a change in distribution compared to v2, which rendered with OpenGL ES on every device.
+On a device without Vulkan the app still runs: `Skia.gpu.isAvailable` is false and canvases stay blank.
+See [the Vulkan section of the installation guide](/docs/getting-started/installation#vulkan) for the details and how to opt out of the declaration.
+
 ### iOS, tvOS, and macOS
 
 The minimum deployment target is iOS 15.1.
@@ -127,16 +133,18 @@ In exchange, Skia and WebGPU can now share a device and textures without any cop
 
 ## 3. Update the Canvas props
 
-Four props of `<Canvas>` were removed:
+Five props of `<Canvas>` were removed:
 
 | Prop | Replacement |
 |:--|:--|
 | `debug` | None, remove the prop. |
 | `colorSpace` | None, remove the prop. The canvas picks its [color space](/docs/canvas/overview#color-space) itself: Display P3 on Apple devices with a wide color gamut display (the default of v2), sRGB everywhere else. |
 | `androidWarmup` | None, remove the prop. To control how the canvas is composited on Android, see the [Android rendering options](/docs/canvas/overview#android-rendering-options). |
+| `opaque` | `android.opaque`: the prop only ever applied to Android, where it is now one of the options of the backing view, applied in place. A canvas that relied on `opaque` to get a `SurfaceView` asks for it with `android={{ backingView: "SurfaceView" }}`, see the [Android rendering options](/docs/canvas/overview#android-rendering-options). |
 | `onSize` | `onLayout`, the view prop: the size of the canvas is the one of its layout. Write the layout into your shared value, see [canvas size](/docs/canvas/overview#canvas-size). |
 
 The `NativeSkiaViewProps` type was removed as well.
+Early v3 releases named the Android backing view with `android.surfaceType` and derived its default from `opaque`; `android.backingView` replaces it, with `TextureView` as the default whatever the opacity.
 
 ## 4. Replace the removed APIs
 
