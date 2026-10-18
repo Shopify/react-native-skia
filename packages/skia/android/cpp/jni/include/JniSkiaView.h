@@ -38,6 +38,8 @@ public:
          makeNativeMethod("surfaceSizeChanged",
                           JniSkiaView::surfaceSizeChanged),
          makeNativeMethod("setLayoutSize", JniSkiaView::setLayoutSize),
+         makeNativeMethod("setSurfaceHighBitDepth",
+                          JniSkiaView::setSurfaceHighBitDepth),
          makeNativeMethod("registerView", JniSkiaView::registerView),
          makeNativeMethod("unregisterView", JniSkiaView::unregisterView),
          makeNativeMethod("presentFrame", JniSkiaView::presentFrame)});
@@ -81,6 +83,15 @@ protected:
    */
   void setLayoutSize(int width, int height) {
     _surface->setLayoutSize(width, height);
+  }
+
+  /**
+   The bit depth the backing view was created with, which its surface gets
+   (see SkiaView.updateView), so that a frame recorded before the surface
+   exists, or while it is away, is recorded for its format. Main thread.
+   */
+  void setSurfaceHighBitDepth(bool highBitDepth) {
+    _surface->setHighBitDepth(highBitDepth);
   }
 
   void registerView(int nativeId) {
