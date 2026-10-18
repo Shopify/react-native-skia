@@ -14282,7 +14282,7 @@ __metadata:
     react-native-svg: "patch:react-native-svg@npm%3A15.14.0#../../.yarn/patches/react-native-svg-npm-15.14.0-macos-uiimage-fix.patch&../../.yarn/patches/react-native-svg-npm-15.14.0-position-props.patch"
     react-native-test-app: 5.4.13
     react-native-web: ^0.21.2
-    react-native-webgpu: 0.14.2
+    react-native-webgpu: 0.17.0
     react-native-windows: ^0.75.0
     react-native-worklets: 0.12.2
     react-test-renderer: 19.0.0
@@ -25423,11 +25423,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-webgpu@npm:0.14.2":
-  version: 0.14.2
-  resolution: "react-native-webgpu@npm:0.14.2"
+"react-native-webgpu@npm:0.17.0":
+  version: 0.17.0
+  resolution: "react-native-webgpu@npm:0.17.0"
   dependencies:
-    react-native-webgpu-dawn: 154.3.0
+    react-native-webgpu-dawn: 157.0.0
   peerDependencies:
     react: "*"
     react-native: ">=0.81.0"
@@ -25438,7 +25438,7 @@ __metadata:
       optional: true
     react-native-worklets:
       optional: true
-  checksum: d1e74cb3cfcca74f07eac27c3f10e4c3f04ea293cb1f5fb7b0320cc499bcc7c5b1226a3834d2f472ea32856ffead3d05d3a0a0bf6e1727b2dbc1a45cf40cfc10
+  checksum: 2ee6f94ab781d76675bc0fba9dcbac5032fe0025dd73671d7a2b0382b3c20c722c54b6c1f8fe749e202283579f3a35b625adfbb12c2562a656ac454ce9df4ddf
   languageName: node
   linkType: hard
 
