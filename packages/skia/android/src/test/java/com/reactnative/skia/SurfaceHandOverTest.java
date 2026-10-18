@@ -67,7 +67,7 @@ public class SurfaceHandOverTest {
     }
 
     private final RecordingHost mHost = new RecordingHost();
-    private final SurfaceHandOver mHandOver = new SurfaceHandOver(mHost, false);
+    private final SurfaceHandOver mHandOver = new SurfaceHandOver(mHost);
 
     @Test
     public void defersArrivalOnlyWhereTheLayerShowsAheadOfTheWindowFrame() {
@@ -144,24 +144,17 @@ public class SurfaceHandOverTest {
     }
 
     @Test
-    public void firstSurfaceReplacingACanvasOnScreenHoldsNothing() {
-        SurfaceHandOver replacing = new SurfaceHandOver(mHost, true);
-        replacing.onSurfaceCreated(true);
-        assertEquals(Arrays.asList(Call.CREATED), mHost.calls);
-        assertEquals(0, mHost.afterFrameCommit.size());
-    }
-
-    @Test
-    public void laterSurfaceOfAReplacingViewHoldsItsFirstFrameForTheWindowFrame() {
-        SurfaceHandOver replacing = new SurfaceHandOver(mHost, true);
-        replacing.onSurfaceCreated(true);
-        replacing.onSurfaceReleased();
-        replacing.onSurfaceCreated(true);
-        assertEquals(Arrays.asList(Call.CREATED, Call.DESTROYED, Call.HELD, Call.CREATED), mHost.calls);
+    public void surfaceArrivingAgainHoldsItsFirstFrameForItsOwnWindowFrame() {
+        mHandOver.onSurfaceCreated(true);
+        mHost.commitWindowFrame();
+        mHandOver.onSurfaceReleased();
+        mHandOver.onSurfaceCreated(true);
+        assertEquals(Arrays.asList(Call.HELD, Call.CREATED, Call.RELEASED, Call.DESTROYED, Call.HELD, Call.CREATED),
+                mHost.calls);
 
         mHost.commitWindowFrame();
-        assertEquals(Arrays.asList(Call.CREATED, Call.DESTROYED, Call.HELD, Call.CREATED, Call.RELEASED),
-                mHost.calls);
+        assertEquals(Arrays.asList(Call.HELD, Call.CREATED, Call.RELEASED, Call.DESTROYED, Call.HELD, Call.CREATED,
+                Call.RELEASED), mHost.calls);
     }
 
     @Test

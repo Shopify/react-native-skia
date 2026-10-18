@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Switch, Text, View } from "react-native";
-import type { AndroidSurfaceType } from "react-native-skia";
+import {
+  Platform,
+  Pressable,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from "react-native";
+import type { AndroidBackingView, AndroidCanvasProps } from "react-native-skia";
 import {
   Canvas,
   Circle,
@@ -19,17 +26,39 @@ import {
 
 // Exercises the Android backing views. The canvas is drawn with rounded
 // corners inside a clipping parent and over a striped background, with an RN
-// view stacked on top of it. This makes the difference between the two views
-// visible at a glance: a TextureView keeps the clip, the alpha and the
-// stacking order, while a SurfaceView punches through all of them. The
-// zOrderOnTop switch then moves the SurfaceView above the whole window. The
-// shown switch puts a plain screen in the canvas's place and swaps the canvas
-// back in one frame; the canvas mounts again while hidden, so it has its
-// picture before the swap gives it a surface, as on a screen navigated to.
+// view stacked on top of it, and, while it is a SurfaceView, a second
+// SurfaceView canvas (a stand-in for a video player) overlapping its corner.
+// This makes the difference between the views visible at a glance: a
+// TextureView keeps the clip, the alpha and the stacking order, while a
+// SurfaceView punches through all of them. The zOrderOnTop switch then moves
+// the SurfaceView above the whole window, and zOrderMediaOverlay above the
+// other SurfaceView. The shown switch puts a plain screen in the canvases'
+// place and swaps them back in one frame; they mount again while hidden, so
+// they have their pictures before the swap gives them surfaces, as on a
+// screen navigated to.
 
-type SurfaceType = "auto" | AndroidSurfaceType;
+const backingViews: AndroidBackingView[] = [
+  "TextureView",
+  "SurfaceView",
+  "HardwareBufferView",
+];
 
-const surfaceTypes: SurfaceType[] = ["auto", "SurfaceView", "TextureView"];
+// The options of each kind of view, see AndroidCanvasProps.
+const androidProps = (
+  backingView: AndroidBackingView,
+  opaque: boolean,
+  zOrderOnTop: boolean,
+  zOrderMediaOverlay: boolean
+): AndroidCanvasProps => {
+  switch (backingView) {
+    case "SurfaceView":
+      return { backingView, opaque, zOrderOnTop, zOrderMediaOverlay };
+    case "TextureView":
+      return { backingView, opaque };
+    case "HardwareBufferView":
+      return { backingView };
+  }
+};
 
 const Stripes = () => (
   <View style={StyleSheet.absoluteFill} pointerEvents="none">
@@ -43,9 +72,11 @@ const Stripes = () => (
 );
 
 export const AndroidViews = () => {
-  const [surfaceType, setSurfaceType] = useState<SurfaceType>("auto");
+  const [backingView, setBackingView] =
+    useState<AndroidBackingView>("TextureView");
   const [opaque, setOpaque] = useState(false);
   const [zOrderOnTop, setZOrderOnTop] = useState(false);
+  const [zOrderMediaOverlay, setZOrderMediaOverlay] = useState(false);
   const [shown, setShown] = useState(true);
   const [hiddenCount, setHiddenCount] = useState(0);
   const [animate, setAnimate] = useState(true);
@@ -69,65 +100,93 @@ export const AndroidViews = () => {
     [frameRate]
   );
   const font = useFont(require("../../assets/SF-Mono-Semibold.otf"), 18);
+  // The backing view is created when the canvas mounts, so a change of the
+  // chips remounts it. opaque applies in place on any view; the z-order
+  // switches only matter to a SurfaceView, which Android 11 and later moves
+  // in place and older releases read at mount.
+  const surfaceView = backingView === "SurfaceView";
+  const zOrderAtMount = surfaceView && Number(Platform.Version) < 30;
+  const backingKey = `${backingView}-${
+    zOrderAtMount ? `${zOrderOnTop}-${zOrderMediaOverlay}` : ""
+  }`;
+  const android = androidProps(
+    backingView,
+    opaque,
+    zOrderOnTop,
+    zOrderMediaOverlay
+  );
   return (
     <View style={styles.container}>
       <View style={styles.stage}>
         <Stripes />
         {!shown && <View style={styles.plainScreen} />}
-        <View key={hiddenCount} style={[styles.clip, !shown && styles.hidden]}>
-          <Canvas
-            style={styles.canvas}
-            opaque={opaque}
-            android={{
-              surfaceType: surfaceType === "auto" ? undefined : surfaceType,
-              zOrderOnTop,
-            }}
-          >
-            <Fill>
-              <LinearGradient
-                start={vec(0, 0)}
-                end={vec(0, 200)}
-                colors={["rgba(0, 122, 255, 0.6)", "rgba(88, 86, 214, 0.6)"]}
-              />
-            </Fill>
-            <Circle cx={animate ? cx : 100} cy={100} r={40} color="white" />
-            {animate && font && (
-              <SkiaText
-                x={24}
-                y={36}
-                text={frameRateLabel}
-                font={font}
-                color="white"
-              />
-            )}
-          </Canvas>
+        <View key={hiddenCount} style={[styles.frame, !shown && styles.hidden]}>
+          <View style={styles.clip}>
+            <Canvas key={backingKey} style={styles.canvas} android={android}>
+              <Fill>
+                <LinearGradient
+                  start={vec(0, 0)}
+                  end={vec(0, 200)}
+                  colors={["rgba(0, 122, 255, 0.6)", "rgba(88, 86, 214, 0.6)"]}
+                />
+              </Fill>
+              <Circle cx={animate ? cx : 100} cy={100} r={40} color="white" />
+              {animate && font && (
+                <SkiaText
+                  x={24}
+                  y={36}
+                  text={frameRateLabel}
+                  font={font}
+                  color="white"
+                />
+              )}
+            </Canvas>
+          </View>
+          {surfaceView && (
+            <Canvas
+              key={`other-${backingKey}`}
+              style={styles.otherSurface}
+              android={{ backingView: "SurfaceView" }}
+            >
+              <Fill color="#34c759" />
+              {font && (
+                <SkiaText
+                  x={12}
+                  y={28}
+                  text="other SurfaceView"
+                  font={font}
+                  color="white"
+                />
+              )}
+            </Canvas>
+          )}
         </View>
         <View style={styles.overlay} pointerEvents="none">
           <Text style={styles.overlayText}>RN view above the canvas</Text>
         </View>
       </View>
       <View style={styles.controls}>
-        <Text style={styles.label}>android.surfaceType</Text>
+        <Text style={styles.label}>android.backingView</Text>
         <View style={styles.row}>
-          {surfaceTypes.map((type) => (
+          {backingViews.map((view) => (
             <Pressable
-              key={type}
-              onPress={() => setSurfaceType(type)}
-              style={[styles.chip, type === surfaceType && styles.chipActive]}
+              key={view}
+              onPress={() => setBackingView(view)}
+              style={[styles.chip, view === backingView && styles.chipActive]}
             >
               <Text
                 style={[
                   styles.chipText,
-                  type === surfaceType && styles.chipTextActive,
+                  view === backingView && styles.chipTextActive,
                 ]}
               >
-                {type}
+                {view}
               </Text>
             </Pressable>
           ))}
         </View>
         <View style={styles.row}>
-          <Text style={styles.label}>opaque</Text>
+          <Text style={styles.label}>android.opaque</Text>
           <Switch value={opaque} onValueChange={setOpaque} />
         </View>
         <View style={styles.row}>
@@ -135,6 +194,15 @@ export const AndroidViews = () => {
             android.zOrderOnTop (SurfaceView only)
           </Text>
           <Switch value={zOrderOnTop} onValueChange={setZOrderOnTop} />
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>
+            android.zOrderMediaOverlay (SurfaceView only)
+          </Text>
+          <Switch
+            value={zOrderMediaOverlay}
+            onValueChange={setZOrderMediaOverlay}
+          />
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>shown</Text>
@@ -153,9 +221,13 @@ export const AndroidViews = () => {
           <Switch value={animate} onValueChange={setAnimate} />
         </View>
         <Text style={styles.hint}>
-          auto picks SurfaceView when opaque and TextureView otherwise. A
-          SurfaceView ignores the rounded clip and the overlay; with zOrderOnTop
-          it also covers the controls when they overlap.
+          The backing view is created when the canvas mounts: a chip remounts
+          the canvas (HardwareBufferView is not available in Skia yet and falls
+          back to a TextureView, with a warning). opaque applies in place, and
+          so do the z-order switches on Android 11 and later. A SurfaceView
+          ignores the rounded clip and the overlay; with zOrderOnTop it also
+          covers the controls when they overlap, and with zOrderMediaOverlay it
+          moves above the other SurfaceView.
         </Text>
       </View>
     </View>
@@ -175,6 +247,10 @@ const styles = StyleSheet.create({
   stripe: {
     flex: 1,
   },
+  frame: {
+    width: 260,
+    height: 200,
+  },
   clip: {
     width: 260,
     height: 200,
@@ -192,6 +268,13 @@ const styles = StyleSheet.create({
   canvas: {
     width: 260,
     height: 200,
+  },
+  otherSurface: {
+    position: "absolute",
+    right: -40,
+    bottom: -30,
+    width: 180,
+    height: 90,
   },
   overlay: {
     position: "absolute",

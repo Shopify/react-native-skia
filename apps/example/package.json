@@ -35,7 +35,7 @@
     "react-native": "0.83.1",
     "react-native-gesture-handler": "^2.24.0",
     "react-native-macos": "^0.81.8",
-    "react-native-reanimated": "4.3.1",
+    "react-native-reanimated": "4.6.0",
     "react-native-safe-area-context": "^5.2.0",
     "react-native-screens": "^4.10.0",
     "react-native-skia": "workspace:*",
@@ -43,7 +43,7 @@
     "react-native-web": "^0.21.2",
     "react-native-webgpu": "0.14.2",
     "react-native-windows": "^0.75.0",
-    "react-native-worklets": "0.8.3",
+    "react-native-worklets": "0.12.2",
     "three": "0.184.0"
   },
   "devDependencies": {
@@ -70,7 +70,7 @@
     "jest-transform-stub": "^2.0.0",
     "playwright": "1.59.0",
     "prettier": "2.8.8",
-    "react-native-test-app": "4.4.7",
+    "react-native-test-app": "5.4.13",
     "react-test-renderer": "19.0.0",
     "typescript": "^5.2.2"
   },

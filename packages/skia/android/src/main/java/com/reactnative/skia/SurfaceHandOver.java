@@ -7,9 +7,7 @@ package com.reactnative.skia;
  * once shows over the screen that window frame replaces. There a canvas
  * arriving on screen gets its surface at once, so that the surface is set up
  * and its first frame recorded before that window frame, but presents nothing
- * until the frame commits. A view replacing a canvas already on screen
- * presents at once: its layer shows the last frame where the window still
- * shows the old view. Android 12L and later show the layer with the window
+ * until the frame commits. Android 12L and later show the layer with the window
  * frame, and a layer behind the window shows only through the hole the window
  * frame punches. Main thread.
  */
@@ -36,14 +34,12 @@ final class SurfaceHandOver {
     }
 
     private final Host mHost;
-    private boolean mReplacesCanvasOnScreen;
     private int mGeneration = 0;
     private boolean mHandedOver = false;
     private boolean mFirstFrameHeld = false;
 
-    SurfaceHandOver(Host host, boolean replacesCanvasOnScreen) {
+    SurfaceHandOver(Host host) {
         mHost = host;
-        mReplacesCanvasOnScreen = replacesCanvasOnScreen;
     }
 
     /**
@@ -57,9 +53,7 @@ final class SurfaceHandOver {
 
     void onSurfaceCreated(boolean defersArrivalToWindowFrame) {
         int generation = ++mGeneration;
-        boolean arriving = !mReplacesCanvasOnScreen;
-        mReplacesCanvasOnScreen = false;
-        if (defersArrivalToWindowFrame && arriving) {
+        if (defersArrivalToWindowFrame) {
             mFirstFrameHeld = true;
             mHost.holdFirstFrame();
             mHost.runAfterWindowFrameCommits(() -> releaseFirstFrame(generation));

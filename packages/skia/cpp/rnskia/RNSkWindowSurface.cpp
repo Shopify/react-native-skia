@@ -116,6 +116,21 @@ int RNSkWindowSurface::getHeight() {
   return _hasTargetInfo ? _targetInfo.height : 0;
 }
 
+void RNSkWindowSurface::setHighBitDepth(bool highBitDepth) {
+  std::lock_guard<std::mutex> lock(_targetInfoMutex);
+  _knownHighBitDepth = highBitDepth;
+  _hasKnownHighBitDepth = true;
+}
+
+bool RNSkWindowSurface::getHighBitDepth(bool *highBitDepth) {
+  std::lock_guard<std::mutex> lock(_targetInfoMutex);
+  if (!_hasKnownHighBitDepth) {
+    return false;
+  }
+  *highBitDepth = _knownHighBitDepth;
+  return true;
+}
+
 bool RNSkWindowSurface::getTargetInfo(RNSkGraphiteTargetInfo *info) {
   std::lock_guard<std::mutex> lock(_targetInfoMutex);
   if (!_hasTargetInfo) {
@@ -137,6 +152,10 @@ void RNSkWindowSurface::updateTargetInfo() {
   _targetInfo.useP3ColorSpace = _useP3ColorSpace;
   _targetInfo.textureInfo = getTextureInfo();
   _hasTargetInfo = true;
+  // What the surface granted, kept once the window is detached: it is what
+  // the window comes back with.
+  _knownHighBitDepth = _colorType == DawnUtils::HighBitDepthColorType;
+  _hasKnownHighBitDepth = true;
 }
 
 skgpu::graphite::TextureInfo RNSkWindowSurface::getTextureInfo() const {

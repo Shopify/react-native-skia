@@ -4,7 +4,12 @@ import type { SkRect } from "../skia/types";
 import SkiaViewNativeComponent from "../specs/SkiaViewNativeComponent";
 
 import { SkiaViewApi } from "./api";
-import { androidNativeProps } from "./android";
+import {
+  androidNativeProps,
+  warnBackingViewAtMount,
+  warnBackingViewChange,
+} from "./android";
+import type { BackingViewProps } from "./android";
 import type { SkiaPictureViewNativeProps } from "./types";
 import { SkiaViewNativeId } from "./SkiaViewNativeId";
 
@@ -22,6 +27,8 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
   constructor(props: SkiaPictureViewProps) {
     super(props);
     this._nativeId = SkiaViewNativeId.current++;
+    this.mountProps = props;
+    warnBackingViewAtMount(props);
     const { picture } = props;
     if (picture) {
       assertSkiaViewApi();
@@ -31,12 +38,15 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
   }
 
   private _nativeId: number;
+  // What the Android backing view was chosen from, see warnBackingViewChange.
+  private mountProps: BackingViewProps;
 
   public get nativeId() {
     return this._nativeId;
   }
 
   componentDidUpdate(prevProps: SkiaPictureViewProps) {
+    warnBackingViewChange(this.mountProps, prevProps, this.props);
     const { picture } = this.props;
     if (picture !== prevProps.picture) {
       assertSkiaViewApi();
@@ -80,7 +90,6 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
     const {
       mode: _mode,
       picture: _picture,
-      opaque = false,
       highBitDepth = false,
       android,
       ...viewProps
@@ -89,9 +98,8 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
       <SkiaViewNativeComponent
         collapsable={false}
         nativeID={`${this._nativeId}`}
-        opaque={opaque}
         highBitDepth={highBitDepth}
-        {...androidNativeProps(android)}
+        {...androidNativeProps({ highBitDepth, android })}
         {...viewProps}
       />
     );
