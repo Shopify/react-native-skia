@@ -471,7 +471,7 @@ The texture must be created with `COPY_DST`; `RENDER_ATTACHMENT` lets React Nati
 `drawElementImageToTexture()` also takes a source rectangle, a destination size and origin, and works from a worklet runtime: see its [documentation](https://wcandillon.github.io/react-native-webgpu/api/draw-element-image-to-texture) for the details, and for what each platform includes in a snapshot.
 
 On Android, a `SurfaceView` is composed outside the view hierarchy and comes out blank in a snapshot.
-A Skia `Canvas` is backed by a `TextureView` unless it is `opaque`, in which case give it `android={{ surfaceType: "TextureView" }}` to appear in snapshots (the same applies to a React Native WebGPU `Canvas`).
+A Skia `Canvas` is backed by a `TextureView` unless its `android.backingView` asks for a `SurfaceView`: keep the default for a canvas that must appear in snapshots (the same applies to a React Native WebGPU `Canvas`).
 
 On the Web, rasterize the DOM node into a canvas (for instance with [html2canvas](https://html2canvas.hertzen.com/)) and pass the canvas to `Skia.Image.MakeImageFromNativeBuffer()`.
 
