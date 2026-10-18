@@ -177,36 +177,10 @@ public:
       return;
     }
     _redrawRequested = false;
-    // Declarative content is recorded again for the surface as it is now.
-    const bool frameComing = _producer->requestFrame();
-    auto target = getTarget();
-    if (target == nullptr) {
-      return;
-    }
-    auto recordings = target->takeQueued();
-    if (recordings.empty()) {
-      // With a frame on its way, the layer keeps showing the last one until
-      // it lands: presenting it again would only cost a second present.
-      // Otherwise the last frame is presented again, also onto a surface of
-      // another size (the view was resized and nothing records for it): the
-      // frame then shows at its own size rather than nothing at all.
-      std::shared_ptr<RNSkGraphiteRecording> lastPresented;
-      {
-        std::lock_guard<std::mutex> lock(_mutex);
-        lastPresented = _lastPresented;
-      }
-      if (frameComing || lastPresented == nullptr) {
-        return;
-      }
-      recordings.push_back(std::move(lastPresented));
-    }
-    if (presentOrKeep(*target, targetInfo, recordings) &&
-        !_surface->hasHeldFrame()) {
-      return;
-    }
     // Not scheduleFrame(): without a scheduler it redraws, which would fail
     // again and recurse.
-    if (_frameScheduler) {
+    if ((!presentLatest(targetInfo) || _surface->hasHeldFrame()) &&
+        _frameScheduler) {
       _frameScheduler();
     }
   }
@@ -376,6 +350,38 @@ private:
         }
       }
     });
+  }
+
+  /**
+   Presents what a redraw shows: everything queued, else the last frame again
+   unless a new one is coming. Returns false when the window could not take a
+   frame, which is then queued again.
+   */
+  bool presentLatest(const RNSkGraphiteTargetInfo &targetInfo) {
+    // Declarative content is recorded again for the surface as it is now.
+    const bool frameComing = _producer->requestFrame();
+    auto target = getTarget();
+    if (target == nullptr) {
+      return true;
+    }
+    auto recordings = target->takeQueued();
+    if (recordings.empty()) {
+      // With a frame on its way, the layer keeps showing the last one until
+      // it lands: presenting it again would only cost a second present.
+      // Otherwise the last frame is presented again, also onto a surface of
+      // another size (the view was resized and nothing records for it): the
+      // frame then shows at its own size rather than nothing at all.
+      std::shared_ptr<RNSkGraphiteRecording> lastPresented;
+      {
+        std::lock_guard<std::mutex> lock(_mutex);
+        lastPresented = _lastPresented;
+      }
+      if (frameComing || lastPresented == nullptr) {
+        return true;
+      }
+      recordings.push_back(std::move(lastPresented));
+    }
+    return presentOrKeep(*target, targetInfo, recordings);
   }
 
   /**
