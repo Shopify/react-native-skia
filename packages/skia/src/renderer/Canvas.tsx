@@ -62,28 +62,19 @@ export const useCanvasSize = () => {
 
 export interface CanvasProps extends ViewProps {
   /**
-   * Declares that the canvas covers every pixel of its bounds, so nothing
-   * behind it needs to show through. On Android an opaque canvas is backed by
-   * a `SurfaceView` by default, the cheapest path (see `android.surfaceType`);
-   * that choice is made when the canvas mounts, a later change of `opaque`
-   * only updates the backing view in place (except on a `SurfaceView` with
-   * `highBitDepth`, where the pair selects the buffer format and both are
-   * read at mount). Defaults to false.
-   */
-  opaque?: boolean;
-  /**
    * Renders into a surface with more than 8 bits per channel (16-bit float on
    * iOS, 10-bit on Android) to avoid banding in subtle gradients. Colors are
    * identical to the default 8-bit surface, only with more precision (this is
-   * about bit depth, not HDR). On Android the extra precision survives
-   * composition only when combined with `opaque`, and both props are read
-   * once, when the canvas mounts.
+   * about bit depth, not HDR). On Android it needs a `SurfaceView` (see
+   * `android.backingView`), which it makes opaque, as the 10-bit format only
+   * has 2 bits of alpha; it is read once, when the canvas mounts.
    */
   highBitDepth?: boolean;
   /**
-   * Android-only rendering options. They select the backing view, which is
-   * chosen when the canvas mounts and kept: a later change is ignored, with a
-   * warning in development. Remount the canvas, with a `key`, to change it.
+   * Android-only rendering options: the native view behind the canvas and its
+   * options, see {@link AndroidCanvasProps}. The view is created when the
+   * canvas mounts and kept: a change of `backingView` is ignored, with a
+   * warning in development; remount the canvas, with a `key`, to change it.
    * Ignored on iOS and web.
    */
   android?: AndroidCanvasProps;
@@ -168,7 +159,6 @@ const useCanvasRoot = ({
  * by `onLayout` (see `useCanvasSize`).
  */
 export const Canvas = ({
-  opaque,
   children,
   highBitDepth = false,
   android,
@@ -176,15 +166,14 @@ export const Canvas = ({
   ...viewProps
 }: CanvasProps) => {
   const { nativeId, viewRef } = useCanvasRoot({ children, ref });
-  useBackingViewWarning({ opaque, highBitDepth, android });
+  useBackingViewWarning({ highBitDepth, android });
   return (
     <SkiaViewNativeComponent
       ref={viewRef}
       collapsable={false}
       nativeID={`${nativeId}`}
-      opaque={opaque}
       highBitDepth={highBitDepth}
-      {...androidNativeProps(android)}
+      {...androidNativeProps({ highBitDepth, android })}
       {...viewProps}
     />
   );
