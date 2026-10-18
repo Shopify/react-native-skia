@@ -25416,13 +25416,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-webgpu-dawn@npm:154.3.0":
-  version: 154.3.0
-  resolution: "react-native-webgpu-dawn@npm:154.3.0"
-  checksum: 29a03a1c88e046413395e1cca965dbcce10146387e24540c59b00e25d069402667ecbf8bf971a66bc69e8d1ae369ca3c63fa0d0af903ff01ee1b16f2aa0dfb65
-  languageName: node
-  linkType: hard
-
 "react-native-webgpu-dawn@npm:157.0.0":
   version: 157.0.0
   resolution: "react-native-webgpu-dawn@npm:157.0.0"
