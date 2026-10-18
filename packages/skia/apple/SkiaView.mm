@@ -306,8 +306,8 @@ static bool appIsBackgrounded() {
       [[RCTConvert NSString:RCTNSStringFromString(newProps.nativeId)] intValue];
   [self bindNativeId:nativeId];
   [self setHighBitDepth:newProps.highBitDepth];
-  // opaque, androidSurfaceType and androidZOrderOnTop select the backing view
-  // on Android; a CAMetalLayer composites like any other layer.
+  // The android* props (backing view, opacity, z-order) select and set up the
+  // backing view on Android; a CAMetalLayer composites like any other layer.
 }
 
 // Not setNativeId:, which is the setter of RCTViewComponentView's nativeId
