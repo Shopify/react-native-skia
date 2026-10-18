@@ -41,7 +41,7 @@ jobs:
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       - run: pip install cpplint
-      - run: cpplint --linelength=230 --filter=-legal/copyright,-whitespace/indent,-whitespace/comments,-whitespace/ending_newline,-build/include_order,-runtime/references,-readability/todo,-whitespace/blank_line,-whitespace/todo,-runtime/int,-build/c++11,-whitespace/parens,-build/include_what_you_use --exclude=packages/skia/cpp/skia --exclude=packages/skia/cpp/dawn --recursive packages/skia/cpp packages/skia/android/cpp
+      - run: cpplint --linelength=230 --filter=-legal/copyright,-whitespace/indent,-whitespace/comments,-whitespace/ending_newline,-build/include_order,-runtime/references,-readability/todo,-whitespace/blank_line,-whitespace/todo,-runtime/int,-build/c++11,-whitespace/parens,-build/include_what_you_use --exclude=packages/skia/cpp/skia --exclude=packages/skia/cpp/dawn --recursive packages/skia/cpp packages/skia/android/cpp packages/skia/tests/cpp
 
       - name: Lint files
         run: yarn lint
@@ -64,6 +64,10 @@ jobs:
 
       - name: Test
         run: yarn test
+
+      - name: Run the C++ unit tests
+        working-directory: packages/skia
+        run: yarn test:cpp
 
   test-web:
     runs-on: ubuntu-latest

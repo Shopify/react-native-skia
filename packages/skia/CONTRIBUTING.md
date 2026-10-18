@@ -219,6 +219,7 @@ In the `packages/skia` folder, we have several scripts set up to help you mainta
 - `yarn lint`: lints the code for potential errors and to ensure consistency with our coding standards.
 - `yarn tsc`: runs the TypeScript compiler to check for typing issues.
 - `yarn test`: executes the unit tests to ensure existing features work as expected after changes.
+- `yarn test:cpp`: builds and runs the C++ unit tests in `tests/cpp` on the host, with CMake and GoogleTest.
 - `yarn e2e`: runs end-to-end tests. For these tests to run properly, you need to have the example app running. Use `yarn ios` or `yarn android` in the `apps/example` folder and navigate to the Tests screen within the app.
 
 ### Running End-to-End Tests
