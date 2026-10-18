@@ -4,7 +4,11 @@ import type { SkRect } from "../skia/types";
 import SkiaViewNativeComponent from "../specs/SkiaViewNativeComponent";
 
 import { SkiaViewApi } from "./api";
-import { androidNativeProps, warnBackingViewChange } from "./android";
+import {
+  androidNativeProps,
+  warnBackingViewAtMount,
+  warnBackingViewChange,
+} from "./android";
 import type { BackingViewProps } from "./android";
 import type { SkiaPictureViewNativeProps } from "./types";
 import { SkiaViewNativeId } from "./SkiaViewNativeId";
@@ -24,6 +28,7 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
     super(props);
     this._nativeId = SkiaViewNativeId.current++;
     this.mountProps = props;
+    warnBackingViewAtMount(props);
     const { picture } = props;
     if (picture) {
       assertSkiaViewApi();
@@ -85,7 +90,6 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
     const {
       mode: _mode,
       picture: _picture,
-      opaque = false,
       highBitDepth = false,
       android,
       ...viewProps
@@ -94,9 +98,8 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
       <SkiaViewNativeComponent
         collapsable={false}
         nativeID={`${this._nativeId}`}
-        opaque={opaque}
         highBitDepth={highBitDepth}
-        {...androidNativeProps(android)}
+        {...androidNativeProps({ highBitDepth, android })}
         {...viewProps}
       />
     );

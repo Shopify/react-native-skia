@@ -64,7 +64,7 @@ describe("Canvas ref", () => {
     const canvas = mount(<Canvas ref={ref} />);
     const handle = ref.current;
     expect(handle).not.toBeNull();
-    canvas.render(<Canvas ref={ref} opaque />);
+    canvas.render(<Canvas ref={ref} />);
     expect(ref.current).toBe(handle);
     canvas.unmount();
   });
@@ -72,7 +72,7 @@ describe("Canvas ref", () => {
   it("calls a callback ref with its handle on mount and null on unmount, only", () => {
     const recordHandle = jest.fn();
     const canvas = mount(<Canvas ref={recordHandle} />);
-    canvas.render(<Canvas ref={recordHandle} opaque />);
+    canvas.render(<Canvas ref={recordHandle} />);
     canvas.render(<Canvas ref={recordHandle} />);
     canvas.unmount();
     expect(recordHandle.mock.calls).toEqual([[expect.anything()], [null]]);
