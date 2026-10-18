@@ -152,6 +152,7 @@ Each frame goes straight to the system compositor as its own layer, with no extr
 The price is that it is not really view content: it punches a hole through the window, so parent transforms, clipping, rounded corners, and z-ordering with sibling views do not apply to it.
 Use it for a canvas that is a plain rectangle: a full-screen scene, a game, a video-like surface.
 On an adaptive display (Android 11 and later) the canvas asks for the display's highest refresh rate while it animates, as the window does for regular views, and lets the rate drop again once the animation stops.
+Up to Android 12 (API 31), a `SurfaceView` canvas that unmounts can leave black where it was for a frame: the `SurfaceView` removes its layer before the window frame without it lands, and nothing the canvas does can delay that. Keep the default `TextureView` for a canvas that unmounts while on screen there.
 
 **`HardwareBufferView`** is a plain view that draws each frame's `AHardwareBuffer` inline: composited like a `TextureView`, without its extra copy.
 React Native WebGPU offers it as an opt-in on Android 10 and later; React Native Skia accepts the value, so both canvases take the same options, but does not implement it yet: the canvas uses a `TextureView`, with a warning in development.
