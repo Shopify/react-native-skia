@@ -133,18 +133,11 @@ If you need to produce the frames yourself, from the thread of your choice, use 
 ## High refresh rate displays
 
 The view presents at the rate of the display it is on, 120 Hz on a ProMotion iPhone or iPad.
-On iPhone, iOS caps every app at 60 Hz until its `Info.plist` opts in:
+Reanimated values and worklets run at the display's rate, so a canvas animated with them shows every frame the display can.
 
-```xml
-<key>CADisableMinimumFrameDurationOnPhone</key>
-<true/>
-```
-
-With Expo, add the key under `ios.infoPlist` in `app.json`.
-Without it, a canvas presents 60 frames per second on an iPhone however fast its animations run.
+An app created from an Expo or React Native template before React Native 0.82 may still carry iOS's 60 Hz cap for iPhone: [Reanimated's performance guide](https://docs.swmansion.com/react-native-reanimated/docs/guides/performance/#-enable-120-fps) covers the `Info.plist` opt-in.
 
 React Native's `requestAnimationFrame` on the JS thread runs at 60 Hz on iOS, so frames recorded from it, as in a [Graphite View](/docs/canvas/graphite) fed from the JS thread, are presented at that rate.
-Reanimated values and worklets run at the display's rate.
 
 ## Android rendering options
 
