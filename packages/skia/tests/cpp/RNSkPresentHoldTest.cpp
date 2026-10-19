@@ -357,7 +357,7 @@ TEST(RNSkPresentHoldTest, PresentsAtMostOneFrameATickInEverySequence) {
   }
 }
 
-TEST(RNSkPresentHoldTest, TakesAFrameOnceTheGpuIsDoneAndATickCameInEverySequence) {
+TEST(RNSkPresentHoldTest, TakesAFrameAfterTheGpuAndATickInEverySequence) {
   for (PresentHold hold : kHolds) {
     size_t held = 0;
     forEachSequence(hold, [hold, &held](const std::vector<Event> &sequence,
