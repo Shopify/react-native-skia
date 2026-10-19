@@ -79,7 +79,7 @@ A few rules follow from this model:
 - Recordings are presented in submission order and never dropped. A later frame may sample a texture an earlier frame uploaded, so when the main thread falls behind, the queued frames are replayed in order and only the last one stays visible. This holds for a frame submitted before the native view exists, whether or not you keep the context: the view owns its recording state natively for as long as it is mounted, and `getContext()` hands out a context to it at any time. A recording made for another size than the surface has by the time it is presented (recorded before the view had a surface, or the view was resized since) still shows, at the cost of an extra copy for that frame.
 - The producer clears the canvas. A recording draws on top of what the view shows, which also lets you record only the parts that changed.
 - GPU-backed images (offscreen surface snapshots, native buffers, video frames, [WebGPU textures](/docs/webgpu)) can be drawn from any runtime. Their content is uploaded when they are created, so create them before the frame that uses them.
-- A loop on the Reanimated UI runtime or on a worklet runtime runs at the display's rate. On iOS, React Native's `requestAnimationFrame` on the JS thread runs at 60 Hz, so a view fed from it presents at that rate (see [High refresh rate displays](/docs/canvas/canvas#high-refresh-rate-displays)).
+- A loop on the Reanimated UI runtime or on a worklet runtime runs at the display's rate. On iOS, React Native's `requestAnimationFrame` on the JS thread runs at 60 Hz, so a view fed from it presents at that rate (see [High refresh rate displays](/docs/canvas/overview#high-refresh-rate-displays)).
 
 ## Snapshots
 
