@@ -370,18 +370,31 @@ public:
   int save() { return _canvas->save(); }
 
   JSI_HOST_FUNCTION(saveLayer) {
-    SkPaint *paint = (count >= 1 && !arguments[0].isUndefined())
-                         ? JsiSkPaint::fromValue(runtime, arguments[0]).get()
-                         : nullptr;
-    SkRect *bounds =
-        count >= 2 && !arguments[1].isNull() && !arguments[1].isUndefined()
-            ? JsiSkRect::fromValue(runtime, arguments[1]).get()
+    // Keep the wrapper smart pointers alive for the duration of the call:
+    // JsiSkRect::fromValue() (and, in principle, the others) returns a
+    // freshly allocated temporary when the argument is a plain JS object
+    // rather than a host object, so taking .get() from the temporary left a
+    // dangling pointer once the expression finished evaluating. On devices
+    // the freed rect read back as zeros, so a layer given plain-object
+    // bounds drew nothing (#4286). Backport of #4063.
+    std::shared_ptr<SkPaint> paintPtr =
+        (count >= 1 && !arguments[0].isNull() && !arguments[0].isUndefined())
+            ? JsiSkPaint::fromValue(runtime, arguments[0])
             : nullptr;
-    SkImageFilter *backdrop =
-        count >= 3 && !arguments[2].isNull() && !arguments[2].isUndefined()
-            ? JsiSkImageFilter::fromValue(runtime, arguments[2]).get()
+    std::shared_ptr<SkRect> boundsPtr =
+        (count >= 2 && !arguments[1].isNull() && !arguments[1].isUndefined())
+            ? JsiSkRect::fromValue(runtime, arguments[1])
             : nullptr;
-    SkCanvas::SaveLayerFlags flags = count >= 4 ? arguments[3].asNumber() : 0;
+    sk_sp<SkImageFilter> backdropPtr =
+        (count >= 3 && !arguments[2].isNull() && !arguments[2].isUndefined())
+            ? JsiSkImageFilter::fromValue(runtime, arguments[2])
+            : nullptr;
+    SkPaint *paint = paintPtr.get();
+    SkRect *bounds = boundsPtr.get();
+    SkImageFilter *backdrop = backdropPtr.get();
+    SkCanvas::SaveLayerFlags flags =
+        (count >= 4 && !arguments[3].isUndefined()) ? arguments[3].asNumber()
+                                                    : 0;
     return jsi::Value(_canvas->saveLayer(
         SkCanvas::SaveLayerRec(bounds, paint, backdrop, flags)));
   }
