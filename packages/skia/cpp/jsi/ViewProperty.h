@@ -26,7 +26,7 @@ public:
   /**
    * Probes the JS value for the native objects a view can display (a picture
    * or a recorder); anything else yields an empty property. Defined in
-   * ViewProperty.cpp so that this header (included by every platform view)
+   * RNSkManager.cpp so that this header (included by every platform view)
    * does not pull in the recorder headers.
    */
   ViewProperty(jsi::Runtime &runtime, const jsi::Value &value);
