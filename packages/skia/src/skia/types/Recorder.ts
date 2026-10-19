@@ -65,10 +65,7 @@ export interface BaseRecorder {
   saveBackdropFilter(): void;
   drawBox(
     boxProps: AnimatedProps<BoxProps>,
-    shadows: {
-      props: BoxShadowProps;
-      animatedProps?: Record<string, SharedValue<unknown>>;
-    }[]
+    shadows: AnimatedProps<BoxShadowProps>[]
   ): void;
   drawImage(props: AnimatedProps<ImageProps>): void;
   drawCircle(props: AnimatedProps<CircleProps>): void;
@@ -93,9 +90,17 @@ export interface BaseRecorder {
 }
 
 export interface JsiRecorder extends BaseRecorder {
-  play(picture: SkPicture): void;
-  applyUpdates(variables: SharedValue<unknown>[]): void;
-  reset(): void;
+  /**
+   * Plays the recording into a picture, on the calling thread, with the
+   * values the shared values had when they were recorded.
+   */
+  makePicture(): SkPicture;
+  /**
+   * The shared values the recording reads, in the order
+   * `SkiaViewApi.applyUpdates` expects them. The recording hands them out
+   * once and lets go of them.
+   */
+  getSharedValues(): SharedValue<unknown>[];
   /**
    * Unique id of the native recording, used to tag the updates sent to the
    * view that owns it.

@@ -40,7 +40,7 @@ export class SkiaSGRoot {
 
   get sg() {
     const children = this.container.root;
-    return { type: NodeType.Group, props: {}, children, isDeclaration: false };
+    return { type: NodeType.Group, props: {}, children };
   }
 
   private updateContainer(element: ReactNode) {
@@ -51,10 +51,13 @@ export class SkiaSGRoot {
     });
   }
 
+  /**
+   * Commits the element. The container records the scene graph at the end
+   * of every commit (resetAfterCommit), this one included.
+   */
   async render(element: ReactNode) {
     this.container.mount();
     await this.updateContainer(element);
-    this.container.redraw();
   }
 
   drawOnCanvas(canvas: SkCanvas) {

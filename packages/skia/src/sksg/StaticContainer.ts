@@ -9,9 +9,13 @@ import { createDrawingContext } from "./Recorder/DrawingContext";
 
 import "../views/api";
 
+/**
+ * Holds the scene graph that React commits and turns it into frames: redraw()
+ * runs after every commit, drawOnCanvas() draws the last one (offscreen
+ * rendering).
+ */
 export abstract class Container {
   private _root: Node[] = [];
-  protected recording: Recording | null = null;
   protected unmounted = false;
 
   constructor(protected Skia: Skia) {}
@@ -32,6 +36,19 @@ export abstract class Container {
     this.unmounted = true;
   }
 
+  abstract drawOnCanvas(canvas: SkCanvas): void;
+
+  abstract redraw(): void;
+}
+
+/**
+ * A container that records the scene graph into a JS command list and
+ * replays it with the JS player: the web and node renderer. On native the
+ * scene is recorded into the native recorder instead (Container.native.ts).
+ */
+export abstract class JsContainer extends Container {
+  protected recording: Recording | null = null;
+
   drawOnCanvas(canvas: SkCanvas) {
     if (!this.recording) {
       throw new Error("No recording to draw");
@@ -50,11 +67,9 @@ export abstract class Container {
       ctx.dispose();
     }
   }
-
-  abstract redraw(): void;
 }
 
-export class StaticContainer extends Container {
+export class StaticContainer extends JsContainer {
   constructor(
     Skia: Skia,
     private nativeId: number

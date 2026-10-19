@@ -1,13 +1,23 @@
-// The native Reanimated container hands its recording to the view (which
-// owns the native recorder) and drives animations through the view id only.
-// These tests pin down that no recorder or picture is captured by a worklet,
-// that the wrapper is disposed once the view owns the recording, and that
-// unmount leaves the view's last frame in place.
+// The native container records the scene into the native recorder. On
+// screen it hands the recording to the view (which owns it) and drives
+// animations through the view id only. These tests pin down that no recorder
+// or picture is captured by a worklet, that the wrapper is disposed once the
+// view owns the recording, that unmount leaves the view's last frame in place,
+// and that offscreen rendering plays the recording into a picture.
 
-type MockRecorder = { id: number; getId: () => number; dispose: jest.Mock };
+type MockPicture = { dispose: jest.Mock };
+type MockRecorder = {
+  id: number;
+  getId: () => number;
+  getSharedValues: () => unknown[];
+  makePicture: () => MockPicture;
+  dispose: jest.Mock;
+};
 
 const mockRecorders: MockRecorder[] = [];
+const mockPictures: MockPicture[] = [];
 let mockSharedValues: unknown[] = [];
+let mockHasReanimated4 = true;
 const mockStartMapper = jest.fn((..._args: unknown[]) => 42);
 const mockStopMapper = jest.fn();
 
@@ -21,67 +31,67 @@ jest.mock("../../external/reanimated/ReanimatedProxy", () => ({
 }));
 
 jest.mock("../../external/reanimated/renderHelpers", () => ({
-  HAS_REANIMATED_3: false,
-  HAS_REANIMATED_4: true,
-  REANIMATED_VERSION_MAJOR: 4,
-}));
-
-jest.mock("../Recorder/ReanimatedRecorder", () => ({
-  ReanimatedRecorder: class {
-    private recorder: MockRecorder = {
-      id: mockRecorders.length,
-      getId() {
-        return this.id;
-      },
-      dispose: jest.fn(),
-    };
-    constructor() {
-      mockRecorders.push(this.recorder);
-    }
-    getSharedValues() {
-      return mockSharedValues;
-    }
-    getRecorder() {
-      return this.recorder;
-    }
+  get HAS_REANIMATED_4() {
+    return mockHasReanimated4;
   },
+  REANIMATED_VERSION_MAJOR: 4,
 }));
 
 jest.mock("../Recorder/Visitor", () => ({ visit: jest.fn() }));
 jest.mock("../../skia/NativeSetup", () => ({}));
 jest.mock("../../views/api", () => ({}));
 
-const setup = () => {
+const mockSkia = {
+  Recorder: (): MockRecorder => {
+    const recorder: MockRecorder = {
+      id: mockRecorders.length,
+      getId() {
+        return this.id;
+      },
+      getSharedValues: () => mockSharedValues,
+      makePicture: () => {
+        const picture = { dispose: jest.fn() };
+        mockPictures.push(picture);
+        return picture;
+      },
+      dispose: jest.fn(),
+    };
+    mockRecorders.push(recorder);
+    return recorder;
+  },
+};
+
+type TestContainer = {
+  redraw: () => void;
+  unmount: () => void;
+  drawOnCanvas: (canvas: unknown) => void;
+};
+
+const setup = (nativeId = 7) => {
   const SkiaViewApi = {
     setJsiProperty: jest.fn(),
     applyUpdates: jest.fn(),
   };
   (globalThis as unknown as { SkiaViewApi: unknown }).SkiaViewApi = SkiaViewApi;
+  let container: TestContainer | null = null;
   // The module reads SkiaViewApi from globalThis when it loads.
   jest.isolateModules(() => {
     const { createContainer } = require("../Container.native");
-    setup.createContainer = createContainer;
+    container = createContainer(mockSkia, nativeId);
   });
-  const container = setup.createContainer({} as never, 7);
-  return { SkiaViewApi, container };
-};
-setup.createContainer = null as unknown as (
-  Skia: never,
-  nativeId: number
-) => {
-  redraw: () => void;
-  unmount: () => void;
-  unmounted: boolean;
+  return { SkiaViewApi, container: container! as TestContainer };
 };
 
 beforeEach(() => {
   mockRecorders.length = 0;
+  mockPictures.length = 0;
   mockSharedValues = [];
+  mockHasReanimated4 = true;
   mockStartMapper.mockClear();
   mockStopMapper.mockClear();
 });
 
-describe("NativeReanimatedContainer", () => {
+describe("NativeContainer", () => {
   it("hands the recorder to the view and starts no mapper for a static scene", () => {
     const { SkiaViewApi, container } = setup();
     container.redraw();
@@ -156,5 +166,31 @@ describe("NativeReanimatedContainer", () => {
     container.redraw();
     expect(mockRecorders).toHaveLength(1);
     expect(mockStartMapper).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports shared values it cannot animate without Reanimated 4", () => {
+    mockSharedValues = [{ value: 0 }];
+    mockHasReanimated4 = false;
+    const { SkiaViewApi, container } = setup();
+    // The recording still reaches the view, with the current values.
+    expect(() => container.redraw()).toThrow(/Reanimated 4/);
+    expect(SkiaViewApi.setJsiProperty).toHaveBeenCalledTimes(1);
+    expect(mockStartMapper).not.toHaveBeenCalled();
+  });
+
+  it("plays the recording into a picture offscreen", () => {
+    const { SkiaViewApi, container } = setup(-1);
+    container.redraw();
+    expect(SkiaViewApi.setJsiProperty).not.toHaveBeenCalled();
+    expect(mockRecorders[0].dispose).toHaveBeenCalledTimes(1);
+    const canvas = { drawPicture: jest.fn() };
+    container.drawOnCanvas(canvas);
+    expect(canvas.drawPicture).toHaveBeenCalledWith(mockPictures[0]);
+    // A new commit replaces the picture; unmount releases the last one.
+    container.redraw();
+    expect(mockPictures[0].dispose).toHaveBeenCalledTimes(1);
+    container.unmount();
+    expect(mockPictures[1].dispose).toHaveBeenCalledTimes(1);
+    expect(() => container.drawOnCanvas(canvas)).toThrow();
   });
 });

@@ -7,7 +7,12 @@ import type {
 import { NodeType } from "../../dom/types";
 import type { BaseRecorder } from "../../skia/types/Recorder";
 import type { Node } from "../Node";
-import { isImageFilter, isShader, sortNodeChildren } from "../Node";
+import {
+  isImageFilter,
+  isShader,
+  resolveType,
+  sortNodeChildren,
+} from "../Node";
 import type { AnimatedProps } from "../../renderer";
 
 export const processPaint = ({
@@ -161,14 +166,14 @@ const pushImageFilters = (
     if (imageFilter.children.length > 0) {
       pushImageFilters(recorder, imageFilter.children);
     }
-    if (isImageFilter(imageFilter.type)) {
-      recorder.pushImageFilter(imageFilter.type, imageFilter.props);
-    } else if (isShader(imageFilter.type)) {
-      recorder.pushShader(imageFilter.type, imageFilter.props, 0);
+    const type = resolveType(imageFilter);
+    if (isImageFilter(type)) {
+      recorder.pushImageFilter(type, imageFilter.props);
+    } else if (isShader(type)) {
+      recorder.pushShader(type, imageFilter.props, 0);
     }
     const needsComposition =
-      imageFilter.type !== NodeType.BlendImageFilter &&
-      imageFilter.children.length > 0;
+      type !== NodeType.BlendImageFilter && imageFilter.children.length > 0;
     if (needsComposition) {
       recorder.composeImageFilter();
     }
@@ -266,8 +271,7 @@ const visitNode = (recorder: BaseRecorder, node: Node<any>) => {
     case NodeType.Box:
       const shadows = node.children
         .filter((n) => n.type === NodeType.BoxShadow)
-        // eslint-disable-next-line @typescript-eslint/no-shadow
-        .map(({ props }) => ({ props }) as { props: BoxShadowProps });
+        .map((n) => n.props as AnimatedProps<BoxShadowProps>);
       recorder.drawBox(props, shadows);
       break;
     case NodeType.Fill:

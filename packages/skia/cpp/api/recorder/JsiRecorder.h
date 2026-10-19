@@ -1,17 +1,12 @@
 #pragma once
 
 #include <memory>
-#include <numeric>
 #include <utility>
-#include <vector>
 
-#include "api/JsiSkCanvas.h"
 #include "api/JsiSkNativeObjects.h"
 #include "api/JsiSkPicture.h"
 
-#include "DrawingCtx.h"
 #include "RNRecorder.h"
-#include "utils/RNSkLog.h"
 
 #include <jsi/jsi.h>
 
@@ -19,6 +14,12 @@ namespace RNSkia {
 
 namespace jsi = facebook::jsi;
 
+/**
+ * The JS handle on a recording. The scene graph visitor records through it
+ * on the JS thread; the handle is then either passed to the view, which takes
+ * ownership of the recording (SkiaViewApi.setJsiProperty), or played into a
+ * picture (makePicture) for offscreen rendering.
+ */
 class JsiRecorder
     : public JsiSkWrappingSharedPtrNativeObject<JsiRecorder, Recorder> {
 public:
@@ -26,8 +27,17 @@ public:
 
   explicit JsiRecorder(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkWrappingSharedPtrNativeObject<JsiRecorder, Recorder>(
-            std::move(context), std::make_shared<Recorder>()) {
-    getObject()->_context = getContext();
+            std::move(context), std::make_shared<Recorder>()) {}
+
+  /**
+   * Runs on the JS thread, when the runtime finalizes the wrapper. A view may
+   * still own the recording and destroy it on another thread: the shared
+   * values, which are objects of this runtime, must go first.
+   */
+  ~JsiRecorder() override {
+    if (auto recorder = getObjectUnchecked()) {
+      recorder->variables.releaseSharedValues();
+    }
   }
 
   JSI_HOST_FUNCTION(savePaint) {
@@ -56,36 +66,24 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_HOST_FUNCTION(play) {
-    // Check if a picture parameter was provided
-    if (count < 1 || arguments[0].isUndefined() || arguments[0].isNull()) {
-      throw jsi::JSError(runtime, "play() requires a Picture parameter");
-    }
-
-    // Get the JsiSkPicture from the argument
-    auto pictureObject = arguments[0].asObject(runtime);
-    auto pictureHostObject =
-        tryGetJsiObject<JsiSkPicture>(runtime, pictureObject);
-    if (!pictureHostObject) {
-      throw jsi::JSError(runtime, "Invalid Picture object provided to play()");
-    }
-
-    auto newPicture = getObject()->makePicture();
-
-    // Update the existing JsiSkPicture object with the new SkPicture
-    // This reuses the existing JavaScript object instead of creating a new one
-    pictureHostObject->setObject(std::move(newPicture));
-    auto memoryPressure = pictureHostObject->getMemoryPressure();
-    pictureObject.setExternalMemoryPressure(runtime, memoryPressure);
-
-    // Return undefined since we're modifying the passed-in object
-    return jsi::Value::undefined();
+  /**
+   * Plays the recording into a picture, on the calling thread, with the
+   * values the shared values had when they were recorded.
+   */
+  JSI_HOST_FUNCTION(makePicture) {
+    auto picture = getObject()->makePicture();
+    return makeJsiObject(runtime, std::make_shared<JsiSkPicture>(
+                                      getContext(), std::move(picture)));
   }
 
-  JSI_HOST_FUNCTION(applyUpdates) {
-    auto values = arguments[0].asObject(runtime).asArray(runtime);
-    getObject()->applyUpdates(runtime, values);
-    return jsi::Value::undefined();
+  /**
+   * The shared values the recording reads, in the order
+   * SkiaViewApi.applyUpdates expects them. They are handed out once: the
+   * recording lets go of them here, so that it can outlive the runtime's
+   * interest in it (see Variables).
+   */
+  JSI_HOST_FUNCTION(getSharedValues) {
+    return getObject()->variables.takeSharedValues(runtime);
   }
 
   JSI_HOST_FUNCTION(getId) { return jsi::Value(getObject()->id); }
@@ -276,13 +274,6 @@ public:
     return jsi::Value::undefined();
   }
 
-  JSI_HOST_FUNCTION(reset) {
-    auto newRecorder = std::make_shared<Recorder>();
-    newRecorder->_context = getContext();
-    setObject(newRecorder);
-    return jsi::Value::undefined();
-  }
-
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
     installCommon(runtime, prototype);
     installHostMethod(runtime, prototype, "saveGroup", &JsiRecorder::saveGroup);
@@ -350,19 +341,19 @@ public:
     installHostMethod(runtime, prototype, "drawAtlas", &JsiRecorder::drawAtlas);
     installHostMethod(runtime, prototype, "drawSkottie",
                       &JsiRecorder::drawSkottie);
-    installHostMethod(runtime, prototype, "play", &JsiRecorder::play);
-    installHostMethod(runtime, prototype, "applyUpdates",
-                      &JsiRecorder::applyUpdates);
-    installHostMethod(runtime, prototype, "reset", &JsiRecorder::reset);
+    installHostMethod(runtime, prototype, "makePicture",
+                      &JsiRecorder::makePicture);
+    installHostMethod(runtime, prototype, "getSharedValues",
+                      &JsiRecorder::getSharedValues);
     installHostMethod(runtime, prototype, "getId", &JsiRecorder::getId);
   }
 
   // The recorder itself is a small command list. The resources it references
   // (images, pictures, paths) report their own size through their wrappers
-  // and the pictures produced by play() report theirs. Do not put a made-up
-  // number here: a new recorder is created on every React commit, and the
-  // wrapper is disposed as soon as the view takes ownership of the recording
-  // (see NativeReanimatedContainer), so the charge would never drive a
+  // and the pictures produced by makePicture() report theirs. Do not put a
+  // made-up number here: a new recorder is created on every React commit, and
+  // the wrapper is disposed as soon as the view takes ownership of the
+  // recording (see Container.native.ts), so the charge would never drive a
   // collection anyway.
   size_t getMemoryPressure() override { return kMinMemoryPressure; }
 
@@ -373,6 +364,20 @@ public:
       auto recorder = std::make_shared<JsiRecorder>(std::move(context));
       return makeJsiObject(runtime, std::move(recorder));
     };
+  }
+
+protected:
+  /**
+   * Runs on the JS thread (dispose() or the finalizer). The shared values the
+   * recording still holds are runtime objects: they must go here, before the
+   * recording is left to the view and the threads that replay it.
+   */
+  void releaseResources() override {
+    if (auto recorder = getObjectUnchecked()) {
+      recorder->variables.releaseSharedValues();
+    }
+    JsiSkWrappingSharedPtrNativeObject<JsiRecorder, Recorder>::
+        releaseResources();
   }
 };
 
