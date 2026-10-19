@@ -122,9 +122,11 @@ protected:
     manager->unregisterSkiaView(_view->getNativeId());
   }
 
-  // Choreographer tick: presents what is waiting, returns whether a frame is
-  // still waiting or coming.
-  bool presentFrame() { return _view->presentFrame(); }
+  // Presents what is waiting (see RNSkView::presentFrame); returns the value
+  // of RNSkView::NextFrame, which FrameScheduler.NextFrame reads.
+  int presentFrame(bool onVsync) {
+    return static_cast<int>(_view->presentFrame(onVsync));
+  }
 
   /**
    The TextureView's window drew the frame last presented into it

@@ -63,8 +63,10 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
         }
 
         @Override
-        public boolean presentFrame() {
-            return hasNativeView() && SkiaView.this.presentFrame();
+        public FrameScheduler.NextFrame presentFrame(boolean onVsync) {
+            return hasNativeView()
+                    ? FrameScheduler.NextFrame.fromNative(SkiaView.this.presentFrame(onVsync))
+                    : FrameScheduler.NextFrame.NONE;
         }
     });
 
@@ -381,8 +383,11 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
 
     private native void unregisterView();
 
-    /** Presents what is waiting, returning whether a frame is still waiting or coming. */
-    private native boolean presentFrame();
+    /**
+     * Presents what is waiting, and returns the value of RNSkView::NextFrame:
+     * whether a frame is still waiting or coming (see FrameScheduler.NextFrame).
+     */
+    private native int presentFrame(boolean onVsync);
 
     private native void frameLatched();
 }

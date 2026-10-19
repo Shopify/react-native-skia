@@ -5,10 +5,31 @@ import androidx.annotation.Nullable;
 /**
  * Decides when a SkiaView presents the recordings queued for it: a SurfaceView
  * on the next vsync, a TextureView behind the draw its window has pending, so
- * that the window has taken the previous frame by then. Keeps at most one
- * frame callback and one posted present outstanding. Main thread.
+ * that the window has taken the previous frame by then. While a replay is in
+ * flight it asks for every vsync, whose present paces the replays. Keeps at
+ * most one frame callback and one posted present outstanding. Main thread.
  */
 final class FrameScheduler {
+    /** What the view still needs after a present. */
+    enum NextFrame {
+        /** Nothing is waiting or coming. */
+        NONE,
+        /** A frame is waiting: it is tried again on the next vsync. */
+        WAITING,
+        /** A replay is in flight: its recording is presented as soon as it comes. */
+        COMING;
+
+        /** The value of RNSkView::NextFrame the native view returned. */
+        static NextFrame fromNative(int value) {
+            return switch (value) {
+                case 0 -> NONE;
+                case 1 -> WAITING;
+                case 2 -> COMING;
+                default -> throw new IllegalArgumentException("Unknown NextFrame " + value);
+            };
+        }
+    }
+
     /** What the scheduler asks of the view. */
     interface Host {
         /** Calls onFrame() on the next Choreographer frame. */
@@ -17,13 +38,20 @@ final class FrameScheduler {
         /** Calls onPosted() from the main looper, behind any draw the window has pending. */
         void postBehindPendingDraw();
 
-        /** Presents what is waiting, returning whether a frame is still waiting or coming. */
-        boolean presentFrame();
+        /**
+         * Presents what is waiting. onVsync tells the present a vsync asked for
+         * from one a submitted recording asked for.
+         */
+        NextFrame presentFrame(boolean onVsync);
     }
 
     private final Host mHost;
     private boolean mFrameCallbackPosted = false;
+    // Whether the frame callback outstanding retries a frame that is waiting.
+    private boolean mRetryPosted = false;
     private boolean mPresentPosted = false;
+    // Whether the posted present is the one a vsync asked for.
+    private boolean mPostedPresentOnVsync = false;
 
     FrameScheduler(Host host) {
         mHost = host;
@@ -34,41 +62,46 @@ final class FrameScheduler {
         if (kind == null) {
             return;
         }
-        // A frame callback still outstanding (a retry, see presentOrRetry) presents
-        // the new recording along with the leftovers on that vsync.
-        if (mFrameCallbackPosted) {
+        // A retry still outstanding presents the new recording along with the
+        // leftovers on that vsync.
+        if (mRetryPosted) {
             return;
         }
         if (presentsOnVsync(kind)) {
             postFrameCallback();
         } else {
-            postBehindPendingDraw();
+            postBehindPendingDraw(false);
         }
     }
 
     /** The Choreographer frame asked for with Host.postFrameCallback(). */
     void onFrame(@Nullable BackingViewKind kind) {
         mFrameCallbackPosted = false;
+        mRetryPosted = false;
         if (kind == null) {
             return;
         }
         if (presentsOnVsync(kind)) {
-            presentOrRetry();
+            present(true);
         } else {
-            postBehindPendingDraw();
+            postBehindPendingDraw(true);
         }
     }
 
     /** The message posted with Host.postBehindPendingDraw(). */
     void onPosted() {
         mPresentPosted = false;
-        presentOrRetry();
+        boolean onVsync = mPostedPresentOnVsync;
+        mPostedPresentOnVsync = false;
+        present(onVsync);
     }
 
     /** The view left its window, and the host removed both callbacks. */
     void cancel() {
         mFrameCallbackPosted = false;
+        mRetryPosted = false;
         mPresentPosted = false;
+        mPostedPresentOnVsync = false;
     }
 
     // The compositor takes a SurfaceView's buffer at the vsync. A TextureView's frame
@@ -81,11 +114,19 @@ final class FrameScheduler {
     }
 
     // A frame still waiting (the present failed, or more were submitted
-    // meanwhile) or coming (a replay in flight) is asked for again on the next
-    // vsync, never straight away.
-    private void presentOrRetry() {
-        if (mHost.presentFrame()) {
-            postFrameCallback();
+    // meanwhile) is tried again on the next vsync, never straight away; a frame
+    // coming keeps the vsync asked for.
+    private void present(boolean onVsync) {
+        switch (mHost.presentFrame(onVsync)) {
+            case NONE -> mRetryPosted = false;
+            case WAITING -> {
+                mRetryPosted = true;
+                postFrameCallback();
+            }
+            case COMING -> {
+                mRetryPosted = false;
+                postFrameCallback();
+            }
         }
     }
 
@@ -96,7 +137,8 @@ final class FrameScheduler {
         }
     }
 
-    private void postBehindPendingDraw() {
+    private void postBehindPendingDraw(boolean onVsync) {
+        mPostedPresentOnVsync = mPostedPresentOnVsync || onVsync;
         if (!mPresentPosted) {
             mPresentPosted = true;
             mHost.postBehindPendingDraw();

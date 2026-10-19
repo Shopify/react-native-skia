@@ -220,11 +220,11 @@ public:
 
   /**
    Installed by the platform view, which calls presentFrame() once its surface
-   can show a new frame, and again a frame later while it returns true: on the
-   display link on iOS, straight away and then a frame apart on macOS, and on
-   Android as its FrameScheduler decides. Main thread. Without one, frames are
-   presented as soon as the main thread gets to them, and one the window could
-   not take waits for the next redraw.
+   can show a new frame, and again a frame later until it returns
+   NextFrame::kNone: on the display link on iOS, straight away and then a
+   frame apart on macOS, and on Android as its FrameScheduler decides. Main
+   thread. Without one, frames are presented as soon as the main thread gets
+   to them, and one the window could not take waits for the next redraw.
    */
   void setFrameScheduler(std::function<void()> scheduler) {
     _frameScheduler = std::move(scheduler);
@@ -240,34 +240,56 @@ public:
   }
 
   /**
+   What the view still needs from the platform view after a present; on
+   Android, FrameScheduler.NextFrame reads these values.
+   */
+  enum class NextFrame {
+    /** Nothing is waiting or coming. */
+    kNone = 0,
+    /**
+     A frame is waiting: it is tried again on the next frame, also when the
+     window could not take it (no drawable), rather than left for a redraw.
+     */
+    kWaiting = 1,
+    /**
+     A replay is in flight: the platform view asks again on every frame,
+     whose presents pace the replays (see RNSkReplaySchedule), and presents
+     the recording as soon as it is submitted.
+     */
+    kComing = 2,
+  };
+
+  /**
    Presents the frame the window holds for the GPU once the GPU is done with
    the one before it, then the queued recordings (see setFrameScheduler for
-   when). Returns whether a frame is still waiting or coming, so that the
-   platform view asks again on its next frame: also when the window could not
-   take one (no drawable), so that it is tried again rather than left waiting
-   for a redraw, and while a replay is in flight, whose ticks pace the
-   replays (see RNSkReplaySchedule). Without a surface the queue is left
-   alone: the surface presents it when it appears. While the window cannot
-   show a frame (the app in the background, a TextureView whose window has yet
-   to draw the last one) the queue is left alone until onCanPresent(), and the
-   ticks go on only while a replay is in flight, so that they count every
-   frame it takes.
+   when). `onVsync` tells the present a frame of the display asked for from
+   one a recording just submitted asked for; only the first counts as a tick.
+   Without a surface the queue is left alone: the surface presents it when it
+   appears. While the window cannot show a frame (the app in the background, a
+   TextureView whose window has yet to draw the last one) the queue is left
+   alone until onCanPresent(), and only a replay in flight keeps the ticks
+   going, so that they count every frame it takes.
    */
-  bool presentFrame() {
+  NextFrame presentFrame(bool onVsync) {
     auto target = getTarget();
     if (target == nullptr) {
-      return false;
+      return NextFrame::kNone;
     }
     RNSkGraphiteTargetInfo targetInfo;
     if (!_surface->getTargetInfo(&targetInfo)) {
-      return false;
+      return NextFrame::kNone;
     }
     const bool canPresent = _surface->canPresent();
     if (canPresent) {
       presentWaiting(*target, targetInfo);
     }
-    _producer->onPresentTick();
-    return canPresent ? hasFrameToShow() : _producer->isReplaying();
+    if (onVsync) {
+      _producer->onPresentTick();
+    }
+    if (canPresent && (target->hasQueued() || _surface->hasHeldFrame())) {
+      return NextFrame::kWaiting;
+    }
+    return _producer->isReplaying() ? NextFrame::kComing : NextFrame::kNone;
   }
 
   /**

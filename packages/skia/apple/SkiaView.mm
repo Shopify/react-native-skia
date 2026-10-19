@@ -199,10 +199,10 @@ static bool appIsBackgrounded() {
 #pragma mark - Frames
 
 // Presents on the display link: armed when a recording is submitted, paused
-// again once the queue is empty. macOS has no CADisplayLink on the minimum
-// deployment target, so frames are presented as soon as the main thread gets
-// to them there, and tried again a frame later while some are left (more were
-// submitted meanwhile, or the window could not take one).
+// again once nothing is waiting or coming. macOS has no CADisplayLink on the
+// minimum deployment target, so frames are presented as soon as the main
+// thread gets to them there, and again a frame later while one is waiting
+// (more were submitted meanwhile, or the window could not take one) or coming.
 - (void)scheduleFrame {
 #if !TARGET_OS_OSX
   if (_displayLink == nil) {
@@ -213,19 +213,25 @@ static bool appIsBackgrounded() {
   }
   _displayLink.paused = NO;
 #else
-  if (_view != nullptr && _view->presentFrame()) {
-    [self presentAgainLater];
-  }
+  [self presentFrameOnVsync:NO];
 #endif
 }
 
 #if !TARGET_OS_OSX
 - (void)onFrame:(CADisplayLink *)link {
-  if (_view == nullptr || !_view->presentFrame()) {
+  if (_view == nullptr ||
+      _view->presentFrame(true) == RNSkia::RNSkView::NextFrame::kNone) {
     link.paused = YES;
   }
 }
 #else
+- (void)presentFrameOnVsync:(BOOL)onVsync {
+  if (_view != nullptr &&
+      _view->presentFrame(onVsync) != RNSkia::RNSkView::NextFrame::kNone) {
+    [self presentAgainLater];
+  }
+}
+
 - (void)presentAgainLater {
   if (_presentAgainScheduled) {
     return;
@@ -239,7 +245,7 @@ static bool appIsBackgrounded() {
                      return;
                    }
                    strongSelf->_presentAgainScheduled = false;
-                   [strongSelf scheduleFrame];
+                   [strongSelf presentFrameOnVsync:YES];
                  });
 }
 #endif
