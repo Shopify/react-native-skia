@@ -1,8 +1,3 @@
-// The recorder headers depend on the include order established by
-// JsiSkApi.h, so the probe lives here rather than in ViewProperty.h (which
-// every platform view includes on its own).
-#include "api/JsiSkApi.h"
-
 #include "jsi/ViewProperty.h"
 
 #include "api/JsiSkPicture.h"
