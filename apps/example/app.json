@@ -32,7 +32,10 @@
     ]
   },
   "ios": {
-    "metalAPIValidation": false
+    "metalAPIValidation": false,
+    "infoPlist": {
+      "CADisableMinimumFrameDurationOnPhone": true
+    }
   },
   "android": {
     "package": "com.reactnativeskia.example"
