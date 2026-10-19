@@ -23,8 +23,8 @@ export interface SkSurface extends SkJSIInstance<"Surface"> {
    new one.
       @return  Image initialized with Surface contents
 
-      Throws if the snapshot cannot be created or its recording is rejected
-      by Graphite; `outputImage` then keeps its previous content.
+      Returns null if the snapshot cannot be created; `outputImage` then
+      keeps its previous content.
 
       example: https://fiddle.skia.org/c/@Surface_makeImageSnapshot
   */

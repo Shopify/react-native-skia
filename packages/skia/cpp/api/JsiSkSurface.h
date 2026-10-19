@@ -113,15 +113,13 @@ public:
     }
     // Before outputImage is updated, so that it keeps its previous content.
     if (image == nullptr) {
-      throw std::runtime_error(
-          "makeImageSnapshot: the snapshot of the surface could not be "
-          "created");
+      return jsi::Value::null();
     }
     // A raster surface (e.g. Skia.Surface.Make) has no Graphite recorder; its
     // snapshot is already a valid CPU image, so skip the recording submit.
     if (auto *recorder = surface->recorder()) {
       auto recording = recorder->snap();
-      DawnContext::getInstance().submitRecordingOrThrow(recording.get());
+      DawnContext::getInstance().submitRecording(recording.get());
     }
     if (count > 1 && arguments[1].isObject()) {
       auto jsiImage = getJsiObject<JsiSkImage>(runtime, arguments[1]);
