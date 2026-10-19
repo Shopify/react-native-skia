@@ -243,8 +243,13 @@ public:
       return image;
     }
     // A recorder of its own: snapping the recorder of this thread would also
-    // submit what the offscreen surfaces of this thread recorded so far.
-    static thread_local auto uploadRecorder = makeRecorder();
+    // submit what the offscreen surfaces of this thread recorded so far. It
+    // only uploads, so it keeps Skia's default image provider rather than an
+    // image cache it would never use.
+    static thread_local auto uploadRecorder = [this]() {
+      std::lock_guard<std::mutex> lock(_mutex);
+      return fGraphiteContext->makeRecorder();
+    }();
     auto *recorder = uploadRecorder.get();
     auto texture =
         SkImages::TextureFromImage(recorder, image.get(), {mipmapped});
@@ -262,9 +267,7 @@ public:
   // calling thread. Creating a recorder is a Context operation, hence the lock.
   std::unique_ptr<skgpu::graphite::Recorder> makeRecorder() {
     std::lock_guard<std::mutex> lock(_mutex);
-    skgpu::graphite::RecorderOptions options;
-    options.fImageProvider = ImageProvider::Make();
-    return fGraphiteContext->makeRecorder(options);
+    return makeRecorderWithImageProvider();
   }
 
   // Replays the recordings, in order, onto the target surface (a deferred
@@ -486,13 +489,7 @@ public:
   }
 
   skgpu::graphite::Recorder *getRecorder() {
-    static thread_local skgpu::graphite::RecorderOptions recorderOptions;
-    if (!recorderOptions.fImageProvider) {
-      auto imageProvider = ImageProvider::Make();
-      recorderOptions.fImageProvider = imageProvider;
-    }
-    static thread_local auto recorder =
-        fGraphiteContext->makeRecorder(recorderOptions);
+    static thread_local auto recorder = makeRecorderWithImageProvider();
     if (!recorder) {
       throw std::runtime_error("Failed to create graphite context");
     }
@@ -500,6 +497,15 @@ public:
   }
 
 private:
+  // A recorder with an image provider of its own. The options go away here,
+  // so the recorder is the provider's only owner: the provider, and the
+  // images it caches, are released with the recorder.
+  std::unique_ptr<skgpu::graphite::Recorder> makeRecorderWithImageProvider() {
+    skgpu::graphite::RecorderOptions options;
+    options.fImageProvider = ImageProvider::Make();
+    return fGraphiteContext->makeRecorder(options);
+  }
+
   struct Probe {
     DawnContext *instance = nullptr;
     GpuInfo info;
