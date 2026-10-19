@@ -21,7 +21,10 @@ public:
   ImageProvider() : fCache(kDefaultNumCachedImages) {}
   ~ImageProvider() override {}
 
-  static sk_sp<ImageProvider> Make() { return sk_ref_sp(new ImageProvider); }
+  // sk_make_sp adopts the reference `new` starts with. sk_ref_sp(new ...)
+  // would add a second one that nothing releases, so the provider and the
+  // images it caches would outlive their recorder.
+  static sk_sp<ImageProvider> Make() { return sk_make_sp<ImageProvider>(); }
 
   sk_sp<SkImage>
   findOrCreate(skgpu::graphite::Recorder *recorder, const SkImage *image,
