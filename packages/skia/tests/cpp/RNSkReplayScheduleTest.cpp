@@ -14,10 +14,10 @@ namespace {
 using Schedule = RNSkReplaySchedule<int>;
 
 static_assert(!std::is_default_constructible_v<Schedule>,
-              "a view's pacing is chosen when the view is made");
+              "a schedule is told how many replays must keep up");
 
-constexpr ReplayPacing kPacings[] = {ReplayPacing::kAfterPresent,
-                                     ReplayPacing::kPipelined};
+/** Replays that must keep up in a row; small, so the search reaches it. */
+constexpr size_t kReplaysToKeepUp = 2;
 
 /** A recording on the target that is not the view's (a client's). */
 constexpr int kClientRecording = -1;
@@ -82,12 +82,16 @@ using History = Recordings<16>;
 /**
  A view's side of the schedule, as RNSkGraphiteProducer and RNSkView drive it:
  the job it runs, its target's queue, the recordings it took off the queue to
- present, and every recording handed to a target, in the order they were
- handed over.
+ present, its present ticks, and every recording handed to a target, in the
+ order they were handed over. It also keeps the pacing the schedule must
+ have, from the definition: a job still running at its second tick makes the
+ view pipeline, and `replaysToKeepUp` replays in a row that started at a
+ present and finished before their second tick make it wait for presents.
  */
 class View {
 public:
-  explicit View(ReplayPacing pacing) : _pacing(pacing), _schedule(pacing) {}
+  explicit View(size_t replaysToKeepUp)
+      : _replaysToKeepUp(replaysToKeepUp), _schedule(replaysToKeepUp) {}
 
   bool startJob() {
     if (!_schedule.tryStartJob()) {
@@ -95,7 +99,7 @@ public:
     }
     _overlappingJobs = _overlappingJobs || _jobRunning;
     const bool ownRecordingWaits = ownRecordingsOnTarget() > 0;
-    switch (_pacing) {
+    switch (_expectedPacing) {
     case ReplayPacing::kAfterPresent:
       _startedEarly = _startedEarly || ownRecordingWaits;
       break;
@@ -105,11 +109,21 @@ public:
     }
     _startedEarly = _startedEarly || deferred() > 0;
     _jobRunning = true;
+    _jobStartedAtPresent = _presentedSinceTick;
+    _jobTicks = 0;
     return true;
   }
 
   void finishJob() {
     _jobRunning = false;
+    if (_jobStartedAtPresent && _jobTicks <= 1) {
+      _replaysKeptUp++;
+      if (_replaysKeptUp >= _replaysToKeepUp &&
+          _expectedPacing == ReplayPacing::kPipelined) {
+        _expectedPacing = ReplayPacing::kAfterPresent;
+        _caughtUp = true;
+      }
+    }
     const int recording = _nextRecording++;
     _finished.pushBack(recording);
     submit(_schedule.finishJob(recording));
@@ -146,7 +160,23 @@ public:
       _clientPresentedWhileOwnWaits =
           _clientPresentedWhileOwnWaits ||
           (recording == kClientRecording && ownRecordingsOnTarget() > 0);
+      _presentedSinceTick =
+          _presentedSinceTick || recording != kClientRecording;
       submit(_schedule.recordingPresented(recording));
+    }
+  }
+
+  /** The platform asked the view to present, and the view's tick ended. */
+  void tick() {
+    _schedule.presentTick();
+    _presentedSinceTick = false;
+    if (!_jobRunning) {
+      return;
+    }
+    _jobTicks++;
+    if (_jobTicks >= 2) {
+      _expectedPacing = ReplayPacing::kPipelined;
+      _replaysKeptUp = 0;
     }
   }
 
@@ -174,6 +204,8 @@ public:
     _takenFromPreviousTarget.clear();
   }
 
+  const Schedule &schedule() const { return _schedule; }
+  ReplayPacing expectedPacing() const { return _expectedPacing; }
   bool jobRunning() const { return _jobRunning; }
   bool retargeted() const { return _retargeted; }
   size_t queued() const { return _queue.size(); }
@@ -189,6 +221,8 @@ public:
   size_t ownRecordingsOnTarget() const {
     return _queue.countOwn() + _taken.countOwn();
   }
+  /** Whether a frame of the view is waiting or coming: the platform ticks. */
+  bool ticks() const { return _jobRunning || queued() > 0 || taken() > 0; }
   const History &finished() const { return _finished; }
   const History &submitted() const { return _submitted; }
   /** Recordings finished and not handed to a target yet. */
@@ -204,6 +238,9 @@ public:
   /** Whether a pipelined job ever started while the view's recording waited.
    */
   bool overlapped() const { return _overlapped; }
+  /** Whether the view ever went back from pipelining to waiting for presents.
+   */
+  bool caughtUp() const { return _caughtUp; }
   bool deferredOnce() const { return _deferredOnce; }
   bool clientPresentedWhileOwnWaits() const {
     return _clientPresentedWhileOwnWaits;
@@ -218,9 +255,14 @@ private:
     }
   }
 
-  ReplayPacing _pacing;
+  size_t _replaysToKeepUp;
   Schedule _schedule;
+  ReplayPacing _expectedPacing = ReplayPacing::kAfterPresent;
   bool _jobRunning = false;
+  bool _jobStartedAtPresent = false;
+  size_t _jobTicks = 0;
+  bool _presentedSinceTick = false;
+  size_t _replaysKeptUp = 0;
   bool _retargeted = false;
   int _nextRecording = 0;
   Queue _queue;
@@ -231,6 +273,7 @@ private:
   bool _overlappingJobs = false;
   bool _startedEarly = false;
   bool _overlapped = false;
+  bool _caughtUp = false;
   bool _deferredOnce = false;
   bool _clientPresentedWhileOwnWaits = false;
   bool _retargetedWhileDeferred = false;
@@ -245,22 +288,34 @@ enum class Event {
   kPresent,
   kPresentFirst,
   kDecline,
+  kTick,
   kRetarget,
   kPresentFromPreviousTarget,
 };
 
-constexpr Event kEvents[] = {
-    Event::kStart,        Event::kFinish,
-    Event::kEnd,          Event::kSubmitClientRecording,
-    Event::kTake,         Event::kPresent,
-    Event::kPresentFirst, Event::kDecline,
-    Event::kRetarget,     Event::kPresentFromPreviousTarget,
+constexpr std::array<Event, 11> kEveryEvent = {
+    Event::kStart,
+    Event::kFinish,
+    Event::kEnd,
+    Event::kSubmitClientRecording,
+    Event::kTake,
+    Event::kPresent,
+    Event::kPresentFirst,
+    Event::kDecline,
+    Event::kTick,
+    Event::kRetarget,
+    Event::kPresentFromPreviousTarget,
+};
+
+/** The events the pacing turns on: jobs, presents and ticks. */
+constexpr std::array<Event, 5> kPacingEvents = {
+    Event::kStart, Event::kFinish, Event::kTake, Event::kPresent, Event::kTick,
 };
 
 /**
  Applies an event the view can take in its state. Returns whether it could.
- A client records one frame at a time, and the view moves to another target
- once.
+ A client records one frame at a time, the platform ticks only while a frame
+ of the view is waiting or coming, and the view moves to another target once.
  */
 bool apply(View &view, Event event) {
   switch (event) {
@@ -308,6 +363,12 @@ bool apply(View &view, Event event) {
     }
     view.present(0);
     return true;
+  case Event::kTick:
+    if (!view.ticks()) {
+      return false;
+    }
+    view.tick();
+    return true;
   case Event::kRetarget:
     if (view.retargeted()) {
       return false;
@@ -344,6 +405,8 @@ View drained(View view) {
 /** What the search reached, to show it is not vacuous. */
 struct Reached {
   size_t mostFinished = 0;
+  bool pipelined = false;
+  bool caughtUp = false;
   bool overlapped = false;
   bool deferred = false;
   bool clientPresentedWhileOwnWaits = false;
@@ -355,6 +418,9 @@ struct Reached {
  drained, every recording reached a target, and a job starts.
  */
 void checkInvariants(const View &view, Reached &reached) {
+  EXPECT_EQ(view.schedule().pacing(), view.expectedPacing())
+      << "a pacing the replays did not call for";
+  EXPECT_EQ(view.schedule().hasJobInFlight(), view.jobRunning());
   EXPECT_FALSE(view.overlappingJobs()) << "two jobs at once";
   EXPECT_FALSE(view.startedEarly()) << "a job started before its pacing";
   EXPECT_LE(view.ownRecordingsOnTarget(), 1u)
@@ -367,6 +433,9 @@ void checkInvariants(const View &view, Reached &reached) {
       << "a recording never reached a target";
   EXPECT_TRUE(settled.startJob()) << "no job starts once drained";
   reached.mostFinished = std::max(reached.mostFinished, view.finished().size());
+  reached.pipelined =
+      reached.pipelined || view.schedule().pacing() == ReplayPacing::kPipelined;
+  reached.caughtUp = reached.caughtUp || view.caughtUp();
   reached.overlapped = reached.overlapped || view.overlapped();
   reached.deferred = reached.deferred || view.deferredOnce();
   reached.clientPresentedWhileOwnWaits = reached.clientPresentedWhileOwnWaits ||
@@ -375,12 +444,17 @@ void checkInvariants(const View &view, Reached &reached) {
       reached.retargetedWhileDeferred || view.retargetedWhileDeferred();
 }
 
-/** Checks every sequence of events up to `depth` the view can take. */
-void checkEverySequence(const View &view, size_t depth, Reached &reached) {
+/**
+ Checks every sequence of up to `depth` of `events` the view can take.
+ */
+template <size_t kCount>
+void checkEverySequence(const View &view, size_t depth,
+                        const std::array<Event, kCount> &events,
+                        Reached &reached) {
   if (depth == 0) {
     return;
   }
-  for (Event event : kEvents) {
+  for (Event event : events) {
     View next = view;
     if (!apply(next, event)) {
       continue;
@@ -389,51 +463,87 @@ void checkEverySequence(const View &view, size_t depth, Reached &reached) {
     if (::testing::Test::HasFailure()) {
       return;
     }
-    checkEverySequence(next, depth - 1, reached);
+    checkEverySequence(next, depth - 1, events, reached);
   }
+}
+
+/** A schedule with a job finished at a present: its recording is on target.
+ */
+Schedule scheduleWithRecordingOnTarget() {
+  Schedule schedule(kReplaysToKeepUp);
+  EXPECT_TRUE(schedule.tryStartJob());
+  EXPECT_EQ(schedule.finishJob(1), std::optional<int>(1));
+  return schedule;
+}
+
+/** Makes the schedule pipeline: its job runs past its second tick. */
+void outlastAFrame(Schedule &schedule, int recording) {
+  ASSERT_TRUE(schedule.tryStartJob());
+  schedule.presentTick();
+  schedule.presentTick();
+  ASSERT_EQ(schedule.pacing(), ReplayPacing::kPipelined);
+  (void)schedule.finishJob(recording);
 }
 
 TEST(RNSkReplayScheduleTest, StartsOneJobAtATime) {
-  for (ReplayPacing pacing : kPacings) {
-    Schedule schedule(pacing);
-    EXPECT_TRUE(schedule.tryStartJob());
-    EXPECT_FALSE(schedule.tryStartJob());
-    schedule.endJob();
-    EXPECT_TRUE(schedule.tryStartJob());
-  }
-}
-
-TEST(RNSkReplayScheduleTest, HandsAFinishedRecordingBackToSubmit) {
-  for (ReplayPacing pacing : kPacings) {
-    Schedule schedule(pacing);
-    ASSERT_TRUE(schedule.tryStartJob());
-    EXPECT_EQ(schedule.finishJob(7), std::optional<int>(7));
-  }
-}
-
-TEST(RNSkReplayScheduleTest,
-     PipelinedStartsTheNextJobWhileARecordingWaitsForItsVsync) {
-  Schedule schedule(ReplayPacing::kPipelined);
-  ASSERT_TRUE(schedule.tryStartJob());
-  ASSERT_EQ(schedule.finishJob(1), std::optional<int>(1));
+  Schedule schedule(kReplaysToKeepUp);
+  EXPECT_TRUE(schedule.tryStartJob());
+  EXPECT_TRUE(schedule.hasJobInFlight());
+  EXPECT_FALSE(schedule.tryStartJob());
+  schedule.endJob();
+  EXPECT_FALSE(schedule.hasJobInFlight());
   EXPECT_TRUE(schedule.tryStartJob());
 }
 
-TEST(RNSkReplayScheduleTest,
-     AfterPresentStartsTheNextJobOnceTheRecordingIsPresented) {
-  Schedule schedule(ReplayPacing::kAfterPresent);
+TEST(RNSkReplayScheduleTest, HandsAFinishedRecordingBackToSubmit) {
+  Schedule schedule(kReplaysToKeepUp);
   ASSERT_TRUE(schedule.tryStartJob());
-  ASSERT_EQ(schedule.finishJob(1), std::optional<int>(1));
+  EXPECT_EQ(schedule.finishJob(7), std::optional<int>(7));
+}
+
+TEST(RNSkReplayScheduleTest, StartsTheNextJobOnceTheRecordingIsPresented) {
+  Schedule schedule = scheduleWithRecordingOnTarget();
+  EXPECT_EQ(schedule.pacing(), ReplayPacing::kAfterPresent);
   EXPECT_FALSE(schedule.tryStartJob());
   EXPECT_EQ(schedule.recordingPresented(1), std::nullopt);
   EXPECT_TRUE(schedule.tryStartJob());
 }
 
+TEST(RNSkReplayScheduleTest, WaitsForPresentsWhileReplaysKeepUp) {
+  Schedule schedule = scheduleWithRecordingOnTarget();
+  for (int recording = 2; recording < 10; recording++) {
+    ASSERT_EQ(schedule.recordingPresented(recording - 1), std::nullopt);
+    ASSERT_TRUE(schedule.tryStartJob());
+    schedule.presentTick();
+    ASSERT_EQ(schedule.finishJob(recording), std::optional<int>(recording));
+    EXPECT_EQ(schedule.pacing(), ReplayPacing::kAfterPresent);
+  }
+}
+
+TEST(RNSkReplayScheduleTest, PipelinesOnceAReplayOutlastsAFrame) {
+  Schedule schedule(kReplaysToKeepUp);
+  ASSERT_TRUE(schedule.tryStartJob());
+  schedule.presentTick();
+  EXPECT_EQ(schedule.pacing(), ReplayPacing::kAfterPresent);
+  schedule.presentTick();
+  EXPECT_EQ(schedule.pacing(), ReplayPacing::kPipelined);
+  ASSERT_EQ(schedule.finishJob(1), std::optional<int>(1));
+  EXPECT_TRUE(schedule.tryStartJob());
+}
+
+TEST(RNSkReplayScheduleTest, CountsNoTickWithoutAJob) {
+  Schedule schedule(kReplaysToKeepUp);
+  schedule.presentTick();
+  schedule.presentTick();
+  ASSERT_TRUE(schedule.tryStartJob());
+  schedule.presentTick();
+  EXPECT_EQ(schedule.pacing(), ReplayPacing::kAfterPresent);
+}
+
 TEST(RNSkReplayScheduleTest,
      DefersARecordingFinishedWhileThePreviousOneWaitsForItsVsync) {
-  Schedule schedule(ReplayPacing::kPipelined);
-  ASSERT_TRUE(schedule.tryStartJob());
-  ASSERT_EQ(schedule.finishJob(1), std::optional<int>(1));
+  Schedule schedule(kReplaysToKeepUp);
+  outlastAFrame(schedule, 1);
   ASSERT_TRUE(schedule.tryStartJob());
   EXPECT_EQ(schedule.finishJob(2), std::nullopt);
   EXPECT_FALSE(schedule.tryStartJob());
@@ -441,10 +551,48 @@ TEST(RNSkReplayScheduleTest,
   EXPECT_TRUE(schedule.tryStartJob());
 }
 
-TEST(RNSkReplayScheduleTest, WaitsOnlyForItsOwnRecording) {
-  Schedule schedule(ReplayPacing::kPipelined);
+TEST(RNSkReplayScheduleTest,
+     WaitsForPresentsAgainOnceReplaysStartedAtPresentsKeepUp) {
+  Schedule schedule(kReplaysToKeepUp);
+  outlastAFrame(schedule, 1);
+  ASSERT_EQ(schedule.recordingPresented(1), std::nullopt);
   ASSERT_TRUE(schedule.tryStartJob());
-  ASSERT_EQ(schedule.finishJob(1), std::optional<int>(1));
+  schedule.presentTick();
+  ASSERT_EQ(schedule.finishJob(2), std::optional<int>(2));
+  EXPECT_EQ(schedule.pacing(), ReplayPacing::kPipelined);
+  ASSERT_EQ(schedule.recordingPresented(2), std::nullopt);
+  ASSERT_TRUE(schedule.tryStartJob());
+  ASSERT_EQ(schedule.finishJob(3), std::optional<int>(3));
+  EXPECT_EQ(schedule.pacing(), ReplayPacing::kAfterPresent);
+  EXPECT_FALSE(schedule.tryStartJob());
+}
+
+TEST(RNSkReplayScheduleTest, KeepsPipeliningForReplaysNotStartedAtAPresent) {
+  Schedule schedule(kReplaysToKeepUp);
+  outlastAFrame(schedule, 1);
+  for (int recording = 2; recording < 6; recording++) {
+    schedule.presentTick();
+    ASSERT_EQ(schedule.recordingPresented(recording - 1), std::nullopt);
+    schedule.presentTick();
+    ASSERT_TRUE(schedule.tryStartJob());
+    ASSERT_EQ(schedule.finishJob(recording), std::optional<int>(recording));
+  }
+  EXPECT_EQ(schedule.pacing(), ReplayPacing::kPipelined);
+}
+
+TEST(RNSkReplayScheduleTest, CountsAJobWithoutARecordingAsNeither) {
+  Schedule schedule(kReplaysToKeepUp);
+  outlastAFrame(schedule, 1);
+  for (int round = 0; round < 3; round++) {
+    ASSERT_TRUE(schedule.tryStartJob());
+    schedule.endJob();
+  }
+  EXPECT_EQ(schedule.pacing(), ReplayPacing::kPipelined);
+}
+
+TEST(RNSkReplayScheduleTest, WaitsOnlyForItsOwnRecording) {
+  Schedule schedule(kReplaysToKeepUp);
+  outlastAFrame(schedule, 1);
   ASSERT_TRUE(schedule.tryStartJob());
   ASSERT_EQ(schedule.finishJob(2), std::nullopt);
   EXPECT_EQ(schedule.recordingPresented(kClientRecording), std::nullopt);
@@ -452,9 +600,8 @@ TEST(RNSkReplayScheduleTest, WaitsOnlyForItsOwnRecording) {
 }
 
 TEST(RNSkReplayScheduleTest, HandsTheDeferredRecordingOverOnce) {
-  Schedule schedule(ReplayPacing::kPipelined);
-  ASSERT_TRUE(schedule.tryStartJob());
-  ASSERT_EQ(schedule.finishJob(1), std::optional<int>(1));
+  Schedule schedule(kReplaysToKeepUp);
+  outlastAFrame(schedule, 1);
   ASSERT_TRUE(schedule.tryStartJob());
   ASSERT_EQ(schedule.finishJob(2), std::nullopt);
   EXPECT_EQ(schedule.recordingPresented(1), std::optional<int>(2));
@@ -464,9 +611,8 @@ TEST(RNSkReplayScheduleTest, HandsTheDeferredRecordingOverOnce) {
 
 TEST(RNSkReplayScheduleTest,
      HandsTheDeferredRecordingToThePreviousTargetOnRetarget) {
-  Schedule schedule(ReplayPacing::kPipelined);
-  ASSERT_TRUE(schedule.tryStartJob());
-  ASSERT_EQ(schedule.finishJob(1), std::optional<int>(1));
+  Schedule schedule(kReplaysToKeepUp);
+  outlastAFrame(schedule, 1);
   ASSERT_TRUE(schedule.tryStartJob());
   ASSERT_EQ(schedule.finishJob(2), std::nullopt);
   EXPECT_EQ(schedule.retarget(), std::optional<int>(2));
@@ -475,33 +621,32 @@ TEST(RNSkReplayScheduleTest,
 }
 
 TEST(RNSkReplayScheduleTest, StopsWaitingForARecordingOfAPreviousTarget) {
-  for (ReplayPacing pacing : kPacings) {
-    Schedule schedule(pacing);
-    ASSERT_TRUE(schedule.tryStartJob());
-    ASSERT_EQ(schedule.finishJob(1), std::optional<int>(1));
-    EXPECT_EQ(schedule.retarget(), std::nullopt);
-    ASSERT_TRUE(schedule.tryStartJob());
-    EXPECT_EQ(schedule.finishJob(2), std::optional<int>(2));
-  }
+  Schedule schedule = scheduleWithRecordingOnTarget();
+  EXPECT_EQ(schedule.retarget(), std::nullopt);
+  ASSERT_TRUE(schedule.tryStartJob());
+  EXPECT_EQ(schedule.finishJob(2), std::optional<int>(2));
 }
 
-TEST(RNSkReplayScheduleTest, AfterPresentKeepsItsInvariantsInEverySequence) {
+TEST(RNSkReplayScheduleTest, KeepsItsInvariantsInEverySequence) {
   Reached reached;
-  checkEverySequence(View(ReplayPacing::kAfterPresent), 12, reached);
+  checkEverySequence(View(1), 11, kEveryEvent, reached);
   EXPECT_GE(reached.mostFinished, 3u);
-  EXPECT_FALSE(reached.overlapped);
-  EXPECT_FALSE(reached.deferred);
-  EXPECT_TRUE(reached.clientPresentedWhileOwnWaits);
-}
-
-TEST(RNSkReplayScheduleTest, PipelinedKeepsItsInvariantsInEverySequence) {
-  Reached reached;
-  checkEverySequence(View(ReplayPacing::kPipelined), 12, reached);
-  EXPECT_GE(reached.mostFinished, 3u);
+  EXPECT_TRUE(reached.pipelined);
+  EXPECT_TRUE(reached.caughtUp);
   EXPECT_TRUE(reached.overlapped);
   EXPECT_TRUE(reached.deferred);
   EXPECT_TRUE(reached.clientPresentedWhileOwnWaits);
   EXPECT_TRUE(reached.retargetedWhileDeferred);
+}
+
+TEST(RNSkReplayScheduleTest, PacesByTheReplaysInEverySequence) {
+  Reached reached;
+  checkEverySequence(View(kReplaysToKeepUp), 17, kPacingEvents, reached);
+  EXPECT_GE(reached.mostFinished, 4u);
+  EXPECT_TRUE(reached.pipelined);
+  EXPECT_TRUE(reached.caughtUp);
+  EXPECT_TRUE(reached.overlapped);
+  EXPECT_TRUE(reached.deferred);
 }
 
 } // namespace

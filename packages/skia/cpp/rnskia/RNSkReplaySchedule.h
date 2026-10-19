@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <optional>
 #include <utility>
 
@@ -24,16 +25,30 @@ enum class ReplayPacing {
  * previous one is still on the target is deferred here until the view has
  * presented that one, and no job starts meanwhile.
  *
- * Pipelined, a job may start while the previous recording still waits for its
- * vsync, so that the replay of one frame overlaps the present of the other: on
- * a Vulkan window the present alone takes two to three milliseconds of the
- * main thread, so a replay that only started once the frame was on screen
- * missed every other vsync at 120 Hz. After present, the next job starts once
- * the previous recording is presented.
+ * The pacing follows the replays, counted in the view's present ticks. A
+ * replay that started at a present and finished before the next tick keeps up
+ * with the display when the next one starts at the following present, which
+ * leaves the main thread alone between presents. A replay still running at
+ * the second tick after it started outlasted a frame: the next one then
+ * starts as soon as it finishes, so that the replay of one frame overlaps the
+ * present of the other, and a view that only started its replays at presents
+ * would show every other frame. A run of replays that keep up again brings
+ * the view back to waiting for presents.
  */
 template <typename Recording> class RNSkReplaySchedule {
 public:
-  explicit RNSkReplaySchedule(ReplayPacing pacing) : _pacing(pacing) {}
+  /**
+   `replaysToKeepUp`: how many replays in a row, each started at a present,
+   must finish before their next tick for the view to wait for presents again.
+   */
+  explicit RNSkReplaySchedule(size_t replaysToKeepUp)
+      : _replaysToKeepUp(replaysToKeepUp) {}
+
+  /** When the next replay may start. */
+  ReplayPacing pacing() const { return _pacing; }
+
+  /** Whether a job is in flight: its frame is coming. */
+  bool hasJobInFlight() const { return _jobInFlight; }
 
   /** Starts a job if one may start now. Returns whether it did. */
   [[nodiscard]] bool tryStartJob() {
@@ -41,6 +56,8 @@ public:
       return false;
     }
     _jobInFlight = true;
+    _jobStartedAtPresent = _presentedSinceTick;
+    _ticksSinceJobStart = 0;
     return true;
   }
 
@@ -51,6 +68,9 @@ public:
    */
   [[nodiscard]] std::optional<Recording> finishJob(Recording recording) {
     _jobInFlight = false;
+    if (_jobStartedAtPresent && _ticksSinceJobStart <= 1) {
+      keptUp();
+    }
     if (_onTarget.has_value()) {
       _deferred = std::move(recording);
       return std::nullopt;
@@ -78,8 +98,25 @@ public:
     if (_onTarget != recording) {
       return std::nullopt;
     }
+    _presentedSinceTick = true;
     _onTarget = std::exchange(_deferred, std::nullopt);
     return _onTarget;
+  }
+
+  /**
+   The view's present tick ended: the platform asked it to present, once a
+   frame, while a frame of it was waiting or coming.
+   */
+  void presentTick() {
+    _presentedSinceTick = false;
+    if (!_jobInFlight) {
+      return;
+    }
+    _ticksSinceJobStart++;
+    if (_ticksSinceJobStart >= 2) {
+      _pacing = ReplayPacing::kPipelined;
+      _replaysKeptUp = 0;
+    }
   }
 
   /**
@@ -104,8 +141,24 @@ private:
     return false;
   }
 
-  const ReplayPacing _pacing;
+  void keptUp() {
+    _replaysKeptUp++;
+    if (_replaysKeptUp >= _replaysToKeepUp) {
+      _pacing = ReplayPacing::kAfterPresent;
+    }
+  }
+
+  const size_t _replaysToKeepUp;
+  ReplayPacing _pacing = ReplayPacing::kAfterPresent;
   bool _jobInFlight = false;
+  // Whether the job in flight started at a present, and how many present
+  // ticks it has seen.
+  bool _jobStartedAtPresent = false;
+  size_t _ticksSinceJobStart = 0;
+  // Whether the view presented its recording since its last present tick.
+  bool _presentedSinceTick = false;
+  // Replays in a row that started at a present and kept up.
+  size_t _replaysKeptUp = 0;
   // The view's recording on the target, until the view has presented it.
   std::optional<Recording> _onTarget;
   // The recording finished after it, until it goes to the target.

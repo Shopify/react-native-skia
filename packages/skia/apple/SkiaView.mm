@@ -117,8 +117,8 @@ static bool appIsBackgrounded() {
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   _layer = [CAMetalLayer layer];
 #pragma clang diagnostic pop
-  // A Metal present does not wait for the GPU, so frames go as soon as they
-  // are replayed, and replays overlap the wait for the next display frame.
+  // A Metal present does not wait for the GPU: frames go as soon as they are
+  // replayed.
   _surface =
       std::make_shared<RNSkia::RNSkWindowSurface>(RNSkia::PresentHold::kNone);
   _surface->setHighBitDepth(_highBitDepth);
@@ -131,8 +131,7 @@ static bool appIsBackgrounded() {
     return strongSelf != nil && [[NSThread currentThread] isMainThread] &&
            strongSelf->_canPresent;
   });
-  _view = std::make_shared<RNSkia::RNSkView>(context, _surface,
-                                             RNSkia::ReplayPacing::kPipelined);
+  _view = std::make_shared<RNSkia::RNSkView>(context, _surface);
   [self.layer addSublayer:_layer];
   if (_nativeId != 0) {
     _manager->setSkiaView(_nativeId, _view);

@@ -16,8 +16,7 @@
 
 namespace RNSkia {
 
-RNSkGraphiteProducer::RNSkGraphiteProducer(ReplayPacing pacing)
-    : _schedule(pacing) {}
+RNSkGraphiteProducer::RNSkGraphiteProducer() : _schedule(kReplaysToKeepUp) {}
 
 RNSkGraphiteProducer::~RNSkGraphiteProducer() = default;
 
@@ -137,6 +136,16 @@ void RNSkGraphiteProducer::onRecordingsPresented(
   if (_dirty) {
     kickLocked();
   }
+}
+
+void RNSkGraphiteProducer::onPresentTick() {
+  std::lock_guard<std::mutex> lock(_mutex);
+  _schedule.presentTick();
+}
+
+bool RNSkGraphiteProducer::isReplaying() {
+  std::lock_guard<std::mutex> lock(_mutex);
+  return _schedule.hasJobInFlight();
 }
 
 void RNSkGraphiteProducer::kickLocked() {

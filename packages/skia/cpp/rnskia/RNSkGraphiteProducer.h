@@ -44,7 +44,7 @@ class RNSkGraphiteTarget;
 class RNSkGraphiteProducer
     : public std::enable_shared_from_this<RNSkGraphiteProducer> {
 public:
-  explicit RNSkGraphiteProducer(ReplayPacing pacing);
+  RNSkGraphiteProducer();
   ~RNSkGraphiteProducer();
 
   /**
@@ -100,12 +100,25 @@ public:
       const std::vector<std::shared_ptr<RNSkGraphiteRecording>> &recordings);
 
   /**
+   The view's present tick ended: the platform asked it to present, once a
+   frame, while a frame of it was waiting or coming. Main thread.
+   */
+  void onPresentTick();
+
+  /** Whether a replay is in flight: its frame is coming. Any thread. */
+  bool isReplaying();
+
+  /**
    Replays the current content into a canvas, on the calling thread (a
    snapshot). The canvas draws in pixels, this applies the density.
    */
   void renderInto(SkCanvas *canvas, float pixelDensity);
 
 private:
+  // Replays in a row that must keep up before the view waits for its
+  // presents again (see RNSkReplaySchedule): half a second at 60 Hz.
+  static constexpr size_t kReplaysToKeepUp = 30;
+
   /**
    Replays declarative content, a recorder if there is one, else a picture,
    into a canvas: clears it and applies the density.

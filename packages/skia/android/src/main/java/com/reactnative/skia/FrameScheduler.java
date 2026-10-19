@@ -17,7 +17,7 @@ final class FrameScheduler {
         /** Calls onPosted() from the main looper, behind any draw the window has pending. */
         void postBehindPendingDraw();
 
-        /** Presents the queued recordings, returning whether any are left. */
+        /** Presents what is waiting, returning whether a frame is still waiting or coming. */
         boolean presentFrame();
     }
 
@@ -80,8 +80,9 @@ final class FrameScheduler {
         };
     }
 
-    // Recordings left over (the present failed, or more were submitted meanwhile)
-    // are tried again on the next vsync, never straight away.
+    // A frame still waiting (the present failed, or more were submitted
+    // meanwhile) or coming (a replay in flight) is asked for again on the next
+    // vsync, never straight away.
     private void presentOrRetry() {
         if (mHost.presentFrame()) {
             postFrameCallback();

@@ -64,16 +64,7 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
 
         @Override
         public boolean presentFrame() {
-            if (!hasNativeView()) {
-                return false;
-            }
-            boolean moreQueued = SkiaView.this.presentFrame();
-            // Only a SurfaceView votes (attached in onSurfaceCreated): a
-            // TextureView is composited into its window, which votes for it.
-            // A frame the surface could not take counts as presented here,
-            // which at worst votes a frame early.
-            mFrameRateVote.onFramePresented();
-            return moreQueued;
+            return hasNativeView() && SkiaView.this.presentFrame();
         }
     });
 
@@ -275,6 +266,16 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
         mFrameScheduler.requestFrame(mKind);
     }
 
+    /**
+     * A frame went to the backing view's surface. Main thread; called from
+     * native. Only a SurfaceView votes (attached in onSurfaceCreated): a
+     * TextureView is composited into its window, which votes for it.
+     */
+    @DoNotStrip
+    public void onFramePresented() {
+        mFrameRateVote.onFramePresented();
+    }
+
     @Override
     public void doFrame(long frameTimeNanos) {
         mFrameScheduler.onFrame(mKind);
@@ -380,7 +381,7 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
 
     private native void unregisterView();
 
-    /** Presents the queued recordings, returning whether any are left. */
+    /** Presents what is waiting, returning whether a frame is still waiting or coming. */
     private native boolean presentFrame();
 
     private native void frameLatched();

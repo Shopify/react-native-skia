@@ -122,8 +122,8 @@ protected:
     manager->unregisterSkiaView(_view->getNativeId());
   }
 
-  // Choreographer tick: presents the queued recordings, returns whether more
-  // are already waiting.
+  // Choreographer tick: presents what is waiting, returns whether a frame is
+  // still waiting or coming.
   bool presentFrame() { return _view->presentFrame(); }
 
   /**
@@ -144,15 +144,14 @@ private:
                        jni::alias_ref<JniSkiaManager::javaobject> skiaManager)
       : _manager(skiaManager->cthis()->getSkiaManager()) {
     auto context = skiaManager->cthis()->getPlatformContext();
-    // Before Android 12 SurfaceFlinger gives a SurfaceView's buffer back only
-    // after compositing the next frame, so a pipelined present that misses
-    // the latch keeps every later frame waiting for one.
-    const bool pipelined = android_get_device_api_level() >= __ANDROID_API_S__;
     // A window's present waits, on the main thread that presents, until the
-    // GPU has finished the frame presented before it; pipelined, a frame is
-    // often replayed that early, so its present is held instead.
+    // GPU has finished the frame presented before it (libgui's queueBuffer,
+    // for every Vulkan swapchain): a frame replayed that early is held.
     _surface = std::make_shared<RNSkWindowSurface>(
-        pipelined ? PresentHold::kUntilPreviousFrameDone : PresentHold::kNone);
+        PresentHold::kUntilPreviousFrameDone);
+    // The Java view's frame callback and its refresh-rate vote. Weak: the
+    // Java view owns this object through its hybrid data.
+    jni::weak_ref<jhybridobject> weakJava = jni::make_weak(jThis);
     // A TextureView takes a frame only when its window draws, on the main
     // thread that also presents. A present before that draw replaces the
     // frame still queued, and on Android 11 waits up to 4.29 s for a buffer
@@ -161,21 +160,27 @@ private:
     // frame waits until the window has drawn the last one (frameLatched);
     // Android 10's queue never waits, and holding frames back there only
     // adds jank.
+    // The vote counts the frames that went to the window, not the frames the
+    // view was asked to present: it asks on every frame while one is coming.
     _surface->setDidPresent([latchesOnWindowDraw = _latchesOnWindowDraw,
-                             framePendingLatch = _framePendingLatch]() {
+                             framePendingLatch = _framePendingLatch,
+                             weakJava]() {
       if (latchesOnWindowDraw->load()) {
         framePendingLatch->store(true);
       }
+      auto javaPart = weakJava.lockLocal();
+      if (!javaPart) {
+        return;
+      }
+      static const auto method =
+          javaPart->getClass()->getMethod<void()>("onFramePresented");
+      method(javaPart);
     });
     _surface->setCanPresent([framePendingLatch = _framePendingLatch]() {
       return !framePendingLatch->load();
     });
-    _view = std::make_shared<RNSkView>(context, _surface,
-                                       pipelined ? ReplayPacing::kPipelined
-                                                 : ReplayPacing::kAfterPresent);
-    // A submitted recording arms the Java view's frame callback. Weak: the
-    // Java view owns this object through its hybrid data.
-    jni::weak_ref<jhybridobject> weakJava = jni::make_weak(jThis);
+    _view = std::make_shared<RNSkView>(context, _surface);
+    // A submitted recording arms the Java view's frame callback.
     _view->setFrameScheduler([weakJava]() {
       auto javaPart = weakJava.lockLocal();
       if (!javaPart) {
