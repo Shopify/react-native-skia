@@ -248,8 +248,10 @@ public:
    for a redraw, and while a replay is in flight, whose ticks pace the
    replays (see RNSkReplaySchedule). Without a surface the queue is left
    alone: the surface presents it when it appears. While the window cannot
-   show a frame (the app in the background) the queue is left alone too, and
-   nobody asks again before onCanPresent().
+   show a frame (the app in the background, a TextureView whose window has yet
+   to draw the last one) the queue is left alone until onCanPresent(), and the
+   ticks go on only while a replay is in flight, so that they count every
+   frame it takes.
    */
   bool presentFrame() {
     auto target = getTarget();
@@ -257,12 +259,15 @@ public:
       return false;
     }
     RNSkGraphiteTargetInfo targetInfo;
-    if (!_surface->getTargetInfo(&targetInfo) || !_surface->canPresent()) {
+    if (!_surface->getTargetInfo(&targetInfo)) {
       return false;
     }
-    presentWaiting(*target, targetInfo);
+    const bool canPresent = _surface->canPresent();
+    if (canPresent) {
+      presentWaiting(*target, targetInfo);
+    }
     _producer->onPresentTick();
-    return hasFrameToShow();
+    return canPresent ? hasFrameToShow() : _producer->isReplaying();
   }
 
   /**
