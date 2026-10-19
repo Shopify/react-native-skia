@@ -57,6 +57,9 @@ static bool appIsBackgrounded() {
   bool _canPresent;
 #if !TARGET_OS_OSX
   CADisplayLink *_displayLink;
+  // Whether the display link asked for the display's full rate yet (see
+  // requestFullFrameRate).
+  bool _fullFrameRateRequested;
 #else
   bool _presentAgainScheduled;
 #endif
@@ -70,6 +73,8 @@ static bool appIsBackgrounded() {
     _canPresent = !appIsBackgrounded();
 #if TARGET_OS_OSX
     _presentAgainScheduled = false;
+#else
+    _fullFrameRateRequested = false;
 #endif
     static const auto defaultProps = std::make_shared<const SkiaViewProps>();
     _props = defaultProps;
@@ -208,6 +213,7 @@ static bool appIsBackgrounded() {
     [_displayLink addToRunLoop:[NSRunLoop mainRunLoop]
                        forMode:NSRunLoopCommonModes];
   }
+  [self requestFullFrameRate];
   _displayLink.paused = NO;
 #else
   if (_view != nullptr && _view->presentFrame()) {
@@ -217,6 +223,31 @@ static bool appIsBackgrounded() {
 }
 
 #if !TARGET_OS_OSX
+// A display link fires at 60 Hz until it asks for more, also while the
+// display already runs at 120 Hz for another link (Reanimated asks for 120):
+// a 120 Hz producer would then be presented every other frame. Ask for the
+// display's full rate once the view knows its screen. On iPhone this needs
+// CADisableMinimumFrameDurationOnPhone in the app's Info.plist too, else iOS
+// caps every link at 60 Hz. The link is paused while nothing is queued, so an
+// idle view does not keep the display at its full rate.
+- (void)requestFullFrameRate {
+#if !TARGET_OS_VISION
+  if (_fullFrameRateRequested) {
+    return;
+  }
+  UIScreen *screen = self.window.screen;
+  if (screen == nil) {
+    return;
+  }
+  _fullFrameRateRequested = true;
+  const float maxFps = (float)screen.maximumFramesPerSecond;
+  if (maxFps > 60) {
+    _displayLink.preferredFrameRateRange =
+        CAFrameRateRangeMake(60, maxFps, maxFps);
+  }
+#endif
+}
+
 - (void)onFrame:(CADisplayLink *)link {
   if (_view == nullptr || !_view->presentFrame()) {
     link.paused = YES;

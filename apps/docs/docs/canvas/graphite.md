@@ -42,7 +42,8 @@ A recording is immutable: you can submit the same one again later without record
 ## Threading model
 
 Recording happens on the thread that calls `beginRecording()`, presenting on the main thread: on the display link (`CADisplayLink` on iOS, the `Choreographer` for an Android `SurfaceView`), or, for an Android `TextureView`, once its window has drawn the previous frame.
-The context can be captured into a worklet, so a frame loop can run on the Reanimated UI runtime without touching the JS thread:
+On iOS, React Native's `requestAnimationFrame` on the JS thread runs at 60 Hz, and an iPhone needs the opt-in described in [High refresh rate displays](/docs/canvas/canvas#high-refresh-rate-displays) to present faster than 60 frames per second at all.
+The context can be captured into a worklet, so a frame loop can run on the Reanimated UI runtime, at the display's rate, without touching the JS thread:
 
 ```tsx
 import { useEffect, useRef } from "react";

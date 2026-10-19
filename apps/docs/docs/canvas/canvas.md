@@ -130,6 +130,22 @@ On the Web, the drawing is recorded into a picture on the JS thread and painted 
 
 If you need to produce the frames yourself, from the thread of your choice, use the [Graphite View](/docs/canvas/graphite).
 
+## High refresh rate displays
+
+The view presents at the rate of the display it is on, 120 Hz on a ProMotion iPhone or iPad.
+On iPhone, iOS caps every app at 60 Hz until its `Info.plist` opts in:
+
+```xml
+<key>CADisableMinimumFrameDurationOnPhone</key>
+<true/>
+```
+
+With Expo, add the key under `ios.infoPlist` in `app.json`.
+Without it, a canvas presents 60 frames per second on an iPhone however fast its animations run.
+
+React Native's `requestAnimationFrame` on the JS thread runs at 60 Hz on iOS, so frames recorded from it, as in a [Graphite View](/docs/canvas/graphite) fed from the JS thread, are presented at that rate.
+Reanimated values and worklets run at the display's rate.
+
 ## Android rendering options
 
 On iOS, the canvas draws into a `CAMetalLayer` and behaves like any other view.
