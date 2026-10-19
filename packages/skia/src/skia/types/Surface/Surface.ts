@@ -6,7 +6,9 @@ import type { SkRect } from "../Rect";
 export interface SkSurface extends SkJSIInstance<"Surface"> {
   /** Returns Canvas that draws into the surface. Subsequent calls return the
      same Canvas. Canvas returned is managed and owned by Surface, and is
-     deleted when Surface is deleted.
+     deleted when Surface is deleted. On native, the canvas also keeps the
+     surface alive: dispose the canvas too (`canvas.dispose()`) to free the
+     surface's texture before both are garbage collected.
 
       @return  drawing Canvas for Surface
 

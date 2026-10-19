@@ -33,6 +33,13 @@ export enum SaveLayerFlag {
 
 export interface SkCanvas {
   /**
+   * Releases the canvas now instead of when it is garbage collected. A canvas
+   * from `surface.getCanvas()` keeps its surface, and the surface's texture,
+   * alive: dispose both to free that memory right away. Later calls on the
+   * canvas throw; calling `dispose()` again does nothing.
+   */
+  dispose(): void;
+  /**
    * Draws the given image with its top-left corner at (left, top) using the current clip,
    * the current matrix, and optionally-provided paint.
    * @param img
