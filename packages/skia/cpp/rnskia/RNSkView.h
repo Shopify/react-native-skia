@@ -260,36 +260,29 @@ public:
   };
 
   /**
-   Presents the frame the window holds for the GPU once the GPU is done with
-   the one before it, then the queued recordings (see setFrameScheduler for
-   when). `onVsync` tells the present a frame of the display asked for from
-   one a recording just submitted asked for; only the first counts as a tick.
-   Without a surface the queue is left alone: the surface presents it when it
-   appears. While the window cannot show a frame (the app in the background, a
-   TextureView whose window has yet to draw the last one) the queue is left
-   alone until onCanPresent(), and only a replay in flight keeps the ticks
-   going, so that they count every frame it takes.
+   Presents the frame the window holds once the GPU is done with the one
+   before it, then the queued recordings (see setFrameScheduler for when).
+   `vsyncs` is how many frames of the display asked for this present since the
+   view's last one, each a tick: none for the present a recording just
+   submitted asked for, more than one when the platform view could not present
+   in time for a frame. A tick lets the window present a frame again, and so
+   does a view that asks for no more frames, so that its next one, whenever it
+   comes, starts a frame of its own (see RNSkPresentHold). Without a surface
+   the queue is left alone: the surface presents it when it appears. While the
+   window cannot show a frame (the app in the background, a TextureView whose
+   window has yet to draw the last one) the queue is left alone until
+   onCanPresent(), and only a replay in flight keeps the ticks going, so that
+   they count every frame it takes.
    */
-  NextFrame presentFrame(bool onVsync) {
-    auto target = getTarget();
-    if (target == nullptr) {
-      return NextFrame::kNone;
+  NextFrame presentFrame(size_t vsyncs) {
+    if (vsyncs > 0) {
+      _surface->allowNextPresent();
     }
-    RNSkGraphiteTargetInfo targetInfo;
-    if (!_surface->getTargetInfo(&targetInfo)) {
-      return NextFrame::kNone;
+    const NextFrame next = presentForTicks(vsyncs);
+    if (next == NextFrame::kNone) {
+      _surface->allowNextPresent();
     }
-    const bool canPresent = _surface->canPresent();
-    if (canPresent) {
-      presentWaiting(*target, targetInfo);
-    }
-    if (onVsync) {
-      _producer->onPresentTick();
-    }
-    if (canPresent && (target->hasQueued() || _surface->hasHeldFrame())) {
-      return NextFrame::kWaiting;
-    }
-    return _producer->isReplaying() ? NextFrame::kComing : NextFrame::kNone;
+    return next;
   }
 
   /**
@@ -311,6 +304,29 @@ public:
   }
 
 private:
+  /** presentFrame(), between the window's present slots. */
+  NextFrame presentForTicks(size_t vsyncs) {
+    auto target = getTarget();
+    if (target == nullptr) {
+      return NextFrame::kNone;
+    }
+    RNSkGraphiteTargetInfo targetInfo;
+    if (!_surface->getTargetInfo(&targetInfo)) {
+      return NextFrame::kNone;
+    }
+    const bool canPresent = _surface->canPresent();
+    if (canPresent) {
+      presentWaiting(*target, targetInfo);
+    }
+    for (size_t tick = 0; tick < vsyncs; tick++) {
+      _producer->onPresentTick();
+    }
+    if (canPresent && (target->hasQueued() || _surface->hasHeldFrame())) {
+      return NextFrame::kWaiting;
+    }
+    return _producer->isReplaying() ? NextFrame::kComing : NextFrame::kNone;
+  }
+
   std::shared_ptr<RNSkGraphiteTarget> getTarget() {
     std::lock_guard<std::mutex> lock(_mutex);
     return _target;

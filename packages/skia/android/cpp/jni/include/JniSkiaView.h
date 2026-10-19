@@ -122,10 +122,11 @@ protected:
     manager->unregisterSkiaView(_view->getNativeId());
   }
 
-  // Presents what is waiting (see RNSkView::presentFrame); returns the value
-  // of RNSkView::NextFrame, which FrameScheduler.NextFrame reads.
-  int presentFrame(bool onVsync) {
-    return static_cast<int>(_view->presentFrame(onVsync));
+  // Presents what is waiting for the vsyncs FrameScheduler counted (see
+  // RNSkView::presentFrame); returns the value of RNSkView::NextFrame, which
+  // FrameScheduler.NextFrame reads.
+  int presentFrame(int vsyncs) {
+    return static_cast<int>(_view->presentFrame(static_cast<size_t>(vsyncs)));
   }
 
   /**
@@ -148,9 +149,10 @@ private:
     auto context = skiaManager->cthis()->getPlatformContext();
     // A window's present waits, on the main thread that presents, until the
     // GPU has finished the frame presented before it (libgui's queueBuffer,
-    // for every Vulkan swapchain): a frame replayed that early is held.
+    // for every Vulkan swapchain), and its compositor takes one frame a vsync:
+    // a frame replayed that early, or a second one in a tick, is held.
     _surface = std::make_shared<RNSkWindowSurface>(
-        PresentHold::kUntilPreviousFrameDone);
+        PresentHold::kOncePerTickAfterPreviousFrame);
     // The Java view's frame callback and its refresh-rate vote. Weak: the
     // Java view owns this object through its hybrid data.
     jni::weak_ref<jhybridobject> weakJava = jni::make_weak(jThis);

@@ -144,16 +144,24 @@ public:
   }
 
   /**
-   Presents the frame the window holds for the GPU once the GPU has finished
-   the frame presented before it, without waiting for the GPU. Main thread.
+   Presents the frame the window holds once the GPU has finished the frame
+   presented before it and a tick allowed it (see allowNextPresent), without
+   waiting for the GPU. Main thread.
    */
   HeldFrame presentHeldFrame();
 
   /**
-   Whether the window holds a frame for the GPU: it takes no other frame
-   meanwhile. Main thread.
+   Whether the window holds a frame: it takes no other frame meanwhile. Main
+   thread.
    */
   bool hasHeldFrame() const { return _presentHold.hasHeldFrame(); }
+
+  /**
+   A frame of the display asked the view to present, or the view asks for no
+   more frames for now: the window presents one frame again (see
+   RNSkPresentHold::allowNextPresent). Main thread.
+   */
+  void allowNextPresent() { _presentHold.allowNextPresent(); }
 
   // RNSkSurface -------------------------------------------------------------
 

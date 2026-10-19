@@ -251,14 +251,15 @@ static bool appIsBackgrounded() {
 
 - (void)onFrame:(CADisplayLink *)link {
   if (_view == nullptr ||
-      _view->presentFrame(true) == RNSkia::RNSkView::NextFrame::kNone) {
+      _view->presentFrame(1) == RNSkia::RNSkView::NextFrame::kNone) {
     link.paused = YES;
   }
 }
 #else
 - (void)presentFrameOnVsync:(BOOL)onVsync {
+  const size_t vsyncs = onVsync ? 1 : 0;
   if (_view != nullptr &&
-      _view->presentFrame(onVsync) != RNSkia::RNSkView::NextFrame::kNone) {
+      _view->presentFrame(vsyncs) != RNSkia::RNSkView::NextFrame::kNone) {
     [self presentAgainLater];
   }
 }
