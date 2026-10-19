@@ -281,6 +281,8 @@ public:
       auto status = fGraphiteContext->insertRecording(info);
       // InsertStatus converts to true on success.
       if (!static_cast<bool>(status)) {
+        // The uploads it carried never ran (see ImageProvider).
+        ImageProvider::invalidateAll();
         RNSkLogger::logToConsole(
             "Graphite rejected a recording (InsertStatus %d): %s",
             static_cast<int>(
@@ -297,7 +299,10 @@ public:
     std::lock_guard<std::mutex> lock(_mutex);
     skgpu::graphite::InsertRecordingInfo info;
     info.fRecording = recording;
-    fGraphiteContext->insertRecording(info);
+    if (!static_cast<bool>(fGraphiteContext->insertRecording(info))) {
+      // The uploads it carried never ran (see ImageProvider).
+      ImageProvider::invalidateAll();
+    }
     fGraphiteContext->submit(syncToCpu);
   }
 
