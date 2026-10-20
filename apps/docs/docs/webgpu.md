@@ -64,11 +64,38 @@ const device = importDevice(Skia.getNativeDevice());
 
 Everything you create with this device (textures, buffers, pipelines) lives on the same device as Skia's own resources, which is what makes sharing textures possible.
 A few things to know about it:
-- The device can be lost (a driver reset, the GPU out of memory, GPU work refused while the app was in the background on iOS). Skia then replaces it with a new device and `Skia.gpu.lost` resolves: import the device again, and make again what you created on the old one. See [GPU device loss](/docs/getting-started/installation#gpu-device-loss).
 
-- The device is owned by Skia and is valid for the lifetime of the process.
-- Skia treats the loss of its device as fatal: there is no point in requesting a replacement when it is lost.
+- The device is owned by Skia, which keeps it alive for as long as it renders with it.
+- The device can be lost: a driver reset, the GPU out of memory, GPU work refused while the app was in the background on iOS. Skia then replaces it with a new device (see [GPU device loss](/docs/getting-started/installation#gpu-device-loss)). The imported `GPUDevice` does not learn of the loss (its `lost` promise never settles) and everything created on it is gone: watch `Skia.gpu.lost` instead, import the new device there and create your resources again.
 - `navigator.gpu.requestAdapter()` and `requestDevice()` still work as usual. Use a device of your own when you want your GPU work isolated from Skia's command queue, but keep in mind that a texture created on another device cannot be shared with Skia.
+
+```tsx
+import { Skia } from "react-native-skia";
+import { importDevice } from "react-native-webgpu";
+
+let device = importDevice(Skia.getNativeDevice());
+let texture = device.createTexture({
+  size: [256, 256],
+  format: "rgba8unorm",
+  usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
+});
+
+const watchDevice = () => {
+  Skia.gpu.lost.then(() => {
+    // The lost device and its texture are gone: Skia has a new device,
+    // import it and create the texture again on it.
+    device = importDevice(Skia.getNativeDevice());
+    texture = device.createTexture({
+      size: [256, 256],
+      format: "rgba8unorm",
+      usage:
+        GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
+    });
+    watchDevice();
+  });
+};
+watchDevice();
+```
 
 The shared device works like any other device, for instance to configure a WebGPU canvas:
 

@@ -123,22 +123,56 @@ To use this library in the browser, see [these instructions](/docs/getting-start
 The GPU device Skia renders with can be lost while the app runs: a driver reset, the GPU out of memory, or GPU work refused while the app was in the background on iOS.
 React Native Skia then replaces it with a new device, and canvases render again on their own.
 Everything made on the lost device is gone for good, though safe to use (it draws nothing): offscreen surfaces and the images taken from them, texture images, snapshots of views, and the device `Skia.getNativeDevice()` returned.
-`Skia.gpu.lost` resolves once the device has been replaced, so an app that keeps such objects makes them again there:
+`Skia.gpu.lost` resolves once the device has been replaced, so an app that keeps such objects lets go of them there and makes new ones.
+Below, a frame callback draws into an offscreen surface and shows it in a canvas through the image sharing its texture; after a loss both are made again on the new device:
 
 ```tsx
-import { Skia } from "react-native-skia";
+import { useEffect } from "react";
+import { Canvas, Image, Skia } from "react-native-skia";
+import type { SkImage, SkSurface } from "react-native-skia";
+import { useFrameCallback, useSharedValue } from "react-native-reanimated";
 
-const watchDevice = () => {
-  Skia.gpu.lost.then(({ reason, message }) => {
-    console.log(`GPU device lost (${reason}): ${message}`);
-    // Make the offscreen surfaces and texture images again, import the
-    // shared WebGPU device again, then wait for the next loss.
-    watchDevice();
+export const Player = () => {
+  const surface = useSharedValue<SkSurface | null>(null);
+  const frame = useSharedValue<SkImage | null>(null);
+  useFrameCallback(() => {
+    "worklet";
+    // Made on first use, and again once the shared values are reset below.
+    surface.value ??= Skia.Surface.MakeOffscreen(1080, 1920);
+    const target = surface.value!;
+    target.getCanvas().drawColor(Skia.Color("black"));
+    target.flush();
+    frame.value ??= target.asImage();
   });
+  useEffect(() => {
+    let mounted = true;
+    const watchDevice = () => {
+      Skia.gpu.lost.then(({ reason, message }) => {
+        if (!mounted) {
+          return;
+        }
+        console.log(`GPU device lost (${reason}): ${message}`);
+        // The surface and its image were made on the lost device and draw
+        // nothing anymore: the frame callback makes new ones on the new one.
+        surface.value = null;
+        frame.value = null;
+        watchDevice();
+      });
+    };
+    watchDevice();
+    return () => {
+      mounted = false;
+    };
+  }, [surface, frame]);
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Image image={frame} x={0} y={0} width={270} height={480} fit="cover" />
+    </Canvas>
+  );
 };
-watchDevice();
 ```
 
+Code sharing Skia's device with React Native WebGPU imports the device again in the same place, see [sharing the device](/docs/webgpu#sharing-the-device).
 `Skia.gpu.isAvailable` is false between the loss and the replacement, and stays false, with `Skia.gpu.error` saying why, if no replacement could be made.
 
 ## Debugging
