@@ -79,7 +79,15 @@ void RNSkGraphiteProducer::replaceContent(std::shared_ptr<Recorder> recorder,
 
 bool RNSkGraphiteProducer::hasContent() {
   std::lock_guard<std::mutex> lock(_mutex);
-  return _recorder != nullptr || _picture != nullptr;
+  return hasContentLocked();
+}
+
+bool RNSkGraphiteProducer::hasContentLocked() const {
+  // A recording whose shared values have not been read yet is not content:
+  // its animated properties are unset, and replaying it would draw them wrong.
+  // The view keeps showing the previous frame until the mapper has read them,
+  // which schedules the frame that draws it (applyUpdates).
+  return (_recorder != nullptr && _recorder->isReady()) || _picture != nullptr;
 }
 
 bool RNSkGraphiteProducer::applyUpdatesTo(
@@ -118,7 +126,7 @@ bool RNSkGraphiteProducer::requestFrame() {
   std::lock_guard<std::mutex> lock(_mutex);
   _dirty = true;
   kickLocked();
-  return _target != nullptr && (_recorder != nullptr || _picture != nullptr);
+  return _target != nullptr && hasContentLocked();
 }
 
 void RNSkGraphiteProducer::onFramePresented(size_t presented) {
@@ -133,7 +141,7 @@ void RNSkGraphiteProducer::onFramePresented(size_t presented) {
 
 void RNSkGraphiteProducer::kickLocked() {
   if (_inFlight || _queued >= kMaxQueued || _target == nullptr ||
-      (_recorder == nullptr && _picture == nullptr)) {
+      !hasContentLocked()) {
     return;
   }
   _inFlight = true;
@@ -152,8 +160,13 @@ void RNSkGraphiteProducer::produce() {
   {
     std::lock_guard<std::mutex> lock(_mutex);
     target = _target;
-    recorder = _recorder;
-    picture = _picture;
+    // A commit may have replaced the content this job was started for with a
+    // recording that has not read its values yet: nothing to replay until it
+    // has (the read schedules the job), and the content stays dirty below.
+    if (hasContentLocked()) {
+      recorder = _recorder;
+      picture = _picture;
+    }
     _dirty = false;
   }
   std::shared_ptr<RNSkGraphiteRecording> recording;
@@ -217,8 +230,10 @@ void RNSkGraphiteProducer::renderInto(SkCanvas *canvas, float pixelDensity) {
   sk_sp<SkPicture> picture;
   {
     std::lock_guard<std::mutex> lock(_mutex);
-    recorder = _recorder;
-    picture = _picture;
+    if (hasContentLocked()) {
+      recorder = _recorder;
+      picture = _picture;
+    }
   }
   drawContent(canvas, recorder.get(), picture, pixelDensity);
 }

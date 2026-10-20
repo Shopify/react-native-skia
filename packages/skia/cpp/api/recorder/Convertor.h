@@ -17,7 +17,6 @@
 #include <modules/skparagraph/include/ParagraphStyle.h>
 
 #include "../CustomBlendModes.h"
-#include "api/JsiSkPoint.h"
 #include "api/JsiSkFont.h"
 #include "api/JsiSkImage.h"
 #include "api/JsiSkImageFilter.h"
@@ -25,6 +24,7 @@
 #include "api/JsiSkPaint.h"
 #include "api/JsiSkParagraph.h"
 #include "api/JsiSkPicture.h"
+#include "api/JsiSkPoint.h"
 #include "api/JsiSkRSXform.h"
 #include "api/JsiSkRuntimeEffect.h"
 #include "api/JsiSkSVG.h"
@@ -58,6 +58,13 @@ using ConversionFunction = std::function<PendingWrite(
  * slot order to JS, and the Reanimated mapper passes the values back in that
  * order (see Recorder::readUpdates).
  *
+ * Recording only registers the conversions; no value is read. On the
+ * recording (JS) runtime, reading a Reanimated 4 shared value is a blocking
+ * round trip to the UI thread, and reading a picture held by one wraps it for
+ * this runtime: the values are read where they live, by the mapper (see
+ * Container.native.ts), or once on the JS thread for a recording played
+ * there (Recorder::readSharedValues).
+ *
  * The shared values themselves, and the Map that finds their slot, are
  * objects of the recording runtime and are only kept until getSharedValues()
  * takes them, on the JS thread: the recording lives on in the view, on other
@@ -85,6 +92,11 @@ public:
       count += conversions.size();
     }
     return count;
+  }
+
+  /** The shared value of a slot, or nullptr once they have been let go of. */
+  const jsi::Object *sharedValue(size_t slot) const {
+    return slot < _sharedValues.size() ? &_sharedValues[slot] : nullptr;
   }
 
   /** The shared values in slot order; this lets go of them. */
@@ -232,9 +244,6 @@ bool convertSelectorProperty(jsi::Runtime &runtime, const jsi::Value &prop,
   };
 
   variables.add(runtime, sharedValue, conv);
-  if (auto write = conv(runtime, sharedValue)) {
-    write();
-  }
   return true;
 }
 
@@ -263,9 +272,6 @@ void convertPropertyImpl(jsi::Runtime &runtime, const jsi::Object &object,
           };
     };
     variables.add(runtime, sharedValue, conv);
-    if (auto write = conv(runtime, sharedValue)) {
-      write();
-    }
     return;
   }
 
