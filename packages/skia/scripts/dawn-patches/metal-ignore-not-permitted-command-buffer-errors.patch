@@ -1,0 +1,152 @@
+[metal] Add a toggle to survive MTLCommandBufferErrorNotPermitted
+
+iOS fails command buffers committed, or not yet scheduled, while the
+application is in the background with MTLCommandBufferErrorNotPermitted:
+GPU access is restricted there, but the device itself stays usable. Dawn
+154 did not look at a completed command buffer's status, so the refused
+work was simply lost and rendering went on. Since Dawn 157 the completed
+handler in QueueMTL.mm treats every failure as an execution error and
+loses the device, so an app with GPU work in flight when it goes to the
+background comes back to a lost device (#4290). WebKit's WebGPU makes the
+distinction in Source/WebGPU/WebGPU/Queue.mm, where only an error other
+than MTLCommandBufferErrorNotPermitted loses the device.
+
+With the metal_ignore_not_permitted_command_buffer_errors toggle enabled,
+the work of such a command buffer is discarded, its serial advances as if
+it had completed, and a warning is logged from the next submit (the handler
+runs on a Metal thread and cannot call into the device). Resources the
+discarded work wrote keep their previous, possibly uninitialized, contents.
+The toggle is off by default: device creation has to opt in.
+
+Upstream: https://github.com/google/dawn/pull/91. The PR also adds
+MetalBackendTests cases for both behaviours, left out here because the
+monolithic build does not compile the tests.
+
+Drop this patch when the pinned Dawn carries the toggle.
+
+---
+
+--- a/src/dawn/native/Toggles.cpp
++++ b/src/dawn/native/Toggles.cpp
+@@ -408,6 +408,15 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
+       "an occlusion query is empty. Workaround this by explicitly filling it with zero if there "
+       "are no draw calls.",
+       "https://crbug.com/dawn/1707", ToggleStage::Device}},
++    {Toggle::MetalIgnoreNotPermittedCommandBufferErrors,
++     {"metal_ignore_not_permitted_command_buffer_errors",
++      "Do not lose the device when a command buffer fails with MTLCommandBufferErrorNotPermitted. "
++      "iOS reports this error for command buffers committed, or not yet scheduled, while the "
++      "application is in the background, where GPU access is restricted; the device itself stays "
++      "usable. The work of such a command buffer is discarded and a warning is logged. Resources "
++      "it wrote keep their previous, possibly uninitialized, contents, which later mappings and "
++      "copies expose. Only for applications that accept this trade-off.",
++      "https://github.com/wcandillon/react-native-skia/issues/4290", ToggleStage::Device}},
+     {Toggle::UseBlitForBufferToDepthTextureCopy,
+      {"use_blit_for_buffer_to_depth_texture_copy",
+       "Use a blit instead of a copy command to copy buffer data to the depth aspect of a "
+--- a/src/dawn/native/Toggles.h
++++ b/src/dawn/native/Toggles.h
+@@ -110,6 +110,7 @@ enum class Toggle {
+     VulkanPolyfillFloatNegation,
+     VulkanPolyfillFloatAbs,
+     MetalFillEmptyOcclusionQueriesWithZero,
++    MetalIgnoreNotPermittedCommandBufferErrors,
+     UseBlitForBufferToDepthTextureCopy,
+     UseBlitForBufferToStencilTextureCopy,
+     UseBlitForStencilTextureWrite,
+--- a/src/dawn/native/metal/QueueMTL.h
++++ b/src/dawn/native/metal/QueueMTL.h
+@@ -30,6 +30,7 @@
+ 
+ #import <Metal/Metal.h>
+ 
++#include <atomic>
+ #include <map>
+ #include <optional>
+ #include <string>
+@@ -92,6 +93,10 @@ class Queue final : public QueueBase {
+         mCommandsScheduledEvents;
+     // - Error message from the Metal command-buffer-completed handler if completion failed.
+     MutexProtected<std::optional<std::string>> mExecutionError;
++    // - Number of command buffers whose work was discarded because they failed with
++    //   MTLCommandBufferErrorNotPermitted while Toggle::MetalIgnoreNotPermittedCommandBufferErrors
++    //   is enabled. Reset by SubmitPendingCommandBuffer() when it emits the warning.
++    std::atomic<uint32_t> mDiscardedCommandBufferCount = 0;
+ 
+     // A shared event that can be exported for synchronization with other users of Metal.
+     // MTLSharedEvent is not available until macOS 10.14+ so use just `id`.
+--- a/src/dawn/native/metal/QueueMTL.mm
++++ b/src/dawn/native/metal/QueueMTL.mm
+@@ -60,6 +60,30 @@ void Complete(EventCompletionType completionType) override {
+         // There's nothing to do here since there are no callbacks associated with this event.
+     }
+ };
++
++// How a Metal command buffer ended, as seen from its completed handler.
++enum class CommandBufferOutcome {
++    Completed,
++    // The command buffer failed with MTLCommandBufferErrorNotPermitted. iOS reports this error
++    // for command buffers committed, or not yet scheduled, while the application is in the
++    // background, where GPU access is restricted. The device stays usable: only the work of this
++    // command buffer is lost. See Toggle::MetalIgnoreNotPermittedCommandBufferErrors.
++    NotPermitted,
++    // The command buffer failed for any other reason.
++    Failed,
++};
++
++CommandBufferOutcome GetCommandBufferOutcome(id<MTLCommandBuffer> commandBuffer) {
++    if (commandBuffer.status != MTLCommandBufferStatusError) [[likely]] {
++        return CommandBufferOutcome::Completed;
++    }
++    NSError* error = commandBuffer.error;
++    if (error != nil && [error.domain isEqualToString:MTLCommandBufferErrorDomain] &&
++        error.code == MTLCommandBufferErrorNotPermitted) {
++        return CommandBufferOutcome::NotPermitted;
++    }
++    return CommandBufferOutcome::Failed;
++}
+ }  // namespace
+ 
+ ResultOrError<Ref<Queue>> Queue::Create(Device* device, const QueueDescriptor* descriptor) {
+@@ -232,6 +256,18 @@ void Complete(EventCompletionType completionType) override {
+     // (for example when this is called by Tick(), which happens even if nothing is pending).
+     DAWN_TRY(CheckExecutionError());
+ 
++    // Report command buffers discarded by the completed handler, which cannot log itself.
++    if (uint32_t discarded = mDiscardedCommandBufferCount.exchange(0, std::memory_order_relaxed);
++        discarded != 0) [[unlikely]] {
++        GetDevice()->EmitLog(
++            wgpu::LoggingType::Warning,
++            absl::StrFormat("Discarded the work of %u Metal command buffer(s) that failed with "
++                            "MTLCommandBufferErrorNotPermitted (GPU access is restricted while the "
++                            "application is in the background). Resources written by that work may "
++                            "hold stale contents.",
++                            discarded));
++    }
++
+     if (!mCommandContext.NeedsSubmit()) {
+         return {};
+     }
+@@ -284,9 +320,19 @@ void Complete(EventCompletionType completionType) override {
+                        deviceState == DeviceBase::State::Disconnecting);
+         }
+ 
+-        MTLCommandBufferStatus status =
+-            INJECT_ERROR_OR_RUN(commandBuffer.status, MTLCommandBufferStatusError);
+-        if (status == MTLCommandBufferStatusError) [[unlikely]] {
++        // For testing, the first injected error fakes a generic failure and the second one a
++        // MTLCommandBufferErrorNotPermitted failure.
++        CommandBufferOutcome outcome =
++            INJECT_ERROR_OR_RUN(GetCommandBufferOutcome(commandBuffer),
++                                CommandBufferOutcome::Failed, CommandBufferOutcome::NotPermitted);
++        if (outcome == CommandBufferOutcome::NotPermitted &&
++            device->IsToggleEnabled(  // Thread-safe (immutable data).
++                Toggle::MetalIgnoreNotPermittedCommandBufferErrors)) [[unlikely]] {
++            // Only the work of this command buffer is lost, so let the serial advance as if it had
++            // completed. The warning is emitted by SubmitPendingCommandBuffer() since this handler
++            // runs on a Metal thread and cannot call into the device.
++            queue->mDiscardedCommandBufferCount.fetch_add(1, std::memory_order_relaxed);
++        } else if (outcome != CommandBufferOutcome::Completed) [[unlikely]] {
+             NSError* error = commandBuffer.error;
+             std::string message =
+                 error ? absl::StrFormat("Metal command buffer failed: %s (domain=%s, code=%ld)",
