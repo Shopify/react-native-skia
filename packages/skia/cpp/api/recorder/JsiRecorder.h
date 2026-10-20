@@ -27,18 +27,16 @@ public:
 
   explicit JsiRecorder(std::shared_ptr<RNSkPlatformContext> context)
       : JsiSkWrappingSharedPtrNativeObject<JsiRecorder, Recorder>(
-            std::move(context), std::make_shared<Recorder>()) {}
+            std::move(context), std::make_shared<Recorder>()) {
+    getObject()->_context = getContext();
+  }
 
   /**
    * Runs on the JS thread, when the runtime finalizes the wrapper. A view may
    * still own the recording and destroy it on another thread: the shared
    * values, which are objects of this runtime, must go first.
    */
-  ~JsiRecorder() override {
-    if (auto recorder = getObjectUnchecked()) {
-      recorder->variables.releaseSharedValues();
-    }
-  }
+  ~JsiRecorder() override { releaseSharedValues(); }
 
   JSI_HOST_FUNCTION(savePaint) {
     getObject()->savePaint(runtime, arguments[0].asObject(runtime),
@@ -373,11 +371,22 @@ protected:
    * recording is left to the view and the threads that replay it.
    */
   void releaseResources() override {
+    releaseSharedValues();
+    JsiSkWrappingSharedPtrNativeObject<JsiRecorder,
+                                       Recorder>::releaseResources();
+  }
+
+private:
+  /**
+   * The shared values are objects of the recording runtime: both the
+   * containers take them (getSharedValues) right after recording, so this is
+   * normally a no-op by the time the wrapper goes, and the runtime that
+   * finalizes it is the one that recorded.
+   */
+  void releaseSharedValues() {
     if (auto recorder = getObjectUnchecked()) {
       recorder->variables.releaseSharedValues();
     }
-    JsiSkWrappingSharedPtrNativeObject<JsiRecorder, Recorder>::
-        releaseResources();
   }
 };
 

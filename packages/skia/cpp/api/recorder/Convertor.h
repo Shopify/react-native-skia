@@ -91,16 +91,37 @@ public:
   void releaseSharedValues() { _sharedValues.clear(); }
 
 private:
+  /**
+   * A shared value is read by many commands of a scene. Rather than scanning
+   * the slots for it each time, the slot it was given is written onto the
+   * shared value itself, and checked against the slot's object: a stale tag
+   * left by another recording never matches, so the lookup stays correct, and
+   * finding a known value costs one property read and one comparison.
+   */
+  static constexpr const char *kSlotProperty = "__rnskSlot";
+
   size_t slotFor(jsi::Runtime &runtime, const jsi::Object &sharedValue) {
-    for (size_t i = 0; i < _sharedValues.size(); i++) {
-      if (jsi::Object::strictEquals(runtime, _sharedValues[i], sharedValue)) {
-        return i;
+    if (_sharedValues.size() != _conversions.size()) {
+      // takeSharedValues() let go of the shared values: a new one could not
+      // get the slot its conversions would be filed under.
+      throw std::runtime_error(
+          "Cannot record a shared value after getSharedValues()");
+    }
+    auto tag = sharedValue.getProperty(runtime, kSlotProperty);
+    if (tag.isNumber()) {
+      auto slot = tag.getNumber();
+      if (slot >= 0 && slot < _sharedValues.size() &&
+          jsi::Object::strictEquals(
+              runtime, _sharedValues[static_cast<size_t>(slot)], sharedValue)) {
+        return static_cast<size_t>(slot);
       }
     }
+    auto slot = _sharedValues.size();
     _sharedValues.push_back(
         jsi::Value(runtime, sharedValue).getObject(runtime));
     _conversions.emplace_back();
-    return _sharedValues.size() - 1;
+    sharedValue.setProperty(runtime, kSlotProperty, static_cast<double>(slot));
+    return slot;
   }
 
   std::vector<jsi::Object> _sharedValues;

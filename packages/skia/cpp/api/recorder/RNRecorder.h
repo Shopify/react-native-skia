@@ -23,6 +23,7 @@
 #include "Paint.h"
 #include "PathEffects.h"
 #include "Shaders.h"
+#include "rnskia/RNSkPlatformContext.h"
 
 namespace RNSkia {
 
@@ -174,6 +175,7 @@ private:
   }
 
 public:
+  std::shared_ptr<RNSkPlatformContext> _context;
   Variables variables;
 
   // Unique per recording. The Reanimated mapper tags its updates with it so a
@@ -182,6 +184,23 @@ public:
   const double id = nextId();
 
   Recorder() { commandStack.push_back(&commands); }
+
+  /**
+   * Runs on whichever thread drops the last reference: the UI thread when a
+   * mapper is the last to let go of a replaced recording, a render thread when
+   * a replay is. The commands hold GPU backed resources (images, pictures,
+   * paragraphs), which are destroyed on the main thread to release safely.
+   */
+  ~Recorder() {
+    if (!_context || commands.empty()) {
+      return;
+    }
+    auto pendingCommands = std::make_shared<CommandList>(std::move(commands));
+    _context->runOnMainThread(
+        [pendingCommands = std::move(pendingCommands)]() mutable {
+          pendingCommands->clear();
+        });
+  }
 
   void savePaint(jsi::Runtime &runtime, const jsi::Object &props,
                  bool standalone) {

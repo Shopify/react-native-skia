@@ -1,6 +1,7 @@
 import Rea from "../external/reanimated/ReanimatedProxy";
 import type { SkCanvas, Skia, SkPicture } from "../skia/types";
 import {
+  HAS_REANIMATED_3,
   HAS_REANIMATED_4,
   REANIMATED_VERSION_MAJOR,
 } from "../external/reanimated/renderHelpers";
@@ -114,9 +115,16 @@ class NativeContainer extends Container {
     const sharedValues = recorder.getSharedValues();
     const { nativeId } = this;
     if (nativeId === -1) {
-      this.picture?.dispose();
-      this.picture = recorder.makePicture();
-      recorder.dispose();
+      try {
+        // The new picture is made before the last one goes: a recording that
+        // fails to play leaves the last frame in place rather than a disposed
+        // picture.
+        const picture = recorder.makePicture();
+        this.picture?.dispose();
+        this.picture = picture;
+      } finally {
+        recorder.dispose();
+      }
       return;
     }
     // stopMapper() only takes effect on the UI thread later, so the previous
@@ -128,13 +136,10 @@ class NativeContainer extends Container {
     // until the JS garbage collector finalizes it.
     SkiaViewApi.setJsiProperty(nativeId, "recorder", recorder);
     recorder.dispose();
-    if (sharedValues.length === 0) {
-      return;
-    }
-    if (!HAS_REANIMATED_4) {
-      // The scene was recorded with the current values of the shared values;
-      // nothing will update them.
-      reportUnsupportedReanimated();
+    if (sharedValues.length === 0 || !HAS_REANIMATED_4) {
+      // Without Reanimated 4 (reported by createContainer) the scene was
+      // recorded with the current values of the shared values, and nothing
+      // will update them.
       return;
     }
     this.mapperId = Rea.startMapper(() => {
@@ -144,6 +149,14 @@ class NativeContainer extends Container {
   }
 }
 
+/**
+ * Reanimated support is checked here, in the render phase (Canvas creates its
+ * root in useMemo), where an error boundary can catch the development error.
+ * The container's redraw() runs in React's commit phase, where it could not.
+ */
 export const createContainer = (Skia: Skia, nativeId: number) => {
+  if (HAS_REANIMATED_3 && !HAS_REANIMATED_4) {
+    reportUnsupportedReanimated();
+  }
   return new NativeContainer(Skia, nativeId);
 };

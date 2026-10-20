@@ -31,6 +31,7 @@ jest.mock("../../external/reanimated/ReanimatedProxy", () => ({
 }));
 
 jest.mock("../../external/reanimated/renderHelpers", () => ({
+  HAS_REANIMATED_3: true,
   get HAS_REANIMATED_4() {
     return mockHasReanimated4;
   },
@@ -41,25 +42,25 @@ jest.mock("../Recorder/Visitor", () => ({ visit: jest.fn() }));
 jest.mock("../../skia/NativeSetup", () => ({}));
 jest.mock("../../views/api", () => ({}));
 
-const mockSkia = {
-  Recorder: (): MockRecorder => {
-    const recorder: MockRecorder = {
-      id: mockRecorders.length,
-      getId() {
-        return this.id;
-      },
-      getSharedValues: () => mockSharedValues,
-      makePicture: () => {
-        const picture = { dispose: jest.fn() };
-        mockPictures.push(picture);
-        return picture;
-      },
-      dispose: jest.fn(),
-    };
-    mockRecorders.push(recorder);
-    return recorder;
-  },
+const mockRecorder = (): MockRecorder => {
+  const recorder: MockRecorder = {
+    id: mockRecorders.length,
+    getId() {
+      return this.id;
+    },
+    getSharedValues: () => mockSharedValues,
+    makePicture: () => {
+      const picture = { dispose: jest.fn() };
+      mockPictures.push(picture);
+      return picture;
+    },
+    dispose: jest.fn(),
+  };
+  mockRecorders.push(recorder);
+  return recorder;
 };
+
+const mockSkia = { Recorder: mockRecorder };
 
 type TestContainer = {
   redraw: () => void;
@@ -168,14 +169,54 @@ describe("NativeContainer", () => {
     expect(mockStartMapper).toHaveBeenCalledTimes(1);
   });
 
-  it("reports shared values it cannot animate without Reanimated 4", () => {
+  it("reports a missing Reanimated 4 when the container is created", () => {
+    mockHasReanimated4 = false;
+    // In the render phase, where an error boundary can catch it, not from a
+    // redraw inside React's commit.
+    expect(() => setup()).toThrow(/Reanimated 4/);
+  });
+
+  it("falls back to the current shared values without Reanimated 4", () => {
     mockSharedValues = [{ value: 0 }];
     mockHasReanimated4 = false;
-    const { SkiaViewApi, container } = setup();
-    // The recording still reaches the view, with the current values.
-    expect(() => container.redraw()).toThrow(/Reanimated 4/);
-    expect(SkiaViewApi.setJsiProperty).toHaveBeenCalledTimes(1);
-    expect(mockStartMapper).not.toHaveBeenCalled();
+    const dev = globalThis as unknown as { __DEV__: boolean };
+    const wasDev = dev.__DEV__;
+    dev.__DEV__ = false;
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    try {
+      const { SkiaViewApi, container } = setup();
+      expect(consoleError).toHaveBeenCalledTimes(1);
+      container.redraw();
+      // The recording still reaches the view, with the current values, and
+      // nothing drives them.
+      expect(SkiaViewApi.setJsiProperty).toHaveBeenCalledTimes(1);
+      expect(mockStartMapper).not.toHaveBeenCalled();
+    } finally {
+      dev.__DEV__ = wasDev;
+      consoleError.mockRestore();
+    }
+  });
+
+  it("keeps the last picture when a recording fails to play offscreen", () => {
+    const { container } = setup(-1);
+    container.redraw();
+    const recorder = mockSkia.Recorder();
+    recorder.makePicture = () => {
+      throw new Error("play failed");
+    };
+    mockSkia.Recorder = () => recorder;
+    try {
+      expect(() => container.redraw()).toThrow("play failed");
+    } finally {
+      mockSkia.Recorder = mockRecorder;
+    }
+    expect(recorder.dispose).toHaveBeenCalledTimes(1);
+    expect(mockPictures[0].dispose).not.toHaveBeenCalled();
+    const canvas = { drawPicture: jest.fn() };
+    container.drawOnCanvas(canvas);
+    expect(canvas.drawPicture).toHaveBeenCalledWith(mockPictures[0]);
   });
 
   it("plays the recording into a picture offscreen", () => {

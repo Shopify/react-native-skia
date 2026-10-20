@@ -98,7 +98,7 @@ export interface JsiRecorder extends BaseRecorder {
   /**
    * The shared values the recording reads, in the order
    * `SkiaViewApi.applyUpdates` expects them. The recording hands them out
-   * once and lets go of them.
+   * once and lets go of them: recording a shared value after this throws.
    */
   getSharedValues(): SharedValue<unknown>[];
   /**
