@@ -2,6 +2,11 @@
 
 #include <jsi/jsi.h>
 
+#include "api/JsiSkPath.h"
+#include "api/JsiSkRRect.h"
+#include "api/JsiSkRect.h"
+#include "api/JsiSkRuntimeEffect.h"
+
 namespace RNSkia {
 
 using Uniforms = std::map<std::string, std::vector<float>>;

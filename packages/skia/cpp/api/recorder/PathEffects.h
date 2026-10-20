@@ -4,6 +4,12 @@
 #include <string>
 #include <variant>
 
+#include <include/effects/Sk1DPathEffect.h>
+#include <include/effects/Sk2DPathEffect.h>
+#include <include/effects/SkCornerPathEffect.h>
+#include <include/effects/SkDashPathEffect.h>
+#include <include/effects/SkDiscretePathEffect.h>
+
 #include "Command.h"
 #include "Convertor.h"
 #include "DrawingCtx.h"

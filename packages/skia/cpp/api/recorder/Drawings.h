@@ -8,6 +8,7 @@
 #include "ImageFit.h"
 #include "rnskia/RNSkPlatformContext.h"
 
+#include "include/core/SkContourMeasure.h"
 #include "include/core/SkPathBuilder.h"
 #include "include/core/SkStrokeRec.h"
 
