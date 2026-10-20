@@ -492,6 +492,17 @@ public:
   }
 
   /**
+   * Whether the commands hold a value for every shared value they read.
+   * Recording registers the reads without performing them (see Variables):
+   * until the first readUpdates(), the animated properties of a recording
+   * are unset and a replay would draw them wrong. A recording without shared
+   * values is complete as recorded.
+   */
+  bool isReady() const {
+    return variables.empty() || _hasReadValues.load(std::memory_order_acquire);
+  }
+
+  /**
    * Reads the current value of each shared value, in slot order (the order
    * of JsiRecorder.getSharedValues()), on the calling runtime into the
    * pending writes. The writes do not need the runtime: the next replay
@@ -499,31 +510,72 @@ public:
    * commands first, so the caller never waits for a replay.
    */
   void readUpdates(jsi::Runtime &runtime, const jsi::Array &values) {
-    // The values are read outside the lock: a conversion calls into the
-    // runtime, and the render thread must not wait on that to replay.
     std::vector<std::pair<size_t, PendingWrite>> writes;
     const auto count = std::min(values.size(runtime), variables.size());
     size_t index = 0;
     for (size_t slot = 0; slot < count; slot++) {
       auto sharedValue =
           values.getValueAtIndex(runtime, slot).asObject(runtime);
-      for (const auto &conversion : variables.conversions(slot)) {
-        if (auto write = conversion(runtime, sharedValue)) {
-          writes.emplace_back(index, std::move(write));
-        }
-        index++;
+      index = readSlot(runtime, slot, sharedValue, index, writes);
+    }
+    filePendingWrites(std::move(writes));
+  }
+
+  /**
+   * Reads the shared values the recording still holds (getSharedValues() has
+   * not taken them), on the recording runtime. For a recording played on the
+   * JS thread, which no mapper updates: on Reanimated 4, each read is a
+   * blocking round trip to the UI thread, so a view's recording gets its
+   * values from the mapper instead.
+   */
+  void readSharedValues(jsi::Runtime &runtime) {
+    std::vector<std::pair<size_t, PendingWrite>> writes;
+    size_t index = 0;
+    for (size_t slot = 0; slot < variables.size(); slot++) {
+      if (const auto *sharedValue = variables.sharedValue(slot)) {
+        index = readSlot(runtime, slot, *sharedValue, index, writes);
+      } else {
+        index += variables.conversions(slot).size();
       }
     }
-    if (writes.empty()) {
-      return;
-    }
-    std::lock_guard<std::mutex> lock(_pendingMutex);
-    layoutPendingWritesLocked();
-    for (auto &[i, write] : writes) {
-      _pendingWrites[i] = std::move(write);
-    }
-    _hasPendingWrites = true;
+    filePendingWrites(std::move(writes));
   }
+
+private:
+  /**
+   * Reads one shared value through the conversions of its slot, outside the
+   * lock: a conversion calls into the runtime, and the render thread must not
+   * wait on that to replay. `index` is the pending write of the slot's first
+   * conversion; the one past its last is returned.
+   */
+  size_t readSlot(jsi::Runtime &runtime, size_t slot,
+                  const jsi::Object &sharedValue, size_t index,
+                  std::vector<std::pair<size_t, PendingWrite>> &writes) {
+    for (const auto &conversion : variables.conversions(slot)) {
+      if (auto write = conversion(runtime, sharedValue)) {
+        writes.emplace_back(index, std::move(write));
+      }
+      index++;
+    }
+    return index;
+  }
+
+  /** Files the writes, taking the lock once, and marks the values as read. */
+  void filePendingWrites(std::vector<std::pair<size_t, PendingWrite>> writes) {
+    if (!writes.empty()) {
+      std::lock_guard<std::mutex> lock(_pendingMutex);
+      layoutPendingWritesLocked();
+      for (auto &[i, write] : writes) {
+        _pendingWrites[i] = std::move(write);
+      }
+      _hasPendingWrites = true;
+    }
+    _hasReadValues.store(true, std::memory_order_release);
+  }
+
+  // Set once by the first read, on whichever runtime performs it, and checked
+  // by the producer before it replays (another thread), hence atomic.
+  std::atomic<bool> _hasReadValues{false};
 };
 
 } // namespace RNSkia
