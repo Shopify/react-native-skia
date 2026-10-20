@@ -118,6 +118,29 @@ Then create the development build with `npx expo run:ios` and `npx expo run:andr
 
 To use this library in the browser, see [these instructions](/docs/getting-started/web).
 
+## GPU device loss
+
+The GPU device Skia renders with can be lost while the app runs: a driver reset, the GPU out of memory, or GPU work refused while the app was in the background on iOS.
+React Native Skia then replaces it with a new device, and canvases render again on their own.
+Everything made on the lost device is gone for good, though safe to use (it draws nothing): offscreen surfaces and the images taken from them, texture images, snapshots of views, and the device `Skia.getNativeDevice()` returned.
+`Skia.gpu.lost` resolves once the device has been replaced, so an app that keeps such objects makes them again there:
+
+```tsx
+import { Skia } from "react-native-skia";
+
+const watchDevice = () => {
+  Skia.gpu.lost.then(({ reason, message }) => {
+    console.log(`GPU device lost (${reason}): ${message}`);
+    // Make the offscreen surfaces and texture images again, import the
+    // shared WebGPU device again, then wait for the next loss.
+    watchDevice();
+  });
+};
+watchDevice();
+```
+
+`Skia.gpu.isAvailable` is false between the loss and the replacement, and stays false, with `Skia.gpu.error` saying why, if no replacement could be made.
+
 ## Debugging
 
 We recommend using React Native DevTools to debug your JS code: see the [React Native docs](https://reactnative.dev/docs/debugging). Alternatively, you can debug both JS and platform code in VS Code and via native IDEs. If using VS Code, we recommend [Expo Tools](https://github.com/expo/vscode-expo), [Radon IDE](https://ide.swmansion.com/), or Microsoft's [React Native Tools](https://marketplace.visualstudio.com/items?itemName=msjsdiag.vscode-react-native#debugging-react-native-applications).

@@ -185,13 +185,16 @@ public:
       // it lands: presenting it again would only cost a second present.
       // Otherwise the last frame is presented again, also onto a surface of
       // another size (the view was resized and nothing records for it): the
-      // frame then shows at its own size rather than nothing at all.
+      // frame then shows at its own size rather than nothing at all. A last
+      // frame made for a GPU device lost since cannot be shown again: the
+      // view stays as it is until something records for it.
       std::shared_ptr<RNSkGraphiteRecording> lastPresented;
       {
         std::lock_guard<std::mutex> lock(_mutex);
         lastPresented = _lastPresented;
       }
-      if (frameComing || lastPresented == nullptr) {
+      if (frameComing || lastPresented == nullptr ||
+          !lastPresented->isCurrent()) {
         return;
       }
       recordings.push_back(std::move(lastPresented));
@@ -298,9 +301,12 @@ public:
    Main thread. The window can show frames again (the app came back to the
    foreground, see RNSkWindowSurface::setCanPresent): a redraw it could not
    show is scheduled again, else the recordings queued meanwhile are handed
-   to the frame scheduler. Nothing is replayed on the spot.
+   to the frame scheduler. Nothing is replayed on the spot. A GPU device
+   lost in the background (where iOS refuses GPU work) is replaced now that
+   the app is back, and the view is asked for a frame once it is.
    */
   void onCanPresent() {
+    DawnContext::requestRecovery();
     if (_redrawRequested) {
       postRedraw();
     } else if (hasQueuedRecordings()) {
@@ -323,7 +329,10 @@ private:
     return _target;
   }
 
-  /** The frame on screen, or the one about to be, if any. Any thread. */
+  /**
+   The frame on screen, or the one about to be, if any; none when it was
+   made for a GPU device lost since (it cannot be replayed). Any thread.
+   */
   std::shared_ptr<RNSkGraphiteRecording> getLastFrame() {
     std::shared_ptr<RNSkGraphiteTarget> target;
     std::shared_ptr<RNSkGraphiteRecording> recording;
@@ -336,6 +345,9 @@ private:
       if (auto latest = target->peekLatest()) {
         recording = latest;
       }
+    }
+    if (recording != nullptr && !recording->isCurrent()) {
+      return nullptr;
     }
     return recording;
   }
@@ -414,6 +426,14 @@ private:
     bool taken = true;
     for (size_t i = 0; i < recordings.size(); i++) {
       const auto &recording = recordings[i];
+      // A recording made for a GPU device lost since (one queued when the
+      // device was lost) can never be replayed: consumed, not shown. The
+      // producer records again for the device in use (see redraw).
+      if (!recording->isCurrent()) {
+        RNSkLogger::logToConsole("SkiaView: skipping a recording made for a "
+                                 "lost GPU device");
+        continue;
+      }
       // A recording made for another format (recorded before the surface
       // existed, with a bit depth the surface did not get) cannot be
       // replayed onto this one.

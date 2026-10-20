@@ -64,6 +64,7 @@ const device = importDevice(Skia.getNativeDevice());
 
 Everything you create with this device (textures, buffers, pipelines) lives on the same device as Skia's own resources, which is what makes sharing textures possible.
 A few things to know about it:
+- The device can be lost (a driver reset, the GPU out of memory, GPU work refused while the app was in the background on iOS). Skia then replaces it with a new device and `Skia.gpu.lost` resolves: import the device again, and make again what you created on the old one. See [GPU device loss](/docs/getting-started/installation#gpu-device-loss).
 
 - The device is owned by Skia and is valid for the lifetime of the process.
 - Skia treats the loss of its device as fatal: there is no point in requesting a replacement when it is lost.
