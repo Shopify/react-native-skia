@@ -3,15 +3,16 @@
 // animations through the view id only. These tests pin down that no recorder
 // or picture is captured by a worklet, that the wrapper is disposed once the
 // view owns the recording, that unmount leaves the view's last frame in place,
-// that offscreen rendering plays the recording into a picture, and that a
-// recording that fails never throws out of React's commit.
+// that offscreen rendering plays the recording into a picture, that the JS
+// thread reads no shared value (the mapper does, on the UI thread), and that
+// a recording that fails never throws out of React's commit.
 
 type MockPicture = { dispose: jest.Mock };
 type MockRecorder = {
   id: number;
   getId: () => number;
-  getSharedValues: () => unknown[];
-  makePicture: () => MockPicture;
+  getSharedValues: jest.Mock;
+  makePicture: jest.Mock;
   dispose: jest.Mock;
 };
 
@@ -52,12 +53,12 @@ const mockRecorder = (): MockRecorder => {
     getId() {
       return this.id;
     },
-    getSharedValues: () => mockSharedValues,
-    makePicture: () => {
+    getSharedValues: jest.fn(() => mockSharedValues),
+    makePicture: jest.fn(() => {
       const picture = { dispose: jest.fn() };
       mockPictures.push(picture);
       return picture;
-    },
+    }),
     dispose: jest.fn(),
   };
   mockRecorders.push(recorder);
@@ -156,6 +157,21 @@ describe("NativeContainer", () => {
     expect(SkiaViewApi.setJsiProperty).toHaveBeenCalledTimes(1);
   });
 
+  it("reads the shared values on the UI thread only, through the mapper", () => {
+    mockSharedValues = [{ value: 0 }];
+    const { SkiaViewApi, container } = setup();
+    container.redraw();
+    // On Reanimated 4, reading a shared value on the JS thread blocks on the
+    // UI thread: the recording reaches the view unread, and the first run of
+    // the mapper (on the UI thread) supplies every value at once.
+    expect(SkiaViewApi.applyUpdates).not.toHaveBeenCalled();
+    expect(mockStartMapper).toHaveBeenCalledTimes(1);
+    // The recorder hands its shared values out before the view owns it.
+    expect(
+      mockRecorders[0].getSharedValues.mock.invocationCallOrder[0]
+    ).toBeLessThan(SkiaViewApi.setJsiProperty.mock.invocationCallOrder[0]);
+  });
+
   it("stops the previous mapper and replaces the recorder on redraw", () => {
     mockSharedValues = [{ value: 0 }];
     const { SkiaViewApi, container } = setup();
@@ -195,7 +211,8 @@ describe("NativeContainer", () => {
   });
 
   it("records the current values without Reanimated 4 in production", () => {
-    mockSharedValues = [{ value: 0 }];
+    const sv = { value: 0 };
+    mockSharedValues = [sv];
     mockHasReanimated4 = false;
     const error = jest.spyOn(console, "error").mockImplementation(() => {});
     try {
@@ -207,6 +224,13 @@ describe("NativeContainer", () => {
         // the commit completes.
         container.recordAfterCommit();
         expect(SkiaViewApi.setJsiProperty).toHaveBeenCalledTimes(1);
+        // No mapper will read the shared values: they are read once, here.
+        expect(SkiaViewApi.applyUpdates).toHaveBeenCalledTimes(1);
+        expect(SkiaViewApi.applyUpdates).toHaveBeenCalledWith(
+          7,
+          mockRecorders[0].id,
+          [sv]
+        );
         expect(mockStartMapper).not.toHaveBeenCalled();
         expect(error).toHaveBeenCalledTimes(1);
       });
@@ -282,9 +306,9 @@ describe("NativeContainer", () => {
     const { container } = setup(-1);
     container.redraw();
     const recorder = mockSkia.Recorder();
-    recorder.makePicture = () => {
+    recorder.makePicture.mockImplementation(() => {
       throw new Error("play failed");
-    };
+    });
     mockSkia.Recorder = () => recorder;
     try {
       expect(() => container.redraw()).toThrow("play failed");
@@ -299,9 +323,15 @@ describe("NativeContainer", () => {
   });
 
   it("plays the recording into a picture offscreen", () => {
+    mockSharedValues = [{ value: 0 }];
     const { SkiaViewApi, container } = setup(-1);
     container.redraw();
     expect(SkiaViewApi.setJsiProperty).not.toHaveBeenCalled();
+    expect(mockStartMapper).not.toHaveBeenCalled();
+    // makePicture() reads the shared values itself, on this thread: the
+    // recorder must still hold them, so they are not taken from it first.
+    expect(mockRecorders[0].getSharedValues).not.toHaveBeenCalled();
+    expect(mockRecorders[0].makePicture).toHaveBeenCalledTimes(1);
     expect(mockRecorders[0].dispose).toHaveBeenCalledTimes(1);
     const canvas = { drawPicture: jest.fn() };
     container.drawOnCanvas(canvas);

@@ -66,10 +66,13 @@ public:
 
   /**
    * Plays the recording into a picture, on the calling thread, with the
-   * values the shared values had when they were recorded.
+   * current values of the shared values it still holds, read here on this
+   * runtime (see Recorder::readSharedValues).
    */
   JSI_HOST_FUNCTION(makePicture) {
-    auto picture = getObject()->makePicture();
+    auto recorder = getObject();
+    recorder->readSharedValues(runtime);
+    auto picture = recorder->makePicture();
     return makeJsiObject(runtime, std::make_shared<JsiSkPicture>(
                                       getContext(), std::move(picture)));
   }

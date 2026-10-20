@@ -216,8 +216,9 @@ public:
           // destroys it): the recording waits in the registry and is drawn,
           // with whatever values it holds by then, once a view registers.
           // Keep it current, under the registry lock so that a registration
-          // cannot slip in between; the first frame would otherwise show
-          // the values from recording time until the next change.
+          // cannot slip in between; the recording would otherwise wait,
+          // unready (it reads no value while recording), until the next
+          // change, and the view would show nothing until then.
           auto it = info->props.find("recorder");
           if (it != info->props.end() && it->second.isRecorder()) {
             RNSkGraphiteProducer::applyUpdatesTo(it->second.getRecorder(),
