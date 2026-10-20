@@ -203,6 +203,9 @@ Pod::Spec.new do |s|
     "cpp/**/*.{h,cpp}"
   ]
 
+  # Keep nested header paths to prevent collisions between headers with the same name.
+  s.header_mappings_dir = "."
+
   install_modules_dependencies(s)
   s.dependency "React"
   s.dependency "React-callinvoker"
