@@ -194,6 +194,9 @@ Pod::Spec.new do |s|
   # Preserve the copied libs directory
   s.preserve_paths = ["libs/**/*"]
 
+  # Keep header directory structure so same-named headers (cpu/Recorder.h vs gpu/graphite/Recorder.h) do not collide under use_frameworks!
+  s.header_mappings_dir = "."
+
   # All iOS cpp/h files
   s.source_files = [
     "apple/**/*.{h,c,cc,cpp,m,mm,swift}",
