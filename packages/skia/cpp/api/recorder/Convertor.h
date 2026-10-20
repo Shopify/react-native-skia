@@ -77,6 +77,15 @@ public:
     return _conversions[slot];
   }
 
+  /** The number of conversions over all the slots. */
+  size_t conversionCount() const {
+    size_t count = 0;
+    for (const auto &conversions : _conversions) {
+      count += conversions.size();
+    }
+    return count;
+  }
+
   /** The shared values in slot order; this lets go of them. */
   jsi::Array takeSharedValues(jsi::Runtime &runtime) {
     auto array = jsi::Array(runtime, _sharedValues.size());

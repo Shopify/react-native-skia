@@ -108,10 +108,17 @@ public:
       break;
     case CommandType::SaveLayer: {
       ctx->materializePaint();
-      auto paint = ctx->paintDeclarations.back();
-      ctx->paintDeclarations.pop_back();
+      // A <Layer> draws through the paint declared on it (its <Paint> child),
+      // or without one when it has none.
+      const SkPaint *paint = nullptr;
+      SkPaint layerPaint;
+      if (!ctx->paintDeclarations.empty()) {
+        layerPaint = ctx->paintDeclarations.back();
+        ctx->paintDeclarations.pop_back();
+        paint = &layerPaint;
+      }
       ctx->canvas->saveLayer(
-          SkCanvas::SaveLayerRec(nullptr, &paint, nullptr, 0));
+          SkCanvas::SaveLayerRec(nullptr, paint, nullptr, 0));
       break;
     }
     case CommandType::DrawPaint:

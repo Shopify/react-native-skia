@@ -169,11 +169,17 @@ const pushImageFilters = (
     const type = resolveType(imageFilter);
     if (isImageFilter(type)) {
       recorder.pushImageFilter(type, imageFilter.props);
-    } else if (isShader(type)) {
-      recorder.pushShader(type, imageFilter.props, 0);
+    } else if (isShader(type) || type === NodeType.Blend) {
+      // A shader among the image filters (the input of a displacement map,
+      // say): it takes its children, pushed above, like a <Blend> of shaders.
+      recorder.pushShader(type, imageFilter.props, imageFilter.children.length);
     }
+    // Only an image filter composes with its children: a shader's children
+    // are shaders, consumed by the shader itself.
     const needsComposition =
-      type !== NodeType.BlendImageFilter && imageFilter.children.length > 0;
+      isImageFilter(type) &&
+      type !== NodeType.BlendImageFilter &&
+      imageFilter.children.length > 0;
     if (needsComposition) {
       recorder.composeImageFilter();
     }

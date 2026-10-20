@@ -8,6 +8,7 @@
 #include <mutex>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <jsi/jsi.h>
@@ -58,29 +59,20 @@ private:
   // lock.
   std::mutex _commandsMutex;
 
-  // The pending writes, one slot per conversion function: a value read
-  // several times between two replays is written once (the last read wins),
-  // and the memory stays bounded whatever the ratio of updates to replays.
-  // They are laid out on the first read, once the recording, and thus
-  // `variables`, is complete.
+  // The pending writes, one per conversion function, in slot order: a value
+  // read several times between two replays is written once (the last read
+  // wins), and the memory stays bounded whatever the ratio of updates to
+  // replays. They are laid out on the first read, once the recording, and
+  // thus `variables`, is complete.
   std::mutex _pendingMutex;
   std::vector<PendingWrite> _pendingWrites;
-  // The first pending write of each shared value.
-  std::vector<size_t> _slotBase;
   bool _hasPendingWrites = false;
 
   /** Under _pendingMutex. */
   void layoutPendingWritesLocked() {
-    if (!_slotBase.empty()) {
-      return;
+    if (_pendingWrites.empty()) {
+      _pendingWrites.resize(variables.conversionCount());
     }
-    size_t count = 0;
-    _slotBase.reserve(variables.size());
-    for (size_t slot = 0; slot < variables.size(); slot++) {
-      _slotBase.push_back(count);
-      count += variables.conversions(slot).size();
-    }
-    _pendingWrites.resize(count);
   }
 
   /** Writes the pending values into the commands. Under _commandsMutex. */
@@ -507,20 +499,30 @@ public:
    * commands first, so the caller never waits for a replay.
    */
   void readUpdates(jsi::Runtime &runtime, const jsi::Array &values) {
+    // The values are read outside the lock: a conversion calls into the
+    // runtime, and the render thread must not wait on that to replay.
+    std::vector<std::pair<size_t, PendingWrite>> writes;
     const auto count = std::min(values.size(runtime), variables.size());
+    size_t index = 0;
     for (size_t slot = 0; slot < count; slot++) {
       auto sharedValue =
           values.getValueAtIndex(runtime, slot).asObject(runtime);
-      const auto &conversions = variables.conversions(slot);
-      for (size_t j = 0; j < conversions.size(); j++) {
-        if (auto write = conversions[j](runtime, sharedValue)) {
-          std::lock_guard<std::mutex> lock(_pendingMutex);
-          layoutPendingWritesLocked();
-          _pendingWrites[_slotBase[slot] + j] = std::move(write);
-          _hasPendingWrites = true;
+      for (const auto &conversion : variables.conversions(slot)) {
+        if (auto write = conversion(runtime, sharedValue)) {
+          writes.emplace_back(index, std::move(write));
         }
+        index++;
       }
     }
+    if (writes.empty()) {
+      return;
+    }
+    std::lock_guard<std::mutex> lock(_pendingMutex);
+    layoutPendingWritesLocked();
+    for (auto &[i, write] : writes) {
+      _pendingWrites[i] = std::move(write);
+    }
+    _hasPendingWrites = true;
   }
 };
 

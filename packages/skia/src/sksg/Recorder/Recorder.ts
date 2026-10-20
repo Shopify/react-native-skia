@@ -227,7 +227,11 @@ export class Recorder implements BaseRecorder {
     shadowProps: AnimatedProps<BoxShadowProps>[]
   ) {
     const shadows = shadowProps.map((props) => {
-      const shadow: { props: unknown; animatedProps?: unknown } = { props };
+      // The shape the player materializes (see commands/Box.ts).
+      const shadow: {
+        props: AnimatedProps<BoxShadowProps>;
+        animatedProps?: Record<string, unknown>;
+      } = { props };
       const { animatedProps } = this.processProps(
         props as unknown as Record<string, unknown>
       );
