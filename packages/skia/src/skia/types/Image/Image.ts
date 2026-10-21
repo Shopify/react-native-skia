@@ -100,8 +100,7 @@ export interface SkImage extends SkJSIInstance<"Image"> {
      SkEncodedImageFormat::kPNG. Skia must be built with SK_ENCODE_PNG to encode
      SkImage.
 
-    Returns nullptr if existing encoded data is missing or invalid, and
-    encoding fails.
+    Throws an Error when the image cannot be encoded.
 
     @param fmt - PNG is the default value.
     @param quality - a value from 0 to 100; 100 is the least lossy. May be ignored.
@@ -115,8 +114,7 @@ export interface SkImage extends SkJSIInstance<"Image"> {
      SkEncodedImageFormat::kPNG. Skia must be built with SK_ENCODE_PNG to encode
      SkImage.
 
-    Returns nullptr if existing encoded data is missing or invalid, and
-    encoding fails.
+    Throws an Error when the image cannot be encoded.
 
     @param fmt - PNG is the default value.
     @param quality - a value from 0 to 100; 100 is the least lossy. May be ignored.
