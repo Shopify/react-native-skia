@@ -86,6 +86,11 @@ export class SkiaSGRoot {
     this.container.drawOnCanvas(canvas);
   }
 
+  /** See Container.readSharedValues(). */
+  readSharedValues() {
+    this.container.readSharedValues();
+  }
+
   getPicture() {
     const recorder = this.Skia.PictureRecorder();
     const canvas = recorder.beginRecording();

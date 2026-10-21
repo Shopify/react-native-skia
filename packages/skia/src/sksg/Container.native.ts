@@ -82,6 +82,11 @@ const reportUnsupportedReanimated = () => {
 class NativeContainer extends Container {
   private mapperId: number | null = null;
   private picture: SkPicture | null = null;
+  /** The recording the view owns and its shared values, if any. */
+  private installed: {
+    recorderId: number;
+    sharedValues: ReturnType<JsiRecorder["getSharedValues"]>;
+  } | null = null;
 
   private stopMapper() {
     if (this.mapperId !== null) {
@@ -93,6 +98,7 @@ class NativeContainer extends Container {
   unmount() {
     super.unmount();
     this.stopMapper();
+    this.installed = null;
     this.picture?.dispose();
     this.picture = null;
   }
@@ -106,6 +112,7 @@ class NativeContainer extends Container {
 
   redraw() {
     this.stopMapper();
+    this.installed = null;
     if (this.unmounted) {
       // The unmount commit triggers a last redraw: recording it would
       // resurrect a recording for a container that has just let go of it.
@@ -149,6 +156,7 @@ class NativeContainer extends Container {
     if (sharedValues.length === 0) {
       return;
     }
+    this.installed = { recorderId, sharedValues };
     if (!HAS_REANIMATED_4) {
       // No mapper will read the shared values (createContainer() reported
       // it): read them once, here, so that the view can draw the scene with
@@ -162,6 +170,22 @@ class NativeContainer extends Container {
       "worklet";
       SkiaViewApi.applyUpdates(nativeId, recorderId, sharedValues);
     }, sharedValues);
+  }
+
+  /**
+   * Reads the shared values of the recording the view owns, on this thread:
+   * a snapshot taken before the mapper's first run (in the commit that
+   * installed the recording) would otherwise draw the previous frame, and
+   * one taken later draws the values as of now rather than as of the last
+   * mapper run. Snapshots are rare, so the Reanimated 4 round trips to the
+   * UI thread are affordable here.
+   */
+  readSharedValues() {
+    if (this.installed === null) {
+      return;
+    }
+    const { recorderId, sharedValues } = this.installed;
+    SkiaViewApi.applyUpdates(this.nativeId, recorderId, sharedValues);
   }
 }
 

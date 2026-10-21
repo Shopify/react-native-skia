@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <stdexcept>
 #include <utility>
 
 #include "api/JsiSkNativeObjects.h"
@@ -67,11 +68,21 @@ public:
   /**
    * Plays the recording into a picture, on the calling thread, with the
    * current values of the shared values it still holds, read here on this
-   * runtime (see Recorder::readSharedValues).
+   * runtime (see Recorder::readSharedValues). A value invalid for its prop
+   * throws, as recording it used to. Once getSharedValues() has taken the
+   * shared values, only applyUpdates can read them: until it has, the picture
+   * would draw the animated properties unset.
    */
   JSI_HOST_FUNCTION(makePicture) {
     auto recorder = getObject();
     recorder->readSharedValues(runtime);
+    if (auto error = recorder->readError()) {
+      throw std::runtime_error(*error);
+    }
+    if (!recorder->isReady()) {
+      throw std::runtime_error("Cannot play a recording whose shared values "
+                               "getSharedValues() took before they were read");
+    }
     auto picture = recorder->makePicture();
     return makeJsiObject(runtime, std::make_shared<JsiSkPicture>(
                                       getContext(), std::move(picture)));
